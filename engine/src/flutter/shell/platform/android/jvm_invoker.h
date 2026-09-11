@@ -36,7 +36,7 @@ class JvmInvoker {
 
   /// @brief Attaches a Java object weak reference to this invoker.
   virtual void SetJavaObject(
-      std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> java_object) {}
+      const std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef>& java_object) {}
 
   /// @brief Returns the attached Java object weak reference.
   virtual std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> GetJavaObject()
@@ -298,8 +298,8 @@ class AndroidJvmInvoker : public JvmInvoker {
       fml::RefPtr<fml::TaskRunner> platform_task_runner = nullptr);
   ~AndroidJvmInvoker() override;
 
-  void SetJavaObject(
-      std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> java_object) override;
+  void SetJavaObject(const std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef>&
+                         java_object) override;
   std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> GetJavaObject()
       const override;
 

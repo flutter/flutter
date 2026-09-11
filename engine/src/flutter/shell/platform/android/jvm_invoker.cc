@@ -309,9 +309,9 @@ AndroidJvmInvoker::~AndroidJvmInvoker() {
 }
 
 void AndroidJvmInvoker::SetJavaObject(
-    std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> java_object) {
+    const std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef>& java_object) {
   std::lock_guard<std::mutex> lock(java_object_mutex_);
-  java_object_ = std::move(java_object);
+  java_object_ = java_object;
 }
 
 std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef>

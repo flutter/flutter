@@ -56,6 +56,7 @@ if (is_android) {
     visibility = [ "*" ]
     testonly = true
     sources = [
+      "android_egl_manager_unittests.cc",
       "android_engine_group_unittests.cc",
       "android_hardware_buffer_unittests.cc",
       "android_mutator_unittests.cc",
@@ -87,6 +88,8 @@ if (is_android) {
     visibility = [ ":*" ]
 
     sources = [
+      "android_egl_manager.cc",
+      "android_egl_manager.h",
       "android_engine_group.cc",
       "android_engine_group.h",
       "android_hardware_buffer.cc",

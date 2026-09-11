@@ -431,6 +431,13 @@ FlutterEmbedderNative::~FlutterEmbedderNative() {
     DeinitializeEngine(engine);
     SetEngine(nullptr);
   }
+  {
+    std::lock_guard<std::mutex> lock(fallback_aot_data_mutex_);
+    if (fallback_aot_data_) {
+      CollectAOTData(fallback_aot_data_);
+      fallback_aot_data_ = nullptr;
+    }
+  }
   std::lock_guard<std::mutex> pres_lock(presentation_mutex_);
   std::lock_guard<std::mutex> surf_lock(surface_mutex_);
   if (native_window_) {
@@ -493,6 +500,11 @@ void FlutterEmbedderNative::SetNativeWindow(ANativeWindow* window) {
   native_window_ = window;
   if (jni_delegate_) {
     jni_delegate_->SetNativeWindow(window);
+  }
+  if (GetSelectedRenderingAPI() != AndroidRenderingAPI::kSoftware) {
+    if (auto* manager = GetEGLManager()) {
+      manager->SetNativeWindow(window);
+    }
   }
 }
 
@@ -697,6 +709,41 @@ bool FlutterEmbedderNative::PresentSoftware(const void* allocation,
   buffer.format = native_buffer.format;
 
   return BlitSoftwareRaster(allocation, row_bytes, height, buffer);
+}
+
+AndroidEGLManager* FlutterEmbedderNative::GetEGLManager() const {
+  std::lock_guard<std::mutex> lock(egl_manager_mutex_);
+  if (!egl_manager_) {
+    egl_manager_ = std::make_unique<AndroidEGLManager>();
+    if (!egl_manager_->Initialize()) {
+      FML_LOG(ERROR) << "Failed to initialize AndroidEGLManager.";
+    }
+  }
+  return egl_manager_.get();
+}
+
+bool FlutterEmbedderNative::MakeGLCurrent() {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::MakeGLCurrent");
+  auto* manager = GetEGLManager();
+  return manager && manager->MakeCurrent();
+}
+
+bool FlutterEmbedderNative::ClearGLCurrent() {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::ClearGLCurrent");
+  auto* manager = GetEGLManager();
+  return manager && manager->ClearCurrent();
+}
+
+bool FlutterEmbedderNative::PresentGL() {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::PresentGL");
+  auto* manager = GetEGLManager();
+  return manager && manager->Present();
+}
+
+bool FlutterEmbedderNative::MakeGLResourceCurrent() {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::MakeGLResourceCurrent");
+  auto* manager = GetEGLManager();
+  return manager && manager->MakeResourceCurrent();
 }
 
 bool FlutterEmbedderNative::IsEmbedderEnabled() {
@@ -2471,15 +2518,76 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
         config.type = kOpenGL;
         config.open_gl.struct_size = sizeof(config.open_gl);
         config.open_gl.make_current = [](void* user_data) -> bool {
-          return true;
+          auto* self = static_cast<FlutterEmbedderNative*>(user_data);
+          return self && self->MakeGLCurrent();
         };
         config.open_gl.clear_current = [](void* user_data) -> bool {
-          return true;
+          auto* self = static_cast<FlutterEmbedderNative*>(user_data);
+          return self && self->ClearGLCurrent();
         };
-        config.open_gl.present = [](void* user_data) -> bool { return true; };
+        config.open_gl.present = [](void* user_data) -> bool {
+          auto* self = static_cast<FlutterEmbedderNative*>(user_data);
+          return self && self->PresentGL();
+        };
         config.open_gl.fbo_callback = [](void* user_data) -> uint32_t {
+          // Default FBO 0 indicates the on-screen window surface.
           return 0;
         };
+        config.open_gl.make_resource_current = [](void* user_data) -> bool {
+          auto* self = static_cast<FlutterEmbedderNative*>(user_data);
+          return self && self->MakeGLResourceCurrent();
+        };
+        config.open_gl.gl_proc_resolver = [](void* user_data,
+                                             const char* name) -> void* {
+          if (!name) {
+            return nullptr;
+          }
+#if defined(__ANDROID__)
+          // On Android, core OpenGL ES functions (e.g. glGetError) are located
+          // in libGLESv3.so (or libGLESv2.so), while extension functions are
+          // resolved via eglGetProcAddress. Per Android NDK guidance, query
+          // libGLESv3 first.
+          static auto gles_library = []() -> fml::RefPtr<fml::NativeLibrary> {
+            auto lib = fml::NativeLibrary::Create("libGLESv3.so");
+            if (!lib) {
+              lib = fml::NativeLibrary::Create("libGLESv2.so");
+            }
+            return lib;
+          }();
+          if (gles_library) {
+            if (auto* proc = gles_library->ResolveSymbol(name)) {
+              return const_cast<uint8_t*>(proc);
+            }
+          }
+          static auto egl_get_proc_address = []() -> void* (*)(const char*) {
+            static fml::RefPtr<fml::NativeLibrary> egl_library =
+                fml::NativeLibrary::Create("libEGL.so");
+            if (!egl_library) {
+              return nullptr;
+            }
+            auto proc = egl_library->ResolveFunction<void* (*)(const char*)>(
+                "eglGetProcAddress");
+            return proc.has_value() ? proc.value() : nullptr;
+          }();
+          if (egl_get_proc_address) {
+            if (auto* proc = egl_get_proc_address(name)) {
+              return proc;
+            }
+          }
+#endif  // defined(__ANDROID__)
+          static fml::RefPtr<fml::NativeLibrary> proc_library =
+              fml::NativeLibrary::CreateForCurrentProcess();
+          return proc_library ? static_cast<void*>(const_cast<uint8_t*>(
+                                    proc_library->ResolveSymbol(name)))
+                              : nullptr;
+        };
+        // Dual registration: wire both hardware buffer & GL callbacks for
+        // OpenGL backend
+        config.open_gl.hardware_buffer_external_texture_frame_callback =
+            &FlutterEmbedderNative::
+                OnHardwareBufferExternalTextureFrameCallback;
+        config.open_gl.gl_external_texture_frame_callback =
+            &FlutterEmbedderNative::OnGlExternalTextureFrameCallback;
       }
     }
   }
@@ -2525,6 +2633,26 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
     args.dart_entrypoint_argv = c_args.data();
   }
 
+  if (args.aot_data == nullptr && RunsAOTCompiledDartCode()) {
+    std::string aot_lib_path = FindAotLibraryPath(default_cmd_strings);
+    if (!aot_lib_path.empty()) {
+      FlutterEngineAOTDataSource source = {};
+      source.type = kFlutterEngineAOTDataSourceTypeElfPath;
+      source.elf_path = aot_lib_path.c_str();
+
+      FlutterEngineAOTData aot_data = nullptr;
+      if (CreateAOTData(&source, &aot_data) == kSuccess &&
+          aot_data != nullptr) {
+        std::lock_guard<std::mutex> lock(fallback_aot_data_mutex_);
+        fallback_aot_data_ = aot_data;
+        args.aot_data = fallback_aot_data_;
+      } else {
+        FML_LOG(ERROR) << "Failed to create fallback AOT data from "
+                       << aot_lib_path;
+      }
+    }
+  }
+
   args.vsync_callback = &FlutterEmbedderNative::OnVsyncCallback;
   args.platform_message_callback =
       &FlutterEmbedderNative::OnPlatformMessageCallback;
@@ -2541,6 +2669,11 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
   FML_LOG(INFO) << "FlutterEmbedderNative::Launch InitializeEngine result="
                 << init_result << " engine=" << engine;
   if (init_result != kSuccess || engine == nullptr) {
+    std::lock_guard<std::mutex> lock(fallback_aot_data_mutex_);
+    if (fallback_aot_data_) {
+      CollectAOTData(fallback_aot_data_);
+      fallback_aot_data_ = nullptr;
+    }
     return init_result;
   }
 
@@ -2888,11 +3021,10 @@ FlutterEmbedderNative::ReleaseResponseHandle(int32_t response_id) const {
 
 void FlutterEmbedderNative::RegisterSurfaceTexture(
     int64_t texture_id,
-    fml::jni::ScopedJavaGlobalRef<jobject> surface_texture) {
+    const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture) {
   std::scoped_lock lock(surface_textures_mutex_);
   surface_textures_[texture_id] =
-      std::make_shared<fml::jni::ScopedJavaGlobalRef<jobject>>(
-          std::move(surface_texture));
+      std::make_shared<fml::jni::ScopedJavaGlobalRef<jobject>>(surface_texture);
 }
 
 void FlutterEmbedderNative::UnregisterSurfaceTexture(int64_t texture_id) {
@@ -2936,10 +3068,20 @@ FlutterEngineResult FlutterEmbedderNative::DeinitializeEngine(
   if (!engine) {
     return kInvalidArguments;
   }
+  FlutterEngineResult result = kSuccess;
   if (deinitialize_engine_fn_) {
-    return deinitialize_engine_fn_(engine);
+    result = deinitialize_engine_fn_(engine);
+  } else {
+    result = EngineDeinitialize(engine);
   }
-  return EngineDeinitialize(engine);
+  {
+    std::lock_guard<std::mutex> lock(fallback_aot_data_mutex_);
+    if (fallback_aot_data_) {
+      CollectAOTData(fallback_aot_data_);
+      fallback_aot_data_ = nullptr;
+    }
+  }
+  return result;
 }
 
 FlutterEngineResult FlutterEmbedderNative::EngineCreateAOTData(
@@ -2999,6 +3141,47 @@ FlutterEngineResult FlutterEmbedderNative::CollectAOTData(
     return aot_provider_->CollectAOTData(data);
   }
   return EngineCollectAOTData(data);
+}
+
+bool FlutterEmbedderNative::RunsAOTCompiledDartCode() const {
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (s_procs.RunsAOTCompiledDartCode) {
+    return s_procs.RunsAOTCompiledDartCode();
+  }
+  return false;
+}
+
+std::string FlutterEmbedderNative::FindAotLibraryPath(
+    const std::vector<std::string>& cmd_strings) const {
+  std::string first_candidate;
+  for (const auto& arg : cmd_strings) {
+    if (arg.rfind("--aot-shared-library-name=", 0) == 0) {
+      std::string val =
+          arg.substr(std::string("--aot-shared-library-name=").length());
+      if (!val.empty()) {
+        if (fml::IsFile(val)) {
+          return val;
+        }
+        if (first_candidate.empty()) {
+          first_candidate = val;
+        }
+      }
+    }
+  }
+  if (!first_candidate.empty()) {
+    return first_candidate;
+  }
+  auto default_vm_args = GetDefaultVMArgs();
+  if (default_vm_args.has_value() &&
+      !default_vm_args->aot_library_path.empty()) {
+    return default_vm_args->aot_library_path;
+  }
+  return "";
 }
 
 std::shared_ptr<AndroidVMInit> FlutterEmbedderNative::GetVMInit() const {
@@ -3362,6 +3545,38 @@ FlutterEmbedderNative::GetVulkanExternalTextureFrameCallback() {
   return &FlutterEmbedderNative::OnVulkanExternalTextureFrameCallback;
 }
 
+bool FlutterEmbedderNative::GetGlExternalTextureFrame(
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterOpenGLTexture* texture_out) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::GetGlExternalTextureFrame",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!texture_out) {
+    return false;
+  }
+  // Android embedder uses HardwareBuffer external textures; raw GL textures
+  // return false.
+  return false;
+}
+
+bool FlutterEmbedderNative::OnGlExternalTextureFrameCallback(
+    void* user_data,
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterOpenGLTexture* texture_out) {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::OnGlExternalTextureFrameCallback",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!user_data || !texture_out) {
+    return false;
+  }
+  auto* native_instance = static_cast<FlutterEmbedderNative*>(user_data);
+  return native_instance->GetGlExternalTextureFrame(texture_id, width, height,
+                                                    texture_out);
+}
+
 std::shared_ptr<AndroidSurfaceControlProvider>
 FlutterEmbedderNative::GetSurfaceControlProvider() const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetSurfaceControlProvider");
@@ -3390,7 +3605,7 @@ std::shared_ptr<AndroidEngineGroup> FlutterEmbedderNative::GetEngineGroup()
 }
 
 void FlutterEmbedderNative::SetEngineGroup(
-    std::shared_ptr<AndroidEngineGroup> group) {
+    const std::shared_ptr<AndroidEngineGroup>& group) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetEngineGroup");
   {
     std::scoped_lock lock(engine_group_mutex_);
@@ -3409,7 +3624,7 @@ FlutterEmbedderNative::GetEngineGroupProvider() const {
 }
 
 void FlutterEmbedderNative::SetEngineGroupProvider(
-    std::shared_ptr<AndroidEngineGroupProvider> provider) {
+    const std::shared_ptr<AndroidEngineGroupProvider>& provider) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetEngineGroupProvider");
   std::shared_ptr<AndroidEngineGroup> group;
   {
@@ -3548,13 +3763,21 @@ FlutterEngineResult FlutterEmbedderNative::ShutdownEngine(
     group = engine_group_;
     provider = engine_group_provider_;
   }
+  FlutterEngineResult result = kInternalInconsistency;
   if (group) {
-    return group->ShutdownEngine(engine) ? kSuccess : kInvalidArguments;
+    result = group->ShutdownEngine(engine) ? kSuccess : kInvalidArguments;
+  } else if (provider) {
+    result = provider->ShutdownEngine(engine);
   }
-  if (provider) {
-    return provider->ShutdownEngine(engine);
+
+  {
+    std::lock_guard<std::mutex> lock(fallback_aot_data_mutex_);
+    if (fallback_aot_data_) {
+      CollectAOTData(fallback_aot_data_);
+      fallback_aot_data_ = nullptr;
+    }
   }
-  return kInternalInconsistency;
+  return result;
 }
 
 bool FlutterEmbedderNative::ShutdownSpawnedEngine(int64_t engine_id) const {
@@ -4260,6 +4483,58 @@ static void FlutterJNI_MarkTextureFrameAvailable(JNIEnv* env,
   }
 }
 
+static void FlutterJNI_UpdateHardwareBufferTexture(
+    JNIEnv* env,
+    jobject jcaller,
+    jlong native_handle,
+    jlong texture_id,
+    jobject java_hardware_buffer) {
+  TRACE_EVENT1("flutter", "FlutterJNI_UpdateHardwareBufferTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance || !java_hardware_buffer) {
+    FML_LOG(ERROR)
+        << "Invalid null arguments in FlutterJNI_UpdateHardwareBufferTexture: "
+        << "native=" << native_instance
+        << " java_buffer=" << java_hardware_buffer;
+    return;
+  }
+
+  auto provider = native_instance->GetHardwareBufferProvider();
+  if (!provider) {
+    provider = std::make_shared<DefaultAndroidHardwareBufferProvider>(
+        FlutterEmbedderNative::GetDefaultLibraryLoader());
+  }
+
+  auto buffer =
+      provider->CreateFromJavaHardwareBuffer(env, java_hardware_buffer);
+  if (!buffer || !buffer->IsValid()) {
+    FML_LOG(ERROR)
+        << "Unable to extract AHardwareBuffer from Java HardwareBuffer object.";
+    return;
+  }
+
+  void* handle = buffer->GetHandle();
+  // Acquire reference for the native texture frame lifetime:
+  provider->Acquire(handle);
+
+  FlutterHardwareBufferExternalTexture texture_frame =
+      buffer->ToExternalTexture(handle, [](void* user_data) {
+        if (user_data) {
+          DefaultAndroidHardwareBufferProvider default_provider(
+              FlutterEmbedderNative::GetDefaultLibraryLoader());
+          default_provider.Release(user_data);
+        }
+      });
+
+  native_instance->SetHardwareBufferFrame(texture_id, texture_frame);
+  auto engine = native_instance->GetEngine();
+  if (engine) {
+    native_instance->MarkExternalTextureFrameAvailable(engine, texture_id);
+  }
+}
+
 static void FlutterJNI_ScheduleFrame(JNIEnv* env,
                                      jobject jcaller,
                                      jlong native_handle) {
@@ -4656,6 +4931,12 @@ bool FlutterEmbedderNative::RegisterJni(JNIEnv* env) {
           .signature = "(JJ)V",
           .fnPtr =
               reinterpret_cast<void*>(&FlutterJNI_MarkTextureFrameAvailable),
+      },
+      {
+          .name = "nativeUpdateHardwareBufferTexture",
+          .signature = "(JJLandroid/hardware/HardwareBuffer;)V",
+          .fnPtr =
+              reinterpret_cast<void*>(&FlutterJNI_UpdateHardwareBufferTexture),
       },
       {
           .name = "nativeScheduleFrame",

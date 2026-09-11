@@ -363,15 +363,15 @@ DefaultWindowMetricsProvider::~DefaultWindowMetricsProvider() {
 }
 
 void DefaultWindowMetricsProvider::SetMetricsCallback(
-    MetricsCallback callback) {
+    const MetricsCallback& callback) {
   std::scoped_lock lock(mutex_);
-  metrics_callback_ = std::move(callback);
+  metrics_callback_ = callback;
 }
 
 void DefaultWindowMetricsProvider::SetDisplayUpdateCallback(
-    DisplayUpdateCallback callback) {
+    const DisplayUpdateCallback& callback) {
   std::scoped_lock lock(mutex_);
-  display_update_callback_ = std::move(callback);
+  display_update_callback_ = callback;
 }
 
 bool DefaultWindowMetricsProvider::SendViewportMetrics(

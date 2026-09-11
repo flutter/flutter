@@ -32,7 +32,9 @@ typedef void (*AChoreographer_frameCallback64)(int64_t frameTimeNanos,
 // In Android NDK (<android/choreographer.h>), legacy frame callback uses
 // `long`. On 32-bit Android (armeabi-v7a / x86), `long` is 32-bit (int32_t
 // passed in r0).
-typedef void (*AChoreographer_frameCallback)(long frameTimeNanos, void* data);
+typedef void (*AChoreographer_frameCallback)(
+    long frameTimeNanos,  // NOLINT(google-runtime-int)
+    void* data);
 
 // Function pointer types resolved from libandroid.so via OSLibraryLoader.
 typedef AChoreographer* (*AChoreographer_getInstance_fn)();
@@ -53,7 +55,7 @@ typedef void (*AChoreographer_postFrameCallbackDelayed_fn)(
     AChoreographer* choreographer,
     AChoreographer_frameCallback callback,
     void* data,
-    long delayMillis);
+    long delayMillis);  // NOLINT(google-runtime-int)
 
 /// @brief Calculated frame timing information for VSync frame pacing.
 struct AndroidVsyncFrameInfo {

@@ -190,10 +190,11 @@ class WindowMetricsProvider {
   virtual ~WindowMetricsProvider() = default;
 
   /// @brief Sets callback to receive viewport metrics events when dispatched.
-  virtual void SetMetricsCallback(MetricsCallback callback) {}
+  virtual void SetMetricsCallback(const MetricsCallback& callback) {}
 
   /// @brief Sets callback to receive display updates when dispatched.
-  virtual void SetDisplayUpdateCallback(DisplayUpdateCallback callback) {}
+  virtual void SetDisplayUpdateCallback(const DisplayUpdateCallback& callback) {
+  }
 
   /// @brief Sends viewport metrics event.
   virtual bool SendViewportMetrics(const AndroidViewportMetrics& metrics) = 0;
@@ -217,8 +218,8 @@ class DefaultWindowMetricsProvider : public WindowMetricsProvider {
       std::shared_ptr<JvmInvoker> jvm_invoker = nullptr);
   ~DefaultWindowMetricsProvider() override;
 
-  void SetMetricsCallback(MetricsCallback callback) override;
-  void SetDisplayUpdateCallback(DisplayUpdateCallback callback) override;
+  void SetMetricsCallback(const MetricsCallback& callback) override;
+  void SetDisplayUpdateCallback(const DisplayUpdateCallback& callback) override;
 
   bool SendViewportMetrics(const AndroidViewportMetrics& metrics) override;
   bool UpdateDisplayMetrics(const AndroidDisplayMetrics& metrics) override;

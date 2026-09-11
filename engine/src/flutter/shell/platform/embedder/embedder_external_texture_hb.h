@@ -54,17 +54,27 @@ class EmbedderExternalTextureHB : public flutter::Texture {
     return std::nullopt;
   }
 
+  bool HasValidImage() const { return last_image_ != nullptr; }
+
+  sk_sp<DlImage> ResolveTexture(int64_t texture_id,
+                                GrDirectContext* context,
+                                impeller::AiksContext* aiks_context,
+                                const SkISize& size);
+
+  sk_sp<DlImage> ResolveTextureSkia(int64_t texture_id,
+                                    GrDirectContext* context,
+                                    const SkISize& size);
+
+  sk_sp<DlImage> ResolveTextureImpeller(int64_t texture_id,
+                                        impeller::AiksContext* aiks_context,
+                                        const SkISize& size);
+
  private:
   ExternalTextureCallback external_texture_callback_;
   mutable std::mutex frame_mutex_;
   sk_sp<DlImage> last_image_;
   std::unique_ptr<FlutterHardwareBufferExternalTexture> last_texture_frame_;
   std::atomic<bool> has_new_frame_{true};
-
-  sk_sp<DlImage> ResolveTexture(int64_t texture_id,
-                                GrDirectContext* context,
-                                impeller::AiksContext* aiks_context,
-                                const SkISize& size);
 
   void ReleaseLatestFrame();
 

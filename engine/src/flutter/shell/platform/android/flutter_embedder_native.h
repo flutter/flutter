@@ -20,6 +20,7 @@
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
+#include "flutter/shell/platform/android/android_egl_manager.h"
 #include "flutter/shell/platform/android/android_engine_group.h"
 #include "flutter/shell/platform/android/android_hardware_buffer.h"
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
@@ -323,6 +324,21 @@ class FlutterEmbedderNative {
   /// @param height Height of the allocation buffer in pixels.
   /// @return True if presentation succeeded, false otherwise.
   bool PresentSoftware(const void* allocation, size_t row_bytes, size_t height);
+
+  /// @brief Makes the OpenGL ES context current on the calling thread.
+  bool MakeGLCurrent();
+
+  /// @brief Clears the current OpenGL ES context on the calling thread.
+  bool ClearGLCurrent();
+
+  /// @brief Presents the OpenGL ES frame via eglSwapBuffers.
+  bool PresentGL();
+
+  /// @brief Makes the OpenGL ES resource context current on the calling thread.
+  bool MakeGLResourceCurrent();
+
+  /// @brief Returns the managed AndroidEGLManager instance, if available.
+  AndroidEGLManager* GetEGLManager() const;
 
   /// @brief Returns the APKAssetProvider managed by this native instance.
   std::shared_ptr<APKAssetProvider> GetAssetProvider() const;
@@ -866,7 +882,7 @@ class FlutterEmbedderNative {
   /// reference.
   void RegisterSurfaceTexture(
       int64_t texture_id,
-      fml::jni::ScopedJavaGlobalRef<jobject> surface_texture);
+      const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture);
 
   /// @brief Unregisters an external SurfaceTexture.
   void UnregisterSurfaceTexture(int64_t texture_id);
@@ -926,6 +942,14 @@ class FlutterEmbedderNative {
 
   /// @brief Static C-API helper for FlutterEngineCollectAOTData.
   static FlutterEngineResult EngineCollectAOTData(FlutterEngineAOTData data);
+
+  /// @brief Checks whether the engine runs AOT compiled Dart code.
+  bool RunsAOTCompiledDartCode() const;
+
+  /// @brief Finds the ELF AOT library path from command line arguments or
+  /// default VM args.
+  std::string FindAotLibraryPath(
+      const std::vector<std::string>& cmd_strings) const;
 
   /// @brief Returns the AndroidVMInit instance managed by this native instance.
   std::shared_ptr<AndroidVMInit> GetVMInit() const;
@@ -1062,11 +1086,26 @@ class FlutterEmbedderNative {
   static FlutterVulkanExternalTextureFrameCallback
   GetVulkanExternalTextureFrameCallback();
 
+  /// @brief Retrieves the latest GL texture frame for a texture.
+  bool GetGlExternalTextureFrame(int64_t texture_id,
+                                 size_t width,
+                                 size_t height,
+                                 FlutterOpenGLTexture* texture_out) const;
+
+  /// @brief Static C-API callback entry point for FlutterOpenGLTexture
+  /// callback.
+  static bool OnGlExternalTextureFrameCallback(
+      void* user_data,
+      int64_t texture_id,
+      size_t width,
+      size_t height,
+      FlutterOpenGLTexture* texture_out);
+
   /// @brief Returns the AndroidEngineGroup managed by this native instance.
   std::shared_ptr<AndroidEngineGroup> GetEngineGroup() const;
 
   /// @brief Sets or replaces the AndroidEngineGroup.
-  void SetEngineGroup(std::shared_ptr<AndroidEngineGroup> group);
+  void SetEngineGroup(const std::shared_ptr<AndroidEngineGroup>& group);
 
   /// @brief Returns the AndroidEngineGroupProvider managed by this native
   /// instance.
@@ -1074,7 +1113,7 @@ class FlutterEmbedderNative {
 
   /// @brief Sets or replaces the AndroidEngineGroupProvider.
   void SetEngineGroupProvider(
-      std::shared_ptr<AndroidEngineGroupProvider> provider);
+      const std::shared_ptr<AndroidEngineGroupProvider>& provider);
 
   /// @brief Spawns a new FlutterEngine from parent with spawn args via C-API.
   FLUTTER_API_SYMBOL(FlutterEngine)
@@ -1190,6 +1229,12 @@ class FlutterEmbedderNative {
                              const FlutterPlatformMessageResponseHandle*>
       response_handles_;
   mutable std::atomic<int32_t> next_response_id_{1};
+
+  mutable std::mutex fallback_aot_data_mutex_;
+  mutable FlutterEngineAOTData fallback_aot_data_ = nullptr;
+
+  mutable std::mutex egl_manager_mutex_;
+  mutable std::unique_ptr<AndroidEGLManager> egl_manager_;
 
   void AttachWindowMetricsCallbacks();
 
