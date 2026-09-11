@@ -1,6 +1,6 @@
 # Migration Branches Index (v7 Rebased & Formatted)
 
-Linear rebased stack of 38 branches with 0 merge commits onto master `5f91bd97888` (Phases 1.1 through 5.0 Parity Checkpoint fully verified and certified on Google Pixel hardware).
+Linear rebased stack of 39 branches with 0 merge commits onto master `5f91bd97888` (Phases 1.1 through 6.1 JNI Registration Cutover fully verified and certified on Google Pixel hardware).
 
 | # | Phase | Branch Name | Head SHA | Status | Compare URL |
 |---|---|---|---|---|---|
@@ -29,7 +29,7 @@ Linear rebased stack of 38 branches with 0 merge commits onto master `5f91bd9788
 | 23 | Phase 3.2 | `android-embedder-migration-v7/phase-3.2-vulkan-external-textures` | [`2f77fdae3e7`](https://github.com/flutter/flutter/commit/2f77fdae3e7fed7352851d24530c4076aaf0233f) | ✅ Rebased & Certified | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-3.2-vulkan-external-textures) |
 | 24 | Phase 3.3 | `android-embedder-migration-v7/phase-3.3-surfacecontrol-hcpp` | [`3162d064b80`](https://github.com/flutter/flutter/commit/3162d064b80d5088de393540d2c6a1fa50c313ba) | ✅ Rebased & Certified | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-3.3-surfacecontrol-hcpp) |
 | 25 | Phase 3.4 | `android-embedder-migration-v7/phase-3.4-multi-engine-add-to-app` | [`414b137b1c9`](https://github.com/flutter/flutter/commit/414b137b1c96a64563b1ca41cfd8bae9ec357465) | ✅ Rebased & Certified | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-3.4-multi-engine-add-to-app) |
-| 26 | Phase 3.0 | `android-embedder-migration-v7/phase-3-parity-checkpoint` | [`e858d20a227`](https://github.com/flutter/flutter/commit/e858d20a2278f630892cc64909e11ec8d37f20d5) | ✅ Rebased & Certified | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-3-parity-checkpoint) |
+| 26 | Phase 3.0 | `android-embedder-migration-v7/phase-3-parity-checkpoint` | [`e858d20a227`](https://github.com/flutter/flutter/commit/e858d20a2278f630892cc64909e11ec8d37f20d5) | ✅ Rebased & Certified | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-3.0-parity-checkpoint) |
 | 27 | Phase 4.1 | `android-embedder-migration-v7/phase-4.1-engine-unit-tests` | [`dbed1ec8484`](https://github.com/flutter/flutter/commit/dbed1ec84849d7cca59b6ef3df9f96af866b9af6) | ✅ Rebased & Certified | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-4.1-engine-unit-tests) |
 | 28 | Phase 4.2 | `android-embedder-migration-v7/phase-4.2-framework-integration-tests-skia-gl-software` | [`484e7b1a050`](https://github.com/flutter/flutter/commit/484e7b1a050d9c17cd13c9a3aee50d6f5d38d8c5) | ✅ Rebased & Certified | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-4.2-framework-integration-tests-skia-gl-software) |
 | 29 | Phase 4.3 | `android-embedder-migration-v7/phase-4.3-framework-integration-tests-impeller` | [`e2e5284c5a4`](https://github.com/flutter/flutter/commit/e2e5284c5a404eefedb7586e11138accd98e7010) | ✅ Rebased & Certified | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-4.3-framework-integration-tests-impeller) |
@@ -42,19 +42,19 @@ Linear rebased stack of 38 branches with 0 merge commits onto master `5f91bd9788
 | 36 | Phase 5.5 | `android-embedder-migration-v7/phase-5.5-flag-obliteration` | [`8d517f972b2`](https://github.com/flutter/flutter/commit/8d517f972b2cd3f485a9b60ccce67147c8959284) | ✅ Rebased & Certified | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-5.5-flag-obliteration) |
 | 37 | Phase 5.6 | `android-embedder-migration-v7/phase-5.6-strict-gn-target-isolation` | [`4b32174e4fb`](https://github.com/flutter/flutter/commit/4b32174e4fb327fa75c0ffcff280de0d182dc55e) | ✅ Rebased & Certified | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-5.6-strict-gn-target-isolation) |
 | 38 | Phase 5.0 | `android-embedder-migration-v7/phase-5-parity-checkpoint` | [`2221f6c261c`](https://github.com/flutter/flutter/commit/2221f6c261c51c132aa25650ce72fb98aa8a17bd) | ✅ Rebased & Certified (Hardware Parity Checkpoint) | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-5-parity-checkpoint) |
+| 39 | Phase 6.1 | `android-embedder-migration-v7/phase-6.1-jni-registration-cutover` | [`26a237dfb5c`](https://github.com/flutter/flutter/commit/26a237dfb5c3ecb277adc3b22eff1c97197d651e) | ✅ Rebased & Certified | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-6.1-jni-registration-cutover) |
 
 *Note on Branch 38*: Commit `2221f6c261c` represents the hardware-verified and certified parity checkpoint commit. Subsequent commits on this branch synchronize architectural decisions and documentation.
 
 ### Upcoming Phase 6 Roadmap (Complete Legacy Purge & Final JNI Cutover)
 
-The following branches represent the pending Phase 6 sequence defined in `MIGRATION_PLAN.md` and `MIGRATION_LEDGER.md`. These branch stubs were authored on an earlier prototype tree and are queued for linear rebase onto `phase-5-parity-checkpoint` and hardware verification during Phase 6 execution.
+The following branches represent the pending Phase 6 sequence defined in `MIGRATION_PLAN.md` and `MIGRATION_LEDGER.md`. These branch stubs were authored on an earlier prototype tree and are queued for linear rebase onto `phase-6.1-jni-registration-cutover` and hardware verification during Phase 6 execution.
 
 | # | Phase | Branch Name | Head SHA | Status | Compare URL |
 |---|---|---|---|---|---|
-| 39 | Phase 6.1 | `android-embedder-migration-v7/phase-6.1-jni-registration-cutover` | [`da7a89ec6e0`](https://github.com/flutter/flutter/commit/da7a89ec6e0d33480cb5135c1c46233facbdaa8e) | ⏳ Pending Rebase onto Phase 5.0 | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-6.1-jni-registration-cutover) |
-| 40 | Phase 6.2 | `android-embedder-migration-v7/phase-6.2-legacy-class-purge` | [`5a3d3c21525`](https://github.com/flutter/flutter/commit/5a3d3c21525613846c529c543acea2515f5671b3) | ⏳ Pending Rebase onto Phase 5.0 | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-6.2-legacy-class-purge) |
-| 41 | Phase 6.3 | `android-embedder-migration-v7/phase-6.3-final-gn-integration` | [`d47aa07a21c`](https://github.com/flutter/flutter/commit/d47aa07a21c9146f22feb151f8bc75e17eb4559d) | ⏳ Pending Rebase onto Phase 5.0 | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-6.3-final-gn-integration) |
-| 42 | Phase 6.4 | `android-embedder-migration-v7/phase-6-parity-checkpoint` | [`cfa7a859df4`](https://github.com/flutter/flutter/commit/cfa7a859df4cb69b2cf2a3c18e3c9f161ffba78a) | ⏳ Pending Rebase onto Phase 5.0 | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-6-parity-checkpoint) |
+| 40 | Phase 6.2 | `android-embedder-migration-v7/phase-6.2-legacy-class-purge` | [`5a3d3c21525`](https://github.com/flutter/flutter/commit/5a3d3c21525613846c529c543acea2515f5671b3) | ⏳ Pending Rebase onto Phase 6.1 | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-6.2-legacy-class-purge) |
+| 41 | Phase 6.3 | `android-embedder-migration-v7/phase-6.3-final-gn-integration` | [`d47aa07a21c`](https://github.com/flutter/flutter/commit/d47aa07a21c9146f22feb151f8bc75e17eb4559d) | ⏳ Pending Rebase onto Phase 6.1 | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-6.3-final-gn-integration) |
+| 42 | Phase 6.4 | `android-embedder-migration-v7/phase-6-parity-checkpoint` | [`cfa7a859df4`](https://github.com/flutter/flutter/commit/cfa7a859df4cb69b2cf2a3c18e3c9f161ffba78a) | ⏳ Pending Rebase onto Phase 6.1 | [Compare](https://github.com/flutter/flutter/compare/main...android-embedder-migration-v7/phase-6-parity-checkpoint) |
 
 ## Multi-Platform Compiler & Clang-Format Fixes in Introductory Commits
 
