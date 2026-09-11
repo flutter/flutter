@@ -8,6 +8,7 @@
 #include <map>
 
 #include "flutter/display_list/dl_canvas.h"
+#include "flutter/display_list/image/dl_image.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 
@@ -57,6 +58,14 @@ class Texture : public ContextListener {
 
   // Called on raster thread.
   virtual void OnTextureUnregistered() = 0;
+
+  // Creates a DlImage snapshot from the texture's current content.
+  // Must be called on raster thread. Returns nullptr if unsupported.
+  // The returned image is independent of the texture - it captures the
+  // current content and will not update when the texture changes.
+  virtual sk_sp<DlImage> CreateDlImage(impeller::AiksContext* aiks_context) {
+    return nullptr;
+  }
 
   int64_t Id() { return id_; }
 
