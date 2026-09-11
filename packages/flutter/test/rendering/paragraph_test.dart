@@ -1599,6 +1599,47 @@ void main() {
     semanticsHandle.dispose();
   });
 
+  test('RenderParagraph ideographic baseline', () {
+    final paragraph = RenderParagraph(
+      const TextSpan(text: 'Hello world', style: TextStyle(fontSize: 10.0)),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph);
+
+    final double alphabetic = paragraph.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+    final double ideographic = paragraph.computeDistanceToActualBaseline(TextBaseline.ideographic);
+
+    expect(alphabetic, 7.5);
+    expect(ideographic, 10.0);
+  });
+
+  test('RenderParagraph computeDryBaseline ideographic baseline', () {
+    // computeDryBaseline should match computeDistanceToActualBaseline for both
+    // alphabetic and ideographic baselines.
+    final paragraph = RenderParagraph(
+      const TextSpan(text: 'Hello world', style: TextStyle(fontSize: 10.0)),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph);
+
+    final double alphabetic = paragraph.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+    final double ideographic = paragraph.computeDistanceToActualBaseline(TextBaseline.ideographic);
+
+    final double dryAlphabetic = paragraph.computeDryBaseline(
+      const BoxConstraints(maxWidth: 800.0),
+      TextBaseline.alphabetic,
+    );
+    final double dryIdeographic = paragraph.computeDryBaseline(
+      const BoxConstraints(maxWidth: 800.0),
+      TextBaseline.ideographic,
+    );
+
+    expect(alphabetic, 7.5);
+    expect(ideographic, 10);
+    expect(dryAlphabetic, equals(alphabetic));
+    expect(dryIdeographic, equals(ideographic));
+  });
+
   group('positionInlineChildren', () {
     test('asserts when boxes length exceeds childCount', () {
       final paragraph = RenderParagraph(

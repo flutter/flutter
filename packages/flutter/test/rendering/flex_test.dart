@@ -940,13 +940,13 @@ void main() {
       additionalConstraints: square,
       child: RenderFlowBaselineTestBox()
         ..gridCount = 1
-        ..baselinePlacer = (double height) => 10,
+        ..baselinePlacer = (double height, TextBaseline baseline) => 10,
     );
     final box2 = RenderConstrainedBox(
       additionalConstraints: square,
       child: RenderFlowBaselineTestBox()
         ..gridCount = 1
-        ..baselinePlacer = (double height) => 10,
+        ..baselinePlacer = (double height, TextBaseline baseline) => 10,
     );
     RenderConstrainedBox filler() => RenderConstrainedBox(additionalConstraints: square);
     final flex = RenderFlex(
@@ -1133,12 +1133,12 @@ void main() {
     test('baseline aligned flex flow computeDryLayout', () {
       // box1 has its baseline placed at the top of the box.
       final box1 = RenderFlowBaselineTestBox()
-        ..baselinePlacer = ((double height) => 0.0)
+        ..baselinePlacer = ((double height, TextBaseline baseline) => 0.0)
         ..gridCount = 10;
 
       // box2 has its baseline placed at the bottom of the box.
       final box2 = RenderFlowBaselineTestBox()
-        ..baselinePlacer = ((double height) => height)
+        ..baselinePlacer = ((double height, TextBaseline baseline) => height)
         ..gridCount = 10;
 
       final flex = RenderFlex(
@@ -1167,12 +1167,12 @@ void main() {
     test('baseline aligned children cross intrinsic size', () {
       // box1 has its baseline placed at the top of the box.
       final box1 = RenderFlowBaselineTestBox()
-        ..baselinePlacer = ((double height) => 0.0)
+        ..baselinePlacer = ((double height, TextBaseline baseline) => 0.0)
         ..gridCount = 10;
 
       // box2 has its baseline placed at the bottom of the box.
       final box2 = RenderFlowBaselineTestBox()
-        ..baselinePlacer = ((double height) => height)
+        ..baselinePlacer = ((double height, TextBaseline baseline) => height)
         ..gridCount = 10;
 
       final flex = RenderFlex(
@@ -1200,12 +1200,12 @@ void main() {
     test('children with no baselines do not affect the baseline location', () {
       // box1 has its baseline placed at the bottom of the box.
       final box1 = RenderFlowBaselineTestBox()
-        ..baselinePlacer = ((double height) => height)
+        ..baselinePlacer = ((double height, TextBaseline baseline) => height)
         ..gridCount = 10;
 
       // box2 has its baseline placed at the bottom of the box.
       final box2 = RenderFlowBaselineTestBox()
-        ..baselinePlacer = ((double height) => null)
+        ..baselinePlacer = ((double height, TextBaseline baseline) => null)
         ..gridCount = 10;
 
       final flex = RenderFlex(
@@ -1229,6 +1229,30 @@ void main() {
       // box 1 one line, box 2 one.
       expect(flex.getDryLayout(BoxConstraints.loose(size)), const Size(300.0, 10.0));
       expect(flex.getDryBaseline(BoxConstraints.loose(size), TextBaseline.alphabetic), 10.0);
+    });
+
+    test('computeDryBaseline handles mismatched requested baseline and textBaseline', () {
+      // This test ensures that requesting a different baseline type (e.g. ideographic)
+      // from the alignment baseline (e.g. alphabetic) computes correctly using child baselines
+      // instead of returning the cached alignment baseline.
+      // See https://github.com/flutter/flutter/issues/22625 for context on why baselines were previously coupled.
+      final box1 = RenderFlowBaselineTestBox()
+        ..baselinePlacer = ((double height, TextBaseline baseline) => switch (baseline) {
+          TextBaseline.alphabetic => 10.0,
+          TextBaseline.ideographic => 20.0,
+        })
+        ..gridCount = 10;
+
+      final flex = RenderFlex(
+        textDirection: TextDirection.ltr,
+        textBaseline: TextBaseline.alphabetic,
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        children: <RenderBox>[box1],
+      );
+
+      // Verify computing the ideographic baseline works even when configured for alphabetic.
+      // The box returns 20.0 for ideographic baseline.
+      expect(flex.getDryBaseline(const BoxConstraints(), TextBaseline.ideographic), 20.0);
     });
   });
 
@@ -1278,7 +1302,8 @@ class RenderFlowBaselineTestBox extends RenderBox {
 
   int lineCount(double width) => (gridCount / lineGridCount(width)).ceil();
 
-  double? Function(double height) baselinePlacer = (double height) => null;
+  double? Function(double height, TextBaseline baseline) baselinePlacer =
+      (double height, TextBaseline baseline) => null;
 
   @override
   double computeMinIntrinsicWidth(double height) => gridSize.width;
@@ -1300,9 +1325,10 @@ class RenderFlowBaselineTestBox extends RenderBox {
 
   @override
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) =>
-      baselinePlacer(getDryLayout(constraints).height);
+      baselinePlacer(getDryLayout(constraints).height, baseline);
   @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) => baselinePlacer(size.height);
+  double? computeDistanceToActualBaseline(TextBaseline baseline) =>
+      baselinePlacer(size.height, baseline);
 
   @override
   void performLayout() {
