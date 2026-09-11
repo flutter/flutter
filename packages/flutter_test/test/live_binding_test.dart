@@ -283,6 +283,48 @@ void main() {
     },
   );
 
+  testWidgets(
+    'a pointer cancelled via cancelPointer is delivered to recognizers tracking a test-sourced pointer (regression for #191757)',
+    (WidgetTester tester) async {
+      var tapCount = 0;
+      var cancelCount = 0;
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: GestureDetector(
+            onTapCancel: () => cancelCount++,
+            onTap: () => tapCount++,
+            child: const Text('Target'),
+          ),
+        ),
+      );
+
+      const pointer = 23;
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.text('Target')),
+        pointer: pointer,
+      );
+
+      // This mimics what Navigator._cancelActivePointers does when a route
+      // is pushed mid-gesture: it calls WidgetsBinding.instance.cancelPointer,
+      // which schedules a PointerCancelEvent to be dispatched in a microtask
+      // — i.e. outside the synchronous `withPointerEventSource(test, ...)`
+      // scope that TestGesture's own events run in.
+      binding.cancelPointer(pointer);
+      await tester.pump();
+
+      // The GestureDetector's recognizer must actually receive the cancel...
+      expect(cancelCount, 1);
+      expect(tapCount, 0);
+
+      await gesture.up();
+
+      // ...and must be left in a clean state so a later, unrelated gesture
+      // on the same widget still works.
+      await tester.tap(find.text('Target'));
+      expect(tapCount, 1);
+    },
+  );
+
   testWidgets('resetLayers resets configuration and replaces root layer', (
     WidgetTester tester,
   ) async {
