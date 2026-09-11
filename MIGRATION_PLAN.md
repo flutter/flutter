@@ -91,7 +91,7 @@ This document represents the synthesized blueprint for migrating the Flutter And
 - **Context & Decision**: Route all Android platform shell native operations strictly through the public C-ABI (`embedder.h`) with opaque types and an isolated GN target (`flutter_embedder_native`), strictly forbidding any direct C++ `#include` of internal Engine headers (`//flutter/flow`, `//flutter/skia`, `//flutter/lib/ui`, `//flutter/impeller`).
 - **Reasoning**:
   - Enforces strict modular separation between the platform shell (Android Java/JNI layer) and the core Flutter engine.
-  - Enables comprehensive desktop host unit testing (`flutter_embedder_native_unittests`) on macOS, Linux, and Windows without initializing the full engine stack or GPU pipelines.
+  - In `BUILD.gn`, Android platform embedder targets (`flutter_embedder_native_src`, `flutter_embedder_native_unittests`, `flutter_shell_native`) are conditionally added strictly when `is_android == true`. This eliminates `#if defined(__ANDROID__)` preprocessor guards and mock stubs across Android embedder source files, with comprehensive unit tests executed natively on Android targets/hardware.
   - Prevents internal engine refactorings (e.g., changes in Skia, Impeller, or Flow layer classes) from breaking the Android embedding.
   - Establishes a clean, stable boundary that aligns Android with other embedders (Windows, Linux, macOS, Custom Embedders).
 - **Alternatives Considered**:
