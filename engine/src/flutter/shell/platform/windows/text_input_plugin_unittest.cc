@@ -125,6 +125,31 @@ static std::unique_ptr<rapidjson::Document> EncodedEditingState(
   return arguments;
 }
 
+// Returns a send handler that records the text and the selection base of the
+// last TextInputClient.updateEditingState message sent to the framework.
+static TestBinaryMessenger::SendHandler RecordEditingState(
+    std::string* text_out,
+    int* selection_base_out) {
+  return [text_out, selection_base_out](const std::string& channel,
+                                        const uint8_t* message, size_t size,
+                                        BinaryReply reply) {
+    auto method = JsonMethodCodec::GetInstance().DecodeMethodCall(
+        std::vector<uint8_t>(message, message + size));
+    if (method->method_name() != kUpdateEditingStateMethod) {
+      return;
+    }
+    const auto& editing_state = (*method->arguments())[1];
+    auto text = editing_state.FindMember(kTextKey);
+    auto base = editing_state.FindMember(kSelectionBaseKey);
+    ASSERT_NE(text, editing_state.MemberEnd());
+    ASSERT_TRUE(text->value.IsString());
+    ASSERT_NE(base, editing_state.MemberEnd());
+    ASSERT_TRUE(base->value.IsInt());
+    *text_out = text->value.GetString();
+    *selection_base_out = base->value.GetInt();
+  };
+}
+
 class MockFlutterWindowsView : public FlutterWindowsView {
  public:
   MockFlutterWindowsView(FlutterWindowsEngine* engine,
@@ -617,6 +642,86 @@ TEST_F(TextInputPluginTest, CompositionCursorPos) {
 
   plugin.ComposeChangeHook(u"12", 2);
   EXPECT_EQ(selection_base, 5);
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/191196.
+//
+// The composition is still pending when the text client is swapped. The new
+// model is not composing, but the IME is under no obligation to honor the
+// engine's cancellation request and keeps updating its composition.
+TEST_F(TextInputPluginTest, ComposeChangeAfterClientSwapDoesNotDuplicateText) {
+  UseEngineWithView();
+
+  std::string last_text;
+  int last_selection_base = -1;
+  TestBinaryMessenger messenger(
+      RecordEditingState(&last_text, &last_selection_base));
+  BinaryReply reply_handler = [](const uint8_t* reply, size_t size) {};
+
+  TextInputPlugin plugin(&messenger, engine());
+  auto& codec = JsonMethodCodec::GetInstance();
+  auto set_client = codec.EncodeMethodCall(
+      {kSetClientMethod,
+       EncodedClientConfig("TextInputType.text", "TextInputAction.done")});
+  EXPECT_TRUE(messenger.SimulateEngineMessage(
+      kChannelName, set_client->data(), set_client->size(), reply_handler));
+
+  plugin.ComposeBeginHook();
+  plugin.ComposeChangeHook(u"n", 1);
+  EXPECT_EQ(last_text, "n");
+
+  EXPECT_CALL(*view(), OnResetImeComposing());
+  auto clear_client =
+      codec.EncodeMethodCall({"TextInput.clearClient", nullptr});
+  EXPECT_TRUE(messenger.SimulateEngineMessage(
+      kChannelName, clear_client->data(), clear_client->size(), reply_handler));
+  EXPECT_TRUE(messenger.SimulateEngineMessage(
+      kChannelName, set_client->data(), set_client->size(), reply_handler));
+
+  plugin.ComposeChangeHook(u"ni", 2);
+
+  // The update is applied once, not inserted by both AddText and
+  // UpdateComposingText.
+  EXPECT_EQ(last_text, "ni");
+  EXPECT_EQ(last_selection_base, 2);
+}
+
+// An IME that reports the end of the composition and then keeps updating it
+// must not corrupt the text: the model restarts composing at the caret, so
+// updates keep replacing the composing region.
+TEST_F(TextInputPluginTest, ComposeChangeAfterComposeEndRestartsComposing) {
+  UseEngineWithView();
+
+  std::string last_text;
+  int last_selection_base = -1;
+  TestBinaryMessenger messenger(
+      RecordEditingState(&last_text, &last_selection_base));
+  BinaryReply reply_handler = [](const uint8_t* reply, size_t size) {};
+
+  TextInputPlugin plugin(&messenger, engine());
+  auto& codec = JsonMethodCodec::GetInstance();
+  auto set_client = codec.EncodeMethodCall(
+      {kSetClientMethod,
+       EncodedClientConfig("TextInputType.text", "TextInputAction.done")});
+  EXPECT_TRUE(messenger.SimulateEngineMessage(
+      kChannelName, set_client->data(), set_client->size(), reply_handler));
+
+  plugin.ComposeBeginHook();
+  plugin.ComposeChangeHook(u"n", 1);
+  plugin.ComposeEndHook();
+  EXPECT_EQ(last_text, "n");
+
+  // "n" was committed by ComposeEndHook, so the new composition is inserted
+  // once at the caret.
+  plugin.ComposeChangeHook(u"ni", 2);
+  EXPECT_EQ(last_text, "nni");
+  EXPECT_EQ(last_selection_base, 3);
+
+  // The next update replaces the composing region instead of overwriting the
+  // beginning of the text.
+  plugin.ComposeChangeHook(u"nihao", 5);
+  EXPECT_EQ(last_text, "nnihao");
+  EXPECT_EQ(last_selection_base, 6);
 }
 
 TEST_F(TextInputPluginTest, TransformCursorRect) {
