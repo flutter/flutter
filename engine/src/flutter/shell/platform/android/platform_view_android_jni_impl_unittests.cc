@@ -174,6 +174,23 @@ TEST_F(PlatformViewAndroidJNIImplTest, SetViewportMetricsEmptyArrays) {
                        0, 0, 0, 0, 0, 0, 0, 0);
 }
 
+TEST_F(PlatformViewAndroidJNIImplTest, HasActivePlatformViewsToggle) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+
+  jobject jcaller = reinterpret_cast<jobject>(123);
+  PlatformViewAndroidJNIImpl impl(
+      fml::jni::JavaObjectWeakGlobalRef(&mock_env, jcaller));
+
+  EXPECT_FALSE(impl.HasActivePlatformViews());
+
+  impl.SetHasActivePlatformViews(true);
+  EXPECT_TRUE(impl.HasActivePlatformViews());
+
+  impl.SetHasActivePlatformViews(false);
+  EXPECT_FALSE(impl.HasActivePlatformViews());
+}
+
 // The load order is exercised with an injected loader rather than real
 // dlopen(): the property under test is purely the ordering (first-to-last,
 // stop at the first that loads), and a fake loader makes that deterministic

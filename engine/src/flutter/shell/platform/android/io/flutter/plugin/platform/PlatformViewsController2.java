@@ -77,6 +77,12 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
   private final ArrayList<SurfaceControl.Transaction> pendingTransactions;
   private final ArrayList<SurfaceControl.Transaction> activeTransactions;
+  // Protects mutation and transfer of pendingTransactions between the raster
+  // thread (where transactions are created) and the platform thread (where
+  // transactions are swapped into activeTransactions).
+  // Note: Individual Transaction objects are populated on the raster thread after
+  // releasing the lock, as each belongs to the submitting frame.
+  private final Object transactionLock = new Object();
   private Surface overlayerSurface = null;
   private SurfaceControl overlaySurfaceControl = null;
 
@@ -98,6 +104,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   /** Whether the SurfaceControl swapchain mode is enabled. */
   public void setFlutterJNI(FlutterJNI flutterJNI) {
     this.flutterJNI = flutterJNI;
+    if (flutterJNI != null && flutterJNI.isAttached() && platformViews.size() > 0) {
+      flutterJNI.setHasActivePlatformViews(true);
+    }
   }
 
   @Override
@@ -126,6 +135,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
     embeddedView.setLayoutDirection(request.direction);
     platformViews.put(request.viewId, platformView);
+    if (flutterJNI != null && flutterJNI.isAttached() && platformViews.size() == 1) {
+      flutterJNI.setHasActivePlatformViews(true);
+    }
     maybeInvokeOnFlutterViewAttached(platformView);
     return platformView;
   }
@@ -623,6 +635,11 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     return new SurfaceHolder.Callback() {
       @Override
       public void surfaceCreated(@NonNull SurfaceHolder holder) {
+        if (platformViews.get(viewId) == null) {
+          viewsWithPendingSurfaceCallback.remove(viewId);
+          surfaceView.getHolder().removeCallback(this);
+          return;
+        }
         SurfaceControl surfaceControl = surfaceView.getSurfaceControl();
         if (surfaceControl != null && surfaceControl.isValid()) {
           SurfaceControl.Transaction tx =
@@ -690,30 +707,40 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     rootSurfaceControl.applyTransactionOnDraw(tx);
   }
 
-  // NOT called from UI thread.
-  public synchronized void swapTransactions() {
-    activeTransactions.clear();
-    activeTransactions.addAll(pendingTransactions);
-    pendingTransactions.clear();
+  // Called on the platform thread (UI thread) via the platform task runner.
+  public void swapTransactions() {
+    synchronized (transactionLock) {
+      activeTransactions.clear();
+      activeTransactions.addAll(pendingTransactions);
+      pendingTransactions.clear();
+    }
   }
 
   // NOT called from UI thread.
   @RequiresApi(API_LEVELS.API_34)
   public SurfaceControl.Transaction createTransaction() {
-    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-    pendingTransactions.add(tx);
-    return tx;
+    synchronized (transactionLock) {
+      SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+      pendingTransactions.add(tx);
+      return tx;
+    }
   }
 
   // NOT called from UI thread.
   @RequiresApi(API_LEVELS.API_34)
   public void applyTransactions() {
-    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-    for (int i = 0; i < pendingTransactions.size(); i++) {
-      tx = tx.merge(pendingTransactions.get(i));
+    final SurfaceControl.Transaction tx;
+    synchronized (transactionLock) {
+      if (pendingTransactions.isEmpty()) {
+        return;
+      }
+      tx = new SurfaceControl.Transaction();
+      for (int i = 0; i < pendingTransactions.size(); i++) {
+        tx.merge(pendingTransactions.get(i));
+      }
+      pendingTransactions.clear();
     }
     tx.apply();
-    pendingTransactions.clear();
   }
 
   @RequiresApi(API_LEVELS.API_34)
@@ -799,6 +826,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
             }
           }
           platformViews.remove(viewId);
+          if (flutterJNI != null && flutterJNI.isAttached() && platformViews.size() == 0) {
+            flutterJNI.setHasActivePlatformViews(false);
+          }
           try {
             platformView.dispose();
           } catch (RuntimeException exception) {
