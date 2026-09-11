@@ -141,6 +141,23 @@ TEST_F(FlViewTest, DisposeClearsTextInputWidget) {
   EXPECT_EQ(fl_text_input_handler_get_widget(handler), nullptr);
 }
 
+TEST_F(FlViewTest, DisposePreservesOtherTextInputWidget) {
+  FlView* view = fl_view_new(project);
+  g_object_ref_sink(view);
+  g_autoptr(FlEngine) engine =
+      FL_ENGINE(g_object_ref(fl_view_get_engine(view)));
+  StartEngine(engine);
+  FlTextInputHandler* handler = fl_engine_get_text_input_handler(engine);
+  g_autoptr(GtkWidget) other = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+  g_object_ref_sink(other);
+  fl_text_input_handler_set_widget(handler, other);
+
+  g_object_unref(view);
+
+  EXPECT_EQ(fl_text_input_handler_get_widget(handler), other);
+  fl_text_input_handler_set_widget(handler, nullptr);
+}
+
 // FIXME(robert-ancell): Disabling this test as it requires the FlView
 // to be realized to work after some refactoring. This is proving to be
 // very difficult to mock. Following PRs will change this code so enable the

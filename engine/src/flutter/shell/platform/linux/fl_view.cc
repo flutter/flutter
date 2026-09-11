@@ -547,6 +547,15 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->zoom_gesture);
   g_clear_object(&self->rotate_gesture);
 #endif
+  if (self->engine != nullptr) {
+    // The engine may outlive the view that currently owns text input focus.
+    FlTextInputHandler* handler =
+        fl_engine_get_text_input_handler(self->engine);
+    if (handler != nullptr &&
+        fl_text_input_handler_get_widget(handler) == GTK_WIDGET(self)) {
+      fl_text_input_handler_set_widget(handler, nullptr);
+    }
+  }
   if (self->engine != nullptr &&
       self->view_id != flutter::kFlutterImplicitViewId) {
     FlMouseCursorHandler* handler =
