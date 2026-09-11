@@ -19,6 +19,7 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/paths.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/paths_android.h"
 #include "flutter/fml/trace_event.h"
@@ -152,6 +153,9 @@ void FlutterMain::Init(JNIEnv* env,
   }
   if (kernelPath != nullptr) {
     vm_args.kernel_path = fml::jni::JavaStringToString(env, kernelPath);
+    vm_args.assets_path = fml::paths::GetDirectoryName(vm_args.kernel_path);
+  } else if (appStoragePath != nullptr) {
+    vm_args.assets_path = fml::jni::JavaStringToString(env, appStoragePath);
   }
   if (appStoragePath != nullptr) {
     vm_args.app_storage_path =

@@ -2791,6 +2791,43 @@ typedef void (*FlutterLogMessageCallback)(const char* /* tag */,
 /// FlutterEngine instance in AOT mode.
 typedef struct _FlutterEngineAOTData* FlutterEngineAOTData;
 
+/// @brief Asset descriptor passed across the Embedder C-ABI.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterAsset).
+  size_t struct_size;
+  /// Pointer to the asset data buffer.
+  const uint8_t* data;
+  /// Size of the asset data buffer in bytes.
+  size_t size;
+  /// User data associated with the asset for destruction callback.
+  void* user_data;
+  /// Callback invoked when the engine or embedder has finished using the asset.
+  void (*asset_free_callback)(void* user_data);
+#if UINTPTR_MAX == 0xffffffff
+  /// Padding to enforce 8-byte natural alignment across 32-bit architectures.
+  uint32_t reserved_padding;
+#endif
+} FlutterAsset;
+
+/// @brief Custom asset resolver bridge structure for embedder integration.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterCustomAssetResolver).
+  size_t struct_size;
+  /// User data passed to all callbacks.
+  void* user_data;
+  /// Callback invoked to find and map an asset by name.
+  bool (*find_asset_callback)(void* user_data,
+                              const char* asset_name,
+                              FlutterAsset* asset_out);
+  /// Callback invoked to check whether this resolver is currently valid.
+  bool (*is_valid_callback)(void* user_data);
+  /// Callback invoked to check whether this resolver is valid after asset
+  /// manager change.
+  bool (*is_valid_after_change_callback)(void* user_data);
+  /// Callback invoked when the custom resolver is destroyed.
+  void (*destruction_callback)(void* user_data);
+} FlutterCustomAssetResolver;
+
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterProjectArgs).
   size_t struct_size;
@@ -3158,6 +3195,21 @@ typedef struct {
   ///
   /// This field is optional.
   FlutterRasterThreadContextCallback raster_thread_context_clear_current;
+
+  /// Custom asset resolver bridge structure for embedder integration.
+  ///
+  /// This field allows the embedder to provide custom asset loading logic
+  /// (e.g., loading assets from an Android APK via `AAssetManager`, in-memory
+  /// bundles, or platform-specific packaging formats).
+  ///
+  /// This field is optional; nullptr may be passed.
+  const FlutterCustomAssetResolver* custom_asset_resolver;
+
+#if UINTPTR_MAX == 0xffffffff
+  /// Reserved padding to maintain 8-byte natural alignment boundaries across
+  /// 32-bit architectures.
+  uint32_t reserved_padding_resolver;
+#endif
 } FlutterProjectArgs;
 
 typedef struct {
@@ -4276,6 +4328,29 @@ FlutterEngineResult FlutterEngineUnregisterImageDecoder(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     FlutterImageDecoderRegistration registration);
 
+//------------------------------------------------------------------------------
+/// @brief      Updates the custom asset resolver for a running engine.
+///
+///             This replaces or registers the custom asset resolver in the
+///             engine's asset manager, enabling dynamic asset updates (e.g.
+///             when Android `AssetManager` changes or deferred components are
+///             loaded).
+///
+///             This function is thread-safe and may be called from any thread.
+///
+/// @param[in]  engine    The running engine instance.
+/// @param[in]  resolver  The custom asset resolver bridge structure.
+///
+/// @return     `kSuccess` if the asset resolver was successfully updated;
+///             `kInvalidArguments` if `engine` or `resolver` is null, or
+///             `resolver->struct_size` is invalid;
+///             `kInternalInconsistency` if the engine is not valid.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineUpdateCustomAssetResolver(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterCustomAssetResolver* resolver);
+
 #endif  // !FLUTTER_ENGINE_NO_PROTOTYPES
 
 // Typedefs for the function pointers in FlutterEngineProcTable.
@@ -4444,6 +4519,9 @@ typedef FlutterEngineResult (*FlutterEngineRegisterImageDecoderFnPtr)(
 typedef FlutterEngineResult (*FlutterEngineUnregisterImageDecoderFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     FlutterImageDecoderRegistration registration);
+typedef FlutterEngineResult (*FlutterEngineUpdateCustomAssetResolverFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterCustomAssetResolver* resolver);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -4503,6 +4581,7 @@ typedef struct {
   FlutterEngineGetCallbackInformationFnPtr GetCallbackInformation;
   FlutterEngineRegisterImageDecoderFnPtr RegisterImageDecoder;
   FlutterEngineUnregisterImageDecoderFnPtr UnregisterImageDecoder;
+  FlutterEngineUpdateCustomAssetResolverFnPtr UpdateCustomAssetResolver;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------
