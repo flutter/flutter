@@ -43,6 +43,7 @@ import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/file_generators/main_dart.dart' as main_dart;
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
+import 'build_targets.dart';
 import 'devfs_web.dart';
 import 'web_expression_compiler.dart';
 
@@ -354,6 +355,7 @@ class ResidentWebRunner extends ResidentRunner {
             platform: globals.platform,
             processManager: globals.processManager,
             terminal: globals.terminal,
+            buildTargets: const BuildTargetsImpl(),
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -516,6 +518,7 @@ class ResidentWebRunner extends ResidentRunner {
           platform: globals.platform,
           processManager: globals.processManager,
           terminal: globals.terminal,
+          buildTargets: const BuildTargetsImpl(),
         );
         await webBuilder.buildWeb(
           flutterProject,

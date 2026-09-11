@@ -19,7 +19,6 @@ import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../flutter_plugins.dart';
-import '../isolated/build_targets.dart';
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -50,7 +49,7 @@ class WebBuilder {
     required Analytics analytics,
     required BuildSystem buildSystem,
     required ToolContext toolContext,
-    BuildTargets buildTargets = const BuildTargetsImpl(),
+    BuildTargets? buildTargets,
   }) : this.fromParameters(
          analytics: analytics,
          artifacts: toolContext.artifacts,
@@ -78,11 +77,11 @@ class WebBuilder {
     required Platform platform,
     required ProcessManager processManager,
     required Terminal terminal,
-    BuildTargets buildTargets = const BuildTargetsImpl(),
+    BuildTargets? buildTargets,
   }) : _analytics = analytics,
        _artifacts = artifacts,
        _buildSystem = buildSystem,
-       _buildTargets = buildTargets,
+       _buildTargets = buildTargets ?? const NoOpBuildTargets(),
        _cache = cache,
        _config = config,
        _fileSystem = fileSystem,
