@@ -3128,7 +3128,8 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     expect(semanticsActions, isEmpty);
   });
 
-  testWithSemantics('Forwards to framework when pointerType is mouse', () async {
+  // Regression test for https://github.com/flutter/flutter/issues/188859
+  testWithSemantics('Forwards physical mouse input to the framework', () async {
     expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
     expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
@@ -3136,19 +3137,42 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     testElement.setAttribute('flt-tappable', '');
     view.dom.semanticsHost.appendChild(testElement);
 
-    // context.primaryDown/Up simulate pointerType: "mouse"
-    testElement.dispatchEvent(context.primaryDown());
-    await nextEventLoop();
-    testElement.dispatchEvent(context.primaryUp());
-    expect(PointerBinding.clickDebouncer.isDebouncing, false);
+    testElement.dispatchEvent(context.mouseDown(button: 0, buttons: 1));
+    expect(
+      reason: 'A physical mouse must not start debouncing.',
+      PointerBinding.clickDebouncer.isDebouncing,
+      isFalse,
+    );
 
-    expect(pointerPackets, <ui.PointerChange>[
-      ui.PointerChange.add,
-      ui.PointerChange.down,
-      ui.PointerChange.up,
-    ]);
-    expect(semanticsActions, isEmpty);
-  });
+    await nextEventLoop();
+    testElement.dispatchEvent(context.mouseUp(button: 0));
+    expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
+
+    expect(
+      reason:
+          'Pointer events reach the framework with real coordinates, so a '
+          'GestureDetector can report accurate Tap*Details.',
+      pointerPackets,
+      <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down, ui.PointerChange.up],
+    );
+
+    // The browser follows the pointer events with a DOM "click". It must not
+    // also be turned into a SemanticsAction.tap, or the tap would fire twice.
+    final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': testElement.getBoundingClientRect().x,
+      'clientY': testElement.getBoundingClientRect().y,
+    });
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
+
+    expect(
+      reason:
+          'Because the DOM click event was deduped against the pointerup that '
+          'was just flushed.',
+      semanticsActions,
+      isEmpty,
+    );
+    // TODO(yjbanov): https://github.com/flutter/flutter/issues/142991.
+  }, skip: ui_web.browser.operatingSystem == ui_web.OperatingSystem.windows);
 
   testWithSemantics('Does not start debouncing if reset before scheduled execution', () async {
     expect(EnginePlatformDispatcher.instance.semanticsEnabled, isTrue);
