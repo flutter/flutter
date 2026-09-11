@@ -749,7 +749,7 @@ abstract class BindingBase {
         'overriddenViewIds': debugViewMetricsOverrides.keys.toList()..sort(),
       };
     }
-    final int? viewId = int.tryParse(rawViewId);
+    final int? viewId = int.tryParse(rawViewId, radix: 10);
     if (viewId == null || viewId < 0) {
       throw FormatException(
         'The viewId parameter must be a non-negative integer, got "$rawViewId".',

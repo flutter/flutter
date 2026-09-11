@@ -1578,6 +1578,12 @@ void main() {
       }),
       throwsA(isA<FormatException>()),
     );
+    await expectLater(
+      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
+        'viewId': '0x10',
+      }),
+      throwsA(isA<FormatException>()),
+    );
 
     // A negative viewId is rejected.
     await expectLater(

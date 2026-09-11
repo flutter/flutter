@@ -232,6 +232,11 @@ class _FakeView implements ui.FlutterView {
       throw UnimplementedError('${invocation.memberName} is not needed by these tests.');
 }
 
+class _NoImplicitViewPlatformDispatcher extends _TwoViewPlatformDispatcher {
+  @override
+  ui.FlutterView? get implicitView => null;
+}
+
 class _NoAccessibilityFeatures implements ui.AccessibilityFeatures {
   const _NoAccessibilityFeatures();
 
@@ -1083,6 +1088,38 @@ void main() {
       // Every dispatcher vends the same view wrappers.
       expect(first.platformDispatcher.view(id: 2), same(second));
       expect(second.platformDispatcher.implicitView, same(first));
+    });
+
+    test('resolves platform metrics when implicitView is null', () {
+      final dispatcher = _NoImplicitViewPlatformDispatcher();
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(dispatcher);
+
+      expect(wrapped.implicitView, isNull);
+
+      // Single override applies to root dispatcher even if implicitView is null.
+      debugSetViewMetricsOverride(
+        2,
+        const DebugViewMetricsOverride(
+          textScaleFactor: 3.0,
+          platformBrightness: ui.Brightness.dark,
+        ),
+      );
+
+      expect(wrapped.textScaleFactor, 3.0);
+      expect(wrapped.platformBrightness, ui.Brightness.dark);
+
+      // With multiple overrides and no implicit view, root dispatcher falls back
+      // to the first view reported by the dispatcher.
+      debugSetViewMetricsOverride(
+        1,
+        const DebugViewMetricsOverride(
+          textScaleFactor: 2.0,
+          platformBrightness: ui.Brightness.light,
+        ),
+      );
+
+      expect(wrapped.textScaleFactor, 2.0);
+      expect(wrapped.platformBrightness, ui.Brightness.light);
     });
 
     test('TestPlatformDispatcher preserves per-view metrics and test-value precedence', () {

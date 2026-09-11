@@ -1321,7 +1321,10 @@ class TestFlutterView implements FlutterView {
   ///   * [reset] to reset all test values for this view
   @override
   ViewConstraints get physicalConstraints =>
-      _physicalConstraints ?? _readMetric((FlutterView view) => view.physicalConstraints);
+      _physicalConstraints ??
+      (_physicalSize != null
+          ? ViewConstraints.tight(_physicalSize!)
+          : _readMetric((FlutterView view) => view.physicalConstraints));
   ViewConstraints? _physicalConstraints;
   set physicalConstraints(ViewConstraints value) {
     _physicalConstraints = value;

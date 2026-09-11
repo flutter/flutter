@@ -641,8 +641,35 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
   }
 
   DebugViewMetricsOverride? get _override {
-    final int? viewId = _viewId ?? _dispatcher.implicitView?.viewId;
-    return viewId == null ? null : debugViewMetricsOverrides[viewId];
+    final int? viewId = _viewId;
+    if (viewId != null) {
+      return debugViewMetricsOverrides[viewId];
+    }
+    int? resolvedViewId;
+    try {
+      resolvedViewId = _dispatcher.implicitView?.viewId;
+    } on NoSuchMethodError {
+      // Test doubles may omit implicitView.
+    } on UnimplementedError {
+      // Test doubles may omit implicitView.
+    }
+    if (resolvedViewId != null) {
+      return debugViewMetricsOverrides[resolvedViewId];
+    }
+    if (debugViewMetricsOverrides.length == 1) {
+      return debugViewMetricsOverrides.values.single;
+    }
+    try {
+      final int? firstViewId = _dispatcher.views.firstOrNull?.viewId;
+      if (firstViewId != null) {
+        return debugViewMetricsOverrides[firstViewId];
+      }
+    } on NoSuchMethodError {
+      // Test doubles may omit views.
+    } on UnimplementedError {
+      // Test doubles may omit views.
+    }
+    return null;
   }
 
   _DebugViewMetricsFlutterView _wrapView(ui.FlutterView view) {

@@ -823,6 +823,7 @@ void main() {
         boldText: true,
       );
       tester.view.devicePixelRatio = 5.0;
+      tester.view.physicalSize = const ui.Size(800, 600);
 
       late MediaQueryData data;
       await tester.pumpWidget(_capture((MediaQueryData value) => data = value));
@@ -834,6 +835,7 @@ void main() {
           platformBrightness: ui.Brightness.light,
           boldText: false,
           devicePixelRatio: 7.0,
+          physicalSize: ui.Size(400, 300),
         ),
       );
       await tester.pump();
@@ -843,6 +845,8 @@ void main() {
       final ui.Brightness dispatcherBrightness = dispatcher.platformBrightness;
       final bool dispatcherBoldText = dispatcher.accessibilityFeatures.boldText;
       final double viewRatio = tester.view.devicePixelRatio;
+      final ui.Size viewSize = tester.view.physicalSize;
+      final ui.ViewConstraints viewConstraints = tester.view.physicalConstraints;
       final reported = data;
       // SystemTextScaler asks the dispatcher at scale() time, so this has to be
       // evaluated before the test values are cleared.
@@ -853,6 +857,7 @@ void main() {
       tester.platformDispatcher.clearPlatformBrightnessTestValue();
       tester.platformDispatcher.clearAccessibilityFeaturesTestValue();
       tester.view.resetDevicePixelRatio();
+      tester.view.resetPhysicalSize();
       await tester.pump();
 
       // The dispatcher and the view report the test values, not the override.
@@ -860,11 +865,14 @@ void main() {
       expect(dispatcherBrightness, ui.Brightness.dark);
       expect(dispatcherBoldText, isTrue);
       expect(viewRatio, 5.0);
+      expect(viewSize, const ui.Size(800, 600));
+      expect(viewConstraints, ui.ViewConstraints.tight(const ui.Size(800, 600)));
       // MediaQuery agrees with them.
       expect(reportedTextScale, 40.0);
       expect(reported.platformBrightness, ui.Brightness.dark);
       expect(reported.boldText, isTrue);
       expect(reported.devicePixelRatio, 5.0);
+      expect(reported.size, const ui.Size(160, 120));
     });
 
     testWidgets('a view read straight from the platform applies its override', (
