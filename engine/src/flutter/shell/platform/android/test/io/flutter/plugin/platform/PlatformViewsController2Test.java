@@ -51,6 +51,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
@@ -641,6 +648,129 @@ public class PlatformViewsController2Test {
     for (SurfaceControl.Transaction tx : created) {
       verify(tx, times(1)).close();
     }
+  }
+
+  /**
+   * Reproduces the HCPP transaction data race.
+   *
+   * <p>With the AHB swapchain, the raster thread calls {@code createTransaction()} once per
+   * present, while the platform thread calls it once per SurfaceView platform view per frame and
+   * then runs {@code swapTransactions()} and {@code onEndFrame()}. If the lists holding those
+   * transactions are not synchronized, an {@code add()} racing a {@code clear()} leaves {@code
+   * null} at a live index, and {@code onEndFrame()} then calls {@code merge(null)}. On device that
+   * NPE unwinds into {@code onEndFrame2()}, where {@code FML_CHECK(fml::jni::CheckException(env))}
+   * turns it into an {@code abort()}.
+   *
+   * <p>This is a probabilistic detector, but a one-sided one: it has no timing assertions, so
+   * scheduling luck decides whether it catches an unsynchronized implementation, never whether it
+   * fails a synchronized one. It reliably catches wholesale loss of the locking; it is not
+   * guaranteed to catch a subtle partial regression.
+   */
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void createTransactionIsSafeWhenRasterAndPlatformThreadsRaceOnFrames() throws Exception {
+    final PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+
+    final int rasterThreadCount = 4;
+    // The pending list is what swapTransactions() has to walk, so its length sets how long the
+    // clear()/addAll() pair stays exposed to a concurrent add(). It is the dominant lever on
+    // whether the race is observed at all; 8 presents per round detects it far less reliably.
+    final int presentsPerRound = 64;
+    final int rounds = 300;
+    // Rounds are cheap, but a run that completes almost none of them has proven nothing. Fail
+    // loudly instead of reporting green.
+    final int minRounds = rounds / 2;
+    // Only a safety net: the cleanup below breaks the barrier explicitly, so a failing run does
+    // not wait this out.
+    final long timeoutMs = 30000;
+
+    // Each round is barrier-synchronized so the raster threads' add()s land inside the platform
+    // thread's swapTransactions(), instead of relying on two free-running loops happening to
+    // overlap. Collision density is then a property of the test rather than of the machine.
+    final CyclicBarrier roundStart = new CyclicBarrier(rasterThreadCount + 1);
+    final AtomicReference<Throwable> failure = new AtomicReference<>();
+    final AtomicBoolean running = new AtomicBoolean(true);
+    final AtomicInteger roundsCompleted = new AtomicInteger();
+    final List<Thread> rasterThreads = new ArrayList<>();
+
+    for (int i = 0; i < rasterThreadCount; i++) {
+      final Thread rasterThread =
+          new Thread(
+              () -> {
+                try {
+                  for (int round = 0; round < rounds && running.get(); round++) {
+                    roundStart.await(timeoutMs, TimeUnit.MILLISECONDS);
+                    for (int present = 0; present < presentsPerRound; present++) {
+                      // The raster thread neither applies nor closes this: the platform thread
+                      // owns it from swapTransactions() onwards.
+                      controller.createTransaction();
+                    }
+                  }
+                } catch (BrokenBarrierException | TimeoutException e) {
+                  // Another participant stopped early. Whichever one it was recorded why.
+                } catch (Throwable t) {
+                  failure.compareAndSet(null, t);
+                } finally {
+                  running.set(false);
+                  // Release anyone parked on the barrier so a failure cannot turn into a hang.
+                  roundStart.reset();
+                }
+              },
+              "fake-raster-" + i);
+      rasterThread.setDaemon(true);
+      rasterThreads.add(rasterThread);
+      rasterThread.start();
+    }
+
+    try {
+      for (int round = 0; round < rounds; round++) {
+        roundStart.await(timeoutMs, TimeUnit.MILLISECONDS);
+
+        // Stand-in for maybeApplyClipToSurfaceView(), which runs once per SurfaceView platform
+        // view in onDisplayPlatformView().
+        controller.createTransaction();
+        controller.createTransaction();
+
+        controller.swapTransactions();
+        // flutterView is null, so onEndFrame() drops the frame instead of applying it. It still
+        // walks and merges the active transactions first, which is where the race shows up.
+        controller.onEndFrame();
+
+        roundsCompleted.incrementAndGet();
+      }
+    } catch (Throwable t) {
+      failure.compareAndSet(null, t);
+    } finally {
+      running.set(false);
+      for (Thread rasterThread : rasterThreads) {
+        // A raster thread can be parked on the barrier waiting for a participant that has already
+        // left, so keep breaking the barrier until it exits. Without this, a failing run waits out
+        // the barrier timeout before it reports, which is exactly when you want a fast answer.
+        for (int attempt = 0; attempt < 500 && rasterThread.isAlive(); attempt++) {
+          roundStart.reset();
+          rasterThread.join(10);
+        }
+        if (rasterThread.isAlive()) {
+          failure.compareAndSet(
+              null, new AssertionError(rasterThread.getName() + " did not terminate"));
+        }
+      }
+    }
+
+    if (failure.get() != null) {
+      throw new AssertionError(
+          "Concurrent createTransaction()/swapTransactions() corrupted the transaction lists.",
+          failure.get());
+    }
+
+    assertTrue(
+        "Only "
+            + roundsCompleted.get()
+            + " of "
+            + rounds
+            + " rounds ran, which is too few to have exercised the race.",
+        roundsCompleted.get() >= minRounds);
   }
 
   @Test
