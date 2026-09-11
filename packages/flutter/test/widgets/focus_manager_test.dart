@@ -2416,6 +2416,142 @@ void main() {
       debugPrint = oldDebugPrint;
     }
   });
+
+  group('FocusNode.canRequestFocus regression tests', () {
+    // Reproduces https://github.com/flutter/flutter/issues/185076:
+    testWidgets('disabling all siblings in the same build does not leave '
+        'primary focus on an unfocusable node', (WidgetTester tester) async {
+      late StateSetter setState;
+      final nodes = List<FocusNode?>.filled(10, null);
+      final disabledNodes = <int>{};
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return Column(
+                  children: List<Widget>.generate(
+                    10,
+                    (int i) => Focus(
+                      debugLabel: 'node$i',
+                      canRequestFocus: !disabledNodes.contains(i),
+                      child: Builder(
+                        builder: (BuildContext context) {
+                          nodes[i] = Focus.of(context);
+                          return Container(
+                            height: 50,
+                            color: const Color(0xFFFFFFFF),
+                            child: Text('Node $i'),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Tab through all the children to build up a navigation history
+      for (var i = 0; i < nodes.length; i++) {
+        nodes[i]!.requestFocus();
+        await tester.pump();
+      }
+      // Then traverse back
+      nodes[8]!.requestFocus();
+      await tester.pump();
+      expect(nodes[8]!.hasPrimaryFocus, isTrue);
+
+      setState(() {
+        disabledNodes.addAll(<int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      });
+      await tester.pumpAndSettle();
+
+      // Expected: no disabled node holds primary focus.
+      for (final node in nodes) {
+        expect(
+          node!.hasPrimaryFocus,
+          isFalse,
+          reason: '${node.debugLabel} should not have primary focus after all '
+              'siblings were disabled in the same build',
+        );
+      }
+
+      final FocusNode? primary = FocusManager.instance.primaryFocus;
+      if (primary != null) {
+        expect(
+          primary.canRequestFocus,
+          isTrue,
+          reason: 'Invariant violation: focus node is not focusable',
+        );
+      }
+    });
+
+    testWidgets('focus moves to a still-focusable sibling when multiple '
+        'siblings are disabled in the same build', (WidgetTester tester) async {
+      late StateSetter setState;
+      final nodes = List<FocusNode?>.filled(10, null);
+      final disabledNodes = <int>{};
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return Column(
+                  children: List<Widget>.generate(
+                    10,
+                    (int i) => Focus(
+                      debugLabel: 'node$i',
+                      canRequestFocus: !disabledNodes.contains(i),
+                      child: Builder(
+                        builder: (BuildContext context) {
+                          nodes[i] = Focus.of(context);
+                          return Container(
+                            height: 50,
+                            color: const Color(0xFFFFFFFF),
+                            child: Text('Node $i'),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      for (var i = 0; i < nodes.length; i++) {
+        nodes[i]!.requestFocus();
+        await tester.pump();
+      }
+      nodes[8]!.requestFocus();
+      await tester.pump();
+      expect(nodes[8]!.hasPrimaryFocus, isTrue);
+
+      setState(() {
+        disabledNodes.addAll(<int>[8, 9]);
+      });
+      await tester.pumpAndSettle();
+
+      // Expected: focus moves to the nearest still-focusable sibling (node7),
+      // not to one of the disabled nodes.
+      expect(nodes[7]!.hasPrimaryFocus, isTrue);
+      expect(nodes[8]!.hasPrimaryFocus, isFalse);
+      expect(nodes[9]!.hasPrimaryFocus, isFalse);
+    });
+  });
 }
 
 class _LoggingTestFocusNode extends FocusNode {

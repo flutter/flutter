@@ -551,7 +551,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       // Have to set this first before unfocusing, since it checks this to cull
       // unfocusable, previously-focused children.
       _canRequestFocus = value;
-      if (hasFocus && !value) {
+      if (!value && (hasFocus || _manager?._markedForFocus == this)) {
         unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
       }
       _manager?._markPropertiesChanged(this);
