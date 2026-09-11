@@ -497,7 +497,10 @@ dependencies:
               .writeAsBytesSync(Uint8List.fromList(<int>[0xff, 0xfe, 0xfd]));
 
           // The tool must not crash when a plugin's pubspec.yaml cannot be read.
-          final Future<List<Plugin>> pluginsFuture = findPlugins(flutterProject);
+          final Future<List<Plugin>> pluginsFuture = findPlugins(
+            flutterProject,
+            logger: BufferLogger.test(),
+          );
           await expectLater(pluginsFuture, completes);
 
           // The unreadable plugin is skipped, but the readable one is still found.

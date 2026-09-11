@@ -15,6 +15,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/net.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -30,8 +31,14 @@ const _pubspecName = 'pubspec.yaml';
 
 typedef _ProjectDeps = ({FlutterProject project, ResolvedDependencies deps});
 
+/// A command to update internal dependencies across Flutter packages.
+///
+/// Note: Full internal migration away from ambient `globals.*` in this command
+/// is deferred until additional services (such as HTTP clients) are integrated
+/// into [ToolContext].
 class UpdatePackagesCommand extends FlutterCommand {
-  UpdatePackagesCommand({required bool verboseHelp}) {
+  UpdatePackagesCommand({required ToolContext toolContext, required bool verboseHelp})
+    : super(toolContext: toolContext, verboseHelp: verboseHelp) {
     argParser
       ..addFlag(
         _keyForceUpgrade,
@@ -197,7 +204,6 @@ class UpdatePackagesCommand extends FlutterCommand {
         rootDirectory.childDirectory('packages').childDirectory('flutter'),
         rootDirectory.childDirectory('packages').childDirectory('flutter_test'),
         rootDirectory.childDirectory('packages').childDirectory('flutter_localizations'),
-        rootDirectory.childDirectory('dev').childDirectory('flutter_analyzer_plugin'),
         hooksUserDefineIntegrationTestDirectory,
       ]) {
         _updatePubspec(package, deps);
@@ -380,7 +386,7 @@ class UpdatePackagesCommand extends FlutterCommand {
             workspaceMembers.contains(packageName) ||
             (subpackagesDir.existsSync() &&
                 subpackagesDir.childDirectory(packageName).childFile(_pubspecName).existsSync());
-        if (isPathDependency || isWorkspaceMember) {
+        if (isPathDependency || (value == null && isWorkspaceMember)) {
           toRemove.add(packageName);
         }
       }
