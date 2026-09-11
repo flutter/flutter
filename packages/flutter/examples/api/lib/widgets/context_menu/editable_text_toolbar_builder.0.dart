@@ -33,8 +33,7 @@ class _EditableTextToolbarBuilderExampleAppState
       BrowserContextMenu.disableContextMenu();
     }
     _controller = TextEditingController(
-      text:
-          'Right click (desktop) or long press (mobile) to see the menu with custom buttons.',
+      text: 'Right click (desktop) or long press (mobile) to see the menu with custom buttons.',
     );
   }
 

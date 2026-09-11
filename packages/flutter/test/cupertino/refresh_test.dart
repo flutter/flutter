@@ -93,34 +93,32 @@ void main() {
       }),
     );
 
-    testWidgets(
-      "don't call the builder if overscroll doesn't move slivers like on Android",
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: MediaQuery(
-              data: const MediaQueryData(),
-              child: CustomScrollView(
-                slivers: <Widget>[
-                  CupertinoSliverRefreshControl(builder: mockHelper.builder),
-                  buildAListOfStuff(),
-                ],
-              ),
+    testWidgets("don't call the builder if overscroll doesn't move slivers like on Android", (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: CustomScrollView(
+              slivers: <Widget>[
+                CupertinoSliverRefreshControl(builder: mockHelper.builder),
+                buildAListOfStuff(),
+              ],
             ),
           ),
-        );
+        ),
+      );
 
-        // Drag down but not enough to trigger the refresh.
-        await tester.drag(find.text('0'), const Offset(0.0, 50.0));
-        await tester.pump();
+      // Drag down but not enough to trigger the refresh.
+      await tester.drag(find.text('0'), const Offset(0.0, 50.0));
+      await tester.pump();
 
-        expect(mockHelper.invocations, isEmpty);
+      expect(mockHelper.invocations, isEmpty);
 
-        expect(tester.getTopLeft(find.widgetWithText(SizedBox, '0')), Offset.zero);
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.android),
-    );
+      expect(tester.getTopLeft(find.widgetWithText(SizedBox, '0')), Offset.zero);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
     testWidgets(
       'let the builder update as canceled drag scrolls away',

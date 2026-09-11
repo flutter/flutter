@@ -74,12 +74,11 @@ class TreeSliverNode<T> {
 ///
 /// Used by [TreeSliver.treeNodeBuilder] to build rows on demand for the
 /// tree.
-typedef TreeSliverNodeBuilder =
-    Widget Function(
-      BuildContext context,
-      TreeSliverNode<Object?> node,
-      AnimationStyle animationStyle,
-    );
+typedef TreeSliverNodeBuilder = Widget Function(
+  BuildContext context,
+  TreeSliverNode<Object?> node,
+  AnimationStyle animationStyle,
+);
 
 /// Signature for a function that returns an extent for the given
 /// [TreeSliverNode] in the [TreeSliver].
@@ -92,8 +91,10 @@ typedef TreeSliverNodeBuilder =
 ///
 ///   * [SliverVariedExtentList], which uses a similar item extent builder for
 ///     dynamic child sizing in the list.
-typedef TreeSliverRowExtentBuilder =
-    double Function(TreeSliverNode<Object?> node, SliverLayoutDimensions dimensions);
+typedef TreeSliverRowExtentBuilder = double Function(
+  TreeSliverNode<Object?> node,
+  SliverLayoutDimensions dimensions,
+);
 
 /// Signature for a function that is called when a [TreeSliverNode] is toggled,
 /// changing its expanded state.
