@@ -284,6 +284,11 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// Setting this does not run [TextInputFormatter]s. Apply them manually if
   /// needed.
+  ///
+  /// See also:
+  ///
+  ///  * [StatelessWidget.build], which explains why a build method must not
+  ///    have side effects such as setting this value.
   set text(String newText) {
     value = value.copyWith(
       text: newText,
