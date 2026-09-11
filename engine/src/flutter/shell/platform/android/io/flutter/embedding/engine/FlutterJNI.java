@@ -915,8 +915,8 @@ public class FlutterJNI {
   /**
    * Invoked by native to send semantics tree updates from Flutter to Android.
    *
-   * <p>The {@code buffer} and {@code strings} form a communication protocol that is implemented
-   * in {@code android_semantics_mapper.cc}.
+   * <p>The {@code buffer} and {@code strings} form a communication protocol that is implemented in
+   * {@code android_semantics_mapper.cc}.
    */
   @SuppressWarnings("unused")
   @UiThread
@@ -961,8 +961,8 @@ public class FlutterJNI {
   /**
    * Invoked by native to send new custom accessibility events from Flutter to Android.
    *
-   * <p>The {@code buffer} and {@code strings} form a communication protocol that is implemented
-   * in {@code android_semantics_mapper.cc}.
+   * <p>The {@code buffer} and {@code strings} form a communication protocol that is implemented in
+   * {@code android_semantics_mapper.cc}.
    *
    * <p>// TODO(cbracken): expand these docs to include more actionable information.
    */
