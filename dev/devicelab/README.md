@@ -272,3 +272,7 @@ Take gallery tasks for example:
    - Separating PR: https://github.com/flutter/flutter/pull/103550
    - Switching PR: https://github.com/flutter/flutter/pull/110533
 2. Mac iOS: https://github.com/flutter/flutter/pull/111164
+
+## Descriptions
+
+Descriptions of all the tests can be found at [DESCRIPTIONS.md](./DESCRIPTIONS.md).
