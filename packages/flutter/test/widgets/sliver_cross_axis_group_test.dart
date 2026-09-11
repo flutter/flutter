@@ -625,50 +625,53 @@ void main() {
     );
   });
 
-  testWidgets('Assertion error when expanded widget runs out of cross axis extent', (
-    WidgetTester tester,
-  ) async {
-    final errors = <FlutterErrorDetails>[];
-    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
+  testWidgets(
+    'Expanded slivers are laid out with zero extent when constrained slivers use it all up',
+    (WidgetTester tester) async {
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
 
-    final items = List<int>.generate(20, (int i) => i);
-    await tester.pumpWidget(
-      _buildSliverCrossAxisGroup(
-        slivers: <Widget>[
-          SliverConstrainedCrossAxis(
-            maxExtent: 200,
-            sliver: _buildSliverList(
-              itemMainAxisExtent: 300,
-              items: items,
-              label: (int item) => Text('Group 0 Tile $item'),
+      final items = List<int>.generate(20, (int i) => i);
+      await tester.pumpWidget(
+        _buildSliverCrossAxisGroup(
+          slivers: <Widget>[
+            SliverConstrainedCrossAxis(
+              maxExtent: 200,
+              sliver: _buildSliverList(
+                itemMainAxisExtent: 300,
+                items: items,
+                label: (int item) => Text('Group 0 Tile $item'),
+              ),
             ),
-          ),
-          SliverConstrainedCrossAxis(
-            maxExtent: 100,
-            sliver: _buildSliverList(
+            SliverConstrainedCrossAxis(
+              maxExtent: 100,
+              sliver: _buildSliverList(
+                itemMainAxisExtent: 200,
+                items: items,
+                label: (int item) => Text('Group 1 Tile $item'),
+              ),
+            ),
+            _buildSliverList(
               itemMainAxisExtent: 200,
               items: items,
-              label: (int item) => Text('Group 1 Tile $item'),
+              label: (int item) => Text('Group 2 Tile $item'),
             ),
-          ),
-          _buildSliverList(
-            itemMainAxisExtent: 200,
-            items: items,
-            label: (int item) => Text('Group 2 Tile $item'),
-          ),
-        ],
-      ),
-    );
-    await tester.pumpAndSettle();
-    FlutterError.onError = oldHandler;
-    expect(errors, isNotEmpty);
-    final error = errors.first.exception as AssertionError;
-    expect(
-      error.toString(),
-      contains('SliverCrossAxisGroup ran out of extent before child could be laid out.'),
-    );
-  });
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+      FlutterError.onError = oldHandler;
+      expect(errors, isEmpty);
+
+      final List<RenderSliverList> renderSlivers = tester
+          .renderObjectList<RenderSliverList>(find.byType(SliverList))
+          .toList();
+      expect(renderSlivers[0].constraints.crossAxisExtent, equals(200));
+      expect(renderSlivers[1].constraints.crossAxisExtent, equals(100));
+      expect(renderSlivers[2].constraints.crossAxisExtent, equals(0));
+    },
+  );
 
   testWidgets('applyPaintTransform is implemented properly', (WidgetTester tester) async {
     await tester.pumpWidget(

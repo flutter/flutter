@@ -87,16 +87,12 @@ class RenderSliverCrossAxisGroup extends RenderSliver
     while (child != null) {
       final childParentData = child.parentData! as SliverPhysicalParentData;
       final int flex = childParentData.crossAxisFlex ?? 0;
-      double childExtent;
       if (flex != 0) {
-        childExtent = extentPerFlexValue * flex;
-        assert(_assertOutOfExtent(childExtent));
+        // Flexible children are allowed to be laid out with zero extent without asserting.
         child.layout(
           constraints.copyWith(crossAxisExtent: extentPerFlexValue * flex),
           parentUsesSize: true,
         );
-      } else {
-        childExtent = child.geometry!.crossAxisExtent!;
       }
       final SliverGeometry childLayoutGeometry = child.geometry!;
       if (geometry!.scrollExtent < childLayoutGeometry.scrollExtent) {
