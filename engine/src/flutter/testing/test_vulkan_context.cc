@@ -115,6 +115,12 @@ TestVulkanContext::~TestVulkanContext() {
 
 std::optional<TestVulkanImage> TestVulkanContext::CreateImage(
     const DlISize& size) const {
+  return CreateImage(size, VK_FORMAT_R8G8B8A8_UNORM);
+}
+
+std::optional<TestVulkanImage> TestVulkanContext::CreateImage(
+    const DlISize& size,
+    VkFormat format) const {
   TestVulkanImage result;
 
   VkImageCreateInfo info = {
@@ -122,7 +128,7 @@ std::optional<TestVulkanImage> TestVulkanContext::CreateImage(
       .pNext = nullptr,
       .flags = 0,
       .imageType = VK_IMAGE_TYPE_2D,
-      .format = VK_FORMAT_R8G8B8A8_UNORM,
+      .format = format,
       .extent = VkExtent3D{static_cast<uint32_t>(size.width),
                            static_cast<uint32_t>(size.height), 1},
       .mipLevels = 1,

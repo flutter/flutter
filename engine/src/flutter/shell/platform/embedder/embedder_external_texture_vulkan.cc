@@ -100,10 +100,29 @@ EmbedderExternalTextureSourceVulkan::~EmbedderExternalTextureSourceVulkan() {
   }
 }
 
+static SkColorType ToSkColorType(VkFormat format) {
+  switch (format) {
+    case VK_FORMAT_R8G8B8A8_UNORM:
+      return kRGBA_8888_SkColorType;
+    case VK_FORMAT_R8G8B8A8_SRGB:
+      return kSRGBA_8888_SkColorType;
+    case VK_FORMAT_B8G8R8A8_UNORM:
+      return kBGRA_8888_SkColorType;
+    case VK_FORMAT_R16G16B16A16_SFLOAT:
+      return kRGBA_F16_SkColorType;
+    case VK_FORMAT_R32G32B32A32_SFLOAT:
+      return kRGBA_F32_SkColorType;
+    case VK_FORMAT_R8_UNORM:
+      return kR8_unorm_SkColorType;
+    case VK_FORMAT_R8G8_UNORM:
+      return kR8G8_unorm_SkColorType;
+    default:
+      return kUnknown_SkColorType;
+  }
+}
+
 static impeller::PixelFormat ToPixelFormat(uint32_t vk_format) {
   switch (vk_format) {
-    case VK_FORMAT_UNDEFINED:
-      return impeller::PixelFormat::kUnknown;
     case VK_FORMAT_R8G8B8A8_UNORM:
       return impeller::PixelFormat::kR8G8B8A8UNormInt;
     case VK_FORMAT_R8G8B8A8_SRGB:
@@ -343,9 +362,11 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureSkia(
   }
 
   // YUV formats (e.g. NV12) only register kRGB_888x in Skia's GrVkCaps,
-  // so we must use kRGB_888x for YUV and kRGBA_8888 for standard RGBA formats.
+  // so we must use kRGB_888x for YUV. For non-YUV formats, map the VkFormat
+  // to the corresponding SkColorType to handle BGRA and other formats
+  // correctly.
   SkColorType color_type =
-      is_yuv ? kRGB_888x_SkColorType : kRGBA_8888_SkColorType;
+      is_yuv ? kRGB_888x_SkColorType : ToSkColorType(vk_format);
 
   auto gr_backend_texture =
       GrBackendTextures::MakeVk(width, height, image_info);

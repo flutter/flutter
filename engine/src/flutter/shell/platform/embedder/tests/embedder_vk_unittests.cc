@@ -196,6 +196,60 @@ static std::optional<TestVulkanImage> CreateVulkanTextureWithPixels(
   return std::move(image_result.value());
 }
 
+// Creates a BGRA VkImage and draws red/blue content into it, similar to
+// CreateVulkanTextureWithPixels but using VK_FORMAT_B8G8R8A8_UNORM.
+static std::optional<TestVulkanImage> CreateVulkanTextureWithPixelsBGRA(
+    fml::RefPtr<TestVulkanContext> context,
+    int width,
+    int height) {
+  auto image_result =
+      context->CreateImage({width, height}, VK_FORMAT_B8G8R8A8_UNORM);
+  if (!image_result.has_value()) {
+    FML_LOG(ERROR) << "Could not create BGRA VkImage for external texture.";
+    return std::nullopt;
+  }
+
+  GrVkImageInfo image_info = {
+      .fImage = image_result.value().GetImage(),
+      .fImageTiling = VK_IMAGE_TILING_OPTIMAL,
+      .fImageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+      .fFormat = VK_FORMAT_B8G8R8A8_UNORM,
+      .fImageUsageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                          VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
+                          VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+                          VK_IMAGE_USAGE_SAMPLED_BIT,
+      .fSampleCount = 1,
+      .fLevelCount = 1,
+  };
+  auto backend_texture = GrBackendTextures::MakeVk(width, height, image_info);
+
+  SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
+  sk_sp<SkSurface> surface = SkSurfaces::WrapBackendTexture(
+      context->GetGrDirectContext().get(), backend_texture,
+      kTopLeft_GrSurfaceOrigin, 1, kBGRA_8888_SkColorType,
+      SkColorSpace::MakeSRGB(), &surface_properties, nullptr, nullptr);
+
+  if (!surface) {
+    FML_LOG(ERROR) << "Could not wrap BGRA VkImage as SkSurface for drawing.";
+    return std::nullopt;
+  }
+
+  auto canvas = surface->getCanvas();
+  // Top half red.
+  SkPaint red_paint;
+  red_paint.setColor(SK_ColorRED);
+  canvas->drawRect(SkRect::MakeWH(width, height / 2), red_paint);
+  // Bottom half blue.
+  SkPaint blue_paint;
+  blue_paint.setColor(SK_ColorBLUE);
+  canvas->drawRect(SkRect::MakeXYWH(0, height / 2, width, height / 2),
+                   blue_paint);
+
+  context->GetGrDirectContext()->flushAndSubmit();
+
+  return std::move(image_result.value());
+}
+
 TEST_F(EmbedderTest, RenderTextureWithImpellerVulkan) {
   constexpr int kWidth = 800;
   constexpr int kHeight = 600;
@@ -450,6 +504,115 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkanDestructCallback) {
   // After the second frame completes, Impeller will have collected the handle
   // of the first frame's texture and called its destruction callback.
   ASSERT_TRUE(destruction_callback_called);
+}
+
+// Tests that a BGRA external texture renders correctly (red/blue channels
+// are not swapped) when using the Impeller backend.
+TEST_F(EmbedderTest, RenderBGRATextureWithImpellerVulkan) {
+  constexpr int kWidth = 800;
+  constexpr int kHeight = 600;
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderConfigBuilder builder(context);
+  fml::AutoResetWaitableEvent latch;
+  context.SetVulkanPresentCallback([&]() { latch.Signal(); });
+  builder.AddCommandLineArgument("--enable-impeller");
+  builder.SetDartEntrypoint("render_texture_impeller_test");
+  builder.SetSurface(DlISize(kWidth, kHeight));
+
+  auto image_result = CreateVulkanTextureWithPixelsBGRA(
+      context.vulkan_context(), kWidth, kHeight);
+  ASSERT_TRUE(image_result.has_value());
+
+  static TestVulkanImage* s_texture_image = nullptr;
+  s_texture_image = &image_result.value();
+
+  auto rendered_scene = context.GetNextSceneImage();
+  context.GetRendererConfig().vulkan.external_texture_frame_callback =
+      [](void* user_data, int64_t texture_id, size_t width, size_t height,
+         FlutterVulkanExternalTexture* texture) -> bool {
+    texture->image = reinterpret_cast<uint64_t>(s_texture_image->GetImage());
+    texture->format = VK_FORMAT_B8G8R8A8_UNORM;
+    texture->destruction_callback = nullptr;
+    texture->user_data = nullptr;
+    texture->width = width;
+    texture->height = height;
+    return true;
+  };
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
+
+  constexpr int texture_id = 1;
+  ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = kWidth;
+  event.height = kHeight;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  latch.Wait();
+  // The rendered scene should match the same fixture as RGBA since the
+  // BGRA-to-SkColorType mapping should prevent channel swapping.
+  ASSERT_TRUE(
+      ImageMatchesFixture("external_texture_impeller.png", rendered_scene));
+}
+
+// Tests that a BGRA external texture renders correctly (red/blue channels
+// are not swapped) when using the Skia backend.
+TEST_F(EmbedderTest, RenderBGRATextureWithSkiaVulkan) {
+  constexpr int kWidth = 800;
+  constexpr int kHeight = 600;
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderConfigBuilder builder(context);
+  fml::AutoResetWaitableEvent latch;
+  context.SetVulkanPresentCallback([&]() { latch.Signal(); });
+  builder.SetDartEntrypoint("render_texture_impeller_test");
+  builder.SetSurface(DlISize(kWidth, kHeight));
+
+  auto image_result = CreateVulkanTextureWithPixelsBGRA(
+      context.vulkan_context(), kWidth, kHeight);
+  ASSERT_TRUE(image_result.has_value());
+
+  static TestVulkanImage* s_texture_image = nullptr;
+  s_texture_image = &image_result.value();
+
+  auto rendered_scene = context.GetNextSceneImage();
+  context.GetRendererConfig().vulkan.external_texture_frame_callback =
+      [](void* user_data, int64_t texture_id, size_t width, size_t height,
+         FlutterVulkanExternalTexture* texture) -> bool {
+    texture->image = reinterpret_cast<uint64_t>(s_texture_image->GetImage());
+    texture->format = VK_FORMAT_B8G8R8A8_UNORM;
+    texture->destruction_callback = nullptr;
+    texture->user_data = nullptr;
+    texture->width = width;
+    texture->height = height;
+    return true;
+  };
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
+
+  constexpr int texture_id = 1;
+  ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = kWidth;
+  event.height = kHeight;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  latch.Wait();
+  // The rendered scene should match the same fixture as RGBA since the
+  // BGRA-to-SkColorType mapping should prevent channel swapping.
+  ASSERT_TRUE(
+      ImageMatchesFixture("external_texture_impeller.png", rendered_scene));
 }
 
 }  // namespace testing
