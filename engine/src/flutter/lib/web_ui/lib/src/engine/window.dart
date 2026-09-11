@@ -10,6 +10,7 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../engine.dart' show DimensionsProvider, registerHotRestartListener, renderer;
+import 'address_bar_controller.dart';
 import 'browser_detection.dart';
 import 'display.dart';
 import 'dom.dart';
@@ -68,6 +69,7 @@ class EngineFlutterView implements ui.FlutterView {
     // The embeddingStrategy will take care of cleaning up the rootElement on
     // hot restart.
     embeddingStrategy.attachViewRoot(dom.rootElement);
+    addressBarController = AddressBarController(this);
     pointerBinding = PointerBinding(this);
     _resizeSubscription = onResize.listen(_handleBrowserResize);
     _globalHtmlAttributes.applyAttributes(
@@ -94,7 +96,7 @@ class EngineFlutterView implements ui.FlutterView {
 
   late final StreamSubscription<ui.Size?> _resizeSubscription;
 
-  final ViewConfiguration _viewConfiguration = const ViewConfiguration();
+  ViewConfiguration _viewConfiguration = const ViewConfiguration();
 
   /// Whether this [EngineFlutterView] has been disposed or not.
   bool isDisposed = false;
@@ -109,6 +111,7 @@ class EngineFlutterView implements ui.FlutterView {
     isDisposed = true;
     _resizeSubscription.cancel();
     dimensionsProvider.close();
+    addressBarController.dispose();
     pointerBinding.dispose();
     dom.rootElement.remove();
     // TODO(harryterkelsen): What should we do about this in multi-view?
@@ -153,6 +156,8 @@ class EngineFlutterView implements ui.FlutterView {
   late final DomManager dom = DomManager(devicePixelRatio: devicePixelRatio);
 
   late final PointerBinding pointerBinding;
+
+  late final AddressBarController addressBarController;
 
   @override
   ViewConstraints get physicalConstraints {
@@ -260,6 +265,14 @@ class EngineFlutterView implements ui.FlutterView {
   ViewPadding get viewInsets => _viewInsets;
   ViewPadding _viewInsets = ui.ViewPadding.zero as ViewPadding;
 
+  /// Reports the strip of the view that browser chrome can cover: [padding] is
+  /// what it covers now, [viewPadding] what it covers when it is showing.
+  ///
+  /// Does not notify; [_handleBrowserResize] does that.
+  void updateChromeInsets({required ViewPadding padding, required ViewPadding viewPadding}) {
+    _viewConfiguration = _viewConfiguration.copyWith(padding: padding, viewPadding: viewPadding);
+  }
+
   @override
   ViewPadding get viewPadding => _viewConfiguration.viewPadding;
 
@@ -322,6 +335,10 @@ class EngineFlutterView implements ui.FlutterView {
       // When physical size changes this value has to be recalculated.
       _computeOnScreenKeyboardInsets(false);
     }
+    // From here rather than a resize subscription of the controller's own,
+    // which would be registered first and run before `_viewInsets` is
+    // recomputed.
+    addressBarController.handleBrowserResize(_viewInsets);
     platformDispatcher.invokeOnMetricsChanged();
   }
 

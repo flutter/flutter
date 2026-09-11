@@ -8,6 +8,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui show Size;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 void main() {
   internalBootstrapBrowserTest(() => doTests);
@@ -100,6 +101,58 @@ void doTests() {
 
       expect(provider.onResize.isEmpty, completion(isTrue));
       expect(completer.future, completion(isTrue));
+    });
+  });
+
+  group('mobile platform overrides', () {
+    late FullPageDimensionsProvider provider;
+
+    setUp(() {
+      provider = FullPageDimensionsProvider();
+    });
+
+    tearDown(() {
+      ui_web.browser.debugOperatingSystemOverride = null;
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null);
+    });
+
+    test('on mobile, the view is measured from the body box', () {
+      // [AddressBarController] pins the body to the viewport with the address
+      // bar collapsed, so the box holds still while the bar animates.
+      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.android;
+      const dpr = 2.5;
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
+      domDocument.body!.style.height = '640px';
+      addTearDown(() => domDocument.body!.style.removeProperty('height'));
+
+      final expected = ui.Size(domDocument.documentElement!.clientWidth * dpr, 640 * dpr);
+      expect(provider.computePhysicalSize(), expected);
+    });
+
+    test('on mobile, keyboard insets stay zero while not editing', () {
+      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.android;
+      const dpr = 2.5;
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
+
+      // computeKeyboardInsets must use the same height source as
+      // computePhysicalSize, otherwise every address bar movement would
+      // produce a phantom bottom inset.
+      final double physicalHeight = provider.computePhysicalSize().height;
+      final ViewPadding insets = provider.computeKeyboardInsets(physicalHeight, false);
+
+      expect(insets.bottom, 0);
+    });
+
+    test('on mobile while editing, insets come from the visualViewport height', () {
+      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.android;
+      const dpr = 2.5;
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
+      const double keyboardGap = 100;
+      final double physicalHeight = (domWindow.visualViewport!.height! + keyboardGap) * dpr;
+
+      final ViewPadding insets = provider.computeKeyboardInsets(physicalHeight, true);
+
+      expect(insets.bottom, keyboardGap * dpr);
     });
   });
 }

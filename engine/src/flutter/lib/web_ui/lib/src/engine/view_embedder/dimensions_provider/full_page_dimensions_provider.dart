@@ -4,11 +4,11 @@
 
 import 'dart:async';
 
+import 'package:ui/src/engine/address_bar_controller.dart';
 import 'package:ui/src/engine/display.dart';
 import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/window.dart';
 import 'package:ui/ui.dart' as ui show Size;
-import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'dimensions_provider.dart';
 
@@ -69,19 +69,18 @@ class FullPageDimensionsProvider extends DimensionsProvider {
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
 
     if (viewport != null) {
-      if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
-        /// Chrome on iOS reports incorrect viewport.height when app
-        /// starts in portrait orientation and the phone is rotated to
-        /// landscape.
-        ///
-        /// We instead use documentElement clientWidth/Height to read
-        /// accurate physical size. VisualViewport api is only used during
-        /// text editing to make sure inset is correctly reported to
-        /// framework.
-        final double docWidth = domDocument.documentElement!.clientWidth;
-        final double docHeight = domDocument.documentElement!.clientHeight;
-        windowInnerWidth = docWidth * devicePixelRatio;
-        windowInnerHeight = docHeight * devicePixelRatio;
+      if (AddressBarController.isSupportedOperatingSystem) {
+        // The view's box is `<body>`, which is laid out against the layout
+        // viewport, not the visual one. It also avoids Chrome on iOS reporting
+        // an incorrect width when the app starts in portrait and is rotated.
+        windowInnerWidth = domDocument.documentElement!.clientWidth * devicePixelRatio;
+        // [AddressBarController] pins `<body>` to the viewport with the address
+        // bar collapsed, so its box is the view's box and holds still while the
+        // bar animates. A height that followed the bar would relayout the whole
+        // app on every frame of its animation, in the middle of the scroll that
+        // caused it; what the bar covers is reported as padding instead.
+        final double boxHeight = domDocument.body!.getBoundingClientRect().height;
+        windowInnerHeight = (boxHeight > 0 ? boxHeight : domWindow.innerHeight!) * devicePixelRatio;
       } else {
         windowInnerWidth = viewport.width! * devicePixelRatio;
         windowInnerHeight = viewport.height! * devicePixelRatio;
@@ -100,8 +99,13 @@ class FullPageDimensionsProvider extends DimensionsProvider {
     late double windowInnerHeight;
 
     if (viewport != null) {
-      if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs && !isEditingOnMobile) {
-        windowInnerHeight = domDocument.documentElement!.clientHeight * devicePixelRatio;
+      if (AddressBarController.isSupportedOperatingSystem && !isEditingOnMobile) {
+        // The same measurement as [computePhysicalSize], so the address bar
+        // produces no inset of its own; what it covers is reported as padding
+        // instead. An inset asks the app to shrink, and this one would ask that
+        // on every frame of the bar's animation.
+        final double boxHeight = domDocument.body!.getBoundingClientRect().height;
+        windowInnerHeight = (boxHeight > 0 ? boxHeight : domWindow.innerHeight!) * devicePixelRatio;
       } else {
         windowInnerHeight = viewport.height! * devicePixelRatio;
       }
