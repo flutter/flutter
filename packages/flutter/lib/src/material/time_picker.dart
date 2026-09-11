@@ -1753,6 +1753,18 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
   late final RestorableTimeOfDay _selectedTime = RestorableTimeOfDay(widget.initialSelectedTime);
   final RestorableBool hourHasError = RestorableBool(false);
   final RestorableBool minuteHasError = RestorableBool(false);
+  Map<String, int>? _cachedNumbers;
+  Locale? _cachedLocale;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final Locale locale = Localizations.localeOf(context);
+    if (_cachedLocale != locale) {
+      _cachedNumbers = null;
+      _cachedLocale = locale;
+    }
+  }
 
   @override
   void dispose() {
@@ -1777,7 +1789,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
       return null;
     }
 
-    int? newHour = int.tryParse(value);
+    int? newHour = _tryParseLocalizedNumber(value);
     if (newHour == null) {
       return null;
     }
@@ -1803,7 +1815,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
       return null;
     }
 
-    final int? newMinute = int.tryParse(value);
+    final int? newMinute = _tryParseLocalizedNumber(value);
     if (newMinute == null) {
       return null;
     }
@@ -1812,6 +1824,36 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
       return newMinute;
     }
     return null;
+  }
+
+  int? _tryParseLocalizedNumber(String number) {
+    final int? parsedNumber = int.tryParse(number);
+    if (parsedNumber != null) {
+      return parsedNumber;
+    }
+
+    _cachedNumbers ??= _generateLocalizedNumbers();
+
+    final String trimmedNumber = _removeLeadingZeros(number);
+
+    return _cachedNumbers![trimmedNumber];
+  }
+
+  Map<String, int> _generateLocalizedNumbers() {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+
+    // Supports 0 - 59.
+    final numbers = <String, int>{for (int i = 0; i < 60; i++) localizations.formatDecimal(i): i};
+
+    return numbers;
+  }
+
+  String _removeLeadingZeros(String value) {
+    final String localizedZero = MaterialLocalizations.of(context).formatDecimal(0);
+    while (value.startsWith(localizedZero) && value.length > localizedZero.length) {
+      value = value.substring(localizedZero.length);
+    }
+    return value;
   }
 
   void _handleHourSavedSubmitted(String? value) {
@@ -1834,7 +1876,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
   void _handleMinuteSavedSubmitted(String? value) {
     final int? newMinute = _parseMinute(value);
     if (newMinute != null) {
-      _selectedTime.value = TimeOfDay(hour: _selectedTime.value.hour, minute: int.parse(value!));
+      _selectedTime.value = TimeOfDay(hour: _selectedTime.value.hour, minute: newMinute);
       _TimePickerModel.setSelectedTime(context, _selectedTime.value);
       FocusScope.of(context).unfocus();
     }
