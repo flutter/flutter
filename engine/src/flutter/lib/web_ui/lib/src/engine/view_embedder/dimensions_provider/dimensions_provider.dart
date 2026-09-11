@@ -50,6 +50,33 @@ abstract class DimensionsProvider {
   /// Returns the [ViewPadding] of the keyboard insets (if present).
   ViewPadding computeKeyboardInsets(double physicalHeight, bool isEditingOnMobile);
 
+  /// Returns the [ViewPadding] of the safe area insets (if any), in physical
+  /// pixels.
+  ///
+  /// The safe area is the part of the viewport that is not obstructed by the
+  /// device itself: display cutouts, rounded corners, or a home indicator.
+  ///
+  /// On the web these insets come from the CSS `env(safe-area-inset-*)`
+  /// environment variables, and only apply to a page that opted into laying
+  /// itself out underneath those obstructions, by declaring
+  /// `viewport-fit=cover` in the viewport meta tag of its `index.html`. A page
+  /// that didn't opt in is laid out within the safe area by the browser, and
+  /// gets no insets. This is a stricter rule than what the browser
+  /// applies to `env()` itself: iOS Safari reports a non-zero
+  /// `env(safe-area-inset-bottom)` for the home indicator even for a viewport
+  /// it keeps clear of it, and reporting that would move the content of apps
+  /// that never asked for a full-bleed layout.
+  ///
+  /// Only [FullPageDimensionsProvider] reports a non-zero value. A view that is
+  /// embedded in a custom element is positioned by the host application, which
+  /// is therefore the one that knows how that element overlaps the obstructions
+  /// of the screen.
+  ///
+  /// The value is only guaranteed to be up to date right after the view is
+  /// resized. A change to the safe area that doesn't resize the viewport, such
+  /// as the taller status bar that iOS shows during a call, isn't observed.
+  ViewPadding computeSafeAreaInsets();
+
   /// Returns a Stream with the changes to [ui.Size] (when cheap to get).
   ///
   /// Currently this Stream always returns `null` measurements because the
