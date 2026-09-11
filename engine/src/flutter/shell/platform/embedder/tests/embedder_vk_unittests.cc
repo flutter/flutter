@@ -132,30 +132,37 @@ TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
 TEST_F(EmbedderTest, CanRegisterAndResolveVulkanExternalTexture) {
   auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
   fml::AutoResetWaitableEvent latch;
-  fml::AutoResetWaitableEvent frame_latch;
-  bool callback_invoked = false;
-  bool destruction_invoked = false;
+
+  struct TestState {
+    fml::AutoResetWaitableEvent frame_latch;
+    bool callback_invoked = false;
+    bool destruction_invoked = false;
+  };
+  TestState test_state;
+  context.SetUserData(&test_state);
 
   context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
 
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
-      [&](void* user_data, int64_t texture_id, size_t width, size_t height,
-          FlutterVulkanExternalTexture* texture) -> bool {
-    callback_invoked = true;
+      [](void* user_data, int64_t texture_id, size_t width, size_t height,
+         FlutterVulkanExternalTexture* texture) -> bool {
+    auto* vk_context = reinterpret_cast<EmbedderTestContextVulkan*>(user_data);
+    auto* state = static_cast<TestState*>(vk_context->GetUserData());
+    state->callback_invoked = true;
     texture->struct_size = sizeof(FlutterVulkanExternalTexture);
     texture->width = width;
     texture->height = height;
-    texture->image = reinterpret_cast<uint64_t>(context.GetNextImage(
+    texture->image = reinterpret_cast<uint64_t>(vk_context->GetNextImage(
         {static_cast<int>(width), static_cast<int>(height)}));
     texture->format = VK_FORMAT_R8G8B8A8_UNORM;
     texture->image_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    texture->user_data = &destruction_invoked;
+    texture->user_data = &state->destruction_invoked;
     texture->destruction_callback = [](void* data) {
       if (data) {
         *static_cast<bool*>(data) = true;
       }
     };
-    frame_latch.Signal();
+    state->frame_latch.Signal();
     return true;
   };
 
@@ -178,12 +185,12 @@ TEST_F(EmbedderTest, CanRegisterAndResolveVulkanExternalTexture) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
-  frame_latch.Wait();
-  EXPECT_TRUE(callback_invoked);
+  test_state.frame_latch.Wait();
+  EXPECT_TRUE(test_state.callback_invoked);
 
   ASSERT_TRUE(embedder_engine->UnregisterTexture(texture_id));
   engine.reset();
-  EXPECT_TRUE(destruction_invoked);
+  EXPECT_TRUE(test_state.destruction_invoked);
 }
 
 TEST_F(EmbedderTest, CanRegisterAndResolveHardwareBufferExternalTextureVulkan) {
@@ -192,28 +199,38 @@ TEST_F(EmbedderTest, CanRegisterAndResolveHardwareBufferExternalTextureVulkan) {
   context.AddIsolateCreateCallback(
       [&isolate_latch]() { isolate_latch.Signal(); });
 
-  fml::AutoResetWaitableEvent frame_latch;
-  bool callback_invoked = false;
-  bool destruction_invoked = false;
+  struct TestState {
+    fml::AutoResetWaitableEvent frame_latch;
+    bool callback_invoked = false;
+    bool destruction_invoked = false;
+  };
+  TestState test_state;
+  context.SetUserData(&test_state);
 
   context.GetRendererConfig()
       .vulkan.hardware_buffer_external_texture_frame_callback =
-      [&](void* user_data, int64_t texture_id, size_t width, size_t height,
-          FlutterHardwareBufferExternalTexture* texture) -> bool {
-    callback_invoked = true;
+      [](void* user_data, int64_t texture_id, size_t width, size_t height,
+         FlutterHardwareBufferExternalTexture* texture) -> bool {
+    auto* vk_context = reinterpret_cast<EmbedderTestContextVulkan*>(user_data);
+    auto* state = static_cast<TestState*>(vk_context->GetUserData());
+    state->callback_invoked = true;
     texture->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
     texture->width = width;
     texture->height = height;
+    // Magic number rationale: 1 corresponds to
+    // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM.
     texture->format = 1;
     texture->fence_fd = -1;
+    // Magic number rationale: arbitrary mock HardwareBuffer handle value for
+    // testing.
     texture->buffer = reinterpret_cast<FlutterHardwareBufferHandle>(0x5555);
-    texture->user_data = &destruction_invoked;
+    texture->user_data = &state->destruction_invoked;
     texture->destruction_callback = [](void* data) {
       if (data) {
         *static_cast<bool*>(data) = true;
       }
     };
-    frame_latch.Signal();
+    state->frame_latch.Signal();
     return true;
   };
 
@@ -236,12 +253,12 @@ TEST_F(EmbedderTest, CanRegisterAndResolveHardwareBufferExternalTextureVulkan) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
-  frame_latch.Wait();
-  EXPECT_TRUE(callback_invoked);
+  test_state.frame_latch.Wait();
+  EXPECT_TRUE(test_state.callback_invoked);
 
   ASSERT_TRUE(embedder_engine->UnregisterTexture(texture_id));
   engine.reset();
-  EXPECT_TRUE(destruction_invoked);
+  EXPECT_TRUE(test_state.destruction_invoked);
 }
 
 TEST_F(EmbedderTest,
