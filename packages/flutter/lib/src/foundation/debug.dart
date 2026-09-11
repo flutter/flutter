@@ -260,6 +260,14 @@ class DebugViewPadding implements ui.ViewPadding {
   @override
   int get hashCode => Object.hash(left, top, right, bottom);
 
+  /// This gives us some grace time when the dart:ui side adds something to
+  /// [ui.ViewPadding], and makes things easier when we do rolls to give
+  /// us time to catch up.
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return null;
+  }
+
   @override
   String toString() => 'DebugViewPadding(left: $left, top: $top, right: $right, bottom: $bottom)';
 }
@@ -540,16 +548,15 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// that an argument was omitted.
   static const Object _omitted = _Omitted();
 
-  /// A sentinel value that can be passed to [copyWith] to explicitly unset an
-  /// override.
-  ///
-  /// Passing `null` to [copyWith] also unsets the override.
-  static const Object unset = _Unset();
-
   /// Creates a copy of this object with the given fields replaced.
   ///
-  /// Passing `null` or [unset] for an argument clears the override for that
-  /// field (resetting it to null, so that the underlying platform value is used).
+  /// The arguments, if provided, must match the types of the corresponding
+  /// fields: [num] for [devicePixelRatio] and [textScaleFactor], [ui.Size] for
+  /// [physicalSize], [ui.Brightness] for [platformBrightness],
+  /// [DebugViewPadding] for insets and paddings, and [bool] for accessibility flags.
+  ///
+  /// Passing `null` for an argument clears the override for that field
+  /// (resetting it to null, so that the underlying platform value is used).
   /// Omitting an argument leaves the existing override in place.
   DebugViewMetricsOverride copyWith({
     Object? devicePixelRatio = _omitted,
@@ -573,8 +580,7 @@ class DebugViewMetricsOverride with Diagnosticable {
     Object? autoPlayVideos = _omitted,
     Object? deterministicCursor = _omitted,
   }) {
-    bool check<T>(Object? value) =>
-        identical(value, _omitted) || identical(value, unset) || value == null || value is T;
+    bool check<T>(Object? value) => identical(value, _omitted) || value == null || value is T;
 
     assert(check<num>(devicePixelRatio));
     assert(check<ui.Size>(physicalSize));
@@ -601,7 +607,7 @@ class DebugViewMetricsOverride with Diagnosticable {
       if (identical(value, _omitted)) {
         return current;
       }
-      if (identical(value, unset) || value == null) {
+      if (value == null) {
         return null;
       }
       return (value as num).toDouble();
@@ -611,13 +617,13 @@ class DebugViewMetricsOverride with Diagnosticable {
       if (identical(value, _omitted)) {
         return current;
       }
-      if (identical(value, unset) || value == null) {
+      if (value == null) {
         return null;
       }
       return value as T;
     }
 
-    return DebugViewMetricsOverride(
+    final result = DebugViewMetricsOverride(
       devicePixelRatio: resolveDouble(devicePixelRatio, this.devicePixelRatio),
       physicalSize: resolve<ui.Size>(physicalSize, this.physicalSize),
       textScaleFactor: resolveDouble(textScaleFactor, this.textScaleFactor),
@@ -639,6 +645,8 @@ class DebugViewMetricsOverride with Diagnosticable {
       autoPlayVideos: resolve<bool>(autoPlayVideos, this.autoPlayVideos),
       deterministicCursor: resolve<bool>(deterministicCursor, this.deterministicCursor),
     );
+    assert(result._debugAssertGeometryIsValid());
+    return result;
   }
 
   /// Serializes this object to the wire format the
@@ -1130,8 +1138,4 @@ void _debugReplayPlatformNotifications(
 
 class _Omitted {
   const _Omitted();
-}
-
-class _Unset {
-  const _Unset();
 }

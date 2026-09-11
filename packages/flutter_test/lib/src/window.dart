@@ -948,7 +948,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
       }
 
       extraViewKeys.remove(view.viewId);
-      if (!_testViews.containsKey(view.viewId)) {
+      final TestFlutterView? testView = _testViews[view.viewId];
+      if (testView == null || !identical(testView._view, view)) {
         _testViews[view.viewId] = TestFlutterView(
           view: view,
           platformDispatcher: this,
@@ -977,9 +978,10 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// views managed by this [TestPlatformDispatcher].
   void removeTestView(FlutterView view) {
     final TestPlatformDispatcher owner = _testValues;
-    owner._customViews.remove(view.viewId);
-    owner._updateViewsAndDisplays();
-    owner._onMetricsChanged?.call();
+    if (owner._customViews.remove(view.viewId) != null) {
+      owner._updateViewsAndDisplays();
+      owner._onMetricsChanged?.call();
+    }
   }
 
   @override

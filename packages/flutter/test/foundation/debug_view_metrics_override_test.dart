@@ -321,12 +321,18 @@ void main() {
       expect(original.copyWith(boldText: null).boldText, isNull);
       expect(original.copyWith(boldText: null).devicePixelRatio, 2.0);
       expect(original.copyWith(devicePixelRatio: null).devicePixelRatio, isNull);
-      // Passing DebugViewMetricsOverride.unset also explicitly clears the override.
-      expect(original.copyWith(boldText: DebugViewMetricsOverride.unset).boldText, isNull);
+
+      // Passing an invalid type throws an AssertionError.
+      expect(() => original.copyWith(boldText: 'notABool'), throwsAssertionError);
+      expect(() => original.copyWith(physicalSize: 123), throwsAssertionError);
+
+      // Passing invalid geometry or ratios throws an error.
       expect(
-        original.copyWith(devicePixelRatio: DebugViewMetricsOverride.unset).devicePixelRatio,
-        isNull,
+        () => original.copyWith(physicalSize: const ui.Size(-10, 10)),
+        throwsA(isA<FlutterError>()),
       );
+      expect(() => original.copyWith(devicePixelRatio: 0.0), throwsAssertionError);
+      expect(() => original.copyWith(textScaleFactor: -1.0), throwsAssertionError);
     });
 
     test('equality covers every metric', () {

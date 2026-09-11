@@ -687,12 +687,12 @@ abstract class BindingBase {
   ///
   /// Recognized parameters:
   ///
-  ///  * `viewId`: the [FlutterView.viewId] to act on. Required unless
-  ///    `clearAll` is `'true'`.
-  ///  * `overrides`: a JSON object in the format
-  ///    [DebugViewMetricsOverride.fromJson] accepts, or `null`. When present,
+  ///  * `viewId`: the [FlutterView.viewId] to act on, as a non-negative integer string.
+  ///    Required unless `clearAll` is `'true'`.
+  ///  * `overrides`: a JSON-encoded string representing an object in the format
+  ///    [DebugViewMetricsOverride.fromJson] accepts, or `'null'`. When present,
   ///    it replaces the override currently registered for `viewId`. An empty
-  ///    object or `null` removes it.
+  ///    object or `'null'` removes it.
   ///  * `clearAll`: when `'true'`, removes every override and ignores `viewId`.
   ///
   /// With neither `overrides` nor `clearAll`, the call is a read.
@@ -732,8 +732,10 @@ abstract class BindingBase {
       throw const FormatException('The viewId parameter is required unless clearAll is true.');
     }
     final int? viewId = int.tryParse(rawViewId);
-    if (viewId == null) {
-      throw FormatException('The viewId parameter must be an integer, got "$rawViewId".');
+    if (viewId == null || viewId < 0) {
+      throw FormatException(
+        'The viewId parameter must be a non-negative integer, got "$rawViewId".',
+      );
     }
 
     final String? rawOverrides = parameters['overrides'];

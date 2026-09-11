@@ -230,11 +230,25 @@ void main() {
     expect(tester.platformDispatcher.view(id: customView.viewId), same(addedView));
     expect(tester.platformDispatcher.views, contains(addedView));
 
-    // Removing the view removes it from views and view(id:).
-    tester.platformDispatcher.removeTestView(customView);
+    // Adding a replacement view with the same viewId updates the wrapped TestFlutterView.
+    final replacementView = _FakeFlutterView(display: tester.view.display, viewId: 100);
+    tester.platformDispatcher.addTestView(replacementView);
     expect(metricsNotificationCount, 3);
-    expect(tester.platformDispatcher.view(id: customView.viewId), isNull);
+    final TestFlutterView? updatedView = tester.platformDispatcher.view(id: customView.viewId);
+    expect(updatedView, isNotNull);
+    expect(updatedView, isNot(same(addedView)));
+    expect(tester.platformDispatcher.views, contains(updatedView));
     expect(tester.platformDispatcher.views, isNot(contains(addedView)));
+
+    // Removing the view removes it from views and view(id:).
+    tester.platformDispatcher.removeTestView(replacementView);
+    expect(metricsNotificationCount, 4);
+    expect(tester.platformDispatcher.view(id: customView.viewId), isNull);
+    expect(tester.platformDispatcher.views, isNot(contains(updatedView)));
+
+    // Removing an already removed or unadded view is a no-op.
+    tester.platformDispatcher.removeTestView(replacementView);
+    expect(metricsNotificationCount, 4);
   });
 
   testWidgets('TestPlatformDispatcher has a working scaleFontSize implementation', (
