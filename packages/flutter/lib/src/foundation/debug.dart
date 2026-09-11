@@ -416,9 +416,9 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// service extension boundary instead of as a metric that silently failed to
   /// apply.
   ///
-  /// For [platformBrightness], values may be `'light'`, `'dark'`,
-  /// `'Brightness.light'`, or `'Brightness.dark'` for compatibility with
-  /// [FoundationServiceExtensions.brightnessOverride].
+  /// For [platformBrightness], values may be [ui.Brightness] enum instances, or
+  /// strings `'light'`, `'dark'`, `'Brightness.light'`, or `'Brightness.dark'`
+  /// for compatibility with [FoundationServiceExtensions.brightnessOverride].
   factory DebugViewMetricsOverride.fromJson(Map<Object?, Object?> json) {
     final Iterable<Object?> unknownKeys = json.keys.where(
       (Object? key) => !_jsonKeys.contains(key),
@@ -447,10 +447,10 @@ class DebugViewMetricsOverride with Diagnosticable {
       },
       platformBrightness: switch (json['platformBrightness']) {
         null => null,
-        'light' || 'Brightness.light' => ui.Brightness.light,
-        'dark' || 'Brightness.dark' => ui.Brightness.dark,
+        'light' || 'Brightness.light' || ui.Brightness.light => ui.Brightness.light,
+        'dark' || 'Brightness.dark' || ui.Brightness.dark => ui.Brightness.dark,
         final Object? value => throw FormatException(
-          'Expected "light", "dark", "Brightness.light", or "Brightness.dark" for platformBrightness, got $value.',
+          'Expected "light", "dark", "Brightness.light", "Brightness.dark", or a Brightness enum for platformBrightness, got $value.',
         ),
       },
       padding: _viewPaddingFromJson(json, 'padding'),
@@ -580,6 +580,9 @@ class DebugViewMetricsOverride with Diagnosticable {
 
   /// Whether this instance overrides nothing at all.
   bool get isEmpty => this == const DebugViewMetricsOverride();
+
+  /// Whether this instance overrides at least one metric.
+  bool get isNotEmpty => !isEmpty;
 
   /// A sentinel value used by [copyWith] as the default argument value to indicate
   /// that an argument was omitted.

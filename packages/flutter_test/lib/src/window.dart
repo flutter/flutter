@@ -233,6 +233,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   final Map<int, TestDisplay> _testDisplays = <int, TestDisplay>{};
   final Map<int, FlutterView> _customViews = <int, FlutterView>{};
 
+  // The getter intentionally returns [_platformDispatcher.onMetricsChanged]
+  // (wired to [_handleMetricsChanged] in the constructor) rather than
+  // [_testValues._onMetricsChanged] so that invoking
+  // `platformDispatcher.onMetricsChanged?.call()` executes
+  // [_updateViewsAndDisplays] before delegating to the test callback.
   @override
   VoidCallback? get onMetricsChanged => _platformDispatcher.onMetricsChanged;
   VoidCallback? _onMetricsChanged;
@@ -246,6 +251,12 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     _testValues._onMetricsChanged?.call();
   }
 
+  // The getter intentionally returns [_platformDispatcher.onViewFocusChange]
+  // (wired to [_handleViewFocusChanged] in the constructor) rather than
+  // [_testValues._onViewFocusChange] so that invoking
+  // `platformDispatcher.onViewFocusChange?.call(event)` executes
+  // [_updateViewsAndDisplays] and updates [_currentlyFocusedViewId] before
+  // delegating to the test callback.
   @override
   ViewFocusChangeCallback? get onViewFocusChange => _platformDispatcher.onViewFocusChange;
   ViewFocusChangeCallback? _onViewFocusChange;

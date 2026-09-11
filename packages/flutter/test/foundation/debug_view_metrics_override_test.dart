@@ -270,9 +270,13 @@ void main() {
   group('DebugViewMetricsOverride', () {
     test('an empty override overrides nothing', () {
       expect(const DebugViewMetricsOverride().isEmpty, isTrue);
+      expect(const DebugViewMetricsOverride().isNotEmpty, isFalse);
       expect(const DebugViewMetricsOverride(devicePixelRatio: 2.0).isEmpty, isFalse);
+      expect(const DebugViewMetricsOverride(devicePixelRatio: 2.0).isNotEmpty, isTrue);
       expect(const DebugViewMetricsOverride(boldText: false).isEmpty, isFalse);
+      expect(const DebugViewMetricsOverride(boldText: false).isNotEmpty, isTrue);
       expect(_fullyPopulated.isEmpty, isFalse);
+      expect(_fullyPopulated.isNotEmpty, isTrue);
     });
 
     test('is usable in a const expression', () {
@@ -411,6 +415,7 @@ void main() {
 
     test('an empty object is an empty override', () {
       expect(DebugViewMetricsOverride.fromJson(const <String, Object?>{}).isEmpty, isTrue);
+      expect(DebugViewMetricsOverride.fromJson(const <String, Object?>{}).isNotEmpty, isFalse);
     });
 
     test('accepts integers where doubles are expected', () {
@@ -518,6 +523,30 @@ void main() {
         ui.Brightness.light,
       );
       expect(
+        DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'platformBrightness': 'dark',
+        }).platformBrightness,
+        ui.Brightness.dark,
+      );
+      expect(
+        DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'platformBrightness': 'light',
+        }).platformBrightness,
+        ui.Brightness.light,
+      );
+      expect(
+        DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'platformBrightness': ui.Brightness.dark,
+        }).platformBrightness,
+        ui.Brightness.dark,
+      );
+      expect(
+        DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'platformBrightness': ui.Brightness.light,
+        }).platformBrightness,
+        ui.Brightness.light,
+      );
+      expect(
         () => DebugViewMetricsOverride.fromJson(const <String, Object?>{
           'platformBrightness': 'DARK',
         }),
@@ -525,7 +554,9 @@ void main() {
           isA<FormatException>().having(
             (FormatException e) => e.message,
             'message',
-            contains('Expected "light", "dark", "Brightness.light", or "Brightness.dark"'),
+            contains(
+              'Expected "light", "dark", "Brightness.light", "Brightness.dark", or a Brightness enum',
+            ),
           ),
         ),
       );
