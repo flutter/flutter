@@ -46,6 +46,7 @@ import io.flutter.plugin.common.StandardMethodCodec;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.view.TextureRegistry;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -608,6 +609,38 @@ public class PlatformViewsController2Test {
 
     verify(mockAttachedSurfaceControl, times(1))
         .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void swapTransactionsClosesTransactionsThatWereNeverApplied() throws Exception {
+    final List<SurfaceControl.Transaction> created = new ArrayList<>();
+    PlatformViewsController2 controller =
+        new PlatformViewsController2() {
+          @Override
+          SurfaceControl.Transaction newTransaction() {
+            SurfaceControl.Transaction tx = spy(super.newTransaction());
+            created.add(tx);
+            return tx;
+          }
+        };
+    controller.setRegistry(new PlatformViewRegistryImpl());
+
+    // Frame 1: one consolidated platform transaction and one isolated raster transaction.
+    controller.createTransaction();
+    Thread rasterThread = new Thread(controller::createTransaction);
+    rasterThread.start();
+    rasterThread.join();
+    assertEquals(2, created.size());
+
+    // Frame 1 is swapped into the active slots but onEndFrame() never runs, so frame 2's swap
+    // discards them. They must be closed rather than leaked.
+    controller.swapTransactions();
+    controller.swapTransactions();
+
+    for (SurfaceControl.Transaction tx : created) {
+      verify(tx, times(1)).close();
+    }
   }
 
   @Test

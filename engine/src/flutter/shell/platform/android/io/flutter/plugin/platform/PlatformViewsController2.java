@@ -752,12 +752,24 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   }
 
   // Called on the platform thread (UI thread) via the platform task runner.
+  @RequiresApi(API_LEVELS.API_34)
   public void swapTransactions() {
     synchronized (transactionLock) {
+      // Anything still active here belongs to a frame whose onEndFrame() never ran, so it will
+      // never be applied. Close it instead of just dropping the reference: raster transactions
+      // can already have buffers attached, and close() releases the native transaction and its
+      // buffer references deterministically rather than waiting for the GC to run the
+      // NativeAllocationRegistry cleaner.
+      for (int i = 0; i < activeRasterTransactions.size(); i++) {
+        activeRasterTransactions.get(i).close();
+      }
       activeRasterTransactions.clear();
       activeRasterTransactions.addAll(pendingRasterTransactions);
       pendingRasterTransactions.clear();
 
+      if (activePlatformTransaction != null) {
+        activePlatformTransaction.close();
+      }
       activePlatformTransaction = pendingPlatformTransaction;
       pendingPlatformTransaction = null;
     }
@@ -770,7 +782,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       // for this frame, eliminating O(N) transaction allocations and tx.merge() calls.
       synchronized (transactionLock) {
         if (pendingPlatformTransaction == null) {
-          pendingPlatformTransaction = new SurfaceControl.Transaction();
+          pendingPlatformTransaction = newTransaction();
         }
         return pendingPlatformTransaction;
       }
@@ -784,10 +796,23 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     // Therefore, raster presentations receive isolated transactions per presentation, which
     // are transferred to the platform thread on swapTransactions() and merged in onEndFrame().
     synchronized (transactionLock) {
-      final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+      final SurfaceControl.Transaction tx = newTransaction();
       pendingRasterTransactions.add(tx);
       return tx;
     }
+  }
+
+  /**
+   * Allocates a new transaction.
+   *
+   * <p>Exists as a seam so tests can observe the transactions this controller retains. Overriding
+   * {@link #createTransaction()} is not sufficient, because the transaction handed back to the
+   * caller is not necessarily the one stored in the pending lists.
+   */
+  @VisibleForTesting
+  @RequiresApi(API_LEVELS.API_34)
+  SurfaceControl.Transaction newTransaction() {
+    return new SurfaceControl.Transaction();
   }
 
   @RequiresApi(API_LEVELS.API_34)
