@@ -52,6 +52,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -620,34 +621,113 @@ public class PlatformViewsController2Test {
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
-  public void swapTransactionsClosesTransactionsThatWereNeverApplied() throws Exception {
-    final List<SurfaceControl.Transaction> created = new ArrayList<>();
+  public void swapTransactionsDoesNotCloseRasterTransactionInUse() throws Exception {
+    assertRasterTransactionInUseIsNotClosed(false);
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onEndFrameDoesNotCloseRasterTransactionInUseAfterDetach() throws Exception {
+    assertRasterTransactionInUseIsNotClosed(true);
+  }
+
+  private void assertRasterTransactionInUseIsNotClosed(boolean endFrame) throws Exception {
+    final SurfaceControl.Transaction rasterTx = spy(new SurfaceControl.Transaction());
     PlatformViewsController2 controller =
         new PlatformViewsController2() {
           @Override
           SurfaceControl.Transaction newTransaction() {
-            SurfaceControl.Transaction tx = spy(super.newTransaction());
-            created.add(tx);
-            return tx;
+            return rasterTx;
           }
         };
     controller.setRegistry(new PlatformViewRegistryImpl());
 
-    // Frame 1: one consolidated platform transaction and one isolated raster transaction.
-    controller.createTransaction();
-    Thread rasterThread = new Thread(controller::createTransaction);
+    FlutterView flutterView = mock(FlutterView.class);
+    controller.attachToView(flutterView);
+    controller.detachFromView();
+
+    final CountDownLatch published = new CountDownLatch(1);
+    final CountDownLatch releaseProducer = new CountDownLatch(1);
+    final AtomicReference<Throwable> producerFailure = new AtomicReference<>();
+    Thread rasterThread =
+        new Thread(
+            () -> {
+              try {
+                SurfaceControl.Transaction tx = controller.createTransaction();
+                published.countDown();
+                // Model native code retaining the borrowed transaction after createTransaction().
+                if (!releaseProducer.await(10, TimeUnit.SECONDS)) {
+                  throw new AssertionError("Platform thread did not release the producer");
+                }
+                verify(tx, never()).close();
+              } catch (Throwable t) {
+                producerFailure.set(t);
+              }
+            });
+    rasterThread.setDaemon(true);
     rasterThread.start();
-    rasterThread.join();
-    assertEquals(2, created.size());
-
-    // Frame 1 is swapped into the active slots but onEndFrame() never runs, so frame 2's swap
-    // discards them. They must be closed rather than leaked.
-    controller.swapTransactions();
-    controller.swapTransactions();
-
-    for (SurfaceControl.Transaction tx : created) {
-      verify(tx, times(1)).close();
+    try {
+      assertTrue("Producer did not publish a transaction", published.await(10, TimeUnit.SECONDS));
+      controller.swapTransactions();
+      if (endFrame) {
+        controller.onEndFrame();
+      } else {
+        // Discard an active frame while the producer is still using its transaction.
+        controller.swapTransactions();
+      }
+      verify(rasterTx, never()).close();
+    } finally {
+      releaseProducer.countDown();
+      rasterThread.join(10000);
     }
+    assertFalse("Producer did not terminate", rasterThread.isAlive());
+    if (producerFailure.get() != null) {
+      throw new AssertionError("Raster producer failed", producerFailure.get());
+    }
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onEndFrameUsesSeparateMergeDestinationForRasterOnlyFrame() throws Exception {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    FlutterView flutterView = mock(FlutterView.class);
+    AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(rootSurfaceControl);
+    controller.attachToView(flutterView);
+
+    AtomicReference<SurfaceControl.Transaction> rasterTx = new AtomicReference<>();
+    Thread rasterThread = new Thread(() -> rasterTx.set(controller.createTransaction()));
+    rasterThread.setDaemon(true);
+    rasterThread.start();
+    rasterThread.join(10000);
+    assertFalse("Producer did not terminate", rasterThread.isAlive());
+    assertNotNull(rasterTx.get());
+
+    controller.swapTransactions();
+    controller.onEndFrame();
+
+    verify(rootSurfaceControl)
+        .applyTransactionOnDraw(argThat(tx -> tx != null && tx != rasterTx.get()));
+    verify(flutterView).invalidate();
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void swapTransactionsClosesDiscardedPlatformTransaction() {
+    final SurfaceControl.Transaction platformTx = spy(new SurfaceControl.Transaction());
+    PlatformViewsController2 controller =
+        new PlatformViewsController2() {
+          @Override
+          SurfaceControl.Transaction newTransaction() {
+            return platformTx;
+          }
+        };
+    controller.createTransaction();
+    controller.swapTransactions();
+    controller.swapTransactions();
+
+    verify(platformTx).close();
   }
 
   /**
@@ -749,7 +829,7 @@ public class PlatformViewsController2Test {
 
         controller.swapTransactions();
         // flutterView is null, so onEndFrame() drops the frame instead of applying it. It still
-        // walks and closes the active transactions first, which is where the race shows up.
+        // merges the active transactions first, which is where the race shows up.
         controller.onEndFrame();
       }
     } catch (TimeoutException | BrokenBarrierException e) {
@@ -819,6 +899,8 @@ public class PlatformViewsController2Test {
     when(mockFlutterView.getRootSurfaceControl()).thenReturn(mockAttachedSurfaceControl);
 
     controller.attachToView(mockFlutterView);
+    controller.createTransaction();
+    controller.swapTransactions();
     controller.detachFromView();
 
     // onEndFrame is posted from the raster thread, so it can run after the view was detached.
@@ -840,6 +922,8 @@ public class PlatformViewsController2Test {
     when(mockFlutterView.getRootSurfaceControl()).thenReturn(null);
 
     controller.attachToView(mockFlutterView);
+    controller.createTransaction();
+    controller.swapTransactions();
 
     controller.onEndFrame();
 

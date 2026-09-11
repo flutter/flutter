@@ -711,6 +711,23 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       activePlatformTransaction = null;
     }
 
+    // Keep the merge destination separate from the raster transactions. The raster thread can
+    // still hold a borrowed native pointer after publishing a transaction (see
+    // createTransaction()).
+    // Closing an input here would free that pointer while the producer may still be using it.
+    SurfaceControl.Transaction tx = null;
+    if (platformTx != null || rasterTxs != null) {
+      tx = new SurfaceControl.Transaction();
+      if (platformTx != null) {
+        tx.merge(platformTx);
+      }
+      if (rasterTxs != null) {
+        for (int i = 0; i < rasterTxs.size(); i++) {
+          tx.merge(rasterTxs.get(i));
+        }
+      }
+    }
+
     // This runs on the platform thread but is posted from the raster thread, so by the time it
     // runs the FlutterView may have been detached from the controller, or detached from its
     // window (in which case getRootSurfaceControl() returns null). Throwing here is fatal rather
@@ -719,29 +736,10 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     final AttachedSurfaceControl rootSurfaceControl =
         flutterView == null ? null : flutterView.getRootSurfaceControl();
     if (rootSurfaceControl == null) {
-      if (platformTx != null) {
-        platformTx.close();
-      }
-      if (rasterTxs != null) {
-        for (int i = 0; i < rasterTxs.size(); i++) {
-          rasterTxs.get(i).close();
-        }
+      if (tx != null) {
+        tx.close();
       }
       return;
-    }
-
-    // Consolidate any raster and platform transactions into a single transaction for
-    // applyTransactionOnDraw. If both exist, this requires at most one merge.
-    SurfaceControl.Transaction tx = platformTx;
-    if (rasterTxs != null) {
-      for (int i = 0; i < rasterTxs.size(); i++) {
-        final SurfaceControl.Transaction rasterTx = rasterTxs.get(i);
-        if (tx == null) {
-          tx = rasterTx;
-        } else {
-          tx = tx.merge(rasterTx);
-        }
-      }
     }
 
     // Unconditional. applyTransactionOnDraw() merges into ViewRootImpl's pending transaction and
@@ -760,19 +758,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   @RequiresApi(API_LEVELS.API_34)
   public void swapTransactions() {
     synchronized (transactionLock) {
-      // Anything still active here belongs to a frame whose onEndFrame() never ran, so it will
-      // never be applied. Close it instead of just dropping the reference.
-      //
-      // This does not recycle any attached buffer. The completion callback is registered with
-      // libgui's process-global TransactionCompletedListener when it is *set*, not when the
-      // transaction is applied, and close() does not unregister it. SurfaceFlinger never learns
-      // about a transaction that was never applied, so that callback never fires and the buffer
-      // is not returned to the pool either way. What close() does release promptly is the
-      // native transaction and the acquire-fence file descriptor it owns -- the
-      // NativeAllocationRegistry cleaner frees those on no bounded schedule.
-      for (int i = 0; i < activeRasterTransactions.size(); i++) {
-        activeRasterTransactions.get(i).close();
-      }
+      // Preserve the existing lifetime of discarded raster transactions. Explicit close() must
+      // wait for a native producer-completion handoff; transactionLock only protects the lists.
       activeRasterTransactions.clear();
       activeRasterTransactions.addAll(pendingRasterTransactions);
       pendingRasterTransactions.clear();
@@ -801,7 +788,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     // Raster thread (or any non-platform thread): SurfaceControl.Transaction, and its native
     // counterpart android::SurfaceComposerClient::Transaction in libgui.so, has no internal
     // mutex. Each presentation therefore gets its own transaction rather than sharing the
-    // platform thread's, and ownership transfers to the platform thread at swapTransactions().
+    // platform thread's. swapTransactions() transfers list entries, not exclusive ownership.
     //
     // This is not complete isolation, and the transaction objects are still raced. The AHB
     // swapchain publishes the transaction here and only afterwards attaches the buffer and the
