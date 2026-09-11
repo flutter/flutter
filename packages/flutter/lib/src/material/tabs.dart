@@ -2396,17 +2396,17 @@ class _TabBarViewState extends State<TabBarView> {
 
     final adjacentDestination = (_currentIndex! - _controller!.previousIndex).abs() == 1;
     if (adjacentDestination) {
-      _warpToAdjacentTab(_controller!.animationDuration);
+      _warpToAdjacentTab(_controller!.indexChangeDuration, _controller!.indexChangeCurve);
     } else {
-      _warpToNonAdjacentTab(_controller!.animationDuration);
+      _warpToNonAdjacentTab(_controller!.indexChangeDuration, _controller!.indexChangeCurve);
     }
   }
 
-  Future<void> _warpToAdjacentTab(Duration duration) async {
+  Future<void> _warpToAdjacentTab(Duration duration, Curve curve) async {
     if (duration == Duration.zero) {
       _jumpToPage(_currentIndex!);
     } else {
-      await _animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
+      await _animateToPage(_currentIndex!, duration: duration, curve: curve);
     }
     if (mounted) {
       setState(() {
@@ -2416,7 +2416,7 @@ class _TabBarViewState extends State<TabBarView> {
     return Future<void>.value();
   }
 
-  Future<void> _warpToNonAdjacentTab(Duration duration) async {
+  Future<void> _warpToNonAdjacentTab(Duration duration, Curve curve) async {
     final int previousIndex = _controller!.previousIndex;
     assert((_currentIndex! - previousIndex).abs() > 1);
 
@@ -2443,7 +2443,7 @@ class _TabBarViewState extends State<TabBarView> {
     if (duration == Duration.zero) {
       _jumpToPage(_currentIndex!);
     } else {
-      await _animateToPage(_currentIndex!, duration: duration, curve: Curves.ease);
+      await _animateToPage(_currentIndex!, duration: duration, curve: curve);
     }
 
     if (mounted) {

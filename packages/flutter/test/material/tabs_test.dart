@@ -1733,6 +1733,112 @@ void main() {
     expect(position.pixels, 800);
   });
 
+  testWidgets('TabController animateTo duration drives TabBarView animation', (
+    WidgetTester tester,
+  ) async {
+    const animationDuration = Duration(milliseconds: 100);
+    const animateToDuration = Duration(seconds: 2);
+    final tabs = <String>['A', 'B', 'C'];
+
+    final TabController tabController = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      animationDuration: animationDuration,
+    );
+    await tester.pumpWidget(
+      boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+              controller: tabController,
+            ),
+            SizedBox.square(
+              dimension: 400.0,
+              child: TabBarView(
+                controller: tabController,
+                children: const <Widget>[
+                  Center(child: Text('0')),
+                  Center(child: Text('1')),
+                  Center(child: Text('2')),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final PageController pageController = tester
+        .widget<PageView>(find.byType(PageView))
+        .controller!;
+    final ScrollPosition position = pageController.position;
+
+    tabController.animateTo(2, duration: animateToDuration, curve: Curves.linear);
+    await tester.pump();
+
+    // The TabBarView's non-adjacent warp first moves page 0 next to page 2, then
+    // animates from page 1 to page 2 using the duration from animateTo.
+    expect(position.pixels, 400.0);
+
+    await tester.pump(animateToDuration ~/ 2);
+    expect(position.pixels, moreOrLessEquals(600.0));
+
+    await tester.pump(animateToDuration ~/ 2);
+    expect(position.pixels, 800.0);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('TabController animateTo curve drives TabBarView animation', (
+    WidgetTester tester,
+  ) async {
+    const animationDuration = Duration(seconds: 1);
+    final tabs = <String>['A', 'B', 'C'];
+
+    final TabController tabController = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      animationDuration: animationDuration,
+    );
+    await tester.pumpWidget(
+      boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+              controller: tabController,
+            ),
+            SizedBox.square(
+              dimension: 400.0,
+              child: TabBarView(
+                controller: tabController,
+                children: const <Widget>[
+                  Center(child: Text('0')),
+                  Center(child: Text('1')),
+                  Center(child: Text('2')),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final PageController pageController = tester
+        .widget<PageView>(find.byType(PageView))
+        .controller!;
+    final ScrollPosition position = pageController.position;
+
+    tabController.animateTo(1, duration: animationDuration, curve: const Threshold(0.75));
+    await tester.pump();
+    await tester.pump(animationDuration ~/ 2);
+    expect(position.pixels, 0.0);
+
+    await tester.pump(animationDuration ~/ 2);
+    expect(position.pixels, 400.0);
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('TabBarView animation can be interrupted', (WidgetTester tester) async {
     const animationDuration = Duration(seconds: 2);
     final tabs = <String>['A', 'B', 'C'];
