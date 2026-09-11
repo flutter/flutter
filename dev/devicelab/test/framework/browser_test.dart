@@ -244,91 +244,90 @@ void main() {
 
         immediateCrashProcess.completeExit(1);
         await pumpEventQueue();
-        expect(immediateCrashErrors, <String>['Chrome process exited prematurely with exit code 1']);
+        expect(immediateCrashErrors, <String>[
+          'Chrome process exited prematurely with exit code 1',
+        ]);
       },
     );
 
-    test(
-      'handles rapid disposal and immediate process exit in the same microtask turn',
-      () async {
-        // 1. Process exits in the same microtask turn as disconnect()
-        final process1 = FakeProcess();
-        final errors1 = <String>[];
+    test('handles rapid disposal and immediate process exit in the same microtask turn', () async {
+      // 1. Process exits in the same microtask turn as disconnect()
+      final process1 = FakeProcess();
+      final errors1 = <String>[];
 
-        final Chrome chrome1 = await Chrome.connect(
-          process1,
-          ChromeOptions(),
-          onError: (String error) {
-            errors1.add(error);
-          },
-        );
+      final Chrome chrome1 = await Chrome.connect(
+        process1,
+        ChromeOptions(),
+        onError: (String error) {
+          errors1.add(error);
+        },
+      );
 
-        // Exit and disconnect within the same synchronous turn
-        process1.completeExit(1);
-        chrome1.disconnect();
+      // Exit and disconnect within the same synchronous turn
+      process1.completeExit(1);
+      chrome1.disconnect();
 
-        await pumpEventQueue();
-        expect(errors1, isEmpty);
-        expect(process1.wasKilled, isFalse);
+      await pumpEventQueue();
+      expect(errors1, isEmpty);
+      expect(process1.wasKilled, isFalse);
 
-        // 2. Disconnect called first, then process exits in the same synchronous turn
-        final process2 = FakeProcess();
-        final errors2 = <String>[];
+      // 2. Disconnect called first, then process exits in the same synchronous turn
+      final process2 = FakeProcess();
+      final errors2 = <String>[];
 
-        final Chrome chrome2 = await Chrome.connect(
-          process2,
-          ChromeOptions(),
-          onError: (String error) {
-            errors2.add(error);
-          },
-        );
+      final Chrome chrome2 = await Chrome.connect(
+        process2,
+        ChromeOptions(),
+        onError: (String error) {
+          errors2.add(error);
+        },
+      );
 
-        chrome2.disconnect();
-        process2.completeExit(1);
+      chrome2.disconnect();
+      process2.completeExit(1);
 
-        await pumpEventQueue();
-        expect(errors2, isEmpty);
-        expect(process2.wasKilled, isFalse);
+      await pumpEventQueue();
+      expect(errors2, isEmpty);
+      expect(process2.wasKilled, isFalse);
 
-        // 3. Process exits in the same microtask turn as stop()
-        final process3 = FakeProcess();
-        final errors3 = <String>[];
+      // 3. Process exits in the same microtask turn as stop()
+      final process3 = FakeProcess();
+      final errors3 = <String>[];
 
-        final Chrome chrome3 = await Chrome.connect(
-          process3,
-          ChromeOptions(),
-          onError: (String error) {
-            errors3.add(error);
-          },
-        );
+      final Chrome chrome3 = await Chrome.connect(
+        process3,
+        ChromeOptions(),
+        onError: (String error) {
+          errors3.add(error);
+        },
+      );
 
-        // stop() calls disconnect() and kills process in the same turn
-        chrome3.stop();
+      // stop() calls disconnect() and kills process in the same turn
+      chrome3.stop();
 
-        await pumpEventQueue();
-        expect(errors3, isEmpty);
-        expect(process3.wasKilled, isTrue);
+      await pumpEventQueue();
+      expect(errors3, isEmpty);
+      expect(process3.wasKilled, isTrue);
 
-        // 4. Process exits with non-zero exit code immediately before stop() in same turn
-        final process4 = FakeProcess();
-        final errors4 = <String>[];
+      // 4. Process exits with non-zero exit code immediately before stop() in same turn
+      final process4 = FakeProcess();
+      final errors4 = <String>[];
 
-        final Chrome chrome4 = await Chrome.connect(
-          process4,
-          ChromeOptions(),
-          onError: (String error) {
-            errors4.add(error);
-          },
-        );
+      final Chrome chrome4 = await Chrome.connect(
+        process4,
+        ChromeOptions(),
+        onError: (String error) {
+          errors4.add(error);
+        },
+      );
 
-        process4.completeExit(1);
-        chrome4.stop();
+      process4.completeExit(1);
+      chrome4.stop();
 
-        await pumpEventQueue();
-        expect(errors4, isEmpty);
-        expect(process4.wasKilled, isTrue);
-      },
-    );
+      await pumpEventQueue();
+      expect(errors4, isEmpty);
+      expect(process4.wasKilled, isTrue);
+    });
   });
 }
 
