@@ -177,7 +177,15 @@ void main() {
     },
   );
 
-  testWithoutContext('incremental asset add and remove synchronizes output APK cleanly', () async {
+  // Verifies that assets removed from pubspec.yaml are pruned from the APK on a
+  // subsequent build, rather than lingering from the previous build's output.
+  //
+  // Note: this deliberately does not assert that the second build was Gradle
+  // *incremental* (e.g. by scraping task stdout for UP-TO-DATE). A full rebuild
+  // that produced a correct APK would also satisfy this test, and that is the
+  // intended contract: the assertion is about stale output never surviving into
+  // the artifact, which is the regression `FileSystemOperations.sync` prevents.
+  testWithoutContext('assets removed from pubspec are pruned from the APK on rebuild', () async {
     final Directory projectDir = await createApp(tempDir);
 
     final Directory assetsDir = projectDir.childDirectory('assets');
@@ -212,7 +220,7 @@ void main() {
     );
     pubspecFile.writeAsStringSync(updatedPubspec);
 
-    // Build 2: Incremental debug APK without clean.
+    // Build 2: rebuild in place, without a clean.
     await buildApk(projectDir);
 
     archive = readApkArchive(apkFile);
@@ -222,10 +230,29 @@ void main() {
     expect(
       archive.findFile('assets/flutter_assets/assets/asset2.txt'),
       isNull,
-      reason: 'asset2.txt should have been pruned from the APK during incremental sync',
+      reason:
+          'asset2.txt was removed from pubspec.yaml and must not survive from the '
+          'previous build into the rebuilt APK',
     );
   });
 
+  // Asserts a documented AGP guarantee, not incidental merge ordering.
+  //
+  // `SourceDirectories.addGeneratedSourceDirectory` places the directory in the
+  // "Variant" overlay. Per the AGP API docs on `SourceDirectories`:
+  //
+  //   "Adding directories is always added to the 'Variant' overlay and will
+  //    therefore carry the highest possible priority among all directories for
+  //    the source type."
+  //
+  // and on `addGeneratedSourceDirectory` itself:
+  //
+  //   "The [Directory] is added last to the variant's list of source
+  //    directories. In case there is merging for the source type, the
+  //    [Directory] will have the highest priority."
+  //
+  // So on a path collision the generated Flutter assets win over
+  // `src/main/assets`, and the build must not fail.
   testWithoutContext(
     'generated Flutter assets take precedence over static src/main/assets on path collision without build failure',
     () async {
@@ -264,13 +291,19 @@ void main() {
         readArchiveFileString(collisionEntry!),
         'flutter_version',
         reason:
-            'AGP resolves asset collisions deterministically, giving generated source directories precedence over main assets',
+            'Per the AGP SourceDirectories contract, addGeneratedSourceDirectory adds to '
+            'the Variant overlay, giving it the highest possible priority during merge '
+            'over src/main/assets',
       );
     },
   );
 
+  // Covers both Android source-set dimensions that vary per variant: product
+  // flavor (`src/<flavor>/assets`) and build type (`src/<buildType>/assets`).
+  // Both are asserted against a single `freeDebug` build so this costs one
+  // Gradle invocation rather than two.
   testWithoutContext(
-    'flavor-specific native assets are packaged into corresponding flavor APKs',
+    'flavor-specific and buildType-specific native assets are packaged into the matching variant APK',
     () async {
       final Directory projectDir = await createApp(tempDir);
 
@@ -294,26 +327,25 @@ android {
     }''');
       buildGradleFile.writeAsStringSync(buildGradleContents);
 
-      // Create flavor-specific assets.
-      final Directory freeAssetsDir = projectDir
+      final Directory appSrcDir = projectDir
           .childDirectory('android')
           .childDirectory('app')
-          .childDirectory('src')
-          .childDirectory('free')
-          .childDirectory('assets');
-      freeAssetsDir.createSync(recursive: true);
-      final File freeAsset = freeAssetsDir.childFile('flavor_free.txt');
-      freeAsset.writeAsStringSync('free_flavor_asset_data');
+          .childDirectory('src');
 
-      final Directory paidAssetsDir = projectDir
-          .childDirectory('android')
-          .childDirectory('app')
-          .childDirectory('src')
-          .childDirectory('paid')
-          .childDirectory('assets');
-      paidAssetsDir.createSync(recursive: true);
-      final File paidAsset = paidAssetsDir.childFile('flavor_paid.txt');
-      paidAsset.writeAsStringSync('paid_flavor_asset_data');
+      /// Writes [contents] to `src/<sourceSet>/assets/<fileName>`.
+      void writeSourceSetAsset(String sourceSet, String fileName, String contents) {
+        final Directory dir = appSrcDir.childDirectory(sourceSet).childDirectory('assets');
+        dir.createSync(recursive: true);
+        dir.childFile(fileName).writeAsStringSync(contents);
+      }
+
+      // Flavor-specific assets: only the selected flavor should be packaged.
+      writeSourceSetAsset('free', 'flavor_free.txt', 'free_flavor_asset_data');
+      writeSourceSetAsset('paid', 'flavor_paid.txt', 'paid_flavor_asset_data');
+
+      // BuildType-specific assets: only the selected build type should be packaged.
+      writeSourceSetAsset('debug', 'buildtype_debug.txt', 'debug_buildtype_asset_data');
+      writeSourceSetAsset('release', 'buildtype_release.txt', 'release_buildtype_asset_data');
 
       // Create standard Flutter asset.
       final Directory assetsDir = projectDir.childDirectory('assets');
@@ -324,16 +356,36 @@ android {
       final File pubspecFile = projectDir.childFile('pubspec.yaml');
       addAssetsToPubspec(pubspecFile, <String>['assets/shared.txt']);
 
-      // Build flavor "free".
+      // Build the freeDebug variant.
       final File freeApkFile = await buildApk(projectDir, flavor: 'free');
       final Archive freeArchive = readApkArchive(freeApkFile);
 
-      // Free flavor must contain shared Flutter asset and free flavor asset, but not paid asset.
+      // Flutter assets are packaged regardless of flavor or build type.
       expect(freeArchive.findFile('assets/flutter_assets/assets/shared.txt'), isNotNull);
+
+      // The selected flavor's assets are present; the other flavor's are not.
       final ArchiveFile? freeAssetEntry = freeArchive.findFile('assets/flavor_free.txt');
       expect(freeAssetEntry, isNotNull);
       expect(readArchiveFileString(freeAssetEntry!), 'free_flavor_asset_data');
-      expect(freeArchive.findFile('assets/flavor_paid.txt'), isNull);
+      expect(
+        freeArchive.findFile('assets/flavor_paid.txt'),
+        isNull,
+        reason: 'the paid flavor source set must not contribute assets to a free build',
+      );
+
+      // The selected build type's assets are present; the other's are not.
+      final ArchiveFile? debugAssetEntry = freeArchive.findFile('assets/buildtype_debug.txt');
+      expect(
+        debugAssetEntry,
+        isNotNull,
+        reason: 'src/debug/assets must be merged into a debug variant APK',
+      );
+      expect(readArchiveFileString(debugAssetEntry!), 'debug_buildtype_asset_data');
+      expect(
+        freeArchive.findFile('assets/buildtype_release.txt'),
+        isNull,
+        reason: 'the release source set must not contribute assets to a debug build',
+      );
     },
   );
 }
