@@ -6,9 +6,11 @@
 
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_gtk.h"
+#include "flutter/shell/platform/linux/fl_key_event.h"
 #include "flutter/shell/platform/linux/fl_keyboard_manager.h"
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
+#include "flutter/shell/platform/linux/fl_text_input_handler.h"
 #include "flutter/shell/platform/linux/fl_touch_manager.h"
 #include "flutter/shell/platform/linux/fl_view_gtk4_accessibility.h"
 
@@ -80,7 +82,6 @@ void fl_view_gtk4_update_accessible_tree(FlView* view) {
         view->accessibility_backend);
   }
 }
-
 
 void fl_view_gtk4_set_cursor(FlView* view, const gchar* cursor_name) {
   FlGdkSurface* surface = fl_gtk_widget_get_surface(GTK_WIDGET(view));
@@ -226,6 +227,82 @@ gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event) {
   }
 }
 
+static gboolean handle_key_event(FlView* view, GdkEvent* event) {
+  if (event == nullptr) {
+    return FALSE;
+  }
+
+  g_autoptr(FlKeyEvent) key_event = fl_key_event_new_from_gdk_event(event);
+  fl_keyboard_manager_handle_event(
+      fl_engine_get_keyboard_manager(view->engine), key_event,
+      view->cancellable,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        FlView* view = FL_VIEW(user_data);
+        g_autoptr(FlKeyEvent) redispatch_event = nullptr;
+        g_autoptr(GError) error = nullptr;
+        if (!fl_keyboard_manager_handle_event_finish(
+                FL_KEYBOARD_MANAGER(object), result, &redispatch_event,
+                &error)) {
+          if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+            g_warning("Failed to handle key event: %s", error->message);
+          }
+          return;
+        }
+
+        FlTextInputHandler* handler =
+            fl_engine_get_text_input_handler(view->engine);
+        if (redispatch_event != nullptr &&
+            fl_text_input_handler_get_widget(handler) == GTK_WIDGET(view)) {
+          // GTK4 has no gdk_event_put equivalent. Do not record an event as
+          // redispatched when it will never return through the event queue.
+          fl_text_input_handler_filter_keypress(handler, redispatch_event);
+        }
+      },
+      view);
+  return TRUE;
+}
+
+static void focus_enter_cb(GtkEventControllerFocus* controller,
+                           gpointer user_data) {
+  FlView* view = FL_VIEW(user_data);
+  fl_text_input_handler_set_widget(
+      fl_engine_get_text_input_handler(view->engine), GTK_WIDGET(view));
+}
+
+static void focus_leave_cb(GtkEventControllerFocus* controller,
+                           gpointer user_data) {
+  FlView* view = FL_VIEW(user_data);
+  FlTextInputHandler* handler = fl_engine_get_text_input_handler(view->engine);
+  if (fl_text_input_handler_get_widget(handler) == GTK_WIDGET(view)) {
+    fl_text_input_handler_set_widget(handler, nullptr);
+  }
+}
+
+static gboolean key_pressed_cb(GtkEventControllerKey* controller,
+                               guint keyval,
+                               guint keycode,
+                               GdkModifierType state,
+                               gpointer user_data) {
+  (void)keyval;
+  (void)keycode;
+  (void)state;
+  return handle_key_event(
+      FL_VIEW(user_data),
+      gtk_event_controller_get_current_event(GTK_EVENT_CONTROLLER(controller)));
+}
+
+static void key_released_cb(GtkEventControllerKey* controller,
+                            guint keyval,
+                            guint keycode,
+                            GdkModifierType state,
+                            gpointer user_data) {
+  (void)keyval;
+  (void)keycode;
+  (void)state;
+  handle_key_event(FL_VIEW(user_data), gtk_event_controller_get_current_event(
+                                           GTK_EVENT_CONTROLLER(controller)));
+}
+
 void fl_view_gtk4_setup(FlView* view) {
   gtk_box_append(GTK_BOX(view), GTK_WIDGET(view->render_area));
 
@@ -239,6 +316,16 @@ void fl_view_gtk4_setup(FlView* view) {
   gtk_event_controller_set_propagation_phase(scroll, GTK_PHASE_CAPTURE);
   g_signal_connect(scroll, "scroll", G_CALLBACK(scroll_cb), view);
   gtk_widget_add_controller(GTK_WIDGET(view->render_area), scroll);
+
+  GtkEventController* key = gtk_event_controller_key_new();
+  g_signal_connect(key, "key-pressed", G_CALLBACK(key_pressed_cb), view);
+  g_signal_connect(key, "key-released", G_CALLBACK(key_released_cb), view);
+  gtk_widget_add_controller(GTK_WIDGET(view), key);
+
+  GtkEventController* focus = gtk_event_controller_focus_new();
+  g_signal_connect(focus, "enter", G_CALLBACK(focus_enter_cb), view);
+  g_signal_connect(focus, "leave", G_CALLBACK(focus_leave_cb), view);
+  gtk_widget_add_controller(GTK_WIDGET(view), focus);
 
   view->zoom_gesture = gtk_gesture_zoom_new();
   g_signal_connect_swapped(view->zoom_gesture, "begin",
