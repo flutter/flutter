@@ -138,7 +138,7 @@ void main() {
     );
   });
 
-  group('Chrome hostile lifecycle stress tests', () {
+  group('Chrome lifecycle edge cases', () {
     test(
       're-entrant and redundant lifecycle calls do not throw and kill process on stop',
       () async {
