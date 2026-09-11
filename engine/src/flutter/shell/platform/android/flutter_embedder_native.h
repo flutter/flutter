@@ -225,6 +225,12 @@ class FlutterEmbedderNative {
   /// @brief Returns the default global AndroidVMArgs instance, if set.
   static std::optional<AndroidVMArgs> GetDefaultVMArgs();
 
+  /// @brief Sets the default global display refresh rate in Hz.
+  static void SetDefaultRefreshRate(double refresh_rate_hz);
+
+  /// @brief Returns the default global display refresh rate in Hz.
+  static double GetDefaultRefreshRate();
+
   /// @brief Atomically resets both default global AndroidVMInit and
   /// AndroidVMArgs to null/empty states.
   static void ResetDefaults();
@@ -774,6 +780,12 @@ class FlutterEmbedderNative {
                                   int64_t frame_start_time_nanos,
                                   int64_t frame_target_time_nanos) const;
 
+  /// @brief Consumes a pending VSync event with the given baton, frame time,
+  /// and optional refresh period from Android Choreographer.
+  void ConsumePendingVsync(intptr_t baton,
+                           int64_t frame_time_nanos,
+                           int64_t refresh_period_nanos = 0) const;
+
   /// @brief Initializes the Android VM with the specified arguments.
   bool InitVM(const AndroidVMArgs& args) const;
 
@@ -797,6 +809,12 @@ class FlutterEmbedderNative {
 
   /// @brief Returns populated FlutterProjectArgs pointer (valid after InitVM).
   const FlutterProjectArgs* GetProjectArgs() const;
+
+  /// @brief Sets the renderer configuration for engine initialization.
+  void SetRendererConfig(const FlutterRendererConfig& config);
+
+  /// @brief Returns the renderer configuration, if set.
+  std::optional<FlutterRendererConfig> GetRendererConfig() const;
 
   /// @brief Initializes a FlutterEngine instance via C-API
   /// FlutterEngineInitialize.
@@ -1101,6 +1119,7 @@ class FlutterEmbedderNative {
   static std::mutex default_vm_init_mutex_;
   static std::shared_ptr<AndroidVMInit> default_vm_init_;
   static std::optional<AndroidVMArgs> default_vm_args_;
+  static std::atomic<double> default_refresh_rate_;
 
   std::mutex surface_mutex_;
   std::mutex presentation_mutex_;
@@ -1115,6 +1134,8 @@ class FlutterEmbedderNative {
   mutable std::mutex vm_init_mutex_;
   mutable std::mutex hardware_buffer_provider_mutex_;
   mutable std::mutex vulkan_texture_provider_mutex_;
+  mutable std::mutex renderer_config_mutex_;
+  std::optional<FlutterRendererConfig> renderer_config_;
   ANativeWindow* native_window_ = nullptr;
 
   mutable std::mutex java_object_mutex_;

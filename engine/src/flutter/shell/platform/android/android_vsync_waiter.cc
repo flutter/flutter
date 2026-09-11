@@ -405,7 +405,8 @@ FlutterEngineResult AndroidVsyncWaiter::NotifyVsyncToEngine(
 }
 
 void AndroidVsyncWaiter::ConsumePendingVsync(intptr_t baton,
-                                             int64_t frame_time_nanos) {
+                                             int64_t frame_time_nanos,
+                                             int64_t refresh_period_nanos) {
   TRACE_EVENT1("flutter", "AndroidVsyncWaiter::ConsumePendingVsync", "baton",
                std::to_string(baton).c_str());
 
@@ -424,8 +425,13 @@ void AndroidVsyncWaiter::ConsumePendingVsync(intptr_t baton,
     invoker = jvm_invoker_;
   }
 
-  AndroidVsyncFrameInfo info =
-      ComputeFramePacing(frame_time_nanos, refresh_rate);
+  AndroidVsyncFrameInfo info;
+  if (refresh_period_nanos > 0) {
+    info.frame_start_time_nanos = frame_time_nanos;
+    info.frame_target_time_nanos = frame_time_nanos + refresh_period_nanos;
+  } else {
+    info = ComputeFramePacing(frame_time_nanos, refresh_rate);
+  }
 
   TRACE_EVENT2_INT("flutter", "PlatformVsync", "frame_start_time",
                    info.frame_start_time_nanos / 1000, "frame_target_time",

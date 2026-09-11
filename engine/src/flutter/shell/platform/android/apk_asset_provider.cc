@@ -70,7 +70,13 @@ std::string NormalizeAssetPath(const std::string& dir,
   while (!clean_dir.empty() && clean_dir.front() == '/') {
     clean_dir.erase(0, 1);
   }
-  return clean_dir.empty() ? clean_asset : clean_dir + "/" + clean_asset;
+  if (clean_dir.empty()) {
+    return clean_asset;
+  }
+  if (clean_asset.rfind(clean_dir + "/", 0) == 0) {
+    return clean_asset;
+  }
+  return clean_dir + "/" + clean_asset;
 }
 
 }  // namespace
@@ -192,10 +198,27 @@ std::unique_ptr<fml::Mapping> InMemoryAPKAssetProviderImpl::GetAsMapping(
                asset_name.c_str());
   std::shared_lock<std::shared_mutex> lock(mutex_);
   auto it = assets_.find(asset_name);
-  if (it == assets_.end()) {
-    return nullptr;
+  if (it != assets_.end()) {
+    return std::make_unique<SharedVectorMapping>(it->second);
   }
-  return std::make_unique<SharedVectorMapping>(it->second);
+  std::string normalized = NormalizeAssetPath(directory_, asset_name);
+  it = assets_.find(normalized);
+  if (it != assets_.end()) {
+    return std::make_unique<SharedVectorMapping>(it->second);
+  }
+  if (asset_name.rfind("flutter_assets/", 0) == 0 && asset_name.length() > 15) {
+    std::string stripped = asset_name.substr(15);
+    it = assets_.find(stripped);
+    if (it != assets_.end()) {
+      return std::make_unique<SharedVectorMapping>(it->second);
+    }
+    std::string normalized_stripped = NormalizeAssetPath(directory_, stripped);
+    it = assets_.find(normalized_stripped);
+    if (it != assets_.end()) {
+      return std::make_unique<SharedVectorMapping>(it->second);
+    }
+  }
+  return nullptr;
 }
 
 std::vector<std::unique_ptr<fml::Mapping>>
@@ -327,6 +350,26 @@ class APKAssetProviderImpl : public APKAssetProviderInternal {
     std::string full_path = NormalizeAssetPath(directory_, asset_name);
     AAsset* asset = AAssetManager_open(asset_manager_, full_path.c_str(),
                                        AASSET_MODE_BUFFER);
+    if (!asset) {
+      std::string clean_asset = asset_name;
+      while (!clean_asset.empty() && clean_asset.front() == '/') {
+        clean_asset.erase(0, 1);
+      }
+      if (full_path.rfind("flutter_assets/", 0) != 0) {
+        std::string fallback_path = "flutter_assets/" + clean_asset;
+        asset = AAssetManager_open(asset_manager_, fallback_path.c_str(),
+                                   AASSET_MODE_BUFFER);
+      } else if (clean_asset.rfind("flutter_assets/", 0) == 0 &&
+                 clean_asset.length() > 15) {
+        std::string stripped = clean_asset.substr(15);
+        asset = AAssetManager_open(asset_manager_, stripped.c_str(),
+                                   AASSET_MODE_BUFFER);
+      }
+      if (!asset && full_path != clean_asset) {
+        asset = AAssetManager_open(asset_manager_, clean_asset.c_str(),
+                                   AASSET_MODE_BUFFER);
+      }
+    }
     if (!asset) {
       return nullptr;
     }

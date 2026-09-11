@@ -372,14 +372,17 @@ bool AndroidJvmInvoker::HandlePlatformMessage(const std::string& channel,
   fml::jni::ScopedJavaLocalRef<jstring> java_channel =
       fml::jni::StringToJavaString(env, channel);
 
-  if (message && message_size > 0) {
+  if (message != nullptr) {
     void* buffer_copy = nullptr;
     if (message_data == 0) {
-      buffer_copy = malloc(message_size);
+      size_t alloc_size = message_size == 0 ? 1 : message_size;
+      buffer_copy = malloc(alloc_size);
       if (!buffer_copy) {
         return false;
       }
-      memcpy(buffer_copy, message, message_size);
+      if (message_size > 0) {
+        memcpy(buffer_copy, message, message_size);
+      }
       message_data = reinterpret_cast<jlong>(buffer_copy);
     } else {
       buffer_copy = reinterpret_cast<void*>(message_data);
@@ -420,9 +423,11 @@ bool AndroidJvmInvoker::HandlePlatformMessageResponse(int32_t response_id,
   }
 
   fml::jni::ScopedJavaLocalRef<jobject> data_buf;
-  if (data && data_size > 0) {
-    data_buf.Reset(
-        env, env->NewDirectByteBuffer(const_cast<uint8_t*>(data), data_size));
+  if (data != nullptr) {
+    static const uint8_t kDummy = 0;
+    void* buffer_ptr = data_size > 0 ? const_cast<uint8_t*>(data)
+                                     : const_cast<uint8_t*>(&kDummy);
+    data_buf.Reset(env, env->NewDirectByteBuffer(buffer_ptr, data_size));
   }
   env->CallVoidMethod(java_object.obj(),
                       g_handle_platform_message_response_method, response_id,

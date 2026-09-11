@@ -7152,7 +7152,7 @@ TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniSuccess) {
 
   bool result = FlutterEmbedderNative::RegisterJni(&mock_env_);
   EXPECT_TRUE(result);
-  EXPECT_EQ(registered_methods.size(), 37u);
+  EXPECT_EQ(registered_methods.size(), 39u);
 
   // Verify all essential methods are present and bound to valid function
   // pointers
@@ -7202,6 +7202,8 @@ TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniSuccess) {
   EXPECT_TRUE(has_method("nativeDeferredComponentInstallFailure"));
   EXPECT_TRUE(has_method("nativeUpdateDisplayMetrics"));
   EXPECT_TRUE(has_method("nativeIsSurfaceControlEnabled"));
+  EXPECT_TRUE(has_method("nativeUpdateRefreshRate"));
+  EXPECT_TRUE(has_method("nativeOnVsync"));
   EXPECT_FALSE(has_method("nativePrefetchDefaultFontManager"));
 }
 
@@ -7986,6 +7988,154 @@ TEST_F(Phase63FinalGNIntegrationTest,
   FlutterEmbedderNative::ResetDefaults();
   EXPECT_EQ(FlutterEmbedderNative::GetDefaultVMInit(), nullptr);
   EXPECT_FALSE(FlutterEmbedderNative::GetDefaultVMArgs().has_value());
+}
+
+// =============================================================================
+// Phase 6.4: Parity Checkpoint & Verification Tests
+// =============================================================================
+
+class Phase64ParityCheckpointTest : public ::testing::Test {
+ protected:
+  void SetUp() override { FlutterEmbedderNative::ResetDefaults(); }
+
+  void TearDown() override { FlutterEmbedderNative::ResetDefaults(); }
+};
+
+TEST_F(Phase64ParityCheckpointTest, DefaultRefreshRateAndVsyncLifecycle) {
+  EXPECT_DOUBLE_EQ(FlutterEmbedderNative::GetDefaultRefreshRate(), 60.0);
+
+  FlutterEmbedderNative::SetDefaultRefreshRate(120.0);
+  EXPECT_DOUBLE_EQ(FlutterEmbedderNative::GetDefaultRefreshRate(), 120.0);
+
+  auto native_instance = std::make_unique<FlutterEmbedderNative>();
+  EXPECT_DOUBLE_EQ(native_instance->GetRefreshRate(), 120.0);
+
+  // Clamping and invalid rate handling
+  FlutterEmbedderNative::SetDefaultRefreshRate(-30.0);
+  EXPECT_DOUBLE_EQ(FlutterEmbedderNative::GetDefaultRefreshRate(), 60.0);
+
+  FlutterEmbedderNative::SetDefaultRefreshRate(0.0);
+  EXPECT_DOUBLE_EQ(FlutterEmbedderNative::GetDefaultRefreshRate(), 60.0);
+
+  FlutterEmbedderNative::SetDefaultRefreshRate(90.0);
+  EXPECT_DOUBLE_EQ(FlutterEmbedderNative::GetDefaultRefreshRate(), 90.0);
+
+  // ResetDefaults restores 60.0
+  FlutterEmbedderNative::ResetDefaults();
+  EXPECT_DOUBLE_EQ(FlutterEmbedderNative::GetDefaultRefreshRate(), 60.0);
+}
+
+TEST_F(Phase64ParityCheckpointTest, ConsumePendingVsyncDispatcher) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto font_provider = std::make_shared<InMemoryFontCollectionProvider>();
+  auto aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
+  auto choreographer = std::make_shared<InMemoryAndroidChoreographerProvider>();
+  auto vsync_waiter =
+      std::make_shared<AndroidVsyncWaiter>(choreographer, mock_invoker);
+
+  bool vsync_callback_fired = false;
+  vsync_waiter->SetVsyncResultCallback(
+      [&vsync_callback_fired](intptr_t baton, int64_t start, int64_t target) {
+        vsync_callback_fired = true;
+        EXPECT_EQ(baton, 42);
+        EXPECT_GT(start, 0);
+        EXPECT_GT(target, start);
+      });
+
+  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr,
+                               choreographer, vsync_waiter, font_provider,
+                               aot_provider);
+
+  int64_t now_nanos = 1000000000LL;
+  native.ConsumePendingVsync(42, now_nanos);
+  EXPECT_TRUE(vsync_callback_fired);
+}
+
+TEST(FlutterEmbedderNativeTest, CustomAssetResolverPassedToInitializeEngine) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto in_memory_assets =
+      std::make_shared<InMemoryAPKAssetProviderImpl>("flutter_assets");
+  in_memory_assets->AddAsset("shaders/ink_sparkle.frag", "ShaderBytecode");
+  auto asset_provider = std::make_shared<APKAssetProvider>(in_memory_assets);
+
+  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, asset_provider);
+
+  FlutterCustomAssetResolver custom_resolver =
+      native.CreateCustomAssetResolver();
+  EXPECT_EQ(custom_resolver.struct_size, sizeof(FlutterCustomAssetResolver));
+  ASSERT_NE(custom_resolver.find_asset_callback, nullptr);
+
+  FlutterAsset asset = {};
+  asset.struct_size = sizeof(FlutterAsset);
+  EXPECT_TRUE(custom_resolver.find_asset_callback(
+      custom_resolver.user_data, "shaders/ink_sparkle.frag", &asset));
+  EXPECT_EQ(asset.size, 14u);
+  EXPECT_EQ(std::string(reinterpret_cast<const char*>(asset.data), asset.size),
+            "ShaderBytecode");
+  ASSERT_NE(asset.asset_free_callback, nullptr);
+  asset.asset_free_callback(asset.user_data);
+
+  custom_resolver.destruction_callback(custom_resolver.user_data);
+}
+
+TEST_F(Phase64ParityCheckpointTest,
+       ConsumePendingVsyncWithChoreographerInterval) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto font_provider = std::make_shared<InMemoryFontCollectionProvider>();
+  auto aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
+  auto choreographer = std::make_shared<InMemoryAndroidChoreographerProvider>();
+  auto vsync_waiter =
+      std::make_shared<AndroidVsyncWaiter>(choreographer, mock_invoker);
+
+  bool vsync_callback_fired = false;
+  int64_t expected_interval = 8333333LL;  // 120Hz frame interval
+  int64_t start_time = 1000000000LL;
+  vsync_waiter->SetVsyncResultCallback(
+      [&](intptr_t baton, int64_t start, int64_t target) {
+        vsync_callback_fired = true;
+        EXPECT_EQ(baton, 88);
+        EXPECT_EQ(start, start_time);
+        EXPECT_EQ(target, start_time + expected_interval);
+      });
+
+  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr,
+                               choreographer, vsync_waiter, font_provider,
+                               aot_provider);
+
+  native.ConsumePendingVsync(88, start_time, expected_interval);
+  EXPECT_TRUE(vsync_callback_fired);
+}
+
+TEST_F(Phase64ParityCheckpointTest, SetAndGetRendererConfig) {
+  FlutterEmbedderNative native;
+  EXPECT_FALSE(native.GetRendererConfig().has_value());
+
+  FlutterRendererConfig config = {};
+  config.type = kOpenGL;
+  config.open_gl.struct_size = sizeof(config.open_gl);
+  native.SetRendererConfig(config);
+
+  auto retrieved = native.GetRendererConfig();
+  ASSERT_TRUE(retrieved.has_value());
+  EXPECT_EQ(retrieved->type, kOpenGL);
+  EXPECT_EQ(retrieved->open_gl.struct_size, sizeof(config.open_gl));
+}
+
+TEST_F(Phase64ParityCheckpointTest,
+       InMemoryAssetProviderPrefixStrippingFallback) {
+  auto in_memory_assets =
+      std::make_shared<InMemoryAPKAssetProviderImpl>("flutter_assets");
+  in_memory_assets->AddAsset("app.bin", "AppPayload");
+
+  // Query with flutter_assets/ prefix
+  auto mapping = in_memory_assets->GetAsMapping("flutter_assets/app.bin");
+  ASSERT_NE(mapping, nullptr);
+  EXPECT_EQ(mapping->GetSize(), 10u);
+  EXPECT_EQ(std::string(reinterpret_cast<const char*>(mapping->GetMapping()),
+                        mapping->GetSize()),
+            "AppPayload");
 }
 
 }  // namespace testing

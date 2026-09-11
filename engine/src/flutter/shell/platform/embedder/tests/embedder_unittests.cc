@@ -6590,6 +6590,38 @@ TEST_F(EmbedderTest, RasterThreadContextStructABI) {
   EXPECT_EQ(offsetof(FlutterProjectArgs, raster_thread_context_clear_current),
             offsetof(FlutterProjectArgs, raster_thread_context_make_current) +
                 sizeof(FlutterRasterThreadContextCallback));
+  EXPECT_EQ(offsetof(FlutterProjectArgs, custom_asset_resolver),
+            offsetof(FlutterProjectArgs, raster_thread_context_clear_current) +
+                sizeof(FlutterRasterThreadContextCallback));
+}
+
+TEST_F(EmbedderTest, CustomAssetResolverStructABI) {
+  EXPECT_EQ(sizeof(FlutterAsset) % 8, 0u);
+  EXPECT_EQ(sizeof(FlutterCustomAssetResolver) % 8, 0u);
+
+  EXPECT_EQ(offsetof(FlutterAsset, struct_size), 0u);
+  EXPECT_EQ(offsetof(FlutterAsset, data), sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterAsset, size),
+            offsetof(FlutterAsset, data) + sizeof(const uint8_t*));
+  EXPECT_EQ(offsetof(FlutterAsset, user_data),
+            offsetof(FlutterAsset, size) + sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterAsset, asset_free_callback),
+            offsetof(FlutterAsset, user_data) + sizeof(void*));
+
+  EXPECT_EQ(offsetof(FlutterCustomAssetResolver, struct_size), 0u);
+  EXPECT_EQ(offsetof(FlutterCustomAssetResolver, user_data), sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterCustomAssetResolver, find_asset_callback),
+            offsetof(FlutterCustomAssetResolver, user_data) + sizeof(void*));
+  EXPECT_EQ(offsetof(FlutterCustomAssetResolver, is_valid_callback),
+            offsetof(FlutterCustomAssetResolver, find_asset_callback) +
+                sizeof(void*));
+  EXPECT_EQ(
+      offsetof(FlutterCustomAssetResolver, is_valid_after_change_callback),
+      offsetof(FlutterCustomAssetResolver, is_valid_callback) + sizeof(void*));
+  EXPECT_EQ(
+      offsetof(FlutterCustomAssetResolver, destruction_callback),
+      offsetof(FlutterCustomAssetResolver, is_valid_after_change_callback) +
+          sizeof(void*));
 }
 
 TEST_F(EmbedderTest, RasterThreadContextHooksInvoked) {

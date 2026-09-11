@@ -187,8 +187,10 @@ class AndroidVsyncWaiter
   virtual bool AsyncWaitForVsync(intptr_t baton);
 
   /// @brief Consumes a pending VSync event with the given start and target
-  /// times.
-  virtual void ConsumePendingVsync(intptr_t baton, int64_t frame_time_nanos);
+  /// times, optionally using the choreographer's frame interval.
+  virtual void ConsumePendingVsync(intptr_t baton,
+                                   int64_t frame_time_nanos,
+                                   int64_t refresh_period_nanos = 0);
 
   /// @brief Computes frame pacing timestamps for a given frame start time and
   /// refresh rate.
