@@ -89,37 +89,46 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
       }
 
       // 2. Stop or disconnect Chrome (in DDC mode Chrome is managed by flutterRunProcess)
-      if (!benchmarkOptions.useDdc) {
-        try {
-          final currentChrome = chrome;
-          final readyFuture = whenChromeIsReady;
-          if (currentChrome != null) {
-            currentChrome.stop();
-          } else if (readyFuture != null) {
-            final Chrome readyChrome = await readyFuture.timeout(
-              const Duration(seconds: 5),
-              onTimeout: () => throw TimeoutException('Chrome ready timeout during cleanup'),
-            );
-            readyChrome.stop();
-          }
-        } catch (e) {
-          print('Warning: Error stopping Chrome: $e');
+      void cleanChrome(Chrome c) {
+        if (benchmarkOptions.useDdc) {
+          c.disconnect();
+        } else {
+          c.stop();
         }
-      } else {
+      }
+
+      final currentChrome = chrome;
+      final readyFuture = whenChromeIsReady;
+      if (currentChrome != null) {
         try {
-          final currentChrome = chrome;
-          final readyFuture = whenChromeIsReady;
-          if (currentChrome != null) {
-            currentChrome.disconnect();
-          } else if (readyFuture != null) {
-            final Chrome readyChrome = await readyFuture.timeout(
-              const Duration(seconds: 5),
-              onTimeout: () => throw TimeoutException('Chrome ready timeout during cleanup'),
-            );
-            readyChrome.disconnect();
+          cleanChrome(currentChrome);
+        } catch (e) {
+          final action = benchmarkOptions.useDdc ? 'disconnecting' : 'stopping';
+          print('Warning: Error $action Chrome: $e');
+        }
+      } else if (readyFuture != null) {
+        try {
+          var cleanedUp = false;
+          unawaited(
+            readyFuture.then((Chrome readyChrome) {
+              if (!cleanedUp) {
+                cleanedUp = true;
+                cleanChrome(readyChrome);
+              }
+            }, onError: (_) {}),
+          );
+
+          final Chrome readyChrome = await readyFuture.timeout(
+            const Duration(seconds: 5),
+            onTimeout: () => throw TimeoutException('Chrome ready timeout during cleanup'),
+          );
+          if (!cleanedUp) {
+            cleanedUp = true;
+            cleanChrome(readyChrome);
           }
         } catch (e) {
-          print('Warning: Error disconnecting Chrome: $e');
+          final action = benchmarkOptions.useDdc ? 'disconnecting' : 'stopping';
+          print('Warning: Error $action Chrome: $e');
         }
       }
 
@@ -368,9 +377,11 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
       shelf_io.serveRequests(server!, cascade.handler);
 
       final String dartToolDirectory = path.join(macrobenchmarksDirectory, '.dart_tool');
-      userDataDir = io.Directory(
-        dartToolDirectory,
-      ).createTempSync('flutter_chrome_user_data.').path;
+      final dartToolDir = io.Directory(dartToolDirectory);
+      if (!dartToolDir.existsSync()) {
+        dartToolDir.createSync(recursive: true);
+      }
+      userDataDir = dartToolDir.createTempSync('flutter_chrome_user_data.').path;
 
       // TODO(yjbanov): temporarily disables headful Chrome until we get
       //                devicelab hardware that is able to run it. Our current
