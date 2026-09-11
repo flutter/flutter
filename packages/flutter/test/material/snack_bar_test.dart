@@ -3305,7 +3305,9 @@ void main() {
     );
   });
 
-  testWidgets('Floating snackbar can display optional icon', (WidgetTester tester) async {
+  testWidgets('Material2 - Floating snackbar can display optional icon', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -4395,6 +4397,133 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(SnackBarAction)), Size.zero);
+  });
+  testWidgets('SnackBar intrinsic width accounts for padding', (WidgetTester tester) async {
+    const horizontalPadding = 20.0;
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SnackBar(
+              animation: AlwaysStoppedAnimation<double>(1.0),
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+              content: SizedBox(width: 100, height: 50),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox renderSnackBarLayout = tester.allRenderObjects
+        .whereType<RenderBox>()
+        .firstWhere((r) => r.runtimeType.toString().contains('RenderSnackBarLayout'));
+
+    final double minWidth = renderSnackBarLayout.getMinIntrinsicWidth(double.infinity);
+    expect(minWidth, greaterThan(100));
+  });
+
+  testWidgets('SnackBar handle infinite width in performLayout', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: UnconstrainedBox(
+            child: SnackBar(
+              animation: const AlwaysStoppedAnimation<double>(1.0),
+              content: const Text('Hello'),
+              action: SnackBarAction(label: 'Action', onPressed: () {}),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Hello'), findsOneWidget);
+  });
+
+  testWidgets('SnackBar includes top and bottom padding when action overflows', (
+    WidgetTester tester,
+  ) async {
+    const customTopPadding = 15.0;
+    const customBottomPadding = 30.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Short content'),
+                      action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                      actionOverflowThreshold: 0.0,
+                      padding: const EdgeInsets.only(
+                        top: customTopPadding,
+                        bottom: customBottomPadding,
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
+    final Offset actionBottomRight = tester.getBottomRight(find.byType(SnackBarAction));
+    final Offset snackBarTopLeft = tester.getTopLeft(find.byType(SnackBar));
+    final Offset contentTopLeft = tester.getTopLeft(find.text('Short content'));
+
+    // Verify that the distance between the bottom of the action button
+    // and the bottom of the SnackBar is exactly the customBottomPadding.
+    expect(snackBarBottomRight.dy - actionBottomRight.dy, customBottomPadding);
+
+    // Verify that the top padding is also correctly applied above the content.
+    expect(contentTopLeft.dy - snackBarTopLeft.dy, customTopPadding);
+  });
+
+  testWidgets('SnackBar aligns content correctly with asymmetric vertical padding', (
+    WidgetTester tester,
+  ) async {
+    const customTopPadding = 40.0;
+    const customBottomPadding = 10.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Content'),
+                      padding: EdgeInsets.only(top: customTopPadding, bottom: customBottomPadding),
+                    ),
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    final Offset snackBarTopLeft = tester.getTopLeft(find.byType(SnackBar));
+    final Offset contentTopLeft = tester.getTopLeft(find.text('Content'));
+
+    expect(contentTopLeft.dy - snackBarTopLeft.dy, customTopPadding);
   });
 }
 
