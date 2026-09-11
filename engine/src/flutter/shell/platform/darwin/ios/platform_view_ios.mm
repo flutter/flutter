@@ -101,7 +101,7 @@ void PlatformViewIOS::attachView() {
 
 PointerDataDispatcherMaker PlatformViewIOS::GetDispatcherMaker() {
   return [](DefaultPointerDataDispatcher::Delegate& delegate) {
-    return std::make_unique<SmoothPointerDataDispatcher>(delegate);
+    return std::make_unique<DefaultPointerDataDispatcher>(delegate);
   };
 }
 
