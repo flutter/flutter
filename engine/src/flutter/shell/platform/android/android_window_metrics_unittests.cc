@@ -264,6 +264,102 @@ TEST(AndroidWindowMetricsMapperTest, InsetBoundaryClamping) {
   EXPECT_DOUBLE_EQ(event.physical_view_inset_right, 500.0);
 }
 
+TEST(AndroidWindowMetricsMapperTest, DisplayFeaturesTranslation) {
+  AndroidViewportMetrics metrics;
+  metrics.physical_width = 1080.0;
+  metrics.physical_height = 2400.0;
+  // 1 cutout feature: left=0, top=0, right=1080, bottom=100.
+  metrics.display_features_bounds = {0.0, 0.0, 1080.0, 100.0};
+  metrics.display_features_type = {
+      static_cast<int32_t>(AndroidDisplayFeatureType::kCutout)};
+  metrics.display_features_state = {
+      static_cast<int32_t>(AndroidDisplayFeatureState::kPostureFlat)};
+
+  FlutterWindowMetricsEvent event =
+      AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(metrics);
+
+  // Expect 1 feature since there are 4 bounds elements per feature.
+  EXPECT_EQ(event.display_features_count, 1u);
+  ASSERT_NE(event.display_features_bounds, nullptr);
+  EXPECT_DOUBLE_EQ(event.display_features_bounds[0], 0.0);
+  EXPECT_DOUBLE_EQ(event.display_features_bounds[1], 0.0);
+  EXPECT_DOUBLE_EQ(event.display_features_bounds[2], 1080.0);
+  EXPECT_DOUBLE_EQ(event.display_features_bounds[3], 100.0);
+  ASSERT_NE(event.display_features_type, nullptr);
+  EXPECT_EQ(event.display_features_type[0],
+            static_cast<int>(AndroidDisplayFeatureType::kCutout));
+  ASSERT_NE(event.display_features_state, nullptr);
+  EXPECT_EQ(event.display_features_state[0],
+            static_cast<int>(AndroidDisplayFeatureState::kPostureFlat));
+}
+
+TEST(AndroidWindowMetricsMapperTest, DisplayFeaturesMismatchedVectorSizes) {
+  AndroidViewportMetrics metrics;
+  metrics.physical_width = 1080.0;
+  metrics.physical_height = 2400.0;
+  // 2 features worth of bounds (8 values).
+  metrics.display_features_bounds = {
+      0.0, 0.0, 1080.0, 100.0, 0.0, 1000.0, 1080.0, 1050.0,
+  };
+  // Only 1 type provided.
+  metrics.display_features_type = {
+      static_cast<int32_t>(AndroidDisplayFeatureType::kCutout)};
+  // Only 1 state provided.
+  metrics.display_features_state = {
+      static_cast<int32_t>(AndroidDisplayFeatureState::kPostureFlat)};
+
+  FlutterWindowMetricsEvent event =
+      AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(metrics);
+
+  // Safe count should clamp to min(2, 1, 1) = 1.
+  EXPECT_EQ(event.display_features_count, 1u);
+  ASSERT_NE(event.display_features_bounds, nullptr);
+  ASSERT_NE(event.display_features_type, nullptr);
+  ASSERT_NE(event.display_features_state, nullptr);
+  EXPECT_DOUBLE_EQ(event.display_features_bounds[0], 0.0);
+  EXPECT_EQ(event.display_features_type[0],
+            static_cast<int>(AndroidDisplayFeatureType::kCutout));
+}
+
+TEST(AndroidWindowMetricsMapperTest, DisplayFeaturesTrailingCoordinates) {
+  AndroidViewportMetrics metrics;
+  metrics.physical_width = 1080.0;
+  metrics.physical_height = 2400.0;
+  // 5 coordinates: 1 full feature (4 coords) + 1 trailing coordinate.
+  metrics.display_features_bounds = {0.0, 0.0, 1080.0, 100.0, 50.0};
+  metrics.display_features_type = {
+      static_cast<int32_t>(AndroidDisplayFeatureType::kCutout)};
+  metrics.display_features_state = {
+      static_cast<int32_t>(AndroidDisplayFeatureState::kPostureFlat)};
+
+  FlutterWindowMetricsEvent event =
+      AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(metrics);
+
+  // Trailing coordinates should be truncated to complete features: 5 / 4 = 1.
+  EXPECT_EQ(event.display_features_count, 1u);
+  ASSERT_NE(event.display_features_bounds, nullptr);
+  ASSERT_NE(event.display_features_type, nullptr);
+  ASSERT_NE(event.display_features_state, nullptr);
+  EXPECT_DOUBLE_EQ(event.display_features_bounds[3], 100.0);
+}
+
+TEST(AndroidWindowMetricsMapperTest, DisplayFeaturesEmptyVectors) {
+  AndroidViewportMetrics metrics;
+  metrics.physical_width = 1080.0;
+  metrics.physical_height = 2400.0;
+  metrics.display_features_bounds.clear();
+  metrics.display_features_type.clear();
+  metrics.display_features_state.clear();
+
+  FlutterWindowMetricsEvent event =
+      AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(metrics);
+
+  EXPECT_EQ(event.display_features_count, 0u);
+  EXPECT_EQ(event.display_features_bounds, nullptr);
+  EXPECT_EQ(event.display_features_type, nullptr);
+  EXPECT_EQ(event.display_features_state, nullptr);
+}
+
 TEST(AndroidWindowMetricsMapperTest, BasicDisplayMetricsTranslation) {
   AndroidDisplayMetrics display;
   display.display_id = 5;

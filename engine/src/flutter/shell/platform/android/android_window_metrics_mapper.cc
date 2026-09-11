@@ -169,6 +169,39 @@ AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(
     event.max_height_constraint = event.height;
   }
 
+  // Each display feature is represented by 4 coordinates (left, top, right,
+  // bottom).
+  constexpr size_t kBoundsPerDisplayFeature = 4;
+  if (metrics.display_features_bounds.size() % kBoundsPerDisplayFeature != 0) {
+    FML_LOG(ERROR) << "Display feature bounds size ("
+                   << metrics.display_features_bounds.size()
+                   << ") is not a multiple of " << kBoundsPerDisplayFeature
+                   << ".";
+  }
+
+  const size_t bounds_feature_count =
+      metrics.display_features_bounds.size() / kBoundsPerDisplayFeature;
+  const size_t types_count = metrics.display_features_type.size();
+  const size_t states_count = metrics.display_features_state.size();
+
+  if (bounds_feature_count != types_count ||
+      bounds_feature_count != states_count) {
+    FML_LOG(ERROR) << "Display feature attribute size mismatch: bounds count = "
+                   << bounds_feature_count << ", types count = " << types_count
+                   << ", states count = " << states_count << ".";
+  }
+
+  const size_t safe_count =
+      std::min({bounds_feature_count, types_count, states_count});
+
+  event.display_features_count = safe_count;
+  event.display_features_bounds =
+      safe_count > 0 ? metrics.display_features_bounds.data() : nullptr;
+  event.display_features_type =
+      safe_count > 0 ? metrics.display_features_type.data() : nullptr;
+  event.display_features_state =
+      safe_count > 0 ? metrics.display_features_state.data() : nullptr;
+
   return event;
 }
 

@@ -436,7 +436,7 @@ public class FlutterJNI {
   // Below represents the stateful part of the FlutterJNI instances that aren't static per program.
   // Conceptually, it represents a native shell instance.
 
-  @Nullable private Long nativeShellHolderId;
+  @Keep @Nullable private Long nativeShellHolderId;
   @Nullable private AccessibilityDelegate accessibilityDelegate;
   @Nullable private PlatformMessageHandler platformMessageHandler;
   @Nullable private LocalizationPlugin localizationPlugin;
@@ -652,6 +652,7 @@ public class FlutterJNI {
   }
 
   // Called by native to notify first Flutter frame rendered.
+  @Keep
   @SuppressWarnings("unused")
   @VisibleForTesting
   @UiThread
@@ -918,6 +919,7 @@ public class FlutterJNI {
    * <p>The {@code buffer} and {@code strings} form a communication protocol that is implemented in
    * {@code android_semantics_mapper.cc}.
    */
+  @Keep
   @SuppressWarnings("unused")
   @UiThread
   private void updateSemantics(
@@ -931,6 +933,7 @@ public class FlutterJNI {
   }
 
   /** Invoked by native to set application locale in Android. */
+  @Keep
   @SuppressWarnings("unused")
   @UiThread
   private void setApplicationLocale(@NonNull String locale) {
@@ -948,6 +951,7 @@ public class FlutterJNI {
    *
    * @param enabled True if the framework is compiling the accessibility tree.
    */
+  @Keep
   @UiThread
   public void setSemanticsTreeEnabled(boolean enabled) {
     ensureRunningOnMainThread();
@@ -966,6 +970,7 @@ public class FlutterJNI {
    *
    * <p>// TODO(cbracken): expand these docs to include more actionable information.
    */
+  @Keep
   @SuppressWarnings("unused")
   @UiThread
   private void updateCustomAccessibilityActions(
@@ -1313,6 +1318,7 @@ public class FlutterJNI {
   }
 
   // Called by native on any thread.
+  @Keep
   @SuppressWarnings("unused")
   @VisibleForTesting
   public void handlePlatformMessage(
@@ -1328,6 +1334,7 @@ public class FlutterJNI {
   }
 
   // Called by native to respond to a platform message that we sent.
+  @Keep
   @SuppressWarnings("unused")
   private void handlePlatformMessageResponse(int replyId, ByteBuffer reply) {
     if (platformMessageHandler != null) {
@@ -1454,6 +1461,7 @@ public class FlutterJNI {
   }
 
   // Called by native.
+  @Keep
   @SuppressWarnings("unused")
   private void onPreEngineRestart() {
     for (EngineLifecycleListener listener : engineLifecycleListeners) {

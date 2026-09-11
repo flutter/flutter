@@ -200,7 +200,9 @@ sk_sp<DlImage> EmbedderExternalTextureVK::ResolveTextureSkia(
       .fImageTiling = VK_IMAGE_TILING_OPTIMAL,
       .fImageLayout = static_cast<VkImageLayout>(texture->image_layout),
       .fFormat = static_cast<VkFormat>(texture->format),
-      .fImageUsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT,
+      .fImageUsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT |
+                          VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
+                          VK_IMAGE_USAGE_TRANSFER_DST_BIT,
       .fSampleCount = 1,
       .fLevelCount = 1,
   };
@@ -254,9 +256,9 @@ sk_sp<DlImage> EmbedderExternalTextureVK::ResolveTextureSkia(
       kPremul_SkAlphaType, nullptr, release_proc, release_context);
 
   if (!image) {
-    if (release_proc && release_context) {
-      release_proc(release_context);
-    }
+    // BorrowTextureFrom takes ownership of release_proc and release_context
+    // via skgpu::RefCntedCallback, which already invokes release_proc on
+    // failure.
     FML_LOG(ERROR) << "Could not create external texture: " << texture_id;
     return nullptr;
   }
