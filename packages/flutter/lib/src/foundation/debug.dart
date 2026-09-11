@@ -4,14 +4,22 @@
 
 /// @docImport 'dart:developer';
 ///
+/// @docImport 'package:flutter/animation.dart';
 /// @docImport 'package:flutter/foundation.dart';
 /// @docImport 'package:flutter/rendering.dart';
 /// @docImport 'package:flutter/semantics.dart';
 /// @docImport 'package:flutter/widgets.dart';
 /// @docImport 'package:flutter_test/flutter_test.dart';
+///
+/// @docImport 'binding.dart';
+/// @docImport 'service_extensions.dart';
 library;
 
 import 'dart:collection';
+// The view metric override types at the bottom of this file are value holders
+// for metrics `dart:ui` defines, so they name the `dart:ui` types they stand in
+// for. See the note at the top of _view_metrics.dart about this dependency; as
+// there, nothing that uses it runs outside of debug mode.
 import 'dart:ui'
     as ui
     show
@@ -292,14 +300,6 @@ class DebugViewPadding implements ui.ViewPadding {
 
   @override
   int get hashCode => Object.hash(left, top, right, bottom);
-
-  /// This gives us some grace time when the dart:ui side adds something to
-  /// [ui.ViewPadding], and makes things easier when we do rolls to give
-  /// us time to catch up.
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    return null;
-  }
 
   @override
   String toString() => 'DebugViewPadding(left: $left, top: $top, right: $right, bottom: $bottom)';
@@ -584,212 +584,121 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// Whether this instance overrides at least one metric.
   bool get isNotEmpty => !isEmpty;
 
-  /// A sentinel value used by [copyWith] as the default argument value to indicate
-  /// that an argument was omitted.
-  static const Object _omitted = _Omitted();
-
-  /// Creates a copy of this object with the given fields replaced.
+  /// Creates a copy of this object with the given metrics replaced.
   ///
-  /// The arguments are typed as [Object?] to distinguish between passing `null`
-  /// (which clears the override for that field, resetting it so the underlying
-  /// platform value is used) and omitting an argument (which preserves the
-  /// existing override).
+  /// A null argument leaves the corresponding metric as this object has it,
+  /// which is the ordinary `copyWith` rule. A null field already means "not
+  /// overridden", so giving up an override is a different request rather than
+  /// the same one spelled with a null: name the metric in [clear].
   ///
-  /// Although widened to [Object?], each argument must match the type of the
-  /// corresponding property if provided:
-  ///  * [num] or `null` for [devicePixelRatio] and [textScaleFactor]
-  ///  * [ui.Size] or `null` for [physicalSize]
-  ///  * [ui.Brightness] or `null` for [platformBrightness]
-  ///  * [DebugViewPadding] or `null` for [padding], [viewPadding], [viewInsets],
-  ///    and [systemGestureInsets]
-  ///  * [bool] or `null` for accessibility and format flags
+  /// Passing a value for a metric that is also named in [clear] is a
+  /// contradiction, and asserts.
   ///
-  /// Type safety is enforced at runtime via assertions in debug mode and
-  /// by throwing an [ArgumentError] if an argument of an unexpected type is
-  /// passed.
+  /// {@tool snippet}
+  /// This stops overriding the text scale factor while leaving every other
+  /// metric of `override` in place:
+  ///
+  /// ```dart
+  /// override.copyWith(clear: <DebugViewMetric>{DebugViewMetric.textScaleFactor});
+  /// ```
+  /// {@end-tool}
   DebugViewMetricsOverride copyWith({
-    Object? devicePixelRatio = _omitted,
-    Object? physicalSize = _omitted,
-    Object? textScaleFactor = _omitted,
-    Object? platformBrightness = _omitted,
-    Object? padding = _omitted,
-    Object? viewPadding = _omitted,
-    Object? viewInsets = _omitted,
-    Object? systemGestureInsets = _omitted,
-    Object? alwaysUse24HourFormat = _omitted,
-    Object? accessibleNavigation = _omitted,
-    Object? invertColors = _omitted,
-    Object? disableAnimations = _omitted,
-    Object? boldText = _omitted,
-    Object? reduceMotion = _omitted,
-    Object? highContrast = _omitted,
-    Object? onOffSwitchLabels = _omitted,
-    Object? supportsAnnounce = _omitted,
-    Object? autoPlayAnimatedImages = _omitted,
-    Object? autoPlayVideos = _omitted,
-    Object? deterministicCursor = _omitted,
+    double? devicePixelRatio,
+    ui.Size? physicalSize,
+    double? textScaleFactor,
+    ui.Brightness? platformBrightness,
+    DebugViewPadding? padding,
+    DebugViewPadding? viewPadding,
+    DebugViewPadding? viewInsets,
+    DebugViewPadding? systemGestureInsets,
+    bool? alwaysUse24HourFormat,
+    bool? accessibleNavigation,
+    bool? invertColors,
+    bool? disableAnimations,
+    bool? boldText,
+    bool? reduceMotion,
+    bool? highContrast,
+    bool? onOffSwitchLabels,
+    bool? supportsAnnounce,
+    bool? autoPlayAnimatedImages,
+    bool? autoPlayVideos,
+    bool? deterministicCursor,
+    Set<DebugViewMetric> clear = const <DebugViewMetric>{},
   }) {
-    bool check<T>(Object? value) => identical(value, _omitted) || value == null || value is T;
-
-    assert(
-      check<num>(devicePixelRatio),
-      'devicePixelRatio must be a num or null, got ${devicePixelRatio.runtimeType} ($devicePixelRatio).',
-    );
-    assert(
-      check<ui.Size>(physicalSize),
-      'physicalSize must be a ui.Size or null, got ${physicalSize.runtimeType} ($physicalSize).',
-    );
-    assert(
-      check<num>(textScaleFactor),
-      'textScaleFactor must be a num or null, got ${textScaleFactor.runtimeType} ($textScaleFactor).',
-    );
-    assert(
-      check<ui.Brightness>(platformBrightness),
-      'platformBrightness must be a ui.Brightness or null, got ${platformBrightness.runtimeType} ($platformBrightness).',
-    );
-    assert(
-      check<DebugViewPadding>(padding),
-      'padding must be a DebugViewPadding or null, got ${padding.runtimeType} ($padding).',
-    );
-    assert(
-      check<DebugViewPadding>(viewPadding),
-      'viewPadding must be a DebugViewPadding or null, got ${viewPadding.runtimeType} ($viewPadding).',
-    );
-    assert(
-      check<DebugViewPadding>(viewInsets),
-      'viewInsets must be a DebugViewPadding or null, got ${viewInsets.runtimeType} ($viewInsets).',
-    );
-    assert(
-      check<DebugViewPadding>(systemGestureInsets),
-      'systemGestureInsets must be a DebugViewPadding or null, got ${systemGestureInsets.runtimeType} ($systemGestureInsets).',
-    );
-    assert(
-      check<bool>(alwaysUse24HourFormat),
-      'alwaysUse24HourFormat must be a bool or null, got ${alwaysUse24HourFormat.runtimeType} ($alwaysUse24HourFormat).',
-    );
-    assert(
-      check<bool>(accessibleNavigation),
-      'accessibleNavigation must be a bool or null, got ${accessibleNavigation.runtimeType} ($accessibleNavigation).',
-    );
-    assert(
-      check<bool>(invertColors),
-      'invertColors must be a bool or null, got ${invertColors.runtimeType} ($invertColors).',
-    );
-    assert(
-      check<bool>(disableAnimations),
-      'disableAnimations must be a bool or null, got ${disableAnimations.runtimeType} ($disableAnimations).',
-    );
-    assert(
-      check<bool>(boldText),
-      'boldText must be a bool or null, got ${boldText.runtimeType} ($boldText).',
-    );
-    assert(
-      check<bool>(reduceMotion),
-      'reduceMotion must be a bool or null, got ${reduceMotion.runtimeType} ($reduceMotion).',
-    );
-    assert(
-      check<bool>(highContrast),
-      'highContrast must be a bool or null, got ${highContrast.runtimeType} ($highContrast).',
-    );
-    assert(
-      check<bool>(onOffSwitchLabels),
-      'onOffSwitchLabels must be a bool or null, got ${onOffSwitchLabels.runtimeType} ($onOffSwitchLabels).',
-    );
-    assert(
-      check<bool>(supportsAnnounce),
-      'supportsAnnounce must be a bool or null, got ${supportsAnnounce.runtimeType} ($supportsAnnounce).',
-    );
-    assert(
-      check<bool>(autoPlayAnimatedImages),
-      'autoPlayAnimatedImages must be a bool or null, got ${autoPlayAnimatedImages.runtimeType} ($autoPlayAnimatedImages).',
-    );
-    assert(
-      check<bool>(autoPlayVideos),
-      'autoPlayVideos must be a bool or null, got ${autoPlayVideos.runtimeType} ($autoPlayVideos).',
-    );
-    assert(
-      check<bool>(deterministicCursor),
-      'deterministicCursor must be a bool or null, got ${deterministicCursor.runtimeType} ($deterministicCursor).',
-    );
-
-    double? resolveDouble(Object? value, double? current, String name) {
-      if (identical(value, _omitted)) {
-        return current;
-      }
-      if (value == null) {
-        return null;
-      }
-      if (value is! num) {
-        throw ArgumentError.value(value, name, 'Expected a num or null.');
-      }
-      return value.toDouble();
-    }
-
-    T? resolve<T extends Object>(Object? value, T? current, String name) {
-      if (identical(value, _omitted)) {
-        return current;
-      }
-      if (value == null) {
-        return null;
-      }
-      if (value is! T) {
-        throw ArgumentError.value(value, name, 'Expected a $T or null.');
-      }
-      return value;
+    T? resolve<T>(DebugViewMetric metric, T? value, T? current) {
+      final bool cleared = clear.contains(metric);
+      assert(
+        !cleared || value == null,
+        'DebugViewMetricsOverride.copyWith was asked both to set ${metric.name} '
+        'and to clear it.',
+      );
+      return cleared ? null : (value ?? current);
     }
 
     final result = DebugViewMetricsOverride(
-      devicePixelRatio: resolveDouble(devicePixelRatio, this.devicePixelRatio, 'devicePixelRatio'),
-      physicalSize: resolve<ui.Size>(physicalSize, this.physicalSize, 'physicalSize'),
-      textScaleFactor: resolveDouble(textScaleFactor, this.textScaleFactor, 'textScaleFactor'),
-      platformBrightness: resolve<ui.Brightness>(
+      devicePixelRatio: resolve(
+        DebugViewMetric.devicePixelRatio,
+        devicePixelRatio,
+        this.devicePixelRatio,
+      ),
+      physicalSize: resolve(DebugViewMetric.physicalSize, physicalSize, this.physicalSize),
+      textScaleFactor: resolve(
+        DebugViewMetric.textScaleFactor,
+        textScaleFactor,
+        this.textScaleFactor,
+      ),
+      platformBrightness: resolve(
+        DebugViewMetric.platformBrightness,
         platformBrightness,
         this.platformBrightness,
-        'platformBrightness',
       ),
-      padding: resolve<DebugViewPadding>(padding, this.padding, 'padding'),
-      viewPadding: resolve<DebugViewPadding>(viewPadding, this.viewPadding, 'viewPadding'),
-      viewInsets: resolve<DebugViewPadding>(viewInsets, this.viewInsets, 'viewInsets'),
-      systemGestureInsets: resolve<DebugViewPadding>(
+      padding: resolve(DebugViewMetric.padding, padding, this.padding),
+      viewPadding: resolve(DebugViewMetric.viewPadding, viewPadding, this.viewPadding),
+      viewInsets: resolve(DebugViewMetric.viewInsets, viewInsets, this.viewInsets),
+      systemGestureInsets: resolve(
+        DebugViewMetric.systemGestureInsets,
         systemGestureInsets,
         this.systemGestureInsets,
-        'systemGestureInsets',
       ),
-      alwaysUse24HourFormat: resolve<bool>(
+      alwaysUse24HourFormat: resolve(
+        DebugViewMetric.alwaysUse24HourFormat,
         alwaysUse24HourFormat,
         this.alwaysUse24HourFormat,
-        'alwaysUse24HourFormat',
       ),
-      accessibleNavigation: resolve<bool>(
+      accessibleNavigation: resolve(
+        DebugViewMetric.accessibleNavigation,
         accessibleNavigation,
         this.accessibleNavigation,
-        'accessibleNavigation',
       ),
-      invertColors: resolve<bool>(invertColors, this.invertColors, 'invertColors'),
-      disableAnimations: resolve<bool>(
+      invertColors: resolve(DebugViewMetric.invertColors, invertColors, this.invertColors),
+      disableAnimations: resolve(
+        DebugViewMetric.disableAnimations,
         disableAnimations,
         this.disableAnimations,
-        'disableAnimations',
       ),
-      boldText: resolve<bool>(boldText, this.boldText, 'boldText'),
-      reduceMotion: resolve<bool>(reduceMotion, this.reduceMotion, 'reduceMotion'),
-      highContrast: resolve<bool>(highContrast, this.highContrast, 'highContrast'),
-      onOffSwitchLabels: resolve<bool>(
+      boldText: resolve(DebugViewMetric.boldText, boldText, this.boldText),
+      reduceMotion: resolve(DebugViewMetric.reduceMotion, reduceMotion, this.reduceMotion),
+      highContrast: resolve(DebugViewMetric.highContrast, highContrast, this.highContrast),
+      onOffSwitchLabels: resolve(
+        DebugViewMetric.onOffSwitchLabels,
         onOffSwitchLabels,
         this.onOffSwitchLabels,
-        'onOffSwitchLabels',
       ),
-      supportsAnnounce: resolve<bool>(supportsAnnounce, this.supportsAnnounce, 'supportsAnnounce'),
-      autoPlayAnimatedImages: resolve<bool>(
+      supportsAnnounce: resolve(
+        DebugViewMetric.supportsAnnounce,
+        supportsAnnounce,
+        this.supportsAnnounce,
+      ),
+      autoPlayAnimatedImages: resolve(
+        DebugViewMetric.autoPlayAnimatedImages,
         autoPlayAnimatedImages,
         this.autoPlayAnimatedImages,
-        'autoPlayAnimatedImages',
       ),
-      autoPlayVideos: resolve<bool>(autoPlayVideos, this.autoPlayVideos, 'autoPlayVideos'),
-      deterministicCursor: resolve<bool>(
+      autoPlayVideos: resolve(DebugViewMetric.autoPlayVideos, autoPlayVideos, this.autoPlayVideos),
+      deterministicCursor: resolve(
+        DebugViewMetric.deterministicCursor,
         deterministicCursor,
         this.deterministicCursor,
-        'deterministicCursor',
       ),
     );
     assert(result._debugAssertGeometryIsValid());
@@ -951,29 +860,12 @@ class DebugViewMetricsOverride with Diagnosticable {
     properties.add(FlagProperty(name, value: value, ifTrue: name, ifFalse: 'not $name'));
   }
 
-  // Every key [toJson] can emit and [fromJson] accepts. Anything else in an
-  // incoming payload is a tooling mistake rather than a metric to ignore.
-  static const Set<String> _jsonKeys = <String>{
-    'devicePixelRatio',
-    'physicalSize',
-    'textScaleFactor',
-    'platformBrightness',
-    'padding',
-    'viewPadding',
-    'viewInsets',
-    'systemGestureInsets',
-    'alwaysUse24HourFormat',
-    'accessibleNavigation',
-    'invertColors',
-    'disableAnimations',
-    'boldText',
-    'reduceMotion',
-    'highContrast',
-    'onOffSwitchLabels',
-    'supportsAnnounce',
-    'autoPlayAnimatedImages',
-    'autoPlayVideos',
-    'deterministicCursor',
+  // Every key [toJson] can emit and [fromJson] accepts, which is exactly the
+  // set of metrics there are: deriving it from [DebugViewMetric] keeps a metric
+  // from being added without the wire format learning about it. Anything else
+  // in an incoming payload is a tooling mistake rather than a metric to ignore.
+  static final Set<String> _jsonKeys = <String>{
+    for (final DebugViewMetric metric in DebugViewMetric.values) metric.name,
   };
 
   static Map<String, Object?> _viewPaddingToJson(DebugViewPadding padding) {
@@ -1275,6 +1167,74 @@ void _debugReplayPlatformNotifications(
   );
 }
 
-class _Omitted {
-  const _Omitted();
+/// A view metric a [DebugViewMetricsOverride] can override.
+///
+/// Names the metrics [DebugViewMetricsOverride.copyWith] can be asked to stop
+/// overriding, and supplies the set of keys the wire format
+/// [DebugViewMetricsOverride.toJson] produces and
+/// [DebugViewMetricsOverride.fromJson] accepts, so that the accepted keys are
+/// not a second list to keep in step with this one.
+///
+/// A metric added here still has to be added to the fields, to `copyWith`, to
+/// `toJson` and to `fromJson` by hand.
+enum DebugViewMetric {
+  /// Names [DebugViewMetricsOverride.devicePixelRatio].
+  devicePixelRatio,
+
+  /// Names [DebugViewMetricsOverride.physicalSize].
+  physicalSize,
+
+  /// Names [DebugViewMetricsOverride.textScaleFactor].
+  textScaleFactor,
+
+  /// Names [DebugViewMetricsOverride.platformBrightness].
+  platformBrightness,
+
+  /// Names [DebugViewMetricsOverride.padding].
+  padding,
+
+  /// Names [DebugViewMetricsOverride.viewPadding].
+  viewPadding,
+
+  /// Names [DebugViewMetricsOverride.viewInsets].
+  viewInsets,
+
+  /// Names [DebugViewMetricsOverride.systemGestureInsets].
+  systemGestureInsets,
+
+  /// Names [DebugViewMetricsOverride.alwaysUse24HourFormat].
+  alwaysUse24HourFormat,
+
+  /// Names [DebugViewMetricsOverride.accessibleNavigation].
+  accessibleNavigation,
+
+  /// Names [DebugViewMetricsOverride.invertColors].
+  invertColors,
+
+  /// Names [DebugViewMetricsOverride.disableAnimations].
+  disableAnimations,
+
+  /// Names [DebugViewMetricsOverride.boldText].
+  boldText,
+
+  /// Names [DebugViewMetricsOverride.reduceMotion].
+  reduceMotion,
+
+  /// Names [DebugViewMetricsOverride.highContrast].
+  highContrast,
+
+  /// Names [DebugViewMetricsOverride.onOffSwitchLabels].
+  onOffSwitchLabels,
+
+  /// Names [DebugViewMetricsOverride.supportsAnnounce].
+  supportsAnnounce,
+
+  /// Names [DebugViewMetricsOverride.autoPlayAnimatedImages].
+  autoPlayAnimatedImages,
+
+  /// Names [DebugViewMetricsOverride.autoPlayVideos].
+  autoPlayVideos,
+
+  /// Names [DebugViewMetricsOverride.deterministicCursor].
+  deterministicCursor,
 }

@@ -1429,6 +1429,9 @@ void main() {
       FoundationServiceExtensions.viewMetricsOverride.name,
       <String, String>{'viewId': '$viewId'},
     );
+    // A call that named a view is answered by 'override', and 'overrides'
+    // carries the whole registry whatever the call was.
+    expect(result['override'], isNull);
     expect(result['overrides'], <String, Object?>{});
     expect(result['overriddenViewIds'], <int>[]);
     expect(extensionChangedEvents, isEmpty);
@@ -1438,6 +1441,8 @@ void main() {
       FoundationServiceExtensions.viewMetricsOverride.name,
       <String, String>{},
     );
+    // A call that named no view is not answered about one.
+    expect(result.containsKey('override'), isFalse);
     expect(result['overrides'], <String, Object?>{});
     expect(result['overriddenViewIds'], <int>[]);
     expect(extensionChangedEvents, isEmpty);
@@ -1450,7 +1455,10 @@ void main() {
         'overrides': '{"boldText": true, "devicePixelRatio": 3.5}',
       },
     );
-    expect(result['overrides'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
+    expect(result['override'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
+    expect(result['overrides'], <String, Object?>{
+      '$viewId': <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true},
+    });
     expect(result['overriddenViewIds'], <int>[viewId]);
     expect(
       debugViewMetricsOverrides[viewId],
@@ -1469,7 +1477,7 @@ void main() {
         'overrides': '{"boldText": true, "devicePixelRatio": 3.5}',
       },
     );
-    expect(result['overrides'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
+    expect(result['override'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
     expect(extensionChangedEvents.length, 1);
 
     // A second view's override: the event reports the whole registry, so that a
@@ -1507,7 +1515,7 @@ void main() {
       FoundationServiceExtensions.viewMetricsOverride.name,
       <String, String>{'viewId': '$viewId'},
     );
-    expect(result['overrides'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
+    expect(result['override'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
     expect(extensionChangedEvents.length, 3);
 
     // Setting partial padding and systemGestureInsets works and defaults omitted edges to 0.
@@ -1516,7 +1524,7 @@ void main() {
           'viewId': '$viewId',
           'overrides': '{"padding": {"top": 48}, "systemGestureInsets": {"left": 20, "right": 20}}',
         });
-    expect(result['overrides'], <String, Object?>{
+    expect(result['override'], <String, Object?>{
       'padding': <String, Object?>{'left': 0.0, 'top': 48.0, 'right': 0.0, 'bottom': 0.0},
       'systemGestureInsets': <String, Object?>{
         'left': 20.0,
@@ -1542,7 +1550,7 @@ void main() {
         'overrides': '{"platformBrightness": "Brightness.dark"}',
       },
     );
-    expect(result['overrides'], <String, Object?>{'platformBrightness': 'dark'});
+    expect(result['override'], <String, Object?>{'platformBrightness': 'dark'});
     expect(
       debugViewMetricsOverrides[viewId],
       const DebugViewMetricsOverride(platformBrightness: ui.Brightness.dark),
@@ -1615,6 +1623,7 @@ void main() {
       FoundationServiceExtensions.viewMetricsOverride.name,
       <String, String>{'viewId': '$viewId', 'overrides': 'null'},
     );
+    expect(result['override'], isNull);
     expect(result['overrides'], <String, Object?>{});
     expect(result['overriddenViewIds'], <int>[]);
     expect(debugViewMetricsOverrides, isEmpty);

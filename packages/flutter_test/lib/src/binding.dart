@@ -169,26 +169,37 @@ class _TestFlutterView implements FlutterView {
     this.constraints,
     this.onRender,
   }) : _platformDispatcher = platformDispatcher,
-       _viewId = _nextViewId++ {
-    platformDispatcher.addTestView(this);
-  }
+       _viewId = _nextViewId++;
 
-  // Keep the explicit test adapter outside the debug wrapper so its values
-  // retain precedence. Every controller exposes this same override-aware view
-  // to View, MediaQuery, and callers inspecting rootView directly.
-  static TestFlutterView create({
+  /// Registers a view for [controller] and returns the [TestFlutterView] that
+  /// wraps it, without reporting the metrics change.
+  ///
+  /// The caller reports it, with [TestPlatformDispatcher.notifyMetricsChanged],
+  /// once it has assigned the result to its `rootView`. That field is late
+  /// initialized, and a metrics change wakes every [WidgetsBindingObserver]
+  /// synchronously, so notifying from here would expose a controller that has
+  /// no view yet.
+  ///
+  /// The returned adapter wraps the backing view rather than the other way
+  /// round, so that values set explicitly on it keep their precedence over any
+  /// [debugViewMetricsOverrides] entry underneath. Every controller exposes
+  /// this same object to [View], to [MediaQuery], and to callers that read
+  /// `rootView` directly.
+  static TestFlutterView register({
     required BaseWindowController controller,
     required TestPlatformDispatcher platformDispatcher,
     BoxConstraints? constraints,
     void Function(Size? size)? onRender,
   }) {
-    final view = _TestFlutterView(
-      controller: controller,
-      platformDispatcher: platformDispatcher,
-      constraints: constraints,
-      onRender: onRender,
+    return platformDispatcher.addTestView(
+      _TestFlutterView(
+        controller: controller,
+        platformDispatcher: platformDispatcher,
+        constraints: constraints,
+        onRender: onRender,
+      ),
+      notify: false,
     );
-    return platformDispatcher.view(id: view.viewId)!;
   }
 
   static int _nextViewId = 1;
@@ -337,11 +348,14 @@ class _TestWindowController extends WindowController with _ChildWindowHierarchyM
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    rootView = _TestFlutterView.create(
+    rootView = _TestFlutterView.register(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
     );
+    // Reported only now that rootView is assigned; see
+    // _TestFlutterView.register.
+    platformDispatcher.notifyMetricsChanged();
 
     // Automatically activate the window when created.
     activate();
@@ -522,11 +536,14 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    rootView = _TestFlutterView.create(
+    rootView = _TestFlutterView.register(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
     );
+    // Reported only now that rootView is assigned; see
+    // _TestFlutterView.register.
+    platformDispatcher.notifyMetricsChanged();
     _addChildToParent(parent, this);
 
     // Automatically activate the window when created.
@@ -635,7 +652,7 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
        _positioner = positioner,
        _parent = parent,
        super.empty() {
-    rootView = _TestFlutterView.create(
+    rootView = _TestFlutterView.register(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
@@ -648,6 +665,9 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
         }
       },
     );
+    // Reported only now that rootView is assigned; see
+    // _TestFlutterView.register.
+    platformDispatcher.notifyMetricsChanged();
     _addChildToParent(parent, this);
   }
 
@@ -711,7 +731,7 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
        _positioner = positioner,
        _parent = parent,
        super.empty() {
-    rootView = _TestFlutterView.create(
+    rootView = _TestFlutterView.register(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
@@ -724,6 +744,9 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
         }
       },
     );
+    // Reported only now that rootView is assigned; see
+    // _TestFlutterView.register.
+    platformDispatcher.notifyMetricsChanged();
     _addChildToParent(parent, this);
   }
 
@@ -798,11 +821,14 @@ class _TestSatelliteWindowController extends SatelliteWindowController
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    rootView = _TestFlutterView.create(
+    rootView = _TestFlutterView.register(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
     );
+    // Reported only now that rootView is assigned; see
+    // _TestFlutterView.register.
+    platformDispatcher.notifyMetricsChanged();
     _addChildToParent(parent, this);
 
     // Automatically activate the window when created.

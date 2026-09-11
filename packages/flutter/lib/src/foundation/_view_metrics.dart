@@ -17,6 +17,14 @@ library;
 // forwards. The dependency is debug-only: everything below is unreachable in
 // release builds, because every function that constructs it does so inside an
 // `assert`.
+//
+// None of the wrappers below declare a `noSuchMethod`, which is deliberate.
+// Every `dart:ui` member a wrapper stands in front of is spelled out, so a
+// member added on the engine side breaks this library at compile time. A
+// `noSuchMethod` returning null would instead put a dispatcher that silently
+// answers `null` for the new member in front of the whole framework in every
+// debug build, and a non-nullable member would then fail as a `TypeError` at
+// whichever call site happened to read it.
 import 'dart:async' show Zone;
 import 'dart:typed_data' show ByteData;
 import 'dart:ui' as ui;
@@ -133,36 +141,39 @@ ui.PlatformDispatcher debugApplyViewMetricsOverridesForView(
 ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
   var result = view;
   assert(() {
-    try {
-      if (!_debugViewAppliesMetricsOverrides(view) &&
-          _viewsApplyingTheirOwnOverride[view] == null) {
-        // An adapter that registered a different dispatcher retains its own
-        // behavior, even if its reported dispatcher has a cached wrapper.
-        // Whether that dispatcher is one an override change is reported to does
-        // not come into it: a view that is credited with an override — see
-        // [MediaQueryData.fromView] — has to be one that applies it, or it
-        // reports neither the override nor what an ancestor supplied. Announcing
-        // the change is the caller's part, and [BindingBase.platformDispatcher]
-        // says how.
-        final ui.PlatformDispatcher dispatcher = view.platformDispatcher;
-        // View can be constructed before runWidget initializes the binding.
-        // Normalize engine views immediately, without registering notifications
-        // until the binding actually wraps its dispatcher.
-        final _DebugViewMetricsPlatformDispatcher? wrapper =
-            identical(dispatcher, ui.PlatformDispatcher.instance)
-            ? _wrapperFor(dispatcher, notify: false)
-            : _wrappers[dispatcher];
-        result = wrapper?._wrapView(view) ?? view;
-      }
-    } on NoSuchMethodError {
-      // Low-level rendering tests can provide a view without a dispatcher.
-      // Such a view cannot opt in to overrides; leave its existing contract
-      // intact until a consumer actually needs the missing platform data.
-    } on UnimplementedError {
-      // Low-level rendering tests can provide a view without a dispatcher.
-      // Such a view cannot opt in to overrides; leave its existing contract
-      // intact until a consumer actually needs the missing platform data.
+    if (view is _DebugViewMetricsFlutterView) {
+      return true;
     }
+    // Read before the record below, because an adapter such as `TestFlutterView`
+    // registers itself from inside this very getter: there is no record to find
+    // until the getter has run at least once.
+    //
+    // Low-level rendering tests can provide a view without a dispatcher. Such a
+    // view cannot opt in to overrides; leave its existing contract intact until
+    // a consumer actually needs the missing platform data.
+    final ui.PlatformDispatcher? dispatcher = _debugDispatcherOf(view);
+    if (dispatcher == null) {
+      return true;
+    }
+    // An adapter that registered a dispatcher — the same one, or a different
+    // one — retains its own behavior, even if its reported dispatcher has a
+    // cached wrapper. Whether that dispatcher is one an override change is
+    // reported to does not come into it: a view that is credited with an
+    // override — see [MediaQueryData.fromView] — has to be one that applies it,
+    // or it reports neither the override nor what an ancestor supplied.
+    // Announcing the change is the caller's part, and
+    // [BindingBase.platformDispatcher] says how.
+    if (_viewsApplyingTheirOwnOverride[view] != null) {
+      return true;
+    }
+    // View can be constructed before runWidget initializes the binding.
+    // Normalize engine views immediately, without registering notifications
+    // until the binding actually wraps its dispatcher.
+    final _DebugViewMetricsPlatformDispatcher? wrapper =
+        identical(dispatcher, ui.PlatformDispatcher.instance)
+        ? _wrapperFor(dispatcher, notify: false)
+        : _wrappers[dispatcher];
+    result = wrapper?._tryWrapView(view) ?? view;
     return true;
   }());
   return result;
@@ -177,47 +188,75 @@ ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
 /// [platformDispatcher] supplies the owner for a test double that does not
 /// implement its own dispatcher getter.
 ///
-/// Returns the same wrapper on repeated calls, or [view] itself if it already
-/// applies overrides. Returns [view] unchanged outside of debug mode (in profile
-/// or release mode).
+/// Returns the same wrapper on repeated calls, and returns [view] itself if it
+/// already applies overrides, if neither it nor [platformDispatcher] supplies a
+/// dispatcher, if it does not implement [ui.FlutterView.viewId], or outside of
+/// debug mode (in profile or release mode). It never throws for an incomplete
+/// view: one that cannot be wrapped keeps the contract it already had.
 ui.FlutterView debugApplyViewMetricsOverridesToView(
   ui.FlutterView view, {
   ui.PlatformDispatcher? platformDispatcher,
 }) {
   var result = view;
   assert(() {
-    var appliesOverrides = false;
-    try {
-      appliesOverrides = _debugViewAppliesMetricsOverrides(view);
-    } on NoSuchMethodError {
-      if (platformDispatcher == null) {
-        rethrow;
-      }
-    } on UnimplementedError {
-      if (platformDispatcher == null) {
-        rethrow;
-      }
+    if (view is _DebugViewMetricsFlutterView) {
+      return true;
     }
-    if (!appliesOverrides) {
-      try {
-        result = _wrapperFor(
-          platformDispatcher ?? view.platformDispatcher,
-          notify: false,
-        )._wrapView(view);
-      } on NoSuchMethodError {
-        // Low-level rendering tests can provide a view without a viewId or
-        // dispatcher. Such a view cannot opt in to overrides; leave its
-        // existing contract intact.
-      } on UnimplementedError {
-        // Low-level rendering tests can provide a view without a viewId or
-        // dispatcher. Such a view cannot opt in to overrides; leave its
-        // existing contract intact.
-      }
+    // Read before the record, for the reason [debugViewWithMetricsOverrides]
+    // gives. Unlike there, a caller that supplied an owner has already said
+    // which dispatcher to resolve against, so a view without one of its own is
+    // still wrappable.
+    final ui.PlatformDispatcher? reported = _debugDispatcherOf(view);
+    if (reported != null && _viewsApplyingTheirOwnOverride[view] != null) {
+      return true;
     }
+    final ui.PlatformDispatcher? owner = platformDispatcher ?? reported;
+    if (owner == null) {
+      // Low-level rendering tests can provide a view without a viewId or
+      // dispatcher. Such a view cannot opt in to overrides; leave its existing
+      // contract intact.
+      return true;
+    }
+    result = _wrapperFor(owner, notify: false)._tryWrapView(view) ?? view;
     return true;
   }());
   return result;
 }
+
+// Reads one member of a `dart:ui` object that an incomplete test double may not
+// implement, and reports "not implemented" as null. The value comes back in a
+// one-element record so that a member whose own type is nullable — such as
+// [ui.PlatformDispatcher.implicitView] — can still be told apart from an absent
+// one.
+//
+// A [ui.FlutterView] or [ui.PlatformDispatcher] written for a rendering-layer
+// test can omit `viewId`, `platformDispatcher` or `implicitView` altogether:
+// `Fake` answers every member it does not implement with an
+// [UnimplementedError], and a double with a `noSuchMethod` of its own throws a
+// [NoSuchMethodError]. Neither object can take part in overrides, so a missing
+// member is treated as an absent value rather than as a failure.
+//
+// [read] must do nothing but read the single member being probed. These two
+// errors are the only signal `dart:ui` gives that a member is missing, and they
+// are indistinguishable from the same errors raised from inside a member that
+// does exist, so anything else in [read] would have its own failures
+// misattributed to a member that is missing.
+(T,)? _ifImplemented<T>(T Function() read) {
+  try {
+    return (read(),);
+  } on NoSuchMethodError {
+    return null;
+  } on UnimplementedError {
+    return null;
+  }
+}
+
+// The dispatcher [view] reports, or null if it does not implement one.
+ui.PlatformDispatcher? _debugDispatcherOf(ui.FlutterView view) =>
+    _ifImplemented(() => view.platformDispatcher)?.$1;
+
+// The id [view] reports, or null if it does not implement one.
+int? _debugViewIdOf(ui.FlutterView view) => _ifImplemented(() => view.viewId)?.$1;
 
 // Only the named backing view can inherit the context. A custom getter that
 // consults another view must not redirect that unrelated view's overrides.
@@ -245,14 +284,9 @@ T debugReadViewMetrics<T>(
   assert(() {
     final (int, bool)? inherited = _viewMetricsReadContext(view);
     if (debugViewMetricsOverrides.isNotEmpty || inherited != null) {
-      final int viewId;
-      try {
-        viewId = inherited?.$1 ?? view.viewId;
-      } on NoSuchMethodError {
-        // A render-only fake without an id cannot resolve an override.
-        return true;
-      } on UnimplementedError {
-        // A render-only fake without an id cannot resolve an override.
+      // A render-only fake without an id cannot resolve an override.
+      final int? viewId = inherited?.$1 ?? _debugViewIdOf(view);
+      if (viewId == null) {
         return true;
       }
       final (ui.FlutterView, int, bool)? previous = _viewMetricsRead;
@@ -263,6 +297,22 @@ T debugReadViewMetrics<T>(
           devicePixelRatioIsOverridden || (inherited?.$2 ?? false),
         );
         result = read(backingView);
+        // The scope below is a global that every nested read replaces and
+        // restores. A read that leaves someone else's in place has either
+        // returned before its own `finally` ran, or kept a reference to the
+        // scope past its return; either way the next read resolves against a
+        // view that is not the one it was asked about.
+        assert(
+          identical(_viewMetricsRead?.$1, backingView),
+          'A nested debugReadViewMetrics call did not restore the read context '
+          'it replaced.',
+        );
+        assert(
+          result is! Future,
+          'debugReadViewMetrics establishes a synchronous scope, so `read` must '
+          'return a value rather than a Future: the scope is already gone by '
+          'the time an asynchronous body resumes.',
+        );
         readInDebug = true;
       } finally {
         _viewMetricsRead = previous;
@@ -299,17 +349,17 @@ DebugViewMetricsOverride? debugViewMetricsOverrideApplied(ui.FlutterView view) {
     if (debugViewMetricsOverrides.isEmpty) {
       return true;
     }
-    try {
-      final DebugViewMetricsOverride? override = debugViewMetricsOverrides[view.viewId];
-      if (override != null && _debugViewAppliesMetricsOverrides(view)) {
-        result = override;
-      }
-    } on NoSuchMethodError {
-      // A geometry-only fake cannot apply platform overrides. Inherited
-      // platform data must remain usable without its missing dispatcher.
-    } on UnimplementedError {
-      // A geometry-only fake cannot apply platform overrides. Inherited
-      // platform data must remain usable without its missing dispatcher.
+    // A geometry-only fake that implements no id cannot be the view an entry
+    // was registered for, and one that implements no dispatcher cannot apply
+    // platform overrides. Inherited platform data must remain usable without
+    // either of them.
+    final int? viewId = _debugViewIdOf(view);
+    if (viewId == null) {
+      return true;
+    }
+    final DebugViewMetricsOverride? override = debugViewMetricsOverrides[viewId];
+    if (override != null && _debugViewAppliesMetricsOverrides(view)) {
+      result = override;
     }
     return true;
   }());
@@ -336,16 +386,20 @@ void debugMarkViewAppliesItsOwnMetricsOverride(
   }());
 }
 
+// Whether [view] resolves its own [debugViewMetricsOverrides] entry.
+//
+// False for a view that implements no dispatcher, which cannot resolve one at
+// all. See [_ifImplemented].
 bool _debugViewAppliesMetricsOverrides(ui.FlutterView view) {
   var result = false;
   assert(() {
     if (view is _DebugViewMetricsFlutterView) {
       result = true;
-    } else {
-      // The getter may register the association, so read it before the record.
-      final ui.PlatformDispatcher dispatcher = view.platformDispatcher;
-      result = identical(_viewsApplyingTheirOwnOverride[view], dispatcher);
+      return true;
     }
+    // The getter may register the association, so read it before the record.
+    final ui.PlatformDispatcher? dispatcher = _debugDispatcherOf(view);
+    result = dispatcher != null && identical(_viewsApplyingTheirOwnOverride[view], dispatcher);
     return true;
   }());
   return result;
@@ -640,36 +694,23 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
         : _DebugViewMetricsPlatformDispatcher._forView(this, viewId);
   }
 
+  // The entry whose platform-wide metrics this dispatcher reports.
+  //
+  // A per-view wrapper resolves the entry registered for its own view. The root
+  // wrapper has no view of its own, so it resolves the implicit view's:
+  // consumers that read a platform-wide metric off the binding rather than off
+  // a view — [SemanticsBinding.accessibilityFeatures], for one — have no view
+  // to resolve against. See [_DebugViewMetricsPlatformDispatcher].
+  //
+  // Without an implicit view either, nothing identifies which view the caller
+  // meant, and no entry is resolved. Guessing — taking the only entry there
+  // happens to be, or the first view the dispatcher reports — would apply an
+  // entry registered for one view to a dispatcher that has nothing to do with
+  // it, and would silently change which entry it picked as soon as a second one
+  // was registered.
   DebugViewMetricsOverride? get _override {
-    final int? viewId = _viewId;
-    if (viewId != null) {
-      return debugViewMetricsOverrides[viewId];
-    }
-    int? resolvedViewId;
-    try {
-      resolvedViewId = _dispatcher.implicitView?.viewId;
-    } on NoSuchMethodError {
-      // Test doubles may omit implicitView.
-    } on UnimplementedError {
-      // Test doubles may omit implicitView.
-    }
-    if (resolvedViewId != null) {
-      return debugViewMetricsOverrides[resolvedViewId];
-    }
-    if (debugViewMetricsOverrides.length == 1) {
-      return debugViewMetricsOverrides.values.single;
-    }
-    try {
-      final int? firstViewId = _dispatcher.views.firstOrNull?.viewId;
-      if (firstViewId != null) {
-        return debugViewMetricsOverrides[firstViewId];
-      }
-    } on NoSuchMethodError {
-      // Test doubles may omit views.
-    } on UnimplementedError {
-      // Test doubles may omit views.
-    }
-    return null;
+    final int? viewId = _viewId ?? _ifImplemented(() => _dispatcher.implicitView?.viewId)?.$1;
+    return viewId == null ? null : debugViewMetricsOverrides[viewId];
   }
 
   _DebugViewMetricsFlutterView _wrapView(ui.FlutterView view) {
@@ -677,6 +718,24 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
     return root._views[view] ??= _DebugViewMetricsFlutterView(
       view,
       _DebugViewMetricsPlatformDispatcher._forView(root, view.viewId),
+    );
+  }
+
+  // [_wrapView], for a view that may not implement [ui.FlutterView.viewId] and
+  // so may not be wrappable at all. See [_ifImplemented].
+  _DebugViewMetricsFlutterView? _tryWrapView(ui.FlutterView view) {
+    final _DebugViewMetricsPlatformDispatcher root = _rootWrapper;
+    final _DebugViewMetricsFlutterView? wrapped = root._views[view];
+    if (wrapped != null) {
+      return wrapped;
+    }
+    final int? viewId = _debugViewIdOf(view);
+    if (viewId == null) {
+      return null;
+    }
+    return root._views[view] = _DebugViewMetricsFlutterView(
+      view,
+      _DebugViewMetricsPlatformDispatcher._forView(root, viewId),
     );
   }
 
@@ -711,15 +770,23 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
     // The platform curve that `scaleFontSize` normally applies is not
     // parameterized by a factor, so an overridden factor is applied linearly,
     // which is what `TextScaler.linear` and `TestPlatformDispatcher` do too.
-    assert(unscaledFontSize >= 0);
-    assert(unscaledFontSize.isFinite);
+    //
+    // A negative or non-finite font size is not rejected here. Whatever
+    // `dart:ui` does with one is what an application already sees, and
+    // installing an override must not turn a value the platform tolerates into
+    // an assertion the platform never raised.
     return unscaledFontSize * textScaleFactor;
   }
 
   // Views, wrapped so that the metrics they report are overridden too.
 
+  // Held rather than torn off per call: `views` is read once per frame per
+  // view, and `map(_wrapView)` would otherwise allocate a fresh bound closure
+  // alongside the iterable every time.
+  late final ui.FlutterView Function(ui.FlutterView) _wrapViewTearOff = _wrapView;
+
   @override
-  Iterable<ui.FlutterView> get views => _dispatcher.views.map(_wrapView);
+  Iterable<ui.FlutterView> get views => _dispatcher.views.map(_wrapViewTearOff);
 
   @override
   ui.FlutterView? view({required int id}) {
@@ -999,14 +1066,6 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
   @override
   void updateSemantics(ui.SemanticsUpdate update) => _dispatcher.updateSemantics(update);
 
-  /// This gives us some grace time when the dart:ui side adds something to
-  /// [ui.PlatformDispatcher], and makes things easier when we do rolls to give
-  /// us time to catch up.
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    return null;
-  }
-
   @override
   String toString() =>
       'DebugViewMetricsPlatformDispatcher(${_viewId == null ? 'implicit view' : 'view $_viewId'})';
@@ -1143,14 +1202,6 @@ class _DebugViewMetricsFlutterView implements ui.FlutterView {
   @override
   void updateSemantics(ui.SemanticsUpdate update) => _view.updateSemantics(update);
 
-  /// This gives us some grace time when the dart:ui side adds something to
-  /// [ui.FlutterView], and makes things easier when we do rolls to give
-  /// us time to catch up.
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    return null;
-  }
-
   @override
   String toString() => 'DebugViewMetricsFlutterView(id: $viewId)';
 }
@@ -1234,14 +1285,6 @@ class _DebugAccessibilityFeatures implements ui.AccessibilityFeatures {
     reduceMotion,
     supportsAnnounce,
   );
-
-  /// This gives us some grace time when the dart:ui side adds something to
-  /// [ui.AccessibilityFeatures], and makes things easier when we do rolls to give
-  /// us time to catch up.
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    return null;
-  }
 
   @override
   String toString() {

@@ -242,16 +242,30 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   bool _isHandlingMetricsChanged = false;
+
+  // Refreshes the view and display registries and then reports the change to
+  // whatever registered [onMetricsChanged].
+  //
+  // This is what the wrapped [PlatformDispatcher] calls, and it is also what
+  // every test value setter in this library calls. Such a setter must not
+  // invoke [onMetricsChanged] itself: that getter reports the framework's
+  // callback, so calling it directly would deliver the notification without the
+  // registry refresh that a real metrics change performs first.
+  //
+  // Reentrant calls are dropped. The refresh can construct a [TestFlutterView],
+  // and reporting a change from inside a change would describe a registry that
+  // is only half rebuilt.
   void _handleMetricsChanged() {
-    if (_testValues._isHandlingMetricsChanged) {
+    final TestPlatformDispatcher owner = _testValues;
+    if (owner._isHandlingMetricsChanged) {
       return;
     }
-    _testValues._isHandlingMetricsChanged = true;
+    owner._isHandlingMetricsChanged = true;
     try {
-      _updateViewsAndDisplays();
-      _testValues._onMetricsChanged?.call();
+      owner._updateViewsAndDisplays();
+      owner._onMetricsChanged?.call();
     } finally {
-      _testValues._isHandlingMetricsChanged = false;
+      owner._isHandlingMetricsChanged = false;
     }
   }
 
@@ -264,20 +278,25 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   bool _isHandlingViewFocusChanged = false;
+
+  // The [onViewFocusChange] counterpart of [_handleMetricsChanged], and the
+  // same rule applies: nothing in this library may invoke [onViewFocusChange]
+  // directly.
   void _handleViewFocusChanged(ViewFocusEvent event) {
-    if (_testValues._isHandlingViewFocusChanged) {
+    final TestPlatformDispatcher owner = _testValues;
+    if (owner._isHandlingViewFocusChanged) {
       return;
     }
-    _testValues._isHandlingViewFocusChanged = true;
+    owner._isHandlingViewFocusChanged = true;
     try {
-      _updateViewsAndDisplays();
-      _testValues._currentlyFocusedViewId = switch (event.state) {
+      owner._updateViewsAndDisplays();
+      owner._currentlyFocusedViewId = switch (event.state) {
         ViewFocusState.focused => event.viewId,
         ViewFocusState.unfocused => null,
       };
-      _testValues._onViewFocusChange?.call(event);
+      owner._onViewFocusChange?.call(event);
     } finally {
-      _testValues._isHandlingViewFocusChanged = false;
+      owner._isHandlingViewFocusChanged = false;
     }
   }
 
@@ -549,7 +568,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     if (lineHeightScaleFactorOverrideTestValue == null) {
       _testValues._forceLineHeightScaleFactorOverrideToBeNull = true;
     }
-    onMetricsChanged?.call();
+    _handleMetricsChanged();
   }
 
   /// Deletes any existing test line height scale factor and returns to using
@@ -557,7 +576,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   void clearLineHeightScaleFactorOverrideTestValue() {
     _testValues._lineHeightScaleFactorOverrideTestValue = null;
     _testValues._forceLineHeightScaleFactorOverrideToBeNull = false;
-    onMetricsChanged?.call();
+    _handleMetricsChanged();
   }
 
   /// The system-suggested amount of additional space (in logical pixels)
@@ -601,7 +620,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     if (letterSpacingOverrideTestValue == null) {
       _testValues._forceLetterSpacingOverrideToBeNull = true;
     }
-    onMetricsChanged?.call();
+    _handleMetricsChanged();
   }
 
   /// Deletes any existing test letter spacing and returns to using the real
@@ -609,7 +628,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   void clearLetterSpacingOverrideTestValue() {
     _testValues._letterSpacingOverrideTestValue = null;
     _testValues._forceLetterSpacingOverrideToBeNull = false;
-    onMetricsChanged?.call();
+    _handleMetricsChanged();
   }
 
   /// The system-suggested amount of additional space (in logical pixels)
@@ -653,7 +672,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     if (wordSpacingOverrideTestValue == null) {
       _testValues._forceWordSpacingOverrideToBeNull = true;
     }
-    onMetricsChanged?.call();
+    _handleMetricsChanged();
   }
 
   /// Deletes any existing test word spacing and returns to using the real
@@ -661,7 +680,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   void clearWordSpacingOverrideTestValue() {
     _testValues._wordSpacingOverrideTestValue = null;
     _testValues._forceWordSpacingOverrideToBeNull = false;
-    onMetricsChanged?.call();
+    _handleMetricsChanged();
   }
 
   /// The system-suggested amount of additional space (in logical pixels)
@@ -702,7 +721,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     if (paragraphSpacingOverrideTestValue == null) {
       _testValues._forceParagraphSpacingOverrideToBeNull = true;
     }
-    onMetricsChanged?.call();
+    _handleMetricsChanged();
   }
 
   /// Deletes any existing test paragraph spacing and returns to using the real
@@ -710,7 +729,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   void clearParagraphSpacingOverrideTestValue() {
     _testValues._paragraphSpacingOverrideTestValue = null;
     _testValues._forceParagraphSpacingOverrideToBeNull = false;
-    onMetricsChanged?.call();
+    _handleMetricsChanged();
   }
 
   @override
@@ -947,31 +966,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     for (final view in allViews) {
       extraViewKeys.remove(view.viewId);
       final TestFlutterView? testView = _testViews[view.viewId];
-      // TODO(pdblasi-google): Remove this try-catch once the Display API is stable and supported on all platforms
-      late final TestDisplay display;
-      try {
-        final Display realDisplay = view.display;
-        if (_testDisplays.containsKey(realDisplay.id)) {
-          display = _testDisplays[realDisplay.id]!;
-        } else if (displays.isNotEmpty) {
-          display = displays.first;
-        } else if (testView?._display is _UnsupportedDisplay) {
-          display = testView!._display;
-        } else {
-          display = _UnsupportedDisplay(
-            this,
-            view,
-            'PlatformDispatcher did not contain a Display with id ${realDisplay.id}, '
-            'which was expected by FlutterView ($view)',
-          );
-        }
-      } catch (error) {
-        display = displays.isNotEmpty
-            ? displays.first
-            : ((testView?._display is _UnsupportedDisplay)
-                  ? testView!._display
-                  : _UnsupportedDisplay(this, view, error));
-      }
+      final TestDisplay display = _displayFor(view, testView);
 
       if (testView == null || !identical(testView._view, view)) {
         _testViews[view.viewId] = TestFlutterView(
@@ -987,26 +982,109 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     extraViewKeys.forEach(_testViews.remove);
   }
 
+  // The [TestDisplay] to attach [view] to, and [existing] is the [TestFlutterView]
+  // already registered for its id, if there is one.
+  //
+  // Ordinarily this is the display the view itself reports. A view a test added
+  // usually reports one the real [PlatformDispatcher] never told this one
+  // about, though, so it falls back to the first display there is: attaching it
+  // to the display the test is already working with keeps
+  // `view.display.devicePixelRatio` writable, where a placeholder would not be.
+  //
+  // With no display at all to fall back to, [existing]'s placeholder is reused
+  // rather than replaced, so that a display a test already reached through
+  // `view.display` is not swapped out from under it on the next refresh.
+  //
+  // TODO(pdblasi-google): Remove the try-catch once the Display API is stable
+  // and supported on all platforms.
+  TestDisplay _displayFor(FlutterView view, TestFlutterView? existing) {
+    assert(_testValuesOwner == null);
+    try {
+      final Display realDisplay = view.display;
+      return _testDisplays[realDisplay.id] ??
+          _fallbackDisplayFor(
+            view,
+            existing,
+            'PlatformDispatcher did not contain a Display with id ${realDisplay.id}, '
+            'which was expected by FlutterView ($view)',
+          );
+    } catch (error) {
+      return _fallbackDisplayFor(view, existing, error);
+    }
+  }
+
+  TestDisplay _fallbackDisplayFor(FlutterView view, TestFlutterView? existing, Object reason) {
+    if (_testDisplays.isNotEmpty) {
+      return _testDisplays.values.first;
+    }
+    final TestDisplay? placeholder = existing?._display;
+    return placeholder is _UnsupportedDisplay
+        ? placeholder
+        : _UnsupportedDisplay(this, view, reason);
+  }
+
   /// Adds a [TestFlutterView] that wraps the given [view] to the list of views
-  /// managed by this [TestPlatformDispatcher].
+  /// managed by this [TestPlatformDispatcher], and returns it.
   ///
   /// The added view will be associated with the display matching [FlutterView.display]
   /// if managed by this [TestPlatformDispatcher], or the first display in [displays]
   /// if not found or unsupported.
-  void addTestView(FlutterView view) {
+  ///
+  /// Reports a metrics change, unless [notify] is false. A caller with more to
+  /// do before the framework should see the view passes false and calls
+  /// [notifyMetricsChanged] once it is ready: a window controller assigns its
+  /// late `rootView` from the return value here, and a notification delivered
+  /// before that assignment would wake observers that can reach a controller
+  /// which has no view yet.
+  TestFlutterView addTestView(FlutterView view, {bool notify = true}) {
     final TestPlatformDispatcher owner = _testValues;
     owner._customViews[view.viewId] = view;
-    owner._updateViewsAndDisplays();
-    owner._onMetricsChanged?.call();
+    if (notify) {
+      owner._handleMetricsChanged();
+    }
+    // Normally the notification above refreshed the registry already, and this
+    // finds the view and refreshes nothing. It has to be checked rather than
+    // assumed: a notification reported from inside another one is dropped as
+    // reentrant, and `notify` may be false, so this is what guarantees the
+    // registry is up to date before the wrapper is read out of it.
+    TestFlutterView? added = owner._testViews[view.viewId];
+    if (added == null || !identical(added._view, view)) {
+      owner._updateViewsAndDisplays();
+      added = owner._testViews[view.viewId];
+    }
+    assert(
+      added != null,
+      'addTestView did not register a TestFlutterView for view ${view.viewId}. '
+      'A subclass that overrides views or view(id:) has to keep reporting the '
+      'views added to it.',
+    );
+    return added!;
+  }
+
+  /// Reports a metrics change, refreshing the view and display registries first,
+  /// exactly as a change delivered by the platform does.
+  ///
+  /// Pairs with `addTestView(view, notify: false)`.
+  void notifyMetricsChanged() {
+    _handleMetricsChanged();
   }
 
   /// Removes the [TestFlutterView] that wraps the given [view] from the list of
   /// views managed by this [TestPlatformDispatcher].
+  ///
+  /// Reports a metrics change if the view was there to remove, and nothing at
+  /// all if it was not, so that removing twice is not reported twice.
   void removeTestView(FlutterView view) {
     final TestPlatformDispatcher owner = _testValues;
-    if (owner._customViews.remove(view.viewId) != null) {
+    if (owner._customViews.remove(view.viewId) == null) {
+      return;
+    }
+    owner._handleMetricsChanged();
+    // For the reason [addTestView] gives: a dropped reentrant notification
+    // would otherwise leave the registry reporting a view that is gone.
+    final TestFlutterView? stale = owner._testViews[view.viewId];
+    if (stale != null && identical(stale._view, view)) {
       owner._updateViewsAndDisplays();
-      owner._onMetricsChanged?.call();
     }
   }
 
@@ -1242,13 +1320,13 @@ class TestFlutterView implements FlutterView {
   List<DisplayFeature>? _displayFeatures;
   set displayFeatures(List<DisplayFeature> value) {
     _displayFeatures = value;
-    platformDispatcher.onMetricsChanged?.call();
+    platformDispatcher._handleMetricsChanged();
   }
 
   /// Resets [displayFeatures] to the default values for this view.
   void resetDisplayFeatures() {
     _displayFeatures = null;
-    platformDispatcher.onMetricsChanged?.call();
+    platformDispatcher._handleMetricsChanged();
   }
 
   /// The padding to use for this test.
@@ -1269,13 +1347,13 @@ class TestFlutterView implements FlutterView {
   FakeViewPadding? _padding;
   set padding(FakeViewPadding value) {
     _padding = value;
-    platformDispatcher.onMetricsChanged?.call();
+    platformDispatcher._handleMetricsChanged();
   }
 
   /// Resets [padding] to the default value for this view.
   void resetPadding() {
     _padding = null;
-    platformDispatcher.onMetricsChanged?.call();
+    platformDispatcher._handleMetricsChanged();
   }
 
   /// The physical size to use for this test.
@@ -1328,13 +1406,13 @@ class TestFlutterView implements FlutterView {
   ViewConstraints? _physicalConstraints;
   set physicalConstraints(ViewConstraints value) {
     _physicalConstraints = value;
-    platformDispatcher.onMetricsChanged?.call();
+    platformDispatcher._handleMetricsChanged();
   }
 
   /// Resets [physicalConstraints] to the default value for this view.
   void resetPhysicalConstraints() {
     _physicalConstraints = null;
-    platformDispatcher.onMetricsChanged?.call();
+    platformDispatcher._handleMetricsChanged();
   }
 
   /// The system gesture insets to use for this test.
@@ -1356,13 +1434,13 @@ class TestFlutterView implements FlutterView {
   FakeViewPadding? _systemGestureInsets;
   set systemGestureInsets(FakeViewPadding value) {
     _systemGestureInsets = value;
-    platformDispatcher.onMetricsChanged?.call();
+    platformDispatcher._handleMetricsChanged();
   }
 
   /// Resets [systemGestureInsets] to the default value for this view.
   void resetSystemGestureInsets() {
     _systemGestureInsets = null;
-    platformDispatcher.onMetricsChanged?.call();
+    platformDispatcher._handleMetricsChanged();
   }
 
   /// The view insets to use for this test.
@@ -1383,13 +1461,13 @@ class TestFlutterView implements FlutterView {
   FakeViewPadding? _viewInsets;
   set viewInsets(FakeViewPadding value) {
     _viewInsets = value;
-    platformDispatcher.onMetricsChanged?.call();
+    platformDispatcher._handleMetricsChanged();
   }
 
   /// Resets [viewInsets] to the default value for this view.
   void resetViewInsets() {
     _viewInsets = null;
-    platformDispatcher.onMetricsChanged?.call();
+    platformDispatcher._handleMetricsChanged();
   }
 
   /// The view padding to use for this test.
@@ -1410,13 +1488,13 @@ class TestFlutterView implements FlutterView {
   FakeViewPadding? _viewPadding;
   set viewPadding(FakeViewPadding value) {
     _viewPadding = value;
-    platformDispatcher.onMetricsChanged?.call();
+    platformDispatcher._handleMetricsChanged();
   }
 
   /// Resets [viewPadding] to the default value for this view.
   void resetViewPadding() {
     _viewPadding = null;
-    platformDispatcher.onMetricsChanged?.call();
+    platformDispatcher._handleMetricsChanged();
   }
 
   /// The gesture settings to use for this test.
@@ -1435,13 +1513,13 @@ class TestFlutterView implements FlutterView {
   GestureSettings? _gestureSettings;
   set gestureSettings(GestureSettings value) {
     _gestureSettings = value;
-    platformDispatcher.onMetricsChanged?.call();
+    platformDispatcher._handleMetricsChanged();
   }
 
   /// Resets [gestureSettings] to the default value for this view.
   void resetGestureSettings() {
     _gestureSettings = null;
-    platformDispatcher.onMetricsChanged?.call();
+    platformDispatcher._handleMetricsChanged();
   }
 
   @override
@@ -1524,7 +1602,7 @@ class TestDisplay implements Display {
   double? _devicePixelRatio;
   set devicePixelRatio(double value) {
     _devicePixelRatio = value;
-    _platformDispatcher.onMetricsChanged?.call();
+    _platformDispatcher._handleMetricsChanged();
   }
 
   /// Resets [devicePixelRatio] to the default value for this display.
@@ -1533,7 +1611,7 @@ class TestDisplay implements Display {
   /// that are related to this display.
   void resetDevicePixelRatio() {
     _devicePixelRatio = null;
-    _platformDispatcher.onMetricsChanged?.call();
+    _platformDispatcher._handleMetricsChanged();
   }
 
   /// The refresh rate to use for this test.
@@ -1552,13 +1630,13 @@ class TestDisplay implements Display {
   double? _refreshRate;
   set refreshRate(double value) {
     _refreshRate = value;
-    _platformDispatcher.onMetricsChanged?.call();
+    _platformDispatcher._handleMetricsChanged();
   }
 
   /// Resets [refreshRate] to the default value for this display.
   void resetRefreshRate() {
     _refreshRate = null;
-    _platformDispatcher.onMetricsChanged?.call();
+    _platformDispatcher._handleMetricsChanged();
   }
 
   /// The size of the [Display] to use for this test.
@@ -1577,13 +1655,13 @@ class TestDisplay implements Display {
   Size? _size;
   set size(Size value) {
     _size = value;
-    _platformDispatcher.onMetricsChanged?.call();
+    _platformDispatcher._handleMetricsChanged();
   }
 
   /// Resets [size] to the default value for this display.
   void resetSize() {
     _size = null;
-    _platformDispatcher.onMetricsChanged?.call();
+    _platformDispatcher._handleMetricsChanged();
   }
 
   /// Resets all values on this [TestDisplay].
@@ -1624,13 +1702,13 @@ class _UnsupportedDisplay implements TestDisplay {
   @override
   set devicePixelRatio(double value) {
     _devicePixelRatio = value;
-    _platformDispatcher.onMetricsChanged?.call();
+    _platformDispatcher._handleMetricsChanged();
   }
 
   @override
   void resetDevicePixelRatio() {
     _devicePixelRatio = null;
-    _platformDispatcher.onMetricsChanged?.call();
+    _platformDispatcher._handleMetricsChanged();
   }
 
   @override

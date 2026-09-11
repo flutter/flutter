@@ -1755,11 +1755,17 @@ mixin WidgetsBinding
     return platformDispatcher.computePlatformResolvedLocale(supportedLocales);
   }
 
-  /// Creates the [WindowingOwner] used during [initInstances].
+  /// Creates the [WindowingOwner] to install in [windowingOwner].
   ///
   /// By default, this creates the owner for the current platform, or an
   /// unsupported owner when windowing is disabled. Test bindings override this
   /// to avoid initializing native windowing before installing their test owner.
+  ///
+  /// [initInstances] calls this, so an override runs before this binding — and
+  /// before every binding mixed in after it — has finished initializing. Only
+  /// state a constructor established, or that a binding earlier in the mixin
+  /// application initialized, can be read from here: [platformDispatcher] can
+  /// be, and anything assigned after the call below cannot.
   ///
   /// Do not use this experimental API in production applications or packages
   /// published to pub.dev. It may change even in patch versions.

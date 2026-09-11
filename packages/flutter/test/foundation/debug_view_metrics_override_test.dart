@@ -340,16 +340,28 @@ void main() {
       const original = DebugViewMetricsOverride(devicePixelRatio: 2.0, boldText: true);
       expect(original.copyWith(boldText: false).devicePixelRatio, 2.0);
       expect(original.copyWith(boldText: false).boldText, isFalse);
-      // An omitted argument leaves the existing override in place.
+      // An omitted argument leaves the existing override in place, and so does
+      // an explicit null: null is what an unset metric already reads as, so a
+      // caller forwarding an optional value cannot clear one by accident.
       expect(original.copyWith().boldText, isTrue);
-      // Passing null explicitly clears the override.
-      expect(original.copyWith(boldText: null).boldText, isNull);
-      expect(original.copyWith(boldText: null).devicePixelRatio, 2.0);
-      expect(original.copyWith(devicePixelRatio: null).devicePixelRatio, isNull);
-
-      // Passing an invalid type throws an AssertionError.
-      expect(() => original.copyWith(boldText: 'notABool'), throwsAssertionError);
-      expect(() => original.copyWith(physicalSize: 123), throwsAssertionError);
+      bool? forwarded;
+      expect(original.copyWith(boldText: forwarded).boldText, isTrue);
+      // Clearing is spelled out, so that it cannot be requested by accident.
+      expect(original.copyWith(clear: const {DebugViewMetric.boldText}).boldText, isNull);
+      expect(original.copyWith(clear: const {DebugViewMetric.boldText}).devicePixelRatio, 2.0);
+      expect(
+        original.copyWith(clear: const {DebugViewMetric.devicePixelRatio}).devicePixelRatio,
+        isNull,
+      );
+      // Setting and clearing the same metric in one call is contradictory, and
+      // is caught rather than resolved in favour of either one.
+      expect(
+        () => original.copyWith(
+          devicePixelRatio: 3.0,
+          clear: const {DebugViewMetric.devicePixelRatio},
+        ),
+        throwsAssertionError,
+      );
 
       // Passing invalid geometry or ratios throws an error.
       expect(
@@ -1090,13 +1102,12 @@ void main() {
       expect(second.platformDispatcher.implicitView, same(first));
     });
 
-    test('resolves platform metrics when implicitView is null', () {
+    test('resolves no platform metrics when there is no implicit view', () {
       final dispatcher = _NoImplicitViewPlatformDispatcher();
       final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(dispatcher);
 
       expect(wrapped.implicitView, isNull);
 
-      // Single override applies to root dispatcher even if implicitView is null.
       debugSetViewMetricsOverride(
         2,
         const DebugViewMetricsOverride(
@@ -1105,11 +1116,14 @@ void main() {
         ),
       );
 
-      expect(wrapped.textScaleFactor, 3.0);
-      expect(wrapped.platformBrightness, ui.Brightness.dark);
+      // Nothing says which view a platform-wide read off the root wrapper meant,
+      // so no entry is resolved. Taking the only entry there happens to be would
+      // apply view 2's override to a dispatcher that has nothing to do with it,
+      // and would silently start reporting something else as soon as a second
+      // entry was registered.
+      expect(wrapped.textScaleFactor, dispatcher.textScaleFactor);
+      expect(wrapped.platformBrightness, dispatcher.platformBrightness);
 
-      // With multiple overrides and no implicit view, root dispatcher falls back
-      // to the first view reported by the dispatcher.
       debugSetViewMetricsOverride(
         1,
         const DebugViewMetricsOverride(
@@ -1118,8 +1132,13 @@ void main() {
         ),
       );
 
-      expect(wrapped.textScaleFactor, 2.0);
-      expect(wrapped.platformBrightness, ui.Brightness.light);
+      expect(wrapped.textScaleFactor, dispatcher.textScaleFactor);
+      expect(wrapped.platformBrightness, dispatcher.platformBrightness);
+
+      // The views themselves still resolve their own entries: it is only the
+      // view-less read that has nothing to resolve against.
+      expect(wrapped.view(id: 2)!.platformDispatcher.textScaleFactor, 3.0);
+      expect(wrapped.view(id: 1)!.platformDispatcher.textScaleFactor, 2.0);
     });
 
     test('TestPlatformDispatcher preserves per-view metrics and test-value precedence', () {
@@ -2045,7 +2064,7 @@ void main() {
   });
 
   group('engine roll tolerance', () {
-    test('wrappers implement noSuchMethod returning null', () {
+    test('wrappers declare no noSuchMethod', () {
       final fake = _TwoViewPlatformDispatcher();
       final ui.PlatformDispatcher dispatcher = debugApplyViewMetricsOverrides(fake);
       final ui.FlutterView view = dispatcher.implicitView!;
@@ -2055,9 +2074,14 @@ void main() {
 
       final ui.AccessibilityFeatures features = dispatcher.accessibilityFeatures;
 
-      expect((dispatcher as dynamic).unimplementedMember, isNull);
-      expect((view as dynamic).unimplementedMember, isNull);
-      expect((features as dynamic).unimplementedMember, isNull);
+      // A `noSuchMethod` returning null would absorb a member added on the
+      // engine side, and would then put a dispatcher that answers null for it
+      // in front of the whole framework in every debug build. Every member is
+      // spelled out instead, so an engine roll that adds one is a compile
+      // error in this library rather than a null at some unrelated call site.
+      expect(() => (dispatcher as dynamic).unimplementedMember, throwsNoSuchMethodError);
+      expect(() => (view as dynamic).unimplementedMember, throwsNoSuchMethodError);
+      expect(() => (features as dynamic).unimplementedMember, throwsNoSuchMethodError);
     });
   });
 }

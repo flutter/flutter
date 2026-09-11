@@ -211,8 +211,8 @@ class MediaQueryData {
   /// [dart:ui.FlutterView], or [MediaQueryData.copyWith] to create a new copy
   /// of [MediaQueryData] with updated properties from a base [MediaQueryData].
   const MediaQueryData({
-    this.size = Size.zero,
-    this.devicePixelRatio = 1.0,
+    Size size = Size.zero,
+    double devicePixelRatio = 1.0,
     @Deprecated(
       'Use textScaler instead. '
       'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
@@ -220,42 +220,71 @@ class MediaQueryData {
     )
     double textScaleFactor = 1.0,
     TextScaler textScaler = _kUnspecifiedTextScaler,
-    this.platformBrightness = Brightness.light,
-    this.padding = EdgeInsets.zero,
-    this.viewInsets = EdgeInsets.zero,
-    this.systemGestureInsets = EdgeInsets.zero,
-    this.viewPadding = EdgeInsets.zero,
-    this.alwaysUse24HourFormat = false,
-    this.accessibleNavigation = false,
-    this.invertColors = false,
-    this.highContrast = false,
-    this.onOffSwitchLabels = false,
-    this.disableAnimations = false,
-    this.reduceMotion = false,
-    this.boldText = false,
-    this.supportsAnnounce = false,
-    this.navigationMode = NavigationMode.traditional,
-    this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
-    this.displayFeatures = const <ui.DisplayFeature>[],
-    this.supportsShowingSystemContextMenu = false,
-    this.lineHeightScaleFactorOverride,
-    this.letterSpacingOverride,
-    this.wordSpacingOverride,
-    this.paragraphSpacingOverride,
-    this.displayCornerRadii,
-  }) : _textScaleFactor = textScaleFactor,
-       _textScaler = textScaler,
-       // The getter also inspects known system and clamped scalers, so a
-       // public const constructor need not inspect its argument here.
-       _debugTextScalerOverrideFallback = false,
-       assert(
-         identical(textScaler, _kUnspecifiedTextScaler) || textScaleFactor == 1.0,
-         'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
+    Brightness platformBrightness = Brightness.light,
+    EdgeInsets padding = EdgeInsets.zero,
+    EdgeInsets viewInsets = EdgeInsets.zero,
+    EdgeInsets systemGestureInsets = EdgeInsets.zero,
+    EdgeInsets viewPadding = EdgeInsets.zero,
+    bool alwaysUse24HourFormat = false,
+    bool accessibleNavigation = false,
+    bool invertColors = false,
+    bool highContrast = false,
+    bool onOffSwitchLabels = false,
+    bool disableAnimations = false,
+    bool reduceMotion = false,
+    bool boldText = false,
+    bool supportsAnnounce = false,
+    NavigationMode navigationMode = NavigationMode.traditional,
+    DeviceGestureSettings gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
+    List<ui.DisplayFeature> displayFeatures = const <ui.DisplayFeature>[],
+    bool supportsShowingSystemContextMenu = false,
+    double? lineHeightScaleFactorOverride,
+    double? letterSpacingOverride,
+    double? wordSpacingOverride,
+    double? paragraphSpacingOverride,
+    BorderRadius? displayCornerRadii,
+  }) : this._(
+         size: size,
+         devicePixelRatio: devicePixelRatio,
+         textScaleFactor: textScaleFactor,
+         textScaler: textScaler,
+         platformBrightness: platformBrightness,
+         padding: padding,
+         viewInsets: viewInsets,
+         systemGestureInsets: systemGestureInsets,
+         viewPadding: viewPadding,
+         alwaysUse24HourFormat: alwaysUse24HourFormat,
+         accessibleNavigation: accessibleNavigation,
+         invertColors: invertColors,
+         highContrast: highContrast,
+         onOffSwitchLabels: onOffSwitchLabels,
+         disableAnimations: disableAnimations,
+         reduceMotion: reduceMotion,
+         boldText: boldText,
+         supportsAnnounce: supportsAnnounce,
+         navigationMode: navigationMode,
+         gestureSettings: gestureSettings,
+         displayFeatures: displayFeatures,
+         supportsShowingSystemContextMenu: supportsShowingSystemContextMenu,
+         lineHeightScaleFactorOverride: lineHeightScaleFactorOverride,
+         letterSpacingOverride: letterSpacingOverride,
+         wordSpacingOverride: wordSpacingOverride,
+         paragraphSpacingOverride: paragraphSpacingOverride,
+         displayCornerRadii: displayCornerRadii,
+         // Nothing a caller can pass here came from an override. The getter
+         // also inspects known system and clamped scalers, so a public const
+         // constructor need not inspect its argument.
+         debugTextScalerIsOverridden: false,
        );
 
-  /// The same as the default constructor, plus whether the text scaler came
-  /// from a [debugViewMetricsOverrides] entry, which [copyWith] carries over
-  /// and [operator ==] compares; see [_debugTextScalerIsOverridden].
+  /// The only constructor that takes the fields as values; [MediaQueryData.new]
+  /// redirects here so that the two cannot drift apart. [_fromView] assigns
+  /// them too, but derives them from a [ui.FlutterView] rather than accepting
+  /// them, so it has an initializer list of its own.
+  ///
+  /// Takes, in addition, whether the text scaler came from a
+  /// [debugViewMetricsOverrides] entry, which [copyWith] carries over and
+  /// [operator ==] compares; see [_debugTextScalerIsOverridden].
   const MediaQueryData._({
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
@@ -2717,19 +2746,50 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   // where there are no overrides.
   bool _debugBrightnessIsOverridden = false;
 
+  // Whether a debug view metrics override supplies any of this view's
+  // platform-wide metrics, which is what makes the PlatformDispatcher rather
+  // than an ancestor MediaQuery the source they have to be re-read from; see
+  // [_shouldUpdateOnPlatformChange].
+  //
+  // Remembered rather than looked up on demand so that the notification
+  // reporting an override being *removed* is still acted on: by the time it
+  // arrives there is no entry left in debugViewMetricsOverrides to find.
+  // Always false in release, where there are no overrides.
+  bool _debugMetricsAreOverridden = false;
+
+  // Whether a platform-wide metric changing can affect this data.
+  //
+  // Without a parent it always can, because the metric is read straight from
+  // the PlatformDispatcher. With one, the parent dictates the value and the
+  // notification can be ignored — unless a debug view metrics override for this
+  // view supersedes what the parent supplied.
+  //
+  // kDebugMode is a compile-time constant, so release builds keep the early out
+  // whole. An application with no override registered behaves exactly as it
+  // does in release, because the rest of the condition is false as well: that
+  // is what keeps this from becoming a debug-only code path that profile builds
+  // never take.
+  bool get _shouldUpdateOnPlatformChange =>
+      _parentData == null ||
+      (kDebugMode && (debugViewMetricsOverrides.isNotEmpty || _debugMetricsAreOverridden));
+
   void _updateData() {
-    final newData = MediaQueryData.fromView(widget.view, platformData: _parentData);
+    // Normalized once. [MediaQueryData.fromView] normalizes what it is given
+    // anyway, and the override applied to the result is needed here too.
+    final FlutterView view = debugViewWithMetricsOverrides(widget.view);
+    final newData = MediaQueryData.fromView(view, platformData: _parentData);
     // Asked of the view that applies the entry, and only when it applies one,
     // for the reason [MediaQueryData.fromView] asks that way: an entry
     // registered for a view that resolves nothing did not supersede
     // [_parentData], so replacing the brightness below would drop what the
     // parent supplied in favour of a value nothing asked for.
-    final bool newBrightnessIsOverridden =
-        kDebugMode &&
-        debugViewMetricsOverrideApplied(
-              debugViewWithMetricsOverrides(widget.view),
-            )?.platformBrightness !=
-            null;
+    final DebugViewMetricsOverride? override = kDebugMode
+        ? debugViewMetricsOverrideApplied(view)
+        : null;
+    final newBrightnessIsOverridden = override?.platformBrightness != null;
+    // Assigned outside setState: nothing built reads it, and a change to it
+    // alone is not a reason to rebuild.
+    _debugMetricsAreOverridden = override != null;
     if (newData != _data || newBrightnessIsOverridden != _debugBrightnessIsOverridden) {
       setState(() {
         _data = newData;
@@ -2738,21 +2798,13 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
     }
   }
 
-  // The platform-wide metrics below are dictated by an ancestor MediaQuery when
-  // there is one, so a change the PlatformDispatcher reports cannot affect this
-  // data. A debug view metrics override for this view supersedes the inherited
-  // value, so in debug mode the resolved values are compared anyway — including
-  // when an override has just been removed, at which point it is no longer in
-  // debugViewMetricsOverrides to be found. kDebugMode is a compile time
-  // constant, so release builds keep the early out.
-
   @override
   void didChangeAccessibilityFeatures() {
-    // If we have a parent, it dictates our accessibility features in release
-    // mode. If we don't have a parent, or in debug mode where an override
-    // supersedes it, update our data in response to the PlatformDispatcher
-    // changing its accessibility features setting.
-    if (_parentData == null || kDebugMode) {
+    // If we have a parent, it dictates our accessibility features, unless an
+    // override for this view supersedes it. Otherwise we get them straight from
+    // the PlatformDispatcher and need to update our data in response to the
+    // PlatformDispatcher changing its accessibility features setting.
+    if (_shouldUpdateOnPlatformChange) {
       _updateData();
     }
   }
@@ -2764,22 +2816,22 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
 
   @override
   void didChangeTextScaleFactor() {
-    // If we have a parent, it dictates our text scale factor in release mode.
-    // If we don't have a parent, or in debug mode where an override supersedes
-    // it, update our data in response to the PlatformDispatcher changing its
-    // text scale factor setting.
-    if (_parentData == null || kDebugMode) {
+    // If we have a parent, it dictates our text scale factor, unless an
+    // override for this view supersedes it. Otherwise we get it from the
+    // PlatformDispatcher and need to update our data in response to the
+    // PlatformDispatcher changing its text scale factor setting.
+    if (_shouldUpdateOnPlatformChange) {
       _updateData();
     }
   }
 
   @override
   void didChangePlatformBrightness() {
-    // If we have a parent, it dictates our platform brightness in release mode.
-    // If we don't have a parent, or in debug mode where an override supersedes
-    // it, update our data in response to the PlatformDispatcher changing its
-    // platform brightness setting.
-    if (_parentData == null || kDebugMode) {
+    // If we have a parent, it dictates our platform brightness, unless an
+    // override for this view supersedes it. Otherwise we get it from the
+    // PlatformDispatcher and need to update our data in response to the
+    // PlatformDispatcher changing its platform brightness setting.
+    if (_shouldUpdateOnPlatformChange) {
       _updateData();
     }
   }

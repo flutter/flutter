@@ -330,11 +330,7 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
       parentViewId: parent.rootView.viewId,
     );
 
-    final FlutterView flutterView =
-        WidgetsBinding.instance.platformDispatcher.view(id: viewId) ??
-        (throw StateError(
-          'No FlutterView with viewId $viewId was found on the platform dispatcher.',
-        ));
+    final FlutterView flutterView = flutterViewForId(viewId);
     rootView = flutterView;
   }
 
@@ -430,11 +426,7 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
       parentViewId: parent.rootView.viewId,
     );
 
-    final FlutterView flutterView =
-        WidgetsBinding.instance.platformDispatcher.view(id: viewId) ??
-        (throw StateError(
-          'No FlutterView with viewId $viewId was found on the platform dispatcher.',
-        ));
+    final FlutterView flutterView = flutterViewForId(viewId);
     rootView = flutterView;
   }
 
@@ -536,11 +528,7 @@ class WindowControllerMacOS extends WindowController with _WindowControllerMixin
       onNotifyListeners: _onResize.nativeFunction,
       resizable: resizable,
     );
-    final FlutterView flutterView =
-        WidgetsBinding.instance.platformDispatcher.view(id: viewId) ??
-        (throw StateError(
-          'No FlutterView with viewId $viewId was found on the platform dispatcher.',
-        ));
+    final FlutterView flutterView = flutterViewForId(viewId);
     rootView = flutterView;
     if (title != null) {
       setTitle(title);
@@ -677,11 +665,7 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
       parentViewId: parent?.rootView.viewId,
       resizable: resizable,
     );
-    final FlutterView flutterView =
-        WidgetsBinding.instance.platformDispatcher.view(id: viewId) ??
-        (throw StateError(
-          'No FlutterView with viewId $viewId was found on the platform dispatcher.',
-        ));
+    final FlutterView flutterView = flutterViewForId(viewId);
     rootView = flutterView;
     if (title != null) {
       setTitle(title);

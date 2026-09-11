@@ -28,6 +28,25 @@ import 'inherited_model.dart';
 import 'transitions.dart';
 import 'view.dart';
 
+/// The [FlutterView] the platform dispatcher reports for [viewId].
+///
+/// Throws a [StateError] naming the id when it reports none, rather than the
+/// bare "Bad state: No element" a `firstWhere` over [PlatformDispatcher.views]
+/// produces.
+///
+/// Asks [WidgetsBinding.instance] rather than [PlatformDispatcher.instance], so
+/// that a binding which supplies its own dispatcher — a test binding, or one
+/// applying debug view metric overrides — is the one that answers, and the view
+/// a controller exposes as its `rootView` is the same object the rest of the
+/// framework sees.
+FlutterView flutterViewForId(int viewId) {
+  final FlutterView? view = WidgetsBinding.instance.platformDispatcher.view(id: viewId);
+  if (view == null) {
+    throw StateError('No FlutterView with viewId $viewId was found on the platform dispatcher.');
+  }
+  return view;
+}
+
 const String _kWindowingDisabledErrorMessage = '''
 Windowing APIs are not enabled.
 

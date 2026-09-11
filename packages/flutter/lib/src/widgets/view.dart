@@ -22,13 +22,19 @@ import 'framework.dart';
 import 'lookup_boundary.dart';
 import 'media_query.dart';
 
-// Normalize once for rendering, MediaQuery, focus, and identity-based lookups.
-// Engine views are normalized even if View is constructed before the binding.
-FlutterView _viewToUse(FlutterView view, RenderView? deprecatedRenderView) {
+// The view [View] and [RawView] actually use: normalized once, for rendering,
+// for MediaQuery, for focus, and for the identity-based lookups all of those
+// rely on. Engine views are normalized even when the widget is constructed
+// before the binding is.
+FlutterView _normalizeViewForOverrides(FlutterView view, RenderView? deprecatedRenderView) {
   final FlutterView normalized = debugViewWithMetricsOverrides(view);
   assert(
     deprecatedRenderView == null || identical(deprecatedRenderView.flutterView, normalized),
-    'A supplied RenderView must render into the same normalized FlutterView.',
+    'A RenderView passed to View or RawView must render into the FlutterView '
+    'passed alongside it. Both are normalized by debugViewWithMetricsOverrides '
+    'and then compared by identity, so a view that merely compares == to the '
+    "RenderView's — a test double with an operator == of its own, say — is not "
+    'the same view for this purpose.',
   );
   return normalized;
 }
@@ -105,7 +111,10 @@ class View extends StatefulWidget {
     )
     RenderView? deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
     required this.child,
-  }) : view = _viewToUse(view, deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView),
+  }) : view = _normalizeViewForOverrides(
+         view,
+         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
+       ),
        _deprecatedPipelineOwner = deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,
        _deprecatedRenderView = deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
        assert(
@@ -359,7 +368,10 @@ class RawView extends StatelessWidget {
     )
     RenderView? deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
     required this.child,
-  }) : view = _viewToUse(view, deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView),
+  }) : view = _normalizeViewForOverrides(
+         view,
+         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
+       ),
        _deprecatedPipelineOwner = deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,
        _deprecatedRenderView = deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
        assert(

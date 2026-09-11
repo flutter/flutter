@@ -2221,6 +2221,49 @@ void main() {
         expect(tester.platformDispatcher.views, isNot(contains(controller.rootView)));
       });
 
+      testWidgets('Destroying a test window controller twice is a no-op the second time', (
+        WidgetTester tester,
+      ) async {
+        final WindowingOwner previousOwner = WidgetsBinding.instance.windowingOwner;
+        tester.binding.resetWindowingOwner();
+        addTearDown(() {
+          WidgetsBinding.instance.windowingOwner = previousOwner;
+        });
+        var destroyedCount = 0;
+        final WindowController controller = WidgetsBinding.instance.windowingOwner
+            .createWindowController(
+              delegate: _CountingWindowControllerDelegate(() {
+                destroyedCount += 1;
+              }),
+              resizable: true,
+            );
+        addTearDown(controller.dispose);
+
+        var metricsChangedCount = 0;
+        final VoidCallback? previousMetricsChanged = tester.platformDispatcher.onMetricsChanged;
+        tester.platformDispatcher.onMetricsChanged = () {
+          previousMetricsChanged?.call();
+          metricsChangedCount += 1;
+        };
+        addTearDown(() {
+          tester.platformDispatcher.onMetricsChanged = previousMetricsChanged;
+        });
+
+        controller.destroy();
+        expect(controller.isDestroyed, isTrue);
+        expect(destroyedCount, 1);
+        expect(metricsChangedCount, 1);
+        expect(tester.platformDispatcher.views, isNot(contains(controller.rootView)));
+
+        // A second destroy has nothing left to remove, so it must not report a
+        // metrics change: a view that is already gone did not just go.
+        controller.destroy();
+        expect(controller.isDestroyed, isTrue);
+        expect(destroyedCount, 1);
+        expect(metricsChangedCount, 1);
+        expect(tester.takeException(), isNull);
+      });
+
       testWidgets('SatelliteWindow does not throw', (WidgetTester tester) async {
         final controller = _StubSatelliteWindowController(tester: tester);
         addTearDown(controller.dispose);
@@ -2231,4 +2274,17 @@ void main() {
       });
     });
   });
+}
+
+// Counts the destruction notifications a controller sends, which is how the
+// tests here tell a second `destroy()` that did nothing from one that ran again.
+class _CountingWindowControllerDelegate with WindowControllerDelegate {
+  _CountingWindowControllerDelegate(this._onDestroyed);
+
+  final VoidCallback _onDestroyed;
+
+  @override
+  void onWindowDestroyed() {
+    _onDestroyed();
+  }
 }
