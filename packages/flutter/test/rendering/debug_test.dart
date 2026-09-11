@@ -245,6 +245,12 @@ void main() {
     debugDisableOpacityLayers = false;
   });
 
+  test('debugAssertAllRenderVarsUnset warns when debugViewMetricsOverrides set', () {
+    debugSetViewMetricsOverride(0, const DebugViewMetricsOverride(boldText: true));
+    expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
+    debugClearViewMetricsOverrides();
+  });
+
   test('debugCheckHasBoundedAxis warns for vertical and horizontal axis', () {
     expect(
       () => debugCheckHasBoundedAxis(Axis.vertical, const BoxConstraints()),
