@@ -109,6 +109,70 @@ void main() {
     );
   });
 
+  testWithoutContext(
+    'KernelCompiler converts dart_registrant_plugin physical path to virtual path',
+    () async {
+      final fileSystem = MemoryFileSystem.test();
+      final Directory registrantDirectory = fileSystem.directory(
+        '/project/.dart_tool/flutter_build',
+      )..createSync(recursive: true);
+      registrantDirectory.childFile('dart_plugin_registrant.dart').createSync();
+
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list([
+        FakeCommand(
+          command: const <String>[
+            'Artifact.engineDartAotRuntime',
+            'Artifact.frontendServerSnapshotForEngineDartSdk',
+            '--sdk-root',
+            'sdkroot/',
+            '--target=flutter',
+            '--no-print-incremental-dependencies',
+            '-Ddart.vm.profile=false',
+            '-Ddart.vm.product=false',
+            '--enable-asserts',
+            '--no-link-platform',
+            '--filesystem-root',
+            '/project/.dart_tool/flutter_build',
+            '--filesystem-scheme',
+            'org-dartlang-plugin-registrant',
+            '--source',
+            'org-dartlang-plugin-registrant:///dart_plugin_registrant.dart',
+            '--source',
+            'package:flutter/src/dart_plugin_registrant.dart',
+            '-Dflutter.dart_plugin_registrant=org-dartlang-plugin-registrant:///dart_plugin_registrant.dart',
+            '--verbosity=error',
+            '--native-assets-only',
+          ],
+          onRun: (_) => completer.complete(),
+        ),
+      ]);
+
+      final compiler = KernelCompiler(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        processManager: processManager,
+        artifacts: Artifacts.test(),
+        fileSystemRoots: <String>[],
+      );
+
+      unawaited(
+        compiler.compile(
+          sdkRoot: 'sdkroot',
+          buildDir: registrantDirectory.childDirectory('somehash'),
+          checkDartPluginRegistry: true,
+          packagesPath: null,
+          buildMode: BuildMode.debug,
+          trackWidgetCreation: false,
+          dartDefines: const <String>[],
+          packageConfig: PackageConfig.empty,
+        ),
+      );
+
+      await completer.future.timeout(const Duration(seconds: 5));
+    },
+  );
+
   testWithoutContext('buildModeOptions removes matching product define', () {
     expect(buildModeOptions(BuildMode.debug, <String>['dart.vm.product=true']), <String>[
       '-Ddart.vm.profile=false',
