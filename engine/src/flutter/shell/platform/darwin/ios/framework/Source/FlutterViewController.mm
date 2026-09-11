@@ -546,6 +546,14 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   scrollView.contentSize = CGSizeMake(kScrollViewContentSize, kScrollViewContentSize);
   // This is an arbitrary offset that is not CGPointZero.
   scrollView.contentOffset = CGPointMake(kScrollViewContentSize, kScrollViewContentSize);
+  // A non-zero offset reads as scrolled content to iOS 26, which paints a
+  // scroll-edge effect under the status bar over whatever Flutter rendered.
+#if defined(__IPHONE_26_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_26_0
+  if (@available(iOS 26.0, *)) {
+    scrollView.topEdgeEffect.hidden = YES;
+    scrollView.bottomEdgeEffect.hidden = YES;
+  }
+#endif
 
   [self.view addSubview:scrollView];
   self.scrollView = scrollView;
