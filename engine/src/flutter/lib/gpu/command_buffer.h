@@ -23,6 +23,8 @@
 namespace flutter {
 namespace gpu {
 
+class RenderPass;
+
 class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
   DEFINE_WRAPPERTYPEINFO();
   FML_FRIEND_MAKE_REF_COUNTED(CommandBuffer);
@@ -33,7 +35,11 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
 
   std::shared_ptr<impeller::CommandBuffer> GetCommandBuffer();
 
-  void AddRenderPass(std::shared_ptr<impeller::RenderPass> render_pass);
+  /// Queues [render_pass] for encoding at submit. [owner] is the wrapper that
+  /// records into it, retained until then because its bindings point at
+  /// shader reflection data that encoding reads.
+  void AddRenderPass(std::shared_ptr<impeller::RenderPass> render_pass,
+                     fml::RefPtr<RenderPass> owner);
 
   bool AddCompletionCallback(
       impeller::CommandBuffer::CompletionCallback completion_callback);
@@ -76,6 +82,7 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
   std::shared_ptr<impeller::BlitPass> GetOrCreateBlitPass();
 
   std::vector<Encodable> encodables_;
+  std::vector<fml::RefPtr<RenderPass>> retained_render_passes_;
   std::vector<impeller::CommandBuffer::CompletionCallback>
       completion_callbacks_;
   bool submitted_ = false;
