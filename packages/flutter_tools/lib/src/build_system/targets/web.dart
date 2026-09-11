@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:path/path.dart' as p; // flutter_ignore: package_path_import
 import 'package:standard_message_codec/standard_message_codec.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -45,7 +46,7 @@ const String _kBundledFallbackRobotoFamily = 'Roboto';
 const String _kBundledFallbackRobotoAsset = 'fonts/fallback/Roboto-Regular.ttf';
 const String _kFontManifestJsonFile = 'FontManifest.json';
 
-const Set<String> _kUnhashedAssetBasenames = <String>{
+const Set<String> _kUnhashedAssetRelativePaths = <String>{
   'AssetManifest.json',
   'AssetManifest.bin',
   'AssetManifest.bin.json',
@@ -1598,37 +1599,46 @@ Map<String, File> _hashWebAssets(Directory assetsDir) {
   final renamedAssets = <String, String>{};
 
   for (final file in files) {
-    final String basename = file.basename;
-    if (_kUnhashedAssetBasenames.contains(basename)) {
+    final String relativePath = fileSystem.path.relative(file.path, from: assetsDir.path);
+    final List<String> segments = fileSystem.path.split(relativePath);
+    final String posixRelativePath = p.posix.joinAll(segments);
+
+    if (_kUnhashedAssetRelativePaths.contains(posixRelativePath) ||
+        fileSystem.path.extension(file.path) == '.frag' ||
+        segments.firstOrNull == 'shaders') {
       continue;
     }
 
+    final String basename = fileSystem.path.basename(file.path);
     final String contentHash = crypto.sha256
         .convert(file.readAsBytesSync())
         .toString()
         .substring(0, 8);
     final String newBasename = _computeHashedBasename(basename, contentHash, fileSystem);
 
-    final String relativePath = fileSystem.path.relative(file.path, from: assetsDir.path);
-    final String newRelativePath = fileSystem.path.join(
-      fileSystem.path.dirname(relativePath),
-      newBasename,
-    );
+    final newSegments = <String>[...segments.sublist(0, segments.length - 1), newBasename];
+    final String newRelativePath = fileSystem.path.joinAll(newSegments);
+    final String posixNewPath = p.posix.joinAll(newSegments);
 
-    // Rename the file
+    // Rename the physical file on disk.
     final String newPath = fileSystem.path.join(assetsDir.path, newRelativePath);
     final String oldPath = file.path;
     file.renameSync(newPath);
     renamedFileMap[oldPath] = fileSystem.file(newPath);
 
-    // Note: use forward slashes for mapping since the manifest uses them.
-    final String posixOldPath = relativePath.replaceAll(fileSystem.path.separator, '/');
-    final String posixNewPath = newRelativePath.replaceAll(fileSystem.path.separator, '/');
-    renamedAssets[posixOldPath] = posixNewPath;
-    renamedAssets[Uri.decodeFull(posixOldPath)] = posixNewPath;
+    // Map POSIX paths (for manifests). Handle raw, decoded, and encoded paths.
+    renamedAssets[posixRelativePath] = posixNewPath;
+    try {
+      final String decoded = Uri.decodeFull(posixRelativePath);
+      renamedAssets[decoded] = posixNewPath;
+    } on FormatException {
+      // Retain raw path if malformed percent escape sequence.
+    }
+    final String encoded = Uri.encodeFull(posixRelativePath);
+    renamedAssets[encoded] = posixNewPath;
   }
 
-  // Now update the manifests if they exist
+  // Now update the manifests if they exist.
   final File assetManifestBin = assetsDir.childFile('AssetManifest.bin');
   if (assetManifestBin.existsSync()) {
     final Uint8List rawBytes = assetManifestBin.readAsBytesSync();
@@ -1640,11 +1650,13 @@ Map<String, File> _hashWebAssets(Directory assetsDir) {
         final key = entry.key.toString();
         final Object? variantsVal = entry.value;
         if (variantsVal is! List<Object?>) {
+          newManifest[key] = variantsVal;
           continue;
         }
         final newVariants = <dynamic>[];
         for (final Object? variantObj in variantsVal) {
           if (variantObj is! Map<Object?, Object?>) {
+            newVariants.add(variantObj);
             continue;
           }
           final newVariantMap = <String, dynamic>{};
@@ -1673,7 +1685,7 @@ Map<String, File> _hashWebAssets(Directory assetsDir) {
     }
   }
 
-  // Update legacy AssetManifest.json if present
+  // Update legacy AssetManifest.json if present.
   final File assetManifestJson = assetsDir.childFile('AssetManifest.json');
   if (assetManifestJson.existsSync()) {
     final Object? decodedJson = json.decode(assetManifestJson.readAsStringSync());
@@ -1681,15 +1693,19 @@ Map<String, File> _hashWebAssets(Directory assetsDir) {
       final newManifest = <String, dynamic>{};
       for (final MapEntry<String, dynamic> entry in decodedJson.entries) {
         final Object? variants = entry.value;
-        if (variants is List<dynamic>) {
-          final newVariants = <String>[];
-          for (final Object? variant in variants) {
-            if (variant is String) {
-              newVariants.add(renamedAssets[variant] ?? variant);
-            }
-          }
-          newManifest[entry.key] = newVariants;
+        if (variants is! List<dynamic>) {
+          newManifest[entry.key] = variants;
+          continue;
         }
+        final newVariants = <String>[];
+        for (final Object? variant in variants) {
+          if (variant is String) {
+            newVariants.add(renamedAssets[variant] ?? variant);
+          } else if (variant != null) {
+            newVariants.add(variant.toString());
+          }
+        }
+        newManifest[entry.key] = newVariants;
       }
       assetManifestJson.writeAsStringSync(json.encode(newManifest));
     }

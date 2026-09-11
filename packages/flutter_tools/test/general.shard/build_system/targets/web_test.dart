@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:file_testing/file_testing.dart';
@@ -21,6 +22,7 @@ import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 import 'package:flutter_tools/src/web_template.dart';
+import 'package:standard_message_codec/standard_message_codec.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
@@ -2329,29 +2331,57 @@ console.log(mapName);
   );
 
   test(
-    'WebReleaseBundle hashes physical assets, leaves NOTICES unhashed, and updates AssetManifest when webContentHash is true',
+    'WebReleaseBundle hashes physical assets, leaves unhashed assets and shaders unhashed, and updates manifests when webContentHash is true',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
       environment.projectDir.childDirectory('web').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync(recursive: true);
 
-      // Create a pubspec.yaml with assets and notices
+      // Create a pubspec.yaml with assets, variants, shaders, fonts, and notices.
       environment.projectDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_app
 flutter:
   assets:
     - images/logo.png
+    - images/2.0x/logo.png
     - NOTICES
+    - nested/NOTICES
+    - shaders/ink_sparkle.frag
+    - fonts/my_font.ttf
+    - images/100%_deal.png
+  fonts:
+    - family: MyFont
+      fonts:
+        - asset: fonts/my_font.ttf
 ''');
 
       final File logo = environment.projectDir.childDirectory('images').childFile('logo.png')
         ..createSync(recursive: true)
         ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+      environment.projectDir.childDirectory('images').childDirectory('2.0x').childFile('logo.png')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
       environment.projectDir.childFile('NOTICES')
         ..createSync(recursive: true)
-        ..writeAsStringSync('License notices');
+        ..writeAsStringSync('Root license notices');
+      environment.projectDir.childDirectory('nested').childFile('NOTICES')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('Nested notices');
+      environment.projectDir.childDirectory('shaders').childFile('ink_sparkle.frag')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('void main() {}');
+      environment.projectDir.childDirectory('fonts').childFile('my_font.ttf')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(<int>[10, 20, 30]);
+      environment.projectDir.childDirectory('images').childFile('100%_deal.png')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(<int>[99, 100]);
 
       const logoHash = '9f64a747'; // sha256 of [1,2,3,4]
+      const logo2xHash = '74f81fe1'; // sha256 of [1,2,3,4,5]
+      const fontHash = '6951bbd9'; // sha256 of [10,20,30]
+      const dealHash = '21e721c3'; // sha256 of [99,100]
+      const nestedNoticesHash = '642c7c36'; // sha256 of 'Nested notices'
 
       await WebReleaseBundle(<WebCompilerConfig>[
         const JsCompilerConfig(webContentHash: true),
@@ -2359,16 +2389,69 @@ flutter:
 
       final Directory assetsDir = environment.outputDir.childDirectory('assets');
 
+      // Hashed assets
       expect(assetsDir.childDirectory('images').childFile('logo.$logoHash.png').existsSync(), true);
       expect(assetsDir.childDirectory('images').childFile('logo.png').existsSync(), false);
-      expect(assetsDir.childFile('NOTICES').existsSync(), true);
-      expect(assetsDir.childFile('AssetManifest.bin').existsSync(), true);
-      expect(assetsDir.childFile('AssetManifest.bin.json').existsSync(), true);
+      expect(
+        assetsDir
+            .childDirectory('images')
+            .childDirectory('2.0x')
+            .childFile('logo.$logo2xHash.png')
+            .existsSync(),
+        true,
+      );
+      expect(
+        assetsDir.childDirectory('fonts').childFile('my_font.$fontHash.ttf').existsSync(),
+        true,
+      );
+      expect(
+        assetsDir.childDirectory('images').childFile('100%25_deal.$dealHash.png').existsSync(),
+        true,
+      );
+      expect(
+        assetsDir.childDirectory('nested').childFile('NOTICES.$nestedNoticesHash').existsSync(),
+        true,
+      );
 
-      // Verify flutter_assets.d references the hashed logo path
+      // Unhashed assets: root NOTICES and shaders
+      expect(assetsDir.childFile('NOTICES').existsSync(), true);
+      expect(assetsDir.childDirectory('shaders').childFile('ink_sparkle.frag').existsSync(), true);
+
+      // Manifest files exist unhashed
+      final File assetManifestBin = assetsDir.childFile('AssetManifest.bin');
+      final File assetManifestBinJson = assetsDir.childFile('AssetManifest.bin.json');
+      final File fontManifest = assetsDir.childFile('FontManifest.json');
+      expect(assetManifestBin.existsSync(), true);
+      expect(assetManifestBinJson.existsSync(), true);
+      expect(fontManifest.existsSync(), true);
+
+      // Decode AssetManifest.bin and verify variant mappings
+      final Uint8List rawBytes = assetManifestBin.readAsBytesSync();
+      final decodedManifest =
+          const StandardMessageCodec().decodeMessage(ByteData.sublistView(rawBytes))!
+              as Map<Object?, Object?>;
+      final List<Map<Object?, Object?>> logoVariants =
+          (decodedManifest['images/logo.png']! as List<Object?>).cast<Map<Object?, Object?>>();
+      expect(logoVariants, hasLength(2));
+      expect(logoVariants[0]['asset'], 'images/logo.$logoHash.png');
+      expect(logoVariants[1]['asset'], 'images/2.0x/logo.$logo2xHash.png');
+      expect(logoVariants[1]['dpr'], 2.0);
+
+      // Verify FontManifest.json rewriting
+      final decodedFonts = json.decode(fontManifest.readAsStringSync()) as List<dynamic>;
+      expect(decodedFonts, hasLength(1));
+      final fontMap = decodedFonts.first as Map<String, dynamic>;
+      expect(fontMap['family'], 'MyFont');
+      final List<Map<String, dynamic>> fontEntries = (fontMap['fonts'] as List<dynamic>)
+          .cast<Map<String, dynamic>>();
+      expect(fontEntries[0]['asset'], 'fonts/my_font.$fontHash.ttf');
+
+      // Verify flutter_assets.d references the hashed paths
       final File depfile = environment.buildDir.childFile('flutter_assets.d');
       expect(depfile.existsSync(), true);
       expect(depfile.readAsStringSync(), contains('logo.$logoHash.png'));
+      expect(depfile.readAsStringSync(), contains('logo.$logo2xHash.png'));
+      expect(depfile.readAsStringSync(), contains('my_font.$fontHash.ttf'));
 
       // Test stale asset cleanup on rebuild: modify logo content
       logo.writeAsBytesSync(<int>[5, 6, 7, 8]);
@@ -2386,6 +2469,34 @@ flutter:
         assetsDir.childDirectory('images').childFile('logo.$logoHash.png').existsSync(),
         false,
       );
+    }),
+  );
+
+  test(
+    'WebReleaseBundle leaves assets and manifests unhashed when webContentHash is false',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      environment.projectDir.childDirectory('web').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js').createSync(recursive: true);
+
+      environment.projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_app
+flutter:
+  assets:
+    - images/logo.png
+''');
+
+      environment.projectDir.childDirectory('images').childFile('logo.png')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
+
+      final Directory assetsDir = environment.outputDir.childDirectory('assets');
+      expect(assetsDir.childDirectory('images').childFile('logo.png').existsSync(), true);
+      expect(assetsDir.childDirectory('images').childFile('logo.9f64a747.png').existsSync(), false);
     }),
   );
   test(
