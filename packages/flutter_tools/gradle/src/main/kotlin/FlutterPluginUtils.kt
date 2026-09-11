@@ -329,6 +329,14 @@ object FlutterPluginUtils {
         project.findProperty(PROP_FORCE_VERSION_CODE_IGNORING_ABI)?.toString()?.toBoolean() ?: false
 
     /**
+     * Delegates to [shouldConfigureFlutterTask(Project, String)] using [assembleTask]'s name.
+     */
+    internal fun shouldConfigureFlutterTask(
+        project: Project,
+        assembleTask: Task
+    ): Boolean = shouldConfigureFlutterTask(project, assembleTask.name)
+
+    /**
      * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
      *
      * In AGP 4.0, the Android linter task depends on the JAR tasks that generate `libapp.so`.
@@ -362,7 +370,7 @@ object FlutterPluginUtils {
     @JvmName("shouldConfigureFlutterTask")
     internal fun shouldConfigureFlutterTask(
         project: Project,
-        assembleTask: Task
+        assembleTaskName: String
     ): Boolean {
         val cliTasksNames = project.gradle.startParameter.taskNames
         if (cliTasksNames.size != 1 || !cliTasksNames.first().contains("assemble")) {
@@ -372,16 +380,16 @@ object FlutterPluginUtils {
         if (taskName == "assemble") {
             return true
         }
-        if (taskName == assembleTask.name) {
+        if (taskName == assembleTaskName) {
             return true
         }
-        if (taskName.endsWith("Release") && assembleTask.name.endsWith("Release")) {
+        if (taskName.endsWith("Release") && assembleTaskName.endsWith("Release")) {
             return true
         }
-        if (taskName.endsWith("Debug") && assembleTask.name.endsWith("Debug")) {
+        if (taskName.endsWith("Debug") && assembleTaskName.endsWith("Debug")) {
             return true
         }
-        if (taskName.endsWith("Profile") && assembleTask.name.endsWith("Profile")) {
+        if (taskName.endsWith("Profile") && assembleTaskName.endsWith("Profile")) {
             return true
         }
         return false
