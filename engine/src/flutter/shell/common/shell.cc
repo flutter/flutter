@@ -216,6 +216,11 @@ Shell::InferVmInitDataFromSettings(Settings& settings) {
   // If the settings did not specify an `isolate_snapshot`, fall back to the
   // one the VM was launched with.
   if (!isolate_snapshot) {
+    if (!vm) {
+      FML_LOG(ERROR)
+          << "Failed to infer isolate snapshot: Dart VM reference is null.";
+      return {std::move(vm), nullptr};
+    }
     isolate_snapshot = vm->GetVMData()->GetIsolateSnapshot();
   }
   return {std::move(vm), isolate_snapshot};
