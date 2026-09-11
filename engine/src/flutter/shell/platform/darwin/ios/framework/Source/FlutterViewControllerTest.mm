@@ -2527,6 +2527,121 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [mockBundle stopMocking];
 }
 
+// Verifies the surface is created when the application becomes active after the first layout
+// pass has already run. UIKit lays out the view while the application is still inactive during a
+// cold start, we create the surface during activation.
+- (void)testSurfaceCreatedWhenApplicationBecomesActiveAfterLayoutWhileInactive {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* flutterViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+
+  // The window must be attached to the connected scene to have a screen. without which the
+  // viewport metrics stay empty and the surface is never updated.
+  UIWindowScene* windowScene =
+      (UIWindowScene*)UIApplication.sharedApplication.connectedScenes.anyObject;
+  XCTAssertNotNil(windowScene, @"The host app must have a connected scene for test");
+  UIWindow* window = [[UIWindow alloc] initWithWindowScene:windowScene];
+  [window addSubview:flutterViewController.view];
+  flutterViewController.view.bounds = CGRectMake(0, 0, 100, 100);
+
+  __block UIApplicationState applicationState = UIApplicationStateInactive;
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMStub([mockApplication applicationState]).andDo(^(NSInvocation* invocation) {
+    [invocation setReturnValue:&applicationState];
+  });
+  id mockVC = OCMPartialMock(flutterViewController);
+
+  // Verify the surface exists once the application is active, whichever callback creates it.
+  [flutterViewController viewDidLayoutSubviews];
+  applicationState = UIApplicationStateActive;
+  [NSNotificationCenter.defaultCenter postNotificationName:UIApplicationDidBecomeActiveNotification
+                                                    object:nil];
+  OCMVerify([mockVC surfaceUpdated:YES]);
+
+  [NSObject cancelPreviousPerformRequestsWithTarget:flutterViewController];
+  [flutterViewController deregisterNotifications];
+  [mockApplication stopMocking];
+}
+
+// Verifies a layout pass while the application is backgrounded does not create the surface.
+// Surface creation accesses the GPU, which can terminate backgrounded processes.
+- (void)testSurfaceNotCreatedWhenLayoutRunsWhileApplicationStateIsBackground {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* flutterViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+
+  // The window must be attached to the connected scene to have a screen, without which the
+  // viewport metrics stay empty and the surface is never updated.
+  UIWindowScene* windowScene =
+      (UIWindowScene*)UIApplication.sharedApplication.connectedScenes.anyObject;
+  XCTAssertNotNil(windowScene, @"The host app must have a connected scene for test");
+  UIWindow* window = [[UIWindow alloc] initWithWindowScene:windowScene];
+  [window addSubview:flutterViewController.view];
+  flutterViewController.view.bounds = CGRectMake(0, 0, 100, 100);
+
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMStub([mockApplication applicationState]).andReturn(UIApplicationStateBackground);
+  id mockVC = OCMPartialMock(flutterViewController);
+
+  [flutterViewController viewDidLayoutSubviews];
+  OCMVerify(never(), [mockVC surfaceUpdated:YES]);
+
+  [flutterViewController deregisterNotifications];
+  [mockApplication stopMocking];
+}
+
+// Verifies rendering resumes when the application returns to the foreground. UIApplication
+// has state UIApplicationStateBackground while UIApplicationWillEnterForegroundNotification is
+// being delivered.
+- (void)testSurfaceCreatedOnWillEnterForegroundWhileApplicationStateIsBackground {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* flutterViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+
+  // The window must be attached to the connected scene to have a screen, without which the
+  // viewport metrics stay empty and the surface is never updated.
+  UIWindowScene* windowScene =
+      (UIWindowScene*)UIApplication.sharedApplication.connectedScenes.anyObject;
+  XCTAssertNotNil(windowScene, @"The host app must have a connected scene for test");
+  UIWindow* window = [[UIWindow alloc] initWithWindowScene:windowScene];
+  [window addSubview:flutterViewController.view];
+  flutterViewController.view.bounds = CGRectMake(0, 0, 100, 100);
+
+  __block UIApplicationState applicationState = UIApplicationStateActive;
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMStub([mockApplication applicationState]).andDo(^(NSInvocation* invocation) {
+    [invocation setReturnValue:&applicationState];
+  });
+  id mockVC = OCMPartialMock(flutterViewController);
+
+  // Lay out while active so the viewport metrics are known and the surface is created.
+  [flutterViewController viewDidLayoutSubviews];
+  OCMVerify(times(1), [mockVC surfaceUpdated:YES]);
+
+  // Verify backgrounding tears down the surface.
+  applicationState = UIApplicationStateBackground;
+  [NSNotificationCenter.defaultCenter
+      postNotificationName:UIApplicationDidEnterBackgroundNotification
+                    object:nil];
+  OCMVerify([mockVC surfaceUpdated:NO]);
+
+  // Verify foregrounding recreates it while the application is still reporting backgrounded state.
+  [NSNotificationCenter.defaultCenter
+      postNotificationName:UIApplicationWillEnterForegroundNotification
+                    object:nil];
+  OCMVerify(times(2), [mockVC surfaceUpdated:YES]);
+
+  [NSObject cancelPreviousPerformRequestsWithTarget:flutterViewController];
+  [flutterViewController deregisterNotifications];
+  [mockApplication stopMocking];
+}
+
 - (void)testLifeCycleNotificationApplicationWillResignActive {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
