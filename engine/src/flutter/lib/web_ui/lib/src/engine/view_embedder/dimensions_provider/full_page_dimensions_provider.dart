@@ -155,8 +155,9 @@ class FullPageDimensionsProvider extends DimensionsProvider {
     double inset(String property) {
       // A browser that doesn't understand `env()` leaves the padding at its
       // initial value, which reads back as `0px`, so there is no separate code
-      // path for it. `parseFloat` only returns null for an empty string, which
-      // can't happen for an element that is in the document.
+      // path for it. web_ui's `parseFloat` returns null wherever JavaScript's
+      // returns NaN, so the `?? 0.0` covers anything a computed `padding-*`
+      // could fail to parse as.
       return (parseFloat(probeStyle.getPropertyValue(property)) ?? 0.0) * devicePixelRatio;
     }
 
