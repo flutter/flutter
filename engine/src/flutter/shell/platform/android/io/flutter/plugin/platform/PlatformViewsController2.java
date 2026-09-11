@@ -78,12 +78,13 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
   // Transactions created on the raster thread (via JNI for AHB swapchain presentation).
   // SurfaceControl.Transaction (and native android::SurfaceComposerClient::Transaction in
-  // libgui.so)
-  // is NOT thread-safe and contains no internal mutexes. Concurrently mutating a single transaction
-  // from both the raster thread (e.g. ASurfaceTransaction_setBuffer) and the platform thread
-  // (e.g. setAlpha, setCrop) corrupts libgui's internal data structures and causes a SIGSEGV.
-  // Therefore, raster presentations receive isolated transactions per frame submission, which
-  // are protected by transactionLock when queued and swapped.
+  // libgui.so) is NOT thread-safe and contains no internal mutexes. Concurrently mutating a single
+  // transaction from both the raster thread (e.g. ASurfaceTransaction_setBuffer) and the platform
+  // thread (e.g. setAlpha, setCrop) corrupts libgui's internal data structures and causes a
+  // SIGSEGV.
+  // Therefore, raster presentations receive separate transactions per frame submission rather than
+  // sharing the platform thread's transaction, and list access is synchronized under
+  // transactionLock (see createTransaction() for residual native lifecycle nuances).
   private final ArrayList<SurfaceControl.Transaction> pendingRasterTransactions;
   private final ArrayList<SurfaceControl.Transaction> activeRasterTransactions;
 

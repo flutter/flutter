@@ -749,7 +749,7 @@ public class PlatformViewsController2Test {
 
         controller.swapTransactions();
         // flutterView is null, so onEndFrame() drops the frame instead of applying it. It still
-        // walks and merges the active transactions first, which is where the race shows up.
+        // walks and closes the active transactions first, which is where the race shows up.
         controller.onEndFrame();
       }
     } catch (TimeoutException | BrokenBarrierException e) {
