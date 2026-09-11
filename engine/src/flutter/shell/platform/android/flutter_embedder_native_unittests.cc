@@ -7048,8 +7048,12 @@ TEST(Phase56StrictGNTargetIsolationTest,
   EXPECT_STREQ(spawn_cfg.initial_route, "/test_route");
 
   // 4. FlutterWindowMetricsEvent
+  // On 64-bit architectures, FlutterWindowMetricsEvent is 168 bytes after
+  // adding display_features_count (8), display_features_bounds (8),
+  // display_features_type (8), and display_features_state (8) to the base 136
+  // bytes.
   EXPECT_EQ(sizeof(FlutterWindowMetricsEvent),
-            sizeof(void*) == 8 ? 136u : sizeof(FlutterWindowMetricsEvent));
+            sizeof(void*) == 8 ? 168u : sizeof(FlutterWindowMetricsEvent));
   EXPECT_EQ(offsetof(FlutterWindowMetricsEvent, struct_size), 0u);
   EXPECT_EQ(offsetof(FlutterWindowMetricsEvent, width), sizeof(size_t));
   EXPECT_EQ(offsetof(FlutterWindowMetricsEvent, height), 2 * sizeof(size_t));
@@ -7074,8 +7078,9 @@ TEST(Phase56StrictGNTargetIsolationTest,
   wm_evt.struct_size = sizeof(FlutterWindowMetricsEvent);
   wm_evt.width = 1080;
   wm_evt.height = 1920;
+  // 168 bytes on 64-bit architectures including display features.
   EXPECT_EQ(wm_evt.struct_size,
-            sizeof(void*) == 8 ? 136u : sizeof(FlutterWindowMetricsEvent));
+            sizeof(void*) == 8 ? 168u : sizeof(FlutterWindowMetricsEvent));
   EXPECT_EQ(wm_evt.width, 1080u);
   EXPECT_EQ(wm_evt.height, 1920u);
 }
@@ -7152,7 +7157,9 @@ TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniSuccess) {
 
   bool result = FlutterEmbedderNative::RegisterJni(&mock_env_);
   EXPECT_TRUE(result);
-  EXPECT_EQ(registered_methods.size(), 39u);
+  // 40 registered native methods on FlutterJNI (including
+  // nativeUpdateHardwareBufferTexture).
+  EXPECT_EQ(registered_methods.size(), 40u);
 
   // Verify all essential methods are present and bound to valid function
   // pointers
@@ -7164,6 +7171,8 @@ TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniSuccess) {
     }
     return false;
   };
+
+  EXPECT_TRUE(has_method("nativeUpdateHardwareBufferTexture"));
 
   EXPECT_TRUE(has_method("nativeAttach"));
   EXPECT_TRUE(has_method("nativeDestroy"));

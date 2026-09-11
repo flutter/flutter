@@ -250,18 +250,56 @@ static bool IsRendererValid(const FlutterRendererConfig* config) {
   return false;
 }
 
-#if FML_OS_LINUX || FML_OS_WIN
+#if FML_OS_LINUX || FML_OS_WIN || FML_OS_ANDROID
 static void* DefaultGLProcResolver(const char* name) {
+  if (!name) {
+    return nullptr;
+  }
+#if FML_OS_ANDROID
+  // On Android, core OpenGL ES functions (e.g. glGetError) are located in
+  // libGLESv3.so (or libGLESv2.so), while extension functions are resolved
+  // via eglGetProcAddress. Per Android NDK guidance, query libGLESv3 first.
+  static auto gles_library = []() -> fml::RefPtr<fml::NativeLibrary> {
+    auto lib = fml::NativeLibrary::Create("libGLESv3.so");
+    if (!lib) {
+      lib = fml::NativeLibrary::Create("libGLESv2.so");
+    }
+    return lib;
+  }();
+  if (gles_library) {
+    if (auto* proc = gles_library->ResolveSymbol(name)) {
+      return const_cast<uint8_t*>(proc);
+    }
+  }
+  static auto egl_get_proc_address = []() -> void* (*)(const char*) {
+    static fml::RefPtr<fml::NativeLibrary> egl_library =
+        fml::NativeLibrary::Create("libEGL.so");
+    if (!egl_library) {
+      return nullptr;
+    }
+    auto proc = egl_library->ResolveFunction<void* (*)(const char*)>(
+        "eglGetProcAddress");
+    return proc.has_value() ? proc.value() : nullptr;
+  }();
+  if (egl_get_proc_address) {
+    if (auto* proc = egl_get_proc_address(name)) {
+      return proc;
+    }
+  }
+#endif  // FML_OS_ANDROID
   static fml::RefPtr<fml::NativeLibrary> proc_library =
-#if FML_OS_LINUX
+#if FML_OS_LINUX || FML_OS_ANDROID
       fml::NativeLibrary::CreateForCurrentProcess();
 #elif FML_OS_WIN  // FML_OS_LINUX
       fml::NativeLibrary::Create("opengl32.dll");
 #endif            // FML_OS_WIN
+  if (!proc_library) {
+    return nullptr;
+  }
   return static_cast<void*>(
       const_cast<uint8_t*>(proc_library->ResolveSymbol(name)));
 }
-#endif  // FML_OS_LINUX || FML_OS_WIN
+#endif  // FML_OS_LINUX || FML_OS_WIN || FML_OS_ANDROID
 
 #ifdef SHELL_ENABLE_GL
 // Auxiliary function used to translate rectangles of type SkIRect to
@@ -464,9 +502,9 @@ InferOpenGLPlatformViewCreationCallback(
       return ptr(user_data, gl_proc_name);
     };
   } else {
-#if FML_OS_LINUX || FML_OS_WIN
+#if FML_OS_LINUX || FML_OS_WIN || FML_OS_ANDROID
     gl_proc_resolver = DefaultGLProcResolver;
-#endif  // FML_OS_LINUX || FML_OS_WIN
+#endif  // FML_OS_LINUX || FML_OS_WIN || FML_OS_ANDROID
   }
 
   bool fbo_reset_after_present =
@@ -2256,8 +2294,6 @@ CreateExternalTextureResolver(const FlutterRendererConfig* config,
   }
 
 #ifdef SHELL_ENABLE_GL
-  flutter::EmbedderExternalTextureGL::ExternalTextureCallback
-      external_texture_callback;
   if (config->type == kOpenGL) {
     const FlutterOpenGLRendererConfig* open_gl_config = &config->open_gl;
     auto gl_cb = SAFE_ACCESS(open_gl_config, gl_external_texture_frame_callback,
@@ -2265,12 +2301,8 @@ CreateExternalTextureResolver(const FlutterRendererConfig* config,
     auto hb_cb =
         SAFE_ACCESS(open_gl_config,
                     hardware_buffer_external_texture_frame_callback, nullptr);
-    if (gl_cb != nullptr && hb_cb != nullptr) {
-      FML_LOG(ERROR)
-          << "Cannot specify both gl_external_texture_frame_callback and "
-             "hardware_buffer_external_texture_frame_callback.";
-      return nullptr;
-    }
+    flutter::EmbedderExternalTextureGL::ExternalTextureCallback
+        external_texture_callback;
     if (gl_cb != nullptr) {
       external_texture_callback =
           [ptr = gl_cb, user_data](
@@ -2284,23 +2316,31 @@ CreateExternalTextureResolver(const FlutterRendererConfig* config,
         }
         return texture;
       };
-      external_texture_resolver =
-          std::make_unique<ExternalTextureResolver>(external_texture_callback);
-    } else if (hb_cb != nullptr) {
-      flutter::EmbedderExternalTextureHB::ExternalTextureCallback hb_callback =
-          [ptr = hb_cb, user_data](int64_t texture_identifier, size_t width,
-                                   size_t height)
+    }
+    flutter::EmbedderExternalTextureHB::ExternalTextureCallback hb_callback;
+    if (hb_cb != nullptr) {
+      hb_callback = [ptr = hb_cb, user_data](int64_t texture_identifier,
+                                             size_t width, size_t height)
           -> std::unique_ptr<FlutterHardwareBufferExternalTexture> {
         TRACE_EVENT0("flutter", "HardwareBufferExternalTextureCallback");
         std::unique_ptr<FlutterHardwareBufferExternalTexture> texture =
             std::make_unique<FlutterHardwareBufferExternalTexture>();
         texture->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+        // -1 indicates no fence file descriptor needed.
         texture->fence_fd = -1;
         if (!ptr(user_data, texture_identifier, width, height, texture.get())) {
           return nullptr;
         }
         return texture;
       };
+    }
+    if (external_texture_callback && hb_callback) {
+      external_texture_resolver = std::make_unique<ExternalTextureResolver>(
+          external_texture_callback, hb_callback);
+    } else if (external_texture_callback) {
+      external_texture_resolver =
+          std::make_unique<ExternalTextureResolver>(external_texture_callback);
+    } else if (hb_callback) {
       external_texture_resolver =
           std::make_unique<ExternalTextureResolver>(hb_callback);
     }
@@ -2331,8 +2371,6 @@ CreateExternalTextureResolver(const FlutterRendererConfig* config,
   }
 #endif
 #ifdef SHELL_ENABLE_VULKAN
-  flutter::EmbedderExternalTextureVK::ExternalTextureCallback
-      external_texture_vulkan_callback;
   if (config->type == kVulkan) {
     const FlutterVulkanRendererConfig* vulkan_config = &config->vulkan;
     auto vk_cb =
@@ -2340,12 +2378,8 @@ CreateExternalTextureResolver(const FlutterRendererConfig* config,
     auto hb_cb =
         SAFE_ACCESS(vulkan_config,
                     hardware_buffer_external_texture_frame_callback, nullptr);
-    if (vk_cb != nullptr && hb_cb != nullptr) {
-      FML_LOG(ERROR)
-          << "Cannot specify both external_texture_frame_callback and "
-             "hardware_buffer_external_texture_frame_callback.";
-      return nullptr;
-    }
+    flutter::EmbedderExternalTextureVK::ExternalTextureCallback
+        external_texture_vulkan_callback;
     if (vk_cb != nullptr) {
       external_texture_vulkan_callback =
           [ptr = vk_cb, user_data](
@@ -2360,23 +2394,31 @@ CreateExternalTextureResolver(const FlutterRendererConfig* config,
         }
         return texture;
       };
-      external_texture_resolver = std::make_unique<ExternalTextureResolver>(
-          external_texture_vulkan_callback);
-    } else if (hb_cb != nullptr) {
-      flutter::EmbedderExternalTextureHB::ExternalTextureCallback hb_callback =
-          [ptr = hb_cb, user_data](int64_t texture_identifier, size_t width,
-                                   size_t height)
+    }
+    flutter::EmbedderExternalTextureHB::ExternalTextureCallback hb_callback;
+    if (hb_cb != nullptr) {
+      hb_callback = [ptr = hb_cb, user_data](int64_t texture_identifier,
+                                             size_t width, size_t height)
           -> std::unique_ptr<FlutterHardwareBufferExternalTexture> {
         TRACE_EVENT0("flutter", "HardwareBufferExternalTextureCallback");
         std::unique_ptr<FlutterHardwareBufferExternalTexture> texture =
             std::make_unique<FlutterHardwareBufferExternalTexture>();
         texture->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+        // -1 indicates no fence file descriptor needed.
         texture->fence_fd = -1;
         if (!ptr(user_data, texture_identifier, width, height, texture.get())) {
           return nullptr;
         }
         return texture;
       };
+    }
+    if (external_texture_vulkan_callback && hb_callback) {
+      external_texture_resolver = std::make_unique<ExternalTextureResolver>(
+          external_texture_vulkan_callback, hb_callback);
+    } else if (external_texture_vulkan_callback) {
+      external_texture_resolver = std::make_unique<ExternalTextureResolver>(
+          external_texture_vulkan_callback);
+    } else if (hb_callback) {
       external_texture_resolver =
           std::make_unique<ExternalTextureResolver>(hb_callback);
     }

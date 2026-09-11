@@ -97,6 +97,13 @@ struct AndroidVMArgs {
   /// Initial VM service URI (if available).
   std::string vm_service_uri;
 
+  /// @brief Parses command-line arguments and updates relevant fields (AOT lib,
+  /// ICU paths, rendering backend, heap size, log tag, etc.).
+  void ParseCommandLineArgs(const std::vector<std::string>& args);
+
+  /// @brief Parses stored command_line_args.
+  void ParseCommandLineArgs() { ParseCommandLineArgs(command_line_args); }
+
   bool operator==(const AndroidVMArgs& other) const {
     return command_line_args == other.command_line_args &&
            assets_path == other.assets_path &&

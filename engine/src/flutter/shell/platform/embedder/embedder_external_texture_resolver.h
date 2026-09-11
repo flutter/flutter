@@ -33,15 +33,39 @@ class EmbedderExternalTextureResolver {
 #ifdef SHELL_ENABLE_GL
   explicit EmbedderExternalTextureResolver(
       EmbedderExternalTextureGL::ExternalTextureCallback gl_callback);
+
+  EmbedderExternalTextureResolver(
+      EmbedderExternalTextureGL::ExternalTextureCallback gl_callback,
+      EmbedderExternalTextureHB::ExternalTextureCallback
+          hardware_buffer_callback);
+
+  void SetGLCallback(
+      EmbedderExternalTextureGL::ExternalTextureCallback gl_callback);
 #endif
 
 #ifdef SHELL_ENABLE_METAL
   explicit EmbedderExternalTextureResolver(
       EmbedderExternalTextureMetal::ExternalTextureCallback metal_callback);
+
+  EmbedderExternalTextureResolver(
+      EmbedderExternalTextureMetal::ExternalTextureCallback metal_callback,
+      EmbedderExternalTextureHB::ExternalTextureCallback
+          hardware_buffer_callback);
+
+  void SetMetalCallback(
+      EmbedderExternalTextureMetal::ExternalTextureCallback metal_callback);
 #endif
 
 #ifdef SHELL_ENABLE_VULKAN
   explicit EmbedderExternalTextureResolver(
+      EmbedderExternalTextureVK::ExternalTextureCallback vulkan_callback);
+
+  EmbedderExternalTextureResolver(
+      EmbedderExternalTextureVK::ExternalTextureCallback vulkan_callback,
+      EmbedderExternalTextureHB::ExternalTextureCallback
+          hardware_buffer_callback);
+
+  void SetVulkanCallback(
       EmbedderExternalTextureVK::ExternalTextureCallback vulkan_callback);
 #endif
 
@@ -49,9 +73,13 @@ class EmbedderExternalTextureResolver {
       EmbedderExternalTextureHB::ExternalTextureCallback
           hardware_buffer_callback);
 
+  void SetHardwareBufferCallback(
+      EmbedderExternalTextureHB::ExternalTextureCallback
+          hardware_buffer_callback);
+
   std::unique_ptr<Texture> ResolveExternalTexture(int64_t texture_id);
 
-  bool SupportsExternalTextures();
+  bool SupportsExternalTextures() const;
 
  private:
 #ifdef SHELL_ENABLE_GL

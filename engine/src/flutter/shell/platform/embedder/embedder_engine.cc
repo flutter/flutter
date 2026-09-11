@@ -507,13 +507,13 @@ bool EmbedderEngine::RegisterImageDecoder(ImageGeneratorFactory factory,
     return true;
   }
   fml::AutoResetWaitableEvent latch;
-  runner->PostTask(
-      [&shell = shell_, factory = std::move(factory), priority, &latch]() {
-        if (shell) {
-          shell->RegisterImageDecoder(std::move(factory), priority);
-        }
-        latch.Signal();
-      });
+  runner->PostTask([&shell = shell_, factory = std::move(factory), priority,
+                    &latch]() mutable {
+    if (shell) {
+      shell->RegisterImageDecoder(std::move(factory), priority);
+    }
+    latch.Signal();
+  });
   latch.Wait();
   return true;
 }

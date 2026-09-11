@@ -7,12 +7,76 @@
 #include <algorithm>
 #include <cstring>
 
+#include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
+#include "flutter/fml/paths.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/android/flutter_embedder_native.h"
 
 namespace flutter {
 namespace android {
+
+void AndroidVMArgs::ParseCommandLineArgs(const std::vector<std::string>& args) {
+  TRACE_EVENT0("flutter", "AndroidVMArgs::ParseCommandLineArgs");
+  command_line_args = args;
+
+  std::string first_aot_candidate;
+  std::string file_aot_candidate;
+
+  for (const auto& arg : args) {
+    if (arg == "--enable-software-rendering") {
+      enable_software_rendering = true;
+    } else if (arg == "--enable-impeller=false" ||
+               arg == "--enable-impeller=0") {
+      enable_impeller = false;
+    } else if (arg == "--enable-impeller" || arg == "--enable-impeller=true" ||
+               arg == "--enable-impeller=1") {
+      enable_impeller = true;
+    } else if (arg.rfind("--impeller-backend=", 0) == 0) {
+      requested_rendering_backend =
+          arg.substr(std::string("--impeller-backend=").length());
+    } else if (arg == "--trace-systrace") {
+      trace_systrace = true;
+    } else if (arg.rfind("--aot-shared-library-name=", 0) == 0) {
+      std::string val =
+          arg.substr(std::string("--aot-shared-library-name=").length());
+      if (!val.empty()) {
+        if (first_aot_candidate.empty()) {
+          first_aot_candidate = val;
+        }
+        if (fml::IsFile(val)) {
+          file_aot_candidate = val;
+        }
+      }
+    } else if (arg.rfind("--icu-data-file-path=", 0) == 0) {
+      icu_data_path = arg.substr(std::string("--icu-data-file-path=").length());
+    } else if (arg.rfind("--log-tag=", 0) == 0) {
+      log_tag = arg.substr(std::string("--log-tag=").length());
+    } else if (arg.rfind("--old-gen-heap-size=", 0) == 0) {
+      std::string val =
+          arg.substr(std::string("--old-gen-heap-size=").length());
+      char* end = nullptr;
+      errno = 0;
+      // Base 10 conversion for decimal integer heap size in bytes.
+      long long parsed = std::strtoll(val.c_str(), &end, 10);
+      if (end == val.c_str() || *end != '\0' || errno == ERANGE ||
+          parsed <= 0) {
+        FML_LOG(ERROR) << "Invalid positive integer for --old-gen-heap-size: "
+                       << val;
+      } else {
+        dart_old_gen_heap_size = parsed;
+      }
+    }
+  }
+
+  // Prioritize existing files on disk over relative/basename strings; fall back
+  // to the first non-empty candidate for direct-from-APK loading via dlopen.
+  if (!file_aot_candidate.empty()) {
+    aot_library_path = file_aot_candidate;
+  } else if (!first_aot_candidate.empty()) {
+    aot_library_path = first_aot_candidate;
+  }
+}
 
 #include <sys/system_properties.h>
 

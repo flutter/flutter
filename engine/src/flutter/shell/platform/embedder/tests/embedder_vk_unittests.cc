@@ -261,14 +261,13 @@ TEST_F(EmbedderTest, CanRegisterAndResolveHardwareBufferExternalTextureVulkan) {
   EXPECT_TRUE(test_state.destruction_invoked);
 }
 
-TEST_F(EmbedderTest,
-       HardwareBufferExternalTextureConflictingCallbacksRejectionVulkan) {
+TEST_F(EmbedderTest, HardwareBufferExternalTextureDualCallbacksSupportVulkan) {
   auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(DlISize(1, 1));
 
   // Configure BOTH external_texture_frame_callback and
-  // hardware_buffer_external_texture_frame_callback.
+  // hardware_buffer_external_texture_frame_callback to verify dual support.
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t id, size_t width, size_t height,
          FlutterVulkanExternalTexture* texture) -> bool { return false; };
@@ -280,7 +279,7 @@ TEST_F(EmbedderTest,
   };
 
   auto engine = builder.InitializeEngine();
-  EXPECT_FALSE(engine.is_valid());
+  EXPECT_TRUE(engine.is_valid());
 }
 
 TEST_F(EmbedderTest, CanSpawnEngineVulkan) {

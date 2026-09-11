@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
+import android.hardware.HardwareBuffer;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -1116,6 +1117,23 @@ public class FlutterJNI {
   }
 
   private native void nativeMarkTextureFrameAvailable(long nativeShellHolderId, long textureId);
+
+  /**
+   * Updates an existing hardware buffer texture with a newly produced frame.
+   *
+   * @param textureId The texture identifier.
+   * @param hardwareBuffer The newly acquired HardwareBuffer backing the frame.
+   */
+  @UiThread
+  public void updateHardwareBufferTexture(long textureId, @NonNull HardwareBuffer hardwareBuffer) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeUpdateHardwareBufferTexture(nativeShellHolderId, textureId, hardwareBuffer);
+  }
+
+  @Keep
+  private native void nativeUpdateHardwareBufferTexture(
+      long nativeShellHolderId, long textureId, @NonNull HardwareBuffer hardwareBuffer);
 
   /** Schedule the engine to draw a frame but does not invalidate the layout tree. */
   @UiThread

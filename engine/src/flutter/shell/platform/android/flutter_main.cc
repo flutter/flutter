@@ -136,21 +136,7 @@ void FlutterMain::Init(JNIEnv* env,
 
   // Initialize AndroidVMArgs and parse flags.
   android::AndroidVMArgs vm_args;
-  vm_args.command_line_args = args;
-  for (const auto& arg : args) {
-    if (arg == "--enable-software-rendering") {
-      vm_args.enable_software_rendering = true;
-    } else if (arg == "--enable-impeller=false" ||
-               arg == "--enable-impeller=0") {
-      vm_args.enable_impeller = false;
-    } else if (arg == "--enable-impeller" || arg == "--enable-impeller=true" ||
-               arg == "--enable-impeller=1") {
-      vm_args.enable_impeller = true;
-    } else if (arg.rfind("--impeller-backend=", 0) == 0) {
-      vm_args.requested_rendering_backend =
-          arg.substr(std::string("--impeller-backend=").length());
-    }
-  }
+  vm_args.ParseCommandLineArgs(args);
   if (kernelPath != nullptr) {
     vm_args.kernel_path = fml::jni::JavaStringToString(env, kernelPath);
     vm_args.assets_path = fml::paths::GetDirectoryName(vm_args.kernel_path);

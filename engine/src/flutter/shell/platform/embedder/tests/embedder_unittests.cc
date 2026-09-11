@@ -3065,8 +3065,11 @@ TEST_F(EmbedderTest, CanCaptureScreenshotConcurrentThreads) {
 
   frame_latch.Wait();
 
+  // kThreadCount = 4 concurrent worker threads to stress-test parallel
+  // execution.
   constexpr size_t kThreadCount = 4;
   std::vector<std::thread> workers;
+  workers.reserve(kThreadCount);
   std::atomic<size_t> success_count{0};
 
   for (size_t i = 0; i < kThreadCount; ++i) {
@@ -6573,8 +6576,9 @@ TEST_F(EmbedderTest,
               DlImageSampling::kLinear);
     EXPECT_EQ(valid_destructions, 0);
     EXPECT_EQ(invalid_destructions, 0);
-    ASSERT_TRUE(hb->GetCurrentFrame().has_value());
-    EXPECT_EQ(hb->GetCurrentFrame()->buffer,
+    const auto current_frame1 = hb->GetCurrentFrame();
+    ASSERT_TRUE(current_frame1.has_value());
+    EXPECT_EQ(current_frame1->buffer,
               reinterpret_cast<FlutterHardwareBufferHandle>(0xABCD));
 
     // Signal new frame, but this time supply an invalid frame.
@@ -6587,8 +6591,9 @@ TEST_F(EmbedderTest,
     EXPECT_EQ(invalid_destructions, 1);
     // Active valid frame was PRESERVED and remains displayed.
     EXPECT_EQ(valid_destructions, 0);
-    ASSERT_TRUE(hb->GetCurrentFrame().has_value());
-    EXPECT_EQ(hb->GetCurrentFrame()->buffer,
+    const auto current_frame2 = hb->GetCurrentFrame();
+    ASSERT_TRUE(current_frame2.has_value());
+    EXPECT_EQ(current_frame2->buffer,
               reinterpret_cast<FlutterHardwareBufferHandle>(0xABCD));
 
     // OnGrContextDestroyed cleans up the valid frame.
