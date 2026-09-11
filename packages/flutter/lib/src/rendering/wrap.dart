@@ -529,10 +529,16 @@ class RenderWrap extends RenderBox
     switch (direction) {
       case Axis.horizontal:
         var width = 0.0;
+        var childCount = 0;
         RenderBox? child = firstChild;
         while (child != null) {
           width += child.getMaxIntrinsicWidth(double.infinity);
+          childCount += 1;
           child = childAfter(child);
+        }
+        // Include inter-child spacing so IntrinsicWidth/PopupMenu sizing matches layout.
+        if (childCount > 1) {
+          width += spacing * (childCount - 1);
         }
         return width;
       case Axis.vertical:
@@ -563,10 +569,15 @@ class RenderWrap extends RenderBox
         return getDryLayout(BoxConstraints(maxWidth: width)).height;
       case Axis.vertical:
         var height = 0.0;
+        var childCount = 0;
         RenderBox? child = firstChild;
         while (child != null) {
           height += child.getMaxIntrinsicHeight(double.infinity);
+          childCount += 1;
           child = childAfter(child);
+        }
+        if (childCount > 1) {
+          height += spacing * (childCount - 1);
         }
         return height;
     }
