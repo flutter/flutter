@@ -161,6 +161,13 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
 
   @override
   PhysicalKeyboardKey get physicalKey {
+    // Android IR Remotes send scanCode 97 and keyCode 23 for DPAD_CENTER/Select.
+    // Scan code 97 is otherwise mapped to PhysicalKeyboardKey.controlRight.
+    // Since DPAD_CENTER is not a modifier key, override the mapping to return
+    // PhysicalKeyboardKey.select to prevent key synchronization issues.
+    if (scanCode == 97 && keyCode == 23) {
+      return PhysicalKeyboardKey.select;
+    }
     if (kAndroidToPhysicalKey.containsKey(scanCode)) {
       return kAndroidToPhysicalKey[scanCode]!;
     }
