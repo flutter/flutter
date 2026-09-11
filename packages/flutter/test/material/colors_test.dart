@@ -83,4 +83,14 @@ void main() {
       }
     }
   });
+
+  test('MaterialColor swatch comparison', () {
+    final sampleMap = <int, Color>{50: const Color(0xFFE1F5FE), 100: const Color(0xFFB3E5FC)};
+    final anotherMap = <int, Color>{50: const Color(0xFFE1F5FE), 100: const Color(0xFFB3E5FC)};
+    final first = MaterialColor(0, sampleMap);
+    final second = MaterialColor(0, sampleMap);
+    final third = MaterialColor(0, anotherMap);
+    expect(first, second);
+    expect(first, third);
+  });
 }
