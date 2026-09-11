@@ -533,6 +533,34 @@ enum class IndexType : uint8_t {
   kNone,
 };
 
+/// The parameters of a non-indexed draw, as read from a buffer by the GPU.
+///
+/// The layout is identical on every backend (`VkDrawIndirectCommand`,
+/// `MTLDrawPrimitivesIndirectArguments`, and the GLES 3.1
+/// `DrawArraysIndirectCommand`), so a shader that writes these fields is
+/// portable as-is.
+struct DrawIndirectArgs {
+  uint32_t vertex_count = 0u;
+  uint32_t instance_count = 0u;
+  uint32_t first_vertex = 0u;
+  uint32_t first_instance = 0u;
+};
+static_assert(sizeof(DrawIndirectArgs) == 16u);
+
+/// The parameters of an indexed draw, as read from a buffer by the GPU.
+///
+/// Matches `VkDrawIndexedIndirectCommand`,
+/// `MTLDrawIndexedPrimitivesIndirectArguments`, and the GLES 3.1
+/// `DrawElementsIndirectCommand`.
+struct DrawIndexedIndirectArgs {
+  uint32_t index_count = 0u;
+  uint32_t instance_count = 0u;
+  uint32_t first_index = 0u;
+  int32_t base_vertex = 0;
+  uint32_t first_instance = 0u;
+};
+static_assert(sizeof(DrawIndexedIndirectArgs) == 20u);
+
 /// Decides how backend draws pixels based on input vertices.
 enum class PrimitiveType : uint8_t {
   /// Draws a triangle for each separate set of three vertices.

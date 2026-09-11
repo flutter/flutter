@@ -65,7 +65,9 @@ bool RenderPass::AddCommand(Command&& command) {
     return false;
   }
 
-  if (command.element_count == 0u || command.instance_count == 0u) {
+  // An indirect draw carries no counts here; they live in the argument buffer.
+  if (!command.indirect_buffer &&
+      (command.element_count == 0u || command.instance_count == 0u)) {
     // Essentially a no-op. Don't record the command but this is not necessary
     // an error either.
     return true;
@@ -171,6 +173,15 @@ bool RenderPass::SetIndexBuffer(BufferView index_buffer, IndexType index_type) {
   return true;
 }
 
+bool RenderPass::SetIndirectBuffer(BufferView indirect_args) {
+  if (!ValidateIndirectBuffer(indirect_args)) {
+    return false;
+  }
+
+  pending_.indirect_buffer = std::move(indirect_args);
+  return true;
+}
+
 bool RenderPass::ValidateVertexBuffers(const BufferView vertex_buffers[],
                                        size_t vertex_buffer_count) {
   if (vertex_buffer_count > kMaxVertexBuffers) {
@@ -199,6 +210,30 @@ bool RenderPass::ValidateIndexBuffer(const BufferView& index_buffer,
 
   if (index_type != IndexType::kNone && !index_buffer) {
     VALIDATION_LOG << "Attempted to bind an invalid index buffer.";
+    return false;
+  }
+
+  return true;
+}
+
+bool RenderPass::ValidateIndirectBuffer(const BufferView& indirect_args) {
+  if (!indirect_args) {
+    VALIDATION_LOG << "Attempted to bind an invalid indirect argument buffer.";
+    return false;
+  }
+
+  // Every backend requires the argument offset to be 4 byte aligned.
+  if (indirect_args.GetRange().offset % 4u != 0u) {
+    VALIDATION_LOG << "The indirect argument buffer offset must be a multiple "
+                      "of 4 bytes.";
+    return false;
+  }
+
+  // The arguments themselves are not inspected, but a view too small to hold
+  // even the shorter of the two layouts is always a caller bug.
+  if (indirect_args.GetRange().length < sizeof(DrawIndirectArgs)) {
+    VALIDATION_LOG << "The indirect argument buffer is too small to hold draw "
+                      "arguments.";
     return false;
   }
 

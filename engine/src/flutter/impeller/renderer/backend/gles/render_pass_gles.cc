@@ -586,7 +586,24 @@ static void EncodeViewport(const ProcTableGLES& gl,
       }
     };
 
-    if (command.instance_count == 0u) {
+    // An indirect draw reads its counts and offsets out of a buffer, so it
+    // ignores the counts on the command entirely.
+    if (command.indirect_buffer) {
+      const auto& indirect_gles =
+          DeviceBufferGLES::Cast(*command.indirect_buffer.GetBuffer());
+      if (!indirect_gles.BindAndUploadDataIfNecessary(
+              DeviceBufferGLES::BindingType::kDrawIndirectBuffer)) {
+        return false;
+      }
+      const GLvoid* indirect_offset = reinterpret_cast<const GLvoid*>(
+          static_cast<uintptr_t>(command.indirect_buffer.GetRange().offset));
+      if (!is_indexed) {
+        gl.DrawArraysIndirect(mode, indirect_offset);
+      } else {
+        gl.DrawElementsIndirect(mode, ToIndexType(command.index_type),
+                                indirect_offset);
+      }
+    } else if (command.instance_count == 0u) {
       // A zero instance count draws nothing, matching the Metal and Vulkan
       // backends.
     } else if (emulate_instanced) {

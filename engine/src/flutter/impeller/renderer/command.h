@@ -87,6 +87,14 @@ struct Command {
   /// The index buffer binding used by the vertex shader stage.
   BufferView index_buffer;
 
+  //----------------------------------------------------------------------------
+  /// When set, the GPU reads the draw parameters from this buffer and
+  /// `element_count`, `instance_count`, and `base_vertex` are ignored.
+  ///
+  /// The contents are `DrawIndirectArgs`, or `DrawIndexedIndirectArgs` when an
+  /// index buffer is bound. They are never validated.
+  BufferView indirect_buffer;
+
   /// An offset into render pass storage where bound buffers/texture metadata is
   /// stored.
   Range bound_buffers = Range{0, 0};

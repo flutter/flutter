@@ -141,6 +141,14 @@ ProcTableGLES::ProcTableGLES(  // NOLINT(google-readability-function-size)
     FOR_EACH_IMPELLER_GLES3_PROC(IMPELLER_PROC);
   }
 
+  // Indirect draw is core on OpenGL ES 3.1 and on desktop GL 4.0. Resolution
+  // is still best-effort, so a driver that advertises the version without the
+  // entry points leaves the procs unavailable and SupportsIndirectDraw false.
+  if (description_->GetGlVersion().IsAtLeast(
+          description_->IsES() ? Version(3, 1) : Version(4))) {
+    FOR_EACH_IMPELLER_INDIRECT_DRAW_PROC(IMPELLER_PROC);
+  }
+
   // 2D array textures need the 3D texture entry points. They are core on
   // GL/GLES 3.0, exposed on desktop GL 2.x through GL_EXT_texture_array (which
   // uses the same entry-point names), and on OpenGL ES 2.0 through

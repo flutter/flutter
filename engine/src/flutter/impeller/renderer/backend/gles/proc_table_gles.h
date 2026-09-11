@@ -258,6 +258,15 @@ void(glDepthRange)(GLdouble n, GLdouble f);
   PROC(ClearDepth);                               \
   PROC(DepthRange);
 
+// Indirect draw entry points. Core on OpenGL ES 3.1 and desktop GL 4.0, and
+// declared here because this backend builds against the ES 3.0 headers.
+void(glDrawArraysIndirect)(GLenum mode, const void* indirect);
+void(glDrawElementsIndirect)(GLenum mode, GLenum type, const void* indirect);
+
+#define FOR_EACH_IMPELLER_INDIRECT_DRAW_PROC(PROC) \
+  PROC(DrawArraysIndirect);                        \
+  PROC(DrawElementsIndirect);
+
 #define FOR_EACH_IMPELLER_GLES3_PROC(PROC) \
   PROC(FenceSync);                         \
   PROC(DeleteSync);                        \
@@ -330,6 +339,7 @@ class ProcTableGLES {
   FOR_EACH_IMPELLER_ES_ONLY_PROC(IMPELLER_PROC);
   FOR_EACH_IMPELLER_DESKTOP_ONLY_PROC(IMPELLER_PROC);
   FOR_EACH_IMPELLER_GLES3_PROC(IMPELLER_PROC);
+  FOR_EACH_IMPELLER_INDIRECT_DRAW_PROC(IMPELLER_PROC);
   FOR_EACH_IMPELLER_TEXTURE_ARRAY_PROC(IMPELLER_PROC);
   FOR_EACH_IMPELLER_EXT_PROC(IMPELLER_PROC);
 

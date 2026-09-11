@@ -23,6 +23,10 @@ ByteData float32(List<double> values) {
   return Float32List.fromList(values).buffer.asByteData();
 }
 
+ByteData uint32(List<int> values) {
+  return Uint32List.fromList(values).buffer.asByteData();
+}
+
 ByteData unlitUBO(Matrix4 mvp, Vector4 color) {
   return float32(<double>[
     mvp[0], mvp[1], mvp[2], mvp[3], //
@@ -1620,6 +1624,142 @@ void main() async {
           (Exception e) => e.toString(),
           'message',
           contains('Failed to append drawIndexed'),
+        ),
+      ),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext.doesSupportIndirectDraw reports a bool', () async {
+    expect(gpu.gpuContext.doesSupportIndirectDraw, isA<bool>());
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  // Renders the same green triangle as the non-indexed test, with the vertex
+  // and instance counts read out of a buffer by the GPU instead of passed
+  // from Dart.
+  test('Can render triangle with drawIndirect', () async {
+    if (!gpu.gpuContext.doesSupportIndirectDraw) {
+      return;
+    }
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    state.renderPass.bindVertexBuffer(
+      transients.emplace(float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5])),
+    );
+    state.renderPass.bindUniform(
+      pipeline.vertexShader.getUniformSlot('VertInfo'),
+      transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime)),
+    );
+
+    // vertexCount, instanceCount, firstVertex, firstInstance.
+    final gpu.BufferView args = transients.emplace(uint32(<int>[3, 1, 0, 0]));
+    state.renderPass.drawIndirect(args);
+    state.commandBuffer.submit();
+
+    final ui.Image image = state.renderTexture.asImage();
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  // The indexed counterpart, walking a 3-entry index buffer with the counts
+  // supplied by the argument buffer.
+  test('Can render triangle with drawIndexedIndirect', () async {
+    if (!gpu.gpuContext.doesSupportIndirectDraw) {
+      return;
+    }
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    state.renderPass.bindVertexBuffer(
+      transients.emplace(float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5])),
+    );
+    state.renderPass.bindIndexBuffer(
+      transients.emplace(Uint16List.fromList(<int>[0, 1, 2]).buffer.asByteData()),
+      gpu.IndexType.int16,
+    );
+    state.renderPass.bindUniform(
+      pipeline.vertexShader.getUniformSlot('VertInfo'),
+      transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime)),
+    );
+
+    // indexCount, instanceCount, firstIndex, baseVertex, firstInstance.
+    final gpu.BufferView args = transients.emplace(uint32(<int>[3, 1, 0, 0, 0]));
+    state.renderPass.drawIndexedIndirect(args);
+    state.commandBuffer.submit();
+
+    final ui.Image image = state.renderTexture.asImage();
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('drawIndirect throws when the argument buffer is too small', () async {
+    if (!gpu.gpuContext.doesSupportIndirectDraw) {
+      return;
+    }
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BufferView args = transients.emplace(uint32(<int>[3, 1, 0]));
+
+    expect(() => state.renderPass.drawIndirect(args), throwsArgumentError);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('drawIndexedIndirect throws when the argument buffer is too small', () async {
+    if (!gpu.gpuContext.doesSupportIndirectDraw) {
+      return;
+    }
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    // Enough for the non-indexed layout, one word short of the indexed one.
+    final gpu.BufferView args = transients.emplace(uint32(<int>[3, 1, 0, 0]));
+
+    expect(() => state.renderPass.drawIndexedIndirect(args), throwsArgumentError);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('drawIndirect throws when the argument offset is misaligned', () async {
+    if (!gpu.gpuContext.doesSupportIndirectDraw) {
+      return;
+    }
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.DeviceBuffer buffer = gpu.gpuContext.createDeviceBuffer(
+      gpu.StorageMode.hostVisible,
+      64,
+    );
+
+    expect(
+      () => state.renderPass.drawIndirect(
+        gpu.BufferView(buffer, offsetInBytes: 2, lengthInBytes: 32),
+      ),
+      throwsArgumentError,
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('drawIndexedIndirect throws when no index buffer is bound', () async {
+    if (!gpu.gpuContext.doesSupportIndirectDraw) {
+      return;
+    }
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    state.renderPass.bindVertexBuffer(
+      transients.emplace(float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5])),
+    );
+    state.renderPass.bindUniform(
+      pipeline.vertexShader.getUniformSlot('VertInfo'),
+      transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime)),
+    );
+    final gpu.BufferView args = transients.emplace(uint32(<int>[3, 1, 0, 0, 0]));
+
+    expect(
+      () => state.renderPass.drawIndexedIndirect(args),
+      throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'message',
+          contains('Failed to append drawIndexedIndirect'),
         ),
       ),
     );

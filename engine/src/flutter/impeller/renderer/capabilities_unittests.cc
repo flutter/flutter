@@ -28,6 +28,7 @@ CAPABILITY_TEST(SupportsReadFromResolve, false);
 CAPABILITY_TEST(SupportsDecalSamplerAddressMode, false);
 CAPABILITY_TEST(SupportsDeviceTransientTextures, false);
 CAPABILITY_TEST(SupportsTriangleFan, false);
+CAPABILITY_TEST(SupportsIndirectDraw, false);
 CAPABILITY_TEST(SupportsExtendedRangeFormats, false);
 CAPABILITY_TEST(NeedsPartitionedHostBuffer, false);
 
