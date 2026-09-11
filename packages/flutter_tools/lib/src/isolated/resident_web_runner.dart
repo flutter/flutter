@@ -24,6 +24,7 @@ import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../dart/language_version.dart';
 import '../dart/package_map.dart';
@@ -43,6 +44,7 @@ import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/file_generators/main_dart.dart' as main_dart;
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
+import 'build_targets.dart';
 import 'devfs_web.dart';
 import 'web_expression_compiler.dart';
 
@@ -114,6 +116,7 @@ class ResidentWebRunner extends ResidentRunner {
     required Analytics analytics,
     UrlTunneller? urlTunneller,
     Map<String, String> webDefines = const <String, String>{},
+    BuildTargets? buildTargets,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
@@ -124,13 +127,20 @@ class ResidentWebRunner extends ResidentRunner {
        super(
          <FlutterDevice>[device],
          target: target ?? fileSystem.path.join('lib', 'main.dart'),
+         analytics: analytics,
+         buildTargets: buildTargets ?? const BuildTargetsImpl(),
          commandHelp: CommandHelp(
            logger: logger,
-           terminal: terminal,
-           platform: platform,
            outputPreferences: outputPreferences,
+           platform: platform,
+           terminal: terminal,
          ),
          dartBuilder: hookRunner,
+         fileSystem: fileSystem,
+         logger: logger,
+         outputPreferences: outputPreferences,
+         platform: platform,
+         terminal: terminal,
        );
 
   final FileSystem _fileSystem;
@@ -340,7 +350,7 @@ class ResidentWebRunner extends ResidentRunner {
             return 1;
           }
           flutterDevice!.generator!.accept();
-          cacheInitialDillCompilation();
+          unawaited(cacheInitialDillCompilation());
         } else {
           final webBuilder = WebBuilder(
             logger: _logger,
@@ -767,6 +777,11 @@ class ResidentWebRunner extends ResidentRunner {
         return UpdateFSReport();
       }
     }
+    final projectFileInvalidator = ProjectFileInvalidator(
+      fileSystem: _fileSystem,
+      platform: _platform,
+      logger: _logger,
+    );
     final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
       lastCompiled: flutterDevice!.devFS!.lastCompiled,
       urisToMonitor: flutterDevice!.devFS!.sources,
