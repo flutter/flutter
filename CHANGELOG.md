@@ -32,6 +32,15 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.47 Changes
 
+### [3.47.4](https://github.com/flutter/flutter/releases/tag/3.47.4)
+- [flutter/191899](https://github.com/flutter/flutter/issues/191899) When Windows Smart App Control or security policies block binary execution on Windows, gracefully handle the error with an actionable message instead of crashing.
+- [flutter/192120](https://github.com/flutter/flutter/pull/192120) Fixes missing preview reload timing analytics in LspPreviewDetector across all platforms.
+- [flutter/181560](https://github.com/flutter/flutter/issues/181560) When building iOS and macOS app, SwiftPM migration warnings and errors are not tracked in analytics.
+- [flutter/191964](https://github.com/flutter/flutter/pull/191964) On iOS, apps bundling native assets fail App Store submission when native libraries are compiled with deployment targets above iOS 13.
+- [flutter/189284](https://github.com/flutter/flutter/issues/189284) When debugging with Xcode 27, the app may launch to a white screen and hang for multiple minutes.
+- [flutter/190465](https://github.com/flutter/flutter/issues/190465) When running WebAssembly dry-run builds on Web, remove redundant experiment flag warning that dropped telemetry error findings.
+- [flutter/191898](https://github.com/flutter/flutter/issues/191898) When remote test processes emit plain-text error output on all platforms, prevent flutter_tools from crashing with an unhandled FormatException.
+
 ### [3.47.3](https://github.com/flutter/flutter/releases/tag/3.47.3)
 - [flutter/191045](https://github.com/flutter/flutter/issues/191045) When calling Actions.handler on all platforms, null was always returned.
 - [flutter/181315](https://github.com/flutter/flutter/issues/181315) When using Impeller on Android devices with B-Series PowerVR GPUs, visual oddities and performance drops can be experienced.
