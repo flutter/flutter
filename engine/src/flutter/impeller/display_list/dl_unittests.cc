@@ -2320,5 +2320,88 @@ TEST_P(
   EXPECT_EQ(it2->second.backdrop_count, 1u);
 }
 
+TEST_P(
+    DisplayListTest,
+    FirstPassDispatcherGeneratedBackdropBoundedBlursWithDifferentBoundsShareId) {
+  flutter::DisplayListBuilder builder;
+  auto blur1 = flutter::DlBlurImageFilter::Make(
+      10, 10, flutter::DlTileMode::kClamp, DlRect::MakeLTRB(0, 0, 100, 100));
+  auto blur2 = flutter::DlBlurImageFilter::Make(
+      10, 10, flutter::DlTileMode::kClamp, DlRect::MakeLTRB(120, 0, 220, 100));
+  flutter::DlPaint save_paint;
+
+  // Sibling SaveLayer 1 with bounded blur
+  builder.SaveLayer(DlRect::MakeLTRB(0, 0, 100, 100), &save_paint, blur1.get());
+  builder.Restore();
+
+  // Sibling SaveLayer 2 with bounded blur having different bounds
+  builder.SaveLayer(DlRect::MakeLTRB(120, 0, 220, 100), &save_paint,
+                    blur2.get());
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  FirstPassDispatcher collector(GetContentContext(), Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  auto [backdrop_data, backdrop_count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 2u);
+  EXPECT_EQ(generated_backdrop_ids.size(), 2u);
+
+  // Both bounded blur layers share the generated ID -1 because their sigma
+  // and tile mode match.
+  EXPECT_EQ(generated_backdrop_ids[0], -1);
+  EXPECT_EQ(generated_backdrop_ids[1], -1);
+
+  auto it = backdrop_data.find(-1);
+  ASSERT_TRUE(it != backdrop_data.end());
+  EXPECT_EQ(it->second.backdrop_count, 2u);
+  // Bounds differ between blur1 and blur2, so all_filters_equal is false.
+  EXPECT_FALSE(it->second.all_filters_equal);
+  EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(0, 0, 220, 100));
+}
+
+TEST_P(DisplayListTest,
+       FirstPassDispatcherGeneratedBackdropBoundedAndUnboundedBlursShareId) {
+  flutter::DisplayListBuilder builder;
+  auto blur_unbounded =
+      flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
+  auto blur_bounded = flutter::DlBlurImageFilter::Make(
+      10, 10, flutter::DlTileMode::kClamp, DlRect::MakeLTRB(120, 0, 220, 100));
+  flutter::DlPaint save_paint;
+
+  // Sibling SaveLayer 1 with unbounded blur
+  builder.SaveLayer(DlRect::MakeLTRB(0, 0, 100, 100), &save_paint,
+                    blur_unbounded.get());
+  builder.Restore();
+
+  // Sibling SaveLayer 2 with bounded blur
+  builder.SaveLayer(DlRect::MakeLTRB(120, 0, 220, 100), &save_paint,
+                    blur_bounded.get());
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  FirstPassDispatcher collector(GetContentContext(), Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  auto [backdrop_data, backdrop_count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 2u);
+  EXPECT_EQ(generated_backdrop_ids.size(), 2u);
+
+  // Both layers share generated ID -1 because blur parameters match.
+  EXPECT_EQ(generated_backdrop_ids[0], -1);
+  EXPECT_EQ(generated_backdrop_ids[1], -1);
+
+  auto it = backdrop_data.find(-1);
+  ASSERT_TRUE(it != backdrop_data.end());
+  EXPECT_EQ(it->second.backdrop_count, 2u);
+  // Unbounded vs bounded blur filters are not equal.
+  EXPECT_FALSE(it->second.all_filters_equal);
+  EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(0, 0, 220, 100));
+}
+
 }  // namespace testing
 }  // namespace impeller

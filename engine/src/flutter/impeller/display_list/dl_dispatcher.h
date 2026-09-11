@@ -486,7 +486,7 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
 
   // Automatic backdrop grouping state. Used to automatically synthesize
   // backdrop IDs to group sibling backdrop layers that are not in explicit
-  // user-specified backdrop groups. Sibling backdrop layers with matching
+  // user-specified backdrop groups. Sibling backdrop layers with compatible
   // filter configurations and without an intervening draw mutation can share a
   // generated backdrop group.
 

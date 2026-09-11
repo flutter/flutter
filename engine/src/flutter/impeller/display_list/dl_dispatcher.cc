@@ -12,6 +12,7 @@
 
 #include "display_list/dl_sampling_options.h"
 #include "display_list/effects/dl_image_filter.h"
+#include "display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/fml/logging.h"
 #include "fml/closure.h"
 #include "impeller/core/formats.h"
@@ -1001,6 +1002,25 @@ void FirstPassDispatcher::save() {
 }
 
 namespace {
+bool CanShareBackdropId(const flutter::DlImageFilter* a,
+                        const flutter::DlImageFilter* b) {
+  if (a == b) {
+    return true;
+  }
+  if (a == nullptr || b == nullptr) {
+    return false;
+  }
+  if (a->type() == flutter::DlImageFilterType::kBlur &&
+      b->type() == flutter::DlImageFilterType::kBlur) {
+    const auto* blur_a = a->asBlur();
+    const auto* blur_b = b->asBlur();
+    return flutter::DlScalarNearlyEqual(blur_a->sigma_x(), blur_b->sigma_x()) &&
+           flutter::DlScalarNearlyEqual(blur_a->sigma_y(), blur_b->sigma_y()) &&
+           blur_a->tile_mode() == blur_b->tile_mode();
+  }
+  return *a == *b;
+}
+
 void RecordBackdropData(
     std::unordered_map<int64_t, BackdropData>* backdrop_data,
     int64_t backdrop_id,
@@ -1053,12 +1073,14 @@ void FirstPassDispatcher::saveLayer(const DlRect& bounds,
       // 1. There is a currently active generated backdrop group, and
       // 2. This layer is at the same saveLayer depth as the active
       //    backdrop group, and
-      // 3. The backdrop filter parameters are equal to the active group's.
+      // 3. The backdrop filter parameters are compatible with the active
+      //    group's (e.g. matching blur parameters even if local bounds differ).
       // If these conditions are not all met, generate a new backdrop group.
       if (!(active_generated_backdrop_group_.has_value() &&
             active_generated_backdrop_group_->save_layer_depth ==
                 save_layer_depth_ &&
-            *active_generated_backdrop_group_->filter == *backdrop)) {
+            CanShareBackdropId(active_generated_backdrop_group_->filter.get(),
+                               backdrop))) {
         active_generated_backdrop_group_ = GeneratedBackdropGroup{
             .id = --next_generated_backdrop_id_,
             .save_layer_depth = save_layer_depth_,
@@ -1088,7 +1110,7 @@ void FirstPassDispatcher::saveLayer(const DlRect& bounds,
         bounds.TransformBounds(frame.matrix));
   }
 
-  stack_.push_back(std::move(frame));
+  stack_.push_back(frame);
   save_layer_depth_++;
 }
 
