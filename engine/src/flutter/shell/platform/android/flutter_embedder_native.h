@@ -212,6 +212,23 @@ class FlutterEmbedderNative {
   /// @brief Returns the default global OSLibraryLoader instance.
   static std::shared_ptr<OSLibraryLoader> GetDefaultLibraryLoader();
 
+  /// @brief Sets the default global AndroidVMInit instance.
+  static void SetDefaultVMInit(std::shared_ptr<AndroidVMInit> vm_init);
+
+  /// @brief Returns the default global AndroidVMInit instance.
+  static std::shared_ptr<AndroidVMInit> GetDefaultVMInit();
+
+  /// @brief Sets the default global AndroidVMArgs instance. Pass std::nullopt
+  /// to clear.
+  static void SetDefaultVMArgs(std::optional<AndroidVMArgs> args);
+
+  /// @brief Returns the default global AndroidVMArgs instance, if set.
+  static std::optional<AndroidVMArgs> GetDefaultVMArgs();
+
+  /// @brief Atomically resets both default global AndroidVMInit and
+  /// AndroidVMArgs to null/empty states.
+  static void ResetDefaults();
+
   /// @brief Creates a default JniRouter instance with an injected JvmInvoker.
   static std::shared_ptr<JniRouter> CreateDefaultRouter(
       std::shared_ptr<JvmInvoker> invoker,
@@ -1081,6 +1098,9 @@ class FlutterEmbedderNative {
  private:
   static std::mutex default_library_loader_mutex_;
   static std::shared_ptr<OSLibraryLoader> default_library_loader_;
+  static std::mutex default_vm_init_mutex_;
+  static std::shared_ptr<AndroidVMInit> default_vm_init_;
+  static std::optional<AndroidVMArgs> default_vm_args_;
 
   std::mutex surface_mutex_;
   std::mutex presentation_mutex_;

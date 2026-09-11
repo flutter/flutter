@@ -24,6 +24,11 @@ namespace android {
 std::mutex FlutterEmbedderNative::default_library_loader_mutex_;
 std::shared_ptr<OSLibraryLoader>
     FlutterEmbedderNative::default_library_loader_ = nullptr;
+std::mutex FlutterEmbedderNative::default_vm_init_mutex_;
+std::shared_ptr<AndroidVMInit> FlutterEmbedderNative::default_vm_init_ =
+    nullptr;
+std::optional<AndroidVMArgs> FlutterEmbedderNative::default_vm_args_ =
+    std::nullopt;
 
 DefaultImageDecoderProvider::DefaultImageDecoderProvider(
     std::shared_ptr<JvmInvoker> jvm_invoker)
@@ -254,9 +259,11 @@ FlutterEmbedderNative::FlutterEmbedderNative()
       font_provider_(
           std::make_shared<DefaultFontCollectionProvider>(library_loader_)),
       aot_provider_(std::make_shared<DefaultAndroidAOTProvider>()),
-      vm_init_(std::make_shared<AndroidVMInit>(jvm_invoker_,
-                                               font_provider_,
-                                               aot_provider_)),
+      vm_init_(GetDefaultVMInit()
+                   ? GetDefaultVMInit()
+                   : std::make_shared<AndroidVMInit>(jvm_invoker_,
+                                                     font_provider_,
+                                                     aot_provider_)),
       hardware_buffer_provider_(
           std::make_shared<DefaultAndroidHardwareBufferProvider>(
               library_loader_)),
@@ -290,6 +297,12 @@ FlutterEmbedderNative::FlutterEmbedderNative()
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, nullptr)),
       asset_provider_(std::make_shared<APKAssetProvider>(
           std::make_shared<InMemoryAPKAssetProviderImpl>())) {
+  if (vm_init_ && !vm_init_->IsInitialized()) {
+    auto default_args = GetDefaultVMArgs();
+    if (default_args.has_value()) {
+      vm_init_->Init(*default_args);
+    }
+  }
   AttachWindowMetricsCallbacks();
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterEmbedderNative");
   FML_DLOG(INFO)
@@ -709,6 +722,39 @@ FlutterEmbedderNative::GetDefaultLibraryLoader() {
     default_library_loader_ = std::make_shared<DefaultOSLibraryLoader>();
   }
   return default_library_loader_;
+}
+
+void FlutterEmbedderNative::SetDefaultVMInit(
+    std::shared_ptr<AndroidVMInit> vm_init) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetDefaultVMInit");
+  std::lock_guard<std::mutex> lock(default_vm_init_mutex_);
+  default_vm_init_ = std::move(vm_init);
+}
+
+std::shared_ptr<AndroidVMInit> FlutterEmbedderNative::GetDefaultVMInit() {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetDefaultVMInit");
+  std::lock_guard<std::mutex> lock(default_vm_init_mutex_);
+  return default_vm_init_;
+}
+
+void FlutterEmbedderNative::SetDefaultVMArgs(
+    std::optional<AndroidVMArgs> args) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetDefaultVMArgs");
+  std::lock_guard<std::mutex> lock(default_vm_init_mutex_);
+  default_vm_args_ = std::move(args);
+}
+
+std::optional<AndroidVMArgs> FlutterEmbedderNative::GetDefaultVMArgs() {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetDefaultVMArgs");
+  std::lock_guard<std::mutex> lock(default_vm_init_mutex_);
+  return default_vm_args_;
+}
+
+void FlutterEmbedderNative::ResetDefaults() {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::ResetDefaults");
+  std::lock_guard<std::mutex> lock(default_vm_init_mutex_);
+  default_vm_init_ = nullptr;
+  default_vm_args_ = std::nullopt;
 }
 
 std::shared_ptr<JniRouter> FlutterEmbedderNative::CreateDefaultRouter(
