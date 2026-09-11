@@ -4,10 +4,10 @@
 
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_api_samples/widgets/image/image.frame_builder.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   // The app being tested loads images via HTTP which the test

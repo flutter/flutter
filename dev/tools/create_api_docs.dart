@@ -800,7 +800,7 @@ class DartdocGenerator {
     // Check a "sample" example, any one will do.
     _sanityCheckExample(
       widgetsDirectory.childFile('showGeneralDialog.html').path,
-      r'\s*<pre\s+id="longSnippet1".*<code\s+class="language-dart">\s*import &#39;package:flutter&#47;material.dart&#39;;',
+      r'\s*<pre\s+id="longSnippet1".*<code\s+class="language-dart">\s*import &#39;package:material_ui&#47;material_ui.dart&#39;;',
     );
 
     // Check a "snippet" example, any one will do.
