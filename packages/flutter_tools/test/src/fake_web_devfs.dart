@@ -145,6 +145,12 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
 class FakeAssetBundle extends Fake implements AssetBundle {
   @override
   final Map<String, AssetBundleEntry> entries = <String, AssetBundleEntry>{};
+
+  @override
+  final Set<String> removedEntries = <String>{};
+
+  @override
+  final Set<String> removedShaderEntries = <String>{};
 }
 
 /// A fake [Dwds] service for testing.

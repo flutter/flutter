@@ -248,23 +248,101 @@ name: my_app''')
         // touch the package config to make sure its change time is after pubspec.yaml's
         packageConfig.setLastModifiedSync(modifiedTime);
 
-        // Even though the previous file was removed, it is left in the
-        // asset manifest and not updated. This is due to the devfs not
-        // supporting file deletion.
         expect(bundle.needsBuild(), true);
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
         );
+        // The removed file's entry is dropped from the manifest, and its key
+        // is reported via removedEntries so a running application's asset
+        // cache can be told to evict it.
         expect(
           bundle.entries.keys,
-          unorderedEquals(<String>[
-            'AssetManifest.bin',
-            'FontManifest.json',
-            'NOTICES.Z',
-            'assets/foo/bar.txt',
-          ]),
+          unorderedEquals(<String>['AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']),
         );
+        expect(bundle.removedEntries, unorderedEquals(<String>['assets/foo/bar.txt']));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        Platform: () => platform,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'handle renaming an explicitly listed asset',
+      () async {
+        globals.fs.file('assets/foo.txt').createSync(recursive: true);
+        globals.fs.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync(r'''
+name: my_app
+flutter:
+  assets:
+    - assets/foo.txt
+''');
+        writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'my_app');
+        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
+        expect(bundle.entries.keys, contains('assets/foo.txt'));
+        expect(bundle.removedEntries, isEmpty);
+
+        // Rename the asset on disk and in the pubspec.
+        globals.fs.file('assets/foo.txt').renameSync('assets/bar.txt');
+        globals.fs.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync(r'''
+name: my_app
+flutter:
+  assets:
+    - assets/bar.txt
+''');
+
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
+        // The old key must not linger in entries forever, and the new key
+        // must be present.
+        expect(bundle.entries.keys, contains('assets/bar.txt'));
+        expect(bundle.entries.keys, isNot(contains('assets/foo.txt')));
+        expect(bundle.removedEntries, unorderedEquals(<String>['assets/foo.txt']));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        Platform: () => platform,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'a removed shader entry is reported via removedShaderEntries, not removedEntries',
+      () async {
+        globals.fs.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync('name: my_app');
+        writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'my_app');
+        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+
+        // Seed a pre-existing shader entry as if a previous build had picked
+        // it up, then rebuild with a manifest that no longer references it.
+        bundle.entries['assets/shader.frag'] = AssetBundleEntry(
+          DevFSStringContent(''),
+          kind: AssetKind.shader,
+          transformers: const [],
+        );
+
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
+
+        expect(bundle.entries.keys, isNot(contains('assets/shader.frag')));
+        expect(bundle.removedShaderEntries, unorderedEquals(<String>['assets/shader.frag']));
+        expect(bundle.removedEntries, isNot(contains('assets/shader.frag')));
       },
       overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
