@@ -5177,6 +5177,7 @@ class EditableTextState extends State<EditableText>
     // (called via _formatAndSetValue), which ensures the active handle is kept in view.
     // Bypassing the default caret auto-scroll here prevents conflicts that would snap
     // the viewport back to the opposite, static selection end.
+    // Follow up work: https://github.com/flutter/flutter/issues/192595
     final bool shouldShowCaret =
         (widget.readOnly ? _value.selection != value.selection : _value != value) &&
         cause != SelectionChangedCause.drag;
