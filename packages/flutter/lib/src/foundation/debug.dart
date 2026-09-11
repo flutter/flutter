@@ -590,14 +590,23 @@ class DebugViewMetricsOverride with Diagnosticable {
 
   /// Creates a copy of this object with the given fields replaced.
   ///
-  /// The arguments, if provided, must match the types of the corresponding
-  /// fields: [num] for [devicePixelRatio] and [textScaleFactor], [ui.Size] for
-  /// [physicalSize], [ui.Brightness] for [platformBrightness],
-  /// [DebugViewPadding] for insets and paddings, and [bool] for accessibility flags.
+  /// The arguments are typed as [Object?] to distinguish between passing `null`
+  /// (which clears the override for that field, resetting it so the underlying
+  /// platform value is used) and omitting an argument (which preserves the
+  /// existing override).
   ///
-  /// Passing `null` for an argument clears the override for that field
-  /// (resetting it to null, so that the underlying platform value is used).
-  /// Omitting an argument leaves the existing override in place.
+  /// Although widened to [Object?], each argument must match the type of the
+  /// corresponding property if provided:
+  ///  * [num] or `null` for [devicePixelRatio] and [textScaleFactor]
+  ///  * [ui.Size] or `null` for [physicalSize]
+  ///  * [ui.Brightness] or `null` for [platformBrightness]
+  ///  * [DebugViewPadding] or `null` for [padding], [viewPadding], [viewInsets],
+  ///    and [systemGestureInsets]
+  ///  * [bool] or `null` for accessibility and format flags
+  ///
+  /// Type safety is enforced at runtime via assertions in debug mode and
+  /// by throwing an [ArgumentError] if an argument of an unexpected type is
+  /// passed.
   DebugViewMetricsOverride copyWith({
     Object? devicePixelRatio = _omitted,
     Object? physicalSize = _omitted,

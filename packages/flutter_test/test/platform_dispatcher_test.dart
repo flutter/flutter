@@ -12,6 +12,9 @@ import 'dart:ui'
         PlatformDispatcher,
         Size,
         ViewFocusChangeCallback,
+        ViewFocusDirection,
+        ViewFocusEvent,
+        ViewFocusState,
         VoidCallback;
 
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver;
@@ -375,6 +378,45 @@ void main() {
         expect(testDispatcher.views.single.devicePixelRatio, defaultDpr);
       });
     });
+  });
+
+  testWidgets('saving and restoring onMetricsChanged does not cause infinite recursion', (
+    WidgetTester tester,
+  ) async {
+    final VoidCallback? previous = tester.platformDispatcher.onMetricsChanged;
+    var callCount = 0;
+    tester.platformDispatcher.onMetricsChanged = () {
+      callCount++;
+    };
+    tester.platformDispatcher.onMetricsChanged?.call();
+    expect(callCount, 1);
+
+    // Restoring the previously saved callback must not cause infinite recursion.
+    tester.platformDispatcher.onMetricsChanged = previous;
+    expect(() => tester.platformDispatcher.onMetricsChanged?.call(), returnsNormally);
+    expect(callCount, 1);
+  });
+
+  testWidgets('saving and restoring onViewFocusChange does not cause infinite recursion', (
+    WidgetTester tester,
+  ) async {
+    final ViewFocusChangeCallback? previous = tester.platformDispatcher.onViewFocusChange;
+    var callCount = 0;
+    tester.platformDispatcher.onViewFocusChange = (ViewFocusEvent event) {
+      callCount++;
+    };
+    const event = ViewFocusEvent(
+      viewId: 0,
+      state: ViewFocusState.focused,
+      direction: ViewFocusDirection.undefined,
+    );
+    tester.platformDispatcher.onViewFocusChange?.call(event);
+    expect(callCount, 1);
+
+    // Restoring the previously saved callback must not cause infinite recursion.
+    tester.platformDispatcher.onViewFocusChange = previous;
+    expect(() => tester.platformDispatcher.onViewFocusChange?.call(event), returnsNormally);
+    expect(callCount, 1);
   });
 }
 

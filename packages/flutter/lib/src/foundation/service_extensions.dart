@@ -96,8 +96,8 @@ enum FoundationServiceExtensions {
   ///  * `clearAll`: when `'true'`, removes every override and ignores `viewId`.
   ///
   /// With neither `overrides` nor `clearAll`, the call is a read. If `viewId` is
-  /// omitted on a read, the call returns an empty `overrides` map and all
-  /// `overriddenViewIds`.
+  /// omitted on a read, the call returns all active overrides keyed by view ID
+  /// string under the `overrides` key, plus all `overriddenViewIds`.
   ///
   /// See also:
   ///

@@ -243,7 +243,18 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   VoidCallback? _onMetricsChanged;
   @override
   set onMetricsChanged(VoidCallback? callback) {
-    _testValues._onMetricsChanged = callback;
+    // If a test reads [onMetricsChanged] (which yields the forwarding closure
+    // [_handleMetricsChanged]) and later restores it, setting it directly on
+    // [_testValues._onMetricsChanged] would cause infinite recursion when
+    // [_handleMetricsChanged] delegates to [_testValues._onMetricsChanged].
+    // Treat the forwarding closure as restoring the default (no test callback).
+    _testValues._onMetricsChanged =
+        (identical(callback, _handleMetricsChanged) ||
+            identical(callback, _platformDispatcher.onMetricsChanged) ||
+            identical(callback, _testValues._handleMetricsChanged) ||
+            identical(callback, _testValues._platformDispatcher.onMetricsChanged))
+        ? null
+        : callback;
   }
 
   void _handleMetricsChanged() {
@@ -262,7 +273,18 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ViewFocusChangeCallback? _onViewFocusChange;
   @override
   set onViewFocusChange(ViewFocusChangeCallback? callback) {
-    _testValues._onViewFocusChange = callback;
+    // If a test reads [onViewFocusChange] (which yields the forwarding closure
+    // [_handleViewFocusChanged]) and later restores it, setting it directly on
+    // [_testValues._onViewFocusChange] would cause infinite recursion when
+    // [_handleViewFocusChanged] delegates to [_testValues._onViewFocusChange].
+    // Treat the forwarding closure as restoring the default (no test callback).
+    _testValues._onViewFocusChange =
+        (identical(callback, _handleViewFocusChanged) ||
+            identical(callback, _platformDispatcher.onViewFocusChange) ||
+            identical(callback, _testValues._handleViewFocusChanged) ||
+            identical(callback, _testValues._platformDispatcher.onViewFocusChange))
+        ? null
+        : callback;
   }
 
   void _handleViewFocusChanged(ViewFocusEvent event) {

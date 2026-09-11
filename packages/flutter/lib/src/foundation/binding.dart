@@ -215,10 +215,12 @@ abstract class BindingBase {
   /// * [platformDispatcher] on this binding to access the [PlatformDispatcher],
   ///   which provides platform-specific functionality.
   ///
-  /// Unlike [platformDispatcher], this reports the metrics the platform
-  /// reports even when [debugViewMetricsOverrides] has an entry for the
-  /// implicit view. Use [platformDispatcher] or [View.of] to obtain a
-  /// [FlutterView] that honors those overrides.
+  /// Unlike [platformDispatcher], this reports the metrics the platform reports
+  /// even when [debugViewMetricsOverrides] has an entry for the implicit view,
+  /// because it accesses the unwrapped engine singleton [ui.window] directly
+  /// without passing through the binding's view metric override wrapper.
+  /// Use [platformDispatcher] or [View.of] to obtain a [FlutterView] that honors
+  /// those overrides.
   @Deprecated(
     'Look up the current FlutterView from the context via View.of(context) or consult the PlatformDispatcher directly instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
@@ -697,11 +699,11 @@ abstract class BindingBase {
   ///  * `clearAll`: when `'true'`, removes every override and ignores `viewId`.
   ///
   /// With neither `overrides` nor `clearAll`, the call is a read. If `viewId` is
-  /// omitted on a read, the call returns an empty `overrides` map and all
-  /// `overriddenViewIds`.
+  /// omitted on a read, the call returns all active overrides keyed by view ID
+  /// string under the `overrides` key, plus all `overriddenViewIds`.
   ///
-  /// The result always reports the override now in effect for `viewId` under
-  /// the `overrides` key, plus every overridden view id under
+  /// When `viewId` is specified, the result reports the override now in effect
+  /// for `viewId` under the `overrides` key, plus every overridden view id under
   /// `overriddenViewIds` (as a sorted `List<int>`), so that tooling can
   /// resynchronize after any call.
   ///
@@ -739,7 +741,11 @@ abstract class BindingBase {
         throw const FormatException('The viewId parameter is required when overrides is provided.');
       }
       return <String, Object?>{
-        'overrides': <String, Object?>{},
+        'overrides': <String, Object?>{
+          for (final MapEntry<int, DebugViewMetricsOverride> entry
+              in debugViewMetricsOverrides.entries)
+            '${entry.key}': entry.value.toJson(),
+        },
         'overriddenViewIds': debugViewMetricsOverrides.keys.toList()..sort(),
       };
     }
