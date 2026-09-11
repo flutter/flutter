@@ -42,24 +42,64 @@ void main() {
       );
     });
 
+    testUsingContext('does not try to complete exitCompleter multiple times', () async {
+      final fakeDevice = FakeDevice('phone', deviceId);
+      deviceManager.attachedDevices.add(fakeDevice);
+      final termSignal = FakeProcessSignal();
+      final intSignal = FakeProcessSignal();
+      final command = LogsCommand(sigterm: termSignal, sigint: intSignal);
+      final Future<void> commandFuture = createTestCommandRunner(
+        command,
+      ).run(<String>['-d', deviceId, 'logs']);
+      intSignal.send(1);
+      termSignal.send(1);
+      await pumpEventQueue(times: 5);
+      await commandFuture;
+    }, overrides: <Type, Generator>{Platform: () => platform, DeviceManager: () => deviceManager});
+
     testUsingContext(
-      'does not try to complete exitCompleter multiple times',
+      'logs command parses --no-adb-log-filtering and disables filtering on device',
       () async {
-        final fakeDevice = FakeDevice('phone', deviceId);
+        final fakeDevice = FakeAndroidDevice('phone', deviceId);
         deviceManager.attachedDevices.add(fakeDevice);
+
+        expect(fakeDevice.lastPassedAdbLogFiltering, isNull);
+
         final termSignal = FakeProcessSignal();
         final intSignal = FakeProcessSignal();
         final command = LogsCommand(sigterm: termSignal, sigint: intSignal);
+
         final Future<void> commandFuture = createTestCommandRunner(
           command,
-        ).run(<String>['-d', deviceId, 'logs']);
+        ).run(<String>['-d', deviceId, 'logs', '--no-adb-log-filtering']);
+
         intSignal.send(1);
-        termSignal.send(1);
-        await pumpEventQueue(times: 5);
         await commandFuture;
+
+        expect(fakeDevice.lastPassedAdbLogFiltering, isFalse);
       },
       overrides: <Type, Generator>{Platform: () => platform, DeviceManager: () => deviceManager},
     );
+
+    testUsingContext('logs command defaults to filtering enabled on device', () async {
+      final fakeDevice = FakeAndroidDevice('phone', deviceId);
+      deviceManager.attachedDevices.add(fakeDevice);
+
+      expect(fakeDevice.lastPassedAdbLogFiltering, isNull);
+
+      final termSignal = FakeProcessSignal();
+      final intSignal = FakeProcessSignal();
+      final command = LogsCommand(sigterm: termSignal, sigint: intSignal);
+
+      final Future<void> commandFuture = createTestCommandRunner(
+        command,
+      ).run(<String>['-d', deviceId, 'logs']);
+
+      intSignal.send(1);
+      await commandFuture;
+
+      expect(fakeDevice.lastPassedAdbLogFiltering, isTrue);
+    }, overrides: <Type, Generator>{Platform: () => platform, DeviceManager: () => deviceManager});
   });
 }
 

@@ -409,6 +409,45 @@ TEST_P(AiksTest, CanRenderBoundedBlur) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CanRenderBoundedBlurWithTranslation) {
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  builder.DrawImage(image, DlPoint(0.0, 0.0), DlImageSampling::kNearestNeighbor,
+                    &paint);
+
+  DlPaint save_paint;
+  save_paint.setBlendMode(DlBlendMode::kSrcOver);
+
+  // Subcase 1: Simple translation (e.g., scrolled list item).
+  builder.Save();
+  builder.Translate(100, 150);
+  DlRect rect1 = DlRect::MakeXYWH(0, 0, 200, 100);
+  builder.ClipRect(rect1);
+  auto backdrop_filter1 =
+      DlBlurImageFilter::Make(20, 20, DlTileMode::kDecal, /*bounds=*/rect1);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter1.get());
+  builder.Restore();
+  builder.Restore();
+
+  // Subcase 2: Translation with scale and rotation.
+  builder.Save();
+  builder.Translate(50, 300);
+  builder.Scale(1.2, 1.2);
+  builder.Rotate(5);
+  DlRect rect2 = DlRect::MakeXYWH(10, 10, 180, 80);
+  builder.ClipRect(rect2);
+  auto backdrop_filter2 =
+      DlBlurImageFilter::Make(15, 15, DlTileMode::kDecal, /*bounds=*/rect2);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter2.get());
+  builder.Restore();
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, CanRenderClippedBlur) {
   DisplayListBuilder builder;
   builder.ClipRect(DlRect::MakeXYWH(100, 150, 400, 400));

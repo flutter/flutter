@@ -27,6 +27,12 @@ class ChannelCommand extends FlutterCommand {
           'This is the equivalent of running "flutter precache" with the "--all-platforms" flag.',
       defaultsTo: true,
     );
+    argParser.addFlag(
+      'force',
+      abbr: 'f',
+      help: 'Force switch channels, potentially discarding local changes.',
+      negatable: false,
+    );
   }
 
   @override
@@ -164,7 +170,7 @@ class ChannelCommand extends FlutterCommand {
         'This is not an official channel. For a list of available channels, try "flutter channel".',
       );
     }
-    await _checkout(branchName);
+    await _checkout(branchName, force: boolArg('force'));
     if (boolArg('cache-artifacts')) {
       await precacheArtifacts(Cache.flutterRoot);
     }
@@ -183,7 +189,7 @@ class ChannelCommand extends FlutterCommand {
     }
   }
 
-  static Future<void> _checkout(String branchName) async {
+  static Future<void> _checkout(String branchName, {bool force = false}) async {
     // Get latest refs from upstream.
     RunResult runResult = await globals.git.run(<String>[
       'fetch',
@@ -200,6 +206,7 @@ class ChannelCommand extends FlutterCommand {
         // branch already exists, try just switching to it
         runResult = await globals.git.run(<String>[
           'checkout',
+          if (force) '-f',
           branchName,
           '--',
         ], workingDirectory: Cache.flutterRoot);
@@ -207,6 +214,7 @@ class ChannelCommand extends FlutterCommand {
         // branch does not exist, we have to create it
         runResult = await globals.git.run(<String>[
           'checkout',
+          if (force) '-f',
           '--track',
           '-b',
           branchName,
