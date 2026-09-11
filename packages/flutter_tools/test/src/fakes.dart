@@ -36,6 +36,9 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
+import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -577,7 +580,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.isSwiftPackageManagerEnabled = false,
     this.isOmitLegacyVersionFileEnabled = false,
     this.isWindowingEnabled = false,
-    this.isAccessibilityEvaluationsEnabled = false,
     this.isLLDBDebuggingEnabled = false,
     this.isUISceneMigrationEnabled = false,
     this.isRiscv64SupportEnabled = false,
@@ -632,9 +634,6 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isWindowingEnabled;
 
   @override
-  final bool isAccessibilityEvaluationsEnabled;
-
-  @override
   final bool isLLDBDebuggingEnabled;
 
   @override
@@ -668,7 +667,6 @@ class TestFeatureFlags implements FeatureFlags {
       swiftPackageManager => isSwiftPackageManagerEnabled,
       omitLegacyVersionFile => isOmitLegacyVersionFileEnabled,
       windowingFeature => isWindowingEnabled,
-      accessibilityEvaluationsFeature => isAccessibilityEvaluationsEnabled,
       lldbDebugging => isLLDBDebuggingEnabled,
       uiSceneMigration => isUISceneMigrationEnabled,
       riscv64 => isRiscv64SupportEnabled,
@@ -697,7 +695,6 @@ class TestFeatureFlags implements FeatureFlags {
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
-    accessibilityEvaluationsFeature,
     lldbDebugging,
     uiSceneMigration,
     riscv64,
@@ -989,20 +986,56 @@ class FakeConfig extends Fake implements Config {
 
 class FakeFileSystemUtils extends Fake implements FileSystemUtils {}
 
-class FakeTerminal extends Fake implements Terminal {}
+class FakeTerminal extends Fake implements AnsiTerminal {
+  @override
+  String get successMark => '✓';
+  @override
+  String get warningMark => '!';
+
+  @override
+  String bolden(String message) => message;
+
+  @override
+  String clearScreen() => '';
+
+  @override
+  String color(String message, TerminalColor color) => message;
+}
 
 class FakeProcessUtils extends Fake implements ProcessUtils {}
 
 class FakeTemplateRenderer extends Fake implements TemplateRenderer {}
 
 class FakeXcode extends Fake implements Xcode {
-  FakeXcode({this.currentVersion, this.isDevicectlInstalled = true});
+  FakeXcode({
+    this.currentVersion,
+    this.isDevicectlInstalled = true,
+    this.isInstalled = true,
+    this.isRecommendedVersionSatisfactory = true,
+    this.isRequiredVersionSatisfactory = true,
+  });
 
   @override
   Version? currentVersion;
 
   @override
   bool isDevicectlInstalled;
+
+  @override
+  bool isInstalled;
+
+  @override
+  bool isRecommendedVersionSatisfactory;
+
+  @override
+  bool isRequiredVersionSatisfactory;
+
+  @override
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
+    XcodeBasedProject xcodeProject,
+    Directory buildDirectory, {
+    bool skipPackageValidation = true,
+  }) async => <String>[...xcrunCommand(), 'xcodebuild'];
 
   @override
   Future<String> sdkLocation(EnvironmentType environmentType) async => '/fake/sdk/path';
@@ -1106,6 +1139,56 @@ class FakeBuildTargets extends Fake implements BuildTargets {}
 
 class FakeCrashReporter extends Fake implements CrashReporter {}
 
+class FakeDoctor extends Fake implements Doctor {
+  FakeDoctor({this.canListEmulators = true, this.canLaunchAnything = true});
+
+  final bool canListEmulators;
+
+  @override
+  final bool canLaunchAnything;
+
+  @override
+  List<Workflow> get workflows => <Workflow>[FakeWorkflow(canListEmulators: canListEmulators)];
+
+  @override
+  List<DoctorValidator> get validators => const <DoctorValidator>[];
+}
+
+class FakeWorkflow extends Fake implements Workflow {
+  FakeWorkflow({this.canListEmulators = true});
+
+  @override
+  final bool canListEmulators;
+}
+
+class FakeEmulatorManager extends Fake implements EmulatorManager {
+  FakeEmulatorManager({this.createResult, this.emulators = const <Emulator>[]});
+
+  final List<Emulator> emulators;
+  final CreateEmulatorResult? createResult;
+  String? lastCreatedName;
+
+  @override
+  Future<List<Emulator>> getAllAvailableEmulators() async => emulators;
+
+  @override
+  Future<List<Emulator>> getEmulatorsMatching(String id) async {
+    return emulators
+        .where(
+          (Emulator e) =>
+              e.id.toLowerCase().contains(id.toLowerCase()) ||
+              e.name.toLowerCase().contains(id.toLowerCase()),
+        )
+        .toList();
+  }
+
+  @override
+  Future<CreateEmulatorResult> createEmulator({String? name}) async {
+    lastCreatedName = name;
+    return createResult ?? CreateEmulatorResult('fake_emulator', success: true);
+  }
+}
+
 class FakeToolDependencies extends Fake implements ToolDependencies {
   FakeToolDependencies({
     Analytics? analytics,
@@ -1114,6 +1197,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     BuildSystem? buildSystem,
     BuildTargets? buildTargets,
     CrashReporter? crashReporter,
+    Doctor? doctor,
+    EmulatorManager? emulatorManager,
+    FeatureFlags? featureFlags,
     ToolContext? toolContext,
   }) : _analytics = analytics,
        _androidContext = androidContext,
@@ -1121,6 +1207,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
        _buildSystem = buildSystem,
        _buildTargets = buildTargets,
        _crashReporter = crashReporter,
+       _doctor = doctor,
+       _emulatorManager = emulatorManager,
+       _featureFlags = featureFlags,
        _toolContext = toolContext;
 
   final Analytics? _analytics;
@@ -1129,6 +1218,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final BuildSystem? _buildSystem;
   final BuildTargets? _buildTargets;
   final CrashReporter? _crashReporter;
+  final Doctor? _doctor;
+  final EmulatorManager? _emulatorManager;
+  final FeatureFlags? _featureFlags;
   final ToolContext? _toolContext;
 
   @override
@@ -1148,6 +1240,15 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
 
   @override
   CrashReporter get crashReporter => _crashReporter ?? FakeCrashReporter();
+
+  @override
+  Doctor get doctor => _doctor ?? FakeDoctor();
+
+  @override
+  EmulatorManager get emulatorManager => _emulatorManager ?? FakeEmulatorManager();
+
+  @override
+  FeatureFlags get featureFlags => _featureFlags ?? TestFeatureFlags();
 
   @override
   ToolContext get toolContext => _toolContext ?? FakeToolContext();
