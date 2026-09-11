@@ -50,9 +50,6 @@ class ShellTestPlatformViewMetal final : public ShellTestPlatformView,
   std::shared_ptr<ExternalViewEmbedder> CreateExternalViewEmbedder() override;
 
   // |PlatformView|
-  PointerDataDispatcherMaker GetDispatcherMaker() override;
-
-  // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;
 
   // |PlatformView|

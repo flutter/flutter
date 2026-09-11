@@ -8,7 +8,6 @@
 #include <functional>
 #include <memory>
 #include <mutex>
-#include <unordered_map>
 
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/frame_timings.h"
@@ -28,12 +27,6 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
   virtual ~VsyncWaiter();
 
   void AsyncWaitForVsync(const Callback& callback);
-
-  /// Add a secondary callback for key |id| for the next vsync.
-  ///
-  /// See also |PointerDataDispatcher::ScheduleSecondaryVsyncCallback| and
-  /// |Animator::ScheduleMaybeClearTraceFlowIds|.
-  void ScheduleSecondaryCallback(uintptr_t id, const fml::closure& callback);
 
  protected:
   // On some backends, the |FireCallback| needs to be made from a static C
@@ -59,28 +52,14 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
   // arguments. This method should not block the current thread.
   virtual void AwaitVSync() = 0;
 
-  // The intent of AwaitVSyncForSecondaryCallback() is simply to wake up at the
-  // next vsync.
-  //
-  // Because there is no association with frame scheduling, underlying
-  // implementations do not need to worry about maintaining invariants or
-  // backpressure. The default implementation is to simply follow the same logic
-  // as AwaitVSync().
-  virtual void AwaitVSyncForSecondaryCallback() { AwaitVSync(); }
-
   // Schedules the callback on the UI task runner. Needs to be invoked as close
   // to the `frame_start_time` as possible.
   void FireCallback(fml::TimePoint frame_start_time,
-                    fml::TimePoint frame_target_time,
-                    bool pause_secondary_tasks = true);
+                    fml::TimePoint frame_target_time);
 
  private:
   std::mutex callback_mutex_;
   Callback callback_;
-  std::unordered_map<uintptr_t, fml::closure> secondary_callbacks_;
-
-  void PauseDartEventLoopTasks();
-  static void ResumeDartEventLoopTasks(fml::TaskQueueId ui_task_queue_id);
 
   FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiter);
 };

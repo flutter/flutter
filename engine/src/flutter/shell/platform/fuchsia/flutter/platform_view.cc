@@ -78,8 +78,6 @@ PlatformView::PlatformView(
     OnRequestAnnounceCallback on_request_announce_callback,
     OnShaderWarmupCallback on_shader_warmup_callback,
     AwaitVsyncCallback await_vsync_callback,
-    AwaitVsyncForSecondaryCallbackCallback
-        await_vsync_for_secondary_callback_callback,
     std::shared_ptr<sys::ServiceDirectory> dart_application_svc)
     : flutter::PlatformView(delegate, std::move(task_runners)),
       external_view_embedder_(external_view_embedder),
@@ -99,8 +97,6 @@ PlatformView::PlatformView(
       on_destroy_view_callback_(std::move(on_destroy_view_callback)),
       on_shader_warmup_callback_(std::move(on_shader_warmup_callback)),
       await_vsync_callback_(await_vsync_callback),
-      await_vsync_for_secondary_callback_callback_(
-          await_vsync_for_secondary_callback_callback),
       dart_application_svc_(dart_application_svc),
       parent_viewport_watcher_(parent_viewport_watcher.Bind()),
       weak_factory_(this) {
@@ -626,9 +622,8 @@ bool PlatformView::OnHandlePointerEvent(
 
 // |flutter::PlatformView|
 std::unique_ptr<flutter::VsyncWaiter> PlatformView::CreateVSyncWaiter() {
-  return std::make_unique<flutter_runner::VsyncWaiter>(
-      await_vsync_callback_, await_vsync_for_secondary_callback_callback_,
-      task_runners_);
+  return std::make_unique<flutter_runner::VsyncWaiter>(await_vsync_callback_,
+                                                       task_runners_);
 }
 
 // |flutter::PlatformView|
