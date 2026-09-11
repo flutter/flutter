@@ -7725,6 +7725,10 @@ targets:
     bringup: true
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: windowing_test_macos
