@@ -2102,7 +2102,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   bool reinitialized = false;
 
   @override
-  void reinitialize({FileSystem? fileSystem}) {
+  void reinitialize() {
     reinitialized = true;
   }
 }
