@@ -8,6 +8,7 @@
 
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/paths.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/testing/testing.h"
@@ -115,6 +116,7 @@ VoidCallback EmbedderTestContext::GetIsolateCreateCallbackHook() {
 }
 
 void EmbedderTestContext::FireIsolateCreateCallbacks() {
+  TRACE_EVENT0("flutter", "EmbedderTestContext::FireIsolateCreateCallbacks");
   for (const auto& closure : isolate_create_callbacks_) {
     closure();
   }
@@ -168,6 +170,7 @@ void EmbedderTestContext::SetViewFocusChangeRequestCallback(
 
 void EmbedderTestContext::PlatformMessageCallback(
     const FlutterPlatformMessage* message) {
+  TRACE_EVENT0("flutter", "EmbedderTestContext::PlatformMessageCallback");
   if (platform_message_callback_) {
     platform_message_callback_(message);
   }
@@ -185,6 +188,7 @@ EmbedderTestContext::GetUpdateSemanticsCallback2Hook() {
   }
 
   return [](const FlutterSemanticsUpdate2* update, void* user_data) {
+    TRACE_EVENT0("flutter", "EmbedderTestContext::UpdateSemanticsCallback2");
     auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
     if (context->update_semantics_callback2_) {
       context->update_semantics_callback2_(update);
@@ -199,6 +203,7 @@ EmbedderTestContext::GetUpdateSemanticsCallbackHook() {
   }
 
   return [](const FlutterSemanticsUpdate* update, void* user_data) {
+    TRACE_EVENT0("flutter", "EmbedderTestContext::UpdateSemanticsCallback");
     auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
     if (context->update_semantics_callback_) {
       context->update_semantics_callback_(update);
@@ -213,6 +218,7 @@ EmbedderTestContext::GetUpdateSemanticsNodeCallbackHook() {
   }
 
   return [](const FlutterSemanticsNode* semantics_node, void* user_data) {
+    TRACE_EVENT0("flutter", "EmbedderTestContext::UpdateSemanticsNodeCallback");
     auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
     if (context->update_semantics_node_callback_) {
       context->update_semantics_node_callback_(semantics_node);
@@ -227,6 +233,8 @@ EmbedderTestContext::GetUpdateSemanticsCustomActionCallbackHook() {
   }
 
   return [](const FlutterSemanticsCustomAction* action, void* user_data) {
+    TRACE_EVENT0("flutter",
+                 "EmbedderTestContext::UpdateSemanticsCustomActionCallback");
     auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
     if (context->update_semantics_custom_action_callback_) {
       context->update_semantics_custom_action_callback_(action);
@@ -236,6 +244,7 @@ EmbedderTestContext::GetUpdateSemanticsCustomActionCallbackHook() {
 
 FlutterLogMessageCallback EmbedderTestContext::GetLogMessageCallbackHook() {
   return [](const char* tag, const char* message, void* user_data) {
+    TRACE_EVENT0("flutter", "EmbedderTestContext::LogMessageCallback");
     auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
     if (context->log_message_callback_) {
       context->log_message_callback_(tag, message);
@@ -247,6 +256,8 @@ FlutterComputePlatformResolvedLocaleCallback
 EmbedderTestContext::GetComputePlatformResolvedLocaleCallbackHook() {
   return [](const FlutterLocale** supported_locales,
             size_t length) -> const FlutterLocale* {
+    TRACE_EVENT0("flutter",
+                 "EmbedderTestContext::ComputePlatformResolvedLocaleCallback");
     return supported_locales[0];
   };
 }
@@ -258,6 +269,7 @@ EmbedderTestContext::GetChannelUpdateCallbackHook() {
   }
 
   return [](const FlutterChannelUpdate* update, void* user_data) {
+    TRACE_EVENT0("flutter", "EmbedderTestContext::ChannelUpdateCallback");
     auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
     if (context->channel_update_callback_) {
       context->channel_update_callback_(update);
@@ -268,6 +280,8 @@ EmbedderTestContext::GetChannelUpdateCallbackHook() {
 FlutterViewFocusChangeRequestCallback
 EmbedderTestContext::GetViewFocusChangeRequestCallbackHook() {
   return [](const FlutterViewFocusChangeRequest* request, void* user_data) {
+    TRACE_EVENT0("flutter",
+                 "EmbedderTestContext::ViewFocusChangeRequestCallback");
     auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
     if (context->view_focus_change_request_callback_) {
       context->view_focus_change_request_callback_(request);
@@ -308,6 +322,8 @@ std::future<sk_sp<SkImage>> EmbedderTestContext::GetNextSceneImage() {
 /// @note Procedure doesn't copy all closures.
 void EmbedderTestContext::FireRootSurfacePresentCallbackIfPresent(
     const std::function<sk_sp<SkImage>(void)>& image_callback) {
+  TRACE_EVENT0("flutter",
+               "EmbedderTestContext::FireRootSurfacePresentCallbackIfPresent");
   if (!next_scene_callback_) {
     return;
   }
@@ -322,6 +338,7 @@ void EmbedderTestContext::SetVsyncCallback(
 }
 
 void EmbedderTestContext::RunVsyncCallback(intptr_t baton) {
+  TRACE_EVENT0("flutter", "EmbedderTestContext::RunVsyncCallback");
   vsync_callback_(baton);
 }
 

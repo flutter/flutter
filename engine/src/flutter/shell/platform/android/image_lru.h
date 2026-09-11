@@ -7,6 +7,7 @@
 
 #include <array>
 #include <cstddef>
+#include <mutex>
 
 #include "display_list/image/dl_image.h"
 
@@ -49,6 +50,7 @@ class ImageLRU {
     sk_sp<flutter::DlImage> value;
   };
 
+  mutable std::mutex mutex_;
   std::array<Data, kImageReaderSwapchainSize> images_;
 };
 

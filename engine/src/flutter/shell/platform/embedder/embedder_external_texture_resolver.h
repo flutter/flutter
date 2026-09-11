@@ -9,12 +9,18 @@
 
 #include "flutter/common/graphics/texture.h"
 
+#include "flutter/shell/platform/embedder/embedder_external_texture_hb.h"
+
 #ifdef SHELL_ENABLE_GL
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
 #endif
 
 #ifdef SHELL_ENABLE_METAL
 #include "flutter/shell/platform/embedder/embedder_external_texture_metal.h"
+#endif
+
+#ifdef SHELL_ENABLE_VULKAN
+#include "flutter/shell/platform/embedder/embedder_external_texture_vk.h"
 #endif
 
 namespace flutter {
@@ -34,6 +40,15 @@ class EmbedderExternalTextureResolver {
       EmbedderExternalTextureMetal::ExternalTextureCallback metal_callback);
 #endif
 
+#ifdef SHELL_ENABLE_VULKAN
+  explicit EmbedderExternalTextureResolver(
+      EmbedderExternalTextureVK::ExternalTextureCallback vulkan_callback);
+#endif
+
+  explicit EmbedderExternalTextureResolver(
+      EmbedderExternalTextureHB::ExternalTextureCallback
+          hardware_buffer_callback);
+
   std::unique_ptr<Texture> ResolveExternalTexture(int64_t texture_id);
 
   bool SupportsExternalTextures();
@@ -46,6 +61,12 @@ class EmbedderExternalTextureResolver {
 #ifdef SHELL_ENABLE_METAL
   EmbedderExternalTextureMetal::ExternalTextureCallback metal_callback_;
 #endif
+
+#ifdef SHELL_ENABLE_VULKAN
+  EmbedderExternalTextureVK::ExternalTextureCallback vulkan_callback_;
+#endif
+
+  EmbedderExternalTextureHB::ExternalTextureCallback hardware_buffer_callback_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalTextureResolver);
 };

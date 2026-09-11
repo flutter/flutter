@@ -48,6 +48,10 @@ class PlatformViewEmbedder final : public PlatformView {
   using ChanneUpdateCallback = std::function<void(const std::string&, bool)>;
   using ViewFocusChangeRequestCallback =
       std::function<void(const ViewFocusChangeRequest&)>;
+  using RequestDartDeferredLibraryCallback =
+      std::function<void(intptr_t loading_unit_id)>;
+  using RasterThreadContextMakeCurrentCallback = std::function<bool()>;
+  using RasterThreadContextClearCurrentCallback = std::function<bool()>;
 
   struct PlatformDispatchTable {
     UpdateSemanticsCallback update_semantics_callback;  // optional
@@ -60,6 +64,12 @@ class PlatformViewEmbedder final : public PlatformView {
     ChanneUpdateCallback on_channel_update;                     // optional
     ViewFocusChangeRequestCallback
         view_focus_change_request_callback;  // optional
+    RequestDartDeferredLibraryCallback
+        request_dart_deferred_library_callback;  // optional
+    RasterThreadContextMakeCurrentCallback
+        raster_thread_context_make_current;  // optional
+    RasterThreadContextClearCurrentCallback
+        raster_thread_context_clear_current;  // optional
   };
 
   // Create a platform view that sets up a software rasterizer.
@@ -153,6 +163,9 @@ class PlatformViewEmbedder final : public PlatformView {
 
   // |PlatformView|
   void RequestViewFocusChange(const ViewFocusChangeRequest& request) override;
+
+  // |PlatformView|
+  void RequestDartDeferredLibrary(intptr_t loading_unit_id) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewEmbedder);
 };

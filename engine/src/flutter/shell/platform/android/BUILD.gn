@@ -45,6 +45,8 @@ executable("flutter_shell_native_unittests") {
   sources = [
     "android_context_gl_impeller_unittests.cc",
     "android_image_generator_unittests.cc",
+    "android_mutator_unittests.cc",
+    "android_semantics_unittests.cc",
     "android_shell_holder_unittests.cc",
     "apk_asset_provider_unittests.cc",
     "flutter_shell_native_unittests.cc",
@@ -57,6 +59,8 @@ executable("flutter_shell_native_unittests") {
   }
   public_configs = [ "//flutter:config" ]
   deps = [
+    # Direct dependency retained intentionally for explicit linkage intent.
+    ":flutter_embedder_native_src",
     ":flutter_shell_native_src",
     "//flutter/fml",
     "//flutter/shell/platform/android/jni:jni_mock",
@@ -66,10 +70,113 @@ executable("flutter_shell_native_unittests") {
   ]
 }
 
+executable("flutter_embedder_native_unittests") {
+  visibility = [ "*" ]
+  testonly = true
+  sources = [
+    "android_engine_group_unittests.cc",
+    "android_hardware_buffer_unittests.cc",
+    "android_mutator_unittests.cc",
+    "android_semantics_unittests.cc",
+    "android_surface_control_unittests.cc",
+    "android_vm_init_unittests.cc",
+    "android_vsync_waiter_unittests.cc",
+    "android_vulkan_texture_unittests.cc",
+    "android_window_metrics_unittests.cc",
+    "apk_asset_provider_unittests.cc",
+    "flutter_embedder_native_unittests.cc",
+  ]
+  public_configs = [ "//flutter:config" ]
+  deps = [
+    ":flutter_embedder_native_src",
+    "//flutter/fml",
+    "//flutter/third_party/googletest:gmock",
+    "//flutter/third_party/googletest:gtest",
+  ]
+}
+
+config("jni_headers_config") {
+  include_dirs = [ "//flutter/shell/platform/android/jni/include" ]
+}
+
+source_set("flutter_embedder_native_src") {
+  visibility = [ ":*" ]
+
+  sources = [
+    "android_engine_group.cc",
+    "android_engine_group.h",
+    "android_hardware_buffer.cc",
+    "android_hardware_buffer.h",
+    "android_mutators_mapper.cc",
+    "android_mutators_mapper.h",
+    "android_platform_views_controller.cc",
+    "android_platform_views_controller.h",
+    "android_semantics_mapper.cc",
+    "android_semantics_mapper.h",
+    "android_surface_control.cc",
+    "android_surface_control.h",
+    "android_vm_init.cc",
+    "android_vm_init.h",
+    "android_vsync_waiter.cc",
+    "android_vsync_waiter.h",
+    "android_vulkan_texture.cc",
+    "android_vulkan_texture.h",
+    "android_window_metrics_mapper.cc",
+    "android_window_metrics_mapper.h",
+    "apk_asset_provider.cc",
+    "apk_asset_provider.h",
+    "flutter_embedder_native.cc",
+    "flutter_embedder_native.h",
+    "jni_delegate.cc",
+    "jni_delegate.h",
+    "jni_router.cc",
+    "jni_router.h",
+    "jvm_invoker.cc",
+    "jvm_invoker.h",
+    "os_library_loader.cc",
+    "os_library_loader.h",
+  ]
+
+  defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
+
+  public_deps = [
+    "//flutter/assets",
+    "//flutter/fml",
+    "//flutter/shell/platform/embedder:embedder_headers",
+  ]
+
+  deps = [ "//flutter/shell/platform/embedder:embedder_as_internal_library" ]
+
+  public_configs = [
+    "//flutter:config",
+    ":jni_headers_config",
+  ]
+
+  if (is_android) {
+    libs = [
+      "android",
+      "EGL",
+      "GLESv2",
+    ]
+  }
+}
+
+shared_library("flutter_embedder_native") {
+  inputs = [ "android_exports.lst" ]
+  output_name = "flutter_embedder"
+  deps = [ ":flutter_embedder_native_src" ]
+  ldflags = [ "-Wl,--version-script=" +
+              rebase_path("android_exports.lst", root_build_dir) ]
+}
+
 shared_library("flutter_shell_native") {
   inputs = [ "android_exports.lst" ]
   output_name = "flutter"
-  deps = [ ":flutter_shell_native_src" ]
+  deps = [
+    # Direct dependency retained intentionally for explicit linkage intent.
+    ":flutter_embedder_native_src",
+    ":flutter_shell_native_src",
+  ]
   ldflags = [ "-Wl,--version-script=" +
               rebase_path("android_exports.lst", root_build_dir) ]
 }
@@ -106,8 +213,6 @@ source_set("flutter_shell_native_src") {
     "android_surface_gl_impeller.h",
     "android_surface_vk_impeller.cc",
     "android_surface_vk_impeller.h",
-    "apk_asset_provider.cc",
-    "apk_asset_provider.h",
     "flutter_main.cc",
     "flutter_main.h",
     "image_external_texture.cc",
@@ -154,11 +259,9 @@ source_set("flutter_shell_native_src") {
     ]
   }
 
-  sources += get_target_outputs(":icudtl_asm")
-
   public_deps = [
     ":android_gpu_configuration",
-    ":icudtl_asm",
+    ":flutter_embedder_native_src",
     ":image_generator",
     "//flutter/assets",
     "//flutter/common",

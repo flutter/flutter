@@ -44,15 +44,27 @@ TaskFunction androidLifecyclesTest({Map<String, String>? environment}) {
  import 'package:flutter/widgets.dart';
 
 class LifecycleObserver extends WidgetsBindingObserver {
+  bool hasEmittedInitialResumed = false;
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      hasEmittedInitialResumed = true;
+    }
     print('==== lifecycle: $state ====');
   }
 }
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  WidgetsBinding.instance.addObserver(LifecycleObserver());
+  final observer = LifecycleObserver();
+  WidgetsBinding.instance.addObserver(observer);
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (!observer.hasEmittedInitialResumed &&
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+      observer.didChangeAppLifecycleState(WidgetsBinding.instance.lifecycleState!);
+    }
+  });
   runApp(Container());
 }
 ''', flush: true);
@@ -94,7 +106,14 @@ void main() {
 
         Future<void> expectedLifecycle(String expected) async {
           section('Wait for lifecycle: $expected (mode: $mode)');
-          await lifecycleItr.moveNext();
+          final bool hasNext = await lifecycleItr.moveNext().timeout(
+            const Duration(seconds: 30),
+            onTimeout: () =>
+                throw TaskResult.failure('Timed out waiting for lifecycle: `$expected`'),
+          );
+          if (!hasNext) {
+            throw TaskResult.failure('Stream closed while waiting for lifecycle: `$expected`');
+          }
           final String got = lifecycleItr.current;
           if (expected != got) {
             throw TaskResult.failure('expected lifecycles: `$expected`, but got` $got`');
@@ -103,12 +122,16 @@ void main() {
 
         await expectedLifecycle('AppLifecycleState.resumed');
 
+        // Allow window manager and activity focus to settle before sending key events.
+        await Future<void>.delayed(const Duration(seconds: 2));
+
         section('Toggling app switch (mode: $mode)');
         await device.shellExec('input', <String>['keyevent', 'KEYCODE_APP_SWITCH']);
 
         await expectedLifecycle('AppLifecycleState.inactive');
         if (device.apiLevel == 28) {
           // Device lab currently runs 28.
+          await expectedLifecycle('AppLifecycleState.hidden');
           await expectedLifecycle('AppLifecycleState.paused');
           await expectedLifecycle('AppLifecycleState.detached');
         }
@@ -122,15 +145,20 @@ void main() {
         await device.shellExec('am', <String>['start', '-a', 'android.settings.SETTINGS']);
 
         await expectedLifecycle('AppLifecycleState.inactive');
+        await expectedLifecycle('AppLifecycleState.hidden');
+        await expectedLifecycle('AppLifecycleState.paused');
         if (device.apiLevel == 28) {
           // Device lab currently runs 28.
-          await expectedLifecycle('AppLifecycleState.paused');
           await expectedLifecycle('AppLifecycleState.detached');
         }
 
         section('Bring activity to foreground (mode: $mode)');
         await device.shellExec('am', <String>['start', '-n', '$_kOrgName.app/.MainActivity']);
 
+        if (device.apiLevel != 28) {
+          await expectedLifecycle('AppLifecycleState.hidden');
+          await expectedLifecycle('AppLifecycleState.inactive');
+        }
         await expectedLifecycle('AppLifecycleState.resumed');
 
         run.kill();

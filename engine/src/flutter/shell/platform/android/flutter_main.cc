@@ -235,9 +235,14 @@ void FlutterMain::SetupDartVMServiceUriCallback(JNIEnv* env) {
       });
 }
 
-static void PrefetchDefaultFontManager(JNIEnv* env, jclass jcaller) {
+extern "C" __attribute__((visibility("default"))) void
+FlutterPlatformPrefetchDefaultFontManager() {
   // Initialize a singleton owned by Skia.
   txt::GetDefaultFontManager();
+}
+
+static void PrefetchDefaultFontManager(JNIEnv* env, jclass jcaller) {
+  FlutterPlatformPrefetchDefaultFontManager();
 }
 
 bool FlutterMain::Register(JNIEnv* env) {

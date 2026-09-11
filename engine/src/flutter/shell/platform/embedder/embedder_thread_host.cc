@@ -9,6 +9,7 @@
 #include <algorithm>
 
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/embedder/embedder_struct_macros.h"
 
 namespace flutter {
@@ -31,11 +32,20 @@ std::mutex EmbedderThreadHost::active_runners_mutex_;
 ///
 static std::pair<bool, fml::RefPtr<EmbedderTaskRunner>>
 CreateEmbedderTaskRunner(const FlutterTaskRunnerDescription* description) {
+  TRACE_EVENT0("flutter", "CreateEmbedderTaskRunner");
   if (description == nullptr) {
     // This is not embedder error. The embedder API will just have to create a
     // plain old task runner (and create a thread for it) instead of using a
     // task runner provided to us by the embedder.
     return {true, {}};
+  }
+
+  if (!STRUCT_HAS_MEMBER(description, struct_size) ||
+      description->struct_size <
+          offsetof(FlutterTaskRunnerDescription, post_task_callback) +
+              sizeof(description->post_task_callback)) {
+    FML_LOG(ERROR) << "Invalid FlutterTaskRunnerDescription struct_size.";
+    return {false, {}};
   }
 
   if (SAFE_ACCESS(description, runs_task_on_current_thread_callback, nullptr) ==
@@ -63,6 +73,27 @@ CreateEmbedderTaskRunner(const FlutterTaskRunnerDescription* description) {
     destruction_callback_c = description->destruction_callback;
   }
 
+  FlutterThreadPriority priority =
+      SAFE_ACCESS(description, priority, FlutterThreadPriority::kNormal);
+
+  auto thread_priority_setter_c =
+      SAFE_ACCESS(description, thread_priority_setter, nullptr);
+  auto thread_priority_setter_with_user_data_c =
+      SAFE_ACCESS(description, thread_priority_setter_with_user_data, nullptr);
+
+  auto invoke_priority_setter = [thread_priority_setter_c,
+                                 thread_priority_setter_with_user_data_c,
+                                 user_data](FlutterThreadPriority prio) {
+    if (thread_priority_setter_with_user_data_c != nullptr) {
+      TRACE_EVENT0("flutter",
+                   "EmbedderTaskRunner::ThreadPrioritySetterWithUserData");
+      thread_priority_setter_with_user_data_c(prio, user_data);
+    } else if (thread_priority_setter_c != nullptr) {
+      TRACE_EVENT0("flutter", "EmbedderTaskRunner::ThreadPrioritySetter");
+      thread_priority_setter_c(prio);
+    }
+  };
+
   EmbedderTaskRunner::DispatchTable task_runner_dispatch_table = {
       .post_task_callback = [post_task_callback_c, user_data](
                                 EmbedderTaskRunner* task_runner,
@@ -85,17 +116,33 @@ CreateEmbedderTaskRunner(const FlutterTaskRunnerDescription* description) {
           [destruction_callback_c, user_data]() {
             destruction_callback_c(user_data);
           },
+      .thread_priority_setter = invoke_priority_setter,
   };
 
-  return {true, fml::MakeRefCounted<EmbedderTaskRunner>(
-                    task_runner_dispatch_table,
-                    SAFE_ACCESS(description, identifier, 0u))};
+  auto runner = fml::MakeRefCounted<EmbedderTaskRunner>(
+      task_runner_dispatch_table, SAFE_ACCESS(description, identifier, 0u),
+      priority);
+
+  if (thread_priority_setter_with_user_data_c != nullptr ||
+      thread_priority_setter_c != nullptr) {
+    if (runner->RunsTasksOnCurrentThread()) {
+      invoke_priority_setter(priority);
+    } else {
+      runner->PostTask([invoke_priority_setter, priority]() {
+        invoke_priority_setter(priority);
+      });
+    }
+  }
+
+  return {true, std::move(runner)};
 }
 
 std::unique_ptr<EmbedderThreadHost>
 EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost(
     const FlutterCustomTaskRunners* custom_task_runners,
     const flutter::ThreadConfigSetter& config_setter) {
+  TRACE_EVENT0("flutter",
+               "EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost");
   {
     auto host =
         CreateEmbedderManagedThreadHost(custom_task_runners, config_setter);
@@ -139,7 +186,17 @@ std::unique_ptr<EmbedderThreadHost>
 EmbedderThreadHost::CreateEmbedderManagedThreadHost(
     const FlutterCustomTaskRunners* custom_task_runners,
     const flutter::ThreadConfigSetter& config_setter) {
+  TRACE_EVENT0("flutter",
+               "EmbedderThreadHost::CreateEmbedderManagedThreadHost");
   if (custom_task_runners == nullptr) {
+    return nullptr;
+  }
+
+  if (!STRUCT_HAS_MEMBER(custom_task_runners, struct_size) ||
+      custom_task_runners->struct_size <
+          offsetof(FlutterCustomTaskRunners, render_task_runner) +
+              sizeof(custom_task_runners->render_task_runner)) {
+    FML_LOG(ERROR) << "Invalid FlutterCustomTaskRunners struct_size.";
     return nullptr;
   }
 
@@ -159,7 +216,8 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
   auto render_task_runner_pair = CreateEmbedderTaskRunner(
       SAFE_ACCESS(custom_task_runners, render_task_runner, nullptr));
 
-  if (!platform_task_runner_pair.first || !render_task_runner_pair.first) {
+  if (!platform_task_runner_pair.first || !render_task_runner_pair.first ||
+      !ui_task_runner_pair.first) {
     // User error while supplying a custom task runner. Return an invalid thread
     // host. This will abort engine initialization. Don't fallback to defaults
     // if the user wanted to specify a task runner but just messed up instead.
@@ -262,6 +320,7 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
 std::unique_ptr<EmbedderThreadHost>
 EmbedderThreadHost::CreateEngineManagedThreadHost(
     const flutter::ThreadConfigSetter& config_setter) {
+  TRACE_EVENT0("flutter", "EmbedderThreadHost::CreateEngineManagedThreadHost");
   // Crate a thraed host config, and specified the thread name and priority.
   auto thread_host_config = ThreadHost::ThreadHostConfig(config_setter);
   thread_host_config.SetUIConfig(MakeThreadConfig(
@@ -317,7 +376,9 @@ EmbedderThreadHost::EmbedderThreadHost(
   }
 }
 
-EmbedderThreadHost::~EmbedderThreadHost() = default;
+EmbedderThreadHost::~EmbedderThreadHost() {
+  InvalidateActiveRunners();
+}
 
 void EmbedderThreadHost::InvalidateActiveRunners() {
   std::lock_guard guard(active_runners_mutex_);
