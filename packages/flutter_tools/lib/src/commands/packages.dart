@@ -594,5 +594,7 @@ Pub _createPub(ToolContext toolContext) => Pub(
   logger: toolContext.logger,
   platform: toolContext.platform,
   processManager: toolContext.processManager,
+  cache: toolContext.cache,
+  flutterRoot: toolContext.cache.flutterRoot,
   stdio: toolContext.stdio,
 );
