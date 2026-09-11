@@ -1240,6 +1240,21 @@ typedef struct {
 /// stable until the Flutter application restarts.
 typedef uint64_t FlutterEngineDisplayId;
 
+/// Types of display features that may be present on a screen.
+typedef enum {
+  kFlutterDisplayFeatureTypeUnknown = 0,
+  kFlutterDisplayFeatureTypeFold = 1,
+  kFlutterDisplayFeatureTypeHinge = 2,
+  kFlutterDisplayFeatureTypeCutout = 3,
+} FlutterDisplayFeatureType;
+
+/// The state of a display feature.
+typedef enum {
+  kFlutterDisplayFeatureStateUnknown = 0,
+  kFlutterDisplayFeatureStatePostureFlat = 1,
+  kFlutterDisplayFeatureStatePostureHalfOpened = 2,
+} FlutterDisplayFeatureState;
+
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterWindowMetricsEvent).
   size_t struct_size;
@@ -1288,6 +1303,20 @@ typedef struct {
   /// If |has_constraints| is `true`, this must be greater than or equal to
   /// |min_height_constraint| and |height|.
   size_t max_height_constraint;
+  /// The number of physical display features.
+  size_t display_features_count;
+  /// Physical display features bounds. Each display feature has 4 double
+  /// values: left, top, right, bottom. Array length must be
+  /// display_features_count * 4.
+  const double* display_features_bounds;
+  /// Physical display features types. Array length must be
+  /// display_features_count. Elements are values from
+  /// `FlutterDisplayFeatureType`.
+  const int* display_features_type;
+  /// Physical display features states. Array length must be
+  /// display_features_count. Elements are values from
+  /// `FlutterDisplayFeatureState`.
+  const int* display_features_state;
 } FlutterWindowMetricsEvent;
 
 typedef struct {

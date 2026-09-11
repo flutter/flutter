@@ -1689,6 +1689,38 @@ MakeViewportMetricsFromWindowMetrics(
            "physical height or width.";
   }
 
+  size_t display_features_count =
+      SAFE_ACCESS(flutter_metrics, display_features_count, 0);
+  const double* display_features_bounds =
+      SAFE_ACCESS(flutter_metrics, display_features_bounds, nullptr);
+  const int* display_features_type =
+      SAFE_ACCESS(flutter_metrics, display_features_type, nullptr);
+  const int* display_features_state =
+      SAFE_ACCESS(flutter_metrics, display_features_state, nullptr);
+
+  // Each display feature rectangle consists of 4 double values: left, top,
+  // right, bottom.
+  constexpr size_t kBoundsPerDisplayFeature = 4;
+  if (display_features_count > 0) {
+    if (display_features_count > SIZE_MAX / kBoundsPerDisplayFeature) {
+      return "Display features count overflow.";
+    }
+    if (display_features_bounds == nullptr ||
+        display_features_type == nullptr || display_features_state == nullptr) {
+      return "Display features count is non-zero, but one or more display "
+             "feature buffers are null.";
+    }
+    metrics.physical_display_features_bounds.assign(
+        display_features_bounds,
+        display_features_bounds +
+            (display_features_count * kBoundsPerDisplayFeature));
+    metrics.physical_display_features_type.assign(
+        display_features_type, display_features_type + display_features_count);
+    metrics.physical_display_features_state.assign(
+        display_features_state,
+        display_features_state + display_features_count);
+  }
+
   return metrics;
 }
 

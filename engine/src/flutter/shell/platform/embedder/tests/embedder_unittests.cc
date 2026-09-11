@@ -4813,6 +4813,47 @@ TEST_F(EmbedderTest, WindowMetricsEventWithConstraints) {
       kInvalidArguments);
 }
 
+TEST_F(EmbedderTest, WindowMetricsEventDisplayFeaturesValidation) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface({1, 1});
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Test with display_features_count > 0 but null buffers.
+  FlutterWindowMetricsEvent event_null_buffers = {};
+  event_null_buffers.struct_size = sizeof(event_null_buffers);
+  event_null_buffers.width = 800;
+  event_null_buffers.height = 600;
+  event_null_buffers.pixel_ratio = 1.0;
+  event_null_buffers.display_features_count = 1;
+  event_null_buffers.display_features_bounds = nullptr;
+  event_null_buffers.display_features_type = nullptr;
+  event_null_buffers.display_features_state = nullptr;
+
+  ASSERT_EQ(
+      FlutterEngineSendWindowMetricsEvent(engine.get(), &event_null_buffers),
+      kInvalidArguments);
+
+  // Test with valid display feature buffers.
+  constexpr double kBounds[] = {0.0, 0.0, 100.0, 20.0};
+  constexpr int kType[] = {kFlutterDisplayFeatureTypeFold};
+  constexpr int kState[] = {kFlutterDisplayFeatureStatePostureFlat};
+
+  FlutterWindowMetricsEvent event_valid = {};
+  event_valid.struct_size = sizeof(event_valid);
+  event_valid.width = 800;
+  event_valid.height = 600;
+  event_valid.pixel_ratio = 1.0;
+  event_valid.display_features_count = 1;
+  event_valid.display_features_bounds = kBounds;
+  event_valid.display_features_type = kType;
+  event_valid.display_features_state = kState;
+
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event_valid),
+            kSuccess);
+}
+
 static void expectSoftwareRenderingOutputMatches(
     EmbedderTest& test,
     std::string entrypoint,
