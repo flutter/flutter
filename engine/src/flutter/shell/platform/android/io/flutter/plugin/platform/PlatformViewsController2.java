@@ -710,10 +710,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       activePlatformTransaction = null;
     }
 
-    if (rasterTxs == null && platformTx == null) {
-      return;
-    }
-
     // This runs on the platform thread but is posted from the raster thread, so by the time it
     // runs the FlutterView may have been detached from the controller, or detached from its
     // window (in which case getRootSurfaceControl() returns null). Throwing here is fatal rather
@@ -747,8 +743,16 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       }
     }
 
+    // Unconditional. applyTransactionOnDraw() merges into ViewRootImpl's pending transaction and
+    // applies it with the NEXT draw -- it does not schedule one. invalidate() is what guarantees
+    // that draw, so a frame with nothing of our own to apply is still the pump that flushes a
+    // transaction ViewRootImpl is already holding but has not drawn. See
+    // https://github.com/flutter/flutter/issues/175546 for the last time we assumed a frame was
+    // coming.
     flutterView.invalidate();
-    rootSurfaceControl.applyTransactionOnDraw(tx);
+    if (tx != null) {
+      rootSurfaceControl.applyTransactionOnDraw(tx);
+    }
   }
 
   // Called on the platform thread (UI thread) via the platform task runner.
@@ -756,10 +760,15 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   public void swapTransactions() {
     synchronized (transactionLock) {
       // Anything still active here belongs to a frame whose onEndFrame() never ran, so it will
-      // never be applied. Close it instead of just dropping the reference: raster transactions
-      // can already have buffers attached, and close() releases the native transaction and its
-      // buffer references deterministically rather than waiting for the GC to run the
-      // NativeAllocationRegistry cleaner.
+      // never be applied. Close it instead of just dropping the reference.
+      //
+      // This does not recycle any attached buffer. The completion callback is registered with
+      // libgui's process-global TransactionCompletedListener when it is *set*, not when the
+      // transaction is applied, and close() does not unregister it. SurfaceFlinger never learns
+      // about a transaction that was never applied, so that callback never fires and the buffer
+      // is not returned to the pool either way. What close() does release promptly is the
+      // native transaction and the acquire-fence file descriptor it owns -- the
+      // NativeAllocationRegistry cleaner frees those on no bounded schedule.
       for (int i = 0; i < activeRasterTransactions.size(); i++) {
         activeRasterTransactions.get(i).close();
       }
@@ -788,13 +797,19 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       }
     }
 
-    // Raster thread (or non-platform thread): SurfaceControl.Transaction (and its native
-    // counterpart android::SurfaceComposerClient::Transaction in libgui.so) is NOT thread-safe
-    // and contains no internal mutexes. Concurrently mutating a single transaction from both
-    // the raster thread (e.g. ASurfaceTransaction_setBuffer) and the platform thread
-    // (e.g. setAlpha, setCrop) corrupts internal hash tables in libgui and causes a SIGSEGV.
-    // Therefore, raster presentations receive isolated transactions per presentation, which
-    // are transferred to the platform thread on swapTransactions() and merged in onEndFrame().
+    // Raster thread (or any non-platform thread): SurfaceControl.Transaction, and its native
+    // counterpart android::SurfaceComposerClient::Transaction in libgui.so, has no internal
+    // mutex. Each presentation therefore gets its own transaction rather than sharing the
+    // platform thread's, and ownership transfers to the platform thread at swapTransactions().
+    //
+    // This is not complete isolation, and the transaction objects are still raced. The AHB
+    // swapchain publishes the transaction here and only afterwards attaches the buffer and the
+    // completion callback to it (see Present() in ahb_swapchain_impl_vk.cc), so a concurrent
+    // merge() on the platform thread can touch a transaction the raster thread is mid-write on.
+    // That predates this change and cannot be closed from Java: past
+    // ASurfaceTransaction_fromJava() the raster thread mutates a raw native pointer and never
+    // re-enters Java. What the lock below does guarantee is that the *lists* stay consistent,
+    // which is the failure that reaches merge(null) and aborts the process.
     synchronized (transactionLock) {
       final SurfaceControl.Transaction tx = newTransaction();
       pendingRasterTransactions.add(tx);
