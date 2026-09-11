@@ -5427,13 +5427,18 @@ targets:
   #
   # Also, rename this to "external_textures_integration_test" to be consistent
   # with the Android test, but that can wait until we've figured out the flake.
-  - name: Mac_ios external_ui_integration_test_ios
+  - name: Mac external_ui_integration_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: external_textures_integration_test_ios
       ignore_flakiness: "true"
 
@@ -5668,13 +5673,18 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: ios_defines_test
 
-  - name: Mac_ios hello_world_impeller_ios_sdfs
+  - name: Mac hello_world_impeller_ios_sdfs
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: hello_world_impeller_ios_sdfs
 
   - name: Mac_ios large_image_changer_perf_ios
