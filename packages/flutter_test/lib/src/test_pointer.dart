@@ -292,6 +292,7 @@ class TestPointer {
       pointer: pointer,
       position: newLocation,
       delta: delta,
+      buttons: _buttons,
     );
   }
 
@@ -512,19 +513,35 @@ class TestGesture {
   }
 
   /// In a test, send a pointer add event for this pointer.
-  Future<void> addPointer({Duration timeStamp = Duration.zero, Offset? location}) {
+  Future<void> addPointer({
+    Duration timeStamp = Duration.zero,
+    Offset? location,
+    FlutterView? view,
+  }) {
     return TestAsyncUtils.guard<void>(() {
       return _dispatcher(
-        _pointer.addPointer(timeStamp: timeStamp, location: location ?? _pointer.location),
+        _pointer.addPointer(
+          timeStamp: timeStamp,
+          location: location ?? _pointer.location,
+          view: view,
+        ),
       );
     });
   }
 
   /// In a test, send a pointer remove event for this pointer.
-  Future<void> removePointer({Duration timeStamp = Duration.zero, Offset? location}) {
+  Future<void> removePointer({
+    Duration timeStamp = Duration.zero,
+    Offset? location,
+    FlutterView? view,
+  }) {
     return TestAsyncUtils.guard<void>(() {
       return _dispatcher(
-        _pointer.removePointer(timeStamp: timeStamp, location: location ?? _pointer.location),
+        _pointer.removePointer(
+          timeStamp: timeStamp,
+          location: location ?? _pointer.location,
+          view: view,
+        ),
       );
     });
   }
