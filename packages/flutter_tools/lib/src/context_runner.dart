@@ -236,7 +236,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
       ),
       FlutterVersion: () =>
-          FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!, git: globals.git),
+          FlutterVersion(fs: globals.fs, flutterRoot: globals.cache.flutterRoot, git: globals.git),
       Git: () => Git(currentPlatform: globals.platform, runProcessWith: globals.processUtils),
       GradleUtils: () => GradleUtils(
         operatingSystemUtils: globals.os,
@@ -269,7 +269,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         logger: globals.logger,
         platform: globals.platform,
         fileSystem: globals.fs,
-        flutterRoot: Cache.flutterRoot!,
+        flutterRoot: globals.cache.flutterRoot,
       ),
       Logger: () => globals.platform.isWindows
           ? WindowsStdoutLogger(
@@ -315,6 +315,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         processManager: globals.processManager,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        cache: globals.cache,
       ),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),

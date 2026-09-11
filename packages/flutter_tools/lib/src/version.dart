@@ -1019,10 +1019,7 @@ class VersionCheckError implements Exception {
 /// If the command fails, throws a [ToolExit] exception.
 Future<String> _run(Git git, List<String> command, {String? workingDirectory}) async {
   // TODO(matanlurey): Inline this in the single place it's called in this file.
-  final RunResult results = await git.run(
-    command,
-    workingDirectory: workingDirectory ?? Cache.flutterRoot,
-  );
+  final RunResult results = await git.run(command, workingDirectory: workingDirectory);
 
   if (results.exitCode == 0) {
     return results.stdout.trim();

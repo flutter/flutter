@@ -33,13 +33,17 @@ class WebTestCompiler {
     required ProcessManager processManager,
     required Config config,
     required ShutdownHooks shutdownHooks,
+    Cache? cache,
+    String? flutterRoot,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _platform = platform,
        _processManager = processManager,
        _config = config,
-       _shutdownHooks = shutdownHooks;
+       _shutdownHooks = shutdownHooks,
+       _cache = cache,
+       _flutterRoot = flutterRoot;
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -48,6 +52,10 @@ class WebTestCompiler {
   final ProcessManager _processManager;
   final ShutdownHooks _shutdownHooks;
   final Config _config;
+  final Cache? _cache;
+  final String? _flutterRoot;
+
+  String get _flutterRootPath => _flutterRoot ?? _cache?.flutterRoot ?? '';
 
   Future<File> _generateTestEntrypoint({
     required List<String> testFiles,
@@ -117,7 +125,7 @@ class WebTestCompiler {
     required BuildInfo buildInfo,
     required WebRendererMode webRenderer,
   }) async {
-    final LanguageVersion languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
+    final LanguageVersion languageVersion = currentLanguageVersion(_fileSystem, _flutterRootPath);
 
     final Directory outputDirectory = _fileSystem.directory(testOutputDir)
       ..createSync(recursive: true);
@@ -188,7 +196,7 @@ class WebTestCompiler {
       testFiles: testFiles,
       projectDirectory: projectDirectory,
       outputDirectory: outputDirectory,
-      languageVersion: currentLanguageVersion(_fileSystem, Cache.flutterRoot!),
+      languageVersion: currentLanguageVersion(_fileSystem, _flutterRootPath),
     );
 
     final String platformBinariesPath = _artifacts

@@ -221,8 +221,9 @@ class DevicesCommandOutput {
 
   Future<void> printDevicesAsJson(List<Device> devices) async {
     _logger.printStatus(
-      const JsonEncoder.withIndent('  ')
-          .convert(await Future.wait(devices.map((Device d) => d.toJson()))),
+      const JsonEncoder.withIndent(
+        '  ',
+      ).convert(await Future.wait(devices.map((Device d) => d.toJson()))),
     );
   }
 }

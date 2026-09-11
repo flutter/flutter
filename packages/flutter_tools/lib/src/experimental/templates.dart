@@ -28,15 +28,21 @@ base class ExtensionTemplateManager extends TemplateService {
     required FeatureFlags featureFlags,
     required FileSystem fileSystem,
     required Logger logger,
+    Cache? cache,
+    String? flutterRoot,
   }) : _extensionManager = extensionManager,
        _featureFlags = featureFlags,
        _fileSystem = fileSystem,
-       _logger = logger;
+       _logger = logger,
+       _cache = cache,
+       _flutterRoot = flutterRoot;
 
   final ExtensionManager _extensionManager;
   final FeatureFlags _featureFlags;
   final FileSystem _fileSystem;
   final Logger _logger;
+  final Cache? _cache;
+  final String? _flutterRoot;
 
   List<ProjectTemplate>? _cachedTemplates;
 
@@ -94,10 +100,11 @@ base class ExtensionTemplateManager extends TemplateService {
   /// 'package:flutter_tools_extension_linux_prototype/' URIs, resolving them
   /// relative to the Flutter SDK root.
   Directory resolveTemplateDirectory(String templatePath) {
+    final String flutterRoot = _flutterRoot ?? _cache?.flutterRoot ?? '';
     if (templatePath.startsWith('package:flutter_tools/')) {
       final String relativePath = templatePath.substring('package:flutter_tools/'.length);
       final String absolutePath = _fileSystem.path.join(
-        Cache.flutterRoot!,
+        flutterRoot,
         'packages',
         'flutter_tools',
         'lib',
@@ -111,7 +118,7 @@ base class ExtensionTemplateManager extends TemplateService {
         'package:flutter_tools_extension_linux_prototype/'.length,
       );
       final String absolutePath = _fileSystem.path.join(
-        Cache.flutterRoot!,
+        flutterRoot,
         'packages',
         'flutter_tools',
         'packages',

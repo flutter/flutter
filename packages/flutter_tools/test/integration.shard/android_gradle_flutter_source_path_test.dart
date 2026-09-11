@@ -4,7 +4,6 @@
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/cache.dart';
 
 import '../src/common.dart';
 import 'test_data/deferred_components_project.dart';
@@ -15,7 +14,6 @@ void main() {
   late Directory tempDir;
 
   setUp(() {
-    Cache.flutterRoot = getFlutterRoot();
     tempDir = createResolvedTempDirectorySync('flutter_gradle_source_path_test.');
   });
 

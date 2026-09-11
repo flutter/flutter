@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
@@ -17,7 +16,6 @@ import 'build_system/depfile.dart';
 import 'build_system/tools/asset_transformer.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
-import 'cache.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
@@ -38,7 +36,7 @@ class BundleBuilder {
     String? applicationKernelFilePath,
     String? depfilePath,
     String? assetDirPath,
-    @visibleForTesting BuildSystem? buildSystem,
+    BuildSystem? buildSystem,
   }) async {
     project ??= FlutterProject.current();
     mainPath ??= defaultMainPath;
@@ -53,7 +51,7 @@ class BundleBuilder {
       outputDir: globals.fs.directory(assetDirPath),
       buildDir: project.dartTool.childDirectory('flutter_build'),
       cacheDir: globals.cache.getRoot(),
-      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+      flutterRootDir: globals.fs.directory(globals.cache.flutterRoot),
       engineVersion: globals.artifacts!.usesLocalArtifacts
           ? null
           : globals.flutterVersion.engineRevision,

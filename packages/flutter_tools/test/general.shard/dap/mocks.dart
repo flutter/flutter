@@ -17,6 +17,7 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
     required FileSystem fileSystem,
     required Platform platform,
     Future<void>? customDebuggerInitialized,
+    String? flutterSdkRoot,
     FutureOr<void> Function(FakeFlutterDebugAdapter adapter)? preAppStart,
     bool simulateAppStarted = true,
     bool simulateAppStopError = false,
@@ -34,9 +35,10 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
     return FakeFlutterDebugAdapter._(
       channel,
       clientChannel: clientChannel,
-      fileSystem: fileSystem,
-      platform: platform,
       customDebuggerInitialized: customDebuggerInitialized,
+      fileSystem: fileSystem,
+      flutterSdkRoot: flutterSdkRoot ?? (platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter'),
+      platform: platform,
       preAppStart: preAppStart,
       simulateAppStarted: simulateAppStarted,
       simulateAppStopError: simulateAppStopError,
@@ -50,6 +52,7 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
     required super.fileSystem,
     required super.platform,
     this.customDebuggerInitialized,
+    super.flutterSdkRoot,
     this.preAppStart,
     this.simulateAppStarted = true,
     this.simulateAppStopError = false,
@@ -226,6 +229,7 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
     required FileSystem fileSystem,
     required Platform platform,
     Future<void>? customDebuggerInitialized,
+    String? flutterSdkRoot,
   }) {
     final stdinController = StreamController<List<int>>();
     final stdoutController = StreamController<List<int>>();
@@ -235,9 +239,10 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
       stdinController.sink,
       stdoutController.stream,
       channel,
-      fileSystem: fileSystem,
-      platform: platform,
       customDebuggerInitialized: customDebuggerInitialized,
+      fileSystem: fileSystem,
+      flutterSdkRoot: flutterSdkRoot ?? (platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter'),
+      platform: platform,
     );
   }
 
@@ -248,6 +253,7 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
     required super.fileSystem,
     required super.platform,
     this.customDebuggerInitialized,
+    super.flutterSdkRoot,
   }) : super(channel);
 
   final StreamSink<List<int>> stdin;

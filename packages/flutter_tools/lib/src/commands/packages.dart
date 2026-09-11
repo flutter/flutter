@@ -17,7 +17,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/localizations.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
@@ -453,7 +452,7 @@ class PackagesGetCommand extends FlutterCommand {
             cacheDir: _toolContext.cache.getRoot(),
             engineVersion: _toolContext.flutterVersion.engineRevision,
             fileSystem: fs,
-            flutterRootDir: fs.directory(Cache.flutterRoot),
+            flutterRootDir: fs.directory(_toolContext.cache.flutterRoot),
             outputDir: fs.directory(getBuildDirectory(_toolContext.config, fs)),
             processManager: _toolContext.processManager,
             platform: _toolContext.platform,
@@ -595,5 +594,7 @@ Pub _createPub(ToolContext toolContext) => Pub(
   logger: toolContext.logger,
   platform: toolContext.platform,
   processManager: toolContext.processManager,
+  cache: toolContext.cache,
+  flutterRoot: toolContext.cache.flutterRoot,
   stdio: toolContext.stdio,
 );
