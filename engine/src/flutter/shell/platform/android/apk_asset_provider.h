@@ -25,50 +25,7 @@
 #include <android/asset_manager_jni.h>
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
-/// @brief Asset descriptor passed across the Embedder C-ABI.
-typedef struct {
-  /// The size of this struct. Must be sizeof(FlutterAsset).
-  size_t struct_size;
-  /// Pointer to the asset data buffer.
-  const uint8_t* data;
-  /// Size of the asset data buffer in bytes.
-  size_t size;
-  /// User data associated with the asset for destruction callback.
-  void* user_data;
-  /// Callback invoked when the engine or embedder has finished using the asset.
-  void (*asset_free_callback)(void* user_data);
-#if UINTPTR_MAX == 0xffffffff
-  /// Padding to enforce 8-byte natural alignment across 32-bit architectures.
-  uint32_t reserved_padding;
-#endif
-} FlutterAsset;
-
-/// @brief Custom asset resolver bridge structure for embedder integration.
-typedef struct {
-  /// The size of this struct. Must be sizeof(FlutterCustomAssetResolver).
-  size_t struct_size;
-  /// User data passed to all callbacks.
-  void* user_data;
-  /// Callback invoked to find and map an asset by name.
-  bool (*find_asset_callback)(void* user_data,
-                              const char* asset_name,
-                              FlutterAsset* asset_out);
-  /// Callback invoked to check whether this resolver is currently valid.
-  bool (*is_valid_callback)(void* user_data);
-  /// Callback invoked to check whether this resolver is valid after asset
-  /// manager change.
-  bool (*is_valid_after_change_callback)(void* user_data);
-  /// Callback invoked when the custom resolver is destroyed.
-  void (*destruction_callback)(void* user_data);
-} FlutterCustomAssetResolver;
-
-#if defined(__cplusplus)
-}  // extern "C"
-#endif
+#include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
 

@@ -2354,6 +2354,86 @@ CreateExternalTextureResolver(const FlutterRendererConfig* config,
   return external_texture_resolver;
 }
 
+namespace {
+
+class CustomAssetMapping : public fml::Mapping {
+ public:
+  explicit CustomAssetMapping(FlutterAsset asset) : asset_(asset) {}
+  ~CustomAssetMapping() override {
+    if (asset_.asset_free_callback) {
+      asset_.asset_free_callback(asset_.user_data);
+    }
+  }
+
+  size_t GetSize() const override { return asset_.size; }
+  const uint8_t* GetMapping() const override { return asset_.data; }
+  bool IsDontNeedSafe() const override { return true; }
+
+ private:
+  FlutterAsset asset_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(CustomAssetMapping);
+};
+
+class EmbedderCustomAssetResolver final : public flutter::AssetResolver {
+ public:
+  explicit EmbedderCustomAssetResolver(FlutterCustomAssetResolver resolver)
+      : resolver_(resolver) {}
+
+  ~EmbedderCustomAssetResolver() override {
+    if (resolver_.destruction_callback) {
+      resolver_.destruction_callback(resolver_.user_data);
+    }
+  }
+
+  bool IsValid() const override {
+    if (resolver_.is_valid_callback) {
+      return resolver_.is_valid_callback(resolver_.user_data);
+    }
+    return true;
+  }
+
+  bool IsValidAfterAssetManagerChange() const override {
+    if (resolver_.is_valid_after_change_callback) {
+      return resolver_.is_valid_after_change_callback(resolver_.user_data);
+    }
+    return true;
+  }
+
+  flutter::AssetResolver::AssetResolverType GetType() const override {
+    return flutter::AssetResolver::AssetResolverType::kApkAssetProvider;
+  }
+
+  std::unique_ptr<fml::Mapping> GetAsMapping(
+      const std::string& asset_name) const override {
+    if (!resolver_.find_asset_callback) {
+      return nullptr;
+    }
+    FlutterAsset asset = {};
+    asset.struct_size = sizeof(FlutterAsset);
+    if (!resolver_.find_asset_callback(resolver_.user_data, asset_name.c_str(),
+                                       &asset)) {
+      return nullptr;
+    }
+    return std::make_unique<CustomAssetMapping>(asset);
+  }
+
+  std::vector<std::unique_ptr<fml::Mapping>> GetAsMappings(
+      const std::string& asset_pattern,
+      const std::optional<std::string>& subdir) const override {
+    return {};
+  }
+
+  bool operator==(const AssetResolver& other) const override { return false; }
+
+ private:
+  FlutterCustomAssetResolver resolver_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderCustomAssetResolver);
+};
+
+}  // namespace
+
 static bool ApplyCustomArgsToRunConfiguration(
     const FlutterProjectArgs* args,
     flutter::RunConfiguration& run_configuration) {
@@ -2389,6 +2469,15 @@ static bool ApplyCustomArgsToRunConfiguration(
 
   if (SAFE_ACCESS(args, engine_id, 0) != 0) {
     run_configuration.SetEngineId(args->engine_id);
+  }
+
+  if (SAFE_ACCESS(args, custom_asset_resolver, nullptr) != nullptr) {
+    if (args->custom_asset_resolver->struct_size >=
+        sizeof(FlutterCustomAssetResolver)) {
+      run_configuration.AddAssetResolver(
+          std::make_unique<EmbedderCustomAssetResolver>(
+              *args->custom_asset_resolver));
+    }
   }
 
   return true;
@@ -3481,13 +3570,22 @@ FlutterEngineResult FlutterEngineSendPlatformMessage(
   }
 
   std::unique_ptr<flutter::PlatformMessage> message;
-  if (message_size == 0) {
+  if (message_data == nullptr) {
     message = std::make_unique<flutter::PlatformMessage>(
         flutter_message->channel, response);
   } else {
+    void* buffer = malloc(message_size == 0 ? 1 : message_size);
+    if (!buffer) {
+      return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                                "Failed to allocate platform message buffer.");
+    }
+    auto mapping =
+        fml::MallocMapping(reinterpret_cast<uint8_t*>(buffer), message_size);
+    if (message_size > 0) {
+      memcpy(buffer, message_data, message_size);
+    }
     message = std::make_unique<flutter::PlatformMessage>(
-        flutter_message->channel,
-        fml::MallocMapping::Copy(message_data, message_size), response);
+        flutter_message->channel, std::move(mapping), response);
   }
 
   return reinterpret_cast<flutter::EmbedderEngine*>(engine)
@@ -3562,11 +3660,14 @@ FlutterEngineResult FlutterEngineSendPlatformMessageResponse(
   auto response = handle->message->response();
 
   if (response) {
-    if (data_length == 0) {
+    if (data == nullptr) {
       response->CompleteEmpty();
     } else {
-      response->Complete(std::make_unique<fml::DataMapping>(
-          std::vector<uint8_t>({data, data + data_length})));
+      std::vector<uint8_t> vec;
+      if (data_length > 0) {
+        vec.assign(data, data + data_length);
+      }
+      response->Complete(std::make_unique<fml::DataMapping>(std::move(vec)));
     }
   }
 
@@ -4502,6 +4603,33 @@ FlutterEngineResult FlutterEngineUnregisterImageDecoder(
   return LOG_EMBEDDER_ERROR(kInvalidArguments, "Registration ID was invalid.");
 }
 
+FlutterEngineResult FlutterEngineUpdateCustomAssetResolver(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterCustomAssetResolver* resolver) {
+  TRACE_EVENT0("flutter", "FlutterEngineUpdateCustomAssetResolver");
+  if (!engine || !resolver) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Invalid engine or resolver specified.");
+  }
+  if (resolver->struct_size < sizeof(FlutterCustomAssetResolver)) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Invalid resolver struct size.");
+  }
+  auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency, "Engine is not valid.");
+  }
+  auto platform_view = embedder_engine->GetShell().GetPlatformView();
+  if (!platform_view) {
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Platform view is not valid.");
+  }
+  platform_view->UpdateAssetResolverByType(
+      std::make_unique<EmbedderCustomAssetResolver>(*resolver),
+      flutter::AssetResolver::AssetResolverType::kApkAssetProvider);
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -4567,6 +4695,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(GetCallbackInformation, FlutterEngineGetCallbackInformation);
   SET_PROC(RegisterImageDecoder, FlutterEngineRegisterImageDecoder);
   SET_PROC(UnregisterImageDecoder, FlutterEngineUnregisterImageDecoder);
+  SET_PROC(UpdateCustomAssetResolver, FlutterEngineUpdateCustomAssetResolver);
 #undef SET_PROC
 
   return kSuccess;
