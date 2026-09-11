@@ -2347,6 +2347,7 @@ flutter:
     - NOTICES
     - nested/NOTICES
     - shaders/ink_sparkle.frag
+    - custom/blur.FRAG
     - fonts/my_font.ttf
     - images/100%_deal.png
   fonts:
@@ -2368,6 +2369,9 @@ flutter:
         ..createSync(recursive: true)
         ..writeAsStringSync('Nested notices');
       environment.projectDir.childDirectory('shaders').childFile('ink_sparkle.frag')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('void main() {}');
+      environment.projectDir.childDirectory('custom').childFile('blur.FRAG')
         ..createSync(recursive: true)
         ..writeAsStringSync('void main() {}');
       environment.projectDir.childDirectory('fonts').childFile('my_font.ttf')
@@ -2416,6 +2420,7 @@ flutter:
       // Unhashed assets: root NOTICES and shaders
       expect(assetsDir.childFile('NOTICES').existsSync(), true);
       expect(assetsDir.childDirectory('shaders').childFile('ink_sparkle.frag').existsSync(), true);
+      expect(assetsDir.childDirectory('custom').childFile('blur.FRAG').existsSync(), true);
 
       // Manifest files exist unhashed
       final File assetManifestBin = assetsDir.childFile('AssetManifest.bin');

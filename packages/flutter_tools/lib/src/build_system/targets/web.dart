@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -1604,7 +1603,7 @@ Map<String, File> _hashWebAssets(Directory assetsDir) {
     final String posixRelativePath = p.posix.joinAll(segments);
 
     if (_kUnhashedAssetRelativePaths.contains(posixRelativePath) ||
-        fileSystem.path.extension(file.path) == '.frag' ||
+        fileSystem.path.extension(file.path).toLowerCase() == '.frag' ||
         segments.firstOrNull == 'shaders') {
       continue;
     }
