@@ -3540,7 +3540,10 @@ class EditableTextState extends State<EditableText>
 
     if (_hasInputConnection) {
       final obscureTextChanged = oldWidget.obscureText != widget.obscureText;
-      if (obscureTextChanged || oldWidget.keyboardType != widget.keyboardType) {
+      final keyboardTypeChanged = oldWidget.keyboardType != widget.keyboardType;
+      final textInputActionChanged = oldWidget.textInputAction != widget.textInputAction;
+
+      if (obscureTextChanged || keyboardTypeChanged || textInputActionChanged) {
         if (obscureTextChanged) {
           // When obscureText is toggled, we should reset its state to prevent the last character from being visible between state changes.
           _obscureShowCharTicksPending = 0;

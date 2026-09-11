@@ -945,6 +945,29 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertFalse(inputView.isSecureTextEntry);
 }
 
+- (void)testUpdateInputAction {
+  NSDictionary* config = self.mutableTemplateCopy;
+  [config setValue:@"TextInputAction.done" forKey:@"inputAction"];
+  [self setClientId:123 configuration:config];
+
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+  FlutterTextInputView* inputView = OCMPartialMock(inputFields[0]);
+
+  __block int callCount = 0;
+  OCMStub([inputView reloadInputViews]).andDo(^(NSInvocation* invocation) {
+    callCount++;
+  });
+
+  XCTAssertEqual(inputView.returnKeyType, UIReturnKeyDone);
+
+  config = self.mutableTemplateCopy;
+  [config setValue:@"TextInputAction.send" forKey:@"inputAction"];
+  [self updateConfig:config];
+
+  XCTAssertEqual(callCount, 1);
+  XCTAssertEqual(inputView.returnKeyType, UIReturnKeySend);
+}
+
 - (void)testInputActionContinueAction {
   id mockBinaryMessenger = OCMClassMock([FlutterBinaryMessengerRelay class]);
   FlutterEngine* testEngine = [[FlutterEngine alloc] init];
