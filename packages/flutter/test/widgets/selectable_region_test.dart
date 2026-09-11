@@ -998,6 +998,44 @@ void main() {
       );
       expect(tester.getSize(find.byType(SelectableRegion)), Size.zero);
     });
+
+    testWidgets('context menu anchors do not crash when the selection has been cleared', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for https://github.com/flutter/flutter/issues/124078.
+      //
+      // The selection points can become null between the gesture that requests
+      // the context menu and the menu being built, for example when the
+      // selected content scrolled out of the viewport or was disposed. Reading
+      // the anchors for the context menu must not crash in that window.
+      const text = 'Hello world, how are you today?';
+      await tester.pumpWidget(
+        TestWidgetsApp(home: _selectableRegion(child: const Text(text))),
+      );
+      await tester.pumpAndSettle();
+
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text(text), matching: find.byType(RichText)),
+      );
+
+      // Long press to select a word and show the context menu.
+      await tester.longPressAt(textOffsetToPosition(paragraph, 7));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections, isNotEmpty);
+
+      // Clear the selection to simulate the race where the selection points
+      // are no longer available while the context menu is being built.
+      final SelectableRegionState state = tester.state<SelectableRegionState>(
+        find.byType(SelectableRegion),
+      );
+      state.clearSelection();
+      await tester.pumpAndSettle();
+
+      // Before the fix this threw a "Null check operator used on a null value"
+      // exception from startGlyphHeight.
+      final TextSelectionToolbarAnchors anchors = state.contextMenuAnchors;
+      expect(anchors.primaryAnchor, isNotNull);
+    });
   });
 
   testWidgets('Can extend StaticSelectionContainerDelegate', (WidgetTester tester) async {
