@@ -7332,7 +7332,6 @@ targets:
   - name: Windows new_gallery_windows_impeller__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
