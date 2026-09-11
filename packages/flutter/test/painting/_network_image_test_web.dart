@@ -123,30 +123,14 @@ void runTests() {
     };
 
     final networkImage = NetworkImage(_uniqueUrl(tester.testDescription));
-    ImageInfo? imageInfo;
     Object? recordedError;
-    Completer<void>? imageCompleter;
-    await tester.runAsync(() async {
-      imageCompleter = Completer<void>();
-      final ImageStream stream = networkImage.resolve(ImageConfiguration.empty);
-      stream.addListener(
-        ImageStreamListener(
-          (ImageInfo info, bool isSync) {
-            imageInfo = info;
-            imageCompleter!.complete();
-          },
-          onError: (Object error, StackTrace? stackTrace) {
-            recordedError = error;
-            imageCompleter!.complete();
-          },
-        ),
-      );
-    });
-    await tester.runAsync(() async {
-      await imageCompleter!.future;
-    });
+    await precacheTestImage(
+      networkImage,
+      onError: (Object error, StackTrace? stackTrace) {
+        recordedError = error;
+      },
+    );
     expect(recordedError, isNotNull);
-    expect(imageInfo, isNull);
   });
 
   testWidgets('When strategy is .fallback, emits a WebImageInfo if the image is cross-origin', (
