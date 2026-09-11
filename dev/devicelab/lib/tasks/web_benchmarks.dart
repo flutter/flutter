@@ -88,7 +88,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
         print('Warning: Error closing server: $e');
       }
 
-      // 2. Stop Chrome (non-DDC mode only; in DDC mode Chrome is managed by flutterRunProcess)
+      // 2. Stop or disconnect Chrome (in DDC mode Chrome is managed by flutterRunProcess)
       if (!benchmarkOptions.useDdc) {
         try {
           final currentChrome = chrome;
@@ -104,6 +104,22 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           }
         } catch (e) {
           print('Warning: Error stopping Chrome: $e');
+        }
+      } else {
+        try {
+          final currentChrome = chrome;
+          final readyFuture = whenChromeIsReady;
+          if (currentChrome != null) {
+            currentChrome.disconnect();
+          } else if (readyFuture != null) {
+            final Chrome readyChrome = await readyFuture.timeout(
+              const Duration(seconds: 5),
+              onTimeout: () => throw TimeoutException('Chrome ready timeout during cleanup'),
+            );
+            readyChrome.disconnect();
+          }
+        } catch (e) {
+          print('Warning: Error disconnecting Chrome: $e');
         }
       }
 
@@ -267,13 +283,15 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
             final profile = json.decode(requestContents) as Map<String, dynamic>;
             final benchmarkName = profile['name'] as String;
             if (benchmarkName != benchmarkIterator.current) {
-              profileData.completeError(
-                Exception(
-                  'Browser returned benchmark results from a wrong benchmark.\n'
-                  'Requested to run benchmark ${benchmarkIterator.current}, but '
-                  'got results for $benchmarkName.',
-                ),
-              );
+              if (!profileData.isCompleted) {
+                profileData.completeError(
+                  Exception(
+                    'Browser returned benchmark results from a wrong benchmark.\n'
+                    'Requested to run benchmark ${benchmarkIterator.current}, but '
+                    'got results for $benchmarkName.',
+                  ),
+                );
+              }
               unawaited(server!.close());
             }
 
@@ -300,7 +318,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
             final errorDetails = json.decode(requestContents) as Map<String, dynamic>;
             unawaited(server!.close());
             // Keep the stack trace as a string. It's thrown in the browser, not this Dart VM.
-            profileData.completeError('${errorDetails['error']}\n${errorDetails['stackTrace']}');
+            if (!profileData.isCompleted) {
+              profileData.completeError('${errorDetails['error']}\n${errorDetails['stackTrace']}');
+            }
             return Response.ok('', headers: requestHeaders);
           } else if (request.requestedUri.path.endsWith('/next-benchmark')) {
             if (benchmarks == null) {
@@ -312,7 +332,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
               print('Launching benchmark "$nextBenchmark"');
               return Response.ok(nextBenchmark, headers: requestHeaders);
             } else {
-              profileData.complete(collectedProfiles);
+              if (!profileData.isCompleted) {
+                profileData.complete(collectedProfiles);
+              }
               return Response.notFound('Finished running benchmarks.', headers: requestHeaders);
             }
           } else if (request.requestedUri.path.endsWith('/print-to-console')) {
@@ -329,7 +351,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
             );
           }
         } catch (error, stackTrace) {
-          profileData.completeError(error, stackTrace);
+          if (!profileData.isCompleted) {
+            profileData.completeError(error, stackTrace);
+          }
           return Response.internalServerError(body: '$error', headers: requestHeaders);
         }
       });
@@ -374,7 +398,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           flutterRunProcess!,
           options,
           onError: (String error) {
-            profileData.completeError(Exception(error));
+            if (!profileData.isCompleted) {
+              profileData.completeError(Exception(error));
+            }
           },
           workingDirectory: cwd,
         );
@@ -382,7 +408,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
         whenChromeIsReady = Chrome.launch(
           options,
           onError: (String error) {
-            profileData.completeError(Exception(error));
+            if (!profileData.isCompleted) {
+              profileData.completeError(Exception(error));
+            }
           },
           workingDirectory: cwd,
         );
