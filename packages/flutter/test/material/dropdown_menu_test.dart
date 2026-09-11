@@ -5406,6 +5406,85 @@ void main() {
 
     expect(controller.text, selectNoneLabel);
   });
+
+  testWidgets('DropdownMenu manages its own focus node when focusNode is not provided', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            requestFocusOnTap: true,
+            dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu1, label: 'Item 1'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Tap to focus the TextField.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    // The internal focus node created by DropdownMenu should have gained focus.
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.focusNode.debugLabel, 'DropdownMenu<TestMenu>');
+    expect(editableText.focusNode.hasFocus, isTrue);
+  });
+
+  testWidgets('DropdownMenu does not leak internal focus node after dispose', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Remove the DropdownMenu from the tree.
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: SizedBox.shrink())),
+    );
+
+    // No exception should be thrown during dispose.
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('DropdownMenu uses provided focusNode instead of creating an internal one', (
+    WidgetTester tester,
+  ) async {
+    final providedFocusNode = FocusNode();
+    addTearDown(providedFocusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            focusNode: providedFocusNode,
+            requestFocusOnTap: true,
+            dropdownMenuEntries: const <DropdownMenuEntry<TestMenu>>[
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Tap to focus the TextField.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    // The provided focus node should have gained focus.
+    expect(providedFocusNode.hasFocus, isTrue);
+  });
 }
 
 enum TestMenu {
