@@ -2719,20 +2719,17 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
 
   void _updateData() {
     final newData = MediaQueryData.fromView(widget.view, platformData: _parentData);
-    var newBrightnessIsOverridden = false;
-    assert(() {
-      // Asked of the view that applies the entry, and only when it applies one,
-      // for the reason [MediaQueryData.fromView] asks that way: an entry
-      // registered for a view that resolves nothing did not supersede
-      // [_parentData], so replacing the brightness below would drop what the
-      // parent supplied in favour of a value nothing asked for.
-      newBrightnessIsOverridden =
-          debugViewMetricsOverrideApplied(
-            debugViewWithMetricsOverrides(widget.view),
-          )?.platformBrightness !=
-          null;
-      return true;
-    }());
+    // Asked of the view that applies the entry, and only when it applies one,
+    // for the reason [MediaQueryData.fromView] asks that way: an entry
+    // registered for a view that resolves nothing did not supersede
+    // [_parentData], so replacing the brightness below would drop what the
+    // parent supplied in favour of a value nothing asked for.
+    final bool newBrightnessIsOverridden =
+        kDebugMode &&
+        debugViewMetricsOverrideApplied(
+              debugViewWithMetricsOverrides(widget.view),
+            )?.platformBrightness !=
+            null;
     if (newData != _data || newBrightnessIsOverridden != _debugBrightnessIsOverridden) {
       setState(() {
         _data = newData;

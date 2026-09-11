@@ -84,6 +84,18 @@ enum FoundationServiceExtensions {
   /// Name of service extension that, when called, gets, sets, or clears the
   /// view metric overrides of an individual view.
   ///
+  /// Recognized parameters:
+  ///
+  ///  * `viewId`: the [FlutterView.viewId] to act on. Required unless
+  ///    `clearAll` is `'true'`.
+  ///  * `overrides`: a JSON object in the format
+  ///    [DebugViewMetricsOverride.fromJson] accepts, or `null`. When present,
+  ///    it replaces the override currently registered for `viewId`. An empty
+  ///    object or `null` removes it.
+  ///  * `clearAll`: when `'true'`, removes every override and ignores `viewId`.
+  ///
+  /// With neither `overrides` nor `clearAll`, the call is a read.
+  ///
   /// See also:
   ///
   ///  * [DebugViewMetricsOverride], the value this service extension exposes.
