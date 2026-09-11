@@ -25,8 +25,8 @@
 #include "third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
 
 #if defined(IMPELLER_SUPPORTS_RENDERING)
-#include "flutter/impeller/display_list/aiks_context.h"
-#include "flutter/impeller/display_list/dl_image_impeller.h"
+#include "flutter/impeller/display_list/aiks_context.h"       // nogncheck
+#include "flutter/impeller/display_list/dl_image_impeller.h"  // nogncheck
 #endif
 
 #if defined(__ANDROID__)
@@ -36,16 +36,16 @@
 #endif
 
 #if defined(SHELL_ENABLE_VULKAN)
-#include "flutter/impeller/renderer/backend/vulkan/android/ahb_texture_source_vk.h"
-#include "flutter/impeller/renderer/backend/vulkan/texture_vk.h"
+#include "flutter/impeller/renderer/backend/vulkan/android/ahb_texture_source_vk.h"  // nogncheck
+#include "flutter/impeller/renderer/backend/vulkan/texture_vk.h"  // nogncheck
 #endif
 
 #if defined(SHELL_ENABLE_GL)
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#include "flutter/impeller/renderer/backend/gles/context_gles.h"
-#include "flutter/impeller/renderer/backend/gles/handle_gles.h"
-#include "flutter/impeller/renderer/backend/gles/texture_gles.h"
+#include "flutter/impeller/renderer/backend/gles/context_gles.h"  // nogncheck
+#include "flutter/impeller/renderer/backend/gles/handle_gles.h"   // nogncheck
+#include "flutter/impeller/renderer/backend/gles/texture_gles.h"  // nogncheck
 #endif
 
 #endif  // defined(__ANDROID__)
