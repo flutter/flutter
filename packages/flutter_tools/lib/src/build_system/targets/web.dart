@@ -1607,7 +1607,7 @@ Map<String, File> _hashWebAssets(Directory assetsDir) {
         .convert(file.readAsBytesSync())
         .toString()
         .substring(0, 8);
-    final String newBasename = _computeHashedBasename(basename, contentHash);
+    final String newBasename = _computeHashedBasename(basename, contentHash, fileSystem);
 
     final String relativePath = fileSystem.path.relative(file.path, from: assetsDir.path);
     final String newRelativePath = fileSystem.path.join(
