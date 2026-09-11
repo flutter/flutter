@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show jsonEncode;
-import 'dart:io' show Directory, File;
-
 import 'package:coverage/coverage.dart' show HitMap;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -359,28 +357,28 @@ void main() {
   });
 
   testWithoutContext('Coverage collector caches read files', () async {
+    final fileSystem = LocalFileSystem.test(signals: FakeSignals());
     Directory? tempDir;
     try {
-      tempDir = Directory.systemTemp.createTempSync('flutter_coverage_collector_test.');
+      tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_coverage_collector_test.');
       final File packagesFile = writeFooBarPackagesJson(tempDir);
-      final fooDir = Directory('${tempDir.path}/foo/');
-      fooDir.createSync();
-      final fooFile = File('${fooDir.path}/foo.dart');
+      final Directory fooDir = tempDir.childDirectory('foo')..createSync();
+      final File fooFile = fooDir.childFile('foo.dart');
       fooFile.writeAsStringSync('hit\nnohit but ignored // coverage:ignore-line\nhit\n');
 
       final String packagesPath = packagesFile.path;
       final collector = CoverageCollector(
-        libraryNames: <String>{'foo', 'bar'},
-        verbose: false,
-        packagesPath: packagesPath,
-        resolver: await CoverageCollector.getResolver(packagesPath),
-        fileSystem: const LocalFileSystem(),
+        fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        packagesPath: packagesPath,
         platform: const LocalPlatform(),
         processUtils: ProcessUtils(
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
         ),
+        libraryNames: <String>{'foo', 'bar'},
+        resolver: await CoverageCollector.getResolver(packagesPath),
+        verbose: false,
       );
       await collector.collectCoverage(
         TestTestDevice(),
@@ -447,28 +445,28 @@ void main() {
   });
 
   testWithoutContext('Coverage collector respects ignore whole file', () async {
+    final fileSystem = LocalFileSystem.test(signals: FakeSignals());
     Directory? tempDir;
     try {
-      tempDir = Directory.systemTemp.createTempSync('flutter_coverage_collector_test.');
+      tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_coverage_collector_test.');
       final File packagesFile = writeFooBarPackagesJson(tempDir);
-      final fooDir = Directory('${tempDir.path}/foo/');
-      fooDir.createSync();
-      final fooFile = File('${fooDir.path}/foo.dart');
+      final Directory fooDir = tempDir.childDirectory('foo')..createSync();
+      final File fooFile = fooDir.childFile('foo.dart');
       fooFile.writeAsStringSync('hit\nnohit but ignored // coverage:ignore-file\nhit\n');
 
       final String packagesPath = packagesFile.path;
       final collector = CoverageCollector(
-        libraryNames: <String>{'foo', 'bar'},
-        verbose: false,
-        packagesPath: packagesPath,
-        resolver: await CoverageCollector.getResolver(packagesPath),
-        fileSystem: const LocalFileSystem(),
+        fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        packagesPath: packagesPath,
         platform: const LocalPlatform(),
         processUtils: ProcessUtils(
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
         ),
+        libraryNames: <String>{'foo', 'bar'},
+        resolver: await CoverageCollector.getResolver(packagesPath),
+        verbose: false,
       );
       await collector.collectCoverage(
         TestTestDevice(),
@@ -497,26 +495,27 @@ void main() {
   });
 
   testWithoutContext('Coverage collector respects libraryNames in finalized report', () async {
+    final fileSystem = LocalFileSystem.test(signals: FakeSignals());
     Directory? tempDir;
     try {
-      tempDir = Directory.systemTemp.createTempSync('flutter_coverage_collector_test.');
+      tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_coverage_collector_test.');
       final File packagesFile = writeFooBarPackagesJson(tempDir);
-      File('${tempDir.path}/foo/foo.dart').createSync(recursive: true);
-      File('${tempDir.path}/bar/bar.dart').createSync(recursive: true);
+      tempDir.childFile('foo/foo.dart').createSync(recursive: true);
+      tempDir.childFile('bar/bar.dart').createSync(recursive: true);
 
       final String packagesPath = packagesFile.path;
       var collector = CoverageCollector(
-        libraryNames: <String>{'foo', 'bar'},
-        verbose: false,
-        packagesPath: packagesPath,
-        resolver: await CoverageCollector.getResolver(packagesPath),
-        fileSystem: const LocalFileSystem(),
+        fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        packagesPath: packagesPath,
         platform: const LocalPlatform(),
         processUtils: ProcessUtils(
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
         ),
+        libraryNames: <String>{'foo', 'bar'},
+        resolver: await CoverageCollector.getResolver(packagesPath),
+        verbose: false,
       );
       await collector.collectCoverage(
         TestTestDevice(),
@@ -530,17 +529,17 @@ void main() {
       expect(report, contains('bar.dart'));
 
       collector = CoverageCollector(
-        libraryNames: <String>{'foo'},
-        verbose: false,
-        packagesPath: packagesPath,
-        resolver: await CoverageCollector.getResolver(packagesPath),
-        fileSystem: const LocalFileSystem(),
+        fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        packagesPath: packagesPath,
         platform: const LocalPlatform(),
         processUtils: ProcessUtils(
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
         ),
+        libraryNames: <String>{'foo'},
+        resolver: await CoverageCollector.getResolver(packagesPath),
+        verbose: false,
       );
       await collector.collectCoverage(
         TestTestDevice(),
@@ -560,28 +559,28 @@ void main() {
   testWithoutContext(
     'Coverage collector records test timings when provided TestTimeRecorder',
     () async {
+      final fileSystem = LocalFileSystem.test(signals: FakeSignals());
       Directory? tempDir;
       try {
-        tempDir = Directory.systemTemp.createTempSync('flutter_coverage_collector_test.');
+        tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_coverage_collector_test.');
         final File packagesFile = writeFooBarPackagesJson(tempDir);
-        final fooDir = Directory('${tempDir.path}/foo/');
-        fooDir.createSync();
-        final fooFile = File('${fooDir.path}/foo.dart');
+        final Directory fooDir = tempDir.childDirectory('foo')..createSync();
+        final File fooFile = fooDir.childFile('foo.dart');
         fooFile.writeAsStringSync('hit\nnohit but ignored // coverage:ignore-line\nhit\n');
 
         final String packagesPath = packagesFile.path;
         final logger = LoggingLogger();
         final testTimeRecorder = TestTimeRecorder(logger);
         final collector = CoverageCollector(
-          libraryNames: <String>{'foo', 'bar'},
-          verbose: false,
-          packagesPath: packagesPath,
-          resolver: await CoverageCollector.getResolver(packagesPath),
-          testTimeRecorder: testTimeRecorder,
-          fileSystem: const LocalFileSystem(),
+          fileSystem: fileSystem,
           logger: logger,
+          packagesPath: packagesPath,
           platform: const LocalPlatform(),
           processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.any()),
+          libraryNames: <String>{'foo', 'bar'},
+          resolver: await CoverageCollector.getResolver(packagesPath),
+          testTimeRecorder: testTimeRecorder,
+          verbose: false,
         );
         await collector.collectCoverage(
           TestTestDevice(),
@@ -761,9 +760,9 @@ void main() {
 }
 
 File writeFooBarPackagesJson(Directory tempDir) {
-  final file = File('${tempDir.path}/packages.json');
+  final File file = tempDir.childFile('packages.json');
   file.writeAsStringSync(
-    jsonEncode(<String, dynamic>{
+    jsonEncode(<String, Object>{
       'configVersion': 2,
       'packages': <Map<String, String>>[
         <String, String>{'name': 'foo', 'rootUri': 'foo'},

@@ -19,17 +19,17 @@ import 'watcher.dart';
 /// A class that collects code coverage data during test runs.
 class CoverageCollector extends TestWatcher {
   CoverageCollector({
-    this.libraryNames,
-    this.verbose = true,
-    required this.packagesPath,
-    this.resolver,
-    this.testTimeRecorder,
-    this.branchCoverage = false,
     required FileSystem fileSystem,
     required Logger logger,
+    required this.packagesPath,
     required Platform platform,
     required ProcessUtils processUtils,
+    this.branchCoverage = false,
+    this.libraryNames,
     OperatingSystemUtils? os,
+    this.resolver,
+    this.testTimeRecorder,
+    this.verbose = true,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
