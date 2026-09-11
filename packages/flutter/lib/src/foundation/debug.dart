@@ -415,6 +415,10 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// throws a [FormatException], so that a tooling mistake surfaces at the
   /// service extension boundary instead of as a metric that silently failed to
   /// apply.
+  ///
+  /// For [platformBrightness], values may be `'light'`, `'dark'`,
+  /// `'Brightness.light'`, or `'Brightness.dark'` for compatibility with
+  /// [FoundationServiceExtensions.brightnessOverride].
   factory DebugViewMetricsOverride.fromJson(Map<Object?, Object?> json) {
     final Iterable<Object?> unknownKeys = json.keys.where(
       (Object? key) => !_jsonKeys.contains(key),

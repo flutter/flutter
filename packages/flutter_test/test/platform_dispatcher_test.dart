@@ -10,6 +10,7 @@ import 'dart:ui'
         FlutterView,
         Locale,
         PlatformDispatcher,
+        Size,
         ViewFocusChangeCallback,
         VoidCallback;
 
@@ -251,6 +252,37 @@ void main() {
     expect(metricsNotificationCount, 4);
   });
 
+  testWidgets(
+    'TestPlatformDispatcher updates display on TestFlutterView when view changes display',
+    (WidgetTester tester) async {
+      final display1 = _FakeDisplay(id: 1);
+      final display2 = _FakeDisplay(id: 2);
+      final fakeView = _FakeFlutterView(display: display1, viewId: 100);
+      final backingDispatcher = _FakePlatformDispatcher(
+        displays: <Display>[display1, display2],
+        views: <FlutterView>[fakeView],
+      );
+      final testDispatcher = TestPlatformDispatcher(platformDispatcher: backingDispatcher);
+
+      final TestFlutterView originalTestView = testDispatcher.views.single;
+      expect(originalTestView.display.id, display1.id);
+
+      // Set a test value override on the TestFlutterView.
+      originalTestView.physicalSize = const Size(800, 600);
+      expect(originalTestView.physicalSize, const Size(800, 600));
+
+      // Move the view to display2 and trigger metrics change.
+      fakeView.display = display2;
+      backingDispatcher.onMetricsChanged?.call();
+
+      final TestFlutterView updatedTestView = testDispatcher.views.single;
+      // The instance is retained, preserving test value overrides.
+      expect(updatedTestView, same(originalTestView));
+      expect(updatedTestView.display.id, display2.id);
+      expect(updatedTestView.physicalSize, const Size(800, 600));
+    },
+  );
+
   testWidgets('TestPlatformDispatcher has a working scaleFontSize implementation', (
     WidgetTester tester,
   ) async {
@@ -378,7 +410,11 @@ class _FakeFlutterView extends Fake implements FlutterView {
     return _display!;
   }
 
-  final Display? _display;
+  set display(Display value) {
+    _display = value;
+  }
+
+  Display? _display;
 
   @override
   final int viewId;
@@ -391,6 +427,16 @@ class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {
 
   @override
   final Iterable<FlutterView> views;
+
+  @override
+  FlutterView? view({required int id}) {
+    for (final FlutterView v in views) {
+      if (v.viewId == id) {
+        return v;
+      }
+    }
+    return null;
+  }
 
   @override
   VoidCallback? onMetricsChanged;

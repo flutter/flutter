@@ -927,6 +927,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     final extraViewKeys = <Object>[..._testViews.keys];
     final allViews = <FlutterView>[..._platformDispatcher.views, ..._customViews.values];
     for (final view in allViews) {
+      extraViewKeys.remove(view.viewId);
+      final TestFlutterView? testView = _testViews[view.viewId];
       // TODO(pdblasi-google): Remove this try-catch once the Display API is stable and supported on all platforms
       late final TestDisplay display;
       try {
@@ -935,6 +937,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
           display = _testDisplays[realDisplay.id]!;
         } else if (displays.isNotEmpty) {
           display = displays.first;
+        } else if (testView?._display is _UnsupportedDisplay) {
+          display = testView!._display;
         } else {
           display = _UnsupportedDisplay(
             this,
@@ -944,17 +948,21 @@ class TestPlatformDispatcher implements PlatformDispatcher {
           );
         }
       } catch (error) {
-        display = displays.isNotEmpty ? displays.first : _UnsupportedDisplay(this, view, error);
+        display = displays.isNotEmpty
+            ? displays.first
+            : ((testView?._display is _UnsupportedDisplay)
+                  ? testView!._display
+                  : _UnsupportedDisplay(this, view, error));
       }
 
-      extraViewKeys.remove(view.viewId);
-      final TestFlutterView? testView = _testViews[view.viewId];
       if (testView == null || !identical(testView._view, view)) {
         _testViews[view.viewId] = TestFlutterView(
           view: view,
           platformDispatcher: this,
           display: display,
         );
+      } else if (!identical(testView._display, display)) {
+        testView._display = display;
       }
     }
 
@@ -1140,7 +1148,7 @@ class TestFlutterView implements FlutterView {
 
   @override
   TestDisplay get display => _display;
-  final TestDisplay _display;
+  TestDisplay _display;
 
   @override
   int get viewId => _view.viewId;

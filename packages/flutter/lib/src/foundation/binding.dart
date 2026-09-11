@@ -688,19 +688,22 @@ abstract class BindingBase {
   /// Recognized parameters:
   ///
   ///  * `viewId`: the [FlutterView.viewId] to act on, as a non-negative integer string.
-  ///    Required unless `clearAll` is `'true'`.
+  ///    Required when `overrides` is present, optional for reads, and ignored
+  ///    when `clearAll` is `'true'`.
   ///  * `overrides`: a JSON-encoded string representing an object in the format
   ///    [DebugViewMetricsOverride.fromJson] accepts, or `'null'`. When present,
   ///    it replaces the override currently registered for `viewId`. An empty
   ///    object or `'null'` removes it.
   ///  * `clearAll`: when `'true'`, removes every override and ignores `viewId`.
   ///
-  /// With neither `overrides` nor `clearAll`, the call is a read.
+  /// With neither `overrides` nor `clearAll`, the call is a read. If `viewId` is
+  /// omitted on a read, the call returns an empty `overrides` map and all
+  /// `overriddenViewIds`.
   ///
   /// The result always reports the override now in effect for `viewId` under
   /// the `overrides` key, plus every overridden view id under
-  /// `overriddenViewIds` (as a `List<int>`), so that tooling can resynchronize
-  /// after any call.
+  /// `overriddenViewIds` (as a sorted `List<int>`), so that tooling can
+  /// resynchronize after any call.
   ///
   /// A call that changes an override also posts a
   /// `Flutter.ServiceExtensionStateChanged` event whose value is the JSON text
@@ -725,13 +728,20 @@ abstract class BindingBase {
       return <String, Object?>{
         'overrides': <String, Object?>{},
         // A synchronous notification may have installed another override.
-        'overriddenViewIds': debugViewMetricsOverrides.keys.toList(),
+        'overriddenViewIds': debugViewMetricsOverrides.keys.toList()..sort(),
       };
     }
 
     final String? rawViewId = parameters['viewId'];
+    final String? rawOverrides = parameters['overrides'];
     if (rawViewId == null) {
-      throw const FormatException('The viewId parameter is required unless clearAll is true.');
+      if (rawOverrides != null) {
+        throw const FormatException('The viewId parameter is required when overrides is provided.');
+      }
+      return <String, Object?>{
+        'overrides': <String, Object?>{},
+        'overriddenViewIds': debugViewMetricsOverrides.keys.toList()..sort(),
+      };
     }
     final int? viewId = int.tryParse(rawViewId);
     if (viewId == null || viewId < 0) {
@@ -740,7 +750,6 @@ abstract class BindingBase {
       );
     }
 
-    final String? rawOverrides = parameters['overrides'];
     if (rawOverrides != null) {
       final Object? decoded = json.decode(rawOverrides);
       if (decoded == null) {
@@ -761,7 +770,7 @@ abstract class BindingBase {
 
     return <String, Object?>{
       'overrides': debugViewMetricsOverrides[viewId]?.toJson() ?? <String, Object?>{},
-      'overriddenViewIds': debugViewMetricsOverrides.keys.toList(),
+      'overriddenViewIds': debugViewMetricsOverrides.keys.toList()..sort(),
     };
   }
 

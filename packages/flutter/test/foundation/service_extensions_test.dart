@@ -1433,6 +1433,15 @@ void main() {
     expect(result['overriddenViewIds'], <int>[]);
     expect(extensionChangedEvents, isEmpty);
 
+    // Parameterless read with no override installed.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{},
+    );
+    expect(result['overrides'], <String, Object?>{});
+    expect(result['overriddenViewIds'], <int>[]);
+    expect(extensionChangedEvents, isEmpty);
+
     // Installing an override.
     result = await binding.testExtension(
       FoundationServiceExtensions.viewMetricsOverride.name,
@@ -1474,6 +1483,15 @@ void main() {
       '$viewId': <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true},
       '${viewId + 1}': <String, Object?>{'textScaleFactor': 2.0},
     });
+
+    // Reading without viewId parameter returns empty overrides and all overridden view IDs.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{},
+    );
+    expect(result['overrides'], <String, Object?>{});
+    expect(result['overriddenViewIds'], <int>[viewId, viewId + 1]);
+    expect(extensionChangedEvents.length, 2);
 
     result = await binding.testExtension(
       FoundationServiceExtensions.viewMetricsOverride.name,
@@ -1566,7 +1584,7 @@ void main() {
       throwsA(isA<FormatException>()),
     );
 
-    // A missing viewId is rejected.
+    // A missing viewId is rejected when overrides is provided.
     await expectLater(
       binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
         'overrides': '{}',
@@ -1650,6 +1668,34 @@ void main() {
     expect(binding.frameScheduled, isTrue);
     await binding.doFrame();
     expect(binding.frameScheduled, isFalse);
+
+    // Overridden view IDs are deterministically sorted.
+    await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '50', 'overrides': '{"devicePixelRatio": 2.0}'},
+    );
+    await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '20', 'overrides': '{"devicePixelRatio": 2.0}'},
+    );
+    await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '35', 'overrides': '{"devicePixelRatio": 2.0}'},
+    );
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{},
+    );
+    expect(result['overrides'], <String, Object?>{});
+    expect(result['overriddenViewIds'], <int>[20, 35, 50]);
+
+    await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'clearAll': 'true'},
+    );
+    if (binding.frameScheduled) {
+      await binding.doFrame();
+    }
 
     testedExtensions.add(FoundationServiceExtensions.viewMetricsOverride.name);
   });
