@@ -1046,6 +1046,73 @@ void main() {
     await tester.pump();
   });
 
+  testWidgets('handleClearSelection does not throw when a selectable unregisters during dispatch', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/192081.
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: _selectableRegion(
+          child: const Column(
+            children: <Widget>[DisappearingSelectable(), DisappearingSelectable()],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final SelectableRegionState state = tester.state<SelectableRegionState>(
+      find.byType(SelectableRegion),
+    );
+
+    // [SelectableRegionState.selectAll] dispatches a [ClearSelectionEvent]
+    // first. Each child drops its content while handling that event, so
+    // [SelectionRegistrant] unregisters it synchronously through
+    // [SelectionRegistrar.remove], mutating the list that
+    // [MultiSelectableSelectionContainerDelegate.handleClearSelection] is
+    // iterating.
+    state.selectAll();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('handleClearSelection skips selectables that unregistered during dispatch', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/192081.
+    final group = <RenderDisappearingSelectable>{};
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: _selectableRegion(
+          child: Column(
+            children: <Widget>[
+              DisappearingSelectable(group: group),
+              DisappearingSelectable(group: group),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(group, hasLength(2));
+
+    final SelectableRegionState state = tester.state<SelectableRegionState>(
+      find.byType(SelectableRegion),
+    );
+    state.selectAll();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    // Dispatching the clear event to the first member of the group unregisters
+    // both members, so the second member must not receive the event.
+    final Iterable<RenderDisappearingSelectable> cleared = group.where(
+      (RenderDisappearingSelectable selectable) =>
+          selectable.events.any((SelectionEvent event) => event.type == SelectionEventType.clear),
+    );
+    expect(cleared, hasLength(1));
+  });
+
   testWidgets('dragging handle or selecting word triggers haptic feedback on Android', (
     WidgetTester tester,
   ) async {
@@ -7071,6 +7138,108 @@ class RenderSelectionSpy extends RenderProxyBox with Selectable, SelectionRegist
 
   @override
   void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {}
+}
+
+/// A [Selectable] whose content disappears as soon as it receives a
+/// [ClearSelectionEvent], mirroring a real [Selectable] being rebuilt or
+/// disposed mid-dispatch.
+///
+/// When [group] is provided, every member of the group disappears together, so
+/// dispatching an event to one member unregisters the others as a side effect.
+class DisappearingSelectable extends LeafRenderObjectWidget {
+  const DisappearingSelectable({super.key, this.group});
+
+  final Set<RenderDisappearingSelectable>? group;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    final renderObject = RenderDisappearingSelectable(
+      SelectionContainer.maybeOf(context),
+      group: group,
+    );
+    group?.add(renderObject);
+    return renderObject;
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderDisappearingSelectable renderObject) {
+    renderObject.registrar = SelectionContainer.maybeOf(context);
+  }
+}
+
+class RenderDisappearingSelectable extends RenderBox with Selectable, SelectionRegistrant {
+  RenderDisappearingSelectable(SelectionRegistrar? registrar, {this.group}) {
+    this.registrar = registrar;
+  }
+
+  final Set<RenderDisappearingSelectable>? group;
+
+  /// The events this selectable has received, in order.
+  final List<SelectionEvent> events = <SelectionEvent>[];
+
+  final Set<VoidCallback> _listeners = <VoidCallback>{};
+
+  SelectionGeometry _value = const SelectionGeometry(
+    status: SelectionStatus.none,
+    hasContent: true,
+  );
+
+  @override
+  SelectionGeometry get value => _value;
+
+  @override
+  void addListener(VoidCallback listener) => _listeners.add(listener);
+
+  @override
+  void removeListener(VoidCallback listener) => _listeners.remove(listener);
+
+  void _disappear() {
+    if (!_value.hasContent) {
+      return;
+    }
+    _value = const SelectionGeometry(status: SelectionStatus.none, hasContent: false);
+    // Notify a snapshot of the listeners: [SelectionRegistrant] reacts by
+    // calling [SelectionRegistrar.remove], which removes a listener.
+    for (final VoidCallback listener in _listeners.toList()) {
+      listener();
+    }
+  }
+
+  @override
+  SelectionResult dispatchSelectionEvent(SelectionEvent event) {
+    events.add(event);
+    if (event.type == SelectionEventType.clear) {
+      final Set<RenderDisappearingSelectable> affected =
+          group ?? <RenderDisappearingSelectable>{this};
+      for (final selectable in affected) {
+        selectable._disappear();
+      }
+    }
+    return SelectionResult.none;
+  }
+
+  @override
+  List<Rect> get boundingBoxes => <Rect>[paintBounds];
+
+  @override
+  int get contentLength => 1;
+
+  @override
+  SelectedContentRange? getSelection() => null;
+
+  @override
+  SelectedContent? getSelectedContent() => null;
+
+  @override
+  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {}
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.constrain(const Size(10.0, 10.0));
+  }
+
+  @override
+  void performLayout() => size = computeDryLayout(constraints);
 }
 
 class SelectAllWidget extends SingleChildRenderObjectWidget {
