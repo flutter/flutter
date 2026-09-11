@@ -806,7 +806,8 @@ class WidgetsApp extends StatefulWidget {
   /// [Localizations], consider [onGenerateTitle] instead.
   ///
   /// The [builder] callback is passed two arguments, the [BuildContext] (as
-  /// `context`) and a [Navigator] or [Router] widget (as `child`).
+  /// `context`) and a [FocusScope] widget enclosing the [Navigator] or [Router]
+  /// (as `child`).
   ///
   /// If no routes are provided to the regular [WidgetsApp] constructor using
   /// [home], [routes], [onGenerateRoute], or [onUnknownRoute], the `child` will

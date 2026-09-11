@@ -485,6 +485,11 @@ void main() {
 
     final FocusScope focusScope = tester.widget(focusScopeFinder);
     expect(focusScope.autofocus, isTrue);
+    expect(focusScope.child, isA<Router<Object>>());
+    expect(
+      delegate.navigatorKey.currentState!.focusNode.enclosingScope?.debugLabel,
+      'Navigator Scope',
+    );
   });
 
   testWidgets('WidgetsApp.router with routerConfig wraps routing in FocusScope', (
@@ -511,11 +516,18 @@ void main() {
 
     final FocusScope focusScope = tester.widget(focusScopeFinder);
     expect(focusScope.autofocus, isTrue);
+    expect(focusScope.child, isA<Router<Object>>());
+    expect(
+      delegate.navigatorKey.currentState!.focusNode.enclosingScope?.debugLabel,
+      'Navigator Scope',
+    );
   });
 
   testWidgets('WidgetsApp wraps navigator in FocusScope', (WidgetTester tester) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       WidgetsApp(
+        navigatorKey: navigatorKey,
         color: const Color(0xFF123456),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
@@ -535,6 +547,38 @@ void main() {
 
     final FocusScope focusScope = tester.widget(focusScopeFinder);
     expect(focusScope.autofocus, isTrue);
+    expect(focusScope.child, isA<Navigator>());
+    expect(navigatorKey.currentState!.focusNode.enclosingScope?.debugLabel, 'Navigator Scope');
+  });
+
+  testWidgets('WidgetsApp.router passes FocusScope as child to builder', (
+    WidgetTester tester,
+  ) async {
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+    Widget? capturedChild;
+    await tester.pumpWidget(
+      WidgetsApp.router(
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: delegate,
+        builder: (BuildContext context, Widget? child) {
+          capturedChild = child;
+          return child!;
+        },
+        color: const Color(0xFF123456),
+      ),
+    );
+
+    expect(capturedChild, isA<FocusScope>());
+    final focusScope = capturedChild! as FocusScope;
+    expect(focusScope.debugLabel, 'Navigator Scope');
+    expect(focusScope.child, isA<Router<Object>>());
   });
 
   testWidgets('WidgetsApp has correct default ScrollBehavior', (WidgetTester tester) async {
