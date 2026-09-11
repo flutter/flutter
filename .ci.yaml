@@ -3672,7 +3672,6 @@ targets:
   - name: Mac ios_universal_link_test
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -4517,7 +4516,6 @@ targets:
 
   - name: Mac uiscene_plugin_lifecycle_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
