@@ -365,9 +365,11 @@ class WindowControllerWin32 extends WindowController with BaseWindowControllerWi
       throw Exception('Windows failed to create a regular window with a valid view id.');
     }
 
-    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    final FlutterView flutterView =
+        WidgetsBinding.instance.platformDispatcher.view(id: viewId) ??
+        (throw StateError(
+          'No FlutterView with viewId $viewId was found on the platform dispatcher.',
+        ));
     rootView = flutterView;
   }
 
@@ -619,9 +621,11 @@ class DialogWindowControllerWin32 extends DialogWindowController with BaseWindow
       throw Exception('Windows failed to create a dialog window with a valid view id.');
     }
 
-    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    final FlutterView flutterView =
+        WidgetsBinding.instance.platformDispatcher.view(id: viewId) ??
+        (throw StateError(
+          'No FlutterView with viewId $viewId was found on the platform dispatcher.',
+        ));
     rootView = flutterView;
   }
 
