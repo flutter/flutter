@@ -817,6 +817,11 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     // A scope's rect spans all of its children, so search from the innermost
     // focused node to reflect where focus actually is.
     focusedChild = focusedChild.innermostFocusedChild;
+    // A node that resolves back to the focused node, like an enclosing scope,
+    // would hand focus straight back to it, trapping it there.
+    traversalDescendants = traversalDescendants.where(
+      (FocusNode node) => node.innermostFocusedChild != focusedChild,
+    );
     switch (direction) {
       case TraversalDirection.down:
       case TraversalDirection.up:

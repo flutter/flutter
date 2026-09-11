@@ -3201,6 +3201,97 @@ void main() {
       expect(gridNodes[0][0].hasPrimaryFocus, isTrue);
     });
 
+    testWidgets('Up escapes the enclosing scope when the row header is taller than the cards', (
+      WidgetTester tester,
+    ) async {
+      // Same structure as the previous test, but each row's header is taller
+      // than its cards, so a row scope's own rect extends above its focused
+      // card. Up must escape to the row above instead of being trapped by the
+      // enclosing scope handing focus back to the same card.
+      const rowCount = 2;
+      const cardsPerRow = 2;
+      final rowScopes = List<FocusScopeNode>.generate(
+        rowCount,
+        (int row) => FocusScopeNode(debugLabel: 'Row scope $row'),
+      );
+      final gridNodes = List<List<FocusNode>>.generate(
+        rowCount,
+        (int row) => List<FocusNode>.generate(
+          cardsPerRow,
+          (int col) => FocusNode(debugLabel: 'Card $row-$col'),
+        ),
+      );
+      addTearDown(() {
+        for (final scope in rowScopes) {
+          scope.dispose();
+        }
+        for (final FocusNode node in gridNodes.flattened) {
+          node.dispose();
+        }
+      });
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: ListView(
+            children: List<Widget>.generate(rowCount, (int row) {
+              return FocusScope(
+                node: rowScopes[row],
+                onKeyEvent: (FocusNode node, KeyEvent event) {
+                  if (event is! KeyDownEvent) {
+                    return KeyEventResult.ignored;
+                  }
+                  if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                    rowScopes[row].enclosingScope?.focusInDirection(TraversalDirection.down);
+                    return KeyEventResult.handled;
+                  }
+                  if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+                    rowScopes[row].enclosingScope?.focusInDirection(TraversalDirection.up);
+                    return KeyEventResult.handled;
+                  }
+                  return KeyEventResult.ignored;
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    // Row header, taller than the cards below it.
+                    const SizedBox(height: 200, width: 100),
+                    SizedBox(
+                      height: 150,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: List<Widget>.generate(cardsPerRow, (int col) {
+                          return Focus(
+                            focusNode: gridNodes[row][col],
+                            autofocus: row == 0 && col == 0,
+                            child: Container(
+                              width: 360,
+                              margin: const EdgeInsets.only(right: 10),
+                              color: getTestColor(row),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(gridNodes[0][0].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(gridNodes[1][0].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(gridNodes[1][0].hasPrimaryFocus, isFalse);
+      expect(gridNodes[0][0].hasPrimaryFocus, isTrue);
+    });
+
     testWidgets('Arrow focus traversal actions can be re-enabled for text fields.', (
       WidgetTester tester,
     ) async {
