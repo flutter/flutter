@@ -90,26 +90,21 @@ APKAssetMapping::APKAssetMapping(std::vector<uint8_t> memory_data)
 
 APKAssetMapping::~APKAssetMapping() {
   TRACE_EVENT0("flutter", "APKAssetMapping::~APKAssetMapping");
-#if defined(__ANDROID__)
   if (asset_) {
     AAsset_close(asset_);
   }
-#endif
 }
 
 size_t APKAssetMapping::GetSize() const {
-#if defined(__ANDROID__)
   if (asset_) {
     off64_t len = AAsset_getLength64(asset_);
     return len > 0 ? static_cast<size_t>(len) : 0;
   }
-#endif
   return buffer_.size();
 }
 
 const uint8_t* APKAssetMapping::GetMapping() const {
   TRACE_EVENT0("flutter", "APKAssetMapping::GetMapping");
-#if defined(__ANDROID__)
   if (asset_) {
     const void* buf = AAsset_getBuffer(asset_);
     if (buf) {
@@ -138,16 +133,13 @@ const uint8_t* APKAssetMapping::GetMapping() const {
     }
     return buffer_.data();
   }
-#endif
   return buffer_.data();
 }
 
 bool APKAssetMapping::IsDontNeedSafe() const {
-#if defined(__ANDROID__)
   if (asset_) {
     return !AAsset_isAllocated(asset_);
   }
-#endif
   return true;
 }
 
@@ -311,7 +303,6 @@ bool CustomAssetResolverAdapter::operator==(const AssetResolver& other) const {
 // APKAssetProviderImpl Implementation
 // =============================================================================
 
-#if defined(__ANDROID__)
 class APKAssetProviderImpl : public APKAssetProviderInternal {
  public:
   explicit APKAssetProviderImpl(JNIEnv* env,
@@ -392,40 +383,6 @@ class APKAssetProviderImpl : public APKAssetProviderInternal {
 
   FML_DISALLOW_COPY_AND_ASSIGN(APKAssetProviderImpl);
 };
-#else   // !defined(__ANDROID__)
-class APKAssetProviderImpl : public APKAssetProviderInternal {
- public:
-  explicit APKAssetProviderImpl([[maybe_unused]] JNIEnv* env,
-                                [[maybe_unused]] jobject jassetManager,
-                                std::string directory)
-      : directory_(std::move(directory)) {}
-
-  ~APKAssetProviderImpl() override = default;
-
-  std::unique_ptr<fml::Mapping> GetAsMapping(
-      [[maybe_unused]] const std::string& asset_name) const override {
-    TRACE_EVENT0("flutter",
-                 "APKAssetProviderImpl::GetAsMapping (Host fallback)");
-    return nullptr;
-  }
-
-  std::vector<std::unique_ptr<fml::Mapping>> GetAsMappings(
-      [[maybe_unused]] const std::string& asset_pattern,
-      [[maybe_unused]] const std::optional<std::string>& subdir)
-      const override {
-    TRACE_EVENT0("flutter",
-                 "APKAssetProviderImpl::GetAsMappings (Host fallback)");
-    return {};
-  }
-
-  const std::string& GetDirectory() const override { return directory_; }
-
- private:
-  const std::string directory_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(APKAssetProviderImpl);
-};
-#endif  // defined(__ANDROID__)
 
 // =============================================================================
 // APKAssetProvider Implementation

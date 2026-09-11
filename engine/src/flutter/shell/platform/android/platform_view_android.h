@@ -42,7 +42,7 @@ class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
 
 class PlatformViewAndroid final : public PlatformView {
  public:
-  static bool Register(JNIEnv* env);
+  static bool Register(JNIEnv* env, bool register_natives = true);
 
   PlatformViewAndroid(PlatformView::Delegate& delegate,
                       const flutter::TaskRunners& task_runners,
