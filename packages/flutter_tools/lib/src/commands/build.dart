@@ -46,7 +46,6 @@ class BuildCommand extends FlutterCommand {
     required ToolContext toolContext,
     bool verboseHelp = false,
   }) : _appleContext = appleContext,
-       _featureFlags = featureFlags,
        super(toolContext: toolContext, verboseHelp: verboseHelp) {
     final ToolContext(
       :Artifacts artifacts,
@@ -85,17 +84,19 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildIOSFrameworkCommand(
+        appleContext: appleContext,
         buildSystem: buildSystem,
         codesign: codesign,
-        logger: logger,
+        toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
     );
     _addSubcommand(
       BuildMacOSFrameworkCommand(
+        appleContext: appleContext,
         buildSystem: buildSystem,
         codesign: codesign,
-        logger: logger,
+        toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
     );
@@ -106,7 +107,7 @@ class BuildCommand extends FlutterCommand {
         buildSystem: buildSystem,
         cache: cache,
         codesign: codesign,
-        featureFlags: _featureFlags,
+        featureFlags: featureFlags,
         fileSystem: fileSystem,
         flutterVersion: flutterVersion,
         logger: logger,
@@ -129,7 +130,7 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(
       BuildBundleCommand(
         buildSystem: buildSystem,
-        featureFlags: _featureFlags,
+        featureFlags: featureFlags,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
@@ -137,7 +138,7 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(
       BuildWebCommand(
         buildSystem: buildSystem,
-        featureFlags: _featureFlags,
+        featureFlags: featureFlags,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
@@ -174,8 +175,6 @@ class BuildCommand extends FlutterCommand {
       ),
     );
   }
-
-  final FeatureFlags _featureFlags;
 
   void _addSubcommand(BuildSubCommand command) {
     if (command.supported) {
