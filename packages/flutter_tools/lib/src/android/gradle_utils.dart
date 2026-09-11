@@ -218,14 +218,11 @@ const gradleWrapperPropertiesFilename = 'gradle-wrapper.properties';
 /// or constructing a Gradle project.
 class GradleUtils {
   GradleUtils({
-    required Platform platform,
-    required Logger logger,
-    required Cache cache,
-    required OperatingSystemUtils operatingSystemUtils,
-  }) : _platform = platform,
-       _logger = logger,
-       _cache = cache,
-       _operatingSystemUtils = operatingSystemUtils;
+    required this._platform,
+    required this._logger,
+    required this._cache,
+    required this._operatingSystemUtils,
+  });
 
   final Cache _cache;
   final Platform _platform;

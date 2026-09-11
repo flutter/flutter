@@ -15,11 +15,7 @@ import '../web_template.dart';
 import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
-  BuildWebCommand({
-    required super.logger,
-    required FileSystem fileSystem,
-    required super.verboseHelp,
-  }) : _fileSystem = fileSystem {
+  BuildWebCommand({required super.logger, required this._fileSystem, required super.verboseHelp}) {
     registerOptionBundles(const <OptionBundle>[
       CommonBuildOptionsBundle(),
       BuildModeOptionsBundle(),

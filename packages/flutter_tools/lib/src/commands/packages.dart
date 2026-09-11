@@ -279,10 +279,9 @@ class PackagesGetCommand extends FlutterCommand {
     this._commandName,
     this._description,
     this._context, {
-    required BuildSystem buildSystem,
+    required this._buildSystem,
     required ToolContext toolContext,
-  }) : _buildSystem = buildSystem,
-       _toolContext = toolContext,
+  }) : _toolContext = toolContext,
        super(toolContext: toolContext);
 
   final ToolContext _toolContext;

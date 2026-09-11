@@ -97,13 +97,11 @@ var _kDefaultTargets = <Target>[
 /// system.
 class AssembleCommand extends FlutterCommand {
   AssembleCommand({
-    required BuildSystem buildSystem,
-    required FeatureFlags featureFlags,
+    required this._buildSystem,
+    required this._featureFlags,
     required ToolContext toolContext,
     bool verboseHelp = false,
-  }) : _buildSystem = buildSystem,
-       _featureFlags = featureFlags,
-       _toolContext = toolContext,
+  }) : _toolContext = toolContext,
        _verboseHelp = verboseHelp,
        super(toolContext: toolContext) {
     requiresPubspecYaml();

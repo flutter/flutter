@@ -71,9 +71,8 @@ class MockHttpClientResponse extends Fake implements HttpClientResponse {
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    return Stream<List<int>>.fromIterable(<List<int>>[
-      kTransparentImage,
-    ]).listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
+    return Stream<List<int>>.fromIterable(<List<int>>[kTransparentImage])
+        .listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
   }
 }
 

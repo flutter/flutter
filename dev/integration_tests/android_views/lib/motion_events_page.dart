@@ -214,9 +214,8 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   }
 
   void showMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message), duration: const Duration(seconds: 3)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message), duration: const Duration(seconds: 3)));
   }
 
   void onPlatformViewCreated(int id) {

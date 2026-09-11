@@ -34,14 +34,12 @@ import 'darwin_add_to_app.dart';
 
 abstract class BuildFrameworkCommand extends BuildSubCommand {
   BuildFrameworkCommand({
-    required AppleContext appleContext,
-    required BuildSystem buildSystem,
+    required this._appleContext,
+    required this._buildSystem,
     required this.codesign,
     required ToolContext toolContext,
     required bool verboseHelp,
-  }) : _appleContext = appleContext,
-       _buildSystem = buildSystem,
-       _toolContext = toolContext,
+  }) : _toolContext = toolContext,
        super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
@@ -77,8 +75,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       )
       ..addFlag(
         'cocoapods',
-        help:
-            'Produce a Flutter.podspec instead of an engine Flutter.xcframework (recommended if host app uses CocoaPods).',
+        help: 'Produce a Flutter.podspec instead of an engine Flutter.xcframework (recommended if host app uses CocoaPods).',
       )
       ..addFlag(
         'plugins',
@@ -89,8 +86,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       )
       ..addFlag(
         'static',
-        help:
-            'Build plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
+        help: 'Build plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
       )
       ..addOption(
         'output',
@@ -101,8 +97,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       ..addFlag(
         'force',
         abbr: 'f',
-        help:
-            'Force Flutter.podspec creation on the master channel. This is only intended for testing the tool itself.',
+        help: 'Force Flutter.podspec creation on the master channel. This is only intended for testing the tool itself.',
         hide: !verboseHelp,
       );
   }

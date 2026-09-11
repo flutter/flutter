@@ -234,9 +234,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
       shelf_io.serveRequests(server, cascade.handler);
 
       final String dartToolDirectory = path.join('$macrobenchmarksDirectory/.dart_tool');
-      final String userDataDir = io.Directory(
-        dartToolDirectory,
-      ).createTempSync('flutter_chrome_user_data.').path;
+      final String userDataDir = io.Directory(dartToolDirectory)
+          .createTempSync('flutter_chrome_user_data.')
+          .path;
 
       // TODO(yjbanov): temporarily disables headful Chrome until we get
       //                devicelab hardware that is able to run it. Our current

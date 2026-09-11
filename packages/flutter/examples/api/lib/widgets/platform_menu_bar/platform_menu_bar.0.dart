@@ -103,16 +103,14 @@ class _PlatformMenuBarExampleState extends State<PlatformMenuBarExample> {
                       },
                     ),
                     PlatformMenuItem(
-                      label:
-                          "There's a million things I haven't done, but just you wait.",
+                      label: "There's a million things I haven't done, but just you wait.",
                       shortcut: const SingleActivator(
                         LogicalKeyboardKey.digit2,
                         meta: true,
                       ),
                       onSelected: () {
                         setState(() {
-                          _message =
-                              "There's a million things I haven't done, but just you wait.";
+                          _message = "There's a million things I haven't done, but just you wait.";
                         });
                       },
                     ),

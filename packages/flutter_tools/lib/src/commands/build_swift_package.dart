@@ -63,32 +63,20 @@ const String _kCodesignIdentityFile = '.codesign_identity';
 class BuildSwiftPackage extends BuildSubCommand {
   BuildSwiftPackage({
     required super.logger,
-    required Analytics analytics,
-    required Artifacts artifacts,
-    required BuildSystem buildSystem,
-    required Cache cache,
-    required FeatureFlags featureFlags,
-    required FileSystem fileSystem,
-    required FlutterVersion flutterVersion,
-    required Platform platform,
-    required ProcessManager processManager,
-    required TemplateRenderer templateRenderer,
-    required Xcode? xcode,
-    required DarwinAddToAppCodesigning codesign,
+    required this._analytics,
+    required this._artifacts,
+    required this._buildSystem,
+    required this._cache,
+    required this._featureFlags,
+    required this._fileSystem,
+    required this._flutterVersion,
+    required this._platform,
+    required this._processManager,
+    required this._templateRenderer,
+    required this._xcode,
+    required this._codesign,
     required bool verboseHelp,
-  }) : _analytics = analytics,
-       _artifacts = artifacts,
-       _cache = cache,
-       _platform = platform,
-       _processManager = processManager,
-       _buildSystem = buildSystem,
-       _featureFlags = featureFlags,
-       _fileSystem = fileSystem,
-       _flutterVersion = flutterVersion,
-       _templateRenderer = templateRenderer,
-       _xcode = xcode,
-       _codesign = codesign,
-       super(verboseHelp: verboseHelp) {
+  }) : super(verboseHelp: verboseHelp) {
     usesFlavorOption();
     addTreeShakeIconsFlag();
     usesTargetOption();
@@ -479,11 +467,7 @@ class BuildSwiftPackage extends BuildSubCommand {
 /// Class that encapsulates logic needed to create the FlutterPluginRegistrant swift package.
 @visibleForTesting
 class FlutterPluginRegistrantSwiftPackage {
-  FlutterPluginRegistrantSwiftPackage({
-    required FlutterDarwinPlatform targetPlatform,
-    required BuildSwiftPackageUtils utils,
-  }) : _targetPlatform = targetPlatform,
-       _utils = utils;
+  FlutterPluginRegistrantSwiftPackage({required this._targetPlatform, required this._utils});
 
   final FlutterDarwinPlatform _targetPlatform;
   final BuildSwiftPackageUtils _utils;
@@ -603,11 +587,7 @@ class FlutterPluginRegistrantSwiftPackage {
 /// for the FlutterPluginRegistrant swift package.
 @visibleForTesting
 class FlutterFrameworkDependency {
-  FlutterFrameworkDependency({
-    required FlutterDarwinPlatform targetPlatform,
-    required BuildSwiftPackageUtils utils,
-  }) : _targetPlatform = targetPlatform,
-       _utils = utils;
+  FlutterFrameworkDependency({required this._targetPlatform, required this._utils});
 
   final FlutterDarwinPlatform _targetPlatform;
   final BuildSwiftPackageUtils _utils;
@@ -741,11 +721,7 @@ class FlutterFrameworkDependency {
 /// dependencies for the FlutterPluginRegistrant swift package.
 @visibleForTesting
 class FlutterPluginSwiftDependencies {
-  FlutterPluginSwiftDependencies({
-    required FlutterDarwinPlatform targetPlatform,
-    required BuildSwiftPackageUtils utils,
-  }) : _targetPlatform = targetPlatform,
-       _utils = utils;
+  FlutterPluginSwiftDependencies({required this._targetPlatform, required this._utils});
 
   final FlutterDarwinPlatform _targetPlatform;
   final BuildSwiftPackageUtils _utils;
@@ -1170,11 +1146,7 @@ class FlutterPluginSwiftDependencies {
 /// dependencies for the FlutterPluginRegistrant swift package.
 @visibleForTesting
 class AppFrameworkAndNativeAssetsDependencies {
-  AppFrameworkAndNativeAssetsDependencies({
-    required FlutterDarwinPlatform targetPlatform,
-    required BuildSwiftPackageUtils utils,
-  }) : _targetPlatform = targetPlatform,
-       _utils = utils;
+  AppFrameworkAndNativeAssetsDependencies({required this._targetPlatform, required this._utils});
 
   final FlutterDarwinPlatform _targetPlatform;
   final BuildSwiftPackageUtils _utils;
@@ -1432,9 +1404,9 @@ class AppFrameworkAndNativeAssetsDependencies {
         };
       case FlutterDarwinPlatform.macos:
         return <String, String>{
-          kDarwinArchs: defaultMacOSArchsForEnvironment(
-            _utils.artifacts,
-          ).map((CpuArch e) => e.darwinArchName).join(' '),
+          kDarwinArchs: defaultMacOSArchsForEnvironment(_utils.artifacts)
+              .map((CpuArch e) => e.darwinArchName)
+              .join(' '),
         };
     }
   }
@@ -1486,11 +1458,7 @@ class AppFrameworkAndNativeAssetsDependencies {
 /// frameworks and then combines them into a single XCFramework for each.
 @visibleForTesting
 class CocoaPodPluginDependencies {
-  CocoaPodPluginDependencies({
-    required FlutterDarwinPlatform targetPlatform,
-    required BuildSwiftPackageUtils utils,
-  }) : _targetPlatform = targetPlatform,
-       _utils = utils;
+  CocoaPodPluginDependencies({required this._targetPlatform, required this._utils});
 
   final FlutterDarwinPlatform _targetPlatform;
   final BuildSwiftPackageUtils _utils;
@@ -1860,12 +1828,10 @@ class CocoaPodPluginDependencies {
 @visibleForTesting
 class FlutterNativeIntegrationSwiftPackage {
   FlutterNativeIntegrationSwiftPackage({
-    required BuildSwiftPackageUtils utils,
-    required bool generateTests,
-    required FlutterDarwinPlatform targetPlatform,
-  }) : _targetPlatform = targetPlatform,
-       _utils = utils,
-       _generateTests = generateTests;
+    required this._utils,
+    required this._generateTests,
+    required this._targetPlatform,
+  });
 
   final FlutterDarwinPlatform _targetPlatform;
   final BuildSwiftPackageUtils _utils;

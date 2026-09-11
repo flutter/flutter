@@ -35,8 +35,10 @@ const AnimationStyle _kDefaultAnimationStyle = AnimationStyle(
 /// and hide animation. This can be used to drive animations that sync up with
 /// the tooltip overlay child show/hide animation, for example to fade the
 /// tooltip in and out.
-typedef TooltipComponentBuilder =
-    Widget Function(BuildContext context, Animation<double> animation);
+typedef TooltipComponentBuilder = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+);
 
 /// Signature for computing the position of a tooltip.
 ///

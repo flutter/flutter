@@ -154,32 +154,29 @@ Unable to locate a development device; please run 'flutter doctor' for informati
       expect(deviceManager.androidDiscoverer.numberOfTimesPolled, 1);
     });
 
-    testUsingContext(
-      'ensure unsupported for projects are included when includeDevicesUnsupportedByProject is true',
-      () async {
-        final logger = BufferLogger.test();
-        final deviceManager = TestDeviceManager(logger: logger, platform: platform);
-        deviceManager.androidDiscoverer.deviceList = <Device>[
-          attachedUnsupportedAndroidDevice,
-          attachedUnsupportedForProjectAndroidDevice,
-        ];
+    testUsingContext('ensure unsupported for projects are included when includeDevicesUnsupportedByProject is true', () async {
+      final logger = BufferLogger.test();
+      final deviceManager = TestDeviceManager(logger: logger, platform: platform);
+      deviceManager.androidDiscoverer.deviceList = <Device>[
+        attachedUnsupportedAndroidDevice,
+        attachedUnsupportedForProjectAndroidDevice,
+      ];
 
-        final targetDevices = TargetDevices(
-          platform: platform,
-          deviceManager: deviceManager,
-          logger: logger,
-        );
-        final List<Device>? devices = await targetDevices.findAllTargetDevices(
-          includeDevicesUnsupportedByProject: true,
-        );
+      final targetDevices = TargetDevices(
+        platform: platform,
+        deviceManager: deviceManager,
+        logger: logger,
+      );
+      final List<Device>? devices = await targetDevices.findAllTargetDevices(
+        includeDevicesUnsupportedByProject: true,
+      );
 
-        expect(logger.statusText, equals(''));
-        expect(devices, <Device>[attachedUnsupportedForProjectAndroidDevice]);
-        expect(deviceManager.androidDiscoverer.devicesCalled, 2);
-        expect(deviceManager.androidDiscoverer.discoverDevicesCalled, 0);
-        expect(deviceManager.androidDiscoverer.numberOfTimesPolled, 1);
-      },
-    );
+      expect(logger.statusText, equals(''));
+      expect(devices, <Device>[attachedUnsupportedForProjectAndroidDevice]);
+      expect(deviceManager.androidDiscoverer.devicesCalled, 2);
+      expect(deviceManager.androidDiscoverer.discoverDevicesCalled, 0);
+      expect(deviceManager.androidDiscoverer.numberOfTimesPolled, 1);
+    });
 
     group('finds no devices', () {
       late BufferLogger logger;
@@ -1232,30 +1229,27 @@ Unable to locate a development device; please run 'flutter doctor' for informati
       expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 1);
     });
 
-    testUsingContext(
-      'ensure unsupported for projects are included when includeDevicesUnsupportedByProject is true',
-      () async {
-        final logger = BufferLogger.test();
-        final deviceManager = TestDeviceManager(logger: logger, platform: platform);
-        deviceManager.iosDiscoverer.deviceList = <Device>[
-          attachedUnsupportedIOSDevice,
-          attachedUnsupportedForProjectIOSDevice,
-        ];
+    testUsingContext('ensure unsupported for projects are included when includeDevicesUnsupportedByProject is true', () async {
+      final logger = BufferLogger.test();
+      final deviceManager = TestDeviceManager(logger: logger, platform: platform);
+      deviceManager.iosDiscoverer.deviceList = <Device>[
+        attachedUnsupportedIOSDevice,
+        attachedUnsupportedForProjectIOSDevice,
+      ];
 
-        final targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
-          deviceManager: deviceManager,
-          logger: logger,
-        );
-        final List<Device>? devices = await targetDevices.findAllTargetDevices(
-          includeDevicesUnsupportedByProject: true,
-        );
+      final targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
+        deviceManager: deviceManager,
+        logger: logger,
+      );
+      final List<Device>? devices = await targetDevices.findAllTargetDevices(
+        includeDevicesUnsupportedByProject: true,
+      );
 
-        expect(logger.statusText, equals(''));
-        expect(devices, <Device>[attachedUnsupportedForProjectIOSDevice]);
-        expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
-        expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
-      },
-    );
+      expect(logger.statusText, equals(''));
+      expect(devices, <Device>[attachedUnsupportedForProjectIOSDevice]);
+      expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
+      expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
+    });
 
     group('finds no devices', () {
       late BufferLogger logger;
@@ -2008,31 +2002,26 @@ Checking for wireless devices...
           expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
         });
 
-        testUsingContext(
-          'when partially matching wireless device and an attached device from different discoverer',
-          () async {
-            final androidDevice = FakeDevice(deviceName: 'target-device-android');
-            deviceManager.androidDiscoverer.deviceList = <Device>[androidDevice];
-            deviceManager.iosDiscoverer.deviceList = <Device>[disconnectedWirelessIOSDevice1];
-            deviceManager.iosDiscoverer.refreshDeviceList = <Device>[
-              disconnectedWirelessIOSDevice1,
-            ];
+        testUsingContext('when partially matching wireless device and an attached device from different discoverer', () async {
+          final androidDevice = FakeDevice(deviceName: 'target-device-android');
+          deviceManager.androidDiscoverer.deviceList = <Device>[androidDevice];
+          deviceManager.iosDiscoverer.deviceList = <Device>[disconnectedWirelessIOSDevice1];
+          deviceManager.iosDiscoverer.refreshDeviceList = <Device>[disconnectedWirelessIOSDevice1];
 
-            final List<Device>? devices = await targetDevices.findAllTargetDevices();
+          final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
-            expect(
-              logger.statusText,
-              equals('''
+          expect(
+            logger.statusText,
+            equals('''
 Checking for wireless devices...
 '''),
-            );
-            expect(devices, <Device>[androidDevice]);
-            expect(deviceManager.iosDiscoverer.devicesCalled, 3);
-            expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
-            expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
-            expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
-          },
-        );
+          );
+          expect(devices, <Device>[androidDevice]);
+          expect(deviceManager.iosDiscoverer.devicesCalled, 3);
+          expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
+          expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
+          expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
+        });
 
         testUsingContext('when matching single non-ephemeral attached device', () async {
           deviceManager.iosDiscoverer.deviceList = <Device>[nonEphemeralDevice];

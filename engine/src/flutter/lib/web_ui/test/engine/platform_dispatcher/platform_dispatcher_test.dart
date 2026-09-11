@@ -329,8 +329,7 @@ void testMain() {
       const expectedWordSpacing = 4.0;
       const expectedParagraphSpacing = 10.0;
 
-      style.text =
-          'html *{ line-height: 2 !important; word-spacing: 4px !important; letter-spacing: 1px !important; margin-bottom: 10px !important; }';
+      style.text = 'html *{ line-height: 2 !important; word-spacing: 4px !important; letter-spacing: 1px !important; margin-bottom: 10px !important; }';
       root.append(style);
       await waitForResizeObserver();
       expect(root.contains(style), isTrue);
