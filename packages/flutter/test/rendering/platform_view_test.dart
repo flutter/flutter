@@ -647,11 +647,7 @@ void main() {
 
     // Compete in the arena: add a pointer down, then resolve the arena with rejection.
     renderBox.handleEvent(
-      const PointerDownEvent(
-        pointer: 1,
-        position: Offset(10, 10),
-        timeStamp: Duration(milliseconds: 12345),
-      ),
+      const PointerDownEvent(pointer: 1, position: Offset(10, 10), embedderId: 12345),
       BoxHitTestEntry(renderBox, const Offset(10, 10)),
     );
 
@@ -667,7 +663,7 @@ void main() {
     expect(viewController.lastRejectGestureId, 12345);
   });
 
-  test('rejectGesture preserves initial downTime across multi-touch sequence', () {
+  test('rejectGesture passes pointer embedderId to rejectGesture', () {
     final viewController = FakePlatformViewController(0);
     final renderBox = PlatformViewRenderBox(
       controller: viewController,
@@ -678,13 +674,9 @@ void main() {
     );
     layout(renderBox);
 
-    // Finger 1 down at T1 = 10000ms.
+    // Finger 1 down with embedderId 101.
     renderBox.handleEvent(
-      const PointerDownEvent(
-        pointer: 1,
-        position: Offset(10, 10),
-        timeStamp: Duration(milliseconds: 10000),
-      ),
+      const PointerDownEvent(pointer: 1, position: Offset(10, 10), embedderId: 101),
       BoxHitTestEntry(renderBox, const Offset(10, 10)),
     );
 
@@ -692,13 +684,9 @@ void main() {
     GestureBinding.instance.gestureArena.close(1);
     GestureBinding.instance.gestureArena.sweep(1);
 
-    // Finger 2 down at T2 = 10050ms while Finger 1 is still down.
+    // Finger 2 down with embedderId 102 while Finger 1 is still down.
     renderBox.handleEvent(
-      const PointerDownEvent(
-        pointer: 2,
-        position: Offset(20, 20),
-        timeStamp: Duration(milliseconds: 10050),
-      ),
+      const PointerDownEvent(pointer: 2, position: Offset(20, 20), embedderId: 102),
       BoxHitTestEntry(renderBox, const Offset(20, 20)),
     );
 
@@ -710,10 +698,38 @@ void main() {
     GestureBinding.instance.gestureArena.close(2);
     entry.resolve(GestureDisposition.accepted);
 
-    // The rejectGesture call must pass the initial gesture downTime (10000ms),
-    // matching Android's MotionEvent.getDownTime() for the active multi-touch gesture.
+    // The rejectGesture call passes the pointer's embedderId (102), which the
+    // platform embedder resolves to the native stream's downTime via MotionEventTracker.
     expect(viewController.rejectGestureCount, 1);
-    expect(viewController.lastRejectGestureId, 10000);
+    expect(viewController.lastRejectGestureId, 102);
+  });
+
+  test('rejectGesture does not invoke controller when embedderId is 0', () {
+    final viewController = FakePlatformViewController(0);
+    final renderBox = PlatformViewRenderBox(
+      controller: viewController,
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer()),
+      },
+    );
+    layout(renderBox);
+
+    // Compete in the arena: pointer down with default embedderId (0).
+    renderBox.handleEvent(
+      const PointerDownEvent(pointer: 1, position: Offset(10, 10)),
+      BoxHitTestEntry(renderBox, const Offset(10, 10)),
+    );
+
+    // Reject gesture for this pointer.
+    final GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(
+      1,
+      _WinningGestureArenaMember(),
+    );
+    GestureBinding.instance.gestureArena.close(1);
+    entry.resolve(GestureDisposition.accepted);
+
+    expect(viewController.rejectGestureCount, 0);
   });
 }
 

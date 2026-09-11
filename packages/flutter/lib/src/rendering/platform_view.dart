@@ -611,19 +611,16 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   late _HandlePointerEvent _handlePointerEvent;
 
-  // Maps active pointer IDs to the downTime timestamp (in milliseconds) of the gesture.
+  // Maps active pointer IDs to the embedderId of the pointer down event.
   //
-  // Invariant: On Android, AndroidTouchProcessor packs MotionEvent downTime into the
-  // PointerDownEvent timeStamp (`event.getEventTime() * 1000`, where eventTime == downTime
-  // on ACTION_DOWN).
+  // On Android, the engine assigns each MotionEvent a unique motionEventId tracked by
+  // MotionEventTracker, which is passed to the framework as PointerEvent.embedderId.
   //
-  // When Flutter wins the gesture arena, this timestamp is passed as `gestureId` to the
-  // platform side to correlate with the active MotionEvent sequence. If timestamps do not
-  // match (e.g. when PointerEventResampler is enabled, which resamples PointerDownEvent
-  // timeStamp to sampleTime, or on non-Android embedders), the optimization safely degrades
-  // to standard buffered touch dispatch.
-  final Map<int, int> _downTimes = <int, int>{};
-  int? _currentDownTime;
+  // When Flutter wins the gesture arena, this embedderId is passed as `gestureId` to the
+  // platform side to correlate with the active MotionEvent sequence via MotionEventTracker.
+  // If the gestureId is invalid or does not match (e.g. on non-Android embedders), the
+  // optimization safely degrades to standard buffered touch dispatch.
+  final Map<int, int> _gestureIds = <int, int>{};
 
   // Maps a pointer to a list of its cached pointer events.
   // Before the arena for a pointer is resolved all events are cached here, if we win the arena
@@ -643,10 +640,7 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    if (_downTimes.isEmpty) {
-      _currentDownTime = event.timeStamp.inMilliseconds;
-    }
-    _downTimes[event.pointer] = _currentDownTime!;
+    _gestureIds[event.pointer] = event.embedderId;
     super.addAllowedPointer(event);
     for (final OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
@@ -677,10 +671,12 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void rejectGesture(int pointer) {
-    final int? gestureId = _downTimes[pointer];
+    final int? gestureId = _gestureIds[pointer];
     stopTrackingPointer(pointer);
     cachedEvents.remove(pointer);
-    onRejectGesture?.call(gestureId);
+    if (gestureId != null && gestureId != 0) {
+      onRejectGesture?.call(gestureId);
+    }
   }
 
   void _cacheEvent(PointerEvent event) {
@@ -696,17 +692,13 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void stopTrackingPointer(int pointer) {
-    _downTimes.remove(pointer);
-    if (_downTimes.isEmpty) {
-      _currentDownTime = null;
-    }
+    _gestureIds.remove(pointer);
     super.stopTrackingPointer(pointer);
     forwardedPointers.remove(pointer);
   }
 
   void reset() {
-    _downTimes.clear();
-    _currentDownTime = null;
+    _gestureIds.clear();
     forwardedPointers.forEach(super.stopTrackingPointer);
     forwardedPointers.clear();
     cachedEvents.keys.forEach(super.stopTrackingPointer);

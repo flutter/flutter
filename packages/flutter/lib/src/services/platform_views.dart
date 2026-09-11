@@ -1763,7 +1763,8 @@ abstract class PlatformViewController {
   /// On other platforms, or if unbuffered dispatch is not supported, this is a no-op.
   /// (On iOS, platform view touch rejection uses `DarwinPlatformViewController.rejectGesture`.)
   ///
-  /// The optional [gestureId] identifies the specific gesture (e.g., its `downTime` timestamp
-  /// in milliseconds on Android) that was rejected by the arena.
+  /// The optional [gestureId] identifies the specific gesture (e.g., its `embedderId`
+  /// matching a MotionEvent tracked by `MotionEventTracker` on Android) that was rejected
+  /// by the arena.
   Future<void> rejectGesture({int? gestureId}) async {}
 }

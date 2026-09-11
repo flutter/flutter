@@ -2019,12 +2019,14 @@ public class PlatformViewsControllerTest {
     // Start active gesture with downTime 100.
     final MotionEvent downEvent =
         MotionEvent.obtain(100, 100, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
+    final MotionEventTracker.MotionEventId eventId =
+        MotionEventTracker.getInstance().track(downEvent);
     parent.onTouchEvent(downEvent);
 
     // Mismatched gestureId does not set flutterWonGesture.
     final Map<String, Object> mismatchArgs = new HashMap<>();
     mismatchArgs.put("id", platformViewId);
-    mismatchArgs.put("gestureId", 50L);
+    mismatchArgs.put("gestureId", 99999L);
     jni.handlePlatformMessage(
         "flutter/platform_views",
         encodeMethodCall(new MethodCall("rejectGesture", mismatchArgs)),
@@ -2035,7 +2037,7 @@ public class PlatformViewsControllerTest {
     // Send rejectGesture via channel with matching gestureId.
     final Map<String, Object> args = new HashMap<>();
     args.put("id", platformViewId);
-    args.put("gestureId", 100L);
+    args.put("gestureId", eventId.getId());
     final MethodCall rejectCall = new MethodCall("rejectGesture", args);
     jni.handlePlatformMessage(
         "flutter/platform_views", encodeMethodCall(rejectCall), /*replyId=*/ 0, /*messageData=*/ 0);
@@ -2088,12 +2090,14 @@ public class PlatformViewsControllerTest {
     // Start active gesture with downTime 100.
     final MotionEvent downEvent =
         MotionEvent.obtain(100, 100, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
+    final MotionEventTracker.MotionEventId eventId =
+        MotionEventTracker.getInstance().track(downEvent);
     wrapper.onTouchEvent(downEvent);
 
     // Mismatched gestureId does not set flutterWonGesture.
     final Map<String, Object> mismatchArgs = new HashMap<>();
     mismatchArgs.put("id", platformViewId);
-    mismatchArgs.put("gestureId", 50L);
+    mismatchArgs.put("gestureId", 99999L);
     jni.handlePlatformMessage(
         "flutter/platform_views",
         encodeMethodCall(new MethodCall("rejectGesture", mismatchArgs)),
@@ -2104,7 +2108,7 @@ public class PlatformViewsControllerTest {
     // Send rejectGesture via channel with matching gestureId.
     final Map<String, Object> args = new HashMap<>();
     args.put("id", platformViewId);
-    args.put("gestureId", 100L);
+    args.put("gestureId", eventId.getId());
     final MethodCall rejectCall = new MethodCall("rejectGesture", args);
     jni.handlePlatformMessage(
         "flutter/platform_views", encodeMethodCall(rejectCall), /*replyId=*/ 0, /*messageData=*/ 0);

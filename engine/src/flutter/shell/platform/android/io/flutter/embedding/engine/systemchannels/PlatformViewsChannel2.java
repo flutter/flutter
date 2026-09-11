@@ -239,9 +239,10 @@ public class PlatformViewsChannel2 {
      * Informs the handler that Flutter has won the gesture arena and rejected the platform view.
      *
      * @param viewId The ID of the platform view that was rejected.
-     * @param gestureId The identifier (downTime in milliseconds) of the specific gesture that was
-     *     won by Flutter. If non-zero, this matches the MotionEvent downTime. If non-matching or
-     *     zero, embedders safely fall back to standard buffered dispatch.
+     * @param gestureId The identifier (motionEventId / embedderId) of the specific gesture that was
+     *     won by Flutter. If non-zero, this corresponds to the MotionEvent tracked by
+     *     MotionEventTracker. If non-matching or zero, embedders safely fall back to standard
+     *     buffered dispatch.
      */
     default void onRejectGesture(int viewId, long gestureId) {}
 

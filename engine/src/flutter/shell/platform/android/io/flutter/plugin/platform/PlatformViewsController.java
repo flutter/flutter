@@ -498,14 +498,20 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
         @Override
         public void onRejectGesture(int viewId, long gestureId) {
+          final MotionEvent event =
+              motionEventTracker.peek(MotionEventTracker.MotionEventId.from(gestureId));
+          if (event == null) {
+            return;
+          }
+          final long downTime = event.getDownTime();
           final FlutterMutatorView parentView = platformViewParent.get(viewId);
           if (parentView != null) {
-            parentView.onFlutterWonGesture(gestureId);
+            parentView.onFlutterWonGesture(downTime);
             return;
           }
           final PlatformViewWrapper viewWrapper = viewWrappers.get(viewId);
           if (viewWrapper != null) {
-            viewWrapper.onFlutterWonGesture(gestureId);
+            viewWrapper.onFlutterWonGesture(downTime);
           }
         }
       };

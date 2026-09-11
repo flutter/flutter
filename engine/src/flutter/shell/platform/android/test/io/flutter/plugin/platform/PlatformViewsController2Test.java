@@ -625,14 +625,16 @@ public class PlatformViewsController2Test {
     // Start active gesture with downTime 100.
     final MotionEvent downEvent =
         MotionEvent.obtain(100, 100, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
+    final MotionEventTracker.MotionEventId eventId =
+        MotionEventTracker.getInstance().track(downEvent);
     parentView.onTouchEvent(downEvent);
 
     // Mismatched gestureId does not set flutterWonGesture.
-    rejectGesturePlatformView(jni, platformViewsController, platformViewId, 50L);
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, 99999L);
     assertFalse(parentView.getFlutterWonGesture());
 
     // Matching gestureId sets flutterWonGesture.
-    rejectGesturePlatformView(jni, platformViewsController, platformViewId, 100L);
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, eventId.getId());
     assertTrue(parentView.getFlutterWonGesture());
   }
 
