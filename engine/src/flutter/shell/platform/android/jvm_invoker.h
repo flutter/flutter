@@ -9,10 +9,16 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
+#include <jni.h>
+
 #include "flutter/fml/macros.h"
+#include "flutter/fml/platform/android/jni_util.h"
+#include "flutter/fml/platform/android/jni_weak_ref.h"
+#include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/fml/task_runner.h"
 
 namespace flutter {
@@ -27,6 +33,16 @@ namespace android {
 class JvmInvoker {
  public:
   virtual ~JvmInvoker() = default;
+
+  /// @brief Attaches a Java object weak reference to this invoker.
+  virtual void SetJavaObject(
+      std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> java_object) {}
+
+  /// @brief Returns the attached Java object weak reference.
+  virtual std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> GetJavaObject()
+      const {
+    return nullptr;
+  }
 
   /// @brief Ensures the current thread is attached to the JVM.
   /// @return True if attached or successfully attached.
@@ -269,6 +285,105 @@ class DefaultJvmInvoker : public JvmInvoker {
   fml::RefPtr<fml::TaskRunner> platform_task_runner_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(DefaultJvmInvoker);
+};
+
+/// @brief Production Android JNI-backed implementation of JvmInvoker.
+/// Dispatches JVM calls to the attached Java FlutterJNI instance via JNIEnv.
+class AndroidJvmInvoker : public JvmInvoker {
+ public:
+  static bool RegisterJni(JNIEnv* env, jclass clazz);
+
+  explicit AndroidJvmInvoker(
+      std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> java_object = nullptr,
+      fml::RefPtr<fml::TaskRunner> platform_task_runner = nullptr);
+  ~AndroidJvmInvoker() override;
+
+  void SetJavaObject(
+      std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> java_object) override;
+  std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> GetJavaObject()
+      const override;
+
+  bool EnsureAttachedToThread() override;
+  void DetachFromThread() override;
+  bool HasPendingException() const override;
+  void ClearPendingException() override;
+
+  bool HandlePlatformMessage(const std::string& channel,
+                             const uint8_t* message,
+                             size_t message_size,
+                             int32_t response_id,
+                             int64_t message_data) override;
+
+  bool HandlePlatformMessageResponse(int32_t response_id,
+                                     const uint8_t* data,
+                                     size_t data_size) override;
+
+  bool UpdateSemantics(
+      const std::vector<uint8_t>& buffer,
+      const std::vector<std::string>& strings,
+      const std::vector<std::vector<uint8_t>>& string_attribute_args) override;
+
+  bool UpdateCustomAccessibilityActions(
+      const std::vector<uint8_t>& actions_buffer,
+      const std::vector<std::string>& action_strings) override;
+
+  bool SetSemanticsTreeEnabled(bool enabled) override;
+  bool SetApplicationLocale(const std::string& locale) override;
+  bool OnFirstFrame() override;
+  bool OnPreEngineRestart() override;
+  bool RequestDartDeferredLibrary(int loading_unit_id) override;
+  bool DecodeImage(const uint8_t* data,
+                   size_t size,
+                   int64_t generator_handle) override;
+  bool PushPlatformViewMutators(int64_t view_id,
+                                int32_t x,
+                                int32_t y,
+                                int32_t width,
+                                int32_t height,
+                                const std::vector<uint8_t>& payload) override;
+  bool PushPlatformViewMutators(int64_t view_id,
+                                int32_t x,
+                                int32_t y,
+                                int32_t width,
+                                int32_t height,
+                                int32_t view_width,
+                                int32_t view_height,
+                                const std::vector<uint8_t>& payload) override;
+
+  bool InvokeVoidMethod(const std::string& method_name,
+                        const std::string& signature,
+                        const std::vector<uint8_t>& payload = {}) override;
+
+  bool InvokeBooleanMethod(const std::string& method_name,
+                           const std::string& signature,
+                           const std::vector<uint8_t>& payload = {}) override;
+
+  int64_t InvokeIntMethod(const std::string& method_name,
+                          const std::string& signature,
+                          const std::vector<uint8_t>& payload = {}) override;
+
+  double InvokeDoubleMethod(const std::string& method_name,
+                            const std::string& signature,
+                            const std::vector<uint8_t>& payload = {}) override;
+
+  std::string InvokeStringMethod(
+      const std::string& method_name,
+      const std::string& signature,
+      const std::vector<uint8_t>& payload = {}) override;
+
+  std::vector<uint8_t> InvokeBytesMethod(
+      const std::string& method_name,
+      const std::string& signature,
+      const std::vector<uint8_t>& payload = {}) override;
+
+  bool PostJvmTask(std::function<void()> task) override;
+
+ private:
+  mutable std::mutex java_object_mutex_;
+  std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> java_object_;
+  fml::RefPtr<fml::TaskRunner> platform_task_runner_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(AndroidJvmInvoker);
 };
 
 }  // namespace android

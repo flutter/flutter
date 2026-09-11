@@ -14,18 +14,13 @@
 namespace flutter {
 namespace android {
 
-#if defined(__ANDROID__)
 #include <sys/system_properties.h>
+
 static bool IsVivanteDevice() {
   char product_model[PROP_VALUE_MAX];
   __system_property_get("ro.hardware.egl", product_model);
   return strcmp(product_model, "VIVANTE") == 0;
 }
-#else
-static bool IsVivanteDevice() {
-  return false;
-}
-#endif
 
 AndroidRenderingAPI SelectRenderingAPI(const AndroidVMArgs& args,
                                        std::optional<bool> is_vivante) {
