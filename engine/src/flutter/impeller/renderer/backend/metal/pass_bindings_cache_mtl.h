@@ -81,6 +81,10 @@ struct PassBindingsCacheMTL {
   ///        the current encoder state.
   void SetStencilRef(uint32_t stencil_ref);
 
+  /// @brief Set the encoder's blend constant if the value is different from
+  ///        the current encoder state.
+  void SetBlendColor(const Color& blend_color);
+
  private:
   struct BufferOffsetPair {
     id<MTLBuffer> buffer = nullptr;
@@ -99,6 +103,7 @@ struct PassBindingsCacheMTL {
   std::optional<Viewport> viewport_;
   std::optional<IRect32> scissor_;
   std::optional<uint32_t> stencil_ref_;
+  std::optional<Color> blend_color_;
 };
 
 }  // namespace impeller

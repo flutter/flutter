@@ -156,6 +156,7 @@ struct GLProc {
   PROC(BindTexture);                         \
   PROC(BindVertexArray);                     \
   PROC(BlendEquationSeparate);               \
+  PROC(BlendColor);                          \
   PROC(BlendFuncSeparate);                   \
   PROC(BufferData);                          \
   PROC(BufferSubData);                       \
