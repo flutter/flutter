@@ -2384,8 +2384,8 @@ class _GtkWindow extends _GtkContainer {
   external static bool _gtkWindowIsFullscreen(ffi.Pointer<ffi.NativeType> widget);
 }
 
-/// Matches the GdkRGBA struct in gdk/gdkrgba.h.
-final class _GdkRGBA extends ffi.Struct {
+/// Matches GTK3's double-based GdkRGBA layout.
+final class _GdkRGBA3 extends ffi.Struct {
   @ffi.Double()
   external double red;
 
@@ -2396,6 +2396,21 @@ final class _GdkRGBA extends ffi.Struct {
   external double blue;
 
   @ffi.Double()
+  external double alpha;
+}
+
+/// GTK4 changed GdkRGBA components from doubles to floats.
+final class _GdkRGBA4 extends ffi.Struct {
+  @ffi.Float()
+  external double red;
+
+  @ffi.Float()
+  external double green;
+
+  @ffi.Float()
+  external double blue;
+
+  @ffi.Float()
   external double alpha;
 }
 
@@ -2431,14 +2446,28 @@ class _FlView extends _GtkWidget {
 
   /// Sets the color drawn behind Flutter content.
   void setBackgroundColor(Color color) {
-    final ffi.Pointer<_GdkRGBA> rgba = _gMalloc0(ffi.sizeOf<_GdkRGBA>()).cast<_GdkRGBA>();
-    rgba.ref
-      ..red = color.r
-      ..green = color.g
-      ..blue = color.b
-      ..alpha = color.a;
-    _flViewSetBackgroundColor(instance, rgba);
-    _gFree(rgba);
+    final bool gtk4 = _LinuxWindowing.gtkMajorVersion >= 4;
+    final ffi.Pointer<ffi.Void> rgba = _gMalloc0(
+      gtk4 ? ffi.sizeOf<_GdkRGBA4>() : ffi.sizeOf<_GdkRGBA3>(),
+    ).cast<ffi.Void>();
+    try {
+      if (gtk4) {
+        rgba.cast<_GdkRGBA4>().ref
+          ..red = color.r
+          ..green = color.g
+          ..blue = color.b
+          ..alpha = color.a;
+      } else {
+        rgba.cast<_GdkRGBA3>().ref
+          ..red = color.r
+          ..green = color.g
+          ..blue = color.b
+          ..alpha = color.a;
+      }
+      _flViewSetBackgroundColor(instance, rgba);
+    } finally {
+      _gFree(rgba);
+    }
   }
 
   @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Pointer<ffi.NativeType>)>(
@@ -2458,12 +2487,12 @@ class _FlView extends _GtkWidget {
   @ffi.Native<ffi.Int64 Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'fl_view_get_id')
   external static int _flViewGetId(ffi.Pointer<ffi.NativeType> view);
 
-  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Pointer<_GdkRGBA>)>(
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Pointer<ffi.Void>)>(
     symbol: 'fl_view_set_background_color',
   )
   external static void _flViewSetBackgroundColor(
     ffi.Pointer<ffi.NativeType> view,
-    ffi.Pointer<_GdkRGBA> color,
+    ffi.Pointer<ffi.Void> color,
   );
 }
 
