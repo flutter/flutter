@@ -214,6 +214,13 @@ abstract class BindingBase {
   ///   functionality from a given [FlutterView].
   /// * [platformDispatcher] on this binding to access the [PlatformDispatcher],
   ///   which provides platform-specific functionality.
+  ///
+  /// Unlike [platformDispatcher], this reports the metrics the platform reports
+  /// even when [debugViewMetricsOverrides] has an entry for the implicit view,
+  /// because it accesses the unwrapped engine singleton [ui.window] directly
+  /// without passing through the binding's view metric override wrapper.
+  /// Use [platformDispatcher] or [View.of] to obtain a [FlutterView] that honors
+  /// those overrides.
   @Deprecated(
     'Look up the current FlutterView from the context via View.of(context) or consult the PlatformDispatcher directly instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
@@ -241,7 +248,30 @@ abstract class BindingBase {
   /// for use by other bindings. A subclass of [BindingBase], such as
   /// [TestWidgetsFlutterBinding], can override this accessor to return a
   /// different [ui.PlatformDispatcher] implementation.
-  ui.PlatformDispatcher get platformDispatcher => ui.PlatformDispatcher.instance;
+  ///
+  /// In debug builds this is [ui.PlatformDispatcher.instance] wrapped so that
+  /// the entries of [debugViewMetricsOverrides] apply to the view metrics it
+  /// reports; see [debugApplyViewMetricsOverrides]. The wrapper is transparent
+  /// while no override is registered, and is not built at all outside of debug
+  /// mode (in profile or release mode). A subclass that overrides this accessor
+  /// takes that wrapper away, so it should apply
+  /// [debugApplyViewMetricsOverrides] to whatever it returns instead, the way
+  /// [TestWidgetsFlutterBinding] does.
+  ui.PlatformDispatcher get platformDispatcher => _platformDispatcher;
+
+  // Resolved once, on first read, rather than on every read.
+  //
+  // This is one of the most frequently read properties in the framework —
+  // [MediaQueryData.fromView], pointer event conversion, image resolution and
+  // every [View.of] go through it — so the wrapping cannot be done in the
+  // getter: an `assert(() { ... }())` there would allocate a closure on each of
+  // those reads in debug builds.
+  //
+  // [debugApplyViewMetricsOverrides] returns its argument unchanged outside of
+  // debug mode, so in profile and release builds this is the singleton itself.
+  late final ui.PlatformDispatcher _platformDispatcher = debugApplyViewMetricsOverrides(
+    ui.PlatformDispatcher.instance,
+  );
 
   /// The initialization method.
   ///
@@ -647,12 +677,136 @@ abstract class BindingBase {
           };
         },
       );
+
+      registerServiceExtension(
+        name: FoundationServiceExtensions.viewMetricsOverride.name,
+        callback: _debugHandleViewMetricsOverrideServiceExtension,
+      );
       return true;
     }());
     assert(() {
       _debugServiceExtensionsRegistered = true;
       return true;
     }());
+  }
+
+  /// Implements the `ext.flutter.viewMetricsOverride` service extension.
+  ///
+  /// Recognized parameters:
+  ///
+  ///  * `viewId`: the [FlutterView.viewId] to act on, as a non-negative integer string.
+  ///    Required when `overrides` is present, optional for reads, and ignored
+  ///    when `clearAll` is `'true'`.
+  ///  * `overrides`: a JSON-encoded string representing an object in the format
+  ///    [DebugViewMetricsOverride.fromJson] accepts, or `'null'`. When present,
+  ///    it replaces the override currently registered for `viewId`. An empty
+  ///    object or `'null'` removes it.
+  ///  * `clearAll`: when `'true'`, removes every override and ignores `viewId`.
+  ///
+  /// With neither `overrides` nor `clearAll`, the call is a read.
+  ///
+  /// Every call returns the same three keys, so that a client does not have to
+  /// know which request it sent in order to read the reply:
+  ///
+  ///  * `overrides`: every override now installed, keyed by stringified view id
+  ///    (JSON object keys must be strings). A client can resynchronize from
+  ///    this after any call.
+  ///  * `overriddenViewIds`: the same view ids as a sorted `List<int>`.
+  ///  * `override`: the override now in effect for the `viewId` the call named,
+  ///    or null if it has none. Present only when the call named a `viewId`.
+  ///
+  /// A call that changes an override also posts a
+  /// `Flutter.ServiceExtensionStateChanged` event whose value is the JSON text
+  /// of every override now installed, keyed by stringified view id (e.g. `{"1": ...}`
+  /// because JSON object keys must be strings), so that a client which
+  /// is not the one that made the request learns about it too. A read, and a
+  /// write that changes nothing, post no event.
+  ///
+  /// A malformed payload is rejected before any override is installed, so a
+  /// failed call leaves no partial state behind.
+  ///
+  /// The response is sent once the override is installed. The framework is told
+  /// to re-read the metrics that changed synchronously, so the change is
+  /// visible in the next frame.
+  Future<Map<String, Object?>> _debugHandleViewMetricsOverrideServiceExtension(
+    Map<String, String> parameters,
+  ) async {
+    if (parameters['clearAll'] == 'true') {
+      if (debugClearViewMetricsOverrides()) {
+        _postViewMetricsOverrideStateChangedEvent();
+      }
+      return _viewMetricsOverrideResult();
+    }
+
+    final String? rawViewId = parameters['viewId'];
+    final String? rawOverrides = parameters['overrides'];
+    if (rawViewId == null) {
+      if (rawOverrides != null) {
+        throw const FormatException('The viewId parameter is required when overrides is provided.');
+      }
+      return _viewMetricsOverrideResult();
+    }
+    final int? viewId = int.tryParse(rawViewId, radix: 10);
+    if (viewId == null || viewId < 0) {
+      throw FormatException(
+        'The viewId parameter must be a non-negative integer, got "$rawViewId".',
+      );
+    }
+
+    if (rawOverrides != null) {
+      // DebugViewMetricsOverride.fromJson throws a FormatException on a
+      // malformed payload, which the service extension machinery reports back
+      // to the caller as an error rather than silently applying part of it.
+      final DebugViewMetricsOverride? override = switch (json.decode(rawOverrides)) {
+        null => null,
+        final Map<Object?, Object?> decoded => DebugViewMetricsOverride.fromJson(decoded),
+        _ => throw const FormatException('The overrides parameter must be a JSON object or null.'),
+      };
+      if (debugSetViewMetricsOverride(viewId, override)) {
+        _postViewMetricsOverrideStateChangedEvent();
+      }
+    }
+
+    return _viewMetricsOverrideResult(viewId: viewId);
+  }
+
+  // The reply to every `ext.flutter.viewMetricsOverride` call.
+  //
+  // `overrides` carries the whole registry whatever the call was, so that one
+  // key has one shape and a client can resynchronize from any reply rather than
+  // having to remember which request produced it. `override` answers the
+  // question a call that named a view actually asked.
+  //
+  // Read after the change has been applied, because a synchronous notification
+  // may have installed another override in the meantime.
+  Map<String, Object?> _viewMetricsOverrideResult({int? viewId}) {
+    return <String, Object?>{
+      if (viewId != null) 'override': debugViewMetricsOverrides[viewId]?.toJson(),
+      'overrides': _viewMetricsOverridesJson(),
+      'overriddenViewIds': debugViewMetricsOverrides.keys.toList()..sort(),
+    };
+  }
+
+  // Keyed by stringified view id because JSON object keys must be strings.
+  Map<String, Object?> _viewMetricsOverridesJson() {
+    return <String, Object?>{
+      for (final MapEntry<int, DebugViewMetricsOverride> entry in debugViewMetricsOverrides.entries)
+        '${entry.key}': entry.value.toJson(),
+    };
+  }
+
+  // The whole of [debugViewMetricsOverrides], rather than the entry that
+  // changed, because one event then describes the state of the extension for a
+  // client that missed the ones before it — including the clearAll that leaves
+  // no entry to report.
+  //
+  // Encoded as text rather than sent as a map, because every other extension
+  // state change carries a [String] and a client is entitled to read one.
+  void _postViewMetricsOverrideStateChangedEvent() {
+    _postExtensionStateChangedEvent(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      json.encode(_viewMetricsOverridesJson()),
+    );
   }
 
   /// Whether [lockEvents] is currently locking events.

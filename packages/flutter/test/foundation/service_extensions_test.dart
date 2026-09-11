@@ -212,7 +212,7 @@ void main() {
     // widget_inspector_test.dart for tests of the ext.flutter.inspector service
     // extensions) or accessibility inspector (see accessibility_inspector_test.dart).
     // Any test counted here must be tested in this file!
-    const serviceExtensionCount = 31;
+    const serviceExtensionCount = 32;
 
     // The tests are in the widgets/accessibility_evaluations_service_extension_test.dart
     // They can't be moved here because they need to run in a WidgetTester environment.
@@ -1412,6 +1412,314 @@ void main() {
     expect(brightnessValue, 'Brightness.light');
 
     testedExtensions.add(FoundationServiceExtensions.brightnessOverride.name);
+  });
+
+  test('Service extensions - viewMetricsOverride', () async {
+    final int viewId = binding.platformDispatcher.views.single.viewId;
+    addTearDown(debugClearViewMetricsOverrides);
+    // Every client listening for extension state changes has to learn about an
+    // override, not just the one that asked for it.
+    final Iterable<Map<String, dynamic>> extensionChangedEvents = binding
+        .getServiceExtensionStateChangedEvents(
+          'ext.flutter.${FoundationServiceExtensions.viewMetricsOverride.name}',
+        );
+
+    // Reading with no override installed.
+    Map<String, dynamic> result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '$viewId'},
+    );
+    // A call that named a view is answered by 'override', and 'overrides'
+    // carries the whole registry whatever the call was.
+    expect(result['override'], isNull);
+    expect(result['overrides'], <String, Object?>{});
+    expect(result['overriddenViewIds'], <int>[]);
+    expect(extensionChangedEvents, isEmpty);
+
+    // Parameterless read with no override installed.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{},
+    );
+    // A call that named no view is not answered about one.
+    expect(result.containsKey('override'), isFalse);
+    expect(result['overrides'], <String, Object?>{});
+    expect(result['overriddenViewIds'], <int>[]);
+    expect(extensionChangedEvents, isEmpty);
+
+    // Installing an override.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{
+        'viewId': '$viewId',
+        'overrides': '{"boldText": true, "devicePixelRatio": 3.5}',
+      },
+    );
+    expect(result['override'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
+    expect(result['overrides'], <String, Object?>{
+      '$viewId': <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true},
+    });
+    expect(result['overriddenViewIds'], <int>[viewId]);
+    expect(
+      debugViewMetricsOverrides[viewId],
+      const DebugViewMetricsOverride(devicePixelRatio: 3.5, boldText: true),
+    );
+    expect(extensionChangedEvents.length, 1);
+    expect(json.decode(extensionChangedEvents.last['value'] as String), <String, Object?>{
+      '$viewId': <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true},
+    });
+
+    // Installing the same override again changes nothing, and says nothing.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{
+        'viewId': '$viewId',
+        'overrides': '{"boldText": true, "devicePixelRatio": 3.5}',
+      },
+    );
+    expect(result['override'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
+    expect(extensionChangedEvents.length, 1);
+
+    // A second view's override: the event reports the whole registry, so that a
+    // client that missed the earlier ones is not left with half of it.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '${viewId + 1}', 'overrides': '{"textScaleFactor": 2.0}'},
+    );
+    expect(extensionChangedEvents.length, 2);
+    expect(json.decode(extensionChangedEvents.last['value'] as String), <String, Object?>{
+      '$viewId': <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true},
+      '${viewId + 1}': <String, Object?>{'textScaleFactor': 2.0},
+    });
+
+    // Reading without viewId parameter returns all overrides keyed by viewId and all overridden view IDs.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{},
+    );
+    expect(result['overrides'], <String, Object?>{
+      '$viewId': <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true},
+      '${viewId + 1}': <String, Object?>{'textScaleFactor': 2.0},
+    });
+    expect(result['overriddenViewIds'], <int>[viewId, viewId + 1]);
+    expect(extensionChangedEvents.length, 2);
+
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '${viewId + 1}', 'overrides': '{}'},
+    );
+    expect(extensionChangedEvents.length, 3);
+
+    // Reading it back.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '$viewId'},
+    );
+    expect(result['override'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
+    expect(extensionChangedEvents.length, 3);
+
+    // Setting partial padding and systemGestureInsets works and defaults omitted edges to 0.
+    result = await binding
+        .testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
+          'viewId': '$viewId',
+          'overrides': '{"padding": {"top": 48}, "systemGestureInsets": {"left": 20, "right": 20}}',
+        });
+    expect(result['override'], <String, Object?>{
+      'padding': <String, Object?>{'left': 0.0, 'top': 48.0, 'right': 0.0, 'bottom': 0.0},
+      'systemGestureInsets': <String, Object?>{
+        'left': 20.0,
+        'top': 0.0,
+        'right': 20.0,
+        'bottom': 0.0,
+      },
+    });
+    expect(
+      debugViewMetricsOverrides[viewId],
+      const DebugViewMetricsOverride(
+        padding: DebugViewPadding(top: 48),
+        systemGestureInsets: DebugViewPadding(left: 20, right: 20),
+      ),
+    );
+    expect(extensionChangedEvents.length, 4);
+
+    // Setting enum-prefixed platformBrightness works.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{
+        'viewId': '$viewId',
+        'overrides': '{"platformBrightness": "Brightness.dark"}',
+      },
+    );
+    expect(result['override'], <String, Object?>{'platformBrightness': 'dark'});
+    expect(
+      debugViewMetricsOverrides[viewId],
+      const DebugViewMetricsOverride(platformBrightness: ui.Brightness.dark),
+    );
+    expect(extensionChangedEvents.length, 5);
+
+    // Restore for subsequent checks.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{
+        'viewId': '$viewId',
+        'overrides': '{"devicePixelRatio": 3.5, "boldText": true}',
+      },
+    );
+
+    // A malformed payload is rejected and leaves the installed override alone.
+    await expectLater(
+      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
+        'viewId': '$viewId',
+        'overrides': '{"devicePixelRatio": 0}',
+      }),
+      throwsA(isA<FormatException>()),
+    );
+    expect(
+      debugViewMetricsOverrides[viewId],
+      const DebugViewMetricsOverride(devicePixelRatio: 3.5, boldText: true),
+    );
+
+    // An unparsable viewId is rejected.
+    await expectLater(
+      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
+        'viewId': 'not-a-number',
+      }),
+      throwsA(isA<FormatException>()),
+    );
+    await expectLater(
+      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
+        'viewId': '0x10',
+      }),
+      throwsA(isA<FormatException>()),
+    );
+
+    // A negative viewId is rejected.
+    await expectLater(
+      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
+        'viewId': '-1',
+      }),
+      throwsA(isA<FormatException>()),
+    );
+
+    // A missing viewId is rejected when overrides is provided.
+    await expectLater(
+      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
+        'overrides': '{}',
+      }),
+      throwsA(isA<FormatException>()),
+    );
+
+    // A non-object/non-null overrides parameter is rejected.
+    await expectLater(
+      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
+        'viewId': '$viewId',
+        'overrides': '123',
+      }),
+      throwsA(isA<FormatException>()),
+    );
+
+    // Setting overrides to 'null' removes the entry.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '$viewId', 'overrides': 'null'},
+    );
+    expect(result['override'], isNull);
+    expect(result['overrides'], <String, Object?>{});
+    expect(result['overriddenViewIds'], <int>[]);
+    expect(debugViewMetricsOverrides, isEmpty);
+    expect(extensionChangedEvents.length, 7);
+    expect(json.decode(extensionChangedEvents.last['value'] as String), <String, Object?>{});
+
+    // Re-installing for the clearAll test below.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{
+        'viewId': '$viewId',
+        'overrides': '{"devicePixelRatio": 3.5, "boldText": true}',
+      },
+    );
+    expect(extensionChangedEvents.length, 8);
+
+    // Clearing everything.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'clearAll': 'true'},
+    );
+    expect(result['overrides'], <String, Object?>{});
+    expect(result['overriddenViewIds'], <int>[]);
+    expect(debugViewMetricsOverrides, isEmpty);
+    expect(extensionChangedEvents.length, 9);
+    expect(json.decode(extensionChangedEvents.last['value'] as String), <String, Object?>{});
+
+    // Clearing again removes nothing, and says nothing.
+    await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'clearAll': 'true'},
+    );
+    expect(extensionChangedEvents.length, 9);
+
+    // Notifications are synchronous and may reinstall an override. Report the
+    // state after those callbacks, just as the state-change event does.
+    debugSetViewMetricsOverride(viewId, const DebugViewMetricsOverride(devicePixelRatio: 4));
+    final VoidCallback? previousMetricsChanged = binding.platformDispatcher.onMetricsChanged;
+    binding.platformDispatcher.onMetricsChanged = () {
+      previousMetricsChanged?.call();
+      debugSetViewMetricsOverride(viewId + 1, const DebugViewMetricsOverride(boldText: true));
+    };
+    try {
+      result = await binding.testExtension(
+        FoundationServiceExtensions.viewMetricsOverride.name,
+        <String, String>{'clearAll': 'true'},
+      );
+    } finally {
+      binding.platformDispatcher.onMetricsChanged = previousMetricsChanged;
+      debugClearViewMetricsOverrides();
+    }
+    expect(result['overriddenViewIds'], <int>[viewId + 1]);
+    expect(json.decode(extensionChangedEvents.last['value'] as String), <String, Object?>{
+      '${viewId + 1}': <String, Object?>{'boldText': true},
+    });
+
+    // Changing the override replays the corresponding platform notifications.
+    // In particular, the accessibility-features change above schedules a frame.
+    // Consume it so that randomized tests do not inherit this test's work.
+    expect(binding.frameScheduled, isTrue);
+    await binding.doFrame();
+    expect(binding.frameScheduled, isFalse);
+
+    // Overridden view IDs are deterministically sorted.
+    await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '50', 'overrides': '{"devicePixelRatio": 2.0}'},
+    );
+    await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '20', 'overrides': '{"devicePixelRatio": 2.0}'},
+    );
+    await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '35', 'overrides': '{"devicePixelRatio": 2.0}'},
+    );
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{},
+    );
+    expect(result['overrides'], <String, Object?>{
+      '20': <String, Object?>{'devicePixelRatio': 2.0},
+      '35': <String, Object?>{'devicePixelRatio': 2.0},
+      '50': <String, Object?>{'devicePixelRatio': 2.0},
+    });
+    expect(result['overriddenViewIds'], <int>[20, 35, 50]);
+
+    await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'clearAll': 'true'},
+    );
+    if (binding.frameScheduled) {
+      await binding.doFrame();
+    }
+
+    testedExtensions.add(FoundationServiceExtensions.viewMetricsOverride.name);
   });
 
   test('Service extensions - activeDevToolsServerAddress', () async {

@@ -80,4 +80,33 @@ enum FoundationServiceExtensions {
   /// * [BindingBase.initServiceExtensions], where the service extension is
   ///   registered.
   brightnessOverride,
+
+  /// Name of service extension that, when called, gets, sets, or clears the
+  /// view metric overrides of an individual view.
+  ///
+  /// Recognized parameters:
+  ///
+  ///  * `viewId`: the [FlutterView.viewId] to act on, as a non-negative integer string.
+  ///    Required when `overrides` is present, optional for reads, and ignored
+  ///    when `clearAll` is `'true'`.
+  ///  * `overrides`: a JSON-encoded string representing an object in the format
+  ///    [DebugViewMetricsOverride.fromJson] accepts, or `'null'`. When present,
+  ///    it replaces the override currently registered for `viewId`. An empty
+  ///    object or `'null'` removes it.
+  ///  * `clearAll`: when `'true'`, removes every override and ignores `viewId`.
+  ///
+  /// With neither `overrides` nor `clearAll`, the call is a read.
+  ///
+  /// Every call returns the same three keys: `overrides` (every override now
+  /// installed, keyed by stringified view id), `overriddenViewIds` (the same
+  /// ids as a sorted `List<int>`), and, when the call named a `viewId`,
+  /// `override` (the entry now in effect for that view, or null).
+  ///
+  /// See also:
+  ///
+  ///  * [DebugViewMetricsOverride], the value this service extension exposes.
+  ///  * [debugViewMetricsOverrides], the map this service extension writes to.
+  ///  * [BindingBase.initServiceExtensions], where the service extension is
+  ///    registered.
+  viewMetricsOverride,
 }

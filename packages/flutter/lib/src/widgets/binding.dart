@@ -485,7 +485,7 @@ mixin WidgetsBinding
       return true;
     }());
     platformMenuDelegate = DefaultPlatformMenuDelegate();
-    _windowingOwner = createDefaultWindowingOwner();
+    _windowingOwner = createWindowingOwner();
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -1754,6 +1754,24 @@ mixin WidgetsBinding
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
     return platformDispatcher.computePlatformResolvedLocale(supportedLocales);
   }
+
+  /// Creates the [WindowingOwner] to install in [windowingOwner].
+  ///
+  /// By default, this creates the owner for the current platform, or an
+  /// unsupported owner when windowing is disabled. Test bindings override this
+  /// to avoid initializing native windowing before installing their test owner.
+  ///
+  /// [initInstances] calls this, so an override runs before this binding — and
+  /// before every binding mixed in after it — has finished initializing. Only
+  /// state a constructor established, or that a binding earlier in the mixin
+  /// application initialized, can be read from here: [platformDispatcher] can
+  /// be, and anything assigned after the call below cannot.
+  ///
+  /// Do not use this experimental API in production applications or packages
+  /// published to pub.dev. It may change even in patch versions.
+  @protected
+  @internal
+  WindowingOwner createWindowingOwner() => createDefaultWindowingOwner();
 
   /// The [WindowingOwner] is responsible for creating and managing [BaseWindowController]s.
   ///
