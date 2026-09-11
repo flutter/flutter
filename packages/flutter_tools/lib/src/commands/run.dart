@@ -6,9 +6,8 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:unified_analytics/unified_analytics.dart';
-import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service.dart' hide Event;
 
 import '../android/android_device.dart';
 import '../base/common.dart';
@@ -144,9 +143,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   @protected
   Future<DebuggingOptions> createDebuggingOptions({WebDevServerConfig? webDevServerConfig}) async {
     final BuildInfo buildInfo = await getBuildInfo();
-    final int? webBrowserDebugPort =
-        featureFlags.isWebEnabled && wasParsed(WebOptions.webBrowserDebugPort)
-        ? int.parse(getValue(WebOptions.webBrowserDebugPort)!)
+    final int? webBrowserDebugPort = featureFlags.isWebEnabled
+        ? getValue(WebOptions.webBrowserDebugPort)
         : null;
     final List<String> webBrowserFlags = featureFlags.isWebEnabled
         ? getValue(WebOptions.webBrowserFlags)
@@ -278,8 +276,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       logger: effectiveLogger,
     );
 
-    final String? webPortArg = getValue(WebOptions.webPort);
-    final int? webPort = webPortArg != null ? int.tryParse(webPortArg) : null;
+    final int? webPort = getValue(WebOptions.webPort);
 
     // Determine HTTPS config with CLI > file precedence
     final HttpsConfig? httpsConfig = HttpsConfig.parse(
@@ -453,10 +450,10 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
-  Future<analytics.Event> unifiedAnalyticsUsageValues(String commandPath) async {
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
     final AnalyticsUsageValuesRecord record = await _sharedAnalyticsUsageValues;
 
-    return analytics.Event.commandUsageValues(
+    return Event.commandUsageValues(
       workflow: commandPath,
       commandHasTerminal: hasTerminal,
       runIsEmulator: record.runIsEmulator,
@@ -742,7 +739,29 @@ class RunCommand extends RunCommandBase {
 
   @visibleForTesting
   Daemon createMachineDaemon() {
-    return Daemon.createMachineDaemon();
+    final ToolContext(
+      fs: FileSystem fs,
+      logger: Logger logger,
+      outputPreferences: OutputPreferences outputPreferences,
+      platform: Platform platform,
+      processManager: ProcessManager processManager,
+      stdio: Stdio stdio,
+      systemClock: SystemClock systemClock,
+      terminal: AnsiTerminal terminal,
+    ) = _toolContext;
+    return Daemon.createMachineDaemon(
+      featureFlags: featureFlags,
+      logger: logger,
+      stdio: stdio,
+      analytics: analytics,
+      deviceManager: _deviceManager,
+      fileSystem: fs,
+      outputPreferences: outputPreferences,
+      platform: platform,
+      processManager: processManager,
+      systemClock: systemClock,
+      terminal: terminal,
+    );
   }
 
   @override

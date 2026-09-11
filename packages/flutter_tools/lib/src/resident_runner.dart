@@ -1899,7 +1899,7 @@ class TerminalHandler {
 
   void setupTerminal() {
     if (!_logger.quiet) {
-      logger.printStatus('');
+      _logger.printStatus('');
       residentRunner.printHelp(details: false);
     }
     _terminal.singleCharMode = true;

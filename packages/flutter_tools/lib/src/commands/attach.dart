@@ -5,10 +5,12 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -22,6 +24,7 @@ import '../context/tool_context.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../features.dart';
 import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
@@ -268,10 +271,13 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attach({required Device device}) async {
-    final Logger logger = _toolContext.logger;
-    final processInfo = ProcessInfo(_toolContext.fs);
-    final Signals signals = _toolContext.signals;
-    final AnsiTerminal terminal = _toolContext.terminal;
+    final ToolContext(
+      fs: FileSystem fs,
+      logger: Logger logger,
+      signals: Signals signals,
+      terminal: AnsiTerminal terminal,
+    ) = _toolContext;
+    final processInfo = ProcessInfo(fs);
 
     terminal.usesTerminalUi = true;
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
@@ -301,9 +307,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attachDaemon({required Device device}) async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final Stdio stdio = _toolContext.stdio;
+    final ToolContext(fs: FileSystem fs, logger: Logger logger, stdio: Stdio stdio) = _toolContext;
 
     final daemon = Daemon(
       DaemonConnection(
@@ -314,6 +318,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
       logToStdout: true,
+      featureFlags: featureFlags,
     );
 
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
@@ -344,8 +349,13 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<ResidentRunner> _discoverVmServiceAndCreateResidentRunner({required Device device}) async {
-    final Platform platform = _toolContext.platform;
-    final Logger logger = _toolContext.logger;
+    final ToolContext(
+      artifacts: Artifacts artifacts,
+      fs: FileSystem fs,
+      logger: Logger logger,
+      platform: Platform platform,
+      processManager: ProcessManager processManager,
+    ) = _toolContext;
 
     final Future<Uri> vmServiceUri = _discoverVmService(device: device);
     vmServiceUri.ignore();
@@ -354,11 +364,15 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      target: targetFile,
-      targetModelOverride: TargetModel(stringArg('target-model')!),
       buildInfo: buildInfo,
-      userIdentifier: userIdentifier,
       platform: platform,
+      target: targetFile,
+      artifacts: artifacts,
+      fileSystem: fs,
+      logger: logger,
+      processManager: processManager,
+      targetModelOverride: TargetModel(stringArg('target-model')!),
+      userIdentifier: userIdentifier,
     );
     flutterDevice.vmServiceUri = vmServiceUri;
     final flutterDevices = <FlutterDevice>[flutterDevice];

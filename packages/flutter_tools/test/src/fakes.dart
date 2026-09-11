@@ -580,7 +580,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.isSwiftPackageManagerEnabled = false,
     this.isOmitLegacyVersionFileEnabled = false,
     this.isWindowingEnabled = false,
-    this.isAccessibilityEvaluationsEnabled = false,
     this.isLLDBDebuggingEnabled = false,
     this.isUISceneMigrationEnabled = false,
     this.isRiscv64SupportEnabled = false,
@@ -635,9 +634,6 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isWindowingEnabled;
 
   @override
-  final bool isAccessibilityEvaluationsEnabled;
-
-  @override
   final bool isLLDBDebuggingEnabled;
 
   @override
@@ -671,7 +667,6 @@ class TestFeatureFlags implements FeatureFlags {
       swiftPackageManager => isSwiftPackageManagerEnabled,
       omitLegacyVersionFile => isOmitLegacyVersionFileEnabled,
       windowingFeature => isWindowingEnabled,
-      accessibilityEvaluationsFeature => isAccessibilityEvaluationsEnabled,
       lldbDebugging => isLLDBDebuggingEnabled,
       uiSceneMigration => isUISceneMigrationEnabled,
       riscv64 => isRiscv64SupportEnabled,
@@ -700,7 +695,6 @@ class TestFeatureFlags implements FeatureFlags {
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
-    accessibilityEvaluationsFeature,
     lldbDebugging,
     uiSceneMigration,
     riscv64,
@@ -995,6 +989,17 @@ class FakeFileSystemUtils extends Fake implements FileSystemUtils {}
 class FakeTerminal extends Fake implements AnsiTerminal {
   @override
   String get successMark => '✓';
+  @override
+  String get warningMark => '!';
+
+  @override
+  String bolden(String message) => message;
+
+  @override
+  String clearScreen() => '';
+
+  @override
+  String color(String message, TerminalColor color) => message;
 }
 
 class FakeProcessUtils extends Fake implements ProcessUtils {}
@@ -1002,13 +1007,35 @@ class FakeProcessUtils extends Fake implements ProcessUtils {}
 class FakeTemplateRenderer extends Fake implements TemplateRenderer {}
 
 class FakeXcode extends Fake implements Xcode {
-  FakeXcode({this.currentVersion, this.isDevicectlInstalled = true});
+  FakeXcode({
+    this.currentVersion,
+    this.isDevicectlInstalled = true,
+    this.isInstalled = true,
+    this.isRecommendedVersionSatisfactory = true,
+    this.isRequiredVersionSatisfactory = true,
+  });
 
   @override
   Version? currentVersion;
 
   @override
   bool isDevicectlInstalled;
+
+  @override
+  bool isInstalled;
+
+  @override
+  bool isRecommendedVersionSatisfactory;
+
+  @override
+  bool isRequiredVersionSatisfactory;
+
+  @override
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
+    XcodeBasedProject xcodeProject,
+    Directory buildDirectory, {
+    bool skipPackageValidation = true,
+  }) async => <String>[...xcrunCommand(), 'xcodebuild'];
 
   @override
   Future<String> sdkLocation(EnvironmentType environmentType) async => '/fake/sdk/path';
