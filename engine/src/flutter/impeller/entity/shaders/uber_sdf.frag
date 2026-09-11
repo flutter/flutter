@@ -326,9 +326,7 @@ vec2 strokedSDF(vec2 p) {
     sdf = max(outer, -inner);
   } else {
     // All other shapes
-    vec2 sdf_and_pixel_size =
-        SDFStroke(base_sdf, pixel_size, frag_info.stroke_width);
-    sdf = sdf_and_pixel_size.x;
+    sdf = SDFStroke(base_sdf, pixel_size, frag_info.stroke_width).x;
   }
   return vec2(sdf, pixel_size);
 }
