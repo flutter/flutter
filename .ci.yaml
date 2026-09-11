@@ -3673,7 +3673,6 @@ targets:
   - name: Mac ios_universal_link_test
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -4518,7 +4517,6 @@ targets:
 
   - name: Mac uiscene_plugin_lifecycle_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -7270,7 +7268,6 @@ targets:
   - name: Windows windows_gradient_consistent_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7284,7 +7281,6 @@ targets:
   - name: Windows windows_gradient_dynamic_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7298,7 +7294,6 @@ targets:
   - name: Windows windows_gradient_static_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
