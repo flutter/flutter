@@ -178,6 +178,29 @@ void main() {
       expectExitCode(result, 0);
       expect(result.stdout, contains('|> bin/flutter'));
     }, testOn: 'posix');
+
+    test('tool_integration_tests runs tests in sorted order with --dry-run', () async {
+      final ProcessResult result = await runScript(<String, String>{
+        'SHARD': 'tool_integration_tests',
+        'SUBSHARD': '7_10',
+      }, <String>['--dry-run']);
+      expectExitCode(result, 0);
+
+      final String prefix = path.join('test', 'integration.shard');
+      final List<String> lines = (result.stdout as String).split('\n');
+      final List<String> testLines = lines
+          .map((String line) => line.trim())
+          .where((String line) => (line.startsWith(prefix) || line.startsWith('test/integration.shard/')) && line.endsWith('_test.dart'))
+          .toList();
+
+      expect(testLines, isNotEmpty);
+      final sortedTestLines = List<String>.of(testLines)..sort();
+      expect(
+        testLines,
+        equals(sortedTestLines),
+        reason: 'Tests in tool_integration_tests must be sorted deterministically to prevent uneven clustering across platforms.',
+      );
+    });
   });
 
   test('selectTestsForSubShard distributes tests amongst subshards correctly', () async {
