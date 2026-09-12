@@ -79,6 +79,9 @@ DEF_SWITCH(
     "disable-vm-service",
     "Disable the Dart VM Service. The Dart VM Service is never available "
     "in release mode.")
+DEF_SWITCH(kVmServiceKernelPath,
+           "vmservice-kernel-path",
+           "Path to the VM Service kernel file.")
 DEF_SWITCH(kDisableVmServicePublication,
            "disable-vm-service-publication",
            "Disable mDNS Dart VM Service publication.")
