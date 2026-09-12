@@ -127,9 +127,21 @@ class BuildCommand extends FlutterCommand {
         verboseHelp: verboseHelp,
       ),
     );
-    _addSubcommand(BuildBundleCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(
-      BuildWebCommand(fileSystem: fileSystem, logger: logger, verboseHelp: verboseHelp),
+      BuildBundleCommand(
+        buildSystem: buildSystem,
+        featureFlags: featureFlags,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
+    _addSubcommand(
+      BuildWebCommand(
+        buildSystem: buildSystem,
+        featureFlags: featureFlags,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
     );
     _addSubcommand(
       BuildMacosCommand(

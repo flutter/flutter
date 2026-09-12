@@ -2,11 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
+import '../context/tool_context.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../isolated/build_targets.dart';
 import '../runner/flutter_command.dart';
 import '../web/compile.dart';
 import '../web/web_constants.dart';
@@ -15,7 +21,18 @@ import '../web_template.dart';
 import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
-  BuildWebCommand({required super.logger, required this._fileSystem, required super.verboseHelp}) {
+  BuildWebCommand({
+    required this.buildSystem,
+    required this.featureFlags,
+    required ToolContext toolContext,
+    required super.verboseHelp,
+    @visibleForTesting this.buildTargets,
+    @visibleForTesting this.webBuilder,
+  }) : super(
+         logger: toolContext.logger,
+         outputPreferences: toolContext.outputPreferences,
+         toolContext: toolContext,
+       ) {
     registerOptionBundles(const <OptionBundle>[
       CommonBuildOptionsBundle(),
       BuildModeOptionsBundle(),
@@ -24,7 +41,14 @@ class BuildWebCommand extends BuildSubCommand {
     ]);
   }
 
-  final FileSystem _fileSystem;
+  final BuildSystem buildSystem;
+  final BuildTargets? buildTargets;
+  @override
+  final FeatureFlags featureFlags;
+  final WebBuilder? webBuilder;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -42,6 +66,8 @@ class BuildWebCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
+
     if (!featureFlags.isWebEnabled) {
       throwToolExit(
         '"build web" is not currently supported. To enable, run "flutter config --enable-web".',
@@ -86,7 +112,7 @@ class BuildWebCommand extends BuildSubCommand {
           'Do not attempt to set a web renderer when using "--${FlutterOptions.kWebWasmFlag}"',
         );
       }
-      globals.logger.printBox(title: 'New feature', '''
+      logger.printBox(title: 'New feature', '''
   WebAssembly compilation is new. Understand the details before deploying to production.
   $kWasmMoreInfo''');
 
@@ -158,7 +184,7 @@ class BuildWebCommand extends BuildSubCommand {
         'To configure this project for the web, run flutter create . --platforms web',
       );
     }
-    final File indexHtmlFile = _fileSystem.file(project.web.indexFile.path);
+    final File indexHtmlFile = fs.file(project.web.indexFile.path);
     if (indexHtmlFile.existsSync()) {
       final String indexHtmlContent = indexHtmlFile.readAsStringSync();
       if (!indexHtmlContent.contains(kBaseHrefPlaceholder) && baseHref != null) {
@@ -176,15 +202,15 @@ class BuildWebCommand extends BuildSubCommand {
 
     final Map<String, String> webDefines = extractWebDefines();
 
-    final webBuilder = WebBuilder(
-      logger: globals.logger,
-      processManager: globals.processManager,
-      buildSystem: globals.buildSystem,
-      fileSystem: globals.fs,
-      flutterVersion: globals.flutterVersion,
-      analytics: globals.analytics,
-    );
-    await webBuilder.buildWeb(
+    final WebBuilder effectiveWebBuilder =
+        webBuilder ??
+        WebBuilder(
+          analytics: analytics,
+          buildSystem: buildSystem,
+          toolContext: toolContext,
+          buildTargets: buildTargets ?? const BuildTargetsImpl(),
+        );
+    await effectiveWebBuilder.buildWeb(
       project,
       targetFile,
       buildInfo,
