@@ -650,6 +650,7 @@ zip_bundle("flutter_gtk") {
   output = "${prefix}${full_target_platform_name}-flutter-gtk.zip"
   deps = [
     ":flutter_linux_gtk",
+    ":flutter_linux_gtk4",
     ":publish_headers_linux",
     "$dart_src/runtime/bin:gen_snapshot",
   ]
@@ -667,6 +668,10 @@ zip_bundle("flutter_gtk") {
     {
       source = "$root_build_dir/libflutter_${host_os}_gtk.so"
       destination = "libflutter_${host_os}_gtk.so"
+    },
+    {
+      source = "$root_build_dir/libflutter_${host_os}_gtk4.so"
+      destination = "libflutter_${host_os}_gtk4.so"
     },
     {
       source = "$root_build_dir/gen_snapshot"
