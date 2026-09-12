@@ -13,7 +13,6 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import 'application_package.dart';
 import 'build_macos.dart';
@@ -22,14 +21,14 @@ import 'macos_workflow.dart';
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
   MacOSDevice({
+    required super.artifacts,
     required super.fileSystem,
     required super.logger,
     required super.operatingSystemUtils,
     required super.processManager,
-    super.artifacts,
-  }) : _processManager = processManager,
-       _logger = logger,
+  }) : _logger = logger,
        _operatingSystemUtils = operatingSystemUtils,
+       _processManager = processManager,
        super('macos', platformType: PlatformType.macos, ephemeral: false);
 
   final ProcessManager _processManager;
@@ -105,21 +104,14 @@ class MacOSDevice extends DesktopDevice {
 
 class MacOSDevices extends PollingDeviceDiscovery {
   MacOSDevices({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required MacOSWorkflow macOSWorkflow,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Platform platform,
-    required ProcessManager processManager,
-    Artifacts? artifacts,
-  }) : _logger = logger,
-       _platform = platform,
-       _macOSWorkflow = macOSWorkflow,
-       _processManager = processManager,
-       _fileSystem = fileSystem,
-       _operatingSystemUtils = operatingSystemUtils,
-       _artifacts = artifacts ?? globals.artifacts!,
-       super('macOS devices');
+    required this._artifacts,
+    required this._fileSystem,
+    required this._logger,
+    required this._macOSWorkflow,
+    required this._operatingSystemUtils,
+    required this._platform,
+    required this._processManager,
+  }) : super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
   final Platform _platform;

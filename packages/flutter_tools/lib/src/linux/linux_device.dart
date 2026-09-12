@@ -13,7 +13,6 @@ import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import 'application_package.dart';
 import 'build_linux.dart';
@@ -22,11 +21,11 @@ import 'linux_workflow.dart';
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends DesktopDevice {
   LinuxDevice({
+    required super.artifacts,
     required super.fileSystem,
     required super.logger,
     required super.operatingSystemUtils,
     required super.processManager,
-    super.artifacts,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _logger = logger,
        super('linux', platformType: PlatformType.linux, ephemeral: false);
@@ -84,20 +83,15 @@ class LinuxDevice extends DesktopDevice {
 
 class LinuxDevices extends PollingDeviceDiscovery {
   LinuxDevices({
+    required this._artifacts,
     required FeatureFlags featureFlags,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required OperatingSystemUtils operatingSystemUtils,
+    required this._fileSystem,
+    required this._logger,
+    required this._operatingSystemUtils,
     required Platform platform,
-    required ProcessManager processManager,
-    Artifacts? artifacts,
+    required this._processManager,
   }) : _platform = platform,
        _linuxWorkflow = LinuxWorkflow(platform: platform, featureFlags: featureFlags),
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _processManager = processManager,
-       _operatingSystemUtils = operatingSystemUtils,
-       _artifacts = artifacts ?? globals.artifacts!,
        super('linux devices');
 
   final Platform _platform;

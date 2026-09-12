@@ -16,7 +16,6 @@ import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
-import '../globals.dart' as globals;
 import '../ios/ios_workflow.dart';
 import '../project.dart';
 
@@ -25,11 +24,11 @@ import '../project.dart';
 /// https://developer.apple.com/documentation/apple-silicon/running-your-ios-apps-on-macos
 class MacOSDesignedForIPadDevice extends DesktopDevice {
   MacOSDesignedForIPadDevice({
+    required super.artifacts,
     required super.fileSystem,
     required super.logger,
     required super.operatingSystemUtils,
     required super.processManager,
-    super.artifacts,
   }) : _operatingSystemUtils = operatingSystemUtils,
        super('mac-designed-for-ipad', platformType: PlatformType.macos, ephemeral: false);
 
@@ -122,21 +121,14 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 
 class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   MacOSDesignedForIPadDevices({
-    required FileSystem fileSystem,
-    required IOSWorkflow iosWorkflow,
-    required Logger logger,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Platform platform,
-    required ProcessManager processManager,
-    Artifacts? artifacts,
-  }) : _logger = logger,
-       _platform = platform,
-       _iosWorkflow = iosWorkflow,
-       _processManager = processManager,
-       _fileSystem = fileSystem,
-       _operatingSystemUtils = operatingSystemUtils,
-       _artifacts = artifacts ?? globals.artifacts!,
-       super('Mac designed for iPad devices');
+    required this._artifacts,
+    required this._fileSystem,
+    required this._iosWorkflow,
+    required this._logger,
+    required this._operatingSystemUtils,
+    required this._platform,
+    required this._processManager,
+  }) : super('Mac designed for iPad devices');
 
   final IOSWorkflow _iosWorkflow;
   final Platform _platform;

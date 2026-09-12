@@ -418,7 +418,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   RenderViewportBase({
     AxisDirection axisDirection = AxisDirection.down,
     required AxisDirection crossAxisDirection,
-    required ViewportOffset offset,
+    required this._offset,
     @Deprecated(
       'Use scrollCacheExtent instead. '
       'This feature was deprecated after v3.41.0-0.0.pre.',
@@ -430,13 +430,12 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     )
     CacheExtentStyle cacheExtentStyle = CacheExtentStyle.pixel,
     ScrollCacheExtent? scrollCacheExtent,
-    SliverPaintOrder paintOrder = SliverPaintOrder.firstIsTop,
-    Clip clipBehavior = Clip.hardEdge,
+    this._paintOrder = SliverPaintOrder.firstIsTop,
+    this._clipBehavior = Clip.hardEdge,
   }) : assert(axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection)),
        assert(cacheExtent != null || cacheExtentStyle == CacheExtentStyle.pixel),
        _axisDirection = axisDirection,
        _crossAxisDirection = crossAxisDirection,
-       _offset = offset,
        _scrollCacheExtent =
            scrollCacheExtent ??
            switch (cacheExtentStyle) {
@@ -444,9 +443,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
                cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
              ),
              CacheExtentStyle.viewport => ScrollCacheExtent.viewport(cacheExtent!),
-           },
-       _paintOrder = paintOrder,
-       _clipBehavior = clipBehavior;
+           };
 
   /// Report the semantics of this node, for example for accessibility purposes.
   ///

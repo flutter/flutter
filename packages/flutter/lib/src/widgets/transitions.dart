@@ -148,14 +148,13 @@ class _AnimatedState extends State<AnimatedWidget> {
 /// when the topmost route is popped off the stack.
 ///
 /// Typically used as the argument for [ModalRoute.delegatedTransition].
-typedef DelegatedTransitionBuilder =
-    Widget? Function(
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      bool allowSnapshotting,
-      Widget? child,
-    );
+typedef DelegatedTransitionBuilder = Widget? Function(
+  BuildContext context,
+  Animation<double> animation,
+  Animation<double> secondaryAnimation,
+  bool allowSnapshotting,
+  Widget? child,
+);
 
 /// Animates the position of a widget relative to its normal position.
 ///
