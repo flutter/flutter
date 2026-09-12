@@ -84,24 +84,18 @@ class HotRunner extends ResidentRunner {
     this.benchmarkMode = false,
     this.applicationBinary,
     this.hostIsIde = false,
-    Logger? logger,
+    this._logger,
     super.projectRootPath,
     super.dillOutputPath,
     super.stayResident,
     super.machine,
-    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-    ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
-    ReassembleHelper reassembleHelper = _defaultReassembleHelper,
-    String? nativeAssetsYamlFile,
-    required Analytics analytics,
+    this._stopwatchFactory = const StopwatchFactory(),
+    this._reloadSourcesHelper = defaultReloadSourcesHelper,
+    this._reassembleHelper = _defaultReassembleHelper,
+    this._nativeAssetsYamlFile,
+    required this._analytics,
     super.dartBuilder,
-  }) : _stopwatchFactory = stopwatchFactory,
-       _reloadSourcesHelper = reloadSourcesHelper,
-       _reassembleHelper = reassembleHelper,
-       _nativeAssetsYamlFile = nativeAssetsYamlFile,
-       _analytics = analytics,
-       _logger = logger,
-       super(hotMode: true);
+  }) : super(hotMode: true);
 
   final StopwatchFactory _stopwatchFactory;
   final ReloadSourcesHelper _reloadSourcesHelper;
@@ -392,13 +386,13 @@ class HotRunner extends ResidentRunner {
 
       switch ((cliFlavor, detectedFlavor)) {
         case (final String cli, final String detected) when cli != detected:
-          globals.printWarning(
+          logger.printWarning(
             'Warning: The app on the device was built with flavor "$detected", '
             'but --flavor was set to "$cli". Hot restart will recompile the app with "$cli", '
             'which may cause unexpected behavior.',
           );
         case (null, final String detected):
-          globals.printStatus('Automatically detected app flavor: "$detected".');
+          logger.printStatus('Automatically detected app flavor: "$detected".');
           final updatedDartDefines = <String>[
             ...device.buildInfo.dartDefines.where((String d) => !d.startsWith('$kAppFlavor=')),
             '$kAppFlavor=$detectedFlavor',
@@ -1489,12 +1483,10 @@ class InvalidationResult {
 /// application to determine when they are dirty.
 class ProjectFileInvalidator {
   ProjectFileInvalidator({
-    required FileSystem fileSystem,
-    required Platform platform,
-    required Logger logger,
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _logger = logger;
+    required this._fileSystem,
+    required this._platform,
+    required this._logger,
+  });
 
   final FileSystem _fileSystem;
   final Platform _platform;

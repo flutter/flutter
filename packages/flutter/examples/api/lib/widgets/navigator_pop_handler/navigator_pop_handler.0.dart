@@ -139,9 +139,8 @@ class _NestedNavigatorsPageOne extends StatelessWidget {
             const Text('A system back here returns to the home page.'),
             TextButton(
               onPressed: () {
-                Navigator.of(
-                  context,
-                ).restorablePushNamed('nested_navigators/one/another_one');
+                Navigator.of(context)
+                    .restorablePushNamed('nested_navigators/one/another_one');
               },
               child: const Text('Go to another route in this nested Navigator'),
             ),

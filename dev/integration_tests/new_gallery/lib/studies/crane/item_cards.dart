@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import '../../layout/adaptive.dart';
 import '../../layout/highlight_focus.dart';
 import '../../layout/image_placeholder.dart';

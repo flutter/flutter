@@ -4,6 +4,7 @@
 
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+
 import '../../gallery_localizations.dart';
 
 // BEGIN sharedZAxisTransitionDemo
@@ -74,12 +75,11 @@ class SharedZAxisTransitionDemo extends StatelessWidget {
 
   Route<void> _createSettingsRoute() {
     return PageRouteBuilder<void>(
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) => const _SettingsPage(),
+      pageBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) => const _SettingsPage(),
       transitionsBuilder:
           (
             BuildContext context,

@@ -154,14 +154,14 @@ class GalleryTransitionTest {
 
     final String testOutputDirectory =
         Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '${galleryDirectory.path}/build';
-    final summary =
-        json.decode(file('$testOutputDirectory/$timelineSummaryFile.json').readAsStringSync())
-            as Map<String, dynamic>;
+    final summary = json.decode(
+      file('$testOutputDirectory/$timelineSummaryFile.json').readAsStringSync(),
+    ) as Map<String, dynamic>;
 
     if (transitionDurationFile != null) {
-      final original =
-          json.decode(file('$testOutputDirectory/$transitionDurationFile.json').readAsStringSync())
-              as Map<String, dynamic>;
+      final original = json.decode(
+        file('$testOutputDirectory/$transitionDurationFile.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
       final transitions = <String, List<int>>{};
       for (final String key in original.keys) {
         transitions[key] = List<int>.from(original[key] as List<dynamic>);
@@ -307,14 +307,14 @@ class GalleryTransitionBuildTest extends BuildTestTask {
 
   @override
   Future<TaskResult> parseTaskResult() async {
-    final summary =
-        json.decode(file('$testOutputDirectory/$timelineSummaryFile.json').readAsStringSync())
-            as Map<String, dynamic>;
+    final summary = json.decode(
+      file('$testOutputDirectory/$timelineSummaryFile.json').readAsStringSync(),
+    ) as Map<String, dynamic>;
 
     if (transitionDurationFile != null) {
-      final original =
-          json.decode(file('$testOutputDirectory/$transitionDurationFile.json').readAsStringSync())
-              as Map<String, dynamic>;
+      final original = json.decode(
+        file('$testOutputDirectory/$transitionDurationFile.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
       final transitions = <String, List<int>>{};
       for (final String key in original.keys) {
         transitions[key] = List<int>.from(original[key] as List<dynamic>);

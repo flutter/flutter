@@ -45,20 +45,15 @@ class InkHighlight extends InteractiveInkFeature {
     required super.controller,
     required super.referenceBox,
     required super.color,
-    required TextDirection textDirection,
-    BoxShape shape = BoxShape.rectangle,
-    double? radius,
+    required this._textDirection,
+    this._shape = BoxShape.rectangle,
+    this._radius,
     BorderRadius? borderRadius,
     super.customBorder,
-    RectCallback? rectCallback,
+    this._rectCallback,
     super.onRemoved,
     Duration fadeDuration = _kDefaultHighlightFadeDuration,
-  }) : _shape = shape,
-       _radius = radius,
-       _borderRadius = borderRadius ?? BorderRadius.zero,
-
-       _textDirection = textDirection,
-       _rectCallback = rectCallback {
+  }) : _borderRadius = borderRadius ?? BorderRadius.zero {
     _alphaController = AnimationController(duration: fadeDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged)

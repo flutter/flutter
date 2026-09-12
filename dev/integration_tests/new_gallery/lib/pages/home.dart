@@ -541,9 +541,8 @@ class _DesktopCategoryHeader extends StatelessWidget {
                 header: true,
                 child: SelectableText(
                   category.displayTitle(GalleryLocalizations.of(context)!)!,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.headlineSmall!.apply(color: colorScheme.onSurface),
+                  style: Theme.of(context).textTheme.headlineSmall!
+                      .apply(color: colorScheme.onSurface),
                 ),
               ),
             ),
@@ -1022,9 +1021,8 @@ class _CarouselCard extends StatelessWidget {
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: () {
-                    Navigator.of(
-                      context,
-                    ).popUntil((Route<void> route) => route.settings.name == '/');
+                    Navigator.of(context)
+                        .popUntil((Route<void> route) => route.settings.name == '/');
                     Navigator.of(context).restorablePushNamed(studyRoute);
                   },
                 ),
@@ -1090,9 +1088,8 @@ class _StudyWrapperState extends State<StudyWrapper> {
                     heroTag: _BackButtonHeroTag(),
                     key: const ValueKey<String>('Back'),
                     onPressed: () {
-                      Navigator.of(
-                        context,
-                      ).popUntil((Route<void> route) => route.settings.name == '/');
+                      Navigator.of(context)
+                          .popUntil((Route<void> route) => route.settings.name == '/');
                     },
                     icon: IconTheme(
                       data: IconThemeData(color: colorScheme.onPrimary),

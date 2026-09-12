@@ -14,26 +14,22 @@ import '../base/process.dart';
 /// See https://github.com/libimobiledevice/libusbmuxd.
 class IProxy {
   IProxy({
-    required Artifacts artifacts,
+    required Artifacts this._artifacts,
     required Logger logger,
     required ProcessManager processManager,
-    required MapEntry<String, String> dyLdLibEntry,
-  }) : _dyLdLibEntry = dyLdLibEntry,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
+    required this._dyLdLibEntry,
+  }) : _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _logger = logger,
-       _artifacts = artifacts,
        _iproxyPath = null;
 
   IProxy.fromPath({
-    required String iproxyPath,
+    required String this._iproxyPath,
     required Logger logger,
     required ProcessManager processManager,
-    required MapEntry<String, String> dyLdLibEntry,
-  }) : _dyLdLibEntry = dyLdLibEntry,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
+    required this._dyLdLibEntry,
+  }) : _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _logger = logger,
-       _artifacts = null,
-       _iproxyPath = iproxyPath;
+       _artifacts = null;
 
   /// Create a [IProxy] for testing.
   ///
