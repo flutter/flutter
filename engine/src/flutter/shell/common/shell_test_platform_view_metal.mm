@@ -77,7 +77,7 @@ std::shared_ptr<ExternalViewEmbedder> ShellTestPlatformViewMetal::CreateExternal
 // |PlatformView|
 PointerDataDispatcherMaker ShellTestPlatformViewMetal::GetDispatcherMaker() {
   return [](DefaultPointerDataDispatcher::Delegate& delegate) {
-    return std::make_unique<SmoothPointerDataDispatcher>(delegate);
+    return std::make_unique<DefaultPointerDataDispatcher>(delegate);
   };
 }
 

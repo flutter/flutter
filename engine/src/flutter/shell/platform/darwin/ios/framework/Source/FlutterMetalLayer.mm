@@ -18,12 +18,8 @@ FLUTTER_ASSERT_ARC
 @class FlutterTexture;
 @class FlutterDrawable;
 
-extern CFTimeInterval display_link_target;
-
 @interface FlutterMetalLayer () {
-  id<MTLDevice> _preferredDevice;
   CGSize _drawableSize;
-  FlutterDisplayLinkManager* _displayLinkManager;
 
   NSUInteger _nextDrawableId;
 
@@ -31,26 +27,11 @@ extern CFTimeInterval display_link_target;
   NSMutableSet<FlutterTexture*>* _availableTextures;
   NSUInteger _totalTextures;
   FlutterTexture* _front;
-
-  // There must be a CADisplayLink scheduled *on main thread* otherwise
-  // core animation only updates layers 60 times a second.
-  CADisplayLink* _displayLink;
-  NSUInteger _displayLinkPauseCountdown;
-
-  // Used to track whether the content was set during this display link.
-  // When unlocking phone the layer (main thread) display link and raster thread
-  // display link get out of sync for several seconds. Even worse, layer display
-  // link does not seem to reflect actual vsync. Forcing the layer link
-  // to max rate (instead range) temporarily seems to fix the issue.
-  BOOL _didSetContentsDuringThisDisplayLinkPeriod;
-
-  // Whether layer displayLink is forced to max rate.
-  BOOL _displayLinkForcedMaxRate;
 }
 
-- (void)onDisplayLink:(CADisplayLink*)link;
 - (void)presentTexture:(FlutterTexture*)texture;
 - (void)returnTexture:(FlutterTexture*)texture;
+- (id<CAMetalDrawable>)acquirePresentationDrawable;
 
 @end
 
@@ -78,6 +59,7 @@ extern CFTimeInterval display_link_target;
 @interface FlutterDrawable : NSObject <FlutterMetalDrawable> {
   FlutterTexture* _texture;
   __weak FlutterMetalLayer* _layer;
+  id<CAMetalDrawable> _presentationDrawable;
   NSUInteger _drawableId;
   BOOL _presented;
 }
@@ -121,6 +103,8 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)present {
+  [_presentationDrawable present];
+  _presentationDrawable = nil;
   [_layer presentTexture:self->_texture];
   self->_presented = YES;
 }
@@ -147,29 +131,41 @@ extern CFTimeInterval display_link_target;
 - (void)flutterPrepareForPresent:(nonnull id<MTLCommandBuffer>)commandBuffer {
   FlutterTexture* texture = _texture;
   texture.waitingForCompletion = YES;
+
+  id<CAMetalDrawable> presentationDrawable = [_layer acquirePresentationDrawable];
+  id<MTLTexture> presentationTexture = presentationDrawable.texture;
+
+  // A resize can leave an old Flutter texture in flight. Do not copy
+  // it into a drawable created for the new layer configuration.
+  const BOOL canCopy = presentationTexture != nil &&
+                       presentationTexture.width == texture.texture.width &&
+                       presentationTexture.height == texture.texture.height &&
+                       presentationTexture.pixelFormat == texture.texture.pixelFormat;
+
+  if (canCopy) {
+    // Copy the IOSurface-backed Flutter result into the drawable owned by this CAMetalLayer.
+    // Encoding the copy and presentation on the render command buffer preserves GPU ordering
+    // without making the CPU wait.
+    id<MTLBlitCommandEncoder> blit = [commandBuffer blitCommandEncoder];
+    MTLOrigin origin = MTLOriginMake(0, 0, 0);
+    MTLSize size = MTLSizeMake(texture.texture.width, texture.texture.height, 1);
+    [blit copyFromTexture:texture.texture
+              sourceSlice:0
+              sourceLevel:0
+             sourceOrigin:origin
+               sourceSize:size
+                toTexture:presentationTexture
+         destinationSlice:0
+         destinationLevel:0
+        destinationOrigin:origin];
+    [blit endEncoding];
+    // Defer presentation until the command buffer is scheduled so the native
+    // drawable can join the Core Animation transaction used by platform views.
+    _presentationDrawable = presentationDrawable;
+  }
   [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
     texture.waitingForCompletion = NO;
   }];
-}
-
-@end
-
-@interface FlutterMetalLayerDisplayLinkProxy : NSObject {
-  __weak FlutterMetalLayer* _layer;
-}
-
-@end
-
-@implementation FlutterMetalLayerDisplayLinkProxy
-- (instancetype)initWithLayer:(FlutterMetalLayer*)layer {
-  if (self = [super init]) {
-    _layer = layer;
-  }
-  return self;
-}
-
-- (void)onDisplayLink:(CADisplayLink*)link {
-  [_layer onDisplayLink:link];
 }
 
 @end
@@ -178,17 +174,10 @@ extern CFTimeInterval display_link_target;
 
 - (instancetype)init {
   if (self = [super init]) {
-    _preferredDevice = MTLCreateSystemDefaultDevice();
-    self.device = self.preferredDevice;
+    self.device = MTLCreateSystemDefaultDevice();
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _availableTextures = [[NSMutableSet alloc] init];
-    _displayLinkManager = FlutterDisplayLinkManager.shared;
 
-    FlutterMetalLayerDisplayLinkProxy* proxy =
-        [[FlutterMetalLayerDisplayLinkProxy alloc] initWithLayer:self];
-    _displayLink = [CADisplayLink displayLinkWithTarget:proxy selector:@selector(onDisplayLink:)];
-    [self setMaxRefreshRate:_displayLinkManager.displayRefreshRate forceMax:NO];
-    [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didEnterBackground:)
                                                  name:UIApplicationDidEnterBackgroundNotification
@@ -198,47 +187,7 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)dealloc {
-  [_displayLink invalidate];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (void)setMaxRefreshRate:(double)refreshRate forceMax:(BOOL)forceMax {
-  // This is copied from vsync_waiter_ios.mm. The vsync waiter has display link scheduled on UI
-  // thread which does not trigger actual core animation frame. As a workaround FlutterMetalLayer
-  // has it's own displaylink scheduled on main thread, which is used to trigger core animation
-  // frame allowing for 120hz updates.
-  if (!_displayLinkManager.maxRefreshRateEnabledOnIPhone) {
-    return;
-  }
-  double maxFrameRate = fmax(refreshRate, 60);
-  double minFrameRate = fmax(maxFrameRate / 2, 60);
-  _displayLink.preferredFrameRateRange =
-      CAFrameRateRangeMake(forceMax ? maxFrameRate : minFrameRate, maxFrameRate, maxFrameRate);
-}
-
-- (void)onDisplayLink:(CADisplayLink*)link {
-  _didSetContentsDuringThisDisplayLinkPeriod = NO;
-  // Do not pause immediately, this seems to prevent 120hz while touching.
-  if (_displayLinkPauseCountdown == 3) {
-    _displayLink.paused = YES;
-    if (_displayLinkForcedMaxRate) {
-      [self setMaxRefreshRate:_displayLinkManager.displayRefreshRate forceMax:NO];
-      _displayLinkForcedMaxRate = NO;
-    }
-  } else {
-    ++_displayLinkPauseCountdown;
-  }
-}
-
-- (BOOL)isKindOfClass:(Class)aClass {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunguarded-availability-new"
-  // Pretend that we're a CAMetalLayer so that the rest of Flutter plays along
-  if ([aClass isEqual:[CAMetalLayer class]]) {
-    return YES;
-  }
-#pragma clang diagnostic pop
-  return [super isKindOfClass:aClass];
 }
 
 - (void)setDrawableSize:(CGSize)drawableSize {
@@ -247,6 +196,7 @@ extern CFTimeInterval display_link_target;
     _front = nil;
     _totalTextures = 0;
     _drawableSize = drawableSize;
+    [super setDrawableSize:drawableSize];
   }
 }
 
@@ -255,7 +205,6 @@ extern CFTimeInterval display_link_target;
     [_availableTextures removeAllObjects];
     _totalTextures = _front != nil ? 1 : 0;
   }
-  _displayLink.paused = YES;
 }
 
 - (CGSize)drawableSize {
@@ -339,12 +288,12 @@ extern CFTimeInterval display_link_target;
         return nil;
       }
       MTLTextureDescriptor* textureDescriptor =
-          [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:_pixelFormat
+          [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:self.pixelFormat
                                                              width:_drawableSize.width
                                                             height:_drawableSize.height
                                                          mipmapped:NO];
 
-      if (_framebufferOnly) {
+      if (self.framebufferOnly) {
         textureDescriptor.usage = MTLTextureUsageRenderTarget;
       } else {
         textureDescriptor.usage =
@@ -386,7 +335,7 @@ extern CFTimeInterval display_link_target;
   }
 }
 
-- (id<CAMetalDrawable>)nextDrawable {
+- (id<CAMetalDrawable>)nextFlutterDrawable {
   FlutterTexture* texture = [self nextTexture];
   if (texture == nil) {
     return nil;
@@ -397,31 +346,13 @@ extern CFTimeInterval display_link_target;
   return drawable;
 }
 
-- (void)presentOnMainThread:(FlutterTexture*)texture {
-  if (texture.texture.width != _drawableSize.width ||
-      texture.texture.height != _drawableSize.height) {
-    // This texture was created with an old size, but the view has since been
-    // resized. Do not present this stale frame to avoid distortion. The texture
-    // will be correctly recycled on the next frame.
-    return;
-  }
+- (id<CAMetalDrawable>)nextDrawable {
+  // Metal renderers receive this instance as CAMetalLayer and call nextDrawable.
+  return [self nextFlutterDrawable];
+}
 
-  // This is needed otherwise frame gets skipped on touch begin / end. Go figure.
-  // Might also be placebo
-  [self setNeedsDisplay];
-
-  [CATransaction begin];
-  [CATransaction setDisableActions:YES];
-  self.contents = texture.surface;
-  [CATransaction commit];
-  _displayLink.paused = NO;
-  _displayLinkPauseCountdown = 0;
-  if (!_didSetContentsDuringThisDisplayLinkPeriod) {
-    _didSetContentsDuringThisDisplayLinkPeriod = YES;
-  } else if (!_displayLinkForcedMaxRate) {
-    _displayLinkForcedMaxRate = YES;
-    [self setMaxRefreshRate:_displayLinkManager.displayRefreshRate forceMax:YES];
-  }
+- (id<CAMetalDrawable>)acquirePresentationDrawable {
+  return [super nextDrawable];
 }
 
 - (void)presentTexture:(FlutterTexture*)texture {
@@ -435,14 +366,6 @@ extern CFTimeInterval display_link_target;
     }
     _front = texture;
     texture.presentedTime = CACurrentMediaTime();
-    if ([NSThread isMainThread]) {
-      [self presentOnMainThread:texture];
-    } else {
-      // Core animation layers can only be updated on main thread.
-      dispatch_async(dispatch_get_main_queue(), ^{
-        [self presentOnMainThread:texture];
-      });
-    }
   }
 }
 

@@ -89,24 +89,6 @@ class Animator final {
 
   const std::weak_ptr<VsyncWaiter> GetVsyncWaiter() const;
 
-  //--------------------------------------------------------------------------
-  /// @brief    Schedule a secondary callback to be executed right after the
-  ///           main `VsyncWaiter::AsyncWaitForVsync` callback (which is added
-  ///           by `Animator::RequestFrame`).
-  ///
-  ///           Like the callback in `AsyncWaitForVsync`, this callback is
-  ///           only scheduled to be called once, and it's supposed to be
-  ///           called in the UI thread. If there is no AsyncWaitForVsync
-  ///           callback (`Animator::RequestFrame` is not called), this
-  ///           secondary callback will still be executed at vsync.
-  ///
-  ///           This callback is used to provide the vsync signal needed by
-  ///           `SmoothPointerDataDispatcher`, and for our own flow events.
-  ///
-  /// @see      `PointerDataDispatcher::ScheduleSecondaryVsyncCallback`.
-  void ScheduleSecondaryVsyncCallback(uintptr_t id,
-                                      const fml::closure& callback);
-
   // Enqueue |trace_flow_id| into |trace_flow_ids_|.  The flow event will be
   // ended at either the next frame, or the next vsync interval with no active
   // rendering.
