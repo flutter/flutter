@@ -5,13 +5,15 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
+import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:test/fake.dart';
-import 'package:test/test.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -25,6 +27,10 @@ class FakeAndroidStudio extends Fake implements AndroidStudio {
 }
 
 class FakeBuildTargets extends Fake implements BuildTargets {}
+
+class FakeGradleUtils extends Fake implements GradleUtils {}
+
+class FakeJava extends Fake implements Java {}
 
 void main() {
   group('ToolDependencies.bootstrap', () {
@@ -149,6 +155,201 @@ void main() {
       );
 
       expect(dependencies.featureFlags, same(mockFeatureFlags));
+    });
+
+    testUsingContext(
+      'lazily evaluates androidStudio and java upon access in AndroidContext',
+      () async {
+        // Mock Android SDK directory to allow SDK detection.
+        fs.directory('/home/user/Android/Sdk/licenses').createSync(recursive: true);
+
+        var studioEvaluations = 0;
+        var javaEvaluations = 0;
+        final mockStudio = FakeAndroidStudio();
+        final mockJava = FakeJava();
+
+        final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+          androidStudioBuilder: () {
+            studioEvaluations++;
+            return mockStudio;
+          },
+          javaBuilder: () {
+            javaEvaluations++;
+            return mockJava;
+          },
+          fs: fs,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        );
+
+        // Neither AndroidStudio nor Java is evaluated during bootstrap or EmulatorManager initialization.
+        expect(studioEvaluations, 0);
+        expect(javaEvaluations, 0);
+
+        // Querying emulator discoverers does not trigger Java or AndroidStudio evaluation.
+        await dependencies.emulatorManager.getAllAvailableEmulators();
+        expect(studioEvaluations, 0);
+        expect(javaEvaluations, 0);
+
+        // Java and AndroidStudio are not evaluated until accessed.
+        final Java? java = dependencies.androidContext.java;
+        expect(javaEvaluations, 1);
+        expect(studioEvaluations, 0);
+        expect(java, same(mockJava));
+
+        final AndroidStudio? studio = dependencies.androidContext.androidStudio;
+        expect(studioEvaluations, 1);
+        expect(studio, same(mockStudio));
+      },
+    );
+
+    testUsingContext(
+      'shares AndroidStudio instance between AndroidContext and default Java.find',
+      () async {
+        // Mock Android SDK directory to allow SDK detection.
+        fs.directory('/home/user/Android/Sdk/licenses').createSync(recursive: true);
+
+        var studioEvaluations = 0;
+        final mockStudio = FakeAndroidStudio();
+
+        final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+          androidStudioBuilder: () {
+            studioEvaluations++;
+            return mockStudio;
+          },
+          fs: fs,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        );
+
+        expect(studioEvaluations, 0);
+
+        final Java? java = dependencies.androidContext.java;
+        final AndroidStudio? studio = dependencies.androidContext.androidStudio;
+
+        // Verify AndroidStudio was only evaluated once despite Java.find referencing it.
+        expect(studioEvaluations, 1);
+        expect(studio, same(mockStudio));
+        if (java != null && java.javaSource == JavaSource.androidStudio) {
+          expect(java.javaHome, studio?.javaPath);
+        }
+      },
+    );
+
+    testUsingContext('lazily evaluates androidSdk upon first access in AndroidContext', () async {
+      final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+        fs: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      );
+
+      final AndroidSdk? sdk = dependencies.androidContext.androidSdk;
+      expect(sdk, isNull);
+    });
+  });
+
+  group('AndroidContext', () {
+    testWithoutContext(
+      'evaluates androidSdk, androidStudio, gradleUtils, and java lazily and memoizes results',
+      () {
+        var sdkEvaluations = 0;
+        var studioEvaluations = 0;
+        var gradleEvaluations = 0;
+        var javaEvaluations = 0;
+
+        final mockSdk = FakeAndroidSdk();
+        final mockStudio = FakeAndroidStudio();
+        final mockGradle = FakeGradleUtils();
+        final mockJava = FakeJava();
+
+        final context = AndroidContext(
+          androidSdkBuilder: () {
+            sdkEvaluations++;
+            return mockSdk;
+          },
+          androidStudioBuilder: () {
+            studioEvaluations++;
+            return mockStudio;
+          },
+          gradleUtilsBuilder: () {
+            gradleEvaluations++;
+            return mockGradle;
+          },
+          javaBuilder: () {
+            javaEvaluations++;
+            return mockJava;
+          },
+        );
+
+        // No factory has been invoked upon instantiation.
+        expect(sdkEvaluations, 0);
+        expect(studioEvaluations, 0);
+        expect(gradleEvaluations, 0);
+        expect(javaEvaluations, 0);
+
+        // Accessing androidSdk multiple times evaluates factory exactly once.
+        expect(context.androidSdk, same(mockSdk));
+        expect(context.androidSdk, same(mockSdk));
+        expect(sdkEvaluations, 1);
+        expect(studioEvaluations, 0);
+        expect(gradleEvaluations, 0);
+        expect(javaEvaluations, 0);
+
+        // Accessing androidStudio multiple times evaluates factory exactly once.
+        expect(context.androidStudio, same(mockStudio));
+        expect(context.androidStudio, same(mockStudio));
+        expect(studioEvaluations, 1);
+        expect(gradleEvaluations, 0);
+        expect(javaEvaluations, 0);
+
+        // Accessing gradleUtils multiple times evaluates factory exactly once.
+        expect(context.gradleUtils, same(mockGradle));
+        expect(context.gradleUtils, same(mockGradle));
+        expect(gradleEvaluations, 1);
+        expect(javaEvaluations, 0);
+
+        // Accessing java multiple times evaluates factory exactly once.
+        expect(context.java, same(mockJava));
+        expect(context.java, same(mockJava));
+        expect(javaEvaluations, 1);
+      },
+    );
+
+    testWithoutContext('memoizes null results without re-invoking factory closures', () {
+      var sdkEvaluations = 0;
+      var studioEvaluations = 0;
+      var javaEvaluations = 0;
+
+      final context = AndroidContext(
+        androidSdkBuilder: () {
+          sdkEvaluations++;
+          return null;
+        },
+        androidStudioBuilder: () {
+          studioEvaluations++;
+          return null;
+        },
+        gradleUtilsBuilder: FakeGradleUtils.new,
+        javaBuilder: () {
+          javaEvaluations++;
+          return null;
+        },
+      );
+
+      expect(context.androidSdk, isNull);
+      expect(context.androidSdk, isNull);
+      expect(sdkEvaluations, 1);
+
+      expect(context.androidStudio, isNull);
+      expect(context.androidStudio, isNull);
+      expect(studioEvaluations, 1);
+
+      expect(context.java, isNull);
+      expect(context.java, isNull);
+      expect(javaEvaluations, 1);
     });
   });
 }
