@@ -30,4 +30,17 @@ TEST_F(SkiaParagraphBuilderTests, ParagraphStrutStyle) {
   strut_style = builder.TxtToSkia(style).getStrutStyle();
   ASSERT_TRUE(strut_style.getHalfLeading());
 }
+
+TEST_F(SkiaParagraphBuilderTests, RenderSoftHyphensEnabled) {
+  ParagraphStyle style = ParagraphStyle();
+  auto collection = std::make_shared<FontCollection>();
+  auto builder = ParagraphBuilderSkia(style, collection, false);
+
+  // Defaults to rendering the soft hyphen glyph (Hyphens.manual).
+  ASSERT_TRUE(builder.TxtToSkia(style).getRenderSoftHyphens());
+
+  // Hyphens.hidden suppresses the soft hyphen glyph.
+  style.render_soft_hyphens = false;
+  ASSERT_FALSE(builder.TxtToSkia(style).getRenderSoftHyphens());
+}
 }  // namespace txt

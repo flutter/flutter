@@ -381,6 +381,7 @@ abstract class ParagraphStyle {
     StrutStyle? strutStyle,
     String? ellipsis,
     Locale? locale,
+    Hyphens? hyphens,
   }) => engine.renderer.createParagraphStyle(
     textAlign: textAlign,
     textDirection: textDirection,
@@ -394,6 +395,7 @@ abstract class ParagraphStyle {
     strutStyle: strutStyle,
     ellipsis: ellipsis,
     locale: locale,
+    hyphens: hyphens,
   );
 }
 
@@ -458,6 +460,9 @@ abstract class StrutStyle {
 
 // The order of this enum must match the order of the values in TextDirection.h's TextDirection.
 enum TextDirection { rtl, ltr }
+
+/// The behavior of soft hyphens (U+00AD) at a line break.
+enum Hyphens { manual, hidden }
 
 class TextBox {
   const TextBox.fromLTRBD(this.left, this.top, this.right, this.bottom, this.direction);
