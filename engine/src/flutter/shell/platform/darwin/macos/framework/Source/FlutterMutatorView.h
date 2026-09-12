@@ -83,6 +83,12 @@ class PlatformViewLayer {
 /// (part of view obscured by Flutter contents).
 - (void)addHitTestIgnoreRegion:(CGRect)region;
 
+/// Releases the active mouse gesture to the embedded platform view.
+- (void)releaseGesture;
+
+/// Blocks the active mouse gesture from reaching the embedded platform view.
+- (void)blockGesture;
+
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERMUTATORVIEW_H_

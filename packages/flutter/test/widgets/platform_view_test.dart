@@ -2482,6 +2482,27 @@ void main() {
       );
     });
 
+    testWidgets('Create AppKitView passes layout direction', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final viewsController = FakeMacosPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: AppKitView(viewType: 'webview', layoutDirection: TextDirection.rtl),
+          ),
+        ),
+      );
+
+      expect(
+        viewsController.layoutDirections[currentViewId + 1],
+        AndroidViewController.kAndroidLayoutDirectionRtl,
+      );
+    });
+
     testWidgets('Change AppKitView view type', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final viewsController = FakeMacosPlatformViewsController();
@@ -2621,8 +2642,6 @@ void main() {
       );
     });
 
-    // TODO(schectman): De-skip the following tests once macOS gesture recognizers are present.
-    // https://github.com/flutter/flutter/issues/128519
     testWidgets('AppKitView accepts gestures', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final viewsController = FakeMacosPlatformViewsController();
@@ -2649,7 +2668,7 @@ void main() {
       await gesture.up();
 
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
-    }, skip: true); // https://github.com/flutter/flutter/issues/128519
+    });
 
     testWidgets('AppKitView transparent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
@@ -2694,7 +2713,7 @@ void main() {
       expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
 
       expect(numPointerDownsOnParent, 1);
-    }, skip: true); // https://github.com/flutter/flutter/issues/128519
+    });
 
     testWidgets('AppKitView translucent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
@@ -2739,7 +2758,7 @@ void main() {
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
 
       expect(numPointerDownsOnParent, 1);
-    }, skip: true); // https://github.com/flutter/flutter/issues/128519
+    });
 
     testWidgets('AppKitView opaque hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
@@ -2779,7 +2798,7 @@ void main() {
 
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
       expect(numPointerDownsOnParent, 0);
-    }, skip: true); // https://github.com/flutter/flutter/issues/128519
+    });
 
     testWidgets('UiKitView can lose gesture arenas', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
