@@ -61,6 +61,11 @@ void main() {
       processManager: processManager,
       hooksVersionConstraint: constraint,
     );
+    _testBuildBundle(
+      targetPlatform: 'linux-arm',
+      processManager: processManager,
+      hooksVersionConstraint: constraint,
+    );
   }
 }
 

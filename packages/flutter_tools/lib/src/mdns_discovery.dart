@@ -595,6 +595,7 @@ class MDnsVmServiceDiscovery {
       case TargetPlatform.darwin:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.linux_arm:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.linux_riscv64:
       case TargetPlatform.linux_x64:
