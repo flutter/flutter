@@ -1216,9 +1216,9 @@ void main() {
 
       <FakeScribbleElement>[...targetElements, ...otherElements].forEach(unregisterElements);
 
-      final List<List<dynamic>> responses =
-          (const JSONMessageCodec().decodeMessage(responseBytes) as List<dynamic>)
-              .cast<List<dynamic>>();
+      final List<List<dynamic>> responses = (const JSONMessageCodec().decodeMessage(
+        responseBytes,
+      ) as List<dynamic>).cast<List<dynamic>>();
       expect(responses.first.length, 2);
       expect(
         responses.first.first,

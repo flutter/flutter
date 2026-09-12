@@ -17,13 +17,11 @@ typedef ExtensionEntryPoint = void Function(SendPort sendPort);
 /// Represents an active host-side connection to a running tool extension isolate.
 class ExtensionConnection {
   ExtensionConnection._({
-    required Isolate isolate,
-    required json_rpc.Peer peer,
+    required Isolate this._isolate,
+    required this._peer,
     required this.capabilities,
-    required Logger logger,
-  }) : _isolate = isolate,
-       _peer = peer,
-       _logger = logger;
+    required this._logger,
+  });
 
   Isolate? _isolate;
   final json_rpc.Peer _peer;
@@ -156,8 +154,8 @@ class ExtensionConnection {
 
 /// Discovers and manages active tool extension isolate connections.
 class ExtensionDiscovery {
-  /// Creates an [ExtensionDiscovery] instance with required [logger].
-  ExtensionDiscovery({required Logger logger}) : _logger = logger;
+  /// Creates an [ExtensionDiscovery] instance with required [_logger].
+  ExtensionDiscovery({required this._logger});
 
   final List<ExtensionConnection> _connections = <ExtensionConnection>[];
   final Logger _logger;

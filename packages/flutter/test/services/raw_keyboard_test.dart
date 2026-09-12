@@ -33,29 +33,25 @@ void main() {
       }
     }, variant: KeySimulatorTransitModeVariant.rawKeyData());
 
-    testWidgets(
-      'No character is produced for non-printables',
-      (WidgetTester tester) async {
-        for (final platform in <String>[
-          'linux',
-          'android',
-          'macos',
-          'fuchsia',
-          'windows',
-          'web',
-          'ios',
-        ]) {
-          void handleKey(RawKeyEvent event) {
-            expect(event.character, isNull, reason: 'on $platform');
-          }
-
-          RawKeyboard.instance.addListener(handleKey);
-          await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
-          RawKeyboard.instance.removeListener(handleKey);
+    testWidgets('No character is produced for non-printables', (WidgetTester tester) async {
+      for (final platform in <String>[
+        'linux',
+        'android',
+        'macos',
+        'fuchsia',
+        'windows',
+        'web',
+        'ios',
+      ]) {
+        void handleKey(RawKeyEvent event) {
+          expect(event.character, isNull, reason: 'on $platform');
         }
-      },
-      variant: KeySimulatorTransitModeVariant.rawKeyData(),
-    );
+
+        RawKeyboard.instance.addListener(handleKey);
+        await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+        RawKeyboard.instance.removeListener(handleKey);
+      }
+    }, variant: KeySimulatorTransitModeVariant.rawKeyData());
 
     testWidgets(
       'keysPressed is maintained',
@@ -2380,62 +2376,58 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
     });
 
-    testWidgets(
-      'Win32 VK_PROCESSKEY events are skipped',
-      (WidgetTester tester) async {
-        const platform = 'windows';
-        var lastHandled = true;
-        final events = <RawKeyEvent>[];
+    testWidgets('Win32 VK_PROCESSKEY events are skipped', (WidgetTester tester) async {
+      const platform = 'windows';
+      var lastHandled = true;
+      final events = <RawKeyEvent>[];
 
-        // Test both code paths: addListener, and FocusNode.onKey.
-        RawKeyboard.instance.addListener(events.add);
-        final node = FocusNode(
-          onKey: (_, RawKeyEvent event) {
-            events.add(event);
-            return KeyEventResult.ignored;
+      // Test both code paths: addListener, and FocusNode.onKey.
+      RawKeyboard.instance.addListener(events.add);
+      final node = FocusNode(
+        onKey: (_, RawKeyEvent event) {
+          events.add(event);
+          return KeyEventResult.ignored;
+        },
+      );
+      addTearDown(node.dispose);
+      await tester.pumpWidget(RawKeyboardListener(focusNode: node, child: Container()));
+      node.requestFocus();
+      await tester.pumpAndSettle();
+
+      // Dispatch an arbitrary key press for the correct transit mode.
+      await simulateKeyDownEvent(LogicalKeyboardKey.keyA);
+      await simulateKeyUpEvent(LogicalKeyboardKey.keyA);
+      expect(events, hasLength(4));
+      events.clear();
+
+      // Simulate raw events because VK_PROCESSKEY does not exist in the key mapping.
+      Future<void> simulateKeyEventMessage(String type, int keyCode, int scanCode) {
+        return tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+          SystemChannels.keyEvent.name,
+          SystemChannels.keyEvent.codec.encodeMessage(<String, Object?>{
+            'type': type,
+            'keymap': platform,
+            'keyCode': keyCode,
+            'scanCode': scanCode,
+            'modifiers': 0,
+          }),
+          (ByteData? data) {
+            final decoded =
+                SystemChannels.keyEvent.codec.decodeMessage(data)! as Map<String, Object?>;
+            lastHandled = decoded['handled']! as bool;
           },
         );
-        addTearDown(node.dispose);
-        await tester.pumpWidget(RawKeyboardListener(focusNode: node, child: Container()));
-        node.requestFocus();
-        await tester.pumpAndSettle();
+      }
 
-        // Dispatch an arbitrary key press for the correct transit mode.
-        await simulateKeyDownEvent(LogicalKeyboardKey.keyA);
-        await simulateKeyUpEvent(LogicalKeyboardKey.keyA);
-        expect(events, hasLength(4));
-        events.clear();
-
-        // Simulate raw events because VK_PROCESSKEY does not exist in the key mapping.
-        Future<void> simulateKeyEventMessage(String type, int keyCode, int scanCode) {
-          return tester.binding.defaultBinaryMessenger.handlePlatformMessage(
-            SystemChannels.keyEvent.name,
-            SystemChannels.keyEvent.codec.encodeMessage(<String, Object?>{
-              'type': type,
-              'keymap': platform,
-              'keyCode': keyCode,
-              'scanCode': scanCode,
-              'modifiers': 0,
-            }),
-            (ByteData? data) {
-              final decoded =
-                  SystemChannels.keyEvent.codec.decodeMessage(data)! as Map<String, Object?>;
-              lastHandled = decoded['handled']! as bool;
-            },
-          );
-        }
-
-        await simulateKeyEventMessage('keydown', 229, 30);
-        expect(events, isEmpty);
-        expect(lastHandled, true);
-        expect(RawKeyboard.instance.keysPressed, isEmpty);
-        await simulateKeyEventMessage('keyup', 65, 30);
-        expect(events, isEmpty);
-        expect(lastHandled, true);
-        expect(RawKeyboard.instance.keysPressed, isEmpty);
-      },
-      variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData(),
-    );
+      await simulateKeyEventMessage('keydown', 229, 30);
+      expect(events, isEmpty);
+      expect(lastHandled, true);
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      await simulateKeyEventMessage('keyup', 65, 30);
+      expect(events, isEmpty);
+      expect(lastHandled, true);
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+    }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
     test('data.toString', () {
       expect(

@@ -22,15 +22,12 @@ import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
   BuildApkCommand({
-    required AndroidBuilder androidBuilder,
-    required AndroidContext androidContext,
-    required BuildSystem buildSystem,
+    required this._androidBuilder,
+    required this._androidContext,
+    required this._buildSystem,
     required ToolContext toolContext,
     bool verboseHelp = false,
-  }) : _androidBuilder = androidBuilder,
-       _androidContext = androidContext,
-       _buildSystem = buildSystem,
-       super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
+  }) : super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);

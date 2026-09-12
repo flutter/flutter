@@ -51,16 +51,20 @@ const double _kDisableSearchBarOpacity = 0.38;
 ///
 /// The `controller` callback provided to [SearchAnchor.builder] can be used
 /// to open the search view and control the editable field on the view.
-typedef SearchAnchorChildBuilder =
-    Widget Function(BuildContext context, SearchController controller);
+typedef SearchAnchorChildBuilder = Widget Function(
+  BuildContext context,
+  SearchController controller,
+);
 
 /// Signature for a function that creates a [Widget] to build the suggestion list
 /// based on the input in the search bar.
 ///
 /// The `controller` callback provided to [SearchAnchor.suggestionsBuilder] can be used
 /// to close the search view and control the editable field on the view.
-typedef SuggestionsBuilder =
-    FutureOr<Iterable<Widget>> Function(BuildContext context, SearchController controller);
+typedef SuggestionsBuilder = FutureOr<Iterable<Widget>> Function(
+  BuildContext context,
+  SearchController controller,
+);
 
 /// Signature for a function that creates a [Widget] to layout the suggestion list.
 ///
