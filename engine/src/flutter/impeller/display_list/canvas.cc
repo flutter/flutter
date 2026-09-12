@@ -34,6 +34,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
+#include "impeller/entity/contents/gradient_generator.h"
 #include "impeller/entity/contents/shadow_vertices_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
@@ -59,6 +60,7 @@
 #include "impeller/entity/save_layer_utils.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
+#include "impeller/geometry/gradient.h"
 #include "impeller/geometry/round_superellipse_param.h"
 #include "impeller/geometry/rounding_radii.h"
 #include "impeller/geometry/rstransform.h"
@@ -163,7 +165,7 @@ static void ApplyFramebufferBlend(Entity& entity) {
 /// @brief Create the subpass restore contents, appling any filters or opacity
 ///        from the provided paint object.
 static std::shared_ptr<Contents> CreateContentsForSubpassTarget(
-    const ContentContext& renderer,
+    ContentContext& renderer,
     const Paint& paint,
     const std::shared_ptr<Texture>& target,
     const Matrix& effect_transform) {
@@ -183,7 +185,7 @@ static const constexpr RenderTarget::AttachmentConfig kDefaultStencilConfig =
         .storage_mode = StorageMode::kDeviceTransient,
         .load_action = LoadAction::kDontCare,
         .store_action = StoreAction::kDontCare,
-    };
+};
 
 static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
     ContentContext& renderer,
@@ -264,6 +266,82 @@ static std::pair<Rect, Color> ExpandRectToPixelMinimum(const Rect& rect,
     return {Rect(), color};
   }
   return {expanded.value(), color.WithAlpha(color.alpha * alpha_scaling)};
+}
+
+/// @brief  Attempts to create UberSDF GradientParameters from a DlColorSource,
+///         if supported by UberSDF (e.g. for linear and radial gradients).
+///
+/// @return The GradientParameters if the color source is a supported gradient,
+///         otherwise std::nullopt.
+static std::optional<UberSDFParameters::GradientParameters>
+CreateUberSDFGradientParameters(const ContentContext& renderer,
+                                const flutter::DlColorSource& color_source,
+                                const std::optional<Matrix>& shape_transform) {
+  if (!color_source.isGradient()) {
+    // Color source not supported by UberSDF.
+    return std::nullopt;
+  }
+
+  UberSDFParameters::GradientParameters gradient;
+
+  std::vector<Color> colors;
+  std::vector<float> stops;
+
+  // When a shape transform is applied to transform the SDF shape from local
+  // space into canvas space, the gradient parameters must be mapped from
+  // canvas space into local space via the inverse shape transform.
+  Matrix inverted_shape_transform =
+      shape_transform.has_value() ? shape_transform->Invert() : Matrix();
+
+  if (color_source.type() == flutter::DlColorSourceType::kLinearGradient) {
+    const auto* linear = color_source.asLinearGradient();
+    FML_DCHECK(linear);
+    Matrix gradient_transform = inverted_shape_transform * linear->matrix();
+    if (!gradient_transform.IsAffine()) {
+      // Non-affine matrix transformation not supported by UberSDF.
+      return std::nullopt;
+    }
+    Paint::ConvertStops(linear, colors, stops);
+    gradient.type = UberSDFParameters::GradientParameters::Type::kLinear;
+    gradient.start = gradient_transform * linear->start_point();
+    gradient.end = gradient_transform * linear->end_point();
+    gradient.tile_mode = static_cast<Entity::TileMode>(linear->tile_mode());
+  } else if (color_source.type() ==
+             flutter::DlColorSourceType::kRadialGradient) {
+    const auto* radial = color_source.asRadialGradient();
+    FML_DCHECK(radial);
+    Matrix gradient_transform = inverted_shape_transform * radial->matrix();
+    if (!gradient_transform.IsAffine()) {
+      // Non-affine matrix transformation not supported by UberSDF.
+      return std::nullopt;
+    }
+    auto scales = gradient_transform.GetScales2D();
+    if (!scales.has_value() ||
+        !ScalarNearlyEqual(scales->first, scales->second)) {
+      // Non-uniform scaling on a radial gradient creates an ellipse, which is
+      // not supported by UberSDF.
+      return std::nullopt;
+    }
+    Paint::ConvertStops(radial, colors, stops);
+    gradient.type = UberSDFParameters::GradientParameters::Type::kRadial;
+    gradient.start = gradient_transform * radial->center();
+    // For radial gradients, gradient.end.x stores the radius.
+    gradient.end = Point(radial->radius() * scales->first, 0.0f);
+    gradient.tile_mode = static_cast<Entity::TileMode>(radial->tile_mode());
+  } else {
+    // Gradient type not supported by UberSDF.
+    return std::nullopt;
+  }
+
+  GradientData gradient_data = CreateGradientBuffer(colors, stops);
+  std::shared_ptr<Texture> texture =
+      CreateGradientTexture(gradient_data, renderer.GetContext());
+  if (!texture) {
+    return std::nullopt;
+  }
+
+  gradient.texture = std::move(texture);
+  return gradient;
 }
 
 }  // namespace
@@ -852,7 +930,7 @@ bool Canvas::AttemptDrawLineSDF(const Point& p0,
                                 const Paint& paint,
                                 bool reuse_depth) {
   if (!renderer_.GetContext()->GetFlags().use_sdfs ||
-      !IsCompatibleWithSDFRendering(paint)) {
+      !IsCompatibleWithSDFRendering(paint, GetCurrentTransform())) {
     return false;
   }
   // Draw the line as a filled rectangle with width=line_length and
@@ -991,7 +1069,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   }
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint)) {
+      IsCompatibleWithSDFRendering(paint, GetCurrentTransform())) {
     Rect effective_rect = rect;
     Color effective_color = paint.color;
 
@@ -1064,7 +1142,7 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint)) {
+      IsCompatibleWithSDFRendering(paint, GetCurrentTransform())) {
     UberSDFParameters params;
 
     if (paint.style == Paint::Style::kStroke) {
@@ -1152,7 +1230,8 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
   const RoundingRadii& radii = round_rect.GetRadii();
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint) && radii.AreAllCornersCircular()) {
+      IsCompatibleWithSDFRendering(paint, GetCurrentTransform()) &&
+      radii.AreAllCornersCircular()) {
     Color effective_color = paint.color;
     Rect bounds = round_rect.GetBounds();
 
@@ -1236,7 +1315,7 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint)) {
+      IsCompatibleWithSDFRendering(paint, GetCurrentTransform())) {
     // Try to draw using UberSDF.
     auto params = UberSDFParameters::MakeRoundedSuperellipse(
         /*color=*/paint.color, /*round_superellipse=*/round_superellipse,
@@ -1300,7 +1379,7 @@ void Canvas::DrawCircle(const Point& center,
   }
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint)) {
+      IsCompatibleWithSDFRendering(paint, GetCurrentTransform())) {
     auto params = UberSDFParameters::MakeCircle(
         /*color=*/paint.color, /*center=*/center, /*radius=*/radius,
         /*stroke=*/paint.GetStroke());
@@ -1899,9 +1978,12 @@ void Canvas::SaveLayer(const Paint& paint,
       // layer once.
       if (backdrop_data->all_filters_equal &&
           !backdrop_data->shared_filter_snapshot.has_value()) {
-        // TODO(157110): compute minimum input hint.
+        Contents::SnapshotOptions snapshot_options = {
+            .coverage_limit = backdrop_data->coverage_union,
+        };
         backdrop_data->shared_filter_snapshot =
-            backdrop_filter_contents->RenderToSnapshot(renderer_, {}, {});
+            backdrop_filter_contents->RenderToSnapshot(renderer_, {},
+                                                       snapshot_options);
       }
 
       std::optional<Snapshot> maybe_snapshot =
@@ -2216,22 +2298,32 @@ void Canvas::AddRenderSDFEntityToCurrentPass(
   entity.SetBlendMode(paint.blend_mode);
 
   if (paint.color_source) {
-    // Since we are going to use BlendMode::kSrcIn to implement the color_source
-    // the SDF portion of the blend should just be solid white to get the
-    // correct color from the color_source.
-    params.color = Color::White();
+    params.gradient = CreateUberSDFGradientParameters(
+        renderer_, *paint.color_source, shape_transform);
   }
-  auto geometry = std::make_unique<UberSDFGeometry>(params);
-  auto contents = UberSDFContents::Make(params, std::move(geometry));
-  const Geometry* geom = contents->GetGeometry();
 
-  if (paint.color_source) {
-    // UberSDF doesn't perform things like gradients so we blend the SDF
-    // with the color source.
+  if (!paint.color_source || params.gradient.has_value()) {
+    // No color source (solid paint color), or a supported gradient color
+    // source.
+    auto geometry = std::make_unique<UberSDFGeometry>(params);
+    auto contents = UberSDFContents::Make(params, std::move(geometry));
+    const Geometry* geom = contents->GetGeometry();
+    AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint, reuse_depth,
+                                            /*override_contents=*/
+                                            std::move(contents));
+  } else {
+    // Color source not directly supported by UberSDF (e.g. image, runtime
+    // effect, or an unsupported gradient type). Render a solid white mask with
+    // UberSDF and blend with ColorSourceContents.
+    params.color = Color::White();
+    auto geometry = std::make_unique<UberSDFGeometry>(params);
+    auto uber_sdf_contents = UberSDFContents::Make(params, std::move(geometry));
+    const Geometry* geom = uber_sdf_contents->GetGeometry();
+
     std::shared_ptr<ColorSourceContents> color_source_contents =
         paint.CreateContents(renderer_, geom, shape_transform);
     std::shared_ptr<Contents> final_contents = ColorFilterContents::MakeBlend(
-        BlendMode::kSrcIn, {FilterInput::Make(std::move(contents)),
+        BlendMode::kSrcIn, {FilterInput::Make(std::move(uber_sdf_contents)),
                             FilterInput::Make(color_source_contents)});
 
     Paint new_paint = paint;
@@ -2240,10 +2332,6 @@ void Canvas::AddRenderSDFEntityToCurrentPass(
                                             reuse_depth,
                                             /*override_contents=*/
                                             std::move(final_contents));
-  } else {
-    AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint, reuse_depth,
-                                            /*override_contents=*/
-                                            std::move(contents));
   }
 }
 
@@ -2665,11 +2753,15 @@ void Canvas::EndReplay() {
   Initialize(initial_cull_rect_);
 }
 
-bool Canvas::IsCompatibleWithSDFRendering(const Paint& paint) {
+bool Canvas::IsCompatibleWithSDFRendering(const Paint& paint,
+                                          const Matrix& transform) {
   if (!paint.anti_alias) {
     return false;
   }
   if (paint.mask_blur_descriptor.has_value()) {
+    return false;
+  }
+  if (transform.HasPerspective()) {
     return false;
   }
   switch (paint.blend_mode) {

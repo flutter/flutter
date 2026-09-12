@@ -215,7 +215,8 @@ void fl_subsurface_egl_resize(FlSubsurfaceEGL* self,
 void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
                                GLuint texture_id,
                                size_t width,
-                               size_t height) {
+                               size_t height,
+                               FlGLFence* fence) {
   g_return_if_fail(FL_IS_SUBSURFACE_EGL(self));
 
   // Present the composited frame to the subsurface window surface using the
@@ -224,6 +225,14 @@ void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
   eglMakeCurrent(egl_display, self->egl_surface, self->egl_surface,
                  self->egl_context);
 
+  // Make this context wait for the frame to have finished rendering in the
+  // engine's context before it reads the texture below. This context is the one
+  // that reads the frame, so the waiting can be left to OpenGL and this thread
+  // doesn't have to block.
+  if (fence != nullptr) {
+    fl_gl_fence_wait(fence);
+  }
+
   EGLint surface_width = 0, surface_height = 0;
   eglQuerySurface(egl_display, self->egl_surface, EGL_WIDTH, &surface_width);
   eglQuerySurface(egl_display, self->egl_surface, EGL_HEIGHT, &surface_height);
@@ -231,6 +240,34 @@ void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
       (static_cast<size_t>(surface_width) != width ||
        static_cast<size_t>(surface_height) != height)) {
     wl_egl_window_resize(self->egl_window, width, height, 0, 0);
+    eglQuerySurface(egl_display, self->egl_surface, EGL_WIDTH, &surface_width);
+    eglQuerySurface(egl_display, self->egl_surface, EGL_HEIGHT,
+                    &surface_height);
+  }
+
+  // The frame and the surface are both window sized, so their dimensions fit in
+  // a GLint and the arithmetic below can stay signed.
+  GLint frame_width = static_cast<GLint>(width);
+  GLint frame_height = static_cast<GLint>(height);
+
+  // OpenGL puts the origin at the bottom left of the surface but Wayland puts
+  // it at the top left, so when the surface and the frame are different heights
+  // the two disagree about which rows line up. Line up the top row of the frame
+  // with the top row of the surface, dropping whatever doesn't fit off the
+  // bottom, which is where the window is being clipped in Wayland's
+  // coordinates. Writing the frame at the OpenGL origin instead would line up
+  // the bottom rows and make the contents jump vertically.
+  GLint src_y0 = 0, src_y1 = frame_height;
+  GLint dst_y0 = 0, dst_y1 = frame_height;
+  if (surface_height > 0) {
+    dst_y0 = surface_height - frame_height;
+    dst_y1 = surface_height;
+    if (dst_y0 < 0) {
+      // The frame is taller than the surface, so drop the rows that fall off
+      // the bottom instead of letting OpenGL clip them from the top.
+      src_y0 = -dst_y0;
+      dst_y0 = 0;
+    }
   }
 
   // The subsurface context shares resources with the engine, so the engine's
@@ -246,13 +283,15 @@ void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
     glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                            GL_TEXTURE_2D, texture_id, 0);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
-                      GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(0, src_y0, frame_width, src_y1, 0, dst_y0, frame_width,
+                      dst_y1, GL_COLOR_BUFFER_BIT, GL_NEAREST);
   } else {
     // glBlitFramebuffer is unavailable; draw the frame texture as a fullscreen
-    // quad with the shader instead.
+    // quad with the shader instead. The viewport is allowed to start off the
+    // bottom of the surface, which clips the frame the same way the blit does.
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, width, height);
+    glViewport(0, surface_height > 0 ? surface_height - frame_height : 0,
+               frame_width, frame_height);
     fl_compositor_opengl_shader_use(self->shader);
     fl_compositor_opengl_shader_set_offset(self->shader, 0, 0);
     fl_compositor_opengl_shader_set_scale(self->shader, 1, 1);

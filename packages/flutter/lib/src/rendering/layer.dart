@@ -1031,8 +1031,7 @@ class PlatformViewLayer extends Layer {
 /// Performance overlay layers are always leaves in the layer tree.
 class PerformanceOverlayLayer extends Layer {
   /// Creates a layer that displays a performance overlay.
-  PerformanceOverlayLayer({required Rect overlayRect, required this.optionsMask})
-    : _overlayRect = overlayRect;
+  PerformanceOverlayLayer({required this._overlayRect, required this.optionsMask});
 
   /// The rectangle in this layer's coordinate system that the overlay should occupy.
   ///
@@ -1459,9 +1458,9 @@ class ContainerLayer extends Layer {
 class OffsetLayer extends ContainerLayer {
   /// Creates an offset layer.
   ///
-  /// By default, [offset] is zero. It must be non-null before the compositing
+  /// By default, [_offset] is zero. It must be non-null before the compositing
   /// phase of the pipeline.
-  OffsetLayer({Offset offset = Offset.zero}) : _offset = offset;
+  OffsetLayer({this._offset = Offset.zero});
 
   /// Offset from parent in the parent's coordinate system.
   ///
@@ -1601,13 +1600,12 @@ class OffsetLayer extends ContainerLayer {
 class ClipRectLayer extends ContainerLayer {
   /// Creates a layer with a rectangular clip.
   ///
-  /// The [clipRect] argument must not be null before the compositing phase of
+  /// The [_clipRect] argument must not be null before the compositing phase of
   /// the pipeline.
   ///
   /// The [clipBehavior] argument must not be [Clip.none].
-  ClipRectLayer({Rect? clipRect, Clip clipBehavior = Clip.hardEdge})
-    : _clipRect = clipRect,
-      _clipBehavior = clipBehavior,
+  ClipRectLayer({this._clipRect, Clip clipBehavior = Clip.hardEdge})
+    : _clipBehavior = clipBehavior,
       assert(clipBehavior != Clip.none);
 
   /// The rectangle to clip in the parent's coordinate system.
@@ -1694,11 +1692,10 @@ class ClipRectLayer extends ContainerLayer {
 class ClipRRectLayer extends ContainerLayer {
   /// Creates a layer with a rounded-rectangular clip.
   ///
-  /// The [clipRRect] and [clipBehavior] properties must be non-null before the
+  /// The [_clipRRect] and [clipBehavior] properties must be non-null before the
   /// compositing phase of the pipeline.
-  ClipRRectLayer({RRect? clipRRect, Clip clipBehavior = Clip.antiAlias})
-    : _clipRRect = clipRRect,
-      _clipBehavior = clipBehavior,
+  ClipRRectLayer({this._clipRRect, Clip clipBehavior = Clip.antiAlias})
+    : _clipBehavior = clipBehavior,
       assert(clipBehavior != Clip.none);
 
   /// The rounded-rect to clip in the parent's coordinate system.
@@ -1784,11 +1781,10 @@ class ClipRRectLayer extends ContainerLayer {
 class ClipRSuperellipseLayer extends ContainerLayer {
   /// Creates a layer with a rounded-rectangular clip.
   ///
-  /// The [clipRSuperellipse] and [clipBehavior] properties must be non-null before the
+  /// The [_clipRSuperellipse] and [clipBehavior] properties must be non-null before the
   /// compositing phase of the pipeline.
-  ClipRSuperellipseLayer({RSuperellipse? clipRSuperellipse, Clip clipBehavior = Clip.antiAlias})
-    : _clipRSuperellipse = clipRSuperellipse,
-      _clipBehavior = clipBehavior,
+  ClipRSuperellipseLayer({this._clipRSuperellipse, Clip clipBehavior = Clip.antiAlias})
+    : _clipBehavior = clipBehavior,
       assert(clipBehavior != Clip.none);
 
   /// The rounded-rect to clip in the parent's coordinate system.
@@ -1871,11 +1867,10 @@ class ClipRSuperellipseLayer extends ContainerLayer {
 class ClipPathLayer extends ContainerLayer {
   /// Creates a layer with a path-based clip.
   ///
-  /// The [clipPath] and [clipBehavior] properties must be non-null before the
+  /// The [_clipPath] and [clipBehavior] properties must be non-null before the
   /// compositing phase of the pipeline.
-  ClipPathLayer({Path? clipPath, Clip clipBehavior = Clip.antiAlias})
-    : _clipPath = clipPath,
-      _clipBehavior = clipBehavior,
+  ClipPathLayer({this._clipPath, Clip clipBehavior = Clip.antiAlias})
+    : _clipBehavior = clipBehavior,
       assert(clipBehavior != Clip.none);
 
   /// The path to clip in the parent's coordinate system.
@@ -1953,9 +1948,9 @@ class ClipPathLayer extends ContainerLayer {
 class ColorFilterLayer extends ContainerLayer {
   /// Creates a layer that applies a [ColorFilter] to its children.
   ///
-  /// The [colorFilter] property must be non-null before the compositing phase
+  /// The [_colorFilter] property must be non-null before the compositing phase
   /// of the pipeline.
-  ColorFilterLayer({ColorFilter? colorFilter}) : _colorFilter = colorFilter;
+  ColorFilterLayer({this._colorFilter});
 
   /// The color filter to apply to children.
   ///
@@ -1993,9 +1988,9 @@ class ColorFilterLayer extends ContainerLayer {
 class ImageFilterLayer extends OffsetLayer {
   /// Creates a layer that applies an [ui.ImageFilter] to its children.
   ///
-  /// The [imageFilter] property must be non-null before the compositing phase
+  /// The [_imageFilter] property must be non-null before the compositing phase
   /// of the pipeline.
-  ImageFilterLayer({ui.ImageFilter? imageFilter, super.offset}) : _imageFilter = imageFilter;
+  ImageFilterLayer({this._imageFilter, super.offset});
 
   /// The image filter to apply to children.
   ///
@@ -2038,9 +2033,9 @@ class ImageFilterLayer extends OffsetLayer {
 class TransformLayer extends OffsetLayer {
   /// Creates a transform layer.
   ///
-  /// The [transform] and [offset] properties must be non-null before the
+  /// The [_transform] and [offset] properties must be non-null before the
   /// compositing phase of the pipeline.
-  TransformLayer({Matrix4? transform, super.offset}) : _transform = transform;
+  TransformLayer({this._transform, super.offset});
 
   /// The matrix to apply.
   ///
@@ -2138,9 +2133,9 @@ class TransformLayer extends OffsetLayer {
 class OpacityLayer extends OffsetLayer {
   /// Creates an opacity layer.
   ///
-  /// The [alpha] property must be non-null before the compositing phase of
+  /// The [_alpha] property must be non-null before the compositing phase of
   /// the pipeline.
-  OpacityLayer({int? alpha, super.offset}) : _alpha = alpha;
+  OpacityLayer({this._alpha, super.offset});
 
   /// The amount to multiply into the alpha channel.
   ///
@@ -2218,12 +2213,9 @@ class OpacityLayer extends OffsetLayer {
 class ShaderMaskLayer extends ContainerLayer {
   /// Creates a shader mask layer.
   ///
-  /// The [shader], [maskRect], and [blendMode] properties must be non-null
+  /// The [_shader], [_maskRect], and [_blendMode] properties must be non-null
   /// before the compositing phase of the pipeline.
-  ShaderMaskLayer({Shader? shader, Rect? maskRect, BlendMode? blendMode})
-    : _shader = shader,
-      _maskRect = maskRect,
-      _blendMode = blendMode;
+  ShaderMaskLayer({this._shader, this._maskRect, this._blendMode});
 
   /// The shader to apply to the children.
   ///
@@ -2325,13 +2317,11 @@ final class BackdropKey {
 class BackdropFilterLayer extends ContainerLayer {
   /// Creates a backdrop filter layer.
   ///
-  /// The [filter] property must be non-null before the compositing phase of the
+  /// The [_filter] property must be non-null before the compositing phase of the
   /// pipeline.
   ///
-  /// The [blendMode] property defaults to [BlendMode.srcOver].
-  BackdropFilterLayer({ui.ImageFilter? filter, BlendMode blendMode = BlendMode.srcOver})
-    : _filter = filter,
-      _blendMode = blendMode;
+  /// The [_blendMode] property defaults to [BlendMode.srcOver].
+  BackdropFilterLayer({this._filter, this._blendMode = BlendMode.srcOver});
 
   /// The filter to apply to the existing contents of the scene.
   ///
@@ -2486,14 +2476,12 @@ class LayerLink {
 class LeaderLayer extends ContainerLayer {
   /// Creates a leader layer.
   ///
-  /// The [link] property must not have been provided to any other [LeaderLayer]
+  /// The [_link] property must not have been provided to any other [LeaderLayer]
   /// layers that are [attached] to the layer tree at the same time.
   ///
-  /// The [offset] property must be non-null before the compositing phase of the
+  /// The [_offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  LeaderLayer({required LayerLink link, Offset offset = Offset.zero})
-    : _link = link,
-      _offset = offset;
+  LeaderLayer({required this._link, this._offset = Offset.zero});
 
   /// The object with which this layer should register.
   ///

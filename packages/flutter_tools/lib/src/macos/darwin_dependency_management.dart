@@ -22,18 +22,13 @@ import 'swift_package_manager.dart';
 /// project settings for the dependency manager(s) being used.
 class DarwinDependencyManagement {
   DarwinDependencyManagement({
-    required FlutterProject project,
-    required CocoaPods? cocoapods,
-    required SwiftPackageManager swiftPackageManager,
-    required FileSystem fileSystem,
-    required FeatureFlags featureFlags,
-    required Analytics analytics,
-  }) : _project = project,
-       _cocoapods = cocoapods,
-       _swiftPackageManager = swiftPackageManager,
-       _fileSystem = fileSystem,
-       _featureFlags = featureFlags,
-       _analytics = analytics;
+    required this._project,
+    required this._cocoapods,
+    required this._swiftPackageManager,
+    required this._fileSystem,
+    required this._featureFlags,
+    required this._analytics,
+  });
 
   final FlutterProject _project;
   final CocoaPods? _cocoapods;
@@ -176,6 +171,7 @@ class DarwinDependencyManagement {
     required FileSystem fileSystem,
     required Logger logger,
     required CocoaPods? cocoapods,
+    required Analytics analytics,
     required FeatureFlags featureFlags,
   }) async {
     final bool projectUsesSwiftPM =
@@ -230,6 +226,7 @@ class DarwinDependencyManagement {
       cocoapodOnlyPlugins: cocoapodOnlyPlugins,
       logger: logger,
       platform: platform,
+      analytics: analytics,
     );
 
     await _printRemoveCocoapodIntegrationMessage(
@@ -287,6 +284,7 @@ class DarwinDependencyManagement {
     required List<String> cocoapodOnlyPlugins,
     required Logger logger,
     required FlutterDarwinPlatform platform,
+    required Analytics analytics,
   }) {
     if (cocoapodOnlyPlugins.isEmpty) {
       return;
@@ -297,6 +295,11 @@ class DarwinDependencyManagement {
       'This will become an error in a future version of Flutter. Please contact the plugin '
       'maintainers to request Swift Package Manager adoption.',
     );
+    for (final plugin in cocoapodOnlyPlugins) {
+      analytics.send(
+        Event.appleUsageEvent(workflow: 'cocoapod-only-plugin-warning', parameter: plugin),
+      );
+    }
   }
 
   /// Print a message recommending removing CocoaPod integration when all plugins support SwiftPM.

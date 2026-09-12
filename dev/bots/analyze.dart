@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:core' hide print;
 import 'dart:io' hide exit;
@@ -14,6 +15,8 @@ import 'package:path/path.dart' as path;
 import 'allowlist.dart';
 import 'run_command.dart';
 import 'utils.dart';
+
+const _kHeartbeatInterval = Duration(seconds: 30);
 
 /// The path to the `dart` executable; set at the top of `main`
 late final String dart;
@@ -259,16 +262,14 @@ List<Validation> _getValidations({
       );
       onDartAnalyzeResult(result);
     }),
-    // TODO(Piinks): Re-enable once formatting changes have rolled in and the repo has been reformatted,
-    // https://github.com/flutter/flutter/issues/187204
-    // Validation(
-    //   'format',
-    //   'Check formatting of Dart files...',
-    //   () => runCommand(dart, <String>[
-    //     '--enable-asserts',
-    //     path.join(flutterRoot, 'dev', 'tools', 'bin', 'format.dart'),
-    //   ], workingDirectory: flutterRoot),
-    // ),
+    Validation(
+      'format',
+      'Check formatting of Dart files...',
+      () => runCommand(dart, <String>[
+        '--enable-asserts',
+        path.join(flutterRoot, 'dev', 'tools', 'bin', 'format.dart'),
+      ], workingDirectory: flutterRoot),
+    ),
     Validation('executable-allowlist', 'Executable allowlist...', () => _checkForNewExecutables()),
     Validation(
       'dart-analysis-watch',
@@ -1726,9 +1727,10 @@ Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
   final errors = <String>[];
   final String integrationTestsPath = path.join(flutterRoot, _kIntegrationTestsRelativePath);
   final String templatePath = path.join(flutterRoot, _kTemplateRelativePath);
-  final Iterable<Directory> subDirs = Directory(
-    integrationTestsPath,
-  ).listSync().toList().whereType<Directory>();
+  final Iterable<Directory> subDirs = Directory(integrationTestsPath)
+      .listSync()
+      .toList()
+      .whereType<Directory>();
   for (final testPath in subDirs) {
     final String projectName = path.basename(testPath.path);
     final String runnerPath = path.join(testPath.path, _kWindowsRunnerSubPath);
@@ -1794,12 +1796,20 @@ Future<CommandResult> _runFlutterAnalyze(
   List<String> options = const <String>[],
   String? failureMessage,
 }) async {
-  return runCommand(
-    flutter,
-    <String>['analyze', ...options],
-    workingDirectory: workingDirectory,
-    failureMessage: failureMessage,
-  );
+  final stopwatch = Stopwatch()..start();
+  final heartbeatTimer = Timer.periodic(_kHeartbeatInterval, (Timer _) {
+    print('Analysis in progress (${stopwatch.elapsed.inSeconds}s)...');
+  });
+  try {
+    return await runCommand(
+      flutter,
+      <String>['analyze', ...options],
+      workingDirectory: workingDirectory,
+      failureMessage: failureMessage,
+    );
+  } finally {
+    heartbeatTimer.cancel();
+  }
 }
 
 // These files legitimately require executable permissions

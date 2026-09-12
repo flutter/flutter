@@ -427,9 +427,8 @@ void main() {
           ),
         );
         final bool helloDynamic = pluginFrameworkBinary.existsSync();
-        final bool helloStatic = AppleTestUtils.getExportedSymbols(
-          runnerBinary.path,
-        ).any((String symbol) => symbol.contains('HelloPlugin') && symbol.contains('handle'));
+        final bool helloStatic = AppleTestUtils.getExportedSymbols(runnerBinary.path)
+            .any((String symbol) => symbol.contains('HelloPlugin') && symbol.contains('handle'));
 
         // Plugin is a dynamic xor static framework.
         expect(helloDynamic != helloStatic, isTrue);

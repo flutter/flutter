@@ -582,14 +582,11 @@ void main() {
     },
   );
 
-  test(
-    'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemSelectAll',
-    () {
-      const item = IOSSystemContextMenuItemSelectAll();
-      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
-      expect(item.getData(localizations), const IOSSystemContextMenuItemDataSelectAll());
-    },
-  );
+  test('can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemSelectAll', () {
+    const item = IOSSystemContextMenuItemSelectAll();
+    const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+    expect(item.getData(localizations), const IOSSystemContextMenuItemDataSelectAll());
+  });
 
   test(
     'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemLookUp',
@@ -603,17 +600,14 @@ void main() {
     },
   );
 
-  test(
-    'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemSearchWeb',
-    () {
-      const item = IOSSystemContextMenuItemSearchWeb();
-      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
-      expect(
-        item.getData(localizations),
-        IOSSystemContextMenuItemDataSearchWeb(title: localizations.searchWebButtonLabel),
-      );
-    },
-  );
+  test('can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemSearchWeb', () {
+    const item = IOSSystemContextMenuItemSearchWeb();
+    const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+    expect(
+      item.getData(localizations),
+      IOSSystemContextMenuItemDataSearchWeb(title: localizations.searchWebButtonLabel),
+    );
+  });
 
   test(
     'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemShare',
@@ -627,15 +621,12 @@ void main() {
     },
   );
 
-  test(
-    'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemLiveText',
-    () {
-      const item = IOSSystemContextMenuItemLiveText();
-      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
-      final IOSSystemContextMenuItemData data = item.getData(localizations);
-      expect(data, isA<IOSSystemContextMenuItemDataLiveText>());
-    },
-  );
+  test('can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemLiveText', () {
+    const item = IOSSystemContextMenuItemLiveText();
+    const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+    final IOSSystemContextMenuItemData data = item.getData(localizations);
+    expect(data, isA<IOSSystemContextMenuItemDataLiveText>());
+  });
 
   test('systemContextMenuItemDataFromJson handles Live Text', () {
     final json = <String, dynamic>{'type': 'captureTextFromCamera'};

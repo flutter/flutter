@@ -20,6 +20,7 @@ import 'dart:ui' as ui show Brightness, PlatformDispatcher, SingletonFlutterWind
 
 // Before adding any more dart:ui imports, please read the README.
 
+import 'package:listen/listen.dart';
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
@@ -40,8 +41,9 @@ export 'basic_types.dart' show AsyncCallback, AsyncValueGetter, AsyncValueSetter
 // mixin BarBinding on BindingBase { }
 
 /// Signature for service extensions.
-typedef ServiceExtensionCallback =
-    Future<Map<String, dynamic>> Function(Map<String, String> parameters);
+typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(
+  Map<String, String> parameters,
+);
 
 /// Base class for mixins that provide singleton services.
 ///
@@ -289,6 +291,33 @@ abstract class BindingBase {
       _debugBindingZone = Zone.current;
       return true;
     }());
+    _initListenable();
+  }
+
+  void _initListenable() {
+    Listenable.onError = (Object error, StackTrace? stackTrace, ErrorContext context) {
+      switch (context) {
+        case ErrorContext.assertion:
+          if (error is FlutterError) {
+            throw error;
+          }
+          final String message = switch (error) {
+            StateError(message: final String msg) => msg,
+            AssertionError(message: final Object? msg) => msg?.toString() ?? error.toString(),
+            _ => error.toString(),
+          };
+          throw FlutterError(message);
+        case ErrorContext.listener:
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: error,
+              stack: stackTrace,
+              library: 'foundation library',
+              context: ErrorDescription('while dispatching notifications for $Listenable'),
+            ),
+          );
+      }
+    };
   }
 
   /// A method that shows a useful error message if the given binding
