@@ -110,6 +110,13 @@ class StandardCapabilities final : public Capabilities {
   bool SupportsFramebufferRenderMipmap() const override { return true; }
 
   // |Capabilities|
+  bool SupportsVertexFormat(VertexAttributeFormat format) const override {
+    // Metal is the only backend built on these capabilities, and every format
+    // in the enum has an MTLVertexFormat equivalent.
+    return format != VertexAttributeFormat::kInvalid;
+  }
+
+  // |Capabilities|
   bool SupportsTextureCompression(
       CompressedTextureFamily family) const override {
     switch (family) {
