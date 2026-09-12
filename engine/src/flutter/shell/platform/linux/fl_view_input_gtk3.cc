@@ -249,7 +249,8 @@ static gboolean motion_notify_event_cb(FlView* self,
   get_pointer_device_state(event, &rotation, &pressure);
   return fl_pointer_manager_handle_motion(
       self->pointer_manager, gdk_event_get_time(event),
-      get_pointer_device_kind(event), x * scale_factor, y * scale_factor, rotation, pressure);
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
+      rotation, pressure);
 }
 
 // Signal handler for GtkWidget::enter-notify-event.
@@ -286,7 +287,8 @@ static gboolean leave_notify_event_cb(FlView* self,
   get_pointer_device_state(event, &rotation, &pressure);
   return fl_pointer_manager_handle_leave(
       self->pointer_manager, gdk_event_get_time(event),
-      get_pointer_device_kind(event), x * scale_factor, y * scale_factor, rotation, pressure);
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
+      rotation, pressure);
 }
 
 void fl_view_input_gtk3_setup(FlView* view) {

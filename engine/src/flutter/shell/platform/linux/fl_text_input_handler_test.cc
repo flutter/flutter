@@ -617,17 +617,17 @@ TEST_F(FlTextInputHandlerTest, SetMarkedTextRect) {
           }),
       },
   });
-  EXPECT_CALL(mock_gtk, gtk_widget_translate_coordinates(
-                            ::testing::_, ::testing::_, 13, 14,
-                            ::testing::_, ::testing::_))
+  EXPECT_CALL(mock_gtk,
+              gtk_widget_translate_coordinates(::testing::_, ::testing::_, 13,
+                                               14, ::testing::_, ::testing::_))
       .WillOnce(::testing::DoAll(::testing::SetArgPointee<4>(13),
                                  ::testing::SetArgPointee<5>(14),
                                  ::testing::Return(true)));
-  EXPECT_CALL(mock_gtk, gtk_im_context_set_cursor_location(
-                            ::testing::_,
-                            ::testing::Pointee(::testing::AllOf(
-                                ::testing::Field(&GdkRectangle::x, 13),
-                                ::testing::Field(&GdkRectangle::y, 14)))));
+  EXPECT_CALL(mock_gtk,
+              gtk_im_context_set_cursor_location(
+                  ::testing::_, ::testing::Pointee(::testing::AllOf(
+                                    ::testing::Field(&GdkRectangle::x, 13),
+                                    ::testing::Field(&GdkRectangle::y, 14)))));
   gboolean called = FALSE;
   fl_mock_binary_messenger_invoke_json_method(
       messenger, "flutter/textinput", "TextInput.setEditableSizeAndTransform",

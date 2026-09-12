@@ -69,7 +69,7 @@ TEST_F(FlViewTest, StylusEventsPreserveAxesAndEraserKind) {
     fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
         SendPointerEvent,
         ([&events](auto engine, const FlutterPointerEvent* pointers,
-                    size_t count) {
+                   size_t count) {
           events.insert(events.end(), pointers, pointers + count);
           return kSuccess;
         }));
@@ -77,12 +77,12 @@ TEST_F(FlViewTest, StylusEventsPreserveAxesAndEraserKind) {
     g_autoptr(GdkDevice) device = GDK_DEVICE(g_object_new(
         gdk_wayland_device_get_type(), "input-source", source, nullptr));
     EXPECT_CALL(mock_gtk, gdk_event_get_axis(::testing::_, GDK_AXIS_PRESSURE,
-                                            ::testing::_))
+                                             ::testing::_))
         .Times(5)
         .WillRepeatedly(::testing::DoAll(::testing::SetArgPointee<2>(0.75),
                                          ::testing::Return(TRUE)));
     EXPECT_CALL(mock_gtk, gdk_event_get_axis(::testing::_, GDK_AXIS_ROTATION,
-                                            ::testing::_))
+                                             ::testing::_))
         .Times(5)
         .WillRepeatedly(::testing::DoAll(::testing::SetArgPointee<2>(0.25),
                                          ::testing::Return(TRUE)));

@@ -36,11 +36,12 @@ MockGtk::MockGtk() {
   thread = g_thread_self();
   mock = this;
   ON_CALL(*this, gdk_event_get_axis(::testing::_, ::testing::_, ::testing::_))
-      .WillByDefault([](const GdkEvent* event, GdkAxisUse axis, gdouble* value) {
-        auto original = reinterpret_cast<decltype(&::gdk_event_get_axis)>(
-            dlsym(RTLD_NEXT, "gdk_event_get_axis"));
-        return original(event, axis, value);
-      });
+      .WillByDefault(
+          [](const GdkEvent* event, GdkAxisUse axis, gdouble* value) {
+            auto original = reinterpret_cast<decltype(&::gdk_event_get_axis)>(
+                dlsym(RTLD_NEXT, "gdk_event_get_axis"));
+            return original(event, axis, value);
+          });
   ON_CALL(*this, gdk_window_get_width(::testing::_))
       .WillByDefault(::testing::Return(100));
   ON_CALL(*this, gdk_window_get_height(::testing::_))
