@@ -6583,7 +6583,10 @@ TEST_F(EmbedderTest,
     EXPECT_EQ(invalid_destructions, 0);
     const auto current_frame1 = hb->GetCurrentFrame();
     ASSERT_TRUE(current_frame1.has_value());
-    EXPECT_EQ(current_frame1->buffer,
+    if (!current_frame1.has_value()) {
+      return;
+    }
+    EXPECT_EQ(current_frame1.value().buffer,
               reinterpret_cast<FlutterHardwareBufferHandle>(0xABCD));
 
     // Signal new frame, but this time supply an invalid frame.
@@ -6598,7 +6601,10 @@ TEST_F(EmbedderTest,
     EXPECT_EQ(valid_destructions, 0);
     const auto current_frame2 = hb->GetCurrentFrame();
     ASSERT_TRUE(current_frame2.has_value());
-    EXPECT_EQ(current_frame2->buffer,
+    if (!current_frame2.has_value()) {
+      return;
+    }
+    EXPECT_EQ(current_frame2.value().buffer,
               reinterpret_cast<FlutterHardwareBufferHandle>(0xABCD));
 
     // OnGrContextDestroyed cleans up the valid frame.

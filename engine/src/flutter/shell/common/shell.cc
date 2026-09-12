@@ -400,7 +400,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
         }
         weak_io_manager_promise.set_value(io_manager->GetWeakPtr());
         unref_queue_promise.set_value(io_manager->GetSkiaUnrefQueue());
-        io_manager_promise.set_value(io_manager);
 
         // Wait until Impeller context setup is complete before creating the
         // resource context.
@@ -408,6 +407,10 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
         sk_sp<GrDirectContext> resource_context =
             platform_view_ptr->CreateResourceContext();
         io_manager->NotifyResourceContextAvailable(resource_context);
+
+        // Signal the platform thread that IO manager setup (including resource
+        // context creation from platform_view_ptr) is complete.
+        io_manager_promise.set_value(io_manager);
       });
 
   // Send dispatcher_maker to the engine constructor because shell won't have
