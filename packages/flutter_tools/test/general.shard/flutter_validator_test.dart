@@ -648,8 +648,70 @@ void main() {
     );
   });
 
+  testWithoutContext(
+    'allows flutter and dart binaries from a symlinked Flutter SDK on Windows',
+    () async {
+      const flutterRoot = r'C:\sdk\flutter_current';
+      const realFlutterRoot = r'C:\sdk\real_flutter';
+      const osName = 'Microsoft Windows';
+      final FileSystem fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      fs.directory(fs.path.join(realFlutterRoot, 'bin')).createSync(recursive: true);
+      fs.file(fs.path.join(realFlutterRoot, 'bin', 'flutter')).createSync();
+      fs.file(fs.path.join(realFlutterRoot, 'bin', 'dart')).createSync();
+      fs.link(flutterRoot).createSync(realFlutterRoot);
+
+      final flutterValidator = FlutterValidator(
+        platform: FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8'),
+        flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
+        devToolsVersion: () => '2.8.0',
+        artifacts: Artifacts.test(),
+        fileSystem: fs,
+        processManager: FakeProcessManager.empty(),
+        operatingSystemUtils: FakeOperatingSystemUtils(
+          name: osName,
+          fs: fs,
+          whichLookup: <String, File>{
+            'flutter': fs.file(fs.path.join(flutterRoot, 'bin', 'flutter')),
+            'dart': fs.file(fs.path.join(flutterRoot, 'bin', 'dart')),
+          },
+        ),
+        flutterRoot: () => flutterRoot,
+        featureFlags: TestFeatureFlags(),
+      );
+
+      final ValidationResult result = await flutterValidator.validate();
+      expect(
+        result,
+        _matchDoctorValidation(
+          validationType: ValidationType.success,
+          statusInfo: 'Channel beta, 1.0.0, on $osName, locale en_US.UTF-8',
+          messages: contains(
+            const ValidationMessage(
+              r'Flutter version 1.0.0 on channel beta at C:\sdk\flutter_current',
+            ),
+          ),
+        ),
+      );
+      expect(
+        result.messages.where(
+          (ValidationMessage message) =>
+              message.message.contains('Warning: `flutter` on your path resolves to'),
+        ),
+        isEmpty,
+      );
+      expect(
+        result.messages.where(
+          (ValidationMessage message) =>
+              message.message.contains('Warning: `dart` on your path resolves to'),
+        ),
+        isEmpty,
+      );
+    },
+  );
+
   testWithoutContext('detects flutter and dart from outside flutter sdk', () async {
     final FileSystem fs = MemoryFileSystem.test();
+    fs.directory('/sdk/flutter').createSync(recursive: true);
     final flutterValidator = FlutterValidator(
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
@@ -660,8 +722,8 @@ void main() {
       operatingSystemUtils: FakeOperatingSystemUtils(
         name: 'Linux',
         whichLookup: <String, File>{
-          'flutter': fs.file('/sdk/flutter-beta')..createSync(recursive: true),
-          'dart': fs.file('/sdk/flutter-beta')..createSync(recursive: true),
+          'flutter': fs.file('/sdk/flutter-beta/bin/flutter')..createSync(recursive: true),
+          'dart': fs.file('/sdk/flutter-beta/bin/dart')..createSync(recursive: true),
         },
       ),
       flutterRoot: () => '/sdk/flutter',
@@ -673,14 +735,59 @@ void main() {
       _matchDoctorValidation(
         validationType: ValidationType.partial,
         statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
-        messages: contains(
+        messages: containsAll(<ValidationMessage>[
           const ValidationMessage.hint(
-            'Warning: `flutter` on your path resolves to /sdk/flutter-beta, which '
+            'Warning: `flutter` on your path resolves to /sdk/flutter-beta/bin/flutter, which '
             'is not inside your current Flutter SDK checkout at /sdk/flutter. '
             'Consider adding /sdk/flutter/bin to the front of your path.',
           ),
-        ),
+          const ValidationMessage.hint(
+            'Warning: `dart` on your path resolves to /sdk/flutter-beta/bin/dart, which '
+            'is not inside your current Flutter SDK checkout at /sdk/flutter. '
+            'Consider adding /sdk/flutter/bin to the front of your path.',
+          ),
+        ]),
       ),
+    );
+  });
+
+  testWithoutContext('does not throw if the Flutter SDK root cannot be resolved', () async {
+    const flutterRoot = '/sdk/flutter';
+    final FileSystem fs = MemoryFileSystem.test();
+    final flutterValidator = FlutterValidator(
+      platform: FakePlatform(localeName: 'en_US.UTF-8'),
+      flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
+      devToolsVersion: () => '2.8.0',
+      artifacts: Artifacts.test(),
+      fileSystem: fs,
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(
+        name: 'Linux',
+        whichLookup: <String, File>{
+          'flutter': fs.file('/sdk/flutter-beta/bin/flutter')..createSync(recursive: true),
+          'dart': fs.file('/sdk/flutter-beta/bin/dart')..createSync(recursive: true),
+        },
+      ),
+      flutterRoot: () => flutterRoot,
+      featureFlags: TestFeatureFlags(),
+    );
+
+    final ValidationResult result = await flutterValidator.validate();
+    expect(result.type, ValidationType.partial);
+    expect(
+      result.messages,
+      containsAll(<ValidationMessage>[
+        const ValidationMessage.hint(
+          'Warning: `flutter` on your path resolves to /sdk/flutter-beta/bin/flutter, which '
+          'is not inside your current Flutter SDK checkout at /sdk/flutter. '
+          'Consider adding /sdk/flutter/bin to the front of your path.',
+        ),
+        const ValidationMessage.hint(
+          'Warning: `dart` on your path resolves to /sdk/flutter-beta/bin/dart, which '
+          'is not inside your current Flutter SDK checkout at /sdk/flutter. '
+          'Consider adding /sdk/flutter/bin to the front of your path.',
+        ),
+      ]),
     );
   });
 
