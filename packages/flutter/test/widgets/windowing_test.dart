@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show Display;
+
 import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter/src/widgets/_window.dart'
     show

@@ -614,39 +614,36 @@ void main() {
       });
     }
 
-    testWithoutContext(
-      'does not reset output files not containing FlutterMacOS when using SwiftPM with macOS project',
-      () async {
-        final testFileSystem = MemoryFileSystem.test();
-        final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
-          fs: testFileSystem,
-          fakeFlutterVersion: FakeFlutterVersion(),
-        );
-        final swiftPackageManager = FakeSwiftPackageManager(expectedPlugins: []);
-        final cocoaPods = FakeCocoaPods();
-        final FlutterProject project = FakeFlutterProject(
-          usesSwiftPackageManager: true,
-          fileSystem: testFileSystem,
-        );
-        final MacOSProject xcodeProject = project.macos;
-        xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
-        xcodeProject.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
-        xcodeProject.outputFileList
-          ..createSync(recursive: true)
-          ..writeAsStringSync('Something else');
+    testWithoutContext('does not reset output files not containing FlutterMacOS when using SwiftPM with macOS project', () async {
+      final testFileSystem = MemoryFileSystem.test();
+      final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: testFileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
+      final swiftPackageManager = FakeSwiftPackageManager(expectedPlugins: []);
+      final cocoaPods = FakeCocoaPods();
+      final FlutterProject project = FakeFlutterProject(
+        usesSwiftPackageManager: true,
+        fileSystem: testFileSystem,
+      );
+      final MacOSProject xcodeProject = project.macos;
+      xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
+      xcodeProject.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
+      xcodeProject.outputFileList
+        ..createSync(recursive: true)
+        ..writeAsStringSync('Something else');
 
-        final dependencyManagement = DarwinDependencyManagement(
-          project: project,
-          cocoapods: cocoaPods,
-          swiftPackageManager: swiftPackageManager,
-          fileSystem: testFileSystem,
-          featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-          analytics: testAnalytics,
-        );
-        await dependencyManagement.setUp(platform: FlutterDarwinPlatform.macos, plugins: []);
-        expect(xcodeProject.outputFileList.readAsStringSync(), 'Something else');
-      },
-    );
+      final dependencyManagement = DarwinDependencyManagement(
+        project: project,
+        cocoapods: cocoaPods,
+        swiftPackageManager: swiftPackageManager,
+        fileSystem: testFileSystem,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        analytics: testAnalytics,
+      );
+      await dependencyManagement.setUp(platform: FlutterDarwinPlatform.macos, plugins: []);
+      expect(xcodeProject.outputFileList.readAsStringSync(), 'Something else');
+    });
   });
 
   group('validatePluginSupportsSwiftPackageManager', () {
@@ -1103,6 +1100,10 @@ flutter:
         () async {
           final fileSystem = MemoryFileSystem.test();
           final logger = BufferLogger.test();
+          final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+            fs: fileSystem,
+            fakeFlutterVersion: FakeFlutterVersion(),
+          );
           final XcodeBasedProject project = switch (platform) {
             FlutterDarwinPlatform.ios => FakeIosProject(
               fileSystem: fileSystem,
@@ -1123,6 +1124,7 @@ flutter:
             fileSystem: fileSystem,
             logger: logger,
             cocoapods: FakeCocoaPods(),
+            analytics: fakeAnalytics,
             featureFlags: TestFeatureFlags(),
           );
 
@@ -1138,6 +1140,10 @@ flutter:
     testWithoutContext('does not warn when Swift Package Manager is unavailable', () async {
       final fileSystem = MemoryFileSystem.test();
       final logger = BufferLogger.test();
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
       final project = FakeIosProject(
         fileSystem: fileSystem,
         usesSwiftPackageManager: false,
@@ -1151,6 +1157,7 @@ flutter:
         fileSystem: fileSystem,
         logger: logger,
         cocoapods: FakeCocoaPods(),
+        analytics: fakeAnalytics,
         featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
@@ -1161,6 +1168,10 @@ flutter:
       final fileSystem = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final cocoapods = FakeCocoaPods();
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
       final project = FakeIosProject(fileSystem: fileSystem, usesSwiftPackageManager: true);
       final plugins = <Plugin>[FakePlugin(name: 'plugin', platforms: <String, PluginPlatform>{})];
 
@@ -1171,16 +1182,22 @@ flutter:
         fileSystem: fileSystem,
         logger: logger,
         cocoapods: cocoapods,
+        analytics: fakeAnalytics,
         featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
       expect(logger.warningText, isEmpty);
+      expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
     testWithoutContext('filters plugins for the correct implementation', () async {
       final fileSystem = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final cocoapods = FakeCocoaPods();
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
       final project = FakeIosProject(fileSystem: fileSystem, usesSwiftPackageManager: true);
 
       final appFacingPlugin = Plugin(
@@ -1257,16 +1274,22 @@ flutter:
         fileSystem: fileSystem,
         logger: logger,
         cocoapods: cocoapods,
+        analytics: fakeAnalytics,
         featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
       expect(logger.warningText, isEmpty);
       expect(logger.errorText, isEmpty);
+      expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
     testWithoutContext('when plugin supports platform but has no podspec or manifest', () async {
       final fileSystem = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final cocoapods = FakeCocoaPods();
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
       final project = FakeIosProject(fileSystem: fileSystem, usesSwiftPackageManager: true);
       final plugins = <Plugin>[
         FakePlugin(
@@ -1282,16 +1305,22 @@ flutter:
         fileSystem: fileSystem,
         logger: logger,
         cocoapods: cocoapods,
+        analytics: fakeAnalytics,
         featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
       expect(logger.warningText, isEmpty);
+      expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
     testWithoutContext('throws when using SwiftPM-only plugin but SwiftPM is disabled', () async {
       final fileSystem = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final cocoapods = FakeCocoaPods();
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
       final project = FakeIosProject(
         fileSystem: fileSystem,
         usesSwiftPackageManager: false,
@@ -1313,6 +1342,7 @@ flutter:
           fileSystem: fileSystem,
           logger: logger,
           cocoapods: cocoapods,
+          analytics: fakeAnalytics,
           featureFlags: TestFeatureFlags(),
         ),
         throwsToolExit(
@@ -1332,6 +1362,10 @@ flutter:
         final fileSystem = MemoryFileSystem.test();
         final logger = BufferLogger.test();
         final cocoapods = FakeCocoaPods();
+        final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+          fs: fileSystem,
+          fakeFlutterVersion: FakeFlutterVersion(),
+        );
         final project = FakeIosProject(
           fileSystem: fileSystem,
           usesSwiftPackageManager: false,
@@ -1353,6 +1387,7 @@ flutter:
             fileSystem: fileSystem,
             logger: logger,
             cocoapods: cocoapods,
+            analytics: fakeAnalytics,
             featureFlags: TestFeatureFlags(),
           ),
           throwsToolExit(
@@ -1372,6 +1407,10 @@ flutter:
       final fileSystem = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final cocoapods = FakeCocoaPods();
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
       final project = FakeIosProject(fileSystem: fileSystem, usesSwiftPackageManager: true);
       final plugins = <Plugin>[
         FakePlugin(
@@ -1388,6 +1427,7 @@ flutter:
         fileSystem: fileSystem,
         logger: logger,
         cocoapods: cocoapods,
+        analytics: fakeAnalytics,
         featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
@@ -1398,11 +1438,68 @@ flutter:
         'This will become an error in a future version of Flutter. Please contact the plugin '
         'maintainers to request Swift Package Manager adoption.\n',
       );
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.appleUsageEvent(workflow: 'cocoapod-only-plugin-warning', parameter: 'plugin'),
+        ),
+      );
+    });
+
+    testWithoutContext('warns and sends analytics for multiple CocoaPod-only plugins', () async {
+      final fileSystem = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final cocoapods = FakeCocoaPods();
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
+      final project = FakeIosProject(fileSystem: fileSystem, usesSwiftPackageManager: true);
+      final plugins = <Plugin>[
+        FakePlugin(
+          name: 'plugin_a',
+          platforms: <String, PluginPlatform>{IOSPlugin.kConfigKey: FakePluginPlatform()},
+          pluginPodspecPath: '/plugin_a/ios/plugin_a.podspec',
+        ),
+        FakePlugin(
+          name: 'plugin_b',
+          platforms: <String, PluginPlatform>{IOSPlugin.kConfigKey: FakePluginPlatform()},
+          pluginPodspecPath: '/plugin_b/ios/plugin_b.podspec',
+        ),
+      ];
+
+      await DarwinDependencyManagement.validatePluginSupport(
+        platform: FlutterDarwinPlatform.ios,
+        xcodeProject: project,
+        plugins: plugins,
+        fileSystem: fileSystem,
+        logger: logger,
+        cocoapods: cocoapods,
+        analytics: fakeAnalytics,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+      );
+
+      expect(
+        logger.warningText,
+        'The following plugins do not support Swift Package Manager for ios:\n'
+        '  - plugin_a\n'
+        '  - plugin_b\n'
+        'This will become an error in a future version of Flutter. Please contact the plugin '
+        'maintainers to request Swift Package Manager adoption.\n',
+      );
+      expect(fakeAnalytics.sentEvents, <Event>[
+        Event.appleUsageEvent(workflow: 'cocoapod-only-plugin-warning', parameter: 'plugin_a'),
+        Event.appleUsageEvent(workflow: 'cocoapod-only-plugin-warning', parameter: 'plugin_b'),
+      ]);
     });
 
     testWithoutContext('warns when CocoaPod is removeable and podfile matches original', () async {
       final fileSystem = MemoryFileSystem.test();
       final logger = BufferLogger.test();
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
       final project = FakeIosProject(fileSystem: fileSystem, usesSwiftPackageManager: true);
       project.xcodeProjectInfoFile.createSync(recursive: true);
       project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
@@ -1431,6 +1528,7 @@ flutter:
         fileSystem: fileSystem,
         logger: logger,
         cocoapods: cocoapods,
+        analytics: fakeAnalytics,
         featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
@@ -1442,98 +1540,117 @@ flutter:
         '  * Also in the ios/ directory, delete the Podfile\n\n'
         "Removing CocoaPods integration will improve the project's build time.\n",
       );
+      expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
-    testWithoutContext('warns when CocoaPod is removeable and podfile does not match original', () async {
-      final fileSystem = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final project = FakeIosProject(fileSystem: fileSystem, usesSwiftPackageManager: true);
-      project.xcodeProjectInfoFile.createSync(recursive: true);
-      project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
-      project.podfile.createSync(recursive: true);
-      project.podfile.writeAsStringSync('modified');
+    testWithoutContext(
+      'warns when CocoaPod is removeable and podfile does not match original',
+      () async {
+        final fileSystem = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+          fs: fileSystem,
+          fakeFlutterVersion: FakeFlutterVersion(),
+        );
+        final project = FakeIosProject(fileSystem: fileSystem, usesSwiftPackageManager: true);
+        project.xcodeProjectInfoFile.createSync(recursive: true);
+        project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
+        project.podfile.createSync(recursive: true);
+        project.podfile.writeAsStringSync('modified');
 
-      final cocoapods = FakeCocoaPods(
-        podFile: fileSystem.file('template')
-          ..createSync()
-          ..writeAsStringSync('template'),
-        configIncludesPods: false,
-      );
+        final cocoapods = FakeCocoaPods(
+          podFile: fileSystem.file('template')
+            ..createSync()
+            ..writeAsStringSync('template'),
+          configIncludesPods: false,
+        );
 
-      final plugins = <Plugin>[
-        FakePlugin(
-          name: 'plugin',
-          platforms: <String, PluginPlatform>{IOSPlugin.kConfigKey: FakePluginPlatform()},
-          pluginSwiftPackageManifestPath: '/plugin/ios/plugin/Package.swift',
-        ),
-      ];
+        final plugins = <Plugin>[
+          FakePlugin(
+            name: 'plugin',
+            platforms: <String, PluginPlatform>{IOSPlugin.kConfigKey: FakePluginPlatform()},
+            pluginSwiftPackageManifestPath: '/plugin/ios/plugin/Package.swift',
+          ),
+        ];
 
-      await DarwinDependencyManagement.validatePluginSupport(
-        platform: FlutterDarwinPlatform.ios,
-        xcodeProject: project,
-        plugins: plugins,
-        fileSystem: fileSystem,
-        logger: logger,
-        cocoapods: cocoapods,
-        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-      );
+        await DarwinDependencyManagement.validatePluginSupport(
+          platform: FlutterDarwinPlatform.ios,
+          xcodeProject: project,
+          plugins: plugins,
+          fileSystem: fileSystem,
+          logger: logger,
+          cocoapods: cocoapods,
+          analytics: fakeAnalytics,
+          featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        );
 
-      expect(
-        logger.warningText,
-        'All plugins found for ios are Swift Packages, but your project still has CocoaPods integration. '
-        'Your project uses a non-standard Podfile and will need to be migrated to Swift Package Manager manually. '
-        'Some steps you may need to complete include:\n'
-        '  * In the ios/ directory run "pod deintegrate"\n'
-        '  * Transition any Pod dependencies to Swift Package equivalents. See https://developer.apple.com/documentation/xcode/adding-package-dependencies-to-your-app\n'
-        '  * Transition any custom logic\n\n'
-        "Removing CocoaPods integration will improve the project's build time.\n",
-      );
-    });
+        expect(
+          logger.warningText,
+          'All plugins found for ios are Swift Packages, but your project still has CocoaPods integration. '
+          'Your project uses a non-standard Podfile and will need to be migrated to Swift Package Manager manually. '
+          'Some steps you may need to complete include:\n'
+          '  * In the ios/ directory run "pod deintegrate"\n'
+          '  * Transition any Pod dependencies to Swift Package equivalents. See https://developer.apple.com/documentation/xcode/adding-package-dependencies-to-your-app\n'
+          '  * Transition any custom logic\n\n'
+          "Removing CocoaPods integration will improve the project's build time.\n",
+        );
+        expect(fakeAnalytics.sentEvents, isEmpty);
+      },
+    );
 
-    testWithoutContext('warning when CocoaPod is removeable includes step to edit xcconfig', () async {
-      final fileSystem = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final project = FakeIosProject(fileSystem: fileSystem, usesSwiftPackageManager: true);
-      project.xcodeProjectInfoFile.createSync(recursive: true);
-      project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
-      project.podfile.createSync(recursive: true);
-      project.podfile.writeAsStringSync('template');
+    testWithoutContext(
+      'warning when CocoaPod is removeable includes step to edit xcconfig',
+      () async {
+        final fileSystem = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+          fs: fileSystem,
+          fakeFlutterVersion: FakeFlutterVersion(),
+        );
+        final project = FakeIosProject(fileSystem: fileSystem, usesSwiftPackageManager: true);
+        project.xcodeProjectInfoFile.createSync(recursive: true);
+        project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
+        project.podfile.createSync(recursive: true);
+        project.podfile.writeAsStringSync('template');
 
-      final cocoapods = FakeCocoaPods(
-        podFile: fileSystem.file('template')
-          ..createSync()
-          ..writeAsStringSync('template'),
-      );
+        final cocoapods = FakeCocoaPods(
+          podFile: fileSystem.file('template')
+            ..createSync()
+            ..writeAsStringSync('template'),
+        );
 
-      final plugins = <Plugin>[
-        FakePlugin(
-          name: 'plugin',
-          platforms: <String, PluginPlatform>{IOSPlugin.kConfigKey: FakePluginPlatform()},
-          pluginSwiftPackageManifestPath: '/plugin/ios/plugin/Package.swift',
-        ),
-      ];
+        final plugins = <Plugin>[
+          FakePlugin(
+            name: 'plugin',
+            platforms: <String, PluginPlatform>{IOSPlugin.kConfigKey: FakePluginPlatform()},
+            pluginSwiftPackageManifestPath: '/plugin/ios/plugin/Package.swift',
+          ),
+        ];
 
-      await DarwinDependencyManagement.validatePluginSupport(
-        platform: FlutterDarwinPlatform.ios,
-        xcodeProject: project,
-        plugins: plugins,
-        fileSystem: fileSystem,
-        logger: logger,
-        cocoapods: cocoapods,
-        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-      );
+        await DarwinDependencyManagement.validatePluginSupport(
+          platform: FlutterDarwinPlatform.ios,
+          xcodeProject: project,
+          plugins: plugins,
+          fileSystem: fileSystem,
+          logger: logger,
+          cocoapods: cocoapods,
+          analytics: fakeAnalytics,
+          featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        );
 
-      expect(
-        logger.warningText,
-        'All plugins found for ios are Swift Packages, but your project still has CocoaPods integration. '
-        'To remove CocoaPods integration, complete the following steps:\n'
-        '  * In the ios/ directory run "pod deintegrate"\n'
-        '  * Also in the ios/ directory, delete the Podfile\n'
-        '  * Remove the include to "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig" in your ios/Flutter/Debug.xcconfig\n'
-        '  * Remove the include to "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig" in your ios/Flutter/Release.xcconfig\n\n'
-        "Removing CocoaPods integration will improve the project's build time.\n",
-      );
-    });
+        expect(
+          logger.warningText,
+          'All plugins found for ios are Swift Packages, but your project still has CocoaPods integration. '
+          'To remove CocoaPods integration, complete the following steps:\n'
+          '  * In the ios/ directory run "pod deintegrate"\n'
+          '  * Also in the ios/ directory, delete the Podfile\n'
+          '  * Remove the include to "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig" in your ios/Flutter/Debug.xcconfig\n'
+          '  * Remove the include to "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig" in your ios/Flutter/Release.xcconfig\n\n'
+          "Removing CocoaPods integration will improve the project's build time.\n",
+        );
+        expect(fakeAnalytics.sentEvents, isEmpty);
+      },
+    );
   });
 }
 
@@ -1541,10 +1658,9 @@ class FakeIosProject extends Fake implements IosProject {
   FakeIosProject({
     required MemoryFileSystem fileSystem,
     required this.usesSwiftPackageManager,
-    bool? compatibleWithSwiftPackageManager,
+    this._compatibleWithSwiftPackageManager,
     FlutterProject? parent,
-  }) : _compatibleWithSwiftPackageManager = compatibleWithSwiftPackageManager,
-       parent = parent ?? FakeFlutterProject(fileSystem: fileSystem),
+  }) : parent = parent ?? FakeFlutterProject(fileSystem: fileSystem),
        hostAppRoot = fileSystem.directory('app_name').childDirectory('ios');
 
   @override
@@ -1591,10 +1707,9 @@ class FakeMacOSProject extends Fake implements MacOSProject {
   FakeMacOSProject({
     required MemoryFileSystem fileSystem,
     required this.usesSwiftPackageManager,
-    bool? compatibleWithSwiftPackageManager,
+    this._compatibleWithSwiftPackageManager,
     FlutterProject? parent,
-  }) : _compatibleWithSwiftPackageManager = compatibleWithSwiftPackageManager,
-       parent = parent ?? FakeFlutterProject(fileSystem: fileSystem),
+  }) : parent = parent ?? FakeFlutterProject(fileSystem: fileSystem),
        hostAppRoot = fileSystem.directory('app_name').childDirectory('macos');
 
   @override
@@ -1735,10 +1850,9 @@ class FakePlugin extends Fake implements Plugin {
   FakePlugin({
     required this.name,
     required this.platforms,
-    String? pluginSwiftPackageManifestPath,
-    String? pluginPodspecPath,
-  }) : _pluginSwiftPackageManifestPath = pluginSwiftPackageManifestPath,
-       _pluginPodspecPath = pluginPodspecPath;
+    this._pluginSwiftPackageManifestPath,
+    this._pluginPodspecPath,
+  });
 
   final String? _pluginSwiftPackageManifestPath;
 

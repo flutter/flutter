@@ -104,15 +104,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addMultiOption(
         'tags',
         abbr: 't',
-        help:
-            'Run only tests associated with the specified tags. See: https://pub.dev/packages/test#tagging-tests',
+        help: 'Run only tests associated with the specified tags. See: https://pub.dev/packages/test#tagging-tests',
         splitCommas: false,
       )
       ..addMultiOption(
         'exclude-tags',
         abbr: 'x',
-        help:
-            'Run only tests that do not have the specified tags. See: https://pub.dev/packages/test#tagging-tests',
+        help: 'Run only tests that do not have the specified tags. See: https://pub.dev/packages/test#tagging-tests',
         splitCommas: false,
       )
       ..addMultiOption(
@@ -259,16 +257,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addOption(
         'reporter',
         abbr: 'r',
-        help:
-            'Set how to print test results. If unset, value will default to either compact or expanded.',
+        help: 'Set how to print test results. If unset, value will default to either compact or expanded.',
         allowed: <String>['compact', 'expanded', 'failures-only', 'github', 'json', 'silent'],
         allowedHelp: <String, String>{
           'compact': 'A single line, updated continuously (the default).',
-          'expanded':
-              'A separate line for each update. May be preferred when logging to a file or in continuous integration.',
+          'expanded': 'A separate line for each update. May be preferred when logging to a file or in continuous integration.',
           'failures-only': 'A separate line for failing tests, with no output for passing tests.',
-          'github':
-              'A custom reporter for GitHub Actions (the default reporter when running on GitHub Actions).',
+          'github': 'A custom reporter for GitHub Actions (the default reporter when running on GitHub Actions).',
           'json': 'A machine-readable format. See: https://dart.dev/go/test-docs/json_reporter.md',
           'silent':
               'A reporter with no output. May be useful when only the exit code is meaningful.',
@@ -820,7 +815,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
     if (_needsRebuild(assetBundle.entries, flavor)) {
       await writeBundle(
-        globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
+        globals.fs.directory(
+          globals.fs.path.join(getBuildDirectory(globals.config, globals.fs), 'unit_test_assets'),
+        ),
         assetBundle.entries,
         targetPlatform: TargetPlatform.tester,
         impellerStatus: impellerStatus,
@@ -833,7 +830,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
 
       final File cachedFlavorFile = globals.fs.file(
-        globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
+        globals.fs.path.join(
+          getBuildDirectory(globals.config, globals.fs),
+          'test_cache',
+          'flavor.txt',
+        ),
       );
       if (cachedFlavorFile.existsSync()) {
         await cachedFlavorFile.delete();
@@ -851,7 +852,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     //  perform a `flutter clean` after upgrading.
     //  See https://github.com/flutter/flutter/issues/128563.
     final File manifest = globals.fs.file(
-      globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
+      globals.fs.path.join(
+        getBuildDirectory(globals.config, globals.fs),
+        'unit_test_assets',
+        'AssetManifest.bin',
+      ),
     );
     if (!manifest.existsSync()) {
       return true;
@@ -872,7 +877,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
 
     final File cachedFlavorFile = globals.fs.file(
-      globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
+      globals.fs.path.join(
+        getBuildDirectory(globals.config, globals.fs),
+        'test_cache',
+        'flavor.txt',
+      ),
     );
     final String? cachedFlavor = cachedFlavorFile.existsSync()
         ? cachedFlavorFile.readAsStringSync()

@@ -21,6 +21,7 @@ import '../compile.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../features.dart';
 import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
@@ -64,21 +65,14 @@ class AttachCommand extends FlutterCommand {
   AttachCommand({
     bool verboseHelp = false,
     HotRunnerFactory? hotRunnerFactory,
-    required Stdio stdio,
-    required Logger logger,
-    required Terminal terminal,
-    required Signals signals,
-    required Platform platform,
-    required ProcessInfo processInfo,
-    required FileSystem fileSystem,
-  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
-       _stdio = stdio,
-       _logger = logger,
-       _terminal = terminal,
-       _signals = signals,
-       _platform = platform,
-       _processInfo = processInfo,
-       _fileSystem = fileSystem {
+    required this._stdio,
+    required this._logger,
+    required this._terminal,
+    required this._signals,
+    required this._platform,
+    required this._processInfo,
+    required this._fileSystem,
+  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory() {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -321,6 +315,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           ? _logger
           : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
       logToStdout: true,
+      featureFlags: featureFlags,
     );
 
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);

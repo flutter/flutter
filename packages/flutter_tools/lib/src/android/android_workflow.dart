@@ -33,11 +33,13 @@ enum LicensesAccepted { none, some, all, unknown }
 final licenseCounts = RegExp(r'(\d+) of (\d+) SDK package licenses? not accepted.');
 final licenseNotAccepted = RegExp(r'licenses? not accepted', caseSensitive: false);
 final licenseAccepted = RegExp(r'All SDK package licenses accepted.');
+final licensesNoLongerNeeded = RegExp(
+  r'--licenses option is no longer needed',
+  caseSensitive: false,
+);
 
 class AndroidWorkflow implements Workflow {
-  AndroidWorkflow({required AndroidSdk? androidSdk, required FeatureFlags featureFlags})
-    : _androidSdk = androidSdk,
-      _featureFlags = featureFlags;
+  AndroidWorkflow({required this._androidSdk, required this._featureFlags});
 
   final AndroidSdk? _androidSdk;
   final FeatureFlags _featureFlags;
@@ -108,21 +110,14 @@ Future<String?> getEmulatorVersion(AndroidSdk androidSdk, ProcessManager process
 /// Android Studio.
 class AndroidValidator extends DoctorValidator {
   AndroidValidator({
-    required Java? java,
-    required AndroidSdk? androidSdk,
-    required Logger logger,
-    required Platform platform,
-    required UserMessages userMessages,
-    required ProcessManager processManager,
-    required OperatingSystemUtils osUtils,
-  }) : _java = java,
-       _androidSdk = androidSdk,
-       _logger = logger,
-       _platform = platform,
-       _userMessages = userMessages,
-       _processManager = processManager,
-       _osUtils = osUtils,
-       super('Android toolchain - develop for Android devices');
+    required this._java,
+    required this._androidSdk,
+    required this._logger,
+    required this._platform,
+    required this._userMessages,
+    required this._processManager,
+    required this._osUtils,
+  }) : super('Android toolchain - develop for Android devices');
 
   final Java? _java;
   final AndroidSdk? _androidSdk;
@@ -348,21 +343,14 @@ class AndroidValidator extends DoctorValidator {
 /// SDK have been accepted.
 class AndroidLicenseValidator extends DoctorValidator {
   AndroidLicenseValidator({
-    required Java? java,
-    required AndroidSdk? androidSdk,
-    required Platform platform,
-    required ProcessManager processManager,
-    required Logger logger,
-    required Stdio stdio,
-    required UserMessages userMessages,
-  }) : _java = java,
-       _androidSdk = androidSdk,
-       _platform = platform,
-       _processManager = processManager,
-       _logger = logger,
-       _stdio = stdio,
-       _userMessages = userMessages,
-       super('Android license subvalidator');
+    required this._java,
+    required this._androidSdk,
+    required this._platform,
+    required this._processManager,
+    required this._logger,
+    required this._stdio,
+    required this._userMessages,
+  }) : super('Android license subvalidator');
 
   final Java? _java;
   final AndroidSdk? _androidSdk;
@@ -446,6 +434,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
   Future<LicensesAccepted> get licensesAccepted async {
     LicensesAccepted? status;
+    var sawNewCliLicensesMessage = false;
 
     void handleLine(String line) {
       if (licenseCounts.hasMatch(line)) {
@@ -462,6 +451,8 @@ class AndroidLicenseValidator extends DoctorValidator {
         status = LicensesAccepted.none;
       } else if (licenseAccepted.hasMatch(line)) {
         status ??= LicensesAccepted.all;
+      } else if (licensesNoLongerNeeded.hasMatch(line)) {
+        sawNewCliLicensesMessage = true;
       }
     }
 
@@ -488,9 +479,33 @@ class AndroidLicenseValidator extends DoctorValidator {
           .listen(handleLine)
           .asFuture<void>();
       await Future.wait<void>(<Future<void>>[output, errors]);
-      return status ?? LicensesAccepted.unknown;
+      if (status != null) {
+        return status!;
+      }
+      if (sawNewCliLicensesMessage) {
+        return _licensesAcceptedFromDisk();
+      }
+      return LicensesAccepted.unknown;
     } on IOException catch (e) {
       _logger.printTrace('Failed to run Android sdk manager: $e');
+      return LicensesAccepted.unknown;
+    }
+  }
+
+  /// Fallback license check for Android cmdline-tools versions where
+  /// `sdkmanager --licenses` no longer prints a parseable status
+  /// (see https://github.com/flutter/flutter/issues/191487).
+  LicensesAccepted _licensesAcceptedFromDisk() {
+    if (_androidSdk == null || !_androidSdk.licensesAvailable) {
+      return LicensesAccepted.none;
+    }
+    final Directory licensesDir = _androidSdk.directory.childDirectory('licenses');
+    try {
+      final bool hasAcceptedLicense = licensesDir.listSync().whereType<File>().any(
+        (File file) => !file.basename.startsWith('.') && file.lengthSync() > 0,
+      );
+      return hasAcceptedLicense ? LicensesAccepted.all : LicensesAccepted.none;
+    } on FileSystemException {
       return LicensesAccepted.unknown;
     }
   }

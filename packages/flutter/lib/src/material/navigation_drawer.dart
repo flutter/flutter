@@ -268,9 +268,8 @@ class NavigationDrawerDestination extends StatelessWidget {
     final NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerTheme.of(context);
     final NavigationDrawerThemeData defaults = _NavigationDrawerDefaultsM3(context);
 
-    final Animation<double> animation = _NavigationDrawerDestinationInfo.of(
-      context,
-    ).selectedAnimation;
+    final Animation<double> animation = _NavigationDrawerDestinationInfo.of(context)
+        .selectedAnimation;
 
     return _NavigationDestinationBuilder(
       buildIcon: (BuildContext context) {
