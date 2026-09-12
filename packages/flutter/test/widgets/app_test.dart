@@ -603,7 +603,88 @@ void main() {
       ),
     );
 
-    // FocusScope enclosing the routing introduces an explicit child semantics node.
+    // FocusScope's explicitChildNodes prevents WidgetsApp's Directionality from
+    // merging with the route's semantics node, ensuring the route remains an
+    // explicit child node even when it is the sole entry in the Navigator.
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(label: 'route content', textDirection: TextDirection.ltr),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    // Inserting an overlay entry (such as Autocomplete options or a dialog) does
+    // not reparent the route's semantics node.
+    final entry = OverlayEntry(
+      builder: (BuildContext context) =>
+          const Text('overlay content', textDirection: TextDirection.ltr),
+    );
+    addTearDown(entry.remove);
+    delegate.navigatorKey.currentState!.overlay!.insert(entry);
+    await tester.pump();
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(label: 'route content', textDirection: TextDirection.ltr),
+                  ],
+                ),
+                TestSemantics(label: 'overlay content', textDirection: TextDirection.ltr),
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('WidgetsApp.router with routerConfig produces expected semantics tree structure', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return const Text('route content', textDirection: TextDirection.ltr);
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
+    final routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
+
+    await tester.pumpWidget(
+      WidgetsApp.router(routerConfig: routerConfig, color: const Color(0xFF123456)),
+    );
+
     expect(
       semantics,
       hasSemantics(
