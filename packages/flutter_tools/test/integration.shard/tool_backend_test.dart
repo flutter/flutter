@@ -34,8 +34,7 @@ void main() {
       result,
       const ProcessResultMatcher(
         exitCode: 1,
-        stderrPattern:
-            'PROJECT_DIR environment variable must be set to the location of Flutter project to be built.',
+        stderrPattern: 'PROJECT_DIR environment variable must be set to the location of Flutter project to be built.',
       ),
     );
   });

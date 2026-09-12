@@ -89,143 +89,137 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgets(
-    'Switch emits light haptic vibration on tap',
-    (WidgetTester tester) async {
-      final Key switchKey = UniqueKey();
-      var value = false;
+  testWidgets('Switch emits light haptic vibration on tap', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    var value = false;
 
-      final log = <MethodCall>[];
+    final log = <MethodCall>[];
 
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
-        MethodCall methodCall,
-      ) async {
-        log.add(methodCall);
-        return null;
-      });
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+      MethodCall methodCall,
+    ) async {
+      log.add(methodCall);
+      return null;
+    });
 
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Center(
-                child: CupertinoSwitch(
-                  key: switchKey,
-                  value: value,
-                  dragStartBehavior: DragStartBehavior.down,
-                  onChanged: (bool newValue) {
-                    setState(() {
-                      value = newValue;
-                    });
-                  },
-                ),
-              );
-            },
-          ),
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: CupertinoSwitch(
+                key: switchKey,
+                value: value,
+                dragStartBehavior: DragStartBehavior.down,
+                onChanged: (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+              ),
+            );
+          },
         ),
-      );
+      ),
+    );
 
-      await tester.tap(find.byKey(switchKey));
-      await tester.pump();
+    await tester.tap(find.byKey(switchKey));
+    await tester.pump();
 
-      expect(log, hasLength(1));
-      expect(
-        log.single,
-        isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'),
-      );
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+    expect(log, hasLength(1));
+    expect(
+      log.single,
+      isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'),
+    );
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-  testWidgets(
-    'Using other widgets that rebuild the switch will not cause vibrations',
-    (WidgetTester tester) async {
-      final Key switchKey = UniqueKey();
-      final Key switchKey2 = UniqueKey();
-      var value = false;
-      var value2 = false;
-      final log = <MethodCall>[];
+  testWidgets('Using other widgets that rebuild the switch will not cause vibrations', (
+    WidgetTester tester,
+  ) async {
+    final Key switchKey = UniqueKey();
+    final Key switchKey2 = UniqueKey();
+    var value = false;
+    var value2 = false;
+    final log = <MethodCall>[];
 
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
-        MethodCall methodCall,
-      ) async {
-        log.add(methodCall);
-        return null;
-      });
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+      MethodCall methodCall,
+    ) async {
+      log.add(methodCall);
+      return null;
+    });
 
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Center(
-                child: Column(
-                  children: <Widget>[
-                    CupertinoSwitch(
-                      key: switchKey,
-                      value: value,
-                      onChanged: (bool newValue) {
-                        setState(() {
-                          value = newValue;
-                        });
-                      },
-                    ),
-                    CupertinoSwitch(
-                      key: switchKey2,
-                      value: value2,
-                      onChanged: (bool newValue) {
-                        setState(() {
-                          value2 = newValue;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: Column(
+                children: <Widget>[
+                  CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                  CupertinoSwitch(
+                    key: switchKey2,
+                    value: value2,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value2 = newValue;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
         ),
-      );
+      ),
+    );
 
-      await tester.tap(find.byKey(switchKey));
-      await tester.pump();
+    await tester.tap(find.byKey(switchKey));
+    await tester.pump();
 
-      expect(log, hasLength(1));
-      expect(
-        log[0],
-        isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'),
-      );
+    expect(log, hasLength(1));
+    expect(
+      log[0],
+      isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'),
+    );
 
-      await tester.tap(find.byKey(switchKey2));
-      await tester.pump();
+    await tester.tap(find.byKey(switchKey2));
+    await tester.pump();
 
-      expect(log, hasLength(2));
-      expect(
-        log[1],
-        isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'),
-      );
+    expect(log, hasLength(2));
+    expect(
+      log[1],
+      isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'),
+    );
 
-      await tester.tap(find.byKey(switchKey));
-      await tester.pump();
+    await tester.tap(find.byKey(switchKey));
+    await tester.pump();
 
-      expect(log, hasLength(3));
-      expect(
-        log[2],
-        isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'),
-      );
+    expect(log, hasLength(3));
+    expect(
+      log[2],
+      isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'),
+    );
 
-      await tester.tap(find.byKey(switchKey2));
-      await tester.pump();
+    await tester.tap(find.byKey(switchKey2));
+    await tester.pump();
 
-      expect(log, hasLength(4));
-      expect(
-        log[3],
-        isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'),
-      );
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+    expect(log, hasLength(4));
+    expect(
+      log[3],
+      isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'),
+    );
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('Haptic vibration triggers on drag', (WidgetTester tester) async {
     var value = false;
@@ -270,63 +264,61 @@ void main() {
     );
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-  testWidgets(
-    'No haptic vibration triggers from a programmatic value change',
-    (WidgetTester tester) async {
-      final Key switchKey = UniqueKey();
-      var value = false;
+  testWidgets('No haptic vibration triggers from a programmatic value change', (
+    WidgetTester tester,
+  ) async {
+    final Key switchKey = UniqueKey();
+    var value = false;
 
-      final log = <MethodCall>[];
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
-        MethodCall methodCall,
-      ) async {
-        log.add(methodCall);
-        return null;
-      });
+    final log = <MethodCall>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+      MethodCall methodCall,
+    ) async {
+      log.add(methodCall);
+      return null;
+    });
 
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Center(
-                child: Column(
-                  children: <Widget>[
-                    CupertinoButton(
-                      child: const Text('Button'),
-                      onPressed: () {
-                        setState(() {
-                          value = !value;
-                        });
-                      },
-                    ),
-                    CupertinoSwitch(
-                      key: switchKey,
-                      value: value,
-                      onChanged: (bool newValue) {
-                        setState(() {
-                          value = newValue;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: Column(
+                children: <Widget>[
+                  CupertinoButton(
+                    child: const Text('Button'),
+                    onPressed: () {
+                      setState(() {
+                        value = !value;
+                      });
+                    },
+                  ),
+                  CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
         ),
-      );
+      ),
+    );
 
-      expect(value, isFalse);
+    expect(value, isFalse);
 
-      await tester.tap(find.byType(CupertinoButton));
-      expect(value, isTrue);
-      await tester.pump();
+    await tester.tap(find.byType(CupertinoButton));
+    expect(value, isTrue);
+    await tester.pump();
 
-      expect(log, hasLength(0));
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+    expect(log, hasLength(0));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {
     var value = false;

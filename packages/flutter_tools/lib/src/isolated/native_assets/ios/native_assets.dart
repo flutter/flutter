@@ -11,7 +11,7 @@ import '../macos/native_assets_host.dart';
 import '../native_assets.dart';
 
 // TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
-const targetIOSVersion = 13;
+const targetIOSVersion = 15;
 
 IOSSdk getIOSSdk(EnvironmentType environmentType) {
   return switch (environmentType) {

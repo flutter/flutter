@@ -7,6 +7,7 @@ import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
+import 'src/android/android_workflow.dart' as android_workflow;
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -185,7 +186,7 @@ Future<void> main(List<String> args) async {
   );
 }
 
-/// The name of the command in [args], or null if there isn't one.
+/// The name of the command in `args`, or null if there isn't one.
 ///
 /// Global options can come before the command, so it can't be found by
 /// position. A throwaway parser walks past them instead: trailing options are
@@ -196,9 +197,8 @@ Future<void> main(List<String> args) async {
 String? findCommandName(List<String> args, {ToolContext? toolContext}) {
   final ArgResults results;
   try {
-    results = FlutterCommandRunner(
-      toolContext: toolContext ?? _FallbackToolContext(),
-    ).argParser.parse(args);
+    results = FlutterCommandRunner(toolContext: toolContext ?? _FallbackToolContext()).argParser
+        .parse(args);
   } on ArgParserException {
     // The real parser will complain about these later.
     return null;
@@ -207,8 +207,7 @@ String? findCommandName(List<String> args, {ToolContext? toolContext}) {
 }
 
 class _FallbackToolContext implements ToolContext {
-  _FallbackToolContext({OutputPreferences? outputPreferences})
-    : _outputPreferences = outputPreferences;
+  _FallbackToolContext() : _outputPreferences = null;
 
   final OutputPreferences? _outputPreferences;
 
@@ -290,8 +289,14 @@ List<FlutterCommand> generateCommands({
   ),
   CustomDevicesCommand(featureFlags: featureFlags, toolContext: toolDependencies.toolContext),
   CreateCommand(verboseHelp: verboseHelp, extensionTemplateManager: extensionTemplateManager),
-  DaemonCommand(hidden: !verboseHelp),
-  DebugAdapterCommand(verboseHelp: verboseHelp),
+  DaemonCommand(
+    androidContext: toolDependencies.androidContext,
+    androidWorkflow: android_workflow.androidWorkflow,
+    deviceManager: globals.deviceManager,
+    hidden: !verboseHelp,
+    toolContext: toolDependencies.toolContext,
+  ),
+  DebugAdapterCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DevicesCommand(
     deviceManager: globals.deviceManager!,
     doctor: globals.doctor!,
@@ -306,7 +311,7 @@ List<FlutterCommand> generateCommands({
     doctor: globals.doctor,
     extensionManager: extensionManager,
   ),
-  DowngradeCommand(verboseHelp: verboseHelp, logger: toolDependencies.toolContext.logger),
+  DowngradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DriveCommand(
     verboseHelp: verboseHelp,
     fileSystem: toolDependencies.toolContext.fs,
@@ -326,7 +331,11 @@ List<FlutterCommand> generateCommands({
   GenerateLocalizationsCommand(toolContext: toolDependencies.toolContext),
   InstallCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   LogsCommand(toolContext: toolDependencies.toolContext),
-  PackagesCommand(),
+  PackagesCommand(
+    buildSystem: toolDependencies.buildSystem,
+    toolContext: toolDependencies.toolContext,
+    verboseHelp: verboseHelp,
+  ),
   PrecacheCommand(
     verboseHelp: verboseHelp,
     cache: toolDependencies.toolContext.cache,
@@ -343,11 +352,11 @@ List<FlutterCommand> generateCommands({
     nativeAssetsBuilder: toolDependencies.toolContext.nativeAssetsBuilder,
   ),
   WidgetPreviewCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
-  UpgradeCommand(verboseHelp: verboseHelp),
+  UpgradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   SymbolizeCommand(toolContext: toolDependencies.toolContext),
   // Development-only commands. These are always hidden,
   IdeConfigCommand(toolContext: toolDependencies.toolContext),
-  UpdatePackagesCommand(verboseHelp: verboseHelp),
+  UpdatePackagesCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
 ];
 
 /// An abstraction for instantiation of the correct logger type.
@@ -355,14 +364,11 @@ List<FlutterCommand> generateCommands({
 /// Our logger class hierarchy and runtime requirements are overly complicated.
 class LoggerFactory {
   LoggerFactory({
-    required Terminal terminal,
-    required Stdio stdio,
-    required OutputPreferences outputPreferences,
-    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  }) : _terminal = terminal,
-       _stdio = stdio,
-       _stopwatchFactory = stopwatchFactory,
-       _outputPreferences = outputPreferences;
+    required this._terminal,
+    required this._stdio,
+    required this._outputPreferences,
+    this._stopwatchFactory = const StopwatchFactory(),
+  });
 
   final Terminal _terminal;
   final Stdio _stdio;

@@ -20,8 +20,11 @@ typedef ChildLayouter = Size Function(RenderBox child, BoxConstraints constraint
 ///
 /// [ChildLayoutHelper.getDryBaseline] and [ChildLayoutHelper.getBaseline] adhere
 /// to this signature.
-typedef ChildBaselineGetter =
-    double? Function(RenderBox child, BoxConstraints constraints, TextBaseline baseline);
+typedef ChildBaselineGetter = double? Function(
+  RenderBox child,
+  BoxConstraints constraints,
+  TextBaseline baseline,
+);
 
 /// A collection of static functions to layout a [RenderBox] child with the
 /// given set of [BoxConstraints].
