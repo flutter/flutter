@@ -336,9 +336,7 @@ abstract mixin class BaseWindowControllerLinux {
     _view = _FlView(engine, isSizedToContent: isSizedToContent);
     _viewMonitor = _FlViewMonitor(_view, onFirstFrame: onFirstFrame);
     final int viewId = _view.getId();
-    rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    rootView = flutterViewForId(viewId);
     _view.show();
     _window.add(_view);
   }
