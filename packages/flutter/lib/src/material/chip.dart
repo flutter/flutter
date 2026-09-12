@@ -1729,8 +1729,8 @@ class _ChipRenderTheme {
 
 class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_ChipSlot, RenderBox> {
   _RenderChip({
-    required _ChipRenderTheme theme,
-    required TextDirection textDirection,
+    required this._theme,
+    required this._textDirection,
     this.value,
     this.isEnabled,
     required this.checkmarkAnimation,
@@ -1738,12 +1738,9 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     required this.deleteDrawerAnimation,
     required this.enableAnimation,
     this.avatarBorder,
-    BoxConstraints? avatarBoxConstraints,
-    BoxConstraints? deleteIconBoxConstraints,
-  }) : _theme = theme,
-       _textDirection = textDirection,
-       _avatarBoxConstraints = avatarBoxConstraints,
-       _deleteIconBoxConstraints = deleteIconBoxConstraints;
+    this._avatarBoxConstraints,
+    this._deleteIconBoxConstraints,
+  });
 
   bool? value;
   bool? isEnabled;

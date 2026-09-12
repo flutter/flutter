@@ -436,9 +436,8 @@ void main() {
 
       final BuildApkCommand commandWithoutFlag = await runBuildApkCommand(projectPath);
       expect(
-        (await commandWithoutFlag.unifiedAnalyticsUsageValues(
-          'run',
-        )).eventData['buildApkSplitPerAbi'],
+        (await commandWithoutFlag.unifiedAnalyticsUsageValues('run'))
+            .eventData['buildApkSplitPerAbi'],
         isFalse,
       );
     }, overrides: <Type, Generator>{AndroidBuilder: () => FakeAndroidBuilder()});

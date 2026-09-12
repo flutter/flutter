@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import '../../gallery_localizations.dart';
 
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';

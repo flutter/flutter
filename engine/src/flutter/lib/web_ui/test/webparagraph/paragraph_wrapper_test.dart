@@ -19,26 +19,23 @@ void main() {
 Future<void> testMain() async {
   setUpUnitTests();
 
-  test(
-    'Text wrapper, 10 lines, 3 trailing whitespaces on each line except the one that has a cluster break',
-    () {
-      final builder = WebParagraphBuilder(ahemStyle);
-      builder.addText(
-        'World   domination   is such   an ugly   phrase - I   prefer to   call it   world   optimisation.   ',
-      );
-      final WebParagraph paragraph = builder.build();
-      paragraph.layout(const ParagraphConstraints(width: 250));
-      final List<TextLine> lines = paragraph.lines;
-      expect(lines.length, 10);
-      for (var i = 0; i < 10; i++) {
-        if (i == 8) {
-          expect(lines[i].whitespacesRange.isEmpty, true);
-        } else {
-          expect(lines[i].whitespacesRange.size, 3);
-        }
+  test('Text wrapper, 10 lines, 3 trailing whitespaces on each line except the one that has a cluster break', () {
+    final builder = WebParagraphBuilder(ahemStyle);
+    builder.addText(
+      'World   domination   is such   an ugly   phrase - I   prefer to   call it   world   optimisation.   ',
+    );
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 250));
+    final List<TextLine> lines = paragraph.lines;
+    expect(lines.length, 10);
+    for (var i = 0; i < 10; i++) {
+      if (i == 8) {
+        expect(lines[i].whitespacesRange.isEmpty, true);
+      } else {
+        expect(lines[i].whitespacesRange.size, 3);
       }
-    },
-  );
+    }
+  });
   test('Text wrapper, 4 lines, 3 trailing whitespaces on each line', () {
     final builder = WebParagraphBuilder(ahemStyle);
     builder.addText(
