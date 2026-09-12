@@ -212,6 +212,7 @@ void main() {
                 commandPath: 'version',
                 result: 'success',
                 commandHasTerminal: false,
+                hostArch: globals.os.hostPlatform.cliName,
               ),
             ),
           );
