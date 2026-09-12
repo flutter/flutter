@@ -1381,9 +1381,13 @@ class IOSDevice extends Device {
   }
 
   bool get _supportsDevicectl {
-    final Version? xcodeVersion = _xcode?.currentVersion;
-    return isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27 &&
-        _xcode!.isDevicectlInstalled;
+    final Xcode? xcode = _xcode ?? globals.xcode;
+    final Version? xcodeVersion = xcode?.currentVersion;
+    return isCoreDevice &&
+        xcode != null &&
+        xcodeVersion != null &&
+        xcodeVersion.major >= 27 &&
+        xcode.isDevicectlInstalled;
   }
 
   @override
@@ -1419,38 +1423,50 @@ class IOSDevice extends Device {
     if (!_supportsDevicectl) {
       throwToolExit('flutter capture recording requires Xcode 27 or higher.');
     }
+    final Process process;
     try {
-      final Process process = await _coreDeviceControl.startScreenRecording(
+      process = await _coreDeviceControl.startScreenRecording(
         deviceId: id,
         destination: outputFile.path,
       );
-      if (duration != null) {
-        await Future.any(<Future<void>>[
-          process.exitCode,
-          Future<void>.delayed(duration).then((_) => ProcessSignal.sigint.kill(process)),
-        ]);
-      }
-      await process.exitCode;
-      return;
     } on Exception catch (error) {
       _handleDevicectlError(error, 'record screen');
+    }
+    final stderrBuf = StringBuffer();
+    final Future<void> stderrFuture = process.stderr
+        .transform(utf8.decoder)
+        .forEach(stderrBuf.write);
+
+    if (duration != null) {
+      await Future.any(<Future<void>>[
+        process.exitCode,
+        Future<void>.delayed(duration).then((_) => ProcessSignal.sigint.kill(process)),
+      ]);
+    }
+    final (int exitCode, _) = await (
+      process.exitCode,
+      stderrFuture,
+    ).wait;
+    if (exitCode != 0) {
+      _handleDevicectlError(
+        ProcessException('devicectl', <String>[], stderrBuf.toString(), exitCode),
+        'record screen',
+      );
     }
   }
 
   Never _handleDevicectlError(Exception error, String operation) {
     // devicectl surfaces errors as ProcessException with stderr containing
     // these error codes; no typed exception hierarchy exists upstream.
-    if (error is ProcessException) {
-      final String message = error.message;
-      if (message.contains('CoreDeviceError error 4000') ||
-          message.contains('CoreDeviceError error 4016') ||
-          message.contains('RemotePairingError error 2') ||
-          message.contains('Connection was invalidated')) {
-        throwToolExit(
-          'Failed to establish a connection to the device. '
-          'Please make sure the device is available and try again.',
-        );
-      }
+    final errorMessage = error.toString();
+    if (errorMessage.contains('CoreDeviceError error 4000') ||
+        errorMessage.contains('CoreDeviceError error 4016') ||
+        errorMessage.contains('RemotePairingError error 2') ||
+        errorMessage.contains('Connection was invalidated')) {
+      throwToolExit(
+        'Failed to establish a connection to the device. '
+        'Please make sure the device is available and try again.',
+      );
     }
     throwToolExit('Failed to $operation with devicectl: $error');
   }

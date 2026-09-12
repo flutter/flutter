@@ -863,7 +863,7 @@ class AndroidDevice extends Device {
     Duration? duration,
   }) async {
     // https://developer.android.com/tools/adb#screenrecord
-    const int maxAdbSeconds = 180;
+    const maxAdbSeconds = 180;
     final effectiveDuration = duration != null
         ? Duration(seconds: duration.inSeconds.clamp(1, maxAdbSeconds))
         : const Duration(seconds: maxAdbSeconds);
@@ -878,7 +878,7 @@ class AndroidDevice extends Device {
     final Process process = await _processManager.start(
       adbCommandForDevice(args),
     );
-    int recordExitCode = -1;
+    var recordExitCode = -1;
     try {
       recordExitCode = await process.exitCode;
     } finally {
@@ -887,7 +887,7 @@ class AndroidDevice extends Device {
           adbCommandForDevice(<String>['pull', remotePath, outputFile.path]),
           throwOnError: true,
         );
-      } on Exception catch (error) {
+      } on Exception {
         if (recordExitCode != 0) {
           throwToolExit('screenrecord failed with exit code $recordExitCode.');
         }

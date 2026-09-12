@@ -731,7 +731,9 @@ class IOSSimulator extends Device {
     final Process process = await _simControl.startRecordVideo(id, outputFile.path);
     final stderrBuf = StringBuffer();
     final recordingStarted = Completer<void>();
-    process.stderr.transform(utf8.decoder).listen((String data) {
+    final Future<void> stderrFuture = process.stderr
+        .transform(utf8.decoder)
+        .forEach((String data) {
       stderrBuf.write(data);
       if (!recordingStarted.isCompleted && data.contains('Recording started')) {
         recordingStarted.complete();
@@ -751,7 +753,10 @@ class IOSSimulator extends Device {
         ProcessSignal.sigint.kill(process);
       }
     }
-    final int exitCode = await process.exitCode;
+    final (int exitCode, _) = await (
+      process.exitCode,
+      stderrFuture,
+    ).wait;
     if (exitCode != 0) {
       throwToolExit('Screen recording failed (exit $exitCode): $stderrBuf');
     }

@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import '../base/common.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -1067,10 +1066,6 @@ class IOSCoreDeviceControl {
     required String deviceId,
     required String destination,
   }) async {
-    if (!_xcode.isDevicectlInstalled) {
-      throwToolExit('devicectl is not installed.');
-    }
-
     return _processUtils.start(<String>[
       ..._xcode.xcrunCommand(),
       'devicectl',

@@ -4161,6 +4161,36 @@ invalid JSON
         expect(logger.errorText, contains('devicectl returned unexpected JSON response'));
       });
     });
+
+    group('start screen recording', () {
+      const deviceId = 'device-id';
+      const destination = '/path/to/recording.mp4';
+
+      testWithoutContext('Successful start screen recording', () async {
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'capture',
+              'screen-record',
+              '--device',
+              deviceId,
+              '--destination',
+              destination,
+            ],
+          ),
+        );
+
+        final Process process = await deviceControl.startScreenRecording(
+          deviceId: deviceId,
+          destination: destination,
+        );
+        expect(process, isNotNull);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+    });
   });
 }
 
@@ -4185,10 +4215,20 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   List<IOSCoreDeviceRunningProcess> runningProcesses;
   bool get terminateProcessCalled => processTerminated != null;
   bool takeScreenshotSuccess;
+  Process? startScreenRecordingProcess;
+  Exception? startScreenRecordingException;
 
   @override
   Future<bool> takeScreenshot({required String deviceId, required String destination}) async {
     return takeScreenshotSuccess;
+  }
+
+  @override
+  Future<Process> startScreenRecording({required String deviceId, required String destination}) async {
+    if (startScreenRecordingException != null) {
+      throw startScreenRecordingException!;
+    }
+    return startScreenRecordingProcess ?? FakeProcess();
   }
 
   @override
