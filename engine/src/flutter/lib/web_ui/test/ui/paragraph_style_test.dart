@@ -134,6 +134,9 @@ final Map<String, _ParagraphStylePropertyPopulator> _populatorsA =
       'locale': (_TestParagraphStyleBuilder builder) {
         builder.locale = const ui.Locale('en', 'US');
       },
+      'fakeMissingFontStyles': (_TestParagraphStyleBuilder builder) {
+        builder.fakeMissingFontStyles = true;
+      },
     };
 
 final Map<String, _ParagraphStylePropertyPopulator> _populatorsB =
@@ -174,6 +177,9 @@ final Map<String, _ParagraphStylePropertyPopulator> _populatorsB =
       'locale': (_TestParagraphStyleBuilder builder) {
         builder.locale = const ui.Locale('fr', 'CA');
       },
+      'fakeMissingFontStyles': (_TestParagraphStyleBuilder builder) {
+        builder.fakeMissingFontStyles = false;
+      },
     };
 
 class _TestParagraphStyleBuilder {
@@ -189,6 +195,7 @@ class _TestParagraphStyleBuilder {
   ui.StrutStyle? strutStyle;
   String? ellipsis;
   ui.Locale? locale;
+  bool? fakeMissingFontStyles;
 
   ui.ParagraphStyle build() {
     return ui.ParagraphStyle(
@@ -204,6 +211,7 @@ class _TestParagraphStyleBuilder {
       strutStyle: strutStyle,
       ellipsis: ellipsis,
       locale: locale,
+      fakeMissingFontStyles: fakeMissingFontStyles,
     );
   }
 }
