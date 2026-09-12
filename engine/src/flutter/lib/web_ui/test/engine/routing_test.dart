@@ -323,6 +323,34 @@ void testMain() {
     expect(myWindow.browserHistory.urlStrategy!.getPath(), '/baz?abc=def#fragment');
   });
 
+  test('routeInformationUpdated preserves percent-encoding in uri', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/180373.
+    await myWindow.debugInitializeHistory(
+      TestUrlStrategy.fromEntry(const TestHistoryEntry('initial state', null, '/initial')),
+      useSingle: false,
+    );
+    expect(myWindow.browserHistory, isA<MultiEntriesBrowserHistory>());
+
+    final callback = Completer<void>();
+    myWindow.sendPlatformMessage(
+      'flutter/navigation',
+      const JSONMethodCodec().encodeMethodCall(
+        const MethodCall('routeInformationUpdated', <String, dynamic>{
+          'uri': 'http://myhostname.com/item/foo%20bar%2Fbaz?abc=d%26ef#frag%20ment',
+        }),
+      ),
+      (_) {
+        callback.complete();
+      },
+    );
+    await callback.future;
+    expect(myWindow.browserHistory, isA<MultiEntriesBrowserHistory>());
+    expect(
+      myWindow.browserHistory.urlStrategy!.getPath(),
+      '/item/foo%20bar%2Fbaz?abc=d%26ef#frag%20ment',
+    );
+  });
+
   test('can replace in MultiEntriesBrowserHistory', () async {
     await myWindow.debugInitializeHistory(
       TestUrlStrategy.fromEntry(const TestHistoryEntry('initial state', null, '/initial')),
