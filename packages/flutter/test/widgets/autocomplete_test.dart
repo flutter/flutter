@@ -3558,19 +3558,17 @@ void main() {
             child: RawAutocomplete<String>(
               initialValue: const TextEditingValue(text: 'X'),
               optionsBuilder: (TextEditingValue textEditingValue) => <String>['Y'],
-              fieldViewBuilder:
-                  (
-                    BuildContext context,
-                    TextEditingController textEditingController,
-                    FocusNode focusNode,
-                    VoidCallback voidCallBack,
-                  ) => TestTextField(controller: textEditingController),
-              optionsViewBuilder:
-                  (
-                    BuildContext context,
-                    AutocompleteOnSelected<String> onSelected,
-                    Iterable<String> options,
-                  ) => Container(),
+              fieldViewBuilder: (
+                BuildContext context,
+                TextEditingController textEditingController,
+                FocusNode focusNode,
+                VoidCallback voidCallBack,
+              ) => TestTextField(controller: textEditingController),
+              optionsViewBuilder: (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) => Container(),
             ),
           ),
         ),
@@ -3730,12 +3728,11 @@ void main() {
                   ) {
                     return TestTextField(controller: textEditingController, focusNode: focusNode);
                   },
-              optionsViewBuilder:
-                  (
-                    BuildContext context,
-                    AutocompleteOnSelected<String> onSelected,
-                    Iterable<String> options,
-                  ) => const Placeholder(),
+              optionsViewBuilder: (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) => const Placeholder(),
             ),
             const SizedBox(height: 200),
           ],
@@ -3794,12 +3791,11 @@ void main() {
                   ) {
                     return TestTextField(controller: textEditingController, focusNode: focusNode);
                   },
-              optionsViewBuilder:
-                  (
-                    BuildContext context,
-                    AutocompleteOnSelected<String> onSelected,
-                    Iterable<String> options,
-                  ) => const Placeholder(),
+              optionsViewBuilder: (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) => const Placeholder(),
             ),
             const SizedBox(height: 200),
           ],
@@ -3965,13 +3961,12 @@ void main() {
               RawAutocomplete<String>(
                 optionsBuilder: (TextEditingValue value) =>
                     kOptions.where((String option) => option.contains(value.text.toLowerCase())),
-                fieldViewBuilder:
-                    (
-                      BuildContext context,
-                      TextEditingController textEditingController,
-                      FocusNode focusNode,
-                      VoidCallback onFieldSubmitted,
-                    ) => TestTextField(controller: textEditingController, focusNode: focusNode),
+                fieldViewBuilder: (
+                  BuildContext context,
+                  TextEditingController textEditingController,
+                  FocusNode focusNode,
+                  VoidCallback onFieldSubmitted,
+                ) => TestTextField(controller: textEditingController, focusNode: focusNode),
                 optionsViewBuilder:
                     (
                       BuildContext context,

@@ -242,12 +242,11 @@ class _StretchEffectShader {
 
   static void initializeShader() {
     if (!_initCalled) {
-      ui.FragmentProgram.fromAsset('shaders/stretch_effect.frag').then((
-        ui.FragmentProgram program,
-      ) {
-        _program = program;
-        _initialized = true;
-      });
+      ui.FragmentProgram.fromAsset('shaders/stretch_effect.frag')
+          .then((ui.FragmentProgram program) {
+            _program = program;
+            _initialized = true;
+          });
       _initCalled = true;
     }
   }

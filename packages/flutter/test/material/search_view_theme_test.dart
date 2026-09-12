@@ -168,9 +168,8 @@ void main() {
         },
       );
       return MaterialApp(
-        theme: ThemeData.from(
-          colorScheme: const ColorScheme.light(),
-        ).copyWith(searchViewTheme: overallTheme),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light())
+            .copyWith(searchViewTheme: overallTheme),
         home: Scaffold(
           body: Center(
             // If the SearchViewThemeData widget is present, it's used

@@ -294,8 +294,7 @@ void main() async {
         commandList.add(
           FakeCommand(
             command: <String>['file', binaryPath],
-            stdout:
-                'Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64:Mach-O 64-bit executable arm64]',
+            stdout: 'Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64:Mach-O 64-bit executable arm64]',
           ),
         );
       }
@@ -320,8 +319,7 @@ void main() async {
           commandList.add(
             FakeCommand(
               command: <String>['file', binaryPath],
-              stdout:
-                  'Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64:Mach-O 64-bit executable arm64]',
+              stdout: 'Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64:Mach-O 64-bit executable arm64]',
             ),
           );
         }

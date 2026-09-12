@@ -1310,23 +1310,24 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               child: MediaQuery(
                 data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: fakeBottomPadding)),
                 child: WidgetInspector(
-                  exitWidgetSelectionButtonBuilder:
-                      (context, {required key, required onPressed, required semanticsLabel}) =>
-                          const Text(exitLabel),
-                  moveExitWidgetSelectionButtonBuilder:
-                      (
-                        context, {
-                        required onPressed,
-                        required semanticsLabel,
-                        bool? usesDefaultAlignment,
-                      }) => const Text(moveLabel),
-                  tapBehaviorButtonBuilder:
-                      (
-                        context, {
-                        required onPressed,
-                        required selectionOnTapEnabled,
-                        required semanticsLabel,
-                      }) => const Text(tapLabel),
+                  exitWidgetSelectionButtonBuilder: (
+                    context, {
+                    required key,
+                    required onPressed,
+                    required semanticsLabel,
+                  }) => const Text(exitLabel),
+                  moveExitWidgetSelectionButtonBuilder: (
+                    context, {
+                    required onPressed,
+                    required semanticsLabel,
+                    bool? usesDefaultAlignment,
+                  }) => const Text(moveLabel),
+                  tapBehaviorButtonBuilder: (
+                    context, {
+                    required onPressed,
+                    required selectionOnTapEnabled,
+                    required semanticsLabel,
+                  }) => const Text(tapLabel),
                   child: const SizedBox(),
                 ),
               ),
@@ -1975,9 +1976,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 final Element elementA = findElementABC('a');
                 service.setSelection(elementA, 'my-group');
 
-                final jsonObject =
-                    json.decode(service.getSelectedWidget(null, 'my-group'))
-                        as Map<String, Object?>;
+                final jsonObject = json.decode(
+                  service.getSelectedWidget(null, 'my-group'),
+                ) as Map<String, Object?>;
                 final creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
 
                 expect(creationLocation, isNotNull);
@@ -2075,9 +2076,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 service.setSelection(richText, 'my-group');
                 service.addPubRootDirectories(<String>[pubRootTest]);
 
-                final jsonObject =
-                    json.decode(service.getSelectedWidget(null, 'my-group'))
-                        as Map<String, Object?>;
+                final jsonObject = json.decode(
+                  service.getSelectedWidget(null, 'my-group'),
+                ) as Map<String, Object?>;
                 expect(jsonObject, isNot(contains('createdByLocalProject')));
                 final creationLocation = jsonObject['creationLocation']! as Map<String, Object?>;
                 expect(creationLocation, isNotNull);
@@ -3099,12 +3100,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             service.setSelection(richTextDiagnostic.value, 'my-group');
 
             service.resetPubRootDirectories();
-            var summarySelection =
-                await service.testExtension(
-                      WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name,
-                      <String, String>{'objectGroup': group},
-                    )
-                    as Map<String, Object?>?;
+            var summarySelection = await service.testExtension(
+              WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name,
+              <String, String>{'objectGroup': group},
+            ) as Map<String, Object?>?;
             // No summary selection because we haven't set the pub root directories
             // yet to indicate what directories are in the summary tree.
             expect(summarySelection, isNull);
@@ -4221,9 +4220,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(creationLocation, isNotNull);
           // This RichText widget is created by the build method of the Text widget
           // thus the creation location is in text.dart not basic.dart
-          final List<String> pathSegmentsFramework = Uri.parse(
-            creationLocation['file']! as String,
-          ).pathSegments;
+          final List<String> pathSegmentsFramework = Uri.parse(creationLocation['file']! as String)
+              .pathSegments;
           expect(pathSegmentsFramework.join('/'), endsWith('/flutter/lib/src/widgets/text.dart'));
 
           // Strip off /src/widgets/text.dart.
@@ -5300,14 +5298,16 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
         // Verify we get the same image if we go through the service extension
         // instead of invoking the screenshot method directly.
-        final Future<Object?> base64ScreenshotFuture = service
-            .testExtension(WidgetInspectorServiceExtensions.screenshot.name, <String, String>{
-              'id': service.toId(clipRect, 'group')!,
-              'width': '100.0',
-              'height': '100.0',
-              'margin': '20.0',
-              'debugPaint': 'true',
-            });
+        final Future<Object?> base64ScreenshotFuture = service.testExtension(
+          WidgetInspectorServiceExtensions.screenshot.name,
+          <String, String>{
+            'id': service.toId(clipRect, 'group')!,
+            'width': '100.0',
+            'height': '100.0',
+            'margin': '20.0',
+            'debugPaint': 'true',
+          },
+        );
 
         final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
         final ui.Image screenshotImage = (await binding.runAsync<ui.Image>(() async {
@@ -5848,7 +5848,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
         // We need the runTest to setup the fake async in the test binding.
         await binding.runTest(() async {
-          // ignore: unawaited_futures
           binding.reassembleApplication();
           await binding.pump();
         }, () {});

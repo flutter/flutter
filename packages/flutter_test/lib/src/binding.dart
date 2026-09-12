@@ -307,14 +307,13 @@ mixin _ChildWindowHierarchyMixin {
 
 class _TestWindowController extends WindowController with _ChildWindowHierarchyMixin {
   _TestWindowController({
-    required WindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     Size? size,
     BoxConstraints? constraints,
     String? title,
-  }) : _delegate = delegate,
-       _size = size ?? const Size(800, 600),
+  }) : _size = size ?? const Size(800, 600),
        _constraints = constraints ?? BoxConstraints.loose(const Size(1920, 1080)),
        _title = title ?? 'Test Window',
        super.empty() {
@@ -466,15 +465,14 @@ void _removeChildFromParent(BaseWindowController? parent, BaseWindowController c
 
 class _TestDialogWindowController extends DialogWindowController with _ChildWindowHierarchyMixin {
   _TestDialogWindowController({
-    required DialogWindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     BaseWindowController? parent,
     Size? size,
     BoxConstraints? constraints,
     String? title,
-  }) : _delegate = delegate,
-       _parent = parent,
+  }) : _parent = parent,
        _size = size ?? const Size(800, 600),
        _constraints = constraints ?? BoxConstraints.loose(const Size(1920, 1080)),
        _title = title ?? 'Test Window',
@@ -575,18 +573,14 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
 
 class _TestTooltipWindowController extends TooltipWindowController with _ChildWindowHierarchyMixin {
   _TestTooltipWindowController({
-    required TooltipWindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
-    required BoxConstraints constraints,
-    required ui.Rect anchorRect,
-    required WindowPositioner positioner,
+    required this._constraints,
+    required this._anchorRect,
+    required this._positioner,
     required BaseWindowController parent,
-  }) : _delegate = delegate,
-       _constraints = constraints,
-       _anchorRect = anchorRect,
-       _positioner = positioner,
-       _parent = parent,
+  }) : _parent = parent,
        super.empty() {
     rootView = _TestFlutterView(
       controller: this,
@@ -646,18 +640,14 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
 
 class _TestPopupWindowController extends PopupWindowController with _ChildWindowHierarchyMixin {
   _TestPopupWindowController({
-    required PopupWindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
-    required BoxConstraints constraints,
-    required ui.Rect anchorRect,
-    required WindowPositioner positioner,
+    required this._constraints,
+    required this._anchorRect,
+    required this._positioner,
     required BaseWindowController parent,
-  }) : _delegate = delegate,
-       _constraints = constraints,
-       _anchorRect = anchorRect,
-       _positioner = positioner,
-       _parent = parent,
+  }) : _parent = parent,
        super.empty() {
     rootView = _TestFlutterView(
       controller: this,
@@ -721,21 +711,16 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
 class _TestSatelliteWindowController extends SatelliteWindowController
     with _ChildWindowHierarchyMixin {
   _TestSatelliteWindowController({
-    required SatelliteWindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     required BaseWindowController parent,
-    ui.Rect? anchorRect,
-    required WindowPositioner positioner,
+    this._anchorRect,
+    required this._positioner,
     Size? size,
     BoxConstraints? constraints,
     String? title,
-  }) : _delegate = delegate,
-       _parent = parent,
-       // ignore: unused_field
-       _anchorRect = anchorRect,
-       // ignore: unused_field
-       _positioner = positioner,
+  }) : _parent = parent,
        _size = size ?? const Size(800, 600),
        _constraints = constraints ?? BoxConstraints.loose(const Size(1920, 1080)),
        _title = title ?? 'Test Window',
@@ -839,8 +824,7 @@ class _TestSatelliteWindowController extends SatelliteWindowController
 /// for tests.
 /// * [WindowingOwner], the base class.
 class _TestWindowingOwner extends WindowingOwner {
-  _TestWindowingOwner({required TestPlatformDispatcher platformDispatcher})
-    : _platformDispatcher = platformDispatcher;
+  _TestWindowingOwner({required this._platformDispatcher});
 
   final TestPlatformDispatcher _platformDispatcher;
   BaseWindowController? _activeWindowController;
@@ -1166,8 +1150,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     if (buildOwner == null) {
       return;
     }
-    buildOwner!.focusManager
-        .listenToApplicationLifecycleChangesIfSupported(); // ignore: invalid_use_of_visible_for_testing_member
+    buildOwner!.focusManager.listenToApplicationLifecycleChangesIfSupported(); // ignore: invalid_use_of_visible_for_testing_member
   }
 
   @override
@@ -1735,8 +1718,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // our main future completing.
       assert(Zone.current == _parentZone);
       if (_pendingExceptionDetails != null) {
-        debugPrint =
-            debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
+        debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
         reportTestException(_pendingExceptionDetails!, testDescription);
         _pendingExceptionDetails = null;
       }
@@ -1799,8 +1781,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     var exceptionCount = 0; // number of un-taken exceptions
     FlutterError.onError = (FlutterErrorDetails details) {
       if (_pendingExceptionDetails != null) {
-        debugPrint =
-            debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
+        debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
         if (exceptionCount == 0) {
           exceptionCount = 2;
           FlutterError.dumpErrorToConsole(_pendingExceptionDetails!, forceReport: true);
@@ -1845,8 +1826,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         // However, if someone tries hard enough they could get in a state where this happens.
         // If we silently dropped these errors on the ground, nobody would ever know. So instead
         // we raise them and fail the test after it has already completed.
-        debugPrint =
-            debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
+        debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
         reportTestException(
           FlutterErrorDetails(
             exception: exception,
