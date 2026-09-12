@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'application_package.dart';
@@ -40,7 +41,11 @@ abstract class DesktopDevice extends Device {
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
   final _runningProcesses = <Process>{};
-  final _deviceLogReader = DesktopLogReader();
+  late final DesktopLogReader _deviceLogReader = createLogReader();
+
+  /// Creates the [DesktopLogReader] instance used by this device.
+  @protected
+  DesktopLogReader createLogReader() => DesktopLogReader();
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
@@ -361,8 +366,25 @@ class DesktopLogReader extends DeviceLogReader {
   /// Adds the stdout and stderr streams of the provided [process] to [logLines].
   void listenToProcessOutput(Process process) {
     process.stdout.listen(_inputController.add, onError: _inputController.addError);
-    process.stderr.listen(_inputController.add, onError: _inputController.addError);
+    final stderrController = StreamController<List<int>>();
+    stderrController.stream.transform(utf8AllowMalformedLineDecoder).listen(handleStderrLine);
+
+    process.stderr.listen(
+      (List<int> data) {
+        _inputController.add(data);
+        stderrController.add(data);
+      },
+      onError: _inputController.addError,
+      onDone: () => unawaited(stderrController.close()),
+    );
   }
+
+  /// Called for each line written to stderr by the process.
+  ///
+  /// Subclasses can override this to inspect stderr for platform-specific
+  /// crash messages.
+  @protected
+  void handleStderrLine(String line) {}
 
   @override
   Stream<String> get logLines {
