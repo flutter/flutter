@@ -2,16 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter_tools/src/widget_preview/preview_detector.dart';
-library;
-
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import '../../../../src/common.dart';
 
+typedef PreviewPath = ({String path, Uri uri});
 typedef WidgetPreviewSourceFile = ({String path, String source});
 
 const _kPubspec = 'pubspec.yaml';
@@ -153,8 +150,6 @@ dependencies:
   String get pubspecContents => _pubspecYaml.readAsStringSync();
 
   /// The root of the fake project.
-  ///
-  /// This should always be set to [PreviewDetector.projectRoot].
   late final Directory projectRoot;
   late final Directory _libDirectory;
   final File _pubspecYaml;
