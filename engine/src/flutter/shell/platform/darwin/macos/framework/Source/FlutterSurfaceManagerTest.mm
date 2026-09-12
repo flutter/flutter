@@ -200,14 +200,14 @@ TEST(FlutterSurfaceManager, BackingStoreCacheSurfaceStuckInUse) {
 
 // Regression test for https://github.com/flutter/flutter/issues/185394.
 //
-// The cache purged itself only when the *first* cached surface had a different
-// size than the request, then returned the youngest idle surface without
-// checking *that* surface's size. A size flip-flop (A -> B -> A) while the
-// previous A surface is still held by the window server leaves a mixed-size
-// cache, and the next request for A gets the B surface. Impeller then wraps a
-// Metal texture whose real size disagrees with the descriptor, the texture
-// invalidates itself, the color attachment is dropped, and the raster thread
-// crashes in impeller::Canvas::SetupRenderPass.
+// The cache is meant to hold surfaces of a single size (the last requested
+// one), but returnSurfaces: appended the previous front surfaces without
+// checking their size. A size flip-flop (A -> B -> A) while the previous A
+// surface is still held by the window server therefore left a mixed-size
+// cache, and the next request for A got the B surface. Impeller then wrapped a
+// Metal texture whose real size disagreed with the descriptor, the texture
+// invalidated itself, the color attachment was dropped, and the raster thread
+// crashed in impeller::Canvas::SetupRenderPass.
 TEST(FlutterSurfaceManager, BackBufferCacheNeverReturnsSurfaceOfDifferentSize) {
   TestView* testView = [[TestView alloc] init];
   FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView);
@@ -232,9 +232,10 @@ TEST(FlutterSurfaceManager, BackBufferCacheNeverReturnsSurfaceOfDifferentSize) {
   auto surfaceA2 = [surfaceManager surfaceForSize:sizeA];
   EXPECT_NE(surfaceA2, surfaceA1);
   EXPECT_TRUE(CGSizeEqualToSize(surfaceA2.size, sizeA));
-  // Presenting returns B1 into a cache whose head is A1 -> mixed sizes.
+  // Presenting A2 returns B1, whose size differs from the cached A1. The cache
+  // must drop it rather than hold two sizes.
   [surfaceManager presentSurfaces:@[ CreatePresentInfo(surfaceA2) ] atTime:0 notify:nil];
-  EXPECT_EQ(surfaceManager.backBufferCache.count, 2ul);
+  EXPECT_EQ(surfaceManager.backBufferCache.count, 1ul);
 
   surfaceA1.isInUseOverride = NO;
 

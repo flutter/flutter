@@ -318,16 +318,9 @@ static const int kSurfaceEvictionAge = 30;
 
 - (nullable FlutterSurface*)removeSurfaceForSize:(CGSize)size {
   @synchronized(self) {
-    // Surfaces of a different size can never be reused. Drop them so a later
-    // request cannot receive a surface whose Metal texture disagrees with the
-    // backing store size it was asked for (flutter/flutter#185394). This is
-    // checked per surface: the cache can hold mixed sizes when the front
-    // surfaces of a frame with a different size are returned while a surface
-    // of the current size is still held by the window server.
-    for (NSInteger i = static_cast<NSInteger>(_surfaces.count) - 1; i >= 0; i--) {
-      if (!CGSizeEqualToSize(_surfaces[i].size, size)) {
-        [_surfaces removeObjectAtIndex:i];
-      }
+    // Purge all cached surfaces if the size has changed.
+    if (_surfaces.firstObject != nil && !CGSizeEqualToSize(_surfaces.firstObject.size, size)) {
+      [_surfaces removeAllObjects];
     }
 
     FlutterSurface* res;
@@ -344,13 +337,20 @@ static const int kSurfaceEvictionAge = 30;
     if (res != nil) {
       [_surfaces removeObject:res];
     }
-    FML_DCHECK(res == nil || CGSizeEqualToSize(res.size, size));
     return res;
   }
 }
 
 - (void)returnSurfaces:(nonnull NSArray<FlutterSurface*>*)returnedSurfaces {
   @synchronized(self) {
+    if (_surfaces.count > 0 && returnedSurfaces.count > 0 &&
+        !CGSizeEqualToSize(returnedSurfaces.firstObject.size, _surfaces.firstObject.size)) {
+      // Any cached surface size will match last requested size (see removeSurfaceForSize:). If the
+      // size of incoming surfaces don't match cached surface size it means they are stale and
+      // should be discarded. Keeping them would let removeSurfaceForSize: hand out a surface of
+      // the wrong size (https://github.com/flutter/flutter/issues/185394).
+      return;
+    }
     for (FlutterSurface* surface in returnedSurfaces) {
       [self setAge:0 forSurface:surface];
     }
