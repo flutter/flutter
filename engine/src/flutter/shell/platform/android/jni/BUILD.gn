@@ -5,55 +5,13 @@
 import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
 
-source_set("jni") {
-  sources = [
-    "platform_view_android_jni.cc",
-    "platform_view_android_jni.h",
-  ]
-
-  public_configs = [ "//flutter:config" ]
-
-  deps = [
-    "//flutter/flow",
-    "//flutter/fml",
-    "//flutter/lib/ui",
-    "//flutter/shell/platform/android/surface:native_window",
-    "//flutter/skia",
-  ]
-}
-
-source_set("jni_mock") {
-  testonly = true
-
-  sources = [ "jni_mock.h" ]
-
-  public_configs = [ "//flutter:config" ]
-
-  deps = [ ":jni" ]
-}
-
 source_set("mock_jni_env") {
   testonly = true
 
   sources = [ "mock_jni_env.h" ]
 
-  public_configs = [ "//flutter:config" ]
-}
-
-test_fixtures("jni_fixtures") {
-  fixtures = []
-}
-
-executable("jni_unittests") {
-  testonly = true
-
-  sources = [ "jni_mock_unittest.cc" ]
-
-  deps = [
-    ":jni_fixtures",
-    ":jni_mock",
-    "//flutter/testing",
-    "//flutter/testing:dart",
-    "//flutter/testing:skia",
+  public_configs = [
+    "//flutter:config",
+    "//flutter/shell/platform/android:jni_headers_config",
   ]
 }

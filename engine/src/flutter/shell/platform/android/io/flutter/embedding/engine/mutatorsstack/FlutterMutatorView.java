@@ -114,23 +114,28 @@ public class FlutterMutatorView extends FrameLayout {
   public void draw(Canvas canvas) {
     // Apply all clippings on the parent canvas.
     canvas.save();
-    for (Path path : mutatorsStack.getFinalClippingPaths()) {
-      // Reverse the current offset.
-      //
-      // The frame of this view includes the final offset of the bounding rect.
-      // We need to apply all the mutators to the view, which includes the mutation that leads to
-      // the final offset. We should reverse this final offset, both as a translate mutation and to
-      // all the clipping paths
-      Path pathCopy = new Path(path);
-      pathCopy.offset(-left, -top);
-      canvas.clipPath(pathCopy);
-    }
+    if (mutatorsStack != null) {
+      for (Path path : mutatorsStack.getFinalClippingPaths()) {
+        // Reverse the current offset.
+        //
+        // The frame of this view includes the final offset of the bounding rect.
+        // We need to apply all the mutators to the view, which includes the mutation that leads to
+        // the final offset. We should reverse this final offset, both as a translate mutation and
+        // to
+        // all the clipping paths
+        Path pathCopy = new Path(path);
+        pathCopy.offset(-left, -top);
+        canvas.clipPath(pathCopy);
+      }
 
-    int newAlpha = (int) (255 * mutatorsStack.getFinalOpacity());
-    boolean shouldApplyOpacity = paint.getAlpha() != newAlpha;
-    if (shouldApplyOpacity) {
-      paint.setAlpha((int) (255 * mutatorsStack.getFinalOpacity()));
-      this.setLayerType(View.LAYER_TYPE_HARDWARE, paint);
+      // Convert opacity in [0.0, 1.0] to an 8-bit alpha channel value in [0, 255].
+      final int maxAlpha = 255;
+      int newAlpha = (int) (maxAlpha * mutatorsStack.getFinalOpacity());
+      boolean shouldApplyOpacity = paint.getAlpha() != newAlpha;
+      if (shouldApplyOpacity) {
+        paint.setAlpha(newAlpha);
+        this.setLayerType(View.LAYER_TYPE_HARDWARE, paint);
+      }
     }
 
     super.draw(canvas);
@@ -142,12 +147,18 @@ public class FlutterMutatorView extends FrameLayout {
     // Apply all the transforms on the child canvas.
     canvas.save();
 
-    canvas.concat(getPlatformViewMatrix());
+    if (mutatorsStack != null) {
+      canvas.concat(getPlatformViewMatrix());
+    }
     super.dispatchDraw(canvas);
     canvas.restore();
   }
 
-  private Matrix getPlatformViewMatrix() {
+  @VisibleForTesting
+  Matrix getPlatformViewMatrix() {
+    if (mutatorsStack == null) {
+      return new Matrix();
+    }
     Matrix finalMatrix = new Matrix(mutatorsStack.getFinalMatrix());
 
     // Reverse scale based on screen scale.

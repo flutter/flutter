@@ -9,8 +9,8 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
-#include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
+#include "flutter/shell/platform/android/android_vm_init.h"
 
 namespace flutter {
 
@@ -23,7 +23,9 @@ class FlutterMain {
   static FlutterMain& Get();
 
   const flutter::Settings& GetSettings() const;
-  flutter::AndroidRenderingAPI GetAndroidRenderingAPI();
+  flutter::AndroidRenderingAPI GetAndroidRenderingAPI() const;
+  const android::AndroidVMArgs& GetVMArgs() const;
+  std::shared_ptr<android::AndroidVMInit> GetVMInit() const;
 
   static AndroidRenderingAPI SelectedRenderingAPI(
       const flutter::Settings& settings,
@@ -32,10 +34,13 @@ class FlutterMain {
  private:
   const flutter::Settings settings_;
   const flutter::AndroidRenderingAPI android_rendering_api_;
-  DartServiceIsolate::CallbackHandle vm_service_uri_callback_ = 0;
+  const android::AndroidVMArgs vm_args_;
+  std::shared_ptr<android::AndroidVMInit> vm_init_;
 
   explicit FlutterMain(const flutter::Settings& settings,
-                       flutter::AndroidRenderingAPI android_rendering_api);
+                       flutter::AndroidRenderingAPI android_rendering_api,
+                       const android::AndroidVMArgs& vm_args,
+                       std::shared_ptr<android::AndroidVMInit> vm_init);
 
   static void Init(JNIEnv* env,
                    jclass clazz,
@@ -46,8 +51,6 @@ class FlutterMain {
                    jstring engineCachesPath,
                    jlong initTimeMillis,
                    jint api_level);
-
-  void SetupDartVMServiceUriCallback(JNIEnv* env);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterMain);
 };

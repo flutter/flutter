@@ -29,6 +29,7 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -344,5 +345,38 @@ public class DartMessengerTest {
     for (int i = 0; i < count - 1; ++i) {
       assertEquals((int) ints.get(i), ints.get(i + 1) - 1);
     }
+  }
+
+  @Test
+  public void testDisableBufferingFlushesToRegisteredHandler() {
+    final FlutterJNI fakeFlutterJni = mock(FlutterJNI.class);
+    final DartMessenger messenger =
+        new DartMessenger(fakeFlutterJni, (options) -> synchronousTaskQueue);
+    final String channel = "test_flush_channel";
+    final ByteBuffer message = ByteBuffer.allocateDirect(4);
+    message.putInt(99);
+    final int replyId = 42;
+    final long messageData = 5678;
+
+    messenger.enableBufferingIncomingMessages();
+    messenger.handleMessageFromDart(channel, message, replyId, messageData);
+
+    final AtomicInteger handledCount = new AtomicInteger(0);
+    final BinaryMessenger.BinaryMessageHandler handler =
+        (ByteBuffer msg, BinaryMessenger.BinaryReply reply) -> {
+          handledCount.incrementAndGet();
+          reply.reply(ByteBuffer.wrap("ok".getBytes()));
+        };
+    BinaryMessenger.TaskQueue taskQueue = messenger.makeBackgroundTaskQueue();
+    messenger.setMessageHandler(channel, handler, taskQueue);
+
+    // Messages were drained upon setMessageHandler, but let's test buffering again:
+    messenger.enableBufferingIncomingMessages();
+    final ByteBuffer message2 = ByteBuffer.allocateDirect(4);
+    message2.putInt(100);
+    messenger.handleMessageFromDart(channel, message2, 43, 5679);
+
+    messenger.disableBufferingIncomingMessages();
+    assertEquals(2, handledCount.get());
   }
 }

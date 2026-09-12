@@ -9,6 +9,7 @@ import static junit.framework.TestCase.*;
 import static org.mockito.Mockito.*;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.view.MotionEvent;
 import android.view.View;
@@ -236,6 +237,72 @@ public class FlutterMutatorViewTest {
     final boolean eventSent =
         wrapperView.requestSendAccessibilityEvent(embeddedView, mock(AccessibilityEvent.class));
     assertFalse(eventSent);
+  }
+
+  @Test
+  public void dispatchDraw_withNullMutatorsStack_doesNotThrow() {
+    final FlutterMutatorView view = new FlutterMutatorView(ctx);
+    final Canvas canvas = mock(Canvas.class);
+    // Should safely execute without throwing NullPointerException when mutatorsStack is null.
+    view.dispatchDraw(canvas);
+    verify(canvas, never()).concat(any(Matrix.class));
+  }
+
+  @Test
+  public void dispatchDraw_withNullMutatorsStack_andChildView_doesNotThrow() {
+    final FlutterMutatorView view = new FlutterMutatorView(ctx);
+    final View child = new View(ctx);
+    view.addView(child);
+    final Canvas canvas = mock(Canvas.class);
+    // When Android ViewRootImpl performs layout and draw passes on newly attached platform views
+    // before readyToDisplay is called, dispatchDraw traverses child views without crashing.
+    view.dispatchDraw(canvas);
+    verify(canvas, never()).concat(any(Matrix.class));
+  }
+
+  @Test
+  public void draw_withNullMutatorsStack_doesNotThrow() {
+    final FlutterMutatorView view = new FlutterMutatorView(ctx);
+    final Canvas canvas = mock(Canvas.class);
+    // Draw pass should skip clipping and opacity mutation safely without throwing.
+    view.draw(canvas);
+    verify(canvas, never()).clipPath(any());
+  }
+
+  @Test
+  public void getPlatformViewMatrix_withNullMutatorsStack_returnsIdentity() {
+    // Test across standard (1.0f) and high-density (2.625f) screen configurations.
+    final float standardDensity = 1.0f;
+    final float highDensity = 2.625f;
+    final FlutterMutatorView standardView = new FlutterMutatorView(ctx, standardDensity, null);
+    final FlutterMutatorView highDensityView = new FlutterMutatorView(ctx, highDensity, null);
+
+    final Matrix standardMatrix = standardView.getPlatformViewMatrix();
+    final Matrix highDensityMatrix = highDensityView.getPlatformViewMatrix();
+
+    assertTrue(standardMatrix.isIdentity());
+    assertTrue(highDensityMatrix.isIdentity());
+  }
+
+  @Test
+  public void dispatchDraw_transitionFromNullToValidMutatorsStack_appliesTransform() {
+    final FlutterMutatorView view = new FlutterMutatorView(ctx);
+    final Canvas canvas = mock(Canvas.class);
+
+    // Initial draw before readyToDisplay: should not throw and not apply transform.
+    view.dispatchDraw(canvas);
+    verify(canvas, never()).concat(any(Matrix.class));
+
+    // Later, when readyToDisplay is invoked by the compositor, transforms are applied.
+    final FlutterMutatorsStack stack = new FlutterMutatorsStack();
+    final int left = 10;
+    final int top = 20;
+    final int width = 100;
+    final int height = 200;
+    view.readyToDisplay(stack, left, top, width, height);
+
+    view.dispatchDraw(canvas);
+    verify(canvas, times(1)).concat(any(Matrix.class));
   }
 
   @Implements(ViewGroup.class)

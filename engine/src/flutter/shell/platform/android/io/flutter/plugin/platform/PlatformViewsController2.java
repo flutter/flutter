@@ -127,6 +127,38 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     embeddedView.setLayoutDirection(request.direction);
     platformViews.put(request.viewId, platformView);
     maybeInvokeOnFlutterViewAttached(platformView);
+    if (initializePlatformViewIfNeeded(request.viewId)) {
+      final FlutterMutatorView parentView = platformViewParent.get(request.viewId);
+      if (parentView != null) {
+        int physicalWidth = toPhysicalPixels(request.logicalWidth);
+        int physicalHeight = toPhysicalPixels(request.logicalHeight);
+        final int physicalTop = toPhysicalPixels(request.logicalTop);
+        final int physicalLeft = toPhysicalPixels(request.logicalLeft);
+
+        // When views are created via createHCPPRequest or createHybridCompositionRequest,
+        // the creation request specifies zero dimensions. In the C embedder architecture,
+        // onDisplayPlatformView is not called per frame to resize the view. Fall back to
+        // MATCH_PARENT so the view hierarchy allocates non-zero geometry to the embedded view.
+        if (physicalWidth <= 0) {
+          physicalWidth = FrameLayout.LayoutParams.MATCH_PARENT;
+        }
+        if (physicalHeight <= 0) {
+          physicalHeight = FrameLayout.LayoutParams.MATCH_PARENT;
+        }
+
+        final FrameLayout.LayoutParams layoutParams =
+            new FrameLayout.LayoutParams(physicalWidth, physicalHeight);
+        layoutParams.leftMargin = physicalLeft;
+        layoutParams.topMargin = physicalTop;
+        parentView.setLayoutParams(layoutParams);
+        parentView.setVisibility(View.VISIBLE);
+
+        final View view = platformView.getView();
+        if (view != null) {
+          view.setLayoutParams(new FrameLayout.LayoutParams(physicalWidth, physicalHeight));
+        }
+      }
+    }
     return platformView;
   }
 
@@ -240,10 +272,17 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
    */
   public void attachToView(@NonNull FlutterView newFlutterView) {
     flutterView = newFlutterView;
+    // Ensure all platform views have their mutator wrapper initialized.
+    for (int index = 0; index < platformViews.size(); index++) {
+      final int viewId = platformViews.keyAt(index);
+      initializePlatformViewIfNeeded(viewId);
+    }
     // Add wrapper for platform views that are composed at the view hierarchy level.
     for (int index = 0; index < platformViewParent.size(); index++) {
       final FlutterMutatorView view = platformViewParent.valueAt(index);
-      flutterView.addView(view);
+      if (view.getParent() == null) {
+        flutterView.addView(view);
+      }
     }
     // Notify platform views that they are now attached to a FlutterView.
     for (int index = 0; index < platformViews.size(); index++) {
@@ -488,7 +527,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
 
     parentView.addView(embeddedView);
-    flutterView.addView(parentView);
+    if (flutterView != null) {
+      flutterView.addView(parentView);
+    }
     return true;
   }
 

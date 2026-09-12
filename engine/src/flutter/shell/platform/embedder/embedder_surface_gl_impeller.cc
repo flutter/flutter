@@ -222,7 +222,8 @@ EmbedderSurfaceGLImpeller::CreateImpellerContext() const {
 // |EmbedderSurface|
 sk_sp<GrDirectContext> EmbedderSurfaceGLImpeller::CreateResourceContext()
     const {
-  if (gl_dispatch_table_.gl_make_resource_current_callback()) {
+  if (gl_dispatch_table_.gl_make_resource_current_callback &&
+      gl_dispatch_table_.gl_make_resource_current_callback()) {
     worker_->SetReactionsAllowedOnCurrentThread(true);
   } else {
     FML_DLOG(ERROR) << "Could not make the resource context current.";
