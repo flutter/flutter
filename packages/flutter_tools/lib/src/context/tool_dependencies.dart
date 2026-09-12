@@ -326,40 +326,58 @@ class ToolDependencies {
     final finalNativeAssetsBuilder = nativeAssetsBuilder;
 
     // 11. AppleContext Dependencies
-    final XcodeProjectInterpreter finalXcodeProjectInterpreter =
-        xcodeProjectInterpreter ??
-        XcodeProjectInterpreter(
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          analytics: finalAnalytics,
-        );
+    final XcodeProjectInterpreter Function() xcodeProjectInterpreterBuilder;
+    if (xcodeProjectInterpreter != null) {
+      xcodeProjectInterpreterBuilder = () => xcodeProjectInterpreter;
+    } else {
+      XcodeProjectInterpreter? resolved;
+      xcodeProjectInterpreterBuilder = () => resolved ??= XcodeProjectInterpreter(
+        analytics: finalAnalytics,
+        fileSystem: finalFS,
+        logger: finalLogger,
+        platform: finalPlatform,
+        processManager: finalProcessManager,
+      );
+    }
 
-    final Xcode finalXcode =
-        xcode ??
-        Xcode(
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
-          userMessages: finalUserMessages,
-        );
+    final Xcode Function() xcodeBuilder;
+    if (xcode != null) {
+      xcodeBuilder = () => xcode;
+    } else {
+      Xcode? resolved;
+      xcodeBuilder = () => resolved ??= Xcode(
+        fileSystem: finalFS,
+        logger: finalLogger,
+        platform: finalPlatform,
+        processManager: finalProcessManager,
+        userMessages: finalUserMessages,
+        xcodeProjectInterpreter: xcodeProjectInterpreterBuilder(),
+      );
+    }
 
-    final CocoaPods finalCocoaPods =
-        cocoaPods ??
-        CocoaPods(
-          fileSystem: finalFS,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          platform: finalPlatform,
-          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
-          analytics: finalAnalytics,
-        );
+    final CocoaPods Function() cocoaPodsBuilder;
+    if (cocoaPods != null) {
+      cocoaPodsBuilder = () => cocoaPods;
+    } else {
+      CocoaPods? resolved;
+      cocoaPodsBuilder = () => resolved ??= CocoaPods(
+        analytics: finalAnalytics,
+        fileSystem: finalFS,
+        logger: finalLogger,
+        platform: finalPlatform,
+        processManager: finalProcessManager,
+        xcodeProjectInterpreter: xcodeProjectInterpreterBuilder(),
+      );
+    }
 
-    final CocoaPodsValidator finalCocoapodsValidator =
-        cocoapodsValidator ?? CocoaPodsValidator(finalCocoaPods, finalUserMessages);
+    final CocoaPodsValidator Function() cocoapodsValidatorBuilder;
+    if (cocoapodsValidator != null) {
+      cocoapodsValidatorBuilder = () => cocoapodsValidator;
+    } else {
+      CocoaPodsValidator? resolved;
+      cocoapodsValidatorBuilder = () =>
+          resolved ??= CocoaPodsValidator(cocoaPodsBuilder(), finalUserMessages);
+    }
 
     // Artifacts will be updated later if a local engine is used.
     final finalArtifacts = DeferredArtifacts(
@@ -370,26 +388,6 @@ class ToolDependencies {
         operatingSystemUtils: finalOS,
       ),
     );
-
-    final XCDevice finalXCDevice =
-        xcdevice ??
-        XCDevice(
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          artifacts: finalArtifacts,
-          cache: finalCache,
-          platform: finalPlatform,
-          xcode: finalXcode,
-          iproxy: IProxy(
-            artifacts: finalArtifacts,
-            logger: finalLogger,
-            processManager: finalProcessManager,
-            dyLdLibEntry: finalCache.dyLdLibEntry,
-          ),
-          fileSystem: finalFS,
-          analytics: finalAnalytics,
-          shutdownHooks: finalShutdownHooks,
-        );
 
     final String projectRoot = findProjectRoot(finalFS) ?? finalFS.currentDirectory.path;
     final FlutterManifest? projectManifest = FlutterManifest.createFromPath(
@@ -410,22 +408,66 @@ class ToolDependencies {
           platform: finalPlatform,
         );
 
-    final IOSWorkflow finalIOSWorkflow =
-        iosWorkflow ??
-        IOSWorkflow(featureFlags: finalFeatureFlags, xcode: finalXcode, platform: finalPlatform);
-
-    final IOSSimulatorUtils finalIOSSimulatorUtils =
-        iosSimulatorUtils ??
-        IOSSimulatorUtils(
+    final XCDevice Function() xcdeviceBuilder;
+    if (xcdevice != null) {
+      xcdeviceBuilder = () => xcdevice;
+    } else {
+      XCDevice? resolved;
+      xcdeviceBuilder = () => resolved ??= XCDevice(
+        analytics: finalAnalytics,
+        artifacts: finalArtifacts,
+        cache: finalCache,
+        fileSystem: finalFS,
+        iproxy: IProxy(
+          artifacts: finalArtifacts,
           logger: finalLogger,
-          operatingSystemUtils: finalOS,
           processManager: finalProcessManager,
-          xcode: finalXcode,
-        );
+          dyLdLibEntry: finalCache.dyLdLibEntry,
+        ),
+        logger: finalLogger,
+        platform: finalPlatform,
+        processManager: finalProcessManager,
+        shutdownHooks: finalShutdownHooks,
+        xcode: xcodeBuilder(),
+      );
+    }
 
-    final PlistParser finalPlistParser =
-        plistParser ??
-        PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
+    final IOSWorkflow Function() iosWorkflowBuilder;
+    if (iosWorkflow != null) {
+      iosWorkflowBuilder = () => iosWorkflow;
+    } else {
+      IOSWorkflow? resolved;
+      iosWorkflowBuilder = () => resolved ??= IOSWorkflow(
+        featureFlags: finalFeatureFlags,
+        platform: finalPlatform,
+        xcode: xcodeBuilder(),
+      );
+    }
+
+    final IOSSimulatorUtils Function() iosSimulatorUtilsBuilder;
+    if (iosSimulatorUtils != null) {
+      iosSimulatorUtilsBuilder = () => iosSimulatorUtils;
+    } else {
+      IOSSimulatorUtils? resolved;
+      iosSimulatorUtilsBuilder = () => resolved ??= IOSSimulatorUtils(
+        logger: finalLogger,
+        operatingSystemUtils: finalOS,
+        processManager: finalProcessManager,
+        xcode: xcodeBuilder(),
+      );
+    }
+
+    final PlistParser Function() plistParserBuilder;
+    if (plistParser != null) {
+      plistParserBuilder = () => plistParser;
+    } else {
+      PlistParser? resolved;
+      plistParserBuilder = () => resolved ??= PlistParser(
+        fileSystem: finalFS,
+        logger: finalLogger,
+        processManager: finalProcessManager,
+      );
+    }
 
     // 12. AndroidContext Dependencies
     final AndroidStudio? finalAndroidStudio = androidStudio ?? AndroidStudio.latestValid();
@@ -479,14 +521,14 @@ class ToolDependencies {
         java: finalJava,
       ),
       appleContext: AppleContext(
-        cocoaPods: finalCocoaPods,
-        cocoapodsValidator: finalCocoapodsValidator,
-        iosSimulatorUtils: finalIOSSimulatorUtils,
-        iosWorkflow: finalIOSWorkflow,
-        plistParser: finalPlistParser,
-        xcdevice: finalXCDevice,
-        xcode: finalXcode,
-        xcodeProjectInterpreter: finalXcodeProjectInterpreter,
+        cocoaPodsBuilder: cocoaPodsBuilder,
+        cocoapodsValidatorBuilder: cocoapodsValidatorBuilder,
+        iosSimulatorUtilsBuilder: iosSimulatorUtilsBuilder,
+        iosWorkflowBuilder: iosWorkflowBuilder,
+        plistParserBuilder: plistParserBuilder,
+        xcdeviceBuilder: xcdeviceBuilder,
+        xcodeBuilder: xcodeBuilder,
+        xcodeProjectInterpreterBuilder: xcodeProjectInterpreterBuilder,
       ),
       buildSystem: finalBuildSystem,
       crashReporter: finalCrashReporter,
