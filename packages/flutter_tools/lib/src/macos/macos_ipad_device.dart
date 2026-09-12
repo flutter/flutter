@@ -72,8 +72,11 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
       appId: appId,
       deviceVmservicePort: filterDevicePort,
       hostVmservicePort: expectedHostPort,
-      usesIpv6: ipv6,
+      // Do not throw on error since DelegateVMServiceDiscoveryForAttach falls
+      // back to log-based protocol discovery.
+      throwOnError: false,
       useDeviceIPAsHost: false,
+      usesIpv6: ipv6,
     );
 
     return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
