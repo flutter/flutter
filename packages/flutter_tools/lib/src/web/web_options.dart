@@ -79,8 +79,13 @@ abstract final class WebOptions {
         'application.',
   );
 
+  // Hidden while content hashing is incomplete: only compiled entrypoints are
+  // hashed today. Un-hide once static assets (flutter/flutter#191915) and the
+  // service worker precache manifest (flutter/flutter#191916) are also hashed,
+  // so that enabling the flag covers everything a deploy caches.
   static const webContentHash = FlagOptionDescriptor(
     name: 'web-content-hash',
+    hide: true,
     help:
         'Include a content hash in the filenames of the compiled web '
         'entrypoints (for example, "main.dart.<hash>.js") so that browsers '
