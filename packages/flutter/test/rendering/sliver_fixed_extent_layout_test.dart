@@ -448,6 +448,55 @@ void main() {
     expect(extraCalls1, lessThanOrEqualTo(2));
     expect(extraCalls2, lessThanOrEqualTo(2));
   });
+
+  test('RenderSliverVariedExtentList cache invalidation', () {
+    final children = List<RenderBox>.generate(
+      100,
+      (index) => RenderSizedBox(const Size(400.0, 100.0)),
+    );
+    final childManager = TestRenderSliverBoxChildManager(children: children);
+
+    var builderCallCount = 0;
+    double? builder1(int index, SliverLayoutDimensions dimensions) {
+      builderCallCount++;
+      return 100.0;
+    }
+
+    final RenderSliverVariedExtentList list = childManager.createRenderSliverVariedExtentList(
+      builder1,
+    );
+
+    final root = RenderViewport(
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      cacheExtent: 0,
+      children: <RenderSliver>[list],
+    );
+    layout(root);
+
+    expect(builderCallCount, greaterThan(0));
+
+    // Change itemExtentBuilder identity.
+    builderCallCount = 0;
+    double? builder2(int index, SliverLayoutDimensions dimensions) {
+      builderCallCount++;
+      return 200.0;
+    }
+
+    list.itemExtentBuilder = builder2;
+    pumpFrame();
+
+    // The cache should have been cleared and builder2 called to re-layout.
+    expect(builderCallCount, greaterThan(0));
+
+    // Explicitly clear the cache.
+    builderCallCount = 0;
+    list.clearItemExtentCache();
+    list.markNeedsLayout();
+    pumpFrame();
+
+    expect(builderCallCount, greaterThan(0));
+  });
 }
 
 int testGetMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {

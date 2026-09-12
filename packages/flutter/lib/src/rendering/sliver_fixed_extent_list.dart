@@ -547,7 +547,9 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   ///
   /// This is called when the [itemExtentBuilder] changes or when
   /// the layout dimensions change in a way that affects the item extents.
-  @protected
+  ///
+  /// It can also be called explicitly if the underlying data changes but the
+  /// [itemExtentBuilder] identity does not.
   void clearItemExtentCache() {
     _itemOffsetCache.clear();
     _itemOffsetCache.add(0.0);

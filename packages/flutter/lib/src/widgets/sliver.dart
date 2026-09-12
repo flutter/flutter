@@ -671,6 +671,15 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
   ///
   /// Should return null if asked to build an item extent with a greater index than
   /// exists.
+  ///
+  /// The extents returned by this builder are cached for layout performance. If
+  /// the underlying data changes (e.g. items are added, removed, or their extents
+  /// change), the [itemExtentBuilder] provided to this widget must be a new
+  /// instance (e.g. not a cached tear-off or a static method) so that the internal
+  /// cache is invalidated.
+  ///
+  /// Alternatively, if a global key is used, one can call
+  /// [RenderSliverVariedExtentList.clearItemExtentCache] directly.
   final ItemExtentBuilder itemExtentBuilder;
 
   @override
