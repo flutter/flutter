@@ -33,16 +33,13 @@ typedef MDnsClientFactory = MDnsClient Function();
 
 /// A wrapper around [MDnsClient] to find a Dart VM Service instance.
 class MDnsVmServiceDiscovery {
-  /// Creates a new [MDnsVmServiceDiscovery] object.
   MDnsVmServiceDiscovery({
-    required Logger logger,
-    required Analytics analytics,
+    required this._analytics,
+    required this._logger,
     MDnsClientFactory mdnsClientFactory = MDnsClient.new,
     MDnsClient? preliminaryMDnsClient,
   }) : _clientFactory = mdnsClientFactory,
-       _preliminaryClient = preliminaryMDnsClient,
-       _logger = logger,
-       _analytics = analytics;
+       _preliminaryClient = preliminaryMDnsClient;
 
   final MDnsClientFactory _clientFactory;
 
@@ -436,9 +433,8 @@ class MDnsVmServiceDiscovery {
 
   String _getAuthCode(String txtRecord) {
     const authCodePrefix = 'authCode=';
-    final Iterable<String> matchingRecords = LineSplitter.split(
-      txtRecord,
-    ).where((String record) => record.startsWith(authCodePrefix));
+    final Iterable<String> matchingRecords = LineSplitter.split(txtRecord)
+        .where((String record) => record.startsWith(authCodePrefix));
     if (matchingRecords.isEmpty) {
       return '';
     }

@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -24,6 +25,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -75,7 +77,10 @@ void main() {
       List<String>? args,
       List<String>? globalArgs,
     }) async {
-      final command = PackagesCommand();
+      final command = PackagesCommand(
+        buildSystem: globals.buildSystem,
+        toolContext: DelegatingToolContext(),
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         ...?globalArgs,
@@ -556,9 +561,8 @@ flutter:
         final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesNumberPlugins'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesNumberPlugins'],
           0,
         );
       },
@@ -593,9 +597,8 @@ flutter:
 
         // A plugin example depends on the plugin itself, and integration_test.
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesNumberPlugins'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesNumberPlugins'],
           2,
         );
       },
@@ -622,9 +625,8 @@ flutter:
         final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesProjectModule'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesProjectModule'],
           false,
         );
       },
@@ -654,9 +656,8 @@ flutter:
         final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesProjectModule'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesProjectModule'],
           true,
         );
       },
@@ -683,9 +684,8 @@ flutter:
         final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesAndroidEmbeddingVersion'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesAndroidEmbeddingVersion'],
           'v2',
         );
       },
@@ -847,7 +847,12 @@ flutter:
             ],
           ),
         );
-        await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
+        await createTestCommandRunner(
+          PackagesCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: DelegatingToolContext(),
+          ),
+        ).run(<String>['packages', 'test']);
 
         expect(processManager, hasNoRemainingExpectations);
       },
@@ -885,7 +890,12 @@ flutter:
             ],
           ),
         );
-        await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
+        await createTestCommandRunner(
+          PackagesCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: DelegatingToolContext(),
+          ),
+        ).run(<String>['packages', 'test']);
 
         expect(processManager, hasNoRemainingExpectations);
       },
@@ -926,7 +936,10 @@ flutter:
           ),
         );
         await createTestCommandRunner(
-          PackagesCommand(),
+          PackagesCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: DelegatingToolContext(),
+          ),
         ).run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
 
         expect(processManager, hasNoRemainingExpectations);
@@ -966,7 +979,10 @@ flutter:
           ),
         );
         await createTestCommandRunner(
-          PackagesCommand(),
+          PackagesCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: DelegatingToolContext(),
+          ),
         ).run(<String>['packages', '--verbose', 'pub', 'token', 'list']);
 
         expect(processManager, hasNoRemainingExpectations);
@@ -1003,7 +1019,12 @@ flutter:
             stdin: IOSink(StreamController<List<int>>().sink),
           ),
         );
-        await createTestCommandRunner(PackagesCommand()).run(<String>['pub', 'upgrade', '-h']);
+        await createTestCommandRunner(
+          PackagesCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: DelegatingToolContext(),
+          ),
+        ).run(<String>['pub', 'upgrade', '-h']);
 
         expect(processManager, hasNoRemainingExpectations);
       },

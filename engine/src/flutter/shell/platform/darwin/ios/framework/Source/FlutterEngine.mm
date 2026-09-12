@@ -130,6 +130,9 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
 @property(nonatomic, readwrite, copy) NSString* isolateId;
 @property(nonatomic, copy) NSString* initialRoute;
+
+// Whether the engine has been destroyed. A destroyed engine cannot be run again.
+@property(nonatomic, assign, getter=isDestroyed) BOOL destroyed;
 @property(nonatomic, strong) id<NSObject> flutterViewControllerWillDeallocObserver;
 @property(nonatomic, strong) FlutterDartVMServicePublisher* publisher;
 @property(nonatomic, strong) FlutterConnectionCollection* connections;
@@ -608,6 +611,10 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)destroyContext {
+  if (self.destroyed) {
+    return;
+  }
+  self.destroyed = YES;
   [self resetChannels];
   self.isolateId = nil;
   _shell.reset();
@@ -923,6 +930,12 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
          "its platform and UI thread, both of which must be the main thread. To start an engine "
          "from a background queue, dispatch to the main queue first.";
 
+  if (self.destroyed) {
+    [FlutterLogger
+        logWarning:@"This FlutterEngine was destroyed by destroyContext and cannot be run again."];
+    return NO;
+  }
+
   if (_shell != nullptr) {
     [FlutterLogger logWarning:@"This FlutterEngine was already invoked."];
     return NO;
@@ -1056,11 +1069,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                libraryURI:(NSString*)libraryURI
              initialRoute:(NSString*)initialRoute
            entrypointArgs:(NSArray<NSString*>*)entrypointArgs {
-  if ([self createShell:entrypoint libraryURI:libraryURI initialRoute:initialRoute]) {
-    [self launchEngine:entrypoint libraryURI:libraryURI entrypointArgs:entrypointArgs];
+  if (![self createShell:entrypoint libraryURI:libraryURI initialRoute:initialRoute]) {
+    return NO;
   }
-
-  return _shell != nullptr;
+  [self launchEngine:entrypoint libraryURI:libraryURI entrypointArgs:entrypointArgs];
+  return YES;
 }
 
 - (void)notifyLowMemory {
@@ -1423,11 +1436,19 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)unregisterTexture:(int64_t)textureId {
-  _shell->GetPlatformView()->UnregisterTexture(textureId);
+  flutter::PlatformViewIOS* platform_view = self.platformView;
+  if (!platform_view) {
+    return;
+  }
+  platform_view->UnregisterTexture(textureId);
 }
 
 - (void)textureFrameAvailable:(int64_t)textureId {
-  _shell->GetPlatformView()->MarkTextureFrameAvailable(textureId);
+  flutter::PlatformViewIOS* platform_view = self.platformView;
+  if (!platform_view) {
+    return;
+  }
+  platform_view->MarkTextureFrameAvailable(textureId);
 }
 
 - (NSString*)lookupKeyForAsset:(NSString*)asset {
@@ -1744,14 +1765,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 static BOOL FLTFlutterPluginRespondsToLegacyAppLifecycleSelectors(
     NSObject<FlutterPlugin>* delegate) {
   SEL selectors[] = {
-    @selector(applicationDidBecomeActive:),
-    @selector(applicationWillResignActive:),
-    @selector(applicationWillEnterForeground:),
-    @selector(applicationDidEnterBackground:),
-    @selector(application:continueUserActivity:restorationHandler:),
-    @selector(application:performActionForShortcutItem:completionHandler:),
-    @selector(application:openURL:options:),
-    @selector(application:performFetchWithCompletionHandler:),
+      @selector(applicationDidBecomeActive:),
+      @selector(applicationWillResignActive:),
+      @selector(applicationWillEnterForeground:),
+      @selector(applicationDidEnterBackground:),
+      @selector(application:continueUserActivity:restorationHandler:),
+      @selector(application:performActionForShortcutItem:completionHandler:),
+      @selector(application:openURL:options:),
+      @selector(application:performFetchWithCompletionHandler:),
   };
   for (SEL sel : selectors) {
     if ([delegate respondsToSelector:sel]) {

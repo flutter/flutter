@@ -975,120 +975,114 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'DevFS.updateBundle ensures all side effects are completed before returning (regression test for race condition)',
-      () async {
-        final FileSystem fileSystem = MemoryFileSystem.test();
-        final dirtyEntries = <Uri, DevFSContent>{};
-        final assetBundle = FakeBundle();
-        assetBundle.entries['shader.frag'] = AssetBundleEntry(
-          DevFSStringContent('source'),
-          kind: AssetKind.shader,
-          transformers: const [],
-        );
+    testWithoutContext('DevFS.updateBundle ensures all side effects are completed before returning (regression test for race condition)', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final dirtyEntries = <Uri, DevFSContent>{};
+      final assetBundle = FakeBundle();
+      assetBundle.entries['shader.frag'] = AssetBundleEntry(
+        DevFSStringContent('source'),
+        kind: AssetKind.shader,
+        transformers: const [],
+      );
 
-        final shaderCompleter = Completer<DevFSContent>();
-        final shaderCompiler = DelayedFakeShaderCompiler(shaderCompleter.future);
+      final shaderCompleter = Completer<DevFSContent>();
+      final shaderCompiler = DelayedFakeShaderCompiler(shaderCompleter.future);
 
-        final assetTransformer = DevelopmentAssetTransformer(
+      final assetTransformer = DevelopmentAssetTransformer(
+        fileSystem: fileSystem,
+        transformer: AssetTransformer(
+          processManager: FakeProcessManager.any(),
           fileSystem: fileSystem,
-          transformer: AssetTransformer(
-            processManager: FakeProcessManager.any(),
-            fileSystem: fileSystem,
-            dartBinaryPath: 'dart',
-            buildMode: BuildMode.debug,
-          ),
-          logger: BufferLogger.test(),
-        );
+          dartBinaryPath: 'dart',
+          buildMode: BuildMode.debug,
+        ),
+        logger: BufferLogger.test(),
+      );
 
-        final Future<int> updateFuture = DevFS.updateBundle(
-          bundle: assetBundle,
-          dirtyEntries: dirtyEntries,
-          assetDirectory: 'assets',
-          assetTransformer: assetTransformer,
-          shaderCompiler: shaderCompiler,
+      final Future<int> updateFuture = DevFS.updateBundle(
+        bundle: assetBundle,
+        dirtyEntries: dirtyEntries,
+        assetDirectory: 'assets',
+        assetTransformer: assetTransformer,
+        shaderCompiler: shaderCompiler,
+        fileSystem: fileSystem,
+        rootDirectoryPath: '/',
+        assetPathsToEvict: <String>{},
+        shaderPathsToEvict: <String>{},
+        bundleFirstUpload: true,
+        syncAllAssetsOnFirstUpload: true,
+      );
+
+      // Complete the shader compilation.
+      shaderCompleter.complete(DevFSStringContent('compiled'));
+
+      // Wait for updateBundle to return.
+      await updateFuture;
+
+      // Verify side effects are visible immediately.
+      // In the broken code, this could fail if updateBundle returned before the .then callback finished.
+      expect(dirtyEntries, hasLength(1));
+      expect(await dirtyEntries.values.first.contentsAsBytes(), utf8.encode('compiled'));
+    });
+
+    testWithoutContext('DevFS.updateBundle initializes isModified state of assets during first upload when sync is skipped', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final dirtyEntries = <Uri, DevFSContent>{};
+      final assetBundle = FakeBundle();
+      final assetContent = DevFSByteContent(<int>[1, 2, 3, 4]);
+      assetBundle.entries['asset.txt'] = AssetBundleEntry(
+        assetContent,
+        kind: AssetKind.regular,
+        transformers: const [],
+      );
+
+      const shaderCompiler = FakeShaderCompiler();
+      final assetTransformer = DevelopmentAssetTransformer(
+        fileSystem: fileSystem,
+        transformer: AssetTransformer(
+          processManager: FakeProcessManager.any(),
           fileSystem: fileSystem,
-          rootDirectoryPath: '/',
-          assetPathsToEvict: <String>{},
-          shaderPathsToEvict: <String>{},
-          bundleFirstUpload: true,
-          syncAllAssetsOnFirstUpload: true,
-        );
+          dartBinaryPath: 'dart',
+          buildMode: BuildMode.debug,
+        ),
+        logger: BufferLogger.test(),
+      );
 
-        // Complete the shader compilation.
-        shaderCompleter.complete(DevFSStringContent('compiled'));
+      // Perform the first upload with sync skipped.
+      final int firstUploadSyncedBytes = await DevFS.updateBundle(
+        bundle: assetBundle,
+        dirtyEntries: dirtyEntries,
+        assetDirectory: 'assets',
+        assetTransformer: assetTransformer,
+        shaderCompiler: shaderCompiler,
+        fileSystem: fileSystem,
+        rootDirectoryPath: '/',
+        assetPathsToEvict: <String>{},
+        shaderPathsToEvict: <String>{},
+        bundleFirstUpload: true,
+      );
 
-        // Wait for updateBundle to return.
-        await updateFuture;
+      expect(firstUploadSyncedBytes, 0);
+      expect(dirtyEntries, isEmpty);
 
-        // Verify side effects are visible immediately.
-        // In the broken code, this could fail if updateBundle returned before the .then callback finished.
-        expect(dirtyEntries, hasLength(1));
-        expect(await dirtyEntries.values.first.contentsAsBytes(), utf8.encode('compiled'));
-      },
-    );
+      // Perform a subsequent hot restart update (where bundleFirstUpload is false).
+      // Since the asset has not been modified since the first upload, it should not be synced.
+      final int secondUploadSyncedBytes = await DevFS.updateBundle(
+        bundle: assetBundle,
+        dirtyEntries: dirtyEntries,
+        assetDirectory: 'assets',
+        assetTransformer: assetTransformer,
+        shaderCompiler: shaderCompiler,
+        fileSystem: fileSystem,
+        rootDirectoryPath: '/',
+        assetPathsToEvict: <String>{},
+        shaderPathsToEvict: <String>{},
+        bundleFirstUpload: false,
+      );
 
-    testWithoutContext(
-      'DevFS.updateBundle initializes isModified state of assets during first upload when sync is skipped',
-      () async {
-        final FileSystem fileSystem = MemoryFileSystem.test();
-        final dirtyEntries = <Uri, DevFSContent>{};
-        final assetBundle = FakeBundle();
-        final assetContent = DevFSByteContent(<int>[1, 2, 3, 4]);
-        assetBundle.entries['asset.txt'] = AssetBundleEntry(
-          assetContent,
-          kind: AssetKind.regular,
-          transformers: const [],
-        );
-
-        const shaderCompiler = FakeShaderCompiler();
-        final assetTransformer = DevelopmentAssetTransformer(
-          fileSystem: fileSystem,
-          transformer: AssetTransformer(
-            processManager: FakeProcessManager.any(),
-            fileSystem: fileSystem,
-            dartBinaryPath: 'dart',
-            buildMode: BuildMode.debug,
-          ),
-          logger: BufferLogger.test(),
-        );
-
-        // Perform the first upload with sync skipped.
-        final int firstUploadSyncedBytes = await DevFS.updateBundle(
-          bundle: assetBundle,
-          dirtyEntries: dirtyEntries,
-          assetDirectory: 'assets',
-          assetTransformer: assetTransformer,
-          shaderCompiler: shaderCompiler,
-          fileSystem: fileSystem,
-          rootDirectoryPath: '/',
-          assetPathsToEvict: <String>{},
-          shaderPathsToEvict: <String>{},
-          bundleFirstUpload: true,
-        );
-
-        expect(firstUploadSyncedBytes, 0);
-        expect(dirtyEntries, isEmpty);
-
-        // Perform a subsequent hot restart update (where bundleFirstUpload is false).
-        // Since the asset has not been modified since the first upload, it should not be synced.
-        final int secondUploadSyncedBytes = await DevFS.updateBundle(
-          bundle: assetBundle,
-          dirtyEntries: dirtyEntries,
-          assetDirectory: 'assets',
-          assetTransformer: assetTransformer,
-          shaderCompiler: shaderCompiler,
-          fileSystem: fileSystem,
-          rootDirectoryPath: '/',
-          assetPathsToEvict: <String>{},
-          shaderPathsToEvict: <String>{},
-          bundleFirstUpload: false,
-        );
-
-        expect(secondUploadSyncedBytes, 0);
-        expect(dirtyEntries, isEmpty);
-      },
-    );
+      expect(secondUploadSyncedBytes, 0);
+      expect(dirtyEntries, isEmpty);
+    });
   });
 }
 

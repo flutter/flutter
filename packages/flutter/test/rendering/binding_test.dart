@@ -10,24 +10,21 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  test(
-    'handleMetricsChanged does not scheduleForcedFrame unless there a registered renderView with a child',
-    () async {
-      expect(SchedulerBinding.instance.hasScheduledFrame, false);
-      RendererBinding.instance.handleMetricsChanged();
-      expect(SchedulerBinding.instance.hasScheduledFrame, false);
+  test('handleMetricsChanged does not scheduleForcedFrame unless there a registered renderView with a child', () async {
+    expect(SchedulerBinding.instance.hasScheduledFrame, false);
+    RendererBinding.instance.handleMetricsChanged();
+    expect(SchedulerBinding.instance.hasScheduledFrame, false);
 
-      RendererBinding.instance.addRenderView(RendererBinding.instance.renderView);
-      RendererBinding.instance.handleMetricsChanged();
-      expect(SchedulerBinding.instance.hasScheduledFrame, false);
+    RendererBinding.instance.addRenderView(RendererBinding.instance.renderView);
+    RendererBinding.instance.handleMetricsChanged();
+    expect(SchedulerBinding.instance.hasScheduledFrame, false);
 
-      RendererBinding.instance.renderView.child = RenderLimitedBox();
-      RendererBinding.instance.handleMetricsChanged();
-      expect(SchedulerBinding.instance.hasScheduledFrame, true);
+    RendererBinding.instance.renderView.child = RenderLimitedBox();
+    RendererBinding.instance.handleMetricsChanged();
+    expect(SchedulerBinding.instance.hasScheduledFrame, true);
 
-      RendererBinding.instance.removeRenderView(RendererBinding.instance.renderView);
-    },
-  );
+    RendererBinding.instance.removeRenderView(RendererBinding.instance.renderView);
+  });
 
   test('debugDumpSemantics prints explanation when semantics are unavailable', () {
     RendererBinding.instance.addRenderView(RendererBinding.instance.renderView);

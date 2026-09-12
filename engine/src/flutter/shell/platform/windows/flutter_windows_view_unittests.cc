@@ -114,7 +114,7 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine(
   modifier.embedder_api().Run = MOCK_ENGINE_PROC(
       Run, ([](size_t version, const FlutterRendererConfig* config,
                const FlutterProjectArgs* args, void* user_data,
-               FLUTTER_API_SYMBOL(FlutterEngine) * engine) {
+               FLUTTER_API_SYMBOL(FlutterEngine)* engine) {
         *engine =
             reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x12345678);
         return kSuccess;

@@ -113,7 +113,7 @@ class _InputBorderTween extends Tween<InputBorder> {
 // Passes the _InputBorderGap parameters along to an InputBorder's paint method.
 class _InputBorderPainter extends CustomPainter {
   _InputBorderPainter({
-    required Listenable repaint,
+    required super.repaint,
     required this.borderAnimation,
     required this.border,
     required this.gapAnimation,
@@ -122,7 +122,7 @@ class _InputBorderPainter extends CustomPainter {
     required this.fillColor,
     required this.hoverAnimation,
     required this.hoverColorTween,
-  }) : super(repaint: repaint);
+  });
 
   final Animation<double> borderAnimation;
   final _InputBorderTween border;
@@ -722,20 +722,14 @@ class _RenderDecorationLayout {
 class _RenderDecoration extends RenderBox
     with SlottedContainerRenderObjectMixin<_DecorationSlot, RenderBox> {
   _RenderDecoration({
-    required _Decoration decoration,
-    required TextDirection textDirection,
-    required TextBaseline textBaseline,
-    required bool isFocused,
-    required bool expands,
-    required bool material3,
-    TextAlignVertical? textAlignVertical,
-  }) : _decoration = decoration,
-       _textDirection = textDirection,
-       _textBaseline = textBaseline,
-       _textAlignVertical = textAlignVertical,
-       _isFocused = isFocused,
-       _expands = expands,
-       _material3 = material3;
+    required this._decoration,
+    required this._textDirection,
+    required this._textBaseline,
+    required this._isFocused,
+    required this._expands,
+    required this._material3,
+    this._textAlignVertical,
+  });
 
   // TODO(bleroux): consider defining this value as a Material token and making it
   // configurable by InputDecorationThemeData.
@@ -2596,9 +2590,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       contentPadding = decorationContentPadding ?? EdgeInsetsDirectional.zero;
     } else if (!border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
-      floatingLabelHeight = MediaQuery.textScalerOf(
-        context,
-      ).scale(4.0 + 0.75 * labelStyle.fontSize!);
+      floatingLabelHeight = MediaQuery.textScalerOf(context)
+          .scale(4.0 + 0.75 * labelStyle.fontSize!);
       if (decoration.filled ?? false) {
         contentPadding =
             decorationContentPadding ??

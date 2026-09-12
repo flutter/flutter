@@ -11,22 +11,15 @@ import 'package:android_driver_extensions/src/backend/android.dart';
 /// The default implementation of each method is a simple success case.
 final class FakeAdb implements Adb {
   FakeAdb({
-    Future<(bool, String?)> Function()? isDeviceConnected,
-    Future<Uint8List> Function()? screencap,
-    Future<void> Function(int x, int y)? tap,
-    Future<void> Function()? disableImmersiveModeConfirmations,
-    Future<void> Function()? disableAnimations,
-    Future<void> Function()? sendToHome,
-    Future<void> Function(String appName, [String? activityName])? resumeApp,
-    Future<void> Function(String appName)? trimMemory,
-  }) : _isDeviceConnected = isDeviceConnected,
-       _screencap = screencap,
-       _tap = tap,
-       _disableImmersiveModeConfirmations = disableImmersiveModeConfirmations,
-       _disableAnimations = disableAnimations,
-       _sendToHome = sendToHome,
-       _resumeApp = resumeApp,
-       _trimMemory = trimMemory;
+    this._isDeviceConnected,
+    this._screencap,
+    this._tap,
+    this._disableImmersiveModeConfirmations,
+    this._disableAnimations,
+    this._sendToHome,
+    this._resumeApp,
+    this._trimMemory,
+  });
 
   @override
   Future<(bool, String?)> isDeviceConnected() async {

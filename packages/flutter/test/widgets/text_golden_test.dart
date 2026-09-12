@@ -74,9 +74,8 @@ void main() {
     const black = Color(0xFF000000);
     const red = Color(0xFFFF0000);
     const blue = Color(0xFF0000FF);
-    final Shader linearGradient = const LinearGradient(
-      colors: <Color>[red, blue],
-    ).createShader(const Rect.fromLTWH(0.0, 0.0, 50.0, 20.0));
+    final Shader linearGradient = const LinearGradient(colors: <Color>[red, blue])
+        .createShader(const Rect.fromLTWH(0.0, 0.0, 50.0, 20.0));
 
     await tester.pumpWidget(
       Align(
