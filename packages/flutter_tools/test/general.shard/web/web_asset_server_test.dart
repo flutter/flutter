@@ -771,7 +771,6 @@ void main() {
         },
       );
     });
-
     testWithoutContext('updateModulesAndDigests prunes stale modules and digests', () async {
       const dummyModuleFile = 'packages/app/dummy.dart.lib.js';
       const dummyModuleName = 'packages/app/dummy.dart';
@@ -793,14 +792,14 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
-        webRenderer: WebRendererMode.canvaskit,
-        isWasm: false,
-        useLocalCanvasKit: false,
-        testMode: true,
         fileSystem: fileSystem,
+        isWasm: false,
         logger: BufferLogger.test(),
         platform: platform,
+        useLocalCanvasKit: false,
+        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webRenderer: WebRendererMode.canvaskit,
+        testMode: true,
       );
 
       // 1. Initial compilation: dummy.dart.lib.js exists in WebMemoryFS and is
@@ -824,5 +823,107 @@ void main() {
       expect(server.modules[mainModuleName], mainModulePath);
       expect(server.digests.containsKey(mainModuleName), isTrue);
     });
+
+    testWithoutContext(
+      'release asset server returns 404 for missing static file asset requests across all static cases',
+      () async {
+        final assetServer = ReleaseAssetServer(
+          Uri.base,
+          fileSystem: fileSystem,
+          platform: platform,
+          flutterRoot: '/flutter',
+          webBuildDirectory: 'build/web',
+          needsCoopCoep: true,
+        );
+
+        // Populate build/web with index.html only
+        fileSystem.file('build/web/index.html')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('<html></html>');
+
+        // Case 1: assets/ prefix missing
+        final Response assetsResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/assets/icons/missing.png')),
+        );
+        expect(assetsResponse.statusCode, equals(404));
+
+        // Case 2: canvaskit/ prefix missing
+        final Response canvaskitResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/canvaskit/skwasm.wasm')),
+        );
+        expect(canvaskitResponse.statusCode, equals(404));
+
+        // Case 3: *.wasm file missing
+        final Response wasmResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/main.dart.wasm')),
+        );
+        expect(wasmResponse.statusCode, equals(404));
+
+        // Case 4: *.mjs file missing
+        final Response mjsResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/main.dart.mjs')),
+        );
+        expect(mjsResponse.statusCode, equals(404));
+
+        // Case 5: *.js file missing
+        final Response jsResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/main.dart.js')),
+        );
+        expect(jsResponse.statusCode, equals(404));
+
+        // Case 6: *.css file missing
+        final Response cssResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/styles.css')),
+        );
+        expect(cssResponse.statusCode, equals(404));
+
+        // Case 7: *.json file missing
+        final Response jsonResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/manifest.json')),
+        );
+        expect(jsonResponse.statusCode, equals(404));
+
+        // Case 8: *.ico file missing
+        final Response icoResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/favicon.ico')),
+        );
+        expect(icoResponse.statusCode, equals(404));
+
+        // Case 9: *.map file missing
+        final Response mapResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/main.dart.js.map')),
+        );
+        expect(mapResponse.statusCode, equals(404));
+      },
+    );
+
+    testWithoutContext(
+      'release asset server serves index.html SPA fallback for route paths without file extensions',
+      () async {
+        final assetServer = ReleaseAssetServer(
+          Uri.base,
+          fileSystem: fileSystem,
+          platform: platform,
+          flutterRoot: '/flutter',
+          webBuildDirectory: 'build/web',
+          needsCoopCoep: false,
+        );
+
+        fileSystem.file('build/web/index.html')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('<html>index</html>');
+
+        // Client-side route paths like /settings, /assets, or /canvaskit must fall back to index.html
+        for (final route in <String>['/settings', '/assets', '/canvaskit']) {
+          final Response routeResponse = await assetServer.handle(
+            Request('GET', Uri.parse('http://localhost:8080$route')),
+          );
+
+          expect(routeResponse.statusCode, equals(200));
+          expect(routeResponse.headers['Content-Type'], equals('text/html'));
+          expect(await routeResponse.readAsString(), equals('<html>index</html>'));
+        }
+      },
+    );
   });
 }

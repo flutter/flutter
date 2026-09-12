@@ -530,13 +530,10 @@ TaskFunction createsScrollSmoothnessPerfTest() {
           deviceId,
         ],
       );
-      final data =
-          json.decode(
-                file(
-                  '${testOutputDirectory(testDirectory)}/scroll_smoothness_test.json',
-                ).readAsStringSync(),
-              )
-              as Map<String, dynamic>;
+      final data = json.decode(
+        file('${testOutputDirectory(testDirectory)}/scroll_smoothness_test.json')
+            .readAsStringSync(),
+      ) as Map<String, dynamic>;
 
       final result = <String, dynamic>{};
       void addResult(dynamic data, String suffix) {
@@ -1066,13 +1063,9 @@ class StartupTest {
           );
           timer.cancel();
           if (result == 0) {
-            final data =
-                json.decode(
-                      file(
-                        '${testOutputDirectory(testDirectory)}/start_up_info.json',
-                      ).readAsStringSync(),
-                    )
-                    as Map<String, dynamic>;
+            final data = json.decode(
+              file('${testOutputDirectory(testDirectory)}/start_up_info.json').readAsStringSync(),
+            ) as Map<String, dynamic>;
             results.add(data);
           } else {
             currentFailures += 1;
@@ -1244,7 +1237,7 @@ class PerfTest {
     this.needsFullTimeline = true,
     this.benchmarkScoreKeys,
     this.dartDefine = '',
-    String? resultFilename,
+    this._resultFilename,
     this.device,
     this.flutterDriveCallback,
     this.timeoutSeconds,
@@ -1255,7 +1248,7 @@ class PerfTest {
     this.enableHcpp = false,
     this.enableLazyShaderMode = false,
     this.createPlatforms = const <String>[],
-  }) : _resultFilename = resultFilename;
+  });
 
   const PerfTest.e2e(
     this.testDirectory,
@@ -1267,7 +1260,7 @@ class PerfTest {
     this.needsFullTimeline = false,
     this.benchmarkScoreKeys = _kCommonScoreKeys,
     this.dartDefine = '',
-    String resultFilename = 'e2e_perf_summary',
+    String this._resultFilename = 'e2e_perf_summary',
     this.device,
     this.flutterDriveCallback,
     this.timeoutSeconds,
@@ -1279,8 +1272,7 @@ class PerfTest {
     this.enableLazyShaderMode = false,
     this.createPlatforms = const <String>[],
   }) : saveTraceFile = false,
-       timelineFileName = null,
-       _resultFilename = resultFilename;
+       timelineFileName = null;
 
   /// The directory where the app under test is defined.
   final String testDirectory;
@@ -1483,13 +1475,9 @@ class PerfTest {
         await selectedDevice.toggleFixedPerformanceMode(false);
       }
 
-      final data =
-          json.decode(
-                file(
-                  '${testOutputDirectory(testDirectory)}/$resultFilename.json',
-                ).readAsStringSync(),
-              )
-              as Map<String, dynamic>;
+      final data = json.decode(
+        file('${testOutputDirectory(testDirectory)}/$resultFilename.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
 
       if (data['frame_count'] as int < 5) {
         return TaskResult.failure(
@@ -1682,9 +1670,8 @@ class WebCompileTest {
         await Process.run('gzip', <String>['--keep', kGzipCompressionLevel, filePath]);
         // gzip does not provide a CLI option to specify an output file, so
         // instead just move the output file to the temp dir
-        final File compressedFile = File(
-          '$filePath.gz',
-        ).renameSync(path.join(tempDir.absolute.path, '$key.gz'));
+        final File compressedFile = File('$filePath.gz')
+            .renameSync(path.join(tempDir.absolute.path, '$key.gz'));
         sizeMetrics['${metric}_${key}_compressed_bytes'] = compressedFile.lengthSync();
       }
 

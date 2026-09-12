@@ -33,29 +33,20 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     XcodeBasedProject project,
     FlutterDarwinPlatform platform,
     BuildInfo buildInfo, {
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
+    required this._xcodeProjectInterpreter,
     required Logger logger,
-    required FileSystem fileSystem,
-    required PlistParser plistParser,
-    required Config config,
-    required Analytics analytics,
-    required Platform hostPlatform,
-    required OperatingSystemUtils operatingSystemUtils,
-    required FlutterVersion flutterVersion,
-    required bool reportCrashes,
+    required this._fileSystem,
+    required this._plistParser,
+    required this._config,
+    required this._analytics,
+    required this._hostPlatform,
+    required this._operatingSystemUtils,
+    required this._flutterVersion,
+    required this._reportCrashes,
   }) : _xcodeProject = project,
        _platform = platform,
        _buildInfo = buildInfo,
        _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter,
-       _fileSystem = fileSystem,
-       _plistParser = plistParser,
-       _config = config,
-       _analytics = analytics,
-       _hostPlatform = hostPlatform,
-       _operatingSystemUtils = operatingSystemUtils,
-       _flutterVersion = flutterVersion,
-       _reportCrashes = reportCrashes,
        super(logger);
 
   final XcodeBasedProject _xcodeProject;
@@ -450,11 +441,9 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
 
     final String scriptText;
     if (_platform == FlutterDarwinPlatform.ios) {
-      scriptText =
-          r'scriptText = "/bin/sh &quot;$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh&quot; prepare&#10;">';
+      scriptText = r'scriptText = "/bin/sh &quot;$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh&quot; prepare&#10;">';
     } else {
-      scriptText =
-          r'scriptText = "&quot;$FLUTTER_ROOT&quot;/packages/flutter_tools/bin/macos_assemble.sh prepare&#10;">';
+      scriptText = r'scriptText = "&quot;$FLUTTER_ROOT&quot;/packages/flutter_tools/bin/macos_assemble.sh prepare&#10;">';
     }
 
     var newContent =

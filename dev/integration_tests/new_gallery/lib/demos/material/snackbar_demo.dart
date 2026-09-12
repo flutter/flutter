@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import '../../gallery_localizations.dart';
 
 // BEGIN snackbarsDemo
@@ -29,9 +30,8 @@ class SnackbarsDemo extends StatelessWidget {
                   label: localizations.demoSnackbarsActionButtonLabel,
                   onPressed: () {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(localizations.demoSnackbarsAction)));
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text(localizations.demoSnackbarsAction)));
                   },
                 ),
               ),

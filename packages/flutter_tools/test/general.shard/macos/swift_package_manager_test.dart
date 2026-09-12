@@ -870,30 +870,27 @@ let package = Package(
             expect(trackingFs.lockAttempts, 1);
           });
 
-          testWithoutContext(
-            'retries lock on FileSystemException and eventually succeeds',
-            () async {
-              project.xcodeProjectInfoFile.createSync(recursive: true);
-              project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
+          testWithoutContext('retries lock on FileSystemException and eventually succeeds', () async {
+            project.xcodeProjectInfoFile.createSync(recursive: true);
+            project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
 
-              trackingFs.throwErrorOnLock = true;
-              trackingFs.throwErrorOnLockTimes = 2; // Fail twice, succeed on 3rd attempt
+            trackingFs.throwErrorOnLock = true;
+            trackingFs.throwErrorOnLockTimes = 2; // Fail twice, succeed on 3rd attempt
 
-              await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
+            await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
 
-              expect(trackingFs.lockCount, 1);
-              expect(trackingFs.unlockCount, 3); // Closed on every retry + final release
-              expect(trackingFs.lockAttempts, 3); // 2 failures + 1 success
+            expect(trackingFs.lockCount, 1);
+            expect(trackingFs.unlockCount, 3); // Closed on every retry + final release
+            expect(trackingFs.lockAttempts, 3); // 2 failures + 1 success
 
-              // Verify the warning was printed to the logger
-              expect(
-                logger.warningText,
-                contains(
-                  'Waiting for another flutter command to release the Swift Package Manager lock...',
-                ),
-              );
-            },
-          );
+            // Verify the warning was printed to the logger
+            expect(
+              logger.warningText,
+              contains(
+                'Waiting for another flutter command to release the Swift Package Manager lock...',
+              ),
+            );
+          });
 
           testWithoutContext('proceeds without lock on UnimplementedError', () async {
             project.xcodeProjectInfoFile.createSync(recursive: true);

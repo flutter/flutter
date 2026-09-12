@@ -742,8 +742,8 @@ class CatmullRomSpline extends Curve2D {
   CatmullRomSpline(
     List<Offset> controlPoints, {
     double tension = 0.0,
-    Offset? startHandle,
-    Offset? endHandle,
+    this._startHandle,
+    this._endHandle,
   }) : assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
        assert(tension >= 0.0, 'tension $tension must not be negative.'),
        assert(
@@ -751,8 +751,6 @@ class CatmullRomSpline extends Curve2D {
          'There must be at least four control points to create a CatmullRomSpline.',
        ),
        _controlPoints = controlPoints,
-       _startHandle = startHandle,
-       _endHandle = endHandle,
        _tension = tension,
        _cubicSegments = <List<Offset>>[];
 

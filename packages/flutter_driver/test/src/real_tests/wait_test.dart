@@ -88,9 +88,7 @@ void main() {
         () => NoTransientCallbacks.deserialize(<String, String>{'conditionName': 'Unknown'}),
         throwsA(
           predicate<SerializationException>(
-            (SerializationException e) =>
-                e.message ==
-                'Error occurred during deserializing the NoTransientCallbacksCondition JSON string: {conditionName: Unknown}',
+            (SerializationException e) => e.message == 'Error occurred during deserializing the NoTransientCallbacksCondition JSON string: {conditionName: Unknown}',
           ),
         ),
       );
@@ -116,9 +114,7 @@ void main() {
         () => NoPendingFrame.deserialize(<String, String>{'conditionName': 'Unknown'}),
         throwsA(
           predicate<SerializationException>(
-            (SerializationException e) =>
-                e.message ==
-                'Error occurred during deserializing the NoPendingFrameCondition JSON string: {conditionName: Unknown}',
+            (SerializationException e) => e.message == 'Error occurred during deserializing the NoPendingFrameCondition JSON string: {conditionName: Unknown}',
           ),
         ),
       );
@@ -144,9 +140,7 @@ void main() {
         () => FirstFrameRasterized.deserialize(<String, String>{'conditionName': 'Unknown'}),
         throwsA(
           predicate<SerializationException>(
-            (SerializationException e) =>
-                e.message ==
-                'Error occurred during deserializing the FirstFrameRasterizedCondition JSON string: {conditionName: Unknown}',
+            (SerializationException e) => e.message == 'Error occurred during deserializing the FirstFrameRasterizedCondition JSON string: {conditionName: Unknown}',
           ),
         ),
       );
@@ -166,8 +160,7 @@ void main() {
 
       expect(combinedCondition.serialize(), <String, String>{
         'conditionName': 'CombinedCondition',
-        'conditions':
-            '[{"conditionName":"NoTransientCallbacksCondition"},{"conditionName":"NoPendingFrameCondition"}]',
+        'conditions': '[{"conditionName":"NoTransientCallbacksCondition"},{"conditionName":"NoPendingFrameCondition"}]',
       });
     });
 
@@ -190,8 +183,7 @@ void main() {
     test('CombinedCondition deserialize', () {
       final jsonMap = <String, String>{
         'conditionName': 'CombinedCondition',
-        'conditions':
-            '[{"conditionName":"NoPendingFrameCondition"},{"conditionName":"NoTransientCallbacksCondition"}]',
+        'conditions': '[{"conditionName":"NoPendingFrameCondition"},{"conditionName":"NoTransientCallbacksCondition"}]',
       };
       final condition = CombinedCondition.deserialize(jsonMap);
       expect(
@@ -217,9 +209,7 @@ void main() {
         () => CombinedCondition.deserialize(<String, String>{'conditionName': 'Unknown'}),
         throwsA(
           predicate<SerializationException>(
-            (SerializationException e) =>
-                e.message ==
-                'Error occurred during deserializing the CombinedCondition JSON string: {conditionName: Unknown}',
+            (SerializationException e) => e.message == 'Error occurred during deserializing the CombinedCondition JSON string: {conditionName: Unknown}',
           ),
         ),
       );
@@ -230,15 +220,12 @@ void main() {
         () {
           return CombinedCondition.deserialize(<String, String>{
             'conditionName': 'CombinedCondition',
-            'conditions':
-                '[{"conditionName":"UnknownCondition"},{"conditionName":"NoTransientCallbacksCondition"}]',
+            'conditions': '[{"conditionName":"UnknownCondition"},{"conditionName":"NoTransientCallbacksCondition"}]',
           });
         },
         throwsA(
           predicate<SerializationException>(
-            (SerializationException e) =>
-                e.message ==
-                'Unsupported wait condition UnknownCondition in the JSON string {conditionName: UnknownCondition}',
+            (SerializationException e) => e.message == 'Unsupported wait condition UnknownCondition in the JSON string {conditionName: UnknownCondition}',
           ),
         ),
       );

@@ -99,6 +99,5 @@ class Utf8Decoder extends Converter<List<int>, String> {
   Stream<String> bind(Stream<List<int>> stream) => _allowMalformedDecoder.bind(stream);
 
   @override
-  Converter<List<int>, T> fuse<T>(Converter<String, T> other) =>
-      _allowMalformedDecoder.fuse(other);
+  Converter<List<int>, T> fuse<T>(Converter<String, T> other) => _allowMalformedDecoder.fuse(other);
 }

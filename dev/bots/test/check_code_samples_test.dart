@@ -190,12 +190,10 @@ void main() {
       '╔═╡ERROR #2╞════════════════════════════════════════════════════════════════════',
       '║ The following malformed links were found in API doc comments:',
       if (!isWindows) '║   /flutter sdk/packages/flutter/lib/src/layer/foo.dart:6: ///*See Code *',
-      if (!isWindows)
-        '║   /flutter sdk/packages/flutter/lib/src/layer/bar.dart:6: /// ** See code examples/api/lib/layer/bar_example.0.dart **',
+      if (!isWindows) '║   /flutter sdk/packages/flutter/lib/src/layer/bar.dart:6: /// ** See code examples/api/lib/layer/bar_example.0.dart **',
       if (isWindows)
         r'║   C:\flutter sdk\packages\flutter\lib\src\layer\foo.dart:6: ///*See Code *',
-      if (isWindows)
-        r'║   C:\flutter sdk\packages\flutter\lib\src\layer\bar.dart:6: /// ** See code examples/api/lib/layer/bar_example.0.dart **',
+      if (isWindows) r'║   C:\flutter sdk\packages\flutter\lib\src\layer\bar.dart:6: /// ** See code examples/api/lib/layer/bar_example.0.dart **',
       '║ Correct the formatting of these links so that they match the exact pattern:',
       r"║   r'\*\* See code in (?<path>.+) \*\*'",
       '╚═══════════════════════════════════════════════════════════════════════════════',

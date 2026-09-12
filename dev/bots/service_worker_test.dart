@@ -90,8 +90,7 @@ self.addEventListener('fetch', (event) => {
     expect(
       _requestedPaths,
       isNot(contains('main.dart.js')),
-      reason:
-          'On a simple reload, main.dart.js should have been served from the cache, so no network request was expected.',
+      reason: 'On a simple reload, main.dart.js should have been served from the cache, so no network request was expected.',
     );
     print('${green}Verification successful: Old caching worker is active.$reset');
     await server.stop();
@@ -111,8 +110,7 @@ self.addEventListener('fetch', (event) => {
     expect(
       _requestedPaths,
       contains('main.dart.js'),
-      reason:
-          'After cleanup, main.dart.js should be requested from the network because the caching worker is gone.',
+      reason: 'After cleanup, main.dart.js should be requested from the network because the caching worker is gone.',
     );
     print(
       '${green}Verification successful: Cleanup worker has removed the old caching behavior.$reset',

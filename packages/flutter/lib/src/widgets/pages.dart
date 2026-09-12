@@ -29,8 +29,8 @@ abstract class PageRoute<T> extends ModalRoute<T> {
     super.directionalTraversalEdgeBehavior,
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
-    bool barrierDismissible = false,
-  }) : _barrierDismissible = barrierDismissible;
+    this._barrierDismissible = false,
+  });
 
   /// {@template flutter.widgets.PageRoute.fullscreenDialog}
   /// Whether this page route is a full-screen dialog.

@@ -156,7 +156,6 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       });
       rethrow;
     } finally {
-      // ignore: unawaited_futures
       chunkEvents.close().catchError((Object error, StackTrace stack) {
         FlutterError.reportError(
           FlutterErrorDetails(
