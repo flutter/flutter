@@ -39,9 +39,7 @@ final licensesNoLongerNeeded = RegExp(
 );
 
 class AndroidWorkflow implements Workflow {
-  AndroidWorkflow({required AndroidSdk? androidSdk, required FeatureFlags featureFlags})
-    : _androidSdk = androidSdk,
-      _featureFlags = featureFlags;
+  AndroidWorkflow({required this._androidSdk, required this._featureFlags});
 
   final AndroidSdk? _androidSdk;
   final FeatureFlags _featureFlags;
@@ -112,21 +110,14 @@ Future<String?> getEmulatorVersion(AndroidSdk androidSdk, ProcessManager process
 /// Android Studio.
 class AndroidValidator extends DoctorValidator {
   AndroidValidator({
-    required Java? java,
-    required AndroidSdk? androidSdk,
-    required Logger logger,
-    required Platform platform,
-    required UserMessages userMessages,
-    required ProcessManager processManager,
-    required OperatingSystemUtils osUtils,
-  }) : _java = java,
-       _androidSdk = androidSdk,
-       _logger = logger,
-       _platform = platform,
-       _userMessages = userMessages,
-       _processManager = processManager,
-       _osUtils = osUtils,
-       super('Android toolchain - develop for Android devices');
+    required this._java,
+    required this._androidSdk,
+    required this._logger,
+    required this._platform,
+    required this._userMessages,
+    required this._processManager,
+    required this._osUtils,
+  }) : super('Android toolchain - develop for Android devices');
 
   final Java? _java;
   final AndroidSdk? _androidSdk;
@@ -352,21 +343,14 @@ class AndroidValidator extends DoctorValidator {
 /// SDK have been accepted.
 class AndroidLicenseValidator extends DoctorValidator {
   AndroidLicenseValidator({
-    required Java? java,
-    required AndroidSdk? androidSdk,
-    required Platform platform,
-    required ProcessManager processManager,
-    required Logger logger,
-    required Stdio stdio,
-    required UserMessages userMessages,
-  }) : _java = java,
-       _androidSdk = androidSdk,
-       _platform = platform,
-       _processManager = processManager,
-       _logger = logger,
-       _stdio = stdio,
-       _userMessages = userMessages,
-       super('Android license subvalidator');
+    required this._java,
+    required this._androidSdk,
+    required this._platform,
+    required this._processManager,
+    required this._logger,
+    required this._stdio,
+    required this._userMessages,
+  }) : super('Android license subvalidator');
 
   final Java? _java;
   final AndroidSdk? _androidSdk;

@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+
 import 'package:ui/ui.dart' as ui;
+
 import 'code_unit_flags.dart';
 import 'layout.dart';
 import 'paragraph.dart';

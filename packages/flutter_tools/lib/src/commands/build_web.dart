@@ -22,17 +22,13 @@ import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
-    required BuildSystem buildSystem,
-    required FeatureFlags featureFlags,
+    required this.buildSystem,
+    required this.featureFlags,
     required ToolContext toolContext,
     required super.verboseHelp,
-    @visibleForTesting BuildTargets? buildTargets,
-    @visibleForTesting WebBuilder? webBuilder,
-  }) : _buildSystem = buildSystem,
-       _buildTargets = buildTargets,
-       _featureFlags = featureFlags,
-       _webBuilder = webBuilder,
-       super(
+    @visibleForTesting this.buildTargets,
+    @visibleForTesting this.webBuilder,
+  }) : super(
          logger: toolContext.logger,
          outputPreferences: toolContext.outputPreferences,
          toolContext: toolContext,
@@ -45,16 +41,11 @@ class BuildWebCommand extends BuildSubCommand {
     ]);
   }
 
-  final BuildSystem _buildSystem;
-  final BuildTargets? _buildTargets;
-  final FeatureFlags _featureFlags;
-  final WebBuilder? _webBuilder;
-
-  @visibleForTesting
-  BuildSystem get buildSystem => _buildSystem;
-
+  final BuildSystem buildSystem;
+  final BuildTargets? buildTargets;
   @override
-  FeatureFlags get featureFlags => _featureFlags;
+  final FeatureFlags featureFlags;
+  final WebBuilder? webBuilder;
 
   @override
   ToolContext get toolContext => super.toolContext!;
@@ -68,7 +59,7 @@ class BuildWebCommand extends BuildSubCommand {
   final name = 'web';
 
   @override
-  bool get hidden => !_featureFlags.isWebEnabled;
+  bool get hidden => !featureFlags.isWebEnabled;
 
   @override
   final description = 'Build a web application bundle.';
@@ -77,7 +68,7 @@ class BuildWebCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
 
-    if (!_featureFlags.isWebEnabled) {
+    if (!featureFlags.isWebEnabled) {
       throwToolExit(
         '"build web" is not currently supported. To enable, run "flutter config --enable-web".',
       );
@@ -211,15 +202,15 @@ class BuildWebCommand extends BuildSubCommand {
 
     final Map<String, String> webDefines = extractWebDefines();
 
-    final WebBuilder webBuilder =
-        _webBuilder ??
+    final WebBuilder effectiveWebBuilder =
+        webBuilder ??
         WebBuilder(
           analytics: analytics,
-          buildSystem: _buildSystem,
+          buildSystem: buildSystem,
           toolContext: toolContext,
-          buildTargets: _buildTargets ?? const BuildTargetsImpl(),
+          buildTargets: buildTargets ?? const BuildTargetsImpl(),
         );
-    await webBuilder.buildWeb(
+    await effectiveWebBuilder.buildWeb(
       project,
       targetFile,
       buildInfo,

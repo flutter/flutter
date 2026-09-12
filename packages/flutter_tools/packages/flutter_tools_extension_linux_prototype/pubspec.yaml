@@ -3,7 +3,7 @@ description: Prototype Linux platform extension package for Flutter tools extens
 resolution: workspace
 
 environment:
-  sdk: ^3.11.0-0
+  sdk: ^3.13.0-0
 
 dependencies:
   meta: 1.19.0

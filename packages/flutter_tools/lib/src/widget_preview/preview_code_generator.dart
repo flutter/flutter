@@ -340,9 +340,9 @@ class PreviewCodeGenerator {
 
     return cb.refer(_kBuildWidgetPreview, _kUtilsUri).call([], {
       ...args,
-      _kTransformedPreview: cb.CodeExpression(
-        cb.Code(preview.previewAnnotation),
-      ).property(_kTransform).call([]),
+      _kTransformedPreview: cb.CodeExpression(cb.Code(preview.previewAnnotation))
+          .property(_kTransform)
+          .call([]),
     });
   }
 }

@@ -315,7 +315,7 @@ FLUTTER_ASSERT_ARC
   skiaTextureInfo.fTexture.retain((__bridge GrMTLHandle)rgbaTex);
 
   GrBackendTexture skiaBackendTexture =
-      GrBackendTextures::MakeMtl(width, height, skgpu::Mipmapped ::kNo, skiaTextureInfo);
+      GrBackendTextures::MakeMtl(width, height, skgpu::Mipmapped::kNo, skiaTextureInfo);
 
   return SkImages::BorrowTextureFrom(grContext, skiaBackendTexture, kTopLeft_GrSurfaceOrigin,
                                      kBGRA_8888_SkColorType, kPremul_SkAlphaType,

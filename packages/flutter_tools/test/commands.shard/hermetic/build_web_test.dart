@@ -19,7 +19,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
+import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
@@ -69,7 +69,7 @@ void main() {
     );
   }
 
-  testWithoutContext('Refuses to build for web when missing index.html', () async {
+  testUsingContext('Refuses to build for web when missing index.html', () async {
     fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
     final CommandRunner<void> runner = createTestCommandRunner(
       createBuildCommand(
@@ -92,7 +92,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Refuses to build for web when feature is disabled', () async {
+  testUsingContext('Refuses to build for web when feature is disabled', () async {
     final CommandRunner<void> runner = createTestCommandRunner(
       createBuildCommand(
         fileSystem: fileSystem,
@@ -113,7 +113,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Setup for a web build with default output directory', () async {
+  testUsingContext('Setup for a web build with default output directory', () async {
     final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
@@ -125,8 +125,7 @@ void main() {
           'HasWebPlugins': 'true',
           'ServiceWorkerStrategy': 'offline-first',
           'BuildMode': 'release',
-          'DartDefines':
-              'Zm9vPWE=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+          'DartDefines': 'Zm9vPWE=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           'DartObfuscation': 'false',
           'TrackWidgetCreation': 'false',
           'TreeShakeIcons': 'true',
@@ -155,7 +154,7 @@ void main() {
     expect(logger.statusText, contains('✓ Built ${buildDir.path}'));
   });
 
-  testWithoutContext('Passes --web-define values to environment defines with prefix', () async {
+  testUsingContext('Passes --web-define values to environment defines with prefix', () async {
     final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
@@ -205,7 +204,7 @@ void main() {
       }
     }
 
-    testWithoutContext(
+    testUsingContext(
       'Passes --web-content-hash flag to compiler configs (wasm: $useWasm)',
       () async {
         final TestWebBuildCommand buildCommand = createBuildCommand(
@@ -229,7 +228,7 @@ void main() {
     );
   }
 
-  testWithoutContext(
+  testUsingContext(
     'Rejects --web-content-hash combined with --enable-wasm-deferred-loading',
     () async {
       final TestWebBuildCommand buildCommand = createBuildCommand(
@@ -255,7 +254,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  testUsingContext(
     'Rejects --web-content-hash when web/index.html references main.dart.js or loadEntrypoint',
     () async {
       final TestWebBuildCommand buildCommand = createBuildCommand(
@@ -301,7 +300,7 @@ void main() {
     },
   );
 
-  testWithoutContext('Prints serving guidance tip when --web-content-hash is used', () async {
+  testUsingContext('Prints serving guidance tip when --web-content-hash is used', () async {
     final TestWebBuildCommand buildCommand = createBuildCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -322,7 +321,7 @@ void main() {
     expect(logger.statusText, contains('with "Cache-Control: no-cache"'));
   });
 
-  testWithoutContext('Builds successfully without --web-define', () async {
+  testUsingContext('Builds successfully without --web-define', () async {
     final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
@@ -349,7 +348,7 @@ void main() {
     expect(buildDir.existsSync(), true);
   });
 
-  testWithoutContext('Infers target entrypoint correctly from --target', () async {
+  testUsingContext('Infers target entrypoint correctly from --target', () async {
     // Regression test for https://github.com/flutter/flutter/issues/136830.
     final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
@@ -362,8 +361,7 @@ void main() {
           'HasWebPlugins': 'true',
           'ServiceWorkerStrategy': 'offline-first',
           'BuildMode': 'release',
-          'DartDefines':
-              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+          'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           'DartObfuscation': 'false',
           'TrackWidgetCreation': 'false',
           'TreeShakeIcons': 'true',
@@ -391,7 +389,7 @@ void main() {
     expect(logger.statusText, contains('✓ Built ${buildDir.path}'));
   });
 
-  testWithoutContext('Infers target entrypoint correctly from positional argument list', () async {
+  testUsingContext('Infers target entrypoint correctly from positional argument list', () async {
     // Regression test for https://github.com/flutter/flutter/issues/136830.
     final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
@@ -404,8 +402,7 @@ void main() {
           'HasWebPlugins': 'true',
           'ServiceWorkerStrategy': 'offline-first',
           'BuildMode': 'release',
-          'DartDefines':
-              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+          'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           'DartObfuscation': 'false',
           'TrackWidgetCreation': 'false',
           'TreeShakeIcons': 'true',
@@ -427,7 +424,7 @@ void main() {
     expect(logger.statusText, contains('✓ Built ${buildDir.path}'));
   });
 
-  testWithoutContext('Does not allow -O0 optimization level', () async {
+  testUsingContext('Does not allow -O0 optimization level', () async {
     final bufferLogger = BufferLogger.test();
     final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
@@ -458,7 +455,7 @@ void main() {
     expect(buildDir.existsSync(), isFalse);
   });
 
-  testWithoutContext('Setup for a web build with a user specified output directory', () async {
+  testUsingContext('Setup for a web build with a user specified output directory', () async {
     final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
@@ -470,8 +467,7 @@ void main() {
           'HasWebPlugins': 'true',
           'ServiceWorkerStrategy': 'offline-first',
           'BuildMode': 'release',
-          'DartDefines':
-              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+          'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           'DartObfuscation': 'false',
           'TrackWidgetCreation': 'false',
           'TreeShakeIcons': 'true',
@@ -504,7 +500,7 @@ void main() {
     expect(logger.statusText, contains('✓ Built $newBuildDir'));
   });
 
-  testWithoutContext('hidden if feature flag is not enabled', () async {
+  testUsingContext('hidden if feature flag is not enabled', () async {
     expect(
       BuildWebCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -521,7 +517,7 @@ void main() {
     );
   });
 
-  testWithoutContext('not hidden if feature flag is enabled', () async {
+  testUsingContext('not hidden if feature flag is enabled', () async {
     expect(
       BuildWebCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -538,7 +534,7 @@ void main() {
     );
   });
 
-  testWithoutContext(
+  testUsingContext(
     'Defaults to web renderer canvaskit and minify mode when no option is specified',
     () async {
       final buildCommand = TestWebBuildCommand(
@@ -582,7 +578,7 @@ void main() {
     },
   );
 
-  testWithoutContext('Does not build wasm when wasm-dry-run is disabled', () async {
+  testUsingContext('Does not build wasm when wasm-dry-run is disabled', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -611,7 +607,7 @@ void main() {
     await runner.run(<String>['build', 'web', '--no-pub', '--no-wasm-dry-run']);
   });
 
-  testWithoutContext(
+  testUsingContext(
     'Defaults to web renderer skwasm mode and minify for wasm when no option is specified',
     () async {
       final buildCommand = TestWebBuildCommand(
@@ -642,7 +638,7 @@ void main() {
     },
   );
 
-  testWithoutContext('Passes minify to only wasm when minify-wasm specified', () async {
+  testUsingContext('Passes minify to only wasm when minify-wasm specified', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -664,7 +660,7 @@ void main() {
     await runner.run(<String>['build', 'web', '--no-pub', '--wasm', '--minify-wasm']);
   });
 
-  testWithoutContext('Passes no-minify to wasm when no-minify-wasm specified', () async {
+  testUsingContext('Passes no-minify to wasm when no-minify-wasm specified', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -686,7 +682,7 @@ void main() {
     await runner.run(<String>['build', 'web', '--no-pub', '--wasm', '--no-minify-wasm']);
   });
 
-  testWithoutContext('Passes minify to js when minify-js specified', () async {
+  testUsingContext('Passes minify to js when minify-js specified', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -708,7 +704,7 @@ void main() {
     await runner.run(<String>['build', 'web', '--no-pub', '--wasm', '--minify-js']);
   });
 
-  testWithoutContext('Passes no-minify to js when no-minify-js specified', () async {
+  testUsingContext('Passes no-minify to js when no-minify-js specified', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -730,7 +726,7 @@ void main() {
     await runner.run(<String>['build', 'web', '--no-pub', '--wasm', '--no-minify-js']);
   });
 
-  testWithoutContext('Passes enabled-deferred-loading to wasm when specified', () async {
+  testUsingContext('Passes enabled-deferred-loading to wasm when specified', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -762,7 +758,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Web build supports build-name and build-number', () async {
+  testUsingContext('Web build supports build-name and build-number', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -787,7 +783,7 @@ void main() {
     expect(buildInfo.buildName, '1.2.3');
   });
 
-  testWithoutContext('Does not override custom CanvasKit URL', () async {
+  testUsingContext('Does not override custom CanvasKit URL', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -809,7 +805,7 @@ void main() {
     expect(buildInfo.dartDefines, contains('FLUTTER_WEB_CANVASKIT_URL=abcdefg'));
   });
 
-  testWithoutContext('Rejects --base-href value that does not start with /', () async {
+  testUsingContext('Rejects --base-href value that does not start with /', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -833,7 +829,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Rejects --static-assets-url value that does not end with /', () async {
+  testUsingContext('Rejects --static-assets-url value that does not end with /', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -857,7 +853,7 @@ void main() {
     );
   });
 
-  testWithoutContext('flutter build web option visibility', () async {
+  testUsingContext('flutter build web option visibility', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -905,7 +901,7 @@ void main() {
     expectVisible('base-href');
   });
 
-  testWithoutContext('flutter build web option visibility with verboseHelp', () async {
+  testUsingContext('flutter build web option visibility with verboseHelp', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -954,7 +950,7 @@ void main() {
     expectVisible('base-href');
   });
 
-  testWithoutContext('Refuses to build for web when folder is missing', () async {
+  testUsingContext('Refuses to build for web when folder is missing', () async {
     fileSystem.file(fileSystem.path.join('web')).deleteSync(recursive: true);
     final TestWebBuildCommand buildCommand = createBuildCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),

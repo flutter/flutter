@@ -18,14 +18,12 @@ import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({
-    required BuildSystem buildSystem,
-    required FeatureFlags featureFlags,
+    required this.buildSystem,
+    required this.featureFlags,
     required ToolContext toolContext,
     required super.verboseHelp,
     BundleBuilder? bundleBuilder,
-  }) : _buildSystem = buildSystem,
-       _bundleBuilder = bundleBuilder ?? BundleBuilder(),
-       _featureFlags = featureFlags,
+  }) : _bundleBuilder = bundleBuilder ?? BundleBuilder(),
        super(
          logger: toolContext.logger,
          outputPreferences: toolContext.outputPreferences,
@@ -81,19 +79,13 @@ class BuildBundleCommand extends BuildSubCommand {
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
 
-  final BuildSystem _buildSystem;
+  final BuildSystem buildSystem;
   final BundleBuilder _bundleBuilder;
-  final FeatureFlags _featureFlags;
-
-  @visibleForTesting
-  BuildSystem get buildSystem => _buildSystem;
+  @override
+  final FeatureFlags featureFlags;
 
   @visibleForTesting
   BundleBuilder get bundleBuilder => _bundleBuilder;
-
-  @visibleForTesting
-  @override
-  FeatureFlags get featureFlags => _featureFlags;
 
   @override
   ToolContext get toolContext => super.toolContext!;
@@ -140,18 +132,18 @@ class BuildBundleCommand extends BuildSubCommand {
     // Check for target platforms that are only allowed via feature flags.
     switch (platform) {
       case TargetPlatform.darwin:
-        if (!_featureFlags.isMacOSEnabled) {
+        if (!featureFlags.isMacOSEnabled) {
           throwToolExit('macOS is not a supported target platform.');
         }
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
-        if (!_featureFlags.isWindowsEnabled) {
+        if (!featureFlags.isWindowsEnabled) {
           throwToolExit('Windows is not a supported target platform.');
         }
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.linux_riscv64:
-        if (!_featureFlags.isLinuxEnabled) {
+        if (!featureFlags.isLinuxEnabled) {
           throwToolExit('Linux is not a supported target platform.');
         }
       case TargetPlatform.android:
@@ -174,7 +166,7 @@ class BuildBundleCommand extends BuildSubCommand {
       buildInfo: buildInfo,
       platform: platform,
       assetDirPath: stringArg('asset-dir'),
-      buildSystem: _buildSystem,
+      buildSystem: buildSystem,
       depfilePath: stringArg('depfile'),
       mainPath: targetFile,
     );

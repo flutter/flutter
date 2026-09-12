@@ -895,12 +895,9 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final privatePackages = <String>{};
     for (final Package package in packageConfigPackages.packages) {
       final String packageName = package.name;
-      if (package.root.pathSegments.where((String s) => s.isNotEmpty).toList() case [
-        ...,
-        'hosted',
-        _,
-        final packageFolder,
-      ] when packageFolder.startsWith('$packageName-')) {
+      if (package.root.pathSegments.where((String s) => s.isNotEmpty).toList()
+          case [..., 'hosted', _, final packageFolder]
+          when packageFolder.startsWith('$packageName-')) {
         // Hosted package directories in .pub-cache follow '<packageName>-<version>'.
         // Substring past the package name and hyphen to extract the version.
         hostedPackages[packageName] = packageFolder.substring(packageName.length + 1);

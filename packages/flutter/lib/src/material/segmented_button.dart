@@ -550,9 +550,8 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     }
 
     final ButtonStyle segmentStyle = segmentStyleFor(widget.style);
-    final ButtonStyle segmentThemeStyle = segmentStyleFor(
-      theme.style,
-    ).merge(segmentStyleFor(defaults.style));
+    final ButtonStyle segmentThemeStyle = segmentStyleFor(theme.style)
+        .merge(segmentStyleFor(defaults.style));
     final Widget? selectedIcon = widget.showSelectedIcon
         ? widget.selectedIcon ?? theme.selectedIcon ?? defaults.selectedIcon
         : null;
@@ -772,20 +771,14 @@ class _RenderSegmentedButton<T> extends RenderBox
         ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
   _RenderSegmentedButton({
-    required List<ButtonSegment<T>> segments,
-    required OutlinedBorder enabledBorder,
-    required OutlinedBorder disabledBorder,
-    required TextDirection textDirection,
-    required double tapTargetVerticalPadding,
-    required bool isExpanded,
-    required Axis direction,
-  }) : _segments = segments,
-       _enabledBorder = enabledBorder,
-       _disabledBorder = disabledBorder,
-       _textDirection = textDirection,
-       _direction = direction,
-       _tapTargetVerticalPadding = tapTargetVerticalPadding,
-       _isExpanded = isExpanded;
+    required this._segments,
+    required this._enabledBorder,
+    required this._disabledBorder,
+    required this._textDirection,
+    required this._tapTargetVerticalPadding,
+    required this._isExpanded,
+    required this._direction,
+  });
 
   List<ButtonSegment<T>> get segments => _segments;
   List<ButtonSegment<T>> _segments;
