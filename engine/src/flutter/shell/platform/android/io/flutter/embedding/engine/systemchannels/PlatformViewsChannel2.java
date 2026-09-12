@@ -48,6 +48,16 @@ public class PlatformViewsChannel2 {
     channel.invokeMethod("viewFocused", viewId);
   }
 
+  public void invokeFocusNext(int viewId, int direction) {
+    if (channel == null) {
+      return;
+    }
+    Map<String, Object> args = new java.util.HashMap<>();
+    args.put("viewId", viewId);
+    args.put("direction", direction);
+    channel.invokeMethod("invokeFocusNext", args);
+  }
+
   private static String detailedExceptionString(Exception exception) {
     return Log.getStackTraceString(exception);
   }
@@ -78,6 +88,9 @@ public class PlatformViewsChannel2 {
               break;
             case "clearFocus":
               clearFocus(call, result);
+              break;
+            case "requestFocus":
+              requestFocus(call, result);
               break;
             case "isSurfaceControlEnabled":
               isSurfaceControlEnabled(call, result);
@@ -172,6 +185,16 @@ public class PlatformViewsChannel2 {
           }
         }
 
+        private void requestFocus(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+          int viewId = call.arguments();
+          try {
+            handler.requestFocus(viewId);
+            result.success(null);
+          } catch (IllegalStateException exception) {
+            result.error("error", detailedExceptionString(exception), null);
+          }
+        }
+
         private void isSurfaceControlEnabled(
             @NonNull MethodCall call, @NonNull MethodChannel.Result result) {
           result.success(handler.isSurfaceControlEnabled());
@@ -202,6 +225,9 @@ public class PlatformViewsChannel2 {
 
     /** The Flutter application would like to dispose of an existing Android {@code View}. */
     void dispose(int viewId);
+
+    /** The Flutter application would like to request focus on an existing Android {@code View}. */
+    void requestFocus(int viewId);
 
     /**
      * The user touched a platform view within Flutter.

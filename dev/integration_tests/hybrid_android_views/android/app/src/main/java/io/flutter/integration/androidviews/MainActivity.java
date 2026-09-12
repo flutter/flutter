@@ -8,6 +8,8 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +31,7 @@ import io.flutter.plugins.GeneratedPluginRegistrant;
 public class MainActivity extends FlutterActivity implements MethodChannel.MethodCallHandler {
     final static int STORAGE_PERMISSION_CODE = 1;
 
+    public static MainActivity activeActivity;
     MethodChannel mMethodChannel;
 
     // The method result to complete with the Android permission request result.
@@ -98,11 +101,16 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
 
     @Override
     public void configureFlutterEngine(FlutterEngine flutterEngine) {
+        activeActivity = this;
         DartExecutor executor = flutterEngine.getDartExecutor();
         flutterEngine
             .getPlatformViewsController()
             .getRegistry()
             .registerViewFactory("simple_view", new SimpleViewFactory(executor));
+        flutterEngine
+            .getPlatformViewsController()
+            .getRegistry()
+            .registerViewFactory("edit_text_view", new EditTextViewFactory(executor));
         mMethodChannel = new MethodChannel(executor, "android_views_integration");
         mMethodChannel.setMethodCallHandler(this);
         GeneratedPluginRegistrant.registerWith(flutterEngine);
@@ -127,8 +135,39 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
                 String viewHierarchy = getSerializedViewHierarchy();
                 result.success(viewHierarchy);
                 return;
+             case "sendAndroidKeyEvent":
+                int keyCode = methodCall.argument("keyCode");
+                sendAndroidKeyEvent(keyCode);
+                result.success(null);
+                return;
+             case "getEditText":
+                String text = "";
+                if (EditTextPlatformView.activeView != null) {
+                    text = EditTextPlatformView.activeView.getText();
+                    android.util.Log.i("MainActivity", "getEditText activeView text=" + text);
+                } else {
+                    android.util.Log.i("MainActivity", "getEditText activeView is NULL");
+                }
+                result.success(text);
+                return;
+             case "requestFocus":
+                if (EditTextPlatformView.activeView != null) {
+                    EditTextPlatformView.activeView.requestFocus();
+                    android.util.Log.i("MainActivity", "requestFocus activeView called");
+                }
+                result.success(null);
+                return;
         }
         result.notImplemented();
+    }
+
+    public void sendAndroidKeyEvent(int keyCode) {
+        long downTime = SystemClock.uptimeMillis();
+        long eventTime = SystemClock.uptimeMillis();
+        KeyEvent downEvent = new KeyEvent(downTime, eventTime, KeyEvent.ACTION_DOWN, keyCode, 0);
+        KeyEvent upEvent = new KeyEvent(downTime, eventTime, KeyEvent.ACTION_UP, keyCode, 0);
+        dispatchKeyEvent(downEvent);
+        dispatchKeyEvent(upEvent);
     }
 
     @SuppressWarnings("unchecked")

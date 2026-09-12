@@ -1228,6 +1228,31 @@ void main() {
       expect(viewsController.lastClearedFocusViewId, currentViewId + 1);
     });
 
+    testWidgets('AndroidView returns skipRemainingHandlers for key events', (
+      WidgetTester tester,
+    ) async {
+      final viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        const AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+      );
+
+      final Focus androidViewFocusWidget = tester.widget(
+        find.descendant(of: find.byType(AndroidView), matching: find.byType(Focus)),
+      );
+      final FocusNode androidViewFocusNode = androidViewFocusWidget.focusNode!;
+      final KeyEventResult result = androidViewFocusNode.onKeyEvent!(
+        androidViewFocusNode,
+        const KeyDownEvent(
+          physicalKey: PhysicalKeyboardKey.tab,
+          logicalKey: LogicalKeyboardKey.tab,
+          timeStamp: Duration.zero,
+        ),
+      );
+      expect(result, KeyEventResult.skipRemainingHandlers);
+    });
+
     testWidgets('can set and update clipBehavior', (WidgetTester tester) async {
       final viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2394,6 +2419,32 @@ void main() {
 
       expect(uiKitViewFocusNode.hasFocus, true);
       expect(channelArguments['platformViewId'], currentViewId + 1);
+    });
+
+    testWidgets('UiKitView returns skipRemainingHandlers for key events', (
+      WidgetTester tester,
+    ) async {
+      final viewsController = FakeIosPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        const UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+      );
+      await tester.pump();
+
+      final Focus uiKitViewFocusWidget = tester.widget(
+        find.descendant(of: find.byType(UiKitView), matching: find.byType(Focus)),
+      );
+      final FocusNode uiKitViewFocusNode = uiKitViewFocusWidget.focusNode!;
+      final KeyEventResult result = uiKitViewFocusNode.onKeyEvent!(
+        uiKitViewFocusNode,
+        const KeyDownEvent(
+          physicalKey: PhysicalKeyboardKey.tab,
+          logicalKey: LogicalKeyboardKey.tab,
+          timeStamp: Duration.zero,
+        ),
+      );
+      expect(result, KeyEventResult.skipRemainingHandlers);
     });
 
     testWidgets('FocusNode is disposed on UIView dispose', (WidgetTester tester) async {
@@ -4117,6 +4168,60 @@ void main() {
       expect(controller.focusCleared, true);
     });
 
+    testWidgets('PlatformViewLink onFocusSearchFailed passes focus correctly', (
+      WidgetTester tester,
+    ) async {
+      late ValueChanged<PlatformViewFocusDirection> focusSearchFailed;
+      final platformViewLink = PlatformViewLink(
+        viewType: 'webview',
+        onCreatePlatformView: (PlatformViewCreationParams params) {
+          params.onPlatformViewCreated(params.id);
+          focusSearchFailed = params.onFocusSearchFailed;
+          return FakePlatformViewController(params.id);
+        },
+        surfaceFactory: (BuildContext context, PlatformViewController controller) {
+          return PlatformViewSurface(
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+            controller: controller,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          );
+        },
+      );
+      final GlobalKey nextFocusKey = GlobalKey();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              SizedBox(width: 300, height: 300, child: platformViewLink),
+              Focus(
+                debugLabel: 'next',
+                child: SizedBox(key: nextFocusKey, width: 10, height: 10),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final Focus platformViewFocusWidget = tester.widget(
+        find.descendant(of: find.byType(PlatformViewLink), matching: find.byType(Focus)),
+      );
+      final FocusNode platformViewFocusNode = platformViewFocusWidget.focusNode!;
+
+      platformViewFocusNode.requestFocus();
+      await tester.pump();
+      expect(platformViewFocusNode.hasFocus, true);
+
+      // Simulate exhausting focus natively (FOCUS_FORWARD == 2)
+      focusSearchFailed(PlatformViewFocusDirection.forward);
+      await tester.pump();
+
+      final Element nextElement = tester.element(find.byKey(nextFocusKey));
+      final FocusNode nextFocusNode = Focus.of(nextElement);
+      expect(nextFocusNode.hasFocus, true);
+      expect(platformViewFocusNode.hasFocus, false);
+    });
+
     testWidgets('PlatformViewLink sets a platform view text input client when focused', (
       WidgetTester tester,
     ) async {
@@ -4165,6 +4270,103 @@ void main() {
       expect(focusNode.hasFocus, true);
       expect(lastPlatformViewTextClient.containsKey('platformViewId'), true);
       expect(lastPlatformViewTextClient['platformViewId'], viewId);
+    });
+
+    testWidgets('PlatformViewLink returns skipRemainingHandlers for key events', (
+      WidgetTester tester,
+    ) async {
+      late FakePlatformViewController controller;
+
+      final platformViewLink = PlatformViewLink(
+        viewType: 'test',
+        onCreatePlatformView: (PlatformViewCreationParams params) {
+          params.onPlatformViewCreated(params.id);
+          controller = FakePlatformViewController(params.id);
+          return controller;
+        },
+        surfaceFactory: (BuildContext context, PlatformViewController controller) {
+          return PlatformViewSurface(
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+            controller: controller,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          );
+        },
+      );
+      await tester.pumpWidget(SizedBox(width: 300, height: 300, child: platformViewLink));
+
+      final Focus platformViewFocusWidget = tester.widget(
+        find.descendant(of: find.byType(PlatformViewLink), matching: find.byType(Focus)),
+      );
+
+      final FocusNode? focusNode = platformViewFocusWidget.focusNode;
+      expect(focusNode, isNotNull);
+      final KeyEventResult result = focusNode!.onKeyEvent!(
+        focusNode,
+        const KeyDownEvent(
+          physicalKey: PhysicalKeyboardKey.tab,
+          logicalKey: LogicalKeyboardKey.tab,
+          timeStamp: Duration.zero,
+        ),
+      );
+      expect(result, KeyEventResult.skipRemainingHandlers);
+    });
+
+    testWidgets('PlatformViewLink does not call setPlatformViewClient when unfocused', (
+      WidgetTester tester,
+    ) async {
+      late FakePlatformViewController controller;
+      late int viewId;
+
+      final platformViewLink = PlatformViewLink(
+        viewType: 'test',
+        onCreatePlatformView: (PlatformViewCreationParams params) {
+          viewId = params.id;
+          params.onPlatformViewCreated(params.id);
+          controller = FakePlatformViewController(params.id);
+          return controller;
+        },
+        surfaceFactory: (BuildContext context, PlatformViewController controller) {
+          return PlatformViewSurface(
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+            controller: controller,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          );
+        },
+      );
+      await tester.pumpWidget(SizedBox(width: 300, height: 300, child: platformViewLink));
+
+      final Focus platformViewFocusWidget = tester.widget(
+        find.descendant(of: find.byType(PlatformViewLink), matching: find.byType(Focus)),
+      );
+
+      final FocusNode? focusNode = platformViewFocusWidget.focusNode;
+      expect(focusNode, isNotNull);
+      expect(focusNode!.hasFocus, false);
+
+      late Map<String, dynamic> lastPlatformViewTextClient;
+      var callCount = 0;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (
+        MethodCall call,
+      ) {
+        if (call.method == 'TextInput.setPlatformViewClient') {
+          lastPlatformViewTextClient = call.arguments as Map<String, dynamic>;
+          callCount++;
+        }
+        return null;
+      });
+
+      platformViewFocusWidget.focusNode!.requestFocus();
+      await tester.pump();
+
+      expect(focusNode.hasFocus, true);
+      expect(callCount, 1);
+      expect(lastPlatformViewTextClient['platformViewId'], viewId);
+
+      platformViewFocusWidget.focusNode!.unfocus();
+      await tester.pump();
+
+      expect(focusNode.hasFocus, false);
+      expect(callCount, 1);
     });
 
     testWidgets('PlatformViewLink focus change reports error when channel fails', (
