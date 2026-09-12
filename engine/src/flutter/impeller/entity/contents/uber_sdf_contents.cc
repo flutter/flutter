@@ -165,8 +165,9 @@ bool UberSDFContents::Render(const ContentContext& renderer,
       this, GetGeometry(), renderer, entity, pass, pipeline_callback,
       frame_info,
       /*bind_fragment_callback=*/
-      [&frag_info, &data_host_buffer,
-       sampler_binding = std::move(sampler_binding)](RenderPass& pass) {
+      // DrawGeometry invokes this before returning, so capturing locals by
+      // reference is safe.
+      [&frag_info, &data_host_buffer, &sampler_binding](RenderPass& pass) {
         FS::BindColorSourceSampler(pass, sampler_binding.texture,
                                    sampler_binding.sampler);
         FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
@@ -175,10 +176,11 @@ bool UberSDFContents::Render(const ContentContext& renderer,
       },
       /*force_stencil=*/false,
       /*create_geom_callback=*/
-      [geometry_result = std::move(geometry_result)](
-          const ContentContext& renderer, const Entity& entity,
-          RenderPass& pass,
-          const Geometry* geometry) { return geometry_result; });
+      // DrawGeometry invokes this before returning, so capturing
+      // geometry_result by reference is safe.
+      [&geometry_result](const ContentContext& renderer, const Entity& entity,
+                         RenderPass& pass,
+                         const Geometry* geometry) { return geometry_result; });
 }
 
 std::optional<Rect> UberSDFContents::GetCoverage(const Entity& entity) const {
