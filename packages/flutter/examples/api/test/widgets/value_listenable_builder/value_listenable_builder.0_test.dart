@@ -13,13 +13,11 @@ void main() {
 
     String getCount() {
       return (tester.widget(
-                find.descendant(
-                  of: find.byType(example.CountDisplay),
-                  matching: find.byType(Text),
-                ),
-              )
-              as Text)
-          .data!;
+        find.descendant(
+          of: find.byType(example.CountDisplay),
+          matching: find.byType(Text),
+        ),
+      ) as Text).data!;
     }
 
     expect(

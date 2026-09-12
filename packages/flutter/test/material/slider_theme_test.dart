@@ -2702,9 +2702,8 @@ void main() {
 
     RenderBox sliderRenderBox() {
       return tester.allRenderObjects.firstWhere(
-            (RenderObject object) => object.runtimeType.toString() == '_RenderSlider',
-          )
-          as RenderBox;
+        (RenderObject object) => object.runtimeType.toString() == '_RenderSlider',
+      ) as RenderBox;
     }
 
     // Test Slider height and tracks spacing with zero padding.
@@ -2789,9 +2788,8 @@ void main() {
 
     RenderBox sliderRenderBox() {
       return tester.allRenderObjects.firstWhere(
-            (RenderObject object) => object.runtimeType.toString() == '_RenderRangeSlider',
-          )
-          as RenderBox;
+        (RenderObject object) => object.runtimeType.toString() == '_RenderRangeSlider',
+      ) as RenderBox;
     }
 
     // Test RangeSlider height and tracks spacing with zero padding.

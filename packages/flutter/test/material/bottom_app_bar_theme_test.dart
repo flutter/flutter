@@ -100,9 +100,8 @@ void main() {
     final RenderBox renderBox = tester.renderObject<RenderBox>(find.byType(BottomAppBar));
     expect(renderBox.size.height, themeData.height);
 
-    final bool hasFab = Scaffold.of(
-      tester.element(find.byType(BottomAppBar)),
-    ).hasFloatingActionButton;
+    final bool hasFab = Scaffold.of(tester.element(find.byType(BottomAppBar)))
+        .hasFloatingActionButton;
     if (hasFab) {
       expect(widget.clipper.toString(), '_BottomAppBarClipper');
     } else {

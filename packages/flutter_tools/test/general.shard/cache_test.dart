@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ffi' show Abi;
+
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -361,9 +362,8 @@ void main() {
     );
 
     testUsingContext('failed storage.googleapis.com download shows China warning', () async {
-      final InternetAddress address = (await InternetAddress.lookup(
-        'storage.googleapis.com',
-      )).first;
+      final InternetAddress address = (await InternetAddress.lookup('storage.googleapis.com'))
+          .first;
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
       final artifact2 = FakeSecondaryCachedArtifact()
         ..upToDate = false
@@ -1447,55 +1447,52 @@ void main() {
     expect(logger.warningText, contains('Failed to delete some stamp files'));
   });
 
-  testWithoutContext(
-    'FlutterWebSdk fetches web artifacts and deletes previous directory contents',
-    () async {
-      final fileSystem = MemoryFileSystem.test();
-      final Directory internalDir = fileSystem.currentDirectory
-          .childDirectory('bin')
-          .childDirectory('internal');
-      final File canvasKitVersionFile = internalDir.childFile('canvaskit.version');
-      canvasKitVersionFile.createSync(recursive: true);
-      canvasKitVersionFile.writeAsStringSync('abcdefg');
+  testWithoutContext('FlutterWebSdk fetches web artifacts and deletes previous directory contents', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final Directory internalDir = fileSystem.currentDirectory
+        .childDirectory('bin')
+        .childDirectory('internal');
+    final File canvasKitVersionFile = internalDir.childFile('canvaskit.version');
+    canvasKitVersionFile.createSync(recursive: true);
+    canvasKitVersionFile.writeAsStringSync('abcdefg');
 
-      final Directory cacheDir = fileSystem.currentDirectory
-          .childDirectory('bin')
-          .childDirectory('cache');
-      final File engineVersionFile = cacheDir.childFile('engine.stamp');
-      engineVersionFile.createSync(recursive: true);
-      engineVersionFile.writeAsStringSync('hijklmnop');
+    final Directory cacheDir = fileSystem.currentDirectory
+        .childDirectory('bin')
+        .childDirectory('cache');
+    final File engineVersionFile = cacheDir.childFile('engine.stamp');
+    engineVersionFile.createSync(recursive: true);
+    engineVersionFile.writeAsStringSync('hijklmnop');
 
-      final cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
-      final Directory webCacheDirectory = cache.getWebSdkDirectory();
-      final artifactUpdater = FakeArtifactUpdater();
-      final webSdk = FlutterWebSdk(cache);
+    final cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
+    final Directory webCacheDirectory = cache.getWebSdkDirectory();
+    final artifactUpdater = FakeArtifactUpdater();
+    final webSdk = FlutterWebSdk(cache);
 
-      final messages = <String>[];
-      final downloads = <String>[];
-      final locations = <String>[];
-      artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
-        messages.add(message);
-        downloads.add(uri.toString());
-        locations.add(location.path);
-        location.createSync(recursive: true);
-        location.childFile('foo').createSync();
-      };
-      webCacheDirectory.childFile('bar').createSync(recursive: true);
+    final messages = <String>[];
+    final downloads = <String>[];
+    final locations = <String>[];
+    artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
+      messages.add(message);
+      downloads.add(uri.toString());
+      locations.add(location.path);
+      location.createSync(recursive: true);
+      location.childFile('foo').createSync();
+    };
+    webCacheDirectory.childFile('bar').createSync(recursive: true);
 
-      await webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
+    await webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
 
-      expect(messages, <String>['Web SDK']);
+    expect(messages, <String>['Web SDK']);
 
-      expect(downloads, <String>[
-        'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk.zip',
-      ]);
+    expect(downloads, <String>[
+      'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk.zip',
+    ]);
 
-      expect(locations, <String>['/bin/cache/flutter_web_sdk']);
+    expect(locations, <String>['/bin/cache/flutter_web_sdk']);
 
-      expect(webCacheDirectory.childFile('foo'), exists);
-      expect(webCacheDirectory.childFile('bar'), isNot(exists));
-    },
-  );
+    expect(webCacheDirectory.childFile('foo'), exists);
+    expect(webCacheDirectory.childFile('bar'), isNot(exists));
+  });
 
   testWithoutContext(
     'FlutterWebSdk CanvasKit URL can be overridden via FLUTTER_STORAGE_BASE_URL',
