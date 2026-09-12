@@ -141,6 +141,81 @@ Future<void> testMain() async {
     }
   });
 
+  test('getLineBoundary respects position affinity at a soft wrap', () {
+    const fontSize = 10.0;
+    final builder = ui.ParagraphBuilder(
+      ui.ParagraphStyle(fontSize: fontSize, fontFamily: 'FlutterTest'),
+    )..addText('Test Text');
+    final ui.Paragraph paragraph = builder.build();
+    // The test font is square, so five characters fit and the text wraps to
+    // 'Test ' and 'Text'.
+    paragraph.layout(const ui.ParagraphConstraints(width: fontSize * 5.0));
+    expect(paragraph.computeLineMetrics(), hasLength(2));
+
+    // Offset 5 is the seam: it is both the end of the first line and the start
+    // of the second, so only the affinity distinguishes the two. Downstream
+    // means the start of the second line.
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 5)),
+      const ui.TextRange(start: 5, end: 9),
+    );
+
+    // Upstream means the end of the first line.
+    expect(
+      paragraph.getLineBoundary(
+        const ui.TextPosition(offset: 5, affinity: ui.TextAffinity.upstream),
+      ),
+      const ui.TextRange(start: 0, end: 5),
+    );
+
+    // Away from the seam the affinity makes no difference. Downstream at 0 and
+    // upstream at 2 both resolve to the first line.
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+      const ui.TextRange(start: 0, end: 5),
+    );
+    expect(
+      paragraph.getLineBoundary(
+        const ui.TextPosition(offset: 2, affinity: ui.TextAffinity.upstream),
+      ),
+      const ui.TextRange(start: 0, end: 5),
+    );
+
+    // The end of the last line has no following line to move to.
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 9)),
+      const ui.TextRange(start: 5, end: 9),
+    );
+  });
+
+  test('getLineBoundary is unaffected by affinity at a hard line break', () {
+    const fontSize = 10.0;
+    final builder = ui.ParagraphBuilder(
+      ui.ParagraphStyle(fontSize: fontSize, fontFamily: 'FlutterTest'),
+    )..addText('Test\nText');
+    final ui.Paragraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+    expect(paragraph.computeLineMetrics(), hasLength(2));
+
+    // Unlike a soft wrap, the newline occupies an offset of its own, so the
+    // first line's end and the second line's start are not the same position
+    // and there is no seam for the affinity to disambiguate.
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 4)),
+      const ui.TextRange(start: 0, end: 4),
+    );
+    expect(
+      paragraph.getLineBoundary(
+        const ui.TextPosition(offset: 4, affinity: ui.TextAffinity.upstream),
+      ),
+      const ui.TextRange(start: 0, end: 4),
+    );
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 5)),
+      const ui.TextRange(start: 5, end: 9),
+    );
+  });
+
   group('when flutter tester emulation is enabled', () {
     setUp(() {
       ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment.flutterTester());

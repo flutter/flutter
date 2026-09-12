@@ -247,10 +247,30 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    final int offset = position.offset;
-    for (final SkwasmLineMetrics metrics in computeLineMetrics()) {
-      if (offset >= metrics.startIndex && offset <= metrics.endIndex) {
-        return ui.TextRange(start: metrics.startIndex, end: metrics.endIndex);
+    final List<SkwasmLineMetrics> metrics = computeLineMetrics();
+    final ui.TextRange line = _lineBoundaryAtOffset(metrics, position.offset);
+
+    // A line's endIndex equals the next line's startIndex at a soft wrap, so
+    // the lookup above cannot tell the two apart on its own and always answers
+    // with the earlier line, as if the affinity were upstream. A downstream
+    // position sitting exactly on that seam belongs to the next line instead.
+    // This mirrors the native implementation in `lib/ui/text.dart`.
+    final ui.TextRange nextLine = _lineBoundaryAtOffset(metrics, position.offset + 1);
+    if (nextLine.isValid &&
+        position.affinity == ui.TextAffinity.downstream &&
+        line != nextLine &&
+        position.offset == line.end &&
+        line.end == nextLine.start) {
+      return nextLine;
+    }
+    return line;
+  }
+
+  // The line containing [offset], treating both line bounds as inclusive.
+  static ui.TextRange _lineBoundaryAtOffset(List<SkwasmLineMetrics> metrics, int offset) {
+    for (final line in metrics) {
+      if (offset >= line.startIndex && offset <= line.endIndex) {
+        return ui.TextRange(start: line.startIndex, end: line.endIndex);
       }
     }
     return ui.TextRange.empty;
