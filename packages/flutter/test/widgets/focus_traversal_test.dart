@@ -16,6 +16,86 @@ import 'utils.dart';
 
 void main() {
   group(WidgetOrderTraversalPolicy, () {
+    testWidgets('findLastFocus returns null when no focusable nodes exist', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      final GlobalKey key3 = GlobalKey(debugLabel: '3');
+      final GlobalKey key4 = GlobalKey(debugLabel: '4');
+      final GlobalKey key5 = GlobalKey(debugLabel: '5');
+      await tester.pumpWidget(
+        FocusTraversalGroup(
+          policy: WidgetOrderTraversalPolicy(),
+          child: FocusScope(
+            key: key1,
+            child: Column(
+              children: <Widget>[
+                Focus(
+                  key: key2,
+                  canRequestFocus: false,
+                  child: SizedBox(key: key3, width: 100, height: 100),
+                ),
+                Focus(
+                  key: key4,
+                  canRequestFocus: false,
+                  child: SizedBox(key: key5, width: 100, height: 100),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Element firstChild = tester.element(find.byKey(key3));
+      final FocusNode firstFocusNode = Focus.of(firstChild);
+      final FocusTraversalPolicy policy = FocusTraversalGroup.of(firstChild);
+
+      final FocusNode? lastFocus = policy.findLastFocus(firstFocusNode);
+
+      expect(lastFocus, isNull);
+    });
+
+    testWidgets('findFirstFocus returns null when no focusable nodes exist', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      final GlobalKey key3 = GlobalKey(debugLabel: '3');
+      final GlobalKey key4 = GlobalKey(debugLabel: '4');
+      final GlobalKey key5 = GlobalKey(debugLabel: '5');
+      await tester.pumpWidget(
+        FocusTraversalGroup(
+          policy: WidgetOrderTraversalPolicy(),
+          child: FocusScope(
+            key: key1,
+            child: Column(
+              children: <Widget>[
+                Focus(
+                  key: key2,
+                  canRequestFocus: false,
+                  child: SizedBox(key: key3, width: 100, height: 100),
+                ),
+                Focus(
+                  key: key4,
+                  canRequestFocus: false,
+                  child: SizedBox(key: key5, width: 100, height: 100),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Element firstChild = tester.element(find.byKey(key3));
+      final FocusNode firstFocusNode = Focus.of(firstChild);
+      final FocusTraversalPolicy policy = FocusTraversalGroup.of(firstChild);
+
+      final FocusNode? firstFocus = policy.findFirstFocus(firstFocusNode);
+
+      expect(firstFocus, isNull);
+    });
+
     testWidgets('Find the initial focus if there is none yet.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
