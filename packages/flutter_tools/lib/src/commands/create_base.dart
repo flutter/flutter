@@ -342,6 +342,7 @@ mixin CreateBase on FlutterCommand {
     bool withFfiPluginHook = false,
     bool withFfiPackage = false,
     bool withEmptyMain = false,
+    bool withPackage = false,
     bool ios = false,
     bool android = false,
     bool web = false,
@@ -391,7 +392,9 @@ mixin CreateBase on FlutterCommand {
       'withFfiPluginHook': withFfiPluginHook,
       'withPlatformChannelPluginHook': withPlatformChannelPluginHook,
       'withSwiftPackageManager': withSwiftPackageManager,
-      'withPluginHook': withFfiPluginHook || withFfiPackage || withPlatformChannelPluginHook,
+      'withPluginHook':
+          withFfiPluginHook || withFfiPackage || withPlatformChannelPluginHook || withPackage,
+      'withPackage': withPackage,
       'withEmptyMain': withEmptyMain,
       'androidLanguage': androidLanguage,
       'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
