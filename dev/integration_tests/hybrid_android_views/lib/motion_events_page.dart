@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
@@ -48,12 +50,15 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        SizedBox(
-          height: 300.0,
+        Expanded(
+          flex: 4,
           child: AndroidPlatformView(
             key: const ValueKey<String>('PlatformView'),
             viewType: 'simple_view',
             onPlatformViewCreated: onPlatformViewCreated,
+            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+              Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer()),
+            },
           ),
         ),
         Expanded(
@@ -129,7 +134,20 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
         await channel.invokeMethod<void>('synthesizeEvent', event);
       }
 
+      // Wait for all synthesized events to be processed and dispatched to the platform view.
+      for (var i = 0; i < 60; i++) {
+        if (flutterViewEvents.length >= recordedEvents.length &&
+            embeddedViewEvents.length >= recordedEvents.length) {
+          break;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
+
       await viewChannel!.invokeMethod<void>('stopTouchEvents');
+
+      if (flutterViewEvents.length != recordedEvents.length) {
+        return 'Synthesized ${recordedEvents.length} events but Flutter received ${flutterViewEvents.length} events';
+      }
 
       if (flutterViewEvents.length != embeddedViewEvents.length) {
         return 'Synthesized ${flutterViewEvents.length} events but the embedded view received ${embeddedViewEvents.length} events';

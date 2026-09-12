@@ -119,6 +119,13 @@ class EmbedderTestContext {
   // Runs the vsync callback.
   void RunVsyncCallback(intptr_t baton);
 
+  // Sets arbitrary test state associated with this context for callback baton
+  // passing.
+  void SetUserData(void* user_data) { user_data_ = user_data; }
+
+  // Returns arbitrary test state associated with this context.
+  void* GetUserData() const { return user_data_; }
+
   // TODO(gw280): encapsulate these properly for subclasses to use
  protected:
   // This allows the builder to access the hooks.
@@ -189,6 +196,8 @@ class EmbedderTestContext {
       const std::function<sk_sp<SkImage>(void)>& image_callback);
 
   void SetNextSceneCallback(const NextSceneCallback& next_scene_callback);
+
+  void* user_data_ = nullptr;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestContext);
 };

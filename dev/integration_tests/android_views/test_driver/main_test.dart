@@ -24,10 +24,13 @@ Future<void> main() async {
     await driver?.runUnsynchronized(() async {
       await driver?.waitFor(find.byValueKey('PlatformView'));
     });
-    final String errorMessage = (await driver?.requestData('run test'))!;
-    expect(errorMessage, '');
-    final SerializableFinder backButton = find.byValueKey('back');
-    await driver?.tap(backButton);
+    try {
+      final String errorMessage = (await driver?.requestData('run test'))!;
+      expect(errorMessage, '');
+    } finally {
+      final SerializableFinder backButton = find.byValueKey('back');
+      await driver?.tap(backButton);
+    }
   }, timeout: Timeout.none);
 
   group('WindowManager', () {

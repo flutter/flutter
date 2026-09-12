@@ -231,30 +231,37 @@ TaskFunction _testCommandLineFlagPrecedence(String buildMode) {
           });
 
       section('Check that the test flag logs are found in the expected order in STDOUT');
-      final Future<bool> commandLinePrecedenceFuture = commandLinePrecedenceCompleter.future;
-      final Object result = await Future.any(<Future<Object>>[
-        commandLinePrecedenceFuture,
-        run.exitCode,
-      ]);
+      try {
+        final Future<bool> commandLinePrecedenceFuture = commandLinePrecedenceCompleter.future
+            .timeout(
+              const Duration(minutes: 5),
+              onTimeout: () =>
+                  throw TimeoutException('Timed out waiting for test flag logs from FlutterLoader'),
+            );
+        final Object result = await Future.any(<Future<Object>>[
+          commandLinePrecedenceFuture,
+          run.exitCode,
+        ]);
 
-      if (result is int) {
-        throw Exception(
-          result == 0
-              ? 'Could not confirm that test flag was loaded by the FlutterLoader; test failed.'
-              : getExcepitonMessageForIncompleteTest(result),
-        );
-      } else if (result is bool) {
-        if (!result) {
+        if (result is int) {
           throw Exception(
-            'Test flag specified in the manifest unexpectedly took precedence over that specified on the command line.',
+            result == 0
+                ? 'Could not confirm that test flag was loaded by the FlutterLoader; test failed.'
+                : getExcepitonMessageForIncompleteTest(result),
           );
+        } else if (result is bool) {
+          if (!result) {
+            throw Exception(
+              'Test flag specified in the manifest unexpectedly took precedence over that specified on the command line.',
+            );
+          }
         }
+      } finally {
+        section('Kill the app');
+        await stdoutSubscription.cancel();
+        run.kill();
+        await run.exitCode;
       }
-
-      section('Kill the app');
-      await stdoutSubscription.cancel();
-      run.kill();
-      await run.exitCode;
 
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {

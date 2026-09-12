@@ -60,6 +60,8 @@ template("embedder_source_set") {
       "embedder.cc",
       "embedder_engine.cc",
       "embedder_engine.h",
+      "embedder_external_texture_hb.cc",
+      "embedder_external_texture_hb.h",
       "embedder_external_texture_resolver.cc",
       "embedder_external_texture_resolver.h",
       "embedder_external_view.cc",
@@ -80,7 +82,6 @@ template("embedder_source_set") {
       "embedder_render_target_skia.h",
       "embedder_semantics_update.cc",
       "embedder_semantics_update.h",
-      "embedder_struct_macros.h",
       "embedder_surface.cc",
       "embedder_surface.h",
       "embedder_surface_software.cc",
@@ -139,6 +140,7 @@ template("embedder_source_set") {
 
       deps += [
         "//flutter/impeller",
+        "//flutter/impeller/display_list",
         "//flutter/impeller/renderer",
       ]
     }
@@ -167,6 +169,8 @@ template("embedder_source_set") {
 
     if (embedder_enable_vulkan) {
       sources += [
+        "embedder_external_texture_vk.cc",
+        "embedder_external_texture_vk.h",
         "embedder_surface_vulkan.cc",
         "embedder_surface_vulkan.h",
       ]
@@ -175,6 +179,10 @@ template("embedder_source_set") {
         sources += [
           "embedder_surface_vulkan_impeller.cc",
           "embedder_surface_vulkan_impeller.h",
+        ]
+        deps += [
+          "//flutter/impeller/display_list",
+          "//flutter/impeller/renderer/backend/vulkan",
         ]
       }
 
@@ -208,7 +216,10 @@ embedder_source_set("embedder_as_internal_library") {
 }
 
 source_set("embedder_headers") {
-  public = [ "embedder.h" ]
+  public = [
+    "embedder.h",
+    "embedder_struct_macros.h",
+  ]
 
   public_configs = [ "//flutter:config" ]
 }

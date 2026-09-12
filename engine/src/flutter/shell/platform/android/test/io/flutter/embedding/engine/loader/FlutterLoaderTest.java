@@ -1608,4 +1608,23 @@ public class FlutterLoaderTest {
           arguments.contains(expectedArg));
     }
   }
+
+  @Test
+  public void preloadAotLibrary_handlesNullOrEmptyAotLibraryGracefully() {
+    FlutterLoader flutterLoader = new FlutterLoader();
+    FlutterApplicationInfo infoWithEmpty =
+        new FlutterApplicationInfo("", "vm", "isolate", "assets", "/data/app/lib");
+    // Should safely no-op without throwing an exception.
+    flutterLoader.preloadAotLibrary(infoWithEmpty);
+  }
+
+  @Test
+  public void preloadAotLibrary_handlesNonExistentAotLibraryGracefully() {
+    FlutterLoader flutterLoader = new FlutterLoader();
+    FlutterApplicationInfo info =
+        new FlutterApplicationInfo(
+            "libnonexistent_test_lib.so", "vm", "isolate", "assets", "/data/app/lib");
+    // Should catch UnsatisfiedLinkError / IOException and log without throwing an exception.
+    flutterLoader.preloadAotLibrary(info);
+  }
 }
