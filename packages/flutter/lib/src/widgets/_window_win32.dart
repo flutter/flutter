@@ -19,6 +19,7 @@ import 'dart:ffi' as ffi;
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' show Display, FlutterView;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -337,13 +338,12 @@ class WindowControllerWin32 extends WindowController with BaseWindowControllerWi
   @internal
   WindowControllerWin32({
     required WindowingOwnerWin32 owner,
-    required WindowControllerDelegate delegate,
+    required this._delegate,
     Size? size,
     BoxConstraints? constraints,
     String? title,
     required bool resizable,
   }) : _owner = owner,
-       _delegate = delegate,
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -581,14 +581,13 @@ class DialogWindowControllerWin32 extends DialogWindowController with BaseWindow
   @internal
   DialogWindowControllerWin32({
     required WindowingOwnerWin32 owner,
-    required DialogWindowControllerDelegate delegate,
+    required this._delegate,
     Size? size,
     BoxConstraints? constraints,
     String? title,
     BaseWindowController? parent,
     required bool resizable,
   }) : _owner = owner,
-       _delegate = delegate,
        _parent = parent,
        super.empty() {
     if (!isWindowingEnabled) {
@@ -767,12 +766,11 @@ class DialogWindowControllerWin32 extends DialogWindowController with BaseWindow
   }
 }
 
-typedef _GetWindowPositionNative =
-    ffi.Pointer<_Rect> Function(
-      ffi.Pointer<_Size> childSize,
-      ffi.Pointer<_Rect> parentRect,
-      ffi.Pointer<_Rect> outputRect,
-    );
+typedef _GetWindowPositionNative = ffi.Pointer<_Rect> Function(
+  ffi.Pointer<_Size> childSize,
+  ffi.Pointer<_Rect> parentRect,
+  ffi.Pointer<_Rect> outputRect,
+);
 
 /// Implementation of [TooltipWindowController] for the Windows platform.
 ///
@@ -795,17 +793,13 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   /// * [TooltipWindowController], the base class for tooltip windows.
   @internal
   TooltipWindowControllerWin32({
-    required WindowingOwnerWin32 owner,
-    required TooltipWindowControllerDelegate delegate,
+    required this._owner,
+    required this._delegate,
     required BoxConstraints contentSizeConstraints,
     required BaseWindowController parent,
-    required Rect anchorRect,
-    required WindowPositioner positioner,
-  }) : _delegate = delegate,
-       _owner = owner,
-       _parent = parent,
-       _anchorRect = anchorRect,
-       _positioner = positioner,
+    required this._anchorRect,
+    required this._positioner,
+  }) : _parent = parent,
        super.empty() {
     _owner._addMessageHandler(this);
     _onGetWindowPosition = ffi.NativeCallable<_GetWindowPositionNative>.isolateLocal(
@@ -989,17 +983,13 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
   /// * [PopupWindowController], the base class for popup windows.
   @internal
   PopupWindowControllerWin32({
-    required WindowingOwnerWin32 owner,
-    required PopupWindowControllerDelegate delegate,
+    required this._owner,
+    required this._delegate,
     required BoxConstraints contentSizeConstraints,
     required BaseWindowController parent,
-    required Rect anchorRect,
-    required WindowPositioner positioner,
-  }) : _delegate = delegate,
-       _owner = owner,
-       _parent = parent,
-       _anchorRect = anchorRect,
-       _positioner = positioner,
+    required this._anchorRect,
+    required this._positioner,
+  }) : _parent = parent,
        super.empty() {
     _owner._addMessageHandler(this);
     _onGetWindowPosition = ffi.NativeCallable<_GetWindowPositionNative>.isolateLocal(

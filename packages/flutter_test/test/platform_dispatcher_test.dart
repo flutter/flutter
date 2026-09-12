@@ -159,9 +159,8 @@ void main() {
   ) async {
     final Locale originalLocale = PlatformDispatcher.instance.locale;
     final double originalTextScaleFactor = PlatformDispatcher.instance.textScaleFactor;
-    final TestPlatformDispatcher testPlatformDispatcher = retrieveTestBinding(
-      tester,
-    ).platformDispatcher;
+    final TestPlatformDispatcher testPlatformDispatcher = retrieveTestBinding(tester)
+        .platformDispatcher;
 
     // Set fake values for window properties.
     testPlatformDispatcher.localeTestValue = const Locale('foobar');
@@ -309,7 +308,7 @@ class _FakeDisplay extends Fake implements Display {
 }
 
 class _FakeFlutterView extends Fake implements FlutterView {
-  _FakeFlutterView({this.devicePixelRatio = 1, Display? display}) : _display = display;
+  _FakeFlutterView({this.devicePixelRatio = 1, this._display});
 
   @override
   final double devicePixelRatio;

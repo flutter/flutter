@@ -26,12 +26,11 @@ import '../depfile.dart';
 /// A wrapper around [ShaderCompiler] to support hot reload of shader sources.
 class DevelopmentShaderCompiler {
   DevelopmentShaderCompiler({
-    required ShaderCompiler shaderCompiler,
+    required this._shaderCompiler,
     required FileSystem fileSystem,
     required Logger logger,
     @visibleForTesting math.Random? random,
-  }) : _shaderCompiler = shaderCompiler,
-       _fileSystem = fileSystem,
+  }) : _fileSystem = fileSystem,
        _logger = logger,
        _depfileService = DepfileService(fileSystem: fileSystem, logger: logger),
        _random = random ?? math.Random();
@@ -148,15 +147,12 @@ class DevelopmentShaderCompiler {
 /// impellerc.
 class ShaderCompiler {
   ShaderCompiler({
-    required ProcessManager processManager,
-    required Logger logger,
+    required this._processManager,
+    required this._logger,
     required FileSystem fileSystem,
-    required Artifacts artifacts,
+    required this._artifacts,
     Platform? platform,
-  }) : _processManager = processManager,
-       _logger = logger,
-       _fs = fileSystem,
-       _artifacts = artifacts,
+  }) : _fs = fileSystem,
        _platform = platform ?? _lookupPlatform();
 
   static Platform _lookupPlatform() {

@@ -357,9 +357,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
 
   /// This generates the map of Web number pad codes to logical keys.
   String get _webLocationMap {
-    final String jsonRaw = File(
-      path.join(dataRoot, 'web_logical_location_mapping.json'),
-    ).readAsStringSync();
+    final String jsonRaw = File(path.join(dataRoot, 'web_logical_location_mapping.json'))
+        .readAsStringSync();
     final Map<String, List<String?>> locationMap = parseMapOfListOfNullableString(jsonRaw);
     final lines = OutputLines<String>('Web location map');
     locationMap.forEach((String key, List<String?> keyNames) {

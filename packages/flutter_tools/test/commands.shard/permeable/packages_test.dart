@@ -561,9 +561,8 @@ flutter:
         final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesNumberPlugins'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesNumberPlugins'],
           0,
         );
       },
@@ -598,9 +597,8 @@ flutter:
 
         // A plugin example depends on the plugin itself, and integration_test.
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesNumberPlugins'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesNumberPlugins'],
           2,
         );
       },
@@ -627,9 +625,8 @@ flutter:
         final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesProjectModule'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesProjectModule'],
           false,
         );
       },
@@ -659,9 +656,8 @@ flutter:
         final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesProjectModule'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesProjectModule'],
           true,
         );
       },
@@ -688,9 +684,8 @@ flutter:
         final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesAndroidEmbeddingVersion'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesAndroidEmbeddingVersion'],
           'v2',
         );
       },

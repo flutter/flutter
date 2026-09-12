@@ -61,8 +61,7 @@ void testUsingContext(
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
   String? testOn,
-  bool?
-  skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
+  bool? skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
   if (overrides[FileSystem] != null && overrides[ProcessManager] == null) {
     fail(
@@ -352,14 +351,11 @@ class NoopIOSSimulatorUtils implements IOSSimulatorUtils {
 
 class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   FakeXcodeProjectInterpreter({
-    bool isInstalled = true,
-    String? versionText = 'Xcode 15',
-    Version? version = const Version.withText(15, 0, 0, '15.0.0'),
-    String? build = '15A240D',
-  }) : _isInstalled = isInstalled,
-       _versionText = versionText,
-       _version = version,
-       _build = build;
+    this._isInstalled = true,
+    this._versionText = 'Xcode 15',
+    this._version = const Version.withText(15, 0, 0, '15.0.0'),
+    this._build = '15A240D',
+  });
 
   final bool _isInstalled;
   final String? _versionText;

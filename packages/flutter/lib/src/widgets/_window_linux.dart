@@ -18,6 +18,7 @@ import 'dart:convert';
 import 'dart:ffi' as ffi;
 import 'dart:io';
 import 'dart:ui' show Display, FlutterView;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -688,13 +689,12 @@ class WindowControllerLinux extends WindowController
   @internal
   WindowControllerLinux({
     required WindowingOwnerLinux owner,
-    required WindowControllerDelegate delegate,
+    required this._delegate,
     Size? size,
     BoxConstraints? constraints,
     String? title,
     bool decorated = true,
-  }) : _delegate = delegate,
-       super.empty() {
+  }) : super.empty() {
     _createWindow(owner, _GtkWindowType.toplevel);
 
     _createWindowMonitor(
@@ -769,14 +769,13 @@ class DialogWindowControllerLinux extends DialogWindowController
   @internal
   DialogWindowControllerLinux({
     required WindowingOwnerLinux owner,
-    required DialogWindowControllerDelegate delegate,
+    required this._delegate,
     Size? size,
     BoxConstraints? constraints,
     BaseWindowController? parent,
     String? title,
     bool decorated = true,
-  }) : _delegate = delegate,
-       _parent = parent,
+  }) : _parent = parent,
        super.empty() {
     _createWindow(owner, _GtkWindowType.toplevel);
 
@@ -837,13 +836,12 @@ class TooltipWindowControllerLinux extends TooltipWindowController
   @internal
   TooltipWindowControllerLinux({
     required WindowingOwnerLinux owner,
-    required TooltipWindowControllerDelegate delegate,
+    required this._delegate,
     required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
-  }) : _delegate = delegate,
-       super.empty() {
+  }) : super.empty() {
     _createWindow(owner, _GtkWindowType.popup);
 
     _window.setTypeHint(_GdkWindowTypeHint.tooltip);
@@ -896,13 +894,12 @@ class PopupWindowControllerLinux extends PopupWindowController
   @internal
   PopupWindowControllerLinux({
     required WindowingOwnerLinux owner,
-    required PopupWindowControllerDelegate delegate,
+    required this._delegate,
     required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
-  }) : _delegate = delegate,
-       super.empty() {
+  }) : super.empty() {
     _createWindow(owner, _GtkWindowType.popup);
 
     _window.setDecorated(false);
@@ -1290,9 +1287,8 @@ class _GdkWindow extends _GObject {
     int rectAnchorDx = 0,
     int rectAnchorDy = 0,
   }) {
-    final ffi.Pointer<_GdkRectangle> rect = _gMalloc0(
-      ffi.sizeOf<_GdkRectangle>(),
-    ).cast<_GdkRectangle>();
+    final ffi.Pointer<_GdkRectangle> rect = _gMalloc0(ffi.sizeOf<_GdkRectangle>())
+        .cast<_GdkRectangle>();
     final _GdkRectangle r = rect.ref;
     r.x = x;
     r.y = y;
@@ -1463,9 +1459,8 @@ class _GtkWindow extends _GtkContainer {
 
   /// Set minimum and maximum size of the window.
   void setGeometryHints({int? minWidth, int? minHeight, int? maxWidth, int? maxHeight}) {
-    final ffi.Pointer<_GdkGeometry> geometry = _gMalloc0(
-      ffi.sizeOf<_GdkGeometry>(),
-    ).cast<_GdkGeometry>();
+    final ffi.Pointer<_GdkGeometry> geometry = _gMalloc0(ffi.sizeOf<_GdkGeometry>())
+        .cast<_GdkGeometry>();
     final _GdkGeometry g = geometry.ref;
     var geometryMask = 0;
     if (minWidth != null || minHeight != null) {
