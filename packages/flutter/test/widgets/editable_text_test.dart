@@ -8,6 +8,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:async';
 import 'dart:convert' show jsonDecode;
 import 'dart:math' as math;
 import 'dart:ui';
@@ -17961,9 +17962,11 @@ void main() {
         ),
       );
 
-      expect(calls, equals(kIsWeb ? 0 : 1));
+      // Building an unfocused field does not check the clipboard.
+      expect(calls, 0);
 
-      // Long-press to bring up the context menu.
+      // Long-press to bring up the context menu. This focuses the field, which
+      // checks the clipboard once, and showing the toolbar checks it again.
       final Finder textFinder = find.byType(EditableText);
       await tester.longPress(textFinder);
       tester.state<EditableTextState>(textFinder).showToolbar();
@@ -17971,6 +17974,139 @@ void main() {
 
       expect(calls, equals(kIsWeb ? 0 : 2));
     });
+
+    Widget buildField({bool readOnly = false, bool enableInteractiveSelection = true}) {
+      return MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          readOnly: readOnly,
+          enableInteractiveSelection: enableInteractiveSelection,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionHandleControls,
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
+          },
+        ),
+      );
+    }
+
+    testWidgets(
+      'the clipboard is not checked on build or app resume while unfocused',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(buildField());
+        expect(calls, 0);
+
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        await tester.pump();
+        expect(calls, 0);
+
+        // Rebuilding the field does not check the clipboard either.
+        await tester.pumpWidget(buildField());
+        expect(calls, 0);
+      },
+      skip: kIsWeb, // [intended] web never calls hasStrings.
+    );
+
+    testWidgets(
+      'the clipboard is checked when the field gains focus',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(buildField());
+        expect(calls, 0);
+
+        focusNode.requestFocus();
+        await tester.pump();
+        expect(calls, 1);
+
+        // Resuming while focused refreshes the status.
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        await tester.pump();
+        expect(calls, 2);
+
+        // Once unfocused, resuming no longer checks the clipboard.
+        focusNode.unfocus();
+        await tester.pump();
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        await tester.pump();
+        expect(calls, 2);
+
+        // Focusing again refreshes the cached status.
+        focusNode.requestFocus();
+        await tester.pump();
+        expect(calls, 3);
+      },
+      skip: kIsWeb, // [intended] web never calls hasStrings.
+    );
+
+    testWidgets(
+      'the clipboard is not checked when paste is not possible',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(buildField(readOnly: true));
+        focusNode.requestFocus();
+        await tester.pump();
+        expect(calls, 0);
+
+        await tester.pumpWidget(buildField(enableInteractiveSelection: false));
+        await tester.pump();
+        expect(calls, 0);
+
+        // Becoming editable and selectable while focused checks the clipboard.
+        await tester.pumpWidget(buildField());
+        await tester.pump();
+        expect(calls, 1);
+      },
+      skip: kIsWeb, // [intended] web never calls hasStrings.
+    );
+
+    testWidgets(
+      'the context menu shows paste once a pending clipboard check resolves',
+      (WidgetTester tester) async {
+        final pending = <Completer<Object?>>[];
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          (MethodCall methodCall) {
+            if (methodCall.method == 'Clipboard.hasStrings') {
+              final completer = Completer<Object?>();
+              pending.add(completer);
+              return completer.future;
+            }
+            return Future<Object?>.value();
+          },
+        );
+        controller.text = 'Atwater Peel Sherbrooke Bonaventure';
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: TextField(controller: controller, focusNode: focusNode),
+            ),
+          ),
+        );
+        expect(pending, isEmpty);
+
+        // Long pressing an unfocused field focuses it and shows the menu in the
+        // same gesture, so the clipboard check is still in flight when the
+        // menu is first built.
+        await tester.longPress(find.byType(TextField));
+        await tester.pump();
+        expect(pending, isNotEmpty);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsNothing);
+
+        for (final completer in pending) {
+          completer.complete(<String, dynamic>{'value': true});
+        }
+        await tester.pumpAndSettle();
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] web never calls hasStrings.
+      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
+    );
   });
 
   testWidgets('Cursor color with an opacity is respected', (WidgetTester tester) async {
