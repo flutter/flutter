@@ -199,7 +199,7 @@ TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
       Run, ([&run_called, engine_instance = engine.get()](
                 size_t version, const FlutterRendererConfig* config,
                 const FlutterProjectArgs* args, void* user_data,
-                FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -341,7 +341,7 @@ TEST_F(FlutterWindowsEngineTest, RunSkiaWithoutANGLEUsesSoftware) {
       Run, ([&run_called, engine_instance = engine.get()](
                 size_t version, const FlutterRendererConfig* config,
                 const FlutterProjectArgs* args, void* user_data,
-                FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
         // We don't have an EGL Manager, so we should be using software.
@@ -442,7 +442,7 @@ TEST_F(FlutterWindowsEngineTest, RunWithDefaultEnablesImpeller) {
       Run, ([&run_called, engine_instance = engine.get()](
                 size_t version, const FlutterRendererConfig* config,
                 const FlutterProjectArgs* args, void* user_data,
-                FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -503,7 +503,7 @@ TEST_F(FlutterWindowsEngineTest, RunWithProjectFlagEnableImpeller) {
   modifier.embedder_api().Run = MOCK_ENGINE_PROC(
       Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
                           const FlutterProjectArgs* args, void* user_data,
-                          FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -564,7 +564,7 @@ TEST_F(FlutterWindowsEngineTest, RunWithProjectFlagEnableFlutterGpu) {
   modifier.embedder_api().Run = MOCK_ENGINE_PROC(
       Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
                           const FlutterProjectArgs* args, void* user_data,
-                          FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -618,7 +618,7 @@ TEST_F(FlutterWindowsEngineTest, RunWithoutProjectFlagEnableFlutterGpu) {
   modifier.embedder_api().Run = MOCK_ENGINE_PROC(
       Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
                           const FlutterProjectArgs* args, void* user_data,
-                          FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -673,7 +673,7 @@ TEST_F(FlutterWindowsEngineTest, RunWithProjectFlagDisableImpeller) {
   modifier.embedder_api().Run = MOCK_ENGINE_PROC(
       Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
                           const FlutterProjectArgs* args, void* user_data,
-                          FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -725,7 +725,7 @@ TEST_F(FlutterWindowsEngineTest, RunWithCommandLineDisableImpeller) {
   modifier.embedder_api().Run = MOCK_ENGINE_PROC(
       Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
                           const FlutterProjectArgs* args, void* user_data,
-                          FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 

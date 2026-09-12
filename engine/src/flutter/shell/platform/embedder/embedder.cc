@@ -626,7 +626,7 @@ InferMetalPlatformViewCreationCallback(
           metal_dispatch_table = {
               .present = metal_present,
               .get_texture = metal_get_texture,
-          };
+      };
       impeller::Flags impeller_flags;
       impeller_flags.use_sdfs = shell.GetSettings().impeller_use_sdfs;
       embedder_surface =
@@ -641,7 +641,7 @@ InferMetalPlatformViewCreationCallback(
           metal_dispatch_table = {
               .present = metal_present,
               .get_texture = metal_get_texture,
-          };
+      };
       embedder_surface = std::make_unique<flutter::EmbedderSurfaceMetalSkia>(
           const_cast<flutter::GPUMTLDeviceHandle>(config->metal.device),
           const_cast<flutter::GPUMTLCommandQueueHandle>(
@@ -726,7 +726,7 @@ InferVulkanPlatformViewCreationCallback(
                 reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
             .get_next_image = vulkan_get_next_image,
             .present_image = vulkan_present_image_callback,
-        };
+    };
 
     std::unique_ptr<flutter::EmbedderSurfaceVulkanImpeller> embedder_surface =
         std::make_unique<flutter::EmbedderSurfaceVulkanImpeller>(
@@ -761,7 +761,7 @@ InferVulkanPlatformViewCreationCallback(
                 reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
             .get_next_image = vulkan_get_next_image,
             .present_image = vulkan_present_image_callback,
-        };
+    };
 
     std::unique_ptr<flutter::EmbedderSurfaceVulkan> embedder_surface =
         std::make_unique<flutter::EmbedderSurfaceVulkan>(
@@ -851,7 +851,7 @@ InferSoftwarePlatformViewCreationCallback(
   flutter::EmbedderSurfaceSoftware::SoftwareDispatchTable
       software_dispatch_table = {
           software_present_backing_store,  // required
-      };
+  };
 
   return fml::MakeCopyable(
       [software_dispatch_table, platform_dispatch_table,
@@ -2670,7 +2670,16 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
                               "Compositor arguments were invalid.");
   }
 
-  auto platform_dispatch_table = CreatePlatformDispatchTable(args, user_data);
+  flutter::PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table =
+      {
+          update_semantics_callback,                  //
+          platform_message_response_callback,         //
+          vsync_callback,                             //
+          compute_platform_resolved_locale_callback,  //
+          on_pre_engine_restart_callback,             //
+          channel_update_callback,                    //
+          view_focus_change_request_callback,         //
+  };
 
   impeller::Flags impeller_flags;
   impeller_flags.use_sdfs = settings.impeller_use_sdfs;
