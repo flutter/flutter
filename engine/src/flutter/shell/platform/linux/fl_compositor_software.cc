@@ -24,25 +24,41 @@ gboolean fl_compositor_software_composite_layers(FlCompositorSoftware* self,
                                                  cairo_t* cr,
                                                  const FlutterLayer** layers,
                                                  size_t layers_count) {
-  if (layers_count == 0) {
-    return TRUE;
-  }
+  cairo_save(cr);
+  cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
+  cairo_paint(cr);
+  cairo_restore(cr);
 
-  // TODO(robert-ancell): Support multiple layers
-  if (layers_count == 1) {
-    const FlutterLayer* layer = layers[0];
-    g_assert(layer->type == kFlutterLayerContentTypeBackingStore);
-    g_assert(layer->backing_store->type == kFlutterBackingStoreTypeSoftware);
-    const FlutterBackingStore* backing_store = layer->backing_store;
+  for (size_t i = 0; i < layers_count; i++) {
+    const FlutterLayer* layer = layers[i];
+    switch (layer->type) {
+      case kFlutterLayerContentTypeBackingStore: {
+        const FlutterBackingStore* backing_store = layer->backing_store;
+        g_assert(backing_store->type == kFlutterBackingStoreTypeSoftware);
 
-    cairo_surface_t* surface = cairo_image_surface_create_for_data(
-        static_cast<unsigned char*>(
-            const_cast<void*>(backing_store->software.allocation)),
-        CAIRO_FORMAT_ARGB32, backing_store->software.row_bytes / 4,
-        backing_store->software.height, backing_store->software.row_bytes);
-    cairo_set_source_surface(cr, surface, 0.0, 0.0);
-    cairo_paint(cr);
-    cairo_surface_destroy(surface);
+        cairo_surface_t* surface = cairo_image_surface_create_for_data(
+            static_cast<unsigned char*>(
+                const_cast<void*>(backing_store->software.allocation)),
+            CAIRO_FORMAT_ARGB32, backing_store->software.row_bytes / 4,
+            backing_store->software.height, backing_store->software.row_bytes);
+
+        // Layers are placed at their offset in the frame, and only cover the
+        // area they were rendered for.
+        cairo_save(cr);
+        cairo_rectangle(cr, layer->offset.x, layer->offset.y, layer->size.width,
+                        layer->size.height);
+        cairo_clip(cr);
+        cairo_set_source_surface(cr, surface, layer->offset.x, layer->offset.y);
+        cairo_paint(cr);
+        cairo_restore(cr);
+
+        cairo_surface_destroy(surface);
+      } break;
+      case kFlutterLayerContentTypePlatformView: {
+        // TODO(robert-ancell) Not implemented -
+        // https://github.com/flutter/flutter/issues/41724
+      } break;
+    }
   }
 
   return TRUE;
