@@ -19,6 +19,7 @@ void main() async {
   late final FlutterDriver flutterDriver;
   late final NativeDriver nativeDriver;
   final expectHcpp = io.Platform.environment['EXPECT_HCPP'] != 'false';
+  int? appPid;
 
   setUpAll(() async {
     flutterDriver = await FlutterDriver.connect();
@@ -34,6 +35,7 @@ void main() async {
   test('verify that HCPP is ${expectHcpp ? "supported and enabled" : "disabled"}', () async {
     final response = json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
     expect(response['supported'], expectHcpp);
+    appPid = response['pid'] as int?;
   }, timeout: Timeout.none);
 
   test('all three platform view types render without crashing', () async {
@@ -43,6 +45,7 @@ void main() async {
 
   test('all three platform view types dispose without crashing', () async {
     await flutterDriver.tap(find.byValueKey('ToggleViews'));
+    // 1-second delay allows platform view disposal animations and unparenting to settle.
     await Future<void>.delayed(const Duration(seconds: 1));
 
     final Health health = await flutterDriver.checkHealth();
@@ -50,15 +53,25 @@ void main() async {
   }, timeout: Timeout.none);
 
   test('verify platform view rendering strategy via logcat', () async {
+    // Ensure we have the application PID to isolate this process's logcat entries.
+    if (appPid == null) {
+      final response = json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
+      appPid = response['pid'] as int?;
+    }
+
     // Poll logcat until expected log entries appear or timeout expires.
     // 500ms polling interval avoids hammering adb while remaining responsive.
     // 30-second timeout accommodates slower emulators in CI under high load.
     const pollInterval = Duration(milliseconds: 500);
     const maxPollDuration = Duration(seconds: 30);
+    // Three platform views are created: HC, TLHC with HC fallback, and TLHC with VD fallback.
+    const expectedViewCount = 3;
+    const expectedZeroCount = 0;
     final stopwatch = Stopwatch()..start();
     var hcppCount = 0;
     var legacyCount = 0;
-    var logcat = '';
+    var rawLogcat = '';
+    var filteredLogcat = '';
 
     while (stopwatch.elapsed < maxPollDuration) {
       final io.ProcessResult result = await io.Process.run('adb', <String>[
@@ -67,16 +80,31 @@ void main() async {
         '-s',
         'PlatformViewsChannel:*',
       ]);
-      logcat = result.stdout as String;
+      rawLogcat = result.stdout as String;
 
-      // We expect 3 platform views to be created.
-      hcppCount = 'Using HCPP platform view rendering strategy.'.allMatches(logcat).length;
-      legacyCount = 'Using legacy platform view rendering strategy.'.allMatches(logcat).length;
+      // Filter logcat lines to only include entries from the current application process.
+      // On Android, logcat threadtime format includes the PID as a discrete column (e.g., " 7500 ").
+      // Also match brief/process format delimiters (e.g., "(7500)", "( 7500)") defensively.
+      final Iterable<String> lines = rawLogcat.split('\n').where((String line) {
+        if (appPid == null) {
+          return true;
+        }
+        return line.contains(' $appPid ') ||
+            line.contains(' $appPid:') ||
+            line.contains('($appPid)') ||
+            line.contains('( $appPid)');
+      });
+      filteredLogcat = lines.join('\n');
 
-      if (expectHcpp && hcppCount >= 3) {
+      hcppCount = 'Using HCPP platform view rendering strategy.'.allMatches(filteredLogcat).length;
+      legacyCount = 'Using legacy platform view rendering strategy.'
+          .allMatches(filteredLogcat)
+          .length;
+
+      if (expectHcpp && hcppCount >= expectedViewCount) {
         break;
       }
-      if (!expectHcpp && legacyCount >= 3) {
+      if (!expectHcpp && legacyCount >= expectedViewCount) {
         break;
       }
       await Future<void>.delayed(pollInterval);
@@ -85,32 +113,32 @@ void main() async {
     if (expectHcpp) {
       expect(
         hcppCount,
-        3,
+        expectedViewCount,
         reason:
-            'Expected 3 HCPP creations (one per view type), '
-            'got $hcppCount. Logcat:\n$logcat',
+            'Expected $expectedViewCount HCPP creations (one per view type), '
+            'got $hcppCount. Filtered logcat:\n$filteredLogcat\nRaw logcat:\n$rawLogcat',
       );
       expect(
         legacyCount,
-        0,
+        expectedZeroCount,
         reason:
-            'Expected 0 legacy creations, '
-            'got $legacyCount. Logcat:\n$logcat',
+            'Expected $expectedZeroCount legacy creations, '
+            'got $legacyCount. Filtered logcat:\n$filteredLogcat\nRaw logcat:\n$rawLogcat',
       );
     } else {
       expect(
         hcppCount,
-        0,
+        expectedZeroCount,
         reason:
-            'Expected 0 HCPP creations when HCPP is disabled, '
-            'got $hcppCount. Logcat:\n$logcat',
+            'Expected $expectedZeroCount HCPP creations when HCPP is disabled, '
+            'got $hcppCount. Filtered logcat:\n$filteredLogcat\nRaw logcat:\n$rawLogcat',
       );
       expect(
         legacyCount,
-        3,
+        expectedViewCount,
         reason:
-            'Expected 3 legacy creations when HCPP is disabled, '
-            'got $legacyCount. Logcat:\n$logcat',
+            'Expected $expectedViewCount legacy creations when HCPP is disabled, '
+            'got $legacyCount. Filtered logcat:\n$filteredLogcat\nRaw logcat:\n$rawLogcat',
       );
     }
   }, timeout: Timeout.none);
