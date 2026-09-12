@@ -75,8 +75,17 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   private final SparseArray<FlutterMutatorView> platformViewParent;
   private final MotionEventTracker motionEventTracker;
 
-  private final ArrayList<SurfaceControl.Transaction> pendingTransactions;
-  private final ArrayList<SurfaceControl.Transaction> activeTransactions;
+  // AHB raster presentations receive separate transactions because native transactions are not
+  // thread-safe. See createTransaction() for the remaining native ownership race.
+  private final ArrayList<SurfaceControl.Transaction> pendingRasterTransactions;
+  private final ArrayList<SurfaceControl.Transaction> activeRasterTransactions;
+
+  // Platform-view clips and overlay visibility share one platform-thread transaction per frame.
+  private SurfaceControl.Transaction pendingPlatformTransaction;
+  private SurfaceControl.Transaction activePlatformTransaction;
+
+  // Protects the lists and platform transaction slots, not native transaction contents.
+  private final Object transactionLock = new Object();
   private Surface overlayerSurface = null;
   private SurfaceControl overlaySurfaceControl = null;
 
@@ -86,8 +95,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     accessibilityEventsDelegate = new AccessibilityEventsDelegate();
     platformViews = new SparseArray<>();
     platformViewParent = new SparseArray<>();
-    pendingTransactions = new ArrayList<>();
-    activeTransactions = new ArrayList<>();
+    pendingRasterTransactions = new ArrayList<>();
+    activeRasterTransactions = new ArrayList<>();
     motionEventTracker = MotionEventTracker.getInstance();
   }
 
@@ -611,7 +620,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       return;
     }
     SurfaceControl.Transaction tx =
-        createTransaction().setAlpha(sc, opacity).setCrop(sc, screenRect);
+        platformTransaction().setAlpha(sc, opacity).setCrop(sc, screenRect);
   }
 
   @RequiresApi(API_LEVELS.API_34)
@@ -626,7 +635,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
         SurfaceControl surfaceControl = surfaceView.getSurfaceControl();
         if (surfaceControl != null && surfaceControl.isValid()) {
           SurfaceControl.Transaction tx =
-              createTransaction()
+              platformTransaction()
                   .setAlpha(surfaceControl, opacity)
                   .setCrop(surfaceControl, screenRect);
         } else {
@@ -668,11 +677,32 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
   @RequiresApi(API_LEVELS.API_34)
   public void onEndFrame() {
-    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-    for (int i = 0; i < activeTransactions.size(); i++) {
-      tx = tx.merge(activeTransactions.get(i));
+    final List<SurfaceControl.Transaction> rasterTxs;
+    final SurfaceControl.Transaction platformTx;
+    synchronized (transactionLock) {
+      rasterTxs =
+          activeRasterTransactions.isEmpty() ? null : new ArrayList<>(activeRasterTransactions);
+      activeRasterTransactions.clear();
+
+      platformTx = activePlatformTransaction;
+      activePlatformTransaction = null;
     }
-    activeTransactions.clear();
+
+    // Use a separate destination: closing a raster input could free a native pointer still in use
+    // by its producer. See createTransaction().
+    SurfaceControl.Transaction tx = null;
+    if (platformTx != null || rasterTxs != null) {
+      tx = new SurfaceControl.Transaction();
+      if (platformTx != null) {
+        tx.merge(platformTx);
+        platformTx.close();
+      }
+      if (rasterTxs != null) {
+        for (int i = 0; i < rasterTxs.size(); i++) {
+          tx.merge(rasterTxs.get(i));
+        }
+      }
+    }
 
     // This runs on the platform thread but is posted from the raster thread, so by the time it
     // runs the FlutterView may have been detached from the controller, or detached from its
@@ -682,38 +712,68 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     final AttachedSurfaceControl rootSurfaceControl =
         flutterView == null ? null : flutterView.getRootSurfaceControl();
     if (rootSurfaceControl == null) {
-      tx.close();
+      if (tx != null) {
+        tx.close();
+      }
       return;
     }
 
+    // applyTransactionOnDraw() does not schedule a draw. Invalidate even on empty frames to flush
+    // pending ViewRootImpl transactions. See https://github.com/flutter/flutter/issues/175546.
     flutterView.invalidate();
-    rootSurfaceControl.applyTransactionOnDraw(tx);
+    if (tx != null) {
+      rootSurfaceControl.applyTransactionOnDraw(tx);
+    }
   }
 
-  // NOT called from UI thread.
-  public synchronized void swapTransactions() {
-    activeTransactions.clear();
-    activeTransactions.addAll(pendingTransactions);
-    pendingTransactions.clear();
+  // Called on the platform thread (UI thread) via the platform task runner.
+  @RequiresApi(API_LEVELS.API_34)
+  public void swapTransactions() {
+    synchronized (transactionLock) {
+      // Normally onEndFrame() has already consumed the active transactions. Do not explicitly
+      // close raster inputs here; their native producers may still be using them.
+      activeRasterTransactions.clear();
+      activeRasterTransactions.addAll(pendingRasterTransactions);
+      pendingRasterTransactions.clear();
+
+      if (activePlatformTransaction != null) {
+        activePlatformTransaction.close();
+      }
+      activePlatformTransaction = pendingPlatformTransaction;
+      pendingPlatformTransaction = null;
+    }
   }
 
-  // NOT called from UI thread.
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  private SurfaceControl.Transaction platformTransaction() {
+    synchronized (transactionLock) {
+      if (pendingPlatformTransaction == null) {
+        pendingPlatformTransaction = newTransaction();
+      }
+      return pendingPlatformTransaction;
+    }
+  }
+
+  // Called from the raster thread through FlutterJNI.
   @RequiresApi(API_LEVELS.API_34)
   public SurfaceControl.Transaction createTransaction() {
-    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-    pendingTransactions.add(tx);
-    return tx;
+    // The lock protects the lists, but AHBSwapchainImplVK::Present writes through a borrowed native
+    // pointer after publication here. Merging can race those writes, and releasing Java references
+    // allows GC to free the transaction while native code still uses it. Both pre-existing hazards
+    // require native lifetime retention and publication after the producer finishes writing.
+    synchronized (transactionLock) {
+      final SurfaceControl.Transaction tx = newTransaction();
+      pendingRasterTransactions.add(tx);
+      return tx;
+    }
   }
 
-  // NOT called from UI thread.
+  /** Allocates a transaction so tests can spy on the instance retained by the controller. */
+  @VisibleForTesting
   @RequiresApi(API_LEVELS.API_34)
-  public void applyTransactions() {
-    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-    for (int i = 0; i < pendingTransactions.size(); i++) {
-      tx = tx.merge(pendingTransactions.get(i));
-    }
-    tx.apply();
-    pendingTransactions.clear();
+  SurfaceControl.Transaction newTransaction() {
+    return new SurfaceControl.Transaction();
   }
 
   @RequiresApi(API_LEVELS.API_34)
@@ -750,7 +810,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     if (overlaySurfaceControl == null) {
       return;
     }
-    SurfaceControl.Transaction tx = createTransaction();
+    SurfaceControl.Transaction tx = platformTransaction();
     tx.setVisibility(overlaySurfaceControl, /*visible=*/ true);
   }
 
@@ -759,7 +819,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     if (overlaySurfaceControl == null) {
       return;
     }
-    SurfaceControl.Transaction tx = createTransaction();
+    SurfaceControl.Transaction tx = platformTransaction();
     tx.setVisibility(overlaySurfaceControl, /*visible=*/ false);
   }
 
