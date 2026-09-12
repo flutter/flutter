@@ -1835,7 +1835,7 @@ resolution: workspace
   );
 }
 
-class FakeFlutterTestRunner implements FlutterTestRunner {
+class FakeFlutterTestRunner extends Fake implements FlutterTestRunner {
   FakeFlutterTestRunner(this.exitCode, [this.leastRunTime, this.fakeVmServiceHost]);
 
   int exitCode;

@@ -112,24 +112,17 @@ class TestCompiler {
   TestCompiler(
     BuildInfo buildInfo,
     this.flutterProject, {
-    required Artifacts artifacts,
-    required Config config,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-    required ShutdownHooks shutdownHooks,
+    required this.artifacts,
+    required this.config,
+    required this.fileSystem,
+    required this.logger,
+    required this.platform,
+    required this.processManager,
+    required this.shutdownHooks,
     String? precompiledDillPath,
     this.residentCompilerFactory = const ResidentCompilerFactory(),
     this.testTimeRecorder,
-  }) : _artifacts = artifacts,
-       _config = config,
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _platform = platform,
-       _processManager = processManager,
-       _shutdownHooks = shutdownHooks,
-       testFilePath =
+  }) : testFilePath =
            precompiledDillPath ??
            fileSystem.path.join(
              flutterProject!.directory.path,
@@ -153,14 +146,14 @@ class TestCompiler {
       'flutter_test_compiler.',
     );
     outputDill = outputDillDirectory.childFile('output.dill');
-    _logger.printTrace(
+    logger.printTrace(
       'Compiler will use the following file as its incremental dill file: ${outputDill.path}',
     );
-    _logger.printTrace('Listening to compiler controller...');
+    logger.printTrace('Listening to compiler controller...');
     compilerController.stream.listen(
       _onCompilationRequest,
       onDone: () {
-        _logger.printTrace('Deleting ${outputDillDirectory.path}...');
+        logger.printTrace('Deleting ${outputDillDirectory.path}...');
         outputDillDirectory.deleteSync(recursive: true);
       },
     );
@@ -175,13 +168,13 @@ class TestCompiler {
   final TestTimeRecorder? testTimeRecorder;
   final ResidentCompilerFactory residentCompilerFactory;
 
-  final Artifacts _artifacts;
-  final Config _config;
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final Platform _platform;
-  final ProcessManager _processManager;
-  final ShutdownHooks _shutdownHooks;
+  final Artifacts artifacts;
+  final Config config;
+  final FileSystem fileSystem;
+  final Logger logger;
+  final Platform platform;
+  final ProcessManager processManager;
+  final ShutdownHooks shutdownHooks;
 
   ResidentCompiler? compiler;
   late File outputDill;
@@ -221,15 +214,15 @@ class TestCompiler {
   @visibleForTesting
   Future<ResidentCompiler?> createCompiler() async {
     final ResidentCompiler residentCompiler = residentCompilerFactory.create(
-      artifacts: _artifacts,
-      logger: _logger,
-      processManager: _processManager,
+      artifacts: artifacts,
+      logger: logger,
+      processManager: processManager,
       buildInfo: buildInfo,
-      platform: _platform,
+      platform: platform,
       testCompilation: true,
-      fileSystem: _fileSystem,
-      shutdownHooks: _shutdownHooks,
-      config: _config,
+      fileSystem: fileSystem,
+      shutdownHooks: shutdownHooks,
+      config: config,
       targetPlatform: TargetPlatform.tester,
     );
     return residentCompiler;
@@ -247,9 +240,7 @@ class TestCompiler {
     }
     while (compilationQueue.isNotEmpty) {
       final _CompilationRequest request = compilationQueue.first;
-      final Logger logger = _logger;
-      final FileSystem fileSystem = _fileSystem;
-      final Platform platform = _platform;
+      final TestCompiler(:fileSystem, :logger, :platform) = this;
       logger.printTrace('Compiling ${request.mainUri}');
       final compilerTime = Stopwatch()..start();
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);

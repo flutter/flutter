@@ -36,37 +36,28 @@ import 'web_test_compiler.dart';
 /// Launching the `flutter_tester` process from the test runner.
 interface class FlutterTestRunner {
   const FlutterTestRunner({
-    required Artifacts artifacts,
-    required Config config,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required OperatingSystemUtils os,
-    required Platform platform,
-    required ProcessManager processManager,
-    required ShutdownHooks shutdownHooks,
-    required Stdio stdio,
-    required AnsiTerminal terminal,
-  }) : _artifacts = artifacts,
-       _config = config,
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _os = os,
-       _platform = platform,
-       _processManager = processManager,
-       _shutdownHooks = shutdownHooks,
-       _stdio = stdio,
-       _terminal = terminal;
+    required this.artifacts,
+    required this.config,
+    required this.fileSystem,
+    required this.logger,
+    required this.os,
+    required this.platform,
+    required this.processManager,
+    required this.shutdownHooks,
+    required this.stdio,
+    required this.terminal,
+  });
 
-  final Artifacts _artifacts;
-  final Config _config;
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final OperatingSystemUtils _os;
-  final Platform _platform;
-  final ProcessManager _processManager;
-  final ShutdownHooks _shutdownHooks;
-  final Stdio _stdio;
-  final AnsiTerminal _terminal;
+  final Artifacts artifacts;
+  final Config config;
+  final FileSystem fileSystem;
+  final Logger logger;
+  final OperatingSystemUtils os;
+  final Platform platform;
+  final ProcessManager processManager;
+  final ShutdownHooks shutdownHooks;
+  final Stdio stdio;
+  final AnsiTerminal terminal;
 
   /// Runs tests using package:test and the Flutter engine.
   Future<int> runTests(
@@ -105,15 +96,17 @@ interface class FlutterTestRunner {
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
     required BuildInfo buildInfo,
   }) async {
-    final Artifacts artifacts = _artifacts;
-    final AnsiTerminal terminal = _terminal;
-    final FileSystem fileSystem = _fileSystem;
-    final Logger logger = _logger;
-    final Platform platform = _platform;
-    final ProcessManager processManager = _processManager;
-    final Config config = _config;
-    final ShutdownHooks shutdownHooks = _shutdownHooks;
-    final OperatingSystemUtils os = _os;
+    final FlutterTestRunner(
+      :artifacts,
+      :config,
+      :fileSystem,
+      :logger,
+      :os,
+      :platform,
+      :processManager,
+      :shutdownHooks,
+      :terminal,
+    ) = this;
 
     // Configure package:test to use the Flutter engine for child processes.
     final String flutterTesterBinPath = artifacts.getArtifactPath(Artifact.flutterTester);
@@ -677,15 +670,17 @@ class SpawnPlugin extends PlatformPlugin {
   }) async {
     assert(testFiles.length > 1);
 
-    final Artifacts artifacts = _artifacts;
-    final Config config = _config;
-    final FileSystem fileSystem = _fileSystem;
-    final Logger logger = _logger;
-    final Platform platform = _platform;
-    final ProcessManager processManager = _processManager;
-    final ShutdownHooks shutdownHooks = _shutdownHooks;
-    final Stdio stdio = _stdio;
-    final AnsiTerminal terminal = _terminal;
+    final FlutterTestRunner(
+      :artifacts,
+      :config,
+      :fileSystem,
+      :logger,
+      :platform,
+      :processManager,
+      :shutdownHooks,
+      :stdio,
+      :terminal,
+    ) = this;
 
     final Directory buildDirectory = fileSystem.directory(
       fileSystem.path.join(flutterProject!.directory.path, getBuildDirectory()),

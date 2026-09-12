@@ -82,24 +82,18 @@ class FlutterWebPlatform extends PlatformPlugin {
     required FlutterProject flutterProject,
     required String flutterTesterBinPath,
     required FileSystem fileSystem,
-    required Directory buildDirectory,
-    required File testDartJs,
-    required File testHostDartJs,
-    required ChromiumLauncher chromiumLauncher,
-    required Logger logger,
-    required Artifacts? artifacts,
+    required this._buildDirectory,
+    required this._testDartJs,
+    required this._testHostDartJs,
+    required this._chromiumLauncher,
+    required this._logger,
+    required this._artifacts,
     required ProcessManager processManager,
     required this.webRenderer,
     required this.useWasm,
     required this.crossOriginIsolation,
     TestTimeRecorder? testTimeRecorder,
-  }) : _fileSystem = fileSystem,
-       _buildDirectory = buildDirectory,
-       _testDartJs = testDartJs,
-       _testHostDartJs = testHostDartJs,
-       _chromiumLauncher = chromiumLauncher,
-       _logger = logger,
-       _artifacts = artifacts {
+  }) : _fileSystem = fileSystem {
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
         .add(
@@ -127,7 +121,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       compilerFactory: () => TestCompiler(
         buildInfo,
         flutterProject,
-        artifacts: artifacts ?? globals.artifacts!,
+        artifacts: _artifacts!,
         config: globals.config,
         fileSystem: _fileSystem,
         logger: _logger,

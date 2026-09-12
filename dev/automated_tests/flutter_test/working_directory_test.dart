@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io';
+
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {

@@ -19,28 +19,24 @@ import 'watcher.dart';
 /// A class that collects code coverage data during test runs.
 class CoverageCollector extends TestWatcher {
   CoverageCollector({
-    required FileSystem fileSystem,
-    required Logger logger,
+    required this.fileSystem,
+    required this.logger,
     required this.packagesPath,
-    required Platform platform,
-    required ProcessUtils processUtils,
+    required this.platform,
+    required this.processUtils,
     this.branchCoverage = false,
     this.libraryNames,
-    OperatingSystemUtils? os,
+    this.os,
     this.resolver,
     this.testTimeRecorder,
     this.verbose = true,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _platform = platform,
-       _processUtils = processUtils,
-       _os = os;
+  });
 
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final Platform _platform;
-  final ProcessUtils _processUtils;
-  final OperatingSystemUtils? _os;
+  final FileSystem fileSystem;
+  final Logger logger;
+  final Platform platform;
+  final ProcessUtils processUtils;
+  final OperatingSystemUtils? os;
 
   /// True when log messages should be emitted.
   final bool verbose;
@@ -86,9 +82,9 @@ class CoverageCollector extends TestWatcher {
       return;
     }
     if (error) {
-      _logger.printError(line);
+      logger.printError(line);
     } else {
-      _logger.printTrace(line);
+      logger.printTrace(line);
     }
   }
 
@@ -113,7 +109,7 @@ class CoverageCollector extends TestWatcher {
     // This may not be a safe assumption in non-standard environments, such as
     // when building under build systems such as Bazel. In those cases, this
     // getter should be overridden.
-    final FileSystem fs = _fileSystem;
+    final FileSystem fs = fileSystem;
     return fs.directory(fs.file(packagesPath).dirname).dirname;
   }
 
@@ -227,7 +223,7 @@ class CoverageCollector extends TestWatcher {
     if (formatter == null) {
       final coverage.Resolver usedResolver =
           resolver ?? this.resolver ?? await CoverageCollector.getResolver(packagesPath);
-      final String packagePath = _fileSystem.currentDirectory.path;
+      final String packagePath = fileSystem.currentDirectory.path;
       // find paths for libraryNames so we can include them to report
       final List<String>? libraryPaths = libraryNames
           ?.map((String e) => usedResolver.resolve('package:$e'))
@@ -249,9 +245,9 @@ class CoverageCollector extends TestWatcher {
     bool mergeCoverageData = false,
     Directory? coverageDirectory,
   }) async {
-    final FileSystem fs = _fileSystem;
-    final Platform platform = _platform;
-    final OperatingSystemUtils? os = _os;
+    final FileSystem fs = fileSystem;
+    final Platform platform = this.platform;
+    final OperatingSystemUtils? os = this.os;
 
     final String? coverageData = await finalizeCoverage(coverageDirectory: coverageDirectory);
     _logMessage('coverage information collection complete');
@@ -292,7 +288,7 @@ class CoverageCollector extends TestWatcher {
         final File sourceFile = coverageFile.copySync(
           fs.path.join(tempDir.path, 'lcov.source.info'),
         );
-        final RunResult result = _processUtils.runSync(<String>[
+        final RunResult result = processUtils.runSync(<String>[
           'lcov',
           '--add-tracefile',
           baseCoverageData,

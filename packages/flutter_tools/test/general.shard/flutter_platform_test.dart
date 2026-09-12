@@ -273,48 +273,51 @@ void main() {
       expect(flutterPlatform.icudtlPath, equals('ghi'));
     });
 
-    testWithoutContext('pipeHarnessToRemote safely ignores non-JSON string and logs warning', () async {
-      final harnessController = StreamChannelController<Object?>();
-      final remoteController = StreamChannelController<String>();
-      final logger = BufferLogger.test();
+    testWithoutContext(
+      'pipeHarnessToRemote safely ignores non-JSON string and logs warning',
+      () async {
+        final harnessController = StreamChannelController<Object?>();
+        final remoteController = StreamChannelController<String>();
+        final logger = BufferLogger.test();
 
-      final Future<void> pipeFuture = pipeHarnessToRemote(
-        id: 0,
-        harnessChannel: harnessController.foreign,
-        remoteChannel: remoteController.foreign,
-        logger: logger,
-      );
+        final Future<void> pipeFuture = pipeHarnessToRemote(
+          id: 0,
+          harnessChannel: harnessController.foreign,
+          remoteChannel: remoteController.foreign,
+          logger: logger,
+        );
 
-      final receivedFromRemote = <Object?>[];
-      harnessController.local.stream.listen(receivedFromRemote.add);
+        final receivedFromRemote = <Object?>[];
+        harnessController.local.stream.listen(receivedFromRemote.add);
 
-      // Send non-JSON error string from remote channel followed by valid JSON.
-      remoteController.local.sink.add(
-        'Loading dynamic library failed: dlopen(/opt/homebrew/share/flutter/bin/cache/libflutter.dylib)',
-      );
-      remoteController.local.sink.add('{"valid": true}');
+        // Send non-JSON error string from remote channel followed by valid JSON.
+        remoteController.local.sink.add(
+          'Loading dynamic library failed: dlopen(/opt/homebrew/share/flutter/bin/cache/libflutter.dylib)',
+        );
+        remoteController.local.sink.add('{"valid": true}');
 
-      await pumpEventQueue();
+        await pumpEventQueue();
 
-      await remoteController.local.sink.close();
-      await harnessController.local.sink.close();
+        await remoteController.local.sink.close();
+        await harnessController.local.sink.close();
 
-      await pipeFuture;
+        await pipeFuture;
 
-      expect(
-        receivedFromRemote,
-        equals(<Object?>[
-          <String, Object?>{'valid': true},
-        ]),
-      );
-      expect(
-        logger.warningText,
-        contains(
-          'Received unexpected non-JSON output from test runner: Loading dynamic library failed: dlopen',
-        ),
-      );
-      expect(logger.traceText, contains('test 0: JSON decoding failed:'));
-    });
+        expect(
+          receivedFromRemote,
+          equals(<Object?>[
+            <String, Object?>{'valid': true},
+          ]),
+        );
+        expect(
+          logger.warningText,
+          contains(
+            'Received unexpected non-JSON output from test runner: Loading dynamic library failed: dlopen',
+          ),
+        );
+        expect(logger.traceText, contains('test 0: JSON decoding failed:'));
+      },
+    );
   });
 
   group('generateTestBootstrap', () {

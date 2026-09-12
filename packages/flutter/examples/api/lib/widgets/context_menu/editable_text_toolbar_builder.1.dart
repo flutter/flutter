@@ -77,7 +77,8 @@ class _EditableTextToolbarBuilderExampleAppState
                       // Here we add an "Email" button to the default TextField
                       // context menu for the current platform, but only if an email
                       // address is currently selected.
-                      final TextEditingValue value = editableTextState.textEditingValue;
+                      final TextEditingValue value =
+                          editableTextState.textEditingValue;
                       if (_isValidEmail(
                         value.selection.textInside(value.text),
                       )) {
