@@ -194,6 +194,31 @@ class ImageFilterEngineLayer extends ContainerLayer implements ui.ImageFilterEng
   // https://github.com/flutter/flutter/issues/82832
 }
 
+/// A layer that applies an overscroll stretch effect to its children.
+class OverscrollStretchEngineLayer extends ContainerLayer
+    implements ui.OverscrollStretchEngineLayer {
+  OverscrollStretchEngineLayer(
+    this.filter,
+    this.overscrollX,
+    this.overscrollY,
+    this.maxStretchIntensity,
+    this.interpolationStrength,
+    this.offset,
+  );
+
+  final LayerImageFilter filter;
+  final double overscrollX;
+  final double overscrollY;
+  final double maxStretchIntensity;
+  final double interpolationStrength;
+  final ui.Offset offset;
+
+  @override
+  R accept<R>(LayerVisitor<R> visitor) {
+    return visitor.visitOverscrollStretch(this);
+  }
+}
+
 class ShaderMaskEngineLayer extends ContainerLayer implements ui.ShaderMaskEngineLayer {
   ShaderMaskEngineLayer(this.shader, this.maskRect, this.blendMode, this.filterQuality);
 

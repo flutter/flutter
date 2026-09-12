@@ -12,6 +12,8 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RenderEffect;
+import android.graphics.RuntimeShader;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,7 +22,9 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
+import io.flutter.Build.API_LEVELS;
 import io.flutter.embedding.android.AndroidTouchProcessor;
 import io.flutter.util.ViewUtils;
 
@@ -36,6 +40,7 @@ public class FlutterMutatorView extends FrameLayout {
 
   private final AndroidTouchProcessor androidTouchProcessor;
   private Paint paint;
+  private StretchEffectHelper stretchEffectHelper;
 
   /**
    * Initialize the FlutterMutatorView. Use this to set the screenDensity, which will be used to
@@ -108,6 +113,20 @@ public class FlutterMutatorView extends FrameLayout {
     layoutParams.topMargin = top;
     setLayoutParams(layoutParams);
     setWillNotDraw(false);
+
+    if (android.os.Build.VERSION.SDK_INT >= io.flutter.Build.API_LEVELS.API_33) {
+      if (stretchEffectHelper == null) {
+        stretchEffectHelper = new StretchEffectHelper();
+      }
+      stretchEffectHelper.applyStretchEffect(
+          this,
+          width,
+          height,
+          mutatorsStack.getFinalOverscrollX(),
+          mutatorsStack.getFinalOverscrollY(),
+          mutatorsStack.getFinalMaxStretchIntensity(),
+          mutatorsStack.getFinalInterpolationStrength());
+    }
   }
 
   @Override
@@ -200,5 +219,166 @@ public class FlutterMutatorView extends FrameLayout {
     final Matrix screenMatrix = new Matrix();
     screenMatrix.postTranslate(getLeft(), getTop());
     return androidTouchProcessor.onTouchEvent(event, screenMatrix);
+  }
+
+  @RequiresApi(API_LEVELS.API_33)
+  private static class StretchEffectHelper {
+    private static final String STRETCH_SHADER =
+        "uniform shader u_texture;\n"
+            + "uniform float2 u_size;\n"
+            + "uniform float u_overscroll_x;\n"
+            + "uniform float u_overscroll_y;\n"
+            + "uniform float u_interpolation_strength;\n"
+            + "\n"
+            + "float ease_in(float t, float d) {\n"
+            + "  return t * d;\n"
+            + "}\n"
+            + "\n"
+            + "float compute_overscroll_start(\n"
+            + "  float in_pos,\n"
+            + "  float overscroll,\n"
+            + "  float u_stretch_affected_dist,\n"
+            + "  float u_inverse_stretch_affected_dist,\n"
+            + "  float distance_stretched,\n"
+            + "  float interpolation_strength\n"
+            + ") {\n"
+            + "  float offset_pos = u_stretch_affected_dist - in_pos;\n"
+            + "  float pos_based_variation = mix(\n"
+            + "    1.0,\n"
+            + "    ease_in(offset_pos, u_inverse_stretch_affected_dist),\n"
+            + "    interpolation_strength\n"
+            + "  );\n"
+            + "  float stretch_intensity = overscroll * pos_based_variation;\n"
+            + "  return distance_stretched - (offset_pos / (1.0 + stretch_intensity));\n"
+            + "}\n"
+            + "\n"
+            + "float compute_overscroll_end(\n"
+            + "  float in_pos,\n"
+            + "  float overscroll,\n"
+            + "  float reverse_stretch_dist,\n"
+            + "  float u_stretch_affected_dist,\n"
+            + "  float u_inverse_stretch_affected_dist,\n"
+            + "  float distance_stretched,\n"
+            + "  float interpolation_strength,\n"
+            + "  float viewport_dimension\n"
+            + ") {\n"
+            + "  float offset_pos = in_pos - reverse_stretch_dist;\n"
+            + "  float pos_based_variation = mix(\n"
+            + "    1.0,\n"
+            + "    ease_in(offset_pos, u_inverse_stretch_affected_dist),\n"
+            + "    interpolation_strength\n"
+            + "  );\n"
+            + "  float stretch_intensity = (-overscroll) * pos_based_variation;\n"
+            + "  return viewport_dimension - (distance_stretched - (offset_pos / (1.0 + stretch_intensity)));\n"
+            + "}\n"
+            + "\n"
+            + "float compute_streched_effect(\n"
+            + "  float in_pos,\n"
+            + "  float overscroll,\n"
+            + "  float u_stretch_affected_dist,\n"
+            + "  float u_inverse_stretch_affected_dist,\n"
+            + "  float distance_stretched,\n"
+            + "  float distance_diff,\n"
+            + "  float interpolation_strength,\n"
+            + "  float viewport_dimension\n"
+            + ") {\n"
+            + "  if (overscroll > 0.0) {\n"
+            + "    if (in_pos <= u_stretch_affected_dist) {\n"
+            + "      return compute_overscroll_start(\n"
+            + "        in_pos, overscroll, u_stretch_affected_dist,\n"
+            + "        u_inverse_stretch_affected_dist, distance_stretched,\n"
+            + "        interpolation_strength\n"
+            + "      );\n"
+            + "    } else {\n"
+            + "      return distance_diff + in_pos;\n"
+            + "    }\n"
+            + "  } else if (overscroll < 0.0) {\n"
+            + "    float stretch_affected_dist_calc = viewport_dimension - u_stretch_affected_dist;\n"
+            + "    if (in_pos >= stretch_affected_dist_calc) {\n"
+            + "      return compute_overscroll_end(\n"
+            + "        in_pos,\n"
+            + "        overscroll,\n"
+            + "        stretch_affected_dist_calc,\n"
+            + "        u_stretch_affected_dist,\n"
+            + "        u_inverse_stretch_affected_dist,\n"
+            + "        distance_stretched,\n"
+            + "        interpolation_strength,\n"
+            + "        viewport_dimension\n"
+            + "      );\n"
+            + "    } else {\n"
+            + "      return -distance_diff + in_pos;\n"
+            + "    }\n"
+            + "  } else {\n"
+            + "    return in_pos;\n"
+            + "  }\n"
+            + "}\n"
+            + "\n"
+            + "vec4 main(vec2 coord) {\n"
+            + "  vec2 uv = coord / u_size;\n"
+            + "  float in_u_norm = uv.x;\n"
+            + "  float in_v_norm = uv.y;\n"
+            + "\n"
+            + "  bool isVertical = u_overscroll_y != 0.0;\n"
+            + "  float overscroll = isVertical ? u_overscroll_y : u_overscroll_x;\n"
+            + "\n"
+            + "  float norm_distance_stretched = 1.0 / (1.0 + abs(overscroll));\n"
+            + "  float norm_dist_diff = norm_distance_stretched - 1.0;\n"
+            + "\n"
+            + "  const float norm_viewport = 1.0;\n"
+            + "  const float norm_stretch_affected_dist = 1.0;\n"
+            + "  const float norm_inverse_stretch_affected_dist = 1.0;\n"
+            + "\n"
+            + "  float out_u_norm = isVertical ? in_u_norm : compute_streched_effect(\n"
+            + "    in_u_norm,\n"
+            + "    overscroll,\n"
+            + "    norm_stretch_affected_dist,\n"
+            + "    norm_inverse_stretch_affected_dist,\n"
+            + "    norm_distance_stretched,\n"
+            + "    norm_dist_diff,\n"
+            + "    u_interpolation_strength,\n"
+            + "    norm_viewport\n"
+            + "  );\n"
+            + "\n"
+            + "  float out_v_norm = isVertical ? compute_streched_effect(\n"
+            + "    in_v_norm,\n"
+            + "    overscroll,\n"
+            + "    norm_stretch_affected_dist,\n"
+            + "    norm_inverse_stretch_affected_dist,\n"
+            + "    norm_distance_stretched,\n"
+            + "    norm_dist_diff,\n"
+            + "    u_interpolation_strength,\n"
+            + "    norm_viewport\n"
+            + "  ) : in_v_norm;\n"
+            + "\n"
+            + "  return u_texture.eval(vec2(out_u_norm * u_size.x, out_v_norm * u_size.y));\n"
+            + "}\n";
+
+    private RuntimeShader runtimeShader;
+
+    public void applyStretchEffect(
+        View view,
+        float width,
+        float height,
+        float overscrollX,
+        float overscrollY,
+        float maxStretchIntensity,
+        float interpolationStrength) {
+      boolean hasStretch = Math.abs(overscrollX) > 0.0001f || Math.abs(overscrollY) > 0.0001f;
+      if (!hasStretch || width <= 0 || height <= 0) {
+        view.setRenderEffect(null);
+        return;
+      }
+      // Note: maxStretchIntensity is retained across the mutators stack for cross-platform
+      // parity and forward compatibility, but is not currently parameterized in the AGSL
+      // stretch shader.
+      if (runtimeShader == null) {
+        runtimeShader = new RuntimeShader(STRETCH_SHADER);
+      }
+      runtimeShader.setFloatUniform("u_size", width, height);
+      runtimeShader.setFloatUniform("u_overscroll_x", overscrollX);
+      runtimeShader.setFloatUniform("u_overscroll_y", overscrollY);
+      runtimeShader.setFloatUniform("u_interpolation_strength", interpolationStrength);
+      view.setRenderEffect(RenderEffect.createRuntimeShaderEffect(runtimeShader, "u_texture"));
+    }
   }
 }

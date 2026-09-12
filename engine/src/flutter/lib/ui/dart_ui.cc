@@ -305,6 +305,7 @@ typedef CanvasPath Path;
   V(SceneBuilder, pushClipRSuperellipse)         \
   V(SceneBuilder, pushColorFilter)               \
   V(SceneBuilder, pushImageFilter)               \
+  V(SceneBuilder, pushOverscrollStretch)         \
   V(SceneBuilder, pushOffset)                    \
   V(SceneBuilder, pushOpacity)                   \
   V(SceneBuilder, pushShaderMask)                \

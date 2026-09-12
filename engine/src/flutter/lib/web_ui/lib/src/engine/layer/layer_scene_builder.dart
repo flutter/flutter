@@ -178,6 +178,28 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   }
 
   @override
+  OverscrollStretchEngineLayer pushOverscrollStretch(
+    ui.ImageFilter filter, {
+    double overscrollX = 0.0,
+    double overscrollY = 0.0,
+    double maxStretchIntensity = 1.0,
+    double interpolationStrength = 0.7,
+    ui.Offset offset = ui.Offset.zero,
+    ui.OverscrollStretchEngineLayer? oldLayer,
+  }) {
+    return pushLayer<OverscrollStretchEngineLayer>(
+      OverscrollStretchEngineLayer(
+        filter as LayerImageFilter,
+        overscrollX,
+        overscrollY,
+        maxStretchIntensity,
+        interpolationStrength,
+        offset,
+      ),
+    );
+  }
+
+  @override
   OffsetEngineLayer pushOffset(double dx, double dy, {ui.EngineLayer? oldLayer}) {
     return pushLayer<OffsetEngineLayer>(OffsetEngineLayer(dx, dy));
   }

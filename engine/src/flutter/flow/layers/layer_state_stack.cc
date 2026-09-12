@@ -306,6 +306,53 @@ class ImageFilterEntry : public LayerStateStack::StateEntry {
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(ImageFilterEntry);
 };
 
+class OverscrollStretchEntry : public LayerStateStack::StateEntry {
+ public:
+  OverscrollStretchEntry(const DlRect& bounds,
+                         const std::shared_ptr<DlImageFilter>& filter,
+                         DlScalar overscroll_x,
+                         DlScalar overscroll_y,
+                         DlScalar max_stretch_intensity,
+                         DlScalar interpolation_strength,
+                         const LayerStateStack::RenderingAttributes& prev)
+      : bounds_(bounds),
+        filter_(filter),
+        overscroll_x_(overscroll_x),
+        overscroll_y_(overscroll_y),
+        max_stretch_intensity_(max_stretch_intensity),
+        interpolation_strength_(interpolation_strength),
+        old_filter_(prev.image_filter),
+        old_bounds_(prev.save_layer_bounds) {}
+  ~OverscrollStretchEntry() override = default;
+
+  void apply(LayerStateStack* stack) const override {
+    stack->outstanding_.save_layer_bounds = bounds_;
+    stack->outstanding_.image_filter = filter_;
+  }
+  void restore(LayerStateStack* stack) const override {
+    stack->outstanding_.save_layer_bounds = old_bounds_;
+    stack->outstanding_.image_filter = old_filter_;
+  }
+
+  void update_mutators(MutatorsStack* mutators_stack) const override {
+    mutators_stack->PushOverscrollStretch(overscroll_x_, overscroll_y_,
+                                          max_stretch_intensity_,
+                                          interpolation_strength_);
+  }
+
+ private:
+  const DlRect bounds_;
+  const std::shared_ptr<DlImageFilter> filter_;
+  const DlScalar overscroll_x_;
+  const DlScalar overscroll_y_;
+  const DlScalar max_stretch_intensity_;
+  const DlScalar interpolation_strength_;
+  const std::shared_ptr<DlImageFilter> old_filter_;
+  const DlRect old_bounds_;
+
+  FML_DISALLOW_COPY_ASSIGN_AND_MOVE(OverscrollStretchEntry);
+};
+
 class ColorFilterEntry : public LayerStateStack::StateEntry {
  public:
   ColorFilterEntry(const DlRect& bounds,
@@ -551,6 +598,18 @@ void MutatorContext::applyImageFilter(
   }
 }
 
+void MutatorContext::applyOverscrollStretch(
+    const DlRect& bounds,
+    const std::shared_ptr<DlImageFilter>& filter,
+    DlScalar overscroll_x,
+    DlScalar overscroll_y,
+    DlScalar max_stretch_intensity,
+    DlScalar interpolation_strength) {
+  layer_state_stack_->push_overscroll_stretch(
+      bounds, filter, overscroll_x, overscroll_y, max_stretch_intensity,
+      interpolation_strength);
+}
+
 void MutatorContext::applyColorFilter(
     const DlRect& bounds,
     const std::shared_ptr<const DlColorFilter>& filter) {
@@ -702,6 +761,20 @@ void LayerStateStack::push_image_filter(
   maybe_save_layer(filter);
   state_stack_.emplace_back(
       std::make_unique<ImageFilterEntry>(bounds, filter, outstanding_));
+  apply_last_entry();
+}
+
+void LayerStateStack::push_overscroll_stretch(
+    const DlRect& bounds,
+    const std::shared_ptr<DlImageFilter>& filter,
+    DlScalar overscroll_x,
+    DlScalar overscroll_y,
+    DlScalar max_stretch_intensity,
+    DlScalar interpolation_strength) {
+  maybe_save_layer(filter);
+  state_stack_.emplace_back(std::make_unique<OverscrollStretchEntry>(
+      bounds, filter, overscroll_x, overscroll_y, max_stretch_intensity,
+      interpolation_strength, outstanding_));
   apply_last_entry();
 }
 

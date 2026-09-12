@@ -114,6 +114,19 @@ void main() async {
     );
   }, timeout: Timeout.none);
 
+  test('should stretch and then stretch back', () async {
+    await flutterDriver.tap(find.byValueKey('Stretch'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.stretch_applied.png'),
+    );
+    await flutterDriver.tap(find.byValueKey('Stretch'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.no_transform.png'),
+    );
+  }, timeout: Timeout.none);
+
   test('should match all applied', () async {
     await flutterDriver.tap(find.byValueKey('Flip X'));
     await flutterDriver.tap(find.byValueKey('Translate Right'));
