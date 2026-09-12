@@ -83,6 +83,9 @@ enum _MediaQueryAspect {
   /// Specifies the aspect corresponding to [MediaQueryData.viewPadding].
   viewPadding,
 
+  /// Specifies the aspect corresponding to [MediaQueryData.keyboardVisible].
+  keyboardVisible,
+
   /// Specifies the aspect corresponding to [MediaQueryData.alwaysUse24HourFormat].
   alwaysUse24HourFormat,
 
@@ -225,6 +228,7 @@ class MediaQueryData {
     this.viewInsets = EdgeInsets.zero,
     this.systemGestureInsets = EdgeInsets.zero,
     this.viewPadding = EdgeInsets.zero,
+    this.keyboardVisible = false,
     this.alwaysUse24HourFormat = false,
     this.accessibleNavigation = false,
     this.invertColors = false,
@@ -315,6 +319,7 @@ class MediaQueryData {
         view.systemGestureInsets,
         view.devicePixelRatio,
       ),
+      keyboardVisible = view.keyboardVisible,
       accessibleNavigation =
           platformData?.accessibleNavigation ??
           view.platformDispatcher.accessibilityFeatures.accessibleNavigation,
@@ -578,6 +583,26 @@ class MediaQueryData {
   /// ** See code in examples/api/lib/widgets/media_query/media_query_data.system_gesture_insets.0.dart **
   /// {@end-tool}
   final EdgeInsets systemGestureInsets;
+
+  /// Whether the soft keyboard is currently visible on the screen.
+  ///
+  /// On Android API 30+ and iOS, this is reported for both docked
+  /// keyboards and undocked ones (such as floating or split keyboards).
+  /// On earlier Android versions, as well as on mobile web browsers,
+  /// the visibility can only be determined for docked keyboards;
+  /// for undocked keyboards the value remains `false`.
+  /// On all other platforms the value is always `false`.
+  ///
+  /// This reflects keyboard visibility on the screen as a whole: in
+  /// multi-window environments (such as split screen), it is `true` even
+  /// when the keyboard was opened by, and is receiving input for, another
+  /// application.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.keyboardVisibleOf], a method to find and depend on the
+  ///    keyboardVisible defined for a [BuildContext].
+  final bool keyboardVisible;
 
   /// Whether to use 24-hour format when formatting time.
   ///
@@ -877,6 +902,7 @@ class MediaQueryData {
     EdgeInsets? viewPadding,
     EdgeInsets? viewInsets,
     EdgeInsets? systemGestureInsets,
+    bool? keyboardVisible,
     bool? alwaysUse24HourFormat,
     bool? highContrast,
     bool? onOffSwitchLabels,
@@ -904,6 +930,7 @@ class MediaQueryData {
       viewPadding: viewPadding ?? this.viewPadding,
       viewInsets: viewInsets ?? this.viewInsets,
       systemGestureInsets: systemGestureInsets ?? this.systemGestureInsets,
+      keyboardVisible: keyboardVisible ?? this.keyboardVisible,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       invertColors: invertColors ?? this.invertColors,
       highContrast: highContrast ?? this.highContrast,
@@ -953,6 +980,7 @@ class MediaQueryData {
       viewPadding: viewPadding,
       viewInsets: viewInsets,
       systemGestureInsets: systemGestureInsets,
+      keyboardVisible: keyboardVisible,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
       invertColors: invertColors,
       highContrast: highContrast,
@@ -989,6 +1017,7 @@ class MediaQueryData {
       viewPadding: viewPadding,
       viewInsets: viewInsets,
       systemGestureInsets: systemGestureInsets,
+      keyboardVisible: keyboardVisible,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
       invertColors: invertColors,
       highContrast: highContrast,
@@ -1194,6 +1223,7 @@ class MediaQueryData {
         other.viewPadding == viewPadding &&
         other.viewInsets == viewInsets &&
         other.systemGestureInsets == systemGestureInsets &&
+        other.keyboardVisible == keyboardVisible &&
         other.alwaysUse24HourFormat == alwaysUse24HourFormat &&
         other.highContrast == highContrast &&
         other.onOffSwitchLabels == onOffSwitchLabels &&
@@ -1241,6 +1271,7 @@ class MediaQueryData {
       wordSpacingOverride,
       paragraphSpacingOverride,
       displayCornerRadii,
+      keyboardVisible,
     ),
   );
 
@@ -1255,6 +1286,7 @@ class MediaQueryData {
       'viewPadding: $viewPadding',
       'viewInsets: $viewInsets',
       'systemGestureInsets: $systemGestureInsets',
+      'keyboardVisible: $keyboardVisible',
       'alwaysUse24HourFormat: $alwaysUse24HourFormat',
       'accessibleNavigation: $accessibleNavigation',
       'highContrast: $highContrast',
@@ -1931,6 +1963,28 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static EdgeInsets? maybeViewPaddingOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.viewPadding)?.viewPadding;
 
+  /// Returns the [MediaQueryData.keyboardVisible] for the nearest [MediaQuery]
+  /// ancestor or throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.keyboardVisible] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static bool keyboardVisibleOf(BuildContext context) =>
+      _of(context, _MediaQueryAspect.keyboardVisible).keyboardVisible;
+
+  /// Returns the [MediaQueryData.keyboardVisible] for the nearest [MediaQuery]
+  /// ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.keyboardVisible] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static bool? maybeKeyboardVisibleOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.keyboardVisible)?.keyboardVisible;
+
   /// Returns [MediaQueryData.alwaysUse24HourFormat] for the nearest
   /// [MediaQuery] ancestor or throws an exception, if no such ancestor exists.
   ///
@@ -2325,6 +2379,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
             _MediaQueryAspect.padding => data.padding != oldWidget.data.padding,
             _MediaQueryAspect.viewInsets => data.viewInsets != oldWidget.data.viewInsets,
             _MediaQueryAspect.viewPadding => data.viewPadding != oldWidget.data.viewPadding,
+            _MediaQueryAspect.keyboardVisible =>
+              data.keyboardVisible != oldWidget.data.keyboardVisible,
             _MediaQueryAspect.invertColors => data.invertColors != oldWidget.data.invertColors,
             _MediaQueryAspect.highContrast => data.highContrast != oldWidget.data.highContrast,
             _MediaQueryAspect.onOffSwitchLabels =>

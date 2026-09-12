@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -328,6 +329,7 @@ public class FlutterRendererTest {
             anyInt(),
             anyInt(),
             anyInt(),
+            anyBoolean(),
             anyInt(),
             boundsCaptor.capture(),
             typeCaptor.capture(),

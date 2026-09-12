@@ -878,7 +878,7 @@ void hooksTests() async {
     window.onMetricsChanged!();
     _callHook(
       '_updateWindowMetrics',
-      29,
+      30,
       0, // window Id
       0.1234, // device pixel ratio
       0.0, // width
@@ -895,6 +895,7 @@ void hooksTests() async {
       0.0, // system gesture inset right
       0.0, // system gesture inset bottom
       0.0, // system gesture inset left
+      false, // keyboard visible
       22.0, // physicalTouchSlop
       <double>[], // display features bounds
       <int>[], // display features types
@@ -1000,7 +1001,7 @@ void hooksTests() async {
   await test('View padding/insets/viewPadding/systemGestureInsets', () {
     _callHook(
       '_updateWindowMetrics',
-      29,
+      30,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -1017,6 +1018,7 @@ void hooksTests() async {
       0.0, // systemGestureInsetRight
       0.0, // systemGestureInsetBottom
       0.0, // systemGestureInsetLeft
+      false, // keyboard visible
       22.0, // physicalTouchSlop
       <double>[], // display features bounds
       <int>[], // display features types
@@ -1039,7 +1041,7 @@ void hooksTests() async {
 
     _callHook(
       '_updateWindowMetrics',
-      29,
+      30,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -1056,6 +1058,7 @@ void hooksTests() async {
       0.0, // systemGestureInsetRight
       44.0, // systemGestureInsetBottom
       0.0, // systemGestureInsetLeft
+      false, // keyboard visible
       22.0, // physicalTouchSlop
       <double>[], // display features bounds
       <int>[], // display features types
@@ -1077,10 +1080,86 @@ void hooksTests() async {
     expectEquals(window.systemGestureInsets.bottom, 44.0);
   });
 
+  await test('Keyboard visible', () {
+    _callHook(
+      '_updateWindowMetrics',
+      30,
+      0, // window Id
+      1.0, // device pixel ratio
+      0.0, // width
+      0.0, // height
+      0.0, // padding top
+      0.0, // padding right
+      0.0, // padding bottom
+      0.0, // padding left
+      0.0, // inset top
+      0.0, // inset right
+      0.0, // inset bottom
+      0.0, // inset left
+      0.0, // system gesture inset top
+      0.0, // system gesture inset right
+      0.0, // system gesture inset bottom
+      0.0, // system gesture inset left
+      true, // keyboard visible
+      0.0, // physicalTouchSlop
+      <double>[], // display features bounds
+      <int>[], // display features types
+      <int>[], // display features states
+      0, // Display ID
+      0.0, // minWidth
+      0.0, // maxWidth
+      0.0, // minHeight
+      0.0, // maxHeight
+      -1.0, // display corner radius top left
+      -1.0, // display corner radius top right
+      -1.0, // display corner radius bottom right
+      -1.0, // display corner radius bottom left
+    );
+
+    expectEquals(window.keyboardVisible, true);
+
+    _callHook(
+      '_updateWindowMetrics',
+      30,
+      0, // window Id
+      1.0, // device pixel ratio
+      0.0, // width
+      0.0, // height
+      0.0, // padding top
+      0.0, // padding right
+      0.0, // padding bottom
+      0.0, // padding left
+      0.0, // inset top
+      0.0, // inset right
+      0.0, // inset bottom
+      0.0, // inset left
+      0.0, // system gesture inset top
+      0.0, // system gesture inset right
+      0.0, // system gesture inset bottom
+      0.0, // system gesture inset left
+      false, // keyboard visible
+      0.0, // physicalTouchSlop
+      <double>[], // display features bounds
+      <int>[], // display features types
+      <int>[], // display features states
+      0, // Display ID
+      0.0, // minWidth
+      0.0, // maxWidth
+      0.0, // minHeight
+      0.0, // maxHeight
+      -1.0, // display corner radius top left
+      -1.0, // display corner radius top right
+      -1.0, // display corner radius bottom right
+      -1.0, // display corner radius bottom left
+    );
+
+    expectEquals(window.keyboardVisible, false);
+  });
+
   await test('Window physical touch slop', () {
     _callHook(
       '_updateWindowMetrics',
-      29,
+      30,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -1097,6 +1176,7 @@ void hooksTests() async {
       0.0, // systemGestureInsetRight
       0.0, // systemGestureInsetBottom
       0.0, // systemGestureInsetLeft
+      false, // keyboard visible
       11.0, // physicalTouchSlop
       <double>[], // display features bounds
       <int>[], // display features types
@@ -1116,7 +1196,7 @@ void hooksTests() async {
 
     _callHook(
       '_updateWindowMetrics',
-      29,
+      30,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -1133,6 +1213,7 @@ void hooksTests() async {
       0.0, // systemGestureInsetRight
       44.0, // systemGestureInsetBottom
       0.0, // systemGestureInsetLeft
+      false, // keyboard visible
       -1.0, // physicalTouchSlop
       <double>[], // display features bounds
       <int>[], // display features types
@@ -1152,7 +1233,7 @@ void hooksTests() async {
 
     _callHook(
       '_updateWindowMetrics',
-      29,
+      30,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -1169,6 +1250,7 @@ void hooksTests() async {
       0.0, // systemGestureInsetRight
       44.0, // systemGestureInsetBottom
       0.0, // systemGestureInsetLeft
+      false, // keyboard visible
       22.0, // physicalTouchSlop
       <double>[], // display features bounds
       <int>[], // display features types
@@ -1190,7 +1272,7 @@ void hooksTests() async {
   await test('Display corner radii', () {
     _callHook(
       '_updateWindowMetrics',
-      29,
+      30,
       0, // window Id
       3.0, // devicePixelRatio
       800.0, // width
@@ -1207,6 +1289,7 @@ void hooksTests() async {
       0.0, // systemGestureInsetRight
       0.0, // systemGestureInsetBottom
       0.0, // systemGestureInsetLeft
+      false, // keyboard visible
       11.0, // physicalTouchSlop
       <double>[], // display features bounds
       <int>[], // display features types
@@ -1229,7 +1312,7 @@ void hooksTests() async {
 
     _callHook(
       '_updateWindowMetrics',
-      29,
+      30,
       0, // window Id
       3.0, // devicePixelRatio
       800.0, // width
@@ -1246,6 +1329,7 @@ void hooksTests() async {
       0.0, // systemGestureInsetRight
       44.0, // systemGestureInsetBottom
       0.0, // systemGestureInsetLeft
+      false, // keyboard visible
       -1.0, // physicalTouchSlop
       <double>[], // display features bounds
       <int>[], // display features types
@@ -1265,7 +1349,7 @@ void hooksTests() async {
 
     _callHook(
       '_updateWindowMetrics',
-      29,
+      30,
       0, // window Id
       3.0, // devicePixelRatio
       800.0, // width
@@ -1282,6 +1366,7 @@ void hooksTests() async {
       0.0, // systemGestureInsetRight
       44.0, // systemGestureInsetBottom
       0.0, // systemGestureInsetLeft
+      false, // keyboard visible
       22.0, // physicalTouchSlop
       <double>[], // display features bounds
       <int>[], // display features types
@@ -1702,4 +1787,5 @@ external void _callHook(
   Object? arg27,
   Object? arg28,
   Object? arg29,
+  Object? arg30,
 ]);

@@ -848,4 +848,12 @@ void testMain() {
       expect(myWindow.physicalSize, initialPhysicalSize);
     });
   });
+
+  test('keyboardVisible is true when view inset bottom is greater than zero', () {
+    myWindow.debugSetViewInsets(const ViewPadding(left: 0, top: 0, right: 0, bottom: 100));
+    expect(myWindow.keyboardVisible, isTrue);
+
+    myWindow.debugSetViewInsets(ui.ViewPadding.zero as ViewPadding);
+    expect(myWindow.keyboardVisible, isFalse);
+  });
 }

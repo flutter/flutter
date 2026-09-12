@@ -1271,7 +1271,10 @@ public class FlutterRenderer implements TextureRegistry {
             + ", R: "
             + viewportMetrics.systemGestureInsetRight
             + ", B: "
-            + viewportMetrics.systemGestureInsetRight
+            + viewportMetrics.systemGestureInsetBottom
+            + "\n"
+            + "Keyboard Visible: "
+            + viewportMetrics.keyboardVisible
             + "\n"
             + "Display Features: "
             + viewportMetrics.displayFeatures.size()
@@ -1325,6 +1328,7 @@ public class FlutterRenderer implements TextureRegistry {
         viewportMetrics.systemGestureInsetRight,
         viewportMetrics.systemGestureInsetBottom,
         viewportMetrics.systemGestureInsetLeft,
+        viewportMetrics.keyboardVisible,
         viewportMetrics.physicalTouchSlop,
         displayFeaturesBounds,
         displayFeaturesType,
@@ -1423,6 +1427,7 @@ public class FlutterRenderer implements TextureRegistry {
     public int systemGestureInsetRight = 0;
     public int systemGestureInsetBottom = 0;
     public int systemGestureInsetLeft = 0;
+    public boolean keyboardVisible = false;
     public int physicalTouchSlop = unsetValue;
     public int displayCornerRadiusTopLeft = unsetValue;
     public int displayCornerRadiusTopRight = unsetValue;

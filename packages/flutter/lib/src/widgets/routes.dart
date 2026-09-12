@@ -1093,11 +1093,20 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 
   /// The node this scope will use for its root [FocusScope] widget.
   final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: '$_ModalScopeState Focus Scope');
+
+  // Set while this route is not the top-most route, and cleared when the
+  // route, having become the top-most route again (e.g. because the route
+  // above it was popped or removed), sends its first focus request. That
+  // first request returns focus to the route's previously focused node and is
+  // marked with `isRouteRegainingFocus: true`; see
+  // FocusNode.consumeRouteRegainedFocusToken.
+  bool _focusRegainPending = false;
   final ScrollController primaryScrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    _focusRegainPending = !widget.route.isCurrent;
     final animations = <Listenable>[?widget.route.animation, ?widget.route.secondaryAnimation];
     _listenable = Listenable.merge(animations);
   }
@@ -1133,8 +1142,14 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     }
     focusScopeNode.traversalEdgeBehavior = traversalEdgeBehavior;
     focusScopeNode.directionalTraversalEdgeBehavior = directionalTraversalEdgeBehavior;
-    if (route.isCurrent && _shouldRequestFocus) {
-      route.navigator!.focusNode.enclosingScope?.setFirstFocus(focusScopeNode);
+    if (!route.isCurrent) {
+      _focusRegainPending = true;
+    } else if (_shouldRequestFocus) {
+      route.navigator!.focusNode.enclosingScope?.setFirstFocus(
+        focusScopeNode,
+        isRouteRegainingFocus: _focusRegainPending,
+      );
+      _focusRegainPending = false;
     }
   }
 
@@ -1160,12 +1175,22 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     return widget.route.requestFocus;
   }
 
+  void _maybeRequestRouteFocus() {
+    if (!widget.route.isCurrent) {
+      _focusRegainPending = true;
+    } else if (!_shouldIgnoreFocusRequest && _shouldRequestFocus) {
+      widget.route.navigator!.focusNode.enclosingScope?.setFirstFocus(
+        focusScopeNode,
+        isRouteRegainingFocus: _focusRegainPending,
+      );
+      _focusRegainPending = false;
+    }
+  }
+
   // This should be called to wrap any changes to route.isCurrent, route.canPop,
   // and route.offstage.
   void _routeSetState(VoidCallback fn) {
-    if (widget.route.isCurrent && !_shouldIgnoreFocusRequest && _shouldRequestFocus) {
-      widget.route.navigator!.focusNode.enclosingScope?.setFirstFocus(focusScopeNode);
-    }
+    _maybeRequestRouteFocus();
     setState(fn);
   }
 
@@ -2226,6 +2251,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         /* internal state already changed */
       });
       _modalBarrier.markNeedsBuild();
+    } else {
+      // During the build phase, setState is skipped (the tree is already
+      // rebuilding), but the route focus update must not be. For example,
+      // removing the top-most page of a page-based navigator updates the
+      // routes during build, and the route below must still return focus to
+      // its previously focused node before the removed route's focus scope is
+      // disposed.
+      _scopeKey.currentState?._maybeRequestRouteFocus();
     }
     _modalScope.maintainState = maintainState;
   }
