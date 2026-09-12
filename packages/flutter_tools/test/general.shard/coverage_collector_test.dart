@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show jsonEncode;
-import 'dart:io' show Directory, File;
-
 import 'package:coverage/coverage.dart' show HitMap;
-import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/file_system.dart' show FileSystem;
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/test_device.dart' show TestDevice;
 import 'package:flutter_tools/src/test/test_time_recorder.dart';
@@ -357,21 +357,28 @@ void main() {
   });
 
   testWithoutContext('Coverage collector caches read files', () async {
+    final fileSystem = LocalFileSystem.test(signals: FakeSignals());
     Directory? tempDir;
     try {
-      tempDir = Directory.systemTemp.createTempSync('flutter_coverage_collector_test.');
+      tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_coverage_collector_test.');
       final File packagesFile = writeFooBarPackagesJson(tempDir);
-      final fooDir = Directory('${tempDir.path}/foo/');
-      fooDir.createSync();
-      final fooFile = File('${fooDir.path}/foo.dart');
+      final Directory fooDir = tempDir.childDirectory('foo')..createSync();
+      final File fooFile = fooDir.childFile('foo.dart');
       fooFile.writeAsStringSync('hit\nnohit but ignored // coverage:ignore-line\nhit\n');
 
       final String packagesPath = packagesFile.path;
       final collector = CoverageCollector(
-        libraryNames: <String>{'foo', 'bar'},
-        verbose: false,
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
         packagesPath: packagesPath,
+        platform: const LocalPlatform(),
+        processUtils: ProcessUtils(
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.any(),
+        ),
+        libraryNames: <String>{'foo', 'bar'},
         resolver: await CoverageCollector.getResolver(packagesPath),
+        verbose: false,
       );
       await collector.collectCoverage(
         TestTestDevice(),
@@ -438,21 +445,28 @@ void main() {
   });
 
   testWithoutContext('Coverage collector respects ignore whole file', () async {
+    final fileSystem = LocalFileSystem.test(signals: FakeSignals());
     Directory? tempDir;
     try {
-      tempDir = Directory.systemTemp.createTempSync('flutter_coverage_collector_test.');
+      tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_coverage_collector_test.');
       final File packagesFile = writeFooBarPackagesJson(tempDir);
-      final fooDir = Directory('${tempDir.path}/foo/');
-      fooDir.createSync();
-      final fooFile = File('${fooDir.path}/foo.dart');
+      final Directory fooDir = tempDir.childDirectory('foo')..createSync();
+      final File fooFile = fooDir.childFile('foo.dart');
       fooFile.writeAsStringSync('hit\nnohit but ignored // coverage:ignore-file\nhit\n');
 
       final String packagesPath = packagesFile.path;
       final collector = CoverageCollector(
-        libraryNames: <String>{'foo', 'bar'},
-        verbose: false,
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
         packagesPath: packagesPath,
+        platform: const LocalPlatform(),
+        processUtils: ProcessUtils(
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.any(),
+        ),
+        libraryNames: <String>{'foo', 'bar'},
         resolver: await CoverageCollector.getResolver(packagesPath),
+        verbose: false,
       );
       await collector.collectCoverage(
         TestTestDevice(),
@@ -480,81 +494,93 @@ void main() {
     }
   });
 
-  testUsingContext(
-    'Coverage collector respects libraryNames in finalized report',
-    () async {
-      Directory? tempDir;
-      try {
-        tempDir = Directory.systemTemp.createTempSync('flutter_coverage_collector_test.');
-        final File packagesFile = writeFooBarPackagesJson(tempDir);
-        File('${tempDir.path}/foo/foo.dart').createSync(recursive: true);
-        File('${tempDir.path}/bar/bar.dart').createSync(recursive: true);
+  testWithoutContext('Coverage collector respects libraryNames in finalized report', () async {
+    final fileSystem = LocalFileSystem.test(signals: FakeSignals());
+    Directory? tempDir;
+    try {
+      tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_coverage_collector_test.');
+      final File packagesFile = writeFooBarPackagesJson(tempDir);
+      tempDir.childFile('foo/foo.dart').createSync(recursive: true);
+      tempDir.childFile('bar/bar.dart').createSync(recursive: true);
 
-        final String packagesPath = packagesFile.path;
-        var collector = CoverageCollector(
-          libraryNames: <String>{'foo', 'bar'},
-          verbose: false,
-          packagesPath: packagesPath,
-          resolver: await CoverageCollector.getResolver(packagesPath),
-        );
-        await collector.collectCoverage(
-          TestTestDevice(),
-          serviceOverride: createFakeVmServiceHostWithFooAndBar(
-            libraryFilters: <String>['package:foo/', 'package:bar/'],
-          ).vmService,
-        );
+      final String packagesPath = packagesFile.path;
+      var collector = CoverageCollector(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        packagesPath: packagesPath,
+        platform: const LocalPlatform(),
+        processUtils: ProcessUtils(
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.any(),
+        ),
+        libraryNames: <String>{'foo', 'bar'},
+        resolver: await CoverageCollector.getResolver(packagesPath),
+        verbose: false,
+      );
+      await collector.collectCoverage(
+        TestTestDevice(),
+        serviceOverride: createFakeVmServiceHostWithFooAndBar(
+          libraryFilters: <String>['package:foo/', 'package:bar/'],
+        ).vmService,
+      );
 
-        String? report = await collector.finalizeCoverage();
-        expect(report, contains('foo.dart'));
-        expect(report, contains('bar.dart'));
+      String? report = await collector.finalizeCoverage();
+      expect(report, contains('foo.dart'));
+      expect(report, contains('bar.dart'));
 
-        collector = CoverageCollector(
-          libraryNames: <String>{'foo'},
-          verbose: false,
-          packagesPath: packagesPath,
-          resolver: await CoverageCollector.getResolver(packagesPath),
-        );
-        await collector.collectCoverage(
-          TestTestDevice(),
-          serviceOverride: createFakeVmServiceHostWithFooAndBar(
-            libraryFilters: <String>['package:foo/'],
-          ).vmService,
-        );
+      collector = CoverageCollector(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        packagesPath: packagesPath,
+        platform: const LocalPlatform(),
+        processUtils: ProcessUtils(
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.any(),
+        ),
+        libraryNames: <String>{'foo'},
+        resolver: await CoverageCollector.getResolver(packagesPath),
+        verbose: false,
+      );
+      await collector.collectCoverage(
+        TestTestDevice(),
+        serviceOverride: createFakeVmServiceHostWithFooAndBar(
+          libraryFilters: <String>['package:foo/'],
+        ).vmService,
+      );
 
-        report = await collector.finalizeCoverage();
-        expect(report, contains('foo.dart'));
-        expect(report, isNot(contains('bar.dart')));
-      } finally {
-        tempDir?.deleteSync(recursive: true);
-      }
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+      report = await collector.finalizeCoverage();
+      expect(report, contains('foo.dart'));
+      expect(report, isNot(contains('bar.dart')));
+    } finally {
+      tempDir?.deleteSync(recursive: true);
+    }
+  });
 
   testWithoutContext(
     'Coverage collector records test timings when provided TestTimeRecorder',
     () async {
+      final fileSystem = LocalFileSystem.test(signals: FakeSignals());
       Directory? tempDir;
       try {
-        tempDir = Directory.systemTemp.createTempSync('flutter_coverage_collector_test.');
+        tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_coverage_collector_test.');
         final File packagesFile = writeFooBarPackagesJson(tempDir);
-        final fooDir = Directory('${tempDir.path}/foo/');
-        fooDir.createSync();
-        final fooFile = File('${fooDir.path}/foo.dart');
+        final Directory fooDir = tempDir.childDirectory('foo')..createSync();
+        final File fooFile = fooDir.childFile('foo.dart');
         fooFile.writeAsStringSync('hit\nnohit but ignored // coverage:ignore-line\nhit\n');
 
         final String packagesPath = packagesFile.path;
         final logger = LoggingLogger();
         final testTimeRecorder = TestTimeRecorder(logger);
         final collector = CoverageCollector(
-          libraryNames: <String>{'foo', 'bar'},
-          verbose: false,
+          fileSystem: fileSystem,
+          logger: logger,
           packagesPath: packagesPath,
+          platform: const LocalPlatform(),
+          processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.any()),
+          libraryNames: <String>{'foo', 'bar'},
           resolver: await CoverageCollector.getResolver(packagesPath),
           testTimeRecorder: testTimeRecorder,
+          verbose: false,
         );
         await collector.collectCoverage(
           TestTestDevice(),
@@ -734,9 +760,9 @@ void main() {
 }
 
 File writeFooBarPackagesJson(Directory tempDir) {
-  final file = File('${tempDir.path}/packages.json');
+  final File file = tempDir.childFile('packages.json');
   file.writeAsStringSync(
-    jsonEncode(<String, dynamic>{
+    jsonEncode(<String, Object>{
       'configVersion': 2,
       'packages': <Map<String, String>>[
         <String, String>{'name': 'foo', 'rootUri': 'foo'},
