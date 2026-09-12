@@ -720,12 +720,36 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   @override
   void handleEvent(PointerEvent event) {
     assert(state != GestureRecognizerState.ready);
-    if (state == GestureRecognizerState.possible && event.pointer == primaryPointer) {
+
+    final isAndroid = defaultTargetPlatform == TargetPlatform.android;
+    var shouldProcess = false;
+
+    if (state == GestureRecognizerState.possible) {
+      if (isAndroid) {
+        // On Android, multi-touch tap and long-press gestures are only completed
+        // when the last tracked pointer is released. If the primary pointer is
+        // released but other pointers are still down, we delay processing the
+        // up event until the last pointer is released.
+        if (event.pointer == primaryPointer) {
+          shouldProcess = !(event is PointerUpEvent && _trackedPointers.length > 1);
+        } else if ((event is PointerUpEvent || event is PointerCancelEvent) &&
+            _trackedPointers.length == 1 &&
+            _trackedPointers.contains(event.pointer)) {
+          shouldProcess = true;
+        }
+      } else {
+        shouldProcess = event.pointer == primaryPointer;
+      }
+    }
+
+    if (shouldProcess) {
       final bool isPreAcceptSlopPastTolerance =
+          event.pointer == primaryPointer &&
           !_gestureAccepted &&
           preAcceptSlopTolerance != null &&
           _getGlobalDistance(event) > preAcceptSlopTolerance!;
       final bool isPostAcceptSlopPastTolerance =
+          event.pointer == primaryPointer &&
           _gestureAccepted &&
           postAcceptSlopTolerance != null &&
           _getGlobalDistance(event) > postAcceptSlopTolerance!;
