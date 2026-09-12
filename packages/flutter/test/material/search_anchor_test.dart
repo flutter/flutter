@@ -2261,6 +2261,46 @@ void main() {
     expect(controller.value.text, suggestion);
   });
 
+  testWidgets('SearchAnchor ignores out-of-order async suggestions', (WidgetTester tester) async {
+    final requests = <String, Completer<Iterable<Widget>>>{};
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SearchAnchor(
+          builder: (BuildContext context, SearchController controller) {
+            return const Icon(Icons.search);
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            final String query = controller.text;
+            if (query.isEmpty) {
+              return <Widget>[];
+            }
+            final request = Completer<Iterable<Widget>>();
+            requests[query] = request;
+            return request.future;
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(findTextField(), 'a');
+    await tester.pump();
+    await tester.enterText(findTextField(), 'ab');
+    await tester.pump();
+
+    requests['ab']!.complete(<Widget>[const Text('ab-result')]);
+    await tester.pumpAndSettle();
+    expect(find.text('ab-result'), findsOneWidget);
+
+    requests['a']!.complete(<Widget>[const Text('a-result')]);
+    await tester.pumpAndSettle();
+    expect(find.text('ab-result'), findsOneWidget);
+    expect(find.text('a-result'), findsNothing);
+  });
+
   testWidgets('SearchAnchor.bar has a default search bar as the anchor', (
     WidgetTester tester,
   ) async {
