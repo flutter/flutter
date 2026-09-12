@@ -679,7 +679,8 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
   /// cache is invalidated.
   ///
   /// Alternatively, if a global key is used, one can call
-  /// [RenderSliverVariedExtentList.clearItemExtentCache] directly.
+  /// `(key.currentContext?.findRenderObject() as RenderSliverVariedExtentList).clearItemExtentCache()`
+  /// directly.
   final ItemExtentBuilder itemExtentBuilder;
 
   @override

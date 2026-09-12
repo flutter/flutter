@@ -559,8 +559,9 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
     if (index < _itemOffsetCache.length) {
       return _itemOffsetCache[index];
     }
+    final SliverLayoutDimensions dimensions = _currentLayoutDimensions ?? layoutDimensions;
     for (int i = _itemOffsetCache.length; i <= index; i++) {
-      final double? previousExtent = itemExtentBuilder(i - 1, _currentLayoutDimensions!);
+      final double? previousExtent = itemExtentBuilder(i - 1, dimensions);
       if (previousExtent == null) {
         return null;
       }
