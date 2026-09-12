@@ -23,8 +23,12 @@ void setUrlStrategy(ui_web.UrlStrategy? strategy) {
 }
 
 /// Use the [PathUrlStrategy] to handle the browser URL.
-void usePathUrlStrategy() {
-  setUrlStrategy(PathUrlStrategy());
+///
+/// Set [includeHash] to preserve the URL fragment (e.g. `/#access_token=...`,
+/// as used by some auth provider redirects) instead of having it stripped on
+/// the very first load. See [PathUrlStrategy.includeHash] for details.
+void usePathUrlStrategy({bool includeHash = false}) {
+  setUrlStrategy(PathUrlStrategy(const ui_web.BrowserPlatformLocation(), includeHash));
 }
 
 /// Uses the browser URL's pathname to represent Flutter's route name.
