@@ -1462,6 +1462,7 @@ class WebBuiltInAssets extends Target {
   @override
   List<Source> get outputs => <Source>[
     const Source.pattern('{BUILD_DIR}/flutter.js'),
+    const Source.pattern('{BUILD_DIR}/flutter.js.map'),
     for (final File file in _canvasKitFiles)
       Source.pattern('{BUILD_DIR}/canvaskit/${_filePathRelativeToCanvasKitDirectory(file)}'),
   ];
@@ -1478,15 +1479,15 @@ class WebBuiltInAssets extends Target {
       file.copySync(targetPath);
     }
 
-    // Write the flutter.js file
-    final String flutterJsOut = fileSystem.path.join(environment.outputDir.path, 'flutter.js');
-    final File flutterJsFile = fileSystem.file(
-      fileSystem.path.join(
-        globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
-        'flutter.js',
-      ),
+    // Write the Flutter loader and its source map.
+    final Directory flutterJsDirectory = fileSystem.directory(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
     );
-    flutterJsFile.copySync(flutterJsOut);
+    for (final fileName in <String>['flutter.js', 'flutter.js.map']) {
+      final File sourceFile = flutterJsDirectory.childFile(fileName);
+      final File targetFile = environment.outputDir.childFile(fileName);
+      sourceFile.copySync(targetFile.path);
+    }
   }
 }
 
