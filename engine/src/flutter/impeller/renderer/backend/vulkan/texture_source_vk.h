@@ -145,10 +145,18 @@ class TextureSourceVK {
   /// non-MSAA color) target of a render pass. By construction, the cached
   /// objects are compatible with any future render pass that targets the
   /// same subresource.
+  ///
+  /// [attachments_key] identifies the *rest* of the attachment set — the depth
+  /// and stencil textures, and any color attachment beyond the first. A
+  /// framebuffer holds image views of all of them, so a cache keyed on this
+  /// texture alone hands back a framebuffer referring to somebody else's
+  /// depth: valid while that texture lives, and a dangling view once it does
+  /// not.
   void SetCachedFrameData(const FramebufferAndRenderPass& data,
                           SampleCount sample_count,
                           uint32_t mip_level = 0u,
-                          uint32_t slice = 0u);
+                          uint32_t slice = 0u,
+                          uint64_t attachments_key = 0u);
 
   /// Retrieve the cached framebuffer and render pass for the given
   /// `(sample_count, mip_level, slice)` subresource.
@@ -156,9 +164,11 @@ class TextureSourceVK {
   /// An empty `FramebufferAndRenderPass` is returned when no cached entry
   /// exists for that key. Entries are populated lazily on first use and
   /// live for the lifetime of the texture.
-  FramebufferAndRenderPass GetCachedFrameData(SampleCount sample_count,
-                                              uint32_t mip_level = 0u,
-                                              uint32_t slice = 0u) const;
+  FramebufferAndRenderPass GetCachedFrameData(
+      SampleCount sample_count,
+      uint32_t mip_level = 0u,
+      uint32_t slice = 0u,
+      uint64_t attachments_key = 0u) const;
 
  protected:
   const TextureDescriptor desc_;
@@ -170,6 +180,7 @@ class TextureSourceVK {
     SampleCount sample_count;
     uint32_t mip_level;
     uint32_t slice;
+    uint64_t attachments_key;
     FramebufferAndRenderPass data;
   };
   // Linear-scanned because N is typically 1 and bounded by

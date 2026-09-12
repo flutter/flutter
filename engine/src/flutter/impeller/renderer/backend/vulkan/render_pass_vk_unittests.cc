@@ -5,6 +5,7 @@
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/render_pass_builder_vk.h"
 #include "impeller/renderer/backend/vulkan/render_pass_vk.h"
@@ -88,6 +89,52 @@ TEST(RenderPassVK, SetViewportPropagatesAllUserSuppliedFields) {
   EXPECT_FLOAT_EQ(vp.height, -80.0f);
   EXPECT_FLOAT_EQ(vp.minDepth, 0.25f);
   EXPECT_FLOAT_EQ(vp.maxDepth, 0.75f);
+}
+
+// Regression guard: the framebuffer cache lives on color attachment zero's
+// texture, and a framebuffer holds image views of *every* attachment. Two
+// passes that share a color texture but bring different depth textures — a
+// shadow atlas drawn with a depth buffer from a pool is the ordinary case —
+// used to be handed the same framebuffer, which still referred to the first
+// pass's depth. Vulkan reports the stale view as
+// VUID-VkRenderPassBeginInfo-framebuffer-parameter, and the driver
+// dereferences it once that texture has been released.
+TEST(RenderPassVK, DoesNotReuseAFramebufferWithADifferentDepthAttachment) {
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+  std::shared_ptr<Context> copy = context;
+  std::shared_ptr<CommandBuffer> cmd_buffer = context->CreateCommandBuffer();
+
+  RenderTargetAllocator allocator(context->GetResourceAllocator());
+  RenderTarget first = allocator.CreateOffscreen(*copy.get(), {4, 4}, 1);
+
+  // The same color texture, and whatever depth the allocator makes next.
+  RenderTarget second = allocator.CreateOffscreen(
+      *copy.get(),                                    //
+      {4, 4},                                         //
+      1,                                              //
+      "Offscreen",                                    //
+      RenderTarget::kDefaultColorAttachmentConfig,    //
+      RenderTarget::kDefaultStencilAttachmentConfig,  //
+      first.GetRenderTargetTexture()                  //
+  );
+
+  ASSERT_TRUE(first.GetDepthAttachment().has_value());
+  ASSERT_TRUE(second.GetDepthAttachment().has_value());
+  ASSERT_EQ(first.GetRenderTargetTexture(), second.GetRenderTargetTexture());
+  ASSERT_NE(first.GetDepthAttachment()->texture,
+            second.GetDepthAttachment()->texture);
+
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(first));
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(second));
+
+  // One framebuffer per attachment set. The render pass itself is compatible
+  // between the two and is cached separately, so the framebuffer is what says
+  // whether the entry was reused: before the key included the depth
+  // attachment, the second pass was handed the first's and only one was made.
+  auto called_functions = GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_EQ(std::count(called_functions->begin(), called_functions->end(),
+                       "vkCreateFramebuffer"),
+            2);
 }
 
 }  // namespace testing

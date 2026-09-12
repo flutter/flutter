@@ -58,14 +58,17 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
   void SetCachedFrameData(const FramebufferAndRenderPass& data,
                           SampleCount sample_count,
                           uint32_t mip_level = 0u,
-                          uint32_t slice = 0u);
+                          uint32_t slice = 0u,
+                          uint64_t attachments_key = 0u);
 
   /// Retrieve the cached framebuffer and render pass for the given
   /// `(sample_count, mip_level, slice)` subresource. Returns an empty
   /// `FramebufferAndRenderPass` if no entry exists.
-  FramebufferAndRenderPass GetCachedFrameData(SampleCount sample_count,
-                                              uint32_t mip_level = 0u,
-                                              uint32_t slice = 0u) const;
+  FramebufferAndRenderPass GetCachedFrameData(
+      SampleCount sample_count,
+      uint32_t mip_level = 0u,
+      uint32_t slice = 0u,
+      uint64_t attachments_key = 0u) const;
 
  private:
   std::weak_ptr<Context> context_;
