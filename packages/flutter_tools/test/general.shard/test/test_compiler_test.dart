@@ -387,6 +387,36 @@ environment:
       Pub: ThrowingPub.new,
     },
   );
+
+  final FileSystem windowsFs = MemoryFileSystem(style: FileSystemStyle.windows);
+  testUsingContext(
+    'TestCompiler handles Windows-style file URIs with FlutterProject',
+    () async {
+      final Directory projectDir = windowsFs.directory(r'C:\project')..createSync(recursive: true);
+      windowsFs.file(r'C:\project\pubspec.yaml').writeAsStringSync('''
+name: foo
+''');
+      windowsFs.file(r'C:\project\test\foo.dart').createSync(recursive: true);
+      writePackageConfigFiles(mainLibName: 'foo', directory: projectDir);
+      final windowsCompiler = FakeResidentCompiler(windowsFs)
+        ..compilerOutput = const CompilerOutput(r'C:\project\abc.dill', 0, <Uri>[]);
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(projectDir);
+      final testCompiler = FakeTestCompiler(debugBuild, flutterProject, windowsCompiler);
+
+      final Uri input = windowsFs.file(r'C:\project\test\foo.dart').uri;
+      expect(
+        await testCompiler.compile(input),
+        TestCompilerComplete(outputPath: r'C:\project\test\foo.dart.dill', mainUri: input),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => windowsFs,
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
+      ProcessManager: () => FakeProcessManager.any(),
+      Logger: () => BufferLogger.test(),
+      Pub: ThrowingPub.new,
+    },
+  );
 }
 
 /// Override the creation of the Resident Compiler to simplify testing.
