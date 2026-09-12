@@ -190,6 +190,7 @@ TEST(CommandBufferGLES, BufferToTextureBlitCanBeSubmittedBeforeContextCurrent) {
         texture_generated = true;
         textures[0] = kTextureHandle;
       });
+  EXPECT_CALL(mock_gles_impl_ref, BindTexture(GL_TEXTURE_2D, 0u)).Times(1);
   EXPECT_CALL(mock_gles_impl_ref, BindTexture(GL_TEXTURE_2D, kTextureHandle))
       .Times(::testing::AtLeast(1));
   EXPECT_CALL(mock_gles_impl_ref,
