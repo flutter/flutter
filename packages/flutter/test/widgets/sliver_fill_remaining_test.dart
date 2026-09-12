@@ -1324,4 +1324,58 @@ void main() {
       });
     });
   });
+
+  testWidgets('SliverFillRemaining does not overflow when a width constrained child wraps text', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/177740
+    // The extent of a SliverFillRemaining with hasScrollBody set to false is
+    // derived from the max intrinsic height of its child. That intrinsic height
+    // used to be measured while ignoring the width constraint imposed by the
+    // SizedBox below, which made the text report fewer lines than it needs.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(400.0, 600.0)),
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Column(
+                  children: <Widget>[
+                    const Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              SizedBox(
+                                width: 240.0,
+                                child: Text(
+                                  'Show this QR Code to the cashier to get your discount of 42% ',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    ...List<Widget>.generate(
+                      50,
+                      (int index) => SizedBox(height: 30.0, child: Text('Item $index')),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
 }
