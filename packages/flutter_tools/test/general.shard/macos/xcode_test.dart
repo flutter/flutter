@@ -2013,6 +2013,42 @@ void main() {
         }, overrides: <Type, Generator>{Platform: () => macPlatform});
       });
     });
+
+    group('environmentTypeFromSdkroot', () {
+      late MemoryFileSystem fileSystem;
+
+      setUp(() {
+        fileSystem = MemoryFileSystem.test();
+      });
+
+      testWithoutContext('returns EnvironmentType.physical for iPhoneOS sdk', () {
+        expect(
+          environmentTypeFromSdkroot('/path/to/iPhoneOS.sdk', fileSystem),
+          EnvironmentType.physical,
+        );
+        expect(
+          environmentTypeFromSdkroot('/path/to/iPhoneOS17.0.sdk', fileSystem),
+          EnvironmentType.physical,
+        );
+      });
+
+      testWithoutContext('returns EnvironmentType.simulator for iPhoneSimulator sdk', () {
+        expect(
+          environmentTypeFromSdkroot('/path/to/iPhoneSimulator.sdk', fileSystem),
+          EnvironmentType.simulator,
+        );
+        expect(
+          environmentTypeFromSdkroot('/path/to/iPhoneSimulator17.0.sdk', fileSystem),
+          EnvironmentType.simulator,
+        );
+      });
+
+      testWithoutContext('returns null for non-iOS sdk', () {
+        expect(environmentTypeFromSdkroot('/path/to/MacOSX.sdk', fileSystem), isNull);
+        expect(environmentTypeFromSdkroot('/path/to/XROS1.0.sdk', fileSystem), isNull);
+        expect(environmentTypeFromSdkroot('/path/to/WatchOS.sdk', fileSystem), isNull);
+      });
+    });
   });
 }
 

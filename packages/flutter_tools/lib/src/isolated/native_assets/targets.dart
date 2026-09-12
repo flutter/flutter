@@ -309,7 +309,12 @@ final class IOSAssetTarget extends CodeAssetTarget {
       throw MissingDefineException(kSdkRoot, 'native_assets');
     }
     final EnvironmentType? environmentType = xcode.environmentTypeFromSdkroot(sdkRoot, fileSystem);
-    return IOSCodeConfig(targetVersion: targetIOSVersion, targetSdk: getIOSSdk(environmentType!));
+    if (environmentType == null) {
+      throwToolExit(
+        'Unsupported iOS SDK root "$sdkRoot". Expected an iPhoneOS or iPhoneSimulator SDK.',
+      );
+    }
+    return IOSCodeConfig(targetVersion: targetIOSVersion, targetSdk: getIOSSdk(environmentType));
   }
 
   @override
