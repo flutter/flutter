@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
 import 'src/android/android_workflow.dart' as android_workflow;
+import 'src/android/gradle.dart';
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -265,6 +266,11 @@ List<FlutterCommand> generateCommands({
     fileSystem: toolDependencies.toolContext.fs,
   ),
   BuildCommand(
+    androidBuilder: AndroidGradleBuilder.fromContexts(
+      analytics: toolDependencies.analytics,
+      androidContext: toolDependencies.androidContext,
+      toolContext: toolDependencies.toolContext,
+    ),
     androidContext: toolDependencies.androidContext,
     appleContext: toolDependencies.appleContext,
     buildSystem: toolDependencies.buildSystem,

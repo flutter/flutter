@@ -117,7 +117,7 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (_androidSdk == null) {
-      exitWithNoSdkMessage();
+      exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
     final androidBuildInfo = <AndroidBuildInfo>{};
 
