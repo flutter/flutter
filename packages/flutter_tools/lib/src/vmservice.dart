@@ -32,6 +32,11 @@ const kRunInViewMethod = '_flutter.runInView';
 const kListViewsMethod = '_flutter.listViews';
 const kScreenshotSkpMethod = '_flutter.screenshotSkp';
 const kReloadAssetFonts = '_flutter.reloadAssetFonts';
+const kAppFlavorMethod = 'ext.flutter.appFlavor';
+const kAppFlavorField = 'appFlavor';
+const kAppFlavorResponseKey = 'flavor';
+const _kFlavorLibraryUri = 'package:flutter/src/services/flavor.dart';
+const _kServicesLibraryUri = 'package:flutter/services.dart';
 
 const kFlutterToolAlias = 'Flutter Tools';
 
@@ -46,11 +51,12 @@ const kIsolateReloadBarred = 1005;
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [io.WebSocket]s (used by tests).
-typedef WebSocketConnector = Future<io.WebSocket> Function(
-  String url, {
-  io.CompressionOptions compression,
-  required Logger logger,
-});
+typedef WebSocketConnector =
+    Future<io.WebSocket> Function(
+      String url, {
+      io.CompressionOptions compression,
+      required Logger logger,
+    });
 
 typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
@@ -79,19 +85,20 @@ typedef ReloadSources = Future<void> Function(String isolateId, {bool force, boo
 
 typedef Restart = Future<void> Function({bool pause});
 
-typedef CompileExpression = Future<String> Function(
-  String isolateId,
-  String expression,
-  List<String> definitions,
-  List<String> definitionTypes,
-  List<String> typeDefinitions,
-  List<String> typeBounds,
-  List<String> typeDefaults,
-  String libraryUri,
-  String? klass,
-  String? method,
-  bool isStatic,
-);
+typedef CompileExpression =
+    Future<String> Function(
+      String isolateId,
+      String expression,
+      List<String> definitions,
+      List<String> definitionTypes,
+      List<String> typeDefinitions,
+      List<String> typeBounds,
+      List<String> typeDefaults,
+      String libraryUri,
+      String? klass,
+      String? method,
+      bool isStatic,
+    );
 
 Future<io.WebSocket> _defaultOpenChannel(
   String url, {
@@ -155,17 +162,18 @@ Future<io.WebSocket> _defaultOpenChannel(
 
 /// Override `VMServiceConnector` in [context] to return a different
 /// [vm_service.VmService] from [connectToVmService] (used by tests).
-typedef VMServiceConnector = Future<FlutterVmService> Function(
-  Uri httpUri, {
-  ReloadSources? reloadSources,
-  Restart? restart,
-  CompileExpression? compileExpression,
-  FlutterProject? flutterProject,
-  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-  io.CompressionOptions compression,
-  Device? device,
-  required Logger logger,
-});
+typedef VMServiceConnector =
+    Future<FlutterVmService> Function(
+      Uri httpUri, {
+      ReloadSources? reloadSources,
+      Restart? restart,
+      CompileExpression? compileExpression,
+      FlutterProject? flutterProject,
+      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      io.CompressionOptions compression,
+      Device? device,
+      required Logger logger,
+    });
 
 /// Set up the VM Service client by attaching services for each of the provided
 /// callbacks.
@@ -804,6 +812,72 @@ class FlutterVmService {
       args: <String, Object?>{'isolateId': ?isolateId, ...?args},
     );
     return response?.json;
+  }
+
+  /// Retrieves the app flavor from the running Flutter application.
+  ///
+  /// First attempts to call the `ext.flutter.appFlavor` service extension on the
+  /// active UI isolates. If the service extension is unavailable, falls back to
+  /// evaluating `appFlavor` in `package:flutter/src/services/flavor.dart`
+  /// or `package:flutter/services.dart`.
+  Future<String?> getAppFlavor() async {
+    try {
+      final List<FlutterView> views = await getFlutterViews(returnEarly: true);
+      for (final view in views) {
+        if (view.uiIsolate?.id case final String isolateId) {
+          final Map<String, Object?>? response = await invokeFlutterExtensionRpcRaw(
+            kAppFlavorMethod,
+            isolateId: isolateId,
+          );
+          if (response != null && response.containsKey(kAppFlavorResponseKey)) {
+            return response[kAppFlavorResponseKey] as String?;
+          }
+        }
+      }
+
+      final vm_service.VM? vm = await getVmGuarded();
+      if (vm == null) {
+        return null;
+      }
+      for (final vm_service.IsolateRef isolateRef in vm.isolates ?? <vm_service.IsolateRef>[]) {
+        if (isolateRef.id case final String isolateId) {
+          final vm_service.Isolate? isolate = await getIsolateOrNull(isolateId);
+          if (isolate == null || (isolate.isSystemIsolate ?? false)) {
+            continue;
+          }
+          for (final vm_service.LibraryRef lib in isolate.libraries ?? <vm_service.LibraryRef>[]) {
+            if (lib case vm_service.LibraryRef(
+              id: final String targetId,
+              uri: _kFlavorLibraryUri || _kServicesLibraryUri,
+            )) {
+              try {
+                final vm_service.Response response = await service.evaluate(
+                  isolateId,
+                  targetId,
+                  kAppFlavorField,
+                );
+                switch (response) {
+                  case vm_service.InstanceRef(
+                    kind: vm_service.InstanceKind.kString,
+                    :final String? valueAsString,
+                  ):
+                    return valueAsString;
+                  case vm_service.InstanceRef(kind: vm_service.InstanceKind.kNull):
+                    return null;
+                  default:
+                    break;
+                }
+              } on vm_service.RPCError catch (e) {
+                globals.printTrace('Failed to evaluate appFlavor: $e');
+              }
+            }
+          }
+        }
+      }
+    } on Exception catch (e) {
+      globals.printTrace('Failed to get app flavor: $e');
+    }
+    return null;
   }
 
   /// List all [FlutterView]s attached to the current VM.

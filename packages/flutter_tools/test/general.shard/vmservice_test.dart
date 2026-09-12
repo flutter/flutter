@@ -162,7 +162,8 @@ void main() {
 
     await flutterVmService.setAssetDirectory(
       assetsDirectory: Uri(
-        path: 'C:/Users/Tester/AppData/Local/Temp/hello_worldb42a6da5/hello_world/build/flutter_assets',
+        path:
+            'C:/Users/Tester/AppData/Local/Temp/hello_worldb42a6da5/hello_world/build/flutter_assets',
         scheme: 'file',
       ),
       viewId: 'abc',
@@ -177,7 +178,8 @@ void main() {
     expect(call.isolateId, 'def');
     expect(call.args, <String, String>{
       'viewId': 'abc',
-      'assetDirectory': r'C:\Users\Tester\AppData\Local\Temp\hello_worldb42a6da5\hello_world\build\flutter_assets',
+      'assetDirectory':
+          r'C:\Users\Tester\AppData\Local\Temp\hello_worldb42a6da5\hello_world\build\flutter_assets',
     });
   });
 
@@ -570,28 +572,31 @@ void main() {
       },
     );
 
-    testWithoutContext('when the isolate stream is already subscribed, returns an isolate with the registered extensionRPC', () async {
-      final fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[
-          const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{'streamId': 'Isolate'},
-            // Stream already subscribed - https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#streamlisten
-            error: FakeRPCError(code: 103),
-          ),
-          listViewsRequest,
-          FakeVmServiceRequest(
-            method: 'getIsolate',
-            jsonResponse: isolate.toJson()..['extensionRPCs'] = <String>[kExtensionName],
-            args: <String, Object>{'isolateId': '1'},
-          ),
-        ],
-      );
+    testWithoutContext(
+      'when the isolate stream is already subscribed, returns an isolate with the registered extensionRPC',
+      () async {
+        final fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Isolate'},
+              // Stream already subscribed - https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#streamlisten
+              error: FakeRPCError(code: 103),
+            ),
+            listViewsRequest,
+            FakeVmServiceRequest(
+              method: 'getIsolate',
+              jsonResponse: isolate.toJson()..['extensionRPCs'] = <String>[kExtensionName],
+              args: <String, Object>{'isolateId': '1'},
+            ),
+          ],
+        );
 
-      final vm_service.IsolateRef isolateRef = await fakeVmServiceHost.vmService
-          .findExtensionIsolate(kExtensionName);
-      expect(isolateRef.id, '1');
-    });
+        final vm_service.IsolateRef isolateRef = await fakeVmServiceHost.vmService
+            .findExtensionIsolate(kExtensionName);
+        expect(isolateRef.id, '1');
+      },
+    );
 
     testWithoutContext('returns an isolate with a extensionRPC that is registered later', () async {
       final fakeVmServiceHost = FakeVmServiceHost(
@@ -652,6 +657,226 @@ void main() {
         throwsA(isA<VmServiceDisappearedException>()),
       );
     });
+  });
+
+  group('getAppFlavor', () {
+    testWithoutContext('returns flavor when service extension succeeds', () async {
+      final fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          listViewsRequest,
+          const FakeVmServiceRequest(
+            method: kAppFlavorMethod,
+            args: <String, Object?>{'isolateId': '1'},
+            jsonResponse: <String, Object?>{kAppFlavorResponseKey: 'paid'},
+          ),
+        ],
+      );
+
+      final String? flavor = await fakeVmServiceHost.vmService.getAppFlavor();
+      expect(flavor, 'paid');
+    });
+
+    testWithoutContext(
+      'returns null directly when service extension returns null flavor without evaluating',
+      () async {
+        final fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            listViewsRequest,
+            const FakeVmServiceRequest(
+              method: kAppFlavorMethod,
+              args: <String, Object?>{'isolateId': '1'},
+              jsonResponse: <String, Object?>{kAppFlavorResponseKey: null},
+            ),
+          ],
+        );
+
+        final String? flavor = await fakeVmServiceHost.vmService.getAppFlavor();
+        expect(flavor, isNull);
+      },
+    );
+
+    testWithoutContext('falls back to evaluate when service extension is not available', () async {
+      final fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          listViewsRequest,
+          FakeVmServiceRequest(
+            method: kAppFlavorMethod,
+            args: <String, Object?>{'isolateId': '1'},
+            error: FakeRPCError(code: vm_service.RPCErrorKind.kMethodNotFound.code),
+          ),
+          FakeVmServiceRequest(
+            method: 'getVM',
+            jsonResponse: vm_service
+                .VM(
+                  isolates: <vm_service.IsolateRef>[
+                    vm_service.IsolateRef(id: '1', number: '1', name: 'main'),
+                  ],
+                )
+                .toJson(),
+          ),
+          FakeVmServiceRequest(
+            method: 'getIsolate',
+            args: <String, Object?>{'isolateId': '1'},
+            jsonResponse: vm_service.Isolate(
+              id: '1',
+              number: '1',
+              name: 'main',
+              startTime: 0,
+              livePorts: 0,
+              pauseOnExit: false,
+              runnable: true,
+              isSystemIsolate: false,
+              isolateFlags: <vm_service.IsolateFlag>[],
+              libraries: <vm_service.LibraryRef>[
+                vm_service.LibraryRef(
+                  id: 'flavor_lib',
+                  uri: 'package:flutter/src/services/flavor.dart',
+                  name: 'flavor',
+                ),
+              ],
+            ).toJson(),
+          ),
+          FakeVmServiceRequest(
+            method: 'evaluate',
+            args: <String, Object?>{
+              'isolateId': '1',
+              'targetId': 'flavor_lib',
+              'expression': kAppFlavorField,
+            },
+            jsonResponse: vm_service.InstanceRef(
+              id: 'str_1',
+              kind: vm_service.InstanceKind.kString,
+              valueAsString: 'dev',
+            ).toJson(),
+          ),
+        ],
+      );
+
+      final String? flavor = await fakeVmServiceHost.vmService.getAppFlavor();
+      expect(flavor, 'dev');
+    });
+
+    testWithoutContext('falls back to evaluate when getFlutterViews returns empty list', () async {
+      final fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          const FakeVmServiceRequest(
+            method: kListViewsMethod,
+            jsonResponse: <String, Object?>{'views': <Object>[]},
+          ),
+          FakeVmServiceRequest(
+            method: 'getVM',
+            jsonResponse: vm_service
+                .VM(
+                  isolates: <vm_service.IsolateRef>[
+                    vm_service.IsolateRef(id: '1', number: '1', name: 'main'),
+                  ],
+                )
+                .toJson(),
+          ),
+          FakeVmServiceRequest(
+            method: 'getIsolate',
+            args: <String, Object?>{'isolateId': '1'},
+            jsonResponse: vm_service.Isolate(
+              id: '1',
+              number: '1',
+              name: 'main',
+              startTime: 0,
+              livePorts: 0,
+              pauseOnExit: false,
+              runnable: true,
+              isSystemIsolate: false,
+              isolateFlags: <vm_service.IsolateFlag>[],
+              libraries: <vm_service.LibraryRef>[
+                vm_service.LibraryRef(
+                  id: 'flavor_lib',
+                  uri: 'package:flutter/src/services/flavor.dart',
+                  name: 'flavor',
+                ),
+              ],
+            ).toJson(),
+          ),
+          FakeVmServiceRequest(
+            method: 'evaluate',
+            args: <String, Object?>{
+              'isolateId': '1',
+              'targetId': 'flavor_lib',
+              'expression': kAppFlavorField,
+            },
+            jsonResponse: vm_service.InstanceRef(
+              id: 'str_1',
+              kind: vm_service.InstanceKind.kString,
+              valueAsString: 'dev',
+            ).toJson(),
+          ),
+        ],
+      );
+
+      final String? flavor = await fakeVmServiceHost.vmService.getAppFlavor();
+      expect(flavor, 'dev');
+    });
+
+    testWithoutContext(
+      'returns null when service extension and fallback both return null or fail',
+      () async {
+        final fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            listViewsRequest,
+            FakeVmServiceRequest(
+              method: kAppFlavorMethod,
+              args: <String, Object?>{'isolateId': '1'},
+              error: FakeRPCError(code: vm_service.RPCErrorKind.kMethodNotFound.code),
+            ),
+            FakeVmServiceRequest(
+              method: 'getVM',
+              jsonResponse: vm_service
+                  .VM(
+                    isolates: <vm_service.IsolateRef>[
+                      vm_service.IsolateRef(id: '1', number: '1', name: 'main'),
+                    ],
+                  )
+                  .toJson(),
+            ),
+            FakeVmServiceRequest(
+              method: 'getIsolate',
+              args: <String, Object?>{'isolateId': '1'},
+              jsonResponse: vm_service.Isolate(
+                id: '1',
+                number: '1',
+                name: 'main',
+                startTime: 0,
+                livePorts: 0,
+                pauseOnExit: false,
+                runnable: true,
+                isSystemIsolate: false,
+                isolateFlags: <vm_service.IsolateFlag>[],
+                libraries: <vm_service.LibraryRef>[
+                  vm_service.LibraryRef(
+                    id: 'flavor_lib',
+                    uri: 'package:flutter/src/services/flavor.dart',
+                    name: 'flavor',
+                  ),
+                ],
+              ).toJson(),
+            ),
+            FakeVmServiceRequest(
+              method: 'evaluate',
+              args: <String, Object?>{
+                'isolateId': '1',
+                'targetId': 'flavor_lib',
+                'expression': kAppFlavorField,
+              },
+              jsonResponse: vm_service.InstanceRef(
+                id: 'null_ref',
+                kind: vm_service.InstanceKind.kNull,
+              ).toJson(),
+            ),
+          ],
+        );
+
+        final String? flavor = await fakeVmServiceHost.vmService.getAppFlavor();
+        expect(flavor, isNull);
+      },
+    );
   });
 
   testWithoutContext('Can process log events from the vm service', () {

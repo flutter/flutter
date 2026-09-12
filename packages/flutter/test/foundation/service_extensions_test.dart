@@ -49,8 +49,9 @@ class TestServiceExtensionsBinding extends BindingBase
   }
 
   Iterable<Map<String, dynamic>> getServiceExtensionStateChangedEvents(String extensionName) {
-    return getEventsDispatched('Flutter.ServiceExtensionStateChanged')
-        .where((Map<String, dynamic> event) => event['extension'] == extensionName);
+    return getEventsDispatched(
+      'Flutter.ServiceExtensionStateChanged',
+    ).where((Map<String, dynamic> event) => event['extension'] == extensionName);
   }
 
   Future<Map<String, dynamic>> testExtension(String name, Map<String, String> arguments) {
@@ -211,7 +212,7 @@ void main() {
     // widget_inspector_test.dart for tests of the ext.flutter.inspector service
     // extensions) or accessibility inspector (see accessibility_inspector_test.dart).
     // Any test counted here must be tested in this file!
-    const serviceExtensionCount = 31;
+    const serviceExtensionCount = 32;
 
     // The tests are in the widgets/accessibility_evaluations_service_extension_test.dart
     // They can't be moved here because they need to run in a WidgetTester environment.
@@ -235,6 +236,15 @@ void main() {
   });
 
   // The following list is alphabetical, one test per extension.
+
+  test('Service extensions - appFlavor', () async {
+    final Map<String, Object?> result = await binding.testExtension(
+      ServicesServiceExtensions.appFlavor.name,
+      <String, String>{},
+    );
+    expect(result, <String, Object?>{'flavor': appFlavor});
+    testedExtensions.add(ServicesServiceExtensions.appFlavor.name);
+  });
 
   test('Service extensions - debugAllowBanner', () async {
     Map<String, dynamic> result;

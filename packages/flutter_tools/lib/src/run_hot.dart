@@ -275,6 +275,8 @@ class HotRunner extends ResidentRunner {
       return 2;
     }
 
+    await _detectAndApplyAppFlavor();
+
     for (final FlutterDevice? device in flutterDevices) {
       device!.developmentShaderCompiler.configureCompiler(device.targetPlatform);
     }
@@ -365,6 +367,49 @@ class HotRunner extends ResidentRunner {
     }
     await cleanupAtFinish();
     return result;
+  }
+
+  @visibleForTesting
+  Future<void> detectAndApplyAppFlavor() => _detectAndApplyAppFlavor();
+
+  Future<void> _detectAndApplyAppFlavor() async {
+    for (final FlutterDevice? device in flutterDevices) {
+      if (device == null) {
+        continue;
+      }
+      final FlutterVmService? vmService = device.vmService;
+      if (vmService == null) {
+        continue;
+      }
+      final String? detectedFlavor = await vmService.getAppFlavor();
+      final String? cliFlavor = device.buildInfo.flavor;
+
+      switch ((cliFlavor, detectedFlavor)) {
+        case (final String cli, final String detected) when cli != detected:
+          logger.printWarning(
+            'Warning: The app on the device was built with flavor "$detected", '
+            'but --flavor was set to "$cli". Hot restart will recompile the app with "$cli", '
+            'which may cause unexpected behavior.',
+          );
+        case (null, final String detected):
+          logger.printStatus('Automatically detected app flavor: "$detected".');
+          final updatedDartDefines = <String>[
+            ...device.buildInfo.dartDefines.where((String d) => !d.startsWith('$kAppFlavor=')),
+            '$kAppFlavor=$detectedFlavor',
+          ];
+          device.buildInfo = device.buildInfo.copyWith(
+            flavor: detectedFlavor,
+            dartDefines: updatedDartDefines,
+          );
+          debuggingOptions.buildInfo = debuggingOptions.buildInfo.copyWith(
+            flavor: detectedFlavor,
+            dartDefines: updatedDartDefines,
+          );
+          device.generator?.dartDefines = updatedDartDefines;
+        case _:
+          break;
+      }
+    }
   }
 
   @override
@@ -1159,17 +1204,18 @@ class HotRunner extends ResidentRunner {
   }
 }
 
-typedef ReloadSourcesHelper = Future<OperationResult> Function(
-  HotRunner hotRunner,
-  List<FlutterDevice?> flutterDevices,
-  bool? pause,
-  Map<String, dynamic> firstReloadDetails,
-  String? targetPlatform,
-  String? sdkName,
-  bool? emulator,
-  String? reason,
-  Analytics analytics,
-);
+typedef ReloadSourcesHelper =
+    Future<OperationResult> Function(
+      HotRunner hotRunner,
+      List<FlutterDevice?> flutterDevices,
+      bool? pause,
+      Map<String, dynamic> firstReloadDetails,
+      String? targetPlatform,
+      String? sdkName,
+      bool? emulator,
+      String? reason,
+      Analytics analytics,
+    );
 
 @visibleForTesting
 Future<OperationResult> defaultReloadSourcesHelper(
@@ -1194,25 +1240,27 @@ Future<OperationResult> defaultReloadSourcesHelper(
       pause: pause,
     );
     allReportsFutures.add(
-      Future.wait(reportFutures)
-          .then<DeviceReloadReport?>((List<vm_service.ReloadReport> reports) async {
-            // TODO(aam): Investigate why we are validating only first reload report,
-            // which seems to be current behavior
-            if (reports.isEmpty) {
-              return null;
-            }
-            final vm_service.ReloadReport firstReport = reports.first;
-            // Don't print errors because they will be printed further down when
-            // `validateReloadReport` is called again.
-            await device.updateReloadStatus(
-              HotRunner.validateReloadReport(firstReport, printErrors: false),
-            );
-            return DeviceReloadReport(device, reports);
-          }),
+      Future.wait(reportFutures).then<DeviceReloadReport?>((
+        List<vm_service.ReloadReport> reports,
+      ) async {
+        // TODO(aam): Investigate why we are validating only first reload report,
+        // which seems to be current behavior
+        if (reports.isEmpty) {
+          return null;
+        }
+        final vm_service.ReloadReport firstReport = reports.first;
+        // Don't print errors because they will be printed further down when
+        // `validateReloadReport` is called again.
+        await device.updateReloadStatus(
+          HotRunner.validateReloadReport(firstReport, printErrors: false),
+        );
+        return DeviceReloadReport(device, reports);
+      }),
     );
   }
-  final Iterable<DeviceReloadReport> reports = (await Future.wait(allReportsFutures))
-      .whereType<DeviceReloadReport>();
+  final Iterable<DeviceReloadReport> reports = (await Future.wait(
+    allReportsFutures,
+  )).whereType<DeviceReloadReport>();
   final vm_service.ReloadReport? reloadReport = reports.isEmpty ? null : reports.first.reports[0];
   if (reloadReport == null || !HotRunner.validateReloadReport(reloadReport)) {
     analytics.send(
@@ -1282,12 +1330,13 @@ class ReassembleResult {
   final bool shouldReportReloadTime;
 }
 
-typedef ReassembleHelper = Future<ReassembleResult> Function(
-  List<FlutterDevice?> flutterDevices,
-  Map<FlutterDevice?, List<FlutterView>> viewCache,
-  void Function(String message)? onSlow,
-  String reloadMessage,
-);
+typedef ReassembleHelper =
+    Future<ReassembleResult> Function(
+      List<FlutterDevice?> flutterDevices,
+      Map<FlutterDevice?, List<FlutterView>> viewCache,
+      void Function(String message)? onSlow,
+      String reloadMessage,
+    );
 
 Future<ReassembleResult> _defaultReassembleHelper(
   List<FlutterDevice?> flutterDevices,

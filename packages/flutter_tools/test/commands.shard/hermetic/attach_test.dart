@@ -131,11 +131,12 @@ void main() {
             }
           });
           final hotRunner = FakeHotRunner();
-          hotRunner.onAttach = (
-            Completer<DebugConnectionInfo>? connectionInfoCompleter,
-            Completer<void>? appStartedCompleter,
-            bool enableDevTools,
-          ) async => 0;
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool enableDevTools,
+              ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
@@ -287,11 +288,12 @@ void main() {
             }
           });
           final hotRunner = FakeHotRunner();
-          hotRunner.onAttach = (
-            Completer<DebugConnectionInfo>? connectionInfoCompleter,
-            Completer<void>? appStartedCompleter,
-            bool enableDevTools,
-          ) async => 0;
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool enableDevTools,
+              ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
           var passedArtifactTest = false;
@@ -361,11 +363,12 @@ void main() {
           );
           testDeviceManager.devices = <Device>[device];
           final hotRunner = FakeHotRunner();
-          hotRunner.onAttach = (
-            Completer<DebugConnectionInfo>? connectionInfoCompleter,
-            Completer<void>? appStartedCompleter,
-            bool enableDevTools,
-          ) async => 0;
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool enableDevTools,
+              ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
@@ -440,11 +443,12 @@ void main() {
           );
           testDeviceManager.devices = <Device>[device];
           final hotRunner = FakeHotRunner();
-          hotRunner.onAttach = (
-            Completer<DebugConnectionInfo>? connectionInfoCompleter,
-            Completer<void>? appStartedCompleter,
-            bool enableDevTools,
-          ) async => 0;
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool enableDevTools,
+              ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
@@ -524,11 +528,12 @@ void main() {
           );
           testDeviceManager.devices = <Device>[device];
           final hotRunner = FakeHotRunner();
-          hotRunner.onAttach = (
-            Completer<DebugConnectionInfo>? connectionInfoCompleter,
-            Completer<void>? appStartedCompleter,
-            bool enableDevTools,
-          ) async => 0;
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool enableDevTools,
+              ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
@@ -621,11 +626,12 @@ void main() {
           );
           testDeviceManager.devices = <Device>[device];
           final hotRunner = FakeHotRunner();
-          hotRunner.onAttach = (
-            Completer<DebugConnectionInfo>? connectionInfoCompleter,
-            Completer<void>? appStartedCompleter,
-            bool enableDevTools,
-          ) async => 0;
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool enableDevTools,
+              ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
@@ -812,11 +818,12 @@ void main() {
           const outputDill = '/tmp/output.dill';
 
           final hotRunner = FakeHotRunner();
-          hotRunner.onAttach = (
-            Completer<DebugConnectionInfo>? connectionInfoCompleter,
-            Completer<void>? appStartedCompleter,
-            bool enableDevTools,
-          ) async => 0;
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool enableDevTools,
+              ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
 
@@ -857,6 +864,97 @@ void main() {
 
           expect(flutterDevice.buildInfo.fileSystemScheme, filesystemScheme);
           expect(flutterDevice.buildInfo.fileSystemRoots, const <String>[filesystemRoot]);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
+        'passes flavor to FlutterDevice when --flavor is provided',
+        () async {
+          const flavor = 'myflavor';
+          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
+          device.onGetLogReader = () => fakeLogReader;
+          testDeviceManager.devices = <Device>[device];
+          final hotRunner = FakeHotRunner();
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool enableDevTools,
+              ) async => 0;
+          hotRunner.exited = false;
+          hotRunner.isWaitingForVmService = false;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+
+          final command = AttachCommand(
+            hotRunnerFactory: hotRunnerFactory,
+            stdio: stdio,
+            logger: logger,
+            terminal: terminal,
+            signals: signals,
+            platform: platform,
+            processInfo: processInfo,
+            fileSystem: testFileSystem,
+          );
+          await createTestCommandRunner(command).run(<String>['attach', '--flavor', flavor]);
+
+          expect(hotRunnerFactory.devices, hasLength(1));
+          final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
+          expect(flutterDevice.buildInfo.flavor, flavor);
+          expect(flutterDevice.buildInfo.dartDefines, contains('$kAppFlavor=$flavor'));
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
+        '--flavor overrides default-flavor from pubspec.yaml',
+        () async {
+          const cliFlavor = 'customFlavor';
+          final File pubspec = testFileSystem.file('pubspec.yaml');
+          await pubspec.writeAsString('''
+name: test
+flutter:
+  default-flavor: defaultFlavor
+''');
+
+          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
+          device.onGetLogReader = () => fakeLogReader;
+          testDeviceManager.devices = <Device>[device];
+          final hotRunner = FakeHotRunner();
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool enableDevTools,
+              ) async => 0;
+          hotRunner.exited = false;
+          hotRunner.isWaitingForVmService = false;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+
+          final command = AttachCommand(
+            hotRunnerFactory: hotRunnerFactory,
+            stdio: stdio,
+            logger: logger,
+            terminal: terminal,
+            signals: signals,
+            platform: platform,
+            processInfo: processInfo,
+            fileSystem: testFileSystem,
+          );
+          await createTestCommandRunner(command).run(<String>['attach', '--flavor', cliFlavor]);
+
+          expect(hotRunnerFactory.devices, hasLength(1));
+          final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
+          expect(flutterDevice.buildInfo.flavor, cliFlavor);
+          expect(flutterDevice.buildInfo.dartDefines, contains('$kAppFlavor=$cliFlavor'));
         },
         overrides: <Type, Generator>{
           FileSystem: () => testFileSystem,
@@ -918,11 +1016,12 @@ void main() {
             }
           });
           final hotRunner = FakeHotRunner();
-          hotRunner.onAttach = (
-            Completer<DebugConnectionInfo>? connectionInfoCompleter,
-            Completer<void>? appStartedCompleter,
-            bool enableDevTools,
-          ) async => 0;
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool enableDevTools,
+              ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
@@ -2151,8 +2250,9 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     if (T == IPAddressResourceRecord) {
       final String key = query.fullyQualifiedName;
       return Stream<IPAddressResourceRecord>.fromIterable(
-        ipResponse[key] ?? <IPAddressResourceRecord>[],
-      ) as Stream<T>;
+            ipResponse[key] ?? <IPAddressResourceRecord>[],
+          )
+          as Stream<T>;
     }
     throw UnsupportedError('Unsupported query type $T');
   }
