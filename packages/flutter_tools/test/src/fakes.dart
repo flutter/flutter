@@ -1559,16 +1559,12 @@ class DelegatingToolContext extends Fake implements ToolContext {
 
 class FakeAndroidContext extends Fake implements AndroidContext {
   FakeAndroidContext({
-    AndroidSdk? androidSdk,
-    AndroidStudio? androidStudio,
-    GradleUtils? gradleUtils,
-    Java? java,
-    Java? Function()? javaBuilder,
-  }) : _androidSdk = androidSdk,
-       _androidStudio = androidStudio,
-       _gradleUtils = gradleUtils,
-       _java = java,
-       _javaBuilder = javaBuilder;
+    this._androidSdk,
+    this._androidStudio,
+    this._gradleUtils,
+    this._java,
+    this._javaBuilder,
+  });
 
   final AndroidSdk? _androidSdk;
   final AndroidStudio? _androidStudio;

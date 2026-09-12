@@ -52,25 +52,22 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
   CreateCommand({
     required this.androidContext,
     required this.appleContext,
-    required TemplateRenderer templateRenderer,
-    required ToolContext toolContext,
-    ExtensionTemplateManager? extensionTemplateManager,
-    Net? net,
-    Pub? pub,
-    bool verboseHelp = false,
-  }) : _extensionTemplateManager = extensionTemplateManager,
-       _net = net,
-       _pub = pub,
-       _templateRenderer = templateRenderer,
-       _verboseHelp = verboseHelp,
-       super(toolContext: toolContext);
+    required this.templateRenderer,
+    required super.toolContext,
+    this.extensionTemplateManager,
+    this.net,
+    this.pub,
+    super.verboseHelp = false,
+  });
 
   final AndroidContext androidContext;
   final AppleContext appleContext;
-  final ExtensionTemplateManager? _extensionTemplateManager;
-  final Net? _net;
-  final Pub? _pub;
-  final bool _verboseHelp;
+  final ExtensionTemplateManager? extensionTemplateManager;
+  final Net? net;
+  final Pub? pub;
+
+  @override
+  final TemplateRenderer templateRenderer;
 
   @override
   ArgParser createBaseArgParser() {
@@ -86,14 +83,13 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           '(deprecated) Historically, this added a flutter_driver dependency and generated a '
           'sample "flutter drive" test. Now it does nothing. Consider using the '
           '"integration_test" package: https://pub.dev/packages/integration_test',
-      hide: !_verboseHelp,
+      hide: !verboseHelp,
     );
     parser.addFlag('overwrite', help: 'When performing operations, overwrite existing files.');
     parser.addOption(
       'description',
       defaultsTo: 'A new Flutter project.',
-      help:
-          'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
+      help: 'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
     );
     parser.addOption(
       'org',
@@ -116,36 +112,35 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           '(deprecated) This option is deprecated and no longer has any effect. '
           'Swift is always used for iOS-specific code. '
           'This flag will be removed in a future version of Flutter.',
-      hide: !_verboseHelp,
+      hide: !verboseHelp,
     );
     parser.addOption(
       'android-language',
       abbr: 'a',
       defaultsTo: 'kotlin',
       allowed: <String>['java', 'kotlin'],
-      help:
-          'The language to use for Android-specific code, either Kotlin (recommended) or Java (legacy).',
+      help: 'The language to use for Android-specific code, either Kotlin (recommended) or Java (legacy).',
     );
     parser.addFlag(
       'skip-name-checks',
       help:
           'Allow the creation of applications and plugins with invalid names. '
           'This is only intended to enable testing of the tool itself.',
-      hide: !_verboseHelp,
+      hide: !verboseHelp,
     );
     parser.addFlag(
       'implementation-tests',
       help:
           'Include implementation tests that verify the template functions correctly. '
           'This is only intended to enable testing of the tool itself.',
-      hide: !_verboseHelp,
+      hide: !verboseHelp,
     );
     parser.addOption(
       'initial-create-revision',
       help:
           'The Flutter SDK git commit hash to store in .migrate_config. This parameter is used by the tool '
           'internally and should generally not be used manually.',
-      hide: !_verboseHelp,
+      hide: !verboseHelp,
     );
 
     final Map<String, String> platformsAllowedHelp = {
@@ -183,7 +178,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           'documentation website (https://api.flutter.dev/). An example can be found at: '
           'https://api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html',
       valueHelp: 'id',
-      hide: !_verboseHelp,
+      hide: !verboseHelp,
     );
     parser.addFlag(
       'empty',
@@ -198,14 +193,14 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           'Specifies a JSON output file for a listing of Flutter code samples '
           'that can be created with "--sample".',
       valueHelp: 'path',
-      hide: !_verboseHelp,
+      hide: !verboseHelp,
     );
     return parser;
   }
 
   @override
   Future<void> initializeDynamicOptions() async {
-    final ExtensionTemplateManager? manager = _extensionTemplateManager;
+    final ExtensionTemplateManager? manager = extensionTemplateManager;
     if (manager != null) {
       try {
         await manager.getProjectTemplates();
@@ -220,7 +215,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
 
   @override
   ArgParser buildDynamicArgParser(ArgParser dynamicParser) {
-    final ExtensionTemplateManager? manager = _extensionTemplateManager;
+    final ExtensionTemplateManager? manager = extensionTemplateManager;
     final List<ProjectTemplate> projectTemplates =
         manager?.cachedTemplates ?? const <ProjectTemplate>[];
     if (projectTemplates.isEmpty) {
@@ -290,20 +285,15 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     createAndroidLanguage: stringArg('android-language'),
   );
 
-  final TemplateRenderer _templateRenderer;
-
-  @override
-  TemplateRenderer get templateRenderer => _templateRenderer;
-
   @override
   ToolContext get toolContext => super.toolContext!;
 
   /// The hostname for the Flutter docs for the current channel.
   String get _snippetsHost =>
       toolContext.flutterVersion.channel == 'stable' ? 'api.flutter.dev' : 'main-api.flutter.dev';
-  Net get _netInstance => _net ?? Net(logger: toolContext.logger, platform: toolContext.platform);
+  Net get _netInstance => net ?? Net(logger: toolContext.logger, platform: toolContext.platform);
   Pub get _pubInstance =>
-      _pub ??
+      pub ??
       Pub(
         fileSystem: toolContext.fs,
         logger: toolContext.logger,
@@ -369,12 +359,12 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     if (templateArgument != null) {
       final ParsedFlutterTemplateType? parsedTemplate = ParsedFlutterTemplateType.fromCliName(
         templateArgument,
-        extensionTemplateManager: _extensionTemplateManager,
+        extensionTemplateManager: extensionTemplateManager,
       );
       if (parsedTemplate == null) {
         final Iterable<String> enabledTemplateNames = ParsedFlutterTemplateType.enabledValues(
           featureFlags,
-          extensionTemplateManager: _extensionTemplateManager,
+          extensionTemplateManager: extensionTemplateManager,
         ).map((ParsedFlutterTemplateType t) => t.cliName);
         throwToolExit(
           'Expected one of ${enabledTemplateNames.join(', ')} '
@@ -399,7 +389,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     // type from the project directory.
     if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
       detectedProjectType = determineTemplateType(
-        extensionTemplateManager: _extensionTemplateManager,
+        extensionTemplateManager: extensionTemplateManager,
       );
       if (detectedProjectType == null && metadataExists) {
         // We can only be definitive that this is the wrong type if the .metadata file
@@ -451,7 +441,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     final String? sampleArgument = stringArg('sample');
     final bool emptyArgument = boolArg('empty');
 
-    final ExtensionTemplateManager? manager = _extensionTemplateManager;
+    final ExtensionTemplateManager? manager = extensionTemplateManager;
     if (manager != null) {
       try {
         await manager.getProjectTemplates();
@@ -708,7 +698,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         pubContext = PubContext.createPackage;
       // Handle custom templates provided by tool extensions.
       case ExtensionProjectTemplateType():
-        final ExtensionTemplateManager? manager = _extensionTemplateManager;
+        final ExtensionTemplateManager? manager = extensionTemplateManager;
         if (manager == null) {
           throwToolExit('ExtensionTemplateManager is not available.');
         }
