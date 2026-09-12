@@ -8,7 +8,6 @@
 #include <fuchsia/ui/pointerinjector/cpp/fidl.h>
 #include <fuchsia/ui/views/cpp/fidl.h>
 
-#include <queue>
 #include <unordered_map>
 #include <vector>
 
@@ -100,15 +99,15 @@ class PointerInjectorDelegate {
               return;
             }
 
-            // Clear all the stale pointer events in |injector_events_| and
-            // reset the state of |weak| so that any future calls do not inject
-            // any stale pointer events.
+            // Reset the state of |weak| so that any future calls re-register
+            // the pointer injector.
             weak->Reset();
           });
     }
 
     // Registers |device_| if it has not been registered and calls
-    // |DispatchPendingEvents()| to dispatch |request| to the view.
+    // |fuchsia.ui.pointerinjector.Device.InjectEvents| to dispatch |request|
+    // to the view.
     void InjectEvent(PointerInjectorRequest request);
 
    private:
@@ -120,22 +119,8 @@ class PointerInjectorDelegate {
     // injected into the channel while registration is pending ("feed forward").
     void RegisterInjector(const PointerInjectorRequest& request);
 
-    // Recursively calls |fuchsia.ui.pointerinjector.Device.Inject| to dispatch
-    // the pointer events in |injector_events_| to the view.
-    void DispatchPendingEvents();
-
-    void EnqueueEvent(fuchsia::ui::pointerinjector::Event event);
-
-    // Resets |registered_|, |injection_in_flight_| and |injector_events_| so
-    // that |device_| can be re-registered and future calls to
-    // |fuchsia.ui.pointerinjector.Device.Inject| do not include any stale
-    // pointer events.
+    // Resets |registered_| so that |device_| can be re-registered.
     void Reset();
-
-    // Set to true if there is a |fuchsia.ui.pointerinjector.Device.Inject| call
-    // in progress. If true, the |fuchsia.ui.pointerinjector.Event| is buffered
-    // in |injector_events_|.
-    bool injection_in_flight_ = false;
 
     // Set to true if |device_| has been registered using
     // |fuchsia.ui.pointerinjector.Registry.Register|. False otherwise.
@@ -151,13 +136,6 @@ class PointerInjectorDelegate {
     std::optional<fuchsia::ui::views::ViewRef> view_ref_;
 
     fuchsia::ui::pointerinjector::DevicePtr device_;
-
-    // A queue containing all the pending |fuchsia.ui.pointerinjector.Event|s
-    // which have to be dispatched to the view.
-    // Note: The size of a vector inside |injector_events_| should not exceed
-    // |fuchsia.ui.pointerinjector.MAX_INJECT|.
-    std::queue<std::vector<fuchsia::ui::pointerinjector::Event>>
-        injector_events_;
 
     fml::WeakPtrFactory<PointerInjectorEndpoint>
         weak_factory_;  // Must be the last member.
