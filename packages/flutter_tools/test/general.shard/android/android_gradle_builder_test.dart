@@ -2456,6 +2456,97 @@ Gradle Crashed
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
 
+    testUsingContext(
+      'build aar reports an actionable error when the Java version is unsupported',
+      () async {
+        final builder = AndroidGradleBuilder(
+          java: FakeJava(version: const Version.withText(25, 0, 2, '25.0.2')),
+          logger: logger,
+          processManager: processManager,
+          fileSystem: fileSystem,
+          artifacts: Artifacts.test(),
+          analytics: fakeAnalytics,
+          gradleUtils: FakeGradleUtils(),
+          platform: FakePlatform(),
+          androidStudio: FakeAndroidStudio(),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'gradlew',
+              '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
+              '-Pflutter-root=/',
+              '-Poutput-dir=build/',
+              '-Pis-plugin=false',
+              '-PbuildNumber=1.0',
+              '-q',
+              '-Pdart-obfuscation=false',
+              '-Ptrack-widget-creation=false',
+              '-Ptree-shake-icons=false',
+              '-Ptarget-platform=android-arm,android-arm64,android-x64',
+              'assembleAarRelease',
+            ],
+            exitCode: 1,
+            stdout: '''
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':flutter:javaDocDebugGeneration'.
+> 25.0.2
+
+* Exception is:
+java.lang.IllegalArgumentException: 25.0.2
+\tat org.jetbrains.kotlin.com.intellij.util.lang.JavaVersion.parse(JavaVersion.java:245)
+''',
+          ),
+        );
+
+        final File manifestFile = fileSystem.file('pubspec.yaml');
+        manifestFile.createSync(recursive: true);
+        manifestFile.writeAsStringSync('''
+        flutter:
+          module:
+            androidPackage: com.example.test
+        ''');
+
+        fileSystem.file('.android/gradlew').createSync(recursive: true);
+        fileSystem.file('.android/gradle.properties').writeAsStringSync('irrelevant');
+        fileSystem.file('.android/build.gradle').createSync(recursive: true);
+        fileSystem.directory('build/outputs/repo').createSync(recursive: true);
+
+        await expectLater(
+          () async => builder.buildGradleAar(
+            androidBuildInfo: const AndroidBuildInfo(
+              BuildInfo(
+                BuildMode.release,
+                null,
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+              ),
+            ),
+            project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+            outputDirectory: fileSystem.directory('build/'),
+            target: '',
+            buildNumber: '1.0',
+          ),
+          throwsToolExit(
+            exitCode: 1,
+            message: 'Gradle task assembleAarRelease failed with exit code 1.',
+          ),
+        );
+        expect(
+          testLogger.statusText,
+          contains('The Java version used by Flutter (25.0.2) is not supported'),
+        );
+        expect(testLogger.statusText, contains('flutter config --jdk-dir='));
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        AndroidStudio: () => FakeAndroidStudio(),
+        Java: () => FakeJava(version: const Version.withText(25, 0, 2, '25.0.2')),
+      },
+    );
+
     testUsingContext('build apk uses selected local engine with arm32 ABI', () async {
       final builder = AndroidGradleBuilder(
         java: FakeJava(),
