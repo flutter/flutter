@@ -94,13 +94,11 @@ config("disable_warnings") {
 
 source_set("flutter_linux_sources_gtk3") {
   public = _public_headers + [
-             "fl_accessibility_semantics_store.h",
              "fl_atk_compat.h",
              "fl_binary_messenger_private.h",
              "fl_compositor_opengl_private.h",
              "fl_engine_private.h",
              "fl_gtk.h",
-             "fl_gtk4_runtime_api.h",
              "fl_gtk_gtk3.h",
              "fl_key_channel_responder.h",
              "fl_key_embedder_responder.h",
@@ -132,7 +130,6 @@ source_set("flutter_linux_sources_gtk3") {
   sources = [
     "fl_accessibility_channel.cc",
     "fl_accessibility_handler.cc",
-    "fl_accessibility_semantics_store.cc",
     "fl_accessible_node.cc",
     "fl_accessible_text_field.cc",
     "fl_application.cc",
@@ -149,7 +146,6 @@ source_set("flutter_linux_sources_gtk3") {
     "fl_event_channel.cc",
     "fl_framebuffer.cc",
     "fl_gl_fence.cc",
-    "fl_glib_compat.h",
     "fl_gnome_settings.cc",
     "fl_json_message_codec.cc",
     "fl_json_method_codec.cc",
@@ -410,7 +406,6 @@ executable("flutter_linux_unittests") {
 
   sources = [
     "fl_accessibility_handler_test.cc",
-    "fl_accessibility_semantics_store_test.cc",
     "fl_accessible_node_test.cc",
     "fl_accessible_text_field_test.cc",
     "fl_application_test.cc",

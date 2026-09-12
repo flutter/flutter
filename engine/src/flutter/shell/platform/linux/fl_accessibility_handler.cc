@@ -7,7 +7,7 @@
 #include "flutter/shell/platform/linux/fl_accessibility_channel.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #if FLUTTER_LINUX_GTK4
-#include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
+#include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"  // nogncheck
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 #else
 #include "flutter/shell/platform/linux/fl_view_private.h"
