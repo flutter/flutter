@@ -257,9 +257,8 @@ class WindowingOwnerWin32 extends WindowingOwner {
   }
 
   void _onMessage(ffi.Pointer<_WindowsMessage> message) {
-    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == message.ref.viewId,
-    );
+    final int viewId = message.ref.viewId;
+    final FlutterView flutterView = flutterViewForId(viewId);
 
     final int handlesLength = _messageHandlers.length;
     for (final _WindowsMessageHandler handler in _messageHandlers) {
@@ -365,9 +364,7 @@ class WindowControllerWin32 extends WindowController with BaseWindowControllerWi
       throw Exception('Windows failed to create a regular window with a valid view id.');
     }
 
-    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    final FlutterView flutterView = flutterViewForId(viewId);
     rootView = flutterView;
   }
 
@@ -619,9 +616,7 @@ class DialogWindowControllerWin32 extends DialogWindowController with BaseWindow
       throw Exception('Windows failed to create a dialog window with a valid view id.');
     }
 
-    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    final FlutterView flutterView = flutterViewForId(viewId);
     rootView = flutterView;
   }
 
@@ -830,9 +825,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
       throw Exception('Windows failed to create a tooltip window with a valid view id.');
     }
 
-    final FlutterView flutterView = PlatformDispatcher.instance.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    final FlutterView flutterView = flutterViewForId(viewId);
     rootView = flutterView;
   }
 
@@ -853,9 +846,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
     ffi.Pointer<_Rect> outputRect,
   ) {
     final ffi.Pointer<_Rect> result = _owner.allocator<_Rect>();
-    final double scale = PlatformDispatcher.instance.views
-        .firstWhere((FlutterView view) => view.viewId == rootView.viewId)
-        .devicePixelRatio;
+    final double scale = rootView.devicePixelRatio;
     final scaledAnchorRect = Rect.fromLTWH(
       _anchorRect.left * scale,
       _anchorRect.top * scale,
@@ -1028,9 +1019,7 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
       throw Exception('Windows failed to create a popup window with a valid view id.');
     }
 
-    final FlutterView flutterView = PlatformDispatcher.instance.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    final FlutterView flutterView = flutterViewForId(viewId);
     rootView = flutterView;
   }
 
@@ -1050,9 +1039,7 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
     ffi.Pointer<_Rect> parentRect,
     ffi.Pointer<_Rect> outputRect,
   ) {
-    final double scale = PlatformDispatcher.instance.views
-        .firstWhere((FlutterView view) => view.viewId == rootView.viewId)
-        .devicePixelRatio;
+    final double scale = rootView.devicePixelRatio;
     final scaledAnchorRect = Rect.fromLTWH(
       _anchorRect.left * scale,
       _anchorRect.top * scale,
@@ -1141,9 +1128,7 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
     );
 
     // Convert from physical pixels to logical pixels.
-    final double scale = PlatformDispatcher.instance.views
-        .firstWhere((FlutterView view) => view.viewId == rootView.viewId)
-        .devicePixelRatio;
+    final double scale = rootView.devicePixelRatio;
 
     return physicalOffset / scale;
   }
@@ -1332,8 +1317,7 @@ class _Win32PlatformInterface {
     bool shrinkWrap,
     bool resizable,
   ) {
-    final ffi.Pointer<_WindowCreationRequest> request =
-        allocator<_WindowCreationRequest>();
+    final ffi.Pointer<_WindowCreationRequest> request = allocator<_WindowCreationRequest>();
     try {
       request.ref.size.from(size);
       request.ref.constraints.from(constraints);
@@ -1349,10 +1333,7 @@ class _Win32PlatformInterface {
   @ffi.Native<ffi.Int64 Function(ffi.Int64, ffi.Pointer<_WindowCreationRequest>)>(
     symbol: 'InternalFlutterWindows_WindowManager_CreateRegularWindow',
   )
-  external static int _createWindow(
-    int engineId,
-    ffi.Pointer<_WindowCreationRequest> request,
-  );
+  external static int _createWindow(int engineId, ffi.Pointer<_WindowCreationRequest> request);
 
   static int createDialogWindow(
     ffi.Allocator allocator,

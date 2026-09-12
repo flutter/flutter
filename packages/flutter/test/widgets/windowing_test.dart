@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Display;
+import 'dart:ui' show Display, PlatformDispatcher;
 import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter/src/widgets/_window.dart'
     show
@@ -21,7 +21,8 @@ import 'package:flutter/src/widgets/_window.dart'
         WindowControllerDelegate,
         WindowScope,
         WindowingOwner,
-        createDefaultWindowingOwner;
+        createDefaultWindowingOwner,
+        flutterViewForId;
 import 'package:flutter/src/widgets/_window_positioner.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -412,6 +413,44 @@ void main() {
     group('isWindowingEnabled is true', () {
       setUp(() {
         isWindowingEnabled = true;
+      });
+
+      testWidgets('flutterViewForId returns the view the binding reports', (
+        WidgetTester tester,
+      ) async {
+        expect(flutterViewForId(tester.view.viewId), same(tester.view));
+      });
+
+      testWidgets('flutterViewForId asks the binding rather than the engine singleton', (
+        WidgetTester tester,
+      ) async {
+        // PlatformDispatcher.instance answers with the engine's own FlutterView
+        // for this id. Getting the TestFlutterView back instead is what says the
+        // lookup went through WidgetsBinding.instance.platformDispatcher, which
+        // is what makes a controller's rootView the same object View.of and
+        // MediaQuery see.
+        expect(flutterViewForId(tester.view.viewId), isA<TestFlutterView>());
+        expect(
+          PlatformDispatcher.instance.view(id: tester.view.viewId),
+          isNot(isA<TestFlutterView>()),
+        );
+      });
+
+      testWidgets('flutterViewForId throws a StateError naming the id it cannot find', (
+        WidgetTester tester,
+      ) async {
+        const absentViewId = 424242;
+        expect(WidgetsBinding.instance.platformDispatcher.view(id: absentViewId), isNull);
+        expect(
+          () => flutterViewForId(absentViewId),
+          throwsA(
+            isA<StateError>().having(
+              (StateError error) => error.message,
+              'message',
+              contains('$absentViewId'),
+            ),
+          ),
+        );
       });
 
       testWidgets('Window does not throw', (WidgetTester tester) async {

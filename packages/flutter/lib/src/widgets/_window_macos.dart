@@ -330,9 +330,7 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
       parentViewId: parent.rootView.viewId,
     );
 
-    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    final FlutterView flutterView = flutterViewForId(viewId);
     rootView = flutterView;
   }
 
@@ -428,9 +426,7 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
       parentViewId: parent.rootView.viewId,
     );
 
-    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    final FlutterView flutterView = flutterViewForId(viewId);
     rootView = flutterView;
   }
 
@@ -532,9 +528,7 @@ class WindowControllerMacOS extends WindowController with _WindowControllerMixin
       onNotifyListeners: _onResize.nativeFunction,
       resizable: resizable,
     );
-    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    final FlutterView flutterView = flutterViewForId(viewId);
     rootView = flutterView;
     if (title != null) {
       setTitle(title);
@@ -671,9 +665,7 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
       parentViewId: parent?.rootView.viewId,
       resizable: resizable,
     );
-    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    final FlutterView flutterView = flutterViewForId(viewId);
     rootView = flutterView;
     if (title != null) {
       setTitle(title);
@@ -928,10 +920,7 @@ class _MacOSPlatformInterface {
         ..constraints.maxHeight = constraints.maxHeight;
     }
     request.ref.resizable = resizable;
-    final int viewId = _createWindow(
-      WidgetsBinding.instance.platformDispatcher.engineId!,
-      request,
-    );
+    final int viewId = _createWindow(WidgetsBinding.instance.platformDispatcher.engineId!, request);
     _allocator.free(request);
     return viewId;
   }
