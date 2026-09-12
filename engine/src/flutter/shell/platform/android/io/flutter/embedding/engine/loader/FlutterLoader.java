@@ -563,6 +563,40 @@ public class FlutterLoader {
           shellArgs.add(
               "--" + AOT_VMSERVICE_SHARED_LIBRARY_NAME + "=" + VMSERVICE_SNAPSHOT_LIBRARY);
         }
+
+        // Ensure the AOT library is resident in the process address space so dynamic
+        // symbol lookup can locate _kDartSnapshotData and _kDartSnapshotText when
+        // android:extractNativeLibs="false" stores libapp.so directly inside the APK.
+        try {
+          String aotLib = flutterApplicationInfo.aotSharedLibraryName;
+          if (aotLib != null && !aotLib.isEmpty()) {
+            File directFile = new File(flutterApplicationInfo.nativeLibraryDir, aotLib);
+            if (directFile.exists()) {
+              System.load(directFile.getAbsolutePath());
+            } else {
+              File rawFile = new File(aotLib);
+              if (rawFile.isAbsolute() && rawFile.exists()) {
+                System.load(rawFile.getAbsolutePath());
+              } else {
+                String libName = aotLib;
+                if (libName.endsWith(".so")) {
+                  libName = libName.substring(0, libName.length() - ".so".length());
+                }
+                if (libName.startsWith("lib")) {
+                  libName = libName.substring("lib".length());
+                }
+                if (!libName.isEmpty()) {
+                  System.loadLibrary(libName);
+                }
+              }
+            }
+          }
+        } catch (Throwable t) {
+          Log.w(
+              TAG,
+              "Could not pre-load AOT library: " + flutterApplicationInfo.aotSharedLibraryName,
+              t);
+        }
       }
 
       shellArgs.add("--cache-dir-path=" + result.engineCachesPath);

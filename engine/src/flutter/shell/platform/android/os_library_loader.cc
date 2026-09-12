@@ -54,7 +54,7 @@ DefaultOSLibrary::DefaultOSLibrary(std::string name) : name_(std::move(name)) {
     FML_DLOG(INFO) << "DefaultOSLibrary: Failed to open dynamic library '"
                    << name_ << "', GetLastError=" << error;
 #else
-    const char* error = dlerror();
+    [[maybe_unused]] const char* error = dlerror();
     FML_DLOG(INFO) << "DefaultOSLibrary: Failed to open dynamic library '"
                    << name_ << "': " << (error ? error : "unknown error");
 #endif
@@ -105,7 +105,7 @@ void* DefaultOSLibrary::ResolveSymbol(const char* symbol_name) const {
   dlerror();
   void* sym = dlsym(handle_, symbol_name);
   if (!sym) {
-    const char* error = dlerror();
+    [[maybe_unused]] const char* error = dlerror();
     FML_DLOG(INFO) << "DefaultOSLibrary: Symbol '" << symbol_name
                    << "' not found in library '" << name_
                    << "': " << (error ? error : "unknown error");

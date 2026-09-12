@@ -97,6 +97,9 @@ struct AndroidVMArgs {
   /// Initial VM service URI (if available).
   std::string vm_service_uri;
 
+  /// Whether HCPP and SurfaceControl are enabled.
+  bool enable_hcpp = false;
+
   /// @brief Parses command-line arguments and updates relevant fields (AOT lib,
   /// ICU paths, rendering backend, heap size, log tag, etc.).
   void ParseCommandLineArgs(const std::vector<std::string>& args);
@@ -134,7 +137,8 @@ struct AndroidVMArgs {
            enable_impeller == other.enable_impeller &&
            enable_software_rendering == other.enable_software_rendering &&
            trace_systrace == other.trace_systrace &&
-           vm_service_uri == other.vm_service_uri;
+           vm_service_uri == other.vm_service_uri &&
+           enable_hcpp == other.enable_hcpp;
   }
 };
 

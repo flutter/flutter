@@ -803,7 +803,8 @@ bool JniDelegate::SetHcppEnabled(bool enabled) {
 bool JniDelegate::IsHcppEnabled() const {
   TRACE_EVENT0("flutter", "JniDelegate::IsHcppEnabled");
   if (hcpp_enabled_) {
-    return true;
+    return surface_control_provider_ &&
+           surface_control_provider_->IsAvailable();
   }
   if (platform_views_controller_) {
     return platform_views_controller_->IsHcppEnabled();

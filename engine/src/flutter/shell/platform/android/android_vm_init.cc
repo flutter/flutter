@@ -58,7 +58,7 @@ void AndroidVMArgs::ParseCommandLineArgs(const std::vector<std::string>& args) {
       char* end = nullptr;
       errno = 0;
       // Base 10 conversion for decimal integer heap size in bytes.
-      long long parsed = std::strtoll(val.c_str(), &end, 10);
+      int64_t parsed = std::strtoll(val.c_str(), &end, 10);
       if (end == val.c_str() || *end != '\0' || errno == ERANGE ||
           parsed <= 0) {
         FML_LOG(ERROR) << "Invalid positive integer for --old-gen-heap-size: "
@@ -66,15 +66,19 @@ void AndroidVMArgs::ParseCommandLineArgs(const std::vector<std::string>& args) {
       } else {
         dart_old_gen_heap_size = parsed;
       }
+    } else if (arg == "--enable-hcpp-and-surface-control" ||
+               arg == "--enable-surface-control" || arg == "--enable-hcpp") {
+      enable_hcpp = true;
     }
   }
 
-  // Prioritize existing files on disk over relative/basename strings; fall back
-  // to the first non-empty candidate for direct-from-APK loading via dlopen.
+  // Prioritize existing files on disk for direct ELF loading. If no file
+  // candidate exists (e.g. uncompressed APK on modern Android), leave
+  // aot_library_path empty so AndroidVMInit succeeds and
+  // FlutterEmbedderNative::Launch can resolve the snapshot symbols dynamically
+  // via memory lookup.
   if (!file_aot_candidate.empty()) {
     aot_library_path = file_aot_candidate;
-  } else if (!first_aot_candidate.empty()) {
-    aot_library_path = first_aot_candidate;
   }
 }
 
