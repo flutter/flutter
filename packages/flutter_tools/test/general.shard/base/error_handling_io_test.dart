@@ -1120,26 +1120,23 @@ Please ensure that the SDK and/or project is installed in a location that has re
     },
   );
 
-  testWithoutContext(
-    "ErrorHandlingFileSystem.systemTempDirectory handles any exception thrown by the delegate's systemTempDirectory implementation",
-    () {
-      final exceptionHandler = FileExceptionHandler();
-      exceptionHandler.addTempError(
-        FileSystemOp.create,
-        const FileSystemException(
-          'Creation of temporary directory failed',
-          'some/temp/path',
-          OSError('No space left on device', 28),
-        ),
-      );
+  testWithoutContext("ErrorHandlingFileSystem.systemTempDirectory handles any exception thrown by the delegate's systemTempDirectory implementation", () {
+    final exceptionHandler = FileExceptionHandler();
+    exceptionHandler.addTempError(
+      FileSystemOp.create,
+      const FileSystemException(
+        'Creation of temporary directory failed',
+        'some/temp/path',
+        OSError('No space left on device', 28),
+      ),
+    );
 
-      final delegate = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
+    final delegate = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
 
-      final FileSystem fs = ErrorHandlingFileSystem(delegate: delegate, platform: FakePlatform());
+    final FileSystem fs = ErrorHandlingFileSystem(delegate: delegate, platform: FakePlatform());
 
-      expect(() => fs.systemTempDirectory, throwsToolExit(message: 'Free up space and try again.'));
-    },
-  );
+    expect(() => fs.systemTempDirectory, throwsToolExit(message: 'Free up space and try again.'));
+  });
 
   group('ProcessManager on windows throws tool exit', () {
     const kDeviceFull = 112;

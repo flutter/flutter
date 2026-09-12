@@ -37,8 +37,9 @@ import 'view.dart';
 /// See also:
 ///
 ///   * [RawAutocomplete.optionsBuilder], which is of this type.
-typedef AutocompleteOptionsBuilder<T extends Object> =
-    FutureOr<Iterable<T>> Function(TextEditingValue textEditingValue);
+typedef AutocompleteOptionsBuilder<T extends Object> = FutureOr<Iterable<T>> Function(
+  TextEditingValue textEditingValue,
+);
 
 /// The type of the callback used by the [RawAutocomplete] widget to indicate
 /// that the user has selected an option.
@@ -60,12 +61,11 @@ typedef AutocompleteOnSelected<T extends Object> = void Function(T option);
 /// See also:
 ///
 ///   * [RawAutocomplete.optionsViewBuilder], which is of this type.
-typedef AutocompleteOptionsViewBuilder<T extends Object> =
-    Widget Function(
-      BuildContext context,
-      AutocompleteOnSelected<T> onSelected,
-      Iterable<T> options,
-    );
+typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
+  BuildContext context,
+  AutocompleteOnSelected<T> onSelected,
+  Iterable<T> options,
+);
 
 /// The type of the Autocomplete callback which returns the widget that
 /// contains the input [TextField] or [TextFormField].
@@ -73,13 +73,12 @@ typedef AutocompleteOptionsViewBuilder<T extends Object> =
 /// See also:
 ///
 ///   * [RawAutocomplete.fieldViewBuilder], which is of this type.
-typedef AutocompleteFieldViewBuilder =
-    Widget Function(
-      BuildContext context,
-      TextEditingController textEditingController,
-      FocusNode focusNode,
-      VoidCallback onFieldSubmitted,
-    );
+typedef AutocompleteFieldViewBuilder = Widget Function(
+  BuildContext context,
+  TextEditingController textEditingController,
+  FocusNode focusNode,
+  VoidCallback onFieldSubmitted,
+);
 
 /// The type of the [RawAutocomplete] callback that converts an option value to
 /// a string which can be displayed in the widget's options menu.

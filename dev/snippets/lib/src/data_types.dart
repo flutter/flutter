@@ -70,9 +70,8 @@ class SkeletonInjection {
 /// A base class to represent a block of any kind of sample code, marked by
 /// "{@tool (snippet|sample|dartdoc) ...}...{@end-tool}".
 abstract class CodeSample {
-  CodeSample(this.args, this.input, {required this.index, required SourceLine lineProto})
+  CodeSample(this.args, this.input, {required this.index, required this._lineProto})
     : assert(args.isNotEmpty),
-      _lineProto = lineProto,
       sourceFile = null;
 
   CodeSample.fromFile(
@@ -80,9 +79,8 @@ abstract class CodeSample {
     this.input,
     this.sourceFile, {
     required this.index,
-    required SourceLine lineProto,
-  }) : assert(args.isNotEmpty),
-       _lineProto = lineProto;
+    required this._lineProto,
+  }) : assert(args.isNotEmpty);
 
   final File? sourceFile;
   final List<String> args;
@@ -357,14 +355,11 @@ class SourceElement {
     this.startLine = -1,
     this.samples = const <CodeSample>[],
     this.override = false,
-    String commentString = '',
-    String commentStringWithoutTools = '',
-    String commentStringWithoutCode = '',
-    List<String> commentLines = const <String>[],
-  }) : _commentString = commentString,
-       _commentStringWithoutTools = commentStringWithoutTools,
-       _commentStringWithoutCode = commentStringWithoutCode,
-       _commentLines = commentLines;
+    this._commentString = '',
+    this._commentStringWithoutTools = '',
+    this._commentStringWithoutCode = '',
+    this._commentLines = const <String>[],
+  });
 
   final String _commentString;
   final String _commentStringWithoutTools;

@@ -10,29 +10,26 @@ import '../android/java.dart';
 /// Holds Android-specific dependencies.
 class AndroidContext {
   AndroidContext({
-    required AndroidSdk? Function() androidSdkBuilder,
-    required AndroidStudio? Function() androidStudioBuilder,
-    required GradleUtils Function() gradleUtilsBuilder,
-    required Java? Function() javaBuilder,
-  }) : _androidSdkBuilder = androidSdkBuilder,
-       _androidStudioBuilder = androidStudioBuilder,
-       _gradleUtilsBuilder = gradleUtilsBuilder,
-       _javaBuilder = javaBuilder;
+    required this.androidSdkBuilder,
+    required this.androidStudioBuilder,
+    required this.gradleUtilsBuilder,
+    required this.javaBuilder,
+  });
 
   /// Discovers, validates, and manages the local Android SDK and platform tools.
-  late final AndroidSdk? androidSdk = _androidSdkBuilder();
+  late final AndroidSdk? androidSdk = androidSdkBuilder();
 
   /// Discovers and inspects local Android Studio installations and embedded JDK paths.
-  late final AndroidStudio? androidStudio = _androidStudioBuilder();
+  late final AndroidStudio? androidStudio = androidStudioBuilder();
 
   /// Utility helpers for interacting with Gradle builds and resolving project configs.
-  late final GradleUtils gradleUtils = _gradleUtilsBuilder();
+  late final GradleUtils gradleUtils = gradleUtilsBuilder();
 
   /// Discovers and validates the active Java Development Kit (JDK) binary.
-  late final Java? java = _javaBuilder();
+  late final Java? java = javaBuilder();
 
-  final AndroidSdk? Function() _androidSdkBuilder;
-  final AndroidStudio? Function() _androidStudioBuilder;
-  final GradleUtils Function() _gradleUtilsBuilder;
-  final Java? Function() _javaBuilder;
+  final AndroidSdk? Function() androidSdkBuilder;
+  final AndroidStudio? Function() androidStudioBuilder;
+  final GradleUtils Function() gradleUtilsBuilder;
+  final Java? Function() javaBuilder;
 }

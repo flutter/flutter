@@ -41,41 +41,40 @@ import 'view.dart';
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.exitWidgetSelectionButtonBuilder].
-typedef ExitWidgetSelectionButtonBuilder =
-    Widget Function(
-      BuildContext context, {
-      required VoidCallback onPressed,
-      required String semanticsLabel,
-      required GlobalKey key,
-    });
+typedef ExitWidgetSelectionButtonBuilder = Widget Function(
+  BuildContext context, {
+  required VoidCallback onPressed,
+  required String semanticsLabel,
+  required GlobalKey key,
+});
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.moveExitWidgetSelectionButtonBuilder].
-typedef MoveExitWidgetSelectionButtonBuilder =
-    Widget Function(
-      BuildContext context, {
-      required VoidCallback onPressed,
-      required String semanticsLabel,
-      bool usesDefaultAlignment,
-    });
+typedef MoveExitWidgetSelectionButtonBuilder = Widget Function(
+  BuildContext context, {
+  required VoidCallback onPressed,
+  required String semanticsLabel,
+  bool usesDefaultAlignment,
+});
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.tapBehaviorButtonBuilder].
-typedef TapBehaviorButtonBuilder =
-    Widget Function(
-      BuildContext context, {
-      required VoidCallback onPressed,
-      required String semanticsLabel,
-      required bool selectionOnTapEnabled,
-    });
+typedef TapBehaviorButtonBuilder = Widget Function(
+  BuildContext context, {
+  required VoidCallback onPressed,
+  required String semanticsLabel,
+  required bool selectionOnTapEnabled,
+});
 
 /// Signature for a method that registers the service extension `callback` with
 /// the given `name`.
 ///
 /// Used as argument to [WidgetInspectorService.initServiceExtensions]. The
 /// [BindingBase.registerServiceExtension] implements this signature.
-typedef RegisterServiceExtensionCallback =
-    void Function({required String name, required ServiceExtensionCallback callback});
+typedef RegisterServiceExtensionCallback = void Function({
+  required String name,
+  required ServiceExtensionCallback callback,
+});
 
 /// A layer that mimics the behavior of another layer.
 ///
@@ -106,9 +105,7 @@ class _ProxyLayer extends Layer {
 /// secondary screenshot canvas so that a screenshot can be recorded at the same
 /// time as performing a normal paint.
 class _MulticastCanvas implements Canvas {
-  _MulticastCanvas({required Canvas main, required Canvas screenshot})
-    : _main = main,
-      _screenshot = screenshot;
+  _MulticastCanvas({required this._main, required this._screenshot});
 
   final Canvas _main;
   final Canvas _screenshot;
@@ -2289,92 +2286,97 @@ mixin WidgetInspectorService {
         summaryTree: true,
         subtreeDepth: subtreeDepth,
         service: this,
-        addAdditionalPropertiesCallback: (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
-          final Object? value = node.value;
-          final RenderObject? renderObject = value is Element ? _renderObjectOrNull(value) : null;
-          if (renderObject == null) {
-            return const <String, Object>{};
-          }
-
-          final DiagnosticsSerializationDelegate renderObjectSerializationDelegate = delegate
-              .copyWith(subtreeDepth: 0, includeProperties: true, expandPropertyValues: false);
-          final additionalJson = <String, Object>{
-            // Only include renderObject properties separately if this value is not already the renderObject.
-            // Only include if we are expanding property values to mitigate the risk of infinite loops if
-            // RenderObjects have properties that are Element objects.
-            if (value is! RenderObject && delegate.expandPropertyValues)
-              'renderObject': renderObject.toDiagnosticsNode().toJsonMap(
-                renderObjectSerializationDelegate,
-              ),
-          };
-
-          final RenderObject? renderParent = renderObject.parent;
-          if (renderParent != null && delegate.subtreeDepth > 0 && delegate.expandPropertyValues) {
-            final Object? parentCreator = renderParent.debugCreator;
-            if (parentCreator is DebugCreator) {
-              additionalJson['parentRenderElement'] = parentCreator.element
-                  .toDiagnosticsNode()
-                  .toJsonMap(delegate.copyWith(subtreeDepth: 0, includeProperties: true));
-              // TODO(jacobr): also describe the path back up the tree to
-              // the RenderParentElement from the current element. It
-              // could be a surprising distance up the tree if a lot of
-              // elements don't have their own RenderObjects.
-            }
-          }
-
-          try {
-            if (!renderObject.debugNeedsLayout) {
-              // ignore: invalid_use_of_protected_member
-              final Constraints constraints = renderObject.constraints;
-              final constraintsProperty = <String, Object>{
-                'type': constraints.runtimeType.toString(),
-                'description': constraints.toString(),
-              };
-              if (constraints is BoxConstraints) {
-                constraintsProperty.addAll(<String, Object>{
-                  'minWidth': constraints.minWidth.toString(),
-                  'minHeight': constraints.minHeight.toString(),
-                  'maxWidth': constraints.maxWidth.toString(),
-                  'maxHeight': constraints.maxHeight.toString(),
-                });
+        addAdditionalPropertiesCallback:
+            (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
+              final Object? value = node.value;
+              final RenderObject? renderObject = value is Element
+                  ? _renderObjectOrNull(value)
+                  : null;
+              if (renderObject == null) {
+                return const <String, Object>{};
               }
-              additionalJson['constraints'] = constraintsProperty;
-            }
-          } catch (e) {
-            // Constraints are sometimes unavailable even though
-            // debugNeedsLayout is false.
-          }
 
-          try {
-            if (renderObject is RenderBox) {
-              additionalJson['isBox'] = true;
-              additionalJson['size'] = <String, Object>{
-                'width': renderObject.size.width.toString(),
-                'height': renderObject.size.height.toString(),
+              final DiagnosticsSerializationDelegate renderObjectSerializationDelegate = delegate
+                  .copyWith(subtreeDepth: 0, includeProperties: true, expandPropertyValues: false);
+              final additionalJson = <String, Object>{
+                // Only include renderObject properties separately if this value is not already the renderObject.
+                // Only include if we are expanding property values to mitigate the risk of infinite loops if
+                // RenderObjects have properties that are Element objects.
+                if (value is! RenderObject && delegate.expandPropertyValues)
+                  'renderObject': renderObject.toDiagnosticsNode().toJsonMap(
+                    renderObjectSerializationDelegate,
+                  ),
               };
 
-              final ParentData? parentData = renderObject.parentData;
-              if (parentData is FlexParentData) {
-                additionalJson['flexFactor'] = parentData.flex ?? 0;
-                additionalJson['flexFit'] = (parentData.fit ?? FlexFit.tight).name;
-              } else if (parentData is BoxParentData) {
-                final Offset offset = parentData.offset;
-                additionalJson['parentData'] = <String, Object>{
-                  'offsetX': offset.dx.toString(),
-                  'offsetY': offset.dy.toString(),
-                };
+              final RenderObject? renderParent = renderObject.parent;
+              if (renderParent != null &&
+                  delegate.subtreeDepth > 0 &&
+                  delegate.expandPropertyValues) {
+                final Object? parentCreator = renderParent.debugCreator;
+                if (parentCreator is DebugCreator) {
+                  additionalJson['parentRenderElement'] = parentCreator.element
+                      .toDiagnosticsNode()
+                      .toJsonMap(delegate.copyWith(subtreeDepth: 0, includeProperties: true));
+                  // TODO(jacobr): also describe the path back up the tree to
+                  // the RenderParentElement from the current element. It
+                  // could be a surprising distance up the tree if a lot of
+                  // elements don't have their own RenderObjects.
+                }
               }
-            } else if (renderObject is RenderView) {
-              additionalJson['size'] = <String, Object>{
-                'width': renderObject.size.width.toString(),
-                'height': renderObject.size.height.toString(),
-              };
-            }
-          } catch (e) {
-            // Not laid out yet.
-          }
-          return additionalJson;
-        },
+
+              try {
+                if (!renderObject.debugNeedsLayout) {
+                  // ignore: invalid_use_of_protected_member
+                  final Constraints constraints = renderObject.constraints;
+                  final constraintsProperty = <String, Object>{
+                    'type': constraints.runtimeType.toString(),
+                    'description': constraints.toString(),
+                  };
+                  if (constraints is BoxConstraints) {
+                    constraintsProperty.addAll(<String, Object>{
+                      'minWidth': constraints.minWidth.toString(),
+                      'minHeight': constraints.minHeight.toString(),
+                      'maxWidth': constraints.maxWidth.toString(),
+                      'maxHeight': constraints.maxHeight.toString(),
+                    });
+                  }
+                  additionalJson['constraints'] = constraintsProperty;
+                }
+              } catch (e) {
+                // Constraints are sometimes unavailable even though
+                // debugNeedsLayout is false.
+              }
+
+              try {
+                if (renderObject is RenderBox) {
+                  additionalJson['isBox'] = true;
+                  additionalJson['size'] = <String, Object>{
+                    'width': renderObject.size.width.toString(),
+                    'height': renderObject.size.height.toString(),
+                  };
+
+                  final ParentData? parentData = renderObject.parentData;
+                  if (parentData is FlexParentData) {
+                    additionalJson['flexFactor'] = parentData.flex ?? 0;
+                    additionalJson['flexFit'] = (parentData.fit ?? FlexFit.tight).name;
+                  } else if (parentData is BoxParentData) {
+                    final Offset offset = parentData.offset;
+                    additionalJson['parentData'] = <String, Object>{
+                      'offsetX': offset.dx.toString(),
+                      'offsetY': offset.dy.toString(),
+                    };
+                  }
+                } else if (renderObject is RenderView) {
+                  additionalJson['size'] = <String, Object>{
+                    'width': renderObject.size.width.toString(),
+                    'height': renderObject.size.height.toString(),
+                  };
+                }
+              } catch (e) {
+                // Not laid out yet.
+              }
+              return additionalJson;
+            },
       ),
     );
     return Future<Map<String, dynamic>>.value(<String, dynamic>{'result': result});
@@ -3386,7 +3388,7 @@ class _InspectorOverlay extends LeafRenderObjectWidget {
 }
 
 class _RenderInspectorOverlay extends RenderBox {
-  _RenderInspectorOverlay({required InspectorSelection selection}) : _selection = selection;
+  _RenderInspectorOverlay({required this._selection});
 
   InspectorSelection get selection => _selection;
   InspectorSelection _selection;
@@ -3540,22 +3542,17 @@ List<RenderObject> _filterInspectorHitCandidatesToModalRouteScope(List<RenderObj
   }
 
   // Ignore widgets that belong to offstage modal routes.
-  final List<RenderObject> onstageHits = hits
-      .where((RenderObject hit) {
-        final ModalRoute<Object?>? route = _modalRouteForRenderObject(hit);
-        return route == null || !route.offstage;
-      })
-      .toList();
+  final List<RenderObject> onstageHits = hits.where((RenderObject hit) {
+    final ModalRoute<Object?>? route = _modalRouteForRenderObject(hit);
+    return route == null || !route.offstage;
+  }).toList();
   if (onstageHits.isEmpty) {
     return onstageHits;
   }
 
   final ModalRoute<Object?>? scopeRoute = _inspectorScopeRouteForHits(onstageHits);
   final List<RenderObject> scopedHits = onstageHits
-      .where(
-        (RenderObject hit) =>
-            identical(_modalRouteForRenderObject(hit), scopeRoute),
-      )
+      .where((RenderObject hit) => identical(_modalRouteForRenderObject(hit), scopeRoute))
       .toList();
 
   scopedHits.sort(
@@ -3637,10 +3634,7 @@ class _InspectorOverlayLayer extends Layer {
       if (candidate == selected ||
           !candidate.attached ||
           !_isInInspectorRenderObjectTree(candidate) ||
-          !identical(
-            _modalRouteForRenderObject(candidate),
-            _modalRouteForRenderObject(selected),
-          )) {
+          !identical(_modalRouteForRenderObject(candidate), _modalRouteForRenderObject(selected))) {
         continue;
       }
       candidates.add(_TransformedRect(candidate, rootRenderObject));
