@@ -131,9 +131,9 @@ class HostBuffer {
           offset <= kAllocatorBlockSize - length) {
         if (buffer != nullptr) {
           ::memcpy(current_contents_ + offset, buffer, length);
+          current_raw_buffer_->Flush(Range{offset, length});
         }
         offset_ = offset + length;
-        current_raw_buffer_->Flush(Range{offset, length});
         return BufferView(current_raw_buffer_, Range{offset, length});
       }
     }
