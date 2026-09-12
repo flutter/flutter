@@ -12,6 +12,9 @@ struct _FlSubsurface {
   // Surface backing the subsurface and the subsurface itself.
   struct wl_surface* surface;
   struct wl_subsurface* subsurface;
+
+  // Surface this subsurface is attached to, owned by the toolkit.
+  struct wl_surface* parent_surface;
 };
 
 G_DEFINE_TYPE(FlSubsurface, fl_subsurface, G_TYPE_OBJECT)
@@ -37,6 +40,7 @@ FlSubsurface* fl_subsurface_new(struct wl_compositor* compositor,
   FlSubsurface* self =
       FL_SUBSURFACE(g_object_new(fl_subsurface_get_type(), nullptr));
 
+  self->parent_surface = parent_surface;
   self->surface = wl_compositor_create_surface(compositor);
   self->subsurface = wl_subcompositor_get_subsurface(
       subcompositor, self->surface, parent_surface);
@@ -60,4 +64,11 @@ struct wl_surface* fl_subsurface_get_surface(FlSubsurface* self) {
 void fl_subsurface_set_position(FlSubsurface* self, gint x, gint y) {
   g_return_if_fail(FL_IS_SUBSURFACE(self));
   wl_subsurface_set_position(self->subsurface, x, y);
+}
+
+void fl_subsurface_commit_parent(FlSubsurface* self) {
+  g_return_if_fail(FL_IS_SUBSURFACE(self));
+  if (self->parent_surface != nullptr) {
+    wl_surface_commit(self->parent_surface);
+  }
 }

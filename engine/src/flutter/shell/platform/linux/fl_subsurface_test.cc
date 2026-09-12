@@ -80,6 +80,16 @@ TEST_F(FlSubsurfaceTest, SetPosition) {
   fl_subsurface_set_position(subsurface, 3, 4);
 }
 
+TEST_F(FlSubsurfaceTest, CommitParent) {
+  g_autoptr(FlSubsurface) subsurface = CreateSubsurface();
+  ASSERT_NE(subsurface, nullptr);
+
+  // Committing the parent applies the synchronized subsurface state.
+  EXPECT_CALL(wayland,
+              Request(::testing::StrEq("wl_surface"), WL_SURFACE_COMMIT));
+  fl_subsurface_commit_parent(subsurface);
+}
+
 // The Wayland objects are released when the subsurface is destroyed.
 TEST_F(FlSubsurfaceTest, Destroy) {
   FlSubsurface* subsurface = CreateSubsurface();

@@ -9,6 +9,8 @@
 //
 // Over time existing tests should be migrated and this file should be removed.
 
+#include <glib.h>
+
 #include <cstring>
 #include <unordered_map>
 #include <utility>
@@ -188,6 +190,19 @@ FlutterEngineResult FlutterEngineAddView(FLUTTER_API_SYMBOL(FlutterEngine)
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineOnVsync(FLUTTER_API_SYMBOL(FlutterEngine)
+                                             engine,
+                                         intptr_t baton,
+                                         uint64_t frame_start_time_nanos,
+                                         uint64_t frame_target_time_nanos) {
+  return kSuccess;
+}
+
+uint64_t FlutterEngineGetCurrentTime() {
+  // Match the engine, which uses the monotonic clock in nanoseconds.
+  return g_get_monotonic_time() * 1000;
+}
+
 FlutterEngineResult FlutterEngineRemoveView(FLUTTER_API_SYMBOL(FlutterEngine)
                                                 engine,
                                             const FlutterRemoveViewInfo* info) {
@@ -236,5 +251,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   table->NotifyDisplayUpdate = &FlutterEngineNotifyDisplayUpdate;
   table->AddView = &FlutterEngineAddView;
   table->RemoveView = &FlutterEngineRemoveView;
+  table->OnVsync = &FlutterEngineOnVsync;
+  table->GetCurrentTime = &FlutterEngineGetCurrentTime;
   return kSuccess;
 }

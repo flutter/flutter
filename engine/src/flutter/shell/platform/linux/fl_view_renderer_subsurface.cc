@@ -130,7 +130,13 @@ static gboolean redraw_cb(gpointer user_data) {
     }
   }
 
-  gtk_widget_queue_draw(GTK_WIDGET(self));
+  // The frame has already been presented to the subsurface; committing the
+  // parent surface makes it visible. Redrawing the widget would also do this,
+  // but repaints the whole window in software which is far too slow to do for
+  // every frame on large displays.
+  if (self->subsurface != nullptr) {
+    fl_subsurface_commit_parent(self->subsurface);
+  }
 
   return G_SOURCE_REMOVE;
 }
