@@ -1736,6 +1736,72 @@ void main() {
       );
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/191482.
+    //
+    // Panning against the boundary of a very tall child used to reset the
+    // vertical translation to zero and jump back to the top of the child.
+    testWidgets('panning against the boundary of a very tall child stays put', (
+      WidgetTester tester,
+    ) async {
+      const viewportSize = Size(400.0, 800.0);
+      const childSize = Size(400.0, 100000.0);
+
+      tester.view.physicalSize = viewportSize;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: InteractiveViewer(
+            maxScale: 3.0,
+            constrained: false,
+            transformationController: transformationController,
+            child: SizedBox.fromSize(size: childSize),
+          ),
+        ),
+      );
+
+      // Each of these rests the viewport against the bottom boundary of the
+      // child at a scale where the boundary check loses enough precision to
+      // report a viewport that fits as being out of bounds.
+      const scales = <double>[2.145201113317985, 1.7979785028542963, 2.950856552791457];
+      const translations = <Offset>[
+        Offset(-303.85748524857473, -213719.76437227987),
+        Offset(-245.2719722233261, -178997.25040212198),
+        Offset(-321.06128323928294, -294285.0304163624),
+      ];
+      const pans = <Offset>[
+        Offset(-0.4154332278286821, -2.4227759928953208),
+        Offset(2.6030588056390362, -1.7826952272598977),
+        Offset(-1.5147411641287807, -1.810529420888404),
+      ];
+
+      for (var i = 0; i < scales.length; i++) {
+        transformationController.value = Matrix4.identity()
+          ..scaleByDouble(scales[i], scales[i], scales[i], 1)
+          ..setTranslation(Vector3(translations[i].dx, translations[i].dy, 0.0));
+        await tester.pump();
+
+        final TestGesture gesture = await tester.startGesture(
+          Offset(viewportSize.width / 2, viewportSize.height / 2),
+        );
+        await tester.pump();
+        await gesture.moveBy(pans[i]);
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+
+        // The pan is clamped to the boundary, so the viewport stays where it
+        // was instead of snapping back to the top of the child.
+        expect(
+          transformationController.value.getTranslation().y,
+          moreOrLessEquals(translations[i].dy, epsilon: 4.0),
+          reason: 'case $i jumped back to the top of the child',
+        );
+      }
+    });
+
     testWidgets('does not accumulate listeners', (WidgetTester tester) async {
       await tester.pumpWidget(
         InteractiveViewer(
