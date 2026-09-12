@@ -195,6 +195,17 @@ void TextInputPlugin::ComposeChangeHook(const std::u16string& text,
   if (active_model_ == nullptr) {
     return;
   }
+  // The IME can send composition updates while the model is not composing:
+  // the text client may be swapped mid-composition, and the engine's request
+  // to cancel the composition (ImmNotifyIME with CPS_CANCEL) is advisory, so
+  // an IME is free to ignore it. Re-enter composing at the caret; otherwise
+  // AddText and UpdateComposingText below both insert |text|, and the
+  // composing range stays anchored at offset 0, so subsequent updates
+  // overwrite the beginning of the text instead of the composing region.
+  // See https://github.com/flutter/flutter/issues/191196.
+  if (!active_model_->composing()) {
+    active_model_->BeginComposing();
+  }
   std::string text_before_change = active_model_->GetText();
   TextRange composing_before_change = active_model_->composing_range();
   active_model_->AddText(text);
