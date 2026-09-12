@@ -1139,12 +1139,19 @@ class FakeBuildTargets extends Fake implements BuildTargets {}
 class FakeCrashReporter extends Fake implements CrashReporter {}
 
 class FakeDoctor extends Fake implements Doctor {
-  FakeDoctor({this.canListEmulators = true, this.canLaunchAnything = true});
+  FakeDoctor({
+    this.canLaunchAnything = true,
+    this.canListAnything = true,
+    this.canListEmulators = true,
+  });
 
   final bool canListEmulators;
 
   @override
   final bool canLaunchAnything;
+
+  @override
+  final bool canListAnything;
 
   @override
   List<Workflow> get workflows => <Workflow>[FakeWorkflow(canListEmulators: canListEmulators)];
