@@ -39,21 +39,20 @@ export 'package:flutter/services.dart'
 // late FocusNode myFocusNode;
 
 /// Signature for the [TextField.buildCounter] callback.
-typedef InputCounterWidgetBuilder =
-    Widget? Function(
-      /// The build context for the TextField.
-      BuildContext context, {
+typedef InputCounterWidgetBuilder = Widget? Function(
+  /// The build context for the TextField.
+  BuildContext context, {
 
-      /// The length of the string currently in the input.
-      required int currentLength,
+  /// The length of the string currently in the input.
+  required int currentLength,
 
-      /// The maximum string length that can be entered into the TextField.
-      required int? maxLength,
+  /// The maximum string length that can be entered into the TextField.
+  required int? maxLength,
 
-      /// Whether or not the TextField is currently focused. Mainly provided for
-      /// the [liveRegion] parameter in the [Semantics] widget for accessibility.
-      required bool isFocused,
-    });
+  /// Whether or not the TextField is currently focused. Mainly provided for
+  /// the [liveRegion] parameter in the [Semantics] widget for accessibility.
+  required bool isFocused,
+});
 
 class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _TextFieldSelectionGestureDetectorBuilder({required _TextFieldState state})

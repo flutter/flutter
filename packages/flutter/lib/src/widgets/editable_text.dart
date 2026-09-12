@@ -83,8 +83,10 @@ export 'package:flutter/services.dart'
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
-typedef SelectionChangedCallback =
-    void Function(TextSelection selection, SelectionChangedCause? cause);
+typedef SelectionChangedCallback = void Function(
+  TextSelection selection,
+  SelectionChangedCause? cause,
+);
 
 /// Signature for the callback that reports the app private command results.
 typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
@@ -96,8 +98,10 @@ typedef AppPrivateCommandCallback = void Function(String action, Map<String, dyn
 ///
 ///  * [SelectableRegionContextMenuBuilder], which performs the same role for
 ///    [SelectableRegion].
-typedef EditableTextContextMenuBuilder =
-    Widget Function(BuildContext context, EditableTextState editableTextState);
+typedef EditableTextContextMenuBuilder = Widget Function(
+  BuildContext context,
+  EditableTextState editableTextState,
+);
 
 // Signature for a function that determines the target location of the given
 // [TextPosition] after applying the given [TextBoundary].
@@ -860,7 +864,7 @@ class EditableText extends StatefulWidget {
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
     required this.style,
-    StrutStyle? strutStyle,
+    this._strutStyle,
     required this.cursorColor,
     required this.backgroundCursorColor,
     this.textAlign = TextAlign.start,
@@ -983,7 +987,6 @@ class EditableText extends StatefulWidget {
              spellCheckConfiguration.misspelledTextStyle != null,
          'spellCheckConfiguration must specify a misspelledTextStyle if spell check behavior is desired',
        ),
-       _strutStyle = strutStyle,
        keyboardType =
            keyboardType ?? _inferKeyboardType(autofillHints: autofillHints, maxLines: maxLines),
        inputFormatters = maxLines == 1
@@ -2793,9 +2796,8 @@ class EditableTextState extends State<EditableText>
       return;
     }
     final String text = textEditingValue.text;
-    Clipboard.setData(
-      ClipboardData(text: selection.textInside(text)),
-    ).catchError(_reportClipboardError('while copying selection to clipboard'));
+    Clipboard.setData(ClipboardData(text: selection.textInside(text)))
+        .catchError(_reportClipboardError('while copying selection to clipboard'));
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
       hideToolbar(false);
@@ -2832,9 +2834,8 @@ class EditableTextState extends State<EditableText>
     if (selection.isCollapsed) {
       return;
     }
-    Clipboard.setData(
-      ClipboardData(text: selection.textInside(text)),
-    ).catchError(_reportClipboardError('while cutting selection to clipboard'));
+    Clipboard.setData(ClipboardData(text: selection.textInside(text)))
+        .catchError(_reportClipboardError('while cutting selection to clipboard'));
     _replaceText(ReplaceTextIntent(textEditingValue, '', selection, cause));
     if (cause == SelectionChangedCause.toolbar) {
       // Schedule a call to bringIntoView() after renderEditable updates.
@@ -4273,8 +4274,7 @@ class EditableTextState extends State<EditableText>
       _openInputConnection();
     } else {
       _flagInternalFocus();
-      widget.focusNode
-          .requestFocus(); // This eventually calls _openInputConnection also, see _handleFocusChanged.
+      widget.focusNode.requestFocus(); // This eventually calls _openInputConnection also, see _handleFocusChanged.
     }
   }
 
@@ -5953,9 +5953,8 @@ class EditableTextState extends State<EditableText>
                         // either case, glowing or stretching.
                         scrollBehavior:
                             widget.scrollBehavior ??
-                            ScrollConfiguration.of(
-                              context,
-                            ).copyWith(scrollbars: _isMultiline, overscroll: false),
+                            ScrollConfiguration.of(context)
+                                .copyWith(scrollbars: _isMultiline, overscroll: false),
                         viewportBuilder: (BuildContext context, ViewportOffset offset) {
                           return CompositedTransformTarget(
                             link: _toolbarLayerLink,

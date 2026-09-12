@@ -404,14 +404,12 @@ _flutter.loader.load();
         const JsCompilerConfig(),
       ], const NoOpAnalytics()).build(environment);
 
-      final fontManifest =
-          jsonDecode(
-                environment.outputDir
-                    .childDirectory('assets')
-                    .childFile('FontManifest.json')
-                    .readAsStringSync(),
-              )
-              as List<dynamic>;
+      final fontManifest = jsonDecode(
+        environment.outputDir
+            .childDirectory('assets')
+            .childFile('FontManifest.json')
+            .readAsStringSync(),
+      ) as List<dynamic>;
       expect(
         fontManifest,
         contains(
@@ -971,9 +969,8 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(
-        const JsCompilerConfig(nativeNullAssertions: true, sourceMaps: false),
-      ).build(environment);
+      await Dart2JSTarget(const JsCompilerConfig(nativeNullAssertions: true, sourceMaps: false))
+          .build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -1011,9 +1008,8 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(
-        const JsCompilerConfig(optimizationLevel: 3, sourceMaps: false),
-      ).build(environment);
+      await Dart2JSTarget(const JsCompilerConfig(optimizationLevel: 3, sourceMaps: false))
+          .build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -1266,9 +1262,8 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(
-        const JsCompilerConfig(dumpInfo: true, sourceMaps: false),
-      ).build(environment);
+      await Dart2JSTarget(const JsCompilerConfig(dumpInfo: true, sourceMaps: false))
+          .build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 

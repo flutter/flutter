@@ -39,11 +39,11 @@ enum FlutterDarwinPlatform {
     required this.binaryName,
     required this.targetPlatform,
     required this.swiftPackagePlatform,
-    required String artifactName,
+    required this._artifactName,
     required this.artifactZip,
     required this.xcframeworkArtifact,
     required this.sdks,
-  }) : _artifactName = artifactName;
+  });
 
   /// The name of the binary file within the [xcframeworkArtifact].
   final String binaryName;

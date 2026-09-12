@@ -748,78 +748,79 @@ void main() {
     expect(ended, 1);
   });
 
-  testGesture('A pressure outside of the device reported min and max pressure will not give an error', (
-    GestureTester tester,
-  ) {
-    // Device specific constants that represent those from the iPhone X
-    const double pressureMin = 0;
-    const pressureMax = 6.66;
+  testGesture(
+    'A pressure outside of the device reported min and max pressure will not give an error',
+    (GestureTester tester) {
+      // Device specific constants that represent those from the iPhone X
+      const double pressureMin = 0;
+      const pressureMax = 6.66;
 
-    var started = 0;
-    var peaked = 0;
-    var updated = 0;
-    var ended = 0;
+      var started = 0;
+      var peaked = 0;
+      var updated = 0;
+      var ended = 0;
 
-    final force = ForcePressGestureRecognizer();
-    addTearDown(force.dispose);
+      final force = ForcePressGestureRecognizer();
+      addTearDown(force.dispose);
 
-    force.onStart = (_) => started += 1;
-    force.onPeak = (_) => peaked += 1;
-    force.onUpdate = (_) => updated += 1;
-    force.onEnd = (_) => ended += 1;
+      force.onStart = (_) => started += 1;
+      force.onPeak = (_) => peaked += 1;
+      force.onUpdate = (_) => updated += 1;
+      force.onEnd = (_) => ended += 1;
 
-    const pointerValue = 1;
-    final pointer = TestPointer();
-    const down = PointerDownEvent(
-      pointer: pointerValue,
-      position: Offset(10.0, 10.0),
-      pressure: 0,
-      pressureMin: pressureMin,
-      pressureMax: pressureMax,
-    );
-    pointer.setDownInfo(down, const Offset(10.0, 10.0));
-    force.addPointer(down);
-    tester.closeArena(1);
-
-    expect(started, 0);
-    expect(peaked, 0);
-    expect(updated, 0);
-    expect(ended, 0);
-
-    // Pressure fed into the test environment simulates the values received directly from the device.
-    tester.route(
-      const PointerMoveEvent(
+      const pointerValue = 1;
+      final pointer = TestPointer();
+      const down = PointerDownEvent(
         pointer: pointerValue,
         position: Offset(10.0, 10.0),
-        pressure: 2.5,
+        pressure: 0,
         pressureMin: pressureMin,
         pressureMax: pressureMax,
-      ),
-    );
+      );
+      pointer.setDownInfo(down, const Offset(10.0, 10.0));
+      force.addPointer(down);
+      tester.closeArena(1);
 
-    // We have not hit the start pressure, so no events should be true.
-    expect(started, 0);
-    expect(peaked, 0);
-    expect(updated, 0);
-    expect(ended, 0);
+      expect(started, 0);
+      expect(peaked, 0);
+      expect(updated, 0);
+      expect(ended, 0);
 
-    // If the case where the pressure is greater than the max pressure were not handled correctly, this move event would throw an error.
-    tester.route(
-      const PointerMoveEvent(
-        pointer: pointerValue,
-        position: Offset(10.0, 10.0),
-        pressure: 8.0,
-        pressureMin: pressureMin,
-        pressureMax: pressureMax,
-      ),
-    );
-    tester.route(pointer.up());
+      // Pressure fed into the test environment simulates the values received directly from the device.
+      tester.route(
+        const PointerMoveEvent(
+          pointer: pointerValue,
+          position: Offset(10.0, 10.0),
+          pressure: 2.5,
+          pressureMin: pressureMin,
+          pressureMax: pressureMax,
+        ),
+      );
 
-    expect(started, 1);
-    expect(peaked, 1);
-    expect(updated, 1);
-    expect(ended, 1);
-  });
+      // We have not hit the start pressure, so no events should be true.
+      expect(started, 0);
+      expect(peaked, 0);
+      expect(updated, 0);
+      expect(ended, 0);
+
+      // If the case where the pressure is greater than the max pressure were not handled correctly, this move event would throw an error.
+      tester.route(
+        const PointerMoveEvent(
+          pointer: pointerValue,
+          position: Offset(10.0, 10.0),
+          pressure: 8.0,
+          pressureMin: pressureMin,
+          pressureMax: pressureMax,
+        ),
+      );
+      tester.route(pointer.up());
+
+      expect(started, 1);
+      expect(peaked, 1);
+      expect(updated, 1);
+      expect(ended, 1);
+    },
+  );
 
   testGesture('A pressure of NAN will not give an error', (GestureTester tester) {
     // Device specific constants that represent those from the iPhone X

@@ -55,12 +55,11 @@ class TestPage<T> extends Page<T> {
       maintainState: maintainState,
       fullscreenDialog: fullscreenDialog,
       allowSnapshotting: allowSnapshotting,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) => child,
+      pageBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) => child,
       transitionsBuilder: transitionsBuilder,
     );
   }
