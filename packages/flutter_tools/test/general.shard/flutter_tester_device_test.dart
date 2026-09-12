@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/flutter_tester_device.dart';
 import 'package:flutter_tools/src/test/font_config_manager.dart';
+import 'package:flutter_tools/src/test/test_device.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/fake.dart';
@@ -325,6 +326,107 @@ void main() {
       },
     );
   });
+
+  group('termination and finished', () {
+    testUsingContext('finished throws TestDeviceException on unexpected process exit on Windows', () async {
+      platform = FakePlatform(operatingSystem: 'windows');
+      processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            '/',
+            '--disable-vm-service',
+            '--ipv6',
+            '--enable-checked-mode',
+            '--verify-entry-points',
+            '--enable-software-rendering',
+            '--skia-deterministic-rendering',
+            '--enable-dart-profiling',
+            '--non-interactive',
+            '--use-test-fonts',
+            '--disable-asset-fonts',
+            '--packages=.dart_tool/package_config.json',
+            'example.dill',
+          ],
+          exitCode: 1,
+        ),
+      ]);
+      device = createDevice();
+      await device.start('example.dill');
+
+      await expectLater(device.finished, throwsA(isA<TestDeviceException>()));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => platform,
+    });
+
+    testUsingContext('finished throws TestDeviceException on unexpected exit 0 on Windows', () async {
+      platform = FakePlatform(operatingSystem: 'windows');
+      processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            '/',
+            '--disable-vm-service',
+            '--ipv6',
+            '--enable-checked-mode',
+            '--verify-entry-points',
+            '--enable-software-rendering',
+            '--skia-deterministic-rendering',
+            '--enable-dart-profiling',
+            '--non-interactive',
+            '--use-test-fonts',
+            '--disable-asset-fonts',
+            '--packages=.dart_tool/package_config.json',
+            'example.dill',
+          ],
+        ),
+      ]);
+      device = createDevice();
+      await device.start('example.dill');
+
+      await expectLater(device.finished, throwsA(isA<TestDeviceException>()));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => platform,
+    });
+
+    testUsingContext('finished completes normally when kill() is called on Windows', () async {
+      platform = FakePlatform(operatingSystem: 'windows');
+      final exitCompleter = Completer<int>();
+      processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            '/',
+            '--disable-vm-service',
+            '--ipv6',
+            '--enable-checked-mode',
+            '--verify-entry-points',
+            '--enable-software-rendering',
+            '--skia-deterministic-rendering',
+            '--enable-dart-profiling',
+            '--non-interactive',
+            '--use-test-fonts',
+            '--disable-asset-fonts',
+            '--packages=.dart_tool/package_config.json',
+            'example.dill',
+          ],
+          completer: exitCompleter,
+        ),
+      ]);
+      device = createDevice();
+      await device.start('example.dill');
+      final Future<void> killFuture = device.kill();
+      exitCompleter.complete(0);
+      await killFuture;
+
+      await expectLater(device.finished, completes);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => platform,
+    });
+  });
 }
 
 /// A Flutter Tester device.
@@ -385,6 +487,9 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
 class FakeHttpServer extends Fake implements HttpServer {
   @override
   int get port => 0;
+
+  @override
+  Future<void> close({bool force = false}) async {}
 }
 
 class FakeNativeAssetsBuilder extends Fake implements TestCompilerNativeAssetsBuilder {
