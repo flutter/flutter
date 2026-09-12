@@ -338,8 +338,8 @@ class FlutterView {
 
   /// The radii of the display corners in physical pixels.
   ///
-  /// This is currently populated only on Android API 31+. On earlier Android
-  /// versions, iOS, and other platforms, this value is `null`.
+  /// This is populated on Android API 31+ and iOS 26+. On earlier Android and
+  /// iOS versions, and on other platforms, this value is `null`.
   DisplayCornerRadii? get displayCornerRadii => _viewConfiguration.displayCornerRadii;
 
   /// Updates the view's rendering on the GPU with the newly provided [Scene].
