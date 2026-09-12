@@ -3046,6 +3046,70 @@ void main() {
       semantics.dispose();
     }, skip: kIsWeb); // [intended] the web traversal order by using ARIA-OWNS.
 
+    // Regression test for https://github.com/flutter/flutter/issues/176533.
+    testWidgets('BlockSemantics in the overlay child blocks the OverlayPortal and its siblings', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      late final OverlayEntry entry;
+      addTearDown(() {
+        entry.remove();
+        entry.dispose();
+      });
+
+      final Widget widget = Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) {
+                return DefaultTextStyle(
+                  style: const TextStyle(fontSize: 10),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      OverlayPortal(
+                        controller: controller1,
+                        overlayChildBuilder: (BuildContext context) => const Positioned(
+                          left: 0.0,
+                          top: 0.0,
+                          child: BlockSemantics(child: Text('BBBB')),
+                        ),
+                        child: const Text('A'),
+                      ),
+                      const Text('CC'),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+
+      // The overlay child paints on top of everything else in the Overlay, so
+      // the BlockSemantics in the overlay child blocks the semantics of the
+      // OverlayPortal (which is the traversal parent of the overlay child) and
+      // its siblings. The overlay child itself must stay in the semantics tree.
+      final expected = TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            children: <TestSemantics>[TestSemantics(label: 'BBBB')],
+          ),
+        ],
+      );
+
+      expect(
+        semantics,
+        hasSemantics(expected, ignoreId: true, ignoreRect: true, ignoreTransform: true),
+      );
+      expect(semantics, isNot(includesNodeWith(label: 'A')));
+      expect(semantics, isNot(includesNodeWith(label: 'CC')));
+      semantics.dispose();
+    }, skip: kIsWeb); // [intended] the web traversal order by using ARIA-OWNS.
+
     testWidgets('OverlayPortal overlay child clipping', (WidgetTester tester) async {
       final semantics = SemanticsTester(tester);
 
