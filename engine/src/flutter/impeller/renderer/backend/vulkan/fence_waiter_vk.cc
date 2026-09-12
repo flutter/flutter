@@ -76,6 +76,14 @@ fml::Status FenceWaiterVK::AddFence(
     }
     auto submit_status = submit_callback(fence.get());
     if (!submit_status.ok()) {
+      // The state of a fence passed to a failed queue submission is not
+      // trustworthy: some drivers partially track the fence even though the
+      // submission failed, and destroying it crashes inside the driver
+      // (observed on AMD as VUID-vkDestroyFence-fence-01120 followed by an
+      // access violation). Release the handle instead of destroying it; a
+      // failed submission marks the device as lost, so the leak is
+      // inconsequential.
+      fence.release();
       return submit_status;
     }
     wait_set_.emplace_back(

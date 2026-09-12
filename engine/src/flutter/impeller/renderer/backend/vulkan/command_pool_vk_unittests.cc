@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <thread>
+
 #include "flutter/testing/testing.h"  // IWYU pragma: keep.
+#include "fml/synchronization/count_down_latch.h"
 #include "fml/synchronization/waitable_event.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/device_holder_vk.h"
@@ -66,7 +69,13 @@ class DeathRattle final {
   DeathRattle(DeathRattle&&) = default;
   DeathRattle& operator=(DeathRattle&&) = default;
 
-  ~DeathRattle() { callback_(); }
+  // The callback may be empty when this instance has been moved from; the
+  // moved-from local still runs this destructor.
+  ~DeathRattle() {
+    if (callback_) {
+      callback_();
+    }
+  }
 
  private:
   std::function<void()> callback_;
@@ -216,6 +225,61 @@ TEST(CommandPoolRecyclerVKTest, ExtraCommandBufferAllocationsTriggerTrim) {
   EXPECT_EQ(std::count(called->begin(), called->end(),
                        "vkResetCommandPoolReleaseResources"),
             1u);
+
+  context->Shutdown();
+}
+
+TEST(CommandPoolRecyclerVKTest, DroppedPoolsFreeBuffersBeforeTheirPool) {
+  auto const context = MockVulkanContextBuilder().Build();
+
+  // Reclaim more pools than the recycler caches, each carrying a recycled
+  // command buffer. Pools are per thread, so a distinct thread is used for
+  // each; a barrier keeps every pool alive until all are created, otherwise
+  // an early Dispose lets a later thread reuse a recycled pool instead of
+  // creating its own.
+  constexpr size_t kPoolCount = 10;  // Cache cap is 8.
+  fml::CountDownLatch all_created(kPoolCount);
+  fml::ManualResetWaitableEvent dispose;
+  std::vector<std::thread> threads;
+  threads.reserve(kPoolCount);
+  for (size_t i = 0; i < kPoolCount; i++) {
+    threads.emplace_back([&]() {
+      auto const recycler = context->GetCommandPoolRecycler();
+      auto pool = recycler->Get();
+      auto buffer = pool->CreateCommandBuffer();
+      pool->CollectCommandBuffer(std::move(buffer));
+      all_created.CountDown();
+      dispose.Wait();
+      pool.reset();
+      recycler->Dispose();
+    });
+  }
+  all_created.Wait();
+  dispose.Signal();
+  for (auto& thread : threads) {
+    thread.join();
+  }
+
+  // Pools reclaimed past the cache cap are destroyed with their recycled
+  // buffers. In this window those are the only destroys and frees (cached
+  // pools stay alive until Shutdown), and each buffer must be freed before
+  // its pool is destroyed: at every point of the recorded call sequence the
+  // number of vkFreeCommandBuffers calls must be at least the number of
+  // vkDestroyCommandPool calls. Freeing a buffer after its pool was
+  // destroyed is a use-after-free inside the driver.
+  auto const called = ReclaimAndGetMockVulkanFunctions(context);
+  int64_t frees = 0;
+  int64_t destroys = 0;
+  for (const auto& function : *called) {
+    if (function == "vkFreeCommandBuffers") {
+      frees++;
+    } else if (function == "vkDestroyCommandPool") {
+      destroys++;
+    }
+    EXPECT_GE(frees, destroys);
+  }
+  EXPECT_EQ(destroys, 2);
+  EXPECT_EQ(frees, 2);
 
   context->Shutdown();
 }
