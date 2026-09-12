@@ -243,7 +243,7 @@ bool DefaultJvmInvoker::PostJvmTask(std::function<void()> task) {
     return false;
   }
   if (platform_task_runner_) {
-    platform_task_runner_->PostTask(std::move(task));
+    platform_task_runner_->PostTask(task);
     return true;
   }
   FML_LOG(WARNING) << "PostJvmTask failed: no platform task runner configured.";
@@ -702,7 +702,7 @@ bool AndroidJvmInvoker::PostJvmTask(std::function<void()> task) {
     return false;
   }
   if (platform_task_runner_) {
-    platform_task_runner_->PostTask(std::move(task));
+    platform_task_runner_->PostTask(task);
     return true;
   }
   return false;

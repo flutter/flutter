@@ -306,6 +306,12 @@ FlutterEmbedderNative::FlutterEmbedderNative()
       vm_init_->Init(*default_args);
     }
   }
+  {
+    auto default_args = GetDefaultVMArgs();
+    if (default_args.has_value() && default_args->enable_hcpp) {
+      SetHcppEnabled(true);
+    }
+  }
   if (vsync_waiter_) {
     vsync_waiter_->UpdateRefreshRate(GetDefaultRefreshRate());
   }
@@ -418,6 +424,12 @@ FlutterEmbedderNative::FlutterEmbedderNative(
               : std::make_shared<APKAssetProvider>(
                     std::make_shared<InMemoryAPKAssetProviderImpl>())) {
   AttachWindowMetricsCallbacks();
+  {
+    auto default_args = GetDefaultVMArgs();
+    if (default_args.has_value() && default_args->enable_hcpp) {
+      SetHcppEnabled(true);
+    }
+  }
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::FlutterEmbedderNative(custom)");
   FML_DLOG(INFO) << "Initialized FlutterEmbedderNative with custom components.";
@@ -2618,6 +2630,13 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
     default_cmd_ptrs.push_back(str.c_str());
     FML_LOG(INFO) << "FlutterEmbedderNative::Launch cmd arg: " << str;
   }
+  for (const auto& str : default_cmd_strings) {
+    if (str == "--enable-hcpp-and-surface-control" ||
+        str == "--enable-surface-control" || str == "--enable-hcpp") {
+      SetHcppEnabled(true);
+      break;
+    }
+  }
   args.command_line_argc = static_cast<int>(default_cmd_ptrs.size());
   args.command_line_argv = default_cmd_ptrs.data();
   args.custom_dart_entrypoint =
@@ -2647,8 +2666,133 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
         fallback_aot_data_ = aot_data;
         args.aot_data = fallback_aot_data_;
       } else {
-        FML_LOG(ERROR) << "Failed to create fallback AOT data from "
-                       << aot_lib_path;
+        FML_LOG(WARNING) << "Failed to create fallback AOT data from "
+                         << aot_lib_path
+                         << "; attempting in-memory symbol resolution.";
+      }
+    }
+
+    if (args.aot_data == nullptr) {
+      // Android API 23+ with android:extractNativeLibs="false" stores libapp.so
+      // uncompressed directly inside base.apk. FlutterLoader preloads it via
+      // System.loadLibrary("app"). Resolve the combined snapshot symbols
+      // (_kDartSnapshotData and _kDartSnapshotText) from the loaded library in
+      // memory.
+      const uint8_t* snapshot_data = nullptr;
+      const uint8_t* snapshot_text = nullptr;
+
+      // Attempt loading via library_loader_ first for host test virtualization.
+      std::shared_ptr<OSLibrary> os_lib;
+      if (library_loader_) {
+        if (!aot_lib_path.empty()) {
+          os_lib = library_loader_->LoadDynamicLibrary(aot_lib_path.c_str());
+        }
+        if (!os_lib || !os_lib->IsValid()) {
+          os_lib = library_loader_->LoadDynamicLibrary("libapp.so");
+        }
+      }
+      if (os_lib && os_lib->IsValid()) {
+        snapshot_data = reinterpret_cast<const uint8_t*>(
+            os_lib->ResolveSymbol("kDartSnapshotData"));
+        if (!snapshot_data) {
+          snapshot_data = reinterpret_cast<const uint8_t*>(
+              os_lib->ResolveSymbol("_kDartSnapshotData"));
+        }
+        snapshot_text = reinterpret_cast<const uint8_t*>(
+            os_lib->ResolveSymbol("kDartSnapshotText"));
+        if (!snapshot_text) {
+          snapshot_text = reinterpret_cast<const uint8_t*>(
+              os_lib->ResolveSymbol("_kDartSnapshotText"));
+        }
+      }
+
+      fml::RefPtr<fml::NativeLibrary> native_lib;
+      if (snapshot_data == nullptr || snapshot_text == nullptr) {
+        void* handle = nullptr;
+        if (!aot_lib_path.empty()) {
+          handle = ::dlopen(aot_lib_path.c_str(), RTLD_NOW | RTLD_GLOBAL);
+        }
+        if (handle == nullptr) {
+          handle = ::dlopen("libapp.so", RTLD_NOW | RTLD_GLOBAL);
+        }
+        if (handle != nullptr) {
+          native_lib = fml::NativeLibrary::CreateWithHandle(handle, false);
+        } else {
+          native_lib = fml::NativeLibrary::CreateForCurrentProcess();
+        }
+
+        if (native_lib) {
+          // 1. Android combined snapshot symbols (preferred on Android).
+          snapshot_data = native_lib->ResolveSymbol("kDartSnapshotData");
+          if (!snapshot_data) {
+            snapshot_data = native_lib->ResolveSymbol("_kDartSnapshotData");
+          }
+          snapshot_text = native_lib->ResolveSymbol("kDartSnapshotText");
+          if (!snapshot_text) {
+            snapshot_text = native_lib->ResolveSymbol("_kDartSnapshotText");
+          }
+        }
+      }
+
+      if (snapshot_data != nullptr && snapshot_text != nullptr) {
+        FML_LOG(INFO)
+            << "Resolved combined AOT snapshot symbols in memory: data="
+            << static_cast<const void*>(snapshot_data)
+            << " text=" << static_cast<const void*>(snapshot_text);
+        // Retain native library reference so pages are never unmapped.
+        static auto* persistent_native_lib =
+            new fml::RefPtr<fml::NativeLibrary>(native_lib);
+        (void)persistent_native_lib;
+
+        args.vm_snapshot_data = snapshot_data;
+        args.vm_snapshot_data_size = 0;
+        args.vm_snapshot_instructions = snapshot_text;
+        args.vm_snapshot_instructions_size = 0;
+        args.isolate_snapshot_data = snapshot_data;
+        args.isolate_snapshot_data_size = 0;
+        args.isolate_snapshot_instructions = snapshot_text;
+        args.isolate_snapshot_instructions_size = 0;
+      } else {
+        // 2. Split snapshot symbols fallback.
+        const uint8_t* vm_data =
+            native_lib->ResolveSymbol("kDartVmSnapshotData");
+        if (!vm_data) {
+          vm_data = native_lib->ResolveSymbol("_kDartVmSnapshotData");
+        }
+        const uint8_t* vm_text =
+            native_lib->ResolveSymbol("kDartVmSnapshotInstructions");
+        if (!vm_text) {
+          vm_text = native_lib->ResolveSymbol("_kDartVmSnapshotInstructions");
+        }
+        const uint8_t* iso_data =
+            native_lib->ResolveSymbol("kDartIsolateSnapshotData");
+        if (!iso_data) {
+          iso_data = native_lib->ResolveSymbol("_kDartIsolateSnapshotData");
+        }
+        const uint8_t* iso_text =
+            native_lib->ResolveSymbol("kDartIsolateSnapshotInstructions");
+        if (!iso_text) {
+          iso_text =
+              native_lib->ResolveSymbol("_kDartIsolateSnapshotInstructions");
+        }
+
+        if (vm_data && vm_text && iso_data && iso_text) {
+          FML_LOG(INFO) << "Resolved split AOT snapshot symbols in memory.";
+          static auto* persistent_native_lib =
+              new fml::RefPtr<fml::NativeLibrary>(native_lib);
+          (void)persistent_native_lib;
+
+          args.vm_snapshot_data = vm_data;
+          args.vm_snapshot_data_size = 0;
+          args.vm_snapshot_instructions = vm_text;
+          args.vm_snapshot_instructions_size = 0;
+          args.isolate_snapshot_data = iso_data;
+          args.isolate_snapshot_data_size = 0;
+          args.isolate_snapshot_instructions = iso_text;
+          args.isolate_snapshot_instructions_size = 0;
+        } else {
+          FML_LOG(ERROR) << "Failed to resolve AOT snapshot symbols in memory.";
+        }
       }
     }
   }

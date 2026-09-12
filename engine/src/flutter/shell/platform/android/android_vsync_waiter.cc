@@ -98,7 +98,9 @@ static void NativeTrampoline64(int64_t frameTimeNanos, void* data) {
   }
 }
 
-static void NativeTrampoline32(long frameTimeNanos, void* data) {
+static void NativeTrampoline32(
+    long frameTimeNanos,  // NOLINT(google-runtime-int)
+    void* data) {
   TRACE_EVENT0("flutter",
                "DefaultAndroidChoreographerProvider::NativeTrampoline32");
   std::unique_ptr<AndroidChoreographerProvider::FrameCallback> holder(
@@ -167,8 +169,9 @@ bool DefaultAndroidChoreographerProvider::PostFrameCallbackDelayed(
   }
 
   if (post_frame_callback_delayed_fn_) {
-    post_frame_callback_delayed_fn_(choreographer, &NativeTrampoline32, holder,
-                                    static_cast<long>(delay_ms));
+    post_frame_callback_delayed_fn_(
+        choreographer, &NativeTrampoline32, holder,
+        static_cast<long>(delay_ms));  // NOLINT(google-runtime-int)
     return true;
   }
 

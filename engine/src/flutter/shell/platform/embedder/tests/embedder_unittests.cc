@@ -2889,8 +2889,12 @@ TEST_F(EmbedderTest, RegisterImageDecoderValidation) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   fml::AutoResetWaitableEvent isolate_latch;
   fml::AutoResetWaitableEvent decode_latch;
+  fml::AutoResetWaitableEvent ready_for_decode;
   context.AddIsolateCreateCallback(
       [&isolate_latch]() { isolate_latch.Signal(); });
+  context.AddFfiNativeCallback(
+      "WaitForDecoderRegistered",
+      CREATE_FFI_LAMBDA([&ready_for_decode]() { ready_for_decode.Wait(); }));
   context.AddFfiNativeCallback(
       "NotifyWidthHeight",
       CREATE_FFI_LAMBDA([&decode_latch](int32_t width, int32_t height) {
@@ -2934,6 +2938,7 @@ TEST_F(EmbedderTest, RegisterImageDecoderValidation) {
                 baton.get(), 100, &reg_id),
             kSuccess);
   EXPECT_GT(reg_id, 0);
+  ready_for_decode.Signal();
 
   decode_latch.Wait();
   EXPECT_TRUE(baton->callback_called);

@@ -553,6 +553,28 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       @NonNull PlatformView platformView, @NonNull PlatformViewCreationRequest request) {
     Log.i(TAG, "Using hybrid composition for platform view: " + request.viewId);
     throwIfHCPPEnabled();
+    if (initializePlatformViewIfNeeded(request.viewId)) {
+      final FlutterMutatorView parentView = platformViewParent.get(request.viewId);
+      if (parentView != null) {
+        final int physicalWidth = toPhysicalPixels(request.logicalWidth);
+        final int physicalHeight = toPhysicalPixels(request.logicalHeight);
+        final int physicalTop = toPhysicalPixels(request.logicalTop);
+        final int physicalLeft = toPhysicalPixels(request.logicalLeft);
+
+        final FrameLayout.LayoutParams layoutParams =
+            new FrameLayout.LayoutParams(physicalWidth, physicalHeight);
+        layoutParams.leftMargin = physicalLeft;
+        layoutParams.topMargin = physicalTop;
+        parentView.setLayoutParams(layoutParams);
+        parentView.setVisibility(View.VISIBLE);
+
+        final View view = platformView.getView();
+        if (view != null) {
+          view.setLayoutParams(new FrameLayout.LayoutParams(physicalWidth, physicalHeight));
+        }
+      }
+      currentFrameUsedPlatformViewIds.add(request.viewId);
+    }
   }
 
   // Throws an exception if HC++ is enabled, as HC mode can not work in combination with HC++.
@@ -1354,6 +1376,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       // they are removed when the framework disposes the platform view widget.
       if (currentFrameUsedPlatformViewIds.contains(viewId)
           && (isFrameRenderedUsingImageReaders || !synchronizeToNativeViewHierarchy)) {
+        parentView.setVisibility(View.VISIBLE);
+      } else if (!flutterViewConvertedToImageView && platformViewParent.containsKey(viewId)) {
+        // In the C embedder without compositor slicing, keep active hybrid composition view
+        // visible.
         parentView.setVisibility(View.VISIBLE);
       } else {
         parentView.setVisibility(View.GONE);
