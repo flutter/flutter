@@ -7,17 +7,24 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
+#include <cstring>
 #include <functional>
 #include <memory>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
 #include "impeller/core/allocator.h"
 #include "impeller/core/buffer_view.h"
+#include "impeller/core/device_buffer.h"
 #include "impeller/core/gpu_submission_tracker.h"
 
 namespace impeller {
+
+/// The size of each host buffer arena allocation.
+inline constexpr size_t kAllocatorBlockSize = 1024000;  // 1024 Kb.
 
 /// Approximately the same size as the max frames in flight.
 static const constexpr size_t kHostBufferArenaSize = 4u;
@@ -109,7 +116,29 @@ class HostBuffer {
 
   [[nodiscard]] BufferView Emplace(const void* buffer,
                                    size_t length,
-                                   size_t align);
+                                   size_t align) {
+    // Fast path: the vast majority of emplaces are small and fit in the
+    // current buffer without rolling over.
+    if (current_contents_ != nullptr) {
+      size_t offset = offset_;
+      if (align > 0u) {
+        const size_t misalignment = offset % align;
+        if (misalignment != 0u) {
+          offset += align - misalignment;
+        }
+      }
+      if (length <= kAllocatorBlockSize &&
+          offset <= kAllocatorBlockSize - length) {
+        if (buffer != nullptr) {
+          ::memcpy(current_contents_ + offset, buffer, length);
+        }
+        offset_ = offset + length;
+        current_raw_buffer_->Flush(Range{offset, length});
+        return BufferView(current_raw_buffer_, Range{offset, length});
+      }
+    }
+    return EmplaceSlow(buffer, length, align);
+  }
 
   using EmplaceProc = std::function<void(uint8_t* buffer)>;
 
@@ -146,6 +175,10 @@ class HostBuffer {
   TestStateQuery GetStateForTest();
 
  private:
+  [[nodiscard]] BufferView EmplaceSlow(const void* buffer,
+                                       size_t length,
+                                       size_t align);
+
   [[nodiscard]] std::tuple<Range, std::shared_ptr<DeviceBuffer>, DeviceBuffer*>
   EmplaceInternal(const void* buffer, size_t length);
 
@@ -164,6 +197,12 @@ class HostBuffer {
   [[nodiscard]] bool MaybeCreateNewBuffer();
 
   const std::shared_ptr<DeviceBuffer>& GetCurrentBuffer() const;
+
+  // Refresh the cached raw pointer and host visible contents of the current
+  // buffer. Must be called whenever |current_buffer_| or |frame_index_|
+  // changes, and whenever the buffer object at that slot is replaced (the
+  // in-flight |Reset| path).
+  void RefreshCurrentBuffer();
 
   [[nodiscard]] BufferView Emplace(const void* buffer, size_t length);
 
@@ -193,6 +232,10 @@ class HostBuffer {
   size_t offset_ = 0u;
   size_t frame_index_ = 0u;
   size_t minimum_uniform_alignment_ = 0u;
+  // Cached raw pointer and host visible contents of the current buffer to
+  // avoid a virtual call and a shared_ptr dereference per emplace.
+  DeviceBuffer* current_raw_buffer_ = nullptr;
+  uint8_t* current_contents_ = nullptr;
 };
 
 }  // namespace impeller
