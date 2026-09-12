@@ -6,6 +6,7 @@ import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
 import 'package:hooks/hooks.dart';
 import 'package:hooks_runner/hooks_runner.dart';
+
 import '../../asset.dart' show FlutterHookResult, HookAsset;
 import 'native_assets.dart' show FlutterCodeAsset;
 

@@ -37,9 +37,10 @@ class HomePage extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   CupertinoSheetRoute<void>(
-                    scrollableBuilder:
-                        (BuildContext context, ScrollController controller) =>
-                            const _SheetScaffold(),
+                    scrollableBuilder: (
+                      BuildContext context,
+                      ScrollController controller,
+                    ) => const _SheetScaffold(),
                   ),
                 );
               },
@@ -74,9 +75,10 @@ class _SheetScaffold extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   CupertinoSheetRoute<void>(
-                    scrollableBuilder:
-                        (BuildContext context, ScrollController controller) =>
-                            const _SheetScaffold(),
+                    scrollableBuilder: (
+                      BuildContext context,
+                      ScrollController controller,
+                    ) => const _SheetScaffold(),
                   ),
                 );
               },

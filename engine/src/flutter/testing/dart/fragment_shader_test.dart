@@ -120,27 +120,20 @@ void main() async {
 
     setUpAll(() async {
       shaderMap = {
-        UniformFloatSlot: (await FragmentProgram.fromAsset(
-          'float_uniform.frag.iplr',
-        )).fragmentShader(),
-        UniformVec2Slot: (await FragmentProgram.fromAsset(
-          'vec2_uniform.frag.iplr',
-        )).fragmentShader(),
-        UniformVec3Slot: (await FragmentProgram.fromAsset(
-          'vec3_uniform.frag.iplr',
-        )).fragmentShader(),
-        UniformVec4Slot: (await FragmentProgram.fromAsset(
-          'vec4_uniform.frag.iplr',
-        )).fragmentShader(),
-        UniformMat2Slot: (await FragmentProgram.fromAsset(
-          'mat2_uniform.frag.iplr',
-        )).fragmentShader(),
-        UniformMat3Slot: (await FragmentProgram.fromAsset(
-          'mat3_uniform.frag.iplr',
-        )).fragmentShader(),
-        UniformMat4Slot: (await FragmentProgram.fromAsset(
-          'mat4_uniform.frag.iplr',
-        )).fragmentShader(),
+        UniformFloatSlot: (await FragmentProgram.fromAsset('float_uniform.frag.iplr'))
+            .fragmentShader(),
+        UniformVec2Slot: (await FragmentProgram.fromAsset('vec2_uniform.frag.iplr'))
+            .fragmentShader(),
+        UniformVec3Slot: (await FragmentProgram.fromAsset('vec3_uniform.frag.iplr'))
+            .fragmentShader(),
+        UniformVec4Slot: (await FragmentProgram.fromAsset('vec4_uniform.frag.iplr'))
+            .fragmentShader(),
+        UniformMat2Slot: (await FragmentProgram.fromAsset('mat2_uniform.frag.iplr'))
+            .fragmentShader(),
+        UniformMat3Slot: (await FragmentProgram.fromAsset('mat3_uniform.frag.iplr'))
+            .fragmentShader(),
+        UniformMat4Slot: (await FragmentProgram.fromAsset('mat4_uniform.frag.iplr'))
+            .fragmentShader(),
         UniformArray<UniformFloatSlot>: (await FragmentProgram.fromAsset(
           'float_array_uniform.frag.iplr',
         )).fragmentShader(),

@@ -262,16 +262,14 @@ List<Validation> _getValidations({
       );
       onDartAnalyzeResult(result);
     }),
-    // TODO(Piinks): Re-enable once formatting changes have rolled in and the repo has been reformatted,
-    // https://github.com/flutter/flutter/issues/187204
-    // Validation(
-    //   'format',
-    //   'Check formatting of Dart files...',
-    //   () => runCommand(dart, <String>[
-    //     '--enable-asserts',
-    //     path.join(flutterRoot, 'dev', 'tools', 'bin', 'format.dart'),
-    //   ], workingDirectory: flutterRoot),
-    // ),
+    Validation(
+      'format',
+      'Check formatting of Dart files...',
+      () => runCommand(dart, <String>[
+        '--enable-asserts',
+        path.join(flutterRoot, 'dev', 'tools', 'bin', 'format.dart'),
+      ], workingDirectory: flutterRoot),
+    ),
     Validation('executable-allowlist', 'Executable allowlist...', () => _checkForNewExecutables()),
     Validation(
       'dart-analysis-watch',
@@ -1729,9 +1727,10 @@ Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
   final errors = <String>[];
   final String integrationTestsPath = path.join(flutterRoot, _kIntegrationTestsRelativePath);
   final String templatePath = path.join(flutterRoot, _kTemplateRelativePath);
-  final Iterable<Directory> subDirs = Directory(
-    integrationTestsPath,
-  ).listSync().toList().whereType<Directory>();
+  final Iterable<Directory> subDirs = Directory(integrationTestsPath)
+      .listSync()
+      .toList()
+      .whereType<Directory>();
   for (final testPath in subDirs) {
     final String projectName = path.basename(testPath.path);
     final String runnerPath = path.join(testPath.path, _kWindowsRunnerSubPath);

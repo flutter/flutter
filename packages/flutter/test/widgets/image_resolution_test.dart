@@ -257,8 +257,7 @@ void main() {
     // If both a main asset and a 1.0x asset are specified, then prefer
     // the 1.0x asset.
 
-    final manifest =
-        json.decode('''
+    final manifest = json.decode('''
     {
       "assets/image.png" : [
         {"asset": "assets/1.0x/image.png", "dpr": 1.0},
@@ -268,8 +267,7 @@ void main() {
         {"asset": "assets/4.0x/image.png", "dpr": 4.0}
       ]
     }
-    ''')
-            as Map<Object?, Object?>;
+    ''') as Map<Object?, Object?>;
     final AssetBundle bundle = TestAssetBundle(manifest: manifest);
 
     const ratio = 1.0;

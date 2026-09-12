@@ -785,147 +785,138 @@ void main() {
   });
 
   group('blocked shader compiler', () {
-    testWithoutContext(
-      'compileShader throws ToolExit and logs friendly message when impellerc is blocked by Windows Application Control',
-      () async {
-        final blockedException = ProcessException(
-          impellerc,
-          <String>[],
-          'An Application Control policy has blocked this file',
-          1260,
-        );
-        final processManager = FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              impellerc,
-              '--runtime-stage-metal',
-              '--iplr',
-              '--sl=$outputPath',
-              '--spirv=$outputPath.spirv',
-              '--input=$fragPath',
-              '--input-type=frag',
-              '--include=$fragDir',
-              '--include=$shaderLibDir',
-            ],
-            exception: blockedException,
-          ),
-        ]);
-        final shaderCompiler = ShaderCompiler(
-          processManager: processManager,
-          logger: logger,
-          fileSystem: fileSystem,
-          artifacts: artifacts,
-          platform: FakePlatform(operatingSystem: 'windows'),
-        );
+    testWithoutContext('compileShader throws ToolExit and logs friendly message when impellerc is blocked by Windows Application Control', () async {
+      final blockedException = ProcessException(
+        impellerc,
+        <String>[],
+        'An Application Control policy has blocked this file',
+        1260,
+      );
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--runtime-stage-metal',
+            '--iplr',
+            '--sl=$outputPath',
+            '--spirv=$outputPath.spirv',
+            '--input=$fragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          exception: blockedException,
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        platform: FakePlatform(operatingSystem: 'windows'),
+      );
 
-        await expectLater(
-          shaderCompiler.compileShader(
-            input: fileSystem.file(fragPath),
-            outputPath: outputPath,
-            targetPlatform: TargetPlatform.ios,
-          ),
-          throwsToolExit(message: 'Impeller shader compiler was blocked by security policy.'),
-        );
+      await expectLater(
+        shaderCompiler.compileShader(
+          input: fileSystem.file(fragPath),
+          outputPath: outputPath,
+          targetPlatform: TargetPlatform.ios,
+        ),
+        throwsToolExit(message: 'Impeller shader compiler was blocked by security policy.'),
+      );
 
-        expect(logger.errorText, contains('blocked by system'));
-        expect(logger.errorText, contains(impellerc));
-      },
-    );
+      expect(logger.errorText, contains('blocked by system'));
+      expect(logger.errorText, contains(impellerc));
+    });
 
-    testWithoutContext(
-      'compileShader throws ToolExit and logs friendly message when impellerc is blocked by WDAC (4551) '
-      '(regression test for https://github.com/flutter/flutter/issues/190232)',
-      () async {
-        final blockedException = ProcessException(
-          impellerc,
-          <String>[],
-          'An Application Control policy has blocked this file',
-          4551,
-        );
-        final processManager = FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              impellerc,
-              '--runtime-stage-metal',
-              '--iplr',
-              '--sl=$outputPath',
-              '--spirv=$outputPath.spirv',
-              '--input=$fragPath',
-              '--input-type=frag',
-              '--include=$fragDir',
-              '--include=$shaderLibDir',
-            ],
-            exception: blockedException,
-          ),
-        ]);
-        final shaderCompiler = ShaderCompiler(
-          processManager: processManager,
-          logger: logger,
-          fileSystem: fileSystem,
-          artifacts: artifacts,
-          platform: FakePlatform(operatingSystem: 'windows'),
-        );
+    testWithoutContext('compileShader throws ToolExit and logs friendly message when impellerc is blocked by WDAC (4551) '
+        '(regression test for https://github.com/flutter/flutter/issues/190232)', () async {
+      final blockedException = ProcessException(
+        impellerc,
+        <String>[],
+        'An Application Control policy has blocked this file',
+        4551,
+      );
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--runtime-stage-metal',
+            '--iplr',
+            '--sl=$outputPath',
+            '--spirv=$outputPath.spirv',
+            '--input=$fragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          exception: blockedException,
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        platform: FakePlatform(operatingSystem: 'windows'),
+      );
 
-        await expectLater(
-          shaderCompiler.compileShader(
-            input: fileSystem.file(fragPath),
-            outputPath: outputPath,
-            targetPlatform: TargetPlatform.ios,
-          ),
-          throwsToolExit(message: 'Impeller shader compiler was blocked by security policy.'),
-        );
+      await expectLater(
+        shaderCompiler.compileShader(
+          input: fileSystem.file(fragPath),
+          outputPath: outputPath,
+          targetPlatform: TargetPlatform.ios,
+        ),
+        throwsToolExit(message: 'Impeller shader compiler was blocked by security policy.'),
+      );
 
-        expect(logger.errorText, contains('blocked by system'));
-        expect(logger.errorText, contains(impellerc));
-      },
-    );
+      expect(logger.errorText, contains('blocked by system'));
+      expect(logger.errorText, contains(impellerc));
+    });
 
-    testWithoutContext(
-      'compileShader throws ToolExit and logs friendly message when impellerc is blocked by group policy',
-      () async {
-        final blockedException = ProcessException(
-          impellerc,
-          <String>[],
-          'blocked by group policy',
-          1260,
-        );
-        final processManager = FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              impellerc,
-              '--runtime-stage-metal',
-              '--iplr',
-              '--sl=$outputPath',
-              '--spirv=$outputPath.spirv',
-              '--input=$fragPath',
-              '--input-type=frag',
-              '--include=$fragDir',
-              '--include=$shaderLibDir',
-            ],
-            exception: blockedException,
-          ),
-        ]);
-        final shaderCompiler = ShaderCompiler(
-          processManager: processManager,
-          logger: logger,
-          fileSystem: fileSystem,
-          artifacts: artifacts,
-          platform: FakePlatform(operatingSystem: 'windows'),
-        );
+    testWithoutContext('compileShader throws ToolExit and logs friendly message when impellerc is blocked by group policy', () async {
+      final blockedException = ProcessException(
+        impellerc,
+        <String>[],
+        'blocked by group policy',
+        1260,
+      );
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--runtime-stage-metal',
+            '--iplr',
+            '--sl=$outputPath',
+            '--spirv=$outputPath.spirv',
+            '--input=$fragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          exception: blockedException,
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        platform: FakePlatform(operatingSystem: 'windows'),
+      );
 
-        await expectLater(
-          shaderCompiler.compileShader(
-            input: fileSystem.file(fragPath),
-            outputPath: outputPath,
-            targetPlatform: TargetPlatform.ios,
-          ),
-          throwsToolExit(message: 'Impeller shader compiler was blocked by security policy.'),
-        );
+      await expectLater(
+        shaderCompiler.compileShader(
+          input: fileSystem.file(fragPath),
+          outputPath: outputPath,
+          targetPlatform: TargetPlatform.ios,
+        ),
+        throwsToolExit(message: 'Impeller shader compiler was blocked by security policy.'),
+      );
 
-        expect(logger.errorText, contains('blocked by system'));
-        expect(logger.errorText, contains(impellerc));
-      },
-    );
+      expect(logger.errorText, contains('blocked by system'));
+      expect(logger.errorText, contains(impellerc));
+    });
 
     testWithoutContext(
       'compileShader handles non-fatal security policy block gracefully',
@@ -1254,50 +1245,47 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'Windows and exit code 3 with Unicode path adds Unicode path warning '
-      '(regression test for https://github.com/flutter/flutter/issues/190233)',
-      () async {
-        const unicodeFragPath = '/shaders/my_shåder.frag';
-        const unicodeOutputPath = '/output/shaders/my_shåder.frag';
-        const unicodeOutputSpirvPath = '/output/shaders/my_shåder.frag.spirv';
-        fileSystem.file(unicodeFragPath).createSync(recursive: true);
+    testWithoutContext('Windows and exit code 3 with Unicode path adds Unicode path warning '
+        '(regression test for https://github.com/flutter/flutter/issues/190233)', () async {
+      const unicodeFragPath = '/shaders/my_shåder.frag';
+      const unicodeOutputPath = '/output/shaders/my_shåder.frag';
+      const unicodeOutputSpirvPath = '/output/shaders/my_shåder.frag.spirv';
+      fileSystem.file(unicodeFragPath).createSync(recursive: true);
 
-        final processManager = FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              impellerc,
-              '--sksl',
-              '--iplr',
-              '--json',
-              '--sl=$unicodeOutputPath',
-              '--spirv=$unicodeOutputSpirvPath',
-              '--input=$unicodeFragPath',
-              '--input-type=frag',
-              '--include=$fragDir',
-              '--include=$shaderLibDir',
-            ],
-            exitCode: 3,
-          ),
-        ]);
-        final shaderCompiler = ShaderCompiler(
-          processManager: processManager,
-          logger: logger,
-          fileSystem: fileSystem,
-          artifacts: artifacts,
-          platform: FakePlatform(operatingSystem: 'windows'),
-        );
-
-        await expectShaderCompilerException(
-          shaderCompiler: shaderCompiler,
-          inputPath: unicodeFragPath,
-          outputPath: unicodeOutputPath,
-          matchers: <Matcher>[
-            contains('The shader compiler (impellerc) aborted during compilation.'),
-            contains('Warning: The path contains non-ASCII characters'),
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--iplr',
+            '--json',
+            '--sl=$unicodeOutputPath',
+            '--spirv=$unicodeOutputSpirvPath',
+            '--input=$unicodeFragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
           ],
-        );
-      },
-    );
+          exitCode: 3,
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        platform: FakePlatform(operatingSystem: 'windows'),
+      );
+
+      await expectShaderCompilerException(
+        shaderCompiler: shaderCompiler,
+        inputPath: unicodeFragPath,
+        outputPath: unicodeOutputPath,
+        matchers: <Matcher>[
+          contains('The shader compiler (impellerc) aborted during compilation.'),
+          contains('Warning: The path contains non-ASCII characters'),
+        ],
+      );
+    });
   });
 }

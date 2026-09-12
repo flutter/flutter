@@ -163,24 +163,18 @@ const kMaxRetryTime = Duration(seconds: 10);
 /// An implementation of the [AndroidBuilder] that delegates to gradle.
 class AndroidGradleBuilder implements AndroidBuilder {
   AndroidGradleBuilder({
-    required Java? java,
+    required this._java,
     required Logger logger,
     required ProcessManager processManager,
     required FileSystem fileSystem,
-    required Artifacts artifacts,
-    required Analytics analytics,
-    required GradleUtils gradleUtils,
+    required this._artifacts,
+    required this._analytics,
+    required this._gradleUtils,
     required Platform platform,
-    required AndroidStudio? androidStudio,
-    AndroidSdk? androidSdk,
-  }) : _java = java,
-       _logger = logger,
+    required this._androidStudio,
+    this._androidSdk,
+  }) : _logger = logger,
        _fileSystem = fileSystem,
-       _artifacts = artifacts,
-       _analytics = analytics,
-       _gradleUtils = gradleUtils,
-       _androidStudio = androidStudio,
-       _androidSdk = androidSdk,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 

@@ -506,52 +506,55 @@ void main() {
         );
       });
 
-      test('runs "flutter attach" with --debug-uri if vmServiceInfoFile is created later', () async {
-        // LocalFileSystem is required here because dap_adapters' waitForVmServiceInfoFile uses .watch(),
-        // which is unsupported in MemoryFileSystem.
-        final fs = LocalFileSystem(
-          LocalSignals.instance,
-          Signals.defaultExitSignals,
-          ShutdownHooks(),
-        );
-        final adapter = FakeFlutterDebugAdapter(fileSystem: fs, platform: platform);
-        final responseCompleter = Completer<void>();
-        final Directory tempDir = fs.systemTempDirectory.createTempSync(
-          'dap_flutter_attach_vmServiceInfoFile',
-        );
-        addTearDown(() => tempDir.deleteSync(recursive: true));
-        final File serviceInfoFile = tempDir.childFile('vmServiceInfo.json');
+      test(
+        'runs "flutter attach" with --debug-uri if vmServiceInfoFile is created later',
+        () async {
+          // LocalFileSystem is required here because dap_adapters' waitForVmServiceInfoFile uses .watch(),
+          // which is unsupported in MemoryFileSystem.
+          final fs = LocalFileSystem(
+            LocalSignals.instance,
+            Signals.defaultExitSignals,
+            ShutdownHooks(),
+          );
+          final adapter = FakeFlutterDebugAdapter(fileSystem: fs, platform: platform);
+          final responseCompleter = Completer<void>();
+          final Directory tempDir = fs.systemTempDirectory.createTempSync(
+            'dap_flutter_attach_vmServiceInfoFile',
+          );
+          addTearDown(() => tempDir.deleteSync(recursive: true));
+          final File serviceInfoFile = tempDir.childFile('vmServiceInfo.json');
 
-        final args = FlutterAttachRequestArguments(
-          cwd: '.',
-          program: 'program/main.dart',
-          vmServiceInfoFile: serviceInfoFile.path,
-        );
+          final args = FlutterAttachRequestArguments(
+            cwd: '.',
+            program: 'program/main.dart',
+            vmServiceInfoFile: serviceInfoFile.path,
+          );
 
-        await adapter.configurationDoneRequest(FakeRequest(), null, () {});
-        final Future<void> attachResponseFuture = adapter.attachRequest(
-          FakeRequest(),
-          args,
-          responseCompleter.complete,
-        );
-        // Write the service info file a little later to ensure we detect it:
-        await pumpEventQueue(times: 5000);
-        serviceInfoFile.writeAsStringSync('{ "uri": "ws://1.2.3.4/ws" }');
-        await attachResponseFuture;
-        await responseCompleter.future;
+          await adapter.configurationDoneRequest(FakeRequest(), null, () {});
+          final Future<void> attachResponseFuture = adapter.attachRequest(
+            FakeRequest(),
+            args,
+            responseCompleter.complete,
+          );
+          // Write the service info file a little later to ensure we detect it:
+          await pumpEventQueue(times: 5000);
+          serviceInfoFile.writeAsStringSync('{ "uri": "ws://1.2.3.4/ws" }');
+          await attachResponseFuture;
+          await responseCompleter.future;
 
-        expect(
-          adapter.processArgs,
-          containsAllInOrder(<String>[
-            'attach',
-            '--machine',
-            '--debug-uri',
-            'ws://1.2.3.4/ws',
-            '--target',
-            'program/main.dart',
-          ]),
-        );
-      });
+          expect(
+            adapter.processArgs,
+            containsAllInOrder(<String>[
+              'attach',
+              '--machine',
+              '--debug-uri',
+              'ws://1.2.3.4/ws',
+              '--target',
+              'program/main.dart',
+            ]),
+          );
+        },
+      );
 
       test('does not record the VMs PID for terminating', () async {
         final adapter = FakeFlutterDebugAdapter(

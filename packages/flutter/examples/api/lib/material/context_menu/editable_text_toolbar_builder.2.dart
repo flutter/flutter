@@ -22,8 +22,7 @@ class EditableTextToolbarBuilderExampleApp extends StatefulWidget {
 class _EditableTextToolbarBuilderExampleAppState
     extends State<EditableTextToolbarBuilderExampleApp> {
   final TextEditingController _controller = TextEditingController(
-    text:
-        'Right click (desktop) or long press (mobile) to see the menu with a custom toolbar.',
+    text: 'Right click (desktop) or long press (mobile) to see the menu with a custom toolbar.',
   );
 
   @override

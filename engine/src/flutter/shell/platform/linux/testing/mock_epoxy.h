@@ -129,6 +129,14 @@ class MockEpoxy {
                GLenum format,
                GLenum type,
                const void* pixels));
+  MOCK_METHOD(void,
+              glViewport,
+              (GLint x, GLint y, GLsizei width, GLsizei height));
+
+  // The size reported for EGL surfaces. Zero by default, so anything drawing
+  // to a mock surface sees a size change on its first frame.
+  EGLint egl_surface_width = 0;
+  EGLint egl_surface_height = 0;
 };
 
 }  // namespace testing

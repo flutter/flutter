@@ -118,9 +118,9 @@ void main() {
       fileSystem.file('pubspec.yaml').createSync();
 
       await expectLater(
-        () => createTestCommandRunner(
-          command,
-        ).run(<String>['drive', '--no-pub', '--target', 'lib/app.dart']),
+        () =>
+            createTestCommandRunner(command)
+                .run(<String>['drive', '--no-pub', '--target', 'lib/app.dart']),
         throwsToolExit(message: 'Target file "lib/app.dart" not found'),
       );
 
@@ -178,9 +178,9 @@ void main() {
       fileSystem.file('pubspec.yaml').createSync();
 
       await expectLater(
-        () => createTestCommandRunner(
-          command,
-        ).run(<String>['drive', '--no-pub', '--target', 'test_driver/main_test.dart']),
+        () =>
+            createTestCommandRunner(command)
+                .run(<String>['drive', '--no-pub', '--target', 'test_driver/main_test.dart']),
         throwsToolExit(message: 'Test file not found: /test_driver/main_test_test.dart'),
       );
 

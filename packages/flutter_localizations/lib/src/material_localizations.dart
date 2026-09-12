@@ -94,26 +94,17 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// The [narrowWeekdays] and [firstDayOfWeekIndex] properties use the values
   /// from the [intl.DateFormat] used by [formatFullDate].
   const GlobalMaterialLocalizations({
-    required String localeName,
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : _localeName = localeName,
-       _fullYearFormat = fullYearFormat,
-       _compactDateFormat = compactDateFormat,
-       _shortDateFormat = shortDateFormat,
-       _mediumDateFormat = mediumDateFormat,
-       _longDateFormat = longDateFormat,
-       _yearMonthFormat = yearMonthFormat,
-       _shortMonthDayFormat = shortMonthDayFormat,
-       _decimalFormat = decimalFormat,
-       _twoDigitZeroPaddedFormat = twoDigitZeroPaddedFormat;
+    required this._localeName,
+    required this._fullYearFormat,
+    required this._compactDateFormat,
+    required this._shortDateFormat,
+    required this._mediumDateFormat,
+    required this._longDateFormat,
+    required this._yearMonthFormat,
+    required this._shortMonthDayFormat,
+    required this._decimalFormat,
+    required this._twoDigitZeroPaddedFormat,
+  });
 
   final String _localeName;
   final intl.DateFormat _fullYearFormat;

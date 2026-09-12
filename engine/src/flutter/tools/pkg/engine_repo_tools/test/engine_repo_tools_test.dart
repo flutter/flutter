@@ -179,9 +179,8 @@ void main() {
 
       // Create two targets in out: host_debug and host_debug_unopt_arm64.
       io.Directory(p.join(emptyDir.path, 'src', 'out', 'host_debug')).createSync(recursive: true);
-      io.Directory(
-        p.join(emptyDir.path, 'src', 'out', 'host_debug_unopt_arm64'),
-      ).createSync(recursive: true);
+      io.Directory(p.join(emptyDir.path, 'src', 'out', 'host_debug_unopt_arm64'))
+          .createSync(recursive: true);
 
       final engine = Engine.fromSrcPath(p.join(emptyDir.path, 'src'));
       final List<String> outputs =

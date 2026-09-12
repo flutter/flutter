@@ -305,8 +305,7 @@ void main() {
       },
       overrides: <Type, Generator>{
         FeatureFlags: () => TestFeatureFlags(
-          isNativeAssetsEnabled:
-              false, // ignore: avoid_redundant_argument_values, If we graduate the feature to true by default, don't break this test.
+          isNativeAssetsEnabled: false, // ignore: avoid_redundant_argument_values, If we graduate the feature to true by default, don't break this test.
         ),
       },
     );
