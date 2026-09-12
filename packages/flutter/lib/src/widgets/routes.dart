@@ -38,6 +38,7 @@ import 'primary_scroll_controller.dart';
 import 'restoration.dart';
 import 'scroll_controller.dart';
 import 'transitions.dart';
+import 'value_listenable_builder.dart';
 
 // Examples can assume:
 // late NavigatorState navigator;
@@ -2275,10 +2276,29 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     if (filter != null) {
       barrier = BackdropFilter(filter: filter, child: barrier);
     }
-    barrier = IgnorePointer(
-      ignoring: !animation!
-          .isForwardOrCompleted, // changedInternalState is called when animation.status updates
-      child: barrier, // dismissed is possible when doing a manual pop gesture
+    barrier = ValueListenableBuilder<bool>(
+      // Ignore pointer events on the barrier when:
+      // 1. The animation is fully dismissed (route is gone, changedInternalState
+      //    is called when animation.status updates).
+      // 2. The animation is in reverse AND no user pop gesture is in progress
+      //    (programmatic dismissal — preserve the original passthrough behavior).
+      //
+      // Keep the barrier active when the animation is in reverse AND a user
+      // gesture IS in progress (e.g. iOS swipe-back). This prevents touch
+      // events from falling through to barriers of routes beneath (e.g.
+      // a ModalBottomSheet), which would cause them to be unexpectedly
+      // dismissed while the top page is being swiped away.
+      //
+      // See https://github.com/flutter/flutter/issues/129829
+      valueListenable: navigator!.userGestureInProgressNotifier,
+      builder: (BuildContext context, bool gestureInProgress, Widget? child) {
+        return IgnorePointer(
+          ignoring:
+              animation!.isDismissed || (!animation!.isForwardOrCompleted && !gestureInProgress),
+          child: child,
+        );
+      },
+      child: barrier,
     );
     if (semanticsDismissible && barrierDismissible) {
       // To be sorted after the _modalScope.
