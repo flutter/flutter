@@ -1806,14 +1806,29 @@ Future<void> a11y_main_multi_view() async {
 
 @pragma('vm:entry-point')
 void canRegisterImageDecoders() {
-  waitForDecoderRegistered();
-  decodeImageFromList(Uint8List(1), (Image result) {
-    notifyWidthHeight(result.width, result.height);
-  });
+  PlatformDispatcher.instance.onPlatformMessage =
+      (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
+        if (name == 'decode_now') {
+          runZonedGuarded(
+            () {
+              // 1-byte dummy image buffer to trigger custom image generator resolution.
+              decodeImageFromList(Uint8List(1), (Image result) {
+                notifyWidthHeight(result.width, result.height);
+                result.dispose();
+              });
+            },
+            (Object error, StackTrace stackTrace) {
+              // Notify failure immediately so the test fails fast instead of hanging.
+              notifyWidthHeight(-1, -1);
+            },
+          );
+        }
+      };
+  notifyEntrypointReady();
 }
 
-@ffi.Native<ffi.Void Function()>(symbol: 'WaitForDecoderRegistered')
-external void waitForDecoderRegistered();
+@ffi.Native<ffi.Void Function()>(symbol: 'NotifyEntrypointReady')
+external void notifyEntrypointReady();
 
 @ffi.Native<ffi.Void Function(ffi.Int32, ffi.Int32)>(symbol: 'NotifyWidthHeight')
 external void notifyWidthHeight(int width, int height);

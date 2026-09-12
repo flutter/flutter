@@ -4,6 +4,7 @@
 
 #define FML_USED_ON_EMBEDDER
 
+#include <atomic>
 #include <string>
 #include <thread>
 #include <utility>
@@ -2880,24 +2881,29 @@ TEST_F(EmbedderTest, RegisterImageDecoderValidation) {
             kInvalidArguments);
 
   struct DecoderBaton {
-    bool callback_called = false;
-    bool destruction_called = false;
+    std::atomic<bool> callback_called{false};
+    // destruction_called is set asynchronously during image finalization after
+    // decode_latch.
+    std::atomic<bool> destruction_called{false};
+    // 100 pixels (10x10 image) in 0xFF00FF00 (opaque green).
     std::vector<uint32_t> pixels = std::vector<uint32_t>(100, 0xFF00FF00);
   };
   auto baton = std::make_shared<DecoderBaton>();
 
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   fml::AutoResetWaitableEvent isolate_latch;
+  fml::AutoResetWaitableEvent entrypoint_ready_latch;
   fml::AutoResetWaitableEvent decode_latch;
-  fml::AutoResetWaitableEvent ready_for_decode;
   context.AddIsolateCreateCallback(
       [&isolate_latch]() { isolate_latch.Signal(); });
-  context.AddFfiNativeCallback(
-      "WaitForDecoderRegistered",
-      CREATE_FFI_LAMBDA([&ready_for_decode]() { ready_for_decode.Wait(); }));
+  context.AddFfiNativeCallback("NotifyEntrypointReady",
+                               CREATE_FFI_LAMBDA([&entrypoint_ready_latch]() {
+                                 entrypoint_ready_latch.Signal();
+                               }));
   context.AddFfiNativeCallback(
       "NotifyWidthHeight",
       CREATE_FFI_LAMBDA([&decode_latch](int32_t width, int32_t height) {
+        // Expected test image dimensions: 10 x 10.
         EXPECT_EQ(width, 10);
         EXPECT_EQ(height, 10);
         decode_latch.Signal();
@@ -2909,6 +2915,7 @@ TEST_F(EmbedderTest, RegisterImageDecoderValidation) {
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
   isolate_latch.Wait();
+  entrypoint_ready_latch.Wait();
 
   auto decoder_cb = [](const uint8_t* data, size_t size,
                        FlutterDecodedImage* decoded_image_out,
@@ -2917,7 +2924,7 @@ TEST_F(EmbedderTest, RegisterImageDecoderValidation) {
     if (!b || !decoded_image_out) {
       return false;
     }
-    b->callback_called = true;
+    b->callback_called.store(true);
     decoded_image_out->width = 10;
     decoded_image_out->height = 10;
     decoded_image_out->row_bytes = 10 * sizeof(uint32_t);
@@ -2926,22 +2933,34 @@ TEST_F(EmbedderTest, RegisterImageDecoderValidation) {
     decoded_image_out->destruction_callback = [](void* ud) {
       auto* inner = reinterpret_cast<DecoderBaton*>(ud);
       if (inner) {
-        inner->destruction_called = true;
+        inner->destruction_called.store(true);
       }
     };
     return true;
   };
 
   FlutterImageDecoderRegistration reg_id = 0;
+  // Register image decoder with priority 100.
+  const int64_t priority = 100;
   EXPECT_EQ(FlutterEngineRegisterImageDecoder(
                 reinterpret_cast<FlutterEngine>(engine.get()), decoder_cb,
-                baton.get(), 100, &reg_id),
+                baton.get(), priority, &reg_id),
             kSuccess);
   EXPECT_GT(reg_id, 0);
-  ready_for_decode.Signal();
+
+  // Send platform message on UI task runner to trigger decodeImageFromList.
+  // Because Shell::RegisterImageDecoder posts AddFactory to the UI task runner,
+  // FIFO task scheduling guarantees AddFactory runs before decode_now message
+  // processing.
+  FlutterPlatformMessage message = {};
+  message.struct_size = sizeof(FlutterPlatformMessage);
+  message.channel = "decode_now";
+  EXPECT_EQ(FlutterEngineSendPlatformMessage(
+                reinterpret_cast<FlutterEngine>(engine.get()), &message),
+            kSuccess);
 
   decode_latch.Wait();
-  EXPECT_TRUE(baton->callback_called);
+  EXPECT_TRUE(baton->callback_called.load());
 
   // Unregister the decoder.
   EXPECT_EQ(FlutterEngineUnregisterImageDecoder(
