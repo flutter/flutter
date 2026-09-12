@@ -11,6 +11,9 @@
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/testing/display_list_testing.h"
+#ifdef IMPELLER_SUPPORTS_RENDERING
+#include "flutter/impeller/display_list/dl_text_impeller.h"  // nogncheck
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -1547,9 +1550,19 @@ void BM_DrawTextBlob(benchmark::State& state,
   state.counters["GlyphCount"] = draw_calls;
   char character[2] = {'A', '\0'};
 
+#ifdef IMPELLER_SUPPORTS_RENDERING
+  const bool targets_impeller = surface_provider->TargetsImpeller();
+#endif  // IMPELLER_SUPPORTS_RENDERING
+
   for (size_t i = 0; i < draw_calls; i++) {
     character[0] = 'A' + (i % 26);
     auto blob = SkTextBlob::MakeFromString(character, CreateTestFontOfSize(20));
+#ifdef IMPELLER_SUPPORTS_RENDERING
+    if (targets_impeller) {
+      builder.DrawText(DlTextImpeller::MakeFromBlob(blob), 50.0f, 50.0f, paint);
+      continue;
+    }
+#endif  // IMPELLER_SUPPORTS_RENDERING
     builder.DrawText(DlTextSkia::Make(blob), 50.0f, 50.0f, paint);
   }
 
