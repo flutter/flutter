@@ -98,9 +98,9 @@ void main() {
       testUsingContext(
         'does not check that Flutter installation is up-to-date with --machine flag present anywhere',
         () async {
-          final runner =
-              createTestCommandRunner(_FlutterCommandWithItsOwnMachineFlag(verboseHelp: false))
-                  as FlutterCommandRunner;
+          final runner = createTestCommandRunner(
+            _FlutterCommandWithItsOwnMachineFlag(verboseHelp: false),
+          ) as FlutterCommandRunner;
           final version = globals.flutterVersion as FakeFlutterVersion;
 
           await runner.run(<String>['dummy-with-machine', '--machine']);

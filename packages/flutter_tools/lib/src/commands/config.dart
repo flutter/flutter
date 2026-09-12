@@ -27,15 +27,12 @@ import '../runner/flutter_command_runner.dart';
 
 class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   ConfigCommand({
-    required AndroidContext androidContext,
+    required this._androidContext,
     required ToolContext toolContext,
     required this.featureFlags,
-    bool verboseHelp = false,
-    ExtensionManager? extensionManager,
-  }) : _androidContext = androidContext,
-       _toolContext = toolContext,
-       _extensionManager = extensionManager,
-       _verboseHelp = verboseHelp,
+    this._verboseHelp = false,
+    this._extensionManager,
+  }) : _toolContext = toolContext,
        super(toolContext: toolContext);
 
   final AndroidContext _androidContext;
@@ -65,20 +62,17 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       'clear-ios-signing-settings',
       negatable: false,
       aliases: <String>['clear-ios-signing-cert'],
-      help:
-          'Clear the saved development certificate or provisioning profile choice used to sign apps for iOS device deployment.',
+      help: 'Clear the saved development certificate or provisioning profile choice used to sign apps for iOS device deployment.',
     );
     parser.addFlag(
       'select-ios-signing-settings',
       negatable: false,
-      help:
-          'Complete prompt to select and save code signing settings used to sign apps for iOS device deployment.',
+      help: 'Complete prompt to select and save code signing settings used to sign apps for iOS device deployment.',
     );
     parser.addOption('android-sdk', help: 'The Android SDK directory.');
     parser.addOption(
       'android-studio-dir',
-      help:
-          'The Android Studio installation directory. If unset, flutter will search for valid installations at well-known locations.',
+      help: 'The Android Studio installation directory. If unset, flutter will search for valid installations at well-known locations.',
     );
     parser.addOption(
       'jdk-dir',

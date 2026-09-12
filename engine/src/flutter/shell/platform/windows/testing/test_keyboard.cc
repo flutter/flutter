@@ -176,7 +176,7 @@ void MockEmbedderApiForKeyboard(
   modifier.embedder_api().Run =
       [](size_t version, const FlutterRendererConfig* config,
          const FlutterProjectArgs* args, void* user_data,
-         FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+         FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
         return kSuccess;

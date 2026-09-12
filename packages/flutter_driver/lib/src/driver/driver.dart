@@ -581,9 +581,8 @@ abstract class FlutterDriver {
   /// callback in [enableFlutterDriverExtension] that can successfully handle
   /// these requests.
   Future<String> requestData(String? message, {Duration? timeout}) async {
-    return RequestDataResult.fromJson(
-      await sendCommand(RequestData(message, timeout: timeout)),
-    ).message;
+    return RequestDataResult.fromJson(await sendCommand(RequestData(message, timeout: timeout)))
+        .message;
   }
 
   /// Turns semantics on or off in the Flutter app under test.

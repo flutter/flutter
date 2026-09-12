@@ -11,8 +11,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 typedef HandleEventCallback = void Function(PointerEvent event);
-typedef HandleHitTestInViewCallback =
-    void Function(HitTestResult result, Offset position, int viewId);
+typedef HandleHitTestInViewCallback = void Function(
+  HitTestResult result,
+  Offset position,
+  int viewId,
+);
 
 class TestGestureFlutterBinding extends BindingBase
     with GestureBinding, SchedulerBinding, ServicesBinding, TestDefaultBinaryMessengerBinding {
@@ -101,8 +104,11 @@ void main() {
 
   test('Platform view hit test should not accept gesture if no hit', () {
     // not found
-    TestGestureFlutterBinding.instance.onHitTestInView =
-        (HitTestResult result, Offset position, int viewId) {};
+    TestGestureFlutterBinding.instance.onHitTestInView = (
+      HitTestResult result,
+      Offset position,
+      int viewId,
+    ) {};
 
     final request = ui.HitTestRequest(view: _FakeFlutterView(), offset: const Offset(1, 1));
     final ui.HitTestResponse response =
@@ -124,43 +130,37 @@ void main() {
     expect(response.hasPlatformView, isFalse);
   });
 
-  test(
-    'Platform view hit test should accept gesture if a platform view is not the first hit in hitTest result path',
-    () {
-      TestGestureFlutterBinding.instance.onHitTestInView =
-          (HitTestResult result, Offset position, int viewId) {
-            result.add(HitTestEntry(_DummyHitTestTarget()));
-            result.add(HitTestEntry(_DummyNativeHitTestTarget()));
-          };
+  test('Platform view hit test should accept gesture if a platform view is not the first hit in hitTest result path', () {
+    TestGestureFlutterBinding.instance.onHitTestInView =
+        (HitTestResult result, Offset position, int viewId) {
+          result.add(HitTestEntry(_DummyHitTestTarget()));
+          result.add(HitTestEntry(_DummyNativeHitTestTarget()));
+        };
 
-      final request = ui.HitTestRequest(view: _FakeFlutterView(), offset: const Offset(1, 1));
+    final request = ui.HitTestRequest(view: _FakeFlutterView(), offset: const Offset(1, 1));
 
-      final ui.HitTestResponse response =
-          GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
-          ui.HitTestResponse.empty;
+    final ui.HitTestResponse response =
+        GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
+        ui.HitTestResponse.empty;
 
-      expect(response.hasPlatformView, isTrue);
-    },
-  );
+    expect(response.hasPlatformView, isTrue);
+  });
 
-  test(
-    'Platform view hit test should accept gesture if a platform view is the first hit in hitTest result path',
-    () {
-      TestGestureFlutterBinding.instance.onHitTestInView =
-          (HitTestResult result, Offset position, int viewId) {
-            result.add(HitTestEntry(_DummyNativeHitTestTarget()));
-            result.add(HitTestEntry(_DummyHitTestTarget()));
-          };
+  test('Platform view hit test should accept gesture if a platform view is the first hit in hitTest result path', () {
+    TestGestureFlutterBinding.instance.onHitTestInView =
+        (HitTestResult result, Offset position, int viewId) {
+          result.add(HitTestEntry(_DummyNativeHitTestTarget()));
+          result.add(HitTestEntry(_DummyHitTestTarget()));
+        };
 
-      final request = ui.HitTestRequest(view: _FakeFlutterView(), offset: const Offset(1, 1));
+    final request = ui.HitTestRequest(view: _FakeFlutterView(), offset: const Offset(1, 1));
 
-      final ui.HitTestResponse response =
-          GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
-          ui.HitTestResponse.empty;
+    final ui.HitTestResponse response =
+        GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
+        ui.HitTestResponse.empty;
 
-      expect(response.hasPlatformView, isTrue);
-    },
-  );
+    expect(response.hasPlatformView, isTrue);
+  });
 
   test('Pointer tap events', () {
     const packet = ui.PointerDataPacket(

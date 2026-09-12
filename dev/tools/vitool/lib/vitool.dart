@@ -556,10 +556,8 @@ bool _hasAttr(XmlElement element, String name) {
 
 XmlElement _extractSvgElement(XmlDocument document) {
   return document.children.singleWhere(
-        (XmlNode node) =>
-            node.nodeType == XmlNodeType.ELEMENT && _asElement(node).name.local == 'svg',
-      )
-      as XmlElement;
+    (XmlNode node) => node.nodeType == XmlNodeType.ELEMENT && _asElement(node).name.local == 'svg',
+  ) as XmlElement;
 }
 
 XmlElement _asElement(XmlNode node) => node as XmlElement;
