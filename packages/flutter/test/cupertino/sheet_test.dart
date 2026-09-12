@@ -164,6 +164,63 @@ void main() {
     expect(sheetContentOffset.dy, greaterThan(dragHandleOffset.dy));
   });
 
+  testWidgets('showCupertinoSheet forwards showDragHandle to the sheet route', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/187693.
+    final Finder dragHandleFinder = find.byWidgetPredicate((Widget widget) {
+      return widget is DecoratedBox &&
+          widget.decoration is ShapeDecoration &&
+          (widget.decoration as ShapeDecoration).color == CupertinoColors.tertiaryLabel;
+    });
+
+    for (final useNestedNavigation in <bool>[false, true]) {
+      final GlobalKey scaffoldKey = GlobalKey();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            key: scaffoldKey,
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  const Text('Page 1'),
+                  CupertinoButton(
+                    onPressed: () {
+                      showCupertinoSheet<void>(
+                        context: scaffoldKey.currentContext!,
+                        useNestedNavigation: useNestedNavigation,
+                        showDragHandle: true,
+                        scrollableBuilder:
+                            (BuildContext context, ScrollController scrollController) {
+                              return const CupertinoPageScaffold(child: Text('Page 2'));
+                            },
+                      );
+                    },
+                    child: const Text('Push Page 2'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 2'), findsOneWidget);
+      expect(
+        dragHandleFinder,
+        findsOneWidget,
+        reason: 'drag handle should be shown when useNestedNavigation is $useNestedNavigation',
+      );
+
+      // Tear the tree down so the next iteration starts with a fresh navigator.
+      await tester.pumpWidget(const SizedBox());
+    }
+  });
+
   testWidgets('Previous route moves slight downward when sheet route is pushed', (
     WidgetTester tester,
   ) async {
