@@ -129,10 +129,9 @@ class PrebuiltMacOSApp extends MacOSApp implements PrebuiltApplicationPackage {
     required this.uncompressedBundle,
     required this.bundleName,
     required this.projectBundleId,
-    required String executable,
+    required this._executable,
     required this.applicationPackage,
-  }) : _executable = executable,
-       super(projectBundleId: projectBundleId);
+  }) : super(projectBundleId: projectBundleId);
 
   /// The uncompressed bundle of the application.
   ///

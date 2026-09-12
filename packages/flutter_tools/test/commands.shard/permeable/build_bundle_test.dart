@@ -67,55 +67,47 @@ void main() {
     return command;
   }
 
-  testUsingContext(
-    'bundle getUsage indicate that project is a module',
-    () async {
-      final String projectPath = await createProject(
-        tempDir,
-        arguments: <String>['--no-pub', '--template=module'],
-      );
+  testUsingContext('bundle getUsage indicate that project is a module', () async {
+    final String projectPath = await createProject(
+      tempDir,
+      arguments: <String>['--no-pub', '--template=module'],
+    );
 
-      await runCommandIn(projectPath);
+    await runCommandIn(projectPath);
 
-      expect(
-        fakeAnalytics.sentEvents,
-        contains(
-          Event.commandUsageValues(
-            workflow: 'bundle',
-            commandHasTerminal: false,
-            buildBundleTargetPlatform: 'android-arm',
-            buildBundleIsModule: true,
-          ),
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.commandUsageValues(
+          workflow: 'bundle',
+          commandHasTerminal: false,
+          buildBundleTargetPlatform: 'android-arm',
+          buildBundleIsModule: true,
         ),
-      );
-    },
-    overrides: <Type, Generator>{Analytics: () => fakeAnalytics},
-  );
+      ),
+    );
+  }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
 
-  testUsingContext(
-    'bundle getUsage indicate that project is not a module',
-    () async {
-      final String projectPath = await createProject(
-        tempDir,
-        arguments: <String>['--no-pub', '--template=app'],
-      );
+  testUsingContext('bundle getUsage indicate that project is not a module', () async {
+    final String projectPath = await createProject(
+      tempDir,
+      arguments: <String>['--no-pub', '--template=app'],
+    );
 
-      await runCommandIn(projectPath);
+    await runCommandIn(projectPath);
 
-      expect(
-        fakeAnalytics.sentEvents,
-        contains(
-          Event.commandUsageValues(
-            workflow: 'bundle',
-            commandHasTerminal: false,
-            buildBundleTargetPlatform: 'android-arm',
-            buildBundleIsModule: false,
-          ),
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.commandUsageValues(
+          workflow: 'bundle',
+          commandHasTerminal: false,
+          buildBundleTargetPlatform: 'android-arm',
+          buildBundleIsModule: false,
         ),
-      );
-    },
-    overrides: <Type, Generator>{Analytics: () => fakeAnalytics},
-  );
+      ),
+    );
+  }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
 
   testUsingContext('bundle getUsage indicate the target platform', () async {
     final String projectPath = await createProject(
@@ -293,23 +285,20 @@ void main() {
       ]);
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(environment.defines, <String, String>{
-          kBuildMode: 'debug',
-          kTargetPlatform: 'android-arm',
-          kTargetFile: globals.fs.path.join('lib', 'main.dart'),
-          kDartDefines:
-              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-          kTrackWidgetCreation: 'true',
-          kFileSystemScheme: 'org-dartlang-root',
-          kIconTreeShakerFlag: 'false',
-          kDeferredComponents: 'false',
-          kDartObfuscation: 'false',
-        });
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(environment.defines, <String, String>{
+              kBuildMode: 'debug',
+              kTargetPlatform: 'android-arm',
+              kTargetFile: globals.fs.path.join('lib', 'main.dart'),
+              kDartDefines: 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              kTrackWidgetCreation: 'true',
+              kFileSystemScheme: 'org-dartlang-root',
+              kIconTreeShakerFlag: 'false',
+              kDeferredComponents: 'false',
+              kDartObfuscation: 'false',
+            });
+          }),
       FileSystem: fsFactory,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -333,23 +322,20 @@ void main() {
       ]);
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(environment.defines, <String, String>{
-          kBuildMode: 'debug',
-          kTargetPlatform: 'android-arm',
-          kTargetFile: globals.fs.path.join('lib', 'main.dart'),
-          kTrackWidgetCreation: 'true',
-          kFileSystemScheme: 'org-dartlang-root',
-          kDartDefines:
-              'Zm9vPWJhcg==,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-          kIconTreeShakerFlag: 'false',
-          kDeferredComponents: 'false',
-          kDartObfuscation: 'false',
-        });
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(environment.defines, <String, String>{
+              kBuildMode: 'debug',
+              kTargetPlatform: 'android-arm',
+              kTargetFile: globals.fs.path.join('lib', 'main.dart'),
+              kTrackWidgetCreation: 'true',
+              kFileSystemScheme: 'org-dartlang-root',
+              kDartDefines: 'Zm9vPWJhcg==,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              kIconTreeShakerFlag: 'false',
+              kDeferredComponents: 'false',
+              kDartObfuscation: 'false',
+            });
+          }),
       FileSystem: fsFactory,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -373,23 +359,20 @@ void main() {
       ]);
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(environment.defines, <String, String>{
-          kBuildMode: 'debug',
-          kTargetPlatform: 'android-arm',
-          kTargetFile: globals.fs.path.join('lib', 'main.dart'),
-          kDartDefines:
-              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-          kTrackWidgetCreation: 'true',
-          kFileSystemScheme: 'org-dartlang-root2',
-          kIconTreeShakerFlag: 'false',
-          kDeferredComponents: 'false',
-          kDartObfuscation: 'false',
-        });
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(environment.defines, <String, String>{
+              kBuildMode: 'debug',
+              kTargetPlatform: 'android-arm',
+              kTargetFile: globals.fs.path.join('lib', 'main.dart'),
+              kDartDefines: 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              kTrackWidgetCreation: 'true',
+              kFileSystemScheme: 'org-dartlang-root2',
+              kIconTreeShakerFlag: 'false',
+              kDeferredComponents: 'false',
+              kDartObfuscation: 'false',
+            });
+          }),
       FileSystem: fsFactory,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -413,24 +396,21 @@ void main() {
       ]);
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(environment.defines, <String, String>{
-          kBuildMode: 'debug',
-          kTargetPlatform: 'android-arm',
-          kTargetFile: globals.fs.path.join('lib', 'main.dart'),
-          kDartDefines:
-              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-          kTrackWidgetCreation: 'true',
-          kFileSystemScheme: 'org-dartlang-root',
-          kFileSystemRoots: 'test1,test2',
-          kIconTreeShakerFlag: 'false',
-          kDeferredComponents: 'false',
-          kDartObfuscation: 'false',
-        });
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(environment.defines, <String, String>{
+              kBuildMode: 'debug',
+              kTargetPlatform: 'android-arm',
+              kTargetFile: globals.fs.path.join('lib', 'main.dart'),
+              kDartDefines: 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              kTrackWidgetCreation: 'true',
+              kFileSystemScheme: 'org-dartlang-root',
+              kFileSystemRoots: 'test1,test2',
+              kIconTreeShakerFlag: 'false',
+              kDeferredComponents: 'false',
+              kDartObfuscation: 'false',
+            });
+          }),
       FileSystem: fsFactory,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -454,24 +434,21 @@ void main() {
       ]);
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(environment.defines, <String, String>{
-          kBuildMode: 'debug',
-          kTargetPlatform: 'android-arm',
-          kTargetFile: globals.fs.path.join('lib', 'main.dart'),
-          kDartDefines:
-              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-          kTrackWidgetCreation: 'true',
-          kFileSystemScheme: 'org-dartlang-root',
-          kExtraFrontEndOptions: '--testflag,--testflag2',
-          kIconTreeShakerFlag: 'false',
-          kDeferredComponents: 'false',
-          kDartObfuscation: 'false',
-        });
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(environment.defines, <String, String>{
+              kBuildMode: 'debug',
+              kTargetPlatform: 'android-arm',
+              kTargetFile: globals.fs.path.join('lib', 'main.dart'),
+              kDartDefines: 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              kTrackWidgetCreation: 'true',
+              kFileSystemScheme: 'org-dartlang-root',
+              kExtraFrontEndOptions: '--testflag,--testflag2',
+              kIconTreeShakerFlag: 'false',
+              kDeferredComponents: 'false',
+              kDartObfuscation: 'false',
+            });
+          }),
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
@@ -494,24 +471,21 @@ void main() {
       ]);
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(environment.defines, <String, String>{
-          kBuildMode: 'debug',
-          kTargetPlatform: 'android-arm',
-          kTargetFile: globals.fs.path.join('lib', 'main.dart'),
-          kDartDefines:
-              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-          kTrackWidgetCreation: 'true',
-          kFileSystemScheme: 'org-dartlang-root',
-          kExtraGenSnapshotOptions: '--testflag,--testflag2',
-          kIconTreeShakerFlag: 'false',
-          kDeferredComponents: 'false',
-          kDartObfuscation: 'false',
-        });
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(environment.defines, <String, String>{
+              kBuildMode: 'debug',
+              kTargetPlatform: 'android-arm',
+              kTargetFile: globals.fs.path.join('lib', 'main.dart'),
+              kDartDefines: 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              kTrackWidgetCreation: 'true',
+              kFileSystemScheme: 'org-dartlang-root',
+              kExtraGenSnapshotOptions: '--testflag,--testflag2',
+              kIconTreeShakerFlag: 'false',
+              kDeferredComponents: 'false',
+              kDartObfuscation: 'false',
+            });
+          }),
       FileSystem: fsFactory,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -540,26 +514,23 @@ void main() {
       ]);
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(environment.defines, <String, String>{
-          kBuildMode: 'profile',
-          kTargetPlatform: 'android-arm',
-          kTargetFile: globals.fs.path.join('lib', 'main.dart'),
-          kDartDefines:
-              'Zm9vPWJhcg==,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-          kTrackWidgetCreation: 'true',
-          kFileSystemScheme: 'org-dartlang-root',
-          kFileSystemRoots: 'test1,test2',
-          kExtraGenSnapshotOptions: '--testflag,--testflag2',
-          kExtraFrontEndOptions: '--testflagFront,--testflagFront2',
-          kIconTreeShakerFlag: 'false',
-          kDeferredComponents: 'false',
-          kDartObfuscation: 'false',
-        });
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(environment.defines, <String, String>{
+              kBuildMode: 'profile',
+              kTargetPlatform: 'android-arm',
+              kTargetFile: globals.fs.path.join('lib', 'main.dart'),
+              kDartDefines: 'Zm9vPWJhcg==,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              kTrackWidgetCreation: 'true',
+              kFileSystemScheme: 'org-dartlang-root',
+              kFileSystemRoots: 'test1,test2',
+              kExtraGenSnapshotOptions: '--testflag,--testflag2',
+              kExtraFrontEndOptions: '--testflagFront,--testflagFront2',
+              kIconTreeShakerFlag: 'false',
+              kDeferredComponents: 'false',
+              kDartObfuscation: 'false',
+            });
+          }),
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
@@ -587,26 +558,23 @@ void main() {
       ]);
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(environment.defines, <String, String>{
-          kBuildMode: 'release',
-          kTargetPlatform: 'android-arm',
-          kTargetFile: globals.fs.path.join('lib', 'main.dart'),
-          kDartDefines:
-              'Zm9vPWJhcg==,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-          kTrackWidgetCreation: 'true',
-          kFileSystemScheme: 'org-dartlang-root',
-          kFileSystemRoots: 'test1,test2',
-          kExtraGenSnapshotOptions: '--testflag,--testflag2',
-          kExtraFrontEndOptions: '--testflagFront,--testflagFront2',
-          kIconTreeShakerFlag: 'false',
-          kDeferredComponents: 'false',
-          kDartObfuscation: 'false',
-        });
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(environment.defines, <String, String>{
+              kBuildMode: 'release',
+              kTargetPlatform: 'android-arm',
+              kTargetFile: globals.fs.path.join('lib', 'main.dart'),
+              kDartDefines: 'Zm9vPWJhcg==,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              kTrackWidgetCreation: 'true',
+              kFileSystemScheme: 'org-dartlang-root',
+              kFileSystemRoots: 'test1,test2',
+              kExtraGenSnapshotOptions: '--testflag,--testflag2',
+              kExtraFrontEndOptions: '--testflagFront,--testflagFront2',
+              kIconTreeShakerFlag: 'false',
+              kDeferredComponents: 'false',
+              kDartObfuscation: 'false',
+            });
+          }),
       FileSystem: fsFactory,
       ProcessManager: () => FakeProcessManager.any(),
     },

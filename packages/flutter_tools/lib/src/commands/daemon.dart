@@ -55,13 +55,11 @@ const protocolVersion = '0.6.1';
 class DaemonCommand extends FlutterCommand {
   DaemonCommand({
     required super.toolContext,
-    required AndroidContext androidContext,
-    AndroidWorkflow? androidWorkflow,
-    DeviceManager? deviceManager,
+    required this._androidContext,
+    this._androidWorkflow,
+    this._deviceManager,
     this.hidden = false,
-  }) : _androidContext = androidContext,
-       _androidWorkflow = androidWorkflow,
-       _deviceManager = deviceManager {
+  }) {
     argParser.addOption(
       'listen-on-tcp-port',
       help:
@@ -171,8 +169,7 @@ class DaemonServer {
     this.analytics,
     this.androidSdk,
     this.androidWorkflow,
-    @visibleForTesting
-    Future<ServerSocket> Function(InternetAddress address, int port) bind = ServerSocket.bind,
+    @visibleForTesting this._bind = ServerSocket.bind,
     this.deviceManager,
     required this.featureFlags,
     this.fileSystem,
@@ -185,7 +182,7 @@ class DaemonServer {
     this.stdio,
     this.systemClock,
     this.terminal,
-  }) : _bind = bind;
+  });
 
   final int? port;
 
@@ -576,14 +573,11 @@ abstract class Domain {
 class DaemonDomain extends Domain {
   DaemonDomain(
     Daemon daemon, {
-    required FeatureFlags featureFlags,
+    required this._featureFlags,
     required FileSystem fileSystem,
-    required Logger logger,
-    Stdio? stdio,
+    required this._logger,
+    this._stdio,
   }) : _fs = fileSystem,
-       _featureFlags = featureFlags,
-       _logger = logger,
-       _stdio = stdio,
        super(daemon, 'daemon') {
     registerHandler('version', version);
     registerHandler('shutdown', shutdown);
@@ -1254,10 +1248,8 @@ typedef _DeviceEventHandler = void Function(Device device);
 /// It exports a `getDevices()` call, as well as firing `device.added` and
 /// `device.removed` events.
 class DeviceDomain extends Domain {
-  DeviceDomain(Daemon daemon, {required Logger logger, DeviceManager? deviceManager})
-    : _deviceManager = deviceManager,
-      _logger = logger,
-      super(daemon, 'device') {
+  DeviceDomain(Daemon daemon, {required this._logger, this._deviceManager})
+    : super(daemon, 'device') {
     registerHandler('getDevices', getDevices);
     registerHandler('discoverDevices', discoverDevices);
     registerHandler('enable', enable);
@@ -1828,12 +1820,7 @@ class NotifyingLogger extends DelegatingLogger {
 
 /// A running application, started by this daemon.
 class AppInstance {
-  AppInstance(
-    this.id, {
-    required this.runner,
-    this.logToStdout = false,
-    required MachineOutputLogger logger,
-  }) : _logger = logger;
+  AppInstance(this.id, {required this.runner, this.logToStdout = false, required this._logger});
 
   final String id;
   final ResidentRunner runner;
@@ -1918,11 +1905,9 @@ class ProxyDomain extends Domain {
   ProxyDomain(
     Daemon daemon, {
     required FileSystem fileSystem,
-    required FileTransfer fileTransfer,
-    required Logger logger,
-  }) : _fileTransfer = fileTransfer,
-       _fs = fileSystem,
-       _logger = logger,
+    required this._fileTransfer,
+    required this._logger,
+  }) : _fs = fileSystem,
        super(daemon, 'proxy') {
     registerHandlerWithBinary('writeTempFile', writeTempFile);
     registerHandler('calculateFileHashes', calculateFileHashes);

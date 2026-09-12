@@ -215,13 +215,9 @@ bool _validateMetadataMap(YamlMap map, Map<String, Type> validations, Logger log
 /// A wrapper around the `.metadata` file.
 class FlutterProjectMetadata {
   /// Creates a MigrateConfig by parsing an existing .migrate_config yaml file.
-  FlutterProjectMetadata(
-    this.file,
-    Logger logger, {
-    required ExtensionTemplateManager? extensionTemplateManager,
-  }) : _logger = logger,
-       _extensionTemplateManager = extensionTemplateManager,
-       migrateConfig = MigrateConfig() {
+  FlutterProjectMetadata(this.file, Logger logger, {required this._extensionTemplateManager})
+    : _logger = logger,
+      migrateConfig = MigrateConfig() {
     if (!file.existsSync()) {
       _logger.printTrace('No .metadata file found at ${file.path}.');
       // Create a default empty metadata.
@@ -268,17 +264,13 @@ class FlutterProjectMetadata {
   /// Creates a FlutterProjectMetadata by explicitly providing all values.
   FlutterProjectMetadata.explicit({
     required this.file,
-    required String? versionRevision,
-    required String? versionChannel,
-    required ParsedFlutterTemplateType? projectType,
+    required this._versionRevision,
+    required this._versionChannel,
+    required this._projectType,
     required this.migrateConfig,
-    required Logger logger,
-    required ExtensionTemplateManager? extensionTemplateManager,
-  }) : _logger = logger,
-       _extensionTemplateManager = extensionTemplateManager,
-       _versionChannel = versionChannel,
-       _versionRevision = versionRevision,
-       _projectType = projectType;
+    required this._logger,
+    required this._extensionTemplateManager,
+  });
 
   /// The name of the config file.
   static const kFileName = '.metadata';

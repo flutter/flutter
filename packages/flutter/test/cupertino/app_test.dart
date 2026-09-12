@@ -635,55 +635,53 @@ void main() {
     debugBrightnessOverride = null;
   });
 
-  testWidgets(
-    'Assert in buildScrollbar that controller != null when using it',
-    (WidgetTester tester) async {
-      const ScrollBehavior defaultBehavior = CupertinoScrollBehavior();
-      late BuildContext capturedContext;
+  testWidgets('Assert in buildScrollbar that controller != null when using it', (
+    WidgetTester tester,
+  ) async {
+    const ScrollBehavior defaultBehavior = CupertinoScrollBehavior();
+    late BuildContext capturedContext;
 
-      await tester.pumpWidget(
-        ScrollConfiguration(
-          // Avoid the default ones here.
-          behavior: const CupertinoScrollBehavior().copyWith(scrollbars: false),
-          child: SingleChildScrollView(
-            child: Builder(
-              builder: (BuildContext context) {
-                capturedContext = context;
-                return Container(height: 1000.0);
-              },
-            ),
+    await tester.pumpWidget(
+      ScrollConfiguration(
+        // Avoid the default ones here.
+        behavior: const CupertinoScrollBehavior().copyWith(scrollbars: false),
+        child: SingleChildScrollView(
+          child: Builder(
+            builder: (BuildContext context) {
+              capturedContext = context;
+              return Container(height: 1000.0);
+            },
           ),
         ),
-      );
+      ),
+    );
 
-      const details = ScrollableDetails(direction: AxisDirection.down);
-      final Widget child = Container();
+    const details = ScrollableDetails(direction: AxisDirection.down);
+    final Widget child = Container();
 
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.iOS:
-          // Does not throw if we aren't using it.
-          defaultBehavior.buildScrollbar(capturedContext, child, details);
-        case TargetPlatform.linux:
-        case TargetPlatform.macOS:
-        case TargetPlatform.windows:
-          expect(
-            () {
-              defaultBehavior.buildScrollbar(capturedContext, child, details);
-            },
-            throwsA(
-              isA<AssertionError>().having(
-                (AssertionError error) => error.toString(),
-                'description',
-                contains('details.controller != null'),
-              ),
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        // Does not throw if we aren't using it.
+        defaultBehavior.buildScrollbar(capturedContext, child, details);
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(
+          () {
+            defaultBehavior.buildScrollbar(capturedContext, child, details);
+          },
+          throwsA(
+            isA<AssertionError>().having(
+              (AssertionError error) => error.toString(),
+              'description',
+              contains('details.controller != null'),
             ),
-          );
-      }
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+          ),
+        );
+    }
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('CupertinoApp does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -702,10 +700,15 @@ class MockScrollBehavior extends ScrollBehavior {
   ScrollPhysics getScrollPhysics(BuildContext context) => const NeverScrollableScrollPhysics();
 }
 
-typedef SimpleRouterDelegateBuilder =
-    Widget Function(BuildContext context, RouteInformation information);
-typedef SimpleNavigatorRouterDelegatePopPage<T> =
-    bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
+typedef SimpleRouterDelegateBuilder = Widget Function(
+  BuildContext context,
+  RouteInformation information,
+);
+typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(
+  Route<T> route,
+  T result,
+  SimpleNavigatorRouterDelegate delegate,
+);
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
   SimpleRouteInformationParser();

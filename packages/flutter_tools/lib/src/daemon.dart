@@ -172,10 +172,9 @@ class DaemonStreams {
   DaemonStreams(
     Stream<List<int>> rawInputStream,
     StreamSink<List<int>> outputSink, {
-    required Logger logger,
+    required this._logger,
   }) : _outputSink = outputSink,
-       inputStream = DaemonInputStreamConverter(rawInputStream).convertedStream,
-       _logger = logger;
+       inputStream = DaemonInputStreamConverter(rawInputStream).convertedStream;
 
   /// Creates a [DaemonStreams] that uses stdin and stdout as the underlying streams.
   DaemonStreams.fromStdio(Stdio stdio, {required Logger logger})
@@ -241,9 +240,8 @@ class DaemonStreams {
 
 /// Connection between a flutter daemon and a client.
 class DaemonConnection {
-  DaemonConnection({required DaemonStreams daemonStreams, required Logger logger})
-    : _logger = logger,
-      _daemonStreams = daemonStreams {
+  DaemonConnection({required DaemonStreams daemonStreams, required this._logger})
+    : _daemonStreams = daemonStreams {
     _commandSubscription = daemonStreams.inputStream.listen(
       _handleMessage,
       onError: (Object error, StackTrace stackTrace) {

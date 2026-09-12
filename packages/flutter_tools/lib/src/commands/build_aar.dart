@@ -23,15 +23,12 @@ import 'build.dart';
 
 class BuildAarCommand extends BuildSubCommand {
   BuildAarCommand({
-    required AndroidBuilder androidBuilder,
-    required AndroidContext androidContext,
-    required BuildSystem buildSystem,
+    required this._androidBuilder,
+    required this._androidContext,
+    required this._buildSystem,
     required ToolContext toolContext,
     bool verboseHelp = false,
-  }) : _androidBuilder = androidBuilder,
-       _androidContext = androidContext,
-       _buildSystem = buildSystem,
-       super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
+  }) : super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
     argParser
       ..addFlag('debug', defaultsTo: true, help: 'Build a debug version of the current project.')
       ..addFlag(
@@ -148,9 +145,8 @@ class BuildAarCommand extends BuildSubCommand {
     }
     final androidBuildInfo = <AndroidBuildInfo>{};
 
-    final Iterable<CpuArch> targetArchitectures = stringsArg(
-      'target-platform',
-    ).map<CpuArch>(getCpuArchForName);
+    final Iterable<CpuArch> targetArchitectures = stringsArg('target-platform')
+        .map<CpuArch>(getCpuArchForName);
 
     final String? buildNumberArg = stringArg('build-number');
     final String buildNumber =

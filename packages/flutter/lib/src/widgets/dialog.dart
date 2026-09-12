@@ -67,12 +67,11 @@ Future<T?> showRawDialog<T>({
   final Route<T> route =
       routeBuilder?.call(context, builder) ??
       RawDialogRoute<T>(
-        pageBuilder:
-            (
-              BuildContext context,
-              Animation<double> animation,
-              Animation<double> secondaryAnimation,
-            ) => builder(context),
+        pageBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+        ) => builder(context),
         settings: routeSettings,
         fullscreenDialog: fullscreenDialog,
       );
