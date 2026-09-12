@@ -634,53 +634,17 @@ ContentContext::ContentContext(
             GetContext()->GetCapabilities()->GetDefaultGlyphAtlasFormat() ==
             PixelFormat::kA8UNormInt)});
     pipelines_->solid_fill.CreateDefault(*context_, options);
-    pipelines_->texture.CreateDefault(*context_, options);
-    pipelines_->fast_gradient.CreateDefault(*context_, options);
-    pipelines_->circle.CreateDefault(*context_, options);
+
     if (context_->GetFlags().use_sdfs) {
       pipelines_->uber_sdf.CreateDefault(*context_, options);
       pipelines_->complex_rse.CreateDefault(*context_, options);
     }
 
-    if (context_->GetCapabilities()->SupportsSSBO()) {
-      pipelines_->linear_gradient_ssbo_fill.CreateDefault(*context_, options);
-      pipelines_->radial_gradient_ssbo_fill.CreateDefault(*context_, options);
-      pipelines_->conical_gradient_ssbo_fill.CreateDefault(*context_, options,
-                                                           {3.0});
-      pipelines_->conical_gradient_ssbo_fill_radial.CreateDefault(
-          *context_, options, {1.0});
-      pipelines_->conical_gradient_ssbo_fill_strip.CreateDefault(
-          *context_, options, {2.0});
-      pipelines_->conical_gradient_ssbo_fill_strip_and_radial.CreateDefault(
-          *context_, options, {0.0});
-      pipelines_->sweep_gradient_ssbo_fill.CreateDefault(*context_, options);
-    } else {
-      pipelines_->linear_gradient_uniform_fill.CreateDefault(*context_,
-                                                             options);
-      pipelines_->radial_gradient_uniform_fill.CreateDefault(*context_,
-                                                             options);
-      pipelines_->conical_gradient_uniform_fill.CreateDefault(*context_,
-                                                              options);
-      pipelines_->conical_gradient_uniform_fill_radial.CreateDefault(*context_,
-                                                                     options);
-      pipelines_->conical_gradient_uniform_fill_strip.CreateDefault(*context_,
-                                                                    options);
-      pipelines_->conical_gradient_uniform_fill_strip_and_radial.CreateDefault(
-          *context_, options);
-      pipelines_->sweep_gradient_uniform_fill.CreateDefault(*context_, options);
+    const std::array<std::vector<Scalar>, 15> porter_duff_constants =
+        GetPorterDuffSpecConstants(supports_decal);
+    pipelines_->source_over_blend.CreateDefault(
+        *context_, options_trianglestrip, porter_duff_constants[3]);
 
-      pipelines_->linear_gradient_fill.CreateDefault(*context_, options);
-      pipelines_->radial_gradient_fill.CreateDefault(*context_, options);
-      pipelines_->conical_gradient_fill.CreateDefault(*context_, options);
-      pipelines_->conical_gradient_fill_radial.CreateDefault(*context_,
-                                                             options);
-      pipelines_->conical_gradient_fill_strip.CreateDefault(*context_, options);
-      pipelines_->conical_gradient_fill_strip_and_radial.CreateDefault(
-          *context_, options);
-      pipelines_->sweep_gradient_fill.CreateDefault(*context_, options);
-    }
-
-    /// Setup default clip pipeline.
     auto clip_pipeline_descriptor =
         ClipPipeline::Builder::MakeDefaultPipelineDescriptor(*context_);
     if (!clip_pipeline_descriptor.has_value()) {
@@ -702,40 +666,57 @@ ContentContext::ContentContext(
     pipelines_->clip.SetDefault(
         options,
         std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
+
+    pipelines_->rrect_blur.CreateDefault(*context_, options_trianglestrip);
+    pipelines_->texture.CreateDefault(*context_, options);
+    pipelines_->fast_gradient.CreateDefault(*context_, options);
+    pipelines_->circle.CreateDefault(*context_, options);
+    pipelines_->color_matrix_color_filter.CreateDefault(*context_,
+                                                        options_trianglestrip);
+
+    if (context_->GetCapabilities()->SupportsSSBO()) {
+      pipelines_->linear_gradient_ssbo_fill.CreateDefault(*context_, options);
+    } else {
+      pipelines_->linear_gradient_uniform_fill.CreateDefault(*context_,
+                                                             options);
+      pipelines_->linear_gradient_fill.CreateDefault(*context_, options);
+    }
+
+    pipelines_->gaussian_blur.CreateDefault(
+        *context_, options_no_msaa_no_depth_stencil, {supports_decal});
+    pipelines_->texture_strict_src.CreateDefault(*context_, options);
+    pipelines_->tiled_texture.CreateDefault(*context_, options,
+                                            {supports_decal});
     pipelines_->texture_downsample.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil);
     pipelines_->texture_downsample_bounded.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil);
-    pipelines_->rrect_blur.CreateDefault(*context_, options_trianglestrip);
     pipelines_->rsuperellipse_blur.CreateDefault(*context_,
                                                  options_trianglestrip);
-    pipelines_->texture_strict_src.CreateDefault(*context_, options);
-    pipelines_->tiled_texture.CreateDefault(*context_, options,
-                                            {supports_decal});
-    pipelines_->gaussian_blur.CreateDefault(
-        *context_, options_no_msaa_no_depth_stencil, {supports_decal});
     pipelines_->border_mask_blur.CreateDefault(*context_,
                                                options_trianglestrip);
-    pipelines_->color_matrix_color_filter.CreateDefault(*context_,
-                                                        options_trianglestrip);
-    pipelines_->shadow_vertices_.CreateDefault(*context_, options);
-    pipelines_->vertices_uber_1_.CreateDefault(*context_, options,
-                                               {supports_decal});
-    pipelines_->vertices_uber_2_.CreateDefault(*context_, options,
-                                               {supports_decal});
 
-    const std::array<std::vector<Scalar>, 15> porter_duff_constants =
-        GetPorterDuffSpecConstants(supports_decal);
-    pipelines_->clear_blend.CreateDefault(*context_, options_trianglestrip,
-                                          porter_duff_constants[0]);
     pipelines_->source_blend.CreateDefault(*context_, options_trianglestrip,
                                            porter_duff_constants[1]);
     pipelines_->destination_blend.CreateDefault(
         *context_, options_trianglestrip, porter_duff_constants[2]);
-    pipelines_->source_over_blend.CreateDefault(
-        *context_, options_trianglestrip, porter_duff_constants[3]);
     pipelines_->destination_over_blend.CreateDefault(
         *context_, options_trianglestrip, porter_duff_constants[4]);
+    pipelines_->plus_blend.CreateDefault(*context_, options_trianglestrip,
+                                         porter_duff_constants[12]);
+    pipelines_->screen_blend.CreateDefault(*context_, options_trianglestrip,
+                                           porter_duff_constants[14]);
+
+    if (context_->GetCapabilities()->SupportsSSBO()) {
+      pipelines_->radial_gradient_ssbo_fill.CreateDefault(*context_, options);
+    } else {
+      pipelines_->radial_gradient_uniform_fill.CreateDefault(*context_,
+                                                             options);
+      pipelines_->radial_gradient_fill.CreateDefault(*context_, options);
+    }
+
+    pipelines_->clear_blend.CreateDefault(*context_, options_trianglestrip,
+                                          porter_duff_constants[0]);
     pipelines_->source_in_blend.CreateDefault(*context_, options_trianglestrip,
                                               porter_duff_constants[5]);
     pipelines_->destination_in_blend.CreateDefault(
@@ -750,12 +731,38 @@ ContentContext::ContentContext(
         *context_, options_trianglestrip, porter_duff_constants[10]);
     pipelines_->xor_blend.CreateDefault(*context_, options_trianglestrip,
                                         porter_duff_constants[11]);
-    pipelines_->plus_blend.CreateDefault(*context_, options_trianglestrip,
-                                         porter_duff_constants[12]);
     pipelines_->modulate_blend.CreateDefault(*context_, options_trianglestrip,
                                              porter_duff_constants[13]);
-    pipelines_->screen_blend.CreateDefault(*context_, options_trianglestrip,
-                                           porter_duff_constants[14]);
+
+    if (context_->GetCapabilities()->SupportsSSBO()) {
+      pipelines_->conical_gradient_ssbo_fill.CreateDefault(*context_, options,
+                                                           {3.0});
+      pipelines_->conical_gradient_ssbo_fill_radial.CreateDefault(
+          *context_, options, {1.0});
+      pipelines_->conical_gradient_ssbo_fill_strip.CreateDefault(
+          *context_, options, {2.0});
+      pipelines_->conical_gradient_ssbo_fill_strip_and_radial.CreateDefault(
+          *context_, options, {0.0});
+      pipelines_->sweep_gradient_ssbo_fill.CreateDefault(*context_, options);
+    } else {
+      pipelines_->conical_gradient_uniform_fill.CreateDefault(*context_,
+                                                              options);
+      pipelines_->conical_gradient_uniform_fill_radial.CreateDefault(*context_,
+                                                                     options);
+      pipelines_->conical_gradient_uniform_fill_strip.CreateDefault(*context_,
+                                                                    options);
+      pipelines_->conical_gradient_uniform_fill_strip_and_radial.CreateDefault(
+          *context_, options);
+      pipelines_->sweep_gradient_uniform_fill.CreateDefault(*context_, options);
+
+      pipelines_->conical_gradient_fill.CreateDefault(*context_, options);
+      pipelines_->conical_gradient_fill_radial.CreateDefault(*context_,
+                                                             options);
+      pipelines_->conical_gradient_fill_strip.CreateDefault(*context_, options);
+      pipelines_->conical_gradient_fill_strip_and_radial.CreateDefault(
+          *context_, options);
+      pipelines_->sweep_gradient_fill.CreateDefault(*context_, options);
+    }
   }
 
   if (context_->GetCapabilities()->SupportsFramebufferFetch()) {
@@ -852,6 +859,11 @@ ContentContext::ContentContext(
         {static_cast<Scalar>(BlendSelectValues::kSoftLight), supports_decal});
   }
 
+  pipelines_->shadow_vertices_.CreateDefault(*context_, options);
+  pipelines_->vertices_uber_1_.CreateDefault(*context_, options,
+                                             {supports_decal});
+  pipelines_->vertices_uber_2_.CreateDefault(*context_, options,
+                                             {supports_decal});
   pipelines_->morphology_filter.CreateDefault(*context_, options_trianglestrip,
                                               {supports_decal});
   pipelines_->linear_to_srgb_filter.CreateDefault(*context_,
