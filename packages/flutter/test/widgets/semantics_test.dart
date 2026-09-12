@@ -2327,6 +2327,68 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('sibling traversal parents are not merged into a single node', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/182444.
+    //
+    // Two sibling anchors (e.g. two adjacent Tooltips, each backed by its own
+    // OverlayPortal) were merged into one SemanticsNode, because
+    // isCompatibleWith only guarded traversalChildIdentifier. absorb() then
+    // dropped the second traversalParentIdentifier via `??=`, so the second
+    // portal's overlay child had no traversal parent to graft onto and was
+    // serialized as an orphan. On Windows that made ui::AXTree reject the
+    // whole update with "N will not be in the tree and is not the new root".
+    //
+    // A ListView is what forces the merge here: each list item is wrapped in
+    // an IndexedSemantics, which absorbs everything it contains into a single
+    // node. The same two anchors in a bare Row stay separate.
+    final semantics = SemanticsTester(tester);
+    const identifierA = 'A';
+    const identifierB = 'B';
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Semantics(
+                  traversalParentIdentifier: identifierA,
+                  child: const SizedBox.square(dimension: 10),
+                ),
+                Semantics(
+                  traversalParentIdentifier: identifierB,
+                  child: const SizedBox.square(dimension: 10),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final anchors = <Object>[];
+    void collect(SemanticsNode node) {
+      if (node.traversalParentIdentifier case final Object identifier?) {
+        anchors.add(identifier);
+      }
+      node.visitChildren((SemanticsNode child) {
+        collect(child);
+        return true;
+      });
+    }
+
+    collect(tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!);
+
+    // Neither identifier may be dropped: each one is the only handle its
+    // traversal children have to find their parent.
+    expect(anchors, containsAll(<Object>[identifierA, identifierB]));
+
+    semantics.dispose();
+  });
+
   testWidgets('semantics grafting in traversal order with multiple same traversalChildIdentifier', (
     WidgetTester tester,
   ) async {
