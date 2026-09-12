@@ -299,7 +299,6 @@ class BuildSwiftPackage extends BuildSubCommand {
     }
 
     final List<Plugin> plugins = await findPlugins(project, logger: logger);
-    plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
     await pluginSwiftDependencies.processPlugins(
       cacheDirectory: cacheDirectory,
       plugins: plugins,
@@ -1404,9 +1403,9 @@ class AppFrameworkAndNativeAssetsDependencies {
         };
       case FlutterDarwinPlatform.macos:
         return <String, String>{
-          kDarwinArchs: defaultMacOSArchsForEnvironment(_utils.artifacts)
-              .map((CpuArch e) => e.darwinArchName)
-              .join(' '),
+          kDarwinArchs: defaultMacOSArchsForEnvironment(
+            _utils.artifacts,
+          ).map((CpuArch e) => e.darwinArchName).join(' '),
         };
     }
   }
