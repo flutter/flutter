@@ -1701,8 +1701,15 @@ class TextStyle with Diagnosticable {
       );
     }
 
-    styles.add(EnumProperty<TextOverflow>('${prefix}overflow', overflow, defaultValue: null));
-    styles.add(FlagProperty('${prefix}fakeMissingFontStyles', value: fakeMissingFontStyles));
+    properties.add(EnumProperty<TextOverflow>('${prefix}overflow', overflow, defaultValue: null));
+    properties.add(
+      FlagProperty(
+        '${prefix}fakeMissingFontStyles',
+        value: fakeMissingFontStyles,
+        ifTrue: '$prefix<fake missing font styles enabled>',
+        ifFalse: '$prefix<fake missing font styles disabled>',
+      ),
+    );
   }
 }
 
