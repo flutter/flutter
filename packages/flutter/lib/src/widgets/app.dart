@@ -806,7 +806,8 @@ class WidgetsApp extends StatefulWidget {
   /// [Localizations], consider [onGenerateTitle] instead.
   ///
   /// The [builder] callback is passed two arguments, the [BuildContext] (as
-  /// `context`) and a [Navigator] or [Router] widget (as `child`).
+  /// `context`) and a [FocusScope] widget enclosing the [Navigator] or [Router]
+  /// (as `child`).
   ///
   /// If no routes are provided to the regular [WidgetsApp] constructor using
   /// [home], [routes], [onGenerateRoute], or [onUnknownRoute], the `child` will
@@ -1687,33 +1688,33 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       );
     } else if (_usesNavigator) {
       assert(_navigator != null);
-      routing = FocusScope(
-        debugLabel: 'Navigator Scope',
-        autofocus: true,
-        child: Navigator(
-          clipBehavior: Clip.none,
-          restorationScopeId: 'nav',
-          key: _navigator,
-          initialRoute: _initialRouteName,
-          onGenerateRoute: _onGenerateRoute,
-          onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
-              ? Navigator.defaultGenerateInitialRoutes
-              : (NavigatorState navigator, String initialRouteName) {
-                  return widget.onGenerateInitialRoutes!(initialRouteName);
-                },
-          onUnknownRoute: _onUnknownRoute,
-          observers: widget.navigatorObservers!,
-          routeTraversalEdgeBehavior: kIsWeb
-              ? TraversalEdgeBehavior.leaveFlutterView
-              : TraversalEdgeBehavior.parentScope,
-          reportsRouteUpdateToEngine: true,
-        ),
+      routing = Navigator(
+        clipBehavior: Clip.none,
+        restorationScopeId: 'nav',
+        key: _navigator,
+        initialRoute: _initialRouteName,
+        onGenerateRoute: _onGenerateRoute,
+        onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
+            ? Navigator.defaultGenerateInitialRoutes
+            : (NavigatorState navigator, String initialRouteName) {
+                return widget.onGenerateInitialRoutes!(initialRouteName);
+              },
+        onUnknownRoute: _onUnknownRoute,
+        observers: widget.navigatorObservers!,
+        routeTraversalEdgeBehavior: kIsWeb
+            ? TraversalEdgeBehavior.leaveFlutterView
+            : TraversalEdgeBehavior.parentScope,
+        reportsRouteUpdateToEngine: true,
       );
     } else if (_usesRouterWithConfig) {
       routing = Router<Object>.withConfig(
         restorationScopeId: 'router',
         config: widget.routerConfig!,
       );
+    }
+
+    if (routing != null) {
+      routing = FocusScope(debugLabel: 'Navigator Scope', autofocus: true, child: routing);
     }
 
     Widget result;

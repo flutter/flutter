@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'semantics_tester.dart';
 import 'test_page_tester.dart';
 
 class TestIntent extends Intent {
@@ -459,6 +460,299 @@ void main() {
       ),
     );
     expect(find.text('/'), findsOneWidget);
+  });
+
+  testWidgets('WidgetsApp.router wraps routing in FocusScope', (WidgetTester tester) async {
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+    await tester.pumpWidget(
+      WidgetsApp.router(
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: delegate,
+        color: const Color(0xFF123456),
+      ),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    expect(focusScopeFinder, findsOneWidget);
+
+    final FocusScope focusScope = tester.widget(focusScopeFinder);
+    expect(focusScope.autofocus, isTrue);
+    expect(focusScope.child, isA<Router<Object>>());
+    expect(
+      delegate.navigatorKey.currentState!.focusNode.enclosingScope?.debugLabel,
+      'Navigator Scope',
+    );
+  });
+
+  testWidgets('WidgetsApp.router with routerConfig wraps routing in FocusScope', (
+    WidgetTester tester,
+  ) async {
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
+    final routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
+    await tester.pumpWidget(
+      WidgetsApp.router(routerConfig: routerConfig, color: const Color(0xFF123456)),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    expect(focusScopeFinder, findsOneWidget);
+
+    final FocusScope focusScope = tester.widget(focusScopeFinder);
+    expect(focusScope.autofocus, isTrue);
+    expect(focusScope.child, isA<Router<Object>>());
+    expect(
+      delegate.navigatorKey.currentState!.focusNode.enclosingScope?.debugLabel,
+      'Navigator Scope',
+    );
+  });
+
+  testWidgets('WidgetsApp wraps navigator in FocusScope', (WidgetTester tester) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      WidgetsApp(
+        navigatorKey: navigatorKey,
+        color: const Color(0xFF123456),
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+          return PageRouteBuilder<T>(
+            settings: settings,
+            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) =>
+                builder(context),
+          );
+        },
+        home: const Placeholder(),
+      ),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    expect(focusScopeFinder, findsOneWidget);
+
+    final FocusScope focusScope = tester.widget(focusScopeFinder);
+    expect(focusScope.autofocus, isTrue);
+    expect(focusScope.child, isA<Navigator>());
+    expect(navigatorKey.currentState!.focusNode.enclosingScope?.debugLabel, 'Navigator Scope');
+  });
+
+  testWidgets('WidgetsApp.router passes FocusScope as child to builder', (
+    WidgetTester tester,
+  ) async {
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+    Widget? capturedChild;
+    await tester.pumpWidget(
+      WidgetsApp.router(
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: delegate,
+        builder: (BuildContext context, Widget? child) {
+          capturedChild = child;
+          return child!;
+        },
+        color: const Color(0xFF123456),
+      ),
+    );
+
+    expect(capturedChild, isA<FocusScope>());
+    final focusScope = capturedChild! as FocusScope;
+    expect(focusScope.debugLabel, 'Navigator Scope');
+    expect(focusScope.child, isA<Router<Object>>());
+  });
+
+  testWidgets('WidgetsApp.router produces expected semantics tree structure', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return const Text('route content', textDirection: TextDirection.ltr);
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+
+    await tester.pumpWidget(
+      WidgetsApp.router(
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: delegate,
+        color: const Color(0xFF123456),
+      ),
+    );
+
+    // FocusScope's explicitChildNodes prevents WidgetsApp's Directionality from
+    // merging with the route's semantics node, ensuring the route remains an
+    // explicit child node even when it is the sole entry in the Navigator.
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(label: 'route content', textDirection: TextDirection.ltr),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    // Inserting an overlay entry (such as Autocomplete options or a dialog) does
+    // not reparent the route's semantics node.
+    final entry = OverlayEntry(
+      builder: (BuildContext context) =>
+          const Text('overlay content', textDirection: TextDirection.ltr),
+    );
+    addTearDown(entry.remove);
+    delegate.navigatorKey.currentState!.overlay!.insert(entry);
+    await tester.pump();
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(label: 'route content', textDirection: TextDirection.ltr),
+                  ],
+                ),
+                TestSemantics(label: 'overlay content', textDirection: TextDirection.ltr),
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('WidgetsApp.router with routerConfig produces expected semantics tree structure', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return const Text('route content', textDirection: TextDirection.ltr);
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
+    final routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
+
+    await tester.pumpWidget(
+      WidgetsApp.router(routerConfig: routerConfig, color: const Color(0xFF123456)),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(label: 'route content', textDirection: TextDirection.ltr),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('WidgetsApp with navigator produces expected semantics tree structure', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFF123456),
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+          return PageRouteBuilder<T>(
+            settings: settings,
+            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) =>
+                builder(context),
+          );
+        },
+        home: const Text('route content', textDirection: TextDirection.ltr),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(label: 'route content', textDirection: TextDirection.ltr),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    semantics.dispose();
   });
 
   testWidgets('WidgetsApp has correct default ScrollBehavior', (WidgetTester tester) async {
