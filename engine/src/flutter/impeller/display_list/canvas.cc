@@ -1909,6 +1909,11 @@ void Canvas::SaveLayer(const Paint& paint,
   std::shared_ptr<FilterContents> backdrop_filter_contents;
   Point local_position = Point(0, 0);
   if (backdrop_filter) {
+    if (!backdrop_id.has_value() && !generated_backdrop_ids_.empty()) {
+      backdrop_id = generated_backdrop_ids_.front();
+      generated_backdrop_ids_.pop_front();
+    }
+
     local_position = subpass_coverage.GetOrigin() - GetGlobalPassPosition();
 
     std::shared_ptr<Texture> input_texture;
@@ -2528,9 +2533,11 @@ RenderPass& Canvas::GetCurrentRenderPass() const {
 
 void Canvas::SetBackdropData(
     std::unordered_map<int64_t, BackdropData> backdrop_data,
-    size_t backdrop_count) {
+    size_t backdrop_count,
+    std::deque<int64_t> generated_backdrop_ids) {
   backdrop_data_ = std::move(backdrop_data);
   backdrop_count_ = backdrop_count;
+  generated_backdrop_ids_ = std::move(generated_backdrop_ids);
 }
 
 std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
@@ -2731,6 +2738,7 @@ void Canvas::EndReplay() {
   render_passes_.back().GetInlinePassContext()->EndPass(
       /*is_onscreen=*/!requires_readback_ && is_onscreen_);
   backdrop_data_.clear();
+  generated_backdrop_ids_.clear();
 
   // If requires_readback_ was true, then we rendered to an offscreen texture
   // instead of to the onscreen provided in the render target. Now we need to

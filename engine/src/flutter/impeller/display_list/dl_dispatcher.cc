@@ -12,6 +12,7 @@
 
 #include "display_list/dl_sampling_options.h"
 #include "display_list/effects/dl_image_filter.h"
+#include "display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/fml/logging.h"
 #include "fml/closure.h"
 #include "impeller/core/formats.h"
@@ -971,8 +972,10 @@ void CanvasDlDispatcher::drawVertices(
 
 void CanvasDlDispatcher::SetBackdropData(
     std::unordered_map<int64_t, BackdropData> backdrop,
-    size_t backdrop_count) {
-  GetCanvas().SetBackdropData(std::move(backdrop), backdrop_count);
+    size_t backdrop_count,
+    std::deque<int64_t> generated_backdrop_ids) {
+  GetCanvas().SetBackdropData(std::move(backdrop), backdrop_count,
+                              std::move(generated_backdrop_ids));
 }
 
 //// Text Frame Dispatcher
@@ -980,20 +983,44 @@ void CanvasDlDispatcher::SetBackdropData(
 FirstPassDispatcher::FirstPassDispatcher(const ContentContext& renderer,
                                          const Matrix& initial_matrix,
                                          const Rect cull_rect)
-    : renderer_(renderer), matrix_(initial_matrix) {
-  cull_rect_state_.push_back(cull_rect);
+    : renderer_(renderer) {
+  stack_.push_back({
+      .matrix = initial_matrix,
+      .cull_rect = cull_rect,
+  });
 }
 
 FirstPassDispatcher::~FirstPassDispatcher() {
-  FML_DCHECK(cull_rect_state_.size() == 1);
+  FML_DCHECK(stack_.size() == 1);
 }
 
 void FirstPassDispatcher::save() {
-  stack_.emplace_back(matrix_);
-  cull_rect_state_.push_back(cull_rect_state_.back());
+  stack_.push_back(SaveFrame{
+      .matrix = stack_.back().matrix,
+      .cull_rect = stack_.back().cull_rect,
+  });
 }
 
 namespace {
+bool CanShareBackdropId(const flutter::DlImageFilter* a,
+                        const flutter::DlImageFilter* b) {
+  if (a == b) {
+    return true;
+  }
+  if (a == nullptr || b == nullptr) {
+    return false;
+  }
+  if (a->type() == flutter::DlImageFilterType::kBlur &&
+      b->type() == flutter::DlImageFilterType::kBlur) {
+    const auto* blur_a = a->asBlur();
+    const auto* blur_b = b->asBlur();
+    return flutter::DlScalarNearlyEqual(blur_a->sigma_x(), blur_b->sigma_x()) &&
+           flutter::DlScalarNearlyEqual(blur_a->sigma_y(), blur_b->sigma_y()) &&
+           blur_a->tile_mode() == blur_b->tile_mode();
+  }
+  return *a == *b;
+}
+
 void RecordBackdropData(
     std::unordered_map<int64_t, BackdropData>* backdrop_data,
     int64_t backdrop_id,
@@ -1024,49 +1051,109 @@ void FirstPassDispatcher::saveLayer(const DlRect& bounds,
                                     const flutter::SaveLayerOptions options,
                                     const flutter::DlImageFilter* backdrop,
                                     std::optional<int64_t> backdrop_id) {
-  save();
+  SaveFrame frame = {
+      .matrix = stack_.back().matrix,
+      .cull_rect = stack_.back().cull_rect,
+      .is_save_layer = true,
+  };
 
   const bool has_layer_bounds =
       !bounds.IsMaximum() &&
       (!bounds.IsEmpty() || options.bounds_from_caller());
 
   backdrop_count_ += (backdrop == nullptr ? 0 : 1);
-  if (backdrop != nullptr && backdrop_id.has_value()) {
-    Rect layer_coverage = cull_rect_state_.back();
-    if (has_layer_bounds) {
-      layer_coverage =
-          layer_coverage.IntersectionOrEmpty(bounds.TransformBounds(matrix_));
+  if (backdrop != nullptr) {
+    if (backdrop_id.has_value()) {
+      // saveLayer called with an explicit backdrop_id. Invalidate any active
+      // generated backdrop group.
+      active_generated_backdrop_group_ = std::nullopt;
+    } else {
+      // saveLayer called with no explicit backdrop_id.
+      // The currently active backdrop group ID can be reused if:
+      // 1. There is a currently active generated backdrop group, and
+      // 2. This layer is at the same saveLayer depth as the active
+      //    backdrop group, and
+      // 3. The backdrop filter parameters are compatible with the active
+      //    group's (e.g. matching blur parameters even if local bounds differ).
+      // If these conditions are not all met, generate a new backdrop group.
+      if (!(active_generated_backdrop_group_.has_value() &&
+            active_generated_backdrop_group_->save_layer_depth ==
+                save_layer_depth_ &&
+            CanShareBackdropId(active_generated_backdrop_group_->filter.get(),
+                               backdrop))) {
+        active_generated_backdrop_group_ = GeneratedBackdropGroup{
+            .id = --next_generated_backdrop_id_,
+            .save_layer_depth = save_layer_depth_,
+            .filter = backdrop->shared(),
+        };
+      }
+      backdrop_id = active_generated_backdrop_group_->id;
+      frame.is_generated_backdrop = true;
+      generated_backdrop_ids_.push_back(active_generated_backdrop_group_->id);
     }
-    RecordBackdropData(&backdrop_data_, backdrop_id.value(), backdrop->shared(),
+
+    Rect layer_coverage = frame.cull_rect;
+    if (has_layer_bounds) {
+      layer_coverage = layer_coverage.IntersectionOrEmpty(
+          bounds.TransformBounds(frame.matrix));
+    }
+    RecordBackdropData(&backdrop_data_, *backdrop_id, backdrop->shared(),
                        layer_coverage);
   }
 
   // This dispatcher does not track enough state to accurately compute
   // cull rects with image filters.
-  auto global_cull_rect = cull_rect_state_.back();
-  if (has_image_filter_ || global_cull_rect.IsMaximum()) {
-    cull_rect_state_.back() = Rect::MakeMaximum();
+  if (has_image_filter_ || frame.cull_rect.IsMaximum()) {
+    frame.cull_rect = Rect::MakeMaximum();
   } else if (has_layer_bounds) {
-    cull_rect_state_.back() =
-        global_cull_rect.IntersectionOrEmpty(bounds.TransformBounds(matrix_));
+    frame.cull_rect = frame.cull_rect.IntersectionOrEmpty(
+        bounds.TransformBounds(frame.matrix));
   }
+
+  stack_.push_back(frame);
+  save_layer_depth_++;
 }
 
 void FirstPassDispatcher::restore() {
-  matrix_ = stack_.back();
+  SaveFrame frame = stack_.back();
   stack_.pop_back();
-  cull_rect_state_.pop_back();
+
+  if (frame.is_save_layer) {
+    save_layer_depth_--;
+    if (active_generated_backdrop_group_.has_value()) {
+      if (active_generated_backdrop_group_->save_layer_depth >
+          save_layer_depth_) {
+        // The parent layer of the active backdrop group was restored, so
+        // invalidate the active group.
+        active_generated_backdrop_group_ = std::nullopt;
+      } else if (active_generated_backdrop_group_->save_layer_depth ==
+                     save_layer_depth_ &&
+                 !frame.is_generated_backdrop) {
+        // Restoring a non-generated saveLayer (e.g. non-backdrop saveLayer or
+        // backdrop with an explicit ID) composites onto the parent canvas and
+        // invalidates the active generated backdrop group at this depth.
+        active_generated_backdrop_group_ = std::nullopt;
+      }
+    }
+  }
+}
+
+void FirstPassDispatcher::onDraw() {
+  // Drawing on the current canvas mutates its backdrop and invalidates any
+  // active generated backdrop group at this saveLayer depth.
+  if (active_generated_backdrop_group_.has_value() &&
+      active_generated_backdrop_group_->save_layer_depth == save_layer_depth_) {
+    active_generated_backdrop_group_ = std::nullopt;
+  }
 }
 
 namespace {
-void Clip(std::vector<Rect>& cull_rect_state,
-          const Matrix& matrix,
+void Clip(FirstPassDispatcher::SaveFrame& frame,
           const DlRect& bounds,
           flutter::DlClipOp clip_op) {
   if (clip_op == flutter::DlClipOp::kIntersect) {
-    auto global_rect = bounds.TransformBounds(matrix);
-    cull_rect_state.back() =
-        cull_rect_state.back().IntersectionOrEmpty(global_rect);
+    auto global_rect = bounds.TransformBounds(frame.matrix);
+    frame.cull_rect = frame.cull_rect.IntersectionOrEmpty(global_rect);
   }
 }
 }  // namespace
@@ -1075,51 +1162,52 @@ void Clip(std::vector<Rect>& cull_rect_state,
 void FirstPassDispatcher::clipRect(const DlRect& rect,
                                    flutter::DlClipOp clip_op,
                                    bool is_aa) {
-  Clip(cull_rect_state_, matrix_, rect, clip_op);
+  Clip(stack_.back(), rect, clip_op);
 }
 
 // |flutter::DlOpReceiver|
 void FirstPassDispatcher::clipOval(const DlRect& bounds,
                                    flutter::DlClipOp clip_op,
                                    bool is_aa) {
-  Clip(cull_rect_state_, matrix_, bounds, clip_op);
+  Clip(stack_.back(), bounds, clip_op);
 }
 
 // |flutter::DlOpReceiver|
 void FirstPassDispatcher::clipRoundRect(const DlRoundRect& rrect,
                                         flutter::DlClipOp clip_op,
                                         bool is_aa) {
-  Clip(cull_rect_state_, matrix_, rrect.GetBounds(), clip_op);
+  Clip(stack_.back(), rrect.GetBounds(), clip_op);
 }
 
 // |flutter::DlOpReceiver|
 void FirstPassDispatcher::clipPath(const DlPath& path,
                                    flutter::DlClipOp clip_op,
                                    bool is_aa) {
-  Clip(cull_rect_state_, matrix_, path.GetBounds(), clip_op);
+  Clip(stack_.back(), path.GetBounds(), clip_op);
 }
 
 // |flutter::DlOpReceiver|
 void FirstPassDispatcher::clipRoundSuperellipse(const DlRoundSuperellipse& rse,
                                                 flutter::DlClipOp clip_op,
                                                 bool is_aa) {
-  Clip(cull_rect_state_, matrix_, rse.GetBounds(), clip_op);
+  Clip(stack_.back(), rse.GetBounds(), clip_op);
 }
 
 void FirstPassDispatcher::translate(DlScalar tx, DlScalar ty) {
-  matrix_ = matrix_.Translate({tx, ty});
+  stack_.back().matrix = stack_.back().matrix.Translate({tx, ty});
 }
 
 void FirstPassDispatcher::scale(DlScalar sx, DlScalar sy) {
-  matrix_ = matrix_.Scale({sx, sy, 1.0f});
+  stack_.back().matrix = stack_.back().matrix.Scale({sx, sy, 1.0f});
 }
 
 void FirstPassDispatcher::rotate(DlScalar degrees) {
-  matrix_ = matrix_ * Matrix::MakeRotationZ(Degrees(degrees));
+  stack_.back().matrix =
+      stack_.back().matrix * Matrix::MakeRotationZ(Degrees(degrees));
 }
 
 void FirstPassDispatcher::skew(DlScalar sx, DlScalar sy) {
-  matrix_ = matrix_ * Matrix::MakeSkew(sx, sy);
+  stack_.back().matrix = stack_.back().matrix * Matrix::MakeSkew(sx, sy);
 }
 
 // clang-format off
@@ -1127,7 +1215,7 @@ void FirstPassDispatcher::skew(DlScalar sx, DlScalar sy) {
 void FirstPassDispatcher::transform2DAffine(
     DlScalar mxx, DlScalar mxy, DlScalar mxt,
     DlScalar myx, DlScalar myy, DlScalar myt) {
-  matrix_ = matrix_ * Matrix::MakeColumn(
+  stack_.back().matrix = stack_.back().matrix * Matrix::MakeColumn(
       mxx,  myx,  0.0f, 0.0f,
       mxy,  myy,  0.0f, 0.0f,
       0.0f, 0.0f, 1.0f, 0.0f,
@@ -1143,7 +1231,7 @@ void FirstPassDispatcher::transformFullPerspective(
     DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
     DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
     DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) {
-  matrix_ = matrix_ * Matrix::MakeColumn(
+  stack_.back().matrix = stack_.back().matrix * Matrix::MakeColumn(
       mxx, myx, mzx, mwx,
       mxy, myy, mzy, mwy,
       mxz, myz, mzz, mwz,
@@ -1153,12 +1241,13 @@ void FirstPassDispatcher::transformFullPerspective(
 // clang-format on
 
 void FirstPassDispatcher::transformReset() {
-  matrix_ = Matrix();
+  stack_.back().matrix = Matrix();
 }
 
 void FirstPassDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
                                    DlScalar x,
                                    DlScalar y) {
+  flutter::DrawHookDispatchHelper::drawText(text, x, y);
   GlyphProperties properties;
   auto text_frame = text->GetTextFrame();
   if (text_frame == nullptr) {
@@ -1175,17 +1264,17 @@ void FirstPassDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
     properties.tone_or_color = GlyphProperties::ComputeTone(paint_.color);
   }
 
-  renderer_.GetLazyGlyphAtlas()->AddTextFrame(text_frame,   //
-                                              Point(x, y),  //
-                                              matrix_,      //
-                                              properties    //
+  renderer_.GetLazyGlyphAtlas()->AddTextFrame(text_frame,            //
+                                              Point(x, y),           //
+                                              stack_.back().matrix,  //
+                                              properties             //
   );
 }
 
 const Rect FirstPassDispatcher::GetCurrentLocalCullingBounds() const {
-  auto cull_rect = cull_rect_state_.back();
+  auto cull_rect = stack_.back().cull_rect;
   if (!cull_rect.IsEmpty() && !cull_rect.IsMaximum()) {
-    Matrix inverse = matrix_.Invert();
+    Matrix inverse = stack_.back().matrix.Invert();
     cull_rect = cull_rect.TransformBounds(inverse);
   }
   return cull_rect;
@@ -1201,7 +1290,7 @@ void FirstPassDispatcher::drawDisplayList(
   bool old_has_image_filter = has_image_filter_;
   has_image_filter_ = false;
 
-  if (matrix_.HasPerspective()) {
+  if (stack_.back().matrix.HasPerspective()) {
     display_list->Dispatch(*this);
   } else {
     Rect local_cull_bounds = GetCurrentLocalCullingBounds();
@@ -1284,11 +1373,12 @@ bool PixelFormatSupportsMSAA(std::optional<PixelFormat> pixel_format) {
 }
 }  // namespace
 
-std::pair<std::unordered_map<int64_t, BackdropData>, size_t>
+std::tuple<std::unordered_map<int64_t, BackdropData>,
+           size_t,
+           std::deque<int64_t>>
 FirstPassDispatcher::TakeBackdropData() {
-  std::unordered_map<int64_t, BackdropData> temp;
-  std::swap(temp, backdrop_data_);
-  return std::make_pair(temp, backdrop_count_);
+  return {std::move(backdrop_data_), backdrop_count_,
+          std::move(generated_backdrop_ids_)};
 }
 
 std::shared_ptr<Texture> DisplayListToTexture(
@@ -1353,8 +1443,9 @@ std::shared_ptr<Texture> DisplayListToTexture(
       display_list->max_root_blend_mode(),       //
       impeller::IRect32::MakeSize(size)          //
   );
-  const auto& [data, count] = collector.TakeBackdropData();
-  impeller_dispatcher.SetBackdropData(data, count);
+  const auto& [data, count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
+  impeller_dispatcher.SetBackdropData(data, count, generated_backdrop_ids);
   context.GetTextShadowCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
@@ -1401,8 +1492,9 @@ bool RenderToTarget(ContentContext& context,
       display_list->max_root_blend_mode(),       //
       IRect32::RoundOut(cull_rect)               //
   );
-  const auto& [data, count] = collector.TakeBackdropData();
-  impeller_dispatcher.SetBackdropData(data, count);
+  const auto& [data, count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
+  impeller_dispatcher.SetBackdropData(data, count, generated_backdrop_ids);
   context.GetTextShadowCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
