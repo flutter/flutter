@@ -27,7 +27,8 @@ class PlaygroundTest : public Playground,
 
   virtual ~PlaygroundTest();
 
-  static void SetupTestEnvironment();
+  /// Initializes the default playground test environment.
+  static bool SetupTestEnvironment();
 
   void SetUp() override;
 

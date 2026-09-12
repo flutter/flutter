@@ -10,8 +10,8 @@
 namespace impeller {
 namespace testing {
 
-void ImpellerUnittestSetup() {
-  ::impeller::PlaygroundTest::SetupTestEnvironment();
+bool ImpellerUnittestSetup() {
+  return ::impeller::PlaygroundTest::SetupTestEnvironment();
 }
 
 }  // namespace testing

@@ -10,11 +10,75 @@
 
 #include "flutter/fml/command_line.h"
 #include "impeller/base/flags.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
 
+struct PlaygroundSwitchOption {
+  PlaygroundSwitchOption(std::string name, bool& value)
+      : name(std::move(name)), value(value) {}
+
+  std::string name;
+  bool& value;
+};
+
+/// There are 4 different ways that a Playground test can be rendered:
+/// - offscreen - the default - renders the playground output to an
+///   offscreen RenderTarget obtained from the context's allocator.
+/// - onscreen - renders the playground output to an onscreen RenderTarget
+///   obtained from the AcquireSurfaceFrame method of the surface.
+/// - golden - renders the playground output to an offscreen RenderTarget
+///   obtained from the allocator twice and saves the second output to
+///   a file in the golden_output_dir.
+/// - window - renders the playground output to a window so that the
+///   developer can inspect and diagnose problems directly.
+///
+/// The default outputs are offscreen and onscreen.
+struct PlaygroundOutputs {
+  bool offscreen = true;
+  bool onscreen = true;
+  bool golden = false;
+  bool window = false;
+
+  std::array<PlaygroundSwitchOption, 4> GetOptions() {
+    return std::array<PlaygroundSwitchOption, 4>{{
+        PlaygroundSwitchOption("offscreen", offscreen),
+        PlaygroundSwitchOption("onscreen", onscreen),
+        PlaygroundSwitchOption("golden", golden),
+        PlaygroundSwitchOption("window", window),
+    }};
+  }
+
+  bool operator==(const PlaygroundOutputs&) const = default;
+};
+
+/// The default list of backends over which the playground tests will be
+/// executed depends mostly on which backends the platform supports, but
+/// a given run may want to focus on a small number
+struct PlaygroundBackends {
+  bool metal = true;
+  bool metal_sdf = true;
+  bool opengles = true;
+  bool opengles_sdf = true;
+  bool vulkan = true;
+
+  std::array<PlaygroundSwitchOption, 5> GetOptions() {
+    return std::array<PlaygroundSwitchOption, 5>{{
+        PlaygroundSwitchOption("Metal", metal),
+        PlaygroundSwitchOption("MetalSDF", metal_sdf),
+        PlaygroundSwitchOption("OpenGLES", opengles),
+        PlaygroundSwitchOption("OpenGLESSDF", opengles_sdf),
+        PlaygroundSwitchOption("Vulkan", vulkan),
+    }};
+  }
+
+  bool operator==(const PlaygroundBackends&) const = default;
+};
+
 struct PlaygroundSwitches {
-  bool enable_playground = false;
+  PlaygroundOutputs outputs_enabled;
+  PlaygroundBackends backends_enabled;
+
   // If specified, the playgrounds will render for at least the duration
   // specified in the timeout. If the timeout is zero, exactly one frame will be
   // rendered in the playground.
@@ -44,11 +108,19 @@ struct PlaygroundSwitches {
 
   Flags flags;
 
+  std::optional<std::string> golden_output_dir;
+
   PlaygroundSwitches();
 
-  explicit PlaygroundSwitches(const fml::CommandLine& args);
+  static const PlaygroundSwitches& CommandLineSwitches();
+
+  static bool InitCommandLineSwitches(const fml::CommandLine& args,
+                                      const std::string& golden_option_name);
 
   bool operator==(const PlaygroundSwitches&) const = default;
+
+ private:
+  static std::optional<PlaygroundSwitches> command_line_switches_;
 };
 
 }  // namespace impeller
