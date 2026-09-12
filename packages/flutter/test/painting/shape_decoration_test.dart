@@ -191,10 +191,7 @@ void main() {
     const colorG = Color(0xff00ff00);
     const Gradient gradient = LinearGradient(colors: <Color>[colorR, colorG]);
     const colorDecoration = ShapeDecoration(color: colorR, shape: CircleBorder());
-    const gradientDecoration = ShapeDecoration(
-      gradient: gradient,
-      shape: RoundedRectangleBorder(),
-    );
+    const gradientDecoration = ShapeDecoration(gradient: gradient, shape: RoundedRectangleBorder());
 
     // The end points are returned unchanged.
     expect(ShapeDecoration.lerp(colorDecoration, gradientDecoration, 0.0), colorDecoration);
@@ -205,14 +202,12 @@ void main() {
     // would otherwise throw the constructor's assertion). This yields a smooth
     // transition rather than a sudden jump at the half-way point.
     for (final t in <double>[0.1, 0.25, 0.49, 0.5, 0.51, 0.75, 0.9]) {
-      final ShapeDecoration forward =
-          ShapeDecoration.lerp(colorDecoration, gradientDecoration, t)!;
+      final ShapeDecoration forward = ShapeDecoration.lerp(colorDecoration, gradientDecoration, t)!;
       expect(forward.color, isNull);
       expect(forward.gradient, isA<LinearGradient>());
 
       // The reverse direction (gradient -> color) behaves the same way.
-      final ShapeDecoration reverse =
-          ShapeDecoration.lerp(gradientDecoration, colorDecoration, t)!;
+      final ShapeDecoration reverse = ShapeDecoration.lerp(gradientDecoration, colorDecoration, t)!;
       expect(reverse.color, isNull);
       expect(reverse.gradient, isA<LinearGradient>());
     }
@@ -220,7 +215,8 @@ void main() {
     // Close to the color end, the interpolated gradient is (almost) the uniform
     // start color.
     final gradientNearColor =
-        ShapeDecoration.lerp(colorDecoration, gradientDecoration, 0.001)!.gradient! as LinearGradient;
+        ShapeDecoration.lerp(colorDecoration, gradientDecoration, 0.001)!.gradient!
+            as LinearGradient;
     expect(gradientNearColor.colors, hasLength(2));
     for (final Color color in gradientNearColor.colors) {
       expect(color.r, closeTo(colorR.r, 0.05));

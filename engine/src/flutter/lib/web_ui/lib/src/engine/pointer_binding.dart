@@ -1177,9 +1177,8 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       final int device = _getPointerId(event);
       if (_hasSanitizer(device)) {
         final pointerData = <ui.PointerData>[];
-        final _SanitizedDetails? details = _getSanitizer(
-          device,
-        ).sanitizeUpEvent(buttons: event.buttons?.toInt());
+        final _SanitizedDetails? details = _getSanitizer(device)
+            .sanitizeUpEvent(buttons: event.buttons?.toInt());
         _removePointerIfUnhoverable(event);
         if (details != null) {
           _convertEventsToPointerData(data: pointerData, event: event, details: details);

@@ -359,7 +359,7 @@ class WebTextStyle extends SharedTextStyle implements ui.TextStyle {
       final double? fontSize = this.fontSize;
       result =
           'fontFamily: ${fontFamily ?? ""} '
-          'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : ""}px '
+          'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(2) : ""}px '
           'fontStyle: ${fontStyle != null ? fontStyle.toString().replaceFirst("FontStyle.", "") : ""} '
           'fontWeight: ${fontWeight != null ? fontWeight.toString().replaceFirst("FontWeight.", "") : ""} '
           'color: ${color != null ? color!.toCssString() : ""} '
@@ -540,10 +540,10 @@ abstract class SharedTextStyle {
   String _buildCssFontString() {
     final String cssFontStyle = fontStyle?.toCssString() ?? StyleManager.defaultFontStyle;
     final String cssFontWeight = fontWeight?.toCssString() ?? StyleManager.defaultFontWeight;
-    final int cssFontSize = (fontSize ?? StyleManager.defaultFontSize).floor();
+    final double cssFontSize = fontSize ?? StyleManager.defaultFontSize;
     final String cssFontFamily = fontFamily ?? StyleManager.defaultFontFamily;
     final String fullFontName = canonicalizeFontFamily(cssFontFamily, fontFamilyFallback)!;
-    return '$cssFontStyle $cssFontWeight ${cssFontSize}px $fullFontName';
+    return '$cssFontStyle $cssFontWeight ${cssFontSize.toStringAsFixed(2)}px $fullFontName';
   }
 
   String _buildLetterSpacingString() {
@@ -1100,6 +1100,14 @@ class WebParagraph implements ui.Paragraph {
 
   late final TextLayout _layout = TextLayout(this);
   late final WebParagraphPainter _painter = renderer.createWebParagraphPainter(this);
+
+  /// The painter used to render this paragraph, exposed for testing.
+  @visibleForTesting
+  WebParagraphPainter get debugPainter => _painter;
+
+  /// The number of times this paragraph has been rasterized, exposed for testing.
+  @visibleForTesting
+  int get debugRasterizeCount => _painter.debugRasterizeCount;
 }
 
 class WebLineMetrics implements ui.LineMetrics {

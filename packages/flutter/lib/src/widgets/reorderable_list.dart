@@ -74,8 +74,11 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// like an elevation or border.
 ///
 /// The returned value will typically be the [child] wrapped in other widgets.
-typedef ReorderItemProxyDecorator =
-    Widget Function(Widget child, int index, Animation<double> animation);
+typedef ReorderItemProxyDecorator = Widget Function(
+  Widget child,
+  int index,
+  Animation<double> animation,
+);
 
 /// Used to provide drag boundaries during drag-and-drop reordering.
 ///

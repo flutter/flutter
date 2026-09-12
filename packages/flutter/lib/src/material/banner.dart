@@ -444,9 +444,8 @@ class _MaterialBannerState extends State<MaterialBanner> {
       container: true,
       liveRegion: true,
       onDismiss: () {
-        ScaffoldMessenger.of(
-          context,
-        ).removeCurrentMaterialBanner(reason: MaterialBannerClosedReason.dismiss);
+        ScaffoldMessenger.of(context)
+            .removeCurrentMaterialBanner(reason: MaterialBannerClosedReason.dismiss);
       },
       child: accessibleNavigation
           ? materialBanner
