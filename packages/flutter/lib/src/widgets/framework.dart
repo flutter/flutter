@@ -3044,6 +3044,36 @@ class BuildOwner {
     assert(_debugStateLockLevel >= 0);
   }
 
+  // Calls the given `callback` in a scope where the restriction established by
+  // [lockState] is lifted.
+  //
+  // Unmounting a widget can invoke application callbacks (for example the
+  // gesture callbacks of a [GestureDetector] whose gesture is interrupted
+  // because the widget is being removed from the tree). Such a callback is
+  // allowed to mark other, still mounted, widgets as needing to build: the
+  // build phase is over by the time the elements are unmounted, so those
+  // widgets are simply rebuilt during a subsequent frame.
+  //
+  // Marking the widget that is being unmounted itself as needing to build
+  // remains an error, which is caught by [State.setState] and by the checks at
+  // the beginning of [Element.markNeedsBuild].
+  void _unlockState(VoidCallback callback) {
+    int? previousStateLockLevel;
+    assert(() {
+      previousStateLockLevel = _debugStateLockLevel;
+      _debugStateLockLevel = 0;
+      return true;
+    }());
+    try {
+      callback();
+    } finally {
+      assert(() {
+        _debugStateLockLevel = previousStateLockLevel!;
+        return true;
+      }());
+    }
+  }
+
   /// Establishes a scope for updating the widget tree, and calls the given
   /// `callback`, if any. Then, builds all the elements that were marked as
   /// dirty using [scheduleBuildFor], in depth order.
@@ -6043,8 +6073,12 @@ class StatefulElement extends ComponentElement {
 
   @override
   void unmount() {
+    final BuildOwner owner = this.owner!;
     super.unmount();
-    state.dispose();
+    // The callbacks invoked by State.dispose may legitimately mark other
+    // widgets as needing to build, so the state lock that the framework holds
+    // while it unmounts the elements is lifted here.
+    owner._unlockState(state.dispose);
     assert(() {
       if (state._debugLifecycleState == _StateLifecycle.defunct) {
         return true;

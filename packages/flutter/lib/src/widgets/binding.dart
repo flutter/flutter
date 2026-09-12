@@ -1460,6 +1460,15 @@ mixin WidgetsBinding
       }
       return true;
     }());
+    if (schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      // This callback is never invoked from within BuildOwner.buildScope, so
+      // the build phase of the frame that is currently being produced is
+      // already over. A new frame is needed to build the elements that were
+      // just marked as dirty, for example by a callback that an application
+      // registered on a widget that is being removed from the tree.
+      scheduleFrame();
+      return;
+    }
     ensureVisualUpdate();
   }
 
@@ -1577,6 +1586,12 @@ mixin WidgetsBinding
       super.drawFrame();
       assert(() {
         debugFrameWasSentToEngine = sendFramesToEngine;
+        // Unmounting the elements that are no longer active can invoke
+        // application callbacks, for example the gesture callbacks of a
+        // GestureDetector whose gesture is interrupted because it is being
+        // removed from the tree. Such a callback is allowed to schedule a build
+        // for a subsequent frame, since the build phase of this frame is over.
+        debugBuildingDirtyElements = false;
         return true;
       }());
       buildOwner!.finalizeTree();
