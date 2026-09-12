@@ -14,6 +14,7 @@ import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
+import 'context/tool_context.dart';
 import 'globals.dart' as globals;
 
 //////////////////////////////////////////////////////////////////////
@@ -297,22 +298,33 @@ abstract class Artifacts {
     return _TestLocalEngine(localEngine, localEngineHost, fileSystem ?? MemoryFileSystem.test());
   }
 
-  static Artifacts getLocalEngine(EngineBuildPaths engineBuildPaths) {
+  static Artifacts getLocalEngine(
+    EngineBuildPaths engineBuildPaths, {
+    required ToolContext toolContext,
+  }) {
+    final ToolContext(
+      :Cache cache,
+      :FileSystem fs,
+      :OperatingSystemUtils os,
+      :Platform platform,
+      :ProcessManager processManager,
+    ) = toolContext;
+
     Artifacts artifacts = CachedArtifacts(
-      fileSystem: globals.fs,
-      platform: globals.platform,
-      cache: globals.cache,
-      operatingSystemUtils: globals.os,
+      fileSystem: fs,
+      platform: platform,
+      cache: cache,
+      operatingSystemUtils: os,
     );
     if (engineBuildPaths.hostEngine != null && engineBuildPaths.targetEngine != null) {
       artifacts = CachedLocalEngineArtifacts(
         engineBuildPaths.hostEngine!,
         engineOutPath: engineBuildPaths.targetEngine!,
-        cache: globals.cache,
-        fileSystem: globals.fs,
-        processManager: globals.processManager,
-        platform: globals.platform,
-        operatingSystemUtils: globals.os,
+        cache: cache,
+        fileSystem: fs,
+        processManager: processManager,
+        platform: platform,
+        operatingSystemUtils: os,
         parent: artifacts,
       );
     }
@@ -320,9 +332,9 @@ abstract class Artifacts {
       artifacts = CachedLocalWebSdkArtifacts(
         parent: artifacts,
         webSdkPath: engineBuildPaths.webSdk!,
-        fileSystem: globals.fs,
-        platform: globals.platform,
-        operatingSystemUtils: globals.os,
+        fileSystem: fs,
+        platform: platform,
+        operatingSystemUtils: os,
       );
     }
     return artifacts;
