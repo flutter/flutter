@@ -533,4 +533,43 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Body'), findsOneWidget);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/84201.
+  testWidgets('Dispatches a SizeChangedLayoutNotification when expanded and collapsed', (
+    WidgetTester tester,
+  ) async {
+    final controller = ExpansibleController();
+    addTearDown(controller.dispose);
+    final notifications = <SizeChangedLayoutNotification>[];
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: NotificationListener<SizeChangedLayoutNotification>(
+          onNotification: (SizeChangedLayoutNotification notification) {
+            notifications.add(notification);
+            return false;
+          },
+          child: Center(
+            child: Expansible(
+              controller: controller,
+              headerBuilder: (BuildContext context, Animation<double> animation) =>
+                  const Text('Header'),
+              bodyBuilder: (BuildContext context, Animation<double> animation) =>
+                  const SizedBox(height: 100.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(notifications, isEmpty);
+
+    controller.expand();
+    await tester.pumpAndSettle();
+    expect(notifications, isNotEmpty);
+
+    notifications.clear();
+    controller.collapse();
+    await tester.pumpAndSettle();
+    expect(notifications, isNotEmpty);
+  });
 }
