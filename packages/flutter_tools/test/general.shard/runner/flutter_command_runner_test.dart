@@ -294,6 +294,18 @@ void main() {
           fileSystem
               .file(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool', 'pubspec.yaml'))
               .createSync();
+          fileSystem
+              .file(
+                fileSystem.path.join(
+                  _kFlutterRoot,
+                  'dev',
+                  'tools',
+                  'build',
+                  'generated_package',
+                  'pubspec.yaml',
+                ),
+              )
+              .createSync(recursive: true);
         });
 
         tearDown(() {
@@ -301,7 +313,7 @@ void main() {
         });
 
         testUsingContext(
-          '',
+          'ignores packages in build directories',
           () {
             final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
             final List<String> packagePaths = runner
