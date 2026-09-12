@@ -63,12 +63,10 @@ abstract final class FlutterGlobalOptions {
 class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({
     required ToolContext toolContext,
-    Analytics analytics = const NoOpAnalytics(),
+    this._analytics = const NoOpAnalytics(),
     bool verboseHelp = false,
-    FeatureFlags? featureFlags,
-  }) : _analytics = analytics,
-       _featureFlags = featureFlags,
-       _toolContext = toolContext,
+    this._featureFlags,
+  }) : _toolContext = toolContext,
        _verboseHelp = verboseHelp,
        _argParser = ArgParser(
          allowTrailingOptions: false,
@@ -562,9 +560,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
       packagePath: topLevelResults[FlutterGlobalOptions.kPackagesOption] as String?,
     );
     if (engineBuildPaths != null) {
-      contextOverrides.addAll(<Type, Object?>{
-        Artifacts: Artifacts.getLocalEngine(engineBuildPaths),
-      });
+      final Artifacts localArtifacts = Artifacts.getLocalEngine(engineBuildPaths);
+      contextOverrides.addAll(<Type, Object?>{Artifacts: localArtifacts});
+      // Update the artifacts the commands were created with.
+      if (_toolContext.artifacts case final DeferredArtifacts artifacts) {
+        artifacts.resolve(localArtifacts);
+      }
     }
 
     await context.run<void>(

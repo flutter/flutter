@@ -16,7 +16,6 @@ import 'base/platform.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
 
 String _missingLocalNetworkPermissionsInstructions(String err) =>
     '''
@@ -35,15 +34,12 @@ class MDnsVmServiceDiscovery {
   ///
   /// The [_client] parameter will be defaulted to a new [MDnsClient] if null.
   MDnsVmServiceDiscovery({
-    required Analytics analytics,
-    required Logger logger,
+    required this._analytics,
+    required this._logger,
+    required this._platform,
     MDnsClient? mdnsClient,
-    Platform? platform,
     MDnsClient? preliminaryMDnsClient,
-  }) : _analytics = analytics,
-       _client = mdnsClient ?? MDnsClient(),
-       _logger = logger,
-       _platform = platform ?? globals.platform,
+  }) : _client = mdnsClient ?? MDnsClient(),
        _preliminaryClient = preliminaryMDnsClient;
 
   final MDnsClient _client;

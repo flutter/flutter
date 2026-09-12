@@ -43,18 +43,13 @@ const kWebDefinePrefix = 'webDefine:';
 
 class WebBuilder {
   WebBuilder({
-    required Logger logger,
-    required ProcessManager processManager,
-    required BuildSystem buildSystem,
-    required Analytics analytics,
-    required FlutterVersion flutterVersion,
-    required FileSystem fileSystem,
-  }) : _logger = logger,
-       _processManager = processManager,
-       _buildSystem = buildSystem,
-       _analytics = analytics,
-       _flutterVersion = flutterVersion,
-       _fileSystem = fileSystem;
+    required this._logger,
+    required this._processManager,
+    required this._buildSystem,
+    required this._analytics,
+    required this._flutterVersion,
+    required this._fileSystem,
+  });
 
   final Logger _logger;
   final ProcessManager _processManager;
@@ -85,6 +80,7 @@ class WebBuilder {
 
     final bool hasWebPlugins = (await findPlugins(
       flutterProject,
+      logger: _logger,
     )).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final Directory outputDirectory = outputDirectoryPath == null
         ? _fileSystem.directory(

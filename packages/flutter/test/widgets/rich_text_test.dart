@@ -288,7 +288,9 @@ void main() {
     expect(paragraph.devicePixelRatio, 4.0);
   });
 
-  testWidgets('RichText defaults to 1.0 devicePixelRatio when no View or MediaQuery is present', (WidgetTester tester) async {
+  testWidgets('RichText defaults to 1.0 devicePixelRatio when no View or MediaQuery is present', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       RawView(
         view: tester.view,

@@ -185,31 +185,28 @@ void main() {
       },
     );
 
-    testUsingContext(
-      'ExtensionConfiguration handles failing extensions gracefully without failing other extensions',
-      () async {
-        final logger = BufferLogger.test();
-        final config = ExtensionConfiguration(
-          extensions: <ConfigurationExtension>[
-            _FailingConfigurationExtension(),
-            _SecondaryConfigurationExtension(),
-          ],
-          logger: logger,
-        );
+    testUsingContext('ExtensionConfiguration handles failing extensions gracefully without failing other extensions', () async {
+      final logger = BufferLogger.test();
+      final config = ExtensionConfiguration(
+        extensions: <ConfigurationExtension>[
+          _FailingConfigurationExtension(),
+          _SecondaryConfigurationExtension(),
+        ],
+        logger: logger,
+      );
 
-        final List<FeatureFlag> flags = await config.fetchFeatureFlags();
-        expect(flags, hasLength(1));
-        expect(flags.first.name, 'enable-secondary-feature');
+      final List<FeatureFlag> flags = await config.fetchFeatureFlags();
+      expect(flags, hasLength(1));
+      expect(flags.first.name, 'enable-secondary-feature');
 
-        final List<ConfigOption> options = await config.fetchConfigurations();
-        expect(options, hasLength(1));
-        expect(options.first.name, 'secondary-config-key');
+      final List<ConfigOption> options = await config.fetchConfigurations();
+      expect(options, hasLength(1));
+      expect(options.first.name, 'secondary-config-key');
 
-        final List<ExtensionSettingsGroup> groups = await config.fetchExtensionSettings();
-        expect(groups, hasLength(1));
-        expect(groups.first.title, 'Secondary Configuration Extension');
-      },
-    );
+      final List<ExtensionSettingsGroup> groups = await config.fetchExtensionSettings();
+      expect(groups, hasLength(1));
+      expect(groups.first.title, 'Secondary Configuration Extension');
+    });
 
     testUsingContext(
       'ConfigurationExtensionClient handles null and invalid responses gracefully',

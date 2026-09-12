@@ -941,8 +941,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
   /// [RenderSliverFixedExtentList]) to avoid inflating unnecessary children.
   SliverMultiBoxAdaptorElement(
     SliverMultiBoxAdaptorWidget super.widget, {
-    bool replaceMovedChildren = false,
-  }) : _replaceMovedChildren = replaceMovedChildren;
+    this._replaceMovedChildren = false,
+  });
 
   final bool _replaceMovedChildren;
 

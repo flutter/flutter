@@ -21,21 +21,16 @@ class AnalysisServer {
   AnalysisServer(
     this.sdkPath,
     this.directories, {
-    required FileSystem fileSystem,
-    required ProcessManager processManager,
-    required Logger logger,
-    required Platform platform,
-    required Terminal terminal,
+    required this._fileSystem,
+    required this._processManager,
+    required this._logger,
+    required this._platform,
+    required this._terminal,
     required this.suppressAnalytics,
     this.withFineDependencies = true,
     this.usePlugins = true,
-    String? protocolTrafficLog,
-  }) : _fileSystem = fileSystem,
-       _processManager = processManager,
-       _logger = logger,
-       _platform = platform,
-       _terminal = terminal,
-       _protocolTrafficLog = protocolTrafficLog;
+    this._protocolTrafficLog,
+  });
 
   final bool withFineDependencies;
   final bool usePlugins;
@@ -255,18 +250,6 @@ class AnalysisServer {
     final Object? response = json.decode(line);
 
     if (response is Map<String, Object?>) {
-      final Object? id = response['id'];
-      final Completer<Map<String, Object?>?>? completer = _outstandingRequests.remove(id);
-      if (completer != null) {
-        if (response case {'result': final Map<String, Object?>? result}) {
-          completer.complete(result);
-        } else if (response case {'error': final Map<String, Object?> error}) {
-          completer.completeError(error['message'] ?? error);
-        } else {
-          completer.completeError('Response for unknown request received: $response');
-        }
-      }
-
       final method = response['method'] as String?;
       if (method != null) {
         final Object? id = response['id'];
@@ -291,6 +274,18 @@ class AnalysisServer {
               _handleAnalysisIssues(paramsMap);
             case 'window/showMessage':
               _handleShowMessage(paramsMap);
+          }
+        }
+      } else {
+        final Object? id = response['id'];
+        final Completer<Map<String, Object?>?>? completer = _outstandingRequests.remove(id);
+        if (completer != null) {
+          if (response case {'result': final Map<String, Object?>? result}) {
+            completer.complete(result);
+          } else if (response case {'error': final Map<String, Object?> error}) {
+            completer.completeError(error['message'] ?? error);
+          } else {
+            completer.completeError('Response for unknown request received: $response');
           }
         }
       }
@@ -374,12 +369,10 @@ enum AnalysisSeverity { error, warning, info, none }
 class AnalysisError implements Comparable<AnalysisError> {
   AnalysisError(
     this.writtenError, {
-    required Platform platform,
-    required Terminal terminal,
-    required FileSystem fileSystem,
-  }) : _platform = platform,
-       _terminal = terminal,
-       _fileSystem = fileSystem;
+    required this._platform,
+    required this._terminal,
+    required this._fileSystem,
+  });
 
   final WrittenError writtenError;
   final Platform _platform;
