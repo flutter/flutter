@@ -635,6 +635,7 @@ mixin _Gtk4PopoverWindowControllerLinux on BaseWindowControllerLinux {
       if (!_destroyed) {
         _popover.realize();
         _view.realize();
+        _showPopover();
       }
     });
   }
@@ -949,9 +950,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController
     _viewMonitor = _FlViewMonitor(
       _view,
       onFirstFrame: () {
-        if (_LinuxWindowing.gtkMajorVersion >= 4) {
-          _showPopover();
-        } else {
+        if (_LinuxWindowing.gtkMajorVersion < 4) {
           _window.show();
         }
       },
@@ -1184,9 +1183,7 @@ class PopupWindowControllerLinux extends PopupWindowController
     _viewMonitor = _FlViewMonitor(
       _view,
       onFirstFrame: () {
-        if (_LinuxWindowing.gtkMajorVersion >= 4) {
-          _showPopover();
-        } else {
+        if (_LinuxWindowing.gtkMajorVersion < 4) {
           _window.show();
         }
       },
