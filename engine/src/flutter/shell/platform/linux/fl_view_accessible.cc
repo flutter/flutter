@@ -154,14 +154,11 @@ void fl_view_accessible_handle_update_semantics(
     const FlutterSemanticsUpdate2* update) {
   g_return_if_fail(FL_IS_VIEW_ACCESSIBLE(self));
 
-  g_autoptr(GHashTable) seen_nodes_by_id =
-      g_hash_table_new(g_direct_hash, g_direct_equal);
   g_autoptr(GHashTable) pending_children =
       g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
                             reinterpret_cast<GDestroyNotify>(fl_value_unref));
   for (size_t i = 0; i < update->node_count; i++) {
     FlutterSemanticsNode2* node = update->nodes[i];
-    g_hash_table_add(seen_nodes_by_id, GINT_TO_POINTER(node->id));
     FlAccessibleNode* atk_node = get_node(self, node);
 
     fl_accessible_node_set_flags(atk_node, node->flags2);
@@ -207,14 +204,6 @@ void fl_view_accessible_handle_update_semantics(
         return TRUE;
       },
       self);
-
-  g_hash_table_foreach_remove(
-      self->semantics_nodes_by_id,
-      [](gpointer key, gpointer value, gpointer user_data) -> gboolean {
-        GHashTable* seen_nodes_by_id = static_cast<GHashTable*>(user_data);
-        return !g_hash_table_contains(seen_nodes_by_id, key);
-      },
-      seen_nodes_by_id);
 }
 
 void fl_view_accessible_send_announcement(FlViewAccessible* self,
