@@ -33,6 +33,13 @@ class EmbedderTestContextVulkan : public EmbedderTestContext {
   void SetVulkanInstanceProcAddressCallback(
       FlutterVulkanInstanceProcAddressCallback callback);
 
+  using VulkanPresentCallback = std::function<void()>;
+  void SetVulkanPresentCallback(VulkanPresentCallback callback);
+
+  fml::RefPtr<TestVulkanContext> vulkan_context() const {
+    return vulkan_context_;
+  }
+
   static void* InstanceProcAddr(void* user_data,
                                 FlutterVulkanInstanceHandle instance,
                                 const char* name);
@@ -52,6 +59,7 @@ class EmbedderTestContextVulkan : public EmbedderTestContext {
 
   DlISize surface_size_;
   size_t present_count_ = 0;
+  VulkanPresentCallback vulkan_present_callback_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestContextVulkan);
 };
