@@ -20,9 +20,15 @@
 
 namespace impeller {
 
+class StrokeSegmentsGeometry;
+class TessellatorTestAccess;
+
 /// The size of the point arena buffer stored on the tessellator.
 [[maybe_unused]]
 static constexpr size_t kPointArenaSize = 4096u;
+
+/// Maximum tessellated stroke points stored in a single cache entry.
+static constexpr size_t kMaxCachedStrokePointsPerEntry = 1u << 14;
 
 //------------------------------------------------------------------------------
 /// @brief      A utility that generates triangles of the specified fill type
@@ -390,6 +396,9 @@ class Tessellator {
   /// Visible for testing.
   size_t GetFillTessellationCacheSizeForTesting() const;
 
+  /// Visible for testing.
+  size_t GetStrokeTessellationCacheSizeForTesting() const;
+
   /// Return a vector of Trig (cos, sin pairs) structs for a 90 degree
   /// circle quadrant of the specified pixel radius
   Trigs GetTrigsForDeviceRadius(Scalar pixel_radius);
@@ -408,12 +417,35 @@ class Tessellator {
   };
   template <typename IndexT>
   friend class ConvexTessellatorImpl;
+  friend class StrokeSegmentsGeometry;
+  friend class TessellatorTestAccess;
+
+  const std::vector<Point>* FindCachedStrokeTessellation(
+      const void* identity,
+      const StrokeParameters& stroke,
+      Scalar scale) const;
+
+  void StoreCachedStrokeTessellation(std::shared_ptr<const void> identity,
+                                     const StrokeParameters& stroke,
+                                     Scalar scale,
+                                     std::vector<Point> points);
+
+  bool HasSeenStrokeTessellation(const void* identity,
+                                 const StrokeParameters& stroke,
+                                 Scalar scale) const;
+
+  void RecordSeenStrokeTessellation(const void* identity,
+                                    const StrokeParameters& stroke,
+                                    Scalar scale);
 
   /// Used for polyline generation.
   std::unique_ptr<ConvexTessellator> convex_tessellator_;
 
   /// Used for stroke path generation.
   std::vector<Point> stroke_points_;
+
+  class StrokeTessellationCache;
+  std::unique_ptr<StrokeTessellationCache> stroke_tessellation_cache_;
 
   // Data for various Circle/EllipseGenerator classes, cached per
   // Tessellator instance which is usually the foreground life of an app

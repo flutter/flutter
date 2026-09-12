@@ -579,8 +579,114 @@ class ConvexTessellatorImpl : public Tessellator::ConvexTessellator {
   size_t cached_points_ = 0u;
 };
 
+class Tessellator::StrokeTessellationCache {
+ public:
+  const std::vector<Point>* Find(const void* identity,
+                                 const StrokeParameters& stroke,
+                                 Scalar scale) const {
+    auto found = cache_.find(Key{identity, stroke, scale});
+    if (found == cache_.end()) {
+      return nullptr;
+    }
+    return &found->second.points;
+  }
+
+  void Store(std::shared_ptr<const void> identity,
+             const StrokeParameters& stroke,
+             Scalar scale,
+             std::vector<Point> points) {
+    // Keep in sync with ConvexTessellatorImpl::InsertCacheEntry.
+    const size_t point_count = points.size();
+    if (point_count == 0u || point_count > kMaxCachedStrokePointsPerEntry) {
+      return;
+    }
+    const Key key{identity.get(), stroke, scale};
+    auto found = cache_.find(key);
+    if (found != cache_.end()) {
+      cached_points_ -= found->second.points.size();
+      cached_points_ += point_count;
+      found->second = Entry{std::move(identity), std::move(points)};
+      return;
+    }
+
+    cache_.emplace(key, Entry{std::move(identity), std::move(points)});
+    cached_points_ += point_count;
+    cache_order_.push_back(key);
+
+    while (!cache_order_.empty() &&
+           (cache_.size() > kMaxEntries || cached_points_ > kMaxPoints)) {
+      const Key oldest = cache_order_.front();
+      cache_order_.pop_front();
+      auto oldest_found = cache_.find(oldest);
+      if (oldest_found != cache_.end()) {
+        cached_points_ -= oldest_found->second.points.size();
+        cache_.erase(oldest_found);
+      }
+    }
+  }
+
+  bool HasSeen(const void* identity,
+               const StrokeParameters& stroke,
+               Scalar scale) const {
+    return seen_.find(Key{identity, stroke, scale}) != seen_.end();
+  }
+
+  void RecordSeen(const void* identity,
+                  const StrokeParameters& stroke,
+                  Scalar scale) {
+    const Key key{identity, stroke, scale};
+    if (!seen_.insert(key).second) {
+      return;
+    }
+    seen_order_.push_back(key);
+    while (seen_.size() > kMaxEntries && !seen_order_.empty()) {
+      seen_.erase(seen_order_.front());
+      seen_order_.pop_front();
+    }
+  }
+
+  size_t GetSize() const { return cache_.size(); }
+
+ private:
+  static constexpr size_t kMaxEntries = 256u;
+  static constexpr size_t kMaxPoints = 1u << 18;
+
+  struct Key {
+    const void* identity = nullptr;
+    StrokeParameters stroke;
+    Scalar scale = 0.0f;
+
+    bool operator==(const Key& other) const {
+      return identity == other.identity && stroke == other.stroke &&
+             scale == other.scale;
+    }
+  };
+
+  struct KeyHash {
+    size_t operator()(const Key& key) const {
+      return fml::HashCombine(
+          key.identity, key.stroke.width, static_cast<int>(key.stroke.cap),
+          static_cast<int>(key.stroke.join), key.stroke.miter_limit, key.scale);
+    }
+  };
+
+  struct Entry {
+    // Keeps the source alive so its address cannot be reused by a different
+    // path while this entry is retained.
+    std::shared_ptr<const void> identity;
+    std::vector<Point> points;
+  };
+
+  std::unordered_map<Key, Entry, KeyHash> cache_;
+  std::deque<Key> cache_order_;
+  std::unordered_set<Key, KeyHash> seen_;
+  std::deque<Key> seen_order_;
+  size_t cached_points_ = 0u;
+};
+
 Tessellator::Tessellator(bool supports_32bit_primitive_indices)
-    : stroke_points_(kPointArenaSize) {
+    : stroke_points_(kPointArenaSize),
+      stroke_tessellation_cache_(std::make_unique<StrokeTessellationCache>()) {
   if (supports_32bit_primitive_indices) {
     convex_tessellator_ = std::make_unique<ConvexTessellatorImpl<uint32_t>>();
   } else {
@@ -596,6 +702,38 @@ std::vector<Point>& Tessellator::GetStrokePointCache() {
 
 size_t Tessellator::GetFillTessellationCacheSizeForTesting() const {
   return convex_tessellator_->GetCacheSizeForTesting();
+}
+
+size_t Tessellator::GetStrokeTessellationCacheSizeForTesting() const {
+  return stroke_tessellation_cache_->GetSize();
+}
+
+const std::vector<Point>* Tessellator::FindCachedStrokeTessellation(
+    const void* identity,
+    const StrokeParameters& stroke,
+    Scalar scale) const {
+  return stroke_tessellation_cache_->Find(identity, stroke, scale);
+}
+
+void Tessellator::StoreCachedStrokeTessellation(
+    std::shared_ptr<const void> identity,
+    const StrokeParameters& stroke,
+    Scalar scale,
+    std::vector<Point> points) {
+  stroke_tessellation_cache_->Store(std::move(identity), stroke, scale,
+                                    std::move(points));
+}
+
+bool Tessellator::HasSeenStrokeTessellation(const void* identity,
+                                            const StrokeParameters& stroke,
+                                            Scalar scale) const {
+  return stroke_tessellation_cache_->HasSeen(identity, stroke, scale);
+}
+
+void Tessellator::RecordSeenStrokeTessellation(const void* identity,
+                                               const StrokeParameters& stroke,
+                                               Scalar scale) {
+  stroke_tessellation_cache_->RecordSeen(identity, stroke, scale);
 }
 
 Tessellator::Trigs Tessellator::GetTrigsForDeviceRadius(Scalar pixel_radius) {
