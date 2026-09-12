@@ -79,16 +79,6 @@ abstract class AotAssemblyBase extends Target {
       throw Exception('aot_assembly is only supported for iOS applications.');
     }
 
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
-      sdkRoot,
-      environment.fileSystem,
-    );
-    if (environmentType == EnvironmentType.simulator) {
-      throw Exception(
-        'release/profile builds are only supported for physical devices. '
-        'attempted to build for simulator.',
-      );
-    }
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
 
     // If we're building multiple iOS archs the binaries need to be lipo'd
@@ -159,13 +149,10 @@ class AotAssemblyRelease extends AotAssemblyBase {
     Source.pattern('{BUILD_DIR}/app.dill'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
-    // TODO(zanderso): cannot reference gen_snapshot with artifacts since
-    // it resolves to a file (ios/gen_snapshot) that never exists. This was
-    // split into gen_snapshot_arm64 and gen_snapshot_armv7.
-    // Source.artifact(Artifact.genSnapshot,
-    //   platform: TargetPlatform.ios,
-    //   mode: BuildMode.release,
-    // ),
+    // TODO(zanderso): Track the architecture-specific gen_snapshot artifacts
+    // as inputs. Artifact.genSnapshot resolves to ios/gen_snapshot, which does
+    // not exist, and the architectures are supplied through kIosArchs at build
+    // time.
   ];
 
   @override
@@ -188,13 +175,10 @@ class AotAssemblyProfile extends AotAssemblyBase {
     Source.pattern('{BUILD_DIR}/app.dill'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
-    // TODO(zanderso): cannot reference gen_snapshot with artifacts since
-    // it resolves to a file (ios/gen_snapshot) that never exists. This was
-    // split into gen_snapshot_arm64 and gen_snapshot_armv7.
-    // Source.artifact(Artifact.genSnapshot,
-    //   platform: TargetPlatform.ios,
-    //   mode: BuildMode.profile,
-    // ),
+    // TODO(zanderso): Track the architecture-specific gen_snapshot artifacts
+    // as inputs. Artifact.genSnapshot resolves to ios/gen_snapshot, which does
+    // not exist, and the architectures are supplied through kIosArchs at build
+    // time.
   ];
 
   @override
