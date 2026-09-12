@@ -133,6 +133,22 @@ class Variants : public GenericVariants {
                                                           /*async=*/true));
   }
 
+  void CreateVariant(const Context& context,
+                     const ContentContextOptions& options,
+                     const std::vector<Scalar>& constants = {}) {
+    std::optional<PipelineDescriptor> desc =
+        PipelineHandleT::Builder::MakeDefaultPipelineDescriptor(context,
+                                                                constants);
+    if (!desc.has_value()) {
+      VALIDATION_LOG << "Failed to create variant pipeline.";
+      return;
+    }
+    context.GetPipelineLibrary()->LogPipelineCreation(*desc);
+    options.ApplyToPipelineDescriptor(*desc);
+    Set(options, std::make_unique<PipelineHandleT>(context, desc,
+                                                   /*async=*/true));
+  }
+
   PipelineHandleT* Get(const ContentContextOptions& options) const {
     return static_cast<PipelineHandleT*>(GenericVariants::Get(options));
   }
@@ -608,15 +624,18 @@ ContentContext::ContentContext(
 
   auto options = ContentContextOptions{
       .sample_count = SampleCount::kCount4,
+      .depth_compare = CompareFunction::kGreaterEqual,
       .color_attachment_pixel_format =
           context_->GetCapabilities()->GetDefaultColorFormat()};
   auto options_trianglestrip = ContentContextOptions{
       .sample_count = SampleCount::kCount4,
+      .depth_compare = CompareFunction::kGreaterEqual,
       .primitive_type = PrimitiveType::kTriangleStrip,
       .color_attachment_pixel_format =
           context_->GetCapabilities()->GetDefaultColorFormat()};
   auto options_no_msaa_no_depth_stencil = ContentContextOptions{
       .sample_count = SampleCount::kCount1,
+      .depth_compare = CompareFunction::kGreaterEqual,
       .primitive_type = PrimitiveType::kTriangleStrip,
       .color_attachment_pixel_format =
           context_->GetCapabilities()->GetDefaultColorFormat(),
@@ -628,20 +647,121 @@ ContentContext::ContentContext(
   // rendered without the pipelines being ready. Put pipelines that are more
   // likely to be used first.
   {
+    // Tier 1: Core UI pipelines (text, shapes, textures/images, clips).
     pipelines_->glyph_atlas.CreateDefault(
         *context_, options,
         {static_cast<Scalar>(
             GetContext()->GetCapabilities()->GetDefaultGlyphAtlasFormat() ==
             PixelFormat::kA8UNormInt)});
     pipelines_->solid_fill.CreateDefault(*context_, options);
-    pipelines_->texture.CreateDefault(*context_, options);
+    pipelines_->solid_fill.CreateVariant(*context_, options_trianglestrip);
+    pipelines_->texture.CreateDefault(*context_, options_trianglestrip);
+    pipelines_->texture.CreateVariant(*context_, options);
+    pipelines_->texture_strict_src.CreateDefault(*context_,
+                                                 options_trianglestrip);
+
+    /// Setup default clip pipelines.
+    auto options_clip_stencil = ContentContextOptions{
+        .sample_count = SampleCount::kCount4,
+        .blend_mode = BlendMode::kDst,
+        .depth_compare = CompareFunction::kGreaterEqual,
+        .stencil_mode = ContentContextOptions::StencilMode::kStencilNonZeroFill,
+        .primitive_type = PrimitiveType::kTriangle,
+        .color_attachment_pixel_format =
+            context_->GetCapabilities()->GetDefaultColorFormat(),
+        .depth_write_enabled = false,
+    };
+    auto options_clip_stencil_inc = ContentContextOptions{
+        .sample_count = SampleCount::kCount4,
+        .blend_mode = BlendMode::kDst,
+        .depth_compare = CompareFunction::kGreaterEqual,
+        .stencil_mode =
+            ContentContextOptions::StencilMode::kStencilIncrementAll,
+        .primitive_type = PrimitiveType::kTriangle,
+        .color_attachment_pixel_format =
+            context_->GetCapabilities()->GetDefaultColorFormat(),
+        .depth_write_enabled = false,
+    };
+    auto options_clip_cover = ContentContextOptions{
+        .sample_count = SampleCount::kCount4,
+        .blend_mode = BlendMode::kDst,
+        .depth_compare = CompareFunction::kGreaterEqual,
+        .stencil_mode =
+            ContentContextOptions::StencilMode::kCoverCompareInverted,
+        .primitive_type = PrimitiveType::kTriangleStrip,
+        .color_attachment_pixel_format =
+            context_->GetCapabilities()->GetDefaultColorFormat(),
+        .depth_write_enabled = true,
+    };
+
+    auto make_clip_descriptor = [&](const ContentContextOptions& opts) {
+      auto desc =
+          ClipPipeline::Builder::MakeDefaultPipelineDescriptor(*context_);
+      if (!desc.has_value()) {
+        return desc;
+      }
+      context_->GetPipelineLibrary()->LogPipelineCreation(*desc);
+      opts.ApplyToPipelineDescriptor(*desc);
+      // Disable write to all color attachments.
+      auto clip_color_attachments = desc->GetColorAttachmentDescriptors();
+      for (auto& color_attachment : clip_color_attachments) {
+        color_attachment.second.write_mask = ColorWriteMaskBits::kNone;
+      }
+      desc->SetColorAttachmentDescriptors(std::move(clip_color_attachments));
+      return desc;
+    };
+
+    auto desc_clip_stencil = make_clip_descriptor(options_clip_stencil);
+    if (desc_clip_stencil.has_value()) {
+      pipelines_->clip.SetDefaultDescriptor(desc_clip_stencil);
+      pipelines_->clip.SetDefault(
+          options_clip_stencil,
+          std::make_unique<ClipPipeline>(*context_, desc_clip_stencil,
+                                         /*async=*/true));
+    }
+    auto desc_clip_stencil_inc = make_clip_descriptor(options_clip_stencil_inc);
+    if (desc_clip_stencil_inc.has_value()) {
+      pipelines_->clip.Set(
+          options_clip_stencil_inc,
+          std::make_unique<ClipPipeline>(*context_, desc_clip_stencil_inc,
+                                         /*async=*/true));
+    }
+    auto desc_clip_cover = make_clip_descriptor(options_clip_cover);
+    if (desc_clip_cover.has_value()) {
+      pipelines_->clip.Set(options_clip_cover, std::make_unique<ClipPipeline>(
+                                                   *context_, desc_clip_cover,
+                                                   /*async=*/true));
+    }
+
+    // Tier 2: Common UI decorations (fast gradients, circles, blurs, SDFs).
     pipelines_->fast_gradient.CreateDefault(*context_, options);
     pipelines_->circle.CreateDefault(*context_, options);
+    pipelines_->rrect_blur.CreateDefault(*context_, options_trianglestrip);
+    pipelines_->rsuperellipse_blur.CreateDefault(*context_,
+                                                 options_trianglestrip);
+    pipelines_->texture_downsample.CreateDefault(
+        *context_, options_no_msaa_no_depth_stencil);
+    pipelines_->texture_downsample_bounded.CreateDefault(
+        *context_, options_no_msaa_no_depth_stencil);
     if (context_->GetFlags().use_sdfs) {
       pipelines_->uber_sdf.CreateDefault(*context_, options);
       pipelines_->complex_rse.CreateDefault(*context_, options);
     }
+    pipelines_->tiled_texture.CreateDefault(*context_, options,
+                                            {supports_decal});
+    pipelines_->gaussian_blur.CreateDefault(
+        *context_, options_no_msaa_no_depth_stencil, {supports_decal});
+    pipelines_->border_mask_blur.CreateDefault(*context_,
+                                               options_trianglestrip);
+    pipelines_->color_matrix_color_filter.CreateDefault(*context_,
+                                                        options_trianglestrip);
+    pipelines_->shadow_vertices_.CreateDefault(*context_, options);
+    pipelines_->vertices_uber_1_.CreateDefault(*context_, options,
+                                               {supports_decal});
+    pipelines_->vertices_uber_2_.CreateDefault(*context_, options,
+                                               {supports_decal});
 
+    // Tier 3: Complex gradients (SSBO or uniform fallbacks).
     if (context_->GetCapabilities()->SupportsSSBO()) {
       pipelines_->linear_gradient_ssbo_fill.CreateDefault(*context_, options);
       pipelines_->radial_gradient_ssbo_fill.CreateDefault(*context_, options);
@@ -679,50 +799,6 @@ ContentContext::ContentContext(
           *context_, options);
       pipelines_->sweep_gradient_fill.CreateDefault(*context_, options);
     }
-
-    /// Setup default clip pipeline.
-    auto clip_pipeline_descriptor =
-        ClipPipeline::Builder::MakeDefaultPipelineDescriptor(*context_);
-    if (!clip_pipeline_descriptor.has_value()) {
-      return;
-    }
-    ContentContextOptions{
-        .sample_count = SampleCount::kCount4,
-        .color_attachment_pixel_format =
-            context_->GetCapabilities()->GetDefaultColorFormat()}
-        .ApplyToPipelineDescriptor(*clip_pipeline_descriptor);
-    // Disable write to all color attachments.
-    auto clip_color_attachments =
-        clip_pipeline_descriptor->GetColorAttachmentDescriptors();
-    for (auto& color_attachment : clip_color_attachments) {
-      color_attachment.second.write_mask = ColorWriteMaskBits::kNone;
-    }
-    clip_pipeline_descriptor->SetColorAttachmentDescriptors(
-        std::move(clip_color_attachments));
-    pipelines_->clip.SetDefault(
-        options,
-        std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
-    pipelines_->texture_downsample.CreateDefault(
-        *context_, options_no_msaa_no_depth_stencil);
-    pipelines_->texture_downsample_bounded.CreateDefault(
-        *context_, options_no_msaa_no_depth_stencil);
-    pipelines_->rrect_blur.CreateDefault(*context_, options_trianglestrip);
-    pipelines_->rsuperellipse_blur.CreateDefault(*context_,
-                                                 options_trianglestrip);
-    pipelines_->texture_strict_src.CreateDefault(*context_, options);
-    pipelines_->tiled_texture.CreateDefault(*context_, options,
-                                            {supports_decal});
-    pipelines_->gaussian_blur.CreateDefault(
-        *context_, options_no_msaa_no_depth_stencil, {supports_decal});
-    pipelines_->border_mask_blur.CreateDefault(*context_,
-                                               options_trianglestrip);
-    pipelines_->color_matrix_color_filter.CreateDefault(*context_,
-                                                        options_trianglestrip);
-    pipelines_->shadow_vertices_.CreateDefault(*context_, options);
-    pipelines_->vertices_uber_1_.CreateDefault(*context_, options,
-                                               {supports_decal});
-    pipelines_->vertices_uber_2_.CreateDefault(*context_, options,
-                                               {supports_decal});
 
     const std::array<std::vector<Scalar>, 15> porter_duff_constants =
         GetPorterDuffSpecConstants(supports_decal);
