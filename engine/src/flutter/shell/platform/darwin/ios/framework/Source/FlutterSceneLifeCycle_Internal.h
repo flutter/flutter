@@ -15,29 +15,14 @@
 @interface FlutterPluginSceneLifeCycleDelegate ()
 
 /**
- * Associates the `FlutterEngine` with the `FlutterPluginSceneLifeCycleDelegate` so that it will
- * forward scene events to the plugins within the engine.
- *
- * Returns NO if the engine is already associated with the delegate.
+ * Registers `engine` to receive lifecycle events in single-scene applications.
  */
-- (BOOL)addFlutterManagedEngine:(FlutterEngine*)engine;
-
-/**
- * Removes the `FlutterEngine` from the `FlutterPluginSceneLifeCycleDelegate` so that it will no
- * longer forward scene events to the plugins within the engine.
- *
- * Returns NO if the engine is not associated with the delegate.
- */
-- (BOOL)removeFlutterManagedEngine:(FlutterEngine*)engine;
-
-- (void)engine:(FlutterEngine*)engine receivedConnectNotificationFor:(UIScene*)scene;
++ (void)registerEngineForSingleScene:(FlutterEngine*)engine;
 
 - (NSUserActivity*)stateRestorationActivityForScene:(UIScene*)scene;
 
 - (void)scene:(UIScene*)scene
     restoreInteractionStateWithUserActivity:(NSUserActivity*)stateRestorationActivity;
-
-+ (FlutterPluginSceneLifeCycleDelegate*)fromScene:(UIScene*)scene;
 
 @end
 

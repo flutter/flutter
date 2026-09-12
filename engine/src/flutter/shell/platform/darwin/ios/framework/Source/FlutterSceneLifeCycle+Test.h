@@ -8,18 +8,26 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 
+@class FlutterViewController;
+
 // Category to add test-only visibility.
 @interface FlutterPluginSceneLifeCycleDelegate (Test)
-@property(nonatomic, strong) UISceneConnectionOptions* connectionOptions;
-@property(nonatomic, strong) NSPointerArray* flutterManagedEngines;
-@property(nonatomic, strong) NSPointerArray* developerManagedEngines;
+@property(nonatomic, strong) NSMapTable<UIScene*, NSPointerArray*>* developerManagedEngines;
+@property(nonatomic, strong) NSMapTable<UIScene*, UISceneConnectionOptions*>* connectingScenes;
+@property(nonatomic, strong) NSMapTable<UIScene*, NSPointerArray*>* enginesSentConnectionEvent;
+@property(nonatomic, strong) NSMapTable<UIScene*, NSNumber*>* sceneWillConnectEventHandledByPlugin;
 
-- (void)updateFlutterManagedEnginesInScene:(UIScene*)scene;
+- (NSArray<FlutterViewController*>*)searchFlutterViewControllersWithScene:(UIScene*)scene;
+- (NSArray<FlutterEngine*>*)searchFlutterEnginesWithScene:(UIScene*)scene;
+- (void)connectEngineIfNeeded:(FlutterEngine*)engine scene:(UIScene*)scene;
+
 - (void)scene:(UIScene*)scene
     willConnectToSession:(UISceneSession*)session
            flutterEngine:(FlutterEngine*)engine
                  options:(UISceneConnectionOptions*)connectionOptions;
-- (NSArray*)allEngines;
+
++ (void)resetSceneWillConnectFallbackCalledForTesting;
++ (void)resetEnginesForSingleSceneForTesting;
 
 @end
 
