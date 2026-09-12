@@ -140,6 +140,7 @@ class BuildAarCommand extends BuildSubCommand {
             await getBuildInfo(
               forcedBuildMode: BuildMode.fromCliName(buildMode),
               forcedTargetFile: targetFile,
+              forcedTargetPlatform: TargetPlatform.android,
             ),
             targetArchs: targetArchitectures,
           ),

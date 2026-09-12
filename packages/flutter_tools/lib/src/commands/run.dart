@@ -134,7 +134,13 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   @visibleForTesting
   @protected
   Future<DebuggingOptions> createDebuggingOptions({WebDevServerConfig? webDevServerConfig}) async {
-    final BuildInfo buildInfo = await getBuildInfo();
+    TargetPlatform? forcedTargetPlatform;
+    if (this case final RunCommand runCommand) {
+      if (runCommand.devices?.length == 1) {
+        forcedTargetPlatform = await runCommand.devices!.first.targetPlatform;
+      }
+    }
+    final BuildInfo buildInfo = await getBuildInfo(forcedTargetPlatform: forcedTargetPlatform);
     final int? webBrowserDebugPort = featureFlags.isWebEnabled
         ? getValue(WebOptions.webBrowserDebugPort)
         : null;
@@ -330,7 +336,8 @@ class RunCommand extends RunCommandBase {
       ..addFlag(
         'hot',
         defaultsTo: kHotReloadDefault,
-        help: 'Run with support for hot reloading. Only available for debug mode. Not available with "--trace-startup".',
+        help:
+            'Run with support for hot reloading. Only available for debug mode. Not available with "--trace-startup".',
       )
       ..addFlag(
         'resident',
@@ -500,7 +507,10 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    final BuildInfo buildInfo = await getBuildInfo();
+    final TargetPlatform? forcedTargetPlatform = devices?.length == 1
+        ? await devices!.first.targetPlatform
+        : null;
+    final BuildInfo buildInfo = await getBuildInfo(forcedTargetPlatform: forcedTargetPlatform);
     final String modeName = buildInfo.modeName;
     return (
       runIsEmulator: isEmulator,
@@ -689,7 +699,10 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final BuildInfo buildInfo = await getBuildInfo();
+    final TargetPlatform? forcedTargetPlatform = devices?.length == 1
+        ? await devices!.first.targetPlatform
+        : null;
+    final BuildInfo buildInfo = await getBuildInfo(forcedTargetPlatform: forcedTargetPlatform);
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
     final bool hotMode = shouldUseHotMode(buildInfo);

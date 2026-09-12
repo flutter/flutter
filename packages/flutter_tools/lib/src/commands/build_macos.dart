@@ -76,7 +76,7 @@ class BuildMacosCommand extends BuildSubCommand {
     final FileSystem fs = toolContext.fs;
     final Logger logger = toolContext.logger;
 
-    final BuildInfo buildInfo = await getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo(forcedTargetPlatform: TargetPlatform.darwin);
     if (!featureFlags.isMacOSEnabled) {
       throwToolExit(
         '"build macos" is not currently supported. To enable, run "flutter config --enable-macos-desktop".',
