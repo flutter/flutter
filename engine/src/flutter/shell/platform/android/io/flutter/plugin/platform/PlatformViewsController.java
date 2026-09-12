@@ -1364,6 +1364,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     for (int i = 0; i < platformViewParent.size(); i++) {
       final int viewId = platformViewParent.keyAt(i);
       final View parentView = platformViewParent.get(viewId);
+      if (parentView == null) {
+        continue;
+      }
 
       // This should only show platform views that are rendered in this frame and either:
       //  1. Surface has images available in this frame or,
@@ -1377,9 +1380,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       if (currentFrameUsedPlatformViewIds.contains(viewId)
           && (isFrameRenderedUsingImageReaders || !synchronizeToNativeViewHierarchy)) {
         parentView.setVisibility(View.VISIBLE);
-      } else if (!flutterViewConvertedToImageView && platformViewParent.containsKey(viewId)) {
+      } else if (!flutterViewConvertedToImageView && platformViews.get(viewId) != null) {
         // In the C embedder without compositor slicing, keep active hybrid composition view
-        // visible.
+        // visible. Specifically, ensure the underlying platform view is actively registered
+        // in platformViews (and has not been disposed). SparseArray.get(key) != null is the
+        // Java 8 / API-safe idiom for presence.
         parentView.setVisibility(View.VISIBLE);
       } else {
         parentView.setVisibility(View.GONE);
