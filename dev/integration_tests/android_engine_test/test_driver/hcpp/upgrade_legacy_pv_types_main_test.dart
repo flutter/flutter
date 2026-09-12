@@ -21,9 +21,6 @@ void main() async {
   final expectHcpp = io.Platform.environment['EXPECT_HCPP'] != 'false';
 
   setUpAll(() async {
-    // Clear logcat before the test so we only see logs from this run.
-    await io.Process.run('adb', <String>['logcat', '-c']);
-
     flutterDriver = await FlutterDriver.connect();
     nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
     await flutterDriver.waitUntilFirstFrameRasterized();
@@ -53,20 +50,37 @@ void main() async {
   }, timeout: Timeout.none);
 
   test('verify platform view rendering strategy via logcat', () async {
-    // Dump logcat filtered to the PlatformViewsChannel tag.
-    final io.ProcessResult result = await io.Process.run('adb', <String>[
-      'logcat',
-      '-d',
-      '-s',
-      'PlatformViewsChannel:*',
-    ]);
-    final logcat = result.stdout as String;
+    // Poll logcat until expected log entries appear or timeout expires.
+    // 500ms polling interval avoids hammering adb while remaining responsive.
+    // 30-second timeout accommodates slower emulators in CI under high load.
+    const pollInterval = Duration(milliseconds: 500);
+    const maxPollDuration = Duration(seconds: 30);
+    final stopwatch = Stopwatch()..start();
+    var hcppCount = 0;
+    var legacyCount = 0;
+    var logcat = '';
 
-    // We created 3 platform views.
-    final int hcppCount = 'Using HCPP platform view rendering strategy.'.allMatches(logcat).length;
-    final int legacyCount = 'Using legacy platform view rendering strategy.'
-        .allMatches(logcat)
-        .length;
+    while (stopwatch.elapsed < maxPollDuration) {
+      final io.ProcessResult result = await io.Process.run('adb', <String>[
+        'logcat',
+        '-d',
+        '-s',
+        'PlatformViewsChannel:*',
+      ]);
+      logcat = result.stdout as String;
+
+      // We expect 3 platform views to be created.
+      hcppCount = 'Using HCPP platform view rendering strategy.'.allMatches(logcat).length;
+      legacyCount = 'Using legacy platform view rendering strategy.'.allMatches(logcat).length;
+
+      if (expectHcpp && hcppCount >= 3) {
+        break;
+      }
+      if (!expectHcpp && legacyCount >= 3) {
+        break;
+      }
+      await Future<void>.delayed(pollInterval);
+    }
 
     if (expectHcpp) {
       expect(
