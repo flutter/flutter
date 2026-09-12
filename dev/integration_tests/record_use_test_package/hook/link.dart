@@ -68,7 +68,7 @@ Set<String> _extractUsedPhrases(Recordings recordings) {
   for (final CallReference call in recordings.calls[translateDef] ?? const <CallReference>[]) {
     switch (call) {
       case CallWithArguments(
-          positionalArguments: [StringConstant(:final value), ...],
+          positionalArguments: [StringConstant(:final String value), ...],
         ):
         usedPhrases.add(value);
       case _:
