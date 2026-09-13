@@ -470,9 +470,8 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
       selectedIndex = (widget.groupValue == currentKey) ? index : selectedIndex;
       pressedIndex = (_pressedKey == currentKey) ? index : pressedIndex;
 
-      final TextStyle textStyle = DefaultTextStyle.of(
-        context,
-      ).style.copyWith(color: getTextColor(index, currentKey));
+      final TextStyle textStyle = DefaultTextStyle.of(context).style
+          .copyWith(color: getTextColor(index, currentKey));
       final iconTheme = IconThemeData(color: getTextColor(index, currentKey));
 
       Widget child = Center(child: widget.children[currentKey]);
@@ -598,16 +597,12 @@ class _RenderSegmentedControl<T> extends RenderBox
         ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
   _RenderSegmentedControl({
-    required int? selectedIndex,
-    required int? pressedIndex,
-    required TextDirection textDirection,
-    required List<Color> backgroundColors,
-    required Color borderColor,
-  }) : _textDirection = textDirection,
-       _selectedIndex = selectedIndex,
-       _pressedIndex = pressedIndex,
-       _backgroundColors = backgroundColors,
-       _borderColor = borderColor;
+    required this._selectedIndex,
+    required this._pressedIndex,
+    required this._textDirection,
+    required this._backgroundColors,
+    required this._borderColor,
+  });
 
   int? get selectedIndex => _selectedIndex;
   int? _selectedIndex;

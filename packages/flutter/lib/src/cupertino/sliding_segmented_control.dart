@@ -101,7 +101,7 @@ const Duration _kHighlightAnimationDuration = Duration(milliseconds: 200);
 
 class _Segment<T> extends StatefulWidget {
   const _Segment({
-    required ValueKey<T> key,
+    required ValueKey<T> super.key,
     required this.child,
     required this.pressed,
     required this.highlighted,
@@ -109,7 +109,7 @@ class _Segment<T> extends StatefulWidget {
     required this.enabled,
     required this.segmentLocation,
     required this.isMomentary,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -238,8 +238,7 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
 
 // Fadeout the separator when either adjacent segment is highlighted.
 class _SegmentSeparator extends StatefulWidget {
-  const _SegmentSeparator({required ValueKey<int> key, required this.highlighted})
-    : super(key: key);
+  const _SegmentSeparator({required ValueKey<int> super.key, required this.highlighted});
 
   final bool highlighted;
 
@@ -1056,15 +1055,12 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
         ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
   _RenderSegmentedControl({
-    required int? highlightedIndex,
-    required Color thumbColor,
-    required double thumbScale,
-    required bool proportionalWidth,
+    required this._highlightedIndex,
+    required this._thumbColor,
+    required this._thumbScale,
+    required this._proportionalWidth,
     required this.state,
-  }) : _highlightedIndex = highlightedIndex,
-       _thumbColor = thumbColor,
-       _thumbScale = thumbScale,
-       _proportionalWidth = proportionalWidth;
+  });
 
   final _SegmentedControlState<T> state;
 

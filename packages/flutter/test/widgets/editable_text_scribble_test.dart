@@ -131,59 +131,57 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
   );
 
-  testWidgets(
-    'Selection changes during Scribble interaction should have the scribble cause',
-    (WidgetTester tester) async {
-      controller.text = 'Lorem ipsum dolor sit amet';
-      late SelectionChangedCause selectionCause;
+  testWidgets('Selection changes during Scribble interaction should have the scribble cause', (
+    WidgetTester tester,
+  ) async {
+    controller.text = 'Lorem ipsum dolor sit amet';
+    late SelectionChangedCause selectionCause;
 
-      await tester.pumpWidget(
-        TestWidgetsApp(
-          home: EditableText(
-            controller: controller,
-            backgroundCursorColor: _grey,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-            selectionControls: testTextSelectionHandleControls,
-            onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
-              if (cause != null) {
-                selectionCause = cause;
-              }
-            },
-          ),
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: _grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: testTextSelectionHandleControls,
+          onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+            if (cause != null) {
+              selectionCause = cause;
+            }
+          },
         ),
-      );
+      ),
+    );
 
-      await tester.showKeyboard(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
 
-      // A normal selection update from the framework has 'keyboard' as the cause.
-      tester.testTextInput.updateEditingValue(
-        TextEditingValue(
-          text: controller.text,
-          selection: const TextSelection(baseOffset: 2, extentOffset: 3),
-        ),
-      );
-      await tester.pumpAndSettle();
+    // A normal selection update from the framework has 'keyboard' as the cause.
+    tester.testTextInput.updateEditingValue(
+      TextEditingValue(
+        text: controller.text,
+        selection: const TextSelection(baseOffset: 2, extentOffset: 3),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(selectionCause, SelectionChangedCause.keyboard);
+    expect(selectionCause, SelectionChangedCause.keyboard);
 
-      // A selection update during a scribble interaction has 'scribble' as the cause.
-      await tester.testTextInput.startScribbleInteraction();
-      tester.testTextInput.updateEditingValue(
-        TextEditingValue(
-          text: controller.text,
-          selection: const TextSelection(baseOffset: 3, extentOffset: 4),
-        ),
-      );
-      await tester.pumpAndSettle();
+    // A selection update during a scribble interaction has 'scribble' as the cause.
+    await tester.testTextInput.startScribbleInteraction();
+    tester.testTextInput.updateEditingValue(
+      TextEditingValue(
+        text: controller.text,
+        selection: const TextSelection(baseOffset: 3, extentOffset: 4),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(selectionCause, SelectionChangedCause.stylusHandwriting);
+    expect(selectionCause, SelectionChangedCause.stylusHandwriting);
 
-      await tester.testTextInput.finishScribbleInteraction();
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
-  );
+    await tester.testTextInput.finishScribbleInteraction();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
 
   testWidgets(
     'Requests focus and changes the selection when onScribbleFocus is called',

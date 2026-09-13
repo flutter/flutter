@@ -330,10 +330,8 @@ class MenuItem extends StatelessWidget {
           Expanded(
             child: SelectableText(
               title,
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                fontWeight: header ? FontWeight.w700 : FontWeight.w600,
-                fontSize: 16,
-              ),
+              style: Theme.of(context).textTheme.titleMedium!
+                  .copyWith(fontWeight: header ? FontWeight.w700 : FontWeight.w600, fontSize: 16),
             ),
           ),
         ],
