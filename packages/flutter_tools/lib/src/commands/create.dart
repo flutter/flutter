@@ -1566,9 +1566,9 @@ List<String>? _getBuildGradleConfigurationFilePaths(
 void _generatePubspecLock(Directory directory, {String? flutterRoot}) {
   final FileSystem fs = directory.fileSystem;
   final String effectiveFlutterRoot = flutterRoot ?? globals.cache.flutterRoot;
-  final flutterPubspecLock =
-      loadYaml(fs.file(fs.path.join(effectiveFlutterRoot, 'pubspec.lock')).readAsStringSync())
-          as YamlMap;
+  final flutterPubspecLock = loadYaml(
+    fs.file(fs.path.join(effectiveFlutterRoot, 'pubspec.lock')).readAsStringSync(),
+  ) as YamlMap;
 
   final flutterPackages = flutterPubspecLock['packages'] as YamlMap;
 
