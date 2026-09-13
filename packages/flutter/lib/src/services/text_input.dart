@@ -660,8 +660,6 @@ class TextInputConfiguration {
   /// See also:
   ///
   ///  * <https://developer.android.com/reference/android/text/InputType.html#TYPE_TEXT_FLAG_NO_SUGGESTIONS>
-  ///  * <https://github.com/flutter/flutter/issues/139143>, which describes
-  ///    this behavior.
   /// {@endtemplate}
   final bool enableSuggestions;
 
