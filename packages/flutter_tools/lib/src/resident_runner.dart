@@ -1884,7 +1884,7 @@ class TerminalHandler {
 
   void setupTerminal() {
     if (!_logger.quiet) {
-      logger.printStatus('');
+      _logger.printStatus('');
       residentRunner.printHelp(details: false);
     }
     _terminal.singleCharMode = true;
@@ -1905,7 +1905,7 @@ class TerminalHandler {
       _addSignalHandler(io.ProcessSignal.sigusr1, _handleSignal);
       _addSignalHandler(io.ProcessSignal.sigusr2, _handleSignal);
       if (_pidFile != null) {
-        logger.printTrace('Writing pid to: $_pidFile');
+        _logger.printTrace('Writing pid to: $_pidFile');
         _actualPidFile = _processInfo.writePidFile(_pidFile);
       }
     }
@@ -1916,7 +1916,7 @@ class TerminalHandler {
     assert(residentRunner.stayResident);
     if (_actualPidFile != null) {
       try {
-        logger.printTrace('Deleting pid file (${_actualPidFile!.path}).');
+        _logger.printTrace('Deleting pid file (${_actualPidFile!.path}).');
         _actualPidFile!.deleteSync();
       } on FileSystemException catch (error) {
         _logger.printWarning(
@@ -1942,7 +1942,7 @@ class TerminalHandler {
   /// This can be extended to support other layouts (AZERTY, QWERTZ, etc.) by
   /// adding entries to [keyboardLayoutMappings].
   Future<bool> _commonTerminalInputHandler(String character) async {
-    logger.printStatus(''); // the key the user tapped might be on this line
+    _logger.printStatus(''); // the key the user tapped might be on this line
     // Map non-Latin characters to Latin equivalents based on physical key position
     character = _mapKeyToLatin(character);
     switch (character) {
@@ -1998,7 +1998,7 @@ class TerminalHandler {
           throwToolExit(result.message);
         }
         if (!result.isOk) {
-          logger.printStatus('Try again after fixing the above error(s).', emphasis: true);
+          _logger.printStatus('Try again after fixing the above error(s).', emphasis: true);
         }
         return true;
       case 'R':
@@ -2011,7 +2011,7 @@ class TerminalHandler {
           throwToolExit(result.message);
         }
         if (!result.isOk) {
-          logger.printStatus('Try again after fixing the above error(s).', emphasis: true);
+          _logger.printStatus('Try again after fixing the above error(s).', emphasis: true);
         }
         return true;
       case 's':
@@ -2057,7 +2057,7 @@ class TerminalHandler {
     // When terminal doesn't support line mode, '\n' can sneak into the input.
     command = command.trim();
     if (_processingUserRequest) {
-      logger.printTrace('Ignoring terminal input: "$command" because we are busy.');
+      _logger.printTrace('Ignoring terminal input: "$command" because we are busy.');
       return;
     }
     _processingUserRequest = true;
@@ -2068,21 +2068,21 @@ class TerminalHandler {
     } catch (error, st) {
       // Don't print stack traces for known error types.
       if (error is! ToolExit) {
-        logger.printError('$error\n$st');
+        _logger.printError('$error\n$st');
       }
       await _cleanUp(null);
       rethrow;
     } finally {
       _processingUserRequest = false;
       if (_reportReady) {
-        logger.printStatus('ready');
+        _logger.printStatus('ready');
       }
     }
   }
 
   Future<void> _handleSignal(io.ProcessSignal signal) async {
     if (_processingUserRequest) {
-      logger.printTrace('Ignoring signal: "$signal" because we are busy.');
+      _logger.printTrace('Ignoring signal: "$signal" because we are busy.');
       return;
     }
     _processingUserRequest = true;
