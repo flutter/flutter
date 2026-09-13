@@ -19,11 +19,10 @@ import 'build.dart';
 class BuildAarCommand extends BuildSubCommand {
   BuildAarCommand({
     required super.logger,
-    required AndroidSdk? androidSdk,
-    required FileSystem fileSystem,
+    required this._androidSdk,
+    required this._fileSystem,
     required super.verboseHelp,
-  }) : _androidSdk = androidSdk,
-       _fileSystem = fileSystem {
+  }) {
     enableUsesPubOption();
     registerOptionBundles(const <OptionBundle>[
       DartCompileOptionsBundle(),
@@ -132,9 +131,8 @@ class BuildAarCommand extends BuildSubCommand {
     }
     final androidBuildInfo = <AndroidBuildInfo>{};
 
-    final Iterable<CpuArch> targetArchitectures = getValue(
-      _targetPlatform,
-    ).map<CpuArch>(getCpuArchForName);
+    final Iterable<CpuArch> targetArchitectures = getValue(_targetPlatform)
+        .map<CpuArch>(getCpuArchForName);
 
     final String? buildNumberArg = getValue(CommonOptions.buildNumber);
     final String buildNumber = (buildNumberArg != null && buildNumberArg.isNotEmpty)
