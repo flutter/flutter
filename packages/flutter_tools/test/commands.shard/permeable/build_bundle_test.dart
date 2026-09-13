@@ -67,55 +67,47 @@ void main() {
     return command;
   }
 
-  testUsingContext(
-    'bundle getUsage indicate that project is a module',
-    () async {
-      final String projectPath = await createProject(
-        tempDir,
-        arguments: <String>['--no-pub', '--template=module'],
-      );
+  testUsingContext('bundle getUsage indicate that project is a module', () async {
+    final String projectPath = await createProject(
+      tempDir,
+      arguments: <String>['--no-pub', '--template=module'],
+    );
 
-      await runCommandIn(projectPath);
+    await runCommandIn(projectPath);
 
-      expect(
-        fakeAnalytics.sentEvents,
-        contains(
-          Event.commandUsageValues(
-            workflow: 'bundle',
-            commandHasTerminal: false,
-            buildBundleTargetPlatform: 'android-arm',
-            buildBundleIsModule: true,
-          ),
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.commandUsageValues(
+          workflow: 'bundle',
+          commandHasTerminal: false,
+          buildBundleTargetPlatform: 'android-arm',
+          buildBundleIsModule: true,
         ),
-      );
-    },
-    overrides: <Type, Generator>{Analytics: () => fakeAnalytics},
-  );
+      ),
+    );
+  }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
 
-  testUsingContext(
-    'bundle getUsage indicate that project is not a module',
-    () async {
-      final String projectPath = await createProject(
-        tempDir,
-        arguments: <String>['--no-pub', '--template=app'],
-      );
+  testUsingContext('bundle getUsage indicate that project is not a module', () async {
+    final String projectPath = await createProject(
+      tempDir,
+      arguments: <String>['--no-pub', '--template=app'],
+    );
 
-      await runCommandIn(projectPath);
+    await runCommandIn(projectPath);
 
-      expect(
-        fakeAnalytics.sentEvents,
-        contains(
-          Event.commandUsageValues(
-            workflow: 'bundle',
-            commandHasTerminal: false,
-            buildBundleTargetPlatform: 'android-arm',
-            buildBundleIsModule: false,
-          ),
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.commandUsageValues(
+          workflow: 'bundle',
+          commandHasTerminal: false,
+          buildBundleTargetPlatform: 'android-arm',
+          buildBundleIsModule: false,
         ),
-      );
-    },
-    overrides: <Type, Generator>{Analytics: () => fakeAnalytics},
-  );
+      ),
+    );
+  }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
 
   testUsingContext('bundle getUsage indicate the target platform', () async {
     final String projectPath = await createProject(
