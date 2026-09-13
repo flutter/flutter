@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show jsonEncode;
+
 import 'package:coverage/coverage.dart' show HitMap;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
