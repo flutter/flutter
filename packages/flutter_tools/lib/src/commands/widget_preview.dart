@@ -223,8 +223,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     previewManifest: _previewManifest,
   );
 
-  
-
   late final _lspPreviewDetector = LspPreviewDetector(
     platform: platform,
     previewAnalytics: previewAnalytics,
@@ -356,7 +354,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       );
     }
 
-
     shutdownHooks.addShutdownHook(() async {
       await _widgetPreviewApp?.exitApp();
       await _lspPreviewDetector.dispose();
@@ -364,33 +361,33 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
     await configureDtd();
 
-      await _lspPreviewDetector.initialize();
+    await _lspPreviewDetector.initialize();
 
-      // Wait for the initial analysis to complete to ensure the analysis server
-      // has registered the widget preview RPC methods.
-      await _lspPreviewDetector.analysisServer?.waitForAnalysis();
+    // Wait for the initial analysis to complete to ensure the analysis server
+    // has registered the widget preview RPC methods.
+    await _lspPreviewDetector.analysisServer?.waitForAnalysis();
 
-      _previewCodeGenerator.populateDtdConnectionInfo(
-        dtdUri: _dtdService.dtdUri!,
-        widgetPreviewServiceName: _dtdService.widgetPreviewService,
-        widgetPreviewScaffoldStreamName: _dtdService.widgetPreviewScaffoldStream,
-        projectRootPath: rootProject.directory.absolute.path,
+    _previewCodeGenerator.populateDtdConnectionInfo(
+      dtdUri: _dtdService.dtdUri!,
+      widgetPreviewServiceName: _dtdService.widgetPreviewService,
+      widgetPreviewScaffoldStreamName: _dtdService.widgetPreviewScaffoldStream,
+      projectRootPath: rootProject.directory.absolute.path,
+    );
+
+    final FlutterWidgetPreviews originalPreviews;
+    try {
+      originalPreviews = await _dtdService.getFlutterWidgetPreviews();
+    } on Exception catch (e) {
+      throwToolExit(
+        'Failed to retrieve widget previews from the Dart Tooling Daemon (DTD). '
+        'Ensure that the analysis server is running and reachable. Details: $e',
       );
-
-      final FlutterWidgetPreviews originalPreviews;
-      try {
-        originalPreviews = await _dtdService.getFlutterWidgetPreviews();
-      } on Exception catch (e) {
-        throwToolExit(
-          'Failed to retrieve widget previews from the Dart Tooling Daemon (DTD). '
-          'Ensure that the analysis server is running and reachable. Details: $e',
-        );
-      } on StateError catch (e) {
-        throwToolExit(
-          'Failed to retrieve widget previews from the Dart Tooling Daemon (DTD). '
-          'Ensure that the analysis server is running and reachable. Details: $e',
-        );
-      }
+    } on StateError catch (e) {
+      throwToolExit(
+        'Failed to retrieve widget previews from the Dart Tooling Daemon (DTD). '
+        'Ensure that the analysis server is running and reachable. Details: $e',
+      );
+    }
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(originalPreviews);
 
     final int result = await runPreviewEnvironment(
@@ -418,7 +415,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
   }
 
-  
   void onHotRestartRequest() {
     logger.printStatus('Triggering restart based on request from preview environment.');
     _widgetPreviewApp?.restart(fullRestart: true);

@@ -11,7 +11,6 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:collection/collection.dart';
 
-
 extension TokenExtension on Token {
   /// Convenience getter to identify tokens for private fields and functions.
   bool get isPrivate => toString().startsWith('_');
