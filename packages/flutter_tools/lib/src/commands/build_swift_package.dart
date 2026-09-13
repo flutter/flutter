@@ -1403,9 +1403,9 @@ class AppFrameworkAndNativeAssetsDependencies {
         };
       case FlutterDarwinPlatform.macos:
         return <String, String>{
-          kDarwinArchs: defaultMacOSArchsForEnvironment(
-            _utils.artifacts,
-          ).map((CpuArch e) => e.darwinArchName).join(' '),
+          kDarwinArchs: defaultMacOSArchsForEnvironment(_utils.artifacts)
+              .map((CpuArch e) => e.darwinArchName)
+              .join(' '),
         };
     }
   }
