@@ -17,6 +17,7 @@
 #include "flutter/flow/layers/image_filter_layer.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/layers/opacity_layer.h"
+#include "flutter/flow/layers/overscroll_stretch_layer.h"
 #include "flutter/flow/layers/performance_overlay_layer.h"
 #include "flutter/flow/layers/platform_view_layer.h"
 #include "flutter/flow/layers/shader_mask_layer.h"
@@ -169,6 +170,29 @@ void SceneBuilder::pushImageFilter(Dart_Handle layer_handle,
                                    const fml::RefPtr<EngineLayer>& old_layer) {
   auto layer = std::make_shared<flutter::ImageFilterLayer>(
       image_filter->filter(DlTileMode::kDecal),
+      DlPoint(SafeNarrow(dx), SafeNarrow(dy)));
+  PushLayer(layer);
+  EngineLayer::MakeRetained(layer_handle, layer);
+
+  if (old_layer && old_layer->Layer()) {
+    layer->AssignOldLayer(old_layer->Layer().get());
+  }
+}
+
+void SceneBuilder::pushOverscrollStretch(
+    Dart_Handle layer_handle,
+    const ImageFilter* image_filter,
+    double overscroll_x,
+    double overscroll_y,
+    double max_stretch_intensity,
+    double interpolation_strength,
+    double dx,
+    double dy,
+    const fml::RefPtr<EngineLayer>& old_layer) {
+  auto layer = std::make_shared<flutter::OverscrollStretchLayer>(
+      image_filter ? image_filter->filter(DlTileMode::kDecal) : nullptr,
+      SafeNarrow(overscroll_x), SafeNarrow(overscroll_y),
+      SafeNarrow(max_stretch_intensity), SafeNarrow(interpolation_strength),
       DlPoint(SafeNarrow(dx), SafeNarrow(dy)));
   PushLayer(layer);
   EngineLayer::MakeRetained(layer_handle, layer);

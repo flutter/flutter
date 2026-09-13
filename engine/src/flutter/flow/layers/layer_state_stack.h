@@ -179,6 +179,13 @@ class LayerStateStack {
     void applyImageFilter(const DlRect& bounds,
                           const std::shared_ptr<DlImageFilter>& filter);
 
+    void applyOverscrollStretch(const DlRect& bounds,
+                                const std::shared_ptr<DlImageFilter>& filter,
+                                DlScalar overscroll_x,
+                                DlScalar overscroll_y,
+                                DlScalar max_stretch_intensity,
+                                DlScalar interpolation_strength);
+
     // Records the color filter for application at the next call to
     // saveLayer or applyState. A saveLayer may be executed at
     // this time if the color filter cannot be batched with other
@@ -324,6 +331,12 @@ class LayerStateStack {
                          const std::shared_ptr<const DlColorFilter>& filter);
   void push_image_filter(const DlRect& bounds,
                          const std::shared_ptr<DlImageFilter>& filter);
+  void push_overscroll_stretch(const DlRect& bounds,
+                               const std::shared_ptr<DlImageFilter>& filter,
+                               DlScalar overscroll_x,
+                               DlScalar overscroll_y,
+                               DlScalar max_stretch_intensity,
+                               DlScalar interpolation_strength);
   void push_backdrop(const DlRect& bounds,
                      const std::shared_ptr<DlImageFilter>& filter,
                      DlBlendMode blend_mode,
@@ -402,6 +415,7 @@ class LayerStateStack {
   friend class BackdropFilterEntry;
   friend class OpacityEntry;
   friend class ImageFilterEntry;
+  friend class OverscrollStretchEntry;
   friend class ColorFilterEntry;
   friend class TranslateEntry;
   friend class TransformMatrixEntry;

@@ -44,6 +44,7 @@ enum class MutatorType {
   kBackdropClipRRect,
   kBackdropClipRSuperellipse,
   kBackdropClipPath,
+  kOverscrollStretch,
 };
 
 // Represents an image filter mutation.
@@ -65,6 +66,29 @@ class ImageFilterMutation {
  private:
   std::shared_ptr<DlImageFilter> filter_;
   const DlRect filter_rect_;
+};
+
+struct OverscrollStretchMutation {
+  DlScalar overscroll_x;
+  DlScalar overscroll_y;
+  DlScalar max_stretch_intensity;
+  DlScalar interpolation_strength;
+
+  OverscrollStretchMutation(DlScalar x,
+                            DlScalar y,
+                            DlScalar max_intensity,
+                            DlScalar interp)
+      : overscroll_x(x),
+        overscroll_y(y),
+        max_stretch_intensity(max_intensity),
+        interpolation_strength(interp) {}
+
+  bool operator==(const OverscrollStretchMutation& other) const {
+    return overscroll_x == other.overscroll_x &&
+           overscroll_y == other.overscroll_y &&
+           max_stretch_intensity == other.max_stretch_intensity &&
+           interpolation_strength == other.interpolation_strength;
+  }
 };
 
 struct BackdropClipRect {
@@ -131,6 +155,7 @@ class Mutator {
       : data_(backdrop_rse) {}
   explicit Mutator(const BackdropClipPath& backdrop_path)
       : data_(backdrop_path) {}
+  explicit Mutator(const OverscrollStretchMutation& stretch) : data_(stretch) {}
 
   MutatorType GetType() const {
     return static_cast<MutatorType>(data_.index());
@@ -161,6 +186,9 @@ class Mutator {
   const BackdropClipPath& GetBackdropClipPath() const {
     return std::get<BackdropClipPath>(data_);
   }
+  const OverscrollStretchMutation& GetOverscrollStretch() const {
+    return std::get<OverscrollStretchMutation>(data_);
+  }
   const uint8_t& GetAlpha() const { return std::get<uint8_t>(data_); }
   float GetAlphaFloat() const { return DlColor::toOpacity(GetAlpha()); }
 
@@ -180,6 +208,7 @@ class Mutator {
       case MutatorType::kOpacity:
       case MutatorType::kTransform:
       case MutatorType::kBackdropFilter:
+      case MutatorType::kOverscrollStretch:
         return false;
     }
   }
@@ -195,7 +224,8 @@ class Mutator {
                BackdropClipRect,
                BackdropClipRRect,
                BackdropClipRSuperellipse,
-               BackdropClipPath>
+               BackdropClipPath,
+               OverscrollStretchMutation>
       data_;
 };  // Mutator
 
@@ -225,6 +255,10 @@ class MutatorsStack {
   void PushPlatformViewClipRRect(const DlRoundRect& rrect);
   void PushPlatformViewClipRSuperellipse(const DlRoundSuperellipse& rse);
   void PushPlatformViewClipPath(const DlPath& path);
+  void PushOverscrollStretch(DlScalar overscroll_x,
+                             DlScalar overscroll_y,
+                             DlScalar max_stretch_intensity,
+                             DlScalar interpolation_strength);
 
   // Removes the `Mutator` on the top of the stack
   // and destroys it.

@@ -28,6 +28,8 @@ abstract class ColorFilterEngineLayer implements EngineLayer {}
 
 abstract class ImageFilterEngineLayer implements EngineLayer {}
 
+abstract class OverscrollStretchEngineLayer implements EngineLayer {}
+
 abstract class BackdropFilterEngineLayer implements EngineLayer {}
 
 abstract class ShaderMaskEngineLayer implements EngineLayer {}
@@ -67,6 +69,15 @@ abstract class SceneBuilder {
     ImageFilter filter, {
     Offset offset = Offset.zero,
     ImageFilterEngineLayer? oldLayer,
+  });
+  OverscrollStretchEngineLayer pushOverscrollStretch(
+    ImageFilter filter, {
+    double overscrollX = 0.0,
+    double overscrollY = 0.0,
+    double maxStretchIntensity = 1.0,
+    double interpolationStrength = 0.7,
+    Offset offset = Offset.zero,
+    OverscrollStretchEngineLayer? oldLayer,
   });
   BackdropFilterEngineLayer pushBackdropFilter(
     ImageFilter filter, {

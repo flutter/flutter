@@ -1346,7 +1346,10 @@ void main() {
       buildTest(box1Key, box2Key, box3Key, controller, axis: Axis.horizontal),
     );
 
-    expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
+    expect(
+      tester.layers,
+      isNot(contains(shaderSupported ? isA<OverscrollStretchLayer>() : isA<ImageFilterLayer>())),
+    );
 
     final TestGesture gesture = await tester.startGesture(
       tester.getCenter(find.byType(CustomScrollView)),
@@ -1355,7 +1358,10 @@ void main() {
     await gesture.moveBy(const Offset(200.0, 0.0));
     await tester.pumpAndSettle();
 
-    expect(tester.layers, contains(isA<ImageFilterLayer>()));
+    expect(
+      tester.layers,
+      contains(shaderSupported ? isA<OverscrollStretchLayer>() : isA<ImageFilterLayer>()),
+    );
   });
 
   testWidgets(
