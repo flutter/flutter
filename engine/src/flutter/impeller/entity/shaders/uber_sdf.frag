@@ -5,11 +5,16 @@
 precision mediump float;
 
 #include <impeller/color.glsl>
+#include <impeller/constants.glsl>
+#include <impeller/gradient.glsl>
+#include <impeller/texture.glsl>
 #include <impeller/types.glsl>
 
 #include "rse_sdf.glsl"
 #include "sdf_functions.glsl"
 #include "sdf_utils.glsl"
+
+uniform sampler2D color_source_sampler;
 
 uniform FragInfo {
   // FragInfo fields are sorted by size (vec4 -> vec2 -> float) to optimize
@@ -19,12 +24,20 @@ uniform FragInfo {
   // vec4 fields
   // ===========================================================================
 
-  /// The RGBA color of the shape.
+  /// The RGBA color of the shape (or paint opacity in color.a for gradients).
   vec4 color;
   /// Corner radii for rounded rects (top-left, top-right, bottom-left,
   /// bottom-right), or the circular cap radii for rounded superellipses in
   /// radii.xy (top octant in x, right octant in y).
   vec4 radii;
+  /// Gradient parameters:
+  ///   - Linear gradient:
+  ///       xy: Start point in local coordinates.
+  ///       zw: Delta vector (end - start) in local coordinates.
+  ///   - Radial gradient:
+  ///       xy: Center point in local coordinates.
+  ///       zw: Unused (0.0).
+  vec4 gradient_coords;
 
   // ===========================================================================
   // vec2 fields
@@ -35,6 +48,8 @@ uniform FragInfo {
   vec2 center;
   /// The half-dimensions of the shape (half-width, half-height).
   vec2 size;
+  /// The size of a device pixel in local coordinates.
+  vec2 pixel_size;
 
   // --- Superellipse Parameters ---
   /// The exponent degree (n_x, n_y) of the superellipse curvature.
@@ -61,6 +76,11 @@ uniform FragInfo {
   ///   3: RoundRect
   ///   4: Rounded Superellipse (must have uniform circular corner radii)
   float type;
+  /// The type of color source:
+  ///   0: Solid color
+  ///   1: Linear gradient
+  ///   2: Radial gradient
+  float color_source_type;
   /// The width in device pixels over which to apply antialiasing.
   float aa_pixels;
 
@@ -74,12 +94,53 @@ uniform FragInfo {
   ///   1: Bevel
   ///   2: Round
   float stroke_join;
+
+  // --- Gradient Parameters ---
+  /// The tile mode for gradient sampling:
+  ///   0: Clamp
+  ///   1: Repeat
+  ///   2: Mirror
+  ///   3: Decal
+  float tile_mode;
+  /// Half the size of a single gradient texel in normalized texture
+  /// coordinates along the gradient ramp (x axis).
+  float half_texel;
+  /// Inverse gradient length:
+  ///   - Linear gradient: 1.0 / dot(delta, delta)
+  ///   - Radial gradient: 1.0 / radius
+  float inv_gradient_length;
 }
 frag_info;
 
 out vec4 frag_color;
 
 highp in vec2 v_position;
+
+// Gets the color to use at v_position based on frag_info properties.
+vec4 getColor() {
+  vec4 color;
+  if (frag_info.color_source_type < 0.5) {
+    // Solid color
+    color = frag_info.color;
+  } else {
+    float t;
+    if (frag_info.color_source_type < 1.5) {
+      // Linear gradient
+      t = IPComputeLinearGradientT(v_position, frag_info.gradient_coords.xy,
+                                   frag_info.gradient_coords.zw,
+                                   frag_info.inv_gradient_length);
+    } else {
+      // Radial gradient
+      t = IPComputeRadialGradientT(v_position, frag_info.gradient_coords.xy,
+                                   frag_info.inv_gradient_length);
+    }
+    vec4 gradient_color = IPSampleLinearWithTileMode(
+        color_source_sampler, vec2(t, 0.5), vec2(frag_info.half_texel, 0.5),
+        frag_info.tile_mode, vec4(0.0));
+    color = vec4(gradient_color.rgb, gradient_color.a * frag_info.color.a);
+  }
+  return color;
+}
 
 float distanceFromCircle(vec2 p, float radius) {
   return length(p) - radius;
@@ -115,7 +176,7 @@ float distanceFromChamferRect(vec2 p, vec2 half_size, float chamfer_size) {
   p = abs(p);
   float d1 = max(p.x - half_size.x, p.y - half_size.y);
   float d2 =
-      (p.x + p.y - half_size.x - half_size.y + chamfer_size) * 0.70710678;
+      (p.x + p.y - half_size.x - half_size.y + chamfer_size) * kHalfSqrtTwo;
   return max(d1, d2);
 }
 
@@ -164,25 +225,14 @@ float distanceFromRoundedSuperellipse(vec2 p,
                                se_degree);
 }
 
-// Special case pixel size calculation for rectangles. The standard `pixelSize`
-// function uses SDF derivatives, which gives invalid results for very small
-// shapes, where adjacent device pixels span across opposing edges of the shape.
-// This function calculates pixel size for rectangles without using SDF
-// derivatives.
+// Calculates pixel size for rectangles using frag_info.pixel_size.
 float rectPixelSize(vec2 p) {
-  // The change in local coordinates per horizontal device pixel (device_dx)
-  // and vertical device pixel (device_dy).
-  vec2 device_dx = dFdx(v_position);
-  vec2 device_dy = dFdy(v_position);
-  // The size of a device pixel in terms of local coordinates.
-  vec2 device_pixel_size = vec2(length(vec2(device_dx.x, device_dy.x)),
-                                length(vec2(device_dx.y, device_dy.y)));
-
   // Get pixel size in the direction perpendicular to the closest edge of the
-  // rectangle: device_pixel_size.x when closer to a vertical edge, and
-  // pixel_size.y when closer to a horizontal edge.
+  // rectangle: frag_info.pixel_size.x when closer to a vertical edge, and
+  // frag_info.pixel_size.y when closer to a horizontal edge.
   vec2 distance = abs(abs(p) - frag_info.size);
-  return (distance.x < distance.y) ? device_pixel_size.x : device_pixel_size.y;
+  return (distance.x < distance.y) ? frag_info.pixel_size.x
+                                   : frag_info.pixel_size.y;
 }
 
 // Special case pixel size calculation for rounded rectangles, similar to
@@ -304,6 +354,8 @@ float gammaCorrectedAlpha(float alpha, vec3 foreground_rgb) {
 }
 
 void main() {
+  vec4 color = getColor();
+
   vec2 p = v_position - frag_info.center;
 
   vec2 sdf_and_pixel_size =
@@ -315,8 +367,10 @@ void main() {
   // Clamp alpha in case floating point precision errors cause it to be outside
   // [0.0, 1.0].
   alpha = clamp(alpha, 0.0, 1.0);
-  alpha = gammaCorrectedAlpha(alpha, frag_info.color.rgb);
+  if (alpha < 1.0) {
+    alpha = gammaCorrectedAlpha(alpha, color.rgb);
+  }
 
-  frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
+  frag_color = vec4(color.rgb, color.a * alpha);
   frag_color = IPPremultiply(frag_color);
 }

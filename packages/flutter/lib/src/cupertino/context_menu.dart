@@ -64,8 +64,10 @@ typedef _DismissCallback = void Function(BuildContext context, double scale, dou
 
 /// A function that builds the child and handles the transition between the
 /// default child and the preview when the CupertinoContextMenu is open.
-typedef CupertinoContextMenuBuilder =
-    Widget Function(BuildContext context, Animation<double> animation);
+typedef CupertinoContextMenuBuilder = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+);
 
 // Given a GlobalKey, return the Rect of the corresponding RenderBox's
 // paintBounds in global coordinates.
@@ -756,18 +758,14 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   // Build a _ContextMenuRoute.
   _ContextMenuRoute({
     required List<Widget> actions,
-    required _ContextMenuLocation contextMenuLocation,
+    required this._contextMenuLocation,
     this.barrierLabel,
-    CupertinoContextMenuBuilder? builder,
+    this._builder,
     super.filter,
-    required Rect previousChildRect,
-    required double scaleFactor,
+    required this._previousChildRect,
+    required this._scaleFactor,
   }) : assert(actions.isNotEmpty),
-       _actions = actions,
-       _builder = builder,
-       _contextMenuLocation = contextMenuLocation,
-       _previousChildRect = previousChildRect,
-       _scaleFactor = scaleFactor;
+       _actions = actions;
 
   // Barrier color for a Cupertino modal barrier.
   static const Color _kModalBarrierColor = Color(0x6604040F);

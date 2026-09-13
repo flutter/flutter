@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/utils.dart';
 import '../runner/options/option_bundle.dart';
 import '../runner/options/option_descriptor.dart';
 import '../web_template.dart';
@@ -48,14 +47,13 @@ abstract final class WebOptions {
         'When this is set, it will replace all $kStaticAssetsUrlPlaceholder in web/index.html for the given value.',
   );
 
-  static final pwaStrategy = StringOptionDescriptor(
+  static const pwaStrategy = EnumOptionDescriptor<ServiceWorkerStrategy>(
     name: 'pwa-strategy',
     hide: true,
     help:
         'This option is deprecated and will be removed in a future Flutter release.\n'
         'The caching strategy to be used by the PWA service worker.',
-    allowed: ServiceWorkerStrategy.values.map((ServiceWorkerStrategy e) => e.cliName).toList(),
-    allowedHelp: CliEnum.allowedHelp(ServiceWorkerStrategy.values),
+    values: ServiceWorkerStrategy.values,
   );
 
   static const webResourcesCdn = FlagOptionDescriptor(
@@ -79,6 +77,21 @@ abstract final class WebOptions {
         'Generate a sourcemap file. These can be used by browsers '
         'to view and debug the original source code of a compiled and minified Dart '
         'application.',
+  );
+
+  static const webContentHash = FlagOptionDescriptor(
+    name: 'web-content-hash',
+    help:
+        'Include a content hash in the filenames of the compiled web '
+        'entrypoints (for example, "main.dart.<hash>.js") so that browsers '
+        'fetch new versions after a deploy instead of serving stale cached '
+        'files. The web server must still serve "index.html" and '
+        '"flutter_bootstrap.js" with revalidation (for example, '
+        '"Cache-Control: no-cache") for a new deploy to be picked up. '
+        'Not supported with deferred imports. Custom "index.html" files '
+        'that reference "main.dart.js" directly, and the deprecated '
+        '"FlutterLoader.loadEntrypoint" JavaScript API, are incompatible '
+        'with this flag.',
   );
 
   static const csp = FlagOptionDescriptor(
@@ -156,6 +169,147 @@ abstract final class WebOptions {
     defaultsTo: true,
     help: 'Whether to strip the resulting wasm file of static symbol names.',
   );
+
+  static const webHeader = MultiOptionDescriptor(
+    name: 'web-header',
+    splitCommas: false,
+    verboseOnly: true,
+    help:
+        'Additional key-value pairs that will added by the web server '
+        'as headers to all responses. Multiple headers can be passed by '
+        'repeating "--web-header" multiple times.',
+    valueHelp: 'X-Custom-Header=header-value',
+  );
+
+  static const webHostname = StringOptionDescriptor(
+    name: 'web-hostname',
+    verboseOnly: true,
+    help:
+        'The hostname that the web server will use to resolve an IP to serve '
+        'from. The unresolved hostname is used to launch Chrome when using '
+        'the chrome Device. The name "any" may also be used to serve on any '
+        'IPV4 for either the Chrome or web-server device.',
+  );
+
+  static const webPort = IntOptionDescriptor(
+    name: 'web-port',
+    verboseOnly: true,
+    help:
+        'The host port to serve the web application from. If not provided, the tool '
+        'will select a random open port on the host.',
+  );
+
+  static const webTlsCertPath = StringOptionDescriptor(
+    name: 'web-tls-cert-path',
+    help:
+        'The certificate that host will use to serve using TLS connection. '
+        'If not provided, the tool will use default http scheme.',
+  );
+
+  static const webTlsCertKeyPath = StringOptionDescriptor(
+    name: 'web-tls-cert-key-path',
+    help:
+        'The certificate key that host will use to authenticate cert. '
+        'If not provided, the tool will use default http scheme.',
+  );
+
+  static const webServerDebugProtocol = DefaultedStringOptionDescriptor(
+    name: 'web-server-debug-protocol',
+    allowed: <String>['sse', 'ws'],
+    defaultsTo: 'ws',
+    verboseOnly: true,
+    help:
+        'The protocol (SSE or WebSockets) to use for the debug service proxy '
+        'when using the Web Server device and Dart Debug extension. '
+        'This is useful for editors/debug adapters that do not support debugging '
+        'over SSE (the default protocol for Web Server/Dart Debugger extension).',
+  );
+
+  static const webServerDebugBackendProtocol = DefaultedStringOptionDescriptor(
+    name: 'web-server-debug-backend-protocol',
+    allowed: <String>['sse', 'ws'],
+    defaultsTo: 'ws',
+    verboseOnly: true,
+    help:
+        'The protocol (SSE or WebSockets) to use for the Dart Debug Extension '
+        'backend service when using the Web Server device. '
+        'Using WebSockets can improve performance but may fail when connecting through '
+        'some proxy servers.',
+  );
+
+  static const webServerDebugInjectedClientProtocol = DefaultedStringOptionDescriptor(
+    name: 'web-server-debug-injected-client-protocol',
+    allowed: <String>['sse', 'ws'],
+    defaultsTo: 'ws',
+    verboseOnly: true,
+    help:
+        'The protocol (SSE or WebSockets) to use for the injected client '
+        'when using the Web Server device. '
+        'Using WebSockets can improve performance but may fail when connecting through '
+        'some proxy servers.',
+  );
+
+  static const webAllowExposeUrl = FlagOptionDescriptor(
+    name: 'web-allow-expose-url',
+    verboseOnly: true,
+    help:
+        'Enables daemon-to-editor requests (app.exposeUrl) for exposing URLs '
+        'when running on remote machines.',
+  );
+
+  static const webRunHeadless = FlagOptionDescriptor(
+    name: 'web-run-headless',
+    verboseOnly: true,
+    help:
+        'Launches the browser in headless mode. Currently only Chrome '
+        'supports this option.',
+  );
+
+  static const webBrowserDebugPort = IntOptionDescriptor(
+    name: 'web-browser-debug-port',
+    verboseOnly: true,
+    help:
+        'The debug port the browser should use. If not specified, a '
+        'random port is selected. Currently only Chrome supports this option. '
+        'It serves the Chrome DevTools Protocol '
+        '(https://chromedevtools.github.io/devtools-protocol/).',
+  );
+
+  static const webEnableExpressionEvaluation = FlagOptionDescriptor(
+    name: 'web-enable-expression-evaluation',
+    defaultsTo: true,
+    verboseOnly: true,
+    help: 'Enables expression evaluation in the debugger.',
+  );
+
+  static const webLaunchUrl = StringOptionDescriptor(
+    name: 'web-launch-url',
+    help:
+        'The URL to provide to the browser. Defaults to an HTTP URL with the host '
+        'name of "--web-hostname", the port of "--web-port", and the path set to "/".',
+  );
+
+  static const webBrowserFlags = MultiOptionDescriptor(
+    name: 'web-browser-flag',
+    valueHelp: '--foo=bar',
+    verboseOnly: true,
+    help:
+        'Additional flag to pass to a browser instance at startup.\n'
+        'Chrome: https://www.chromium.org/developers/how-tos/run-chromium-with-flags/\n'
+        'Firefox: https://wiki.mozilla.org/Firefox/CommandLineOptions\n'
+        'Multiple flags can be passed by repeating "--web-browser-flag" multiple times.',
+  );
+
+  static const crossOriginIsolation = NullableFlagOptionDescriptor(
+    name: 'cross-origin-isolation',
+    verboseOnly: true,
+    help:
+        'Adds the Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy '
+        'headers to the web server. These headers are required for using APIs like '
+        'SharedArrayBuffer. This is on by default for the "skwasm" web renderer, '
+        'and this flag can be used to override the default. To disable this for the '
+        'skwasm renderer, use "--no-cross-origin-isolation".',
+  );
 }
 
 /// A bundle encapsulating general Flutter Web options and flags.
@@ -175,6 +329,7 @@ class WebCoreOptionsBundle extends OptionBundle {
     WebOptions.webDefineFromFile,
     WebOptions.optimizationLevel,
     WebOptions.sourceMaps,
+    WebOptions.webContentHash,
   ];
 }
 
