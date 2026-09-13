@@ -198,9 +198,8 @@ void main() {
         visualStudio: fakeVisualStudio,
       );
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['windows', '--no-pub', '--flavor', 'apple']);
+      await createTestCommandRunner(command)
+          .run(const <String>['windows', '--no-pub', '--flavor', 'apple']);
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{

@@ -176,7 +176,7 @@ void main() {
       projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
     );
     return BuildLinuxCommand(
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       featureFlags: effectiveFeatureFlags,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
@@ -235,8 +235,7 @@ void main() {
       expect(
         createTestCommandRunner(command).run(const <String>['build', 'linux', '--no-pub']),
         throwsToolExit(
-          message:
-              '"build linux" is not currently supported. To enable, run "flutter config --enable-linux-desktop".',
+          message: '"build linux" is not currently supported. To enable, run "flutter config --enable-linux-desktop".',
         ),
       );
     },
@@ -370,9 +369,8 @@ void main() {
         ninjaCommand('debug', stdout: 'STDOUT STUFF'),
       ]);
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--debug', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--debug', '--no-pub']);
       expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
       expect(testLogger.warningText, isNot(contains('STDOUT STUFF')));
       expect(testLogger.errorText, isNot(contains('STDOUT STUFF')));
@@ -455,9 +453,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         ),
       ]);
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--debug', '-v', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--debug', '-v', '--no-pub']);
       expect(testLogger.statusText, contains('STDOUT STUFF'));
       expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
       expect(testLogger.warningText, isNot(contains('STDOUT STUFF')));
@@ -480,9 +477,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[cmakeCommand('debug'), ninjaCommand('debug')]);
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--debug', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--debug', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -506,9 +502,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         ninjaCommand('debug', target: 'arm64'),
       ]);
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--debug', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--debug', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -530,9 +525,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         ninjaCommand('debug', target: 'riscv64'),
       ]);
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--debug', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--debug', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -549,9 +543,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[cmakeCommand('profile'), ninjaCommand('profile')]);
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--profile', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--profile', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -574,9 +567,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         ninjaCommand('profile', target: 'arm64'),
       ]);
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--profile', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--profile', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -598,9 +590,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         ninjaCommand('profile', target: 'riscv64'),
       ]);
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--profile', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--profile', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -618,9 +609,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
       );
 
       expect(
-        createTestCommandRunner(
-          command,
-        ).run(const <String>['build', 'linux', '--no-pub', '--target-platform=linux-x64']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'linux', '--no-pub', '--target-platform=linux-x64']),
         throwsToolExit(),
       );
     },
@@ -789,9 +779,8 @@ set(BINARY_NAME "fizz_bar")
         ..createSync(recursive: true)
         ..writeAsBytesSync(List<int>.filled(10000, 0));
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--no-pub', '--analyze-size']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--no-pub', '--analyze-size']);
 
       expect(
         testLogger.statusText,
@@ -845,9 +834,8 @@ set(BINARY_NAME "fizz_bar")
         ..createSync(recursive: true)
         ..writeAsBytesSync(List<int>.filled(10000, 0));
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--no-pub', '--analyze-size']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--no-pub', '--analyze-size']);
 
       // check if libapp.so of "build/linux/arm64/release" directory can be referenced.
       expect(testLogger.statusText, contains('libapp.so (Dart AOT)'));
@@ -900,9 +888,8 @@ set(BINARY_NAME "fizz_bar")
         ..createSync(recursive: true)
         ..writeAsBytesSync(List<int>.filled(10000, 0));
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--no-pub', '--analyze-size']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--no-pub', '--analyze-size']);
 
       // check if libapp.so of "build/linux/riscv64/release" directory can be referenced.
       expect(testLogger.statusText, contains('libapp.so (Dart AOT)'));

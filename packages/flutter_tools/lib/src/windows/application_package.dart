@@ -84,8 +84,7 @@ class PrebuiltWindowsApp extends WindowsApp implements PrebuiltApplicationPackag
   final String _executable;
 
   @override
-  String executable(BuildMode buildMode, TargetPlatform targetPlatform, [String? flavor]) =>
-      _executable;
+  String executable(BuildMode buildMode, TargetPlatform targetPlatform, [String? flavor]) => _executable;
 
   @override
   String get name => _executable;
