@@ -244,4 +244,52 @@ public class PlatformViewWrapper extends FrameLayout {
       observer.removeOnGlobalFocusChangeListener(currFocusListener);
     }
   }
+
+  public interface FocusSearchFailedListener {
+    void onFocusSearchFailed(int direction);
+  }
+
+  private FocusSearchFailedListener focusSearchFailedListener;
+
+  public void setFocusSearchFailedListener(FocusSearchFailedListener listener) {
+    this.focusSearchFailedListener = listener;
+  }
+
+  private boolean isDescendant(android.view.View view) {
+    if (view == null) return false;
+    android.view.ViewParent parent = view.getParent();
+    while (parent != null) {
+      if (parent == this) return true;
+      parent = parent.getParent();
+    }
+    return false;
+  }
+
+  // View.focusSearch delegates to ViewGroup.focusSearch at runtime, which supports tab navigation.
+  @Override
+  @SuppressLint("WrongConstant")
+  public boolean dispatchKeyEvent(android.view.KeyEvent event) {
+    boolean handled = super.dispatchKeyEvent(event);
+    if (!handled
+        && event.getAction() == android.view.KeyEvent.ACTION_DOWN
+        && event.getKeyCode() == android.view.KeyEvent.KEYCODE_TAB) {
+      View focused = findFocus();
+      int direction =
+          event.hasModifiers(android.view.KeyEvent.META_SHIFT_ON)
+              ? android.view.View.FOCUS_BACKWARD
+              : android.view.View.FOCUS_FORWARD;
+      if (focused != null) {
+        View next = focused.focusSearch(direction);
+        if (next != null && next != focused && isDescendant(next) && next.requestFocus(direction)) {
+          return true;
+        } else {
+          if (focusSearchFailedListener != null) {
+            focusSearchFailedListener.onFocusSearchFailed(direction);
+            return true;
+          }
+        }
+      }
+    }
+    return handled;
+  }
 }

@@ -53,6 +53,7 @@ class FakeAndroidViewController implements AndroidViewController {
 
   bool disposed = false;
   bool focusCleared = false;
+  bool focusRequested = false;
   bool created = false;
   // If true, [create] won't be considered to have been called successfully
   // unless it includes a size.
@@ -61,6 +62,11 @@ class FakeAndroidViewController implements AndroidViewController {
   bool _createCalledSuccessfully = false;
 
   Offset? createPosition;
+
+  @override
+  Future<void> requestFocus() async {
+    focusRequested = true;
+  }
 
   final List<PlatformViewCreatedCallback> _createdCallbacks = <PlatformViewCreatedCallback>[];
 
