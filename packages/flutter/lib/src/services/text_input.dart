@@ -647,11 +647,21 @@ class TextInputConfiguration {
   /// [autocorrect], so that suggestions are only shown when [autocorrect] is
   /// true. On Android autocorrection and suggestion are controlled separately.
   ///
+  /// On Android, setting this to false can also limit which keyboard languages
+  /// the user can type in. Keyboards interpret the underlying
+  /// `TYPE_TEXT_FLAG_NO_SUGGESTIONS` flag differently: some, like Gboard,
+  /// disable keyboard languages that rely on suggestions to work, such as
+  /// Chinese, Korean, and Cantonese, so the user can't switch to them while
+  /// typing in the field. Consider leaving this true for fields where users may
+  /// need to type in those languages.
+  ///
   /// Defaults to true.
   ///
   /// See also:
   ///
   ///  * <https://developer.android.com/reference/android/text/InputType.html#TYPE_TEXT_FLAG_NO_SUGGESTIONS>
+  ///  * <https://github.com/flutter/flutter/issues/139143>, which describes
+  ///    this behavior.
   /// {@endtemplate}
   final bool enableSuggestions;
 
