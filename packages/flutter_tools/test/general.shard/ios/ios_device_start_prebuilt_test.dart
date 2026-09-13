@@ -1358,8 +1358,7 @@ void main() {
         },
         // If mDNS is not the only method of discovery, it shouldn't throw on error.
         overrides: <Type, Generator>{
-          MDnsVmServiceDiscovery: () =>
-              FakeMDnsVmServiceDiscovery(allowThrowOnError: false),
+          MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery(allowThrowOnError: false),
         },
       );
 

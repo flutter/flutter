@@ -385,32 +385,28 @@ void main() {
         expect(() async => portDiscovery.queryForAttach(), throwsA(isA<UnsupportedError>()));
       }, overrides: <Type, Generator>{Platform: () => FakePlatform()});
 
-      testUsingContext(
-        'On macOS, traces error and returns null when client throws SocketException on start with throwOnError: false',
-        () async {
-          final MDnsClient client = FakeMDnsClient(
-            <PtrResourceRecord>[],
-            <String, List<SrvResourceRecord>>{},
-            socketExceptionOnStart: true,
-          );
+      testUsingContext('On macOS, traces error and returns null when client throws SocketException on start with throwOnError: false', () async {
+        final MDnsClient client = FakeMDnsClient(
+          <PtrResourceRecord>[],
+          <String, List<SrvResourceRecord>>{},
+          socketExceptionOnStart: true,
+        );
 
-          final logger = BufferLogger.test();
-          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
-            mdnsClient: client,
-            preliminaryMDnsClient: emptyClient,
-            logger: logger,
-            analytics: const NoOpAnalytics(),
-          );
+        final logger = BufferLogger.test();
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
+          mdnsClient: client,
+          preliminaryMDnsClient: emptyClient,
+          logger: logger,
+          analytics: const NoOpAnalytics(),
+        );
 
-          final MDnsVmServiceDiscoveryResult? result = await portDiscovery.queryForAttach(
-            throwOnError: false,
-          );
+        final MDnsVmServiceDiscoveryResult? result = await portDiscovery.queryForAttach(
+          throwOnError: false,
+        );
 
-          expect(result, isNull);
-          expect(logger.traceText, contains('mDNS discovery failed:'));
-        },
-        overrides: <Type, Generator>{Platform: () => FakePlatform(operatingSystem: 'macos')},
-      );
+        expect(result, isNull);
+        expect(logger.traceText, contains('mDNS discovery failed:'));
+      }, overrides: <Type, Generator>{Platform: () => FakePlatform(operatingSystem: 'macos')});
 
       testWithoutContext('Correctly builds VM Service URI with hostVmservicePort == 0', () async {
         final MDnsClient client = FakeMDnsClient(
@@ -720,66 +716,58 @@ void main() {
       // On macOS, the mDNS client's socket stream creates a SocketException if
       // the app running the tool does not have Local Network permissions.
       // See: https://github.com/flutter/flutter/issues/150131
-      testUsingContext(
-        'On macOS, tool exits with a helpful message when mDNS lookup throws an uncaught SocketException',
-        () async {
-          final MDnsClient client = FakeMDnsClient(
-            <PtrResourceRecord>[],
-            <String, List<SrvResourceRecord>>{},
-            uncaughtSocketExceptionOnLookup: true,
-          );
+      testUsingContext('On macOS, tool exits with a helpful message when mDNS lookup throws an uncaught SocketException', () async {
+        final MDnsClient client = FakeMDnsClient(
+          <PtrResourceRecord>[],
+          <String, List<SrvResourceRecord>>{},
+          uncaughtSocketExceptionOnLookup: true,
+        );
 
-          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
-            mdnsClient: client,
-            logger: BufferLogger.test(),
-            analytics: const NoOpAnalytics(),
-          );
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
+          mdnsClient: client,
+          logger: BufferLogger.test(),
+          analytics: const NoOpAnalytics(),
+        );
 
-          expect(
-            () async => portDiscovery.firstMatchingVmService(client),
-            throwsToolExit(
-              message:
-                  'Flutter could not access the local network.\n'
-                  '\n'
-                  'Please ensure your IDE or terminal app has permission to access '
-                  'devices on the local network. This allows Flutter to connect to '
-                  'the Dart VM.\n'
-                  '\n'
-                  'You can grant this permission in System Settings > Privacy & '
-                  'Security > Local Network.\n',
-            ),
-          );
-        },
-        overrides: <Type, Generator>{Platform: () => FakePlatform(operatingSystem: 'macos')},
-      );
+        expect(
+          () async => portDiscovery.firstMatchingVmService(client),
+          throwsToolExit(
+            message:
+                'Flutter could not access the local network.\n'
+                '\n'
+                'Please ensure your IDE or terminal app has permission to access '
+                'devices on the local network. This allows Flutter to connect to '
+                'the Dart VM.\n'
+                '\n'
+                'You can grant this permission in System Settings > Privacy & '
+                'Security > Local Network.\n',
+          ),
+        );
+      }, overrides: <Type, Generator>{Platform: () => FakePlatform(operatingSystem: 'macos')});
 
-      testUsingContext(
-        'On macOS, tool traces an error and returns null when mDNS lookup throws an uncaught SocketException and throwOnError is false',
-        () async {
-          final MDnsClient client = FakeMDnsClient(
-            <PtrResourceRecord>[],
-            <String, List<SrvResourceRecord>>{},
-            uncaughtSocketExceptionOnLookup: true,
-          );
+      testUsingContext('On macOS, tool traces an error and returns null when mDNS lookup throws an uncaught SocketException and throwOnError is false', () async {
+        final MDnsClient client = FakeMDnsClient(
+          <PtrResourceRecord>[],
+          <String, List<SrvResourceRecord>>{},
+          uncaughtSocketExceptionOnLookup: true,
+        );
 
-          final logger = BufferLogger.test();
+        final logger = BufferLogger.test();
 
-          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
-            mdnsClient: client,
-            logger: logger,
-            analytics: const NoOpAnalytics(),
-          );
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
+          mdnsClient: client,
+          logger: logger,
+          analytics: const NoOpAnalytics(),
+        );
 
-          final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
-            client,
-            throwOnError: false,
-          );
+        final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
+          client,
+          throwOnError: false,
+        );
 
-          expect(result, isNull);
-          expect(logger.traceText, contains('mDNS discovery failed:'));
-        },
-        overrides: <Type, Generator>{Platform: () => FakePlatform(operatingSystem: 'macos')},
-      );
+        expect(result, isNull);
+        expect(logger.traceText, contains('mDNS discovery failed:'));
+      }, overrides: <Type, Generator>{Platform: () => FakePlatform(operatingSystem: 'macos')});
 
       testUsingContext(
         'Throws UnsupportedError on non-macOS platforms for firstMatchingVmService',
