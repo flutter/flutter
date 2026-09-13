@@ -316,8 +316,8 @@ class _CaptureDevice extends Fake implements Device {
     required this.name,
     this.supportsScreenshot = true,
     this.supportsScreenRecording = false,
-    bool isSupportedForProject = true,
-  }) : _isSupportedForProject = isSupportedForProject;
+    this._isSupportedForProject = true,
+  });
 
   @override
   final String name;
