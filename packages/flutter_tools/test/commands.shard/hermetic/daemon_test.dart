@@ -236,9 +236,8 @@ void main() {
       });
       expect(response.data['id'], isNull);
       expect(response.data['event'], 'daemon.logMessage');
-      final Map<String, String> logMessage = castStringKeyedMap(
-        response.data['params'],
-      )!.cast<String, String>();
+      final Map<String, String> logMessage = castStringKeyedMap(response.data['params'])!
+          .cast<String, String>();
       expect(logMessage['level'], 'error');
       expect(logMessage['message'], 'daemon.logMessage test');
     }, overrides: <Type, Generator>{Logger: () => notifyingLogger});
@@ -259,9 +258,8 @@ void main() {
       });
       expect(response.data['id'], isNull);
       expect(response.data['event'], 'daemon.logMessage');
-      final Map<String, String> logMessage = castStringKeyedMap(
-        response.data['params'],
-      )!.cast<String, String>();
+      final Map<String, String> logMessage = castStringKeyedMap(response.data['params'])!
+          .cast<String, String>();
       expect(logMessage['level'], 'warning');
       expect(logMessage['message'], 'daemon.logMessage test');
     }, overrides: <Type, Generator>{Logger: () => notifyingLogger});
@@ -319,9 +317,8 @@ void main() {
         });
         expect(response.data['id'], isNull);
         expect(response.data['event'], 'daemon.logMessage');
-        final Map<String, String> logMessage = castStringKeyedMap(
-          response.data['params'],
-        )!.cast<String, String>();
+        final Map<String, String> logMessage = castStringKeyedMap(response.data['params'])!
+            .cast<String, String>();
         expect(logMessage['level'], 'trace');
         expect(logMessage['message'], 'daemon.logMessage test 2');
       },
@@ -1236,9 +1233,8 @@ void main() {
       await _runFakeAsync((FakeAsync time) async {
         final operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
-          Future<void>.delayed(
-            debounceDuration * 2,
-          ).then((_) => queue.queueAndDebounce('OP1', debounceDuration, () async => 2)),
+          Future<void>.delayed(debounceDuration * 2)
+              .then((_) => queue.queueAndDebounce('OP1', debounceDuration, () async => 2)),
         ];
 
         time.elapse(debounceDuration * 5);
