@@ -153,9 +153,8 @@ void main() {
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-          await createTestCommandRunner(
-            createAttachCommand(hotRunnerFactory: hotRunnerFactory),
-          ).run(<String>['attach']);
+          await createTestCommandRunner(createAttachCommand(hotRunnerFactory: hotRunnerFactory))
+              .run(<String>['attach']);
 
           await completer.future;
 
@@ -223,9 +222,8 @@ void main() {
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-          await createTestCommandRunner(
-            createAttachCommand(hotRunnerFactory: hotRunnerFactory),
-          ).run(<String>['attach']);
+          await createTestCommandRunner(createAttachCommand(hotRunnerFactory: hotRunnerFactory))
+              .run(<String>['attach']);
           await completer.future;
           await Future.wait<void>(<Future<void>>[
             fakeLogReader.dispose(),
@@ -366,9 +364,8 @@ void main() {
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-          await createTestCommandRunner(
-            createAttachCommand(hotRunnerFactory: hotRunnerFactory),
-          ).run(<String>['attach']);
+          await createTestCommandRunner(createAttachCommand(hotRunnerFactory: hotRunnerFactory))
+              .run(<String>['attach']);
           await fakeLogReader.dispose();
 
           // Listen to the URI before checking port forwarder. Port forwarding
@@ -436,9 +433,8 @@ void main() {
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-          await createTestCommandRunner(
-            createAttachCommand(hotRunnerFactory: hotRunnerFactory),
-          ).run(<String>['attach']);
+          await createTestCommandRunner(createAttachCommand(hotRunnerFactory: hotRunnerFactory))
+              .run(<String>['attach']);
           await fakeLogReader.dispose();
 
           // Listen to the URI before checking port forwarder. Port forwarding
@@ -511,9 +507,8 @@ void main() {
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-          await createTestCommandRunner(
-            createAttachCommand(hotRunnerFactory: hotRunnerFactory),
-          ).run(<String>['attach', '--debug-port', '123']);
+          await createTestCommandRunner(createAttachCommand(hotRunnerFactory: hotRunnerFactory))
+              .run(<String>['attach', '--debug-port', '123']);
           await fakeLogReader.dispose();
 
           // Listen to the URI before checking port forwarder. Port forwarding
@@ -599,9 +594,8 @@ void main() {
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-          await createTestCommandRunner(
-            createAttachCommand(hotRunnerFactory: hotRunnerFactory),
-          ).run(<String>['attach', '--debug-url', 'https://0.0.0.0:123']);
+          await createTestCommandRunner(createAttachCommand(hotRunnerFactory: hotRunnerFactory))
+              .run(<String>['attach', '--debug-url', 'https://0.0.0.0:123']);
           await fakeLogReader.dispose();
 
           // Listen to the URI before checking port forwarder. Port forwarding
@@ -688,9 +682,8 @@ void main() {
               completer.complete();
             }
           });
-          final Future<void> task = createTestCommandRunner(
-            createAttachCommand(),
-          ).run(<String>['attach']);
+          final Future<void> task = createTestCommandRunner(createAttachCommand())
+              .run(<String>['attach']);
           await completer.future;
 
           expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
@@ -852,9 +845,8 @@ void main() {
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-          await createTestCommandRunner(
-            createAttachCommand(hotRunnerFactory: hotRunnerFactory),
-          ).run(<String>['attach', '--ipv6']);
+          await createTestCommandRunner(createAttachCommand(hotRunnerFactory: hotRunnerFactory))
+              .run(<String>['attach', '--ipv6']);
           await completer.future;
 
           expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
@@ -942,9 +934,8 @@ void main() {
               completer.complete();
             }
           });
-          final Future<void> task = createTestCommandRunner(
-            createAttachCommand(),
-          ).run(<String>['attach', '--debug-port', '$devicePort']);
+          final Future<void> task = createTestCommandRunner(createAttachCommand())
+              .run(<String>['attach', '--debug-port', '$devicePort']);
           await completer.future;
 
           expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
@@ -979,9 +970,8 @@ void main() {
               completer.complete();
             }
           });
-          final Future<void> task = createTestCommandRunner(
-            createAttachCommand(),
-          ).run(<String>['attach', '--debug-port', '$devicePort', '--ipv6']);
+          final Future<void> task = createTestCommandRunner(createAttachCommand())
+              .run(<String>['attach', '--debug-port', '$devicePort', '--ipv6']);
           await completer.future;
 
           expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
@@ -1106,9 +1096,8 @@ void main() {
         final device = FakeIOSDevice();
         testDeviceManager.devices = <Device>[device];
         expect(
-          createTestCommandRunner(
-            createAttachCommand(),
-          ).run(<String>['attach', '--device-user', '10']),
+          createTestCommandRunner(createAttachCommand())
+              .run(<String>['attach', '--device-user', '10']),
           throwsToolExit(message: '--device-user is only supported for Android'),
         );
       },
