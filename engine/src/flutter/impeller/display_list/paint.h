@@ -69,7 +69,7 @@ struct Paint {
 
     std::shared_ptr<Contents> CreateMaskBlur(
         const Paint& paint,
-        const ContentContext& renderer,
+        ContentContext& renderer,
         const Geometry* geometry,
         std::shared_ptr<ColorSourceContents> contents,
         bool needs_color_filter,
@@ -101,7 +101,7 @@ struct Paint {
   /// @return     The filter-wrapped contents. If there are no filters that need
   ///             to be wrapped for the current paint configuration, the
   ///             original contents is returned.
-  std::shared_ptr<Contents> WithFilters(const ContentContext& renderer,
+  std::shared_ptr<Contents> WithFilters(ContentContext& renderer,
                                         std::shared_ptr<Contents> input) const;
 
   /// @brief      Wrap this paint's configured filters to the given contents of
@@ -113,7 +113,7 @@ struct Paint {
   ///             to be wrapped for the current paint configuration, the
   ///             original contents is returned.
   std::shared_ptr<Contents> WithFiltersForSubpassTarget(
-      const ContentContext& renderer,
+      ContentContext& renderer,
       std::shared_ptr<Contents> input,
       const Matrix& effect_transform = Matrix()) const;
 
@@ -133,7 +133,7 @@ struct Paint {
   ///                                 space.
   /// @return     The generated color source contents.
   std::shared_ptr<ColorSourceContents> CreateContents(
-      const ContentContext& renderer,
+      ContentContext& renderer,
       const Geometry* geometry,
       const std::optional<Matrix>& geometry_transform = std::nullopt) const;
 
@@ -142,7 +142,7 @@ struct Paint {
                                          const Matrix& ctm) const;
 
   std::shared_ptr<FilterContents> WithImageFilter(
-      const ContentContext& renderer,
+      ContentContext& renderer,
       const FilterInput::Variant& input,
       const Matrix& effect_transform,
       Entity::RenderingMode rendering_mode) const;

@@ -146,9 +146,8 @@ void main() {
     });
 
     test('test filtering formatter, deny mode', () {
-      final TextEditingValue actualValue = FilteringTextInputFormatter.deny(
-        RegExp(r'[a-z]'),
-      ).formatEditUpdate(testOldValue, testNewValue);
+      final TextEditingValue actualValue = FilteringTextInputFormatter.deny(RegExp(r'[a-z]'))
+          .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
       // 1(23
@@ -163,9 +162,8 @@ void main() {
     });
 
     test('test filtering formatter, deny mode (deprecated names)', () {
-      final TextEditingValue actualValue = FilteringTextInputFormatter.deny(
-        RegExp(r'[a-z]'),
-      ).formatEditUpdate(testOldValue, testNewValue);
+      final TextEditingValue actualValue = FilteringTextInputFormatter.deny(RegExp(r'[a-z]'))
+          .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
       // 1(23
@@ -210,9 +208,8 @@ void main() {
     });
 
     test('test filtering formatter, allow mode', () {
-      final TextEditingValue actualValue = FilteringTextInputFormatter.allow(
-        RegExp(r'[a-c]'),
-      ).formatEditUpdate(testOldValue, testNewValue);
+      final TextEditingValue actualValue = FilteringTextInputFormatter.allow(RegExp(r'[a-c]'))
+          .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
       // ab(c)
@@ -226,9 +223,8 @@ void main() {
     });
 
     test('test filtering formatter, allow mode (deprecated names)', () {
-      final TextEditingValue actualValue = FilteringTextInputFormatter.allow(
-        RegExp(r'[a-c]'),
-      ).formatEditUpdate(testOldValue, testNewValue);
+      final TextEditingValue actualValue = FilteringTextInputFormatter.allow(RegExp(r'[a-c]'))
+          .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
       // ab(c)
@@ -276,9 +272,8 @@ void main() {
     });
 
     test('test length limiting formatter', () {
-      final TextEditingValue actualValue = LengthLimitingTextInputFormatter(
-        6,
-      ).formatEditUpdate(testOldValue, testNewValue);
+      final TextEditingValue actualValue = LengthLimitingTextInputFormatter(6)
+          .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
       // a1b(2c3)
@@ -296,9 +291,8 @@ void main() {
         selection: TextSelection(baseOffset: 0, extentOffset: 0),
       );
 
-      final TextEditingValue actualValue = LengthLimitingTextInputFormatter(
-        1,
-      ).formatEditUpdate(testOldValue, testNewValue);
+      final TextEditingValue actualValue = LengthLimitingTextInputFormatter(1)
+          .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting the empty string.
       expect(
@@ -317,9 +311,8 @@ void main() {
         ),
       );
 
-      final TextEditingValue actualValue = LengthLimitingTextInputFormatter(
-        2,
-      ).formatEditUpdate(testOldValue, testNewValue);
+      final TextEditingValue actualValue = LengthLimitingTextInputFormatter(2)
+          .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting two characters, with the caret moved to the new end of the
       // string.
@@ -356,9 +349,8 @@ void main() {
         text: '\u{1F984}\u{0020}',
         selection: TextSelection(baseOffset: 1, extentOffset: 1),
       );
-      TextEditingValue actualValue = LengthLimitingTextInputFormatter(
-        1,
-      ).formatEditUpdate(testOldValue, testNewValue);
+      TextEditingValue actualValue = LengthLimitingTextInputFormatter(1)
+          .formatEditUpdate(testOldValue, testNewValue);
       expect(
         actualValue,
         const TextEditingValue(
@@ -373,9 +365,8 @@ void main() {
         text: '\u{0058}\u{0059}',
         selection: TextSelection(baseOffset: 1, extentOffset: 1),
       );
-      actualValue = LengthLimitingTextInputFormatter(
-        1,
-      ).formatEditUpdate(testOldValue, testNewValue);
+      actualValue = LengthLimitingTextInputFormatter(1)
+          .formatEditUpdate(testOldValue, testNewValue);
       expect(
         actualValue,
         const TextEditingValue(
@@ -386,9 +377,8 @@ void main() {
     });
 
     test('test length limiting formatter when selection is off the end', () {
-      final TextEditingValue actualValue = LengthLimitingTextInputFormatter(
-        2,
-      ).formatEditUpdate(testOldValue, testNewValue);
+      final TextEditingValue actualValue = LengthLimitingTextInputFormatter(2)
+          .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
       // a1()
@@ -490,24 +480,21 @@ void main() {
     });
   });
 
-  test(
-    'FilteringTextInputFormatter should return the old value if new value contains non-white-listed character',
-    () {
-      const oldValue = TextEditingValue(text: '12345');
-      const newValue = TextEditingValue(text: '12345@');
+  test('FilteringTextInputFormatter should return the old value if new value contains non-white-listed character', () {
+    const oldValue = TextEditingValue(text: '12345');
+    const newValue = TextEditingValue(text: '12345@');
 
-      final TextInputFormatter formatter = FilteringTextInputFormatter.digitsOnly;
-      final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
+    final TextInputFormatter formatter = FilteringTextInputFormatter.digitsOnly;
+    final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
 
-      // assert that we are passing digits only at the first time
-      expect(oldValue.text, equals('12345'));
-      // The new value is always the oldValue plus a non-digit character (user press @)
-      expect(newValue.text, equals('12345@'));
-      // we expect that the formatted value returns the oldValue only since the newValue does not
-      // satisfy the formatter condition (which is, in this case, digitsOnly)
-      expect(formatted.text, equals('12345'));
-    },
-  );
+    // assert that we are passing digits only at the first time
+    expect(oldValue.text, equals('12345'));
+    // The new value is always the oldValue plus a non-digit character (user press @)
+    expect(newValue.text, equals('12345@'));
+    // we expect that the formatted value returns the oldValue only since the newValue does not
+    // satisfy the formatter condition (which is, in this case, digitsOnly)
+    expect(formatted.text, equals('12345'));
+  });
 
   test('FilteringTextInputFormatter should move the cursor to the right position', () {
     TextEditingValue collapsedValue(String text, int offset) => TextEditingValue(
@@ -554,24 +541,21 @@ void main() {
     expect(formatted.text, equals('12345'));
   });
 
-  test(
-    'WhitelistingTextInputFormatter should return the old value if new value contains non-allowed character',
-    () {
-      const oldValue = TextEditingValue(text: '12345');
-      const newValue = TextEditingValue(text: '12345@');
+  test('WhitelistingTextInputFormatter should return the old value if new value contains non-allowed character', () {
+    const oldValue = TextEditingValue(text: '12345');
+    const newValue = TextEditingValue(text: '12345@');
 
-      final TextInputFormatter formatter = FilteringTextInputFormatter.digitsOnly;
-      final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
+    final TextInputFormatter formatter = FilteringTextInputFormatter.digitsOnly;
+    final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
 
-      // assert that we are passing digits only at the first time
-      expect(oldValue.text, equals('12345'));
-      // The new value is always the oldValue plus a non-digit character (user press @)
-      expect(newValue.text, equals('12345@'));
-      // we expect that the formatted value returns the oldValue only since the newValue does not
-      // satisfy the formatter condition (which is, in this case, digitsOnly)
-      expect(formatted.text, equals('12345'));
-    },
-  );
+    // assert that we are passing digits only at the first time
+    expect(oldValue.text, equals('12345'));
+    // The new value is always the oldValue plus a non-digit character (user press @)
+    expect(newValue.text, equals('12345@'));
+    // we expect that the formatted value returns the oldValue only since the newValue does not
+    // satisfy the formatter condition (which is, in this case, digitsOnly)
+    expect(formatted.text, equals('12345'));
+  });
 
   test('FilteringTextInputFormatter should move the cursor to the right position', () {
     TextEditingValue collapsedValue(String text, int offset) => TextEditingValue(
