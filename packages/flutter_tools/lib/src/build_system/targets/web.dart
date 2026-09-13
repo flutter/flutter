@@ -801,7 +801,11 @@ class Dart2WasmTarget extends Dart2WebTarget {
       logger.printWarning('Wasm dry run findings:');
       logger.printWarning(stdout);
       logger.printWarning(
-        'Consider addressing these issues to enable wasm builds. See docs for more info: '
+        'Consider addressing these issues to enable wasm builds. '
+        'dart:html, dart:js, and legacy JS interop libraries are deprecated and planned for removal '
+        'from the Dart SDK in a future release. Migrate your project to '
+        'package:web and dart:js_interop.\n'
+        'See docs for more info: '
         'https://docs.flutter.dev/platform-integration/web/wasm\n',
       );
       return _DryRunOutcome.findings;
@@ -1001,7 +1005,9 @@ class Dart2WasmTarget extends Dart2WebTarget {
         _kLegacyImportErrorPattern.hasMatch(stderr)) {
       environment.logger.printStatus(
         'Note: WebAssembly compilation failed due to legacy web imports.\n'
-        'Migrate your project from dart:html and package:js to package:web and dart:js_interop.\n'
+        'dart:html, dart:js, and legacy JS interop libraries are deprecated and planned for removal '
+        'from the Dart SDK in a future release. Migrate your project to '
+        'package:web and dart:js_interop.\n'
         '$kWasmErrorsMoreInfo',
       );
     }
