@@ -860,7 +860,11 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext('returns template app icon dirname for images', () async {
-      final String toolsDir = globals.fs.path.join(globals.cache.flutterRoot, 'packages', 'flutter_tools');
+      final String toolsDir = globals.fs.path.join(
+        globals.cache.flutterRoot,
+        'packages',
+        'flutter_tools',
+      );
       final String packageConfigPath = globals.fs.path.join(
         toolsDir,
         '.dart_tool',
@@ -943,7 +947,11 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext('returns template launch image dirname for images', () async {
-      final String toolsDir = globals.fs.path.join(globals.cache.flutterRoot, 'packages', 'flutter_tools');
+      final String toolsDir = globals.fs.path.join(
+        globals.cache.flutterRoot,
+        'packages',
+        'flutter_tools',
+      );
       final String packageConfigPath = globals.fs.path.join(
         toolsDir,
         '.dart_tool',
