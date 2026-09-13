@@ -320,46 +320,43 @@ void main() {
     expect(result.started, true);
   });
 
-  testWithoutContext(
-    'startApp passes fallback aot-vmservice-shared-library-name basename in profile mode when artifact does not exist on host',
-    () async {
-      final fileSystem = MemoryFileSystem.test();
-      final artifacts = FakeArtifacts();
-      final String dylibPath = artifacts.getArtifactPath(
-        Artifact.vmserviceSharedLibrary,
-        platform: TargetPlatform.tester,
-        mode: BuildMode.profile,
-      );
-      final String dylibBasename = fileSystem.path.basename(dylibPath);
+  testWithoutContext('startApp passes fallback aot-vmservice-shared-library-name basename in profile mode when artifact does not exist on host', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final artifacts = FakeArtifacts();
+    final String dylibPath = artifacts.getArtifactPath(
+      Artifact.vmserviceSharedLibrary,
+      platform: TargetPlatform.tester,
+      mode: BuildMode.profile,
+    );
+    final String dylibBasename = fileSystem.path.basename(dylibPath);
 
-      final completer = Completer<void>();
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: const <String>['profile'],
-          stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
-          completer: completer,
-          environment: <String, String>{
-            'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
-            'FLUTTER_ENGINE_SWITCH_2': 'aot-vmservice-shared-library-name=$dylibBasename',
-            'FLUTTER_ENGINE_SWITCHES': '2',
-          },
-        ),
-      ]);
-      final FakeDesktopDevice device = setUpDesktopDevice(
-        fileSystem: fileSystem,
-        artifacts: artifacts,
-        processManager: processManager,
-      );
-      final package = FakeApplicationPackage();
-      final LaunchResult result = await device.startApp(
-        package,
-        prebuiltApplication: true,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
-      );
+    final completer = Completer<void>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['profile'],
+        stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
+        completer: completer,
+        environment: <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'aot-vmservice-shared-library-name=$dylibBasename',
+          'FLUTTER_ENGINE_SWITCHES': '2',
+        },
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      processManager: processManager,
+    );
+    final package = FakeApplicationPackage();
+    final LaunchResult result = await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
+    );
 
-      expect(result.started, true);
-    },
-  );
+    expect(result.started, true);
+  });
 
   testWithoutContext('Port forwarder is a no-op', () async {
     final FakeDesktopDevice device = setUpDesktopDevice();
