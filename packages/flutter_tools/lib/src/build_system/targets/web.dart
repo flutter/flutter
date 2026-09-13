@@ -41,6 +41,10 @@ import 'native_assets.dart';
 const String _kBundledFallbackRobotoFamily = 'Roboto';
 const String _kBundledFallbackRobotoAsset = 'fonts/fallback/Roboto-Regular.ttf';
 const String _kFontManifestJsonFile = 'FontManifest.json';
+const String _kLegacyWebDeprecationWarning =
+    'dart:html, dart:js, and legacy JS interop libraries are deprecated and planned for removal '
+    'from the Dart SDK in a future release. Migrate your project to '
+    'package:web and dart:js_interop.';
 
 /// Generates an entry point for a web target.
 // Keep this in sync with build_runner/resident_web_runner.dart
@@ -802,9 +806,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       logger.printWarning(stdout);
       logger.printWarning(
         'Consider addressing these issues to enable wasm builds. '
-        'dart:html, dart:js, and legacy JS interop libraries are deprecated and planned for removal '
-        'from the Dart SDK in a future release. Migrate your project to '
-        'package:web and dart:js_interop.\n'
+        '$_kLegacyWebDeprecationWarning\n'
         'See docs for more info: '
         'https://docs.flutter.dev/platform-integration/web/wasm\n',
       );
@@ -1005,9 +1007,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
         _kLegacyImportErrorPattern.hasMatch(stderr)) {
       environment.logger.printStatus(
         'Note: WebAssembly compilation failed due to legacy web imports.\n'
-        'dart:html, dart:js, and legacy JS interop libraries are deprecated and planned for removal '
-        'from the Dart SDK in a future release. Migrate your project to '
-        'package:web and dart:js_interop.\n'
+        '$_kLegacyWebDeprecationWarning\n'
         '$kWasmErrorsMoreInfo',
       );
     }
