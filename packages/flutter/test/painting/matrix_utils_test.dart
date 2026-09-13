@@ -171,6 +171,59 @@ void main() {
       );
     }
   });
+
+  test(
+    'MatrixUtils.computeEffectiveTransform returns transform when origin and alignment are null',
+    () {
+      final transform = Matrix4.translationValues(10.0, 20.0, 0.0);
+      final Matrix4 effective = MatrixUtils.computeEffectiveTransform(
+        transform: transform,
+        size: const Size(100.0, 100.0),
+      );
+      expect(effective, same(transform));
+    },
+  );
+
+  test('MatrixUtils.computeEffectiveTransform applies origin and alignment', () {
+    final transform = Matrix4.rotationZ(pi / 2.0);
+    final Matrix4 effective = MatrixUtils.computeEffectiveTransform(
+      transform: transform,
+      size: const Size(100.0, 100.0),
+      alignment: Alignment.center,
+    );
+    // A point at (0, 0) rotated 90 degrees around center (50, 50) goes to (100, 0).
+    final Offset transformed = MatrixUtils.transformPoint(effective, Offset.zero);
+    expect(transformed.dx, closeTo(100.0, 0.0001));
+    expect(transformed.dy, closeTo(0.0, 0.0001));
+  });
+
+  test('MatrixUtils.computeEffectiveTransform applies origin offset', () {
+    final transform = Matrix4.rotationZ(pi / 2.0);
+    final Matrix4 effective = MatrixUtils.computeEffectiveTransform(
+      transform: transform,
+      size: const Size(100.0, 100.0),
+      origin: const Offset(50.0, 50.0),
+    );
+    // A point at (0, 0) rotated 90 degrees around origin (50, 50) goes to (100, 0).
+    final Offset transformed = MatrixUtils.transformPoint(effective, Offset.zero);
+    expect(transformed.dx, closeTo(100.0, 0.0001));
+    expect(transformed.dy, closeTo(0.0, 0.0001));
+  });
+
+  test('MatrixUtils.computeEffectiveTransform resolves directional alignment', () {
+    final transform = Matrix4.rotationZ(pi / 2.0);
+    final Matrix4 effectiveRtl = MatrixUtils.computeEffectiveTransform(
+      transform: transform,
+      size: const Size(100.0, 100.0),
+      alignment: AlignmentDirectional.topStart,
+      textDirection: TextDirection.rtl,
+    );
+    // In RTL, AlignmentDirectional.topStart is Alignment.topRight (1.0, -1.0) -> point (100, 0).
+    // Rotating (0, 0) 90 deg around (100, 0) gives (100, -100).
+    final Offset transformed = MatrixUtils.transformPoint(effectiveRtl, Offset.zero);
+    expect(transformed.dx, closeTo(100.0, 0.0001));
+    expect(transformed.dy, closeTo(-100.0, 0.0001));
+  });
 }
 
 // Produces the same computation as `MatrixUtils.transformPoint` but it uses
