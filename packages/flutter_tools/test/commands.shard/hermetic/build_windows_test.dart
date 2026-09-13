@@ -239,8 +239,7 @@ void main() {
       expect(
         createTestCommandRunner(command).run(const <String>['windows', '--no-pub']),
         throwsToolExit(
-          message:
-              '"build windows" is not currently supported. To enable, run "flutter config --enable-windows-desktop".',
+          message: '"build windows" is not currently supported. To enable, run "flutter config --enable-windows-desktop".',
         ),
       );
     },
@@ -626,9 +625,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       ]);
 
       final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['windows', '--profile', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['windows', '--profile', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -650,9 +648,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       ]);
 
       final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['windows', '--release', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['windows', '--release', '--no-pub']);
       expect(testLogger.statusText, contains(r'✓ Built build\windows\x64\runner\Release'));
     },
     overrides: <Type, Generator>{
@@ -676,9 +673,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       ]);
 
       final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['windows', '--release', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['windows', '--release', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -747,9 +743,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       ]);
 
       final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['windows', '--no-pub', '--build-name=1.2.3', '--build-number=4']);
+      await createTestCommandRunner(command)
+          .run(const <String>['windows', '--no-pub', '--build-name=1.2.3', '--build-number=4']);
 
       final File cmakeConfig = fileSystem.currentDirectory
           .childDirectory('windows')
@@ -796,9 +791,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       ]);
 
       final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['windows', '--no-pub', '--build-name=1.2.3']);
+      await createTestCommandRunner(command)
+          .run(const <String>['windows', '--no-pub', '--build-name=1.2.3']);
 
       final File cmakeConfig = fileSystem.currentDirectory
           .childDirectory('windows')
@@ -845,9 +839,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       ]);
 
       final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['windows', '--no-pub', '--build-number=4']);
+      await createTestCommandRunner(command)
+          .run(const <String>['windows', '--no-pub', '--build-number=4']);
 
       final File cmakeConfig = fileSystem.currentDirectory
           .childDirectory('windows')
@@ -894,9 +887,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       ]);
 
       final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['windows', '--no-pub', '--build-name=1.2.3', '--build-number=4']);
+      await createTestCommandRunner(command)
+          .run(const <String>['windows', '--no-pub', '--build-name=1.2.3', '--build-number=4']);
 
       final File cmakeConfig = fileSystem.currentDirectory
           .childDirectory('windows')
@@ -939,9 +931,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       ]);
 
       final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['windows', '--no-pub', '--build-name=1.2.3', '--build-number=hello']);
+      await createTestCommandRunner(command)
+          .run(const <String>['windows', '--no-pub', '--build-name=1.2.3', '--build-number=hello']);
 
       final File cmakeConfig = fileSystem.currentDirectory
           .childDirectory('windows')
@@ -993,9 +984,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       ]);
 
       final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['windows', '--no-pub', '--build-name=1.2.3', '--build-number=4.5']);
+      await createTestCommandRunner(command)
+          .run(const <String>['windows', '--no-pub', '--build-name=1.2.3', '--build-number=4.5']);
 
       final File cmakeConfig = fileSystem.currentDirectory
           .childDirectory('windows')
@@ -1100,9 +1090,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       ]);
 
       final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['windows', '--no-pub', '--analyze-size']);
+      await createTestCommandRunner(command)
+          .run(const <String>['windows', '--no-pub', '--analyze-size']);
 
       expect(
         testLogger.statusText,
