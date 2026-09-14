@@ -1957,20 +1957,23 @@ impl TextInputSession {
         if !changed {
             return None;
         }
-        self.editing_state.text = state.text;
-        self.editing_state.selection_base = selection_base;
-        self.editing_state.selection_extent = selection_extent;
-        self.editing_state.selection_affinity = TextAffinity::Downstream;
-        self.editing_state.selection_is_directional = false;
-        self.editing_state.composing_base = composing_base;
-        self.editing_state.composing_extent = composing_extent;
-        if !self.editing_state.validate() {
+        let candidate = TextEditingState {
+            text: state.text,
+            selection_base,
+            selection_extent,
+            selection_affinity: TextAffinity::Downstream,
+            selection_is_directional: false,
+            composing_base,
+            composing_extent,
+        };
+        if !candidate.validate() {
             // GameActivity's spans are Java/UTF-16-index-based like Flutter's
             // own model, but defend against a malformed report the same way
             // the Wayland/X11 IME and raw-key paths already validate at
             // their boundaries rather than forwarding a corrupt range.
             return None;
         }
+        self.editing_state = candidate;
         Some(self.encode_update(client))
     }
 

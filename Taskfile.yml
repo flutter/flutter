@@ -13,13 +13,32 @@ vars:
   RESIZE_ITERATIONS: 500
   LIFECYCLE_ITERATIONS: 20
   TEXTURE_LIFECYCLE_ITERATIONS: 40
+  RUST_SHELL_DIR: '{{.ENGINE_SRC}}/flutter/shell/platform/rust'
 
 tasks:
   fmt:
-    desc: Run the engine formatting checks (requires depot_tools and Python <=3.12 for yapf)
+    desc: Run the engine formatting checks (requires depot_tools and Python <=3.12 for yapf) and format the Rust shell.
+    cmds:
+      - task: fmt-engine
+      - task: fmt-rust
+
+  fmt-engine:
+    internal: true
     dir: engine/src/flutter
     cmds:
       - PATH="{{.PY312_BIN}}:{{.DEPOT_TOOLS}}:$PATH" ./ci/format.sh
+
+  fmt-rust:
+    desc: Format all Rust shell crates with cargo fmt.
+    dir: '{{.RUST_SHELL_DIR}}'
+    cmds:
+      - cargo fmt --all
+
+  fix-rust-lints:
+    desc: Auto-fix cargo clippy lints across all Rust shell packages.
+    dir: '{{.RUST_SHELL_DIR}}'
+    cmds:
+      - cargo clippy --workspace --all-targets --fix --allow-dirty --allow-staged
 
   push:
     desc: Push changes (requires depot_tools in PATH)

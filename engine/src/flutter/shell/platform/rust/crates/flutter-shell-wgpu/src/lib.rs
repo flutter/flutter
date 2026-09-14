@@ -1281,6 +1281,11 @@ mod vulkan {
                 // already gone (e.g. Android destroyed the window before
                 // Impeller finished this frame); presenting would touch a
                 // dead swapchain. Drop the frame instead of submitting it.
+                if let Some(device) =
+                    unsafe { self.context.device.as_hal::<wgpu::hal::vulkan::Api>() }
+                {
+                    let _ = unsafe { device.raw_device().device_wait_idle() };
+                }
                 self.destroy_frame_sync(pending.sync);
                 return false;
             }

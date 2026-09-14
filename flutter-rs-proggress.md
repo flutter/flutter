@@ -714,10 +714,12 @@ same way Linux's own flutter_tools integration followed its native runner.
   the kernel dill `flutter build bundle --release --target-platform
   android-arm64` produced, using the locally built `out/android_release_arm64`
   engine and `out/host_release`'s frontend server via `--local-engine`.
-- Built a release-signed APK (`android_shell_app`'s Gradle project, JDK from
-  Android Studio's bundled JBR since the system default was too new for this
-  Gradle/AGP version) with both `libflutter_shell_android_runner.so` and
-  `libflutter_rust_engine.so` staged into `jniLibs/arm64-v8a/`, installed it
+- Built a release-variant APK signed with the debug key through the release
+  build type's signing configuration (`android_shell_app`'s Gradle project,
+  JDK from Android Studio's bundled JBR since the system default was too new
+  for this Gradle/AGP version) with both
+  `libflutter_shell_android_runner.so` and `libflutter_rust_engine.so` staged
+  into `jniLibs/arm64-v8a/`, installed it
   on a physical Android device over adb, and adb-pushed `flutter_assets/`,
   `app.so`, and `icudtl.dat` into its private files directory — deliberately
   without a `kernel_blob.bin`, so a successful boot could only mean the AOT

@@ -49,10 +49,12 @@ def main() -> None:
   manifest_path = Path(args.manifest_path).resolve()
   output_path = Path(args.output).resolve()
   cargo_target_dir = (
-      Path(args.cargo_target_dir).resolve()
-      if args.cargo_target_dir else output_path.parent / "cargo-target")
-  profile_dir = ("release" if os.environ.get("FLUTTER_RUNTIME_MODE") == "release" else "debug")
-  artifact_dir = cargo_target_dir / (args.target or "") / profile_dir
+      Path(args.cargo_target_dir).resolve() if args.cargo_target_dir else output_path.parent /
+      "cargo-target"
+  )
+  profile_dir = os.environ.get("FLUTTER_RUNTIME_MODE", "debug")
+  cargo_profile_dir = "release" if profile_dir in ("profile", "release") else "debug"
+  artifact_dir = cargo_target_dir / (args.target or "") / cargo_profile_dir
   extension = "so" if args.crate_type == "cdylib" else "a"
   prefix = "" if extension == "so" and os.name == "nt" else "lib"
   artifact = artifact_dir / (prefix + args.package.replace("-", "_") + "." + extension)
@@ -71,7 +73,7 @@ def main() -> None:
       "--package",
       args.package,
   ]
-  if profile_dir == "release":
+  if profile_dir in ("profile", "release"):
     command.append("--release")
   if args.target:
     command += ["--target", args.target]
@@ -88,7 +90,8 @@ def main() -> None:
       environment[f"CARGO_TARGET_{cargo_env_target}_LINKER"] = android_clang
     if args.android_clang_cxx:
       environment[f"CXX_{args.target.replace('-', '_')}"] = str(
-          Path(args.android_clang_cxx).resolve())
+          Path(args.android_clang_cxx).resolve()
+      )
     if args.android_ar:
       android_ar = str(Path(args.android_ar).resolve())
       environment[f"AR_{args.target.replace('-', '_')}"] = android_ar
