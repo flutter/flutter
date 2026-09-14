@@ -403,6 +403,11 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureImpeller(
     return nullptr;
   }
 
+  if (texture_desc->width == 0 || texture_desc->height == 0) {
+    texture_desc->width = size.width();
+    texture_desc->height = size.height();
+  }
+
   auto& impeller_context =
       impeller::ContextVK::Cast(*aiks_context->GetContext());
 
