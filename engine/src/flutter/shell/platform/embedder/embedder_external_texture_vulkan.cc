@@ -79,14 +79,14 @@ EmbedderExternalTextureSourceVulkan::EmbedderExternalTextureSourceVulkan(
     // Figure out how to perform YUV conversions.
     yuv_conversion = CreateYUVConversion(context, embedder_desc);
     if (!yuv_conversion || !yuv_conversion->IsValid()) {
-      VALIDATION_LOG << "Fail to create yuv conversion";
+      VALIDATION_LOG << "Failed to create yuv conversion";
       return;
     }
   }
 
   // Create image view for the newly created image.
   if (!CreateTextureImageView(device, embedder_desc, yuv_conversion)) {
-    VALIDATION_LOG << "Fail to create texture image view";
+    VALIDATION_LOG << "Failed to create texture image view";
     return;
   }
 
@@ -260,7 +260,6 @@ EmbedderExternalTextureSourceVulkan::GetYUVConversion() const {
 // --- EmbedderExternalTextureVulkan ---
 
 EmbedderExternalTextureVulkan::EmbedderExternalTextureVulkan(
-
     int64_t texture_identifier,
     const ExternalTextureCallback& callback)
     : Texture(texture_identifier), external_texture_callback_(callback) {
@@ -430,7 +429,9 @@ EmbedderExternalTextureVulkan::~EmbedderExternalTextureVulkan() = default;
 void EmbedderExternalTextureVulkan::OnGrContextCreated() {}
 
 // |flutter::Texture|
-void EmbedderExternalTextureVulkan::OnGrContextDestroyed() {}
+void EmbedderExternalTextureVulkan::OnGrContextDestroyed() {
+  last_image_ = nullptr;
+}
 
 // |flutter::Texture|
 void EmbedderExternalTextureVulkan::MarkNewFrameAvailable() {

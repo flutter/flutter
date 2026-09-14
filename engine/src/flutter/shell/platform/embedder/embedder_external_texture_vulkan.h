@@ -62,7 +62,7 @@ class EmbedderExternalTextureSourceVulkan final
   impeller::vk::Image texture_image_;
   impeller::vk::UniqueImageView texture_image_view_ = {};
   VoidCallback destruction_callback_;
-  void* user_data_;
+  void* user_data_ = nullptr;
   EmbedderExternalTextureSourceVulkan(
       const EmbedderExternalTextureSourceVulkan&) = delete;
   EmbedderExternalTextureSourceVulkan& operator=(
