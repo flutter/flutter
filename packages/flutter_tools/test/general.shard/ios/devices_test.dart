@@ -800,47 +800,42 @@ void main() {
         expect(() => device.takeScreenshot(outputFile), throwsToolExit());
       }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))});
 
-      testUsingContext(
-        'takeScreenshot throws a ToolExit with actionable message when CoreDevice is locked/unreachable',
-        () async {
-          device = IOSDevice(
-            'device-123',
-            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-            fileSystem: fileSystem,
-            fileSystemUtils: fileSystemUtils,
-            logger: logger,
-            platform: macPlatform,
-            iosDeploy: iosDeploy,
-            analytics: FakeAnalytics(),
-            iMobileDevice: iMobileDevice,
-            coreDeviceControl: fakeCoreDeviceControl,
-            coreDeviceLauncher: coreDeviceLauncher,
-            xcodeDebug: xcodeDebug,
-            name: 'iPhone 1',
-            sdkVersion: '17.0',
-            cpuArch: CpuArch.arm64,
-            connectionInterface: DeviceConnectionInterface.attached,
-            isConnected: true,
-            isPaired: true,
-            devModeEnabled: true,
-            isCoreDevice: true,
-            processUtils: processUtils,
-            xcode: null,
-          );
+      testUsingContext('takeScreenshot throws a ToolExit with actionable message when CoreDevice is locked/unreachable', () async {
+        device = IOSDevice(
+          'device-123',
+          iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+          fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
+          logger: logger,
+          platform: macPlatform,
+          iosDeploy: iosDeploy,
+          analytics: FakeAnalytics(),
+          iMobileDevice: iMobileDevice,
+          coreDeviceControl: fakeCoreDeviceControl,
+          coreDeviceLauncher: coreDeviceLauncher,
+          xcodeDebug: xcodeDebug,
+          name: 'iPhone 1',
+          sdkVersion: '17.0',
+          cpuArch: CpuArch.arm64,
+          connectionInterface: DeviceConnectionInterface.attached,
+          isConnected: true,
+          isPaired: true,
+          devModeEnabled: true,
+          isCoreDevice: true,
+          processUtils: processUtils,
+          xcode: null,
+        );
 
-          fakeCoreDeviceControl.takeScreenshotException = Exception(
-            'ERROR: A connection to this device could not be established. (com.apple.dt.CoreDeviceError error 4000 (0xFA0))',
-          );
-          expect(
-            () => device.takeScreenshot(outputFile),
-            throwsToolExit(
-              message:
-                  'Failed to establish a connection to the device. Please make sure the device is available and try again.',
-            ),
-          );
-        },
-        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))},
-      );
+        fakeCoreDeviceControl.takeScreenshotException = Exception(
+          'ERROR: A connection to this device could not be established. (com.apple.dt.CoreDeviceError error 4000 (0xFA0))',
+        );
+        expect(
+          () => device.takeScreenshot(outputFile),
+          throwsToolExit(
+            message: 'Failed to establish a connection to the device. Please make sure the device is available and try again.',
+          ),
+        );
+      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))});
 
       testUsingContext('takeScreenshot throws ToolExit on CoreDevice with Xcode < 27', () async {
         device = IOSDevice(
