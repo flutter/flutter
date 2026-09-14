@@ -1770,8 +1770,6 @@ mixin WidgetsBinding
   /// Do not use this API in production applications or packages published to
   /// pub.dev. Flutter will make breaking changes to this API, even in patch
   /// versions.
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
   @protected
   WindowingOwner createWindowingOwner() => createDefaultWindowingOwner();
 
