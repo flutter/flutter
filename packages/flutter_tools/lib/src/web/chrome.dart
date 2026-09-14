@@ -187,7 +187,13 @@ class ChromiumLauncher {
       if (userDataDirFlag != null) {
         final Directory userDataDir = _fileSystem.directory(userDataDirFlag.split('=')[1]);
         // Ensure custom profile path exists before Chrome launch.
-        userDataDir.createSync(recursive: true);
+        try {
+          userDataDir.createSync(recursive: true);
+        } on FileSystemException catch (err) {
+          throwToolExit(
+            'Failed to create custom user data directory at "${userDataDir.path}": $err',
+          );
+        }
         webBrowserFlags.remove(userDataDirFlag);
         return (directory: userDataDir, isCustom: true);
       }
