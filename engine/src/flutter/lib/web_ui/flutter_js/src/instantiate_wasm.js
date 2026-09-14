@@ -12,12 +12,12 @@
 export const createWasmInstantiator = (url, filename) => {
   const wasmHashes = window._flutter?.buildConfig?.wasmHashes;
   let hash = wasmHashes?.[filename];
-  if (!hash && filename.includes('/')) {
+  if (!hash && filename?.includes('/')) {
     const basename = filename.split('/').pop();
     hash = wasmHashes?.[basename];
   }
 
-  const supportsCrossOriginStorage = 'crossOriginStorage' in navigator && 'requestFileHandles' in navigator.crossOriginStorage;
+  const supportsCrossOriginStorage = !!navigator.crossOriginStorage?.requestFileHandle;
   if (supportsCrossOriginStorage) {
     console.log('Cross-Origin Storage is supported. See https://wicg.github.io/cross-origin-storage/ for more details.');
   }
@@ -32,16 +32,14 @@ export const createWasmInstantiator = (url, filename) => {
   const tryGettingResponseFromCrossOriginStorage = async (hash) => {
     const cosHash = { algorithm: 'SHA-256', value: hash };
     try {
-      const [handle] = await navigator.crossOriginStorage.requestFileHandles([cosHash]);
+      const handle = await navigator.crossOriginStorage.requestFileHandle(cosHash);
       const fileBlob = await handle.getFile();
       return new Response(fileBlob, {
         headers: { 'Content-Type': 'application/wasm' },
       });
-    } catch (err) {
-      if (err.name === 'NotAllowedError') {
-        console.warn(`Not allowed to retrieve ${filename} (hash: ${hash}).`);
-      } else if (err.name !== 'NotFoundError') {
-        console.warn(`Unexpected error during retrieval of ${filename} (hash: ${hash}).`, err);
+    } catch(err) {
+      if (err && err.name !== 'NotFoundError' && err.name !== 'NotAllowedError') {
+        console.warn('Unexpected error during retrieval of ' + filename + ' (hash: ' + hash + ').', err);
       }
     }
   }
@@ -62,7 +60,7 @@ export const createWasmInstantiator = (url, filename) => {
       (async () => {
         try {
           const blob = await clonedResponse.blob();
-          const [handle] = await navigator.crossOriginStorage.requestFileHandles([cosHash], { create: true });
+          const handle = await navigator.crossOriginStorage.requestFileHandle(cosHash, { create: true, origins: '*' });
           const writableStream = await handle.createWritable();
           await writableStream.write(blob);
           await writableStream.close();
