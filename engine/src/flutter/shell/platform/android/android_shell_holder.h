@@ -94,6 +94,8 @@ class AndroidShellHolder {
 
   bool IsSurfaceControlEnabled();
 
+  void SetHasActivePlatformViews(bool has_views);
+
   Rasterizer::Screenshot Screenshot(Rasterizer::ScreenshotType type,
                                     bool base64_encode);
 
