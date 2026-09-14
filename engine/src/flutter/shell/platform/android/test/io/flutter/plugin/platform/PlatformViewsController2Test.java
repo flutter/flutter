@@ -906,72 +906,49 @@ public class PlatformViewsController2Test {
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
-  public void createFlutterPlatformViewEagerlyAttachesToFlutterView() {
+  public void itInformsMutatorViewWhenGestureIsRejected() {
     PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
-    PlatformViewsController2 controller = new PlatformViewsController2();
-    controller.setRegistry(registryImpl);
+    PlatformViewsController2 platformViewsController = new PlatformViewsController2();
+    platformViewsController.setRegistry(registryImpl);
+
+    int platformViewId = 0;
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
     FlutterJNI jni = new FlutterJNI();
-    FlutterView flutterView = attach(jni, controller);
+    jni.attachToNative();
+    attach(jni, platformViewsController);
 
-    PlatformViewRegistry registry = controller.getRegistry();
-    registry.registerViewFactory(
-        CountingPlatformView.VIEW_TYPE_ID,
-        new PlatformViewFactory(StandardMessageCodec.INSTANCE) {
-          @Override
-          public PlatformView create(Context context, int viewId, Object args) {
-            return new CountingPlatformView(context);
-          }
-        });
+    createPlatformView(jni, platformViewsController, platformViewId, "testType");
 
-    int viewId = 0;
-    final PlatformViewCreationRequest request =
-        PlatformViewCreationRequest.createHCPPRequest(
-            viewId, CountingPlatformView.VIEW_TYPE_ID, View.LAYOUT_DIRECTION_LTR, null);
-    PlatformView pView = controller.createFlutterPlatformView(request);
-    assertNotNull(pView);
-    assertNotNull(pView.getView().getParent());
-    assertTrue(pView.getView().getParent() instanceof FlutterMutatorView);
-    FlutterMutatorView mutatorView = (FlutterMutatorView) pView.getView().getParent();
-    assertEquals(flutterView, mutatorView.getParent());
-  }
+    assertTrue(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
 
-  @Test
-  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
-  public void attachToViewEagerlyAttachesPreExistingPlatformViews() {
-    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
-    PlatformViewsController2 controller = new PlatformViewsController2();
-    controller.setRegistry(registryImpl);
-    final Context context = ApplicationProvider.getApplicationContext();
-    FlutterJNI jni = new FlutterJNI();
-    final DartExecutor executor = new DartExecutor(jni, mock(AssetManager.class));
-    executor.onAttachedToJNI();
-    controller.attach(context, executor);
+    FlutterMutatorView parentView = platformViewsController.getPlatformViewParent(platformViewId);
+    assertNotNull(parentView);
+    assertFalse(parentView.getFlutterWonGesture());
 
-    PlatformViewRegistry registry = controller.getRegistry();
-    registry.registerViewFactory(
-        CountingPlatformView.VIEW_TYPE_ID,
-        new PlatformViewFactory(StandardMessageCodec.INSTANCE) {
-          @Override
-          public PlatformView create(Context context, int viewId, Object args) {
-            return new CountingPlatformView(context);
-          }
-        });
+    // Without active gesture, rejectGesture has no effect.
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, 100L);
+    assertFalse(parentView.getFlutterWonGesture());
 
-    int viewId = 0;
-    final PlatformViewCreationRequest request =
-        PlatformViewCreationRequest.createHCPPRequest(
-            viewId, CountingPlatformView.VIEW_TYPE_ID, View.LAYOUT_DIRECTION_LTR, null);
-    PlatformView pView = controller.createFlutterPlatformView(request);
-    assertNotNull(pView);
-    assertNull(pView.getView().getParent());
+    // Start active gesture with downTime 100.
+    final MotionEvent downEvent =
+        MotionEvent.obtain(100, 100, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
+    final MotionEventTracker.MotionEventId eventId =
+        MotionEventTracker.getInstance().track(downEvent);
+    parentView.onTouchEvent(downEvent);
 
-    FlutterView flutterView = new FlutterView(context, new FlutterSurfaceView(context));
-    controller.attachToView(flutterView);
+    // Mismatched gestureId does not set flutterWonGesture.
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, 99999L);
+    assertFalse(parentView.getFlutterWonGesture());
 
-    assertNotNull(pView.getView().getParent());
-    assertTrue(pView.getView().getParent() instanceof FlutterMutatorView);
-    FlutterMutatorView mutatorView = (FlutterMutatorView) pView.getView().getParent();
-    assertEquals(flutterView, mutatorView.getParent());
+    // Matching gestureId sets flutterWonGesture.
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, eventId.getId());
+    assertTrue(parentView.getFlutterWonGesture());
   }
 
   private static ByteBuffer encodeMethodCall(MethodCall call) {
@@ -1030,6 +1007,24 @@ public class PlatformViewsController2Test {
     jni.handlePlatformMessage(
         "flutter/platform_views_2",
         encodeMethodCall(platformDisposeMethodCall),
+        /*replyId=*/ 0,
+        /*messageData=*/ 0);
+  }
+
+  private static void rejectGesturePlatformView(
+      FlutterJNI jni,
+      PlatformViewsController2 platformViewsController,
+      int platformViewId,
+      long gestureId) {
+    final Map<String, Object> args = new HashMap<>();
+    args.put("id", platformViewId);
+    args.put("gestureId", gestureId);
+
+    final MethodCall platformRejectGestureMethodCall = new MethodCall("rejectGesture", args);
+
+    jni.handlePlatformMessage(
+        "flutter/platform_views_2",
+        encodeMethodCall(platformRejectGestureMethodCall),
         /*replyId=*/ 0,
         /*messageData=*/ 0);
   }
