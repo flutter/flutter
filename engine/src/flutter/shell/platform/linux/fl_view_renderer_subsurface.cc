@@ -275,36 +275,49 @@ static void fl_view_renderer_subsurface_present_layers(
     return;
   }
 
-  if (layers_count == 0) {
-    g_mutex_unlock(&self->frame_mutex);
-    return;
+  size_t width, height;
+  if (layers_count > 0) {
+    width = layers[0]->size.width;
+    height = layers[0]->size.height;
+  } else if (self->framebuffer != nullptr) {
+    // A frame with nothing to rasterize, e.g. everything painted was fully
+    // transparent, has no layers and so no size. Keep the current size and
+    // present the frame, which is cleared when the layers are composited
+    // below, so the previous frame is not left on screen.
+    width = fl_framebuffer_get_width(self->framebuffer);
+    height = fl_framebuffer_get_height(self->framebuffer);
+  } else {
+    // Nothing has been rendered yet, so there is nothing to clear. The GTK
+    // thread is still notified below so the window is shown.
+    width = 0;
+    height = 0;
   }
 
-  size_t width = layers[0]->size.width;
-  size_t height = layers[0]->size.height;
+  if (width > 0 && height > 0) {
+    // Recreate the framebuffer if the frame size has changed. The subsurface's
+    // EGL context shares resources with the engine, so the frame texture is
+    // read directly and doesn't need to be shareable or copied via CPU memory.
+    if (self->framebuffer == nullptr ||
+        fl_framebuffer_get_width(self->framebuffer) != width ||
+        fl_framebuffer_get_height(self->framebuffer) != height) {
+      GLint general_format =
+          fl_compositor_opengl_get_frame_format(layers, layers_count);
+      g_clear_object(&self->framebuffer);
+      self->framebuffer =
+          fl_framebuffer_new(general_format, width, height, FALSE);
+    }
 
-  // Recreate the framebuffer if the frame size has changed. The subsurface's
-  // EGL context shares resources with the engine, so the frame texture is read
-  // directly and doesn't need to be shareable or copied via CPU memory.
-  if (self->framebuffer == nullptr ||
-      fl_framebuffer_get_width(self->framebuffer) != width ||
-      fl_framebuffer_get_height(self->framebuffer) != height) {
-    GLint general_format =
-        fl_compositor_opengl_get_frame_format(layers, layers_count);
-    g_clear_object(&self->framebuffer);
-    self->framebuffer =
-        fl_framebuffer_new(general_format, width, height, FALSE);
+    // Bind the target framebuffer so the compositor draws into it.
+    GLint saved_draw_framebuffer_binding;
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &saved_draw_framebuffer_binding);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
+                      fl_framebuffer_get_id(self->framebuffer));
+
+    fl_compositor_opengl_composite_layers(self->compositor, layers,
+                                          layers_count);
+
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_draw_framebuffer_binding);
   }
-
-  // Bind the target framebuffer so the compositor draws into it.
-  GLint saved_draw_framebuffer_binding;
-  glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &saved_draw_framebuffer_binding);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
-                    fl_framebuffer_get_id(self->framebuffer));
-
-  fl_compositor_opengl_composite_layers(self->compositor, layers, layers_count);
-
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_draw_framebuffer_binding);
 
   // The frame is presented below using the subsurface's own OpenGL context.
   // Sharing a texture between contexts requires the rendering to have completed
@@ -322,9 +335,11 @@ static void fl_view_renderer_subsurface_present_layers(
   // Present the composited frame directly to the subsurface using its own EGL
   // context. This reads the engine's frame texture directly, as the subsurface
   // context shares resources with the engine.
-  fl_subsurface_egl_present(self->egl,
-                            fl_framebuffer_get_texture_id(self->framebuffer),
-                            width, height, fence);
+  if (width > 0 && height > 0) {
+    fl_subsurface_egl_present(self->egl,
+                              fl_framebuffer_get_texture_id(self->framebuffer),
+                              width, height, fence);
+  }
 
   g_mutex_unlock(&self->frame_mutex);
 
