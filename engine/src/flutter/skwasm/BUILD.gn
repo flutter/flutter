@@ -61,15 +61,20 @@ template("skwasm_variant") {
 
     inputs = [ rebase_path("library_skwasm_support.js") ]
     if (invoker.is_heavy) {
-      sources += [
-        "animated_image.cc",
-        "text/paragraph_builder_builtin_icu.cc",
-      ]
+      sources += [ "text/paragraph_builder_builtin_icu.cc" ]
     } else {
-      sources += [
-        "animated_image_stub.cc",
-        "text/paragraph_builder_client_icu.cc",
-      ]
+      sources += [ "text/paragraph_builder_client_icu.cc" ]
+    }
+
+    # TODO(gaaclarke): wimp_heavy should have builtin animated image codecs to
+    # match skwasm_heavy, but SkAnimatedImage produces an SkImage which Impeller
+    # can't render. Stubbed out until animatedImage_getCurrentFrame has an
+    # Impeller-backed implementation.
+    # https://github.com/flutter/flutter/issues/187212
+    if (invoker.is_heavy && !invoker.use_impeller) {
+      sources += [ "animated_image.cc" ]
+    } else {
+      sources += [ "animated_image_stub.cc" ]
     }
 
     if (invoker.use_impeller) {

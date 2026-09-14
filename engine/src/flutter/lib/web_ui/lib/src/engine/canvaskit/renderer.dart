@@ -285,6 +285,9 @@ class CanvasKitRenderer extends Renderer {
   bool get supportsResizingAnimatedImages => false;
 
   @override
+  bool get supportsAnimatedImages => true;
+
+  @override
   BackendImage decodeBackendImageFromPixels(
     Uint8List pixels, {
     required int width,
