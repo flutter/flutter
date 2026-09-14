@@ -307,12 +307,12 @@ class TimelineSummary {
       'frame_rasterizer_times': _extractGpuRasterizerDrawDurations()
           .map<int>((Duration duration) => duration.inMicroseconds)
           .toList(),
-      'frame_begin_times': _extractBeginTimestamps(
-        kBuildFrameEventName,
-      ).map<int>((Duration duration) => duration.inMicroseconds).toList(),
-      'frame_rasterizer_begin_times': _extractBeginTimestamps(
-        kRasterizeFrameEventName,
-      ).map<int>((Duration duration) => duration.inMicroseconds).toList(),
+      'frame_begin_times': _extractBeginTimestamps(kBuildFrameEventName)
+          .map<int>((Duration duration) => duration.inMicroseconds)
+          .toList(),
+      'frame_rasterizer_begin_times': _extractBeginTimestamps(kRasterizeFrameEventName)
+          .map<int>((Duration duration) => duration.inMicroseconds)
+          .toList(),
       'average_vsync_transitions_missed': sceneDisplayLagSummarizer
           .computeAverageVsyncTransitionsMissed(),
       '90th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer

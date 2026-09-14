@@ -79,7 +79,7 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreview
   }
 }
 
-class FakeTerminal extends Fake implements Terminal {}
+class FakeTerminal extends Fake implements AnsiTerminal {}
 
 class FakeAnalysisServer extends Fake implements AnalysisServer {
   @override
@@ -171,11 +171,16 @@ void main() {
     await ensureFlutterToolsSnapshot();
     loggingProcessManager = LoggingProcessManager();
     shutdownHooks = ShutdownHooks();
-    logger = WidgetPreviewMachineAwareLogger(BufferLogger.test(), machine: false, verbose: false);
+    mockStdio = FakeStdio();
+    logger = WidgetPreviewMachineAwareLogger(
+      BufferLogger.test(),
+      machine: false,
+      stdio: mockStdio,
+      verbose: false,
+    );
     fs = LocalFileSystem.test(signals: Signals.test());
     botDetector = const FakeBotDetector(false);
     tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
-    mockStdio = FakeStdio();
     platform = FakePlatform.fromPlatform(const LocalPlatform());
 
     fakeGoogleChromeDevice = FakeGoogleChromeDevice();
@@ -218,22 +223,23 @@ void main() {
   }) async {
     final CommandRunner<void> runner = createTestCommandRunner(
       WidgetPreviewCommand(
-        verboseHelp: false,
-        logger: logger,
-        fs: fs,
-        projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs),
-        cache: Cache.test(processManager: loggingProcessManager, platform: platform),
-        platform: platform,
-        shutdownHooks: shutdownHooks,
-        os: OperatingSystemUtils(
-          fileSystem: fs,
-          processManager: loggingProcessManager,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: loggingProcessManager, platform: platform),
+          fs: fs,
           logger: logger,
+          os: OperatingSystemUtils(
+            fileSystem: fs,
+            processManager: loggingProcessManager,
+            logger: logger,
+            platform: platform,
+          ),
           platform: platform,
+          processManager: loggingProcessManager,
+          projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs),
+          shutdownHooks: shutdownHooks,
+          terminal: FakeTerminal(),
         ),
-        artifacts: Artifacts.test(),
-        processManager: loggingProcessManager,
-        terminal: FakeTerminal(),
         dtdServicesOverride: fakeDtdServices,
         analysisServerFactoryOverride:
             analysisServerFactoryOverride ?? () async => FakeAnalysisServer(),
@@ -283,7 +289,21 @@ void main() {
   }
 
   Future<void> cleanWidgetPreview({required Directory rootProject}) async {
-    await runWidgetPreviewCommand(<String>['clean', rootProject.path]);
+    var retries = 5;
+    var delay = const Duration(milliseconds: 100);
+    while (true) {
+      try {
+        await runWidgetPreviewCommand(<String>['clean', rootProject.path]);
+        break;
+      } on Exception catch (_) {
+        retries--;
+        if (retries <= 0) {
+          rethrow;
+        }
+        await Future<void>.delayed(delay);
+        delay *= 2;
+      }
+    }
     expect(fs.directory(rootProject).childDirectory('.widget_preview'), isNot(exists));
   }
 
@@ -602,8 +622,8 @@ Widget preview() => Text('Foo');''';
 
     const expectedGeneratedFileContents = '''
 // ignore_for_file: implementation_imports
-
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+
 import 'widget_preview.dart' as _i1;
 import 'utils.dart' as _i2;
 import 'package:flutter_project/foo.dart' as _i3;

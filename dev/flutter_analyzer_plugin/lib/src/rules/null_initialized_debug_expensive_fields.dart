@@ -9,8 +9,10 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
+import '../flutter_analysis_rule.dart';
+
 /// An analysis rule that verifies that debug expensive fields annotated with @_debugOnly are null initialized.
-class NullInitializedDebugExpensiveFields extends AnalysisRule {
+class NullInitializedDebugExpensiveFields extends FlutterAnalysisRule {
   NullInitializedDebugExpensiveFields()
     : super(
         name: code.name,
@@ -28,7 +30,7 @@ class NullInitializedDebugExpensiveFields extends AnalysisRule {
   DiagnosticCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final visitor = _Visitor(this, context);
     registry.addFieldDeclaration(this, visitor);
   }
