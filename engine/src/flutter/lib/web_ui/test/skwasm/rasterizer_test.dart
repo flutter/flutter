@@ -13,6 +13,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
+// Regression tests for https://github.com/flutter/flutter/issues/182476
 void testMain() {
   group('SkwasmRenderer', () {
     setUpUnitTests();
@@ -29,7 +30,7 @@ void testMain() {
       );
     });
 
-    group('Hostile Stress Audit: pictureToImageSurface lifecycle', () {
+    group('pictureToImageSurface lifecycle', () {
       test('debugResetRasterizer creates a fresh pictureToImageSurface distinct from prior and isolated from offscreenSurface', () {
         final testRenderer = SkwasmRenderer();
         testRenderer.initialize();

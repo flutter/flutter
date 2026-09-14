@@ -295,10 +295,7 @@ class SkwasmRenderer extends Renderer {
 
   @override
   FutureOr<void> initialize() {
-    rasterizer = OffscreenCanvasRasterizer(
-      (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
-    );
-    _pictureToImageSurface = rasterizer.createPictureToImageSurface();
+    _resetRasterizer();
     return super.initialize();
   }
 
@@ -412,14 +409,23 @@ class SkwasmRenderer extends Renderer {
     }
   }
 
-  @override
-  void debugResetRasterizer() {
+  void _resetRasterizer() {
     rasterizer = OffscreenCanvasRasterizer(
       (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
     );
     _pictureToImageSurface = rasterizer.createPictureToImageSurface();
   }
 
+  @override
+  void debugResetRasterizer() {
+    _resetRasterizer();
+  }
+
+  /// Dedicated surface allocated for picture-to-image conversions.
+  ///
+  /// This must not alias the rasterizer's offscreen surface to prevent race
+  /// conditions and dimension overwrites during scene rendering (see
+  /// https://github.com/flutter/flutter/issues/182476).
   late Surface _pictureToImageSurface;
 
   @override
