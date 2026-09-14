@@ -453,10 +453,15 @@ class _TestWindowController extends WindowController with _ChildWindowHierarchyM
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
-    _delegate.onWindowDestroyed();
-    removeAllChildren();
-    windowingOwner.deactivateWindowController(this);
+    _destroyTestWindowController(
+      controller: this,
+      onWindowDestroyed: _delegate.onWindowDestroyed,
+      windowingOwner: windowingOwner,
+    );
   }
 }
 
@@ -491,6 +496,25 @@ void _removeChildFromParent(BaseWindowController? parent, BaseWindowController c
       case TooltipWindowController _:
         fail('TooltipWindowController cannot be a parent of another window controller.');
     }
+  }
+}
+
+void _destroyTestWindowController({
+  required BaseWindowController controller,
+  required VoidCallback onWindowDestroyed,
+  required _TestWindowingOwner windowingOwner,
+  BaseWindowController? parent,
+}) {
+  onWindowDestroyed();
+  if (controller case final _ChildWindowHierarchyMixin hierarchy) {
+    hierarchy.removeAllChildren();
+  }
+  if (controller.rootView.platformDispatcher case final TestPlatformDispatcher dispatcher) {
+    dispatcher.removeTestView(controller.rootView);
+  }
+  windowingOwner.deactivateWindowController(controller);
+  if (parent != null) {
+    _removeChildFromParent(parent, controller);
   }
 }
 
@@ -597,11 +621,16 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
-    _delegate.onWindowDestroyed();
-    removeAllChildren();
-    windowingOwner.deactivateWindowController(this);
-    _removeChildFromParent(_parent, this);
+    _destroyTestWindowController(
+      controller: this,
+      onWindowDestroyed: _delegate.onWindowDestroyed,
+      windowingOwner: windowingOwner,
+      parent: _parent,
+    );
   }
 }
 
@@ -667,11 +696,16 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
-    _delegate.onWindowDestroyed();
-    removeAllChildren();
-    windowingOwner.deactivateWindowController(this);
-    _removeChildFromParent(parent, this);
+    _destroyTestWindowController(
+      controller: this,
+      onWindowDestroyed: _delegate.onWindowDestroyed,
+      windowingOwner: windowingOwner,
+      parent: parent,
+    );
   }
 }
 
@@ -737,11 +771,16 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
-    _delegate.onWindowDestroyed();
-    removeAllChildren();
-    windowingOwner.deactivateWindowController(this);
-    _removeChildFromParent(parent, this);
+    _destroyTestWindowController(
+      controller: this,
+      onWindowDestroyed: _delegate.onWindowDestroyed,
+      windowingOwner: windowingOwner,
+      parent: parent,
+    );
   }
 
   @override
@@ -849,11 +888,16 @@ class _TestSatelliteWindowController extends SatelliteWindowController
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
-    _delegate.onWindowDestroyed();
-    removeAllChildren();
-    windowingOwner.deactivateWindowController(this);
-    _removeChildFromParent(_parent, this);
+    _destroyTestWindowController(
+      controller: this,
+      onWindowDestroyed: _delegate.onWindowDestroyed,
+      windowingOwner: windowingOwner,
+      parent: _parent,
+    );
   }
 }
 
@@ -1340,10 +1384,23 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       binding.setupHttpOverrides();
     }
     _testTextInput = TestTextInput(onCleared: _resetFocusedEditable);
+  }
 
+  @override
+  WindowingOwner createWindowingOwner() {
     if (isWindowingEnabled && registerTestWindowingOwner) {
-      windowingOwner = _TestWindowingOwner(platformDispatcher: platformDispatcher);
+      return _TestWindowingOwner(platformDispatcher: platformDispatcher);
     }
+    return super.createWindowingOwner();
+  }
+
+  /// Resets [windowingOwner] to a new instance created by
+  /// [createWindowingOwner].
+  ///
+  /// Tests that destroy windows, or that replace the owner, can call this to
+  /// return the binding to the state it had at the start of the test.
+  void resetWindowingOwner() {
+    windowingOwner = createWindowingOwner();
   }
 
   @override
