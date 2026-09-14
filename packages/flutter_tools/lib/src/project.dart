@@ -52,9 +52,7 @@ enum SupportedPlatform {
 }
 
 class FlutterProjectFactory {
-  FlutterProjectFactory({required Logger logger, required FileSystem fileSystem})
-    : _logger = logger,
-      _fileSystem = fileSystem;
+  FlutterProjectFactory({required this._logger, required this._fileSystem});
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -96,10 +94,9 @@ class FlutterProject {
     this.directory,
     FlutterManifest manifest,
     this._exampleManifest, {
-    Directory? buildDirectory,
-    FlutterProjectFactory? projectFactory,
-  }) : _buildDirectory = buildDirectory,
-       _projectFactory = projectFactory {
+    this._buildDirectory,
+    this._projectFactory,
+  }) {
     _setManifest(manifest);
   }
 

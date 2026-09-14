@@ -138,18 +138,14 @@ abstract class FlutterVersion {
   }
 
   FlutterVersion._({
-    required SystemClock clock,
+    required this._clock,
     required this.flutterRoot,
     required this.fs,
-    required Git git,
-    Cache? cache,
-    Logger? logger,
-    Platform? platform,
-  }) : _clock = clock,
-       _git = git,
-       _platform = platform,
-       _logger = logger,
-       _cache = cache;
+    required this._git,
+    this._cache,
+    this._logger,
+    this._platform,
+  });
 
   factory FlutterVersion.fromRevision({
     required String flutterRoot,

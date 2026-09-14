@@ -1307,43 +1307,40 @@ Information about project "Runner":
     },
   );
 
-  testWithoutContext(
-    'build configuration for flavored project falls back to BuildMode when flavor match is unavailable',
-    () {
-      final info = XcodeProjectInfo(
-        <String>['Runner'],
-        <String>['Debug', 'Profile', 'Release'],
-        <String>['Banana'],
-        logger,
-      );
+  testWithoutContext('build configuration for flavored project falls back to BuildMode when flavor match is unavailable', () {
+    final info = XcodeProjectInfo(
+      <String>['Runner'],
+      <String>['Debug', 'Profile', 'Release'],
+      <String>['Banana'],
+      logger,
+    );
 
-      expect(
-        info.buildConfigurationFor(
-          const BuildInfo(
-            BuildMode.debug,
-            'banana',
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-          ),
-          'Banana',
+    expect(
+      info.buildConfigurationFor(
+        const BuildInfo(
+          BuildMode.debug,
+          'banana',
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
         ),
-        'Debug',
-      );
+        'Banana',
+      ),
+      'Debug',
+    );
 
-      expect(
-        info.buildConfigurationFor(
-          const BuildInfo(
-            BuildMode.release,
-            'banana',
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-          ),
-          'Banana',
+    expect(
+      info.buildConfigurationFor(
+        const BuildInfo(
+          BuildMode.release,
+          'banana',
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
         ),
-        'Release',
-      );
-    },
-  );
+        'Banana',
+      ),
+      'Release',
+    );
+  });
 
   testWithoutContext(
     "build configuration doesn't fall back when multiple matches for mode and flavor are available",
