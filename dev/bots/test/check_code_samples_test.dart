@@ -30,9 +30,9 @@ void main() {
   void writeLink({
     required File source,
     required File example,
-    String? alternateLink,
     required bool useStandardStyle,
-    // "region" is the "#body" segment at the end of standard style links.
+    String? alternateLink,
+    // "region" refers to the "#body" segment at the end of standard style links.
     String? region,
   }) {
     final String relativePath = getRelativePath(example, exampleBase());
