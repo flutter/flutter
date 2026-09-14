@@ -55,7 +55,13 @@ class IconButtonTemplateM3E extends TokenTemplateM3E {
   @override
   String generateContents(String className) {
     return '''
-// generated defaults
+class $className {
+  const $className(this.context);
+
+  final BuildContext context;
+
+  // generated defaults
+}
 ''';
   }
 }
@@ -121,7 +127,7 @@ class IconButtonThemeData with Diagnosticable {
 }
 ```
 
-Update the component theme data class support methods, such as `lerp`, `==`, `hashCode`, `debugFillProperties`, etc.
+Update the component theme data class support methods, such as `lerp`, `==`, `hashCode`, `debugFillProperties`, etc. Update `copyWith` if the class already has one.
 
 Default null to `StyleVariant.material3` in component behavior.
 
@@ -161,11 +167,13 @@ Prefer existing style fields in the corresponding component theme data first. Ad
 
 For example, Material 3 Expressive IconButton provides size variants that control multiple values, such as icon size and container size. Since `IconButtonThemeData.style` did not already have a single property for selecting those token groups, the migration introduced `ButtonStyle.sizeVariant`.
 
+Use the [IconButton migration](https://github.com/flutter/packages/pull/12832) as a reference for adding `ButtonStyle.sizeVariant` and related button variant APIs.
+
 When adding new style fields:
 
 - Add constructor parameters.
 - Add fields.
-- Update `copyWith`.
+- Update `copyWith`, if the class already has one.
 - Update `merge`.
 - Update `lerp`.
 - Update equality and `hashCode`.
@@ -226,12 +234,13 @@ Add or update example tests if required by the package. Remember to list the exa
 Example:
 
 ```dart
-/// {@tool dartpad}
+/// <callout-box>
 /// This sample shows creation of [IconButton] widgets for standard, filled,
 /// filled tonal and outlined types, as described in: https://m3.material.io/components/icon-buttons/overview
 ///
-/// ** See code in packages/material_ui/example/lib/icon_button/icon_button.2.dart **
-/// {@end-tool}
+/// {@macro material_ui.dartpad_guide}
+/// {@example /example/lib/icon_button/icon_button.2.dart#body}
+/// </callout-box>
 ```
 
 ## 11. Add Changelog and Version Update
@@ -239,6 +248,13 @@ Example:
 Create a pending changelog file that includes the changelog entry and version bump.
 
 Make a copy of the [`material_ui` `template.yaml`](https://github.com/flutter/packages/blob/main/packages/material_ui/pending_changelogs/template.yaml), then fill out the details. Use `version: minor` when the PR adds public API or new M3E component support.
+
+For manually created pending changelog files, use one of:
+
+- `version: major`
+- `version: minor`
+- `version: patch`
+- `version: skip`
 
 Alternatively, use the Flutter Packages Tool. Follow the [configuration instructions](https://github.com/flutter/packages/tree/main/script/tool#flutter-plugin-tools), then set up the local tool from the repository root:
 
@@ -256,7 +272,7 @@ dart run ../../script/tool/bin/flutter_plugin_tools.dart update-release-info \
   --changelog="Adds Material 3 Expressive support for <Component>."
 ```
 
-Use `bugfix` or `next` instead of `minor` only when that better matches the change.
+For the Flutter Packages Tool command, use `--version=bugfix` for patch-level changes or `--version=next` for changelog-only changes that should not publish a package version.
 
 ## 12. Run Verification
 
@@ -297,7 +313,7 @@ Run generator tests from the `gen_defaults` package directory if generator code 
 
 ```shell
 cd packages/material_ui/tool/gen_defaults
-dart run test test
+flutter test test
 ```
 
 ## 13. PR Description Checklist
