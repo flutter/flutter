@@ -39,9 +39,18 @@ final licensesNoLongerNeeded = RegExp(
 );
 
 class AndroidWorkflow implements Workflow {
-  AndroidWorkflow({required this._androidSdk, required this._featureFlags});
+  AndroidWorkflow({
+    required this._featureFlags,
+    AndroidSdk? androidSdk,
+    AndroidSdk? Function()? androidSdkBuilder,
+  }) : assert(
+         androidSdk == null || androidSdkBuilder == null,
+         'Cannot provide both androidSdk and androidSdkBuilder to AndroidWorkflow.',
+       ),
+       _androidSdkBuilder = androidSdkBuilder ?? (() => androidSdk);
 
-  final AndroidSdk? _androidSdk;
+  final AndroidSdk? Function() _androidSdkBuilder;
+  late final AndroidSdk? _androidSdk = _androidSdkBuilder();
   final FeatureFlags _featureFlags;
 
   @override

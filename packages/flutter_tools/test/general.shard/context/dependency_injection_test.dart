@@ -239,15 +239,31 @@ void main() {
     );
 
     testUsingContext('lazily evaluates androidSdk upon first access in AndroidContext', () async {
+      var sdkEvaluations = 0;
+      final mockSdk = FakeAndroidSdk();
+
       final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+        androidSdkBuilder: () {
+          sdkEvaluations++;
+          return mockSdk;
+        },
         fs: fs,
         logger: logger,
         platform: platform,
         processManager: processManager,
       );
 
+      // AndroidSdk is not evaluated during bootstrap or EmulatorManager initialization.
+      expect(sdkEvaluations, 0);
+
+      // AndroidSdk is not evaluated until accessed.
       final AndroidSdk? sdk = dependencies.androidContext.androidSdk;
-      expect(sdk, isNull);
+      expect(sdkEvaluations, 1);
+      expect(sdk, same(mockSdk));
+
+      // Subsequent access does not re-evaluate.
+      expect(dependencies.androidContext.androidSdk, same(mockSdk));
+      expect(sdkEvaluations, 1);
     });
   });
 

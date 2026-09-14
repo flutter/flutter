@@ -108,6 +108,7 @@ class ToolDependencies {
   static Future<ToolDependencies> bootstrap({
     Analytics? analytics,
     AndroidSdk? androidSdk,
+    AndroidSdk? Function()? androidSdkBuilder,
     AndroidStudio? androidStudio,
     AndroidStudio? Function()? androidStudioBuilder,
     BotDetector? botDetector,
@@ -150,6 +151,10 @@ class ToolDependencies {
     Xcode? xcode,
     XcodeProjectInterpreter? xcodeProjectInterpreter,
   }) async {
+    assert(
+      androidSdk == null || androidSdkBuilder == null,
+      'Cannot provide both androidSdk and androidSdkBuilder to ToolDependencies.bootstrap.',
+    );
     assert(
       androidStudio == null || androidStudioBuilder == null,
       'Cannot provide both androidStudio and androidStudioBuilder to ToolDependencies.bootstrap.',
@@ -439,9 +444,8 @@ class ToolDependencies {
         PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
 
     // 12. AndroidContext Dependencies
-    final AndroidSdk? Function() finalAndroidSdkBuilder = androidSdk != null
-        ? () => androidSdk
-        : AndroidSdk.locateAndroidSdk;
+    final AndroidSdk? Function() finalAndroidSdkBuilder =
+        androidSdkBuilder ?? (androidSdk != null ? () => androidSdk : AndroidSdk.locateAndroidSdk);
 
     final AndroidStudio? Function() finalAndroidStudioBuilder =
         androidStudioBuilder ??
@@ -485,15 +489,15 @@ class ToolDependencies {
     final EmulatorManager finalEmulatorManager =
         emulatorManager ??
         EmulatorManager(
+          androidSdkBuilder: () => finalAndroidContext.androidSdk,
           androidWorkflow: AndroidWorkflow(
-            androidSdk: finalAndroidContext.androidSdk,
+            androidSdkBuilder: () => finalAndroidContext.androidSdk,
             featureFlags: finalFeatureFlags,
           ),
           fileSystem: finalFS,
           javaBuilder: () => finalAndroidContext.java,
           logger: finalLogger,
           processManager: finalProcessManager,
-          androidSdk: finalAndroidContext.androidSdk,
         );
 
     return ToolDependencies(

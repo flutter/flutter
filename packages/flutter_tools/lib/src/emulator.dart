@@ -28,28 +28,34 @@ class EmulatorManager {
     required Logger logger,
     required ProcessManager processManager,
     AndroidSdk? androidSdk,
+    AndroidSdk? Function()? androidSdkBuilder,
     Java? java,
     Java? Function()? javaBuilder,
   }) : assert(
+         androidSdk == null || androidSdkBuilder == null,
+         'Cannot provide both androidSdk and androidSdkBuilder to EmulatorManager.',
+       ),
+       assert(
          java == null || javaBuilder == null,
          'Cannot provide both java and javaBuilder to EmulatorManager.',
        ),
+       _androidSdkBuilder = androidSdkBuilder ?? (() => androidSdk),
        _javaBuilder = javaBuilder ?? (() => java),
-       _androidSdk = androidSdk,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _androidEmulators = AndroidEmulators(
-         androidSdk: androidSdk,
+         androidSdkBuilder: androidSdkBuilder ?? (() => androidSdk),
+         androidWorkflow: androidWorkflow,
+         fileSystem: fileSystem,
          logger: logger,
          processManager: processManager,
-         fileSystem: fileSystem,
-         androidWorkflow: androidWorkflow,
        ) {
     _emulatorDiscoverers.add(_androidEmulators);
   }
 
+  final AndroidSdk? Function() _androidSdkBuilder;
+  late final AndroidSdk? _androidSdk = _androidSdkBuilder();
   final Java? Function() _javaBuilder;
   late final Java? _java = _javaBuilder();
-  final AndroidSdk? _androidSdk;
   final AndroidEmulators _androidEmulators;
   final ProcessUtils _processUtils;
 
