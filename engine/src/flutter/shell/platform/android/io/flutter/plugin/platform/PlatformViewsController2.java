@@ -688,8 +688,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       tx.merge(platformTx);
       platformTx.close();
     }
-    for (int i = 0; i < activeRasterTransactions.size(); i++) {
-      tx.merge(activeRasterTransactions.get(i));
+    for (SurfaceControl.Transaction rasterTx : activeRasterTransactions) {
+      tx.merge(rasterTx);
     }
     activeRasterTransactions.clear();
 
