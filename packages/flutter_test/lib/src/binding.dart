@@ -1705,8 +1705,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// Called by the [testWidgets] and [benchmarkWidgets] functions to
   /// run a test.
   ///
-  /// The `invariantTester` argument is called after the `testBody`'s [Future]
-  /// completes. If it throws, then the test is marked as failed.
+  /// The `invariantTester` argument is called inside this method immediately
+  /// after the `testBody` completes and the widget tree is unmounted (for
+  /// example, to verify that tickers and semantics handles were disposed).
+  ///
+  /// This should not be confused with framework-level invariant checks (such as
+  /// verifying that debug flags were reset and pending timers disposed) and
+  /// binding state cleanups, which are performed in [postTest] after the
+  /// [Future] returned by this method completes and after any per-test
+  /// `addTearDown` callbacks have executed.
   ///
   /// The `description` is used by the [LiveTestWidgetsFlutterBinding] to
   /// show a label on the screen during the test. The description comes from
@@ -2141,11 +2148,18 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   /// Called by the [testWidgets] function after a test is executed.
+  ///
+  /// Subclasses that override this method must call `super.postTest()` and must
+  /// not throw exceptions. This method will not throw errors; any invariant
+  /// failures detected during verification are reported via
+  /// [reportTestException].
+  @mustCallSuper
   void postTest() {
     assert(inTest);
-    try {
-      if (_shouldVerifyInvariants) {
-        _shouldVerifyInvariants = false;
+    FlutterErrorDetails? invariantError;
+    if (_shouldVerifyInvariants) {
+      _shouldVerifyInvariants = false;
+      try {
         _verifyAutoUpdateGoldensUnset(_beforeTestAutoUpdateGoldens && !isBrowser);
         _verifyReportTestExceptionUnset(_beforeTestReportTestException);
         _verifyErrorWidgetBuilderUnset(_beforeTestErrorWidgetBuilder);
@@ -2153,43 +2167,53 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           _beforeTestShouldPropagateDevicePointerEvents,
         );
         _verifyInvariants();
+      } catch (error, stack) {
+        invariantError = FlutterErrorDetails(
+          exception: error,
+          stack: stack,
+          context: ErrorDescription('running invariant verifications after a test'),
+          library: 'Flutter test framework',
+        );
       }
-    } finally {
-      FlutterError.onError = _oldExceptionHandler;
-      FlutterError.demangleStackTrace = _oldStackTraceDemangler;
-      _pendingExceptionDetails = null;
-      _parentZone = null;
-      _testZone = null;
-      buildOwner!.focusManager.dispose();
+    }
+    FlutterError.onError = _oldExceptionHandler;
+    FlutterError.demangleStackTrace = _oldStackTraceDemangler;
+    _pendingExceptionDetails = null;
+    _parentZone = null;
+    _testZone = null;
+    buildOwner!.focusManager.dispose();
 
-      if (TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(
-        SystemChannels.accessibility.name,
-        _announcementHandler,
-      )) {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockDecodedMessageHandler(SystemChannels.accessibility, null);
-        _announcementHandler = null;
-      }
-      _announcements = <CapturedAccessibilityAnnouncement>[];
+    if (TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(
+      SystemChannels.accessibility.name,
+      _announcementHandler,
+    )) {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockDecodedMessageHandler(SystemChannels.accessibility, null);
+      _announcementHandler = null;
+    }
+    _announcements = <CapturedAccessibilityAnnouncement>[];
 
-      ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
-      buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
+    ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
+    buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
 
-      // Disabling the warning because @visibleForTesting doesn't take the testing
-      // framework itself into account, but we don't want it visible outside of
-      // tests.
-      // ignore: invalid_use_of_visible_for_testing_member
-      RawKeyboard.instance.clearKeysPressed();
-      // ignore: invalid_use_of_visible_for_testing_member
-      HardwareKeyboard.instance.clearState();
-      // ignore: invalid_use_of_visible_for_testing_member
-      keyEventManager.clearState();
-      // ignore: invalid_use_of_visible_for_testing_member
-      RendererBinding.instance.initMouseTracker();
+    // Disabling the warning because @visibleForTesting doesn't take the testing
+    // framework itself into account, but we don't want it visible outside of
+    // tests.
+    // ignore: invalid_use_of_visible_for_testing_member
+    RawKeyboard.instance.clearKeysPressed();
+    // ignore: invalid_use_of_visible_for_testing_member
+    HardwareKeyboard.instance.clearState();
+    // ignore: invalid_use_of_visible_for_testing_member
+    keyEventManager.clearState();
+    // ignore: invalid_use_of_visible_for_testing_member
+    RendererBinding.instance.initMouseTracker();
 
-      assert(ServicesBinding.instance == WidgetsBinding.instance);
-      // ignore: invalid_use_of_visible_for_testing_member
-      ServicesBinding.instance.resetInternalState();
+    assert(ServicesBinding.instance == WidgetsBinding.instance);
+    // ignore: invalid_use_of_visible_for_testing_member
+    ServicesBinding.instance.resetInternalState();
+
+    if (invariantError != null) {
+      reportTestException(invariantError, '');
     }
   }
 }
@@ -2571,14 +2595,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void postTest() {
-    try {
-      super.postTest();
-    } finally {
-      assert(_currentFakeAsync != null);
-      assert(_clock != null);
-      _clock = null;
-      _currentFakeAsync = null;
-    }
+    super.postTest();
+    assert(_currentFakeAsync != null);
+    assert(_clock != null);
+    _clock = null;
+    _currentFakeAsync = null;
   }
 }
 
@@ -3129,13 +3150,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void postTest() {
-    try {
-      super.postTest();
-    } finally {
-      assert(!_expectingFrame);
-      assert(_pendingFrame == null);
-      _inTest = false;
-    }
+    super.postTest();
+    assert(!_expectingFrame);
+    assert(_pendingFrame == null);
+    _inTest = false;
   }
 
   @override

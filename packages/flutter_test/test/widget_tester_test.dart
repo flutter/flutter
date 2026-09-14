@@ -669,6 +669,11 @@ void main() {
     });
 
     test('Throws assertion message without code', () async {
+      late FlutterErrorDetails flutterErrorDetails;
+      reportTestException = (FlutterErrorDetails details, String testDescription) {
+        flutterErrorDetails = details;
+      };
+
       final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
       debugPrint('DISREGARD NEXT PENDING TIMER LIST, IT IS EXPECTED');
       await binding.runTest(() async {
@@ -676,15 +681,12 @@ void main() {
         expect(timer.isActive, true);
       }, () {});
 
+      binding.postTest();
+
+      expect(flutterErrorDetails.exception, isA<AssertionError>());
       expect(
-        () => binding.postTest(),
-        throwsA(
-          isA<AssertionError>().having(
-            (AssertionError e) => e.message,
-            'message',
-            'A Timer is still pending even after the widget tree was disposed.',
-          ),
-        ),
+        (flutterErrorDetails.exception as AssertionError).message,
+        'A Timer is still pending even after the widget tree was disposed.',
       );
       expect(binding.inTest, false);
     });

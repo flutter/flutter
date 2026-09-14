@@ -52,23 +52,27 @@ void main() {
     });
   });
 
-  test('direct runTest invariant failure throws in postTest and cleans up binding', () async {
+  test('direct runTest invariant failure reports exception and cleans up binding', () async {
+    FlutterErrorDetails? reportedError;
+    final TestExceptionReporter oldReporter = reportTestException;
+    reportTestException = (FlutterErrorDetails details, String testDescription) {
+      reportedError = details;
+    };
+    addTearDown(() {
+      reportTestException = oldReporter;
+    });
+
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     await binding.runTest(() async {
       debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
     }, () {});
 
+    expect(() => binding.postTest(), returnsNormally);
+    expect(reportedError, isNotNull);
     expect(
-      () => binding.postTest(),
-      throwsA(
-        isA<FlutterError>().having(
-          (FlutterError e) => e.message,
-          'message',
-          'The value of a foundation debug variable was changed by the test.',
-        ),
-      ),
+      (reportedError!.exception as FlutterError).message,
+      'The value of a foundation debug variable was changed by the test.',
     );
-    // Ensure cleanup still happened despite postTest throwing
     expect(binding.inTest, isFalse);
     debugDefaultTargetPlatformOverride = null;
   });
