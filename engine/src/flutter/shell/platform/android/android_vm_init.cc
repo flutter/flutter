@@ -69,6 +69,9 @@ void AndroidVMArgs::ParseCommandLineArgs(const std::vector<std::string>& args) {
     } else if (arg == "--enable-hcpp-and-surface-control" ||
                arg == "--enable-surface-control" || arg == "--enable-hcpp") {
       enable_hcpp = true;
+    } else if (arg.rfind("--cache-dir-path=", 0) == 0) {
+      engine_caches_path =
+          arg.substr(std::string("--cache-dir-path=").length());
     }
   }
 
@@ -358,8 +361,13 @@ void AndroidProjectArgsHolder::Populate(const AndroidVMArgs& args,
 
   // Executable name must be first entry in command_line_argv.
   argv_strings_.push_back("flutter");
-  for (const auto& arg : args.command_line_args) {
-    argv_strings_.push_back(arg);
+  size_t start_idx = 0;
+  if (!args.command_line_args.empty() &&
+      args.command_line_args[0] == "flutter") {
+    start_idx = 1;
+  }
+  for (size_t i = start_idx; i < args.command_line_args.size(); ++i) {
+    argv_strings_.push_back(args.command_line_args[i]);
   }
   for (const auto& str : argv_strings_) {
     argv_ptrs_.push_back(str.c_str());

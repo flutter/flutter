@@ -26,6 +26,7 @@
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
+#include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_hb.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_resolver.h"
@@ -6698,6 +6699,88 @@ TEST_F(EmbedderTest, CustomAssetResolverStructABI) {
       offsetof(FlutterCustomAssetResolver, destruction_callback),
       offsetof(FlutterCustomAssetResolver, is_valid_after_change_callback) +
           sizeof(void*));
+}
+
+static_assert(sizeof(FlutterProjectArgs) % 8 == 0,
+              "FlutterProjectArgs must maintain 8-byte alignment");
+static_assert(offsetof(FlutterProjectArgs, vm_service_server_status_callback) >
+                  0,
+              "vm_service_server_status_callback offset must be valid");
+
+TEST_F(EmbedderTest, VMServiceServerStatusStructABI) {
+  FlutterProjectArgs args = {};
+  args.struct_size = sizeof(FlutterProjectArgs);
+  EXPECT_EQ(args.struct_size, sizeof(FlutterProjectArgs));
+  EXPECT_EQ(sizeof(FlutterProjectArgs) % 8, 0u);
+  EXPECT_GE(args.struct_size,
+            offsetof(FlutterProjectArgs, vm_service_server_status_callback) +
+                sizeof(args.vm_service_server_status_callback));
+
+#if UINTPTR_MAX == 0xffffffff
+  EXPECT_EQ(offsetof(FlutterProjectArgs, vm_service_server_status_callback),
+            offsetof(FlutterProjectArgs, custom_asset_resolver) +
+                sizeof(const FlutterCustomAssetResolver*) + sizeof(uint32_t));
+#else
+  EXPECT_EQ(offsetof(FlutterProjectArgs, vm_service_server_status_callback),
+            offsetof(FlutterProjectArgs, custom_asset_resolver) +
+                sizeof(const FlutterCustomAssetResolver*));
+#endif
+}
+
+TEST_F(EmbedderTest, VMServiceServerStatusCallbackDispatchedAndCancelled) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  // 1x1 surface size for headless software rasterization
+  builder.SetSurface(DlISize(1, 1));
+
+  struct CallbackState {
+    std::atomic<int> call_count{0};
+    std::string uri;
+    void* user_data = nullptr;
+    fml::AutoResetWaitableEvent latch;
+  };
+
+  static CallbackState s_callback_state;
+  s_callback_state.call_count = 0;
+  s_callback_state.uri.clear();
+  s_callback_state.user_data = nullptr;
+
+  builder.GetProjectArgs().vm_service_server_status_callback =
+      [](const char* uri, void* user_data) {
+        s_callback_state.uri = uri ? uri : "";
+        s_callback_state.user_data = user_data;
+        s_callback_state.call_count++;
+        s_callback_state.latch.Signal();
+      };
+
+  auto engine = builder.InitializeEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  const std::string test_uri = "http://127.0.0.1:45678/test_auth_token/";
+  DartServiceIsolate::TriggerServerStatusCallbackForTesting(test_uri);
+
+  // Pump the platform message loop so the posted task executes on the platform
+  // runner.
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+
+  // 1 callback invocation expected on platform runner
+  EXPECT_EQ(s_callback_state.call_count.load(), 1);
+  EXPECT_EQ(s_callback_state.uri, test_uri);
+  EXPECT_EQ(s_callback_state.user_data, &context);
+
+  // Now destroy engine and verify cancellation token prevents further callbacks
+  // and handle is unregistered from DartServiceIsolate.
+  engine.reset();
+
+  const std::string post_reset_uri = "http://127.0.0.1:99999/post_reset/";
+  DartServiceIsolate::TriggerServerStatusCallbackForTesting(post_reset_uri);
+
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+
+  // Since engine is destroyed, callback must NOT be invoked again; call count
+  // remains 1.
+  EXPECT_EQ(s_callback_state.call_count.load(), 1);
+  EXPECT_EQ(s_callback_state.uri, test_uri);
 }
 
 TEST_F(EmbedderTest, RasterThreadContextHooksInvoked) {

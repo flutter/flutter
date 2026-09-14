@@ -614,7 +614,7 @@ InferMetalPlatformViewCreationCallback(
           metal_dispatch_table = {
               .present = metal_present,
               .get_texture = metal_get_texture,
-      };
+          };
       impeller::Flags impeller_flags;
       impeller_flags.use_sdfs = shell.GetSettings().impeller_use_sdfs;
       embedder_surface =
@@ -629,7 +629,7 @@ InferMetalPlatformViewCreationCallback(
           metal_dispatch_table = {
               .present = metal_present,
               .get_texture = metal_get_texture,
-      };
+          };
       embedder_surface = std::make_unique<flutter::EmbedderSurfaceMetalSkia>(
           const_cast<flutter::GPUMTLDeviceHandle>(config->metal.device),
           const_cast<flutter::GPUMTLCommandQueueHandle>(
@@ -714,7 +714,7 @@ InferVulkanPlatformViewCreationCallback(
                 reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
             .get_next_image = vulkan_get_next_image,
             .present_image = vulkan_present_image_callback,
-    };
+        };
 
     std::unique_ptr<flutter::EmbedderSurfaceVulkanImpeller> embedder_surface =
         std::make_unique<flutter::EmbedderSurfaceVulkanImpeller>(
@@ -749,7 +749,7 @@ InferVulkanPlatformViewCreationCallback(
                 reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
             .get_next_image = vulkan_get_next_image,
             .present_image = vulkan_present_image_callback,
-    };
+        };
 
     std::unique_ptr<flutter::EmbedderSurfaceVulkan> embedder_surface =
         std::make_unique<flutter::EmbedderSurfaceVulkan>(
@@ -839,7 +839,7 @@ InferSoftwarePlatformViewCreationCallback(
   flutter::EmbedderSurfaceSoftware::SoftwareDispatchTable
       software_dispatch_table = {
           software_present_backing_store,  // required
-  };
+      };
 
   return fml::MakeCopyable(
       [software_dispatch_table, platform_dispatch_table,
@@ -2876,6 +2876,11 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       std::move(external_texture_resolver),  //
       renderer_config_copy                   //
   );
+
+  if (auto callback =
+          SAFE_ACCESS(args, vm_service_server_status_callback, nullptr)) {
+    embedder_engine->SetVMServiceServerStatusCallback(callback, user_data);
+  }
 
   // Release the ownership of the embedder engine to the caller.
   *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(

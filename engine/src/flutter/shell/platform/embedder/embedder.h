@@ -2857,6 +2857,20 @@ typedef struct {
   void (*destruction_callback)(void* user_data);
 } FlutterCustomAssetResolver;
 
+/// Callback invoked when the Dart VM service server status changes (e.g. when
+/// the VM service protocol HTTP/WS server is started and its URI becomes
+/// available).
+///
+/// The uri string is a null-terminated UTF-8 string containing the full service
+/// URI, e.g. "http://127.0.0.1:12345/authcode/".
+/// The callback will be invoked on the engine-managed platform runner.
+/// The user_data passed to this callback is the `user_data` argument passed
+/// to `FlutterEngineInitialize` or `FlutterEngineRun`.
+///
+/// This field is optional; nullptr may be passed.
+typedef void (*FlutterVMServiceServerStatusCallback)(const char* uri,
+                                                     void* user_data);
+
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterProjectArgs).
   size_t struct_size;
@@ -3238,6 +3252,18 @@ typedef struct {
   /// Reserved padding to maintain 8-byte natural alignment boundaries across
   /// 32-bit architectures.
   uint32_t reserved_padding_resolver;
+#endif
+
+  /// Callback invoked when the Dart VM service server status changes and its
+  /// URI becomes available.
+  ///
+  /// This field is optional; nullptr may be passed.
+  FlutterVMServiceServerStatusCallback vm_service_server_status_callback;
+
+#if UINTPTR_MAX == 0xffffffff
+  /// Reserved padding to maintain 8-byte natural alignment boundaries across
+  /// 32-bit architectures.
+  uint32_t reserved_padding_vm_service;
 #endif
 } FlutterProjectArgs;
 

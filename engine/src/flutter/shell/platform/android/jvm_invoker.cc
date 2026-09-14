@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/android/jvm_invoker.h"
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/trace_event.h"
 
 namespace flutter {
@@ -648,6 +649,91 @@ bool AndroidJvmInvoker::InvokeVoidMethod(const std::string& method_name,
                                          const std::vector<uint8_t>& payload) {
   TRACE_EVENT1("flutter", "AndroidJvmInvoker::InvokeVoidMethod", "method",
                method_name.c_str());
+
+  if (method_name == "setVmServiceUri") {
+    if (!fml::jni::HasJavaVM()) {
+      // Host unit tests or environments without an active JavaVM.
+      return true;
+    }
+
+    JNIEnv* env = fml::jni::AttachCurrentThread();
+    if (!env) {
+      FML_LOG(ERROR) << "Failed to attach current thread to JVM.";
+      return false;
+    }
+
+    std::string uri(payload.begin(), payload.end());
+    jstring j_uri = env->NewStringUTF(uri.c_str());
+    if (!j_uri) {
+      FML_LOG(ERROR) << "Failed to allocate jstring for VM service URI.";
+      return false;
+    }
+
+    bool success = false;
+
+    // Check if an instance object is available.
+    std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> java_obj_ref;
+    {
+      std::lock_guard<std::mutex> lock(java_object_mutex_);
+      java_obj_ref = java_object_;
+    }
+
+    if (java_obj_ref) {
+      auto instance = java_obj_ref->get(env);
+      if (instance.obj()) {
+        jclass cls = env->GetObjectClass(instance.obj());
+        if (cls) {
+          // Instance method is named setVmServiceUri (lowercase 'm')
+          jmethodID method =
+              env->GetMethodID(cls, "setVmServiceUri", "(Ljava/lang/String;)V");
+          if (env->ExceptionCheck()) {
+            env->ExceptionClear();
+            method = nullptr;
+          }
+          if (method) {
+            env->CallVoidMethod(instance.obj(), method, j_uri);
+            if (fml::jni::CheckException(env)) {
+              success = true;
+            }
+          }
+          env->DeleteLocalRef(cls);
+        }
+      }
+    }
+
+    // Fall back to static method if instance method was not invoked.
+    if (!success) {
+      jclass cls = env->FindClass("io/flutter/embedding/engine/FlutterJNI");
+      if (cls) {
+        // Static method is named setVMServiceUri (capital 'VM')
+        jmethodID method = env->GetStaticMethodID(cls, "setVMServiceUri",
+                                                  "(Ljava/lang/String;)V");
+        if (env->ExceptionCheck()) {
+          env->ExceptionClear();
+          method = nullptr;
+        }
+        if (method) {
+          env->CallStaticVoidMethod(cls, method, j_uri);
+          if (fml::jni::CheckException(env)) {
+            success = true;
+          }
+        }
+        env->DeleteLocalRef(cls);
+      }
+    }
+
+    env->DeleteLocalRef(j_uri);
+
+    if (env->ExceptionCheck()) {
+      env->ExceptionDescribe();
+      env->ExceptionClear();
+      FML_LOG(ERROR) << "Exception occurred while calling setVMServiceUri.";
+      return false;
+    }
+
+    return success;
+  }
+
   return true;
 }
 

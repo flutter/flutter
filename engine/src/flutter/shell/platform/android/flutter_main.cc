@@ -26,6 +26,7 @@
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/android_vm_init.h"
 #include "flutter/shell/platform/android/flutter_embedder_native.h"
+#include "flutter/shell/platform/android/jvm_invoker.h"
 
 namespace flutter {
 
@@ -150,7 +151,23 @@ void FlutterMain::Init(JNIEnv* env,
   if (engineCachesPath != nullptr) {
     vm_args.engine_caches_path =
         fml::jni::JavaStringToString(env, engineCachesPath);
+  } else if (vm_args.engine_caches_path.empty() && appStoragePath != nullptr) {
+    std::string app_storage = fml::jni::JavaStringToString(env, appStoragePath);
+    if (!app_storage.empty()) {
+      vm_args.engine_caches_path =
+          fml::paths::JoinPaths({app_storage, "cache"});
+      fml::paths::InitializeAndroidCachesPath(vm_args.engine_caches_path);
+    }
   }
+
+  if (!vm_args.engine_caches_path.empty()) {
+    settings.temp_directory_path = vm_args.engine_caches_path;
+  } else {
+    FML_LOG(ERROR)
+        << "Neither engine caches path nor app storage path could be "
+           "resolved. Temp directory path is unset.";
+  }
+
   vm_args.init_time_millis = initTimeMillis;
   vm_args.api_level = api_level;
 
@@ -165,7 +182,12 @@ void FlutterMain::Init(JNIEnv* env,
       (android_rendering_api == AndroidRenderingAPI::kSoftware);
   settings.requested_rendering_backend = vm_args.requested_rendering_backend;
 
-  auto vm_init = std::make_shared<android::AndroidVMInit>();
+  // Synchronize vm_args with computed settings.
+  vm_args.enable_impeller = settings.enable_impeller;
+  vm_args.enable_software_rendering = settings.enable_software_rendering;
+
+  auto jvm_invoker = std::make_shared<android::AndroidJvmInvoker>();
+  auto vm_init = std::make_shared<android::AndroidVMInit>(jvm_invoker);
   vm_init->Init(vm_args);
 
   // Propagate to FlutterEmbedderNative global registry.

@@ -7677,6 +7677,183 @@ TEST_F(Phase61JniRegistrationCutoverTest,
 }
 
 TEST_F(Phase61JniRegistrationCutoverTest,
+       AndroidJvmInvokerSetVmServiceUriInstanceSuccess) {
+  // Arbitrary mock pointers for JNI structures
+  const jclass kFlutterJNIClass = reinterpret_cast<jclass>(100);
+  const jobject kFlutterJNIObj = reinterpret_cast<jobject>(500);
+  const jmethodID kSetVmServiceUriMethod = reinterpret_cast<jmethodID>(601);
+  const jstring kJUri = reinterpret_cast<jstring>(701);
+
+  EXPECT_CALL(mock_env_, GetObjectClass(kFlutterJNIObj))
+      .WillRepeatedly(Return(kFlutterJNIClass));
+  EXPECT_CALL(mock_env_, GetMethodID(kFlutterJNIClass, _, _))
+      .WillRepeatedly(
+          [&](jclass, const char* name, const char* sig) -> jmethodID {
+            if (strcmp(name, "setVmServiceUri") == 0) {
+              return kSetVmServiceUriMethod;
+            }
+            return nullptr;
+          });
+  EXPECT_CALL(mock_env_, NewStringUTF(_)).WillRepeatedly(Return(kJUri));
+  EXPECT_CALL(mock_env_, DeleteLocalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env_, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+
+  std::atomic<bool> instance_called{false};
+  EXPECT_CALL(mock_env_,
+              CallVoidMethodV(kFlutterJNIObj, kSetVmServiceUriMethod, _))
+      .WillOnce([&](jobject, jmethodID, va_list) { instance_called = true; });
+
+  auto invoker = std::make_shared<AndroidJvmInvoker>();
+  auto weak_ref = std::make_shared<fml::jni::JavaObjectWeakGlobalRef>(
+      &mock_env_, kFlutterJNIObj);
+  invoker->SetJavaObject(weak_ref);
+
+  const std::string test_uri = "http://127.0.0.1:12345/instance_success/";
+  std::vector<uint8_t> payload(test_uri.begin(), test_uri.end());
+
+  EXPECT_TRUE(invoker->InvokeVoidMethod("setVmServiceUri",
+                                        "(Ljava/lang/String;)V", payload));
+  EXPECT_TRUE(instance_called.load());
+}
+
+TEST_F(Phase61JniRegistrationCutoverTest,
+       AndroidJvmInvokerSetVmServiceUriStaticFallbackWhenMethodMissing) {
+  // Arbitrary mock pointers for JNI structures
+  const jclass kInstanceClass = reinterpret_cast<jclass>(100);
+  const jclass kStaticClass = reinterpret_cast<jclass>(101);
+  const jobject kFlutterJNIObj = reinterpret_cast<jobject>(500);
+  const jmethodID kStaticMethod = reinterpret_cast<jmethodID>(602);
+  const jstring kJUri = reinterpret_cast<jstring>(701);
+
+  EXPECT_CALL(mock_env_, GetObjectClass(kFlutterJNIObj))
+      .WillRepeatedly(Return(kInstanceClass));
+  // Simulate NoSuchMethodError on instance object: GetMethodID returns nullptr
+  // and ExceptionCheck returns true until ExceptionClear is called.
+  bool exception_pending = false;
+  EXPECT_CALL(mock_env_, GetMethodID(kInstanceClass, _, _))
+      .WillRepeatedly(
+          [&](jclass, const char* name, const char* sig) -> jmethodID {
+            if (strcmp(name, "setVmServiceUri") == 0) {
+              exception_pending = true;
+              return nullptr;
+            }
+            return nullptr;
+          });
+  EXPECT_CALL(mock_env_, ExceptionCheck()).WillRepeatedly([&]() -> jboolean {
+    return exception_pending ? JNI_TRUE : JNI_FALSE;
+  });
+  EXPECT_CALL(mock_env_, ExceptionClear()).WillRepeatedly([&]() {
+    exception_pending = false;
+  });
+
+  // Static fallback: FindClass returns kStaticClass
+  EXPECT_CALL(mock_env_, FindClass(_))
+      .WillRepeatedly([&](const char* name) -> jclass {
+        if (strcmp(name, "io/flutter/embedding/engine/FlutterJNI") == 0) {
+          return kStaticClass;
+        }
+        return nullptr;
+      });
+  EXPECT_CALL(mock_env_, GetStaticMethodID(kStaticClass, _, _))
+      .WillRepeatedly(
+          [&](jclass, const char* name, const char* sig) -> jmethodID {
+            if (strcmp(name, "setVMServiceUri") == 0) {
+              return kStaticMethod;
+            }
+            return nullptr;
+          });
+
+  std::atomic<bool> static_called{false};
+  EXPECT_CALL(mock_env_, CallStaticVoidMethodV(kStaticClass, kStaticMethod, _))
+      .WillOnce([&](jclass, jmethodID, va_list) { static_called = true; });
+
+  EXPECT_CALL(mock_env_, NewStringUTF(_)).WillRepeatedly(Return(kJUri));
+  EXPECT_CALL(mock_env_, DeleteLocalRef(_)).WillRepeatedly(Return());
+
+  auto invoker = std::make_shared<AndroidJvmInvoker>();
+  auto weak_ref = std::make_shared<fml::jni::JavaObjectWeakGlobalRef>(
+      &mock_env_, kFlutterJNIObj);
+  invoker->SetJavaObject(weak_ref);
+
+  const std::string test_uri = "http://127.0.0.1:12345/static_fallback/";
+  std::vector<uint8_t> payload(test_uri.begin(), test_uri.end());
+
+  EXPECT_TRUE(invoker->InvokeVoidMethod("setVmServiceUri",
+                                        "(Ljava/lang/String;)V", payload));
+  // Exception must have been cleared before calling FindClass to avoid CheckJNI
+  // crash!
+  EXPECT_FALSE(exception_pending);
+  EXPECT_TRUE(static_called.load());
+}
+
+TEST_F(Phase61JniRegistrationCutoverTest,
+       AndroidJvmInvokerSetVmServiceUriNeitherMethodFound) {
+  // Arbitrary mock pointers for JNI structures
+  const jclass kInstanceClass = reinterpret_cast<jclass>(100);
+  const jobject kFlutterJNIObj = reinterpret_cast<jobject>(500);
+  const jstring kJUri = reinterpret_cast<jstring>(701);
+
+  EXPECT_CALL(mock_env_, GetObjectClass(kFlutterJNIObj))
+      .WillRepeatedly(Return(kInstanceClass));
+  EXPECT_CALL(mock_env_, GetMethodID(kInstanceClass, _, _))
+      .WillRepeatedly(Return(nullptr));
+  EXPECT_CALL(mock_env_, FindClass(_)).WillRepeatedly(Return(nullptr));
+  EXPECT_CALL(mock_env_, NewStringUTF(_)).WillRepeatedly(Return(kJUri));
+  EXPECT_CALL(mock_env_, DeleteLocalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env_, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+
+  auto invoker = std::make_shared<AndroidJvmInvoker>();
+  auto weak_ref = std::make_shared<fml::jni::JavaObjectWeakGlobalRef>(
+      &mock_env_, kFlutterJNIObj);
+  invoker->SetJavaObject(weak_ref);
+
+  const std::string test_uri = "http://127.0.0.1:12345/neither_found/";
+  std::vector<uint8_t> payload(test_uri.begin(), test_uri.end());
+
+  EXPECT_FALSE(invoker->InvokeVoidMethod("setVmServiceUri",
+                                         "(Ljava/lang/String;)V", payload));
+}
+
+TEST_F(Phase61JniRegistrationCutoverTest,
+       AndroidJvmInvokerSetVmServiceUriExceptionClearedAtExit) {
+  // Arbitrary mock pointers for JNI structures
+  const jclass kInstanceClass = reinterpret_cast<jclass>(100);
+  const jobject kFlutterJNIObj = reinterpret_cast<jobject>(500);
+  const jstring kJUri = reinterpret_cast<jstring>(701);
+
+  EXPECT_CALL(mock_env_, GetObjectClass(kFlutterJNIObj))
+      .WillRepeatedly(Return(kInstanceClass));
+  EXPECT_CALL(mock_env_, GetMethodID(kInstanceClass, _, _))
+      .WillRepeatedly(Return(nullptr));
+  EXPECT_CALL(mock_env_, FindClass(_)).WillRepeatedly(Return(nullptr));
+  EXPECT_CALL(mock_env_, NewStringUTF(_)).WillRepeatedly(Return(kJUri));
+  EXPECT_CALL(mock_env_, DeleteLocalRef(_)).WillRepeatedly(Return());
+
+  // Simulate a pending JNI exception at exit of method dispatch
+  bool exception_pending = true;
+  EXPECT_CALL(mock_env_, ExceptionCheck()).WillRepeatedly([&]() -> jboolean {
+    return exception_pending ? JNI_TRUE : JNI_FALSE;
+  });
+  EXPECT_CALL(mock_env_, ExceptionDescribe()).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env_, ExceptionClear()).WillRepeatedly([&]() {
+    exception_pending = false;
+  });
+
+  auto invoker = std::make_shared<AndroidJvmInvoker>();
+  auto weak_ref = std::make_shared<fml::jni::JavaObjectWeakGlobalRef>(
+      &mock_env_, kFlutterJNIObj);
+  invoker->SetJavaObject(weak_ref);
+
+  const std::string test_uri = "http://127.0.0.1:12345/exception_cleared/";
+  std::vector<uint8_t> payload(test_uri.begin(), test_uri.end());
+
+  EXPECT_FALSE(invoker->InvokeVoidMethod("setVmServiceUri",
+                                         "(Ljava/lang/String;)V", payload));
+  // Exception must have been cleared at exit without crashing or leaking
+  EXPECT_FALSE(exception_pending);
+}
+
+TEST_F(Phase61JniRegistrationCutoverTest,
        SendPointerDataPacketUnpacksEmbedderId) {
   auto native_instance = std::make_unique<FlutterEmbedderNative>();
 
@@ -7780,7 +7957,7 @@ TEST_F(Phase61JniRegistrationCutoverTest, LaunchPropagatesEngineId) {
 
   native_instance->SetInitializeEngineFnForTesting(
       [&](const FlutterRendererConfig* config, const FlutterProjectArgs* args,
-          void* user_data, FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+          void* user_data, FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
         initialize_called = true;
         EXPECT_NE(args, nullptr);
         if (args) {
@@ -8145,6 +8322,32 @@ TEST_F(Phase64ParityCheckpointTest,
   EXPECT_EQ(std::string(reinterpret_cast<const char*>(mapping->GetMapping()),
                         mapping->GetSize()),
             "AppPayload");
+}
+
+TEST_F(Phase64ParityCheckpointTest,
+       OnVMServiceServerStatusPropagatesToDefaultVMInit) {
+  auto vm_init = std::make_shared<AndroidVMInit>();
+  AndroidVMArgs args;
+  // API level 34 represents Android 14 (UPSIDE_DOWN_CAKE).
+  args.api_level = 34;
+  ASSERT_TRUE(vm_init->Init(args));
+
+  FlutterEmbedderNative::SetDefaultVMInit(vm_init);
+  FlutterEmbedderNative::OnVMServiceServerStatus(
+      "http://127.0.0.1:45678/authcode/", nullptr);
+
+  EXPECT_EQ(vm_init->GetVmServiceUri(), "http://127.0.0.1:45678/authcode/");
+}
+
+TEST_F(Phase64ParityCheckpointTest,
+       OnVMServiceServerStatusPropagatesToInstance) {
+  auto native = std::make_unique<FlutterEmbedderNative>();
+  FlutterEmbedderNative::OnVMServiceServerStatus(
+      "http://127.0.0.1:56789/instance_auth/", native.get());
+
+  ASSERT_NE(native->GetVMInit(), nullptr);
+  EXPECT_EQ(native->GetVMInit()->GetVmServiceUri(),
+            "http://127.0.0.1:56789/instance_auth/");
 }
 
 }  // namespace testing

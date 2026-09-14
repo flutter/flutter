@@ -109,6 +109,7 @@ template("embedder_source_set") {
       "//flutter/flow",
       "//flutter/fml",
       "//flutter/lib/ui",
+      "//flutter/runtime",
       "//flutter/runtime:libdart",
       "//flutter/shell/common",
       "//flutter/skia",

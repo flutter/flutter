@@ -1020,6 +1020,10 @@ class FlutterEmbedderNative {
   static FlutterHardwareBufferExternalTextureFrameCallback
   GetHardwareBufferFrameCallback();
 
+  /// @brief Static callback invoked when the Dart VM service server status
+  /// becomes available.
+  static void OnVMServiceServerStatus(const char* uri, void* user_data);
+
   /// @brief Signals the engine that a texture has a new frame ready via
   /// FlutterEngineMarkExternalTextureFrameAvailable.
   FlutterEngineResult MarkExternalTextureFrameAvailable(
