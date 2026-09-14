@@ -57,6 +57,8 @@ class MockableJNIEnv : public JNIEnv {
     jni_.CallObjectMethodV = WrapCallObjectMethodV;
     jni_.CallVoidMethod = WrapCallVoidMethod;
     jni_.CallVoidMethodV = WrapCallVoidMethodV;
+    jni_.CallStaticVoidMethod = WrapCallStaticVoidMethod;
+    jni_.CallStaticVoidMethodV = WrapCallStaticVoidMethodV;
     jni_.DeleteGlobalRef = WrapDeleteGlobalRef;
     jni_.DeleteLocalRef = WrapDeleteLocalRef;
     jni_.ExceptionCheck = WrapExceptionCheck;
@@ -66,11 +68,13 @@ class MockableJNIEnv : public JNIEnv {
     jni_.FindClass = WrapFindClass;
     jni_.GetFieldID = WrapGetFieldID;
     jni_.GetMethodID = WrapGetMethodID;
+    jni_.GetObjectClass = WrapGetObjectClass;
     jni_.GetObjectRefType = WrapGetObjectRefType;
     jni_.GetStaticFieldID = WrapGetStaticFieldID;
     jni_.GetStaticMethodID = WrapGetStaticMethodID;
     jni_.NewGlobalRef = WrapNewGlobalRef;
     jni_.NewLocalRef = WrapNewLocalRef;
+    jni_.NewStringUTF = WrapNewStringUTF;
     jni_.NewWeakGlobalRef = WrapNewWeakGlobalRef;
     jni_.DeleteWeakGlobalRef = WrapDeleteWeakGlobalRef;
     jni_.PushLocalFrame = WrapPushLocalFrame;
@@ -82,6 +86,9 @@ class MockableJNIEnv : public JNIEnv {
 
   virtual jobject CallObjectMethodV(jobject, jmethodID, va_list) = 0;
   virtual void CallVoidMethodV(jobject, jmethodID, va_list) = 0;
+  virtual void CallStaticVoidMethodV(jclass, jmethodID, va_list) = 0;
+  virtual jclass GetObjectClass(jobject) = 0;
+  virtual jstring NewStringUTF(const char*) = 0;
   virtual void DeleteGlobalRef(jobject) = 0;
   virtual void DeleteLocalRef(jobject) = 0;
   virtual jboolean ExceptionCheck() = 0;
@@ -136,6 +143,28 @@ class MockableJNIEnv : public JNIEnv {
                                   jmethodID methodID,
                                   va_list args) {
     static_cast<MockableJNIEnv*>(env)->CallVoidMethodV(obj, methodID, args);
+  }
+  static void WrapCallStaticVoidMethod(JNIEnv* env,
+                                       jclass clazz,
+                                       jmethodID methodID,
+                                       ...) {
+    va_list args;
+    va_start(args, methodID);
+    WrapCallStaticVoidMethodV(env, clazz, methodID, args);
+    va_end(args);
+  }
+  static void WrapCallStaticVoidMethodV(JNIEnv* env,
+                                        jclass clazz,
+                                        jmethodID methodID,
+                                        va_list args) {
+    static_cast<MockableJNIEnv*>(env)->CallStaticVoidMethodV(clazz, methodID,
+                                                             args);
+  }
+  static jclass WrapGetObjectClass(JNIEnv* env, jobject obj) {
+    return static_cast<MockableJNIEnv*>(env)->GetObjectClass(obj);
+  }
+  static jstring WrapNewStringUTF(JNIEnv* env, const char* bytes) {
+    return static_cast<MockableJNIEnv*>(env)->NewStringUTF(bytes);
   }
   static void WrapDeleteGlobalRef(JNIEnv* env, jobject globalRef) {
     static_cast<MockableJNIEnv*>(env)->DeleteGlobalRef(globalRef);
@@ -244,6 +273,15 @@ class MockJNIEnv : public MockableJNIEnv {
         .WillByDefault(::testing::ReturnArg<0>());
     ON_CALL(*this, CallVoidMethodV(::testing::_, ::testing::_, ::testing::_))
         .WillByDefault(::testing::Return());
+    ON_CALL(*this,
+            CallStaticVoidMethodV(::testing::_, ::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return());
+    ON_CALL(*this, GetObjectClass(::testing::_))
+        .WillByDefault(::testing::Return(reinterpret_cast<jclass>(0x2001)));
+    ON_CALL(*this, NewStringUTF(::testing::_))
+        .WillByDefault(::testing::Return(reinterpret_cast<jstring>(0x3001)));
+    ON_CALL(*this, GetObjectRefType(::testing::_))
+        .WillByDefault(::testing::Return(JNILocalRefType));
   }
 
   MOCK_METHOD(jobject,
@@ -251,6 +289,12 @@ class MockJNIEnv : public MockableJNIEnv {
               (jobject, jmethodID, va_list),
               (override));
   MOCK_METHOD(void, CallVoidMethodV, (jobject, jmethodID, va_list), (override));
+  MOCK_METHOD(void,
+              CallStaticVoidMethodV,
+              (jclass, jmethodID, va_list),
+              (override));
+  MOCK_METHOD(jclass, GetObjectClass, (jobject), (override));
+  MOCK_METHOD(jstring, NewStringUTF, (const char*), (override));
   MOCK_METHOD(void, DeleteGlobalRef, (jobject), (override));
   MOCK_METHOD(void, DeleteLocalRef, (jobject), (override));
   MOCK_METHOD(jboolean, ExceptionCheck, (), (override));

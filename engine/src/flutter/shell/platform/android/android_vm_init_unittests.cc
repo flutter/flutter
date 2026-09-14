@@ -467,6 +467,44 @@ TEST(AndroidVMInitTest, MultithreadedConcurrentVMInitOperations) {
             kThreadCount * kIterationsPerThread);
 }
 
+TEST(AndroidVMInitTest, AndroidProjectArgsHolderDeduplicatesLeadingFlutter) {
+  AndroidProjectArgsHolder holder;
+  AndroidVMArgs args;
+  // args.command_line_args already contains "flutter" as argv0 from
+  // FlutterMain::Init.
+  args.command_line_args = {"flutter", "--enable-dart-profiling",
+                            "--observatory-port=0"};
+  holder.Populate(args);
+
+  const FlutterProjectArgs* project_args = holder.GetProjectArgs();
+  ASSERT_NE(project_args, nullptr);
+  // Expected argc is 3 ("flutter", "--enable-dart-profiling",
+  // "--observatory-port=0"), not 4 with duplicate "flutter".
+  constexpr int kExpectedArgc = 3;
+  EXPECT_EQ(project_args->command_line_argc, kExpectedArgc);
+  ASSERT_NE(project_args->command_line_argv, nullptr);
+  EXPECT_STREQ(project_args->command_line_argv[0], "flutter");
+  EXPECT_STREQ(project_args->command_line_argv[1], "--enable-dart-profiling");
+  EXPECT_STREQ(project_args->command_line_argv[2], "--observatory-port=0");
+}
+
+TEST(AndroidVMInitTest, AndroidVMArgsParsesCacheDirPath) {
+  AndroidVMArgs args;
+  std::vector<std::string> raw_args = {
+      "flutter", "--cache-dir-path=/data/user/0/com.example/cache"};
+  args.ParseCommandLineArgs(raw_args);
+
+  EXPECT_EQ(args.engine_caches_path, "/data/user/0/com.example/cache");
+}
+
+TEST(AndroidVMInitTest, AndroidVMInitSetVmServiceUriWithDefaultInvoker) {
+  // Default AndroidVMInit uses DefaultJvmInvoker when nullptr is passed,
+  // safe for host execution.
+  AndroidVMInit vm_init;
+  EXPECT_TRUE(vm_init.SetVmServiceUri("http://127.0.0.1:12345/authcode/"));
+  EXPECT_EQ(vm_init.GetVmServiceUri(), "http://127.0.0.1:12345/authcode/");
+}
+
 }  // namespace testing
 }  // namespace android
 }  // namespace flutter

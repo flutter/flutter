@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_ENGINE_H_
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_ENGINE_H_
 
+#include <atomic>
+#include <cstddef>
 #include <memory>
 #include <optional>
 #include <unordered_map>
@@ -124,6 +126,10 @@ class EmbedderEngine {
           external_texture_resolver,
       std::optional<FlutterRendererConfig> renderer_config) const;
 
+  void SetVMServiceServerStatusCallback(
+      FlutterVMServiceServerStatusCallback callback,
+      void* user_data);
+
  private:
   std::shared_ptr<EmbedderThreadHost> thread_host_;
   TaskRunners task_runners_;
@@ -132,6 +138,8 @@ class EmbedderEngine {
   std::unique_ptr<Shell> shell_;
   std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver_;
   std::optional<FlutterRendererConfig> renderer_config_;
+  std::optional<ptrdiff_t> vm_service_callback_handle_;
+  std::shared_ptr<std::atomic<bool>> vm_service_callback_active_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderEngine);
 };

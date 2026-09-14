@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "flutter/fml/make_copyable.h"
+#include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/shell/platform/embedder/embedder_struct_macros.h"
 #include "flutter/shell/platform/embedder/pixel_formats.h"
 #include "flutter/shell/platform/embedder/vsync_waiter_embedder.h"
@@ -47,7 +48,8 @@ EmbedderEngine::EmbedderEngine(
                                               on_create_platform_view,
                                               on_create_rasterizer)),
       external_texture_resolver_(std::move(external_texture_resolver)),
-      renderer_config_(renderer_config) {}
+      renderer_config_(renderer_config),
+      vm_service_callback_active_(std::make_shared<std::atomic<bool>>(true)) {}
 
 EmbedderEngine::EmbedderEngine(
     std::shared_ptr<EmbedderThreadHost> thread_host,
@@ -59,9 +61,56 @@ EmbedderEngine::EmbedderEngine(
       task_runners_(task_runners),
       shell_(std::move(shell)),
       external_texture_resolver_(std::move(external_texture_resolver)),
-      renderer_config_(renderer_config) {}
+      renderer_config_(renderer_config),
+      vm_service_callback_active_(std::make_shared<std::atomic<bool>>(true)) {}
 
-EmbedderEngine::~EmbedderEngine() = default;
+EmbedderEngine::~EmbedderEngine() {
+  if (vm_service_callback_active_) {
+    vm_service_callback_active_->store(false);
+  }
+  if (vm_service_callback_handle_.has_value()) {
+    DartServiceIsolate::RemoveServerStatusCallback(
+        *vm_service_callback_handle_);
+    vm_service_callback_handle_.reset();
+  }
+}
+
+void EmbedderEngine::SetVMServiceServerStatusCallback(
+    FlutterVMServiceServerStatusCallback callback,
+    void* user_data) {
+  if (vm_service_callback_active_) {
+    vm_service_callback_active_->store(false);
+  }
+  vm_service_callback_active_ = std::make_shared<std::atomic<bool>>(true);
+  if (vm_service_callback_handle_.has_value()) {
+    DartServiceIsolate::RemoveServerStatusCallback(
+        *vm_service_callback_handle_);
+    vm_service_callback_handle_.reset();
+  }
+  if (!callback) {
+    return;
+  }
+  auto platform_runner = task_runners_.GetPlatformTaskRunner();
+  if (!platform_runner) {
+    FML_LOG(ERROR)
+        << "Cannot register VM service status callback without platform "
+           "task runner.";
+    return;
+  }
+  auto active_token = vm_service_callback_active_;
+  vm_service_callback_handle_ = DartServiceIsolate::AddServerStatusCallback(
+      [platform_runner, callback, user_data,
+       active_token](const std::string& uri) {
+        if (!active_token || !active_token->load()) {
+          return;
+        }
+        platform_runner->PostTask([callback, user_data, uri, active_token] {
+          if (active_token && active_token->load()) {
+            callback(uri.c_str(), user_data);
+          }
+        });
+      });
+}
 
 bool EmbedderEngine::LaunchShell() {
   if (!shell_args_) {

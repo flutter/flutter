@@ -2607,22 +2607,80 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
   std::vector<std::string> default_cmd_strings;
   std::vector<const char*> default_cmd_ptrs;
 
+  // argv0 is always the binary name "flutter".
   default_cmd_strings.push_back("flutter");
 
   if (args.command_line_argc > 0 && args.command_line_argv) {
-    for (int i = 0; i < args.command_line_argc; ++i) {
+    int start_idx = 0;
+    if (args.command_line_argv[0] != nullptr &&
+        std::string(args.command_line_argv[0]) == "flutter") {
+      start_idx = 1;
+    }
+    for (int i = start_idx; i < args.command_line_argc; ++i) {
       const char* arg = args.command_line_argv[i];
       if (arg) {
-        if (i == 0 && std::string(arg) == "flutter") {
-          continue;
-        }
         default_cmd_strings.push_back(arg);
       }
     }
   } else if (default_vm_args.has_value()) {
-    for (const auto& str : default_vm_args->command_line_args) {
-      default_cmd_strings.push_back(str);
+    size_t start_idx = 0;
+    if (!default_vm_args->command_line_args.empty() &&
+        default_vm_args->command_line_args[0] == "flutter") {
+      start_idx = 1;
     }
+    for (size_t i = start_idx; i < default_vm_args->command_line_args.size();
+         ++i) {
+      default_cmd_strings.push_back(default_vm_args->command_line_args[i]);
+    }
+  }
+
+  // Ensure --cache-dir-path= is present if engine_caches_path is known.
+  if (default_vm_args.has_value() &&
+      !default_vm_args->engine_caches_path.empty()) {
+    bool has_cache_dir = false;
+    for (const auto& str : default_cmd_strings) {
+      if (str.rfind("--cache-dir-path=", 0) == 0) {
+        has_cache_dir = true;
+        break;
+      }
+    }
+    if (!has_cache_dir) {
+      default_cmd_strings.push_back("--cache-dir-path=" +
+                                    default_vm_args->engine_caches_path);
+    }
+  }
+
+  // Impeller gating enforcement:
+  // If the active rendering API is Skia or Software, guarantee
+  // --enable-impeller=false is passed so UIDartState does not default to
+  // Impeller.
+  AndroidRenderingAPI selected_api = GetSelectedRenderingAPI();
+  bool impeller_active =
+      (selected_api == AndroidRenderingAPI::kImpellerAutoselect ||
+       selected_api == AndroidRenderingAPI::kImpellerOpenGLES ||
+       selected_api == AndroidRenderingAPI::kImpellerVulkan);
+  if (!impeller_active) {
+    // Remove any --enable-impeller=true or --enable-impeller flags if present.
+    std::vector<std::string> filtered_cmd_strings;
+    filtered_cmd_strings.reserve(default_cmd_strings.size() + 1);
+    for (const auto& str : default_cmd_strings) {
+      if (str == "--enable-impeller" || str == "--enable-impeller=true" ||
+          str == "--enable-impeller=1") {
+        continue;
+      }
+      filtered_cmd_strings.push_back(str);
+    }
+    bool has_disable_impeller = false;
+    for (const auto& str : filtered_cmd_strings) {
+      if (str == "--enable-impeller=false" || str == "--enable-impeller=0") {
+        has_disable_impeller = true;
+        break;
+      }
+    }
+    if (!has_disable_impeller) {
+      filtered_cmd_strings.push_back("--enable-impeller=false");
+    }
+    default_cmd_strings = std::move(filtered_cmd_strings);
   }
 
   default_cmd_ptrs.reserve(default_cmd_strings.size());
@@ -2801,6 +2859,8 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
   args.platform_message_callback =
       &FlutterEmbedderNative::OnPlatformMessageCallback;
   args.update_semantics_callback2 = &FlutterEmbedderNative::OnUpdateSemantics2;
+  args.vm_service_server_status_callback =
+      &FlutterEmbedderNative::OnVMServiceServerStatus;
   args.log_message_callback = [](const char* tag, const char* message,
                                  void* user_data) {
     __android_log_print(ANDROID_LOG_INFO, tag ? tag : "flutter", "%s",
@@ -3505,6 +3565,28 @@ FlutterEmbedderNative::GetHardwareBufferFrameCallback() {
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::GetHardwareBufferFrameCallback");
   return &FlutterEmbedderNative::OnHardwareBufferExternalTextureFrameCallback;
+}
+
+void FlutterEmbedderNative::OnVMServiceServerStatus(const char* uri,
+                                                    void* user_data) {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::OnVMServiceServerStatus",
+               "uri", uri ? uri : "null");
+  if (!uri) {
+    return;
+  }
+  std::string uri_str(uri);
+  if (user_data) {
+    auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
+    if (native) {
+      if (auto vm_init = native->GetVMInit()) {
+        vm_init->SetVmServiceUri(uri_str);
+        return;
+      }
+    }
+  }
+  if (auto default_vm_init = FlutterEmbedderNative::GetDefaultVMInit()) {
+    default_vm_init->SetVmServiceUri(uri_str);
+  }
 }
 
 FlutterEngineResult FlutterEmbedderNative::MarkExternalTextureFrameAvailable(
