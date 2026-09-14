@@ -353,11 +353,15 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
+      artifacts: toolContext!.artifacts,
+      buildInfo: buildInfo,
+      fileSystem: _fileSystem,
+      logger: _logger,
+      platform: _platform,
+      processManager: toolContext!.processManager,
       target: targetFile,
       targetModelOverride: TargetModel(stringArg('target-model')!),
-      buildInfo: buildInfo,
       userIdentifier: userIdentifier,
-      platform: _platform,
     );
     flutterDevice.vmServiceUri = vmServiceUri;
     final flutterDevices = <FlutterDevice>[flutterDevice];
