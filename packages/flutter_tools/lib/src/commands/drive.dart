@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
+import 'package:process/process.dart';
 
 import '../android/android_device.dart';
 import '../application_package.dart';
@@ -304,14 +305,17 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Artifacts artifacts = _toolContext.artifacts;
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final OutputPreferences outputPreferences = _toolContext.outputPreferences;
-    final Platform platform = _toolContext.platform;
-    final ProcessUtils processUtils = _toolContext.processUtils;
-    final SystemClock systemClock = _toolContext.systemClock;
-    final AnsiTerminal terminal = _toolContext.terminal;
+    final ToolContext(
+      :Artifacts artifacts,
+      :FileSystem fs,
+      :Logger logger,
+      :OutputPreferences outputPreferences,
+      :Platform platform,
+      :ProcessManager processManager,
+      :ProcessUtils processUtils,
+      :SystemClock systemClock,
+      :AnsiTerminal terminal,
+    ) = _toolContext;
 
     final String? testFile = _getTestFile();
     if (testFile == null) {
@@ -347,14 +351,16 @@ class DriveCommand extends RunCommandBase {
 
     _flutterDriverFactory ??= FlutterDriverFactory(
       applicationPackageFactory: ApplicationPackageFactory.instance!,
-      logger: logger,
-      platform: platform,
-      terminal: terminal,
-      outputPreferences: outputPreferences,
-      processUtils: processUtils,
+      artifacts: artifacts,
       dartSdkPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
       devtoolsLauncher: DevtoolsLauncher.instance!,
       fileSystem: fs,
+      logger: logger,
+      outputPreferences: outputPreferences,
+      platform: platform,
+      processManager: processManager,
+      processUtils: processUtils,
+      terminal: terminal,
       analytics: analytics,
       systemClock: systemClock,
     );

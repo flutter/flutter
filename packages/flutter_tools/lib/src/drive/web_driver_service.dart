@@ -8,9 +8,11 @@ import 'dart:math' as math;
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -31,11 +33,13 @@ import 'drive_service.dart';
 /// An implementation of the driver service for web debug and release applications.
 class WebDriverService extends DriverService {
   WebDriverService({
+    required this._artifacts,
     required this._dartSdkPath,
     required this._fileSystem,
     required this._logger,
     required this._outputPreferences,
     required this._platform,
+    required this._processManager,
     required this._processUtils,
     required this._terminal,
     Analytics? analytics,
@@ -43,11 +47,13 @@ class WebDriverService extends DriverService {
   }) : _analytics = analytics ?? const NoOpAnalytics(),
        _systemClock = systemClock ?? const SystemClock();
 
+  final Artifacts _artifacts;
   final String _dartSdkPath;
   final FileSystem _fileSystem;
   final Logger _logger;
   final OutputPreferences _outputPreferences;
   final Platform _platform;
+  final ProcessManager _processManager;
   final ProcessUtils _processUtils;
   final Terminal _terminal;
   final Analytics _analytics;
@@ -79,9 +85,13 @@ class WebDriverService extends DriverService {
   }) async {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      target: mainPath,
+      artifacts: _artifacts,
       buildInfo: buildInfo,
+      fileSystem: _fileSystem,
+      logger: _logger,
       platform: _platform,
+      processManager: _processManager,
+      target: mainPath,
     );
     _residentRunner = webRunnerFactory!.createWebRunner(
       flutterDevice,

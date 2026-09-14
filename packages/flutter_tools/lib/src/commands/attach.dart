@@ -364,13 +364,13 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      buildInfo: buildInfo,
-      platform: platform,
-      target: targetFile,
       artifacts: artifacts,
+      buildInfo: buildInfo,
       fileSystem: fs,
       logger: logger,
+      platform: platform,
       processManager: processManager,
+      target: targetFile,
       targetModelOverride: TargetModel(stringArg('target-model')!),
       userIdentifier: userIdentifier,
     );

@@ -7,10 +7,12 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/dds.dart';
 import '../base/logger.dart';
@@ -27,12 +29,14 @@ import 'web_driver_service.dart';
 class FlutterDriverFactory {
   FlutterDriverFactory({
     required this._applicationPackageFactory,
+    required this._artifacts,
     required this._dartSdkPath,
     required this._devtoolsLauncher,
     required this._fileSystem,
     required this._logger,
     required this._outputPreferences,
     required this._platform,
+    required this._processManager,
     required this._processUtils,
     required this._terminal,
     this._analytics,
@@ -40,12 +44,14 @@ class FlutterDriverFactory {
   });
 
   final ApplicationPackageFactory _applicationPackageFactory;
+  final Artifacts _artifacts;
   final String _dartSdkPath;
   final DevtoolsLauncher _devtoolsLauncher;
   final FileSystem _fileSystem;
   final Logger _logger;
   final OutputPreferences _outputPreferences;
   final Platform _platform;
+  final ProcessManager _processManager;
   final ProcessUtils _processUtils;
   final Terminal _terminal;
   final Analytics? _analytics;
@@ -55,15 +61,17 @@ class FlutterDriverFactory {
   DriverService createDriverService(bool web) {
     if (web) {
       return WebDriverService(
-        analytics: _analytics,
+        artifacts: _artifacts,
         dartSdkPath: _dartSdkPath,
         fileSystem: _fileSystem,
         logger: _logger,
         outputPreferences: _outputPreferences,
         platform: _platform,
+        processManager: _processManager,
         processUtils: _processUtils,
-        systemClock: _systemClock,
         terminal: _terminal,
+        analytics: _analytics,
+        systemClock: _systemClock,
       );
     }
     return FlutterDriverService(

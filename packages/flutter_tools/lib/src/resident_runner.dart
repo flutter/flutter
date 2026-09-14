@@ -75,58 +75,47 @@ class FlutterDevice {
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
     Device device, {
-    required String? target,
+    required Artifacts artifacts,
     required BuildInfo buildInfo,
+    required FileSystem fileSystem,
+    required Logger logger,
     required Platform platform,
-    String? userIdentifier,
-    TargetModel? targetModelOverride,
-    Artifacts? artifacts,
-    ProcessManager? processManager,
-    FileSystem? fileSystem,
-    Logger? logger,
-    ShutdownHooks? shutdownHooks,
+    required ProcessManager processManager,
+    required String? target,
     Config? config,
     OperatingSystemUtils? osUtils,
+    ShutdownHooks? shutdownHooks,
+    TargetModel? targetModelOverride,
+    String? userIdentifier,
   }) async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    final FileSystem effectiveFs = fileSystem ?? MemoryFileSystem.test();
-    final Logger effectiveLogger = logger ?? BufferLogger.test();
-    final ProcessManager effectiveProcessManager = processManager ?? const LocalProcessManager();
     final OperatingSystemUtils effectiveOsUtils =
         osUtils ??
         OperatingSystemUtils(
-          fileSystem: effectiveFs,
-          logger: effectiveLogger,
+          fileSystem: fileSystem,
+          logger: logger,
           platform: platform,
-          processManager: effectiveProcessManager,
-        );
-    final Artifacts effectiveArtifacts =
-        artifacts ??
-        CachedArtifacts(
-          fileSystem: effectiveFs,
-          platform: platform,
-          cache: Cache.test(fileSystem: effectiveFs, processManager: effectiveProcessManager),
-          operatingSystemUtils: effectiveOsUtils,
+          processManager: processManager,
         );
     final Config effectiveConfig = config ?? Config.test();
     final ShutdownHooks effectiveShutdownHooks = shutdownHooks ?? ShutdownHooks();
 
     final shaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: ShaderCompiler(
-        artifacts: effectiveArtifacts,
-        logger: effectiveLogger,
-        processManager: effectiveProcessManager,
-        fileSystem: effectiveFs,
+        artifacts: artifacts,
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
       ),
-      fileSystem: effectiveFs,
-      logger: effectiveLogger,
+      fileSystem: fileSystem,
+      logger: logger,
     );
 
     final ResidentCompiler generator = residentCompilerFactory.create(
-      artifacts: effectiveArtifacts,
-      processManager: effectiveProcessManager,
-      logger: effectiveLogger,
-      fileSystem: effectiveFs,
+      artifacts: artifacts,
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
       platform: platform,
       shutdownHooks: effectiveShutdownHooks,
       config: effectiveConfig,
@@ -142,10 +131,10 @@ class FlutterDevice {
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
       developmentShaderCompiler: shaderCompiler,
-      logger: effectiveLogger,
-      fileSystem: effectiveFs,
-      artifacts: effectiveArtifacts,
-      processManager: effectiveProcessManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      processManager: processManager,
       osUtils: effectiveOsUtils,
       platform: platform,
     );

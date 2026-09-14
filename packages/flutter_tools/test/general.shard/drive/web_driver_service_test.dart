@@ -7,6 +7,7 @@ import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -444,13 +445,15 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 WebDriverService setUpDriverService() {
   final logger = BufferLogger.test();
   return WebDriverService(
-    logger: logger,
-    terminal: Terminal.test(),
-    platform: FakePlatform(),
-    outputPreferences: OutputPreferences.test(),
-    processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.any()),
+    artifacts: Artifacts.test(),
     dartSdkPath: 'dart',
     fileSystem: MemoryFileSystem.test(),
+    logger: logger,
+    outputPreferences: OutputPreferences.test(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.any()),
+    terminal: Terminal.test(),
   );
 }
 
