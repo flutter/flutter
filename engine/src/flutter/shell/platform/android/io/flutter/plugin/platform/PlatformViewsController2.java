@@ -683,13 +683,13 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
     // Use a fresh destination so cleanup cannot close a raster input still in native use.
     // Bypass newTransaction(), which tests may override to return an existing input.
-    final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
     if (platformTx != null) {
-      tx.merge(platformTx);
+      tx = tx.merge(platformTx);
       platformTx.close();
     }
     for (SurfaceControl.Transaction rasterTx : activeRasterTransactions) {
-      tx.merge(rasterTx);
+      tx = tx.merge(rasterTx);
     }
     activeRasterTransactions.clear();
 
