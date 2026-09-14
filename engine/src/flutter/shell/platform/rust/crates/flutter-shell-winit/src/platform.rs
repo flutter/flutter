@@ -5,15 +5,17 @@ use winit::{
     window::{Window, WindowAttributes},
 };
 
-use crate::{NativeWindowKind, PopupPlacement};
+use super::{NativeWindowKind, PopupPlacement};
 
 #[cfg(target_os = "linux")]
+#[path = "platform/linux.rs"]
 mod linux;
 
 #[cfg(target_os = "linux")]
 pub(crate) use linux::LinuxPlatform as CurrentPlatform;
 
 #[cfg(target_os = "android")]
+#[path = "platform/android.rs"]
 mod android;
 
 #[cfg(target_os = "android")]

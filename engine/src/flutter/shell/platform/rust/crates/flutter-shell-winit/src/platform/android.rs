@@ -7,8 +7,8 @@
 use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowAttributes};
 
+use super::super::{NativeWindowKind, PopupPlacement};
 use super::PlatformBackend;
-use crate::{NativeWindowKind, PopupPlacement};
 
 pub(crate) struct AndroidPlatform;
 
