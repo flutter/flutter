@@ -115,8 +115,8 @@ void MessageLoopImpl::DoTerminate() {
   Terminate();
 }
 
-void MessageLoopImpl::RunTask(fml::closure task,
-                              std::vector<fml::closure> observers) {
+void MessageLoopImpl::RunTask(const fml::closure& task,
+                              const std::vector<fml::closure>& observers) {
   task();
   for (const auto& observer : observers) {
     observer();
@@ -133,7 +133,7 @@ void MessageLoopImpl::FlushTasks() {
     }
     std::vector<fml::closure> observers =
         task_queue_->GetObserversToNotify(queue_id_);
-    RunTask(std::move(invocation), std::move(observers));
+    RunTask(invocation, observers);
   }
 }
 

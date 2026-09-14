@@ -59,7 +59,8 @@ class MessageLoopImpl : public Wakeable,
 
   void RunExpiredTasksNow();
 
-  virtual void RunTask(fml::closure task, std::vector<fml::closure> observers);
+  virtual void RunTask(const fml::closure& task,
+                       const std::vector<fml::closure>& observers);
 
   MessageLoopImpl();
 

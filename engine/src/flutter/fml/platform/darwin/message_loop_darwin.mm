@@ -79,9 +79,10 @@ void MessageLoopDarwin::WakeUp(fml::TimePoint time_point) {
       CFAbsoluteTimeGetCurrent() + (time_point - fml::TimePoint::Now()).ToSecondsF());
 }
 
-void MessageLoopDarwin::RunTask(fml::closure task, std::vector<fml::closure> observers) {
+void MessageLoopDarwin::RunTask(const fml::closure& task,
+                                const std::vector<fml::closure>& observers) {
   @autoreleasepool {
-    MessageLoopImpl::RunTask(std::move(task), std::move(observers));
+    MessageLoopImpl::RunTask(task, observers);
   }
 }
 
