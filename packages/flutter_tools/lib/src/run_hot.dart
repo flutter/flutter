@@ -275,7 +275,9 @@ class HotRunner extends ResidentRunner {
       return 2;
     }
 
-    await _detectAndApplyAppFlavor();
+    if (needsFullRestart) {
+      await _detectAndApplyAppFlavor();
+    }
 
     for (final FlutterDevice? device in flutterDevices) {
       device!.developmentShaderCompiler.configureCompiler(device.targetPlatform);
