@@ -722,8 +722,7 @@ abstract final class DebuggingOptionDescriptors {
   static const iosProfileDebugger = NullableFlagOptionDescriptor(
     name: 'ios-profile-debugger',
     negatable: false,
-    help:
-        'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
+    help: 'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
   );
 
   static const useTestFonts = FlagOptionDescriptor(
