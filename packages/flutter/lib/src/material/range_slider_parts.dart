@@ -5,7 +5,6 @@
 /// @docImport 'color_scheme.dart';
 /// @docImport 'range_slider.dart';
 /// @docImport 'text_theme.dart';
-/// @docImport 'theme_data.dart';
 library;
 
 import 'dart:math' as math;
