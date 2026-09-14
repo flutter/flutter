@@ -447,8 +447,10 @@ TEST(ImageDecoderNoGLTest, ImpellerUnmultipliedAlphaPng) {
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
-TEST(ImageDecoderNoGLTest, ImpellerHdrPqImageDecodesToF16) {
 #if IMPELLER_SUPPORTS_RENDERING
+void ExpectDecodedFormat(sk_sp<SkColorSpace> color_space,
+                         bool supports_wide_gamut,
+                         impeller::PixelFormat expected_format) {
   uint8_t pixel_data[] = {255, 255, 255, 255};
   sk_sp<SkData> sk_data = SkData::MakeWithCopy(pixel_data, sizeof(pixel_data));
   auto immutable_buffer =
@@ -459,8 +461,7 @@ TEST(ImageDecoderNoGLTest, ImpellerHdrPqImageDecodesToF16) {
       .height = 1,
       .format = ImageDescriptor::PixelFormat::kRGBA8888,
       .alpha_type = kOpaque_SkAlphaType,
-      .color_space =
-          SkColorSpace::MakeRGB(SkNamedTransferFn::kPQ, SkNamedGamut::kRec2020),
+      .color_space = std::move(color_space),
   };
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
       immutable_buffer->data(), image_info, sizeof(pixel_data));
@@ -475,155 +476,51 @@ TEST(ImageDecoderNoGLTest, ImpellerHdrPqImageDecodesToF16) {
   absl::StatusOr<ImageDecoderImpeller::DecompressResult> result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), {.target_width = 1, .target_height = 1}, {1, 1},
-          /*supports_wide_gamut=*/true, capabilities, allocator);
+          supports_wide_gamut, capabilities, allocator);
 
   ASSERT_TRUE(result.ok());
-  EXPECT_EQ(result->image_info.format,
-            impeller::PixelFormat::kR16G16B16A16Float);
+  EXPECT_EQ(result->image_info.format, expected_format);
+}
+#endif  // IMPELLER_SUPPORTS_RENDERING
+
+TEST(ImageDecoderNoGLTest, ImpellerHdrPqImageDecodesToF16) {
+#if IMPELLER_SUPPORTS_RENDERING
+  ExpectDecodedFormat(
+      SkColorSpace::MakeRGB(SkNamedTransferFn::kPQ, SkNamedGamut::kRec2020),
+      /*supports_wide_gamut=*/true, impeller::PixelFormat::kR16G16B16A16Float);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
 TEST(ImageDecoderNoGLTest, ImpellerHdrHlgImageDecodesToF16) {
 #if IMPELLER_SUPPORTS_RENDERING
-  uint8_t pixel_data[] = {255, 255, 255, 255};
-  sk_sp<SkData> sk_data = SkData::MakeWithCopy(pixel_data, sizeof(pixel_data));
-  auto immutable_buffer =
-      fml::MakeRefCounted<ImmutableBuffer>(std::move(sk_data));
-
-  ImageDescriptor::ImageInfo image_info = {
-      .width = 1,
-      .height = 1,
-      .format = ImageDescriptor::PixelFormat::kRGBA8888,
-      .alpha_type = kOpaque_SkAlphaType,
-      .color_space = SkColorSpace::MakeRGB(SkNamedTransferFn::kHLG,
-                                           SkNamedGamut::kRec2020),
-  };
-  auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
-      immutable_buffer->data(), image_info, sizeof(pixel_data));
-
-  std::shared_ptr<impeller::Capabilities> capabilities =
-      impeller::CapabilitiesBuilder()
-          .SetSupportsTextureToTextureBlits(true)
-          .Build();
-  std::shared_ptr<impeller::Allocator> allocator =
-      std::make_shared<impeller::TestImpellerAllocator>();
-
-  absl::StatusOr<ImageDecoderImpeller::DecompressResult> result =
-      ImageDecoderImpeller::DecompressTexture(
-          descriptor.get(), {.target_width = 1, .target_height = 1}, {1, 1},
-          /*supports_wide_gamut=*/true, capabilities, allocator);
-
-  ASSERT_TRUE(result.ok());
-  EXPECT_EQ(result->image_info.format,
-            impeller::PixelFormat::kR16G16B16A16Float);
+  ExpectDecodedFormat(
+      SkColorSpace::MakeRGB(SkNamedTransferFn::kHLG, SkNamedGamut::kRec2020),
+      /*supports_wide_gamut=*/true, impeller::PixelFormat::kR16G16B16A16Float);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
 TEST(ImageDecoderNoGLTest, ImpellerOpaqueSdrWideGamutDecodesToB10XR) {
 #if IMPELLER_SUPPORTS_RENDERING
-  uint8_t pixel_data[] = {255, 255, 255, 255};
-  sk_sp<SkData> sk_data = SkData::MakeWithCopy(pixel_data, sizeof(pixel_data));
-  auto immutable_buffer =
-      fml::MakeRefCounted<ImmutableBuffer>(std::move(sk_data));
-
-  ImageDescriptor::ImageInfo image_info = {
-      .width = 1,
-      .height = 1,
-      .format = ImageDescriptor::PixelFormat::kRGBA8888,
-      .alpha_type = kOpaque_SkAlphaType,
-      .color_space = SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
-                                           SkNamedGamut::kDisplayP3),
-  };
-  auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
-      immutable_buffer->data(), image_info, sizeof(pixel_data));
-
-  std::shared_ptr<impeller::Capabilities> capabilities =
-      impeller::CapabilitiesBuilder()
-          .SetSupportsTextureToTextureBlits(true)
-          .Build();
-  std::shared_ptr<impeller::Allocator> allocator =
-      std::make_shared<impeller::TestImpellerAllocator>();
-
-  absl::StatusOr<ImageDecoderImpeller::DecompressResult> result =
-      ImageDecoderImpeller::DecompressTexture(
-          descriptor.get(), {.target_width = 1, .target_height = 1}, {1, 1},
-          /*supports_wide_gamut=*/true, capabilities, allocator);
-
-  ASSERT_TRUE(result.ok());
-  EXPECT_EQ(result->image_info.format, impeller::PixelFormat::kB10G10R10XR);
+  ExpectDecodedFormat(
+      SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDisplayP3),
+      /*supports_wide_gamut=*/true, impeller::PixelFormat::kB10G10R10XR);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
 TEST(ImageDecoderNoGLTest, ImpellerHdrImageWithoutWideGamutDecodesToF16) {
 #if IMPELLER_SUPPORTS_RENDERING
-  uint8_t pixel_data[] = {255, 255, 255, 255};
-  sk_sp<SkData> sk_data = SkData::MakeWithCopy(pixel_data, sizeof(pixel_data));
-  auto immutable_buffer =
-      fml::MakeRefCounted<ImmutableBuffer>(std::move(sk_data));
-
-  ImageDescriptor::ImageInfo image_info = {
-      .width = 1,
-      .height = 1,
-      .format = ImageDescriptor::PixelFormat::kRGBA8888,
-      .alpha_type = kOpaque_SkAlphaType,
-      .color_space =
-          SkColorSpace::MakeRGB(SkNamedTransferFn::kPQ, SkNamedGamut::kSRGB),
-  };
-  auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
-      immutable_buffer->data(), image_info, sizeof(pixel_data));
-
-  std::shared_ptr<impeller::Capabilities> capabilities =
-      impeller::CapabilitiesBuilder()
-          .SetSupportsTextureToTextureBlits(true)
-          .Build();
-  std::shared_ptr<impeller::Allocator> allocator =
-      std::make_shared<impeller::TestImpellerAllocator>();
-
-  absl::StatusOr<ImageDecoderImpeller::DecompressResult> result =
-      ImageDecoderImpeller::DecompressTexture(
-          descriptor.get(), {.target_width = 1, .target_height = 1}, {1, 1},
-          /*supports_wide_gamut=*/true, capabilities, allocator);
-
-  ASSERT_TRUE(result.ok());
-  EXPECT_EQ(result->image_info.format,
-            impeller::PixelFormat::kR16G16B16A16Float);
+  ExpectDecodedFormat(
+      SkColorSpace::MakeRGB(SkNamedTransferFn::kPQ, SkNamedGamut::kSRGB),
+      /*supports_wide_gamut=*/true, impeller::PixelFormat::kR16G16B16A16Float);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
 TEST(ImageDecoderNoGLTest,
      ImpellerHdrImageWithoutWideGamutSupportDecodesToRGBA8888) {
 #if IMPELLER_SUPPORTS_RENDERING
-  uint8_t pixel_data[] = {255, 255, 255, 255};
-  sk_sp<SkData> sk_data = SkData::MakeWithCopy(pixel_data, sizeof(pixel_data));
-  auto immutable_buffer =
-      fml::MakeRefCounted<ImmutableBuffer>(std::move(sk_data));
-
-  ImageDescriptor::ImageInfo image_info = {
-      .width = 1,
-      .height = 1,
-      .format = ImageDescriptor::PixelFormat::kRGBA8888,
-      .alpha_type = kOpaque_SkAlphaType,
-      .color_space =
-          SkColorSpace::MakeRGB(SkNamedTransferFn::kPQ, SkNamedGamut::kRec2020),
-  };
-  auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
-      immutable_buffer->data(), image_info, sizeof(pixel_data));
-
-  std::shared_ptr<impeller::Capabilities> capabilities =
-      impeller::CapabilitiesBuilder()
-          .SetSupportsTextureToTextureBlits(true)
-          .Build();
-  std::shared_ptr<impeller::Allocator> allocator =
-      std::make_shared<impeller::TestImpellerAllocator>();
-
-  absl::StatusOr<ImageDecoderImpeller::DecompressResult> result =
-      ImageDecoderImpeller::DecompressTexture(
-          descriptor.get(), {.target_width = 1, .target_height = 1}, {1, 1},
-          /*supports_wide_gamut=*/false, capabilities, allocator);
-
-  ASSERT_TRUE(result.ok());
-  EXPECT_EQ(result->image_info.format,
-            impeller::PixelFormat::kR8G8B8A8UNormInt);
+  ExpectDecodedFormat(
+      SkColorSpace::MakeRGB(SkNamedTransferFn::kPQ, SkNamedGamut::kRec2020),
+      /*supports_wide_gamut=*/false, impeller::PixelFormat::kR8G8B8A8UNormInt);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
