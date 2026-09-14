@@ -49,9 +49,8 @@ class TestServiceExtensionsBinding extends BindingBase
   }
 
   Iterable<Map<String, dynamic>> getServiceExtensionStateChangedEvents(String extensionName) {
-    return getEventsDispatched(
-      'Flutter.ServiceExtensionStateChanged',
-    ).where((Map<String, dynamic> event) => event['extension'] == extensionName);
+    return getEventsDispatched('Flutter.ServiceExtensionStateChanged')
+        .where((Map<String, dynamic> event) => event['extension'] == extensionName);
   }
 
   Future<Map<String, dynamic>> testExtension(String name, Map<String, String> arguments) {

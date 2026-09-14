@@ -737,13 +737,11 @@ class _CreationParams {
 abstract class AndroidViewController extends PlatformViewController {
   AndroidViewController._({
     required this.viewId,
-    required String viewType,
-    required TextDirection layoutDirection,
+    required this._viewType,
+    required this._layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
   }) : assert(creationParams == null || creationParamsCodec != null),
-       _viewType = viewType,
-       _layoutDirection = layoutDirection,
        _creationParams = creationParams == null
            ? null
            : _CreationParams(creationParams, creationParamsCodec!);
