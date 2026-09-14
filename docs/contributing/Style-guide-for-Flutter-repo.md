@@ -288,7 +288,7 @@ by real developers.
 
 ### Get early feedback when designing new APIs
 
-If you're designing a new API or a new feature, consider [writing a design doc](Design-Documents.md).
+If you're designing a new API or a new feature, consider [writing an RFC or design doc](Design-Documents.md).
 Then, get feedback from the relevant people, e.g. post it on the [relevant chat channel](Chat.md#existing-channels).
 
 
