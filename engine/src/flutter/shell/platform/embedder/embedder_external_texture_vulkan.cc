@@ -186,7 +186,21 @@ EmbedderExternalTextureSourceVulkan::CreateYUVConversion(
                                 impeller::vk::ComponentSwizzle::eIdentity};
   conversion_info.xChromaOffset = impeller::vk::ChromaLocation::eCositedEven;
   conversion_info.yChromaOffset = impeller::vk::ChromaLocation::eCositedEven;
-  conversion_info.chromaFilter = impeller::vk::Filter::eNearest;
+
+  impeller::vk::FormatProperties format_props;
+  context.GetPhysicalDevice().getFormatProperties(
+      static_cast<impeller::vk::Format>(embedder_desc->format), &format_props);
+
+  const bool supports_linear_filtering =
+      !!(format_props.optimalTilingFeatures &
+         impeller::vk::FormatFeatureFlagBits::
+             eSampledImageYcbcrConversionLinearFilter) &&
+      !!(format_props.optimalTilingFeatures &
+         impeller::vk::FormatFeatureFlagBits::eSampledImageFilterLinear);
+
+  conversion_info.chromaFilter = supports_linear_filtering
+                                     ? impeller::vk::Filter::eLinear
+                                     : impeller::vk::Filter::eNearest;
   conversion_info.forceExplicitReconstruction = false;
   return context.GetYUVConversionLibrary()->GetConversion(conversion_chain);
 }
