@@ -1469,7 +1469,13 @@ _flutter.loader.load();
       expect(
         logger.statusText,
         contains(
-          'Migrate your project from dart:html and package:js to package:web and dart:js_interop.',
+          'dart:html, dart:js, and legacy JS interop libraries are deprecated and planned for removal',
+        ),
+      );
+      expect(
+        logger.statusText,
+        contains(
+          'from the Dart SDK in a future release. Migrate your project to package:web and dart:js_interop.',
         ),
       );
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
