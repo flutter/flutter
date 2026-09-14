@@ -680,28 +680,24 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     final List<SurfaceControl.Transaction> rasterTxs;
     final SurfaceControl.Transaction platformTx;
     synchronized (transactionLock) {
-      rasterTxs =
-          activeRasterTransactions.isEmpty() ? null : new ArrayList<>(activeRasterTransactions);
+      rasterTxs = new ArrayList<>(activeRasterTransactions);
       activeRasterTransactions.clear();
 
       platformTx = activePlatformTransaction;
       activePlatformTransaction = null;
     }
 
-    // Use a separate destination: closing a raster input could free a native pointer still in use
-    // by its producer. See createTransaction().
-    SurfaceControl.Transaction tx = null;
-    if (platformTx != null || rasterTxs != null) {
-      tx = new SurfaceControl.Transaction();
-      if (platformTx != null) {
-        tx.merge(platformTx);
-        platformTx.close();
-      }
-      if (rasterTxs != null) {
-        for (int i = 0; i < rasterTxs.size(); i++) {
-          tx.merge(rasterTxs.get(i));
-        }
-      }
+    // Merge into a fresh destination: closing a raster input could free a native pointer still in
+    // use by its producer. See createTransaction().
+    final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+    if (platformTx != null) {
+      tx.merge(platformTx);
+      // merge() moved the contents into tx, so this frees the now-empty native transaction
+      // instead of leaving it to an arbitrary later GC.
+      platformTx.close();
+    }
+    for (int i = 0; i < rasterTxs.size(); i++) {
+      tx.merge(rasterTxs.get(i));
     }
 
     // This runs on the platform thread but is posted from the raster thread, so by the time it
@@ -712,18 +708,15 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     final AttachedSurfaceControl rootSurfaceControl =
         flutterView == null ? null : flutterView.getRootSurfaceControl();
     if (rootSurfaceControl == null) {
-      if (tx != null) {
-        tx.close();
-      }
+      // Nothing will apply this. close() releases the native transaction and the file descriptors
+      // it owns, including acquire fences merged in from raster buffers, rather than deferring
+      // them to an arbitrary later GC. It does not recall buffers already sent to SurfaceFlinger.
+      tx.close();
       return;
     }
 
-    // applyTransactionOnDraw() does not schedule a draw. Invalidate even on empty frames to flush
-    // pending ViewRootImpl transactions. See https://github.com/flutter/flutter/issues/175546.
     flutterView.invalidate();
-    if (tx != null) {
-      rootSurfaceControl.applyTransactionOnDraw(tx);
-    }
+    rootSurfaceControl.applyTransactionOnDraw(tx);
   }
 
   // Called on the platform thread (UI thread) via the platform task runner.
@@ -737,6 +730,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       pendingRasterTransactions.clear();
 
       if (activePlatformTransaction != null) {
+        // This belongs to a frame whose onEndFrame() never ran, so nothing will ever apply it.
+        // Closing frees the native transaction now instead of at an arbitrary later GC. It holds
+        // only platform-thread mutations, so there are no buffers or fences to release.
         activePlatformTransaction.close();
       }
       activePlatformTransaction = pendingPlatformTransaction;

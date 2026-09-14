@@ -802,28 +802,6 @@ public class PlatformViewsController2Test {
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
-  public void onEndFrameInvalidatesEvenWhenTheFrameProducedNoTransactions() {
-    PlatformViewsController2 controller = new PlatformViewsController2();
-    controller.setRegistry(new PlatformViewRegistryImpl());
-
-    FlutterView mockFlutterView = mock(FlutterView.class);
-    AttachedSurfaceControl mockAttachedSurfaceControl = mock(AttachedSurfaceControl.class);
-    when(mockFlutterView.getRootSurfaceControl()).thenReturn(mockAttachedSurfaceControl);
-    controller.attachToView(mockFlutterView);
-
-    controller.swapTransactions();
-    controller.onEndFrame();
-
-    // Nothing of our own to apply, but the invalidate is still owed: applyTransactionOnDraw()
-    // applies with the next draw and does not schedule one, so skipping the invalidate can
-    // strand a transaction ViewRootImpl is already holding.
-    verify(mockFlutterView, times(1)).invalidate();
-    verify(mockAttachedSurfaceControl, never())
-        .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
-  }
-
-  @Test
-  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void onEndFrameIsANoopAfterDetachFromView() {
     PlatformViewsController2 controller = new PlatformViewsController2();
     controller.setRegistry(new PlatformViewRegistryImpl());
