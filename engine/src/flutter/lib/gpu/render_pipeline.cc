@@ -9,6 +9,7 @@
 #include <cstring>
 #include <span>
 #include <string_view>
+#include <utility>
 
 #include "flutter/lib/gpu/shader.h"
 #include "impeller/base/validation.h"
@@ -42,6 +43,17 @@ RenderPipeline::RenderPipeline(
   vertex_descriptor_->RegisterDescriptorSetLayouts(
       fragment_shader_->GetDescriptorSetLayouts().data(),
       fragment_shader_->GetDescriptorSetLayouts().size());
+
+  // Same reasoning: the pipeline layout has to spell out which stages read
+  // push constants, and the ranges accumulate.
+  if (const auto* block = vertex_shader_->GetPushConstantBlock()) {
+    vertex_descriptor_->RegisterPushConstantRange(
+        impeller::ShaderStage::kVertex, block->slot.size_in_bytes);
+  }
+  if (const auto* block = fragment_shader_->GetPushConstantBlock()) {
+    vertex_descriptor_->RegisterPushConstantRange(
+        impeller::ShaderStage::kFragment, block->slot.size_in_bytes);
+  }
 }
 
 bool RenderPipeline::BindToPipelineDescriptor(
@@ -72,6 +84,29 @@ bool RenderPipeline::BindToPipelineDescriptor(
 }
 
 RenderPipeline::~RenderPipeline() = default;
+
+std::string ValidatePushConstantSizes(Context& gpu_context,
+                                      const Shader& vertex_shader,
+                                      const Shader& fragment_shader) {
+  const size_t max_size =
+      gpu_context.GetContext().GetCapabilities()->GetMaxPushConstantSize();
+  const std::pair<const Shader*, const char*> stages[] = {
+      {&vertex_shader, "vertex"},
+      {&fragment_shader, "fragment"},
+  };
+  for (const auto& [shader, stage_name] : stages) {
+    const auto* block = shader->GetPushConstantBlock();
+    if (block == nullptr || block->slot.size_in_bytes <= max_size) {
+      continue;
+    }
+    return absl::StrCat("The ", stage_name, " shader declares a ",
+                        block->slot.size_in_bytes,
+                        " byte push constant block, but this device supports "
+                        "at most ",
+                        max_size, " bytes.");
+  }
+  return {};
+}
 
 const char* ValidateRenderPipelineShaderStages(const Shader& vertex_shader,
                                                const Shader& fragment_shader) {
@@ -334,6 +369,14 @@ Dart_Handle InternalFlutterGpu_RenderPipeline_Initialize(
           flutter::gpu::ValidateRenderPipelineShaderStages(*vertex_shader,
                                                            *fragment_shader)) {
     return tonic::ToDart(stage_error);
+  }
+
+  // Failing here rather than at draw time is deliberate: silently falling back
+  // to a uniform buffer would make an unsupported size invisible.
+  const std::string size_error = flutter::gpu::ValidatePushConstantSizes(
+      *gpu_context, *vertex_shader, *fragment_shader);
+  if (!size_error.empty()) {
+    return tonic::ToDart(size_error);
   }
 
   // Lazily register the shaders synchronously if they haven't been already.

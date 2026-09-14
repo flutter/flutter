@@ -24,6 +24,7 @@
 #include "impeller/renderer/pipeline_library.h"
 #include "lib/gpu/context.h"
 #include "lib/ui/ui_dart_state.h"
+#include "third_party/tonic/typed_data/dart_byte_data.h"
 #include "tonic/converter/dart_converter.h"
 
 namespace flutter {
@@ -152,7 +153,12 @@ void RenderPass::SetPolygonMode(impeller::PolygonMode mode) {
   pipeline_state_dirty_ = true;
 }
 
+void RenderPass::SetPushConstants(const uint8_t* data, size_t length) {
+  push_constant_data.assign(data, data + length);
+}
+
 void RenderPass::ClearBindings() {
+  push_constant_data.clear();
   vertex_uniform_bindings.clear();
   vertex_texture_bindings.clear();
   fragment_uniform_bindings.clear();
@@ -267,6 +273,33 @@ RenderPass::GetOrCreatePipeline() {
   return pipeline;
 }
 
+bool RenderPass::ReplayPushConstants() {
+  const flutter::gpu::Shader::PushConstantBinding* blocks[2] = {
+      render_pipeline_->GetVertexShader().GetPushConstantBlock(),
+      render_pipeline_->GetFragmentShader().GetPushConstantBlock(),
+  };
+  const impeller::ShaderStage stages[2] = {
+      impeller::ShaderStage::kVertex,
+      impeller::ShaderStage::kFragment,
+  };
+  for (size_t i = 0; i < 2; i++) {
+    if (blocks[i] == nullptr) {
+      continue;
+    }
+    if (push_constant_data.empty()) {
+      VALIDATION_LOG << "The bound pipeline declares a push constant block, "
+                        "but no push constants were set on the render pass.";
+      return false;
+    }
+    if (!render_pass_->SetPushConstants(
+            stages[i], blocks[i]->slot, &blocks[i]->metadata,
+            push_constant_data.data(), push_constant_data.size())) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool RenderPass::Draw(size_t element_count,
                       size_t instance_count,
                       bool indexed) {
@@ -317,6 +350,10 @@ bool RenderPass::Draw(size_t element_count,
         std::make_unique<impeller::ShaderMetadata>(
             *texture.texture.GetMetadata()),
         texture.texture.resource, texture.sampler);
+  }
+
+  if (!ReplayPushConstants()) {
+    return false;
   }
 
   render_pass_->SetVertexBuffer(vertex_buffers.data(), vertex_buffer_count);
@@ -647,6 +684,18 @@ bool InternalFlutterGpu_RenderPass_BindTextureIndexed(
       wrapper, shader, shader->GetUniformTextureAt(uniform_texture_index),
       texture, min_filter, mag_filter, mip_filter, width_address_mode,
       height_address_mode, max_anisotropy);
+}
+
+bool InternalFlutterGpu_RenderPass_SetPushConstants(
+    flutter::gpu::RenderPass* wrapper,
+    Dart_Handle data_handle) {
+  tonic::DartByteData data(data_handle);
+  if (data.data() == nullptr) {
+    return false;
+  }
+  wrapper->SetPushConstants(static_cast<const uint8_t*>(data.data()),
+                            data.length_in_bytes());
+  return true;
 }
 
 void InternalFlutterGpu_RenderPass_ClearBindings(

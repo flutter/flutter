@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "flutter/lib/gpu/context.h"
@@ -39,6 +40,14 @@ class Shader : public RefCountedDartWrappable<Shader> {
     impeller::ShaderMetadata metadata;
   };
 
+  struct PushConstantBinding {
+    impeller::ShaderPushConstantSlot slot;
+    impeller::ShaderMetadata metadata;
+
+    const impeller::ShaderStructMemberMetadata* GetMemberMetadata(
+        const std::string& name) const;
+  };
+
   ~Shader() override;
 
   static fml::RefPtr<Shader> Make(
@@ -50,7 +59,8 @@ class Shader : public RefCountedDartWrappable<Shader> {
       std::vector<impeller::ShaderStageBufferLayout> layouts,
       std::unordered_map<std::string, UniformBinding> uniform_structs,
       std::unordered_map<std::string, TextureBinding> uniform_textures,
-      std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts);
+      std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts,
+      std::optional<PushConstantBinding> push_constants);
 
   std::shared_ptr<const impeller::ShaderFunction> GetFunctionFromLibrary(
       impeller::ShaderLibrary& library);
@@ -109,6 +119,10 @@ class Shader : public RefCountedDartWrappable<Shader> {
   /// The texture counterpart to `GetUniformStructAt`.
   const Shader::TextureBinding* GetUniformTextureAt(int index) const;
 
+  /// The push constant block this shader declares, or nullptr when it
+  /// declares none.
+  const Shader::PushConstantBinding* GetPushConstantBlock() const;
+
  private:
   Shader();
 
@@ -130,6 +144,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
   std::vector<const UniformBinding*> uniform_struct_order_;
   std::vector<const TextureBinding*> uniform_texture_order_;
   std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts_;
+  std::optional<PushConstantBinding> push_constants_;
   bool is_dirty_ = true;
 
   void RebuildBindingOrder();
@@ -165,6 +180,15 @@ FLUTTER_GPU_EXPORT
 extern int InternalFlutterGpu_Shader_GetUniformStructIndex(
     flutter::gpu::Shader* wrapper,
     Dart_Handle struct_name_handle);
+
+FLUTTER_GPU_EXPORT
+extern int InternalFlutterGpu_Shader_GetPushConstantSize(
+    flutter::gpu::Shader* wrapper);
+
+FLUTTER_GPU_EXPORT
+extern int InternalFlutterGpu_Shader_GetPushConstantMemberOffset(
+    flutter::gpu::Shader* wrapper,
+    Dart_Handle member_name_handle);
 
 FLUTTER_GPU_EXPORT
 extern int InternalFlutterGpu_Shader_GetUniformTextureIndex(
