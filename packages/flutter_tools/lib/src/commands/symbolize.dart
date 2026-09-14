@@ -27,9 +27,8 @@ const rootLoadingUnitId = 1;
 class SymbolizeCommand extends FlutterCommand {
   SymbolizeCommand({
     required ToolContext super.toolContext,
-    DwarfSymbolizationService dwarfSymbolizationService = const DwarfSymbolizationService(),
-  }) : _toolContext = toolContext,
-       _dwarfSymbolizationService = dwarfSymbolizationService {
+    this._dwarfSymbolizationService = const DwarfSymbolizationService(),
+  }) : _toolContext = toolContext {
     argParser.addOption(
       'debug-info',
       abbr: 'd',

@@ -443,8 +443,9 @@ abstract final class DebuggingOptionDescriptors {
         'not already connected to the target application.',
   );
 
-  static const ddsPort = StringOptionDescriptor(
+  static const ddsPort = DefaultedIntOptionDescriptor(
     name: 'dds-port',
+    defaultsTo: 0,
     help:
         'When this value is provided, the Dart Development Service (DDS) will be '
         'bound to the provided port.\n'
@@ -721,8 +722,7 @@ abstract final class DebuggingOptionDescriptors {
   static const iosProfileDebugger = NullableFlagOptionDescriptor(
     name: 'ios-profile-debugger',
     negatable: false,
-    help:
-        'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
+    help: 'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
   );
 
   static const useTestFonts = FlagOptionDescriptor(
