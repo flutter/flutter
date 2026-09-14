@@ -208,6 +208,10 @@ abstract class CkSurface extends Surface {
     _resizeCanvas(size);
   }
 
+  /// Resizes the underlying canvas to [size] and recreates the Skia surface.
+  ///
+  /// Subclasses may override this if their underlying canvas type requires
+  /// re-allocation or context recreation instead of in-place dimension updates.
   void _resizeCanvas(BitmapSize size) {
     _canvasProvider.resizeCanvas(canvas, size);
     _recreateSkSurface();
@@ -353,15 +357,22 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     // Do not attach the OffscreenCanvas to the DOM.
   }
 
+  /// Reallocates a new [DomOffscreenCanvas] and recreates the graphics context.
+  ///
+  /// In-place resizing of an [OffscreenCanvas] with an active WebGL context
+  /// triggers clipping bugs in ANGLE/Chromium where rendering remains constrained
+  /// to the original canvas dimensions (see https://github.com/flutter/flutter/issues/182476).
+  /// To avoid this clipping hazard, we acquire a brand-new canvas at the target
+  /// [size], release the old canvas, and recreate the context.
   @override
   void _resizeCanvas(BitmapSize size) {
     final DomEventTarget oldCanvas = canvas;
     final DomEventTarget newCanvas = _canvasProvider.acquireCanvas(
-      _currentSize,
+      size,
       onContextLost: onContextLost,
     );
     _canvasProvider.releaseCanvas(oldCanvas);
-    recreateContextForCanvas(newCanvas);
+    unawaited(recreateContextForCanvas(newCanvas));
   }
 
   @override

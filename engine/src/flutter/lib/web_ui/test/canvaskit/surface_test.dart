@@ -155,6 +155,7 @@ void testMain() {
       CkSurface.debugForceGLFailure = false;
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/182476
     test('resizing CkOffscreenSurface to large dimensions renders across full bounds without clipping', () async {
       final surface = CkOffscreenSurface(OffscreenCanvasProvider());
       await surface.initialized;
@@ -211,7 +212,7 @@ void testMain() {
       surface.dispose();
     });
 
-    group('adversarial stress tests (issue-182476-canvaskit)', () {
+    group('surface resizing stress tests', () {
       test('rapid sequential resizing & ping-pong sizing does not leak or crash', () async {
         final surface = CkOffscreenSurface(OffscreenCanvasProvider());
         await surface.initialized;
