@@ -540,133 +540,130 @@ Future<void> testMain() async {
     }
   });
 
-  test(
-    'ParagraphTransform correctly extracts scale from matrix and handles rotations and translations',
-    () {
-      const dpr = 2.0;
+  test('ParagraphTransform correctly extracts scale from matrix and handles rotations and translations', () {
+    const dpr = 2.0;
 
-      // Identity transform
-      final identity = Float64List.fromList(<double>[
-        1.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0,
-      ]);
-      final idTransform = ParagraphTransform.from(identity, dpr);
-      expect(idTransform.effectiveScaleX, closeTo(2.0, epsilon));
-      expect(idTransform.effectiveScaleY, closeTo(2.0, epsilon));
-      expect(idTransform.transformX, closeTo(0.0, epsilon));
-      expect(idTransform.transformY, closeTo(0.0, epsilon));
+    // Identity transform
+    final identity = Float64List.fromList(<double>[
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+    ]);
+    final idTransform = ParagraphTransform.from(identity, dpr);
+    expect(idTransform.effectiveScaleX, closeTo(2.0, epsilon));
+    expect(idTransform.effectiveScaleY, closeTo(2.0, epsilon));
+    expect(idTransform.transformX, closeTo(0.0, epsilon));
+    expect(idTransform.transformY, closeTo(0.0, epsilon));
 
-      // Translation only (not identity)
-      final translation = Float64List.fromList(<double>[
-        1.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0,
-        0.0,
-        10.0,
-        20.0,
-        0.0,
-        1.0,
-      ]);
-      final transTransform = ParagraphTransform.from(translation, dpr);
-      expect(transTransform.effectiveScaleX, closeTo(2.0, epsilon));
-      expect(transTransform.effectiveScaleY, closeTo(2.0, epsilon));
-      expect(transTransform.transformX, closeTo(10.0, epsilon));
-      expect(transTransform.transformY, closeTo(20.0, epsilon));
+    // Translation only (not identity)
+    final translation = Float64List.fromList(<double>[
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      10.0,
+      20.0,
+      0.0,
+      1.0,
+    ]);
+    final transTransform = ParagraphTransform.from(translation, dpr);
+    expect(transTransform.effectiveScaleX, closeTo(2.0, epsilon));
+    expect(transTransform.effectiveScaleY, closeTo(2.0, epsilon));
+    expect(transTransform.transformX, closeTo(10.0, epsilon));
+    expect(transTransform.transformY, closeTo(20.0, epsilon));
 
-      // Uniform scale 1.5x
-      final uniform = Float64List.fromList(<double>[
-        1.5,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        1.5,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0,
-        0.0,
-        10.0,
-        20.0,
-        0.0,
-        1.0,
-      ]);
-      final uniTransform = ParagraphTransform.from(uniform, dpr);
-      expect(uniTransform.effectiveScaleX, closeTo(3.0, epsilon));
-      expect(uniTransform.effectiveScaleY, closeTo(3.0, epsilon));
+    // Uniform scale 1.5x
+    final uniform = Float64List.fromList(<double>[
+      1.5,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.5,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      10.0,
+      20.0,
+      0.0,
+      1.0,
+    ]);
+    final uniTransform = ParagraphTransform.from(uniform, dpr);
+    expect(uniTransform.effectiveScaleX, closeTo(3.0, epsilon));
+    expect(uniTransform.effectiveScaleY, closeTo(3.0, epsilon));
 
-      // 45 degree rotation: cos(pi/4) = sin(pi/4) = 1/sqrt(2)
-      final double cos45 = math.cos(math.pi / 4);
-      final double sin45 = math.sin(math.pi / 4);
-      final rot45 = Float64List.fromList(<double>[
-        cos45,
-        sin45,
-        0.0,
-        0.0,
-        -sin45,
-        cos45,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0,
-      ]);
-      final rotTransform = ParagraphTransform.from(rot45, dpr);
-      expect(rotTransform.effectiveScaleX, closeTo(2.0, epsilon));
-      expect(rotTransform.effectiveScaleY, closeTo(2.0, epsilon));
+    // 45 degree rotation: cos(pi/4) = sin(pi/4) = 1/sqrt(2)
+    final double cos45 = math.cos(math.pi / 4);
+    final double sin45 = math.sin(math.pi / 4);
+    final rot45 = Float64List.fromList(<double>[
+      cos45,
+      sin45,
+      0.0,
+      0.0,
+      -sin45,
+      cos45,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+    ]);
+    final rotTransform = ParagraphTransform.from(rot45, dpr);
+    expect(rotTransform.effectiveScaleX, closeTo(2.0, epsilon));
+    expect(rotTransform.effectiveScaleY, closeTo(2.0, epsilon));
 
-      // Non-uniform scale with zero fallback
-      final nonUniformZero = Float64List.fromList(<double>[
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        2.5,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0,
-      ]);
-      final nzTransform = ParagraphTransform.from(nonUniformZero, dpr);
-      expect(nzTransform.effectiveScaleX, closeTo(2.0, epsilon)); // fallback to 1.0 * dpr
-      expect(nzTransform.effectiveScaleY, closeTo(5.0, epsilon));
-    },
-  );
+    // Non-uniform scale with zero fallback
+    final nonUniformZero = Float64List.fromList(<double>[
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      2.5,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+    ]);
+    final nzTransform = ParagraphTransform.from(nonUniformZero, dpr);
+    expect(nzTransform.effectiveScaleX, closeTo(2.0, epsilon)); // fallback to 1.0 * dpr
+    expect(nzTransform.effectiveScaleY, closeTo(5.0, epsilon));
+  });
 
   test('CanvasKit canvas.getTransform() returns logical coordinates independent of DPR', () {
     final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
