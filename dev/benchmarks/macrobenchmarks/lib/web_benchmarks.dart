@@ -98,16 +98,11 @@ Future<void> main(List<String> args) async {
           'API required for orchestrating macrobenchmarks.',
     );
   final ArgResults argResults = parser.parse(args);
-  Uri serverOrigin;
-  if (argResults.wasParsed('port')) {
-    final int port = int.parse(argResults['port'] as String);
-    serverOrigin = Uri.http('localhost:$port');
-  } else if (const String.fromEnvironment('BENCHMARK_SERVER_PORT').isNotEmpty) {
-    final int port = int.parse(const String.fromEnvironment('BENCHMARK_SERVER_PORT'));
-    serverOrigin = Uri.http('localhost:$port');
-  } else {
-    serverOrigin = Uri.base;
-  }
+  const portEnv = String.fromEnvironment('BENCHMARK_SERVER_PORT');
+  final int? port = argResults.wasParsed('port')
+      ? int.tryParse(argResults['port'] as String)
+      : int.tryParse(portEnv);
+  final Uri serverOrigin = port != null ? Uri.http('localhost:$port') : Uri.base;
 
   _client = LocalBenchmarkServerClient(serverOrigin);
 
