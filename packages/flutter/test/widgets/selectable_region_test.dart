@@ -4156,8 +4156,7 @@ void main() {
                   TextSpan(
                     children: <InlineSpan>[
                       const TextSpan(
-                        text:
-                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                        text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                       ),
                       WidgetSpan(child: FlutterLogo(key: flutterLogo)),
                       const TextSpan(text: 'Hello, world.'),
@@ -4201,8 +4200,7 @@ void main() {
                   const TextSpan(
                     children: <InlineSpan>[
                       TextSpan(
-                        text:
-                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                        text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                       ),
                       WidgetSpan(child: Text('Some text in a WidgetSpan. ')),
                       TextSpan(text: 'Hello, world.'),
@@ -4247,8 +4245,7 @@ void main() {
                 const TextSpan(
                   children: <InlineSpan>[
                     TextSpan(
-                      text:
-                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                     ),
                     WidgetSpan(child: SizedBox.shrink()),
                     TextSpan(text: 'Hello, world.'),

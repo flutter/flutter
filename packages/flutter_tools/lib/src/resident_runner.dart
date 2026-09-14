@@ -235,22 +235,20 @@ class FlutterDevice {
     // shuts down, including after an error. If `done` completes before `connectToVmService`,
     // something went wrong that caused DDS to shutdown early.
     try {
-      service =
-          await Future.any<dynamic>(<Future<dynamic>>[
-                connectToVmService(
-                  debuggingOptions.enableDds ? (device!.dds.uri ?? vmServiceUri) : vmServiceUri,
-                  reloadSources: reloadSources,
-                  restart: restart,
-                  compileExpression: compileExpression,
-                  flutterProject: FlutterProject.current(),
-                  printStructuredErrorLogMethod: printStructuredErrorLogMethod,
-                  device: device,
-                  logger: globals.logger,
-                ),
-                if (!existingDds)
-                  device!.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
-              ])
-              as FlutterVmService?;
+      service = await Future.any<dynamic>(<Future<dynamic>>[
+        connectToVmService(
+          debuggingOptions.enableDds ? (device!.dds.uri ?? vmServiceUri) : vmServiceUri,
+          reloadSources: reloadSources,
+          restart: restart,
+          compileExpression: compileExpression,
+          flutterProject: FlutterProject.current(),
+          printStructuredErrorLogMethod: printStructuredErrorLogMethod,
+          device: device,
+          logger: globals.logger,
+        ),
+        if (!existingDds)
+          device!.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
+      ]) as FlutterVmService?;
     } on Exception catch (exception) {
       globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $exception');
       rethrow;
@@ -1627,18 +1625,13 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
 class TerminalHandler {
   TerminalHandler(
     this.residentRunner, {
-    required Logger logger,
-    required Terminal terminal,
-    required Signals signals,
-    required io.ProcessInfo processInfo,
-    required bool reportReady,
-    String? pidFile,
-  }) : _logger = logger,
-       _terminal = terminal,
-       _signals = signals,
-       _processInfo = processInfo,
-       _reportReady = reportReady,
-       _pidFile = pidFile;
+    required this._logger,
+    required this._terminal,
+    required this._signals,
+    required this._processInfo,
+    required this._reportReady,
+    this._pidFile,
+  });
 
   final Logger _logger;
   final Terminal _terminal;

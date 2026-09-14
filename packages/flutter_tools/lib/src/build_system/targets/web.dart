@@ -115,12 +115,78 @@ class WebEntrypointTarget extends Target {
   }
 }
 
+@visibleForTesting
+String hashAndRenameWebOutput({required File file, File? sourceMapFile}) =>
+    _hashAndRenameWebOutput(file: file, sourceMapFile: sourceMapFile);
+
+const List<String> _kKnownHashedExtensions = <String>[
+  '.js.map',
+  '.wasm.map',
+  '.mjs.map',
+  '.js',
+  '.wasm',
+  '.mjs',
+];
+
+String _computeHashedBasename(String oldBasename, String contentHash, FileSystem fileSystem) {
+  final String doubleExt = fileSystem.path.extension(oldBasename, 2);
+  final String ext = _kKnownHashedExtensions.contains(doubleExt)
+      ? doubleExt
+      : fileSystem.path.extension(oldBasename);
+  if (ext.isNotEmpty) {
+    final String stem = oldBasename.substring(0, oldBasename.length - ext.length);
+    return '$stem.$contentHash$ext';
+  }
+  return '$oldBasename.$contentHash';
+}
+
+String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
+  if (!file.existsSync()) {
+    return file.basename;
+  }
+
+  // The hash is computed before the sourceMappingURL comment is rewritten
+  // below; deriving the map name from the hashed binary name would otherwise
+  // be circular. The compiler emits the binary and its map from the same
+  // compilation, so identical binaries imply identical maps.
+  final String contentHash = crypto.sha256
+      .convert(file.readAsBytesSync())
+      .toString()
+      .substring(0, 8);
+  final String newBasename = _computeHashedBasename(file.basename, contentHash, file.fileSystem);
+
+  // The source map shares the binary's hash so the pair stays discoverable as
+  // '<binary>.map'. A `.wasm` binary embeds its map name in a binary custom
+  // section that cannot be rewritten here, so its map keeps the unhashed name.
+  final isWasm = file.fileSystem.path.extension(file.path) == '.wasm';
+  if (sourceMapFile != null && sourceMapFile.existsSync() && !isWasm) {
+    final String oldMapBasename = sourceMapFile.basename;
+    final newMapBasename = '$newBasename.map';
+    sourceMapFile.renameSync(sourceMapFile.parent.childFile(newMapBasename).path);
+
+    final String content = file.readAsStringSync();
+    final mapDirectiveRegex = RegExp(
+      r'//[#@]\s*sourceMappingURL=' + RegExp.escape(oldMapBasename) + r'\s*$',
+      multiLine: true,
+    );
+    if (mapDirectiveRegex.hasMatch(content)) {
+      file.writeAsStringSync(
+        content.replaceFirst(mapDirectiveRegex, '//# sourceMappingURL=$newMapBasename'),
+      );
+    }
+  }
+
+  file.renameSync(file.parent.childFile(newBasename).path);
+  return newBasename;
+}
+
 abstract class Dart2WebTarget extends Target {
   const Dart2WebTarget();
 
   WebCompilerConfig get compilerConfig;
 
   Map<String, Object?> get buildConfig;
+  Map<String, Object?> getBuildConfig(Environment environment) => buildConfig;
   Iterable<File> buildFiles(Environment environment);
   Iterable<String> get buildPatternStems;
 
@@ -162,11 +228,50 @@ abstract class Dart2WebTarget extends Target {
 
   @override
   String get buildKey => compilerConfig.buildKey;
+
+  String _resolveHashedBasename(Directory dir, RegExp pattern, String defaultName) {
+    if (!dir.existsSync()) {
+      return defaultName;
+    }
+    final List<File> candidates = dir
+        .listSync()
+        .whereType<File>()
+        .where((File f) => pattern.hasMatch(f.basename))
+        .toList();
+    if (candidates.isEmpty) {
+      return defaultName;
+    }
+    final List<File> hashedCandidates = candidates
+        .where((File f) => f.basename != defaultName)
+        .toList();
+    final targetCandidates = hashedCandidates.isNotEmpty ? hashedCandidates : candidates;
+    if (targetCandidates.length == 1) {
+      return targetCandidates.first.basename;
+    }
+    targetCandidates.sort((File a, File b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+    return targetCandidates.first.basename;
+  }
+
+  void _cleanStaleBuildOutputs(Directory dir, List<RegExp> patterns) {
+    if (!dir.existsSync()) {
+      return;
+    }
+    for (final File file in dir.listSync().whereType<File>()) {
+      if (patterns.any((RegExp pattern) => pattern.hasMatch(file.basename))) {
+        file.deleteSync();
+      }
+    }
+  }
 }
 
 /// Compiles a web entry point with dart2js.
 class Dart2JSTarget extends Dart2WebTarget {
   Dart2JSTarget(this.compilerConfig);
+
+  static final RegExp _mainJsRegex = RegExp(r'^main\.dart(\.[a-f0-9]+)?\.js$');
+  static final RegExp _mainJsMapRegex = RegExp(r'^main\.dart(\.[a-f0-9]+)?\.js\.map$');
+  static final RegExp _partFileRegex = RegExp(r'^main\.dart\.js_[0-9].*\.part\.js$');
+  static final RegExp _partFileMapRegex = RegExp(r'^main\.dart\.js_[0-9].*\.part\.js\.map$');
 
   @override
   final JsCompilerConfig compilerConfig;
@@ -184,6 +289,19 @@ class Dart2JSTarget extends Dart2WebTarget {
       throw MissingDefineException(kBuildMode, name);
     }
     final buildMode = BuildMode.fromCliName(buildModeEnvironment);
+
+    if (compilerConfig.webContentHash) {
+      // Delete previously compiled JS entrypoints and deferred part files so
+      // that stale hashed outputs do not remain in buildDir and leftover
+      // .part.js files from prior builds do not trigger a false-positive
+      // deferred loading error.
+      _cleanStaleBuildOutputs(environment.buildDir, <RegExp>[
+        _mainJsRegex,
+        _mainJsMapRegex,
+        _partFileRegex,
+        _partFileMapRegex,
+      ]);
+    }
     final Artifacts artifacts = environment.artifacts;
     final String platformBinariesPath = artifacts
         .getHostArtifact(HostArtifact.webPlatformKernelFolder)
@@ -248,10 +366,31 @@ class Dart2JSTarget extends Dart2WebTarget {
       );
       return;
     }
+    var finalOutputFile = outputJSFile;
+    if (compilerConfig.webContentHash) {
+      final bool hasDeferredParts = environment.buildDir.listSync().whereType<File>().any(
+        (File file) => _partFileRegex.hasMatch(file.basename),
+      );
+      if (hasDeferredParts) {
+        throwToolExit(
+          '"--web-content-hash" does not yet support deferred imports: '
+          'deferred part files keep unhashed names and can be served stale '
+          'from the browser cache alongside a new entrypoint. Remove the '
+          'deferred imports or build without "--web-content-hash".',
+        );
+      }
+      final String newBasename = _hashAndRenameWebOutput(
+        file: outputJSFile,
+        sourceMapFile: compilerConfig.sourceMaps
+            ? environment.buildDir.childFile('main.dart.js.map')
+            : null,
+      );
+      finalOutputFile = environment.buildDir.childFile(newBasename);
+    }
     final DepfileService depFileService = environment.depFileService;
     final Depfile depFile = depFileService.parseDart2js(
       environment.buildDir.childFile('app.dill.deps'),
-      outputJSFile,
+      finalOutputFile,
     );
     depFileService.writeToFile(depFile, environment.buildDir.childFile('dart2js.d'));
   }
@@ -264,39 +403,54 @@ class Dart2JSTarget extends Dart2WebTarget {
   };
 
   @override
-  Iterable<File> buildFiles(Environment environment) =>
-      environment.buildDir.listSync(recursive: true).whereType<File>().where((File file) {
-        if (file.basename == 'main.dart.js') {
+  Map<String, Object?> getBuildConfig(Environment environment) {
+    final String mainJsPath = compilerConfig.webContentHash
+        ? _resolveHashedBasename(environment.buildDir, _mainJsRegex, 'main.dart.js')
+        : 'main.dart.js';
+    return <String, Object?>{
+      'compileTarget': 'dart2js',
+      'renderer': compilerConfig.renderer.name,
+      'mainJsPath': mainJsPath,
+    };
+  }
+
+  @override
+  Iterable<File> buildFiles(Environment environment) {
+    final String mainJsName =
+        (getBuildConfig(environment)['mainJsPath'] as String?) ?? 'main.dart.js';
+    final mainJsMapName = '$mainJsName.map';
+    return environment.buildDir.listSync(recursive: true).whereType<File>().where((File file) {
+      if (file.basename == mainJsName) {
+        return true;
+      }
+      if (compilerConfig.sourceMaps && file.basename == mainJsMapName) {
+        return true;
+      }
+      if (_partFileRegex.hasMatch(file.basename)) {
+        return true;
+      }
+
+      if (compilerConfig.sourceMaps && _partFileMapRegex.hasMatch(file.basename)) {
+        return true;
+      }
+
+      if (compilerConfig.dumpInfo) {
+        if (file.basename == 'main.dart.js.info.json') {
           return true;
         }
-        if (file.basename == 'main.dart.js.map') {
-          return compilerConfig.sourceMaps;
-        }
-        final partFileRegex = RegExp(r'main\.dart\.js_[0-9].*\.part\.js');
-        if (partFileRegex.hasMatch(file.basename)) {
-          return true;
-        }
-
-        if (compilerConfig.sourceMaps) {
-          final partFileSourceMapRegex = RegExp(r'main\.dart\.js_[0-9].*.part\.js\.map');
-          if (partFileSourceMapRegex.hasMatch(file.basename)) {
-            return true;
-          }
-        }
-
-        if (compilerConfig.dumpInfo) {
-          if (file.basename == 'main.dart.js.info.json') {
-            return true;
-          }
-        }
-        return false;
-      });
+      }
+      return false;
+    });
+  }
 
   @override
   Iterable<String> get buildPatternStems => <String>[
-    'main.dart.js',
+    if (compilerConfig.webContentHash) 'main.dart.*.js' else 'main.dart.js',
     'main.dart.js_*.part.js',
-    if (compilerConfig.sourceMaps) ...<String>['main.dart.js.map', 'main.dart.js_*.part.js.map'],
+    if (compilerConfig.sourceMaps) ...<String>[
+      if (compilerConfig.webContentHash) 'main.dart.*.js.map' else 'main.dart.js.map',
+      'main.dart.js_*.part.js.map',
+    ],
     if (featureFlags.isRecordUseEnabled) LinkHooks.recordedUsesJsFileName,
   ];
 }
@@ -333,6 +487,11 @@ enum _DryRunOutcome {
 /// Compiles a web entry point with dart2wasm.
 class Dart2WasmTarget extends Dart2WebTarget {
   Dart2WasmTarget(this.compilerConfig, this._analytics);
+
+  static final RegExp _mainWasmRegex = RegExp(r'^main\.dart(\.[a-f0-9]+)?\.wasm$');
+  static final RegExp _mainWasmMapRegex = RegExp(r'^main\.dart(\.[a-f0-9]+)?\.wasm\.map$');
+  static final RegExp _mainMjsRegex = RegExp(r'^main\.dart(\.[a-f0-9]+)?\.mjs$');
+  static final RegExp _mainMjsMapRegex = RegExp(r'^main\.dart(\.[a-f0-9]+)?\.mjs\.map$');
 
   @override
   final WasmCompilerConfig compilerConfig;
@@ -375,6 +534,15 @@ class Dart2WasmTarget extends Dart2WebTarget {
       throw MissingDefineException(kBuildMode, name);
     }
     final buildMode = BuildMode.fromCliName(buildModeEnvironment);
+
+    if (compilerConfig.webContentHash) {
+      _cleanStaleBuildOutputs(environment.buildDir, <RegExp>[
+        _mainWasmRegex,
+        _mainWasmMapRegex,
+        _mainMjsRegex,
+        _mainMjsMapRegex,
+      ]);
+    }
     final Artifacts artifacts = environment.artifacts;
     final File outputWasmFile = environment.buildDir.childFile('main.dart.wasm');
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
@@ -422,6 +590,23 @@ class Dart2WasmTarget extends Dart2WebTarget {
       environment.logger.printError(runResult.stderr);
       _checkForLegacyWebImports(environment, runResult.stdout, runResult.stderr);
       throwToolExit('Failed to compile application for the Web.');
+    } else if (compilerConfig.webContentHash) {
+      final String newWasmBasename = _hashAndRenameWebOutput(
+        file: outputWasmFile,
+        sourceMapFile: compilerConfig.sourceMaps
+            ? environment.buildDir.childFile('main.dart.wasm.map')
+            : null,
+      );
+      final String newMjsBasename = _hashAndRenameWebOutput(
+        file: environment.buildDir.childFile('main.dart.mjs'),
+        sourceMapFile: compilerConfig.sourceMaps
+            ? environment.buildDir.childFile('main.dart.mjs.map')
+            : null,
+      );
+      _rewriteDepfileOutputs(environment, depFile, <String, String>{
+        'main.dart.wasm': newWasmBasename,
+        'main.dart.mjs': newMjsBasename,
+      });
     }
     final File recordedUsesFile = environment.buildDir.childFile(
       LinkHooks.recordedUsesWasmFileName,
@@ -429,6 +614,19 @@ class Dart2WasmTarget extends Dart2WebTarget {
     if (!recordedUsesFile.existsSync() && featureFlags.isRecordUseEnabled) {
       recordedUsesFile.writeAsStringSync(KernelSnapshot.recordedUsesEmptyContent);
     }
+  }
+
+  void _rewriteDepfileOutputs(Environment env, File depFile, Map<String, String> renamedBasenames) {
+    if (!depFile.existsSync()) {
+      return;
+    }
+    final Depfile parsed = env.depFileService.parse(depFile);
+    final List<File> newOutputs = parsed.outputs.map((File f) {
+      final String? renamed = renamedBasenames[f.basename];
+      return renamed != null ? f.parent.childFile(renamed) : f;
+    }).toList();
+    final updatedDepfile = Depfile(parsed.inputs, newOutputs);
+    env.depFileService.writeToFile(updatedDepfile, depFile);
   }
 
   @override
@@ -447,37 +645,67 @@ class Dart2WasmTarget extends Dart2WebTarget {
           'jsSupportRuntimePath': 'main.dart.mjs',
         };
 
+  @override
+  Map<String, Object?> getBuildConfig(Environment environment) {
+    if (compilerConfig.dryRun) {
+      return const <String, Object?>{};
+    }
+    final String mainWasmPath = compilerConfig.webContentHash
+        ? _resolveHashedBasename(environment.buildDir, _mainWasmRegex, 'main.dart.wasm')
+        : 'main.dart.wasm';
+    final String jsSupportRuntimePath = compilerConfig.webContentHash
+        ? _resolveHashedBasename(environment.buildDir, _mainMjsRegex, 'main.dart.mjs')
+        : 'main.dart.mjs';
+    return <String, Object?>{
+      'compileTarget': 'dart2wasm',
+      'renderer': compilerConfig.renderer.name,
+      'mainWasmPath': mainWasmPath,
+      'jsSupportRuntimePath': jsSupportRuntimePath,
+    };
+  }
+
   static final RegExp _partWasmRegex = RegExp(r'^main\.dart_module[0-9].*\.wasm$');
   static final RegExp _partWasmMapRegex = RegExp(r'^main\.dart_module[0-9].*\.wasm\.map$');
 
   @override
-  Iterable<File> buildFiles(Environment environment) => compilerConfig.dryRun
-      ? const <File>[]
-      : environment.buildDir.listSync(recursive: true).whereType<File>().where((File file) {
-          if (file.basename == 'main.dart.wasm' || file.basename == 'main.dart.mjs') {
-            return true;
-          }
-          if (compilerConfig.sourceMaps && file.basename == 'main.dart.wasm.map') {
-            return true;
-          }
-          if (_partWasmRegex.hasMatch(file.basename)) {
-            return true;
-          }
-          if (compilerConfig.sourceMaps && _partWasmMapRegex.hasMatch(file.basename)) {
-            return true;
-          }
-          return false;
-        });
+  Iterable<File> buildFiles(Environment environment) {
+    if (compilerConfig.dryRun) {
+      return const <File>[];
+    }
+    final Map<String, Object?> config = getBuildConfig(environment);
+    final String mainWasmName = (config['mainWasmPath'] as String?) ?? 'main.dart.wasm';
+    final String jsSupportName = (config['jsSupportRuntimePath'] as String?) ?? 'main.dart.mjs';
+    const mainWasmMapName = 'main.dart.wasm.map';
+    final jsSupportMapName = '$jsSupportName.map';
+
+    return environment.buildDir.listSync(recursive: true).whereType<File>().where((File file) {
+      if (file.basename == mainWasmName || file.basename == jsSupportName) {
+        return true;
+      }
+      if (compilerConfig.sourceMaps &&
+          (file.basename == mainWasmMapName || file.basename == jsSupportMapName)) {
+        return true;
+      }
+      if (_partWasmRegex.hasMatch(file.basename)) {
+        return true;
+      }
+      if (compilerConfig.sourceMaps && _partWasmMapRegex.hasMatch(file.basename)) {
+        return true;
+      }
+      return false;
+    });
+  }
 
   @override
   Iterable<String> get buildPatternStems => compilerConfig.dryRun
       ? const <String>[]
       : <String>[
-          'main.dart.wasm',
+          if (compilerConfig.webContentHash) 'main.dart.*.wasm' else 'main.dart.wasm',
           'main.dart_module*.wasm',
-          'main.dart.mjs',
+          if (compilerConfig.webContentHash) 'main.dart.*.mjs' else 'main.dart.mjs',
           if (compilerConfig.sourceMaps) ...<String>[
             'main.dart.wasm.map',
+            if (compilerConfig.webContentHash) 'main.dart.*.mjs.map' else 'main.dart.mjs.map',
             'main.dart_module*.wasm.map',
           ],
           if (featureFlags.isRecordUseEnabled) LinkHooks.recordedUsesWasmFileName,
@@ -667,12 +895,9 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final privatePackages = <String>{};
     for (final Package package in packageConfigPackages.packages) {
       final String packageName = package.name;
-      if (package.root.pathSegments.where((String s) => s.isNotEmpty).toList() case [
-        ...,
-        'hosted',
-        _,
-        final packageFolder,
-      ] when packageFolder.startsWith('$packageName-')) {
+      if (package.root.pathSegments.where((String s) => s.isNotEmpty).toList()
+          case [..., 'hosted', _, final packageFolder]
+          when packageFolder.startsWith('$packageName-')) {
         // Hosted package directories in .pub-cache follow '<packageName>-<version>'.
         // Substring past the package name and hyphen to extract the version.
         hostedPackages[packageName] = packageFolder.substring(packageName.length + 1);
@@ -801,6 +1026,7 @@ class WebReleaseBundle extends Target {
   WebReleaseBundle._({required this.compileTargets})
     : templatedFilesTarget = WebTemplatedFiles(
         compileTargets.map((Dart2WebTarget target) => target.buildConfig).toList(),
+        compileTargets: compileTargets,
       );
 
   final List<Dart2WebTarget> compileTargets;
@@ -834,15 +1060,38 @@ class WebReleaseBundle extends Target {
   @override
   List<String> get depfiles => const <String>['flutter_assets.d', 'web_resources.d'];
 
+  /// Matches the compiled entrypoint files (hashed or not) and deferred part
+  /// files that this bundle copies into the output directory.
+  static final RegExp _entrypointFileRegex = RegExp(
+    r'^main\.dart((\.js_[0-9]+.*\.part\.js)|((_module[0-9]+)?(\.[a-f0-9]+)?\.(js|wasm|mjs)))(\.map)?$',
+  );
+
   @override
   Future<void> build(Environment environment) async {
     final FileSystem fileSystem = environment.fileSystem;
-    for (final Dart2WebTarget target in compileTargets) {
-      for (final File outputFile in target.buildFiles(environment)) {
-        outputFile.copySync(
-          environment.outputDir.childFile(fileSystem.path.basename(outputFile.path)).path,
-        );
+    final compiledFiles = <File>[
+      for (final Dart2WebTarget target in compileTargets) ...target.buildFiles(environment),
+    ];
+
+    // Entrypoint filenames change when compiling with content hashes or when
+    // toggling between build modes, and glob-based [outputs] patterns match
+    // previous builds' files too. Delete outdated entrypoints before copying
+    // the current ones so that build/web does not accumulate dead files or
+    // pollute the service worker cache.
+    final currentBasenames = <String>{for (final File file in compiledFiles) file.basename};
+    if (environment.outputDir.existsSync()) {
+      for (final File file in environment.outputDir.listSync().whereType<File>()) {
+        if (_entrypointFileRegex.hasMatch(file.basename) &&
+            !currentBasenames.contains(file.basename)) {
+          file.deleteSync();
+        }
       }
+    }
+
+    for (final outputFile in compiledFiles) {
+      outputFile.copySync(
+        environment.outputDir.childFile(fileSystem.path.basename(outputFile.path)).path,
+      );
     }
 
     final String? buildModeEnvironment = environment.defines[kBuildMode];
@@ -968,12 +1217,15 @@ class WebReleaseBundle extends Target {
 }
 
 class WebTemplatedFiles extends Target {
-  WebTemplatedFiles(this.buildDescriptions);
+  WebTemplatedFiles(this.buildDescriptions, {this.compileTargets});
 
   final List<Map<String, Object?>> buildDescriptions;
+  final List<Dart2WebTarget>? compileTargets;
 
   @override
-  String get buildKey => jsonEncode(buildDescriptions);
+  String get buildKey => compileTargets != null
+      ? jsonEncode(compileTargets!.map((Dart2WebTarget target) => target.buildKey).toList())
+      : jsonEncode(buildDescriptions);
 
   void _emitWebTemplateWarning(
     Environment environment,
@@ -985,7 +1237,29 @@ class WebTemplatedFiles extends Target {
     );
   }
 
-  String buildConfigString(Environment environment) {
+  void _scanDirectoryForWasmHashes(
+    Directory directory,
+    Map<String, String> wasmHashes, {
+    bool skipCanvasKit = false,
+  }) {
+    if (!directory.existsSync()) {
+      return;
+    }
+    for (final File file in directory.listSync(recursive: true).whereType<File>()) {
+      if (directory.fileSystem.path.extension(file.path) != '.wasm') {
+        continue;
+      }
+      final List<String> segments = directory.fileSystem.path.split(
+        directory.fileSystem.path.relative(file.path, from: directory.path),
+      );
+      if (skipCanvasKit && segments.first == 'canvaskit') {
+        continue;
+      }
+      wasmHashes[segments.join('/')] = crypto.sha256.convert(file.readAsBytesSync()).toString();
+    }
+  }
+
+  Map<String, String> _computeWasmHashes(Environment environment) {
     // Calculate SHA-256 hashes for WASM assets to support Cross-Origin Storage
     // (https://wicg.github.io/cross-origin-storage/). This assumes that the files will exist in
     // the output directory at this point.
@@ -996,37 +1270,42 @@ class WebTemplatedFiles extends Target {
     final Directory canvasKitDirectory = globals.fs.directory(
       globals.fs.path.join(canvasKitPath, 'canvaskit'),
     );
-    if (canvasKitDirectory.existsSync()) {
-      for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
-        if (file.path.endsWith('.wasm')) {
-          final String relativePath = globals.fs.path
-              .relative(file.path, from: canvasKitDirectory.path)
-              .replaceAll(r'\', '/');
-          wasmHashes[relativePath] = crypto.sha256.convert(file.readAsBytesSync()).toString();
+    _scanDirectoryForWasmHashes(canvasKitDirectory, wasmHashes);
+
+    if (compileTargets != null) {
+      for (final Dart2WebTarget target in compileTargets!) {
+        for (final File file in target.buildFiles(environment)) {
+          // CanvasKit WASM assets (canvaskit.wasm, skwasm.wasm) are already
+          // scanned and hashed separately from the SDK host artifacts above.
+          // Scope the exclusion check to the relative build directory path so
+          // parent directory names (e.g. /work/canvaskit/app) do not falsely match.
+          final String relativePath = environment.fileSystem.path.relative(
+            file.path,
+            from: environment.buildDir.path,
+          );
+          if (environment.fileSystem.path.extension(file.path) == '.wasm' &&
+              !environment.fileSystem.path.split(relativePath).contains('canvaskit') &&
+              file.existsSync()) {
+            wasmHashes[file.basename] = crypto.sha256.convert(file.readAsBytesSync()).toString();
+          }
         }
       }
+    } else {
+      _scanDirectoryForWasmHashes(environment.outputDir, wasmHashes, skipCanvasKit: true);
     }
+    return wasmHashes;
+  }
 
-    final Directory outputDirectory = environment.outputDir;
-    for (final File file in outputDirectory.listSync(recursive: true).whereType<File>()) {
-      if (file.path.endsWith('.wasm')) {
-        final String relativePath = globals.fs.path
-            .relative(file.path, from: outputDirectory.path)
-            .replaceAll(r'\', '/');
-        // Skip files under the canvaskit/ subdirectory — they are already
-        // covered by the canvasKit SDK directory scan above with keys that
-        // match what the JS lookup code actually uses.
-        if (relativePath.startsWith('canvaskit/')) {
-          continue;
-        }
-        wasmHashes[relativePath] = crypto.sha256.convert(file.readAsBytesSync()).toString();
-      }
-    }
-
+  String buildConfigString(Environment environment) {
+    final List<Map<String, Object?>> descriptions = compileTargets != null
+        ? compileTargets!
+              .map((Dart2WebTarget target) => target.getBuildConfig(environment))
+              .toList()
+        : buildDescriptions;
     final buildConfig = <String, Object>{
       'engineRevision': globals.flutterVersion.engineRevision,
-      'wasmHashes': wasmHashes,
-      'builds': buildDescriptions,
+      'wasmHashes': _computeWasmHashes(environment),
+      'builds': descriptions,
       if (environment.defines[kUseLocalCanvasKitFlag] == 'true') 'useLocalCanvasKit': true,
     };
     return '''
@@ -1122,13 +1401,17 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   }
 
   @override
-  List<Target> get dependencies => <Target>[];
+  List<Target> get dependencies =>
+      compileTargets != null ? <Target>[...compileTargets!] : <Target>[];
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{PROJECT_DIR}/web/*/index.html'),
-    Source.pattern('{PROJECT_DIR}/web/flutter_bootstrap.js'),
-    Source.hostArtifact(HostArtifact.flutterWebSdk),
+  List<Source> get inputs => <Source>[
+    const Source.pattern('{PROJECT_DIR}/web/*/index.html'),
+    const Source.pattern('{PROJECT_DIR}/web/flutter_bootstrap.js'),
+    const Source.hostArtifact(HostArtifact.flutterWebSdk),
+    if (compileTargets != null)
+      for (final Dart2WebTarget target in compileTargets!)
+        for (final String stem in target.buildPatternStems) Source.pattern('{BUILD_DIR}/$stem'),
   ];
 
   @override
