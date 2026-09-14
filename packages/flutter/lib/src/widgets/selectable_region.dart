@@ -1786,19 +1786,39 @@ class SelectableRegionState extends State<SelectableRegion>
   }
 
   /// The line height at the start of the current selection.
+  ///
+  /// The selection points can be null when they are queried while the selection
+  /// is being cleared, for example when the selected content is disposed or
+  /// scrolled out of the viewport. Falls back to the other selection point, and
+  /// to zero when there is no selection at all, so that callers such as
+  /// [contextMenuAnchors] do not crash in that window.
   double get startGlyphHeight {
-    return _selectionDelegate.value.startSelectionPoint!.lineHeight;
+    final SelectionPoint? start = _selectionDelegate.value.startSelectionPoint;
+    final SelectionPoint? end = _selectionDelegate.value.endSelectionPoint;
+    return (start ?? end)?.lineHeight ?? 0;
   }
 
   /// The line height at the end of the current selection.
+  ///
+  /// Falls back to the other selection point, and to zero when there is no
+  /// selection at all. See [startGlyphHeight].
   double get endGlyphHeight {
-    return _selectionDelegate.value.endSelectionPoint!.lineHeight;
+    final SelectionPoint? start = _selectionDelegate.value.startSelectionPoint;
+    final SelectionPoint? end = _selectionDelegate.value.endSelectionPoint;
+    return (end ?? start)?.lineHeight ?? 0;
   }
 
   /// Returns the local coordinates of the endpoints of the current selection.
+  ///
+  /// Returns an empty list when there is no selection, which can happen when
+  /// this is queried while the selection is being cleared. See
+  /// [startGlyphHeight].
   List<TextSelectionPoint> get selectionEndpoints {
     final SelectionPoint? start = _selectionDelegate.value.startSelectionPoint;
     final SelectionPoint? end = _selectionDelegate.value.endSelectionPoint;
+    if (start == null && end == null) {
+      return const <TextSelectionPoint>[];
+    }
     late List<TextSelectionPoint> points;
     final Offset startLocalPosition = start?.localPosition ?? end!.localPosition;
     final Offset endLocalPosition = end?.localPosition ?? start!.localPosition;
