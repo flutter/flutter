@@ -1,0 +1,86 @@
+plugins {
+    id "com.android.application"
+}
+
+// Points at the directory containing one subdirectory per ABI
+// (e.g. "arm64-v8a/libflutter_shell_android_runner.so"). Overridable so this
+// can read straight from a GN `out/<config>/android_shell/jniLibs` directory
+// once //flutter/shell/platform/rust:flutter_shell_android_runner_rust is
+// built; defaults to a local scratch directory used while this milestone has
+// no Flutter-tool-driven build wiring these together automatically.
+def flutterShellJniLibsDir = project.findProperty("flutterShellJniLibsDir") ?: "${projectDir}/../jniLibs"
+
+android {
+    namespace "dev.flutter.rustshell"
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "dev.flutter.rustshell"
+        minSdk 24
+        targetSdk 36
+        versionCode 1
+        versionName "0.1"
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = [flutterShellJniLibsDir]
+        }
+    }
+
+    packagingOptions {
+        // The GameActivity native glue is entirely self-contained inside
+        // libflutter_shell_android_runner.so; nothing else should claim to
+        // own its symbols.
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+        }
+        release {
+            // `debuggable` only controls the Android manifest attribute (adb
+            // run-as / JDWP access) needed to adb-push the milestone's
+            // placeholder flutter_assets/app.so into a non-rooted device's
+            // app-private files dir; it does not affect the Rust cdylib
+            // itself, which is always a real `cargo build --release`
+            // artifact regardless of this flag.
+            debuggable true
+            // No release keystore exists for this milestone-scaffold app; the
+            // default debug signing config is a dev-only convenience for
+            // on-device validation, not production signing.
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    // "lint vital" (AGP's mandatory pre-release lint pass) is irrelevant for
+    // this milestone-scaffold app and, separately, currently crashes under
+    // newer JDKs unrelated to anything in this source tree; skip it so
+    // assembleRelease actually reaches the packaging task.
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation "androidx.games:games-activity:4.4.0"
+    // GameActivity extends AppCompatActivity but its POM does not declare
+    // this as a transitive dependency; without it, loading the class throws
+    // NoClassDefFoundError for AppCompatActivity at runtime.
+    implementation "androidx.appcompat:appcompat:1.7.0"
+}
+
+// appcompat and games-activity pull in mismatched kotlin-stdlib versions
+// (1.8.22 vs. the older split kotlin-stdlib-jdk7/jdk8 1.6.21 artifacts),
+// which duplicate classes across dex inputs. Force one consistent version.
+configurations.all {
+    resolutionStrategy {
+        force "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
+        force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22"
+        force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22"
+    }
+}

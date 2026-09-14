@@ -1,0 +1,7 @@
+build/
+.gradle/
+local.properties
+# Scratch copy of cargo-built artifacts used only while no GN/tool wiring
+# populates this from the real build output; see flutterShellJniLibsDir in
+# app/build.gradle.
+/jniLibs/

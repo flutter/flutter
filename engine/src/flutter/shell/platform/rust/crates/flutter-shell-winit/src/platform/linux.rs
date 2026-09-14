@@ -17,8 +17,8 @@ use winit::{
     window::{Window, WindowAttributes},
 };
 
+use super::super::{NativeWindowKind, PopupAnchor as HostPopupAnchor, PopupPlacement};
 use super::PlatformBackend;
-use crate::{NativeWindowKind, PopupAnchor as HostPopupAnchor, PopupPlacement};
 
 pub(crate) struct LinuxPlatform;
 

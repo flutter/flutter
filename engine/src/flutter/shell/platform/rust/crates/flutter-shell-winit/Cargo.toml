@@ -31,3 +31,12 @@ winit = { version = "=0.31.0-beta.2", default-features = false, features = [
   "x11",
 ] }
 x11-dl = "=2.21.0"
+
+[target.'cfg(target_os = "android")'.dependencies]
+jni = "=0.22.4"
+ndk-context = "=0.1.1"
+raw-window-handle = "=0.6.2"
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "014d9e84813a2946febfa4888694c0b70565b2f5", default-features = false, features = ["vulkan"] }
+winit = { version = "=0.31.0-beta.2", default-features = false, features = [
+  "android-game-activity",
+] }

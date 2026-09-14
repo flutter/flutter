@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Milestone 1 scaffold: launches the flutter-shell-android-runner cdylib
+  directly through GameActivity, with no custom Activity subclass. See
+  crates/flutter-shell-android-runner/src/lib.rs for the native entry point
+  and flutter-rs-proggress.md for what this milestone does and does not
+  prove.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:label="Flutter Rust Shell (Android milestone 1)">
+
+        <activity
+            android:name="com.google.androidgamesdk.GameActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:theme="@style/AndroidRunnerTheme">
+
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="flutter_shell_android_runner" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
