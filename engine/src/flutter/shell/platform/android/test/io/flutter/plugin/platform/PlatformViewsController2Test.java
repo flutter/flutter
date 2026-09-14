@@ -705,12 +705,10 @@ public class PlatformViewsController2Test {
   }
 
   /**
-   * Stress-tests HCPP transaction list synchronization. Concurrent add/clear operations can leave
-   * null entries, causing merge(null) to throw and abort the engine through JNI.
+   * Detects list corruption that causes merge(null) and a JNI abort.
    *
-   * <p>Detection is probabilistic. This does not exercise native writes after publication; see
-   * {@code createTransaction()} for that separate race. Barrier timeouts skip the run, so this is
-   * not a liveness test.
+   * <p>Detection is probabilistic and excludes native writes after publication. Barrier timeouts
+   * skip the run, so this does not test liveness.
    */
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
@@ -722,12 +720,11 @@ public class PlatformViewsController2Test {
     // Larger batches increase the opportunity for add() to overlap clear()/addAll().
     final int presentsPerRound = 64;
     final int rounds = 300;
-    // Safety timeout; cleanup resets the barrier to release waiting threads sooner.
     final long timeoutMs = 30000;
 
     // Start producers and the frame swap together each round to encourage overlap.
     final CyclicBarrier roundStart = new CyclicBarrier(rasterThreadCount + 1);
-    // Report product failures before skipping runs interrupted by harness timeouts or shutdown.
+    // Product failures take precedence over harness skips.
     final AtomicReference<Throwable> raceFailure = new AtomicReference<>();
     final AtomicReference<Throwable> harnessFailure = new AtomicReference<>();
     final AtomicBoolean running = new AtomicBoolean(true);
@@ -752,7 +749,6 @@ public class PlatformViewsController2Test {
                   raceFailure.compareAndSet(null, t);
                 } finally {
                   running.set(false);
-                  // Release waiting participants on exit.
                   roundStart.reset();
                 }
               },
@@ -773,7 +769,6 @@ public class PlatformViewsController2Test {
         controller.onEndFrame();
       }
     } catch (TimeoutException | BrokenBarrierException e) {
-      // Any producer failure is recorded separately and reported first below.
       harnessFailure.compareAndSet(null, e);
     } catch (Throwable t) {
       raceFailure.compareAndSet(null, t);

@@ -75,22 +75,14 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   private final SparseArray<FlutterMutatorView> platformViewParent;
   private final MotionEventTracker motionEventTracker;
 
-  // The only cross-thread state in this class. The raster thread appends through
-  // createTransaction() while the platform thread drains in swapTransactions(); transactionLock
-  // guards exactly that handoff. AHB raster presentations get their own transactions because
-  // native transactions are not thread-safe; see createTransaction() for the residual native
-  // ownership race that this lock does not address.
+  // Guarded by transactionLock: the raster thread appends; the platform thread drains.
   private final ArrayList<SurfaceControl.Transaction> pendingRasterTransactions;
   private final Object transactionLock = new Object();
 
-  // Platform-thread only, and therefore unlocked: written by swapTransactions() and drained by
-  // onEndFrame(), both of which run on the platform task runner.
+  // Platform-thread only: populated by swapTransactions(), drained by onEndFrame().
   private final ArrayList<SurfaceControl.Transaction> activeRasterTransactions;
 
-  // Platform-thread only. Platform-view clips and overlay visibility share one transaction per
-  // frame. Locking these would not make off-thread use safe anyway: callers mutate the returned
-  // transaction after any lock would be released, and SurfaceControl.Transaction has no internal
-  // mutex.
+  // Platform-thread only. Clips and overlay visibility share one transaction per frame.
   private SurfaceControl.Transaction pendingPlatformTransaction;
   private SurfaceControl.Transaction activePlatformTransaction;
 
@@ -683,22 +675,17 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     parentView.setVisibility(View.GONE);
   }
 
-  // Called on the platform thread (UI thread) via the platform task runner.
   @UiThread
   @RequiresApi(API_LEVELS.API_34)
   public void onEndFrame() {
     final SurfaceControl.Transaction platformTx = activePlatformTransaction;
     activePlatformTransaction = null;
 
-    // Merge into a fresh destination: closing a raster input could free a native pointer still in
-    // use by its producer. See createTransaction(). This is deliberately not newTransaction(): the
-    // destination must be a distinct instance from the merge inputs, and tests override
-    // newTransaction() to hand back a single tracked transaction.
+    // Use a fresh destination so cleanup cannot close a raster input still in native use.
+    // Bypass newTransaction(), which tests may override to return an existing input.
     final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
     if (platformTx != null) {
       tx.merge(platformTx);
-      // merge() moved the contents into tx, so this frees the now-empty native transaction
-      // instead of leaving it to an arbitrary later GC.
       platformTx.close();
     }
     for (int i = 0; i < activeRasterTransactions.size(); i++) {
@@ -706,17 +693,11 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
     activeRasterTransactions.clear();
 
-    // This runs on the platform thread but is posted from the raster thread, so by the time it
-    // runs the FlutterView may have been detached from the controller, or detached from its
-    // window (in which case getRootSurfaceControl() returns null). Throwing here is fatal rather
-    // than merely wrong: the JNI caller, onEndFrame2(), turns a pending Java exception into an
-    // abort() via FML_CHECK(fml::jni::CheckException(env)).
+    // The view or its window may detach before this posted frame runs.
     final AttachedSurfaceControl rootSurfaceControl =
         flutterView == null ? null : flutterView.getRootSurfaceControl();
     if (rootSurfaceControl == null) {
-      // Nothing will apply this. close() releases the native transaction and the file descriptors
-      // it owns, including acquire fences merged in from raster buffers, rather than deferring
-      // them to an arbitrary later GC. It does not recall buffers already sent to SurfaceFlinger.
+      // Release the unapplied transaction and its owned fence FDs.
       tx.close();
       return;
     }
@@ -725,12 +706,10 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     rootSurfaceControl.applyTransactionOnDraw(tx);
   }
 
-  // Called on the platform thread (UI thread) via the platform task runner.
   @UiThread
   @RequiresApi(API_LEVELS.API_34)
   public void swapTransactions() {
-    // Normally onEndFrame() has already consumed the active transactions. Do not explicitly close
-    // raster inputs here; their native producers may still be using them.
+    // Do not close discarded raster inputs; native producers may still use them.
     activeRasterTransactions.clear();
     synchronized (transactionLock) {
       activeRasterTransactions.addAll(pendingRasterTransactions);
@@ -738,9 +717,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
 
     if (activePlatformTransaction != null) {
-      // This belongs to a frame whose onEndFrame() never ran, so nothing will ever apply it.
-      // Closing frees the native transaction now instead of at an arbitrary later GC. It holds
-      // only platform-thread mutations, so there are no buffers or fences to release.
+      // Discard a platform transaction whose onEndFrame() never ran.
       activePlatformTransaction.close();
     }
     activePlatformTransaction = pendingPlatformTransaction;
@@ -760,11 +737,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   @RequiresApi(API_LEVELS.API_34)
   public SurfaceControl.Transaction createTransaction() {
     final SurfaceControl.Transaction tx = newTransaction();
-    // The lock makes this handoff safe, but AHBSwapchainImplVK::Present writes through a borrowed
-    // native pointer after publication here. Merging can race those writes, and releasing Java
-    // references allows GC to free the transaction while native code still uses it. Both
-    // pre-existing hazards require native lifetime retention and publication after the producer
-    // finishes writing.
+    // This lock protects the list, not AHBSwapchainImplVK::Present's later native writes.
+    // Those can race merging or GC freeing the transaction. Fix both hazards by retaining it
+    // natively and publishing only after the writes finish.
     synchronized (transactionLock) {
       pendingRasterTransactions.add(tx);
     }
