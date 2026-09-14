@@ -28,15 +28,30 @@ import 'package:pigeon/pigeon.dart';
 {{/android}}
 {{#darwin}}
     swiftOut:
+{{#withSwiftPackageManager}}
       'darwin/{{projectName}}/Sources/{{projectName}}/Messages.g.swift',
+{{/withSwiftPackageManager}}
+{{^withSwiftPackageManager}}
+      'darwin/Classes/Messages.g.swift',
+{{/withSwiftPackageManager}}
 {{/darwin}}
 {{^darwin}}
     swiftOut: [
 {{#ios}}
+{{#withSwiftPackageManager}}
       'ios/{{projectName}}/Sources/{{projectName}}/Messages.g.swift',
+{{/withSwiftPackageManager}}
+{{^withSwiftPackageManager}}
+      'ios/Classes/Messages.g.swift',
+{{/withSwiftPackageManager}}
 {{/ios}}
 {{#macos}}
+{{#withSwiftPackageManager}}
       'macos/{{projectName}}/Sources/{{projectName}}/Messages.g.swift',
+{{/withSwiftPackageManager}}
+{{^withSwiftPackageManager}}
+      'macos/Classes/Messages.g.swift',
+{{/withSwiftPackageManager}}
 {{/macos}}
     ],
 {{/darwin}}

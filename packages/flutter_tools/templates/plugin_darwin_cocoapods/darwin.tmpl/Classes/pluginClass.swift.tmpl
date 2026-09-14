@@ -1,3 +1,4 @@
+// Import the correct Flutter module and UI framework for each platform
 #if os(iOS)
 import Flutter
 import UIKit
@@ -6,31 +7,28 @@ import Cocoa
 import FlutterMacOS
 #endif
 
-public class {{pluginClass}}: NSObject, FlutterPlugin {
+public class {{pluginClass}}: NSObject, FlutterPlugin, {{pluginClassApi}} {
   public static func register(with registrar: FlutterPluginRegistrar) {
+    // The registrar's `messenger` is a method on iOS and a property on macOS.
+    // Use a compile-time condition to handle this difference.
     #if os(iOS)
-    let messenger = registrar.messenger()
+      let messenger = registrar.messenger()
     #elseif os(macOS)
-    let messenger = registrar.messenger
+      let messenger = registrar.messenger
     #endif
 
-    let channel = FlutterMethodChannel(name: "{{projectName}}", binaryMessenger: messenger)
     let instance = {{pluginClass}}()
-    registrar.addMethodCallDelegate(instance, channel: channel)
+    {{pluginClassApi}}Setup.setUp(binaryMessenger: messenger, api: instance)
   }
 
-  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    switch call.method {
-    case "getPlatformVersion":
-      #if os(iOS)
-        result("iOS " + UIDevice.current.systemVersion)
-      #elseif os(macOS)
-        result("macOS " + ProcessInfo.processInfo.operatingSystemVersionString)
-      #else
-        result(FlutterMethodNotImplemented)
-      #endif
-    default:
-      result(FlutterMethodNotImplemented)
-    }
+  public func getPlatformVersion() throws -> String {
+    // Use compile-time conditions to return the correct OS version string.
+    #if os(iOS)
+      return "iOS " + UIDevice.current.systemVersion
+    #elseif os(macOS)
+      return "macOS " + ProcessInfo.processInfo.operatingSystemVersionString
+    #else
+      return "Unsupported platform"
+    #endif
   }
 }
