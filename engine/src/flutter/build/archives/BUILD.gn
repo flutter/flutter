@@ -384,7 +384,7 @@ if (host_os == "win") {
         destination = "gen_snapshot.exe"
       },
     ]
-    if (flutter_runtime_mode == "profile") {
+    if (flutter_runtime_mode == "profile" && target_os != "android") {
       deps += [ "//flutter/shell/vmservice:vmservice_snapshot" ]
       files += [
         {
