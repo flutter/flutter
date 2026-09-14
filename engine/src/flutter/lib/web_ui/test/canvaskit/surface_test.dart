@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -18,6 +20,7 @@ void testMain() {
     setUpCanvasKitTest();
     setUp(() {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+      CkSurface.debugForceGLFailure = false;
     });
 
     test('CkOnscreenSurface resizes correctly', () async {
@@ -148,6 +151,63 @@ void testMain() {
       // Check that it is safe to call dispose multiple times on the same
       // surface.
       surface.dispose();
+      surface.dispose();
+      CkSurface.debugForceGLFailure = false;
+    });
+
+    test('resizing CkOffscreenSurface to large dimensions renders across full bounds without clipping', () async {
+      final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+      await surface.initialized;
+
+      surface.setSize(const BitmapSize(100, 100));
+      surface.setSize(const BitmapSize(4960, 7016));
+
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      final paint = ui.Paint()..color = const ui.Color(0xFFFF0000);
+      canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 4960, 7016), paint);
+      final ui.Picture picture = recorder.endRecording();
+
+      await surface.rasterizeToCanvas(picture);
+
+      final SkImage snapshot = surface.skSurface!.makeImageSnapshot();
+      Uint8List? pixels;
+      try {
+        final imageInfo = SkImageInfo(
+          alphaType: canvasKit.AlphaType.Premul,
+          colorType: canvasKit.ColorType.RGBA_8888,
+          colorSpace: SkColorSpaceSRGB,
+          width: 4960,
+          height: 7016,
+        );
+        pixels = snapshot.readPixels(0, 0, imageInfo);
+      } finally {
+        snapshot.delete();
+      }
+
+      expect(pixels, isNotNull);
+
+      const sampleX = 4950;
+      const sampleY = 100;
+      const int pixelOffset = (sampleY * 4960 + sampleX) * 4;
+      final int r = pixels![pixelOffset];
+      final int g = pixels[pixelOffset + 1];
+      final int b = pixels[pixelOffset + 2];
+      final int a = pixels[pixelOffset + 3];
+
+      expect(
+        r,
+        255,
+        reason:
+            'Pixel at ($sampleX, $sampleY) should have red == 255, but got red == $r (rgba: [$r, $g, $b, $a])',
+      );
+      expect(
+        a,
+        255,
+        reason:
+            'Pixel at ($sampleX, $sampleY) should have alpha == 255, but got alpha == $a (rgba: [$r, $g, $b, $a])',
+      );
+
       surface.dispose();
     });
   });
