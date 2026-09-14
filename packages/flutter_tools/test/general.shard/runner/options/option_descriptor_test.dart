@@ -4,6 +4,7 @@
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 import '../../../src/common.dart';
@@ -79,6 +80,25 @@ void main() {
       final ArgResults results = parser.parse(<String>['--no-test-flag']);
       expect(descriptor.wasProvided(results), isTrue);
       expect(descriptor.getValue(results), isFalse);
+    });
+
+    test('isRegistered reports true when added to parser and false when not', () {
+      const descriptor = FlagOptionDescriptor(
+        name: 'registered-flag',
+        defaultsTo: true,
+        help: 'Registered flag help',
+      );
+      const unaddedDescriptor = FlagOptionDescriptor(
+        name: 'unadded-flag',
+        defaultsTo: true,
+        help: 'Unadded flag help',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>[]);
+      expect(descriptor.isRegistered(results), isTrue);
+      expect(unaddedDescriptor.isRegistered(results), isFalse);
     });
   });
 
@@ -199,27 +219,256 @@ void main() {
       expect(descriptor.wasProvided(results), isTrue);
       expect(descriptor.getValue(results), <String>['a=1', 'b=2']);
     });
+
+    test('supports abbreviation and aliases', () {
+      const descriptor = MultiOptionDescriptor(
+        name: 'project-arg',
+        abbr: 'P',
+        aliases: <String>['project-args'],
+        help: 'Project args',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      expect(parser.options['project-arg']!.abbr, 'P');
+      expect(parser.options['project-arg']!.aliases, contains('project-args'));
+
+      final ArgResults abbrResults = parser.parse(<String>['-P', 'key=val', '-P', 'key2=val2']);
+      expect(descriptor.wasProvided(abbrResults), isTrue);
+      expect(descriptor.getValue(abbrResults), <String>['key=val', 'key2=val2']);
+
+      final ArgResults aliasResults = parser.parse(<String>['--project-args=foo=bar']);
+      expect(descriptor.wasProvided(aliasResults), isTrue);
+      expect(descriptor.getValue(aliasResults), <String>['foo=bar']);
+    });
+  });
+
+  group('DefaultedStringOptionDescriptor', () {
+    test('returns non-nullable default value when omitted', () {
+      const descriptor = DefaultedStringOptionDescriptor(
+        name: 'target',
+        defaultsTo: 'lib/main.dart',
+        help: 'Target entrypoint',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>[]);
+      expect(descriptor.wasProvided(results), isFalse);
+      expect(descriptor.getValue(results), 'lib/main.dart');
+    });
+
+    test('returns parsed string when provided', () {
+      const descriptor = DefaultedStringOptionDescriptor(
+        name: 'target',
+        defaultsTo: 'lib/main.dart',
+        help: 'Target entrypoint',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>['--target=lib/custom.dart']);
+      expect(descriptor.wasProvided(results), isTrue);
+      expect(descriptor.getValue(results), 'lib/custom.dart');
+    });
+  });
+
+  group('IntOptionDescriptor', () {
+    test('returns null when omitted without default', () {
+      const descriptor = IntOptionDescriptor(name: 'port', help: 'Port number');
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>[]);
+      expect(descriptor.wasProvided(results), isFalse);
+      expect(descriptor.getValue(results), isNull);
+    });
+
+    test('parses valid integer string', () {
+      const descriptor = IntOptionDescriptor(name: 'port', help: 'Port number');
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>['--port=8080']);
+      expect(descriptor.wasProvided(results), isTrue);
+      expect(descriptor.getValue(results), 8080);
+    });
+
+    test('throws FormatException on invalid integer string', () {
+      const descriptor = IntOptionDescriptor(name: 'port', help: 'Port number');
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>['--port=not-an-int']);
+      expect(() => descriptor.getValue(results), throwsA(isA<FormatException>()));
+    });
+  });
+
+  group('DefaultedIntOptionDescriptor', () {
+    test('returns default value when omitted', () {
+      const descriptor = DefaultedIntOptionDescriptor(
+        name: 'timeout',
+        defaultsTo: 30,
+        help: 'Timeout in seconds',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>[]);
+      expect(descriptor.wasProvided(results), isFalse);
+      expect(descriptor.getValue(results), 30);
+    });
+
+    test('returns parsed integer when provided', () {
+      const descriptor = DefaultedIntOptionDescriptor(
+        name: 'timeout',
+        defaultsTo: 30,
+        help: 'Timeout in seconds',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>['--timeout=60']);
+      expect(descriptor.wasProvided(results), isTrue);
+      expect(descriptor.getValue(results), 60);
+    });
+
+    test('throws FormatException on invalid integer string', () {
+      const descriptor = DefaultedIntOptionDescriptor(
+        name: 'timeout',
+        defaultsTo: 30,
+        help: 'Timeout in seconds',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>['--timeout=abc']);
+      expect(() => descriptor.getValue(results), throwsA(isA<FormatException>()));
+    });
+  });
+
+  group('EnumOptionDescriptor', () {
+    test('derives allowed from enum values and returns null when omitted', () {
+      const descriptor = EnumOptionDescriptor<_TestEnum>(
+        name: 'mode',
+        values: _TestEnum.values,
+        help: 'Mode option',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      expect(parser.options['mode']!.allowed, <String>['firstOption', 'secondOption']);
+
+      final ArgResults results = parser.parse(<String>[]);
+      expect(descriptor.wasProvided(results), isFalse);
+      expect(descriptor.getValue(results), isNull);
+    });
+
+    test('parses matching enum value', () {
+      const descriptor = EnumOptionDescriptor<_TestEnum>(
+        name: 'mode',
+        values: _TestEnum.values,
+        help: 'Mode option',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>['--mode=secondOption']);
+      expect(descriptor.wasProvided(results), isTrue);
+      expect(descriptor.getValue(results), _TestEnum.secondOption);
+    });
+
+    test('supports CliEnum auto-formatting for allowed and allowedHelp', () {
+      const descriptor = EnumOptionDescriptor<_TestCliEnum>(
+        name: 'strategy',
+        values: _TestCliEnum.values,
+        help: 'Strategy option',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      expect(parser.options['strategy']!.allowed, <String>['alpha-val', 'beta-val']);
+      expect(parser.options['strategy']!.allowedHelp, <String, String>{
+        'alpha-val': 'Help for alpha',
+        'beta-val': 'Help for beta',
+      });
+
+      final ArgResults results = parser.parse(<String>['--strategy=beta-val']);
+      expect(descriptor.wasProvided(results), isTrue);
+      expect(descriptor.getValue(results), _TestCliEnum.beta);
+    });
+
+    test('supports custom nameMapper and valueParser', () {
+      final descriptor = EnumOptionDescriptor<_TestEnum>(
+        name: 'mode',
+        values: _TestEnum.values,
+        help: 'Mode option',
+        nameMapper: (_TestEnum e) => e == _TestEnum.firstOption ? 'first' : 'second',
+        valueParser: (String s) => s == 'first' ? _TestEnum.firstOption : _TestEnum.secondOption,
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      expect(parser.options['mode']!.allowed, <String>['first', 'second']);
+
+      final ArgResults results = parser.parse(<String>['--mode=first']);
+      expect(descriptor.getValue(results), _TestEnum.firstOption);
+    });
+  });
+
+  group('DefaultedEnumOptionDescriptor', () {
+    test('returns non-nullable default value when omitted', () {
+      const descriptor = DefaultedEnumOptionDescriptor<_TestEnum>(
+        name: 'mode',
+        values: _TestEnum.values,
+        defaultsTo: _TestEnum.firstOption,
+        help: 'Mode option with default',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      expect(parser.options['mode']!.defaultsTo, 'firstOption');
+
+      final ArgResults results = parser.parse(<String>[]);
+      expect(descriptor.wasProvided(results), isFalse);
+      expect(descriptor.getValue(results), _TestEnum.firstOption);
+    });
+
+    test('parses explicit enum value over default', () {
+      const descriptor = DefaultedEnumOptionDescriptor<_TestEnum>(
+        name: 'mode',
+        values: _TestEnum.values,
+        defaultsTo: _TestEnum.firstOption,
+        help: 'Mode option with default',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>['--mode=secondOption']);
+      expect(descriptor.wasProvided(results), isTrue);
+      expect(descriptor.getValue(results), _TestEnum.secondOption);
+    });
   });
 
   group('OptionDescriptor conflicts and identity', () {
-    test('re-registering identical descriptor succeeds', () {
+    test('re-registering identical descriptor succeeds automatically via Expando', () {
       const descriptor = FlagOptionDescriptor(name: 'shared-flag', help: 'Shared flag');
       final parser = ArgParser();
-      final registry = <String, OptionDescriptor<Object?>>{};
 
-      descriptor.addTo(parser, registry: registry);
-      expect(() => descriptor.addTo(parser, registry: registry), returnsNormally);
+      descriptor.addTo(parser);
+      expect(() => descriptor.addTo(parser), returnsNormally);
+      expect(() => parser.addDescriptor(descriptor), returnsNormally);
+      expect(() => parser.addDescriptors(<OptionDescriptor<Object?>>[descriptor]), returnsNormally);
     });
 
     test('registering conflicting descriptor throws detailed ArgumentError', () {
       const first = FlagOptionDescriptor(name: 'conflict-flag', help: 'First flag');
       const second = FlagOptionDescriptor(name: 'conflict-flag', help: 'Second flag');
       final parser = ArgParser();
-      final registry = <String, OptionDescriptor<Object?>>{};
 
-      first.addTo(parser, registry: registry);
+      first.addTo(parser);
       expect(
-        () => second.addTo(parser, registry: registry),
+        () => second.addTo(parser),
         throwsA(
           isA<ArgumentError>().having(
             (ArgumentError e) => e.message,
@@ -257,6 +506,24 @@ void main() {
 
       expect(command.getValue(stringOpt), 'custom');
       expect(command.wasProvided(stringOpt), isTrue);
+    });
+
+    testUsingContext('converts FormatException from IntOptionDescriptor into ToolExit', () async {
+      const intOpt = IntOptionDescriptor(name: 'port', help: 'Server port');
+      const bundle = _SimpleBundle(descriptors: <OptionDescriptor<Object?>>[intOpt]);
+      final command = _FakeCommand(
+        name: 'serve',
+        description: 'Serve command',
+        bundles: const <OptionBundle>[bundle],
+      );
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['serve', '--port=not-a-number']);
+
+      expect(
+        () => command.getValue(intOpt),
+        throwsToolExit(message: 'Invalid integer value "not-a-number" for "--port".'),
+      );
     });
 
     testUsingContext('renders section separator titles in command usage', () {
@@ -329,4 +596,19 @@ class _TitledBundle extends OptionBundle {
   List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
     FlagOptionDescriptor(name: 'titled-flag', help: 'Flag under title'),
   ];
+}
+
+enum _TestEnum { firstOption, secondOption }
+
+enum _TestCliEnum implements CliEnum {
+  alpha('alpha-val', 'Help for alpha'),
+  beta('beta-val', 'Help for beta');
+
+  const _TestCliEnum(this.cliName, this.helpText);
+
+  @override
+  final String cliName;
+
+  @override
+  final String helpText;
 }

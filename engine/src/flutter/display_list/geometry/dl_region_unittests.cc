@@ -343,6 +343,7 @@ TEST(DisplayListRegion, UnionEmpty) {
     std::vector<DlIRect> expected{
         DlIRect::MakeXYWH(0, 0, 20, 20),
     };
+    EXPECT_EQ(rects, expected);
   }
   {
     DlRegion region1({
@@ -355,6 +356,7 @@ TEST(DisplayListRegion, UnionEmpty) {
     std::vector<DlIRect> expected{
         DlIRect::MakeXYWH(0, 0, 20, 20),
     };
+    EXPECT_EQ(rects, expected);
   }
 }
 

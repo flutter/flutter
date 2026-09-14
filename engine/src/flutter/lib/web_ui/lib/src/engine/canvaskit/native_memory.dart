@@ -24,13 +24,19 @@ class CkUniqueRef<T extends JSObject> extends UniqueRef<T> {
 
 /// Manages the lifecycle of a C++ object referenced by multiple Dart objects.
 class CkCountedRef<R extends StackTraceDebugger, T extends JSObject> extends CountedRef<R, T> {
-  CkCountedRef(super.nativeObject, super.debugReferrer, super.debugLabel, {super.onDisposed})
-    : super(
-        onDispose: (T obj) {
-          final deletable = obj as SkDeletable;
-          if (!deletable.isDeleted()) {
-            deletable.delete();
-          }
-        },
-      );
+  CkCountedRef(
+    super.nativeObject,
+    super.debugReferrer,
+    super.debugLabel, {
+    super.onDisposed,
+    void Function(T)? onDispose,
+  }) : super(
+         onDispose: (T obj) {
+           final deletable = obj as SkDeletable;
+           if (!deletable.isDeleted()) {
+             deletable.delete();
+           }
+           onDispose?.call(obj);
+         },
+       );
 }

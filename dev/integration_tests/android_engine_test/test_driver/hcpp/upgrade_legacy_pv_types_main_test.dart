@@ -13,10 +13,12 @@ import 'package:test/test.dart';
 /// legacy platform view creation APIs (HC via initExpensiveAndroidView,
 /// TLHC with HC fallback via initSurfaceAndroidView, and
 /// TLHC with VD fallback via initAndroidView) are upgraded to HCPP mode
-/// without crashing.
+/// without crashing. When HCPP is disabled via --no-enable-hcpp,
+/// verifies that all three fall back to their legacy creation strategies.
 void main() async {
   late final FlutterDriver flutterDriver;
   late final NativeDriver nativeDriver;
+  final expectHcpp = io.Platform.environment['EXPECT_HCPP'] != 'false';
 
   setUpAll(() async {
     // Clear logcat before the test so we only see logs from this run.
@@ -32,9 +34,9 @@ void main() async {
     await flutterDriver.close();
   });
 
-  test('verify that HCPP is supported and enabled', () async {
+  test('verify that HCPP is ${expectHcpp ? "supported and enabled" : "disabled"}', () async {
     final response = json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
-    expect(response['supported'], true);
+    expect(response['supported'], expectHcpp);
   }, timeout: Timeout.none);
 
   test('all three platform view types render without crashing', () async {
@@ -50,7 +52,7 @@ void main() async {
     expect(health.status, HealthStatus.ok);
   }, timeout: Timeout.none);
 
-  test('verify HCPP was used for all views via logcat', () async {
+  test('verify platform view rendering strategy via logcat', () async {
     // Dump logcat filtered to the PlatformViewsChannel tag.
     final io.ProcessResult result = await io.Process.run('adb', <String>[
       'logcat',
@@ -60,25 +62,42 @@ void main() async {
     ]);
     final logcat = result.stdout as String;
 
-    // We created 3 platform views — expect 3 HCPP log lines.
+    // We created 3 platform views.
     final int hcppCount = 'Using HCPP platform view rendering strategy.'.allMatches(logcat).length;
     final int legacyCount = 'Using legacy platform view rendering strategy.'
         .allMatches(logcat)
         .length;
 
-    expect(
-      hcppCount,
-      3,
-      reason:
-          'Expected 3 HCPP creations (one per view type), '
-          'got $hcppCount. Logcat:\n$logcat',
-    );
-    expect(
-      legacyCount,
-      0,
-      reason:
-          'Expected 0 legacy creations, '
-          'got $legacyCount. Logcat:\n$logcat',
-    );
+    if (expectHcpp) {
+      expect(
+        hcppCount,
+        3,
+        reason:
+            'Expected 3 HCPP creations (one per view type), '
+            'got $hcppCount. Logcat:\n$logcat',
+      );
+      expect(
+        legacyCount,
+        0,
+        reason:
+            'Expected 0 legacy creations, '
+            'got $legacyCount. Logcat:\n$logcat',
+      );
+    } else {
+      expect(
+        hcppCount,
+        0,
+        reason:
+            'Expected 0 HCPP creations when HCPP is disabled, '
+            'got $hcppCount. Logcat:\n$logcat',
+      );
+      expect(
+        legacyCount,
+        3,
+        reason:
+            'Expected 3 legacy creations when HCPP is disabled, '
+            'got $legacyCount. Logcat:\n$logcat',
+      );
+    }
   }, timeout: Timeout.none);
 }

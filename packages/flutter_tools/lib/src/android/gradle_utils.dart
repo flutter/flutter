@@ -218,14 +218,11 @@ const gradleWrapperPropertiesFilename = 'gradle-wrapper.properties';
 /// or constructing a Gradle project.
 class GradleUtils {
   GradleUtils({
-    required Platform platform,
-    required Logger logger,
-    required Cache cache,
-    required OperatingSystemUtils operatingSystemUtils,
-  }) : _platform = platform,
-       _logger = logger,
-       _cache = cache,
-       _operatingSystemUtils = operatingSystemUtils;
+    required this._platform,
+    required this._logger,
+    required this._cache,
+    required this._operatingSystemUtils,
+  });
 
   final Cache _cache;
   final Platform _platform;
@@ -1218,18 +1215,6 @@ void updateLocalProperties({
   if (changed) {
     settings.writeContents(localProperties);
   }
-}
-
-/// Writes standard Android local properties to the specified [properties] file.
-///
-/// Writes the path to the Android SDK, if known.
-void writeLocalProperties(File properties) {
-  final settings = SettingsFile();
-  final AndroidSdk? androidSdk = globals.androidSdk;
-  if (androidSdk != null) {
-    settings.values['sdk.dir'] = globals.fsUtils.escapePath(androidSdk.directory.path);
-  }
-  settings.writeContents(properties);
 }
 
 void exitWithNoSdkMessage() {
