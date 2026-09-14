@@ -9,6 +9,7 @@
 /// @docImport 'package:flutter/rendering.dart';
 /// @docImport 'package:flutter/semantics.dart';
 /// @docImport 'package:flutter/widgets.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
 ///
 /// @docImport 'binding.dart';
 /// @docImport 'service_extensions.dart';
@@ -17,7 +18,8 @@ library;
 import 'dart:collection';
 // The view metric override types at the bottom of this file are value holders
 // for metrics `dart:ui` defines, so they name the `dart:ui` types they stand in
-// for. Nothing that uses them runs outside of debug mode.
+// for. See the note at the top of _view_metrics.dart about this dependency; as
+// there, nothing that uses it runs outside of debug mode.
 import 'dart:ui'
     as ui
     show
@@ -31,6 +33,7 @@ import 'dart:ui'
 
 import 'package:meta/meta.dart';
 
+import '_view_metrics.dart' show debugReplayViewMetricsNotifications;
 import 'assertions.dart';
 import 'diagnostics.dart';
 import 'memory_allocations.dart';
@@ -39,6 +42,15 @@ import 'print.dart';
 
 export 'dart:ui' show Brightness;
 
+export '_view_metrics.dart'
+    show
+        debugApplyViewMetricsOverrides,
+        debugApplyViewMetricsOverridesForView,
+        debugApplyViewMetricsOverridesToView,
+        debugMarkViewAppliesItsOwnMetricsOverride,
+        debugReadViewMetrics,
+        debugViewMetricsOverrideApplied,
+        debugViewWithMetricsOverrides;
 export 'print.dart' show DebugPrintCallback;
 
 /// Returns true if none of the foundation library debug variables have been
@@ -311,21 +323,36 @@ class DebugViewPadding implements ui.ViewPadding {
 /// application can be audited under many device configurations without changing
 /// any real device setting.
 ///
-/// An override changes what the framework is told about the platform, not the
-/// platform itself, so content the engine composites rather than the framework,
-/// such as platform views and system UI, is unaffected. Direct reads from
-/// [ui.PlatformDispatcher.instance] also continue to report the real platform
-/// metrics.
+/// Because the override is applied at the `dart:ui` layer — see
+/// [debugApplyViewMetricsOverrides] — it reaches everything downstream of it:
+/// the [MediaQuery] a [View] creates, the [ViewConfiguration] a [RenderView]
+/// lays out with, the conversion of incoming pointer events,
+/// [SemanticsBinding.accessibilityFeatures], accessibility evaluations, image
+/// resolution, and the keyboard inset calculations in [EditableText]. Content
+/// the engine composites rather than the framework, such as platform views and
+/// system UI, is unaffected: this changes what the framework believes about the
+/// platform, not the platform itself.
 ///
 /// All values are in the units `dart:ui` uses, which for sizes and insets means
 /// physical pixels rather than the logical pixels [MediaQueryData] reports.
 ///
-/// This class has no effect outside of debug mode (in profile or release mode).
+/// Direct reads from [ui.PlatformDispatcher.instance] still report the real
+/// platform metrics. Engine views passed to [View], [RenderView], or
+/// [MediaQueryData.fromView] are normalized to apply overrides.
 ///
-/// The individual metrics below describe what overriding each one does once it
-/// is applied. Applying them is the job of the code that reads
-/// [debugViewMetricsOverrides], which the framework does not do yet: for now,
-/// registering an override records it and nothing more.
+/// The deprecated [BindingBase.window] reports the platform's own metrics, and with it
+/// the deprecated [ScrollPhysics.tolerance] that reads it. The deprecated
+/// [MediaQuery.fromWindow] does apply them: it builds its data with
+/// [MediaQueryData.fromView], which resolves the override registered for the
+/// view the window stands for.
+///
+/// In a widget test, a value set on [TestFlutterView] or
+/// [TestPlatformDispatcher] — including the size
+/// `TestWidgetsFlutterBinding.setSurfaceSize` sets — takes precedence over the
+/// corresponding metric here, because those objects wrap the ones this
+/// overrides and resolve their own value first.
+///
+/// This class has no effect outside of debug mode (in profile or release mode).
 ///
 /// See also:
 ///
@@ -471,7 +498,9 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// Overrides [ui.PlatformDispatcher.platformBrightness].
   ///
   /// Unlike [debugBrightnessOverride], which replaces the brightness of every
-  /// view, this applies only to the view it is registered for.
+  /// view, this applies only to the view it is registered for. When
+  /// [debugBrightnessOverride] is also set, it wins in [MediaQuery], which
+  /// applies it after the [MediaQueryData] has been built from this.
   final ui.Brightness? platformBrightness;
 
   /// Overrides [ui.FlutterView.padding], in physical pixels.
@@ -713,10 +742,11 @@ class DebugViewMetricsOverride with Diagnosticable {
   // The metrics dart:ui delivers through PlatformDispatcher.onMetricsChanged.
   //
   // This grouping, `_accessibilityFeatures`, and the standalone `textScaleFactor`
-  // and `platformBrightness` are what == and hashCode compare, so a metric that
-  // reaches none of them is never compared. A record is used so that adding a
-  // field without adding it here shows up as a completeness guard failure
-  // rather than as a metric that only sometimes takes effect.
+  // and `platformBrightness` are what == and hashCode compare, and what decides
+  // which platform notification an override change replays, so a metric that
+  // reaches none of them is neither compared nor propagated. A record is used
+  // so that adding a field without adding it here shows up as a completeness
+  // guard failure rather than as a metric that only sometimes takes effect.
   (
     double?,
     ui.Size?,
@@ -736,6 +766,18 @@ class DebugViewMetricsOverride with Diagnosticable {
     alwaysUse24HourFormat,
   );
 
+  // Everything dart:ui keeps in its platform configuration — the metrics that
+  // belong to the application rather than to one view, which it reports through
+  // PlatformDispatcher.onPlatformConfigurationChanged as well as through the
+  // callback for the field that changed, when that field has one.
+  //
+  // This grouping overlaps the others rather than partitioning with them: every
+  // metric it names is also compared elsewhere. A metric added to
+  // DebugViewMetricsOverride has to be classified here too, or the umbrella
+  // notification silently never fires for it.
+  (double?, ui.Brightness?, bool?, Object?) get _platformConfiguration =>
+      (textScaleFactor, platformBrightness, alwaysUse24HourFormat, _accessibilityFeatures);
+
   // The flags dart:ui delivers through
   // PlatformDispatcher.onAccessibilityFeaturesChanged.
   (bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?)
@@ -752,6 +794,12 @@ class DebugViewMetricsOverride with Diagnosticable {
     autoPlayVideos,
     deterministicCursor,
   );
+
+  static const (bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?)
+  _emptyAccessibilityFeatures = (null, null, null, null, null, null, null, null, null, null, null);
+
+  /// Whether any [ui.AccessibilityFeatures] are overridden by this instance.
+  bool get hasAccessibilityFeatures => _accessibilityFeatures != _emptyAccessibilityFeatures;
 
   @override
   bool operator ==(Object other) {
@@ -972,19 +1020,23 @@ class DebugViewMetricsOverride with Diagnosticable {
 /// Developer tooling installs entries here — normally through the
 /// `ext.flutter.viewMetricsOverride` service extension rather than directly —
 /// to make an application behave as though the platform reported different
-/// settings.
+/// settings. They are applied by the [ui.PlatformDispatcher]
+/// [debugApplyViewMetricsOverrides] installs, which is what
+/// [BindingBase.platformDispatcher] returns, so every part of the framework
+/// that reads a view metric sees them.
 ///
-/// This map is read-only. Use [debugSetViewMetricsOverride] and
-/// [debugClearViewMetricsOverrides] to change it; mutating the map directly
-/// throws an [UnsupportedError].
+/// This map is read-only. Changing an override has to tell the framework to
+/// re-read the affected metrics, so use [debugSetViewMetricsOverride] and
+/// [debugClearViewMetricsOverrides] instead; mutating the map directly throws
+/// an [UnsupportedError] rather than silently leaving the application stale.
 ///
-/// Entries survive a hot reload, and are lost on a hot restart, which starts
-/// the isolate over. Tooling that wants an override to outlive a restart has to
-/// install it again.
+/// Entries survive a hot reload, which rebuilds the application against them,
+/// and are lost on a hot restart, which starts the isolate over. Tooling that
+/// wants an override to outlive a restart has to install it again.
 ///
-/// A view that is removed while it has an override leaves its entry behind.
-/// Entries are keyed by view ID alone, so the entry matches again if a view is
-/// later created with the same [ui.FlutterView.viewId].
+/// A view that is removed while it has an override leaves its entry behind;
+/// the entry becomes inert, and applies again if a view is later created with
+/// the same [ui.FlutterView.viewId].
 ///
 /// This map is always empty outside of debug mode (in profile or release mode).
 Map<int, DebugViewMetricsOverride> get debugViewMetricsOverrides =>
@@ -1002,6 +1054,10 @@ final Map<int, DebugViewMetricsOverride> _unmodifiableViewMetricsOverrides =
 ///
 /// Returns true if the registered override actually changed. Always returns
 /// false, and does nothing, outside of debug mode (in profile or release mode).
+///
+/// The framework is told to re-read the metrics that changed, synchronously,
+/// before this returns. Do not call this during a build: the service extension
+/// that normally drives it runs on the event loop, outside the build phase.
 ///
 /// Tests that call this must reset it before the test body ends, because
 /// [debugAssertAllFoundationVarsUnset] treats a leftover override as a leaked
@@ -1021,6 +1077,9 @@ bool debugSetViewMetricsOverride(int viewId, DebugViewMetricsOverride? override)
       _viewMetricsOverrides[viewId] = next;
     }
     changed = true;
+    _debugReplayPlatformNotifications(<(DebugViewMetricsOverride?, DebugViewMetricsOverride?)>[
+      (previous, next),
+    ]);
     return true;
   }());
   return changed;
@@ -1036,11 +1095,76 @@ bool debugClearViewMetricsOverrides() {
     if (_viewMetricsOverrides.isEmpty) {
       return true;
     }
+    final removed = <(DebugViewMetricsOverride?, DebugViewMetricsOverride?)>[
+      for (final DebugViewMetricsOverride override in _viewMetricsOverrides.values)
+        (override, null),
+    ];
     _viewMetricsOverrides.clear();
     changed = true;
+    _debugReplayPlatformNotifications(removed);
     return true;
   }());
   return changed;
+}
+
+// Tells the framework that the metrics which differ between [before] and
+// [after] changed, by invoking the dart:ui callbacks that deliver them.
+//
+// An override change is, from the framework's point of view, exactly what a
+// platform settings change is: the values it reads from dart:ui are now
+// different. Replaying the platform's own notifications is therefore not a lie,
+// and it means overrides get the same handling real changes do —
+// RendererBinding.handleMetricsChanged rebuilds every ViewConfiguration,
+// SemanticsBinding re-reads its cached AccessibilityFeatures, and every
+// WidgetsBindingObserver is notified — with no code in those paths that knows
+// about overrides at all.
+//
+// The callbacks are invoked on every dispatcher an override applies to rather
+// than on ui.PlatformDispatcher.instance, because a binding that supplies its
+// own dispatcher registers the framework's callbacks on that one, and each runs
+// in the zone it was registered in; see
+// [debugReplayViewMetricsNotifications], which owns both.
+//
+// Only the notifications whose metrics actually changed are replayed, so that
+// toggling an accessibility flag does not tell the application its window
+// changed size. alwaysUse24HourFormat is the exception: dart:ui has no
+// dedicated callback for it, and onMetricsChanged is the only notification the
+// framework treats as "re-read everything about this view".
+void _debugReplayPlatformNotifications(
+  Iterable<(DebugViewMetricsOverride?, DebugViewMetricsOverride?)> changes,
+) {
+  var viewMetrics = false;
+  var textScaleFactor = false;
+  var platformBrightness = false;
+  var accessibilityFeatures = false;
+  var platformConfiguration = false;
+  for (final (DebugViewMetricsOverride? previous, DebugViewMetricsOverride? next) in changes) {
+    // No override at all and an override that leaves a group alone report the
+    // same metrics, so a missing override is compared as the empty one.
+    // Comparing null against an all-null group would report every group as
+    // changed whenever any override is installed or removed.
+    final DebugViewMetricsOverride before = previous ?? const DebugViewMetricsOverride();
+    final DebugViewMetricsOverride after = next ?? const DebugViewMetricsOverride();
+    viewMetrics = viewMetrics || before._viewMetrics != after._viewMetrics;
+    textScaleFactor = textScaleFactor || before.textScaleFactor != after.textScaleFactor;
+    platformBrightness =
+        platformBrightness || before.platformBrightness != after.platformBrightness;
+    accessibilityFeatures =
+        accessibilityFeatures || before._accessibilityFeatures != after._accessibilityFeatures;
+    // Reported once, and before the callback for the field that changed, the
+    // way dart:ui reports it. A consumer that listens to the umbrella
+    // notification rather than to the narrower ones — and alwaysUse24HourFormat
+    // has no narrower one at all — has to hear about an override too.
+    platformConfiguration =
+        platformConfiguration || before._platformConfiguration != after._platformConfiguration;
+  }
+  debugReplayViewMetricsNotifications(
+    platformConfiguration: platformConfiguration,
+    textScaleFactor: textScaleFactor,
+    platformBrightness: platformBrightness,
+    accessibilityFeatures: accessibilityFeatures,
+    viewMetrics: viewMetrics,
+  );
 }
 
 /// A view metric a [DebugViewMetricsOverride] can override.
