@@ -743,24 +743,21 @@ void main() {
     goldenStyleTest(
       'single line',
       style: DiagnosticsTreeStyle.singleLine,
-      golden:
-          'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)',
+      golden: 'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)',
     );
 
     goldenStyleTest(
       'single line',
       name: 'some name',
       style: DiagnosticsTreeStyle.singleLine,
-      golden:
-          'some name: TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)',
+      golden: 'some name: TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)',
     );
 
     // No name so we don't indent.
     goldenStyleTest(
       'indented single line',
       style: DiagnosticsTreeStyle.errorProperty,
-      golden:
-          'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n',
+      golden: 'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n',
     );
 
     goldenStyleTest(
@@ -876,9 +873,8 @@ void main() {
           name: 'node transition',
           properties: <DiagnosticsNode>[
             StringProperty('p1', 'v1'),
-            TestTree(
-              properties: <DiagnosticsNode>[DiagnosticsProperty<bool>('survived', true)],
-            ).toDiagnosticsNode(name: 'tree property', style: DiagnosticsTreeStyle.whitespace),
+            TestTree(properties: <DiagnosticsNode>[DiagnosticsProperty<bool>('survived', true)])
+                .toDiagnosticsNode(name: 'tree property', style: DiagnosticsTreeStyle.whitespace),
           ],
           children: <TestTree>[
             TestTree(name: 'dense child', style: DiagnosticsTreeStyle.dense),

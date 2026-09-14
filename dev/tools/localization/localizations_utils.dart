@@ -220,18 +220,15 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
     )
     ..addFlag(
       'widgets',
-      help:
-          'Whether to print the generated classes for the Widgets package only. Ignored when --overwrite is passed.',
+      help: 'Whether to print the generated classes for the Widgets package only. Ignored when --overwrite is passed.',
     )
     ..addFlag(
       'material',
-      help:
-          'Whether to print the generated classes for the Material package only. Ignored when --overwrite is passed.',
+      help: 'Whether to print the generated classes for the Material package only. Ignored when --overwrite is passed.',
     )
     ..addFlag(
       'cupertino',
-      help:
-          'Whether to print the generated classes for the Cupertino package only. Ignored when --overwrite is passed.',
+      help: 'Whether to print the generated classes for the Cupertino package only. Ignored when --overwrite is passed.',
     );
   final argslib.ArgResults args = argParser.parse(rawArgs);
   if (args.wasParsed('help') && args['help'] == true) {

@@ -46,8 +46,10 @@ import 'value_listenable_builder.dart';
 /// For example, users  of [DraggableScrollableSheet] should apply the [scrollController]
 /// to a [ScrollView] subclass, such as a [SingleChildScrollView], [ListView] or
 /// [GridView], to have the whole sheet be draggable.
-typedef ScrollableWidgetBuilder =
-    Widget Function(BuildContext context, ScrollController scrollController);
+typedef ScrollableWidgetBuilder = Widget Function(
+  BuildContext context,
+  ScrollController scrollController,
+);
 
 /// Controls a [DraggableScrollableSheet].
 ///
@@ -764,9 +766,9 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       // have changed when the widget was updated.
       WidgetsBinding.instance.addPostFrameCallback((Duration timeStamp) {
         for (var index = 0; index < _scrollController.positions.length; index++) {
-          final position =
-              _scrollController.positions.elementAt(index)
-                  as _DraggableScrollableSheetScrollPosition;
+          final position = _scrollController.positions.elementAt(
+            index,
+          ) as _DraggableScrollableSheetScrollPosition;
           position.goBallistic(0);
         }
       }, debugLabel: 'DraggableScrollableSheet.snap');
