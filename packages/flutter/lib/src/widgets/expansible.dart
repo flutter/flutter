@@ -385,9 +385,10 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     // such as a Scrollable that saves a double. Only use the stored value if it
     // is a bool, otherwise fall back to the controller's state.
     final Object? storedExpansionState = PageStorage.maybeOf(context)?.readState(context);
-    final bool initiallyExpanded = storedExpansionState is bool
-        ? storedExpansionState
-        : widget.controller.isExpanded;
+    final bool initiallyExpanded = switch (storedExpansionState) {
+      bool isExpanded => isExpanded,
+      _ => widget.controller.isExpanded,
+    };
     if (initiallyExpanded) {
       _animationController.value = 1.0;
       widget.controller.expand();
