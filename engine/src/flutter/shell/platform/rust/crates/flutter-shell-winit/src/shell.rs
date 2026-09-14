@@ -5187,5 +5187,5 @@ impl ShellApplication {
 }
 
 #[cfg(test)]
-#[path = "../tests/unit/winit.rs"]
-mod tests;
+#[path = "winit_tests.rs"]
+mod winit_tests;
