@@ -1022,9 +1022,8 @@ void main() {
         final streamController = StreamController<ImageChunkEvent>();
         addTearDown(streamController.close);
         final ImageStreamCompleterHandle imageStreamCompleterHandle =
-            FakeEventReportingImageStreamCompleter(
-              chunkEvents: streamController.stream,
-            ).keepAlive();
+            FakeEventReportingImageStreamCompleter(chunkEvents: streamController.stream)
+                .keepAlive();
         imageStreamCompleterHandle.dispose();
       }, ImageStreamCompleterHandle),
       areCreateAndDispose,

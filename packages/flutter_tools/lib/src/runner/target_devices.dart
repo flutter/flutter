@@ -66,11 +66,10 @@ class TargetDevices {
   }
 
   TargetDevices._private({
-    required DeviceManager deviceManager,
-    required Logger logger,
+    required this._deviceManager,
+    required this._logger,
     required this.deviceConnectionInterface,
-  }) : _deviceManager = deviceManager,
-       _logger = logger;
+  });
 
   final DeviceManager _deviceManager;
   final Logger _logger;

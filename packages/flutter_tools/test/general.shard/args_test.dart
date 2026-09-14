@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -14,6 +15,8 @@ import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -67,7 +70,10 @@ void main() {
         }
       }
     }),
-    overrides: <Type, Generator>{AndroidSdk: () => FakeAndroidSdk()},
+    overrides: <Type, Generator>{
+      AndroidSdk: () => FakeAndroidSdk(),
+      AndroidStudio: () => FakeAndroidStudio(),
+    },
   );
 
   testUsingContext('Global arg results are available in FlutterCommands', () async {
@@ -494,6 +500,8 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     BuildSystem? buildSystem,
     BuildTargets? buildTargets,
     CrashReporter? crashReporter,
+    Doctor? doctor,
+    EmulatorManager? emulatorManager,
     FeatureFlags? featureFlags,
     ToolContext? toolContext,
   }) : analytics = analytics ?? FakeAnalytics(),
@@ -502,6 +510,8 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
        buildSystem = buildSystem ?? FakeBuildSystem(),
        buildTargets = buildTargets ?? FakeBuildTargets(),
        crashReporter = crashReporter ?? FakeCrashReporter(),
+       doctor = doctor ?? FakeDoctor(),
+       emulatorManager = emulatorManager ?? FakeEmulatorManager(),
        featureFlags = featureFlags ?? TestFeatureFlags(),
        toolContext = toolContext ?? FakeToolContext();
 
@@ -522,6 +532,12 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
 
   @override
   final CrashReporter crashReporter;
+
+  @override
+  final Doctor doctor;
+
+  @override
+  final EmulatorManager emulatorManager;
 
   @override
   final FeatureFlags featureFlags;
