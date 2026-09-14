@@ -1745,6 +1745,19 @@ extern "C" fn handle_platform_message(
             inbox.exit.initialized.store(true, Ordering::Release);
             return FlutterRustPlatformMessageDisposition::Success;
         }
+        #[cfg(target_os = "android")]
+        if let Ok(call) = serde_json::from_slice::<RawMethodCall>(message)
+            && let Some(envelope) = android_platform::handle_method_call(&call)
+        {
+            if response_handle.0.is_null() {
+                return FlutterRustPlatformMessageDisposition::Success;
+            }
+            complete_cpp_platform_message(
+                PendingPlatformResponse(response_handle.0 as usize),
+                &envelope,
+            );
+            return FlutterRustPlatformMessageDisposition::Pending;
+        }
         let Some(request) = ApplicationExitRequest::decode(message) else {
             return FlutterRustPlatformMessageDisposition::Unhandled;
         };
@@ -1868,6 +1881,8 @@ struct TextInputSession {
     editing_state: TextEditingState,
     ime_allowed: bool,
     cursor_rect: Option<TextInputRect>,
+    #[cfg(any(target_os = "android", test))]
+    android_text_input_sync_deadline: Option<Instant>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -1876,9 +1891,44 @@ enum TextInputEffect {
     SetImeAllowed(bool),
     /// Move the IME candidate window to avoid covering this screen rect.
     SetCursorRect(TextInputRect),
+    /// Re-seed GameActivity's native text buffer from Flutter's editing
+    /// state after the framework (not the IME) changed it, e.g. long-press
+    /// word selection or "Select All". Without this, `poll_android_text_input`
+    /// reads GameActivity's now-stale buffer on the next event-loop turn and
+    /// reverts the framework's change right back.
+    SyncAndroidTextInputState,
 }
 
 impl TextInputSession {
+    /// GameActivity applies `set_text_input_state` asynchronously. Until it
+    /// exposes the requested state, polling can briefly return the old native
+    /// buffer and undo a framework-driven selection change. Suppress that
+    /// stale echo, but bound the suppression so a failed native sync cannot
+    /// block real IME edits indefinitely.
+    #[cfg(any(target_os = "android", test))]
+    fn begin_android_text_input_sync(&mut self) {
+        self.android_text_input_sync_deadline = Some(Instant::now() + Duration::from_millis(500));
+    }
+
+    #[cfg(any(target_os = "android", test))]
+    fn suppress_android_text_input_while_syncing(
+        &mut self,
+        native_matches_framework: bool,
+        now: Instant,
+    ) -> bool {
+        let Some(deadline) = self.android_text_input_sync_deadline else {
+            return false;
+        };
+        if native_matches_framework || now <= deadline {
+            if native_matches_framework {
+                self.android_text_input_sync_deadline = None;
+            }
+            return true;
+        }
+        self.android_text_input_sync_deadline = None;
+        false
+    }
+
     fn apply(&mut self, command: TextInputCommand) -> Option<TextInputEffect> {
         match command {
             TextInputCommand::SetClient(client) => {
@@ -1888,8 +1938,10 @@ impl TextInputSession {
             TextInputCommand::SetEditingState(state) => {
                 if self.active_client.is_some() {
                     self.editing_state = state;
+                    Some(TextInputEffect::SyncAndroidTextInputState)
+                } else {
+                    None
                 }
-                None
             }
             TextInputCommand::Show => {
                 self.ime_allowed = self.active_client.is_some();
@@ -1986,6 +2038,9 @@ impl TextInputSession {
             || self.editing_state.selection_extent != selection_extent
             || self.editing_state.composing_base != composing_base
             || self.editing_state.composing_extent != composing_extent;
+        if self.suppress_android_text_input_while_syncing(!changed, Instant::now()) {
+            return None;
+        }
         if !changed {
             return None;
         }
@@ -2991,6 +3046,210 @@ mod android_app {
         ANDROID_APP
             .set(app)
             .unwrap_or_else(|_| panic!("set_android_app must only be called once"));
+    }
+}
+
+/// Handles the `flutter/platform` methods the framework uses for text
+/// selection actions (`Share.invoke`, `Clipboard.*`) that have no other
+/// implementation in this shell. GameActivity has no Java-side plugin
+/// registrant to answer these the way the stock Android embedding does, so
+/// this talks to `ClipboardManager`/`Intent.ACTION_SEND` directly over JNI
+/// using the ambient `ndk_context` android-activity initializes.
+#[cfg(target_os = "android")]
+mod android_platform {
+    use jni::{
+        Env, JavaVM,
+        errors::Result as JniResult,
+        jni_sig, jni_str,
+        objects::{JObject, JString, JValue},
+    };
+    use serde_json::{Value, json};
+
+    use super::RawMethodCall;
+
+    fn with_env<T>(f: impl FnOnce(&mut Env, &JObject) -> JniResult<T>) -> Option<T> {
+        let ctx = ndk_context::android_context();
+        // SAFETY: android-activity initializes this pointer before any Rust
+        // code runs and it remains valid for the process lifetime.
+        let vm = unsafe { JavaVM::from_raw(ctx.vm().cast()) };
+        let result = vm.attach_current_thread(|env| {
+            // SAFETY: `ctx.context()` is a valid, process-lifetime jobject
+            // (the Activity) supplied by android-activity.
+            let activity = unsafe { JObject::from_raw(env, ctx.context().cast()) };
+            f(env, &activity)
+        });
+        result
+            .inspect_err(|err: &jni::errors::Error| {
+                log::warn!("Android platform-channel JNI call failed: {err}");
+            })
+            .ok()
+    }
+
+    fn share_text(text: &str) -> bool {
+        with_env(|env, activity| {
+            let intent_class = env.find_class(jni_str!("android/content/Intent"))?;
+            let action = env.new_string("android.intent.action.SEND")?;
+            let intent = env.new_object(
+                &intent_class,
+                jni_sig!("(Ljava/lang/String;)V"),
+                &[JValue::from(&action)],
+            )?;
+            let mime_type = env.new_string("text/plain")?;
+            env.call_method(
+                &intent,
+                jni_str!("setType"),
+                jni_sig!("(Ljava/lang/String;)Landroid/content/Intent;"),
+                &[JValue::from(&mime_type)],
+            )?;
+            let extra_key = env.new_string("android.intent.extra.TEXT")?;
+            let extra_value = env.new_string(text)?;
+            env.call_method(
+                &intent,
+                jni_str!("putExtra"),
+                jni_sig!("(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;"),
+                &[JValue::from(&extra_key), JValue::from(&extra_value)],
+            )?;
+            // GameActivity's native context isn't always seen by the
+            // framework as a live Activity context for this call, which
+            // otherwise throws `AndroidRuntimeException` demanding this flag.
+            const FLAG_ACTIVITY_NEW_TASK: i32 = 0x1000_0000;
+            env.call_method(
+                &intent,
+                jni_str!("addFlags"),
+                jni_sig!("(I)Landroid/content/Intent;"),
+                &[JValue::Int(FLAG_ACTIVITY_NEW_TASK)],
+            )?;
+            env.call_method(
+                activity,
+                jni_str!("startActivity"),
+                jni_sig!("(Landroid/content/Intent;)V"),
+                &[JValue::from(&intent)],
+            )?;
+            Ok(())
+        })
+        .is_some()
+    }
+
+    fn clipboard_manager<'local>(
+        env: &mut Env<'local>,
+        activity: &JObject,
+    ) -> JniResult<JObject<'local>> {
+        let service_name = env.new_string("clipboard")?;
+        env.call_method(
+            activity,
+            jni_str!("getSystemService"),
+            jni_sig!("(Ljava/lang/String;)Ljava/lang/Object;"),
+            &[JValue::from(&service_name)],
+        )?
+        .l()
+    }
+
+    fn clipboard_set_text(text: &str) -> bool {
+        with_env(|env, activity| {
+            let clipboard = clipboard_manager(env, activity)?;
+            let label = env.new_string("text")?;
+            let text_jstr = env.new_string(text)?;
+            let clip_data = env
+                .call_static_method(
+                    jni_str!("android/content/ClipData"),
+                    jni_str!("newPlainText"),
+                    jni_sig!(
+                        "(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Landroid/content/ClipData;"
+                    ),
+                    &[JValue::from(&label), JValue::from(&text_jstr)],
+                )?
+                .l()?;
+            env.call_method(
+                &clipboard,
+                jni_str!("setPrimaryClip"),
+                jni_sig!("(Landroid/content/ClipData;)V"),
+                &[JValue::from(&clip_data)],
+            )?;
+            Ok(())
+        })
+        .is_some()
+    }
+
+    /// Returns `None` both when the clipboard genuinely holds no text and
+    /// when the JNI round-trip itself failed; either way the framework
+    /// contract for `Clipboard.getData`/`hasStrings` is to report "no data".
+    fn clipboard_get_text() -> Option<String> {
+        with_env(|env, activity| {
+            let clipboard = clipboard_manager(env, activity)?;
+            let clip_data = env
+                .call_method(
+                    &clipboard,
+                    jni_str!("getPrimaryClip"),
+                    jni_sig!("()Landroid/content/ClipData;"),
+                    &[],
+                )?
+                .l()?;
+            if clip_data.is_null() {
+                return Ok(None);
+            }
+            let item = env
+                .call_method(
+                    &clip_data,
+                    jni_str!("getItemAt"),
+                    jni_sig!("(I)Landroid/content/ClipData$Item;"),
+                    &[JValue::Int(0)],
+                )?
+                .l()?;
+            let text = env
+                .call_method(
+                    &item,
+                    jni_str!("getText"),
+                    jni_sig!("()Ljava/lang/CharSequence;"),
+                    &[],
+                )?
+                .l()?;
+            if text.is_null() {
+                return Ok(None);
+            }
+            let text = env
+                .call_method(
+                    &text,
+                    jni_str!("toString"),
+                    jni_sig!("()Ljava/lang/String;"),
+                    &[],
+                )?
+                .l()?;
+            let text = env.cast_local::<JString>(text)?;
+            Ok(Some(text.mutf8_chars(env)?.to_string()))
+        })
+        .flatten()
+    }
+
+    /// Returns the JSON `[result]` success envelope for a recognized
+    /// `flutter/platform` method, or `None` if this shell has no handling
+    /// for it (the caller falls back to its existing behavior).
+    pub(super) fn handle_method_call(call: &RawMethodCall) -> Option<Vec<u8>> {
+        let value = match call.method.as_str() {
+            "Share.invoke" => {
+                let text = call.args.as_str()?;
+                if !share_text(text) {
+                    return None;
+                }
+                Value::Null
+            }
+            "Clipboard.setData" => {
+                let text = call.args.get("text")?.as_str()?;
+                if !clipboard_set_text(text) {
+                    return None;
+                }
+                Value::Null
+            }
+            "Clipboard.getData" => match clipboard_get_text() {
+                Some(text) => json!({ "text": text }),
+                None => Value::Null,
+            },
+            "Clipboard.hasStrings" => {
+                let has_text = clipboard_get_text().is_some_and(|text| !text.is_empty());
+                json!({ "value": has_text })
+            }
+            _ => return None,
+        };
+        Some(serde_json::to_vec(&[value]).expect("json envelope must serialize"))
     }
 }
 
@@ -4969,6 +5228,13 @@ impl ShellApplication {
                         ));
                     }
                 }
+                Some(TextInputEffect::SyncAndroidTextInputState) => {
+                    #[cfg(target_os = "android")]
+                    if let Some(app) = &self.android_app {
+                        self.text_input_session.begin_android_text_input_sync();
+                        app.set_text_input_state(self.text_input_session.android_seed_state());
+                    }
+                }
                 None => {}
             }
         }
@@ -4995,7 +5261,10 @@ impl ShellApplication {
             return;
         };
         let state = app.text_input_state();
-        if let Some(message) = self.text_input_session.apply_android_text_input_state(state) {
+        if let Some(message) = self
+            .text_input_session
+            .apply_android_text_input_state(state)
+        {
             self.send_text_input_update(&message);
         }
     }
@@ -5410,6 +5679,29 @@ mod tests {
                 )
                 .is_none()
             );
+    }
+
+    #[test]
+    fn android_text_input_sync_suppresses_stale_native_echo_until_target_arrives() {
+        let mut session = TextInputSession::default();
+        session.begin_android_text_input_sync();
+        let deadline = session
+            .android_text_input_sync_deadline
+            .expect("sync should install a deadline");
+
+        assert!(session.suppress_android_text_input_while_syncing(false, Instant::now()));
+        assert!(session.suppress_android_text_input_while_syncing(true, Instant::now()));
+        assert!(session.android_text_input_sync_deadline.is_none());
+        assert!(!session.suppress_android_text_input_while_syncing(false, Instant::now()));
+
+        session.begin_android_text_input_sync();
+        assert!(
+            !session.suppress_android_text_input_while_syncing(
+                false,
+                deadline + Duration::from_secs(1),
+            )
+        );
+        assert!(session.android_text_input_sync_deadline.is_none());
     }
 
     #[test]
