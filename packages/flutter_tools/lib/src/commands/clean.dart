@@ -19,7 +19,7 @@ import '../runner/flutter_command.dart';
 
 class CleanCommand extends FlutterCommand {
   CleanCommand({
-    required ToolContext this.toolContext,
+    required ToolContext super.toolContext,
     required this._xcode,
     required this._xcodeProjectInterpreter,
     this._verbose = false,
