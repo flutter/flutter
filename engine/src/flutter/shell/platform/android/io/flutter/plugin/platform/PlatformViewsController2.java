@@ -75,17 +75,25 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   private final SparseArray<FlutterMutatorView> platformViewParent;
   private final MotionEventTracker motionEventTracker;
 
-  // AHB raster presentations receive separate transactions because native transactions are not
-  // thread-safe. See createTransaction() for the remaining native ownership race.
+  // The only cross-thread state in this class. The raster thread appends through
+  // createTransaction() while the platform thread drains in swapTransactions(); transactionLock
+  // guards exactly that handoff. AHB raster presentations get their own transactions because
+  // native transactions are not thread-safe; see createTransaction() for the residual native
+  // ownership race that this lock does not address.
   private final ArrayList<SurfaceControl.Transaction> pendingRasterTransactions;
+  private final Object transactionLock = new Object();
+
+  // Platform-thread only, and therefore unlocked: written by swapTransactions() and drained by
+  // onEndFrame(), both of which run on the platform task runner.
   private final ArrayList<SurfaceControl.Transaction> activeRasterTransactions;
 
-  // Platform-view clips and overlay visibility share one platform-thread transaction per frame.
+  // Platform-thread only. Platform-view clips and overlay visibility share one transaction per
+  // frame. Locking these would not make off-thread use safe anyway: callers mutate the returned
+  // transaction after any lock would be released, and SurfaceControl.Transaction has no internal
+  // mutex.
   private SurfaceControl.Transaction pendingPlatformTransaction;
   private SurfaceControl.Transaction activePlatformTransaction;
 
-  // Protects the lists and platform transaction slots, not native transaction contents.
-  private final Object transactionLock = new Object();
   private Surface overlayerSurface = null;
   private SurfaceControl overlaySurfaceControl = null;
 
@@ -675,20 +683,16 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     parentView.setVisibility(View.GONE);
   }
 
+  // Called on the platform thread (UI thread) via the platform task runner.
   @RequiresApi(API_LEVELS.API_34)
   public void onEndFrame() {
-    final List<SurfaceControl.Transaction> rasterTxs;
-    final SurfaceControl.Transaction platformTx;
-    synchronized (transactionLock) {
-      rasterTxs = new ArrayList<>(activeRasterTransactions);
-      activeRasterTransactions.clear();
-
-      platformTx = activePlatformTransaction;
-      activePlatformTransaction = null;
-    }
+    final SurfaceControl.Transaction platformTx = activePlatformTransaction;
+    activePlatformTransaction = null;
 
     // Merge into a fresh destination: closing a raster input could free a native pointer still in
-    // use by its producer. See createTransaction().
+    // use by its producer. See createTransaction(). This is deliberately not newTransaction(): the
+    // destination must be a distinct instance from the merge inputs, and tests override
+    // newTransaction() to hand back a single tracked transaction.
     final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
     if (platformTx != null) {
       tx.merge(platformTx);
@@ -696,9 +700,10 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       // instead of leaving it to an arbitrary later GC.
       platformTx.close();
     }
-    for (int i = 0; i < rasterTxs.size(); i++) {
-      tx.merge(rasterTxs.get(i));
+    for (int i = 0; i < activeRasterTransactions.size(); i++) {
+      tx.merge(activeRasterTransactions.get(i));
     }
+    activeRasterTransactions.clear();
 
     // This runs on the platform thread but is posted from the raster thread, so by the time it
     // runs the FlutterView may have been detached from the controller, or detached from its
@@ -722,47 +727,46 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   // Called on the platform thread (UI thread) via the platform task runner.
   @RequiresApi(API_LEVELS.API_34)
   public void swapTransactions() {
+    // Normally onEndFrame() has already consumed the active transactions. Do not explicitly close
+    // raster inputs here; their native producers may still be using them.
+    activeRasterTransactions.clear();
     synchronized (transactionLock) {
-      // Normally onEndFrame() has already consumed the active transactions. Do not explicitly
-      // close raster inputs here; their native producers may still be using them.
-      activeRasterTransactions.clear();
       activeRasterTransactions.addAll(pendingRasterTransactions);
       pendingRasterTransactions.clear();
-
-      if (activePlatformTransaction != null) {
-        // This belongs to a frame whose onEndFrame() never ran, so nothing will ever apply it.
-        // Closing frees the native transaction now instead of at an arbitrary later GC. It holds
-        // only platform-thread mutations, so there are no buffers or fences to release.
-        activePlatformTransaction.close();
-      }
-      activePlatformTransaction = pendingPlatformTransaction;
-      pendingPlatformTransaction = null;
     }
+
+    if (activePlatformTransaction != null) {
+      // This belongs to a frame whose onEndFrame() never ran, so nothing will ever apply it.
+      // Closing frees the native transaction now instead of at an arbitrary later GC. It holds
+      // only platform-thread mutations, so there are no buffers or fences to release.
+      activePlatformTransaction.close();
+    }
+    activePlatformTransaction = pendingPlatformTransaction;
+    pendingPlatformTransaction = null;
   }
 
   @UiThread
   @RequiresApi(API_LEVELS.API_34)
   private SurfaceControl.Transaction platformTransaction() {
-    synchronized (transactionLock) {
-      if (pendingPlatformTransaction == null) {
-        pendingPlatformTransaction = newTransaction();
-      }
-      return pendingPlatformTransaction;
+    if (pendingPlatformTransaction == null) {
+      pendingPlatformTransaction = newTransaction();
     }
+    return pendingPlatformTransaction;
   }
 
   // Called from the raster thread through FlutterJNI.
   @RequiresApi(API_LEVELS.API_34)
   public SurfaceControl.Transaction createTransaction() {
-    // The lock protects the lists, but AHBSwapchainImplVK::Present writes through a borrowed native
-    // pointer after publication here. Merging can race those writes, and releasing Java references
-    // allows GC to free the transaction while native code still uses it. Both pre-existing hazards
-    // require native lifetime retention and publication after the producer finishes writing.
+    final SurfaceControl.Transaction tx = newTransaction();
+    // The lock makes this handoff safe, but AHBSwapchainImplVK::Present writes through a borrowed
+    // native pointer after publication here. Merging can race those writes, and releasing Java
+    // references allows GC to free the transaction while native code still uses it. Both
+    // pre-existing hazards require native lifetime retention and publication after the producer
+    // finishes writing.
     synchronized (transactionLock) {
-      final SurfaceControl.Transaction tx = newTransaction();
       pendingRasterTransactions.add(tx);
-      return tx;
     }
+    return tx;
   }
 
   /** Allocates a transaction so tests can spy on the instance retained by the controller. */
