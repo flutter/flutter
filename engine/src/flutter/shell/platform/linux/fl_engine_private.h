@@ -355,6 +355,25 @@ void fl_engine_send_touch_move_event(FlEngine* engine,
                                      int32_t device);
 
 /**
+ * fl_engine_send_touch_cancel_event:
+ * @engine: an #FlEngine.
+ * @view_id: the view that the event occured on.
+ * @timestamp: time when event occurred in microseconds.
+ * @x: x location of mouse cursor.
+ * @y: y location of mouse cursor.
+ * @device: device id.
+ *
+ * Sends a touch cancel event to the engine, i.e. the touch sequence was
+ * aborted without the touch being lifted.
+ */
+void fl_engine_send_touch_cancel_event(FlEngine* engine,
+                                       FlutterViewId view_id,
+                                       size_t timestamp,
+                                       double x,
+                                       double y,
+                                       int32_t device);
+
+/**
  * fl_engine_send_touch_add_event:
  * @engine: an #FlEngine.
  * @view_id: the view that the event occured on.
