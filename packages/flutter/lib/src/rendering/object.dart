@@ -9,6 +9,7 @@
 /// @docImport 'box.dart';
 /// @docImport 'paragraph.dart';
 /// @docImport 'proxy_box.dart';
+/// @docImport 'sliver.dart';
 /// @docImport 'view.dart';
 /// @docImport 'viewport.dart';
 library;
