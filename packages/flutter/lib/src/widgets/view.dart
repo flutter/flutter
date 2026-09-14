@@ -22,6 +22,23 @@ import 'framework.dart';
 import 'lookup_boundary.dart';
 import 'media_query.dart';
 
+// The view [View] and [RawView] actually use: normalized once, for rendering,
+// for MediaQuery, for focus, and for the identity-based lookups all of those
+// rely on. Engine views are normalized even when the widget is constructed
+// before the binding is.
+FlutterView _normalizeViewForOverrides(FlutterView view, RenderView? deprecatedRenderView) {
+  final FlutterView normalized = debugViewWithMetricsOverrides(view);
+  assert(
+    deprecatedRenderView == null || identical(deprecatedRenderView.flutterView, normalized),
+    'A RenderView passed to View or RawView must render into the FlutterView '
+    'passed alongside it. Both are normalized by debugViewWithMetricsOverrides '
+    'and then compared by identity, so a view that merely compares == to the '
+    "RenderView's — a test double with an operator == of its own, say — is not "
+    'the same view for this purpose.',
+  );
+  return normalized;
+}
+
 /// Bootstraps a render tree that is rendered into the provided [FlutterView].
 ///
 /// The content rendered into that view is determined by the provided [child].
@@ -80,7 +97,7 @@ class View extends StatefulWidget {
   /// widget.
   View({
     super.key,
-    required this.view,
+    required FlutterView view,
     @Deprecated(
       'Do not use. '
       'This parameter only exists to implement the deprecated RendererBinding.pipelineOwner property until it is removed. '
@@ -94,15 +111,15 @@ class View extends StatefulWidget {
     )
     RenderView? deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
     required this.child,
-  }) : _deprecatedPipelineOwner = deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,
+  }) : view = _normalizeViewForOverrides(
+         view,
+         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
+       ),
+       _deprecatedPipelineOwner = deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,
        _deprecatedRenderView = deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
        assert(
          (deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner == null) ==
              (deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null),
-       ),
-       assert(
-         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null ||
-             deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView.flutterView == view,
        );
 
   /// The [FlutterView] into which [child] is drawn.
@@ -337,7 +354,7 @@ class RawView extends StatelessWidget {
   /// Creates a [RawView] widget.
   RawView({
     super.key,
-    required this.view,
+    required FlutterView view,
     @Deprecated(
       'Do not use. '
       'This parameter only exists to implement the deprecated RendererBinding.pipelineOwner property until it is removed. '
@@ -351,15 +368,15 @@ class RawView extends StatelessWidget {
     )
     RenderView? deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
     required this.child,
-  }) : _deprecatedPipelineOwner = deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,
+  }) : view = _normalizeViewForOverrides(
+         view,
+         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
+       ),
+       _deprecatedPipelineOwner = deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,
        _deprecatedRenderView = deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
        assert(
          (deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner == null) ==
              (deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null),
-       ),
-       assert(
-         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null ||
-             deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView.flutterView == view,
        );
 
   /// The [FlutterView] into which [child] is drawn.

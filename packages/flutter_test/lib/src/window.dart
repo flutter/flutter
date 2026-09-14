@@ -201,15 +201,16 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   TestPlatformDispatcher get _testValues => _testValuesOwner ?? this;
 
-  /// A dispatcher bound to [viewId] that shares this dispatcher's test values.
+  /// A dispatcher that resolves debug view metric overrides for [viewId] while
+  /// sharing this dispatcher's test values.
   ///
   /// [TestFlutterView] builds its own from its own [FlutterView.viewId], so
-  /// that a subclass which reports a different id than the view it wraps is
-  /// bound to the id it reports.
+  /// that a subclass which reports a different id than the view it wraps still
+  /// resolves the overrides registered for the id it reports.
   TestPlatformDispatcher _forViewId(int viewId) {
     final TestPlatformDispatcher owner = _testValues;
     return TestPlatformDispatcher._forView(
-      platformDispatcher: owner._platformDispatcher,
+      platformDispatcher: debugApplyViewMetricsOverridesForView(owner._platformDispatcher, viewId),
       testValuesOwner: owner,
     );
   }
@@ -1207,6 +1208,31 @@ class TestFlutterView implements FlutterView {
   /// The [FlutterView] backing this [TestFlutterView].
   final FlutterView _view;
 
+  // A raw custom backing view needs the same geometry wrapper as engine views.
+  // Keep it lazy because subclasses may initialize their view id after super.
+  late final FlutterView _metricsView = () {
+    try {
+      return debugApplyViewMetricsOverridesToView(
+        _view,
+        platformDispatcher: _ownerPlatformDispatcher,
+      );
+    } on NoSuchMethodError {
+      // Render-only test doubles may omit their view id as well as dispatcher.
+      return _view;
+    } on UnimplementedError {
+      // Render-only test doubles may omit their view id as well as dispatcher.
+      return _view;
+    }
+  }();
+
+  T _readMetric<T>(T Function(FlutterView) read, {bool devicePixelRatioIsOverridden = false}) =>
+      debugReadViewMetrics(
+        this,
+        _metricsView,
+        read,
+        devicePixelRatioIsOverridden: devicePixelRatioIsOverridden,
+      );
+
   /// The [TestPlatformDispatcher] this view was constructed with, which owns
   /// the test values [platformDispatcher] shares.
   final TestPlatformDispatcher _ownerPlatformDispatcher;
@@ -1217,12 +1243,14 @@ class TestFlutterView implements FlutterView {
   // Bound to this view's own [viewId] rather than to whatever the dispatcher
   // passed to the constructor resolves, so that a subclass which reports a
   // different id than the view it wraps — FakeView, which wraps view 0 and
-  // reports 100 — is bound to the id it reports instead of the wrapped view's.
-  // Resolved lazily because `viewId` may be overridden by such a subclass and
-  // is not readable during construction.
-  late final TestPlatformDispatcher _platformDispatcher = _ownerPlatformDispatcher._forViewId(
-    viewId,
-  );
+  // reports 100 — resolves the overrides registered for the id it reports
+  // instead of the wrapped view's. Resolved lazily because `viewId` may be
+  // overridden by such a subclass and is not readable during construction.
+  late final TestPlatformDispatcher _platformDispatcher = () {
+    final TestPlatformDispatcher dispatcher = _ownerPlatformDispatcher._forViewId(viewId);
+    debugMarkViewAppliesItsOwnMetricsOverride(this, dispatcher);
+    return dispatcher;
+  }();
 
   @override
   TestDisplay get display => _display;
@@ -1255,11 +1283,21 @@ class TestFlutterView implements FlutterView {
     } on UnimplementedError {
       // Allow Fake test doubles that implement TestDisplay without _devicePixelRatio.
     }
-    return _view.devicePixelRatio;
+    return _readMetric((FlutterView view) => view.devicePixelRatio);
   }
 
   set devicePixelRatio(double value) {
     _display.devicePixelRatio = value;
+  }
+
+  bool get _hasExplicitDevicePixelRatio {
+    try {
+      return _display._devicePixelRatio != null;
+    } on NoSuchMethodError {
+      return false;
+    } on UnimplementedError {
+      return false;
+    }
   }
 
   /// Resets [devicePixelRatio] for this test view to the default value for this view.
@@ -1282,7 +1320,13 @@ class TestFlutterView implements FlutterView {
   ///   * [resetDisplayFeatures] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  List<DisplayFeature> get displayFeatures => _displayFeatures ?? _view.displayFeatures;
+  List<DisplayFeature> get displayFeatures =>
+      _displayFeatures ??
+      _readMetric(
+        (FlutterView view) => view.displayFeatures,
+        devicePixelRatioIsOverridden:
+            debugViewMetricsOverrides.isNotEmpty && _hasExplicitDevicePixelRatio,
+      );
   List<DisplayFeature>? _displayFeatures;
   set displayFeatures(List<DisplayFeature> value) {
     _displayFeatures = value;
@@ -1308,7 +1352,8 @@ class TestFlutterView implements FlutterView {
   ///   * [resetPadding] to reset this value specifically.
   ///   * [reset] to reset all test values for this view.
   @override
-  FakeViewPadding get padding => _padding ?? FakeViewPadding._wrap(_view.padding);
+  FakeViewPadding get padding =>
+      _padding ?? FakeViewPadding._wrap(_readMetric((FlutterView view) => view.padding));
   FakeViewPadding? _padding;
   set padding(FakeViewPadding value) {
     _padding = value;
@@ -1336,7 +1381,7 @@ class TestFlutterView implements FlutterView {
   ///   * [resetPhysicalSize] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  Size get physicalSize => _physicalSize ?? _view.physicalSize;
+  Size get physicalSize => _physicalSize ?? _readMetric((FlutterView view) => view.physicalSize);
   Size? _physicalSize;
   set physicalSize(Size value) {
     _physicalSize = value;
@@ -1365,7 +1410,9 @@ class TestFlutterView implements FlutterView {
   @override
   ViewConstraints get physicalConstraints =>
       _physicalConstraints ??
-      (_physicalSize != null ? ViewConstraints.tight(_physicalSize!) : _view.physicalConstraints);
+      (_physicalSize != null
+          ? ViewConstraints.tight(_physicalSize!)
+          : _readMetric((FlutterView view) => view.physicalConstraints));
   ViewConstraints? _physicalConstraints;
   set physicalConstraints(ViewConstraints value) {
     _physicalConstraints = value;
@@ -1392,7 +1439,8 @@ class TestFlutterView implements FlutterView {
   ///   * [reset] to reset all test values for this view
   @override
   FakeViewPadding get systemGestureInsets =>
-      _systemGestureInsets ?? FakeViewPadding._wrap(_view.systemGestureInsets);
+      _systemGestureInsets ??
+      FakeViewPadding._wrap(_readMetric((FlutterView view) => view.systemGestureInsets));
   FakeViewPadding? _systemGestureInsets;
   set systemGestureInsets(FakeViewPadding value) {
     _systemGestureInsets = value;
@@ -1418,7 +1466,8 @@ class TestFlutterView implements FlutterView {
   ///   * [resetViewInsets] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  FakeViewPadding get viewInsets => _viewInsets ?? FakeViewPadding._wrap(_view.viewInsets);
+  FakeViewPadding get viewInsets =>
+      _viewInsets ?? FakeViewPadding._wrap(_readMetric((FlutterView view) => view.viewInsets));
   FakeViewPadding? _viewInsets;
   set viewInsets(FakeViewPadding value) {
     _viewInsets = value;
@@ -1444,7 +1493,8 @@ class TestFlutterView implements FlutterView {
   ///   * [resetViewPadding] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  FakeViewPadding get viewPadding => _viewPadding ?? FakeViewPadding._wrap(_view.viewPadding);
+  FakeViewPadding get viewPadding =>
+      _viewPadding ?? FakeViewPadding._wrap(_readMetric((FlutterView view) => view.viewPadding));
   FakeViewPadding? _viewPadding;
   set viewPadding(FakeViewPadding value) {
     _viewPadding = value;
@@ -1487,7 +1537,7 @@ class TestFlutterView implements FlutterView {
     // An omitted size uses this view's physical size. Keep explicit test
     // geometry above any debug override, and preserve an omission when neither
     // layer supplies a size (which avoids unnecessary web resizes).
-    _view.render(scene, size: size ?? _physicalSize);
+    _readMetric((FlutterView view) => view.render(scene, size: size ?? _physicalSize));
   }
 
   @override

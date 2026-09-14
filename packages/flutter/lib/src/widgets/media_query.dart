@@ -2877,9 +2877,8 @@ class _UnspecifiedTextScaler implements TextScaler {
 /// A [TextScaler] that reflects the user's font scale preferences from the
 /// platform's accessibility settings.
 final class SystemTextScaler extends TextScaler {
-  SystemTextScaler._(this._platformDispatcher, {required bool debugScalesLinearly})
-    : textScaleFactor = _platformDispatcher.textScaleFactor,
-      _debugScalesLinearly = debugScalesLinearly;
+  SystemTextScaler._(this._platformDispatcher, {required this._debugScalesLinearly})
+    : textScaleFactor = _platformDispatcher.textScaleFactor;
 
   final ui.PlatformDispatcher _platformDispatcher;
   @override

@@ -597,9 +597,8 @@ void main() {
       expect(nested.viewId, isNot(tester.view.viewId));
 
       late MediaQueryData data;
-      final MediaQueryData inherited = MediaQueryData.fromView(
-        tester.view,
-      ).copyWith(textScaler: const TextScaler.linear(4.0), boldText: false, highContrast: true);
+      final MediaQueryData inherited = MediaQueryData.fromView(tester.view)
+          .copyWith(textScaler: const TextScaler.linear(4.0), boldText: false, highContrast: true);
       await tester.pumpWidget(
         MediaQuery(
           data: inherited,
@@ -883,9 +882,8 @@ void main() {
       // resolving one against it reported neither the override nor the
       // inherited value.
       final ui.FlutterView rawView = ui.PlatformDispatcher.instance.implicitView!;
-      final MediaQueryData inherited = MediaQueryData.fromView(
-        rawView,
-      ).copyWith(boldText: false, highContrast: true);
+      final MediaQueryData inherited = MediaQueryData.fromView(rawView)
+          .copyWith(boldText: false, highContrast: true);
       debugSetViewMetricsOverride(
         rawView.viewId,
         const DebugViewMetricsOverride(
@@ -2045,9 +2043,8 @@ void main() {
           ? ui.Brightness.dark
           : ui.Brightness.light;
       final bool inheritedContrast = !tester.platformDispatcher.accessibilityFeatures.highContrast;
-      final MediaQueryData inherited = MediaQueryData.fromView(
-        tester.view,
-      ).copyWith(platformBrightness: inheritedBrightness, highContrast: inheritedContrast);
+      final MediaQueryData inherited = MediaQueryData.fromView(tester.view)
+          .copyWith(platformBrightness: inheritedBrightness, highContrast: inheritedContrast);
       expect(inherited.platformBrightness, isNot(tester.platformDispatcher.platformBrightness));
 
       late MediaQueryData data;
@@ -2119,9 +2116,8 @@ void main() {
       late MediaQueryData data;
       await tester.pumpWidget(
         MediaQuery(
-          data: MediaQueryData.fromView(
-            tester.view,
-          ).copyWith(platformBrightness: ui.Brightness.dark),
+          data: MediaQueryData.fromView(tester.view)
+              .copyWith(platformBrightness: ui.Brightness.dark),
           child: MediaQuery.fromView(
             view: window,
             child: Builder(
@@ -2166,9 +2162,8 @@ void main() {
       late MediaQueryData data;
       await tester.pumpWidget(
         MediaQuery(
-          data: MediaQueryData.fromView(
-            tester.view,
-          ).copyWith(platformBrightness: ui.Brightness.dark),
+          data: MediaQueryData.fromView(tester.view)
+              .copyWith(platformBrightness: ui.Brightness.dark),
           child: MediaQuery.fromView(
             view: tester.view,
             child: Builder(

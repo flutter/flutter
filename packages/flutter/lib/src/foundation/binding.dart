@@ -215,6 +215,13 @@ abstract class BindingBase {
   ///   functionality from a given [FlutterView].
   /// * [platformDispatcher] on this binding to access the [PlatformDispatcher],
   ///   which provides platform-specific functionality.
+  ///
+  /// Unlike [platformDispatcher], this reports the metrics the platform reports
+  /// even when [debugViewMetricsOverrides] has an entry for the implicit view,
+  /// because it accesses the unwrapped engine singleton [ui.window] directly
+  /// without passing through the binding's view metric override wrapper.
+  /// Use [platformDispatcher] or [View.of] to obtain a [FlutterView] that honors
+  /// those overrides.
   @Deprecated(
     'Look up the current FlutterView from the context via View.of(context) or consult the PlatformDispatcher directly instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
@@ -242,7 +249,30 @@ abstract class BindingBase {
   /// for use by other bindings. A subclass of [BindingBase], such as
   /// [TestWidgetsFlutterBinding], can override this accessor to return a
   /// different [ui.PlatformDispatcher] implementation.
-  ui.PlatformDispatcher get platformDispatcher => ui.PlatformDispatcher.instance;
+  ///
+  /// In debug builds this is [ui.PlatformDispatcher.instance] wrapped so that
+  /// the entries of [debugViewMetricsOverrides] apply to the view metrics it
+  /// reports; see [debugApplyViewMetricsOverrides]. The wrapper is transparent
+  /// while no override is registered, and is not built at all outside of debug
+  /// mode (in profile or release mode). A subclass that overrides this accessor
+  /// takes that wrapper away, so it should apply
+  /// [debugApplyViewMetricsOverrides] to whatever it returns instead, the way
+  /// [TestWidgetsFlutterBinding] does.
+  ui.PlatformDispatcher get platformDispatcher => _platformDispatcher;
+
+  // Resolved once, on first read, rather than on every read.
+  //
+  // This is one of the most frequently read properties in the framework —
+  // [MediaQueryData.fromView], pointer event conversion, image resolution and
+  // every [View.of] go through it — so the wrapping cannot be done in the
+  // getter: an `assert(() { ... }())` there would allocate a closure on each of
+  // those reads in debug builds.
+  //
+  // [debugApplyViewMetricsOverrides] returns its argument unchanged outside of
+  // debug mode, so in profile and release builds this is the singleton itself.
+  late final ui.PlatformDispatcher _platformDispatcher = debugApplyViewMetricsOverrides(
+    ui.PlatformDispatcher.instance,
+  );
 
   /// The initialization method.
   ///
@@ -699,6 +729,10 @@ abstract class BindingBase {
   ///
   /// A malformed payload is rejected before any override is installed, so a
   /// failed call leaves no partial state behind.
+  ///
+  /// The response is sent once the override is installed. The framework is told
+  /// to re-read the metrics that changed synchronously, so the change is
+  /// visible in the next frame.
   Future<Map<String, Object?>> _debugHandleViewMetricsOverrideServiceExtension(
     Map<String, String> parameters,
   ) async {
@@ -748,8 +782,8 @@ abstract class BindingBase {
   // having to remember which request produced it. `override` answers the
   // question a call that named a view actually asked.
   //
-  // Read after the change has been applied, so that the reply describes the
-  // registry as it stands once the call is done.
+  // Read after the change has been applied, because a synchronous notification
+  // may have installed another override in the meantime.
   Map<String, Object?> _viewMetricsOverrideResult({int? viewId}) {
     return <String, Object?>{
       if (viewId != null) 'override': debugViewMetricsOverrides[viewId]?.toJson(),
