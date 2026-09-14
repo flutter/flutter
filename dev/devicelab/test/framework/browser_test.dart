@@ -71,29 +71,26 @@ void main() {
       },
     );
 
-    test(
-      'does not throw Future already completed when wrapped process terminates after completer completes',
-      () async {
-        final fakeProcess = FakeProcess();
-        final profileData = Completer<List<Map<String, dynamic>>>();
+    test('does not throw Future already completed when wrapped process terminates after completer completes', () async {
+      final fakeProcess = FakeProcess();
+      final profileData = Completer<List<Map<String, dynamic>>>();
 
-        await Chrome.connect(
-          fakeProcess,
-          ChromeOptions(),
-          onError: (String error) {
-            profileData.completeError(Exception(error));
-          },
-        );
+      await Chrome.connect(
+        fakeProcess,
+        ChromeOptions(),
+        onError: (String error) {
+          profileData.completeError(Exception(error));
+        },
+      );
 
-        // Simulate benchmark completion
-        profileData.complete(<Map<String, dynamic>>[]);
-        await profileData.future;
+      // Simulate benchmark completion
+      profileData.complete(<Map<String, dynamic>>[]);
+      await profileData.future;
 
-        // Simulate graceful shutdown of the wrapped process (e.g. sending 'q' to flutter run)
-        fakeProcess.completeExit(0);
-        await pumpEventQueue();
-      },
-    );
+      // Simulate graceful shutdown of the wrapped process (e.g. sending 'q' to flutter run)
+      fakeProcess.completeExit(0);
+      await pumpEventQueue();
+    });
 
     test('reports premature exit when wrapped process crashes with non-zero exitCode', () async {
       final fakeProcess = FakeProcess();
