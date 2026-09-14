@@ -206,30 +206,27 @@ void main() {
     expect(devices.first.usesPortForwarding, false);
   });
 
-  testWithoutContext(
-    'CustomDevicesConfig logs error when port forward command is given but not regex',
-    () {
-      final logger = BufferLogger.test();
-      final fileSystem = MemoryFileSystem.test();
-      final Directory directory = fileSystem.directory('custom_devices_config');
+  testWithoutContext('CustomDevicesConfig logs error when port forward command is given but not regex', () {
+    final logger = BufferLogger.test();
+    final fileSystem = MemoryFileSystem.test();
+    final Directory directory = fileSystem.directory('custom_devices_config');
 
-      writeCustomDevicesConfigFile(
-        directory,
-        json: <dynamic>[
-          copyJsonObjectWith(testConfigJson, <String, dynamic>{'forwardPortSuccessRegex': null}),
-        ],
-      );
+    writeCustomDevicesConfigFile(
+      directory,
+      json: <dynamic>[
+        copyJsonObjectWith(testConfigJson, <String, dynamic>{'forwardPortSuccessRegex': null}),
+      ],
+    );
 
-      final customDevicesConfig = CustomDevicesConfig.test(
-        fileSystem: fileSystem,
-        directory: directory,
-        logger: logger,
-      );
+    final customDevicesConfig = CustomDevicesConfig.test(
+      fileSystem: fileSystem,
+      directory: directory,
+      logger: logger,
+    );
 
-      const msg =
-          'Could not load custom device from config index 0: When forwardPort is given, forwardPortSuccessRegex must be specified too.';
-      expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
-      expect(logger.errorText, contains(msg));
-    },
-  );
+    const msg =
+        'Could not load custom device from config index 0: When forwardPort is given, forwardPortSuccessRegex must be specified too.';
+    expect(() => customDevicesConfig.devices, throwsA(const CustomDeviceRevivalException(msg)));
+    expect(logger.errorText, contains(msg));
+  });
 }

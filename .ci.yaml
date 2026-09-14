@@ -700,7 +700,6 @@ targets:
 
   - name: Linux snippets
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 30
     properties:
       tags: >
@@ -1877,8 +1876,9 @@ targets:
         ]
 
   - name: Linux_android_emu_vulkan_stable android_hardware_smoke_vulkan_instrumented_tests
-    bringup: true
     recipe: flutter/flutter_drone
+    # Post-submit only: Instrumented tests are more resource-intensive; driver shards catch most regressions in presubmit.
+    presubmit: false
     timeout: 60
     properties:
       shard: android_hardware_smoke_vulkan_instrumented_tests
@@ -1890,8 +1890,9 @@ targets:
         ]
 
   - name: Linux_android_emu android_hardware_smoke_opengles_instrumented_tests
-    bringup: true
     recipe: flutter/flutter_drone
+    # Post-submit only: Instrumented tests are more resource-intensive; driver shards catch most regressions in presubmit.
+    presubmit: false
     timeout: 60
     properties:
       shard: android_hardware_smoke_opengles_instrumented_tests
@@ -2702,7 +2703,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "android", "linux", "mokey"]
@@ -3668,6 +3668,19 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: animated_advanced_blend_perf__timeline_summary
 
+  - name: Mac ios_universal_link_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      task_name: ios_universal_link_test
+
   - name: Mac_ios animated_advanced_blend_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4500,7 +4513,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac module_uiscene_test_ios
+  - name: Mac uiscene_plugin_lifecycle_test_ios
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4510,7 +4523,7 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
-      task_name: module_uiscene_test_ios
+      task_name: uiscene_plugin_lifecycle_test_ios
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5349,7 +5362,6 @@ targets:
 
   - name: Mac channels_integration_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5423,7 +5435,6 @@ targets:
 
   - name: Mac route_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5795,7 +5806,6 @@ targets:
 
   - name: Mac platform_interaction_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -6736,7 +6746,6 @@ targets:
   - name: Windows flavors_test_windows
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -7152,7 +7161,6 @@ targets:
   - name: Windows tool_tests_commands_2_2
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -7257,7 +7265,6 @@ targets:
   - name: Windows windows_gradient_consistent_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7271,7 +7278,6 @@ targets:
   - name: Windows windows_gradient_dynamic_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7285,7 +7291,6 @@ targets:
   - name: Windows windows_gradient_static_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7325,7 +7330,6 @@ targets:
   - name: Windows new_gallery_windows_impeller__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7339,7 +7343,6 @@ targets:
   - name: Windows new_gallery_windows_skia__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7722,6 +7725,10 @@ targets:
     bringup: true
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: windowing_test_macos
