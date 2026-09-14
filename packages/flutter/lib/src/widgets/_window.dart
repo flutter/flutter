@@ -14,7 +14,7 @@
 //
 // See: https://github.com/flutter/flutter/issues/30701.
 
-import 'dart:ui' show Display, FlutterView;
+import 'dart:ui' show Display, FlutterView, PlatformDispatcher;
 
 import 'package:flutter/foundation.dart';
 
