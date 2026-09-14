@@ -295,8 +295,8 @@ std::optional<TestVulkanImage> TestVulkanContext::CreateNV12Image(
   buffer_alloc_info.allocationSize = buffer_mem_req.size;
   // Use HOST_VISIBLE | HOST_COHERENT for staging.
   buffer_alloc_info.memoryTypeIndex = static_cast<uint32_t>(__builtin_ctz(
-      buffer_mem_req.memoryTypeBits & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT &
-      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
+      buffer_mem_req.memoryTypeBits & (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)));
 
   VkDeviceMemory buffer_memory;
   if (VK_CALL_LOG_ERROR(vk_->AllocateMemory(
