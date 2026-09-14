@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io' as io;
+
 import 'package:flutter/foundation.dart';
 
 /// Whether or not Flutter CI has configured Impeller for this test run.
