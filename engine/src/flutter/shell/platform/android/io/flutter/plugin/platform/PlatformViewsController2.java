@@ -684,6 +684,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   }
 
   // Called on the platform thread (UI thread) via the platform task runner.
+  @UiThread
   @RequiresApi(API_LEVELS.API_34)
   public void onEndFrame() {
     final SurfaceControl.Transaction platformTx = activePlatformTransaction;
@@ -725,6 +726,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   }
 
   // Called on the platform thread (UI thread) via the platform task runner.
+  @UiThread
   @RequiresApi(API_LEVELS.API_34)
   public void swapTransactions() {
     // Normally onEndFrame() has already consumed the active transactions. Do not explicitly close
