@@ -298,6 +298,7 @@ class SkwasmRenderer extends Renderer {
     rasterizer = OffscreenCanvasRasterizer(
       (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
     );
+    _pictureToImageSurface = rasterizer.createPictureToImageSurface();
     return super.initialize();
   }
 
@@ -416,8 +417,11 @@ class SkwasmRenderer extends Renderer {
     rasterizer = OffscreenCanvasRasterizer(
       (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
     );
+    _pictureToImageSurface = rasterizer.createPictureToImageSurface();
   }
 
+  late Surface _pictureToImageSurface;
+
   @override
-  Surface get pictureToImageSurface => (rasterizer as OffscreenCanvasRasterizer).offscreenSurface;
+  Surface get pictureToImageSurface => _pictureToImageSurface;
 }
