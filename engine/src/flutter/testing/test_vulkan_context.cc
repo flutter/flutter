@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <bit>
 #include <cassert>
 #include <memory>
 #include <optional>
@@ -160,8 +161,13 @@ std::optional<TestVulkanImage> TestVulkanContext::CreateImage(
   VkMemoryAllocateInfo alloc_info{};
   alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   alloc_info.allocationSize = mem_req.size;
-  alloc_info.memoryTypeIndex = static_cast<uint32_t>(__builtin_ctz(
-      mem_req.memoryTypeBits & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT));
+  uint32_t device_local_bits =
+      mem_req.memoryTypeBits & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+  if (device_local_bits == 0) {
+    FML_LOG(ERROR) << "No device local memory type found for image.";
+    return std::nullopt;
+  }
+  alloc_info.memoryTypeIndex = std::countr_zero(device_local_bits);
 
   VkDeviceMemory memory;
   if (VK_CALL_LOG_ERROR(vk_->AllocateMemory(device_->GetHandle(), &alloc_info,
@@ -248,8 +254,13 @@ std::optional<TestVulkanImage> TestVulkanContext::CreateNV12Image(
   VkMemoryAllocateInfo alloc_info{};
   alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   alloc_info.allocationSize = mem_req.size;
-  alloc_info.memoryTypeIndex = static_cast<uint32_t>(__builtin_ctz(
-      mem_req.memoryTypeBits & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT));
+  uint32_t nv12_device_local_bits =
+      mem_req.memoryTypeBits & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+  if (nv12_device_local_bits == 0) {
+    FML_LOG(ERROR) << "No device local memory type found for NV12 image.";
+    return std::nullopt;
+  }
+  alloc_info.memoryTypeIndex = std::countr_zero(nv12_device_local_bits);
 
   VkDeviceMemory memory;
   if (VK_CALL_LOG_ERROR(vk_->AllocateMemory(device_->GetHandle(), &alloc_info,
@@ -293,10 +304,16 @@ std::optional<TestVulkanImage> TestVulkanContext::CreateNV12Image(
   VkMemoryAllocateInfo buffer_alloc_info{};
   buffer_alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   buffer_alloc_info.allocationSize = buffer_mem_req.size;
-  // Use HOST_VISIBLE | HOST_COHERENT for staging.
-  buffer_alloc_info.memoryTypeIndex = static_cast<uint32_t>(__builtin_ctz(
+  uint32_t host_visible_bits =
       buffer_mem_req.memoryTypeBits & (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)));
+                                       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+  if (host_visible_bits == 0) {
+    FML_LOG(ERROR) << "No host visible/coherent memory type found for staging "
+                      "buffer.";
+    vk_->DestroyBuffer(device_->GetHandle(), staging_buffer, nullptr);
+    return std::nullopt;
+  }
+  buffer_alloc_info.memoryTypeIndex = std::countr_zero(host_visible_bits);
 
   VkDeviceMemory buffer_memory;
   if (VK_CALL_LOG_ERROR(vk_->AllocateMemory(
