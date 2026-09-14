@@ -205,6 +205,10 @@ abstract class CkSurface extends Surface {
     }
     _currentDevicePixelRatio = devicePixelRatio;
     _currentSize = size;
+    _resizeCanvas(size);
+  }
+
+  void _resizeCanvas(BitmapSize size) {
     _canvasProvider.resizeCanvas(canvas, size);
     _recreateSkSurface();
   }
@@ -347,6 +351,17 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   @override
   void _maybeAttachCanvasToDom() {
     // Do not attach the OffscreenCanvas to the DOM.
+  }
+
+  @override
+  void _resizeCanvas(BitmapSize size) {
+    final DomEventTarget oldCanvas = canvas;
+    final DomEventTarget newCanvas = _canvasProvider.acquireCanvas(
+      _currentSize,
+      onContextLost: onContextLost,
+    );
+    _canvasProvider.releaseCanvas(oldCanvas);
+    recreateContextForCanvas(newCanvas);
   }
 
   @override
