@@ -1050,6 +1050,7 @@ abstract class FlutterCommand extends Command<void> {
   Future<BuildInfo> getBuildInfo({
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
+    TargetPlatform? forcedTargetPlatform,
     bool? forcedUseLocalCanvasKit,
     // TODO(nshahan): Delete when fully migrated to new module system,
     // https://github.com/flutter/flutter/issues/142060.
@@ -1145,7 +1146,7 @@ abstract class FlutterCommand extends Command<void> {
     }
     final bool useLocalCanvasKit = forcedUseLocalCanvasKit ?? (!useCdn || useLocalWebSdk);
 
-    final String? defaultFlavor = project.manifest.defaultFlavor;
+    final String? defaultFlavor = project.manifest.defaultFlavorForPlatform(forcedTargetPlatform);
     final String? cliFlavor = getValue(BuildInfoOptions.flavor);
     final String? flavor = cliFlavor ?? defaultFlavor;
 

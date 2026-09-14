@@ -128,9 +128,21 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 
   Future<List<BuildInfo>> getBuildInfos() async {
     return <BuildInfo>[
-      if (boolArg('debug')) await getBuildInfo(forcedBuildMode: BuildMode.debug),
-      if (boolArg('profile')) await getBuildInfo(forcedBuildMode: BuildMode.profile),
-      if (boolArg('release')) await getBuildInfo(forcedBuildMode: BuildMode.release),
+      if (boolArg('debug'))
+        await getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+          forcedTargetPlatform: TargetPlatform.ios,
+        ),
+      if (boolArg('profile'))
+        await getBuildInfo(
+          forcedBuildMode: BuildMode.profile,
+          forcedTargetPlatform: TargetPlatform.ios,
+        ),
+      if (boolArg('release'))
+        await getBuildInfo(
+          forcedBuildMode: BuildMode.release,
+          forcedTargetPlatform: TargetPlatform.ios,
+        ),
     ];
   }
 

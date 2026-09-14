@@ -76,7 +76,6 @@ class BuildWindowsCommand extends BuildSubCommand {
     final OperatingSystemUtils os = toolContext.os;
     final Platform platform = toolContext.platform;
 
-    final BuildInfo buildInfo = await getBuildInfo();
     if (!_featureFlags.isWindowsEnabled) {
       throwToolExit(
         '"build windows" is not currently supported. To enable, run "flutter config --enable-windows-desktop".',
@@ -90,7 +89,7 @@ class BuildWindowsCommand extends BuildSubCommand {
         ? 'windows-arm64'
         : 'windows-x64';
     final targetPlatform = TargetPlatform.fromName(defaultTargetPlatform);
-
+    final BuildInfo buildInfo = await getBuildInfo(forcedTargetPlatform: targetPlatform);
     await buildWindows(
       project.windows,
       buildInfo,

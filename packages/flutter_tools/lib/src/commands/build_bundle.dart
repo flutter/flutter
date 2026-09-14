@@ -141,7 +141,7 @@ class BuildBundleCommand extends BuildSubCommand {
         TargetPlatform.throwUnsupportedTarget();
     }
 
-    final BuildInfo buildInfo = await getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo(forcedTargetPlatform: platform);
 
     await _bundleBuilder.build(
       platform: platform,
