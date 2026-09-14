@@ -389,6 +389,7 @@ mixin CreateBase on FlutterCommand {
       'organization': organization,
       'projectName': projectName,
       'titleCaseProjectName': titleCaseProjectName,
+      'capitalSnakeCaseProjectName': projectName.toUpperCase(),
       'androidIdentifier': androidIdentifier,
       'iosIdentifier': appleIdentifier,
       'macosIdentifier': appleIdentifier,
