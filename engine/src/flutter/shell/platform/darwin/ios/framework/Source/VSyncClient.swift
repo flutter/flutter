@@ -121,6 +121,13 @@ class VSyncClient: NSObject {
   /// exists so the caller can fall back to `CADisplayLink`.
   @available(iOS 18.0, *)
   private func awaitUIUpdate() -> Bool {
+    // UIWindowScene and UIUpdateLink are UIKit objects and must only be
+    // accessed from the main thread. Tests and embedders may use a distinct UI
+    // task runner, in which case CADisplayLink remains the compatible path.
+    guard Thread.isMainThread else {
+      return false
+    }
+
     if updateLinkClient == nil {
       guard let scene = UIApplication.shared.connectedScenes.first(where: {
         $0.activationState == .foregroundActive

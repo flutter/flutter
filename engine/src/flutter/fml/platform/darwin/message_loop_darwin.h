@@ -40,6 +40,9 @@ class MessageLoopDarwin : public MessageLoopImpl {
   // |fml::MessageLoopImpl|
   void WakeUp(fml::TimePoint time_point) override;
 
+  // |fml::MessageLoopImpl|
+  void RunTask(fml::closure task, std::vector<fml::closure> observers) override;
+
   static void OnTimerFire(CFRunLoopTimerRef timer, MessageLoopDarwin* loop);
 
   FML_FRIEND_MAKE_REF_COUNTED(MessageLoopDarwin);

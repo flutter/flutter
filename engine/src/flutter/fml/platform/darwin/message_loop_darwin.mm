@@ -79,20 +79,15 @@ void MessageLoopDarwin::WakeUp(fml::TimePoint time_point) {
       CFAbsoluteTimeGetCurrent() + (time_point - fml::TimePoint::Now()).ToSecondsF());
 }
 
-void MessageLoopDarwin::OnTimerFire(CFRunLoopTimerRef timer, MessageLoopDarwin* loop) {
-  // Drain the existing autorelease pool after each task instead of retaining
-  // temporary Objective-C objects until the entire ready-task batch finishes.
-  // Keep one timestamp so tasks posted by the batch run on the next wakeup.
-  const auto now = fml::TimePoint::Now();
-  while (true) {
-    bool ran_task = false;
-    @autoreleasepool {
-      ran_task = loop->RunSingleExpiredTaskNow(now);
-    }
-    if (!ran_task) {
-      break;
-    }
+void MessageLoopDarwin::RunTask(fml::closure task, std::vector<fml::closure> observers) {
+  @autoreleasepool {
+    MessageLoopImpl::RunTask(std::move(task), std::move(observers));
   }
+}
+
+void MessageLoopDarwin::OnTimerFire(CFRunLoopTimerRef timer, MessageLoopDarwin* loop) {
+  // RunExpiredTasksNow rearms the timer as appropriate via a call to WakeUp.
+  loop->RunExpiredTasksNow();
 }
 
 }  // namespace fml

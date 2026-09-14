@@ -129,6 +129,14 @@ FLUTTER_ASSERT_ARC
     return NO;
   }
 
+  // Extended-range Metal pixel formats are unavailable on some devices,
+  // including simulator GPUs, even when the attached display reports a wide
+  // color gamut.
+  CAMetalLayer* layer = (CAMetalLayer*)self.layer;
+  if (![layer.device supportsFamily:MTLGPUFamilyApple3]) {
+    return NO;
+  }
+
   // This predicates the decision on the capabilities of the iOS device's
   // display.  This means external displays will not support wide gamut if the
   // device's display doesn't support it.  It practice that should be never.

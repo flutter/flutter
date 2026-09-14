@@ -253,6 +253,11 @@ void Animator::RequestFrame(bool regenerate_layer_trees) {
     return;
   }
 
+  // Mark the frame as scheduled before AwaitVSync can run synchronously on the
+  // UI thread. A synchronous test waiter may deliver the frame immediately and
+  // clear this flag before RunNowOrPostTask returns.
+  frame_scheduled_ = true;
+
   // Avoid an extra UI queue turn that could delay VSync registration past the
   // next VSync. Requests from other threads are still posted to the UI thread.
   fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
@@ -261,8 +266,6 @@ void Animator::RequestFrame(bool regenerate_layer_trees) {
                                         self->AwaitVSync();
                                       }
                                     });
-
-  frame_scheduled_ = true;
 }
 
 void Animator::AwaitVSync() {
