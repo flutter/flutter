@@ -361,6 +361,7 @@ abstract class FlutterCommand extends Command<void> {
       WebOptions.webEnableExpressionEvaluation,
       WebOptions.webLaunchUrl,
       WebOptions.webBrowserFlags,
+      WebOptions.webBrowserDefaultFlags,
       WebOptions.crossOriginIsolation,
     ], verboseHelp: verboseHelp);
     usesBaseHrefOption();
