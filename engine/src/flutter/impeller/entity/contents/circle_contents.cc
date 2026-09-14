@@ -51,8 +51,6 @@ bool CircleContents::Render(const ContentContext& renderer,
   frag_info.aa_pixels = aa_padding_;
   frag_info.stroked = stroked_ ? 1.0f : 0.0f;
 
-  auto geometry_result = geometry_->GetPositionBuffer(renderer, entity, pass);
-
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
         return renderer.GetCirclePipeline(options);
@@ -62,20 +60,11 @@ bool CircleContents::Render(const ContentContext& renderer,
       this, geometry_.get(), renderer, entity, pass, pipeline_callback,
       frame_info,
       /*bind_fragment_callback=*/
-      // DrawGeometry invokes this before returning, so capturing locals by
-      // reference is safe.
       [&frag_info, &data_host_buffer](RenderPass& pass) {
         FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
         pass.SetCommandLabel("Circle");
         return true;
-      },
-      /*force_stencil=*/false,
-      /*create_geom_callback=*/
-      // DrawGeometry invokes this before returning, so capturing
-      // geometry_result by reference is safe.
-      [&geometry_result](const ContentContext& renderer, const Entity& entity,
-                         RenderPass& pass,
-                         const Geometry* geometry) { return geometry_result; });
+      });
 }
 
 std::optional<Rect> CircleContents::GetCoverage(const Entity& entity) const {
