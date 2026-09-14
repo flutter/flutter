@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -224,7 +225,7 @@ void main() {
     });
     testWidgets('moves to the new sub-screen over the duration', (WidgetTester tester) async {
       const childKey = Key('childKey');
-      final MediaQueryData flat = MediaQueryData.fromView(tester.view);
+      final flat = MediaQueryData.fromView(tester.view);
       final MediaQueryData folded = flat.copyWith(
         displayFeatures: <DisplayFeature>[
           const DisplayFeature(
@@ -260,7 +261,7 @@ void main() {
 
     testWidgets('Duration.zero moves the child in a single frame', (WidgetTester tester) async {
       const childKey = Key('childKey');
-      final MediaQueryData flat = MediaQueryData.fromView(tester.view);
+      final flat = MediaQueryData.fromView(tester.view);
       final MediaQueryData folded = flat.copyWith(
         displayFeatures: <DisplayFeature>[
           const DisplayFeature(
@@ -312,6 +313,39 @@ void main() {
       // A widget built into an already folded device starts where it belongs,
       // so a test that sets up a fold and pumps once sees what it saw before.
       expect(tester.renderObject<RenderBox>(find.byKey(childKey)).size.width, 390.0);
+    });
+    testWidgets('debugFillProperties lists what differs from the defaults', (
+      WidgetTester tester,
+    ) async {
+      final properties = DiagnosticPropertiesBuilder();
+      const DisplayFeatureSubScreen(
+        anchorPoint: Offset(10, 20),
+        duration: Duration(milliseconds: 500),
+        curve: Curves.linear,
+        child: SizedBox(),
+      ).debugFillProperties(properties);
+
+      final List<String> description = properties.properties
+          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
+
+      expect(description, hasLength(3));
+      expect(description[0], 'anchorPoint: Offset(10.0, 20.0)');
+      expect(description[1], startsWith('duration:'));
+      expect(description[2], startsWith('curve:'));
+    });
+
+    testWidgets('debugFillProperties hides the defaults', (WidgetTester tester) async {
+      final properties = DiagnosticPropertiesBuilder();
+      const DisplayFeatureSubScreen(child: SizedBox()).debugFillProperties(properties);
+
+      final List<String> description = properties.properties
+          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
+
+      expect(description, isEmpty);
     });
   });
 

@@ -11,7 +11,7 @@ library;
 import 'dart:math' as math;
 import 'dart:ui' show DisplayFeature, DisplayFeatureState;
 
-import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'debug.dart';
@@ -146,6 +146,16 @@ class DisplayFeatureSubScreen extends StatelessWidget {
       ),
       child: MediaQuery(data: mediaQuery.removeDisplayFeatures(closestSubScreen), child: child),
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('anchorPoint', anchorPoint, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<Duration>('duration', duration, defaultValue: _defaultDuration),
+    );
+    properties.add(DiagnosticsProperty<Curve>('curve', curve, defaultValue: Curves.easeInOut));
   }
 
   static Offset _fallbackAnchorPoint(BuildContext context) {
