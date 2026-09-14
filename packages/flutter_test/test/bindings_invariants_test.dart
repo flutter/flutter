@@ -137,29 +137,26 @@ void main() {
   // leaves the widget tree intact for inspection (does not unmount it to
   // `_postTestMessage`) and [TestWidgetsFlutterBinding.postTest] skips invariant
   // verification to avoid spurious secondary errors.
-  test(
-    'direct runTest with failed test body skips invariant check and preserves widget tree in postTest',
-    () async {
-      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-      final TestExceptionReporter oldReporter = reportTestException;
-      reportTestException = (FlutterErrorDetails details, String testDescription) {};
-      addTearDown(() {
-        reportTestException = oldReporter;
-      });
+  test('direct runTest with failed test body skips invariant check and preserves widget tree in postTest', () async {
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+    final TestExceptionReporter oldReporter = reportTestException;
+    reportTestException = (FlutterErrorDetails details, String testDescription) {};
+    addTearDown(() {
+      reportTestException = oldReporter;
+    });
 
-      await binding.runTest(() async {
-        debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-        runApp(const Placeholder());
-        throw Exception('test failed');
-      }, () {});
+    await binding.runTest(() async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      runApp(const Placeholder());
+      throw Exception('test failed');
+    }, () {});
 
-      // postTest should NOT throw invariant error because the test body failed.
-      expect(() => binding.postTest(), returnsNormally);
-      expect(binding.inTest, isFalse);
-      // The widget tree from the test is preserved for inspection rather than
-      // being unmounted and replaced with _postTestMessage.
-      expect(find.byType(Placeholder), findsOneWidget);
-      debugDefaultTargetPlatformOverride = null;
-    },
-  );
+    // postTest should NOT throw invariant error because the test body failed.
+    expect(() => binding.postTest(), returnsNormally);
+    expect(binding.inTest, isFalse);
+    // The widget tree from the test is preserved for inspection rather than
+    // being unmounted and replaced with _postTestMessage.
+    expect(find.byType(Placeholder), findsOneWidget);
+    debugDefaultTargetPlatformOverride = null;
+  });
 }
