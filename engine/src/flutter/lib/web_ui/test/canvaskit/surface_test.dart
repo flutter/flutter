@@ -210,6 +210,127 @@ void testMain() {
 
       surface.dispose();
     });
+
+    group('adversarial stress tests (issue-182476-canvaskit)', () {
+      test('rapid sequential resizing & ping-pong sizing does not leak or crash', () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        await surface.initialized;
+
+        // Rapid ping-pong resizing between small (10x10) and large (5000x5000) dimensions.
+        for (var i = 0; i < 15; i++) {
+          surface.setSize(const BitmapSize(10, 10));
+          surface.setSize(const BitmapSize(5000, 5000));
+        }
+
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder);
+        final paint = ui.Paint()..color = const ui.Color(0xFF00FF00);
+        canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 5000, 5000), paint);
+        final ui.Picture picture = recorder.endRecording();
+
+        await surface.rasterizeToCanvas(picture);
+        expect(surface.skSurface, isNotNull);
+
+        // Verify pixel rendering reaches the bounds of the large surface after ping-ponging.
+        final SkImage snapshot = surface.skSurface!.makeImageSnapshot();
+        try {
+          final imageInfo = SkImageInfo(
+            alphaType: canvasKit.AlphaType.Premul,
+            colorType: canvasKit.ColorType.RGBA_8888,
+            colorSpace: SkColorSpaceSRGB,
+            width: 5000,
+            height: 5000,
+          );
+          final Uint8List? pixels = snapshot.readPixels(0, 0, imageInfo);
+          expect(pixels, isNotNull);
+          const sampleX = 4990;
+          const sampleY = 4990;
+          const int pixelOffset = (sampleY * 5000 + sampleX) * 4;
+          expect(pixels![pixelOffset + 1], 255, reason: 'Green channel should be 255 at corner');
+          expect(pixels[pixelOffset + 3], 255, reason: 'Alpha channel should be 255 at corner');
+        } finally {
+          snapshot.delete();
+        }
+
+        surface.dispose();
+
+        // Also verify CkOnscreenSurface rapid ping-pong resizing.
+        final onscreenSurface = CkOnscreenSurface(OnscreenCanvasProvider());
+        await onscreenSurface.initialized;
+        for (var i = 0; i < 15; i++) {
+          onscreenSurface.setSize(const BitmapSize(10, 10));
+          onscreenSurface.setSize(const BitmapSize(2000, 2000));
+        }
+
+        final recorder2 = ui.PictureRecorder();
+        final canvas2 = ui.Canvas(recorder2);
+        canvas2.drawRect(const ui.Rect.fromLTWH(0, 0, 2000, 2000), paint);
+        final ui.Picture picture2 = recorder2.endRecording();
+
+        await onscreenSurface.rasterizeToCanvas(picture2);
+        expect(onscreenSurface.skSurface, isNotNull);
+
+        onscreenSurface.dispose();
+      });
+
+      test('lifecycle & disposal during/after resize behaves cleanly and idempotently', () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        await surface.initialized;
+
+        // Calling dispose immediately after setSize.
+        surface.setSize(const BitmapSize(500, 500));
+        surface.dispose();
+        expect(surface.skSurface, isNull);
+
+        // Calling dispose twice should be safe and idempotent.
+        surface.dispose();
+        expect(surface.skSurface, isNull);
+
+        // Verify CkOnscreenSurface behaves identically.
+        final onscreenSurface = CkOnscreenSurface(OnscreenCanvasProvider());
+        await onscreenSurface.initialized;
+        onscreenSurface.setSize(const BitmapSize(500, 500));
+        onscreenSurface.dispose();
+        expect(onscreenSurface.skSurface, isNull);
+        onscreenSurface.dispose();
+        expect(onscreenSurface.skSurface, isNull);
+      });
+
+      test('zero / minimum dimension boundary sizing followed by picture rasterization', () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        await surface.initialized;
+
+        // Minimum dimension boundary: 1x1
+        surface.setSize(const BitmapSize(1, 1));
+        final recorder1 = ui.PictureRecorder();
+        final canvas1 = ui.Canvas(recorder1);
+        final paint1 = ui.Paint()..color = const ui.Color(0xFFFF0000);
+        canvas1.drawRect(const ui.Rect.fromLTWH(0, 0, 1, 1), paint1);
+        final ui.Picture picture1 = recorder1.endRecording();
+        await surface.rasterizeToCanvas(picture1);
+        expect(surface.skSurface, isNotNull);
+
+        final SkImage snapshot1 = surface.skSurface!.makeImageSnapshot();
+        try {
+          expect(snapshot1.width(), 1);
+          expect(snapshot1.height(), 1);
+        } finally {
+          snapshot1.delete();
+        }
+
+        // Zero dimension boundary: 0x0
+        surface.setSize(BitmapSize.zero);
+        final recorder0 = ui.PictureRecorder();
+        final canvas0 = ui.Canvas(recorder0);
+        final paint0 = ui.Paint()..color = const ui.Color(0xFF00FF00);
+        canvas0.drawRect(ui.Rect.zero, paint0);
+        final ui.Picture picture0 = recorder0.endRecording();
+        await surface.rasterizeToCanvas(picture0);
+        expect(surface.skSurface, isNotNull);
+
+        surface.dispose();
+      });
+    });
   });
 }
 
