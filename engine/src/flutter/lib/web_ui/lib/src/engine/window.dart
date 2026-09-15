@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -251,9 +252,11 @@ class EngineFlutterView implements ui.FlutterView {
     return physicalSizeOverride ?? dimensionsProvider.computePhysicalSize();
   }
 
-  /// Forces the view to recompute its physical size. Useful for tests.
+  /// Forces the view to recompute its physical size and safe area. Useful for
+  /// tests.
   void debugForceResize() {
     _physicalSize = _computePhysicalSize();
+    _viewPadding = dimensionsProvider.computeSafeAreaInsets();
   }
 
   @override
@@ -261,13 +264,25 @@ class EngineFlutterView implements ui.FlutterView {
   ViewPadding _viewInsets = ui.ViewPadding.zero as ViewPadding;
 
   @override
-  ViewPadding get viewPadding => _viewConfiguration.viewPadding;
+  ViewPadding get viewPadding => _viewPadding ??= dimensionsProvider.computeSafeAreaInsets();
 
+  /// Lazily populated, and recomputed every time the view is resized (which
+  /// includes device rotations).
+  ///
+  /// A resize is the only trigger, so a change to the safe area that leaves the
+  /// size of the viewport alone isn't picked up. On iOS that happens while the
+  /// status bar is taller than usual, e.g. during a call.
+  ViewPadding? _viewPadding;
+
+  // The web platform has no notion of system gesture areas: `env()` describes
+  // the parts of the viewport obstructed by the device, not the parts of it
+  // that the system reserves for its own gestures, and browsers don't expose
+  // the latter. So this stays zero.
   @override
   ViewPadding get systemGestureInsets => _viewConfiguration.systemGestureInsets;
 
   @override
-  ViewPadding get padding => _viewConfiguration.padding;
+  ViewPadding get padding => viewPadding.minus(viewInsets);
 
   @override
   ui.GestureSettings get gestureSettings => _viewConfiguration.gestureSettings;
@@ -319,6 +334,9 @@ class EngineFlutterView implements ui.FlutterView {
       _computeOnScreenKeyboardInsets(true);
     } else {
       _physicalSize = newPhysicalSize;
+      // The safe area moves with the size of the view, e.g. when the device is
+      // rotated, so it has to be recalculated too.
+      _viewPadding = dimensionsProvider.computeSafeAreaInsets();
       // When physical size changes this value has to be recalculated.
       _computeOnScreenKeyboardInsets(false);
     }
@@ -744,6 +762,21 @@ class ViewPadding implements ui.ViewPadding {
 
   /// Returns true if all padding values are non-negative.
   bool get isNonNegative => left >= 0.0 && top >= 0.0 && right >= 0.0 && bottom >= 0.0;
+
+  /// Returns what is left of this padding after subtracting [insets] from it,
+  /// clamped so that no side ever becomes negative.
+  ///
+  /// This is the relationship that [ui.FlutterView.padding] has with
+  /// [ui.FlutterView.viewPadding] and [ui.FlutterView.viewInsets] on the other
+  /// platforms: an area that is already obstructed by system UI, such as the
+  /// on-screen keyboard, is no longer reported as safe area padding, because
+  /// the app is avoiding it anyway.
+  ViewPadding minus(ViewPadding insets) => ViewPadding(
+    left: math.max(0.0, left - insets.left),
+    top: math.max(0.0, top - insets.top),
+    right: math.max(0.0, right - insets.right),
+    bottom: math.max(0.0, bottom - insets.bottom),
+  );
 }
 
 class ViewConstraints implements ui.ViewConstraints {
