@@ -254,16 +254,7 @@ List<FlutterCommand> generateCommands({
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
   ),
-  AttachCommand(
-    verboseHelp: verboseHelp,
-    stdio: toolDependencies.toolContext.stdio,
-    logger: toolDependencies.toolContext.logger,
-    terminal: toolDependencies.toolContext.terminal,
-    signals: toolDependencies.toolContext.signals,
-    platform: toolDependencies.toolContext.platform,
-    processInfo: ProcessInfo(toolDependencies.toolContext.fs),
-    fileSystem: toolDependencies.toolContext.fs,
-  ),
+  AttachCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   BuildCommand(
     androidContext: toolDependencies.androidContext,
     appleContext: toolDependencies.appleContext,
