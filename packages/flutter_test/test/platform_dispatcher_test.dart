@@ -10,7 +10,11 @@ import 'dart:ui'
         FlutterView,
         Locale,
         PlatformDispatcher,
+        Size,
         ViewFocusChangeCallback,
+        ViewFocusDirection,
+        ViewFocusEvent,
+        ViewFocusState,
         VoidCallback;
 
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver;
@@ -20,6 +24,13 @@ import 'utils/fake_and_mock_utils.dart';
 
 void main() {
   test('TestPlatformDispatcher can handle new methods without breaking', () {
+    final VoidCallback? previousOnMetricsChanged = PlatformDispatcher.instance.onMetricsChanged;
+    final ViewFocusChangeCallback? previousOnViewFocusChange =
+        PlatformDispatcher.instance.onViewFocusChange;
+    addTearDown(() {
+      PlatformDispatcher.instance.onMetricsChanged = previousOnMetricsChanged;
+      PlatformDispatcher.instance.onViewFocusChange = previousOnViewFocusChange;
+    });
     final dynamic testPlatformDispatcher = TestPlatformDispatcher(
       platformDispatcher: PlatformDispatcher.instance,
     );
@@ -165,6 +176,7 @@ void main() {
     // Set fake values for window properties.
     testPlatformDispatcher.localeTestValue = const Locale('foobar');
     testPlatformDispatcher.textScaleFactorTestValue = 3.0;
+    testPlatformDispatcher.applicationLocale = const Locale('foobar_app');
 
     // Erase fake window property values.
     testPlatformDispatcher.clearAllTestValues();
@@ -172,6 +184,7 @@ void main() {
     // Verify that the window once again reports real property values.
     expect(WidgetsBinding.instance.platformDispatcher.locale, originalLocale);
     expect(WidgetsBinding.instance.platformDispatcher.textScaleFactor, originalTextScaleFactor);
+    expect(testPlatformDispatcher.applicationLocale, isNull);
   });
 
   testWidgets(
@@ -194,6 +207,206 @@ void main() {
       WidgetsBinding.instance.platformDispatcher.view(id: tester.view.viewId),
       same(tester.view),
     );
+  });
+
+  testWidgets('TestPlatformDispatcher addTestView and removeTestView manages custom views', (
+    WidgetTester tester,
+  ) async {
+    var metricsNotificationCount = 0;
+    tester.platformDispatcher.onMetricsChanged = () {
+      metricsNotificationCount++;
+    };
+
+    final customView = _FakeFlutterView(display: tester.view.display, viewId: 100);
+    tester.platformDispatcher.addTestView(customView);
+    addTearDown(() => tester.platformDispatcher.removeTestView(customView));
+
+    expect(metricsNotificationCount, 1);
+    final TestFlutterView? addedView = tester.platformDispatcher.view(id: customView.viewId);
+    expect(addedView, isNotNull);
+    expect(addedView!.viewId, customView.viewId);
+    expect(tester.platformDispatcher.views, contains(addedView));
+
+    // Ensure custom view survives metrics changed notifications. This has to go
+    // through notifyMetricsChanged: the onMetricsChanged getter reports the
+    // callback registered just above, so calling that would count a
+    // notification without refreshing the registry the assertion reads.
+    tester.platformDispatcher.notifyMetricsChanged();
+    expect(metricsNotificationCount, 2);
+    expect(tester.platformDispatcher.view(id: customView.viewId), same(addedView));
+    expect(tester.platformDispatcher.views, contains(addedView));
+
+    // Adding a replacement view with the same viewId updates the wrapped TestFlutterView.
+    final replacementView = _FakeFlutterView(display: tester.view.display, viewId: 100);
+    tester.platformDispatcher.addTestView(replacementView);
+    expect(metricsNotificationCount, 3);
+    final TestFlutterView? updatedView = tester.platformDispatcher.view(id: customView.viewId);
+    expect(updatedView, isNotNull);
+    expect(updatedView, isNot(same(addedView)));
+    expect(tester.platformDispatcher.views, contains(updatedView));
+    expect(tester.platformDispatcher.views, isNot(contains(addedView)));
+
+    // Removing the view removes it from views and view(id:).
+    tester.platformDispatcher.removeTestView(replacementView);
+    expect(metricsNotificationCount, 4);
+    expect(tester.platformDispatcher.view(id: customView.viewId), isNull);
+    expect(tester.platformDispatcher.views, isNot(contains(updatedView)));
+
+    // Removing an already removed or unadded view is a no-op.
+    tester.platformDispatcher.removeTestView(replacementView);
+    expect(metricsNotificationCount, 4);
+  });
+
+  testWidgets(
+    'TestPlatformDispatcher updates display on TestFlutterView when view changes display',
+    (WidgetTester tester) async {
+      final display1 = _FakeDisplay(id: 1);
+      final display2 = _FakeDisplay(id: 2);
+      final fakeView = _FakeFlutterView(display: display1, viewId: 100);
+      final backingDispatcher = _FakePlatformDispatcher(
+        displays: <Display>[display1, display2],
+        views: <FlutterView>[fakeView],
+      );
+      final testDispatcher = TestPlatformDispatcher(platformDispatcher: backingDispatcher);
+
+      final TestFlutterView originalTestView = testDispatcher.views.single;
+      expect(originalTestView.display.id, display1.id);
+
+      // Set a test value override on the TestFlutterView.
+      originalTestView.physicalSize = const Size(800, 600);
+      expect(originalTestView.physicalSize, const Size(800, 600));
+
+      // Move the view to display2 and trigger metrics change.
+      fakeView.display = display2;
+      backingDispatcher.onMetricsChanged?.call();
+
+      final TestFlutterView updatedTestView = testDispatcher.views.single;
+      // The instance is retained, preserving test value overrides.
+      expect(updatedTestView, same(originalTestView));
+      expect(updatedTestView.display.id, display2.id);
+      expect(updatedTestView.physicalSize, const Size(800, 600));
+    },
+  );
+
+  testWidgets('TestPlatformDispatcher keeps one view when a custom view shadows an engine view', (
+    WidgetTester tester,
+  ) async {
+    final display = _FakeDisplay(id: 1);
+    final engineView = _FakeFlutterView(display: display, viewId: 100);
+    final backingDispatcher = _FakePlatformDispatcher(
+      displays: <Display>[display],
+      views: <FlutterView>[engineView],
+    );
+    final testDispatcher = TestPlatformDispatcher(platformDispatcher: backingDispatcher);
+
+    final TestFlutterView engineTestView = testDispatcher.views.single;
+
+    // A custom view registered for an id the engine also reports takes over
+    // that id, rather than adding a second view alongside it.
+    final customView = _FakeFlutterView(display: display, viewId: 100);
+    testDispatcher.addTestView(customView);
+
+    final TestFlutterView shadowing = testDispatcher.views.single;
+    expect(shadowing, isNot(same(engineTestView)));
+    expect(testDispatcher.view(id: 100), same(shadowing));
+
+    // The wrapper survives refreshes, so the test values set on it survive too.
+    shadowing.physicalSize = const Size(800, 600);
+    backingDispatcher.onMetricsChanged?.call();
+    expect(testDispatcher.views.single, same(shadowing));
+    expect(shadowing.physicalSize, const Size(800, 600));
+    backingDispatcher.onMetricsChanged?.call();
+    expect(testDispatcher.views.single, same(shadowing));
+
+    // Removing it brings the engine's view back.
+    testDispatcher.removeTestView(customView);
+    final TestFlutterView restored = testDispatcher.views.single;
+    expect(restored, isNot(same(shadowing)));
+    expect(restored.viewId, 100);
+  });
+
+  testWidgets('notifyViewFocusChanged records the focused view, and resetting unfocuses it', (
+    WidgetTester tester,
+  ) async {
+    final display = _FakeDisplay(id: 1);
+    final backingDispatcher = _FakePlatformDispatcher(
+      displays: <Display>[display],
+      views: <FlutterView>[_FakeFlutterView(display: display, viewId: 100)],
+    );
+    final testDispatcher = TestPlatformDispatcher(platformDispatcher: backingDispatcher);
+
+    final received = <ViewFocusEvent>[];
+    testDispatcher.onViewFocusChange = received.add;
+
+    expect(testDispatcher.currentlyFocusedViewIdTestValue, isNull);
+
+    testDispatcher.notifyViewFocusChanged(
+      const ViewFocusEvent(
+        viewId: 100,
+        state: ViewFocusState.focused,
+        direction: ViewFocusDirection.forward,
+      ),
+    );
+
+    expect(testDispatcher.currentlyFocusedViewIdTestValue, 100);
+    expect(received, hasLength(1));
+
+    // Recording the focused view is what lets the reset unfocus it. Without it
+    // a focused view outlives the test that focused it.
+    testDispatcher.resetFocusedViewTestValues();
+
+    expect(testDispatcher.currentlyFocusedViewIdTestValue, isNull);
+    expect(received, hasLength(2));
+    expect(received.last.viewId, 100);
+    expect(received.last.state, ViewFocusState.unfocused);
+  });
+
+  testWidgets('a metrics change refreshes the view registry before it notifies', (
+    WidgetTester tester,
+  ) async {
+    final display = _FakeDisplay(id: 1);
+    final backingDispatcher = _FakePlatformDispatcher(
+      displays: <Display>[display],
+      views: <FlutterView>[_FakeFlutterView(display: display, viewId: 100)],
+    );
+    final testDispatcher = TestPlatformDispatcher(platformDispatcher: backingDispatcher);
+
+    TestFlutterView? seenWhileNotifying;
+    testDispatcher.onMetricsChanged = () {
+      seenWhileNotifying = testDispatcher.view(id: 200);
+    };
+
+    testDispatcher.addTestView(_FakeFlutterView(display: display, viewId: 200));
+
+    // The listener could already see the new view, so the registry was rebuilt
+    // before the notification went out rather than after it.
+    expect(seenWhileNotifying, isNotNull);
+    expect(seenWhileNotifying!.viewId, 200);
+  });
+
+  testWidgets("a view's dispatcher shares the test values of the dispatcher that owns it", (
+    WidgetTester tester,
+  ) async {
+    final display = _FakeDisplay(id: 1);
+    final backingDispatcher = _FakePlatformDispatcher(
+      displays: <Display>[display],
+      views: <FlutterView>[_FakeFlutterView(display: display, viewId: 100)],
+    );
+    final testDispatcher = TestPlatformDispatcher(platformDispatcher: backingDispatcher);
+
+    final TestPlatformDispatcher viewDispatcher = testDispatcher.views.single.platformDispatcher;
+    expect(viewDispatcher, isNot(same(testDispatcher)));
+
+    // Set through the view, read through the owner.
+    viewDispatcher.textScaleFactorTestValue = 4;
+    expect(testDispatcher.textScaleFactor, 4);
+
+    // Set through the owner, read through the view.
+    testDispatcher.platformBrightnessTestValue = Brightness.dark;
+    expect(viewDispatcher.platformBrightness, Brightness.dark);
+
+    // The registries are the owner's as well.
+    expect(viewDispatcher.views.single, same(testDispatcher.views.single));
   });
 
   testWidgets('TestPlatformDispatcher has a working scaleFontSize implementation', (
@@ -289,6 +502,120 @@ void main() {
       });
     });
   });
+
+  testWidgets('saving and restoring onMetricsChanged does not cause infinite recursion', (
+    WidgetTester tester,
+  ) async {
+    final VoidCallback? previous = tester.platformDispatcher.onMetricsChanged;
+    var callCount = 0;
+    tester.platformDispatcher.onMetricsChanged = () {
+      callCount++;
+    };
+    tester.platformDispatcher.onMetricsChanged?.call();
+    expect(callCount, 1);
+
+    // Restoring the previously saved callback must not cause infinite recursion.
+    tester.platformDispatcher.onMetricsChanged = previous;
+    expect(() => tester.platformDispatcher.onMetricsChanged?.call(), returnsNormally);
+    expect(callCount, 1);
+  });
+
+  testWidgets('saving and restoring onViewFocusChange does not cause infinite recursion', (
+    WidgetTester tester,
+  ) async {
+    final ViewFocusChangeCallback? previous = tester.platformDispatcher.onViewFocusChange;
+    var callCount = 0;
+    tester.platformDispatcher.onViewFocusChange = (ViewFocusEvent event) {
+      callCount++;
+    };
+    const event = ViewFocusEvent(
+      viewId: 0,
+      state: ViewFocusState.focused,
+      direction: ViewFocusDirection.undefined,
+    );
+    tester.platformDispatcher.onViewFocusChange?.call(event);
+    expect(callCount, 1);
+
+    // Restoring the previously saved callback must not cause infinite recursion.
+    tester.platformDispatcher.onViewFocusChange = previous;
+    expect(() => tester.platformDispatcher.onViewFocusChange?.call(event), returnsNormally);
+    expect(callCount, 1);
+  });
+
+  testWidgets('onMetricsChanged has symmetric getter and setter and supports chaining', (
+    WidgetTester tester,
+  ) async {
+    final VoidCallback? previous = tester.platformDispatcher.onMetricsChanged;
+    addTearDown(() {
+      tester.platformDispatcher.onMetricsChanged = previous;
+    });
+
+    var initialCalled = false;
+    void initialCallback() {
+      initialCalled = true;
+    }
+
+    tester.platformDispatcher.onMetricsChanged = initialCallback;
+    expect(tester.platformDispatcher.onMetricsChanged, initialCallback);
+
+    // Chain through the getter, not through the local: reading back what was
+    // set is the whole point, and a getter that reported the dispatcher's own
+    // handler instead would drop the callback the test registered.
+    final VoidCallback? existing = tester.platformDispatcher.onMetricsChanged;
+    var chainedCalled = false;
+    tester.platformDispatcher.onMetricsChanged = () {
+      chainedCalled = true;
+      existing?.call();
+    };
+
+    tester.platformDispatcher.onMetricsChanged?.call();
+    expect(chainedCalled, isTrue);
+    expect(initialCalled, isTrue);
+
+    // Restoring initial callback returns original reference without losing listener.
+    tester.platformDispatcher.onMetricsChanged = initialCallback;
+    expect(tester.platformDispatcher.onMetricsChanged, initialCallback);
+  });
+
+  testWidgets('onViewFocusChange has symmetric getter and setter and supports chaining', (
+    WidgetTester tester,
+  ) async {
+    final ViewFocusChangeCallback? previous = tester.platformDispatcher.onViewFocusChange;
+    addTearDown(() {
+      tester.platformDispatcher.onViewFocusChange = previous;
+    });
+
+    var initialCalled = false;
+    void initialCallback(ViewFocusEvent event) {
+      initialCalled = true;
+    }
+
+    tester.platformDispatcher.onViewFocusChange = initialCallback;
+    expect(tester.platformDispatcher.onViewFocusChange, initialCallback);
+
+    // Chain through the getter, not through the local: reading back what was
+    // set is the whole point, and a getter that reported the dispatcher's own
+    // handler instead would drop the callback the test registered.
+    final ViewFocusChangeCallback? existing = tester.platformDispatcher.onViewFocusChange;
+    var chainedCalled = false;
+    tester.platformDispatcher.onViewFocusChange = (ViewFocusEvent event) {
+      chainedCalled = true;
+      existing?.call(event);
+    };
+
+    const event = ViewFocusEvent(
+      viewId: 0,
+      state: ViewFocusState.focused,
+      direction: ViewFocusDirection.undefined,
+    );
+    tester.platformDispatcher.onViewFocusChange?.call(event);
+    expect(chainedCalled, isTrue);
+    expect(initialCalled, isTrue);
+
+    // Restoring initial callback returns original reference without losing listener.
+    tester.platformDispatcher.onViewFocusChange = initialCallback;
+    expect(tester.platformDispatcher.onViewFocusChange, initialCallback);
+  });
 }
 
 class TestObserver with WidgetsBindingObserver {
@@ -308,7 +635,7 @@ class _FakeDisplay extends Fake implements Display {
 }
 
 class _FakeFlutterView extends Fake implements FlutterView {
-  _FakeFlutterView({this.devicePixelRatio = 1, this._display});
+  _FakeFlutterView({this.devicePixelRatio = 1, this._display, this.viewId = 1});
 
   @override
   final double devicePixelRatio;
@@ -322,10 +649,14 @@ class _FakeFlutterView extends Fake implements FlutterView {
     return _display!;
   }
 
-  final Display? _display;
+  set display(Display value) {
+    _display = value;
+  }
+
+  Display? _display;
 
   @override
-  final int viewId = 1;
+  final int viewId;
 }
 
 class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {
@@ -337,10 +668,26 @@ class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {
   final Iterable<FlutterView> views;
 
   @override
+  FlutterView? view({required int id}) {
+    for (final FlutterView v in views) {
+      if (v.viewId == id) {
+        return v;
+      }
+    }
+    return null;
+  }
+
+  @override
   VoidCallback? onMetricsChanged;
 
   @override
   ViewFocusChangeCallback? onViewFocusChange;
+
+  @override
+  VoidCallback? onTextScaleFactorChanged;
+
+  @override
+  VoidCallback? onPlatformBrightnessChanged;
 
   @override
   double get textScaleFactor => 1.0;
