@@ -7,7 +7,7 @@ import FlutterMacOS
 import Cocoa
 #endif
 
-public class {{pluginClass}}: NSObject, FlutterPlugin, {{pluginClassApi}} {
+public class {{pluginClass}}: NSObject, FlutterPlugin, {{pluginClass}}Api {
   public static func register(with registrar: FlutterPluginRegistrar) {
     // The registrar's `messenger` is a method on iOS and a property on macOS.
     // Use a compile-time condition to handle this difference.
@@ -18,7 +18,7 @@ public class {{pluginClass}}: NSObject, FlutterPlugin, {{pluginClassApi}} {
     #endif
 
     let instance = {{pluginClass}}()
-    {{pluginClassApi}}Setup.setUp(binaryMessenger: messenger, api: instance)
+    {{pluginClass}}ApiSetup.setUp(binaryMessenger: messenger, api: instance)
   }
 
   public func getPlatformVersion() throws -> String {

@@ -24,7 +24,7 @@ import 'package:pigeon/pigeon.dart';
 {{/linux}}
 {{#android}}
 {{#withJava}}
-    javaOut: 'android/src/main/java/com/example/{{androidIdentifier}}/Messages.java',
+    javaOut: 'android/src/main/java/{{androidIdentifierPosixPath}}/Messages.java',
     javaOptions: JavaOptions(
       className: 'Messages',
       package: '{{androidIdentifier}}',
@@ -32,7 +32,7 @@ import 'package:pigeon/pigeon.dart';
 {{/withJava}}
 {{^withJava}}
     kotlinOut:
-        'android/src/main/kotlin/com/example/{{androidIdentifier}}/Messages.g.kt',
+        'android/src/main/kotlin/{{androidIdentifierPosixPath}}/Messages.g.kt',
 {{/withJava}}
 {{/android}}
 {{#darwin}}

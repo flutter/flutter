@@ -391,6 +391,7 @@ mixin CreateBase on FlutterCommand {
       'titleCaseProjectName': titleCaseProjectName,
       'capitalSnakeCaseProjectName': projectName.toUpperCase(),
       'androidIdentifier': androidIdentifier,
+      'androidIdentifierPosixPath': androidIdentifier.replaceAll('.', '/'),
       'iosIdentifier': appleIdentifier,
       'macosIdentifier': appleIdentifier,
       'darwinIdentifier': appleIdentifier,

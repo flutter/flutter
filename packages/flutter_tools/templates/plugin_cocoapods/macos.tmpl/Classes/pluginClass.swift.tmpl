@@ -1,7 +1,7 @@
 import Cocoa
 import FlutterMacOS
 
-public class {{pluginClass}}: NSObject, FlutterPlugin, {{pluginClassApi}} {
+public class {{pluginClass}}: NSObject, FlutterPlugin, {{pluginClass}}Api {
   public static func register(with registrar: FlutterPluginRegistrar) {
     let instance = {{pluginClass}}()
     {{pluginClass}}ApiSetup.setUp(binaryMessenger: registrar.messenger, api: instance)
