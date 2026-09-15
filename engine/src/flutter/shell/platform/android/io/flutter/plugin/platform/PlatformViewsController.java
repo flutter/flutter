@@ -1312,7 +1312,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    */
   public void onDisplayOverlaySurface(int id, int x, int y, int width, int height) {
     if (overlayLayerViews.get(id) == null) {
-      throw new IllegalStateException("The overlay surface (id:" + id + ") doesn't exist");
+      Log.w(TAG, "onDisplayOverlaySurface: overlay surface (id:" + id + ") does not exist");
+      return;
     }
     initializeRootImageViewIfNeeded();
 

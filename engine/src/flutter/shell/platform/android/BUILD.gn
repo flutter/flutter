@@ -135,6 +135,7 @@ if (is_android) {
     deps = [
       "//flutter/shell/platform/embedder:embedder_as_internal_library",
       "//flutter/third_party/icu",
+      "//flutter/third_party/rapidjson",
     ]
 
     public_configs = [

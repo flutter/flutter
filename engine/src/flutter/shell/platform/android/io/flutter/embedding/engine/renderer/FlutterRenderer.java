@@ -94,9 +94,9 @@ public class FlutterRenderer implements TextureRegistry {
   private static final String TAG = "FlutterRenderer";
 
   @NonNull private final FlutterJNI flutterJNI;
-  // Start texture identifiers at 1L. While non-negative identifiers are valid,
-  // 1-based IDs prevent collision with 0 which is often used as a sentinel.
-  @NonNull private final AtomicLong nextTextureId = new AtomicLong(1L);
+  // Texture identifiers must start at 0L to maintain backward compatibility with
+  // existing plugins, tests, and framework consumers (e.g. Texture(textureId: 0)).
+  @NonNull private final AtomicLong nextTextureId = new AtomicLong(0L);
   @Nullable private Surface surface;
   private boolean isDisplayingFlutterUi = false;
   private final Handler handler = new Handler();

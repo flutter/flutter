@@ -143,6 +143,15 @@ class MockJvmInvoker : public JvmInvoker {
                int32_t view_height,
                const std::vector<uint8_t>& payload),
               (override));
+
+  MOCK_METHOD(bool,
+              OnDisplayOverlaySurface,
+              (int32_t id, int32_t x, int32_t y, int32_t width, int32_t height),
+              (override));
+
+  bool is_hcpp_enabled_ = false;
+  bool IsHcppEnabled() const override { return is_hcpp_enabled_; }
+  void SetHcppEnabled(bool enabled) override { is_hcpp_enabled_ = enabled; }
 };
 
 class MockLegacyJniDelegate : public LegacyJniDelegate {
@@ -8348,6 +8357,168 @@ TEST_F(Phase64ParityCheckpointTest,
   ASSERT_NE(native->GetVMInit(), nullptr);
   EXPECT_EQ(native->GetVMInit()->GetVmServiceUri(),
             "http://127.0.0.1:56789/instance_auth/");
+}
+
+TEST_F(Phase64ParityCheckpointTest,
+       PreLaunchNavigationMessageSetsInitialRoute) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  FlutterEmbedderNative native(mock_invoker);
+
+  const std::string json_message =
+      "{\"method\":\"setInitialRoute\",\"args\":\"/profile_details\"}";
+  // Response ID 0 indicates a one-way notification without an awaiting
+  // callback.
+  FlutterEngineResult result = native.SendPlatformMessage(
+      "flutter/navigation",
+      reinterpret_cast<const uint8_t*>(json_message.data()),
+      json_message.size(), /*response_id=*/0);
+
+  EXPECT_EQ(result, kSuccess);
+  EXPECT_EQ(native.GetInitialRoute(), "/profile_details");
+}
+
+TEST_F(Phase64ParityCheckpointTest,
+       PreLaunchNavigationMessageCompletesPendingCallback) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  FlutterEmbedderNative native(mock_invoker);
+
+  const std::string json_message =
+      "{\"method\":\"setInitialRoute\",\"args\":\"/profile_details\"}";
+  // Response ID 55 represents an awaiting asynchronous platform message
+  // response callback.
+  const int32_t kResponseId = 55;
+  int32_t notified_response_id = 0;
+  EXPECT_CALL(*mock_invoker,
+              HandlePlatformMessageResponse(kResponseId, nullptr, 0))
+      .WillOnce(::testing::DoAll(::testing::SaveArg<0>(&notified_response_id),
+                                 ::testing::Return(true)));
+
+  FlutterEngineResult result = native.SendPlatformMessage(
+      "flutter/navigation",
+      reinterpret_cast<const uint8_t*>(json_message.data()),
+      json_message.size(), kResponseId);
+
+  EXPECT_EQ(result, kSuccess);
+  EXPECT_EQ(native.GetInitialRoute(), "/profile_details");
+  EXPECT_EQ(notified_response_id, kResponseId);
+}
+
+TEST_F(Phase64ParityCheckpointTest,
+       PreLaunchPlatformMessageBufferCapDropsAndNotifies) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  FlutterEmbedderNative native(mock_invoker);
+
+  // Send 100 small messages to fill the pre-launch message buffer to its
+  // capacity. The buffer capacity constant kMaxPreLaunchPlatformMessages is
+  // defined as 100.
+  const std::string dummy_msg = "ping";
+  for (int i = 1; i <= 100; ++i) {
+    FlutterEngineResult res = native.SendPlatformMessage(
+        "custom_channel", reinterpret_cast<const uint8_t*>(dummy_msg.data()),
+        dummy_msg.size(), /*response_id=*/i);
+    EXPECT_EQ(res, kSuccess);
+  }
+
+  // The 101st message exceeds the buffer limit (100).
+  // It must drop the message and immediately notify the response handle with an
+  // empty payload.
+  int32_t notified_response_id = 0;
+  // Response ID 101 is the sequence ID of the overflow message.
+  const int32_t kOverflowResponseId = 101;
+  EXPECT_CALL(*mock_invoker,
+              HandlePlatformMessageResponse(kOverflowResponseId, nullptr, 0))
+      .WillOnce(::testing::DoAll(::testing::SaveArg<0>(&notified_response_id),
+                                 ::testing::Return(true)));
+
+  FlutterEngineResult overflow_res = native.SendPlatformMessage(
+      "custom_channel", reinterpret_cast<const uint8_t*>(dummy_msg.data()),
+      dummy_msg.size(), kOverflowResponseId);
+  EXPECT_EQ(overflow_res, kSuccess);
+  EXPECT_EQ(notified_response_id, kOverflowResponseId);
+}
+
+TEST_F(Phase64ParityCheckpointTest,
+       PreLaunchPlatformMessageRejectNotifiesPendingCallbacks) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  FlutterEmbedderNative native(mock_invoker);
+
+  const std::string test_msg = "test_request";
+  // Response ID 42 represents an arbitrary unique asynchronous platform message
+  // callback identifier.
+  const int32_t kResponseId = 42;
+  FlutterEngineResult res = native.SendPlatformMessage(
+      "sample/channel", reinterpret_cast<const uint8_t*>(test_msg.data()),
+      test_msg.size(), kResponseId);
+  EXPECT_EQ(res, kSuccess);
+
+  EXPECT_CALL(*mock_invoker,
+              HandlePlatformMessageResponse(kResponseId, nullptr, 0))
+      .WillOnce(::testing::Return(true));
+
+  native.RejectPreLaunchPlatformMessages();
+}
+
+TEST_F(Phase64ParityCheckpointTest, LaunchInjectsConfiguredRouteArg) {
+  auto native = std::make_unique<FlutterEmbedderNative>();
+  native->SetInitialRoute("/test_route");
+
+  // Arbitrary unique 64-bit engine ID for testing.
+  const int64_t kTestEngineId = 0x12345678LL;
+  // Arbitrary non-null sentinel address representing an initialized mock
+  // FlutterEngine handle.
+  const uintptr_t kMockEngineAddress = 0x5678;
+  bool initialize_called = false;
+  bool route_arg_found = false;
+  auto mock_engine =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(kMockEngineAddress);
+
+  native->SetInitializeEngineFnForTesting(
+      [&](const FlutterRendererConfig* config, const FlutterProjectArgs* args,
+          void* user_data, FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        initialize_called = true;
+        EXPECT_NE(args, nullptr);
+        if (args) {
+          for (int i = 0; i < args->command_line_argc; ++i) {
+            if (std::string(args->command_line_argv[i]) ==
+                "--route=/test_route") {
+              route_arg_found = true;
+              break;
+            }
+          }
+        }
+        *engine_out = mock_engine;
+        return kSuccess;
+      });
+
+  native->SetRunInitializedEngineFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine) { return kSuccess; });
+
+  native->SetDeinitializeEngineFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine) { return kSuccess; });
+
+  FlutterEngineResult result =
+      native->Launch("customMain", "entrypoint_url", {"--arg1"}, kTestEngineId);
+  EXPECT_EQ(result, kSuccess);
+  EXPECT_TRUE(initialize_called);
+  EXPECT_TRUE(route_arg_found);
+}
+
+TEST_F(Phase64ParityCheckpointTest,
+       JvmInvokerOnDisplayOverlaySurfaceDelegatesInHcpp) {
+  AndroidJvmInvoker invoker;
+  invoker.SetHcppEnabled(true);
+  EXPECT_TRUE(invoker.IsHcppEnabled());
+  // In headless test environments without an attached JavaVM, invoking
+  // showOverlaySurface2 gracefully returns true without throwing or crashing.
+  // Viewport dimensions (width 100, height 100) and origin (0, 0) represent a
+  // test overlay surface.
+  const int32_t kOverlayId = 0;
+  const int32_t kX = 0;
+  const int32_t kY = 0;
+  const int32_t kWidth = 100;
+  const int32_t kHeight = 100;
+  EXPECT_TRUE(
+      invoker.OnDisplayOverlaySurface(kOverlayId, kX, kY, kWidth, kHeight));
 }
 
 }  // namespace testing

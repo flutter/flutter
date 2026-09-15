@@ -7,6 +7,10 @@
 #include <unistd.h>
 #include <cstring>
 
+#if defined(__ANDROID__)
+#include <android/api-level.h>
+#endif
+
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/android/android_vsync_waiter.h"
@@ -803,6 +807,13 @@ bool JniDelegate::SetHcppEnabled(bool enabled) {
 bool JniDelegate::IsHcppEnabled() const {
   TRACE_EVENT0("flutter", "JniDelegate::IsHcppEnabled");
   if (hcpp_enabled_) {
+#if defined(__ANDROID__)
+    // Hybrid Composition++ (HCPP) requires Android 14 (API 34+) for
+    // SurfaceControl hierarchy and AttachedSurfaceControl integration.
+    if (android_get_device_api_level() < 34) {
+      return false;
+    }
+#endif
     return surface_control_provider_ &&
            surface_control_provider_->IsAvailable();
   }

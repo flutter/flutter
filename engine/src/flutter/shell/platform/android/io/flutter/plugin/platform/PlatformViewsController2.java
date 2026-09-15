@@ -11,6 +11,7 @@ import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Build;
 import android.util.SparseArray;
 import android.view.AttachedSurfaceControl;
 import android.view.Gravity;
@@ -59,6 +60,9 @@ import java.util.List;
  */
 public class PlatformViewsController2 implements PlatformViewsAccessibilityDelegate {
   private static final String TAG = "PlatformViewsController2";
+  // Z-index layer for the overlay surface to ensure it renders above Flutter content and platform
+  // views.
+  private static final int OVERLAY_SURFACE_Z_INDEX = 1000;
 
   private PlatformViewRegistryImpl registry;
   private AndroidTouchProcessor androidTouchProcessor;
@@ -714,6 +718,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
   @RequiresApi(API_LEVELS.API_34)
   public void onEndFrame() {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_34) {
+      return;
+    }
     SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
     for (int i = 0; i < activeTransactions.size(); i++) {
       tx = tx.merge(activeTransactions.get(i));
@@ -746,6 +753,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   // NOT called from UI thread.
   @RequiresApi(API_LEVELS.API_34)
   public SurfaceControl.Transaction createTransaction() {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_34) {
+      return null;
+    }
     SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
     pendingTransactions.add(tx);
     return tx;
@@ -754,6 +764,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   // NOT called from UI thread.
   @RequiresApi(API_LEVELS.API_34)
   public void applyTransactions() {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_34) {
+      return;
+    }
     SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
     for (int i = 0; i < pendingTransactions.size(); i++) {
       tx = tx.merge(pendingTransactions.get(i));
@@ -764,23 +777,41 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
   @RequiresApi(API_LEVELS.API_34)
   public FlutterOverlaySurface createOverlaySurface() {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_34) {
+      return null;
+    }
     if (overlayerSurface == null) {
+      if (flutterView == null) {
+        Log.w(TAG, "createOverlaySurface: flutterView is null, cannot create overlay surface");
+        return null;
+      }
+      final AttachedSurfaceControl rootSurfaceControl = flutterView.getRootSurfaceControl();
+      if (rootSurfaceControl == null) {
+        Log.w(
+            TAG,
+            "createOverlaySurface: rootSurfaceControl is null, cannot reparent overlay surface");
+        return null;
+      }
+      final int width = Math.max(1, flutterView.getWidth());
+      final int height = Math.max(1, flutterView.getHeight());
       final SurfaceControl.Builder surfaceControlBuilder = new SurfaceControl.Builder();
-      surfaceControlBuilder.setBufferSize(flutterView.getWidth(), flutterView.getHeight());
+      surfaceControlBuilder.setBufferSize(width, height);
       surfaceControlBuilder.setFormat(PixelFormat.RGBA_8888);
       surfaceControlBuilder.setName("Flutter Overlay Surface");
       surfaceControlBuilder.setOpaque(false);
       surfaceControlBuilder.setHidden(false);
       final SurfaceControl surfaceControl = surfaceControlBuilder.build();
       final SurfaceControl.Transaction tx =
-          flutterView.getRootSurfaceControl().buildReparentTransaction(surfaceControl);
-      tx.setLayer(surfaceControl, 1000);
+          rootSurfaceControl.buildReparentTransaction(surfaceControl);
+      tx.setLayer(surfaceControl, OVERLAY_SURFACE_Z_INDEX);
       tx.apply();
       overlayerSurface = new Surface(surfaceControl);
       overlaySurfaceControl = surfaceControl;
     }
 
-    return new FlutterOverlaySurface(0, overlayerSurface);
+    // Overlay surface identifier 0 is the primary overlay surface in HCPP mode.
+    final int overlaySurfaceId = 0;
+    return new FlutterOverlaySurface(overlaySurfaceId, overlayerSurface);
   }
 
   public void destroyOverlaySurface() {
@@ -793,20 +824,30 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
   @RequiresApi(API_LEVELS.API_34)
   public void showOverlaySurface() {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_34) {
+      return;
+    }
     if (overlaySurfaceControl == null) {
       return;
     }
     SurfaceControl.Transaction tx = createTransaction();
-    tx.setVisibility(overlaySurfaceControl, /*visible=*/ true);
+    if (tx != null) {
+      tx.setVisibility(overlaySurfaceControl, /*visible=*/ true);
+    }
   }
 
   @RequiresApi(API_LEVELS.API_34)
   public void hideOverlaySurface() {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_34) {
+      return;
+    }
     if (overlaySurfaceControl == null) {
       return;
     }
     SurfaceControl.Transaction tx = createTransaction();
-    tx.setVisibility(overlaySurfaceControl, /*visible=*/ false);
+    if (tx != null) {
+      tx.setVisibility(overlaySurfaceControl, /*visible=*/ false);
+    }
   }
 
   public boolean isHcppEnabled() {

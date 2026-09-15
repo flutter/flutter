@@ -1641,6 +1641,10 @@ public class FlutterJNI {
   @SuppressLint("NewApi")
   @UiThread
   public void endFrame2() {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_34) {
+      onEndFrame();
+      return;
+    }
     if (Looper.myLooper() != Looper.getMainLooper()) {
       if (mainHandler != null) {
         mainHandler.post(this::endFrame2);
@@ -1659,6 +1663,9 @@ public class FlutterJNI {
   @SuppressLint("NewApi")
   @UiThread
   public FlutterOverlaySurface createOverlaySurface2() {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_34) {
+      return createOverlaySurface();
+    }
     if (Looper.myLooper() != mainLooper) {
       final java.util.concurrent.FutureTask<FlutterOverlaySurface> task =
           new java.util.concurrent.FutureTask<>(
@@ -1696,6 +1703,9 @@ public class FlutterJNI {
   @SuppressLint("NewApi")
   @UiThread
   public void showOverlaySurface2() {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_34) {
+      return;
+    }
     if (Looper.myLooper() != mainLooper) {
       new Handler(mainLooper).post(this::showOverlaySurface2);
       return;
@@ -1711,6 +1721,9 @@ public class FlutterJNI {
   @SuppressLint("NewApi")
   @UiThread
   public void hideOverlaySurface2() {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_34) {
+      return;
+    }
     if (Looper.myLooper() != mainLooper) {
       new Handler(mainLooper).post(this::hideOverlaySurface2);
       return;

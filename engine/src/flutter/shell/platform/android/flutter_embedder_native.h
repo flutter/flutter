@@ -913,6 +913,20 @@ class FlutterEmbedderNative {
       std::function<FlutterEngineResult(FLUTTER_API_SYMBOL(FlutterEngine))>;
   void SetDeinitializeEngineFnForTesting(DeinitializeEngineFn fn);
 
+  /// @brief Returns the initial route configured prior to launch, if any.
+  std::string GetInitialRoute() const;
+
+  /// @brief Explicitly sets or updates the initial route.
+  void SetInitialRoute(const std::string& initial_route) const;
+
+  /// @brief Flushes all pre-launch buffered platform messages to the active
+  /// engine.
+  void FlushPreLaunchPlatformMessages();
+
+  /// @brief Rejects any remaining pre-launch platform messages if launch fails,
+  /// notifying pending Java response callbacks to avoid hanging listeners.
+  void RejectPreLaunchPlatformMessages();
+
   using InitializeEngineFn =
       std::function<FlutterEngineResult(const FlutterRendererConfig*,
                                         const FlutterProjectArgs*,
@@ -1319,6 +1333,33 @@ class FlutterEmbedderNative {
   void DestroyActiveOverlaySurfaces();
 
   void AttachWindowMetricsCallbacks();
+
+  /// @brief Describes a platform message buffered before the engine is
+  /// launched.
+  struct BufferedPlatformMessage {
+    std::string channel;
+    std::vector<uint8_t> message;
+    int32_t response_id = 0;
+  };
+
+  // Maximum number of pre-launch platform messages buffered prior to engine
+  // launch. Set to 100 to comfortably accommodate all framework initial
+  // handshakes (navigation, lifecycle, localization, settings, restoration)
+  // and early plugin messages without allowing unbounded native heap memory
+  // consumption before isolate initialization.
+  static constexpr size_t kMaxPreLaunchPlatformMessages = 100;
+
+  // Maximum cumulative byte size (1 MiB) for buffered pre-launch platform
+  // messages to prevent memory exhaustion from large binary asset transmissions
+  // prior to engine launch.
+  static constexpr size_t kMaxPreLaunchPlatformMessageBytes = 1024 * 1024;
+
+  mutable std::mutex pre_launch_messages_mutex_;
+  mutable bool engine_launched_ = false;
+  mutable size_t pre_launch_messages_bytes_ = 0;
+  mutable std::vector<BufferedPlatformMessage> pre_launch_messages_;
+  mutable std::mutex initial_route_mutex_;
+  mutable std::string initial_route_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterEmbedderNative);
 };

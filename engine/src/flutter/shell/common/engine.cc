@@ -57,6 +57,7 @@ Engine::Engine(
       task_runners_(task_runners),
       weak_factory_(this) {
   pointer_data_dispatcher_ = dispatcher_maker(*this);
+  initial_route_ = settings_.route;
 }
 
 Engine::Engine(Delegate& delegate,
@@ -406,11 +407,21 @@ bool Engine::HandleNavigationPlatformMessage(
   }
   auto root = document.GetObj();
   auto method = root.FindMember("method");
-  if (method->value != "setInitialRoute") {
+  if (method == root.MemberEnd() || !method->value.IsString() ||
+      method->value != "setInitialRoute") {
     return false;
   }
   auto route = root.FindMember("args");
-  initial_route_ = route->value.GetString();
+  if (route == root.MemberEnd() || !route->value.IsString()) {
+    return false;
+  }
+  const std::string new_route = route->value.GetString();
+  // Do not let a fallback root route ("/") overwrite an explicit command-line
+  // route.
+  if (new_route == "/" && !settings_.route.empty()) {
+    return true;
+  }
+  initial_route_ = new_route;
   return true;
 }
 
