@@ -32,8 +32,11 @@ namespace flutter {
 static bool IsYuvFormat(VkFormat format) {
   switch (format) {
     // 8-bit multi-planar formats.
+    case VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM:
     case VK_FORMAT_G8_B8R8_2PLANE_420_UNORM:
+    case VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM:
     case VK_FORMAT_G8_B8R8_2PLANE_422_UNORM:
+    case VK_FORMAT_G8_B8_R8_3PLANE_444_UNORM:
     case VK_FORMAT_G8_B8R8_2PLANE_444_UNORM:
     // 10-bit multi-planar formats.
     case VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16:
@@ -50,8 +53,11 @@ static bool IsYuvFormat(VkFormat format) {
     case VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_444_UNORM_3PACK16:
     case VK_FORMAT_G12X4_B12X4R12X4_2PLANE_444_UNORM_3PACK16:
     // 16-bit multi-planar formats.
+    case VK_FORMAT_G16_B16_R16_3PLANE_420_UNORM:
     case VK_FORMAT_G16_B16R16_2PLANE_420_UNORM:
+    case VK_FORMAT_G16_B16_R16_3PLANE_422_UNORM:
     case VK_FORMAT_G16_B16R16_2PLANE_422_UNORM:
+    case VK_FORMAT_G16_B16_R16_3PLANE_444_UNORM:
     case VK_FORMAT_G16_B16R16_2PLANE_444_UNORM:
       return true;
     default:
@@ -64,13 +70,13 @@ static bool IsYuvFormat(VkFormat format) {
 EmbedderExternalTextureSourceVulkan::EmbedderExternalTextureSourceVulkan(
     const std::shared_ptr<impeller::Context>& p_context,
     FlutterVulkanExternalTexture* embedder_desc)
-    : TextureSourceVK(ToTextureDescriptor(embedder_desc)) {
+    : TextureSourceVK(ToTextureDescriptor(embedder_desc)),
+      destruction_callback_(embedder_desc->destruction_callback),
+      user_data_(embedder_desc->user_data) {
   const auto& context = impeller::ContextVK::Cast(*p_context);
   const auto& device = context.GetDevice();
   texture_image_ =
       impeller::vk::Image(reinterpret_cast<VkImage>(embedder_desc->image));
-  destruction_callback_ = embedder_desc->destruction_callback;
-  user_data_ = embedder_desc->user_data;
 
   needs_yuv_conversion_ =
       IsYuvFormat(static_cast<VkFormat>(embedder_desc->format));
@@ -95,6 +101,7 @@ EmbedderExternalTextureSourceVulkan::EmbedderExternalTextureSourceVulkan(
 }
 
 EmbedderExternalTextureSourceVulkan::~EmbedderExternalTextureSourceVulkan() {
+  texture_image_view_.reset();
   if (destruction_callback_) {
     destruction_callback_(user_data_);
   }
