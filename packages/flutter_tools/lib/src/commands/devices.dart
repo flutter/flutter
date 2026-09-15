@@ -11,6 +11,8 @@ import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../doctor.dart';
+import '../experimental/extension_device_manager.dart';
+import '../experimental/extension_manager.dart';
 import '../runner/flutter_command.dart';
 
 /// The `flutter devices` command, which lists all connected devices.
@@ -19,6 +21,7 @@ class DevicesCommand extends FlutterCommand {
     required this._deviceManager,
     required this._doctor,
     required super.toolContext,
+    this.extensionManager,
     super.verboseHelp,
   }) {
     addMachineOutputFlag(verboseHelp: verboseHelp);
@@ -32,6 +35,8 @@ class DevicesCommand extends FlutterCommand {
     usesDeviceConnectionOption();
   }
 
+  /// The active tool extension manager, if extensions are enabled.
+  final ExtensionManager? extensionManager;
   final DeviceManager _deviceManager;
   final Doctor _doctor;
 
@@ -39,10 +44,10 @@ class DevicesCommand extends FlutterCommand {
   final name = 'devices';
 
   @override
-  final description = 'List all connected devices.';
+  String get description => 'List all connected devices.';
 
   @override
-  final String category = FlutterCommandCategory.tools;
+  String get category => FlutterCommandCategory.tools;
 
   @override
   ToolContext get toolContext => super.toolContext!;
@@ -79,6 +84,16 @@ class DevicesCommand extends FlutterCommand {
         'information about installing additional components.',
         exitCode: 1,
       );
+    }
+
+    if (extensionManager case final manager?) {
+      if (!_deviceManager.deviceDiscoverers.any(
+        (DeviceDiscovery d) => d is ExtensionDeviceDiscovery,
+      )) {
+        _deviceManager.deviceDiscoverers.add(
+          ExtensionDeviceDiscovery(extensionManager: manager, logger: toolContext.logger),
+        );
+      }
     }
 
     final output = DevicesCommandOutput(
@@ -219,8 +234,9 @@ class DevicesCommandOutput {
 
   Future<void> printDevicesAsJson(List<Device> devices) async {
     _logger.printStatus(
-      const JsonEncoder.withIndent('  ')
-          .convert(await Future.wait(devices.map((Device d) => d.toJson()))),
+      const JsonEncoder.withIndent(
+        '  ',
+      ).convert(await Future.wait(devices.map((Device d) => d.toJson()))),
     );
   }
 }
