@@ -167,6 +167,8 @@ template("embedder_source_set") {
 
     if (embedder_enable_vulkan) {
       sources += [
+        "embedder_external_texture_vulkan.cc",
+        "embedder_external_texture_vulkan.h",
         "embedder_surface_vulkan.cc",
         "embedder_surface_vulkan.h",
       ]
@@ -257,6 +259,8 @@ test_fixtures("fixtures") {
     "fixtures/gradient_metal.png",
     "fixtures/external_texture_impeller.png",
     "fixtures/external_texture_metal.png",
+    "fixtures/external_texture_nv12.png",
+    "fixtures/texture.nv12",
     "fixtures/gradient_xform.png",
     "fixtures/scene_without_custom_compositor.png",
     "fixtures/scene_without_custom_compositor_with_xform.png",
