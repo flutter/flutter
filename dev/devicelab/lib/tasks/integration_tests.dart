@@ -100,6 +100,14 @@ TaskFunction createEndToEndKeyboardTest({String? deviceIdOverride}) {
   ).call;
 }
 
+TaskFunction createEndToEndKeyboardInsetJumpTest({String? deviceIdOverride}) {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/keyboard_inset_jump.dart',
+    deviceIdOverride: deviceIdOverride,
+  ).call;
+}
+
 TaskFunction createEndToEndFrameNumberTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
