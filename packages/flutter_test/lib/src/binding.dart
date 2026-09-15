@@ -2003,8 +2003,35 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   // unreset debug flags from aborted tests) from obscuring the real failure.
   bool _shouldVerifyInvariants = false;
 
+  /// Verifies invariants that must hold immediately after the widget tree is
+  /// unmounted and pumped at the end of the test body, before teardowns run.
+  ///
+  /// This is an exceptional hook called inside `_runTestBody` right after
+  /// the widget tree is replaced with `_postTestMessage` and pumped. Almost all
+  /// invariant checks belong in `_verifyInvariants` instead of here.
+  ///
+  /// Use this method only for rare, specialized checks that strictly depend on
+  /// the immediate synchronous state of the test zone right after the final
+  /// pump (such as asserting that no unflushed microtasks remain in `FakeAsync`).
+  /// Checks placed here cannot be reset or cleaned up by user `addTearDown`
+  /// callbacks.
   void _verifyPostPumpInvariants() {}
 
+  /// Verifies framework-level invariants after the test body and all user
+  /// `addTearDown` callbacks have finished executing.
+  ///
+  /// This method is called in [postTest] and is the default place for invariant
+  /// verifications. The vast majority of invariants belong here, including
+  /// persistent framework state, global debug flags (such as
+  /// [debugDefaultTargetPlatformOverride] or [timeDilation]), and resources
+  /// (such as pending [Timer]s or active animations). Running these checks in
+  /// [postTest] allows tests to cleanly reset state using `addTearDown`.
+  ///
+  /// See also:
+  ///
+  ///  * `_verifyPostPumpInvariants`, which is used in rare cases where an
+  ///    invariant strictly requires the immediate synchronous state following
+  ///    widget disposal (such as `FakeAsync.microtaskCount` being zero).
   void _verifyInvariants() {
     assert(
       debugAssertNoTransientCallbacks(
