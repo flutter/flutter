@@ -14,37 +14,53 @@ import '../macos/xcode.dart';
 /// Holds Apple-specific dependencies.
 class AppleContext {
   AppleContext({
-    required this.cocoaPods,
-    required this.cocoapodsValidator,
-    required this.iosSimulatorUtils,
-    required this.iosWorkflow,
-    required this.plistParser,
-    required this.xcdevice,
-    required this.xcode,
-    required this.xcodeProjectInterpreter,
-  });
+    required CocoaPods Function() cocoaPodsBuilder,
+    required CocoaPodsValidator Function() cocoapodsValidatorBuilder,
+    required IOSSimulatorUtils Function() iosSimulatorUtilsBuilder,
+    required IOSWorkflow Function() iosWorkflowBuilder,
+    required PlistParser Function() plistParserBuilder,
+    required XCDevice Function() xcdeviceBuilder,
+    required Xcode Function() xcodeBuilder,
+    required XcodeProjectInterpreter Function() xcodeProjectInterpreterBuilder,
+  }) : _cocoaPodsBuilder = cocoaPodsBuilder,
+       _cocoapodsValidatorBuilder = cocoapodsValidatorBuilder,
+       _iosSimulatorUtilsBuilder = iosSimulatorUtilsBuilder,
+       _iosWorkflowBuilder = iosWorkflowBuilder,
+       _plistParserBuilder = plistParserBuilder,
+       _xcdeviceBuilder = xcdeviceBuilder,
+       _xcodeBuilder = xcodeBuilder,
+       _xcodeProjectInterpreterBuilder = xcodeProjectInterpreterBuilder;
 
   /// Interacts with and executes CocoaPods dependency management commands.
-  final CocoaPods cocoaPods;
+  late final CocoaPods cocoaPods = _cocoaPodsBuilder();
 
   /// Validates the host CocoaPods installation health and doctor status.
-  final CocoaPodsValidator cocoapodsValidator;
+  late final CocoaPodsValidator cocoapodsValidator = _cocoapodsValidatorBuilder();
 
   /// Manages discovery, booting, and queries for iOS simulator devices.
-  final IOSSimulatorUtils iosSimulatorUtils;
+  late final IOSSimulatorUtils iosSimulatorUtils = _iosSimulatorUtilsBuilder();
 
   /// Evaluates host readiness and toolchain requirements for iOS workflows.
-  final IOSWorkflow iosWorkflow;
+  late final IOSWorkflow iosWorkflow = _iosWorkflowBuilder();
 
   /// Parses Apple Property List (`.plist`) XML and binary format files.
-  final PlistParser plistParser;
+  late final PlistParser plistParser = _plistParserBuilder();
 
   /// Discovers and interacts with physical iOS devices attached to the host.
-  final XCDevice xcdevice;
+  late final XCDevice xcdevice = _xcdeviceBuilder();
 
   /// Inspects and validates the host Xcode installation and SDK version compliance.
-  final Xcode xcode;
+  late final Xcode xcode = _xcodeBuilder();
 
   /// Evaluates Xcode project settings, schemes, and target configurations.
-  final XcodeProjectInterpreter xcodeProjectInterpreter;
+  late final XcodeProjectInterpreter xcodeProjectInterpreter = _xcodeProjectInterpreterBuilder();
+
+  final CocoaPods Function() _cocoaPodsBuilder;
+  final CocoaPodsValidator Function() _cocoapodsValidatorBuilder;
+  final IOSSimulatorUtils Function() _iosSimulatorUtilsBuilder;
+  final IOSWorkflow Function() _iosWorkflowBuilder;
+  final PlistParser Function() _plistParserBuilder;
+  final XCDevice Function() _xcdeviceBuilder;
+  final Xcode Function() _xcodeBuilder;
+  final XcodeProjectInterpreter Function() _xcodeProjectInterpreterBuilder;
 }
