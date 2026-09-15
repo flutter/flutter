@@ -736,6 +736,7 @@ enum TargetPlatform {
   ios('ios'),
   darwin('darwin'),
   linux_x64('linux-x64'),
+  linux_arm('linux-arm'),
   linux_arm64('linux-arm64'),
   linux_riscv64('linux-riscv64'),
   windows_x64('windows-x64'),
@@ -767,6 +768,7 @@ enum TargetPlatform {
       // host platform name (HostPlatform.darwin_x64)
       'darwin' || 'darwin-x64' || 'darwin-arm64' => TargetPlatform.darwin,
       'linux-x64' => TargetPlatform.linux_x64,
+      'linux-arm' => TargetPlatform.linux_arm,
       'linux-arm64' => TargetPlatform.linux_arm64,
       'linux-riscv64' => TargetPlatform.linux_riscv64,
       'windows-x64' => TargetPlatform.windows_x64,
@@ -796,6 +798,7 @@ enum TargetPlatform {
     android_x64 ||
     darwin ||
     ios ||
+    linux_arm ||
     linux_arm64 ||
     linux_riscv64 ||
     linux_x64 ||
@@ -807,7 +810,7 @@ enum TargetPlatform {
   };
 
   String get osName => switch (this) {
-    linux_x64 || linux_arm64 || linux_riscv64 => 'linux',
+    linux_x64 || linux_arm || linux_arm64 || linux_riscv64 => 'linux',
     darwin => 'macos',
     windows_x64 || windows_arm64 => 'windows',
     android || android_arm || android_arm64 || android_x64 => 'android',
@@ -821,6 +824,7 @@ enum TargetPlatform {
   String get simpleName => switch (this) {
     linux_x64 || darwin || windows_x64 => 'x64',
     linux_arm64 || windows_arm64 => 'arm64',
+    linux_arm => 'arm',
     linux_riscv64 => 'riscv64',
     android ||
     android_arm ||

@@ -1912,6 +1912,7 @@ DevelopmentArtifact? artifactFromTargetPlatform(
       }
       return null;
     case TargetPlatform.linux_x64:
+    case TargetPlatform.linux_arm:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.linux_riscv64:
       if (featureFlags.isLinuxEnabled) {
