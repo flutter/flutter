@@ -56,6 +56,9 @@ void main() {
     fileSystem
         .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
         .createSync(recursive: true);
+    fileSystem
+        .file(artifacts.getArtifactPath(Artifact.vmserviceKernelDill, mode: BuildMode.debug))
+        .createSync(recursive: true);
 
     await const DebugAndroidApplication().build(environment);
 
@@ -74,6 +77,12 @@ void main() {
     expect(
       fileSystem
           .file(fileSystem.path.join('out', 'flutter_assets', 'kernel_blob.bin'))
+          .existsSync(),
+      true,
+    );
+    expect(
+      fileSystem
+          .file(fileSystem.path.join('out', 'flutter_assets', 'vmservice_snapshot.dill'))
           .existsSync(),
       true,
     );
