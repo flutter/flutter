@@ -97,7 +97,11 @@ class OnscreenCanvasProvider extends CanvasProvider<DomHTMLCanvasElement> {
   void resizeCanvas(DomHTMLCanvasElement canvas, BitmapSize size) {
     canvas.width = size.width.toDouble();
     canvas.height = size.height.toDouble();
+    resizeCanvasCss(canvas, size);
+  }
 
+  /// Updates only the visible CSS size of an onscreen canvas.
+  void resizeCanvasCss(DomHTMLCanvasElement canvas, BitmapSize size) {
     // When using an onscreen canvas, we also need to update the CSS size to
     // account for the device pixel ratio.
     final double ratio = EngineFlutterDisplay.instance.devicePixelRatio;
