@@ -15,7 +15,7 @@ vars = {
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
   'dart_ai_rev': '9c96bfe5f091c9451eff5b59c9bffeb2e806b875',
-  'skia_revision': 'eaf9f82813ebb65546de238278f344de52fe8306',
+  'skia_revision': '59904977fcbb8f870b6e90e1fb332f4451189f14',
 
   # Do not download the Emscripten SDK by default.
   # This prevents us from downloading the Emscripten toolchain for builds
@@ -203,7 +203,7 @@ vars = {
 
   # The version / instance id of the cipd:chromium/fuchsia/gn-sdk which will be
   # used altogether with fuchsia-sdk to generate gn based build rules.
-  'fuchsia_gn_sdk_version': 'ZsxUUK2SfA-TrNvb8eTBxNftQSqDU5z-cdDoS4_nWTgC',
+  'fuchsia_gn_sdk_version': 'PDJz3b3CL31uoLOkDb0mm8FidqJ1eCJryoRFd9iVmbIC',
 }
 
 gclient_gn_args_file = 'engine/src/flutter/third_party/dart/build/config/gclient_args.gni'
