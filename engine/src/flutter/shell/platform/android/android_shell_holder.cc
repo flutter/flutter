@@ -47,8 +47,11 @@ static void AndroidPlatformThreadConfigSetter(
     }
     case fml::Thread::ThreadPriority::kDisplay: {
       fml::RequestAffinity(fml::CpuAffinity::kNotEfficiency);
-      if (::setpriority(PRIO_PROCESS, 0, -1) != 0) {
-        FML_LOG(ERROR) << "Failed to set UI task runner priority";
+      if (::setpriority(PRIO_PROCESS, 0, -10) != 0) {
+        // Defensive fallback to original priority if OEM restricts -10.
+        if (::setpriority(PRIO_PROCESS, 0, -1) != 0) {
+          FML_LOG(ERROR) << "Failed to set UI task runner priority";
+        }
       }
       break;
     }
