@@ -84,11 +84,10 @@ Future<Map<String, dynamic>> _loadTranslations(EncodedAsset asset) async {
 Map<String, dynamic> _filterTranslations(
   Map<String, dynamic> allTranslations,
   Set<String> usedPhrases,
-) =>
-    {
-      for (final entry in allTranslations.entries)
-        if (usedPhrases.contains(entry.key)) entry.key: entry.value,
-    };
+) => {
+  for (final entry in allTranslations.entries)
+    if (usedPhrases.contains(entry.key)) entry.key: entry.value,
+};
 
 Future<void> _writeOutputAsset(
   LinkInput input,
