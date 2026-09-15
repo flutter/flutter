@@ -1898,9 +1898,15 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The filter quality with which to apply the transform as a bitmap operation.
   ///
   /// {@template flutter.widgets.Transform.optional.FilterQuality}
-  /// The transform will be applied by re-rendering the child if [filterQuality] is null,
-  /// otherwise it controls the quality of an [ImageFilter.matrix] applied to a bitmap
-  /// rendering of the child.
+  /// When [filterQuality] is null (the default), the child is re-rendered on
+  /// every frame to apply the transform. This avoids the overhead of an
+  /// [ImageFilter] layer but may cause more CPU usage for complex children.
+  ///
+  /// When [filterQuality] is set, an [ImageFilter.matrix] is applied to a
+  /// bitmap rendering of the child. This creates a saveLayer in the layer tree,
+  /// which can improve performance for complex children during animation.
+  /// However, the saveLayer introduces overhead and should only be used while
+  /// the animation is actively running.
   /// {@endtemplate}
   final FilterQuality? filterQuality;
 
