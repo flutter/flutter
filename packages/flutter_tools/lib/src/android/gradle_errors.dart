@@ -445,22 +445,21 @@ final _minCompileSdkVersionPattern = RegExp(r'The minCompileSdk \(([0-9]+)\) spe
 @visibleForTesting
 final minCompileSdkVersionHandler = GradleHandledError(
   test: _minCompileSdkVersionPattern.hasMatch,
-  handler:
-      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-        final Match? minCompileSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
-        assert(minCompileSdkVersionMatch?.groupCount == 1);
+  handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
+    final Match? minCompileSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
+    assert(minCompileSdkVersionMatch?.groupCount == 1);
 
-        final File gradleFile = project.android.appGradleFile;
-        globals.printBox(
-          '${globals.logger.terminal.warningMark} Your project requires a higher compileSdk version.\n'
-          'Fix this issue by bumping the compileSdk version in ${gradleFile.path}:\n'
-          'android {\n'
-          '  compileSdk ${minCompileSdkVersionMatch?.group(1)}\n'
-          '}',
-          title: _boxTitle,
-        );
-        return GradleBuildStatus.exit;
-      },
+    final File gradleFile = project.android.appGradleFile;
+    globals.printBox(
+      '${globals.logger.terminal.warningMark} Your project requires a higher compileSdk version.\n'
+      'Fix this issue by bumping the compileSdk version in ${gradleFile.path}:\n'
+      'android {\n'
+      '  compileSdk ${minCompileSdkVersionMatch?.group(1)}\n'
+      '}',
+      title: _boxTitle,
+    );
+    return GradleBuildStatus.exit;
+  },
   eventLabel: 'min-compile-sdk-version',
 );
 
