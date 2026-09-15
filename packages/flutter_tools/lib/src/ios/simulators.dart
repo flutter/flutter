@@ -313,7 +313,8 @@ class SimControl {
         'io',
         deviceId,
         'recordVideo',
-        '--codec', 'h264',
+        '--codec',
+        'h264',
         '--force',
         outputPath,
       ]);
@@ -718,16 +719,11 @@ class IOSSimulator extends Device {
   }
 
   @override
-  Future<void> startScreenRecording(
-    File outputFile, {
-    Duration? duration,
-  }) async {
+  Future<void> startScreenRecording(File outputFile, {Duration? duration}) async {
     final Process process = await _simControl.startRecordVideo(id, outputFile.path);
     final stderrBuf = StringBuffer();
     final recordingStarted = Completer<void>();
-    final Future<void> stderrFuture = process.stderr
-        .transform(utf8.decoder)
-        .forEach((String data) {
+    final Future<void> stderrFuture = process.stderr.transform(utf8.decoder).forEach((String data) {
       stderrBuf.write(data);
       if (!recordingStarted.isCompleted && data.contains('Recording started')) {
         recordingStarted.complete();
@@ -735,10 +731,7 @@ class IOSSimulator extends Device {
     });
 
     // Wait for simctl to confirm the first frame is captured.
-    await Future.any(<Future<void>>[
-      recordingStarted.future,
-      process.exitCode,
-    ]);
+    await Future.any(<Future<void>>[recordingStarted.future, process.exitCode]);
 
     if (duration != null) {
       try {
@@ -747,10 +740,7 @@ class IOSSimulator extends Device {
         ProcessSignal.sigint.kill(process);
       }
     }
-    final (int exitCode, _) = await (
-      process.exitCode,
-      stderrFuture,
-    ).wait;
+    final (int exitCode, _) = await (process.exitCode, stderrFuture).wait;
     if (exitCode != 0) {
       throwToolExit('Screen recording failed (exit $exitCode): $stderrBuf');
     }

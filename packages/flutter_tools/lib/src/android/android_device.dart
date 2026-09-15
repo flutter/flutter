@@ -852,10 +852,7 @@ class AndroidDevice extends Device {
   ///
   /// See: https://developer.android.com/tools/adb#screenrecord
   @override
-  Future<void> startScreenRecording(
-    File outputFile, {
-    Duration? duration,
-  }) async {
+  Future<void> startScreenRecording(File outputFile, {Duration? duration}) async {
     // https://developer.android.com/tools/adb#screenrecord
     const maxAdbSeconds = 180;
     final effectiveDuration = duration != null
@@ -865,13 +862,13 @@ class AndroidDevice extends Device {
     // the shell user on all API levels that support screenrecord (19+).
     const remotePath = '/data/local/tmp/flutter_recording.mp4';
     final args = <String>[
-      'shell', 'screenrecord',
-      '--time-limit', '${effectiveDuration.inSeconds}',
+      'shell',
+      'screenrecord',
+      '--time-limit',
+      '${effectiveDuration.inSeconds}',
       remotePath,
     ];
-    final Process process = await _processManager.start(
-      adbCommandForDevice(args),
-    );
+    final Process process = await _processManager.start(adbCommandForDevice(args));
     var recordExitCode = -1;
     try {
       recordExitCode = await process.exitCode;

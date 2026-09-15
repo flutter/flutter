@@ -255,9 +255,7 @@ void main() {
     final fileSystem = MemoryFileSystem.test();
     final File outputFile = fileSystem.file('screenshot.png');
     final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: <String>['screencapture', '-x', outputFile.path],
-      ),
+      FakeCommand(command: <String>['screencapture', '-x', outputFile.path]),
     ]);
     final device = MacOSDevice(
       fileSystem: fileSystem,
@@ -293,32 +291,31 @@ void main() {
     );
   });
 
-  testWithoutContext('startScreenRecording runs screencapture successfully without duration', () async {
-    final fileSystem = MemoryFileSystem.test();
-    final File outputFile = fileSystem.file('recording.mp4');
-    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: <String>['screencapture', '-v', outputFile.path],
-      ),
-    ]);
-    final device = MacOSDevice(
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      processManager: fakeProcessManager,
-      operatingSystemUtils: FakeOperatingSystemUtils(),
-    );
+  testWithoutContext(
+    'startScreenRecording runs screencapture successfully without duration',
+    () async {
+      final fileSystem = MemoryFileSystem.test();
+      final File outputFile = fileSystem.file('recording.mp4');
+      final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(command: <String>['screencapture', '-v', outputFile.path]),
+      ]);
+      final device = MacOSDevice(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        processManager: fakeProcessManager,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+      );
 
-    await device.startScreenRecording(outputFile);
-    expect(fakeProcessManager, hasNoRemainingExpectations);
-  });
+      await device.startScreenRecording(outputFile);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+  );
 
   testWithoutContext('startScreenRecording runs screencapture with duration', () async {
     final fileSystem = MemoryFileSystem.test();
     final File outputFile = fileSystem.file('recording.mp4');
     final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: <String>['screencapture', '-v', '-V', '10', outputFile.path],
-      ),
+      FakeCommand(command: <String>['screencapture', '-v', '-V', '10', outputFile.path]),
     ]);
     final device = MacOSDevice(
       fileSystem: fileSystem,

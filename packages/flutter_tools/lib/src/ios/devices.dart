@@ -1381,12 +1381,9 @@ class IOSDevice extends Device {
     }
     var success = false;
     try {
-      success = await _coreDeviceControl.takeScreenshot(
-        deviceId: id,
-        destination: outputFile.path,
-      );
+      success = await _coreDeviceControl.takeScreenshot(deviceId: id, destination: outputFile.path);
     } on Exception catch (error) {
-      _handleDevicectlError(error, 'take screenshot');
+      _handleDevicectlError(error.toString(), 'take screenshot');
     }
     if (!success) {
       throwToolExit('Failed to take screenshot with devicectl.');
@@ -1397,10 +1394,7 @@ class IOSDevice extends Device {
   bool get supportsScreenRecording => _supportsDevicectl;
 
   @override
-  Future<void> startScreenRecording(
-    File outputFile, {
-    Duration? duration,
-  }) async {
+  Future<void> startScreenRecording(File outputFile, {Duration? duration}) async {
     if (!_supportsDevicectl) {
       throwToolExit('flutter capture recording requires Xcode 27 or higher.');
     }
@@ -1411,7 +1405,7 @@ class IOSDevice extends Device {
         destination: outputFile.path,
       );
     } on Exception catch (error) {
-      _handleDevicectlError(error, 'record screen');
+      _handleDevicectlError(error.toString(), 'record screen');
     }
     final stderrBuf = StringBuffer();
     final Future<void> stderrFuture = process.stderr
@@ -1419,27 +1413,21 @@ class IOSDevice extends Device {
         .forEach(stderrBuf.write);
 
     if (duration != null) {
-      await Future.any(<Future<void>>[
-        process.exitCode,
-        Future<void>.delayed(duration).then((_) => ProcessSignal.sigint.kill(process)),
-      ]);
+      try {
+        await process.exitCode.timeout(duration);
+      } on TimeoutException {
+        ProcessSignal.sigint.kill(process);
+      }
     }
-    final (int exitCode, _) = await (
-      process.exitCode,
-      stderrFuture,
-    ).wait;
+    final (int exitCode, _) = await (process.exitCode, stderrFuture).wait;
     if (exitCode != 0) {
-      _handleDevicectlError(
-        ProcessException('devicectl', <String>[], stderrBuf.toString(), exitCode),
-        'record screen',
-      );
+      _handleDevicectlError(stderrBuf.toString(), 'record screen');
     }
   }
 
-  Never _handleDevicectlError(Exception error, String operation) {
-    // devicectl surfaces errors as ProcessException with stderr containing
-    // these error codes; no typed exception hierarchy exists upstream.
-    final errorMessage = error.toString();
+  Never _handleDevicectlError(String errorMessage, String operation) {
+    // devicectl surfaces errors via stderr containing these error codes;
+    // no typed exception hierarchy exists upstream.
     if (errorMessage.contains('CoreDeviceError error 4000') ||
         errorMessage.contains('CoreDeviceError error 4016') ||
         errorMessage.contains('RemotePairingError error 2') ||
@@ -1449,7 +1437,7 @@ class IOSDevice extends Device {
         'Please make sure the device is available and try again.',
       );
     }
-    throwToolExit('Failed to $operation with devicectl: $error');
+    throwToolExit('Failed to $operation with devicectl: $errorMessage');
   }
 
   @override

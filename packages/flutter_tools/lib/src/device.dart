@@ -830,10 +830,8 @@ abstract class Device {
   ///
   /// [duration] caps the recording length. When null, recording runs until
   /// the process is interrupted.
-  Future<void> startScreenRecording(
-    File outputFile, {
-    Duration? duration,
-  }) async => throw UnimplementedError();
+  Future<void> startScreenRecording(File outputFile, {Duration? duration}) async =>
+      throw UnimplementedError();
 
   @nonVirtual
   @override

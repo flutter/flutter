@@ -4224,7 +4224,10 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   }
 
   @override
-  Future<Process> startScreenRecording({required String deviceId, required String destination}) async {
+  Future<Process> startScreenRecording({
+    required String deviceId,
+    required String destination,
+  }) async {
     if (startScreenRecordingException != null) {
       throw startScreenRecordingException!;
     }

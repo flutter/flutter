@@ -92,19 +92,18 @@ class MacOSDevice extends DesktopDevice {
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    final ProcessResult result = await _processManager.run(
-      <String>['screencapture', '-x', outputFile.path],
-    );
+    final ProcessResult result = await _processManager.run(<String>[
+      'screencapture',
+      '-x',
+      outputFile.path,
+    ]);
     if (result.exitCode != 0) {
       throwToolExit('screencapture failed: ${result.stderr}');
     }
   }
 
   @override
-  Future<void> startScreenRecording(
-    File outputFile, {
-    Duration? duration,
-  }) async {
+  Future<void> startScreenRecording(File outputFile, {Duration? duration}) async {
     final args = <String>[
       'screencapture',
       '-v',

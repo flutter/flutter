@@ -43,27 +43,27 @@ void main() {
 
     testUsingContext('requires device for device type', () async {
       await expectLater(
-        () => createTestCommandRunner(
-          ScreenshotCommand(toolContext: _testToolContext()),
-        ).run(<String>['screenshot']),
+        () =>
+            createTestCommandRunner(ScreenshotCommand(toolContext: _testToolContext()))
+                .run(<String>['screenshot']),
         throwsToolExit(message: 'Must have a connected device for screenshot type device'),
       );
     });
 
     testUsingContext('rejects VM Service URI for device type', () async {
       await expectLater(
-        () => createTestCommandRunner(
-          ScreenshotCommand(toolContext: _testToolContext()),
-        ).run(<String>['screenshot', '--vm-service-url=http://localhost:8181']),
+        () =>
+            createTestCommandRunner(ScreenshotCommand(toolContext: _testToolContext()))
+                .run(<String>['screenshot', '--vm-service-url=http://localhost:8181']),
         throwsToolExit(message: 'VM Service URI cannot be provided for screenshot type device'),
       );
     });
 
     testUsingContext('requires VM Service URI for skia type', () async {
       await expectLater(
-        () => createTestCommandRunner(
-          ScreenshotCommand(toolContext: _testToolContext()),
-        ).run(<String>['screenshot', '--type=skia']),
+        () =>
+            createTestCommandRunner(ScreenshotCommand(toolContext: _testToolContext()))
+                .run(<String>['screenshot', '--type=skia']),
         throwsToolExit(message: 'VM Service URI must be specified for screenshot type skia'),
       );
     });
@@ -76,9 +76,8 @@ void main() {
           };
 
       await expectLater(
-        () => createTestCommandRunner(
-          ScreenshotCommand(toolContext: _testToolContext()),
-        ).run(<String>['screenshot', '--type=skia', '--vm-service-url=http://localhost:8181']),
+        () => createTestCommandRunner(ScreenshotCommand(toolContext: _testToolContext()))
+            .run(<String>['screenshot', '--type=skia', '--vm-service-url=http://localhost:8181']),
         throwsA(
           isException.having(
             (Exception exception) => exception.toString(),
@@ -92,9 +91,8 @@ void main() {
     testUsingContext(
       'takes a screenshot',
       () async {
-        await createTestCommandRunner(
-          ScreenshotCommand(toolContext: _testToolContext()),
-        ).run(<String>['screenshot']);
+        await createTestCommandRunner(ScreenshotCommand(toolContext: _testToolContext()))
+            .run(<String>['screenshot']);
 
         expect(testLogger.statusText, contains('Screenshot written to'));
       },
@@ -109,9 +107,9 @@ void main() {
       'rejects unsupported device',
       () async {
         await expectLater(
-          () => createTestCommandRunner(
-            ScreenshotCommand(toolContext: _testToolContext()),
-          ).run(<String>['screenshot']),
+          () =>
+              createTestCommandRunner(ScreenshotCommand(toolContext: _testToolContext()))
+                  .run(<String>['screenshot']),
           throwsToolExit(message: 'Screenshot not supported'),
         );
       },
@@ -126,9 +124,8 @@ void main() {
     testUsingContext(
       'should not throw for single device unsupported for project',
       () async {
-        await createTestCommandRunner(
-          ScreenshotCommand(toolContext: _testToolContext()),
-        ).run(<String>['screenshot']);
+        await createTestCommandRunner(ScreenshotCommand(toolContext: _testToolContext()))
+            .run(<String>['screenshot']);
       },
       overrides: <Type, Generator>{
         DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
@@ -142,9 +139,9 @@ void main() {
       'should tool exit for multiple devices unsupported for project',
       () async {
         await expectLater(
-          () => createTestCommandRunner(
-            ScreenshotCommand(toolContext: _testToolContext()),
-          ).run(<String>['screenshot']),
+          () =>
+              createTestCommandRunner(ScreenshotCommand(toolContext: _testToolContext()))
+                  .run(<String>['screenshot']),
           throwsToolExit(message: 'Must have a connected device for screenshot type device'),
         );
 
@@ -171,9 +168,9 @@ Device 2 (mobile) • 456 • android • 1.2.3
   group('capture screenshot', () {
     testUsingContext('requires a connected device', () async {
       await expectLater(
-        () => createTestCommandRunner(
-          CaptureCommand(toolContext: _testToolContext()),
-        ).run(<String>['capture', 'screenshot']),
+        () =>
+            createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
+                .run(<String>['capture', 'screenshot']),
         throwsToolExit(message: 'Must have a connected device for screenshot type device'),
       );
     });
@@ -181,9 +178,8 @@ Device 2 (mobile) • 456 • android • 1.2.3
     testUsingContext(
       'takes a screenshot',
       () async {
-        await createTestCommandRunner(
-          CaptureCommand(toolContext: _testToolContext()),
-        ).run(<String>['capture', 'screenshot']);
+        await createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
+            .run(<String>['capture', 'screenshot']);
 
         expect(testLogger.statusText, contains('Screenshot written to'));
       },
@@ -196,9 +192,9 @@ Device 2 (mobile) • 456 • android • 1.2.3
 
     testUsingContext('supports --type and --vm-service-url', () async {
       await expectLater(
-        () => createTestCommandRunner(
-          CaptureCommand(toolContext: _testToolContext()),
-        ).run(<String>['capture', 'screenshot', '--type=skia']),
+        () =>
+            createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
+                .run(<String>['capture', 'screenshot', '--type=skia']),
         throwsToolExit(message: 'VM Service URI must be specified for screenshot type skia'),
       );
     });
@@ -207,9 +203,9 @@ Device 2 (mobile) • 456 • android • 1.2.3
   group('capture recording', () {
     testUsingContext('requires a connected device', () async {
       await expectLater(
-        () => createTestCommandRunner(
-          CaptureCommand(toolContext: _testToolContext()),
-        ).run(<String>['capture', 'recording']),
+        () =>
+            createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
+                .run(<String>['capture', 'recording']),
         throwsToolExit(message: 'No connected device found'),
       );
     });
@@ -218,9 +214,9 @@ Device 2 (mobile) • 456 • android • 1.2.3
       'rejects device that does not support recording',
       () async {
         await expectLater(
-          () => createTestCommandRunner(
-            CaptureCommand(toolContext: _testToolContext()),
-          ).run(<String>['capture', 'recording']),
+          () =>
+              createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
+                  .run(<String>['capture', 'recording']),
           throwsToolExit(message: 'Screen recording not supported'),
         );
       },
@@ -234,9 +230,8 @@ Device 2 (mobile) • 456 • android • 1.2.3
     testUsingContext(
       'records video with a single device',
       () async {
-        await createTestCommandRunner(
-          CaptureCommand(toolContext: _testToolContext()),
-        ).run(<String>['capture', 'recording']);
+        await createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
+            .run(<String>['capture', 'recording']);
 
         expect(testLogger.statusText, contains('Recording written to'));
       },
@@ -251,9 +246,8 @@ Device 2 (mobile) • 456 • android • 1.2.3
     testUsingContext(
       'shows duration message when duration specified',
       () async {
-        await createTestCommandRunner(
-          CaptureCommand(toolContext: _testToolContext()),
-        ).run(<String>['capture', 'recording', '-d', '5']);
+        await createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
+            .run(<String>['capture', 'recording', '-d', '5']);
 
         expect(testLogger.statusText, contains('5 seconds'));
       },
@@ -269,9 +263,9 @@ Device 2 (mobile) • 456 • android • 1.2.3
       'rejects invalid duration',
       () async {
         await expectLater(
-          () => createTestCommandRunner(
-            CaptureCommand(toolContext: _testToolContext()),
-          ).run(<String>['capture', 'recording', '-d', 'abc']),
+          () =>
+              createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
+                  .run(<String>['capture', 'recording', '-d', 'abc']),
           throwsToolExit(message: 'Invalid duration'),
         );
       },
@@ -283,7 +277,6 @@ Device 2 (mobile) • 456 • android • 1.2.3
       },
     );
   });
-
 
   group('Screenshot output validation', () {
     testWithoutContext('successful', () async {
