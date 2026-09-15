@@ -220,7 +220,6 @@ Future<void> testMain() async {
 
     expect(boxes.isNotEmpty, true);
     for (final box in boxes) {
-      print('Box: left=${box.left}, top=${box.top}, right=${box.right}, bottom=${box.bottom}');
       expect(box.left >= 0, true);
       expect(box.top <= 0, true);
       expect(box.right > box.left, true);
