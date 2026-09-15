@@ -50,6 +50,7 @@ std::unique_ptr<Canvas> CreateTestCanvas(
   color0.load_action = LoadAction::kClear;
   if (context.GetContext()->GetCapabilities()->SupportsOffscreenMSAA()) {
     TextureDescriptor onscreen_msaa_desc = onscreen_desc;
+    onscreen_msaa_desc.usage = TextureUsage::kRenderTarget;
     onscreen_msaa_desc.sample_count = SampleCount::kCount4;
     onscreen_msaa_desc.storage_mode = StorageMode::kDeviceTransient;
     onscreen_msaa_desc.type = TextureType::kTexture2DMultisample;
@@ -113,8 +114,8 @@ TEST_P(AiksTest, TransformMultipliesCorrectly) {
     canvas->GetCurrentTransform(),
     Matrix(   0,   2,   0,   0,
              -3,   0,   0,   0,
-              0,   0,   0,   0,
-           -500, 400,   0,   1));
+               0,   0,   0,   0,
+            -500, 400,   0,   1));
   // clang-format on
 }
 
@@ -153,7 +154,8 @@ TEST_P(AiksTest, BackdropCountDownNormal) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
-                                 /*requires_readback=*/true);
+                                 /*requires_readback=*/true,
+                                 /*is_onscreen=*/true);
   // 3 backdrop filters
   canvas->SetBackdropData({}, 3);
 
@@ -188,7 +190,8 @@ TEST_P(AiksTest, BackdropCountDownBackdropId) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
-                                 /*requires_readback=*/true);
+                                 /*requires_readback=*/true,
+                                 /*is_onscreen=*/true);
   // 3 backdrop filters all with same id.
   std::unordered_map<int64_t, BackdropData> data;
   data[1] = BackdropData{.backdrop_count = 3};
@@ -228,7 +231,8 @@ TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
-                                 /*requires_readback=*/true);
+                                 /*requires_readback=*/true,
+                                 /*is_onscreen=*/true);
   // 3 backdrop filters, 2 with same id.
   std::unordered_map<int64_t, BackdropData> data;
   data[1] = BackdropData{.backdrop_count = 2};
@@ -305,7 +309,8 @@ TEST_P(AiksTest, BackdropCountDownWithNestedSaveLayers) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
-                                 /*requires_readback=*/true);
+                                 /*requires_readback=*/true,
+                                 /*is_onscreen=*/true);
 
   canvas->SetBackdropData({}, 2);
 
@@ -737,7 +742,8 @@ TEST_P(AiksTest, EmulatedAdvancedBlendPreservesDepthMonotonicity) {
   // 2. Record sequential save scopes with emulated advanced blends.
   ContentContext& context = GetContentContext();
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 800, 600),
-                                 /*requires_readback=*/true);
+                                 /*requires_readback=*/true,
+                                 /*is_onscreen=*/true);
 
   uint64_t previous_depth = 0;
   for (int i = 0; i < 3; ++i) {
