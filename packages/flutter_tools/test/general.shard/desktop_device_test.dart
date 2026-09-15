@@ -473,6 +473,32 @@ void main() {
 
       await subscription.cancel();
     });
+
+    testWithoutContext('forwards stderr errors to logLines without unhandled exceptions', () async {
+      final logReader = DesktopLogReader();
+      final receivedErrors = <Object>[];
+      final completer = Completer<void>();
+      final StreamSubscription<String> subscription = logReader.logLines.listen(
+        (_) {},
+        onError: (Object error) {
+          receivedErrors.add(error);
+          completer.complete();
+        },
+      );
+
+      final stderrController = StreamController<List<int>>();
+      final process = FakeProcess(stderr: stderrController.stream);
+      logReader.listenToProcessOutput(process);
+
+      stderrController.addError(Exception('test stderr error'));
+      await completer.future;
+
+      expect(receivedErrors, hasLength(1));
+      expect(receivedErrors.single, isA<Exception>());
+
+      await subscription.cancel();
+      logReader.dispose();
+    });
   });
 
   group('SingleLaunchLogReader', () {
