@@ -8,63 +8,55 @@ import '../android/android_builder.dart';
 import '../android/build_validation.dart';
 import '../android/gradle_utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command.dart';
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
-  BuildApkCommand({required super.logger, bool verboseHelp = false})
-    : super(verboseHelp: verboseHelp) {
-    addTreeShakeIconsFlag();
-    usesTargetOption();
-    addBuildModeFlags(verboseHelp: verboseHelp);
-    usesFlavorOption();
-    usesPubOption();
-    usesBuildNumberOption();
-    usesBuildNameOption();
-    addShrinkingFlag(verboseHelp: verboseHelp);
-    addSplitDebugInfoOption();
-    addDartObfuscationOption();
-    usesDartDefineOption();
-    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
-    addEnableExperimentation(hide: !verboseHelp);
-    addBuildPerformanceFile(hide: !verboseHelp);
-    usesAnalyzeSizeFlag();
-    addAndroidSpecificBuildOptions(hide: !verboseHelp);
-    addIgnoreDeprecationOption();
-    addEnableHcppFlag(verboseHelp: verboseHelp);
-    argParser
-      ..addFlag(
-        'split-per-abi',
-        negatable: false,
-        help:
-            'Whether to split the APKs per ABIs. '
-            'To learn more, see: https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',
-      )
-      ..addFlag(
-        'config-only',
-        help:
-            'Generate build files used by flutter but '
-            'do not build any artifacts.',
-      )
-      ..addMultiOption(
-        'target-platform',
-        allowed: <String>['android-arm', 'android-arm64', 'android-x64'],
-        help: 'The target platform for which the app is compiled.',
-      );
-    usesTrackWidgetCreation(verboseHelp: verboseHelp);
+  BuildApkCommand({required super.logger, super.verboseHelp = false}) {
+    registerOptionBundles(const <OptionBundle>[
+      CommonBuildOptionsBundle(),
+      BuildModeOptionsBundle(),
+      DartCompileOptionsBundle(),
+      AndroidBuildOptionsBundle(),
+    ]);
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      _splitPerAbi,
+      _configOnly,
+      _targetPlatform,
+    ]);
   }
 
+  static const _splitPerAbi = FlagOptionDescriptor(
+    name: 'split-per-abi',
+    negatable: false,
+    help:
+        'Whether to split the APKs per ABIs. '
+        'To learn more, see: https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',
+  );
+
+  static const _configOnly = FlagOptionDescriptor(
+    name: 'config-only',
+    help:
+        'Generate build files used by flutter but '
+        'do not build any artifacts.',
+  );
+
+  static const _targetPlatform = MultiOptionDescriptor(
+    name: 'target-platform',
+    allowed: <String>['android-arm', 'android-arm64', 'android-x64'],
+    help: 'The target platform for which the app is compiled.',
+  );
+
   BuildMode get _buildMode {
-    if (boolArg('release')) {
+    if (getValue(CommonOptions.releaseMode)) {
       return BuildMode.release;
-    } else if (boolArg('profile')) {
+    } else if (getValue(CommonOptions.profileMode)) {
       return BuildMode.profile;
-    } else if (boolArg('debug')) {
+    } else if (getValue(CommonOptions.debugMode)) {
       return BuildMode.debug;
-    } else if (boolArg('jit-release')) {
+    } else if (getValue(CommonOptions.jitReleaseMode)) {
       return BuildMode.jitRelease;
     }
     return BuildMode.release;
@@ -72,21 +64,25 @@ class BuildApkCommand extends BuildSubCommand {
 
   static const _kDefaultJitArchs = <String>['android-arm', 'android-arm64', 'android-x64'];
   static const _kDefaultAotArchs = <String>['android-arm', 'android-arm64', 'android-x64'];
-  List<String> get _targetArchs => stringsArg('target-platform').isEmpty
-      ? switch (_buildMode) {
-          BuildMode.release || BuildMode.profile => _kDefaultAotArchs,
-          BuildMode.debug || BuildMode.jitRelease => _kDefaultJitArchs,
-        }
-      : stringsArg('target-platform');
+  List<String> get _targetArchs {
+    final List<String> targetPlatform = getValue(_targetPlatform);
+    return targetPlatform.isEmpty
+        ? switch (_buildMode) {
+            BuildMode.release || BuildMode.profile => _kDefaultAotArchs,
+            BuildMode.debug || BuildMode.jitRelease => _kDefaultJitArchs,
+          }
+        : targetPlatform;
+  }
 
   @override
   final name = 'apk';
 
   @override
-  DeprecationBehavior get deprecationBehavior =>
-      boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
+  DeprecationBehavior get deprecationBehavior => getValue(BuildInfoOptions.ignoreDeprecation)
+      ? DeprecationBehavior.ignore
+      : DeprecationBehavior.exit;
 
-  bool get configOnly => boolArg('config-only');
+  bool get configOnly => getValue(_configOnly);
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -110,7 +106,7 @@ class BuildApkCommand extends BuildSubCommand {
       commandHasTerminal: hasTerminal,
       buildApkTargetPlatform: _targetArchs.join(','),
       buildApkBuildMode: _buildMode.cliName,
-      buildApkSplitPerAbi: boolArg('split-per-abi'),
+      buildApkSplitPerAbi: getValue(_splitPerAbi),
       buildApkEnableHcpp:
           explicitEnableHcpp ?? project.android.computeHcppEnabled(ifAbsent: enableHcpp),
     );
@@ -125,7 +121,7 @@ class BuildApkCommand extends BuildSubCommand {
 
     final androidBuildInfo = AndroidBuildInfo(
       buildInfo,
-      splitPerAbi: boolArg('split-per-abi'),
+      splitPerAbi: getValue(_splitPerAbi),
       targetArchs: _targetArchs.map<CpuArch>(getCpuArchForName),
     );
     validateBuild(androidBuildInfo);
