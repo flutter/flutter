@@ -606,7 +606,6 @@ abstract class FlutterCommand extends Command<void> {
         ? DebuggingOptionDescriptors.publishPort
         : const FlagOptionDescriptor(
             name: 'publish-port',
-            defaultsTo: false,
             verboseOnly: true,
             help:
                 'Publish the VM service port over mDNS. Disable to prevent the '

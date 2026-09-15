@@ -913,9 +913,9 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     required this._appleContext,
     required this._buildSystem,
     required ToolContext toolContext,
-    required bool verboseHelp,
+    required super.verboseHelp,
   }) : _toolContext = toolContext,
-       super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
+       super(logger: toolContext.logger, toolContext: toolContext) {
     registerOptionBundles(const <OptionBundle>[
       CommonBuildOptionsBundle(),
       BuildModeOptionsBundle(),

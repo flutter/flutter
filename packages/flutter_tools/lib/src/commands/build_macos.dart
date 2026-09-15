@@ -10,7 +10,6 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
 import '../macos/build_macos.dart';
