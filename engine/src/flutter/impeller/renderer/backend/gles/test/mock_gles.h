@@ -102,6 +102,7 @@ class IMockGLESImpl {
                              GLsizeiptr size,
                              const void* data) {}
   virtual GLboolean IsTexture(GLuint texture) { return true; }
+  virtual GLboolean IsProgram(GLuint program) { return true; }
   virtual void DiscardFramebufferEXT(GLenum target,
                                      GLsizei numAttachments,
                                      const GLenum* attachments) {};
@@ -277,6 +278,7 @@ class MockGLESImpl : public IMockGLESImpl {
       (GLenum target, GLintptr offset, GLsizeiptr size, const void* data),
       (override));
   MOCK_METHOD(GLboolean, IsTexture, (GLuint texture), (override));
+  MOCK_METHOD(GLboolean, IsProgram, (GLuint program), (override));
   MOCK_METHOD(void,
               DiscardFramebufferEXT,
               (GLenum target,

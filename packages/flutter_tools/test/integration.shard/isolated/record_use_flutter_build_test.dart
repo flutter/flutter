@@ -72,9 +72,9 @@ void main() {
         }
         for (final manifestFile in manifestFiles) {
           final Uint8List manifestData = manifestFile.readAsBytesSync();
-          final manifest =
-              const StandardMessageCodec().decodeMessage(ByteData.sublistView(manifestData))
-                  as Map<Object?, Object?>;
+          final manifest = const StandardMessageCodec().decodeMessage(
+            ByteData.sublistView(manifestData),
+          ) as Map<Object?, Object?>;
           const id1Key = 'packages/record_use_test_package/data/translations.json';
           expect(manifest.containsKey(id1Key), isTrue, reason: 'id1.json should be present');
           final File id1File = manifestFile.parent.childFile(id1Key);

@@ -5,34 +5,142 @@
 precision mediump float;
 
 #include <impeller/color.glsl>
+#include <impeller/constants.glsl>
+#include <impeller/gradient.glsl>
+#include <impeller/texture.glsl>
 #include <impeller/types.glsl>
 
+#include "rse_sdf.glsl"
 #include "sdf_functions.glsl"
 #include "sdf_utils.glsl"
 
+uniform sampler2D color_source_sampler;
+
 uniform FragInfo {
+  // FragInfo fields are sorted by size (vec4 -> vec2 -> float) to optimize
+  // uniform register usage.
+
+  // ===========================================================================
+  // vec4 fields
+  // ===========================================================================
+
+  /// The RGBA color of the shape (or paint opacity in color.a for gradients).
   vec4 color;
-  vec2 center;
-  vec2 size;
-  float stroke_width;
-  float stroke_join;
-  float aa_pixels;
-  float stroked;
-  float type;
-  vec2 superellipse_degree;
-  vec2 superellipse_semi_axis;
-  vec2 angle_span;
-  float octant_offset_c;
-  vec2 circle_center_top;
-  vec2 circle_center_right;
-  vec2 superellipse_scale;
+  /// Corner radii for rounded rects (top-left, top-right, bottom-left,
+  /// bottom-right), or the circular cap radii for rounded superellipses in
+  /// radii.xy (top octant in x, right octant in y).
   vec4 radii;
+  /// Gradient parameters:
+  ///   - Linear gradient:
+  ///       xy: Start point in local coordinates.
+  ///       zw: Delta vector (end - start) in local coordinates.
+  ///   - Radial gradient:
+  ///       xy: Center point in local coordinates.
+  ///       zw: Unused (0.0).
+  vec4 gradient_coords;
+
+  // ===========================================================================
+  // vec2 fields
+  // ===========================================================================
+
+  // --- General Shape Geometry ---
+  /// The center position of the shape in local coordinates.
+  vec2 center;
+  /// The half-dimensions of the shape (half-width, half-height).
+  vec2 size;
+  /// The size of a device pixel in local coordinates.
+  vec2 pixel_size;
+
+  // --- Superellipse Parameters ---
+  /// The exponent degree (n_x, n_y) of the superellipse curvature.
+  vec2 superellipse_degree;
+  /// The angular span of the corner circular arc transitions for rounded
+  /// superellipses.
+  vec2 angle_span;
+  /// The center of the corner transition circle for the top octant of a
+  /// rounded superellipse.
+  vec2 circle_center_top;
+  /// The center of the corner transition circle for the right octant of a
+  /// rounded superellipse.
+  vec2 circle_center_right;
+
+  // ===========================================================================
+  // float fields
+  // ===========================================================================
+
+  // --- General Configuration ---
+  /// The shape type:
+  ///   0: Circle
+  ///   1: Rect
+  ///   2: Oval
+  ///   3: RoundRect
+  ///   4: Rounded Superellipse (must have uniform circular corner radii)
+  float type;
+  /// The type of color source:
+  ///   0: Solid color
+  ///   1: Linear gradient
+  ///   2: Radial gradient
+  float color_source_type;
+  /// The width in device pixels over which to apply antialiasing.
+  float aa_pixels;
+
+  // --- Stroke Parameters ---
+  /// Whether the shape is stroked (1.0) or filled (0.0).
+  float stroked;
+  /// The width of the stroke.
+  float stroke_width;
+  /// The join style for the stroke:
+  ///   0: Miter
+  ///   1: Bevel
+  ///   2: Round
+  float stroke_join;
+
+  // --- Gradient Parameters ---
+  /// The tile mode for gradient sampling:
+  ///   0: Clamp
+  ///   1: Repeat
+  ///   2: Mirror
+  ///   3: Decal
+  float tile_mode;
+  /// Half the size of a single gradient texel in normalized texture
+  /// coordinates along the gradient ramp (x axis).
+  float half_texel;
+  /// Inverse gradient length:
+  ///   - Linear gradient: 1.0 / dot(delta, delta)
+  ///   - Radial gradient: 1.0 / radius
+  float inv_gradient_length;
 }
 frag_info;
 
 out vec4 frag_color;
 
 highp in vec2 v_position;
+
+// Gets the color to use at v_position based on frag_info properties.
+vec4 getColor() {
+  vec4 color;
+  if (frag_info.color_source_type < 0.5) {
+    // Solid color
+    color = frag_info.color;
+  } else {
+    float t;
+    if (frag_info.color_source_type < 1.5) {
+      // Linear gradient
+      t = IPComputeLinearGradientT(v_position, frag_info.gradient_coords.xy,
+                                   frag_info.gradient_coords.zw,
+                                   frag_info.inv_gradient_length);
+    } else {
+      // Radial gradient
+      t = IPComputeRadialGradientT(v_position, frag_info.gradient_coords.xy,
+                                   frag_info.inv_gradient_length);
+    }
+    vec4 gradient_color = IPSampleLinearWithTileMode(
+        color_source_sampler, vec2(t, 0.5), vec2(frag_info.half_texel, 0.5),
+        frag_info.tile_mode, vec4(0.0));
+    color = vec4(gradient_color.rgb, gradient_color.a * frag_info.color.a);
+  }
+  return color;
+}
 
 float distanceFromCircle(vec2 p, float radius) {
   return length(p) - radius;
@@ -68,23 +176,22 @@ float distanceFromChamferRect(vec2 p, vec2 half_size, float chamfer_size) {
   p = abs(p);
   float d1 = max(p.x - half_size.x, p.y - half_size.y);
   float d2 =
-      (p.x + p.y - half_size.x - half_size.y + chamfer_size) * 0.70710678;
+      (p.x + p.y - half_size.x - half_size.y + chamfer_size) * kHalfSqrtTwo;
   return max(d1, d2);
 }
 
 float distanceFromRoundedSuperellipse(vec2 p,
                                       vec2 degree,
-                                      vec2 se_a,
+                                      vec2 size,
                                       vec2 radii,
                                       vec2 angle_span,
                                       vec2 circle_center_top,
-                                      vec2 circle_center_right,
-                                      float c,
-                                      vec2 scale) {
+                                      vec2 circle_center_right) {
   // Do work in the first quadrant to simply things.
   p = abs(p);
-  // Map p in to a square.
-  vec2 p_norm = p / scale;
+
+  // Transition line offset dividing top and right octants.
+  float c = size.x - size.y;
 
   // Declare all RSE params for a single octant.
   float se_degree, span, radius, axis_length;
@@ -93,67 +200,39 @@ float distanceFromRoundedSuperellipse(vec2 p,
   // 'p' in the coordinate system of the octant.
   vec2 p_oct;
 
-  // We split the quadrant along the diagonal of the transition (p_norm.y + c ==
-  // p_norm.x). This allows us to grab the correct set of parameters for the
+  // We split the quadrant along the diagonal of the transition (p.y + c ==
+  // p.x). This allows us to grab the correct set of parameters for the
   // "top" and "right" halves of the corner.
-  if (p_norm.y + c > p_norm.x) {
-    p_oct = p_norm + vec2(0.0, c);
+  if (p.y + c > p.x) {
+    p_oct = p + vec2(0.0, c);
     se_degree = degree.x;
     span = angle_span.x;
     radius = radii.x;
     circle_center = circle_center_top;
-    axis_length = se_a.x;
+    axis_length = size.x;
   } else {
     // For the 'right' octant, we flip the point and shift it according to
     // the CPU's OctantContains/Flip logic.
-    p_oct = p_norm.yx - vec2(0.0, c);
+    p_oct = p.yx - vec2(0.0, c);
     se_degree = degree.y;
     span = angle_span.y;
     radius = radii.y;
     circle_center = circle_center_right;
-    axis_length = se_a.y;
+    axis_length = size.y;
   }
 
-  // Move the point to the corner circle's coordinate system.
-  vec2 p_rel = p_oct - circle_center;
-
-  // Grab the angle offset of the point.
-  float theta = atan(p_rel.y, p_rel.x);
-
-  // The angular distance between the point and the 45 degree midline.
-  float d_theta = theta - PI_OVER_FOUR;
-  d_theta = mod(d_theta + PI, TWO_PI) - PI;
-
-  // If the point is within the span of the corner circle's arc,
-  // use a circle SDF.
-  // This works because the normals of the circular and superelliptical sections
-  // agree at the transition angle, the total RSE curve is continuous and
-  // the closest point on a continuous curve to a point lies along the normal.
-  if (abs(d_theta) < abs(span)) {
-    return distanceFromCircle(p_rel, radius);
-  }
-  return sdSuperellipse(p_oct / axis_length, se_degree) * axis_length;
+  return distanceFromRSEOctant(p_oct, circle_center, radius, span, axis_length,
+                               se_degree);
 }
 
-// Special case pixel size calculation for rectangles. The standard `pixelSize`
-// function uses SDF derivatives, which gives invalid results for very small
-// shapes, where adjacent device pixels span across opposing edges of the shape.
-// This function calculates pixel size for rectangles without using SDF
-// derivatives.
+// Calculates pixel size for rectangles using frag_info.pixel_size.
 float rectPixelSize(vec2 p) {
-  // The change in local coordinates per horizontal device pixel (device_dx)
-  // and vertical device pixel (device_dy).
-  vec2 device_dx = dFdx(v_position);
-  vec2 device_dy = dFdy(v_position);
-  // The size of a device pixel in terms of local coordinates.
-  vec2 device_pixel_size = vec2(length(vec2(device_dx.x, device_dy.x)),
-                                length(vec2(device_dx.y, device_dy.y)));
-
   // Get pixel size in the direction perpendicular to the closest edge of the
-  // rectangle: device_pixel_size.x when closer to a vertical edge, and
-  // pixel_size.y when closer to a horizontal edge.
+  // rectangle: frag_info.pixel_size.x when closer to a vertical edge, and
+  // frag_info.pixel_size.y when closer to a horizontal edge.
   vec2 distance = abs(abs(p) - frag_info.size);
-  return (distance.x < distance.y) ? device_pixel_size.x : device_pixel_size.y;
+  return (distance.x < distance.y) ? frag_info.pixel_size.x
+                                   : frag_info.pixel_size.y;
 }
 
 // Special case pixel size calculation for rounded rectangles, similar to
@@ -214,10 +293,9 @@ vec2 filledSDF(vec2 p) {
     pixel_size = roundRectPixelSize(p);
   } else {  // Symmetric Rounded Superellipse
     sdf = distanceFromRoundedSuperellipse(
-        p, frag_info.superellipse_degree, frag_info.superellipse_semi_axis,
-        frag_info.radii.xy, frag_info.angle_span, frag_info.circle_center_top,
-        frag_info.circle_center_right, frag_info.octant_offset_c,
-        frag_info.superellipse_scale);
+        p, frag_info.superellipse_degree, frag_info.size, frag_info.radii.xy,
+        frag_info.angle_span, frag_info.circle_center_top,
+        frag_info.circle_center_right);
     pixel_size = pixelSize(sdf);
   }
   return vec2(sdf, pixel_size);
@@ -276,6 +354,8 @@ float gammaCorrectedAlpha(float alpha, vec3 foreground_rgb) {
 }
 
 void main() {
+  vec4 color = getColor();
+
   vec2 p = v_position - frag_info.center;
 
   vec2 sdf_and_pixel_size =
@@ -287,8 +367,10 @@ void main() {
   // Clamp alpha in case floating point precision errors cause it to be outside
   // [0.0, 1.0].
   alpha = clamp(alpha, 0.0, 1.0);
-  alpha = gammaCorrectedAlpha(alpha, frag_info.color.rgb);
+  if (alpha < 1.0) {
+    alpha = gammaCorrectedAlpha(alpha, color.rgb);
+  }
 
-  frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
+  frag_color = vec4(color.rgb, color.a * alpha);
   frag_color = IPPremultiply(frag_color);
 }

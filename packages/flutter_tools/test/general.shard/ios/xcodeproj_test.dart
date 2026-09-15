@@ -753,6 +753,99 @@ void main() {
     },
   );
 
+  testWithoutContext(
+    'xcodebuild -list getInfo throws a tool exit when xcodebuild is missing (exit code 72)',
+    () async {
+      const workingDirectory = '/';
+      final Directory buildDirectory = fileSystem.directory('build/ios');
+      const stderr =
+          'xcrun: error: unable to find utility "xcodebuild", not a developer tool or in PATH';
+
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        kWhichSysctlCommand,
+        kx64CheckCommand,
+        kResolvePackagesCommand,
+        FakeCommand(
+          command: <String>[
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/ios/SourcePackages',
+            '-skipPackagePluginValidation',
+            '-skipPackageSignatureValidation',
+            '-list',
+          ],
+          exitCode: 72,
+          stderr: stderr,
+        ),
+      ]);
+
+      final xcodeProjectInterpreter = XcodeProjectInterpreter(
+        logger: logger,
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: fakeProcessManager,
+        analytics: const NoOpAnalytics(),
+      );
+
+      await expectLater(
+        () => xcodeProjectInterpreter.getInfo(
+          FakeXcodeBasedProject(workingDirectory, fileSystem),
+          buildDirectory: buildDirectory,
+        ),
+        throwsToolExit(message: stderr),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+  );
+
+  testWithoutContext(
+    'xcodebuild -list getInfo throws a tool exit when process execution throws ProcessException',
+    () async {
+      const workingDirectory = '/';
+      final Directory buildDirectory = fileSystem.directory('build/ios');
+      const errorMessage = 'xcrun: error: unable to find utility "xcodebuild"';
+      const processException = ProcessException('xcrun', <String>['xcodebuild'], errorMessage, 72);
+
+      fakeProcessManager.addCommands(<FakeCommand>[
+        kWhichSysctlCommand,
+        kx64CheckCommand,
+        kResolvePackagesCommand,
+        FakeCommand(
+          command: const <String>[
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/ios/SourcePackages',
+            '-skipPackagePluginValidation',
+            '-skipPackageSignatureValidation',
+            '-list',
+          ],
+          onRun: (_) {
+            throw processException;
+          },
+        ),
+      ]);
+
+      final xcodeProjectInterpreter = XcodeProjectInterpreter(
+        logger: logger,
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: fakeProcessManager,
+        analytics: const NoOpAnalytics(),
+      );
+
+      await expectLater(
+        () => xcodeProjectInterpreter.getInfo(
+          FakeXcodeBasedProject(workingDirectory, fileSystem),
+          buildDirectory: buildDirectory,
+        ),
+        throwsToolExit(message: processException.toString()),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+  );
+
   testWithoutContext('Xcode project properties from default project can be parsed', () {
     const output = '''
 Information about project "Runner":
@@ -1214,43 +1307,40 @@ Information about project "Runner":
     },
   );
 
-  testWithoutContext(
-    'build configuration for flavored project falls back to BuildMode when flavor match is unavailable',
-    () {
-      final info = XcodeProjectInfo(
-        <String>['Runner'],
-        <String>['Debug', 'Profile', 'Release'],
-        <String>['Banana'],
-        logger,
-      );
+  testWithoutContext('build configuration for flavored project falls back to BuildMode when flavor match is unavailable', () {
+    final info = XcodeProjectInfo(
+      <String>['Runner'],
+      <String>['Debug', 'Profile', 'Release'],
+      <String>['Banana'],
+      logger,
+    );
 
-      expect(
-        info.buildConfigurationFor(
-          const BuildInfo(
-            BuildMode.debug,
-            'banana',
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-          ),
-          'Banana',
+    expect(
+      info.buildConfigurationFor(
+        const BuildInfo(
+          BuildMode.debug,
+          'banana',
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
         ),
-        'Debug',
-      );
+        'Banana',
+      ),
+      'Debug',
+    );
 
-      expect(
-        info.buildConfigurationFor(
-          const BuildInfo(
-            BuildMode.release,
-            'banana',
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-          ),
-          'Banana',
+    expect(
+      info.buildConfigurationFor(
+        const BuildInfo(
+          BuildMode.release,
+          'banana',
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
         ),
-        'Release',
-      );
-    },
-  );
+        'Banana',
+      ),
+      'Release',
+    );
+  });
 
   testWithoutContext(
     "build configuration doesn't fall back when multiple matches for mode and flavor are available",

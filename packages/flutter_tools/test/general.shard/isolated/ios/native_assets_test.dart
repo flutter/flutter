@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart' hide Target;
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/ios/native_assets.dart';
@@ -55,6 +56,8 @@ void main() {
     testUsingContext(
       'build with assets $buildMode',
       overrides: <Type, Generator>{
+        FeatureFlags: () =>
+            TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
         ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <Pattern>[

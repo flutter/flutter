@@ -110,8 +110,7 @@ class _SliverAnimatedGridSampleState extends State<SliverAnimatedGridSample> {
               leading: IconButton(
                 icon: const Icon(Icons.remove_circle),
                 onPressed: _remove,
-                tooltip:
-                    'Remove the selected item, or the last item if none selected.',
+                tooltip: 'Remove the selected item, or the last item if none selected.',
                 iconSize: 32,
               ),
               actions: <Widget>[
@@ -140,12 +139,11 @@ class _SliverAnimatedGridSampleState extends State<SliverAnimatedGridSample> {
   }
 }
 
-typedef RemovedItemBuilder =
-    Widget Function(
-      int item,
-      BuildContext context,
-      Animation<double> animation,
-    );
+typedef RemovedItemBuilder = Widget Function(
+  int item,
+  BuildContext context,
+  Animation<double> animation,
+);
 
 // Keeps a Dart [List] in sync with an [AnimatedGrid].
 //

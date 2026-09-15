@@ -43,14 +43,13 @@ BuildContext? _getAncestor(BuildContext context, {int count = 1}) {
 
 /// Signature for the callback that's called when a traversal policy
 /// requests focus.
-typedef TraversalRequestFocusCallback =
-    void Function(
-      FocusNode node, {
-      ScrollPositionAlignmentPolicy? alignmentPolicy,
-      double? alignment,
-      Duration? duration,
-      Curve? curve,
-    });
+typedef TraversalRequestFocusCallback = void Function(
+  FocusNode node, {
+  ScrollPositionAlignmentPolicy? alignmentPolicy,
+  double? alignment,
+  Duration? duration,
+  Curve? curve,
+});
 
 // A class to temporarily hold information about FocusTraversalGroups when
 // sorting their contents.
@@ -1509,9 +1508,8 @@ class _ReadingOrderSortData with Diagnosticable {
           .getElementForInheritedWidgetOfExactType<Directionality>();
       while (directionalityElement != null) {
         result.add(directionalityElement.widget as Directionality);
-        directionalityElement = _getAncestor(
-          directionalityElement,
-        )?.getElementForInheritedWidgetOfExactType<Directionality>();
+        directionalityElement = _getAncestor(directionalityElement)
+            ?.getElementForInheritedWidgetOfExactType<Directionality>();
       }
       return result;
     }
@@ -2223,8 +2221,8 @@ class FocusTraversalGroup extends StatefulWidget {
           'FocusTraversalGroup.of() was called with a context that does not contain a '
           'Focus or FocusScope widget, or there was no FocusTraversalPolicy in effect.\n'
           'This can happen if there is not a FocusTraversalGroup that defines the policy, '
-          'or if the context comes from a widget that is above the WidgetsApp, MaterialApp, '
-          'or CupertinoApp widget (those widgets introduce an implicit default policy) \n'
+          'or if the context comes from a widget that is above the WidgetsApp '
+          'widget (which introduces an implicit default policy)\n'
           'The context used was:\n'
           '  $context',
         );

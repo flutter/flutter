@@ -13,6 +13,7 @@ import '../base/process.dart';
 import '../base/template.dart';
 import '../base/version.dart';
 import '../darwin/darwin.dart';
+import '../features.dart';
 import '../plugins.dart';
 import '../xcode_project.dart';
 import 'swift_packages.dart';
@@ -30,7 +31,7 @@ const kSwiftPackageCacheDirectoryName = 'SourcePackages';
 const kDisableSwiftPMInstructions =
     'You can also disable Swift Package Manager for the project by following these instructions:\n'
     '  https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-turn-off-swift-package-manager\n'
-    'Disabling Swift Package Manager will not be allowed in a future version of Flutter.\n';
+    '$kSwiftPackageManagerDisabledWarning\n';
 
 /// Swift Package Manager is a dependency management solution for iOS and macOS
 /// applications.
@@ -42,16 +43,12 @@ const kDisableSwiftPMInstructions =
 ///     documentation on Swift Package Manager manifest file, Package.swift.
 class SwiftPackageManager {
   const SwiftPackageManager({
-    required FileSystem fileSystem,
-    required TemplateRenderer templateRenderer,
-    required ProcessUtils processUtils,
-    required Config config,
-    Logger? logger,
-  }) : _fileSystem = fileSystem,
-       _templateRenderer = templateRenderer,
-       _processUtils = processUtils,
-       _config = config,
-       _logger = logger;
+    required this._fileSystem,
+    required this._templateRenderer,
+    required this._processUtils,
+    required this._config,
+    this._logger,
+  });
 
   final FileSystem _fileSystem;
   final TemplateRenderer _templateRenderer;

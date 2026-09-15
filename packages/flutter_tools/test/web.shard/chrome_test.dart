@@ -631,6 +631,38 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
   });
 
   testWithoutContext(
+    'can override default headless window-size (1024x1024) via webBrowserFlags',
+    () async {
+      // When webBrowserFlags specifies a --window-size flag, ChromiumLauncher should
+      // pass that flag without appending the default '--window-size=1024,1024' flag.
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'example_chrome',
+            '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+            '--remote-debugging-port=12345',
+            ...kChromeArgs,
+            '--no-sandbox',
+            '--headless',
+            '--window-size=800,600',
+            'example_url',
+          ],
+          stderr: kDevtoolsStderr,
+        ),
+      );
+
+      await expectReturnsNormallyLater(
+        chromeLauncher.launch(
+          'example_url',
+          skipCheck: true,
+          headless: true,
+          webBrowserFlags: <String>['--window-size=800,600'],
+        ),
+      );
+    },
+  );
+
+  testWithoutContext(
     'can seed chrome temp directory with existing session data, excluding Cache folder',
     () async {
       final exitCompleter = Completer<void>.sync();
