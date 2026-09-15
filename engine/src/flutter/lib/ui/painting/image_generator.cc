@@ -19,6 +19,13 @@ ImageGenerator::~ImageGenerator() = default;
 sk_sp<SkImage> ImageGenerator::GetImage() {
   SkImageInfo info = GetInfo();
 
+  if (info.computeMinByteSize() > kMaxDecodedImageBytes) {
+    FML_DLOG(ERROR) << "Decoded image of size " << info.computeMinByteSize()
+                    << "B exceeds the maximum supported decoded image size of "
+                    << kMaxDecodedImageBytes << "B.";
+    return nullptr;
+  }
+
   SkBitmap bitmap;
   if (!bitmap.tryAllocPixels(info)) {
     FML_DLOG(ERROR) << "Failed to allocate memory for bitmap of size "
@@ -194,6 +201,15 @@ std::unique_ptr<ImageGenerator> BuiltinSkiaCodecImageGenerator::MakeFromData(
   if (!codec) {
     return nullptr;
   }
+
+  SkImageInfo info = getInfoIncludingExif(codec.get());
+  if (info.computeMinByteSize() > ImageGenerator::kMaxDecodedImageBytes) {
+    FML_DLOG(ERROR) << "Decoded image of size " << info.computeMinByteSize()
+                    << "B exceeds the maximum supported decoded image size of "
+                    << ImageGenerator::kMaxDecodedImageBytes << "B.";
+    return nullptr;
+  }
+
   return std::make_unique<BuiltinSkiaCodecImageGenerator>(std::move(codec));
 }
 
