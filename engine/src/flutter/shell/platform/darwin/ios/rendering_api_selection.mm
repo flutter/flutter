@@ -38,7 +38,6 @@ Class GetCoreAnimationLayerClass() {
          "does not expose a Metal device; enabling GPU passthrough may fix this.";
 
   if (@available(iOS METAL_IOS_VERSION_BASELINE, *)) {
-    // FlutterMetalLayer reports itself as a CAMetalLayer via -isKindOfClass:.
     if ([FlutterMetalLayer enabled]) {
       return [FlutterMetalLayer class];
     }
