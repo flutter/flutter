@@ -340,6 +340,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 @property(nonatomic, strong) FlutterVSyncClient* keyboardAnimationVSyncClient;
 @property(nonatomic, strong) FlutterVSyncClient* touchRateCorrectionVSyncClient;
 @property(nonatomic, assign) BOOL awokenFromNib;
+@property(nonatomic, strong) UIScrollView* scrollView;
 
 - (void)createTouchRateCorrectionVSyncClientIfNeeded;
 - (void)surfaceUpdated:(BOOL)appeared;
@@ -1475,6 +1476,21 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [viewController updateViewportMetricsIfNeeded];
 
   OCMVerifyAll(mockEngine);
+}
+
+- (void)testLoadViewHidesScrollEdgeEffectsOnScrollToTopHelper {
+#if defined(__IPHONE_26_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_26_0
+  if (@available(iOS 26.0, *)) {
+    FlutterEngine* engine = [[FlutterEngine alloc] init];
+    [engine runWithEntrypoint:nil];
+    FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                  nibName:nil
+                                                                                   bundle:nil];
+    [viewController loadView];
+    XCTAssertTrue(viewController.scrollView.topEdgeEffect.hidden);
+    XCTAssertTrue(viewController.scrollView.bottomEdgeEffect.hidden);
+  }
+#endif
 }
 
 - (void)testViewDidLoadDoesntInvokeEngineWhenNotTheViewController {
