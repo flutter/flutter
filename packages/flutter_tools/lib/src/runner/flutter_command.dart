@@ -305,7 +305,7 @@ abstract class FlutterCommand extends Command<void> {
 
   DeprecationBehavior get deprecationBehavior => DeprecationBehavior.none;
 
-  bool get shouldRunPub => _usesPubOption && boolArg('pub');
+  bool get shouldRunPub => _usesPubOption && getValue(CommonOptions.pub);
 
   bool get outputMachineFormat =>
       argParser.options.containsKey(FlutterGlobalOptions.kMachineFlag) &&
@@ -387,14 +387,15 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   String get targetFile {
-    if (argResults?.wasParsed('target') ?? false) {
-      return stringArg('target')!;
+    if (wasParsed(CommonOptions.target)) {
+      return getValue(CommonOptions.target);
     }
     final List<String>? rest = argResults?.rest;
     if (rest != null && rest.isNotEmpty) {
       return rest.first;
     }
-    return bundle.defaultMainPath;
+    final FileSystem fileSystem = toolContext?.fs ?? globals.fs;
+    return fileSystem.path.join('lib', 'main.dart');
   }
 
   /// Indicates if the current command running has a terminal attached.
@@ -602,16 +603,10 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addPublishPort({bool enabledByDefault = true, bool verboseHelp = false}) {
-    final FlagOptionDescriptor descriptor = enabledByDefault
-        ? DebuggingOptionDescriptors.publishPort
-        : const FlagOptionDescriptor(
-            name: 'publish-port',
-            verboseOnly: true,
-            help:
-                'Publish the VM service port over mDNS. Disable to prevent the '
-                'local network permission app dialog in debug and profile build modes (iOS devices only).',
-          );
-    argParser.addDescriptor(descriptor, verboseHelp: verboseHelp);
+    argParser.addDescriptor(
+      DebuggingOptionDescriptors.publishPortOption(enabledByDefault: enabledByDefault),
+      verboseHelp: verboseHelp,
+    );
   }
 
   Future<bool> get disablePortPublication async =>

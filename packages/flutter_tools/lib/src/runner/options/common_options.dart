@@ -436,6 +436,14 @@ class AndroidBuildOptionsBundle extends OptionBundle {
 class AppleBuildOptionsBundle extends OptionBundle {
   const AppleBuildOptionsBundle();
 
+  static const configOnly = FlagOptionDescriptor(
+    name: 'config-only',
+    help:
+        'Update the project configuration without performing a build. '
+        'This can be used in CI/CD process that create an archive to avoid '
+        'performing duplicate work.',
+  );
+
   @override
   List<OptionDescriptor<Object?>> get descriptors => const [
     BuildInfoOptions.flavor,
@@ -457,6 +465,34 @@ class DarwinCodeSignXCFrameworksOptionsBundle extends OptionBundle {
   List<OptionDescriptor<Object?>> get descriptors => const [
     BuildInfoOptions.codesign,
     BuildInfoOptions.codesignIdentity,
+  ];
+}
+
+/// A bundle encapsulating shared options for Darwin Add-to-App builds (`build ios-framework`, `build macos-framework`, and `build swift-package`).
+class DarwinAddToAppOptionsBundle extends OptionBundle {
+  const DarwinAddToAppOptionsBundle();
+
+  @override
+  void onRegister(FlutterCommand command) {
+    command.enableUsesTargetOption();
+    command.enableUsesPubOption();
+  }
+
+  @override
+  List<OptionBundle> get subBundles => const [
+    DartCompileOptionsBundle(),
+    DarwinCodeSignXCFrameworksOptionsBundle(),
+  ];
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const [
+    CommonOptions.treeShakeIcons,
+    CommonOptions.target,
+    CommonOptions.pub,
+    BuildInfoOptions.splitDebugInfo,
+    BuildInfoOptions.obfuscate,
+    BuildInfoOptions.extraFrontEndOptions,
+    BuildInfoOptions.extraGenSnapshotOptions,
   ];
 }
 
@@ -553,6 +589,19 @@ abstract final class DebuggingOptionDescriptors {
         'Publish the VM service port over mDNS. Disable to prevent the '
         'local network permission app dialog in debug and profile build modes (iOS devices only).',
   );
+
+  static FlagOptionDescriptor publishPortOption({bool enabledByDefault = true}) {
+    if (enabledByDefault) {
+      return publishPort;
+    }
+    return const FlagOptionDescriptor(
+      name: 'publish-port',
+      verboseOnly: true,
+      help:
+          'Publish the VM service port over mDNS. Disable to prevent the '
+          'local network permission app dialog in debug and profile build modes (iOS devices only).',
+    );
+  }
 
   static const disableDds = FlagOptionDescriptor(
     name: 'disable-dds',

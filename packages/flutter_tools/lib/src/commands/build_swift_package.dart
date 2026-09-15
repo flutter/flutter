@@ -75,21 +75,9 @@ class BuildSwiftPackage extends BuildSubCommand {
     required this._codesign,
     required bool verboseHelp,
   }) : super(verboseHelp: verboseHelp) {
-    enableUsesTargetOption();
-    enableUsesPubOption();
-    registerOptionBundles(const <OptionBundle>[
-      DartCompileOptionsBundle(),
-      DarwinCodeSignXCFrameworksOptionsBundle(),
-    ]);
+    registerOptionBundle(const DarwinAddToAppOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       BuildInfoOptions.flavor,
-      CommonOptions.treeShakeIcons,
-      CommonOptions.target,
-      CommonOptions.pub,
-      BuildInfoOptions.splitDebugInfo,
-      BuildInfoOptions.obfuscate,
-      BuildInfoOptions.extraFrontEndOptions,
-      BuildInfoOptions.extraGenSnapshotOptions,
       _output,
       _platformOption,
       _buildMode,

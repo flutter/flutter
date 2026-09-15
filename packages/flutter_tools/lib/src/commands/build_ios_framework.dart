@@ -26,6 +26,7 @@ import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'build.dart';
@@ -40,20 +41,8 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required bool verboseHelp,
   }) : _toolContext = toolContext,
        super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
-    enableUsesTargetOption();
-    enableUsesPubOption();
-    registerOptionBundles(const <OptionBundle>[
-      DartCompileOptionsBundle(),
-      DarwinCodeSignXCFrameworksOptionsBundle(),
-    ]);
+    registerOptionBundle(const DarwinAddToAppOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
-      CommonOptions.treeShakeIcons,
-      CommonOptions.target,
-      CommonOptions.pub,
-      BuildInfoOptions.splitDebugInfo,
-      BuildInfoOptions.obfuscate,
-      BuildInfoOptions.extraFrontEndOptions,
-      BuildInfoOptions.extraGenSnapshotOptions,
       debugMode,
       profileMode,
       releaseMode,
@@ -153,17 +142,18 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     ];
   }
 
-  @override
-  String get targetFile {
-    if (wasParsed(CommonOptions.target)) {
-      return getValue(CommonOptions.target);
-    }
-    final List<String>? rest = argResults?.rest;
-    if (rest != null && rest.isNotEmpty) {
-      return rest.first;
-    }
-    return _toolContext.fs.path.join('lib', 'main.dart');
-  }
+  @protected
+  Future<String?> getCodesignIdentity({
+    required BuildInfo buildInfo,
+    required Directory outputDirectory,
+    required XcodeBasedProject xcodeProject,
+  }) => codesign.getCodesignIdentity(
+    buildInfo: buildInfo,
+    codesignEnabled: getValue(BuildInfoOptions.codesign),
+    codesignIdentityOption: getValue(BuildInfoOptions.codesignIdentity),
+    identityFile: outputDirectory.childFile('.codesign_identity'),
+    xcodeProject: xcodeProject,
+  );
 
   @override
   bool get supported => platform.isMacOS;
@@ -556,11 +546,9 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     );
     final List<BuildInfo> buildInfos = await getBuildInfos();
 
-    final String? codesignIdentity = await codesign.getCodesignIdentity(
+    final String? codesignIdentity = await getCodesignIdentity(
       buildInfo: buildInfos.first,
-      codesignEnabled: getValue(BuildInfoOptions.codesign),
-      codesignIdentityOption: getValue(BuildInfoOptions.codesignIdentity),
-      identityFile: outputDirectory.childFile('.codesign_identity'),
+      outputDirectory: outputDirectory,
       xcodeProject: project.ios,
     );
 

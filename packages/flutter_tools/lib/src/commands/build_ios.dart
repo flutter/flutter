@@ -48,18 +48,10 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   }) {
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       DebuggingOptionDescriptors.publishPort,
-      _configOnly,
+      AppleBuildOptionsBundle.configOnly,
       _simulator,
     ], verboseHelp: verboseHelp);
   }
-
-  static const _configOnly = FlagOptionDescriptor(
-    name: 'config-only',
-    help:
-        'Update the project configuration without performing a build. '
-        'This can be used in CI/CD process that create an archive to avoid '
-        'performing duplicate work.',
-  );
 
   static const _simulator = FlagOptionDescriptor(
     name: 'simulator',
@@ -82,7 +74,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
       getValue(_simulator) ? EnvironmentType.simulator : EnvironmentType.physical;
 
   @override
-  bool get configOnly => getValue(_configOnly);
+  bool get configOnly => getValue(AppleBuildOptionsBundle.configOnly);
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) =>

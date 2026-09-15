@@ -701,6 +701,41 @@ void main() {
         }
       },
     );
+
+    testUsingContext(
+      'DarwinAddToAppOptionsBundle registers shared Darwin Add-to-App options and subBundles',
+      () {
+        final command = _FakeCommand(
+          name: 'ios-framework',
+          description: 'Build iOS Framework',
+          bundles: const <OptionBundle>[DarwinAddToAppOptionsBundle()],
+        );
+        createTestCommandRunner(command);
+
+        const allOptions = <OptionDescriptor<Object?>>[
+          CommonOptions.treeShakeIcons,
+          CommonOptions.target,
+          CommonOptions.pub,
+          BuildInfoOptions.splitDebugInfo,
+          BuildInfoOptions.obfuscate,
+          BuildInfoOptions.extraFrontEndOptions,
+          BuildInfoOptions.extraGenSnapshotOptions,
+          CommonOptions.dartDefines,
+          CommonOptions.dartDefineFromFile,
+          CommonOptions.enableExperiment,
+          BuildInfoOptions.codesign,
+          BuildInfoOptions.codesignIdentity,
+        ];
+
+        for (final descriptor in allOptions) {
+          expect(
+            command.argParser.options.containsKey(descriptor.name),
+            isTrue,
+            reason: 'Option ${descriptor.name} should be registered',
+          );
+        }
+      },
+    );
   });
 }
 

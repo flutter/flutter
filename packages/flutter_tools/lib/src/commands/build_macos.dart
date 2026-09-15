@@ -38,17 +38,9 @@ class BuildMacosCommand extends BuildSubCommand {
     ]);
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       BuildInfoOptions.trackWidgetCreation,
-      _configOnly,
+      AppleBuildOptionsBundle.configOnly,
     ], verboseHelp: verboseHelp);
   }
-
-  static const _configOnly = FlagOptionDescriptor(
-    name: 'config-only',
-    help:
-        'Update the project configuration without performing a build. '
-        'This can be used in CI/CD process that create an archive to avoid '
-        'performing duplicate work.',
-  );
 
   /// The build system used to execute targets.
   final BuildSystem buildSystem;
@@ -77,7 +69,7 @@ class BuildMacosCommand extends BuildSubCommand {
   @override
   bool get supported => toolContext.platform.isMacOS;
 
-  bool get configOnly => getValue(_configOnly);
+  bool get configOnly => getValue(AppleBuildOptionsBundle.configOnly);
 
   @override
   Future<FlutterCommandResult> runCommand() async {

@@ -86,11 +86,9 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
 
     final List<BuildInfo> buildInfos = await getBuildInfos();
 
-    final String? codesignIdentity = await codesign.getCodesignIdentity(
+    final String? codesignIdentity = await getCodesignIdentity(
       buildInfo: buildInfos.first,
-      codesignEnabled: getValue(BuildInfoOptions.codesign),
-      codesignIdentityOption: getValue(BuildInfoOptions.codesignIdentity),
-      identityFile: outputDirectory.childFile('.codesign_identity'),
+      outputDirectory: outputDirectory,
       xcodeProject: project.macos,
     );
 
