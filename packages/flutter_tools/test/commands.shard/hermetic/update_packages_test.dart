@@ -277,7 +277,6 @@ void main() {
       hookUserDefinesIntegrationTest.childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync(kNonWorkspacePubspecYaml);
-      Cache.flutterRoot = flutterSdk.absolute.path;
       pub = _FakePub(flutterTools: flutterTools);
       processManager = FakeProcessManager.empty();
     });
@@ -299,7 +298,7 @@ void main() {
         Pub: () => pub,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
-        Cache: () => Cache.test(processManager: processManager),
+        Cache: () => Cache.test(rootOverride: flutterSdk, processManager: processManager),
       },
     );
 
@@ -349,7 +348,7 @@ void main() {
         Pub: () => pub,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
-        Cache: () => Cache.test(processManager: processManager),
+        Cache: () => Cache.test(rootOverride: flutterSdk, processManager: processManager),
       },
     );
 
@@ -375,7 +374,7 @@ void main() {
         Pub: () => pub,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
-        Cache: () => Cache.test(processManager: processManager),
+        Cache: () => Cache.test(rootOverride: flutterSdk, processManager: processManager),
         Logger: () => logger,
       },
     );
@@ -402,7 +401,7 @@ void main() {
         Pub: () => pub,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
-        Cache: () => Cache.test(processManager: processManager),
+        Cache: () => Cache.test(rootOverride: flutterSdk, processManager: processManager),
         Logger: () => logger,
       },
     );
@@ -432,7 +431,7 @@ void main() {
         Pub: () => pub,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
-        Cache: () => Cache.test(processManager: processManager),
+        Cache: () => Cache.test(rootOverride: flutterSdk, processManager: processManager),
         Logger: () => logger,
       },
     );
@@ -450,7 +449,7 @@ void main() {
         Pub: () => pub,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
-        Cache: () => Cache.test(processManager: processManager),
+        Cache: () => Cache.test(rootOverride: flutterSdk, processManager: processManager),
         Logger: () => logger,
       },
     );
@@ -599,7 +598,7 @@ dependencies:
         Pub: () => pub,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
-        Cache: () => Cache.test(processManager: processManager),
+        Cache: () => Cache.test(rootOverride: flutterSdk, processManager: processManager),
         Logger: () => logger,
       },
     );

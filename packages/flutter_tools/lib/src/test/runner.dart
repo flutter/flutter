@@ -9,7 +9,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -237,7 +236,7 @@ interface class FlutterTestRunner {
     // The flutter_tools package_config.json is guaranteed to include
     // package:ffi and package:test_core.
     final File flutterToolsPackageConfigFile = globals.fs
-        .directory(globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'))
+        .directory(globals.fs.path.join(globals.cache.flutterRoot, 'packages', 'flutter_tools'))
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
     final PackageConfig flutterToolsPackageConfig = PackageConfig.parseBytes(

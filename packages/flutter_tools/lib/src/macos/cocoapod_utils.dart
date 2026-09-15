@@ -4,7 +4,6 @@
 
 import '../base/fingerprint.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -64,7 +63,6 @@ Future<void> processPodsIfNeeded(
       templateRenderer: globals.templateRenderer,
       processUtils: globals.processUtils,
       config: globals.config,
-      logger: globals.logger,
     );
     final FlutterDarwinPlatform platform = xcodeProject is IosProject
         ? FlutterDarwinPlatform.ios
@@ -87,7 +85,13 @@ Future<void> processPodsIfNeeded(
       xcodeProject.podfile.path,
       if (xcodeProject.flutterPluginSwiftPackageManifest.existsSync())
         xcodeProject.flutterPluginSwiftPackageManifest.path,
-      globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'bin', 'podhelper.rb'),
+      globals.fs.path.join(
+        globals.cache.flutterRoot,
+        'packages',
+        'flutter_tools',
+        'bin',
+        'podhelper.rb',
+      ),
     ],
     fileSystem: globals.fs,
     logger: globals.logger,

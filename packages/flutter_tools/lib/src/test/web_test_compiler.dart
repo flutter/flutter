@@ -26,13 +26,15 @@ import 'test_config.dart';
 /// A web compiler for the test runner.
 class WebTestCompiler {
   WebTestCompiler({
+    required this._artifacts,
+    required this._config,
     required this._fileSystem,
     required this._logger,
-    required this._artifacts,
     required this._platform,
     required this._processManager,
-    required this._config,
     required this._shutdownHooks,
+    this._cache,
+    this._flutterRoot,
   });
 
   final Logger _logger;
@@ -42,6 +44,10 @@ class WebTestCompiler {
   final ProcessManager _processManager;
   final ShutdownHooks _shutdownHooks;
   final Config _config;
+  final Cache? _cache;
+  final String? _flutterRoot;
+
+  String get _flutterRootPath => _flutterRoot ?? _cache?.flutterRoot ?? '';
 
   Future<File> _generateTestEntrypoint({
     required List<String> testFiles,
@@ -111,7 +117,7 @@ class WebTestCompiler {
     required BuildInfo buildInfo,
     required WebRendererMode webRenderer,
   }) async {
-    final LanguageVersion languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
+    final LanguageVersion languageVersion = currentLanguageVersion(_fileSystem, _flutterRootPath);
 
     final Directory outputDirectory = _fileSystem.directory(testOutputDir)
       ..createSync(recursive: true);
@@ -182,7 +188,7 @@ class WebTestCompiler {
       testFiles: testFiles,
       projectDirectory: projectDirectory,
       outputDirectory: outputDirectory,
-      languageVersion: currentLanguageVersion(_fileSystem, Cache.flutterRoot!),
+      languageVersion: currentLanguageVersion(_fileSystem, _flutterRootPath),
     );
 
     final String platformBinariesPath = _artifacts

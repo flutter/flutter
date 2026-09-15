@@ -13,7 +13,6 @@ import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
 import '../convert.dart';
@@ -278,7 +277,7 @@ void _writeGeneratedFlutterConfig(
   String? target,
 ) {
   final environment = <String, String>{
-    'FLUTTER_ROOT': Cache.flutterRoot!,
+    'FLUTTER_ROOT': globals.cache.flutterRoot,
     'FLUTTER_EPHEMERAL_DIR': windowsProject.ephemeralDirectory.path,
     'PROJECT_DIR': windowsProject.parent.directory.path,
     'FLUTTER_TARGET': ?target,
@@ -293,7 +292,7 @@ void _writeGeneratedFlutterConfig(
     environment['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
   }
   writeGeneratedCmakeConfig(
-    Cache.flutterRoot!,
+    globals.cache.flutterRoot,
     windowsProject,
     buildInfo,
     environment,

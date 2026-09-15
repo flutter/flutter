@@ -27,7 +27,6 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = flutterRoot;
   });
 
   setUp(() {
@@ -38,6 +37,7 @@ void main() {
 
   CommandRunner<void> createRunner({FlutterVersion? flutterVersion}) {
     final toolContext = FakeToolContext(
+      cache: FakeCache(fileSystem: fileSystem, flutterRoot: flutterRoot),
       flutterVersion: flutterVersion,
       fs: fileSystem,
       logger: logger,
@@ -191,7 +191,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
     expect(
       logger.statusText,
-      'Upgrading Flutter to 3.1.0 from 3.0.0 in ${Cache.flutterRoot}...\n'
+      'Upgrading Flutter to 3.1.0 from 3.0.0 in $flutterRoot...\n'
       '\n'
       'Upgrading engine...\n'
       '\n'
@@ -289,7 +289,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
     expect(
       logger.statusText,
-      'Upgrading Flutter to 3.1.0 from 3.0.0 in ${Cache.flutterRoot}...\n'
+      'Upgrading Flutter to 3.1.0 from 3.0.0 in $flutterRoot...\n'
       '\n'
       'Upgrading engine...\n'
       '\n'
