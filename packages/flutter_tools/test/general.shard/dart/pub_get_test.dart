@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -21,10 +20,6 @@ import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 
 void main() {
-  setUpAll(() {
-    Cache.flutterRoot = '';
-  });
-
   testWithoutContext('Throws a tool exit if pub cannot be run', () async {
     final processManager = FakeProcessManager.empty();
     final logger = BufferLogger.test();

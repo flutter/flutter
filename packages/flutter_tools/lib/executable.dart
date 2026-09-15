@@ -11,13 +11,10 @@ import 'src/android/android_workflow.dart' as android_workflow;
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
-import 'src/base/platform.dart';
 import 'src/base/template.dart';
 import 'src/base/terminal.dart';
-import 'src/base/user_messages.dart';
 import 'src/build_system/build_targets.dart';
 import 'src/build_system/targets/hook_runner_native.dart' show FlutterHookRunnerNative;
-import 'src/cache.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
@@ -101,15 +98,6 @@ Future<void> main(List<String> args) async {
   final widgetPreviews = commandName == WidgetPreviewCommand.kWidgetPreview;
   final bool runMachine = args.contains('--machine');
 
-  // Cache.flutterRoot must be set early because other features use it (e.g.
-  // enginePath's initializer uses it). This can only work with the real
-  // instances of the platform or filesystem, so just use those.
-  Cache.flutterRoot = Cache.defaultFlutterRoot(
-    platform: const LocalPlatform(),
-    fileSystem: globals.localFileSystem,
-    userMessages: UserMessages(),
-  );
-
   await runner.run(
     args,
     (ToolDependencies toolDependencies) {
@@ -124,6 +112,7 @@ Future<void> main(List<String> args) async {
         fileSystem: toolDependencies.toolContext.fs,
         logger: toolDependencies.toolContext.logger,
         featureFlags: featureFlags,
+        cache: toolDependencies.toolContext.cache,
       );
       return generateCommands(
         toolDependencies: toolDependencies,
@@ -179,7 +168,7 @@ Future<void> main(List<String> args) async {
         );
         // runner.run calls "terminal.applyFeatureFlags()"
       },
-      PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
+      PreRunValidator: () => PreRunValidator(fileSystem: globals.fs, cache: globals.cache),
       TestCompilerNativeAssetsBuilder: () => const TestCompilerNativeAssetsBuilderImpl(),
     },
     shutdownHooks: globals.shutdownHooks,
