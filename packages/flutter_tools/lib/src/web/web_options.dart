@@ -79,6 +79,26 @@ abstract final class WebOptions {
         'application.',
   );
 
+  // Hidden while content hashing is incomplete: only compiled entrypoints are
+  // hashed today. Un-hide once static assets (flutter/flutter#191915) and the
+  // service worker precache manifest (flutter/flutter#191916) are also hashed,
+  // so that enabling the flag covers everything a deploy caches.
+  static const webContentHash = FlagOptionDescriptor(
+    name: 'web-content-hash',
+    hide: true,
+    help:
+        'Include a content hash in the filenames of the compiled web '
+        'entrypoints (for example, "main.dart.<hash>.js") so that browsers '
+        'fetch new versions after a deploy instead of serving stale cached '
+        'files. The web server must still serve "index.html" and '
+        '"flutter_bootstrap.js" with revalidation (for example, '
+        '"Cache-Control: no-cache") for a new deploy to be picked up. '
+        'Not supported with deferred imports. Custom "index.html" files '
+        'that reference "main.dart.js" directly, and the deprecated '
+        '"FlutterLoader.loadEntrypoint" JavaScript API, are incompatible '
+        'with this flag.',
+  );
+
   static const csp = FlagOptionDescriptor(
     name: 'csp',
     negatable: false,
@@ -314,6 +334,7 @@ class WebCoreOptionsBundle extends OptionBundle {
     WebOptions.webDefineFromFile,
     WebOptions.optimizationLevel,
     WebOptions.sourceMaps,
+    WebOptions.webContentHash,
   ];
 }
 
