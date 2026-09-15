@@ -21,12 +21,12 @@ class CoverageCollector extends TestWatcher {
   CoverageCollector({
     required this.fileSystem,
     required this.logger,
+    required this._os,
     required this.packagesPath,
     required this.platform,
     required this.processUtils,
     this.branchCoverage = false,
     this.libraryNames,
-    this.os,
     this.resolver,
     this.testTimeRecorder,
     this.verbose = true,
@@ -34,9 +34,9 @@ class CoverageCollector extends TestWatcher {
 
   final FileSystem fileSystem;
   final Logger logger;
+  final OperatingSystemUtils _os;
   final Platform platform;
   final ProcessUtils processUtils;
-  final OperatingSystemUtils? os;
 
   /// True when log messages should be emitted.
   final bool verbose;
@@ -262,7 +262,7 @@ class CoverageCollector extends TestWatcher {
         return false;
       }
 
-      if (os?.which('lcov') == null) {
+      if (_os.which('lcov') == null) {
         var installMessage = 'Please install lcov.';
         if (platform.isLinux) {
           installMessage = 'Consider running "sudo apt-get install lcov".';

@@ -18,6 +18,7 @@ import 'package:vm_service/vm_service.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_vm_services.dart';
+import '../src/fakes.dart';
 import '../src/logging_logger.dart';
 
 void main() {
@@ -371,6 +372,7 @@ void main() {
       final collector = CoverageCollector(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
         packagesPath: packagesPath,
         platform: const LocalPlatform(),
         processUtils: ProcessUtils(
@@ -459,6 +461,7 @@ void main() {
       final collector = CoverageCollector(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
         packagesPath: packagesPath,
         platform: const LocalPlatform(),
         processUtils: ProcessUtils(
@@ -508,6 +511,7 @@ void main() {
       var collector = CoverageCollector(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
         packagesPath: packagesPath,
         platform: const LocalPlatform(),
         processUtils: ProcessUtils(
@@ -532,6 +536,7 @@ void main() {
       collector = CoverageCollector(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
         packagesPath: packagesPath,
         platform: const LocalPlatform(),
         processUtils: ProcessUtils(
@@ -575,6 +580,7 @@ void main() {
         final collector = CoverageCollector(
           fileSystem: fileSystem,
           logger: logger,
+          os: FakeOperatingSystemUtils(),
           packagesPath: packagesPath,
           platform: const LocalPlatform(),
           processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.any()),
