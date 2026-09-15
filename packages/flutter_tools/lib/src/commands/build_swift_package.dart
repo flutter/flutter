@@ -33,9 +33,7 @@ import '../macos/swift_packages.dart';
 import '../macos/xcode.dart';
 import '../plugins.dart';
 import '../project.dart';
-import '../runner/flutter_command.dart'
-    show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
-import '../runner/flutter_command_runner.dart';
+import '../runner/flutter_command.dart';
 import '../template.dart';
 import '../version.dart';
 import 'build.dart';
@@ -77,37 +75,53 @@ class BuildSwiftPackage extends BuildSubCommand {
     required this._codesign,
     required bool verboseHelp,
   }) : super(verboseHelp: verboseHelp) {
-    usesFlavorOption();
-    addTreeShakeIconsFlag();
-    usesTargetOption();
-    usesPubOption();
-    usesDartDefineOption();
-    addSplitDebugInfoOption();
-    addDartObfuscationOption();
-    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
-    addEnableExperimentation(hide: !verboseHelp);
-    usesDarwinCodeSignXCFrameworksOption();
-    argParser
-      ..addOption(
-        'output',
-        abbr: 'o',
-        valueHelp: 'path/to/directory/',
-        help: 'Directory where the Swift package will be written.',
-      )
-      ..addOption(
-        'platform',
-        allowed: _kSupportedPlatforms,
-        defaultsTo: 'ios',
-        help: 'Target platform for the build.',
-      )
-      ..addMultiOption(
-        'build-mode',
-        allowed: availableBuildModes.map((e) => e.cliName).toList(),
-        defaultsTo: availableBuildModes.map((e) => e.cliName).toList(),
-        help: 'Build modes to include.',
-      )
-      ..addFlag('static', help: 'Build CocoaPods plugins as static frameworks.');
+    enableUsesTargetOption();
+    enableUsesPubOption();
+    registerOptionBundles(const <OptionBundle>[
+      DartCompileOptionsBundle(),
+      DarwinCodeSignXCFrameworksOptionsBundle(),
+    ]);
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      BuildInfoOptions.flavor,
+      CommonOptions.treeShakeIcons,
+      CommonOptions.target,
+      CommonOptions.pub,
+      BuildInfoOptions.splitDebugInfo,
+      BuildInfoOptions.obfuscate,
+      BuildInfoOptions.extraFrontEndOptions,
+      BuildInfoOptions.extraGenSnapshotOptions,
+      _output,
+      _platformOption,
+      _buildMode,
+      _static,
+    ], verboseHelp: verboseHelp);
   }
+
+  static const _output = StringOptionDescriptor(
+    name: 'output',
+    abbr: 'o',
+    valueHelp: 'path/to/directory/',
+    help: 'Directory where the Swift package will be written.',
+  );
+
+  static const _platformOption = DefaultedStringOptionDescriptor(
+    name: 'platform',
+    defaultsTo: 'ios',
+    allowed: _kSupportedPlatforms,
+    help: 'Target platform for the build.',
+  );
+
+  static const _buildMode = MultiOptionDescriptor(
+    name: 'build-mode',
+    defaultsTo: <String>['debug', 'profile', 'release'],
+    allowed: <String>['debug', 'profile', 'release'],
+    help: 'Build modes to include.',
+  );
+
+  static const _static = FlagOptionDescriptor(
+    name: 'static',
+    help: 'Build CocoaPods plugins as static frameworks.',
+  );
 
   @override
   final name = 'swift-package';
@@ -137,12 +151,10 @@ class BuildSwiftPackage extends BuildSubCommand {
   bool get supported => _platform.isMacOS;
 
   FlutterDarwinPlatform get _targetPlatform {
-    final String? platformString = stringArg('platform');
-    if (platformString != null) {
-      final FlutterDarwinPlatform? darwinPlatform = FlutterDarwinPlatform.fromName(platformString);
-      if (darwinPlatform != null) {
-        return darwinPlatform;
-      }
+    final String platformString = getValue(_platformOption);
+    final FlutterDarwinPlatform? darwinPlatform = FlutterDarwinPlatform.fromName(platformString);
+    if (darwinPlatform != null) {
+      return darwinPlatform;
     }
     throwToolExit(
       'The $platformString platform is being targeted, but is not supported for this command. '
@@ -161,7 +173,7 @@ class BuildSwiftPackage extends BuildSubCommand {
   }
 
   Future<List<BuildInfo>> _getBuildInfos() async {
-    final List<String> buildModes = stringsArg('build-mode');
+    final List<String> buildModes = getValue(_buildMode);
     return <BuildInfo>[
       for (final mode in availableBuildModes)
         if (buildModes.contains(mode.cliName)) await getBuildInfo(forcedBuildMode: mode),
@@ -263,13 +275,13 @@ class BuildSwiftPackage extends BuildSubCommand {
   /// Test are only generated with `--ci` is passed in. This is only expected to be used
   /// by the Flutter CI. Tests are not needed by regular users of the command.
   bool get generateTests {
-    return boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true);
+    return usingCISystem;
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     final String outputArgument =
-        stringArg('output') ??
+        getValue(_output) ??
         _fileSystem.path.join(
           _fileSystem.currentDirectory.path,
           'build',
@@ -309,8 +321,8 @@ class BuildSwiftPackage extends BuildSubCommand {
     final File codesignIdentityFile = cacheDirectory.childFile(_kCodesignIdentityFile);
     final String? codesignIdentity = await _codesign.getCodesignIdentity(
       buildInfo: buildInfos.first,
-      codesignEnabled: boolArg(FlutterOptions.kCodesign),
-      codesignIdentityOption: stringArg(FlutterOptions.kCodesignIdentity),
+      codesignEnabled: getValue(BuildInfoOptions.codesign),
+      codesignIdentityOption: getValue(BuildInfoOptions.codesignIdentity),
       identityFile: codesignIdentityFile,
       xcodeProject: _xcodeProject,
     );
@@ -382,7 +394,7 @@ class BuildSwiftPackage extends BuildSubCommand {
 
     await cocoapodDependencies.generateArtifacts(
       buildInfo: buildInfo,
-      buildStatic: boolArg('static'),
+      buildStatic: getValue(_static),
       cacheDirectory: cacheDirectory,
       xcframeworkOutput: xcframeworkOutput,
       codesignIdentity: codesignIdentity,

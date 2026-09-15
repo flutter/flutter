@@ -46,22 +46,27 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
     required super.toolContext,
     required super.verboseHelp,
   }) {
-    addPublishPort(verboseHelp: verboseHelp);
-    argParser
-      ..addFlag(
-        'config-only',
-        help:
-            'Update the project configuration without performing a build. '
-            'This can be used in CI/CD process that create an archive to avoid '
-            'performing duplicate work.',
-      )
-      ..addFlag(
-        'simulator',
-        help:
-            'Build for the iOS simulator instead of the device. This changes '
-            'the default build mode to debug if otherwise unspecified.',
-      );
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      DebuggingOptionDescriptors.publishPort,
+      _configOnly,
+      _simulator,
+    ], verboseHelp: verboseHelp);
   }
+
+  static const _configOnly = FlagOptionDescriptor(
+    name: 'config-only',
+    help:
+        'Update the project configuration without performing a build. '
+        'This can be used in CI/CD process that create an archive to avoid '
+        'performing duplicate work.',
+  );
+
+  static const _simulator = FlagOptionDescriptor(
+    name: 'simulator',
+    help:
+        'Build for the iOS simulator instead of the device. This changes '
+        'the default build mode to debug if otherwise unspecified.',
+  );
 
   @override
   final name = 'ios';
@@ -74,10 +79,10 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 
   @override
   EnvironmentType get environmentType =>
-      boolArg('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
+      getValue(_simulator) ? EnvironmentType.simulator : EnvironmentType.physical;
 
   @override
-  bool get configOnly => boolArg('config-only');
+  bool get configOnly => getValue(_configOnly);
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) =>
@@ -126,27 +131,30 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     required super.toolContext,
     required super.verboseHelp,
   }) {
-    argParser.addOption(
-      'export-method',
-      defaultsTo: 'app-store',
-      allowed: <String>['app-store', 'ad-hoc', 'development', 'enterprise'],
-      help: 'Specify how the IPA will be distributed.',
-      allowedHelp: <String, String>{
-        'app-store': 'Upload to the App Store.',
-        'ad-hoc':
-            'Test on designated devices that do not need to be registered with the Apple developer account. '
-            'Requires a distribution certificate.',
-        'development':
-            'Test only on development devices registered with the Apple developer account.',
-        'enterprise': 'Distribute an app registered with the Apple Developer Enterprise Program.',
-      },
-    );
-    argParser.addOption(
-      'export-options-plist',
-      valueHelp: 'ExportOptions.plist',
-      help: 'Export an IPA with these options. See "xcodebuild -h" for available exportOptionsPlist keys.',
-    );
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[_exportMethod, _exportOptionsPlist]);
   }
+
+  static const _exportMethod = DefaultedStringOptionDescriptor(
+    name: 'export-method',
+    defaultsTo: 'app-store',
+    allowed: <String>['app-store', 'ad-hoc', 'development', 'enterprise'],
+    help: 'Specify how the IPA will be distributed.',
+    allowedHelp: <String, String>{
+      'app-store': 'Upload to the App Store.',
+      'ad-hoc':
+          'Test on designated devices that do not need to be registered with the Apple developer account. '
+          'Requires a distribution certificate.',
+      'development':
+          'Test only on development devices registered with the Apple developer account.',
+      'enterprise': 'Distribute an app registered with the Apple Developer Enterprise Program.',
+    },
+  );
+
+  static const _exportOptionsPlist = StringOptionDescriptor(
+    name: 'export-options-plist',
+    valueHelp: 'ExportOptions.plist',
+    help: 'Export an IPA with these options. See "xcodebuild -h" for available exportOptionsPlist keys.',
+  );
 
   @override
   final name = 'ipa';
@@ -166,7 +174,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   @override
   final configOnly = false;
 
-  String? get exportOptionsPlist => stringArg('export-options-plist');
+  String? get exportOptionsPlist => getValue(_exportOptionsPlist);
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) => _toolContext.fs
@@ -179,7 +187,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final FileSystem fs = _toolContext.fs;
     final String? exportOptions = exportOptionsPlist;
     if (exportOptions != null) {
-      if (argResults?.wasParsed('export-method') ?? false) {
+      if (wasParsed(_exportMethod)) {
         throwToolExit(
           '"--export-options-plist" is not compatible with "--export-method". Either use "--export-options-plist" and '
           'a plist describing how the IPA should be exported by Xcode, or use "--export-method" to create a new plist.\n'
@@ -546,7 +554,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     String? exportMethod = exportOptions != null
         ? plistParser.getValueFromFile<String?>(exportOptions, 'method')
         : null;
-    exportMethod ??= _getVersionAppropriateExportMethod(stringArg('export-method')!);
+    exportMethod ??= _getVersionAppropriateExportMethod(getValue(_exportMethod));
     final bool isAppStoreUpload =
         exportMethod == 'app-store' || exportMethod == 'app-store-connect';
     File? generatedExportPlist;
@@ -908,26 +916,20 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     required bool verboseHelp,
   }) : _toolContext = toolContext,
        super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
-    addTreeShakeIconsFlag();
-    addSplitDebugInfoOption();
-    addBuildModeFlags(verboseHelp: verboseHelp);
-    usesTargetOption();
-    usesFlavorOption();
-    usesPubOption();
-    usesBuildNumberOption();
-    usesBuildNameOption();
-    addDartObfuscationOption();
-    usesDartDefineOption();
-    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
-    addEnableExperimentation(hide: !verboseHelp);
-    addBuildPerformanceFile(hide: !verboseHelp);
-    usesAnalyzeSizeFlag();
-    argParser.addFlag(
-      'codesign',
-      defaultsTo: true,
-      help: 'Codesign the application bundle (only available on device builds).',
-    );
+    registerOptionBundles(const <OptionBundle>[
+      CommonBuildOptionsBundle(),
+      BuildModeOptionsBundle(),
+      DartCompileOptionsBundle(),
+      AppleBuildOptionsBundle(),
+    ]);
+    argParser.addDescriptor(_codesign);
   }
+
+  static const _codesign = FlagOptionDescriptor(
+    name: 'codesign',
+    defaultsTo: true,
+    help: 'Codesign the application bundle (only available on device builds).',
+  );
 
   final AppleContext _appleContext;
   final BuildSystem _buildSystem;
@@ -957,7 +959,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   EnvironmentType get environmentType;
   bool get configOnly;
 
-  bool get shouldCodesign => boolArg('codesign');
+  bool get shouldCodesign => getValue(_codesign);
 
   late final Future<BuildInfo> cachedBuildInfo = getBuildInfo();
 

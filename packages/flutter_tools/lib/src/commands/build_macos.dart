@@ -14,7 +14,7 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
 import '../macos/build_macos.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart' show FlutterGlobalOptions;
 import 'build.dart';
 
@@ -31,16 +31,25 @@ class BuildMacosCommand extends BuildSubCommand {
          toolContext: toolContext,
          verboseHelp: verboseHelp,
        ) {
-    addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
-    usesFlavorOption();
-    argParser.addFlag(
-      'config-only',
-      help:
-          'Update the project configuration without performing a build. '
-          'This can be used in CI/CD process that create an archive to avoid '
-          'performing duplicate work.',
-    );
+    registerOptionBundles(const <OptionBundle>[
+      CommonBuildOptionsBundle(),
+      BuildModeOptionsBundle(),
+      DartCompileOptionsBundle(),
+      AppleBuildOptionsBundle(),
+    ]);
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      BuildInfoOptions.trackWidgetCreation,
+      _configOnly,
+    ], verboseHelp: verboseHelp);
   }
+
+  static const _configOnly = FlagOptionDescriptor(
+    name: 'config-only',
+    help:
+        'Update the project configuration without performing a build. '
+        'This can be used in CI/CD process that create an archive to avoid '
+        'performing duplicate work.',
+  );
 
   /// The build system used to execute targets.
   final BuildSystem buildSystem;
@@ -69,7 +78,7 @@ class BuildMacosCommand extends BuildSubCommand {
   @override
   bool get supported => toolContext.platform.isMacOS;
 
-  bool get configOnly => boolArg('config-only');
+  bool get configOnly => getValue(_configOnly);
 
   @override
   Future<FlutterCommandResult> runCommand() async {

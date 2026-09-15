@@ -259,6 +259,15 @@ abstract final class BuildInfoOptions {
     help: 'Whether to code-sign XCFrameworks.',
   );
 
+  static const codesignIdentity = StringOptionDescriptor(
+    name: FlutterOptions.kCodesignIdentity,
+    help:
+        'The identity to use for code-signing XCFrameworks. If an identity is not provided and '
+        '"${FlutterOptions.kCodesign}" is enabled, a code signing identity will be selected '
+        "automatically from the Flutter app's Xcode project settings or Flutter config. To see "
+        'a list of valid identities run "security find-identity -p codesigning -v".',
+  );
+
   static const frontendServerStarterPath = StringOptionDescriptor(
     name: FlutterOptions.kFrontendServerStarterPath,
     verboseOnly: true,
@@ -423,6 +432,34 @@ class AndroidBuildOptionsBundle extends OptionBundle {
   ];
 }
 
+/// A bundle encapsulating general options for Apple (iOS and macOS) builds.
+class AppleBuildOptionsBundle extends OptionBundle {
+  const AppleBuildOptionsBundle();
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const [
+    BuildInfoOptions.flavor,
+    BuildInfoOptions.splitDebugInfo,
+    BuildInfoOptions.obfuscate,
+    BuildInfoOptions.extraFrontEndOptions,
+    BuildInfoOptions.extraGenSnapshotOptions,
+    BuildInfoOptions.performanceMeasurementFile,
+    BuildInfoOptions.analyzeSize,
+    BuildInfoOptions.codeSizeDirectory,
+  ];
+}
+
+/// A bundle encapsulating Darwin XCFramework code-signing options (`--codesign` and `--codesign-identity`).
+class DarwinCodeSignXCFrameworksOptionsBundle extends OptionBundle {
+  const DarwinCodeSignXCFrameworksOptionsBundle();
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const [
+    BuildInfoOptions.codesign,
+    BuildInfoOptions.codesignIdentity,
+  ];
+}
+
 /// Typed option descriptors specific to `DebuggingOptions` and resident runners (`run`, `drive`, `test`).
 abstract final class DebuggingOptionDescriptors {
   static const enableImpeller = NullableFlagOptionDescriptor(
@@ -506,6 +543,15 @@ abstract final class DebuggingOptionDescriptors {
         'When this value is provided, the Dart Development Service (DDS) will be '
         'bound to the provided port.\n'
         'Specifying port 0 (the default) will find a random free port.',
+  );
+
+  static const publishPort = FlagOptionDescriptor(
+    name: 'publish-port',
+    defaultsTo: true,
+    verboseOnly: true,
+    help:
+        'Publish the VM service port over mDNS. Disable to prevent the '
+        'local network permission app dialog in debug and profile build modes (iOS devices only).',
   );
 
   static const disableDds = FlagOptionDescriptor(
