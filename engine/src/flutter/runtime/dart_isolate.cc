@@ -5,6 +5,7 @@
 #include "flutter/runtime/dart_isolate.h"
 
 #include <cstdlib>
+#include <string>
 #include <utility>
 
 #include "flutter/fml/logging.h"
@@ -1200,24 +1201,64 @@ static void* NativeAssetsDlopenRelative(const char* path, char** error) {
                                                  error);
 }
 
-static void* NativeAssetsDlopen(const char* asset_id, char** error) {
+static void SetNativeAssetsError(char** error, const std::string& message) {
+  if (error == nullptr) {
+    return;
+  }
+  *error = fml::strdup(message.c_str());
+}
+
+static void SetNativeAssetUnavailableError(const char* asset_id, char** error) {
+  std::string message = "Native asset '";
+  message.append(asset_id);
+  message.append("' is unavailable. No available native assets.");
+  SetNativeAssetsError(error, message);
+}
+
+static void SetNativeAssetInvalidMappingError(const char* asset_id,
+                                              const std::string& path_type,
+                                              char** error) {
+  std::string message = "Native asset '";
+  message.append(asset_id);
+  if (path_type.empty()) {
+    message.append("' has an empty mapping.");
+  } else {
+    message.append("' has invalid mapping for path type '");
+    message.append(path_type);
+    message.append("'.");
+  }
+  SetNativeAssetsError(error, message);
+}
+
+static bool NativeAssetsContainsAsset(const char* asset_id) {
+  FML_DCHECK(asset_id != nullptr);
+  auto* isolate_group_data =
+      static_cast<std::shared_ptr<DartIsolateGroupData>*>(
+          Dart_CurrentIsolateGroupData());
+  auto native_assets_manager = (*isolate_group_data)->GetNativeAssetsManager();
+  return native_assets_manager != nullptr &&
+         native_assets_manager->ContainsNativeAsset(asset_id);
+}
+
+static void* NativeAssetsDlopenAsset(const char* asset_id, char** error) {
+  FML_DCHECK(asset_id != nullptr);
   auto* isolate_group_data =
       static_cast<std::shared_ptr<DartIsolateGroupData>*>(
           Dart_CurrentIsolateGroupData());
   auto native_assets_manager = (*isolate_group_data)->GetNativeAssetsManager();
   if (native_assets_manager == nullptr) {
+    SetNativeAssetUnavailableError(asset_id, error);
     return nullptr;
   }
 
   std::vector<std::string> asset_path =
       native_assets_manager->LookupNativeAsset(asset_id);
-  if (asset_path.size() == 0) {
-    // The asset id was not in the mapping.
+  if (asset_path.empty()) {
+    SetNativeAssetInvalidMappingError(asset_id, "", error);
     return nullptr;
   }
 
   auto& path_type = asset_path[0];
-  std::string path;
   static constexpr const char* kAbsolute = "absolute";
   static constexpr const char* kExecutable = "executable";
   static constexpr const char* kProcess = "process";
@@ -1225,21 +1266,26 @@ static void* NativeAssetsDlopen(const char* asset_id, char** error) {
   static constexpr const char* kSystem = "system";
   if (path_type == kAbsolute || path_type == kRelative ||
       path_type == kSystem) {
-    path = asset_path[1];
+    if (asset_path.size() < 2) {
+      SetNativeAssetInvalidMappingError(asset_id, path_type, error);
+      return nullptr;
+    }
   }
 
   if (path_type == kAbsolute) {
-    return dart::bin::NativeAssets::DlopenAbsolute(path.c_str(), error);
+    return dart::bin::NativeAssets::DlopenAbsolute(asset_path[1].c_str(),
+                                                   error);
   } else if (path_type == kRelative) {
-    return NativeAssetsDlopenRelative(path.c_str(), error);
+    return NativeAssetsDlopenRelative(asset_path[1].c_str(), error);
   } else if (path_type == kSystem) {
-    return dart::bin::NativeAssets::DlopenSystem(path.c_str(), error);
+    return dart::bin::NativeAssets::DlopenSystem(asset_path[1].c_str(), error);
   } else if (path_type == kProcess) {
     return dart::bin::NativeAssets::DlopenProcess(error);
   } else if (path_type == kExecutable) {
     return dart::bin::NativeAssets::DlopenExecutable(error);
   }
 
+  SetNativeAssetInvalidMappingError(asset_id, path_type, error);
   return nullptr;
 }
 
@@ -1248,8 +1294,10 @@ static char* NativeAssetsAvailableAssets() {
       static_cast<std::shared_ptr<DartIsolateGroupData>*>(
           Dart_CurrentIsolateGroupData());
   auto native_assets_manager = (*isolate_group_data)->GetNativeAssetsManager();
-  FML_DCHECK(native_assets_manager != nullptr);
-  auto available_assets = native_assets_manager->AvailableNativeAssets();
+  std::string available_assets = "No available native assets.";
+  if (native_assets_manager != nullptr) {
+    available_assets = native_assets_manager->AvailableNativeAssets();
+  }
   auto* result = fml::strdup(available_assets.c_str());
   return result;
 }
@@ -1257,15 +1305,16 @@ static char* NativeAssetsAvailableAssets() {
 static void InitDartFFIForIsolateGroup() {
   NativeAssetsApi native_assets;
   memset(&native_assets, 0, sizeof(native_assets));
-  // TODO(dacoharkes): Remove after flutter_tools stops kernel embedding.
+  // TODO(dacoharkes): Remove after Flutter stops kernel embedding in g3.
   native_assets.dlopen_absolute = &dart::bin::NativeAssets::DlopenAbsolute;
   native_assets.dlopen_relative = &NativeAssetsDlopenRelative;
   native_assets.dlopen_system = &dart::bin::NativeAssets::DlopenSystem;
   native_assets.dlopen_executable = &dart::bin::NativeAssets::DlopenExecutable;
   native_assets.dlopen_process = &dart::bin::NativeAssets::DlopenProcess;
-  // TODO(dacoharkes): End todo.
   native_assets.dlsym = &dart::bin::NativeAssets::Dlsym;
-  native_assets.dlopen = &NativeAssetsDlopen;
+  native_assets.dlclose = &dart::bin::NativeAssets::Dlclose;
+  native_assets.contains_asset = &NativeAssetsContainsAsset;
+  native_assets.dlopen_asset = &NativeAssetsDlopenAsset;
   native_assets.available_assets = &NativeAssetsAvailableAssets;
   Dart_InitializeNativeAssetsResolver(&native_assets);
 };
