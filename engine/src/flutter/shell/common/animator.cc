@@ -253,21 +253,19 @@ void Animator::RequestFrame(bool regenerate_layer_trees) {
     return;
   }
 
-  // The AwaitVSync is going to call us back at the next VSync. However, we want
-  // to be reasonably certain that the UI thread is not in the middle of a
-  // particularly expensive callout. We post the AwaitVSync to run right after
-  // an idle. This does NOT provide a guarantee that the UI thread has not
-  // started an expensive operation right after posting this message however.
-  // To support that, we need edge triggered wakes on VSync.
-
-  task_runners_.GetUITaskRunner()->PostTask(
-      [self = weak_factory_.GetWeakPtr()]() {
-        if (!self) {
-          return;
-        }
-        self->AwaitVSync();
-      });
+  // Mark the frame as scheduled before AwaitVSync can run synchronously on the
+  // UI thread. A synchronous test waiter may deliver the frame immediately and
+  // clear this flag before RunNowOrPostTask returns.
   frame_scheduled_ = true;
+
+  // Avoid an extra UI queue turn that could delay VSync registration past the
+  // next VSync. Requests from other threads are still posted to the UI thread.
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
+                                    [self = weak_factory_.GetWeakPtr()]() {
+                                      if (self) {
+                                        self->AwaitVSync();
+                                      }
+                                    });
 }
 
 void Animator::AwaitVSync() {
@@ -292,11 +290,6 @@ void Animator::OnAllViewsRendered() {
   if (!layer_trees_tasks_.empty()) {
     EndFrame();
   }
-}
-
-void Animator::ScheduleSecondaryVsyncCallback(uintptr_t id,
-                                              const fml::closure& callback) {
-  waiter_->ScheduleSecondaryCallback(id, callback);
 }
 
 void Animator::ScheduleMaybeClearTraceFlowIds() {

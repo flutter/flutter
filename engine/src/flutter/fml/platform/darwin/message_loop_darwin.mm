@@ -79,11 +79,16 @@ void MessageLoopDarwin::WakeUp(fml::TimePoint time_point) {
       CFAbsoluteTimeGetCurrent() + (time_point - fml::TimePoint::Now()).ToSecondsF());
 }
 
-void MessageLoopDarwin::OnTimerFire(CFRunLoopTimerRef timer, MessageLoopDarwin* loop) {
+void MessageLoopDarwin::RunTask(const fml::closure& task,
+                                const std::vector<fml::closure>& observers) {
   @autoreleasepool {
-    // RunExpiredTasksNow rearms the timer as appropriate via a call to WakeUp.
-    loop->RunExpiredTasksNow();
+    MessageLoopImpl::RunTask(task, observers);
   }
+}
+
+void MessageLoopDarwin::OnTimerFire(CFRunLoopTimerRef timer, MessageLoopDarwin* loop) {
+  // RunExpiredTasksNow rearms the timer as appropriate via a call to WakeUp.
+  loop->RunExpiredTasksNow();
 }
 
 }  // namespace fml

@@ -11,6 +11,7 @@
 #include <mutex>
 #include <queue>
 #include <utility>
+#include <vector>
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/delayed_task.h"
@@ -58,9 +59,9 @@ class MessageLoopImpl : public Wakeable,
 
   void RunExpiredTasksNow();
 
-  void RunSingleExpiredTaskNow();
+  virtual void RunTask(const fml::closure& task,
+                       const std::vector<fml::closure>& observers);
 
- protected:
   MessageLoopImpl();
 
  private:
@@ -69,7 +70,7 @@ class MessageLoopImpl : public Wakeable,
 
   std::atomic_bool terminated_;
 
-  void FlushTasks(FlushType type);
+  void FlushTasks();
 
   FML_DISALLOW_COPY_AND_ASSIGN(MessageLoopImpl);
 };
