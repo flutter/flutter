@@ -61,7 +61,7 @@ internal data class FlutterCompileOptions(
          * The behavior predates the variant API migration and is preserved here unchanged.
          *
          * TODO(reidbaker): Split on "|" so that multiple `--filesystem-root` values reach
-         *  `flutter assemble`. https://github.com/flutter/flutter/issues/166550
+         *  `flutter assemble`. https://github.com/flutter/flutter/issues/192824
          */
         private const val FILE_SYSTEM_ROOTS_SEPARATOR = "\\|"
 
