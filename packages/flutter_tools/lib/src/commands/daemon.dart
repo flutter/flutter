@@ -14,10 +14,12 @@ import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
 import '../android/java.dart';
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/signals.dart';
@@ -25,6 +27,7 @@ import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -117,6 +120,7 @@ class DaemonCommand extends FlutterCommand {
         analytics: analytics,
         androidSdk: _androidSdk,
         androidWorkflow: _androidWorkflow,
+        artifacts: toolContext.artifacts,
         deviceManager: _deviceManager,
         featureFlags: featureFlags,
         fileSystem: fs,
@@ -138,6 +142,7 @@ class DaemonCommand extends FlutterCommand {
       ),
       analytics: analytics,
       androidSdk: _androidSdk,
+      artifacts: toolContext.artifacts,
       androidWorkflow: _androidWorkflow,
       deviceManager: _deviceManager,
       featureFlags: featureFlags,
@@ -168,6 +173,7 @@ class DaemonServer {
     this.analytics,
     this.androidSdk,
     this.androidWorkflow,
+    this.artifacts,
     @visibleForTesting this._bind = ServerSocket.bind,
     this.deviceManager,
     required this.featureFlags,
@@ -191,6 +197,7 @@ class DaemonServer {
   // Logger that sends the message to the other end of daemon connection.
   final NotifyingLogger? notifyingLogger;
 
+  final Artifacts? artifacts;
   final FileSystem? fileSystem;
   final Platform? platform;
   final ProcessManager? processManager;
@@ -238,6 +245,7 @@ class DaemonServer {
           logger: logger,
         ),
         notifyingLogger: notifyingLogger,
+        artifacts: artifacts,
         fileSystem: fileSystem,
         platform: platform,
         processManager: processManager,
@@ -275,6 +283,7 @@ class Daemon {
     Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
+    Artifacts? artifacts,
     DeviceManager? deviceManager,
     required FeatureFlags featureFlags,
     FileSystem? fileSystem,
@@ -293,7 +302,8 @@ class Daemon {
        _logger = logger ?? BufferLogger.test(),
        _fs =
            fileSystem ??
-           LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, ShutdownHooks()) {
+           LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, ShutdownHooks()),
+       _artifacts = artifacts {
     final Platform p = platform ?? const LocalPlatform();
     final ProcessManager pm = processManager ?? const LocalProcessManager();
     final AnsiTerminal term = terminal ?? AnsiTerminal(stdio: stdio ?? Stdio(), platform: p);
@@ -317,10 +327,12 @@ class Daemon {
       appDomain = AppDomain(
         this,
         analytics: an,
+        artifacts: artifacts,
         fileSystem: _fs,
         logger: _logger,
         outputPreferences: prefs,
         platform: p,
+        processManager: pm,
         systemClock: clock,
         terminal: term,
       ),
@@ -357,13 +369,14 @@ class Daemon {
   }
 
   factory Daemon.createMachineDaemon({
+    required FeatureFlags featureFlags,
     required Logger logger,
     required Stdio stdio,
     Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
+    Artifacts? artifacts,
     DeviceManager? deviceManager,
-    required FeatureFlags featureFlags,
     FileSystem? fileSystem,
     Java? java,
     OutputPreferences? outputPreferences,
@@ -383,6 +396,7 @@ class Daemon {
       logToStdout: true,
       stdio: stdio,
       logger: logger,
+      artifacts: artifacts,
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
@@ -403,6 +417,7 @@ class Daemon {
   final Stdio? _stdio;
   final Logger _logger;
   final FileSystem _fs;
+  final Artifacts? _artifacts;
 
   late DaemonDomain daemonDomain;
   late AppDomain appDomain;
@@ -858,13 +873,17 @@ class AppDomain extends Domain {
   AppDomain(
     Daemon daemon, {
     Analytics? analytics,
+    Artifacts? artifacts,
     FileSystem? fileSystem,
     Logger? logger,
     OutputPreferences? outputPreferences,
     Platform? platform,
+    ProcessManager? processManager,
     SystemClock? systemClock,
     AnsiTerminal? terminal,
-  }) : _fs = fileSystem ?? daemon._fs,
+  }) : _artifacts = artifacts ?? daemon._artifacts,
+       _processManager = processManager ?? const LocalProcessManager(),
+       _fs = fileSystem ?? daemon._fs,
        _platform = platform ?? const LocalPlatform(),
        _analytics = analytics ?? const NoOpAnalytics(),
        _systemClock = systemClock ?? const SystemClock(),
@@ -883,6 +902,8 @@ class AppDomain extends Domain {
     registerHandler('detach', detach);
   }
 
+  final Artifacts? _artifacts;
+  final ProcessManager _processManager;
   final FileSystem _fs;
   final Platform _platform;
   final Analytics _analytics;
@@ -930,9 +951,35 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      target: target,
+      artifacts:
+          _artifacts ??
+          CachedArtifacts(
+            fileSystem: _fs,
+            platform: _platform,
+            cache: Cache(
+              logger: _logger,
+              fileSystem: _fs,
+              platform: _platform,
+              osUtils: OperatingSystemUtils(
+                fileSystem: _fs,
+                logger: _logger,
+                platform: _platform,
+                processManager: _processManager,
+              ),
+            ),
+            operatingSystemUtils: OperatingSystemUtils(
+              fileSystem: _fs,
+              logger: _logger,
+              platform: _platform,
+              processManager: _processManager,
+            ),
+          ),
       buildInfo: options.buildInfo,
+      fileSystem: _fs,
+      logger: _logger,
       platform: _platform,
+      processManager: _processManager,
+      target: target,
       userIdentifier: userIdentifier,
     );
 
