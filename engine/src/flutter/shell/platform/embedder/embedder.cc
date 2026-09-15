@@ -614,7 +614,7 @@ InferMetalPlatformViewCreationCallback(
           metal_dispatch_table = {
               .present = metal_present,
               .get_texture = metal_get_texture,
-      };
+          };
       impeller::Flags impeller_flags;
       impeller_flags.use_sdfs = shell.GetSettings().impeller_use_sdfs;
       embedder_surface =
@@ -629,7 +629,7 @@ InferMetalPlatformViewCreationCallback(
           metal_dispatch_table = {
               .present = metal_present,
               .get_texture = metal_get_texture,
-      };
+          };
       embedder_surface = std::make_unique<flutter::EmbedderSurfaceMetalSkia>(
           const_cast<flutter::GPUMTLDeviceHandle>(config->metal.device),
           const_cast<flutter::GPUMTLCommandQueueHandle>(
@@ -714,7 +714,7 @@ InferVulkanPlatformViewCreationCallback(
                 reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
             .get_next_image = vulkan_get_next_image,
             .present_image = vulkan_present_image_callback,
-    };
+        };
 
     std::unique_ptr<flutter::EmbedderSurfaceVulkanImpeller> embedder_surface =
         std::make_unique<flutter::EmbedderSurfaceVulkanImpeller>(
@@ -749,7 +749,7 @@ InferVulkanPlatformViewCreationCallback(
                 reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
             .get_next_image = vulkan_get_next_image,
             .present_image = vulkan_present_image_callback,
-    };
+        };
 
     std::unique_ptr<flutter::EmbedderSurfaceVulkan> embedder_surface =
         std::make_unique<flutter::EmbedderSurfaceVulkan>(
@@ -839,7 +839,7 @@ InferSoftwarePlatformViewCreationCallback(
   flutter::EmbedderSurfaceSoftware::SoftwareDispatchTable
       software_dispatch_table = {
           software_present_backing_store,  // required
-  };
+      };
 
   return fml::MakeCopyable(
       [software_dispatch_table, platform_dispatch_table,
@@ -1265,9 +1265,13 @@ MakeRenderTargetFromBackingStoreImpeller(
   render_target_desc.SetDepthAttachment(depth0);
   render_target_desc.SetStencilAttachment(stencil0);
 
-  fml::closure framebuffer_destruct =
-      [callback = framebuffer->destruction_callback,
-       user_data = framebuffer->user_data]() { callback(user_data); };
+  fml::closure framebuffer_destruct = [callback =
+                                           framebuffer->destruction_callback,
+                                       user_data = framebuffer->user_data]() {
+    if (callback) {
+      callback(user_data);
+    }
+  };
 
   return std::make_unique<flutter::EmbedderRenderTargetImpeller>(
       backing_store, aiks_context,
@@ -3767,7 +3771,9 @@ FlutterEngineResult FlutterEngineRegisterExternalTexture(
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
   }
 
-  if (texture_identifier == 0) {
+  // Negative texture identifiers are invalid; 0 and positive numbers are
+  // valid 64-bit texture keys supported by the Flutter TextureRegistry.
+  if (texture_identifier < 0) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments,
                               "Texture identifier was invalid.");
   }
@@ -3786,7 +3792,9 @@ FlutterEngineResult FlutterEngineUnregisterExternalTexture(
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
   }
 
-  if (texture_identifier == 0) {
+  // Negative texture identifiers are invalid; 0 and positive numbers are
+  // valid 64-bit texture keys supported by the Flutter TextureRegistry.
+  if (texture_identifier < 0) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments,
                               "Texture identifier was invalid.");
   }
@@ -3806,7 +3814,9 @@ FlutterEngineResult FlutterEngineMarkExternalTextureFrameAvailable(
   if (engine == nullptr) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
   }
-  if (texture_identifier == 0) {
+  // Negative texture identifiers are invalid; 0 and positive numbers are
+  // valid 64-bit texture keys supported by the Flutter TextureRegistry.
+  if (texture_identifier < 0) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid texture identifier.");
   }
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)

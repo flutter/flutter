@@ -50,6 +50,27 @@ class AndroidEGLManager {
   /// @return True if presentation succeeded.
   bool Present();
 
+  /// @brief Creates an EGL window surface for an ANativeWindow (e.g. an overlay
+  /// surface).
+  /// @param window The ANativeWindow pointer.
+  /// @return The created EGLSurface, or EGL_NO_SURFACE on failure.
+  EGLSurface CreateWindowSurface(ANativeWindow* window);
+
+  /// @brief Destroys a previously created EGL window surface.
+  /// @param surface The EGLSurface to destroy.
+  void DestroyWindowSurface(EGLSurface surface);
+
+  /// @brief Binds the specified EGLSurface to the render context on the calling
+  /// thread.
+  /// @param surface The EGLSurface to bind (or EGL_NO_SURFACE to bind pbuffer).
+  /// @return True if the surface was successfully made current.
+  bool MakeSurfaceCurrent(EGLSurface surface);
+
+  /// @brief Swaps display buffers for an overlay surface.
+  /// @param surface The EGLSurface to present.
+  /// @return True if presentation succeeded.
+  bool SwapSurfaceBuffers(EGLSurface surface);
+
   /// @brief Returns the underlying EGLDisplay handle.
   EGLDisplay GetDisplay() const;
 

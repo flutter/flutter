@@ -38,6 +38,7 @@
 #include "flutter/shell/platform/android/os_library_loader.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
+#include <GLES2/gl2.h>
 #include <android/native_window.h>
 
 namespace flutter {
@@ -1105,6 +1106,18 @@ class FlutterEmbedderNative {
       size_t height,
       FlutterOpenGLTexture* texture_out);
 
+  /// @brief Static C-API compositor callback for allocating backing stores.
+  static bool OnCreateBackingStore(const FlutterBackingStoreConfig* config,
+                                   FlutterBackingStore* backing_store_out,
+                                   void* user_data);
+
+  /// @brief Static C-API compositor callback for collecting backing stores.
+  static bool OnCollectBackingStore(const FlutterBackingStore* renderer,
+                                    void* user_data);
+
+  /// @brief Static C-API compositor callback for presenting view layers.
+  static bool OnPresentView(const FlutterPresentViewInfo* info);
+
   /// @brief Returns the AndroidEngineGroup managed by this native instance.
   std::shared_ptr<AndroidEngineGroup> GetEngineGroup() const;
 
@@ -1239,6 +1252,71 @@ class FlutterEmbedderNative {
 
   mutable std::mutex egl_manager_mutex_;
   mutable std::unique_ptr<AndroidEGLManager> egl_manager_;
+
+  /// @brief Describes an offscreen framebuffer backing store for multi-layer
+  /// composition.
+  struct OffscreenBackingStore {
+    GLuint fbo = 0;
+    GLuint color_texture = 0;
+    size_t width = 0;
+    size_t height = 0;
+    bool in_use = false;
+  };
+
+  /// @brief Shader program for compositing offscreen FBO textures onto FBO 0.
+  struct BlitProgram {
+    GLuint program = 0;
+    GLint a_position_loc = -1;
+    GLint a_texcoord_loc = -1;
+    GLint u_texture_loc = -1;
+    bool initialized = false;
+  };
+
+  mutable std::mutex offscreen_fbo_mutex_;
+  std::vector<OffscreenBackingStore> offscreen_fbo_pool_;
+  std::atomic<bool> base_backing_store_in_use_{false};
+  BlitProgram blit_program_;
+
+  /// @brief Allocates or checks out an offscreen FBO matching width and height.
+  GLuint GetOrCreateOffscreenFBO(size_t width, size_t height);
+
+  /// @brief Releases an offscreen FBO back to the pool.
+  void ReleaseOffscreenFBO(GLuint fbo);
+
+  /// @brief Looks up the color texture associated with an offscreen FBO.
+  GLuint GetTextureForFBO(GLuint fbo) const;
+
+  /// @brief Lazily compiles and links the fullscreen textured quad blit
+  /// program.
+  bool EnsureBlitProgramInitialized();
+
+  /// @brief Destroys all offscreen FBOs, textures, and shader programs.
+  void DestroyOffscreenFBOs();
+
+  /// @brief Blends and composites overlay backing stores onto the base
+  /// framebuffer.
+  void CompositeOverlayLayers(const FlutterLayer** layers, size_t layers_count);
+
+  /// @brief Tracks an allocated platform view overlay surface with its ID,
+  /// native window, and EGLSurface.
+  struct ActiveOverlaySurface {
+    int32_t id = -1;
+    ANativeWindow* window = nullptr;
+    EGLSurface egl_surface = EGL_NO_SURFACE;
+  };
+
+  mutable std::mutex overlay_surfaces_mutex_;
+  std::vector<ActiveOverlaySurface> active_overlay_surfaces_;
+
+  /// @brief Presents an overlay backing store layer into a dedicated platform
+  /// overlay surface.
+  bool PresentOverlayLayer(const FlutterLayer* layer,
+                           size_t overlay_index,
+                           float screen_width,
+                           float screen_height);
+
+  /// @brief Destroys all active overlay surfaces, windows, and EGL surfaces.
+  void DestroyActiveOverlaySurfaces();
 
   void AttachWindowMetricsCallbacks();
 

@@ -114,19 +114,27 @@ void EmbedderExternalTextureHB::Paint(PaintContext& context,
         ResolveTexture(Id(), context.gr_context, context.aiks_context,
                        SkISize::Make(bounds.GetWidth(), bounds.GetHeight()));
     if (new_image) {
+      std::lock_guard<std::mutex> lock(frame_mutex_);
       last_image_ = std::move(new_image);
     }
+  }
+
+  sk_sp<DlImage> image_to_paint;
+  {
+    std::lock_guard<std::mutex> lock(frame_mutex_);
+    image_to_paint = last_image_;
   }
 
   DlCanvas* canvas = context.canvas;
   const DlPaint* paint = context.paint;
 
-  if (last_image_ && canvas) {
-    DlRect image_bounds = DlRect::Make(last_image_->GetBounds());
+  if (image_to_paint && canvas) {
+    DlRect image_bounds = DlRect::Make(image_to_paint->GetBounds());
     if (bounds != image_bounds) {
-      canvas->DrawImageRect(last_image_, image_bounds, bounds, sampling, paint);
+      canvas->DrawImageRect(image_to_paint, image_bounds, bounds, sampling,
+                            paint);
     } else {
-      canvas->DrawImage(last_image_, bounds.GetOrigin(), sampling, paint);
+      canvas->DrawImage(image_to_paint, bounds.GetOrigin(), sampling, paint);
     }
   }
 }
@@ -371,7 +379,6 @@ sk_sp<DlImage> EmbedderExternalTextureHB::ResolveTextureImpeller(
       return nullptr;
     }
     glEGLImageTargetTexture2DOES(kTextureExternalOes, egl_image);
-    eglDestroyImageKHR(display, egl_image);
 
     AHardwareBuffer_Desc hb_desc = {};
     AHardwareBuffer_describe(hardware_buffer, &hb_desc);
@@ -393,11 +400,49 @@ sk_sp<DlImage> EmbedderExternalTextureHB::ResolveTextureImpeller(
     if (!texture_gles) {
       FML_LOG(ERROR) << "Failed to wrap TextureGLES for external texture.";
       gl.DeleteTextures(1, &gl_tex);
+      EGLBoolean res = eglDestroyImageKHR(display, egl_image);
+      if (res != EGL_TRUE) {
+        FML_LOG(ERROR) << "eglDestroyImageKHR failed with error: "
+                       << eglGetError();
+      }
       if (texture->destruction_callback) {
         texture->destruction_callback(texture->user_data);
+        texture->destruction_callback = nullptr;
       }
       return nullptr;
     }
+
+    bool registered = context_gles.GetReactor()->RegisterCleanupCallback(
+        handle, [reactor = context_gles.GetReactor(), display, egl_image,
+                 gl_tex, destruction_callback = texture->destruction_callback,
+                 user_data = texture->user_data]() {
+          EGLBoolean res = eglDestroyImageKHR(display, egl_image);
+          if (res != EGL_TRUE) {
+            FML_LOG(ERROR) << "eglDestroyImageKHR in cleanup callback failed.";
+          }
+          reactor->GetProcTable().DeleteTextures(1, &gl_tex);
+          if (destruction_callback) {
+            destruction_callback(user_data);
+          }
+        });
+
+    if (!registered) {
+      FML_LOG(ERROR)
+          << "Failed to register cleanup callback on reactor handle.";
+      gl.DeleteTextures(1, &gl_tex);
+      EGLBoolean res = eglDestroyImageKHR(display, egl_image);
+      if (res != EGL_TRUE) {
+        FML_LOG(ERROR) << "eglDestroyImageKHR failed with error: "
+                       << eglGetError();
+      }
+      if (texture->destruction_callback) {
+        texture->destruction_callback(texture->user_data);
+        texture->destruction_callback = nullptr;
+      }
+      return nullptr;
+    }
+
+    texture->destruction_callback = nullptr;
     texture_gles->MarkContentsInitialized();
     impeller_texture = texture_gles;
   }
@@ -516,17 +561,14 @@ sk_sp<DlImage> EmbedderExternalTextureHB::ResolveTextureSkia(
 
 void EmbedderExternalTextureHB::ReleaseLatestFrame() {
   TRACE_EVENT0("flutter", "EmbedderExternalTextureHB::ReleaseLatestFrame");
-  {
-    std::lock_guard<std::mutex> lock(frame_mutex_);
-    if (last_texture_frame_) {
-      if (last_texture_frame_->destruction_callback) {
-        TRACE_EVENT0("flutter",
-                     "HardwareBufferExternalTextureDestructionCallback");
-        last_texture_frame_->destruction_callback(
-            last_texture_frame_->user_data);
-      }
-      last_texture_frame_.reset();
+  std::lock_guard<std::mutex> lock(frame_mutex_);
+  if (last_texture_frame_) {
+    if (last_texture_frame_->destruction_callback) {
+      TRACE_EVENT0("flutter",
+                   "HardwareBufferExternalTextureDestructionCallback");
+      last_texture_frame_->destruction_callback(last_texture_frame_->user_data);
     }
+    last_texture_frame_.reset();
   }
   last_image_ = nullptr;
 }

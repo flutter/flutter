@@ -7957,7 +7957,7 @@ TEST_F(Phase61JniRegistrationCutoverTest, LaunchPropagatesEngineId) {
 
   native_instance->SetInitializeEngineFnForTesting(
       [&](const FlutterRendererConfig* config, const FlutterProjectArgs* args,
-          void* user_data, FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+          void* user_data, FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
         initialize_called = true;
         EXPECT_NE(args, nullptr);
         if (args) {
