@@ -85,7 +85,7 @@ class JvmInvoker {
   /// @brief Sets the platform task runner for scheduling work on the Android UI
   /// thread.
   virtual void SetPlatformTaskRunner(
-      fml::RefPtr<fml::TaskRunner> platform_task_runner) {}
+      const fml::RefPtr<fml::TaskRunner>& platform_task_runner) {}
 
   /// @brief Returns the platform task runner.
   virtual fml::RefPtr<fml::TaskRunner> GetPlatformTaskRunner() const {
@@ -368,8 +368,8 @@ class DefaultJvmInvoker : public JvmInvoker {
   }
 
   void SetPlatformTaskRunner(
-      fml::RefPtr<fml::TaskRunner> platform_task_runner) override {
-    platform_task_runner_ = std::move(platform_task_runner);
+      const fml::RefPtr<fml::TaskRunner>& platform_task_runner) override {
+    platform_task_runner_ = platform_task_runner;
   }
 
   fml::RefPtr<fml::TaskRunner> GetPlatformTaskRunner() const override {
@@ -489,7 +489,7 @@ class AndroidJvmInvoker
                                int32_t height) override;
 
   void SetPlatformTaskRunner(
-      fml::RefPtr<fml::TaskRunner> platform_task_runner) override;
+      const fml::RefPtr<fml::TaskRunner>& platform_task_runner) override;
   fml::RefPtr<fml::TaskRunner> GetPlatformTaskRunner() const override;
 
  private:
