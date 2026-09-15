@@ -114,6 +114,47 @@ AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(
   event.physical_view_inset_left =
       std::min(inset_left, static_cast<double>(event.width));
 
+  // View padding: bounded within physical dimensions.
+  double padding_top = SafeDimension(metrics.physical_padding_top);
+  double padding_right = SafeDimension(metrics.physical_padding_right);
+  double padding_bottom = SafeDimension(metrics.physical_padding_bottom);
+  double padding_left = SafeDimension(metrics.physical_padding_left);
+
+  event.physical_padding_top =
+      std::min(padding_top, static_cast<double>(event.height));
+  event.physical_padding_right =
+      std::min(padding_right, static_cast<double>(event.width));
+  event.physical_padding_bottom =
+      std::min(padding_bottom, static_cast<double>(event.height));
+  event.physical_padding_left =
+      std::min(padding_left, static_cast<double>(event.width));
+
+  // System gesture insets: bounded within physical dimensions.
+  double gesture_top = SafeDimension(metrics.system_gesture_inset_top);
+  double gesture_right = SafeDimension(metrics.system_gesture_inset_right);
+  double gesture_bottom = SafeDimension(metrics.system_gesture_inset_bottom);
+  double gesture_left = SafeDimension(metrics.system_gesture_inset_left);
+
+  event.physical_system_gesture_inset_top =
+      std::min(gesture_top, static_cast<double>(event.height));
+  event.physical_system_gesture_inset_right =
+      std::min(gesture_right, static_cast<double>(event.width));
+  event.physical_system_gesture_inset_bottom =
+      std::min(gesture_bottom, static_cast<double>(event.height));
+  event.physical_system_gesture_inset_left =
+      std::min(gesture_left, static_cast<double>(event.width));
+
+  event.physical_touch_slop = metrics.physical_touch_slop;
+
+  event.physical_display_corner_radius_top_left =
+      metrics.physical_display_corner_radius_top_left;
+  event.physical_display_corner_radius_top_right =
+      metrics.physical_display_corner_radius_top_right;
+  event.physical_display_corner_radius_bottom_right =
+      metrics.physical_display_corner_radius_bottom_right;
+  event.physical_display_corner_radius_bottom_left =
+      metrics.physical_display_corner_radius_bottom_left;
+
   event.display_id = metrics.display_id;
   event.view_id = metrics.view_id;
 

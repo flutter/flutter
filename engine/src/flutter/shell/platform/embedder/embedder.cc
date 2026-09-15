@@ -1710,6 +1710,37 @@ MakeViewportMetricsFromWindowMetrics(
       SAFE_ACCESS(flutter_metrics, physical_view_inset_bottom, 0.0);
   metrics.physical_view_inset_left =
       SAFE_ACCESS(flutter_metrics, physical_view_inset_left, 0.0);
+
+  metrics.physical_padding_top =
+      SAFE_ACCESS(flutter_metrics, physical_padding_top, 0.0);
+  metrics.physical_padding_right =
+      SAFE_ACCESS(flutter_metrics, physical_padding_right, 0.0);
+  metrics.physical_padding_bottom =
+      SAFE_ACCESS(flutter_metrics, physical_padding_bottom, 0.0);
+  metrics.physical_padding_left =
+      SAFE_ACCESS(flutter_metrics, physical_padding_left, 0.0);
+
+  metrics.physical_system_gesture_inset_top =
+      SAFE_ACCESS(flutter_metrics, physical_system_gesture_inset_top, 0.0);
+  metrics.physical_system_gesture_inset_right =
+      SAFE_ACCESS(flutter_metrics, physical_system_gesture_inset_right, 0.0);
+  metrics.physical_system_gesture_inset_bottom =
+      SAFE_ACCESS(flutter_metrics, physical_system_gesture_inset_bottom, 0.0);
+  metrics.physical_system_gesture_inset_left =
+      SAFE_ACCESS(flutter_metrics, physical_system_gesture_inset_left, 0.0);
+
+  metrics.physical_touch_slop =
+      SAFE_ACCESS(flutter_metrics, physical_touch_slop, -1.0);
+
+  metrics.physical_display_corner_radius_top_left = SAFE_ACCESS(
+      flutter_metrics, physical_display_corner_radius_top_left, -1.0);
+  metrics.physical_display_corner_radius_top_right = SAFE_ACCESS(
+      flutter_metrics, physical_display_corner_radius_top_right, -1.0);
+  metrics.physical_display_corner_radius_bottom_right = SAFE_ACCESS(
+      flutter_metrics, physical_display_corner_radius_bottom_right, -1.0);
+  metrics.physical_display_corner_radius_bottom_left = SAFE_ACCESS(
+      flutter_metrics, physical_display_corner_radius_bottom_left, -1.0);
+
   metrics.display_id = SAFE_ACCESS(flutter_metrics, display_id, 0);
 
   if (metrics.device_pixel_ratio <= 0.0) {
@@ -1728,6 +1759,20 @@ MakeViewportMetricsFromWindowMetrics(
       metrics.physical_view_inset_bottom > metrics.physical_height ||
       metrics.physical_view_inset_left > metrics.physical_width) {
     return "Physical view insets are invalid. They cannot be greater than "
+           "physical height or width.";
+  }
+
+  if (metrics.physical_padding_top < 0 || metrics.physical_padding_right < 0 ||
+      metrics.physical_padding_bottom < 0 ||
+      metrics.physical_padding_left < 0) {
+    return "Physical view paddings are invalid. They must be non-negative.";
+  }
+
+  if (metrics.physical_padding_top > metrics.physical_height ||
+      metrics.physical_padding_right > metrics.physical_width ||
+      metrics.physical_padding_bottom > metrics.physical_height ||
+      metrics.physical_padding_left > metrics.physical_width) {
+    return "Physical view paddings are invalid. They cannot be greater than "
            "physical height or width.";
   }
 
