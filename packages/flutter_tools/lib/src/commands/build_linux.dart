@@ -25,9 +25,8 @@ class BuildLinuxCommand extends BuildSubCommand {
     required this.buildSystem,
     required ToolContext toolContext,
     required bool verboseHelp,
-    required FeatureFlags featureFlags,
-  }) : _featureFlags = featureFlags,
-       super(
+    required this._featureFlags,
+  }) : super(
          logger: toolContext.logger,
          outputPreferences: toolContext.outputPreferences,
          toolContext: toolContext,

@@ -26,20 +26,14 @@ import 'test_config.dart';
 /// A web compiler for the test runner.
 class WebTestCompiler {
   WebTestCompiler({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Artifacts artifacts,
-    required Platform platform,
-    required ProcessManager processManager,
-    required Config config,
-    required ShutdownHooks shutdownHooks,
-  }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _artifacts = artifacts,
-       _platform = platform,
-       _processManager = processManager,
-       _config = config,
-       _shutdownHooks = shutdownHooks;
+    required this._fileSystem,
+    required this._logger,
+    required this._artifacts,
+    required this._platform,
+    required this._processManager,
+    required this._config,
+    required this._shutdownHooks,
+  });
 
   final Logger _logger;
   final FileSystem _fileSystem;
