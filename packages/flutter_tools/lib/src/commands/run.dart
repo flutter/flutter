@@ -762,10 +762,14 @@ class RunCommand extends RunCommandBase {
       for (final Device device in devices!)
         await FlutterDevice.create(
           device,
-          target: targetFile,
+          artifacts: globals.artifacts!,
           buildInfo: buildInfo,
-          userIdentifier: userIdentifier,
+          fileSystem: globals.fs,
+          logger: globals.logger,
           platform: globals.platform,
+          processManager: globals.processManager,
+          target: targetFile,
+          userIdentifier: userIdentifier,
         ),
     ];
 

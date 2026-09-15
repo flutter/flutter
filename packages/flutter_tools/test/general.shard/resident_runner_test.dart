@@ -1311,9 +1311,13 @@ flutter:
     () => testbed.run(() async {
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         FakeDevice(targetPlatform: TargetPlatform.web_javascript),
-        target: 'lib/main.dart',
+        artifacts: Artifacts.test(),
         buildInfo: BuildInfo.profile,
+        fileSystem: globals.fs,
+        logger: BufferLogger.test(),
         platform: FakePlatform(),
+        processManager: FakeProcessManager.any(),
+        target: 'lib/main.dart',
       );
 
       final ResidentRunner residentRunner = HotRunner(
@@ -1689,14 +1693,18 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
+                artifacts: globals.artifacts!,
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
                   treeShakeIcons: false,
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                target: null,
+                fileSystem: globals.fs,
+                logger: BufferLogger.test(),
                 platform: FakePlatform(),
+                processManager: FakeProcessManager.any(),
+                target: null,
               )).generator
               as DefaultResidentCompiler?;
 
@@ -1741,6 +1749,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
+                artifacts: globals.artifacts!,
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1748,8 +1757,11 @@ flutter:
                   extraFrontEndOptions: <String>['--enable-experiment=non-nullable'],
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                target: null,
+                fileSystem: globals.fs,
+                logger: BufferLogger.test(),
                 platform: FakePlatform(),
+                processManager: FakeProcessManager.any(),
+                target: null,
               )).generator
               as DefaultResidentCompiler?;
 
@@ -1794,6 +1806,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
+                artifacts: globals.artifacts!,
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1801,8 +1814,11 @@ flutter:
                   extraFrontEndOptions: <String>[],
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                target: null,
+                fileSystem: globals.fs,
+                logger: BufferLogger.test(),
                 platform: FakePlatform(),
+                processManager: FakeProcessManager.any(),
+                target: null,
               )).generator
               as DefaultResidentCompiler?;
 
@@ -1827,6 +1843,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
+                artifacts: globals.artifacts!,
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1835,8 +1852,11 @@ flutter:
                   initializeFromDill: '/foo/bar.dill',
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                target: null,
+                fileSystem: globals.fs,
+                logger: BufferLogger.test(),
                 platform: FakePlatform(),
+                processManager: FakeProcessManager.any(),
+                target: null,
               )).generator
               as DefaultResidentCompiler?;
 
@@ -1859,6 +1879,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
+                artifacts: globals.artifacts!,
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1867,8 +1888,11 @@ flutter:
                   assumeInitializeFromDillUpToDate: true,
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                target: null,
+                fileSystem: globals.fs,
+                logger: BufferLogger.test(),
                 platform: FakePlatform(),
+                processManager: FakeProcessManager.any(),
+                target: null,
               )).generator
               as DefaultResidentCompiler?;
 
@@ -1890,6 +1914,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
+                artifacts: globals.artifacts!,
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1897,8 +1922,11 @@ flutter:
                   frontendServerStarterPath: '/foo/bar/frontend_server_starter.dart',
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                target: null,
+                fileSystem: globals.fs,
+                logger: BufferLogger.test(),
                 platform: FakePlatform(),
+                processManager: FakeProcessManager.any(),
+                target: null,
               )).generator
               as DefaultResidentCompiler?;
 
