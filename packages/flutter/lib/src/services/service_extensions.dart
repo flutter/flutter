@@ -4,6 +4,7 @@
 
 /// @docImport 'binding.dart';
 /// @docImport 'debug.dart';
+/// @docImport 'flavor.dart';
 library;
 
 /// Service extension constants for the services library.
@@ -40,4 +41,14 @@ enum ServicesServiceExtensions {
   /// * [ServicesBinding.initServiceExtensions], where the service extension is
   ///   registered.
   evict,
+
+  /// Name of service extension that, when called, will return the flavor this
+  /// app was built with.
+  ///
+  /// See also:
+  ///
+  /// * [appFlavor], which is the value that this service extension exposes.
+  /// * [ServicesBinding.initServiceExtensions], where the service extension is
+  ///   registered.
+  appFlavor,
 }
