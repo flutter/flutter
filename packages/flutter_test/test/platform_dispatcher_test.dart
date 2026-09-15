@@ -213,9 +213,15 @@ void main() {
     WidgetTester tester,
   ) async {
     var metricsNotificationCount = 0;
+    final VoidCallback? previousMetricsChanged = tester.platformDispatcher.onMetricsChanged;
     tester.platformDispatcher.onMetricsChanged = () {
       metricsNotificationCount++;
     };
+    // The dispatcher is shared across the tests in this file, so the override
+    // has to be put back or it leaks into every test that follows.
+    addTearDown(() {
+      tester.platformDispatcher.onMetricsChanged = previousMetricsChanged;
+    });
 
     final customView = _FakeFlutterView(display: tester.view.display, viewId: 100);
     tester.platformDispatcher.addTestView(customView);
@@ -255,6 +261,26 @@ void main() {
     // Removing an already removed or unadded view is a no-op.
     tester.platformDispatcher.removeTestView(replacementView);
     expect(metricsNotificationCount, 4);
+  });
+
+  testWidgets('TestPlatformDispatcher clearAllTestValues removes custom views', (
+    WidgetTester tester,
+  ) async {
+    final customView = _FakeFlutterView(display: tester.view.display, viewId: 101);
+    tester.platformDispatcher.addTestView(customView);
+    addTearDown(() => tester.platformDispatcher.removeTestView(customView));
+
+    expect(tester.platformDispatcher.view(id: customView.viewId), isNotNull);
+
+    tester.platformDispatcher.clearAllTestValues();
+
+    // clearAllTestValues drops the custom views and refreshes the registry, so
+    // the view is gone from both view(id:) and views.
+    expect(tester.platformDispatcher.view(id: customView.viewId), isNull);
+    expect(
+      tester.platformDispatcher.views.map((FlutterView view) => view.viewId),
+      isNot(contains(customView.viewId)),
+    );
   });
 
   testWidgets(
@@ -482,6 +508,11 @@ void main() {
     WidgetTester tester,
   ) async {
     final VoidCallback? previous = tester.platformDispatcher.onMetricsChanged;
+    // The restore below is the behaviour under test, but an expect that fails
+    // before it would leak the override, so it is also guaranteed here.
+    addTearDown(() {
+      tester.platformDispatcher.onMetricsChanged = previous;
+    });
     var callCount = 0;
     tester.platformDispatcher.onMetricsChanged = () {
       callCount++;
@@ -499,6 +530,11 @@ void main() {
     WidgetTester tester,
   ) async {
     final ViewFocusChangeCallback? previous = tester.platformDispatcher.onViewFocusChange;
+    // The restore below is the behaviour under test, but an expect that fails
+    // before it would leak the override, so it is also guaranteed here.
+    addTearDown(() {
+      tester.platformDispatcher.onViewFocusChange = previous;
+    });
     var callCount = 0;
     tester.platformDispatcher.onViewFocusChange = (ViewFocusEvent event) {
       callCount++;

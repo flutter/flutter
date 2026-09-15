@@ -1037,6 +1037,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// Removes the [TestFlutterView] that wraps the given [view] from the list of
   /// views managed by this [TestPlatformDispatcher].
   ///
+  /// Accepts either the view passed to [addTestView] or the [TestFlutterView]
+  /// it returned, which is what a window controller holds as its `rootView`.
+  ///
   /// Reports a metrics change if the view was there to remove, and nothing at
   /// all if it was not, so that removing twice is not reported twice.
   void removeTestView(FlutterView view) {
@@ -1045,9 +1048,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     }
     _handleMetricsChanged();
     // For the reason [addTestView] gives: a dropped reentrant notification
-    // would otherwise leave the registry reporting a view that is gone.
+    // would otherwise leave the registry reporting a view that is gone. The
+    // caller may hold either the backing view or the wrapper, so both identify
+    // the entry that the removal above just invalidated.
     final TestFlutterView? stale = _testViews[view.viewId];
-    if (stale != null && identical(stale._view, view)) {
+    if (stale != null && (identical(stale._view, view) || identical(stale, view))) {
       _updateViewsAndDisplays();
     }
   }
@@ -1299,9 +1304,7 @@ class TestFlutterView implements FlutterView {
   ///   * [physicalConstraints] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  ViewConstraints get physicalConstraints =>
-      _physicalConstraints ??
-      (_physicalSize != null ? ViewConstraints.tight(_physicalSize!) : _view.physicalConstraints);
+  ViewConstraints get physicalConstraints => _physicalConstraints ?? _view.physicalConstraints;
   ViewConstraints? _physicalConstraints;
   set physicalConstraints(ViewConstraints value) {
     _physicalConstraints = value;
@@ -1420,10 +1423,7 @@ class TestFlutterView implements FlutterView {
 
   @override
   void render(Scene scene, {Size? size}) {
-    // An omitted size uses this view's physical size. Keep explicit test
-    // geometry above any debug override, and preserve an omission when neither
-    // layer supplies a size (which avoids unnecessary web resizes).
-    _view.render(scene, size: size ?? _physicalSize);
+    _view.render(scene, size: size);
   }
 
   @override
