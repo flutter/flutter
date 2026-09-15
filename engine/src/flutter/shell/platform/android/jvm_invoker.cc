@@ -477,9 +477,9 @@ AndroidJvmInvoker::GetJavaObject() const {
 }
 
 void AndroidJvmInvoker::SetPlatformTaskRunner(
-    fml::RefPtr<fml::TaskRunner> platform_task_runner) {
+    const fml::RefPtr<fml::TaskRunner>& platform_task_runner) {
   std::lock_guard<std::mutex> lock(platform_task_runner_mutex_);
-  platform_task_runner_ = std::move(platform_task_runner);
+  platform_task_runner_ = platform_task_runner;
 }
 
 fml::RefPtr<fml::TaskRunner> AndroidJvmInvoker::GetPlatformTaskRunner() const {
@@ -1430,7 +1430,7 @@ bool AndroidJvmInvoker::PostJvmTask(std::function<void()> task) {
     platform_runner = platform_task_runner_;
   }
   if (platform_runner) {
-    platform_runner->PostTask(std::move(task));
+    platform_runner->PostTask(task);
     return true;
   }
   return false;
