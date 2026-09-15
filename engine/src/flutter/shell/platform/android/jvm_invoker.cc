@@ -1121,6 +1121,9 @@ bool AndroidJvmInvoker::OnDisplayOverlaySurface(int32_t id,
                                                 int32_t width,
                                                 int32_t height) {
   TRACE_EVENT0("flutter", "AndroidJvmInvoker::OnDisplayOverlaySurface");
+  if (is_hcpp_active_.load()) {
+    return InvokeVoidMethod("showOverlaySurface2", "()V");
+  }
   if (!fml::jni::HasJavaVM()) {
     return true;
   }
@@ -1244,7 +1247,9 @@ bool AndroidJvmInvoker::InvokeVoidMethod(const std::string& method_name,
     return success;
   }
 
-  if (method_name == "onEndFrame" || method_name == "endFrame2") {
+  if (method_name == "onEndFrame" || method_name == "endFrame2" ||
+      method_name == "showOverlaySurface2" ||
+      method_name == "hideOverlaySurface2") {
     if (!fml::jni::HasJavaVM()) {
       return true;
     }

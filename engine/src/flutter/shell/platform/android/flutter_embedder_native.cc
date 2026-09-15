@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cstring>
 
+#include "rapidjson/document.h"
 #include "unicode/uchar.h"
 
 #include "flutter/fml/logging.h"
@@ -1875,6 +1876,10 @@ void FlutterEmbedderNative::SetEngine(FLUTTER_API_SYMBOL(FlutterEngine)
     std::scoped_lock lock(engine_mutex_);
     registered_engine_ = engine;
   }
+  if (engine == nullptr) {
+    std::lock_guard<std::mutex> lock(pre_launch_messages_mutex_);
+    engine_launched_ = false;
+  }
   AttachWindowMetricsCallbacks();
   {
     std::scoped_lock lock(vsync_waiter_mutex_);
@@ -1887,6 +1892,53 @@ void FlutterEmbedderNative::SetEngine(FLUTTER_API_SYMBOL(FlutterEngine)
 FLUTTER_API_SYMBOL(FlutterEngine) FlutterEmbedderNative::GetEngine() const {
   std::scoped_lock lock(engine_mutex_);
   return registered_engine_;
+}
+
+std::string FlutterEmbedderNative::GetInitialRoute() const {
+  std::lock_guard<std::mutex> lock(initial_route_mutex_);
+  return initial_route_;
+}
+
+void FlutterEmbedderNative::SetInitialRoute(
+    const std::string& initial_route) const {
+  std::lock_guard<std::mutex> lock(initial_route_mutex_);
+  initial_route_ = initial_route;
+}
+
+void FlutterEmbedderNative::FlushPreLaunchPlatformMessages() {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlushPreLaunchPlatformMessages");
+  std::vector<BufferedPlatformMessage> to_flush;
+  {
+    std::lock_guard<std::mutex> lock(pre_launch_messages_mutex_);
+    engine_launched_ = true;
+    to_flush.swap(pre_launch_messages_);
+    pre_launch_messages_bytes_ = 0;
+  }
+  for (const auto& msg : to_flush) {
+    SendPlatformMessage(msg.channel,
+                        msg.message.empty() ? nullptr : msg.message.data(),
+                        msg.message.size(), msg.response_id);
+  }
+}
+
+void FlutterEmbedderNative::RejectPreLaunchPlatformMessages() {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::RejectPreLaunchPlatformMessages");
+  std::vector<BufferedPlatformMessage> to_reject;
+  {
+    std::lock_guard<std::mutex> lock(pre_launch_messages_mutex_);
+    to_reject.swap(pre_launch_messages_);
+    pre_launch_messages_bytes_ = 0;
+  }
+  if (jvm_invoker_) {
+    for (const auto& msg : to_reject) {
+      if (msg.response_id != 0) {
+        jvm_invoker_->HandlePlatformMessageResponse(msg.response_id, nullptr,
+                                                    0);
+      }
+    }
+  }
 }
 
 void FlutterEmbedderNative::AttachWindowMetricsCallbacks() {
@@ -2715,6 +2767,20 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
     default_cmd_strings = std::move(filtered_cmd_strings);
   }
 
+  bool has_route_arg = false;
+  for (const auto& str : default_cmd_strings) {
+    if (str.rfind("--route=", 0) == 0 || str == "--route") {
+      has_route_arg = true;
+      break;
+    }
+  }
+  if (!has_route_arg) {
+    const std::string initial_route = GetInitialRoute();
+    if (!initial_route.empty() && initial_route != "/") {
+      default_cmd_strings.push_back("--route=" + initial_route);
+    }
+  }
+
   default_cmd_ptrs.reserve(default_cmd_strings.size());
   for (const auto& str : default_cmd_strings) {
     default_cmd_ptrs.push_back(str.c_str());
@@ -2920,6 +2986,7 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
   FML_LOG(INFO) << "FlutterEmbedderNative::Launch InitializeEngine result="
                 << init_result << " engine=" << engine;
   if (init_result != kSuccess || engine == nullptr) {
+    RejectPreLaunchPlatformMessages();
     std::lock_guard<std::mutex> lock(fallback_aot_data_mutex_);
     if (fallback_aot_data_) {
       CollectAOTData(fallback_aot_data_);
@@ -2929,7 +2996,11 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
   }
 
   SetEngine(engine);
+  FlushPreLaunchPlatformMessages();
   FlutterEngineResult run_result = RunInitializedEngine(engine);
+  if (run_result != kSuccess) {
+    RejectPreLaunchPlatformMessages();
+  }
   FML_LOG(INFO) << "FlutterEmbedderNative::Launch RunInitializedEngine result="
                 << run_result;
   return run_result;
@@ -3134,6 +3205,60 @@ FlutterEngineResult FlutterEmbedderNative::SendPlatformMessage(
 
   if (send_platform_message_fn_) {
     return send_platform_message_fn_(channel, message, size, response_id);
+  }
+
+  bool should_buffer = false;
+  {
+    std::lock_guard<std::mutex> lock(pre_launch_messages_mutex_);
+    should_buffer = !engine_launched_;
+  }
+
+  if (should_buffer) {
+    if (channel == "flutter/navigation" && message && size > 0) {
+      rapidjson::Document document;
+      document.Parse(reinterpret_cast<const char*>(message), size);
+      if (!document.HasParseError() && document.IsObject()) {
+        auto root = document.GetObj();
+        auto method = root.FindMember("method");
+        if (method != root.MemberEnd() && method->value.IsString() &&
+            std::strcmp(method->value.GetString(), "setInitialRoute") == 0) {
+          auto args = root.FindMember("args");
+          if (args != root.MemberEnd() && args->value.IsString()) {
+            SetInitialRoute(args->value.GetString());
+            if (response_id != 0 && jvm_invoker_) {
+              jvm_invoker_->HandlePlatformMessageResponse(response_id, nullptr,
+                                                          0);
+            }
+            return kSuccess;
+          }
+        }
+      }
+    }
+
+    std::lock_guard<std::mutex> lock(pre_launch_messages_mutex_);
+    if (!engine_launched_) {
+      if (pre_launch_messages_.size() >= kMaxPreLaunchPlatformMessages ||
+          pre_launch_messages_bytes_ + size >
+              kMaxPreLaunchPlatformMessageBytes) {
+        FML_LOG(WARNING)
+            << "FlutterEmbedderNative::SendPlatformMessage: Pre-launch buffer "
+               "full, dropping message on channel "
+            << channel;
+        if (response_id != 0 && jvm_invoker_) {
+          jvm_invoker_->HandlePlatformMessageResponse(response_id, nullptr, 0);
+        }
+        return kSuccess;
+      }
+      BufferedPlatformMessage buffered_msg;
+      buffered_msg.channel = channel;
+      if (message && size > 0) {
+        buffered_msg.message.assign(message, message + size);
+      }
+      buffered_msg.response_id = response_id;
+      pre_launch_messages_.push_back(std::move(buffered_msg));
+      pre_launch_messages_bytes_ += size;
+      return kSuccess;
+    }
   }
 
   auto engine = GetEngine();
@@ -4404,9 +4529,13 @@ bool FlutterEmbedderNative::PresentOverlayLayer(const FlutterLayer* layer,
 
   // Display and position overlay in Android hierarchy.
   if (jvm_invoker_) {
-    jvm_invoker_->OnDisplayOverlaySurface(target_overlay.id, 0, 0,
-                                          static_cast<int32_t>(screen_width),
-                                          static_cast<int32_t>(screen_height));
+    if (jvm_invoker_->IsHcppEnabled()) {
+      jvm_invoker_->InvokeVoidMethod("showOverlaySurface2", "()V");
+    } else {
+      jvm_invoker_->OnDisplayOverlaySurface(
+          target_overlay.id, 0, 0, static_cast<int32_t>(screen_width),
+          static_cast<int32_t>(screen_height));
+    }
   }
 
   // Restore main render context surface and OpenGL state.
