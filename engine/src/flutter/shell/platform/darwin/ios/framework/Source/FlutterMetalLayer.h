@@ -7,25 +7,12 @@
 
 #import <QuartzCore/QuartzCore.h>
 
-/// Drop-in replacement (as far as Flutter is concerned) for CAMetalLayer
-/// that can present with transaction from a background thread.
-///
-/// Properties and method declarations must exactly match those in the
-/// CAMetalLayer interface declaration.
-@interface FlutterMetalLayer : CALayer
+/// A CAMetalLayer that provides Flutter with IOSurface-backed render targets
+/// and presents their completed contents through the native drawable pipeline.
+@interface FlutterMetalLayer : CAMetalLayer
 
-@property(nullable, retain) id<MTLDevice> device;
-@property(nullable, readonly) id<MTLDevice> preferredDevice API_AVAILABLE(macos(10.15),
-                                                                          ios(13.0),
-                                                                          tvos(13.0))
-    API_UNAVAILABLE(watchos);
-@property MTLPixelFormat pixelFormat;
-@property BOOL framebufferOnly;
-@property CGSize drawableSize;
-@property BOOL presentsWithTransaction;
-@property(nullable) CGColorSpaceRef colorspace;
-
-- (nullable id<CAMetalDrawable>)nextDrawable;
+/// Returns an IOSurface-backed drawable for Flutter rendering.
+- (nullable id<CAMetalDrawable>)nextFlutterDrawable;
 
 /// Returns whether the Metal layer is enabled.
 /// This is controlled by FLTUseFlutterMetalLayer value in Info.plist.
