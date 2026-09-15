@@ -657,6 +657,16 @@ public class FlutterRenderer implements TextureRegistry {
           lastQueueTime = System.nanoTime();
         }
       }
+
+      // Extract HardwareBuffer on API 28+ (Android P) and forward to native pipeline:
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
+        try (HardwareBuffer hb = image.getHardwareBuffer()) {
+          if (hb != null) {
+            flutterJNI.updateHardwareBufferTexture(id(), hb);
+          }
+        }
+      }
+
       scheduleEngineFrame();
     }
 

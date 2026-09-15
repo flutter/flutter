@@ -129,6 +129,183 @@ TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
   EXPECT_TRUE(g_vulkan_proc_info.did_call_queue_submit);
 }
 
+TEST_F(EmbedderTest, CanRegisterAndResolveVulkanExternalTexture) {
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  fml::AutoResetWaitableEvent latch;
+
+  struct TestState {
+    fml::AutoResetWaitableEvent frame_latch;
+    bool callback_invoked = false;
+    bool destruction_invoked = false;
+  };
+  TestState test_state;
+  context.SetUserData(&test_state);
+
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+
+  context.GetRendererConfig().vulkan.external_texture_frame_callback =
+      [](void* user_data, int64_t texture_id, size_t width, size_t height,
+         FlutterVulkanExternalTexture* texture) -> bool {
+    auto* vk_context = reinterpret_cast<EmbedderTestContextVulkan*>(user_data);
+    auto* state = static_cast<TestState*>(vk_context->GetUserData());
+    state->callback_invoked = true;
+    texture->struct_size = sizeof(FlutterVulkanExternalTexture);
+    texture->width = width;
+    texture->height = height;
+    texture->image = reinterpret_cast<uint64_t>(vk_context->GetNextImage(
+        {static_cast<int>(width), static_cast<int>(height)}));
+    texture->format = VK_FORMAT_R8G8B8A8_UNORM;
+    texture->image_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    texture->user_data = &state->destruction_invoked;
+    texture->destruction_callback = [](void* data) {
+      if (data) {
+        *static_cast<bool*>(data) = true;
+      }
+    };
+    state->frame_latch.Signal();
+    return true;
+  };
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetDartEntrypoint("render_texture_impeller_test");
+  builder.SetSurface(DlISize(800, 600));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  constexpr int64_t texture_id = 1;
+  flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
+  ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  test_state.frame_latch.Wait();
+  EXPECT_TRUE(test_state.callback_invoked);
+
+  ASSERT_TRUE(embedder_engine->UnregisterTexture(texture_id));
+  engine.reset();
+  EXPECT_TRUE(test_state.destruction_invoked);
+}
+
+TEST_F(EmbedderTest, CanRegisterAndResolveHardwareBufferExternalTextureVulkan) {
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  fml::AutoResetWaitableEvent isolate_latch;
+  context.AddIsolateCreateCallback(
+      [&isolate_latch]() { isolate_latch.Signal(); });
+
+  struct TestState {
+    fml::AutoResetWaitableEvent frame_latch;
+    bool callback_invoked = false;
+    bool destruction_invoked = false;
+  };
+  TestState test_state;
+  context.SetUserData(&test_state);
+
+  context.GetRendererConfig()
+      .vulkan.hardware_buffer_external_texture_frame_callback =
+      [](void* user_data, int64_t texture_id, size_t width, size_t height,
+         FlutterHardwareBufferExternalTexture* texture) -> bool {
+    auto* vk_context = reinterpret_cast<EmbedderTestContextVulkan*>(user_data);
+    auto* state = static_cast<TestState*>(vk_context->GetUserData());
+    state->callback_invoked = true;
+    texture->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+    texture->width = width;
+    texture->height = height;
+    // Magic number rationale: 1 corresponds to
+    // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM.
+    texture->format = 1;
+    texture->fence_fd = -1;
+    // Magic number rationale: arbitrary mock HardwareBuffer handle value for
+    // testing.
+    texture->buffer = reinterpret_cast<FlutterHardwareBufferHandle>(0x5555);
+    texture->user_data = &state->destruction_invoked;
+    texture->destruction_callback = [](void* data) {
+      if (data) {
+        *static_cast<bool*>(data) = true;
+      }
+    };
+    state->frame_latch.Signal();
+    return true;
+  };
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetDartEntrypoint("render_texture_impeller_test");
+  builder.SetSurface(DlISize(800, 600));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  isolate_latch.Wait();
+
+  constexpr int64_t texture_id = 1;
+  flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
+  ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  test_state.frame_latch.Wait();
+  EXPECT_TRUE(test_state.callback_invoked);
+
+  ASSERT_TRUE(embedder_engine->UnregisterTexture(texture_id));
+  engine.reset();
+  EXPECT_TRUE(test_state.destruction_invoked);
+}
+
+TEST_F(EmbedderTest, HardwareBufferExternalTextureDualCallbacksSupportVulkan) {
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+
+  // Configure BOTH external_texture_frame_callback and
+  // hardware_buffer_external_texture_frame_callback to verify dual support.
+  context.GetRendererConfig().vulkan.external_texture_frame_callback =
+      [](void* user_data, int64_t id, size_t width, size_t height,
+         FlutterVulkanExternalTexture* texture) -> bool { return false; };
+  context.GetRendererConfig()
+      .vulkan.hardware_buffer_external_texture_frame_callback =
+      [](void* user_data, int64_t id, size_t width, size_t height,
+         FlutterHardwareBufferExternalTexture* texture) -> bool {
+    return false;
+  };
+
+  auto engine = builder.InitializeEngine();
+  EXPECT_TRUE(engine.is_valid());
+}
+
+TEST_F(EmbedderTest, CanSpawnEngineVulkan) {
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(100, 100));
+  auto parent_engine = builder.LaunchEngine();
+  ASSERT_TRUE(parent_engine.is_valid());
+  latch.Wait();
+
+  FlutterEngine spawned_engine = nullptr;
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_config.user_data = &context;
+
+  ASSERT_EQ(
+      FlutterEngineSpawn(parent_engine.get(), &spawn_config, &spawned_engine),
+      kSuccess);
+  ASSERT_NE(spawned_engine, nullptr);
+
+  ASSERT_EQ(FlutterEngineShutdown(spawned_engine), kSuccess);
+}
+
 }  // namespace testing
 }  // namespace flutter
 

@@ -284,6 +284,15 @@ EmbedderSemanticsUpdate2::EmbedderSemanticsUpdate2(
 EmbedderSemanticsUpdate2::~EmbedderSemanticsUpdate2() {}
 
 void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
+  static_assert(
+      static_cast<int32_t>(flutter::SemanticsRole::kRegion) ==
+          static_cast<int32_t>(kFlutterSemanticsRoleRegion),
+      "SemanticsRole and FlutterSemanticsRole upper bound must match");
+  static_assert(
+      static_cast<int32_t>(flutter::SemanticsRole::kNone) ==
+          static_cast<int32_t>(kFlutterSemanticsRoleNone),
+      "SemanticsRole and FlutterSemanticsRole lower bound must match");
+
   SkMatrix transform = node.transform.asM33();
   FlutterTransformation flutter_transform{
       transform.get(SkMatrix::kMScaleX), transform.get(SkMatrix::kMSkewX),
@@ -344,6 +353,8 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       flags_.back().get(),
       node.headingLevel,
       node.identifier.c_str(),
+      static_cast<FlutterSemanticsRole>(node.role),
+      0,  // reserved_padding
   });
 }
 
