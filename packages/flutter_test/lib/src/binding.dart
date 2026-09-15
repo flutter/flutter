@@ -1981,6 +1981,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         _testTextInput.unregister();
       }
       invariantTester();
+      _verifyPostPumpInvariants();
       _shouldVerifyInvariants = true;
     }
 
@@ -2001,6 +2002,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   // checks are skipped to avoid spurious errors (e.g., active animations or
   // unreset debug flags from aborted tests) from obscuring the real failure.
   bool _shouldVerifyInvariants = false;
+
+  void _verifyPostPumpInvariants() {}
 
   void _verifyInvariants() {
     assert(
@@ -2550,6 +2553,12 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
+  void _verifyPostPumpInvariants() {
+    super._verifyPostPumpInvariants();
+    assert(_currentFakeAsync!.microtaskCount == 0); // Shouldn't be possible.
+  }
+
+  @override
   void _verifyInvariants() {
     super._verifyInvariants();
 
@@ -2570,7 +2579,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       timersPending = true;
     }
     assert(!timersPending, 'A Timer is still pending even after the widget tree was disposed.');
-    assert(_currentFakeAsync!.microtaskCount == 0); // Shouldn't be possible.
   }
 
   @override

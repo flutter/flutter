@@ -159,4 +159,16 @@ void main() {
     expect(find.byType(Placeholder), findsOneWidget);
     debugDefaultTargetPlatformOverride = null;
   });
+
+  // Verifies that asynchronous operations executed in [addTearDown] callbacks
+  // (which may schedule microtasks) do not cause invariant failures in
+  // [TestWidgetsFlutterBinding.postTest].
+  testWidgets(
+    'addTearDown can execute asynchronous operations without triggering invariant errors',
+    (WidgetTester tester) async {
+      addTearDown(() async {
+        await Future<void>.value();
+      });
+    },
+  );
 }
