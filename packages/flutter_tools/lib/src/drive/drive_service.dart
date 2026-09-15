@@ -75,12 +75,12 @@ class FlutterDriverFactory {
       );
     }
     return FlutterDriverService(
+      applicationPackageFactory: _applicationPackageFactory,
+      dartSdkPath: _dartSdkPath,
+      devtoolsLauncher: _devtoolsLauncher,
       logger: _logger,
       platform: _platform,
       processUtils: _processUtils,
-      dartSdkPath: _dartSdkPath,
-      applicationPackageFactory: _applicationPackageFactory,
-      devtoolsLauncher: _devtoolsLauncher,
     );
   }
 }
@@ -130,11 +130,11 @@ abstract class DriverService {
 class FlutterDriverService extends DriverService {
   FlutterDriverService({
     required this._applicationPackageFactory,
+    required this._dartSdkPath,
+    required this._devtoolsLauncher,
     required this._logger,
     required this._platform,
     required this._processUtils,
-    required this._dartSdkPath,
-    required this._devtoolsLauncher,
     @visibleForTesting this._vmServiceConnector = connectToVmService,
     @visibleForTesting this._logFlushDelay = const Duration(milliseconds: 500),
   });

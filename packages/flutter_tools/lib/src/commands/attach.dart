@@ -272,12 +272,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   Future<void> _attach({required Device device}) async {
     final ToolContext(
-      fs: FileSystem fs,
-      logger: Logger logger,
-      signals: Signals signals,
-      terminal: AnsiTerminal terminal,
+      :FileSystem fs,
+      :Logger logger,
+      :ProcessInfo processInfo,
+      :Signals signals,
+      :AnsiTerminal terminal,
     ) = _toolContext;
-    final processInfo = ProcessInfo(fs);
 
     terminal.usesTerminalUi = true;
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
@@ -307,7 +307,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attachDaemon({required Device device}) async {
-    final ToolContext(fs: FileSystem fs, logger: Logger logger, stdio: Stdio stdio) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger, :Stdio stdio) = _toolContext;
 
     final daemon = Daemon(
       DaemonConnection(
@@ -350,11 +350,11 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   Future<ResidentRunner> _discoverVmServiceAndCreateResidentRunner({required Device device}) async {
     final ToolContext(
-      artifacts: Artifacts artifacts,
-      fs: FileSystem fs,
-      logger: Logger logger,
-      platform: Platform platform,
-      processManager: ProcessManager processManager,
+      :Artifacts artifacts,
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
     ) = _toolContext;
 
     final Future<Uri> vmServiceUri = _discoverVmService(device: device);
