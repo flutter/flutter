@@ -273,59 +273,49 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    "CustomDevices.discoverDevices doesn't report device when ping command output doesn't match ping success regex",
-    () async {
-      final fs = MemoryFileSystem.test();
-      final Directory dir = fs.directory('custom_devices_config_dir');
+  testWithoutContext("CustomDevices.discoverDevices doesn't report device when ping command output doesn't match ping success regex", () async {
+    final fs = MemoryFileSystem.test();
+    final Directory dir = fs.directory('custom_devices_config_dir');
 
-      _writeCustomDevicesConfigFile(dir, <CustomDeviceConfig>[testConfig]);
+    _writeCustomDevicesConfigFile(dir, <CustomDeviceConfig>[testConfig]);
 
-      final discovery = CustomDevices(
-        featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(command: testConfig.pingCommand),
-        ]),
-        config: CustomDevicesConfig.test(
-          fileSystem: fs,
-          directory: dir,
-          logger: BufferLogger.test(),
+    final discovery = CustomDevices(
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(command: testConfig.pingCommand),
+      ]),
+      config: CustomDevicesConfig.test(fileSystem: fs, directory: dir, logger: BufferLogger.test()),
+    );
+
+    expect(await discovery.discoverDevices(), hasLength(0));
+  });
+
+  testWithoutContext("CustomDevices.discoverDevices doesn't report device and does not throw when ping command times out", () async {
+    final fs = MemoryFileSystem.test();
+    final Directory dir = fs.directory('custom_devices_config_dir');
+
+    _writeCustomDevicesConfigFile(dir, <CustomDeviceConfig>[testConfig]);
+
+    final logger = BufferLogger.test();
+    final discovery = CustomDevices(
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+      logger: logger,
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: testConfig.pingCommand,
+          exception: const ProcessException('testping', <String>[], 'Process timed out'),
         ),
-      );
+      ]),
+      config: CustomDevicesConfig.test(fileSystem: fs, directory: dir, logger: logger),
+    );
 
-      expect(await discovery.discoverDevices(), hasLength(0));
-    },
-  );
-
-  testWithoutContext(
-    "CustomDevices.discoverDevices doesn't report device and does not throw when ping command times out",
-    () async {
-      final fs = MemoryFileSystem.test();
-      final Directory dir = fs.directory('custom_devices_config_dir');
-
-      _writeCustomDevicesConfigFile(dir, <CustomDeviceConfig>[testConfig]);
-
-      final logger = BufferLogger.test();
-      final discovery = CustomDevices(
-        featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
-        logger: logger,
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(
-            command: testConfig.pingCommand,
-            exception: const ProcessException('testping', <String>[], 'Process timed out'),
-          ),
-        ]),
-        config: CustomDevicesConfig.test(fileSystem: fs, directory: dir, logger: logger),
-      );
-
-      expect(await discovery.discoverDevices(), hasLength(0));
-      expect(
-        logger.traceText,
-        contains('Error pinging custom device testid: ProcessException: Process timed out'),
-      );
-    },
-  );
+    expect(await discovery.discoverDevices(), hasLength(0));
+    expect(
+      logger.traceText,
+      contains('Error pinging custom device testid: ProcessException: Process timed out'),
+    );
+  });
 
   testWithoutContext(
     'CustomDevice.tryPing returns false and logs trace when ping command times out',
@@ -470,43 +460,40 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    'CustomDeviceAppSession forwards VM Service port correctly when port forwarding is not configured',
-    () async {
-      final runDebugCompleter = Completer<void>();
+  testWithoutContext('CustomDeviceAppSession forwards VM Service port correctly when port forwarding is not configured', () async {
+    final runDebugCompleter = Completer<void>();
 
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: testConfigNonForwarding.runDebugCommand,
-          completer: runDebugCompleter,
-          stdout: 'The Dart VM service is listening on http://192.168.178.123:12345/abcd/\n',
-        ),
-      ]);
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: testConfigNonForwarding.runDebugCommand,
+        completer: runDebugCompleter,
+        stdout: 'The Dart VM service is listening on http://192.168.178.123:12345/abcd/\n',
+      ),
+    ]);
 
-      final appSession = CustomDeviceAppSession(
-        name: 'testname',
-        device: CustomDevice(
-          config: testConfigNonForwarding,
-          logger: BufferLogger.test(),
-          processManager: processManager,
-        ),
-        appPackage: PrebuiltLinuxApp(executable: 'testexecutable'),
+    final appSession = CustomDeviceAppSession(
+      name: 'testname',
+      device: CustomDevice(
+        config: testConfigNonForwarding,
         logger: BufferLogger.test(),
         processManager: processManager,
-      );
+      ),
+      appPackage: PrebuiltLinuxApp(executable: 'testexecutable'),
+      logger: BufferLogger.test(),
+      processManager: processManager,
+    );
 
-      final LaunchResult launchResult = await appSession.start(
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      );
+    final LaunchResult launchResult = await appSession.start(
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
 
-      expect(launchResult.started, true);
-      expect(launchResult.vmServiceUri, Uri.parse('http://192.168.178.123:12345/abcd/'));
-      expect(runDebugCompleter.isCompleted, false);
+    expect(launchResult.started, true);
+    expect(launchResult.vmServiceUri, Uri.parse('http://192.168.178.123:12345/abcd/'));
+    expect(runDebugCompleter.isCompleted, false);
 
-      expect(await appSession.stop(), true);
-      expect(runDebugCompleter.isCompleted, true);
-    },
-  );
+    expect(await appSession.stop(), true);
+    expect(runDebugCompleter.isCompleted, true);
+  });
 
   testUsingContext(
     'custom device end-to-end test',

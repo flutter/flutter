@@ -26,11 +26,9 @@ class BuildWindowsCommand extends BuildSubCommand {
     required this.buildSystem,
     required ToolContext toolContext,
     required bool verboseHelp,
-    required FeatureFlags featureFlags,
-    required VisualStudio visualStudio,
-  }) : _featureFlags = featureFlags,
-       _visualStudio = visualStudio,
-       super(
+    required this._featureFlags,
+    required this._visualStudio,
+  }) : super(
          logger: toolContext.logger,
          outputPreferences: toolContext.outputPreferences,
          toolContext: toolContext,
