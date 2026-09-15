@@ -16,6 +16,7 @@
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_runtime_effect_impeller.h"
+#include "impeller/entity/contents/content_context.h"
 #include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
@@ -53,7 +54,8 @@ TEST_P(AiksTest, VerticesGeometryUVPositionData) {
   DlPaint paint;
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
-  auto size = image->GetImpellerTexture(GetContext())->GetSize();
+  ContentContext content_context(GetContext(), nullptr);
+  auto size = image->GetImpellerTexture(content_context)->GetSize();
 
   paint.setColorSource(
       DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
@@ -76,7 +78,8 @@ TEST_P(AiksTest, VerticesGeometryUVPositionDataWithTranslate) {
   DlPaint paint;
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
-  auto size = image->GetImpellerTexture(GetContext())->GetSize();
+  ContentContext content_context(GetContext(), nullptr);
+  auto size = image->GetImpellerTexture(content_context)->GetSize();
 
   DlMatrix matrix = DlMatrix::MakeTranslation({100, 100});
   paint.setColorSource(
@@ -101,7 +104,8 @@ TEST_P(AiksTest, VerticesGeometryColorUVPositionData) {
   DlPaint paint;
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
-  auto size = image->GetImpellerTexture(GetContext())->GetSize();
+  ContentContext content_context(GetContext(), nullptr);
+  auto size = image->GetImpellerTexture(content_context)->GetSize();
 
   paint.setColorSource(
       DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
@@ -129,7 +133,8 @@ TEST_P(AiksTest, VerticesGeometryColorUVPositionDataAdvancedBlend) {
   DlPaint paint;
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
-  auto size = image->GetImpellerTexture(GetContext())->GetSize();
+  ContentContext content_context(GetContext(), nullptr);
+  auto size = image->GetImpellerTexture(content_context)->GetSize();
 
   paint.setColorSource(
       DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));

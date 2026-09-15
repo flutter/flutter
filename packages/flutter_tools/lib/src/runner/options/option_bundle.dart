@@ -26,20 +26,16 @@ abstract class OptionBundle {
 
   /// Registers all option descriptors and child bundles into [parser] and binds
   /// to [command].
-  void register(
-    FlutterCommand command,
-    ArgParser parser,
-    Map<String, OptionDescriptor<Object?>> registry,
-  ) {
+  void register(FlutterCommand command, ArgParser parser) {
     if (title != null) {
       parser.addSeparator(title!);
     }
     onRegister(command);
     for (final OptionDescriptor<Object?> descriptor in descriptors) {
-      descriptor.addTo(parser, registry: registry, verboseHelp: command.verboseHelp);
+      descriptor.addTo(parser, verboseHelp: command.verboseHelp);
     }
     for (final OptionBundle subBundle in subBundles) {
-      subBundle.register(command, parser, registry);
+      subBundle.register(command, parser);
     }
   }
 }
