@@ -1309,8 +1309,13 @@ class EditableText extends StatefulWidget {
   /// This affects the height of the field itself and does not limit the number
   /// of lines that can be entered into the field.
   ///
-  /// If this is null (default), text container starts with enough vertical space
-  /// for one line and grows to accommodate additional lines as they are entered.
+  /// If this is null (default), the minimum height is determined by [maxLines]
+  /// instead: the field starts out tall enough to show [maxLines] lines, or a
+  /// single line when [maxLines] is also null. In other words, leaving
+  /// [minLines] null while setting [maxLines] to a value greater than one
+  /// produces a field that starts at its full [maxLines] height rather than
+  /// growing into it. To make the field start shorter and grow up to
+  /// [maxLines], set [minLines] explicitly.
   ///
   /// This can be used in combination with [maxLines] for a varying set of behaviors.
   ///
@@ -1337,6 +1342,13 @@ class EditableText extends StatefulWidget {
   /// scroll vertically.
   /// ```dart
   /// const TextField(minLines:2, maxLines: 4)
+  /// ```
+  ///
+  /// Input that is 4 lines tall from the start, because a null [minLines]
+  /// defers to [maxLines]. If additional lines are entered it will scroll
+  /// vertically.
+  /// ```dart
+  /// const TextField(maxLines: 4)
   /// ```
   ///
   /// Defaults to null.
