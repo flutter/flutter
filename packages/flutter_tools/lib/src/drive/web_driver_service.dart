@@ -72,9 +72,13 @@ class WebDriverService extends DriverService {
   }) async {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      target: mainPath,
+      artifacts: globals.artifacts!,
       buildInfo: buildInfo,
+      fileSystem: globals.fs,
+      logger: _logger,
       platform: _platform,
+      processManager: globals.processManager,
+      target: mainPath,
     );
     _residentRunner = webRunnerFactory!.createWebRunner(
       flutterDevice,
