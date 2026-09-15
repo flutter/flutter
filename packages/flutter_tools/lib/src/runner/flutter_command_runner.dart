@@ -63,12 +63,10 @@ abstract final class FlutterGlobalOptions {
 class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({
     required ToolContext toolContext,
-    Analytics analytics = const NoOpAnalytics(),
+    this._analytics = const NoOpAnalytics(),
     bool verboseHelp = false,
-    FeatureFlags? featureFlags,
-  }) : _analytics = analytics,
-       _featureFlags = featureFlags,
-       _toolContext = toolContext,
+    this._featureFlags,
+  }) : _toolContext = toolContext,
        _verboseHelp = verboseHelp,
        _argParser = ArgParser(
          allowTrailingOptions: false,

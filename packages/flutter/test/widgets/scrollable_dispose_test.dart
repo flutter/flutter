@@ -82,8 +82,7 @@ void main() {
       final TestGesture gesture = await tester.startGesture(
         tester.getTopLeft(find.byKey(outerContainer)) + const Offset(50.0, 50.0),
       );
-      await tester
-          .pumpAndSettle(); // This shouldn't change the scroll offset because of the down event above.
+      await tester.pumpAndSettle(); // This shouldn't change the scroll offset because of the down event above.
       expect(controller.offset, currentOffset);
 
       // Dispose the scrollables while the finger is still down, this should not crash.
