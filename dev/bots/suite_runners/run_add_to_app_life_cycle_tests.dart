@@ -10,7 +10,7 @@ import '../run_command.dart';
 import '../utils.dart';
 
 Future<void> addToAppLifeCycleRunner() async {
-  if (Platform.isMacOS) {
+  if (Platform.isMacOS || dryRun) {
     printProgress('${green}Running add-to-app life cycle iOS integration tests$reset...');
     final String addToAppDir = path.join(
       flutterRoot,
