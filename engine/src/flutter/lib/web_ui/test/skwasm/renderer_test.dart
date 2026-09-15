@@ -73,5 +73,89 @@ void testMain() {
         picture.dispose();
       }
     }, timeout: const Timeout(Duration(seconds: 10)));
+
+    test('picture to image preserves rendered pixels', () async {
+      final globalRenderer = renderer as SkwasmRenderer;
+      for (final forceMultiSurface in <bool>[false, true]) {
+        debugOverrideJsConfiguration(
+          <String, Object?>{'skwasmForceMultiSurfaceRasterizer': forceMultiSurface}.jsify()
+              as JsFlutterConfiguration?,
+        );
+        globalRenderer.debugResetRasterizer();
+
+        if (!forceMultiSurface) {
+          expect(globalRenderer.rasterizer, isA<OffscreenCanvasRasterizer>());
+        } else if (browserSupportsTransferControlToOffscreen || !globalRenderer.isMultiThreaded) {
+          expect(globalRenderer.rasterizer, isA<MultiSurfaceRasterizer>());
+        }
+
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder, const ui.Rect.fromLTWH(0, 0, 2, 2));
+        canvas.drawRect(
+          const ui.Rect.fromLTWH(0, 0, 1, 1),
+          ui.Paint()..color = const ui.Color(0xFFFF0000),
+        );
+        canvas.drawRect(
+          const ui.Rect.fromLTWH(1, 0, 1, 1),
+          ui.Paint()..color = const ui.Color(0xFF00FF00),
+        );
+        canvas.drawRect(
+          const ui.Rect.fromLTWH(0, 1, 1, 1),
+          ui.Paint()..color = const ui.Color(0xFF0000FF),
+        );
+        canvas.drawRect(
+          const ui.Rect.fromLTWH(1, 1, 1, 1),
+          ui.Paint()..color = const ui.Color(0xFFFFFFFF),
+        );
+        final ui.Picture picture = recorder.endRecording();
+        final ui.Image image = await picture.toImage(2, 2);
+        try {
+          final ByteData? data = await image.toByteData();
+          expect(data, isNotNull);
+          expect(data!.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes), <int>[
+            0xFF,
+            0x00,
+            0x00,
+            0xFF,
+            0x00,
+            0xFF,
+            0x00,
+            0xFF,
+            0x00,
+            0x00,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xFF,
+          ]);
+          final ByteData? pngData = await image.toByteData(format: ui.ImageByteFormat.png);
+          expect(pngData, isNotNull);
+          final Uint8List pngBytes = pngData!.buffer.asUint8List(
+            pngData.offsetInBytes,
+            pngData.lengthInBytes,
+          );
+          expect(pngBytes.sublist(0, 8), <int>[137, 80, 78, 71, 13, 10, 26, 10]);
+
+          final ui.Codec codec = await ui.instantiateImageCodec(pngBytes);
+          final ui.FrameInfo decodedFrame = await codec.getNextFrame();
+          try {
+            final ByteData? decodedData = await decodedFrame.image.toByteData();
+            expect(decodedData, isNotNull);
+            expect(
+              decodedData!.buffer.asUint8List(decodedData.offsetInBytes, decodedData.lengthInBytes),
+              data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+            );
+          } finally {
+            decodedFrame.image.dispose();
+            codec.dispose();
+          }
+        } finally {
+          image.dispose();
+          picture.dispose();
+        }
+      }
+    }, timeout: const Timeout(Duration(seconds: 10)));
   });
 }

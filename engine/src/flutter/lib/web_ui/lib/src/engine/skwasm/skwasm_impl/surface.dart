@@ -129,6 +129,7 @@ class SkwasmSurface implements OffscreenSurface, OnscreenSurface {
   late final bool _isOnscreen;
   late final bool _useTransferredCanvas;
   final DomElement _hostElement = createDomElement('flt-canvas-container');
+  bool _isOverlay = false;
   double _currentDevicePixelRatio = -1;
   BitmapSize _currentSize = const BitmapSize(1, 1);
   Completer<void> _initializedCompleter;
@@ -155,6 +156,21 @@ class SkwasmSurface implements OffscreenSurface, OnscreenSurface {
   void _maybeAttachCanvasToDom() {
     if (_isOnscreen) {
       _hostElement.appendChild(_canvas as DomHTMLCanvasElement);
+      _applyOverlayPositioning();
+    }
+  }
+
+  void _applyOverlayPositioning() {
+    if (!_isOnscreen) {
+      return;
+    }
+    final DomCSSStyleDeclaration style = (_canvas as DomHTMLCanvasElement).style;
+    if (_isOverlay) {
+      if (style.position != 'absolute') {
+        style.position = 'absolute';
+      }
+    } else if (style.position == 'absolute') {
+      style.removeProperty('position');
     }
   }
 
@@ -361,6 +377,7 @@ class SkwasmSurface implements OffscreenSurface, OnscreenSurface {
 
   @override
   void setIsOverlay(bool isOverlay) {
-    // Skwasm does not need to change its canvas when it is used as an overlay.
+    _isOverlay = isOverlay;
+    _applyOverlayPositioning();
   }
 }
