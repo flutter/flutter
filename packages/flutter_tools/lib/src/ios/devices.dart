@@ -1361,44 +1361,83 @@ class IOSDevice extends Device {
     }
   }
 
-  @override
-  bool get supportsScreenshot {
-    final Version? xcodeVersion = globals.xcode?.currentVersion;
-    if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
-      return globals.xcode!.isDevicectlInstalled;
-    }
-    return false;
+  bool get _supportsDevicectl {
+    final Xcode? xcode = _xcode ?? globals.xcode;
+    final Version? xcodeVersion = xcode?.currentVersion;
+    return isCoreDevice &&
+        xcode != null &&
+        xcodeVersion != null &&
+        xcodeVersion.major >= 27 &&
+        xcode.isDevicectlInstalled;
   }
 
   @override
+  bool get supportsScreenshot => _supportsDevicectl;
+
+  @override
   Future<void> takeScreenshot(File outputFile) async {
-    final Version? xcodeVersion = globals.xcode?.currentVersion;
-    if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
-      var success = false;
-      try {
-        success = await _coreDeviceControl.takeScreenshot(
-          deviceId: id,
-          destination: outputFile.path,
-        );
-      } on Exception catch (error) {
-        final errorMessage = error.toString();
-        if (errorMessage.contains('CoreDeviceError error 4000') ||
-            errorMessage.contains('CoreDeviceError error 4016') ||
-            errorMessage.contains('RemotePairingError error 2') ||
-            errorMessage.contains('Connection was invalidated')) {
-          throwToolExit(
-            'Failed to establish a connection to the device. '
-            'Please make sure the device is available and try again.',
-          );
-        }
-        throwToolExit('Failed to take screenshot with devicectl: $error');
-      }
-      if (success) {
-        return;
-      }
+    if (!_supportsDevicectl) {
+      throwToolExit('flutter capture screenshot requires Xcode 27 or higher.');
+    }
+    var success = false;
+    try {
+      success = await _coreDeviceControl.takeScreenshot(deviceId: id, destination: outputFile.path);
+    } on Exception catch (error) {
+      _handleDevicectlError(error.toString(), 'take screenshot');
+    }
+    if (!success) {
       throwToolExit('Failed to take screenshot with devicectl.');
     }
-    throwToolExit('flutter screenshot requires Xcode 27 or higher.');
+  }
+
+  @override
+  bool get supportsScreenRecording => _supportsDevicectl;
+
+  @override
+  Future<void> startScreenRecording(File outputFile, {Duration? duration}) async {
+    if (!_supportsDevicectl) {
+      throwToolExit('flutter capture recording requires Xcode 27 or higher.');
+    }
+    final Process process;
+    try {
+      process = await _coreDeviceControl.startScreenRecording(
+        deviceId: id,
+        destination: outputFile.path,
+      );
+    } on Exception catch (error) {
+      _handleDevicectlError(error.toString(), 'record screen');
+    }
+    final stderrBuf = StringBuffer();
+    final Future<void> stderrFuture = process.stderr
+        .transform(utf8.decoder)
+        .forEach(stderrBuf.write);
+
+    if (duration != null) {
+      try {
+        await process.exitCode.timeout(duration);
+      } on TimeoutException {
+        ProcessSignal.sigint.kill(process);
+      }
+    }
+    final (int exitCode, _) = await (process.exitCode, stderrFuture).wait;
+    if (exitCode != 0) {
+      _handleDevicectlError(stderrBuf.toString(), 'record screen');
+    }
+  }
+
+  Never _handleDevicectlError(String errorMessage, String operation) {
+    // devicectl surfaces errors via stderr containing these error codes;
+    // no typed exception hierarchy exists upstream.
+    if (errorMessage.contains('CoreDeviceError error 4000') ||
+        errorMessage.contains('CoreDeviceError error 4016') ||
+        errorMessage.contains('RemotePairingError error 2') ||
+        errorMessage.contains('Connection was invalidated')) {
+      throwToolExit(
+        'Failed to establish a connection to the device. '
+        'Please make sure the device is available and try again.',
+      );
+    }
+    throwToolExit('Failed to $operation with devicectl: $errorMessage');
   }
 
   @override
