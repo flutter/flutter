@@ -131,6 +131,18 @@ FLUTTER_ASSERT_ARC
 - (void)flutterPrepareForPresent:(nonnull id<MTLCommandBuffer>)commandBuffer {
   FlutterTexture* texture = _texture;
   texture.waitingForCompletion = YES;
+  [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
+    texture.waitingForCompletion = NO;
+  }];
+
+  // Avoid waiting for a native drawable when a resize has already made this
+  // Flutter texture unsuitable for the current layer configuration.
+  const CGSize drawableSize = _layer.drawableSize;
+  if (drawableSize.width != texture.texture.width ||
+      drawableSize.height != texture.texture.height ||
+      _layer.pixelFormat != texture.texture.pixelFormat) {
+    return;
+  }
 
   id<CAMetalDrawable> presentationDrawable = [_layer acquirePresentationDrawable];
   id<MTLTexture> presentationTexture = presentationDrawable.texture;
@@ -163,9 +175,6 @@ FLUTTER_ASSERT_ARC
     // drawable can join the Core Animation transaction used by platform views.
     _presentationDrawable = presentationDrawable;
   }
-  [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
-    texture.waitingForCompletion = NO;
-  }];
 }
 
 @end

@@ -14,6 +14,12 @@
 @interface FlutterMetalLayerTest : XCTestCase
 @end
 
+@interface FlutterMetalLayer (Testing)
+
+- (id<CAMetalDrawable>)acquirePresentationDrawable;
+
+@end
+
 @interface TestFlutterMetalLayerView : UIView
 @end
 
@@ -312,6 +318,25 @@
     XCTAssertEqual(drawable.texture.width, newSize);
   }
 
+  [self removeMetalLayer:layer];
+}
+
+- (void)testResizeBeforePrepareDoesNotAcquirePresentationDrawable {
+  FlutterMetalLayer* layer = [self addMetalLayer];
+  id<CAMetalDrawable> drawable = [layer nextDrawable];
+  BAIL_IF_NO_DRAWABLE(drawable);
+
+  layer.drawableSize = CGSizeMake(200, 200);
+
+  id mockLayer = OCMPartialMock(layer);
+  OCMReject([mockLayer acquirePresentationDrawable]);
+  id<MTLCommandBuffer> mockCommandBuffer = OCMProtocolMock(@protocol(MTLCommandBuffer));
+  OCMStub([mockCommandBuffer addCompletedHandler:OCMOCK_ANY]);
+
+  [(id<FlutterMetalDrawable>)drawable flutterPrepareForPresent:mockCommandBuffer];
+
+  [mockLayer verify];
+  [mockLayer stopMocking];
   [self removeMetalLayer:layer];
 }
 
