@@ -483,6 +483,26 @@ void main() {
       expect(nodeB.hasPrimaryFocus, isTrue);
       expect(nodeA.hasPrimaryFocus, isFalse);
     }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets('Detached FocusNode ancestors list is empty', (WidgetTester tester) async {
+      final outer = FocusNode(debugLabel: 'outer');
+      final inner = FocusNode(debugLabel: 'inner');
+      addTearDown(outer.dispose);
+      addTearDown(inner.dispose);
+
+      await tester.pumpWidget(
+        Focus(
+          focusNode: outer,
+          child: Focus(focusNode: inner, child: const SizedBox()),
+        ),
+      );
+      expect(inner.ancestors, contains(outer));
+
+      await tester.pumpWidget(Focus(focusNode: outer, child: const SizedBox()));
+
+      expect(inner.parent, isNull);
+      expect(inner.ancestors, isEmpty);
+    });
   });
 
   group(FocusScopeNode, () {

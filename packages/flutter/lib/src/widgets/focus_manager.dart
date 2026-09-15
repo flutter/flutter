@@ -235,6 +235,7 @@ class FocusAttachment {
       // This node is no longer in the tree, so shouldn't send notifications anymore.
       _node._manager?._markDetached(_node);
       _node._parent?._removeChild(_node);
+      _node._ancestors = null;
       _node._attachment = null;
       assert(
         !_node.hasPrimaryFocus,
@@ -735,7 +736,13 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Iterates the ancestors of this node starting at the parent and iterating
   /// over successively more remote ancestors of this node, ending at the root
   /// [FocusScopeNode] ([FocusManager.rootScope]).
+  ///
+  /// Returns an empty iterable if this node has no parent.
   Iterable<FocusNode> get ancestors {
+    if (_parent == null) {
+      return const Iterable<FocusNode>.empty();
+    }
+
     if (_ancestors == null) {
       final result = <FocusNode>[];
       FocusNode? parent = _parent;
