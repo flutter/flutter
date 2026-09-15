@@ -974,7 +974,26 @@ class CkParagraph implements ui.Paragraph {
   ui.TextRange getLineBoundary(ui.TextPosition position) {
     assert(!_disposed, 'Paragraph has been disposed.');
     final List<SkLineMetrics> metrics = skiaObject.getLineMetrics();
-    final int offset = position.offset;
+    final ui.TextRange line = _lineBoundaryAtOffset(metrics, position.offset);
+
+    // A line's endIndex equals the next line's startIndex at a soft wrap, so
+    // the lookup above cannot tell the two apart on its own and always answers
+    // with the earlier line, as if the affinity were upstream. A downstream
+    // position sitting exactly on that seam belongs to the next line instead.
+    // This mirrors the native implementation in `lib/ui/text.dart`.
+    final ui.TextRange nextLine = _lineBoundaryAtOffset(metrics, position.offset + 1);
+    if (nextLine.isValid &&
+        position.affinity == ui.TextAffinity.downstream &&
+        line != nextLine &&
+        position.offset == line.end &&
+        line.end == nextLine.start) {
+      return nextLine;
+    }
+    return line;
+  }
+
+  // The line containing [offset], treating both line bounds as inclusive.
+  static ui.TextRange _lineBoundaryAtOffset(List<SkLineMetrics> metrics, int offset) {
     for (final metric in metrics) {
       if (offset >= metric.startIndex && offset <= metric.endIndex) {
         return ui.TextRange(start: metric.startIndex.toInt(), end: metric.endIndex.toInt());
