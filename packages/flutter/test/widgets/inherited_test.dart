@@ -33,7 +33,7 @@ class ValueInherited extends InheritedWidget {
 
 class ExpectFail extends StatefulWidget {
   const ExpectFail(this.onError, {super.key});
-  final VoidCallback onError;
+  final ValueChanged<Object> onError;
 
   @override
   ExpectFailState createState() => ExpectFailState();
@@ -46,7 +46,7 @@ class ExpectFailState extends State<ExpectFail> {
     try {
       context.dependOnInheritedWidgetOfExactType<TestInherited>(); // should fail
     } catch (e) {
-      widget.onError();
+      widget.onError(e);
     }
   }
 
@@ -532,13 +532,45 @@ void main() {
     var exceptionCaught = false;
 
     final parent = TestInherited(
-      child: ExpectFail(() {
+      child: ExpectFail((Object error) {
         exceptionCaught = true;
       }),
     );
     await tester.pumpWidget(parent);
 
     expect(exceptionCaught, isTrue);
+  });
+
+  testWidgets('initState() dependency on Inherited explains why initState() is too early', (
+    WidgetTester tester,
+  ) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/105705
+    Object? error;
+
+    final parent = TestInherited(
+      child: ExpectFail((Object caughtError) {
+        error = caughtError;
+      }),
+    );
+    await tester.pumpWidget(parent);
+
+    expect(error, isFlutterError);
+    // The error is line-wrapped when it is rendered, so collapse the whitespace
+    // before looking for the sentences.
+    final String message = error.toString().replaceAll(RegExp(r'\s+'), ' ');
+    expect(
+      message,
+      contains(
+        'dependOnInheritedWidgetOfExactType<TestInherited>() or dependOnInheritedElement() '
+        'was called before ExpectFailState.initState() completed',
+      ),
+    );
+    // The reason the call is too early is that initState() runs once and is not
+    // run again when the inherited widget changes, so the error should say so
+    // rather than claiming the rebuilt widget does not see the change.
+    expect(message, contains('calls initState() only once per State object'));
+    expect(message, contains('is never updated when that inherited widget changes'));
+    expect(message, contains('can be placed in the didChangeDependencies method'));
   });
 
   testWidgets('InheritedNotifier', (WidgetTester tester) async {
