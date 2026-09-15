@@ -8,44 +8,44 @@
 
 G_BEGIN_DECLS
 
-G_DECLARE_FINAL_TYPE({{pluginClass}}MessageCodec, {{projectName}}_message_codec, {{capitalSnakeCaseProjectName}}, MESSAGE_CODEC, FlStandardMessageCodec)
+G_DECLARE_FINAL_TYPE({{projectNameUpperCamelCase}}MessageCodec, {{projectName}}_message_codec, {{projectNameCapitalSnakeCase}}, MESSAGE_CODEC, FlStandardMessageCodec)
 
-G_DECLARE_FINAL_TYPE({{pluginClass}}{{pluginClass}}Api, {{projectName}}_{{projectName}}_api, {{capitalSnakeCaseProjectName}}, {{capitalSnakeCaseProjectName}}_API, GObject)
+G_DECLARE_FINAL_TYPE({{projectNameUpperCamelCase}}{{pluginClass}}Api, {{projectName}}_{{pluginClassSnakeCase}}_api, {{projectNameCapitalSnakeCase}}, {{pluginClassCapitalSnakeCase}}_API, GObject)
 
-G_DECLARE_FINAL_TYPE({{pluginClass}}{{pluginClass}}ApiGetPlatformVersionResponse, {{projectName}}_{{projectName}}_api_get_platform_version_response, {{capitalSnakeCaseProjectName}}, {{capitalSnakeCaseProjectName}}_API_GET_PLATFORM_VERSION_RESPONSE, GObject)
+G_DECLARE_FINAL_TYPE({{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponse, {{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_response, {{projectNameCapitalSnakeCase}}, {{pluginClassCapitalSnakeCase}}_API_GET_PLATFORM_VERSION_RESPONSE, GObject)
 
 /**
- * {{projectName}}_{{projectName}}_api_get_platform_version_response_new:
+ * {{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_response_new:
  *
  * Creates a new response to {{pluginClass}}Api.getPlatformVersion.
  *
- * Returns: a new #{{pluginClass}}{{pluginClass}}ApiGetPlatformVersionResponse
+ * Returns: a new #{{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponse
  */
-{{pluginClass}}{{pluginClass}}ApiGetPlatformVersionResponse* {{projectName}}_{{projectName}}_api_get_platform_version_response_new(const gchar* return_value);
+{{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponse* {{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_response_new(const gchar* return_value);
 
 /**
- * {{projectName}}_{{projectName}}_api_get_platform_version_response_new_error:
+ * {{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_response_new_error:
  * @code: error code.
  * @message: error message.
  * @details: (allow-none): error details or %NULL.
  *
  * Creates a new error response to {{pluginClass}}Api.getPlatformVersion.
  *
- * Returns: a new #{{pluginClass}}{{pluginClass}}ApiGetPlatformVersionResponse
+ * Returns: a new #{{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponse
  */
-{{pluginClass}}{{pluginClass}}ApiGetPlatformVersionResponse* {{projectName}}_{{projectName}}_api_get_platform_version_response_new_error(const gchar* code, const gchar* message, FlValue* details);
+{{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponse* {{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_response_new_error(const gchar* code, const gchar* message, FlValue* details);
 
 /**
- * {{pluginClass}}{{pluginClass}}ApiVTable:
+ * {{projectNameUpperCamelCase}}{{pluginClass}}ApiVTable:
  *
  * Table of functions exposed by {{pluginClass}}Api to be implemented by the API provider.
  */
 typedef struct {
-  {{pluginClass}}{{pluginClass}}ApiGetPlatformVersionResponse* (*get_platform_version)(gpointer user_data);
-} {{pluginClass}}{{pluginClass}}ApiVTable;
+  {{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponse* (*get_platform_version)(gpointer user_data);
+} {{projectNameUpperCamelCase}}{{pluginClass}}ApiVTable;
 
 /**
- * {{projectName}}_{{projectName}}_api_set_method_handlers:
+ * {{projectName}}_{{pluginClassSnakeCase}}_api_set_method_handlers:
  *
  * @messenger: an #FlBinaryMessenger.
  * @suffix: (allow-none): a suffix to add to the API or %NULL for none.
@@ -55,17 +55,17 @@ typedef struct {
  *
  * Connects the method handlers in the {{pluginClass}}Api API.
  */
-void {{projectName}}_{{projectName}}_api_set_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix, const {{pluginClass}}{{pluginClass}}ApiVTable* vtable, gpointer user_data, GDestroyNotify user_data_free_func);
+void {{projectName}}_{{pluginClassSnakeCase}}_api_set_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix, const {{projectNameUpperCamelCase}}{{pluginClass}}ApiVTable* vtable, gpointer user_data, GDestroyNotify user_data_free_func);
 
 /**
- * {{projectName}}_{{projectName}}_api_clear_method_handlers:
+ * {{projectName}}_{{pluginClassSnakeCase}}_api_clear_method_handlers:
  *
  * @messenger: an #FlBinaryMessenger.
  * @suffix: (allow-none): a suffix to add to the API or %NULL for none.
  *
  * Clears the method handlers in the {{pluginClass}}Api API.
  */
-void {{projectName}}_{{projectName}}_api_clear_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix);
+void {{projectName}}_{{pluginClassSnakeCase}}_api_clear_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix);
 
 G_END_DECLS
 

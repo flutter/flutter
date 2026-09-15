@@ -26,7 +26,7 @@ FlValue *{{pluginClassSnakeCase}}_get_platform_version() {
   return fl_value_new_string(version);
 }
 
-static {{pluginClass}}{{pluginClass}}ApiGetPlatformVersionResponse *handle_get_platform_version(gpointer user_data) {
+static {{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponse *handle_get_platform_version(gpointer user_data) {
   // The plugin instance is unused in this simple example, but more complex
   // plugins may have plugin state to access here.
   // {{pluginClass}}* self = {{pluginClassCapitalSnakeCase}}(user_data);

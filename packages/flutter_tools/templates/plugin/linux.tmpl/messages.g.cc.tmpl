@@ -286,12 +286,12 @@ static gchar* G_GNUC_UNUSED flpigeon_to_string(FlValue* value) {
 }
 
 
-struct _{{pluginClass}}MessageCodec {
+struct _{{projectNameUpperCamelCase}}MessageCodec {
   FlStandardMessageCodec parent_instance;
 
 };
 
-G_DEFINE_TYPE({{pluginClass}}MessageCodec, {{projectName}}_message_codec, fl_standard_message_codec_get_type())
+G_DEFINE_TYPE({{projectNameUpperCamelCase}}MessageCodec, {{projectName}}_message_codec, fl_standard_message_codec_get_type())
 
 
 static gboolean {{projectName}}_message_codec_write_value(FlStandardMessageCodec* codec, GByteArray* buffer, FlValue* value, GError** error) {
@@ -310,49 +310,49 @@ static FlValue* {{projectName}}_message_codec_read_value_of_type(FlStandardMessa
   }
 }
 
-static void {{projectName}}_message_codec_init({{pluginClass}}MessageCodec* self) {
+static void {{projectName}}_message_codec_init({{projectNameUpperCamelCase}}MessageCodec* self) {
 }
 
-static void {{projectName}}_message_codec_class_init({{pluginClass}}MessageCodecClass* klass) {
+static void {{projectName}}_message_codec_class_init({{projectNameUpperCamelCase}}MessageCodecClass* klass) {
   FL_STANDARD_MESSAGE_CODEC_CLASS(klass)->write_value = {{projectName}}_message_codec_write_value;
   FL_STANDARD_MESSAGE_CODEC_CLASS(klass)->read_value_of_type = {{projectName}}_message_codec_read_value_of_type;
 }
 
-static {{pluginClass}}MessageCodec* {{projectName}}_message_codec_new() {
-  {{pluginClass}}MessageCodec* self = {{capitalSnakeCaseProjectName}}_MESSAGE_CODEC(g_object_new({{projectName}}_message_codec_get_type(), nullptr));
+static {{projectNameUpperCamelCase}}MessageCodec* {{projectName}}_message_codec_new() {
+  {{projectNameUpperCamelCase}}MessageCodec* self = {{projectNameCapitalSnakeCase}}_MESSAGE_CODEC(g_object_new({{projectName}}_message_codec_get_type(), nullptr));
   return self;
 }
 
-struct _{{pluginClass}}{{pluginClass}}ApiGetPlatformVersionResponse {
+struct _{{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponse {
   GObject parent_instance;
 
   FlValue* value;
 };
 
-G_DEFINE_TYPE({{pluginClass}}{{pluginClass}}ApiGetPlatformVersionResponse, {{projectName}}_{{projectName}}_api_get_platform_version_response, G_TYPE_OBJECT)
+G_DEFINE_TYPE({{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponse, {{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_response, G_TYPE_OBJECT)
 
-static void {{projectName}}_{{projectName}}_api_get_platform_version_response_dispose(GObject* object) {
-  {{pluginClass}}{{pluginClass}}ApiGetPlatformVersionResponse* self = {{capitalSnakeCaseProjectName}}_{{capitalSnakeCaseProjectName}}_API_GET_PLATFORM_VERSION_RESPONSE(object);
+static void {{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_response_dispose(GObject* object) {
+  {{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponse* self = {{projectNameCapitalSnakeCase}}_{{pluginClassCapitalSnakeCase}}_API_GET_PLATFORM_VERSION_RESPONSE(object);
   g_clear_pointer(&self->value, fl_value_unref);
-  G_OBJECT_CLASS({{projectName}}_{{projectName}}_api_get_platform_version_response_parent_class)->dispose(object);
+  G_OBJECT_CLASS({{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_response_parent_class)->dispose(object);
 }
 
-static void {{projectName}}_{{projectName}}_api_get_platform_version_response_init({{pluginClass}}{{pluginClass}}ApiGetPlatformVersionResponse* self) {
+static void {{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_response_init({{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponse* self) {
 }
 
-static void {{projectName}}_{{projectName}}_api_get_platform_version_response_class_init({{pluginClass}}{{pluginClass}}ApiGetPlatformVersionResponseClass* klass) {
-  G_OBJECT_CLASS(klass)->dispose = {{projectName}}_{{projectName}}_api_get_platform_version_response_dispose;
+static void {{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_response_class_init({{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponseClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = {{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_response_dispose;
 }
 
-{{pluginClass}}{{pluginClass}}ApiGetPlatformVersionResponse* {{projectName}}_{{projectName}}_api_get_platform_version_response_new(const gchar* return_value) {
-  {{pluginClass}}{{pluginClass}}ApiGetPlatformVersionResponse* self = {{capitalSnakeCaseProjectName}}_{{capitalSnakeCaseProjectName}}_API_GET_PLATFORM_VERSION_RESPONSE(g_object_new({{projectName}}_{{projectName}}_api_get_platform_version_response_get_type(), nullptr));
+{{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponse* {{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_response_new(const gchar* return_value) {
+  {{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponse* self = {{projectNameCapitalSnakeCase}}_{{pluginClassCapitalSnakeCase}}_API_GET_PLATFORM_VERSION_RESPONSE(g_object_new({{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_response_get_type(), nullptr));
   self->value = fl_value_new_list();
   fl_value_append_take(self->value, fl_value_new_string(return_value));
   return self;
 }
 
-{{pluginClass}}{{pluginClass}}ApiGetPlatformVersionResponse* {{projectName}}_{{projectName}}_api_get_platform_version_response_new_error(const gchar* code, const gchar* message, FlValue* details) {
-  {{pluginClass}}{{pluginClass}}ApiGetPlatformVersionResponse* self = {{capitalSnakeCaseProjectName}}_{{capitalSnakeCaseProjectName}}_API_GET_PLATFORM_VERSION_RESPONSE(g_object_new({{projectName}}_{{projectName}}_api_get_platform_version_response_get_type(), nullptr));
+{{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponse* {{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_response_new_error(const gchar* code, const gchar* message, FlValue* details) {
+  {{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponse* self = {{projectNameCapitalSnakeCase}}_{{pluginClassCapitalSnakeCase}}_API_GET_PLATFORM_VERSION_RESPONSE(g_object_new({{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_response_get_type(), nullptr));
   self->value = fl_value_new_list();
   fl_value_append_take(self->value, fl_value_new_string(code));
   fl_value_append_take(self->value, fl_value_new_string(message != nullptr ? message : ""));
@@ -360,48 +360,48 @@ static void {{projectName}}_{{projectName}}_api_get_platform_version_response_cl
   return self;
 }
 
-struct _{{pluginClass}}{{pluginClass}}Api {
+struct _{{projectNameUpperCamelCase}}{{pluginClass}}Api {
   GObject parent_instance;
 
-  const {{pluginClass}}{{pluginClass}}ApiVTable* vtable;
+  const {{projectNameUpperCamelCase}}{{pluginClass}}ApiVTable* vtable;
   gpointer user_data;
   GDestroyNotify user_data_free_func;
 };
 
-G_DEFINE_TYPE({{pluginClass}}{{pluginClass}}Api, {{projectName}}_{{projectName}}_api, G_TYPE_OBJECT)
+G_DEFINE_TYPE({{projectNameUpperCamelCase}}{{pluginClass}}Api, {{projectName}}_{{pluginClassSnakeCase}}_api, G_TYPE_OBJECT)
 
-static void {{projectName}}_{{projectName}}_api_dispose(GObject* object) {
-  {{pluginClass}}{{pluginClass}}Api* self = {{capitalSnakeCaseProjectName}}_{{capitalSnakeCaseProjectName}}_API(object);
+static void {{projectName}}_{{pluginClassSnakeCase}}_api_dispose(GObject* object) {
+  {{projectNameUpperCamelCase}}{{pluginClass}}Api* self = {{projectNameCapitalSnakeCase}}_{{pluginClassCapitalSnakeCase}}_API(object);
   if (self->user_data != nullptr) {
     self->user_data_free_func(self->user_data);
   }
   self->user_data = nullptr;
-  G_OBJECT_CLASS({{projectName}}_{{projectName}}_api_parent_class)->dispose(object);
+  G_OBJECT_CLASS({{projectName}}_{{pluginClassSnakeCase}}_api_parent_class)->dispose(object);
 }
 
-static void {{projectName}}_{{projectName}}_api_init({{pluginClass}}{{pluginClass}}Api* self) {
+static void {{projectName}}_{{pluginClassSnakeCase}}_api_init({{projectNameUpperCamelCase}}{{pluginClass}}Api* self) {
 }
 
-static void {{projectName}}_{{projectName}}_api_class_init({{pluginClass}}{{pluginClass}}ApiClass* klass) {
-  G_OBJECT_CLASS(klass)->dispose = {{projectName}}_{{projectName}}_api_dispose;
+static void {{projectName}}_{{pluginClassSnakeCase}}_api_class_init({{projectNameUpperCamelCase}}{{pluginClass}}ApiClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = {{projectName}}_{{pluginClassSnakeCase}}_api_dispose;
 }
 
-static {{pluginClass}}{{pluginClass}}Api* {{projectName}}_{{projectName}}_api_new(const {{pluginClass}}{{pluginClass}}ApiVTable* vtable, gpointer user_data, GDestroyNotify user_data_free_func) {
-  {{pluginClass}}{{pluginClass}}Api* self = {{capitalSnakeCaseProjectName}}_{{capitalSnakeCaseProjectName}}_API(g_object_new({{projectName}}_{{projectName}}_api_get_type(), nullptr));
+static {{projectNameUpperCamelCase}}{{pluginClass}}Api* {{projectName}}_{{pluginClassSnakeCase}}_api_new(const {{projectNameUpperCamelCase}}{{pluginClass}}ApiVTable* vtable, gpointer user_data, GDestroyNotify user_data_free_func) {
+  {{projectNameUpperCamelCase}}{{pluginClass}}Api* self = {{projectNameCapitalSnakeCase}}_{{pluginClassCapitalSnakeCase}}_API(g_object_new({{projectName}}_{{pluginClassSnakeCase}}_api_get_type(), nullptr));
   self->vtable = vtable;
   self->user_data = user_data;
   self->user_data_free_func = user_data_free_func;
   return self;
 }
 
-static void {{projectName}}_{{projectName}}_api_get_platform_version_cb(FlBasicMessageChannel* channel, FlValue* message_, FlBasicMessageChannelResponseHandle* response_handle, gpointer user_data) {
-  {{pluginClass}}{{pluginClass}}Api* self = {{capitalSnakeCaseProjectName}}_{{capitalSnakeCaseProjectName}}_API(user_data);
+static void {{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_cb(FlBasicMessageChannel* channel, FlValue* message_, FlBasicMessageChannelResponseHandle* response_handle, gpointer user_data) {
+  {{projectNameUpperCamelCase}}{{pluginClass}}Api* self = {{projectNameCapitalSnakeCase}}_{{pluginClassCapitalSnakeCase}}_API(user_data);
 
   if (self->vtable == nullptr || self->vtable->get_platform_version == nullptr) {
     return;
   }
 
-  g_autoptr({{pluginClass}}{{pluginClass}}ApiGetPlatformVersionResponse) response = self->vtable->get_platform_version(self->user_data);
+  g_autoptr({{projectNameUpperCamelCase}}{{pluginClass}}ApiGetPlatformVersionResponse) response = self->vtable->get_platform_version(self->user_data);
   if (response == nullptr) {
     g_warning("No response returned to %s.%s", "{{pluginClass}}Api", "getPlatformVersion");
     return;
@@ -413,20 +413,20 @@ static void {{projectName}}_{{projectName}}_api_get_platform_version_cb(FlBasicM
   }
 }
 
-void {{projectName}}_{{projectName}}_api_set_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix, const {{pluginClass}}{{pluginClass}}ApiVTable* vtable, gpointer user_data, GDestroyNotify user_data_free_func) {
+void {{projectName}}_{{pluginClassSnakeCase}}_api_set_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix, const {{projectNameUpperCamelCase}}{{pluginClass}}ApiVTable* vtable, gpointer user_data, GDestroyNotify user_data_free_func) {
   g_autofree gchar* dot_suffix = suffix != nullptr ? g_strdup_printf(".%s", suffix) : g_strdup("");
-  g_autoptr({{pluginClass}}{{pluginClass}}Api) api_data = {{projectName}}_{{projectName}}_api_new(vtable, user_data, user_data_free_func);
+  g_autoptr({{projectNameUpperCamelCase}}{{pluginClass}}Api) api_data = {{projectName}}_{{pluginClassSnakeCase}}_api_new(vtable, user_data, user_data_free_func);
 
-  g_autoptr({{pluginClass}}MessageCodec) codec = {{projectName}}_message_codec_new();
+  g_autoptr({{projectNameUpperCamelCase}}MessageCodec) codec = {{projectName}}_message_codec_new();
   g_autofree gchar* get_platform_version_channel_name = g_strdup_printf("dev.flutter.pigeon.{{projectName}}.{{pluginClass}}Api.getPlatformVersion%s", dot_suffix);
   g_autoptr(FlBasicMessageChannel) get_platform_version_channel = fl_basic_message_channel_new(messenger, get_platform_version_channel_name, FL_MESSAGE_CODEC(codec));
-  fl_basic_message_channel_set_message_handler(get_platform_version_channel, {{projectName}}_{{projectName}}_api_get_platform_version_cb, g_object_ref(api_data), g_object_unref);
+  fl_basic_message_channel_set_message_handler(get_platform_version_channel, {{projectName}}_{{pluginClassSnakeCase}}_api_get_platform_version_cb, g_object_ref(api_data), g_object_unref);
 }
 
-void {{projectName}}_{{projectName}}_api_clear_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix) {
+void {{projectName}}_{{pluginClassSnakeCase}}_api_clear_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix) {
   g_autofree gchar* dot_suffix = suffix != nullptr ? g_strdup_printf(".%s", suffix) : g_strdup("");
 
-  g_autoptr({{pluginClass}}MessageCodec) codec = {{projectName}}_message_codec_new();
+  g_autoptr({{projectNameUpperCamelCase}}MessageCodec) codec = {{projectName}}_message_codec_new();
   g_autofree gchar* get_platform_version_channel_name = g_strdup_printf("dev.flutter.pigeon.{{projectName}}.{{pluginClass}}Api.getPlatformVersion%s", dot_suffix);
   g_autoptr(FlBasicMessageChannel) get_platform_version_channel = fl_basic_message_channel_new(messenger, get_platform_version_channel_name, FL_MESSAGE_CODEC(codec));
   fl_basic_message_channel_set_message_handler(get_platform_version_channel, nullptr, nullptr, nullptr);

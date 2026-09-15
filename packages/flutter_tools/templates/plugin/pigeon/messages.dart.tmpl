@@ -12,6 +12,7 @@ import 'package:pigeon/pigeon.dart';
 
 @ConfigurePigeon(
   PigeonOptions(
+    dartPackageName: '{{projectName}}',
     dartOut: 'lib/src/messages.g.dart',
 {{#windows}}
     cppHeaderOut: 'windows/messages.g.h',
