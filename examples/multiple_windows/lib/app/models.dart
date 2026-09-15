@@ -15,10 +15,10 @@ class TooltipSettings {}
 class WindowSettings {
   WindowSettings({
     this.regularSize = const Size(800, 600),
-    this.regularSizedToContent = false,
+    this.shrinkWrap = false,
     this.regularResizable = true,
     this.dialogSize = const Size(400, 400),
-    this.dialogSizedToContent = false,
+    this.dialogShrinkWrap = false,
     this.dialogResizable = true,
     this.positioner = const WindowPositioner(
       parentAnchor: WindowPositionerAnchor.right,
@@ -27,21 +27,21 @@ class WindowSettings {
   });
 
   /// The initial size for newly created regular windows.
-  /// Ignored when [regularSizedToContent] is true.
+  /// Ignored when [shrinkWrap] is true.
   Size regularSize;
 
   /// If true, new regular windows will be sized to fit their content.
-  bool regularSizedToContent;
+  bool shrinkWrap;
 
   /// If true, regular windows may be manually resized by the user.
   bool regularResizable;
 
   /// The initial size of the dialog window.
-  /// Ignored when [dialogSizedToContent] is true.
+  /// Ignored when [dialogShrinkWrap] is true.
   Size dialogSize;
 
   /// If true, new dialog windows will be sized to fit their content.
-  bool dialogSizedToContent;
+  bool dialogShrinkWrap;
 
   /// If true, dialog windows may be manually resized by the user.
   bool dialogResizable;

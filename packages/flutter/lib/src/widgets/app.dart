@@ -15,8 +15,6 @@ import 'dart:collection' show HashMap;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import '../foundation/_features.dart' show isWindowingEnabled;
-import '_window.dart' show WindowManager;
 
 import 'actions.dart';
 import 'banner.dart';
@@ -69,8 +67,10 @@ export 'dart:ui' show Locale;
 ///  * [LocaleResolutionCallback], which takes only one default locale (instead of a list)
 ///    and is attempted only after this callback fails or is null. [LocaleListResolutionCallback]
 ///    is recommended over [LocaleResolutionCallback].
-typedef LocaleListResolutionCallback =
-    Locale? Function(List<Locale>? locales, Iterable<Locale> supportedLocales);
+typedef LocaleListResolutionCallback = Locale? Function(
+  List<Locale>? locales,
+  Iterable<Locale> supportedLocales,
+);
 
 /// {@template flutter.widgets.LocaleResolutionCallback}
 /// The signature of [WidgetsApp.localeResolutionCallback].
@@ -98,8 +98,10 @@ typedef LocaleListResolutionCallback =
 ///  * [LocaleListResolutionCallback], which takes a list of preferred locales (instead of one locale).
 ///    Resolutions by [LocaleListResolutionCallback] take precedence over [LocaleResolutionCallback].
 /// {@endtemplate}
-typedef LocaleResolutionCallback =
-    Locale? Function(Locale? locale, Iterable<Locale> supportedLocales);
+typedef LocaleResolutionCallback = Locale? Function(
+  Locale? locale,
+  Iterable<Locale> supportedLocales,
+);
 
 /// The default locale resolution algorithm.
 ///
@@ -1728,10 +1730,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     } else {
       assert(routing != null);
       result = routing!;
-    }
-
-    if (isWindowingEnabled) {
-      result = WindowManager(child: result);
     }
 
     if (widget.textStyle != null) {

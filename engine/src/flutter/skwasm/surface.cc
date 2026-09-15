@@ -4,7 +4,7 @@
 
 #include "flutter/skwasm/surface.h"
 
-#include <algorithm>
+#include <atomic>
 
 #include <emscripten/wasm_worker.h>
 
@@ -41,24 +41,46 @@
 //    the Dart code, which will complete the future that was returned by the
 //    original Dart method call.
 
+namespace {
+// We store the raster thread ID in a global atomic rather than a function-local
+// static variable to avoid compiler-generated __cxa_guard locks. In Emscripten
+// with -sWASM_WORKERS=1, condition variables (pthread_cond_wait) are stubs, so
+// any contention or re-entrancy during function-local static initialization
+// would result in an unrecoverable busy-spin on the main browser thread.
+std::atomic<bool> g_raster_thread_initialized{false};
+unsigned long g_raster_thread = 0;
+uint32_t g_next_callback_id = 0;
+
+uint32_t NextCallbackId() {
+  assert(emscripten_is_main_browser_thread());
+  return ++g_next_callback_id;
+}
+}  // namespace
+
 unsigned long Skwasm::GetRasterThread() {
-  static unsigned long thread = []() {
+  if (!g_raster_thread_initialized.load(std::memory_order_acquire)) {
     if (skwasm_isSingleThreaded()) {
       skwasm_connectThread(0);
+      g_raster_thread = 0UL;
+      g_raster_thread_initialized.store(true, std::memory_order_release);
       return 0UL;
     }
     assert(emscripten_is_main_browser_thread());
     unsigned long t = emscripten_malloc_wasm_worker(65536);
+    // Publish the raster thread ID before posting any work or message listeners
+    // so any worker or callback can safely read g_raster_thread immediately.
+    g_raster_thread = t;
+    g_raster_thread_initialized.store(true, std::memory_order_release);
+
     emscripten_wasm_worker_post_function_v(t, []() {
       // Listen to the main thread from the worker
       skwasm_connectThread(0);
     });
 
-    // Listen to messages from the worker
+    // Listen to messages from the worker on the main thread
     skwasm_connectThread(t);
-    return t;
-  }();
-  return thread;
+  }
+  return g_raster_thread;
 }
 
 Skwasm::Surface::Surface() {
@@ -85,7 +107,12 @@ void Skwasm::Surface::Dispose() {
 // Main thread only
 uint32_t Skwasm::Surface::SetCanvas(SkwasmObject canvas) {
   assert(emscripten_is_main_browser_thread());
-  uint32_t callback_id = ++current_callback_id_;
+  uint32_t callback_id = NextCallbackId();
+
+  // Allocated here instead of on the worker so that callback IDs are unique
+  // across all surfaces sharing the callback handler.
+  context_lost_callback_id_ = NextCallbackId();
+
   skwasm_dispatchTransferCanvas(GetRasterThread(), this, canvas, callback_id);
   return callback_id;
 }
@@ -129,16 +156,18 @@ void Skwasm::Surface::ReceiveCanvasOnWorker(SkwasmObject canvas,
   render_context_ = Skwasm::RenderContext::Make(sample_count, stencil);
   render_context_->Resize(canvas_width_, canvas_height_);
 
-  context_lost_callback_id_ = ++current_callback_id_;
+  if (resource_cache_limit_) {
+    render_context_->SetResourceCacheLimit(*resource_cache_limit_);
+  }
 
-  skwasm_reportInitialized(this, context_lost_callback_id_, callback_id);
+  skwasm_reportInitialized(this, callback_id);
 }
 
 // Resizing
 
 uint32_t Skwasm::Surface::SetSize(int width, int height) {
   assert(emscripten_is_main_browser_thread());
-  uint32_t callback_id = ++current_callback_id_;
+  uint32_t callback_id = NextCallbackId();
 
   skwasm_dispatchResizeSurface(GetRasterThread(), this, width, height,
                                callback_id);
@@ -171,7 +200,7 @@ uint32_t Skwasm::Surface::RenderPictures(flutter::DisplayList** pictures,
                                          int count,
                                          bool capture_image_bitmaps) {
   assert(emscripten_is_main_browser_thread());
-  uint32_t callback_id = ++current_callback_id_;
+  uint32_t callback_id = NextCallbackId();
   std::unique_ptr<sk_sp<flutter::DisplayList>[]> picture_pointers =
       std::make_unique<sk_sp<flutter::DisplayList>[]>(count);
   for (int i = 0; i < count; i++) {
@@ -219,7 +248,7 @@ void Skwasm::Surface::RenderPicturesOnWorker(
 uint32_t Skwasm::Surface::RasterizeImage(flutter::DlImage* image,
                                          Skwasm::ImageByteFormat format) {
   assert(emscripten_is_main_browser_thread());
-  uint32_t callback_id = ++current_callback_id_;
+  uint32_t callback_id = NextCallbackId();
   image->ref();
 
   skwasm_dispatchRasterizeImage(GetRasterThread(), this, image, format,
@@ -262,7 +291,7 @@ void Skwasm::Surface::RasterizeImageOnWorker(flutter::DlImage* image,
 
 uint32_t Skwasm::Surface::TriggerContextLoss() {
   assert(emscripten_is_main_browser_thread());
-  uint32_t callback_id = ++current_callback_id_;
+  uint32_t callback_id = NextCallbackId();
   skwasm_dispatchTriggerContextLoss(GetRasterThread(), this, callback_id);
   return callback_id;
 }
@@ -293,8 +322,20 @@ void Skwasm::Surface::OnContextLost() {
 
 // Other
 
+// Main thread only
 void Skwasm::Surface::SetResourceCacheLimit(int bytes) {
-  render_context_->SetResourceCacheLimit(bytes);
+  assert(emscripten_is_main_browser_thread());
+  skwasm_dispatchSetResourceCacheLimit(GetRasterThread(), this, bytes);
+}
+
+// Worker thread only
+void Skwasm::Surface::SetResourceCacheLimitOnWorker(int bytes) {
+  // Always stored so ReceiveCanvasOnWorker can reapply it whenever the
+  // render context is (re)created.
+  resource_cache_limit_ = bytes;
+  if (render_context_) {
+    render_context_->SetResourceCacheLimit(bytes);
+  }
 }
 
 std::unique_ptr<Skwasm::TextureSourceWrapper>
@@ -415,7 +456,14 @@ SKWASM_EXPORT void surface_dispose(Skwasm::Surface* surface) {
 
 SKWASM_EXPORT void surface_setResourceCacheLimitBytes(Skwasm::Surface* surface,
                                                       int bytes) {
+  // Dispatch to the worker, which owns the render context.
   surface->SetResourceCacheLimit(bytes);
+}
+
+SKWASM_EXPORT void surface_setResourceCacheLimitOnWorker(
+    Skwasm::Surface* surface,
+    int bytes) {
+  surface->SetResourceCacheLimitOnWorker(bytes);
 }
 
 SKWASM_EXPORT uint32_t surface_renderPictures(Skwasm::Surface* surface,

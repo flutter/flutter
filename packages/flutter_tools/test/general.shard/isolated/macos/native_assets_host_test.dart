@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:code_assets/code_assets.dart';
+import 'package:flutter_tools/src/isolated/native_assets/ios/native_assets.dart';
+import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:hooks_runner/hooks_runner.dart';
@@ -224,5 +226,88 @@ void main() {
     expect(result[pathB]!.length, equals(2));
     expect(result[pathB]!.contains(assetB1), isTrue);
     expect(result[pathB]!.contains(assetB2), isTrue);
+  });
+
+  // The manifest entry is the string the Dart VM passes to `dlopen`, and dyld
+  // recognizes a library it has already loaded by the name it is opened with.
+  // If that name is not the framework's install name, dyld has to fall back on
+  // the file's identity on disk, which a rebuild changes underneath a running
+  // debug instance. The asset then gets mapped a second time. See
+  // https://github.com/flutter/flutter/issues/190799.
+  test('macOS manifest entry is the framework install name', () {
+    final asset = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'my_package',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libmy_asset.dylib'),
+      ),
+      target: Target.fromString('macos_arm64'),
+    );
+    final assets = <FlutterCodeAsset>[asset];
+
+    final Map<FlutterCodeAsset, KernelAsset> manifest = assetTargetLocationsMacOS(assets, null);
+    expect(
+      (manifest[asset]!.path as KernelAssetAbsolutePath).uri.path,
+      equals('@rpath/my_asset.framework/my_asset'),
+    );
+
+    // The framework itself is still bundled without the install name prefix.
+    final Map<KernelAssetPath, List<FlutterCodeAsset>> bundled = fatAssetTargetLocationsMacOS(
+      assets,
+      null,
+    );
+    expect(
+      (bundled.keys.single as KernelAssetAbsolutePath).uri.path,
+      equals('my_asset.framework/my_asset'),
+    );
+  });
+
+  test('macOS flutter tester manifest entry is the host path', () {
+    final asset = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'my_package',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libmy_asset.dylib'),
+      ),
+      target: Target.fromString('macos_arm64'),
+    );
+
+    // The tester loads the dylib from where it was built instead of from a
+    // bundle, and its install name is set to that same absolute path.
+    final Map<FlutterCodeAsset, KernelAsset> manifest = assetTargetLocationsMacOS(
+      <FlutterCodeAsset>[asset],
+      Uri.parse('file:///build/native_assets/macos/'),
+    );
+    expect(
+      (manifest[asset]!.path as KernelAssetAbsolutePath).uri,
+      equals(Uri.parse('file:///build/native_assets/macos/libmy_asset.dylib')),
+    );
+  });
+
+  test('iOS manifest entry is the framework install name', () {
+    final asset = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'my_package',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libmy_asset.dylib'),
+      ),
+      target: Target.fromString('ios_arm64'),
+    );
+    final assets = <FlutterCodeAsset>[asset];
+
+    final Map<FlutterCodeAsset, KernelAsset> manifest = assetTargetLocationsIOS(assets);
+    expect(
+      (manifest[asset]!.path as KernelAssetAbsolutePath).uri.path,
+      equals('@rpath/my_asset.framework/my_asset'),
+    );
+
+    final Map<KernelAssetPath, List<FlutterCodeAsset>> bundled = fatAssetTargetLocationsIOS(assets);
+    expect(
+      (bundled.keys.single as KernelAssetAbsolutePath).uri.path,
+      equals('my_asset.framework/my_asset'),
+    );
   });
 }

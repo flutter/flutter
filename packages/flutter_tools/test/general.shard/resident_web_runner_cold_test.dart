@@ -231,6 +231,9 @@ class FakeWebDevFS extends Fake implements WebDevFS {
   Future<Uri> create() async {
     return Uri.base;
   }
+
+  @override
+  void markReady() {}
 }
 
 class FakeWebDevice extends Fake implements Device {
@@ -299,4 +302,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {
     throw UnimplementedError();
   }
+
+  @override
+  bool areDependenciesModified(DevFSContent shaderContent) => false;
 }

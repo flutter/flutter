@@ -121,6 +121,7 @@ List<String> binariesWithoutEntitlements(String flutterRoot) {
     'dart-sdk/bin/snapshots/dart2bytecode.dart.snapshot',
     'dart-sdk/bin/snapshots/dart2js_aot.dart.snapshot',
     'dart-sdk/bin/snapshots/dart2wasm_product.snapshot',
+    'dart-sdk/bin/snapshots/dart_runtime_service_vm_aot.dart.snapshot',
     'dart-sdk/bin/snapshots/dart_tooling_daemon_aot.dart.snapshot',
     'dart-sdk/bin/snapshots/dartdev_aot.dart.snapshot',
     'dart-sdk/bin/snapshots/dartdevc_aot.dart.snapshot',
@@ -428,9 +429,9 @@ Future<List<String>> findXcframeworksPaths(
     '-name',
     '*xcframework',
   ]);
-  final List<String> allXcframeworkPaths = LineSplitter.split(
-    result.stdout as String,
-  ).where((String s) => s.isNotEmpty).toList();
+  final List<String> allXcframeworkPaths = LineSplitter.split(result.stdout as String)
+      .where((String s) => s.isNotEmpty)
+      .toList();
   for (final path in allXcframeworkPaths) {
     print('Found: $path\n');
   }

@@ -17,7 +17,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
+import '../../src/fakes.dart' hide FakeProcess;
 
 void main() {
   group('process exceptions', () {
@@ -108,6 +108,44 @@ void main() {
       expect(logger.statusText, equals('match\n'));
       expect(logger.errorText, equals('match\n'));
     });
+
+    testWithoutContext(
+      'Command output tolerates malformed UTF-8 bytes followed by a newline.',
+      () async {
+        final invalidUtf8Bytes = <int>[0xFF, 0xFE, 0xFD, 0x0A, 0x68, 0x65, 0x6C, 0x6C, 0x6F];
+        processManager.addCommand(
+          FakeCommand(
+            command: const <String>['command'],
+            process: FakeProcess(stdout: invalidUtf8Bytes, stderr: invalidUtf8Bytes),
+          ),
+        );
+
+        await processUtils.stream(<String>['command']);
+
+        expect(logger.statusText, contains('hello'));
+        expect(logger.errorText, contains('hello'));
+        expect(logger.statusText, contains('\uFFFD'));
+        expect(logger.errorText, contains('\uFFFD'));
+      },
+    );
+
+    testWithoutContext(
+      'Command output tolerates malformed UTF-8 sequences within a line.',
+      () async {
+        final fakeProcess = FakeProcess(
+          stdout: <int>[0x61, 0x62, 0xc3, 0x28, 0x63, 0x64], // 'ab' + malformed + 'cd'
+          stderr: <int>[0x61, 0x62, 0xc3, 0x28, 0x63, 0x64],
+        );
+        processManager.addCommand(
+          FakeCommand(command: const <String>['command'], process: fakeProcess),
+        );
+
+        await processUtils.stream(<String>['command']);
+
+        expect(logger.statusText, equals('ab\uFFFD(cd\n'));
+        expect(logger.errorText, equals('ab\uFFFD(cd\n'));
+      },
+    );
   });
 
   group('run', () {
@@ -425,19 +463,15 @@ void main() {
       expect(logger.statusText, contains(analytics.getConsentMessage));
     }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
 
-    testUsingContext(
-      'does not print analytics welcome message if Analytics instance indicates it should not be printed',
-      () async {
-        setExitFunctionForTests((int exitCode) {});
+    testUsingContext('does not print analytics welcome message if Analytics instance indicates it should not be printed', () async {
+      setExitFunctionForTests((int exitCode) {});
 
-        analytics.clientShowedMessage();
+      analytics.clientShowedMessage();
 
-        final shutdownHooks = ShutdownHooks();
-        await exitWithHooks(0, shutdownHooks: shutdownHooks);
-        expect(logger.statusText, isNot(contains(analytics.getConsentMessage)));
-      },
-      overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
-    );
+      final shutdownHooks = ShutdownHooks();
+      await exitWithHooks(0, shutdownHooks: shutdownHooks);
+      expect(logger.statusText, isNot(contains(analytics.getConsentMessage)));
+    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
 
     testUsingContext('[sync] exceptions thrown from a hook do not crash the tool', () async {
       setExitFunctionForTests((int exitCode) {});

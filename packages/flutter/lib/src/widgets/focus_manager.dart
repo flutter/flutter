@@ -4,6 +4,8 @@
 
 /// @docImport 'package:flutter/material.dart';
 /// @docImport 'package:flutter/rendering.dart';
+///
+/// @docImport 'debug.dart';
 library;
 
 import 'dart:async';
@@ -26,6 +28,12 @@ import 'framework.dart';
 /// Can be used to debug focus issues: each time the focus changes, the focus
 /// tree will be printed and requests for focus and other focus operations will
 /// be logged.
+///
+/// This has no effect in release builds.
+///
+/// See also:
+///
+/// * [debugPaintFocusBoxes], which draws boxes around focus nodes.
 bool debugFocusChanges = false;
 
 // When using _focusDebug, always call it like so:
@@ -460,14 +468,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     )
     this.onKey,
     this.onKeyEvent,
-    bool skipTraversal = false,
-    bool canRequestFocus = true,
-    bool descendantsAreFocusable = true,
-    bool descendantsAreTraversable = true,
-  }) : _skipTraversal = skipTraversal,
-       _canRequestFocus = canRequestFocus,
-       _descendantsAreFocusable = descendantsAreFocusable,
-       _descendantsAreTraversable = descendantsAreTraversable {
+    this._skipTraversal = false,
+    this._canRequestFocus = true,
+    this._descendantsAreFocusable = true,
+    this._descendantsAreTraversable = true,
+  }) {
     // Set it via the setter so that it does nothing on release builds.
     this.debugLabel = debugLabel;
 
@@ -1863,9 +1868,17 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
         assert(_focusDebug(() => 'focus changed while app was paused, ignoring $_suspendedNode'));
         _suspendedNode = null;
       } else if (_suspendedNode != null) {
-        assert(_focusDebug(() => 'requesting focus for $_suspendedNode'));
-        _suspendedNode!.requestFocus();
-        _suspendedNode = null;
+        // Only restore the focus that was suspended when the app went inactive
+        // if nothing else has requested focus in the meantime. For example,
+        // activating a different window will cause its view to request focus.
+        if (_markedForFocus == null) {
+          assert(_focusDebug(() => 'requesting focus for $_suspendedNode'));
+          _suspendedNode!.requestFocus();
+          _suspendedNode = null;
+        } else {
+          assert(_haveScheduledUpdate);
+          _suspendedNode = null;
+        }
       }
     } else if (_primaryFocus != rootScope) {
       assert(_focusDebug(() => 'suspending $_primaryFocus'));

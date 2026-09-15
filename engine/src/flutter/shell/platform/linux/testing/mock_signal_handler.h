@@ -41,7 +41,7 @@ class SignalHandler {
 
  private:
   gulong id_ = 0;
-  gpointer instance_ = nullptr;
+  GWeakRef instance_;
 };
 
 // A mock signal handler that has no arguments. Used with EXPECT_SIGNAL().

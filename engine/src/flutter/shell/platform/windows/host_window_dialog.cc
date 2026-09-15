@@ -145,19 +145,7 @@ LRESULT HostWindowDialog::HandleMessage(HWND hwnd,
         return *result;
       }
 
-      if (LOWORD(wparam) != WA_INACTIVE) {
-        // Prevent disabled window from being activated using the task
-        // switcher.
-        if (!IsWindowEnabled(hwnd)) {
-          // Redirect focus and activation to the first enabled descendant.
-          if (HostWindow* enabled_descendant = FindFirstEnabledDescendant()) {
-            SetActiveWindow(enabled_descendant->GetWindowHandle());
-            FocusRootViewOf(this);
-          }
-          return 0;
-        }
-        FocusRootViewOf(this);
-      }
+      HandleWindowActivation(hwnd, wparam);
       return 0;
   }
 

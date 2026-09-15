@@ -39,11 +39,11 @@ enum FlutterDarwinPlatform {
     required this.binaryName,
     required this.targetPlatform,
     required this.swiftPackagePlatform,
-    required String artifactName,
+    required this._artifactName,
     required this.artifactZip,
     required this.xcframeworkArtifact,
     required this.sdks,
-  }) : _artifactName = artifactName;
+  });
 
   /// The name of the binary file within the [xcframeworkArtifact].
   final String binaryName;
@@ -77,7 +77,7 @@ enum FlutterDarwinPlatform {
   Version deploymentTarget() {
     return switch (this) {
       ios => Version(15, 0, null),
-      macos => Version(10, 15, null),
+      macos => Version(12, 0, null),
     };
   }
 

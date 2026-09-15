@@ -4,10 +4,8 @@
 
 package io.flutter.plugin.platform;
 
-import static android.view.View.OnFocusChangeListener;
 import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.spy;
 

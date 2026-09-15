@@ -146,9 +146,8 @@ void main(List<String> arguments) {
   }
 
   final inputFiles = <String>[];
-  final List<FileSystemEntity> entries = Directory(
-    inputDirectoryPath,
-  ).listSync(recursive: true, followLinks: false);
+  final List<FileSystemEntity> entries = Directory(inputDirectoryPath)
+      .listSync(recursive: true, followLinks: false);
   for (final File inputFile in entries.whereType<File>()) {
     if (excludePattern != null && inputFile.path.startsWith(excludePattern)) {
       continue;
@@ -210,6 +209,7 @@ List<String> getExtraImportsForLibrary(String libraryName) {
   }
   if (libraryName == 'skwasm_impl') {
     extraImports.add("import 'dart:_wasm';");
+    extraImports.add("import 'dart:_js_interop_wasm';");
   }
   return extraImports;
 }

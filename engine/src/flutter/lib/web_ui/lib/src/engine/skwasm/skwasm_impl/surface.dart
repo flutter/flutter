@@ -292,7 +292,7 @@ class SkwasmSurface implements OffscreenSurface, OnscreenSurface {
     _currentDevicePixelRatio = devicePixelRatio;
     _currentSize = size;
     if (_isOnscreen) {
-      final DomHTMLCanvasElement canvas = _canvas as DomHTMLCanvasElement;
+      final canvas = _canvas as DomHTMLCanvasElement;
       if (_useTransferredCanvas) {
         // Once control is transferred, the visible HTML canvas may only receive
         // CSS/layout updates. Backing-store sizing is handled by surfaceSetSize.
@@ -357,5 +357,10 @@ class SkwasmSurface implements OffscreenSurface, OnscreenSurface {
   @override
   void initialize() {
     // No extra initialization is required.
+  }
+
+  @override
+  void setIsOverlay(bool isOverlay) {
+    // Skwasm does not need to change its canvas when it is used as an overlay.
   }
 }

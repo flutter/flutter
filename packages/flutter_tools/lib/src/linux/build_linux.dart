@@ -83,7 +83,7 @@ Future<void> buildLinux(
   final String buildModeName = buildInfo.mode.cliName;
   final Directory platformBuildDirectory = globals.fs
       .directory(linuxProject.parent.directory.path)
-      .childDirectory(getLinuxBuildDirectory(targetPlatform));
+      .childDirectory(getLinuxBuildDirectory(targetPlatform, buildInfo.flavor));
   final Directory buildDirectory = platformBuildDirectory.childDirectory(buildModeName);
   try {
     await _runCmake(
@@ -103,7 +103,10 @@ Future<void> buildLinux(
   }
 
   final String? binaryName = getCmakeExecutableName(linuxProject);
-  final File binaryFile = buildDirectory.childDirectory('bundle').childFile('$binaryName');
+  if (binaryName == null) {
+    throwToolExit('Unable to find BINARY_NAME in ${linuxProject.cmakeFile.path}');
+  }
+  final File binaryFile = buildDirectory.childDirectory('bundle').childFile(binaryName);
   final FileSystemEntity buildOutput = binaryFile.existsSync() ? binaryFile : binaryFile.parent;
   // We don't print a size because the output directory can contain
   // optional files not needed by the user and because the binary is not
@@ -126,7 +129,11 @@ Future<void> buildLinux(
       aotSnapshot: codeSizeFile,
       // This analysis is only supported for release builds.
       outputDirectory: globals.fs.directory(
-        globals.fs.path.join(getLinuxBuildDirectory(targetPlatform), 'release', 'bundle'),
+        globals.fs.path.join(
+          getLinuxBuildDirectory(targetPlatform, buildInfo.flavor),
+          'release',
+          'bundle',
+        ),
       ),
       precompilerTrace: precompilerTrace,
       type: 'linux',

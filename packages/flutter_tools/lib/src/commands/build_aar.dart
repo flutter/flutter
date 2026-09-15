@@ -20,12 +20,10 @@ import 'build.dart';
 class BuildAarCommand extends BuildSubCommand {
   BuildAarCommand({
     required super.logger,
-    required AndroidSdk? androidSdk,
-    required FileSystem fileSystem,
+    required this._androidSdk,
+    required this._fileSystem,
     required bool verboseHelp,
-  }) : _androidSdk = androidSdk,
-       _fileSystem = fileSystem,
-       super(verboseHelp: verboseHelp) {
+  }) : super(verboseHelp: verboseHelp) {
     argParser
       ..addFlag('debug', defaultsTo: true, help: 'Build a debug version of the current project.')
       ..addFlag(
@@ -50,6 +48,11 @@ class BuildAarCommand extends BuildSubCommand {
     usesTrackWidgetCreation(verboseHelp: false);
     addEnableExperimentation(hide: !verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
+    // No --[no-]enable-hcpp flag here: the Flutter Gradle Plugin intentionally
+    // does not inject the EnableHcpp metadata into module (aar) manifests,
+    // because a library-provided value that conflicts with an explicit value in
+    // the host app's manifest fails the host build in the manifest merger. The
+    // host app's manifest is the source of truth for HCPP in add-to-app.
     argParser.addMultiOption(
       'target-platform',
       defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
@@ -118,9 +121,8 @@ class BuildAarCommand extends BuildSubCommand {
     }
     final androidBuildInfo = <AndroidBuildInfo>{};
 
-    final Iterable<AndroidArch> targetArchitectures = stringsArg(
-      'target-platform',
-    ).map<AndroidArch>(getAndroidArchForName);
+    final Iterable<CpuArch> targetArchitectures = stringsArg('target-platform')
+        .map<CpuArch>(getCpuArchForName);
 
     final String? buildNumberArg = stringArg('build-number');
     final String buildNumber =

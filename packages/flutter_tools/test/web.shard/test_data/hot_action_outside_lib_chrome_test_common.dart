@@ -44,11 +44,7 @@ void testHotActionOutsideLib(HotAction action) {
     await flutter.run(
       device: GoogleChromeDevice.kChromeDeviceId,
       script: 'integration_test/main.dart',
-      additionalCommandArgs: <String>[
-        '--verbose',
-        '--no-web-resources-cdn',
-        '--web-experimental-hot-reload',
-      ],
+      additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
     );
 
     final completer = Completer<void>();

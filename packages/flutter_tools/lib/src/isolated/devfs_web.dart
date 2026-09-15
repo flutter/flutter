@@ -83,8 +83,8 @@ class WebDevFS implements DevFS {
     required this.logger,
     required this.platform,
     this.testMode = false,
-    Map<String, String> webDefines = const <String, String>{},
-  }) : _webDefines = webDefines {
+    this._webDefines = const <String, String>{},
+  }) {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (ddcModuleSystem) {
@@ -242,6 +242,16 @@ class WebDevFS implements DevFS {
     return baseUri;
   }
 
+  /// Signal that the underlying web asset server is ready to handle requests.
+  ///
+  /// The HTTP server starts listening early during [create] so the port and URI
+  /// are known before compilation. However, incoming HTTP requests are held
+  /// until initial compilation completes and the DWDS connection listener is
+  /// registered so clients do not load incomplete assets or miss connection events.
+  void markReady() {
+    webAssetServer.markReady();
+  }
+
   @override
   Future<void> destroy() async {
     await webAssetServer.dispose();
@@ -380,19 +390,20 @@ class WebDevFS implements DevFS {
           assetPathsToEvict: _assetPathsToEvict,
           shaderPathsToEvict: _shaderPathsToEvict,
           bundleFirstUpload: bundleFirstUpload,
+          invalidatedFiles: invalidatedFiles,
           syncAllAssetsOnFirstUpload: true,
           onFontManifestUpdated: () => didUpdateFontManifest = true,
         );
         syncedBytes += bundleSyncedBytes;
+        _assetTransformer.pruneDependencies(bundle.entries.keys.toSet());
       } on Exception catch (err, stackTrace) {
         logger.printError('Error updating bundle: $err');
         logger.printTrace('$stackTrace');
         return UpdateFSReport();
       }
       if (dirtyEntries.isNotEmpty) {
-        await LocalDevFSWriter(
-          fileSystem: fileSystem,
-        ).write(dirtyEntries, fileSystem.path.toUri(assetDirectory));
+        await LocalDevFSWriter(fileSystem: fileSystem)
+            .write(dirtyEntries, fileSystem.path.toUri(assetDirectory));
       }
     }
     await _validateTemplateFile('index.html');
@@ -407,7 +418,14 @@ class WebDevFS implements DevFS {
     // mapping the file name, this is done via an additional file root and
     // special hard-coded scheme.
     final CompilerOutput? compilerOutput = await generator.recompile(
-      Uri(scheme: 'org-dartlang-app', path: '/${mainUri.pathSegments.last}'),
+      Uri(
+        scheme: 'org-dartlang-app',
+        // An empty String here causes the URI to appear with three slashes and
+        // matches the pattern the infra creates for other modules in the app.
+        // Ex: org-dartlang-app:///main.dart
+        host: '',
+        path: '/${mainUri.pathSegments.last}',
+      ),
       invalidatedFiles,
       outputPath: dillOutputPath,
       packageConfig: packageConfig,
@@ -430,7 +448,10 @@ class WebDevFS implements DevFS {
     // Only update the last compiled time if we successfully compiled.
     lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
-    sources = compilerOutput.sources;
+    sources = <Uri>{
+      ...compilerOutput.sources,
+      ..._assetTransformer.dependencies.values.expand((Set<Uri> uris) => uris),
+    }.toList();
     late File codeFile;
     File manifestFile;
     File sourcemapFile;

@@ -74,6 +74,23 @@ FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_Texture_AsImage(
     flutter::gpu::Texture* wrapper);
 
+// Returns an Int32List describing the texture that backs the given ui.Image,
+// or an empty list if the image is not backed by a Flutter GPU compatible
+// texture. See the Dart `Texture.fromImage` for the field layout.
+FLUTTER_GPU_EXPORT
+extern Dart_Handle InternalFlutterGpu_Texture_ImageTextureInfo(
+    flutter::gpu::Context* gpu_context,
+    Dart_Handle image_wrapper);
+
+// Associates `wrapper` with the impeller texture that backs the given
+// ui.Image, without copying. Returns false if the image is not backed by a
+// Flutter GPU compatible texture.
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_Texture_InitializeFromImage(
+    Dart_Handle wrapper,
+    flutter::gpu::Context* gpu_context,
+    Dart_Handle image_wrapper);
+
 }  // extern "C"
 
 #endif  // FLUTTER_LIB_GPU_TEXTURE_H_

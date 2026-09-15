@@ -27,7 +27,6 @@ import 'dart:ui'
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:meta/meta_meta.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -42,41 +41,40 @@ import 'view.dart';
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.exitWidgetSelectionButtonBuilder].
-typedef ExitWidgetSelectionButtonBuilder =
-    Widget Function(
-      BuildContext context, {
-      required VoidCallback onPressed,
-      required String semanticsLabel,
-      required GlobalKey key,
-    });
+typedef ExitWidgetSelectionButtonBuilder = Widget Function(
+  BuildContext context, {
+  required VoidCallback onPressed,
+  required String semanticsLabel,
+  required GlobalKey key,
+});
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.moveExitWidgetSelectionButtonBuilder].
-typedef MoveExitWidgetSelectionButtonBuilder =
-    Widget Function(
-      BuildContext context, {
-      required VoidCallback onPressed,
-      required String semanticsLabel,
-      bool usesDefaultAlignment,
-    });
+typedef MoveExitWidgetSelectionButtonBuilder = Widget Function(
+  BuildContext context, {
+  required VoidCallback onPressed,
+  required String semanticsLabel,
+  bool usesDefaultAlignment,
+});
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.tapBehaviorButtonBuilder].
-typedef TapBehaviorButtonBuilder =
-    Widget Function(
-      BuildContext context, {
-      required VoidCallback onPressed,
-      required String semanticsLabel,
-      required bool selectionOnTapEnabled,
-    });
+typedef TapBehaviorButtonBuilder = Widget Function(
+  BuildContext context, {
+  required VoidCallback onPressed,
+  required String semanticsLabel,
+  required bool selectionOnTapEnabled,
+});
 
 /// Signature for a method that registers the service extension `callback` with
 /// the given `name`.
 ///
 /// Used as argument to [WidgetInspectorService.initServiceExtensions]. The
 /// [BindingBase.registerServiceExtension] implements this signature.
-typedef RegisterServiceExtensionCallback =
-    void Function({required String name, required ServiceExtensionCallback callback});
+typedef RegisterServiceExtensionCallback = void Function({
+  required String name,
+  required ServiceExtensionCallback callback,
+});
 
 /// A layer that mimics the behavior of another layer.
 ///
@@ -107,9 +105,7 @@ class _ProxyLayer extends Layer {
 /// secondary screenshot canvas so that a screenshot can be recorded at the same
 /// time as performing a normal paint.
 class _MulticastCanvas implements Canvas {
-  _MulticastCanvas({required Canvas main, required Canvas screenshot})
-    : _main = main,
-      _screenshot = screenshot;
+  _MulticastCanvas({required this._main, required this._screenshot});
 
   final Canvas _main;
   final Canvas _screenshot;
@@ -1640,7 +1636,7 @@ mixin WidgetInspectorService {
   void _notifyToolsOfSelection(Object? object, {bool restrictToProjectFiles = false}) {
     inspect(object);
 
-    final _Location? location = _getSelectedWidgetLocation(
+    final developer.CreationLocation? location = _getSelectedWidgetLocation(
       restrictToSummaryTree: restrictToProjectFiles,
     );
     if (location != null) {
@@ -1795,7 +1791,7 @@ mixin WidgetInspectorService {
   }
 
   bool _isValueCreatedByLocalProject(Object? value) {
-    final _Location? creationLocation = _getCreationLocation(value);
+    final developer.CreationLocation? creationLocation = _getCreationLocation(value);
     if (creationLocation == null) {
       return false;
     }
@@ -2290,92 +2286,97 @@ mixin WidgetInspectorService {
         summaryTree: true,
         subtreeDepth: subtreeDepth,
         service: this,
-        addAdditionalPropertiesCallback: (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
-          final Object? value = node.value;
-          final RenderObject? renderObject = value is Element ? _renderObjectOrNull(value) : null;
-          if (renderObject == null) {
-            return const <String, Object>{};
-          }
-
-          final DiagnosticsSerializationDelegate renderObjectSerializationDelegate = delegate
-              .copyWith(subtreeDepth: 0, includeProperties: true, expandPropertyValues: false);
-          final additionalJson = <String, Object>{
-            // Only include renderObject properties separately if this value is not already the renderObject.
-            // Only include if we are expanding property values to mitigate the risk of infinite loops if
-            // RenderObjects have properties that are Element objects.
-            if (value is! RenderObject && delegate.expandPropertyValues)
-              'renderObject': renderObject.toDiagnosticsNode().toJsonMap(
-                renderObjectSerializationDelegate,
-              ),
-          };
-
-          final RenderObject? renderParent = renderObject.parent;
-          if (renderParent != null && delegate.subtreeDepth > 0 && delegate.expandPropertyValues) {
-            final Object? parentCreator = renderParent.debugCreator;
-            if (parentCreator is DebugCreator) {
-              additionalJson['parentRenderElement'] = parentCreator.element
-                  .toDiagnosticsNode()
-                  .toJsonMap(delegate.copyWith(subtreeDepth: 0, includeProperties: true));
-              // TODO(jacobr): also describe the path back up the tree to
-              // the RenderParentElement from the current element. It
-              // could be a surprising distance up the tree if a lot of
-              // elements don't have their own RenderObjects.
-            }
-          }
-
-          try {
-            if (!renderObject.debugNeedsLayout) {
-              // ignore: invalid_use_of_protected_member
-              final Constraints constraints = renderObject.constraints;
-              final constraintsProperty = <String, Object>{
-                'type': constraints.runtimeType.toString(),
-                'description': constraints.toString(),
-              };
-              if (constraints is BoxConstraints) {
-                constraintsProperty.addAll(<String, Object>{
-                  'minWidth': constraints.minWidth.toString(),
-                  'minHeight': constraints.minHeight.toString(),
-                  'maxWidth': constraints.maxWidth.toString(),
-                  'maxHeight': constraints.maxHeight.toString(),
-                });
+        addAdditionalPropertiesCallback:
+            (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
+              final Object? value = node.value;
+              final RenderObject? renderObject = value is Element
+                  ? _renderObjectOrNull(value)
+                  : null;
+              if (renderObject == null) {
+                return const <String, Object>{};
               }
-              additionalJson['constraints'] = constraintsProperty;
-            }
-          } catch (e) {
-            // Constraints are sometimes unavailable even though
-            // debugNeedsLayout is false.
-          }
 
-          try {
-            if (renderObject is RenderBox) {
-              additionalJson['isBox'] = true;
-              additionalJson['size'] = <String, Object>{
-                'width': renderObject.size.width.toString(),
-                'height': renderObject.size.height.toString(),
+              final DiagnosticsSerializationDelegate renderObjectSerializationDelegate = delegate
+                  .copyWith(subtreeDepth: 0, includeProperties: true, expandPropertyValues: false);
+              final additionalJson = <String, Object>{
+                // Only include renderObject properties separately if this value is not already the renderObject.
+                // Only include if we are expanding property values to mitigate the risk of infinite loops if
+                // RenderObjects have properties that are Element objects.
+                if (value is! RenderObject && delegate.expandPropertyValues)
+                  'renderObject': renderObject.toDiagnosticsNode().toJsonMap(
+                    renderObjectSerializationDelegate,
+                  ),
               };
 
-              final ParentData? parentData = renderObject.parentData;
-              if (parentData is FlexParentData) {
-                additionalJson['flexFactor'] = parentData.flex ?? 0;
-                additionalJson['flexFit'] = (parentData.fit ?? FlexFit.tight).name;
-              } else if (parentData is BoxParentData) {
-                final Offset offset = parentData.offset;
-                additionalJson['parentData'] = <String, Object>{
-                  'offsetX': offset.dx.toString(),
-                  'offsetY': offset.dy.toString(),
-                };
+              final RenderObject? renderParent = renderObject.parent;
+              if (renderParent != null &&
+                  delegate.subtreeDepth > 0 &&
+                  delegate.expandPropertyValues) {
+                final Object? parentCreator = renderParent.debugCreator;
+                if (parentCreator is DebugCreator) {
+                  additionalJson['parentRenderElement'] = parentCreator.element
+                      .toDiagnosticsNode()
+                      .toJsonMap(delegate.copyWith(subtreeDepth: 0, includeProperties: true));
+                  // TODO(jacobr): also describe the path back up the tree to
+                  // the RenderParentElement from the current element. It
+                  // could be a surprising distance up the tree if a lot of
+                  // elements don't have their own RenderObjects.
+                }
               }
-            } else if (renderObject is RenderView) {
-              additionalJson['size'] = <String, Object>{
-                'width': renderObject.size.width.toString(),
-                'height': renderObject.size.height.toString(),
-              };
-            }
-          } catch (e) {
-            // Not laid out yet.
-          }
-          return additionalJson;
-        },
+
+              try {
+                if (!renderObject.debugNeedsLayout) {
+                  // ignore: invalid_use_of_protected_member
+                  final Constraints constraints = renderObject.constraints;
+                  final constraintsProperty = <String, Object>{
+                    'type': constraints.runtimeType.toString(),
+                    'description': constraints.toString(),
+                  };
+                  if (constraints is BoxConstraints) {
+                    constraintsProperty.addAll(<String, Object>{
+                      'minWidth': constraints.minWidth.toString(),
+                      'minHeight': constraints.minHeight.toString(),
+                      'maxWidth': constraints.maxWidth.toString(),
+                      'maxHeight': constraints.maxHeight.toString(),
+                    });
+                  }
+                  additionalJson['constraints'] = constraintsProperty;
+                }
+              } catch (e) {
+                // Constraints are sometimes unavailable even though
+                // debugNeedsLayout is false.
+              }
+
+              try {
+                if (renderObject is RenderBox) {
+                  additionalJson['isBox'] = true;
+                  additionalJson['size'] = <String, Object>{
+                    'width': renderObject.size.width.toString(),
+                    'height': renderObject.size.height.toString(),
+                  };
+
+                  final ParentData? parentData = renderObject.parentData;
+                  if (parentData is FlexParentData) {
+                    additionalJson['flexFactor'] = parentData.flex ?? 0;
+                    additionalJson['flexFit'] = (parentData.fit ?? FlexFit.tight).name;
+                  } else if (parentData is BoxParentData) {
+                    final Offset offset = parentData.offset;
+                    additionalJson['parentData'] = <String, Object>{
+                      'offsetX': offset.dx.toString(),
+                      'offsetY': offset.dy.toString(),
+                    };
+                  }
+                } else if (renderObject is RenderView) {
+                  additionalJson['size'] = <String, Object>{
+                    'width': renderObject.size.width.toString(),
+                    'height': renderObject.size.height.toString(),
+                  };
+                }
+              } catch (e) {
+                // Not laid out yet.
+              }
+              return additionalJson;
+            },
       ),
     );
     return Future<Map<String, dynamic>>.value(<String, dynamic>{'result': result});
@@ -2481,7 +2482,7 @@ mixin WidgetInspectorService {
   /// not in the summary tree (i.e. not created by the current project), this
   /// method will instead return the location of its nearest ancestor widget
   /// that is in the summary tree.
-  _Location? _getSelectedWidgetLocation({bool restrictToSummaryTree = false}) {
+  developer.CreationLocation? _getSelectedWidgetLocation({bool restrictToSummaryTree = false}) {
     final DiagnosticsNode? selectedNode = restrictToSummaryTree
         ? _getSelectedSummaryDiagnosticsNode(null)
         : _getSelectedWidgetDiagnosticsNode(null);
@@ -2519,7 +2520,7 @@ mixin WidgetInspectorService {
   ///
   /// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
   bool isWidgetCreationTracked() {
-    _widgetCreationTracked ??= const _WidgetForTypeTests() is _HasCreationLocation;
+    _widgetCreationTracked ??= (developer.CreationLocation.of(const _WidgetForTypeTests()) != null);
     return _widgetCreationTracked!;
   }
 
@@ -2642,7 +2643,7 @@ class _LocationCount {
   /// Whether the location is local to the current project.
   final bool local;
 
-  final _Location location;
+  final developer.CreationLocation location;
 
   int get count => _count;
   int _count = 0;
@@ -2694,11 +2695,7 @@ class _ElementLocationStatsTracker {
   /// the creation location is local to the current project.
   void add(Element element) {
     final Object widget = element.widget;
-    if (widget is! _HasCreationLocation) {
-      return;
-    }
-    final _HasCreationLocation creationLocationSource = widget;
-    final _Location? location = creationLocationSource._location;
+    final developer.CreationLocation? location = developer.CreationLocation.of(widget);
     if (location == null) {
       return;
     }
@@ -2772,7 +2769,7 @@ class _ElementLocationStatsTracker {
       // Add all newly used location ids to the JSON.
       final locationsJson = <String, List<int>>{};
       for (final _LocationCount entry in newLocations) {
-        final _Location location = entry.location;
+        final developer.CreationLocation location = entry.location;
         final List<int> jsonForFile = locationsJson.putIfAbsent(location.file, () => <int>[]);
         jsonForFile
           ..add(entry.id)
@@ -2786,7 +2783,7 @@ class _ElementLocationStatsTracker {
     if (newLocations.isNotEmpty) {
       final fileLocationsMap = <String, Map<String, List<Object?>>>{};
       for (final _LocationCount entry in newLocations) {
-        final _Location location = entry.location;
+        final developer.CreationLocation location = entry.location;
         final Map<String, List<Object?>> locations = fileLocationsMap.putIfAbsent(
           location.file,
           () => <String, List<Object?>>{
@@ -3391,7 +3388,7 @@ class _InspectorOverlay extends LeafRenderObjectWidget {
 }
 
 class _RenderInspectorOverlay extends RenderBox {
-  _RenderInspectorOverlay({required InspectorSelection selection}) : _selection = selection;
+  _RenderInspectorOverlay({required this._selection});
 
   InspectorSelection get selection => _selection;
   InspectorSelection _selection;
@@ -3545,22 +3542,17 @@ List<RenderObject> _filterInspectorHitCandidatesToModalRouteScope(List<RenderObj
   }
 
   // Ignore widgets that belong to offstage modal routes.
-  final List<RenderObject> onstageHits = hits
-      .where((RenderObject hit) {
-        final ModalRoute<Object?>? route = _modalRouteForRenderObject(hit);
-        return route == null || !route.offstage;
-      })
-      .toList();
+  final List<RenderObject> onstageHits = hits.where((RenderObject hit) {
+    final ModalRoute<Object?>? route = _modalRouteForRenderObject(hit);
+    return route == null || !route.offstage;
+  }).toList();
   if (onstageHits.isEmpty) {
     return onstageHits;
   }
 
   final ModalRoute<Object?>? scopeRoute = _inspectorScopeRouteForHits(onstageHits);
   final List<RenderObject> scopedHits = onstageHits
-      .where(
-        (RenderObject hit) =>
-            identical(_modalRouteForRenderObject(hit), scopeRoute),
-      )
+      .where((RenderObject hit) => identical(_modalRouteForRenderObject(hit), scopeRoute))
       .toList();
 
   scopedHits.sort(
@@ -3642,10 +3634,7 @@ class _InspectorOverlayLayer extends Layer {
       if (candidate == selected ||
           !candidate.attached ||
           !_isInInspectorRenderObjectTree(candidate) ||
-          !identical(
-            _modalRouteForRenderObject(candidate),
-            _modalRouteForRenderObject(selected),
-          )) {
+          !identical(_modalRouteForRenderObject(candidate), _modalRouteForRenderObject(selected))) {
         continue;
       }
       candidates.add(_TransformedRect(candidate, rootRenderObject));
@@ -4171,45 +4160,6 @@ class _ExitWidgetSelectionTooltipPainter extends CustomPainter {
   }
 }
 
-/// Interface for classes that track the source code location the their
-/// constructor was called from.
-///
-/// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
-// ignore: unused_element
-abstract class _HasCreationLocation {
-  _Location? get _location;
-}
-
-/// A tuple with file, line, and column number, for displaying human-readable
-/// file locations.
-class _Location {
-  const _Location({
-    required this.file,
-    required this.line,
-    required this.column,
-    this.name, // ignore: unused_element_parameter
-  });
-
-  /// File path of the location.
-  final String file;
-
-  /// 1-based line number.
-  final int line;
-
-  /// 1-based column number.
-  final int column;
-
-  /// Optional name of the parameter or function at this location.
-  final String? name;
-
-  Map<String, Object?> toJsonMap() {
-    return <String, Object?>{'file': file, 'line': line, 'column': column, 'name': ?name};
-  }
-
-  @override
-  String toString() => <String>[?name, file, '$line', '$column'].join(':');
-}
-
 bool _isDebugCreator(DiagnosticsNode node) => node is DiagnosticsDebugCreator;
 
 /// Transformer to parse and gather information about [DiagnosticsDebugCreator].
@@ -4369,7 +4319,7 @@ class DevToolsDeepLinkProperty extends DiagnosticsProperty<String> {
 bool debugIsLocalCreationLocation(Object object) {
   var isLocal = false;
   assert(() {
-    final _Location? location = _getCreationLocation(object);
+    final developer.CreationLocation? location = _getCreationLocation(object);
     if (location != null) {
       isLocal = WidgetInspectorService.instance._isLocalCreationLocation(location.file);
     }
@@ -4383,7 +4333,7 @@ bool debugIsLocalCreationLocation(Object object) {
 /// This is a faster variant of `debugIsLocalCreationLocation` that is available
 /// in debug and profile builds but only works for [Widget].
 bool debugIsWidgetLocalCreation(Widget widget) {
-  final _Location? location = _getObjectCreationLocation(widget);
+  final developer.CreationLocation? location = developer.CreationLocation.of(widget);
   return location != null &&
       WidgetInspectorService.instance._isLocalCreationLocation(location.file);
 }
@@ -4396,12 +4346,8 @@ bool debugIsWidgetLocalCreation(Widget widget) {
 ///
 /// Currently creation locations are only available for [Widget] and [Element].
 String? _describeCreationLocation(Object object) {
-  final _Location? location = _getCreationLocation(object);
+  final developer.CreationLocation? location = _getCreationLocation(object);
   return location?.toString();
-}
-
-_Location? _getObjectCreationLocation(Object object) {
-  return object is _HasCreationLocation ? object._location : null;
 }
 
 /// Returns the creation location of an object if one is available.
@@ -4409,18 +4355,18 @@ _Location? _getObjectCreationLocation(Object object) {
 /// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
 ///
 /// Currently creation locations are only available for [Widget] and [Element].
-_Location? _getCreationLocation(Object? object) {
+developer.CreationLocation? _getCreationLocation(Object? object) {
   final Object? candidate = object is Element && !object.debugIsDefunct ? object.widget : object;
-  return candidate == null ? null : _getObjectCreationLocation(candidate);
+  return candidate == null ? null : developer.CreationLocation.of(candidate);
 }
 
-// _Location objects are always const so we don't need to worry about the GC
+// CreationLocation objects are always const so we don't need to worry about the GC
 // issues that are a concern for other object ids tracked by
 // [WidgetInspectorService].
-final Map<_Location, int> _locationToId = <_Location, int>{};
-final List<_Location> _locations = <_Location>[];
+final Map<developer.CreationLocation, int> _locationToId = <developer.CreationLocation, int>{};
+final List<developer.CreationLocation> _locations = <developer.CreationLocation>[];
 
-int _toLocationId(_Location location) {
+int _toLocationId(developer.CreationLocation location) {
   int? id = _locationToId[location];
   if (id != null) {
     return id;
@@ -4438,8 +4384,8 @@ Map<String, dynamic> _locationIdMapToJson() {
   const namesKey = 'names';
 
   final fileLocationsMap = <String, Map<String, List<Object?>>>{};
-  for (final MapEntry<_Location, int> entry in _locationToId.entries) {
-    final _Location location = entry.key;
+  for (final MapEntry<developer.CreationLocation, int> entry in _locationToId.entries) {
+    final developer.CreationLocation location = entry.key;
     final Map<String, List<Object?>> locations = fileLocationsMap.putIfAbsent(
       location.file,
       () => <String, List<Object?>>{
@@ -4527,7 +4473,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
     if (_interactive) {
       result['valueId'] = service.toId(value, groupName!);
     }
-    final _Location? creationLocation = _getCreationLocation(value);
+    final developer.CreationLocation? creationLocation = _getCreationLocation(value);
     if (creationLocation != null) {
       if (fullDetails) {
         result['locationId'] = _toLocationId(creationLocation);
@@ -4601,11 +4547,6 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   }
 }
 
-@Target(<TargetKind>{TargetKind.method})
-class _WidgetFactory {
-  const _WidgetFactory();
-}
-
 /// Annotation which marks a function as a widget factory for the purpose of
 /// widget creation tracking.
 ///
@@ -4660,11 +4601,7 @@ class _WidgetFactory {
 /// See also:
 ///
 /// * the documentation for [Track widget creation](https://flutter.dev/to/track-widget-creation).
-// The below ignore is needed because the static type of the annotation is used
-// by the CFE kernel transformer that implements the instrumentation to
-// recognize the annotation.
-// ignore: library_private_types_in_public_api
-const _WidgetFactory widgetFactory = _WidgetFactory();
+const widgetFactory = pragma('track-creation-locations');
 
 /// Does not hold keys from garbage collection.
 @visibleForTesting

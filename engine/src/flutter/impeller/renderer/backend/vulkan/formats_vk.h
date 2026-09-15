@@ -12,6 +12,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/shader_types.h"
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "vulkan/vulkan_enums.hpp"
 
@@ -608,11 +609,13 @@ constexpr vk::ImageAspectFlags ToVKImageAspectFlags(PixelFormat format) {
   FML_UNREACHABLE();
 }
 
-constexpr uint32_t ToArrayLayerCount(TextureType type) {
-  switch (type) {
+constexpr uint32_t ToArrayLayerCount(const TextureDescriptor& desc) {
+  switch (desc.type) {
     case TextureType::kTexture2D:
     case TextureType::kTexture2DMultisample:
       return 1u;
+    case TextureType::kTexture2DArray:
+      return desc.array_layer_count;
     case TextureType::kTextureCube:
       return 6u;
     case TextureType::kTextureExternalOES:
@@ -627,6 +630,8 @@ constexpr vk::ImageViewType ToVKImageViewType(TextureType type) {
     case TextureType::kTexture2D:
     case TextureType::kTexture2DMultisample:
       return vk::ImageViewType::e2D;
+    case TextureType::kTexture2DArray:
+      return vk::ImageViewType::e2DArray;
     case TextureType::kTextureCube:
       return vk::ImageViewType::eCube;
     case TextureType::kTextureExternalOES:
@@ -640,6 +645,7 @@ constexpr vk::ImageCreateFlags ToVKImageCreateFlags(TextureType type) {
   switch (type) {
     case TextureType::kTexture2D:
     case TextureType::kTexture2DMultisample:
+    case TextureType::kTexture2DArray:
       return {};
     case TextureType::kTextureCube:
       return vk::ImageCreateFlagBits::eCubeCompatible;

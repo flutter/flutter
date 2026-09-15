@@ -9,16 +9,6 @@
 
 namespace impeller {
 
-std::shared_ptr<PipelineCompileQueue> PipelineCompileQueue::Create(
-    std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner) {
-  return std::shared_ptr<PipelineCompileQueue>(
-      new PipelineCompileQueue(std::move(worker_task_runner)));
-}
-
-PipelineCompileQueue::PipelineCompileQueue(
-    std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner)
-    : worker_task_runner_(std::move(worker_task_runner)) {}
-
 PipelineCompileQueue::~PipelineCompileQueue() {
   FinishAllJobs();
 }
@@ -29,29 +19,31 @@ bool PipelineCompileQueue::PostJobForDescriptor(const PipelineDescriptor& desc,
     return false;
   }
 
-  {
-    Lock lock(pending_jobs_mutex_);
-    auto insertion_result = pending_jobs_.insert(std::make_pair(desc, job));
-    if (!insertion_result.second) {
-      // This bit is being extremely conservative. If insertion did not take
-      // place, someone gave the compile queue a job for the same description.
-      // This is highly unusual but technically not impossible. Just run the job
-      // eagerly.
-      FML_LOG(ERROR) << "Got multiple compile jobs for the same descriptor. "
+  if (!AddJob(desc, job)) {
+    // This bit is being extremely conservative. If insertion did not take
+    // place, someone gave the compile queue a job for the same description.
+    // This is highly unusual but technically not impossible. Just run the job
+    // eagerly.
+    FML_LOG(WARNING) << "Got multiple compile jobs for the same descriptor. "
                         "Running eagerly.";
-      // Don't invoke the job here has there are we have currently acquired a
-      // mutex.
-      worker_task_runner_->PostTask(job);
-      return true;
-    }
+    PostJob(job);
+    return true;
   }
 
-  worker_task_runner_->PostTask([weak_queue = weak_from_this()]() {
-    if (auto queue = weak_queue.lock()) {
-      queue->DoOneJob();
-    }
-  });
+  OnJobAdded();
   return true;
+}
+
+bool PipelineCompileQueue::AddJob(const PipelineDescriptor& desc,
+                                  const fml::closure& job) {
+  Lock lock(pending_jobs_mutex_);
+  auto insertion_result = pending_jobs_.insert(std::make_pair(desc, job));
+  return insertion_result.second;
+}
+
+bool PipelineCompileQueue::HasPendingJobs() {
+  Lock lock(pending_jobs_mutex_);
+  return !pending_jobs_.empty();
 }
 
 fml::closure PipelineCompileQueue::TakeNextJob() {

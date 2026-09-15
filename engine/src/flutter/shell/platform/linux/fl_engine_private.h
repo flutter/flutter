@@ -283,6 +283,8 @@ void fl_engine_send_window_metrics_event(FlEngine* engine,
  * @scroll_delta_x: x offset of scroll.
  * @scroll_delta_y: y offset of scroll.
  * @buttons: buttons that are pressed.
+ * @rotation: rotation of the pointer device in degrees.
+ * @pressure: pressure of the pointer device.
  *
  * Sends a mouse pointer event to the engine.
  */
@@ -295,7 +297,9 @@ void fl_engine_send_mouse_pointer_event(FlEngine* engine,
                                         FlutterPointerDeviceKind device_kind,
                                         double scroll_delta_x,
                                         double scroll_delta_y,
-                                        int64_t buttons);
+                                        int64_t buttons,
+                                        double rotation,
+                                        double pressure);
 
 /**
  * fl_engine_send_touch_up_event:
@@ -349,6 +353,25 @@ void fl_engine_send_touch_move_event(FlEngine* engine,
                                      double x,
                                      double y,
                                      int32_t device);
+
+/**
+ * fl_engine_send_touch_cancel_event:
+ * @engine: an #FlEngine.
+ * @view_id: the view that the event occured on.
+ * @timestamp: time when event occurred in microseconds.
+ * @x: x location of mouse cursor.
+ * @y: y location of mouse cursor.
+ * @device: device id.
+ *
+ * Sends a touch cancel event to the engine, i.e. the touch sequence was
+ * aborted without the touch being lifted.
+ */
+void fl_engine_send_touch_cancel_event(FlEngine* engine,
+                                       FlutterViewId view_id,
+                                       size_t timestamp,
+                                       double x,
+                                       double y,
+                                       int32_t device);
 
 /**
  * fl_engine_send_touch_add_event:

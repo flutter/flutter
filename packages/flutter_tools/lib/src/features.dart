@@ -73,9 +73,6 @@ abstract class FeatureFlags {
   /// Whether desktop windowing is enabled.
   bool get isWindowingEnabled;
 
-  /// Whether accessibility evaluations is enabled.
-  bool get isAccessibilityEvaluationsEnabled;
-
   /// Whether physical iOS devices are debugging with LLDB.
   bool get isLLDBDebuggingEnabled;
 
@@ -84,6 +81,15 @@ abstract class FeatureFlags {
 
   /// Whether riscv64 support is enabled.
   bool get isRiscv64SupportEnabled;
+
+  /// Whether to only build for arm64 when targeting macOS.
+  bool get isMacOSArm64OnlyEnabled;
+
+  /// Whether the HCPP platform view rendering mode is enabled by default.
+  bool get isHcppEnabled;
+
+  /// Whether support for tool extensions is enabled.
+  bool get isToolExtensionsEnabled;
 
   /// Whether a particular feature is enabled for the current channel.
   ///
@@ -107,10 +113,12 @@ abstract class FeatureFlags {
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
-    accessibilityEvaluationsFeature,
     lldbDebugging,
     uiSceneMigration,
     riscv64,
+    macOSArm64Only,
+    hcpp,
+    toolExtensionsFeature,
   ];
 
   /// All current Flutter feature flags that can be configured.
@@ -220,14 +228,21 @@ const recordUse = Feature(
   name: 'record use experiment',
   configSetting: 'enable-record-use',
   environmentOverride: 'FLUTTER_RECORD_USE',
-  master: FeatureChannelSetting(available: true),
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
+
+/// Warning printed when Swift Package Manager is disabled in configuration.
+const kSwiftPackageManagerDisabledWarning =
+    'Enabling Swift Package Manager will be required in a future version of Flutter.';
 
 /// Enable Swift Package Manager as a darwin dependency manager.
 const swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
   environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
+  warningMessageOnDisable: kSwiftPackageManagerDisabledWarning,
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
   beta: FeatureChannelSetting(available: true, enabledByDefault: true),
   stable: FeatureChannelSetting(available: true, enabledByDefault: true),
@@ -253,15 +268,6 @@ const windowingFeature = Feature(
   configSetting: 'enable-windowing',
   environmentOverride: 'FLUTTER_WINDOWING',
   runtimeId: 'windowing',
-  master: FeatureChannelSetting(available: true),
-);
-
-/// Whether accessibility evaluations is enabled.
-const accessibilityEvaluationsFeature = Feature(
-  name: 'support for accessibility evaluations',
-  configSetting: 'enable-accessibility-evaluations',
-  environmentOverride: 'FLUTTER_ACCESSIBILITY_EVALUATIONS',
-  runtimeId: 'accessibility_evaluations',
   master: FeatureChannelSetting(available: true),
 );
 
@@ -307,6 +313,47 @@ const riscv64 = Feature(
   stable: FeatureChannelSetting(available: true),
 );
 
+/// Whether to only build for arm64 when targeting macOS.
+const macOSArm64Only = Feature(
+  name: 'building arm64 architecture only for non-debug macOS builds',
+  extraHelpText:
+      'If enabled, macOS release and profile builds generate Apple Silicon binaries instead of universal binaries. '
+      'This feature is disabled by default, but will default to enabled in a future release, before Intel Mac support is eventually discontinued. '
+      'See https://flutter.dev/go/macos-intel-deprecation for details.',
+  configSetting: 'enable-macos-arm64-only',
+  environmentOverride: 'FLUTTER_MACOS_ARM64_ONLY',
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
+);
+
+/// Whether the HCPP (Hybrid Composition++) platform view rendering mode is used
+/// by default on Android.
+///
+/// This is the default only: it is baked into the Android manifest of the
+/// artifact the tool builds, and an explicit
+/// `io.flutter.embedding.android.EnableHcpp` entry in the app's manifest, or an
+/// explicit `--[no-]enable-hcpp`, takes priority over it.
+const hcpp = Feature(
+  name: 'the HCPP platform view rendering mode',
+  extraHelpText:
+      'HCPP requires the Impeller rendering backend, and Android API 34 or above. '
+      "Devices that do not support it fall back to each platform view's developer-chosen mode.",
+  configSetting: 'enable-hcpp',
+  environmentOverride: 'FLUTTER_ENABLE_HCPP',
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true),
+);
+
+/// Enable tool extensions feature.
+const toolExtensionsFeature = Feature(
+  name: 'support for tool extensions',
+  configSetting: 'enable-tool-extensions',
+  environmentOverride: 'FLUTTER_TOOL_EXTENSIONS',
+  master: FeatureChannelSetting(available: true),
+);
+
 /// A [Feature] is a process for conditionally enabling tool features.
 ///
 /// All settings are optional, and if not provided will generally default to
@@ -323,6 +370,7 @@ class Feature {
     this.configSetting,
     this.runtimeId,
     this.extraHelpText,
+    this.warningMessageOnDisable,
     this.master = const FeatureChannelSetting(),
     this.beta = const FeatureChannelSetting(),
     this.stable = const FeatureChannelSetting(),
@@ -335,6 +383,7 @@ class Feature {
     this.configSetting,
     this.runtimeId,
     this.extraHelpText,
+    this.warningMessageOnDisable,
   }) : master = const FeatureChannelSetting(available: true, enabledByDefault: true),
        beta = const FeatureChannelSetting(available: true, enabledByDefault: true),
        stable = const FeatureChannelSetting(available: true, enabledByDefault: true);
@@ -375,6 +424,11 @@ class Feature {
   ///
   /// If not provided, defaults to `null` meaning there is no additional text.
   final String? extraHelpText;
+
+  /// A warning to print when this feature is explicitly disabled.
+  ///
+  /// If not provided, defaults to `null` meaning there is no warning.
+  final String? warningMessageOnDisable;
 
   /// A help message for the `flutter config` command, or null if unsupported.
   String? generateHelpMessage() {

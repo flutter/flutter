@@ -689,6 +689,7 @@ Matcher matchesSemantics({
   ui.SemanticsInputType? inputType,
   String? maxValue,
   String? minValue,
+  ui.SemanticsRole? role,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -776,6 +777,7 @@ Matcher matchesSemantics({
     inputType: inputType,
     minValue: minValue,
     maxValue: maxValue,
+    role: role,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -1090,6 +1092,7 @@ Matcher isSemantics({
   ui.SemanticsInputType? inputType,
   String? maxValue,
   String? minValue,
+  ui.SemanticsRole? role,
   // Flags
   bool? hasCheckedState,
   bool? isChecked,
@@ -1177,6 +1180,7 @@ Matcher isSemantics({
     inputType: inputType,
     minValue: minValue,
     maxValue: maxValue,
+    role: role,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -1558,9 +1562,8 @@ class _EqualsIgnoringHashCodes extends Matcher {
 
   static Iterable<String> _normalize(Object value, {bool expected = true}) {
     if (value is String) {
-      return LineSplitter.split(
-        value,
-      ).map<String>((dynamic item) => _normalizeString(item.toString()));
+      return LineSplitter.split(value)
+          .map<String>((dynamic item) => _normalizeString(item.toString()));
     }
     if (value is Iterable<String>) {
       return value.map<String>((dynamic item) => _normalizeString(item.toString()));
@@ -2559,8 +2562,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
   @override
   Future<String?> matchAsync(dynamic item) async {
     Future<ui.Image> imageFuture;
-    final bool
-    disposeImage; // set to true if the matcher created and owns the image and must therefore dispose it.
+    final bool disposeImage; // set to true if the matcher created and owns the image and must therefore dispose it.
     if (item is Future<ui.Image>) {
       imageFuture = item;
       disposeImage = false;
@@ -2642,6 +2644,7 @@ class _MatchesSemanticsData extends Matcher {
     required this.inputType,
     required this.minValue,
     required this.maxValue,
+    required this.role,
     // Flags
     required bool? hasCheckedState,
     required bool? isChecked,
@@ -2791,6 +2794,7 @@ class _MatchesSemanticsData extends Matcher {
   final SemanticsValidationResult? validationResult;
   final String? maxValue;
   final String? minValue;
+  final ui.SemanticsRole? role;
 
   /// There are three possible states for these two maps:
   ///
@@ -2909,6 +2913,9 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (maxValue != null) {
       description.add(' with maxValue: $maxValue');
+    }
+    if (role != null) {
+      description.add(' with role: $role');
     }
     if (children != null) {
       description.add(' with children:\n  ');
@@ -3075,6 +3082,9 @@ class _MatchesSemanticsData extends Matcher {
     if (maxValue != null && maxValue != data.maxValue) {
       return failWithDescription(matchState, 'maxValue was: ${data.maxValue}');
     }
+    if (role != null && role != data.role) {
+      return failWithDescription(matchState, 'role was: ${data.role}');
+    }
     if (actions.isNotEmpty) {
       final unexpectedActions = <SemanticsAction>[];
       final missingActions = <SemanticsAction>[];
@@ -3164,8 +3174,15 @@ class _MatchesSemanticsData extends Matcher {
     }
     var allMatched = true;
     if (children != null) {
+      final int actualChildrenCount = (node as SemanticsNode).childrenCount;
+      if (children!.length != actualChildrenCount) {
+        return failWithDescription(
+          matchState,
+          'expected ${children!.length} child${children!.length == 1 ? '' : 'ren'}, found $actualChildrenCount',
+        );
+      }
       var i = 0;
-      (node as SemanticsNode).visitChildren((SemanticsNode child) {
+      node.visitChildren((SemanticsNode child) {
         allMatched = children![i].matches(child, matchState) && allMatched;
         i += 1;
         return allMatched;

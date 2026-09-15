@@ -75,7 +75,7 @@ DecompressedImage DecompressedImage::ConvertToRGBA() const {
   }
 
   auto rgba_allocation = std::make_shared<Allocation>();
-  if (!rgba_allocation->Truncate(Bytes{size_.Area() * 4u}, false)) {
+  if (!rgba_allocation->Truncate(Bytes(size_.Area() * 4u), false)) {
     return {};
   }
 

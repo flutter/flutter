@@ -499,6 +499,52 @@ class ScrollPhysics {
   /// Whether a viewport is allowed to change the scroll position as the result of user input.
   bool get allowUserScrolling => true;
 
+  /// Whether a viewport may scroll to reveal more content when a selection
+  /// gesture extends past the visible area, i.e. the viewport's edge.
+  ///
+  /// Paged scrollables that want to prevent selection gestures from revealing an
+  /// adjacent page should override this to false in their [ScrollPhysics],
+  /// similar to [PageScrollPhysics] used by [PageView].
+  ///
+  /// Defaults to true, or to the value of the [parent] physics when there is one.
+  bool get allowSelectionEdgeScrolling => parent?.allowSelectionEdgeScrolling ?? true;
+
+  /// Called whenever a [Scrollable] is rebuilt with a new [ScrollPhysics]
+  /// of the same [runtimeType].
+  ///
+  /// If the new instance represents different information than the old
+  /// instance, then the method should return true, otherwise it should return
+  /// false.
+  ///
+  /// If this method returns true, the [Scrollable] will update its
+  /// [ScrollPosition] with the new [ScrollPhysics]. If this method returns
+  /// false, the physics update on the existing [ScrollPosition] is skipped,
+  /// though the position may still be recreated if other properties on
+  /// [Scrollable] force a reset.
+  ///
+  /// Subclasses that contain configuration parameters should override this
+  /// method to return true when those parameters change, and should call
+  /// `super.shouldUpdate(old)` to also update when the [parent] changes.
+  ///
+  /// The base class implementation returns false if `this` and [old] are
+  /// [identical], and returns true if the [runtimeType] or [parent] changes.
+  @mustCallSuper
+  bool shouldUpdate(covariant ScrollPhysics old) {
+    if (identical(this, old)) {
+      return false;
+    }
+    if (old.runtimeType != runtimeType) {
+      return true;
+    }
+    if (parent?.runtimeType != old.parent?.runtimeType) {
+      return true;
+    }
+    if (parent != null) {
+      return parent!.shouldUpdate(old.parent!);
+    }
+    return false;
+  }
+
   @override
   String toString() {
     if (parent == null) {
@@ -690,6 +736,14 @@ class BouncingScrollPhysics extends ScrollPhysics {
     return BouncingScrollPhysics(parent: buildParent(ancestor), decelerationRate: decelerationRate);
   }
 
+  @override
+  bool shouldUpdate(covariant BouncingScrollPhysics old) {
+    if (decelerationRate != old.decelerationRate) {
+      return true;
+    }
+    return super.shouldUpdate(old);
+  }
+
   /// The multiple applied to overscroll to make it appear that scrolling past
   /// the edge of the scrollable contents is harder than scrolling within bounds.
   /// This is done by reducing the ratio of the scroll effect output vs the
@@ -780,7 +834,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   double get minFlingVelocity => kMinFlingVelocity * 2.0;
 
   // Methodology:
-  // 1- Use https://github.com/flutter/platform_tests/tree/master/scroll_overlay to test with
+  // 1- Use https://github.com/flutter/platform_tests/tree/main/scroll_overlay to test with
   //    Flutter and platform scroll views superimposed.
   // 3- If the scrollables stopped overlapping at any moment, adjust the desired
   //    output value of this function at that input speed.

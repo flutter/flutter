@@ -21,7 +21,7 @@ void testMain() {
     });
 
     test('resizeCanvas updates backing store and CSS size', () {
-      final OnscreenCanvasProvider provider = OnscreenCanvasProvider();
+      final provider = OnscreenCanvasProvider();
       final DomHTMLCanvasElement canvas = provider.acquireCanvas(
         const BitmapSize(1, 1),
         onContextLost: () {},
@@ -37,7 +37,7 @@ void testMain() {
     });
 
     test('resizeCanvasCss preserves backing store while updating CSS size', () {
-      final OnscreenCanvasProvider provider = OnscreenCanvasProvider();
+      final provider = OnscreenCanvasProvider();
       final DomHTMLCanvasElement canvas = provider.acquireCanvas(
         const BitmapSize(1, 1),
         onContextLost: () {},

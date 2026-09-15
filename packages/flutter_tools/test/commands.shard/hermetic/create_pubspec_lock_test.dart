@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
@@ -81,5 +82,21 @@ void main() {
 
     expect(() => gatherSdkPackageDependencies(projectDir), returnsNormally);
     expect(gatherSdkPackageDependencies(projectDir), contains('vector_math'));
+  });
+
+  testWithoutContext('throws ToolExit if project pubspec.yaml is empty', () {
+    final Directory projectDir = writeProject('');
+    expect(() => gatherSdkPackageDependencies(projectDir), throwsA(isA<ToolExit>()));
+  });
+
+  testWithoutContext('does not throw if project pubspec.yaml has no dependencies', () {
+    final Directory projectDir = writeProject('name: my_app\n');
+    expect(() => gatherSdkPackageDependencies(projectDir), returnsNormally);
+    expect(gatherSdkPackageDependencies(projectDir), isEmpty);
+  });
+
+  testWithoutContext('throws ToolExit if project pubspec.yaml is malformed', () {
+    final Directory projectDir = writeProject('malformed: yaml: check');
+    expect(() => gatherSdkPackageDependencies(projectDir), throwsA(isA<ToolExit>()));
   });
 }

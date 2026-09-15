@@ -270,15 +270,12 @@ class _DevFSHttpWriter implements DevFSWriter {
   _DevFSHttpWriter(
     this.fsName,
     FlutterVmService serviceProtocol, {
-    required OperatingSystemUtils osUtils,
+    required this._osUtils,
     required HttpClient httpClient,
-    required Logger logger,
-    Duration? uploadRetryThrottle,
+    required this._logger,
+    this._uploadRetryThrottle,
   }) : httpAddress = serviceProtocol.httpAddress,
-       _client = httpClient,
-       _osUtils = osUtils,
-       _uploadRetryThrottle = uploadRetryThrottle,
-       _logger = logger;
+       _client = httpClient;
 
   final HttpClient _client;
   final OperatingSystemUtils _osUtils;
@@ -378,22 +375,15 @@ class _DevFSHttpWriter implements DevFSWriter {
 // Basic statistics for DevFS update operation.
 class UpdateFSReport {
   UpdateFSReport({
-    bool success = false,
-    int invalidatedSourcesCount = 0,
-    int syncedBytes = 0,
-    int scannedSourcesCount = 0,
-    Duration compileDuration = Duration.zero,
-    Duration transferDuration = Duration.zero,
-    Duration findInvalidatedDuration = Duration.zero,
-    bool hotReloadRejected = false,
-  }) : _success = success,
-       _invalidatedSourcesCount = invalidatedSourcesCount,
-       _syncedBytes = syncedBytes,
-       _scannedSourcesCount = scannedSourcesCount,
-       _compileDuration = compileDuration,
-       _transferDuration = transferDuration,
-       _findInvalidatedDuration = findInvalidatedDuration,
-       _hotReloadRejected = hotReloadRejected;
+    this._success = false,
+    this._invalidatedSourcesCount = 0,
+    this._syncedBytes = 0,
+    this._scannedSourcesCount = 0,
+    this._compileDuration = Duration.zero,
+    this._transferDuration = Duration.zero,
+    this._findInvalidatedDuration = Duration.zero,
+    this._hotReloadRejected = false,
+  });
 
   bool get success => _success;
   int get invalidatedSourcesCount => _invalidatedSourcesCount;
@@ -450,8 +440,8 @@ class DevFS {
     required BuildMode buildMode,
     HttpClient? httpClient,
     Duration? uploadRetryThrottle,
-    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-    Config? config,
+    this._stopwatchFactory = const StopwatchFactory(),
+    this._config,
   }) : _vmService = serviceProtocol,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -467,8 +457,6 @@ class DevFS {
                  ? HttpClient()
                  : context.get<HttpClientFactory>()!()),
        ),
-       _stopwatchFactory = stopwatchFactory,
-       _config = config,
        _assetTransformer = DevelopmentAssetTransformer(
          transformer: AssetTransformer(
            processManager: processManager,
@@ -642,9 +630,11 @@ class DevFS {
           assetPathsToEvict: assetPathsToEvict,
           shaderPathsToEvict: shaderPathsToEvict,
           bundleFirstUpload: bundleFirstUpload,
+          invalidatedFiles: invalidatedFiles,
           onFontManifestUpdated: () => didUpdateFontManifest = true,
         );
         syncedBytes += bundleSyncedBytes;
+        _assetTransformer.pruneDependencies(bundle.entries.keys.toSet());
       } on Exception catch (err, stackTrace) {
         _logger.printError('Error updating bundle: $err');
         _logger.printTrace('$stackTrace');
@@ -663,7 +653,10 @@ class DevFS {
     _previousCompiled = lastCompiled;
     lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
-    sources = compilerOutput.sources;
+    sources = <Uri>{
+      ...compilerOutput.sources,
+      ..._assetTransformer.dependencies.values.expand((Set<Uri> uris) => uris),
+    }.toList();
     //
     // Don't send full kernel file that would overwrite what VM already
     // started loading from.
@@ -717,23 +710,34 @@ class DevFS {
     required Set<String> assetPathsToEvict,
     required Set<String> shaderPathsToEvict,
     required bool bundleFirstUpload,
+    List<Uri> invalidatedFiles = const <Uri>[],
     bool syncAllAssetsOnFirstUpload = false,
     void Function()? onFontManifestUpdated,
   }) async {
-    if (bundleFirstUpload && !syncAllAssetsOnFirstUpload) {
-      for (final AssetBundleEntry entry in bundle.entries.values) {
-        entry.content.markClean();
-      }
-      return 0;
-    }
-
     final String assetBuildDirPrefix = _asUriPath(fileSystem, assetDirectory);
     final pendingAssetBuilds = <Future<void>>[];
     var syncedBytes = 0;
 
+    final Set<Uri> invalidatedSet = invalidatedFiles.toSet();
     final syncedEntries = <AssetBundleEntry>[];
     bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
-      if (!bundleFirstUpload && !entry.content.isModified) {
+      final bool hasTransformers = entry.transformers.isNotEmpty;
+      final bool skipSync = bundleFirstUpload && !syncAllAssetsOnFirstUpload && !hasTransformers;
+
+      if (skipSync) {
+        entry.content.markClean();
+        return;
+      }
+
+      final isShader = entry.kind == AssetKind.shader;
+      final bool isEntryModified =
+          entry.content.isModified ||
+          (isShader && shaderCompiler.areDependenciesModified(entry.content));
+
+      final Set<Uri>? deps = assetTransformer.dependencies[archivePath];
+      final bool hasInvalidatedDependencies = deps != null && deps.any(invalidatedSet.contains);
+
+      if (!bundleFirstUpload && !isEntryModified && !hasInvalidatedDependencies) {
         return;
       }
       syncedEntries.add(entry);
@@ -766,12 +770,14 @@ class DevFS {
               }
               content = transformed;
             }
-            final DevFSContent? compiled = await shaderCompiler.recompileShader(content);
-            if (compiled == null) {
-              throw DevFSShaderCompilationException(archivePath, 'Failed to compile shader');
+            if (!bundleFirstUpload || syncAllAssetsOnFirstUpload) {
+              final DevFSContent? compiled = await shaderCompiler.recompileShader(content);
+              if (compiled == null) {
+                throw DevFSShaderCompilationException(archivePath, 'Failed to compile shader');
+              }
+              dirtyEntries[deviceUri] = compiled;
+              syncedBytes += compiled.size;
             }
-            dirtyEntries[deviceUri] = compiled;
-            syncedBytes += compiled.size;
             if (!bundleFirstUpload) {
               shaderPathsToEvict.add(archivePath);
             }
@@ -793,8 +799,10 @@ class DevFS {
             if (content == null) {
               throw AssetTransformationException(archivePath, 'Failed to transform asset');
             }
-            dirtyEntries[deviceUri] = content;
-            syncedBytes += content.size;
+            if (!bundleFirstUpload || syncAllAssetsOnFirstUpload) {
+              dirtyEntries[deviceUri] = content;
+              syncedBytes += content.size;
+            }
             if (!bundleFirstUpload) {
               assetPathsToEvict.add(archivePath);
             }
@@ -819,7 +827,7 @@ class DevFS {
 ///
 /// Requires that the file system is the same for both the tool and application.
 class LocalDevFSWriter implements DevFSWriter {
-  LocalDevFSWriter({required FileSystem fileSystem}) : _fileSystem = fileSystem;
+  LocalDevFSWriter({required this._fileSystem});
 
   final FileSystem _fileSystem;
 

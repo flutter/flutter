@@ -22,19 +22,18 @@ import 'utils.dart';
 export 'package:dds/dds.dart'
     show DartDevelopmentServiceException, ExistingDartDevelopmentServiceException;
 
-typedef DDSLauncherCallback =
-    Future<DartDevelopmentServiceLauncher> Function({
-      required Uri remoteVmServiceUri,
-      String? appName,
-      Uri? serviceUri,
-      bool enableAuthCodes,
-      bool serveDevTools,
-      Uri? devToolsServerAddress,
-      bool enableServicePortFallback,
-      List<String> cachedUserTags,
-      String? dartExecutable,
-      String? google3WorkspaceRoot,
-    });
+typedef DDSLauncherCallback = Future<DartDevelopmentServiceLauncher> Function({
+  required Uri remoteVmServiceUri,
+  String? appName,
+  Uri? serviceUri,
+  bool enableAuthCodes,
+  bool serveDevTools,
+  Uri? devToolsServerAddress,
+  bool enableServicePortFallback,
+  List<String> cachedUserTags,
+  String? dartExecutable,
+  String? google3WorkspaceRoot,
+});
 
 typedef StartChromeCallback = Future<io.Process> Function(List<String> urls, {List<String> args});
 
@@ -118,7 +117,9 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
     }
   }
 
-  void shutdown() => _ddsInstance?.shutdown();
+  Future<void> shutdown() async {
+    await _ddsInstance?.shutdown();
+  }
 }
 
 /// Contains common functionality that can be used with any implementation of
@@ -175,7 +176,15 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
     }
     assert(devToolsUri != null);
     logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUri');
-    unawaited(startChrome(<String>[devToolsUri!.toString()]));
+    Future<void> launchChrome() async {
+      try {
+        await startChrome(<String>[devToolsUri!.toString()]);
+      } on Exception catch (error) {
+        logger.printError('Failed to launch DevTools in browser: $error');
+      }
+    }
+
+    unawaited(launchChrome());
     return true;
   }
 

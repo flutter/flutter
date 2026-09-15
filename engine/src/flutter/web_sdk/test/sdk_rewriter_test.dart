@@ -171,6 +171,7 @@ void printSomething() {
       "import 'dart:_web_test_fonts';",
       "import 'dart:_web_locale_keymap' as locale_keymap;",
       "import 'dart:_wasm';",
+      "import 'dart:_js_interop_wasm';",
     ]);
 
     // Other libraries (should not have extra imports).
