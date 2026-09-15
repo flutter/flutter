@@ -6,7 +6,6 @@ import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
@@ -66,8 +65,6 @@ class BuildWebCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
-
     if (!featureFlags.isWebEnabled) {
       throwToolExit(
         '"build web" is not currently supported. To enable, run "flutter config --enable-web".',
@@ -184,7 +181,7 @@ class BuildWebCommand extends BuildSubCommand {
         'To configure this project for the web, run flutter create . --platforms web',
       );
     }
-    final File indexHtmlFile = fs.file(project.web.indexFile.path);
+    final File indexHtmlFile = toolContext.fs.file(project.web.indexFile.path);
     if (indexHtmlFile.existsSync()) {
       final String indexHtmlContent = indexHtmlFile.readAsStringSync();
       if (!indexHtmlContent.contains(kBaseHrefPlaceholder) && baseHref != null) {
