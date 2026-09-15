@@ -994,6 +994,9 @@ abstract class FlutterCommand extends Command<void> {
     return getValue(DebuggingOptionDescriptors.enableHcpp);
   }
 
+  /// The [FeatureFlags] instance, or null if none is available.
+  FeatureFlags? get featureFlags => runner?.featureFlags;
+
   /// The HCPP value for an Android artifact when the developer did not pass
   /// `--[no-]enable-hcpp`: the `enable-hcpp` feature flag, which is on by
   /// default on master and beta.

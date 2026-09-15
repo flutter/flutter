@@ -154,7 +154,12 @@ class BuildCommand extends FlutterCommand {
       ),
     );
     _addSubcommand(
-      BuildWebCommand(fileSystem: fileSystem, logger: logger, verboseHelp: verboseHelp),
+      BuildWebCommand(
+        buildSystem: buildSystem,
+        featureFlags: featureFlags,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
     );
     _addSubcommand(
       BuildMacosCommand(

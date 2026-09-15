@@ -81,6 +81,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
   final BuildSystem buildSystem;
   final BundleBuilder _bundleBuilder;
+  @override
   final FeatureFlags featureFlags;
 
   @visibleForTesting

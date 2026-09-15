@@ -64,6 +64,7 @@ class BuildLinuxCommand extends BuildSubCommand {
   final FeatureFlags _featureFlags;
 
   @visibleForTesting
+  @override
   FeatureFlags get featureFlags => _featureFlags;
 
   @override
