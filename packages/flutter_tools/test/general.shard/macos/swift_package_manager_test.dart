@@ -906,6 +906,40 @@ let package = Package(
           });
 
           testWithoutContext(
+            'proceeds without lock on FileSystemException when locking is unsupported',
+            () async {
+              project.xcodeProjectInfoFile.createSync(recursive: true);
+              project.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
+
+              // macOS SMB share returns ENOTSUP (45), ENOLCK (77), or EINVAL (22).
+              const kMacOSEnotsup = 45;
+              trackingFs.errorToThrowOnLock = const FileSystemException(
+                'lock failed',
+                'path',
+                OSError('Operation not supported', kMacOSEnotsup),
+              );
+
+              await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
+
+              expect(trackingFs.lockCount, 0); // No successful locks recorded
+              expect(trackingFs.unlockCount, 1); // Still closed
+              expect(trackingFs.lockAttempts, 1); // 1 attempt that threw
+              expect(
+                logger.traceText,
+                contains('Locking not supported: FileSystemException: lock failed'),
+              );
+              expect(
+                logger.warningText,
+                isNot(
+                  contains(
+                    'Waiting for another flutter command to release the Swift Package Manager lock...',
+                  ),
+                ),
+              );
+            },
+          );
+
+          testWithoutContext(
             'non-destructive symlink update: preserves active, creates new, deletes obsolete',
             () async {
               project.xcodeProjectInfoFile.createSync(recursive: true);
@@ -1156,6 +1190,7 @@ class LockTrackingFileSystem extends ForwardingFileSystem {
   bool throwErrorOnLock = false;
   int throwErrorOnLockTimes = 0;
   bool throwUnimplementedOnLock = false;
+  FileSystemException? errorToThrowOnLock;
 
   final Map<String, int> linkDeleteCount = <String, int>{};
   final Map<String, int> linkCreateCount = <String, int>{};
@@ -1254,6 +1289,10 @@ class _LockTrackingRandomAccessFile extends Fake implements RandomAccessFile {
     _fileSystem.lockAttempts++;
     if (_fileSystem.throwUnimplementedOnLock) {
       throw UnimplementedError('Lock not supported');
+    }
+    if (_fileSystem.errorToThrowOnLock case final FileSystemException err) {
+      _fileSystem.errorToThrowOnLock = null;
+      throw err;
     }
     if (_fileSystem.throwErrorOnLock) {
       if (_fileSystem.throwErrorOnLockTimes > 0) {
