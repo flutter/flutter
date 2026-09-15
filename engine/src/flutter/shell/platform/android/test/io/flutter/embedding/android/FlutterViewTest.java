@@ -12,6 +12,7 @@ import static junit.framework.TestCase.assertSame;
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -1207,6 +1208,80 @@ public class FlutterViewTest {
     // Verify.
     verify(flutterRenderer, times(1)).setViewportMetrics(viewportMetricsCaptor.capture());
     validateViewportMetricPadding(viewportMetricsCaptor, 100, 0, 100, 0);
+  }
+
+  // This test uses the API 30+ Algorithm for window insets.
+  @Test
+  @TargetApi(30)
+  @Config(minSdk = API_LEVELS.API_30)
+  public void onApplyWindowInsets_setsKeyboardVisible_basedOnImeVisible() {
+    FlutterView flutterView = spy(new FlutterView(ctx));
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+
+    // When we attach a new FlutterView to the engine without any system insets, keyboardVisible
+    // defaults to false.
+    flutterView.attachToFlutterEngine(flutterEngine);
+    ArgumentCaptor<FlutterRenderer.ViewportMetrics> viewportMetricsCaptor =
+        ArgumentCaptor.forClass(FlutterRenderer.ViewportMetrics.class);
+    verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
+    assertFalse(viewportMetricsCaptor.getValue().keyboardVisible);
+    clearInvocations(flutterRenderer);
+
+    // Then we simulate the system applying a window inset with ime being visible.
+    WindowInsets windowInsets =
+        new WindowInsets.Builder().setVisible(android.view.WindowInsets.Type.ime(), true).build();
+    flutterView.onApplyWindowInsets(windowInsets);
+
+    verify(flutterRenderer, atLeastOnce()).setViewportMetrics(viewportMetricsCaptor.capture());
+    assertTrue(viewportMetricsCaptor.getValue().keyboardVisible);
+    clearInvocations(flutterRenderer);
+
+    // Then we simulate the system applying a window inset with ime being invisible.
+    windowInsets =
+        new WindowInsets.Builder().setVisible(android.view.WindowInsets.Type.ime(), false).build();
+    flutterView.onApplyWindowInsets(windowInsets);
+
+    verify(flutterRenderer, atLeastOnce()).setViewportMetrics(viewportMetricsCaptor.capture());
+    assertFalse(viewportMetricsCaptor.getValue().keyboardVisible);
+  }
+
+  // This test uses the pre-API 30 Algorithm for window insets.
+  @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_29)
+  public void onApplyWindowInsets_setsKeyboardVisible_basedOnBottomInset_preApi30() {
+    FlutterView flutterView = spy(new FlutterView(ctx));
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+
+    // When we attach a new FlutterView to the engine without any system insets, keyboardVisible
+    // defaults to false.
+    flutterView.attachToFlutterEngine(flutterEngine);
+    ArgumentCaptor<FlutterRenderer.ViewportMetrics> viewportMetricsCaptor =
+        ArgumentCaptor.forClass(FlutterRenderer.ViewportMetrics.class);
+    verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
+    assertFalse(viewportMetricsCaptor.getValue().keyboardVisible);
+    clearInvocations(flutterRenderer);
+
+    // Then we simulate the system applying a window inset with bottom inset greater than zero.
+    WindowInsets windowInsets = mock(WindowInsets.class);
+    mockSystemWindowInsets(windowInsets, 0, 0, 0, 200);
+    mockSystemGestureInsetsIfNeed(windowInsets);
+    flutterView.onApplyWindowInsets(windowInsets);
+
+    verify(flutterRenderer, atLeastOnce()).setViewportMetrics(viewportMetricsCaptor.capture());
+    assertTrue(viewportMetricsCaptor.getValue().keyboardVisible);
+    clearInvocations(flutterRenderer);
+
+    // Then we simulate the system applying a window inset with bottom inset equal to zero.
+    mockSystemWindowInsets(windowInsets, 0, 0, 0, 0);
+    mockSystemGestureInsetsIfNeed(windowInsets);
+    flutterView.onApplyWindowInsets(windowInsets);
+
+    verify(flutterRenderer, atLeastOnce()).setViewportMetrics(viewportMetricsCaptor.capture());
+    assertFalse(viewportMetricsCaptor.getValue().keyboardVisible);
   }
 
   @Test

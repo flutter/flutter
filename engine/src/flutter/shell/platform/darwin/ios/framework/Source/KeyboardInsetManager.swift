@@ -56,6 +56,8 @@ typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterval) -> V
 @objc protocol FlutterKeyboardInsetManagerDelegate: NSObjectProtocol {
   @objc(updateViewportMetricsWithInset:)
   func updateViewportMetrics(withInset inset: CGFloat)
+  @objc(updateViewportMetricsWithKeyboardVisibility:)
+  func updateViewportMetrics(withKeyboardVisibility visible: Bool)
   func physicalViewInsetBottom() -> CGFloat
   func uiTaskRunner() -> TaskRunner?
   func view() -> UIView
@@ -110,9 +112,15 @@ typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterval) -> V
   }
 
   @objc func handleKeyboardNotification(_ notification: Notification) {
+    guard delegate != nil else { return }
+
+    // Update the keyboard visibility first, before checking if the notification should be
+    // ignored. That's because we want to have the keyboard visibility update even if the
+    // notification is from a different view/app, to match the behavior on Android.
+    updateKeyboardVisibility(notification)
+
     // See https://flutter.dev/go/ios-keyboard-calculating-inset for more details on why
     // notifications are used and how things are calculated.
-    guard delegate != nil else { return }
     if shouldIgnoreKeyboardNotification(notification) {
       return
     }
@@ -160,6 +168,33 @@ typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterval) -> V
     } else if let keyboardSpringAnimation = keyboardSpringAnimation {
       keyboardSpringAnimation.toValue = targetViewInsetBottom
     }
+  }
+
+  func updateKeyboardVisibility(_ notification: Notification) {
+    // We use UIKeyboardLayoutGuide.layoutFrame for determining the keyboard visibility because it
+    // generally provides an accurate keyboard frame for both docked and undocked keyboards.
+    // In particular, calculateKeyboardAttachMode cannot be used for this: it incorrectly reports
+    // "hidden" for floating keyboards (as observed on the iPad Pro 13-inch (M5) and
+    // iPad mini (A17 Pro) simulators).
+    // It would be good to observe UIKeyboardLayoutGuide.layoutFrame directly, but there seems to
+    // be no supported API for that. Instead, we rely on observing
+    // UIResponder.keyboardWillChangeFrameNotification and getting the new value of
+    // UIKeyboardLayoutGuide.layoutFrame in the observer code.
+    if notification.name != UIResponder.keyboardWillChangeFrameNotification {
+      return
+    }
+
+    guard let delegate, delegate.isViewLoaded() else { return }
+    let view = delegate.view()
+
+    // When the keyboard is hidden, normally the height of the keyboard layout guide frame is the
+    // same as the bottom inset. But only in the case when a floating keyboard is hidden, its
+    // layout guide frame height becomes 11 (as observed empirically on different simulators).
+    let floatingKeyboardHeightOnHide: CGFloat = 11
+    let hiddenKeyboardHeight = max(view.safeAreaInsets.bottom, floatingKeyboardHeightOnHide)
+    let keyboardVisible = view.keyboardLayoutGuide.layoutFrame.size.height > hiddenKeyboardHeight
+
+    delegate.updateViewportMetrics(withKeyboardVisibility: keyboardVisible)
   }
 
   @objc func shouldIgnoreKeyboardNotification(_ notification: Notification) -> Bool {

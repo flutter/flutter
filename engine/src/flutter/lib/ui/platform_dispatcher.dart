@@ -2001,6 +2001,7 @@ class _ViewConfiguration {
     this.viewPadding = ViewPadding.zero,
     this.systemGestureInsets = ViewPadding.zero,
     this.padding = ViewPadding.zero,
+    this.keyboardVisible = false,
     this.gestureSettings = const GestureSettings(),
     this.displayFeatures = const <DisplayFeature>[],
     this.displayId = 0,
@@ -2061,6 +2062,9 @@ class _ViewConfiguration {
   /// The relationship between this [viewInsets], [viewPadding], and [padding]
   /// are described in more detail in the documentation for [FlutterView].
   final ViewPadding padding;
+
+  /// Whether the soft keyboard is currently visible.
+  final bool keyboardVisible;
 
   /// Additional configuration for touch gestures performed on this view.
   ///
