@@ -179,46 +179,19 @@ class FakeViewPadding implements ViewPadding {
 class TestPlatformDispatcher implements PlatformDispatcher {
   /// Constructs a [TestPlatformDispatcher] that defers all behavior to the given
   /// [PlatformDispatcher] unless explicitly overridden for test purposes.
-  TestPlatformDispatcher({required this._platformDispatcher}) : _testValuesOwner = null {
+  TestPlatformDispatcher({required this._platformDispatcher}) {
     _updateViewsAndDisplays();
     _platformDispatcher.onMetricsChanged = _handleMetricsChanged;
     _platformDispatcher.onViewFocusChange = _handleViewFocusChanged;
   }
 
-  TestPlatformDispatcher._forView({
-    required this._platformDispatcher,
-    required this._testValuesOwner,
-  });
-
   /// The [PlatformDispatcher] that is wrapped by this [TestPlatformDispatcher].
   final PlatformDispatcher _platformDispatcher;
 
-  // The root dispatcher owns the test values and TestFlutterViews. Per-view
-  // dispatchers use a view-specific underlying PlatformDispatcher, but share
-  // this mutable test state so the existing TestPlatformDispatcher overrides
-  // retain precedence and remain platform-wide.
-  final TestPlatformDispatcher? _testValuesOwner;
-
-  TestPlatformDispatcher get _testValues => _testValuesOwner ?? this;
-
-  /// A dispatcher bound to [viewId] that shares this dispatcher's test values.
-  ///
-  /// [TestFlutterView] builds its own from its own [FlutterView.viewId], so
-  /// that a subclass which reports a different id than the view it wraps is
-  /// bound to the id it reports.
-  TestPlatformDispatcher _forViewId(int viewId) {
-    final TestPlatformDispatcher owner = _testValues;
-    return TestPlatformDispatcher._forView(
-      platformDispatcher: owner._platformDispatcher,
-      testValuesOwner: owner,
-    );
-  }
-
   @override
   TestFlutterView? get implicitView {
-    final TestPlatformDispatcher owner = _testValues;
-    return owner._platformDispatcher.implicitView != null
-        ? owner._testViews[owner._platformDispatcher.implicitView!.viewId]!
+    return _platformDispatcher.implicitView != null
+        ? _testViews[_platformDispatcher.implicitView!.viewId]!
         : null;
   }
 
@@ -230,11 +203,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   final Map<int, FlutterView> _customViews = <int, FlutterView>{};
 
   @override
-  VoidCallback? get onMetricsChanged => _testValues._onMetricsChanged;
+  VoidCallback? get onMetricsChanged => _onMetricsChanged;
   VoidCallback? _onMetricsChanged;
   @override
   set onMetricsChanged(VoidCallback? callback) {
-    _testValues._onMetricsChanged = callback;
+    _onMetricsChanged = callback;
   }
 
   bool _isHandlingMetricsChanged = false;
@@ -252,25 +225,24 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   // and reporting a change from inside a change would describe a registry that
   // is only half rebuilt.
   void _handleMetricsChanged() {
-    final TestPlatformDispatcher owner = _testValues;
-    if (owner._isHandlingMetricsChanged) {
+    if (_isHandlingMetricsChanged) {
       return;
     }
-    owner._isHandlingMetricsChanged = true;
+    _isHandlingMetricsChanged = true;
     try {
-      owner._updateViewsAndDisplays();
-      owner._onMetricsChanged?.call();
+      _updateViewsAndDisplays();
+      _onMetricsChanged?.call();
     } finally {
-      owner._isHandlingMetricsChanged = false;
+      _isHandlingMetricsChanged = false;
     }
   }
 
   @override
-  ViewFocusChangeCallback? get onViewFocusChange => _testValues._onViewFocusChange;
+  ViewFocusChangeCallback? get onViewFocusChange => _onViewFocusChange;
   ViewFocusChangeCallback? _onViewFocusChange;
   @override
   set onViewFocusChange(ViewFocusChangeCallback? callback) {
-    _testValues._onViewFocusChange = callback;
+    _onViewFocusChange = callback;
   }
 
   bool _isHandlingViewFocusChanged = false;
@@ -279,20 +251,19 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   // same rule applies: nothing in this library may invoke [onViewFocusChange]
   // directly.
   void _handleViewFocusChanged(ViewFocusEvent event) {
-    final TestPlatformDispatcher owner = _testValues;
-    if (owner._isHandlingViewFocusChanged) {
+    if (_isHandlingViewFocusChanged) {
       return;
     }
-    owner._isHandlingViewFocusChanged = true;
+    _isHandlingViewFocusChanged = true;
     try {
-      owner._updateViewsAndDisplays();
-      owner._currentlyFocusedViewId = switch (event.state) {
+      _updateViewsAndDisplays();
+      _currentlyFocusedViewId = switch (event.state) {
         ViewFocusState.focused => event.viewId,
         ViewFocusState.unfocused => null,
       };
-      owner._onViewFocusChange?.call(event);
+      _onViewFocusChange?.call(event);
     } finally {
-      owner._isHandlingViewFocusChanged = false;
+      _isHandlingViewFocusChanged = false;
     }
   }
 
@@ -317,33 +288,32 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ///
   /// Clearing or modifying the returned list will do nothing (it's a copy).
   /// Call [resetFocusedViewTestValues] to clear.
-  List<ViewFocusEvent> get testFocusEvents => _testValues._testFocusEvents.toList();
+  List<ViewFocusEvent> get testFocusEvents => _testFocusEvents.toList();
   final List<ViewFocusEvent> _testFocusEvents = <ViewFocusEvent>[];
 
   /// Returns the last view ID to be focused by [onViewFocusChange].
   /// Returns null if no views are focused.
   ///
   /// Can be reset to null with [resetFocusedViewTestValues].
-  int? get currentlyFocusedViewIdTestValue => _testValues._currentlyFocusedViewId;
+  int? get currentlyFocusedViewIdTestValue => _currentlyFocusedViewId;
   int? _currentlyFocusedViewId;
 
   /// Clears [testFocusEvents] and sets [currentlyFocusedViewIdTestValue] to
   /// null.
   void resetFocusedViewTestValues() {
-    final TestPlatformDispatcher owner = _testValues;
-    if (owner._currentlyFocusedViewId != null) {
+    if (_currentlyFocusedViewId != null) {
       // If there is a focused view, then tell everyone who still cares that
       // it's unfocusing.
-      owner._platformDispatcher.onViewFocusChange?.call(
+      notifyViewFocusChanged(
         ViewFocusEvent(
-          viewId: owner._currentlyFocusedViewId!,
+          viewId: _currentlyFocusedViewId!,
           state: ViewFocusState.unfocused,
           direction: ViewFocusDirection.undefined,
         ),
       );
-      owner._currentlyFocusedViewId = null;
+      _currentlyFocusedViewId = null;
     }
-    owner._testFocusEvents.clear();
+    _testFocusEvents.clear();
   }
 
   @override
@@ -352,47 +322,41 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     required ViewFocusState state,
     required ViewFocusDirection direction,
   }) {
-    _testValues._testFocusEvents.add(
-      ViewFocusEvent(viewId: viewId, state: state, direction: direction),
-    );
-    _testValues._platformDispatcher.requestViewFocusChange(
-      viewId: viewId,
-      state: state,
-      direction: direction,
-    );
+    _testFocusEvents.add(ViewFocusEvent(viewId: viewId, state: state, direction: direction));
+    _platformDispatcher.requestViewFocusChange(viewId: viewId, state: state, direction: direction);
   }
 
   @override
-  Locale get locale => _testValues._localeTestValue ?? _platformDispatcher.locale;
+  Locale get locale => _localeTestValue ?? _platformDispatcher.locale;
   Locale? _localeTestValue;
 
   /// Hides the real locale and reports the given [localeTestValue] instead.
   // ignore: avoid_setters_without_getters
   set localeTestValue(Locale localeTestValue) {
-    _testValues._localeTestValue = localeTestValue;
+    _localeTestValue = localeTestValue;
     onLocaleChanged?.call();
   }
 
   /// Deletes any existing test locale and returns to using the real locale.
   void clearLocaleTestValue() {
-    _testValues._localeTestValue = null;
+    _localeTestValue = null;
     onLocaleChanged?.call();
   }
 
   @override
-  List<Locale> get locales => _testValues._localesTestValue ?? _platformDispatcher.locales;
+  List<Locale> get locales => _localesTestValue ?? _platformDispatcher.locales;
   List<Locale>? _localesTestValue;
 
   /// Hides the real locales and reports the given [localesTestValue] instead.
   // ignore: avoid_setters_without_getters
   set localesTestValue(List<Locale> localesTestValue) {
-    _testValues._localesTestValue = localesTestValue;
+    _localesTestValue = localesTestValue;
     onLocaleChanged?.call();
   }
 
   /// Deletes any existing test locales and returns to using the real locales.
   void clearLocalesTestValue() {
-    _testValues._localesTestValue = null;
+    _localesTestValue = null;
     onLocaleChanged?.call();
   }
 
@@ -404,37 +368,36 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  String get initialLifecycleState => _testValues._initialLifecycleStateTestValue;
+  String get initialLifecycleState => _initialLifecycleStateTestValue;
   String _initialLifecycleStateTestValue = '';
 
   /// Sets a faked initialLifecycleState for testing.
   // ignore: avoid_setters_without_getters
   set initialLifecycleStateTestValue(String state) {
-    _testValues._initialLifecycleStateTestValue = state;
+    _initialLifecycleStateTestValue = state;
   }
 
   /// Resets [initialLifecycleState] to the default value for the platform.
   void resetInitialLifecycleState() {
-    _testValues._initialLifecycleStateTestValue = '';
+    _initialLifecycleStateTestValue = '';
   }
 
   @override
-  double get textScaleFactor =>
-      _testValues._textScaleFactorTestValue ?? _platformDispatcher.textScaleFactor;
+  double get textScaleFactor => _textScaleFactorTestValue ?? _platformDispatcher.textScaleFactor;
   double? _textScaleFactorTestValue;
 
   /// Hides the real text scale factor and reports the given
   /// [textScaleFactorTestValue] instead.
   // ignore: avoid_setters_without_getters
   set textScaleFactorTestValue(double textScaleFactorTestValue) {
-    _testValues._textScaleFactorTestValue = textScaleFactorTestValue;
+    _textScaleFactorTestValue = textScaleFactorTestValue;
     onTextScaleFactorChanged?.call();
   }
 
   /// Deletes any existing test text scale factor and returns to using the real
   /// text scale factor.
   void clearTextScaleFactorTestValue() {
-    _testValues._textScaleFactorTestValue = null;
+    _textScaleFactorTestValue = null;
     onTextScaleFactorChanged?.call();
   }
 
@@ -443,7 +406,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   @override
   Brightness get platformBrightness =>
-      _testValues._platformBrightnessTestValue ?? _platformDispatcher.platformBrightness;
+      _platformBrightnessTestValue ?? _platformDispatcher.platformBrightness;
   Brightness? _platformBrightnessTestValue;
   @override
   VoidCallback? get onPlatformBrightnessChanged => _platformDispatcher.onPlatformBrightnessChanged;
@@ -456,33 +419,33 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// [platformBrightnessTestValue] instead.
   // ignore: avoid_setters_without_getters
   set platformBrightnessTestValue(Brightness platformBrightnessTestValue) {
-    _testValues._platformBrightnessTestValue = platformBrightnessTestValue;
+    _platformBrightnessTestValue = platformBrightnessTestValue;
     onPlatformBrightnessChanged?.call();
   }
 
   /// Deletes any existing test platform brightness and returns to using the
   /// real platform brightness.
   void clearPlatformBrightnessTestValue() {
-    _testValues._platformBrightnessTestValue = null;
+    _platformBrightnessTestValue = null;
     onPlatformBrightnessChanged?.call();
   }
 
   @override
   bool get alwaysUse24HourFormat =>
-      _testValues._alwaysUse24HourFormatTestValue ?? _platformDispatcher.alwaysUse24HourFormat;
+      _alwaysUse24HourFormatTestValue ?? _platformDispatcher.alwaysUse24HourFormat;
   bool? _alwaysUse24HourFormatTestValue;
 
   /// Hides the real clock format and reports the given
   /// [alwaysUse24HourFormatTestValue] instead.
   // ignore: avoid_setters_without_getters
   set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) {
-    _testValues._alwaysUse24HourFormatTestValue = alwaysUse24HourFormatTestValue;
+    _alwaysUse24HourFormatTestValue = alwaysUse24HourFormatTestValue;
   }
 
   /// Deletes any existing test clock format and returns to using the real clock
   /// format.
   void clearAlwaysUse24HourTestValue() {
-    _testValues._alwaysUse24HourFormatTestValue = null;
+    _alwaysUse24HourFormatTestValue = null;
   }
 
   @override
@@ -494,49 +457,48 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   @override
   bool get nativeSpellCheckServiceDefined =>
-      _testValues._nativeSpellCheckServiceDefinedTestValue ??
+      _nativeSpellCheckServiceDefinedTestValue ??
       _platformDispatcher.nativeSpellCheckServiceDefined;
   bool? _nativeSpellCheckServiceDefinedTestValue;
   // ignore: avoid_setters_without_getters
   set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) {
-    _testValues._nativeSpellCheckServiceDefinedTestValue = nativeSpellCheckServiceDefinedTestValue;
+    _nativeSpellCheckServiceDefinedTestValue = nativeSpellCheckServiceDefinedTestValue;
   }
 
   /// Deletes existing value that determines whether or not a native spell check
   /// service is defined and returns to the real value.
   void clearNativeSpellCheckServiceDefined() {
-    _testValues._nativeSpellCheckServiceDefinedTestValue = null;
+    _nativeSpellCheckServiceDefinedTestValue = null;
   }
 
   @override
   bool get supportsShowingSystemContextMenu =>
-      _testValues._supportsShowingSystemContextMenu ??
-      _platformDispatcher.supportsShowingSystemContextMenu;
+      _supportsShowingSystemContextMenu ?? _platformDispatcher.supportsShowingSystemContextMenu;
   bool? _supportsShowingSystemContextMenu;
   set supportsShowingSystemContextMenu(bool value) {
-    _testValues._supportsShowingSystemContextMenu = value;
+    _supportsShowingSystemContextMenu = value;
   }
 
   /// Resets [supportsShowingSystemContextMenu] to the default value.
   void resetSupportsShowingSystemContextMenu() {
-    _testValues._supportsShowingSystemContextMenu = null;
+    _supportsShowingSystemContextMenu = null;
   }
 
   @override
   bool get brieflyShowPassword =>
-      _testValues._brieflyShowPasswordTestValue ?? _platformDispatcher.brieflyShowPassword;
+      _brieflyShowPasswordTestValue ?? _platformDispatcher.brieflyShowPassword;
   bool? _brieflyShowPasswordTestValue;
 
   /// Hides the real [brieflyShowPassword] and reports the given
   /// `brieflyShowPasswordTestValue` instead.
   // ignore: avoid_setters_without_getters
   set brieflyShowPasswordTestValue(bool brieflyShowPasswordTestValue) {
-    _testValues._brieflyShowPasswordTestValue = brieflyShowPasswordTestValue;
+    _brieflyShowPasswordTestValue = brieflyShowPasswordTestValue;
   }
 
   /// Resets [brieflyShowPassword] to the default value for the platform.
   void resetBrieflyShowPassword() {
-    _testValues._brieflyShowPasswordTestValue = null;
+    _brieflyShowPasswordTestValue = null;
   }
 
   /// The system-suggested height of the text, as a multiple of the font size.
@@ -563,10 +525,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ///   * [clearLineHeightScaleFactorOverrideTestValue] to reset this value specifically
   ///   * [clearAllTestValues] to reset all test values for this view
   @override
-  double? get lineHeightScaleFactorOverride =>
-      _testValues._forceLineHeightScaleFactorOverrideToBeNull
+  double? get lineHeightScaleFactorOverride => _forceLineHeightScaleFactorOverrideToBeNull
       ? null
-      : _testValues._lineHeightScaleFactorOverrideTestValue ??
+      : _lineHeightScaleFactorOverrideTestValue ??
             _platformDispatcher.lineHeightScaleFactorOverride;
   double? _lineHeightScaleFactorOverrideTestValue;
   bool _forceLineHeightScaleFactorOverrideToBeNull = false;
@@ -575,9 +536,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// [lineHeightScaleFactorOverrideTestValue] instead.
   // ignore: avoid_setters_without_getters
   set lineHeightScaleFactorOverrideTestValue(double? lineHeightScaleFactorOverrideTestValue) {
-    _testValues._lineHeightScaleFactorOverrideTestValue = lineHeightScaleFactorOverrideTestValue;
+    _lineHeightScaleFactorOverrideTestValue = lineHeightScaleFactorOverrideTestValue;
     if (lineHeightScaleFactorOverrideTestValue == null) {
-      _testValues._forceLineHeightScaleFactorOverrideToBeNull = true;
+      _forceLineHeightScaleFactorOverrideToBeNull = true;
     }
     _handleMetricsChanged();
   }
@@ -585,8 +546,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// Deletes any existing test line height scale factor and returns to using
   /// the real line height scale factor.
   void clearLineHeightScaleFactorOverrideTestValue() {
-    _testValues._lineHeightScaleFactorOverrideTestValue = null;
-    _testValues._forceLineHeightScaleFactorOverrideToBeNull = false;
+    _lineHeightScaleFactorOverrideTestValue = null;
+    _forceLineHeightScaleFactorOverrideToBeNull = false;
     _handleMetricsChanged();
   }
 
@@ -617,9 +578,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ///   * [clearLetterSpacingOverrideTestValue] to reset this value specifically
   ///   * [clearAllTestValues] to reset all test values for this view
   @override
-  double? get letterSpacingOverride => _testValues._forceLetterSpacingOverrideToBeNull
+  double? get letterSpacingOverride => _forceLetterSpacingOverrideToBeNull
       ? null
-      : _testValues._letterSpacingOverrideTestValue ?? _platformDispatcher.letterSpacingOverride;
+      : _letterSpacingOverrideTestValue ?? _platformDispatcher.letterSpacingOverride;
   double? _letterSpacingOverrideTestValue;
   bool _forceLetterSpacingOverrideToBeNull = false;
 
@@ -627,9 +588,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// [letterSpacingOverrideTestValue] instead.
   /// ignore: avoid_setters_without_getters
   set letterSpacingOverrideTestValue(double? letterSpacingOverrideTestValue) {
-    _testValues._letterSpacingOverrideTestValue = letterSpacingOverrideTestValue;
+    _letterSpacingOverrideTestValue = letterSpacingOverrideTestValue;
     if (letterSpacingOverrideTestValue == null) {
-      _testValues._forceLetterSpacingOverrideToBeNull = true;
+      _forceLetterSpacingOverrideToBeNull = true;
     }
     _handleMetricsChanged();
   }
@@ -637,8 +598,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// Deletes any existing test letter spacing and returns to using the real
   /// letter spacing.
   void clearLetterSpacingOverrideTestValue() {
-    _testValues._letterSpacingOverrideTestValue = null;
-    _testValues._forceLetterSpacingOverrideToBeNull = false;
+    _letterSpacingOverrideTestValue = null;
+    _forceLetterSpacingOverrideToBeNull = false;
     _handleMetricsChanged();
   }
 
@@ -669,9 +630,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ///   * [clearWordSpacingOverrideTestValue] to reset this value specifically
   ///   * [clearAllTestValues] to reset all test values for this view
   @override
-  double? get wordSpacingOverride => _testValues._forceWordSpacingOverrideToBeNull
+  double? get wordSpacingOverride => _forceWordSpacingOverrideToBeNull
       ? null
-      : _testValues._wordSpacingOverrideTestValue ?? _platformDispatcher.wordSpacingOverride;
+      : _wordSpacingOverrideTestValue ?? _platformDispatcher.wordSpacingOverride;
   double? _wordSpacingOverrideTestValue;
   bool _forceWordSpacingOverrideToBeNull = false;
 
@@ -679,9 +640,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// [wordSpacingOverrideTestValue] instead.
   /// ignore: avoid_setters_without_getters
   set wordSpacingOverrideTestValue(double? wordSpacingOverrideTestValue) {
-    _testValues._wordSpacingOverrideTestValue = wordSpacingOverrideTestValue;
+    _wordSpacingOverrideTestValue = wordSpacingOverrideTestValue;
     if (wordSpacingOverrideTestValue == null) {
-      _testValues._forceWordSpacingOverrideToBeNull = true;
+      _forceWordSpacingOverrideToBeNull = true;
     }
     _handleMetricsChanged();
   }
@@ -689,8 +650,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// Deletes any existing test word spacing and returns to using the real
   /// word spacing.
   void clearWordSpacingOverrideTestValue() {
-    _testValues._wordSpacingOverrideTestValue = null;
-    _testValues._forceWordSpacingOverrideToBeNull = false;
+    _wordSpacingOverrideTestValue = null;
+    _forceWordSpacingOverrideToBeNull = false;
     _handleMetricsChanged();
   }
 
@@ -717,10 +678,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ///   * [clearParagraphSpacingOverrideTestValue] to reset this value specifically
   ///   * [clearAllTestValues] to reset all test values for this view
   @override
-  double? get paragraphSpacingOverride => _testValues._forceParagraphSpacingOverrideToBeNull
+  double? get paragraphSpacingOverride => _forceParagraphSpacingOverrideToBeNull
       ? null
-      : _testValues._paragraphSpacingOverrideTestValue ??
-            _platformDispatcher.paragraphSpacingOverride;
+      : _paragraphSpacingOverrideTestValue ?? _platformDispatcher.paragraphSpacingOverride;
   double? _paragraphSpacingOverrideTestValue;
   bool _forceParagraphSpacingOverrideToBeNull = false;
 
@@ -728,9 +688,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// [paragraphSpacingOverrideTestValue] instead.
   /// ignore: avoid_setters_without_getters
   set paragraphSpacingOverrideTestValue(double? paragraphSpacingOverrideTestValue) {
-    _testValues._paragraphSpacingOverrideTestValue = paragraphSpacingOverrideTestValue;
+    _paragraphSpacingOverrideTestValue = paragraphSpacingOverrideTestValue;
     if (paragraphSpacingOverrideTestValue == null) {
-      _testValues._forceParagraphSpacingOverrideToBeNull = true;
+      _forceParagraphSpacingOverrideToBeNull = true;
     }
     _handleMetricsChanged();
   }
@@ -738,8 +698,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// Deletes any existing test paragraph spacing and returns to using the real
   /// paragraph spacing.
   void clearParagraphSpacingOverrideTestValue() {
-    _testValues._paragraphSpacingOverrideTestValue = null;
-    _testValues._forceParagraphSpacingOverrideToBeNull = false;
+    _paragraphSpacingOverrideTestValue = null;
+    _forceParagraphSpacingOverrideToBeNull = false;
     _handleMetricsChanged();
   }
 
@@ -772,21 +732,20 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  String get defaultRouteName =>
-      _testValues._defaultRouteNameTestValue ?? _platformDispatcher.defaultRouteName;
+  String get defaultRouteName => _defaultRouteNameTestValue ?? _platformDispatcher.defaultRouteName;
   String? _defaultRouteNameTestValue;
 
   /// Hides the real default route name and reports the given
   /// [defaultRouteNameTestValue] instead.
   // ignore: avoid_setters_without_getters
   set defaultRouteNameTestValue(String defaultRouteNameTestValue) {
-    _testValues._defaultRouteNameTestValue = defaultRouteNameTestValue;
+    _defaultRouteNameTestValue = defaultRouteNameTestValue;
   }
 
   /// Deletes any existing test default route name and returns to using the real
   /// default route name.
   void clearDefaultRouteNameTestValue() {
-    _testValues._defaultRouteNameTestValue = null;
+    _defaultRouteNameTestValue = null;
   }
 
   @override
@@ -795,21 +754,15 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  bool get semanticsEnabled =>
-      _testValues._semanticsEnabledTestValue ?? _platformDispatcher.semanticsEnabled;
+  bool get semanticsEnabled => _semanticsEnabledTestValue ?? _platformDispatcher.semanticsEnabled;
   bool? _semanticsEnabledTestValue;
 
   /// The application locale set during the test.
-  Locale? get applicationLocale => _testValues._applicationLocale;
-  set applicationLocale(Locale? value) {
-    _testValues._applicationLocale = value;
-  }
-
-  Locale? _applicationLocale;
+  Locale? applicationLocale;
 
   /// Resets [applicationLocale] to null.
   void resetApplicationLocale() {
-    _testValues._applicationLocale = null;
+    applicationLocale = null;
   }
 
   @override
@@ -821,14 +774,14 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// [semanticsEnabledTestValue] instead.
   // ignore: avoid_setters_without_getters
   set semanticsEnabledTestValue(bool semanticsEnabledTestValue) {
-    _testValues._semanticsEnabledTestValue = semanticsEnabledTestValue;
+    _semanticsEnabledTestValue = semanticsEnabledTestValue;
     onSemanticsEnabledChanged?.call();
   }
 
   /// Deletes any existing test semantics enabled and returns to using the real
   /// semantics enabled.
   void clearSemanticsEnabledTestValue() {
-    _testValues._semanticsEnabledTestValue = null;
+    _semanticsEnabledTestValue = null;
     onSemanticsEnabledChanged?.call();
   }
 
@@ -849,7 +802,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   @override
   AccessibilityFeatures get accessibilityFeatures =>
-      _testValues._accessibilityFeaturesTestValue ?? _platformDispatcher.accessibilityFeatures;
+      _accessibilityFeaturesTestValue ?? _platformDispatcher.accessibilityFeatures;
   AccessibilityFeatures? _accessibilityFeaturesTestValue;
 
   /// Hides the real accessibility features and reports the given
@@ -859,14 +812,14 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// values for the various accessibility features under test.
   // ignore: avoid_setters_without_getters
   set accessibilityFeaturesTestValue(AccessibilityFeatures accessibilityFeaturesTestValue) {
-    _testValues._accessibilityFeaturesTestValue = accessibilityFeaturesTestValue;
+    _accessibilityFeaturesTestValue = accessibilityFeaturesTestValue;
     onAccessibilityFeaturesChanged?.call();
   }
 
   /// Deletes any existing test accessibility features and returns to using the
   /// real accessibility features.
   void clearAccessibilityFeaturesTestValue() {
-    _testValues._accessibilityFeaturesTestValue = null;
+    _accessibilityFeaturesTestValue = null;
     onAccessibilityFeaturesChanged?.call();
   }
 
@@ -895,8 +848,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// If desired, clearing of properties can be done on an individual basis,
   /// e.g., [clearLocaleTestValue].
   void clearAllTestValues() {
-    _testValues._customViews.clear();
-    _testValues._updateViewsAndDisplays();
+    _customViews.clear();
+    _updateViewsAndDisplays();
     clearAccessibilityFeaturesTestValue();
     clearAlwaysUse24HourTestValue();
     clearDefaultRouteNameTestValue();
@@ -949,20 +902,15 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ByteData? getPersistentIsolateData() => _platformDispatcher.getPersistentIsolateData();
 
   @override
-  Iterable<TestFlutterView> get views => _testValues._testViews.values;
+  Iterable<TestFlutterView> get views => _testViews.values;
 
   @override
-  TestFlutterView? view({required int id}) => _testValues._testViews[id];
+  TestFlutterView? view({required int id}) => _testViews[id];
 
   @override
-  Iterable<TestDisplay> get displays => _testValues._testDisplays.values;
+  Iterable<TestDisplay> get displays => _testDisplays.values;
 
   void _updateViewsAndDisplays() {
-    assert(
-      _testValuesOwner == null,
-      'The view and display registries belong to the root TestPlatformDispatcher; '
-      'a per-view dispatcher reads them through _testValues and must not build its own.',
-    );
     final extraDisplayKeys = <Object>[..._testDisplays.keys];
     for (final Display display in _platformDispatcher.displays) {
       extraDisplayKeys.remove(display.id);
@@ -973,7 +921,15 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     extraDisplayKeys.forEach(_testDisplays.remove);
 
     final extraViewKeys = <Object>[..._testViews.keys];
-    final allViews = <FlutterView>[..._platformDispatcher.views, ..._customViews.values];
+    // A custom view registered for an id the engine also reports shadows the
+    // engine's. Both would otherwise be visited, and the second visit would
+    // replace the wrapper the first one just built, so every refresh would hand
+    // back a new [TestFlutterView] and drop the test values set on the old one.
+    final allViews = <FlutterView>[
+      for (final FlutterView view in _platformDispatcher.views)
+        if (!_customViews.containsKey(view.viewId)) view,
+      ..._customViews.values,
+    ];
     for (final view in allViews) {
       extraViewKeys.remove(view.viewId);
       final TestFlutterView? testView = _testViews[view.viewId];
@@ -1009,7 +965,6 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   // TODO(pdblasi-google): Remove the try-catch once the Display API is stable
   // and supported on all platforms.
   TestDisplay _displayFor(FlutterView view, TestFlutterView? existing) {
-    assert(_testValuesOwner == null);
     try {
       final Display realDisplay = view.display;
       return _testDisplays[realDisplay.id] ??
@@ -1048,20 +1003,19 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// before that assignment would wake observers that can reach a controller
   /// which has no view yet.
   TestFlutterView addTestView(FlutterView view, {bool notify = true}) {
-    final TestPlatformDispatcher owner = _testValues;
-    owner._customViews[view.viewId] = view;
+    _customViews[view.viewId] = view;
     if (notify) {
-      owner._handleMetricsChanged();
+      _handleMetricsChanged();
     }
     // Normally the notification above refreshed the registry already, and this
     // finds the view and refreshes nothing. It has to be checked rather than
     // assumed: a notification reported from inside another one is dropped as
     // reentrant, and `notify` may be false, so this is what guarantees the
     // registry is up to date before the wrapper is read out of it.
-    TestFlutterView? added = owner._testViews[view.viewId];
+    TestFlutterView? added = _testViews[view.viewId];
     if (added == null || !identical(added._view, view)) {
-      owner._updateViewsAndDisplays();
-      added = owner._testViews[view.viewId];
+      _updateViewsAndDisplays();
+      added = _testViews[view.viewId];
     }
     assert(
       added != null,
@@ -1086,16 +1040,15 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// Reports a metrics change if the view was there to remove, and nothing at
   /// all if it was not, so that removing twice is not reported twice.
   void removeTestView(FlutterView view) {
-    final TestPlatformDispatcher owner = _testValues;
-    if (owner._customViews.remove(view.viewId) == null) {
+    if (_customViews.remove(view.viewId) == null) {
       return;
     }
-    owner._handleMetricsChanged();
+    _handleMetricsChanged();
     // For the reason [addTestView] gives: a dropped reentrant notification
     // would otherwise leave the registry reporting a view that is gone.
-    final TestFlutterView? stale = owner._testViews[view.viewId];
+    final TestFlutterView? stale = _testViews[view.viewId];
     if (stale != null && identical(stale._view, view)) {
-      owner._updateViewsAndDisplays();
+      _updateViewsAndDisplays();
     }
   }
 
@@ -1144,25 +1097,25 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ///   * [clearAllTestValues] to reset all test values for this view
   @override
   String? get systemFontFamily {
-    return _testValues._forceSystemFontFamilyToBeNull
+    return _forceSystemFontFamilyToBeNull
         ? null
-        : _testValues._systemFontFamily ?? _platformDispatcher.systemFontFamily;
+        : _systemFontFamily ?? _platformDispatcher.systemFontFamily;
   }
 
   String? _systemFontFamily;
   bool _forceSystemFontFamilyToBeNull = false;
   set systemFontFamily(String? value) {
-    _testValues._systemFontFamily = value;
+    _systemFontFamily = value;
     if (value == null) {
-      _testValues._forceSystemFontFamilyToBeNull = true;
+      _forceSystemFontFamilyToBeNull = true;
     }
     onSystemFontFamilyChanged?.call();
   }
 
   /// Resets [systemFontFamily] to the default for the platform.
   void resetSystemFontFamily() {
-    _testValues._systemFontFamily = null;
-    _testValues._forceSystemFontFamilyToBeNull = false;
+    _systemFontFamily = null;
+    _forceSystemFontFamilyToBeNull = false;
     onSystemFontFamilyChanged?.call();
   }
 
@@ -1198,31 +1151,14 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 class TestFlutterView implements FlutterView {
   /// Constructs a [TestFlutterView] that defers all behavior to the given
   /// [FlutterView] unless explicitly overridden for testing.
-  TestFlutterView({
-    required this._view,
-    required TestPlatformDispatcher platformDispatcher,
-    required this._display,
-  }) : _ownerPlatformDispatcher = platformDispatcher;
+  TestFlutterView({required this._view, required this._platformDispatcher, required this._display});
 
   /// The [FlutterView] backing this [TestFlutterView].
   final FlutterView _view;
 
-  /// The [TestPlatformDispatcher] this view was constructed with, which owns
-  /// the test values [platformDispatcher] shares.
-  final TestPlatformDispatcher _ownerPlatformDispatcher;
-
   @override
   TestPlatformDispatcher get platformDispatcher => _platformDispatcher;
-
-  // Bound to this view's own [viewId] rather than to whatever the dispatcher
-  // passed to the constructor resolves, so that a subclass which reports a
-  // different id than the view it wraps — FakeView, which wraps view 0 and
-  // reports 100 — is bound to the id it reports instead of the wrapped view's.
-  // Resolved lazily because `viewId` may be overridden by such a subclass and
-  // is not readable during construction.
-  late final TestPlatformDispatcher _platformDispatcher = _ownerPlatformDispatcher._forViewId(
-    viewId,
-  );
+  final TestPlatformDispatcher _platformDispatcher;
 
   @override
   TestDisplay get display => _display;

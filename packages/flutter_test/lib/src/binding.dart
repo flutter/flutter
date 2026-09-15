@@ -180,10 +180,10 @@ class _TestFlutterView implements FlutterView {
   /// no view yet.
   ///
   /// The returned adapter wraps the backing view rather than the other way
-  /// round, so that values set explicitly on it keep their precedence over any
-  /// [debugViewMetricsOverrides] entry underneath. Every controller exposes
-  /// this same object to [View], to [MediaQuery], and to callers that read
-  /// `rootView` directly.
+  /// round, so that values set explicitly on it keep their precedence over
+  /// whatever the backing view reports. Every controller exposes this same
+  /// object to [View], to [MediaQuery], and to callers that read `rootView`
+  /// directly.
   static TestFlutterView register({
     required BaseWindowController controller,
     required TestPlatformDispatcher platformDispatcher,
@@ -1394,11 +1394,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return super.createWindowingOwner();
   }
 
-  /// Resets [windowingOwner] to a new instance created by
+  /// Replaces [windowingOwner] with a new instance created by
   /// [createWindowingOwner].
   ///
-  /// Tests that destroy windows, or that replace the owner, can call this to
-  /// return the binding to the state it had at the start of the test.
+  /// A test that needs an owner of its own, rather than whichever one an
+  /// earlier test left installed, calls this first.
+  ///
+  /// The windows the previous owner created are not destroyed, and the views
+  /// they registered stay registered. A test that creates windows destroys them
+  /// itself.
   void resetWindowingOwner() {
     windowingOwner = createWindowingOwner();
   }
