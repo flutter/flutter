@@ -25,14 +25,16 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/context/android_context.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/context.dart' as test_context show testUsingContext;
+import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
@@ -80,6 +82,47 @@ void main() {
     String apkAnalyzerPath() =>
         fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin', apkAnalyzerBinaryName);
 
+    AndroidGradleBuilder createBuilder({
+      ToolContext? toolContext,
+      AndroidContext? androidContext,
+      Analytics? analytics,
+      Java? java,
+      Logger? logger,
+      ProcessManager? processManager,
+      FileSystem? fileSystem,
+      Artifacts? artifacts,
+      GradleUtils? gradleUtils,
+      Platform? platform,
+      AndroidStudio? androidStudio,
+      AndroidSdk? androidSdk,
+    }) {
+      return AndroidGradleBuilder.fromContexts(
+        toolContext:
+            toolContext ??
+            FakeToolContext(
+              logger: logger,
+              processManager: processManager,
+              fs: fileSystem ?? globals.fs,
+              artifacts: artifacts,
+              platform: platform,
+            ),
+        androidContext:
+            androidContext ??
+            FakeAndroidContext(
+              java: java,
+              gradleUtils: gradleUtils,
+              androidStudio: androidStudio,
+              androidSdk:
+                  androidSdk ??
+                  AndroidSdk(
+                    (fileSystem ?? globals.fs).directory(missingSdkPath()),
+                    java: FakeJava(),
+                  ),
+            ),
+        analytics: analytics ?? fakeAnalytics,
+      );
+    }
+
     void testUsingContext(
       String description,
       dynamic Function() body, {
@@ -99,7 +142,7 @@ void main() {
     testUsingContext(
       'build apk passes sdkmanager path, sdk root, and validated installed ndk versions to gradle',
       () async {
-        final builder = AndroidGradleBuilder(
+        final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: logger,
           processManager: processManager,
@@ -191,7 +234,7 @@ void main() {
     testUsingContext(
       'build apk keeps skip dependency checks on the main gradle invocation when ndk provisioning is unavailable',
       () async {
-        final builder = AndroidGradleBuilder(
+        final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: logger,
           processManager: processManager,
@@ -281,7 +324,7 @@ void main() {
         const engineShellArgs = <String>['--enable-impeller=true', '--trace-skia'];
         final String base64EngineShellArgs = base64Encode(utf8.encode(jsonEncode(engineShellArgs)));
 
-        final builder = AndroidGradleBuilder(
+        final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: logger,
           processManager: processManager,
@@ -369,7 +412,7 @@ void main() {
     testUsingContext(
       'build apk passes an empty installed ndk version list when no valid ndks are installed',
       () async {
-        final builder = AndroidGradleBuilder(
+        final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: logger,
           processManager: processManager,
@@ -454,7 +497,7 @@ void main() {
     );
 
     testUsingContext('Can immediately tool exit on recognized exit code/stderr', () async {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -557,7 +600,7 @@ void main() {
     testUsingContext(
       'Verbose mode for APKs includes Gradle stacktrace and sets debug log level',
       () async {
-        final builder = AndroidGradleBuilder(
+        final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: BufferLogger.test(verbose: true),
           processManager: processManager,
@@ -630,7 +673,7 @@ void main() {
     );
 
     testUsingContext('Can retry build on recognized exit code/stderr', () async {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -730,7 +773,7 @@ void main() {
     }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
 
     testUsingContext('Gradle build retries with exponential backoff capped at kMaxRetryTime', () {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -831,7 +874,7 @@ void main() {
     }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
 
     testUsingContext('Converts recognized ProcessExceptions into tools exits', () async {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -919,7 +962,7 @@ void main() {
     }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
 
     testUsingContext('rethrows unrecognized ProcessException', () async {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -984,7 +1027,7 @@ void main() {
     }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
 
     testUsingContext('logs success event after a successful retry', () async {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -1089,7 +1132,7 @@ void main() {
     }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
 
     testUsingContext('performs code size analysis and sends analytics', () async {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -1365,7 +1408,7 @@ void main() {
       testUsingContext(
         'build succeeds when debug symbols present for at least one architecture',
         () async {
-          final builder = AndroidGradleBuilder(
+          final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
             logger: logger,
             processManager: processManager,
@@ -1432,7 +1475,7 @@ void main() {
       testUsingContext(
         'build succeeds when debug info and symbol tables present for at least one architecture',
         () async {
-          final builder = AndroidGradleBuilder(
+          final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
             logger: logger,
             processManager: processManager,
@@ -1499,7 +1542,7 @@ void main() {
       testUsingContext(
         'building a debug aab does not invoke apkanalyzer',
         () async {
-          final builder = AndroidGradleBuilder(
+          final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
             logger: logger,
             processManager: processManager,
@@ -1564,7 +1607,7 @@ void main() {
               .childFile(apkAnalyzerBinaryName)
               .createSync(recursive: true);
           final sdk = AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
-          final builder = AndroidGradleBuilder(
+          final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
             logger: logger,
             processManager: processManager,
@@ -1644,7 +1687,7 @@ void main() {
               .childFile(apkAnalyzerBinaryName)
               .createSync(recursive: true);
           final sdk = AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
-          final builder = AndroidGradleBuilder(
+          final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
             logger: logger,
             processManager: processManager,
@@ -1708,7 +1751,7 @@ void main() {
     });
 
     testUsingContext('indicates that an APK has been built successfully', () async {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -1846,7 +1889,7 @@ android {
     testUsingContext(
       'can call custom gradle task getBuildOptions and parse the result',
       () async {
-        final builder = AndroidGradleBuilder(
+        final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: logger,
           processManager: processManager,
@@ -1898,7 +1941,7 @@ BuildVariant: paidProfile
     );
 
     testUsingContext('getBuildOptions returns empty list if gradle returns error', () async {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -1932,7 +1975,7 @@ Gradle Crashed
           '/build/deeplink_data',
           'app-link-settings-freeDebug.json',
         );
-        final builder = AndroidGradleBuilder(
+        final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: logger,
           processManager: processManager,
@@ -1978,7 +2021,7 @@ Gradle Crashed
     testUsingContext(
       "doesn't indicate how to consume an AAR when printHowToConsumeAar is false",
       () async {
-        final builder = AndroidGradleBuilder(
+        final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: logger,
           processManager: processManager,
@@ -2058,7 +2101,7 @@ Gradle Crashed
     testUsingContext(
       'build aar passes sdkmanager path, sdk root, and validated installed ndk versions to gradle',
       () async {
-        final builder = AndroidGradleBuilder(
+        final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: logger,
           processManager: processManager,
@@ -2147,7 +2190,7 @@ Gradle Crashed
         printOnFailure(logger.statusText);
         printOnFailure(logger.errorText);
       });
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -2275,7 +2318,7 @@ Gradle Crashed
     testUsingContext(
       'Verbose mode for AARs includes Gradle stacktrace and sets debug log level',
       () async {
-        final builder = AndroidGradleBuilder(
+        final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: BufferLogger.test(verbose: true),
           processManager: processManager,
@@ -2340,7 +2383,7 @@ Gradle Crashed
     );
 
     testUsingContext('gradle exit code and stderr is forwarded to tool exit', () async {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -2409,7 +2452,7 @@ Gradle Crashed
     }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
 
     testUsingContext('build apk uses selected local engine with arm32 ABI', () async {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -2496,7 +2539,7 @@ Gradle Crashed
     }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
 
     testUsingContext('build apk uses selected local engine with arm64 ABI', () async {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -2587,7 +2630,7 @@ Gradle Crashed
     }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
 
     testUsingContext('build apk uses selected local engine with x64 ABI', () async {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -2675,7 +2718,7 @@ Gradle Crashed
     }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
 
     testUsingContext('honors --no-android-gradle-daemon setting', () async {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -2736,7 +2779,7 @@ Gradle Crashed
     }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
 
     testUsingContext('honors --android-project-cache-dir setting', () async {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -2797,7 +2840,7 @@ Gradle Crashed
     }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
 
     testUsingContext('build aar uses selected local engine with arm32 ABI', () async {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -2898,7 +2941,7 @@ Gradle Crashed
     }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
 
     testUsingContext('build aar uses selected local engine with x64 ABI', () async {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -3002,7 +3045,7 @@ Gradle Crashed
     }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
 
     testUsingContext('build aar uses selected local engine on x64 ABI', () async {
-      final builder = AndroidGradleBuilder(
+      final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
@@ -3104,7 +3147,7 @@ Gradle Crashed
     testUsingContext(
       'build apk throws ToolExit when Java and Gradle versions are incompatible',
       () async {
-        final builder = AndroidGradleBuilder(
+        final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
           logger: logger,
           processManager: processManager,
@@ -3210,7 +3253,7 @@ Gradle Crashed
     testUsingContext(
       'build apk succeeds when Java and Gradle versions are incompatible but Gradle build succeeds',
       () async {
-        final builder = AndroidGradleBuilder(
+        final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
           logger: logger,
           processManager: processManager,
@@ -3313,7 +3356,7 @@ Gradle Crashed
     testUsingContext(
       'skips Java and Gradle compatibility check when androidSkipBuildDependencyValidation is true',
       () async {
-        final builder = AndroidGradleBuilder(
+        final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
           logger: logger,
           processManager: processManager,
