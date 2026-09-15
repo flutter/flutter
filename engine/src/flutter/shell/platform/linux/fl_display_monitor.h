@@ -51,6 +51,28 @@ FlutterEngineDisplayId fl_display_monitor_get_display_id(
     FlDisplayMonitor* monitor,
     GdkMonitor* gdk_monitor);
 
+/**
+ * fl_display_monitor_get_refresh_rate:
+ * @monitor: an #FlDisplayMonitor.
+ * @display_id: ID Flutter is using for a display.
+ *
+ * Get the refresh rate of the display with the given ID.
+ *
+ * Returns: refresh rate in Hz or 0 if unknown.
+ */
+gdouble fl_display_monitor_get_refresh_rate(FlDisplayMonitor* monitor,
+                                            FlutterEngineDisplayId display_id);
+
+/**
+ * fl_display_monitor_get_max_refresh_rate:
+ * @monitor: an #FlDisplayMonitor.
+ *
+ * Get the highest refresh rate of all the displays currently connected.
+ *
+ * Returns: refresh rate in Hz or 0 if unknown.
+ */
+gdouble fl_display_monitor_get_max_refresh_rate(FlDisplayMonitor* monitor);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_DISPLAY_MONITOR_H_
