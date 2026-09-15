@@ -212,6 +212,42 @@ void testMain() {
       surface.dispose();
     });
 
+    test('CkOffscreenSurface preserves canvas instance during non-clamped resize', () async {
+      final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+      await surface.initialized;
+
+      surface.setSize(const BitmapSize(50, 50));
+      final DomEventTarget originalCanvas = surface.canvas;
+
+      surface.setSize(const BitmapSize(150, 150));
+      expect(
+        identical(surface.canvas, originalCanvas),
+        isTrue,
+        reason: 'Non-clamped resize should perform in-place resize without recreating canvas',
+      );
+
+      surface.dispose();
+    });
+
+    test(
+      'CkOffscreenSurface throws UnsupportedError when requested size exceeds hardware limits',
+      () async {
+        final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        await surface.initialized;
+
+        final WebGLContext gl = (surface.canvas as DomOffscreenCanvas).getGlContext(2);
+        final int maxTextureSize = gl.getParameter(0x0D33); // GL_MAX_TEXTURE_SIZE
+        final int oversized = maxTextureSize + 1000;
+
+        expect(
+          () => surface.setSize(BitmapSize(oversized, oversized)),
+          throwsA(isA<UnsupportedError>()),
+        );
+
+        surface.dispose();
+      },
+    );
+
     group('surface resizing stress tests', () {
       test('rapid sequential resizing & ping-pong sizing does not leak or crash', () async {
         final surface = CkOffscreenSurface(OffscreenCanvasProvider());
