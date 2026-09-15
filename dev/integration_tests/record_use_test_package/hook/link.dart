@@ -67,9 +67,7 @@ Set<String> _extractUsedPhrases(Recordings recordings) {
 
   for (final CallReference call in recordings.calls[translateDef] ?? const <CallReference>[]) {
     switch (call) {
-      case CallWithArguments(
-          positionalArguments: [StringConstant(:final value), ...],
-        ):
+      case CallWithArguments(positionalArguments: [StringConstant(:final value), ...]):
         usedPhrases.add(value);
       case _:
         throw UnsupportedError('Cannot determine which translations are used.');
@@ -97,16 +95,10 @@ Future<void> _writeOutputAsset(
   LinkOutputBuilder output,
   Map<String, dynamic> content,
 ) async {
-  final Uri filteredFile = input.outputDirectory.resolve(
-    'filtered_translations.json',
-  );
+  final Uri filteredFile = input.outputDirectory.resolve('filtered_translations.json');
   await File.fromUri(filteredFile).writeAsString(jsonEncode(content));
 
   output.assets.data.add(
-    DataAsset(
-      package: input.packageName,
-      name: 'data/translations.json',
-      file: filteredFile,
-    ),
+    DataAsset(package: input.packageName, name: 'data/translations.json', file: filteredFile),
   );
 }
