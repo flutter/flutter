@@ -4,9 +4,29 @@
 
 import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/ios.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/tasks/integration_tests.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  await task(createExternalTexturesFrameRateIntegrationTest());
+  await task(() async {
+    String? simulatorDeviceId;
+    TaskResult? result;
+    try {
+      await testWithNewIOSSimulator('external_textures_integration_test_ios', (
+        String deviceId,
+      ) async {
+        simulatorDeviceId = deviceId;
+        result = await createExternalTexturesFrameRateIntegrationTest(
+          deviceIdOverride: deviceId,
+        ).call();
+      });
+    } finally {
+      if (simulatorDeviceId != null) {
+        await removeIOSSimulator(simulatorDeviceId);
+      }
+    }
+    return result ?? TaskResult.failure('Simulator creation failed');
+  });
 }
