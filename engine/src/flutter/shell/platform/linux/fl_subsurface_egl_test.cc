@@ -113,7 +113,7 @@ TEST_F(FlSubsurfaceEGLTest, Present) {
 
   EXPECT_CALL(epoxy, glBlitFramebuffer);
 
-  fl_subsurface_egl_present(egl, 1, kWidth, kHeight);
+  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
 }
 
 // The native window is resized if a frame of a different size arrives, so the
@@ -124,7 +124,7 @@ TEST_F(FlSubsurfaceEGLTest, PresentResizes) {
 
   EXPECT_CALL(wayland, EGLWindowResize(kWidth, kHeight));
 
-  fl_subsurface_egl_present(egl, 1, kWidth, kHeight);
+  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
 }
 
 // Drivers without glBlitFramebuffer draw the frame with a shader instead.
@@ -138,7 +138,120 @@ TEST_F(FlSubsurfaceEGLTest, PresentWithoutBlit) {
 
   EXPECT_CALL(epoxy, glBlitFramebuffer).Times(0);
 
-  fl_subsurface_egl_present(egl, 1, kWidth, kHeight);
+  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
+}
+
+// A frame that fills the surface is written to the whole surface.
+TEST_F(FlSubsurfaceEGLTest, PresentMatchingSurface) {
+  epoxy.egl_surface_width = kWidth;
+  epoxy.egl_surface_height = kHeight;
+
+  g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
+  ASSERT_NE(egl, nullptr);
+
+  EXPECT_CALL(epoxy, glBlitFramebuffer(0, 0, kWidth, kHeight, 0, 0, kWidth,
+                                       kHeight, ::testing::_, ::testing::_));
+
+  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
+}
+
+// OpenGL puts the origin at the bottom left of the surface but Wayland puts it
+// at the top left, so a frame that doesn't fill a taller surface has to be
+// moved up to stay where the window expects it. Writing it at the OpenGL
+// origin would leave it below where it belongs.
+TEST_F(FlSubsurfaceEGLTest, PresentTallerSurface) {
+  epoxy.egl_surface_width = kWidth;
+  epoxy.egl_surface_height = kHeight + 50;
+
+  g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
+  ASSERT_NE(egl, nullptr);
+
+  EXPECT_CALL(epoxy,
+              glBlitFramebuffer(0, 0, kWidth, kHeight, 0, 50, kWidth,
+                                kHeight + 50, ::testing::_, ::testing::_));
+
+  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
+}
+
+// The origins only differ vertically, so a frame that doesn't fill a wider
+// surface is left where it is.
+TEST_F(FlSubsurfaceEGLTest, PresentWiderSurface) {
+  epoxy.egl_surface_width = kWidth + 50;
+  epoxy.egl_surface_height = kHeight;
+
+  g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
+  ASSERT_NE(egl, nullptr);
+
+  EXPECT_CALL(epoxy, glBlitFramebuffer(0, 0, kWidth, kHeight, 0, 0, kWidth,
+                                       kHeight, ::testing::_, ::testing::_));
+
+  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
+}
+
+// A frame bigger than the surface has its bottom rows dropped, as that's the
+// end the window is being clipped at in Wayland's coordinates. Writing it from
+// the OpenGL origin would drop the top rows instead and shift the contents up.
+TEST_F(FlSubsurfaceEGLTest, PresentShorterSurface) {
+  epoxy.egl_surface_width = kWidth;
+  epoxy.egl_surface_height = kHeight - 50;
+
+  g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
+  ASSERT_NE(egl, nullptr);
+
+  EXPECT_CALL(epoxy,
+              glBlitFramebuffer(0, 50, kWidth, kHeight, 0, 0, kWidth,
+                                kHeight - 50, ::testing::_, ::testing::_));
+
+  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
+}
+
+// The shader path clips the same way, using a viewport that starts off the
+// bottom of the surface.
+TEST_F(FlSubsurfaceEGLTest, PresentShorterSurfaceWithoutBlit) {
+  EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(20));
+  EXPECT_CALL(epoxy, epoxy_has_gl_extension(::testing::_))
+      .WillRepeatedly(::testing::Return(false));
+  epoxy.egl_surface_width = kWidth;
+  epoxy.egl_surface_height = kHeight - 50;
+
+  g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
+  ASSERT_NE(egl, nullptr);
+
+  EXPECT_CALL(epoxy, glViewport(0, -50, kWidth, kHeight));
+
+  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
+}
+
+// The frame is moved up the same way when it's drawn with the shader.
+TEST_F(FlSubsurfaceEGLTest, PresentTallerSurfaceWithoutBlit) {
+  EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(20));
+  EXPECT_CALL(epoxy, epoxy_has_gl_extension(::testing::_))
+      .WillRepeatedly(::testing::Return(false));
+  epoxy.egl_surface_width = kWidth;
+  epoxy.egl_surface_height = kHeight + 50;
+
+  g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
+  ASSERT_NE(egl, nullptr);
+
+  EXPECT_CALL(epoxy, glViewport(0, 50, kWidth, kHeight));
+
+  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
+}
+
+// If the surface size isn't known, e.g. because it couldn't be queried, the
+// frame is written from the origin rather than being aligned against a size
+// that would drop all of it.
+TEST_F(FlSubsurfaceEGLTest, PresentUnknownSurfaceSize) {
+  epoxy.egl_surface_width = 0;
+  epoxy.egl_surface_height = 0;
+
+  g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
+  ASSERT_NE(egl, nullptr);
+
+  EXPECT_CALL(epoxy, glBlitFramebuffer(0, 0, kWidth, kHeight, 0, 0, kWidth,
+                                       kHeight, ::testing::_, ::testing::_));
+
+  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
 }
 
 // The native window is released with the object.

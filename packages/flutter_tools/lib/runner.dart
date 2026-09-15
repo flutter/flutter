@@ -69,6 +69,7 @@ Future<int> run(
       config: globals.config,
       crashReporter: globals.crashReporter,
       customDevicesConfig: globals.customDevicesConfig,
+      featureFlags: featureFlags,
       flutterVersion: globals.flutterVersion,
       fs: globals.fs,
       git: globals.git,

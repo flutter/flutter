@@ -25,16 +25,12 @@ import '../dart/package_map.dart';
 /// For more information on local engines, see README.md.
 class LocalEngineLocator {
   LocalEngineLocator({
-    required Platform platform,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required String flutterRoot,
-    required UserMessages userMessages,
-  }) : _platform = platform,
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _flutterRoot = flutterRoot,
-       _userMessages = userMessages;
+    required this._platform,
+    required this._logger,
+    required this._fileSystem,
+    required this._flutterRoot,
+    required this._userMessages,
+  });
 
   final Platform _platform;
   final Logger _logger;
