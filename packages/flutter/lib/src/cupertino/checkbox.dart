@@ -122,6 +122,7 @@ class CupertinoCheckbox extends StatefulWidget {
     this.shape,
     this.tapTargetSize,
     this.semanticLabel,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(tristate || value != null);
 
   /// Whether this checkbox is checked.
@@ -312,6 +313,9 @@ class CupertinoCheckbox extends StatefulWidget {
   /// This label does not show in the UI.
   final String? semanticLabel;
 
+  /// {@macro flutter.widgets.AnimationController.animationBehavior}
+  final AnimationBehavior animationBehavior;
+
   /// The width of a checkbox widget.
   static const double width = 14.0;
 
@@ -345,6 +349,9 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox>
     _painter.dispose();
     super.dispose();
   }
+
+  @override
+  AnimationBehavior get animationBehavior => widget.animationBehavior;
 
   @override
   ValueChanged<bool?>? get onChanged => widget.onChanged;

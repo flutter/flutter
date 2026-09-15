@@ -147,6 +147,13 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   /// {@endtemplate}
   Duration get reverseTransitionDuration => transitionDuration;
 
+  /// {@template flutter.widgets.TransitionRoute.animationBehavior}
+  /// The animation behavior for the [AnimationController] created by [createAnimationController].
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  /// {@endtemplate}
+  AnimationBehavior get animationBehavior => AnimationBehavior.normal;
+
   /// {@template flutter.widgets.TransitionRoute.opaque}
   /// Whether the route obscures previous routes when the transition is complete.
   ///
@@ -237,6 +244,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
       duration: duration,
       reverseDuration: reverseDuration,
       debugLabel: debugLabel,
+      animationBehavior: animationBehavior,
       vsync: navigator!,
     );
   }
@@ -2606,6 +2614,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     super.traversalEdgeBehavior,
     super.directionalTraversalEdgeBehavior,
     this.fullscreenDialog = false,
+    this._animationBehavior = AnimationBehavior.normal,
   });
 
   final RoutePageBuilder _pageBuilder;
@@ -2625,6 +2634,10 @@ class RawDialogRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => _transitionDuration;
   final Duration _transitionDuration;
+
+  @override
+  AnimationBehavior get animationBehavior => _animationBehavior;
+  final AnimationBehavior _animationBehavior;
 
   final RouteTransitionsBuilder? _transitionBuilder;
 
@@ -2796,6 +2809,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   bool? requestFocus,
+  AnimationBehavior animationBehavior = AnimationBehavior.normal,
 }) {
   assert(!barrierDismissible || barrierLabel != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(
@@ -2811,6 +2825,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
       anchorPoint: anchorPoint,
       requestFocus: requestFocus,
       fullscreenDialog: fullscreenDialog,
+      animationBehavior: animationBehavior,
     ),
   );
 }
@@ -2819,11 +2834,12 @@ Future<T?> showGeneralDialog<T extends Object?>({
 /// Used in [PageRouteBuilder] and [showGeneralDialog].
 ///
 /// See [ModalRoute.buildPage] for complete definition of the parameters.
-typedef RoutePageBuilder = Widget Function(
-  BuildContext context,
-  Animation<double> animation,
-  Animation<double> secondaryAnimation,
-);
+typedef RoutePageBuilder =
+    Widget Function(
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+    );
 
 /// Signature for the function that builds a route's transitions.
 /// Used in [PageRouteBuilder] and [showGeneralDialog].
@@ -2840,12 +2856,13 @@ typedef RoutePageBuilder = Widget Function(
 /// [secondaryAnimation] remains [kAlwaysDismissedAnimation].
 ///
 /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
-typedef RouteTransitionsBuilder = Widget Function(
-  BuildContext context,
-  Animation<double> animation,
-  Animation<double> secondaryAnimation,
-  Widget child,
-);
+typedef RouteTransitionsBuilder =
+    Widget Function(
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      Widget child,
+    );
 
 /// Configuration details for a custom modal barrier.
 ///
@@ -2893,11 +2910,8 @@ class RouteBarrierDetails {
 /// that wraps this `barrier` (for instance, with a [Padding] or a [BackdropFilter]),
 /// rather than replacing it entirely, to preserve the built-in semantics and
 /// gestures.
-typedef RouteBarrierBuilder = Widget Function(
-  BuildContext context,
-  RouteBarrierDetails details,
-  Widget barrier,
-);
+typedef RouteBarrierBuilder =
+    Widget Function(BuildContext context, RouteBarrierDetails details, Widget barrier);
 
 /// A callback type for informing that a navigation pop has been invoked,
 /// whether or not it was handled successfully.

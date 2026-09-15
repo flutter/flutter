@@ -1003,6 +1003,7 @@ class RawScrollbar extends StatefulWidget {
     this.crossAxisMargin = 0.0,
     this.padding,
     this.mouseCursor,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(
          !(thumbVisibility == false && (trackVisibility ?? false)),
          'A scrollbar track cannot be drawn without a scrollbar thumb.',
@@ -1366,6 +1367,11 @@ class RawScrollbar extends StatefulWidget {
   /// {@endtemplate}
   final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
+  /// The [AnimationBehavior] of the fade animation.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
+
   @override
   RawScrollbarState<RawScrollbar> createState() => RawScrollbarState<RawScrollbar>();
 }
@@ -1440,8 +1446,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void initState() {
     super.initState();
-    _fadeoutAnimationController = AnimationController(vsync: this, duration: widget.fadeDuration)
-      ..addStatusListener(_validateInteractions);
+    _fadeoutAnimationController = AnimationController(
+      vsync: this,
+      duration: widget.fadeDuration,
+      animationBehavior: widget.animationBehavior,
+    )..addStatusListener(_validateInteractions);
     _fadeoutOpacityAnimation = CurvedAnimation(
       parent: _fadeoutAnimationController,
       curve: Curves.fastOutSlowIn,
