@@ -374,6 +374,45 @@ typedef enum {
   kFlutterTextDirectionLTR = 2,
 } FlutterTextDirection;
 
+/// The accessibility role of a semantics node.
+///
+/// Must match `SemanticsRole` in semantics_node.h and semantics.dart.
+typedef enum {
+  kFlutterSemanticsRoleNone = 0,
+  kFlutterSemanticsRoleTab = 1,
+  kFlutterSemanticsRoleTabBar = 2,
+  kFlutterSemanticsRoleTabPanel = 3,
+  kFlutterSemanticsRoleDialog = 4,
+  kFlutterSemanticsRoleAlertDialog = 5,
+  kFlutterSemanticsRoleTable = 6,
+  kFlutterSemanticsRoleCell = 7,
+  kFlutterSemanticsRoleRow = 8,
+  kFlutterSemanticsRoleColumnHeader = 9,
+  kFlutterSemanticsRoleDragHandle = 10,
+  kFlutterSemanticsRoleSpinButton = 11,
+  kFlutterSemanticsRoleComboBox = 12,
+  kFlutterSemanticsRoleMenuBar = 13,
+  kFlutterSemanticsRoleMenu = 14,
+  kFlutterSemanticsRoleMenuItem = 15,
+  kFlutterSemanticsRoleMenuItemCheckbox = 16,
+  kFlutterSemanticsRoleMenuItemRadio = 17,
+  kFlutterSemanticsRoleList = 18,
+  kFlutterSemanticsRoleListItem = 19,
+  kFlutterSemanticsRoleForm = 20,
+  kFlutterSemanticsRoleTooltip = 21,
+  kFlutterSemanticsRoleLoadingSpinner = 22,
+  kFlutterSemanticsRoleProgressBar = 23,
+  kFlutterSemanticsRoleHotKey = 24,
+  kFlutterSemanticsRoleRadioGroup = 25,
+  kFlutterSemanticsRoleStatus = 26,
+  kFlutterSemanticsRoleAlert = 27,
+  kFlutterSemanticsRoleComplementary = 28,
+  kFlutterSemanticsRoleContentInfo = 29,
+  kFlutterSemanticsRoleMain = 30,
+  kFlutterSemanticsRoleNavigation = 31,
+  kFlutterSemanticsRoleRegion = 32,
+} FlutterSemanticsRole;
+
 /// Valid values for priority of Thread.
 typedef enum {
   /// Suitable for threads that shouldn't disrupt high priority work.
@@ -385,6 +424,15 @@ typedef enum {
   /// Suitable for thread which raster data.
   kRaster = 3,
 } FlutterThreadPriority;
+
+/// Callback invoked to set thread priority for a thread.
+typedef void (*FlutterThreadPrioritySetter)(
+    FlutterThreadPriority /* priority */);
+
+/// Callback invoked to set thread priority with user data context.
+typedef void (*FlutterThreadPrioritySetterWithUserData)(
+    FlutterThreadPriority /* priority */,
+    void* /* user data */);
 
 typedef struct _FlutterEngine* FLUTTER_API_SYMBOL(FlutterEngine);
 
@@ -726,6 +774,44 @@ typedef struct {
   FlutterDamage buffer_damage;
 } FlutterPresentInfo;
 
+/// Alias for an opaque OS-level hardware buffer handle (such as an
+/// AHardwareBuffer* on Android).
+typedef void* FlutterHardwareBufferHandle;
+
+/// Represents an external HardwareBuffer texture (such as an Android
+/// AHardwareBuffer zero-copy buffer) provided by the embedder.
+typedef struct {
+  /// The size of this struct. Must be
+  /// sizeof(FlutterHardwareBufferExternalTexture).
+  size_t struct_size;
+  /// Width of the buffer in pixels.
+  size_t width;
+  /// Height of the buffer in pixels.
+  size_t height;
+  /// Format of the buffer (e.g. AHARDWAREBUFFER_FORMAT_* on Android).
+  uint32_t format;
+  /// Sync fence file descriptor (e.g. sync_file fd on Android).
+  /// Pass -1 if no fence synchronization is required.
+  /// If non-negative, the engine takes ownership of the file descriptor and
+  /// will close it once GPU synchronization completes or upon frame rejection.
+  int32_t fence_fd;
+  /// Handle to the opaque hardware buffer (e.g. AHardwareBuffer* on Android).
+  FlutterHardwareBufferHandle buffer;
+  /// User data to be returned on the invocation of destruction_callback.
+  void* user_data;
+  /// Callback to collect the texture and associated embedder resources.
+  VoidCallback destruction_callback;
+} FlutterHardwareBufferExternalTexture;
+
+/// Callback to provide an external HardwareBuffer texture for a given
+/// texture_id.
+typedef bool (*FlutterHardwareBufferExternalTextureFrameCallback)(
+    void* /* user data */,
+    int64_t /* texture identifier */,
+    size_t /* width */,
+    size_t /* height */,
+    FlutterHardwareBufferExternalTexture* /* texture out */);
+
 /// Callback for when a surface is presented.
 typedef bool (*BoolPresentInfoCallback)(
     void* /* user data */,
@@ -811,6 +897,12 @@ typedef struct {
   /// ID. Not specifying populate_existing_damage will result in full
   /// repaint (i.e. rendering all the pixels on the screen at every frame).
   FlutterFrameBufferWithDamageCallback populate_existing_damage;
+  /// When the embedder specifies that a texture backed by a HardwareBuffer has
+  /// a frame available, the engine will call this method (on an internal engine
+  /// managed thread) so that hardware buffer details can be supplied to the
+  /// engine for subsequent composition.
+  FlutterHardwareBufferExternalTextureFrameCallback
+      hardware_buffer_external_texture_frame_callback;
 } FlutterOpenGLRendererConfig;
 
 /// Alias for id<MTLDevice>.
@@ -950,6 +1042,84 @@ typedef struct {
   uint32_t format;
 } FlutterVulkanImage;
 
+/// Component swizzle for Vulkan YCbCr conversion or texture component mapping.
+typedef enum {
+  kFlutterVulkanComponentSwizzleIdentity = 0,
+  kFlutterVulkanComponentSwizzleZero = 1,
+  kFlutterVulkanComponentSwizzleOne = 2,
+  kFlutterVulkanComponentSwizzleR = 3,
+  kFlutterVulkanComponentSwizzleG = 4,
+  kFlutterVulkanComponentSwizzleB = 5,
+  kFlutterVulkanComponentSwizzleA = 6,
+} FlutterVulkanComponentSwizzle;
+
+/// Component mapping for Vulkan YCbCr conversion or texture swizzle.
+typedef struct {
+  FlutterVulkanComponentSwizzle r;
+  FlutterVulkanComponentSwizzle g;
+  FlutterVulkanComponentSwizzle b;
+  FlutterVulkanComponentSwizzle a;
+} FlutterVulkanComponentMapping;
+
+/// YCbCr conversion parameters for Vulkan external textures.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterVulkanYcbcrConversionInfo).
+  size_t struct_size;
+  /// Format of the image or 0 (VK_FORMAT_UNDEFINED) if using external_format.
+  uint32_t format;
+  /// Color model conversion (corresponds to VkSamplerYcbcrModelConversion).
+  uint32_t ycbcr_model;
+  /// Numerical range of color components (corresponds to VkSamplerYcbcrRange).
+  uint32_t ycbcr_range;
+  /// Component mapping for the conversion.
+  FlutterVulkanComponentMapping components;
+  /// Horizontal chroma location (corresponds to VkChromaLocation).
+  uint32_t x_chroma_offset;
+  /// Vertical chroma location (corresponds to VkChromaLocation).
+  uint32_t y_chroma_offset;
+  /// Filter used for chroma downsampling (corresponds to VkFilter).
+  uint32_t chroma_filter;
+  /// Force explicit reconstruction (corresponds to VkBool32).
+  uint32_t force_explicit_reconstruction;
+  /// Format features for the conversion (corresponds to VkFormatFeatureFlags).
+  uint32_t format_features;
+  /// External format ID for Android / vendor-specific buffers. When non-zero,
+  /// format must be 0 (VK_FORMAT_UNDEFINED).
+  uint64_t external_format;
+} FlutterVulkanYcbcrConversionInfo;
+
+/// Represents an external Vulkan texture provided by the embedder.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterVulkanExternalTexture).
+  size_t struct_size;
+  /// Width of the texture in pixels.
+  size_t width;
+  /// Height of the texture in pixels.
+  size_t height;
+  /// Handle to the VkImage (as a uint64_t / FlutterVulkanImageHandle).
+  FlutterVulkanImageHandle image;
+  /// The VkFormat of the image (for example: VK_FORMAT_R8G8B8A8_UNORM).
+  uint32_t format;
+  /// The VkImageLayout of the image (for example:
+  /// VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL).
+  uint32_t image_layout;
+  /// Optional pointer to YCbCr conversion info. If NULL, standard sampling is
+  /// used.
+  const FlutterVulkanYcbcrConversionInfo* ycbcr_conversion_info;
+  /// User data to be returned on the invocation of destruction_callback.
+  void* user_data;
+  /// Callback to collect the texture and associated embedder resources.
+  VoidCallback destruction_callback;
+} FlutterVulkanExternalTexture;
+
+/// Callback to provide an external Vulkan texture for a given texture_id.
+typedef bool (*FlutterVulkanExternalTextureFrameCallback)(
+    void* /* user data */,
+    int64_t /* texture identifier */,
+    size_t /* width */,
+    size_t /* height */,
+    FlutterVulkanExternalTexture* /* texture out */);
+
 /// Callback to fetch a Vulkan function pointer for a given instance. Normally,
 /// this should return the results of vkGetInstanceProcAddr.
 typedef void* (*FlutterVulkanInstanceProcAddressCallback)(
@@ -1031,6 +1201,17 @@ typedef struct {
   /// without any additional synchronization.
   /// Not used if a FlutterCompositor is supplied in FlutterProjectArgs.
   FlutterVulkanPresentCallback present_image_callback;
+  /// When the embedder specifies that a texture has a frame available, the
+  /// engine will call this method (on an internal engine managed thread) so
+  /// that external texture details can be supplied to the engine for subsequent
+  /// composition.
+  FlutterVulkanExternalTextureFrameCallback external_texture_frame_callback;
+  /// When the embedder specifies that a texture backed by a HardwareBuffer has
+  /// a frame available, the engine will call this method (on an internal engine
+  /// managed thread) so that hardware buffer details can be supplied to the
+  /// engine for subsequent composition.
+  FlutterHardwareBufferExternalTextureFrameCallback
+      hardware_buffer_external_texture_frame_callback;
 
 } FlutterVulkanRendererConfig;
 
@@ -1406,6 +1587,39 @@ typedef struct {
   /// The maximum bound of the pressure of the current pointer, where 0.0 is the
   /// default maximum bound.
   double pressure_max;
+  /// The distance of the detected object from the input surface, where 0.0 is
+  /// the default value.
+  double distance;
+  /// The maximum value of a distance for the current pointer, where 0.0 is the
+  /// default maximum bound.
+  double distance_max;
+  /// The area of the screen being pressed, normalized between 0.0 and 1.0,
+  /// where 0.0 is the default value.
+  double size;
+  /// The radius of the contact area along the major axis of the ellipse in
+  /// physical pixels, where 0.0 is the default value.
+  double radius_major;
+  /// The radius of the contact area along the minor axis of the ellipse in
+  /// physical pixels, where 0.0 is the default value.
+  double radius_minor;
+  /// The minimum radius of the contact area for the current pointer in physical
+  /// pixels, where 0.0 is the default value.
+  double radius_min;
+  /// The maximum radius of the contact area for the current pointer in physical
+  /// pixels, where 0.0 is the default value.
+  double radius_max;
+  /// The orientation of the current pointer in radians in the range -pi/2 <
+  /// orientation <= pi/2 for touch, and -pi < orientation <= pi for stylus,
+  /// where 0.0 is the default value.
+  double orientation;
+  /// The tilt of the current pointer in radians in the range 0 <= tilt <= pi/2,
+  /// where 0.0 is the default value.
+  double tilt;
+  /// An arbitrary int64 payload provided by the platform / embedder.
+  int64_t platform_data;
+  /// Identifier provided by the embedder to identify this event (e.g. Android
+  /// MotionEvent ID). Defaults to 0 if unassigned or unsupported.
+  int64_t embedder_id;
 } FlutterPointerEvent;
 
 typedef enum {
@@ -1675,7 +1889,7 @@ typedef struct {
 ///
 /// @see https://api.flutter.dev/flutter/semantics/SemanticsNode-class.html
 typedef struct {
-  /// The size of this struct. Must be sizeof(FlutterSemanticsNode).
+  /// The size of this struct. Must be sizeof(FlutterSemanticsNode2).
   size_t struct_size;
   /// The unique identifier for this node.
   int32_t id;
@@ -1780,6 +1994,10 @@ typedef struct {
   /// This is usually used for UI testing with tools that work by querying the
   /// native accessibility, like UI Automator, XCUITest, or Appium.
   const char* identifier;
+  /// The accessibility role of this node.
+  FlutterSemanticsRole role;
+  /// Reserved for future use and 8-byte natural alignment padding. Must be 0.
+  uint32_t reserved_padding;
 } FlutterSemanticsNode2;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a
@@ -1914,6 +2132,26 @@ typedef void (*FlutterViewFocusChangeRequestCallback)(
     const FlutterViewFocusChangeRequest* /* request */,
     void* /* user data */);
 
+/// Request from Dart to load a deferred library loading unit.
+typedef struct {
+  /// The size of this struct. Must be
+  /// sizeof(FlutterDartDeferredLibraryLoadingUnit).
+  size_t struct_size;
+  /// The unique ID of the loading unit.
+  int64_t loading_unit_id;
+} FlutterDartDeferredLibraryLoadingUnit;
+
+typedef void (*FlutterDartDeferredLibraryLoadingUnitCallback)(
+    const FlutterDartDeferredLibraryLoadingUnit* /* loading unit */,
+    void* /* user data */);
+
+/// Callback invoked on the raster thread in order to give the embedder the
+/// chance to manage thread/graphics context lifetimes (e.g. EGL context
+/// make current or clear current).
+///
+/// Should return true if the operation succeeded, false if an error occurred.
+typedef BoolCallback FlutterRasterThreadContextCallback;
+
 typedef struct _FlutterTaskRunner* FlutterTaskRunner;
 
 typedef struct {
@@ -1955,6 +2193,25 @@ typedef struct {
   size_t identifier;
   /// The callback invoked when the task runner is destroyed.
   VoidCallback destruction_callback;
+  /// The thread priority hint or configuration associated with this custom task
+  /// runner.
+  FlutterThreadPriority priority;
+#if UINTPTR_MAX == 0xffffffffffffffff
+  /// Explicit padding to ensure 8-byte alignment and eliminate implicit padding
+  /// holes.
+  uint32_t reserved_priority_padding;
+#endif
+  /// Specify a callback that is used to set the thread priority for this task
+  /// runner.
+  FlutterThreadPrioritySetter thread_priority_setter;
+  /// Specify a callback that is used to set the thread priority for this task
+  /// runner with user data context.
+  FlutterThreadPrioritySetterWithUserData thread_priority_setter_with_user_data;
+#if UINTPTR_MAX == 0xffffffff
+  /// Explicit padding on 32-bit platforms to ensure 8-byte natural alignment
+  /// and eliminate padding holes for future 64-bit field additions.
+  uint32_t reserved_user_data_padding;
+#endif
 } FlutterTaskRunnerDescription;
 
 typedef struct {
@@ -1972,11 +2229,21 @@ typedef struct {
   const FlutterTaskRunnerDescription* render_task_runner;
   /// Specify a callback that is used to set the thread priority for embedder
   /// task runners.
-  void (*thread_priority_setter)(FlutterThreadPriority);
+  FlutterThreadPrioritySetter thread_priority_setter;
   /// Specify the task runner for the thread on which the UI tasks will be run.
   /// This may be same as platform_task_runner, in which case the Flutter engine
   /// will run the UI isolate on platform thread.
   const FlutterTaskRunnerDescription* ui_task_runner;
+  /// Specify a callback that is used to set the thread priority for embedder
+  /// task runners with user data context.
+  FlutterThreadPrioritySetterWithUserData thread_priority_setter_with_user_data;
+  /// User data passed to `thread_priority_setter_with_user_data`.
+  void* user_data;
+#if UINTPTR_MAX == 0xffffffff
+  /// Explicit padding on 32-bit platforms to ensure 8-byte natural alignment
+  /// and eliminate padding holes for future 64-bit field additions.
+  uint32_t reserved_user_data_padding;
+#endif
 } FlutterCustomTaskRunners;
 
 typedef struct {
@@ -2838,6 +3105,59 @@ typedef struct {
   /// If true, the engine will decode images in wide gamut color spaces
   /// (Display P3) when supported. If false, images are decoded to sRGB.
   bool enable_wide_gamut;
+
+  /// Reserved padding to prevent tail-padding overlap across 32-bit ABIs.
+  uint8_t reserved_padding[7];
+
+  /// The callback invoked by the engine in order to request a Dart deferred
+  /// library loading unit.
+  ///
+  /// The callback will be invoked from a task posted to the platform thread.
+  FlutterDartDeferredLibraryLoadingUnitCallback
+      dart_deferred_library_loading_unit_callback;
+
+#if UINTPTR_MAX == 0xffffffff
+  /// Reserved padding to maintain 8-byte natural alignment boundaries across
+  /// 32-bit architectures, preventing tail-padding overlap with previous
+  /// phases.
+  uint32_t reserved_padding_callback;
+#endif
+
+  /// The callback invoked on the raster thread in order to give the embedder
+  /// the chance to make the rendering context current on the raster thread
+  /// (e.g. EGL context setup on Android).
+  ///
+  /// Unlike `FlutterOpenGLRendererConfig.make_current` which is invoked
+  /// per-frame around rendering operations to bind on-screen surfaces, this
+  /// hook is invoked exactly once on the raster thread when the rasterizer
+  /// subsystem is initialized for engine-managed thread context setup.
+  ///
+  /// The callback will be invoked on the engine-managed raster thread.
+  /// The user data passed to this callback is the `user_data` argument passed
+  /// to `FlutterEngineInitialize` or `FlutterEngineRun`.
+  ///
+  /// This field is optional.
+  FlutterRasterThreadContextCallback raster_thread_context_make_current;
+
+  /// The callback invoked on the raster thread in order to give the embedder
+  /// the chance to clear the rendering context current on the raster thread
+  /// (e.g. EGL context teardown on Android).
+  ///
+  /// Unlike `FlutterOpenGLRendererConfig.clear_current` which is invoked
+  /// per-frame around rendering operations, this hook is invoked exactly once
+  /// on the raster thread when the rasterizer subsystem is torn down.
+  ///
+  /// The callback will be invoked on the engine-managed raster thread.
+  /// The user data passed to this callback is the `user_data` argument passed
+  /// to `FlutterEngineInitialize` or `FlutterEngineRun`.
+  ///
+  /// Note: In spawned engines sharing the parent's task runners, caution must
+  /// be exercised if supplying this callback, as clearing the context on
+  /// spawned engine shutdown will unbind the context on the shared raster
+  /// thread.
+  ///
+  /// This field is optional.
+  FlutterRasterThreadContextCallback raster_thread_context_clear_current;
 } FlutterProjectArgs;
 
 typedef struct {
@@ -2860,6 +3180,111 @@ typedef struct {
   /// The data length.
   size_t data_length;
 } FlutterSendSemanticsActionInfo;
+
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterEngineSpawnConfig).
+  size_t struct_size;
+
+  /// Custom project arguments for the spawned engine (e.g. custom entrypoint,
+  /// entrypoint arguments, callbacks, engine ID, etc.).
+  /// This field is optional; nullptr may be specified.
+  ///
+  /// Note: The spawned engine shares task runners (including the raster thread)
+  /// with the parent engine. If `custom_args` specifies
+  /// `raster_thread_context_clear_current`, shutting down the spawned engine
+  /// will execute the clear callback on the shared raster thread.
+  const FlutterProjectArgs* custom_args;
+
+  /// Custom renderer configuration for the spawned engine.
+  /// This field is optional; if nullptr, renderer configuration from the parent
+  /// engine is inherited.
+  const FlutterRendererConfig* custom_renderer_config;
+
+  /// User data baton passed back to embedders in callbacks for the spawned
+  /// engine. This field is optional.
+  void* user_data;
+
+  /// Initial route for the spawned engine isolate.
+  /// This field is optional; nullptr or empty string defaults to "/".
+  const char* initial_route;
+} FlutterEngineSpawnConfig;
+
+/// Describes a screenshot captured from the engine.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterEngineScreenshotInfo).
+  size_t struct_size;
+
+  /// The width of the screenshot in physical pixels.
+  uint32_t width;
+
+  /// The height of the screenshot in physical pixels.
+  uint32_t height;
+
+  /// The number of bytes per row of pixels (stride).
+  size_t row_bytes;
+
+  /// Pointer to the raw uncompressed 32-bit RGBA raster pixel buffer.
+  /// The memory is allocated by the engine via `std::malloc` and must be freed
+  /// by passing this screenshot struct to `FlutterEngineFreeScreenshot`.
+  const void* pixels;
+
+  /// The size in bytes of the buffer pointed to by `pixels`.
+  size_t pixels_size;
+
+  /// The pixel format of the screenshot buffer. Guaranteed to be
+  /// `kFlutterSoftwarePixelFormatRGBA8888`.
+  FlutterSoftwarePixelFormat pixel_format;
+
+  /// Reserved for future use and 8-byte natural alignment padding. Must be 0.
+  uint32_t reserved_padding;
+} FlutterEngineScreenshotInfo;
+
+/// Callback information structure for Dart callbacks looked up by handle.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterCallbackInformation).
+  size_t struct_size;
+
+  /// The name of the callback.
+  const char* name;
+
+  /// The class name if the callback is a method of a class. Null if top-level.
+  const char* class_name;
+
+  /// The library path where the callback is defined.
+  const char* library_path;
+} FlutterCallbackInformation;
+
+/// Decoded image descriptor returned by a custom image decoder callback.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterDecodedImage).
+  size_t struct_size;
+  /// Width of the decoded image in pixels.
+  uint32_t width;
+  /// Height of the decoded image in pixels.
+  uint32_t height;
+  /// Number of bytes per row (stride).
+  size_t row_bytes;
+  /// Pointer to decoded pixel data (RGBA 8888 premultiplied).
+  const void* raw_pixels;
+  /// Context pointer passed to destruction_callback.
+  void* user_data;
+  /// Optional callback invoked when the engine is done with raw_pixels.
+  void (*destruction_callback)(void* user_data);
+} FlutterDecodedImage;
+
+/// Callback for decoding an image from raw buffer bytes.
+///
+/// If the callback recognizes and decodes the image, it populates
+/// [decoded_image_out] and returns true. If it cannot decode the image,
+/// it returns false (allowing subsequent decoders or built-in decoders to try).
+typedef bool (*FlutterImageDecoderCallback)(
+    const uint8_t* /* data */,
+    size_t /* data_size */,
+    FlutterDecodedImage* /* decoded_image_out */,
+    void* /* user_data */);
+
+/// Opaque identifier representing a registered image decoder.
+typedef int64_t FlutterImageDecoderRegistration;
 
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
 
@@ -3005,6 +3430,36 @@ FlutterEngineResult FlutterEngineDeinitialize(FLUTTER_API_SYMBOL(FlutterEngine)
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineRunInitialized(
     FLUTTER_API_SYMBOL(FlutterEngine) engine);
+
+//------------------------------------------------------------------------------
+/// @brief      Spawns a new Flutter engine instance sharing the same Dart VM
+///             and task runners with the parent engine.
+///
+///             The spawned engine runs the isolate specified in the
+///             `FlutterEngineSpawnConfig` in the same VM / isolate group.
+///             If unspecified in `FlutterEngineSpawnConfig`, the entrypoint
+///             defaults to "main" with empty arguments. The new engine
+///             starts in a running state.
+///
+///             NOTE: This function must be called on the platform task runner
+///             thread.
+///
+/// @param[in]  parent_engine  The parent Flutter engine instance. Must be a
+///                            valid running engine instance.
+/// @param[in]  config         The configuration for spawning the new engine.
+///                            Must not be null and must have a valid
+///                            struct_size >= sizeof(FlutterEngineSpawnConfig).
+/// @param[out] engine_out     The engine handle for the spawned engine on
+///                            success.
+///
+/// @return     The result of the call to spawn the Flutter engine.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine)
+                                           parent_engine,
+                                       const FlutterEngineSpawnConfig* config,
+                                       FLUTTER_API_SYMBOL(FlutterEngine) *
+                                           engine_out);
 
 //------------------------------------------------------------------------------
 /// @brief      Adds a view.
@@ -3640,6 +4095,187 @@ FlutterEngineResult FlutterEngineSetNextFrameCallback(
     VoidCallback callback,
     void* user_data);
 
+//------------------------------------------------------------------------------
+/// @brief      Loads a Dart deferred library loading unit into a running engine
+///             instance.
+///
+///             The buffers pointed to by `snapshot_data` and
+///             `snapshot_instructions` are referenced directly by the engine
+///             and must remain valid until `FlutterEngineShutdown` has
+///             returned. The embedder must not free or unmap these buffers
+///             while the engine is running.
+///
+///             This function is thread-safe and may be called from any thread.
+///
+/// @param[in]  engine                     The running engine instance.
+/// @param[in]  loading_unit_id            The unique ID of the loading unit to
+///                                        load.
+/// @param[in]  snapshot_data              The Dart snapshot data of the loading
+///                                        unit. Must not be null.
+/// @param[in]  snapshot_data_size         The size in bytes of the snapshot
+///                                        data buffer.
+/// @param[in]  snapshot_instructions      The Dart snapshot instructions of the
+///                                        loading unit. Must not be null.
+/// @param[in]  snapshot_instructions_size The size in bytes of the snapshot
+///                                        instructions buffer.
+///
+/// @return     The result of the call to load the Dart deferred library.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineLoadDartDeferredLibrary(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t loading_unit_id,
+    const uint8_t* snapshot_data,
+    size_t snapshot_data_size,
+    const uint8_t* snapshot_instructions,
+    size_t snapshot_instructions_size);
+
+//------------------------------------------------------------------------------
+/// @brief      Notifies the engine that loading a Dart deferred library loading
+///             unit failed.
+///
+///             This function is thread-safe and may be called from any thread.
+///
+/// @param[in]  engine          The running engine instance.
+/// @param[in]  loading_unit_id The unique ID of the loading unit that failed to
+///                             load.
+/// @param[in]  error_message   A human-readable error message describing the
+///                             failure. Must not be null.
+/// @param[in]  transient       Whether the failure is transient (e.g. temporary
+///                             network error) and can be retried, or permanent.
+///
+/// @return     The result of the call to report the loading failure.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineNotifyDartDeferredLibraryLoadError(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t loading_unit_id,
+    const char* error_message,
+    bool transient);
+
+//------------------------------------------------------------------------------
+/// @brief      Captures a synchronous uncompressed raster screenshot from the
+///             engine.
+///
+///             The `screenshot_out` struct must be initialized with its
+///             `struct_size` set to `sizeof(FlutterEngineScreenshotInfo)`
+///             before calling this function.
+///
+///             If successful, the `screenshot_out` fields will be populated
+///             with the screenshot dimensions and raw uncompressed 32-bit RGBA
+///             pixel buffer. The caller is responsible for releasing the pixel
+///             buffer by calling `FlutterEngineFreeScreenshot`.
+///
+///             Note: This captures the Flutter rasterizer surface. Platform
+///             views rendered natively outside Flutter (e.g. Android Hybrid
+///             Composition) are not included in this raster buffer.
+///
+///             This function is thread-safe and may be called from any thread.
+///
+/// @param[in]  engine          The running engine instance.
+/// @param[out] screenshot_out  Pointer to a `FlutterEngineScreenshotInfo`
+///                             struct to be populated. Must not be null.
+///
+/// @return     `kSuccess` if the screenshot was successfully captured;
+///             `kInvalidArguments` if arguments are invalid or `struct_size`
+///             is less than `sizeof(FlutterEngineScreenshotInfo)`;
+///             `kInternalInconsistency` if engine is not running or
+///             rasterizer has no frame available.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineScreenshot(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterEngineScreenshotInfo* screenshot_out);
+
+//------------------------------------------------------------------------------
+/// @brief      Frees the pixel buffer allocated by `FlutterEngineScreenshot`.
+///
+///             This function is thread-safe and may be called from any thread.
+///             Upon freeing, `screenshot->pixels` is set to `NULL` and
+///             `screenshot->pixels_size` is set to 0, making subsequent calls
+///             with the same struct a safe no-op.
+///
+/// @param[in,out] screenshot  The screenshot struct whose pixel buffer is to be
+///                            freed. Must not be null.
+///
+/// @return     `kSuccess` if the screenshot buffer was successfully freed;
+///             `kInvalidArguments` if `screenshot` is null or `struct_size` is
+///             less than `offsetof(FlutterEngineScreenshotInfo, pixel_format)`.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineFreeScreenshot(
+    FlutterEngineScreenshotInfo* screenshot);
+
+//------------------------------------------------------------------------------
+/// @brief      Looks up Dart callback information for a given callback handle.
+///
+///             The `callback_info_out` struct must be initialized with its
+///             `struct_size` set to at least
+///             `sizeof(FlutterCallbackInformation)` before calling this
+///             function.
+///
+///             The returned string pointers in `callback_info_out` remain
+///             valid for the lifetime of the process.
+///
+/// @param[in]  handle             The Dart callback handle to look up.
+/// @param[out] callback_info_out  Pointer to a `FlutterCallbackInformation`
+///                                struct to be populated. Must not be null.
+///
+/// @return     `kSuccess` if the callback was found and info populated;
+///             `kInvalidArguments` if `callback_info_out` is null or
+///             `struct_size` is less than `sizeof(FlutterCallbackInformation)`;
+///             `kInternalInconsistency` if the callback handle could not be
+///             found.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineGetCallbackInformation(
+    int64_t handle,
+    FlutterCallbackInformation* callback_info_out);
+
+//------------------------------------------------------------------------------
+/// @brief      Registers a platform/custom image decoder callback with the
+///             engine.
+///
+///             The registered image decoder callback will be invoked on
+///             decoding threads when processing image assets.
+///
+/// @param[in]  engine            The engine handle.
+/// @param[in]  callback          The image decoder callback to invoke.
+/// @param[in]  user_data         User data passed to the callback.
+/// @param[in]  priority          Priority for the image decoder. Higher
+/// priority
+///                               decoders are tried before lower priority ones.
+/// @param[out] registration_out  Optional pointer to receive the registration
+///                               identifier, which can be passed to
+///                               `FlutterEngineUnregisterImageDecoder`.
+///
+/// @return     `kSuccess` if the image decoder was successfully registered;
+///             `kInvalidArguments` if the engine handle or callback is null.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineRegisterImageDecoder(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterImageDecoderCallback callback,
+    void* user_data,
+    int32_t priority,
+    FlutterImageDecoderRegistration* registration_out);
+
+//------------------------------------------------------------------------------
+/// @brief      Unregisters a previously registered image decoder callback.
+///
+/// @param[in]  engine        The engine handle.
+/// @param[in]  registration  The registration identifier returned by
+///                           `FlutterEngineRegisterImageDecoder`.
+///
+/// @return     `kSuccess` if the image decoder was unregistered;
+///             `kInvalidArguments` if the engine handle or registration is
+///             invalid.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineUnregisterImageDecoder(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterImageDecoderRegistration registration);
+
 #endif  // !FLUTTER_ENGINE_NO_PROTOTYPES
 
 // Typedefs for the function pointers in FlutterEngineProcTable.
@@ -3774,6 +4410,40 @@ typedef FlutterEngineResult (*FlutterEngineRemoveViewFnPtr)(
 typedef FlutterEngineResult (*FlutterEngineSendViewFocusEventFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterViewFocusEvent* event);
+typedef FlutterEngineResult (*FlutterEngineSpawnFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) parent_engine,
+    const FlutterEngineSpawnConfig* config,
+    FLUTTER_API_SYMBOL(FlutterEngine) * engine_out);
+typedef FlutterEngineResult (*FlutterEngineLoadDartDeferredLibraryFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t loading_unit_id,
+    const uint8_t* snapshot_data,
+    size_t snapshot_data_size,
+    const uint8_t* snapshot_instructions,
+    size_t snapshot_instructions_size);
+typedef FlutterEngineResult (
+    *FlutterEngineNotifyDartDeferredLibraryLoadErrorFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t loading_unit_id,
+    const char* error_message,
+    bool transient);
+typedef FlutterEngineResult (*FlutterEngineScreenshotFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterEngineScreenshotInfo* screenshot_out);
+typedef FlutterEngineResult (*FlutterEngineFreeScreenshotFnPtr)(
+    FlutterEngineScreenshotInfo* screenshot);
+typedef FlutterEngineResult (*FlutterEngineGetCallbackInformationFnPtr)(
+    int64_t handle,
+    FlutterCallbackInformation* callback_info_out);
+typedef FlutterEngineResult (*FlutterEngineRegisterImageDecoderFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterImageDecoderCallback callback,
+    void* user_data,
+    int32_t priority,
+    FlutterImageDecoderRegistration* registration_out);
+typedef FlutterEngineResult (*FlutterEngineUnregisterImageDecoderFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterImageDecoderRegistration registration);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -3824,6 +4494,15 @@ typedef struct {
   FlutterEngineRemoveViewFnPtr RemoveView;
   FlutterEngineSendViewFocusEventFnPtr SendViewFocusEvent;
   FlutterEngineSendSemanticsActionFnPtr SendSemanticsAction;
+  FlutterEngineSpawnFnPtr Spawn;
+  FlutterEngineLoadDartDeferredLibraryFnPtr LoadDartDeferredLibrary;
+  FlutterEngineNotifyDartDeferredLibraryLoadErrorFnPtr
+      NotifyDartDeferredLibraryLoadError;
+  FlutterEngineScreenshotFnPtr Screenshot;
+  FlutterEngineFreeScreenshotFnPtr FreeScreenshot;
+  FlutterEngineGetCallbackInformationFnPtr GetCallbackInformation;
+  FlutterEngineRegisterImageDecoderFnPtr RegisterImageDecoder;
+  FlutterEngineUnregisterImageDecoderFnPtr UnregisterImageDecoder;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------
