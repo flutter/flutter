@@ -26,8 +26,8 @@ import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
-import '../runner/flutter_command.dart'
-    show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
+import '../project.dart';
+import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'build.dart';
 import 'darwin_add_to_app.dart';
@@ -41,66 +41,74 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required bool verboseHelp,
   }) : _toolContext = toolContext,
        super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
-    addTreeShakeIconsFlag();
-    usesTargetOption();
-    usesPubOption();
-    usesDartDefineOption();
-    addSplitDebugInfoOption();
-    addDartObfuscationOption();
-    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
-    addEnableExperimentation(hide: !verboseHelp);
-    usesDarwinCodeSignXCFrameworksOption();
-
-    argParser
-      ..addFlag(
-        'debug',
-        defaultsTo: true,
-        help:
-            'Whether to produce a framework for the debug build configuration. '
-            'By default, all build configurations are built.',
-      )
-      ..addFlag(
-        'profile',
-        defaultsTo: true,
-        help:
-            'Whether to produce a framework for the profile build configuration. '
-            'By default, all build configurations are built.',
-      )
-      ..addFlag(
-        'release',
-        defaultsTo: true,
-        help:
-            'Whether to produce a framework for the release build configuration. '
-            'By default, all build configurations are built.',
-      )
-      ..addFlag(
-        'cocoapods',
-        help: 'Produce a Flutter.podspec instead of an engine Flutter.xcframework (recommended if host app uses CocoaPods).',
-      )
-      ..addFlag(
-        'plugins',
-        defaultsTo: true,
-        help:
-            'Whether to produce frameworks for the plugins. '
-            'This is intended for cases where plugins are already being built separately.',
-      )
-      ..addFlag(
-        'static',
-        help: 'Build plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
-      )
-      ..addOption(
-        'output',
-        abbr: 'o',
-        valueHelp: 'path/to/directory/',
-        help: 'Location to write the frameworks.',
-      )
-      ..addFlag(
-        'force',
-        abbr: 'f',
-        help: 'Force Flutter.podspec creation on the master channel. This is only intended for testing the tool itself.',
-        hide: !verboseHelp,
-      );
+    registerOptionBundle(const DarwinAddToAppOptionsBundle());
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      debugMode,
+      profileMode,
+      releaseMode,
+      cocoapods,
+      plugins,
+      staticFrameworks,
+      output,
+      force,
+    ], verboseHelp: verboseHelp);
   }
+
+  static const debugMode = FlagOptionDescriptor(
+    name: 'debug',
+    defaultsTo: true,
+    help:
+        'Whether to produce a framework for the debug build configuration. '
+        'By default, all build configurations are built.',
+  );
+
+  static const profileMode = FlagOptionDescriptor(
+    name: 'profile',
+    defaultsTo: true,
+    help:
+        'Whether to produce a framework for the profile build configuration. '
+        'By default, all build configurations are built.',
+  );
+
+  static const releaseMode = FlagOptionDescriptor(
+    name: 'release',
+    defaultsTo: true,
+    help:
+        'Whether to produce a framework for the release build configuration. '
+        'By default, all build configurations are built.',
+  );
+
+  static const cocoapods = FlagOptionDescriptor(
+    name: 'cocoapods',
+    help: 'Produce a Flutter.podspec instead of an engine Flutter.xcframework (recommended if host app uses CocoaPods).',
+  );
+
+  static const plugins = FlagOptionDescriptor(
+    name: 'plugins',
+    defaultsTo: true,
+    help:
+        'Whether to produce frameworks for the plugins. '
+        'This is intended for cases where plugins are already being built separately.',
+  );
+
+  static const staticFrameworks = FlagOptionDescriptor(
+    name: 'static',
+    help: 'Build plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
+  );
+
+  static const output = StringOptionDescriptor(
+    name: 'output',
+    abbr: 'o',
+    valueHelp: 'path/to/directory/',
+    help: 'Location to write the frameworks.',
+  );
+
+  static const force = FlagOptionDescriptor(
+    name: 'force',
+    abbr: 'f',
+    verboseOnly: true,
+    help: 'Force Flutter.podspec creation on the master channel. This is only intended for testing the tool itself.',
+  );
 
   final DarwinAddToAppCodesigning codesign;
 
@@ -128,23 +136,24 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 
   Future<List<BuildInfo>> getBuildInfos() async {
     return <BuildInfo>[
-      if (boolArg('debug')) await getBuildInfo(forcedBuildMode: BuildMode.debug),
-      if (boolArg('profile')) await getBuildInfo(forcedBuildMode: BuildMode.profile),
-      if (boolArg('release')) await getBuildInfo(forcedBuildMode: BuildMode.release),
+      if (getValue(debugMode)) await getBuildInfo(forcedBuildMode: BuildMode.debug),
+      if (getValue(profileMode)) await getBuildInfo(forcedBuildMode: BuildMode.profile),
+      if (getValue(releaseMode)) await getBuildInfo(forcedBuildMode: BuildMode.release),
     ];
   }
 
-  @override
-  String get targetFile {
-    if (argResults?.wasParsed('target') ?? false) {
-      return stringArg('target')!;
-    }
-    final List<String>? rest = argResults?.rest;
-    if (rest != null && rest.isNotEmpty) {
-      return rest.first;
-    }
-    return _toolContext.fs.path.join('lib', 'main.dart');
-  }
+  @protected
+  Future<String?> getCodesignIdentity({
+    required BuildInfo buildInfo,
+    required Directory outputDirectory,
+    required XcodeBasedProject xcodeProject,
+  }) => codesign.getCodesignIdentity(
+    buildInfo: buildInfo,
+    codesignEnabled: getValue(BuildInfoOptions.codesign),
+    codesignIdentityOption: getValue(BuildInfoOptions.codesignIdentity),
+    identityFile: outputDirectory.childFile('.codesign_identity'),
+    xcodeProject: xcodeProject,
+  );
 
   @override
   bool get supported => platform.isMacOS;
@@ -156,11 +165,11 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       throwToolExit('Building frameworks for iOS is only supported on the Mac.');
     }
 
-    if (!boolArg('debug') && !boolArg('profile') && !boolArg('release')) {
+    if (!getValue(debugMode) && !getValue(profileMode) && !getValue(releaseMode)) {
       throwToolExit('At least one of "--debug" or "--profile", or "--release" is required.');
     }
 
-    if (!boolArg('plugins') && boolArg('static')) {
+    if (!getValue(plugins) && getValue(staticFrameworks)) {
       throwToolExit('--static cannot be used with the --no-plugins flag');
     }
   }
@@ -464,22 +473,26 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     required super.toolContext,
     required super.verboseHelp,
   }) {
-    usesFlavorOption();
-
-    argParser
-      ..addFlag(
-        'universal',
-        help: '(deprecated) Produce universal frameworks that include all valid architectures.',
-        hide: !verboseHelp,
-      )
-      ..addFlag(
-        'xcframework',
-        help: 'Produce xcframeworks that include all valid architectures.',
-        negatable: false,
-        defaultsTo: true,
-        hide: !verboseHelp,
-      );
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      BuildInfoOptions.flavor,
+      _universal,
+      _xcframework,
+    ], verboseHelp: verboseHelp);
   }
+
+  static const _universal = FlagOptionDescriptor(
+    name: 'universal',
+    verboseOnly: true,
+    help: '(deprecated) Produce universal frameworks that include all valid architectures.',
+  );
+
+  static const _xcframework = FlagOptionDescriptor(
+    name: 'xcframework',
+    defaultsTo: true,
+    negatable: false,
+    verboseOnly: true,
+    help: 'Produce xcframeworks that include all valid architectures.',
+  );
 
   @override
   final name = 'ios-framework';
@@ -499,7 +512,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
   Future<void> validateCommand() async {
     await super.validateCommand();
 
-    if (boolArg('universal')) {
+    if (getValue(_universal)) {
       throwToolExit('--universal has been deprecated, only XCFrameworks are supported.');
     }
   }
@@ -517,7 +530,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     ) = toolContext;
 
     final String outputArgument =
-        stringArg('output') ??
+        getValue(BuildFrameworkCommand.output) ??
         fs.path.join(fs.currentDirectory.path, getBuildDirectory(config, fs), 'ios', 'framework');
 
     if (outputArgument.isEmpty) {
@@ -533,11 +546,9 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     );
     final List<BuildInfo> buildInfos = await getBuildInfos();
 
-    final String? codesignIdentity = await codesign.getCodesignIdentity(
+    final String? codesignIdentity = await getCodesignIdentity(
       buildInfo: buildInfos.first,
-      codesignEnabled: boolArg(FlutterOptions.kCodesign),
-      codesignIdentityOption: stringArg(FlutterOptions.kCodesignIdentity),
-      identityFile: outputDirectory.childFile('.codesign_identity'),
+      outputDirectory: outputDirectory,
       xcodeProject: project.ios,
     );
 
@@ -563,8 +574,12 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         modeDirectory.deleteSync(recursive: true);
       }
 
-      if (boolArg('cocoapods')) {
-        produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArg('force'));
+      if (getValue(BuildFrameworkCommand.cocoapods)) {
+        produceFlutterPodspec(
+          buildInfo.mode,
+          modeDirectory,
+          force: getValue(BuildFrameworkCommand.force),
+        );
       } else {
         // Copy Flutter.xcframework.
         await _produceFlutterFramework(buildInfo, modeDirectory, codesignIdentity);
@@ -586,7 +601,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       );
 
       // Build and copy plugins.
-      if (boolArg('plugins')) {
+      if (getValue(BuildFrameworkCommand.plugins)) {
         await processPodsIfNeeded(
           project.ios,
           getIosBuildDirectory(config: config, fileSystem: fs),
@@ -905,7 +920,7 @@ end
         'SYMROOT=${iPhoneBuildOutput.path}',
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
-        if (boolArg('static')) 'MACH_O_TYPE=staticlib',
+        if (getValue(BuildFrameworkCommand.staticFrameworks)) 'MACH_O_TYPE=staticlib',
       ];
 
       RunResult buildPluginsResult = await processUtils.run(
@@ -930,7 +945,7 @@ end
         'SYMROOT=${simulatorBuildOutput.path}',
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
-        if (boolArg('static')) 'MACH_O_TYPE=staticlib',
+        if (getValue(BuildFrameworkCommand.staticFrameworks)) 'MACH_O_TYPE=staticlib',
       ];
 
       buildPluginsResult = await processUtils.run(
