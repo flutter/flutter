@@ -102,6 +102,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
     this.maintainState = true,
     super.fullscreenDialog,
     super.allowSnapshotting = true,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// {@template flutter.widgets.pageRouteBuilder.pageBuilder}
@@ -147,6 +148,9 @@ class PageRouteBuilder<T> extends PageRoute<T> {
 
   @override
   final bool maintainState;
+
+  @override
+  final AnimationBehavior animationBehavior;
 
   @override
   Widget buildPage(

@@ -261,6 +261,7 @@ class Expansible extends StatefulWidget {
     )
     this.reverseCurve,
     this.maintainState = true,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// Expands and collapses the widget.
@@ -341,6 +342,9 @@ class Expansible extends StatefulWidget {
   /// Defaults to true.
   final bool maintainState;
 
+  /// {@macro flutter.animation.AnimationController.animationBehavior}
+  final AnimationBehavior animationBehavior;
+
   /// Builds the widget with the results of [headerBuilder] and [bodyBuilder].
   ///
   /// Defaults to placing the header and body in a [Column].
@@ -378,7 +382,11 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(duration: _duration, vsync: this);
+    _animationController = AnimationController(
+      duration: _duration,
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
     final bool initiallyExpanded =
         PageStorage.maybeOf(context)?.readState(context) as bool? ?? widget.controller.isExpanded;
     if (initiallyExpanded) {

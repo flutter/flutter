@@ -176,6 +176,7 @@ class ReorderableList extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.autoScrollerVelocityScalar,
     this.dragBoundaryProvider,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(itemCount >= 0),
        assert(
          (itemExtent == null && prototypeItem == null) ||
@@ -371,6 +372,9 @@ class ReorderableList extends StatefulWidget {
   /// {@endtemplate}
   final ReorderDragBoundaryProvider? dragBoundaryProvider;
 
+  /// {@macro flutter.animation.AnimationController.animationBehavior}
+  final AnimationBehavior animationBehavior;
+
   /// The state from the closest instance of this class that encloses the given
   /// context.
   ///
@@ -538,6 +542,7 @@ class ReorderableListState extends State<ReorderableList> {
             proxyDecorator: widget.proxyDecorator,
             autoScrollerVelocityScalar: widget.autoScrollerVelocityScalar,
             dragBoundaryProvider: widget.dragBoundaryProvider,
+            animationBehavior: widget.animationBehavior,
           ),
         ),
       ],
@@ -592,6 +597,7 @@ class SliverReorderableList extends StatefulWidget {
     this.proxyDecorator,
     this.dragBoundaryProvider,
     double? autoScrollerVelocityScalar,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : autoScrollerVelocityScalar = autoScrollerVelocityScalar ?? _kDefaultAutoScrollVelocityScalar,
        assert(itemCount >= 0),
        assert(
@@ -657,6 +663,9 @@ class SliverReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.reorderable_list.dragBoundaryProvider}
   final ReorderDragBoundaryProvider? dragBoundaryProvider;
+
+  /// {@macro flutter.animation.AnimationController.animationBehavior}
+  final AnimationBehavior animationBehavior;
 
   @override
   SliverReorderableListState createState() => SliverReorderableListState();
@@ -1336,7 +1345,11 @@ class _ReorderableItemState extends State<_ReorderableItem> {
       if (animate) {
         if (_offsetAnimation == null) {
           _offsetAnimation =
-              AnimationController(vsync: _listState, duration: const Duration(milliseconds: 250))
+              AnimationController(
+                  vsync: _listState,
+                  duration: const Duration(milliseconds: 250),
+                  animationBehavior: _listState.widget.animationBehavior,
+                )
                 ..addListener(rebuild)
                 ..addStatusListener((AnimationStatus status) {
                   if (status.isCompleted) {
@@ -1557,7 +1570,11 @@ class _DragInfo extends Drag {
 
   void startDrag() {
     _proxyAnimation =
-        AnimationController(vsync: tickerProvider, duration: const Duration(milliseconds: 250))
+        AnimationController(
+            vsync: tickerProvider,
+            duration: const Duration(milliseconds: 250),
+            animationBehavior: listState.widget.animationBehavior,
+          )
           ..addStatusListener((AnimationStatus status) {
             if (status.isDismissed) {
               _dropCompleted();

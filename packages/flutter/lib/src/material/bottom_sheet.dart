@@ -244,12 +244,14 @@ class BottomSheet extends StatefulWidget {
   static AnimationController createAnimationController(
     TickerProvider vsync, {
     AnimationStyle? sheetAnimationStyle,
+    AnimationBehavior animationBehavior = AnimationBehavior.normal,
   }) {
     return AnimationController(
       duration: sheetAnimationStyle?.duration ?? _kBottomSheetEnterDuration,
       reverseDuration: sheetAnimationStyle?.reverseDuration ?? _kBottomSheetExitDuration,
       debugLabel: 'BottomSheet',
       vsync: vsync,
+      animationBehavior: animationBehavior,
     );
   }
 }
@@ -891,6 +893,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.anchorPoint,
     this.useSafeArea = false,
     this.sheetAnimationStyle,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// A builder for the contents of the sheet.
@@ -1051,6 +1054,12 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// To disable the modal bottom sheet animation, use [AnimationStyle.noAnimation].
   final AnimationStyle? sheetAnimationStyle;
 
+  /// The behavior of the animation relative to the device's clock.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  @override
+  final AnimationBehavior animationBehavior;
+
   /// {@template flutter.material.ModalBottomSheetRoute.barrierOnTapHint}
   /// The semantic hint text that informs users what will happen if they
   /// tap on the widget. Announced in the format of 'Double tap to ...'.
@@ -1120,6 +1129,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
       _animationController = BottomSheet.createAnimationController(
         navigator!,
         sheetAnimationStyle: sheetAnimationStyle,
+        animationBehavior: animationBehavior,
       );
     }
     return _animationController!;
@@ -1308,6 +1318,7 @@ Future<T?> showModalBottomSheet<T>({
   Offset? anchorPoint,
   AnimationStyle? sheetAnimationStyle,
   bool? requestFocus,
+  AnimationBehavior animationBehavior = AnimationBehavior.normal,
 }) {
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1337,6 +1348,7 @@ Future<T?> showModalBottomSheet<T>({
       useSafeArea: useSafeArea,
       sheetAnimationStyle: sheetAnimationStyle,
       requestFocus: requestFocus,
+      animationBehavior: animationBehavior,
     ),
   );
 }

@@ -86,6 +86,7 @@ class CupertinoSlider extends StatefulWidget {
     this.divisions,
     this.activeColor,
     this.thumbColor = CupertinoColors.white,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0);
 
@@ -220,6 +221,11 @@ class CupertinoSlider extends StatefulWidget {
   /// Defaults to [CupertinoColors.white].
   final Color thumbColor;
 
+  /// The behavior of the animation relative to the device's clock.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
+
   @override
   State<CupertinoSlider> createState() => _CupertinoSliderState();
 
@@ -288,6 +294,7 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     );
   }
 }
@@ -302,6 +309,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.onChangeStart,
     this.onChangeEnd,
     required this.vsync,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   final double value;
@@ -312,6 +320,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<double>? onChangeStart;
   final ValueChanged<double>? onChangeEnd;
   final TickerProvider vsync;
+  final AnimationBehavior animationBehavior;
 
   @override
   _RenderCupertinoSlider createRenderObject(BuildContext context) {
@@ -328,6 +337,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       vsync: vsync,
       textDirection: Directionality.of(context),
       cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      animationBehavior: animationBehavior,
     );
   }
 
@@ -369,6 +379,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     required TickerProvider vsync,
     required TextDirection textDirection,
     MouseCursor cursor = MouseCursor.defer,
+    AnimationBehavior animationBehavior = AnimationBehavior.normal,
   }) : assert(value >= 0.0 && value <= 1.0),
        _cursor = cursor,
        _value = value,
@@ -392,6 +403,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
       value: value,
       duration: _kDiscreteTransitionDuration,
       vsync: vsync,
+      animationBehavior: animationBehavior,
     )..addListener(markNeedsPaint);
   }
 

@@ -488,6 +488,7 @@ class FloatingHeaderSnapConfiguration {
   FloatingHeaderSnapConfiguration({
     this.curve = Curves.ease,
     this.duration = const Duration(milliseconds: 300),
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// The snap animation curve.
@@ -495,6 +496,9 @@ class FloatingHeaderSnapConfiguration {
 
   /// The snap animation's duration.
   final Duration duration;
+
+  /// The snap animation's behavior.
+  final AnimationBehavior animationBehavior;
 }
 
 /// A sliver with a [RenderBox] child which shrinks and scrolls like a
@@ -515,7 +519,11 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     this.snapConfiguration,
     super.stretchConfiguration,
     required this.showOnScreenConfiguration,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : _vsync = vsync;
+
+  /// The [AnimationBehavior] to use when animating the scroll position.
+  AnimationBehavior animationBehavior;
 
   AnimationController? _controller;
   late Animation<double> _animation;
@@ -600,7 +608,11 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     assert(vsync != null, 'vsync must not be null if the floating header changes size animatedly.');
 
     final AnimationController effectiveController = _controller ??=
-        AnimationController(vsync: vsync!, duration: duration)..addListener(() {
+        AnimationController(
+          vsync: vsync!,
+          duration: duration,
+          animationBehavior: snapConfiguration?.animationBehavior ?? animationBehavior,
+        )..addListener(() {
           if (_effectiveScrollOffset == _animation.value) {
             return;
           }
@@ -805,6 +817,7 @@ abstract class RenderSliverFloatingPinnedPersistentHeader
     super.snapConfiguration,
     super.stretchConfiguration,
     super.showOnScreenConfiguration,
+    super.animationBehavior,
   });
 
   @override

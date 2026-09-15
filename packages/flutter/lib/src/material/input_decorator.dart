@@ -187,6 +187,7 @@ class _BorderContainer extends StatefulWidget {
     required this.fillColor,
     required this.hoverColor,
     required this.isHovering,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   final InputBorder border;
@@ -195,6 +196,7 @@ class _BorderContainer extends StatefulWidget {
   final Color fillColor;
   final Color hoverColor;
   final bool isHovering;
+  final AnimationBehavior animationBehavior;
 
   @override
   _BorderContainerState createState() => _BorderContainerState();
@@ -217,8 +219,13 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
       duration: _kHoverDuration,
       value: widget.isHovering ? 1.0 : 0.0,
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     );
-    _controller = AnimationController(duration: _kTransitionDuration, vsync: this);
+    _controller = AnimationController(
+      duration: _kTransitionDuration,
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
     _borderAnimation = CurvedAnimation(
       parent: _controller,
       curve: _kTransitionCurve,
@@ -298,6 +305,7 @@ class _HelperError extends StatefulWidget {
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   final TextAlign? textAlign;
@@ -309,6 +317,7 @@ class _HelperError extends StatefulWidget {
   final String? errorText;
   final TextStyle? errorStyle;
   final int? errorMaxLines;
+  final AnimationBehavior animationBehavior;
 
   @override
   _HelperErrorState createState() => _HelperErrorState();
@@ -329,7 +338,11 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: _kTransitionDuration, vsync: this);
+    _controller = AnimationController(
+      duration: _kTransitionDuration,
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
     if (_hasError) {
       _error = _buildError();
       _controller.value = 1.0;
@@ -1877,6 +1890,7 @@ class InputDecorator extends StatefulWidget {
     this.isHovering = false,
     this.expands = false,
     this.isEmpty = false,
+    this.animationBehavior = AnimationBehavior.normal,
     this.child,
   });
 
@@ -1962,6 +1976,9 @@ class InputDecorator extends StatefulWidget {
   /// Typically an [EditableText], [DropdownButton], or [InkWell].
   final Widget? child;
 
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  final AnimationBehavior animationBehavior;
+
   /// Whether the label needs to get out of the way of the input, either by
   /// floating or disappearing.
   ///
@@ -2023,7 +2040,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   void initState() {
     super.initState();
 
-    _floatingLabelController = AnimationController(duration: _kTransitionDuration, vsync: this);
+    _floatingLabelController = AnimationController(
+      duration: _kTransitionDuration,
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
     _floatingLabelController.addListener(_handleChange);
     _floatingLabelAnimation = CurvedAnimation(
       parent: _floatingLabelController,
@@ -2031,7 +2052,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       reverseCurve: _kTransitionCurve.flipped,
     );
 
-    _shakingLabelController = AnimationController(duration: _kTransitionDuration, vsync: this);
+    _shakingLabelController = AnimationController(
+      duration: _kTransitionDuration,
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
   }
 
   @override
@@ -2376,6 +2401,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       fillColor: _getFillColor(themeData, defaults),
       hoverColor: _getHoverColor(themeData),
       isHovering: isHovering,
+      animationBehavior: widget.animationBehavior,
     );
 
     Widget? label;
@@ -2550,6 +2576,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       errorText: decoration.errorText,
       errorStyle: _getErrorStyle(themeData, defaults),
       errorMaxLines: decoration.errorMaxLines,
+      animationBehavior: widget.animationBehavior,
     );
 
     Widget? counter;

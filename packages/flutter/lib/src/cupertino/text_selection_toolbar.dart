@@ -95,6 +95,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     required this.anchorBelow,
     required this.children,
     this.toolbarBuilder = _defaultToolbarBuilder,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(children.length > 0);
 
   /// {@macro flutter.material.TextSelectionToolbar.anchorAbove}
@@ -115,6 +116,11 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   /// The given anchor and isAbove can be used to position an arrow, as in the
   /// default Cupertino toolbar.
   final CupertinoToolbarBuilder toolbarBuilder;
+
+  /// The behavior of the animation relative to the device's clock.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
 
   /// Minimal padding from all edges of the selection toolbar to all edges of the
   /// viewport.
@@ -182,6 +188,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
           anchorAbove: anchorAboveAdjusted,
           anchorBelow: anchorBelowAdjusted,
           toolbarBuilder: toolbarBuilder,
+          animationBehavior: animationBehavior,
           children: children,
         ),
       ),
@@ -526,12 +533,14 @@ class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
     required this.anchorBelow,
     required this.toolbarBuilder,
     required this.children,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(children.length > 0);
 
   final Offset anchorAbove;
   final Offset anchorBelow;
   final List<Widget> children;
   final CupertinoToolbarBuilder toolbarBuilder;
+  final AnimationBehavior animationBehavior;
 
   @override
   _CupertinoTextSelectionToolbarContentState createState() =>
@@ -602,6 +611,7 @@ class _CupertinoTextSelectionToolbarContentState
       vsync: this,
       // This was eyeballed on a physical iOS device running iOS 13.
       duration: _kToolbarTransitionDuration,
+      animationBehavior: widget.animationBehavior,
     );
   }
 

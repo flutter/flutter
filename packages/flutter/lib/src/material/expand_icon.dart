@@ -44,6 +44,7 @@ class ExpandIcon extends StatefulWidget {
     this.expandedColor,
     this.splashColor,
     this.highlightColor,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// Whether the icon is in an expanded state.
@@ -113,6 +114,9 @@ class ExpandIcon extends StatefulWidget {
   /// Defaults to [ThemeData.highlightColor].
   final Color? highlightColor;
 
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  final AnimationBehavior animationBehavior;
+
   @override
   State<ExpandIcon> createState() => _ExpandIconState();
 }
@@ -129,7 +133,11 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: kThemeAnimationDuration, vsync: this);
+    _controller = AnimationController(
+      duration: kThemeAnimationDuration,
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
     _iconTurns = _controller.drive(_iconTurnTween);
     // If the widget is initially expanded, rotate the icon without animating it.
     if (widget.isExpanded) {

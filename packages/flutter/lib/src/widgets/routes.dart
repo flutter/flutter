@@ -147,6 +147,13 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   /// {@endtemplate}
   Duration get reverseTransitionDuration => transitionDuration;
 
+  /// {@template flutter.widgets.TransitionRoute.animationBehavior}
+  /// The animation behavior for the [AnimationController] created by [createAnimationController].
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  /// {@endtemplate}
+  AnimationBehavior get animationBehavior => AnimationBehavior.normal;
+
   /// {@template flutter.widgets.TransitionRoute.opaque}
   /// Whether the route obscures previous routes when the transition is complete.
   ///
@@ -237,6 +244,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
       duration: duration,
       reverseDuration: reverseDuration,
       debugLabel: debugLabel,
+      animationBehavior: animationBehavior,
       vsync: navigator!,
     );
   }
@@ -2605,12 +2613,14 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     super.traversalEdgeBehavior,
     super.directionalTraversalEdgeBehavior,
     this.fullscreenDialog = false,
+    AnimationBehavior animationBehavior = AnimationBehavior.normal,
   }) : _pageBuilder = pageBuilder,
        _barrierDismissible = barrierDismissible,
        _barrierLabel = barrierLabel,
        _barrierColor = barrierColor,
        _transitionDuration = transitionDuration,
-       _transitionBuilder = transitionBuilder;
+       _transitionBuilder = transitionBuilder,
+       _animationBehavior = animationBehavior;
 
   final RoutePageBuilder _pageBuilder;
 
@@ -2629,6 +2639,10 @@ class RawDialogRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => _transitionDuration;
   final Duration _transitionDuration;
+
+  @override
+  AnimationBehavior get animationBehavior => _animationBehavior;
+  final AnimationBehavior _animationBehavior;
 
   final RouteTransitionsBuilder? _transitionBuilder;
 
@@ -2770,6 +2784,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   bool? requestFocus,
+  AnimationBehavior animationBehavior = AnimationBehavior.normal,
 }) {
   assert(!barrierDismissible || barrierLabel != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(
@@ -2784,6 +2799,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
       anchorPoint: anchorPoint,
       requestFocus: requestFocus,
       fullscreenDialog: fullscreenDialog,
+      animationBehavior: animationBehavior,
     ),
   );
 }

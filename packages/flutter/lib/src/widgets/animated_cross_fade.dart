@@ -137,6 +137,7 @@ class AnimatedCrossFade extends StatefulWidget {
     this.excludeBottomFocus = true,
     this.clipBehavior = Clip.hardEdge,
     this.onEnd,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// The child that is visible when [crossFadeState] is
@@ -232,6 +233,9 @@ class AnimatedCrossFade extends StatefulWidget {
   /// at the end of the current animation.
   final VoidCallback? onEnd;
 
+  /// {@macro flutter.animation.AnimationController.animationBehavior}
+  final AnimationBehavior animationBehavior;
+
   /// The default layout algorithm used by [AnimatedCrossFade].
   ///
   /// The top child is placed in a stack that sizes itself to match the top
@@ -279,6 +283,13 @@ class AnimatedCrossFade extends StatefulWidget {
         defaultValue: null,
       ),
     );
+    properties.add(
+      EnumProperty<AnimationBehavior>(
+        'animationBehavior',
+        animationBehavior,
+        defaultValue: AnimationBehavior.normal,
+      ),
+    );
   }
 }
 
@@ -294,6 +305,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       duration: widget.duration,
       reverseDuration: widget.reverseDuration,
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     );
     if (widget.crossFadeState == CrossFadeState.showSecond) {
       _controller.value = 1.0;
@@ -411,6 +423,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
         reverseDuration: widget.reverseDuration,
         curve: widget.sizeCurve,
         clipBehavior: widget.clipBehavior,
+        animationBehavior: widget.animationBehavior,
         child: widget.layoutBuilder(topChild, topKey, bottomChild, bottomKey),
       ),
     );

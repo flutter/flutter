@@ -112,6 +112,7 @@ class InkSparkle extends InteractiveInkFeature {
     double? radius,
     super.onRemoved,
     double? turbulenceSeed,
+    AnimationBehavior animationBehavior = AnimationBehavior.normal,
   }) : assert(containedInkWell || rectCallback == null),
        _color = color,
        _position = position,
@@ -127,7 +128,11 @@ class InkSparkle extends InteractiveInkFeature {
 
     // Immediately begin animating the ink.
     _animationController =
-        AnimationController(duration: _animationDuration, vsync: controller.vsync)
+        AnimationController(
+            duration: _animationDuration,
+            vsync: controller.vsync,
+            animationBehavior: animationBehavior,
+          )
           ..addListener(controller.markNeedsPaint)
           ..addStatusListener(_handleStatusChanged)
           ..forward();

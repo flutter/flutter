@@ -109,6 +109,7 @@ class _Segment<T> extends StatefulWidget {
     required this.enabled,
     required this.segmentLocation,
     required this.isMomentary,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : super(key: key);
 
   final Widget child;
@@ -118,6 +119,7 @@ class _Segment<T> extends StatefulWidget {
   final bool enabled;
   final _SegmentLocation segmentLocation;
   final bool isMomentary;
+  final AnimationBehavior animationBehavior;
 
   // Whether the thumb of the parent widget (CupertinoSlidingSegmentedControl)
   // is currently being dragged.
@@ -142,6 +144,7 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
       duration: _kOpacityAnimationDuration,
       value: widget.shouldScaleContent ? 1 : 0,
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     );
 
     highlightPressScaleAnimation = highlightPressScaleController.drive(
@@ -238,10 +241,14 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
 
 // Fadeout the separator when either adjacent segment is highlighted.
 class _SegmentSeparator extends StatefulWidget {
-  const _SegmentSeparator({required ValueKey<int> key, required this.highlighted})
-    : super(key: key);
+  const _SegmentSeparator({
+    required ValueKey<int> key,
+    required this.highlighted,
+    this.animationBehavior = AnimationBehavior.normal,
+  }) : super(key: key);
 
   final bool highlighted;
+  final AnimationBehavior animationBehavior;
 
   @override
   _SegmentSeparatorState createState() => _SegmentSeparatorState();
@@ -259,6 +266,7 @@ class _SegmentSeparatorState extends State<_SegmentSeparator>
       duration: _kSpringAnimationDuration,
       value: widget.highlighted ? 0 : 1,
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     );
   }
 
@@ -379,6 +387,7 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
     this.backgroundColor = CupertinoColors.tertiarySystemFill,
     this.proportionalWidth = false,
     this.isMomentary = false,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(children.length >= 2),
        assert(
          groupValue == null || children.keys.contains(groupValue),
@@ -509,6 +518,11 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   /// {@end-tool}
   final bool isMomentary;
 
+  /// The behavior of the animation relative to the device's clock.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
+
   @override
   State<CupertinoSlidingSegmentedControl<T>> createState() => _SegmentedControlState<T>();
 }
@@ -595,6 +609,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     duration: _kSpringAnimationDuration,
     value: 0,
     vsync: this,
+    animationBehavior: widget.animationBehavior,
   );
   Animatable<Rect?>? thumbAnimatable;
 
@@ -602,6 +617,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     duration: _kSpringAnimationDuration,
     value: 0,
     vsync: this,
+    animationBehavior: widget.animationBehavior,
   );
   late Animation<double> thumbScaleAnimation = thumbScaleController.drive(
     Tween<double>(begin: 1, end: _kMinThumbScale),
@@ -867,6 +883,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
             // changes, the separators should mostly stay where they were.
             key: ValueKey<int>(index),
             highlighted: isPreviousSegmentHighlighted || isHighlighted,
+            animationBehavior: widget.animationBehavior,
           ),
         );
       }
@@ -910,6 +927,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
                 enabled: !widget.disabledChildren.contains(entry.key),
                 segmentLocation: segmentLocation,
                 isMomentary: widget.isMomentary,
+                animationBehavior: widget.animationBehavior,
                 child: entry.value,
               ),
             ),

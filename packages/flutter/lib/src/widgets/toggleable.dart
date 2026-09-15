@@ -146,6 +146,11 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// considered to be in its third or "indeterminate" state.
   bool get tristate;
 
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  AnimationBehavior get animationBehavior => AnimationBehavior.normal;
+
   @override
   void initState() {
     super.initState();
@@ -153,18 +158,24 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
       duration: _kToggleDuration,
       value: value == false ? 0.0 : 1.0,
       vsync: this,
+      animationBehavior: animationBehavior,
     );
     _position = CurvedAnimation(
       parent: _positionController,
       curve: Curves.easeIn,
       reverseCurve: Curves.easeOut,
     );
-    _reactionController = AnimationController(duration: _reactionAnimationDuration, vsync: this);
+    _reactionController = AnimationController(
+      duration: _reactionAnimationDuration,
+      vsync: this,
+      animationBehavior: animationBehavior,
+    );
     _reaction = CurvedAnimation(parent: _reactionController, curve: Curves.fastOutSlowIn);
     _reactionHoverFadeController = AnimationController(
       duration: _kReactionFadeDuration,
       value: _hovering || _focused ? 1.0 : 0.0,
       vsync: this,
+      animationBehavior: animationBehavior,
     );
     _reactionHoverFade = CurvedAnimation(
       parent: _reactionHoverFadeController,
@@ -174,6 +185,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
       duration: _kReactionFadeDuration,
       value: _hovering || _focused ? 1.0 : 0.0,
       vsync: this,
+      animationBehavior: animationBehavior,
     );
     _reactionFocusFade = CurvedAnimation(
       parent: _reactionFocusFadeController,

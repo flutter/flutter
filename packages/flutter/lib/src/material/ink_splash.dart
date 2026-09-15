@@ -141,6 +141,7 @@ class InkSplash extends InteractiveInkFeature {
     super.customBorder,
     double? radius,
     super.onRemoved,
+    AnimationBehavior animationBehavior = AnimationBehavior.normal,
   }) : _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _targetRadius =
@@ -150,15 +151,24 @@ class InkSplash extends InteractiveInkFeature {
        _textDirection = textDirection,
        super(controller: controller, color: color) {
     _radiusController =
-        AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
+        AnimationController(
+            duration: _kUnconfirmedSplashDuration,
+            vsync: controller.vsync,
+            animationBehavior: animationBehavior,
+          )
           ..addListener(controller.markNeedsPaint)
           ..forward();
     _radius = _radiusController.drive(
       Tween<double>(begin: _kSplashInitialSize, end: _targetRadius),
     );
-    _alphaController = AnimationController(duration: _kSplashFadeDuration, vsync: controller.vsync)
-      ..addListener(controller.markNeedsPaint)
-      ..addStatusListener(_handleAlphaStatusChanged);
+    _alphaController =
+        AnimationController(
+            duration: _kSplashFadeDuration,
+            vsync: controller.vsync,
+            animationBehavior: animationBehavior,
+          )
+          ..addListener(controller.markNeedsPaint)
+          ..addStatusListener(_handleAlphaStatusChanged);
     _alpha = _alphaController!.drive(IntTween(begin: color.alpha, end: 0));
 
     controller.addInkFeature(this);

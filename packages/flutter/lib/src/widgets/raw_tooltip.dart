@@ -253,6 +253,7 @@ class RawTooltip extends StatefulWidget {
     this.animationStyle = _kDefaultAnimationStyle,
     this.positionDelegate,
     this.ignorePointer = false,
+    this.animationBehavior = AnimationBehavior.normal,
     required this.child,
   });
 
@@ -472,6 +473,9 @@ class RawTooltip extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
+  /// {@macro flutter.animation.AnimationController.animationBehavior}
+  final AnimationBehavior animationBehavior;
+
   static final List<RawTooltipState> _openedTooltips = <RawTooltipState>[];
 
   /// {@template flutter.widgets.RawTooltip.dismissAllToolTips}
@@ -528,6 +532,13 @@ class RawTooltip extends StatefulWidget {
         defaultValue: null,
       ),
     );
+    properties.add(
+      EnumProperty<AnimationBehavior>(
+        'animationBehavior',
+        animationBehavior,
+        defaultValue: AnimationBehavior.normal,
+      ),
+    );
   }
 }
 
@@ -545,6 +556,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
       duration: widget.animationStyle.duration,
       reverseDuration: widget.animationStyle.reverseDuration,
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     )..addStatusListener(_handleStatusChanged);
   }
 

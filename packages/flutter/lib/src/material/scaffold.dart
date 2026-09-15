@@ -111,12 +111,19 @@ enum _ScaffoldSlot {
 ///  * Cookbook: [Display a SnackBar](https://docs.flutter.dev/cookbook/design/snackbars)
 class ScaffoldMessenger extends StatefulWidget {
   /// Creates a widget that manages [SnackBar]s for [Scaffold] descendants.
-  const ScaffoldMessenger({super.key, required this.child});
+  const ScaffoldMessenger({
+    super.key,
+    this.animationBehavior = AnimationBehavior.normal,
+    required this.child,
+  });
 
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
+
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  final AnimationBehavior animationBehavior;
 
   /// The state from the closest instance of this class that encloses the given
   /// context.
@@ -325,6 +332,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       duration: snackBarAnimationStyle?.duration,
       reverseDuration: snackBarAnimationStyle?.reverseDuration,
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     )..addStatusListener(_handleSnackBarStatusChanged);
     if (_snackBars.isEmpty) {
       assert(_snackBarController!.isDismissed);
@@ -504,8 +512,10 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       'ScaffoldMessenger.showMaterialBanner was called, but there are currently no '
       'descendant Scaffolds to present to.',
     );
-    _materialBannerController ??= MaterialBanner.createAnimationController(vsync: this)
-      ..addStatusListener(_handleMaterialBannerStatusChanged);
+    _materialBannerController ??= MaterialBanner.createAnimationController(
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    )..addStatusListener(_handleMaterialBannerStatusChanged);
     if (_materialBanners.isEmpty) {
       assert(_materialBannerController!.isDismissed);
       _materialBannerController!.forward();
@@ -1356,8 +1366,11 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   void initState() {
     super.initState();
 
-    _previousController = AnimationController(duration: kFloatingActionButtonSegue, vsync: this)
-      ..addStatusListener(_handlePreviousAnimationStatusChanged);
+    _previousController = AnimationController(
+      duration: kFloatingActionButtonSegue,
+      vsync: this,
+      animationBehavior: widget.currentController.animationBehavior,
+    )..addStatusListener(_handlePreviousAnimationStatusChanged);
     _updateAnimations();
 
     if (widget.child != null) {
@@ -1714,6 +1727,7 @@ class Scaffold extends StatefulWidget {
     this.drawerEnableOpenDragGesture = true,
     this.endDrawerEnableOpenDragGesture = true,
     this.restorationId,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// If true, and [bottomNavigationBar] or [persistentFooterButtons]
@@ -2004,6 +2018,11 @@ class Scaffold extends StatefulWidget {
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
   final String? restorationId;
+
+  /// The behavior of the animation relative to the device's clock.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
 
   /// Finds the [ScaffoldState] from the closest instance of this class that
   /// encloses the given context.
@@ -2363,8 +2382,10 @@ class ScaffoldState extends State<Scaffold>
       // The new _currentBottomSheet is not a local history entry so a "back" button
       // will not be added to the Scaffold's appbar and the bottom sheet will not
       // support drag or swipe to dismiss.
-      final AnimationController animationController = BottomSheet.createAnimationController(this)
-        ..value = 1.0;
+      final AnimationController animationController = BottomSheet.createAnimationController(
+        this,
+        animationBehavior: widget.animationBehavior,
+      )..value = 1.0;
       bool persistentBottomSheetExtentChanged(DraggableScrollableNotification notification) {
         if (notification.extent - notification.initialExtent > precisionErrorTolerance) {
           if (_persistentSheetHistoryEntry == null) {
@@ -2681,7 +2702,11 @@ class ScaffoldState extends State<Scaffold>
     _closeCurrentBottomSheet();
     final AnimationController controller =
         (transitionAnimationController ??
-              BottomSheet.createAnimationController(this, sheetAnimationStyle: sheetAnimationStyle))
+              BottomSheet.createAnimationController(
+                this,
+                sheetAnimationStyle: sheetAnimationStyle,
+                animationBehavior: widget.animationBehavior,
+              ))
           ..forward();
     setState(() {
       _currentBottomSheet = _buildBottomSheet(
@@ -2794,14 +2819,19 @@ class ScaffoldState extends State<Scaffold>
       vsync: this,
       value: 1.0,
       duration: kFloatingActionButtonSegue * 2,
+      animationBehavior: widget.animationBehavior,
     );
 
     _floatingActionButtonVisibilityController = AnimationController(
       duration: kFloatingActionButtonSegue,
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     );
 
-    _bottomSheetScrimAnimationController = AnimationController(vsync: this);
+    _bottomSheetScrimAnimationController = AnimationController(
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
     if (widget.primary) {
       WidgetsBinding.instance.addObserver(this);
     }
