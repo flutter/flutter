@@ -100,8 +100,17 @@ bool RenderPass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
   if (!render_pass_) {
     return false;
   }
-  command_buffer.AddRenderPass(render_pass_);
+  command_buffer.AddRenderPass(render_pass_, fml::RefPtr<RenderPass>(this));
   return true;
+}
+
+void RenderPass::RetainShader(Shader* shader) {
+  for (const auto& retained : retained_shaders_) {
+    if (retained.get() == shader) {
+      return;
+    }
+  }
+  retained_shaders_.push_back(fml::RefPtr<Shader>(shader));
 }
 
 void RenderPass::SetPipeline(fml::RefPtr<RenderPipeline> pipeline) {
@@ -288,35 +297,32 @@ bool RenderPass::Draw(size_t element_count,
   }
   render_pass_->SetPipeline(impeller::PipelineRef(pipeline));
 
-  for (const auto& [_, buffer] : vertex_uniform_bindings) {
-    render_pass_->BindDynamicResource(
-        impeller::ShaderStage::kVertex,
-        impeller::DescriptorType::kUniformBuffer, buffer.slot,
-        std::make_unique<impeller::ShaderMetadata>(*buffer.view.GetMetadata()),
-        buffer.view.resource);
+  // Metadata is bound by pointer, not copied. It lives on the shader the
+  // binding came from, which `RetainShader` keeps alive, and the pass wrapper
+  // itself is retained by the command buffer until the commands encode.
+  for (const BufferAndUniformSlot& buffer : vertex_uniform_bindings) {
+    render_pass_->BindResource(impeller::ShaderStage::kVertex,
+                               impeller::DescriptorType::kUniformBuffer,
+                               buffer.slot, buffer.view.GetMetadata(),
+                               buffer.view.resource);
   }
-  for (const auto& [_, texture] : vertex_texture_bindings) {
-    render_pass_->BindDynamicResource(
-        impeller::ShaderStage::kVertex, impeller::DescriptorType::kSampledImage,
-        texture.slot,
-        std::make_unique<impeller::ShaderMetadata>(
-            *texture.texture.GetMetadata()),
-        texture.texture.resource, texture.sampler);
+  for (const TextureAndSamplerSlot& texture : vertex_texture_bindings) {
+    render_pass_->BindResource(impeller::ShaderStage::kVertex,
+                               impeller::DescriptorType::kSampledImage,
+                               texture.slot, texture.texture.GetMetadata(),
+                               texture.texture.resource, texture.sampler);
   }
-  for (const auto& [_, buffer] : fragment_uniform_bindings) {
-    render_pass_->BindDynamicResource(
-        impeller::ShaderStage::kFragment,
-        impeller::DescriptorType::kUniformBuffer, buffer.slot,
-        std::make_unique<impeller::ShaderMetadata>(*buffer.view.GetMetadata()),
-        buffer.view.resource);
+  for (const BufferAndUniformSlot& buffer : fragment_uniform_bindings) {
+    render_pass_->BindResource(impeller::ShaderStage::kFragment,
+                               impeller::DescriptorType::kUniformBuffer,
+                               buffer.slot, buffer.view.GetMetadata(),
+                               buffer.view.resource);
   }
-  for (const auto& [_, texture] : fragment_texture_bindings) {
-    render_pass_->BindDynamicResource(
-        impeller::ShaderStage::kFragment,
-        impeller::DescriptorType::kSampledImage, texture.slot,
-        std::make_unique<impeller::ShaderMetadata>(
-            *texture.texture.GetMetadata()),
-        texture.texture.resource, texture.sampler);
+  for (const TextureAndSamplerSlot& texture : fragment_texture_bindings) {
+    render_pass_->BindResource(impeller::ShaderStage::kFragment,
+                               impeller::DescriptorType::kSampledImage,
+                               texture.slot, texture.texture.GetMetadata(),
+                               texture.texture.resource, texture.sampler);
   }
 
   render_pass_->SetVertexBuffer(vertex_buffers.data(), vertex_buffer_count);
@@ -496,6 +502,31 @@ void InternalFlutterGpu_RenderPass_BindIndexBufferDevice(
                   length_in_bytes, index_type);
 }
 
+namespace {
+
+// Typical shaders stay well inside this, so a bound pass stops reallocating
+// after its first draw.
+constexpr size_t kInitialBindingCapacity = 8;
+
+/// The entry [list] holds for [binding], appended if this is the first bind
+/// for it. Rebinding overwrites in place, so the order draws replay bindings
+/// in is the order they were first bound.
+template <typename List, typename Key>
+typename List::value_type& GetOrAppendBinding(List& list, const Key* binding) {
+  for (auto& entry : list) {
+    if (entry.binding == binding) {
+      return entry;
+    }
+  }
+  if (list.empty()) {
+    list.reserve(kInitialBindingCapacity);
+  }
+  list.push_back({.binding = binding});
+  return list.back();
+}
+
+}  // namespace
+
 static bool BindUniformStruct(
     flutter::gpu::RenderPass* wrapper,
     flutter::gpu::Shader* shader,
@@ -507,13 +538,13 @@ static bool BindUniformStruct(
     return false;
   }
 
-  flutter::gpu::RenderPass::BufferUniformMap* uniform_map = nullptr;
+  flutter::gpu::RenderPass::BufferUniformList* uniform_list = nullptr;
   switch (shader->GetShaderStage()) {
     case impeller::ShaderStage::kVertex:
-      uniform_map = &wrapper->vertex_uniform_bindings;
+      uniform_list = &wrapper->vertex_uniform_bindings;
       break;
     case impeller::ShaderStage::kFragment:
-      uniform_map = &wrapper->fragment_uniform_bindings;
+      uniform_list = &wrapper->fragment_uniform_bindings;
       break;
     case impeller::ShaderStage::kUnknown:
     case impeller::ShaderStage::kCompute:
@@ -525,15 +556,13 @@ static bool BindUniformStruct(
     return false;
   }
 
-  uniform_map->insert_or_assign(
-      uniform_struct,
-      flutter::gpu::RenderPass::BufferAndUniformSlot{
-          .slot = uniform_struct->slot,
-          .view = impeller::BufferResource{
-              &uniform_struct->metadata,
-              impeller::BufferView(
-                  buffer, impeller::Range(offset_in_bytes, length_in_bytes)),
-          }});
+  wrapper->RetainShader(shader);
+  auto& entry = GetOrAppendBinding(*uniform_list, uniform_struct);
+  entry.slot = uniform_struct->slot;
+  entry.view = impeller::BufferResource(
+      &uniform_struct->metadata,
+      impeller::BufferView(buffer,
+                           impeller::Range(offset_in_bytes, length_in_bytes)));
   return true;
 }
 
@@ -592,25 +621,25 @@ static bool BindTextureBinding(
   auto sampler =
       wrapper->GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc);
 
-  flutter::gpu::RenderPass::TextureUniformMap* uniform_map = nullptr;
+  flutter::gpu::RenderPass::TextureUniformList* uniform_list = nullptr;
   switch (shader->GetShaderStage()) {
     case impeller::ShaderStage::kVertex:
-      uniform_map = &wrapper->vertex_texture_bindings;
+      uniform_list = &wrapper->vertex_texture_bindings;
       break;
     case impeller::ShaderStage::kFragment:
-      uniform_map = &wrapper->fragment_texture_bindings;
+      uniform_list = &wrapper->fragment_texture_bindings;
       break;
     case impeller::ShaderStage::kUnknown:
     case impeller::ShaderStage::kCompute:
       return false;
   }
-  uniform_map->insert_or_assign(
-      texture_binding,
-      impeller::TextureAndSampler{
-          .slot = texture_binding->slot,
-          .texture = {&texture_binding->metadata, texture->GetTexture()},
-          .sampler = sampler,
-      });
+
+  wrapper->RetainShader(shader);
+  auto& entry = GetOrAppendBinding(*uniform_list, texture_binding);
+  entry.slot = texture_binding->slot;
+  entry.texture = impeller::TextureResource(&texture_binding->metadata,
+                                            texture->GetTexture());
+  entry.sampler = sampler;
   return true;
 }
 
