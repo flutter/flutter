@@ -1544,13 +1544,7 @@ TEST(AndroidExternalViewEmbedder2,
         /*frame_size=*/frame_size);
   };
 
-  bool has_active_platform_views = true;
-  EXPECT_CALL(*jni_mock, HasActivePlatformViews())
-      .WillRepeatedly(
-          [&has_active_platform_views]() { return has_active_platform_views; });
-
-  // Frame 1: Displays a platform view with active platform views reported as
-  // true.
+  // Frame 1: Displays a platform view.
   EXPECT_CALL(*jni_mock, SetFrameUsesJavaTransactions(true));
   EXPECT_CALL(*jni_mock, SetFrameUsesJavaTransactions(false));
   EXPECT_CALL(*jni_mock,
@@ -1568,10 +1562,9 @@ TEST(AndroidExternalViewEmbedder2,
   });
   PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
 
-  // Frame 2: No platform layers and HasActivePlatformViews() is false,
-  // but views_visible_last_frame_ still forces Java transaction routing to
-  // issue hidePlatformView2 and swap the hide transaction.
-  has_active_platform_views = false;
+  // Frame 2: No platform layers, but views_visible_last_frame_ still forces
+  // Java transaction routing to issue hidePlatformView2 and swap the hide
+  // transaction.
   EXPECT_CALL(*jni_mock, hidePlatformView2(view_id));
   EXPECT_CALL(*jni_mock, SetFrameUsesJavaTransactions(true));
   EXPECT_CALL(*jni_mock, SetFrameUsesJavaTransactions(false));
@@ -1585,9 +1578,10 @@ TEST(AndroidExternalViewEmbedder2,
   PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
 
   // Frame 3: Nothing composited and views_visible_last_frame_ is now empty,
-  // but a platform view is still alive (HasActivePlatformViews() == true).
-  // Tests the 3rd term of the predicate: Java routing must stay enabled.
-  has_active_platform_views = true;
+  // but previous_frame_used_java_transactions_ keeps Java routing enabled for
+  // a 1-frame transition cooldown so direct raster-thread
+  // ASurfaceTransaction_apply cannot overtake Frame 2's UI-thread
+  // applyTransactionOnDraw.
   EXPECT_CALL(*jni_mock, SetFrameUsesJavaTransactions(true));
   EXPECT_CALL(*jni_mock, SetFrameUsesJavaTransactions(false));
   EXPECT_CALL(*jni_mock, swapTransaction());
@@ -1599,12 +1593,12 @@ TEST(AndroidExternalViewEmbedder2,
   });
   PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
 
-  // Frame 4: No layers, views_visible_last_frame_ is empty, and
-  // HasActivePlatformViews() is false. This is the PR's optimization fast path:
-  // Java transactions are bypassed, no routing flag is set, and no platform
-  // task is posted.
-  has_active_platform_views = false;
+  // Frame 4: Steady-state no-PV frame. No layers, views_visible_last_frame_ is
+  // empty, no resize, and transition cooldown has completed. Java transactions
+  // are bypassed, desired present time is forwarded, and no platform task is
+  // posted.
   EXPECT_CALL(*jni_mock, SetFrameUsesJavaTransactions(_)).Times(0);
+  EXPECT_CALL(*jni_mock, SetFrameDesiredPresentTime(_)).Times(2);
   EXPECT_CALL(*jni_mock, swapTransaction()).Times(0);
   EXPECT_CALL(*jni_mock, onEndFrame2()).Times(0);
   embedder->PrepareFlutterView(frame_size, 1.0);
@@ -1612,6 +1606,67 @@ TEST(AndroidExternalViewEmbedder2,
     embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                 make_frame());
   });
+  PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
+
+  // Frame 5: FlutterView resize (100x100 -> 200x200) with zero platform views.
+  // Must route through Java transactions so the new buffer size synchronizes
+  // with ViewRootImpl via applyTransactionOnDraw.
+  const DlISize resized_frame_size(200, 200);
+  EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(200, 200)).Times(AnyNumber());
+  EXPECT_CALL(*jni_mock, SetFrameUsesJavaTransactions(true));
+  EXPECT_CALL(*jni_mock, SetFrameUsesJavaTransactions(false));
+  EXPECT_CALL(*jni_mock, swapTransaction());
+  EXPECT_CALL(*jni_mock, onEndFrame2());
+  embedder->PrepareFlutterView(resized_frame_size, 1.0);
+  PostTaskSync(task_runners.GetRasterTaskRunner(), [&]() {
+    embedder->SubmitFlutterView(
+        kImplicitViewId, nullptr, nullptr,
+        std::make_unique<SurfaceFrame>(
+            SkSurfaces::Null(200, 200), framebuffer_info,
+            [](const SurfaceFrame&, DlCanvas*) { return true; },
+            [](const SurfaceFrame&) { return true; }, resized_frame_size));
+  });
+  // Drain platform task runner for Frame 5.
+  PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
+
+  // Block the platform thread so Frame 6's platform task remains in-flight
+  // while Frame 7 is submitted on the raster thread.
+  fml::AutoResetWaitableEvent unblock_platform;
+  task_runners.GetPlatformTaskRunner()->PostTask(
+      [&unblock_platform]() { unblock_platform.Wait(); });
+
+  // Frame 6: Cooldown frame after resize (200x200). Platform task is queued
+  // behind unblock_platform, so in_flight_java_frames_ becomes 1.
+  EXPECT_CALL(*jni_mock, SetFrameUsesJavaTransactions(true)).Times(2);
+  EXPECT_CALL(*jni_mock, SetFrameUsesJavaTransactions(false)).Times(2);
+  EXPECT_CALL(*jni_mock, swapTransaction()).Times(2);
+  EXPECT_CALL(*jni_mock, onEndFrame2()).Times(2);
+  embedder->PrepareFlutterView(resized_frame_size, 1.0);
+  PostTaskSync(task_runners.GetRasterTaskRunner(), [&]() {
+    embedder->SubmitFlutterView(
+        kImplicitViewId, nullptr, nullptr,
+        std::make_unique<SurfaceFrame>(
+            SkSurfaces::Null(200, 200), framebuffer_info,
+            [](const SurfaceFrame&, DlCanvas*) { return true; },
+            [](const SurfaceFrame&) { return true; }, resized_frame_size));
+  });
+
+  // Frame 7: Even though primary_uses_java_transactions and
+  // previous_frame_used_java_transactions_ are now false, Frame 6's platform
+  // task is still in flight (in_flight_java_frames_ > 0), so Frame 7 must
+  // remain on the Java transaction path to prevent out-of-order submission.
+  embedder->PrepareFlutterView(resized_frame_size, 1.0);
+  PostTaskSync(task_runners.GetRasterTaskRunner(), [&]() {
+    embedder->SubmitFlutterView(
+        kImplicitViewId, nullptr, nullptr,
+        std::make_unique<SurfaceFrame>(
+            SkSurfaces::Null(200, 200), framebuffer_info,
+            [](const SurfaceFrame&, DlCanvas*) { return true; },
+            [](const SurfaceFrame&) { return true; }, resized_frame_size));
+  });
+
+  // Unblock and drain both Frame 6 and Frame 7 platform tasks.
+  unblock_platform.Signal();
   PostTaskSync(task_runners.GetPlatformTaskRunner(), []() {});
 
   embedder->Teardown();
@@ -1675,7 +1730,6 @@ TEST(AndroidExternalViewEmbedder2,
       .WillRepeatedly(Return(
           ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
               0, window))));
-  EXPECT_CALL(*jni_mock, HasActivePlatformViews()).WillRepeatedly(Return(true));
   EXPECT_CALL(*jni_mock, swapTransaction()).Times(AtLeast(1));
   EXPECT_CALL(*jni_mock, onEndFrame2()).Times(AtLeast(1));
   EXPECT_CALL(*jni_mock, destroyOverlaySurface2()).Times(AnyNumber());

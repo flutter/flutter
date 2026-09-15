@@ -6,6 +6,8 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
 
 #include <atomic>
+#include <memory>
+#include <optional>
 #include <unordered_map>
 
 #include "flutter/common/task_runners.h"
@@ -139,6 +141,20 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
 
   // The set of platform views that were visible in the last frame.
   absl::flat_hash_set<int64_t> views_visible_last_frame_;
+
+  // The size of the root canvas on the last submitted frame, used to detect
+  // surface resizes that require ViewRootImpl BLAST synchronization.
+  std::optional<DlISize> last_submitted_frame_size_;
+
+  // Number of Java-routed frames posted to the platform thread that have not
+  // yet finished onEndFrame2(). Shared with posted tasks to prevent raster
+  // submissions from overtaking pending UI-thread transactions.
+  std::shared_ptr<std::atomic<int32_t>> in_flight_java_frames_ =
+      std::make_shared<std::atomic<int32_t>>(0);
+
+  // Whether the previous frame required Java transactions, used to hold the
+  // Java path for one transition frame so ViewRootImpl drains in FIFO order.
+  bool previous_frame_used_java_transactions_ = false;
 
   // Destroys the surfaces created from the surface factory.
   // This method schedules a task on the platform thread, and waits for

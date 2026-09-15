@@ -700,7 +700,6 @@ targets:
 
   - name: Linux snippets
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 30
     properties:
       tags: >
@@ -2704,7 +2703,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "android", "linux", "mokey"]
@@ -6748,7 +6746,6 @@ targets:
   - name: Windows flavors_test_windows
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -7333,7 +7330,6 @@ targets:
   - name: Windows new_gallery_windows_impeller__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7347,7 +7343,6 @@ targets:
   - name: Windows new_gallery_windows_skia__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7730,6 +7725,10 @@ targets:
     bringup: true
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: windowing_test_macos

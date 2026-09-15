@@ -6,7 +6,13 @@
 #include <gtest/gtest.h>
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/async-loop/default.h>
+// TODO(cbracken): https://github.com/flutter/flutter/issues/192609
+// Remove once the Fuchsia SDK marks bindings_local as maybe_unused in
+// BindingSet::CloseAll.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-variable"
 #include <lib/fidl/cpp/binding_set.h>
+#pragma clang diagnostic pop
 #include <lib/zx/eventpair.h>
 
 #include "flutter/shell/platform/fuchsia/flutter/focus_delegate.h"

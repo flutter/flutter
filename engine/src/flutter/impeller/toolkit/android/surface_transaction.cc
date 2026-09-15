@@ -112,6 +112,17 @@ bool SurfaceTransaction::SetParent(const SurfaceControl& control,
   return true;
 }
 
+bool SurfaceTransaction::SetDesiredPresentTime(
+    int64_t desired_present_time_ns) {
+  if (!IsValid() ||
+      !GetProcTable().ASurfaceTransaction_setDesiredPresentTime.IsAvailable()) {
+    return false;
+  }
+  GetProcTable().ASurfaceTransaction_setDesiredPresentTime(
+      transaction_.get().tx, desired_present_time_ns);
+  return true;
+}
+
 bool SurfaceTransaction::IsAvailableOnPlatform() {
   return GetProcTable().IsValid() &&
          GetProcTable().ASurfaceTransaction_create.IsAvailable();

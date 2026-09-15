@@ -88,7 +88,12 @@ bool AndroidSurfaceVKImpeller::SetNativeWindow(
   impeller::CreateTransactionCB cb = [jni_facade = jni_facade]() {
     FML_CHECK(jni_facade) << "JNI was nullptr";
     if (!jni_facade->FrameUsesJavaTransactions()) {
-      return impeller::android::SurfaceTransaction();
+      impeller::android::SurfaceTransaction tx;
+      if (auto present_time = jni_facade->FrameDesiredPresentTime();
+          present_time.has_value()) {
+        (void)tx.SetDesiredPresentTime(*present_time);
+      }
+      return tx;
     }
     ASurfaceTransaction* tx = jni_facade->createTransaction();
     if (tx == nullptr) {

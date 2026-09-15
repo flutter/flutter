@@ -94,9 +94,18 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
     std::unique_ptr<SurfaceFrame> frame) {
   TRACE_EVENT0("flutter", "AndroidExternalViewEmbedder2::SubmitFlutterView");
 
-  const bool uses_java_transactions = FrameHasPlatformLayers() ||
-                                      !views_visible_last_frame_.empty() ||
-                                      jni_facade_->HasActivePlatformViews();
+  const bool frame_size_changed = last_submitted_frame_size_.has_value() &&
+                                  *last_submitted_frame_size_ != frame_size_;
+  last_submitted_frame_size_ = frame_size_;
+
+  const bool primary_uses_java_transactions =
+      FrameHasPlatformLayers() || !views_visible_last_frame_.empty() ||
+      frame_size_changed;
+  const bool uses_java_transactions =
+      primary_uses_java_transactions ||
+      previous_frame_used_java_transactions_ ||
+      in_flight_java_frames_->load(std::memory_order_acquire) > 0;
+  previous_frame_used_java_transactions_ = primary_uses_java_transactions;
 
   fml::ScopedCleanupClosure restore_transaction_path;
   if (uses_java_transactions) {
@@ -105,13 +114,27 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         fml::ScopedCleanupClosure([jni_facade = jni_facade_]() {
           jni_facade->SetFrameUsesJavaTransactions(false);
         });
+  } else {
+    std::optional<int64_t> present_time_ns;
+    if (frame->submit_info().presentation_time.has_value()) {
+      present_time_ns = frame->submit_info()
+                            .presentation_time->ToEpochDelta()
+                            .ToNanoseconds();
+    }
+    jni_facade_->SetFrameDesiredPresentTime(present_time_ns);
+    restore_transaction_path =
+        fml::ScopedCleanupClosure([jni_facade = jni_facade_]() {
+          jni_facade->SetFrameDesiredPresentTime(std::nullopt);
+        });
   }
 
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
     if (uses_java_transactions) {
+      in_flight_java_frames_->fetch_add(1, std::memory_order_acq_rel);
       task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
           [this, jni_facade = jni_facade_,
+           in_flight_java_frames = in_flight_java_frames_,
            views_visible_last_frame = views_visible_last_frame_]() {
             // This pointer is guaranteed to not be dangling as long as
             // DestroySurfaces is called before the embedder is deleted. See
@@ -123,6 +146,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
 
             jni_facade->swapTransaction();
             jni_facade->onEndFrame2();
+            in_flight_java_frames->fetch_sub(1, std::memory_order_acq_rel);
           }));
     }
     views_visible_last_frame_.clear();
@@ -204,12 +228,14 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   }
 
   frame->Submit();
+  in_flight_java_frames_->fetch_add(1, std::memory_order_acq_rel);
   task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
       [&, composition_order = composition_order_, view_params = view_params_,
        jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
        slices = std::move(slices_),
        views_visible_last_frame = views_visible_last_frame_,
-       overlay_layer_has_content_this_frame_]() mutable -> void {
+       overlay_layer_has_content_this_frame_,
+       in_flight_java_frames = in_flight_java_frames_]() mutable -> void {
         if (overlay_layer_has_content_this_frame_) {
           ShowOverlayLayerIfNeeded();
         } else {
@@ -242,6 +268,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
 
         jni_facade->swapTransaction();
         jni_facade_->onEndFrame2();
+        in_flight_java_frames->fetch_sub(1, std::memory_order_acq_rel);
       }));
 
   views_visible_last_frame_.clear();
@@ -320,6 +347,8 @@ void AndroidExternalViewEmbedder2::Teardown() {
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder2::DestroySurfaces() {
+  last_submitted_frame_size_ = std::nullopt;
+  previous_frame_used_java_transactions_ = false;
   if (!surface_pool_->HasLayers()) {
     return;
   }

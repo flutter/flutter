@@ -131,14 +131,6 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
   // New Platform View Support.
   ASurfaceTransaction* createTransaction() override;
 
-  bool HasActivePlatformViews() const override {
-    return has_active_platform_views_.load(std::memory_order_relaxed);
-  }
-
-  void SetHasActivePlatformViews(bool has_views) override {
-    has_active_platform_views_.store(has_views, std::memory_order_relaxed);
-  }
-
   bool FrameUsesJavaTransactions() const override {
     return frame_uses_java_transactions_;
   }
@@ -147,9 +139,16 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
     frame_uses_java_transactions_ = uses_java;
   }
 
-  void swapTransaction() override;
+  std::optional<int64_t> FrameDesiredPresentTime() const override {
+    return frame_desired_present_time_;
+  }
 
-  void applyTransaction() override;
+  void SetFrameDesiredPresentTime(
+      std::optional<int64_t> present_time_ns) override {
+    frame_desired_present_time_ = present_time_ns;
+  }
+
+  void swapTransaction() override;
 
   std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
   createOverlaySurface2() override;
@@ -178,8 +177,8 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
  private:
   // Reference to FlutterJNI object.
   const fml::jni::JavaObjectWeakGlobalRef java_object_;
-  std::atomic<bool> has_active_platform_views_{false};
   bool frame_uses_java_transactions_ = false;
+  std::optional<int64_t> frame_desired_present_time_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroidJNIImpl);
 };

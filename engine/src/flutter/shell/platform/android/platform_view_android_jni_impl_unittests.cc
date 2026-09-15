@@ -174,7 +174,7 @@ TEST_F(PlatformViewAndroidJNIImplTest, SetViewportMetricsEmptyArrays) {
                        0, 0, 0, 0, 0, 0, 0, 0);
 }
 
-TEST_F(PlatformViewAndroidJNIImplTest, HasActivePlatformViewsToggle) {
+TEST_F(PlatformViewAndroidJNIImplTest, FrameTransactionConfigToggle) {
   MockJNIEnvProvider env_provider;
   MockJNIEnv& mock_env = env_provider.env();
 
@@ -182,13 +182,18 @@ TEST_F(PlatformViewAndroidJNIImplTest, HasActivePlatformViewsToggle) {
   PlatformViewAndroidJNIImpl impl(
       fml::jni::JavaObjectWeakGlobalRef(&mock_env, jcaller));
 
-  EXPECT_FALSE(impl.HasActivePlatformViews());
+  EXPECT_FALSE(impl.FrameUsesJavaTransactions());
+  EXPECT_FALSE(impl.FrameDesiredPresentTime().has_value());
 
-  impl.SetHasActivePlatformViews(true);
-  EXPECT_TRUE(impl.HasActivePlatformViews());
+  impl.SetFrameUsesJavaTransactions(true);
+  impl.SetFrameDesiredPresentTime(123456789LL);
+  EXPECT_TRUE(impl.FrameUsesJavaTransactions());
+  EXPECT_EQ(impl.FrameDesiredPresentTime(), 123456789LL);
 
-  impl.SetHasActivePlatformViews(false);
-  EXPECT_FALSE(impl.HasActivePlatformViews());
+  impl.SetFrameUsesJavaTransactions(false);
+  impl.SetFrameDesiredPresentTime(std::nullopt);
+  EXPECT_FALSE(impl.FrameUsesJavaTransactions());
+  EXPECT_FALSE(impl.FrameDesiredPresentTime().has_value());
 }
 
 // The load order is exercised with an injected loader rather than real

@@ -368,10 +368,4 @@ bool AndroidShellHolder::IsSurfaceControlEnabled() {
   return GetPlatformView()->IsSurfaceControlEnabled();
 }
 
-void AndroidShellHolder::SetHasActivePlatformViews(bool has_views) {
-  if (jni_facade_) {
-    jni_facade_->SetHasActivePlatformViews(has_views);
-  }
-}
-
 }  // namespace flutter
