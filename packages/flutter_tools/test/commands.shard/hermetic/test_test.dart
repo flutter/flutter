@@ -1453,6 +1453,46 @@ dev_dependencies:
     },
   );
 
+  testUsingContext(
+    'Rebuild the asset bundle if the asset manifest on disk does not match the newly generated asset manifest',
+    () async {
+      final testRunner = FakeFlutterTestRunner(0);
+      fs.file('asset.txt').writeAsStringSync('1');
+      fs.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
+flutter:
+  assets:
+    - asset.txt
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter''');
+      final testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>['test', '--no-pub']);
+
+      final File manifestFile = fs.file(
+        globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
+      );
+      expect(manifestFile, exists);
+
+      // Simulate a stale manifest on disk (e.g. from an older Flutter version with different schema/contents).
+      manifestFile.writeAsBytesSync(<int>[0, 1, 2, 3]);
+
+      await commandRunner.run(const <String>['test', '--no-pub']);
+
+      final List<int> manifestBytes = manifestFile.readAsBytesSync();
+      expect(manifestBytes, isNot(<int>[0, 1, 2, 3]));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.empty(),
+      DeviceManager: () => _FakeDeviceManager(<Device>[]),
+    },
+  );
+
   group('Fatal Logs', () {
     testUsingContext(
       "doesn't fail when --fatal-warnings is set and no warning output",
