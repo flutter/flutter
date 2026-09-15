@@ -106,6 +106,28 @@ Future<void> doTests() async {
         expect(element.decimals, <double>[math.pi, math.e]);
       });
     });
+
+    group('addView and removeView', () {
+      test('can add and remove a view', () {
+        final DomElement host = createDomElement('div');
+        final int viewId = views.addView(
+          FlutterViewOptions(
+            hostElement: host,
+            viewConstraints: FlutterViewConstraints(
+              minWidth: 100.0,
+              maxWidth: 500.0,
+              minHeight: 100.0,
+              maxHeight: 500.0,
+            ),
+          ),
+        );
+        expect(viewManager[viewId], isNotNull);
+        expect(views.getHostElement(viewId), host);
+
+        views.removeView(viewId);
+        expect(viewManager[viewId], isNull);
+      });
+    });
   });
 }
 
