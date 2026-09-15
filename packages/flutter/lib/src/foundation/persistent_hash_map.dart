@@ -158,9 +158,8 @@ class _CompressedNode extends _TrieNode {
 
       // Is this a (null, trieNode) pair?
       if (identical(keyOrNull, null)) {
-        final _TrieNode newNode = _unsafeCast<_TrieNode>(
-          valueOrNode,
-        ).put(bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash, value);
+        final _TrieNode newNode = _unsafeCast<_TrieNode>(valueOrNode)
+            .put(bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash, value);
         if (newNode == valueOrNode) {
           return this;
         }

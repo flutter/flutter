@@ -20,11 +20,10 @@ class ExtensionManager {
   ExtensionManager({
     required this.hostPlatform,
     required Logger logger,
-    List<ExtensionEntryPoint> entryPoints = const <ExtensionEntryPoint>[],
+    this._entryPoints = const <ExtensionEntryPoint>[],
     ExtensionDiscovery? discovery,
     FeatureFlags? featureFlags,
   }) : _logger = logger,
-       _entryPoints = entryPoints,
        _discovery = discovery ?? ExtensionDiscovery(logger: logger),
        _featureFlags = featureFlags ?? context.get<FeatureFlags>()!;
 

@@ -44,9 +44,7 @@ export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 export 'autofill.dart' show AutofillConfiguration, AutofillScope;
 export 'text_editing.dart' show TextSelection;
-
-// TODO(a14n): the following export leads to Segmentation fault, see https://github.com/flutter/flutter/issues/106332
-// export 'text_editing_delta.dart' show TextEditingDelta;
+export 'text_editing_delta.dart' show TextEditingDelta;
 
 /// Indicates how to handle the intelligent replacement of dashes in text input.
 ///

@@ -181,12 +181,8 @@ abstract final class FlutterCommandCategory {
 }
 
 abstract class FlutterCommand extends Command<void> {
-  FlutterCommand({
-    this.verboseHelp = false,
-    ToolContext? toolContext,
-    OutputPreferences? outputPreferences,
-  }) : _explicitToolContext = toolContext,
-       _outputPreferences = outputPreferences;
+  FlutterCommand({this.verboseHelp = false, ToolContext? toolContext, this._outputPreferences})
+    : _explicitToolContext = toolContext;
 
   /// Whether this command was invoked with verbose help enabled.
   final bool verboseHelp;
@@ -668,8 +664,7 @@ abstract class FlutterCommand extends Command<void> {
   void usesDeviceUserOption() {
     argParser.addOption(
       FlutterOptions.kDeviceUser,
-      help:
-          'Identifier number for a user or work profile on Android only. Run "adb shell pm list users" for available identifiers.',
+      help: 'Identifier number for a user or work profile on Android only. Run "adb shell pm list users" for available identifiers.',
       valueHelp: '10',
     );
   }
@@ -677,8 +672,7 @@ abstract class FlutterCommand extends Command<void> {
   void usesDeviceTimeoutOption() {
     argParser.addOption(
       FlutterOptions.kDeviceTimeout,
-      help:
-          'Time in seconds to wait for devices to attach. Longer timeouts may be necessary for networked devices.',
+      help: 'Time in seconds to wait for devices to attach. Longer timeouts may be necessary for networked devices.',
       valueHelp: '10',
     );
   }
@@ -691,10 +685,8 @@ abstract class FlutterCommand extends Command<void> {
       allowed: <String>['attached', 'wireless', 'both'],
       allowedHelp: <String, String>{
         'both': 'Searches for both attached and wireless devices.',
-        'attached':
-            'Only searches for devices connected by USB or built-in (such as simulators/emulators, MacOS/Windows, Chrome)',
-        'wireless':
-            'Only searches for devices connected wirelessly. Discovering wireless devices may take longer.',
+        'attached': 'Only searches for devices connected by USB or built-in (such as simulators/emulators, MacOS/Windows, Chrome)',
+        'wireless': 'Only searches for devices connected wirelessly. Discovering wireless devices may take longer.',
       },
     );
   }
@@ -802,16 +794,6 @@ abstract class FlutterCommand extends Command<void> {
     CommonOptions.treeShakeIcons.addTo(argParser, hideOverride: enabledByDefault == false);
   }
 
-  void addShrinkingFlag({required bool verboseHelp}) {
-    argParser.addFlag(
-      'shrink',
-      hide: !verboseHelp,
-      help:
-          'This flag has no effect. Code shrinking is always enabled in release builds. '
-          'To learn more, see: https://developer.android.com/studio/build/shrink-code',
-    );
-  }
-
   void usesFrontendServerStarterPathOption({required bool verboseHelp}) {
     BuildInfoOptions.frontendServerStarterPath.addTo(argParser, verboseHelp: verboseHelp);
   }
@@ -875,14 +857,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addIgnoreDeprecationOption({bool hide = false}) {
-    argParser.addFlag(
-      'ignore-deprecation',
-      negatable: false,
-      help:
-          'Indicates that the app should ignore deprecation warnings and continue to build '
-          'using deprecated APIs. Use of this flag may cause your app to fail to build when '
-          'deprecated APIs are removed.',
-    );
+    BuildInfoOptions.ignoreDeprecation.addTo(argParser, hideOverride: hide);
   }
 
   /// Adds build options common to all of the desktop build commands.
@@ -1080,12 +1055,10 @@ abstract class FlutterCommand extends Command<void> {
     );
 
     final List<String> experiments = getValue(CommonOptions.enableExperiment);
-    final List<String> extraGenSnapshotOptions = getValue(
-      BuildInfoOptions.extraGenSnapshotOptions,
-    ).toList();
-    final List<String> extraFrontEndOptions = getValue(
-      BuildInfoOptions.extraFrontEndOptions,
-    ).toList();
+    final List<String> extraGenSnapshotOptions = getValue(BuildInfoOptions.extraGenSnapshotOptions)
+        .toList();
+    final List<String> extraFrontEndOptions = getValue(BuildInfoOptions.extraFrontEndOptions)
+        .toList();
 
     if (experiments.isNotEmpty) {
       for (final expFlag in experiments) {
@@ -1358,9 +1331,8 @@ abstract class FlutterCommand extends Command<void> {
     });
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
-      final Iterable<String> defines = stringsArg(
-        FlutterOptions.kDartDefinesOption,
-      ).where((string) => string.isNotEmpty);
+      final Iterable<String> defines = stringsArg(FlutterOptions.kDartDefinesOption)
+          .where((string) => string.isNotEmpty);
       dartDefines.addAll(defines);
     }
 
