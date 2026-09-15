@@ -192,11 +192,13 @@ void main() {
     WidgetTester tester,
   ) async {
     ABCModel? inheritedModel;
+    ABCModel? inheritedModelWithAspect;
 
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
           inheritedModel = InheritedModel.inheritFrom(context);
+          inheritedModelWithAspect = InheritedModel.inheritFrom(context, aspect: 'a');
           return Container();
         },
       ),
@@ -204,6 +206,7 @@ void main() {
     // Shouldn't crash first of all.
 
     expect(inheritedModel, null);
+    expect(inheritedModelWithAspect, null);
   });
 
   testWidgets('Inner InheritedModel shadows the outer one', (WidgetTester tester) async {
@@ -506,5 +509,65 @@ void main() {
       findsOneWidget,
     ); // rebuilt showC now depends on the inner model
     expect(find.text('a: 101 b: 102 c: null'), findsOneWidget); // inner model's a, b, c
+  });
+
+  testWidgets('inheritFrom depends on models up to the first one that supports the aspect', (
+    WidgetTester tester,
+  ) async {
+    const outerKey = Key('outer');
+    const innerKey = Key('inner');
+    late BuildContext supportedContext;
+    late BuildContext unsupportedContext;
+
+    bool dependsOn(BuildContext context, InheritedElement model) {
+      final element = context as Element;
+      // No public API exposes the dependencies created by inheritFrom.
+      // ignore: invalid_use_of_protected_member
+      return element.doesDependOnInheritedElement(model);
+    }
+
+    await tester.pumpWidget(
+      ABCModel(
+        key: outerKey,
+        a: 0,
+        b: 1,
+        child: ABCModel(
+          key: innerKey,
+          a: 100,
+          b: 101,
+          aspects: const <String>{'a'},
+          child: Column(
+            children: <Widget>[
+              Builder(
+                builder: (BuildContext context) {
+                  supportedContext = context;
+                  ABCModel.of(context, fieldName: 'a');
+                  return const SizedBox();
+                },
+              ),
+              Builder(
+                builder: (BuildContext context) {
+                  unsupportedContext = context;
+                  ABCModel.of(context, fieldName: 'b');
+                  return const SizedBox();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final outerElement = tester.element(find.byKey(outerKey)) as InheritedElement;
+    final innerElement = tester.element(find.byKey(innerKey)) as InheritedElement;
+
+    // The inner model supports 'a': the dependency stops there.
+    expect(dependsOn(supportedContext, innerElement), isTrue);
+    expect(dependsOn(supportedContext, outerElement), isFalse);
+
+    // The inner model does not support 'b': dependencies are created on all
+    // models up to and including the first one that supports it.
+    expect(dependsOn(unsupportedContext, innerElement), isTrue);
+    expect(dependsOn(unsupportedContext, outerElement), isTrue);
   });
 }
