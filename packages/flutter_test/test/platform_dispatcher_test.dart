@@ -227,8 +227,11 @@ void main() {
     expect(addedView!.viewId, customView.viewId);
     expect(tester.platformDispatcher.views, contains(addedView));
 
-    // Ensure custom view survives metrics changed notifications.
-    tester.platformDispatcher.onMetricsChanged?.call();
+    // Ensure custom view survives metrics changed notifications. This has to go
+    // through notifyMetricsChanged: the onMetricsChanged getter reports the
+    // callback registered just above, so calling that would count a
+    // notification without refreshing the registry the assertion reads.
+    tester.platformDispatcher.notifyMetricsChanged();
     expect(metricsNotificationCount, 2);
     expect(tester.platformDispatcher.view(id: customView.viewId), same(addedView));
     expect(tester.platformDispatcher.views, contains(addedView));
@@ -284,6 +287,127 @@ void main() {
       expect(updatedTestView.physicalSize, const Size(800, 600));
     },
   );
+
+  testWidgets('TestPlatformDispatcher keeps one view when a custom view shadows an engine view', (
+    WidgetTester tester,
+  ) async {
+    final display = _FakeDisplay(id: 1);
+    final engineView = _FakeFlutterView(display: display, viewId: 100);
+    final backingDispatcher = _FakePlatformDispatcher(
+      displays: <Display>[display],
+      views: <FlutterView>[engineView],
+    );
+    final testDispatcher = TestPlatformDispatcher(platformDispatcher: backingDispatcher);
+
+    final TestFlutterView engineTestView = testDispatcher.views.single;
+
+    // A custom view registered for an id the engine also reports takes over
+    // that id, rather than adding a second view alongside it.
+    final customView = _FakeFlutterView(display: display, viewId: 100);
+    testDispatcher.addTestView(customView);
+
+    final TestFlutterView shadowing = testDispatcher.views.single;
+    expect(shadowing, isNot(same(engineTestView)));
+    expect(testDispatcher.view(id: 100), same(shadowing));
+
+    // The wrapper survives refreshes, so the test values set on it survive too.
+    shadowing.physicalSize = const Size(800, 600);
+    backingDispatcher.onMetricsChanged?.call();
+    expect(testDispatcher.views.single, same(shadowing));
+    expect(shadowing.physicalSize, const Size(800, 600));
+    backingDispatcher.onMetricsChanged?.call();
+    expect(testDispatcher.views.single, same(shadowing));
+
+    // Removing it brings the engine's view back.
+    testDispatcher.removeTestView(customView);
+    final TestFlutterView restored = testDispatcher.views.single;
+    expect(restored, isNot(same(shadowing)));
+    expect(restored.viewId, 100);
+  });
+
+  testWidgets('notifyViewFocusChanged records the focused view, and resetting unfocuses it', (
+    WidgetTester tester,
+  ) async {
+    final display = _FakeDisplay(id: 1);
+    final backingDispatcher = _FakePlatformDispatcher(
+      displays: <Display>[display],
+      views: <FlutterView>[_FakeFlutterView(display: display, viewId: 100)],
+    );
+    final testDispatcher = TestPlatformDispatcher(platformDispatcher: backingDispatcher);
+
+    final received = <ViewFocusEvent>[];
+    testDispatcher.onViewFocusChange = received.add;
+
+    expect(testDispatcher.currentlyFocusedViewIdTestValue, isNull);
+
+    testDispatcher.notifyViewFocusChanged(
+      const ViewFocusEvent(
+        viewId: 100,
+        state: ViewFocusState.focused,
+        direction: ViewFocusDirection.forward,
+      ),
+    );
+
+    expect(testDispatcher.currentlyFocusedViewIdTestValue, 100);
+    expect(received, hasLength(1));
+
+    // Recording the focused view is what lets the reset unfocus it. Without it
+    // a focused view outlives the test that focused it.
+    testDispatcher.resetFocusedViewTestValues();
+
+    expect(testDispatcher.currentlyFocusedViewIdTestValue, isNull);
+    expect(received, hasLength(2));
+    expect(received.last.viewId, 100);
+    expect(received.last.state, ViewFocusState.unfocused);
+  });
+
+  testWidgets('a metrics change refreshes the view registry before it notifies', (
+    WidgetTester tester,
+  ) async {
+    final display = _FakeDisplay(id: 1);
+    final backingDispatcher = _FakePlatformDispatcher(
+      displays: <Display>[display],
+      views: <FlutterView>[_FakeFlutterView(display: display, viewId: 100)],
+    );
+    final testDispatcher = TestPlatformDispatcher(platformDispatcher: backingDispatcher);
+
+    TestFlutterView? seenWhileNotifying;
+    testDispatcher.onMetricsChanged = () {
+      seenWhileNotifying = testDispatcher.view(id: 200);
+    };
+
+    testDispatcher.addTestView(_FakeFlutterView(display: display, viewId: 200));
+
+    // The listener could already see the new view, so the registry was rebuilt
+    // before the notification went out rather than after it.
+    expect(seenWhileNotifying, isNotNull);
+    expect(seenWhileNotifying!.viewId, 200);
+  });
+
+  testWidgets("a view's dispatcher shares the test values of the dispatcher that owns it", (
+    WidgetTester tester,
+  ) async {
+    final display = _FakeDisplay(id: 1);
+    final backingDispatcher = _FakePlatformDispatcher(
+      displays: <Display>[display],
+      views: <FlutterView>[_FakeFlutterView(display: display, viewId: 100)],
+    );
+    final testDispatcher = TestPlatformDispatcher(platformDispatcher: backingDispatcher);
+
+    final TestPlatformDispatcher viewDispatcher = testDispatcher.views.single.platformDispatcher;
+    expect(viewDispatcher, isNot(same(testDispatcher)));
+
+    // Set through the view, read through the owner.
+    viewDispatcher.textScaleFactorTestValue = 4;
+    expect(testDispatcher.textScaleFactor, 4);
+
+    // Set through the owner, read through the view.
+    testDispatcher.platformBrightnessTestValue = Brightness.dark;
+    expect(viewDispatcher.platformBrightness, Brightness.dark);
+
+    // The registries are the owner's as well.
+    expect(viewDispatcher.views.single, same(testDispatcher.views.single));
+  });
 
   testWidgets('TestPlatformDispatcher has a working scaleFontSize implementation', (
     WidgetTester tester,
@@ -434,10 +558,14 @@ void main() {
     tester.platformDispatcher.onMetricsChanged = initialCallback;
     expect(tester.platformDispatcher.onMetricsChanged, initialCallback);
 
+    // Chain through the getter, not through the local: reading back what was
+    // set is the whole point, and a getter that reported the dispatcher's own
+    // handler instead would drop the callback the test registered.
+    final VoidCallback? existing = tester.platformDispatcher.onMetricsChanged;
     var chainedCalled = false;
     tester.platformDispatcher.onMetricsChanged = () {
       chainedCalled = true;
-      initialCallback();
+      existing?.call();
     };
 
     tester.platformDispatcher.onMetricsChanged?.call();
@@ -465,10 +593,14 @@ void main() {
     tester.platformDispatcher.onViewFocusChange = initialCallback;
     expect(tester.platformDispatcher.onViewFocusChange, initialCallback);
 
+    // Chain through the getter, not through the local: reading back what was
+    // set is the whole point, and a getter that reported the dispatcher's own
+    // handler instead would drop the callback the test registered.
+    final ViewFocusChangeCallback? existing = tester.platformDispatcher.onViewFocusChange;
     var chainedCalled = false;
     tester.platformDispatcher.onViewFocusChange = (ViewFocusEvent event) {
       chainedCalled = true;
-      initialCallback(event);
+      existing?.call(event);
     };
 
     const event = ViewFocusEvent(
@@ -550,6 +682,12 @@ class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {
 
   @override
   ViewFocusChangeCallback? onViewFocusChange;
+
+  @override
+  VoidCallback? onTextScaleFactorChanged;
+
+  @override
+  VoidCallback? onPlatformBrightnessChanged;
 
   @override
   double get textScaleFactor => 1.0;

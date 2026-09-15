@@ -335,7 +335,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     if (owner._currentlyFocusedViewId != null) {
       // If there is a focused view, then tell everyone who still cares that
       // it's unfocusing.
-      owner._platformDispatcher.onViewFocusChange?.call(
+      owner.notifyViewFocusChanged(
         ViewFocusEvent(
           viewId: owner._currentlyFocusedViewId!,
           state: ViewFocusState.unfocused,
@@ -974,7 +974,15 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     extraDisplayKeys.forEach(_testDisplays.remove);
 
     final extraViewKeys = <Object>[..._testViews.keys];
-    final allViews = <FlutterView>[..._platformDispatcher.views, ..._customViews.values];
+    // A custom view registered for an id the engine also reports shadows the
+    // engine's. Both would otherwise be visited, and the second visit would
+    // replace the wrapper the first one just built, so every refresh would hand
+    // back a new [TestFlutterView] and drop the test values set on the old one.
+    final allViews = <FlutterView>[
+      for (final FlutterView view in _platformDispatcher.views)
+        if (!_customViews.containsKey(view.viewId)) view,
+      ..._customViews.values,
+    ];
     for (final view in allViews) {
       extraViewKeys.remove(view.viewId);
       final TestFlutterView? testView = _testViews[view.viewId];
