@@ -605,19 +605,35 @@ public class PlatformViewsController2Test {
     verify(rasterTx2, never()).close();
   }
 
+  /** How the controller discards a frame while a producer still holds its raster transaction. */
+  private enum FrameDiscard {
+    /** Drop an active frame by swapping again, as a skipped onEndFrame() would. */
+    SWAP_AGAIN,
+    /** Detach the view before the transaction is swapped into the active list. */
+    DETACH_BEFORE_SWAP,
+    /** Run the frame that was posted from the raster thread just before the detach. */
+    DETACH_THEN_END_FRAME
+  }
+
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void swapTransactionsDoesNotCloseRasterTransactionInUse() throws Exception {
-    assertRasterTransactionInUseIsNotClosed(false);
+    assertRasterTransactionInUseIsNotClosed(FrameDiscard.SWAP_AGAIN);
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void detachFromViewDoesNotCloseRasterTransactionInUse() throws Exception {
+    assertRasterTransactionInUseIsNotClosed(FrameDiscard.DETACH_BEFORE_SWAP);
   }
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void onEndFrameDoesNotCloseRasterTransactionInUseAfterDetach() throws Exception {
-    assertRasterTransactionInUseIsNotClosed(true);
+    assertRasterTransactionInUseIsNotClosed(FrameDiscard.DETACH_THEN_END_FRAME);
   }
 
-  private void assertRasterTransactionInUseIsNotClosed(boolean endFrame) throws Exception {
+  private void assertRasterTransactionInUseIsNotClosed(FrameDiscard discard) throws Exception {
     final SurfaceControl.Transaction rasterTx = spy(new SurfaceControl.Transaction());
     PlatformViewsController2 controller =
         new PlatformViewsController2() {
@@ -630,7 +646,6 @@ public class PlatformViewsController2Test {
 
     FlutterView flutterView = mock(FlutterView.class);
     controller.attachToView(flutterView);
-    controller.detachFromView();
 
     final CountDownLatch published = new CountDownLatch(1);
     final CountDownLatch releaseProducer = new CountDownLatch(1);
@@ -654,12 +669,19 @@ public class PlatformViewsController2Test {
     rasterThread.start();
     try {
       assertTrue("Producer did not publish a transaction", published.await(10, TimeUnit.SECONDS));
-      controller.swapTransactions();
-      if (endFrame) {
-        controller.onEndFrame();
-      } else {
-        // Discard an active frame while the producer is still using its transaction.
-        controller.swapTransactions();
+      switch (discard) {
+        case SWAP_AGAIN:
+          controller.swapTransactions();
+          controller.swapTransactions();
+          break;
+        case DETACH_BEFORE_SWAP:
+          controller.detachFromView();
+          break;
+        case DETACH_THEN_END_FRAME:
+          controller.swapTransactions();
+          controller.detachFromView();
+          controller.onEndFrame();
+          break;
       }
       verify(rasterTx, never()).close();
     } finally {
@@ -702,6 +724,26 @@ public class PlatformViewsController2Test {
     controller.swapTransactions();
 
     verify(controller.transactions.get(0)).close();
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void detachFromViewClosesPlatformTransactions() {
+    TransactionTrackingController controller = new TransactionTrackingController();
+    attachToViewWithOverlay(controller);
+
+    controller.showOverlaySurface();
+    controller.swapTransactions();
+    // The active transaction from the frame above and a pending one from the frame that never
+    // reached onEndFrame().
+    controller.showOverlaySurface();
+    assertEquals(2, controller.transactions.size());
+
+    controller.detachFromView();
+
+    // Both target the overlay SurfaceControl that detachFromView() just released.
+    verify(controller.transactions.get(0)).close();
+    verify(controller.transactions.get(1)).close();
   }
 
   /**

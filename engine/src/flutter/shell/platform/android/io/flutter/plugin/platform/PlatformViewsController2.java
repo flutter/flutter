@@ -11,6 +11,7 @@ import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Build;
 import android.util.SparseArray;
 import android.view.AttachedSurfaceControl;
 import android.view.Gravity;
@@ -277,6 +278,10 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
     destroyOverlaySurface();
     flutterView = null;
+
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
+      dropTransactions();
+    }
 
     // Notify that the platform view have been detached from FlutterView.
     for (int index = 0; index < platformViews.size(); index++) {
@@ -722,6 +727,32 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
     activePlatformTransaction = pendingPlatformTransaction;
     pendingPlatformTransaction = null;
+  }
+
+  /**
+   * Discards the transaction state of the view that just detached.
+   *
+   * <p>Platform transactions are closed here: they only touch SurfaceControls that this detach
+   * invalidates, including the overlay that {@link #destroyOverlaySurface()} just released, and
+   * nothing outside the platform thread references them. Raster transactions are dropped without
+   * closing them, because their native producers may still be writing into them.
+   */
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  private void dropTransactions() {
+    activeRasterTransactions.clear();
+    synchronized (transactionLock) {
+      pendingRasterTransactions.clear();
+    }
+
+    if (activePlatformTransaction != null) {
+      activePlatformTransaction.close();
+      activePlatformTransaction = null;
+    }
+    if (pendingPlatformTransaction != null) {
+      pendingPlatformTransaction.close();
+      pendingPlatformTransaction = null;
+    }
   }
 
   @UiThread
