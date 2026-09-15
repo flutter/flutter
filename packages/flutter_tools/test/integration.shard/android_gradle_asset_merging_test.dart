@@ -15,6 +15,95 @@ import 'package:flutter_tools/src/base/io.dart';
 import '../src/common.dart';
 import 'test_utils.dart';
 
+Archive readApkArchive(File apkFile) {
+  expect(apkFile, exists);
+  final List<int> bytes = apkFile.readAsBytesSync();
+  return ZipDecoder().decodeBytes(bytes);
+}
+
+void expectApkEntry(Archive archive, String path, String expectedContents, {String? reason}) {
+  final ArchiveFile? file = archive.findFile(path);
+  expect(file, isNotNull, reason: reason ?? 'APK is missing expected entry $path');
+  final dynamic rawContent = file!.content;
+  final List<int> content = rawContent is List<int> ? rawContent : <int>[];
+  final String actualContents = utf8.decode(content, allowMalformed: true);
+  expect(actualContents, expectedContents, reason: reason);
+}
+
+void expectNoApkEntry(Archive archive, String path, {required String reason}) {
+  expect(archive.findFile(path), isNull, reason: reason);
+}
+
+void writeFlutterAsset(Directory projectDir, String relativePath, String contents) {
+  final File file = projectDir.childFile(relativePath);
+  file.parent.createSync(recursive: true);
+  file.writeAsStringSync(contents);
+}
+
+void writeAndroidSourceSetAsset(
+  Directory projectDir,
+  String sourceSet,
+  String relativePath,
+  String contents,
+) {
+  final File file = projectDir
+      .childDirectory('android')
+      .childDirectory('app')
+      .childDirectory('src')
+      .childDirectory(sourceSet)
+      .childDirectory('assets')
+      .childFile(relativePath);
+  file.parent.createSync(recursive: true);
+  file.writeAsStringSync(contents);
+}
+
+void addAssetsToPubspec(File pubspecFile, List<String> assets) {
+  final String content = pubspecFile.readAsStringSync();
+  final flutterSection = RegExp(r'^flutter:$', multiLine: true);
+  expect(
+    flutterSection.hasMatch(content),
+    isTrue,
+    reason: 'pubspec.yaml missing top-level flutter: section',
+  );
+  final String assetLines = assets.map((String a) => '    - $a').join('\n');
+  final String updated = content.replaceFirst(flutterSection, 'flutter:\n  assets:\n$assetLines');
+  pubspecFile.writeAsStringSync(updated);
+}
+
+Future<Directory> createApp(Directory workingDir, {String name = 'app'}) async {
+  final ProcessResult createResult = await processManager.run(<String>[
+    flutterBin,
+    'create',
+    '--template=app',
+    '--platforms=android',
+    name,
+  ], workingDirectory: workingDir.path);
+  expect(createResult, const ProcessResultMatcher());
+  return workingDir.childDirectory(name);
+}
+
+Future<File> buildApk(Directory projectDir, {String mode = '--debug', String? flavor}) async {
+  final ProcessResult buildResult = await processManager.run(<String>[
+    flutterBin,
+    ...getLocalEngineArguments(),
+    'build',
+    'apk',
+    mode,
+    if (flavor != null) ...<String>['--flavor', flavor],
+  ], workingDirectory: projectDir.path);
+  expect(buildResult, const ProcessResultMatcher());
+
+  final apkName = flavor == null ? 'app-debug.apk' : 'app-$flavor-debug.apk';
+  final File apkFile = projectDir
+      .childDirectory('build')
+      .childDirectory('app')
+      .childDirectory('outputs')
+      .childDirectory('flutter-apk')
+      .childFile(apkName);
+  expect(apkFile, exists);
+  return apkFile;
+}
+
 void main() {
   late Directory tempDir;
 
@@ -26,154 +115,88 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  Archive readApkArchive(File apkFile) {
-    expect(apkFile, exists);
-    final List<int> bytes = apkFile.readAsBytesSync();
-    return ZipDecoder().decodeBytes(bytes);
-  }
-
-  String readArchiveFileString(ArchiveFile file) {
-    final dynamic rawContent = file.content;
-    final List<int> content = rawContent is List<int> ? rawContent : <int>[];
-    return utf8.decode(content, allowMalformed: true);
-  }
-
-  void addAssetsToPubspec(File pubspecFile, List<String> assets) {
-    final String content = pubspecFile.readAsStringSync();
-    expect(
-      content.contains('uses-material-design: true'),
-      isTrue,
-      reason: 'pubspec.yaml missing uses-material-design entry',
-    );
-    final String assetLines = assets.map((String a) => '    - $a').join('\n');
-    final String updated = content.replaceFirst(
-      'uses-material-design: true',
-      'uses-material-design: true\n  assets:\n$assetLines',
-    );
-    pubspecFile.writeAsStringSync(updated);
-  }
-
-  Future<Directory> createApp(Directory workingDir, {String name = 'app'}) async {
-    final ProcessResult createResult = await processManager.run(<String>[
-      flutterBin,
-      'create',
-      '--template=app',
-      '--platforms=android',
-      name,
-    ], workingDirectory: workingDir.path);
-    expect(createResult, const ProcessResultMatcher());
-    return workingDir.childDirectory(name);
-  }
-
-  Future<File> buildApk(Directory projectDir, {String mode = '--debug', String? flavor}) async {
-    final ProcessResult buildResult = await processManager.run(<String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'build',
-      'apk',
-      mode,
-      if (flavor != null) ...<String>['--flavor', flavor],
-    ], workingDirectory: projectDir.path);
-    expect(buildResult, const ProcessResultMatcher());
-
-    final apkName = flavor == null ? 'app-debug.apk' : 'app-$flavor-debug.apk';
-    final File apkFile = projectDir
-        .childDirectory('build')
-        .childDirectory('app')
-        .childDirectory('outputs')
-        .childDirectory('flutter-apk')
-        .childFile(apkName);
-    expect(apkFile, exists);
-    return apkFile;
-  }
-
   testWithoutContext(
     'Flutter assets, directory assets, resolution variants, and native Android assets coexist in APK',
     () async {
       final Directory projectDir = await createApp(tempDir);
 
-      // Create Flutter assets.
-      final Directory assetsDir = projectDir.childDirectory('assets');
-      final Directory nestedDir = assetsDir.childDirectory('nested');
-      final Directory resolutionDir = assetsDir.childDirectory('2.0x');
-      assetsDir.createSync(recursive: true);
-      nestedDir.createSync(recursive: true);
-      resolutionDir.createSync(recursive: true);
+      // Every file this test packages is declared in one of the two tables below. To cover a new
+      // asset type, add a row to the matching table.
+      //
+      // For Flutter assets:
+      //  * source is written into the project,
+      //  * pubspecEntry is what `pubspec.yaml` declares, or null when the tool finds the file
+      //    without a declaration, which is how resolution variants work,
+      //  * apkEntry is where the file has to end up inside the APK.
+      final flutterAssets =
+          <({String source, String? pubspecEntry, String apkEntry, String contents})>[
+            (
+              source: 'assets/single_asset.txt',
+              pubspecEntry: 'assets/single_asset.txt',
+              apkEntry: 'assets/flutter_assets/assets/single_asset.txt',
+              contents: 'flutter_single_asset_content',
+            ),
+            (
+              source: 'assets/nested/dir_asset.txt',
+              pubspecEntry: 'assets/nested/',
+              apkEntry: 'assets/flutter_assets/assets/nested/dir_asset.txt',
+              contents: 'flutter_nested_asset_content',
+            ),
+            (
+              source: 'assets/image.png',
+              pubspecEntry: 'assets/image.png',
+              apkEntry: 'assets/flutter_assets/assets/image.png',
+              contents: 'flutter_image_base_content',
+            ),
+            // Declaring the base image also packages its density variants.
+            (
+              source: 'assets/3.0x/image.png',
+              pubspecEntry: null,
+              apkEntry: 'assets/flutter_assets/assets/3.0x/image.png',
+              contents: 'flutter_image_3x_content',
+            ),
+            (
+              source: 'assets/4.0x/image.png',
+              pubspecEntry: null,
+              apkEntry: 'assets/flutter_assets/assets/4.0x/image.png',
+              contents: 'flutter_image_4x_content',
+            ),
+          ];
 
-      final File singleAsset = assetsDir.childFile('single_asset.txt');
-      singleAsset.writeAsStringSync('flutter_single_asset_content');
+      // Native Android assets need no pubspec entry. AGP merges src/main/assets into the APK.
+      final nativeAndroidAssets = <({String source, String apkEntry, String contents})>[
+        (
+          source: 'native_asset.txt',
+          apkEntry: 'assets/native_asset.txt',
+          contents: 'native_asset_content',
+        ),
+        (
+          source: 'custom/config.json',
+          apkEntry: 'assets/custom/config.json',
+          contents: '{"native_config": true}',
+        ),
+      ];
 
-      final File nestedAsset = nestedDir.childFile('dir_asset.txt');
-      nestedAsset.writeAsStringSync('flutter_nested_asset_content');
-
-      final File baseImage = assetsDir.childFile('image.png');
-      baseImage.writeAsStringSync('flutter_image_1x_content');
-
-      final File resImage = resolutionDir.childFile('image.png');
-      resImage.writeAsStringSync('flutter_image_2x_content');
-
-      // Create native Android assets under android/app/src/main/assets/.
-      final Directory nativeAssetsDir = projectDir
-          .childDirectory('android')
-          .childDirectory('app')
-          .childDirectory('src')
-          .childDirectory('main')
-          .childDirectory('assets');
-      final Directory nativeCustomDir = nativeAssetsDir.childDirectory('custom');
-      nativeCustomDir.createSync(recursive: true);
-
-      final File nativeAsset = nativeAssetsDir.childFile('native_asset.txt');
-      nativeAsset.writeAsStringSync('native_asset_content');
-
-      final File nativeNested = nativeCustomDir.childFile('config.json');
-      nativeNested.writeAsStringSync('{"native_config": true}');
-
-      // Configure pubspec.yaml with Flutter asset references.
-      final File pubspecFile = projectDir.childFile('pubspec.yaml');
-      expect(pubspecFile, exists);
-      addAssetsToPubspec(pubspecFile, <String>[
-        'assets/single_asset.txt',
-        'assets/nested/',
-        'assets/image.png',
-        'assets/2.0x/image.png',
+      for (final asset in flutterAssets) {
+        writeFlutterAsset(projectDir, asset.source, asset.contents);
+      }
+      for (final asset in nativeAndroidAssets) {
+        writeAndroidSourceSetAsset(projectDir, 'main', asset.source, asset.contents);
+      }
+      addAssetsToPubspec(projectDir.childFile('pubspec.yaml'), <String>[
+        for (final asset in flutterAssets)
+          if (asset.pubspecEntry case final String entry) entry,
       ]);
 
       final File apkFile = await buildApk(projectDir);
       final Archive archive = readApkArchive(apkFile);
 
-      // Verify Flutter assets packaged under assets/flutter_assets/.
-      final ArchiveFile? singleAssetEntry = archive.findFile(
-        'assets/flutter_assets/assets/single_asset.txt',
-      );
-      expect(singleAssetEntry, isNotNull);
-      expect(readArchiveFileString(singleAssetEntry!), 'flutter_single_asset_content');
-
-      final ArchiveFile? nestedAssetEntry = archive.findFile(
-        'assets/flutter_assets/assets/nested/dir_asset.txt',
-      );
-      expect(nestedAssetEntry, isNotNull);
-      expect(readArchiveFileString(nestedAssetEntry!), 'flutter_nested_asset_content');
-
-      final ArchiveFile? baseImageEntry = archive.findFile(
-        'assets/flutter_assets/assets/image.png',
-      );
-      expect(baseImageEntry, isNotNull);
-      expect(readArchiveFileString(baseImageEntry!), 'flutter_image_1x_content');
-
-      final ArchiveFile? resImageEntry = archive.findFile(
-        'assets/flutter_assets/assets/2.0x/image.png',
-      );
-      expect(resImageEntry, isNotNull);
-      expect(readArchiveFileString(resImageEntry!), 'flutter_image_2x_content');
-
-      // Verify native Android assets packaged under assets/.
-      final ArchiveFile? nativeAssetEntry = archive.findFile('assets/native_asset.txt');
-      expect(nativeAssetEntry, isNotNull);
-      expect(readArchiveFileString(nativeAssetEntry!), 'native_asset_content');
-
-      final ArchiveFile? nativeNestedEntry = archive.findFile('assets/custom/config.json');
-      expect(nativeNestedEntry, isNotNull);
-      expect(readArchiveFileString(nativeNestedEntry!), '{"native_config": true}');
+      for (final asset in flutterAssets) {
+        expectApkEntry(archive, asset.apkEntry, asset.contents);
+      }
+      for (final asset in nativeAndroidAssets) {
+        expectApkEntry(archive, asset.apkEntry, asset.contents);
+      }
     },
   );
 
@@ -188,30 +211,22 @@ void main() {
   testWithoutContext('assets removed from pubspec are pruned from the APK on rebuild', () async {
     final Directory projectDir = await createApp(tempDir);
 
-    final Directory assetsDir = projectDir.childDirectory('assets');
-    assetsDir.createSync(recursive: true);
-
-    final File asset1 = assetsDir.childFile('asset1.txt');
-    asset1.writeAsStringSync('asset_one_initial');
-
-    final File asset2 = assetsDir.childFile('asset2.txt');
-    asset2.writeAsStringSync('asset_two_initial');
+    writeFlutterAsset(projectDir, 'assets/asset1.txt', 'asset_one_initial');
+    writeFlutterAsset(projectDir, 'assets/asset2.txt', 'asset_two_initial');
 
     final File pubspecFile = projectDir.childFile('pubspec.yaml');
-    expect(pubspecFile, exists);
     addAssetsToPubspec(pubspecFile, <String>['assets/asset1.txt', 'assets/asset2.txt']);
 
     // Build 1: Initial debug APK.
     final File apkFile = await buildApk(projectDir);
     Archive archive = readApkArchive(apkFile);
 
-    expect(archive.findFile('assets/flutter_assets/assets/asset1.txt'), isNotNull);
-    expect(archive.findFile('assets/flutter_assets/assets/asset2.txt'), isNotNull);
+    expectApkEntry(archive, 'assets/flutter_assets/assets/asset1.txt', 'asset_one_initial');
+    expectApkEntry(archive, 'assets/flutter_assets/assets/asset2.txt', 'asset_two_initial');
 
     // Mutate assets: delete asset2, add asset3, update pubspec.yaml.
-    asset2.deleteSync();
-    final File asset3 = assetsDir.childFile('asset3.txt');
-    asset3.writeAsStringSync('asset_three_added');
+    projectDir.childFile('assets/asset2.txt').deleteSync();
+    writeFlutterAsset(projectDir, 'assets/asset3.txt', 'asset_three_added');
 
     final String currentPubspec = pubspecFile.readAsStringSync();
     final String updatedPubspec = currentPubspec.replaceFirst(
@@ -225,11 +240,11 @@ void main() {
 
     archive = readApkArchive(apkFile);
 
-    expect(archive.findFile('assets/flutter_assets/assets/asset1.txt'), isNotNull);
-    expect(archive.findFile('assets/flutter_assets/assets/asset3.txt'), isNotNull);
-    expect(
-      archive.findFile('assets/flutter_assets/assets/asset2.txt'),
-      isNull,
+    expectApkEntry(archive, 'assets/flutter_assets/assets/asset1.txt', 'asset_one_initial');
+    expectApkEntry(archive, 'assets/flutter_assets/assets/asset3.txt', 'asset_three_added');
+    expectNoApkEntry(
+      archive,
+      'assets/flutter_assets/assets/asset2.txt',
       reason:
           'asset2.txt was removed from pubspec.yaml and must not survive from the '
           'previous build into the rebuilt APK',
@@ -258,24 +273,13 @@ void main() {
     () async {
       final Directory projectDir = await createApp(tempDir);
 
-      // Create a Flutter asset in assets/collision.txt.
-      final Directory assetsDir = projectDir.childDirectory('assets');
-      assetsDir.createSync(recursive: true);
-      final File flutterAsset = assetsDir.childFile('collision.txt');
-      flutterAsset.writeAsStringSync('flutter_version');
-
-      // Create a native asset at android/app/src/main/assets/flutter_assets/assets/collision.txt.
-      final Directory nativeCollisionDir = projectDir
-          .childDirectory('android')
-          .childDirectory('app')
-          .childDirectory('src')
-          .childDirectory('main')
-          .childDirectory('assets')
-          .childDirectory('flutter_assets')
-          .childDirectory('assets');
-      nativeCollisionDir.createSync(recursive: true);
-      final File nativeAsset = nativeCollisionDir.childFile('collision.txt');
-      nativeAsset.writeAsStringSync('native_override_version');
+      writeFlutterAsset(projectDir, 'assets/collision.txt', 'flutter_version');
+      writeAndroidSourceSetAsset(
+        projectDir,
+        'main',
+        'flutter_assets/assets/collision.txt',
+        'native_override_version',
+      );
 
       final File pubspecFile = projectDir.childFile('pubspec.yaml');
       addAssetsToPubspec(pubspecFile, <String>['assets/collision.txt']);
@@ -283,12 +287,9 @@ void main() {
       final File apkFile = await buildApk(projectDir);
       final Archive archive = readApkArchive(apkFile);
 
-      final ArchiveFile? collisionEntry = archive.findFile(
+      expectApkEntry(
+        archive,
         'assets/flutter_assets/assets/collision.txt',
-      );
-      expect(collisionEntry, isNotNull);
-      expect(
-        readArchiveFileString(collisionEntry!),
         'flutter_version',
         reason:
             'Per the AGP SourceDirectories contract, addGeneratedSourceDirectory adds to '
@@ -327,31 +328,26 @@ android {
     }''');
       buildGradleFile.writeAsStringSync(buildGradleContents);
 
-      final Directory appSrcDir = projectDir
-          .childDirectory('android')
-          .childDirectory('app')
-          .childDirectory('src');
-
-      /// Writes [contents] to `src/<sourceSet>/assets/<fileName>`.
-      void writeSourceSetAsset(String sourceSet, String fileName, String contents) {
-        final Directory dir = appSrcDir.childDirectory(sourceSet).childDirectory('assets');
-        dir.createSync(recursive: true);
-        dir.childFile(fileName).writeAsStringSync(contents);
-      }
-
       // Flavor-specific assets: only the selected flavor should be packaged.
-      writeSourceSetAsset('free', 'flavor_free.txt', 'free_flavor_asset_data');
-      writeSourceSetAsset('paid', 'flavor_paid.txt', 'paid_flavor_asset_data');
+      writeAndroidSourceSetAsset(projectDir, 'free', 'flavor_free.txt', 'free_flavor_asset_data');
+      writeAndroidSourceSetAsset(projectDir, 'paid', 'flavor_paid.txt', 'paid_flavor_asset_data');
 
       // BuildType-specific assets: only the selected build type should be packaged.
-      writeSourceSetAsset('debug', 'buildtype_debug.txt', 'debug_buildtype_asset_data');
-      writeSourceSetAsset('release', 'buildtype_release.txt', 'release_buildtype_asset_data');
+      writeAndroidSourceSetAsset(
+        projectDir,
+        'debug',
+        'buildtype_debug.txt',
+        'debug_buildtype_asset_data',
+      );
+      writeAndroidSourceSetAsset(
+        projectDir,
+        'release',
+        'buildtype_release.txt',
+        'release_buildtype_asset_data',
+      );
 
       // Create standard Flutter asset.
-      final Directory assetsDir = projectDir.childDirectory('assets');
-      assetsDir.createSync(recursive: true);
-      final File sharedAsset = assetsDir.childFile('shared.txt');
-      sharedAsset.writeAsStringSync('shared_flutter_asset');
+      writeFlutterAsset(projectDir, 'assets/shared.txt', 'shared_flutter_asset');
 
       final File pubspecFile = projectDir.childFile('pubspec.yaml');
       addAssetsToPubspec(pubspecFile, <String>['assets/shared.txt']);
@@ -361,29 +357,30 @@ android {
       final Archive freeArchive = readApkArchive(freeApkFile);
 
       // Flutter assets are packaged regardless of flavor or build type.
-      expect(freeArchive.findFile('assets/flutter_assets/assets/shared.txt'), isNotNull);
+      expectApkEntry(
+        freeArchive,
+        'assets/flutter_assets/assets/shared.txt',
+        'shared_flutter_asset',
+      );
 
       // The selected flavor's assets are present; the other flavor's are not.
-      final ArchiveFile? freeAssetEntry = freeArchive.findFile('assets/flavor_free.txt');
-      expect(freeAssetEntry, isNotNull);
-      expect(readArchiveFileString(freeAssetEntry!), 'free_flavor_asset_data');
-      expect(
-        freeArchive.findFile('assets/flavor_paid.txt'),
-        isNull,
+      expectApkEntry(freeArchive, 'assets/flavor_free.txt', 'free_flavor_asset_data');
+      expectNoApkEntry(
+        freeArchive,
+        'assets/flavor_paid.txt',
         reason: 'the paid flavor source set must not contribute assets to a free build',
       );
 
       // The selected build type's assets are present; the other's are not.
-      final ArchiveFile? debugAssetEntry = freeArchive.findFile('assets/buildtype_debug.txt');
-      expect(
-        debugAssetEntry,
-        isNotNull,
+      expectApkEntry(
+        freeArchive,
+        'assets/buildtype_debug.txt',
+        'debug_buildtype_asset_data',
         reason: 'src/debug/assets must be merged into a debug variant APK',
       );
-      expect(readArchiveFileString(debugAssetEntry!), 'debug_buildtype_asset_data');
-      expect(
-        freeArchive.findFile('assets/buildtype_release.txt'),
-        isNull,
+      expectNoApkEntry(
+        freeArchive,
+        'assets/buildtype_release.txt',
         reason: 'the release source set must not contribute assets to a debug build',
       );
     },

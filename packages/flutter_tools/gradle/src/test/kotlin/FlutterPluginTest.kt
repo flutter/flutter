@@ -39,7 +39,6 @@ import java.util.Base64
 import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertContains
-import kotlin.test.assertFalse
 
 class FlutterPluginTest {
     // Clear global singleton mocks to prevent mock state leaking into other tests in the same JVM.
@@ -128,13 +127,6 @@ class FlutterPluginTest {
     ) {
         val env = setupTestProjectEnvironment(tempDir)
         val project = env.project
-        setupMockApplicationExtension(project)
-        val mockComponentsExtension = setupMockComponentsExtension(project)
-        setupMockNativePluginLoader(project, env.flutterExtension)
-
-        val onVariantSlot = slot<(Variant) -> Unit>()
-        every { mockComponentsExtension.onVariants(any(), capture(onVariantSlot)) } returns Unit
-
         val mockCompileTaskProvider = mockk<TaskProvider<FlutterTask>>(relaxed = true)
         val mockCopyAssetsTaskProvider = mockk<TaskProvider<CopyFlutterAssetsTask>>(relaxed = true)
         every {
@@ -144,21 +136,9 @@ class FlutterPluginTest {
             project.tasks.register("copyFlutterAssetsDebug", CopyFlutterAssetsTask::class.java, any())
         } returns mockCopyAssetsTaskProvider
 
-        val flutterPlugin = FlutterPlugin()
-        flutterPlugin.apply(project)
-
-        val mockVariant = mockk<ApplicationVariant>(relaxed = true)
+        val onVariant = applyPluginCapturingVariantCallback(env)
         val mockAssetsSource = mockk<SourceDirectories.Layered>(relaxed = true)
-        val mockSources = mockk<Sources>(relaxed = true)
-        every { mockVariant.name } returns "debug"
-        every { mockVariant.buildType } returns "debug"
-        every { mockVariant.debuggable } returns true
-        every { mockVariant.flavorName } returns null
-        every { mockVariant.minSdk.apiLevel } returns 21
-        every { mockVariant.sources } returns mockSources
-        every { mockSources.assets } returns mockAssetsSource
-
-        onVariantSlot.captured.invoke(mockVariant)
+        onVariant(mockApplicationVariant(assetsSource = mockAssetsSource))
 
         verify {
             project.tasks.register("compileFlutterBuildDebug", FlutterTask::class.java, any())
@@ -179,30 +159,12 @@ class FlutterPluginTest {
         @TempDir tempDir: Path
     ) {
         val env = setupTestProjectEnvironment(tempDir)
-        val project = env.project
-        setupMockApplicationExtension(project)
-        val mockComponentsExtension = setupMockComponentsExtension(project)
-        setupMockNativePluginLoader(project, env.flutterExtension)
 
-        val onVariantSlot = slot<(Variant) -> Unit>()
-        every { mockComponentsExtension.onVariants(any(), capture(onVariantSlot)) } returns Unit
-
-        val flutterPlugin = FlutterPlugin()
-        flutterPlugin.apply(project)
-
-        val mockVariant = mockk<ApplicationVariant>(relaxed = true)
-        val mockSources = mockk<Sources>(relaxed = true)
-        every { mockVariant.name } returns "debug"
-        every { mockVariant.buildType } returns "debug"
-        every { mockVariant.debuggable } returns true
-        every { mockVariant.flavorName } returns null
-        every { mockVariant.minSdk.apiLevel } returns 21
-        every { mockVariant.sources } returns mockSources
-        every { mockSources.assets } returns null
+        val onVariant = applyPluginCapturingVariantCallback(env)
 
         val exception =
             assertThrows<GradleException> {
-                onVariantSlot.captured.invoke(mockVariant)
+                onVariant(mockApplicationVariant(assetsSource = null))
             }
         assertContains(
             exception.message!!,
@@ -216,33 +178,15 @@ class FlutterPluginTest {
     ) {
         val env = setupTestProjectEnvironment(tempDir)
         val project = env.project
-        setupMockApplicationExtension(project)
-        val mockComponentsExtension = setupMockComponentsExtension(project)
-        setupMockNativePluginLoader(project, env.flutterExtension)
-
+        // A single assembleDebug on the command line must not configure Flutter for androidTest.
         val mockStartParameter = mockk<org.gradle.StartParameter>()
         every { mockStartParameter.taskNames } returns listOf("assembleDebug")
         val mockGradle = mockk<org.gradle.api.invocation.Gradle>()
         every { mockGradle.startParameter } returns mockStartParameter
         every { project.gradle } returns mockGradle
 
-        val onVariantSlot = slot<(Variant) -> Unit>()
-        every { mockComponentsExtension.onVariants(any(), capture(onVariantSlot)) } returns Unit
-
-        val flutterPlugin = FlutterPlugin()
-        flutterPlugin.apply(project)
-
-        val mockVariant = mockk<ApplicationVariant>(relaxed = true)
-        every { mockVariant.name } returns "androidTest"
-        every { mockVariant.buildType } returns "debug"
-        every { mockVariant.debuggable } returns true
-        every { mockVariant.flavorName } returns null
-        every { mockVariant.minSdk.apiLevel } returns 21
-
-        val isConfigured = FlutterPluginUtils.shouldConfigureFlutterTask(project, "assembleAndroidTest")
-        assertFalse(isConfigured, "shouldConfigureFlutterTask should return false for assembleAndroidTest when cli task is assembleDebug")
-
-        onVariantSlot.captured.invoke(mockVariant)
+        val onVariant = applyPluginCapturingVariantCallback(env)
+        onVariant(mockApplicationVariant(name = "androidTest"))
 
         val taskContainer = project.tasks
         verify(exactly = 0) {
@@ -253,13 +197,14 @@ class FlutterPluginTest {
         }
     }
 
+    // How each Gradle property is parsed is covered by FlutterCompileOptionsTest. This covers the
+    // mapping of those options, and of the variant's own values, onto the FlutterTask.
     @Test
-    fun `registerFlutterCompileTask sets compile properties from project and variant`(
+    fun `registerFlutterCompileTask applies compile options and variant values to the task`(
         @TempDir tempDir: Path
     ) {
         val env = setupTestProjectEnvironment(tempDir)
         val project = env.project
-        every { project.findProperty("filesystem-roots") } returns "root1|root2"
         every { project.findProperty("filesystem-scheme") } returns "custom-scheme"
         every { project.findProperty("track-widget-creation") } returns "false"
         every { project.findProperty("frontend-server-starter-path") } returns "starter.dart"
@@ -274,33 +219,13 @@ class FlutterPluginTest {
         every { project.findProperty("deferred-components") } returns "true"
         every { project.findProperty("validate-deferred-components") } returns "false"
 
-        setupMockApplicationExtension(project)
-        val mockComponentsExtension = setupMockComponentsExtension(project)
-        setupMockNativePluginLoader(project, env.flutterExtension)
-
-        val onVariantSlot = slot<(Variant) -> Unit>()
-        every { mockComponentsExtension.onVariants(any(), capture(onVariantSlot)) } returns Unit
-
         val compileActionSlot = slot<Action<FlutterTask>>()
         every {
             project.tasks.register("compileFlutterBuildDebug", FlutterTask::class.java, capture(compileActionSlot))
         } returns mockk(relaxed = true)
 
-        val flutterPlugin = FlutterPlugin()
-        flutterPlugin.apply(project)
-
-        val mockVariant = mockk<ApplicationVariant>(relaxed = true)
-        val mockAssetsSource = mockk<SourceDirectories.Layered>(relaxed = true)
-        val mockSources = mockk<Sources>(relaxed = true)
-        every { mockVariant.name } returns "debug"
-        every { mockVariant.buildType } returns "debug"
-        every { mockVariant.debuggable } returns true
-        every { mockVariant.flavorName } returns "free"
-        every { mockVariant.minSdk.apiLevel } returns 24
-        every { mockVariant.sources } returns mockSources
-        every { mockSources.assets } returns mockAssetsSource
-
-        onVariantSlot.captured.invoke(mockVariant)
+        val onVariant = applyPluginCapturingVariantCallback(env)
+        onVariant(mockApplicationVariant(flavorName = "free", minSdkApiLevel = 24))
 
         val mockFlutterTask = mockk<FlutterTask>(relaxed = true)
         compileActionSlot.captured.execute(mockFlutterTask)
@@ -321,6 +246,46 @@ class FlutterPluginTest {
         verify { mockFlutterTask.dartDefines = "key=val" }
         verify { mockFlutterTask.performanceMeasurementFile = "perf.json" }
         verify { mockFlutterTask.codeSizeDirectory = "code/size" }
+    }
+
+    /**
+     * Applies the plugin to [env]'s project with the Android mocks it needs, and returns the
+     * callback the plugin registered with `AndroidComponentsExtension.onVariants`.
+     */
+    private fun applyPluginCapturingVariantCallback(env: TestProjectEnvironment): (Variant) -> Unit {
+        setupMockApplicationExtension(env.project)
+        val mockComponentsExtension = setupMockComponentsExtension(env.project)
+        setupMockNativePluginLoader(env.project, env.flutterExtension)
+
+        val onVariantSlot = slot<(Variant) -> Unit>()
+        every { mockComponentsExtension.onVariants(any(), capture(onVariantSlot)) } returns Unit
+
+        FlutterPlugin().apply(env.project)
+        return onVariantSlot.captured
+    }
+
+    /**
+     * An [ApplicationVariant] that answers everything the plugin reads while configuring a
+     * variant. Pass the values a test is about; the rest are stubbed so the plugin can run.
+     */
+    private fun mockApplicationVariant(
+        name: String = "debug",
+        buildType: String = "debug",
+        debuggable: Boolean = true,
+        flavorName: String? = null,
+        minSdkApiLevel: Int = 21,
+        assetsSource: SourceDirectories.Layered? = mockk(relaxed = true)
+    ): ApplicationVariant {
+        val mockVariant = mockk<ApplicationVariant>(relaxed = true)
+        val mockSources = mockk<Sources>(relaxed = true)
+        every { mockVariant.name } returns name
+        every { mockVariant.buildType } returns buildType
+        every { mockVariant.debuggable } returns debuggable
+        every { mockVariant.flavorName } returns flavorName
+        every { mockVariant.minSdk.apiLevel } returns minSdkApiLevel
+        every { mockVariant.sources } returns mockSources
+        every { mockSources.assets } returns assetsSource
+        return mockVariant
     }
 
     private data class TestProjectEnvironment(
