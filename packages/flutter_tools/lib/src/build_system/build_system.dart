@@ -19,6 +19,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../flutter_manifest.dart';
 import 'depfile.dart';
 import 'exceptions.dart';
 import 'file_store.dart';
@@ -363,6 +364,20 @@ class Environment {
     for (final key in keys) {
       buffer.write(key);
       buffer.write(defines[key]);
+    }
+    final FlutterManifest? manifest = FlutterManifest.createFromPath(
+      projectDir.childFile('pubspec.yaml').path,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
+    final assetEnvironmentKeys = <String>{
+      for (final AssetsEntry asset in <AssetsEntry>[...?manifest?.assets, ...?manifest?.shaders])
+        ...asset.environment.keys,
+    };
+    final List<String> sortedAssetEnvironmentKeys = assetEnvironmentKeys.toList()..sort();
+    for (final key in sortedAssetEnvironmentKeys) {
+      buffer.write(key);
+      buffer.write(platform.environment[key]);
     }
     buffer.write(outputDir.path);
     final output = buffer.toString();
