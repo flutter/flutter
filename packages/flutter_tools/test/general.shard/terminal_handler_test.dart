@@ -1182,77 +1182,68 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    's, does not take a screenshot on a device that does not support screenshot or the service protocol',
-    () async {
-      final logger = BufferLogger.test();
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final TerminalHandler terminalHandler = setUpTerminalHandler(
-        <FakeVmServiceRequest>[],
-        logger: logger,
-        supportsServiceProtocol: false,
-        fileSystem: fileSystem,
-      );
+  testWithoutContext('s, does not take a screenshot on a device that does not support screenshot or the service protocol', () async {
+    final logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(
+      <FakeVmServiceRequest>[],
+      logger: logger,
+      supportsServiceProtocol: false,
+      fileSystem: fileSystem,
+    );
 
-      await terminalHandler.processTerminalInput('s');
+    await terminalHandler.processTerminalInput('s');
 
-      expect(logger.statusText, '\n');
-      expect(fileSystem.currentDirectory.childFile('flutter_01.png'), isNot(exists));
-    },
-  );
+    expect(logger.statusText, '\n');
+    expect(fileSystem.currentDirectory.childFile('flutter_01.png'), isNot(exists));
+  });
 
-  testWithoutContext(
-    's, does not take a screenshot on a web device that does not support screenshot or the service protocol',
-    () async {
-      final logger = BufferLogger.test();
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final TerminalHandler terminalHandler = setUpTerminalHandler(
-        <FakeVmServiceRequest>[],
-        logger: logger,
-        supportsServiceProtocol: false,
-        web: true,
-        fileSystem: fileSystem,
-      );
+  testWithoutContext('s, does not take a screenshot on a web device that does not support screenshot or the service protocol', () async {
+    final logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(
+      <FakeVmServiceRequest>[],
+      logger: logger,
+      supportsServiceProtocol: false,
+      web: true,
+      fileSystem: fileSystem,
+    );
 
-      await terminalHandler.processTerminalInput('s');
+    await terminalHandler.processTerminalInput('s');
 
-      expect(logger.statusText, '\n');
-      expect(fileSystem.currentDirectory.childFile('flutter_01.png'), isNot(exists));
-    },
-  );
+    expect(logger.statusText, '\n');
+    expect(fileSystem.currentDirectory.childFile('flutter_01.png'), isNot(exists));
+  });
 
-  testWithoutContext(
-    's, bails taking screenshot on debug device if dwds.screenshot throws RpcError, restoring banner',
-    () async {
-      final logger = BufferLogger.test();
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final TerminalHandler terminalHandler = setUpTerminalHandler(
-        <FakeVmServiceRequest>[
-          listViews,
-          FakeVmServiceRequest(
-            method: 'ext.flutter.debugAllowBanner',
-            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id, 'enabled': 'false'},
-          ),
-          FakeVmServiceRequest(
-            method: 'ext.dwds.screenshot',
-            // Failed response,
-            error: FakeRPCError(code: vm_service.RPCErrorKind.kInternalError.code),
-          ),
-          FakeVmServiceRequest(
-            method: 'ext.flutter.debugAllowBanner',
-            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id, 'enabled': 'true'},
-          ),
-        ],
-        logger: logger,
-        web: true,
-        fileSystem: fileSystem,
-      );
+  testWithoutContext('s, bails taking screenshot on debug device if dwds.screenshot throws RpcError, restoring banner', () async {
+    final logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(
+      <FakeVmServiceRequest>[
+        listViews,
+        FakeVmServiceRequest(
+          method: 'ext.flutter.debugAllowBanner',
+          args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id, 'enabled': 'false'},
+        ),
+        FakeVmServiceRequest(
+          method: 'ext.dwds.screenshot',
+          // Failed response,
+          error: FakeRPCError(code: vm_service.RPCErrorKind.kInternalError.code),
+        ),
+        FakeVmServiceRequest(
+          method: 'ext.flutter.debugAllowBanner',
+          args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id, 'enabled': 'true'},
+        ),
+      ],
+      logger: logger,
+      web: true,
+      fileSystem: fileSystem,
+    );
 
-      await terminalHandler.processTerminalInput('s');
+    await terminalHandler.processTerminalInput('s');
 
-      expect(logger.errorText, contains('Error'));
-    },
-  );
+    expect(logger.errorText, contains('Error'));
+  });
 
   testWithoutContext(
     's, bails taking screenshot on debug device if debugAllowBanner during second request',

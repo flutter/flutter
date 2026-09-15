@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io' show exitCode;
+
 import 'package:compare_goldens/compare_goldens.dart' as compare_goldens;
 
 void main(List<String> args) {
