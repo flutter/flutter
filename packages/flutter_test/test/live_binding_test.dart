@@ -284,8 +284,9 @@ void main() {
   );
 
   testWidgets(
-    'a pointer cancelled via cancelPointer is delivered to recognizers tracking a test-sourced pointer (regression for #191757)',
+    'a pointer cancelled via cancelPointer is delivered to recognizers tracking a test-sourced pointer',
     (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/191757.
       var tapCount = 0;
       var cancelCount = 0;
       await tester.pumpWidget(
@@ -304,26 +305,69 @@ void main() {
         pointer: pointer,
       );
 
-      // This mimics what Navigator._cancelActivePointers does when a route
-      // is pushed mid-gesture: it calls WidgetsBinding.instance.cancelPointer,
-      // which schedules a PointerCancelEvent to be dispatched in a microtask
-      // — i.e. outside the synchronous `withPointerEventSource(test, ...)`
-      // scope that TestGesture's own events run in.
+      // This mimics what Navigator._cancelActivePointers does when a route is
+      // pushed mid-gesture: it calls cancelPointer, which schedules a cancel
+      // outside TestGesture's synchronous test-event scope.
       binding.cancelPointer(pointer);
       await tester.pump();
 
-      // The GestureDetector's recognizer must actually receive the cancel...
+      // The recognizer must receive the cancel and remain usable afterward.
       expect(cancelCount, 1);
       expect(tapCount, 0);
 
       await gesture.up();
 
-      // ...and must be left in a clean state so a later, unrelated gesture
-      // on the same widget still works.
       await tester.tap(find.text('Target'));
       expect(tapCount, 1);
     },
   );
+
+  testWidgets('pan/zoom events use the source of their start event', (WidgetTester tester) async {
+    final dispatcher = _RecordingDispatcher();
+    binding.deviceEventDispatcher = dispatcher;
+    addTearDown(() => binding.deviceEventDispatcher = null);
+
+    const pointer = 24;
+    const position = Offset(10, 10);
+    binding.handlePointerEventForSource(
+      const PointerPanZoomStartEvent(pointer: pointer, position: position),
+      source: TestBindingEventSource.test,
+    );
+    binding.handlePointerEvent(const PointerPanZoomEndEvent(pointer: pointer, position: position));
+
+    expect(dispatcher.events, isEmpty);
+  });
+
+  testWidgets('device-origin pointers keep using the device dispatcher', (
+    WidgetTester tester,
+  ) async {
+    final dispatcher = _RecordingDispatcher();
+    binding.deviceEventDispatcher = dispatcher;
+    addTearDown(() => binding.deviceEventDispatcher = null);
+
+    const pointer = 25;
+    const position = Offset(10, 10);
+    binding.handlePointerEventForSource(
+      const PointerDownEvent(pointer: pointer, position: position),
+      source: TestBindingEventSource.device,
+    );
+    binding.handlePointerEventForSource(
+      const PointerMoveEvent(pointer: pointer, position: position),
+      source: TestBindingEventSource.test,
+    );
+    binding.handlePointerEventForSource(
+      const PointerRemovedEvent(pointer: pointer, position: position),
+      source: TestBindingEventSource.test,
+    );
+
+    expect(dispatcher.events, hasLength(2));
+
+    binding.handlePointerEventForSource(
+      const PointerMoveEvent(pointer: pointer, position: position),
+      source: TestBindingEventSource.test,
+    );
+    expect(dispatcher.events, hasLength(2));
+  });
 
   testWidgets('resetLayers resets configuration and replaces root layer', (
     WidgetTester tester,
@@ -354,6 +398,15 @@ void main() {
     // Verify that root layer has been replaced
     expect(binding.renderView.debugLayer, isNot(same(currentRootLayer)));
   });
+}
+
+class _RecordingDispatcher implements HitTestDispatcher {
+  final List<PointerEvent> events = <PointerEvent>[];
+
+  @override
+  void dispatchEvent(PointerEvent event, HitTestResult result) {
+    events.add(event);
+  }
 }
 
 /// A widget that shows the number of times it has been tapped.
