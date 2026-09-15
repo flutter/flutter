@@ -654,14 +654,16 @@ class RunCommand extends RunCommandBase {
     required String? applicationBinaryPath,
     required FlutterProject flutterProject,
   }) async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
+    final ToolContext(
+      :FileSystem fs,
+      :Logger logger,
+      :OutputPreferences outputPreferences,
+      :Platform platform,
+      :ProcessManager processManager,
+      :SystemClock systemClock,
+      :Terminal terminal,
+    ) = _toolContext;
     final Analytics analytics = this.analytics;
-    final ProcessManager processManager = _toolContext.processManager;
-    final Platform platform = _toolContext.platform;
-    final Terminal terminal = _toolContext.terminal;
-    final OutputPreferences outputPreferences = _toolContext.outputPreferences;
-    final SystemClock systemClock = _toolContext.systemClock;
 
     final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
     final webMode = webDevServerConfig != null;
@@ -672,28 +674,29 @@ class RunCommand extends RunCommandBase {
     if (hotMode && !webMode) {
       return HotRunner(
         flutterDevices,
-        target: targetFile,
         debuggingOptions: debuggingOptions,
-        benchmarkMode: boolArg('benchmark'),
-        applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
-        projectRootPath: stringArg('project-root'),
-        dillOutputPath: stringArg('output-dill'),
-        stayResident: stayResident,
+        target: targetFile,
         analytics: analytics,
-        nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+        applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
+        artifacts: _toolContext.artifacts,
+        benchmarkMode: boolArg('benchmark'),
+        buildSystem: _buildSystem,
+        buildTargets: _buildTargets,
+        cache: _toolContext.cache,
+        config: _toolContext.config,
         dartBuilder: hookRunner,
-        logger: logger,
+        dillOutputPath: stringArg('output-dill'),
         fileSystem: fs,
+        flutterVersion: _toolContext.flutterVersion,
+        logger: logger,
+        nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+        osUtils: _toolContext.os,
+        outputPreferences: outputPreferences,
         platform: platform,
         processManager: processManager,
-        artifacts: _toolContext.artifacts,
+        projectRootPath: stringArg('project-root'),
+        stayResident: stayResident,
         terminal: terminal,
-        outputPreferences: outputPreferences,
-        config: _toolContext.config,
-        buildTargets: _buildTargets,
-        buildSystem: _buildSystem,
-        cache: _toolContext.cache,
-        flutterVersion: _toolContext.flutterVersion,
         xcode: _appleContext.xcode,
       );
     } else if (webMode) {
@@ -715,26 +718,27 @@ class RunCommand extends RunCommandBase {
     }
     return ColdRunner(
       flutterDevices,
-      target: targetFile,
       debuggingOptions: debuggingOptions,
-      traceStartup: traceStartup,
-      awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
+      target: targetFile,
+      analytics: analytics,
       applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
-      stayResident: stayResident,
+      artifacts: _toolContext.artifacts,
+      awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
+      buildSystem: _buildSystem,
+      buildTargets: _buildTargets,
+      cache: _toolContext.cache,
+      config: _toolContext.config,
       dartBuilder: hookRunner,
-      logger: logger,
       fileSystem: fs,
+      flutterVersion: _toolContext.flutterVersion,
+      logger: logger,
+      osUtils: _toolContext.os,
+      outputPreferences: outputPreferences,
       platform: platform,
       processManager: processManager,
-      artifacts: _toolContext.artifacts,
+      stayResident: stayResident,
       terminal: terminal,
-      outputPreferences: outputPreferences,
-      analytics: analytics,
-      config: _toolContext.config,
-      buildTargets: _buildTargets,
-      buildSystem: _buildSystem,
-      cache: _toolContext.cache,
-      flutterVersion: _toolContext.flutterVersion,
+      traceStartup: traceStartup,
       xcode: _appleContext.xcode,
     );
   }
@@ -772,13 +776,16 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final Platform platform = _toolContext.platform;
-    final Terminal terminal = _toolContext.terminal;
-    final Signals signals = _toolContext.signals;
+    final ToolContext(
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+      :Signals signals,
+      :SystemClock systemClock,
+      :Terminal terminal,
+    ) = _toolContext;
     final ProcessInfo processInfo = this.processInfo;
-    final SystemClock systemClock = _toolContext.systemClock;
 
     final BuildInfo buildInfo = await getBuildInfo();
     // Enable hot mode by default if `--no-hot` was not passed and we are in
@@ -851,17 +858,14 @@ class RunCommand extends RunCommandBase {
       for (final Device device in devices!)
         await FlutterDevice.create(
           device,
-          target: targetFile,
-          buildInfo: buildInfo,
-          userIdentifier: userIdentifier,
-          platform: platform,
           artifacts: _toolContext.artifacts,
-          processManager: _toolContext.processManager,
+          buildInfo: buildInfo,
           fileSystem: fs,
           logger: logger,
-          shutdownHooks: _toolContext.shutdownHooks,
-          config: _toolContext.config,
-          osUtils: _toolContext.os,
+          platform: platform,
+          processManager: processManager,
+          target: targetFile,
+          userIdentifier: userIdentifier,
         ),
     ];
 
