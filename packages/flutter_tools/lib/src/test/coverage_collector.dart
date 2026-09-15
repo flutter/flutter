@@ -109,8 +109,7 @@ class CoverageCollector extends TestWatcher {
     // This may not be a safe assumption in non-standard environments, such as
     // when building under build systems such as Bazel. In those cases, this
     // getter should be overridden.
-    final FileSystem fs = fileSystem;
-    return fs.directory(fs.file(packagesPath).dirname).dirname;
+    return fileSystem.directory(fileSystem.file(packagesPath).dirname).dirname;
   }
 
   /// Collects coverage for an isolate using the given `port`.
@@ -245,24 +244,20 @@ class CoverageCollector extends TestWatcher {
     bool mergeCoverageData = false,
     Directory? coverageDirectory,
   }) async {
-    final FileSystem fs = fileSystem;
-    final Platform platform = this.platform;
-    final OperatingSystemUtils? os = this.os;
-
     final String? coverageData = await finalizeCoverage(coverageDirectory: coverageDirectory);
     _logMessage('coverage information collection complete');
     if (coverageData == null) {
       return false;
     }
 
-    final File coverageFile = fs.file(coveragePath)
+    final File coverageFile = fileSystem.file(coveragePath)
       ..createSync(recursive: true)
       ..writeAsStringSync(coverageData, flush: true);
     _logMessage('wrote coverage data to $coveragePath (size=${coverageData.length})');
 
     const baseCoverageData = 'coverage/lcov.base.info';
     if (mergeCoverageData) {
-      if (!fs.isFileSync(baseCoverageData)) {
+      if (!fileSystem.isFileSync(baseCoverageData)) {
         _logMessage('Missing "$baseCoverageData". Unable to merge coverage data.', error: true);
         return false;
       }
@@ -281,12 +276,12 @@ class CoverageCollector extends TestWatcher {
         return false;
       }
 
-      final Directory tempDir = fs.systemTempDirectory.createTempSync(
+      final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
         'flutter_tools_test_coverage.',
       );
       try {
         final File sourceFile = coverageFile.copySync(
-          fs.path.join(tempDir.path, 'lcov.source.info'),
+          fileSystem.path.join(tempDir.path, 'lcov.source.info'),
         );
         final RunResult result = processUtils.runSync(<String>[
           'lcov',

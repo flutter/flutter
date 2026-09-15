@@ -312,16 +312,16 @@ typedef Finalizer = Future<void> Function();
 /// The flutter test platform used to integrate with package:test.
 class FlutterPlatform extends PlatformPlugin {
   FlutterPlatform({
-    required Artifacts artifacts,
+    required this._artifacts,
     required this.buildInfo,
-    required Config config,
+    required this._config,
     required this.debuggingOptions,
-    required FileSystem fileSystem,
+    required this._fileSystem,
     required this.flutterTesterBinPath,
     required this.logger,
-    required Platform platform,
-    required ProcessManager processManager,
-    required ShutdownHooks shutdownHooks,
+    required this._platform,
+    required this._processManager,
+    required this._shutdownHooks,
     this.watcher,
     this.enableVmService,
     this.machine,
@@ -337,12 +337,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.integrationTestUserIdentifier,
     this.testTimeRecorder,
     this.nativeAssetsBuilder,
-  }) : _artifacts = artifacts,
-       _config = config,
-       _fileSystem = fileSystem,
-       _platform = platform,
-       _processManager = processManager,
-       _shutdownHooks = shutdownHooks {
+  }) {
     _testGoldenComparator = TestGoldenComparator(
       flutterTesterBinPath: flutterTesterBinPath,
       compilerFactory: () =>
@@ -350,18 +345,18 @@ class FlutterPlatform extends PlatformPlugin {
           TestCompiler(
             buildInfo,
             flutterProject,
-            artifacts: artifacts,
-            config: config,
-            fileSystem: fileSystem,
+            artifacts: _artifacts,
+            config: _config,
+            fileSystem: _fileSystem,
             logger: logger,
-            platform: platform,
-            processManager: processManager,
-            shutdownHooks: shutdownHooks,
+            platform: _platform,
+            processManager: _processManager,
+            shutdownHooks: _shutdownHooks,
             testTimeRecorder: testTimeRecorder,
           ),
-      fileSystem: fileSystem,
+      fileSystem: _fileSystem,
       logger: logger,
-      processManager: processManager,
+      processManager: _processManager,
     );
   }
 
@@ -607,9 +602,7 @@ class FlutterPlatform extends PlatformPlugin {
     StreamChannel<dynamic> testHarnessChannel,
     int ourTestCount,
   ) async {
-    final FileSystem fs = _fileSystem;
-    final Logger log = logger;
-    log.printTrace('test $ourTestCount: starting test $testPath');
+    logger.printTrace('test $ourTestCount: starting test $testPath');
 
     _AsyncError? outOfBandError; // error that we couldn't send to the harness that we need to send via our future
 
@@ -622,18 +615,18 @@ class FlutterPlatform extends PlatformPlugin {
         return;
       }
       ranFinalizers = true;
-      log.printTrace('test $ourTestCount: cleaning up...');
+      logger.printTrace('test $ourTestCount: cleaning up...');
       for (final Finalizer finalizer in finalizers.reversed) {
         try {
           await finalizer();
         } on Exception catch (error, stack) {
-          log.printTrace(
+          logger.printTrace(
             'test $ourTestCount: error while cleaning up; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}',
           );
           if (!controllerSinkClosed) {
             testHarnessChannel.sink.addError(error, stack);
           } else {
-            log.printError(
+            logger.printError(
               'unhandled error during finalization of test:\n$testPath\n$error\n$stack',
             );
             outOfBandError ??= _AsyncError(error, stack);
@@ -663,15 +656,15 @@ class FlutterPlatform extends PlatformPlugin {
             flutterProject,
             artifacts: _artifacts,
             config: _config,
-            fileSystem: fs,
-            logger: log,
+            fileSystem: _fileSystem,
+            logger: logger,
             platform: _platform,
             processManager: _processManager,
             shutdownHooks: _shutdownHooks,
             precompiledDillPath: precompiledDillPath,
             testTimeRecorder: testTimeRecorder,
           );
-          final Uri uri = fs.file(path).uri;
+          final Uri uri = _fileSystem.file(path).uri;
           // Trigger a compilation to initialize the resident compiler.
           unawaited(compiler!.compile(uri));
         }
@@ -697,14 +690,14 @@ class FlutterPlatform extends PlatformPlugin {
             flutterProject,
             artifacts: _artifacts,
             config: _config,
-            fileSystem: fs,
-            logger: log,
+            fileSystem: _fileSystem,
+            logger: logger,
             platform: _platform,
             processManager: _processManager,
             shutdownHooks: _shutdownHooks,
             testTimeRecorder: testTimeRecorder,
           );
-          switch (await compiler!.compile(fs.file(mainDart).uri)) {
+          switch (await compiler!.compile(_fileSystem.file(mainDart).uri)) {
             case TestCompilerComplete(:final String outputPath):
               mainDart = outputPath;
             case TestCompilerFailure(:final String? error):
@@ -719,7 +712,7 @@ class FlutterPlatform extends PlatformPlugin {
         }
       }
 
-      log.printTrace('test $ourTestCount: starting test device');
+      logger.printTrace('test $ourTestCount: starting test device');
       final TestDevice testDevice = _createTestDevice(ourTestCount);
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Run);
       final remoteChannelCompleter = Completer<StreamChannel<String>>();
@@ -735,7 +728,7 @@ class FlutterPlatform extends PlatformPlugin {
         ),
       );
       finalizers.add(() async {
-        log.printTrace('test $ourTestCount: ensuring test device is terminated.');
+        logger.printTrace('test $ourTestCount: ensuring test device is terminated.');
         await testDevice.kill();
       });
 
@@ -744,7 +737,7 @@ class FlutterPlatform extends PlatformPlugin {
       // will complete.
       // B. The test device could connect to us, in which case
       // [remoteChannelFuture] will complete.
-      log.printTrace('test $ourTestCount: awaiting connection to test device');
+      logger.printTrace('test $ourTestCount: awaiting connection to test device');
       await Future.any<void>(<Future<void>>[
         testDevice.finished,
         () async {
@@ -767,16 +760,18 @@ class FlutterPlatform extends PlatformPlugin {
           );
           final remoteChannel = first! as StreamChannel<String>;
 
-          log.printTrace('test $ourTestCount: connected to test device, now awaiting test result');
+          logger.printTrace(
+            'test $ourTestCount: connected to test device, now awaiting test result',
+          );
 
           await pipeHarnessToRemote(
             id: ourTestCount,
             harnessChannel: testHarnessChannel,
             remoteChannel: remoteChannel,
-            logger: log,
+            logger: logger,
           );
 
-          log.printTrace('test $ourTestCount: finished');
+          logger.printTrace('test $ourTestCount: finished');
           testTimeRecorder?.stop(TestTimePhases.Run, testTimeRecorderStopwatch!);
           final Stopwatch? watchTestTimeRecorderStopwatch = testTimeRecorder?.start(
             TestTimePhases.WatcherFinishedTest,
@@ -796,13 +791,13 @@ class FlutterPlatform extends PlatformPlugin {
         reportedStackTrace = error.stackTrace;
       }
 
-      log.printTrace(
+      logger.printTrace(
         'test $ourTestCount: error caught during test; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}',
       );
       if (!controllerSinkClosed) {
         testHarnessChannel.sink.addError(reportedError, reportedStackTrace);
       } else {
-        log.printError(
+        logger.printError(
           'unhandled error during test:\n$testPath\n$reportedError\n$reportedStackTrace',
         );
         outOfBandError ??= _AsyncError(reportedError, reportedStackTrace);
@@ -812,41 +807,41 @@ class FlutterPlatform extends PlatformPlugin {
       if (!controllerSinkClosed) {
         // Waiting below with await.
         unawaited(testHarnessChannel.sink.close());
-        log.printTrace('test $ourTestCount: waiting for controller sink to close');
+        logger.printTrace('test $ourTestCount: waiting for controller sink to close');
         await testHarnessChannel.sink.done;
       }
     }
     assert(controllerSinkClosed);
     if (outOfBandError != null) {
-      log.printTrace('test $ourTestCount: finished with out-of-band failure');
+      logger.printTrace('test $ourTestCount: finished with out-of-band failure');
     } else {
-      log.printTrace('test $ourTestCount: finished');
+      logger.printTrace('test $ourTestCount: finished');
     }
     return outOfBandError;
   }
 
   String _createListenerDart(List<Finalizer> finalizers, int ourTestCount, String testPath) {
     // Prepare a temporary directory to store the Dart file that will talk to us.
-    final FileSystem fs = _fileSystem;
-    final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_test_listener.');
+    final Directory tempDir = _fileSystem.systemTempDirectory.createTempSync(
+      'flutter_test_listener.',
+    );
     finalizers.add(() async {
       logger.printTrace('test $ourTestCount: deleting temporary directory');
       tempDir.deleteSync(recursive: true);
     });
 
     // Prepare the Dart file that will talk to us and start the test.
-    final File listenerFile = fs.file('${tempDir.path}/listener.dart');
+    final File listenerFile = _fileSystem.file('${tempDir.path}/listener.dart');
     listenerFile.createSync();
     listenerFile.writeAsStringSync(
-      _generateTestMain(testUrl: fs.path.toUri(fs.path.absolute(testPath))),
+      _generateTestMain(testUrl: _fileSystem.path.toUri(_fileSystem.path.absolute(testPath))),
     );
     return listenerFile.path;
   }
 
   String _generateTestMain({required Uri testUrl}) {
     assert(testUrl.scheme == 'file');
-    final FileSystem fs = _fileSystem;
-    final File file = fs.file(testUrl);
+    final File file = _fileSystem.file(testUrl);
     final PackageConfig packageConfig = debuggingOptions.buildInfo.packageConfig;
 
     final LanguageVersion languageVersion = determineLanguageVersion(
@@ -856,9 +851,9 @@ class FlutterPlatform extends PlatformPlugin {
     );
     return generateTestBootstrap(
       testUrl: testUrl,
-      testConfigFile: findTestConfigFile(fs.file(testUrl), logger),
+      testConfigFile: findTestConfigFile(_fileSystem.file(testUrl), logger),
       // This MUST be a file URI.
-      packageConfigUri: fs.path.toUri(buildInfo.packageConfigPath),
+      packageConfigUri: _fileSystem.path.toUri(buildInfo.packageConfigPath),
       host: host!,
       updateGoldens: updateGoldens!,
       flutterTestDep: packageConfig['flutter_test'] != null,

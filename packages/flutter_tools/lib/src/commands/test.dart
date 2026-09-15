@@ -387,8 +387,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
 
     final List<Uri> testUris = argResults!.rest
         .map((String arg) => _parseTestArgument(arg, fs))
@@ -450,14 +449,17 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final ProcessManager processManager = _toolContext.processManager;
-    final Artifacts artifacts = _toolContext.artifacts;
-    final Stdio stdio = _toolContext.stdio;
-    final Platform platform = _toolContext.platform;
-    final ProcessUtils processUtils = _toolContext.processUtils;
-    final OperatingSystemUtils os = _toolContext.os;
+    final ToolContext(
+      :Artifacts artifacts,
+      :FileSystem fs,
+      :Logger logger,
+      :OperatingSystemUtils os,
+      :Platform platform,
+      :ProcessManager processManager,
+      :ProcessUtils processUtils,
+      :FlutterProjectFactory projectFactory,
+      :Stdio stdio,
+    ) = _toolContext;
 
     if (!fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
@@ -467,9 +469,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'directory (or one of its subdirectories).',
       );
     }
-    final FlutterProject flutterProject = _toolContext.projectFactory.fromDirectory(
-      fs.currentDirectory,
-    );
+    final FlutterProject flutterProject = projectFactory.fromDirectory(fs.currentDirectory);
     final bool buildTestAssets = boolArg('test-assets');
     final List<String> names = stringsArg('name');
     final List<String> plainNames = stringsArg('plain-name');

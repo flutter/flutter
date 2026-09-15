@@ -240,7 +240,6 @@ class TestCompiler {
     }
     while (compilationQueue.isNotEmpty) {
       final _CompilationRequest request = compilationQueue.first;
-      final TestCompiler(:fileSystem, :logger, :platform) = this;
       logger.printTrace('Compiling ${request.mainUri}');
       final compilerTime = Stopwatch()..start();
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);

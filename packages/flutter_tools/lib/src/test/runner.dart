@@ -96,18 +96,6 @@ interface class FlutterTestRunner {
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
     required BuildInfo buildInfo,
   }) async {
-    final FlutterTestRunner(
-      :artifacts,
-      :config,
-      :fileSystem,
-      :logger,
-      :os,
-      :platform,
-      :processManager,
-      :shutdownHooks,
-      :terminal,
-    ) = this;
-
     // Configure package:test to use the Flutter engine for child processes.
     final String flutterTesterBinPath = artifacts.getArtifactPath(Artifact.flutterTester);
 
@@ -669,18 +657,6 @@ class SpawnPlugin extends PlatformPlugin {
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     assert(testFiles.length > 1);
-
-    final FlutterTestRunner(
-      :artifacts,
-      :config,
-      :fileSystem,
-      :logger,
-      :platform,
-      :processManager,
-      :shutdownHooks,
-      :stdio,
-      :terminal,
-    ) = this;
 
     final Directory buildDirectory = fileSystem.directory(
       fileSystem.path.join(flutterProject!.directory.path, getBuildDirectory()),
