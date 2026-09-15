@@ -104,6 +104,36 @@ class _NegativeViewPadding implements ui.ViewPadding {
   final double bottom;
 }
 
+// DebugViewPadding's constructors assert their edges, so an out-of-range
+// padding can only reach the registry by implementing the class instead of
+// constructing it. This is what an application that implements the interface
+// itself, deliberately or not, hands to debugSetViewMetricsOverride.
+class _UncheckedDebugViewPadding implements DebugViewPadding {
+  const _UncheckedDebugViewPadding({this.left = 0, this.top = 0, this.right = 0, this.bottom = 0});
+
+  @override
+  final double left;
+
+  @override
+  final double top;
+
+  @override
+  final double right;
+
+  @override
+  final double bottom;
+
+  @override
+  DebugViewPadding copyWith({double? left, double? top, double? right, double? bottom}) {
+    return DebugViewPadding(
+      left: left ?? this.left,
+      top: top ?? this.top,
+      right: right ?? this.right,
+      bottom: bottom ?? this.bottom,
+    );
+  }
+}
+
 void main() {
   group('DebugViewMetricsOverride', () {
     test('the per-metric table covers every metric', () {
@@ -719,11 +749,17 @@ void main() {
       // physicalSize cannot assert in a const constructor, and tooling payloads
       // go through fromJson, so debugSetViewMetricsOverride is the only gate a
       // directly built override with an invalid physicalSize passes through.
+      // The paddings assert in their own constructors, but only for values that
+      // went through one, so this is their only gate too.
       const invalid = <DebugViewMetricsOverride>[
         DebugViewMetricsOverride(physicalSize: ui.Size(double.nan, 100)),
         DebugViewMetricsOverride(physicalSize: ui.Size(100, double.infinity)),
         DebugViewMetricsOverride(physicalSize: ui.Size(-1, 100)),
         DebugViewMetricsOverride(physicalSize: ui.Size(100, -1)),
+        DebugViewMetricsOverride(padding: _UncheckedDebugViewPadding(left: -1)),
+        DebugViewMetricsOverride(viewPadding: _UncheckedDebugViewPadding(top: double.nan)),
+        DebugViewMetricsOverride(viewInsets: _UncheckedDebugViewPadding(right: double.infinity)),
+        DebugViewMetricsOverride(systemGestureInsets: _UncheckedDebugViewPadding(bottom: -1)),
       ];
       for (final override in invalid) {
         expect(

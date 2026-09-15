@@ -715,7 +715,10 @@ class DebugViewMetricsOverride with Diagnosticable {
     };
   }
 
-  // The metrics dart:ui delivers through PlatformDispatcher.onMetricsChanged.
+  // The metrics dart:ui delivers through PlatformDispatcher.onMetricsChanged,
+  // plus alwaysUse24HourFormat, which dart:ui reports through
+  // PlatformDispatcher.onPlatformConfigurationChanged because it has no
+  // callback of its own.
   //
   // This grouping, `_accessibilityFeatures`, and the standalone `textScaleFactor`
   // and `platformBrightness` are what == and hashCode compare, so a metric that
