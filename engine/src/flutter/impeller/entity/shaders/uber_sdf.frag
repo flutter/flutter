@@ -238,14 +238,6 @@ float rectPixelSize(vec2 p) {
 // Special case pixel size calculation for rounded rectangles, similar to
 // `rectPixelSize` for regular rectangles.
 float roundRectPixelSize(vec2 p) {
-  // The change in local coordinates per horizontal device pixel (device_dx)
-  // and vertical device pixel (device_dy).
-  vec2 device_dx = dFdx(v_position);
-  vec2 device_dy = dFdy(v_position);
-  // The size of a device pixel in terms of local coordinates.
-  vec2 device_pixel_size = vec2(length(vec2(device_dx.x, device_dy.x)),
-                                length(vec2(device_dx.y, device_dy.y)));
-
   // Select the corner radius for the quadrant of p.
   vec4 r = frag_info.radii;
   r.xy = (p.x > 0.0) ? r.xy : r.zw;
@@ -258,11 +250,11 @@ float roundRectPixelSize(vec2 p) {
   float pixel_size;
   // If in the rounded corner arc, blend X and Y pixel sizes along the normal.
   if (q.x > 0.0 && q.y > 0.0) {
-    pixel_size = length(normalize(q) * device_pixel_size);
+    pixel_size = length(normalize(q) * frag_info.pixel_size);
   } else {
     // Otherwise, we are closer to a straight edge. Get pixel size in the
     // direction perpendicular to the closer edge.
-    pixel_size = (q.x > q.y) ? device_pixel_size.x : device_pixel_size.y;
+    pixel_size = (q.x > q.y) ? frag_info.pixel_size.x : frag_info.pixel_size.y;
   }
   return pixel_size;
 }
@@ -272,6 +264,19 @@ float pixelSize(float sdf) {
   return length(gradient);
 }
 
+// Calculates the effective pixel size in local coordinates along a given
+// surface normal vector.
+//
+// For affine transforms, the size of a screen pixel in local coordinates is
+// constant across the quad and precomputed on the CPU in
+// `frag_info.pixel_size`. Projecting the unit normal onto these local-space
+// pixel dimensions scales the antialiasing width appropriately along the
+// gradient direction (handling both uniform scaling and non-uniform
+// stretching).
+float directionalPixelSize(vec2 normal) {
+  return length(normal * frag_info.pixel_size);
+}
+
 // Evaluates the SDF for the shape selected by frag_info.type.
 // Returns vec2(sdf, pixel_size).
 vec2 filledSDF(vec2 p) {
@@ -279,7 +284,8 @@ vec2 filledSDF(vec2 p) {
   float pixel_size;
   if (frag_info.type < 0.5) {  // Circle
     sdf = distanceFromCircle(p, frag_info.size.x);
-    pixel_size = pixelSize(sdf);
+    pixel_size = (length(p) > 0.0) ? directionalPixelSize(normalize(p))
+                                   : frag_info.pixel_size.x;
   } else if (frag_info.type < 1.5) {  // Rect
     sdf = distanceFromRect(p, frag_info.size);
     // Rect has its own separate logic for calculating pixel size.
