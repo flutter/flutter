@@ -42,12 +42,7 @@ const kPlatformHelp =
     'Adding desktop platforms requires the corresponding desktop config setting to be enabled.';
 
 class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMixin {
-  CreateCommand({
-    bool verboseHelp = false,
-    // TODO(bkonyi): Make extensionTemplateManager a required argument in the future.
-    ExtensionTemplateManager? extensionTemplateManager,
-  }) : _verboseHelp = verboseHelp,
-       _extensionTemplateManager = extensionTemplateManager;
+  CreateCommand({this._verboseHelp = false, this._extensionTemplateManager});
 
   final bool _verboseHelp;
   final ExtensionTemplateManager? _extensionTemplateManager;
@@ -72,8 +67,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     parser.addOption(
       'description',
       defaultsTo: 'A new Flutter project.',
-      help:
-          'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
+      help: 'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
     );
     parser.addOption(
       'org',
@@ -103,8 +97,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
       abbr: 'a',
       defaultsTo: 'kotlin',
       allowed: <String>['java', 'kotlin'],
-      help:
-          'The language to use for Android-specific code, either Kotlin (recommended) or Java (legacy).',
+      help: 'The language to use for Android-specific code, either Kotlin (recommended) or Java (legacy).',
     );
     parser.addFlag(
       'skip-name-checks',

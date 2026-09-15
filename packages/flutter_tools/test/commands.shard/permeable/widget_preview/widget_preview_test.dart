@@ -622,8 +622,8 @@ Widget preview() => Text('Foo');''';
 
     const expectedGeneratedFileContents = '''
 // ignore_for_file: implementation_imports
-
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+
 import 'widget_preview.dart' as _i1;
 import 'utils.dart' as _i2;
 import 'package:flutter_project/foo.dart' as _i3;
