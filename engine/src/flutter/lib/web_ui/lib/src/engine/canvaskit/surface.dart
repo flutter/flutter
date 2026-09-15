@@ -359,11 +359,22 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
 
   /// Reallocates a new [DomOffscreenCanvas] and recreates the graphics context.
   ///
-  /// In-place resizing of an [OffscreenCanvas] with an active WebGL context
-  /// triggers clipping bugs in ANGLE/Chromium where rendering remains constrained
-  /// to the original canvas dimensions (see https://github.com/flutter/flutter/issues/182476).
-  /// To avoid this clipping hazard, we acquire a brand-new canvas at the target
-  /// [size], release the old canvas, and recreate the context.
+  /// While raw WebGL permits in-place canvas resizing via `canvas.width` and
+  /// `canvas.height` followed by `gl.viewport()`, CanvasKit's Skia bindings in
+  /// `canvasKit.MakeOnScreenGLSurface` wrap WebGL's default framebuffer (FBO 0)
+  /// using `WrapBackendRenderTarget` and only call `dContext->resetContext(...)`
+  /// with `kRenderTarget_GrGLBackendState | kMisc_GrGLBackendState`, omitting
+  /// `kView_GrGLBackendState`.
+  ///
+  /// Consequently, Skia's cached hardware viewport (`fHWViewport`) and scissor
+  /// settings (`fHWScissorSettings`) on the reused `GrDirectContext` can
+  /// desynchronize from the newly resized drawing buffer, causing rendering
+  /// beyond the original dimensions to clip or produce transparent pixels
+  /// (see https://github.com/flutter/flutter/issues/182476).
+  ///
+  /// To circumvent this Skia desynchronization bug without waiting for an
+  /// upstream Skia patch, we acquire a brand-new canvas element at the target
+  /// [size], release the old canvas, and recreate the context and `GrDirectContext`.
   @override
   void _resizeCanvas(BitmapSize size) {
     final DomEventTarget oldCanvas = canvas;
