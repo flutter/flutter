@@ -828,6 +828,12 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   AndroidSdkVersion? latestVersion;
+
+  @override
+  String? get avdManagerPath => 'avdmanager';
+
+  @override
+  String? getAvdManagerPath() => 'avdmanager';
 }
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {
