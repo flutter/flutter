@@ -1331,8 +1331,10 @@ class InputConfiguration {
   final bool enableInteractiveSelection;
 }
 
-typedef OnChangeCallback =
-    void Function(EditingState? editingState, TextEditingDeltaState? editingDeltaState);
+typedef OnChangeCallback = void Function(
+  EditingState? editingState,
+  TextEditingDeltaState? editingDeltaState,
+);
 typedef OnActionCallback = void Function(String? inputAction);
 
 /// Provides HTML DOM functionality for editable text.

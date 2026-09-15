@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
 import '../utils.dart';
 import 'use_cases.dart';
 
@@ -42,9 +43,8 @@ class MainWidgetState extends State<MainWidget> {
             ElevatedButton(
               child: const Text('Show Snackbar'),
               onPressed: () {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('Awesome Snackbar!')));
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(const SnackBar(content: Text('Awesome Snackbar!')));
               },
             ),
             ElevatedButton(

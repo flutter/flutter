@@ -903,9 +903,9 @@ class _MenuOverlayState extends State<_MenuOverlay>
     // Behavior of reduce motion is based on iOS 18.5 simulator. Because the
     // disableAnimations accessibility feature is not present on iOS, all
     // animations are disabled when disableAnimations is enabled.
-    final ui.AccessibilityFeatures accessibilityFeatures = View.of(
-      context,
-    ).platformDispatcher.accessibilityFeatures;
+    final ui.AccessibilityFeatures accessibilityFeatures = View.of(context)
+        .platformDispatcher
+        .accessibilityFeatures;
 
     switch (accessibilityFeatures) {
       case ui.AccessibilityFeatures(disableAnimations: true):
@@ -2108,11 +2108,10 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
     this.trailing,
     this.trailingWidth,
     AlignmentGeometry? trailingMidpointAlignment,
-    BoxConstraints? constraints,
+    this._constraints,
     this.padding,
   }) : _leadingAlignment = leadingMidpointAlignment,
-       _trailingAlignment = trailingMidpointAlignment,
-       _constraints = constraints;
+       _trailingAlignment = trailingMidpointAlignment;
 
   static const double _kDefaultHorizontalWidth = 16;
 
@@ -2849,12 +2848,8 @@ class _SwipeSurface extends SingleChildRenderObjectWidget {
 }
 
 class _RenderSwipeSurface extends RenderProxyBoxWithHitTestBehavior {
-  _RenderSwipeSurface({
-    required _SwipeRegionState region,
-    required this.delay,
-    required this.onStart,
-  }) : _region = region,
-       super(behavior: HitTestBehavior.opaque) {
+  _RenderSwipeSurface({required this._region, required this.delay, required this.onStart})
+    : super(behavior: HitTestBehavior.opaque) {
     _region.attachSurface(this);
   }
 
