@@ -329,40 +329,40 @@ object FlutterPluginUtils {
         project.findProperty(PROP_FORCE_VERSION_CODE_IGNORING_ABI)?.toString()?.toBoolean() ?: false
 
     /**
+     * Delegates to [shouldConfigureFlutterTask(Project, String)] using [assembleTask]'s name.
+     */
+    internal fun shouldConfigureFlutterTask(
+        project: Project,
+        assembleTask: Task
+    ): Boolean = shouldConfigureFlutterTask(project, assembleTask.name)
+
+    /**
+     * Whether Flutter's tasks should be configured for the variant that [assembleTaskName]
+     * assembles.
+     *
+     * Returns true unless exactly one `assemble` task is named on the command line and that task
+     * builds a different variant. Build mode suffixes match, so `assembleRelease` also configures
+     * `assembleFreeRelease`.
+     *
+     * This exists because the Android linter task depends on the JAR tasks that generate
+     * `libapp.so`, so building release requires the debug JAR, which Gradle will not build.
+     * Configuring only the variant named on the command line avoids that. Removing the check was
+     * tried on AGP/Gradle 7.2.0/7.5 and still caused build failures.
+     *
+     * Callers gate both the compile task registration in
+     * [FlutterPlugin][com.flutter.gradle.FlutterPlugin] and, through it, the assets that
+     * `flutter assemble` produces.
+     *
      * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
-     *
-     * In AGP 4.0, the Android linter task depends on the JAR tasks that generate `libapp.so`.
-     * When building APKs, this causes an issue where building release requires the debug JAR,
-     * but Gradle won't build debug.
-     *
-     * To workaround this issue, only configure the JAR task that is required given the task
-     * from the command line.
-     *
-     * The AGP team said that this issue is fixed in Gradle 7.0, which isn't released at the
-     * time of adding this code. Once released, this can be removed. However, after updating to
-     * AGP/Gradle 7.2.0/7.5, removing this hack still causes build failures. Further
-     * investigation necessary to remove this.
-     *
-     * Tested cases:
-     * * `./gradlew assembleRelease`
-     * * `./gradlew app:assembleRelease.`
-     * * `./gradlew assemble{flavorName}Release`
-     * * `./gradlew app:assemble{flavorName}Release`
-     * * `./gradlew assemble.`
-     * * `./gradlew app:assemble.`
-     * * `./gradlew bundle.`
-     * * `./gradlew bundleRelease.`
-     * * `./gradlew app:bundleRelease.`
-     *
-     * Related issues:
-     * https://issuetracker.google.com/issues/158060799
-     * https://issuetracker.google.com/issues/158753935
+     *  That issue records the original rationale verbatim, the Gradle invocations that were
+     *  tested, and the related AGP bugs https://issuetracker.google.com/issues/158060799 and
+     *  https://issuetracker.google.com/issues/158753935.
      */
     @JvmStatic
     @JvmName("shouldConfigureFlutterTask")
     internal fun shouldConfigureFlutterTask(
         project: Project,
-        assembleTask: Task
+        assembleTaskName: String
     ): Boolean {
         val cliTasksNames = project.gradle.startParameter.taskNames
         if (cliTasksNames.size != 1 || !cliTasksNames.first().contains("assemble")) {
@@ -372,16 +372,16 @@ object FlutterPluginUtils {
         if (taskName == "assemble") {
             return true
         }
-        if (taskName == assembleTask.name) {
+        if (taskName == assembleTaskName) {
             return true
         }
-        if (taskName.endsWith("Release") && assembleTask.name.endsWith("Release")) {
+        if (taskName.endsWith("Release") && assembleTaskName.endsWith("Release")) {
             return true
         }
-        if (taskName.endsWith("Debug") && assembleTask.name.endsWith("Debug")) {
+        if (taskName.endsWith("Debug") && assembleTaskName.endsWith("Debug")) {
             return true
         }
-        if (taskName.endsWith("Profile") && assembleTask.name.endsWith("Profile")) {
+        if (taskName.endsWith("Profile") && assembleTaskName.endsWith("Profile")) {
             return true
         }
         return false
