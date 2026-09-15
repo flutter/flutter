@@ -1027,6 +1027,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
 
     node._parent = null;
+    node._ancestors = null;
     node._clearEnclosingScopeCache();
     _children.remove(node);
     for (final FocusNode ancestor in ancestors) {
