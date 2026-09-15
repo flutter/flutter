@@ -6,6 +6,7 @@ import 'dart:ui'
     as ui
     show FontFeature, FontVariation, ParagraphStyle, Shadow, TextStyle, lerpDouble;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -875,5 +876,81 @@ void main() {
         equals(const <FontVariation>[s0, sp40, w200]),
       ),
     );
+  });
+
+  group('fakeMissingFontStyles', () {
+    test('copyWith', () {
+      const style = TextStyle(fakeMissingFontStyles: true);
+      final TextStyle copiedStyle = style.copyWith();
+      expect(copiedStyle.fakeMissingFontStyles, isTrue);
+
+      final TextStyle copiedStyleFalse = style.copyWith(fakeMissingFontStyles: false);
+      expect(copiedStyleFalse.fakeMissingFontStyles, isFalse);
+    });
+
+    test('apply', () {
+      const style = TextStyle(fakeMissingFontStyles: true);
+      TextStyle appliedStyle = style.apply();
+      expect(appliedStyle.fakeMissingFontStyles, isTrue);
+      appliedStyle = style.apply(fakeMissingFontStyles: false);
+      expect(appliedStyle.fakeMissingFontStyles, isFalse);
+    });
+
+    test('merge', () {
+      const style = TextStyle(fakeMissingFontStyles: true);
+      final TextStyle mergedStyle = style.merge(const TextStyle());
+      expect(mergedStyle.fakeMissingFontStyles, isTrue);
+    });
+
+    test('lerp', () {
+      const style = TextStyle(fakeMissingFontStyles: true);
+      TextStyle lerpedStyle = TextStyle.lerp(style, const TextStyle(), 0.4)!;
+      expect(lerpedStyle.fakeMissingFontStyles, isTrue);
+      lerpedStyle = TextStyle.lerp(style, const TextStyle(), 0.5)!;
+      expect(lerpedStyle.fakeMissingFontStyles, isNull);
+    });
+
+    test('equality', () {
+      const style1 = TextStyle(fakeMissingFontStyles: true);
+      const style2 = TextStyle(fakeMissingFontStyles: true);
+      const style3 = TextStyle(fakeMissingFontStyles: false);
+
+      expect(style1 == style2, isTrue);
+      expect(style1 == style3, isFalse);
+      expect(style1.hashCode, equals(style2.hashCode));
+      expect(style1.hashCode, isNot(equals(style3.hashCode)));
+    });
+
+    test('debugFillProperties', () {
+      const styleEnabled = TextStyle(fakeMissingFontStyles: true);
+      final builderEnabled = DiagnosticPropertiesBuilder();
+      styleEnabled.debugFillProperties(builderEnabled);
+      expect(
+        builderEnabled.properties.any(
+          (DiagnosticsNode node) => node.toString().contains('<fake missing font styles enabled>'),
+        ),
+        isTrue,
+      );
+
+      const styleDisabled = TextStyle(fakeMissingFontStyles: false);
+      final builderDisabled = DiagnosticPropertiesBuilder();
+      styleDisabled.debugFillProperties(builderDisabled);
+      expect(
+        builderDisabled.properties.any(
+          (DiagnosticsNode node) => node.toString().contains('<fake missing font styles disabled>'),
+        ),
+        isTrue,
+      );
+
+      const styleNull = TextStyle();
+      final builderNull = DiagnosticPropertiesBuilder();
+      styleNull.debugFillProperties(builderNull);
+      expect(
+        builderNull.properties.any(
+          (DiagnosticsNode node) => node.toString().contains('fakeMissingFontStyles: null'),
+        ),
+        isTrue,
+      );
+    });
   });
 }
