@@ -407,6 +407,8 @@ class TextTheme with Diagnosticable {
     TextDecoration? decoration,
     Color? decorationColor,
     TextDecorationStyle? decorationStyle,
+    List<FontFeature>? fontFeatures,
+    List<FontVariation>? fontVariations,
   }) {
     return TextTheme(
       displayLarge: displayLarge?.apply(
@@ -425,6 +427,8 @@ class TextTheme with Diagnosticable {
         heightFactor: heightFactor,
         heightDelta: heightDelta,
         package: package,
+        fontFeatures: fontFeatures,
+        fontVariations: fontVariations,
       ),
       displayMedium: displayMedium?.apply(
         color: displayColor,
@@ -442,6 +446,8 @@ class TextTheme with Diagnosticable {
         heightFactor: heightFactor,
         heightDelta: heightDelta,
         package: package,
+        fontFeatures: fontFeatures,
+        fontVariations: fontVariations,
       ),
       displaySmall: displaySmall?.apply(
         color: displayColor,
@@ -459,6 +465,8 @@ class TextTheme with Diagnosticable {
         heightFactor: heightFactor,
         heightDelta: heightDelta,
         package: package,
+        fontFeatures: fontFeatures,
+        fontVariations: fontVariations,
       ),
       headlineLarge: headlineLarge?.apply(
         color: displayColor,
@@ -476,6 +484,8 @@ class TextTheme with Diagnosticable {
         heightFactor: heightFactor,
         heightDelta: heightDelta,
         package: package,
+        fontFeatures: fontFeatures,
+        fontVariations: fontVariations,
       ),
       headlineMedium: headlineMedium?.apply(
         color: displayColor,
@@ -493,6 +503,8 @@ class TextTheme with Diagnosticable {
         heightFactor: heightFactor,
         heightDelta: heightDelta,
         package: package,
+        fontFeatures: fontFeatures,
+        fontVariations: fontVariations,
       ),
       headlineSmall: headlineSmall?.apply(
         color: bodyColor,
@@ -510,6 +522,8 @@ class TextTheme with Diagnosticable {
         heightFactor: heightFactor,
         heightDelta: heightDelta,
         package: package,
+        fontFeatures: fontFeatures,
+        fontVariations: fontVariations,
       ),
       titleLarge: titleLarge?.apply(
         color: bodyColor,
@@ -527,6 +541,8 @@ class TextTheme with Diagnosticable {
         heightFactor: heightFactor,
         heightDelta: heightDelta,
         package: package,
+        fontFeatures: fontFeatures,
+        fontVariations: fontVariations,
       ),
       titleMedium: titleMedium?.apply(
         color: bodyColor,
@@ -544,6 +560,8 @@ class TextTheme with Diagnosticable {
         heightFactor: heightFactor,
         heightDelta: heightDelta,
         package: package,
+        fontFeatures: fontFeatures,
+        fontVariations: fontVariations,
       ),
       titleSmall: titleSmall?.apply(
         color: bodyColor,
@@ -561,6 +579,8 @@ class TextTheme with Diagnosticable {
         heightFactor: heightFactor,
         heightDelta: heightDelta,
         package: package,
+        fontFeatures: fontFeatures,
+        fontVariations: fontVariations,
       ),
       bodyLarge: bodyLarge?.apply(
         color: bodyColor,
@@ -578,6 +598,8 @@ class TextTheme with Diagnosticable {
         heightFactor: heightFactor,
         heightDelta: heightDelta,
         package: package,
+        fontFeatures: fontFeatures,
+        fontVariations: fontVariations,
       ),
       bodyMedium: bodyMedium?.apply(
         color: bodyColor,
@@ -595,6 +617,8 @@ class TextTheme with Diagnosticable {
         heightFactor: heightFactor,
         heightDelta: heightDelta,
         package: package,
+        fontFeatures: fontFeatures,
+        fontVariations: fontVariations,
       ),
       bodySmall: bodySmall?.apply(
         color: displayColor,
@@ -612,6 +636,8 @@ class TextTheme with Diagnosticable {
         heightFactor: heightFactor,
         heightDelta: heightDelta,
         package: package,
+        fontFeatures: fontFeatures,
+        fontVariations: fontVariations,
       ),
       labelLarge: labelLarge?.apply(
         color: bodyColor,
@@ -629,6 +655,8 @@ class TextTheme with Diagnosticable {
         heightFactor: heightFactor,
         heightDelta: heightDelta,
         package: package,
+        fontFeatures: fontFeatures,
+        fontVariations: fontVariations,
       ),
       labelMedium: labelMedium?.apply(
         color: bodyColor,
@@ -646,6 +674,8 @@ class TextTheme with Diagnosticable {
         heightFactor: heightFactor,
         heightDelta: heightDelta,
         package: package,
+        fontFeatures: fontFeatures,
+        fontVariations: fontVariations,
       ),
       labelSmall: labelSmall?.apply(
         color: bodyColor,
@@ -663,6 +693,8 @@ class TextTheme with Diagnosticable {
         heightFactor: heightFactor,
         heightDelta: heightDelta,
         package: package,
+        fontFeatures: fontFeatures,
+        fontVariations: fontVariations,
       ),
     );
   }
