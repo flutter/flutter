@@ -15,7 +15,8 @@ import 'package:meta/meta.dart';
 ///
 /// Unlike counterparts in Bazel and GN:
 /// - The package name is always a source-absolute path (i.e. starts with `//`).
-/// - Valid identifier characters are `a-zA-Z0-9_-`, not starting with a digit.
+/// - Valid package identifier characters are `a-zA-Z0-9_-`, not starting with
+///   a digit; target names additionally allow `.`.
 /// - The target name is never empty, even when it is a default target.
 @immutable
 final class Label {
@@ -78,7 +79,7 @@ final class Label {
 
   /// A target name within the package.
   ///
-  /// The target name must be a valid identifier.
+  /// The target name must be a valid identifier, which may also contain dots.
   final String target;
 
   @override
@@ -128,13 +129,22 @@ final class Label {
   }
 
   static FormatException? _checkTarget(String target) {
-    if (!_identifier.hasMatch(target)) {
-      return FormatException('Target name must be a valid identifier.', target);
+    if (!_targetName.hasMatch(target)) {
+      return FormatException(
+        'Target name must start with a letter or underscore and contain only '
+        'letters, digits, "_", "-", or ".".',
+        target,
+      );
     }
     return null;
   }
 
   static final RegExp _identifier = RegExp(r'^[a-zA-Z_][a-zA-Z0-9_-]*$');
+
+  /// Target names additionally allow a dot, which GN permits and which the
+  /// engine's own build files rely on: `testing/dart/BUILD.gn` derives a
+  /// target per test file, giving names like `compile_gpu_test.dart`.
+  static final RegExp _targetName = RegExp(r'^[a-zA-Z_][a-zA-Z0-9_.-]*$');
 }
 
 /// A generic target pattern that can be used to match multiple targets.
