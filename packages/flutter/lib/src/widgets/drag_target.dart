@@ -48,8 +48,11 @@ typedef DragTargetAcceptWithDetails<T> = void Function(DragTargetDetails<T> deta
 /// not be accepted by the [DragTarget].
 ///
 /// Used by [DragTarget.builder].
-typedef DragTargetBuilder<T> =
-    Widget Function(BuildContext context, List<T?> candidateData, List<dynamic> rejectedData);
+typedef DragTargetBuilder<T> = Widget Function(
+  BuildContext context,
+  List<T?> candidateData,
+  List<dynamic> rejectedData,
+);
 
 /// Signature for when a [Draggable] is dragged across the screen.
 ///
@@ -91,8 +94,11 @@ typedef DragTargetMove<T> = void Function(DragTargetDetails<T> details);
 ///
 ///  * [pointerDragAnchorStrategy], which displays the feedback anchored at the
 ///    position of the touch that started the drag.
-typedef DragAnchorStrategy =
-    Offset Function(Draggable<Object> draggable, BuildContext context, Offset position);
+typedef DragAnchorStrategy = Offset Function(
+  Draggable<Object> draggable,
+  BuildContext context,
+  Offset position,
+);
 
 /// Display the feedback anchored at the position of the original child.
 ///
