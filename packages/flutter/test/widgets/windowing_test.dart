@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Display, PlatformDispatcher;
+import 'dart:ui' show Display, FlutterView, PlatformDispatcher;
 
 import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter/src/widgets/_window.dart'
@@ -431,10 +431,12 @@ void main() {
         // is what makes a controller's rootView the same object View.of and
         // MediaQuery see.
         expect(flutterViewForId(tester.view.viewId), isA<TestFlutterView>());
-        expect(
-          PlatformDispatcher.instance.view(id: tester.view.viewId),
-          isNot(isA<TestFlutterView>()),
-        );
+        // Bound to a local and null-checked first: isNot(isA<TestFlutterView>())
+        // would also accept null, which would make this pass while proving
+        // nothing.
+        final FlutterView? engineView = PlatformDispatcher.instance.view(id: tester.view.viewId);
+        expect(engineView, isNotNull);
+        expect(engineView, isNot(isA<TestFlutterView>()));
       });
 
       testWidgets('flutterViewForId throws a StateError naming the id it cannot find', (

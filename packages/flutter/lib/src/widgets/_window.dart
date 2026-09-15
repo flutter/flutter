@@ -39,6 +39,7 @@ import 'view.dart';
 /// applying debug view metric overrides — is the one that answers, and the view
 /// a controller exposes as its `rootView` is the same object the rest of the
 /// framework sees.
+@internal
 FlutterView flutterViewForId(int viewId) {
   final FlutterView? view = WidgetsBinding.instance.platformDispatcher.view(id: viewId);
   if (view == null) {
