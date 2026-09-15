@@ -53,4 +53,22 @@ void main() {
       throwsA(isA<FormatException>()),
     );
   });
+
+  test('throws on malformed targetAssets or pathInfo in manifest JSON', () {
+    expect(
+      () => NativeAssetsManifest.fromJson(const <String, Object?>{
+        'native-assets': <String, Object?>{'ios_arm64': 'not-a-map'},
+      }),
+      throwsA(isA<FormatException>()),
+    );
+
+    expect(
+      () => NativeAssetsManifest.fromJson(const <String, Object?>{
+        'native-assets': <String, Object?>{
+          'ios_arm64': <String, Object?>{'package:project/asset1': 'not-a-list'},
+        },
+      }),
+      throwsA(isA<FormatException>()),
+    );
+  });
 }

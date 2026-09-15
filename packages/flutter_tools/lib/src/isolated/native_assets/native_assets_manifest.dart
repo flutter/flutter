@@ -134,7 +134,7 @@ FlutterCodeAssetTargetLocation targetLocationForCodeAsset(
 ) {
   final LinkMode linkMode = asset.codeAsset.linkMode;
   return switch (linkMode) {
-    DynamicLoadingSystem(:final uri) => FlutterCodeAssetTargetLocation(
+    DynamicLoadingSystem(:final Uri uri) => FlutterCodeAssetTargetLocation(
       runtimePath: NativeAssetSystemPath.fromFileUri(uri),
     ),
     LookupInExecutable() => const FlutterCodeAssetTargetLocation(
@@ -142,7 +142,9 @@ FlutterCodeAssetTargetLocation targetLocationForCodeAsset(
     ),
     LookupInProcess() => const FlutterCodeAssetTargetLocation(runtimePath: NativeAssetInProcess()),
     DynamicLoadingBundled() => bundledLocationCallback(asset),
-    _ => throw Exception('Unsupported asset link mode ${linkMode.runtimeType} in asset $asset'),
+    StaticLinking() => throw Exception(
+      'Unsupported asset link mode ${linkMode.runtimeType} in asset $asset',
+    ),
   };
 }
 
@@ -177,19 +179,23 @@ final class NativeAssetsManifest {
     for (final MapEntry<String, Object?>(key: targetString, value: targetAssets)
         in nativeAssetsJson.entries) {
       if (targetAssets is! Map<String, Object?>) {
-        continue;
+        throw FormatException(
+          'Invalid native assets map for target "$targetString": $targetAssets',
+        );
       }
       final targetMap = <String, NativeAssetPath>{};
       for (final MapEntry<String, Object?>(key: assetId, value: pathInfo) in targetAssets.entries) {
-        if (pathInfo is List<Object?>) {
-          targetMap[assetId] = NativeAssetPath.fromJson(pathInfo);
+        if (pathInfo is! List<Object?>) {
+          throw FormatException('Invalid path info for asset "$assetId": $pathInfo');
         }
+        targetMap[assetId] = NativeAssetPath.fromJson(pathInfo);
       }
       assets[targetString] = targetMap;
     }
     return NativeAssetsManifest(assets: assets);
   }
 
+  static const _formatVersion = <int>[1, 0, 0];
   static const _formatVersionKey = 'format-version';
   static const _nativeAssetsKey = 'native-assets';
 
@@ -198,7 +204,7 @@ final class NativeAssetsManifest {
   final Map<String, Map<String, NativeAssetPath>> assets;
 
   Map<String, Object> toJson() => <String, Object>{
-    _formatVersionKey: const <int>[1, 0, 0],
+    _formatVersionKey: _formatVersion,
     _nativeAssetsKey: <String, Map<String, List<String>>>{
       for (final MapEntry<String, Map<String, NativeAssetPath>>(
             key: targetString,
