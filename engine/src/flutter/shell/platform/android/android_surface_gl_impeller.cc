@@ -17,8 +17,8 @@ namespace flutter {
 
 namespace {
 
-// On some older MediaTek devices running Android 10 or below (specifically
-// MT6762/Helio P22 and MT6765/Helio P35 with PowerVR Rogue GE8320 GPUs),
+// On some MediaTek devices running Android 13 (API 33) or below (specifically
+// MT6762/Helio P22, MT6765/Helio P35, and MT6779/Helio P90),
 // keeping the EGL context current on the raster thread while the thread is idle
 // triggers a driver-level race condition/crash inside the system RenderThread's
 // eglMakeCurrent call during activity transitions or platform view rendering.
@@ -31,7 +31,7 @@ bool ShouldClearContextBetweenFrames() {
   if (__system_property_get("ro.build.version.sdk", sdk_value) > 0) {
     sdk_version = atoi(sdk_value);
   }
-  if (sdk_version == 0 || sdk_version > 29) {
+  if (sdk_version == 0 || sdk_version > 33) {
     return false;
   }
 
@@ -40,7 +40,8 @@ bool ShouldClearContextBetweenFrames() {
     if (__system_property_get(name, value) > 0) {
       std::string_view platform(value);
       if (platform.starts_with("mt6762") || platform.starts_with("mt6765") ||
-          platform.starts_with("MT6762") || platform.starts_with("MT6765")) {
+          platform.starts_with("mt6779") || platform.starts_with("MT6762") ||
+          platform.starts_with("MT6765") || platform.starts_with("MT6779")) {
         return true;
       }
     }
