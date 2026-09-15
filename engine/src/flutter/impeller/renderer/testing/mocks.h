@@ -255,6 +255,7 @@ class MockCapabilities : public Capabilities {
   MOCK_METHOD(bool, SupportsDeviceTransientTextures, (), (const, override));
   MOCK_METHOD(bool, SupportsTriangleFan, (), (const override));
   MOCK_METHOD(bool, SupportsPrimitiveRestart, (), (const override));
+  MOCK_METHOD(bool, SupportsIndirectDraw, (), (const override));
   MOCK_METHOD(bool, Supports32BitPrimitiveIndices, (), (const override));
   MOCK_METHOD(bool, SupportsManuallyMippedTextures, (), (const override));
   MOCK_METHOD(bool, SupportsExtendedRangeFormats, (), (const override));

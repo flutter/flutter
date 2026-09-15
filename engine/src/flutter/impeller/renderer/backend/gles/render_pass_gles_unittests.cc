@@ -236,13 +236,16 @@ class RenderPassGLESCommandTest : public ::testing::Test {
   // Builds a mock OpenGL ES context with a render pass and a minimal
   // pipeline. The [resolver] controls which GL entry points the backend can
   // see, which is how a caller selects the hardware or emulated instancing
-  // path.
+  // path. [version_string] controls which core entry points are resolved at
+  // all, which is how a caller reaches the ES 3.1 indirect draw path.
   static RenderPassGLESContext CreateRenderPassGLESContext(
-      ProcTableGLES::Resolver resolver = kMockResolverGLES) {
+      ProcTableGLES::Resolver resolver = kMockResolverGLES,
+      const char* version_string = "OpenGL ES 3.0") {
     std::unique_ptr<NiceMock<MockGLESImpl>> mock_gl_impl =
         std::make_unique<NiceMock<MockGLESImpl>>();
     testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = *mock_gl_impl;
-    std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gl_impl));
+    std::shared_ptr<MockGLES> mock_gl =
+        MockGLES::Init(std::move(mock_gl_impl), std::nullopt, version_string);
 
     std::shared_ptr<ContextGLES> context =
         CreateFakeGLESContext(std::move(resolver));
@@ -543,6 +546,140 @@ TEST_F(RenderPassGLESCommandTest, ZeroInstanceCountIssuesNoDraw) {
 
   EXPECT_TRUE(render_pass->EncodeCommands());
   EXPECT_TRUE(reactor->React());
+}
+
+namespace {
+// A device buffer big enough to hold either indirect argument layout.
+std::shared_ptr<DeviceBuffer> CreateIndirectArgsBuffer(
+    const std::shared_ptr<ContextGLES>& context) {
+  DeviceBufferDescriptor desc;
+  desc.size = sizeof(DrawIndexedIndirectArgs);
+  desc.storage_mode = StorageMode::kHostVisible;
+  return std::static_pointer_cast<Context>(context)
+      ->GetResourceAllocator()
+      ->CreateBuffer(desc);
+}
+}  // namespace
+
+// A non-indexed command with an indirect argument buffer issues
+// glDrawArraysIndirect and never the count-carrying entry points.
+TEST_F(RenderPassGLESCommandTest, IndirectArrayDraw) {
+  auto ctx = CreateRenderPassGLESContext(kMockResolverGLES, "OpenGL ES 3.1");
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  EXPECT_TRUE(ctx.context->GetCapabilities()->SupportsIndirectDraw());
+
+  auto args = CreateIndirectArgsBuffer(ctx.context);
+  ASSERT_TRUE(args);
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  ASSERT_TRUE(render_pass->SetIndirectBuffer(DeviceBuffer::AsBufferView(args)));
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  EXPECT_CALL(mock_gl_impl_ref, DrawArraysIndirect(/*mode=*/_,
+                                                   /*indirect=*/nullptr))
+      .Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, DrawArrays(_, _, _)).Times(0);
+  EXPECT_CALL(mock_gl_impl_ref, DrawArraysInstanced(_, _, _, _)).Times(0);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
+// The indexed counterpart issues glDrawElementsIndirect.
+TEST_F(RenderPassGLESCommandTest, IndirectElementsDraw) {
+  auto ctx = CreateRenderPassGLESContext(kMockResolverGLES, "OpenGL ES 3.1");
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  DeviceBufferDescriptor index_desc;
+  index_desc.size = 6 * sizeof(uint16_t);
+  index_desc.storage_mode = StorageMode::kHostVisible;
+  auto index_buffer = std::static_pointer_cast<Context>(ctx.context)
+                          ->GetResourceAllocator()
+                          ->CreateBuffer(index_desc);
+  ASSERT_TRUE(index_buffer);
+  auto args = CreateIndirectArgsBuffer(ctx.context);
+  ASSERT_TRUE(args);
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  ASSERT_TRUE(render_pass->SetIndexBuffer(
+      DeviceBuffer::AsBufferView(index_buffer), IndexType::k16bit));
+  ASSERT_TRUE(render_pass->SetIndirectBuffer(DeviceBuffer::AsBufferView(args)));
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  EXPECT_CALL(mock_gl_impl_ref, DrawElementsIndirect(/*mode=*/_, /*type=*/_,
+                                                     /*indirect=*/nullptr))
+      .Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, DrawElements(_, _, _, _)).Times(0);
+  EXPECT_CALL(mock_gl_impl_ref, DrawElementsInstanced(_, _, _, _, _)).Times(0);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
+// The counts live in the argument buffer, so a command that never set them
+// still records a draw. Without this, the zero-count no-op check would drop
+// every indirect draw.
+TEST_F(RenderPassGLESCommandTest, IndirectDrawIgnoresUnsetCounts) {
+  auto ctx = CreateRenderPassGLESContext(kMockResolverGLES, "OpenGL ES 3.1");
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  auto args = CreateIndirectArgsBuffer(ctx.context);
+  ASSERT_TRUE(args);
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  render_pass->SetElementCount(0);
+  render_pass->SetInstanceCount(0);
+  ASSERT_TRUE(render_pass->SetIndirectBuffer(DeviceBuffer::AsBufferView(args)));
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  EXPECT_CALL(mock_gl_impl_ref, DrawArraysIndirect(_, _)).Times(1);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
+// An argument view whose offset is not 4 byte aligned is rejected before it
+// reaches the driver, which requires the alignment on every backend.
+TEST_F(RenderPassGLESCommandTest, IndirectDrawRejectsUnalignedOffset) {
+  auto ctx = CreateRenderPassGLESContext(kMockResolverGLES, "OpenGL ES 3.1");
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+
+  DeviceBufferDescriptor desc;
+  desc.size = sizeof(DrawIndexedIndirectArgs) + 2u;
+  desc.storage_mode = StorageMode::kHostVisible;
+  auto args = std::static_pointer_cast<Context>(ctx.context)
+                  ->GetResourceAllocator()
+                  ->CreateBuffer(desc);
+  ASSERT_TRUE(args);
+
+  EXPECT_FALSE(render_pass->SetIndirectBuffer(
+      BufferView(args, Range(2u, sizeof(DrawIndirectArgs)))));
+}
+
+// A context that advertises ES 3.1 but does not hand back the entry points
+// reports indirect draw as unsupported.
+TEST_F(RenderPassGLESCommandTest, IndirectDrawNeedsResolvedEntryPoints) {
+  auto ctx = CreateRenderPassGLESContext(kMockResolverGLESWithoutIndirectDraw,
+                                         "OpenGL ES 3.1");
+  EXPECT_FALSE(ctx.context->GetCapabilities()->SupportsIndirectDraw());
+}
+
+// Indirect draw is an ES 3.1 feature; an ES 3.0 context does not offer it.
+TEST_F(RenderPassGLESCommandTest, IndirectDrawUnsupportedOnES30) {
+  auto ctx = CreateRenderPassGLESContext(kMockResolverGLES, "OpenGL ES 3.0");
+  EXPECT_FALSE(ctx.context->GetCapabilities()->SupportsIndirectDraw());
 }
 
 }  // namespace testing
