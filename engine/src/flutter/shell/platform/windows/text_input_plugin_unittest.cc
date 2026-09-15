@@ -138,6 +138,7 @@ class MockFlutterWindowsView : public FlutterWindowsView {
 
   MOCK_METHOD(void, OnCursorRectUpdated, (const Rect&), (override));
   MOCK_METHOD(void, OnResetImeComposing, (), (override));
+  MOCK_METHOD(void, OnTextInputClientChanged, (bool), (override));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockFlutterWindowsView);
@@ -237,9 +238,28 @@ TEST_F(TextInputPluginTest, ClearClientResetsComposing) {
   modifier.SetViewId(456);
 
   EXPECT_CALL(*view(), OnResetImeComposing());
+  EXPECT_CALL(*view(), OnTextInputClientChanged(false));
 
   auto& codec = JsonMethodCodec::GetInstance();
   auto message = codec.EncodeMethodCall({"TextInput.clearClient", nullptr});
+  messenger.SimulateEngineMessage(kChannelName, message->data(),
+                                  message->size(), reply_handler);
+}
+
+TEST_F(TextInputPluginTest, SetClientEnablesIme) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger([](const std::string& channel,
+                                   const uint8_t* message, size_t message_size,
+                                   BinaryReply reply) {});
+  BinaryReply reply_handler = [](const uint8_t* reply, size_t reply_size) {};
+
+  TextInputPlugin handler(&messenger, engine());
+  EXPECT_CALL(*view(), OnTextInputClientChanged(true));
+
+  auto message = JsonMethodCodec::GetInstance().EncodeMethodCall(
+      {"TextInput.setClient",
+       EncodedClientConfig("TextInputType.text", "TextInputAction.done")});
   messenger.SimulateEngineMessage(kChannelName, message->data(),
                                   message->size(), reply_handler);
 }
@@ -731,7 +751,8 @@ TEST_F(TextInputPluginTest, SetMarkedTextRectRequiresView) {
 
 TEST_F(TextInputPluginTest, SetAndUseMultipleClients) {
   UseEngineWithView();  // Creates the default view
-  AddViewWithId(789);   // Creates the next view
+  std::unique_ptr<MockFlutterWindowsView> second_view =
+      AddViewWithId(789);  // Creates the next view
 
   bool sent_message = false;
   TestBinaryMessenger messenger(
@@ -740,6 +761,13 @@ TEST_F(TextInputPluginTest, SetAndUseMultipleClients) {
                       BinaryReply reply) { sent_message = true; });
 
   TextInputPlugin handler(&messenger, engine());
+
+  {
+    InSequence sequence;
+    EXPECT_CALL(*view(), OnTextInputClientChanged(true));
+    EXPECT_CALL(*view(), OnTextInputClientChanged(false));
+    EXPECT_CALL(*second_view, OnTextInputClientChanged(true));
+  }
 
   auto const set_client_and_send_message = [&](int client_id, int view_id) {
     auto args = std::make_unique<rapidjson::Document>(rapidjson::kArrayType);
@@ -800,6 +828,7 @@ TEST_F(TextInputPluginTest, OnViewRemovedResetsActiveView) {
   auto set_client_message = codec.EncodeMethodCall(
       {"TextInput.setClient",
        EncodedClientConfig("TextInputType.text", "TextInputAction.done")});
+  EXPECT_CALL(*view(), OnTextInputClientChanged(true));
   messenger.SimulateEngineMessage(kChannelName, set_client_message->data(),
                                   set_client_message->size(), reply_handler);
 
@@ -807,6 +836,7 @@ TEST_F(TextInputPluginTest, OnViewRemovedResetsActiveView) {
   EXPECT_EQ(modifier.GetViewId(), 456);
 
   // Remove the active view.
+  EXPECT_CALL(*view(), OnTextInputClientChanged(false));
   handler.OnViewRemoved(456);
 
   EXPECT_FALSE(modifier.HasActiveModel());
