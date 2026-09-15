@@ -288,7 +288,14 @@ List<FlutterCommand> generateCommands({
     extensionManager: extensionManager,
   ),
   CustomDevicesCommand(featureFlags: featureFlags, toolContext: toolDependencies.toolContext),
-  CreateCommand(verboseHelp: verboseHelp, extensionTemplateManager: extensionTemplateManager),
+  CreateCommand(
+    androidContext: toolDependencies.androidContext,
+    appleContext: toolDependencies.appleContext,
+    templateRenderer: const MustacheTemplateRenderer(),
+    toolContext: toolDependencies.toolContext,
+    extensionTemplateManager: extensionTemplateManager,
+    verboseHelp: verboseHelp,
+  ),
   DaemonCommand(
     androidContext: toolDependencies.androidContext,
     androidWorkflow: android_workflow.androidWorkflow,
