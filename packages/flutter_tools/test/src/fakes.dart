@@ -36,6 +36,9 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
+import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -48,6 +51,7 @@ import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/native_assets.dart';
+import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
@@ -576,11 +580,11 @@ class TestFeatureFlags implements FeatureFlags {
     this.isSwiftPackageManagerEnabled = false,
     this.isOmitLegacyVersionFileEnabled = false,
     this.isWindowingEnabled = false,
-    this.isAccessibilityEvaluationsEnabled = false,
     this.isLLDBDebuggingEnabled = false,
     this.isUISceneMigrationEnabled = false,
     this.isRiscv64SupportEnabled = false,
     this.isMacOSArm64OnlyEnabled = false,
+    this.isHcppEnabled = false,
     this.isToolExtensionsEnabled = false,
   });
 
@@ -630,9 +634,6 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isWindowingEnabled;
 
   @override
-  final bool isAccessibilityEvaluationsEnabled;
-
-  @override
   final bool isLLDBDebuggingEnabled;
 
   @override
@@ -643,6 +644,9 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isMacOSArm64OnlyEnabled;
+
+  @override
+  final bool isHcppEnabled;
 
   @override
   final bool isToolExtensionsEnabled;
@@ -663,12 +667,12 @@ class TestFeatureFlags implements FeatureFlags {
       swiftPackageManager => isSwiftPackageManagerEnabled,
       omitLegacyVersionFile => isOmitLegacyVersionFileEnabled,
       windowingFeature => isWindowingEnabled,
-      accessibilityEvaluationsFeature => isAccessibilityEvaluationsEnabled,
       lldbDebugging => isLLDBDebuggingEnabled,
       uiSceneMigration => isUISceneMigrationEnabled,
       riscv64 => isRiscv64SupportEnabled,
       macOSArm64Only => isMacOSArm64OnlyEnabled,
       recordUse => isRecordUseEnabled,
+      hcpp => isHcppEnabled,
       toolExtensionsFeature => isToolExtensionsEnabled,
       _ => false,
     };
@@ -691,11 +695,11 @@ class TestFeatureFlags implements FeatureFlags {
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
-    accessibilityEvaluationsFeature,
     lldbDebugging,
     uiSceneMigration,
     riscv64,
     macOSArm64Only,
+    hcpp,
     toolExtensionsFeature,
   ];
 
@@ -837,14 +841,13 @@ class FakeJava extends Fake implements Java {
     this.javaSource = JavaSource.androidStudio,
     String binary = '/android-studio/jbr/bin/java',
     Version? version,
-    bool canRun = true,
+    this._canRun = true,
   }) : binaryPath = binary,
        version = version ?? const Version.withText(19, 0, 2, 'openjdk 19.0.2 2023-01-17'),
        _environment = <String, String>{
          Java.javaHomeEnvironmentVariable: ?javaHome,
          'PATH': '/android-studio/jbr/bin',
-       },
-       _canRun = canRun;
+       };
 
   @override
   String? javaHome;
@@ -892,7 +895,7 @@ class FakeDartDevelopmentServiceLauncher extends Fake implements DartDevelopment
 }
 
 class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
-  FakeDevtoolsLauncher({DevToolsServerAddress? serverAddress}) : _serverAddress = serverAddress;
+  FakeDevtoolsLauncher({this._serverAddress});
 
   @override
   Future<void> get processStart => _processStarted.future;
@@ -982,20 +985,56 @@ class FakeConfig extends Fake implements Config {
 
 class FakeFileSystemUtils extends Fake implements FileSystemUtils {}
 
-class FakeTerminal extends Fake implements Terminal {}
+class FakeTerminal extends Fake implements AnsiTerminal {
+  @override
+  String get successMark => '✓';
+  @override
+  String get warningMark => '!';
+
+  @override
+  String bolden(String message) => message;
+
+  @override
+  String clearScreen() => '';
+
+  @override
+  String color(String message, TerminalColor color) => message;
+}
 
 class FakeProcessUtils extends Fake implements ProcessUtils {}
 
 class FakeTemplateRenderer extends Fake implements TemplateRenderer {}
 
 class FakeXcode extends Fake implements Xcode {
-  FakeXcode({this.currentVersion, this.isDevicectlInstalled = true});
+  FakeXcode({
+    this.currentVersion,
+    this.isDevicectlInstalled = true,
+    this.isInstalled = true,
+    this.isRecommendedVersionSatisfactory = true,
+    this.isRequiredVersionSatisfactory = true,
+  });
 
   @override
   Version? currentVersion;
 
   @override
   bool isDevicectlInstalled;
+
+  @override
+  bool isInstalled;
+
+  @override
+  bool isRecommendedVersionSatisfactory;
+
+  @override
+  bool isRequiredVersionSatisfactory;
+
+  @override
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
+    XcodeBasedProject xcodeProject,
+    Directory buildDirectory, {
+    bool skipPackageValidation = true,
+  }) async => <String>[...xcrunCommand(), 'xcodebuild'];
 
   @override
   Future<String> sdkLocation(EnvironmentType environmentType) async => '/fake/sdk/path';
@@ -1005,9 +1044,11 @@ class FakeXcode extends Fake implements Xcode {
 }
 
 class FakeArtifacts extends Fake implements Artifacts {
-  FakeArtifacts({FileSystem? fileSystem}) : _delegate = Artifacts.test(fileSystem: fileSystem);
+  FakeArtifacts({FileSystem? fileSystem, this.sdkPath})
+    : _delegate = Artifacts.test(fileSystem: fileSystem);
 
   final Artifacts _delegate;
+  final String? sdkPath;
 
   @override
   LocalEngineInfo? get localEngineInfo => _delegate.localEngineInfo;
@@ -1024,12 +1065,17 @@ class FakeArtifacts extends Fake implements Artifacts {
     TargetPlatform? platform,
     BuildMode? mode,
     EnvironmentType? environmentType,
-  }) => _delegate.getArtifactPath(
-    artifact,
-    platform: platform,
-    mode: mode,
-    environmentType: environmentType,
-  );
+  }) {
+    if (artifact == Artifact.engineDartSdkPath && sdkPath != null) {
+      return sdkPath!;
+    }
+    return _delegate.getArtifactPath(
+      artifact,
+      platform: platform,
+      mode: mode,
+      environmentType: environmentType,
+    );
+  }
 
   @override
   String getEngineType(TargetPlatform platform, [BuildMode? mode]) =>
@@ -1092,22 +1138,69 @@ class FakeBuildTargets extends Fake implements BuildTargets {}
 
 class FakeCrashReporter extends Fake implements CrashReporter {}
 
+class FakeDoctor extends Fake implements Doctor {
+  FakeDoctor({this.canListEmulators = true, this.canLaunchAnything = true});
+
+  final bool canListEmulators;
+
+  @override
+  final bool canLaunchAnything;
+
+  @override
+  List<Workflow> get workflows => <Workflow>[FakeWorkflow(canListEmulators: canListEmulators)];
+
+  @override
+  List<DoctorValidator> get validators => const <DoctorValidator>[];
+}
+
+class FakeWorkflow extends Fake implements Workflow {
+  FakeWorkflow({this.canListEmulators = true});
+
+  @override
+  final bool canListEmulators;
+}
+
+class FakeEmulatorManager extends Fake implements EmulatorManager {
+  FakeEmulatorManager({this.createResult, this.emulators = const <Emulator>[]});
+
+  final List<Emulator> emulators;
+  final CreateEmulatorResult? createResult;
+  String? lastCreatedName;
+
+  @override
+  Future<List<Emulator>> getAllAvailableEmulators() async => emulators;
+
+  @override
+  Future<List<Emulator>> getEmulatorsMatching(String id) async {
+    return emulators
+        .where(
+          (Emulator e) =>
+              e.id.toLowerCase().contains(id.toLowerCase()) ||
+              e.name.toLowerCase().contains(id.toLowerCase()),
+        )
+        .toList();
+  }
+
+  @override
+  Future<CreateEmulatorResult> createEmulator({String? name}) async {
+    lastCreatedName = name;
+    return createResult ?? CreateEmulatorResult('fake_emulator', success: true);
+  }
+}
+
 class FakeToolDependencies extends Fake implements ToolDependencies {
   FakeToolDependencies({
-    Analytics? analytics,
-    AndroidContext? androidContext,
-    AppleContext? appleContext,
-    BuildSystem? buildSystem,
-    BuildTargets? buildTargets,
-    CrashReporter? crashReporter,
-    ToolContext? toolContext,
-  }) : _analytics = analytics,
-       _androidContext = androidContext,
-       _appleContext = appleContext,
-       _buildSystem = buildSystem,
-       _buildTargets = buildTargets,
-       _crashReporter = crashReporter,
-       _toolContext = toolContext;
+    this._analytics,
+    this._androidContext,
+    this._appleContext,
+    this._buildSystem,
+    this._buildTargets,
+    this._crashReporter,
+    this._doctor,
+    this._emulatorManager,
+    this._featureFlags,
+    this._toolContext,
+  });
 
   final Analytics? _analytics;
   final AndroidContext? _androidContext;
@@ -1115,6 +1208,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final BuildSystem? _buildSystem;
   final BuildTargets? _buildTargets;
   final CrashReporter? _crashReporter;
+  final Doctor? _doctor;
+  final EmulatorManager? _emulatorManager;
+  final FeatureFlags? _featureFlags;
   final ToolContext? _toolContext;
 
   @override
@@ -1136,59 +1232,47 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   CrashReporter get crashReporter => _crashReporter ?? FakeCrashReporter();
 
   @override
+  Doctor get doctor => _doctor ?? FakeDoctor();
+
+  @override
+  EmulatorManager get emulatorManager => _emulatorManager ?? FakeEmulatorManager();
+
+  @override
+  FeatureFlags get featureFlags => _featureFlags ?? TestFeatureFlags();
+
+  @override
   ToolContext get toolContext => _toolContext ?? FakeToolContext();
 }
 
 class FakeToolContext extends Fake implements ToolContext {
   FakeToolContext({
-    Artifacts? artifacts,
-    BotDetector? botDetector,
-    Cache? cache,
-    Config? config,
-    CustomDevicesConfig? customDevicesConfig,
-    FlutterVersion? flutterVersion,
-    FileSystem? fs,
-    Git? git,
-    LocalEngineLocator? localEngineLocator,
-    Logger? logger,
-    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-    OperatingSystemUtils? os,
-    OutputPreferences? outputPreferences,
-    Platform? platform,
-    PreRunValidator? preRunValidator,
-    ProcessManager? processManager,
-    ProcessUtils? processUtils,
-    FlutterProjectFactory? projectFactory,
-    ShutdownHooks? shutdownHooks,
-    Signals? signals,
-    Stdio? stdio,
-    SystemClock? systemClock,
-    AnsiTerminal? terminal,
-    UserMessages? userMessages,
-  }) : _artifacts = artifacts,
-       _botDetector = botDetector,
-       _cache = cache,
-       _config = config,
-       _customDevicesConfig = customDevicesConfig,
-       _flutterVersion = flutterVersion,
-       _fs = fs,
-       _git = git,
-       _localEngineLocator = localEngineLocator,
-       _logger = logger,
-       _nativeAssetsBuilder = nativeAssetsBuilder,
-       _os = os,
-       _outputPreferences = outputPreferences,
-       _platform = platform,
-       _preRunValidator = preRunValidator,
-       _processManager = processManager,
-       _processUtils = processUtils,
-       _projectFactory = projectFactory,
-       _shutdownHooks = shutdownHooks,
-       _signals = signals,
-       _stdio = stdio,
-       _systemClock = systemClock,
-       _terminal = terminal,
-       _userMessages = userMessages;
+    this._artifacts,
+    this._botDetector,
+    this._cache,
+    this._config,
+    this._customDevicesConfig,
+    this._flutterVersion,
+    this._fs,
+    this._git,
+    this._localEngineLocator,
+    this._logger,
+    this._nativeAssetsBuilder,
+    this._os,
+    this._outputPreferences,
+    this._persistentToolState,
+    this._platform,
+    this._preRunValidator,
+    this._processInfo,
+    this._processManager,
+    this._processUtils,
+    this._projectFactory,
+    this._shutdownHooks,
+    this._signals,
+    this._stdio,
+    this._systemClock,
+    this._terminal,
+    this._userMessages,
+  });
 
   final Artifacts? _artifacts;
   final BotDetector? _botDetector;
@@ -1203,8 +1287,10 @@ class FakeToolContext extends Fake implements ToolContext {
   final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
   final OperatingSystemUtils? _os;
   final OutputPreferences? _outputPreferences;
+  final PersistentToolState? _persistentToolState;
   final Platform? _platform;
   final PreRunValidator? _preRunValidator;
+  final ProcessInfo? _processInfo;
   final ProcessManager? _processManager;
   final ProcessUtils? _processUtils;
   final FlutterProjectFactory? _projectFactory;
@@ -1265,10 +1351,21 @@ class FakeToolContext extends Fake implements ToolContext {
   late final OutputPreferences outputPreferences = _outputPreferences ?? OutputPreferences.test();
 
   @override
+  late final PersistentToolState persistentToolState =
+      _persistentToolState ??
+      PersistentToolState.test(
+        directory: fs.systemTempDirectory.createTempSync('persistent_tool_state'),
+        logger: logger,
+      );
+
+  @override
   late final Platform platform = _platform ?? FakePlatform();
 
   @override
   late final PreRunValidator preRunValidator = _preRunValidator ?? const NoOpPreRunValidator();
+
+  @override
+  late final ProcessInfo processInfo = _processInfo ?? ProcessInfo.test(fs);
 
   @override
   late final ProcessManager processManager = _processManager ?? FakeProcessManager.any();
@@ -1306,52 +1403,32 @@ class FakeToolContext extends Fake implements ToolContext {
 /// A [ToolContext] that dynamically delegates to [globals] for use in [testUsingContext].
 class DelegatingToolContext extends Fake implements ToolContext {
   DelegatingToolContext({
-    Artifacts? artifacts,
-    BotDetector? botDetector,
-    Cache? cache,
-    Config? config,
-    CustomDevicesConfig? customDevicesConfig,
-    FlutterVersion? flutterVersion,
-    FileSystem? fs,
-    Git? git,
-    LocalEngineLocator? localEngineLocator,
-    Logger? logger,
-    OperatingSystemUtils? os,
-    OutputPreferences? outputPreferences,
-    Platform? platform,
-    PreRunValidator? preRunValidator,
-    ProcessManager? processManager,
-    ProcessUtils? processUtils,
-    FlutterProjectFactory? projectFactory,
-    ShutdownHooks? shutdownHooks,
-    Signals? signals,
-    Stdio? stdio,
-    SystemClock? systemClock,
-    AnsiTerminal? terminal,
-    UserMessages? userMessages,
-  }) : _artifacts = artifacts,
-       _botDetector = botDetector,
-       _cache = cache,
-       _config = config,
-       _customDevicesConfig = customDevicesConfig,
-       _flutterVersion = flutterVersion,
-       _fs = fs,
-       _git = git,
-       _localEngineLocator = localEngineLocator,
-       _logger = logger,
-       _os = os,
-       _outputPreferences = outputPreferences,
-       _platform = platform,
-       _preRunValidator = preRunValidator,
-       _processManager = processManager,
-       _processUtils = processUtils,
-       _projectFactory = projectFactory,
-       _shutdownHooks = shutdownHooks,
-       _signals = signals,
-       _stdio = stdio,
-       _systemClock = systemClock,
-       _terminal = terminal,
-       _userMessages = userMessages;
+    this._artifacts,
+    this._botDetector,
+    this._cache,
+    this._config,
+    this._customDevicesConfig,
+    this._flutterVersion,
+    this._fs,
+    this._git,
+    this._localEngineLocator,
+    this._logger,
+    this._os,
+    this._outputPreferences,
+    this._persistentToolState,
+    this._platform,
+    this._preRunValidator,
+    this._processInfo,
+    this._processManager,
+    this._processUtils,
+    this._projectFactory,
+    this._shutdownHooks,
+    this._signals,
+    this._stdio,
+    this._systemClock,
+    this._terminal,
+    this._userMessages,
+  });
 
   final Artifacts? _artifacts;
   final BotDetector? _botDetector;
@@ -1365,8 +1442,10 @@ class DelegatingToolContext extends Fake implements ToolContext {
   final Logger? _logger;
   final OperatingSystemUtils? _os;
   final OutputPreferences? _outputPreferences;
+  final PersistentToolState? _persistentToolState;
   final Platform? _platform;
   final PreRunValidator? _preRunValidator;
+  final ProcessInfo? _processInfo;
   final ProcessManager? _processManager;
   final ProcessUtils? _processUtils;
   final FlutterProjectFactory? _projectFactory;
@@ -1424,10 +1503,22 @@ class DelegatingToolContext extends Fake implements ToolContext {
   OutputPreferences get outputPreferences => _outputPreferences ?? globals.outputPreferences;
 
   @override
+  PersistentToolState get persistentToolState =>
+      _persistentToolState ??
+      globals.persistentToolState ??
+      PersistentToolState.test(
+        directory: fs.systemTempDirectory.createTempSync('persistent_tool_state'),
+        logger: logger,
+      );
+
+  @override
   Platform get platform => _platform ?? globals.platform;
 
   @override
   PreRunValidator get preRunValidator => _preRunValidator ?? const NoOpPreRunValidator();
+
+  @override
+  ProcessInfo get processInfo => _processInfo ?? globals.processInfo;
 
   @override
   ProcessManager get processManager => _processManager ?? globals.processManager;
@@ -1461,15 +1552,7 @@ class DelegatingToolContext extends Fake implements ToolContext {
 }
 
 class FakeAndroidContext extends Fake implements AndroidContext {
-  FakeAndroidContext({
-    AndroidSdk? androidSdk,
-    AndroidStudio? androidStudio,
-    GradleUtils? gradleUtils,
-    Java? java,
-  }) : _androidSdk = androidSdk,
-       _androidStudio = androidStudio,
-       _gradleUtils = gradleUtils,
-       _java = java;
+  FakeAndroidContext({this._androidSdk, this._androidStudio, this._gradleUtils, this._java});
 
   final AndroidSdk? _androidSdk;
   final AndroidStudio? _androidStudio;
@@ -1491,22 +1574,15 @@ class FakeAndroidContext extends Fake implements AndroidContext {
 
 class FakeAppleContext extends Fake implements AppleContext {
   FakeAppleContext({
-    CocoaPods? cocoaPods,
-    CocoaPodsValidator? cocoapodsValidator,
-    IOSSimulatorUtils? iosSimulatorUtils,
-    IOSWorkflow? iosWorkflow,
-    PlistParser? plistParser,
-    XCDevice? xcdevice,
-    Xcode? xcode,
-    XcodeProjectInterpreter? xcodeProjectInterpreter,
-  }) : _cocoaPods = cocoaPods,
-       _cocoapodsValidator = cocoapodsValidator,
-       _iosSimulatorUtils = iosSimulatorUtils,
-       _iosWorkflow = iosWorkflow,
-       _plistParser = plistParser,
-       _xcdevice = xcdevice,
-       _xcode = xcode,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter;
+    this._cocoaPods,
+    this._cocoapodsValidator,
+    this._iosSimulatorUtils,
+    this._iosWorkflow,
+    this._plistParser,
+    this._xcdevice,
+    this._xcode,
+    this._xcodeProjectInterpreter,
+  });
 
   final CocoaPods? _cocoaPods;
   final CocoaPodsValidator? _cocoapodsValidator;

@@ -150,7 +150,7 @@ Future<void> testMain() async {
         ui.Offset(25.0, lineHeight / 2),
       );
       expect(posLine0.offset, 3);
-      //expect(posLine0.affinity, ui.TextAffinity.upstream);
+      expect(posLine0.affinity, ui.TextAffinity.upstream);
 
       // Click past right edge of line 0 ('Hello\n')
       final ui.TextPosition posPastLine0 = paragraph.getPositionForOffset(
@@ -164,7 +164,8 @@ Future<void> testMain() async {
         ui.Offset(20.0, lineHeight + lineHeight / 2),
       );
       expect(posLine1.offset, 8);
-      //expect(posLine1.affinity, ui.TextAffinity.downstream);
+      // At x=20.0px (boundary between 'o' and 'r'), hit-testing associates with the right edge of 'o' (upstream).
+      expect(posLine1.affinity, ui.TextAffinity.upstream);
 
       // Click above paragraph at x=25.0px -> hit-tests line 0 at x=25.0px (offset 3, upstream)
       final ui.TextPosition posAbove = paragraph.getPositionForOffset(const ui.Offset(25.0, -10.0));

@@ -2,12 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart';
-import 'package:ui/src/engine/web_paragraph/paragraph.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
@@ -84,6 +80,15 @@ Future<void> testMain() async {
       expect(width2 > 500, true);
       expect(width34 > 500, true);
       expect(width5 < 500, true);
+
+      // Rectangles for whitespaces adjustments added correctly
+      // Vertically
+      expect(rects[0].toRect().top, rects[1].toRect().top);
+      expect(rects[3].toRect().top, rects[4].toRect().top);
+      // Horizontally
+      expect(width01, width2);
+      expect(width01, width34);
+
       expect(paragraph.longestLine < 500, true);
     }
 

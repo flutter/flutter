@@ -231,6 +231,9 @@ class FakeWebDevFS extends Fake implements WebDevFS {
   Future<Uri> create() async {
     return Uri.base;
   }
+
+  @override
+  void markReady() {}
 }
 
 class FakeWebDevice extends Fake implements Device {

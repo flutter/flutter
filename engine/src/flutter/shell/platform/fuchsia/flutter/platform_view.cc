@@ -24,6 +24,7 @@
 #include "third_party/rapidjson/include/rapidjson/writer.h"
 
 #include "flutter/fml/make_copyable.h"
+#include "flutter/shell/platform/fuchsia/flutter/pointer_injector_delegate.h"
 #include "flutter/shell/platform/fuchsia/flutter/text_delegate.h"
 #include "flutter/shell/platform/fuchsia/flutter/vsync_waiter.h"
 #include "flutter/shell/platform/fuchsia/runtime/dart/utils/inlines.h"
@@ -67,6 +68,7 @@ PlatformView::PlatformView(
     fuchsia::ui::views::ViewRefFocusedHandle view_ref_focused,
     fuchsia::ui::composition::ParentViewportWatcherHandle
         parent_viewport_watcher,
+    fuchsia::ui::pointerinjector::RegistryHandle pointerinjector_registry,
     OnEnableWireframeCallback wireframe_enabled_callback,
     OnCreateViewCallback on_create_view_callback,
     OnUpdateViewCallback on_update_view_callback,
@@ -102,6 +104,9 @@ PlatformView::PlatformView(
       dart_application_svc_(dart_application_svc),
       parent_viewport_watcher_(parent_viewport_watcher.Bind()),
       weak_factory_(this) {
+  fuchsia::ui::views::ViewRef view_ref_clone;
+  fidl::Clone(view_ref, &view_ref_clone);
+
   text_delegate_ =
       std::make_unique<TextDelegate>(
           std::move(view_ref), std::move(ime_service), std::move(keyboard),
@@ -157,6 +162,10 @@ PlatformView::PlatformView(
     }
     weak->DispatchPointerDataPacket(std::move(packet));
   });
+
+  // Configure the pointer injector delegate.
+  pointer_injector_delegate_ = std::make_unique<PointerInjectorDelegate>(
+      std::move(pointerinjector_registry), std::move(view_ref_clone));
 
   // This is only used by the integration tests.
   if (dart_application_svc) {
@@ -409,8 +418,12 @@ void PlatformView::OnChildViewViewRef(uint64_t content_id,
                                       fuchsia::ui::views::ViewRef view_ref) {
   FML_CHECK(child_view_info_.count(content_id) == 1);
 
+  fuchsia::ui::views::ViewRef view_ref_clone;
+  fidl::Clone(view_ref, &view_ref_clone);
+
   focus_delegate_->OnChildViewViewRef(view_id, std::move(view_ref));
 
+  pointer_injector_delegate_->OnCreateView(view_id, std::move(view_ref_clone));
   OnChildViewConnected(content_id);
 }
 
@@ -444,7 +457,7 @@ void PlatformView::OnCreateView(ViewCallback on_view_created,
               watcher_handle.Bind();
           FML_CHECK(child_view_watcher);
 
-          child_view_watcher.set_error_handler([weak, content_id](
+          child_view_watcher.set_error_handler([weak, view_id, content_id](
                                                    zx_status_t status) {
             FML_LOG(WARNING)
                 << "Child disconnected. ChildViewWatcher status: " << status;
@@ -455,6 +468,9 @@ void PlatformView::OnCreateView(ViewCallback on_view_created,
                                   "destroyed; ignoring.";
               return;
             }
+
+            // Disconnected views cannot listen to pointer events.
+            weak->pointer_injector_delegate_->OnDestroyView(view_id);
 
             weak->OnChildViewDisconnected(content_id.value);
           });
@@ -501,6 +517,7 @@ void PlatformView::OnDisposeView(int64_t view_id_raw) {
           weak->OnChildViewDisconnected(content_id.value);
           weak->child_view_info_.erase(content_id.value);
           weak->focus_delegate_->OnDisposeChildView(view_id_raw);
+          weak->pointer_injector_delegate_->OnDestroyView(view_id_raw);
         });
       };
   on_destroy_view_callback_(view_id_raw, std::move(on_view_unbound));
@@ -884,6 +901,10 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
   } else if (method.rfind("View.focus", 0) == 0) {
     return focus_delegate_->HandlePlatformMessage(document,
                                                   message->response());
+  } else if (method.rfind(PointerInjectorDelegate::kPointerInjectorMethodPrefix,
+                          0) == 0) {
+    return pointer_injector_delegate_->HandlePlatformMessage(
+        document, message->response());
   } else {
     FML_LOG(ERROR) << "Unknown " << message->channel() << " method " << method;
   }

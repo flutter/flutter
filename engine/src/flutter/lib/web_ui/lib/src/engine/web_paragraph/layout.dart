@@ -202,7 +202,9 @@ class TextLayout {
     paragraph.alphabeticBaseline = lines.first.fontBoundingBoxAscent;
     paragraph.ideographicBaseline = lines.first.height;
     // We only know now which line is the last and we need this information for later
-    lines.last.lastLine = true;
+    if (lines.isNotEmpty) {
+      lines.last.lastLine = true;
+    }
   }
 
   double addLine(
@@ -628,6 +630,11 @@ class TextLayout {
             block.isLtr ? ui.TextDirection.ltr : ui.TextDirection.rtl,
           ),
         );
+      }
+
+      if (result.isEmpty) {
+        // We didn't find any intersections between the range and the line's visual blocks
+        continue;
       }
 
       if (boxWidthStyle == ui.BoxWidthStyle.max && lineIndex < lines.length - 1) {

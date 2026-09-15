@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+
 import 'package:ui/ui.dart' as ui;
+
 import 'code_unit_flags.dart';
 import 'layout.dart';
 import 'paragraph.dart';
@@ -55,8 +57,10 @@ class TextWrapper {
         line.consumePendingText();
         line.addHardLineBreak(index);
 
-        // There is a special case: "\n" at the end of the text
-        // In this special case we will add 2 lines
+        // There is a special case: "\n" at the end of the text.
+        // The last element of `allClusters` is an artificial EOF cluster,
+        // so `_layout.allClusters.length - 2` is the last text cluster.
+        // In this special case we will add 2 lines (including an empty trailing line).
         line.build(/*specialCase=*/ index == _layout.allClusters.length - 2);
 
         if (line.reachedMaxLines()) {
