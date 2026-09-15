@@ -394,6 +394,9 @@ bool DefaultPlatformViewsProvider::IsHcppEnabled() const {
 void DefaultPlatformViewsProvider::SetHcppEnabled(bool enabled) {
   TRACE_EVENT0("flutter", "DefaultPlatformViewsProvider::SetHcppEnabled");
   hcpp_enabled_ = enabled;
+  if (jvm_invoker_) {
+    jvm_invoker_->SetHcppEnabled(enabled);
+  }
 }
 
 // =============================================================================
@@ -980,6 +983,19 @@ bool AndroidPlatformViewsController::PushPlatformViewMutators(
   TRACE_EVENT1("flutter",
                "AndroidPlatformViewsController::PushPlatformViewMutators",
                "view_id", std::to_string(view_id).c_str());
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (active_composition_types_.find(view_id) ==
+        active_composition_types_.end()) {
+      // Platform views created dynamically from Dart via the platform views
+      // channel are managed by the Android embedding in Java
+      // (PlatformViewsController) and may not be explicitly registered via
+      // C++ CreatePlatformView. Default their active composition type to
+      // Hybrid Composition so OnDisplayPlatformView can forward mutators.
+      active_composition_types_[view_id] =
+          PlatformViewCompositionType::kHybridComposition;
+    }
+  }
   return OnDisplayPlatformView(view_id, x, y, width, height, view_width,
                                view_height, mutators_stack);
 }

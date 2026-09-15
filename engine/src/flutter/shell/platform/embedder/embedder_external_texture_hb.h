@@ -54,7 +54,10 @@ class EmbedderExternalTextureHB : public flutter::Texture {
     return std::nullopt;
   }
 
-  bool HasValidImage() const { return last_image_ != nullptr; }
+  bool HasValidImage() const {
+    std::lock_guard<std::mutex> lock(frame_mutex_);
+    return last_image_ != nullptr;
+  }
 
   sk_sp<DlImage> ResolveTexture(int64_t texture_id,
                                 GrDirectContext* context,

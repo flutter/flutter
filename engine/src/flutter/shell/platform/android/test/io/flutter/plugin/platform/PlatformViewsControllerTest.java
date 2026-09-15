@@ -1678,6 +1678,88 @@ public class PlatformViewsControllerTest {
         ShadowFlutterJNI.class,
         ShadowPlatformTaskQueue.class
       })
+  public void
+      onEndFrame_preservesHybridCompositionViewVisibilityWhenConvertedToImageViewAndFrameContainsView() {
+    final PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    // Constant 42: An arbitrary non-zero platform view ID used for testing to avoid
+    // relying on default/zero values and ensure arbitrary IDs are correctly routed.
+    final int platformViewId = 42;
+    assertNull(platformViewsController.getPlatformViewById(platformViewId));
+
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    final Context context = ApplicationProvider.getApplicationContext();
+    final View androidView = new View(context);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
+
+    final FlutterView flutterView = attach(jni, platformViewsController);
+
+    jni.onFirstFrame();
+
+    // Simulate create call from the framework for Hybrid Composition.
+    createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
+    assertTrue(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
+
+    // Verify mutator view wrapping the platform view.
+    assertTrue(androidView.getParent() instanceof FlutterMutatorView);
+    final FlutterMutatorView mutatorView = (FlutterMutatorView) androidView.getParent();
+    assertNotNull(mutatorView);
+    assertEquals(View.VISIBLE, mutatorView.getVisibility());
+
+    // Produce a frame that displays the platform view and an overlay surface,
+    // which triggers convertToImageView() on the root FlutterView.
+    // Dimensions 10x10 are arbitrary non-zero dimensions for test display rects.
+    final int testWidth = 10;
+    final int testHeight = 10;
+    platformViewsController.onBeginFrame();
+    platformViewsController.onDisplayPlatformView(
+        platformViewId,
+        /* x=*/ 0,
+        /* y=*/ 0,
+        /* width=*/ testWidth,
+        /* height=*/ testHeight,
+        /* viewWidth=*/ testWidth,
+        /* viewHeight=*/ testHeight,
+        /* mutatorsStack=*/ new FlutterMutatorsStack());
+
+    final PlatformOverlayView overlayImageView = mock(PlatformOverlayView.class);
+    when(overlayImageView.acquireLatestImage()).thenReturn(false);
+
+    final FlutterOverlaySurface overlaySurface =
+        platformViewsController.createOverlaySurface(overlayImageView);
+    platformViewsController.onDisplayOverlaySurface(
+        overlaySurface.getId(),
+        /* x=*/ 0,
+        /* y=*/ 0,
+        /* width=*/ testWidth,
+        /* height=*/ testHeight);
+
+    // End frame where isFrameRenderedUsingImageReaders is false because overlayImageView
+    // returned false and root flutterView was converted to image view without new buffer.
+    platformViewsController.onEndFrame();
+
+    // In the C embedder, the platform view used in this frame must remain visible.
+    assertEquals(View.VISIBLE, mutatorView.getVisibility());
+
+    // Simulate dispose call from the framework.
+    disposePlatformView(jni, platformViewsController, platformViewId);
+  }
+
+  @Test
+  @Config(
+      shadows = {
+        ShadowFlutterSurfaceView.class,
+        ShadowFlutterJNI.class,
+        ShadowPlatformTaskQueue.class
+      })
   public void detach_destroysOverlaySurfaces() {
     final PlatformViewsController platformViewsController = new PlatformViewsController();
 

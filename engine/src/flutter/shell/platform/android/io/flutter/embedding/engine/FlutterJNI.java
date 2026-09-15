@@ -1490,6 +1490,10 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @UiThread
   public void onDisplayOverlaySurface(int id, int x, int y, int width, int height) {
+    if (Looper.myLooper() != mainLooper) {
+      new Handler(mainLooper).post(() -> onDisplayOverlaySurface(id, x, y, width, height));
+      return;
+    }
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
       throw new RuntimeException(
@@ -1501,6 +1505,10 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @UiThread
   public void onBeginFrame() {
+    if (Looper.myLooper() != mainLooper) {
+      new Handler(mainLooper).post(this::onBeginFrame);
+      return;
+    }
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
       throw new RuntimeException(
@@ -1512,6 +1520,12 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @UiThread
   public void onEndFrame() {
+    if (Looper.myLooper() != Looper.getMainLooper()) {
+      if (mainHandler != null) {
+        mainHandler.post(this::onEndFrame);
+      }
+      return;
+    }
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
       throw new RuntimeException(
@@ -1523,6 +1537,24 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @UiThread
   public FlutterOverlaySurface createOverlaySurface() {
+    if (Looper.myLooper() != mainLooper) {
+      final java.util.concurrent.FutureTask<FlutterOverlaySurface> task =
+          new java.util.concurrent.FutureTask<>(
+              () -> {
+                if (platformViewsController == null) {
+                  throw new RuntimeException(
+                      "platformViewsController must be set before attempting to position an overlay surface");
+                }
+                return platformViewsController.createOverlaySurface();
+              });
+      new Handler(mainLooper).post(task);
+      try {
+        return task.get();
+      } catch (Exception e) {
+        Log.e(TAG, "Failed to create overlay surface on main thread", e);
+        return null;
+      }
+    }
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
       throw new RuntimeException(
@@ -1541,6 +1573,10 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @UiThread
   public void destroyOverlaySurfaces() {
+    if (Looper.myLooper() != mainLooper) {
+      new Handler(mainLooper).post(this::destroyOverlaySurfaces);
+      return;
+    }
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
       throw new RuntimeException(
@@ -1595,8 +1631,16 @@ public class FlutterJNI {
   @SuppressLint("NewApi")
   @UiThread
   public void endFrame2() {
+    if (Looper.myLooper() != Looper.getMainLooper()) {
+      if (mainHandler != null) {
+        mainHandler.post(this::endFrame2);
+      }
+      return;
+    }
+    ensureRunningOnMainThread();
     if (platformViewsController2 == null) {
-      throw new RuntimeException("");
+      throw new RuntimeException(
+          "platformViewsController2 must be set before attempting to end the frame");
     }
     platformViewsController2.onEndFrame();
   }
@@ -1605,9 +1649,27 @@ public class FlutterJNI {
   @SuppressLint("NewApi")
   @UiThread
   public FlutterOverlaySurface createOverlaySurface2() {
+    if (Looper.myLooper() != mainLooper) {
+      final java.util.concurrent.FutureTask<FlutterOverlaySurface> task =
+          new java.util.concurrent.FutureTask<>(
+              () -> {
+                if (platformViewsController2 == null) {
+                  throw new RuntimeException(
+                      "platformViewsController2 must be set before attempting to position an overlay surface");
+                }
+                return platformViewsController2.createOverlaySurface();
+              });
+      new Handler(mainLooper).post(task);
+      try {
+        return task.get();
+      } catch (Exception e) {
+        Log.e(TAG, "Failed to create overlay surface 2 on main thread", e);
+        return null;
+      }
+    }
     if (platformViewsController2 == null) {
       throw new RuntimeException(
-          "platformViewsController must be set before attempting to position an overlay surface");
+          "platformViewsController2 must be set before attempting to position an overlay surface");
     }
     return platformViewsController2.createOverlaySurface();
   }
@@ -1624,9 +1686,13 @@ public class FlutterJNI {
   @SuppressLint("NewApi")
   @UiThread
   public void showOverlaySurface2() {
+    if (Looper.myLooper() != mainLooper) {
+      new Handler(mainLooper).post(this::showOverlaySurface2);
+      return;
+    }
     if (platformViewsController2 == null) {
       throw new RuntimeException(
-          "platformViewsController must be set before attempting to destroy an overlay surface");
+          "platformViewsController2 must be set before attempting to show an overlay surface");
     }
     platformViewsController2.showOverlaySurface();
   }
@@ -1635,9 +1701,13 @@ public class FlutterJNI {
   @SuppressLint("NewApi")
   @UiThread
   public void hideOverlaySurface2() {
+    if (Looper.myLooper() != mainLooper) {
+      new Handler(mainLooper).post(this::hideOverlaySurface2);
+      return;
+    }
     if (platformViewsController2 == null) {
       throw new RuntimeException(
-          "platformViewsController must be set before attempting to destroy an overlay surface");
+          "platformViewsController2 must be set before attempting to hide an overlay surface");
     }
     platformViewsController2.hideOverlaySurface();
   }
@@ -1646,10 +1716,14 @@ public class FlutterJNI {
   @SuppressLint("NewApi")
   @UiThread
   public void destroyOverlaySurface2() {
+    if (Looper.myLooper() != mainLooper) {
+      new Handler(mainLooper).post(this::destroyOverlaySurface2);
+      return;
+    }
     ensureRunningOnMainThread();
     if (platformViewsController2 == null) {
       throw new RuntimeException(
-          "platformViewsController must be set before attempting to destroy an overlay surface");
+          "platformViewsController2 must be set before attempting to destroy an overlay surface");
     }
     platformViewsController2.destroyOverlaySurface();
   }
@@ -1666,6 +1740,14 @@ public class FlutterJNI {
       int viewWidth,
       int viewHeight,
       FlutterMutatorsStack mutatorsStack) {
+    if (Looper.myLooper() != mainLooper) {
+      new Handler(mainLooper)
+          .post(
+              () ->
+                  onDisplayPlatformView2(
+                      viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack));
+      return;
+    }
     ensureRunningOnMainThread();
     if (platformViewsController2 == null) {
       throw new RuntimeException(
@@ -1884,6 +1966,14 @@ public class FlutterJNI {
       int viewWidth,
       int viewHeight,
       FlutterMutatorsStack mutatorsStack) {
+    if (Looper.myLooper() != mainLooper) {
+      new Handler(mainLooper)
+          .post(
+              () ->
+                  onDisplayPlatformView(
+                      viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack));
+      return;
+    }
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
       throw new RuntimeException(

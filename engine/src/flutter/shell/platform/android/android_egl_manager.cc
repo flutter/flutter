@@ -412,5 +412,87 @@ EGLContext AndroidEGLManager::GetResourceContext() const {
   return resource_context_;
 }
 
+EGLSurface AndroidEGLManager::CreateWindowSurface(ANativeWindow* window) {
+  TRACE_EVENT0("flutter", "AndroidEGLManager::CreateWindowSurface");
+  std::lock_guard<std::mutex> lock(mutex_);
+  if (!is_valid_ || !window || display_ == EGL_NO_DISPLAY || !config_) {
+    FML_LOG(ERROR)
+        << "CreateWindowSurface failed: invalid manager state or null window.";
+    return EGL_NO_SURFACE;
+  }
+  EGLint format = 0;
+  if (eglGetConfigAttrib(display_, config_, EGL_NATIVE_VISUAL_ID, &format) ==
+      EGL_TRUE) {
+    // kAutoDimension (0) instructs Android to preserve the window's existing
+    // buffer geometry.
+    ANativeWindow_setBuffersGeometry(window, kAutoDimension, kAutoDimension,
+                                     format);
+  }
+  EGLSurface surface =
+      eglCreateWindowSurface(display_, config_, window, nullptr);
+  if (surface == EGL_NO_SURFACE) {
+    FML_LOG(ERROR) << "Failed to create EGL window surface: " << eglGetError();
+  }
+  return surface;
+}
+
+void AndroidEGLManager::DestroyWindowSurface(EGLSurface surface) {
+  TRACE_EVENT0("flutter", "AndroidEGLManager::DestroyWindowSurface");
+  std::lock_guard<std::mutex> lock(mutex_);
+  if (!is_valid_ || display_ == EGL_NO_DISPLAY || surface == EGL_NO_SURFACE) {
+    return;
+  }
+  if (eglGetCurrentSurface(EGL_DRAW) == surface ||
+      eglGetCurrentSurface(EGL_READ) == surface) {
+    eglMakeCurrent(display_, render_pbuffer_surface_, render_pbuffer_surface_,
+                   render_context_);
+  }
+  eglDestroySurface(display_, surface);
+}
+
+bool AndroidEGLManager::MakeSurfaceCurrent(EGLSurface surface) {
+  TRACE_EVENT0("flutter", "AndroidEGLManager::MakeSurfaceCurrent");
+  std::lock_guard<std::mutex> lock(mutex_);
+  if (!is_valid_ || display_ == EGL_NO_DISPLAY ||
+      render_context_ == EGL_NO_CONTEXT) {
+    FML_LOG(ERROR) << "MakeSurfaceCurrent failed: invalid EGL manager state.";
+    return false;
+  }
+  EGLSurface target =
+      (surface != EGL_NO_SURFACE) ? surface : render_pbuffer_surface_;
+  if (eglGetCurrentContext() == render_context_ &&
+      eglGetCurrentSurface(EGL_DRAW) == target &&
+      eglGetCurrentSurface(EGL_READ) == target) {
+    return true;
+  }
+  if (eglMakeCurrent(display_, target, target, render_context_) != EGL_TRUE) {
+    FML_LOG(ERROR) << "eglMakeCurrent failed for surface: " << eglGetError();
+    return false;
+  }
+  return true;
+}
+
+bool AndroidEGLManager::SwapSurfaceBuffers(EGLSurface surface) {
+  TRACE_EVENT0("flutter", "AndroidEGLManager::SwapSurfaceBuffers");
+  EGLDisplay display = EGL_NO_DISPLAY;
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!is_valid_ || display_ == EGL_NO_DISPLAY || surface == EGL_NO_SURFACE) {
+      FML_LOG(ERROR)
+          << "SwapSurfaceBuffers failed: invalid manager state or surface.";
+      return false;
+    }
+    display = display_;
+  }
+  // eglSwapBuffers is called outside mutex_ to avoid blocking other threads
+  // during presentation
+  if (eglSwapBuffers(display, surface) != EGL_TRUE) {
+    FML_LOG(ERROR) << "eglSwapBuffers failed for overlay surface: "
+                   << eglGetError();
+    return false;
+  }
+  return true;
+}
+
 }  // namespace android
 }  // namespace flutter

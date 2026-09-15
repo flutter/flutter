@@ -1296,8 +1296,11 @@ bool JniDelegate::PushPlatformViewMutators(
     const AndroidMutatorsStack& mutators_stack) {
   TRACE_EVENT0("flutter", "JniDelegate::PushPlatformViewMutators");
   if (platform_views_controller_) {
-    return platform_views_controller_->PushPlatformViewMutators(
-        view_id, x, y, width, height, view_width, view_height, mutators_stack);
+    if (platform_views_controller_->PushPlatformViewMutators(
+            view_id, x, y, width, height, view_width, view_height,
+            mutators_stack)) {
+      return true;
+    }
   }
   if (!jvm_invoker_) {
     return false;
@@ -1330,8 +1333,10 @@ bool JniDelegate::PushPlatformViewMutators(
     return false;
   }
   if (platform_views_controller_) {
-    return platform_views_controller_->PushPlatformViewMutators(
-        platform_view, x, y, width, height, view_width, view_height);
+    if (platform_views_controller_->PushPlatformViewMutators(
+            platform_view, x, y, width, height, view_width, view_height)) {
+      return true;
+    }
   }
   AndroidMutatorsStack stack =
       AndroidMutatorsMapper::MapPlatformView(platform_view);

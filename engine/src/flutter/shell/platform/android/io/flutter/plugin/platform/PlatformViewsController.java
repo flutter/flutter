@@ -1407,7 +1407,13 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       // Otherwise, hide the platform view, but don't remove it from the view hierarchy yet as
       // they are removed when the framework disposes the platform view widget.
       if (currentFrameUsedPlatformViewIds.contains(viewId)
-          && (isFrameRenderedUsingImageReaders || !synchronizeToNativeViewHierarchy)) {
+          && (isFrameRenderedUsingImageReaders
+              || !synchronizeToNativeViewHierarchy
+              || platformViews.get(viewId) != null)) {
+        // In the C embedder without compositor slicing, keep active hybrid composition view
+        // visible when used in this frame. Specifically, ensure the underlying platform view is
+        // actively
+        // registered in platformViews (and has not been disposed).
         parentView.setVisibility(View.VISIBLE);
       } else if (!flutterViewConvertedToImageView && platformViews.get(viewId) != null) {
         // In the C embedder without compositor slicing, keep active hybrid composition view

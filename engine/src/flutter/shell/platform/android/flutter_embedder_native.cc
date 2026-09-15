@@ -14,6 +14,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/message_loop.h"
 #include "flutter/fml/native_library.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/platform/android/jni_util.h"
@@ -22,6 +23,17 @@
 
 namespace flutter {
 namespace android {
+
+// Returns the FML task runner bound to the current thread's ALooper.
+// MessageLoop::GetCurrent() is marked FML_EMBEDDER_ONLY, which triggers
+// -Wdeprecated-declarations when consumed outside the core embedder target.
+static fml::RefPtr<fml::TaskRunner> GetCurrentPlatformTaskRunner() {
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+  return fml::MessageLoop::GetCurrent().GetTaskRunner();
+#pragma clang diagnostic pop
+}
 
 std::mutex FlutterEmbedderNative::default_library_loader_mutex_;
 std::shared_ptr<OSLibraryLoader>
@@ -316,6 +328,9 @@ FlutterEmbedderNative::FlutterEmbedderNative()
     vsync_waiter_->UpdateRefreshRate(GetDefaultRefreshRate());
   }
   AttachWindowMetricsCallbacks();
+  if (jvm_invoker_) {
+    jvm_invoker_->SetPlatformTaskRunner(GetCurrentPlatformTaskRunner());
+  }
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterEmbedderNative");
   FML_DLOG(INFO)
       << "Initialized FlutterEmbedderNative with default components.";
@@ -424,6 +439,9 @@ FlutterEmbedderNative::FlutterEmbedderNative(
               : std::make_shared<APKAssetProvider>(
                     std::make_shared<InMemoryAPKAssetProviderImpl>())) {
   AttachWindowMetricsCallbacks();
+  if (jvm_invoker_) {
+    jvm_invoker_->SetPlatformTaskRunner(GetCurrentPlatformTaskRunner());
+  }
   {
     auto default_args = GetDefaultVMArgs();
     if (default_args.has_value() && default_args->enable_hcpp) {
@@ -437,6 +455,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
 
 FlutterEmbedderNative::~FlutterEmbedderNative() {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::~FlutterEmbedderNative");
+  DestroyActiveOverlaySurfaces();
+  DestroyOffscreenFBOs();
   UnregisterImageDecoder();
   auto engine = GetEngine();
   if (engine) {
@@ -720,7 +740,11 @@ bool FlutterEmbedderNative::PresentSoftware(const void* allocation,
   buffer.stride = native_buffer.stride;
   buffer.format = native_buffer.format;
 
-  return BlitSoftwareRaster(allocation, row_bytes, height, buffer);
+  bool result = BlitSoftwareRaster(allocation, row_bytes, height, buffer);
+  if (result) {
+    OnEndFrame();
+  }
+  return result;
 }
 
 AndroidEGLManager* FlutterEmbedderNative::GetEGLManager() const {
@@ -749,7 +773,11 @@ bool FlutterEmbedderNative::ClearGLCurrent() {
 bool FlutterEmbedderNative::PresentGL() {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::PresentGL");
   auto* manager = GetEGLManager();
-  return manager && manager->Present();
+  bool result = manager && manager->Present();
+  if (result) {
+    OnEndFrame();
+  }
+  return result;
 }
 
 bool FlutterEmbedderNative::MakeGLResourceCurrent() {
@@ -1343,6 +1371,7 @@ std::optional<int32_t> FlutterEmbedderNative::CreateOverlaySurface() const {
 
 bool FlutterEmbedderNative::DestroyOverlaySurfaces() const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::DestroyOverlaySurfaces");
+  const_cast<FlutterEmbedderNative*>(this)->DestroyActiveOverlaySurfaces();
   if (!jni_router_) {
     return false;
   }
@@ -1380,6 +1409,9 @@ bool FlutterEmbedderNative::HideOverlaySurface(int32_t surface_id) const {
 bool FlutterEmbedderNative::SetHcppEnabled(bool enabled) const {
   TRACE_EVENT1("flutter", "FlutterEmbedderNative::SetHcppEnabled", "enabled",
                enabled ? "true" : "false");
+  if (jvm_invoker_) {
+    jvm_invoker_->SetHcppEnabled(enabled);
+  }
   if (!jni_router_) {
     return false;
   }
@@ -2867,6 +2899,21 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
                         message ? message : "");
   };
 
+  FlutterCompositor compositor = {};
+  if (config.type == kOpenGL) {
+    compositor.struct_size = sizeof(FlutterCompositor);
+    compositor.user_data = this;
+    compositor.create_backing_store_callback =
+        &FlutterEmbedderNative::OnCreateBackingStore;
+    compositor.collect_backing_store_callback =
+        &FlutterEmbedderNative::OnCollectBackingStore;
+    compositor.present_view_callback = &FlutterEmbedderNative::OnPresentView;
+    // avoid_backing_store_cache must be true for window-bound FBO 0 to prevent
+    // stale target reuse
+    compositor.avoid_backing_store_cache = true;
+    args.compositor = &compositor;
+  }
+
   FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
   FlutterEngineResult init_result =
       InitializeEngine(&config, &args, this, &engine);
@@ -3803,6 +3850,802 @@ bool FlutterEmbedderNative::OnGlExternalTextureFrameCallback(
                                                     texture_out);
 }
 
+#ifndef GL_RGBA8
+// Standard OpenGL ES 3.0 sized internal color format GL_RGBA8 (0x8058).
+#define GL_RGBA8 0x8058
+#endif
+
+// Number of vertices for GL_TRIANGLE_STRIP fullscreen quad (4 vertices).
+static constexpr size_t kQuadVertexCount = 4;
+// Floats per vertex: 2 floats for position (x, y) + 2 floats for UV (u, v).
+static constexpr size_t kFloatsPerVertex = 4;
+// 16 bytes stride between vertex attributes (4 floats * 4 bytes per float).
+static constexpr GLsizei kQuadStride =
+    static_cast<GLsizei>(kFloatsPerVertex * sizeof(GLfloat));
+
+GLuint FlutterEmbedderNative::GetOrCreateOffscreenFBO(size_t width,
+                                                      size_t height) {
+  std::scoped_lock lock(offscreen_fbo_mutex_);
+
+  if (eglGetCurrentContext() == EGL_NO_CONTEXT) {
+    if (egl_manager_) {
+      egl_manager_->MakeCurrent();
+    }
+  }
+
+  // 1. Look for an existing unused FBO with matching dimensions.
+  for (auto& entry : offscreen_fbo_pool_) {
+    if (!entry.in_use && entry.width == width && entry.height == height) {
+      entry.in_use = true;
+      return entry.fbo;
+    }
+  }
+
+  // 2. Look for an unused FBO with different dimensions that can be resized.
+  for (auto& entry : offscreen_fbo_pool_) {
+    if (!entry.in_use) {
+      glBindTexture(GL_TEXTURE_2D, entry.color_texture);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, static_cast<GLsizei>(width),
+                   static_cast<GLsizei>(height), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                   nullptr);
+      glBindTexture(GL_TEXTURE_2D, 0);
+
+      entry.width = width;
+      entry.height = height;
+      entry.in_use = true;
+      return entry.fbo;
+    }
+  }
+
+  // 3. Allocate a brand new offscreen FBO.
+  OffscreenBackingStore new_entry;
+  new_entry.width = width;
+  new_entry.height = height;
+  new_entry.in_use = true;
+
+  glGenFramebuffers(1, &new_entry.fbo);
+  glGenTextures(1, &new_entry.color_texture);
+  glBindTexture(GL_TEXTURE_2D, new_entry.color_texture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, static_cast<GLsizei>(width),
+               static_cast<GLsizei>(height), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+               nullptr);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, new_entry.fbo);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                         new_entry.color_texture, 0);
+
+  GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+  if (status != GL_FRAMEBUFFER_COMPLETE) {
+    FML_LOG(ERROR) << "Incomplete offscreen framebuffer: " << status;
+  }
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  offscreen_fbo_pool_.push_back(new_entry);
+  return new_entry.fbo;
+}
+
+void FlutterEmbedderNative::ReleaseOffscreenFBO(GLuint fbo) {
+  std::scoped_lock lock(offscreen_fbo_mutex_);
+  for (auto& entry : offscreen_fbo_pool_) {
+    if (entry.fbo == fbo) {
+      entry.in_use = false;
+      return;
+    }
+  }
+}
+
+GLuint FlutterEmbedderNative::GetTextureForFBO(GLuint fbo) const {
+  std::scoped_lock lock(offscreen_fbo_mutex_);
+  for (const auto& entry : offscreen_fbo_pool_) {
+    if (entry.fbo == fbo) {
+      return entry.color_texture;
+    }
+  }
+  return 0;
+}
+
+bool FlutterEmbedderNative::EnsureBlitProgramInitialized() {
+  if (blit_program_.initialized) {
+    return blit_program_.program != 0;
+  }
+
+  static const char* kVertexShaderSource =
+      "attribute vec2 a_position;\n"
+      "attribute vec2 a_texcoord;\n"
+      "varying vec2 v_texcoord;\n"
+      "void main() {\n"
+      "  gl_Position = vec4(a_position, 0.0, 1.0);\n"
+      "  v_texcoord = a_texcoord;\n"
+      "}\n";
+
+  static const char* kFragmentShaderSource =
+      "precision mediump float;\n"
+      "varying vec2 v_texcoord;\n"
+      "uniform sampler2D u_texture;\n"
+      "void main() {\n"
+      "  gl_FragColor = texture2D(u_texture, v_texcoord);\n"
+      "}\n";
+
+  auto compile_shader = [](GLenum type, const char* src) -> GLuint {
+    GLuint shader = glCreateShader(type);
+    if (!shader) {
+      FML_LOG(ERROR) << "glCreateShader failed with error: " << glGetError();
+      return 0;
+    }
+    glShaderSource(shader, 1, &src, nullptr);
+    glCompileShader(shader);
+    GLint compiled = 0;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+    if (!compiled) {
+      GLint info_len = 0;
+      glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &info_len);
+      if (info_len > 0) {
+        std::vector<char> info_log(info_len);
+        glGetShaderInfoLog(shader, info_len, nullptr, info_log.data());
+        FML_LOG(ERROR) << "Error compiling blit shader: " << info_log.data();
+      }
+      glDeleteShader(shader);
+      return 0;
+    }
+    return shader;
+  };
+
+  GLuint vs = compile_shader(GL_VERTEX_SHADER, kVertexShaderSource);
+  if (!vs) {
+    return false;
+  }
+  GLuint fs = compile_shader(GL_FRAGMENT_SHADER, kFragmentShaderSource);
+  if (!fs) {
+    glDeleteShader(vs);
+    return false;
+  }
+
+  GLuint program = glCreateProgram();
+  if (!program) {
+    FML_LOG(ERROR) << "glCreateProgram failed with error: " << glGetError();
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+    return false;
+  }
+
+  glAttachShader(program, vs);
+  glAttachShader(program, fs);
+  glLinkProgram(program);
+
+  glDeleteShader(vs);
+  glDeleteShader(fs);
+
+  GLint linked = 0;
+  glGetProgramiv(program, GL_LINK_STATUS, &linked);
+  if (!linked) {
+    GLint info_len = 0;
+    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &info_len);
+    if (info_len > 0) {
+      std::vector<char> info_log(info_len);
+      glGetProgramInfoLog(program, info_len, nullptr, info_log.data());
+      FML_LOG(ERROR) << "Error linking blit program: " << info_log.data();
+    }
+    glDeleteProgram(program);
+    return false;
+  }
+
+  blit_program_.program = program;
+  blit_program_.a_position_loc = glGetAttribLocation(program, "a_position");
+  blit_program_.a_texcoord_loc = glGetAttribLocation(program, "a_texcoord");
+  blit_program_.u_texture_loc = glGetUniformLocation(program, "u_texture");
+  blit_program_.initialized = true;
+
+  return true;
+}
+
+void FlutterEmbedderNative::DestroyOffscreenFBOs() {
+  std::scoped_lock lock(offscreen_fbo_mutex_);
+  if (blit_program_.initialized && blit_program_.program != 0) {
+    glDeleteProgram(blit_program_.program);
+    blit_program_ = {};
+  }
+  for (auto& entry : offscreen_fbo_pool_) {
+    if (entry.fbo != 0) {
+      glDeleteFramebuffers(1, &entry.fbo);
+    }
+    if (entry.color_texture != 0) {
+      glDeleteTextures(1, &entry.color_texture);
+    }
+  }
+  offscreen_fbo_pool_.clear();
+  base_backing_store_in_use_.store(false);
+}
+
+void FlutterEmbedderNative::CompositeOverlayLayers(const FlutterLayer** layers,
+                                                   size_t layers_count) {
+  if (!layers || layers_count <= 1) {
+    return;
+  }
+
+  // Check if there are any overlay backing stores that need compositing.
+  bool has_overlays = false;
+  for (size_t i = 0; i < layers_count; ++i) {
+    const FlutterLayer* layer = layers[i];
+    if (layer && layer->type == kFlutterLayerContentTypeBackingStore &&
+        layer->backing_store &&
+        layer->backing_store->type == kFlutterBackingStoreTypeOpenGL &&
+        layer->backing_store->open_gl.type ==
+            kFlutterOpenGLTargetTypeFramebuffer &&
+        layer->backing_store->open_gl.framebuffer.name != 0) {
+      has_overlays = true;
+      break;
+    }
+  }
+  if (!has_overlays) {
+    return;
+  }
+
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::CompositeOverlayLayers");
+
+  if (!EnsureBlitProgramInitialized()) {
+    FML_LOG(ERROR)
+        << "Failed to initialize blit program for overlay composition.";
+    return;
+  }
+
+  // Save current OpenGL state.
+  GLint prev_program = 0;
+  GLint prev_fbo = 0;
+  GLint prev_texture = 0;
+  GLint prev_viewport[4] = {0};
+  GLint prev_array_buffer = 0;
+  GLboolean prev_blend = GL_FALSE;
+  GLboolean prev_scissor = GL_FALSE;
+
+  glGetIntegerv(GL_CURRENT_PROGRAM, &prev_program);
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prev_fbo);
+  glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev_texture);
+  glGetIntegerv(GL_VIEWPORT, prev_viewport);
+  glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &prev_array_buffer);
+  prev_blend = glIsEnabled(GL_BLEND);
+  prev_scissor = glIsEnabled(GL_SCISSOR_TEST);
+
+  // Determine base frame dimensions.
+  float frame_width = static_cast<float>(prev_viewport[2]);
+  float frame_height = static_cast<float>(prev_viewport[3]);
+  if (layers[0] && layers[0]->size.width > 0 && layers[0]->size.height > 0) {
+    frame_width = static_cast<float>(layers[0]->size.width);
+    frame_height = static_cast<float>(layers[0]->size.height);
+  }
+
+  // Target FBO 0 (the window / ImageReader surface).
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glViewport(0, 0, static_cast<GLsizei>(frame_width),
+             static_cast<GLsizei>(frame_height));
+  glDisable(GL_SCISSOR_TEST);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendEquation(GL_FUNC_ADD);
+
+  glUseProgram(blit_program_.program);
+  glUniform1i(blit_program_.u_texture_loc, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  // Draw each overlay layer in order.
+  for (size_t i = 0; i < layers_count; ++i) {
+    const FlutterLayer* layer = layers[i];
+    if (!layer || layer->type != kFlutterLayerContentTypeBackingStore ||
+        !layer->backing_store ||
+        layer->backing_store->type != kFlutterBackingStoreTypeOpenGL ||
+        layer->backing_store->open_gl.type !=
+            kFlutterOpenGLTargetTypeFramebuffer) {
+      continue;
+    }
+
+    GLuint fbo = layer->backing_store->open_gl.framebuffer.name;
+    if (fbo == 0) {
+      continue;  // Base layer already rendered directly into FBO 0.
+    }
+
+    GLuint texture_id = GetTextureForFBO(fbo);
+    if (texture_id == 0) {
+      FML_LOG(ERROR) << "No texture found for overlay FBO: " << fbo;
+      continue;
+    }
+
+    FML_LOG(INFO) << "CompositeOverlayLayers: compositing overlay layer " << i
+                  << " with FBO=" << fbo << " texture=" << texture_id
+                  << " offset=(" << layer->offset.x << "," << layer->offset.y
+                  << ") size=(" << layer->size.width << "x"
+                  << layer->size.height << ") frame=(" << frame_width << "x"
+                  << frame_height << ")";
+
+    float ndc_x0 =
+        (static_cast<float>(layer->offset.x) / frame_width) * 2.0f - 1.0f;
+    float ndc_x1 = (static_cast<float>(layer->offset.x + layer->size.width) /
+                    frame_width) *
+                       2.0f -
+                   1.0f;
+    float ndc_y0 =
+        1.0f - (static_cast<float>(layer->offset.y) / frame_height) * 2.0f;
+    float ndc_y1 =
+        1.0f - (static_cast<float>(layer->offset.y + layer->size.height) /
+                frame_height) *
+                   2.0f;
+
+    const GLfloat quad_vertices[kQuadVertexCount * kFloatsPerVertex] = {
+        // Vertex 0: Bottom-Left
+        ndc_x0,
+        ndc_y1,
+        0.0f,
+        0.0f,
+        // Vertex 1: Bottom-Right
+        ndc_x1,
+        ndc_y1,
+        1.0f,
+        0.0f,
+        // Vertex 2: Top-Left
+        ndc_x0,
+        ndc_y0,
+        0.0f,
+        1.0f,
+        // Vertex 3: Top-Right
+        ndc_x1,
+        ndc_y0,
+        1.0f,
+        1.0f,
+    };
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+
+    glEnableVertexAttribArray(blit_program_.a_position_loc);
+    glEnableVertexAttribArray(blit_program_.a_texcoord_loc);
+
+    glVertexAttribPointer(blit_program_.a_position_loc, 2, GL_FLOAT, GL_FALSE,
+                          kQuadStride, quad_vertices);
+    glVertexAttribPointer(blit_program_.a_texcoord_loc, 2, GL_FLOAT, GL_FALSE,
+                          kQuadStride, &quad_vertices[2]);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, kQuadVertexCount);
+
+    glDisableVertexAttribArray(blit_program_.a_position_loc);
+    glDisableVertexAttribArray(blit_program_.a_texcoord_loc);
+  }
+
+  // Restore OpenGL state.
+  glBindBuffer(GL_ARRAY_BUFFER, prev_array_buffer);
+  glBindTexture(GL_TEXTURE_2D, prev_texture);
+  glBindFramebuffer(GL_FRAMEBUFFER, prev_fbo);
+  glUseProgram(prev_program);
+  glViewport(prev_viewport[0], prev_viewport[1], prev_viewport[2],
+             prev_viewport[3]);
+  if (!prev_blend) {
+    glDisable(GL_BLEND);
+  }
+  if (prev_scissor) {
+    glEnable(GL_SCISSOR_TEST);
+  }
+}
+
+bool FlutterEmbedderNative::PresentOverlayLayer(const FlutterLayer* layer,
+                                                size_t overlay_index,
+                                                float screen_width,
+                                                float screen_height) {
+  if (!layer || layer->type != kFlutterLayerContentTypeBackingStore ||
+      !layer->backing_store ||
+      layer->backing_store->type != kFlutterBackingStoreTypeOpenGL ||
+      layer->backing_store->open_gl.type !=
+          kFlutterOpenGLTargetTypeFramebuffer) {
+    FML_LOG(ERROR)
+        << "PresentOverlayLayer: invalid layer type or backing store.";
+    return false;
+  }
+
+  GLuint fbo = layer->backing_store->open_gl.framebuffer.name;
+  if (fbo == 0) {
+    return true;  // Base layer already in FBO 0.
+  }
+
+  GLuint texture_id = GetTextureForFBO(fbo);
+  if (texture_id == 0) {
+    FML_LOG(ERROR) << "PresentOverlayLayer: No texture found for overlay FBO "
+                   << fbo;
+    return false;
+  }
+
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::PresentOverlayLayer",
+               "overlay_index", std::to_string(overlay_index).c_str());
+
+  if (!EnsureBlitProgramInitialized()) {
+    FML_LOG(ERROR) << "PresentOverlayLayer: Failed to initialize blit program.";
+    return false;
+  }
+
+  auto* manager = GetEGLManager();
+  if (!manager) {
+    FML_LOG(ERROR) << "PresentOverlayLayer: No EGL manager available.";
+    return false;
+  }
+
+  // Ensure active overlay surface exists for overlay_index.
+  std::lock_guard<std::mutex> lock(overlay_surfaces_mutex_);
+  while (active_overlay_surfaces_.size() <= overlay_index) {
+    if (!jvm_invoker_) {
+      FML_LOG(ERROR)
+          << "PresentOverlayLayer: No jvm_invoker_ to create overlay surface.";
+      return false;
+    }
+    auto overlay_surface = jvm_invoker_->CreateOverlaySurface();
+    if (!overlay_surface || !overlay_surface->window) {
+      FML_LOG(ERROR)
+          << "PresentOverlayLayer: Failed to create overlay surface via JVM.";
+      return false;
+    }
+    EGLSurface egl_surf = manager->CreateWindowSurface(overlay_surface->window);
+    if (egl_surf == EGL_NO_SURFACE) {
+      FML_LOG(ERROR)
+          << "PresentOverlayLayer: Failed to create EGLSurface for overlay.";
+      return false;
+    }
+    ActiveOverlaySurface active_surf;
+    active_surf.id = overlay_surface->id;
+    active_surf.window = overlay_surface->window;
+    overlay_surface->window = nullptr;  // Transfer ownership to active_surf.
+    active_surf.egl_surface = egl_surf;
+    active_overlay_surfaces_.push_back(active_surf);
+  }
+
+  ActiveOverlaySurface& target_overlay =
+      active_overlay_surfaces_[overlay_index];
+
+  // Save current OpenGL state before switching surfaces.
+  GLint prev_program = 0;
+  GLint prev_fbo = 0;
+  GLint prev_texture = 0;
+  GLint prev_viewport[4] = {0};
+  GLint prev_array_buffer = 0;
+  GLboolean prev_blend = GL_FALSE;
+  GLboolean prev_scissor = GL_FALSE;
+
+  glGetIntegerv(GL_CURRENT_PROGRAM, &prev_program);
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prev_fbo);
+  glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev_texture);
+  glGetIntegerv(GL_VIEWPORT, prev_viewport);
+  glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &prev_array_buffer);
+  prev_blend = glIsEnabled(GL_BLEND);
+  prev_scissor = glIsEnabled(GL_SCISSOR_TEST);
+
+  // Bind the dedicated overlay EGLSurface.
+  if (!manager->MakeSurfaceCurrent(target_overlay.egl_surface)) {
+    FML_LOG(ERROR)
+        << "PresentOverlayLayer: Failed to make overlay surface current (id="
+        << target_overlay.id << ").";
+    return false;
+  }
+
+  // Clear overlay surface completely transparent so non-badge areas remain
+  // see-through.
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glViewport(0, 0, static_cast<GLsizei>(screen_width),
+             static_cast<GLsizei>(screen_height));
+  glDisable(GL_SCISSOR_TEST);
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendEquation(GL_FUNC_ADD);
+
+  glUseProgram(blit_program_.program);
+  glUniform1i(blit_program_.u_texture_loc, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  // Map layer offset and size to full-screen NDC [-1, 1] coordinates.
+  float ndc_x0 =
+      (static_cast<float>(layer->offset.x) / screen_width) * 2.0f - 1.0f;
+  float ndc_x1 =
+      (static_cast<float>(layer->offset.x + layer->size.width) / screen_width) *
+          2.0f -
+      1.0f;
+  float ndc_y0 =
+      1.0f - (static_cast<float>(layer->offset.y) / screen_height) * 2.0f;
+  float ndc_y1 =
+      1.0f - (static_cast<float>(layer->offset.y + layer->size.height) /
+              screen_height) *
+                 2.0f;
+
+  const GLfloat quad_vertices[kQuadVertexCount * kFloatsPerVertex] = {
+      // Vertex 0: Bottom-Left
+      ndc_x0,
+      ndc_y1,
+      0.0f,
+      0.0f,
+      // Vertex 1: Bottom-Right
+      ndc_x1,
+      ndc_y1,
+      1.0f,
+      0.0f,
+      // Vertex 2: Top-Left
+      ndc_x0,
+      ndc_y0,
+      0.0f,
+      1.0f,
+      // Vertex 3: Top-Right
+      ndc_x1,
+      ndc_y0,
+      1.0f,
+      1.0f,
+  };
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, texture_id);
+
+  glEnableVertexAttribArray(blit_program_.a_position_loc);
+  glEnableVertexAttribArray(blit_program_.a_texcoord_loc);
+
+  glVertexAttribPointer(blit_program_.a_position_loc, 2, GL_FLOAT, GL_FALSE,
+                        kQuadStride, quad_vertices);
+  glVertexAttribPointer(blit_program_.a_texcoord_loc, 2, GL_FLOAT, GL_FALSE,
+                        kQuadStride, &quad_vertices[2]);
+
+  glDrawArrays(GL_TRIANGLE_STRIP, 0, kQuadVertexCount);
+
+  glDisableVertexAttribArray(blit_program_.a_position_loc);
+  glDisableVertexAttribArray(blit_program_.a_texcoord_loc);
+
+  // Present the overlay surface buffers to make the frame available in
+  // ImageReader.
+  if (!manager->SwapSurfaceBuffers(target_overlay.egl_surface)) {
+    FML_LOG(ERROR)
+        << "PresentOverlayLayer: Failed to swap surface buffers for id "
+        << target_overlay.id;
+  }
+
+  // Display and position overlay in Android hierarchy.
+  if (jvm_invoker_) {
+    jvm_invoker_->OnDisplayOverlaySurface(target_overlay.id, 0, 0,
+                                          static_cast<int32_t>(screen_width),
+                                          static_cast<int32_t>(screen_height));
+  }
+
+  // Restore main render context surface and OpenGL state.
+  manager->MakeCurrent();
+  glBindBuffer(GL_ARRAY_BUFFER, prev_array_buffer);
+  glBindTexture(GL_TEXTURE_2D, prev_texture);
+  glBindFramebuffer(GL_FRAMEBUFFER, prev_fbo);
+  glUseProgram(prev_program);
+  glViewport(prev_viewport[0], prev_viewport[1], prev_viewport[2],
+             prev_viewport[3]);
+  if (!prev_blend) {
+    glDisable(GL_BLEND);
+  }
+  if (prev_scissor) {
+    glEnable(GL_SCISSOR_TEST);
+  }
+
+  return true;
+}
+
+void FlutterEmbedderNative::DestroyActiveOverlaySurfaces() {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::DestroyActiveOverlaySurfaces");
+  std::lock_guard<std::mutex> lock(overlay_surfaces_mutex_);
+  if (active_overlay_surfaces_.empty()) {
+    return;
+  }
+  auto* manager = GetEGLManager();
+  for (auto& overlay : active_overlay_surfaces_) {
+    if (manager && overlay.egl_surface != EGL_NO_SURFACE) {
+      manager->DestroyWindowSurface(overlay.egl_surface);
+      overlay.egl_surface = EGL_NO_SURFACE;
+    }
+    if (overlay.window) {
+      ANativeWindow_release(overlay.window);
+      overlay.window = nullptr;
+    }
+  }
+  active_overlay_surfaces_.clear();
+
+  if (jvm_invoker_) {
+    jvm_invoker_->DestroyOverlaySurfaces();
+  }
+}
+
+bool FlutterEmbedderNative::OnCreateBackingStore(
+    const FlutterBackingStoreConfig* config,
+    FlutterBackingStore* backing_store_out,
+    void* user_data) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::OnCreateBackingStore");
+  if (!config || !backing_store_out || !user_data) {
+    FML_LOG(ERROR) << "Invalid arguments to OnCreateBackingStore.";
+    return false;
+  }
+  if (config->struct_size < sizeof(FlutterBackingStoreConfig)) {
+    FML_LOG(ERROR) << "Invalid FlutterBackingStoreConfig struct size: "
+                   << config->struct_size;
+    return false;
+  }
+
+  auto* self = static_cast<FlutterEmbedderNative*>(user_data);
+
+  backing_store_out->struct_size = sizeof(FlutterBackingStore);
+  backing_store_out->user_data = user_data;
+  backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
+  backing_store_out->open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
+  // Impeller requires a recognized GL format (GL_RGBA8) to avoid rejection.
+  backing_store_out->open_gl.framebuffer.target = GL_RGBA8;
+  backing_store_out->open_gl.framebuffer.user_data = user_data;
+  backing_store_out->open_gl.framebuffer.destruction_callback =
+      [](void* /*user_data*/) {};
+
+  // Check if base FBO 0 is already in use for this frame.
+  // The first layer in each frame renders into FBO 0 (the window / ImageReader
+  // surface). Subsequent layers (overlays) render into offscreen FBOs to
+  // prevent wiping out Layer 0.
+  bool expected = false;
+  if (self->base_backing_store_in_use_.compare_exchange_strong(expected,
+                                                               true)) {
+    backing_store_out->open_gl.framebuffer.name = 0;
+    return true;
+  }
+
+  // Allocate or checkout an offscreen FBO for the overlay layer.
+  size_t width = static_cast<size_t>(config->size.width);
+  size_t height = static_cast<size_t>(config->size.height);
+  GLuint fbo = self->GetOrCreateOffscreenFBO(width, height);
+  if (fbo == 0) {
+    FML_LOG(ERROR) << "Failed to allocate offscreen FBO for layer of size "
+                   << width << "x" << height;
+    // Fallback to FBO 0 rather than failing hard.
+    backing_store_out->open_gl.framebuffer.name = 0;
+    return true;
+  }
+
+  backing_store_out->open_gl.framebuffer.name = fbo;
+  return true;
+}
+
+bool FlutterEmbedderNative::OnCollectBackingStore(
+    const FlutterBackingStore* renderer,
+    void* user_data) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::OnCollectBackingStore");
+  if (!renderer || !user_data) {
+    return false;
+  }
+  auto* self = static_cast<FlutterEmbedderNative*>(user_data);
+  if (renderer->type == kFlutterBackingStoreTypeOpenGL &&
+      renderer->open_gl.type == kFlutterOpenGLTargetTypeFramebuffer) {
+    GLuint fbo = renderer->open_gl.framebuffer.name;
+    if (fbo == 0) {
+      self->base_backing_store_in_use_.store(false);
+    } else {
+      self->ReleaseOffscreenFBO(fbo);
+    }
+  }
+  return true;
+}
+
+bool FlutterEmbedderNative::OnPresentView(const FlutterPresentViewInfo* info) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::OnPresentView");
+  if (!info || !info->user_data) {
+    FML_LOG(ERROR) << "Invalid arguments to OnPresentView.";
+    return false;
+  }
+  if (info->struct_size < sizeof(FlutterPresentViewInfo)) {
+    FML_LOG(ERROR) << "Invalid FlutterPresentViewInfo struct size: "
+                   << info->struct_size;
+    return false;
+  }
+
+  auto* self = static_cast<FlutterEmbedderNative*>(info->user_data);
+
+  if (info->layers_count > 0 && !info->layers) {
+    FML_LOG(ERROR) << "Non-zero layer count with null layers array.";
+    return false;
+  }
+
+  // Begin frame: resets active platform views and overlay tracking in
+  // PlatformViewsController.
+  self->OnBeginFrame();
+
+  // Detect whether platform views are present in this frame, and the index of
+  // the first one.
+  bool has_platform_views = false;
+  size_t first_pv_index = info->layers_count;
+  for (size_t i = 0; i < info->layers_count; ++i) {
+    const FlutterLayer* layer = info->layers[i];
+    if (layer && layer->type == kFlutterLayerContentTypePlatformView) {
+      has_platform_views = true;
+      if (first_pv_index == info->layers_count) {
+        first_pv_index = i;
+      }
+    }
+  }
+
+  // Determine frame dimensions from base layer or OpenGL viewport.
+  float frame_width = 0.0f;
+  float frame_height = 0.0f;
+  if (info->layers_count > 0 && info->layers[0] &&
+      info->layers[0]->size.width > 0 && info->layers[0]->size.height > 0) {
+    frame_width = static_cast<float>(info->layers[0]->size.width);
+    frame_height = static_cast<float>(info->layers[0]->size.height);
+  } else {
+    GLint viewport[4] = {0};
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    frame_width = static_cast<float>(viewport[2]);
+    frame_height = static_cast<float>(viewport[3]);
+  }
+
+  FML_LOG(INFO) << "OnPresentView: layers_count=" << info->layers_count
+                << " has_pv=" << has_platform_views << " frame=(" << frame_width
+                << "x" << frame_height << ")";
+
+  size_t overlay_idx = 0;
+  for (size_t i = 0; i < info->layers_count; ++i) {
+    const FlutterLayer* layer = info->layers[i];
+    if (!layer || layer->struct_size < sizeof(FlutterLayer)) {
+      continue;
+    }
+    if (layer->type == kFlutterLayerContentTypeBackingStore) {
+      GLuint fbo = (layer->backing_store && layer->backing_store->type ==
+                                                kFlutterBackingStoreTypeOpenGL)
+                       ? layer->backing_store->open_gl.framebuffer.name
+                       : 99999;
+      FML_LOG(INFO) << "  Layer " << i << ": BackingStore FBO=" << fbo
+                    << " offset=(" << layer->offset.x << "," << layer->offset.y
+                    << ") size=(" << layer->size.width << "x"
+                    << layer->size.height << ")";
+
+      // When platform views are present, any backing store occurring after the
+      // first platform view is an overlay layer that must be rendered into a
+      // dedicated overlay surface to avoid being occluded behind native Android
+      // views.
+      if (has_platform_views && i > first_pv_index && fbo != 0) {
+        FML_LOG(INFO) << "Presenting overlay layer " << i << " (overlay index "
+                      << overlay_idx << ") to dedicated overlay surface.";
+        bool ok = self->PresentOverlayLayer(layer, overlay_idx++, frame_width,
+                                            frame_height);
+        if (!ok) {
+          FML_LOG(ERROR) << "Failed to present overlay layer " << i;
+        }
+      }
+    } else if (layer->type == kFlutterLayerContentTypePlatformView) {
+      int64_t view_id =
+          layer->platform_view ? layer->platform_view->identifier : -1;
+      FML_LOG(INFO) << "  Layer " << i << ": PlatformView ID=" << view_id
+                    << " offset=(" << layer->offset.x << "," << layer->offset.y
+                    << ") size=(" << layer->size.width << "x"
+                    << layer->size.height << ")";
+      if (!layer->platform_view ||
+          layer->platform_view->struct_size < sizeof(FlutterPlatformView)) {
+        continue;
+      }
+      bool ok = self->PushPlatformViewMutators(
+          *layer->platform_view, static_cast<int32_t>(layer->offset.x),
+          static_cast<int32_t>(layer->offset.y),
+          static_cast<int32_t>(layer->size.width),
+          static_cast<int32_t>(layer->size.height));
+      if (!ok) {
+        FML_LOG(ERROR) << "Failed to push platform view mutators for view: "
+                       << layer->platform_view->identifier;
+      }
+    }
+  }
+
+  // When no platform views are present, composite any overlay backing stores
+  // directly onto FBO 0.
+  if (!has_platform_views) {
+    self->CompositeOverlayLayers(info->layers, info->layers_count);
+    self->DestroyActiveOverlaySurfaces();
+  }
+
+  // Frame presentation is complete; reset base backing store checkout state.
+  self->base_backing_store_in_use_.store(false);
+
+  return self->PresentGL();
+}
+
 std::shared_ptr<AndroidSurfaceControlProvider>
 FlutterEmbedderNative::GetSurfaceControlProvider() const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetSurfaceControlProvider");
@@ -4081,6 +4924,10 @@ static FlutterEmbedderNative* FromJavaFlutterJNI(JNIEnv* env, jobject obj) {
 static jlong FlutterJNI_Attach(JNIEnv* env, jclass clazz, jobject flutterJNI) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterJNI_Attach");
   auto native_instance = std::make_unique<FlutterEmbedderNative>();
+  if (native_instance->GetJvmInvoker()) {
+    native_instance->GetJvmInvoker()->SetPlatformTaskRunner(
+        GetCurrentPlatformTaskRunner());
+  }
   native_instance->AttachJavaObject(env, flutterJNI);
   return reinterpret_cast<jlong>(native_instance.release());
 }

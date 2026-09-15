@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include <android/native_window.h>
 #include <jni.h>
 
 #include "flutter/fml/macros.h"
@@ -23,6 +24,43 @@
 
 namespace flutter {
 namespace android {
+
+/// @brief Represents an Android platform view overlay surface with its ID and
+/// ANativeWindow.
+struct PlatformViewOverlaySurface {
+  int32_t id = -1;
+  ANativeWindow* window = nullptr;
+
+  PlatformViewOverlaySurface() = default;
+  PlatformViewOverlaySurface(int32_t surface_id, ANativeWindow* native_window)
+      : id(surface_id), window(native_window) {}
+  ~PlatformViewOverlaySurface() {
+    if (window) {
+      ANativeWindow_release(window);
+      window = nullptr;
+    }
+  }
+
+  FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewOverlaySurface);
+
+  PlatformViewOverlaySurface(PlatformViewOverlaySurface&& other) noexcept
+      : id(other.id), window(other.window) {
+    other.window = nullptr;
+  }
+
+  PlatformViewOverlaySurface& operator=(
+      PlatformViewOverlaySurface&& other) noexcept {
+    if (this != &other) {
+      if (window) {
+        ANativeWindow_release(window);
+      }
+      id = other.id;
+      window = other.window;
+      other.window = nullptr;
+    }
+    return *this;
+  }
+};
 
 /// @brief Abstract interface for safely and mockably invoking JVM methods
 /// and managing JNI environment operations on host and target.
@@ -44,6 +82,16 @@ class JvmInvoker {
     return nullptr;
   }
 
+  /// @brief Sets the platform task runner for scheduling work on the Android UI
+  /// thread.
+  virtual void SetPlatformTaskRunner(
+      fml::RefPtr<fml::TaskRunner> platform_task_runner) {}
+
+  /// @brief Returns the platform task runner.
+  virtual fml::RefPtr<fml::TaskRunner> GetPlatformTaskRunner() const {
+    return nullptr;
+  }
+
   /// @brief Ensures the current thread is attached to the JVM.
   /// @return True if attached or successfully attached.
   virtual bool EnsureAttachedToThread() = 0;
@@ -57,6 +105,12 @@ class JvmInvoker {
 
   /// @brief Clears any pending JVM exception on the current thread.
   virtual void ClearPendingException() = 0;
+
+  /// @brief Enables or disables HCPP mode routing.
+  virtual void SetHcppEnabled(bool enabled) {}
+
+  /// @brief Checks whether HCPP mode routing is active.
+  virtual bool IsHcppEnabled() const { return false; }
 
   // Typed dispatch methods matching FlutterJNI.java:
 
@@ -195,6 +249,28 @@ class JvmInvoker {
   /// @param task Closure to execute.
   /// @return True if task was successfully scheduled.
   virtual bool PostJvmTask(std::function<void()> task) = 0;
+
+  /// @brief Creates an overlay surface in the Android platform views
+  /// controller.
+  /// @return Metadata with surface id and ANativeWindow*, or nullptr on
+  /// failure.
+  virtual std::unique_ptr<PlatformViewOverlaySurface> CreateOverlaySurface() {
+    return nullptr;
+  }
+
+  /// @brief Destroys all overlay surfaces in the Android platform views
+  /// controller.
+  virtual void DestroyOverlaySurfaces() {}
+
+  /// @brief Positions and displays an overlay surface in the Android view
+  /// hierarchy.
+  virtual bool OnDisplayOverlaySurface(int32_t id,
+                                       int32_t x,
+                                       int32_t y,
+                                       int32_t width,
+                                       int32_t height) {
+    return true;
+  }
 };
 
 /// @brief Default in-memory / host-safe implementation of JvmInvoker.
@@ -279,6 +355,27 @@ class DefaultJvmInvoker : public JvmInvoker {
 
   bool PostJvmTask(std::function<void()> task) override;
 
+  std::unique_ptr<PlatformViewOverlaySurface> CreateOverlaySurface() override {
+    return nullptr;
+  }
+  void DestroyOverlaySurfaces() override {}
+  bool OnDisplayOverlaySurface(int32_t id,
+                               int32_t x,
+                               int32_t y,
+                               int32_t width,
+                               int32_t height) override {
+    return true;
+  }
+
+  void SetPlatformTaskRunner(
+      fml::RefPtr<fml::TaskRunner> platform_task_runner) override {
+    platform_task_runner_ = std::move(platform_task_runner);
+  }
+
+  fml::RefPtr<fml::TaskRunner> GetPlatformTaskRunner() const override {
+    return platform_task_runner_;
+  }
+
  private:
   std::atomic<bool> attached_{false};
   std::atomic<bool> pending_exception_{false};
@@ -289,9 +386,14 @@ class DefaultJvmInvoker : public JvmInvoker {
 
 /// @brief Production Android JNI-backed implementation of JvmInvoker.
 /// Dispatches JVM calls to the attached Java FlutterJNI instance via JNIEnv.
-class AndroidJvmInvoker : public JvmInvoker {
+class AndroidJvmInvoker
+    : public JvmInvoker,
+      public std::enable_shared_from_this<AndroidJvmInvoker> {
  public:
   static bool RegisterJni(JNIEnv* env, jclass clazz);
+
+  void SetHcppEnabled(bool enabled) override { is_hcpp_active_ = enabled; }
+  bool IsHcppEnabled() const override { return is_hcpp_active_; }
 
   explicit AndroidJvmInvoker(
       std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> java_object = nullptr,
@@ -378,10 +480,24 @@ class AndroidJvmInvoker : public JvmInvoker {
 
   bool PostJvmTask(std::function<void()> task) override;
 
+  std::unique_ptr<PlatformViewOverlaySurface> CreateOverlaySurface() override;
+  void DestroyOverlaySurfaces() override;
+  bool OnDisplayOverlaySurface(int32_t id,
+                               int32_t x,
+                               int32_t y,
+                               int32_t width,
+                               int32_t height) override;
+
+  void SetPlatformTaskRunner(
+      fml::RefPtr<fml::TaskRunner> platform_task_runner) override;
+  fml::RefPtr<fml::TaskRunner> GetPlatformTaskRunner() const override;
+
  private:
   mutable std::mutex java_object_mutex_;
   std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> java_object_;
+  mutable std::mutex platform_task_runner_mutex_;
   fml::RefPtr<fml::TaskRunner> platform_task_runner_;
+  std::atomic<bool> is_hcpp_active_{false};
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidJvmInvoker);
 };
