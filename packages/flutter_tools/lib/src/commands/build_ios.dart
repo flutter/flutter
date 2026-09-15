@@ -905,7 +905,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     required this._appleContext,
     required this._buildSystem,
     required ToolContext super.toolContext,
-    required bool verboseHelp,
+    required super.verboseHelp,
   }) : _toolContext = toolContext,
        super(logger: toolContext.logger) {
     addTreeShakeIconsFlag();
