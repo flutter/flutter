@@ -303,6 +303,44 @@ void main() async {
     expect(view0.buffer, equals(view1.buffer));
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('HostBuffer.emplace across a block boundary views only the write', () async {
+    final int blockLength = gpu.gpuContext.minimumUniformByteAlignment * 2;
+    final gpu.HostBuffer hostBuffer = gpu.gpuContext.createHostBuffer(
+      blockLengthInBytes: blockLength,
+    );
+
+    hostBuffer.emplace(Uint8List(blockLength).buffer.asByteData());
+    final gpu.BufferView view = hostBuffer.emplace(
+      Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData(),
+    );
+
+    expect(view.offsetInBytes, 0);
+    expect(view.lengthInBytes, 4);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('HostBuffer reuses blocks allocated after a block boundary', () async {
+    final int blockLength = gpu.gpuContext.minimumUniformByteAlignment * 2;
+    final gpu.HostBuffer hostBuffer = gpu.gpuContext.createHostBuffer(
+      blockLengthInBytes: blockLength,
+    );
+
+    hostBuffer.emplace(Uint8List(blockLength).buffer.asByteData());
+    final gpu.BufferView view0 = hostBuffer.emplace(
+      Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData(),
+    );
+
+    for (var i = 0; i < hostBuffer.frameCount; i++) {
+      hostBuffer.reset();
+    }
+
+    hostBuffer.emplace(Uint8List(blockLength).buffer.asByteData());
+    final gpu.BufferView view1 = hostBuffer.emplace(
+      Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData(),
+    );
+
+    expect(view1.buffer, equals(view0.buffer));
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('GpuContext.createDeviceBuffer', () async {
     final gpu.DeviceBuffer deviceBuffer = gpu.gpuContext.createDeviceBuffer(
       gpu.StorageMode.hostVisible,

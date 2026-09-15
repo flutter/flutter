@@ -264,15 +264,21 @@ base class HostBuffer {
     // So reset the padding to zero.
     padding %= _gpuContext.minimumUniformByteAlignment;
     if (_offsetCursor + padding >= blockLengthInBytes) {
-      DeviceBuffer buffer = _allocateNewBlock(blockLengthInBytes);
-      _buffers[_frameCursor].add(buffer);
       _bufferCursor++;
+      // [reset] rewinds the cursors without dropping the blocks, so a block
+      // allocated for this position on an earlier frame is reused here rather
+      // than replaced.
+      final List<DeviceBuffer> frameBuffers = _buffers[_frameCursor];
+      if (_bufferCursor >= frameBuffers.length) {
+        frameBuffers.add(_allocateNewBlock(blockLengthInBytes));
+      }
+      final DeviceBuffer buffer = frameBuffers[_bufferCursor];
       _offsetCursor = bytes.lengthInBytes;
 
       return BufferView(
         buffer,
         offsetInBytes: 0,
-        lengthInBytes: blockLengthInBytes,
+        lengthInBytes: bytes.lengthInBytes,
       );
     }
 
