@@ -1310,12 +1310,13 @@ class EditableText extends StatefulWidget {
   /// of lines that can be entered into the field.
   ///
   /// If this is null (default), the minimum height is determined by [maxLines]
-  /// instead: the field starts out tall enough to show [maxLines] lines, or a
-  /// single line when [maxLines] is also null. In other words, leaving
-  /// [minLines] null while setting [maxLines] to a value greater than one
-  /// produces a field that starts at its full [maxLines] height rather than
-  /// growing into it. To make the field start shorter and grow up to
-  /// [maxLines], set [minLines] explicitly.
+  /// instead. When [maxLines] is also null, the field starts with enough
+  /// vertical space for one line and grows to accommodate additional lines as
+  /// they are entered; otherwise it starts out tall enough to show [maxLines]
+  /// lines. In other words, leaving [minLines] null while setting [maxLines] to
+  /// a value greater than one produces a field that starts at its full
+  /// [maxLines] height rather than growing into it. To make the field start
+  /// shorter and grow up to [maxLines], set [minLines] explicitly.
   ///
   /// This can be used in combination with [maxLines] for a varying set of behaviors.
   ///
