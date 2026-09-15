@@ -65,6 +65,47 @@ void main() {
     },
   );
 
+  testUsingContext(
+    'BundleBuilder propagates local engine options to build system Environment',
+    () async {
+      late Environment capturedEnvironment;
+      final BuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (
+        Target target,
+        Environment environment,
+      ) {
+        capturedEnvironment = environment;
+        environment.outputDir.childFile('kernel_blob.bin').createSync(recursive: true);
+        environment.outputDir.childFile('isolate_snapshot_data').createSync();
+        environment.outputDir.childFile('vm_snapshot_data').createSync();
+        environment.outputDir.childFile('LICENSE').createSync(recursive: true);
+      });
+
+      await BundleBuilder().build(
+        platform: TargetPlatform.ios,
+        buildInfo: BuildInfo.debug,
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+        mainPath: globals.fs.path.join('lib', 'main.dart'),
+        assetDirPath: 'example',
+        depfilePath: 'example.d',
+        buildSystem: buildSystem,
+      );
+
+      expect(capturedEnvironment.artifacts.usesLocalArtifacts, isTrue);
+      expect(capturedEnvironment.artifacts.localEngineInfo, isNotNull);
+      expect(capturedEnvironment.artifacts.localEngineInfo?.localTargetName, 'ios_debug');
+      expect(capturedEnvironment.artifacts.localEngineInfo?.localHostName, 'host_debug');
+      expect(capturedEnvironment.engineVersion, isNull);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+      Artifacts: () => Artifacts.testLocalEngine(
+        localEngine: 'engine/src/out/ios_debug',
+        localEngineHost: 'engine/src/out/host_debug',
+      ),
+    },
+  );
+
   testWithoutContext(
     'writeBundle applies transformations to any assets that have them defined',
     () async {
