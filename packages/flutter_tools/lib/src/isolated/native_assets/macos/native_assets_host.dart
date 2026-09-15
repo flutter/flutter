@@ -376,14 +376,13 @@ Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsApple(
       if (absolutePath != null) {
         // Flutter tester needs full host paths.
         return FlutterCodeAssetTargetLocation(
-          runtimePath: NativeAssetAbsolutePath(absolutePath.resolve(fileName)),
+          runtimePath: NativeAssetAbsolutePath.fromFileUri(absolutePath.resolve(fileName)),
           bundlePath: Uri(path: fileName),
         );
       }
       final Uri bundlePath = frameworkUri(fileName, alreadyTakenNames);
-      final runtimeUri = Uri(path: frameworkInstallName(bundlePath));
       return FlutterCodeAssetTargetLocation(
-        runtimePath: NativeAssetAbsolutePath(runtimeUri),
+        runtimePath: NativeAssetAbsolutePath(frameworkInstallName(bundlePath)),
         bundlePath: bundlePath,
       );
     });

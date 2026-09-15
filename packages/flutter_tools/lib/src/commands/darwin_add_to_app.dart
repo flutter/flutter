@@ -347,8 +347,9 @@ class DarwinAddToAppNativeAssets {
     for (final Map<String, NativeAssetPath> targetAssets in manifest.assets.values) {
       for (final MapEntry<String, NativeAssetPath>(key: assetId, value: path)
           in targetAssets.entries) {
-        if (path case NativeAssetAbsolutePath(:final uri)) {
-          final String pathString = uri.toFilePath();
+        if (path
+            case NativeAssetAbsolutePath(path: final pathString) ||
+                NativeAssetSystemPath(path: final pathString)) {
           // A code asset is recorded under the name it is loaded with, which for
           // a framework is its `@rpath`-relative install name. Drop the prefix
           // to get back to where it sits in the bundle.

@@ -78,7 +78,7 @@ Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsAndroi
         final String fileName = asset.codeAsset.file!.pathSegments.last;
         final uri = Uri(path: fileName);
         return FlutterCodeAssetTargetLocation(
-          runtimePath: NativeAssetAbsolutePath(uri),
+          runtimePath: NativeAssetAbsolutePath(fileName),
           bundlePath: uri,
         );
       }),

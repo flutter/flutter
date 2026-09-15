@@ -735,7 +735,7 @@ Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> _assetTargetLocationsWindo
         final bundlePath = Uri(path: fileName);
         final Uri runtimeUri = absolutePath != null ? absolutePath.resolve(fileName) : bundlePath;
         return FlutterCodeAssetTargetLocation(
-          runtimePath: NativeAssetAbsolutePath(runtimeUri),
+          runtimePath: NativeAssetAbsolutePath.fromFileUri(runtimeUri),
           bundlePath: bundlePath,
         );
       }),

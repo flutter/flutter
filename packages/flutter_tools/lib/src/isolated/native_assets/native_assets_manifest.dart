@@ -18,8 +18,8 @@ sealed class NativeAssetPath {
 
   factory NativeAssetPath.fromJson(List<Object?> json) {
     return switch (json) {
-      ['absolute', final String path] => NativeAssetAbsolutePath(Uri.file(path)),
-      ['system', final String path] => NativeAssetSystemPath(Uri.file(path)),
+      ['absolute', final String path] => NativeAssetAbsolutePath(path),
+      ['system', final String path] => NativeAssetSystemPath(path),
       ['process'] => const NativeAssetInProcess(),
       ['executable'] => const NativeAssetInExecutable(),
       _ => throw FormatException('Invalid native asset path JSON: $json'),
@@ -29,48 +29,67 @@ sealed class NativeAssetPath {
   List<String> toJson();
 }
 
-/// Asset at an absolute or bundle-relative path [uri] on the target device.
+/// Asset at an absolute or bundle-relative [path] on the target device.
+///
+/// The path is a path on the target device, which is not necessarily the host
+/// on which the tool runs. It is therefore stored as an opaque string rather
+/// than as a [Uri], so that it is not reinterpreted with the host's path
+/// semantics (e.g. `@rpath/Foo.framework/Foo` must not become
+/// `@rpath\Foo.framework\Foo` when the tool runs on Windows).
 final class NativeAssetAbsolutePath extends NativeAssetPath {
-  const NativeAssetAbsolutePath(this.uri);
+  const NativeAssetAbsolutePath(this.path);
 
-  final Uri uri;
+  /// The path on the target device, as a host [Uri].
+  ///
+  /// Only use this for assets that are loaded from the host file system, such
+  /// as assets for the Flutter tester, or when the host and target file system
+  /// layout match.
+  NativeAssetAbsolutePath.fromFileUri(Uri uri) : path = uri.toFilePath();
+
+  final String path;
 
   static const _pathTypeValue = 'absolute';
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || (other is NativeAssetAbsolutePath && other.uri == uri);
+      identical(this, other) || (other is NativeAssetAbsolutePath && other.path == path);
 
   @override
-  int get hashCode => uri.hashCode;
+  int get hashCode => path.hashCode;
 
   @override
-  String toString() => 'NativeAssetAbsolutePath($uri)';
+  String toString() => 'NativeAssetAbsolutePath($path)';
 
   @override
-  List<String> toJson() => <String>[_pathTypeValue, uri.toFilePath()];
+  List<String> toJson() => <String>[_pathTypeValue, path];
 }
 
 /// Asset available on the target system's dynamic library search path (`PATH` / `LD_LIBRARY_PATH`).
+///
+/// As with [NativeAssetAbsolutePath], [path] is a target device path and is
+/// stored as an opaque string.
 final class NativeAssetSystemPath extends NativeAssetPath {
-  const NativeAssetSystemPath(this.uri);
+  const NativeAssetSystemPath(this.path);
 
-  final Uri uri;
+  /// See [NativeAssetAbsolutePath.fromFileUri].
+  NativeAssetSystemPath.fromFileUri(Uri uri) : path = uri.toFilePath();
+
+  final String path;
 
   static const _pathTypeValue = 'system';
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || (other is NativeAssetSystemPath && other.uri == uri);
+      identical(this, other) || (other is NativeAssetSystemPath && other.path == path);
 
   @override
-  int get hashCode => uri.hashCode;
+  int get hashCode => path.hashCode;
 
   @override
-  String toString() => 'NativeAssetSystemPath($uri)';
+  String toString() => 'NativeAssetSystemPath($path)';
 
   @override
-  List<String> toJson() => <String>[_pathTypeValue, uri.toFilePath()];
+  List<String> toJson() => <String>[_pathTypeValue, path];
 }
 
 /// Asset loaded in the process and available through `DynamicLibrary.process()`.
@@ -116,7 +135,7 @@ FlutterCodeAssetTargetLocation targetLocationForCodeAsset(
   final LinkMode linkMode = asset.codeAsset.linkMode;
   return switch (linkMode) {
     DynamicLoadingSystem(:final uri) => FlutterCodeAssetTargetLocation(
-      runtimePath: NativeAssetSystemPath(uri),
+      runtimePath: NativeAssetSystemPath.fromFileUri(uri),
     ),
     LookupInExecutable() => const FlutterCodeAssetTargetLocation(
       runtimePath: NativeAssetInExecutable(),

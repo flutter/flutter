@@ -238,7 +238,7 @@ void main() {
     final Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> manifest =
         assetTargetLocationsMacOS(assets, null);
     expect(
-      (manifest[asset]!.runtimePath as NativeAssetAbsolutePath).uri.path,
+      (manifest[asset]!.runtimePath as NativeAssetAbsolutePath).path,
       equals('@rpath/my_asset.framework/my_asset'),
     );
 
@@ -266,8 +266,8 @@ void main() {
           asset,
         ], Uri.parse('file:///build/native_assets/macos/'));
     expect(
-      (manifest[asset]!.runtimePath as NativeAssetAbsolutePath).uri,
-      equals(Uri.parse('file:///build/native_assets/macos/libmy_asset.dylib')),
+      (manifest[asset]!.runtimePath as NativeAssetAbsolutePath).path,
+      equals(Uri.parse('file:///build/native_assets/macos/libmy_asset.dylib').toFilePath()),
     );
   });
 
@@ -288,7 +288,7 @@ void main() {
       assets,
     );
     expect(
-      (manifest[asset]!.runtimePath as NativeAssetAbsolutePath).uri.path,
+      (manifest[asset]!.runtimePath as NativeAssetAbsolutePath).path,
       equals('@rpath/my_asset.framework/my_asset'),
     );
 
