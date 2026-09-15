@@ -214,6 +214,10 @@ TEST(AndroidWindowMetricsMapperTest, BasicViewportMetricsTranslation) {
   EXPECT_DOUBLE_EQ(event.physical_view_inset_bottom, 200.0);
   EXPECT_DOUBLE_EQ(event.physical_view_inset_left, 0.0);
   EXPECT_DOUBLE_EQ(event.physical_view_inset_right, 0.0);
+  EXPECT_DOUBLE_EQ(event.physical_padding_top, 72.0);
+  EXPECT_DOUBLE_EQ(event.physical_padding_bottom, 48.0);
+  EXPECT_DOUBLE_EQ(event.physical_padding_left, 0.0);
+  EXPECT_DOUBLE_EQ(event.physical_padding_right, 0.0);
   EXPECT_FALSE(event.has_constraints);
   EXPECT_EQ(event.min_width_constraint, 1080u);
   EXPECT_EQ(event.max_width_constraint, 1080u);

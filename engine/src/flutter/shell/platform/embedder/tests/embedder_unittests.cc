@@ -4743,6 +4743,31 @@ TEST_F(EmbedderTest, InvalidFlutterWindowMetricsEvent) {
   // Left/right insets cannot be greater than width.
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kInvalidArguments);
+
+  // Reset insets to zero to test negative padding validation.
+  event.physical_view_inset_top = 0.0;
+  event.physical_view_inset_right = 0.0;
+  event.physical_view_inset_bottom = 0.0;
+  event.physical_view_inset_left = 0.0;
+
+  // Negative padding should be rejected.
+  // Using -1.0 as a canonical negative offset to verify non-negative invariant.
+  event.physical_padding_top = -1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kInvalidArguments);
+
+  // Excessive padding exceeding window dimensions should be rejected.
+  // 800 width, 600 height; test padding exceeding height (e.g. 700.0).
+  event.physical_padding_top = 700.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kInvalidArguments);
+
+  // Valid padding should succeed.
+  // 72.0px status bar padding, 48.0px navigation bar padding.
+  event.physical_padding_top = 72.0;
+  event.physical_padding_bottom = 48.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
 }
 
 TEST_F(EmbedderTest, WindowMetricsEventWithConstraints) {
