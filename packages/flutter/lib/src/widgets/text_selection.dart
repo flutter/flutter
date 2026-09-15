@@ -347,6 +347,7 @@ class TextSelectionOverlay {
     ClipboardStatusNotifier? clipboardStatus,
     this.contextMenuBuilder,
     required TextMagnifierConfiguration magnifierConfiguration,
+    AnimationBehavior animationBehavior = AnimationBehavior.normal,
   }) {
     assert(debugMaybeDispatchCreated('widgets', 'TextSelectionOverlay', this));
     renderObject.selectionStartInViewport.addListener(_updateTextSelectionOverlayVisibilities);
@@ -380,6 +381,7 @@ class TextSelectionOverlay {
       onSelectionHandleTapped: onSelectionHandleTapped,
       dragStartBehavior: dragStartBehavior,
       toolbarLocation: renderObject.lastSecondaryTapDownPosition,
+      animationBehavior: animationBehavior,
     );
   }
 
@@ -1126,12 +1128,18 @@ class SelectionOverlay {
     )
     this._toolbarLocation,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(debugCheckHasOverlay(context)) {
     assert(debugMaybeDispatchCreated('widgets', 'SelectionOverlay', this));
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.context}
   final BuildContext context;
+
+  /// The [AnimationBehavior] of the fade animation for toolbar and handles.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
 
   final ValueNotifier<MagnifierInfo> _magnifierInfo = ValueNotifier<MagnifierInfo>(
     MagnifierInfo.empty,
@@ -1689,6 +1697,7 @@ class SelectionOverlay {
           visibility: toolbarVisible,
           layerLink: toolbarLayerLink,
           offset: -renderBox.localToGlobal(Offset.zero),
+          animationBehavior: animationBehavior,
           child: contextMenuBuilder(context),
         );
       },
@@ -1709,6 +1718,7 @@ class SelectionOverlay {
         return _SelectionToolbarWrapper(
           layerLink: toolbarLayerLink,
           offset: -renderBox.localToGlobal(Offset.zero),
+          animationBehavior: animationBehavior,
           child: builder(context),
         );
       },
@@ -1812,6 +1822,7 @@ class SelectionOverlay {
         visibility: startHandlesVisible,
         preferredLineHeight: _lineHeightAtStart,
         dragStartBehavior: dragStartBehavior,
+        animationBehavior: animationBehavior,
       );
     }
     return TapRegion(
@@ -1843,6 +1854,7 @@ class SelectionOverlay {
         visibility: endHandlesVisible,
         preferredLineHeight: _lineHeightAtEnd,
         dragStartBehavior: dragStartBehavior,
+        animationBehavior: animationBehavior,
       );
     }
     return TapRegion(
@@ -1934,6 +1946,7 @@ class _SelectionToolbarWrapper extends StatefulWidget {
     this.visibility,
     required this.layerLink,
     required this.offset,
+    this.animationBehavior = AnimationBehavior.normal,
     required this.child,
   });
 
@@ -1941,6 +1954,7 @@ class _SelectionToolbarWrapper extends StatefulWidget {
   final Offset offset;
   final LayerLink layerLink;
   final ValueListenable<bool>? visibility;
+  final AnimationBehavior animationBehavior;
 
   @override
   State<_SelectionToolbarWrapper> createState() => _SelectionToolbarWrapperState();
@@ -1955,7 +1969,11 @@ class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper>
   void initState() {
     super.initState();
 
-    _controller = AnimationController(duration: SelectionOverlay.fadeDuration, vsync: this);
+    _controller = AnimationController(
+      duration: SelectionOverlay.fadeDuration,
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
 
     _toolbarVisibilityChanged();
     widget.visibility?.addListener(_toolbarVisibilityChanged);
@@ -2023,6 +2041,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
     this.visibility,
     required this.preferredLineHeight,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   final LayerLink handleLayerLink;
@@ -2035,6 +2054,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
   final double preferredLineHeight;
   final TextSelectionHandleType type;
   final DragStartBehavior dragStartBehavior;
+  final AnimationBehavior animationBehavior;
 
   @override
   State<_SelectionHandleOverlay> createState() => _SelectionHandleOverlayState();
@@ -2049,7 +2069,11 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
   void initState() {
     super.initState();
 
-    _controller = AnimationController(duration: SelectionOverlay.fadeDuration, vsync: this);
+    _controller = AnimationController(
+      duration: SelectionOverlay.fadeDuration,
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
 
     _handleVisibilityChanged();
     widget.visibility?.addListener(_handleVisibilityChanged);

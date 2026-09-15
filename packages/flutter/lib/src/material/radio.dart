@@ -122,6 +122,7 @@ class Radio<T> extends StatefulWidget {
     this.backgroundColor,
     this.side,
     this.innerRadius,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : _radioType = _RadioType.material,
        useCupertinoCheckmarkStyle = false;
 
@@ -172,6 +173,7 @@ class Radio<T> extends StatefulWidget {
     this.backgroundColor,
     this.side,
     this.innerRadius,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : _radioType = _RadioType.adaptive;
 
   /// {@macro flutter.widget.RawRadio.value}
@@ -464,6 +466,11 @@ class Radio<T> extends StatefulWidget {
   /// If that is also null, the default value is `4.5` in all states.
   final WidgetStateProperty<double?>? innerRadius;
 
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
+
   @override
   State<Radio<T>> createState() => _RadioState<T>();
 }
@@ -536,6 +543,7 @@ class _RadioState<T> extends State<Radio<T>> {
               useCheckmarkStyle: widget.useCupertinoCheckmarkStyle,
               groupRegistry: _effectiveRegistry,
               enabled: _enabled,
+              animationBehavior: widget.animationBehavior,
             );
         }
     }
@@ -558,6 +566,7 @@ class _RadioState<T> extends State<Radio<T>> {
       autofocus: widget.autofocus,
       groupRegistry: _effectiveRegistry,
       enabled: _enabled,
+      animationBehavior: widget.animationBehavior,
       builder: (BuildContext context, ToggleableStateMixin state) {
         return _RadioPaint(
           toggleableState: state,

@@ -113,12 +113,18 @@ class NavigationRail extends StatefulWidget {
     this.trailingAtBottom = false,
     this.scrollable = false,
     this.mainAxisAlignment,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(selectedIndex == null || (0 <= selectedIndex && selectedIndex < destinations.length)),
        assert(elevation == null || elevation > 0),
        assert(minWidth == null || minWidth > 0),
        assert(minExtendedWidth == null || minExtendedWidth > 0),
        assert((minWidth == null || minExtendedWidth == null) || minExtendedWidth >= minWidth),
        assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none));
+
+  /// The behavior of the animation relative to the device's clock.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
 
   /// Sets the color of the Container that holds all of the [NavigationRail]'s
   /// contents.
@@ -588,8 +594,11 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     _destinationControllers = List<AnimationController>.generate(widget.destinations.length, (
       int index,
     ) {
-      return AnimationController(duration: kThemeAnimationDuration, vsync: this)
-        ..addListener(_rebuild);
+      return AnimationController(
+        duration: kThemeAnimationDuration,
+        vsync: this,
+        animationBehavior: widget.animationBehavior,
+      )..addListener(_rebuild);
     });
     _destinationAnimations = _destinationControllers
         .map((AnimationController controller) => controller.view)
@@ -601,6 +610,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
       duration: kThemeAnimationDuration,
       vsync: this,
       value: widget.extended ? 1.0 : 0.0,
+      animationBehavior: widget.animationBehavior,
     );
     _extendedAnimation = CurvedAnimation(parent: _extendedController, curve: Curves.easeInOut);
     _extendedController.addListener(() {
