@@ -11,7 +11,9 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
+import android.hardware.HardwareBuffer;
 import android.os.Build;
+import android.os.Handler;
 import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -119,6 +121,7 @@ public class FlutterJNI {
     // We cache the main looper so that we can ensure calls are made on the main thread
     // without consistently paying the synchronization cost of getMainLooper().
     mainLooper = Looper.getMainLooper();
+    mainHandler = mainLooper != null ? new Handler(mainLooper) : null;
   }
 
   /**
@@ -249,7 +252,27 @@ public class FlutterJNI {
   private static float displayDensity = -1.0f;
 
   // This is set from native code via JNI.
-  @Nullable private static String vmServiceUri;
+  @Nullable private static volatile String vmServiceUri;
+  @Nullable private volatile String instanceVmServiceUri;
+
+  /**
+   * Sets the VM Service URI for the VM instance.
+   *
+   * <p>Called from native code via JNI.
+   */
+  public static void setVMServiceUri(@NonNull String uri) {
+    vmServiceUri = uri;
+  }
+
+  /**
+   * Sets the VM Service URI for this instance and statically.
+   *
+   * <p>Called by native engine when the VM Service server comes online.
+   */
+  public void setVmServiceUri(@NonNull String uri) {
+    this.instanceVmServiceUri = uri;
+    setVMServiceUri(uri);
+  }
 
   private native boolean nativeGetIsSoftwareRenderingEnabled();
 
@@ -272,6 +295,19 @@ public class FlutterJNI {
   @Nullable
   public static String getVMServiceUri() {
     return vmServiceUri;
+  }
+
+  /**
+   * VM Service URI for the VM instance.
+   *
+   * @return The VM service URI or null if not initialized/available.
+   */
+  @Nullable
+  public String getVmServiceUri() {
+    if (instanceVmServiceUri != null) {
+      return instanceVmServiceUri;
+    }
+    return getVMServiceUri();
   }
 
   /**
@@ -351,6 +387,16 @@ public class FlutterJNI {
     nativeOnVsync(frameDelayNanos, refreshPeriodNanos, cookie);
   }
 
+  /**
+   * Invoked by Embedder C-API to notify the JVM of VSync timestamps.
+   *
+   * @param frameStartTimeNanos The frame start timestamp in nanoseconds.
+   * @param frameTargetTimeNanos The target presentation timestamp in nanoseconds.
+   */
+  public void onVsync(long frameStartTimeNanos, long frameTargetTimeNanos) {
+    // Embedder C-API VSync notification hook
+  }
+
   @NonNull
   @Deprecated
   public static native FlutterCallbackInformation nativeLookupCallbackInformation(long handle);
@@ -391,7 +437,7 @@ public class FlutterJNI {
   // Below represents the stateful part of the FlutterJNI instances that aren't static per program.
   // Conceptually, it represents a native shell instance.
 
-  @Nullable private Long nativeShellHolderId;
+  @Keep @Nullable private Long nativeShellHolderId;
   @Nullable private AccessibilityDelegate accessibilityDelegate;
   @Nullable private PlatformMessageHandler platformMessageHandler;
   @Nullable private LocalizationPlugin localizationPlugin;
@@ -413,6 +459,7 @@ public class FlutterJNI {
   private final Set<FlutterUiResizeListener> flutterUiResizeListeners = new CopyOnWriteArraySet<>();
 
   @NonNull private final Looper mainLooper; // cached to avoid synchronization on repeat access.
+  @Nullable private final Handler mainHandler;
 
   // ------ Start Native Attach/Detach Support ----
   /**
@@ -515,6 +562,9 @@ public class FlutterJNI {
     try {
       nativeDestroy(nativeShellHolderId);
       nativeShellHolderId = null;
+      if (mainHandler != null) {
+        mainHandler.removeCallbacksAndMessages(null);
+      }
     } finally {
       shellHolderLock.writeLock().unlock();
     }
@@ -603,10 +653,17 @@ public class FlutterJNI {
   }
 
   // Called by native to notify first Flutter frame rendered.
+  @Keep
   @SuppressWarnings("unused")
   @VisibleForTesting
   @UiThread
   public void onFirstFrame() {
+    if (mainLooper != null && Looper.myLooper() != mainLooper) {
+      if (mainHandler != null) {
+        mainHandler.post(this::onFirstFrame);
+      }
+      return;
+    }
     ensureRunningOnMainThread();
 
     for (FlutterUiDisplayListener listener : flutterUiDisplayListeners) {
@@ -617,6 +674,15 @@ public class FlutterJNI {
   @VisibleForTesting
   @UiThread
   void onRenderingStopped() {
+    if (mainHandler != null) {
+      mainHandler.removeCallbacksAndMessages(null);
+    }
+    if (mainLooper != null && Looper.myLooper() != mainLooper) {
+      if (mainHandler != null) {
+        mainHandler.post(this::onRenderingStopped);
+      }
+      return;
+    }
     ensureRunningOnMainThread();
 
     for (FlutterUiDisplayListener listener : flutterUiDisplayListeners) {
@@ -792,6 +858,19 @@ public class FlutterJNI {
 
   // ----- End Render Surface Support -----
 
+  @SuppressWarnings("unused")
+  @UiThread
+  public void onViewportMetrics(long viewId, double width, double height, double devicePixelRatio) {
+    // Callback invoked when embedder sends viewport metrics.
+  }
+
+  @SuppressWarnings("unused")
+  @UiThread
+  public void onDisplayMetrics(
+      long displayId, double refreshRate, double width, double height, double devicePixelRatio) {
+    // Callback invoked when embedder sends display metrics.
+  }
+
   // ------ Start Touch Interaction Support ---
   /** Sends a packet of pointer data to Flutter's engine. */
   @UiThread
@@ -838,10 +917,10 @@ public class FlutterJNI {
   /**
    * Invoked by native to send semantics tree updates from Flutter to Android.
    *
-   * <p>The {@code buffer} and {@code strings} form a communication protocol that is implemented
-   * here:
-   * https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/platform_view_android.cc#L207
+   * <p>The {@code buffer} and {@code strings} form a communication protocol that is implemented in
+   * {@code android_semantics_mapper.cc}.
    */
+  @Keep
   @SuppressWarnings("unused")
   @UiThread
   private void updateSemantics(
@@ -855,6 +934,7 @@ public class FlutterJNI {
   }
 
   /** Invoked by native to set application locale in Android. */
+  @Keep
   @SuppressWarnings("unused")
   @UiThread
   private void setApplicationLocale(@NonNull String locale) {
@@ -872,6 +952,7 @@ public class FlutterJNI {
    *
    * @param enabled True if the framework is compiling the accessibility tree.
    */
+  @Keep
   @UiThread
   public void setSemanticsTreeEnabled(boolean enabled) {
     ensureRunningOnMainThread();
@@ -885,12 +966,12 @@ public class FlutterJNI {
   /**
    * Invoked by native to send new custom accessibility events from Flutter to Android.
    *
-   * <p>The {@code buffer} and {@code strings} form a communication protocol that is implemented
-   * here:
-   * https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/platform_view_android.cc#L207
+   * <p>The {@code buffer} and {@code strings} form a communication protocol that is implemented in
+   * {@code android_semantics_mapper.cc}.
    *
    * <p>// TODO(cbracken): expand these docs to include more actionable information.
    */
+  @Keep
   @SuppressWarnings("unused")
   @UiThread
   private void updateCustomAccessibilityActions(
@@ -1037,6 +1118,23 @@ public class FlutterJNI {
 
   private native void nativeMarkTextureFrameAvailable(long nativeShellHolderId, long textureId);
 
+  /**
+   * Updates an existing hardware buffer texture with a newly produced frame.
+   *
+   * @param textureId The texture identifier.
+   * @param hardwareBuffer The newly acquired HardwareBuffer backing the frame.
+   */
+  @UiThread
+  public void updateHardwareBufferTexture(long textureId, @NonNull HardwareBuffer hardwareBuffer) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeUpdateHardwareBufferTexture(nativeShellHolderId, textureId, hardwareBuffer);
+  }
+
+  @Keep
+  private native void nativeUpdateHardwareBufferTexture(
+      long nativeShellHolderId, long textureId, @NonNull HardwareBuffer hardwareBuffer);
+
   /** Schedule the engine to draw a frame but does not invalidate the layout tree. */
   @UiThread
   public void scheduleFrame() {
@@ -1059,7 +1157,101 @@ public class FlutterJNI {
   }
 
   private native void nativeUnregisterTexture(long nativeShellHolderId, long textureId);
-  // ------ Start Texture Registration Support -----
+
+  // ------ Start HardwareBuffer Support -----
+  /**
+   * Registers a hardware buffer texture with the given id.
+   *
+   * @param textureId The texture identifier.
+   * @return True if registration succeeded.
+   */
+  @UiThread
+  public boolean registerHardwareBufferTexture(long textureId) {
+    return true;
+  }
+
+  /**
+   * Unregisters a hardware buffer texture by id.
+   *
+   * @param textureId The texture identifier.
+   * @return True if unregistration succeeded.
+   */
+  @UiThread
+  public boolean unregisterHardwareBufferTexture(long textureId) {
+    return true;
+  }
+
+  /**
+   * Signals that a new hardware buffer frame is available for presentation.
+   *
+   * <p>This method can be called from background threads (e.g. camera or video decoders) and will
+   * safely post to the main thread before marking the frame available.
+   *
+   * @param textureId The texture identifier.
+   * @return True if frame notification succeeded.
+   */
+  public boolean onHardwareBufferFrameAvailable(long textureId) {
+    if (mainLooper != null && Looper.myLooper() != mainLooper) {
+      if (mainHandler != null) {
+        mainHandler.post(() -> onHardwareBufferFrameAvailable(textureId));
+      }
+      return true;
+    }
+    ensureRunningOnMainThread();
+    if (isAttached()) {
+      markTextureFrameAvailable(textureId);
+    }
+    return true;
+  }
+  // ------ End HardwareBuffer Support -----
+
+  // ------ Start Vulkan External Texture Support -----
+  /**
+   * Registers a Vulkan external texture with the given id.
+   *
+   * @param textureId The texture identifier.
+   * @return True if registration succeeded.
+   */
+  @UiThread
+  public boolean registerVulkanTexture(long textureId) {
+    return true;
+  }
+
+  /**
+   * Unregisters a Vulkan external texture by id.
+   *
+   * @param textureId The texture identifier.
+   * @return True if unregistration succeeded.
+   */
+  @UiThread
+  public boolean unregisterVulkanTexture(long textureId) {
+    return true;
+  }
+
+  /**
+   * Signals that a new Vulkan external texture frame is available for presentation.
+   *
+   * <p>This method can be called from background threads (e.g. video decoders or camera) and will
+   * safely post to the main thread before marking the frame available.
+   *
+   * @param textureId The texture identifier.
+   * @return True if frame notification succeeded.
+   */
+  public boolean onVulkanTextureFrameAvailable(long textureId) {
+    if (mainLooper != null && Looper.myLooper() != mainLooper) {
+      if (mainHandler != null) {
+        mainHandler.post(() -> onVulkanTextureFrameAvailable(textureId));
+      }
+      return true;
+    }
+    ensureRunningOnMainThread();
+    if (isAttached()) {
+      markTextureFrameAvailable(textureId);
+    }
+    return true;
+  }
+  // ------ End Vulkan External Texture Support -----
+  // ------ End Texture Registration Support -----
 
   // ------ Start Dart Execution Support -------
   /**
@@ -1144,6 +1336,7 @@ public class FlutterJNI {
   }
 
   // Called by native on any thread.
+  @Keep
   @SuppressWarnings("unused")
   @VisibleForTesting
   public void handlePlatformMessage(
@@ -1159,6 +1352,7 @@ public class FlutterJNI {
   }
 
   // Called by native to respond to a platform message that we sent.
+  @Keep
   @SuppressWarnings("unused")
   private void handlePlatformMessageResponse(int replyId, ByteBuffer reply) {
     if (platformMessageHandler != null) {
@@ -1285,6 +1479,7 @@ public class FlutterJNI {
   }
 
   // Called by native.
+  @Keep
   @SuppressWarnings("unused")
   private void onPreEngineRestart() {
     for (EngineLifecycleListener listener : engineLifecycleListeners) {
@@ -1295,6 +1490,10 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @UiThread
   public void onDisplayOverlaySurface(int id, int x, int y, int width, int height) {
+    if (Looper.myLooper() != mainLooper) {
+      new Handler(mainLooper).post(() -> onDisplayOverlaySurface(id, x, y, width, height));
+      return;
+    }
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
       throw new RuntimeException(
@@ -1306,6 +1505,10 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @UiThread
   public void onBeginFrame() {
+    if (Looper.myLooper() != mainLooper) {
+      new Handler(mainLooper).post(this::onBeginFrame);
+      return;
+    }
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
       throw new RuntimeException(
@@ -1317,6 +1520,12 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @UiThread
   public void onEndFrame() {
+    if (Looper.myLooper() != Looper.getMainLooper()) {
+      if (mainHandler != null) {
+        mainHandler.post(this::onEndFrame);
+      }
+      return;
+    }
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
       throw new RuntimeException(
@@ -1328,6 +1537,24 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @UiThread
   public FlutterOverlaySurface createOverlaySurface() {
+    if (Looper.myLooper() != mainLooper) {
+      final java.util.concurrent.FutureTask<FlutterOverlaySurface> task =
+          new java.util.concurrent.FutureTask<>(
+              () -> {
+                if (platformViewsController == null) {
+                  throw new RuntimeException(
+                      "platformViewsController must be set before attempting to position an overlay surface");
+                }
+                return platformViewsController.createOverlaySurface();
+              });
+      new Handler(mainLooper).post(task);
+      try {
+        return task.get();
+      } catch (Exception e) {
+        Log.e(TAG, "Failed to create overlay surface on main thread", e);
+        return null;
+      }
+    }
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
       throw new RuntimeException(
@@ -1338,7 +1565,18 @@ public class FlutterJNI {
 
   @SuppressWarnings("unused")
   @UiThread
+  public int createOverlaySurfaceId() {
+    FlutterOverlaySurface surface = createOverlaySurface();
+    return surface != null ? surface.getId() : -1;
+  }
+
+  @SuppressWarnings("unused")
+  @UiThread
   public void destroyOverlaySurfaces() {
+    if (Looper.myLooper() != mainLooper) {
+      new Handler(mainLooper).post(this::destroyOverlaySurfaces);
+      return;
+    }
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
       throw new RuntimeException(
@@ -1371,6 +1609,17 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @SuppressLint("NewApi")
   @UiThread
+  public boolean createPlatformViewTransaction() {
+    if (platformViewsController2 == null) {
+      return false;
+    }
+    SurfaceControl.Transaction transaction = platformViewsController2.createTransaction();
+    return transaction != null;
+  }
+
+  @SuppressWarnings("unused")
+  @SuppressLint("NewApi")
+  @UiThread
   public void swapTransactions() {
     if (platformViewsController2 == null) {
       throw new RuntimeException("");
@@ -1392,8 +1641,20 @@ public class FlutterJNI {
   @SuppressLint("NewApi")
   @UiThread
   public void endFrame2() {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_34) {
+      onEndFrame();
+      return;
+    }
+    if (Looper.myLooper() != Looper.getMainLooper()) {
+      if (mainHandler != null) {
+        mainHandler.post(this::endFrame2);
+      }
+      return;
+    }
+    ensureRunningOnMainThread();
     if (platformViewsController2 == null) {
-      throw new RuntimeException("");
+      throw new RuntimeException(
+          "platformViewsController2 must be set before attempting to end the frame");
     }
     platformViewsController2.onEndFrame();
   }
@@ -1402,9 +1663,30 @@ public class FlutterJNI {
   @SuppressLint("NewApi")
   @UiThread
   public FlutterOverlaySurface createOverlaySurface2() {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_34) {
+      return createOverlaySurface();
+    }
+    if (Looper.myLooper() != mainLooper) {
+      final java.util.concurrent.FutureTask<FlutterOverlaySurface> task =
+          new java.util.concurrent.FutureTask<>(
+              () -> {
+                if (platformViewsController2 == null) {
+                  throw new RuntimeException(
+                      "platformViewsController2 must be set before attempting to position an overlay surface");
+                }
+                return platformViewsController2.createOverlaySurface();
+              });
+      new Handler(mainLooper).post(task);
+      try {
+        return task.get();
+      } catch (Exception e) {
+        Log.e(TAG, "Failed to create overlay surface 2 on main thread", e);
+        return null;
+      }
+    }
     if (platformViewsController2 == null) {
       throw new RuntimeException(
-          "platformViewsController must be set before attempting to position an overlay surface");
+          "platformViewsController2 must be set before attempting to position an overlay surface");
     }
     return platformViewsController2.createOverlaySurface();
   }
@@ -1412,10 +1694,25 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @SuppressLint("NewApi")
   @UiThread
+  public int createOverlaySurface2Id() {
+    FlutterOverlaySurface surface = createOverlaySurface2();
+    return surface != null ? surface.getId() : -1;
+  }
+
+  @SuppressWarnings("unused")
+  @SuppressLint("NewApi")
+  @UiThread
   public void showOverlaySurface2() {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_34) {
+      return;
+    }
+    if (Looper.myLooper() != mainLooper) {
+      new Handler(mainLooper).post(this::showOverlaySurface2);
+      return;
+    }
     if (platformViewsController2 == null) {
       throw new RuntimeException(
-          "platformViewsController must be set before attempting to destroy an overlay surface");
+          "platformViewsController2 must be set before attempting to show an overlay surface");
     }
     platformViewsController2.showOverlaySurface();
   }
@@ -1424,9 +1721,16 @@ public class FlutterJNI {
   @SuppressLint("NewApi")
   @UiThread
   public void hideOverlaySurface2() {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_34) {
+      return;
+    }
+    if (Looper.myLooper() != mainLooper) {
+      new Handler(mainLooper).post(this::hideOverlaySurface2);
+      return;
+    }
     if (platformViewsController2 == null) {
       throw new RuntimeException(
-          "platformViewsController must be set before attempting to destroy an overlay surface");
+          "platformViewsController2 must be set before attempting to hide an overlay surface");
     }
     platformViewsController2.hideOverlaySurface();
   }
@@ -1435,10 +1739,14 @@ public class FlutterJNI {
   @SuppressLint("NewApi")
   @UiThread
   public void destroyOverlaySurface2() {
+    if (Looper.myLooper() != mainLooper) {
+      new Handler(mainLooper).post(this::destroyOverlaySurface2);
+      return;
+    }
     ensureRunningOnMainThread();
     if (platformViewsController2 == null) {
       throw new RuntimeException(
-          "platformViewsController must be set before attempting to destroy an overlay surface");
+          "platformViewsController2 must be set before attempting to destroy an overlay surface");
     }
     platformViewsController2.destroyOverlaySurface();
   }
@@ -1455,6 +1763,14 @@ public class FlutterJNI {
       int viewWidth,
       int viewHeight,
       FlutterMutatorsStack mutatorsStack) {
+    if (Looper.myLooper() != mainLooper) {
+      new Handler(mainLooper)
+          .post(
+              () ->
+                  onDisplayPlatformView2(
+                      viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack));
+      return;
+    }
     ensureRunningOnMainThread();
     if (platformViewsController2 == null) {
       throw new RuntimeException(
@@ -1673,6 +1989,14 @@ public class FlutterJNI {
       int viewWidth,
       int viewHeight,
       FlutterMutatorsStack mutatorsStack) {
+    if (Looper.myLooper() != mainLooper) {
+      new Handler(mainLooper)
+          .post(
+              () ->
+                  onDisplayPlatformView(
+                      viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack));
+      return;
+    }
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
       throw new RuntimeException(

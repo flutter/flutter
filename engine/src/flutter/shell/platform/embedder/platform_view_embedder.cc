@@ -224,6 +224,25 @@ void PlatformViewEmbedder::RequestViewFocusChange(
   }
 }
 
+void PlatformViewEmbedder::RequestDartDeferredLibrary(
+    intptr_t loading_unit_id) {
+  TRACE_EVENT0("flutter", "PlatformViewEmbedder::RequestDartDeferredLibrary");
+  if (platform_dispatch_table_.request_dart_deferred_library_callback !=
+      nullptr) {
+    platform_dispatch_table_.request_dart_deferred_library_callback(
+        loading_unit_id);
+  } else {
+    FML_LOG(ERROR)
+        << "No dart_deferred_library_loading_unit_callback set in "
+           "FlutterProjectArgs. Deferred library request for loading unit "
+        << loading_unit_id << " failed.";
+    LoadDartDeferredLibraryError(
+        loading_unit_id,
+        "No deferred library loading callback registered by the embedder.",
+        /*transient=*/false);
+  }
+}
+
 std::shared_ptr<PlatformMessageHandler>
 PlatformViewEmbedder::GetPlatformMessageHandler() const {
   return platform_message_handler_;

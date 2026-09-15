@@ -291,6 +291,12 @@ public class DartExecutor implements BinaryMessenger {
     return isolateServiceId;
   }
 
+  /** Returns the VM Service URI for this executor's FlutterJNI instance. */
+  @Nullable
+  public String getVmServiceUri() {
+    return flutterJNI.getVmServiceUri();
+  }
+
   /** Callback interface invoked when the isolate identifier becomes available. */
   public interface IsolateServiceIdListener {
     void onIsolateServiceIdAvailable(@NonNull String isolateServiceId);

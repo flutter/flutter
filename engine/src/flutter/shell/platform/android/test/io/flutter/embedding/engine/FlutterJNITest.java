@@ -16,6 +16,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.LocaleList;
+import android.os.Looper;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
@@ -33,6 +35,7 @@ import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import java.nio.ByteBuffer;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -385,6 +388,83 @@ public class FlutterJNITest {
     } finally {
       ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", originalSdkInt);
     }
+  }
+
+  @Test
+  public void itManagesVmServiceUri() {
+    FlutterJNI flutterJNI = new FlutterJNI();
+    FlutterJNI.setVMServiceUri("http://127.0.0.1:1234/static");
+    assertEquals("http://127.0.0.1:1234/static", FlutterJNI.getVMServiceUri());
+    assertEquals("http://127.0.0.1:1234/static", flutterJNI.getVmServiceUri());
+
+    flutterJNI.setVmServiceUri("http://127.0.0.1:5678/instance");
+    assertEquals("http://127.0.0.1:5678/instance", flutterJNI.getVmServiceUri());
+  }
+
+  @Test
+  public void itDispatchesFirstFrameOnMainThread() {
+    FlutterJNI flutterJNI = new FlutterJNI();
+    AtomicInteger displayedCount = new AtomicInteger(0);
+    flutterJNI.addIsDisplayingFlutterUiListener(
+        new FlutterUiDisplayListener() {
+          @Override
+          public void onFlutterUiDisplayed() {
+            displayedCount.incrementAndGet();
+          }
+
+          @Override
+          public void onFlutterUiNoLongerDisplayed() {}
+        });
+
+    flutterJNI.onFirstFrame();
+    assertEquals(1, displayedCount.get());
+  }
+
+  @Test
+  public void itDispatchesRenderingStoppedAndCancelsPendingFirstFrame()
+      throws InterruptedException {
+    FlutterJNI flutterJNI = new FlutterJNI();
+    AtomicInteger displayedCount = new AtomicInteger(0);
+    AtomicInteger stoppedCount = new AtomicInteger(0);
+    flutterJNI.addIsDisplayingFlutterUiListener(
+        new FlutterUiDisplayListener() {
+          @Override
+          public void onFlutterUiDisplayed() {
+            displayedCount.incrementAndGet();
+          }
+
+          @Override
+          public void onFlutterUiNoLongerDisplayed() {
+            stoppedCount.incrementAndGet();
+          }
+        });
+
+    CountDownLatch frameQueued = new CountDownLatch(1);
+    Thread frameThread =
+        new Thread(
+            () -> {
+              flutterJNI.onFirstFrame();
+              frameQueued.countDown();
+            });
+    frameThread.start();
+    frameQueued.await();
+    frameThread.join();
+
+    CountDownLatch stopQueued = new CountDownLatch(1);
+    Thread stopThread =
+        new Thread(
+            () -> {
+              flutterJNI.onRenderingStopped();
+              stopQueued.countDown();
+            });
+    stopThread.start();
+    stopQueued.await();
+    stopThread.join();
+
+    shadowOf(Looper.getMainLooper()).idle();
+
+    assertEquals(0, displayedCount.get());
+    assertEquals(1, stoppedCount.get());
   }
 
   static class FlutterJNITester extends FlutterJNI {

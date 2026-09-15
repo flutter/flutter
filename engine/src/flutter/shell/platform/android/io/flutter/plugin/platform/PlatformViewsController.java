@@ -582,6 +582,28 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       @NonNull PlatformView platformView, @NonNull PlatformViewCreationRequest request) {
     Log.i(TAG, "Using hybrid composition for platform view: " + request.viewId);
     throwIfHCPPEnabled();
+    if (initializePlatformViewIfNeeded(request.viewId)) {
+      final FlutterMutatorView parentView = platformViewParent.get(request.viewId);
+      if (parentView != null) {
+        final int physicalWidth = toPhysicalPixels(request.logicalWidth);
+        final int physicalHeight = toPhysicalPixels(request.logicalHeight);
+        final int physicalTop = toPhysicalPixels(request.logicalTop);
+        final int physicalLeft = toPhysicalPixels(request.logicalLeft);
+
+        final FrameLayout.LayoutParams layoutParams =
+            new FrameLayout.LayoutParams(physicalWidth, physicalHeight);
+        layoutParams.leftMargin = physicalLeft;
+        layoutParams.topMargin = physicalTop;
+        parentView.setLayoutParams(layoutParams);
+        parentView.setVisibility(View.VISIBLE);
+
+        final View view = platformView.getView();
+        if (view != null) {
+          view.setLayoutParams(new FrameLayout.LayoutParams(physicalWidth, physicalHeight));
+        }
+      }
+      currentFrameUsedPlatformViewIds.add(request.viewId);
+    }
   }
 
   // Throws an exception if HC++ is enabled, as HC mode can not work in combination with HC++.
@@ -1290,7 +1312,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    */
   public void onDisplayOverlaySurface(int id, int x, int y, int width, int height) {
     if (overlayLayerViews.get(id) == null) {
-      throw new IllegalStateException("The overlay surface (id:" + id + ") doesn't exist");
+      Log.w(TAG, "onDisplayOverlaySurface: overlay surface (id:" + id + ") does not exist");
+      return;
     }
     initializeRootImageViewIfNeeded();
 
@@ -1371,6 +1394,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     for (int i = 0; i < platformViewParent.size(); i++) {
       final int viewId = platformViewParent.keyAt(i);
       final View parentView = platformViewParent.get(viewId);
+      if (parentView == null) {
+        continue;
+      }
 
       // This should only show platform views that are rendered in this frame and either:
       //  1. Surface has images available in this frame or,
@@ -1382,7 +1408,19 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       // Otherwise, hide the platform view, but don't remove it from the view hierarchy yet as
       // they are removed when the framework disposes the platform view widget.
       if (currentFrameUsedPlatformViewIds.contains(viewId)
-          && (isFrameRenderedUsingImageReaders || !synchronizeToNativeViewHierarchy)) {
+          && (isFrameRenderedUsingImageReaders
+              || !synchronizeToNativeViewHierarchy
+              || platformViews.get(viewId) != null)) {
+        // In the C embedder without compositor slicing, keep active hybrid composition view
+        // visible when used in this frame. Specifically, ensure the underlying platform view is
+        // actively
+        // registered in platformViews (and has not been disposed).
+        parentView.setVisibility(View.VISIBLE);
+      } else if (!flutterViewConvertedToImageView && platformViews.get(viewId) != null) {
+        // In the C embedder without compositor slicing, keep active hybrid composition view
+        // visible. Specifically, ensure the underlying platform view is actively registered
+        // in platformViews (and has not been disposed). SparseArray.get(key) != null is the
+        // Java 8 / API-safe idiom for presence.
         parentView.setVisibility(View.VISIBLE);
       } else {
         parentView.setVisibility(View.GONE);
