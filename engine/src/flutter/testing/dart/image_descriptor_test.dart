@@ -74,6 +74,26 @@ void main() {
     codec.dispose();
   });
 
+  test('image descriptor - height inference with rounding', () async {
+    final bytes = Uint8List.fromList(List<int>.filled(3 * 2 * 4, 0xFFABCDEF));
+    final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(bytes);
+    final descriptor = ImageDescriptor.raw(
+      buffer,
+      width: 3,
+      height: 2,
+      rowBytes: 3 * 4,
+      pixelFormat: PixelFormat.rgba8888,
+    );
+
+    final Codec codec = await descriptor.instantiateCodec(targetWidth: 4);
+    final FrameInfo frame = await codec.getNextFrame();
+    expect(frame.image.width, 4);
+    expect(frame.image.height, 3);
+    frame.image.dispose();
+    codec.dispose();
+    descriptor.dispose();
+  });
+
   test('HEIC image', () async {
     final Uint8List bytes = await readFile('grill_chicken.heic');
     final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(bytes);
