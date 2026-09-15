@@ -239,10 +239,10 @@ List<FlutterCommand> generateCommands({
     allProjectValidators: <ProjectValidator>[
       GeneralInfoProjectValidator(),
       VariableDumpMachineProjectValidator(
-        logger: toolDependencies.toolContext.logger,
         fileSystem: toolDependencies.toolContext.fs,
-        platform: toolDependencies.toolContext.platform,
         git: toolDependencies.toolContext.git,
+        logger: toolDependencies.toolContext.logger,
+        platform: toolDependencies.toolContext.platform,
       ),
     ],
     suppressAnalytics: !toolDependencies.analytics.okToSend,
@@ -255,16 +255,7 @@ List<FlutterCommand> generateCommands({
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
   ),
-  AttachCommand(
-    verboseHelp: verboseHelp,
-    stdio: toolDependencies.toolContext.stdio,
-    logger: toolDependencies.toolContext.logger,
-    terminal: toolDependencies.toolContext.terminal,
-    signals: toolDependencies.toolContext.signals,
-    platform: toolDependencies.toolContext.platform,
-    processInfo: ProcessInfo(toolDependencies.toolContext.fs),
-    fileSystem: toolDependencies.toolContext.fs,
-  ),
+  AttachCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   BuildCommand(
     androidBuilder: AndroidGradleBuilder.fromContexts(
       analytics: toolDependencies.analytics,
@@ -325,15 +316,7 @@ List<FlutterCommand> generateCommands({
     extensionManager: extensionManager,
   ),
   DowngradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
-  DriveCommand(
-    verboseHelp: verboseHelp,
-    fileSystem: toolDependencies.toolContext.fs,
-    logger: toolDependencies.toolContext.logger,
-    platform: toolDependencies.toolContext.platform,
-    terminal: toolDependencies.toolContext.terminal,
-    outputPreferences: toolDependencies.toolContext.outputPreferences,
-    signals: toolDependencies.toolContext.signals,
-  ),
+  DriveCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   EmulatorsCommand(
     doctor: toolDependencies.doctor,
     emulatorManager: toolDependencies.emulatorManager,
@@ -356,13 +339,23 @@ List<FlutterCommand> generateCommands({
     platform: toolDependencies.toolContext.platform,
     featureFlags: featureFlags,
   ),
-  RunCommand(verboseHelp: verboseHelp),
+  RunCommand(
+    appleContext: toolDependencies.appleContext,
+    toolContext: toolDependencies.toolContext,
+    androidContext: toolDependencies.androidContext,
+    androidWorkflow: android_workflow.androidWorkflow,
+    buildSystem: toolDependencies.buildSystem,
+    buildTargets: toolDependencies.buildTargets,
+    deviceManager: globals.deviceManager,
+    verboseHelp: verboseHelp,
+  ),
   ScreenshotCommand(toolContext: toolDependencies.toolContext),
   ShellCompletionCommand(toolContext: toolDependencies.toolContext),
   TestCommand(
-    verboseHelp: verboseHelp,
-    verbose: verbose,
     nativeAssetsBuilder: toolDependencies.toolContext.nativeAssetsBuilder,
+    toolContext: toolDependencies.toolContext,
+    verbose: verbose,
+    verboseHelp: verboseHelp,
   ),
   WidgetPreviewCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   UpgradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
@@ -423,8 +416,8 @@ class LoggerFactory {
       return WidgetPreviewMachineAwareLogger(
         logger,
         machine: machine,
-        verbose: verbose,
         stdio: _stdio,
+        verbose: verbose,
       );
     }
     if (daemon) {
