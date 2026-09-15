@@ -648,12 +648,136 @@ abstract class BindingBase {
           };
         },
       );
+
+      registerServiceExtension(
+        name: FoundationServiceExtensions.viewMetricsOverride.name,
+        callback: _debugHandleViewMetricsOverrideServiceExtension,
+      );
       return true;
     }());
     assert(() {
       _debugServiceExtensionsRegistered = true;
       return true;
     }());
+  }
+
+  /// Implements the `ext.flutter.viewMetricsOverride` service extension.
+  ///
+  /// Recognized parameters:
+  ///
+  ///  * `viewId`: the [FlutterView.viewId] to act on, as a non-negative integer string.
+  ///    Required when `overrides` is present, optional for reads, and ignored
+  ///    when `clearAll` is `'true'`.
+  ///  * `overrides`: a JSON-encoded string representing an object in the format
+  ///    [DebugViewMetricsOverride.fromJson] accepts, or `'null'`. When present,
+  ///    it replaces the override currently registered for `viewId`. An empty
+  ///    object or `'null'` removes it.
+  ///  * `clearAll`: when `'true'`, removes every override and ignores `viewId`.
+  ///
+  /// With neither `overrides` nor `clearAll`, the call is a read.
+  ///
+  /// Every call returns the same two keys, so that a client does not have to
+  /// know which request it sent in order to read the reply:
+  ///
+  ///  * `overrides`: every override now installed, keyed by stringified view id
+  ///    (JSON object keys must be strings). A client can resynchronize from
+  ///    this after any call.
+  ///  * `overriddenViewIds`: the same view ids as a sorted `List<int>`.
+  ///
+  /// A call that acted on a single view returns a third key:
+  ///
+  ///  * `override`: the override now in effect for that view, or null if it has
+  ///    none. A `clearAll` acts on every view, so it does not return this key
+  ///    even when the call also carried a `viewId`.
+  ///
+  /// A call that changes an override also posts a
+  /// `Flutter.ServiceExtensionStateChanged` event whose value is the JSON text
+  /// of every override now installed, keyed by stringified view id (e.g. `{"1": ...}`
+  /// because JSON object keys must be strings), so that a client which
+  /// is not the one that made the request learns about it too. A read, and a
+  /// write that changes nothing, post no event.
+  ///
+  /// A malformed payload is rejected before any override is installed, so a
+  /// failed call leaves no partial state behind.
+  Future<Map<String, Object?>> _debugHandleViewMetricsOverrideServiceExtension(
+    Map<String, String> parameters,
+  ) async {
+    if (parameters['clearAll'] == 'true') {
+      if (debugClearViewMetricsOverrides()) {
+        _postViewMetricsOverrideStateChangedEvent();
+      }
+      return _viewMetricsOverrideResult();
+    }
+
+    final String? rawViewId = parameters['viewId'];
+    final String? rawOverrides = parameters['overrides'];
+    if (rawViewId == null) {
+      if (rawOverrides != null) {
+        throw const FormatException('The viewId parameter is required when overrides is provided.');
+      }
+      return _viewMetricsOverrideResult();
+    }
+    final int? viewId = int.tryParse(rawViewId, radix: 10);
+    if (viewId == null || viewId < 0) {
+      throw FormatException(
+        'The viewId parameter must be a non-negative integer, got "$rawViewId".',
+      );
+    }
+
+    if (rawOverrides != null) {
+      // DebugViewMetricsOverride.fromJson throws a FormatException on a
+      // malformed payload, which the service extension machinery reports back
+      // to the caller as an error rather than silently applying part of it.
+      final DebugViewMetricsOverride? override = switch (json.decode(rawOverrides)) {
+        null => null,
+        final Map<Object?, Object?> decoded => DebugViewMetricsOverride.fromJson(decoded),
+        _ => throw const FormatException('The overrides parameter must be a JSON object or null.'),
+      };
+      if (debugSetViewMetricsOverride(viewId, override)) {
+        _postViewMetricsOverrideStateChangedEvent();
+      }
+    }
+
+    return _viewMetricsOverrideResult(viewId: viewId);
+  }
+
+  // The reply to every `ext.flutter.viewMetricsOverride` call.
+  //
+  // `overrides` carries the whole registry whatever the call was, so that one
+  // key has one shape and a client can resynchronize from any reply rather than
+  // having to remember which request produced it. `override` answers the
+  // question a call that named a view actually asked.
+  //
+  // Read after the change has been applied, so that the reply describes the
+  // registry as it stands once the call is done.
+  Map<String, Object?> _viewMetricsOverrideResult({int? viewId}) {
+    return <String, Object?>{
+      if (viewId != null) 'override': debugViewMetricsOverrides[viewId]?.toJson(),
+      'overrides': _viewMetricsOverridesJson(),
+      'overriddenViewIds': debugViewMetricsOverrides.keys.toList()..sort(),
+    };
+  }
+
+  // Keyed by stringified view id because JSON object keys must be strings.
+  Map<String, Object?> _viewMetricsOverridesJson() {
+    return <String, Object?>{
+      for (final MapEntry<int, DebugViewMetricsOverride> entry in debugViewMetricsOverrides.entries)
+        '${entry.key}': entry.value.toJson(),
+    };
+  }
+
+  // The whole of [debugViewMetricsOverrides], rather than the entry that
+  // changed, because one event then describes the state of the extension for a
+  // client that missed the ones before it — including the clearAll that leaves
+  // no entry to report.
+  //
+  // Encoded as text rather than sent as a map, because every other extension
+  // state change carries a [String] and a client is entitled to read one.
+  void _postViewMetricsOverrideStateChangedEvent() {
+    _postExtensionStateChangedEvent(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      json.encode(_viewMetricsOverridesJson()),
+    );
   }
 
   /// Whether [lockEvents] is currently locking events.
