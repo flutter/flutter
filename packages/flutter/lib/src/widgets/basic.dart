@@ -4161,6 +4161,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required Locale? localeForSubtree,
     required String? minValue,
     required String? maxValue,
+    required int? indexInParent,
   }) : this.fromProperties(
          key: key,
          child: child,
@@ -4248,6 +4249,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            inputType: inputType,
            minValue: minValue,
            maxValue: maxValue,
+           indexInParent: indexInParent,
          ),
        );
 
@@ -4503,6 +4505,7 @@ class SliverSemantics extends _SemanticsBase {
     super.localeForSubtree,
     super.minValue,
     super.maxValue,
+    super.indexInParent,
   }) : super(child: sliver);
 
   /// {@macro flutter.widgets.SemanticsBase.fromProperties}
@@ -7885,6 +7888,7 @@ class Semantics extends _SemanticsBase {
     super.localeForSubtree,
     super.minValue,
     super.maxValue,
+    super.indexInParent,
   });
 
   /// {@macro flutter.widgets.SemanticsBase.fromProperties}
