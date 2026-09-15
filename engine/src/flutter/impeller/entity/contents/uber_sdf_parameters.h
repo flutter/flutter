@@ -7,6 +7,8 @@
 
 #include <optional>
 
+#include "impeller/core/texture.h"
+#include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
@@ -30,6 +32,31 @@ struct UberSDFParameters {
     kOval,
     kRoundedRect,
     kRoundedSuperellipseSymmetric,
+  };
+
+  /// The gradient properties applied to the shape.
+  struct GradientParameters {
+    enum class Type {
+      kLinear,
+      kRadial,
+    };
+
+    /// The type of gradient.
+    Type type;
+
+    /// Gradient start point (for linear gradients) or center (for radial
+    /// gradients).
+    Point start;
+
+    /// Gradient end point (for linear gradients) or `(radius, 0)` (for radial
+    /// gradients).
+    Point end;
+
+    /// Tile mode for the gradient.
+    Entity::TileMode tile_mode = Entity::TileMode::kClamp;
+
+    /// Texture for gradient ramp.
+    std::shared_ptr<Texture> texture;
   };
 
   /// Creates UberSDFParameters for a rectangle.
@@ -68,6 +95,9 @@ struct UberSDFParameters {
 
   /// The color used for filling or stroking the shape.
   Color color;
+
+  /// Gradient properties. Populated when using a gradient color source.
+  std::optional<GradientParameters> gradient;
 
   /// The center point of the shape in local coordinates.
   Point center;

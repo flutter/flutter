@@ -18,7 +18,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'button_tester.dart';
-import 'semantics_tester.dart';
 
 void main() {
   group('RawImage', () {
@@ -1058,9 +1057,8 @@ void main() {
   group('ConstraintsTransformBox', () {
     test('toString', () {
       expect(
-        const ConstraintsTransformBox(
-          constraintsTransform: ConstraintsTransformBox.unconstrained,
-        ).toString(),
+        const ConstraintsTransformBox(constraintsTransform: ConstraintsTransformBox.unconstrained)
+            .toString(),
         equals(
           'ConstraintsTransformBox(alignment: Alignment.center, constraints transform: unconstrained)',
         ),
@@ -1610,22 +1608,6 @@ void main() {
       );
     });
 
-    testWidgets('drops semantics when its ignoringSemantics is true', (WidgetTester tester) async {
-      final semantics = SemanticsTester(tester);
-      final key = UniqueKey();
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: IgnorePointer(
-            ignoringSemantics: true,
-            child: TestButton(key: key, onPressed: () {}, child: const Text('button')),
-          ),
-        ),
-      );
-      expect(semantics, isNot(includesNodeWith(label: 'button')));
-      semantics.dispose();
-    });
-
     testWidgets('ignores user interactions', (WidgetTester tester) async {
       final key = UniqueKey();
       await tester.pumpWidget(
@@ -1871,6 +1853,18 @@ void main() {
     expect(tester.getSize(find.byType(Padding)), Size.zero);
   });
 
+  testWidgets('IgnoreBaseline does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: IgnoreBaseline(child: Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(IgnoreBaseline)), Size.zero);
+  });
+
   testWidgets('Offstage does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
     addTearDown(tester.view.reset);
@@ -1881,6 +1875,22 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(Offstage)), Size.zero);
+  });
+
+  testWidgets('PositionedDirectional does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Stack(
+            children: [PositionedDirectional(top: 0.0, start: 0.0, child: Placeholder())],
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Stack)), Size.zero);
   });
 
   testWidgets('IntrinsicHeight does not crash at zero area', (WidgetTester tester) async {

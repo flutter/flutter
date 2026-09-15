@@ -73,9 +73,6 @@ abstract class FeatureFlags {
   /// Whether desktop windowing is enabled.
   bool get isWindowingEnabled;
 
-  /// Whether accessibility evaluations is enabled.
-  bool get isAccessibilityEvaluationsEnabled;
-
   /// Whether physical iOS devices are debugging with LLDB.
   bool get isLLDBDebuggingEnabled;
 
@@ -87,6 +84,9 @@ abstract class FeatureFlags {
 
   /// Whether to only build for arm64 when targeting macOS.
   bool get isMacOSArm64OnlyEnabled;
+
+  /// Whether the HCPP platform view rendering mode is enabled by default.
+  bool get isHcppEnabled;
 
   /// Whether support for tool extensions is enabled.
   bool get isToolExtensionsEnabled;
@@ -113,11 +113,11 @@ abstract class FeatureFlags {
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
-    accessibilityEvaluationsFeature,
     lldbDebugging,
     uiSceneMigration,
     riscv64,
     macOSArm64Only,
+    hcpp,
     toolExtensionsFeature,
   ];
 
@@ -271,15 +271,6 @@ const windowingFeature = Feature(
   master: FeatureChannelSetting(available: true),
 );
 
-/// Whether accessibility evaluations is enabled.
-const accessibilityEvaluationsFeature = Feature(
-  name: 'support for accessibility evaluations',
-  configSetting: 'enable-accessibility-evaluations',
-  environmentOverride: 'FLUTTER_ACCESSIBILITY_EVALUATIONS',
-  runtimeId: 'accessibility_evaluations',
-  master: FeatureChannelSetting(available: true),
-);
-
 /// Enable LLDB debugging for physical iOS devices. When LLDB debugging is off,
 /// Xcode debugging is used instead.
 ///
@@ -333,6 +324,25 @@ const macOSArm64Only = Feature(
   environmentOverride: 'FLUTTER_MACOS_ARM64_ONLY',
   master: FeatureChannelSetting(available: true),
   beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
+);
+
+/// Whether the HCPP (Hybrid Composition++) platform view rendering mode is used
+/// by default on Android.
+///
+/// This is the default only: it is baked into the Android manifest of the
+/// artifact the tool builds, and an explicit
+/// `io.flutter.embedding.android.EnableHcpp` entry in the app's manifest, or an
+/// explicit `--[no-]enable-hcpp`, takes priority over it.
+const hcpp = Feature(
+  name: 'the HCPP platform view rendering mode',
+  extraHelpText:
+      'HCPP requires the Impeller rendering backend, and Android API 34 or above. '
+      "Devices that do not support it fall back to each platform view's developer-chosen mode.",
+  configSetting: 'enable-hcpp',
+  environmentOverride: 'FLUTTER_ENABLE_HCPP',
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
   stable: FeatureChannelSetting(available: true),
 );
 

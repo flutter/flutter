@@ -11,7 +11,7 @@ library experimental.extension_arg_parser;
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 
-import '../globals.dart' as globals;
+import '../base/terminal.dart';
 import '../runner/flutter_command.dart';
 
 /// A mixin on `FlutterCommand` that supports lazy, dynamic rebuilding of `argParser`
@@ -36,12 +36,12 @@ mixin ExtensionArgParserMixin on FlutterCommand {
   /// and flags rather than adding options in the constructor, allowing the
   /// base parser to be cloned and dynamically rebuilt when extension options change.
   @protected
-  ArgParser createBaseArgParser() => ArgParser(
-    allowTrailingOptions: false,
-    usageLineLength: globals.outputPreferences.wrapText
-        ? globals.outputPreferences.wrapColumn
-        : null,
-  );
+  ArgParser createBaseArgParser() {
+    final OutputPreferences? preferences = toolContext?.outputPreferences;
+    final bool wrapText = preferences?.wrapText ?? false;
+    final int? wrapColumn = preferences?.wrapColumn;
+    return ArgParser(allowTrailingOptions: false, usageLineLength: wrapText ? wrapColumn : null);
+  }
 
   /// Injects dynamic extension options or allowed help entries into [dynamicParser].
   ///
@@ -50,51 +50,65 @@ mixin ExtensionArgParserMixin on FlutterCommand {
   @protected
   ArgParser buildDynamicArgParser(ArgParser dynamicParser);
 
+  /// Clones [opt] from an existing [ArgParser] into [target].
+  @protected
+  static void copyOption(ArgParser target, Option opt) {
+    switch (opt.type) {
+      case OptionType.flag:
+        target.addFlag(
+          opt.name,
+          abbr: opt.abbr,
+          aliases: opt.aliases,
+          defaultsTo: opt.defaultsTo as bool?,
+          help: opt.help,
+          hide: opt.hide,
+          hideNegatedUsage: opt.hideNegatedUsage ?? false,
+          negatable: opt.negatable ?? true,
+        );
+      case OptionType.single:
+        target.addOption(
+          opt.name,
+          abbr: opt.abbr,
+          aliases: opt.aliases,
+          allowed: opt.allowed,
+          allowedHelp: opt.allowedHelp,
+          defaultsTo: opt.defaultsTo as String?,
+          help: opt.help,
+          hide: opt.hide,
+          mandatory: opt.mandatory,
+          valueHelp: opt.valueHelp,
+        );
+      case OptionType.multiple:
+        target.addMultiOption(
+          opt.name,
+          abbr: opt.abbr,
+          aliases: opt.aliases,
+          allowed: opt.allowed,
+          allowedHelp: opt.allowedHelp,
+          defaultsTo: (opt.defaultsTo as Iterable<Object?>?)?.cast<String>(),
+          help: opt.help,
+          hide: opt.hide,
+          splitCommas: opt.splitCommas,
+          valueHelp: opt.valueHelp,
+        );
+    }
+  }
+
   /// Clones all options from [source] into a new [ArgParser] instance.
-  static ArgParser _cloneParser(ArgParser source) {
+  @protected
+  static ArgParser cloneParser(
+    ArgParser source, {
+    void Function(ArgParser newParser, Option opt)? optionCloner,
+  }) {
     final newParser = ArgParser(
       allowTrailingOptions: source.allowTrailingOptions,
       usageLineLength: source.usageLineLength,
     );
     for (final Option opt in source.options.values) {
-      switch (opt.type) {
-        case OptionType.flag:
-          newParser.addFlag(
-            opt.name,
-            abbr: opt.abbr,
-            help: opt.help,
-            defaultsTo: opt.defaultsTo as bool?,
-            negatable: opt.negatable ?? true,
-            hide: opt.hide,
-            hideNegatedUsage: opt.hideNegatedUsage ?? false,
-            aliases: opt.aliases,
-          );
-        case OptionType.single:
-          newParser.addOption(
-            opt.name,
-            abbr: opt.abbr,
-            help: opt.help,
-            valueHelp: opt.valueHelp,
-            allowed: opt.allowed,
-            allowedHelp: opt.allowedHelp,
-            defaultsTo: opt.defaultsTo as String?,
-            mandatory: opt.mandatory,
-            hide: opt.hide,
-            aliases: opt.aliases,
-          );
-        case OptionType.multiple:
-          newParser.addMultiOption(
-            opt.name,
-            abbr: opt.abbr,
-            help: opt.help,
-            valueHelp: opt.valueHelp,
-            allowed: opt.allowed,
-            allowedHelp: opt.allowedHelp,
-            defaultsTo: (opt.defaultsTo as Iterable<Object?>?)?.cast<String>(),
-            splitCommas: opt.splitCommas,
-            hide: opt.hide,
-            aliases: opt.aliases,
-          );
+      if (optionCloner != null) {
+        optionCloner(newParser, opt);
+      } else {
+        copyOption(newParser, opt);
       }
     }
     return newParser;
@@ -120,7 +134,7 @@ mixin ExtensionArgParserMixin on FlutterCommand {
   /// Subclasses should call this when dynamic options or capabilities are discovered.
   @protected
   void rebuildDynamicArgParser() {
-    final ArgParser clonedParser = _cloneParser(baseArgParser);
+    final ArgParser clonedParser = cloneParser(baseArgParser);
     _dynamicArgParser = buildDynamicArgParser(clonedParser);
     // Re-add subcommands to the dynamic parser to ensure they are not lost.
     for (final MapEntry(:key, :value) in subcommands.entries) {

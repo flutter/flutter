@@ -931,7 +931,7 @@ String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
 
   final String buildDir = localConfig.getValue('build-dir') as String? ?? 'build';
   if (localFilesystem.path.isAbsolute(buildDir)) {
-    throw Exception('build-dir config setting in ${globals.config.configPath} must be relative');
+    throw Exception('build-dir config setting in ${localConfig.configPath} must be relative');
   }
   return buildDir;
 }

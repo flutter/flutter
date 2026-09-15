@@ -13,6 +13,7 @@
 #include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"
 #include "flutter/impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "flutter/skwasm/export.h"
+#include "flutter/skwasm/image_precache_impeller.h"
 
 SKWASM_EXPORT bool skwasm_isWimp() {
   return true;
@@ -68,6 +69,7 @@ class ImpellerRenderContext : public Skwasm::RenderContext {
 
   virtual void RenderPicture(
       const sk_sp<flutter::DisplayList> display_list) override {
+    Skwasm::PrecacheImages(display_list.get(), *content_context_);
     impeller::RenderToTarget(
         *content_context_, surface_->GetRenderTarget(), display_list,
         impeller::Rect::MakeLTRB(0, 0, width_, height_), true, true);
@@ -77,8 +79,9 @@ class ImpellerRenderContext : public Skwasm::RenderContext {
                               Skwasm::ImageByteFormat format,
                               void* out_pixels) override {
     auto impeller_image = image ? image->asImpellerImage() : nullptr;
-    auto texture =
-        impeller_image ? impeller_image->GetImpellerTexture(context_) : nullptr;
+    auto texture = impeller_image
+                       ? impeller_image->GetImpellerTexture(*content_context_)
+                       : nullptr;
     if (!texture) {
       return false;
     }

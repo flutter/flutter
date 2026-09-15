@@ -222,5 +222,21 @@ TEST_P(AiksTest, CanRenderSkewedCircleHairline) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CanRenderSkewedRectHairline) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kBlack(), DlBlendMode::kSrc);
+
+  RenderParameters params{
+      .render_type = RenderType::kRectangle,
+      .center = GetWindowBounds().GetCenter(),
+      .skew_x = 0.75f,
+      .skew_y = 0.5f,
+  };
+  RenderPrimitiveWithStroke(builder, params);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

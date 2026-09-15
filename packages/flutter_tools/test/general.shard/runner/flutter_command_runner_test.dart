@@ -98,9 +98,9 @@ void main() {
       testUsingContext(
         'does not check that Flutter installation is up-to-date with --machine flag present anywhere',
         () async {
-          final runner =
-              createTestCommandRunner(_FlutterCommandWithItsOwnMachineFlag(verboseHelp: false))
-                  as FlutterCommandRunner;
+          final runner = createTestCommandRunner(
+            _FlutterCommandWithItsOwnMachineFlag(verboseHelp: false),
+          ) as FlutterCommandRunner;
           final version = globals.flutterVersion as FakeFlutterVersion;
 
           await runner.run(<String>['dummy-with-machine', '--machine']);
@@ -399,6 +399,22 @@ void main() {
         );
       });
 
+      group('toolContext', () {
+        test('is preserved when provided to constructor', () {
+          final fakeToolContext = FakeToolContext();
+          final runner = FlutterCommandRunner(toolContext: fakeToolContext);
+          expect(runner.toolContext, same(fakeToolContext));
+        });
+
+        test('command attached to runner inherits runner toolContext', () {
+          final fakeToolContext = FakeToolContext();
+          final runner = FlutterCommandRunner(toolContext: fakeToolContext);
+          final command = FakeFlutterCommand();
+          runner.addCommand(command);
+          expect(command.toolContext, same(fakeToolContext));
+        });
+      });
+
       group('dynamic options initialization', () {
         testUsingContext(
           'initializes dynamic options when command is invoked directly',
@@ -656,10 +672,12 @@ void main() {
 }
 
 class FakeFlutterCommand extends FlutterCommand {
+  bool ran = false;
   late OutputPreferences preferences;
 
   @override
   Future<FlutterCommandResult> runCommand() {
+    ran = true;
     preferences = globals.outputPreferences;
     return Future<FlutterCommandResult>.value(const FlutterCommandResult(ExitStatus.success));
   }
