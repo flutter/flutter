@@ -22,7 +22,6 @@ class TooltipButton extends StatefulWidget {
 
 class _TooltipButtonState extends State<TooltipButton> {
   final NestedWindowController _anchorController = NestedWindowController();
-  final GlobalKey _tooltipButtonKey = GlobalKey();
 
   void _onPressed() {
     _anchorController.toggle();
@@ -55,7 +54,6 @@ class _TooltipButtonState extends State<TooltipButton> {
       controller: _anchorController,
       entryBuilder: (anchorRect) => _buildEntry(anchorRect, windowSettings),
       child: OutlinedButton(
-        key: _tooltipButtonKey,
         onPressed: _onPressed,
         child: ListenableBuilder(
           listenable: _anchorController,

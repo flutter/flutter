@@ -22,7 +22,6 @@ class PopupButton extends StatefulWidget {
 
 class _PopupButtonState extends State<PopupButton> {
   final NestedWindowController _anchorController = NestedWindowController();
-  final GlobalKey _popupButtonKey = GlobalKey();
 
   void _onPressed() {
     _anchorController.toggle();
@@ -55,7 +54,6 @@ class _PopupButtonState extends State<PopupButton> {
       controller: _anchorController,
       entryBuilder: (Rect? anchorRect) => _buildEntry(anchorRect, windowSettings),
       child: OutlinedButton(
-        key: _popupButtonKey,
         onPressed: _onPressed,
         child: ListenableBuilder(
           listenable: _anchorController,
