@@ -339,11 +339,13 @@ Future<ui.Codec> engineInstantiateImageCodec(
       allowUpscaling: allowUpscaling,
     );
   } else {
-    // The backend can only take over decoding if it was built with the builtin
-    // image codecs. If it wasn't, an animated image degrades to a still of its
-    // first frame rather than failing outright.
-    final bool useBackendCodec = imageType.isAnimated && renderer.supportsAnimatedImages;
-    if (!useBackendCodec && browserSupportsCreateImageBitmap) {
+    // The backend codec is the general fallback for anything the browser can't
+    // decode itself, but it can only handle animated images if it was built
+    // with the builtin codecs. When it wasn't, an animated image degrades to a
+    // still of its first frame rather than failing outright.
+    final bool backendCanDecode = !imageType.isAnimated || renderer.supportsAnimatedImages;
+    final bool preferBitmap = !imageType.isAnimated || !backendCanDecode;
+    if (preferBitmap && browserSupportsCreateImageBitmap) {
       final DomBlob blob = createDomBlob(<ByteBuffer>[list.buffer]);
       final DomImageBitmap originalBitmap = await createImageBitmap(blob);
       final int originalWidth = originalBitmap.width;
@@ -379,7 +381,7 @@ Future<ui.Codec> engineInstantiateImageCodec(
         targetHeight: targetHeight,
         allowUpscaling: allowUpscaling,
       );
-    } else if (useBackendCodec) {
+    } else if (backendCanDecode) {
       final BackendAnimatedImage backendAnimated = renderer.createAnimatedImage(
         list,
         targetWidth: targetWidth,
@@ -514,13 +516,14 @@ Future<ui.Codec> engineInstantiateImageCodecFromUrl(
       return EngineCodec.browser(decoder);
     }
 
-    final bool useBackendCodec = imageType.isAnimated && renderer.supportsAnimatedImages;
-    if (!useBackendCodec && browserSupportsCreateImageBitmap) {
+    final bool backendCanDecode = !imageType.isAnimated || renderer.supportsAnimatedImages;
+    final bool preferBitmap = !imageType.isAnimated || !backendCanDecode;
+    if (preferBitmap && browserSupportsCreateImageBitmap) {
       final DomBlob blob = createDomBlob(<ByteBuffer>[buffer]);
       final DomImageBitmap bitmap = await createImageBitmap(blob);
       final ImageSource source = ImageBitmapImageSource(bitmap);
       return EngineCodec.staticImage(source);
-    } else if (useBackendCodec) {
+    } else if (backendCanDecode) {
       final BackendAnimatedImage backendAnimated = renderer.createAnimatedImage(list);
       return EngineCodec.skia(backendAnimated);
     } else {
