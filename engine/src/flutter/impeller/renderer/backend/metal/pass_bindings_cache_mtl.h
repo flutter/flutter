@@ -7,6 +7,12 @@
 
 #include <Metal/Metal.h>
 
+#include <array>
+#include <optional>
+#include <vector>
+
+#include "impeller/core/formats.h"
+#include "impeller/core/shader_types.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
 
@@ -39,7 +45,9 @@ struct PassBindingsCacheMTL {
   ///
   /// If this matches the previous render pipeline state, no update
   /// is performed.
-  void SetRenderPipelineState(id<MTLRenderPipelineState> pipeline);
+  ///
+  /// @returns true if the pipeline state changed.
+  bool SetRenderPipelineState(id<MTLRenderPipelineState> pipeline);
 
   /// @brief Set the depth and stencil state for the current encoder.
   ///
@@ -81,24 +89,55 @@ struct PassBindingsCacheMTL {
   ///        the current encoder state.
   void SetStencilRef(uint32_t stencil_ref);
 
+  /// @brief Set the encoder front-facing winding if it differs from the
+  ///        current encoder state.
+  void SetWindingOrder(WindingOrder winding);
+
+  /// @brief Set the encoder cull mode if it differs from the current encoder
+  ///        state.
+  void SetCullMode(CullMode cull_mode);
+
+  /// @brief Set the encoder triangle fill mode if it differs from the current
+  ///        encoder state.
+  void SetPolygonMode(PolygonMode polygon_mode);
+
  private:
   struct BufferOffsetPair {
     id<MTLBuffer> buffer = nullptr;
     size_t offset = 0u;
   };
-  using BufferMap = std::map<uint64_t, BufferOffsetPair>;
-  using TextureMap = std::map<uint64_t, id<MTLTexture>>;
-  using SamplerMap = std::map<uint64_t, id<MTLSamplerState>>;
+
+  // Shader argument table binding indices are small, dense integers, so
+  // per-stage vectors indexed by the binding index avoid the allocation and
+  // lookup costs of a node-based map on the per-command hot path.
+  static constexpr size_t kShaderStageCount = 4u;
+  static_assert(kShaderStageCount ==
+                static_cast<size_t>(ShaderStage::kCompute) + 1u);
+  static constexpr uint64_t kMaxBindingIndex = 512u;
+
+  using BufferBindings =
+      std::array<std::vector<BufferOffsetPair>, kShaderStageCount>;
+  using TextureBindings =
+      std::array<std::vector<id<MTLTexture>>, kShaderStageCount>;
+  using SamplerBindings =
+      std::array<std::vector<id<MTLSamplerState>>, kShaderStageCount>;
+
+  static bool IsCacheableStage(ShaderStage stage) {
+    return stage == ShaderStage::kVertex || stage == ShaderStage::kFragment;
+  }
 
   id<MTLRenderCommandEncoder> encoder_;
   id<MTLRenderPipelineState> pipeline_ = nullptr;
   id<MTLDepthStencilState> depth_stencil_ = nullptr;
-  std::map<ShaderStage, BufferMap> buffers_;
-  std::map<ShaderStage, TextureMap> textures_;
-  std::map<ShaderStage, SamplerMap> samplers_;
+  BufferBindings buffers_;
+  TextureBindings textures_;
+  SamplerBindings samplers_;
   std::optional<Viewport> viewport_;
   std::optional<IRect32> scissor_;
   std::optional<uint32_t> stencil_ref_;
+  std::optional<WindingOrder> winding_;
+  std::optional<CullMode> cull_mode_;
+  std::optional<PolygonMode> polygon_mode_;
 };
 
 }  // namespace impeller

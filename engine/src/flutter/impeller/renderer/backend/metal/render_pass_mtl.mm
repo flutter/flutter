@@ -238,13 +238,12 @@ void RenderPassMTL::SetPipeline(PipelineRef pipeline) {
   pass_bindings_.SetDepthStencilState(
       PipelineMTL::Cast(*pipeline).GetMTLDepthStencilState());
 
-  [encoder_ setFrontFacingWinding:pipeline_desc.GetWindingOrder() ==
-                                          WindingOrder::kClockwise
-                                      ? MTLWindingClockwise
-                                      : MTLWindingCounterClockwise];
-  [encoder_ setCullMode:ToMTLCullMode(pipeline_desc.GetCullMode())];
-  [encoder_ setTriangleFillMode:ToMTLTriangleFillMode(
-                                    pipeline_desc.GetPolygonMode())];
+  // Winding, cull, and triangle fill live on the encoder, not in the PSO.
+  // Cache them independently of pipeline identity so a future PSO intern
+  // that ignored these fields cannot skip a needed encoder update.
+  pass_bindings_.SetWindingOrder(pipeline_desc.GetWindingOrder());
+  pass_bindings_.SetCullMode(pipeline_desc.GetCullMode());
+  pass_bindings_.SetPolygonMode(pipeline_desc.GetPolygonMode());
   has_valid_pipeline_ = true;
 }
 
