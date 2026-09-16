@@ -4215,7 +4215,8 @@ void main() {
     expect(
       logger.statusText,
       contains(
-        'To add platforms, run `flutter create -t plugin --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))}.',
+        'To add platforms, run `flutter create -t plugin --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))},\n'
+        'then update pigeon/messages.dart and pubspec.yaml to include the new platforms.',
       ),
     );
     expect(
