@@ -37,18 +37,39 @@ class RunSuiteStep implements PipelineStep {
     required this.overridePathToCanvasKit,
     required this.useDwarf,
     this.testFiles,
+    this.isOffline = false,
+    this.refreshGoldens = false,
   });
 
+  /// The test suite to run.
   final TestSuite suite;
-  final Set<FilePath>? testFiles;
+
+  /// Whether to start the test in paused mode.
   final bool startPaused;
+
+  /// Whether to output verbose diagnostic logs.
   final bool isVerbose;
+
+  /// Whether to update screenshots in golden directory instead of comparing.
   final bool doUpdateScreenshotGoldens;
-  final String? overridePathToCanvasKit;
-  final bool useDwarf;
 
   /// Require Skia Gold to be available and reachable.
   final bool requireSkiaGold;
+
+  /// An optional override path to CanvasKit artifacts.
+  final String? overridePathToCanvasKit;
+
+  /// Whether to use DWARF stack traces.
+  final bool useDwarf;
+
+  /// Specific test files to run within the suite.
+  final Set<FilePath>? testFiles;
+
+  /// Whether to run tests offline using cached baselines.
+  final bool isOffline;
+
+  /// Whether to force refresh cached goldens from Skia Gold.
+  final bool refreshGoldens;
 
   @override
   String get description => 'run_suite';
@@ -99,6 +120,8 @@ class RunSuiteStep implements PipelineStep {
         skiaClient: skiaClient,
         overridePathToCanvasKit: overridePathToCanvasKit,
         isVerbose: isVerbose,
+        isOffline: isOffline,
+        refreshGoldens: refreshGoldens,
       );
     });
 
@@ -204,6 +227,11 @@ class RunSuiteStep implements PipelineStep {
     final bool isWebParagraph = suite.runConfig.enableWebParagraph;
 
     final dimensions = <String, String>{
+      // All Flutter Web Engine screenshot tryjobs run on Linux on CI (LUCI).
+      // Hardcoding 'Platform': 'linux' ensures that local test runs on macOS
+      // and Windows query and match the official Linux CI golden baselines
+      // stored in Skia Gold.
+      'Platform': 'linux',
       'Browser': suite.runConfig.browser.name,
       if (isWasm) 'Wasm': 'true',
       'Renderer': rendererName,
@@ -228,14 +256,19 @@ class RunSuiteStep implements PipelineStep {
 
   /// Checks whether the Skia Client is usable in this environment.
   Future<(bool, String?)> _checkSkiaClient(SkiaGoldClient skiaClient) async {
+    // When offline, we don't attempt network connectivity to Skia Gold, but we still
+    // return true so SkiaGoldClient is instantiated for local offline baseline comparisons.
+    if (isOffline) {
+      return (true, null);
+    }
     // Now let's check whether Skia Gold is reachable or not.
     if (isLuci) {
       if (SkiaGoldClient.isAvailable()) {
         try {
           await skiaClient.auth();
           return (true, null);
-        } catch (e) {
-          print(e);
+        } catch (error) {
+          print(error);
         }
       }
     } else {
@@ -243,10 +276,14 @@ class RunSuiteStep implements PipelineStep {
         // Check if we can reach Gold.
         await skiaClient.getExpectationForTest('');
         return (true, null);
-      } on io.OSError catch (_) {
-        return (false, 'OSError occurred, could not reach Gold');
-      } on io.SocketException catch (_) {
-        return (false, 'SocketException occurred, could not reach Gold');
+      } on io.OSError catch (error) {
+        return (false, 'OSError occurred, could not reach Gold: $error');
+      } on io.SocketException catch (error) {
+        return (false, 'SocketException occurred, could not reach Gold: $error');
+      } on io.IOException catch (error) {
+        return (false, 'Network error occurred, could not reach Gold: $error');
+      } on FormatException catch (error) {
+        return (false, 'Format error occurred, could not parse Gold response: $error');
       }
     }
 

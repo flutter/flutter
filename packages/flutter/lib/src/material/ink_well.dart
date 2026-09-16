@@ -47,11 +47,10 @@ abstract class InteractiveInkFeature extends InkFeature {
   InteractiveInkFeature({
     required super.controller,
     required super.referenceBox,
-    required Color color,
-    ShapeBorder? customBorder,
+    required this._color,
+    this._customBorder,
     super.onRemoved,
-  }) : _color = color,
-       _customBorder = customBorder;
+  });
 
   /// Called when the user input that triggered this feature's appearance was confirmed.
   ///

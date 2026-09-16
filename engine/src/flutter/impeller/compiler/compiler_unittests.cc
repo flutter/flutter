@@ -670,6 +670,156 @@ TEST_P(CompilerTestUnknownPlatform, MustFailDueToUnknownPlatform) {
       CanCompileAndReflect("sample.frag", SourceType::kFragmentShader));
 }
 
+TEST(CompilerTest, EarlyReturnWithSamplerWarns) {
+  const std::string shader_source = R"(
+    #version 460 core
+    uniform sampler2D u_texture;
+    uniform vec4 u_array[4];
+    out vec4 fragColor;
+    void main() {
+      vec4 c = texture(u_texture, vec2(0.0));
+      if (c.a < 0.5) {
+        fragColor = vec4(0.0);
+        return;
+      }
+      vec4 total = vec4(0.0);
+      for (int i = 0; i < 4; i++) {
+        total += u_array[i];
+      }
+      fragColor = c + 0.001 * total;
+    }
+  )";
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(shader_source.data()),
+      shader_source.size(), [](auto, auto) {});
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kRuntimeStageGLES;
+  options.type = SourceType::kFragmentShader;
+  options.file_name = "early_return_test.frag";
+  options.entry_point_name = "main";
+  options.working_directory = std::make_shared<fml::UniqueFD>(
+      flutter::testing::OpenFixturesDirectory());
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
+
+  Compiler compiler(mapping, options, reflector_options);
+  EXPECT_TRUE(compiler.IsValid()) << compiler.GetErrorMessages();
+  EXPECT_FALSE(compiler.GetWarningMessages().empty())
+      << "Generated SL:\n"
+      << std::string(reinterpret_cast<const char*>(
+                         compiler.GetSLShaderSource()->GetMapping()),
+                     compiler.GetSLShaderSource()->GetSize());
+  EXPECT_NE(compiler.GetWarningMessages().find("multiple 'return'"),
+            std::string::npos);
+}
+
+TEST(CompilerTest, EarlyReturnWithoutSamplerDoesNotWarn) {
+  const std::string shader_source = R"(
+    #version 460 core
+    out vec4 fragColor;
+    void main() {
+      fragColor = vec4(1.0);
+      if (fragColor.r > 0.5) {
+        return;
+      }
+      fragColor = vec4(0.0);
+    }
+  )";
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(shader_source.data()),
+      shader_source.size(), [](auto, auto) {});
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kRuntimeStageGLES;
+  options.type = SourceType::kFragmentShader;
+  options.file_name = "no_sampler_test.frag";
+  options.entry_point_name = "main";
+  options.working_directory = std::make_shared<fml::UniqueFD>(
+      flutter::testing::OpenFixturesDirectory());
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
+
+  Compiler compiler(mapping, options, reflector_options);
+  EXPECT_TRUE(compiler.IsValid()) << compiler.GetErrorMessages();
+  EXPECT_TRUE(compiler.GetWarningMessages().empty());
+}
+
+TEST(CompilerTest, ReturnInCommentsDoesNotWarn) {
+  const std::string shader_source = R"(
+    #version 460 core
+    uniform sampler2D u_texture;
+    out vec4 fragColor;
+    // single line comment with return;
+    /* multi line comment
+       with return;
+    */
+    void main() {
+      // return; inside main comment
+      fragColor = texture(u_texture, vec2(0.0));
+    }
+  )";
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(shader_source.data()),
+      shader_source.size(), [](auto, auto) {});
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kRuntimeStageGLES;
+  options.type = SourceType::kFragmentShader;
+  options.file_name = "comment_test.frag";
+  options.entry_point_name = "main";
+  options.working_directory = std::make_shared<fml::UniqueFD>(
+      flutter::testing::OpenFixturesDirectory());
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
+
+  Compiler compiler(mapping, options, reflector_options);
+  EXPECT_TRUE(compiler.IsValid()) << compiler.GetErrorMessages();
+  EXPECT_TRUE(compiler.GetWarningMessages().empty());
+}
+
+TEST(CompilerTest, HelperFunctionWithReturnDoesNotWarn) {
+  const std::string shader_source = R"(
+    #version 460 core
+    uniform sampler2D u_texture;
+    out vec4 fragColor;
+    float helper(float val) {
+      if (val > 0.5) {
+        return 1.0;
+      }
+      return 0.0;
+    }
+    void main() {
+      fragColor = texture(u_texture, vec2(helper(0.8)));
+    }
+  )";
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(shader_source.data()),
+      shader_source.size(), [](auto, auto) {});
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kRuntimeStageGLES;
+  options.type = SourceType::kFragmentShader;
+  options.file_name = "helper_test.frag";
+  options.entry_point_name = "main";
+  options.working_directory = std::make_shared<fml::UniqueFD>(
+      flutter::testing::OpenFixturesDirectory());
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
+
+  Compiler compiler(mapping, options, reflector_options);
+  EXPECT_TRUE(compiler.IsValid()) << compiler.GetErrorMessages();
+  EXPECT_TRUE(compiler.GetWarningMessages().empty());
+}
+
 }  // namespace testing
 }  // namespace compiler
 }  // namespace impeller
