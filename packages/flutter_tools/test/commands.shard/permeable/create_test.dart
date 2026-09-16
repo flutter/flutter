@@ -4234,7 +4234,8 @@ void main() {
     expect(
       logger.statusText,
       contains(
-        'To add platforms, run `flutter create -t plugin_ffi --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))}.',
+        'To add platforms, run `flutter create -t plugin_ffi --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))},\n'
+        'then update pubspec.yaml to include the new platforms.',
       ),
     );
     expect(
