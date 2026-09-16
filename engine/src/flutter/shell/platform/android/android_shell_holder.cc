@@ -47,8 +47,10 @@ static void AndroidPlatformThreadConfigSetter(
     }
     case fml::Thread::ThreadPriority::kDisplay: {
       fml::RequestAffinity(fml::CpuAffinity::kNotEfficiency);
+      // Only used for isolate creation which bottlenecks startup, so
+      // prioritize to avoid preemption.
+      // Defensive fallbacks. Depending on OEM, setting priority might fail.
       if (::setpriority(PRIO_PROCESS, 0, -10) != 0) {
-        // Defensive fallback to original priority if OEM restricts -10.
         if (::setpriority(PRIO_PROCESS, 0, -1) != 0) {
           FML_LOG(ERROR) << "Failed to set UI task runner priority";
         }
