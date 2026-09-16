@@ -251,6 +251,81 @@ void main() {
     expect(fileSystem.file(outputPath).existsSync(), false);
   });
 
+  testWithoutContext(
+    'compileShader logs warnings when impellerc outputs to stderr on success',
+    () async {
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--runtime-stage-gles',
+            '--runtime-stage-gles3',
+            '--runtime-stage-vulkan',
+            '--iplr',
+            '--sl=$outputPath',
+            '--spirv=$outputSpirvPath',
+            '--input=$fragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          stderr: '[WARNING] early return warning',
+          onRun: (_) {
+            fileSystem.file(outputPath).createSync(recursive: true);
+            fileSystem.file(outputSpirvPath).createSync(recursive: true);
+          },
+        ),
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--runtime-stage-gles',
+            '--runtime-stage-gles3',
+            '--runtime-stage-vulkan',
+            '--iplr',
+            '--sl=$outputPath',
+            '--spirv=$outputSpirvPath',
+            '--input=$fragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          stderr: '[WARNING] early return warning',
+          onRun: (_) {
+            fileSystem.file(outputPath).createSync(recursive: true);
+            fileSystem.file(outputSpirvPath).createSync(recursive: true);
+          },
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+      );
+
+      final bool result = await shaderCompiler.compileShader(
+        input: fileSystem.file(fragPath),
+        outputPath: outputPath,
+        targetPlatform: TargetPlatform.android,
+      );
+
+      expect(result, true);
+      expect(logger.statusText, contains('Shader Warning'));
+      expect(logger.statusText, contains('[WARNING] early return warning'));
+
+      // Verify deduplication: compiling the same shader again does not re-print the box.
+      final String initialStatus = logger.statusText;
+      await shaderCompiler.compileShader(
+        input: fileSystem.file(fragPath),
+        outputPath: outputPath,
+        targetPlatform: TargetPlatform.android,
+      );
+      expect(logger.statusText, initialStatus);
+    },
+  );
+
   testWithoutContext('DevelopmentShaderCompiler can compile for android non-impeller', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
