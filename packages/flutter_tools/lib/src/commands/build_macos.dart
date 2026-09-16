@@ -47,7 +47,6 @@ class BuildMacosCommand extends BuildSubCommand {
 
   /// Feature flags governing macOS desktop builds.
   @visibleForTesting
-  @override
   final FeatureFlags featureFlags;
 
   @override

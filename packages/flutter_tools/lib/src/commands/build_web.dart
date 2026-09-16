@@ -42,7 +42,6 @@ class BuildWebCommand extends BuildSubCommand {
 
   final BuildSystem buildSystem;
   final BuildTargets? buildTargets;
-  @override
   final FeatureFlags featureFlags;
   final WebBuilder? webBuilder;
 
