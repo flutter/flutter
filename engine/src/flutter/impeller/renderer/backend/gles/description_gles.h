@@ -35,6 +35,9 @@ class DescriptionGLES {
 
   bool IsANGLE() const;
 
+  /// Whether uploads must reset a stale shared-context texture binding.
+  bool NeedsTextureUploadRebind() const;
+
  private:
   Version gl_version_;
   Version sl_version_;
@@ -45,6 +48,7 @@ class DescriptionGLES {
   std::string sl_version_string_;
   std::set<std::string> extensions_;
   bool is_angle_ = false;
+  bool needs_texture_upload_rebind_ = false;
   bool is_valid_ = false;
 
   DescriptionGLES(const DescriptionGLES&) = delete;

@@ -90,11 +90,24 @@ BlitCopyTextureToBufferCommandGLES CreateCopyTextureToBufferCommand(
 
 }  // namespace
 
-TEST(BlitCommandGLESTest, BlitCopyBufferToTextureCommandGLESRGBA) {
+struct TextureUploadPrebindCase {
+  const char* name;
+  const char* renderer;
+  const char* version;
+  bool needs_prebind;
+};
+
+class TextureUploadPrebindTest
+    : public ::testing::TestWithParam<TextureUploadPrebindCase> {};
+
+TEST_P(TextureUploadPrebindTest, RebindsOnlyAffectedDriversBeforeUpload) {
   auto mock_gles_impl = std::make_unique<MockGLESImpl>();
   auto& mock_gles_impl_ref = *mock_gles_impl;
 
-  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+  const auto& test_case = GetParam();
+  std::shared_ptr<MockGLES> mock_gl =
+      MockGLES::Init(std::move(mock_gles_impl), std::nullopt, test_case.version,
+                     test_case.renderer);
   auto reactor = std::make_shared<TestReactorGLES>();
   auto worker = std::make_shared<MockWorker>();
   reactor->AddWorker(worker);
@@ -108,9 +121,14 @@ TEST(BlitCommandGLESTest, BlitCopyBufferToTextureCommandGLESRGBA) {
   BlitCopyBufferToTextureCommandGLES command =
       CreateCopyBufferToTextureCommand(source_buffer, dest_texture);
 
+  if (!test_case.needs_prebind) {
+    EXPECT_CALL(mock_gles_impl_ref, BindTexture(GL_TEXTURE_2D, 0u)).Times(0);
+  }
   {
     ::testing::InSequence sequence;
-    EXPECT_CALL(mock_gles_impl_ref, BindTexture(GL_TEXTURE_2D, 0u));
+    if (test_case.needs_prebind) {
+      EXPECT_CALL(mock_gles_impl_ref, BindTexture(GL_TEXTURE_2D, 0u));
+    }
     EXPECT_CALL(mock_gles_impl_ref, BindTexture(GL_TEXTURE_2D, 7u));
     // Upload only after the texture has been rebound.
     EXPECT_CALL(mock_gles_impl_ref,
@@ -120,6 +138,53 @@ TEST(BlitCommandGLESTest, BlitCopyBufferToTextureCommandGLESRGBA) {
 
   EXPECT_TRUE(command.Encode(*reactor));
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    ArmErratum1792661,
+    TextureUploadPrebindTest,
+    ::testing::Values(
+        TextureUploadPrebindCase{"BeforeAffectedRange", "Mali-G71",
+                                 "OpenGL ES 3.2 v1.r16p0-01rel0", false},
+        TextureUploadPrebindCase{"FirstAffectedRelease", "Mali-G71",
+                                 "OpenGL ES 3.2 v1.r17p0-01rel0", true},
+        TextureUploadPrebindCase{"AffectedG72", "Mali-G72 MP18",
+                                 "OpenGL ES 3.2 v1.r18p0-01rel0", true},
+        TextureUploadPrebindCase{"LastAffectedRelease", "Mali-G76",
+                                 "OpenGL ES 3.2 v1.r23p0-01rel0", true},
+        TextureUploadPrebindCase{"AffectedValhall", "Mali-G77",
+                                 "OpenGL ES 3.2 v1.r19p0-01rel0", true},
+        TextureUploadPrebindCase{"FixedRelease", "Mali-G72",
+                                 "OpenGL ES 3.2 v1.r24p0-01rel0", false},
+        TextureUploadPrebindCase{"NewerRelease", "Mali-G78",
+                                 "OpenGL ES 3.2 v1.r36p0-01rel0", false},
+        TextureUploadPrebindCase{"Midgard", "Mali-T880",
+                                 "OpenGL ES 3.2 v1.r18p0-01rel0", false},
+        TextureUploadPrebindCase{"OtherVendor", "Adreno (TM) 530",
+                                 "OpenGL ES 3.2 V@145.0", false},
+        TextureUploadPrebindCase{"UnknownArmDriver", "Mali-G72",
+                                 "OpenGL ES 3.2", true},
+        TextureUploadPrebindCase{"MalformedArmDriver", "Mali-G72",
+                                 "OpenGL ES 3.2 v1.r24p-01rel0", true},
+        TextureUploadPrebindCase{"Angle", "Mali-G72",
+                                 "OpenGL ES 3.2 (ANGLE 2.1) v1.r18p0", false},
+        TextureUploadPrebindCase{"DesktopGL", "Mali-G72", "4.6 v1.r18p0",
+                                 false},
+        TextureUploadPrebindCase{"LaterPatchBeforeFix", "Mali-G76",
+                                 "OpenGL ES 3.2 v1.r23p1-01rel0", true},
+        TextureUploadPrebindCase{"NoBuildSuffix", "Mali-G72",
+                                 "OpenGL ES 3.2 v1.r18p0", true},
+        TextureUploadPrebindCase{"CompleteReleaseNumber", "Mali-G720",
+                                 "OpenGL ES 3.2 v1.r170p0-01rel0", false},
+        TextureUploadPrebindCase{"ImmortalisFixedDriver", "Immortalis-G715",
+                                 "OpenGL ES 3.2 v1.r42p0-01rel0", false},
+        TextureUploadPrebindCase{"OverflowRelease", "Mali-G72",
+                                 "OpenGL ES 3.2 v1.r99999999999999999999p0",
+                                 true},
+        TextureUploadPrebindCase{"MalformedPatchSuffix", "Mali-G72",
+                                 "OpenGL ES 3.2 v1.r24p0invalid", true}),
+    [](const ::testing::TestParamInfo<TextureUploadPrebindCase>& info) {
+      return info.param.name;
+    });
 
 TEST(BlitCommandGLESTest, BlitCopyBufferToTextureCommandGLESBGRA) {
   auto mock_gles_impl = std::make_unique<MockGLESImpl>();
@@ -511,7 +576,7 @@ TEST(BlitCommandGLESTest,
 
   // The bind target is the cubemap parent, even though allocation/upload
   // calls use the per-face target.
-  EXPECT_CALL(mock_gles_impl_ref, BindTexture(GL_TEXTURE_CUBE_MAP, _)).Times(2);
+  EXPECT_CALL(mock_gles_impl_ref, BindTexture(GL_TEXTURE_CUBE_MAP, _)).Times(1);
   EXPECT_CALL(mock_gles_impl_ref,
               TexImage2D(face_target, 0, _, 4, 4, _, _, _, nullptr))
       .Times(1);

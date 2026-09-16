@@ -210,9 +210,12 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
     return false;
   }
   const auto& gl = reactor.GetProcTable();
-  // Force a rebind after deleted shared texture names can be reused on Mali.
-  // See https://github.com/flutter/flutter/issues/190640.
-  gl.BindTexture(texture_type, 0u);
+  // Arm erratum EN_ID 1,792,661: force a binding change before uploading to
+  // a reused shared texture name. See
+  // https://github.com/flutter/flutter/issues/190640.
+  if (gl.GetDescription()->NeedsTextureUploadRebind()) {
+    gl.BindTexture(texture_type, 0u);
+  }
   gl.BindTexture(texture_type, gl_handle.value());
   const GLvoid* tex_data =
       source.GetBuffer()->OnGetContents() + source.GetRange().offset;
