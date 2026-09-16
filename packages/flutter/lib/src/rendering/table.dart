@@ -801,8 +801,10 @@ class RenderTable extends RenderBox {
         if (addCellWrapper) {
           // TODO(hm21): These wrapper bounds use a single column width and a
           // single row height, so a cell spanning multiple columns or rows is
-          // clipped to one cell in the semantics tree. Make them span-aware
-          // (along with the RTL handling in findColumnIndex) in a follow-up.
+          // clipped to one cell in the semantics tree. Make them span-aware,
+          // see https://github.com/flutter/flutter/issues/192849. The RTL
+          // handling in findColumnIndex is tracked separately in
+          // https://github.com/flutter/flutter/issues/192848.
           cell
             ..transform = Matrix4.translationValues(_columnLefts!.elementAt(x), 0, 0)
             ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
@@ -1027,6 +1029,7 @@ class RenderTable extends RenderBox {
   // for - and [TableColumnWidth] does not expose whether that is the case.
   // TODO(hm21): Share the width of a column-spanning cell between the columns
   // it covers, once TableColumnWidth can report whether it is cell-driven.
+  // See https://github.com/flutter/flutter/issues/192847.
   @override
   double computeMinIntrinsicWidth(double height) {
     assert(_children.length == rows * columns);
