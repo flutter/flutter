@@ -1314,6 +1314,70 @@ void main() {
       expect(control.methodCalls, expectedMethodCalls);
     });
 
+    test('platform-reported connection close clears and hides the client', () async {
+      final control = FakeTextInputControl();
+      TextInput.setInputControl(control);
+
+      final client = FakeTextInputClient(TextEditingValue.empty);
+      final TextInputConnection connection = TextInput.attach(
+        client,
+        const TextInputConfiguration(),
+      );
+      fakeTextChannel.outgoingCalls.clear();
+      control.methodCalls.clear();
+
+      connection.connectionClosedReceived();
+
+      expect(connection.attached, isFalse);
+      expect(control.methodCalls, <String>['detach']);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        const MethodCall('TextInput.clearClient'),
+      ]);
+
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+      await binding.runAsync(() async {});
+
+      expect(control.methodCalls, <String>['detach', 'hide']);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        const MethodCall('TextInput.clearClient'),
+        const MethodCall('TextInput.hide'),
+      ]);
+    });
+
+    test('new connection prevents hide scheduled by platform-reported close', () async {
+      final control = FakeTextInputControl();
+      TextInput.setInputControl(control);
+
+      final firstClient = FakeTextInputClient(TextEditingValue.empty);
+      final TextInputConnection firstConnection = TextInput.attach(
+        firstClient,
+        const TextInputConfiguration(),
+      );
+      fakeTextChannel.outgoingCalls.clear();
+      control.methodCalls.clear();
+
+      firstConnection.connectionClosedReceived();
+
+      final secondClient = FakeTextInputClient(TextEditingValue.empty);
+      final TextInputConnection secondConnection = TextInput.attach(
+        secondClient,
+        const TextInputConfiguration(),
+      );
+
+      expect(firstConnection.attached, isFalse);
+      expect(secondConnection.attached, isTrue);
+      expect(control.methodCalls, <String>['detach', 'attach']);
+
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+      await binding.runAsync(() async {});
+
+      expect(control.methodCalls, <String>['detach', 'attach']);
+      expect(fakeTextChannel.outgoingCalls.map((MethodCall call) => call.method), <String>[
+        'TextInput.clearClient',
+        'TextInput.setClient',
+      ]);
+    });
+
     test('receives text input state changes', () {
       final control = FakeTextInputControl();
       TextInput.setInputControl(control);
