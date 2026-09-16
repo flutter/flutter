@@ -785,6 +785,72 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertEqualObjects(inputView.text, @"");
 }
 
+- (void)testPastingImageDisallowedWithoutContentCommitMimeTypes {
+  NSDictionary* config = self.mutableTemplateCopy;
+  [self setClientId:123 configuration:config];
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+  FlutterTextInputView* inputView = inputFields[0];
+
+  [UIPasteboard.generalPasteboard setData:[self pngData] forPasteboardType:@"public.png"];
+  XCTAssertNil(UIPasteboard.generalPasteboard.string);
+
+  XCTAssertFalse([inputView canPerformAction:@selector(paste:) withSender:nil]);
+  [inputView paste:nil];
+
+  XCTAssertEqualObjects(inputView.text, @"");
+}
+
+- (void)testPastingImageCommitsContent {
+  NSMutableDictionary* config = self.mutableTemplateCopy;
+  config[@"contentCommitMimeTypes"] = @[ @"image/png" ];
+  [self setClientId:123 configuration:config];
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+  FlutterTextInputView* inputView = inputFields[0];
+
+  NSData* png = [self pngData];
+  [UIPasteboard.generalPasteboard setData:png forPasteboardType:@"public.png"];
+  XCTAssertNil(UIPasteboard.generalPasteboard.string);
+
+  XCTAssertTrue([inputView canPerformAction:@selector(paste:) withSender:nil]);
+  [inputView paste:nil];
+
+  OCMVerify([engine flutterTextInputView:inputView
+                   commitContentWithData:png
+                                mimeType:@"image/png"
+                              withClient:123]);
+  // The image goes to the framework; nothing is typed into the field.
+  XCTAssertEqualObjects(inputView.text, @"");
+}
+
+- (void)testPastingPrefersTextOverContent {
+  NSMutableDictionary* config = self.mutableTemplateCopy;
+  config[@"contentCommitMimeTypes"] = @[ @"image/png" ];
+  [self setClientId:123 configuration:config];
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+  FlutterTextInputView* inputView = inputFields[0];
+
+  UIPasteboard.generalPasteboard.items =
+      @[ @{@"public.utf8-plain-text" : @"text", @"public.png" : [self pngData]} ];
+
+  [inputView paste:nil];
+
+  XCTAssertEqualObjects(inputView.text, @"text");
+  OCMVerify(never(), [engine flutterTextInputView:inputView
+                            commitContentWithData:[OCMArg any]
+                                         mimeType:[OCMArg any]
+                                       withClient:123]);
+}
+
+- (NSData*)pngData {
+  UIGraphicsImageRenderer* renderer =
+      [[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(1, 1)];
+  UIImage* image = [renderer imageWithActions:^(UIGraphicsImageRendererContext* context) {
+    [UIColor.redColor setFill];
+    [context fillRect:CGRectMake(0, 0, 1, 1)];
+  }];
+  return UIImagePNGRepresentation(image);
+}
+
 - (void)testNoZombies {
   // Regression test for https://github.com/flutter/flutter/issues/62501.
   FlutterSecureTextInputView* passwordView =

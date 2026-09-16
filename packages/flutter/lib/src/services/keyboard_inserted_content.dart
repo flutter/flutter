@@ -31,6 +31,9 @@ class KeyboardInsertedContent {
   final String mimeType;
 
   /// The URI (location) of the inserted content, usually a "content://" URI.
+  ///
+  /// Empty on iOS, where content is pasted from the system pasteboard, which has
+  /// no location to name.
   final String uri;
 
   /// The bytedata of the inserted content.

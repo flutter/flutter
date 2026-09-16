@@ -7,6 +7,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 
 #include "unicode/uchar.h"
 
@@ -67,6 +68,7 @@ static NSString* const kKeyboardAppearance = @"keyboardAppearance";
 static NSString* const kInputAction = @"inputAction";
 static NSString* const kEnableDeltaModel = @"enableDeltaModel";
 static NSString* const kEnableInteractiveSelection = @"enableInteractiveSelection";
+static NSString* const kContentCommitMimeTypes = @"contentCommitMimeTypes";
 
 static NSString* const kSmartDashesType = @"smartDashesType";
 static NSString* const kSmartQuotesType = @"smartQuotesType";
@@ -806,6 +808,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 @property(nonatomic, copy) NSString* temporarilyDeletedComposedCharacter;
 @property(nonatomic, assign) CGRect editMenuTargetRect;
 @property(nonatomic, strong) NSArray<NSDictionary*>* editMenuItems;
+// MIME types the framework side is willing to receive from a paste, from
+// ContentInsertionConfiguration.allowedMimeTypes. Empty when the field only accepts text.
+@property(nonatomic, copy) NSArray<NSString*>* contentCommitMimeTypes;
 
 - (void)setEditableTransform:(NSArray*)matrix;
 @end
@@ -1084,6 +1089,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   self.returnKeyType = ToUIReturnKeyType(configuration[kInputAction]);
   self.autocapitalizationType = ToUITextAutoCapitalizationType(configuration);
   _enableInteractiveSelection = [configuration[kEnableInteractiveSelection] boolValue];
+  self.contentCommitMimeTypes = configuration[kContentCommitMimeTypes];
   NSString* smartDashesType = configuration[kSmartDashesType];
   // This index comes from the SmartDashesType enum in the framework.
   bool smartDashesIsDisabled = smartDashesType && [smartDashesType isEqualToString:@"0"];
@@ -1361,8 +1367,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
   if (action == @selector(paste:)) {
-    // Forbid pasting images, memojis, or other non-string content.
-    return [UIPasteboard generalPasteboard].hasStrings;
+    // Non-string content is only pasteable into a field that asked for it, in a type it asked for.
+    // Anything else would reach the framework as a string it cannot make sense of.
+    return [UIPasteboard generalPasteboard].hasStrings || [self pasteboardTypeToCommit] != nil;
   } else if (action == @selector(copy:) || action == @selector(cut:) ||
              action == @selector(delete:)) {
     return [self textInRange:_selectedTextRange].length > 0;
@@ -1389,10 +1396,55 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)paste:(id)sender {
+  // Text first, so a pasteboard carrying both a picture and a caption for it keeps pasting what a
+  // text field has always pasted.
   NSString* pasteboardString = [UIPasteboard generalPasteboard].string;
   if (pasteboardString != nil) {
     [self insertText:pasteboardString];
+    return;
   }
+
+  NSString* type = [self pasteboardTypeToCommit];
+  if (type == nil) {
+    return;
+  }
+  NSData* data = [[UIPasteboard generalPasteboard] dataForPasteboardType:type];
+  if (data == nil) {
+    return;
+  }
+  [self.textInputDelegate flutterTextInputView:self
+                         commitContentWithData:data
+                                      mimeType:[self mimeTypeForPasteboardType:type]
+                                    withClient:_textInputClient];
+}
+
+// The pasteboard type to hand to the framework, or nil when the pasteboard holds nothing this field
+// asked for. Types are tried in the order the framework listed them, so allowedMimeTypes doubles as
+// a preference order.
+- (NSString*)pasteboardTypeToCommit {
+  if (self.contentCommitMimeTypes.count == 0) {
+    return nil;
+  }
+  if (@available(iOS 14.0, *)) {
+    UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
+    for (NSString* mimeType in self.contentCommitMimeTypes) {
+      UTType* type = [UTType typeWithMIMEType:mimeType];
+      if (type != nil && [pasteboard containsPasteboardTypes:@[ type.identifier ]]) {
+        return type.identifier;
+      }
+    }
+  }
+  return nil;
+}
+
+- (NSString*)mimeTypeForPasteboardType:(NSString*)pasteboardType {
+  if (@available(iOS 14.0, *)) {
+    NSString* mimeType = [UTType typeWithIdentifier:pasteboardType].preferredMIMEType;
+    if (mimeType != nil) {
+      return mimeType;
+    }
+  }
+  return pasteboardType;
 }
 
 - (void)delete:(id)sender {

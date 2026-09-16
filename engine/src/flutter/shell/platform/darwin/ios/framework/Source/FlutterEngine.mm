@@ -1187,6 +1187,29 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+       commitContentWithData:(NSData*)data
+                    mimeType:(NSString*)mimeType
+                  withClient:(int)client {
+  // The message the Android embedding sends for the same gesture, so both platforms arrive at
+  // TextInputClient.insertContent in one shape. The bytes travel as numbers because this channel is
+  // JSON, and `uri` is empty because a pasteboard item, unlike Android's content:// URI, has no
+  // name to give.
+  NSMutableArray<NSNumber*>* bytes = [NSMutableArray arrayWithCapacity:data.length];
+  const uint8_t* buffer = static_cast<const uint8_t*>(data.bytes);
+  for (NSUInteger i = 0; i < data.length; i++) {
+    [bytes addObject:@(buffer[i])];
+  }
+  [self.textInputChannel invokeMethod:@"TextInputClient.performAction"
+                            arguments:@[
+                              @(client), @"TextInputAction.commitContent", @{
+                                @"mimeType" : mimeType,
+                                @"uri" : @"",
+                                @"data" : bytes,
+                              }
+                            ]];
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     showAutocorrectionPromptRectForStart:(NSUInteger)start
                                      end:(NSUInteger)end
                               withClient:(int)client {
