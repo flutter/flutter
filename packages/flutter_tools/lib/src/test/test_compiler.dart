@@ -134,21 +134,22 @@ class TestCompiler {
            ),
        shouldCopyDillFile = precompiledDillPath == null {
     this.buildInfo = buildInfo.copyWith(initializeFromDill: testFilePath);
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
-    final Directory outputDillDirectory = _toolContext.fs.systemTempDirectory.createTempSync(
+    final Directory outputDillDirectory = fs.systemTempDirectory.createTempSync(
       'flutter_test_compiler.',
     );
     outputDill = outputDillDirectory.childFile('output.dill');
-    _toolContext.logger.printTrace(
+    logger.printTrace(
       'Compiler will use the following file as its incremental dill file: ${outputDill.path}',
     );
-    _toolContext.logger.printTrace('Listening to compiler controller...');
+    logger.printTrace('Listening to compiler controller...');
     compilerController.stream.listen(
       _onCompilationRequest,
       onDone: () {
-        _toolContext.logger.printTrace('Deleting ${outputDillDirectory.path}...');
+        logger.printTrace('Deleting ${outputDillDirectory.path}...');
         outputDillDirectory.deleteSync(recursive: true);
       },
     );
@@ -236,9 +237,10 @@ class TestCompiler {
     if (!isEmpty) {
       return;
     }
+    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform) = _toolContext;
     while (compilationQueue.isNotEmpty) {
       final _CompilationRequest request = compilationQueue.first;
-      _toolContext.logger.printTrace('Compiling ${request.mainUri}');
+      logger.printTrace('Compiling ${request.mainUri}');
       final compilerTime = Stopwatch()..start();
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
       var firstCompile = false;
@@ -249,7 +251,7 @@ class TestCompiler {
 
       final invalidatedRegistrantFiles = <Uri>[];
       if (flutterProject != null) {
-        final File mainFile = _toolContext.fs.file(request.mainUri);
+        final File mainFile = fs.file(request.mainUri);
         final LanguageVersion languageVersion = determineLanguageVersion(
           mainFile,
           buildInfo.packageConfig.packageOf(request.mainUri),
@@ -277,7 +279,7 @@ class TestCompiler {
         packageConfig: buildInfo.packageConfig,
         projectRootPath: flutterProject?.directory.absolute.path,
         checkDartPluginRegistry: true,
-        fs: _toolContext.fs,
+        fs: fs,
       );
       final String? outputPath = compilerOutput?.outputFilename;
 
@@ -295,10 +297,10 @@ class TestCompiler {
         await _shutdown();
       } else {
         if (shouldCopyDillFile) {
-          final String path = request.mainUri.toFilePath(windows: _toolContext.platform.isWindows);
-          final File outputFile = _toolContext.fs.file(outputPath);
+          final String path = request.mainUri.toFilePath(windows: platform.isWindows);
+          final File outputFile = fs.file(outputPath);
           final File kernelReadyToRun = await outputFile.copy('$path.dill');
-          final File testCache = _toolContext.fs.file(testFilePath);
+          final File testCache = fs.file(testFilePath);
           if (firstCompile ||
               !testCache.existsSync() ||
               (testCache.lengthSync() < outputFile.lengthSync())) {
@@ -321,9 +323,7 @@ class TestCompiler {
         compiler!.accept();
         compiler!.reset();
       }
-      _toolContext.logger.printTrace(
-        'Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms',
-      );
+      logger.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
       testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
       // Only remove now when we finished processing the element
       compilationQueue.removeAt(0);

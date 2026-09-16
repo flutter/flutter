@@ -9,6 +9,7 @@ import 'package:process/process.dart';
 import '../artifacts.dart';
 import '../asset.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -852,8 +853,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       throwToolExit('Error: Failed to build asset bundle');
     }
     if (_needsRebuild(assetBundle.entries, flavor, fs)) {
+      final Config config = _toolContext.config;
       await writeBundle(
-        fs.directory(fs.path.join(getBuildDirectory(_toolContext.config, fs), 'unit_test_assets')),
+        fs.directory(fs.path.join(getBuildDirectory(config, fs), 'unit_test_assets')),
         assetBundle.entries,
         targetPlatform: TargetPlatform.tester,
         impellerStatus: impellerStatus,
@@ -866,7 +868,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
 
       final File cachedFlavorFile = fs.file(
-        fs.path.join(getBuildDirectory(_toolContext.config, fs), 'test_cache', 'flavor.txt'),
+        fs.path.join(getBuildDirectory(config, fs), 'test_cache', 'flavor.txt'),
       );
       if (cachedFlavorFile.existsSync()) {
         await cachedFlavorFile.delete();
@@ -883,12 +885,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     //  schema of the contents of the asset manifest file and the user does not
     //  perform a `flutter clean` after upgrading.
     //  See https://github.com/flutter/flutter/issues/128563.
+    final Config config = _toolContext.config;
     final File manifest = fs.file(
-      fs.path.join(
-        getBuildDirectory(_toolContext.config, fs),
-        'unit_test_assets',
-        'AssetManifest.bin',
-      ),
+      fs.path.join(getBuildDirectory(config, fs), 'unit_test_assets', 'AssetManifest.bin'),
     );
     if (!manifest.existsSync()) {
       return true;
@@ -909,7 +908,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
 
     final File cachedFlavorFile = fs.file(
-      fs.path.join(getBuildDirectory(_toolContext.config, fs), 'test_cache', 'flavor.txt'),
+      fs.path.join(getBuildDirectory(config, fs), 'test_cache', 'flavor.txt'),
     );
     final String? cachedFlavor = cachedFlavorFile.existsSync()
         ? cachedFlavorFile.readAsStringSync()
