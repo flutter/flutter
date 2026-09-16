@@ -49,9 +49,13 @@ class ClipContents {
   ClipCoverage GetClipCoverage(
       const std::optional<Rect>& current_clip_coverage) const;
 
+  /// @param[in] transform Optional transform matrix to replace the baked clip
+  ///                      geometry transform when replaying clips into a new
+  ///                      render pass (such as during FlipBackdrop).
   bool Render(const ContentContext& renderer,
               RenderPass& pass,
-              uint32_t clip_depth) const;
+              uint32_t clip_depth,
+              const std::optional<Matrix>& transform = std::nullopt) const;
 
  private:
   // Pre-tessellated clip geometry.
