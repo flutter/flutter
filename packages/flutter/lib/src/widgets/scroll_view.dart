@@ -1316,6 +1316,23 @@ class ListView extends BoxScrollView {
   /// `addSemanticIndexes` argument corresponds to the
   /// [SliverChildListDelegate.addSemanticIndexes] property. None
   /// may be null.
+  /// It is common to see an assertion saying "Vertical/Horizontal viewport was
+  /// given unbounded height/width" when a [ListView] is a child of a [Column]
+  /// or [Row].
+  ///
+  /// This happens because a [ListView] tries to expand infinitely in its
+  /// scroll direction (vertically by default), but flex widgets like [Column]
+  /// and [Row] provide unbounded space along their main axis.
+  ///
+  /// To fix this, you must constrain the [ListView] by doing one of the following:
+  ///
+  /// * Wrap the [ListView] in an [Expanded] or [Flexible] widget so it safely
+  ///   takes up only the remaining available space.
+  /// * Wrap the [ListView] in a [SizedBox] or [Container] with an explicit
+  ///   height (for Columns) or width (for Rows).
+  /// * Set [ListView.shrinkWrap] to true if you want the list to only occupy
+  ///   the space its children need (Note: use this sparingly as it computes the
+  ///   size of all children, which hurts performance on large lists).
   ListView({
     super.key,
     super.scrollDirection,
