@@ -8,14 +8,17 @@
 #include "flutter/common/graphics/texture.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "impeller/renderer/backend/vulkan/context_vk.h"
-#include "impeller/renderer/backend/vulkan/texture_source_vk.h"
-#include "impeller/renderer/backend/vulkan/vk.h"
-#include "impeller/renderer/backend/vulkan/yuv_conversion_vk.h"
+#if IMPELLER_SUPPORTS_RENDERING
+#include "impeller/renderer/backend/vulkan/context_vk.h"         // nogncheck
+#include "impeller/renderer/backend/vulkan/texture_source_vk.h"  // nogncheck
+#include "impeller/renderer/backend/vulkan/vk.h"                 // nogncheck
+#include "impeller/renderer/backend/vulkan/yuv_conversion_vk.h"  // nogncheck
+#endif  // IMPELLER_SUPPORTS_RENDERING
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {
 
+#if IMPELLER_SUPPORTS_RENDERING
 class EmbedderExternalTextureSourceVulkan final
     : public impeller::TextureSourceVK {
  public:
@@ -68,6 +71,7 @@ class EmbedderExternalTextureSourceVulkan final
   EmbedderExternalTextureSourceVulkan& operator=(
       const EmbedderExternalTextureSourceVulkan&) = delete;
 };
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 class EmbedderExternalTextureVulkan : public flutter::Texture {
  public:
@@ -90,9 +94,11 @@ class EmbedderExternalTextureVulkan : public flutter::Texture {
   sk_sp<DlImage> ResolveTextureSkia(int64_t texture_id,
                                     GrDirectContext* context,
                                     const SkISize& size);
+#if IMPELLER_SUPPORTS_RENDERING
   sk_sp<DlImage> ResolveTextureImpeller(int64_t texture_id,
                                         impeller::AiksContext* aiks_context,
                                         const SkISize& size);
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
   // |flutter::Texture|
   void Paint(PaintContext& context,
