@@ -262,10 +262,10 @@ packages:
     dependency: transitive
     description:
       name: dap_adapters
-      sha256: "26f1ae0945bd0e0d015d2c0cb0fa8d1ed84262d7e5db3bf2642fb4c199fa7844"
+      sha256: a536d0bf43bc7b7859a3d18c0c3fdc134fb21e714a8ce3a5f1ae71b5678fb5d7
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.1"
   dart_service_protocol_shared:
     dependency: transitive
     description:
