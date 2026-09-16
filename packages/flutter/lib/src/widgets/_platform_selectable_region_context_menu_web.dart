@@ -52,22 +52,52 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   // ignore: use_setters_to_change_properties
   static void attach(SelectionContainerDelegate client) {
     _activeClient = client;
+    if (!_copyEventListenerAttached) {
+      web.document.addEventListener('copy', _onCopy);
+      _copyEventListenerAttached = true;
+    }
   }
 
   /// See `_platform_selectable_region_context_menu_io.dart`.
   static void detach(SelectionContainerDelegate client) {
     if (_activeClient == client) {
       _activeClient = null;
+      web.document.removeEventListener('copy', _onCopy);
+      _copyEventListenerAttached = false;
     }
   }
 
   static SelectionContainerDelegate? _activeClient;
+  static bool _copyEventListenerAttached = false;
+
+  static final JSExportedDartFunction _onCopy = (web.Event event) {
+    final SelectionContainerDelegate? client = _activeClient;
+    final element = web.document.querySelector('.$_kClassName') as web.HTMLElement?;
+    if (client != null && element != null) {
+      _synchronizeDomSelection(element, client);
+    }
+  }.toJS;
+
+  static void _synchronizeDomSelection(web.HTMLElement element, SelectionContainerDelegate client) {
+    // The innerText must contain the text in order to be selected by the browser.
+    element.innerText = client.getSelectedContent()?.plainText ?? '';
+
+    // Programmatically select the DOM element in browser.
+    final web.Range range = web.document.createRange()..selectNode(element);
+    web.window.getSelection()
+      ?..removeAllRanges()
+      ..addRange(range);
+  }
 
   /// The client currently attached to the [PlatformSelectableRegionContextMenu].
   ///
   /// This should only be used for testing.
   @visibleForTesting
   static SelectionContainerDelegate? get debugActiveClient => _activeClient;
+
+  /// Whether the document copy listener is attached.
+  @visibleForTesting
+  static bool get debugIsCopyEventListenerAttached => _copyEventListenerAttached;
 
   // Keeps track if this widget has already registered its view factories or not.
   static String? _registeredViewType;
@@ -102,16 +132,7 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
         final Matrix4 transform = client.getTransformTo(null);
         final Offset globalOffset = MatrixUtils.transformPoint(transform, localOffset);
         client.dispatchSelectionEvent(SelectWordSelectionEvent(globalPosition: globalOffset));
-        // The innerText must contain the text in order to be selected by
-        // the browser.
-        element.innerText = client.getSelectedContent()?.plainText ?? '';
-
-        // Programmatically select the dom element in browser.
-        final web.Range range = web.document.createRange()..selectNode(element);
-
-        web.window.getSelection()
-          ?..removeAllRanges()
-          ..addRange(range);
+        _synchronizeDomSelection(element, client);
       }
     });
   }

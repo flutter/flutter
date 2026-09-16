@@ -157,6 +157,68 @@ void main() {
     expect((selectWordEvent.globalPosition.dy - 300).abs() < precisionErrorTolerance, isTrue);
   }, variant: _browserContextMenuEnabledVariants);
 
+  testWidgets('copy event synchronizes the active SelectableRegion without a mouse event', (
+    WidgetTester tester,
+  ) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final focusNodeA = FocusNode();
+    final focusNodeB = FocusNode();
+    addTearDown(focusNodeA.dispose);
+    addTearDown(focusNodeB.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Column(
+          children: <Widget>[
+            SelectableRegion(
+              focusNode: focusNodeA,
+              selectionControls: emptyTextSelectionControls,
+              child: const Text('first selection'),
+            ),
+            SelectableRegion(
+              focusNode: focusNodeB,
+              selectionControls: emptyTextSelectionControls,
+              child: const Text('second selection'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Mount the fake platform-view element so the document copy handler can
+    // find and update it.
+    final element = fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    web.document.body!.append(element);
+    addTearDown(() => element.remove());
+
+    Future<void> selectRegion(FocusNode focusNode) async {
+      focusNode.requestFocus();
+      await tester.pump();
+      PlatformSelectableRegionContextMenu.debugActiveClient!.dispatchSelectionEvent(
+        const SelectAllSelectionEvent(),
+      );
+    }
+
+    // Select all text in the first region, then copy it without a mouse event.
+    await selectRegion(focusNodeA);
+    web.document.dispatchEvent(web.ClipboardEvent('copy'));
+    await tester.pump();
+    expect(element.innerText, 'first selection');
+    expect(web.window.getSelection()?.toString(), 'first selection');
+
+    // Select all text in the second region, then copy it without a mouse event.
+    await selectRegion(focusNodeB);
+    web.document.dispatchEvent(web.ClipboardEvent('copy'));
+    await tester.pump();
+    expect(element.innerText, 'second selection');
+    expect(web.window.getSelection()?.toString(), 'second selection');
+
+    // Veryify we dispose the listener when the widgets are removed.
+    expect(PlatformSelectableRegionContextMenu.debugIsCopyEventListenerAttached, isTrue);
+    await tester.pumpWidget(const TestWidgetsApp(home: SizedBox.shrink()));
+    expect(PlatformSelectableRegionContextMenu.debugIsCopyEventListenerAttached, isFalse);
+  }, variant: _browserContextMenuEnabledVariants);
+
   // Regression test for https://github.com/flutter/flutter/issues/189575.
   testWidgets('right click does not dispatch event to previous stale client after losing focus', (
     WidgetTester tester,
@@ -341,6 +403,7 @@ void main() {
     await tester.pumpWidget(const TestWidgetsApp(home: SizedBox.shrink()));
 
     expect(PlatformSelectableRegionContextMenu.debugActiveClient, isNull);
+    expect(PlatformSelectableRegionContextMenu.debugIsCopyEventListenerAttached, isFalse);
   }, variant: _browserContextMenuEnabledVariants);
 
   group('when the browser context menu is disabled after attaching', () {
