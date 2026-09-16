@@ -8,7 +8,6 @@
 import 'package:flutter/src/widgets/_window.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'element_position_tracker.dart';
 import 'models.dart';
 import 'tooltip_window_content.dart';
 
@@ -22,74 +21,55 @@ class TooltipButton extends StatefulWidget {
 }
 
 class _TooltipButtonState extends State<TooltipButton> {
-  WindowEntry? _tooltipEntry;
-  ElementPositionTracker? _tooltipTracker;
+  final NestedWindowController _anchorController = NestedWindowController();
   final GlobalKey _tooltipButtonKey = GlobalKey();
 
-  @override
-  void dispose() {
-    _tooltipTracker?.dispose();
-    super.dispose();
+  void _onPressed() {
+    _anchorController.toggle();
   }
 
-  void _onPressed(WindowSettings windowSettings) {
-    // Toggle tooltip visibility.
-    if (_tooltipEntry != null) {
-      _tooltipEntry!.controller.destroy();
-      _tooltipTracker?.dispose();
-      setState(() {
-        _tooltipEntry = null;
-        _tooltipTracker = null;
-      });
-    } else {
-      // Tooltip is not shown, show it.
-      final tracker = ElementPositionTracker(element: _tooltipButtonKey.currentContext!);
-      late final WindowEntry entry;
-      final controller = TooltipWindowController(
-        anchorRect: tracker.getGlobalRect()!,
-        positioner: windowSettings.positioner,
-        delegate: _TooltipWindowControllerDelegate(
-          onDestroyed: () {
-            tracker.dispose();
-            if (mounted) {
-              setState(() {
-                _tooltipEntry = null;
-                _tooltipTracker = null;
-              });
-            }
-          },
-        ),
-        parent: widget.parentController,
-      );
-      entry = WindowEntry(
-        controller: controller,
-        builder: (BuildContext context) => TooltipWindowContent(controller: controller),
-      );
-      tracker.onGlobalRectChange = (rect) {
-        controller.updatePosition(anchorRect: rect);
-      };
-      setState(() {
-        _tooltipEntry = entry;
-        _tooltipTracker = tracker;
-      });
+  WindowEntry _buildEntry(WindowSettings windowSettings) {
+    final controller = TooltipWindowController(
+      anchorRect: _getAnchorRect()!,
+      positioner: windowSettings.positioner,
+      delegate: _TooltipWindowControllerDelegate(
+        onDestroyed: () {
+          if (mounted) {
+            _anchorController.hide();
+          }
+        },
+      ),
+      parent: widget.parentController,
+    );
+    return WindowEntry(
+      controller: controller,
+      builder: (BuildContext context) => TooltipWindowContent(controller: controller),
+    );
+  }
+
+  Rect? _getAnchorRect() {
+    final RenderObject? renderObject = _tooltipButtonKey.currentContext?.findRenderObject();
+    if (renderObject is! RenderBox) {
+      return null;
     }
+    return renderObject.localToGlobal(Offset.zero) & renderObject.size;
   }
 
   @override
   Widget build(BuildContext context) {
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
-    return OutlinedButton(
-      key: _tooltipButtonKey,
-      onPressed: () => _onPressed(windowSettings),
-      child: ViewAnchor(
-        view: _tooltipEntry != null
-            ? View(
-                view: _tooltipEntry!.controller.rootView,
-                child: Builder(builder: _tooltipEntry!.builder),
-              )
-            : null,
-        child: Text(_tooltipEntry != null ? 'Hide Tooltip' : 'Show Tooltip'),
+    return NestedWindow(
+      controller: _anchorController,
+      entryBuilder: () => _buildEntry(windowSettings),
+      child: OutlinedButton(
+        key: _tooltipButtonKey,
+        onPressed: _onPressed,
+        child: ListenableBuilder(
+          listenable: _anchorController,
+          builder: (BuildContext context, Widget? child) =>
+              Text(_anchorController.showing ? 'Hide Tooltip' : 'Show Tooltip'),
+        ),
       ),
     );
   }

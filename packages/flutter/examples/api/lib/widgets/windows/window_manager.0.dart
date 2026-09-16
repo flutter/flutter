@@ -44,41 +44,8 @@ void main() {
   }
 }
 
-class MainWindow extends StatefulWidget {
+class MainWindow extends StatelessWidget {
   const MainWindow({super.key});
-
-  @override
-  State<StatefulWidget> createState() => MainWindowState();
-}
-
-class MainWindowState extends State<MainWindow> {
-  WindowEntry? entry;
-
-  void _openDialog(BuildContext context) {
-    final WindowRegistry? registry = WindowRegistry.maybeOf(context);
-    assert(registry != null);
-    entry = WindowEntry(
-      controller: DialogWindowController(
-        parent: WindowScope.of(context),
-        size: const Size(400, 300),
-        delegate: _DialogWindowControllerDelegate(
-          mainWindow: this,
-          registry: registry!,
-        ),
-      ),
-      builder: (BuildContext context) {
-        return const SizedBox.shrink();
-      },
-    );
-    registry.register(entry!);
-  }
-
-  void closeDialog(WindowRegistry registry) {
-    if (entry != null) {
-      registry.unregister(entry!);
-      entry = null;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +54,18 @@ class MainWindowState extends State<MainWindow> {
       builder: (BuildContext context, Widget? child) {
         return Center(
           child: GestureDetector(
-            onTap: () => _openDialog(context),
+            onTap: () => mountToplevelWindow(
+              context: context,
+              entry: WindowEntry(
+                controller: DialogWindowController(
+                  parent: WindowScope.of(context),
+                  size: const Size(400, 300),
+                ),
+                builder: (BuildContext context) {
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
             child: const Text(
               'Open a dialog',
               textDirection: TextDirection.ltr,
@@ -96,21 +74,5 @@ class MainWindowState extends State<MainWindow> {
         );
       },
     );
-  }
-}
-
-class _DialogWindowControllerDelegate extends DialogWindowControllerDelegate {
-  _DialogWindowControllerDelegate({
-    required this.mainWindow,
-    required this.registry,
-  });
-
-  final MainWindowState mainWindow;
-  final WindowRegistry registry;
-
-  @override
-  void onWindowDestroyed() {
-    super.onWindowDestroyed();
-    mainWindow.closeDialog(registry);
   }
 }

@@ -15,13 +15,17 @@ import 'package:flutter/src/widgets/_window_positioner.dart';
 void main() {
   try {
     runWidget(
-      Window(
-        controller: WindowController(
-          size: const Size(800, 600),
-          constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-          title: 'Example Window',
-        ),
-        child: const MaterialApp(home: MyApp()),
+      WindowManager(
+        initialWindows: [
+          WindowEntry(
+            controller: WindowController(
+              size: const Size(800, 600),
+              constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+              title: 'Example Window',
+            ),
+            builder: (context) => const MaterialApp(home: MyApp()),
+          ),
+        ],
       ),
     );
   } on UnsupportedError catch (e) {
@@ -48,43 +52,38 @@ class _MyAppState extends State<MyApp> {
   final GlobalKey _key = GlobalKey();
   TooltipWindowController? _tooltipController;
 
-  @override
-  Widget build(BuildContext context) {
-    final List<Widget> children = <Widget>[
-      Text(
-        key: _key,
-        'Hover Me',
-        style: const TextStyle(color: Colors.white),
+  void _openTooltip(BuildContext context) {
+    final tooltipController = TooltipWindowController(
+      parent: WindowScope.of(context),
+      anchorRect: _getAnchorRect()!,
+      positioner: const WindowPositioner(
+        parentAnchor: WindowPositionerAnchor.right,
+        childAnchor: WindowPositionerAnchor.left,
       ),
-    ];
-
-    if (_tooltipController != null) {
-      children.add(
-        TooltipWindow(
-          controller: _tooltipController!,
-          child: Container(
+    );
+    mountToplevelWindow(
+      context: context,
+      entry: WindowEntry(
+        controller: tooltipController,
+        builder: (context) {
+          return Container(
             padding: const .all(8),
             color: Colors.black,
             child: const Text(
               'This is a tooltip',
               style: TextStyle(color: Colors.white),
             ),
-          ),
-        ),
-      );
-    }
-
-    return MouseRegion(
-      onEnter: (_) => setState(
-        () => _tooltipController = TooltipWindowController(
-          parent: WindowScope.of(context),
-          anchorRect: _getAnchorRect()!,
-          positioner: const WindowPositioner(
-            parentAnchor: WindowPositionerAnchor.right,
-            childAnchor: WindowPositionerAnchor.left,
-          ),
-        ),
+          );
+        },
       ),
+    );
+    setState(() => _tooltipController = tooltipController);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => _openTooltip(context),
       onExit: (_) => setState(() {
         _tooltipController?.destroy();
         _tooltipController = null;
@@ -94,7 +93,11 @@ class _MyAppState extends State<MyApp> {
         duration: const Duration(milliseconds: 200),
         color: _tooltipController != null ? Colors.blueAccent : Colors.blue,
         padding: const .all(12),
-        child: Row(children: children),
+        child: Text(
+          key: _key,
+          'Hover Me',
+          style: const TextStyle(color: Colors.white),
+        ),
       ),
     );
   }
