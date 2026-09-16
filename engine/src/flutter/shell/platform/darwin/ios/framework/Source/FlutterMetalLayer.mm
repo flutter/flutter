@@ -17,9 +17,12 @@ FLUTTER_ASSERT_ARC
 
 @class FlutterTexture;
 @class FlutterDrawable;
+@class FlutterMetalPresenter;
 
 // A grace period for app transitions, not a system animation-completion deadline.
 static constexpr int64_t kActivationCompositingDelay = 1500 * NSEC_PER_MSEC;
+// Includes the frame currently being processed by the presentation worker.
+static constexpr NSUInteger kMaxPresentationFrames = 3;
 
 @interface FlutterMetalLayer () {
   CGSize _drawableSize;
@@ -28,6 +31,7 @@ static constexpr int64_t kActivationCompositingDelay = 1500 * NSEC_PER_MSEC;
   BOOL _requestedOpaque;
   BOOL _compositingHold;
   NSUInteger _activationGeneration;
+  FlutterMetalPresenter* _presenter;
 
   // Access to these variables must be synchronized.
   NSMutableSet<FlutterTexture*>* _availableTextures;
@@ -38,6 +42,7 @@ static constexpr int64_t kActivationCompositingDelay = 1500 * NSEC_PER_MSEC;
 - (void)presentTexture:(FlutterTexture*)texture;
 - (void)returnTexture:(FlutterTexture*)texture;
 - (id<CAMetalDrawable>)acquirePresentationDrawable;
+- (void)enqueueTexture:(FlutterTexture*)texture afterRendering:(id<MTLCommandBuffer>)buffer;
 
 @end
 
@@ -62,12 +67,144 @@ static constexpr int64_t kActivationCompositingDelay = 1500 * NSEC_PER_MSEC;
 
 @end
 
+// Only completed rendering results are copied to native drawables. Waiting
+// frames retain their source texture, never a native drawable.
+@interface FlutterPresentationFrame : NSObject
+@property(nonatomic, strong) FlutterTexture* texture;
+@property(nonatomic, strong) id<MTLCommandBuffer> rendering;
+@end
+
+@implementation FlutterPresentationFrame
+@end
+
+@interface FlutterMetalPresenter : NSObject {
+  __weak FlutterMetalLayer* _layer;
+  dispatch_queue_t _queue;
+  id<MTLCommandQueue> _commandQueue;
+  // Protected by @synchronized(self); _running reserves one in-flight slot.
+  NSMutableArray<FlutterPresentationFrame*>* _pending;
+  BOOL _running;
+}
+- (instancetype)initWithLayer:(FlutterMetalLayer*)layer;
+- (void)enqueueTexture:(FlutterTexture*)texture afterRendering:(id<MTLCommandBuffer>)buffer;
+- (void)discardPendingAndWait;
+@end
+
+@implementation FlutterMetalPresenter
+
+- (instancetype)initWithLayer:(FlutterMetalLayer*)layer {
+  if (self = [super init]) {
+    _layer = layer;
+    _queue = dispatch_queue_create("io.flutter.metal.presentation", DISPATCH_QUEUE_SERIAL);
+    _commandQueue = [layer.device newCommandQueue];
+    _pending = [[NSMutableArray alloc] init];
+  }
+  return self;
+}
+
+- (void)enqueueTexture:(FlutterTexture*)texture afterRendering:(id<MTLCommandBuffer>)buffer {
+  FlutterPresentationFrame* frame = [[FlutterPresentationFrame alloc] init];
+  frame.texture = texture;
+  frame.rendering = buffer;
+  @synchronized(self) {
+    if (_running) {
+      // Three frames total: one being processed and at most two waiting.
+      if (_pending.count >= kMaxPresentationFrames - 1) {
+        [_layer returnTexture:_pending.firstObject.texture];
+        [_pending removeObjectAtIndex:0];
+      }
+      [_pending addObject:frame];
+      return;
+    }
+    _running = YES;
+  }
+  dispatch_async(_queue, ^{
+    [self drainStartingWith:frame];
+  });
+}
+
+- (void)drainStartingWith:(FlutterPresentationFrame*)first {
+  FlutterPresentationFrame* frame = first;
+  while (frame != nil) {
+    @autoreleasepool {
+      // Drain native drawable and command-buffer autoreleases per frame,
+      // rather than retaining them for the lifetime of this worker task.
+      [self presentFrame:frame];
+      [_layer returnTexture:frame.texture];
+      @synchronized(self) {
+        frame = _pending.firstObject;
+        if (frame != nil) {
+          [_pending removeObjectAtIndex:0];
+        } else {
+          _running = NO;
+        }
+      }
+    }
+  }
+}
+
+- (void)presentFrame:(FlutterPresentationFrame*)frame {
+  // This wait is confined to the worker. The rendering command buffer belongs
+  // to another Metal queue, so its writes must finish before the copy begins.
+  [frame.rendering waitUntilCompleted];
+  FlutterMetalLayer* layer = _layer;
+  id<MTLTexture> source = frame.texture.texture;
+  if (layer == nil || frame.rendering.status == MTLCommandBufferStatusError ||
+      layer.drawableSize.width != source.width || layer.drawableSize.height != source.height ||
+      layer.pixelFormat != source.pixelFormat) {
+    return;
+  }
+  id<CAMetalDrawable> drawable = [layer acquirePresentationDrawable];
+  id<MTLTexture> destination = drawable.texture;
+  if (destination == nil || destination.width != source.width ||
+      destination.height != source.height || destination.pixelFormat != source.pixelFormat) {
+    return;
+  }
+  id<MTLCommandBuffer> copy = [_commandQueue commandBuffer];
+  id<MTLBlitCommandEncoder> blit = [copy blitCommandEncoder];
+  if (blit == nil) {
+    return;
+  }
+  [blit copyFromTexture:source
+            sourceSlice:0
+            sourceLevel:0
+           sourceOrigin:MTLOriginMake(0, 0, 0)
+             sourceSize:MTLSizeMake(source.width, source.height, 1)
+              toTexture:destination
+       destinationSlice:0
+       destinationLevel:0
+      destinationOrigin:MTLOriginMake(0, 0, 0)];
+  [blit endEncoding];
+  [copy presentDrawable:drawable];
+  [copy commit];
+  drawable = nil;
+  // Keep the source out of the reusable pool until the copy has consumed it.
+  [copy waitUntilCompleted];
+}
+
+- (void)discardPendingAndWait {
+  @synchronized(self) {
+    for (FlutterPresentationFrame* frame in _pending) {
+      [_layer returnTexture:frame.texture];
+    }
+    [_pending removeAllObjects];
+  }
+  // Only used when switching back to transaction presentation. An outstanding
+  // async presentation must not overtake the first transaction-bound frame.
+  dispatch_sync(_queue, ^{
+                    // The serial worker has finished using the active frame at this point.
+                });
+}
+
+@end
+
 @interface FlutterDrawable : NSObject <FlutterMetalDrawable> {
   FlutterTexture* _texture;
   __weak FlutterMetalLayer* _layer;
   id<CAMetalDrawable> _presentationDrawable;
   NSUInteger _drawableId;
   BOOL _presented;
+  BOOL _asynchronous;
 }
 
 - (instancetype)initWithTexture:(FlutterTexture*)texture
@@ -109,6 +246,9 @@ static constexpr int64_t kActivationCompositingDelay = 1500 * NSEC_PER_MSEC;
 }
 
 - (void)present {
+  if (_asynchronous) {
+    return;
+  }
   [_presentationDrawable present];
   _presentationDrawable = nil;
   [_layer presentTexture:self->_texture];
@@ -137,6 +277,25 @@ static constexpr int64_t kActivationCompositingDelay = 1500 * NSEC_PER_MSEC;
 - (void)flutterPrepareForPresent:(nonnull id<MTLCommandBuffer>)commandBuffer {
   FlutterTexture* texture = _texture;
   texture.waitingForCompletion = YES;
+  [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
+    texture.waitingForCompletion = NO;
+  }];
+
+  // Avoid waiting for a native drawable when a resize has already made this
+  // Flutter texture unsuitable for the current layer configuration.
+  const CGSize drawableSize = _layer.drawableSize;
+  if (drawableSize.width != texture.texture.width ||
+      drawableSize.height != texture.texture.height ||
+      _layer.pixelFormat != texture.texture.pixelFormat) {
+    return;
+  }
+
+  if (!_layer.presentsWithTransaction) {
+    _asynchronous = YES;
+    _presented = YES;  // The presenter now owns returning this texture.
+    [_layer enqueueTexture:texture afterRendering:commandBuffer];
+    return;
+  }
 
   id<CAMetalDrawable> presentationDrawable = [_layer acquirePresentationDrawable];
   id<MTLTexture> presentationTexture = presentationDrawable.texture;
@@ -169,9 +328,6 @@ static constexpr int64_t kActivationCompositingDelay = 1500 * NSEC_PER_MSEC;
     // drawable can join the Core Animation transaction used by platform views.
     _presentationDrawable = presentationDrawable;
   }
-  [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
-    texture.waitingForCompletion = NO;
-  }];
 }
 
 @end
@@ -195,6 +351,20 @@ static constexpr int64_t kActivationCompositingDelay = 1500 * NSEC_PER_MSEC;
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)setPresentsWithTransaction:(BOOL)value {
+  if (value && !self.presentsWithTransaction) {
+    [_presenter discardPendingAndWait];
+  }
+  [super setPresentsWithTransaction:value];
+}
+
+- (void)enqueueTexture:(FlutterTexture*)texture afterRendering:(id<MTLCommandBuffer>)buffer {
+  if (_presenter == nil) {
+    _presenter = [[FlutterMetalPresenter alloc] initWithLayer:self];
+  }
+  [_presenter enqueueTexture:texture afterRendering:buffer];
 }
 
 - (void)setOpaque:(BOOL)opaque {
@@ -319,7 +489,9 @@ static constexpr int64_t kActivationCompositingDelay = 1500 * NSEC_PER_MSEC;
     if (_front != nil && _front.waitingForCompletion) {
       return nil;
     }
-    if (_totalTextures < 3) {
+    // Async presentation can hold three results, alongside the old front and
+    // the frame currently being rendered. These are not native drawables.
+    if (_totalTextures < (_presenter != nil ? kMaxPresentationFrames + 2 : 3u)) {
       ++_totalTextures;
       IOSurface* surface = [self createIOSurface];
       if (surface == nil) {
@@ -354,6 +526,10 @@ static constexpr int64_t kActivationCompositingDelay = 1500 * NSEC_PER_MSEC;
       // has not decreased the use count yet (there seems to be certain latency).
       FlutterTexture* res = nil;
       for (FlutterTexture* texture in _availableTextures) {
+        // A dropped pending frame may still have rendering in flight.
+        if (texture.waitingForCompletion) {
+          continue;
+        }
         if (res == nil) {
           res = texture;
         } else if (res.surface.isInUse && !texture.surface.isInUse) {

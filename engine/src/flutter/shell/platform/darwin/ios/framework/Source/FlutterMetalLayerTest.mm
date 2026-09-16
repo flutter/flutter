@@ -14,6 +14,39 @@
 @interface FlutterMetalLayerTest : XCTestCase
 @end
 
+@interface FlutterMetalLayer (Testing)
+
+- (id<CAMetalDrawable>)acquirePresentationDrawable;
+- (void)returnTexture:(id)texture;
+
+@end
+
+// Exercise queue policy without depending on native drawable availability.
+@interface FlutterMetalPresenter : NSObject
+- (instancetype)initWithLayer:(FlutterMetalLayer*)layer;
+- (void)enqueueTexture:(id)texture afterRendering:(id<MTLCommandBuffer>)buffer;
+- (void)discardPendingAndWait;
+@end
+
+@interface TestFlutterMetalPresenter : FlutterMetalPresenter
+@property(nonatomic, strong) NSMutableArray<NSNumber*>* presented;
+@property(nonatomic, strong) dispatch_semaphore_t started;
+@property(nonatomic, strong) dispatch_semaphore_t resume;
+@property(nonatomic, strong) XCTestExpectation* completed;
+@end
+
+@implementation TestFlutterMetalPresenter
+- (void)presentFrame:(id)frame {
+  NSNumber* identifier = [frame valueForKey:@"texture"];
+  if ([identifier isEqual:@1]) {
+    dispatch_semaphore_signal(self.started);
+    dispatch_semaphore_wait(self.resume, DISPATCH_TIME_FOREVER);
+  }
+  [self.presented addObject:identifier];
+  [self.completed fulfill];
+}
+@end
+
 @interface TestFlutterMetalLayerView : UIView
 @end
 
@@ -232,6 +265,8 @@
 
 - (void)testTimeout {
   FlutterMetalLayer* layer = [self addMetalLayer];
+  // Transaction-bound presentation retains the original synchronous behavior.
+  layer.presentsWithTransaction = YES;
   TestCompositor* compositor = [[TestCompositor alloc] init];
 
   id<CAMetalDrawable> drawable = [layer nextDrawable];
@@ -313,6 +348,60 @@
   }
 
   [self removeMetalLayer:layer];
+}
+
+- (void)testResizeBeforePrepareDoesNotAcquirePresentationDrawable {
+  FlutterMetalLayer* layer = [self addMetalLayer];
+  id<CAMetalDrawable> drawable = [layer nextDrawable];
+  BAIL_IF_NO_DRAWABLE(drawable);
+
+  layer.drawableSize = CGSizeMake(200, 200);
+
+  id mockLayer = OCMPartialMock(layer);
+  OCMReject([mockLayer acquirePresentationDrawable]);
+  id<MTLCommandBuffer> mockCommandBuffer = OCMProtocolMock(@protocol(MTLCommandBuffer));
+  OCMStub([mockCommandBuffer addCompletedHandler:OCMOCK_ANY]);
+
+  [(id<FlutterMetalDrawable>)drawable flutterPrepareForPresent:mockCommandBuffer];
+
+  [mockLayer verify];
+  [mockLayer stopMocking];
+  [self removeMetalLayer:layer];
+}
+
+- (void)checkPresentationOrderWithOverflow:(BOOL)overflow {
+  id layer = OCMClassMock([FlutterMetalLayer class]);
+  TestFlutterMetalPresenter* presenter = [[TestFlutterMetalPresenter alloc] initWithLayer:layer];
+  presenter.presented = [[NSMutableArray alloc] init];
+  presenter.started = dispatch_semaphore_create(0);
+  presenter.resume = dispatch_semaphore_create(0);
+  presenter.completed = [self expectationWithDescription:@"Three presentations"];
+  presenter.completed.expectedFulfillmentCount = 3;
+
+  [presenter enqueueTexture:@1 afterRendering:nil];
+  long started = dispatch_semaphore_wait(presenter.started,
+                                         dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC));
+  XCTAssertEqual(started, 0);
+  [presenter enqueueTexture:@2 afterRendering:nil];
+  [presenter enqueueTexture:@3 afterRendering:nil];
+  if (overflow) {
+    [presenter enqueueTexture:@4 afterRendering:nil];
+    OCMVerify([layer returnTexture:@2]);
+  }
+  dispatch_semaphore_signal(presenter.resume);
+  [self waitForExpectations:@[ presenter.completed ] timeout:5];
+  [presenter discardPendingAndWait];
+  NSArray* expected = overflow ? @[ @1, @3, @4 ] : @[ @1, @2, @3 ];
+  XCTAssertEqualObjects(presenter.presented, expected);
+  [layer stopMocking];
+}
+
+- (void)testAsynchronousPresentationPreservesFIFOOrder {
+  [self checkPresentationOrderWithOverflow:NO];
+}
+
+- (void)testAsynchronousPresentationDropsOldestWaitingFrameWhenFull {
+  [self checkPresentationOrderWithOverflow:YES];
 }
 
 @end
