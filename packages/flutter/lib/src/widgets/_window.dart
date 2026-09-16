@@ -2609,9 +2609,24 @@ class _NestedWindowState extends State<NestedWindow> {
       }
     };
     widget.controller._setShowing(true);
+    entry.controller.addListener(_onDestroyed);
     setState(() {
       _entry = entry;
       _tracker = tracker;
+    });
+  }
+
+  void _onDestroyed() {
+    if (_entry == null || !_entry!.controller.isDestroyed) {
+      return;
+    }
+
+    _tracker?.dispose();
+    widget.controller._setShowing(false);
+    _entry?.controller.removeListener(_onDestroyed);
+    setState(() {
+      _entry = null;
+      _tracker = null;
     });
   }
 
@@ -2621,12 +2636,6 @@ class _NestedWindowState extends State<NestedWindow> {
     }
 
     _entry!.controller.destroy();
-    _tracker?.dispose();
-    widget.controller._setShowing(false);
-    setState(() {
-      _entry = null;
-      _tracker = null;
-    });
   }
 
   void _toggle() {
