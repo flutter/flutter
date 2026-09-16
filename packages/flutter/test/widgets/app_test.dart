@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'semantics_tester.dart';
 import 'test_page_tester.dart';
 
 class TestIntent extends Intent {
@@ -585,7 +585,7 @@ void main() {
   testWidgets('WidgetsApp.router produces expected semantics tree structure', (
     WidgetTester tester,
   ) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsHandle handle = tester.ensureSemantics();
     final delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return const Text('route content', textDirection: TextDirection.ltr);
@@ -603,31 +603,18 @@ void main() {
       ),
     );
 
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    final SemanticsNode focusScopeNode = tester.semantics.find(focusScopeFinder);
+    final SemanticsNode routeContentNode = tester.semantics.find(find.text('route content'));
+    final SemanticsNode routeScopeNode = routeContentNode.parent!;
+
     // FocusScope's explicitChildNodes prevents WidgetsApp's Directionality from
     // merging with the route's semantics node, ensuring the route remains an
     // explicit child node even when it is the sole entry in the Navigator.
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  children: <TestSemantics>[
-                    TestSemantics(label: 'route content', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        ignoreId: true,
-        ignoreRect: true,
-        ignoreTransform: true,
-      ),
-    );
+    expect(routeScopeNode, isNot(same(focusScopeNode)));
+    expect(routeScopeNode.parent, same(focusScopeNode));
 
     // Inserting an overlay entry (such as Autocomplete options or a dialog) does
     // not reparent the route's semantics node.
@@ -639,37 +626,16 @@ void main() {
     delegate.navigatorKey.currentState!.overlay!.insert(entry);
     await tester.pump();
 
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  children: <TestSemantics>[
-                    TestSemantics(label: 'route content', textDirection: TextDirection.ltr),
-                  ],
-                ),
-                TestSemantics(label: 'overlay content', textDirection: TextDirection.ltr),
-              ],
-            ),
-          ],
-        ),
-        ignoreId: true,
-        ignoreRect: true,
-        ignoreTransform: true,
-      ),
-    );
-
-    semantics.dispose();
+    expect(tester.semantics.find(find.text('route content')).parent, same(routeScopeNode));
+    expect(routeScopeNode.parent, same(focusScopeNode));
+    expect(tester.semantics.find(find.text('overlay content')).parent, same(focusScopeNode));
+    handle.dispose();
   });
 
   testWidgets('WidgetsApp.router with routerConfig produces expected semantics tree structure', (
     WidgetTester tester,
   ) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsHandle handle = tester.ensureSemantics();
     final delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return const Text('route content', textDirection: TextDirection.ltr);
@@ -685,36 +651,22 @@ void main() {
       WidgetsApp.router(routerConfig: routerConfig, color: const Color(0xFF123456)),
     );
 
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  children: <TestSemantics>[
-                    TestSemantics(label: 'route content', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        ignoreId: true,
-        ignoreRect: true,
-        ignoreTransform: true,
-      ),
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
     );
+    final SemanticsNode focusScopeNode = tester.semantics.find(focusScopeFinder);
+    final SemanticsNode routeContentNode = tester.semantics.find(find.text('route content'));
+    final SemanticsNode routeScopeNode = routeContentNode.parent!;
 
-    semantics.dispose();
+    expect(routeScopeNode, isNot(same(focusScopeNode)));
+    expect(routeScopeNode.parent, same(focusScopeNode));
+    handle.dispose();
   });
 
   testWidgets('WidgetsApp with navigator produces expected semantics tree structure', (
     WidgetTester tester,
   ) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       WidgetsApp(
         color: const Color(0xFF123456),
@@ -729,30 +681,16 @@ void main() {
       ),
     );
 
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  children: <TestSemantics>[
-                    TestSemantics(label: 'route content', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        ignoreId: true,
-        ignoreRect: true,
-        ignoreTransform: true,
-      ),
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
     );
+    final SemanticsNode focusScopeNode = tester.semantics.find(focusScopeFinder);
+    final SemanticsNode routeContentNode = tester.semantics.find(find.text('route content'));
+    final SemanticsNode routeScopeNode = routeContentNode.parent!;
 
-    semantics.dispose();
+    expect(routeScopeNode, isNot(same(focusScopeNode)));
+    expect(routeScopeNode.parent, same(focusScopeNode));
+    handle.dispose();
   });
 
   testWidgets('WidgetsApp has correct default ScrollBehavior', (WidgetTester tester) async {
