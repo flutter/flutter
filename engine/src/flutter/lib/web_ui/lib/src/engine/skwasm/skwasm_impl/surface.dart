@@ -155,6 +155,9 @@ class SkwasmSurface implements OffscreenSurface, OnscreenSurface {
 
   void _maybeAttachCanvasToDom() {
     if (_isOnscreen) {
+      while (_hostElement.firstChild != null) {
+        _hostElement.removeChild(_hostElement.firstChild!);
+      }
       _hostElement.appendChild(_canvas as DomHTMLCanvasElement);
       _applyOverlayPositioning();
     }
@@ -314,7 +317,7 @@ class SkwasmSurface implements OffscreenSurface, OnscreenSurface {
         // CSS/layout updates. Backing-store sizing is handled by surfaceSetSize.
         (_canvasProvider as OnscreenCanvasProvider).resizeCanvasCss(canvas, size);
       } else {
-        _canvasProvider.resizeCanvas(_canvas, size);
+        (_canvasProvider as OnscreenCanvasProvider).resizeCanvas(canvas, size);
       }
     }
     final int callbackId = surfaceSetSize(handle, size.width, size.height);

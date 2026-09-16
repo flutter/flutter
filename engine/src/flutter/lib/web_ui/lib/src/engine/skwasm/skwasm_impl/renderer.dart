@@ -315,7 +315,7 @@ class SkwasmRenderer extends Renderer {
   }) => createSkwasmImageFromPixels(pixels, width, height, format, rowBytes: rowBytes);
 
   @override
-  FutureOr<void> initialize() async {
+  FutureOr<void> initialize() {
     rasterizer = _createRasterizer(isMultiThreaded: isMultiThreaded);
     return super.initialize();
   }
