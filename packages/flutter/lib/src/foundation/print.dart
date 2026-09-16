@@ -7,6 +7,7 @@
 // ignore_for_file: avoid_print
 
 /// @docImport 'package:flutter/widgets.dart';
+///
 /// @docImport 'error_dumper.dart';
 library;
 
