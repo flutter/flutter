@@ -54,7 +54,7 @@ class MainWindow extends StatelessWidget {
       builder: (BuildContext context, Widget? child) {
         return Center(
           child: GestureDetector(
-            onTap: () => mountToplevelWindow(
+            onTap: () => showToplevelWindow(
               context: context,
               entry: WindowEntry(
                 controller: DialogWindowController(

@@ -78,7 +78,7 @@ class _MyAppState extends State<MyApp> {
         },
       ),
     );
-    mountToplevelWindow(
+    showToplevelWindow(
       context: context,
       entry: WindowEntry(
         controller: controller,

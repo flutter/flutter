@@ -40,7 +40,7 @@ class DialogWindowContent extends StatelessWidget {
                             size: windowSettings.dialogSize,
                             parent: dialogWindowController,
                           );
-                          mountToplevelWindow(
+                          showToplevelWindow(
                             context: context,
                             entry: WindowEntry(
                               controller: controller,

@@ -112,7 +112,7 @@ class _WindowCreationButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () {
             final controller = WindowController(title: 'Regular', size: windowSettings.regularSize);
-            mountToplevelWindow(
+            showToplevelWindow(
               context: context,
               entry: WindowEntry(
                 controller: controller,
@@ -131,7 +131,7 @@ class _WindowCreationButtons extends StatelessWidget {
               parent: windowController,
             );
 
-            mountToplevelWindow(
+            showToplevelWindow(
               context: context,
               entry: WindowEntry(
                 controller: controller,

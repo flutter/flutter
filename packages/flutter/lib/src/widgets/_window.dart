@@ -113,7 +113,7 @@ sealed class BaseWindowController extends ChangeNotifier {
 /// See also:
 ///
 ///  * [WindowController], the controller that creates and manages regular windows.
-///  * [mountToplevelWindow], which renders a window managed by this controller.
+///  * [showToplevelWindow], which renders a window managed by this controller.
 @internal
 mixin class WindowControllerDelegate {
   /// Invoked when the user attempts to close the window.
@@ -160,7 +160,7 @@ mixin class WindowControllerDelegate {
 /// This class does not interact with the widget tree. To render content in the
 /// window, provide this controller and a content builder in a [WindowEntry].
 /// Pass the entry to [WindowManager.initialWindows] when starting the application,
-/// to [mountToplevelWindow] to open an additional top-level window, or return it
+/// to [showToplevelWindow] to open an additional top-level window, or return it
 /// from [NestedWindow.entryBuilder] to render a nested window.
 /// {@endtemplate}
 ///
@@ -200,7 +200,7 @@ mixin class WindowControllerDelegate {
 /// {@end-tool}
 ///
 /// {@template flutter.widgets.windowing.controllerScope}
-/// When mounted with [mountToplevelWindow] or [NestedWindow], descendants of the
+/// When mounted with [showToplevelWindow] or [NestedWindow], descendants of the
 /// window's content can access this controller via [WindowScope.of]. This also
 /// applies to windows provided in [WindowManager.initialWindows].
 /// {@endtemplate}
@@ -457,7 +457,7 @@ abstract class WindowController extends BaseWindowController {
 /// See also:
 ///
 ///  * [DialogWindowController], the controller that creates and manages dialog windows.
-///  * [mountToplevelWindow], which renders a dialog in a separate widget subtree.
+///  * [showToplevelWindow], which renders a dialog in a separate widget subtree.
 ///  * [NestedWindow], which renders a dialog in the surrounding widget subtree.
 ///  * [WindowControllerDelegate], the delegate for regular window controllers.
 @internal
@@ -551,7 +551,7 @@ mixin class DialogWindowControllerDelegate {
 ///               parent: WindowScope.of(context),
 ///               title: 'Example Dialog',
 ///             );
-///             mountToplevelWindow(
+///             showToplevelWindow(
 ///               context: context,
 ///               entry: WindowEntry(
 ///                 controller: controller,
@@ -1093,7 +1093,7 @@ abstract class PopupWindowController extends BaseWindowController {
 /// See also:
 ///
 ///  * [SatelliteWindowController], the controller that creates and manages a satellite window.
-///  * [mountToplevelWindow], which renders a satellite in a separate widget subtree.
+///  * [showToplevelWindow], which renders a satellite in a separate widget subtree.
 @internal
 mixin class SatelliteWindowControllerDelegate {
   /// Invoked when the user attempts to close the window.
@@ -1564,7 +1564,7 @@ enum _WindowControllerAspect {
 ///
 ///  * [WindowManager], which provides a scope for each top-level window.
 ///  * [NestedWindow], which provides a scope for a nested window.
-///  * [mountToplevelWindow], which adds a window to the nearest manager.
+///  * [showToplevelWindow], which adds a window to the nearest manager.
 @internal
 class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// Creates a new [WindowScope].
@@ -2037,7 +2037,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
 /// The [WindowManager] provides a [WindowRegistry] to its descendants.
 ///
 /// Descendants of the manager can use [WindowRegistry.maybeOf] to access the
-/// registry and inspect [windows]. To add a window, use [mountToplevelWindow].
+/// registry and inspect [windows]. To add a window, use [showToplevelWindow].
 /// When a registered window's controller reports that it has been destroyed,
 /// the manager removes its entry from the registry.
 ///
@@ -2155,7 +2155,7 @@ class _WindowRegistryScope extends InheritedWidget {
 /// Pairs a native window controller with a builder for its widget content.
 ///
 /// Creating an entry does not mount its content. Pass it to
-/// [WindowManager.initialWindows] or [mountToplevelWindow] to render it in a
+/// [WindowManager.initialWindows] or [showToplevelWindow] to render it in a
 /// separate subtree, or return it from [NestedWindow.entryBuilder] to render it
 /// in the surrounding subtree.
 ///
@@ -2163,7 +2163,7 @@ class _WindowRegistryScope extends InheritedWidget {
 ///
 /// See also:
 ///
-///  * [mountToplevelWindow], which adds an entry to the nearest window manager.
+///  * [showToplevelWindow], which adds an entry to the nearest window manager.
 ///  * [NestedWindow], which renders an entry without registering it with a manager.
 @internal
 class WindowEntry {
@@ -2211,7 +2211,7 @@ class WindowEntry {
 /// the binding with [WidgetsFlutterBinding.ensureInitialized] before creating
 /// the windows' controllers.
 ///
-/// Descendants may use [mountToplevelWindow] to add windows. Each entry is
+/// Descendants may use [showToplevelWindow] to add windows. Each entry is
 /// rendered in its own [View] and [WindowScope], as a sibling of the other
 /// entries. The manager provides a [WindowRegistry] for inspecting these entries
 /// and removes an entry when its controller reports that the window is destroyed.
@@ -2221,7 +2221,7 @@ class WindowEntry {
 /// without windowing support.
 ///
 /// {@tool sample}
-/// This example starts with one window and uses [mountToplevelWindow] to add a
+/// This example starts with one window and uses [showToplevelWindow] to add a
 /// dialog as a sibling subtree.
 ///
 /// ** See code in examples/api/lib/widgets/windows/window_manager.0.dart **
@@ -2231,7 +2231,7 @@ class WindowEntry {
 ///
 /// See also:
 ///
-///  * [mountToplevelWindow], a global function to render a window into the tree.
+///  * [showToplevelWindow], a global function to render a window into the tree.
 @internal
 class WindowManager extends StatefulWidget {
   /// Creates a window manager.
@@ -2246,7 +2246,7 @@ class WindowManager extends StatefulWidget {
   ///
   /// This list is read only when the state is initialized. Updating it during a
   /// rebuild does not add or remove windows. To open another window, use
-  /// [mountToplevelWindow]; to close one, call [BaseWindowController.destroy].
+  /// [showToplevelWindow]; to close one, call [BaseWindowController.destroy].
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   final List<WindowEntry> initialWindows;
@@ -2371,7 +2371,7 @@ class _WindowEntryRenderState extends State<_WindowEntryRender> {
 ///  * [WindowManager.initialWindows], which supplies windows at startup.
 ///  * [NestedWindow], which renders a window in the surrounding widget subtree.
 @internal
-void mountToplevelWindow({required BuildContext context, required WindowEntry entry}) {
+void showToplevelWindow({required BuildContext context, required WindowEntry entry}) {
   if (!isWindowingEnabled) {
     throw UnsupportedError(_kWindowingDisabledErrorMessage);
   }
@@ -2379,7 +2379,7 @@ void mountToplevelWindow({required BuildContext context, required WindowEntry en
   final WindowRegistry? windowRegistry = WindowRegistry.maybeOf(context);
   if (windowRegistry == null) {
     throw StateError(
-      'To use `mountToplevelWindow`, a `WindowManager` widget must be rendered in your hierarchy and accessible in via the context.',
+      'To use `showToplevelWindow`, a `WindowManager` widget must be rendered in your hierarchy and accessible in via the context.',
     );
   }
 
@@ -2465,7 +2465,7 @@ class NestedWindowController extends ChangeNotifier {
 /// ancestors of this widget, but not from [child] or its descendants.
 /// This widget must have a [View] ancestor for [child] to render into.
 ///
-/// Unlike [mountToplevelWindow], this widget does not require a [WindowManager]
+/// Unlike [showToplevelWindow], this widget does not require a [WindowManager]
 /// or add an entry to a [WindowRegistry]. It is useful for popups, tooltips, and
 /// other windows that need access to the surrounding inherited widgets.
 ///
@@ -2534,7 +2534,7 @@ class NestedWindowController extends ChangeNotifier {
 ///
 /// See also:
 ///
-///  * [mountToplevelWindow], which renders content in a separate subtree under a
+///  * [showToplevelWindow], which renders content in a separate subtree under a
 ///    window manager.
 ///  * [ViewAnchor], which attaches a view alongside a widget in another view.
 @internal
