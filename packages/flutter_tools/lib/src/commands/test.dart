@@ -77,20 +77,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     this.verbose = false,
     this.nativeAssetsBuilder,
   }) : _toolContext = toolContext,
-       testRunner =
-           testRunner ??
-           FlutterTestRunner(
-             artifacts: toolContext.artifacts,
-             config: toolContext.config,
-             fileSystem: toolContext.fs,
-             logger: toolContext.logger,
-             os: toolContext.os,
-             platform: toolContext.platform,
-             processManager: toolContext.processManager,
-             shutdownHooks: toolContext.shutdownHooks,
-             stdio: toolContext.stdio,
-             terminal: toolContext.terminal,
-           ),
+       _testRunner = testRunner ?? FlutterTestRunner(toolContext: toolContext),
        super(toolContext: toolContext) {
     requiresPubspecYaml();
     usesPubOption();
@@ -349,7 +336,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   final TestWrapper testWrapper;
 
   /// Interface for running the tester process.
-  final FlutterTestRunner testRunner;
+  final FlutterTestRunner _testRunner;
 
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
 
@@ -718,7 +705,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final int result;
     if (experimentalFasterTesting) {
       assert(!isWeb && !_isIntegrationTest && _testFileUris.length > 1);
-      result = await testRunner.runTestsBySpawningLightweightEngines(
+      result = await _testRunner.runTestsBySpawningLightweightEngines(
         _testFileUris.toList(),
         debuggingOptions: debuggingOptions,
         names: names,
@@ -744,7 +731,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         nativeAssetsBuilder: nativeAssetsBuilder,
       );
     } else {
-      result = await testRunner.runTests(
+      result = await _testRunner.runTests(
         testWrapper,
         _testFileUris.toList(),
         debuggingOptions: debuggingOptions,

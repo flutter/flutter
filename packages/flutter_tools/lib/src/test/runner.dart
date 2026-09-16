@@ -18,6 +18,7 @@ import '../base/terminal.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../compile.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../native_assets.dart';
@@ -35,29 +36,9 @@ import 'web_test_compiler.dart';
 
 /// Launching the `flutter_tester` process from the test runner.
 interface class FlutterTestRunner {
-  const FlutterTestRunner({
-    required this.artifacts,
-    required this.config,
-    required this.fileSystem,
-    required this.logger,
-    required this.os,
-    required this.platform,
-    required this.processManager,
-    required this.shutdownHooks,
-    required this.stdio,
-    required this.terminal,
-  });
+  const FlutterTestRunner({required this._toolContext});
 
-  final Artifacts artifacts;
-  final Config config;
-  final FileSystem fileSystem;
-  final Logger logger;
-  final OperatingSystemUtils os;
-  final Platform platform;
-  final ProcessManager processManager;
-  final ShutdownHooks shutdownHooks;
-  final Stdio stdio;
-  final AnsiTerminal terminal;
+  final ToolContext _toolContext;
 
   /// Runs tests using package:test and the Flutter engine.
   Future<int> runTests(
@@ -96,6 +77,18 @@ interface class FlutterTestRunner {
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
     required BuildInfo buildInfo,
   }) async {
+    final ToolContext(
+      :Artifacts artifacts,
+      :Config config,
+      :FileSystem fs,
+      :Logger logger,
+      :OperatingSystemUtils os,
+      :Platform platform,
+      :ProcessManager processManager,
+      :ShutdownHooks shutdownHooks,
+      :AnsiTerminal terminal,
+    ) = _toolContext;
+
     // Configure package:test to use the Flutter engine for child processes.
     final String flutterTesterBinPath = artifacts.getArtifactPath(Artifact.flutterTester);
 
@@ -125,7 +118,7 @@ interface class FlutterTestRunner {
       // Unsupported for general Flutter developers.
       // This is only used by the Flutter Framework tests.
       // See: https://github.com/flutter/flutter/pull/65984.
-      final String tempBuildDir = fileSystem.systemTempDirectory
+      final String tempBuildDir = fs.systemTempDirectory
           .createTempSync('flutter_test.')
           .absolute
           .uri
@@ -133,7 +126,7 @@ interface class FlutterTestRunner {
       final WebMemoryFS result =
           await WebTestCompiler(
             logger: logger,
-            fileSystem: fileSystem,
+            fileSystem: fs,
             platform: platform,
             artifacts: artifacts,
             processManager: processManager,
@@ -161,12 +154,12 @@ interface class FlutterTestRunner {
           buildInfo: debuggingOptions.buildInfo,
           webMemoryFS: result,
           logger: logger,
-          fileSystem: fileSystem,
-          buildDirectory: fileSystem.directory(tempBuildDir),
+          fileSystem: fs,
+          buildDirectory: fs.directory(tempBuildDir),
           artifacts: artifacts,
           processManager: processManager,
           chromiumLauncher: ChromiumLauncher(
-            fileSystem: fileSystem,
+            fileSystem: fs,
             platform: platform,
             processManager: processManager,
             operatingSystemUtils: os,
@@ -203,7 +196,7 @@ interface class FlutterTestRunner {
       precompiledDillFiles: precompiledDillFiles,
       updateGoldens: updateGoldens,
       testAssetDirectory: testAssetDirectory,
-      projectRootDirectory: fileSystem.currentDirectory.uri,
+      projectRootDirectory: fs.currentDirectory.uri,
       flutterProject: flutterProject,
       icudtlPath: icudtlPath,
       integrationTestDevice: integrationTestDevice,
@@ -211,7 +204,7 @@ interface class FlutterTestRunner {
       testTimeRecorder: testTimeRecorder,
       nativeAssetsBuilder: nativeAssetsBuilder,
       buildInfo: buildInfo,
-      fileSystem: fileSystem,
+      fileSystem: fs,
       logger: logger,
       processManager: processManager,
       platform: platform,
@@ -656,10 +649,22 @@ class SpawnPlugin extends PlatformPlugin {
     TestTimeRecorder? testTimeRecorder,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
+    final ToolContext(
+      :Artifacts artifacts,
+      :Config config,
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+      :ShutdownHooks shutdownHooks,
+      :Stdio stdio,
+      :AnsiTerminal terminal,
+    ) = _toolContext;
+
     assert(testFiles.length > 1);
 
-    final Directory buildDirectory = fileSystem.directory(
-      fileSystem.path.join(flutterProject!.directory.path, getBuildDirectory()),
+    final Directory buildDirectory = fs.directory(
+      fs.path.join(flutterProject!.directory.path, getBuildDirectory()),
     );
     final Directory isolateSpawningTesterDirectory = buildDirectory.childDirectory(
       'isolate_spawning_tester',
@@ -673,7 +678,7 @@ class SpawnPlugin extends PlatformPlugin {
     await _generateIsolateSpawningTesterPackageConfig(
       flutterProject: flutterProject,
       isolateSpawningTesterPackageConfigFile: isolateSpawningTesterPackageConfigFile,
-      fileSystem: fileSystem,
+      fileSystem: fs,
     );
     final PackageConfig isolateSpawningTesterPackageConfig = PackageConfig.parseBytes(
       isolateSpawningTesterPackageConfigFile.readAsBytesSync(),
@@ -719,7 +724,7 @@ class SpawnPlugin extends PlatformPlugin {
       packageTestArgs: packageTestArgs,
       autoUpdateGoldenFiles: updateGoldens,
       childTestIsolateSpawnerSourceFile: childTestIsolateSpawnerSourceFile,
-      fileSystem: fileSystem,
+      fileSystem: fs,
       platform: platform,
       logger: logger,
     );
@@ -739,7 +744,7 @@ class SpawnPlugin extends PlatformPlugin {
       artifacts: artifacts,
       buildInfo: buildInfo,
       config: config,
-      fileSystem: fileSystem,
+      fileSystem: fs,
       logger: logger,
       outputDillFile: childTestIsolateSpawnerDillFile,
       platform: platform,
@@ -753,7 +758,7 @@ class SpawnPlugin extends PlatformPlugin {
       artifacts: artifacts,
       buildInfo: buildInfo,
       config: config,
-      fileSystem: fileSystem,
+      fileSystem: fs,
       logger: logger,
       outputDillFile: rootTestIsolateSpawnerDillFile,
       platform: platform,

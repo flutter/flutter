@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -163,18 +164,14 @@ Future<void> run(List<String> args) async {
         globals.fs.path.absolute(argResults[_kOptionPackages] as String),
       ),
     );
-    final testRunner = FlutterTestRunner(
-      artifacts: globals.artifacts!,
-      config: globals.config,
-      fileSystem: globals.fs,
+    final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+      artifacts: globals.artifacts,
+      fs: globals.fs,
       logger: globals.logger,
-      os: globals.os,
       platform: globals.platform,
       processManager: globals.processManager,
-      shutdownHooks: globals.shutdownHooks,
-      stdio: globals.stdio,
-      terminal: globals.terminal,
     );
+    final testRunner = FlutterTestRunner(toolContext: dependencies.toolContext);
     exitCode = await testRunner.runTests(
       const TestWrapper(),
       tests.keys.map(Uri.file).toList(),
