@@ -870,6 +870,10 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   return [self.activeTextInputPlugin handleKeyEvent:event];
 }
 
+- (BOOL)isComposing {
+  return self.activeTextInputPlugin.hasMarkedText;
+}
+
 #pragma mark - NSResponder
 
 - (BOOL)acceptsFirstResponder {
