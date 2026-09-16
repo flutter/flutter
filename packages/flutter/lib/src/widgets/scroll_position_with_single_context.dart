@@ -107,7 +107,19 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @override
   void applyNewDimensions() {
     super.applyNewDimensions();
-    context.setCanDrag(physics.shouldAcceptUserOffset(this));
+    _updateCanDrag();
+  }
+
+  // Whether the user was last told that this position can be dragged.
+  bool? _lastCanDrag;
+
+  void _updateCanDrag({bool onlyIfChanged = false}) {
+    final bool canDrag = physics.shouldAcceptUserOffset(this);
+    if (onlyIfChanged && canDrag == _lastCanDrag) {
+      return;
+    }
+    _lastCanDrag = canDrag;
+    context.setCanDrag(canDrag);
   }
 
   @override
@@ -134,6 +146,14 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @override
   void goIdle() {
     beginActivity(IdleScrollActivity(this));
+    // The scroll extents or the viewport dimensions may have changed while the
+    // previous activity was moving the position out of range. In that case the
+    // decision made by the last call to applyNewDimensions was based on a
+    // scroll offset that has since settled back within the scroll extents, so
+    // whether the user can drag the scroll view has to be re-evaluated.
+    if (hasPixels && haveDimensions) {
+      _updateCanDrag(onlyIfChanged: true);
+    }
   }
 
   /// Start a physics-driven simulation that settles the [pixels] position,
