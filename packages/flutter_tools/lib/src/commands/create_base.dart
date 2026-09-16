@@ -429,6 +429,7 @@ mixin CreateBase on FlutterCommand {
       'darwin': darwin,
       'sharedDarwinSource': darwin,
       'windows': windows,
+      'iosOrMacOS': ios || macos,
       'year': DateTime.now().year,
       'dartSdkVersionBounds': dartSdkVersionBounds,
       'implementationTests': implementationTests,
