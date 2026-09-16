@@ -87,11 +87,11 @@ Future<void> runAndroidEngineHcppTests() async {
     ];
 
     for (final testName in runFirstTests) {
-      await _runTest(
-        mains.firstWhere((FileSystemEntity file) => file.path.contains(testName)),
-        impellerBackend: impellerBackend,
-        useHCPPFlag: true,
+      final FileSystemEntity testFile = mains.firstWhere(
+        (FileSystemEntity file) => file.path.contains(testName),
+        orElse: () => throw StateError('Could not find test file matching "$testName"'),
       );
+      await _runTest(testFile, impellerBackend: impellerBackend, useHCPPFlag: true);
     }
 
     androidManifestXml.writeAsStringSync(
@@ -103,8 +103,12 @@ Future<void> runAndroidEngineHcppTests() async {
 
     // Verify that --no-enable-hcpp disables HCPP even when the manifest enables it.
     for (final testName in runFirstTests) {
+      final FileSystemEntity testFile = mains.firstWhere(
+        (FileSystemEntity file) => file.path.contains(testName),
+        orElse: () => throw StateError('Could not find test file matching "$testName"'),
+      );
       await _runTest(
-        mains.firstWhere((FileSystemEntity file) => file.path.contains(testName)),
+        testFile,
         impellerBackend: impellerBackend,
         useHCPPFlag: false,
         additionalEnvironment: const <String, String>{'EXPECT_HCPP': 'false'},
