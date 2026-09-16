@@ -18,6 +18,7 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../compile.dart';
+import '../context/tool_context.dart';
 import '../dart/language_version.dart';
 import '../flutter_plugins.dart';
 import '../project.dart';
@@ -112,25 +113,19 @@ class TestCompiler {
   TestCompiler(
     BuildInfo buildInfo,
     this.flutterProject, {
-    required this.artifacts,
-    required this.config,
-    required this.fileSystem,
-    required this.logger,
-    required this.platform,
-    required this.processManager,
-    required this.shutdownHooks,
+    required this._toolContext,
     String? precompiledDillPath,
     this.residentCompilerFactory = const ResidentCompilerFactory(),
     this.testTimeRecorder,
   }) : testFilePath =
            precompiledDillPath ??
-           fileSystem.path.join(
+           _toolContext.fs.path.join(
              flutterProject!.directory.path,
              getBuildDirectory(),
              'test_cache',
              getDefaultCachedKernelPath(
-               config: config,
-               fileSystem: fileSystem,
+               config: _toolContext.config,
+               fileSystem: _toolContext.fs,
                trackWidgetCreation: buildInfo.trackWidgetCreation,
                dartDefines: buildInfo.dartDefines,
                targetModel: TargetModel.flutter,
@@ -142,18 +137,18 @@ class TestCompiler {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
-    final Directory outputDillDirectory = fileSystem.systemTempDirectory.createTempSync(
+    final Directory outputDillDirectory = _toolContext.fs.systemTempDirectory.createTempSync(
       'flutter_test_compiler.',
     );
     outputDill = outputDillDirectory.childFile('output.dill');
-    logger.printTrace(
+    _toolContext.logger.printTrace(
       'Compiler will use the following file as its incremental dill file: ${outputDill.path}',
     );
-    logger.printTrace('Listening to compiler controller...');
+    _toolContext.logger.printTrace('Listening to compiler controller...');
     compilerController.stream.listen(
       _onCompilationRequest,
       onDone: () {
-        logger.printTrace('Deleting ${outputDillDirectory.path}...');
+        _toolContext.logger.printTrace('Deleting ${outputDillDirectory.path}...');
         outputDillDirectory.deleteSync(recursive: true);
       },
     );
@@ -168,13 +163,7 @@ class TestCompiler {
   final TestTimeRecorder? testTimeRecorder;
   final ResidentCompilerFactory residentCompilerFactory;
 
-  final Artifacts artifacts;
-  final Config config;
-  final FileSystem fileSystem;
-  final Logger logger;
-  final Platform platform;
-  final ProcessManager processManager;
-  final ShutdownHooks shutdownHooks;
+  final ToolContext _toolContext;
 
   ResidentCompiler? compiler;
   late File outputDill;
@@ -213,6 +202,15 @@ class TestCompiler {
   /// Create the resident compiler used to compile the test.
   @visibleForTesting
   Future<ResidentCompiler?> createCompiler() async {
+    final ToolContext(
+      :Artifacts artifacts,
+      :Config config,
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+      :ShutdownHooks shutdownHooks,
+    ) = _toolContext;
     final ResidentCompiler residentCompiler = residentCompilerFactory.create(
       artifacts: artifacts,
       logger: logger,
@@ -220,7 +218,7 @@ class TestCompiler {
       buildInfo: buildInfo,
       platform: platform,
       testCompilation: true,
-      fileSystem: fileSystem,
+      fileSystem: fs,
       shutdownHooks: shutdownHooks,
       config: config,
       targetPlatform: TargetPlatform.tester,
@@ -240,7 +238,7 @@ class TestCompiler {
     }
     while (compilationQueue.isNotEmpty) {
       final _CompilationRequest request = compilationQueue.first;
-      logger.printTrace('Compiling ${request.mainUri}');
+      _toolContext.logger.printTrace('Compiling ${request.mainUri}');
       final compilerTime = Stopwatch()..start();
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
       var firstCompile = false;
@@ -251,7 +249,7 @@ class TestCompiler {
 
       final invalidatedRegistrantFiles = <Uri>[];
       if (flutterProject != null) {
-        final File mainFile = fileSystem.file(request.mainUri);
+        final File mainFile = _toolContext.fs.file(request.mainUri);
         final LanguageVersion languageVersion = determineLanguageVersion(
           mainFile,
           buildInfo.packageConfig.packageOf(request.mainUri),
@@ -279,7 +277,7 @@ class TestCompiler {
         packageConfig: buildInfo.packageConfig,
         projectRootPath: flutterProject?.directory.absolute.path,
         checkDartPluginRegistry: true,
-        fs: fileSystem,
+        fs: _toolContext.fs,
       );
       final String? outputPath = compilerOutput?.outputFilename;
 
@@ -297,10 +295,10 @@ class TestCompiler {
         await _shutdown();
       } else {
         if (shouldCopyDillFile) {
-          final String path = request.mainUri.toFilePath(windows: platform.isWindows);
-          final File outputFile = fileSystem.file(outputPath);
+          final String path = request.mainUri.toFilePath(windows: _toolContext.platform.isWindows);
+          final File outputFile = _toolContext.fs.file(outputPath);
           final File kernelReadyToRun = await outputFile.copy('$path.dill');
-          final File testCache = fileSystem.file(testFilePath);
+          final File testCache = _toolContext.fs.file(testFilePath);
           if (firstCompile ||
               !testCache.existsSync() ||
               (testCache.lengthSync() < outputFile.lengthSync())) {
@@ -323,7 +321,9 @@ class TestCompiler {
         compiler!.accept();
         compiler!.reset();
       }
-      logger.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
+      _toolContext.logger.printTrace(
+        'Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms',
+      );
       testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
       // Only remove now when we finished processing the element
       compilationQueue.removeAt(0);

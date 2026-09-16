@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
@@ -398,24 +399,28 @@ class FakeTestCompiler extends TestCompiler {
     super.buildInfo,
     super.flutterProject,
     this.residentCompiler, {
-    super.precompiledDillPath,
-    super.testTimeRecorder,
     Artifacts? artifacts,
     Config? config,
     FileSystem? fileSystem,
     Logger? logger,
     Platform? platform,
+    super.precompiledDillPath,
     ProcessManager? processManager,
     ShutdownHooks? shutdownHooks,
+    super.testTimeRecorder,
+    ToolContext? toolContext,
   }) : super(
-         artifacts: artifacts ?? FakeArtifacts(),
-         config: config ?? Config.test(),
-         fileSystem:
-             fileSystem ?? (flutterProject?.directory.fileSystem ?? MemoryFileSystem.test()),
-         logger: logger ?? BufferLogger.test(),
-         platform: platform ?? FakePlatform(),
-         processManager: processManager ?? FakeProcessManager.any(),
-         shutdownHooks: shutdownHooks ?? FakeShutdownHooks(),
+         toolContext:
+             toolContext ??
+             FakeToolContext(
+               artifacts: artifacts ?? FakeArtifacts(),
+               config: config ?? Config.test(),
+               fs: fileSystem ?? (flutterProject?.directory.fileSystem ?? MemoryFileSystem.test()),
+               logger: logger ?? BufferLogger.test(),
+               platform: platform ?? FakePlatform(),
+               processManager: processManager ?? FakeProcessManager.any(),
+               shutdownHooks: shutdownHooks ?? FakeShutdownHooks(),
+             ),
        );
 
   final FakeResidentCompiler? residentCompiler;

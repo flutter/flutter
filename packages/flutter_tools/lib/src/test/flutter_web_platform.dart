@@ -26,6 +26,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart' as globals;
@@ -92,6 +93,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required this.webRenderer,
     required this.useWasm,
     required this.crossOriginIsolation,
+    required this._toolContext,
     TestTimeRecorder? testTimeRecorder,
   }) : _fileSystem = fileSystem {
     final shelf.Cascade cascade = shelf.Cascade()
@@ -121,13 +123,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       compilerFactory: () => TestCompiler(
         buildInfo,
         flutterProject,
-        artifacts: _artifacts!,
-        config: globals.config,
-        fileSystem: _fileSystem,
-        logger: _logger,
-        platform: globals.platform,
-        processManager: processManager,
-        shutdownHooks: globals.shutdownHooks,
+        toolContext: _toolContext,
         testTimeRecorder: testTimeRecorder,
       ),
       flutterTesterBinPath: flutterTesterBinPath,
@@ -150,6 +146,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   final Directory _buildDirectory;
   final File _testDartJs;
   final File _testHostDartJs;
+  final ToolContext _toolContext;
   final ChromiumLauncher _chromiumLauncher;
   final Logger _logger;
   final Artifacts? _artifacts;
@@ -175,24 +172,25 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   static Future<FlutterWebPlatform> start(
     String root, {
-    bool updateGoldens = false,
-    bool pauseAfterLoad = false,
+    required Artifacts? artifacts,
+    required BuildInfo buildInfo,
+    required Directory buildDirectory,
+    required ChromiumLauncher chromiumLauncher,
+    required bool crossOriginIsolation,
+    required FileSystem fileSystem,
     required FlutterProject flutterProject,
     required String flutterTesterBinPath,
-    required BuildInfo buildInfo,
-    required WebMemoryFS webMemoryFS,
-    required FileSystem fileSystem,
-    required Directory buildDirectory,
     required Logger logger,
-    required ChromiumLauncher chromiumLauncher,
-    required Artifacts? artifacts,
     required ProcessManager processManager,
-    required WebRendererMode webRenderer,
+    required ToolContext toolContext,
     required bool useWasm,
-    required bool crossOriginIsolation,
+    required WebMemoryFS webMemoryFS,
+    required WebRendererMode webRenderer,
+    bool pauseAfterLoad = false,
+    Future<shelf.Server> Function() serverFactory = defaultServerFactory,
     TestTimeRecorder? testTimeRecorder,
     Uri? testPackageUri,
-    Future<shelf.Server> Function() serverFactory = defaultServerFactory,
+    bool updateGoldens = false,
   }) async {
     final shelf.Server server = await serverFactory();
     if (testPackageUri == null) {
@@ -229,6 +227,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       artifacts: artifacts,
       logger: logger,
       processManager: processManager,
+      toolContext: toolContext,
       webRenderer: webRenderer,
       useWasm: useWasm,
       crossOriginIsolation: crossOriginIsolation,

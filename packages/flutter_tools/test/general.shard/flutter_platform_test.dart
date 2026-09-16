@@ -28,6 +28,7 @@ import 'package:vm_service/src/vm_service.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 
 void main() {
   late FileSystem fileSystem;
@@ -54,13 +55,15 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, hostVmServicePort: 1234),
           enableVmService: false,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
-          artifacts: Artifacts.test(fileSystem: fileSystem),
-          config: Config.test(),
-          platform: FakePlatform(),
-          shutdownHooks: ShutdownHooks(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: ShutdownHooks(),
+          ),
         );
         flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
 
@@ -85,13 +88,15 @@ void main() {
           precompiledDillPath: 'example.dill',
           enableVmService: false,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
-          artifacts: Artifacts.test(fileSystem: fileSystem),
-          config: Config.test(),
-          platform: FakePlatform(),
-          shutdownHooks: ShutdownHooks(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: ShutdownHooks(),
+          ),
         );
         flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
 
@@ -120,13 +125,15 @@ void main() {
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: logger,
-          artifacts: Artifacts.test(fileSystem: fileSystem),
-          config: Config.test(),
-          platform: FakePlatform(),
-          shutdownHooks: ShutdownHooks(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: ShutdownHooks(),
+          ),
         );
 
         await expectLater(
@@ -164,14 +171,16 @@ void main() {
           flutterProject: _FakeFlutterProject(),
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
-          shutdownHooks: shutdownHooks,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: logger,
-          artifacts: Artifacts.test(fileSystem: fileSystem),
-          config: Config.test(),
-          platform: FakePlatform(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: shutdownHooks,
+          ),
         );
 
         await expectLater(
@@ -195,13 +204,15 @@ void main() {
           flutterTesterBinPath: 'abc',
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
-          artifacts: Artifacts.test(fileSystem: fileSystem),
-          config: Config.test(),
-          platform: FakePlatform(),
-          shutdownHooks: ShutdownHooks(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: ShutdownHooks(),
+          ),
         ),
         throwsAssertionError,
       );
@@ -215,13 +226,15 @@ void main() {
             hostVmServicePort: 123,
           ),
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
-          artifacts: Artifacts.test(fileSystem: fileSystem),
-          config: Config.test(),
-          platform: FakePlatform(),
-          shutdownHooks: ShutdownHooks(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: ShutdownHooks(),
+          ),
         ),
         throwsAssertionError,
       );
@@ -248,13 +261,15 @@ void main() {
           capturedPlatform = platform;
         },
         buildInfo: BuildInfo.debug,
-        fileSystem: fileSystem,
-        processManager: FakeProcessManager.empty(),
-        logger: BufferLogger.test(),
-        artifacts: Artifacts.test(fileSystem: fileSystem),
-        config: Config.test(),
-        platform: FakePlatform(),
-        shutdownHooks: ShutdownHooks(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          artifacts: Artifacts.test(fileSystem: fileSystem),
+          config: Config.test(),
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.empty(),
+          shutdownHooks: ShutdownHooks(),
+        ),
       );
 
       expect(identical(capturedPlatform, flutterPlatform), equals(true));
@@ -426,13 +441,15 @@ void main() {
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: processManager,
-          logger: BufferLogger.test(),
-          artifacts: artifacts,
-          config: Config.test(),
-          platform: FakePlatform(),
-          shutdownHooks: ShutdownHooks(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: artifacts,
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: processManager,
+            shutdownHooks: ShutdownHooks(),
+          ),
         );
         flutterPlatform.compiler = testCompiler;
 
@@ -493,13 +510,15 @@ void main() {
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: processManager,
-          logger: BufferLogger.test(),
-          artifacts: artifacts,
-          config: Config.test(),
-          platform: FakePlatform(),
-          shutdownHooks: ShutdownHooks(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: artifacts,
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: processManager,
+            shutdownHooks: ShutdownHooks(),
+          ),
         );
         flutterPlatform.compiler = testCompiler;
 
