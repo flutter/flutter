@@ -14,14 +14,19 @@ import 'package:flutter/src/widgets/_window_positioner.dart';
 
 void main() {
   try {
+    WidgetsFlutterBinding.ensureInitialized();
     runWidget(
-      Window(
-        controller: WindowController(
-          size: const Size(800, 600),
-          constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-          title: 'Example Window',
-        ),
-        child: const MaterialApp(home: MyApp()),
+      WindowManager(
+        initialWindows: <WindowEntry>[
+          WindowEntry(
+            controller: WindowController(
+              size: const Size(800, 600),
+              constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+              title: 'Example Window',
+            ),
+            builder: (BuildContext context) => const MaterialApp(home: MyApp()),
+          ),
+        ],
       ),
     );
   } on UnsupportedError catch (e) {
@@ -59,67 +64,66 @@ class _MyAppState extends State<MyApp> {
   final GlobalKey _key = GlobalKey();
   PopupWindowController? _popupController;
 
-  @override
-  Widget build(BuildContext context) {
-    final List<Widget> children = <Widget>[
-      ElevatedButton(
-        key: _key,
-        onPressed: () {
-          setState(() {
-            _popupController ??= PopupWindowController(
-              parent: WindowScope.of(context),
-              anchorRect: _getAnchorRect()!,
-              positioner: const WindowPositioner(
-                parentAnchor: .right,
-                childAnchor: .left,
-              ),
-              delegate: _CallbackPopupDelegate(
-                onDestroyCallback: () {
-                  setState(() {
-                    _popupController = null;
-                  });
-                },
-              ),
-            );
-          });
-        },
-        child: const Text('Show Popup'),
+  void _showPopup() {
+    final PopupWindowController controller = PopupWindowController(
+      parent: WindowScope.of(context),
+      anchorRect: _getAnchorRect()!,
+      positioner: const WindowPositioner(
+        parentAnchor: .right,
+        childAnchor: .left,
       ),
-    ];
-
-    if (_popupController != null) {
-      children.add(
-        PopupWindow(
-          controller: _popupController!,
-          child: Container(
-            padding: const .all(8),
+      delegate: _CallbackPopupDelegate(
+        onDestroyCallback: () {
+          if (mounted) {
+            setState(() {
+              _popupController = null;
+            });
+          }
+        },
+      ),
+    );
+    mountToplevelWindow(
+      context: context,
+      entry: WindowEntry(
+        controller: controller,
+        builder: (BuildContext context) => MaterialApp(
+          builder: (BuildContext context, Widget? child) => Material(
             color: Colors.black,
-            child: Column(
-              mainAxisSize: .min,
-              children: <Widget>[
-                const Text(
-                  'This is a popup',
-                  style: TextStyle(color: Colors.white),
-                ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _popupController?.destroy();
-                    });
-                  },
-                  child: const Text('Close'),
-                ),
-              ],
+            child: Padding(
+              padding: const .all(8),
+              child: Column(
+                mainAxisSize: .min,
+                children: <Widget>[
+                  const Text(
+                    'This is a popup',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: controller.destroy,
+                    child: const Text('Close'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      );
-    }
+      ),
+    );
+    setState(() {
+      _popupController = controller;
+    });
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Row(mainAxisSize: .min, children: children),
+        child: ElevatedButton(
+          key: _key,
+          onPressed: _popupController == null ? _showPopup : null,
+          child: const Text('Show Popup'),
+        ),
       ),
     );
   }

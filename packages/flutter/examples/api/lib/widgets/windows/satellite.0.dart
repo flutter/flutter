@@ -14,13 +14,17 @@ void main() {
   try {
     WidgetsFlutterBinding.ensureInitialized();
     runWidget(
-      Window(
-        controller: WindowController(
-          size: const Size(800, 600),
-          constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-          title: 'Example Window',
-        ),
-        child: const MaterialApp(home: MyApp()),
+      WindowManager(
+        initialWindows: <WindowEntry>[
+          WindowEntry(
+            controller: WindowController(
+              size: const Size(800, 600),
+              constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+              title: 'Example Window',
+            ),
+            builder: (BuildContext context) => const MaterialApp(home: MyApp()),
+          ),
+        ],
       ),
     );
   } on UnsupportedError catch (_) {
@@ -55,67 +59,66 @@ class _CallbackSatelliteDelegate extends SatelliteWindowControllerDelegate {
 class _MyAppState extends State<MyApp> {
   SatelliteWindowController? _satelliteController;
 
-  @override
-  Widget build(BuildContext context) {
-    final List<Widget> children = <Widget>[
-      ElevatedButton(
-        onPressed: () {
-          setState(() {
-            _satelliteController ??= SatelliteWindowController(
-              parent: WindowScope.of(context),
-              initialPositioner: const WindowPositioner(
-                parentAnchor: WindowPositionerAnchor.right,
-                childAnchor: WindowPositionerAnchor.left,
-              ),
-              size: const Size(300, 200),
-              title: 'Satellite Window',
-              delegate: _CallbackSatelliteDelegate(
-                onDestroyCallback: () {
-                  setState(() {
-                    _satelliteController = null;
-                  });
-                },
-              ),
-            );
-          });
-        },
-        child: const Text('Show Satellite'),
+  void _showSatellite() {
+    final SatelliteWindowController controller = SatelliteWindowController(
+      parent: WindowScope.of(context),
+      initialPositioner: const WindowPositioner(
+        parentAnchor: WindowPositionerAnchor.right,
+        childAnchor: WindowPositionerAnchor.left,
       ),
-    ];
-
-    if (_satelliteController != null) {
-      children.add(
-        SatelliteWindow(
-          controller: _satelliteController!,
-          child: Container(
-            padding: const EdgeInsets.all(8),
+      size: const Size(300, 200),
+      title: 'Satellite Window',
+      delegate: _CallbackSatelliteDelegate(
+        onDestroyCallback: () {
+          if (mounted) {
+            setState(() {
+              _satelliteController = null;
+            });
+          }
+        },
+      ),
+    );
+    mountToplevelWindow(
+      context: context,
+      entry: WindowEntry(
+        controller: controller,
+        builder: (BuildContext context) => MaterialApp(
+          home: Material(
             color: Colors.black,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                const Text(
-                  'This is a satellite window',
-                  style: TextStyle(color: Colors.white),
-                ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _satelliteController?.destroy();
-                    });
-                  },
-                  child: const Text('Close'),
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  const Text(
+                    'This is a satellite window',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: controller.destroy,
+                    child: const Text('Close'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      );
-    }
+      ),
+    );
+    setState(() {
+      _satelliteController = controller;
+    });
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Row(mainAxisSize: MainAxisSize.min, children: children),
+        child: ElevatedButton(
+          onPressed: _satelliteController == null ? _showSatellite : null,
+          child: const Text('Show Satellite'),
+        ),
       ),
     );
   }

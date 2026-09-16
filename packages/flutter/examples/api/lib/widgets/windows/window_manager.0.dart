@@ -17,10 +17,10 @@ void main() {
     );
     runWidget(
       WindowManager(
-        initialWindows: [
+        initialWindows: <WindowEntry>[
           WindowEntry(
             controller: controller,
-            builder: (context) => const MainWindow(),
+            builder: (BuildContext context) => const MainWindow(),
           ),
         ],
       ),

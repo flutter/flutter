@@ -14,16 +14,17 @@ import 'package:flutter/src/widgets/_window_positioner.dart';
 
 void main() {
   try {
+    WidgetsFlutterBinding.ensureInitialized();
     runWidget(
       WindowManager(
-        initialWindows: [
+        initialWindows: <WindowEntry>[
           WindowEntry(
             controller: WindowController(
               size: const Size(800, 600),
               constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
               title: 'Example Window',
             ),
-            builder: (context) => const MaterialApp(home: MyApp()),
+            builder: (BuildContext context) => const MaterialApp(home: MyApp()),
           ),
         ],
       ),
@@ -53,7 +54,7 @@ class _MyAppState extends State<MyApp> {
   TooltipWindowController? _tooltipController;
 
   void _openTooltip(BuildContext context) {
-    final tooltipController = TooltipWindowController(
+    final TooltipWindowController tooltipController = TooltipWindowController(
       parent: WindowScope.of(context),
       anchorRect: _getAnchorRect()!,
       positioner: const WindowPositioner(
@@ -65,13 +66,15 @@ class _MyAppState extends State<MyApp> {
       context: context,
       entry: WindowEntry(
         controller: tooltipController,
-        builder: (context) {
-          return Container(
-            padding: const .all(8),
-            color: Colors.black,
-            child: const Text(
-              'This is a tooltip',
-              style: TextStyle(color: Colors.white),
+        builder: (BuildContext context) {
+          return MaterialApp(
+            builder: (BuildContext context, Widget? child) => Container(
+              padding: const .all(8),
+              color: Colors.black,
+              child: const Text(
+                'This is a tooltip',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           );
         },
