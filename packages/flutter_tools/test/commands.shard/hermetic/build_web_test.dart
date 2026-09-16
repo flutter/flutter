@@ -49,22 +49,27 @@ void main() {
     processManager = FakeProcessManager.any();
   });
 
+  FileSystem defaultFileSystem() => fileSystem;
+  BufferLogger defaultLogger() => logger;
+  ProcessManager defaultProcessManager() => processManager;
+  Platform defaultPlatform() => fakePlatform;
+
   TestWebBuildCommand createBuildCommand({
-    required FileSystem fileSystem,
-    required BuildSystem buildSystem,
+    BuildSystem? buildSystem,
     FeatureFlags? featureFlags,
+    FileSystem? fileSystem,
     BufferLogger? logger,
     Platform? platform,
     ProcessManager? processManager,
     bool verboseHelp = false,
   }) {
     return TestWebBuildCommand(
-      buildSystem: buildSystem,
+      buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
       featureFlags: featureFlags ?? TestFeatureFlags(isWebEnabled: true),
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
+      fileSystem: fileSystem ?? defaultFileSystem(),
+      logger: logger ?? defaultLogger(),
+      platform: platform ?? defaultPlatform(),
+      processManager: processManager ?? defaultProcessManager(),
       verboseHelp: verboseHelp,
     );
   }
@@ -72,14 +77,7 @@ void main() {
   testWithoutContext('Refuses to build for web when missing index.html', () async {
     fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
     final CommandRunner<void> runner = createTestCommandRunner(
-      createBuildCommand(
-        fileSystem: fileSystem,
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        logger: logger,
-        platform: fakePlatform,
-        processManager: processManager,
-        featureFlags: TestFeatureFlags(isWebEnabled: true),
-      ),
+      createBuildCommand(featureFlags: TestFeatureFlags(isWebEnabled: true)),
     );
 
     expect(
@@ -94,14 +92,7 @@ void main() {
 
   testWithoutContext('Refuses to build for web when feature is disabled', () async {
     final CommandRunner<void> runner = createTestCommandRunner(
-      createBuildCommand(
-        fileSystem: fileSystem,
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        logger: logger,
-        platform: fakePlatform,
-        processManager: processManager,
-        featureFlags: TestFeatureFlags(),
-      ),
+      createBuildCommand(featureFlags: TestFeatureFlags()),
     );
 
     expect(
@@ -115,7 +106,6 @@ void main() {
 
   testWithoutContext('Setup for a web build with default output directory', () async {
     final TestWebBuildCommand buildCommand = createBuildCommand(
-      fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
         Target target,
         Environment environment,
@@ -132,9 +122,6 @@ void main() {
           'UseLocalCanvasKit': 'true',
         });
       }),
-      logger: logger,
-      platform: fakePlatform,
-      processManager: processManager,
       featureFlags: TestFeatureFlags(isWebEnabled: true),
     );
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
@@ -156,7 +143,6 @@ void main() {
 
   testWithoutContext('Passes --web-define values to environment defines with prefix', () async {
     final TestWebBuildCommand buildCommand = createBuildCommand(
-      fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
         Target target,
         Environment environment,
@@ -164,9 +150,6 @@ void main() {
         expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
         expect(environment.defines['webDefine:API_URL'], 'https://api.example.com');
       }),
-      logger: logger,
-      platform: fakePlatform,
-      processManager: processManager,
       featureFlags: TestFeatureFlags(isWebEnabled: true),
     );
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
@@ -209,10 +192,6 @@ void main() {
       () async {
         final TestWebBuildCommand buildCommand = createBuildCommand(
           buildSystem: TestBuildSystem.all(BuildResult(success: true), expectContentHashConfigs),
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: fakePlatform,
-          processManager: processManager,
         );
         final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
         setupFileSystemForEndToEndTest(fileSystem);
@@ -231,13 +210,7 @@ void main() {
   testWithoutContext(
     'Rejects --web-content-hash combined with --enable-wasm-deferred-loading',
     () async {
-      final TestWebBuildCommand buildCommand = createBuildCommand(
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: fakePlatform,
-        processManager: processManager,
-      );
+      final TestWebBuildCommand buildCommand = createBuildCommand();
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
       await expectLater(
@@ -257,13 +230,7 @@ void main() {
   testWithoutContext(
     'Rejects --web-content-hash when web/index.html references main.dart.js or loadEntrypoint',
     () async {
-      final TestWebBuildCommand buildCommand = createBuildCommand(
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: fakePlatform,
-        processManager: processManager,
-      );
+      final TestWebBuildCommand buildCommand = createBuildCommand();
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
 
@@ -301,13 +268,7 @@ void main() {
   );
 
   testWithoutContext('Prints serving guidance tip when --web-content-hash is used', () async {
-    final TestWebBuildCommand buildCommand = createBuildCommand(
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: fakePlatform,
-      processManager: processManager,
-    );
+    final TestWebBuildCommand buildCommand = createBuildCommand();
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     setupFileSystemForEndToEndTest(fileSystem);
     await runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']);
@@ -323,7 +284,6 @@ void main() {
 
   testWithoutContext('Builds successfully without --web-define', () async {
     final TestWebBuildCommand buildCommand = createBuildCommand(
-      fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
         Target target,
         Environment environment,
@@ -334,9 +294,6 @@ void main() {
         );
         expect(hasWebDefines, isFalse);
       }),
-      logger: logger,
-      platform: fakePlatform,
-      processManager: processManager,
       featureFlags: TestFeatureFlags(isWebEnabled: true),
     );
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
@@ -351,7 +308,6 @@ void main() {
   testWithoutContext('Infers target entrypoint correctly from --target', () async {
     // Regression test for https://github.com/flutter/flutter/issues/136830.
     final TestWebBuildCommand buildCommand = createBuildCommand(
-      fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
         Target target,
         Environment environment,
@@ -368,9 +324,6 @@ void main() {
           'UseLocalCanvasKit': 'true',
         });
       }),
-      logger: logger,
-      platform: fakePlatform,
-      processManager: processManager,
       featureFlags: TestFeatureFlags(isWebEnabled: true),
     );
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
@@ -392,7 +345,6 @@ void main() {
   testWithoutContext('Infers target entrypoint correctly from positional argument list', () async {
     // Regression test for https://github.com/flutter/flutter/issues/136830.
     final TestWebBuildCommand buildCommand = createBuildCommand(
-      fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
         Target target,
         Environment environment,
@@ -409,9 +361,6 @@ void main() {
           'UseLocalCanvasKit': 'true',
         });
       }),
-      logger: logger,
-      platform: fakePlatform,
-      processManager: processManager,
       featureFlags: TestFeatureFlags(isWebEnabled: true),
     );
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
@@ -427,11 +376,7 @@ void main() {
   testWithoutContext('Does not allow -O0 optimization level', () async {
     final bufferLogger = BufferLogger.test();
     final TestWebBuildCommand buildCommand = createBuildCommand(
-      fileSystem: fileSystem,
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: bufferLogger,
-      platform: fakePlatform,
-      processManager: processManager,
       featureFlags: TestFeatureFlags(isWebEnabled: true),
     );
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
@@ -457,7 +402,6 @@ void main() {
 
   testWithoutContext('Setup for a web build with a user specified output directory', () async {
     final TestWebBuildCommand buildCommand = createBuildCommand(
-      fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
         Target target,
         Environment environment,
@@ -474,9 +418,6 @@ void main() {
           'UseLocalCanvasKit': 'true',
         });
       }),
-      logger: logger,
-      platform: fakePlatform,
-      processManager: processManager,
       featureFlags: TestFeatureFlags(isWebEnabled: true),
     );
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
@@ -958,12 +899,7 @@ void main() {
 
   testWithoutContext('Refuses to build for web when folder is missing', () async {
     fileSystem.file(fileSystem.path.join('web')).deleteSync(recursive: true);
-    final TestWebBuildCommand buildCommand = createBuildCommand(
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: fileSystem,
-      platform: fakePlatform,
-      processManager: processManager,
-    );
+    final TestWebBuildCommand buildCommand = createBuildCommand();
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
 
     expect(
