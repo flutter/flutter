@@ -1017,9 +1017,6 @@ class TestWebBuildCommand extends FlutterCommand {
   final BuildWebCommand webCommand;
 
   @override
-  FeatureFlags get featureFlags => webCommand.featureFlags;
-
-  @override
   final name = 'build';
 
   @override
