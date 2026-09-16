@@ -47,8 +47,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)installFirstFrameCallback:(void (^)(void))block;
 - (void)enableSemantics:(BOOL)enabled withFlags:(int64_t)flags;
-- (void)notifyViewCreated:(FlutterViewIdentifier)viewIdentifier;
-- (void)notifyViewDestroyed:(FlutterViewIdentifier)viewIdentifier;
+- (void)notifyViewRenderingSurfaceCreated:(FlutterViewIdentifier)viewIdentifier;
+- (void)notifyViewRenderingSurfaceDestroyed:(FlutterViewIdentifier)viewIdentifier;
 
 - (flutter::Rasterizer::Screenshot)screenshot:(flutter::Rasterizer::ScreenshotType)type
                                  base64Encode:(bool)base64Encode;

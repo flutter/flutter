@@ -707,15 +707,14 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
     return;
   }
 
-  // NotifyCreated/NotifyDestroyed are synchronous and require hops between the UI and raster
-  // thread.
+  // Surface updates synchronize with the raster thread before returning.
   if (appeared) {
     [self installFirstFrameCallback];
     [self.platformViewsController attachToFlutterViewController:self];
-    [self.engine notifyViewCreated:self.viewIdentifier];
+    [self.engine notifyViewRenderingSurfaceCreated:self.viewIdentifier];
   } else {
     self.displayingFlutterUI = NO;
-    [self.engine notifyViewDestroyed:self.viewIdentifier];
+    [self.engine notifyViewRenderingSurfaceDestroyed:self.viewIdentifier];
     [self.platformViewsController detachFromFlutterViewController:self.viewIdentifier];
   }
 }

@@ -444,6 +444,44 @@ FLUTTER_ASSERT_ARC
   XCTAssertNil(weakViewController);
 }
 
+- (void)testSingleViewControllerDeallocationWithoutHeadlessExecutionDestroysContext {
+  __weak FlutterEngine* weakEngine = nil;
+  __weak FlutterViewController* weakViewController = nil;
+  __weak CALayer* weakLayer = nil;
+  __weak id<NSObject> weakObserver = nil;
+  @autoreleasepool {
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"
+                                                        project:nil
+                                         allowHeadlessExecution:NO];
+    weakEngine = engine;
+    [engine createShell:@"" libraryURI:@"" initialRoute:nil];
+    auto weak_platform_view = engine.platformView->GetWeakPtr();
+    XCTAssertTrue(weak_platform_view.get());
+
+    @autoreleasepool {
+      FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                    nibName:nil
+                                                                                     bundle:nil];
+      weakViewController = viewController;
+      [viewController loadViewIfNeeded];
+      weakLayer = viewController.view.layer;
+      weakObserver =
+          engine.flutterViewControllerWillDeallocObservers[@(viewController.viewIdentifier)];
+      XCTAssertNotNil(weakObserver);
+      [engine notifyViewRenderingSurfaceCreated:viewController.viewIdentifier];
+      viewController = nil;
+    }
+    XCTAssertNil(weakViewController);
+    XCTAssertNil(weakLayer);
+    XCTAssertNil(engine.viewController);
+    XCTAssertTrue(engine.platformView == nullptr);
+    XCTAssertFalse(weak_platform_view.get());
+    engine = nil;
+  }
+  XCTAssertNil(weakEngine);
+  XCTAssertNil(weakObserver);
+}
+
 - (void)testReplacingImplicitViewControllerKeepsNewControllerAfterOldDealloc {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
   [engine createShell:@"" libraryURI:@"" initialRoute:nil];

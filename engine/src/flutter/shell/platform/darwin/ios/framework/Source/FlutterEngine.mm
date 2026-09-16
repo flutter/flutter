@@ -483,18 +483,18 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   self.platformView->SetAccessibilityFeatures(flags);
 }
 
-- (void)notifyViewCreated:(FlutterViewIdentifier)viewIdentifier {
+- (void)notifyViewRenderingSurfaceCreated:(FlutterViewIdentifier)viewIdentifier {
   if (!self.platformView) {
     return;
   }
-  self.platformView->NotifyCreated(viewIdentifier);
+  self.platformView->NotifyViewRenderingSurfaceCreated(viewIdentifier);
 }
 
-- (void)notifyViewDestroyed:(FlutterViewIdentifier)viewIdentifier {
+- (void)notifyViewRenderingSurfaceDestroyed:(FlutterViewIdentifier)viewIdentifier {
   if (!self.platformView) {
     return;
   }
-  self.platformView->NotifyDestroyed(viewIdentifier);
+  self.platformView->NotifyViewRenderingSurfaceDestroyed(viewIdentifier);
 }
 
 - (flutter::PlatformViewIOS*)platformView {
@@ -641,7 +641,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
         dispatch_semaphore_signal(sem);
       });
       dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
-      // The callback should be called synchronously from platform thread.
+      // Raster-thread collection must finish before releasing the native surface.
       FML_DCHECK(removed);
       self.platformView->RemoveOwnerViewController(viewIdentifier);
     } else {

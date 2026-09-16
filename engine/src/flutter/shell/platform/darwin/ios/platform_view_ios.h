@@ -23,9 +23,10 @@
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
 @class FlutterViewController;
-class IOSSurfacesManager;
 
 namespace flutter {
+
+class IOSSurfacesManager;
 
 /**
  * A bridge connecting the platform agnostic shell and the iOS embedding.
@@ -56,11 +57,13 @@ class PlatformViewIOS final : public PlatformView {
 
   ~PlatformViewIOS() override;
 
-  void NotifyCreated(int64_t view_id);
+  /// Creates the view's rendering surface and starts the shared pipeline if this is the first one.
+  /// Repeated calls for a view with a rendering surface have no effect.
+  void NotifyViewRenderingSurfaceCreated(int64_t view_id);
 
-  void NotifyDestroyed() override;
-
-  void NotifyDestroyed(int64_t view_id);
+  /// Destroys the view's rendering surface and stops the shared pipeline if this is the last one.
+  /// Calls for a view without a rendering surface have no effect.
+  void NotifyViewRenderingSurfaceDestroyed(int64_t view_id);
 
   /**
    * Returns the `FlutterViewController` currently attached to the `FlutterEngine` owning
@@ -77,6 +80,7 @@ class PlatformViewIOS final : public PlatformView {
 
   void AddOwnerViewController(__weak FlutterViewController* owner_controller);
 
+  /// For non-implicit views, call this after RemoveView has completed.
   void RemoveOwnerViewController(FlutterViewIdentifier viewIdentifier);
 
   /**
@@ -156,32 +160,13 @@ class PlatformViewIOS final : public PlatformView {
 
  private:
   void ApplyLocaleToOwnerController();
-  /// Smart pointer for use with objective-c observers.
-  /// This guarantees we remove the observer.
-  class ScopedObserver {
-   public:
-    ScopedObserver();
-    ~ScopedObserver();
-    void reset(id<NSObject> observer);
-    ScopedObserver(const ScopedObserver&) = delete;
-    ScopedObserver& operator=(const ScopedObserver&) = delete;
-
-   private:
-    id<NSObject> observer_ = nil;
-  };
 
   // __weak FlutterViewController* owner_controller_;
   std::string application_locale_;
-  // Since the `ios_surface_` is created on the platform thread but
-  // used on the raster thread we need to protect it with a mutex.
-  std::mutex ios_surface_mutex_;
-  std::unique_ptr<IOSSurface> ios_surface_;
   std::shared_ptr<IOSContext> ios_context_;
   __weak FlutterPlatformViewsController* platform_views_controller_;
   // std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
   std::unordered_map<int64_t, std::unique_ptr<AccessibilityBridge>> accessibility_bridges_;
-  // ScopedObserver dealloc_view_controller_observer_;
-  std::unordered_map<int64_t, ScopedObserver> flutter_view_controller_will_dealloc_observers_;
   bool semantics_tree_enabled_ = false;
   std::vector<std::string> platform_resolved_locale_;
   std::shared_ptr<PlatformMessageHandlerIos> platform_message_handler_;

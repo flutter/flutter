@@ -4,34 +4,74 @@
 
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 #include <memory>
-
+#include <mutex>
+#include <shared_mutex>
+#include <unordered_map>
 #include <utility>
 
 #include "flutter/common/constants.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/impeller/renderer/backend/metal/formats_mtl.h"
 #include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/gpu/gpu_surface_metal_impeller.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
-#include "flutter/shell/platform/darwin/ios/ios_surface_metal_impeller.h"
 
 FLUTTER_ASSERT_ARC
 
 namespace flutter {
 
+namespace {
+
+// The root surface never presents to a view, so its delegate must not depend on any view's layer.
+class IOSRootSurfaceMetalDelegate final : public GPUSurfaceMetalDelegate {
+ public:
+  IOSRootSurfaceMetalDelegate() : GPUSurfaceMetalDelegate(MTLRenderTargetType::kCAMetalLayer) {}
+
+  GPUCAMetalLayerHandle GetCAMetalLayer(const DlISize& frame_size) const override {
+    FML_DCHECK(false);
+    return nullptr;
+  }
+
+  bool PresentDrawable(GrMTLHandle drawable) const override {
+    FML_DCHECK(false);
+    return false;
+  }
+
+  GPUMTLTextureInfo GetMTLTexture(const DlISize& frame_size) const override {
+    FML_DCHECK(false);
+    return {};
+  }
+
+  bool PresentTexture(GPUMTLTextureInfo texture) const override {
+    FML_DCHECK(false);
+    return false;
+  }
+
+  bool AllowsDrawingWhenGpuDisabled() const override { return false; }
+};
+
+}  // namespace
+
 class IOSSurfacesManager {
  public:
+  enum class SurfaceCreationResult {
+    kAlreadyExists,
+    kFailed,
+    kFirstSurfaceCreated,
+    kAdditionalSurfaceCreated,
+  };
+
+  enum class SurfaceDestructionResult {
+    kNotFound,
+    kSurfaceDestroyed,
+    kLastSurfaceDestroyed,
+  };
+
   explicit IOSSurfacesManager(const std::shared_ptr<IOSContext>& context)
-      : impeller_context_(context ? context->GetImpellerContext() : nullptr),
-        aiks_context_(context ? context->GetAiksContext() : nullptr) {
-    if (!impeller_context_ || !aiks_context_) {
-      return;
-    }
-  }
+      : aiks_context_(context->GetAiksContext()) {}
 
   ~IOSSurfacesManager() = default;
 
@@ -45,35 +85,47 @@ class IOSSurfacesManager {
     ios_surfaces_.erase(view_id);
   }
 
-  std::unique_ptr<Surface> CreateGPUSurface() {
-    // Create a dump `GPUSurfaceMetalImpeller`
+  std::unique_ptr<Surface> CreateRootSurface() {
+    return std::make_unique<GPUSurfaceMetalImpeller>(&root_surface_delegate_, aiks_context_,
+                                                     /*render_to_surface=*/false);
+  }
+
+  // Rendering surfaces are only accessed on the raster thread.
+  SurfaceCreationResult CreateRenderingSurfaceForView(int64_t view_id) {
+    if (rendering_surfaces_.find(view_id) != rendering_surfaces_.end()) {
+      return SurfaceCreationResult::kAlreadyExists;
+    }
+    if (!aiks_context_ || !aiks_context_->IsValid()) {
+      return SurfaceCreationResult::kFailed;
+    }
+
     std::shared_lock<std::shared_mutex> lock(ios_surface_mutex_);
-    auto iter = ios_surfaces_.begin();
-    if (iter != ios_surfaces_.end()) {
-      return iter->second.get()->CreateGPUSurface();
+    auto iter = ios_surfaces_.find(view_id);
+    if (iter == ios_surfaces_.end() || !iter->second->IsValid()) {
+      return SurfaceCreationResult::kFailed;
     }
 
-    return nullptr;
-  }
-
-  int ActiveRenderingSurfaceCount() const { return rendering_surface_.size(); }
-
-  void CreateRenderingSurfaceForView(int64_t view_id) {
-    auto* ios_surface = GetSurface(view_id);
-    if (!ios_surface) {
-      return;
+    auto surface = iter->second->CreateGPUSurface();
+    if (!surface || !surface->IsValid()) {
+      return SurfaceCreationResult::kFailed;
     }
-
-    auto* delegate = static_cast<IOSSurfaceMetalImpeller*>(ios_surface);
-    rendering_surface_[view_id] =
-        std::make_unique<GPUSurfaceMetalImpeller>(delegate, aiks_context_);
+    bool is_first_surface = rendering_surfaces_.empty();
+    rendering_surfaces_.emplace(view_id, std::move(surface));
+    return is_first_surface ? SurfaceCreationResult::kFirstSurfaceCreated
+                            : SurfaceCreationResult::kAdditionalSurfaceCreated;
   }
 
-  void DestroyRenderingSurfaceForView(int64_t view_id) { rendering_surface_.erase(view_id); }
+  SurfaceDestructionResult DestroyRenderingSurfaceForView(int64_t view_id) {
+    if (rendering_surfaces_.erase(view_id) == 0) {
+      return SurfaceDestructionResult::kNotFound;
+    }
+    return rendering_surfaces_.empty() ? SurfaceDestructionResult::kLastSurfaceDestroyed
+                                       : SurfaceDestructionResult::kSurfaceDestroyed;
+  }
 
   std::unique_ptr<SurfaceFrame> CreateSurfaceFrame(int64_t flutter_view_id, DlISize& frame_size) {
-    auto iter = rendering_surface_.find(flutter_view_id);
-    if (iter != rendering_surface_.end()) {
+    auto iter = rendering_surfaces_.find(flutter_view_id);
+    if (iter != rendering_surfaces_.end()) {
       return iter->second.get()->AcquireFrame(frame_size);
     }
     // Return a display-list-backed frame so rasterization has a non-null canvas when the target
@@ -84,26 +136,15 @@ class IOSSurfacesManager {
   }
 
  private:
-  IOSSurface* GetSurface(int64_t view_id) const {
-    std::shared_lock<std::shared_mutex> lock(ios_surface_mutex_);
-    auto iter = ios_surfaces_.find(view_id);
-    if (iter != ios_surfaces_.end()) {
-      return iter->second.get();
-    }
-
-    return nullptr;
-  }
-
-  const std::shared_ptr<impeller::Context> impeller_context_;
-  std::shared_ptr<impeller::AiksContext> aiks_context_;
+  const std::shared_ptr<impeller::AiksContext> aiks_context_;
+  IOSRootSurfaceMetalDelegate root_surface_delegate_;
 
   std::unordered_map<int64_t, std::unique_ptr<IOSSurface>> ios_surfaces_;
 
-  std::unordered_map<int64_t, std::unique_ptr<Surface>> rendering_surface_;
+  std::unordered_map<int64_t, std::unique_ptr<Surface>> rendering_surfaces_;
 
-  // Since the `ios_surface_` is created on the platform thread but
-  // used on the raster thread we need to protect it with a mutex.
-  mutable std::shared_mutex ios_surface_mutex_;
+  // Native surfaces are added and removed on the platform thread and read on the raster thread.
+  std::shared_mutex ios_surface_mutex_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSSurfacesManager);
 };
@@ -139,37 +180,38 @@ PlatformViewIOS::PlatformViewIOS(
 
 PlatformViewIOS::~PlatformViewIOS() = default;
 
-void PlatformViewIOS::NotifyCreated(int64_t view_id) {
-  if (ios_surfaces_manager_->ActiveRenderingSurfaceCount() == 0) {
-    PlatformView::NotifyCreated();
-  }
-
+void PlatformViewIOS::NotifyViewRenderingSurfaceCreated(int64_t view_id) {
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+  auto result = IOSSurfacesManager::SurfaceCreationResult::kFailed;
   IOSSurfacesManager* surfaces_manager_ptr = ios_surfaces_manager_.get();
   fml::ManualResetWaitableEvent latch;
-  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetRasterTaskRunner(),
-                                    [&latch, surfaces_manager_ptr, view_id]() {
-                                      surfaces_manager_ptr->CreateRenderingSurfaceForView(view_id);
-                                      latch.Signal();
-                                    });
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetRasterTaskRunner(), [&latch, &result, surfaces_manager_ptr, view_id]() {
+        result = surfaces_manager_ptr->CreateRenderingSurfaceForView(view_id);
+        latch.Signal();
+      });
   latch.Wait();
-}
-
-void PlatformViewIOS::NotifyDestroyed() {
-  PlatformView::NotifyDestroyed();
-}
-
-void PlatformViewIOS::NotifyDestroyed(int64_t view_id) {
-  if (ios_surfaces_manager_->ActiveRenderingSurfaceCount() == 1) {
-    PlatformView::NotifyDestroyed();
+  if (result == IOSSurfacesManager::SurfaceCreationResult::kFirstSurfaceCreated) {
+    NotifyCreated();
+  } else if (result == IOSSurfacesManager::SurfaceCreationResult::kAdditionalSurfaceCreated) {
+    ScheduleFrame();
   }
+}
+
+void PlatformViewIOS::NotifyViewRenderingSurfaceDestroyed(int64_t view_id) {
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+  auto result = IOSSurfacesManager::SurfaceDestructionResult::kNotFound;
   IOSSurfacesManager* surfaces_manager_ptr = ios_surfaces_manager_.get();
   fml::AutoResetWaitableEvent latch;
-  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetRasterTaskRunner(),
-                                    [&latch, surfaces_manager_ptr, view_id]() {
-                                      surfaces_manager_ptr->DestroyRenderingSurfaceForView(view_id);
-                                      latch.Signal();
-                                    });
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetRasterTaskRunner(), [&latch, &result, surfaces_manager_ptr, view_id]() {
+        result = surfaces_manager_ptr->DestroyRenderingSurfaceForView(view_id);
+        latch.Signal();
+      });
   latch.Wait();
+  if (result == IOSSurfacesManager::SurfaceDestructionResult::kLastSurfaceDestroyed) {
+    NotifyDestroyed();
+  }
 }
 
 // |PlatformView|
@@ -185,15 +227,13 @@ void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
   FlutterViewController* existing_controller =
       [view_controllers_ objectForKey:@(flutter::kFlutterImplicitViewId)];
-  if (existing_controller == owner_controller) {
+  if (owner_controller != nil && existing_controller == owner_controller) {
     ApplyLocaleToOwnerController();
     return;
   }
 
-  // Preserve the legacy implicit-view behavior: replacing or clearing the single attached
-  // controller synchronously tears down the implicit rendering surface before removing the owner.
-  if (existing_controller != nil) {
-    NotifyDestroyed(flutter::kFlutterImplicitViewId);
+  // The weak controller may already be nil when its deallocation notification arrives.
+  if (existing_controller != nil || owner_controller == nil) {
     RemoveOwnerViewController(flutter::kFlutterImplicitViewId);
   }
 
@@ -207,7 +247,6 @@ void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner
 void PlatformViewIOS::AddOwnerViewController(__weak FlutterViewController* owner_controller) {
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  std::lock_guard<std::mutex> guard(ios_surface_mutex_);
   FlutterViewIdentifier viewIdentifier = owner_controller.viewIdentifier;
   FML_DCHECK([view_controllers_ objectForKey:@(viewIdentifier)] == nil);
   [view_controllers_ setObject:owner_controller forKey:@(viewIdentifier)];
@@ -216,19 +255,6 @@ void PlatformViewIOS::AddOwnerViewController(__weak FlutterViewController* owner
     accessibility_bridges_[viewIdentifier] =
         std::make_unique<AccessibilityBridge>(owner_controller, this, platform_views_controller_);
   }
-
-  // Add an observer that will clear out the owner_controller_ ivar and
-  // the accessibility_bridge_ in case the view controller is deleted.
-  auto [it, inserted] = flutter_view_controller_will_dealloc_observers_.try_emplace(viewIdentifier);
-  it->second.reset([[NSNotificationCenter defaultCenter]
-      addObserverForName:FlutterViewControllerWillDealloc
-                  object:owner_controller
-                   queue:[NSOperationQueue mainQueue]
-              usingBlock:^(NSNotification* note) {
-                // Implicit copy of 'this' is fine.
-                FlutterViewController* owner_controller = (FlutterViewController*)note.object;
-                RemoveOwnerViewController(owner_controller.viewIdentifier);
-              }]);
 
   if (owner_controller && owner_controller.isViewLoaded) {
     this->attachView(viewIdentifier);
@@ -242,15 +268,12 @@ void PlatformViewIOS::AddOwnerViewController(__weak FlutterViewController* owner
 void PlatformViewIOS::RemoveOwnerViewController(FlutterViewIdentifier viewIdentifier) {
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  std::lock_guard<std::mutex> guard(ios_surface_mutex_);
-
-  auto observer_it = flutter_view_controller_will_dealloc_observers_.find(viewIdentifier);
-  if (observer_it != flutter_view_controller_will_dealloc_observers_.end()) {
-    flutter_view_controller_will_dealloc_observers_.erase(observer_it);
-  }
+  // Rendering surfaces borrow the native surface as their delegate.
+  NotifyViewRenderingSurfaceDestroyed(viewIdentifier);
 
   [view_controllers_ removeObjectForKey:@(viewIdentifier)];
   ios_surfaces_manager_->RemoveSurface(viewIdentifier);
+  [platform_views_controller_ detachFromFlutterViewController:viewIdentifier];
 
   auto iter = accessibility_bridges_.find(viewIdentifier);
   if (iter != accessibility_bridges_.end()) {
@@ -265,7 +288,7 @@ void PlatformViewIOS::attachView(FlutterViewIdentifier viewIdentifier) {
                                                "before attaching to PlatformViewIOS.";
   FlutterView* flutter_view = static_cast<FlutterView*>(owner_controller.view);
   CALayer* ca_layer = flutter_view.layer;
-  auto ios_surface = IOSSurface::Create(ios_context_, ca_layer, false);
+  auto ios_surface = IOSSurface::Create(ios_context_, ca_layer);
   FML_DCHECK(ios_surface != nullptr);
   ios_surfaces_manager_->AddSurface(viewIdentifier, std::move(ios_surface));
 
@@ -290,13 +313,7 @@ void PlatformViewIOS::RegisterExternalTexture(int64_t texture_id,
 // |PlatformView|
 std::unique_ptr<Surface> PlatformViewIOS::CreateRenderingSurface() {
   FML_DCHECK(task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread());
-  std::lock_guard<std::mutex> guard(ios_surface_mutex_);
-  if (!ios_surfaces_manager_) {
-    FML_DLOG(INFO) << "Could not CreateRenderingSurface, this PlatformViewIOS "
-                      "has no ViewController.";
-    return nullptr;
-  }
-  return ios_surfaces_manager_->CreateGPUSurface();
+  return ios_surfaces_manager_->CreateRootSurface();
 }
 
 // |PlatformView|
@@ -434,23 +451,6 @@ void PlatformViewIOS::ApplyLocaleToOwnerController() {
       controller.applicationLocale =
           application_locale_.empty() ? nil : @(application_locale_.data());
     }
-  }
-}
-
-PlatformViewIOS::ScopedObserver::ScopedObserver() {}
-
-PlatformViewIOS::ScopedObserver::~ScopedObserver() {
-  if (observer_) {
-    [[NSNotificationCenter defaultCenter] removeObserver:observer_];
-  }
-}
-
-void PlatformViewIOS::ScopedObserver::reset(id<NSObject> observer) {
-  if (observer != observer_) {
-    if (observer_) {
-      [[NSNotificationCenter defaultCenter] removeObserver:observer_];
-    }
-    observer_ = observer;
   }
 }
 

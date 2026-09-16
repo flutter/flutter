@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <functional>
 #include <memory>
 #include <vector>
 #define FML_USED_ON_EMBEDDER
@@ -11,6 +12,7 @@
 
 #include "flutter/common/constants.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/thread.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
@@ -43,7 +45,11 @@ class FakeDelegate : public PlatformView::Delegate {
   }
   void OnPlatformViewRemoveView(int64_t view_id, RemoveViewCallback callback) override {
     removed_view_ids_.push_back(view_id);
-    callback(true);
+    if (remove_view_handler_) {
+      remove_view_handler_(std::move(callback));
+    } else {
+      callback(true);
+    }
   }
   void OnPlatformViewSendViewFocusEvent(const ViewFocusEvent& event) override {}
   void OnPlatformViewSetNextFrameCallback(const fml::closure& closure) override {}
@@ -83,12 +89,31 @@ class FakeDelegate : public PlatformView::Delegate {
   int on_platform_view_destroyed_calls_ = 0;
   std::vector<int64_t> added_view_ids_;
   std::vector<int64_t> removed_view_ids_;
+  std::function<void(RemoveViewCallback)> remove_view_handler_;
   int viewport_metrics_calls_ = 0;
   int64_t last_viewport_metrics_view_id_ = -1;
 };
 
 }  // namespace
 }  // namespace flutter
+
+// Avoid retaining view controllers through OCMock's recorded invocations.
+@interface FlutterEngineWithFakePlatformView : FlutterEngine
+@property(nonatomic, assign) flutter::PlatformViewIOS* fakePlatformView;
+@property(nonatomic, strong) NSObject<FlutterBinaryMessenger>* fakeBinaryMessenger;
+@end
+
+@implementation FlutterEngineWithFakePlatformView
+
+- (flutter::PlatformViewIOS*)platformView {
+  return self.fakePlatformView;
+}
+
+- (NSObject<FlutterBinaryMessenger>*)binaryMessenger {
+  return self.fakeBinaryMessenger ?: [super binaryMessenger];
+}
+
+@end
 
 @interface FlutterEnginePlatformViewTest : XCTestCase
 @end
@@ -104,6 +129,7 @@ flutter::FakeDelegate fake_delegate;
   fake_delegate.on_platform_view_destroyed_calls_ = 0;
   fake_delegate.added_view_ids_.clear();
   fake_delegate.removed_view_ids_.clear();
+  fake_delegate.remove_view_handler_ = nullptr;
   fake_delegate.viewport_metrics_calls_ = 0;
   fake_delegate.last_viewport_metrics_view_id_ = -1;
   auto thread_task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
@@ -180,7 +206,7 @@ flutter::FakeDelegate fake_delegate;
   [engine setViewController:flutterViewController];
   XCTAssertEqual(engine.viewController, flutterViewController);
 
-  platform_view->NotifyCreated(flutter::kFlutterImplicitViewId);
+  [engine notifyViewRenderingSurfaceCreated:flutter::kFlutterImplicitViewId];
   XCTAssertEqual(fake_delegate.on_platform_view_created_calls_, 1);
 
   [engine setViewController:nil];
@@ -279,17 +305,212 @@ flutter::FakeDelegate fake_delegate;
   [implicitViewController loadViewIfNeeded];
   [secondaryViewController loadViewIfNeeded];
 
-  platform_view->NotifyCreated(flutter::kFlutterImplicitViewId);
+  [engine notifyViewRenderingSurfaceCreated:flutter::kFlutterImplicitViewId];
   XCTAssertEqual(fake_delegate.on_platform_view_created_calls_, 1);
 
-  platform_view->NotifyCreated(kSecondaryFlutterViewId);
+  [engine notifyViewRenderingSurfaceCreated:kSecondaryFlutterViewId];
   XCTAssertEqual(fake_delegate.on_platform_view_created_calls_, 1);
 
-  platform_view->NotifyDestroyed(kSecondaryFlutterViewId);
+  [engine notifyViewRenderingSurfaceDestroyed:kSecondaryFlutterViewId];
   XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 0);
 
-  platform_view->NotifyDestroyed(flutter::kFlutterImplicitViewId);
+  [engine notifyViewRenderingSurfaceDestroyed:flutter::kFlutterImplicitViewId];
   XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 1);
+}
+
+- (void)testRemovingActiveViewControllerWithoutSurfaceUpdateCleansUpSurface {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"tester"];
+  id mockEngine = OCMPartialMock(engine);
+  OCMStub([mockEngine platformView]).andReturn(platform_view.get());
+  [engine enableMultiView];
+
+  FlutterViewController* implicitViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  FlutterViewController* secondaryViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  [implicitViewController loadViewIfNeeded];
+  [secondaryViewController loadViewIfNeeded];
+  [engine notifyViewRenderingSurfaceCreated:flutter::kFlutterImplicitViewId];
+  [engine notifyViewRenderingSurfaceCreated:kSecondaryFlutterViewId];
+
+  [engine removeViewController:kSecondaryFlutterViewId];
+  XCTAssertEqual(fake_delegate.on_platform_view_created_calls_, 1);
+  XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 0);
+  XCTAssertEqual(fake_delegate.removed_view_ids_.size(), 1UL);
+  XCTAssertEqual(fake_delegate.removed_view_ids_[0], kSecondaryFlutterViewId);
+
+  [engine notifyViewRenderingSurfaceDestroyed:kSecondaryFlutterViewId];
+  XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 0);
+
+  [engine setViewController:nil];
+  XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 1);
+}
+
+- (void)testReplacingImplicitControllerKeepsSecondarySurface {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"tester"];
+  id mockEngine = OCMPartialMock(engine);
+  OCMStub([mockEngine platformView]).andReturn(platform_view.get());
+  [engine enableMultiView];
+
+  FlutterViewController* implicitViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  FlutterViewController* secondaryViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  [implicitViewController loadViewIfNeeded];
+  [secondaryViewController loadViewIfNeeded];
+  [engine notifyViewRenderingSurfaceCreated:flutter::kFlutterImplicitViewId];
+  [engine notifyViewRenderingSurfaceCreated:kSecondaryFlutterViewId];
+
+  id replacementController = OCMClassMock([FlutterViewController class]);
+  UIView* replacementView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
+  OCMStub([replacementController isViewLoaded]).andReturn(YES);
+  OCMStub([replacementController view]).andReturn(replacementView);
+  OCMStub([replacementController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
+  [engine setViewController:replacementController];
+  XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 0);
+
+  [engine notifyViewRenderingSurfaceCreated:flutter::kFlutterImplicitViewId];
+  XCTAssertEqual(fake_delegate.on_platform_view_created_calls_, 1);
+  [engine removeViewController:kSecondaryFlutterViewId];
+  XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 0);
+  [engine setViewController:nil];
+  XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 1);
+}
+
+- (void)testViewControllerDeallocationWaitsForViewRemoval {
+  FlutterEngineWithFakePlatformView* engine =
+      [[FlutterEngineWithFakePlatformView alloc] initWithName:@"tester"];
+  engine.fakePlatformView = platform_view.get();
+  [engine enableMultiView];
+
+  FlutterViewController* implicitViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  __weak FlutterViewController* weakViewController = nil;
+  __weak CALayer* weakLayer = nil;
+  __weak id<NSObject> weakObserver = nil;
+  fml::Thread raster_thread("FlutterEnginePlatformViewTest.raster");
+  fake_delegate.remove_view_handler_ = [&](flutter::PlatformView::RemoveViewCallback callback) {
+    raster_thread.GetTaskRunner()->PostTask([&, callback = std::move(callback)] {
+      XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 0);
+      XCTAssertNotNil(weakLayer);
+      callback(true);
+    });
+  };
+  @autoreleasepool {
+    FlutterViewController* secondaryViewController =
+        [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+    weakViewController = secondaryViewController;
+    [secondaryViewController loadViewIfNeeded];
+    weakLayer = secondaryViewController.view.layer;
+    weakObserver = engine.flutterViewControllerWillDeallocObservers[@(kSecondaryFlutterViewId)];
+    XCTAssertNotNil(weakObserver);
+    [engine notifyViewRenderingSurfaceCreated:kSecondaryFlutterViewId];
+    XCTAssertEqual(fake_delegate.on_platform_view_created_calls_, 1);
+    secondaryViewController = nil;
+  }
+
+  XCTAssertNil(weakViewController);
+  XCTAssertNil(weakLayer);
+  XCTAssertNil(weakObserver);
+  XCTAssertNil(engine.flutterViewControllerWillDeallocObservers[@(kSecondaryFlutterViewId)]);
+  XCTAssertEqual(engine.flutterViewControllerWillDeallocObservers.count, 1UL);
+  XCTAssertNil([engine viewControllerForIdentifier:kSecondaryFlutterViewId]);
+  XCTAssertEqual(engine.viewController, implicitViewController);
+  XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 1);
+  XCTAssertTrue(fake_delegate.removed_view_ids_ == std::vector<int64_t>{kSecondaryFlutterViewId});
+  fake_delegate.remove_view_handler_ = nullptr;
+}
+
+- (void)testSingleViewControllerDeallocationCleansUpResourcesAndAllowsReattachment {
+  FlutterEngineWithFakePlatformView* engine =
+      [[FlutterEngineWithFakePlatformView alloc] initWithName:@"tester"];
+  engine.fakePlatformView = platform_view.get();
+  engine.fakeBinaryMessenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  platform_view->SetSemanticsTreeEnabled(true);
+
+  for (int attachment = 1; attachment <= 2; attachment++) {
+    __weak FlutterViewController* weakViewController = nil;
+    __weak CALayer* weakLayer = nil;
+    __weak id<NSObject> weakObserver = nil;
+    fml::WeakPtr<flutter::AccessibilityBridge> weak_bridge;
+    @autoreleasepool {
+      FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                    nibName:nil
+                                                                                     bundle:nil];
+      weakViewController = viewController;
+      XCTAssertEqual(viewController.viewIdentifier, flutter::kFlutterImplicitViewId);
+      [viewController loadViewIfNeeded];
+      weakLayer = viewController.view.layer;
+      weakObserver =
+          engine.flutterViewControllerWillDeallocObservers[@(flutter::kFlutterImplicitViewId)];
+      XCTAssertNotNil(weakObserver);
+      weak_bridge = platform_view->GetAccessibilityBridge()->GetWeakPtr();
+      XCTAssertTrue(weak_bridge.get());
+      [engine notifyViewRenderingSurfaceCreated:flutter::kFlutterImplicitViewId];
+      XCTAssertEqual(fake_delegate.on_platform_view_created_calls_, attachment);
+      viewController = nil;
+    }
+    XCTAssertNil(weakViewController);
+    XCTAssertNil(weakLayer);
+    XCTAssertNil(weakObserver);
+    XCTAssertFalse(weak_bridge.get());
+    XCTAssertNil(engine.viewController);
+    XCTAssertNil(platform_view->GetOwnerViewController());
+    XCTAssertEqual(engine.flutterViewControllerWillDeallocObservers.count, 0UL);
+    XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, attachment);
+  }
+  XCTAssertTrue(fake_delegate.added_view_ids_.empty());
+  XCTAssertTrue(fake_delegate.removed_view_ids_.empty());
+}
+
+- (void)testReplacingSingleViewControllerKeepsReplacementAfterOldDeallocation {
+  FlutterEngineWithFakePlatformView* engine =
+      [[FlutterEngineWithFakePlatformView alloc] initWithName:@"tester"];
+  engine.fakePlatformView = platform_view.get();
+
+  __weak FlutterViewController* weakOldViewController = nil;
+  __weak CALayer* weakOldLayer = nil;
+  __weak id<NSObject> weakOldObserver = nil;
+  __weak id<NSObject> weakReplacementObserver = nil;
+  FlutterViewController* replacement = nil;
+  @autoreleasepool {
+    FlutterViewController* oldViewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                     nibName:nil
+                                                                                      bundle:nil];
+    weakOldViewController = oldViewController;
+    [oldViewController loadViewIfNeeded];
+    weakOldLayer = oldViewController.view.layer;
+    weakOldObserver =
+        engine.flutterViewControllerWillDeallocObservers[@(flutter::kFlutterImplicitViewId)];
+    XCTAssertNotNil(weakOldObserver);
+    [engine notifyViewRenderingSurfaceCreated:flutter::kFlutterImplicitViewId];
+
+    replacement = [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+    [replacement loadViewIfNeeded];
+    [engine notifyViewRenderingSurfaceCreated:flutter::kFlutterImplicitViewId];
+    weakReplacementObserver =
+        engine.flutterViewControllerWillDeallocObservers[@(flutter::kFlutterImplicitViewId)];
+    XCTAssertNotNil(weakReplacementObserver);
+    XCTAssertEqual(fake_delegate.on_platform_view_created_calls_, 2);
+    XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 1);
+    oldViewController = nil;
+  }
+  XCTAssertNil(weakOldViewController);
+  XCTAssertNil(weakOldLayer);
+  XCTAssertNil(weakOldObserver);
+  XCTAssertEqual(engine.viewController, replacement);
+  XCTAssertEqual(platform_view->GetOwnerViewController(), replacement);
+  XCTAssertEqual(engine.flutterViewControllerWillDeallocObservers.count, 1UL);
+  XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 1);
+
+  @autoreleasepool {
+    [engine setViewController:nil];
+  }
+  XCTAssertNil(weakReplacementObserver);
+  XCTAssertEqual(engine.flutterViewControllerWillDeallocObservers.count, 0UL);
+  XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 2);
+  XCTAssertTrue(fake_delegate.added_view_ids_.empty());
+  XCTAssertTrue(fake_delegate.removed_view_ids_.empty());
 }
 
 - (void)testRemovingSecondaryViewControllerKeepsOtherControllerMappings {

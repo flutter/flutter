@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import <OCMock/OCMock.h>
+#import <QuartzCore/QuartzCore.h>
 #import <XCTest/XCTest.h>
 
 #include "flutter/common/constants.h"
@@ -18,6 +19,16 @@ FLUTTER_ASSERT_ARC
 
 namespace {
 constexpr int64_t kSecondaryFlutterViewId = flutter::kFlutterImplicitViewId + 1;
+
+FlutterViewController* CreateMockViewController(int64_t view_id, CALayer* layer) {
+  id flutter_view = OCMClassMock([FlutterView class]);
+  OCMStub([flutter_view layer]).andReturn(layer);
+  id controller = OCMClassMock([FlutterViewController class]);
+  OCMStub([controller isViewLoaded]).andReturn(YES);
+  OCMStub([controller view]).andReturn(flutter_view);
+  OCMStub([controller viewIdentifier]).andReturn(view_id);
+  return controller;
+}
 }  // namespace
 
 namespace flutter {
@@ -28,9 +39,13 @@ class MockDelegate : public PlatformView::Delegate {
  public:
   void OnPlatformViewCreated(std::unique_ptr<Surface> surface) override {
     on_platform_view_created_calls_++;
+    surface_ = std::move(surface);
   }
-  void OnPlatformViewDestroyed() override { on_platform_view_destroyed_calls_++; }
-  void OnPlatformViewScheduleFrame() override {}
+  void OnPlatformViewDestroyed() override {
+    on_platform_view_destroyed_calls_++;
+    surface_.reset();
+  }
+  void OnPlatformViewScheduleFrame() override { on_platform_view_schedule_frame_calls_++; }
   void OnPlatformViewAddView(int64_t view_id,
                              const ViewportMetrics& viewport_metrics,
                              AddViewCallback callback) override {}
@@ -68,6 +83,18 @@ class MockDelegate : public PlatformView::Delegate {
   flutter::Settings settings_;
   int on_platform_view_created_calls_ = 0;
   int on_platform_view_destroyed_calls_ = 0;
+  int on_platform_view_schedule_frame_calls_ = 0;
+  std::unique_ptr<Surface> surface_;
+};
+
+class InvalidIOSContext : public IOSContext {
+ public:
+  IOSRenderingBackend GetBackend() const override { return IOSRenderingBackend::kImpeller; }
+
+  std::unique_ptr<Texture> CreateExternalTexture(int64_t texture_id,
+                                                 NSObject<FlutterTexture>* texture) override {
+    return nullptr;
+  }
 };
 
 }  // namespace
@@ -194,19 +221,152 @@ class MockDelegate : public PlatformView::Delegate {
     platform_view->SetOwnerViewController(implicitViewController);
     platform_view->AddOwnerViewController(secondaryViewController);
 
-    platform_view->NotifyCreated(flutter::kFlutterImplicitViewId);
+    platform_view->NotifyViewRenderingSurfaceCreated(flutter::kFlutterImplicitViewId);
     XCTAssertEqual(mock_delegate.on_platform_view_created_calls_, 1);
 
-    platform_view->NotifyCreated(kSecondaryFlutterViewId);
+    platform_view->NotifyViewRenderingSurfaceCreated(flutter::kFlutterImplicitViewId);
     XCTAssertEqual(mock_delegate.on_platform_view_created_calls_, 1);
+    XCTAssertEqual(mock_delegate.on_platform_view_schedule_frame_calls_, 0);
 
-    platform_view->NotifyDestroyed(kSecondaryFlutterViewId);
+    platform_view->NotifyViewRenderingSurfaceCreated(kSecondaryFlutterViewId);
+    XCTAssertEqual(mock_delegate.on_platform_view_created_calls_, 1);
+    XCTAssertEqual(mock_delegate.on_platform_view_schedule_frame_calls_, 1);
+
+    platform_view->NotifyViewRenderingSurfaceDestroyed(kSecondaryFlutterViewId);
     XCTAssertEqual(mock_delegate.on_platform_view_destroyed_calls_, 0);
+
+    platform_view->NotifyViewRenderingSurfaceDestroyed(kSecondaryFlutterViewId);
+    XCTAssertEqual(mock_delegate.on_platform_view_destroyed_calls_, 0);
+
+    platform_view->NotifyViewRenderingSurfaceCreated(kSecondaryFlutterViewId);
+    XCTAssertEqual(mock_delegate.on_platform_view_created_calls_, 1);
+    XCTAssertEqual(mock_delegate.on_platform_view_schedule_frame_calls_, 2);
 
     platform_view->RemoveOwnerViewController(kSecondaryFlutterViewId);
     XCTAssertEqual(platform_view->GetOwnerViewController(), implicitViewController);
+    XCTAssertEqual(mock_delegate.on_platform_view_destroyed_calls_, 0);
 
-    platform_view->NotifyDestroyed(flutter::kFlutterImplicitViewId);
+    platform_view->NotifyViewRenderingSurfaceDestroyed(flutter::kFlutterImplicitViewId);
+    XCTAssertEqual(mock_delegate.on_platform_view_destroyed_calls_, 1);
+
+    platform_view->NotifyViewRenderingSurfaceDestroyed(flutter::kFlutterImplicitViewId);
+    XCTAssertEqual(mock_delegate.on_platform_view_destroyed_calls_, 1);
+
+    platform_view->NotifyViewRenderingSurfaceCreated(flutter::kFlutterImplicitViewId);
+    XCTAssertEqual(mock_delegate.on_platform_view_created_calls_, 2);
+
+    platform_view->RemoveOwnerViewController(flutter::kFlutterImplicitViewId);
+    XCTAssertEqual(mock_delegate.on_platform_view_destroyed_calls_, 2);
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
+- (void)testSurfaceCreationCanRetryAfterViewAttachment {
+  flutter::MockDelegate mock_delegate;
+  fml::Thread platform_thread("PlatformViewIOSTest.platform");
+  fml::Thread raster_thread("PlatformViewIOSTest.raster");
+  auto platform_runner = platform_thread.GetTaskRunner();
+  flutter::TaskRunners runners(self.name.UTF8String, platform_runner, raster_thread.GetTaskRunner(),
+                               platform_runner, platform_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      mock_delegate, flutter::IOSRenderingAPI::kMetal, nil, runners, nullptr,
+      std::make_shared<fml::SyncSwitch>());
+  FlutterViewController* controller =
+      CreateMockViewController(flutter::kFlutterImplicitViewId, [CAMetalLayer layer]);
+
+  fml::AutoResetWaitableEvent latch;
+  platform_runner->PostTask([&] {
+    platform_view->NotifyViewRenderingSurfaceCreated(flutter::kFlutterImplicitViewId);
+    platform_view->NotifyViewRenderingSurfaceDestroyed(flutter::kFlutterImplicitViewId);
+    XCTAssertEqual(mock_delegate.on_platform_view_created_calls_, 0);
+    XCTAssertEqual(mock_delegate.on_platform_view_destroyed_calls_, 0);
+
+    platform_view->SetOwnerViewController(controller);
+    platform_view->NotifyViewRenderingSurfaceCreated(flutter::kFlutterImplicitViewId);
+    XCTAssertEqual(mock_delegate.on_platform_view_created_calls_, 1);
+    XCTAssertTrue(mock_delegate.surface_ && mock_delegate.surface_->IsValid());
+
+    platform_view->NotifyViewRenderingSurfaceCreated(kSecondaryFlutterViewId);
+    platform_view->NotifyViewRenderingSurfaceDestroyed(kSecondaryFlutterViewId);
+    XCTAssertEqual(mock_delegate.on_platform_view_created_calls_, 1);
+    XCTAssertEqual(mock_delegate.on_platform_view_destroyed_calls_, 0);
+    XCTAssertEqual(mock_delegate.on_platform_view_schedule_frame_calls_, 0);
+
+    platform_view->SetOwnerViewController(nil);
+    XCTAssertEqual(mock_delegate.on_platform_view_destroyed_calls_, 1);
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
+- (void)testInvalidContextDoesNotActivateRenderingSurface {
+  flutter::MockDelegate mock_delegate;
+  fml::Thread thread("PlatformViewIOSTest");
+  auto runner = thread.GetTaskRunner();
+  flutter::TaskRunners runners(self.name.UTF8String, runner, runner, runner, runner);
+  auto context = std::make_shared<flutter::InvalidIOSContext>();
+  auto platform_view =
+      std::make_unique<flutter::PlatformViewIOS>(mock_delegate, context, nil, runners);
+  FlutterViewController* controller =
+      CreateMockViewController(flutter::kFlutterImplicitViewId, [CAMetalLayer layer]);
+
+  fml::AutoResetWaitableEvent latch;
+  runner->PostTask([&] {
+    platform_view->SetOwnerViewController(controller);
+    platform_view->NotifyViewRenderingSurfaceCreated(flutter::kFlutterImplicitViewId);
+    platform_view->NotifyViewRenderingSurfaceCreated(flutter::kFlutterImplicitViewId);
+    platform_view->RemoveOwnerViewController(flutter::kFlutterImplicitViewId);
+    XCTAssertEqual(mock_delegate.on_platform_view_created_calls_, 0);
+    XCTAssertEqual(mock_delegate.on_platform_view_destroyed_calls_, 0);
+    XCTAssertEqual(mock_delegate.on_platform_view_schedule_frame_calls_, 0);
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
+- (void)testRootSurfaceSurvivesRemovalOfFirstView {
+  flutter::MockDelegate mock_delegate;
+  fml::Thread thread("PlatformViewIOSTest");
+  auto runner = thread.GetTaskRunner();
+  flutter::TaskRunners runners(self.name.UTF8String, runner, runner, runner, runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      mock_delegate, flutter::IOSRenderingAPI::kMetal, nil, runners, nullptr,
+      std::make_shared<fml::SyncSwitch>());
+  FlutterViewController* secondary_controller =
+      CreateMockViewController(kSecondaryFlutterViewId, [CAMetalLayer layer]);
+
+  fml::AutoResetWaitableEvent latch;
+  runner->PostTask([&] {
+    __weak CALayer* first_layer;
+    @autoreleasepool {
+      CALayer* layer = [CAMetalLayer layer];
+      first_layer = layer;
+      id controller = CreateMockViewController(flutter::kFlutterImplicitViewId, layer);
+      platform_view->SetOwnerViewController(controller);
+      platform_view->NotifyViewRenderingSurfaceCreated(flutter::kFlutterImplicitViewId);
+      platform_view->AddOwnerViewController(secondary_controller);
+      platform_view->NotifyViewRenderingSurfaceCreated(kSecondaryFlutterViewId);
+
+      platform_view->RemoveOwnerViewController(flutter::kFlutterImplicitViewId);
+      [controller stopMocking];
+    }
+    XCTAssertNil(first_layer);
+    XCTAssertEqual(mock_delegate.on_platform_view_created_calls_, 1);
+    XCTAssertEqual(mock_delegate.on_platform_view_destroyed_calls_, 0);
+    XCTAssertTrue(mock_delegate.surface_ != nullptr);
+    if (mock_delegate.surface_) {
+      XCTAssertFalse(mock_delegate.surface_->AllowsDrawingWhenGpuDisabled());
+      XCTAssertEqual(mock_delegate.surface_->GetAiksContext().get(),
+                     platform_view->GetIosContext()->GetAiksContext().get());
+      auto frame = mock_delegate.surface_->AcquireFrame(flutter::DlISize(10, 10));
+      XCTAssertTrue(frame != nullptr);
+      if (frame) {
+        XCTAssertTrue(frame->Submit());
+      }
+    }
+
+    platform_view->RemoveOwnerViewController(kSecondaryFlutterViewId);
     XCTAssertEqual(mock_delegate.on_platform_view_destroyed_calls_, 1);
     latch.Signal();
   });
