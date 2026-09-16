@@ -1334,7 +1334,6 @@ class ListView extends BoxScrollView {
   /// * Set [shrinkWrap] to true if you want the list to only occupy
   ///   the space its children need (Note: use this sparingly as it computes the
   ///   size of all children, which hurts performance on large lists).
-  ///   size of all children, which hurts performance on large lists).
   ListView({
     super.key,
     super.scrollDirection,
