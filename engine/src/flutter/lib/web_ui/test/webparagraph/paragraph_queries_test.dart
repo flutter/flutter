@@ -75,9 +75,7 @@ Future<void> testMain() async {
       const ui.TextRange(start: text.length, end: text.length),
     );
     expect(
-      paragraph.getWordBoundary(
-        const ui.TextPosition(offset: text.length, affinity: ui.TextAffinity.downstream),
-      ),
+      paragraph.getWordBoundary(const ui.TextPosition(offset: text.length)),
       const ui.TextRange(start: text.length, end: text.length),
     );
   });
@@ -155,14 +153,14 @@ Future<void> testMain() async {
       paragraph.getLineBoundary(
         const ui.TextPosition(offset: -1 /* affinity: ui.TextAffinity.downstream */),
       ),
-      const ui.TextRange(start: -1, end: -1),
+      ui.TextRange.empty,
     );
 
     expect(
       paragraph.getLineBoundary(
         const ui.TextPosition(offset: text.length + 1, affinity: ui.TextAffinity.upstream),
       ),
-      const ui.TextRange(start: -1, end: -1),
+      ui.TextRange.empty,
     );
   });
 
