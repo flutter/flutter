@@ -61,26 +61,17 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   /// The remaining '*Format' arguments uses the intl package to provide
   /// [DateFormat] configurations for the `localeName`.
   const GlobalCupertinoLocalizations({
-    required String localeName,
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat dayFormat,
-    required intl.DateFormat weekdayFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat singleDigitHourFormat,
-    required intl.DateFormat singleDigitMinuteFormat,
-    required intl.DateFormat doubleDigitMinuteFormat,
-    required intl.DateFormat singleDigitSecondFormat,
-    required intl.NumberFormat decimalFormat,
-  }) : _localeName = localeName,
-       _fullYearFormat = fullYearFormat,
-       _dayFormat = dayFormat,
-       _weekdayFormat = weekdayFormat,
-       _mediumDateFormat = mediumDateFormat,
-       _singleDigitHourFormat = singleDigitHourFormat,
-       _singleDigitMinuteFormat = singleDigitMinuteFormat,
-       _doubleDigitMinuteFormat = doubleDigitMinuteFormat,
-       _singleDigitSecondFormat = singleDigitSecondFormat,
-       _decimalFormat = decimalFormat;
+    required this._localeName,
+    required this._fullYearFormat,
+    required this._dayFormat,
+    required this._weekdayFormat,
+    required this._mediumDateFormat,
+    required this._singleDigitHourFormat,
+    required this._singleDigitMinuteFormat,
+    required this._doubleDigitMinuteFormat,
+    required this._singleDigitSecondFormat,
+    required this._decimalFormat,
+  });
 
   final String _localeName;
   final intl.DateFormat _fullYearFormat;
