@@ -394,7 +394,7 @@ abstract class FlutterCommand extends Command<void> {
     if (rest != null && rest.isNotEmpty) {
       return rest.first;
     }
-    return bundle.defaultMainPath;
+    return toolContext?.fs.path.join('lib', 'main.dart') ?? bundle.defaultMainPath;
   }
 
   /// Indicates if the current command running has a terminal attached.
@@ -794,16 +794,6 @@ abstract class FlutterCommand extends Command<void> {
     CommonOptions.treeShakeIcons.addTo(argParser, hideOverride: enabledByDefault == false);
   }
 
-  void addShrinkingFlag({required bool verboseHelp}) {
-    argParser.addFlag(
-      'shrink',
-      hide: !verboseHelp,
-      help:
-          'This flag has no effect. Code shrinking is always enabled in release builds. '
-          'To learn more, see: https://developer.android.com/studio/build/shrink-code',
-    );
-  }
-
   void usesFrontendServerStarterPathOption({required bool verboseHelp}) {
     BuildInfoOptions.frontendServerStarterPath.addTo(argParser, verboseHelp: verboseHelp);
   }
@@ -867,14 +857,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addIgnoreDeprecationOption({bool hide = false}) {
-    argParser.addFlag(
-      'ignore-deprecation',
-      negatable: false,
-      help:
-          'Indicates that the app should ignore deprecation warnings and continue to build '
-          'using deprecated APIs. Use of this flag may cause your app to fail to build when '
-          'deprecated APIs are removed.',
-    );
+    BuildInfoOptions.ignoreDeprecation.addTo(argParser, hideOverride: hide);
   }
 
   /// Adds build options common to all of the desktop build commands.
@@ -1018,7 +1001,7 @@ abstract class FlutterCommand extends Command<void> {
   /// This is only a default. Gradle injects it when the merged manifest does
   /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
   /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
-  bool get enableHcpp => explicitEnableHcpp ?? featureFlags.isHcppEnabled;
+  bool get enableHcpp => explicitEnableHcpp ?? runner?.featureFlags?.isHcppEnabled ?? false;
 
   void addTestFlag({required bool verboseHelp}) {
     argParser.addDescriptor(DebuggingOptionDescriptors.testFlag, verboseHelp: verboseHelp);
@@ -1245,8 +1228,13 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
-    final String enabledFeatureFlags = featureFlags.allFeatures
-        .where((Feature feature) => featureFlags.isEnabled(feature))
+    final FeatureFlags? flags = runner?.featureFlags;
+    if (flags == null) {
+      return;
+    }
+
+    final String enabledFeatureFlags = flags.allFeatures
+        .where((Feature feature) => flags.isEnabled(feature))
         .where((Feature feature) => feature.runtimeId != null)
         .map((Feature feature) => feature.runtimeId!)
         .join(',');

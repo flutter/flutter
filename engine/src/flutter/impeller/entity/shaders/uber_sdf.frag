@@ -306,19 +306,17 @@ vec2 filledSDF(vec2 p) {
 vec2 strokedSDF(vec2 p) {
   vec2 base_sdf_and_pixel_size = filledSDF(p);
   float base_sdf = base_sdf_and_pixel_size.x;
-  float base_pixel_size = base_sdf_and_pixel_size.y;
+  float pixel_size = base_sdf_and_pixel_size.y;
 
-  float half_stroke = max(frag_info.stroke_width, base_pixel_size) * 0.5;
+  float half_stroke = max(frag_info.stroke_width, pixel_size) * 0.5;
 
   float sdf;
-  float pixel_size;
   if (frag_info.type >= 0.5 && frag_info.type < 1.5 &&
       frag_info.stroke_join < 0.5) {
     // Rect with Miter join
     float outer = distanceFromRect(p, frag_info.size + half_stroke);
     float inner = base_sdf + half_stroke;
     sdf = max(outer, -inner);
-    pixel_size = pixelSize(sdf);
   } else if (frag_info.type >= 0.5 && frag_info.type < 1.5 &&
              frag_info.stroke_join >= 0.5 && frag_info.stroke_join < 1.5) {
     // Rect with Bevel join
@@ -326,13 +324,9 @@ vec2 strokedSDF(vec2 p) {
         distanceFromChamferRect(p, frag_info.size + half_stroke, half_stroke);
     float inner = base_sdf + half_stroke;
     sdf = max(outer, -inner);
-    pixel_size = pixelSize(sdf);
   } else {
     // All other shapes
-    vec2 sdf_and_pixel_size =
-        SDFStroke(base_sdf, base_pixel_size, frag_info.stroke_width);
-    sdf = sdf_and_pixel_size.x;
-    pixel_size = sdf_and_pixel_size.y;
+    sdf = SDFStroke(base_sdf, pixel_size, frag_info.stroke_width).x;
   }
   return vec2(sdf, pixel_size);
 }
