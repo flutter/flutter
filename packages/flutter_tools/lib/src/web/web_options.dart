@@ -306,6 +306,19 @@ abstract final class WebOptions {
         'Multiple flags can be passed by repeating "--web-browser-flag" multiple times.',
   );
 
+  // Positive flag (defaults on); pass --no-web-browser-default-flags to opt out.
+  static const webBrowserDefaultFlags = FlagOptionDescriptor(
+    name: 'web-browser-default-flags',
+    defaultsTo: true,
+    verboseOnly: true,
+    help:
+        'Whether to pass Flutter\'s default browser launch flags (for example "--bwsi" and '
+        '"--disable-extensions"). Essential flags such as "--user-data-dir" and '
+        '"--remote-debugging-port" are always applied. Use "--no-web-browser-default-flags" '
+        'with "--web-browser-flag" to supply your own flags without Flutter defaults.\n'
+        'Currently only Chrome supports this option.',
+  );
+
   static const crossOriginIsolation = NullableFlagOptionDescriptor(
     name: 'cross-origin-isolation',
     verboseOnly: true,
