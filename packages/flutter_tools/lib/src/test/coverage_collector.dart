@@ -7,10 +7,9 @@ import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../context/tool_context.dart';
 import '../vmservice.dart';
 import 'test_device.dart';
 import 'test_time_recorder.dart';
@@ -19,12 +18,8 @@ import 'watcher.dart';
 /// A class that collects code coverage data during test runs.
 class CoverageCollector extends TestWatcher {
   CoverageCollector({
-    required this.fileSystem,
-    required this.logger,
-    required this._os,
     required this.packagesPath,
-    required this.platform,
-    required this.processUtils,
+    required this._toolContext,
     this.branchCoverage = false,
     this.libraryNames,
     this.resolver,
@@ -32,11 +27,7 @@ class CoverageCollector extends TestWatcher {
     this.verbose = true,
   });
 
-  final FileSystem fileSystem;
-  final Logger logger;
-  final OperatingSystemUtils _os;
-  final Platform platform;
-  final ProcessUtils processUtils;
+  final ToolContext _toolContext;
 
   /// True when log messages should be emitted.
   final bool verbose;
@@ -82,9 +73,9 @@ class CoverageCollector extends TestWatcher {
       return;
     }
     if (error) {
-      logger.printError(line);
+      _toolContext.logger.printError(line);
     } else {
-      logger.printTrace(line);
+      _toolContext.logger.printTrace(line);
     }
   }
 
@@ -109,7 +100,8 @@ class CoverageCollector extends TestWatcher {
     // This may not be a safe assumption in non-standard environments, such as
     // when building under build systems such as Bazel. In those cases, this
     // getter should be overridden.
-    return fileSystem.directory(fileSystem.file(packagesPath).dirname).dirname;
+    final FileSystem fs = _toolContext.fs;
+    return fs.directory(fs.file(packagesPath).dirname).dirname;
   }
 
   /// Collects coverage for an isolate using the given `port`.
@@ -222,7 +214,7 @@ class CoverageCollector extends TestWatcher {
     if (formatter == null) {
       final coverage.Resolver usedResolver =
           resolver ?? this.resolver ?? await CoverageCollector.getResolver(packagesPath);
-      final String packagePath = fileSystem.currentDirectory.path;
+      final String packagePath = _toolContext.fs.currentDirectory.path;
       // find paths for libraryNames so we can include them to report
       final List<String>? libraryPaths = libraryNames
           ?.map((String e) => usedResolver.resolve('package:$e'))
@@ -250,19 +242,20 @@ class CoverageCollector extends TestWatcher {
       return false;
     }
 
-    final File coverageFile = fileSystem.file(coveragePath)
+    final ToolContext(:FileSystem fs, :Platform platform) = _toolContext;
+    final File coverageFile = fs.file(coveragePath)
       ..createSync(recursive: true)
       ..writeAsStringSync(coverageData, flush: true);
     _logMessage('wrote coverage data to $coveragePath (size=${coverageData.length})');
 
     const baseCoverageData = 'coverage/lcov.base.info';
     if (mergeCoverageData) {
-      if (!fileSystem.isFileSync(baseCoverageData)) {
+      if (!fs.isFileSync(baseCoverageData)) {
         _logMessage('Missing "$baseCoverageData". Unable to merge coverage data.', error: true);
         return false;
       }
 
-      if (_os.which('lcov') == null) {
+      if (_toolContext.os.which('lcov') == null) {
         var installMessage = 'Please install lcov.';
         if (platform.isLinux) {
           installMessage = 'Consider running "sudo apt-get install lcov".';
@@ -276,14 +269,14 @@ class CoverageCollector extends TestWatcher {
         return false;
       }
 
-      final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
+      final Directory tempDir = fs.systemTempDirectory.createTempSync(
         'flutter_tools_test_coverage.',
       );
       try {
         final File sourceFile = coverageFile.copySync(
-          fileSystem.path.join(tempDir.path, 'lcov.source.info'),
+          fs.path.join(tempDir.path, 'lcov.source.info'),
         );
-        final RunResult result = processUtils.runSync(<String>[
+        final RunResult result = _toolContext.processUtils.runSync(<String>[
           'lcov',
           '--add-tracefile',
           baseCoverageData,

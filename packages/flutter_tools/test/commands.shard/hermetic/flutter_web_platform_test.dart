@@ -117,7 +117,6 @@ void main() {
       final server = FakeServer();
       final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
         'ProjectRoot',
-        artifacts: artifacts,
         buildDirectory: fileSystem.directory('build'),
         buildInfo: const BuildInfo(
           BuildMode.debug,
@@ -129,11 +128,8 @@ void main() {
         ),
         chromiumLauncher: chromiumLauncher,
         crossOriginIsolation: false,
-        fileSystem: fileSystem,
         flutterProject: FlutterProject.fromDirectoryTest(tempDir),
         flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
-        logger: logger,
-        processManager: processManager,
         toolContext: FakeToolContext(
           artifacts: artifacts,
           fs: fileSystem,
@@ -195,7 +191,6 @@ void main() {
 
       final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
         'ProjectRoot',
-        artifacts: artifacts,
         buildDirectory: fileSystem.directory('build'),
         buildInfo: const BuildInfo(
           BuildMode.debug,
@@ -207,11 +202,8 @@ void main() {
         ),
         chromiumLauncher: chromiumLauncher,
         crossOriginIsolation: false,
-        fileSystem: fileSystem,
         flutterProject: FlutterProject.fromDirectoryTest(tempDir),
         flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
-        logger: logger,
-        processManager: processManager,
         toolContext: FakeToolContext(
           artifacts: artifacts,
           fs: fileSystem,
@@ -272,7 +264,6 @@ void main() {
       final server = FakeServer();
       final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
         'ProjectRoot',
-        artifacts: artifacts,
         buildDirectory: fileSystem.directory('build'),
         buildInfo: const BuildInfo(
           BuildMode.debug,
@@ -283,11 +274,8 @@ void main() {
         ),
         chromiumLauncher: recordingLauncher,
         crossOriginIsolation: false,
-        fileSystem: fileSystem,
         flutterProject: FlutterProject.fromDirectoryTest(tempDir),
         flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
-        logger: logger,
-        processManager: processManager,
         toolContext: FakeToolContext(
           artifacts: artifacts,
           fs: fileSystem,

@@ -370,14 +370,16 @@ void main() {
 
       final String packagesPath = packagesFile.path;
       final collector = CoverageCollector(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        os: FakeOperatingSystemUtils(),
         packagesPath: packagesPath,
-        platform: const LocalPlatform(),
-        processUtils: ProcessUtils(
+        toolContext: FakeToolContext(
+          fs: fileSystem,
           logger: BufferLogger.test(),
-          processManager: FakeProcessManager.any(),
+          os: FakeOperatingSystemUtils(),
+          platform: const LocalPlatform(),
+          processUtils: ProcessUtils(
+            logger: BufferLogger.test(),
+            processManager: FakeProcessManager.any(),
+          ),
         ),
         libraryNames: <String>{'foo', 'bar'},
         resolver: await CoverageCollector.getResolver(packagesPath),
@@ -459,14 +461,16 @@ void main() {
 
       final String packagesPath = packagesFile.path;
       final collector = CoverageCollector(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        os: FakeOperatingSystemUtils(),
         packagesPath: packagesPath,
-        platform: const LocalPlatform(),
-        processUtils: ProcessUtils(
+        toolContext: FakeToolContext(
+          fs: fileSystem,
           logger: BufferLogger.test(),
-          processManager: FakeProcessManager.any(),
+          os: FakeOperatingSystemUtils(),
+          platform: const LocalPlatform(),
+          processUtils: ProcessUtils(
+            logger: BufferLogger.test(),
+            processManager: FakeProcessManager.any(),
+          ),
         ),
         libraryNames: <String>{'foo', 'bar'},
         resolver: await CoverageCollector.getResolver(packagesPath),
@@ -509,14 +513,16 @@ void main() {
 
       final String packagesPath = packagesFile.path;
       var collector = CoverageCollector(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        os: FakeOperatingSystemUtils(),
         packagesPath: packagesPath,
-        platform: const LocalPlatform(),
-        processUtils: ProcessUtils(
+        toolContext: FakeToolContext(
+          fs: fileSystem,
           logger: BufferLogger.test(),
-          processManager: FakeProcessManager.any(),
+          os: FakeOperatingSystemUtils(),
+          platform: const LocalPlatform(),
+          processUtils: ProcessUtils(
+            logger: BufferLogger.test(),
+            processManager: FakeProcessManager.any(),
+          ),
         ),
         libraryNames: <String>{'foo', 'bar'},
         resolver: await CoverageCollector.getResolver(packagesPath),
@@ -534,14 +540,16 @@ void main() {
       expect(report, contains('bar.dart'));
 
       collector = CoverageCollector(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        os: FakeOperatingSystemUtils(),
         packagesPath: packagesPath,
-        platform: const LocalPlatform(),
-        processUtils: ProcessUtils(
+        toolContext: FakeToolContext(
+          fs: fileSystem,
           logger: BufferLogger.test(),
-          processManager: FakeProcessManager.any(),
+          os: FakeOperatingSystemUtils(),
+          platform: const LocalPlatform(),
+          processUtils: ProcessUtils(
+            logger: BufferLogger.test(),
+            processManager: FakeProcessManager.any(),
+          ),
         ),
         libraryNames: <String>{'foo'},
         resolver: await CoverageCollector.getResolver(packagesPath),
@@ -578,12 +586,14 @@ void main() {
         final logger = LoggingLogger();
         final testTimeRecorder = TestTimeRecorder(logger);
         final collector = CoverageCollector(
-          fileSystem: fileSystem,
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
           packagesPath: packagesPath,
-          platform: const LocalPlatform(),
-          processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.any()),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            os: FakeOperatingSystemUtils(),
+            platform: const LocalPlatform(),
+            processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.any()),
+          ),
           libraryNames: <String>{'foo', 'bar'},
           resolver: await CoverageCollector.getResolver(packagesPath),
           testTimeRecorder: testTimeRecorder,

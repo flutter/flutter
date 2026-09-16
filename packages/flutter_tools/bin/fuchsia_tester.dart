@@ -117,6 +117,14 @@ Future<void> run(List<String> args) async {
     // TODO(tvolkert): Remove once flutter_tester no longer looks for this.
     globals.fs.link(sdkRootDest.childFile('platform.dill').path).createSync('platform_strong.dill');
 
+    final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+      artifacts: globals.artifacts,
+      fs: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+      processManager: globals.processManager,
+    );
+
     Directory? testDirectory;
     CoverageCollector? collector;
     if (argResults['coverage'] as bool? ?? false) {
@@ -130,13 +138,9 @@ Future<void> run(List<String> args) async {
       );
       collector = CoverageCollector(
         packagesPath: packagesPath,
+        toolContext: dependencies.toolContext,
         libraryNames: libraryNames,
         resolver: await CoverageCollector.getResolver(packagesPath),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        platform: globals.platform,
-        processUtils: globals.processUtils,
-        os: globals.os,
       );
       if (!argResults.options.contains(_kOptionTestDirectory)) {
         throwToolExit('Use of --coverage requires setting --test-directory');
@@ -163,13 +167,6 @@ Future<void> run(List<String> args) async {
       packageConfigPath: globals.fs.path.normalize(
         globals.fs.path.absolute(argResults[_kOptionPackages] as String),
       ),
-    );
-    final ToolDependencies dependencies = await ToolDependencies.bootstrap(
-      artifacts: globals.artifacts,
-      fs: globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
-      processManager: globals.processManager,
     );
     final testRunner = FlutterTestRunner(toolContext: dependencies.toolContext);
     exitCode = await testRunner.runTests(

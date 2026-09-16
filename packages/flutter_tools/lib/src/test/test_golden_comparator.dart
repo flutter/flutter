@@ -6,12 +6,12 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import 'test_compiler.dart';
 import 'test_config.dart';
@@ -32,32 +32,26 @@ import 'test_config.dart';
 /// ```dart
 /// final comparator = TestGoldenComparator(
 ///   flutterTesterBinPath: '/path/to/flutter_tester',
-///   logger: ...,
-///   fileSystem: ...,
-///   processManager: ...,
-/// )
+///   toolContext: ...,
+/// );
 ///
 /// final result = await comparator.compare(testUri, bytes, goldenKey);
 /// ```
 final class TestGoldenComparator {
   /// Creates a [TestGoldenComparator] instance.
   TestGoldenComparator({
-    required this._flutterTesterBinPath,
     required this._compilerFactory,
-    required this._logger,
-    required FileSystem fileSystem,
-    required this._processManager,
+    required this._flutterTesterBinPath,
+    required this._toolContext,
     this._environment = const <String, String>{},
-  }) : _tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform.'),
-       _fileSystem = fileSystem;
+  }) {
+    _tempDir = _toolContext.fs.systemTempDirectory.createTempSync('flutter_web_platform.');
+  }
 
   final String _flutterTesterBinPath;
-  final Directory _tempDir;
-  final Logger _logger;
-  final FileSystem _fileSystem;
-  final ProcessManager _processManager;
+  late final Directory _tempDir;
+  final ToolContext _toolContext;
   final Map<String, String> _environment;
-
   final TestCompiler Function() _compilerFactory;
   late final TestCompiler _compiler = _compilerFactory();
 
@@ -81,16 +75,16 @@ final class TestGoldenComparator {
     }
 
     final String bootstrap = TestGoldenComparatorProcess.generateBootstrap(
-      _fileSystem.file(testUri),
+      _toolContext.fs.file(testUri),
       testUri,
-      logger: _logger,
+      logger: _toolContext.logger,
     );
     final Process? process = await _startProcess(bootstrap);
     if (process == null) {
       return null;
     }
     unawaited(_previousComparator?.close());
-    _previousComparator = TestGoldenComparatorProcess(process, logger: _logger);
+    _previousComparator = TestGoldenComparatorProcess(process, logger: _toolContext.logger);
     _previousTestUri = testUri;
 
     return _previousComparator!;
@@ -104,7 +98,9 @@ final class TestGoldenComparator {
     final TestCompilerResult result = await _compiler.compile(listenerFile.uri);
     switch (result) {
       case TestCompilerFailure(:final String error):
-        _logger.printWarning('An error occurred compiling ${listenerFile.uri}: $error.');
+        _toolContext.logger.printWarning(
+          'An error occurred compiling ${listenerFile.uri}: $error.',
+        );
         return null;
       case TestCompilerComplete(:final String outputPath):
         final command = <String>[
@@ -114,7 +110,7 @@ final class TestGoldenComparator {
           outputPath,
         ];
 
-        return _processManager.start(command, environment: _environment);
+        return _toolContext.processManager.start(command, environment: _environment);
     }
   }
 

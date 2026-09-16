@@ -636,17 +636,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         buildInfo.packageConfig,
       );
       collector = CoverageCollector(
-        verbose: !outputMachineFormat,
-        libraryNames: packagesToInclude,
         packagesPath: buildInfo.packageConfigPath,
+        toolContext: _toolContext,
+        branchCoverage: boolArg('branch-coverage'),
+        libraryNames: packagesToInclude,
         resolver: await CoverageCollector.getResolver(buildInfo.packageConfigPath),
         testTimeRecorder: testTimeRecorder,
-        branchCoverage: boolArg('branch-coverage'),
-        fileSystem: fs,
-        logger: logger,
-        platform: platform,
-        processUtils: processUtils,
-        os: os,
+        verbose: !outputMachineFormat,
       );
     }
 
@@ -852,7 +848,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    if (_needsRebuild(assetBundle.entries, flavor, fs)) {
+    if (_needsRebuild(assetBundle.entries, flavor)) {
       final Config config = _toolContext.config;
       await writeBundle(
         fs.directory(fs.path.join(getBuildDirectory(config, fs), 'unit_test_assets')),
@@ -880,12 +876,12 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
   }
 
-  bool _needsRebuild(Map<String, AssetBundleEntry> entries, String? flavor, FileSystem fs) {
+  bool _needsRebuild(Map<String, AssetBundleEntry> entries, String? flavor) {
     // TODO(andrewkolos): This logic might fail in the future if we change the
     //  schema of the contents of the asset manifest file and the user does not
     //  perform a `flutter clean` after upgrading.
     //  See https://github.com/flutter/flutter/issues/128563.
-    final Config config = _toolContext.config;
+    final ToolContext(:Config config, :FileSystem fs) = _toolContext;
     final File manifest = fs.file(
       fs.path.join(getBuildDirectory(config, fs), 'unit_test_assets', 'AssetManifest.bin'),
     );

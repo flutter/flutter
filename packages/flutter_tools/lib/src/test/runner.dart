@@ -123,23 +123,14 @@ interface class FlutterTestRunner {
           .absolute
           .uri
           .toFilePath();
-      final WebMemoryFS result =
-          await WebTestCompiler(
-            logger: logger,
-            fileSystem: fs,
-            platform: platform,
-            artifacts: artifacts,
-            processManager: processManager,
-            config: config,
-            shutdownHooks: shutdownHooks,
-          ).initialize(
-            projectDirectory: flutterProject!.directory,
-            testOutputDir: tempBuildDir,
-            testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
-            buildInfo: debuggingOptions.buildInfo,
-            webRenderer: debuggingOptions.webRenderer,
-            useWasm: debuggingOptions.webUseWasm,
-          );
+      final WebMemoryFS result = await WebTestCompiler(toolContext: _toolContext).initialize(
+        projectDirectory: flutterProject!.directory,
+        testOutputDir: tempBuildDir,
+        testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
+        buildInfo: debuggingOptions.buildInfo,
+        webRenderer: debuggingOptions.webRenderer,
+        useWasm: debuggingOptions.webUseWasm,
+      );
       testArgs
         ..add('--platform=chrome')
         ..add('--')
@@ -147,7 +138,6 @@ interface class FlutterTestRunner {
       testWrapper.registerPlatformPlugin(<Runtime>[Runtime.chrome], () {
         return FlutterWebPlatform.start(
           flutterProject.directory.path,
-          artifacts: artifacts,
           buildDirectory: fs.directory(tempBuildDir),
           buildInfo: debuggingOptions.buildInfo,
           chromiumLauncher: ChromiumLauncher(
@@ -159,11 +149,8 @@ interface class FlutterTestRunner {
             logger: logger,
           ),
           crossOriginIsolation: debuggingOptions.webCrossOriginIsolation,
-          fileSystem: fs,
           flutterProject: flutterProject,
           flutterTesterBinPath: flutterTesterBinPath,
-          logger: logger,
-          processManager: processManager,
           toolContext: _toolContext,
           useWasm: debuggingOptions.webUseWasm,
           webMemoryFS: result,
@@ -229,9 +216,9 @@ interface class FlutterTestRunner {
   static Future<void> _generateIsolateSpawningTesterPackageConfig({
     required FlutterProject flutterProject,
     required File isolateSpawningTesterPackageConfigFile,
-    required FileSystem fileSystem,
+    required ToolContext toolContext,
   }) async {
-    final File packageConfigFile = fileSystem
+    final File packageConfigFile = toolContext.fs
         .directory(flutterProject.directory.path)
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
@@ -247,7 +234,7 @@ interface class FlutterTestRunner {
       // different package which does not use package:file. This inhibits
       // mocking the file system.
       projectPackageConfig = await findPackageConfig(
-        fileSystem.directory(flutterProject.directory.path),
+        toolContext.fs.directory(flutterProject.directory.path),
       );
     }
 
@@ -257,8 +244,8 @@ interface class FlutterTestRunner {
 
     // The flutter_tools package_config.json is guaranteed to include
     // package:ffi and package:test_core.
-    final File flutterToolsPackageConfigFile = fileSystem
-        .directory(fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'))
+    final File flutterToolsPackageConfigFile = toolContext.fs
+        .directory(toolContext.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'))
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
     final PackageConfig flutterToolsPackageConfig = PackageConfig.parseBytes(
@@ -282,13 +269,12 @@ interface class FlutterTestRunner {
 
   static void _generateChildTestIsolateSpawnerSourceFile(
     List<Uri> paths, {
-    required List<String> packageTestArgs,
     required bool autoUpdateGoldenFiles,
     required File childTestIsolateSpawnerSourceFile,
-    required FileSystem fileSystem,
-    required Platform platform,
-    required Logger logger,
+    required List<String> packageTestArgs,
+    required ToolContext toolContext,
   }) {
+    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform) = toolContext;
     final testConfigPaths = <String, String>{};
 
     final buffer = StringBuffer();
@@ -320,7 +306,7 @@ import 'package:test_api/backend.dart'; // flutter_ignore: test_api_import
       buffer.writeln("import '$sanitizedPath' as $sanitizedImport;");
       testImports[sanitizedPath] = sanitizedImport;
       final File? testConfigFile = findTestConfigFile(
-        fileSystem.file(
+        fs.file(
           platform.isWindows
               ? sanitizedPath.replaceAll('/', r'\').replaceFirst(r'\', '')
               : sanitizedPath,
@@ -570,19 +556,22 @@ class SpawnPlugin extends PlatformPlugin {
   }
 
   static Future<void> _compileFile({
-    required Artifacts artifacts,
     required BuildInfo buildInfo,
-    required Config config,
-    required FileSystem fileSystem,
-    required Logger logger,
     required File outputDillFile,
-    required Platform platform,
-    required ProcessManager processManager,
-    required ShutdownHooks shutdownHooks,
     required File sourceFile,
-    required TestTimeRecorder? testTimeRecorder,
+    required ToolContext toolContext,
     Uri? nativeAssetsYaml,
+    TestTimeRecorder? testTimeRecorder,
   }) async {
+    final ToolContext(
+      :Artifacts artifacts,
+      :Config config,
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+      :ShutdownHooks shutdownHooks,
+    ) = toolContext;
     logger.printTrace('Compiling ${sourceFile.absolute.uri}');
     final compilerTime = Stopwatch()..start();
     final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
@@ -595,7 +584,7 @@ class SpawnPlugin extends PlatformPlugin {
       buildInfo: buildInfo,
       platform: platform,
       testCompilation: true,
-      fileSystem: fileSystem,
+      fileSystem: fs,
       shutdownHooks: shutdownHooks,
       config: config,
     );
@@ -605,7 +594,7 @@ class SpawnPlugin extends PlatformPlugin {
       null,
       outputPath: outputDillFile.absolute.path,
       packageConfig: buildInfo.packageConfig,
-      fs: fileSystem,
+      fs: fs,
       nativeAssetsYaml: nativeAssetsYaml,
     );
     residentCompiler.accept();
@@ -673,7 +662,7 @@ class SpawnPlugin extends PlatformPlugin {
     await _generateIsolateSpawningTesterPackageConfig(
       flutterProject: flutterProject,
       isolateSpawningTesterPackageConfigFile: isolateSpawningTesterPackageConfigFile,
-      fileSystem: fs,
+      toolContext: _toolContext,
     );
     final PackageConfig isolateSpawningTesterPackageConfig = PackageConfig.parseBytes(
       isolateSpawningTesterPackageConfigFile.readAsBytesSync(),
@@ -716,12 +705,10 @@ class SpawnPlugin extends PlatformPlugin {
 
     _generateChildTestIsolateSpawnerSourceFile(
       testFiles,
-      packageTestArgs: packageTestArgs,
       autoUpdateGoldenFiles: updateGoldens,
       childTestIsolateSpawnerSourceFile: childTestIsolateSpawnerSourceFile,
-      fileSystem: fs,
-      platform: platform,
-      logger: logger,
+      packageTestArgs: packageTestArgs,
+      toolContext: _toolContext,
     );
 
     _generateRootTestIsolateSpawnerSourceFile(
@@ -736,30 +723,18 @@ class SpawnPlugin extends PlatformPlugin {
       packageConfigPath: isolateSpawningTesterPackageConfigFile.path,
     );
     await _compileFile(
-      artifacts: artifacts,
       buildInfo: buildInfo,
-      config: config,
-      fileSystem: fs,
-      logger: logger,
       outputDillFile: childTestIsolateSpawnerDillFile,
-      platform: platform,
-      processManager: processManager,
-      shutdownHooks: shutdownHooks,
       sourceFile: childTestIsolateSpawnerSourceFile,
+      toolContext: _toolContext,
       testTimeRecorder: testTimeRecorder,
     );
 
     await _compileFile(
-      artifacts: artifacts,
       buildInfo: buildInfo,
-      config: config,
-      fileSystem: fs,
-      logger: logger,
       outputDillFile: rootTestIsolateSpawnerDillFile,
-      platform: platform,
-      processManager: processManager,
-      shutdownHooks: shutdownHooks,
       sourceFile: rootTestIsolateSpawnerSourceFile,
+      toolContext: _toolContext,
       testTimeRecorder: testTimeRecorder,
     );
 

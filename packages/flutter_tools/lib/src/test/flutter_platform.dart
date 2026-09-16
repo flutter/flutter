@@ -319,10 +319,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.updateGoldens,
     this.watcher,
   }) {
-    final ToolContext(:FileSystem fs, :Logger logger, :ProcessManager processManager) =
-        _toolContext;
     _testGoldenComparator = TestGoldenComparator(
-      flutterTesterBinPath: flutterTesterBinPath,
       compilerFactory: () =>
           compiler ??
           TestCompiler(
@@ -331,9 +328,8 @@ class FlutterPlatform extends PlatformPlugin {
             toolContext: _toolContext,
             testTimeRecorder: testTimeRecorder,
           ),
-      fileSystem: fs,
-      logger: logger,
-      processManager: processManager,
+      flutterTesterBinPath: flutterTesterBinPath,
+      toolContext: _toolContext,
     );
   }
 

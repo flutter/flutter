@@ -71,11 +71,9 @@ void main() {
       toolContext: DelegatingToolContext(),
     );
     return TestGoldenComparator(
-      flutterTesterBinPath: globals.artifacts!.getArtifactPath(Artifact.flutterTester),
       compilerFactory: () => compiler,
-      logger: logger,
-      fileSystem: globals.fs,
-      processManager: globals.processManager,
+      flutterTesterBinPath: globals.artifacts!.getArtifactPath(Artifact.flutterTester),
+      toolContext: DelegatingToolContext(logger: logger),
     );
   }
 
