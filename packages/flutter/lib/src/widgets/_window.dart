@@ -2193,13 +2193,12 @@ class WindowEntry {
   /// This callback may be invoked more than once and should not create the
   /// native window; use [controller] for that window.
   ///
-  /// When rendered by [WindowManager], the supplied context is above the
-  /// window's [View] and [WindowScope]. To look up that view or controller,
-  /// use a context from a descendant of the returned widget, for example by
-  /// returning a [Builder].
+  /// When rendered by [WindowManager] or [NestedWindow], the supplied context
+  /// is below the window's [View] and [WindowScope], so it can be used to look
+  /// up that view or controller.
   ///
-  /// When rendered by [NestedWindow], the context is below the nested [View]
-  /// and inherits from the widgets surrounding [NestedWindow].
+  /// When rendered by [NestedWindow], the context also inherits from the widgets
+  /// surrounding [NestedWindow].
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -2642,12 +2641,7 @@ class _NestedWindowState extends State<NestedWindow> {
   @override
   Widget build(BuildContext context) {
     return ViewAnchor(
-      view: _entry != null
-          ? View(
-              view: _entry!.controller.rootView,
-              child: _WindowEntryRender(entry: _entry!, removeFromRegistry: false),
-            )
-          : null,
+      view: _entry != null ? _WindowEntryRender(entry: _entry!, removeFromRegistry: false) : null,
       child: KeyedSubtree(key: _key, child: widget.child),
     );
   }
