@@ -63,12 +63,10 @@ abstract final class FlutterGlobalOptions {
 class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({
     required ToolContext toolContext,
-    Analytics analytics = const NoOpAnalytics(),
+    this._analytics = const NoOpAnalytics(),
     bool verboseHelp = false,
-    FeatureFlags? featureFlags,
-  }) : _analytics = analytics,
-       _featureFlags = featureFlags,
-       _toolContext = toolContext,
+    this._featureFlags,
+  }) : _toolContext = toolContext,
        _verboseHelp = verboseHelp,
        _argParser = ArgParser(
          allowTrailingOptions: false,
@@ -330,6 +328,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   /// The [ToolContext] instance.
   ToolContext get toolContext => _toolContext;
+
+  /// The [FeatureFlags] instance, if provided.
+  FeatureFlags? get featureFlags => _featureFlags;
 
   // See https://github.com/flutter/flutter/issues/145158.
   late bool _machineFlagPresentInAnyCliArg;

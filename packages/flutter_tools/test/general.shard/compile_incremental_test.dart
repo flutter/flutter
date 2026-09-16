@@ -131,61 +131,58 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext(
-    'incremental compile sends correct package URI for pub workspace member package located under root lib/',
-    () async {
-      final packageConfig = PackageConfig(<Package>[
-        Package(
-          'root',
-          Uri.parse('file:///workspace/'),
-          packageUriRoot: Uri.parse('file:///workspace/lib/'),
-        ),
-        Package(
-          'member',
-          Uri.parse('file:///workspace/lib/member/'),
-          packageUriRoot: Uri.parse('file:///workspace/lib/member/lib/'),
-        ),
-      ]);
+  testWithoutContext('incremental compile sends correct package URI for pub workspace member package located under root lib/', () async {
+    final packageConfig = PackageConfig(<Package>[
+      Package(
+        'root',
+        Uri.parse('file:///workspace/'),
+        packageUriRoot: Uri.parse('file:///workspace/lib/'),
+      ),
+      Package(
+        'member',
+        Uri.parse('file:///workspace/lib/member/'),
+        packageUriRoot: Uri.parse('file:///workspace/lib/member/lib/'),
+      ),
+    ]);
 
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: const <String>[
-            ...frontendServerCommand,
-            '--initialize-from-dill',
-            expectedCachePath,
-            '--verbosity=error',
-          ],
-          stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0',
-          stdin: frontendServerStdIn,
-        ),
-      );
+    fakeProcessManager.addCommand(
+      FakeCommand(
+        command: const <String>[
+          ...frontendServerCommand,
+          '--initialize-from-dill',
+          expectedCachePath,
+          '--verbosity=error',
+        ],
+        stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0',
+        stdin: frontendServerStdIn,
+      ),
+    );
 
-      await generator.recompile(
-        Uri.parse('file:///workspace/lib/main.dart'),
-        null,
-        outputPath: '/build/',
-        packageConfig: packageConfig,
-        fs: MemoryFileSystem(),
-        projectRootPath: '',
-      );
-      expect(frontendServerStdIn.getAndClear(), 'compile package:root/main.dart\n');
+    await generator.recompile(
+      Uri.parse('file:///workspace/lib/main.dart'),
+      null,
+      outputPath: '/build/',
+      packageConfig: packageConfig,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
+    );
+    expect(frontendServerStdIn.getAndClear(), 'compile package:root/main.dart\n');
 
-      await _accept(generator, frontendServerStdIn, '');
-      await _reject(generatorStdoutHandler, generator, frontendServerStdIn, '', '');
+    await _accept(generator, frontendServerStdIn, '');
+    await _reject(generatorStdoutHandler, generator, frontendServerStdIn, '', '');
 
-      await _recompile(
-        generatorStdoutHandler,
-        generator,
-        frontendServerStdIn,
-        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
-        mainUri: Uri.parse('file:///workspace/lib/main.dart'),
-        expectedMainUri: 'package:root/main.dart',
-        updatedUris: <Uri>[Uri.parse('file:///workspace/lib/member/lib/foo.dart')],
-        expectedUpdatedUris: <String>['package:member/foo.dart'],
-        packageConfig: packageConfig,
-      );
-    },
-  );
+    await _recompile(
+      generatorStdoutHandler,
+      generator,
+      frontendServerStdIn,
+      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n',
+      mainUri: Uri.parse('file:///workspace/lib/main.dart'),
+      expectedMainUri: 'package:root/main.dart',
+      updatedUris: <Uri>[Uri.parse('file:///workspace/lib/member/lib/foo.dart')],
+      expectedUpdatedUris: <String>['package:member/foo.dart'],
+      packageConfig: packageConfig,
+    );
+  });
 
   testWithoutContext('incremental compile single dart compile with filesystem scheme', () async {
     fakeProcessManager.addCommand(

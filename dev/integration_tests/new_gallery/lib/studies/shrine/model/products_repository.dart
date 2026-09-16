@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+
 import '../../../gallery_localizations.dart';
 import 'product.dart';
 

@@ -1057,9 +1057,8 @@ void main() {
   group('ConstraintsTransformBox', () {
     test('toString', () {
       expect(
-        const ConstraintsTransformBox(
-          constraintsTransform: ConstraintsTransformBox.unconstrained,
-        ).toString(),
+        const ConstraintsTransformBox(constraintsTransform: ConstraintsTransformBox.unconstrained)
+            .toString(),
         equals(
           'ConstraintsTransformBox(alignment: Alignment.center, constraints transform: unconstrained)',
         ),
