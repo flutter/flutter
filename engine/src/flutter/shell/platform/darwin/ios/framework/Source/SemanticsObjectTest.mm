@@ -1267,6 +1267,29 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertEqual([object accessibilityTraits], UIAccessibilityTraitNone);
 }
 
+- (void)testTextInputSemanticsObject_isSecureTextEntry {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode node;
+  node.label = "foo";
+  node.flags.isTextField = true;
+  node.flags.isObscured = true;
+
+  TextInputSemanticsObject* object = [[TextInputSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [object setSemanticsNode:&node];
+  [object accessibilityBridgeDidFinishUpdate];
+
+  XCTAssertTrue([object isSecureTextEntry]);
+
+  node.flags.isObscured = false;
+  [object setSemanticsNode:&node];
+  [object accessibilityBridgeDidFinishUpdate];
+
+  XCTAssertFalse([object isSecureTextEntry]);
+}
+
 - (void)testTextInputSemanticsObject_canPerformAction {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
       new flutter::testing::MockAccessibilityBridge());
