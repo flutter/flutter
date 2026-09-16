@@ -28,9 +28,9 @@ class _PopupButtonState extends State<PopupButton> {
     _anchorController.toggle();
   }
 
-  WindowEntry _buildEntry(WindowSettings windowSettings) {
+  WindowEntry _buildEntry(Rect? anchorRect, WindowSettings windowSettings) {
     final controller = PopupWindowController(
-      anchorRect: _getAnchorRect()!,
+      anchorRect: anchorRect!,
       positioner: windowSettings.positioner,
       delegate: _PopupWindowControllerDelegate(
         onDestroyed: () {
@@ -47,21 +47,13 @@ class _PopupButtonState extends State<PopupButton> {
     );
   }
 
-  Rect? _getAnchorRect() {
-    final RenderObject? renderObject = _popupButtonKey.currentContext?.findRenderObject();
-    if (renderObject is! RenderBox) {
-      return null;
-    }
-    return renderObject.localToGlobal(Offset.zero) & renderObject.size;
-  }
-
   @override
   Widget build(BuildContext context) {
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
     return NestedWindow(
       controller: _anchorController,
-      entryBuilder: () => _buildEntry(windowSettings),
+      entryBuilder: (Rect? anchorRect) => _buildEntry(anchorRect, windowSettings),
       child: OutlinedButton(
         key: _popupButtonKey,
         onPressed: _onPressed,

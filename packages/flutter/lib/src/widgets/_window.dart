@@ -2393,13 +2393,12 @@ void mountToplevelWindow({required BuildContext context, required WindowEntry en
 /// it with a content builder in a [WindowEntry], since hiding the nested window
 /// destroys the previous controller's native window.
 ///
-/// Unlike [WidgetBuilder], this callback does not receive a [BuildContext].
-/// Capture the surrounding context if needed, for example to obtain a native
-/// parent with [WindowScope.of].
+/// This callback receives the potential anchor rectangle of the window as a
+/// parameter, if one is available.
 ///
 /// {@macro flutter.widgets.windowing.nestedExperimental}
 @internal
-typedef WindowEntryBuilder = WindowEntry Function();
+typedef WindowEntryBuilder = WindowEntry Function(Rect?);
 
 /// Controls whether a [NestedWindow] renders its window content.
 ///
@@ -2598,7 +2597,7 @@ class _NestedWindowState extends State<NestedWindow> {
       return;
     }
     final tracker = _ElementPositionTracker(element: _key.currentContext!);
-    final WindowEntry entry = widget.entryBuilder();
+    final WindowEntry entry = widget.entryBuilder(tracker.getGlobalRect());
     tracker.onGlobalRectChange = (rect) {
       switch (entry.controller) {
         case final PopupWindowController popup:

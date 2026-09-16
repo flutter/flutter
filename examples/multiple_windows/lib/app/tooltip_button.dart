@@ -28,9 +28,9 @@ class _TooltipButtonState extends State<TooltipButton> {
     _anchorController.toggle();
   }
 
-  WindowEntry _buildEntry(WindowSettings windowSettings) {
+  WindowEntry _buildEntry(Rect? anchorRect, WindowSettings windowSettings) {
     final controller = TooltipWindowController(
-      anchorRect: _getAnchorRect()!,
+      anchorRect: anchorRect!,
       positioner: windowSettings.positioner,
       delegate: _TooltipWindowControllerDelegate(
         onDestroyed: () {
@@ -47,21 +47,13 @@ class _TooltipButtonState extends State<TooltipButton> {
     );
   }
 
-  Rect? _getAnchorRect() {
-    final RenderObject? renderObject = _tooltipButtonKey.currentContext?.findRenderObject();
-    if (renderObject is! RenderBox) {
-      return null;
-    }
-    return renderObject.localToGlobal(Offset.zero) & renderObject.size;
-  }
-
   @override
   Widget build(BuildContext context) {
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
     return NestedWindow(
       controller: _anchorController,
-      entryBuilder: () => _buildEntry(windowSettings),
+      entryBuilder: (anchorRect) => _buildEntry(anchorRect, windowSettings),
       child: OutlinedButton(
         key: _tooltipButtonKey,
         onPressed: _onPressed,
