@@ -20,7 +20,6 @@
 #include "flutter/testing/test_vulkan_image.h"
 #include "flutter/testing/test_vulkan_surface.h"
 #include "flutter/testing/testing.h"
-#include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkSurface.h"

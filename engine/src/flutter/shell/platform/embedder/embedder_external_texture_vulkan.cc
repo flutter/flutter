@@ -6,13 +6,14 @@
 
 #include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/fml/logging.h"
-#include "flutter/impeller/display_list/dl_image_impeller.h"
-#include "flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h"
-#include "flutter/impeller/renderer/backend/vulkan/texture_vk.h"
-#include "flutter/impeller/renderer/backend/vulkan/yuv_conversion_library_vk.h"
-#include "impeller/core/texture_descriptor.h"
-#include "impeller/display_list/aiks_context.h"
-#include "impeller/renderer/context.h"
+#if IMPELLER_SUPPORTS_RENDERING
+#include "flutter/impeller/display_list/dl_image_impeller.h"      // nogncheck
+#include "flutter/impeller/renderer/backend/vulkan/texture_vk.h"  // nogncheck
+#include "flutter/impeller/renderer/backend/vulkan/yuv_conversion_library_vk.h"  // nogncheck
+#include "impeller/core/texture_descriptor.h"    // nogncheck
+#include "impeller/display_list/aiks_context.h"  // nogncheck
+#include "impeller/renderer/context.h"           // nogncheck
+#endif                                           // IMPELLER_SUPPORTS_RENDERING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
@@ -66,6 +67,7 @@ static bool IsYuvFormat(VkFormat format) {
 }
 
 // --- EmbedderExternalTextureSourceVulkan ---
+#if IMPELLER_SUPPORTS_RENDERING
 
 EmbedderExternalTextureSourceVulkan::EmbedderExternalTextureSourceVulkan(
     const std::shared_ptr<impeller::Context>& p_context,
@@ -104,27 +106,6 @@ EmbedderExternalTextureSourceVulkan::~EmbedderExternalTextureSourceVulkan() {
   texture_image_view_.reset();
   if (destruction_callback_) {
     destruction_callback_(user_data_);
-  }
-}
-
-static SkColorType ToSkColorType(VkFormat format) {
-  switch (format) {
-    case VK_FORMAT_R8G8B8A8_UNORM:
-      return kRGBA_8888_SkColorType;
-    case VK_FORMAT_R8G8B8A8_SRGB:
-      return kSRGBA_8888_SkColorType;
-    case VK_FORMAT_B8G8R8A8_UNORM:
-      return kBGRA_8888_SkColorType;
-    case VK_FORMAT_R16G16B16A16_SFLOAT:
-      return kRGBA_F16_SkColorType;
-    case VK_FORMAT_R32G32B32A32_SFLOAT:
-      return kRGBA_F32_SkColorType;
-    case VK_FORMAT_R8_UNORM:
-      return kR8_unorm_SkColorType;
-    case VK_FORMAT_R8G8_UNORM:
-      return kR8G8_unorm_SkColorType;
-    default:
-      return kUnknown_SkColorType;
   }
 }
 
@@ -277,6 +258,28 @@ std::shared_ptr<impeller::YUVConversionVK>
 EmbedderExternalTextureSourceVulkan::GetYUVConversion() const {
   return needs_yuv_conversion_ ? yuv_conversion_ : nullptr;
 }
+#endif  // IMPELLER_SUPPORTS_RENDERING
+
+static SkColorType ToSkColorType(VkFormat format) {
+  switch (format) {
+    case VK_FORMAT_R8G8B8A8_UNORM:
+      return kRGBA_8888_SkColorType;
+    case VK_FORMAT_R8G8B8A8_SRGB:
+      return kSRGBA_8888_SkColorType;
+    case VK_FORMAT_B8G8R8A8_UNORM:
+      return kBGRA_8888_SkColorType;
+    case VK_FORMAT_R16G16B16A16_SFLOAT:
+      return kRGBA_F16_SkColorType;
+    case VK_FORMAT_R32G32B32A32_SFLOAT:
+      return kRGBA_F32_SkColorType;
+    case VK_FORMAT_R8_UNORM:
+      return kR8_unorm_SkColorType;
+    case VK_FORMAT_R8G8_UNORM:
+      return kR8G8_unorm_SkColorType;
+    default:
+      return kUnknown_SkColorType;
+  }
+}
 
 // --- EmbedderExternalTextureVulkan ---
 
@@ -316,9 +319,12 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTexture(
     GrDirectContext* context,
     impeller::AiksContext* aiks_context,
     const SkISize& size) {
+#if IMPELLER_SUPPORTS_RENDERING
   if (!!aiks_context) {
     return ResolveTextureImpeller(texture_id, aiks_context, size);
-  } else if (!!context) {
+  }
+#endif  // IMPELLER_SUPPORTS_RENDERING
+  if (!!context) {
     return ResolveTextureSkia(texture_id, context, size);
   }
   return nullptr;
@@ -413,6 +419,7 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureSkia(
   return DlImageSkia::Make(std::move(image));
 }
 
+#if IMPELLER_SUPPORTS_RENDERING
 sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureImpeller(
     int64_t texture_id,
     impeller::AiksContext* aiks_context,
@@ -428,9 +435,6 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureImpeller(
     texture_desc->height = size.height();
   }
 
-  auto& impeller_context =
-      impeller::ContextVK::Cast(*aiks_context->GetContext());
-
   auto texture_source = std::make_shared<EmbedderExternalTextureSourceVulkan>(
       aiks_context->GetContext(), texture_desc.get());
 
@@ -443,6 +447,7 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureImpeller(
 
   return impeller::DlImageImpeller::Make(texture);
 }
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 EmbedderExternalTextureVulkan::~EmbedderExternalTextureVulkan() = default;
 

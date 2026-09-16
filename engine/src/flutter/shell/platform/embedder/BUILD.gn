@@ -178,6 +178,7 @@ template("embedder_source_set") {
           "embedder_surface_vulkan_impeller.cc",
           "embedder_surface_vulkan_impeller.h",
         ]
+        deps += [ "//flutter/impeller/display_list" ]
       }
 
       deps += [
