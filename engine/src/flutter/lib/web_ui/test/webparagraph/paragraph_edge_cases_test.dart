@@ -245,6 +245,39 @@ Future<void> testMain() async {
       expect(paragraph.didExceedMaxLines, false);
       expect(paragraph.computeLineMetrics().length, 2);
     });
+
+    test(r'trailing newline respects maxLines: 1', () {
+      final style = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20, maxLines: 1);
+      final builder = ui.ParagraphBuilder(style);
+      builder.addText('Single line with trailing newline\n');
+      final ui.Paragraph paragraph = builder.build();
+      paragraph.layout(const ui.ParagraphConstraints(width: 500));
+
+      expect(paragraph.computeLineMetrics().length, 1);
+      expect(paragraph.didExceedMaxLines, true);
+    });
+
+    test(r'trailing newline respects maxLines: 2', () {
+      final style = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20, maxLines: 2);
+      final builder = ui.ParagraphBuilder(style);
+      builder.addText('First line\nSecond line\n');
+      final ui.Paragraph paragraph = builder.build();
+      paragraph.layout(const ui.ParagraphConstraints(width: 500));
+
+      expect(paragraph.computeLineMetrics().length, 2);
+      expect(paragraph.didExceedMaxLines, true);
+    });
+
+    test(r'trailing newline within maxLines (maxLines: 2 for Single line\n)', () {
+      final style = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20, maxLines: 2);
+      final builder = ui.ParagraphBuilder(style);
+      builder.addText('Single line\n');
+      final ui.Paragraph paragraph = builder.build();
+      paragraph.layout(const ui.ParagraphConstraints(width: 500));
+
+      expect(paragraph.computeLineMetrics().length, 2);
+      expect(paragraph.didExceedMaxLines, false);
+    });
   });
 
   group('Paragraph Placeholders Edge Cases', () {

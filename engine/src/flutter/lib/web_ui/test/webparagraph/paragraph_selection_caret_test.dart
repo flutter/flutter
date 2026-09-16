@@ -190,6 +190,18 @@ Future<void> testMain() async {
       expect(posLine1.affinity, ui.TextAffinity.downstream);
     });
 
+    test(r'Caret hit-testing on empty line between multiline text (Line 1\n\nLine 3)', () {
+      final ui.Paragraph paragraph = buildParagraph('Line 1\n\nLine 3');
+      final double lineHeight = paragraph.height / 3;
+
+      // Click on empty middle line (line 1)
+      final ui.TextPosition posLine1 = paragraph.getPositionForOffset(
+        ui.Offset(10.0, lineHeight + lineHeight / 2),
+      );
+      expect(posLine1.offset, 7);
+      expect(posLine1.affinity, ui.TextAffinity.downstream);
+    });
+
     test('getLineBoundary queries for multiline text', () {
       final ui.Paragraph paragraph = buildParagraph('Hello\nWorld');
 

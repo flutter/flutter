@@ -730,8 +730,14 @@ class TextLayout {
 
       if ((line.fullWidth - line.trailingSpacesWidth) < epsilon &&
           line.trailingSpacesWidth < epsilon) {
-        // Accordingly to SkParagraph this is a special Flutter case
-        return ui.TextPosition(offset: line.hardLineBreakRange.end);
+        // Accordingly to SkParagraph this is a special Flutter case.
+        // For the synthetic trailing empty line (after a trailing \n), the caret
+        // belongs at the end of the break. For an empty line in the middle of text,
+        // the caret belongs at the start of that line (before its \n).
+        final int offset = line.lastLine
+            ? line.hardLineBreakRange.end
+            : line.hardLineBreakRange.start;
+        return ui.TextPosition(offset: offset);
       }
 
       // We found the line that contains the offset; let's go through all the visual blocks to find the position

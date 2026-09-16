@@ -64,6 +64,9 @@ class TextWrapper {
         line.build(/*specialCase=*/ index == _layout.allClusters.length - 2);
 
         if (line.reachedMaxLines()) {
+          if (!line.reachedEndOfText()) {
+            _layout.paragraph.didExceedMaxLines = true;
+          }
           break;
         } else {
           continue;
@@ -111,6 +114,9 @@ class TextWrapper {
         // Add the line
         line.build(false);
         if (line.reachedMaxLines()) {
+          if (!line.reachedEndOfText()) {
+            _layout.paragraph.didExceedMaxLines = true;
+          }
           break;
         }
 
@@ -371,13 +377,17 @@ class _LineBuilder {
     // Flutter wants to have another (empty) line if \n is the last codepoint in the text
     // This empty line gets in a way of detecting line visual runs (there isn't any)
     if (specialCase) {
-      _top += _layout.addLine(
-        ClusterRange(start: _whitespaceEnd, end: _whitespaceEnd),
-        ClusterRange(start: _whitespaceEnd, end: _whitespaceEnd),
-        ClusterRange(start: _whitespaceEnd, end: _newlineEnd),
-        _top,
-        true,
-      );
+      if (!reachedMaxLines()) {
+        _top += _layout.addLine(
+          ClusterRange(start: _whitespaceEnd, end: _whitespaceEnd),
+          ClusterRange(start: _whitespaceEnd, end: _whitespaceEnd),
+          ClusterRange(start: _whitespaceEnd, end: _newlineEnd),
+          _top,
+          true,
+        );
+      } else {
+        _layout.paragraph.didExceedMaxLines = true;
+      }
     }
     // Reset the line builder to be ready for the next line.
 
