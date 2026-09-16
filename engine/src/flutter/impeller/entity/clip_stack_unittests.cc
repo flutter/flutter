@@ -327,5 +327,46 @@ TEST(EntityPassClipStackTest, ClipAndRestoreWithSubpassesNonAA) {
             Rect::MakeLTRB(50, 50, 55, 55));
 }
 
+TEST(EntityPassClipStackTest, RestoringChildClipPreservesParentReplayEntities) {
+  EntityPassClipStack recorder =
+      EntityPassClipStack(Rect::MakeLTRB(0, 0, 100, 100));
+
+  // 1. Record parent clip at height 1.
+  recorder.RecordClip(ClipContents(Rect::MakeLTRB(0, 0, 100, 100),
+                                   /*is_axis_aligned_rect=*/false),
+                      Matrix(), {0, 0}, 0, 100, /*is_aa=*/true);
+  EXPECT_EQ(recorder.GetReplayEntities().size(), 1u);
+  EXPECT_EQ(recorder.GetReplayEntities()[0].clip_height, 1u);
+
+  // 2. Record first child clip at height 2.
+  recorder.RecordClip(ClipContents(Rect::MakeLTRB(10, 10, 50, 50),
+                                   /*is_axis_aligned_rect=*/false),
+                      Matrix(), {0, 0}, 2, 100, /*is_aa=*/true);
+  EXPECT_EQ(recorder.GetReplayEntities().size(), 2u);
+  EXPECT_EQ(recorder.GetReplayEntities()[1].clip_height, 2u);
+
+  // 3. Restore down to height 1. The parent clip must be preserved on the
+  // replay stack.
+  recorder.RecordRestore({0, 0}, 1);
+  EXPECT_EQ(recorder.GetReplayEntities().size(), 1u);
+  EXPECT_EQ(recorder.GetReplayEntities()[0].clip_height, 1u);
+
+  // 4. Record a sibling child clip at height 2.
+  recorder.RecordClip(ClipContents(Rect::MakeLTRB(20, 20, 40, 40),
+                                   /*is_axis_aligned_rect=*/false),
+                      Matrix(), {0, 0}, 4, 100, /*is_aa=*/true);
+  EXPECT_EQ(recorder.GetReplayEntities().size(), 2u);
+  EXPECT_EQ(recorder.GetReplayEntities()[1].clip_height, 2u);
+
+  // 5. Restore down to height 1 again. The parent clip must still be preserved.
+  recorder.RecordRestore({0, 0}, 1);
+  EXPECT_EQ(recorder.GetReplayEntities().size(), 1u);
+  EXPECT_EQ(recorder.GetReplayEntities()[0].clip_height, 1u);
+
+  // 6. Restore to height 0 (popping parent clip).
+  recorder.RecordRestore({0, 0}, 0);
+  EXPECT_TRUE(recorder.GetReplayEntities().empty());
+}
+
 }  // namespace testing
 }  // namespace impeller
