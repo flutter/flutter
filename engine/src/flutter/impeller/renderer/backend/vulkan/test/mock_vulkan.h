@@ -175,6 +175,9 @@ std::vector<VkImageMemoryBarrier>& GetImageMemoryBarriers(
 ///        given command buffer, in call order.
 const std::vector<VkViewport>& GetRecordedViewports(VkCommandBuffer buffer);
 
+const std::vector<std::array<float, 4>>& GetRecordedBlendConstants(
+    VkCommandBuffer buffer);
+
 }  // namespace testing
 }  // namespace impeller
 

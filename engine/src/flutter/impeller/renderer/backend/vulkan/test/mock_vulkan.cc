@@ -29,6 +29,7 @@ struct MockCommandBuffer {
   std::shared_ptr<std::vector<std::string>> called_functions_;
   std::vector<VkImageMemoryBarrier> image_memory_barriers_;
   std::vector<VkViewport> recorded_viewports_;
+  std::vector<std::array<float, 4>> recorded_blend_constants_;
 };
 
 class MockQueue {
@@ -733,6 +734,16 @@ void vkCmdSetStencilReference(VkCommandBuffer commandBuffer,
   mock_command_buffer->called_functions_->push_back("vkCmdSetStencilReference");
 }
 
+void vkCmdSetBlendConstants(VkCommandBuffer commandBuffer,
+                            const float blendConstants[4]) {
+  MockCommandBuffer* mock_command_buffer =
+      reinterpret_cast<MockCommandBuffer*>(commandBuffer);
+  mock_command_buffer->called_functions_->push_back("vkCmdSetBlendConstants");
+  mock_command_buffer->recorded_blend_constants_.push_back(
+      {blendConstants[0], blendConstants[1], blendConstants[2],
+       blendConstants[3]});
+}
+
 void vkCmdSetScissor(VkCommandBuffer commandBuffer,
                      uint32_t firstScissor,
                      uint32_t scissorCount,
@@ -1203,6 +1214,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkCmdPipelineBarrier);
   } else if (strcmp("vkCmdSetStencilReference", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCmdSetStencilReference);
+  } else if (strcmp("vkCmdSetBlendConstants", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCmdSetBlendConstants);
   } else if (strcmp("vkCmdSetScissor", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCmdSetScissor);
   } else if (strcmp("vkCmdSetViewport", pName) == 0) {
@@ -1356,6 +1369,13 @@ const std::vector<VkViewport>& GetRecordedViewports(VkCommandBuffer buffer) {
   MockCommandBuffer* mock_command_buffer =
       reinterpret_cast<MockCommandBuffer*>(buffer);
   return mock_command_buffer->recorded_viewports_;
+}
+
+const std::vector<std::array<float, 4>>& GetRecordedBlendConstants(
+    VkCommandBuffer buffer) {
+  MockCommandBuffer* mock_command_buffer =
+      reinterpret_cast<MockCommandBuffer*>(buffer);
+  return mock_command_buffer->recorded_blend_constants_;
 }
 
 }  // namespace testing

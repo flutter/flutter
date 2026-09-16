@@ -50,6 +50,56 @@ TEST(RenderPassVK, DoesNotRedundantlySetStencil) {
             2);
 }
 
+TEST(RenderPassVK, DoesNotRedundantlySetBlendColor) {
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+  std::shared_ptr<Context> copy = context;
+  auto cmd_buffer = context->CreateCommandBuffer();
+
+  RenderTargetAllocator allocator(context->GetResourceAllocator());
+  RenderTarget target = allocator.CreateOffscreenMSAA(*copy.get(), {1, 1}, 1);
+
+  std::shared_ptr<RenderPass> render_pass =
+      cmd_buffer->CreateRenderPass(target);
+
+  // Written once when the pass opens, for the same reason the stencil
+  // reference is: pipelines declare it dynamic, and a dynamic state nothing
+  // sets is undefined at draw time.
+  auto called_functions = GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_EQ(std::count(called_functions->begin(), called_functions->end(),
+                       "vkCmdSetBlendConstants"),
+            1);
+
+  // Asking for the value that write left behind records nothing further.
+  render_pass->SetBlendColor(Color::BlackTransparent());
+  called_functions = GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_EQ(std::count(called_functions->begin(), called_functions->end(),
+                       "vkCmdSetBlendConstants"),
+            1);
+
+  // A different colour reaches the command buffer.
+  render_pass->SetBlendColor(Color::Red());
+  called_functions = GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_EQ(std::count(called_functions->begin(), called_functions->end(),
+                       "vkCmdSetBlendConstants"),
+            2);
+
+  // And repeating it does not.
+  render_pass->SetBlendColor(Color::Red());
+  render_pass->SetBlendColor(Color::Red());
+  called_functions = GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_EQ(std::count(called_functions->begin(), called_functions->end(),
+                       "vkCmdSetBlendConstants"),
+            2);
+
+  // The channels arrive in the order the driver reads them. Counting calls
+  // alone would pass with the components permuted.
+  const auto& recorded = GetRecordedBlendConstants(
+      CommandBufferVK::Cast(*cmd_buffer).GetCommandBuffer());
+  ASSERT_EQ(recorded.size(), 2u);
+  EXPECT_EQ(recorded[0], (std::array<float, 4>{0.0f, 0.0f, 0.0f, 0.0f}));
+  EXPECT_EQ(recorded[1], (std::array<float, 4>{1.0f, 0.0f, 0.0f, 1.0f}));
+}
+
 // Regression guard for the bug where `RenderPassVK::SetViewport` silently
 // dropped the user's X and Y offsets and the depth range, only honoring
 // width and height.
