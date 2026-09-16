@@ -973,6 +973,8 @@ Your $application code is in $relativeAppMain.
         templateContext[platform] = false;
       }
     }
+    templateContext['iosOrMacOS'] =
+        (templateContext['ios'] as bool? ?? false) || (templateContext['macos'] as bool? ?? false);
     final List<String> platformsToAdd = _getSupportedPlatformsFromTemplateContext(templateContext);
 
     final List<String> existingPlatforms = _getSupportedPlatformsInPlugin(
