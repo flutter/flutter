@@ -1347,6 +1347,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 - (void)triggerTouchRateCorrectionIfNeeded:(NSSet*)touches {
+  // This is not needed now that we're running CADisplayLink on main thread.
+#if 0
   if (_touchRateCorrectionVSyncClient == nil) {
     // If the _touchRateCorrectionVSyncClient is not created, means current devices doesn't
     // need to correct the touch rate. So just return.
@@ -1368,6 +1370,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   } else {
     [_touchRateCorrectionVSyncClient pause];
   }
+#endif
 }
 
 - (void)invalidateTouchRateCorrectionVSyncClient {
