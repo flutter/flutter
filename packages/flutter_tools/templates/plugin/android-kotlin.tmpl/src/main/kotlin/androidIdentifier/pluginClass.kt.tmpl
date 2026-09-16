@@ -3,7 +3,9 @@ package {{androidIdentifier}}
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 
 /** {{pluginClass}} */
-class {{pluginClass}} : FlutterPlugin, {{pluginClass}}Api {
+class {{pluginClass}} :
+    FlutterPlugin,
+    {{pluginClass}}Api {
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         {{pluginClass}}Api.setUp(flutterPluginBinding.binaryMessenger, this)
     }
