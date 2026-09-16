@@ -1652,7 +1652,11 @@ void main() {
     // `flutter create -t plugin` output passes `dart format` out of the box.
     // Regression test for https://github.com/flutter/flutter/issues/175960.
     for (final FileSystemEntity file in projectDir.listSync(recursive: true)) {
-      if (file is File && file.path.endsWith('.dart')) {
+      if (file is File &&
+          file.path.endsWith('.dart') &&
+          // Skip Pigeon-generated files, as they are intentionally not autoformatted
+          // to minimize diffs when developers re-run Pigeon generation.
+          !file.path.endsWith('.g.dart')) {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
@@ -2759,7 +2763,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
     expect(
-      projectDir.childDirectory('lib').childFile('flutter_project_method_channel.dart'),
+      projectDir.childDirectory('lib').childFile('flutter_project_pigeon.dart'),
       exists,
     );
     expect(
