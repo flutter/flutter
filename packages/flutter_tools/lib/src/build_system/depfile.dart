@@ -8,9 +8,7 @@ import '../base/logger.dart';
 
 /// A service for creating and parsing [Depfile]s.
 class DepfileService {
-  DepfileService({required Logger logger, required FileSystem fileSystem})
-    : _logger = logger,
-      _fileSystem = fileSystem;
+  DepfileService({required this._logger, required this._fileSystem});
 
   final Logger _logger;
   final FileSystem _fileSystem;
