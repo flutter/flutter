@@ -34,6 +34,7 @@ import 'package:pigeon/pigeon.dart';
 {{^withJava}}
     kotlinOut:
         'android/src/main/kotlin/{{androidIdentifierPosixPath}}/Messages.g.kt',
+    kotlinOptions: KotlinOptions(package: '{{androidIdentifier}}'),
 {{/withJava}}
 {{/android}}
 {{#darwin}}
