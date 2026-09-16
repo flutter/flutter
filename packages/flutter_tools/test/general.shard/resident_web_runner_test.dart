@@ -2693,7 +2693,7 @@ class FakeChromeConnection extends Fake implements ChromeConnection {
 }
 
 class FakeChromeTab extends Fake implements ChromeTab {
-  FakeChromeTab(this.url, {Exception? connectException}) : _connectException = connectException;
+  FakeChromeTab(this.url, {this._connectException});
 
   @override
   final String url;
