@@ -55,6 +55,16 @@
   [_resizeSynchronizer performCommitForSize:frameSize afterDelay:delay notify:notifyBlock];
 }
 
+- (void)onPresentEmptyFrameWithBlock:(dispatch_block_t)block delay:(NSTimeInterval)delay {
+  // Such a frame has no contents, and thus no content size of its own. Report the current view
+  // size, which is the size a view sized to its contents is already laid out for.
+  auto notifyBlock = ^{
+    [self.sizingDelegate viewDidUpdateContents:self withSize:self.bounds.size];
+    block();
+  };
+  [_resizeSynchronizer performCommitForEmptyFrameAfterDelay:delay notify:notifyBlock];
+}
+
 - (FlutterSurfaceManager*)surfaceManager {
   return _surfaceManager;
 }
