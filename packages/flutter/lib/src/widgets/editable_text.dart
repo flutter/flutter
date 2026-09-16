@@ -4701,17 +4701,7 @@ class EditableTextState extends State<EditableText>
       }
 
       spellCheckResults = SpellCheckResults(text, suggestions);
-      final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(
-        context,
-      );
-      final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
-      final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);
-      renderEditable.text = _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides(
-        lineHeightScaleFactor: lineHeightScaleFactor,
-        letterSpacing: letterSpacing,
-        wordSpacing: wordSpacing,
-        textSpan: buildTextSpan(),
-      );
+      setState(() {});
     } catch (exception, stack) {
       FlutterError.reportError(
         FlutterErrorDetails(
