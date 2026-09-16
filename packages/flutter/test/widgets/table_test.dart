@@ -1297,10 +1297,7 @@ void main() {
       FlutterError.onError = oldHandler;
 
       expect(errors, isNotEmpty);
-      expect(
-        errors.first.exception.toString(),
-        contains('must be declared as TableCell.none'),
-      );
+      expect(errors.first.exception.toString(), contains('must be declared as TableCell.none'));
     });
 
     testWidgets('Non-TableCell.none widget in rowSpan-covered position - throws error', (
@@ -1335,10 +1332,108 @@ void main() {
       FlutterError.onError = oldHandler;
 
       expect(errors, isNotEmpty);
-      expect(
-        errors.first.exception.toString(),
-        contains('must be declared as TableCell.none'),
+      expect(errors.first.exception.toString(), contains('must be declared as TableCell.none'));
+    });
+
+    testWidgets('Overlapping colSpan and rowSpan - throws error', (WidgetTester tester) async {
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = errors.add;
+
+      // The rowSpan of (1, 0) and the colSpan of (0, 1) both cover (1, 1).
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  Text('Cell 1'),
+                  TableCell(rowSpan: 2, child: Text('Tall')),
+                ],
+              ),
+              TableRow(
+                children: <Widget>[
+                  TableCell(colSpan: 2, child: Text('Wide')),
+                  TableCell.none,
+                ],
+              ),
+            ],
+          ),
+        ),
       );
+
+      FlutterError.onError = oldHandler;
+
+      expect(errors, isNotEmpty);
+      expect(errors.first.exception, isA<FlutterError>());
+      final message = errors.first.exception.toString();
+      expect(message, contains('Overlapping TableCell spans'));
+      expect(message, contains('column 0, row 1 (colSpan: 2, rowSpan: 1)'));
+      expect(message, contains('column 1, row 0 (colSpan: 1, rowSpan: 2)'));
+      expect(message, contains('both cover the cell at column 1, row 1'));
+    });
+
+    testWidgets('Spanning TableCell covered by another span - throws error', (
+      WidgetTester tester,
+    ) async {
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = errors.add;
+
+      // (1, 0) is covered by the colSpan of (0, 0) but is a spanning cell
+      // itself rather than a TableCell.none.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(colSpan: 2, child: Text('Wide')),
+                  TableCell(rowSpan: 2, child: Text('Tall')),
+                ],
+              ),
+              TableRow(children: <Widget>[Text('Cell 1'), TableCell.none]),
+            ],
+          ),
+        ),
+      );
+
+      FlutterError.onError = oldHandler;
+
+      expect(errors, isNotEmpty);
+      expect(errors.first.exception, isA<FlutterError>());
+      final message = errors.first.exception.toString();
+      expect(message, contains('covered by the span of another cell'));
+      expect(message, contains('column 1, row 0'));
+      expect(message, contains('column 0, row 0 (colSpan: 2, rowSpan: 1)'));
+      expect(message, contains('must be declared as TableCell.none'));
+    });
+
+    testWidgets('TableCell.none outside of any span - throws error', (WidgetTester tester) async {
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = errors.add;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(children: <Widget>[Text('Cell 1'), TableCell.none]),
+            ],
+          ),
+        ),
+      );
+
+      FlutterError.onError = oldHandler;
+
+      expect(errors, isNotEmpty);
+      expect(errors.first.exception, isA<FlutterError>());
+      final message = errors.first.exception.toString();
+      expect(message, contains('Misplaced TableCell.none'));
+      expect(message, contains('column 1, row 0'));
     });
 
     testWidgets('TableCell with colSpan at last column - valid edge case', (

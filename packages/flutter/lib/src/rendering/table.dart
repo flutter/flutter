@@ -1370,6 +1370,34 @@ class RenderTable extends RenderBox {
     super.markNeedsLayout();
   }
 
+  // Describes the visible cell, among those laid out before `limit` (an index
+  // into [_children] in row-major order), whose span covers the cell at
+  // (`x`, `y`). Only used to build error messages in debug mode.
+  String _debugDescribeSpanningCellCovering(int x, int y, int limit) {
+    for (var i = 0; i < limit; i += 1) {
+      final RenderBox? child = _children[i];
+      if (child == null) {
+        continue;
+      }
+      final childParentData = child.parentData! as TableCellParentData;
+      if (!childParentData._isVisible || !childParentData._hasSpan) {
+        continue;
+      }
+      final int originX = i % columns;
+      final int originY = i ~/ columns;
+      final bool covers =
+          x >= originX &&
+          x < originX + childParentData.colSpan &&
+          y >= originY &&
+          y < originY + childParentData.rowSpan;
+      if (covers) {
+        return 'cell at column $originX, row $originY '
+            '(colSpan: ${childParentData.colSpan}, rowSpan: ${childParentData.rowSpan})';
+      }
+    }
+    return 'span of an earlier cell';
+  }
+
   /// Computes the visual x-position for a cell, adjusting for text direction
   /// and column span.
   double _computeCellX({
@@ -1591,6 +1619,42 @@ class RenderTable extends RenderBox {
         }
         spanWidthsInRowMajor[y * columns + x] = spanWidth;
 
+        // A cell is covered by a span if and only if it is a TableCell.none
+        // placeholder. Only cells before this one can have marked it, so the
+        // check is complete here, before this cell's own span is recorded.
+        final bool isHiddenCell = spannedCells._isSpanned(x, y);
+        assert(() {
+          if (isHiddenCell && childParentData._isVisible) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('A TableCell is covered by the span of another cell.'),
+              ErrorDescription(
+                'The cell at column $x, row $y lies within the area covered by the '
+                '${_debugDescribeSpanningCellCovering(x, y, xy)}, but it is not a '
+                'TableCell.none placeholder.',
+              ),
+              ErrorHint(
+                'A cell covered by a colSpan or rowSpan must be declared as TableCell.none. '
+                'Either replace this cell with TableCell.none, or reduce the span that '
+                'covers it.',
+              ),
+            ]);
+          }
+          if (!isHiddenCell && !childParentData._isVisible) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Misplaced TableCell.none.'),
+              ErrorDescription(
+                'The cell at column $x, row $y is a TableCell.none placeholder, but no '
+                'colSpan or rowSpan of another cell covers it.',
+              ),
+              ErrorHint(
+                'TableCell.none must only appear where it is covered by a span. '
+                'To leave a cell empty, use a SizedBox.shrink instead.',
+              ),
+            ]);
+          }
+          return true;
+        }());
+
         // Update span caches for hidden-cell detection and border painting.
         if (childParentData._hasSpan) {
           assert(() {
@@ -1633,6 +1697,27 @@ class RenderTable extends RenderBox {
               if (dx == 0 && dy == 0) {
                 continue;
               }
+              // Every spanning cell marks all the cells it covers in this one
+              // pass, so a cell that is already marked here is covered by the
+              // span of an earlier cell as well.
+              assert(() {
+                if (spannedCells._isSpanned(x + dx, y + dy)) {
+                  throw FlutterError.fromParts(<DiagnosticsNode>[
+                    ErrorSummary('Overlapping TableCell spans.'),
+                    ErrorDescription(
+                      'The cell at column $x, row $y (colSpan: $colSpan, rowSpan: $rowSpan) '
+                      'and the ${_debugDescribeSpanningCellCovering(x + dx, y + dy, xy)} '
+                      'both cover the cell at column ${x + dx}, row ${y + dy}.',
+                    ),
+                    ErrorHint(
+                      'The areas covered by colSpan and rowSpan must not overlap. '
+                      'Reduce one of the spans so that every cell is covered by at most '
+                      'one spanning cell.',
+                    ),
+                  ]);
+                }
+                return true;
+              }());
               // dx > 0: this cell is covered by the horizontal (colSpan) extent.
               // dy > 0: this cell is covered by the vertical (rowSpan) extent.
               // Corner cells (dx > 0 AND dy > 0) are marked as both.
@@ -1646,14 +1731,6 @@ class RenderTable extends RenderBox {
           }
         }
 
-        final bool isHiddenCell = spannedCells._isSpanned(x, y);
-        assert(
-          isHiddenCell == !childParentData._isVisible,
-          'Cell at ($x, $y): a cell is covered by a span if and only if it is a '
-          'TableCell.none placeholder. A cell covered by a colSpan or rowSpan must '
-          'be declared as TableCell.none, and a TableCell.none must only appear '
-          'where it is covered by a span.',
-        );
         if (isHiddenCell) {
           continue;
         }

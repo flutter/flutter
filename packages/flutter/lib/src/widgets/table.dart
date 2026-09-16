@@ -500,6 +500,8 @@ class TableCell extends StatelessWidget {
   /// When a cell spans multiple columns, you must follow with
   /// the corresponding number of [TableCell.none] in the same row to fill the
   /// remaining covered columns and maintain the table’s grid structure.
+  ///
+  /// The areas covered by the spans of different cells must not overlap.
   final int colSpan;
 
   /// The number of rows this cell should span.
@@ -510,6 +512,8 @@ class TableCell extends StatelessWidget {
   /// When a cell spans multiple rows, you must follow with
   /// the corresponding number of [TableCell.none] in the following [TableRow]s
   /// to preserve consistent table alignment.
+  ///
+  /// The areas covered by the spans of different cells must not overlap.
   final int rowSpan;
 
   /// The child of this cell.
