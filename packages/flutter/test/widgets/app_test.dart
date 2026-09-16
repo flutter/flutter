@@ -585,7 +585,6 @@ void main() {
   testWidgets('WidgetsApp.router produces expected semantics tree structure', (
     WidgetTester tester,
   ) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
     final delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return const Text('route content', textDirection: TextDirection.ltr);
@@ -629,13 +628,11 @@ void main() {
     expect(tester.semantics.find(find.text('route content')).parent, same(routeScopeNode));
     expect(routeScopeNode.parent, same(focusScopeNode));
     expect(tester.semantics.find(find.text('overlay content')).parent, same(focusScopeNode));
-    handle.dispose();
   });
 
   testWidgets('WidgetsApp.router with routerConfig produces expected semantics tree structure', (
     WidgetTester tester,
   ) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
     final delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return const Text('route content', textDirection: TextDirection.ltr);
@@ -660,13 +657,11 @@ void main() {
 
     expect(routeScopeNode, isNot(same(focusScopeNode)));
     expect(routeScopeNode.parent, same(focusScopeNode));
-    handle.dispose();
   });
 
   testWidgets('WidgetsApp with navigator produces expected semantics tree structure', (
     WidgetTester tester,
   ) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       WidgetsApp(
         color: const Color(0xFF123456),
@@ -690,7 +685,6 @@ void main() {
 
     expect(routeScopeNode, isNot(same(focusScopeNode)));
     expect(routeScopeNode.parent, same(focusScopeNode));
-    handle.dispose();
   });
 
   testWidgets('WidgetsApp has correct default ScrollBehavior', (WidgetTester tester) async {
