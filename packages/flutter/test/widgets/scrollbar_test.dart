@@ -4399,4 +4399,62 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     await tester.pump();
     expect(scrollbarCursor(), SystemMouseCursors.grab);
   });
+
+  testWidgets('RawScrollbar ignores metrics from a sibling ScrollView', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/175012
+    // A sibling ScrollView shares the scrollbar's notification scope. Its
+    // metrics must not be applied to a scrollbar that is attached to a
+    // different ScrollView, which would otherwise leave the thumb unpainted
+    // until the user scrolled.
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            thumbVisibility: true,
+            controller: scrollController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                SizedBox(
+                  height: 300.0,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    controller: scrollController,
+                    child: const SizedBox(width: 1600.0),
+                  ),
+                ),
+                // Scrolls along the same axis, is not attached to the
+                // scrollbar's controller, and has nothing to scroll. This is
+                // the PaginatedDataTable footer scenario.
+                const SizedBox(
+                  height: 300.0,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(width: 100.0),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // The thumb is painted without any user interaction, and its extent is
+    // derived from the scrollable child rather than from the sibling.
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 594.0, 800.0, 600.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 594.0, 400.0, 600.0)),
+    );
+  });
 }
