@@ -45,6 +45,7 @@ executable("flutter_shell_native_unittests") {
   sources = [
     "android_context_gl_impeller_unittests.cc",
     "android_image_generator_unittests.cc",
+    "android_performance_hint_manager_unittests.cc",
     "android_shell_holder_unittests.cc",
     "apk_asset_provider_unittests.cc",
     "flutter_shell_native_unittests.cc",
@@ -98,6 +99,8 @@ source_set("flutter_shell_native_src") {
     "android_egl_surface.h",
     "android_environment_gl.cc",
     "android_environment_gl.h",
+    "android_performance_hint_manager.cc",
+    "android_performance_hint_manager.h",
     "android_shell_holder.cc",
     "android_shell_holder.h",
     "android_surface_dynamic_impeller.cc",
