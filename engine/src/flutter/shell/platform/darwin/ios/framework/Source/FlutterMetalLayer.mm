@@ -174,6 +174,7 @@ FLUTTER_ASSERT_ARC
 
 - (instancetype)init {
   if (self = [super init]) {
+    self.opaque = NO;
     self.device = MTLCreateSystemDefaultDevice();
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _availableTextures = [[NSMutableSet alloc] init];
@@ -188,6 +189,14 @@ FLUTTER_ASSERT_ARC
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)setOpaque:(BOOL)opaque {
+  // Keep this layer eligible for alpha compositing instead of direct-to-display
+  // presentation, which can hold native drawables longer across app transitions.
+  // FlutterView may set opaque again after initialization. Keep layer opacity
+  // and rendered pixel values unchanged; only disable the opaque optimization.
+  [super setOpaque:NO];
 }
 
 - (void)setDrawableSize:(CGSize)drawableSize {
