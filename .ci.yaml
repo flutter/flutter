@@ -5424,7 +5424,6 @@ targets:
   - name: Mac external_ui_integration_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5670,7 +5669,6 @@ targets:
   - name: Mac hello_world_impeller_ios_sdfs
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
