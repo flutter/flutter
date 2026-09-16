@@ -95,6 +95,49 @@ TEST(SwitchesTest, ShaderBundleModeValid) {
   ASSERT_EQ(switches.shader_bundle, "{}");
 }
 
+TEST(SwitchesTest, ShaderBundleTargetsEveryBackendByDefault) {
+  std::vector<const char*> options = {"--shader-bundle={}",
+                                      "--sl=test.shaderbundle"};
+
+  auto cl = fml::CommandLineFromIteratorsWithArgv0("impellerc", options.begin(),
+                                                   options.end());
+  Switches switches(cl);
+  ASSERT_TRUE(switches.AreValid(std::cout));
+  EXPECT_EQ(switches.PlatformsToBundle(),
+            (std::vector<TargetPlatform>{
+                TargetPlatform::kMetalIOS, TargetPlatform::kMetalDesktop,
+                TargetPlatform::kOpenGLES, TargetPlatform::kOpenGLDesktop,
+                TargetPlatform::kVulkan}));
+}
+
+TEST(SwitchesTest, ShaderBundleTargetsCanBeNarrowedToOneBackend) {
+  std::vector<const char*> options = {"--shader-bundle={}",
+                                      "--sl=test.shaderbundle", "--metal-ios"};
+
+  auto cl = fml::CommandLineFromIteratorsWithArgv0("impellerc", options.begin(),
+                                                   options.end());
+  Switches switches(cl);
+  ASSERT_TRUE(switches.AreValid(std::cout));
+  EXPECT_EQ(switches.PlatformsToBundle(),
+            (std::vector<TargetPlatform>{TargetPlatform::kMetalIOS}));
+}
+
+TEST(SwitchesTest, ShaderBundleTargetsCombineAcrossPlatformFlags) {
+  // More than one platform flag is an error for single shader compiles, but
+  // selects a set of backends for a bundle.
+  std::vector<const char*> options = {"--shader-bundle={}",
+                                      "--sl=test.shaderbundle", "--opengl-es",
+                                      "--vulkan"};
+
+  auto cl = fml::CommandLineFromIteratorsWithArgv0("impellerc", options.begin(),
+                                                   options.end());
+  Switches switches(cl);
+  ASSERT_TRUE(switches.AreValid(std::cout));
+  EXPECT_EQ(switches.PlatformsToBundle(),
+            (std::vector<TargetPlatform>{TargetPlatform::kOpenGLES,
+                                         TargetPlatform::kVulkan}));
+}
+
 TEST(SwitchesTest, EntryPointPrefixIsApplied) {
   Switches switches =
       MakeSwitchesDesktopGL({"--entry-point-prefix=my_prefix_"});
