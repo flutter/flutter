@@ -8,17 +8,15 @@
 #include "messages.g.h"
 #include "{{pluginClassSnakeCase}}.h"
 
+// This demonstrates a simple unit test of the C++ portion of this plugin's
+// implementation.
+//
+// Once you have built the plugin's example app, you can run these tests
+// from the command line. For instance, for an x64 debug build, run:
+// $ build\windows\x64\plugins\{{projectName}}/Debug\{{projectName}}_test.exe
+
 namespace {{projectName}} {
 namespace test {
-
-namespace {
-
-using flutter::EncodableMap;
-using flutter::EncodableValue;
-using flutter::MethodCall;
-using flutter::MethodResultFunctions;
-
-}  // namespace
 
 TEST({{pluginClass}}, GetPlatformVersion) {
   {{pluginClass}} plugin;
