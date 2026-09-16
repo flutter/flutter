@@ -55,12 +55,22 @@ void fl_opengl_frame_composite(FlOpenGLFrame* self,
                                size_t layers_count) {
   g_return_if_fail(FL_IS_OPENGL_FRAME(self));
 
-  if (layers_count == 0) {
+  size_t width, height;
+  if (layers_count > 0) {
+    width = layers[0]->size.width;
+    height = layers[0]->size.height;
+  } else if (self->framebuffer != nullptr) {
+    // A frame with nothing to rasterize, e.g. everything painted was fully
+    // transparent, has no layers and so no size. Keep the current size so the
+    // frame still matches the window and is drawn (showing the view
+    // background) rather than being skipped - the contents are cleared when
+    // the layers are composited below.
+    width = fl_framebuffer_get_width(self->framebuffer);
+    height = fl_framebuffer_get_height(self->framebuffer);
+  } else {
+    // Nothing has been rendered yet, so there is nothing to clear.
     return;
   }
-
-  size_t width = layers[0]->size.width;
-  size_t height = layers[0]->size.height;
 
   if (width == 0 || height == 0) {
     // A zero-sized layer has no content to show. Drop any existing frame so
