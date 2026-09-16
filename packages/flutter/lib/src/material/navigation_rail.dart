@@ -536,7 +536,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
             ),
             disabled: widget.destinations[i].disabled,
           ),
-        if (!widget.trailingAtBottom && widget.trailing != null) widget.trailing!,
+        if (!widget.trailingAtBottom) ?widget.trailing,
       ],
     );
 
@@ -566,7 +566,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                   Flexible(
                     child: Align(alignment: Alignment(0, groupAlignment), child: mainGroup),
                   ),
-                  if (widget.trailingAtBottom && widget.trailing != null) widget.trailing!,
+                  if (widget.trailingAtBottom) ?widget.trailing,
                 ],
               ),
             ),
