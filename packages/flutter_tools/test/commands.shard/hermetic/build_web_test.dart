@@ -69,7 +69,7 @@ void main() {
     );
   }
 
-  testUsingContext('Refuses to build for web when missing index.html', () async {
+  testWithoutContext('Refuses to build for web when missing index.html', () async {
     fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
     final CommandRunner<void> runner = createTestCommandRunner(
       createBuildCommand(
@@ -92,7 +92,7 @@ void main() {
     );
   });
 
-  testUsingContext('Refuses to build for web when feature is disabled', () async {
+  testWithoutContext('Refuses to build for web when feature is disabled', () async {
     final CommandRunner<void> runner = createTestCommandRunner(
       createBuildCommand(
         fileSystem: fileSystem,
@@ -113,7 +113,7 @@ void main() {
     );
   });
 
-  testUsingContext('Setup for a web build with default output directory', () async {
+  testWithoutContext('Setup for a web build with default output directory', () async {
     final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
@@ -154,7 +154,7 @@ void main() {
     expect(logger.statusText, contains('✓ Built ${buildDir.path}'));
   });
 
-  testUsingContext('Passes --web-define values to environment defines with prefix', () async {
+  testWithoutContext('Passes --web-define values to environment defines with prefix', () async {
     final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
@@ -204,7 +204,7 @@ void main() {
       }
     }
 
-    testUsingContext(
+    testWithoutContext(
       'Passes --web-content-hash flag to compiler configs (wasm: $useWasm)',
       () async {
         final TestWebBuildCommand buildCommand = createBuildCommand(
@@ -228,7 +228,7 @@ void main() {
     );
   }
 
-  testUsingContext(
+  testWithoutContext(
     'Rejects --web-content-hash combined with --enable-wasm-deferred-loading',
     () async {
       final TestWebBuildCommand buildCommand = createBuildCommand(
@@ -254,7 +254,7 @@ void main() {
     },
   );
 
-  testUsingContext(
+  testWithoutContext(
     'Rejects --web-content-hash when web/index.html references main.dart.js or loadEntrypoint',
     () async {
       final TestWebBuildCommand buildCommand = createBuildCommand(
@@ -300,7 +300,7 @@ void main() {
     },
   );
 
-  testUsingContext('Prints serving guidance tip when --web-content-hash is used', () async {
+  testWithoutContext('Prints serving guidance tip when --web-content-hash is used', () async {
     final TestWebBuildCommand buildCommand = createBuildCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -321,7 +321,7 @@ void main() {
     expect(logger.statusText, contains('with "Cache-Control: no-cache"'));
   });
 
-  testUsingContext('Builds successfully without --web-define', () async {
+  testWithoutContext('Builds successfully without --web-define', () async {
     final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
@@ -348,7 +348,7 @@ void main() {
     expect(buildDir.existsSync(), true);
   });
 
-  testUsingContext('Infers target entrypoint correctly from --target', () async {
+  testWithoutContext('Infers target entrypoint correctly from --target', () async {
     // Regression test for https://github.com/flutter/flutter/issues/136830.
     final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
@@ -389,7 +389,7 @@ void main() {
     expect(logger.statusText, contains('✓ Built ${buildDir.path}'));
   });
 
-  testUsingContext('Infers target entrypoint correctly from positional argument list', () async {
+  testWithoutContext('Infers target entrypoint correctly from positional argument list', () async {
     // Regression test for https://github.com/flutter/flutter/issues/136830.
     final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
@@ -424,7 +424,7 @@ void main() {
     expect(logger.statusText, contains('✓ Built ${buildDir.path}'));
   });
 
-  testUsingContext('Does not allow -O0 optimization level', () async {
+  testWithoutContext('Does not allow -O0 optimization level', () async {
     final bufferLogger = BufferLogger.test();
     final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
@@ -455,7 +455,7 @@ void main() {
     expect(buildDir.existsSync(), isFalse);
   });
 
-  testUsingContext('Setup for a web build with a user specified output directory', () async {
+  testWithoutContext('Setup for a web build with a user specified output directory', () async {
     final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
@@ -500,7 +500,7 @@ void main() {
     expect(logger.statusText, contains('✓ Built $newBuildDir'));
   });
 
-  testUsingContext('hidden if feature flag is not enabled', () async {
+  testWithoutContext('hidden if feature flag is not enabled', () async {
     expect(
       BuildWebCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -517,7 +517,7 @@ void main() {
     );
   });
 
-  testUsingContext('not hidden if feature flag is enabled', () async {
+  testWithoutContext('not hidden if feature flag is enabled', () async {
     expect(
       BuildWebCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -534,7 +534,7 @@ void main() {
     );
   });
 
-  testUsingContext(
+  testWithoutContext(
     'Defaults to web renderer canvaskit and minify mode when no option is specified',
     () async {
       final buildCommand = TestWebBuildCommand(
@@ -578,7 +578,7 @@ void main() {
     },
   );
 
-  testUsingContext('Does not build wasm when wasm-dry-run is disabled', () async {
+  testWithoutContext('Does not build wasm when wasm-dry-run is disabled', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -607,7 +607,7 @@ void main() {
     await runner.run(<String>['build', 'web', '--no-pub', '--no-wasm-dry-run']);
   });
 
-  testUsingContext(
+  testWithoutContext(
     'Defaults to web renderer skwasm mode and minify for wasm when no option is specified',
     () async {
       final buildCommand = TestWebBuildCommand(
@@ -638,7 +638,7 @@ void main() {
     },
   );
 
-  testUsingContext('Passes minify to only wasm when minify-wasm specified', () async {
+  testWithoutContext('Passes minify to only wasm when minify-wasm specified', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -660,7 +660,7 @@ void main() {
     await runner.run(<String>['build', 'web', '--no-pub', '--wasm', '--minify-wasm']);
   });
 
-  testUsingContext('Passes no-minify to wasm when no-minify-wasm specified', () async {
+  testWithoutContext('Passes no-minify to wasm when no-minify-wasm specified', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -682,7 +682,7 @@ void main() {
     await runner.run(<String>['build', 'web', '--no-pub', '--wasm', '--no-minify-wasm']);
   });
 
-  testUsingContext('Passes minify to js when minify-js specified', () async {
+  testWithoutContext('Passes minify to js when minify-js specified', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -704,7 +704,7 @@ void main() {
     await runner.run(<String>['build', 'web', '--no-pub', '--wasm', '--minify-js']);
   });
 
-  testUsingContext('Passes no-minify to js when no-minify-js specified', () async {
+  testWithoutContext('Passes no-minify to js when no-minify-js specified', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -726,7 +726,7 @@ void main() {
     await runner.run(<String>['build', 'web', '--no-pub', '--wasm', '--no-minify-js']);
   });
 
-  testUsingContext('Passes enabled-deferred-loading to wasm when specified', () async {
+  testWithoutContext('Passes enabled-deferred-loading to wasm when specified', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -758,7 +758,7 @@ void main() {
     ]);
   });
 
-  testUsingContext('Web build supports build-name and build-number', () async {
+  testWithoutContext('Web build supports build-name and build-number', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -783,7 +783,7 @@ void main() {
     expect(buildInfo.buildName, '1.2.3');
   });
 
-  testUsingContext('Does not override custom CanvasKit URL', () async {
+  testWithoutContext('Does not override custom CanvasKit URL', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -805,7 +805,7 @@ void main() {
     expect(buildInfo.dartDefines, contains('FLUTTER_WEB_CANVASKIT_URL=abcdefg'));
   });
 
-  testUsingContext('Rejects --base-href value that does not start with /', () async {
+  testWithoutContext('Rejects --base-href value that does not start with /', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -829,7 +829,7 @@ void main() {
     );
   });
 
-  testUsingContext('Rejects --static-assets-url value that does not end with /', () async {
+  testWithoutContext('Rejects --static-assets-url value that does not end with /', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -853,7 +853,7 @@ void main() {
     );
   });
 
-  testUsingContext('flutter build web option visibility', () async {
+  testWithoutContext('flutter build web option visibility', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -904,7 +904,7 @@ void main() {
     expectVisible('base-href');
   });
 
-  testUsingContext('flutter build web option visibility with verboseHelp', () async {
+  testWithoutContext('flutter build web option visibility with verboseHelp', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
       platform: fakePlatform,
@@ -956,7 +956,7 @@ void main() {
     expectVisible('base-href');
   });
 
-  testUsingContext('Refuses to build for web when folder is missing', () async {
+  testWithoutContext('Refuses to build for web when folder is missing', () async {
     fileSystem.file(fileSystem.path.join('web')).deleteSync(recursive: true);
     final TestWebBuildCommand buildCommand = createBuildCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
