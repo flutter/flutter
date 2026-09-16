@@ -79,15 +79,19 @@ class BuildAppBundleCommand extends BuildSubCommand {
   final AndroidContext _androidContext;
   final BuildSystem _buildSystem;
 
+  /// The [AndroidBuilder] used to build the app bundle.
   @visibleForTesting
   AndroidBuilder get androidBuilder => _androidBuilder;
 
+  /// The [AndroidContext] containing Android-specific toolchain dependencies.
   @visibleForTesting
   AndroidContext get androidContext => _androidContext;
 
+  /// The [AndroidSdk] instance, if available.
   @visibleForTesting
   AndroidSdk? get androidSdk => _androidContext.androidSdk;
 
+  /// The [BuildSystem] used for building the project.
   @visibleForTesting
   BuildSystem get buildSystem => _buildSystem;
 
@@ -99,18 +103,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   @override
   List<String> get aliases => const <String>['aab'];
-
-  @override
-  String get targetFile {
-    if (argResults?.wasParsed('target') ?? false) {
-      return stringArg('target')!;
-    }
-    final List<String>? rest = argResults?.rest;
-    if (rest != null && rest.isNotEmpty) {
-      return rest.first;
-    }
-    return toolContext.fs.path.join('lib', 'main.dart');
-  }
 
   @override
   DeprecationBehavior get deprecationBehavior => getValue(BuildInfoOptions.ignoreDeprecation)
@@ -157,7 +149,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(:Logger logger, :Platform platform, :Terminal terminal) = toolContext;
-    if (androidSdk == null) {
+    if (_androidContext.androidSdk == null) {
       exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
     final androidBuildInfo = AndroidBuildInfo(
