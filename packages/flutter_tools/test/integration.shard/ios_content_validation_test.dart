@@ -159,7 +159,13 @@ void main() {
                 : outputRunnerBinary.path;
             final bool helloStatic = AppleTestUtils.getExportedSymbols(
               binaryPath,
-            ).any((String symbol) => symbol.contains('HelloPlugin') && symbol.contains('handle'));
+            ).any(
+              (String symbol) =>
+                  symbol.contains('HelloPlugin') &&
+                  // Ignore the Pigeon API class, which is also generated in Dart code.
+                  !symbol.contains('HelloPluginApi') &&
+                  symbol.contains('handle'),
+            );
 
             // Plugin is a dynamic xor static framework.
             expect(helloDynamic != helloStatic, isTrue);
@@ -310,7 +316,7 @@ void main() {
 
           testWithoutContext('validate obfuscation', () {
             // HelloPlugin class is present in project.
-            ProcessResult grepResult = processManager.runSync(<String>[
+            final ProcessResult grepResult = processManager.runSync(<String>[
               'grep',
               '-r',
               'HelloPlugin',
@@ -320,13 +326,20 @@ void main() {
             expect(grepResult.exitCode, 0);
 
             // Not present in binary.
-            grepResult = processManager.runSync(<String>[
-              'grep',
-              'HelloPlugin',
+            final ProcessResult stringsResult = processManager.runSync(<String>[
+              'strings',
               outputAppFrameworkBinary.path,
             ]);
-            // Does not match exits 1.
-            expect(grepResult.exitCode, 1);
+            final List<String> classMatches = (stringsResult.stdout as String)
+                .split('\n')
+                .where(
+                  (String line) =>
+                      line.contains('HelloPlugin') &&
+                      // Ignore the Pigeon API name, which is in the channel name
+                      !line.contains('HelloPluginApi'),
+                )
+                .toList();
+            expect(classMatches, isEmpty);
           });
         });
       }
@@ -428,7 +441,13 @@ void main() {
         );
         final bool helloDynamic = pluginFrameworkBinary.existsSync();
         final bool helloStatic = AppleTestUtils.getExportedSymbols(runnerBinary.path)
-            .any((String symbol) => symbol.contains('HelloPlugin') && symbol.contains('handle'));
+            .any(
+          (String symbol) =>
+              symbol.contains('HelloPlugin') &&
+              // Ignore the Pigeon API class, which is also generated in Dart code.
+              !symbol.contains('HelloPluginApi') &&
+              symbol.contains('handle'),
+        );
 
         // Plugin is a dynamic xor static framework.
         expect(helloDynamic != helloStatic, isTrue);
