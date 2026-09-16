@@ -2503,7 +2503,7 @@ class NestedWindowController extends ChangeNotifier {
 /// ) {
 ///   return NestedWindow(
 ///     controller: controller,
-///     entryBuilder: () {
+///     entryBuilder: (Rect? anchorRect) {
 ///       final DialogWindowController dialog = DialogWindowController(
 ///         parent: WindowScope.of(context),
 ///         size: const Size(400, 300),

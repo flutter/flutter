@@ -4,8 +4,6 @@
 
 // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
 // See: https://github.com/flutter/flutter/issues/177586
-// TODO(mattkae): refactor this example for better widget position tracking
-// This positioning logic is simpler than you might want in production. See https://github.com/flutter/flutter/issues/178829.
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
 import 'package:flutter/material.dart';
@@ -49,94 +47,66 @@ class MyApp extends StatefulWidget {
   }
 }
 
-class _CallbackPopupDelegate extends PopupWindowControllerDelegate {
-  _CallbackPopupDelegate({required this.onDestroyCallback});
-
-  final VoidCallback onDestroyCallback;
+class _MyAppState extends State<MyApp> {
+  final NestedWindowController _nestedWindowController =
+      NestedWindowController();
 
   @override
-  void onWindowDestroyed() {
-    onDestroyCallback();
+  void dispose() {
+    _nestedWindowController.dispose();
+    super.dispose();
   }
-}
 
-class _MyAppState extends State<MyApp> {
-  final GlobalKey _key = GlobalKey();
-  PopupWindowController? _popupController;
-
-  void _showPopup() {
+  WindowEntry _buildPopupEntry(Rect? anchorRect) {
     final PopupWindowController controller = PopupWindowController(
       parent: WindowScope.of(context),
-      anchorRect: _getAnchorRect()!,
+      anchorRect: anchorRect!,
       positioner: const WindowPositioner(
         parentAnchor: .right,
         childAnchor: .left,
       ),
-      delegate: _CallbackPopupDelegate(
-        onDestroyCallback: () {
-          if (mounted) {
-            setState(() {
-              _popupController = null;
-            });
-          }
-        },
+    );
+    return WindowEntry(
+      controller: controller,
+      builder: (BuildContext context) => Material(
+        color: Colors.black,
+        child: Padding(
+          padding: const .all(8),
+          child: Column(
+            mainAxisSize: .min,
+            children: <Widget>[
+              const Text(
+                'This is a popup',
+                style: TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: _nestedWindowController.hide,
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
-    mountToplevelWindow(
-      context: context,
-      entry: WindowEntry(
-        controller: controller,
-        builder: (BuildContext context) => MaterialApp(
-          builder: (BuildContext context, Widget? child) => Material(
-            color: Colors.black,
-            child: Padding(
-              padding: const .all(8),
-              child: Column(
-                mainAxisSize: .min,
-                children: <Widget>[
-                  const Text(
-                    'This is a popup',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: controller.destroy,
-                    child: const Text('Close'),
-                  ),
-                ],
-              ),
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: NestedWindow(
+        controller: _nestedWindowController,
+        entryBuilder: _buildPopupEntry,
+        child: ElevatedButton(
+          onPressed: _nestedWindowController.toggle,
+          child: ListenableBuilder(
+            listenable: _nestedWindowController,
+            builder: (BuildContext context, Widget? child) => Text(
+              _nestedWindowController.showing ? 'Hide Popup' : 'Show Popup',
             ),
           ),
         ),
       ),
     );
-    setState(() {
-      _popupController = controller;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: ElevatedButton(
-          key: _key,
-          onPressed: _popupController == null ? _showPopup : null,
-          child: const Text('Show Popup'),
-        ),
-      ),
-    );
-  }
-
-  Rect? _getAnchorRect() {
-    final RenderBox? renderBox =
-        _key.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      final Offset position = renderBox.localToGlobal(Offset.zero);
-      final Size size = renderBox.size;
-      return position & size; // creates a Rect
-    }
-
-    return null;
   }
 }

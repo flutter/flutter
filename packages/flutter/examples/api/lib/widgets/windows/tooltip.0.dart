@@ -4,8 +4,6 @@
 
 // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
 // See: https://github.com/flutter/flutter/issues/177586
-// TODO(mattkae): refactor this example for better widget position tracking
-// This positioning logic is simpler than you might want in production. See https://github.com/flutter/flutter/issues/178829.
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
 import 'package:flutter/material.dart';
@@ -50,70 +48,64 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final GlobalKey _key = GlobalKey();
-  TooltipWindowController? _tooltipController;
+  final NestedWindowController _nestedWindowController =
+      NestedWindowController();
 
-  void _openTooltip(BuildContext context) {
+  @override
+  void dispose() {
+    _nestedWindowController.dispose();
+    super.dispose();
+  }
+
+  WindowEntry _buildTooltipEntry(Rect? anchorRect) {
     final TooltipWindowController tooltipController = TooltipWindowController(
       parent: WindowScope.of(context),
-      anchorRect: _getAnchorRect()!,
+      anchorRect: anchorRect!,
       positioner: const WindowPositioner(
         parentAnchor: WindowPositionerAnchor.right,
         childAnchor: WindowPositionerAnchor.left,
       ),
     );
-    mountToplevelWindow(
-      context: context,
-      entry: WindowEntry(
-        controller: tooltipController,
-        builder: (BuildContext context) {
-          return MaterialApp(
-            builder: (BuildContext context, Widget? child) => Container(
-              padding: const .all(8),
-              color: Colors.black,
-              child: const Text(
-                'This is a tooltip',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-    setState(() => _tooltipController = tooltipController);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => _openTooltip(context),
-      onExit: (_) => setState(() {
-        _tooltipController?.destroy();
-        _tooltipController = null;
-      }),
-      cursor: SystemMouseCursors.click,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        color: _tooltipController != null ? Colors.blueAccent : Colors.blue,
-        padding: const .all(12),
-        child: Text(
-          key: _key,
-          'Hover Me',
-          style: const TextStyle(color: Colors.white),
+    return WindowEntry(
+      controller: tooltipController,
+      builder: (BuildContext context) => Container(
+        padding: const .all(8),
+        color: Colors.black,
+        child: const Text(
+          'This is a tooltip',
+          style: TextStyle(color: Colors.white),
         ),
       ),
     );
   }
 
-  Rect? _getAnchorRect() {
-    final RenderBox? renderBox =
-        _key.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      final Offset position = renderBox.localToGlobal(Offset.zero);
-      final Size size = renderBox.size;
-      return position & size; // creates a Rect
-    }
-
-    return null;
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: NestedWindow(
+        controller: _nestedWindowController,
+        entryBuilder: _buildTooltipEntry,
+        child: MouseRegion(
+          onEnter: (_) => _nestedWindowController.show(),
+          onExit: (_) => _nestedWindowController.hide(),
+          cursor: SystemMouseCursors.click,
+          child: ListenableBuilder(
+            listenable: _nestedWindowController,
+            builder: (BuildContext context, Widget? child) => AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              color: _nestedWindowController.showing
+                  ? Colors.blueAccent
+                  : Colors.blue,
+              padding: const .all(12),
+              child: child,
+            ),
+            child: const Text(
+              'Hover Me',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
