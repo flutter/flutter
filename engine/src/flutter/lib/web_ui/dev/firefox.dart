@@ -69,6 +69,8 @@ user_pref("dom.disable_open_during_load", false);
 user_pref("dom.max_script_run_time", 0);
 user_pref("trailhead.firstrun.branches", "nofirstrun-empty");
 user_pref("browser.aboutwelcome.enabled", false);
+user_pref("webgl.force-enabled", true);
+user_pref("gfx.webrender.software", true);
 ''';
 
         final temporaryProfileDirectory = Directory(
