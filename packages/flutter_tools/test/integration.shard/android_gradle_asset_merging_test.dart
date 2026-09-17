@@ -115,90 +115,87 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext(
-    'Flutter assets, directory assets, resolution variants, and native Android assets coexist in APK',
-    () async {
-      final Directory projectDir = await createApp(tempDir);
+  testWithoutContext('Flutter assets, directory assets, resolution variants, and native Android assets coexist in APK', () async {
+    final Directory projectDir = await createApp(tempDir);
 
-      // Every file this test packages is declared in one of the two tables below. To cover a new
-      // asset type, add a row to the matching table.
-      //
-      // For Flutter assets:
-      //  * source is written into the project,
-      //  * pubspecEntry is what `pubspec.yaml` declares, or null when the tool finds the file
-      //    without a declaration, which is how resolution variants work,
-      //  * apkEntry is where the file has to end up inside the APK.
-      final flutterAssets =
-          <({String source, String? pubspecEntry, String apkEntry, String contents})>[
-            (
-              source: 'assets/single_asset.txt',
-              pubspecEntry: 'assets/single_asset.txt',
-              apkEntry: 'assets/flutter_assets/assets/single_asset.txt',
-              contents: 'flutter_single_asset_content',
-            ),
-            (
-              source: 'assets/nested/dir_asset.txt',
-              pubspecEntry: 'assets/nested/',
-              apkEntry: 'assets/flutter_assets/assets/nested/dir_asset.txt',
-              contents: 'flutter_nested_asset_content',
-            ),
-            (
-              source: 'assets/image.png',
-              pubspecEntry: 'assets/image.png',
-              apkEntry: 'assets/flutter_assets/assets/image.png',
-              contents: 'flutter_image_base_content',
-            ),
-            // Declaring the base image also packages its density variants.
-            (
-              source: 'assets/3.0x/image.png',
-              pubspecEntry: null,
-              apkEntry: 'assets/flutter_assets/assets/3.0x/image.png',
-              contents: 'flutter_image_3x_content',
-            ),
-            (
-              source: 'assets/4.0x/image.png',
-              pubspecEntry: null,
-              apkEntry: 'assets/flutter_assets/assets/4.0x/image.png',
-              contents: 'flutter_image_4x_content',
-            ),
-          ];
+    // Every file this test packages is declared in one of the two tables below. To cover a new
+    // asset type, add a row to the matching table.
+    //
+    // For Flutter assets:
+    //  * source is written into the project,
+    //  * pubspecEntry is what `pubspec.yaml` declares, or null when the tool finds the file
+    //    without a declaration, which is how resolution variants work,
+    //  * apkEntry is where the file has to end up inside the APK.
+    final flutterAssets =
+        <({String source, String? pubspecEntry, String apkEntry, String contents})>[
+          (
+            source: 'assets/single_asset.txt',
+            pubspecEntry: 'assets/single_asset.txt',
+            apkEntry: 'assets/flutter_assets/assets/single_asset.txt',
+            contents: 'flutter_single_asset_content',
+          ),
+          (
+            source: 'assets/nested/dir_asset.txt',
+            pubspecEntry: 'assets/nested/',
+            apkEntry: 'assets/flutter_assets/assets/nested/dir_asset.txt',
+            contents: 'flutter_nested_asset_content',
+          ),
+          (
+            source: 'assets/image.png',
+            pubspecEntry: 'assets/image.png',
+            apkEntry: 'assets/flutter_assets/assets/image.png',
+            contents: 'flutter_image_base_content',
+          ),
+          // Declaring the base image also packages its density variants.
+          (
+            source: 'assets/3.0x/image.png',
+            pubspecEntry: null,
+            apkEntry: 'assets/flutter_assets/assets/3.0x/image.png',
+            contents: 'flutter_image_3x_content',
+          ),
+          (
+            source: 'assets/4.0x/image.png',
+            pubspecEntry: null,
+            apkEntry: 'assets/flutter_assets/assets/4.0x/image.png',
+            contents: 'flutter_image_4x_content',
+          ),
+        ];
 
-      // Native Android assets need no pubspec entry. AGP merges src/main/assets into the APK.
-      final nativeAndroidAssets = <({String source, String apkEntry, String contents})>[
-        (
-          source: 'native_asset.txt',
-          apkEntry: 'assets/native_asset.txt',
-          contents: 'native_asset_content',
-        ),
-        (
-          source: 'custom/config.json',
-          apkEntry: 'assets/custom/config.json',
-          contents: '{"native_config": true}',
-        ),
-      ];
+    // Native Android assets need no pubspec entry. AGP merges src/main/assets into the APK.
+    final nativeAndroidAssets = <({String source, String apkEntry, String contents})>[
+      (
+        source: 'native_asset.txt',
+        apkEntry: 'assets/native_asset.txt',
+        contents: 'native_asset_content',
+      ),
+      (
+        source: 'custom/config.json',
+        apkEntry: 'assets/custom/config.json',
+        contents: '{"native_config": true}',
+      ),
+    ];
 
-      for (final asset in flutterAssets) {
-        writeFlutterAsset(projectDir, asset.source, asset.contents);
-      }
-      for (final asset in nativeAndroidAssets) {
-        writeAndroidSourceSetAsset(projectDir, 'main', asset.source, asset.contents);
-      }
-      addAssetsToPubspec(projectDir.childFile('pubspec.yaml'), <String>[
-        for (final asset in flutterAssets)
-          if (asset.pubspecEntry case final String entry) entry,
-      ]);
+    for (final asset in flutterAssets) {
+      writeFlutterAsset(projectDir, asset.source, asset.contents);
+    }
+    for (final asset in nativeAndroidAssets) {
+      writeAndroidSourceSetAsset(projectDir, 'main', asset.source, asset.contents);
+    }
+    addAssetsToPubspec(projectDir.childFile('pubspec.yaml'), <String>[
+      for (final asset in flutterAssets)
+        if (asset.pubspecEntry case final String entry) entry,
+    ]);
 
-      final File apkFile = await buildApk(projectDir);
-      final Archive archive = readApkArchive(apkFile);
+    final File apkFile = await buildApk(projectDir);
+    final Archive archive = readApkArchive(apkFile);
 
-      for (final asset in flutterAssets) {
-        expectApkEntry(archive, asset.apkEntry, asset.contents);
-      }
-      for (final asset in nativeAndroidAssets) {
-        expectApkEntry(archive, asset.apkEntry, asset.contents);
-      }
-    },
-  );
+    for (final asset in flutterAssets) {
+      expectApkEntry(archive, asset.apkEntry, asset.contents);
+    }
+    for (final asset in nativeAndroidAssets) {
+      expectApkEntry(archive, asset.apkEntry, asset.contents);
+    }
+  });
 
   // Verifies that assets removed from pubspec.yaml are pruned from the APK on a
   // subsequent build, rather than lingering from the previous build's output.
@@ -268,54 +265,49 @@ void main() {
   //
   // So on a path collision the generated Flutter assets win over
   // `src/main/assets`, and the build must not fail.
-  testWithoutContext(
-    'generated Flutter assets take precedence over static src/main/assets on path collision without build failure',
-    () async {
-      final Directory projectDir = await createApp(tempDir);
+  testWithoutContext('generated Flutter assets take precedence over static src/main/assets on path collision without build failure', () async {
+    final Directory projectDir = await createApp(tempDir);
 
-      writeFlutterAsset(projectDir, 'assets/collision.txt', 'flutter_version');
-      writeAndroidSourceSetAsset(
-        projectDir,
-        'main',
-        'flutter_assets/assets/collision.txt',
-        'native_override_version',
-      );
+    writeFlutterAsset(projectDir, 'assets/collision.txt', 'flutter_version');
+    writeAndroidSourceSetAsset(
+      projectDir,
+      'main',
+      'flutter_assets/assets/collision.txt',
+      'native_override_version',
+    );
 
-      final File pubspecFile = projectDir.childFile('pubspec.yaml');
-      addAssetsToPubspec(pubspecFile, <String>['assets/collision.txt']);
+    final File pubspecFile = projectDir.childFile('pubspec.yaml');
+    addAssetsToPubspec(pubspecFile, <String>['assets/collision.txt']);
 
-      final File apkFile = await buildApk(projectDir);
-      final Archive archive = readApkArchive(apkFile);
+    final File apkFile = await buildApk(projectDir);
+    final Archive archive = readApkArchive(apkFile);
 
-      expectApkEntry(
-        archive,
-        'assets/flutter_assets/assets/collision.txt',
-        'flutter_version',
-        reason:
-            'Per the AGP SourceDirectories contract, addGeneratedSourceDirectory adds to '
-            'the Variant overlay, giving it the highest possible priority during merge '
-            'over src/main/assets',
-      );
-    },
-  );
+    expectApkEntry(
+      archive,
+      'assets/flutter_assets/assets/collision.txt',
+      'flutter_version',
+      reason:
+          'Per the AGP SourceDirectories contract, addGeneratedSourceDirectory adds to '
+          'the Variant overlay, giving it the highest possible priority during merge '
+          'over src/main/assets',
+    );
+  });
 
   // Covers both Android source-set dimensions that vary per variant: product
   // flavor (`src/<flavor>/assets`) and build type (`src/<buildType>/assets`).
   // Both are asserted against a single `freeDebug` build so this costs one
   // Gradle invocation rather than two.
-  testWithoutContext(
-    'flavor-specific and buildType-specific native assets are packaged into the matching variant APK',
-    () async {
-      final Directory projectDir = await createApp(tempDir);
+  testWithoutContext('flavor-specific and buildType-specific native assets are packaged into the matching variant APK', () async {
+    final Directory projectDir = await createApp(tempDir);
 
-      // Add product flavors to build.gradle.kts.
-      final File buildGradleFile = projectDir
-          .childDirectory('android')
-          .childDirectory('app')
-          .childFile('build.gradle.kts');
-      expect(buildGradleFile, exists);
-      String buildGradleContents = buildGradleFile.readAsStringSync();
-      buildGradleContents = buildGradleContents.replaceFirst('android {', '''
+    // Add product flavors to build.gradle.kts.
+    final File buildGradleFile = projectDir
+        .childDirectory('android')
+        .childDirectory('app')
+        .childFile('build.gradle.kts');
+    expect(buildGradleFile, exists);
+    String buildGradleContents = buildGradleFile.readAsStringSync();
+    buildGradleContents = buildGradleContents.replaceFirst('android {', '''
 android {
     flavorDimensions += "default"
     productFlavors {
@@ -326,63 +318,58 @@ android {
             dimension = "default"
         }
     }''');
-      buildGradleFile.writeAsStringSync(buildGradleContents);
+    buildGradleFile.writeAsStringSync(buildGradleContents);
 
-      // Flavor-specific assets: only the selected flavor should be packaged.
-      writeAndroidSourceSetAsset(projectDir, 'free', 'flavor_free.txt', 'free_flavor_asset_data');
-      writeAndroidSourceSetAsset(projectDir, 'paid', 'flavor_paid.txt', 'paid_flavor_asset_data');
+    // Flavor-specific assets: only the selected flavor should be packaged.
+    writeAndroidSourceSetAsset(projectDir, 'free', 'flavor_free.txt', 'free_flavor_asset_data');
+    writeAndroidSourceSetAsset(projectDir, 'paid', 'flavor_paid.txt', 'paid_flavor_asset_data');
 
-      // BuildType-specific assets: only the selected build type should be packaged.
-      writeAndroidSourceSetAsset(
-        projectDir,
-        'debug',
-        'buildtype_debug.txt',
-        'debug_buildtype_asset_data',
-      );
-      writeAndroidSourceSetAsset(
-        projectDir,
-        'release',
-        'buildtype_release.txt',
-        'release_buildtype_asset_data',
-      );
+    // BuildType-specific assets: only the selected build type should be packaged.
+    writeAndroidSourceSetAsset(
+      projectDir,
+      'debug',
+      'buildtype_debug.txt',
+      'debug_buildtype_asset_data',
+    );
+    writeAndroidSourceSetAsset(
+      projectDir,
+      'release',
+      'buildtype_release.txt',
+      'release_buildtype_asset_data',
+    );
 
-      // Create standard Flutter asset.
-      writeFlutterAsset(projectDir, 'assets/shared.txt', 'shared_flutter_asset');
+    // Create standard Flutter asset.
+    writeFlutterAsset(projectDir, 'assets/shared.txt', 'shared_flutter_asset');
 
-      final File pubspecFile = projectDir.childFile('pubspec.yaml');
-      addAssetsToPubspec(pubspecFile, <String>['assets/shared.txt']);
+    final File pubspecFile = projectDir.childFile('pubspec.yaml');
+    addAssetsToPubspec(pubspecFile, <String>['assets/shared.txt']);
 
-      // Build the freeDebug variant.
-      final File freeApkFile = await buildApk(projectDir, flavor: 'free');
-      final Archive freeArchive = readApkArchive(freeApkFile);
+    // Build the freeDebug variant.
+    final File freeApkFile = await buildApk(projectDir, flavor: 'free');
+    final Archive freeArchive = readApkArchive(freeApkFile);
 
-      // Flutter assets are packaged regardless of flavor or build type.
-      expectApkEntry(
-        freeArchive,
-        'assets/flutter_assets/assets/shared.txt',
-        'shared_flutter_asset',
-      );
+    // Flutter assets are packaged regardless of flavor or build type.
+    expectApkEntry(freeArchive, 'assets/flutter_assets/assets/shared.txt', 'shared_flutter_asset');
 
-      // The selected flavor's assets are present; the other flavor's are not.
-      expectApkEntry(freeArchive, 'assets/flavor_free.txt', 'free_flavor_asset_data');
-      expectNoApkEntry(
-        freeArchive,
-        'assets/flavor_paid.txt',
-        reason: 'the paid flavor source set must not contribute assets to a free build',
-      );
+    // The selected flavor's assets are present; the other flavor's are not.
+    expectApkEntry(freeArchive, 'assets/flavor_free.txt', 'free_flavor_asset_data');
+    expectNoApkEntry(
+      freeArchive,
+      'assets/flavor_paid.txt',
+      reason: 'the paid flavor source set must not contribute assets to a free build',
+    );
 
-      // The selected build type's assets are present; the other's are not.
-      expectApkEntry(
-        freeArchive,
-        'assets/buildtype_debug.txt',
-        'debug_buildtype_asset_data',
-        reason: 'src/debug/assets must be merged into a debug variant APK',
-      );
-      expectNoApkEntry(
-        freeArchive,
-        'assets/buildtype_release.txt',
-        reason: 'the release source set must not contribute assets to a debug build',
-      );
-    },
-  );
+    // The selected build type's assets are present; the other's are not.
+    expectApkEntry(
+      freeArchive,
+      'assets/buildtype_debug.txt',
+      'debug_buildtype_asset_data',
+      reason: 'src/debug/assets must be merged into a debug variant APK',
+    );
+    expectNoApkEntry(
+      freeArchive,
+      'assets/buildtype_release.txt',
+      reason: 'the release source set must not contribute assets to a debug build',
+    );
+  });
 }
