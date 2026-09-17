@@ -21,6 +21,7 @@ namespace flutter {
 
 class FlutterWindowsEngine;
 class HostWindow;
+class HostWindowSatellite;
 
 // Specifies a preferred content size for the window.
 struct WindowSizeRequest {
@@ -86,6 +87,16 @@ struct PopupWindowCreationRequest {
   GetWindowPositionCallback get_position_callback;
 };
 
+struct SatelliteWindowCreationRequest {
+  WindowSizeRequest preferred_size;
+  WindowConstraints preferred_constraints;
+  HWND parent;
+  GetWindowPositionCallback get_position_callback;
+  LPCWSTR title;
+  bool sized_to_content = false;
+  bool resizable = true;
+};
+
 struct WindowsMessage {
   FlutterViewId view_id;
   HWND hwnd;
@@ -132,6 +143,9 @@ class WindowManager {
 
   FlutterViewId CreatePopupWindow(const PopupWindowCreationRequest* request);
 
+  FlutterViewId CreateSatelliteWindow(
+      const SatelliteWindowCreationRequest* request);
+
   // Message handler called by |HostWindow::WndProc| to process window
   // messages before delegating them to the host window. This allows the
   // manager to process messages that affect the state of other host windows.
@@ -156,6 +170,11 @@ class WindowManager {
   // A map of active windows. Used to destroy remaining windows on engine
   // shutdown.
   std::unordered_map<HWND, std::unique_ptr<HostWindow>> active_windows_;
+
+  // The subset of |active_windows_| that are satellites, so that window
+  // movement can be propagated without scanning every window. Entries are
+  // owned by |active_windows_| and removed on WM_NCDESTROY.
+  std::vector<HostWindowSatellite*> satellites_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(WindowManager);
 };
@@ -227,6 +246,18 @@ void InternalFlutterWindows_WindowManager_UpdateTooltipPosition(HWND hwnd);
 
 FLUTTER_EXPORT
 void InternalFlutterWindows_WindowManager_UpdatePopupPosition(HWND hwnd);
+
+FLUTTER_EXPORT
+FlutterViewId InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+    int64_t engine_id,
+    const flutter::SatelliteWindowCreationRequest* request);
+
+// Re-anchors the satellite window |satellite_hwnd| to |new_parent|. The
+// satellite keeps its current screen position.
+FLUTTER_EXPORT
+void InternalFlutterWindows_WindowManager_SetSatelliteParent(
+    HWND satellite_hwnd,
+    HWND new_parent);
 }
 
 #endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOW_MANAGER_H_

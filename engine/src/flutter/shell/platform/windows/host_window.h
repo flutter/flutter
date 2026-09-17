@@ -105,8 +105,37 @@ class HostWindow {
       GetWindowPositionCallback get_position_callback,
       HWND parent);
 
+  // Creates a satellite Win32 window with a child view confined to its client
+  // area. |window_manager| is a pointer to the window manager that manages the
+  // |HostWindow|. |engine| is a pointer to the engine that manages the window
+  // manager. |preferred_size| is the requested content size, which is required
+  // unless |sized_to_content| is true. |preferred_constraints| are the
+  // constraints set on the window's size. |get_position_callback| is a callback
+  // that determines the initial position of the satellite window; unlike for
+  // tooltips and popups it is invoked only once, for the initial placement.
+  // |parent| is the window this satellite is anchored to, which must be
+  // non-null. |title| is the window title. When |sized_to_content| is true the
+  // window is resized to fit its rendered content after the first frame. When
+  // |resizable| is true the user can resize the window manually.
+  //
+  // A satellite follows its parent's movement, retaining the offset it has from
+  // it, and cannot be minimized on its own.
+  static std::unique_ptr<HostWindow> CreateSatelliteWindow(
+      WindowManager* window_manager,
+      FlutterWindowsEngine* engine,
+      const WindowSizeRequest& preferred_size,
+      const WindowConstraints& preferred_constraints,
+      GetWindowPositionCallback get_position_callback,
+      HWND parent,
+      LPCWSTR title,
+      bool sized_to_content,
+      bool resizable);
+
   // Returns the instance pointer for |hwnd| or nullptr if invalid.
   static HostWindow* GetThisFromHandle(HWND hwnd);
+
+  // Returns the archetype of this window.
+  WindowArchetype GetArchetype() const { return archetype_; }
 
   // Returns the backing window handle, or nullptr if the native window is not
   // created or has already been destroyed.
@@ -231,9 +260,6 @@ class HostWindow {
   // is enabled, returns the current window. If no window is enabled, returns
   // `nullptr`.
   HostWindow* FindFirstEnabledDescendant() const;
-
-  // Returns the archetype of this window.
-  WindowArchetype GetArchetype() const { return archetype_; }
 
   // Returns windows owned by this window.
   std::vector<HostWindow*> GetOwnedWindows() const;

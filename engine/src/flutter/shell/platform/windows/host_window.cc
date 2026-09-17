@@ -6,6 +6,7 @@
 #include "flutter/shell/platform/windows/host_window_dialog.h"
 #include "flutter/shell/platform/windows/host_window_popup.h"
 #include "flutter/shell/platform/windows/host_window_regular.h"
+#include "flutter/shell/platform/windows/host_window_satellite.h"
 #include "flutter/shell/platform/windows/host_window_tooltip.h"
 
 #include <dwmapi.h>
@@ -223,6 +224,22 @@ std::unique_ptr<HostWindow> HostWindow::CreatePopupWindow(
   return std::unique_ptr<HostWindowPopup>(new HostWindowPopup(
       window_manager, engine, FromWindowConstraints(preferred_constraints),
       get_position_callback, parent));
+}
+
+std::unique_ptr<HostWindow> HostWindow::CreateSatelliteWindow(
+    WindowManager* window_manager,
+    FlutterWindowsEngine* engine,
+    const WindowSizeRequest& preferred_size,
+    const WindowConstraints& preferred_constraints,
+    GetWindowPositionCallback get_position_callback,
+    HWND parent,
+    LPCWSTR title,
+    bool sized_to_content,
+    bool resizable) {
+  return std::unique_ptr<HostWindowSatellite>(new HostWindowSatellite(
+      window_manager, engine, preferred_size,
+      FromWindowConstraints(preferred_constraints), get_position_callback,
+      parent, title, sized_to_content, resizable));
 }
 
 HostWindow::HostWindow(WindowManager* window_manager,

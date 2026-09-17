@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/window_manager.h"
 
 #include <dwmapi.h>
+#include <algorithm>
 #include <optional>
 #include <vector>
 
@@ -18,6 +19,7 @@
 #include "shell/platform/windows/flutter_windows_view.h"
 #include "shell/platform/windows/host_window.h"
 #include "shell/platform/windows/host_window_popup.h"
+#include "shell/platform/windows/host_window_satellite.h"
 #include "shell/platform/windows/host_window_tooltip.h"
 
 namespace flutter {
@@ -86,6 +88,22 @@ FlutterViewId WindowManager::CreatePopupWindow(
   return view_id;
 }
 
+FlutterViewId WindowManager::CreateSatelliteWindow(
+    const SatelliteWindowCreationRequest* request) {
+  auto window = HostWindow::CreateSatelliteWindow(
+      this, engine_, request->preferred_size, request->preferred_constraints,
+      request->get_position_callback, request->parent, request->title,
+      request->sized_to_content, request->resizable);
+  if (!window || !window->GetWindowHandle()) {
+    FML_LOG(ERROR) << "Failed to create host window";
+    return -1;
+  }
+  FlutterViewId const view_id = window->view_controller_->view()->view_id();
+  satellites_.push_back(static_cast<HostWindowSatellite*>(window.get()));
+  active_windows_[window->GetWindowHandle()] = std::move(window);
+  return view_id;
+}
+
 void WindowManager::OnEngineShutdown() {
   std::vector<HWND> active_handles;
   active_handles.reserve(active_windows_.size());
@@ -111,8 +129,46 @@ std::optional<LRESULT> WindowManager::HandleMessage(HWND hwnd,
                                                     WPARAM wparam,
                                                     LPARAM lparam) {
   if (message == WM_NCDESTROY) {
+    // Stop tracking the window before it is destroyed: |active_windows_| owns
+    // the |HostWindow|, so erasing it invalidates any pointer in
+    // |satellites_|.
+    std::erase_if(satellites_, [hwnd](HostWindowSatellite* satellite) {
+      return satellite->GetWindowHandle() == hwnd;
+    });
     active_windows_.erase(hwnd);
     return std::nullopt;
+  }
+
+  // A satellite retains its offset from the window it is anchored to, so when
+  // any window moves, shift the satellites that track it by the same delta.
+  // Moving a satellite generates its own WM_WINDOWPOSCHANGED, which propagates
+  // the movement to any satellites anchored to it in turn.
+  if (message == WM_WINDOWPOSCHANGED && !satellites_.empty()) {
+    auto const* const window_pos = reinterpret_cast<WINDOWPOS*>(lparam);
+    if (window_pos && !(window_pos->flags & SWP_NOMOVE)) {
+      // |OnParentMoved| runs nested message handling, during which a satellite
+      // may be destroyed. Snapshot the handles of the satellites to move, then
+      // resolve each handle back to a live satellite immediately before using
+      // it. Snapshotting handles rather than pointers also avoids mistaking a
+      // recycled allocation for a still-live satellite.
+      std::vector<HWND> satellite_handles;
+      satellite_handles.reserve(satellites_.size());
+      for (HostWindowSatellite* const satellite : satellites_) {
+        if (satellite->GetParentHwnd() == hwnd) {
+          satellite_handles.push_back(satellite->GetWindowHandle());
+        }
+      }
+      for (HWND const satellite_handle : satellite_handles) {
+        auto const it = std::find_if(
+            satellites_.begin(), satellites_.end(),
+            [satellite_handle](HostWindowSatellite* const satellite) {
+              return satellite->GetWindowHandle() == satellite_handle;
+            });
+        if (it != satellites_.end()) {
+          (*it)->OnParentMoved();
+        }
+      }
+    }
   }
 
   HostWindow* host_window = HostWindow::GetThisFromHandle(hwnd);
@@ -283,4 +339,27 @@ void InternalFlutterWindows_WindowManager_UpdatePopupPosition(HWND hwnd) {
   flutter::HostWindowPopup* popup_window =
       reinterpret_cast<flutter::HostWindowPopup*>(window);
   popup_window->UpdatePosition();
+}
+
+FLUTTER_EXPORT
+FlutterViewId InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+    int64_t engine_id,
+    const flutter::SatelliteWindowCreationRequest* request) {
+  flutter::FlutterWindowsEngine* engine =
+      flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
+  return engine->window_manager()->CreateSatelliteWindow(request);
+}
+
+FLUTTER_EXPORT
+void InternalFlutterWindows_WindowManager_SetSatelliteParent(
+    HWND satellite_hwnd,
+    HWND new_parent) {
+  flutter::HostWindow* window =
+      flutter::HostWindow::GetThisFromHandle(satellite_hwnd);
+  if (!window ||
+      window->GetArchetype() != flutter::WindowArchetype::kSatellite) {
+    return;
+  }
+  static_cast<flutter::HostWindowSatellite*>(window)->SetSatelliteParent(
+      new_parent);
 }
