@@ -5594,7 +5594,6 @@ class InputDecorationThemeData with Diagnosticable {
         other.hintMaxLines == hintMaxLines &&
         other.alignLabelWithHint == alignLabelWithHint &&
         other.constraints == constraints &&
-        other.disabledBorder == disabledBorder &&
         other.visualDensity == visualDensity;
   }
 
