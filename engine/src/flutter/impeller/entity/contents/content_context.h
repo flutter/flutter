@@ -17,6 +17,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
+#include "impeller/entity/contents/gradient_texture_cache.h"
 #include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/geometry/color.h"
 #include "impeller/renderer/capabilities.h"
@@ -322,6 +323,10 @@ class ContentContext {
 
   TextShadowCache& GetTextShadowCache() const { return *text_shadow_cache_; }
 
+  GradientTextureCache& GetGradientTextureCache() const {
+    return *gradient_texture_cache_;
+  }
+
  protected:
   // Visible for testing.
   void SetTransientsIndexesBuffer(std::shared_ptr<HostBuffer> host_buffer) {
@@ -381,6 +386,7 @@ class ContentContext {
   std::shared_ptr<HostBuffer> indexes_host_buffer_;
   std::shared_ptr<Texture> empty_texture_;
   std::unique_ptr<TextShadowCache> text_shadow_cache_;
+  std::unique_ptr<GradientTextureCache> gradient_texture_cache_;
 
   bool is_texture_caching_enabled_ = false;
   mutable std::unordered_map<const flutter::DlImage*, std::shared_ptr<Texture>>
