@@ -584,6 +584,9 @@ abstract class ResidentHandlers {
 
   /// Dump the application's current layer tree to the terminal.
   Future<bool> debugDumpLayerTree() async {
+    if (!isRunningDebug) {
+      return false;
+    }
     return _debugDumpTree(
       (FlutterVmService vmService, String isolateId) =>
           vmService.flutterDebugDumpLayerTree(isolateId: isolateId),
@@ -591,6 +594,9 @@ abstract class ResidentHandlers {
   }
 
   Future<bool> debugDumpFocusTree() async {
+    if (!isRunningDebug) {
+      return false;
+    }
     return _debugDumpTree(
       (FlutterVmService vmService, String isolateId) =>
           vmService.flutterDebugDumpFocusTree(isolateId: isolateId),
@@ -620,7 +626,7 @@ abstract class ResidentHandlers {
   Future<bool> _debugDumpTree(
     Future<String> Function(FlutterVmService vmService, String isolateId) dumpCall,
   ) async {
-    if (!supportsServiceProtocol || !isRunningDebug) {
+    if (!supportsServiceProtocol) {
       return false;
     }
     var dumped = false;
