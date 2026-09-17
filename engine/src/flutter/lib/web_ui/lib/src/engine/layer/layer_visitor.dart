@@ -427,7 +427,21 @@ class PaintVisitor extends LayerVisitor<void> {
     if (element.parent != surface!.canvas) {
       (surface!.canvas as DomElement).append(element);
       final DomEventListener stopPropagationListener = createDomEventListener((DomEvent event) {
-        event.stopPropagation();
+        var curr = event.target as DomElement?;
+        while (curr != null && curr != element) {
+          final String tag = curr.tagName.toUpperCase();
+          if (tag == 'INPUT' ||
+              tag == 'BUTTON' ||
+              tag == 'TEXTAREA' ||
+              tag == 'SELECT' ||
+              tag == 'A' ||
+              tag == 'LABEL' ||
+              curr.getAttribute('contenteditable') == 'true') {
+            event.stopPropagation();
+            return;
+          }
+          curr = curr.parentElement;
+        }
       });
       element.addEventListener('pointerdown', stopPropagationListener);
       element.addEventListener('mousedown', stopPropagationListener);
@@ -541,27 +555,30 @@ class PaintVisitor extends LayerVisitor<void> {
     } else {
       currentMatrix = Matrix4.identity();
     }
+    final Matrix4 deviceMatrix = currentMatrix.clone()
+      ..translate(platformView.offset.dx, platformView.offset.dy);
     final Matrix4 cssMatrix = Matrix4.diagonal3Values(
       1 / dpr,
       1 / dpr,
       1.0,
-    ).multiplied(currentMatrix)..translate(platformView.offset.dx, platformView.offset.dy);
+    ).multiplied(deviceMatrix);
     try {
+      final deviceDomMatrix = DOMMatrix(deviceMatrix.storage.toJS);
       final domMatrix = DOMMatrix(cssMatrix.storage.toJS);
       final htmlCanvas = surface!.canvas as DomHTMLCanvasElement;
       if ((htmlCanvas as JSObject).hasProperty('updateElementGeometry'.toJS).toDart) {
         htmlCanvas.updateElementGeometry(
           element,
-          DomDrawElementOptions(canvasTransform: domMatrix),
+          DomDrawElementOptions(canvasTransform: deviceDomMatrix),
         );
       } else if ((htmlCanvas as JSObject).hasProperty('getElementTransform'.toJS).toDart) {
-        final DomDOMMatrix? resultMatrix = htmlCanvas.getElementTransform(element, domMatrix);
-        if (resultMatrix != null && (element as JSAny?).isA<DomHTMLElement>()) {
-          final htmlElem = element as DomHTMLElement;
-          htmlElem.style.left = '0px';
-          htmlElem.style.top = '0px';
-          htmlElem.style.transform = resultMatrix.toString();
-        }
+        htmlCanvas.getElementTransform(element, deviceDomMatrix);
+      }
+      if ((element as JSAny?).isA<DomHTMLElement>()) {
+        final htmlElem = element as DomHTMLElement;
+        htmlElem.style.left = '0px';
+        htmlElem.style.top = '0px';
+        htmlElem.style.transform = domMatrix.toString();
       }
     } catch (_) {
       // Guard for environments where transform sync is not supported or throws.
