@@ -653,13 +653,20 @@ class RenderTable extends RenderBox {
       return -1;
     }
 
+    int logicalColumnIndexForVisualIndex(int visualIndex) {
+      return switch (textDirection) {
+        TextDirection.ltr => visualIndex,
+        TextDirection.rtl => _columns - visualIndex - 1,
+      };
+    }
+
     int findColumnIndex(double left) {
       if (_columnLefts == null) {
         return -1;
       }
       for (int i = _columnLefts!.length - 1; i >= 0; i--) {
         if (_columnLefts!.elementAt(i) <= left) {
-          return i;
+          return logicalColumnIndexForVisualIndex(i);
         }
       }
       return -1;
@@ -710,7 +717,8 @@ class RenderTable extends RenderBox {
       // The list of cells of this Row.
       final cells = <SemanticsNode>[];
 
-      for (var x = 0; x < columns; x++) {
+      for (var visualX = 0; visualX < columns; visualX++) {
+        final int x = logicalColumnIndexForVisualIndex(visualX);
         final List<SemanticsNode> rawChildrens = rawCells[y][x];
         if (rawChildrens.isEmpty) {
           continue;
@@ -737,9 +745,9 @@ class RenderTable extends RenderBox {
             );
         }
 
-        final double cellWidth = x == _columns - 1
-            ? rowBox.width - _columnLefts!.elementAt(x)
-            : _columnLefts!.elementAt(x + 1) - _columnLefts!.elementAt(x);
+        final double cellWidth = visualX == _columns - 1
+            ? rowBox.width - _columnLefts!.elementAt(visualX)
+            : _columnLefts!.elementAt(visualX + 1) - _columnLefts!.elementAt(visualX);
 
         // Skip cell if it's invisible
         if (cellWidth <= 0.0) {
@@ -748,7 +756,7 @@ class RenderTable extends RenderBox {
         // Add wrapper transform
         if (addCellWrapper) {
           cell
-            ..transform = Matrix4.translationValues(_columnLefts!.elementAt(x), 0, 0)
+            ..transform = Matrix4.translationValues(_columnLefts!.elementAt(visualX), 0, 0)
             ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
         }
         for (final child in rawChildrens) {
@@ -764,10 +772,12 @@ class RenderTable extends RenderBox {
           // if addCellWrapper is true, the rect is relative to the cell
           // The rect should satisfy 0 <= localRect.left < localRect.right <= cellWidth
           // if addCellWrapper is false, the rect is relative to the row
-          // The rect should satisfy _columnLefts!.elementAt(x) <= localRect.left < localRect.right <= _columnLefts!.elementAt(x+1)
+          // The rect should satisfy _columnLefts!.elementAt(visualX) <= localRect.left < localRect.right <= _columnLefts!.elementAt(visualX+1)
           final double dx = addCellWrapper
-              ? ((localRect.left >= cellWidth) ? -_columnLefts!.elementAt(x) : 0.0)
-              : (localRect.right <= _columnLefts!.elementAt(x) ? _columnLefts!.elementAt(x) : 0.0);
+              ? ((localRect.left >= cellWidth) ? -_columnLefts!.elementAt(visualX) : 0.0)
+              : (localRect.right <= _columnLefts!.elementAt(visualX)
+                    ? _columnLefts!.elementAt(visualX)
+                    : 0.0);
 
           if (dx != 0 || dy != 0) {
             shiftTransform(child, dx, dy);
