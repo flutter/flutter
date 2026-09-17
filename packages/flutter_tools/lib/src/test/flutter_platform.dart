@@ -943,6 +943,9 @@ Future<void> pipeHarnessToRemote({
   ]);
 }
 
+// TODO(bkonyi): This will be removed in a follow up PR once Google3 callers
+// provide ToolContext directly. This fallback context delegates to globals.* to
+// maintain backwards compatibility with existing Google3 test runners.
 class _FallbackToolContext implements ToolContext {
   _FallbackToolContext({
     this._artifacts,
