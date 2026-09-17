@@ -220,29 +220,41 @@ class InheritedModelElement<T> extends InheritedElement {
   /// Creates an element that uses the given widget as its configuration.
   InheritedModelElement(InheritedModel<T> super.widget);
 
+  static const Set<Never> _emptySet = <Never>{};
+
+  @override
+  bool get hasAspectDependencies => true;
+
   @override
   void updateDependencies(Element dependent, Object? aspect) {
-    final dependencies = getDependencies(dependent) as Set<T>?;
+    final dependencies = getDependencies(dependent) as Set<Object?>?;
     if (dependencies != null && dependencies.isEmpty) {
       return;
     }
 
     if (aspect == null) {
-      setDependencies(dependent, HashSet<T>());
+      setDependencies(dependent, _emptySet);
     } else {
       assert(aspect is T);
-      setDependencies(dependent, (dependencies ?? HashSet<T>())..add(aspect as T));
+      if (dependencies == null) {
+        setDependencies(dependent, HashSet<T>()..add(aspect as T));
+      } else {
+        dependencies.add(aspect);
+      }
     }
   }
 
   @override
   void notifyDependent(InheritedModel<T> oldWidget, Element dependent) {
-    final dependencies = getDependencies(dependent) as Set<T>?;
+    final dependencies = getDependencies(dependent) as Set<Object?>?;
     if (dependencies == null) {
       return;
     }
     if (dependencies.isEmpty ||
-        (widget as InheritedModel<T>).updateShouldNotifyDependent(oldWidget, dependencies)) {
+        (widget as InheritedModel<T>).updateShouldNotifyDependent(
+          oldWidget,
+          dependencies as Set<T>,
+        )) {
       dependent.didChangeDependencies();
     }
   }
