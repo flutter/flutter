@@ -121,7 +121,9 @@ class LazyRenderingConfig {
 
 class Canvas {
  public:
-  static constexpr uint32_t kMaxDepth = 1 << 24;
+  /// Maximum discrete integer depth level within the 18-bit depth precision
+  /// limit defined by `Entity::kDepthEpsilon`.
+  static constexpr uint32_t kMaxDepth = (1 << 18) - 1;
 
   Canvas(ContentContext& renderer,
          const RenderTarget& render_target,
