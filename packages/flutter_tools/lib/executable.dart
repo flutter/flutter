@@ -356,7 +356,16 @@ List<FlutterCommand> generateCommands({
     platform: toolDependencies.toolContext.platform,
     featureFlags: featureFlags,
   ),
-  RunCommand(verboseHelp: verboseHelp),
+  RunCommand(
+    appleContext: toolDependencies.appleContext,
+    toolContext: toolDependencies.toolContext,
+    androidContext: toolDependencies.androidContext,
+    androidWorkflow: android_workflow.androidWorkflow,
+    buildSystem: toolDependencies.buildSystem,
+    buildTargets: toolDependencies.buildTargets,
+    deviceManager: globals.deviceManager,
+    verboseHelp: verboseHelp,
+  ),
   ScreenshotCommand(toolContext: toolDependencies.toolContext),
   ShellCompletionCommand(toolContext: toolDependencies.toolContext),
   TestCommand(
