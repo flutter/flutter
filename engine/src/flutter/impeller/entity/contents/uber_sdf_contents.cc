@@ -153,9 +153,6 @@ bool UberSDFContents::Render(const ContentContext& renderer,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
   }
 
-  auto geometry_result =
-      GetGeometry()->GetPositionBuffer(renderer, entity, pass);
-
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
         return renderer.GetUberSDFPipeline(options);
@@ -165,20 +162,13 @@ bool UberSDFContents::Render(const ContentContext& renderer,
       this, GetGeometry(), renderer, entity, pass, pipeline_callback,
       frame_info,
       /*bind_fragment_callback=*/
-      [&frag_info, &data_host_buffer,
-       sampler_binding = std::move(sampler_binding)](RenderPass& pass) {
+      [&frag_info, &data_host_buffer, &sampler_binding](RenderPass& pass) {
         FS::BindColorSourceSampler(pass, sampler_binding.texture,
                                    sampler_binding.sampler);
         FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
         pass.SetCommandLabel("UberSDF");
         return true;
-      },
-      /*force_stencil=*/false,
-      /*create_geom_callback=*/
-      [geometry_result = std::move(geometry_result)](
-          const ContentContext& renderer, const Entity& entity,
-          RenderPass& pass,
-          const Geometry* geometry) { return geometry_result; });
+      });
 }
 
 std::optional<Rect> UberSDFContents::GetCoverage(const Entity& entity) const {
