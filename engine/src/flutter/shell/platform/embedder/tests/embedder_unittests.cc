@@ -4316,6 +4316,325 @@ TEST_F(EmbedderTest, PlatformThreadIsolatesWithCustomPlatformTaskRunner) {
   ASSERT_EQ(platform_thread_id, ffi_call_thread_id);
 }
 
+TEST_F(EmbedderTest, DeferredLibraryStructABI) {
+  EXPECT_EQ(sizeof(FlutterLoadDeferredLibraryInfo) % 8, 0u);
+  EXPECT_EQ(sizeof(FlutterLoadDeferredLibraryErrorInfo), 4 * sizeof(void*));
+  EXPECT_EQ(sizeof(FlutterLoadDeferredLibraryErrorInfo),
+            sizeof(void*) == 8 ? 32u : 16u);
+
+  EXPECT_EQ(offsetof(FlutterLoadDeferredLibraryInfo, struct_size), 0u);
+  EXPECT_EQ(offsetof(FlutterLoadDeferredLibraryInfo, loading_unit_id),
+            sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterLoadDeferredLibraryInfo, isolate_snapshot_data),
+            offsetof(FlutterLoadDeferredLibraryInfo, loading_unit_id) +
+                sizeof(intptr_t));
+  EXPECT_EQ(
+      offsetof(FlutterLoadDeferredLibraryInfo, isolate_snapshot_data_size),
+      offsetof(FlutterLoadDeferredLibraryInfo, isolate_snapshot_data) +
+          sizeof(const uint8_t*));
+  EXPECT_EQ(
+      offsetof(FlutterLoadDeferredLibraryInfo, isolate_snapshot_instructions),
+      offsetof(FlutterLoadDeferredLibraryInfo, isolate_snapshot_data_size) +
+          sizeof(size_t));
+  EXPECT_EQ(
+      offsetof(FlutterLoadDeferredLibraryInfo,
+               isolate_snapshot_instructions_size),
+      offsetof(FlutterLoadDeferredLibraryInfo, isolate_snapshot_instructions) +
+          sizeof(const uint8_t*));
+  EXPECT_EQ(offsetof(FlutterLoadDeferredLibraryInfo, user_data),
+            offsetof(FlutterLoadDeferredLibraryInfo,
+                     isolate_snapshot_instructions_size) +
+                sizeof(size_t));
+  EXPECT_EQ(
+      offsetof(FlutterLoadDeferredLibraryInfo, destruction_callback),
+      offsetof(FlutterLoadDeferredLibraryInfo, user_data) + sizeof(void*));
+
+  EXPECT_EQ(offsetof(FlutterLoadDeferredLibraryErrorInfo, struct_size), 0u);
+  EXPECT_EQ(offsetof(FlutterLoadDeferredLibraryErrorInfo, loading_unit_id),
+            sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterLoadDeferredLibraryErrorInfo, error_message),
+            offsetof(FlutterLoadDeferredLibraryErrorInfo, loading_unit_id) +
+                sizeof(intptr_t));
+  EXPECT_EQ(offsetof(FlutterLoadDeferredLibraryErrorInfo, transient),
+            offsetof(FlutterLoadDeferredLibraryErrorInfo, error_message) +
+                sizeof(const char*));
+
+  EXPECT_EQ(
+      offsetof(FlutterProjectArgs, dart_deferred_library_request_callback),
+      offsetof(FlutterProjectArgs, enable_wide_gamut) + sizeof(void*));
+}
+
+TEST_F(EmbedderTest, DeferredLibraryProcTableEntries) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+  EXPECT_EQ(procs.LoadDartDeferredLibrary,
+            &FlutterEngineLoadDartDeferredLibrary);
+  EXPECT_EQ(procs.LoadDartDeferredLibraryError,
+            &FlutterEngineLoadDartDeferredLibraryError);
+}
+
+TEST_F(EmbedderTest, DeferredLibraryInvalidArguments) {
+  static constexpr const uint8_t kDummyBuffer[] = {0x01, 0x02, 0x03, 0x04};
+
+  // Null info pointer.
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(nullptr, nullptr),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibraryError(nullptr, nullptr),
+            kInvalidArguments);
+
+  // Invalid struct_size.
+  FlutterLoadDeferredLibraryInfo bad_size_info = {};
+  bad_size_info.struct_size = 4;
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(nullptr, &bad_size_info),
+            kInvalidArguments);
+
+  // Null engine handle with valid struct_size must invoke destruction_callback
+  // before returning kInvalidArguments.
+  {
+    std::atomic<int> destroyed{0};
+    FlutterLoadDeferredLibraryInfo info = {};
+    info.struct_size = sizeof(FlutterLoadDeferredLibraryInfo);
+    info.loading_unit_id = 2;
+    info.isolate_snapshot_data = kDummyBuffer;
+    info.isolate_snapshot_data_size = sizeof(kDummyBuffer);
+    info.isolate_snapshot_instructions = kDummyBuffer;
+    info.isolate_snapshot_instructions_size = sizeof(kDummyBuffer);
+    info.user_data = &destroyed;
+    info.destruction_callback = [](void* user_data) {
+      (*static_cast<std::atomic<int>*>(user_data))++;
+    };
+    EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(nullptr, &info),
+              kInvalidArguments);
+    EXPECT_EQ(destroyed.load(), 1);
+  }
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Null snapshot data must invoke destruction_callback and return
+  // kInvalidArguments.
+  {
+    std::atomic<int> destroyed{0};
+    FlutterLoadDeferredLibraryInfo info = {};
+    info.struct_size = sizeof(FlutterLoadDeferredLibraryInfo);
+    info.loading_unit_id = 2;
+    info.isolate_snapshot_data = nullptr;
+    info.isolate_snapshot_instructions = kDummyBuffer;
+    info.isolate_snapshot_instructions_size = sizeof(kDummyBuffer);
+    info.user_data = &destroyed;
+    info.destruction_callback = [](void* user_data) {
+      (*static_cast<std::atomic<int>*>(user_data))++;
+    };
+    EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(engine.get(), &info),
+              kInvalidArguments);
+    EXPECT_EQ(destroyed.load(), 1);
+  }
+
+  // Null snapshot instructions must invoke destruction_callback and return
+  // kInvalidArguments.
+  {
+    std::atomic<int> destroyed{0};
+    FlutterLoadDeferredLibraryInfo info = {};
+    info.struct_size = sizeof(FlutterLoadDeferredLibraryInfo);
+    info.loading_unit_id = 2;
+    info.isolate_snapshot_data = kDummyBuffer;
+    info.isolate_snapshot_data_size = sizeof(kDummyBuffer);
+    info.isolate_snapshot_instructions = nullptr;
+    info.user_data = &destroyed;
+    info.destruction_callback = [](void* user_data) {
+      (*static_cast<std::atomic<int>*>(user_data))++;
+    };
+    EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(engine.get(), &info),
+              kInvalidArguments);
+    EXPECT_EQ(destroyed.load(), 1);
+  }
+
+  // Error info validation.
+  FlutterLoadDeferredLibraryErrorInfo bad_error_size = {};
+  bad_error_size.struct_size = 4;
+  EXPECT_EQ(
+      FlutterEngineLoadDartDeferredLibraryError(engine.get(), &bad_error_size),
+      kInvalidArguments);
+
+  FlutterLoadDeferredLibraryErrorInfo null_msg_error = {};
+  null_msg_error.struct_size = sizeof(FlutterLoadDeferredLibraryErrorInfo);
+  null_msg_error.loading_unit_id = 2;
+  null_msg_error.error_message = nullptr;
+  EXPECT_EQ(
+      FlutterEngineLoadDartDeferredLibraryError(engine.get(), &null_msg_error),
+      kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, DeferredLibraryRequestAndLoadLifecycle) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent isolate_latch;
+  context.AddIsolateCreateCallback(
+      [&isolate_latch]() { isolate_latch.Signal(); });
+
+  struct DeferredTestState {
+    std::atomic<int> destruction_calls{0};
+    fml::AutoResetWaitableEvent destroyed_latch;
+  };
+
+  static std::atomic<intptr_t> g_requested_unit_id{0};
+  static fml::AutoResetWaitableEvent* g_request_latch = nullptr;
+  fml::AutoResetWaitableEvent request_latch;
+  g_request_latch = &request_latch;
+
+  DeferredTestState state;
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.GetProjectArgs().dart_deferred_library_request_callback =
+      [](intptr_t loading_unit_id, void* user_data) {
+        ASSERT_NE(user_data, nullptr);
+        g_requested_unit_id = loading_unit_id;
+        if (g_request_latch) {
+          g_request_latch->Signal();
+        }
+      };
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  isolate_latch.Wait();
+
+  auto* embedder_engine =
+      reinterpret_cast<flutter::EmbedderEngine*>(engine.get());
+
+  // Trigger a deferred library request from the engine on the UI thread and
+  // verify dart_deferred_library_request_callback is invoked on the platform
+  // thread.
+  fml::AutoResetWaitableEvent ui_posted_latch;
+  embedder_engine->GetTaskRunners().GetUITaskRunner()->PostTask([&]() {
+    static_cast<flutter::RuntimeDelegate*>(
+        embedder_engine->GetShell().GetEngine().get())
+        ->RequestDartDeferredLibrary(99);
+    ui_posted_latch.Signal();
+  });
+  ui_posted_latch.Wait();
+  // Drain tasks posted to platform thread task runner.
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+  request_latch.Wait();
+  EXPECT_EQ(g_requested_unit_id.load(), 99);
+  g_request_latch = nullptr;
+
+  static constexpr const uint8_t kDummySnapshot[] = {0xAA, 0xBB, 0xCC, 0xDD};
+
+  FlutterLoadDeferredLibraryInfo load_info = {};
+  load_info.struct_size = sizeof(FlutterLoadDeferredLibraryInfo);
+  load_info.loading_unit_id = 42;
+  load_info.isolate_snapshot_data = kDummySnapshot;
+  load_info.isolate_snapshot_data_size = sizeof(kDummySnapshot);
+  load_info.isolate_snapshot_instructions = kDummySnapshot;
+  load_info.isolate_snapshot_instructions_size = sizeof(kDummySnapshot);
+  load_info.user_data = &state;
+  load_info.destruction_callback = [](void* user_data) {
+    auto* s = static_cast<DeferredTestState*>(user_data);
+    s->destruction_calls++;
+    s->destroyed_latch.Signal();
+  };
+
+  ASSERT_EQ(FlutterEngineLoadDartDeferredLibrary(engine.get(), &load_info),
+            kSuccess);
+
+  // When Dart_DeferredLoadComplete runs on the UI thread and rejects the dummy
+  // snapshot, DartSnapshot and its NonOwnedMappings are destroyed, triggering
+  // destruction_callback.
+  state.destroyed_latch.Wait();
+  EXPECT_EQ(state.destruction_calls.load(), 1);
+
+  // Verify reporting a deferred library load error succeeds and executes on the
+  // UI thread without error.
+  FlutterLoadDeferredLibraryErrorInfo error_info = {};
+  error_info.struct_size = sizeof(FlutterLoadDeferredLibraryErrorInfo);
+  error_info.loading_unit_id = 43;
+  error_info.error_message = "Simulated network failure loading split APK";
+  error_info.transient = true;
+  ASSERT_EQ(
+      FlutterEngineLoadDartDeferredLibraryError(engine.get(), &error_info),
+      kSuccess);
+
+  fml::AutoResetWaitableEvent ui_sync_latch;
+  embedder_engine->GetTaskRunners().GetUITaskRunner()->PostTask(
+      [&]() { ui_sync_latch.Signal(); });
+  ui_sync_latch.Wait();
+}
+
+TEST_F(EmbedderTest, DeferredLibraryLoadBeforeIsolateLaunch) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+
+  // Initialize engine without launching the shell or root isolate yet.
+  auto engine = builder.InitializeEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  struct DestroyState {
+    std::atomic<int> destruction_calls{0};
+    fml::AutoResetWaitableEvent destroyed_latch;
+  } state;
+
+  static constexpr const uint8_t kDummySnapshot[] = {0xAA, 0xBB, 0xCC, 0xDD};
+  FlutterLoadDeferredLibraryInfo load_info = {};
+  load_info.struct_size = sizeof(FlutterLoadDeferredLibraryInfo);
+  load_info.loading_unit_id = 77;
+  load_info.isolate_snapshot_data = kDummySnapshot;
+  load_info.isolate_snapshot_data_size = sizeof(kDummySnapshot);
+  load_info.isolate_snapshot_instructions = kDummySnapshot;
+  load_info.isolate_snapshot_instructions_size = sizeof(kDummySnapshot);
+  load_info.user_data = &state;
+  load_info.destruction_callback = [](void* user_data) {
+    auto* s = static_cast<DestroyState*>(user_data);
+    s->destruction_calls++;
+    s->destroyed_latch.Signal();
+  };
+
+  // Before LaunchShell(), engine handle is not yet valid; must return
+  // kInvalidArguments and still invoke destruction_callback.
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(engine.get(), &load_info),
+            kInvalidArguments);
+  state.destroyed_latch.Wait();
+  EXPECT_EQ(state.destruction_calls.load(), 1);
+
+  FlutterLoadDeferredLibraryErrorInfo error_info = {};
+  error_info.struct_size = sizeof(FlutterLoadDeferredLibraryErrorInfo);
+  error_info.loading_unit_id = 78;
+  error_info.error_message = "Error before shell launch";
+  error_info.transient = true;
+  EXPECT_EQ(
+      FlutterEngineLoadDartDeferredLibraryError(engine.get(), &error_info),
+      kInvalidArguments);
+
+  // Now launch the shell WITHOUT running the root isolate so that
+  // embedder_engine->IsValid() is true while RuntimeController's root_isolate_
+  // weak_ptr is expired/null.
+  auto* embedder_engine =
+      reinterpret_cast<flutter::EmbedderEngine*>(engine.get());
+  ASSERT_TRUE(embedder_engine->LaunchShell());
+  ASSERT_TRUE(embedder_engine->IsValid());
+
+  // Calling LoadDartDeferredLibrary when root_isolate_ is null must not
+  // dereference a null shared_ptr and must invoke destruction_callback when
+  // mappings are dropped on the UI thread.
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(engine.get(), &load_info),
+            kSuccess);
+  state.destroyed_latch.Wait();
+  EXPECT_EQ(state.destruction_calls.load(), 2);
+
+  error_info.error_message = "Error before isolate launch";
+  EXPECT_EQ(
+      FlutterEngineLoadDartDeferredLibraryError(engine.get(), &error_info),
+      kSuccess);
+
+  fml::AutoResetWaitableEvent ui_sync_latch;
+  embedder_engine->GetTaskRunners().GetUITaskRunner()->PostTask(
+      [&]() { ui_sync_latch.Signal(); });
+  ui_sync_latch.Wait();
+}
+
 }  // namespace testing
 }  // namespace flutter
 
