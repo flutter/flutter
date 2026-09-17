@@ -2762,10 +2762,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
-    expect(
-      projectDir.childDirectory('lib').childFile('flutter_project_pigeon.dart'),
-      exists,
-    );
+    expect(projectDir.childDirectory('lib').childFile('flutter_project_pigeon.dart'), exists);
     expect(
       projectDir.childDirectory('lib').childFile('flutter_project_platform_interface.dart'),
       exists,

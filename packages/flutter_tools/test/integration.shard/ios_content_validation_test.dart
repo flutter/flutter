@@ -157,9 +157,7 @@ void main() {
             final String binaryPath = buildMode == BuildMode.debug
                 ? outputRunnerBinaryDebugDylib.path
                 : outputRunnerBinary.path;
-            final bool helloStatic = AppleTestUtils.getExportedSymbols(
-              binaryPath,
-            ).any(
+            final bool helloStatic = AppleTestUtils.getExportedSymbols(binaryPath).any(
               (String symbol) =>
                   symbol.contains('HelloPlugin') &&
                   // Ignore the Pigeon API class, which is also generated in Dart code.
@@ -440,8 +438,7 @@ void main() {
           ),
         );
         final bool helloDynamic = pluginFrameworkBinary.existsSync();
-        final bool helloStatic = AppleTestUtils.getExportedSymbols(runnerBinary.path)
-            .any(
+        final bool helloStatic = AppleTestUtils.getExportedSymbols(runnerBinary.path).any(
           (String symbol) =>
               symbol.contains('HelloPlugin') &&
               // Ignore the Pigeon API class, which is also generated in Dart code.
