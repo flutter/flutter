@@ -13,6 +13,7 @@ import 'dart:ui';
 
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
+
 import 'goldens.dart';
 
 Future<Uint8List> readFile(String fileName) async {
