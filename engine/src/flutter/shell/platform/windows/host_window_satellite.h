@@ -64,6 +64,24 @@ class HostWindowSatellite : public HostWindowSized {
   // decorated and activatable, but never minimizable.
   static DWORD GetWindowStyleForSatellite(bool resizable);
 
+  // Returns the rectangle the satellite window is created with.
+  //
+  // The size is derived from |preferred_size| (or, when |sized_to_content| is
+  // true, from the smallest size allowed by |constraints|). For a satellite
+  // whose size is already known at creation time, the origin is resolved by
+  // running the positioner and |*initial_position_applied| is set to true;
+  // otherwise the origin is left at CW_USEDEFAULT and the satellite is placed
+  // from |ApplyContentSize| once its content size is known.
+  static Rect GetInitialRect(FlutterWindowsEngine* engine,
+                             const WindowSizeRequest& preferred_size,
+                             const BoxConstraints& constraints,
+                             GetWindowPositionCallback get_position_callback,
+                             const Isolate& isolate,
+                             HWND parent,
+                             bool sized_to_content,
+                             bool resizable,
+                             bool* initial_position_applied);
+
   // FlutterWindowsViewSizingDelegate:
   //
   // Overridden to report the work area of the monitor that the parent window
@@ -84,9 +102,6 @@ class HostWindowSatellite : public HostWindowSized {
       const Isolate& isolate,
       HWND parent,
       const WindowSize& window_size);
-
-  // Returns the work area of the monitor that |hwnd| is on.
-  static WindowRect GetWorkAreaForWindow(HWND hwnd);
 
   GetWindowPositionCallback get_position_callback_;
 

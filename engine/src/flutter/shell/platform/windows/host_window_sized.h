@@ -66,6 +66,10 @@ class HostWindowSized : public HostWindow,
   virtual void ApplyContentSize(int32_t physical_width,
                                 int32_t physical_height);
 
+  // Returns the work area of the monitor that |hwnd| is on, or a large default
+  // area if the monitor cannot be determined.
+  static WindowRect GetWorkAreaForWindow(HWND hwnd);
+
   // Whether the user can manually resize this window.
   const bool resizable_;
 

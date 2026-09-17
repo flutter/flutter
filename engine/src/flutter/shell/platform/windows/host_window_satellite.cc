@@ -4,9 +4,6 @@
 
 #include "flutter/shell/platform/windows/host_window_satellite.h"
 
-#include <dwmapi.h>
-
-#include <algorithm>
 #include <cstdlib>
 #include <memory>
 
@@ -16,11 +13,6 @@
 #include "flutter/shell/platform/windows/window_proc_delegate_manager.h"
 
 namespace flutter {
-
-namespace {
-// Fallback work area used when the monitor for a window cannot be determined.
-constexpr int32_t kDefaultWorkAreaSize = 10000;
-}  // namespace
 
 DWORD HostWindowSatellite::GetWindowStyleForSatellite(bool resizable) {
   // Satellites are decorated and activatable like a regular window, but they
@@ -49,52 +41,14 @@ HostWindowSatellite::HostWindowSatellite(
       isolate_(Isolate::Current()) {
   FML_CHECK(sized_to_content || preferred_size.has_preferred_view_size);
 
-  DWORD const window_style = GetWindowStyleForSatellite(resizable);
-
-  double client_width;
-  double client_height;
-  if (sized_to_content) {
-    // Use the minimum constraint as the initial size so the view can be
-    // created with valid metrics. The window is resized to fit the rendered
-    // content after the first frame.
-    client_width = std::max(1.0, constraints.smallest().width());
-    client_height = std::max(1.0, constraints.smallest().height());
-  } else {
-    client_width = preferred_size.preferred_view_width;
-    client_height = preferred_size.preferred_view_height;
-  }
-
-  std::optional<Size> const window_size = GetWindowSizeForClientSize(
-      *engine->windows_proc_table(), Size(client_width, client_height),
-      constraints.smallest(), constraints.biggest(), window_style,
-      /*extended_window_style=*/0, parent);
-
-  Size const initial_size =
-      window_size ? *window_size : Size{CW_USEDEFAULT, CW_USEDEFAULT};
-  Point window_origin = {CW_USEDEFAULT, CW_USEDEFAULT};
-
-  // When the satellite has a fixed size, its final frame size is already known,
-  // so the initial placement can be resolved up front and the window created
-  // directly at its target position. Sized-to-content satellites have to wait
-  // for the first frame before their size, and therefore their placement, is
-  // known; those are positioned from |ApplyContentSize|.
-  if (!sized_to_content && window_size) {
-    if (std::optional<WindowRect> const rect = ComputePosition(
-            get_position_callback, isolate_, parent,
-            WindowSize{static_cast<int32_t>(window_size->width()),
-                       static_cast<int32_t>(window_size->height())})) {
-      window_origin = {static_cast<double>(rect->left),
-                       static_cast<double>(rect->top)};
-      initial_position_applied_ = true;
-    }
-  }
-
   InitializeFlutterView(HostWindowInitializationParams{
       .archetype = WindowArchetype::kSatellite,
-      .window_style = window_style,
+      .window_style = GetWindowStyleForSatellite(resizable),
       .extended_window_style = 0,
       .box_constraints = constraints,
-      .initial_window_rect = {window_origin, initial_size},
+      .initial_window_rect = GetInitialRect(
+          engine, preferred_size, constraints, get_position_callback, isolate_,
+          parent, sized_to_content, resizable, &initial_position_applied_),
       .title = title ? title : L"",
       .owner_window = parent,
       .sizing_delegate = sized_to_content ? AsSizingDelegate() : nullptr,
@@ -122,20 +76,41 @@ HostWindowSatellite::~HostWindowSatellite() {
   view_controller_.reset();
 }
 
-WindowRect HostWindowSatellite::GetWorkAreaForWindow(HWND hwnd) {
-  WindowRect work_area = {0, 0, kDefaultWorkAreaSize, kDefaultWorkAreaSize};
-  HMONITOR const monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
-  if (monitor) {
-    MONITORINFO monitor_info = {};
-    monitor_info.cbSize = sizeof(monitor_info);
-    if (GetMonitorInfo(monitor, &monitor_info)) {
-      work_area.left = monitor_info.rcWork.left;
-      work_area.top = monitor_info.rcWork.top;
-      work_area.width = monitor_info.rcWork.right - monitor_info.rcWork.left;
-      work_area.height = monitor_info.rcWork.bottom - monitor_info.rcWork.top;
+Rect HostWindowSatellite::GetInitialRect(
+    FlutterWindowsEngine* engine,
+    const WindowSizeRequest& preferred_size,
+    const BoxConstraints& constraints,
+    GetWindowPositionCallback get_position_callback,
+    const Isolate& isolate,
+    HWND parent,
+    bool sized_to_content,
+    bool resizable,
+    bool* initial_position_applied) {
+  std::optional<Size> const window_size = GetInitialWindowSize(
+      engine, preferred_size, constraints,
+      GetWindowStyleForSatellite(resizable), /*extended_window_style=*/0,
+      parent, sized_to_content);
+
+  Point window_origin = {CW_USEDEFAULT, CW_USEDEFAULT};
+
+  // When the satellite has a fixed size, its final frame size is already known,
+  // so the initial placement can be resolved up front and the window created
+  // directly at its target position. Sized-to-content satellites have to wait
+  // for the first frame before their size, and therefore their placement, is
+  // known; those are positioned from |ApplyContentSize|.
+  if (!sized_to_content && window_size) {
+    if (std::optional<WindowRect> const rect = ComputePosition(
+            get_position_callback, isolate, parent,
+            WindowSize{static_cast<int32_t>(window_size->width()),
+                       static_cast<int32_t>(window_size->height())})) {
+      window_origin = {static_cast<double>(rect->left),
+                       static_cast<double>(rect->top)};
+      *initial_position_applied = true;
     }
   }
-  return work_area;
+
+  return {window_origin,
+          window_size ? *window_size : Size{CW_USEDEFAULT, CW_USEDEFAULT}};
 }
 
 WindowRect HostWindowSatellite::GetWorkArea() const {
@@ -202,23 +177,10 @@ void HostWindowSatellite::ApplyInitialPosition() {
 
   // |HostWindow::InitializeFlutterView| aligns a window's origin with the
   // top-left corner of its frame rather than its window rectangle, which
-  // includes the invisible drop-shadow border. Reapply that adjustment here so
-  // that both placement paths interpret the positioner's result identically.
-  RECT frame_rect;
-  RECT positioned_rect;
-  if (SUCCEEDED(DwmGetWindowAttribute(window_handle_,
-                                      DWMWA_EXTENDED_FRAME_BOUNDS, &frame_rect,
-                                      sizeof(frame_rect))) &&
-      GetWindowRect(window_handle_, &positioned_rect)) {
-    LONG const left_dropshadow_width = frame_rect.left - positioned_rect.left;
-    LONG const top_dropshadow_height = positioned_rect.top - frame_rect.top;
-    if (left_dropshadow_width != 0 || top_dropshadow_height != 0) {
-      SetWindowPos(
-          window_handle_, nullptr, positioned_rect.left - left_dropshadow_width,
-          positioned_rect.top - top_dropshadow_height, 0, 0,
-          SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
-    }
-  }
+  // includes the invisible drop-shadow border. Reapply the same adjustment
+  // here so that both placement paths interpret the positioner's result
+  // identically.
+  AlignOriginWithFrame();
 
   initial_position_applied_ = true;
 

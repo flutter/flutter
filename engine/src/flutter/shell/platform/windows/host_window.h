@@ -233,6 +233,28 @@ class HostWindow {
       DWORD extended_window_style,
       std::optional<HWND> const& owner_hwnd);
 
+  // Calculates the initial window size, in physical coordinates, of a window
+  // with the specified |window_style| and |extended_window_style|, owned by
+  // |owner_window|. If |sized_to_content| is true, the window is sized to the
+  // smallest size allowed by |constraints|, which gives the view valid metrics
+  // until the window is resized to fit its content after the first frame;
+  // otherwise, the window is sized to |preferred_size|. On error, returns
+  // std::nullopt and logs an error message.
+  static std::optional<Size> GetInitialWindowSize(
+      FlutterWindowsEngine* engine,
+      const WindowSizeRequest& preferred_size,
+      const BoxConstraints& constraints,
+      DWORD window_style,
+      DWORD extended_window_style,
+      std::optional<HWND> const& owner_window,
+      bool sized_to_content);
+
+  // Moves the window so that the origin of its window frame, rather than the
+  // origin of its window rectangle (which includes the invisible drop-shadow
+  // border), lands on the position the window was last placed at. Does nothing
+  // if the window has no drop-shadow border.
+  void AlignOriginWithFrame();
+
   // Processes and routes salient window messages for mouse handling,
   // size change and DPI. Delegates handling of these to member overloads that
   // inheriting classes can handle.
