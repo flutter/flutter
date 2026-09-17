@@ -1061,6 +1061,12 @@ extension type WebGLContext._(JSObject _) implements JSObject {
   @JS('TEXTURE_2D')
   external int get texture2D;
 
+  @JS('TEXTURE_BINDING_2D')
+  external int get textureBinding2D;
+
+  @JS('getParameter')
+  external JSAny? getParameterObject(int pname);
+
   @JS('RGBA')
   external int get rgba;
 

@@ -452,6 +452,7 @@ class PaintVisitor extends LayerVisitor<void> {
     }
 
     // 2. Upload to WebGL texture
+    final prevTexture = gl.getParameterObject(gl.textureBinding2D) as WebGLTexture?;
     final WebGLTexture glTexture = surface!.textureCache.getOrCreateTexture(platformView.viewId);
     gl.bindTexture(gl.texture2D, glTexture);
     var uploaded = false;
@@ -478,10 +479,15 @@ class PaintVisitor extends LayerVisitor<void> {
     } catch (e) {
       // Frame 0 guard: Blink snapshot may not be ready yet ("No cached paint record for element").
       // Request next frame so once Blink records the layout/paint snapshot, Flutter draws it.
-      EnginePlatformDispatcher.instance.scheduleFrame();
-      return;
+      if (e.toString().contains('No cached paint record')) {
+        EnginePlatformDispatcher.instance.scheduleFrame();
+      }
     } finally {
-      gl.bindTexture(gl.texture2D, null);
+      gl.bindTexture(gl.texture2D, prevTexture);
+      final SkSurface? skSurface = surface!.skSurface;
+      if (skSurface != null && (skSurface as JSObject).hasProperty('_resetContext'.toJS).toDart) {
+        skSurface.resetContext();
+      }
     }
 
     // 3. Wrap in SkImage via CanvasKit
