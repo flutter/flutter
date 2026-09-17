@@ -116,7 +116,6 @@ class TestCompiler {
     BuildInfo buildInfo,
     this.flutterProject, {
     String? precompiledDillPath,
-    this.residentCompilerFactory = const ResidentCompilerFactory(),
     this.testTimeRecorder,
     ToolContext? toolContext,
   }) : _toolContext = toolContext ?? const _FallbackToolContext(),
@@ -174,7 +173,7 @@ class TestCompiler {
   final String testFilePath;
   final bool shouldCopyDillFile;
   final TestTimeRecorder? testTimeRecorder;
-  final ResidentCompilerFactory residentCompilerFactory;
+  final ResidentCompilerFactory residentCompilerFactory = const ResidentCompilerFactory();
 
   final ToolContext _toolContext;
 
