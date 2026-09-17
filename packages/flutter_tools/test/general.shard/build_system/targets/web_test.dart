@@ -2442,6 +2442,15 @@ flutter:
       expect(logoVariants[1]['asset'], 'images/2.0x/logo.$logo2xHash.png');
       expect(logoVariants[1]['dpr'], 2.0);
 
+      // Verify AssetManifest.bin.json decodes to the same variant mappings
+      final Object? binJsonDecoded = json.decode(assetManifestBinJson.readAsStringSync());
+      final binJsonBytes = ByteData.sublistView(base64.decode(binJsonDecoded! as String));
+      final manifestFromBinJson =
+          const StandardMessageCodec().decodeMessage(binJsonBytes)! as Map<Object?, Object?>;
+      final List<Map<Object?, Object?>> logoVariantsFromBinJson =
+          (manifestFromBinJson['images/logo.png']! as List<Object?>).cast<Map<Object?, Object?>>();
+      expect(logoVariantsFromBinJson[0]['asset'], 'images/logo.$logoHash.png');
+
       // Verify FontManifest.json rewriting
       final decodedFonts = json.decode(fontManifest.readAsStringSync()) as List<dynamic>;
       expect(decodedFonts, hasLength(1));
