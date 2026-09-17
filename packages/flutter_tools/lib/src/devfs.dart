@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:package_config/package_config.dart';
-import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'artifacts.dart';
@@ -19,6 +18,7 @@ import 'build_info.dart';
 import 'build_system/tools/asset_transformer.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'compile.dart';
+import 'context/tool_context.dart';
 import 'convert.dart' show base64, utf8;
 import 'vmservice.dart';
 
@@ -429,45 +429,36 @@ class DevFS {
     FlutterVmService serviceProtocol,
     this.fsName,
     this.rootDirectory, {
-    required Artifacts artifacts,
     required BuildMode buildMode,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required OperatingSystemUtils osUtils,
-    required ProcessManager processManager,
-    Config? config,
+    required ToolContext toolContext,
     HttpClient? httpClient,
     this._stopwatchFactory = const StopwatchFactory(),
     Duration? uploadRetryThrottle,
-  }) : _vmService = serviceProtocol,
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _config = config ?? Config.test(),
+  }) : _toolContext = toolContext,
+       _vmService = serviceProtocol,
        _httpWriter = _DevFSHttpWriter(
          fsName,
          serviceProtocol,
-         osUtils: osUtils,
-         logger: logger,
+         osUtils: toolContext.os,
+         logger: toolContext.logger,
          uploadRetryThrottle: uploadRetryThrottle,
          httpClient: httpClient ?? HttpClient(),
        ),
        _assetTransformer = DevelopmentAssetTransformer(
          transformer: AssetTransformer(
-           processManager: processManager,
-           fileSystem: fileSystem,
-           dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
+           processManager: toolContext.processManager,
+           fileSystem: toolContext.fs,
+           dartBinaryPath: toolContext.artifacts.getArtifactPath(Artifact.engineDartBinary),
            buildMode: buildMode,
          ),
-         fileSystem: fileSystem,
-         logger: logger,
+         fileSystem: toolContext.fs,
+         logger: toolContext.logger,
        );
 
+  final ToolContext _toolContext;
   final FlutterVmService _vmService;
   final _DevFSHttpWriter _httpWriter;
-  final Logger _logger;
-  final FileSystem _fileSystem;
   final StopwatchFactory _stopwatchFactory;
-  final Config? _config;
   final DevelopmentAssetTransformer _assetTransformer;
 
   final String fsName;
@@ -500,7 +491,7 @@ class DevFS {
   }
 
   Future<Uri> create() async {
-    _logger.printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
+    _toolContext.logger.printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
     try {
       final vm_service.Response response = await _vmService.createDevFS(fsName);
       _baseUri = Uri.parse(response.json!['uri'] as String);
@@ -518,19 +509,19 @@ class DevFS {
         // logging.
         rethrow;
       }
-      _logger.printTrace('DevFS: Creating failed. Destroying and trying again');
+      _toolContext.logger.printTrace('DevFS: Creating failed. Destroying and trying again');
       await destroy();
       final vm_service.Response response = await _vmService.createDevFS(fsName);
       _baseUri = Uri.parse(response.json!['uri'] as String);
     }
-    _logger.printTrace('DevFS: Created new filesystem on the device ($_baseUri)');
+    _toolContext.logger.printTrace('DevFS: Created new filesystem on the device ($_baseUri)');
     return _baseUri!;
   }
 
   Future<void> destroy() async {
-    _logger.printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
+    _toolContext.logger.printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
     await _vmService.deleteDevFS(fsName);
-    _logger.printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
+    _toolContext.logger.printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
   }
 
   /// Mark the [lastCompiled] time to the previous successful compile.
@@ -570,6 +561,7 @@ class DevFS {
     bool resetCompiler = false,
     File? dartPluginRegistrant,
   }) async {
+    final ToolContext(:Config config, :FileSystem fs, :Logger logger) = _toolContext;
     final candidateCompileTime = DateTime.now();
     lastPackageConfig = packageConfig;
 
@@ -583,7 +575,7 @@ class DevFS {
     // On a full restart, or on an initial compile for the attach based workflow,
     // this will produce a full dill. Subsequent invocations will produce incremental
     // dill files that depend on the invalidated files.
-    _logger.printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
+    logger.printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
 
     // Await the compiler response after checking if the bundle is updated. This allows the file
     // stating to be done while waiting for the frontend_server response.
@@ -593,7 +585,7 @@ class DevFS {
           mainUri,
           invalidatedFiles,
           outputPath: dillOutputPath,
-          fs: _fileSystem,
+          fs: fs,
           projectRootPath: rootDirectory.path,
           packageConfig: packageConfig,
           checkDartPluginRegistry: true, // The entry point is assumed not to have changed.
@@ -607,11 +599,11 @@ class DevFS {
     if (bundle != null) {
       // Mark processing of bundle started for testability of starting the compile
       // before processing bundle.
-      _logger.printTrace('Processing bundle.');
+      logger.printTrace('Processing bundle.');
       // await null to give time for telling the compiler to compile.
       await null;
 
-      final String assetDirectory = getAssetBuildDirectory(_config, _fileSystem);
+      final String assetDirectory = getAssetBuildDirectory(config, fs);
       try {
         final int bundleSyncedBytes = await updateBundle(
           bundle: bundle,
@@ -619,7 +611,7 @@ class DevFS {
           assetDirectory: assetDirectory,
           assetTransformer: _assetTransformer,
           shaderCompiler: shaderCompiler,
-          fileSystem: _fileSystem,
+          fileSystem: fs,
           rootDirectoryPath: rootDirectory.path,
           assetPathsToEvict: assetPathsToEvict,
           shaderPathsToEvict: shaderPathsToEvict,
@@ -630,14 +622,14 @@ class DevFS {
         syncedBytes += bundleSyncedBytes;
         _assetTransformer.pruneDependencies(bundle.entries.keys.toSet());
       } on Exception catch (err, stackTrace) {
-        _logger.printError('Error updating bundle: $err');
-        _logger.printTrace('$stackTrace');
+        logger.printError('Error updating bundle: $err');
+        logger.printTrace('$stackTrace');
         assetBuildFailed = true;
       }
 
       // Mark processing of bundle done for testability of starting the compile
       // before processing bundle.
-      _logger.printTrace('Bundle processing done.');
+      logger.printTrace('Bundle processing done.');
     }
     final CompilerOutput? compilerOutput = await pendingCompilerOutput;
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
@@ -657,25 +649,25 @@ class DevFS {
     if (!bundleFirstUpload) {
       final String compiledBinary = compilerOutput.outputFilename;
       if (compiledBinary.isNotEmpty) {
-        final Uri entryUri = _fileSystem.path.toUri(pathToReload);
-        final content = DevFSFileContent(_fileSystem.file(compiledBinary));
+        final Uri entryUri = fs.path.toUri(pathToReload);
+        final content = DevFSFileContent(fs.file(compiledBinary));
         syncedBytes += content.size;
         dirtyEntries[entryUri] = content;
       }
     }
-    _logger.printTrace('Updating files.');
+    logger.printTrace('Updating files.');
     final Stopwatch transferTimer = _stopwatchFactory.createStopwatch('transfer')..start();
 
     if (assetBuildFailed) {
       return UpdateFSReport();
     }
 
-    _logger.printTrace('Pending asset builds completed. Writing dirty entries.');
+    logger.printTrace('Pending asset builds completed. Writing dirty entries.');
     if (dirtyEntries.isNotEmpty) {
       await (devFSWriter ?? _httpWriter).write(dirtyEntries, _baseUri!, _httpWriter);
     }
     transferTimer.stop();
-    _logger.printTrace('DevFS: Sync finished');
+    logger.printTrace('DevFS: Sync finished');
     return UpdateFSReport(
       success: true,
       syncedBytes: syncedBytes,
