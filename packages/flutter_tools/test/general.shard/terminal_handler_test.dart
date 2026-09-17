@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -1284,6 +1285,7 @@ void main() {
     final residentRunner = FakeResidentRunner(
       FlutterDevice(
         FakeDevice(),
+        artifacts: Artifacts.test(),
         targetPlatform: .unsupported,
         buildInfo: BuildInfo.debug,
         generator: FakeResidentCompiler(),
@@ -1657,6 +1659,7 @@ TerminalHandler setUpTerminalHandler(
   final processInfo = ProcessInfo.test(MemoryFileSystem.test());
   final device = FlutterDevice(
     FakeDevice()..supportsScreenshot = supportsScreenshot,
+    artifacts: Artifacts.test(),
     buildInfo: BuildInfo(
       buildMode,
       '',

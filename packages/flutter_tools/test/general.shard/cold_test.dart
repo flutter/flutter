@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -260,8 +261,9 @@ class TestFlutterDevice extends FlutterDevice {
     required ResidentCompiler generator,
     Future<Uri>? vmServiceUri,
   }) : super(
-         targetPlatform: .unsupported,
          device,
+         artifacts: Artifacts.test(),
+         targetPlatform: .unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,
          developmentShaderCompiler: const FakeShaderCompiler(),
