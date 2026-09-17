@@ -63,15 +63,16 @@ import 'daemon.dart';
 /// also be provided.
 class AttachCommand extends FlutterCommand {
   AttachCommand({
-    bool verboseHelp = false,
-    HotRunnerFactory? hotRunnerFactory,
-    required this._stdio,
+    required this._fileSystem,
     required this._logger,
-    required this._terminal,
-    required this._signals,
     required this._platform,
     required this._processInfo,
-    required this._fileSystem,
+    required this._signals,
+    required this._stdio,
+    required this._terminal,
+    HotRunnerFactory? hotRunnerFactory,
+    super.toolContext,
+    bool verboseHelp = false,
   }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory() {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
