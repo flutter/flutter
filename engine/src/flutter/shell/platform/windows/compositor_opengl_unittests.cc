@@ -137,6 +137,71 @@ const impeller::ProcTableGLES::Resolver kMockResolverWithOffscreenMSAA =
   return kMockResolver(name);
 };
 
+// ANGLE returns these strings for an OpenGL ES 2.0 context
+const unsigned char* MockGetStringGLES2(GLenum name) {
+  switch (name) {
+    case GL_VERSION:
+      return reinterpret_cast<const unsigned char*>("OpenGL ES 2.0");
+    case GL_SHADING_LANGUAGE_VERSION:
+      return reinterpret_cast<const unsigned char*>("OpenGL ES GLSL ES 1.00");
+    case GL_EXTENSIONS:
+      return reinterpret_cast<const unsigned char*>(
+          "GL_ANGLE_framebuffer_blit GL_EXT_texture_format_BGRA8888");
+    default:
+      return reinterpret_cast<const unsigned char*>("");
+  }
+}
+
+const unsigned char* MockGetStringGLES3(GLenum name) {
+  switch (name) {
+    case GL_VERSION:
+      return reinterpret_cast<const unsigned char*>("OpenGL ES 3.0");
+    case GL_SHADING_LANGUAGE_VERSION:
+      return reinterpret_cast<const unsigned char*>("OpenGL ES GLSL ES 3.00");
+    default:
+      return reinterpret_cast<const unsigned char*>("");
+  }
+}
+
+std::vector<GLint>& TexImage2DInternalFormats() {
+  static std::vector<GLint> internal_formats;
+  return internal_formats;
+}
+
+void RecordTexImage2D(GLenum,
+                      GLint,
+                      GLint internalformat,
+                      GLsizei,
+                      GLsizei,
+                      GLint,
+                      GLenum,
+                      GLenum,
+                      const void*) {
+  TexImage2DInternalFormats().push_back(internalformat);
+}
+
+const impeller::ProcTableGLES::Resolver kRecordingResolverGLES2 =
+    [](const char* name) -> void* {
+  std::string_view function_name{name};
+  if (function_name == "glGetString") {
+    return reinterpret_cast<void*>(&MockGetStringGLES2);
+  } else if (function_name == "glTexImage2D") {
+    return reinterpret_cast<void*>(&RecordTexImage2D);
+  }
+  return kMockResolver(name);
+};
+
+const impeller::ProcTableGLES::Resolver kRecordingResolverGLES3 =
+    [](const char* name) -> void* {
+  std::string_view function_name{name};
+  if (function_name == "glGetString") {
+    return reinterpret_cast<void*>(&MockGetStringGLES3);
+  } else if (function_name == "glTexImage2D") {
+    return reinterpret_cast<void*>(&RecordTexImage2D);
+  }
+  return kMockResolver(name);
+};
+
 class CompositorOpenGLTest : public WindowsTest {
  public:
   CompositorOpenGLTest() = default;
@@ -369,6 +434,55 @@ TEST_F(CompositorOpenGLTest, CreateBackingStoreImpellerOffscreenMSAA) {
   ASSERT_TRUE(compositor.CollectBackingStore(&backing_store));
   EXPECT_EQ(delete_renderbuffers_calls, 2);
   EXPECT_EQ(delete_textures_calls, 0);
+}
+
+// OpenGL ES 2.0 rejects a sized internal format in glTexImage2D, so the
+// texture gets the unsized format while the engine still receives the sized one
+TEST_F(CompositorOpenGLTest, CreateBackingStoreGLES2Unsized) {
+  UseHeadlessEngine();
+  TexImage2DInternalFormats().clear();
+
+  auto compositor = CompositorOpenGL{engine(), kRecordingResolverGLES2,
+                                     /*enable_impeller=*/false};
+  FlutterBackingStoreConfig config = {};
+  FlutterBackingStore backing_store = {};
+
+  EXPECT_CALL(*render_context(), MakeCurrent).WillOnce(Return(true));
+  ASSERT_TRUE(compositor.CreateBackingStore(config, &backing_store));
+  EXPECT_EQ(TexImage2DInternalFormats(), std::vector<GLint>{GL_BGRA_EXT});
+  EXPECT_EQ(backing_store.open_gl.framebuffer.target,
+            static_cast<uint32_t>(GL_BGRA8_EXT));
+  ASSERT_TRUE(compositor.CollectBackingStore(&backing_store));
+}
+
+TEST_F(CompositorOpenGLTest, CreateBackingStoreImpellerGLES2Unsized) {
+  UseHeadlessEngine();
+  TexImage2DInternalFormats().clear();
+
+  auto compositor = CompositorOpenGL{engine(), kRecordingResolverGLES2,
+                                     /*enable_impeller=*/true};
+  FlutterBackingStoreConfig config = {};
+  FlutterBackingStore backing_store = {};
+
+  EXPECT_CALL(*render_context(), MakeCurrent).WillOnce(Return(true));
+  ASSERT_TRUE(compositor.CreateBackingStore(config, &backing_store));
+  EXPECT_EQ(TexImage2DInternalFormats(), std::vector<GLint>{GL_BGRA_EXT});
+  ASSERT_TRUE(compositor.CollectBackingStore(&backing_store));
+}
+
+TEST_F(CompositorOpenGLTest, CreateBackingStoreGLES3Sized) {
+  UseHeadlessEngine();
+  TexImage2DInternalFormats().clear();
+
+  auto compositor = CompositorOpenGL{engine(), kRecordingResolverGLES3,
+                                     /*enable_impeller=*/false};
+  FlutterBackingStoreConfig config = {};
+  FlutterBackingStore backing_store = {};
+
+  EXPECT_CALL(*render_context(), MakeCurrent).WillOnce(Return(true));
+  ASSERT_TRUE(compositor.CreateBackingStore(config, &backing_store));
+  EXPECT_EQ(TexImage2DInternalFormats(), std::vector<GLint>{GL_RGBA8});
+  ASSERT_TRUE(compositor.CollectBackingStore(&backing_store));
 }
 
 TEST_F(CompositorOpenGLTest, InitializationFailure) {
