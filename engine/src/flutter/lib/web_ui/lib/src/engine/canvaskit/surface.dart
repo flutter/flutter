@@ -76,7 +76,6 @@ abstract class CkSurface extends Surface {
   int _glContext = -1;
 
   /// The canvas object that this surface is rendering to.
-  @visibleForTesting
   DomEventTarget get canvas => _canvas;
   late DomEventTarget _canvas;
 
@@ -376,9 +375,34 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
   @override
   DomElement get hostElement => _hostElement;
 
+  WebGLContext get glContextObject => (canvas as DomHTMLCanvasElement).getGlContext(webGLVersion);
+
+  late final PlatformViewTextureCache textureCache = PlatformViewTextureCache(this);
+
+  bool _scheduledFrameFromPaint = false;
+
+  void _setupPaintListener(DomHTMLCanvasElement htmlCanvas) {
+    htmlCanvas.addEventListener(
+      'paint',
+      (DomEvent event) {
+        if (!_scheduledFrameFromPaint) {
+          _scheduledFrameFromPaint = true;
+          Timer.run(() {
+            _scheduledFrameFromPaint = false;
+            EnginePlatformDispatcher.instance.scheduleFrame();
+          });
+        }
+      }.toJS,
+    );
+  }
+
   @override
   void _maybeAttachCanvasToDom() {
-    hostElement.appendChild(canvas as DomHTMLCanvasElement);
+    final htmlCanvas = canvas as DomHTMLCanvasElement;
+    htmlCanvas.setAttribute('content', 'drawable');
+    htmlCanvas.setAttribute('tabindex', '0');
+    hostElement.appendChild(htmlCanvas);
+    _setupPaintListener(htmlCanvas);
   }
 
   @override
@@ -408,5 +432,51 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
     _handledContextLostEvent = Completer<void>();
     final WebGLContext gl = (canvas as DomHTMLCanvasElement).getGlContext(webGLVersion);
     gl.loseContextExtension.loseContext();
+  }
+
+  @override
+  void dispose() {
+    textureCache.dispose();
+    super.dispose();
+  }
+}
+
+class PlatformViewTextureCache {
+  PlatformViewTextureCache(this.surface);
+
+  final CkOnscreenSurface surface;
+  final Map<int, WebGLTexture> _textures = <int, WebGLTexture>{};
+
+  WebGLTexture getOrCreateTexture(int viewId) {
+    if (_textures.containsKey(viewId)) {
+      return _textures[viewId]!;
+    }
+    final WebGLContext gl = surface.glContextObject;
+    final WebGLTexture? texture = gl.createTexture();
+    if (texture == null) {
+      throw StateError('Failed to create WebGL texture for platform view $viewId');
+    }
+    gl.bindTexture(gl.texture2D, texture);
+    gl.texParameteri(gl.texture2D, gl.textureWrapS, gl.clampToEdge);
+    gl.texParameteri(gl.texture2D, gl.textureWrapT, gl.clampToEdge);
+    gl.texParameteri(gl.texture2D, gl.textureMinFilter, gl.linear);
+    gl.texParameteri(gl.texture2D, gl.textureMagFilter, gl.linear);
+    _textures[viewId] = texture;
+    return texture;
+  }
+
+  void disposeView(int viewId) {
+    final WebGLTexture? texture = _textures.remove(viewId);
+    if (texture != null) {
+      surface.glContextObject.deleteTexture(texture);
+    }
+  }
+
+  void dispose() {
+    // ignore: prefer_foreach, tear-offs of JS interop members are disallowed
+    for (final WebGLTexture texture in _textures.values) {
+      surface.glContextObject.deleteTexture(texture);
+    }
+    _textures.clear();
   }
 }

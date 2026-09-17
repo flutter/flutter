@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
+import 'dart:js_interop';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
@@ -30,27 +30,13 @@ abstract class LayerVisitor<R> {
 /// apply heuristics to prepare the render cache for pictures that
 /// should be cached.
 class PrerollVisitor extends LayerVisitor<void> {
-  PrerollVisitor(this.viewEmbedder);
+  PrerollVisitor([Object? _]);
 
-  final MutatorsStack mutatorsStack = MutatorsStack();
-
-  /// A compositor for embedded HTML views.
-  final PlatformViewEmbedder? viewEmbedder;
+  final List<ui.Rect> _clipStack = <ui.Rect>[];
 
   ui.Rect get cullRect {
     ui.Rect cullRect = ui.Rect.largest;
-    for (final Mutator m in mutatorsStack) {
-      ui.Rect clipRect;
-      switch (m.type) {
-        case MutatorType.clipRect:
-          clipRect = m.rect!;
-        case MutatorType.clipRRect:
-          clipRect = m.rrect!.outerRect;
-        case MutatorType.clipPath:
-          clipRect = m.path!.getBounds();
-        default:
-          continue;
-      }
+    for (final ui.Rect clipRect in _clipStack) {
       cullRect = cullRect.intersect(clipRect);
     }
     return cullRect;
@@ -91,45 +77,45 @@ class PrerollVisitor extends LayerVisitor<void> {
 
   @override
   void visitClipPath(ClipPathEngineLayer clipPath) {
-    mutatorsStack.pushClipPath(clipPath.clipPath);
-    final ui.Rect childPaintBounds = prerollChildren(clipPath);
     final ui.Rect clipBounds = clipPath.clipPath.getBounds();
+    _clipStack.add(clipBounds);
+    final ui.Rect childPaintBounds = prerollChildren(clipPath);
     if (childPaintBounds.overlaps(clipBounds)) {
       clipPath.paintBounds = childPaintBounds.intersect(clipBounds);
     }
-    mutatorsStack.pop();
+    _clipStack.removeLast();
   }
 
   @override
   void visitClipRRect(ClipRRectEngineLayer clipRRect) {
-    mutatorsStack.pushClipRRect(clipRRect.clipRRect);
+    _clipStack.add(clipRRect.clipRRect.outerRect);
     final ui.Rect childPaintBounds = prerollChildren(clipRRect);
     if (childPaintBounds.overlaps(clipRRect.clipRRect.outerRect)) {
       clipRRect.paintBounds = childPaintBounds.intersect(clipRRect.clipRRect.outerRect);
     }
-    mutatorsStack.pop();
+    _clipStack.removeLast();
   }
 
   @override
   void visitClipRSuperellipse(ClipRSuperellipseEngineLayer clipRSuperellipse) {
-    mutatorsStack.pushClipRSuperellipse(clipRSuperellipse.clipRSuperellipse);
+    _clipStack.add(clipRSuperellipse.clipRSuperellipse.outerRect);
     final ui.Rect childPaintBounds = prerollChildren(clipRSuperellipse);
     if (childPaintBounds.overlaps(clipRSuperellipse.clipRSuperellipse.outerRect)) {
       clipRSuperellipse.paintBounds = childPaintBounds.intersect(
         clipRSuperellipse.clipRSuperellipse.outerRect,
       );
     }
-    mutatorsStack.pop();
+    _clipStack.removeLast();
   }
 
   @override
   void visitClipRect(ClipRectEngineLayer clipRect) {
-    mutatorsStack.pushClipRect(clipRect.clipRect);
+    _clipStack.add(clipRect.clipRect);
     final ui.Rect childPaintBounds = prerollChildren(clipRect);
     if (childPaintBounds.overlaps(clipRect.clipRect)) {
       clipRect.paintBounds = childPaintBounds.intersect(clipRect.clipRect);
     }
-    mutatorsStack.pop();
+    _clipStack.removeLast();
   }
 
   @override
@@ -139,9 +125,6 @@ class PrerollVisitor extends LayerVisitor<void> {
 
   @override
   void visitImageFilter(ImageFilterEngineLayer imageFilter) {
-    mutatorsStack.pushTransform(
-      Matrix4.translationValues(imageFilter.offset.dx, imageFilter.offset.dy, 0.0),
-    );
     ui.Rect childPaintBounds = prerollChildren(imageFilter);
     childPaintBounds = childPaintBounds.translate(imageFilter.offset.dx, imageFilter.offset.dy);
     if (imageFilter.filter is ui.ColorFilter) {
@@ -153,7 +136,6 @@ class PrerollVisitor extends LayerVisitor<void> {
         childPaintBounds,
       );
     }
-    mutatorsStack.pop();
   }
 
   @override
@@ -163,13 +145,7 @@ class PrerollVisitor extends LayerVisitor<void> {
 
   @override
   void visitOpacity(OpacityEngineLayer opacity) {
-    mutatorsStack.pushTransform(
-      Matrix4.translationValues(opacity.offset.dx, opacity.offset.dy, 0.0),
-    );
-    mutatorsStack.pushOpacity(opacity.alpha);
     prerollContainerLayer(opacity);
-    mutatorsStack.pop();
-    mutatorsStack.pop();
     opacity.paintBounds = opacity.paintBounds.translate(opacity.offset.dx, opacity.offset.dy);
   }
 
@@ -197,17 +173,6 @@ class PrerollVisitor extends LayerVisitor<void> {
       platformView.width,
       platformView.height,
     );
-
-    /// ViewEmbedder is set to null when screenshotting. Therefore, skip
-    /// rendering
-    viewEmbedder?.prerollCompositeEmbeddedView(
-      platformView.viewId,
-      EmbeddedViewParams(
-        platformView.offset,
-        ui.Size(platformView.width, platformView.height),
-        mutatorsStack,
-      ),
-    );
   }
 
   @override
@@ -217,287 +182,20 @@ class PrerollVisitor extends LayerVisitor<void> {
 
   @override
   void visitTransform(TransformEngineLayer transform) {
-    mutatorsStack.pushTransform(transform.transform);
     final ui.Rect childPaintBounds = prerollChildren(transform);
     transform.paintBounds = transform.transform.transformRect(childPaintBounds);
-    mutatorsStack.pop();
   }
 }
 
-/// A layer visitor which measures the pictures that make up the scene and
-/// prepares for them to be optimized into few canvases.
-class MeasureVisitor extends LayerVisitor<void> {
-  MeasureVisitor(BitmapSize size, this.viewEmbedder)
-    : measuringRecorder = ui.PictureRecorder() as LayerPictureRecorder {
-    measuringCanvas = ui.Canvas(measuringRecorder, ui.Offset.zero & size.toSize()) as LayerCanvas;
-  }
-
-  /// A stack of image filters which apply their transforms to measured bounds.
-  List<EngineImageFilter> imageFilterStack = <EngineImageFilter>[];
-
-  final LayerPictureRecorder measuringRecorder;
-
-  /// A Canvas which records the scene operations. Used to measure pictures
-  /// in the scene.
-  late final LayerCanvas measuringCanvas;
-
-  /// A compositor for embedded HTML views.
-  final PlatformViewEmbedder? viewEmbedder;
-
-  /// Clean up the measuring picture recorder and the picture it recorded.
-  void dispose() {
-    final ui.Picture picture = measuringRecorder.endRecording();
-    picture.dispose();
-  }
-
-  /// Measures all child layers that need painting.
-  void measureChildren(ContainerLayer container) {
-    assert(container.needsPainting);
-
-    for (final Layer layer in container.children) {
-      if (layer.needsPainting) {
-        layer.accept(this);
-      }
-    }
-  }
-
-  @override
-  void visitRoot(RootLayer root) {
-    // If all children of the root are clipped out, then `measureChildren` will
-    // crash since the root doesn't need painting.
-    if (root.needsPainting) {
-      measureChildren(root);
-    }
-  }
-
-  @override
-  void visitBackdropFilter(BackdropFilterEngineLayer backdropFilter) {
-    measureChildren(backdropFilter);
-  }
-
-  @override
-  void visitClipPath(ClipPathEngineLayer clipPath) {
-    assert(clipPath.needsPainting);
-
-    measuringCanvas.save();
-    measuringCanvas.clipPath(
-      clipPath.clipPath,
-      doAntiAlias: clipPath.clipBehavior != ui.Clip.hardEdge,
-    );
-
-    if (clipPath.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      measuringCanvas.saveLayer(clipPath.paintBounds, ui.Paint());
-    }
-    measureChildren(clipPath);
-    if (clipPath.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      measuringCanvas.restore();
-    }
-    measuringCanvas.restore();
-  }
-
-  @override
-  void visitClipRect(ClipRectEngineLayer clipRect) {
-    assert(clipRect.needsPainting);
-
-    measuringCanvas.save();
-    measuringCanvas.clipRect(
-      clipRect.clipRect,
-      doAntiAlias: clipRect.clipBehavior != ui.Clip.hardEdge,
-    );
-    if (clipRect.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      measuringCanvas.saveLayer(clipRect.clipRect, ui.Paint());
-    }
-    measureChildren(clipRect);
-    if (clipRect.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      measuringCanvas.restore();
-    }
-    measuringCanvas.restore();
-  }
-
-  @override
-  void visitClipRRect(ClipRRectEngineLayer clipRRect) {
-    assert(clipRRect.needsPainting);
-
-    measuringCanvas.save();
-    measuringCanvas.clipRRect(
-      clipRRect.clipRRect,
-      doAntiAlias: clipRRect.clipBehavior != ui.Clip.hardEdge,
-    );
-    if (clipRRect.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      measuringCanvas.saveLayer(clipRRect.paintBounds, ui.Paint());
-    }
-    measureChildren(clipRRect);
-    if (clipRRect.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      measuringCanvas.restore();
-    }
-    measuringCanvas.restore();
-  }
-
-  @override
-  void visitClipRSuperellipse(ClipRSuperellipseEngineLayer clipRSuperellipse) {
-    assert(clipRSuperellipse.needsPainting);
-
-    measuringCanvas.save();
-    measuringCanvas.clipRSuperellipse(
-      clipRSuperellipse.clipRSuperellipse,
-      doAntiAlias: clipRSuperellipse.clipBehavior != ui.Clip.hardEdge,
-    );
-    if (clipRSuperellipse.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      measuringCanvas.saveLayer(clipRSuperellipse.paintBounds, ui.Paint());
-    }
-    measureChildren(clipRSuperellipse);
-    if (clipRSuperellipse.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      measuringCanvas.restore();
-    }
-    measuringCanvas.restore();
-  }
-
-  @override
-  void visitOpacity(OpacityEngineLayer opacity) {
-    assert(opacity.needsPainting);
-
-    final paint = ui.Paint();
-    paint.color = ui.Color.fromARGB(opacity.alpha, 0, 0, 0);
-
-    measuringCanvas.save();
-    measuringCanvas.translate(opacity.offset.dx, opacity.offset.dy);
-
-    measuringCanvas.saveLayer(ui.Rect.largest, paint);
-    measureChildren(opacity);
-    // Restore twice: once for the translate and once for the saveLayer.
-    measuringCanvas.restore();
-    measuringCanvas.restore();
-  }
-
-  @override
-  void visitTransform(TransformEngineLayer transform) {
-    assert(transform.needsPainting);
-
-    measuringCanvas.save();
-    measuringCanvas.transform(transform.transform.toFloat64());
-    measureChildren(transform);
-    measuringCanvas.restore();
-  }
-
-  @override
-  void visitOffset(OffsetEngineLayer offset) {
-    visitTransform(offset);
-  }
-
-  @override
-  void visitImageFilter(ImageFilterEngineLayer imageFilter) {
-    assert(imageFilter.needsPainting);
-    final ui.Rect offsetPaintBounds = imageFilter.paintBounds.shift(-imageFilter.offset);
-    measuringCanvas.save();
-    measuringCanvas.translate(imageFilter.offset.dx, imageFilter.offset.dy);
-    measuringCanvas.clipRect(offsetPaintBounds, doAntiAlias: false);
-    final paint = ui.Paint();
-    paint.imageFilter = imageFilter.filter;
-    measuringCanvas.saveLayer(offsetPaintBounds, paint);
-    if (imageFilter.filter is! ui.ColorFilter) {
-      imageFilterStack.add(imageFilter.filter as EngineImageFilter);
-    }
-    measureChildren(imageFilter);
-    if (imageFilter.filter is! ui.ColorFilter) {
-      imageFilterStack.removeLast();
-    }
-    measuringCanvas.restore();
-    measuringCanvas.restore();
-  }
-
-  @override
-  void visitShaderMask(ShaderMaskEngineLayer shaderMask) {
-    assert(shaderMask.needsPainting);
-
-    measuringCanvas.saveLayer(shaderMask.paintBounds, ui.Paint());
-    measureChildren(shaderMask);
-
-    measuringCanvas.restore();
-  }
-
-  @override
-  void visitPicture(PictureLayer picture) {
-    assert(picture.needsPainting);
-    if (picture.picture.isDisposed) {
-      // The picture layer was disposed before the picture could be painted.
-      // Just ignore it then.
-      picture.isCulled = true;
-      return;
-    }
-
-    measuringCanvas.save();
-    measuringCanvas.translate(picture.offset.dx, picture.offset.dy);
-
-    // Get the picture bounds using the measuring canvas.
-    final localTransform = Float32List.fromList(measuringCanvas.getTransform());
-    ui.Rect transformedBounds = Matrix4.fromFloat32List(localTransform)
-        .transformRect(picture.picture.cullRect);
-    // Modify the bounds with the image filters.
-    for (final EngineImageFilter imageFilter in imageFilterStack.reversed) {
-      transformedBounds = imageFilter.filterBounds(transformedBounds);
-    }
-    picture.sceneBounds = transformedBounds;
-
-    picture.isCulled = measuringCanvas.quickReject(picture.picture.cullRect);
-
-    measuringCanvas.restore();
-
-    viewEmbedder?.addPictureToUnoptimizedScene(picture);
-  }
-
-  @override
-  void visitColorFilter(ColorFilterEngineLayer colorFilter) {
-    assert(colorFilter.needsPainting);
-
-    final paint = ui.Paint();
-    paint.colorFilter = colorFilter.filter;
-
-    // We need to clip because if the ColorFilter affects transparent black,
-    // then it will fill the entire `cullRect` of the picture, ignoring the
-    // `paintBounds` passed to `saveLayer`. See:
-    // https://github.com/flutter/flutter/issues/88866
-    measuringCanvas.save();
-
-    // TODO(hterkelsen): Only clip if the ColorFilter affects transparent black.
-    measuringCanvas.clipRect(colorFilter.paintBounds, doAntiAlias: false);
-
-    measuringCanvas.saveLayer(colorFilter.paintBounds, paint);
-    measureChildren(colorFilter);
-    measuringCanvas.restore();
-    measuringCanvas.restore();
-  }
-
-  @override
-  void visitPlatformView(PlatformViewLayer platformView) {
-    // TODO(harryterkelsen): Warn if we are a child of a backdrop filter or
-    // shader mask.
-    viewEmbedder?.compositeEmbeddedView(platformView.viewId);
-  }
-}
-
-/// A layer visitor which paints the layer tree into one or more canvases.
-///
-/// The canvases are the optimized canvases that were created when the view
-/// embedder optimized the canvases after the measure step.
+/// A layer visitor which paints the layer tree into a single canvas.
 class PaintVisitor extends LayerVisitor<void> {
-  PaintVisitor(this.nWayCanvas, PlatformViewEmbedder this.viewEmbedder) : toImageCanvas = null;
+  PaintVisitor(this.canvas, [this.surface]);
 
-  PaintVisitor.forToImage(this.nWayCanvas, this.toImageCanvas) : viewEmbedder = null;
+  PaintVisitor.forToImage(this.canvas, [Object? _]) : surface = null;
 
-  /// A multi-canvas that applies clips, transforms, and opacity
-  /// operations to all canvases (root canvas and overlay canvases for the
-  /// platform views).
-  NWayCanvas nWayCanvas;
-
-  /// A compositor for embedded HTML views.
-  final PlatformViewEmbedder? viewEmbedder;
-
-  final List<ShaderMaskEngineLayer> shaderMaskStack = <ShaderMaskEngineLayer>[];
-
-  final Map<ShaderMaskEngineLayer, List<PictureLayer>> picturesUnderShaderMask =
-      <ShaderMaskEngineLayer, List<PictureLayer>>{};
-
-  final ui.Canvas? toImageCanvas;
+  final LayerCanvas canvas;
+  final CkOnscreenSurface? surface;
+  final Set<int> renderedViewIds = <int>{};
 
   /// Calls [paint] on all child layers that need painting.
   void paintChildren(ContainerLayer container) {
@@ -519,80 +217,80 @@ class PaintVisitor extends LayerVisitor<void> {
   void visitBackdropFilter(BackdropFilterEngineLayer backdropFilter) {
     final paint = ui.Paint()..blendMode = backdropFilter.blendMode;
 
-    nWayCanvas.saveLayerWithFilter(backdropFilter.paintBounds, backdropFilter.filter, paint);
+    canvas.saveLayerWithFilter(backdropFilter.paintBounds, paint, backdropFilter.filter);
     paintChildren(backdropFilter);
-    nWayCanvas.restore();
+    canvas.restore();
   }
 
   @override
   void visitClipPath(ClipPathEngineLayer clipPath) {
     assert(clipPath.needsPainting);
 
-    nWayCanvas.save();
-    nWayCanvas.clipPath(clipPath.clipPath, clipPath.clipBehavior != ui.Clip.hardEdge);
+    canvas.save();
+    canvas.clipPath(clipPath.clipPath, doAntiAlias: clipPath.clipBehavior != ui.Clip.hardEdge);
 
     if (clipPath.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      nWayCanvas.saveLayer(clipPath.paintBounds, null);
+      canvas.saveLayer(clipPath.paintBounds, ui.Paint());
     }
     paintChildren(clipPath);
     if (clipPath.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      nWayCanvas.restore();
+      canvas.restore();
     }
-    nWayCanvas.restore();
+    canvas.restore();
   }
 
   @override
   void visitClipRect(ClipRectEngineLayer clipRect) {
     assert(clipRect.needsPainting);
 
-    nWayCanvas.save();
-    nWayCanvas.clipRect(
-      clipRect.clipRect,
-      ui.ClipOp.intersect,
-      clipRect.clipBehavior != ui.Clip.hardEdge,
-    );
+    canvas.save();
+    canvas.clipRect(clipRect.clipRect, doAntiAlias: clipRect.clipBehavior != ui.Clip.hardEdge);
+
     if (clipRect.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      nWayCanvas.saveLayer(clipRect.clipRect, null);
+      canvas.saveLayer(clipRect.paintBounds, ui.Paint());
     }
     paintChildren(clipRect);
     if (clipRect.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      nWayCanvas.restore();
+      canvas.restore();
     }
-    nWayCanvas.restore();
+    canvas.restore();
   }
 
   @override
   void visitClipRRect(ClipRRectEngineLayer clipRRect) {
     assert(clipRRect.needsPainting);
 
-    nWayCanvas.save();
-    nWayCanvas.clipRRect(clipRRect.clipRRect, clipRRect.clipBehavior != ui.Clip.hardEdge);
+    canvas.save();
+    canvas.clipRRect(clipRRect.clipRRect, doAntiAlias: clipRRect.clipBehavior != ui.Clip.hardEdge);
+
     if (clipRRect.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      nWayCanvas.saveLayer(clipRRect.paintBounds, null);
+      canvas.saveLayer(clipRRect.paintBounds, ui.Paint());
     }
     paintChildren(clipRRect);
     if (clipRRect.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      nWayCanvas.restore();
+      canvas.restore();
     }
-    nWayCanvas.restore();
+    canvas.restore();
   }
 
   @override
   void visitClipRSuperellipse(ClipRSuperellipseEngineLayer clipRSuperellipse) {
     assert(clipRSuperellipse.needsPainting);
-    nWayCanvas.save();
-    nWayCanvas.clipRSuperellipse(
+
+    canvas.save();
+    canvas.clipRSuperellipse(
       clipRSuperellipse.clipRSuperellipse,
-      clipRSuperellipse.clipBehavior != ui.Clip.hardEdge,
+      doAntiAlias: clipRSuperellipse.clipBehavior != ui.Clip.hardEdge,
     );
+
     if (clipRSuperellipse.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      nWayCanvas.saveLayer(clipRSuperellipse.paintBounds, null);
+      canvas.saveLayer(clipRSuperellipse.paintBounds, ui.Paint());
     }
     paintChildren(clipRSuperellipse);
     if (clipRSuperellipse.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      nWayCanvas.restore();
+      canvas.restore();
     }
-    nWayCanvas.restore();
+    canvas.restore();
   }
 
   @override
@@ -602,24 +300,23 @@ class PaintVisitor extends LayerVisitor<void> {
     final paint = ui.Paint();
     paint.color = ui.Color.fromARGB(opacity.alpha, 0, 0, 0);
 
-    nWayCanvas.save();
-    nWayCanvas.translate(opacity.offset.dx, opacity.offset.dy);
+    canvas.save();
+    canvas.translate(opacity.offset.dx, opacity.offset.dy);
 
-    nWayCanvas.saveLayer(ui.Rect.largest, paint);
+    canvas.saveLayer(ui.Rect.largest, paint);
     paintChildren(opacity);
-    // Restore twice: once for the translate and once for the saveLayer.
-    nWayCanvas.restore();
-    nWayCanvas.restore();
+    canvas.restore();
+    canvas.restore();
   }
 
   @override
   void visitTransform(TransformEngineLayer transform) {
     assert(transform.needsPainting);
 
-    nWayCanvas.save();
-    nWayCanvas.transform(transform.transform.storage);
+    canvas.save();
+    canvas.transform(transform.transform.toFloat64());
     paintChildren(transform);
-    nWayCanvas.restore();
+    canvas.restore();
   }
 
   @override
@@ -631,56 +328,37 @@ class PaintVisitor extends LayerVisitor<void> {
   void visitImageFilter(ImageFilterEngineLayer imageFilter) {
     assert(imageFilter.needsPainting);
     final ui.Rect offsetPaintBounds = imageFilter.paintBounds.shift(-imageFilter.offset);
-    nWayCanvas.save();
-    nWayCanvas.translate(imageFilter.offset.dx, imageFilter.offset.dy);
-    nWayCanvas.clipRect(offsetPaintBounds, ui.ClipOp.intersect, false);
+    canvas.save();
+    canvas.translate(imageFilter.offset.dx, imageFilter.offset.dy);
+    canvas.clipRect(offsetPaintBounds);
     final paint = ui.Paint();
     paint.imageFilter = imageFilter.filter;
-    nWayCanvas.saveLayer(null, paint);
+    canvas.saveLayer(null, paint);
     paintChildren(imageFilter);
-    nWayCanvas.restore();
-    nWayCanvas.restore();
+    canvas.restore();
+    canvas.restore();
   }
 
   @override
   void visitShaderMask(ShaderMaskEngineLayer shaderMask) {
     assert(shaderMask.needsPainting);
 
-    shaderMaskStack.add(shaderMask);
-    nWayCanvas.saveLayer(shaderMask.paintBounds, null);
+    canvas.saveLayer(shaderMask.paintBounds, ui.Paint());
     paintChildren(shaderMask);
 
-    final paint = ui.Paint();
-    paint.shader = shaderMask.shader;
-    paint.blendMode = shaderMask.blendMode;
-    paint.filterQuality = shaderMask.filterQuality;
+    final paint = ui.Paint()
+      ..shader = shaderMask.shader
+      ..blendMode = shaderMask.blendMode
+      ..filterQuality = shaderMask.filterQuality;
 
-    late List<ui.Canvas> canvasesToApplyShaderMask;
-    if (viewEmbedder != null) {
-      final canvases = <ui.Canvas>{};
-      final List<PictureLayer>? pictureChildren = picturesUnderShaderMask[shaderMask];
-      if (pictureChildren != null) {
-        for (final PictureLayer picture in pictureChildren) {
-          canvases.add(viewEmbedder!.getOptimizedCanvasFor(picture));
-        }
-      }
-      canvasesToApplyShaderMask = canvases.toList();
-    } else {
-      canvasesToApplyShaderMask = <ui.Canvas>[toImageCanvas!];
-    }
-
-    for (final canvas in canvasesToApplyShaderMask) {
-      canvas.save();
-      canvas.translate(shaderMask.maskRect.left, shaderMask.maskRect.top);
-
-      canvas.drawRect(
-        ui.Rect.fromLTWH(0, 0, shaderMask.maskRect.width, shaderMask.maskRect.height),
-        paint,
-      );
-      canvas.restore();
-    }
-    nWayCanvas.restore();
-    shaderMaskStack.removeLast();
+    canvas.save();
+    canvas.translate(shaderMask.maskRect.left, shaderMask.maskRect.top);
+    canvas.drawRect(
+      ui.Rect.fromLTWH(0, 0, shaderMask.maskRect.width, shaderMask.maskRect.height),
+      paint,
+    );
+    canvas.restore();
+    canvas.restore();
   }
 
   @override
@@ -688,59 +366,104 @@ class PaintVisitor extends LayerVisitor<void> {
     assert(picture.needsPainting);
 
     if (picture.picture.isDisposed) {
-      // The picture layer was disposed before the picture could be painted.
-      // Just ignore it then.
       picture.isCulled = true;
       return;
     }
 
-    // For each shader mask this picture is a child of, record that it needs
-    // to have the shader mask applied to it.
-    for (final ShaderMaskEngineLayer shaderMask in shaderMaskStack) {
-      picturesUnderShaderMask.putIfAbsent(shaderMask, () => <PictureLayer>[]);
-      picturesUnderShaderMask[shaderMask]!.add(picture);
-    }
-
-    late ui.Canvas pictureRecorderCanvas;
-    if (viewEmbedder != null) {
-      pictureRecorderCanvas = viewEmbedder!.getOptimizedCanvasFor(picture);
-    } else {
-      pictureRecorderCanvas = toImageCanvas!;
-    }
-
-    pictureRecorderCanvas.save();
-    pictureRecorderCanvas.translate(picture.offset.dx, picture.offset.dy);
-
-    pictureRecorderCanvas.drawPicture(picture.picture);
-    pictureRecorderCanvas.restore();
+    canvas.save();
+    canvas.translate(picture.offset.dx, picture.offset.dy);
+    canvas.drawPicture(picture.picture);
+    canvas.restore();
   }
 
   @override
   void visitColorFilter(ColorFilterEngineLayer colorFilter) {
     assert(colorFilter.needsPainting);
 
-    final paint = ui.Paint();
-    paint.colorFilter = colorFilter.filter;
+    final paint = ui.Paint()..colorFilter = colorFilter.filter;
 
-    // We need to clip because if the ColorFilter affects transparent black,
-    // then it will fill the entire `cullRect` of the picture, ignoring the
-    // `paintBounds` passed to `saveLayer`. See:
-    // https://github.com/flutter/flutter/issues/88866
-    nWayCanvas.save();
-
-    // TODO(hterkelsen): Only clip if the ColorFilter affects transparent black.
-    nWayCanvas.clipRect(colorFilter.paintBounds, ui.ClipOp.intersect, false);
-
-    nWayCanvas.saveLayer(colorFilter.paintBounds, paint);
+    canvas.save();
+    canvas.clipRect(colorFilter.paintBounds);
+    canvas.saveLayer(colorFilter.paintBounds, paint);
     paintChildren(colorFilter);
-    nWayCanvas.restore();
-    nWayCanvas.restore();
+    canvas.restore();
+    canvas.restore();
   }
 
   @override
   void visitPlatformView(PlatformViewLayer platformView) {
-    // Do nothing. The platform view was already measured and placed in the
-    // optimized rendering in the measure step.
+    renderedViewIds.add(platformView.viewId);
+    final DomElement? element = PlatformViewManager.instance.getSlottedContent(platformView.viewId);
+    if (element == null || surface == null) {
+      return;
+    }
+
+    // 1. Ensure element is marked drawable and mounted inside the <canvas content="drawable">
+    element.setAttribute('drawable', '');
+    if (element.parent != surface!.canvas) {
+      (surface!.canvas as DomElement).append(element);
+    }
+
+    // 2. Upload to WebGL texture
+    final WebGLTexture glTexture = surface!.textureCache.getOrCreateTexture(platformView.viewId);
+    final WebGLContext gl = surface!.glContextObject;
+    gl.bindTexture(gl.texture2D, glTexture);
+    try {
+      gl.texElementSubImage2D(gl.texture2D, 0, 0, 0, element);
+    } catch (e) {
+      // Frame 0 guard: Blink snapshot may not be ready yet
+      return;
+    }
+
+    // 3. Wrap in SkImage via CanvasKit
+    final SkImage? skImage = surface!.skSurface?.makeImageFromTexture(
+      glTexture,
+      SkPartialImageInfo(
+        width: platformView.width,
+        height: platformView.height,
+        alphaType: canvasKit.AlphaType.Premul,
+        colorType: canvasKit.ColorType.RGBA_8888,
+        colorSpace: SkColorSpaceSRGB,
+      ),
+    );
+    if (skImage != null) {
+      final engineImage = EngineImage(
+        CkImageDelegate(skImage),
+        platformView.width.toInt(),
+        platformView.height.toInt(),
+      );
+      canvas.drawImageRect(
+        engineImage,
+        ui.Rect.fromLTWH(0, 0, platformView.width, platformView.height),
+        ui.Rect.fromLTWH(
+          platformView.offset.dx,
+          platformView.offset.dy,
+          platformView.width,
+          platformView.height,
+        ),
+        ui.Paint(),
+      );
+      engineImage.dispose(); // Free C++ WASM handle after draw call
+    }
+
+    // 4. Update element geometry with DPR-unscaled matrix
+    final double dpr = EngineFlutterDisplay.instance.devicePixelRatio;
+    final Matrix4 currentMatrix;
+    if (canvas is CkCanvas) {
+      currentMatrix = Matrix4.fromFloat32List((canvas as CkCanvas).getLocalToDevice());
+    } else {
+      currentMatrix = Matrix4.identity();
+    }
+    final Matrix4 cssMatrix = Matrix4.diagonal3Values(
+      1 / dpr,
+      1 / dpr,
+      1.0,
+    ).multiplied(currentMatrix);
+    final domMatrix = DOMMatrix(cssMatrix.storage.toJS);
+    (surface!.canvas as DomHTMLCanvasElement).updateElementGeometry(
+      element,
+      DomDrawElementOptions(canvasTransform: domMatrix),
+    );
   }
 }
 
