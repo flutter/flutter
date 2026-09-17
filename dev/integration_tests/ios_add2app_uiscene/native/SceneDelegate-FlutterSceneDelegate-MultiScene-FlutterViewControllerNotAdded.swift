@@ -14,16 +14,19 @@ class SceneDelegate: FlutterSceneDelegate {
     willConnectTo session: UISceneSession,
     options connectionOptions: UIScene.ConnectionOptions
   ) {
-    // Confirm the scene is a window scene in iOS or iPadOS.
     guard let windowScene = scene as? UIWindowScene else { return }
     window = UIWindow(windowScene: windowScene)
 
     flutterEngine.run()
     GeneratedPluginRegistrant.register(with: flutterEngine)
-    let viewController = ViewController(engine: flutterEngine)
 
+    // Manually register because FlutterViewController is never added to the scene hierarchy!
+    self.registerSceneLifeCycle(with: flutterEngine, scene: windowScene)
+
+    let viewController = ViewController(engine: flutterEngine)
     window?.rootViewController = viewController
     window?.makeKeyAndVisible()
+
     super.scene(scene, willConnectTo: session, options: connectionOptions)
   }
 }
