@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -63,6 +64,32 @@ void main() {
 
       expect(windowsApp, isNull);
       expect(logger.errorText, contains('Cannot find .exe files in the zip archive.'));
+    }, overrides: overrides);
+
+    testUsingContext('Bad zipped app, unzip throws exception', () {
+      fileSystem.file('app.zip').createSync();
+      os.unzipOverride = (File zipFile, Directory targetDirectory) {
+        throw const FormatException('Corrupt archive');
+      };
+      final WindowsApp? windowsApp = WindowsApp.fromPrebuiltApp(fileSystem.file('app.zip'));
+
+      expect(windowsApp, isNull);
+      expect(
+        logger.errorText,
+        contains('Invalid prebuilt Windows app. Unable to extract from archive.'),
+      );
+    }, overrides: overrides);
+
+    testUsingContext('Bad zipped app, unzip throws ToolExit', () {
+      fileSystem.file('app.zip').createSync();
+      os.unzipOverride = (File zipFile, Directory targetDirectory) {
+        throwToolExit('Missing "tar" or "powershell" tool.');
+      };
+
+      expect(
+        () => WindowsApp.fromPrebuiltApp(fileSystem.file('app.zip')),
+        throwsToolExit(message: 'Missing "tar" or "powershell" tool.'),
+      );
     }, overrides: overrides);
 
     testUsingContext('Bad zipped app, two .exe files', () {
