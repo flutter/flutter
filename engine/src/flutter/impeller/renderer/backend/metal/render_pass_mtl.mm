@@ -265,6 +265,11 @@ void RenderPassMTL::SetStencilReference(uint32_t value) {
 }
 
 // |RenderPass|
+void RenderPassMTL::SetBlendColor(Color color) {
+  pass_bindings_.SetBlendColor(color);
+}
+
+// |RenderPass|
 void RenderPassMTL::SetBaseVertex(uint64_t value) {
   base_vertex_ = value;
 }

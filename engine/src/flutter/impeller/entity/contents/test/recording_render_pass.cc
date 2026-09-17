@@ -40,6 +40,14 @@ void RecordingRenderPass::SetStencilReference(uint32_t value) {
 }
 
 // |RenderPass|
+void RecordingRenderPass::SetBlendColor(Color color) {
+  pending_.blend_color = color;
+  if (delegate_) {
+    delegate_->SetBlendColor(color);
+  }
+}
+
+// |RenderPass|
 void RecordingRenderPass::SetBaseVertex(uint64_t value) {
   pending_.base_vertex = value;
   if (delegate_) {

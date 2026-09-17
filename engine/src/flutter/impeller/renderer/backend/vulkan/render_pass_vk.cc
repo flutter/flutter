@@ -278,6 +278,14 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   command_buffer_vk_.setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack,
                                          0u);
 
+  // Set the initial blend constant. Required, not tidiness: pipelines declare
+  // eBlendConstants dynamic, which makes the value in the pipeline's colour
+  // blend state ignored, and a dynamic state that no command sets is undefined
+  // at draw time. It also resynchronises the cache below, since blend
+  // constants belong to the command buffer and several passes share one.
+  const std::array<float, 4> initial_blend_color = {0.0f, 0.0f, 0.0f, 0.0f};
+  command_buffer_vk_.setBlendConstants(initial_blend_color.data());
+
   is_valid_ = true;
 }
 
@@ -400,6 +408,21 @@ void RenderPassVK::SetStencilReference(uint32_t value) {
   current_stencil_ = value;
   command_buffer_vk_.setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack,
                                          value);
+}
+
+// |RenderPass|
+void RenderPassVK::SetBlendColor(Color color) {
+  // Deliberately not `Color::operator==`, which is `ScalarNearlyEqual` with a
+  // 1e-3 tolerance. Comparing each request against the last committed value
+  // under a tolerance loses a constant that ramps in steps smaller than it,
+  // and never commits any of them.
+  if (Color::ExactlyEqual(current_blend_color_, color)) {
+    return;
+  }
+  current_blend_color_ = color;
+  const std::array<float, 4> constants = {color.red, color.green, color.blue,
+                                          color.alpha};
+  command_buffer_vk_.setBlendConstants(constants.data());
 }
 
 // |RenderPass|
