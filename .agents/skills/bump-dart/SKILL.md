@@ -1,11 +1,9 @@
 ---
 name: bump-dart
-description: Bump the minimum Dart SDK version constraint across the flutter/flutter repository, update dependency checksums, and run verification.
+description: Do not trigger automatically; only run when a user runs /bump-dart. Bump the minimum Dart SDK version constraint across the flutter/flutter repository, update dependency checksums, and run verification.
 ---
 
 # Bumping the Dart SDK Version Constraint
-
-Use this skill when the user asks to bump, upgrade, or change the minimum Dart SDK version constraint in the Flutter repository.
 
 ## Important Rules
 
@@ -32,7 +30,7 @@ dart dev/tools/bin/bump_version_constraints.dart <OLD_VERSION_CONSTRAINT> <NEW_V
 ```
 *Example:* `dart dev/tools/bin/bump_version_constraints.dart ^3.10.0-0 ^3.11.0-0`
 
-* **Note:** The script only updates packages whose current SDK constraint matches `<OLD_VERSION_CONSTRAINT>`. If it encounters packages with deviating constraints (e.g. higher SDK versions like `^3.12.0` or custom ranges), it will leave them untouched and print a message flagging them to the user.
+* The script only updates packages whose current SDK constraint matches `<OLD_VERSION_CONSTRAINT>`. If it encounters packages with deviating constraints (e.g. higher SDK versions like `^3.12.0` or custom ranges), it leaves them untouched and prints a message flagging them to the user.
 
 ### Step 3: Update Dependency Checksums and Hashes
 Flutter enforces dependency integrity via checksums. Run the `update-packages` tool to re-solve the package workspace, generate updated `pubspec.lock` files, and update the checksums:
@@ -48,7 +46,7 @@ Run static analysis:
 ```bash
 flutter analyze --flutter-repo
 ```
-* **Important:** Treat any non-zero exit code from `flutter analyze` as a failure. Do not ignore `info` (lint) or `warning` diagnostics, as the Flutter repository requires all analysis issues to be clean. Pay close attention to newly firing lints or deprecated lint rule warnings.
+* Treat any non-zero exit code from `flutter analyze` as a failure. Do not ignore `info` (lint) or `warning` diagnostics, as the Flutter repository requires all analysis issues to be clean. Pay close attention to newly firing lints or deprecated lint rule warnings.
 
 ### Step 5: Report Status, Write Results File, and Prepare Pull Request
 1. **Write Results File in Workspace Root:**
@@ -61,5 +59,3 @@ flutter analyze --flutter-repo
 2. **Handle Failure/Success:**
    - If static analysis fails (even if it only contains `info` or `warning` diagnostics like `prefer_initializing_formals` or `deprecated_lint`), list the failures/warnings in `bump_results.md`, report them to the user, and ask for guidance (or proceed to fix them if instructed).
    - If static analysis passes, point the user to `bump_results.md` in the workspace root, show a summary of modified files (`git status`), and prompt the user to commit the changes and prepare a pull request.
-
-

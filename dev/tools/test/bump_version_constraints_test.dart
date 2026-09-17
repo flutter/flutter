@@ -30,7 +30,7 @@ void main() {
     exitCode = null;
   });
 
-  test('succeeds with no pubspec files', () {
+  test('errors when no pubspec files are updated', () {
     bump.run(
       <String>['^3.10.0-0', '^3.13.0-0'],
       fileSystem: fileSystem,
@@ -40,9 +40,9 @@ void main() {
       exit: mockExit,
     );
 
-    expect(exitCode, isNull);
+    expect(exitCode, 1);
     expect(stdout.toString(), contains('Done. Updated 0 pubspec.yaml files.'));
-    expect(stderr.toString(), isEmpty);
+    expect(stderr.toString(), contains('Error: No pubspec.yaml files were updated.'));
   });
 
   test('updates pubspec.yaml files with matching SDK constraints and skips deviators', () {
@@ -135,14 +135,14 @@ environment:
       exit: mockExit,
     );
 
-    expect(exitCode, isNull);
+    expect(exitCode, 1);
     expect(pubspec.readAsStringSync(), '''
 name: flutter
 environment:
   sdk: ^3.13.0-0
 ''');
     expect(stdout.toString(), contains('Done. Updated 0 pubspec.yaml files.'));
-    expect(stderr.toString(), isEmpty);
+    expect(stderr.toString(), contains('Error: No pubspec.yaml files were updated.'));
   });
 
   test('handles environment: without sdk:', () {
@@ -163,14 +163,14 @@ environment:
       exit: mockExit,
     );
 
-    expect(exitCode, isNull);
+    expect(exitCode, 1);
     expect(pubspec.readAsStringSync(), '''
 name: flutter
 environment:
   foo: bar
 ''');
     expect(stdout.toString(), contains('Done. Updated 0 pubspec.yaml files.'));
-    expect(stderr.toString(), isEmpty);
+    expect(stderr.toString(), contains('Error: No pubspec.yaml files were updated.'));
   });
 
   test('ignores pubspec.yaml outside flutterRoot, in dot-directories, or in bin/cache', () {
@@ -219,12 +219,13 @@ environment:
       exit: mockExit,
     );
 
-    expect(exitCode, isNull);
+    expect(exitCode, 1);
     expect(pubspecHidden.readAsStringSync(), contains('  sdk: ^3.10.0-0\n'));
     expect(pubspecOutside.readAsStringSync(), contains('  sdk: ^3.10.0-0\n'));
     expect(pubspecBuild.readAsStringSync(), contains('  sdk: ^3.10.0-0\n'));
     expect(pubspecCache.readAsStringSync(), contains('  sdk: ^3.10.0-0\n'));
     expect(stdout.toString(), contains('Done. Updated 0 pubspec.yaml files.'));
+    expect(stderr.toString(), contains('Error: No pubspec.yaml files were updated.'));
   });
 
   test('prints usage and exits with 0 on --help or -h', () {
@@ -459,7 +460,7 @@ environment: invalid
       exit: mockExit,
     );
 
-    expect(exitCode, isNull);
+    expect(exitCode, 1);
     expect(pubspecNoEnv.readAsStringSync(), '''
 name: no_env
 ''');
@@ -468,7 +469,7 @@ name: scalar_env
 environment: invalid
 ''');
     expect(stdout.toString(), contains('Done. Updated 0 pubspec.yaml files.'));
-    expect(stderr.toString(), isEmpty);
+    expect(stderr.toString(), contains('Error: No pubspec.yaml files were updated.'));
   });
 
   test('does not ignore cache directory if outside bin/', () {
@@ -524,6 +525,7 @@ environment:
     );
 
     expect(pubspecGood.readAsStringSync(), contains('  sdk: ^3.13.0-0\n'));
+    expect(exitCode, 1);
     expect(
       stderr.toString(),
       contains('Error traversing ${fileSystem.path.join('/flutter', 'packages', 'unreadable')}:'),

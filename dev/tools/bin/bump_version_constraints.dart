@@ -10,6 +10,7 @@ import 'package:file/local.dart';
 import 'package:yaml/yaml.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 
+/// The entry point for the version constraint bumping tool.
 void main(List<String> arguments) {
   const FileSystem fileSystem = LocalFileSystem();
   final File script = fileSystem.file(io.Platform.script).absolute;
@@ -25,6 +26,9 @@ void main(List<String> arguments) {
   );
 }
 
+/// Runs the version constraint bumping tool with the given [arguments].
+///
+/// This is separated from [main] to allow for hermetic testing.
 void run(
   List<String> arguments, {
   required FileSystem fileSystem,
@@ -64,7 +68,10 @@ void run(
   var updatedCount = 0;
   var errorCount = 0;
 
-  final List<File> pubspecs = _findPubspecs(flutterRoot, stderr);
+  final (List<File> pubspecs, bool hasTraversalError) = _findPubspecs(flutterRoot, stderr);
+  if (hasTraversalError) {
+    errorCount++;
+  }
 
   for (final file in pubspecs) {
     final String relativePath = fileSystem.path.relative(file.path, from: flutterRoot.path);
@@ -113,14 +120,19 @@ void run(
   }
 
   stdout.writeln('Done. Updated $updatedCount pubspec.yaml file${updatedCount == 1 ? '' : 's'}.');
+  if (updatedCount == 0) {
+    stderr.writeln('Error: No pubspec.yaml files were updated.');
+    errorCount++;
+  }
   if (errorCount > 0) {
     exit(1);
   }
 }
 
-List<File> _findPubspecs(Directory dir, StringSink stderr) {
+(List<File>, bool) _findPubspecs(Directory dir, StringSink stderr) {
   final FileSystem fileSystem = dir.fileSystem;
   final result = <File>[];
+  var hasError = false;
   void search(Directory currentDir) {
     try {
       for (final FileSystemEntity entity in currentDir.listSync(followLinks: false)) {
@@ -140,11 +152,12 @@ List<File> _findPubspecs(Directory dir, StringSink stderr) {
       }
     } catch (e) {
       stderr.writeln('Error traversing ${currentDir.path}: $e');
+      hasError = true;
     }
   }
 
   search(dir);
-  return result;
+  return (result, hasError);
 }
 
 void _usage(ArgParser parser, StringSink out, void Function(int) exit, {int exitCode = 1}) {
