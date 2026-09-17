@@ -283,6 +283,8 @@ void main() {
         () {
           gradle_utils.updateLocalProperties(
             project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+            analytics: globals.analytics,
+            logger: globals.logger,
           );
         },
         throwsToolExit(
