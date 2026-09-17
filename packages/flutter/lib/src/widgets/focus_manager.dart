@@ -1589,20 +1589,22 @@ enum FocusHighlightStrategy {
 enum FocusLifecyclePolicy {
   /// The behavior is platform-dependent. On desktop and web platforms, where
   /// [AppLifecycleState] changes reliably reflect the app moving to and from
-  /// the foreground, the behavior matches [FocusLifecyclePolicy.suspendAndRestore]. On
-  /// Android and iOS, the behavior matches [FocusLifecyclePolicy.preserve] due
-  /// to known issues with keyboard and autofill interactions on those platforms.
+  /// the foreground, the behavior matches [FocusLifecyclePolicy.suspendAndRestore].
+  /// On Android and iOS, the behavior matches [FocusLifecyclePolicy.keepFocused]
+  /// due to known issues with keyboard and autofill interactions on those platforms.
   ///
   /// This is the default.
   automatic,
 
-  /// The primary focus node is always saved and cleared when the app leaves
-  /// the foreground, and restored when it returns, regardless of platform.
+  /// When the app is sent to the background, primary focus is reset to the root
+  /// focus node. When the app returns to the foreground, primary focus is
+  /// restored to the the original node that had it before the app was
+  /// backgrounded.
   suspendAndRestore,
 
-  /// The primary focus node is unaffected by [AppLifecycleState] changes,
-  /// regardless of platform.
-  preserve,
+  /// The node with primary focus retains primary focus across the backgrounding
+  /// and foregrounding of the app.
+  keepFocused,
 }
 
 // By extending the WidgetsBindingObserver class,
@@ -1764,9 +1766,14 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// This property can be changed at any time and takes effect immediately.
   /// It is typically set once during app initialization:
   ///
+  /// {@tool snippet}
   /// ```dart
-  /// FocusManager.instance.lifecyclePolicy = .preserve;
+  /// void main() {
+  ///   WidgetsFlutterBinding.ensureInitialized();
+  ///   WidgetsBinding.instance.focusManager.lifecyclePolicy = .keepFocused;
+  /// }
   /// ```
+  /// {@end-tool}
   ///
   /// Defaults to [FocusLifecyclePolicy.automatic].
   ///
@@ -1910,13 +1917,12 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   FocusNode? _suspendedNode;
 
   // Registers or unregisters _appLifecycleListener based on the current
-  // _lifecyclePolicy and platform. Called from the constructor, the
-  // lifecyclePolicy setter, and listenToApplicationLifecycleChangesIfSupported.
+  // _lifecyclePolicy and platform.
   void _updateLifecycleListener() {
     final bool shouldListen = switch (_lifecyclePolicy) {
       .automatic => _respondToLifecycleChange,
       .suspendAndRestore => true,
-      .preserve => false,
+      .keepFocused => false,
     };
     if (shouldListen && _appLifecycleListener == null) {
       _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
@@ -2122,6 +2128,13 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     );
     properties.add(
       DiagnosticsProperty<FocusNode>('nextFocus', _markedForFocus, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<FocusLifecyclePolicy>(
+        'lifecyclePolicy',
+        lifecyclePolicy,
+        defaultValue: FocusLifecyclePolicy.automatic,
+      ),
     );
     final element = primaryFocus?.context as Element?;
     if (element != null) {
