@@ -606,11 +606,17 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      final FlutterVmService? vmService = device?.vmService;
+      if (vmService == null) {
+        continue;
+      }
+      final List<FlutterView> views = await vmService.getFlutterViews();
       for (final view in views) {
-        final String data = await device.vmService!.flutterDebugDumpLayerTree(
-          isolateId: view.uiIsolate!.id!,
-        );
+        final String? isolateId = view.uiIsolate?.id;
+        if (isolateId == null) {
+          continue;
+        }
+        final String data = await vmService.flutterDebugDumpLayerTree(isolateId: isolateId);
         logger.printStatus(data);
       }
     }
@@ -622,11 +628,17 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      final FlutterVmService? vmService = device?.vmService;
+      if (vmService == null) {
+        continue;
+      }
+      final List<FlutterView> views = await vmService.getFlutterViews();
       for (final view in views) {
-        final String data = await device.vmService!.flutterDebugDumpFocusTree(
-          isolateId: view.uiIsolate!.id!,
-        );
+        final String? isolateId = view.uiIsolate?.id;
+        if (isolateId == null) {
+          continue;
+        }
+        final String data = await vmService.flutterDebugDumpFocusTree(isolateId: isolateId);
         logger.printStatus(data);
       }
     }

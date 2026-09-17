@@ -54,6 +54,15 @@ final listViews = FakeVmServiceRequest(
   },
 );
 
+final fakeFlutterViewWithoutIsolate = FlutterView(id: 'a', uiIsolate: null);
+
+final listViewsWithoutIsolate = FakeVmServiceRequest(
+  method: kListViewsMethod,
+  jsonResponse: <String, Object>{
+    'views': <Object>[fakeFlutterViewWithoutIsolate.toJson()],
+  },
+);
+
 void main() {
   testWithoutContext('keyboard input handling single help character', () async {
     final testRunner = TestRunner();
@@ -367,6 +376,21 @@ void main() {
       await terminalHandler.processTerminalInput('L');
     });
 
+    testWithoutContext('L - debugDumpLayerTree with null vmService does not crash', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+        <FakeVmServiceRequest>[],
+        nullVmService: true,
+      );
+      await terminalHandler.processTerminalInput('L');
+    });
+
+    testWithoutContext('L - debugDumpLayerTree with null uiIsolate does not crash', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViewsWithoutIsolate,
+      ]);
+      await terminalHandler.processTerminalInput('L');
+    });
+
     testWithoutContext('f - debugDumpFocusTree', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
         listViews,
@@ -411,6 +435,21 @@ void main() {
         <FakeVmServiceRequest>[],
         supportsServiceProtocol: false,
       );
+      await terminalHandler.processTerminalInput('f');
+    });
+
+    testWithoutContext('f - debugDumpFocusTree with null vmService does not crash', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+        <FakeVmServiceRequest>[],
+        nullVmService: true,
+      );
+      await terminalHandler.processTerminalInput('f');
+    });
+
+    testWithoutContext('f - debugDumpFocusTree with null uiIsolate does not crash', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViewsWithoutIsolate,
+      ]);
       await terminalHandler.processTerminalInput('f');
     });
 
