@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../context/tool_context.dart';
@@ -41,7 +42,7 @@ class CoverageCollector extends TestWatcher {
 
   /// The names of the libraries to gather coverage for. If null, all libraries
   /// will be accepted.
-  Set<String>? libraryNames;
+  final Set<String>? libraryNames;
 
   final coverage.Resolver? resolver;
   final _ignoredLinesInFilesCache = <String, List<List<int>>?>{};
@@ -50,7 +51,7 @@ class CoverageCollector extends TestWatcher {
   final TestTimeRecorder? testTimeRecorder;
 
   /// Whether to collect branch coverage information.
-  bool branchCoverage;
+  final bool branchCoverage;
 
   static Future<coverage.Resolver> getResolver(String? packagesPath) async {
     try {
@@ -72,10 +73,11 @@ class CoverageCollector extends TestWatcher {
     if (!verbose) {
       return;
     }
+    final Logger logger = _toolContext.logger;
     if (error) {
-      _toolContext.logger.printError(line);
+      logger.printError(line);
     } else {
-      _toolContext.logger.printTrace(line);
+      logger.printTrace(line);
     }
   }
 

@@ -529,8 +529,9 @@ class FlutterPlatform extends PlatformPlugin {
   static const _kExtension = 'ext.$_kEventName';
 
   Future<void> _listenToVmServiceForGoldens({required Uri uri, required String testPath}) async {
-    final goldensBaseUri = Uri.file(testPath, windows: _toolContext.platform.isWindows);
-    final FlutterVmService vmService = await connectToVmService(uri, logger: _toolContext.logger);
+    final ToolContext(:Logger logger, :Platform platform) = _toolContext;
+    final goldensBaseUri = Uri.file(testPath, windows: platform.isWindows);
+    final FlutterVmService vmService = await connectToVmService(uri, logger: logger);
     final IsolateRef testAppIsolate = await vmService.findExtensionIsolate(_kExtension);
     await vmService.service.streamListen(_kEventName);
     vmService.service.onEvent(_kEventName).listen((Event e) async {
@@ -784,11 +785,11 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   String _createListenerDart(List<Finalizer> finalizers, int ourTestCount, String testPath) {
-    final FileSystem fs = _toolContext.fs;
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     // Prepare a temporary directory to store the Dart file that will talk to us.
     final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_test_listener.');
     finalizers.add(() async {
-      _toolContext.logger.printTrace('test $ourTestCount: deleting temporary directory');
+      logger.printTrace('test $ourTestCount: deleting temporary directory');
       tempDir.deleteSync(recursive: true);
     });
 

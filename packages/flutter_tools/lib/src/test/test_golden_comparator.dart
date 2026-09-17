@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -74,17 +75,18 @@ final class TestGoldenComparator {
       return _previousComparator!;
     }
 
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final String bootstrap = TestGoldenComparatorProcess.generateBootstrap(
-      _toolContext.fs.file(testUri),
+      fs.file(testUri),
       testUri,
-      logger: _toolContext.logger,
+      logger: logger,
     );
     final Process? process = await _startProcess(bootstrap);
     if (process == null) {
       return null;
     }
     unawaited(_previousComparator?.close());
-    _previousComparator = TestGoldenComparatorProcess(process, logger: _toolContext.logger);
+    _previousComparator = TestGoldenComparatorProcess(process, logger: logger);
     _previousTestUri = testUri;
 
     return _previousComparator!;
@@ -95,12 +97,11 @@ final class TestGoldenComparator {
     final File listenerFile = (await _tempDir.createTemp('listener')).childFile('listener.dart');
     await listenerFile.writeAsString(testBootstrap);
 
+    final ToolContext(:Logger logger, :ProcessManager processManager) = _toolContext;
     final TestCompilerResult result = await _compiler.compile(listenerFile.uri);
     switch (result) {
       case TestCompilerFailure(:final String error):
-        _toolContext.logger.printWarning(
-          'An error occurred compiling ${listenerFile.uri}: $error.',
-        );
+        logger.printWarning('An error occurred compiling ${listenerFile.uri}: $error.');
         return null;
       case TestCompilerComplete(:final String outputPath):
         final command = <String>[
@@ -110,7 +111,7 @@ final class TestGoldenComparator {
           outputPath,
         ];
 
-        return _toolContext.processManager.start(command, environment: _environment);
+        return processManager.start(command, environment: _environment);
     }
   }
 

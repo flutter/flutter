@@ -218,7 +218,8 @@ interface class FlutterTestRunner {
     required File isolateSpawningTesterPackageConfigFile,
     required ToolContext toolContext,
   }) async {
-    final File packageConfigFile = toolContext.fs
+    final FileSystem fs = toolContext.fs;
+    final File packageConfigFile = fs
         .directory(flutterProject.directory.path)
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
@@ -233,9 +234,7 @@ interface class FlutterTestRunner {
       // `flutterProject.directory.path` first, as `findPackageConfig` is from a
       // different package which does not use package:file. This inhibits
       // mocking the file system.
-      projectPackageConfig = await findPackageConfig(
-        toolContext.fs.directory(flutterProject.directory.path),
-      );
+      projectPackageConfig = await findPackageConfig(fs.directory(flutterProject.directory.path));
     }
 
     if (projectPackageConfig == null) {
@@ -244,8 +243,8 @@ interface class FlutterTestRunner {
 
     // The flutter_tools package_config.json is guaranteed to include
     // package:ffi and package:test_core.
-    final File flutterToolsPackageConfigFile = toolContext.fs
-        .directory(toolContext.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'))
+    final File flutterToolsPackageConfigFile = fs
+        .directory(fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'))
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
     final PackageConfig flutterToolsPackageConfig = PackageConfig.parseBytes(

@@ -186,11 +186,10 @@ class FlutterWebPlatform extends PlatformPlugin {
       final PackageConfig packageConfig = await currentPackageConfig();
       testPackageUri = packageConfig['test']!.packageUriRoot;
     }
-    final File testDartJs = toolContext.fs.file(
-      toolContext.fs.path.join(testPackageUri.toFilePath(), 'dart.js'),
-    );
-    final File testHostDartJs = toolContext.fs.file(
-      toolContext.fs.path.join(
+    final FileSystem fs = toolContext.fs;
+    final File testDartJs = fs.file(fs.path.join(testPackageUri.toFilePath(), 'dart.js'));
+    final File testHostDartJs = fs.file(
+      fs.path.join(
         testPackageUri.toFilePath(),
         'src',
         'runner',

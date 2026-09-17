@@ -113,25 +113,13 @@ class TestCompiler {
   TestCompiler(
     BuildInfo buildInfo,
     this.flutterProject, {
-    required this._toolContext,
+    required ToolContext toolContext,
     String? precompiledDillPath,
     this.residentCompilerFactory = const ResidentCompilerFactory(),
     this.testTimeRecorder,
-  }) : testFilePath =
-           precompiledDillPath ??
-           _toolContext.fs.path.join(
-             flutterProject!.directory.path,
-             getBuildDirectory(),
-             'test_cache',
-             getDefaultCachedKernelPath(
-               config: _toolContext.config,
-               fileSystem: _toolContext.fs,
-               trackWidgetCreation: buildInfo.trackWidgetCreation,
-               dartDefines: buildInfo.dartDefines,
-               targetModel: TargetModel.flutter,
-               extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-             ),
-           ),
+  }) : _toolContext = toolContext,
+       testFilePath =
+           precompiledDillPath ?? _computeTestFilePath(toolContext, flutterProject, buildInfo),
        shouldCopyDillFile = precompiledDillPath == null {
     this.buildInfo = buildInfo.copyWith(initializeFromDill: testFilePath);
     final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
@@ -152,6 +140,27 @@ class TestCompiler {
         logger.printTrace('Deleting ${outputDillDirectory.path}...');
         outputDillDirectory.deleteSync(recursive: true);
       },
+    );
+  }
+
+  static String _computeTestFilePath(
+    ToolContext toolContext,
+    FlutterProject? flutterProject,
+    BuildInfo buildInfo,
+  ) {
+    final ToolContext(:Config config, :FileSystem fs) = toolContext;
+    return fs.path.join(
+      flutterProject!.directory.path,
+      getBuildDirectory(),
+      'test_cache',
+      getDefaultCachedKernelPath(
+        config: config,
+        fileSystem: fs,
+        trackWidgetCreation: buildInfo.trackWidgetCreation,
+        dartDefines: buildInfo.dartDefines,
+        targetModel: TargetModel.flutter,
+        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+      ),
     );
   }
 

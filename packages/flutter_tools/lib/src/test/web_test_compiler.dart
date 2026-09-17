@@ -36,13 +36,13 @@ class WebTestCompiler {
     required Directory outputDirectory,
     required LanguageVersion languageVersion,
   }) async {
-    final FileSystem fs = _toolContext.fs;
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final List<WebTestInfo> testInfos = testFiles.map((String testFilePath) {
       final List<String> relativeTestSegments = fs.path.split(
         fs.path.relative(testFilePath, from: projectDirectory.childDirectory('test').path),
       );
 
-      final File? testConfigFile = findTestConfigFile(fs.file(testFilePath), _toolContext.logger);
+      final File? testConfigFile = findTestConfigFile(fs.file(testFilePath), logger);
       String? testConfigPath;
       if (testConfigFile != null) {
         testConfigPath = fs.path
