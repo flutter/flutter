@@ -491,7 +491,8 @@ class DevFS {
   }
 
   Future<Uri> create() async {
-    _toolContext.logger.printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
+    final ToolContext(:Logger logger) = _toolContext;
+    logger.printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
     try {
       final vm_service.Response response = await _vmService.createDevFS(fsName);
       _baseUri = Uri.parse(response.json!['uri'] as String);
@@ -509,19 +510,20 @@ class DevFS {
         // logging.
         rethrow;
       }
-      _toolContext.logger.printTrace('DevFS: Creating failed. Destroying and trying again');
+      logger.printTrace('DevFS: Creating failed. Destroying and trying again');
       await destroy();
       final vm_service.Response response = await _vmService.createDevFS(fsName);
       _baseUri = Uri.parse(response.json!['uri'] as String);
     }
-    _toolContext.logger.printTrace('DevFS: Created new filesystem on the device ($_baseUri)');
+    logger.printTrace('DevFS: Created new filesystem on the device ($_baseUri)');
     return _baseUri!;
   }
 
   Future<void> destroy() async {
-    _toolContext.logger.printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
+    final ToolContext(:Logger logger) = _toolContext;
+    logger.printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
     await _vmService.deleteDevFS(fsName);
-    _toolContext.logger.printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
+    logger.printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
   }
 
   /// Mark the [lastCompiled] time to the previous successful compile.
