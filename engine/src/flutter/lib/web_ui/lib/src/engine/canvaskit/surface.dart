@@ -379,23 +379,6 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
 
   late final PlatformViewTextureCache textureCache = PlatformViewTextureCache(this);
 
-  bool _scheduledFrameFromPaint = false;
-
-  void _setupPaintListener(DomHTMLCanvasElement htmlCanvas) {
-    htmlCanvas.addEventListener(
-      'paint',
-      (DomEvent event) {
-        if (!_scheduledFrameFromPaint) {
-          _scheduledFrameFromPaint = true;
-          Timer.run(() {
-            _scheduledFrameFromPaint = false;
-            EnginePlatformDispatcher.instance.scheduleFrame();
-          });
-        }
-      }.toJS,
-    );
-  }
-
   @override
   void _maybeAttachCanvasToDom() {
     final htmlCanvas = canvas as DomHTMLCanvasElement;
@@ -403,7 +386,6 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
     htmlCanvas.setAttribute('content', 'drawable');
     htmlCanvas.setAttribute('tabindex', '0');
     hostElement.appendChild(htmlCanvas);
-    _setupPaintListener(htmlCanvas);
   }
 
   @override

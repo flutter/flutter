@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
@@ -66,12 +68,43 @@ class SingleSurfaceRasterizer extends Rasterizer {
 class SingleSurfaceViewRasterizer extends ViewRasterizer {
   SingleSurfaceViewRasterizer(super.view, this.rasterizer, this.surface) {
     sceneElement.appendChild(surface.hostElement);
+    _setupRepaintListeners();
   }
 
   final SingleSurfaceRasterizer rasterizer;
   final CkOnscreenSurface surface;
   Set<int> _activeViewIds = <int>{};
   bool _isDisposed = false;
+  LayerTree? _lastLayerTree;
+  bool _reRasterizeScheduled = false;
+
+  void _setupRepaintListeners() {
+    final htmlCanvas = surface.canvas as DomHTMLCanvasElement;
+    final JSFunction listener = (DomEvent event) {
+      reRasterize();
+    }.toJS;
+    htmlCanvas.addEventListener('paint', listener);
+    htmlCanvas.addEventListener('input', listener);
+    htmlCanvas.addEventListener('change', listener);
+  }
+
+  /// Re-rasterizes the last known [LayerTree] on the next animation frame.
+  ///
+  /// This is triggered when DOM mutations or paint events occur in the
+  /// platform views attached to the canvas layout subtree without requiring
+  /// a new frame to be requested from the Flutter framework.
+  void reRasterize() {
+    if (_isDisposed || _lastLayerTree == null || _reRasterizeScheduled) {
+      return;
+    }
+    _reRasterizeScheduled = true;
+    domWindow.requestAnimationFrame((_) {
+      _reRasterizeScheduled = false;
+      if (!_isDisposed && _lastLayerTree != null) {
+        draw(_lastLayerTree!, null);
+      }
+    });
+  }
 
   @override
   Future<void> prepareToDraw() async {
@@ -80,6 +113,7 @@ class SingleSurfaceViewRasterizer extends ViewRasterizer {
 
   @override
   Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) async {
+    _lastLayerTree = layerTree;
     final ui.Size frameSize = view.physicalSize;
     if (frameSize.isEmpty) {
       recorder?.recordBuildFinish();
@@ -105,6 +139,7 @@ class SingleSurfaceViewRasterizer extends ViewRasterizer {
       layerTree.rootLayer.accept(paintVisitor);
     }
     skSurface.flush();
+    paintVisitor.disposeTransientImages();
 
     final Set<int> unmountedViews = _activeViewIds.difference(paintVisitor.renderedViewIds);
     for (final viewId in unmountedViews) {
@@ -130,6 +165,7 @@ class SingleSurfaceViewRasterizer extends ViewRasterizer {
       return;
     }
     _isDisposed = true;
+    _lastLayerTree = null;
     rasterizer._viewRasterizers.remove(view);
     surface.dispose();
     super.dispose();

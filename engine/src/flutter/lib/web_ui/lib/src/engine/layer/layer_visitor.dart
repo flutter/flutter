@@ -201,6 +201,18 @@ class PaintVisitor extends LayerVisitor<void> {
   final LayerCanvas canvas;
   final CkOnscreenSurface? surface;
   final Set<int> renderedViewIds = <int>{};
+  final List<EngineImage> _transientImages = <EngineImage>[];
+
+  /// Disposes transient SkImages created during rasterization.
+  ///
+  /// Must be called AFTER skSurface.flush() so Skia has finished reading
+  /// from the image buffers.
+  void disposeTransientImages() {
+    for (final EngineImage image in _transientImages) {
+      image.dispose();
+    }
+    _transientImages.clear();
+  }
 
   /// Calls [paint] on all child layers that need painting.
   void paintChildren(ContainerLayer container) {
@@ -420,8 +432,8 @@ class PaintVisitor extends LayerVisitor<void> {
     if ((element as JSAny?).isA<DomHTMLElement>()) {
       final DomCSSStyleDeclaration style = (element as DomHTMLElement).style;
       style.position = 'absolute';
-      style.left = '${platformView.offset.dx}px';
-      style.top = '${platformView.offset.dy}px';
+      style.left = '0px';
+      style.top = '0px';
       style.width = '${platformView.width}px';
       style.height = '${platformView.height}px';
       style.transformOrigin = '0 0';
@@ -468,6 +480,8 @@ class PaintVisitor extends LayerVisitor<void> {
       // Request next frame so once Blink records the layout/paint snapshot, Flutter draws it.
       EnginePlatformDispatcher.instance.scheduleFrame();
       return;
+    } finally {
+      gl.bindTexture(gl.texture2D, null);
     }
 
     // 3. Wrap in SkImage via CanvasKit
@@ -499,11 +513,12 @@ class PaintVisitor extends LayerVisitor<void> {
           ),
           ui.Paint(),
         );
-        engineImage.dispose(); // Free C++ WASM handle after draw call
+        // Defer image disposal until after skSurface.flush() completes!
+        _transientImages.add(engineImage);
       }
     }
 
-    // 4. Update element geometry with DPR-unscaled matrix
+    // 4. Update element geometry with DPR-unscaled matrix including platformView offset
     final double dpr = EngineFlutterDisplay.instance.devicePixelRatio;
     final Matrix4 currentMatrix;
     if (canvas is CkCanvas) {
@@ -515,7 +530,7 @@ class PaintVisitor extends LayerVisitor<void> {
       1 / dpr,
       1 / dpr,
       1.0,
-    ).multiplied(currentMatrix);
+    ).multiplied(currentMatrix)..translate(platformView.offset.dx, platformView.offset.dy);
     try {
       final domMatrix = DOMMatrix(cssMatrix.storage.toJS);
       final htmlCanvas = surface!.canvas as DomHTMLCanvasElement;
@@ -527,7 +542,10 @@ class PaintVisitor extends LayerVisitor<void> {
       } else if ((htmlCanvas as JSObject).hasProperty('getElementTransform'.toJS).toDart) {
         final DomDOMMatrix? resultMatrix = htmlCanvas.getElementTransform(element, domMatrix);
         if (resultMatrix != null && (element as JSAny?).isA<DomHTMLElement>()) {
-          (element as DomHTMLElement).style.transform = resultMatrix.toString();
+          final htmlElem = element as DomHTMLElement;
+          htmlElem.style.left = '0px';
+          htmlElem.style.top = '0px';
+          htmlElem.style.transform = resultMatrix.toString();
         }
       }
     } catch (_) {
