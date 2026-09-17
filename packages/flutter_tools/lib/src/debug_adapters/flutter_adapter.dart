@@ -99,16 +99,12 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   /// Whether the launch configuration arguments specify `--profile`.
   ///
   /// Always `false` for attach requests.
-  bool get profileMode {
-    return args.hasLaunchArg('--profile');
-  }
+  bool get profileMode => args.hasLaunchArg('--profile');
 
   /// Whether the launch configuration arguments specify `--release`.
   ///
   /// Always `false` for attach requests.
-  bool get releaseMode {
-    return args.hasLaunchArg('--release');
-  }
+  bool get releaseMode => args.hasLaunchArg('--release');
 
   /// Whether the launch configuration arguments specify `--wasm`.
   ///
@@ -116,9 +112,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   /// specified, see https://github.com/flutter/flutter/issues/190777.
   ///
   /// Always `false` for attach requests.
-  bool get wasmMode {
-    return args.hasLaunchArg('--wasm');
-  }
+  bool get wasmMode => args.hasLaunchArg('--wasm');
 
   /// Called by [attachRequest] to request that we actually connect to the app to be debugged.
   @override
