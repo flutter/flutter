@@ -14,6 +14,7 @@ import 'utils/date_localizations.dart' as util;
 import 'widgets_localizations.dart';
 
 // Examples can assume:
+// // ignore_for_file: deprecated_member_use
 // import 'package:flutter_localizations/flutter_localizations.dart';
 // import 'package:flutter/cupertino.dart';
 
