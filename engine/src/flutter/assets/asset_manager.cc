@@ -4,6 +4,8 @@
 
 #include "flutter/assets/asset_manager.h"
 
+#include <mutex>
+
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/fml/trace_event.h"
 
@@ -18,6 +20,7 @@ bool AssetManager::PushFront(std::unique_ptr<AssetResolver> resolver) {
     return false;
   }
 
+  std::unique_lock<std::shared_mutex> lock(resolvers_mutex_);
   resolvers_.push_front(std::move(resolver));
   return true;
 }
@@ -27,6 +30,7 @@ bool AssetManager::PushBack(std::unique_ptr<AssetResolver> resolver) {
     return false;
   }
 
+  std::unique_lock<std::shared_mutex> lock(resolvers_mutex_);
   resolvers_.push_back(std::move(resolver));
   return true;
 }
@@ -34,28 +38,34 @@ bool AssetManager::PushBack(std::unique_ptr<AssetResolver> resolver) {
 void AssetManager::UpdateResolverByType(
     std::unique_ptr<AssetResolver> updated_asset_resolver,
     AssetResolver::AssetResolverType type) {
-  if (updated_asset_resolver == nullptr) {
+  if (updated_asset_resolver == nullptr || !updated_asset_resolver->IsValid()) {
     return;
   }
-  bool updated = false;
-  std::deque<std::unique_ptr<AssetResolver>> new_resolvers;
-  for (auto& old_resolver : resolvers_) {
-    if (!updated && old_resolver->GetType() == type) {
-      // Push the replacement updated resolver in place of the old_resolver.
-      new_resolvers.push_back(std::move(updated_asset_resolver));
-      updated = true;
-    } else {
-      new_resolvers.push_back(std::move(old_resolver));
+  std::deque<std::unique_ptr<AssetResolver>> old_resolvers;
+  {
+    std::unique_lock<std::shared_mutex> lock(resolvers_mutex_);
+    bool updated = false;
+    std::deque<std::unique_ptr<AssetResolver>> new_resolvers;
+    for (auto& old_resolver : resolvers_) {
+      if (!updated && old_resolver->GetType() == type) {
+        // Push the replacement updated resolver in place of the old_resolver.
+        new_resolvers.push_back(std::move(updated_asset_resolver));
+        updated = true;
+      } else {
+        new_resolvers.push_back(std::move(old_resolver));
+      }
     }
+    // Append resolver to the end if not used as a replacement.
+    if (!updated) {
+      new_resolvers.push_back(std::move(updated_asset_resolver));
+    }
+    resolvers_.swap(new_resolvers);
+    old_resolvers.swap(new_resolvers);
   }
-  // Append resolver to the end if not used as a replacement.
-  if (!updated) {
-    new_resolvers.push_back(std::move(updated_asset_resolver));
-  }
-  resolvers_.swap(new_resolvers);
 }
 
 std::deque<std::unique_ptr<AssetResolver>> AssetManager::TakeResolvers() {
+  std::unique_lock<std::shared_mutex> lock(resolvers_mutex_);
   return std::move(resolvers_);
 }
 
@@ -67,6 +77,7 @@ std::unique_ptr<fml::Mapping> AssetManager::GetAsMapping(
   }
   TRACE_EVENT1("flutter", "AssetManager::GetAsMapping", "name",
                asset_name.c_str());
+  std::shared_lock<std::shared_mutex> lock(resolvers_mutex_);
   for (const auto& resolver : resolvers_) {
     auto mapping = resolver->GetAsMapping(asset_name);
     if (mapping != nullptr) {
@@ -87,6 +98,7 @@ std::vector<std::unique_ptr<fml::Mapping>> AssetManager::GetAsMappings(
   }
   TRACE_EVENT1("flutter", "AssetManager::GetAsMappings", "pattern",
                asset_pattern.c_str());
+  std::shared_lock<std::shared_mutex> lock(resolvers_mutex_);
   for (const auto& resolver : resolvers_) {
     auto resolver_mappings = resolver->GetAsMappings(asset_pattern, subdir);
     mappings.insert(mappings.end(),
@@ -98,6 +110,7 @@ std::vector<std::unique_ptr<fml::Mapping>> AssetManager::GetAsMappings(
 
 // |AssetResolver|
 bool AssetManager::IsValid() const {
+  std::shared_lock<std::shared_mutex> lock(resolvers_mutex_);
   return !resolvers_.empty();
 }
 
@@ -116,6 +129,16 @@ bool AssetManager::operator==(const AssetResolver& other) const {
   if (!other_manager) {
     return false;
   }
+  if (this == other_manager) {
+    return true;
+  }
+
+  std::shared_lock<std::shared_mutex> lock_this(resolvers_mutex_,
+                                                std::defer_lock);
+  std::shared_lock<std::shared_mutex> lock_other(
+      other_manager->resolvers_mutex_, std::defer_lock);
+  std::lock(lock_this, lock_other);
+
   if (resolvers_.size() != other_manager->resolvers_.size()) {
     return false;
   }
