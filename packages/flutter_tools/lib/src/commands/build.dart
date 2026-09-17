@@ -91,7 +91,15 @@ class BuildCommand extends FlutterCommand {
         verboseHelp: verboseHelp,
       ),
     );
-    _addSubcommand(BuildAppBundleCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(
+      BuildAppBundleCommand(
+        androidBuilder: effectiveAndroidBuilder,
+        androidContext: androidContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
     _addSubcommand(
       BuildIOSCommand(
         appleContext: appleContext,
