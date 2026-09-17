@@ -813,12 +813,53 @@ void main() {
         logger: logger,
       );
 
+      unawaited(
+        service.getVersion().then<void>((_) {}, onError: (Object error, StackTrace stackTrace) {}),
+      );
+      expect(logger.traceText, contains('Failed to send VM service message'));
+
       // Call dispose, which invokes disposeHandler (channel.close).
       await service.dispose();
       expect(fakeWebSocket.closed, isTrue);
       expect(logger.traceText, contains('Error closing VM service channel'));
     },
   );
+
+  testWithoutContext('createVmServiceDelegate handles synchronous StateError during write and close without throwing', () async {
+    final fakeWebSocket = FakeWebSocket()
+      ..errorOnAdd = StateError('WebSocket is closed')
+      ..errorOnClose = StateError('WebSocket is closed');
+    openChannelForTesting = (
+      String url, {
+      io.CompressionOptions? compression,
+      Logger? logger,
+    }) async => fakeWebSocket;
+    addTearDown(() {
+      openChannelForTesting = null;
+    });
+
+    final logger = BufferLogger.test();
+    final vm_service.VmService service = await createVmServiceDelegate(
+      Uri.parse('ws://127.0.0.1:12345/ws'),
+      logger: logger,
+    );
+
+    unawaited(
+      service.getVersion().then<void>((_) {}, onError: (Object error, StackTrace stackTrace) {}),
+    );
+    expect(
+      logger.traceText,
+      contains('Failed to send VM service message: Bad state: WebSocket is closed'),
+    );
+
+    // Call dispose, which invokes disposeHandler (channel.close).
+    await service.dispose();
+    expect(fakeWebSocket.closed, isTrue);
+    expect(
+      logger.traceText,
+      contains('Error closing VM service channel: Bad state: WebSocket is closed'),
+    );
+  });
 }
 
 class FakeVMService extends Fake implements vm_service.VmService {
@@ -897,6 +938,8 @@ class FakeWebSocket extends Fake implements io.WebSocket {
   bool closed = false;
   bool throwOnAdd = false;
   bool throwOnClose = false;
+  Error? errorOnAdd;
+  Error? errorOnClose;
 
   @override
   StreamSubscription<dynamic> listen(
@@ -918,6 +961,9 @@ class FakeWebSocket extends Fake implements io.WebSocket {
 
   @override
   void add(dynamic data) {
+    if (errorOnAdd != null) {
+      throw errorOnAdd!;
+    }
     if (throwOnAdd) {
       throw const io.SocketException(
         'Error event raised in event handler : error condition has been reset',
@@ -930,6 +976,9 @@ class FakeWebSocket extends Fake implements io.WebSocket {
   @override
   Future<void> close([int? code, String? reason]) async {
     closed = true;
+    if (errorOnClose != null) {
+      throw errorOnClose!;
+    }
     if (throwOnClose) {
       throw const io.SocketException(
         'Error event raised in event handler : error condition has been reset',

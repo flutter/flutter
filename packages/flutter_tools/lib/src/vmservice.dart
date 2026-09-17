@@ -391,14 +391,14 @@ Future<vm_service.VmService> createVmServiceDelegate(
     (String message) {
       try {
         channel.add(message);
-      } on Exception catch (error, stackTrace) {
+      } on Object catch (error, stackTrace) {
         logger.printTrace('Failed to send VM service message: $error\n$stackTrace');
       }
     },
     disposeHandler: () async {
       try {
         await channel.close();
-      } on Exception catch (error, stackTrace) {
+      } on Object catch (error, stackTrace) {
         logger.printTrace('Error closing VM service channel: $error\n$stackTrace');
       }
     },

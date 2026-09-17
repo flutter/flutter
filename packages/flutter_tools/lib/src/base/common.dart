@@ -64,6 +64,8 @@ extension FutureErrorHandling<T> on Future<T> {
       onError: (Object error, StackTrace stackTrace) {
         if (test == null || test(error)) {
           onError(error, stackTrace);
+        } else {
+          Error.throwWithStackTrace(error, stackTrace);
         }
       },
     );

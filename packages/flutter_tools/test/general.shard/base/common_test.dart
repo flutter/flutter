@@ -74,15 +74,28 @@ void main() {
       expect(errorCalled, isTrue);
     });
 
-    test('does not invoke onError when test predicate returns false', () async {
+    test('does not invoke onError and rethrows original error and stack trace when test predicate returns false', () async {
       var errorCalled = false;
       final exception = Exception('other exception');
+      final StackTrace stack = StackTrace.current;
 
-      await Future<void>.error(exception).handleError((Object error, StackTrace stackTrace) {
-        errorCalled = true;
-      }, test: (Object error) => error is FormatException);
+      Object? rethrownError;
+      StackTrace? rethrownStackTrace;
+      try {
+        await Future<void>.error(exception, stack).handleError((
+          Object error,
+          StackTrace stackTrace,
+        ) {
+          errorCalled = true;
+        }, test: (Object error) => error is FormatException);
+      } on Object catch (error, stackTrace) {
+        rethrownError = error;
+        rethrownStackTrace = stackTrace;
+      }
 
       expect(errorCalled, isFalse);
+      expect(rethrownError, same(exception));
+      expect(rethrownStackTrace, same(stack));
     });
   });
 }
