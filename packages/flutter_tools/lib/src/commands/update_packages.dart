@@ -56,8 +56,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       )
       ..addMultiOption(
         _keyCherryPick,
-        help:
-            'Attempt to update only the specified package. To be specified as [pub package name]:[pub package version],[pub package2 name]:[pub package2 version].',
+        help: 'Attempt to update only the specified package. To be specified as [pub package name]:[pub package version],[pub package2 name]:[pub package2 version].',
       )
       ..addFlag(
         _keyOffline,
