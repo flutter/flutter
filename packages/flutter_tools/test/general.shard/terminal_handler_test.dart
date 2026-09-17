@@ -376,21 +376,6 @@ void main() {
       await terminalHandler.processTerminalInput('L');
     });
 
-    testWithoutContext('L - debugDumpLayerTree with null vmService does not crash', () async {
-      final TerminalHandler terminalHandler = setUpTerminalHandler(
-        <FakeVmServiceRequest>[],
-        nullVmService: true,
-      );
-      await terminalHandler.processTerminalInput('L');
-    });
-
-    testWithoutContext('L - debugDumpLayerTree with null uiIsolate does not crash', () async {
-      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
-        listViewsWithoutIsolate,
-      ]);
-      await terminalHandler.processTerminalInput('L');
-    });
-
     testWithoutContext('f - debugDumpFocusTree', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
         listViews,
@@ -438,19 +423,55 @@ void main() {
       await terminalHandler.processTerminalInput('f');
     });
 
-    testWithoutContext('f - debugDumpFocusTree with null vmService does not crash', () async {
+    testWithoutContext('debugDump* with null vmService does not crash', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(
         <FakeVmServiceRequest>[],
         nullVmService: true,
       );
-      await terminalHandler.processTerminalInput('f');
+      for (final key in <String>['w', 't', 'L', 'f', 'S', 'U']) {
+        await terminalHandler.processTerminalInput(key);
+      }
+      expect(await terminalHandler.residentRunner.debugDumpApp(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpRenderTree(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpLayerTree(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpFocusTree(), isFalse);
+      expect(
+        await terminalHandler.residentRunner.debugDumpSemanticsTreeInTraversalOrder(),
+        isFalse,
+      );
+      expect(
+        await terminalHandler.residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder(),
+        isFalse,
+      );
     });
 
-    testWithoutContext('f - debugDumpFocusTree with null uiIsolate does not crash', () async {
+    testWithoutContext('debugDump* with null uiIsolate does not crash', () async {
+      for (final key in <String>['w', 't', 'L', 'f', 'S', 'U']) {
+        final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+          listViewsWithoutIsolate,
+        ]);
+        await terminalHandler.processTerminalInput(key);
+      }
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
         listViewsWithoutIsolate,
+        listViewsWithoutIsolate,
+        listViewsWithoutIsolate,
+        listViewsWithoutIsolate,
+        listViewsWithoutIsolate,
+        listViewsWithoutIsolate,
       ]);
-      await terminalHandler.processTerminalInput('f');
+      expect(await terminalHandler.residentRunner.debugDumpApp(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpRenderTree(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpLayerTree(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpFocusTree(), isFalse);
+      expect(
+        await terminalHandler.residentRunner.debugDumpSemanticsTreeInTraversalOrder(),
+        isFalse,
+      );
+      expect(
+        await terminalHandler.residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder(),
+        isFalse,
+      );
     });
 
     testWithoutContext('o,O - debugTogglePlatform', () async {
