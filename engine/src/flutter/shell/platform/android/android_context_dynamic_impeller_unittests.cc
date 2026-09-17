@@ -36,23 +36,28 @@ TEST(AndroidContextDynamicImpellerTest, RenderingApiBlocksUntilBackendChosen) {
   auto context = std::make_shared<AndroidContextDynamicImpeller>(
       AndroidContext::ContextSettings{}, /*io_task_runner=*/nullptr);
 
-  // Setup happens on the raster thread in production, and can take 100+ ms
-  // while probing for Vulkan.
-  std::thread raster_thread([&context]() {
-    std::this_thread::sleep_for(kSetupDelay);
-    context->SetupImpellerContext();
+  fml::AutoResetWaitableEvent waiter_started;
+  std::atomic<bool> waiter_returned = false;
+
+  std::thread waiter_thread([context, &waiter_started, &waiter_returned]() {
+    waiter_started.Signal();
+    context->RenderingApi();
+    waiter_returned.store(true);
   });
 
-  const auto start = std::chrono::steady_clock::now();
-  const AndroidRenderingAPI api = context->RenderingApi();
-  const auto elapsed = std::chrono::steady_clock::now() - start;
+  waiter_started.Wait();
+  // Give the waiter thread a moment to enter RenderingApi() and block.
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-  // Without the wait this would return kImpellerAutoselect immediately, which
-  // is what made early RegisterImageTexture calls crash.
-  EXPECT_NE(api, AndroidRenderingAPI::kImpellerAutoselect);
-  EXPECT_GE(elapsed, kMinObservedWait);
+  // Verify that the waiter thread is indeed blocked and hasn't returned yet.
+  EXPECT_FALSE(waiter_returned);
 
-  raster_thread.join();
+  // Now run setup, which should unblock the waiter.
+  context->SetupImpellerContext();
+
+  waiter_thread.join();
+  EXPECT_TRUE(waiter_returned.load());
+  EXPECT_NE(context->RenderingApi(), AndroidRenderingAPI::kImpellerAutoselect);
 }
 
 TEST(AndroidContextDynamicImpellerTest, RenderingApiDoesNotBlockAfterSetup) {
