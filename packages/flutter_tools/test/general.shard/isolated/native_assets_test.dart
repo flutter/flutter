@@ -554,7 +554,11 @@ environment:
         );
 
         final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
-        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
+        final Uri? result = await testCompilerBuildNativeAssets(
+          buildInfo,
+          buildRunner: fakeRunner,
+          fileSystem: fileSystem,
+        );
         expect(result, isNotNull);
         if (result != null) {
           expect(fileSystem.file(result).existsSync(), isTrue);
@@ -596,7 +600,11 @@ environment:
         );
 
         final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
-        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
+        final Uri? result = await testCompilerBuildNativeAssets(
+          buildInfo,
+          buildRunner: fakeRunner,
+          fileSystem: fileSystem,
+        );
         expect(result, isNotNull);
         if (result != null) {
           expect(fileSystem.file(result).existsSync(), isTrue);
@@ -639,7 +647,11 @@ environment:
         );
 
         final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
-        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
+        final Uri? result = await testCompilerBuildNativeAssets(
+          buildInfo,
+          buildRunner: fakeRunner,
+          fileSystem: fileSystem,
+        );
         expect(result, isNotNull);
         if (result != null) {
           expect(fileSystem.file(result).existsSync(), isTrue);
@@ -679,7 +691,11 @@ environment:
         );
 
         final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
-        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
+        final Uri? result = await testCompilerBuildNativeAssets(
+          buildInfo,
+          buildRunner: fakeRunner,
+          fileSystem: fileSystem,
+        );
         expect(result, isNull);
       },
     );
@@ -717,7 +733,10 @@ environment:
         );
 
         final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
-        final builder = TestCompilerNativeAssetsBuilderImpl(buildRunner: fakeRunner);
+        final builder = TestCompilerNativeAssetsBuilderImpl(
+          buildRunner: fakeRunner,
+          fileSystem: fileSystem,
+        );
         final Uri? result = await builder.build(buildInfo);
         expect(result, isNotNull);
         if (result != null) {

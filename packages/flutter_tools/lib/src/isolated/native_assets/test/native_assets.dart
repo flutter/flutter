@@ -18,14 +18,20 @@ import '../dart_hook_result.dart';
 import '../native_assets.dart';
 
 class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBuilder {
-  const TestCompilerNativeAssetsBuilderImpl({@visibleForTesting this.buildRunner});
+  const TestCompilerNativeAssetsBuilderImpl({
+    @visibleForTesting this.buildRunner,
+    @visibleForTesting this.fileSystem,
+  });
 
   @visibleForTesting
   final FlutterNativeAssetsBuildRunner? buildRunner;
 
+  @visibleForTesting
+  final FileSystem? fileSystem;
+
   @override
   Future<Uri?> build(BuildInfo buildInfo) =>
-      testCompilerBuildNativeAssets(buildInfo, buildRunner: buildRunner);
+      testCompilerBuildNativeAssets(buildInfo, buildRunner: buildRunner, fileSystem: fileSystem);
 
   @override
   String windowsBuildDirectory(FlutterProject project) {
@@ -34,25 +40,38 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
   }
 }
 
+/// Builds native assets for `flutter test` execution using [buildInfo].
+///
+/// Resolves the target package name for the current project and executes build
+/// and install hooks for the host test platform ([TargetPlatform.tester]),
+/// writing the generated manifest to `build/native_assets/<os>/native_assets.json`.
+///
+/// Optional [buildRunner] and [fileSystem] parameters may be provided for testing.
+/// Returns the [Uri] to the generated `native_assets.json` file, or `null` if
+/// native assets are disabled, unsupported on the host OS, or no package can
+/// be resolved.
 Future<Uri?> testCompilerBuildNativeAssets(
   BuildInfo buildInfo, {
   @visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner,
+  @visibleForTesting FileSystem? fileSystem,
 }) async {
   if (!buildInfo.buildNativeAssets) {
     return null;
   }
+  final FileSystem fs = fileSystem ?? globals.fs;
   final FlutterProject project = FlutterProject.current();
   final Uri projectUri = project.directory.uri;
   final String? runPackageName = _findRunPackageName(
-    fileSystem: globals.fs,
+    fileSystem: fs,
+    manifestAppName: project.manifest.appName,
     packageConfig: buildInfo.packageConfig,
-    project: project,
+    projectUri: projectUri,
   );
   if (runPackageName == null) {
     globals.logger.printTrace('Could not determine run package name for native assets testing.');
     return null;
   }
-  final File pubspecFromPackageConfig = globals.fs.file(
+  final File pubspecFromPackageConfig = fs.file(
     Uri.file(buildInfo.packageConfigPath).resolve('../pubspec.yaml'),
   );
   final String pubspecPath = pubspecFromPackageConfig.existsSync()
@@ -63,7 +82,7 @@ Future<Uri?> testCompilerBuildNativeAssets(
       FlutterNativeAssetsBuildRunnerImpl(
         buildInfo.packageConfigPath,
         buildInfo.packageConfig,
-        globals.fs,
+        fs,
         globals.logger,
         globals.platform,
         runPackageName,
@@ -75,7 +94,7 @@ Future<Uri?> testCompilerBuildNativeAssets(
     await ensureNoNativeAssetsOrOsIsSupported(
       projectUri,
       const LocalPlatform().operatingSystem,
-      globals.fs,
+      fs,
       runner,
     );
     return null;
@@ -98,7 +117,7 @@ Future<Uri?> testCompilerBuildNativeAssets(
     buildRunner: runner,
     targetPlatform: TargetPlatform.tester,
     projectUri: projectUri,
-    fileSystem: globals.fs,
+    fileSystem: fs,
     buildCodeAssets: const BuildCodeAssetsOptions(
       // We're in tests, so there is no app build directory
       appBuildDirectory: null,
@@ -113,22 +132,31 @@ Future<Uri?> testCompilerBuildNativeAssets(
     environmentDefines: environmentDefines,
     targetPlatform: TargetPlatform.tester,
     projectUri: projectUri,
-    fileSystem: globals.fs,
+    fileSystem: fs,
     nativeAssetsFileUri: nativeAssetsFileUri,
     targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/$osName/'),
   );
-  assert(globals.fs.file(nativeAssetsFileUri).existsSync());
+  assert(fs.file(nativeAssetsFileUri).existsSync());
 
   return nativeAssetsFileUri;
 }
 
+/// Resolves the target package name for native assets builds using the following
+/// fallback order:
+///
+/// 1. A package in [packageConfig] whose `root` URI directly matches [projectUri].
+/// 2. A package in [packageConfig] whose canonicalized `root` path matches the
+///    canonicalized path of [projectUri] (handling symlinks and trailing slashes).
+/// 3. [manifestAppName] if it is non-empty and exists in [packageConfig].
+/// 4. The first package in [packageConfig], if any.
+/// 5. [manifestAppName] if it is non-empty.
+/// 6. `null` if no package name can be determined.
 String? _findRunPackageName({
   required FileSystem fileSystem,
+  required String manifestAppName,
   required PackageConfig packageConfig,
-  required FlutterProject project,
+  required Uri projectUri,
 }) {
-  final Uri projectUri = project.directory.uri;
-
   // 1. Direct match on package root URI.
   final Package? directMatch = packageConfig.packages
       .where((Package p) => p.root == projectUri)
@@ -139,12 +167,14 @@ String? _findRunPackageName({
 
   // 2. Canonicalized path match (handles symlinks, trailing slashes, etc.).
   if (projectUri.isScheme('file')) {
-    final String canonicalProjectDir = fileSystem.path.canonicalize(project.directory.path);
+    final String canonicalProjectDir = fileSystem.path.canonicalize(
+      fileSystem.path.fromUri(projectUri),
+    );
     final Package? pathMatch = packageConfig.packages.where((Package p) {
       if (!p.root.isScheme('file')) {
         return false;
       }
-      return fileSystem.path.canonicalize(fileSystem.directory(p.root).path) == canonicalProjectDir;
+      return fileSystem.path.canonicalize(fileSystem.path.fromUri(p.root)) == canonicalProjectDir;
     }).firstOrNull;
     if (pathMatch != null) {
       return pathMatch.name;
@@ -152,7 +182,6 @@ String? _findRunPackageName({
   }
 
   // 3. Match against project manifest app name if it exists in package config.
-  final String manifestAppName = project.manifest.appName;
   if (manifestAppName.isNotEmpty && packageConfig[manifestAppName] != null) {
     return manifestAppName;
   }
