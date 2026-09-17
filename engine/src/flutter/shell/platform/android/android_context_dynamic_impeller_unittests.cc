@@ -89,7 +89,7 @@ TEST(AndroidContextDynamicImpellerTest, SetupThreadCanReadBackendAfterSetup) {
   // in a frame, as AndroidExternalViewEmbedderWrapper::EnsureInitialized does.
   // The debug assert guarding against a deadlocking self-wait must not fire
   // here, because the wait completes immediately once setup is done.
-  std::thread raster_thread([&context]() {
+  std::thread raster_thread([context]() {
     context->SetupImpellerContext();
     EXPECT_NE(context->RenderingApi(),
               AndroidRenderingAPI::kImpellerAutoselect);
