@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
@@ -466,12 +467,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Directionality(
@@ -513,12 +513,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -691,12 +690,11 @@ void main() {
           color: const Color(0x00000000),
           pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
             return PageRouteBuilder<T>(
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) => builder(context),
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) => builder(context),
             );
           },
           home: GestureDetector(
@@ -747,12 +745,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -796,12 +793,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -846,12 +842,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -909,12 +904,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Column(
@@ -971,12 +965,11 @@ void main() {
           color: const Color(0x00000000),
           pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
             return PageRouteBuilder<T>(
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) => builder(context),
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) => builder(context),
             );
           },
           home: Center(
@@ -1066,12 +1059,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -1126,12 +1118,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -1210,12 +1201,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -1255,12 +1245,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -1317,12 +1306,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -1349,12 +1337,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: const Center(child: SizedBox()),
@@ -1524,12 +1511,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -1558,12 +1544,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -1617,12 +1602,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -1676,12 +1660,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -1853,12 +1836,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -1892,12 +1874,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -1944,12 +1925,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -2000,12 +1980,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -2047,12 +2026,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -2098,12 +2076,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -2157,12 +2134,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: RawTooltip(
@@ -2184,12 +2160,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: RawTooltip(
@@ -2212,12 +2187,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: RawTooltip(
@@ -2259,12 +2233,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: MouseRegion(
@@ -2299,12 +2272,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: RawTooltip(
@@ -2339,12 +2311,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -2400,12 +2371,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -2477,12 +2447,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -2525,12 +2494,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -2572,12 +2540,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -2619,12 +2586,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -2658,12 +2624,11 @@ void main() {
           color: const Color(0x00000000),
           pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
             return PageRouteBuilder<T>(
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) => builder(context),
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) => builder(context),
             );
           },
           home: Center(
@@ -2700,12 +2665,11 @@ void main() {
         color: const Color(0x00000000),
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
           );
         },
         home: Center(
@@ -3270,12 +3234,11 @@ Future<void> setWidgetForTooltipMode(
       color: const Color(0x00000000),
       pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
         return PageRouteBuilder<T>(
-          pageBuilder:
-              (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) => builder(context),
+          pageBuilder: (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) => builder(context),
         );
       },
       home: Center(

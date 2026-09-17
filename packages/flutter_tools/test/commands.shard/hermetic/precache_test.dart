@@ -73,9 +73,8 @@ void main() {
         featureFlags: TestFeatureFlags(isWebEnabled: true),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--web', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--web', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -97,9 +96,8 @@ void main() {
         featureFlags: TestFeatureFlags(),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--web', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--web', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -120,9 +118,8 @@ void main() {
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -144,9 +141,8 @@ void main() {
         featureFlags: TestFeatureFlags(),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -167,9 +163,8 @@ void main() {
         featureFlags: TestFeatureFlags(isWindowsEnabled: true),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -191,9 +186,8 @@ void main() {
         featureFlags: TestFeatureFlags(),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -214,9 +208,8 @@ void main() {
         featureFlags: TestFeatureFlags(isLinuxEnabled: true),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -238,9 +231,8 @@ void main() {
         featureFlags: TestFeatureFlags(),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -261,9 +253,8 @@ void main() {
     );
 
     expect(
-      createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--no-android', '--android_gen_snapshot']),
+      createTestCommandRunner(command)
+          .run(const <String>['precache', '--no-android', '--android_gen_snapshot']),
       throwsToolExit(message: '--android_gen_snapshot requires --android'),
     );
   });
@@ -448,9 +439,8 @@ void main() {
         ),
       );
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--no-ios', '--no-android', '--macos']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--no-ios', '--no-android', '--macos']);
 
       expect(
         cache.artifacts,

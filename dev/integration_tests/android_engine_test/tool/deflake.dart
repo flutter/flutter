@@ -20,8 +20,7 @@ final ArgParser _argParser = ArgParser()
   )
   ..addFlag(
     'build-app-once',
-    help:
-        'Whether to use flutter build and --use-application-binary instead of rebuilding every iteration.',
+    help: 'Whether to use flutter build and --use-application-binary instead of rebuilding every iteration.',
     defaultsTo: true,
   )
   ..addOption('runs', abbr: 'n', help: 'How many times to run the test.', defaultsTo: '10');
