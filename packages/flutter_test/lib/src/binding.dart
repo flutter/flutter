@@ -505,17 +505,15 @@ void _destroyTestWindowController({
   required _TestWindowingOwner windowingOwner,
   BaseWindowController? parent,
 }) {
-  onWindowDestroyed();
   if (controller case final _ChildWindowHierarchyMixin hierarchy) {
     hierarchy.removeAllChildren();
   }
-  if (controller.rootView.platformDispatcher case final TestPlatformDispatcher dispatcher) {
-    dispatcher.removeTestView(controller.rootView);
-  }
+  windowingOwner._platformDispatcher.removeTestView(controller.rootView);
   windowingOwner.deactivateWindowController(controller);
   if (parent != null) {
     _removeChildFromParent(parent, controller);
   }
+  onWindowDestroyed();
 }
 
 class _TestDialogWindowController extends DialogWindowController with _ChildWindowHierarchyMixin {

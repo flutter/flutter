@@ -2300,13 +2300,17 @@ void main() {
           WidgetsBinding.instance.windowingOwner = previousOwner;
         });
         var destroyedCount = 0;
-        final WindowController controller = WidgetsBinding.instance.windowingOwner
-            .createWindowController(
-              delegate: _CountingWindowControllerDelegate(() {
-                destroyedCount += 1;
-              }),
-              resizable: true,
+        var rootViewPresentDuringDestroyCallback = true;
+        late final WindowController controller;
+        controller = WidgetsBinding.instance.windowingOwner.createWindowController(
+          delegate: _CountingWindowControllerDelegate(() {
+            destroyedCount += 1;
+            rootViewPresentDuringDestroyCallback = tester.platformDispatcher.views.contains(
+              controller.rootView,
             );
+          }),
+          resizable: true,
+        );
         addTearDown(controller.dispose);
 
         var metricsChangedCount = 0;
@@ -2322,6 +2326,7 @@ void main() {
         controller.destroy();
         expect(controller.isDestroyed, isTrue);
         expect(destroyedCount, 1);
+        expect(rootViewPresentDuringDestroyCallback, isFalse);
         expect(metricsChangedCount, 1);
         expect(tester.platformDispatcher.views, isNot(contains(controller.rootView)));
 
