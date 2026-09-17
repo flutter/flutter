@@ -81,5 +81,22 @@ TEST(AndroidContextDynamicImpellerTest, SetupIsIdempotent) {
   EXPECT_EQ(context->RenderingApi(), first);
 }
 
+TEST(AndroidContextDynamicImpellerTest, SetupThreadCanReadBackendAfterSetup) {
+  auto context = std::make_shared<AndroidContextDynamicImpeller>(
+      AndroidContext::ContextSettings{}, /*io_task_runner=*/nullptr);
+
+  // Mirrors the raster thread running setup and then reading the backend later
+  // in a frame, as AndroidExternalViewEmbedderWrapper::EnsureInitialized does.
+  // The debug assert guarding against a deadlocking self-wait must not fire
+  // here, because the wait completes immediately once setup is done.
+  std::thread raster_thread([&context]() {
+    context->SetupImpellerContext();
+    EXPECT_NE(context->RenderingApi(),
+              AndroidRenderingAPI::kImpellerAutoselect);
+    EXPECT_NE(context->GetImpellerContext(), nullptr);
+  });
+  raster_thread.join();
+}
+
 }  // namespace testing
 }  // namespace flutter

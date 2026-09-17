@@ -5,6 +5,9 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_CONTEXT_DYNAMIC_IMPELLER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_CONTEXT_DYNAMIC_IMPELLER_H_
 
+#include <atomic>
+#include <thread>
+
 #include "flutter/fml/macros.h"
 #include "flutter/fml/native_library.h"
 #include "flutter/fml/synchronization/waitable_event.h"
@@ -82,6 +85,11 @@ class AndroidContextDynamicImpeller : public AndroidContext {
  private:
   /// @brief Blocks until [SetupImpellerContext] has completed on the raster
   ///        thread. Returns immediately once it has.
+  ///
+  ///        Debug builds assert that the caller is not the thread running
+  ///        setup, which would deadlock. Note the assert can only fire once
+  ///        setup has begun; a thread that waits before setup is ever
+  ///        scheduled still hangs undiagnosed.
   void WaitForSetup() const;
 
   const AndroidContext::ContextSettings settings_;
@@ -93,6 +101,14 @@ class AndroidContextDynamicImpeller : public AndroidContext {
   // Signalled by |SetupImpellerContext| once a backend has been chosen.
   // Mutable so the const accessors above can wait on it.
   mutable fml::ManualResetWaitableEvent setup_complete_;
+  // The thread running |SetupImpellerContext|, recorded so |WaitForSetup| can
+  // assert it is not being called from that same thread. Atomic because it is
+  // read by waiters concurrently with the setup thread writing it.
+  //
+  // Only ever written in debug builds: both the stores and the assert that
+  // reads them live inside FML_DCHECK. In release builds this stays
+  // default-constructed, so do not add non-debug readers.
+  std::atomic<std::thread::id> setup_thread_id_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidContextDynamicImpeller);
 };
