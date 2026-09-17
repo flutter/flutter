@@ -38,10 +38,9 @@ class Priority {
   ///
   /// The parameter [offset] is clamped to ±[kMaxOffset].
   Priority operator +(int offset) {
-    if (offset > kMaxOffset) {
-      offset = kMaxOffset;
-    } else if (offset < -kMaxOffset) {
-      offset = -kMaxOffset;
+    if (offset.abs() > kMaxOffset) {
+      // Clamp the input offset.
+      offset = kMaxOffset * offset.sign;
     }
     return Priority._(_value + offset);
   }

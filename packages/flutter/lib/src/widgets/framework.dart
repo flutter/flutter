@@ -5089,10 +5089,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   InheritedWidget dependOnInheritedElement(InheritedElement ancestor, {Object? aspect}) {
-    final bool isNew = (_dependencies ??= HashSet<InheritedElement>()).add(ancestor);
-    if (isNew || aspect != null || ancestor.hasAspectDependencies) {
-      ancestor.updateDependencies(this, aspect);
-    }
+    (_dependencies ??= HashSet<InheritedElement>()).add(ancestor);
+    ancestor.updateDependencies(this, aspect);
     return ancestor.widget as InheritedWidget;
   }
 
@@ -5839,26 +5837,9 @@ abstract class ComponentElement extends Element {
         return true;
       }());
       debugWidgetBuilderValue(widget, built);
-      // We delay marking the element as clean until after calling build() so
-      // that attempts to markNeedsBuild() during build() will be ignored.
-      super.performRebuild(); // clears the "dirty" flag
     } catch (e, stack) {
-      built = _handleBuildException(e, stack);
-    }
-    try {
-      _child = updateChild(_child, built, slot);
-      assert(_child != null);
-    } catch (e, stack) {
-      _handleUpdateChildException(e, stack);
-    }
-  }
-
-  @pragma('vm:never-inline')
-  @pragma('wasm:never-inline')
-  Widget _handleBuildException(Object e, StackTrace stack) {
-    _debugDoingBuild = false;
-    try {
-      return ErrorWidget.builder(
+      _debugDoingBuild = false;
+      built = ErrorWidget.builder(
         _reportException(
           ErrorDescription('building $this'),
           e,
@@ -5869,29 +5850,30 @@ abstract class ComponentElement extends Element {
         ),
       );
     } finally {
-      // Ensure the element is marked clean even if ErrorWidget.builder throws.
-      super.performRebuild();
+      // We delay marking the element as clean until after calling build() so
+      // that attempts to markNeedsBuild() during build() will be ignored.
+      super.performRebuild(); // clears the "dirty" flag
     }
-  }
-
-  @pragma('vm:never-inline')
-  @pragma('wasm:never-inline')
-  void _handleUpdateChildException(Object e, StackTrace stack) {
-    final Widget built = ErrorWidget.builder(
-      _reportException(
-        ErrorDescription('building $this'),
-        e,
-        stack,
-        informationCollector: () => <DiagnosticsNode>[
-          if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
-        ],
-      ),
-    );
-    // _Make sure the old child subtree are deactivated and disposed.
     try {
-      _child?.deactivate();
-    } catch (_) {}
-    _child = updateChild(null, built, slot);
+      _child = updateChild(_child, built, slot);
+      assert(_child != null);
+    } catch (e, stack) {
+      built = ErrorWidget.builder(
+        _reportException(
+          ErrorDescription('building $this'),
+          e,
+          stack,
+          informationCollector: () => <DiagnosticsNode>[
+            if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
+          ],
+        ),
+      );
+      // _Make sure the old child subtree are deactivated and disposed.
+      try {
+        _child?.deactivate();
+      } catch (_) {}
+      _child = updateChild(null, built, slot);
+    }
   }
 
   /// Subclasses should override this function to actually call the appropriate
@@ -6386,14 +6368,6 @@ class InheritedElement extends ProxyElement {
   void updateDependencies(Element dependent, Object? aspect) {
     setDependencies(dependent, null);
   }
-
-  /// Whether this inherited element manages aspect-based dependencies.
-  ///
-  /// Subclasses that manage aspect-based dependencies (such as [InheritedModelElement])
-  /// should override this to return true so that [dependOnInheritedElement]
-  /// continues to notify the element of aspect changes across rebuilds.
-  @protected
-  bool get hasAspectDependencies => false;
 
   /// Called by [notifyClients] for each dependent.
   ///

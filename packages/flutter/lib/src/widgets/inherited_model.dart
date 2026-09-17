@@ -220,11 +220,6 @@ class InheritedModelElement<T> extends InheritedElement {
   /// Creates an element that uses the given widget as its configuration.
   InheritedModelElement(InheritedModel<T> super.widget);
 
-  static const Set<Never> _emptySet = <Never>{};
-
-  @override
-  bool get hasAspectDependencies => true;
-
   @override
   void updateDependencies(Element dependent, Object? aspect) {
     final dependencies = getDependencies(dependent) as Set<Object?>?;
@@ -233,14 +228,12 @@ class InheritedModelElement<T> extends InheritedElement {
     }
 
     if (aspect == null) {
-      setDependencies(dependent, _emptySet);
+      setDependencies(dependent, const <Never>{});
+    } else if (dependencies == null) {
+      setDependencies(dependent, HashSet<T>()..add(aspect as T));
     } else {
       assert(aspect is T);
-      if (dependencies == null) {
-        setDependencies(dependent, HashSet<T>()..add(aspect as T));
-      } else {
-        dependencies.add(aspect);
-      }
+      dependencies.add(aspect);
     }
   }
 
