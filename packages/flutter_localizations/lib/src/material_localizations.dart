@@ -69,6 +69,10 @@ import 'widgets_localizations.dart';
 ///  * The Flutter Internationalization Tutorial,
 ///    <https://flutter.dev/to/internationalization/>.
 ///  * [DefaultMaterialLocalizations], which only provides US English translations.
+@Deprecated(
+  'Use GlobalMaterialLocalizations from package:material_ui/material_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// Initializes an object that defines the material widgets' localized strings
   /// for the given `locale`.
@@ -93,6 +97,10 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///
   /// The [narrowWeekdays] and [firstDayOfWeekIndex] properties use the values
   /// from the [intl.DateFormat] used by [formatFullDate].
+  @Deprecated(
+    'Use GlobalMaterialLocalizations from package:material_ui/material_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const GlobalMaterialLocalizations({
     required this._localeName,
     required this._fullYearFormat,
