@@ -32,9 +32,18 @@ abstract class CopyFlutterAssetsTask : DefaultTask() {
     /**
      * The Flutter build output directory (the `flutter assemble` `--output` location).
      *
-     * Optional for the same reason as [CopyFlutterJniLibsTask.intermediateDir]: absent when
-     * there is no Flutter compile task for the variant, in which case this task stages
-     * nothing.
+     * Always present on the application path: this task is only registered for variants that
+     * Flutter compiles for, and it is wired directly to that variant's compile task, which
+     * always sets an output directory. A variant Flutter does not compile for gets no task at
+     * all, rather than a task with an absent input. That is the opposite of
+     * [CopyFlutterJniLibsTask.intermediateDir], which is registered unconditionally and so
+     * genuinely can be absent.
+     *
+     * Declared `@Optional` regardless, because the add-to-app module path registers this task
+     * for library variants once it migrates
+     * (https://github.com/flutter/flutter/issues/166550), where an absent value is expected.
+     * Until then, an absent value here means Flutter assets would silently be missing from the
+     * APK, so the registration site asserts the value is set rather than letting it default.
      */
     @get:Optional
     @get:InputDirectory

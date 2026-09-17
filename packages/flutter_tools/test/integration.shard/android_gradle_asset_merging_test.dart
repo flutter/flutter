@@ -82,13 +82,18 @@ Future<Directory> createApp(Directory workingDir, {String name = 'app'}) async {
   return workingDir.childDirectory(name);
 }
 
-Future<File> buildApk(Directory projectDir, {String mode = '--debug', String? flavor}) async {
+/// Builds a debug APK and returns it from the `flutter-apk` output directory.
+///
+/// Debug-only on purpose. The APK file name encodes the build mode
+/// (`app-[<flavor>-]<mode>.apk`), so a mode parameter would have to be threaded into both the
+/// command line and the expected file name to stay correct. No test here needs another mode.
+Future<File> buildApk(Directory projectDir, {String? flavor}) async {
   final ProcessResult buildResult = await processManager.run(<String>[
     flutterBin,
     ...getLocalEngineArguments(),
     'build',
     'apk',
-    mode,
+    '--debug',
     if (flavor != null) ...<String>['--flavor', flavor],
   ], workingDirectory: projectDir.path);
   expect(buildResult, const ProcessResultMatcher());

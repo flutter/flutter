@@ -616,6 +616,11 @@ class FlutterPlugin : Plugin<Project> {
                     "copyFlutterAssets${FlutterPluginUtils.capitalize(variant.name)}",
                     CopyFlutterAssetsTask::class.java
                 ) {
+                    // The compile task registered just above always sets an output directory,
+                    // so this is an invariant rather than a tolerated absence. Letting the
+                    // provider go absent instead would stage an empty directory and produce an
+                    // APK with no flutter_assets, which fails at runtime rather than at build
+                    // time.
                     intermediateDir.set(
                         project.layout.dir(
                             compileTaskProvider.map { requireNotNull(it.outputDirectory) }
