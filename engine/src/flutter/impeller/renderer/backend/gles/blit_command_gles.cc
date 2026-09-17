@@ -213,7 +213,7 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
   // Arm erratum EN_ID 1,792,661: force a binding change before uploading to
   // a reused shared texture name. See
   // https://github.com/flutter/flutter/issues/190640.
-  if (gl.GetDescription()->NeedsTextureUploadRebind()) {
+  if (gl.GetCapabilities()->NeedsTextureUploadRebind()) {
     gl.BindTexture(texture_type, 0u);
   }
   gl.BindTexture(texture_type, gl_handle.value());

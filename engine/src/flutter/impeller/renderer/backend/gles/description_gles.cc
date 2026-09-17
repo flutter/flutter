@@ -6,7 +6,6 @@
 
 #include <algorithm>
 #include <cctype>
-#include <charconv>
 #include <iomanip>
 #include <sstream>
 #include <string>
@@ -80,33 +79,6 @@ static std::optional<Version> DetermineVersion(std::string version) {
   return Version::FromVector(version_components);
 }
 
-static bool MaliDriverNeedsTextureUploadRebind(const std::string& version) {
-  // Arm's version string includes a driver release, for example:
-  // "OpenGL ES 3.2 v1.r18p0-01rel0...". If it is unavailable, retain the
-  // workaround rather than assuming that the driver has been fixed.
-  const auto marker = version.find(" v1.r");
-  if (marker == std::string::npos) {
-    return true;
-  }
-  const char* end = version.data() + version.size();
-  unsigned int release = 0;
-  const auto release_result =
-      std::from_chars(version.data() + marker + 5, end, release);
-  if (release_result.ec != std::errc{} || release_result.ptr == end ||
-      *release_result.ptr != 'p') {
-    return true;
-  }
-  unsigned int patch = 0;
-  const auto patch_result = std::from_chars(release_result.ptr + 1, end, patch);
-  if (patch_result.ec != std::errc{} ||
-      (patch_result.ptr != end && *patch_result.ptr != '-')) {
-    return true;
-  }
-  // Arm erratum EN_ID 1,792,661 affects Bifrost/Valhall r17p0-r23p0 and was
-  // fixed in r24p0. OEM backports within that range cannot be detected.
-  return release >= 17 && release < 24;
-}
-
 DescriptionGLES::DescriptionGLES(const ProcTableGLES& gl)
     : vendor_(GetGLString(gl, GL_VENDOR)),
       renderer_(GetGLString(gl, GL_RENDERER)),
@@ -144,12 +116,6 @@ DescriptionGLES::DescriptionGLES(const ProcTableGLES& gl)
     return;
   }
   sl_version_ = sl_version.value();
-
-  needs_texture_upload_rebind_ =
-      is_es_ && !is_angle_ &&
-      (HasPrefix(renderer_, "Mali-G") ||
-       HasPrefix(renderer_, "Immortalis-G")) &&
-      MaliDriverNeedsTextureUploadRebind(gl_version_string_);
 
   is_valid_ = true;
 }
@@ -207,8 +173,12 @@ bool DescriptionGLES::IsANGLE() const {
   return is_angle_;
 }
 
-bool DescriptionGLES::NeedsTextureUploadRebind() const {
-  return needs_texture_upload_rebind_;
+const std::string& DescriptionGLES::GetRenderer() const {
+  return renderer_;
+}
+
+const std::string& DescriptionGLES::GetGlVersionString() const {
+  return gl_version_string_;
 }
 
 bool DescriptionGLES::HasExtension(const std::string& ext) const {
