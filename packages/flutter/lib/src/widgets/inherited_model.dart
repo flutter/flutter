@@ -229,10 +229,13 @@ class InheritedModelElement<T> extends InheritedElement {
 
     if (aspect == null) {
       setDependencies(dependent, const <Never>{});
-    } else if (dependencies == null) {
+      return;
+    }
+
+    assert(aspect is T);
+    if (dependencies == null) {
       setDependencies(dependent, HashSet<T>()..add(aspect as T));
     } else {
-      assert(aspect is T);
       dependencies.add(aspect);
     }
   }
