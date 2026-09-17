@@ -4,13 +4,19 @@
 
 import 'package:coverage/coverage.dart' as coverage;
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
+import '../artifacts.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
+import '../context/tool_context.dart';
 import '../globals.dart' as globals;
 import '../vmservice.dart';
-
 import 'test_device.dart';
 import 'test_time_recorder.dart';
 import 'watcher.dart';
@@ -18,13 +24,25 @@ import 'watcher.dart';
 /// A class that collects code coverage data during test runs.
 class CoverageCollector extends TestWatcher {
   CoverageCollector({
-    this.libraryNames,
-    this.verbose = true,
     required this.packagesPath,
+    this.branchCoverage = false,
+    this.libraryNames,
     this.resolver,
     this.testTimeRecorder,
-    this.branchCoverage = false,
-  });
+    ToolContext? toolContext,
+    this.verbose = true,
+  }) : _toolContext =
+           toolContext ??
+           _FallbackToolContext(
+             artifacts: globals.artifacts,
+             config: globals.config,
+             fileSystem: globals.fs,
+             logger: globals.logger,
+             platform: globals.platform,
+             processManager: globals.processManager,
+           );
+
+  final ToolContext _toolContext;
 
   /// True when log messages should be emitted.
   final bool verbose;
@@ -38,7 +56,7 @@ class CoverageCollector extends TestWatcher {
 
   /// The names of the libraries to gather coverage for. If null, all libraries
   /// will be accepted.
-  Set<String>? libraryNames;
+  final Set<String>? libraryNames;
 
   final coverage.Resolver? resolver;
   final _ignoredLinesInFilesCache = <String, List<List<int>>?>{};
@@ -47,7 +65,7 @@ class CoverageCollector extends TestWatcher {
   final TestTimeRecorder? testTimeRecorder;
 
   /// Whether to collect branch coverage information.
-  bool branchCoverage;
+  final bool branchCoverage;
 
   static Future<coverage.Resolver> getResolver(String? packagesPath) async {
     try {
@@ -69,10 +87,11 @@ class CoverageCollector extends TestWatcher {
     if (!verbose) {
       return;
     }
+    final Logger logger = _toolContext.logger;
     if (error) {
-      globals.printError(line);
+      logger.printError(line);
     } else {
-      globals.printTrace(line);
+      logger.printTrace(line);
     }
   }
 
@@ -97,7 +116,8 @@ class CoverageCollector extends TestWatcher {
     // This may not be a safe assumption in non-standard environments, such as
     // when building under build systems such as Bazel. In those cases, this
     // getter should be overridden.
-    return globals.fs.directory(globals.fs.file(packagesPath).dirname).dirname;
+    final FileSystem fs = _toolContext.fs;
+    return fs.directory(fs.file(packagesPath).dirname).dirname;
   }
 
   /// Collects coverage for an isolate using the given `port`.
@@ -210,7 +230,7 @@ class CoverageCollector extends TestWatcher {
     if (formatter == null) {
       final coverage.Resolver usedResolver =
           resolver ?? this.resolver ?? await CoverageCollector.getResolver(packagesPath);
-      final String packagePath = globals.fs.currentDirectory.path;
+      final String packagePath = _toolContext.fs.currentDirectory.path;
       // find paths for libraryNames so we can include them to report
       final List<String>? libraryPaths = libraryNames
           ?.map((String e) => usedResolver.resolve('package:$e'))
@@ -238,23 +258,24 @@ class CoverageCollector extends TestWatcher {
       return false;
     }
 
-    final File coverageFile = globals.fs.file(coveragePath)
+    final ToolContext(:FileSystem fs, :Platform platform) = _toolContext;
+    final File coverageFile = fs.file(coveragePath)
       ..createSync(recursive: true)
       ..writeAsStringSync(coverageData, flush: true);
     _logMessage('wrote coverage data to $coveragePath (size=${coverageData.length})');
 
     const baseCoverageData = 'coverage/lcov.base.info';
     if (mergeCoverageData) {
-      if (!globals.fs.isFileSync(baseCoverageData)) {
+      if (!fs.isFileSync(baseCoverageData)) {
         _logMessage('Missing "$baseCoverageData". Unable to merge coverage data.', error: true);
         return false;
       }
 
-      if (globals.os.which('lcov') == null) {
+      if (_toolContext.os.which('lcov') == null) {
         var installMessage = 'Please install lcov.';
-        if (globals.platform.isLinux) {
+        if (platform.isLinux) {
           installMessage = 'Consider running "sudo apt-get install lcov".';
-        } else if (globals.platform.isMacOS) {
+        } else if (platform.isMacOS) {
           installMessage = 'Consider running "brew install lcov".';
         }
         _logMessage(
@@ -264,14 +285,14 @@ class CoverageCollector extends TestWatcher {
         return false;
       }
 
-      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+      final Directory tempDir = fs.systemTempDirectory.createTempSync(
         'flutter_tools_test_coverage.',
       );
       try {
         final File sourceFile = coverageFile.copySync(
-          globals.fs.path.join(tempDir.path, 'lcov.source.info'),
+          fs.path.join(tempDir.path, 'lcov.source.info'),
         );
-        final RunResult result = globals.processUtils.runSync(<String>[
+        final RunResult result = _toolContext.processUtils.runSync(<String>[
           'lcov',
           '--add-tracefile',
           baseCoverageData,
@@ -317,4 +338,49 @@ Future<Map<String, dynamic>> collect(
     branchCoverage: branchCoverage,
     coverableLineCache: coverableLineCache,
   );
+}
+
+class _FallbackToolContext implements ToolContext {
+  _FallbackToolContext({
+    this._artifacts,
+    this._config,
+    this._fileSystem,
+    this._logger,
+    this._platform,
+    this._processManager,
+  });
+
+  final Artifacts? _artifacts;
+  final Config? _config;
+  final FileSystem? _fileSystem;
+  final Logger? _logger;
+  final Platform? _platform;
+  final ProcessManager? _processManager;
+
+  @override
+  Artifacts get artifacts => _artifacts ?? globals.artifacts!;
+
+  @override
+  Config get config => _config ?? globals.config;
+
+  @override
+  FileSystem get fs => _fileSystem ?? globals.fs;
+
+  @override
+  Logger get logger => _logger ?? globals.logger;
+
+  @override
+  OperatingSystemUtils get os => globals.os;
+
+  @override
+  Platform get platform => _platform ?? globals.platform;
+
+  @override
+  ProcessManager get processManager => _processManager ?? globals.processManager;
+
+  @override
+  ProcessUtils get processUtils => globals.processUtils;
+
+  @override
+  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
