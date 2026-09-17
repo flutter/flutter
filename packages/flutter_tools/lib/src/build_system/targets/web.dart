@@ -42,6 +42,10 @@ import 'native_assets.dart';
 const String _kBundledFallbackRobotoFamily = 'Roboto';
 const String _kBundledFallbackRobotoAsset = 'fonts/fallback/Roboto-Regular.ttf';
 const String _kFontManifestJsonFile = 'FontManifest.json';
+const String _kLegacyWebDeprecationWarning =
+    'dart:html, dart:js, and legacy JS interop libraries are deprecated and planned for removal '
+    'from the Dart SDK in a future release. Migrate your project to '
+    'package:web and dart:js_interop.';
 
 /// Generates an entry point for a web target.
 // Keep this in sync with build_runner/resident_web_runner.dart
@@ -781,7 +785,9 @@ class Dart2WasmTarget extends Dart2WebTarget {
       logger.printWarning('Wasm dry run findings:');
       logger.printWarning(stdout);
       logger.printWarning(
-        'Consider addressing these issues to enable wasm builds. See docs for more info: '
+        'Consider addressing these issues to enable wasm builds. '
+        '$_kLegacyWebDeprecationWarning\n'
+        'See docs for more info: '
         'https://docs.flutter.dev/platform-integration/web/wasm\n',
       );
       return _DryRunOutcome.findings;
@@ -875,12 +881,9 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final privatePackages = <String>{};
     for (final Package package in packageConfigPackages.packages) {
       final String packageName = package.name;
-      if (package.root.pathSegments.where((String s) => s.isNotEmpty).toList() case [
-        ...,
-        'hosted',
-        _,
-        final packageFolder,
-      ] when packageFolder.startsWith('$packageName-')) {
+      if (package.root.pathSegments.where((String s) => s.isNotEmpty).toList()
+          case [..., 'hosted', _, final packageFolder]
+          when packageFolder.startsWith('$packageName-')) {
         // Hosted package directories in .pub-cache follow '<packageName>-<version>'.
         // Substring past the package name and hyphen to extract the version.
         hostedPackages[packageName] = packageFolder.substring(packageName.length + 1);
@@ -984,7 +987,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
         _kLegacyImportErrorPattern.hasMatch(stderr)) {
       environment.logger.printStatus(
         'Note: WebAssembly compilation failed due to legacy web imports.\n'
-        'Migrate your project from dart:html and package:js to package:web and dart:js_interop.\n'
+        '$_kLegacyWebDeprecationWarning\n'
         '$kWasmErrorsMoreInfo',
       );
     }

@@ -406,14 +406,12 @@ _flutter.loader.load();
         const JsCompilerConfig(),
       ], const NoOpAnalytics()).build(environment);
 
-      final fontManifest =
-          jsonDecode(
-                environment.outputDir
-                    .childDirectory('assets')
-                    .childFile('FontManifest.json')
-                    .readAsStringSync(),
-              )
-              as List<dynamic>;
+      final fontManifest = jsonDecode(
+        environment.outputDir
+            .childDirectory('assets')
+            .childFile('FontManifest.json')
+            .readAsStringSync(),
+      ) as List<dynamic>;
       expect(
         fontManifest,
         contains(
@@ -973,9 +971,8 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(
-        const JsCompilerConfig(nativeNullAssertions: true, sourceMaps: false),
-      ).build(environment);
+      await Dart2JSTarget(const JsCompilerConfig(nativeNullAssertions: true, sourceMaps: false))
+          .build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -1013,9 +1010,8 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(
-        const JsCompilerConfig(optimizationLevel: 3, sourceMaps: false),
-      ).build(environment);
+      await Dart2JSTarget(const JsCompilerConfig(optimizationLevel: 3, sourceMaps: false))
+          .build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -1268,9 +1264,8 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(
-        const JsCompilerConfig(dumpInfo: true, sourceMaps: false),
-      ).build(environment);
+      await Dart2JSTarget(const JsCompilerConfig(dumpInfo: true, sourceMaps: false))
+          .build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -1476,7 +1471,13 @@ _flutter.loader.load();
       expect(
         logger.statusText,
         contains(
-          'Migrate your project from dart:html and package:js to package:web and dart:js_interop.',
+          'dart:html, dart:js, and legacy JS interop libraries are deprecated and planned for removal',
+        ),
+      );
+      expect(
+        logger.statusText,
+        contains(
+          'from the Dart SDK in a future release. Migrate your project to package:web and dart:js_interop.',
         ),
       );
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
