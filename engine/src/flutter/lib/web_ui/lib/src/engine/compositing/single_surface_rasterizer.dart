@@ -39,6 +39,10 @@ class SingleSurfaceRasterizer extends Rasterizer {
   final Map<EngineFlutterView, SingleSurfaceViewRasterizer> _viewRasterizers =
       <EngineFlutterView, SingleSurfaceViewRasterizer>{};
 
+  void debugClear() {
+    _viewRasterizers.clear();
+  }
+
   @override
   void setResourceCacheMaxBytes(int bytes) {
     _surfaceProvider.setSkiaResourceCacheMaxBytes(bytes);
@@ -67,6 +71,7 @@ class SingleSurfaceViewRasterizer extends ViewRasterizer {
   final SingleSurfaceRasterizer rasterizer;
   final CkOnscreenSurface surface;
   Set<int> _activeViewIds = <int>{};
+  bool _isDisposed = false;
 
   @override
   Future<void> prepareToDraw() async {
@@ -85,9 +90,11 @@ class SingleSurfaceViewRasterizer extends ViewRasterizer {
     currentFrameSize = BitmapSize.fromSize(frameSize);
     surface.setSize(currentFrameSize);
 
-    context.acquireFrame();
+    final Frame compositorFrame = context.acquireFrame();
     recorder?.recordBuildFinish();
     recorder?.recordRasterStart();
+
+    layerTree.preroll(compositorFrame);
 
     final SkSurface skSurface = surface.skSurface!;
     final canvas = CkCanvas.fromSkCanvas(skSurface.getCanvas());
@@ -103,7 +110,11 @@ class SingleSurfaceViewRasterizer extends ViewRasterizer {
     for (final viewId in unmountedViews) {
       final DomElement? element = PlatformViewManager.instance.getSlottedContent(viewId);
       if (element != null) {
-        (surface.canvas as DomHTMLCanvasElement).clearElementGeometry(element);
+        try {
+          (surface.canvas as DomHTMLCanvasElement).clearElementGeometry(element);
+        } catch (_) {
+          // Guard for environments where CanvasDrawElement is not enabled.
+        }
         element.remove();
       }
       surface.textureCache.disposeView(viewId);
@@ -115,6 +126,11 @@ class SingleSurfaceViewRasterizer extends ViewRasterizer {
 
   @override
   void dispose() {
+    if (_isDisposed) {
+      return;
+    }
+    _isDisposed = true;
+    rasterizer._viewRasterizers.remove(view);
     surface.dispose();
     super.dispose();
   }

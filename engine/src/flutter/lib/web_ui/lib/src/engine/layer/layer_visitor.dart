@@ -167,6 +167,10 @@ class PrerollVisitor extends LayerVisitor<void> {
 
   @override
   void visitPlatformView(PlatformViewLayer platformView) {
+    if (platformView.width <= 0 || platformView.height <= 0) {
+      platformView.paintBounds = ui.Rect.zero;
+      return;
+    }
     platformView.paintBounds = ui.Rect.fromLTWH(
       platformView.offset.dx,
       platformView.offset.dy,
@@ -404,6 +408,10 @@ class PaintVisitor extends LayerVisitor<void> {
       (surface!.canvas as DomElement).append(element);
     }
 
+    if (platformView.width <= 0 || platformView.height <= 0) {
+      return;
+    }
+
     // 2. Upload to WebGL texture
     final WebGLTexture glTexture = surface!.textureCache.getOrCreateTexture(platformView.viewId);
     final WebGLContext gl = surface!.glContextObject;
@@ -459,11 +467,15 @@ class PaintVisitor extends LayerVisitor<void> {
       1 / dpr,
       1.0,
     ).multiplied(currentMatrix);
-    final domMatrix = DOMMatrix(cssMatrix.storage.toJS);
-    (surface!.canvas as DomHTMLCanvasElement).updateElementGeometry(
-      element,
-      DomDrawElementOptions(canvasTransform: domMatrix),
-    );
+    try {
+      final domMatrix = DOMMatrix(cssMatrix.storage.toJS);
+      (surface!.canvas as DomHTMLCanvasElement).updateElementGeometry(
+        element,
+        DomDrawElementOptions(canvasTransform: domMatrix),
+      );
+    } catch (_) {
+      // Guard for environments where CanvasDrawElement is not enabled.
+    }
   }
 }
 
