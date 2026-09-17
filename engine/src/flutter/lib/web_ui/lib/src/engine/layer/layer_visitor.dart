@@ -426,6 +426,15 @@ class PaintVisitor extends LayerVisitor<void> {
     element.setAttribute('drawable', '');
     if (element.parent != surface!.canvas) {
       (surface!.canvas as DomElement).append(element);
+      final DomEventListener stopPropagationListener = createDomEventListener((DomEvent event) {
+        event.stopPropagation();
+      });
+      element.addEventListener('pointerdown', stopPropagationListener);
+      element.addEventListener('mousedown', stopPropagationListener);
+      element.addEventListener('click', stopPropagationListener);
+      element.addEventListener('keydown', stopPropagationListener);
+      element.addEventListener('keyup', stopPropagationListener);
+      element.addEventListener('keypress', stopPropagationListener);
     }
 
     // Set styling for geometry and hit-testing
