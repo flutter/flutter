@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:js_interop';
-
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
@@ -75,35 +73,30 @@ class SingleSurfaceViewRasterizer extends ViewRasterizer {
   final CkOnscreenSurface surface;
   Set<int> _activeViewIds = <int>{};
   bool _isDisposed = false;
-  LayerTree? _lastLayerTree;
-  bool _reRasterizeScheduled = false;
+  DomEventListener? _repaintListener;
 
   void _setupRepaintListeners() {
     final htmlCanvas = surface.canvas as DomHTMLCanvasElement;
-    final JSFunction listener = (DomEvent event) {
-      reRasterize();
-    }.toJS;
+    final DomEventListener listener = createDomEventListener((DomEvent event) {
+      if (!_isDisposed) {
+        EnginePlatformDispatcher.instance.scheduleFrame();
+      }
+    });
+    _repaintListener = listener;
     htmlCanvas.addEventListener('paint', listener);
     htmlCanvas.addEventListener('input', listener);
     htmlCanvas.addEventListener('change', listener);
   }
 
-  /// Re-rasterizes the last known [LayerTree] on the next animation frame.
-  ///
-  /// This is triggered when DOM mutations or paint events occur in the
-  /// platform views attached to the canvas layout subtree without requiring
-  /// a new frame to be requested from the Flutter framework.
-  void reRasterize() {
-    if (_isDisposed || _lastLayerTree == null || _reRasterizeScheduled) {
-      return;
+  void _removeRepaintListeners() {
+    final DomEventListener? listener = _repaintListener;
+    if (listener != null) {
+      final htmlCanvas = surface.canvas as DomHTMLCanvasElement;
+      htmlCanvas.removeEventListener('paint', listener);
+      htmlCanvas.removeEventListener('input', listener);
+      htmlCanvas.removeEventListener('change', listener);
+      _repaintListener = null;
     }
-    _reRasterizeScheduled = true;
-    domWindow.requestAnimationFrame((_) {
-      _reRasterizeScheduled = false;
-      if (!_isDisposed && _lastLayerTree != null) {
-        draw(_lastLayerTree!, null);
-      }
-    });
   }
 
   @override
@@ -113,7 +106,6 @@ class SingleSurfaceViewRasterizer extends ViewRasterizer {
 
   @override
   Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) async {
-    _lastLayerTree = layerTree;
     final ui.Size frameSize = view.physicalSize;
     if (frameSize.isEmpty) {
       recorder?.recordBuildFinish();
@@ -165,7 +157,7 @@ class SingleSurfaceViewRasterizer extends ViewRasterizer {
       return;
     }
     _isDisposed = true;
-    _lastLayerTree = null;
+    _removeRepaintListeners();
     rasterizer._viewRasterizers.remove(view);
     surface.dispose();
     super.dispose();
