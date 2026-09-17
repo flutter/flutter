@@ -239,15 +239,12 @@ class InheritedModelElement<T> extends InheritedElement {
 
   @override
   void notifyDependent(InheritedModel<T> oldWidget, Element dependent) {
-    final dependencies = getDependencies(dependent) as Set<Object?>?;
+    final dependencies = getDependencies(dependent) as Set<T>?;
     if (dependencies == null) {
       return;
     }
     if (dependencies.isEmpty ||
-        (widget as InheritedModel<T>).updateShouldNotifyDependent(
-          oldWidget,
-          dependencies as Set<T>,
-        )) {
+        (widget as InheritedModel<T>).updateShouldNotifyDependent(oldWidget, dependencies)) {
       dependent.didChangeDependencies();
     }
   }
