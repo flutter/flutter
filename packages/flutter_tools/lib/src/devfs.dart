@@ -491,7 +491,7 @@ class DevFS {
   }
 
   Future<Uri> create() async {
-    final ToolContext(:Logger logger) = _toolContext;
+    final Logger logger = _toolContext.logger;
     logger.printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
     try {
       final vm_service.Response response = await _vmService.createDevFS(fsName);
@@ -520,7 +520,7 @@ class DevFS {
   }
 
   Future<void> destroy() async {
-    final ToolContext(:Logger logger) = _toolContext;
+    final Logger logger = _toolContext.logger;
     logger.printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
     await _vmService.deleteDevFS(fsName);
     logger.printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
