@@ -14,7 +14,10 @@
 //
 // See: https://github.com/flutter/flutter/issues/30701.
 
-import 'dart:ui' show Display, FlutterView, PlatformDispatcher;
+/// @docImport 'dart:ui';
+library;
+
+import 'dart:ui' show Display, FlutterView;
 
 import 'package:flutter/foundation.dart';
 
@@ -39,8 +42,13 @@ import 'view.dart';
 /// applying debug view metric overrides — is the one that answers, and the view
 /// a controller exposes as its `rootView` is the same object the rest of the
 /// framework sees.
+///
+/// {@macro flutter.widgets.windowing.experimental}
 @internal
 FlutterView flutterViewForId(int viewId) {
+  if (!isWindowingEnabled) {
+    throw UnsupportedError(_kWindowingDisabledErrorMessage);
+  }
   final FlutterView? view = WidgetsBinding.instance.platformDispatcher.view(id: viewId);
   if (view == null) {
     throw StateError('No FlutterView with viewId $viewId was found on the platform dispatcher.');

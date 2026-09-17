@@ -409,6 +409,10 @@ void main() {
 
         expect(() => WindowScope.of(context), throwsUnsupportedError);
       });
+
+      testWidgets('flutterViewForId throws UnsupportedError', (WidgetTester tester) async {
+        expect(() => flutterViewForId(tester.view.viewId), throwsUnsupportedError);
+      });
     });
 
     group('isWindowingEnabled is true', () {
