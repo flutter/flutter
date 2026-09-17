@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:async/async.dart';
 
+import '../base/common.dart';
 import '../base/io.dart';
 import '../convert.dart';
 
@@ -33,6 +36,12 @@ class AndroidConsole {
   Future<void> connect() async {
     assert(_socket != null);
     assert(_queue == null);
+
+    unawaited(
+      _socket!.done.handleError((Object error, StackTrace stackTrace) {
+        // Socket error, handled when reading or destroying.
+      }),
+    );
 
     _queue = StreamQueue<String>(_socket!.asyncMap(ascii.decode));
 

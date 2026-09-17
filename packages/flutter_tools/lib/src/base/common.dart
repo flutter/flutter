@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 /// Throws a specialized exception to exit with an actionable [message].
 ///
 /// A [ToolExit] is interpreted by the `flutter` tool to mean "exit the tool
@@ -45,4 +47,25 @@ final class ToolExit implements Exception {
 
   @override
   String toString() => 'Error: $message';
+}
+
+/// Error handling extensions on [Future].
+extension FutureErrorHandling<T> on Future<T> {
+  /// Handles errors on this future without requiring an empty `.then` callback.
+  ///
+  /// Useful for guarding background sink/socket completion futures
+  /// (e.g., `socket.done`, `sink.done`) against unhandled zone exceptions.
+  Future<void> handleError(
+    void Function(Object error, StackTrace stackTrace) onError, {
+    bool Function(Object error)? test,
+  }) {
+    return then<void>(
+      (_) {},
+      onError: (Object error, StackTrace stackTrace) {
+        if (test == null || test(error)) {
+          onError(error, stackTrace);
+        }
+      },
+    );
+  }
 }

@@ -719,6 +719,106 @@ void main() {
       expect(otherError.isServiceExtensionUnregisteredError, isFalse);
     },
   );
+
+  testWithoutContext('createVmServiceDelegate handles socket reset error on WebSocket stream cleanly without uncaught zone errors', () async {
+    final streamController = StreamController<dynamic>();
+    final fakeWebSocket = FakeWebSocket(stream: streamController.stream);
+    openChannelForTesting = (
+      String url, {
+      io.CompressionOptions? compression,
+      Logger? logger,
+    }) async => fakeWebSocket;
+    addTearDown(() {
+      openChannelForTesting = null;
+    });
+
+    final logger = BufferLogger.test();
+    final vm_service.VmService service = await createVmServiceDelegate(
+      Uri.parse('ws://127.0.0.1:12345/ws'),
+      logger: logger,
+    );
+
+    // Emit a socket reset error on the WebSocket stream.
+    streamController.addError(
+      const io.SocketException(
+        'Error event raised in event handler : error condition has been reset',
+        port: 0,
+      ),
+    );
+    await pumpEventQueue();
+
+    expect(
+      logger.traceText,
+      contains(
+        'VM service WebSocket error: SocketException: Error event raised in event handler : error condition has been reset, port = 0',
+      ),
+    );
+    await service.dispose();
+  });
+
+  testWithoutContext('createVmServiceDelegate handles socket reset error on WebSocket done future cleanly without uncaught zone errors', () async {
+    final doneCompleter = Completer<void>();
+    final fakeWebSocket = FakeWebSocket(done: doneCompleter.future);
+    openChannelForTesting = (
+      String url, {
+      io.CompressionOptions? compression,
+      Logger? logger,
+    }) async => fakeWebSocket;
+    addTearDown(() {
+      openChannelForTesting = null;
+    });
+
+    final logger = BufferLogger.test();
+    final vm_service.VmService service = await createVmServiceDelegate(
+      Uri.parse('ws://127.0.0.1:12345/ws'),
+      logger: logger,
+    );
+
+    // Complete done with socket reset error.
+    doneCompleter.completeError(
+      const io.SocketException(
+        'Error event raised in event handler : error condition has been reset',
+        port: 0,
+      ),
+    );
+    await pumpEventQueue();
+
+    expect(
+      logger.traceText,
+      contains(
+        'VM service WebSocket done error: SocketException: Error event raised in event handler : error condition has been reset, port = 0',
+      ),
+    );
+    await service.dispose();
+  });
+
+  testWithoutContext(
+    'createVmServiceDelegate handles exception during write and close without throwing',
+    () async {
+      final fakeWebSocket = FakeWebSocket()
+        ..throwOnAdd = true
+        ..throwOnClose = true;
+      openChannelForTesting = (
+        String url, {
+        io.CompressionOptions? compression,
+        Logger? logger,
+      }) async => fakeWebSocket;
+      addTearDown(() {
+        openChannelForTesting = null;
+      });
+
+      final logger = BufferLogger.test();
+      final vm_service.VmService service = await createVmServiceDelegate(
+        Uri.parse('ws://127.0.0.1:12345/ws'),
+        logger: logger,
+      );
+
+      // Call dispose, which invokes disposeHandler (channel.close).
+      await service.dispose();
+      expect(fakeWebSocket.closed, isTrue);
+      expect(logger.traceText, contains('Error closing VM service channel'));
+    },
+  );
 }
 
 class FakeVMService extends Fake implements vm_service.VmService {
@@ -784,4 +884,57 @@ Future<io.WebSocket> httpFailingWebSocketConnector(
   throw const io.HttpException(
     'Connection closed before full header was received, uri = http://127.0.0.1:63745/TjwUKCgX5S8=/ws',
   );
+}
+
+class FakeWebSocket extends Fake implements io.WebSocket {
+  FakeWebSocket({Future<void>? done, Stream<dynamic>? stream})
+    : _done = done ?? Completer<void>().future,
+      _stream = stream ?? const Stream<dynamic>.empty();
+
+  final Future<void> _done;
+  final Stream<dynamic> _stream;
+  final List<dynamic> addedMessages = <dynamic>[];
+  bool closed = false;
+  bool throwOnAdd = false;
+  bool throwOnClose = false;
+
+  @override
+  StreamSubscription<dynamic> listen(
+    void Function(dynamic data)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
+    return _stream.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  }
+
+  @override
+  Stream<dynamic> handleError(Function onError, {bool Function(dynamic error)? test}) {
+    return _stream.handleError(onError, test: test);
+  }
+
+  @override
+  Future<void> get done => _done;
+
+  @override
+  void add(dynamic data) {
+    if (throwOnAdd) {
+      throw const io.SocketException(
+        'Error event raised in event handler : error condition has been reset',
+        port: 0,
+      );
+    }
+    addedMessages.add(data);
+  }
+
+  @override
+  Future<void> close([int? code, String? reason]) async {
+    closed = true;
+    if (throwOnClose) {
+      throw const io.SocketException(
+        'Error event raised in event handler : error condition has been reset',
+        port: 0,
+      );
+    }
+  }
 }
