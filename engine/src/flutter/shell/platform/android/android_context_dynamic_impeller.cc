@@ -149,6 +149,9 @@ AndroidContextDynamicImpeller::AndroidContextDynamicImpeller(
 AndroidContextDynamicImpeller::~AndroidContextDynamicImpeller() = default;
 
 AndroidRenderingAPI AndroidContextDynamicImpeller::RenderingApi() const {
+  // Block until the raster thread has chosen a backend. Without this, callers
+  // on the platform thread can observe kImpellerAutoselect during startup.
+  WaitForSetup();
   if (vk_context_) {
     return AndroidRenderingAPI::kImpellerVulkan;
   }
@@ -190,6 +193,12 @@ void AndroidContextDynamicImpeller::SetupImpellerContext() {
         std::make_unique<impeller::egl::Display>(),
         settings_.enable_gpu_tracing, io_task_runner_);
   }
+  // Publish the backend selection to any thread blocked in |WaitForSetup|.
+  setup_complete_.Signal();
+}
+
+void AndroidContextDynamicImpeller::WaitForSetup() const {
+  setup_complete_.Wait();
 }
 
 }  // namespace flutter
