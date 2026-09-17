@@ -7162,7 +7162,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   void update(SingleChildRenderObjectWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    _child = updateChild(_child, (widget as SingleChildRenderObjectWidget).child, null);
+    _child = updateChild(_child, newWidget.child, null);
   }
 
   @override
@@ -7332,12 +7332,11 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   @override
   void update(MultiChildRenderObjectWidget newWidget) {
     super.update(newWidget);
-    final multiChildRenderObjectWidget = widget as MultiChildRenderObjectWidget;
     assert(widget == newWidget);
-    assert(!debugChildrenHaveDuplicateKeys(widget, multiChildRenderObjectWidget.children));
+    assert(!debugChildrenHaveDuplicateKeys(widget, newWidget.children));
     _children = updateChildren(
       _children,
-      multiChildRenderObjectWidget.children,
+      newWidget.children,
       forgottenChildren: _forgottenChildren,
     );
     _forgottenChildren.clear();
