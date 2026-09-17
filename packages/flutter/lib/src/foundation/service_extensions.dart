@@ -97,10 +97,10 @@ enum FoundationServiceExtensions {
   ///
   /// With neither `overrides` nor `clearAll`, the call is a read.
   ///
-  /// Every call returns the same three keys: `overrides` (every override now
-  /// installed, keyed by stringified view id), `overriddenViewIds` (the same
-  /// ids as a sorted `List<int>`), and, when the call named a `viewId`,
-  /// `override` (the entry now in effect for that view, or null).
+  /// Every call returns `overrides` (every override now installed, keyed by
+  /// stringified view id) and `overriddenViewIds` (the same ids as a sorted
+  /// `List<int>`). A call that acted on a single view also returns `override`
+  /// (the entry now in effect for that view, or null).
   ///
   /// See also:
   ///

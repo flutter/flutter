@@ -346,13 +346,15 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// value would produce infinite or NaN sizes throughout the render tree.
   /// [textScaleFactor], if given, must be finite and non-negative.
   ///
-  /// [physicalSize], [padding], [viewPadding], [viewInsets], and
-  /// [systemGestureInsets] are subject to similar requirements, which cannot
-  /// be asserted here because reading a field off one of them is not a constant
+  /// [physicalSize] is subject to similar requirements, which cannot be
+  /// asserted here because reading a field off a [ui.Size] is not a constant
   /// expression and would make this constructor unusable in a `const`
-  /// expression.
+  /// expression ([padding], [viewPadding], [viewInsets], and
+  /// [systemGestureInsets] assert their own edges when constructed via
+  /// [DebugViewPadding]).
   /// [DebugViewMetricsOverride.fromJson] rejects invalid values, which covers
-  /// everything arriving from developer tooling.
+  /// everything arriving from developer tooling, and
+  /// [debugSetViewMetricsOverride] checks all geometry before installing it.
   const DebugViewMetricsOverride({
     this.devicePixelRatio,
     this.physicalSize,
@@ -1017,6 +1019,7 @@ final Map<int, DebugViewMetricsOverride> _unmodifiableViewMetricsOverrides =
 bool debugSetViewMetricsOverride(int viewId, DebugViewMetricsOverride? override) {
   var changed = false;
   assert(() {
+    assert(viewId >= 0, 'viewId must be non-negative, got $viewId.');
     assert(override?._debugAssertGeometryIsValid() ?? true);
     final DebugViewMetricsOverride? previous = _viewMetricsOverrides[viewId];
     final DebugViewMetricsOverride? next = override == null || override.isEmpty ? null : override;

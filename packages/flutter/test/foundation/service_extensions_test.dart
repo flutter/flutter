@@ -1619,6 +1619,38 @@ void main() {
       throwsA(isA<FormatException>()),
     );
 
+    // Unknown parameter keys are rejected.
+    await expectLater(
+      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
+        'view_id': '$viewId',
+      }),
+      throwsA(isA<FormatException>()),
+    );
+
+    // Invalid clearAll values are rejected.
+    await expectLater(
+      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
+        'clearAll': 'TRUE',
+      }),
+      throwsA(isA<FormatException>()),
+    );
+
+    // Providing overrides when clearAll is true is rejected.
+    await expectLater(
+      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
+        'clearAll': 'true',
+        'overrides': '{}',
+      }),
+      throwsA(isA<FormatException>()),
+    );
+
+    // Passing isolateId (as the VM service does) is accepted.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '$viewId', 'isolateId': 'isolates/123'},
+    );
+    expect(result['override'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
+
     // Setting overrides to 'null' removes the entry.
     result = await binding.testExtension(
       FoundationServiceExtensions.viewMetricsOverride.name,

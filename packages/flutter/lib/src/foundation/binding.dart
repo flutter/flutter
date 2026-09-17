@@ -702,15 +702,37 @@ abstract class BindingBase {
   Future<Map<String, Object?>> _debugHandleViewMetricsOverrideServiceExtension(
     Map<String, String> parameters,
   ) async {
-    if (parameters['clearAll'] == 'true') {
+    const allowedParameters = <String>{'viewId', 'overrides', 'clearAll', 'isolateId'};
+    final Iterable<String> unknownParameters = parameters.keys.where(
+      (String key) => !allowedParameters.contains(key),
+    );
+    if (unknownParameters.isNotEmpty) {
+      throw FormatException(
+        'Unknown parameter(s): ${unknownParameters.join(', ')}. '
+        'Supported parameters are: viewId, overrides, clearAll.',
+      );
+    }
+
+    final String? rawClearAll = parameters['clearAll'];
+    if (rawClearAll != null && rawClearAll != 'true' && rawClearAll != 'false') {
+      throw FormatException(
+        'The clearAll parameter must be "true" or "false", got "$rawClearAll".',
+      );
+    }
+
+    final String? rawViewId = parameters['viewId'];
+    final String? rawOverrides = parameters['overrides'];
+    if (rawClearAll == 'true') {
+      if (rawOverrides != null) {
+        throw const FormatException(
+          'The overrides parameter cannot be provided when clearAll is "true".',
+        );
+      }
       if (debugClearViewMetricsOverrides()) {
         _postViewMetricsOverrideStateChangedEvent();
       }
       return _viewMetricsOverrideResult();
     }
-
-    final String? rawViewId = parameters['viewId'];
-    final String? rawOverrides = parameters['overrides'];
     if (rawViewId == null) {
       if (rawOverrides != null) {
         throw const FormatException('The viewId parameter is required when overrides is provided.');

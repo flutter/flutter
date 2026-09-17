@@ -73,10 +73,9 @@ final Map<String, DebugViewMetricsOverride Function(DebugViewMetricsOverride)> _
       'deterministicCursor': (DebugViewMetricsOverride o) => o.copyWith(deterministicCursor: false),
     };
 
-/// Every metric [DebugViewMetricsOverride] supports, according to
-/// [DebugViewMetricsOverride.fromJson], which names them when it rejects one it
-/// does not know — the only place the full set is available at runtime.
-Set<String> _allOverridableMetrics() {
+/// Every metric [DebugViewMetricsOverride] supports as reported by
+/// [DebugViewMetricsOverride.fromJson] when it rejects an unknown metric.
+Set<String> _allOverridableMetricsFromJsonError() {
   try {
     DebugViewMetricsOverride.fromJson(const <String, Object?>{'not-a-metric': true});
   } on FormatException catch (error) {
@@ -137,11 +136,15 @@ class _UncheckedDebugViewPadding implements DebugViewPadding {
 void main() {
   group('DebugViewMetricsOverride', () {
     test('the per-metric table covers every metric', () {
+      final enumMetricNames = <String>{
+        for (final DebugViewMetric metric in DebugViewMetric.values) metric.name,
+      };
       expect(
         _perMetricChange.keys.toSet(),
-        _allOverridableMetrics(),
+        enumMetricNames,
         reason: 'this table is the enumeration the guards below run over',
       );
+      expect(_allOverridableMetricsFromJsonError(), enumMetricNames);
     });
 
     test('an empty override overrides nothing', () {
@@ -794,6 +797,14 @@ void main() {
       expect(() => debugAssertAllFoundationVarsUnset('leak'), throwsFlutterError);
       debugClearViewMetricsOverrides();
       expect(debugAssertAllFoundationVarsUnset('leak'), isTrue);
+    });
+
+    test('rejects negative viewId', () {
+      expect(
+        () => debugSetViewMetricsOverride(-1, const DebugViewMetricsOverride(boldText: true)),
+        throwsAssertionError,
+      );
+      expect(debugViewMetricsOverrides, isEmpty);
     });
   });
 }
