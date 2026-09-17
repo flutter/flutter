@@ -512,7 +512,7 @@ void main() {
     WidgetTester tester,
   ) async {
     var a = 1;
-    var b = 10;
+    const b = 10;
     var c = 100;
     var subscribeAll = false;
     var builds = 0;
