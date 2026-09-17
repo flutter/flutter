@@ -80,12 +80,12 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   /// Completers for reverse requests from Flutter that may need to be handled by the client.
   final _reverseRequestCompleters = <Object, Completer<Object?>>{};
 
-  /// Whether or not the user requested debugging be enabled.
+  /// Whether or not the user requested debugging be enabled and it's supported.
   ///
   /// For debugging to be enabled, the user must have chosen "Debug" (and not
   /// "Run") in the editor (which maps to the DAP `noDebug` field) _and_ must
-  /// not have requested to run in Profile or Release mode. Profile/Release
-  /// modes will always disable debugging.
+  /// not have requested to run in Profile, Release or WASM mode. These modes
+  /// will always disable debugging.
   ///
   /// This is always `true` for attach requests.
   ///
@@ -94,32 +94,30 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   /// Functionality provided via the daemon (hot reload/restart) will still be
   /// available.
   @override
-  bool get enableDebugger => super.enableDebugger && !profileMode && !releaseMode;
+  bool get enableDebugger => super.enableDebugger && !profileMode && !releaseMode && !wasmMode;
 
   /// Whether the launch configuration arguments specify `--profile`.
   ///
   /// Always `false` for attach requests.
   bool get profileMode {
-    final DartCommonLaunchAttachRequestArguments args = this.args;
-    if (args is FlutterLaunchRequestArguments) {
-      return args.toolArgs?.contains('--profile') ?? false;
-    }
-
-    // Otherwise (attach), always false.
-    return false;
+    return args.hasLaunchArg('--profile');
   }
 
   /// Whether the launch configuration arguments specify `--release`.
   ///
   /// Always `false` for attach requests.
   bool get releaseMode {
-    final DartCommonLaunchAttachRequestArguments args = this.args;
-    if (args is FlutterLaunchRequestArguments) {
-      return args.toolArgs?.contains('--release') ?? false;
-    }
+    return args.hasLaunchArg('--release');
+  }
 
-    // Otherwise (attach), always false.
-    return false;
+  /// Whether the launch configuration arguments specify `--wasm`.
+  ///
+  /// Debugging is not supported for WASM, even if `--release` was not
+  /// specified, see https://github.com/flutter/flutter/issues/190777.
+  ///
+  /// Always `false` for attach requests.
+  bool get wasmMode {
+    return args.hasLaunchArg('--wasm');
   }
 
   /// Called by [attachRequest] to request that we actually connect to the app to be debugged.
@@ -754,5 +752,31 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     if (data != null) {
       sendEvent(RawEventBody(data), eventType: 'flutter.serviceExtensionStateChanged');
     }
+  }
+}
+
+extension on DartCommonLaunchAttachRequestArguments {
+  /// Whether `this` is a set of launch arguments (not attach) and contains
+  /// [arg] in the `args` or `toolArgs`.
+  ///
+  /// For Flutter, `args` and `toolArgs` as essentially the same, whereas for
+  /// Dart, `toolArgs` are passed to `dart run` and `args` to the users
+  /// script.
+  bool hasLaunchArg(String arg) {
+    if (this case final FlutterLaunchRequestArguments args) {
+      return args.hasArg(arg);
+    }
+    return false;
+  }
+}
+
+extension on FlutterLaunchRequestArguments {
+  /// Whether these launch args contain [arg] in the `args` or `toolArgs`.
+  ///
+  /// For Flutter, `args` and `toolArgs` as essentially the same, whereas for
+  /// Dart, `toolArgs` are passed to `dart run` and `args` to the users
+  /// script.
+  bool hasArg(String arg) {
+    return (args?.contains(arg) ?? false) || (toolArgs?.contains(arg) ?? false);
   }
 }
