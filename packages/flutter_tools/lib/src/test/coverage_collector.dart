@@ -4,13 +4,18 @@
 
 import 'package:coverage/coverage.dart' as coverage;
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
+import '../artifacts.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../context/tool_context.dart';
+import '../globals.dart' as globals;
 import '../vmservice.dart';
 import 'test_device.dart';
 import 'test_time_recorder.dart';
@@ -20,13 +25,22 @@ import 'watcher.dart';
 class CoverageCollector extends TestWatcher {
   CoverageCollector({
     required this.packagesPath,
-    required this._toolContext,
     this.branchCoverage = false,
     this.libraryNames,
     this.resolver,
     this.testTimeRecorder,
+    ToolContext? toolContext,
     this.verbose = true,
-  });
+  }) : _toolContext =
+           toolContext ??
+           _FallbackToolContext(
+             artifacts: globals.artifacts,
+             config: globals.config,
+             fileSystem: globals.fs,
+             logger: globals.logger,
+             platform: globals.platform,
+             processManager: globals.processManager,
+           );
 
   final ToolContext _toolContext;
 
@@ -324,4 +338,49 @@ Future<Map<String, dynamic>> collect(
     branchCoverage: branchCoverage,
     coverableLineCache: coverableLineCache,
   );
+}
+
+class _FallbackToolContext implements ToolContext {
+  _FallbackToolContext({
+    this._artifacts,
+    this._config,
+    this._fileSystem,
+    this._logger,
+    this._platform,
+    this._processManager,
+  });
+
+  final Artifacts? _artifacts;
+  final Config? _config;
+  final FileSystem? _fileSystem;
+  final Logger? _logger;
+  final Platform? _platform;
+  final ProcessManager? _processManager;
+
+  @override
+  Artifacts get artifacts => _artifacts ?? globals.artifacts!;
+
+  @override
+  Config get config => _config ?? globals.config;
+
+  @override
+  FileSystem get fs => _fileSystem ?? globals.fs;
+
+  @override
+  Logger get logger => _logger ?? globals.logger;
+
+  @override
+  OperatingSystemUtils get os => globals.os;
+
+  @override
+  Platform get platform => _platform ?? globals.platform;
+
+  @override
+  ProcessManager get processManager => _processManager ?? globals.processManager;
+
+  @override
+  ProcessUtils get processUtils => globals.processUtils;
+
+  @override
+  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

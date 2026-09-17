@@ -774,6 +774,14 @@ void main() {
       expect(fakeVmServiceHost.hasRemainingExpectations, false);
     },
   );
+
+  testUsingContext(
+    'Coverage collector can be constructed without toolContext and falls back to globals',
+    () {
+      final collector = CoverageCollector(packagesPath: 'packages_path');
+      expect(collector, isNotNull);
+    },
+  );
 }
 
 File writeFooBarPackagesJson(Directory tempDir) {

@@ -12,11 +12,14 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:vm_service/vm_service.dart';
 
+import '../artifacts.dart';
 import '../base/async_guard.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
@@ -26,6 +29,7 @@ import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
 import '../vmservice.dart';
@@ -58,28 +62,40 @@ FlutterPlatform installHook({
   required BuildInfo buildInfo,
   required DebuggingOptions debuggingOptions,
   required String flutterTesterBinPath,
-  required ToolContext toolContext,
   bool enableVmService = false,
+  FileSystem? fileSystem,
   FlutterProject? flutterProject,
   String? icudtlPath,
   Device? integrationTestDevice,
   String? integrationTestUserIdentifier,
+  Logger? logger,
   bool machine = false,
   TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   PlatformPluginRegistration? platformPluginRegistration,
   Map<String, String>? precompiledDillFiles,
   String? precompiledDillPath,
+  ProcessManager? processManager,
   Uri? projectRootDirectory,
   InternetAddressType serverType = InternetAddressType.IPv4,
   String? testAssetDirectory,
   TestTimeRecorder? testTimeRecorder,
   TestWrapper testWrapper = const TestWrapper(),
+  ToolContext? toolContext,
   bool updateGoldens = false,
   TestWatcher? watcher,
 }) {
   assert(
     enableVmService ||
         (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null),
+  );
+
+  toolContext ??= _FallbackToolContext(
+    artifacts: globals.artifacts,
+    config: globals.config,
+    fileSystem: fileSystem ?? globals.fs,
+    logger: logger ?? globals.logger,
+    platform: globals.platform,
+    processManager: processManager ?? globals.processManager,
   );
 
   // registerPlatformPlugin can be injected for testing since it's not very mock-friendly.
@@ -925,4 +941,52 @@ Future<void> pipeHarnessToRemote({
           logger.printTrace('test $id: Test harness is no longer needed by test process');
         }),
   ]);
+}
+
+class _FallbackToolContext implements ToolContext {
+  _FallbackToolContext({
+    this._artifacts,
+    this._config,
+    this._fileSystem,
+    this._logger,
+    this._platform,
+    this._processManager,
+  });
+
+  final Artifacts? _artifacts;
+  final Config? _config;
+  final FileSystem? _fileSystem;
+  final Logger? _logger;
+  final Platform? _platform;
+  final ProcessManager? _processManager;
+
+  @override
+  Artifacts get artifacts => _artifacts ?? globals.artifacts!;
+
+  @override
+  Config get config => _config ?? globals.config;
+
+  @override
+  FileSystem get fs => _fileSystem ?? globals.fs;
+
+  @override
+  Logger get logger => _logger ?? globals.logger;
+
+  @override
+  OperatingSystemUtils get os => globals.os;
+
+  @override
+  Platform get platform => _platform ?? globals.platform;
+
+  @override
+  ProcessManager get processManager => _processManager ?? globals.processManager;
+
+  @override
+  ProcessUtils get processUtils => globals.processUtils;
+
+  @override
+  ShutdownHooks get shutdownHooks => globals.shutdownHooks;
+
+  @override
+  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
