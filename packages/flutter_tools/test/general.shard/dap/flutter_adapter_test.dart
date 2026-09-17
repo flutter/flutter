@@ -819,68 +819,29 @@ void main() {
         final useToolArgs = argField == 'toolArgs';
         final bool useArgs = !useToolArgs;
 
-        test('is not passed if $argField contains --profile', () async {
-          final adapter = FakeFlutterDebugAdapter(
-            fileSystem: MemoryFileSystem.test(style: fsStyle),
-            platform: platform,
-          );
-          final responseCompleter = Completer<void>();
+        // Test each flag we expect to disable debugging.
+        for (final flag in <String>['--profile', '--release', '--wasm']) {
+          test('is not passed if $argField contains $flag', () async {
+            final adapter = FakeFlutterDebugAdapter(
+              fileSystem: MemoryFileSystem.test(style: fsStyle),
+              platform: platform,
+            );
+            final responseCompleter = Completer<void>();
 
-          final args = FlutterLaunchRequestArguments(
-            cwd: '.',
-            program: 'foo.dart',
-            toolArgs: useToolArgs ? <String>['--profile'] : null,
-            args: useArgs ? <String>['--profile'] : null,
-          );
+            final args = FlutterLaunchRequestArguments(
+              cwd: '.',
+              program: 'foo.dart',
+              toolArgs: useToolArgs ? <String>[flag] : null,
+              args: useArgs ? <String>[flag] : null,
+            );
 
-          await adapter.configurationDoneRequest(FakeRequest(), null, () {});
-          await adapter.launchRequest(FakeRequest(), args, responseCompleter.complete);
-          await responseCompleter.future;
+            await adapter.configurationDoneRequest(FakeRequest(), null, () {});
+            await adapter.launchRequest(FakeRequest(), args, responseCompleter.complete);
+            await responseCompleter.future;
 
-          expect(adapter.processArgs, isNot(contains('--start-paused')));
-        });
-
-        test('is not passed if $argField contains --release', () async {
-          final adapter = FakeFlutterDebugAdapter(
-            fileSystem: MemoryFileSystem.test(style: fsStyle),
-            platform: platform,
-          );
-          final responseCompleter = Completer<void>();
-
-          final args = FlutterLaunchRequestArguments(
-            cwd: '.',
-            program: 'foo.dart',
-            toolArgs: useToolArgs ? <String>['--release'] : null,
-            args: useArgs ? <String>['--release'] : null,
-          );
-
-          await adapter.configurationDoneRequest(FakeRequest(), null, () {});
-          await adapter.launchRequest(FakeRequest(), args, responseCompleter.complete);
-          await responseCompleter.future;
-
-          expect(adapter.processArgs, isNot(contains('--start-paused')));
-        });
-
-        test('is not passed if $argField contains --wasm', () async {
-          final adapter = FakeFlutterDebugAdapter(
-            fileSystem: MemoryFileSystem.test(style: fsStyle),
-            platform: platform,
-          );
-          final responseCompleter = Completer<void>();
-
-          final args = FlutterLaunchRequestArguments(
-            cwd: '.',
-            program: 'foo.dart',
-            toolArgs: useToolArgs ? <String>['--wasm'] : null,
-            args: useArgs ? <String>['--wasm'] : null,
-          );
-
-          await adapter.configurationDoneRequest(FakeRequest(), null, () {});
-          await adapter.launchRequest(FakeRequest(), args, responseCompleter.complete);
-          await responseCompleter.future;
-
-          expect(adapter.processArgs, isNot(contains('--start-paused')));
-        });
+            expect(adapter.processArgs, isNot(contains('--start-paused')));
+          });
+        }
       }
     });
 
