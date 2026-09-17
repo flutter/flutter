@@ -298,11 +298,15 @@ static void fl_view_renderer_subsurface_size_allocate(
   update_parent_surface(self);
   update_subsurface_position(self);
 
+  // Hold frame_mutex while resizing, as the raster thread uses the sizes this
+  // updates when it presents a frame.
+  g_mutex_lock(&self->frame_mutex);
   if (self->egl != nullptr) {
     gint scale_factor = gtk_widget_get_scale_factor(widget);
     fl_subsurface_egl_resize(self->egl, allocation->width * scale_factor,
                              allocation->height * scale_factor);
   }
+  g_mutex_unlock(&self->frame_mutex);
 }
 
 // Runs after the size_allocate default handler and, crucially, after FlView has
