@@ -13,14 +13,18 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
+import 'package:flutter_tools/src/isolated/native_assets/test/native_assets.dart';
+import 'package:package_config/package_config_types.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import 'fake_native_assets_build_runner.dart';
 
 void main() {
@@ -512,6 +516,216 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       expect(staleFile, isNot(exists));
     },
   );
+
+  group('testCompilerBuildNativeAssets', () {
+    testUsingContext(
+      'falls back to manifest appName when package root does not match projectUri '
+      '(regression test for https://github.com/flutter/flutter/issues/192933)',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+      () async {
+        final Directory projectDir = fileSystem.directory('/my_app')..createSync(recursive: true);
+        fileSystem.currentDirectory = projectDir;
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_app
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+''');
+
+        // Write package_config where the package root does NOT match projectDir.uri.
+        final File packageConfigFile = writePackageConfigFiles(
+          directory: projectDir,
+          mainLibName: 'my_app',
+          mainLibRootUri: '../different_dir',
+        );
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          packageConfigFile,
+          logger: logger,
+        );
+
+        final buildInfo = BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          packageConfigPath: packageConfigFile.path,
+          packageConfig: packageConfig,
+        );
+
+        final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
+        expect(result, isNotNull);
+        if (result != null) {
+          expect(fileSystem.file(result).existsSync(), isTrue);
+        }
+      },
+    );
+
+    testUsingContext(
+      'matches package root via canonicalized path when URIs differ',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+      () async {
+        final Directory projectDir = fileSystem.directory('/real_dir')..createSync(recursive: true);
+        final Link symlink = fileSystem.link('/symlink_dir')..createSync('/real_dir');
+        fileSystem.currentDirectory = fileSystem.directory(symlink.path);
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_app
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+''');
+
+        final File packageConfigFile = writePackageConfigFiles(
+          directory: projectDir,
+          mainLibName: 'my_app',
+        );
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          packageConfigFile,
+          logger: logger,
+        );
+
+        final buildInfo = BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          packageConfigPath: packageConfigFile.path,
+          packageConfig: packageConfig,
+        );
+
+        final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
+        expect(result, isNotNull);
+        if (result != null) {
+          expect(fileSystem.file(result).existsSync(), isTrue);
+        }
+      },
+    );
+
+    testUsingContext(
+      'falls back to first package in package config when projectUri and manifest do not match',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+      () async {
+        final Directory projectDir = fileSystem.directory('/unmatched_app')
+          ..createSync(recursive: true);
+        fileSystem.currentDirectory = projectDir;
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: unknown_app
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+''');
+
+        final File packageConfigFile = writePackageConfigFiles(
+          directory: projectDir,
+          mainLibName: 'fallback_pkg',
+          mainLibRootUri: '../fallback_pkg',
+        );
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          packageConfigFile,
+          logger: logger,
+        );
+
+        final buildInfo = BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          packageConfigPath: packageConfigFile.path,
+          packageConfig: packageConfig,
+        );
+
+        final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
+        expect(result, isNotNull);
+        if (result != null) {
+          expect(fileSystem.file(result).existsSync(), isTrue);
+        }
+      },
+    );
+
+    testUsingContext(
+      'returns null gracefully when no package can be resolved',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+      () async {
+        final Directory projectDir = fileSystem.directory('/empty_app')
+          ..createSync(recursive: true);
+        fileSystem.currentDirectory = projectDir;
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+''');
+
+        final File packageConfigFile = projectDir.childFile('.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"configVersion": 2, "packages": []}');
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          packageConfigFile,
+          logger: logger,
+        );
+
+        final buildInfo = BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          packageConfigPath: packageConfigFile.path,
+          packageConfig: packageConfig,
+        );
+
+        final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
+        expect(result, isNull);
+      },
+    );
+
+    testUsingContext(
+      'TestCompilerNativeAssetsBuilderImpl invokes testCompilerBuildNativeAssets with injected buildRunner',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+      () async {
+        final Directory projectDir = fileSystem.directory('/my_app')..createSync(recursive: true);
+        fileSystem.currentDirectory = projectDir;
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_app
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+''');
+
+        final File packageConfigFile = writePackageConfigFiles(
+          directory: projectDir,
+          mainLibName: 'my_app',
+        );
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          packageConfigFile,
+          logger: logger,
+        );
+
+        final buildInfo = BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          packageConfigPath: packageConfigFile.path,
+          packageConfig: packageConfig,
+        );
+
+        final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
+        final builder = TestCompilerNativeAssetsBuilderImpl(buildRunner: fakeRunner);
+        final Uri? result = await builder.build(buildInfo);
+        expect(result, isNotNull);
+        if (result != null) {
+          expect(fileSystem.file(result).existsSync(), isTrue);
+        }
+      },
+    );
+  });
 }
 
 class _SetCCompilerConfigTarget extends FakeFlutterNativeAssetsBuildRunner {
