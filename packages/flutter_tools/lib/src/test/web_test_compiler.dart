@@ -26,30 +26,21 @@ import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import 'test_config.dart';
 
-class _DefaultArtifacts implements Artifacts {
-  const _DefaultArtifacts();
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-const _kDefaultArtifacts = _DefaultArtifacts();
-
 /// A web compiler for the test runner.
 class WebTestCompiler {
   WebTestCompiler({
-    ToolContext? toolContext,
-    Artifacts artifacts = _kDefaultArtifacts,
+    Artifacts? artifacts,
     Config? config,
     FileSystem? fileSystem,
     Logger? logger,
     Platform? platform,
     ProcessManager? processManager,
     ShutdownHooks? shutdownHooks,
+    ToolContext? toolContext,
   }) : _toolContext =
            toolContext ??
            _FallbackToolContext(
-             artifacts: artifacts is _DefaultArtifacts ? null : artifacts,
+             artifacts: artifacts,
              config: config,
              fileSystem: fileSystem,
              logger: logger,
@@ -255,6 +246,9 @@ class WebTestCompiler {
   }
 }
 
+// TODO(bkonyi): This will be removed in a follow up PR once Google3 callers
+// provide ToolContext directly. This fallback context delegates to globals.* to
+// maintain backwards compatibility with existing Google3 test runners.
 class _FallbackToolContext implements ToolContext {
   _FallbackToolContext({
     this._artifacts,

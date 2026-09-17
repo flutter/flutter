@@ -115,14 +115,13 @@ class TestCompiler {
   TestCompiler(
     BuildInfo buildInfo,
     this.flutterProject, {
-    ToolContext? toolContext,
     String? precompiledDillPath,
     this.residentCompilerFactory = const ResidentCompilerFactory(),
     this.testTimeRecorder,
-  }) : _toolContext = toolContext ?? _FallbackToolContext(),
+    ToolContext? toolContext,
+  }) : _toolContext = toolContext ?? const _FallbackToolContext(),
        testFilePath =
-           precompiledDillPath ??
-           _computeTestFilePath(toolContext ?? _FallbackToolContext(), flutterProject, buildInfo),
+           precompiledDillPath ?? _computeTestFilePath(toolContext, flutterProject, buildInfo),
        shouldCopyDillFile = precompiledDillPath == null {
     this.buildInfo = buildInfo.copyWith(initializeFromDill: testFilePath);
     final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
@@ -147,11 +146,12 @@ class TestCompiler {
   }
 
   static String _computeTestFilePath(
-    ToolContext toolContext,
+    ToolContext? toolContext,
     FlutterProject? flutterProject,
     BuildInfo buildInfo,
   ) {
-    final ToolContext(:Config config, :FileSystem fs) = toolContext;
+    final ToolContext context = toolContext ?? const _FallbackToolContext();
+    final ToolContext(:Config config, :FileSystem fs) = context;
     return fs.path.join(
       flutterProject!.directory.path,
       getBuildDirectory(),
@@ -343,8 +343,11 @@ class TestCompiler {
   }
 }
 
+// TODO(bkonyi): This will be removed in a follow up PR once Google3 callers
+// provide ToolContext directly. This fallback context delegates to globals.* to
+// maintain backwards compatibility with existing Google3 test runners.
 class _FallbackToolContext implements ToolContext {
-  _FallbackToolContext();
+  const _FallbackToolContext();
 
   @override
   Artifacts get artifacts => globals.artifacts!;
