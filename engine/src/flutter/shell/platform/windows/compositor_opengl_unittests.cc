@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <memory>
+#include <type_traits>
 #include <vector>
 
 #include "flutter/impeller/renderer/backend/gles/gles.h"
@@ -75,6 +76,12 @@ const unsigned char* MockGetStringiWithMSAA(GLenum name, int index) {
 }
 
 void DoNothing() {}
+
+template <typename T, typename U>
+struct CheckSameSignature : std::false_type {};
+
+template <typename Ret, typename... Args>
+struct CheckSameSignature<Ret(Args...), Ret(Args...)> : std::true_type {};
 
 const impeller::ProcTableGLES::Resolver kMockResolver = [](const char* name) {
   std::string function_name{name};
@@ -152,6 +159,9 @@ const unsigned char* MockGetStringGLES2(GLenum name) {
   }
 }
 
+static_assert(CheckSameSignature<decltype(MockGetStringGLES2),  //
+                                 decltype(glGetString)>::value);
+
 const unsigned char* MockGetStringGLES3(GLenum name) {
   switch (name) {
     case GL_VERSION:
@@ -162,6 +172,9 @@ const unsigned char* MockGetStringGLES3(GLenum name) {
       return reinterpret_cast<const unsigned char*>("");
   }
 }
+
+static_assert(CheckSameSignature<decltype(MockGetStringGLES3),  //
+                                 decltype(glGetString)>::value);
 
 std::vector<GLint>& TexImage2DInternalFormats() {
   static std::vector<GLint> internal_formats;
@@ -179,6 +192,9 @@ void RecordTexImage2D(GLenum,
                       const void*) {
   TexImage2DInternalFormats().push_back(internalformat);
 }
+
+static_assert(CheckSameSignature<decltype(RecordTexImage2D),  //
+                                 decltype(glTexImage2D)>::value);
 
 const impeller::ProcTableGLES::Resolver kRecordingResolverGLES2 =
     [](const char* name) -> void* {
@@ -208,6 +224,11 @@ class CompositorOpenGLTest : public WindowsTest {
   virtual ~CompositorOpenGLTest() = default;
 
  protected:
+  void TearDown() override {
+    TexImage2DInternalFormats().clear();
+    WindowsTest::TearDown();
+  }
+
   FlutterWindowsEngine* engine() { return engine_.get(); }
   FlutterWindowsView* view() { return view_.get(); }
   egl::MockManager* egl_manager() { return egl_manager_; }
@@ -440,7 +461,6 @@ TEST_F(CompositorOpenGLTest, CreateBackingStoreImpellerOffscreenMSAA) {
 // texture gets the unsized format while the engine still receives the sized one
 TEST_F(CompositorOpenGLTest, CreateBackingStoreGLES2Unsized) {
   UseHeadlessEngine();
-  TexImage2DInternalFormats().clear();
 
   auto compositor = CompositorOpenGL{engine(), kRecordingResolverGLES2,
                                      /*enable_impeller=*/false};
@@ -457,7 +477,6 @@ TEST_F(CompositorOpenGLTest, CreateBackingStoreGLES2Unsized) {
 
 TEST_F(CompositorOpenGLTest, CreateBackingStoreImpellerGLES2Unsized) {
   UseHeadlessEngine();
-  TexImage2DInternalFormats().clear();
 
   auto compositor = CompositorOpenGL{engine(), kRecordingResolverGLES2,
                                      /*enable_impeller=*/true};
@@ -472,7 +491,6 @@ TEST_F(CompositorOpenGLTest, CreateBackingStoreImpellerGLES2Unsized) {
 
 TEST_F(CompositorOpenGLTest, CreateBackingStoreGLES3Sized) {
   UseHeadlessEngine();
-  TexImage2DInternalFormats().clear();
 
   auto compositor = CompositorOpenGL{engine(), kRecordingResolverGLES3,
                                      /*enable_impeller=*/false};
