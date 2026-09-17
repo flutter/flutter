@@ -74,7 +74,7 @@ String generateArbBasedLocalizationSubclasses({
   required String supportedLanguagesConstant,
   required String supportedLanguagesDocMacro,
   String? deprecatedReplacementPackage,
-  List<String>? generatedClassNames,
+  Set<String>? generatedClassNames,
 }) {
   assert(generatedClassPrefix.isNotEmpty);
   assert(baseClass.isNotEmpty);
@@ -682,7 +682,7 @@ void main(List<String> rawArgs) {
           supportedLanguagesDocMacro: widgetsSupportedLanguagesDocMacro,
         )
       : null;
-  final materialGeneratedClasses = <String>[];
+  final materialGeneratedClasses = <String>{};
   final String? materialLocalizations = options.writeToFile || !options.cupertinoOnly
       ? generateArbBasedLocalizationSubclasses(
           localeToResources: materialLocaleToResources,
@@ -701,7 +701,7 @@ void main(List<String> rawArgs) {
           generatedClassNames: materialGeneratedClasses,
         )
       : null;
-  final cupertinoGeneratedClasses = <String>[];
+  final cupertinoGeneratedClasses = <String>{};
   final String? cupertinoLocalizations = options.writeToFile || !options.materialOnly
       ? generateArbBasedLocalizationSubclasses(
           localeToResources: cupertinoLocaleToResources,
@@ -776,7 +776,7 @@ String generateLocalizationFixData({
   required String baseClass,
   required String supportedLanguagesConstant,
   required String factoryName,
-  required List<String> generatedClassNames,
+  required Set<String> generatedClassNames,
   required String replacementPackageUri,
 }) {
   final buffer = StringBuffer('''
