@@ -32,6 +32,11 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.47 Changes
 
+### [3.47.5](https://github.com/flutter/flutter/releases/tag/3.47.5)
+- [flutter/190307](https://github.com/flutter/flutter/issues/190307) When debugging on physical iOS 27 devices, app occasionally crashes.
+- [flutter/191242](https://github.com/flutter/flutter/issues/191242) When re-expanding a preview group in the Widget Previewer, previews crash due to a type error in scroll restoration.
+- [flutter/189507](https://github.com/flutter/flutter/pull/189507) When Dart Development Service encounters a startup failure, flutter_tools crashes with an unhandled FormatException.
+
 ### [3.47.4](https://github.com/flutter/flutter/releases/tag/3.47.4)
 - [flutter/191899](https://github.com/flutter/flutter/issues/191899) When Windows Smart App Control or security policies block binary execution on Windows, gracefully handle the error with an actionable message instead of crashing.
 - [flutter/192120](https://github.com/flutter/flutter/pull/192120) Fixes missing preview reload timing analytics in LspPreviewDetector across all platforms.
