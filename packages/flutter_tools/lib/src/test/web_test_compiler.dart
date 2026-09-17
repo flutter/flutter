@@ -11,37 +11,54 @@ import '../base/common.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../compile.dart';
+import '../context/tool_context.dart';
 import '../dart/language_version.dart';
+import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import 'test_config.dart';
 
+class _DefaultArtifacts implements Artifacts {
+  const _DefaultArtifacts();
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+const _kDefaultArtifacts = _DefaultArtifacts();
+
 /// A web compiler for the test runner.
 class WebTestCompiler {
   WebTestCompiler({
-    required this._fileSystem,
-    required this._logger,
-    required this._artifacts,
-    required this._platform,
-    required this._processManager,
-    required this._config,
-    required this._shutdownHooks,
-  });
+    ToolContext? toolContext,
+    Artifacts artifacts = _kDefaultArtifacts,
+    Config? config,
+    FileSystem? fileSystem,
+    Logger? logger,
+    Platform? platform,
+    ProcessManager? processManager,
+    ShutdownHooks? shutdownHooks,
+  }) : _toolContext =
+           toolContext ??
+           _FallbackToolContext(
+             artifacts: artifacts is _DefaultArtifacts ? null : artifacts,
+             config: config,
+             fileSystem: fileSystem,
+             logger: logger,
+             platform: platform,
+             processManager: processManager,
+             shutdownHooks: shutdownHooks,
+           );
 
-  final Logger _logger;
-  final FileSystem _fileSystem;
-  final Artifacts _artifacts;
-  final Platform _platform;
-  final ProcessManager _processManager;
-  final ShutdownHooks _shutdownHooks;
-  final Config _config;
+  final ToolContext _toolContext;
 
   Future<File> _generateTestEntrypoint({
     required List<String> testFiles,
@@ -49,17 +66,18 @@ class WebTestCompiler {
     required Directory outputDirectory,
     required LanguageVersion languageVersion,
   }) async {
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final List<WebTestInfo> testInfos = testFiles.map((String testFilePath) {
-      final List<String> relativeTestSegments = _fileSystem.path.split(
-        _fileSystem.path.relative(testFilePath, from: projectDirectory.childDirectory('test').path),
+      final List<String> relativeTestSegments = fs.path.split(
+        fs.path.relative(testFilePath, from: projectDirectory.childDirectory('test').path),
       );
 
-      final File? testConfigFile = findTestConfigFile(_fileSystem.file(testFilePath), _logger);
+      final File? testConfigFile = findTestConfigFile(fs.file(testFilePath), logger);
       String? testConfigPath;
       if (testConfigFile != null) {
-        testConfigPath = _fileSystem.path
+        testConfigPath = fs.path
             .split(
-              _fileSystem.path.relative(
+              fs.path.relative(
                 testConfigFile.path,
                 from: projectDirectory.childDirectory('test').path,
               ),
@@ -72,7 +90,7 @@ class WebTestCompiler {
         goldensUri: Uri.file(testFilePath),
       );
     }).toList();
-    return _fileSystem.file(_fileSystem.path.join(outputDirectory.path, 'main.dart'))
+    return fs.file(fs.path.join(outputDirectory.path, 'main.dart'))
       ..createSync(recursive: true)
       ..writeAsStringSync(
         generateTestEntrypoint(testInfos: testInfos, languageVersion: languageVersion),
@@ -111,10 +129,18 @@ class WebTestCompiler {
     required BuildInfo buildInfo,
     required WebRendererMode webRenderer,
   }) async {
-    final LanguageVersion languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
+    final ToolContext(
+      :Artifacts artifacts,
+      :Config config,
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+      :ShutdownHooks shutdownHooks,
+    ) = _toolContext;
+    final LanguageVersion languageVersion = currentLanguageVersion(fs, Cache.flutterRoot!);
 
-    final Directory outputDirectory = _fileSystem.directory(testOutputDir)
-      ..createSync(recursive: true);
+    final Directory outputDirectory = fs.directory(testOutputDir)..createSync(recursive: true);
     final File testFile = await _generateTestEntrypoint(
       testFiles: testFiles,
       projectDirectory: projectDirectory,
@@ -127,8 +153,8 @@ class WebTestCompiler {
       dartDefines: buildInfo.dartDefines,
       targetModel: TargetModel.dartdevc,
       extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-      fileSystem: _fileSystem,
-      config: _config,
+      fileSystem: fs,
+      config: config,
     );
     final ResidentCompiler residentCompiler = residentCompilerFactory.create(
       buildInfo: buildInfo.copyWith(
@@ -136,13 +162,13 @@ class WebTestCompiler {
         initializeFromDill: cachedKernelPath,
         dartDefines: webRenderer.updateDartDefines(buildInfo.dartDefines),
       ),
-      artifacts: _artifacts,
-      processManager: _processManager,
-      logger: _logger,
-      platform: _platform,
-      fileSystem: _fileSystem,
-      shutdownHooks: _shutdownHooks,
-      config: _config,
+      artifacts: artifacts,
+      processManager: processManager,
+      logger: logger,
+      platform: platform,
+      fileSystem: fs,
+      shutdownHooks: shutdownHooks,
+      config: config,
       targetPlatform: .web_javascript,
     );
 
@@ -151,15 +177,15 @@ class WebTestCompiler {
       <Uri>[],
       outputPath: outputDirectory.childFile('out').path,
       packageConfig: buildInfo.packageConfig,
-      fs: _fileSystem,
+      fs: fs,
       projectRootPath: projectDirectory.absolute.path,
     );
     if (output == null || output.errorCount > 0) {
       throwToolExit('Failed to compile');
     }
     // Cache the output kernel file to speed up subsequent compiles.
-    _fileSystem.file(cachedKernelPath).parent.createSync(recursive: true);
-    _fileSystem.file(output.outputFilename).copySync(cachedKernelPath);
+    fs.file(cachedKernelPath).parent.createSync(recursive: true);
+    fs.file(output.outputFilename).copySync(cachedKernelPath);
 
     final File codeFile = outputDirectory.childFile('${output.outputFilename}.sources');
     final File manifestFile = outputDirectory.childFile('${output.outputFilename}.json');
@@ -176,30 +202,29 @@ class WebTestCompiler {
     required BuildInfo buildInfo,
     required WebRendererMode webRenderer,
   }) async {
-    final Directory outputDirectory = _fileSystem.directory(testOutputDir)
-      ..createSync(recursive: true);
+    final ToolContext(
+      :Artifacts artifacts,
+      :FileSystem fs,
+      :Logger logger,
+      :ProcessManager processManager,
+    ) = _toolContext;
+    final Directory outputDirectory = fs.directory(testOutputDir)..createSync(recursive: true);
     final File testFile = await _generateTestEntrypoint(
       testFiles: testFiles,
       projectDirectory: projectDirectory,
       outputDirectory: outputDirectory,
-      languageVersion: currentLanguageVersion(_fileSystem, Cache.flutterRoot!),
+      languageVersion: currentLanguageVersion(fs, Cache.flutterRoot!),
     );
 
-    final String platformBinariesPath = _artifacts
+    final String platformBinariesPath = artifacts
         .getHostArtifact(HostArtifact.webPlatformKernelFolder)
         .path;
-    final String platformFilePath = _fileSystem.path.join(
-      platformBinariesPath,
-      'dart2wasm_platform.dill',
-    );
+    final String platformFilePath = fs.path.join(platformBinariesPath, 'dart2wasm_platform.dill');
     final List<String> dartDefines = webRenderer.updateDartDefines(buildInfo.dartDefines);
     final File outputWasmFile = outputDirectory.childFile('main.dart.wasm');
 
     final compilationArgs = <String>[
-      _artifacts.getArtifactPath(
-        Artifact.engineDartBinary,
-        platform: TargetPlatform.web_javascript,
-      ),
+      artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
       'compile',
       'wasm',
       '--packages=${buildInfo.packageConfigPath}',
@@ -222,10 +247,60 @@ class WebTestCompiler {
       testFile.path, // dartfile
     ];
 
-    final processUtils = ProcessUtils(logger: _logger, processManager: _processManager);
+    final processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
     await processUtils.stream(compilationArgs);
 
     return WebMemoryFS();
   }
+}
+
+class _FallbackToolContext implements ToolContext {
+  _FallbackToolContext({
+    this._artifacts,
+    this._config,
+    this._fileSystem,
+    this._logger,
+    this._platform,
+    this._processManager,
+    this._shutdownHooks,
+  });
+
+  final Artifacts? _artifacts;
+  final Config? _config;
+  final FileSystem? _fileSystem;
+  final Logger? _logger;
+  final Platform? _platform;
+  final ProcessManager? _processManager;
+  final ShutdownHooks? _shutdownHooks;
+
+  @override
+  Artifacts get artifacts => _artifacts ?? globals.artifacts!;
+
+  @override
+  Config get config => _config ?? globals.config;
+
+  @override
+  FileSystem get fs => _fileSystem ?? globals.fs;
+
+  @override
+  Logger get logger => _logger ?? globals.logger;
+
+  @override
+  OperatingSystemUtils get os => globals.os;
+
+  @override
+  Platform get platform => _platform ?? globals.platform;
+
+  @override
+  ProcessManager get processManager => _processManager ?? globals.processManager;
+
+  @override
+  ProcessUtils get processUtils => globals.processUtils;
+
+  @override
+  ShutdownHooks get shutdownHooks => _shutdownHooks ?? globals.shutdownHooks;
+
+  @override
+  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
