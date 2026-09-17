@@ -37,6 +37,7 @@ import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
+import 'context/tool_context.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -347,12 +348,14 @@ class FlutterDevice {
       vmService!,
       fsName,
       rootDirectory,
-      osUtils: osUtils,
-      fileSystem: fileSystem,
-      logger: logger,
-      processManager: processManager,
-      artifacts: artifacts,
       buildMode: buildInfo.mode,
+      toolContext: _FallbackToolContext(
+        artifacts: artifacts,
+        fs: fileSystem,
+        logger: logger,
+        os: osUtils,
+        processManager: processManager,
+      ),
     );
     return devFS!.create();
   }
@@ -2204,4 +2207,38 @@ class DevToolsServerAddress {
   Uri? get uri {
     return Uri(scheme: 'http', host: host, port: port);
   }
+}
+
+// TODO(bkonyi): This will be removed in a follow up PR once ResidentRunner is
+// migrated to accept ToolContext directly.
+class _FallbackToolContext implements ToolContext {
+  _FallbackToolContext({
+    required this.artifacts,
+    required this.fs,
+    required this.logger,
+    required this.os,
+    required this.processManager,
+    Config? config,
+  }) : config = config ?? Config.test();
+
+  @override
+  final Artifacts artifacts;
+
+  @override
+  final Config config;
+
+  @override
+  final FileSystem fs;
+
+  @override
+  final Logger logger;
+
+  @override
+  final OperatingSystemUtils os;
+
+  @override
+  final ProcessManager processManager;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
