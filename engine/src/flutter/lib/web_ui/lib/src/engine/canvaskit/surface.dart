@@ -399,6 +399,7 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
   @override
   void _maybeAttachCanvasToDom() {
     final htmlCanvas = canvas as DomHTMLCanvasElement;
+    htmlCanvas.setAttribute('layoutsubtree', '');
     htmlCanvas.setAttribute('content', 'drawable');
     htmlCanvas.setAttribute('tabindex', '0');
     hostElement.appendChild(htmlCanvas);
@@ -448,10 +449,11 @@ class PlatformViewTextureCache {
   final Map<int, WebGLTexture> _textures = <int, WebGLTexture>{};
 
   WebGLTexture getOrCreateTexture(int viewId) {
-    if (_textures.containsKey(viewId)) {
-      return _textures[viewId]!;
-    }
     final WebGLContext gl = surface.glContextObject;
+    final WebGLTexture? existing = _textures[viewId];
+    if (existing != null && gl.isTexture(existing)) {
+      return existing;
+    }
     final WebGLTexture? texture = gl.createTexture();
     if (texture == null) {
       throw StateError('Failed to create WebGL texture for platform view $viewId');
@@ -468,14 +470,20 @@ class PlatformViewTextureCache {
   void disposeView(int viewId) {
     final WebGLTexture? texture = _textures.remove(viewId);
     if (texture != null) {
-      surface.glContextObject.deleteTexture(texture);
+      final WebGLContext gl = surface.glContextObject;
+      if (gl.isTexture(texture)) {
+        gl.deleteTexture(texture);
+      }
     }
   }
 
   void dispose() {
+    final WebGLContext gl = surface.glContextObject;
     // ignore: prefer_foreach, tear-offs of JS interop members are disallowed
     for (final WebGLTexture texture in _textures.values) {
-      surface.glContextObject.deleteTexture(texture);
+      if (gl.isTexture(texture)) {
+        gl.deleteTexture(texture);
+      }
     }
     _textures.clear();
   }

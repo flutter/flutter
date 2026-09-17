@@ -990,6 +990,9 @@ extension type DomHTMLCanvasElement._(JSObject _) implements DomHTMLElement, Dom
 }
 
 extension DomHTMLCanvasElementDrawElementExtension on DomHTMLCanvasElement {
+  @JS('getElementTransform')
+  external DomDOMMatrix? getElementTransform(DomElement element, DomDOMMatrix drawTransform);
+
   @JS('updateElementGeometry')
   external void updateElementGeometry(DomElement element, JSAny? options);
 
@@ -1082,6 +1085,12 @@ extension type WebGLContext._(JSObject _) implements JSObject {
   @JS('LINEAR')
   external int get linear;
 
+  @JS('RGBA8')
+  external int get rgba8;
+
+  @JS('isTexture')
+  external bool isTexture(WebGLTexture? texture);
+
   @JS('createTexture')
   external WebGLTexture? createTexture();
 
@@ -1107,6 +1116,9 @@ extension type WebGLContext._(JSObject _) implements JSObject {
   @JS('texParameteri')
   external void texParameteri(int target, int pname, int param);
 
+  @JS('texElementImage2D')
+  external void texElementImage2D(int target, int internalformat, DomElement element);
+
   @JS('texElementSubImage2D')
   external void texElementSubImage2D(
     int target,
@@ -1118,6 +1130,9 @@ extension type WebGLContext._(JSObject _) implements JSObject {
 }
 
 extension WebGLRenderingContextDrawElementExtension on WebGLContext {
+  @JS('texElementImage2D')
+  external void texElementImage2D(int target, int internalformat, DomElement element);
+
   @JS('texElementSubImage2D')
   external void texElementSubImage2D(
     int target,

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
@@ -402,56 +403,104 @@ class PaintVisitor extends LayerVisitor<void> {
       return;
     }
 
+    final WebGLContext gl = surface!.glContextObject;
+    final bool hasTexElementImage = (gl as JSObject).hasProperty('texElementImage2D'.toJS).toDart;
+    final bool hasTexElementSubImage = (gl as JSObject)
+        .hasProperty('texElementSubImage2D'.toJS)
+        .toDart;
+    final bool isSupported = hasTexElementImage || hasTexElementSubImage;
+
     // 1. Ensure element is marked drawable and mounted inside the <canvas content="drawable">
     element.setAttribute('drawable', '');
     if (element.parent != surface!.canvas) {
       (surface!.canvas as DomElement).append(element);
     }
 
+    // Set styling for geometry and hit-testing
+    if ((element as JSAny?).isA<DomHTMLElement>()) {
+      final DomCSSStyleDeclaration style = (element as DomHTMLElement).style;
+      style.position = 'absolute';
+      style.left = '${platformView.offset.dx}px';
+      style.top = '${platformView.offset.dy}px';
+      style.width = '${platformView.width}px';
+      style.height = '${platformView.height}px';
+      style.transformOrigin = '0 0';
+    }
+
     if (platformView.width <= 0 || platformView.height <= 0) {
+      return;
+    }
+
+    if (!isSupported) {
+      print(
+        'WARNING: HTML-in-Canvas is not supported in this browser. '
+        'Run Chrome with --enable-blink-features=CanvasDrawElement or enable chrome://flags/#canvas-draw-element.',
+      );
       return;
     }
 
     // 2. Upload to WebGL texture
     final WebGLTexture glTexture = surface!.textureCache.getOrCreateTexture(platformView.viewId);
-    final WebGLContext gl = surface!.glContextObject;
     gl.bindTexture(gl.texture2D, glTexture);
+    var uploaded = false;
     try {
-      gl.texElementSubImage2D(gl.texture2D, 0, 0, 0, element);
+      if (hasTexElementImage) {
+        final int format = gl.rgba8 != 0 ? gl.rgba8 : 0x8058;
+        gl.texElementImage2D(gl.texture2D, format, element);
+        uploaded = true;
+      } else if (hasTexElementSubImage) {
+        gl.texImage2D(
+          gl.texture2D,
+          0,
+          gl.rgba,
+          platformView.width.toInt(),
+          platformView.height.toInt(),
+          0,
+          gl.rgba,
+          gl.unsignedByte,
+          null,
+        );
+        gl.texElementSubImage2D(gl.texture2D, 0, 0, 0, element);
+        uploaded = true;
+      }
     } catch (e) {
-      // Frame 0 guard: Blink snapshot may not be ready yet
+      // Frame 0 guard: Blink snapshot may not be ready yet ("No cached paint record for element").
+      // Request next frame so once Blink records the layout/paint snapshot, Flutter draws it.
+      EnginePlatformDispatcher.instance.scheduleFrame();
       return;
     }
 
     // 3. Wrap in SkImage via CanvasKit
-    final SkImage? skImage = surface!.skSurface?.makeImageFromTexture(
-      glTexture,
-      SkPartialImageInfo(
-        width: platformView.width,
-        height: platformView.height,
-        alphaType: canvasKit.AlphaType.Premul,
-        colorType: canvasKit.ColorType.RGBA_8888,
-        colorSpace: SkColorSpaceSRGB,
-      ),
-    );
-    if (skImage != null) {
-      final engineImage = EngineImage(
-        CkImageDelegate(skImage),
-        platformView.width.toInt(),
-        platformView.height.toInt(),
-      );
-      canvas.drawImageRect(
-        engineImage,
-        ui.Rect.fromLTWH(0, 0, platformView.width, platformView.height),
-        ui.Rect.fromLTWH(
-          platformView.offset.dx,
-          platformView.offset.dy,
-          platformView.width,
-          platformView.height,
+    if (uploaded) {
+      final SkImage? skImage = surface!.skSurface?.makeImageFromTexture(
+        glTexture,
+        SkPartialImageInfo(
+          width: platformView.width,
+          height: platformView.height,
+          alphaType: canvasKit.AlphaType.Premul,
+          colorType: canvasKit.ColorType.RGBA_8888,
+          colorSpace: SkColorSpaceSRGB,
         ),
-        ui.Paint(),
       );
-      engineImage.dispose(); // Free C++ WASM handle after draw call
+      if (skImage != null) {
+        final engineImage = EngineImage(
+          CkImageDelegate(skImage),
+          platformView.width.toInt(),
+          platformView.height.toInt(),
+        );
+        canvas.drawImageRect(
+          engineImage,
+          ui.Rect.fromLTWH(0, 0, platformView.width, platformView.height),
+          ui.Rect.fromLTWH(
+            platformView.offset.dx,
+            platformView.offset.dy,
+            platformView.width,
+            platformView.height,
+          ),
+          ui.Paint(),
+        );
+        engineImage.dispose(); // Free C++ WASM handle after draw call
+      }
     }
 
     // 4. Update element geometry with DPR-unscaled matrix
@@ -469,12 +518,20 @@ class PaintVisitor extends LayerVisitor<void> {
     ).multiplied(currentMatrix);
     try {
       final domMatrix = DOMMatrix(cssMatrix.storage.toJS);
-      (surface!.canvas as DomHTMLCanvasElement).updateElementGeometry(
-        element,
-        DomDrawElementOptions(canvasTransform: domMatrix),
-      );
+      final htmlCanvas = surface!.canvas as DomHTMLCanvasElement;
+      if ((htmlCanvas as JSObject).hasProperty('updateElementGeometry'.toJS).toDart) {
+        htmlCanvas.updateElementGeometry(
+          element,
+          DomDrawElementOptions(canvasTransform: domMatrix),
+        );
+      } else if ((htmlCanvas as JSObject).hasProperty('getElementTransform'.toJS).toDart) {
+        final DomDOMMatrix? resultMatrix = htmlCanvas.getElementTransform(element, domMatrix);
+        if (resultMatrix != null && (element as JSAny?).isA<DomHTMLElement>()) {
+          (element as DomHTMLElement).style.transform = resultMatrix.toString();
+        }
+      }
     } catch (_) {
-      // Guard for environments where CanvasDrawElement is not enabled.
+      // Guard for environments where transform sync is not supported or throws.
     }
   }
 }
