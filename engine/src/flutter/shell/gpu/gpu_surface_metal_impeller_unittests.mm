@@ -165,25 +165,16 @@ TEST(GPUSurfaceMetalImpeller, CreatesImpellerCaptureScope) {
 
 class TestSnapshotDelegate : public SnapshotController::Delegate {
  public:
-  explicit TestSnapshotDelegate(
-      std::shared_ptr<impeller::AiksContext> aiks_context)
+  explicit TestSnapshotDelegate(std::shared_ptr<impeller::AiksContext> aiks_context)
       : aiks_context_(std::move(aiks_context)) {}
 
-  const std::unique_ptr<Surface>& GetSurface() const override {
-    return null_surface_;
-  }
-  bool IsAiksContextInitialized() const override {
-    return aiks_context_ != nullptr;
-  }
-  std::shared_ptr<impeller::AiksContext> GetAiksContext() const override {
-    return aiks_context_;
-  }
-  const std::unique_ptr<SnapshotSurfaceProducer>& GetSnapshotSurfaceProducer()
-      const override {
+  const std::unique_ptr<Surface>& GetSurface() const override { return null_surface_; }
+  bool IsAiksContextInitialized() const override { return aiks_context_ != nullptr; }
+  std::shared_ptr<impeller::AiksContext> GetAiksContext() const override { return aiks_context_; }
+  const std::unique_ptr<SnapshotSurfaceProducer>& GetSnapshotSurfaceProducer() const override {
     return null_producer_;
   }
-  std::shared_ptr<const fml::SyncSwitch> GetIsGpuDisabledSyncSwitch()
-      const override {
+  std::shared_ptr<const fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() const override {
     return sync_switch_;
   }
 
@@ -191,8 +182,7 @@ class TestSnapshotDelegate : public SnapshotController::Delegate {
   std::shared_ptr<impeller::AiksContext> aiks_context_;
   std::unique_ptr<Surface> null_surface_;
   std::unique_ptr<SnapshotSurfaceProducer> null_producer_;
-  std::shared_ptr<fml::SyncSwitch> sync_switch_ =
-      std::make_shared<fml::SyncSwitch>(false);
+  std::shared_ptr<fml::SyncSwitch> sync_switch_ = std::make_shared<fml::SyncSwitch>(false);
 };
 
 TEST(SnapshotControllerImpeller, MakeImpellerSnapshotSyncRecyclesHostBuffer) {
@@ -210,15 +200,13 @@ TEST(SnapshotControllerImpeller, MakeImpellerSnapshotSyncRecyclesHostBuffer) {
   auto display_list = builder.Build();
 
   for (int i = 0; i < 100; ++i) {
-    auto texture = controller->MakeImpellerSnapshotSync(
-        display_list, DlISize(100, 100), SnapshotPixelFormat::kDontCare);
+    auto texture = controller->MakeImpellerSnapshotSync(display_list, DlISize(100, 100),
+                                                        SnapshotPixelFormat::kDontCare);
     ASSERT_NE(texture, nullptr);
   }
 
   impeller::HostBuffer::TestStateQuery state =
-      aiks_context->GetContentContext()
-          .GetTransientsDataBuffer()
-          .GetStateForTest();
+      aiks_context->GetContentContext().GetTransientsDataBuffer().GetStateForTest();
   EXPECT_EQ(state.total_buffer_count, 1u);
 }
 
