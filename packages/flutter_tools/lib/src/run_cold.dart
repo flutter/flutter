@@ -6,9 +6,7 @@ import 'dart:async';
 
 import 'base/dds.dart';
 import 'base/file_system.dart';
-import 'base/logger.dart';
 import 'build_info.dart';
-import 'globals.dart' as globals;
 import 'resident_runner.dart';
 import 'tracing.dart';
 import 'vmservice.dart';
@@ -18,14 +16,32 @@ const kFlutterTestOutputsDirEnvName = 'FLUTTER_TEST_OUTPUTS_DIR';
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     super.flutterDevices, {
-    required super.target,
     required super.debuggingOptions,
-    this.traceStartup = false,
-    this.awaitFirstFrameWhenTracing = true,
+    required super.target,
+    super.analytics,
     this.applicationBinary,
-    super.stayResident,
-    super.machine,
+    super.artifacts,
+    this.awaitFirstFrameWhenTracing = true,
+    super.buildSystem,
+    super.buildTargets,
+    super.cache,
+    super.commandHelp,
+    super.config,
     super.dartBuilder,
+    super.dillOutputPath,
+    super.fileSystem,
+    super.flutterVersion,
+    super.logger,
+    super.machine,
+    super.osUtils,
+    super.outputPreferences,
+    super.platform,
+    super.processManager,
+    super.projectRootPath,
+    super.stayResident,
+    super.terminal,
+    this.traceStartup = false,
+    super.xcode,
   }) : super(hotMode: false);
 
   final bool traceStartup;
@@ -38,12 +54,6 @@ class ColdRunner extends ResidentRunner {
 
   @override
   bool get reloadIsRestart => false;
-
-  @override
-  Logger get logger => globals.logger;
-
-  @override
-  FileSystem get fileSystem => globals.fs;
 
   @override
   bool get supportsDetach => _didAttach;
@@ -63,7 +73,7 @@ class ColdRunner extends ResidentRunner {
         }
       }
     } on Exception catch (err, stack) {
-      globals.printError('$err\n$stack');
+      logger.printError('$err\n$stack');
       appFailedToStart();
       return 1;
     }
@@ -73,7 +83,7 @@ class ColdRunner extends ResidentRunner {
       try {
         await connectToServiceProtocol();
       } on Exception catch (exception) {
-        globals.printError(exception.toString());
+        logger.printError(exception.toString());
         appFailedToStart();
         return 2;
       }
@@ -94,27 +104,27 @@ class ColdRunner extends ResidentRunner {
       );
     }
 
-    globals.printTrace('Application running.');
+    logger.printTrace('Application running.');
 
     for (final FlutterDevice? device in flutterDevices) {
       if (device!.vmService == null) {
         continue;
       }
-      globals.printTrace('Connected to ${device.device!.displayName}');
+      logger.printTrace('Connected to ${device.device!.displayName}');
     }
 
     if (traceStartup) {
       // Only trace startup for the first device.
       final FlutterDevice device = flutterDevices.first;
       if (device.vmService != null) {
-        globals.printStatus('Tracing startup on ${device.device!.displayName}.');
+        logger.printStatus('Tracing startup on ${device.device!.displayName}.');
         final String outputPath =
-            globals.platform.environment[kFlutterTestOutputsDirEnvName] ?? getBuildDirectory();
+            platform.environment[kFlutterTestOutputsDirEnvName] ?? getBuildDirectory();
         await downloadStartupTrace(
           device.vmService!,
           awaitFirstFrame: awaitFirstFrameWhenTracing,
-          logger: globals.logger,
-          output: globals.fs.directory(outputPath),
+          logger: logger,
+          output: fileSystem.directory(outputPath),
         );
       }
       appFinished();
@@ -141,14 +151,14 @@ class ColdRunner extends ResidentRunner {
     try {
       await connectToServiceProtocol();
     } on Exception catch (error) {
-      globals.printError('Error connecting to the service protocol: $error');
+      logger.printError('Error connecting to the service protocol: $error');
       return 2;
     }
 
     for (final FlutterDevice? device in flutterDevices) {
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final view in views) {
-        globals.printTrace('Connected to $view.');
+        logger.printTrace('Connected to $view.');
       }
     }
 
