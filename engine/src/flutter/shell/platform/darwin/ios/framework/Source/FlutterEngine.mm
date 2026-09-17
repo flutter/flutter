@@ -1295,6 +1295,15 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+    didReopenFirstResponderWithTextInputClient:(int)client {
+  // The platform gave text input focus back to a client whose connection was
+  // reported closed, so the framework can take that connection back instead of
+  // dropping the text that is about to arrive.
+  [self.textInputChannel invokeMethod:@"TextInputClient.onConnectionReopened"
+                            arguments:@[ @(client) ]];
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     didResignFirstResponderWithTextInputClient:(int)client {
   // When flutter text input view resign first responder, send a message to
   // framework to ensure the focus state is correct. This is useful when close
