@@ -319,9 +319,9 @@ void main() {
         ),
       );
 
-      final ui.Image imageWhenDisabled =
-          (tester.renderObject(find.byKey(repaintBoundaryKey)) as RenderRepaintBoundary)
-              .toImageSync();
+      final ui.Image imageWhenDisabled = (tester.renderObject(
+        find.byKey(repaintBoundaryKey),
+      ) as RenderRepaintBoundary).toImageSync();
       addTearDown(imageWhenDisabled.dispose);
 
       controller.allowSnapshotting = true;
