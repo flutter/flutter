@@ -964,29 +964,26 @@ abstract class ResidentRunner extends ResidentHandlers {
     this._xcode,
   }) : _analytics = analytics ?? const NoOpAnalytics(),
        _dillOutputPath = dillOutputPath,
-       _fileSystem = fileSystem ?? MemoryFileSystem.test(),
-       _logger = logger ?? BufferLogger.test(),
-       _outputPreferences = outputPreferences ?? OutputPreferences.test(),
-       _platform = platform ?? const LocalPlatform(),
-       _processManager = processManager ?? const LocalProcessManager(),
-       _terminal = terminal ?? Terminal.test(),
-       mainPath = (fileSystem ?? MemoryFileSystem.test()).file(target).absolute.path,
+       _fileSystem = fileSystem ??= MemoryFileSystem.test(),
+       _logger = logger ??= BufferLogger.test(),
+       _outputPreferences = outputPreferences ??= OutputPreferences.test(),
+       _platform = platform ??= const LocalPlatform(),
+       _processManager = processManager ??= const LocalProcessManager(),
+       _terminal = terminal ??= Terminal.test(),
+       mainPath = fileSystem.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
-       projectRootPath =
-           projectRootPath ?? (fileSystem ?? MemoryFileSystem.test()).currentDirectory.path,
+       projectRootPath = projectRootPath ?? fileSystem.currentDirectory.path,
        artifactDirectory = dillOutputPath == null
-           ? (fileSystem ?? MemoryFileSystem.test()).systemTempDirectory.createTempSync(
-               'flutter_tool.',
-             )
-           : (fileSystem ?? MemoryFileSystem.test()).file(dillOutputPath).parent,
+           ? fileSystem.systemTempDirectory.createTempSync('flutter_tool.')
+           : fileSystem.file(dillOutputPath).parent,
        assetBundle = AssetBundleFactory.instance.createBundle(),
        commandHelp =
            commandHelp ??
            CommandHelp(
-             logger: logger ?? BufferLogger.test(),
-             terminal: terminal ?? Terminal.test(),
-             platform: platform ?? const LocalPlatform(),
-             outputPreferences: outputPreferences ?? OutputPreferences.test(),
+             logger: logger,
+             terminal: terminal,
+             platform: platform,
+             outputPreferences: outputPreferences,
            ) {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
@@ -1076,7 +1073,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     engineVersion: _flutterVersion?.engineRevision ?? 'engineVersion',
     fileSystem: _fileSystem,
     flutterRootDir: _fileSystem.directory(_cache?.flutterRoot),
-    outputDir: _fileSystem.directory(getBuildDirectory()),
+    outputDir: _fileSystem.directory(getBuildDirectory(_config, _fileSystem)),
     processManager: _processManager,
     platform: _platform,
     analytics: _analytics,

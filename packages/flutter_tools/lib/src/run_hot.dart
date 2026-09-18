@@ -93,7 +93,7 @@ class HotRunner extends ResidentRunner {
     super.processManager,
     this._projectFileInvalidator,
     super.projectRootPath,
-    this._reassembleHelper = _defaultReassembleHelper,
+    this._reassembleHelper,
     this._reloadSourcesHelper = defaultReloadSourcesHelper,
     super.stayResident,
     this._stopwatchFactory = const StopwatchFactory(),
@@ -103,7 +103,7 @@ class HotRunner extends ResidentRunner {
 
   final StopwatchFactory _stopwatchFactory;
   final ReloadSourcesHelper _reloadSourcesHelper;
-  final ReassembleHelper _reassembleHelper;
+  final ReassembleHelper? _reassembleHelper;
   final String? _nativeAssetsYamlFile;
   final ProjectFileInvalidator? _projectFileInvalidator;
   final HotRunnerConfig? _hotRunnerConfig;
@@ -416,7 +416,7 @@ class HotRunner extends ResidentRunner {
                 dartPluginRegistrant: FlutterProject.current().dartPluginRegistrant,
                 outputPath: dillOutputPath,
                 packageConfig: debuggingOptions.buildInfo.packageConfig,
-                projectRootPath: FlutterProject.current().directory.absolute.path,
+                projectRootPath: fileSystem.directory(projectRootPath).absolute.path,
                 fs: fileSystem,
                 nativeAssetsYaml: nativeAssetsYaml,
               )
@@ -1034,12 +1034,9 @@ class HotRunner extends ResidentRunner {
     final Stopwatch reassembleTimer = _stopwatchFactory.createStopwatch('reloadSources:reassemble')
       ..start();
 
-    final ReassembleResult reassembleResult = await _reassembleHelper(
-      flutterDevices,
-      viewCache,
-      onSlow,
-      reloadMessage,
-    );
+    final ReassembleResult reassembleResult = _reassembleHelper != null
+        ? await _reassembleHelper(flutterDevices, viewCache, onSlow, reloadMessage)
+        : await _defaultReassembleHelper(this, flutterDevices, viewCache, onSlow, reloadMessage);
     shouldReportReloadTime = reassembleResult.shouldReportReloadTime;
     if (reassembleResult.reassembleViews.isEmpty) {
       return OperationResult(OperationResult.ok.code, reloadMessage);
@@ -1298,12 +1295,13 @@ typedef ReassembleHelper = Future<ReassembleResult> Function(
 );
 
 Future<ReassembleResult> _defaultReassembleHelper(
+  HotRunner hotRunner,
   List<FlutterDevice?> flutterDevices,
   Map<FlutterDevice?, List<FlutterView>> viewCache,
   void Function(String message)? onSlow,
   String reloadMessage,
 ) async {
-  final Logger logger = flutterDevices.firstOrNull?.logger ?? BufferLogger.test();
+  final Logger logger = hotRunner.logger;
   // Check if any isolates are paused and reassemble those that aren't.
   final reassembleViews = <FlutterView, FlutterVmService?>{};
   final reassembleFutures = <Future<void>>[];
