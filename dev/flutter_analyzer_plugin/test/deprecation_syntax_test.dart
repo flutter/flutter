@@ -17,13 +17,14 @@ class DeprecationSyntaxTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => DeprecationSyntax.code.name;
+}
 
-  static const String _invalidAnnotation =
-      '@Deprecated(\n'
-      "        'This is an invalid deprecation message. ' // missing version\n"
-      '      )';
+const String _invalidAnnotation =
+    '@Deprecated(\n'
+    "        'This is an invalid deprecation message. ' // missing version\n"
+    '      )';
 
-  static const String source = '''
+const String _source = '''
       @Deprecated(
         'This is a valid deprecation message. '
         'This feature was deprecated after v3.12.0-1.0.pre.'
@@ -34,13 +35,6 @@ class DeprecationSyntaxTest extends AnalysisRuleTest {
       void bar() {}
 ''';
 
-  Future<void> testDeprecationSyntax() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[
-      lint(source.indexOf(_invalidAnnotation), _invalidAnnotation.length),
-    ]);
-  }
-}
-
 void main() {
   late DeprecationSyntaxTest testSuite;
 
@@ -50,5 +44,9 @@ void main() {
 
   tearDown(() => testSuite.tearDown());
 
-  test('deprecation_syntax', () => testSuite.testDeprecationSyntax());
+  test('deprecation syntax', () async {
+    await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[
+      testSuite.lint(_source.indexOf(_invalidAnnotation), _invalidAnnotation.length),
+    ]);
+  });
 }

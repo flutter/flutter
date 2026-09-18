@@ -28,8 +28,9 @@ class ProtectPublicStateSubtypesTest extends AnalysisRuleTest
 
   @override
   String get analysisRule => ProtectPublicStateSubtypes.code.name;
+}
 
-  static const String source = '''
+const String _source = '''
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
@@ -146,22 +147,6 @@ class MyWidgetStateValid extends State<MyWidget>{
 }
 ''';
 
-  Future<void> testProtectPublicStateSubtypes() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[
-      lint(224, 66),
-      lint(294, 115),
-      lint(413, 68),
-      lint(485, 45),
-      lint(543, 68),
-      lint(615, 64),
-      lint(683, 62),
-      lint(749, 59),
-      lint(812, 90),
-      lint(906, 134),
-    ]);
-  }
-}
-
 void main() {
   late ProtectPublicStateSubtypesTest testSuite;
 
@@ -171,5 +156,18 @@ void main() {
 
   tearDown(() => testSuite.tearDown());
 
-  test('protect_public_state_subtypes', () => testSuite.testProtectPublicStateSubtypes());
+  test('protect public state subtypes', () async {
+    await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[
+      testSuite.lint(224, 66),
+      testSuite.lint(294, 115),
+      testSuite.lint(413, 68),
+      testSuite.lint(485, 45),
+      testSuite.lint(543, 68),
+      testSuite.lint(615, 64),
+      testSuite.lint(683, 62),
+      testSuite.lint(749, 59),
+      testSuite.lint(812, 90),
+      testSuite.lint(906, 134),
+    ]);
+  });
 }

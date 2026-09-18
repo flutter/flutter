@@ -17,8 +17,9 @@ class NoRuntimeTypeInToStringTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => NoRuntimeTypeInToString.code.name;
+}
 
-  static const String source = r'''
+const String _source = r'''
 class GoodToString {
   @override
   String toString() {
@@ -56,11 +57,6 @@ class GoodToStringWithAssert {
 }
 ''';
 
-  Future<void> testNoRuntimeType() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[lint(173, 11), lint(273, 11)]);
-  }
-}
-
 void main() {
   late NoRuntimeTypeInToStringTest testSuite;
 
@@ -70,5 +66,10 @@ void main() {
 
   tearDown(() => testSuite.tearDown());
 
-  test('no_runtimeType', () => testSuite.testNoRuntimeType());
+  test('no runtimeType', () async {
+    await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[
+      testSuite.lint(173, 11),
+      testSuite.lint(273, 11),
+    ]);
+  });
 }

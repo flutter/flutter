@@ -17,8 +17,9 @@ class RenderBoxIntrinsicCalculationRuleTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => RenderBoxIntrinsicCalculationRule.code.name;
+}
 
-  static const String source = '''
+const String _source = '''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -83,18 +84,6 @@ class RenderBoxSubclass2 extends RenderBox with ARenderBoxMixin {
 }
 ''';
 
-  Future<void> testRenderBoxIntrinsics() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[
-      lint(585, 24),
-      lint(786, 24),
-      lint(980, 18),
-      lint(1079, 16),
-      lint(1264, 31),
-      lint(1488, 25),
-    ]);
-  }
-}
-
 void main() {
   late RenderBoxIntrinsicCalculationRuleTest testSuite;
 
@@ -104,5 +93,14 @@ void main() {
 
   tearDown(() => testSuite.tearDown());
 
-  test('render_box_intrinsics', () => testSuite.testRenderBoxIntrinsics());
+  test('render box intrinsics', () async {
+    await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[
+      testSuite.lint(585, 24),
+      testSuite.lint(786, 24),
+      testSuite.lint(980, 18),
+      testSuite.lint(1079, 16),
+      testSuite.lint(1264, 31),
+      testSuite.lint(1488, 25),
+    ]);
+  });
 }

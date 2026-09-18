@@ -17,20 +17,21 @@ class NoSyncAsyncStarTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => NoSyncAsyncStar.code.name;
+}
 
-  static const String _fooDeclaration =
-      'Stream<int> foo() async* {\n'
-      '        yield 1;\n'
-      '      }';
+const String _fooDeclaration =
+    'Stream<int> foo() async* {\n'
+    '        yield 1;\n'
+    '      }';
 
-  static const String _barDeclaration =
-      'Iterable<int> bar() sync* {\n'
-      '        yield 1;\n'
-      '      }';
+const String _barDeclaration =
+    'Iterable<int> bar() sync* {\n'
+    '        yield 1;\n'
+    '      }';
 
-  static const String _nestedClosure = '() async* { yield 1; }';
+const String _nestedClosure = '() async* { yield 1; }';
 
-  static const String source = '''
+const String _source = '''
       $_fooDeclaration
       $_barDeclaration
       // The following uses async* because: Fake reason.
@@ -46,15 +47,6 @@ class NoSyncAsyncStarTest extends AnalysisRuleTest {
       }
 ''';
 
-  Future<void> testNoSyncAsyncStar() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[
-      lint(source.indexOf(_fooDeclaration), _fooDeclaration.length),
-      lint(source.indexOf(_barDeclaration), _barDeclaration.length),
-      lint(source.indexOf(_nestedClosure), _nestedClosure.length),
-    ]);
-  }
-}
-
 void main() {
   late NoSyncAsyncStarTest testSuite;
 
@@ -64,5 +56,11 @@ void main() {
 
   tearDown(() => testSuite.tearDown());
 
-  test('no_sync_async_star', () => testSuite.testNoSyncAsyncStar());
+  test('no sync async star', () async {
+    await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[
+      testSuite.lint(_source.indexOf(_fooDeclaration), _fooDeclaration.length),
+      testSuite.lint(_source.indexOf(_barDeclaration), _barDeclaration.length),
+      testSuite.lint(_source.indexOf(_nestedClosure), _nestedClosure.length),
+    ]);
+  });
 }

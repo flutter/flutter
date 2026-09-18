@@ -19,8 +19,9 @@ class IntegrationTestTimeoutsTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => IntegrationTestTimeouts.code.name;
+}
 
-  static const String source = '''
+const String _source = '''
 class Timeout {
   static const Timeout none = Timeout();
   const Timeout();
@@ -34,11 +35,6 @@ void main() {
 }
 ''';
 
-  Future<void> testIntegrationTestTimeouts() async {
-    await assertDiagnostics(source, [lint(163, 4)]);
-  }
-}
-
 void main() {
   late IntegrationTestTimeoutsTest testSuite;
 
@@ -48,5 +44,7 @@ void main() {
 
   tearDown(() => testSuite.tearDown());
 
-  test('integration_test_timeouts', () => testSuite.testIntegrationTestTimeouts());
+  test('integration test timeouts', () async {
+    await testSuite.assertDiagnostics(_source, [testSuite.lint(163, 4)]);
+  });
 }

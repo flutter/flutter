@@ -17,8 +17,9 @@ class NoDoubleClampTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => NoDoubleClamp.code.name;
+}
 
-  static const String source = '''
+const String _source = '''
 class ClassWithAClampMethod {
   ClassWithAClampMethod clamp(double min, double max) => this;
 }
@@ -50,18 +51,6 @@ void testNoDoubleClamp(int input) {
 }
 ''';
 
-  Future<void> testNoDoubleClamp() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[
-      lint(553, 5),
-      lint(617, 5),
-      lint(745, 5),
-      lint(815, 5),
-      lint(1084, 5),
-      lint(1214, 5),
-    ]);
-  }
-}
-
 void main() {
   late NoDoubleClampTest testSuite;
 
@@ -71,5 +60,14 @@ void main() {
 
   tearDown(() => testSuite.tearDown());
 
-  test('no_double_clamp', () => testSuite.testNoDoubleClamp());
+  test('no double clamp', () async {
+    await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[
+      testSuite.lint(553, 5),
+      testSuite.lint(617, 5),
+      testSuite.lint(745, 5),
+      testSuite.lint(815, 5),
+      testSuite.lint(1084, 5),
+      testSuite.lint(1214, 5),
+    ]);
+  });
 }

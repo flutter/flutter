@@ -17,8 +17,9 @@ class NullInitializedDebugExpensiveFieldsTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => NullInitializedDebugExpensiveFields.code.name;
+}
 
-  static const String source = '''
+const String _source = '''
 class GoodClass {
   @_debugOnly
   final int? _foo = kDebugMode ? 1 : null;
@@ -61,15 +62,6 @@ abstract final class foundation {
 }
 ''';
 
-  Future<void> testNullInitialized() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[
-      lint(122, 8),
-      lint(174, 4),
-      lint(228, 25),
-    ]);
-  }
-}
-
 void main() {
   late NullInitializedDebugExpensiveFieldsTest testSuite;
 
@@ -79,5 +71,11 @@ void main() {
 
   tearDown(() => testSuite.tearDown());
 
-  test('null_initialized', () => testSuite.testNullInitialized());
+  test('null initialized', () async {
+    await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[
+      testSuite.lint(122, 8),
+      testSuite.lint(174, 4),
+      testSuite.lint(228, 25),
+    ]);
+  });
 }

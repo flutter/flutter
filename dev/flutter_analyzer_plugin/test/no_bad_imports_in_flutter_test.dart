@@ -29,29 +29,14 @@ class NoBadImportsInFlutterTest extends AnalysisRuleTest with MetaPackage {
 
   @override
   String get testPackageLibPath => '$testPackageRootPath/lib/src/widgets';
+}
 
-  static const String source = '''
+const String _source = '''
 import 'package:meta/meta.dart';
 
 @protected
 class Foo {}
 ''';
-
-  Future<void> testNoBadImportsInFlutter() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[lint(7, 24)]);
-  }
-
-  Future<void> testRecursiveSelfImport() async {
-    await assertDiagnostics(
-      '''
-import 'package:flutter/widgets.dart';
-
-const int x = widget;
-''',
-      <ExpectedDiagnostic>[lint(7, 30)],
-    );
-  }
-}
 
 void main() {
   late NoBadImportsInFlutterTest testSuite;
@@ -62,6 +47,18 @@ void main() {
 
   tearDown(() => testSuite.tearDown());
 
-  test('no_bad_imports_in_flutter', () => testSuite.testNoBadImportsInFlutter());
-  test('recursive_self_import', () => testSuite.testRecursiveSelfImport());
+  test('no bad imports in flutter', () async {
+    await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[testSuite.lint(7, 24)]);
+  });
+
+  test('recursive self import', () async {
+    await testSuite.assertDiagnostics(
+      '''
+import 'package:flutter/widgets.dart';
+
+const int x = widget;
+''',
+      <ExpectedDiagnostic>[testSuite.lint(7, 30)],
+    );
+  });
 }

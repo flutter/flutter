@@ -17,8 +17,9 @@ class AvoidFutureCatchErrorTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => AvoidFutureCatchError.code.name;
+}
 
-  static const String source = '''
+const String _source = '''
 import 'dart:async';
 
 // This extension isn't picked up from dart:async, so we just fake it.
@@ -38,11 +39,6 @@ void main() {
 }
 ''';
 
-  Future<void> testAvoidFutureCatchError() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[lint(313, 48), lint(374, 45)]);
-  }
-}
-
 void main() {
   late AvoidFutureCatchErrorTest testSuite;
 
@@ -52,5 +48,10 @@ void main() {
 
   tearDown(() => testSuite.tearDown());
 
-  test('avoid_future_catch_error', () => testSuite.testAvoidFutureCatchError());
+  test('avoid future catch error', () async {
+    await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[
+      testSuite.lint(313, 48),
+      testSuite.lint(374, 45),
+    ]);
+  });
 }

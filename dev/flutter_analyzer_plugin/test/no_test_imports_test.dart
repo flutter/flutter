@@ -28,83 +28,6 @@ class NoTestImportsTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => NoTestImports.code.name;
-
-  Future<void> testStandardImport() async {
-    const source = '''
-import 'foo.dart';
-
-void main() {
-  const int x = foo;
-}
-''';
-    await assertNoDiagnostics(source);
-  }
-
-  Future<void> testExemptFlutterTestImport() async {
-    const source = '''
-import 'package:flutter_test/flutter_test.dart';
-
-void main() {
-  const int x = flutterTest;
-}
-''';
-    await assertNoDiagnostics(source);
-  }
-
-  Future<void> testExemptHitTestImport() async {
-    const source = '''
-import 'hit_test.dart';
-
-void main() {
-  const int x = hitTest;
-}
-''';
-    await assertNoDiagnostics(source);
-  }
-
-  Future<void> testExemptLiveTestImport() async {
-    const source = '''
-import 'package:test_api/src/backend/live_test.dart';
-
-void main() {
-  const int x = liveTest;
-}
-''';
-    await assertNoDiagnostics(source);
-  }
-
-  Future<void> testExemptIntegrationTestImport() async {
-    const source = '''
-import 'package:integration_test/integration_test.dart';
-
-void main() {
-  const int x = integrationTest;
-}
-''';
-    await assertNoDiagnostics(source);
-  }
-
-  Future<void> testRelativeTestImportFails() async {
-    const source = '''
-import 'foo_test.dart';
-
-void main() {
-  const int x = fooTest;
-}
-''';
-    await assertDiagnostics(source, [lint(7, 15)]);
-  }
-
-  Future<void> testPackageTestImportFails() async {
-    const source = '''
-import 'package:some_pkg/bar_test.dart';
-
-void main() {
-  const int x = barTest;
-}
-''';
-    await assertDiagnostics(source, [lint(7, 32)]);
-  }
 }
 
 void main() {
@@ -116,11 +39,80 @@ void main() {
 
   tearDown(() => testSuite.tearDown());
 
-  test('standard_import', () => testSuite.testStandardImport());
-  test('exempt_flutter_test_import', () => testSuite.testExemptFlutterTestImport());
-  test('exempt_hit_test_import', () => testSuite.testExemptHitTestImport());
-  test('exempt_live_test_import', () => testSuite.testExemptLiveTestImport());
-  test('exempt_integration_test_import', () => testSuite.testExemptIntegrationTestImport());
-  test('relative_test_import_fails', () => testSuite.testRelativeTestImportFails());
-  test('package_test_import_fails', () => testSuite.testPackageTestImportFails());
+  test('standard import', () async {
+    const source = '''
+import 'foo.dart';
+
+void main() {
+  const int x = foo;
+}
+''';
+    await testSuite.assertNoDiagnostics(source);
+  });
+
+  test('exempt flutter test import', () async {
+    const source = '''
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  const int x = flutterTest;
+}
+''';
+    await testSuite.assertNoDiagnostics(source);
+  });
+
+  test('exempt hit test import', () async {
+    const source = '''
+import 'hit_test.dart';
+
+void main() {
+  const int x = hitTest;
+}
+''';
+    await testSuite.assertNoDiagnostics(source);
+  });
+
+  test('exempt live test import', () async {
+    const source = '''
+import 'package:test_api/src/backend/live_test.dart';
+
+void main() {
+  const int x = liveTest;
+}
+''';
+    await testSuite.assertNoDiagnostics(source);
+  });
+
+  test('exempt integration test import', () async {
+    const source = '''
+import 'package:integration_test/integration_test.dart';
+
+void main() {
+  const int x = integrationTest;
+}
+''';
+    await testSuite.assertNoDiagnostics(source);
+  });
+
+  test('relative test import fails', () async {
+    const source = '''
+import 'foo_test.dart';
+
+void main() {
+  const int x = fooTest;
+}
+''';
+    await testSuite.assertDiagnostics(source, [testSuite.lint(7, 15)]);
+  });
+
+  test('package test import fails', () async {
+    const source = '''
+import 'package:some_pkg/bar_test.dart';
+
+void main() {
+  const int x = barTest;
+}
+''';
+    await testSuite.assertDiagnostics(source, [testSuite.lint(7, 32)]);
+  });
 }

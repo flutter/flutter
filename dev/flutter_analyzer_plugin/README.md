@@ -489,29 +489,6 @@ class MyCustomRuleTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => MyCustomRule.code.name;
-
-  Future<void> testDisallowedPattern() async {
-    await assertDiagnostics(
-      '''
-void test() {
-  badFunction();
-}
-''',
-      <ExpectedDiagnostic>[
-        lint(16, 13),
-      ],
-    );
-  }
-
-  Future<void> testAllowedPattern() async {
-    await assertNoDiagnostics(
-      '''
-void test() {
-  goodFunction();
-}
-''',
-    );
-  }
 }
 
 void main() {
@@ -523,8 +500,28 @@ void main() {
 
   tearDown(() => testSuite.tearDown());
 
-  test('disallowedPattern', () => testSuite.testDisallowedPattern());
-  test('allowedPattern', () => testSuite.testAllowedPattern());
+  test('disallowed pattern', () async {
+    await testSuite.assertDiagnostics(
+      '''
+void test() {
+  badFunction();
+}
+''',
+      <ExpectedDiagnostic>[
+        testSuite.lint(16, 13),
+      ],
+    );
+  });
+
+  test('allowed pattern', () async {
+    await testSuite.assertNoDiagnostics(
+      '''
+void test() {
+  goodFunction();
+}
+''',
+    );
+  });
 }
 ```
 

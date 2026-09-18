@@ -16,21 +16,15 @@ class SkipTestCommentsTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => SkipTestComments.code.name;
+}
 
-  static const String source = '''
+const String _source = '''
 void test(String name, void Function() body, {bool skip = false}) {}
 
 void main() {
   test('a test', () {}, skip: true); // ERROR
 }
 ''';
-
-  Future<void> testSkipTestComments() async {
-    await assertDiagnostics(source, [
-      lint(108, 10), // skip: true
-    ]);
-  }
-}
 
 void main() {
   late SkipTestCommentsTest testSuite;
@@ -41,5 +35,9 @@ void main() {
 
   tearDown(() => testSuite.tearDown());
 
-  test('skip_test_comments', () => testSuite.testSkipTestComments());
+  test('skip test comments', () async {
+    await testSuite.assertDiagnostics(_source, [
+      testSuite.lint(108, 10), // skip: true
+    ]);
+  });
 }

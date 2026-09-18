@@ -22,8 +22,9 @@ class NoStopwatchesTest extends AnalysisRuleTest with ExternalStopwatchesPackage
 
   @override
   String get analysisRule => NoStopwatches.code.name;
+}
 
-  static const String source = '''
+const String _source = '''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -96,23 +97,6 @@ void testStopwatchIgnore(Stopwatch stopwatch) {
 }
 ''';
 
-  Future<void> testNoStopwatches() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[
-      lint(696, 9),
-      lint(781, 9),
-      lint(970, 15),
-      lint(1207, 19),
-      lint(1390, 22),
-      lint(1615, 30),
-      lint(1845, 27),
-      lint(2028, 9),
-      lint(2162, 17),
-      lint(2316, 15),
-      lint(2513, 17),
-    ]);
-  }
-}
-
 void main() {
   late NoStopwatchesTest testSuite;
 
@@ -122,5 +106,19 @@ void main() {
 
   tearDown(() => testSuite.tearDown());
 
-  test('no_stopwatches', () => testSuite.testNoStopwatches());
+  test('no stopwatches', () async {
+    await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[
+      testSuite.lint(696, 9),
+      testSuite.lint(781, 9),
+      testSuite.lint(970, 15),
+      testSuite.lint(1207, 19),
+      testSuite.lint(1390, 22),
+      testSuite.lint(1615, 30),
+      testSuite.lint(1845, 27),
+      testSuite.lint(2028, 9),
+      testSuite.lint(2162, 17),
+      testSuite.lint(2316, 15),
+      testSuite.lint(2513, 17),
+    ]);
+  });
 }
