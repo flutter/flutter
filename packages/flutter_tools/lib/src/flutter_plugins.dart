@@ -104,6 +104,7 @@ Future<Plugin?> _pluginFromPackage(
   Uri packageRoot,
   Set<String> appDependencies, {
   required bool isDevDependency,
+  required Logger logger,
   FileSystem? fileSystem,
   PubspecCache? pubspecCache,
 }) async {
@@ -123,10 +124,10 @@ Future<Plugin?> _pluginFromPackage(
       final Object? parsed = loadYaml(await pubspecFile.readAsString());
       pubspec = parsed is YamlMap ? parsed : null;
     } on YamlException catch (err) {
-      globals.printTrace('Failed to parse plugin manifest for $name: $err');
+      logger.printTrace('Failed to parse plugin manifest for $name: $err');
       // Do nothing, potentially not a plugin.
     } on FileSystemException catch (err) {
-      globals.printTrace('Failed to read plugin manifest for $name: $err');
+      logger.printTrace('Failed to read plugin manifest for $name: $err');
       // Do nothing, potentially not a plugin.
     }
   }
@@ -143,7 +144,7 @@ Future<Plugin?> _pluginFromPackage(
       : semver.VersionConstraint.parse(flutterConstraintText);
   final String packageRootPath = fs.path.fromUri(packageRoot);
   final dependencies = pubspec['dependencies'] as YamlMap?;
-  globals.printTrace('Found plugin $name at $packageRootPath');
+  logger.printTrace('Found plugin $name at $packageRootPath');
   return Plugin.fromYaml(
     name,
     packageRootPath,
@@ -209,6 +210,7 @@ Future<List<Plugin>> findPlugins(
       dependency.rootUri,
       project.manifest.dependencies,
       isDevDependency: dependency.isExclusiveDevDependency,
+      logger: logger,
       fileSystem: fs,
       pubspecCache: pubspecCache,
     );

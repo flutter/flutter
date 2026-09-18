@@ -59,7 +59,8 @@ class BuildCommand extends FlutterCommand {
       :Platform platform,
       :ProcessManager processManager,
     ) = toolContext;
-    final Xcode? xcode = appleContext.xcode;
+    final Xcode xcode = appleContext.xcode;
+    final AndroidSdk? androidSdk = androidContext.androidSdk;
 
     final codesign = DarwinAddToAppCodesigning.fromContexts(
       appleContext: appleContext,
@@ -168,7 +169,12 @@ class BuildCommand extends FlutterCommand {
       ),
     );
     _addSubcommand(
-      BuildWebCommand(fileSystem: fileSystem, logger: logger, verboseHelp: verboseHelp),
+      BuildWebCommand(
+        buildSystem: buildSystem,
+        featureFlags: featureFlags,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
     );
     _addSubcommand(
       BuildMacosCommand(
