@@ -28,7 +28,6 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
@@ -322,7 +321,7 @@ class FlutterWebPlatform extends PlatformPlugin {
           ddcModuleLoaderUrl: 'ddc_module_loader.js',
           mapperUrl: 'dart_stack_trace_mapper.js',
           generateLoadingIndicator: false,
-          isWindows: globals.platform.isWindows,
+          isWindows: _toolContext.platform.isWindows,
         ),
         headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/javascript'},
       );
@@ -350,7 +349,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         entrypoint: 'main.dart',
         nativeNullAssertions: true,
         onLoadEndBootstrap: 'on_load_end_bootstrap.js',
-        isCi: await globals.botDetector.isRunningOnBot,
+        isCi: await _toolContext.botDetector.isRunningOnBot,
       );
 
       mainModuleSrc +=

@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../context/tool_context.dart';
@@ -244,7 +245,12 @@ class CoverageCollector extends TestWatcher {
       return false;
     }
 
-    final ToolContext(:FileSystem fs, :Platform platform) = _toolContext;
+    final ToolContext(
+      :FileSystem fs,
+      :OperatingSystemUtils os,
+      :Platform platform,
+      :ProcessUtils processUtils,
+    ) = _toolContext;
     final File coverageFile = fs.file(coveragePath)
       ..createSync(recursive: true)
       ..writeAsStringSync(coverageData, flush: true);
@@ -257,7 +263,7 @@ class CoverageCollector extends TestWatcher {
         return false;
       }
 
-      if (_toolContext.os.which('lcov') == null) {
+      if (os.which('lcov') == null) {
         var installMessage = 'Please install lcov.';
         if (platform.isLinux) {
           installMessage = 'Consider running "sudo apt-get install lcov".';
@@ -278,7 +284,7 @@ class CoverageCollector extends TestWatcher {
         final File sourceFile = coverageFile.copySync(
           fs.path.join(tempDir.path, 'lcov.source.info'),
         );
-        final RunResult result = _toolContext.processUtils.runSync(<String>[
+        final RunResult result = processUtils.runSync(<String>[
           'lcov',
           '--add-tracefile',
           baseCoverageData,

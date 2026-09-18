@@ -13,9 +13,6 @@ import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../context/tool_context.dart';
@@ -72,11 +69,11 @@ const _kIntegrationTestDirectory = 'integration_test';
 class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
     required ToolContext toolContext,
-    bool verboseHelp = false,
-    this.testWrapper = const TestWrapper(),
-    FlutterTestRunner? testRunner,
-    this.verbose = false,
     this.nativeAssetsBuilder,
+    FlutterTestRunner? testRunner,
+    this.testWrapper = const TestWrapper(),
+    this.verbose = false,
+    bool verboseHelp = false,
   }) : _toolContext = toolContext,
        _testRunner = testRunner ?? FlutterTestRunner(toolContext: toolContext),
        super(toolContext: toolContext) {
@@ -436,13 +433,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(
-      :Artifacts artifacts,
       :FileSystem fs,
       :Logger logger,
-      :OperatingSystemUtils os,
-      :Platform platform,
-      :ProcessManager processManager,
-      :ProcessUtils processUtils,
       :FlutterProjectFactory projectFactory,
       :Stdio stdio,
     ) = _toolContext;

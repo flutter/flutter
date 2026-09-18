@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -72,7 +71,7 @@ void main() {
     );
     return TestGoldenComparator(
       compilerFactory: () => compiler,
-      flutterTesterBinPath: globals.artifacts!.getArtifactPath(Artifact.flutterTester),
+      flutterTesterBinPath: globals.artifacts!.getArtifactPath(.flutterTester),
       toolContext: DelegatingToolContext(logger: logger),
     );
   }

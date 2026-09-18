@@ -79,13 +79,11 @@ interface class FlutterTestRunner {
   }) async {
     final ToolContext(
       :Artifacts artifacts,
-      :Config config,
       :FileSystem fs,
       :Logger logger,
       :OperatingSystemUtils os,
       :Platform platform,
       :ProcessManager processManager,
-      :ShutdownHooks shutdownHooks,
       :AnsiTerminal terminal,
     ) = _toolContext;
 
@@ -410,10 +408,10 @@ void main([dynamic sendPort]) {
   }
 
   static void _generateRootTestIsolateSpawnerSourceFile({
-    required File childTestIsolateSpawnerSourceFile,
     required File childTestIsolateSpawnerDillFile,
-    required File rootTestIsolateSpawnerSourceFile,
+    required File childTestIsolateSpawnerSourceFile,
     required Platform platform,
+    required File rootTestIsolateSpawnerSourceFile,
   }) {
     final buffer = StringBuffer();
     buffer.writeln('''
@@ -576,7 +574,7 @@ class SpawnPlugin extends PlatformPlugin {
     final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
 
     final ResidentCompiler residentCompiler = residentCompilerFactory.create(
-      targetPlatform: TargetPlatform.tester,
+      targetPlatform: .tester,
       artifacts: artifacts,
       logger: logger,
       processManager: processManager,
@@ -634,12 +632,10 @@ class SpawnPlugin extends PlatformPlugin {
   }) async {
     final ToolContext(
       :Artifacts artifacts,
-      :Config config,
       :FileSystem fs,
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,
-      :ShutdownHooks shutdownHooks,
       :Stdio stdio,
       :AnsiTerminal terminal,
     ) = _toolContext;
