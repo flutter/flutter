@@ -58,6 +58,8 @@ template("embedder_source_set") {
   source_set(target_name) {
     sources = [
       "embedder.cc",
+      "embedder_asset_resolver.cc",
+      "embedder_asset_resolver.h",
       "embedder_engine.cc",
       "embedder_engine.h",
       "embedder_external_texture_hb.cc",
@@ -68,6 +70,8 @@ template("embedder_source_set") {
       "embedder_external_view.h",
       "embedder_external_view_embedder.cc",
       "embedder_external_view_embedder.h",
+      "embedder_image_generator.cc",
+      "embedder_image_generator.h",
       "embedder_include.c",
       "embedder_include2.c",
       "embedder_layers.cc",
@@ -110,10 +114,12 @@ template("embedder_source_set") {
       "//flutter/flow",
       "//flutter/fml",
       "//flutter/lib/ui",
+      "//flutter/runtime",
       "//flutter/runtime:libdart",
       "//flutter/shell/common",
       "//flutter/skia",
       "//flutter/third_party/tonic",
+      "//flutter/txt",
     ]
 
     if (embedder_enable_gl) {
@@ -178,13 +184,11 @@ template("embedder_source_set") {
 
       if (impeller_supports_rendering) {
         sources += [
+          "embedder_external_texture_vk_impeller.cc",
           "embedder_surface_vulkan_impeller.cc",
           "embedder_surface_vulkan_impeller.h",
         ]
-        deps += [
-          "//flutter/impeller/display_list",
-          "//flutter/impeller/renderer/backend/vulkan",
-        ]
+        deps += [ "//flutter/impeller/renderer/backend/vulkan" ]
       }
 
       deps += [

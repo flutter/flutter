@@ -17,6 +17,7 @@ namespace flutter {
 class AssetManager;
 class APKAssetProvider;
 class DirectoryAssetBundle;
+class EmbedderAssetResolver;
 
 class AssetResolver {
  public:
@@ -31,7 +32,7 @@ class AssetResolver {
     kAssetManager,
     kApkAssetProvider,
     kDirectoryAssetBundle,
-    kCustomAssetResolver,
+    kCustomResolver,
   };
 
   virtual const AssetManager* as_asset_manager() const { return nullptr; }
@@ -39,6 +40,9 @@ class AssetResolver {
     return nullptr;
   }
   virtual const DirectoryAssetBundle* as_directory_asset_bundle() const {
+    return nullptr;
+  }
+  virtual const EmbedderAssetResolver* as_embedder_asset_resolver() const {
     return nullptr;
   }
 

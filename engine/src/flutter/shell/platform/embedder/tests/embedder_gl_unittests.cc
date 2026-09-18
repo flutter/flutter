@@ -2580,6 +2580,11 @@ TEST_P(EmbedderTestMultiBackend, PlatformViewMutatorsAreValid) {
                 FML_CHECK(false)
                     << "There should be no transformation in the test.";
                 break;
+              case kFlutterPlatformViewMutationTypeClipRoundSuperellipse:
+              case kFlutterPlatformViewMutationTypeClipPath:
+                FML_CHECK(false) << "There should be no path or superellipse "
+                                    "clip in the test.";
+                break;
             }
 
             ASSERT_EQ(*platform_view.mutations[i], mutation);
@@ -2690,6 +2695,11 @@ TEST_F(EmbedderTest, PlatformViewMutatorsAreValidWithPixelRatio) {
                 mutation.type = kFlutterPlatformViewMutationTypeTransformation;
                 mutation.transformation = FlutterTransformationMake(
                     DlMatrix::MakeScale({2.0, 2.0, 1}));
+                break;
+              case kFlutterPlatformViewMutationTypeClipRoundSuperellipse:
+              case kFlutterPlatformViewMutationTypeClipPath:
+                FML_CHECK(false) << "There should be no path or superellipse "
+                                    "clip in the test.";
                 break;
             }
 
@@ -2809,6 +2819,11 @@ TEST_F(EmbedderTest,
                 mutation.transformation =
                     FlutterTransformationMake(root_surface_transformation);
 
+                break;
+              case kFlutterPlatformViewMutationTypeClipRoundSuperellipse:
+              case kFlutterPlatformViewMutationTypeClipPath:
+                FML_CHECK(false) << "There should be no path or superellipse "
+                                    "clip in the test.";
                 break;
             }
 

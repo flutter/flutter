@@ -27,10 +27,10 @@ void EmbedderPlatformMessageResponse::Complete(
       // The static leak checker gets confused by the use of fml::MakeCopyable.
       // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
       fml::MakeCopyable([data = std::move(data), callback = callback_]() {
-        static const uint8_t dummy = 0;
+        static const uint8_t kEmptyByte = 0;
         const uint8_t* mapping = data->GetMapping();
         if (mapping == nullptr && data->GetSize() == 0) {
-          mapping = &dummy;
+          mapping = &kEmptyByte;
         }
         callback(mapping, data->GetSize());
       }));
@@ -39,6 +39,8 @@ void EmbedderPlatformMessageResponse::Complete(
 // |PlatformMessageResponse|
 void EmbedderPlatformMessageResponse::CompleteEmpty() {
   runner_->PostTask(
+      // The static leak checker gets confused by the use of fml::MakeCopyable.
+      // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
       fml::MakeCopyable([callback = callback_]() { callback(nullptr, 0); }));
 }
 

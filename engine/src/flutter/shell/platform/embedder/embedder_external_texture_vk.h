@@ -13,10 +13,6 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "third_party/skia/include/core/SkSize.h"
 
-namespace impeller {
-class AiksContext;
-}  // namespace impeller
-
 namespace flutter {
 
 class EmbedderExternalTextureVK : public flutter::Texture {
@@ -25,7 +21,7 @@ class EmbedderExternalTextureVK : public flutter::Texture {
       std::unique_ptr<FlutterVulkanExternalTexture>(int64_t, size_t, size_t)>;
 
   EmbedderExternalTextureVK(int64_t texture_identifier,
-                            const ExternalTextureCallback& callback);
+                            ExternalTextureCallback callback);
 
   ~EmbedderExternalTextureVK() override;
 
@@ -48,7 +44,7 @@ class EmbedderExternalTextureVK : public flutter::Texture {
   void OnTextureUnregistered() override;
 
  private:
-  const ExternalTextureCallback& external_texture_callback_;
+  ExternalTextureCallback external_texture_callback_;
   sk_sp<DlImage> last_image_;
 
   sk_sp<DlImage> ResolveTexture(int64_t texture_id,
@@ -60,9 +56,13 @@ class EmbedderExternalTextureVK : public flutter::Texture {
                                     GrDirectContext* context,
                                     const SkISize& size);
 
+#if IMPELLER_SUPPORTS_RENDERING
+  // Defined in embedder_external_texture_vk_impeller.cc, which is only built
+  // when Impeller supports rendering on the target platform.
   sk_sp<DlImage> ResolveTextureImpeller(int64_t texture_id,
                                         impeller::AiksContext* aiks_context,
                                         const SkISize& size);
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalTextureVK);
 };

@@ -21,7 +21,6 @@ EmbedderTaskRunner::EmbedderTaskRunner(DispatchTable table,
       placeholder_id_(fml::TaskQueueId(fml::TaskQueueId::kInvalid)),
       unique_id_(next_unique_id_++),
       priority_(priority) {
-  TRACE_EVENT0("flutter", "EmbedderTaskRunner::EmbedderTaskRunner");
   FML_DCHECK(dispatch_table_.post_task_callback);
   FML_DCHECK(dispatch_table_.runs_task_on_current_thread_callback);
   FML_DCHECK(dispatch_table_.destruction_callback);
@@ -36,10 +35,18 @@ size_t EmbedderTaskRunner::GetEmbedderIdentifier() const {
 }
 
 void EmbedderTaskRunner::SetThreadPriority(FlutterThreadPriority priority) {
-  TRACE_EVENT0("flutter", "EmbedderTaskRunner::SetThreadPriority");
-  priority_ = priority;
-  if (dispatch_table_.thread_priority_setter) {
+  priority_.store(priority);
+  if (!dispatch_table_.thread_priority_setter) {
+    return;
+  }
+  if (RunsTasksOnCurrentThread()) {
     dispatch_table_.thread_priority_setter(priority);
+  } else {
+    PostTask([this, priority]() {
+      if (dispatch_table_.thread_priority_setter) {
+        dispatch_table_.thread_priority_setter(priority);
+      }
+    });
   }
 }
 

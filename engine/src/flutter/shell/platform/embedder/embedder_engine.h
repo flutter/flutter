@@ -14,10 +14,16 @@
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_resolver.h"
+#include "flutter/shell/platform/embedder/embedder_image_generator.h"
 #include "flutter/shell/platform/embedder/embedder_thread_host.h"
 namespace flutter {
 
 struct ShellArgs;
+
+struct ImageGeneratorFactoryRegistration {
+  ImageGeneratorFactory factory;
+  int32_t priority;
+};
 
 // The object that is returned to the embedder as an opaque pointer to the
 // instance of the Flutter engine.
@@ -32,19 +38,27 @@ class EmbedderEngine {
       const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
       std::unique_ptr<EmbedderExternalTextureResolver>
           external_texture_resolver,
-      std::optional<FlutterRendererConfig> renderer_config = std::nullopt);
+      std::vector<ImageGeneratorFactoryRegistration> image_generators = {});
 
-  EmbedderEngine(
-      std::shared_ptr<EmbedderThreadHost> thread_host,
-      const TaskRunners& task_runners,
-      std::unique_ptr<Shell> shell,
-      std::unique_ptr<EmbedderExternalTextureResolver>
-          external_texture_resolver,
-      std::optional<FlutterRendererConfig> renderer_config = std::nullopt);
+  EmbedderEngine(std::shared_ptr<EmbedderThreadHost> thread_host,
+                 const TaskRunners& task_runners,
+                 std::unique_ptr<Shell> shell,
+                 std::unique_ptr<EmbedderExternalTextureResolver>
+                     external_texture_resolver);
 
   EmbedderEngine(const TaskRunners& task_runners, std::unique_ptr<Shell> shell);
 
   ~EmbedderEngine();
+
+  std::unique_ptr<EmbedderEngine> Spawn(
+      const std::shared_ptr<EmbedderThreadHost>& thread_host,
+      const TaskRunners& task_runners,
+      RunConfiguration run_configuration,
+      const std::string& initial_route,
+      const Shell::CreateCallback<PlatformView>& on_create_platform_view,
+      const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
+      std::unique_ptr<EmbedderExternalTextureResolver>
+          external_texture_resolver) const;
 
   bool LaunchShell();
 
@@ -53,6 +67,8 @@ class EmbedderEngine {
   void CollectThreadHost();
 
   const TaskRunners& GetTaskRunners() const;
+
+  std::shared_ptr<EmbedderThreadHost> GetThreadHost() const;
 
   bool NotifyCreated();
 
@@ -100,26 +116,35 @@ class EmbedderEngine {
 
   bool ScheduleFrame();
 
+  bool UpdateAssetResolver(
+      std::unique_ptr<AssetResolver> updated_asset_resolver,
+      AssetResolver::AssetResolverType type);
+
   bool LoadDartDeferredLibrary(
-      int64_t loading_unit_id,
+      intptr_t loading_unit_id,
       std::unique_ptr<const fml::Mapping> snapshot_data,
       std::unique_ptr<const fml::Mapping> snapshot_instructions);
 
-  bool NotifyDartDeferredLibraryLoadError(int64_t loading_unit_id,
-                                          const std::string& error_message,
-                                          bool transient);
+  bool LoadDartDeferredLibraryError(intptr_t loading_unit_id,
+                                    const std::string& error_message,
+                                    bool transient);
 
-  bool Screenshot(FlutterEngineScreenshotInfo* screenshot_out);
+  bool RegisterImageGenerator(ImageGeneratorFactory factory, int32_t priority);
 
-  bool RegisterImageDecoder(ImageGeneratorFactory factory, int32_t priority);
-
-  bool UpdateAssetResolverByType(
-      std::unique_ptr<AssetResolver> updated_asset_resolver,
-      AssetResolver::AssetResolverType type);
+  Rasterizer::Screenshot Screenshot(Rasterizer::ScreenshotType type,
+                                    bool base64_encode) const;
 
   Shell& GetShell();
 
   const std::unique_ptr<Shell>& GetShellPointer() const { return shell_; }
+
+  void SetRendererConfig(const FlutterRendererConfig& config) {
+    renderer_config_ = config;
+  }
+
+  const std::optional<FlutterRendererConfig>& GetRendererConfig() const {
+    return renderer_config_;
+  }
 
  private:
   std::shared_ptr<EmbedderThreadHost> thread_host_;
@@ -128,6 +153,7 @@ class EmbedderEngine {
   std::unique_ptr<ShellArgs> shell_args_;
   std::unique_ptr<Shell> shell_;
   std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver_;
+  std::vector<ImageGeneratorFactoryRegistration> image_generators_;
   std::optional<FlutterRendererConfig> renderer_config_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderEngine);
