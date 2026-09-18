@@ -280,7 +280,7 @@ class AndroidEngineGroup {
   bool IsInitialized() const;
 
   /// @brief Returns group configuration.
-  const AndroidEngineGroupConfig& GetConfig() const;
+  AndroidEngineGroupConfig GetConfig() const;
 
   /// @brief Sets the primary / root FlutterEngine handle in this group.
   void SetPrimaryEngine(FLUTTER_API_SYMBOL(FlutterEngine) engine,
@@ -383,6 +383,7 @@ class AndroidEngineGroup {
 
   std::map<int64_t, AndroidEngineRecord> active_engines_;
   std::map<FLUTTER_API_SYMBOL(FlutterEngine), int64_t> handle_to_id_;
+  std::map<int64_t, AndroidEngineRecord> retired_engines_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidEngineGroup);
 };

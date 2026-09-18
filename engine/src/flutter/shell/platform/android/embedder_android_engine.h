@@ -17,12 +17,15 @@
 #include "flutter/flow/embedded_views.h"
 #include "flutter/shell/platform/android/android_compositor.h"
 #include "flutter/shell/platform/android/android_engine.h"
+#include "flutter/shell/platform/android/android_engine_group.h"
+#include "flutter/shell/platform/android/android_hardware_buffer.h"
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/android_surface_control.h"
 #include "flutter/shell/platform/android/android_surface_manager.h"
 #include "flutter/shell/platform/android/android_task_runners.h"
 #include "flutter/shell/platform/android/android_vsync_waiter.h"
+#include "flutter/shell/platform/android/android_vulkan_texture.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -219,6 +222,17 @@ class EmbedderAndroidEngine final : public AndroidEngine {
   GetSurfaceControlProvider() const {
     return surface_control_provider_;
   }
+  std::shared_ptr<android::AndroidHardwareBufferProvider>
+  GetHardwareBufferProvider() const {
+    return hardware_buffer_provider_;
+  }
+  std::shared_ptr<android::AndroidVulkanTextureProvider>
+  GetVulkanTextureProvider() const {
+    return vulkan_texture_provider_;
+  }
+  std::shared_ptr<android::AndroidEngineGroup> GetEngineGroup() const {
+    return engine_group_;
+  }
 
   void OnBeginFrame();
   void OnPlatformViewPresented(int64_t view_id,
@@ -346,6 +360,11 @@ class EmbedderAndroidEngine final : public AndroidEngine {
       platform_views_controller_;
   std::shared_ptr<android::AndroidSurfaceControlProvider>
       surface_control_provider_;
+  std::shared_ptr<android::AndroidHardwareBufferProvider>
+      hardware_buffer_provider_;
+  std::shared_ptr<android::AndroidVulkanTextureProvider>
+      vulkan_texture_provider_;
+  std::shared_ptr<android::AndroidEngineGroup> engine_group_;
   std::shared_ptr<AndroidSurfaceManager> surface_manager_;
   std::shared_ptr<CompositorDelegate> compositor_delegate_;
   std::shared_ptr<AndroidCompositor> compositor_;

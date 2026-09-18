@@ -75,7 +75,6 @@ TEST(AndroidVulkanTextureTest, ComponentMappingAndSwizzle) {
   EXPECT_EQ(mapping.a, AndroidVulkanComponentSwizzle::kIdentity);
 
   FlutterVulkanComponentMapping c_mapping = mapping.ToFlutterComponentMapping();
-  EXPECT_EQ(c_mapping.struct_size, sizeof(FlutterVulkanComponentMapping));
   EXPECT_EQ(c_mapping.r, kFlutterVulkanComponentSwizzleIdentity);
   EXPECT_EQ(c_mapping.g, kFlutterVulkanComponentSwizzleIdentity);
   EXPECT_EQ(c_mapping.b, kFlutterVulkanComponentSwizzleIdentity);
@@ -102,10 +101,12 @@ TEST(AndroidVulkanTextureTest, ComponentMappingAndSwizzle) {
 
 TEST(AndroidVulkanTextureTest, YcbcrConversionDescCreationAndConversion) {
   constexpr uint64_t external_format_id = 0xABCD1234ULL;
+  constexpr uint32_t expected_format_features = 0x1F;
   auto ycbcr = AndroidVulkanYcbcrConversionDesc::MakeExternal(
       external_format_id, AndroidVulkanYcbcrModel::kYcbcr709,
       AndroidVulkanYcbcrRange::kItuFull,
-      AndroidVulkanChromaLocation::kCositedEven, AndroidVulkanFilter::kNearest);
+      AndroidVulkanChromaLocation::kCositedEven, AndroidVulkanFilter::kNearest,
+      expected_format_features);
 
   EXPECT_EQ(ycbcr.format, 0u);
   EXPECT_EQ(ycbcr.external_format, external_format_id);
@@ -120,6 +121,7 @@ TEST(AndroidVulkanTextureTest, YcbcrConversionDescCreationAndConversion) {
   EXPECT_EQ(ycbcr.chroma_filter,
             static_cast<uint32_t>(AndroidVulkanFilter::kNearest));
   EXPECT_EQ(ycbcr.force_explicit_reconstruction, 0u);
+  EXPECT_EQ(ycbcr.format_features, expected_format_features);
 
   FlutterVulkanYcbcrConversionInfo c_info =
       ycbcr.ToFlutterYcbcrConversionInfo();
@@ -129,12 +131,16 @@ TEST(AndroidVulkanTextureTest, YcbcrConversionDescCreationAndConversion) {
             static_cast<uint32_t>(AndroidVulkanYcbcrModel::kYcbcr709));
   EXPECT_EQ(c_info.ycbcr_range,
             static_cast<uint32_t>(AndroidVulkanYcbcrRange::kItuFull));
-  EXPECT_EQ(c_info.components.struct_size,
-            sizeof(FlutterVulkanComponentMapping));
+  EXPECT_EQ(c_info.components.r, kFlutterVulkanComponentSwizzleIdentity);
+  EXPECT_EQ(c_info.components.g, kFlutterVulkanComponentSwizzleIdentity);
+  EXPECT_EQ(c_info.components.b, kFlutterVulkanComponentSwizzleIdentity);
+  EXPECT_EQ(c_info.components.a, kFlutterVulkanComponentSwizzleIdentity);
+  EXPECT_EQ(c_info.format_features, expected_format_features);
 
   auto roundtrip =
       AndroidVulkanYcbcrConversionDesc::FromFlutterYcbcrConversionInfo(c_info);
   EXPECT_EQ(roundtrip, ycbcr);
+  EXPECT_EQ(roundtrip.format_features, expected_format_features);
 }
 
 TEST(AndroidVulkanTextureTest, ImageDescValidationAndEquality) {
@@ -401,6 +407,31 @@ TEST(AndroidVulkanTextureTest, CreateFromAHardwareBufferIntegration) {
   FlutterVulkanExternalTexture ext_yuv = vk_yuv_tex->ToExternalTexture();
   ASSERT_NE(ext_yuv.ycbcr_conversion_info, nullptr);
   EXPECT_EQ(ext_yuv.ycbcr_conversion_info->external_format, ahb_yuv->GetId());
+}
+
+TEST(AndroidVulkanTextureTest, CreateFromAHardwareBufferFallbacks) {
+  auto ahb_provider = std::make_shared<InMemoryAndroidHardwareBufferProvider>();
+  auto ahb_rgba_desc = AndroidHardwareBufferDesc::MakeRGBA8(1920, 1080);
+  auto ahb = ahb_provider->Allocate(ahb_rgba_desc);
+  ASSERT_NE(ahb, nullptr);
+
+  // 1. DefaultAndroidVulkanTextureProvider must return nullptr (unsupported
+  // conversion in embedder)
+  auto default_vk_provider =
+      std::make_shared<DefaultAndroidVulkanTextureProvider>();
+  EXPECT_EQ(default_vk_provider->CreateFromAHardwareBuffer(ahb.get()), nullptr);
+
+  // 2. InMemoryAndroidVulkanTextureProvider: fallback when !is_available_
+  auto in_mem_provider =
+      std::make_shared<InMemoryAndroidVulkanTextureProvider>();
+  in_mem_provider->SetAvailable(false);
+  EXPECT_EQ(in_mem_provider->CreateFromAHardwareBuffer(ahb.get()), nullptr);
+
+  // 3. InMemoryAndroidVulkanTextureProvider: fallback when allocation_failure_
+  // is true
+  in_mem_provider->SetAvailable(true);
+  in_mem_provider->SetAllocationFailure(true);
+  EXPECT_EQ(in_mem_provider->CreateFromAHardwareBuffer(ahb.get()), nullptr);
 }
 
 TEST(AndroidVulkanTextureTest, ConcurrentMultiThreadedVulkanTextureOperations) {

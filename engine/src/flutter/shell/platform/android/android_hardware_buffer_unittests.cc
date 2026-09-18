@@ -126,6 +126,12 @@ TEST(AndroidHardwareBufferTest, FormatAndBytesPerPixel) {
   EXPECT_EQ(AndroidHardwareBufferBytesPerPixel(
                 static_cast<uint32_t>(AndroidHardwareBufferFormat::kR16Uint)),
             2u);
+  EXPECT_EQ(AndroidHardwareBufferBytesPerPixel(
+                static_cast<uint32_t>(AndroidHardwareBufferFormat::kD24Unorm)),
+            3u);
+  EXPECT_EQ(AndroidHardwareBufferBytesPerPixel(static_cast<uint32_t>(
+                AndroidHardwareBufferFormat::kR10G10B10A10Unorm)),
+            8u);
   EXPECT_EQ(AndroidHardwareBufferBytesPerPixel(static_cast<uint32_t>(
                 AndroidHardwareBufferFormat::kR16G16Uint)),
             4u);
@@ -187,17 +193,29 @@ TEST(AndroidHardwareBufferTest, InMemoryProviderAllocationAndLifecycle) {
   EXPECT_EQ(ext_texture.width, 640u);
   EXPECT_EQ(ext_texture.height, 480u);
   EXPECT_EQ(ext_texture.format, desc.format);
+  EXPECT_EQ(ext_texture.fence_fd, -1);
   EXPECT_EQ(ext_texture.buffer, buffer->ToHandle());
   EXPECT_EQ(ext_texture.user_data, test_user_data);
 
+  // Test invalid rect rejection in Lock
+  AndroidHardwareBufferRect invalid_rect{0, 0, 1000, 1000};  // Exceeds 640x480
+  void* invalid_addr = nullptr;
+  EXPECT_EQ(buffer->Lock(AndroidHardwareBufferUsage::kCpuWriteOften, -1,
+                         &invalid_rect, &invalid_addr),
+            -1);
+
+  // Unbalanced unlock before lock returns -1
+  EXPECT_EQ(buffer->Unlock(), -1);
+
   // Lock and write memory
   void* mapped_address = nullptr;
+  AndroidHardwareBufferRect valid_rect{0, 0, 640, 480};
   int lock_res = buffer->Lock(AndroidHardwareBufferUsage::kCpuWriteOften, -1,
-                              nullptr, &mapped_address);
+                              &valid_rect, &mapped_address);
   EXPECT_EQ(lock_res, 0);
   ASSERT_NE(mapped_address, nullptr);
 
-  // Write byte pattern
+  // Write byte pattern at (0, 0)
   uint8_t* byte_ptr = static_cast<uint8_t*>(mapped_address);
   byte_ptr[0] = 0xAA;
   byte_ptr[1] = 0xBB;
@@ -206,6 +224,18 @@ TEST(AndroidHardwareBufferTest, InMemoryProviderAllocationAndLifecycle) {
 
   int unlock_res = buffer->Unlock();
   EXPECT_EQ(unlock_res, 0);
+
+  // Lock sub-rect and verify pointer is correctly offset
+  void* sub_address = nullptr;
+  AndroidHardwareBufferRect sub_rect{10, 20, 100, 100};
+  EXPECT_EQ(buffer->Lock(AndroidHardwareBufferUsage::kCpuWriteOften, -1,
+                         &sub_rect, &sub_address),
+            0);
+  ASSERT_NE(sub_address, nullptr);
+  size_t expected_offset = (20 * 640 + 10) * 4;
+  EXPECT_EQ(static_cast<uint8_t*>(sub_address),
+            static_cast<uint8_t*>(mapped_address) + expected_offset);
+  EXPECT_EQ(buffer->Unlock(), 0);
 
   // Lock again to verify persistent contents
   void* read_address = nullptr;
@@ -219,16 +249,17 @@ TEST(AndroidHardwareBufferTest, InMemoryProviderAllocationAndLifecycle) {
   EXPECT_EQ(read_ptr[3], 0xFF);
   buffer->Unlock();
 
-  // Test acquire/release
-  buffer->Acquire();
-  buffer->Release();
-
-  // Destroy buffer and verify release
+  // Test acquire/release reflecting on provider
   void* handle = buffer->GetHandle();
   EXPECT_NE(handle, nullptr);
+  buffer->Acquire();
+  // Provider release on handle should decrement refcount back
+  provider->Release(handle);
+
+  // Destroy buffer and verify release
   buffer.reset();
 
-  EXPECT_EQ(provider->GetReleaseCount(), 1u);
+  EXPECT_EQ(provider->GetReleaseCount(), 2u);
   EXPECT_EQ(provider->GetActiveBufferCount(), 0u);
 }
 
@@ -358,6 +389,14 @@ TEST(AndroidHardwareBufferTest, DefaultProviderWithMockOSLibrary) {
   EXPECT_EQ(buffer->Unlock(), 0);
   EXPECT_TRUE(g_mock_unlock_called);
 
+  // Test external texture conversion
+  auto ext_texture = buffer->ToExternalTexture();
+  EXPECT_EQ(ext_texture.struct_size,
+            sizeof(FlutterHardwareBufferExternalTexture));
+  EXPECT_EQ(ext_texture.width, 1920u);
+  EXPECT_EQ(ext_texture.height, 1080u);
+  EXPECT_EQ(ext_texture.fence_fd, -1);
+
   // Test acquire
   buffer->Acquire();
   EXPECT_TRUE(g_mock_acquire_called);
@@ -381,6 +420,44 @@ TEST(AndroidHardwareBufferTest,
   EXPECT_EQ(provider->Allocate(desc), nullptr);
   EXPECT_EQ(provider->CreateFromNativeHandle(reinterpret_cast<void*>(0x1234)),
             nullptr);
+}
+
+TEST(AndroidHardwareBufferTest, DefaultProviderApi26To28Degradation) {
+  auto mock_loader = std::make_shared<MockOSLibraryLoader>();
+  auto mock_lib = std::make_shared<MockOSLibrary>("libandroid.so");
+
+  // Register only baseline API 26 symbols (omit getId and isSupported)
+  mock_lib->SetSymbol("AHardwareBuffer_allocate",
+                      reinterpret_cast<void*>(&Mock_AHardwareBuffer_allocate));
+  mock_lib->SetSymbol("AHardwareBuffer_release",
+                      reinterpret_cast<void*>(&Mock_AHardwareBuffer_release));
+  mock_lib->SetSymbol("AHardwareBuffer_describe",
+                      reinterpret_cast<void*>(&Mock_AHardwareBuffer_describe));
+  mock_lib->SetSymbol("AHardwareBuffer_acquire",
+                      reinterpret_cast<void*>(&Mock_AHardwareBuffer_acquire));
+  mock_lib->SetSymbol("AHardwareBuffer_lock",
+                      reinterpret_cast<void*>(&Mock_AHardwareBuffer_lock));
+  mock_lib->SetSymbol("AHardwareBuffer_unlock",
+                      reinterpret_cast<void*>(&Mock_AHardwareBuffer_unlock));
+
+  mock_loader->RegisterLibrary("libandroid.so", mock_lib);
+
+  auto provider =
+      std::make_shared<DefaultAndroidHardwareBufferProvider>(mock_loader);
+  EXPECT_TRUE(provider->IsAvailable());
+
+  auto desc = AndroidHardwareBufferDesc::MakeRGBA8(1280, 720);
+  // Without isSupported symbol, provider falls back to is_available_ &&
+  // desc.IsValid()
+  EXPECT_TRUE(provider->IsSupported(desc));
+
+  auto buffer = provider->Allocate(desc);
+  ASSERT_NE(buffer, nullptr);
+  // Without getId symbol, id defaults to 0
+  EXPECT_EQ(buffer->GetId(), 0u);
+  EXPECT_EQ(buffer->GetHandle(), g_mock_ahb_handle);
+
+  buffer.reset();
 }
 
 TEST(AndroidHardwareBufferTest, MultithreadedConcurrentBufferOperations) {

@@ -9,7 +9,6 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/shell/platform/android/flutter_embedder_native.h"
 
 namespace flutter {
 namespace android {
@@ -108,12 +107,14 @@ void* DefaultAndroidVulkanExternalTexture::GetDeviceMemory() const {
 uint32_t DefaultAndroidVulkanExternalTexture::GetImageLayout() const {
   TRACE_EVENT0("flutter",
                "DefaultAndroidVulkanExternalTexture::GetImageLayout");
+  std::lock_guard<std::mutex> lock(mutex_);
   return desc_.image_layout;
 }
 
 void DefaultAndroidVulkanExternalTexture::SetImageLayout(uint32_t layout) {
   TRACE_EVENT0("flutter",
                "DefaultAndroidVulkanExternalTexture::SetImageLayout");
+  std::lock_guard<std::mutex> lock(mutex_);
   desc_.image_layout = layout;
 }
 
@@ -158,6 +159,7 @@ DefaultAndroidVulkanExternalTexture::ToExternalTexture(
     VoidCallback destruction_callback) const {
   TRACE_EVENT0("flutter",
                "DefaultAndroidVulkanExternalTexture::ToExternalTexture");
+  std::lock_guard<std::mutex> lock(mutex_);
   FlutterVulkanExternalTexture ext_texture = {};
   ext_texture.struct_size = sizeof(FlutterVulkanExternalTexture);
   ext_texture.width = desc_.width;
@@ -194,7 +196,7 @@ DefaultAndroidVulkanTextureProvider::DefaultAndroidVulkanTextureProvider(
     std::shared_ptr<OSLibraryLoader> library_loader)
     : library_loader_(library_loader
                           ? std::move(library_loader)
-                          : FlutterEmbedderNative::GetDefaultLibraryLoader()) {
+                          : OSLibraryLoader::GetDefaultLibraryLoader()) {
   TRACE_EVENT0("flutter",
                "DefaultAndroidVulkanTextureProvider::"
                "DefaultAndroidVulkanTextureProvider");
@@ -213,7 +215,7 @@ void DefaultAndroidVulkanTextureProvider::EnsureLoaded() const {
     return;
   }
   if (!library_loader_) {
-    library_loader_ = FlutterEmbedderNative::GetDefaultLibraryLoader();
+    library_loader_ = OSLibraryLoader::GetDefaultLibraryLoader();
   }
   if (!library_loader_) {
     loaded_ = true;
@@ -297,43 +299,19 @@ DefaultAndroidVulkanTextureProvider::CreateFromAHardwareBuffer(
       "flutter",
       "DefaultAndroidVulkanTextureProvider::CreateFromAHardwareBuffer");
   EnsureLoaded();
+  if (!is_available_) {
+    return nullptr;
+  }
   if (!hardware_buffer || !hardware_buffer->IsValid()) {
     return nullptr;
   }
-
-  const auto& ahb_desc = hardware_buffer->GetDescription();
-  AndroidVulkanImageDesc vk_desc;
-  vk_desc.width = ahb_desc.width;
-  vk_desc.height = ahb_desc.height;
-  vk_desc.image_layout =
-      static_cast<uint32_t>(AndroidVulkanImageLayout::kShaderReadOnlyOptimal);
-
-  if (ycbcr_desc != nullptr) {
-    vk_desc.format = ycbcr_desc->format;
-    vk_desc.ycbcr_conversion = *ycbcr_desc;
-  } else if (ahb_desc.format ==
-                 static_cast<uint32_t>(
-                     AndroidHardwareBufferFormat::kY8Cb8Cr8420) ||
-             ahb_desc.format == static_cast<uint32_t>(
-                                    AndroidHardwareBufferFormat::kYCbCrP010) ||
-             ahb_desc.format == static_cast<uint32_t>(
-                                    AndroidHardwareBufferFormat::kYCbCrP210)) {
-    vk_desc.format = 0;  // external format
-    vk_desc.ycbcr_conversion = AndroidVulkanYcbcrConversionDesc::MakeExternal(
-        hardware_buffer->GetId());
-  } else {
-    vk_desc.format = static_cast<uint32_t>(AndroidVulkanFormat::kR8G8B8A8Unorm);
-  }
-
-  uint64_t simulated_image = static_cast<uint64_t>(
-      reinterpret_cast<uintptr_t>(hardware_buffer->GetHandle()));
-  if (simulated_image == 0) {
-    simulated_image = hardware_buffer->GetId();
-  }
-
-  return std::make_unique<DefaultAndroidVulkanExternalTexture>(
-      vk_desc, simulated_image, nullptr, /*owns_handle=*/false,
-      shared_from_this());
+  // Hardware buffers cannot be directly converted to VkImage handles without
+  // engine VkDevice import. Callers must route AHardwareBuffer instances
+  // directly through SetHardwareBufferFrame.
+  FML_LOG(ERROR)
+      << "Direct conversion of AHardwareBuffer to VkImage in embedder is "
+         "unsupported. Use SetHardwareBufferFrame instead.";
+  return nullptr;
 }
 
 void DefaultAndroidVulkanTextureProvider::Acquire(uint64_t image_handle) {
@@ -416,12 +394,14 @@ void* InMemoryAndroidVulkanExternalTexture::GetDeviceMemory() const {
 uint32_t InMemoryAndroidVulkanExternalTexture::GetImageLayout() const {
   TRACE_EVENT0("flutter",
                "InMemoryAndroidVulkanExternalTexture::GetImageLayout");
+  std::lock_guard<std::mutex> lock(mutex_);
   return desc_.image_layout;
 }
 
 void InMemoryAndroidVulkanExternalTexture::SetImageLayout(uint32_t layout) {
   TRACE_EVENT0("flutter",
                "InMemoryAndroidVulkanExternalTexture::SetImageLayout");
+  std::lock_guard<std::mutex> lock(mutex_);
   desc_.image_layout = layout;
 }
 
@@ -466,6 +446,7 @@ InMemoryAndroidVulkanExternalTexture::ToExternalTexture(
     VoidCallback destruction_callback) const {
   TRACE_EVENT0("flutter",
                "InMemoryAndroidVulkanExternalTexture::ToExternalTexture");
+  std::lock_guard<std::mutex> lock(mutex_);
   FlutterVulkanExternalTexture ext_texture = {};
   ext_texture.struct_size = sizeof(FlutterVulkanExternalTexture);
   ext_texture.width = desc_.width;
@@ -628,6 +609,9 @@ InMemoryAndroidVulkanTextureProvider::CreateFromAHardwareBuffer(
   }
 
   std::lock_guard<std::mutex> lock(mutex_);
+  if (!is_available_ || allocation_failure_) {
+    return nullptr;
+  }
   uint64_t handle = next_image_handle_++;
   allocation_count_++;
 

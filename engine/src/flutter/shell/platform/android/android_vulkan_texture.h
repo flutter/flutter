@@ -102,7 +102,6 @@ struct AndroidVulkanComponentMapping {
 
   FlutterVulkanComponentMapping ToFlutterComponentMapping() const {
     FlutterVulkanComponentMapping mapping = {};
-    mapping.struct_size = sizeof(FlutterVulkanComponentMapping);
     mapping.r = static_cast<FlutterVulkanComponentSwizzle>(r);
     mapping.g = static_cast<FlutterVulkanComponentSwizzle>(g);
     mapping.b = static_cast<FlutterVulkanComponentSwizzle>(b);
@@ -143,6 +142,7 @@ struct AndroidVulkanYcbcrConversionDesc {
       static_cast<uint32_t>(AndroidVulkanChromaLocation::kMidpoint);
   uint32_t chroma_filter = static_cast<uint32_t>(AndroidVulkanFilter::kLinear);
   uint32_t force_explicit_reconstruction = 0;
+  uint32_t format_features = 0;
   uint64_t external_format = 0;
 
   static AndroidVulkanYcbcrConversionDesc MakeExternal(
@@ -151,7 +151,8 @@ struct AndroidVulkanYcbcrConversionDesc {
       AndroidVulkanYcbcrRange range = AndroidVulkanYcbcrRange::kItuNarrow,
       AndroidVulkanChromaLocation chroma_offset =
           AndroidVulkanChromaLocation::kMidpoint,
-      AndroidVulkanFilter filter = AndroidVulkanFilter::kLinear) {
+      AndroidVulkanFilter filter = AndroidVulkanFilter::kLinear,
+      uint32_t format_features = 0) {
     AndroidVulkanYcbcrConversionDesc desc;
     desc.format = 0;
     desc.ycbcr_model = static_cast<uint32_t>(model);
@@ -161,6 +162,7 @@ struct AndroidVulkanYcbcrConversionDesc {
     desc.y_chroma_offset = static_cast<uint32_t>(chroma_offset);
     desc.chroma_filter = static_cast<uint32_t>(filter);
     desc.force_explicit_reconstruction = 0;
+    desc.format_features = format_features;
     desc.external_format = external_format_id;
     return desc;
   }
@@ -171,7 +173,8 @@ struct AndroidVulkanYcbcrConversionDesc {
       AndroidVulkanYcbcrRange range,
       AndroidVulkanChromaLocation x_chroma_offset,
       AndroidVulkanChromaLocation y_chroma_offset,
-      AndroidVulkanFilter filter) {
+      AndroidVulkanFilter filter,
+      uint32_t format_features = 0) {
     AndroidVulkanYcbcrConversionDesc desc;
     desc.format = 0;
     desc.ycbcr_model = static_cast<uint32_t>(model);
@@ -181,6 +184,7 @@ struct AndroidVulkanYcbcrConversionDesc {
     desc.y_chroma_offset = static_cast<uint32_t>(y_chroma_offset);
     desc.chroma_filter = static_cast<uint32_t>(filter);
     desc.force_explicit_reconstruction = 0;
+    desc.format_features = format_features;
     desc.external_format = external_format_id;
     return desc;
   }
@@ -196,6 +200,7 @@ struct AndroidVulkanYcbcrConversionDesc {
     info.y_chroma_offset = y_chroma_offset;
     info.chroma_filter = chroma_filter;
     info.force_explicit_reconstruction = force_explicit_reconstruction;
+    info.format_features = format_features;
     info.external_format = external_format;
     return info;
   }
@@ -213,6 +218,7 @@ struct AndroidVulkanYcbcrConversionDesc {
     desc.y_chroma_offset = info.y_chroma_offset;
     desc.chroma_filter = info.chroma_filter;
     desc.force_explicit_reconstruction = info.force_explicit_reconstruction;
+    desc.format_features = info.format_features;
     desc.external_format = info.external_format;
     return desc;
   }
@@ -225,6 +231,7 @@ struct AndroidVulkanYcbcrConversionDesc {
            chroma_filter == other.chroma_filter &&
            force_explicit_reconstruction ==
                other.force_explicit_reconstruction &&
+           format_features == other.format_features &&
            external_format == other.external_format;
   }
 
@@ -406,6 +413,7 @@ class DefaultAndroidVulkanExternalTexture
   FlutterVulkanImage ToFlutterVulkanImage() const override;
 
  private:
+  mutable std::mutex mutex_;
   AndroidVulkanImageDesc desc_;
   uint64_t image_handle_ = 0;
   void* device_memory_ = nullptr;
