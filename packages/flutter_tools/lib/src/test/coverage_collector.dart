@@ -4,14 +4,10 @@
 
 import 'package:coverage/coverage.dart' as coverage;
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
-import '../artifacts.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../context/tool_context.dart';
@@ -22,6 +18,7 @@ import 'watcher.dart';
 
 /// A class that collects code coverage data during test runs.
 class CoverageCollector extends TestWatcher {
+  // ignore: prefer_initializing_formals
   CoverageCollector({
     required this.packagesPath,
     required ToolContext toolContext,
