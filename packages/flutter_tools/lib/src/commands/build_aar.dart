@@ -10,7 +10,6 @@ import '../android/android_sdk.dart';
 import '../android/gradle_utils.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -80,15 +79,19 @@ class BuildAarCommand extends BuildSubCommand {
   final AndroidContext _androidContext;
   final BuildSystem _buildSystem;
 
+  /// The [AndroidBuilder] used to build the AAR.
   @visibleForTesting
   AndroidBuilder get androidBuilder => _androidBuilder;
 
+  /// The [AndroidContext] containing Android-specific toolchain dependencies.
   @visibleForTesting
   AndroidContext get androidContext => _androidContext;
 
+  /// The [AndroidSdk] instance, if available.
   @visibleForTesting
   AndroidSdk? get androidSdk => _androidContext.androidSdk;
 
+  /// The [BuildSystem] used for building the project.
   @visibleForTesting
   BuildSystem get buildSystem => _buildSystem;
 
@@ -150,8 +153,7 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Logger logger = toolContext.logger;
-    if (androidSdk == null) {
+    if (_androidContext.androidSdk == null) {
       exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
     final androidBuildInfo = <AndroidBuildInfo>{};
