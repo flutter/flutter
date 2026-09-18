@@ -377,7 +377,7 @@ void main() {
           fs: fileSystem,
           logger: BufferLogger.test(),
           os: FakeOperatingSystemUtils(),
-          platform: const LocalPlatform(),
+          platform: FakePlatform(),
           processUtils: ProcessUtils(
             logger: BufferLogger.test(),
             processManager: FakeProcessManager.any(),
@@ -468,7 +468,7 @@ void main() {
           fs: fileSystem,
           logger: BufferLogger.test(),
           os: FakeOperatingSystemUtils(),
-          platform: const LocalPlatform(),
+          platform: FakePlatform(),
           processUtils: ProcessUtils(
             logger: BufferLogger.test(),
             processManager: FakeProcessManager.any(),
@@ -520,7 +520,7 @@ void main() {
           fs: fileSystem,
           logger: BufferLogger.test(),
           os: FakeOperatingSystemUtils(),
-          platform: const LocalPlatform(),
+          platform: FakePlatform(),
           processUtils: ProcessUtils(
             logger: BufferLogger.test(),
             processManager: FakeProcessManager.any(),
@@ -547,7 +547,7 @@ void main() {
           fs: fileSystem,
           logger: BufferLogger.test(),
           os: FakeOperatingSystemUtils(),
-          platform: const LocalPlatform(),
+          platform: FakePlatform(),
           processUtils: ProcessUtils(
             logger: BufferLogger.test(),
             processManager: FakeProcessManager.any(),
@@ -594,7 +594,7 @@ void main() {
             fs: fileSystem,
             logger: logger,
             os: FakeOperatingSystemUtils(),
-            platform: const LocalPlatform(),
+            platform: FakePlatform(),
             processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.any()),
           ),
           verbose: false,
