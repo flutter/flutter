@@ -4338,7 +4338,7 @@ void _testRoute() {
     ]);
 
     expectSemanticsTree(owner(), '''
-      <sem role="region" aria-label=""><sem></sem></sem>
+      <sem aria-label=""><sem></sem></sem>
     ''');
 
     expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);

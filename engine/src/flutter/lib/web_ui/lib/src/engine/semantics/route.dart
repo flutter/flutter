@@ -104,7 +104,8 @@ class SemanticRoute extends SemanticRouteBase {
   @override
   void update() {
     super.update();
-    if (semanticsObject.namesRoute) {
+    final String? label = semanticsObject.label;
+    if (semanticsObject.namesRoute && label != null && label.trim().isNotEmpty) {
       setAriaRole('region');
     } else {
       removeAttribute('role');
