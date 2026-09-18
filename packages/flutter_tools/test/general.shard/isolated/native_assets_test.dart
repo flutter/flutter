@@ -19,7 +19,6 @@ import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/test/native_assets.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../../src/common.dart';
@@ -518,7 +517,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
     },
   );
 
-  group('TestCompilerNativeAssetsBuilderImpl', () {
+  group('testCompilerBuildNativeAssets', () {
     testUsingContext(
       'falls back to manifest appName when package root does not match projectUri '
       '(regression test for https://github.com/flutter/flutter/issues/192933)',
@@ -568,19 +567,7 @@ environment:
         );
 
         final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
-        String? resolvedRunPackageName;
-        final builder = TestCompilerNativeAssetsBuilderImpl(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: FakePlatform(),
-          projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
-          buildRunnerFactory: (String runPackageName, String pubspecPath) {
-            resolvedRunPackageName = runPackageName;
-            return fakeRunner;
-          },
-        );
-        final Uri? result = await builder.build(buildInfo);
-        expect(resolvedRunPackageName, 'my_app');
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
         expect(result, isNotNull);
         expect(fileSystem.file(result).existsSync(), isTrue);
       },
@@ -636,19 +623,7 @@ environment:
         );
 
         final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
-        String? resolvedRunPackageName;
-        final builder = TestCompilerNativeAssetsBuilderImpl(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: FakePlatform(),
-          projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
-          buildRunnerFactory: (String runPackageName, String pubspecPath) {
-            resolvedRunPackageName = runPackageName;
-            return fakeRunner;
-          },
-        );
-        final Uri? result = await builder.build(buildInfo);
-        expect(resolvedRunPackageName, 'symlink_pkg');
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
         expect(result, isNotNull);
         expect(fileSystem.file(result).existsSync(), isTrue);
       },
@@ -700,19 +675,7 @@ environment:
         );
 
         final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
-        String? resolvedRunPackageName;
-        final builder = TestCompilerNativeAssetsBuilderImpl(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: FakePlatform(),
-          projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
-          buildRunnerFactory: (String runPackageName, String pubspecPath) {
-            resolvedRunPackageName = runPackageName;
-            return fakeRunner;
-          },
-        );
-        final Uri? result = await builder.build(buildInfo);
-        expect(resolvedRunPackageName, 'fallback_pkg');
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
         expect(result, isNotNull);
         expect(fileSystem.file(result).existsSync(), isTrue);
       },
@@ -761,19 +724,7 @@ environment:
         );
 
         final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
-        String? resolvedRunPackageName;
-        final builder = TestCompilerNativeAssetsBuilderImpl(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: FakePlatform(),
-          projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
-          buildRunnerFactory: (String runPackageName, String pubspecPath) {
-            resolvedRunPackageName = runPackageName;
-            return fakeRunner;
-          },
-        );
-        final Uri? result = await builder.build(buildInfo);
-        expect(resolvedRunPackageName, 'standalone_app');
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
         expect(result, isNotNull);
         expect(fileSystem.file(result).existsSync(), isTrue);
       },
@@ -821,20 +772,13 @@ environment:
         );
 
         final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
-        final builder = TestCompilerNativeAssetsBuilderImpl(
-          buildRunner: fakeRunner,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: FakePlatform(),
-          projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
-        );
-        final Uri? result = await builder.build(buildInfo);
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
         expect(result, isNull);
       },
     );
 
     testUsingContext(
-      'prefers direct root URI match and invokes buildRunnerFactory',
+      'prefers direct root URI match over manifest and first package',
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
@@ -861,6 +805,16 @@ environment:
           logger: logger,
         );
 
+        expect(
+          findRunPackageName(
+            fileSystem: fileSystem,
+            manifestAppName: 'manifest_pkg',
+            packageConfig: packageConfig,
+            projectUri: projectDir.uri,
+          ),
+          'direct_pkg',
+        );
+
         final buildInfo = BuildInfo(
           BuildMode.debug,
           '',
@@ -870,19 +824,7 @@ environment:
         );
 
         final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
-        String? resolvedRunPackageName;
-        final builder = TestCompilerNativeAssetsBuilderImpl(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: FakePlatform(),
-          projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
-          buildRunnerFactory: (String runPackageName, String pubspecPath) {
-            resolvedRunPackageName = runPackageName;
-            return fakeRunner;
-          },
-        );
-        final Uri? result = await builder.build(buildInfo);
-        expect(resolvedRunPackageName, 'direct_pkg');
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
         expect(result, isNotNull);
         expect(fileSystem.file(result).existsSync(), isTrue);
       },

@@ -181,12 +181,7 @@ Future<void> main(List<String> args) async {
         // runner.run calls "terminal.applyFeatureFlags()"
       },
       PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
-      TestCompilerNativeAssetsBuilder: () => TestCompilerNativeAssetsBuilderImpl(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        platform: globals.platform,
-        projectFactory: globals.projectFactory,
-      ),
+      TestCompilerNativeAssetsBuilder: () => const TestCompilerNativeAssetsBuilderImpl(),
     },
     shutdownHooks: globals.shutdownHooks,
   );

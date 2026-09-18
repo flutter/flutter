@@ -9,9 +9,9 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
-import '../../../base/logger.dart';
 import '../../../base/platform.dart';
 import '../../../build_info.dart';
+import '../../../globals.dart' as globals;
 import '../../../native_assets.dart';
 import '../../../project.dart';
 import '../dart_hook_result.dart';
@@ -23,126 +23,115 @@ const _pubspecYamlFileName = 'pubspec.yaml';
 
 /// Builds native assets for `flutter test` targets on the host platform.
 class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBuilder {
-  const TestCompilerNativeAssetsBuilderImpl({
-    required this._fileSystem,
-    required this._logger,
-    required this._platform,
-    required this._projectFactory,
-    @visibleForTesting this._buildRunner,
-    @visibleForTesting this._buildRunnerFactory,
-  });
+  const TestCompilerNativeAssetsBuilderImpl();
 
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final Platform _platform;
-  final FlutterProjectFactory _projectFactory;
-  final FlutterNativeAssetsBuildRunner? _buildRunner;
-  final FlutterNativeAssetsBuildRunner Function(String runPackageName, String pubspecPath)?
-  _buildRunnerFactory;
-
-  /// Builds native assets for `flutter test` execution using [buildInfo].
-  ///
-  /// Resolves the target package name for the current project and executes build
-  /// and install hooks for the host test platform ([TargetPlatform.tester]),
-  /// writing the generated manifest to `build/native_assets/<os>/native_assets.json`.
-  ///
-  /// Returns the [Uri] to the generated `native_assets.json` file, or `null`
-  /// if native assets are disabled, unsupported on the host OS, or no package can
-  /// be resolved.
   @override
-  Future<Uri?> build(BuildInfo buildInfo) async {
-    final BuildInfo(:buildNativeAssets, :mode, :packageConfig, :packageConfigPath) = buildInfo;
-    if (!buildNativeAssets) {
-      return null;
-    }
-    final FlutterProject project = _projectFactory.fromDirectory(_fileSystem.currentDirectory);
-    final Uri projectUri = project.directory.uri;
-    final String? runPackageName = findRunPackageName(
-      fileSystem: _fileSystem,
-      manifestAppName: project.manifest.appName,
-      packageConfig: packageConfig,
-      projectUri: projectUri,
-    );
-    if (runPackageName == null) {
-      _logger.printTrace('Could not determine run package name for native assets testing.');
-      return null;
-    }
-    final File pubspecFromPackageConfig = _fileSystem.file(
-      Uri.file(packageConfigPath).resolve('../$_pubspecYamlFileName'),
-    );
-    final String pubspecPath = pubspecFromPackageConfig.existsSync()
-        ? pubspecFromPackageConfig.path
-        : project.directory.childFile(_pubspecYamlFileName).path;
-    final FlutterNativeAssetsBuildRunner runner =
-        _buildRunner ??
-        _buildRunnerFactory?.call(runPackageName, pubspecPath) ??
-        FlutterNativeAssetsBuildRunnerImpl(
-          packageConfigPath,
-          packageConfig,
-          _fileSystem,
-          _logger,
-          _platform,
-          runPackageName,
-          pubspecPath,
-          includeDevDependencies: true,
-        );
-
-    if (!_platform.isMacOS && !_platform.isLinux && !_platform.isWindows) {
-      await ensureNoNativeAssetsOrOsIsSupported(
-        projectUri,
-        _platform.operatingSystem,
-        _fileSystem,
-        runner,
-      );
-      return null;
-    }
-
-    // Only `flutter test` uses the
-    // `build/native_assets/<os>/native_assets.json` file which uses absolute
-    // paths to the shared libraries.
-    final OS targetOS = getNativeOSFromTargetPlatform(TargetPlatform.tester);
-    final String buildDir = getBuildDirectory();
-    final String osName = targetOS.name;
-    final Uri buildUri = projectUri.resolve('$buildDir/native_assets/$osName/');
-    final Uri nativeAssetsFileUri = buildUri.resolve(_nativeAssetsJsonFileName);
-
-    final environmentDefines = <String, String>{kBuildMode: mode.cliName};
-
-    // First perform the dart build.
-    final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
-      environmentDefines: environmentDefines,
-      buildRunner: runner,
-      targetPlatform: TargetPlatform.tester,
-      projectUri: projectUri,
-      fileSystem: _fileSystem,
-      buildCodeAssets: const BuildCodeAssetsOptions(
-        // We're in tests, so there is no app build directory
-        appBuildDirectory: null,
-      ),
-      buildDataAssets: true,
-      recordedUsesFile: null,
-    );
-
-    // Then "install" the code assets so they can be used at runtime.
-    await installCodeAssets(
-      dartHookResult: dartHookResult,
-      environmentDefines: environmentDefines,
-      targetPlatform: TargetPlatform.tester,
-      projectUri: projectUri,
-      fileSystem: _fileSystem,
-      nativeAssetsFileUri: nativeAssetsFileUri,
-      targetUri: buildUri,
-    );
-    assert(_fileSystem.file(nativeAssetsFileUri).existsSync());
-
-    return nativeAssetsFileUri;
-  }
+  Future<Uri?> build(BuildInfo buildInfo) => testCompilerBuildNativeAssets(buildInfo);
 
   @override
   String windowsBuildDirectory(FlutterProject project) {
     final String buildDir = getBuildDirectory();
     return project.directory.uri.resolve('$buildDir/native_assets/windows/').toFilePath();
   }
+}
+
+/// Builds native assets for `flutter test` execution using [buildInfo].
+///
+/// Resolves the target package name for the current project and executes build
+/// and install hooks for the host test platform ([TargetPlatform.tester]),
+/// writing the generated manifest to `build/native_assets/<os>/native_assets.json`.
+///
+/// An optional [buildRunner] parameter may be provided for testing. Returns the
+/// [Uri] to the generated `native_assets.json` file, or `null` if native assets
+/// are disabled, unsupported on the host OS, or no package can be resolved.
+Future<Uri?> testCompilerBuildNativeAssets(
+  BuildInfo buildInfo, {
+  @visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner,
+}) async {
+  final BuildInfo(:buildNativeAssets, :mode, :packageConfig, :packageConfigPath) = buildInfo;
+  if (!buildNativeAssets) {
+    return null;
+  }
+  final FlutterProject project = FlutterProject.current();
+  final Uri projectUri = project.directory.uri;
+  final String? runPackageName = findRunPackageName(
+    fileSystem: globals.fs,
+    manifestAppName: project.manifest.appName,
+    packageConfig: packageConfig,
+    projectUri: projectUri,
+  );
+  if (runPackageName == null) {
+    globals.logger.printTrace('Could not determine run package name for native assets testing.');
+    return null;
+  }
+  final File pubspecFromPackageConfig = globals.fs.file(
+    Uri.file(packageConfigPath).resolve('../$_pubspecYamlFileName'),
+  );
+  final String pubspecPath = pubspecFromPackageConfig.existsSync()
+      ? pubspecFromPackageConfig.path
+      : project.directory.childFile(_pubspecYamlFileName).path;
+  final FlutterNativeAssetsBuildRunner runner =
+      buildRunner ??
+      FlutterNativeAssetsBuildRunnerImpl(
+        packageConfigPath,
+        packageConfig,
+        globals.fs,
+        globals.logger,
+        globals.platform,
+        runPackageName,
+        pubspecPath,
+        includeDevDependencies: true,
+      );
+
+  if (!globals.platform.isMacOS && !globals.platform.isLinux && !globals.platform.isWindows) {
+    await ensureNoNativeAssetsOrOsIsSupported(
+      projectUri,
+      const LocalPlatform().operatingSystem,
+      globals.fs,
+      runner,
+    );
+    return null;
+  }
+
+  // Only `flutter test` uses the
+  // `build/native_assets/<os>/native_assets.json` file which uses absolute
+  // paths to the shared libraries.
+  final OS targetOS = getNativeOSFromTargetPlatform(TargetPlatform.tester);
+  final String buildDir = getBuildDirectory();
+  final String osName = targetOS.name;
+  final Uri buildUri = projectUri.resolve('$buildDir/native_assets/$osName/');
+  final Uri nativeAssetsFileUri = buildUri.resolve(_nativeAssetsJsonFileName);
+
+  final environmentDefines = <String, String>{kBuildMode: mode.cliName};
+
+  // First perform the dart build.
+  final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
+    environmentDefines: environmentDefines,
+    buildRunner: runner,
+    targetPlatform: TargetPlatform.tester,
+    projectUri: projectUri,
+    fileSystem: globals.fs,
+    buildCodeAssets: const BuildCodeAssetsOptions(
+      // We're in tests, so there is no app build directory
+      appBuildDirectory: null,
+    ),
+    buildDataAssets: true,
+    recordedUsesFile: null,
+  );
+
+  // Then "install" the code assets so they can be used at runtime.
+  await installCodeAssets(
+    dartHookResult: dartHookResult,
+    environmentDefines: environmentDefines,
+    targetPlatform: TargetPlatform.tester,
+    projectUri: projectUri,
+    fileSystem: globals.fs,
+    nativeAssetsFileUri: nativeAssetsFileUri,
+    targetUri: buildUri,
+  );
+  assert(globals.fs.file(nativeAssetsFileUri).existsSync());
+
+  return nativeAssetsFileUri;
 }
 
 /// Resolves the target package name for native assets builds using the following
