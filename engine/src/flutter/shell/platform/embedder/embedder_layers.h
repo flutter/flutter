@@ -48,6 +48,8 @@ class EmbedderLayers {
       present_info_referenced_;
   std::vector<std::unique_ptr<FlutterRegion>> regions_referenced_;
   std::vector<std::unique_ptr<std::vector<FlutterRect>>> rects_referenced_;
+  std::vector<std::unique_ptr<std::vector<FlutterPathSegment>>>
+      path_segments_referenced_;
   std::vector<FlutterLayer> presented_layers_;
   uint64_t presentation_time_;
 

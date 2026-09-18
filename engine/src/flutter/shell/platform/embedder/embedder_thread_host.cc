@@ -63,6 +63,24 @@ CreateEmbedderTaskRunner(const FlutterTaskRunnerDescription* description) {
     destruction_callback_c = description->destruction_callback;
   }
 
+  FlutterThreadPriority priority =
+      SAFE_ACCESS(description, priority, FlutterThreadPriority::kNormal);
+
+  auto thread_priority_setter_c =
+      SAFE_ACCESS(description, thread_priority_setter, nullptr);
+  auto thread_priority_setter_with_user_data_c =
+      SAFE_ACCESS(description, thread_priority_setter_with_user_data, nullptr);
+
+  auto invoke_priority_setter = [thread_priority_setter_c,
+                                 thread_priority_setter_with_user_data_c,
+                                 user_data](FlutterThreadPriority prio) {
+    if (thread_priority_setter_with_user_data_c != nullptr) {
+      thread_priority_setter_with_user_data_c(prio, user_data);
+    } else if (thread_priority_setter_c != nullptr) {
+      thread_priority_setter_c(prio);
+    }
+  };
+
   EmbedderTaskRunner::DispatchTable task_runner_dispatch_table = {
       .post_task_callback = [post_task_callback_c, user_data](
                                 EmbedderTaskRunner* task_runner,
@@ -85,11 +103,25 @@ CreateEmbedderTaskRunner(const FlutterTaskRunnerDescription* description) {
           [destruction_callback_c, user_data]() {
             destruction_callback_c(user_data);
           },
+      .thread_priority_setter = invoke_priority_setter,
   };
 
-  return {true, fml::MakeRefCounted<EmbedderTaskRunner>(
-                    task_runner_dispatch_table,
-                    SAFE_ACCESS(description, identifier, 0u))};
+  auto runner = fml::MakeRefCounted<EmbedderTaskRunner>(
+      task_runner_dispatch_table, SAFE_ACCESS(description, identifier, 0u),
+      priority);
+
+  if (thread_priority_setter_with_user_data_c != nullptr ||
+      thread_priority_setter_c != nullptr) {
+    if (runner->RunsTasksOnCurrentThread()) {
+      invoke_priority_setter(priority);
+    } else {
+      runner->PostTask([invoke_priority_setter, priority]() {
+        invoke_priority_setter(priority);
+      });
+    }
+  }
+
+  return {true, std::move(runner)};
 }
 
 std::unique_ptr<EmbedderThreadHost>
@@ -159,7 +191,8 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
   auto render_task_runner_pair = CreateEmbedderTaskRunner(
       SAFE_ACCESS(custom_task_runners, render_task_runner, nullptr));
 
-  if (!platform_task_runner_pair.first || !render_task_runner_pair.first) {
+  if (!platform_task_runner_pair.first || !render_task_runner_pair.first ||
+      !ui_task_runner_pair.first) {
     // User error while supplying a custom task runner. Return an invalid thread
     // host. This will abort engine initialization. Don't fallback to defaults
     // if the user wanted to specify a task runner but just messed up instead.
@@ -317,7 +350,9 @@ EmbedderThreadHost::EmbedderThreadHost(
   }
 }
 
-EmbedderThreadHost::~EmbedderThreadHost() = default;
+EmbedderThreadHost::~EmbedderThreadHost() {
+  InvalidateActiveRunners();
+}
 
 void EmbedderThreadHost::InvalidateActiveRunners() {
   std::lock_guard guard(active_runners_mutex_);
