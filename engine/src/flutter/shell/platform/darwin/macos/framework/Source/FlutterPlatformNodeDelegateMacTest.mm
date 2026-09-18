@@ -115,6 +115,7 @@ TEST(FlutterPlatformNodeDelegateMac, ExposesHintAsAccessibilityHelp) {
 
   [engine shutDownEngine];
 }
+
 TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
