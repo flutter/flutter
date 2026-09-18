@@ -29,8 +29,11 @@ typedef void (*AChoreographer_frameCallback64)(int64_t frameTimeNanos,
                                                void* data);
 
 // 32-bit / legacy frame callback signature (Android API 24-28).
-typedef void (*AChoreographer_frameCallback)(int64_t frameTimeNanos,
-                                             void* data);
+// In Android NDK (<android/choreographer.h>), legacy frame callback uses
+// `long`. On 32-bit Android (armeabi-v7a / x86), `long` is 32-bit (int32_t
+// passed in r0).
+// NOLINTNEXTLINE(google-runtime-int)
+typedef void (*AChoreographer_frameCallback)(long frameTimeNanos, void* data);
 
 // Function pointer types resolved from libandroid.so via OSLibraryLoader.
 typedef AChoreographer* (*AChoreographer_getInstance_fn)();
@@ -51,7 +54,7 @@ typedef void (*AChoreographer_postFrameCallbackDelayed_fn)(
     AChoreographer* choreographer,
     AChoreographer_frameCallback callback,
     void* data,
-    int64_t delayMillis);
+    long delayMillis);  // NOLINT(google-runtime-int)
 
 /// @brief Calculated frame timing information for VSync frame pacing.
 struct AndroidVsyncFrameInfo {
@@ -109,6 +112,7 @@ class DefaultAndroidChoreographerProvider
   void EnsureLoaded() const;
 
   mutable std::shared_ptr<OSLibraryLoader> library_loader_;
+  mutable std::shared_ptr<OSLibrary> library_;
   mutable std::mutex mutex_;
   mutable bool loaded_ = false;
   mutable bool is_available_ = false;
@@ -184,8 +188,10 @@ class AndroidVsyncWaiter
   virtual bool AsyncWaitForVsync(intptr_t baton);
 
   /// @brief Consumes a pending VSync event with the given start and target
-  /// times.
-  virtual void ConsumePendingVsync(intptr_t baton, int64_t frame_time_nanos);
+  /// times, optionally using the choreographer's frame interval.
+  virtual void ConsumePendingVsync(intptr_t baton,
+                                   int64_t frame_time_nanos,
+                                   int64_t refresh_period_nanos = 0);
 
   /// @brief Computes frame pacing timestamps for a given frame start time and
   /// refresh rate.
@@ -226,6 +232,22 @@ class AndroidVsyncWaiter
   /// @brief Sets or replaces the JvmInvoker.
   void SetJvmInvoker(std::shared_ptr<JvmInvoker> invoker);
 
+  /// @brief Sets a mock/testing hook for FlutterEngineOnVsync.
+  using NotifyVsyncFn =
+      std::function<FlutterEngineResult(FLUTTER_API_SYMBOL(FlutterEngine),
+                                        intptr_t,
+                                        uint64_t,
+                                        uint64_t)>;
+  void SetNotifyVsyncFnForTesting(NotifyVsyncFn fn);
+
+  /// @brief Helper to invoke FlutterEngineOnVsync using dynamic lookup of
+  /// FlutterEngineProcTable with parameter validation.
+  static FlutterEngineResult NotifyVsyncToEngine(
+      FLUTTER_API_SYMBOL(FlutterEngine) engine,
+      intptr_t baton,
+      uint64_t frame_start_time_nanos,
+      uint64_t frame_target_time_nanos);
+
   /// @brief Returns the number of VSync requests served.
   size_t GetVsyncRequestCount() const;
 
@@ -241,6 +263,7 @@ class AndroidVsyncWaiter
   size_t vsync_request_count_ = 0;
   size_t vsync_delivered_count_ = 0;
   VsyncResultCallback vsync_result_callback_;
+  NotifyVsyncFn notify_vsync_fn_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidVsyncWaiter);
 };

@@ -288,9 +288,17 @@ AndroidShellHolder::CreateDispatchTable(
                                    unscaled_font_size, configuration_id)
                              : -1.0;
       };
-  dispatch_table.create_vsync_waiter_callback = [platform_view]() {
-    return platform_view ? platform_view->CreateVSyncWaiter() : nullptr;
-  };
+  if (settings_.enable_embedder_api) {
+    dispatch_table.vsync_callback = [platform_view](intptr_t baton) {
+      if (platform_view) {
+        platform_view->OnVsyncCallback(baton);
+      }
+    };
+  } else {
+    dispatch_table.create_vsync_waiter_callback = [platform_view]() {
+      return platform_view ? platform_view->CreateVSyncWaiter() : nullptr;
+    };
+  }
   dispatch_table.set_application_locale_callback =
       [platform_view](std::string locale) {
         if (platform_view) {

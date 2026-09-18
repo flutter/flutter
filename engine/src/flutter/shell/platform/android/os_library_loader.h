@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_OS_LIBRARY_LOADER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_OS_LIBRARY_LOADER_H_
 
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <mutex>
@@ -17,6 +18,8 @@
 namespace flutter {
 namespace android {
 
+class MockOSLibrary;
+
 /// @brief Abstract interface representing a loaded dynamic shared library.
 ///
 /// This abstraction shields callers from direct platform-specific handles
@@ -25,6 +28,10 @@ namespace android {
 class OSLibrary {
  public:
   virtual ~OSLibrary() = default;
+
+  /// @brief Returns pointer to MockOSLibrary if this instance is a mock,
+  /// otherwise nullptr. Used for safe downcasting in -fno-rtti builds.
+  virtual MockOSLibrary* AsMockOSLibrary() { return nullptr; }
 
   /// @brief Returns the name or path of the library.
   virtual const std::string& GetName() const = 0;
@@ -54,6 +61,9 @@ class OSLibraryLoader {
  public:
   virtual ~OSLibraryLoader() = default;
 
+  /// @brief Special identifier representing the process-global symbol scope.
+  static constexpr const char* kProcessGlobalScope = "";
+
   /// @brief Loads or retrieves a shared library by name.
   /// @param library_name Name or path of the library (e.g., "libandroid.so").
   /// @return Shared pointer to the OSLibrary instance, or nullptr on failure.
@@ -64,6 +74,10 @@ class OSLibraryLoader {
   /// @param library_name Name of the library containing the symbol.
   /// @param symbol_name Name of the symbol to resolve.
   /// @return Pointer to the resolved symbol, or nullptr if unavailable.
+  ///
+  /// @note Callers intending to store resolved function pointers long-term
+  /// must retain the std::shared_ptr<OSLibrary> returned by
+  /// LoadDynamicLibrary() to ensure the library remains mapped in memory.
   virtual void* ResolveSymbol(const char* library_name,
                               const char* symbol_name) = 0;
 
@@ -75,6 +89,13 @@ class OSLibraryLoader {
 
   /// @brief Checks if a library is currently loaded and available.
   virtual bool IsLibraryLoaded(const char* library_name) const = 0;
+
+  /// @brief Returns the default shared OSLibraryLoader instance.
+  static std::shared_ptr<OSLibraryLoader> GetDefaultLibraryLoader();
+
+  /// @brief Overrides the default shared OSLibraryLoader instance (for
+  /// testing).
+  static void SetDefaultLibraryLoader(std::shared_ptr<OSLibraryLoader> loader);
 };
 
 /// @brief Default platform dynamic library implementation using dlopen / dlsym
@@ -127,6 +148,7 @@ class MockOSLibrary : public OSLibrary {
   const std::string& GetName() const override;
   void* ResolveSymbol(const char* symbol_name) const override;
   bool IsValid() const override;
+  MockOSLibrary* AsMockOSLibrary() override { return this; }
 
   /// @brief Sets whether this mock library should report as valid.
   void SetValid(bool valid);
@@ -142,7 +164,7 @@ class MockOSLibrary : public OSLibrary {
 
  private:
   std::string name_;
-  bool is_valid_ = true;
+  std::atomic<bool> is_valid_{true};
   mutable std::mutex mutex_;
   std::unordered_map<std::string, void*> symbols_;
 

@@ -4,13 +4,18 @@
 
 #include "flutter/shell/platform/android/android_vsync_waiter.h"
 
+#include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <utility>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/shell/platform/android/flutter_embedder_native.h"
+
+#if FML_OS_ANDROID
+#include <android/looper.h>
+#endif
 
 namespace flutter {
 namespace android {
@@ -23,7 +28,7 @@ DefaultAndroidChoreographerProvider::DefaultAndroidChoreographerProvider(
     std::shared_ptr<OSLibraryLoader> library_loader)
     : library_loader_(library_loader
                           ? std::move(library_loader)
-                          : FlutterEmbedderNative::GetDefaultLibraryLoader()) {
+                          : OSLibraryLoader::GetDefaultLibraryLoader()) {
   TRACE_EVENT0("flutter",
                "DefaultAndroidChoreographerProvider::"
                "DefaultAndroidChoreographerProvider");
@@ -40,28 +45,28 @@ void DefaultAndroidChoreographerProvider::EnsureLoaded() const {
     return;
   }
   if (!library_loader_) {
-    library_loader_ = FlutterEmbedderNative::GetDefaultLibraryLoader();
+    library_loader_ = OSLibraryLoader::GetDefaultLibraryLoader();
   }
   if (!library_loader_) {
     loaded_ = true;
     return;
   }
 
-  auto lib = library_loader_->LoadDynamicLibrary("libandroid.so");
-  if (lib && lib->IsValid()) {
-    get_instance_fn_ = lib->ResolveFunction<AChoreographer_getInstance_fn>(
+  library_ = library_loader_->LoadDynamicLibrary("libandroid.so");
+  if (library_ && library_->IsValid()) {
+    get_instance_fn_ = library_->ResolveFunction<AChoreographer_getInstance_fn>(
         "AChoreographer_getInstance");
     post_frame_callback64_fn_ =
-        lib->ResolveFunction<AChoreographer_postFrameCallback64_fn>(
+        library_->ResolveFunction<AChoreographer_postFrameCallback64_fn>(
             "AChoreographer_postFrameCallback64");
     post_frame_callback_fn_ =
-        lib->ResolveFunction<AChoreographer_postFrameCallback_fn>(
+        library_->ResolveFunction<AChoreographer_postFrameCallback_fn>(
             "AChoreographer_postFrameCallback");
     post_frame_callback_delayed64_fn_ =
-        lib->ResolveFunction<AChoreographer_postFrameCallbackDelayed64_fn>(
+        library_->ResolveFunction<AChoreographer_postFrameCallbackDelayed64_fn>(
             "AChoreographer_postFrameCallbackDelayed64");
     post_frame_callback_delayed_fn_ =
-        lib->ResolveFunction<AChoreographer_postFrameCallbackDelayed_fn>(
+        library_->ResolveFunction<AChoreographer_postFrameCallbackDelayed_fn>(
             "AChoreographer_postFrameCallbackDelayed");
 
     if (get_instance_fn_ &&
@@ -96,13 +101,18 @@ static void NativeTrampoline64(int64_t frameTimeNanos, void* data) {
   }
 }
 
-static void NativeTrampoline32(int64_t frameTimeNanos, void* data) {
+// NOLINTNEXTLINE(google-runtime-int)
+static void NativeTrampoline32(long frameTimeNanos, void* data) {
   TRACE_EVENT0("flutter",
                "DefaultAndroidChoreographerProvider::NativeTrampoline32");
   std::unique_ptr<AndroidChoreographerProvider::FrameCallback> holder(
       static_cast<AndroidChoreographerProvider::FrameCallback*>(data));
   if (holder && *holder) {
+#if INTPTR_MAX == INT32_MAX
+    (*holder)(fml::TimePoint::Now().ToEpochDelta().ToNanoseconds());
+#else
     (*holder)(static_cast<int64_t>(frameTimeNanos));
+#endif
   }
 }
 
@@ -116,6 +126,12 @@ bool DefaultAndroidChoreographerProvider::PostFrameCallback(
   if (!is_available_ || !get_instance_fn_) {
     return false;
   }
+
+#if FML_OS_ANDROID
+  if (ALooper_forThread() == nullptr) {
+    ALooper_prepare(0);
+  }
+#endif
 
   AChoreographer* choreographer = get_instance_fn_();
   if (!choreographer) {
@@ -151,6 +167,12 @@ bool DefaultAndroidChoreographerProvider::PostFrameCallbackDelayed(
     return false;
   }
 
+#if FML_OS_ANDROID
+  if (ALooper_forThread() == nullptr) {
+    ALooper_prepare(0);
+  }
+#endif
+
   AChoreographer* choreographer = get_instance_fn_();
   if (!choreographer) {
     return false;
@@ -165,8 +187,9 @@ bool DefaultAndroidChoreographerProvider::PostFrameCallbackDelayed(
   }
 
   if (post_frame_callback_delayed_fn_) {
-    post_frame_callback_delayed_fn_(choreographer, &NativeTrampoline32, holder,
-                                    static_cast<int64_t>(delay_ms));
+    post_frame_callback_delayed_fn_(
+        choreographer, &NativeTrampoline32, holder,
+        static_cast<long>(delay_ms));  // NOLINT(google-runtime-int)
     return true;
   }
 
@@ -323,22 +346,25 @@ bool AndroidVsyncWaiter::AsyncWaitForVsync(intptr_t baton) {
   }
 
   if (choreographer && choreographer->IsAvailable()) {
-    std::weak_ptr<AndroidVsyncWaiter> weak_this = shared_from_this();
-    bool posted = choreographer->PostFrameCallback(
-        [weak_this, baton](int64_t frame_time_nanos) {
-          auto shared_this = weak_this.lock();
-          if (shared_this) {
-            shared_this->ConsumePendingVsync(baton, frame_time_nanos);
-          }
-        });
-    if (posted) {
-      return true;
+    std::weak_ptr<AndroidVsyncWaiter> weak_this = weak_from_this();
+    if (!weak_this.expired()) {
+      bool posted = choreographer->PostFrameCallback(
+          [weak_this, baton](int64_t frame_time_nanos) {
+            auto shared_this = weak_this.lock();
+            if (shared_this) {
+              shared_this->ConsumePendingVsync(baton, frame_time_nanos);
+            }
+          });
+      if (posted) {
+        return true;
+      }
     }
   }
 
   if (invoker) {
-    std::vector<uint8_t> payload(sizeof(intptr_t));
-    std::memcpy(payload.data(), &baton, sizeof(intptr_t));
+    int64_t baton_64 = static_cast<int64_t>(baton);
+    std::vector<uint8_t> payload(sizeof(int64_t));
+    std::memcpy(payload.data(), &baton_64, sizeof(int64_t));
     return invoker->InvokeVoidMethod("asyncWaitForVsync", "(J)V", payload);
   }
 
@@ -352,8 +378,10 @@ AndroidVsyncFrameInfo AndroidVsyncWaiter::ComputeFramePacing(
     int64_t frame_time_nanos,
     double refresh_rate_hz) {
   TRACE_EVENT0("flutter", "AndroidVsyncWaiter::ComputeFramePacing");
-  if (refresh_rate_hz <= 0.0) {
+  if (!std::isfinite(refresh_rate_hz) || refresh_rate_hz <= 0.0) {
     refresh_rate_hz = 60.0;
+  } else {
+    refresh_rate_hz = std::clamp(refresh_rate_hz, 1.0, 1000.0);
   }
 
   int64_t refresh_period_nanos =
@@ -375,11 +403,15 @@ AndroidVsyncFrameInfo AndroidVsyncWaiter::ComputeFramePacing(
   };
 }
 
-static FlutterEngineResult EngineNotifyVsync(FLUTTER_API_SYMBOL(FlutterEngine)
-                                                 engine,
-                                             intptr_t baton,
-                                             uint64_t frame_start_time_nanos,
-                                             uint64_t frame_target_time_nanos) {
+FlutterEngineResult AndroidVsyncWaiter::NotifyVsyncToEngine(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    intptr_t baton,
+    uint64_t frame_start_time_nanos,
+    uint64_t frame_target_time_nanos) {
+  if (!engine || frame_start_time_nanos == 0 ||
+      frame_target_time_nanos <= frame_start_time_nanos) {
+    return kInvalidArguments;
+  }
   static FlutterEngineProcTable s_procs = []() {
     FlutterEngineProcTable procs = {};
     procs.struct_size = sizeof(FlutterEngineProcTable);
@@ -394,31 +426,56 @@ static FlutterEngineResult EngineNotifyVsync(FLUTTER_API_SYMBOL(FlutterEngine)
 }
 
 void AndroidVsyncWaiter::ConsumePendingVsync(intptr_t baton,
-                                             int64_t frame_time_nanos) {
+                                             int64_t frame_time_nanos,
+                                             int64_t refresh_period_nanos) {
   TRACE_EVENT1("flutter", "AndroidVsyncWaiter::ConsumePendingVsync", "baton",
                std::to_string(baton).c_str());
 
   double refresh_rate;
   FLUTTER_API_SYMBOL(FlutterEngine) engine;
   VsyncResultCallback result_cb;
+  NotifyVsyncFn notify_vsync_fn;
+  std::shared_ptr<JvmInvoker> invoker;
   {
     std::scoped_lock lock(mutex_);
     vsync_delivered_count_++;
     refresh_rate = refresh_rate_hz_;
     engine = engine_;
     result_cb = vsync_result_callback_;
+    notify_vsync_fn = notify_vsync_fn_;
+    invoker = jvm_invoker_;
   }
 
-  AndroidVsyncFrameInfo info =
-      ComputeFramePacing(frame_time_nanos, refresh_rate);
+  AndroidVsyncFrameInfo info;
+  if (refresh_period_nanos > 0) {
+    info.frame_start_time_nanos = frame_time_nanos;
+    info.frame_target_time_nanos = frame_time_nanos + refresh_period_nanos;
+  } else {
+    info = ComputeFramePacing(frame_time_nanos, refresh_rate);
+  }
 
   TRACE_EVENT2_INT("flutter", "PlatformVsync", "frame_start_time",
                    info.frame_start_time_nanos / 1000, "frame_target_time",
                    info.frame_target_time_nanos / 1000);
 
-  if (engine) {
-    EngineNotifyVsync(engine, baton, info.frame_start_time_nanos,
-                      info.frame_target_time_nanos);
+  if (notify_vsync_fn) {
+    notify_vsync_fn(engine, baton, info.frame_start_time_nanos,
+                    info.frame_target_time_nanos);
+  } else if (engine) {
+    NotifyVsyncToEngine(engine, baton, info.frame_start_time_nanos,
+                        info.frame_target_time_nanos);
+  }
+
+  if (invoker) {
+    struct PackedVsync {
+      int64_t frame_start_time_nanos;
+      int64_t frame_target_time_nanos;
+    };
+    PackedVsync data = {info.frame_start_time_nanos,
+                        info.frame_target_time_nanos};
+    std::vector<uint8_t> payload(sizeof(PackedVsync));
+    std::memcpy(payload.data(), &data, sizeof(PackedVsync));
+    invoker->InvokeVoidMethod("onVsync", "(JJ)V", payload);
   }
 
   if (result_cb) {
@@ -426,13 +483,21 @@ void AndroidVsyncWaiter::ConsumePendingVsync(intptr_t baton,
   }
 }
 
+void AndroidVsyncWaiter::SetNotifyVsyncFnForTesting(NotifyVsyncFn fn) {
+  std::scoped_lock lock(mutex_);
+  notify_vsync_fn_ = std::move(fn);
+}
+
 void AndroidVsyncWaiter::UpdateRefreshRate(double refresh_rate_hz) {
   TRACE_EVENT1("flutter", "AndroidVsyncWaiter::UpdateRefreshRate",
                "refresh_rate", std::to_string(refresh_rate_hz).c_str());
-  std::scoped_lock lock(mutex_);
-  if (refresh_rate_hz > 0.0) {
-    refresh_rate_hz_ = refresh_rate_hz;
+  if (!std::isfinite(refresh_rate_hz) || refresh_rate_hz <= 0.0) {
+    refresh_rate_hz = 60.0;
+  } else {
+    refresh_rate_hz = std::clamp(refresh_rate_hz, 1.0, 1000.0);
   }
+  std::scoped_lock lock(mutex_);
+  refresh_rate_hz_ = refresh_rate_hz;
 }
 
 double AndroidVsyncWaiter::GetRefreshRate() const {
@@ -442,7 +507,13 @@ double AndroidVsyncWaiter::GetRefreshRate() const {
 
 int64_t AndroidVsyncWaiter::GetRefreshPeriodNanos() const {
   std::scoped_lock lock(mutex_);
-  return static_cast<int64_t>(1000000000.0 / refresh_rate_hz_);
+  double rate = refresh_rate_hz_;
+  if (!std::isfinite(rate) || rate <= 0.0) {
+    rate = 60.0;
+  } else {
+    rate = std::clamp(rate, 1.0, 1000.0);
+  }
+  return static_cast<int64_t>(1000000000.0 / rate);
 }
 
 void AndroidVsyncWaiter::SetEngine(FLUTTER_API_SYMBOL(FlutterEngine) engine) {

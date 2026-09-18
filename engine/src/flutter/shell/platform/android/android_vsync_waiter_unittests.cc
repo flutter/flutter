@@ -71,6 +71,60 @@ class MockVsyncJvmInvoker : public JvmInvoker {
                const std::vector<uint8_t>& payload),
               (override));
 
+  MOCK_METHOD(bool,
+              HandlePlatformMessage,
+              (const std::string& channel,
+               const uint8_t* message,
+               size_t message_size,
+               int32_t response_id,
+               int64_t message_data),
+              (override));
+
+  MOCK_METHOD(bool,
+              HandlePlatformMessageResponse,
+              (int32_t response_id, const uint8_t* data, size_t data_size),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateSemantics,
+              (const std::vector<uint8_t>& buffer,
+               const std::vector<std::string>& strings,
+               const std::vector<std::vector<uint8_t>>& string_attribute_args),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateCustomAccessibilityActions,
+              (const std::vector<uint8_t>& actions_buffer,
+               const std::vector<std::string>& action_strings),
+              (override));
+
+  MOCK_METHOD(bool, SetSemanticsTreeEnabled, (bool enabled), (override));
+  MOCK_METHOD(bool,
+              SetApplicationLocale,
+              (const std::string& locale),
+              (override));
+  MOCK_METHOD(bool, OnFirstFrame, (), (override));
+  MOCK_METHOD(bool, OnPreEngineRestart, (), (override));
+  MOCK_METHOD(bool,
+              RequestDartDeferredLibrary,
+              (int loading_unit_id),
+              (override));
+  MOCK_METHOD(bool,
+              DecodeImage,
+              (const uint8_t* data, size_t size, int64_t generator_handle),
+              (override));
+  MOCK_METHOD(bool,
+              PushPlatformViewMutators,
+              (int64_t view_id,
+               int32_t x,
+               int32_t y,
+               int32_t width,
+               int32_t height,
+               int32_t view_width,
+               int32_t view_height,
+               const std::vector<uint8_t>& payload),
+              (override));
+
   MOCK_METHOD(bool, PostJvmTask, (std::function<void()> task), (override));
 };
 
@@ -120,7 +174,7 @@ void Mock_AChoreographer_postFrameCallbackDelayed(
     AChoreographer* choreographer,
     AChoreographer_frameCallback callback,
     void* data,
-    int64_t delayMillis) {
+    long delayMillis) {
   g_last_callback32 = callback;
   g_last_data32 = data;
   g_last_delay_ms32 = delayMillis;
@@ -534,6 +588,215 @@ TEST(AndroidVsyncWaiterTest, ThreadSafeConcurrentVsyncRequests) {
   EXPECT_EQ(completed_count.load(), kThreads * kRequestsPerThread);
   EXPECT_EQ(waiter->GetVsyncDeliveredCount(),
             static_cast<size_t>(kThreads * kRequestsPerThread));
+}
+
+TEST(AndroidVsyncWaiterTest, FramePacingNaNAndInfiniteRefreshRates) {
+  // Quiet NaN should default to 60Hz
+  double nan_hz = std::numeric_limits<double>::quiet_NaN();
+  auto info_nan = AndroidVsyncWaiter::ComputeFramePacing(1000000LL, nan_hz);
+  EXPECT_DOUBLE_EQ(info_nan.refresh_rate_hz, 60.0);
+  EXPECT_EQ(info_nan.refresh_period_nanos, 16666666LL);
+
+  // Positive infinity should default to 60Hz
+  double inf_hz = std::numeric_limits<double>::infinity();
+  auto info_inf = AndroidVsyncWaiter::ComputeFramePacing(1000000LL, inf_hz);
+  EXPECT_DOUBLE_EQ(info_inf.refresh_rate_hz, 60.0);
+  EXPECT_EQ(info_inf.refresh_period_nanos, 16666666LL);
+
+  // Negative infinity should default to 60Hz
+  double neg_inf_hz = -std::numeric_limits<double>::infinity();
+  auto info_neg_inf =
+      AndroidVsyncWaiter::ComputeFramePacing(1000000LL, neg_inf_hz);
+  EXPECT_DOUBLE_EQ(info_neg_inf.refresh_rate_hz, 60.0);
+  EXPECT_EQ(info_neg_inf.refresh_period_nanos, 16666666LL);
+
+  // Negative values should default to 60Hz
+  auto info_neg = AndroidVsyncWaiter::ComputeFramePacing(1000000LL, -144.0);
+  EXPECT_DOUBLE_EQ(info_neg.refresh_rate_hz, 60.0);
+
+  // Unreasonably large rate should clamp to 1000.0Hz
+  auto info_extreme =
+      AndroidVsyncWaiter::ComputeFramePacing(1000000LL, 1000000.0);
+  EXPECT_DOUBLE_EQ(info_extreme.refresh_rate_hz, 1000.0);
+  EXPECT_EQ(info_extreme.refresh_period_nanos, 1000000LL);
+}
+
+TEST(AndroidVsyncWaiterTest, NotifyVsyncTestingHookAndEnginePropagation) {
+  auto mock_choreographer =
+      std::make_shared<InMemoryAndroidChoreographerProvider>();
+  auto waiter = std::make_shared<AndroidVsyncWaiter>(mock_choreographer);
+
+  auto dummy_engine =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xABCD);
+  waiter->SetEngine(dummy_engine);
+  EXPECT_EQ(waiter->GetEngine(), dummy_engine);
+
+  bool hook_invoked = false;
+  intptr_t received_baton = 0;
+  uint64_t received_start = 0;
+  uint64_t received_target = 0;
+
+  waiter->SetNotifyVsyncFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine, intptr_t baton,
+          uint64_t start, uint64_t target) {
+        EXPECT_EQ(engine, dummy_engine);
+        hook_invoked = true;
+        received_baton = baton;
+        received_start = start;
+        received_target = target;
+        return kSuccess;
+      });
+
+  EXPECT_TRUE(waiter->AsyncWaitForVsync(4321));
+  mock_choreographer->TriggerPendingCallbacks(20000000LL);
+
+  EXPECT_TRUE(hook_invoked);
+  EXPECT_EQ(received_baton, 4321);
+  EXPECT_EQ(received_start, 20000000ULL);
+  EXPECT_EQ(received_target, 20000000ULL + 16666666ULL);
+}
+
+TEST(AndroidVsyncWaiterTest, SharedFromThisSafetyWithoutSharedPtr) {
+  // Stack allocation without shared_ptr should not crash with bad_weak_ptr
+  auto mock_choreographer =
+      std::make_shared<InMemoryAndroidChoreographerProvider>();
+  AndroidVsyncWaiter stack_waiter(mock_choreographer);
+
+  // AsyncWaitForVsync catches std::bad_weak_ptr and falls back safely
+  EXPECT_TRUE(stack_waiter.AsyncWaitForVsync(9999));
+  EXPECT_EQ(stack_waiter.GetVsyncDeliveredCount(), 1u);
+}
+
+TEST(AndroidVsyncWaiterTest, ConcurrentProviderReplacementInWaiter) {
+  auto waiter = std::make_shared<AndroidVsyncWaiter>();
+  constexpr int kThreads = 8;
+  constexpr int kOpsPerThread = 500;
+  std::vector<std::thread> threads;
+  threads.reserve(kThreads);
+
+  for (int i = 0; i < kThreads; ++i) {
+    threads.emplace_back([waiter, i]() {
+      for (int j = 0; j < kOpsPerThread; ++j) {
+        if (i % 2 == 0) {
+          auto mock_provider =
+              std::make_shared<InMemoryAndroidChoreographerProvider>();
+          waiter->SetChoreographerProvider(mock_provider);
+        } else {
+          auto provider = waiter->GetChoreographerProvider();
+          EXPECT_NE(provider, nullptr);
+        }
+      }
+    });
+  }
+
+  for (auto& t : threads) {
+    t.join();
+  }
+}
+
+TEST(AndroidVsyncWaiterTest, NDKCallback32BitCompatibility) {
+  // Verify that AChoreographer_frameCallback accepts long frameTimeNanos
+  // matching Android NDK API 24-28 specification on 32-bit and 64-bit
+  // platforms.
+  static_assert(
+      std::is_same_v<AChoreographer_frameCallback, void (*)(long, void*)>);
+  static_assert(
+      std::is_same_v<AChoreographer_frameCallback64, void (*)(int64_t, void*)>);
+
+  // Verify that long frame times (e.g. 32-bit long integer) promote safely
+  long sample_frame_time = 12345678L;
+  int64_t promoted = static_cast<int64_t>(sample_frame_time);
+  EXPECT_EQ(promoted, 12345678LL);
+}
+
+TEST(AndroidVsyncWaiterTest, UpdateRefreshRateClampingAndNaNValidation) {
+  auto waiter = std::make_shared<AndroidVsyncWaiter>();
+
+  // NaN should clamp to 60.0
+  waiter->UpdateRefreshRate(std::numeric_limits<double>::quiet_NaN());
+  EXPECT_DOUBLE_EQ(waiter->GetRefreshRate(), 60.0);
+  EXPECT_EQ(waiter->GetRefreshPeriodNanos(), 16666666LL);
+
+  // Positive infinity should clamp to 60.0
+  waiter->UpdateRefreshRate(std::numeric_limits<double>::infinity());
+  EXPECT_DOUBLE_EQ(waiter->GetRefreshRate(), 60.0);
+  EXPECT_EQ(waiter->GetRefreshPeriodNanos(), 16666666LL);
+
+  // Negative infinity should clamp to 60.0
+  waiter->UpdateRefreshRate(-std::numeric_limits<double>::infinity());
+  EXPECT_DOUBLE_EQ(waiter->GetRefreshRate(), 60.0);
+  EXPECT_EQ(waiter->GetRefreshPeriodNanos(), 16666666LL);
+
+  // Zero should clamp to 60.0
+  waiter->UpdateRefreshRate(0.0);
+  EXPECT_DOUBLE_EQ(waiter->GetRefreshRate(), 60.0);
+
+  // Negative rate should clamp to 60.0
+  waiter->UpdateRefreshRate(-120.0);
+  EXPECT_DOUBLE_EQ(waiter->GetRefreshRate(), 60.0);
+
+  // Unreasonably large rate should clamp to 1000.0Hz
+  waiter->UpdateRefreshRate(1000000.0);
+  EXPECT_DOUBLE_EQ(waiter->GetRefreshRate(), 1000.0);
+  EXPECT_EQ(waiter->GetRefreshPeriodNanos(), 1000000LL);
+
+  // Unreasonably small positive rate should clamp to 1.0Hz
+  waiter->UpdateRefreshRate(0.0001);
+  EXPECT_DOUBLE_EQ(waiter->GetRefreshRate(), 1.0);
+  EXPECT_EQ(waiter->GetRefreshPeriodNanos(), 1000000000LL);
+}
+
+TEST(AndroidVsyncWaiterTest, NotifyVsyncToEngineValidation) {
+  auto dummy_engine =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xBEEF);
+
+  // Null engine rejected
+  EXPECT_EQ(AndroidVsyncWaiter::NotifyVsyncToEngine(nullptr, 1, 1000, 2000),
+            kInvalidArguments);
+
+  // Zero start time rejected
+  EXPECT_EQ(AndroidVsyncWaiter::NotifyVsyncToEngine(dummy_engine, 1, 0, 2000),
+            kInvalidArguments);
+
+  // Target <= start rejected
+  EXPECT_EQ(
+      AndroidVsyncWaiter::NotifyVsyncToEngine(dummy_engine, 1, 2000, 1000),
+      kInvalidArguments);
+  EXPECT_EQ(
+      AndroidVsyncWaiter::NotifyVsyncToEngine(dummy_engine, 1, 2000, 2000),
+      kInvalidArguments);
+}
+
+TEST(AndroidVsyncWaiterTest, ConsumePendingVsyncNotifiesJvmInvoker) {
+  auto mock_choreographer =
+      std::make_shared<InMemoryAndroidChoreographerProvider>();
+  auto mock_invoker = std::make_shared<MockVsyncJvmInvoker>();
+  auto waiter =
+      std::make_shared<AndroidVsyncWaiter>(mock_choreographer, mock_invoker);
+
+  bool jvm_on_vsync_called = false;
+  int64_t received_start = 0;
+  int64_t received_target = 0;
+
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod(::testing::StrEq("onVsync"),
+                               ::testing::StrEq("(JJ)V"), ::testing::_))
+      .WillOnce([&](const std::string& method, const std::string& sig,
+                    const std::vector<uint8_t>& payload) {
+        jvm_on_vsync_called = true;
+        EXPECT_EQ(payload.size(), 16u);
+        std::memcpy(&received_start, payload.data(), sizeof(int64_t));
+        std::memcpy(&received_target, payload.data() + sizeof(int64_t),
+                    sizeof(int64_t));
+        return true;
+      });
+
+  EXPECT_TRUE(waiter->AsyncWaitForVsync(1234));
+  mock_choreographer->TriggerPendingCallbacks(50000000LL);
+
+  EXPECT_TRUE(jvm_on_vsync_called);
+  EXPECT_EQ(received_start, 50000000LL);
+  EXPECT_EQ(received_target, 50000000LL + 16666666LL);
 }
 
 }  // namespace testing
