@@ -466,7 +466,6 @@ class AndroidSdk {
   /// SDK artifacts, such as after running a gradle build.
   void reinitialize() {
     _reinitialized = true;
-    final FileSystem fs = directory.fileSystem;
     var buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
 
     final Directory buildToolsDir = directory.childDirectory('build-tools');
@@ -529,10 +528,10 @@ class AndroidSdk {
 
           return AndroidSdkVersion._(
             this,
-            sdkLevel: platformVersion,
-            platformName: platformName,
             buildToolsVersion: buildToolsVersion,
-            fileSystem: fs,
+            fileSystem: directory.fileSystem,
+            platformName: platformName,
+            sdkLevel: platformVersion,
           );
         })
         .whereType<AndroidSdkVersion>()
