@@ -70,6 +70,8 @@ class SemanticRouteBase extends SemanticRole {
       }());
 
       setAttribute('aria-label', label ?? '');
+    } else {
+      removeAttribute('aria-label');
     }
   }
 
