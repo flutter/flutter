@@ -17,7 +17,9 @@
 #include "flutter/flow/embedded_views.h"
 #include "flutter/shell/platform/android/android_compositor.h"
 #include "flutter/shell/platform/android/android_engine.h"
+#include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
+#include "flutter/shell/platform/android/android_surface_control.h"
 #include "flutter/shell/platform/android/android_surface_manager.h"
 #include "flutter/shell/platform/android/android_task_runners.h"
 #include "flutter/shell/platform/android/android_vsync_waiter.h"
@@ -193,6 +195,14 @@ class EmbedderAndroidEngine final : public AndroidEngine {
   std::shared_ptr<android::AndroidVsyncWaiter> GetVsyncWaiter() const {
     return vsync_waiter_;
   }
+  std::shared_ptr<android::AndroidPlatformViewsController>
+  GetPlatformViewsController() const {
+    return platform_views_controller_;
+  }
+  std::shared_ptr<android::AndroidSurfaceControlProvider>
+  GetSurfaceControlProvider() const {
+    return surface_control_provider_;
+  }
 
   void OnBeginFrame();
   void OnPlatformViewPresented(int64_t view_id,
@@ -311,6 +321,10 @@ class EmbedderAndroidEngine final : public AndroidEngine {
 
   std::shared_ptr<AndroidTaskRunners> android_task_runners_;
   std::shared_ptr<android::AndroidVsyncWaiter> vsync_waiter_;
+  std::shared_ptr<android::AndroidPlatformViewsController>
+      platform_views_controller_;
+  std::shared_ptr<android::AndroidSurfaceControlProvider>
+      surface_control_provider_;
   std::shared_ptr<AndroidSurfaceManager> surface_manager_;
   std::shared_ptr<CompositorDelegate> compositor_delegate_;
   std::shared_ptr<AndroidCompositor> compositor_;

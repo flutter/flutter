@@ -101,6 +101,10 @@ void EmbedderAndroidEngine::InitializeSubsystems(
   surface_manager_ =
       std::make_shared<AndroidSurfaceManager>(android_rendering_api_);
   vsync_waiter_ = std::make_shared<android::AndroidVsyncWaiter>();
+  platform_views_controller_ =
+      std::make_shared<android::AndroidPlatformViewsController>();
+  surface_control_provider_ =
+      std::make_shared<android::DefaultAndroidSurfaceControlProvider>();
   compositor_delegate_ = std::make_shared<CompositorDelegate>(this);
   compositor_ = std::make_shared<AndroidCompositor>(surface_manager_,
                                                     compositor_delegate_);
