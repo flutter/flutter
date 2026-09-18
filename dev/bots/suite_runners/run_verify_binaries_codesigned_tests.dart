@@ -20,6 +20,12 @@ Future<void> verifyCodesignedTestRunner() async {
     '--ios',
     '--macos',
   ], workingDirectory: flutterRoot);
+  if (dryRun) {
+    // The verification below inspects (and runs `file`/`codesign` on) every
+    // binary in the cache directly rather than through runCommand, so there is
+    // nothing to simulate.
+    return;
+  }
 
   await verifyExist(flutterRoot);
   await verifySignatures(flutterRoot);
@@ -36,6 +42,10 @@ Future<void> verifyPreCodesignedTestRunner() async {
     '--ios',
     '--macos',
   ], workingDirectory: flutterRoot);
+  if (dryRun) {
+    // See verifyCodesignedTestRunner.
+    return;
+  }
 
   await verifyExist(flutterRoot);
   await verifySignatures(flutterRoot, forRelease: false);
