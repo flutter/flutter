@@ -193,6 +193,7 @@ Map<String, File> hashWebAssets(Directory assetsDir) {
   return renamedFileMap;
 }
 
+/// The filename of the precache manifest generated for web content hashing.
 const String kPrecacheManifestFile = 'precache_manifest.json';
 
 bool _shouldExcludeFromPrecacheManifest({
