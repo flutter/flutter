@@ -22,6 +22,7 @@ import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
+import '../context/tool_context.dart';
 import '../resident_runner.dart';
 import '../web/chrome_constants.dart';
 import '../web/web_runner.dart';
@@ -30,20 +31,31 @@ import 'drive_service.dart';
 /// An implementation of the driver service for web debug and release applications.
 class WebDriverService extends DriverService {
   WebDriverService({
-    required this._processUtils,
-    required this._dartSdkPath,
-    required this._platform,
-    required this._logger,
-    required this._terminal,
-    required this._outputPreferences,
-  });
+    ToolContext? toolContext,
+    required Logger logger,
+    required Terminal terminal,
+    required Platform platform,
+    required OutputPreferences outputPreferences,
+    required ProcessUtils processUtils,
+    required String dartSdkPath,
+    required DevtoolsLauncher devtoolsLauncher,
+  }) : _toolContext = toolContext,
+       _logger = logger,
+       _terminal = terminal,
+       _platform = platform,
+       _outputPreferences = outputPreferences,
+       _processUtils = processUtils,
+       _dartSdkPath = dartSdkPath,
+       _devtoolsLauncher = devtoolsLauncher;
 
-  final ProcessUtils _processUtils;
-  final String _dartSdkPath;
-  final Platform _platform;
+  final ToolContext? _toolContext;
   final Logger _logger;
   final Terminal _terminal;
+  final Platform _platform;
   final OutputPreferences _outputPreferences;
+  final ProcessUtils _processUtils;
+  final String _dartSdkPath;
+  final DevtoolsLauncher _devtoolsLauncher;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -72,13 +84,10 @@ class WebDriverService extends DriverService {
   }) async {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      artifacts: globals.artifacts!,
+      toolContext: _toolContext!,
       buildInfo: buildInfo,
-      fileSystem: globals.fs,
-      logger: _logger,
-      platform: _platform,
-      processManager: globals.processManager,
       target: mainPath,
+      userIdentifier: userIdentifier,
     );
     _residentRunner = webRunnerFactory!.createWebRunner(
       flutterDevice,
