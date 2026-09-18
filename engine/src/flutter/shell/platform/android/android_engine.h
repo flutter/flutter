@@ -104,6 +104,8 @@ class AndroidEngine {
     return false;
   }
 
+  virtual void OnVsyncCallback(intptr_t baton) {}
+
   virtual void RegisterTexture(std::shared_ptr<flutter::Texture> texture) = 0;
 
   virtual void UnregisterTexture(int64_t texture_id) = 0;
