@@ -69,9 +69,8 @@ class NestedScrollViewExample extends StatelessWidget {
             // expectations. For the purpose of this sample, which can be run on
             // any platform, default scrollbars are disabled for the inner
             // scrollables.
-            behavior: ScrollConfiguration.of(
-              context,
-            ).copyWith(scrollbars: false),
+            behavior: ScrollConfiguration.of(context)
+                .copyWith(scrollbars: false),
             child: TabBarView(
               // These are the contents of the tab views, below the tabs.
               children: tabs.map((String name) {
