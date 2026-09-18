@@ -5,12 +5,22 @@ on:
     branches:
       - fix-rtl-table-semantics-index
 
+permissions:
+  contents: write
+
 jobs:
   table-semantics-regression:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
       - name: Run targeted table semantics tests
         run: ./bin/flutter test packages/flutter/test/widgets/table_semantics_test.dart
+      - name: Remove temporary validation workflow
+        run: |
+          git config user.name "Yazan Arafeh"
+          git config user.email "32390922+yazanmg@users.noreply.github.com"
+          git rm .github/workflows/pr192929-validation.yml
+          git commit -m "ci: remove temporary PR 192929 validation"
+          git push origin HEAD:fix-rtl-table-semantics-index
