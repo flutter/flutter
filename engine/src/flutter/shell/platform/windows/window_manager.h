@@ -21,7 +21,6 @@ namespace flutter {
 
 class FlutterWindowsEngine;
 class HostWindow;
-class HostWindowSatellite;
 
 // Specifies a preferred content size for the window.
 struct WindowSizeRequest {
@@ -71,9 +70,16 @@ struct DialogWindowCreationRequest {
   bool resizable = true;
 };
 
-typedef WindowRect* (*GetWindowPositionCallback)(const WindowSize& child_size,
-                                                 const WindowRect& parent_rect,
-                                                 const WindowRect& output_rect);
+// Invoked to determine the position of a window. |child_size| is the size of
+// the window being positioned, |parent_rect| the rectangle of its parent, and
+// |output_rect| the work area of the display to position within; all in
+// physical coordinates. On success, writes the resulting rectangle to
+// |out_rect| and returns true. Returns false if no position could be
+// determined, in which case |out_rect| is left untouched.
+typedef bool (*GetWindowPositionCallback)(const WindowSize& child_size,
+                                          const WindowRect& parent_rect,
+                                          const WindowRect& output_rect,
+                                          WindowRect* out_rect);
 
 struct TooltipWindowCreationRequest {
   WindowConstraints preferred_constraints;
@@ -170,11 +176,6 @@ class WindowManager {
   // A map of active windows. Used to destroy remaining windows on engine
   // shutdown.
   std::unordered_map<HWND, std::unique_ptr<HostWindow>> active_windows_;
-
-  // The subset of |active_windows_| that are satellites, so that window
-  // movement can be propagated without scanning every window. Entries are
-  // owned by |active_windows_| and removed on WM_NCDESTROY.
-  std::vector<HostWindowSatellite*> satellites_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(WindowManager);
 };

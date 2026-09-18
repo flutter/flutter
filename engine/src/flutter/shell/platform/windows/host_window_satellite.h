@@ -36,18 +36,14 @@ class HostWindowSatellite : public HostWindowSized {
 
   ~HostWindowSatellite() override;
 
-  // Called by |WindowManager| when the window this satellite is anchored to has
-  // moved. Shifts the satellite by the same delta so it retains its relative
-  // offset.
+  // Called by the window this satellite is anchored to when it has moved.
+  // Shifts the satellite by the same delta so it retains its relative offset.
   void OnParentMoved();
 
   // Changes the window that this satellite is anchored to. The satellite keeps
   // its current screen position; only future movement deltas are computed
   // against |new_parent|.
   void SetSatelliteParent(HWND new_parent);
-
-  // The window that this satellite is currently anchored to.
-  HWND GetParentHwnd() const { return parent_; }
 
  protected:
   LRESULT HandleMessage(HWND hwnd,

@@ -74,26 +74,21 @@ void HostWindowPopup::UpdatePosition() {
 
   IsolateScope scope(isolate_);
 
-  // Frees the memory allocated by the positioner callback.
-  // Even if the callback throws an exception, the memory will be freed when
-  // rect goes out of scope.
-  std::unique_ptr<WindowRect, decltype(&free)> rect(
-      get_position_callback_(
+  WindowRect rect = {};
+  if (!get_position_callback_(
           WindowSize{physical_width_, physical_height_},
           WindowRect{parent_top_left.x, parent_top_left.y,
                      parent_bottom_right.x - parent_top_left.x,
                      parent_bottom_right.y - parent_top_left.y},
-          work_area),
-      free);
-  if (!rect) {
+          work_area, &rect)) {
     return;
   }
-  SetWindowPos(window_handle_, HWND_TOP, rect->left, rect->top, rect->width,
-               rect->height, SWP_NOACTIVATE | SWP_NOOWNERZORDER);
+  SetWindowPos(window_handle_, HWND_TOP, rect.left, rect.top, rect.width,
+               rect.height, SWP_NOACTIVATE | SWP_NOOWNERZORDER);
 
   // The positioner constrained the dimensions more than current size, apply
   // positioner constraints.
-  if (rect->width < physical_width_ || rect->height < physical_height_) {
+  if (rect.width < physical_width_ || rect.height < physical_height_) {
     auto metrics_event = view_controller_->view()->CreateWindowMetricsEvent();
     view_controller_->engine()->SendWindowMetricsEvent(metrics_event);
   }

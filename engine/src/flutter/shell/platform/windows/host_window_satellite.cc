@@ -4,9 +4,6 @@
 
 #include "flutter/shell/platform/windows/host_window_satellite.h"
 
-#include <cstdlib>
-#include <memory>
-
 #include "flutter/fml/logging.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
@@ -16,8 +13,7 @@ namespace flutter {
 
 DWORD HostWindowSatellite::GetWindowStyleForSatellite(bool resizable) {
   // Satellites are decorated and activatable like a regular window, but they
-  // are never minimizable: a satellite has no meaningful existence apart from
-  // the parent it tracks.
+  // are never minimizable.
   DWORD window_style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU;
   if (resizable) {
     window_style |= WS_THICKFRAME | WS_MAXIMIZEBOX;
@@ -54,11 +50,6 @@ HostWindowSatellite::HostWindowSatellite(
       .sizing_delegate = sized_to_content ? AsSizingDelegate() : nullptr,
       .is_sized_to_content = sized_to_content,
   });
-
-  // Owned windows are destroyed alongside their owner and always stay above it
-  // in the z-order, which is the relationship a satellite needs.
-  SetWindowLongPtr(window_handle_, GWLP_HWNDPARENT,
-                   reinterpret_cast<LONG_PTR>(parent_));
 
   // Record where the parent is now so subsequent moves can be applied as
   // deltas.
@@ -138,20 +129,16 @@ std::optional<WindowRect> HostWindowSatellite::ComputePosition(
 
   IsolateScope scope(isolate);
 
-  // Frees the memory allocated by the positioner callback. Even if the callback
-  // throws an exception, the memory is freed when |rect| goes out of scope.
-  std::unique_ptr<WindowRect, decltype(&free)> rect(
-      get_position_callback(
+  WindowRect rect = {};
+  if (!get_position_callback(
           window_size,
           WindowRect{parent_top_left.x, parent_top_left.y,
                      parent_bottom_right.x - parent_top_left.x,
                      parent_bottom_right.y - parent_top_left.y},
-          GetWorkAreaForWindow(parent)),
-      free);
-  if (!rect) {
+          GetWorkAreaForWindow(parent), &rect)) {
     return std::nullopt;
   }
-  return *rect;
+  return rect;
 }
 
 void HostWindowSatellite::ApplyInitialPosition() {
@@ -245,6 +232,8 @@ void HostWindowSatellite::SetSatelliteParent(HWND new_parent) {
   }
 
   parent_ = new_parent;
+  // Transfer ownership to the new parent, so that the satellite is destroyed
+  // alongside it.
   SetWindowLongPtr(window_handle_, GWLP_HWNDPARENT,
                    reinterpret_cast<LONG_PTR>(new_parent));
 
@@ -262,8 +251,7 @@ LRESULT HostWindowSatellite::HandleMessage(HWND hwnd,
                                            LPARAM lparam) {
   switch (message) {
     case WM_SYSCOMMAND:
-      // A satellite has no meaningful existence apart from its parent, so it
-      // cannot be minimized on its own.
+      // Disallow minimization.
       if ((wparam & 0xFFF0) == SC_MINIMIZE) {
         return 0;
       }

@@ -5,7 +5,6 @@
 #include "flutter/shell/platform/windows/window_manager.h"
 
 #include <dwmapi.h>
-#include <algorithm>
 #include <optional>
 #include <vector>
 
@@ -99,7 +98,6 @@ FlutterViewId WindowManager::CreateSatelliteWindow(
     return -1;
   }
   FlutterViewId const view_id = window->view_controller_->view()->view_id();
-  satellites_.push_back(static_cast<HostWindowSatellite*>(window.get()));
   active_windows_[window->GetWindowHandle()] = std::move(window);
   return view_id;
 }
@@ -129,46 +127,8 @@ std::optional<LRESULT> WindowManager::HandleMessage(HWND hwnd,
                                                     WPARAM wparam,
                                                     LPARAM lparam) {
   if (message == WM_NCDESTROY) {
-    // Stop tracking the window before it is destroyed: |active_windows_| owns
-    // the |HostWindow|, so erasing it invalidates any pointer in
-    // |satellites_|.
-    std::erase_if(satellites_, [hwnd](HostWindowSatellite* satellite) {
-      return satellite->GetWindowHandle() == hwnd;
-    });
     active_windows_.erase(hwnd);
     return std::nullopt;
-  }
-
-  // A satellite retains its offset from the window it is anchored to, so when
-  // any window moves, shift the satellites that track it by the same delta.
-  // Moving a satellite generates its own WM_WINDOWPOSCHANGED, which propagates
-  // the movement to any satellites anchored to it in turn.
-  if (message == WM_WINDOWPOSCHANGED && !satellites_.empty()) {
-    auto const* const window_pos = reinterpret_cast<WINDOWPOS*>(lparam);
-    if (window_pos && !(window_pos->flags & SWP_NOMOVE)) {
-      // |OnParentMoved| runs nested message handling, during which a satellite
-      // may be destroyed. Snapshot the handles of the satellites to move, then
-      // resolve each handle back to a live satellite immediately before using
-      // it. Snapshotting handles rather than pointers also avoids mistaking a
-      // recycled allocation for a still-live satellite.
-      std::vector<HWND> satellite_handles;
-      satellite_handles.reserve(satellites_.size());
-      for (HostWindowSatellite* const satellite : satellites_) {
-        if (satellite->GetParentHwnd() == hwnd) {
-          satellite_handles.push_back(satellite->GetWindowHandle());
-        }
-      }
-      for (HWND const satellite_handle : satellite_handles) {
-        auto const it = std::find_if(
-            satellites_.begin(), satellites_.end(),
-            [satellite_handle](HostWindowSatellite* const satellite) {
-              return satellite->GetWindowHandle() == satellite_handle;
-            });
-        if (it != satellites_.end()) {
-          (*it)->OnParentMoved();
-        }
-      }
-    }
   }
 
   HostWindow* host_window = HostWindow::GetThisFromHandle(hwnd);

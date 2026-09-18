@@ -102,15 +102,15 @@ class WindowManagerTest : public WindowsTest {
 
   // Places a satellite at the origin of its parent's client area, offset by
   // (20, 30), at its requested size.
-  static WindowRect* OffsetPositionCallback(const WindowSize& child_size,
-                                            const WindowRect& parent_rect,
-                                            const WindowRect& output_rect) {
-    auto* const rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 20;
-    rect->top = parent_rect.top + 30;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
+  static bool OffsetPositionCallback(const WindowSize& child_size,
+                                     const WindowRect& parent_rect,
+                                     const WindowRect& output_rect,
+                                     WindowRect* out_rect) {
+    out_rect->left = parent_rect.left + 20;
+    out_rect->top = parent_rect.top + 30;
+    out_rect->width = child_size.width;
+    out_rect->height = child_size.height;
+    return true;
   }
 
   // Returns a fixed-size, resizable satellite creation request anchored to
@@ -503,15 +503,14 @@ TEST_F(WindowManagerTest, CreateTooltipWindow) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), parent_view_id);
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& output_rect, WindowRect* out_rect) -> bool {
+    out_rect->left = parent_rect.left + 10;
+    out_rect->top = parent_rect.top + 10;
+    out_rect->width = child_size.width;
+    out_rect->height = child_size.height;
+    return true;
   };
 
   TooltipWindowCreationRequest creation_request{
@@ -544,15 +543,14 @@ TEST_F(WindowManagerTest, TooltipWindowHasNoActivateStyle) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), parent_view_id);
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& output_rect, WindowRect* out_rect) -> bool {
+    out_rect->left = parent_rect.left + 10;
+    out_rect->top = parent_rect.top + 10;
+    out_rect->width = child_size.width;
+    out_rect->height = child_size.height;
+    return true;
   };
 
   TooltipWindowCreationRequest creation_request{
@@ -590,15 +588,14 @@ TEST_F(WindowManagerTest, TooltipWindowDoesNotStealFocus) {
   SetFocus(parent_window_handle);
   HWND focused_before = GetFocus();
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& output_rect, WindowRect* out_rect) -> bool {
+    out_rect->left = parent_rect.left + 10;
+    out_rect->top = parent_rect.top + 10;
+    out_rect->width = child_size.width;
+    out_rect->height = child_size.height;
+    return true;
   };
 
   TooltipWindowCreationRequest creation_request{
@@ -634,15 +631,14 @@ TEST_F(WindowManagerTest, TooltipWindowReturnsNoActivateOnMouseClick) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), parent_view_id);
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& output_rect, WindowRect* out_rect) -> bool {
+    out_rect->left = parent_rect.left + 10;
+    out_rect->top = parent_rect.top + 10;
+    out_rect->width = child_size.width;
+    out_rect->height = child_size.height;
+    return true;
   };
 
   TooltipWindowCreationRequest creation_request{
@@ -689,20 +685,18 @@ TEST_F(WindowManagerTest,
   static int last_width = 0;
   static int last_height = 0;
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& output_rect, WindowRect* out_rect) -> bool {
     callback_count++;
     last_width = child_size.width;
     last_height = child_size.height;
 
-    // Use malloc since the caller will use free()
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + callback_count * 5;
-    rect->top = parent_rect.top + callback_count * 5;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
+    out_rect->left = parent_rect.left + callback_count * 5;
+    out_rect->top = parent_rect.top + callback_count * 5;
+    out_rect->width = child_size.width;
+    out_rect->height = child_size.height;
+    return true;
   };
 
   TooltipWindowCreationRequest creation_request{
@@ -769,15 +763,14 @@ TEST_F(WindowManagerTest, CreatePopupWindow) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), parent_view_id);
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& output_rect, WindowRect* out_rect) -> bool {
+    out_rect->left = parent_rect.left + 10;
+    out_rect->top = parent_rect.top + 10;
+    out_rect->width = child_size.width;
+    out_rect->height = child_size.height;
+    return true;
   };
 
   PopupWindowCreationRequest creation_request{
@@ -810,15 +803,14 @@ TEST_F(WindowManagerTest, PopupWindowHasNoActivateStyle) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), parent_view_id);
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& output_rect, WindowRect* out_rect) -> bool {
+    out_rect->left = parent_rect.left + 10;
+    out_rect->top = parent_rect.top + 10;
+    out_rect->width = child_size.width;
+    out_rect->height = child_size.height;
+    return true;
   };
 
   PopupWindowCreationRequest creation_request{
@@ -856,15 +848,14 @@ TEST_F(WindowManagerTest, PopupWindowDoesNotStealFocus) {
   SetFocus(parent_window_handle);
   HWND focused_before = GetFocus();
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& output_rect, WindowRect* out_rect) -> bool {
+    out_rect->left = parent_rect.left + 10;
+    out_rect->top = parent_rect.top + 10;
+    out_rect->width = child_size.width;
+    out_rect->height = child_size.height;
+    return true;
   };
 
   PopupWindowCreationRequest creation_request{
@@ -901,9 +892,10 @@ TEST_F(WindowManagerTest, PopupWindowHandlesNullPositionCallback) {
           engine_id(), parent_view_id);
 
   // Simulates the positioner failing (e.g. its anchor was torn down).
-  auto position_callback =
-      [](const WindowSize& child_size, const WindowRect& parent_rect,
-         const WindowRect& output_rect) -> WindowRect* { return nullptr; };
+  auto position_callback = [](const WindowSize& child_size,
+                              const WindowRect& parent_rect,
+                              const WindowRect& output_rect,
+                              WindowRect* out_rect) -> bool { return false; };
 
   PopupWindowCreationRequest creation_request{
       .preferred_constraints = {.has_view_constraints = true,
@@ -956,20 +948,18 @@ TEST_F(WindowManagerTest, DISABLED_PopupWindowUpdatesPositionOnViewSizeChange) {
   static int last_width = 0;
   static int last_height = 0;
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& output_rect, WindowRect* out_rect) -> bool {
     callback_count++;
     last_width = child_size.width;
     last_height = child_size.height;
 
-    // Use malloc since the caller will use free()
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + callback_count * 5;
-    rect->top = parent_rect.top + callback_count * 5;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
+    out_rect->left = parent_rect.left + callback_count * 5;
+    out_rect->top = parent_rect.top + callback_count * 5;
+    out_rect->width = child_size.width;
+    out_rect->height = child_size.height;
+    return true;
   };
 
   PopupWindowCreationRequest creation_request{
@@ -1267,15 +1257,14 @@ TEST_F(WindowManagerTest, OnEngineShutdownDispatchesWmDestroyForPopupWindow) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), parent_view_id);
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& output_rect, WindowRect* out_rect) -> bool {
+    out_rect->left = parent_rect.left + 10;
+    out_rect->top = parent_rect.top + 10;
+    out_rect->width = child_size.width;
+    out_rect->height = child_size.height;
+    return true;
   };
 
   PopupWindowCreationRequest creation_request{
@@ -1316,15 +1305,14 @@ TEST_F(WindowManagerTest, OnEngineShutdownDispatchesWmDestroyForTooltipWindow) {
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
           engine_id(), parent_view_id);
 
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
+  auto position_callback =
+      [](const WindowSize& child_size, const WindowRect& parent_rect,
+         const WindowRect& output_rect, WindowRect* out_rect) -> bool {
+    out_rect->left = parent_rect.left + 10;
+    out_rect->top = parent_rect.top + 10;
+    out_rect->width = child_size.width;
+    out_rect->height = child_size.height;
+    return true;
   };
 
   TooltipWindowCreationRequest creation_request{

@@ -250,7 +250,8 @@ mixin _ChildWindowHierarchyMixin {
 
   /// Removes and destroys all child window controllers.
   void removeAllChildren() {
-    for (final BaseWindowController child in _children) {
+    // Destroying a child removes it from |_children|, so iterate over a copy.
+    for (final child in List<BaseWindowController>.of(_children)) {
       child.destroy();
     }
     _children.clear();

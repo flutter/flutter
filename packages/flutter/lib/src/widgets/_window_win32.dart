@@ -781,10 +781,15 @@ class DialogWindowControllerWin32 extends DialogWindowController with BaseWindow
   }
 }
 
-typedef _GetWindowPositionNative = ffi.Pointer<_Rect> Function(
+/// Invoked from C++ to determine the position of a window.
+///
+/// Writes the resulting rectangle into `outRect`, which is provided by the
+/// caller, and returns whether a position could be determined.
+typedef _GetWindowPositionNative = ffi.Bool Function(
   ffi.Pointer<_Size> childSize,
   ffi.Pointer<_Rect> parentRect,
   ffi.Pointer<_Rect> outputRect,
+  ffi.Pointer<_Rect> outRect,
 );
 
 /// Implementation of [TooltipWindowController] for the Windows platform.
@@ -819,6 +824,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
     _owner._addMessageHandler(this);
     _onGetWindowPosition = ffi.NativeCallable<_GetWindowPositionNative>.isolateLocal(
       _handleGetWindowPosition,
+      exceptionalReturn: false,
     );
     final int viewId = _Win32PlatformInterface.createTooltipWindow(
       _owner.allocator,
@@ -851,12 +857,12 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   @internal
   bool get isDestroyed => _destroyed;
 
-  ffi.Pointer<_Rect> _handleGetWindowPosition(
+  bool _handleGetWindowPosition(
     ffi.Pointer<_Size> childSize,
     ffi.Pointer<_Rect> parentRect,
     ffi.Pointer<_Rect> outputRect,
+    ffi.Pointer<_Rect> outRect,
   ) {
-    final ffi.Pointer<_Rect> result = _owner.allocator<_Rect>();
     final double scale = PlatformDispatcher.instance.views
         .firstWhere((FlutterView view) => view.viewId == rootView.viewId)
         .devicePixelRatio;
@@ -877,11 +883,11 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
       parentRect: parentRect.ref.toRect(),
       displayRect: outputRect.ref.toRect(),
     );
-    result.ref.left = targetRect.left.toInt();
-    result.ref.top = targetRect.top.toInt();
-    result.ref.width = targetRect.width.toInt();
-    result.ref.height = targetRect.height.toInt();
-    return result;
+    outRect.ref.left = targetRect.left.toInt();
+    outRect.ref.top = targetRect.top.toInt();
+    outRect.ref.width = targetRect.width.toInt();
+    outRect.ref.height = targetRect.height.toInt();
+    return true;
   }
 
   /// Returns HWND pointer to the top level window.
@@ -1013,6 +1019,7 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
     _owner._addMessageHandler(this);
     _onGetWindowPosition = ffi.NativeCallable<_GetWindowPositionNative>.isolateLocal(
       _handleGetWindowPosition,
+      exceptionalReturn: false,
     );
     final int viewId = _Win32PlatformInterface.createPopupWindow(
       _owner.allocator,
@@ -1045,10 +1052,11 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
   @internal
   bool get isDestroyed => _destroyed;
 
-  ffi.Pointer<_Rect> _handleGetWindowPosition(
+  bool _handleGetWindowPosition(
     ffi.Pointer<_Size> childSize,
     ffi.Pointer<_Rect> parentRect,
     ffi.Pointer<_Rect> outputRect,
+    ffi.Pointer<_Rect> outRect,
   ) {
     final double scale = PlatformDispatcher.instance.views
         .firstWhere((FlutterView view) => view.viewId == rootView.viewId)
@@ -1070,12 +1078,11 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
       parentRect: parentRect.ref.toRect(),
       displayRect: outputRect.ref.toRect(),
     );
-    final ffi.Pointer<_Rect> result = _owner.allocator<_Rect>();
-    result.ref.left = targetRect.left.toInt();
-    result.ref.top = targetRect.top.toInt();
-    result.ref.width = targetRect.width.toInt();
-    result.ref.height = targetRect.height.toInt();
-    return result;
+    outRect.ref.left = targetRect.left.toInt();
+    outRect.ref.top = targetRect.top.toInt();
+    outRect.ref.width = targetRect.width.toInt();
+    outRect.ref.height = targetRect.height.toInt();
+    return true;
   }
 
   /// Returns HWND pointer to the top level window.
@@ -1289,6 +1296,7 @@ class SatelliteWindowControllerWin32 extends SatelliteWindowController
     owner._addMessageHandler(_handler);
     _onGetWindowPosition = ffi.NativeCallable<_GetWindowPositionNative>.isolateLocal(
       _handleGetWindowPosition,
+      exceptionalReturn: false,
     );
 
     final shrinkWrap = size == null;
@@ -1326,10 +1334,11 @@ class SatelliteWindowControllerWin32 extends SatelliteWindowController
   late final ffi.NativeCallable<_GetWindowPositionNative> _onGetWindowPosition;
   bool _destroyed = false;
 
-  ffi.Pointer<_Rect> _handleGetWindowPosition(
+  bool _handleGetWindowPosition(
     ffi.Pointer<_Size> childSize,
     ffi.Pointer<_Rect> parentRect,
     ffi.Pointer<_Rect> outputRect,
+    ffi.Pointer<_Rect> outRect,
   ) {
     // The anchor rect and the positioner offset are expressed in the parent's
     // coordinate space, so they are scaled by the parent's device pixel ratio.
@@ -1360,12 +1369,11 @@ class SatelliteWindowControllerWin32 extends SatelliteWindowController
       parentRect: parentRect.ref.toRect(),
       displayRect: outputRect.ref.toRect(),
     );
-    final ffi.Pointer<_Rect> result = _owner.allocator<_Rect>();
-    result.ref.left = targetRect.left.toInt();
-    result.ref.top = targetRect.top.toInt();
-    result.ref.width = targetRect.width.toInt();
-    result.ref.height = targetRect.height.toInt();
-    return result;
+    outRect.ref.left = targetRect.left.toInt();
+    outRect.ref.top = targetRect.top.toInt();
+    outRect.ref.width = targetRect.width.toInt();
+    outRect.ref.height = targetRect.height.toInt();
+    return true;
   }
 
   /// Returns HWND pointer to the top level window.
@@ -1665,10 +1673,11 @@ class _Win32PlatformInterface {
     HWND parent,
     ffi.Pointer<
       ffi.NativeFunction<
-        ffi.Pointer<_Rect> Function(
+        ffi.Bool Function(
           ffi.Pointer<_Size> childSize,
           ffi.Pointer<_Rect> parentRect,
           ffi.Pointer<_Rect> outputRect,
+          ffi.Pointer<_Rect> outRect,
         )
       >
     >
@@ -1701,10 +1710,11 @@ class _Win32PlatformInterface {
     HWND parent,
     ffi.Pointer<
       ffi.NativeFunction<
-        ffi.Pointer<_Rect> Function(
+        ffi.Bool Function(
           ffi.Pointer<_Size> childSize,
           ffi.Pointer<_Rect> parentRect,
           ffi.Pointer<_Rect> outputRect,
+          ffi.Pointer<_Rect> outRect,
         )
       >
     >
@@ -1738,10 +1748,11 @@ class _Win32PlatformInterface {
     HWND parent,
     ffi.Pointer<
       ffi.NativeFunction<
-        ffi.Pointer<_Rect> Function(
+        ffi.Bool Function(
           ffi.Pointer<_Size> childSize,
           ffi.Pointer<_Rect> parentRect,
           ffi.Pointer<_Rect> outputRect,
+          ffi.Pointer<_Rect> outRect,
         )
       >
     >
@@ -1990,10 +2001,11 @@ final class _TooltipWindowCreationRequest extends ffi.Struct {
   external HWND parent;
   external ffi.Pointer<
     ffi.NativeFunction<
-      ffi.Pointer<_Rect> Function(
+      ffi.Bool Function(
         ffi.Pointer<_Size> childSize,
         ffi.Pointer<_Rect> parentRect,
         ffi.Pointer<_Rect> outputRect,
+        ffi.Pointer<_Rect> outRect,
       )
     >
   >
@@ -2005,10 +2017,11 @@ final class _PopupWindowCreationRequest extends ffi.Struct {
   external HWND parent;
   external ffi.Pointer<
     ffi.NativeFunction<
-      ffi.Pointer<_Rect> Function(
+      ffi.Bool Function(
         ffi.Pointer<_Size> childSize,
         ffi.Pointer<_Rect> parentRect,
         ffi.Pointer<_Rect> outputRect,
+        ffi.Pointer<_Rect> outRect,
       )
     >
   >
@@ -2023,10 +2036,11 @@ final class _SatelliteWindowCreationRequest extends ffi.Struct {
   external HWND parent;
   external ffi.Pointer<
     ffi.NativeFunction<
-      ffi.Pointer<_Rect> Function(
+      ffi.Bool Function(
         ffi.Pointer<_Size> childSize,
         ffi.Pointer<_Rect> parentRect,
         ffi.Pointer<_Rect> outputRect,
+        ffi.Pointer<_Rect> outRect,
       )
     >
   >
