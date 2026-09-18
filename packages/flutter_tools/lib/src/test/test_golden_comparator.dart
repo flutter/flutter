@@ -12,7 +12,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
-import '../context/tool_context.dart';
 import '../convert.dart';
 import 'test_compiler.dart';
 import 'test_config.dart';
@@ -33,34 +32,32 @@ import 'test_config.dart';
 /// ```dart
 /// final comparator = TestGoldenComparator(
 ///   flutterTesterBinPath: '/path/to/flutter_tester',
-///   toolContext: ...,
-/// );
+///   logger: ...,
+///   fileSystem: ...,
+///   processManager: ...,
+/// )
 ///
 /// final result = await comparator.compare(testUri, bytes, goldenKey);
 /// ```
 final class TestGoldenComparator {
   /// Creates a [TestGoldenComparator] instance.
   TestGoldenComparator({
-    required this._compilerFactory,
     required this._flutterTesterBinPath,
+    required this._compilerFactory,
+    required this._logger,
+    required FileSystem fileSystem,
+    required this._processManager,
     this._environment = const <String, String>{},
-    FileSystem? fileSystem,
-    Logger? logger,
-    ProcessManager? processManager,
-    ToolContext? toolContext,
-  }) : assert(
-         toolContext != null || (fileSystem != null && logger != null && processManager != null),
-       ),
-       _toolContext =
-           toolContext ??
-           _PartialToolContext(fs: fileSystem!, logger: logger!, processManager: processManager!) {
-    _tempDir = _toolContext.fs.systemTempDirectory.createTempSync('flutter_web_platform.');
-  }
+  }) : _tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform.'),
+       _fileSystem = fileSystem;
 
   final String _flutterTesterBinPath;
-  late final Directory _tempDir;
-  final ToolContext _toolContext;
+  final Directory _tempDir;
+  final Logger _logger;
+  final FileSystem _fileSystem;
+  final ProcessManager _processManager;
   final Map<String, String> _environment;
+
   final TestCompiler Function() _compilerFactory;
   late final TestCompiler _compiler = _compilerFactory();
 
@@ -83,18 +80,17 @@ final class TestGoldenComparator {
       return _previousComparator!;
     }
 
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final String bootstrap = TestGoldenComparatorProcess.generateBootstrap(
-      fs.file(testUri),
+      _fileSystem.file(testUri),
       testUri,
-      logger: logger,
+      logger: _logger,
     );
     final Process? process = await _startProcess(bootstrap);
     if (process == null) {
       return null;
     }
     unawaited(_previousComparator?.close());
-    _previousComparator = TestGoldenComparatorProcess(process, logger: logger);
+    _previousComparator = TestGoldenComparatorProcess(process, logger: _logger);
     _previousTestUri = testUri;
 
     return _previousComparator!;
@@ -105,11 +101,10 @@ final class TestGoldenComparator {
     final File listenerFile = (await _tempDir.createTemp('listener')).childFile('listener.dart');
     await listenerFile.writeAsString(testBootstrap);
 
-    final ToolContext(:Logger logger, :ProcessManager processManager) = _toolContext;
     final TestCompilerResult result = await _compiler.compile(listenerFile.uri);
     switch (result) {
       case TestCompilerFailure(:final String error):
-        logger.printWarning('An error occurred compiling ${listenerFile.uri}: $error.');
+        _logger.printWarning('An error occurred compiling ${listenerFile.uri}: $error.');
         return null;
       case TestCompilerComplete(:final String outputPath):
         final command = <String>[
@@ -119,7 +114,7 @@ final class TestGoldenComparator {
           outputPath,
         ];
 
-        return processManager.start(command, environment: _environment);
+        return _processManager.start(command, environment: _environment);
     }
   }
 
@@ -359,20 +354,4 @@ void main() async {
 }
     ''';
   }
-}
-
-class _PartialToolContext implements ToolContext {
-  _PartialToolContext({required this.fs, required this.logger, required this.processManager});
-
-  @override
-  final FileSystem fs;
-
-  @override
-  final Logger logger;
-
-  @override
-  final ProcessManager processManager;
-
-  @override
-  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

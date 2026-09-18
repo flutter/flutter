@@ -15,7 +15,6 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fakes.dart';
 
 void main() {
   final testUri1 = Uri(scheme: 'file', path: 'test_file_1');
@@ -56,17 +55,11 @@ void main() {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
-      toolContext: FakeToolContext(
-        fs: fileSystem,
-        logger: logger,
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          fakeFluterTester(
-            'flutter_tester',
-            stdout: _encodeStdout(success: true),
-            mainUri: testUri1,
-          ),
-        ]),
-      ),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        fakeFluterTester('flutter_tester', stdout: _encodeStdout(success: true), mainUri: testUri1),
+      ]),
+      fileSystem: fileSystem,
+      logger: logger,
     );
 
     final TestGoldenComparison result = await comparator.compare(testUri1, imageBytes, goldenKey1);
@@ -77,17 +70,15 @@ void main() {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
-      toolContext: FakeToolContext(
-        fs: fileSystem,
-        logger: logger,
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          fakeFluterTester(
-            'flutter_tester',
-            stdout: _encodeStdout(success: false),
-            mainUri: testUri1,
-          ),
-        ]),
-      ),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        fakeFluterTester(
+          'flutter_tester',
+          stdout: _encodeStdout(success: false),
+          mainUri: testUri1,
+        ),
+      ]),
+      fileSystem: fileSystem,
+      logger: logger,
     );
 
     final TestGoldenComparison result = await comparator.compare(testUri1, imageBytes, goldenKey1);
@@ -98,17 +89,15 @@ void main() {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
-      toolContext: FakeToolContext(
-        fs: fileSystem,
-        logger: logger,
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          fakeFluterTester(
-            'flutter_tester',
-            stdout: _encodeStdout(success: false, message: 'Did a bad'),
-            mainUri: testUri1,
-          ),
-        ]),
-      ),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        fakeFluterTester(
+          'flutter_tester',
+          stdout: _encodeStdout(success: false, message: 'Did a bad'),
+          mainUri: testUri1,
+        ),
+      ]),
+      fileSystem: fileSystem,
+      logger: logger,
     );
 
     final TestGoldenComparison result = await comparator.compare(testUri1, imageBytes, goldenKey1);
@@ -119,17 +108,11 @@ void main() {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
-      toolContext: FakeToolContext(
-        fs: fileSystem,
-        logger: logger,
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          fakeFluterTester(
-            'flutter_tester',
-            stdout: _encodeStdout(success: true),
-            mainUri: testUri1,
-          ),
-        ]),
-      ),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        fakeFluterTester('flutter_tester', stdout: _encodeStdout(success: true), mainUri: testUri1),
+      ]),
+      fileSystem: fileSystem,
+      logger: logger,
     );
 
     final TestGoldenUpdate result = await comparator.update(testUri1, imageBytes, goldenKey1);
@@ -140,17 +123,15 @@ void main() {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
-      toolContext: FakeToolContext(
-        fs: fileSystem,
-        logger: logger,
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          fakeFluterTester(
-            'flutter_tester',
-            stdout: _encodeStdout(success: false, message: 'Did a bad'),
-            mainUri: testUri1,
-          ),
-        ]),
-      ),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        fakeFluterTester(
+          'flutter_tester',
+          stdout: _encodeStdout(success: false, message: 'Did a bad'),
+          mainUri: testUri1,
+        ),
+      ]),
+      fileSystem: fileSystem,
+      logger: logger,
     );
 
     final TestGoldenUpdate result = await comparator.update(testUri1, imageBytes, goldenKey1);
@@ -161,18 +142,16 @@ void main() {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
-      toolContext: FakeToolContext(
-        fs: fileSystem,
-        logger: logger,
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          fakeFluterTester(
-            'flutter_tester',
-            stdout: _encodeStdout(success: true),
-            environment: <String, String>{'THE_ANSWER': '42'},
-            mainUri: testUri1,
-          ),
-        ]),
-      ),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        fakeFluterTester(
+          'flutter_tester',
+          stdout: _encodeStdout(success: true),
+          environment: <String, String>{'THE_ANSWER': '42'},
+          mainUri: testUri1,
+        ),
+      ]),
+      fileSystem: fileSystem,
+      logger: logger,
       environment: <String, String>{'THE_ANSWER': '42'},
     );
 
@@ -184,20 +163,18 @@ void main() {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
-      toolContext: FakeToolContext(
-        fs: fileSystem,
-        logger: logger,
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          fakeFluterTester(
-            'flutter_tester',
-            stdout: <String>[
-              _encodeStdout(success: false, message: '1 Did a bad'),
-              _encodeStdout(success: false, message: '2 Did a bad'),
-            ].join('\n'),
-            mainUri: testUri1,
-          ),
-        ]),
-      ),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        fakeFluterTester(
+          'flutter_tester',
+          stdout: <String>[
+            _encodeStdout(success: false, message: '1 Did a bad'),
+            _encodeStdout(success: false, message: '2 Did a bad'),
+          ].join('\n'),
+          mainUri: testUri1,
+        ),
+      ]),
+      fileSystem: fileSystem,
+      logger: logger,
     );
 
     final TestGoldenComparison result1 = await comparator.compare(testUri1, imageBytes, goldenKey1);
@@ -211,22 +188,20 @@ void main() {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
-      toolContext: FakeToolContext(
-        fs: fileSystem,
-        logger: logger,
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          fakeFluterTester(
-            'flutter_tester',
-            stdout: _encodeStdout(success: false, message: '1 Did a bad'),
-            mainUri: testUri1,
-          ),
-          fakeFluterTester(
-            'flutter_tester',
-            stdout: _encodeStdout(success: false, message: '2 Did a bad'),
-            mainUri: testUri2,
-          ),
-        ]),
-      ),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        fakeFluterTester(
+          'flutter_tester',
+          stdout: _encodeStdout(success: false, message: '1 Did a bad'),
+          mainUri: testUri1,
+        ),
+        fakeFluterTester(
+          'flutter_tester',
+          stdout: _encodeStdout(success: false, message: '2 Did a bad'),
+          mainUri: testUri2,
+        ),
+      ]),
+      fileSystem: fileSystem,
+      logger: logger,
     );
 
     final TestGoldenComparison result1 = await comparator.compare(testUri1, imageBytes, goldenKey1);
@@ -240,11 +215,9 @@ void main() {
     final comparator = TestGoldenComparator(
       compilerFactory: _FakeTestCompiler.new,
       flutterTesterBinPath: 'flutter_tester',
-      toolContext: FakeToolContext(
-        fs: fileSystem,
-        logger: logger,
-        processManager: FakeProcessManager.empty(),
-      ),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: logger,
     );
 
     expect(fileSystem.systemTempDirectory.listSync(recursive: true), isNotEmpty);
@@ -257,11 +230,9 @@ void main() {
     final comparator = TestGoldenComparator(
       compilerFactory: () => testCompiler,
       flutterTesterBinPath: 'flutter_tester',
-      toolContext: FakeToolContext(
-        fs: fileSystem,
-        logger: logger,
-        processManager: FakeProcessManager.empty(),
-      ),
+      processManager: FakeProcessManager.empty(),
+      fileSystem: fileSystem,
+      logger: logger,
     );
 
     expect(testCompiler.disposed, false);
