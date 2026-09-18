@@ -712,7 +712,7 @@ class RunCommand extends RunCommandBase {
       stdio: globals.stdio,
       systemClock: globals.systemClock,
       terminal: globals.terminal,
-      toolContext: toolContext!,
+      toolContext: toolContext,
     );
   }
 

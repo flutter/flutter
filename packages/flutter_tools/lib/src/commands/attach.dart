@@ -142,6 +142,7 @@ class AttachCommand extends FlutterCommand {
   final Logger _logger;
   final Terminal _terminal;
   final Signals _signals;
+  final Platform _platform;
   final ProcessInfo _processInfo;
   final FileSystem _fileSystem;
 
@@ -316,6 +317,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
       logToStdout: true,
       featureFlags: featureFlags,
+      platform: _platform,
     );
 
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
