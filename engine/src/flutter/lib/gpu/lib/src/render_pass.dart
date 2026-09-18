@@ -191,6 +191,34 @@ base class SamplerOptions {
   /// levels (via [Texture.overwrite] or by rendering into them) to get the
   /// full quality benefit.
   int maxAnisotropy;
+
+  void _validate() {
+    if (maxAnisotropy < 1) {
+      throw Exception("SamplerOptions.maxAnisotropy must be at least 1");
+    }
+    if (maxAnisotropy > 1 &&
+        (minFilter != MinMagFilter.linear ||
+            magFilter != MinMagFilter.linear ||
+            mipFilter != MipFilter.linear)) {
+      throw Exception(
+        "When SamplerOptions.maxAnisotropy is greater than 1, minFilter, "
+        "magFilter, and mipFilter must all be linear",
+      );
+    }
+  }
+}
+
+/// Textures the GPU only ever writes have no backing memory to sample, so
+/// they cannot be read by a shader.
+void _validateBindableTexture(Texture texture) {
+  assert(() {
+    if (texture.storageMode == StorageMode.deviceTransient) {
+      throw Exception(
+        "Textures with StorageMode.deviceTransient cannot be bound to a RenderPass",
+      );
+    }
+    return true;
+  }());
 }
 
 base class Scissor {
@@ -342,6 +370,11 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// native side, which in turn matches `impeller::kMaxVertexBuffers`; keep
   /// them in sync.
   static const int _kMaxVertexBufferSlots = 16;
+
+  /// The number of binding set slots that can be bound to a single draw.
+  /// Matches `flutter::gpu::RenderPass::kMaxBindingSets` on the native side;
+  /// keep them in sync. See [bindSet].
+  static const int maxBindingSets = 4;
 
   /// Bitmask of slots that have been bound via [bindVertexBuffer] since the
   /// most recent [clearBindings] (or since this RenderPass was created).
@@ -497,27 +530,8 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       sampler = SamplerOptions();
     }
 
-    assert(() {
-      if (texture.storageMode == StorageMode.deviceTransient) {
-        throw Exception(
-          "Textures with StorageMode.deviceTransient cannot be bound to a RenderPass",
-        );
-      }
-      return true;
-    }());
-
-    if (sampler.maxAnisotropy < 1) {
-      throw Exception("SamplerOptions.maxAnisotropy must be at least 1");
-    }
-    if (sampler.maxAnisotropy > 1 &&
-        (sampler.minFilter != MinMagFilter.linear ||
-            sampler.magFilter != MinMagFilter.linear ||
-            sampler.mipFilter != MipFilter.linear)) {
-      throw Exception(
-        "When SamplerOptions.maxAnisotropy is greater than 1, minFilter, "
-        "magFilter, and mipFilter must all be linear",
-      );
-    }
+    _validateBindableTexture(texture);
+    sampler._validate();
 
     int uniformTextureIndex = slot._resolvedTextureIndex;
     if (uniformTextureIndex < 0) {
@@ -539,6 +553,32 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     if (!success) {
       throw Exception("Failed to bind texture");
     }
+  }
+
+  /// Binds every resource in [bindingSet] for subsequent draws, replacing
+  /// whatever set was bound to [slot].
+  ///
+  /// This is O(1) regardless of how many resources the set holds, because the
+  /// set already resolved them against shader reflection when it was created.
+  ///
+  /// Set bindings are applied before individual [bindUniform] and
+  /// [bindTexture] calls, so an individual bind to the same shader binding
+  /// overrides the set's. Where two bound sets declare the same binding, the
+  /// higher slot wins. [clearBindings] empties every slot.
+  ///
+  /// [slot] must be in `[0, maxBindingSets)`.
+  void bindSet(BindingSet bindingSet, {int slot = 0}) {
+    if (slot < 0 || slot >= maxBindingSets) {
+      throw RangeError.range(
+        slot,
+        0,
+        maxBindingSets - 1,
+        'slot',
+        'bindSet slot must be in [0, $maxBindingSets)',
+      );
+    }
+    bindingSet._syncReloadEpoch();
+    _bindSet(bindingSet, slot);
   }
 
   void clearBindings() {
@@ -863,6 +903,11 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     int heightAddressMode,
     int maxAnisotropy,
   );
+
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Int)>(
+    symbol: 'InternalFlutterGpu_RenderPass_BindSet',
+  )
+  external void _bindSet(BindingSet bindingSet, int slot);
 
   @Native<Void Function(Pointer<Void>)>(
     symbol: 'InternalFlutterGpu_RenderPass_ClearBindings',
