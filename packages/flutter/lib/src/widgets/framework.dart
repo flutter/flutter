@@ -3178,7 +3178,8 @@ class BuildOwner {
   // In Profile/Release mode this field must never be accessed, to allow the
   // Dart compiler to eliminate the field along with its initializer.
   @_debugOnly
-  late final Map<Element, Map<Element, GlobalKey>> _debugGlobalKeyReservations = <Element, Map<Element, GlobalKey>>{};
+  late final Map<Element, Map<Element, GlobalKey>> _debugGlobalKeyReservations =
+      <Element, Map<Element, GlobalKey>>{};
 
   /// The number of [GlobalKey] instances that are currently associated with
   /// [Element]s that have been built by this build owner.
@@ -3218,7 +3219,8 @@ class BuildOwner {
 
   void _debugReserveGlobalKeyFor(Element parent, Element child, GlobalKey key) {
     assert(() {
-      final Map<Element, GlobalKey> childToKey = _debugGlobalKeyReservations[parent] ??= <Element, GlobalKey>{};
+      final Map<Element, GlobalKey> childToKey = _debugGlobalKeyReservations[parent] ??=
+          <Element, GlobalKey>{};
       childToKey[child] = key;
       return true;
     }());
