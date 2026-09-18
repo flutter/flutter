@@ -32,6 +32,8 @@ class EmbedderEngine {
       std::unique_ptr<EmbedderExternalTextureResolver>
           external_texture_resolver);
 
+  EmbedderEngine(const TaskRunners& task_runners, std::unique_ptr<Shell> shell);
+
   ~EmbedderEngine();
 
   bool LaunchShell();
@@ -89,6 +91,8 @@ class EmbedderEngine {
   bool ScheduleFrame();
 
   Shell& GetShell();
+
+  const std::unique_ptr<Shell>& GetShellPointer() const { return shell_; }
 
  private:
   std::unique_ptr<EmbedderThreadHost> thread_host_;
