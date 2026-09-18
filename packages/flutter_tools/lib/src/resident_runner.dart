@@ -54,69 +54,38 @@ import 'vmservice.dart';
 class FlutterDevice {
   FlutterDevice(
     this.device, {
-    required this.artifacts,
     required this.buildInfo,
     required this.developmentShaderCompiler,
     required this.generator,
     required this.targetPlatform,
-    FileSystem? fileSystem,
+    required this._toolContext,
     @visibleForTesting this.logFlushDelay = const Duration(milliseconds: 500),
-    Logger? logger,
-    OperatingSystemUtils? osUtils,
-    Platform? platform,
-    ProcessManager? processManager,
     this.userIdentifier,
-  }) : fileSystem = fileSystem ?? MemoryFileSystem.test(),
-       logger = logger ?? BufferLogger.test(),
-       osUtils =
-           osUtils ??
-           OperatingSystemUtils(
-             fileSystem: fileSystem ?? MemoryFileSystem.test(),
-             logger: logger ?? BufferLogger.test(),
-             platform: platform ?? const LocalPlatform(),
-             processManager: processManager ?? const LocalProcessManager(),
-           ),
-       platform = platform ?? const LocalPlatform(),
-       processManager = processManager ?? const LocalProcessManager();
+  });
 
   final Duration logFlushDelay;
 
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
     Device device, {
-    required Artifacts artifacts,
     required BuildInfo buildInfo,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
     required String? target,
-    Config? config,
-    OperatingSystemUtils? osUtils,
+    required ToolContext toolContext,
     ShutdownHooks? shutdownHooks,
     TargetModel? targetModelOverride,
     String? userIdentifier,
   }) async {
+    final ToolContext(:artifacts, :config, :fs, :logger, :platform, :processManager) = toolContext;
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    final OperatingSystemUtils effectiveOsUtils =
-        osUtils ??
-        OperatingSystemUtils(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        );
-    final Config effectiveConfig = config ?? Config.test();
-    final ShutdownHooks effectiveShutdownHooks = shutdownHooks ?? ShutdownHooks();
 
     final shaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: ShaderCompiler(
         artifacts: artifacts,
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
+        fileSystem: fs,
       ),
-      fileSystem: fileSystem,
+      fileSystem: fs,
       logger: logger,
     );
 
@@ -124,10 +93,10 @@ class FlutterDevice {
       artifacts: artifacts,
       processManager: processManager,
       logger: logger,
-      fileSystem: fileSystem,
+      fileSystem: fs,
       platform: platform,
-      shutdownHooks: effectiveShutdownHooks,
-      config: effectiveConfig,
+      shutdownHooks: shutdownHooks ?? ShutdownHooks(),
+      config: config,
       targetPlatform: targetPlatform,
       buildInfo: buildInfo,
       targetModelOverride: targetModelOverride,
@@ -135,17 +104,12 @@ class FlutterDevice {
 
     return FlutterDevice(
       device,
-      targetPlatform: targetPlatform,
-      generator: generator,
       buildInfo: buildInfo,
-      userIdentifier: userIdentifier,
       developmentShaderCompiler: shaderCompiler,
-      logger: logger,
-      fileSystem: fileSystem,
-      artifacts: artifacts,
-      processManager: processManager,
-      osUtils: effectiveOsUtils,
-      platform: platform,
+      generator: generator,
+      targetPlatform: targetPlatform,
+      toolContext: toolContext,
+      userIdentifier: userIdentifier,
     );
   }
 
@@ -153,12 +117,13 @@ class FlutterDevice {
   final Device? device;
   final ResidentCompiler? generator;
   final BuildInfo buildInfo;
-  final Logger logger;
-  final FileSystem fileSystem;
-  final Artifacts artifacts;
-  final ProcessManager processManager;
-  final OperatingSystemUtils osUtils;
-  final Platform platform;
+  Logger get logger => _toolContext.logger;
+  FileSystem get fileSystem => _toolContext.fs;
+  final ToolContext _toolContext;
+  Artifacts get artifacts => _toolContext.artifacts;
+  ProcessManager get processManager => _toolContext.processManager;
+  OperatingSystemUtils get osUtils => _toolContext.os;
+  Platform get platform => _toolContext.platform;
   final String? userIdentifier;
   final DevelopmentShaderCompiler developmentShaderCompiler;
 
@@ -349,13 +314,7 @@ class FlutterDevice {
       fsName,
       rootDirectory,
       buildMode: buildInfo.mode,
-      toolContext: _FlutterDeviceDevFSContext(
-        artifacts: artifacts,
-        fs: fileSystem,
-        logger: logger,
-        os: osUtils,
-        processManager: processManager,
-      ),
+      toolContext: _toolContext,
     );
     return devFS!.create();
   }
@@ -2207,26 +2166,4 @@ class DevToolsServerAddress {
   Uri? get uri {
     return Uri(scheme: 'http', host: host, port: port);
   }
-}
-
-class _FlutterDeviceDevFSContext implements ToolContext {
-  _FlutterDeviceDevFSContext({
-    required this.artifacts,
-    required this.fs,
-    required this.logger,
-    required this.os,
-    required this.processManager,
-  });
-  @override
-  final Artifacts artifacts;
-  @override
-  final FileSystem fs;
-  @override
-  final Logger logger;
-  @override
-  final OperatingSystemUtils os;
-  @override
-  final ProcessManager processManager;
-  @override
-  dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }

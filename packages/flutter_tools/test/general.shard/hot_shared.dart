@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -23,6 +24,7 @@ import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/fake_process_manager.dart';
+import '../src/fakes.dart';
 
 class FakeDevFs extends Fake implements DevFS {
   @override
@@ -166,7 +168,12 @@ class TestFlutterDevice extends FlutterDevice {
     Future<Uri>? vmServiceUri,
   }) : super(
          device,
-         artifacts: Artifacts.test(),
+         toolContext: TestToolContext(
+           fileSystem: globals.fs,
+           logger: globals.logger,
+           processManager: globals.processManager,
+           artifacts: Artifacts.test(),
+         ),
          targetPlatform: TargetPlatform.unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,
