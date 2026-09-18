@@ -22,7 +22,8 @@ void main() {
   late RepositoryLinkSyntaxTest testSuite;
 
   setUp(() {
-    testSuite = RepositoryLinkSyntaxTest()..setUp();
+    testSuite = RepositoryLinkSyntaxTest();
+    testSuite.setUp();
   });
 
   tearDown(() => testSuite.tearDown());

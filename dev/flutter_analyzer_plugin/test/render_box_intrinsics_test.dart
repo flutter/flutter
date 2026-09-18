@@ -88,7 +88,8 @@ void main() {
   late RenderBoxIntrinsicCalculationRuleTest testSuite;
 
   setUp(() {
-    testSuite = RenderBoxIntrinsicCalculationRuleTest()..setUp();
+    testSuite = RenderBoxIntrinsicCalculationRuleTest();
+    testSuite.setUp();
   });
 
   tearDown(() => testSuite.tearDown());

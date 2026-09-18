@@ -34,7 +34,8 @@ void main() {
   late NoTestImportsTest testSuite;
 
   setUp(() {
-    testSuite = NoTestImportsTest()..setUp();
+    testSuite = NoTestImportsTest();
+    testSuite.setUp();
   });
 
   tearDown(() => testSuite.tearDown());

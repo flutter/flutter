@@ -39,7 +39,8 @@ void main() {
   late IntegrationTestTimeoutsTest testSuite;
 
   setUp(() {
-    testSuite = IntegrationTestTimeoutsTest()..setUp();
+    testSuite = IntegrationTestTimeoutsTest();
+    testSuite.setUp();
   });
 
   tearDown(() => testSuite.tearDown());

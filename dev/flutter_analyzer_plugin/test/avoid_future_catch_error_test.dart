@@ -43,7 +43,8 @@ void main() {
   late AvoidFutureCatchErrorTest testSuite;
 
   setUp(() {
-    testSuite = AvoidFutureCatchErrorTest()..setUp();
+    testSuite = AvoidFutureCatchErrorTest();
+    testSuite.setUp();
   });
 
   tearDown(() => testSuite.tearDown());

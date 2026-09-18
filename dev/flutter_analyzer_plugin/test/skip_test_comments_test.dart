@@ -30,7 +30,8 @@ void main() {
   late SkipTestCommentsTest testSuite;
 
   setUp(() {
-    testSuite = SkipTestCommentsTest()..setUp();
+    testSuite = SkipTestCommentsTest();
+    testSuite.setUp();
   });
 
   tearDown(() => testSuite.tearDown());

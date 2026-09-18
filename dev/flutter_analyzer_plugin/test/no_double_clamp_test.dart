@@ -55,7 +55,8 @@ void main() {
   late NoDoubleClampTest testSuite;
 
   setUp(() {
-    testSuite = NoDoubleClampTest()..setUp();
+    testSuite = NoDoubleClampTest();
+    testSuite.setUp();
   });
 
   tearDown(() => testSuite.tearDown());

@@ -61,7 +61,8 @@ void main() {
   late NoRuntimeTypeInToStringTest testSuite;
 
   setUp(() {
-    testSuite = NoRuntimeTypeInToStringTest()..setUp();
+    testSuite = NoRuntimeTypeInToStringTest();
+    testSuite.setUp();
   });
 
   tearDown(() => testSuite.tearDown());

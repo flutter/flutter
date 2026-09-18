@@ -151,7 +151,8 @@ void main() {
   late ProtectPublicStateSubtypesTest testSuite;
 
   setUp(() {
-    testSuite = ProtectPublicStateSubtypesTest()..setUp();
+    testSuite = ProtectPublicStateSubtypesTest();
+    testSuite.setUp();
   });
 
   tearDown(() => testSuite.tearDown());

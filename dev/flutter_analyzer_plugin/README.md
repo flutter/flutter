@@ -495,7 +495,8 @@ void main() {
   late MyCustomRuleTest testSuite;
 
   setUp(() {
-    testSuite = MyCustomRuleTest()..setUp();
+    testSuite = MyCustomRuleTest();
+    testSuite.setUp();
   });
 
   tearDown(() => testSuite.tearDown());

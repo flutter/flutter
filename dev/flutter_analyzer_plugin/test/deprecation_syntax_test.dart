@@ -39,7 +39,8 @@ void main() {
   late DeprecationSyntaxTest testSuite;
 
   setUp(() {
-    testSuite = DeprecationSyntaxTest()..setUp();
+    testSuite = DeprecationSyntaxTest();
+    testSuite.setUp();
   });
 
   tearDown(() => testSuite.tearDown());

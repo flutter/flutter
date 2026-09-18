@@ -51,7 +51,8 @@ void main() {
   late NoSyncAsyncStarTest testSuite;
 
   setUp(() {
-    testSuite = NoSyncAsyncStarTest()..setUp();
+    testSuite = NoSyncAsyncStarTest();
+    testSuite.setUp();
   });
 
   tearDown(() => testSuite.tearDown());

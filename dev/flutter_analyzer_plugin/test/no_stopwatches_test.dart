@@ -101,7 +101,8 @@ void main() {
   late NoStopwatchesTest testSuite;
 
   setUp(() {
-    testSuite = NoStopwatchesTest()..setUp();
+    testSuite = NoStopwatchesTest();
+    testSuite.setUp();
   });
 
   tearDown(() => testSuite.tearDown());

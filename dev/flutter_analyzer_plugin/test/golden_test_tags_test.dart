@@ -40,7 +40,8 @@ void main() {
   late GoldenTestTagsTest testSuite;
 
   setUp(() {
-    testSuite = GoldenTestTagsTest()..setUp();
+    testSuite = GoldenTestTagsTest();
+    testSuite.setUp();
   });
 
   tearDown(() => testSuite.tearDown());

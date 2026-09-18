@@ -66,7 +66,8 @@ void main() {
   late NullInitializedDebugExpensiveFieldsTest testSuite;
 
   setUp(() {
-    testSuite = NullInitializedDebugExpensiveFieldsTest()..setUp();
+    testSuite = NullInitializedDebugExpensiveFieldsTest();
+    testSuite.setUp();
   });
 
   tearDown(() => testSuite.tearDown());

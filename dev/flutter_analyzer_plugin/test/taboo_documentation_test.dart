@@ -22,7 +22,8 @@ void main() {
   late TabooDocumentationTest testSuite;
 
   setUp(() {
-    testSuite = TabooDocumentationTest()..setUp();
+    testSuite = TabooDocumentationTest();
+    testSuite.setUp();
   });
 
   tearDown(() => testSuite.tearDown());

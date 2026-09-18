@@ -37,7 +37,8 @@ void main() {
     late IssueLinkSyntaxTest testSuite;
 
     setUp(() {
-      testSuite = IssueLinkSyntaxTest()..setUp();
+      testSuite = IssueLinkSyntaxTest();
+      testSuite.setUp();
     });
 
     tearDown(() => testSuite.tearDown());
@@ -126,7 +127,8 @@ void main() {
     late IssueLinkSyntaxTestFileTest testSuite;
 
     setUp(() {
-      testSuite = IssueLinkSyntaxTestFileTest()..setUp();
+      testSuite = IssueLinkSyntaxTestFileTest();
+      testSuite.setUp();
     });
 
     tearDown(() => testSuite.tearDown());

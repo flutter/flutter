@@ -42,7 +42,8 @@ void main() {
   late NoBadImportsInFlutterTest testSuite;
 
   setUp(() {
-    testSuite = NoBadImportsInFlutterTest()..setUp();
+    testSuite = NoBadImportsInFlutterTest();
+    testSuite.setUp();
   });
 
   tearDown(() => testSuite.tearDown());
