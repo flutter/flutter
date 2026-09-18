@@ -14,8 +14,7 @@ void main() {
     testWidgets('Table semantics uses logical column indices in ${textDirection.name.toUpperCase()}', (
       WidgetTester tester,
     ) async {
-      final handle = tester.ensureSemantics();
-      addTearDown(handle.dispose);
+      final SemanticsHandle handle = tester.ensureSemantics();
 
       await tester.pumpWidget(
         Directionality(
@@ -64,6 +63,8 @@ void main() {
             : MatrixUtils.getAsTranslation(secondCell.transform!),
         secondOffset,
       );
+
+      handle.dispose();
     });
   }
 }
