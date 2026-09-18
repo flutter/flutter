@@ -1275,6 +1275,27 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// {@macro flutter.widgets.ScrollView.PageStorage}
 ///
+/// ## Common pitfalls
+///
+/// It is common to see an assertion saying "Vertical viewport was given
+/// unbounded height" or "Horizontal viewport was given unbounded width" when
+/// a [ListView] is placed inside a [Column] or [Row] along the same axis
+/// (e.g., a vertical [ListView] inside a [Column]).
+///
+/// This happens because a [ListView] tries to expand infinitely in its
+/// scroll direction (vertically by default), but flex widgets like [Column]
+/// and [Row] provide unbounded space along their main axis.
+///
+/// To fix this, you must constrain the [ListView] by doing one of the following:
+///
+/// * Wrap the [ListView] in an [Expanded] or [Flexible] widget so it safely
+///   takes up only the remaining available space.
+/// * Wrap the [ListView] in a [SizedBox] or [Container] with an explicit
+///   height (for a [Column]) or width (for a [Row]).
+/// * Set [shrinkWrap] to true if you want the list to only occupy
+///   the space its children need (Note: use this sparingly as it computes the
+///   size of all children, which hurts performance on large lists).
+///
 /// See also:
 ///
 ///  * [SingleChildScrollView], which is a scrollable widget that has a single
