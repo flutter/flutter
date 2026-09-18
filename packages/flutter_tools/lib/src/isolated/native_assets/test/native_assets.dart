@@ -48,7 +48,12 @@ Future<Uri?> testCompilerBuildNativeAssets(
   BuildInfo buildInfo, {
   @visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner,
 }) async {
-  final BuildInfo(:buildNativeAssets, :mode, :packageConfig, :packageConfigPath) = buildInfo;
+  final BuildInfo(
+    :bool buildNativeAssets,
+    :BuildMode mode,
+    :PackageConfig packageConfig,
+    :String packageConfigPath,
+  ) = buildInfo;
   if (!buildNativeAssets) {
     return null;
   }
