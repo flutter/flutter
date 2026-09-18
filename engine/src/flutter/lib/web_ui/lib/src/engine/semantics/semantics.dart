@@ -1074,11 +1074,25 @@ final class GenericRole extends SemanticRole {
 
   @override
   void update() {
+    if (semanticsObject.isAccessibilityFocusBlocked) {
+      if (semanticsObject.hasChildren) {
+        setAriaRole('none');
+        removeAttribute('aria-hidden');
+      } else {
+        removeAttribute('role');
+        setAttribute('aria-hidden', 'true');
+      }
+      super.update();
+      return;
+    }
+    removeAttribute('aria-hidden');
+
     if (!semanticsObject.hasLabel) {
       // The node didn't get a more specific role, and it has no label. It is
       // likely that this node is simply there for positioning its children and
       // has no other role for the screen reader to be aware of. In this case,
       // the element does not need a `role` attribute at all.
+      removeAttribute('role');
       super.update();
       return;
     }
@@ -1092,18 +1106,6 @@ final class GenericRole extends SemanticRole {
     //   In HTML text has no ARIA role. It's just a DOM node with text inside
     //   it. Previously, role="text" was used, but it was only supported by
     //   Safari, and it was removed starting Safari 17.
-    if (semanticsObject.isAccessibilityFocusBlocked) {
-      if (semanticsObject.hasChildren) {
-        setAriaRole('none');
-        removeAttribute('aria-hidden');
-      } else {
-        removeAttribute('role');
-        setAttribute('aria-hidden', 'true');
-      }
-      super.update();
-      return;
-    }
-    removeAttribute('aria-hidden');
 
     if (semanticsObject.hasChildren) {
       labelAndValue!.preferredRepresentation = LabelRepresentation.ariaLabel;
