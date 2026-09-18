@@ -567,20 +567,16 @@ abstract class ResidentHandlers {
   }
 
   /// Dump the application's current widget tree to the terminal.
-  Future<bool> debugDumpApp() async {
-    return _debugDumpTree(
-      (FlutterVmService vmService, String isolateId) =>
-          vmService.flutterDebugDumpApp(isolateId: isolateId),
-    );
-  }
+  Future<bool> debugDumpApp() => _debugDumpTree(
+    (FlutterVmService vmService, String isolateId) =>
+        vmService.flutterDebugDumpApp(isolateId: isolateId),
+  );
 
   /// Dump the application's current render tree to the terminal.
-  Future<bool> debugDumpRenderTree() async {
-    return _debugDumpTree(
-      (FlutterVmService vmService, String isolateId) =>
-          vmService.flutterDebugDumpRenderTree(isolateId: isolateId),
-    );
-  }
+  Future<bool> debugDumpRenderTree() => _debugDumpTree(
+    (FlutterVmService vmService, String isolateId) =>
+        vmService.flutterDebugDumpRenderTree(isolateId: isolateId),
+  );
 
   /// Dump the application's current layer tree to the terminal.
   Future<bool> debugDumpLayerTree() async {
@@ -593,6 +589,7 @@ abstract class ResidentHandlers {
     );
   }
 
+  /// Dump the application's current focus tree to the terminal.
   Future<bool> debugDumpFocusTree() async {
     if (!isRunningDebug) {
       return false;
@@ -606,22 +603,18 @@ abstract class ResidentHandlers {
   /// Dump the application's current semantics tree to the terminal.
   ///
   /// If semantics are not enabled, nothing is returned.
-  Future<bool> debugDumpSemanticsTreeInTraversalOrder() async {
-    return _debugDumpTree(
-      (FlutterVmService vmService, String isolateId) =>
-          vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(isolateId: isolateId),
-    );
-  }
+  Future<bool> debugDumpSemanticsTreeInTraversalOrder() => _debugDumpTree(
+    (FlutterVmService vmService, String isolateId) =>
+        vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(isolateId: isolateId),
+  );
 
   /// Dump the application's current semantics tree to the terminal.
   ///
   /// If semantics are not enabled, nothing is returned.
-  Future<bool> debugDumpSemanticsTreeInInverseHitTestOrder() async {
-    return _debugDumpTree(
-      (FlutterVmService vmService, String isolateId) =>
-          vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(isolateId: isolateId),
-    );
-  }
+  Future<bool> debugDumpSemanticsTreeInInverseHitTestOrder() => _debugDumpTree(
+    (FlutterVmService vmService, String isolateId) =>
+        vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(isolateId: isolateId),
+  );
 
   Future<bool> _debugDumpTree(
     Future<String> Function(FlutterVmService vmService, String isolateId) dumpCall,

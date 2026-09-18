@@ -423,12 +423,14 @@ void main() {
       await terminalHandler.processTerminalInput('f');
     });
 
+    const debugDumpKeys = <String>['w', 't', 'L', 'f', 'S', 'U'];
+
     testWithoutContext('debugDump* with null vmService does not crash', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(
         <FakeVmServiceRequest>[],
         nullVmService: true,
       );
-      for (final key in <String>['w', 't', 'L', 'f', 'S', 'U']) {
+      for (final key in debugDumpKeys) {
         await terminalHandler.processTerminalInput(key);
       }
       expect(await terminalHandler.residentRunner.debugDumpApp(), isFalse);
@@ -446,20 +448,19 @@ void main() {
     });
 
     testWithoutContext('debugDump* with null uiIsolate does not crash', () async {
-      for (final key in <String>['w', 't', 'L', 'f', 'S', 'U']) {
+      for (final key in debugDumpKeys) {
         final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
           listViewsWithoutIsolate,
         ]);
         await terminalHandler.processTerminalInput(key);
       }
-      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
-        listViewsWithoutIsolate,
-        listViewsWithoutIsolate,
-        listViewsWithoutIsolate,
-        listViewsWithoutIsolate,
-        listViewsWithoutIsolate,
-        listViewsWithoutIsolate,
-      ]);
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+        List<FakeVmServiceRequest>.filled(
+          debugDumpKeys.length,
+          listViewsWithoutIsolate,
+          growable: true,
+        ),
+      );
       expect(await terminalHandler.residentRunner.debugDumpApp(), isFalse);
       expect(await terminalHandler.residentRunner.debugDumpRenderTree(), isFalse);
       expect(await terminalHandler.residentRunner.debugDumpLayerTree(), isFalse);
