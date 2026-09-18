@@ -19,6 +19,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterChannelKeyResponder.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDisplayFeatures.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+TaskRunners.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
@@ -162,6 +163,7 @@ typedef struct MouseState {
 
 @implementation FlutterViewController {
   flutter::ViewportMetrics _viewportMetrics;
+  FlutterDisplayFeaturesMonitor* _displayFeaturesMonitor API_AVAILABLE(ios(27.1));
   MouseState _mouseState;
   FlutterSplashScreenManager* _splashScreenManager;
 }
@@ -790,6 +792,18 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
     [self.flutterView addGestureRecognizer:_rotationGestureRecognizer];
   }
 
+  if (@available(iOS 27.1, *)) {
+    // Reports the fold and camera regions of a foldable device (iPhone Duo) as
+    // display features. Returns nil when the engine was built against an SDK
+    // older than iOS 27.1, in which case nothing is reported.
+    __weak FlutterViewController* weakSelf = self;
+    _displayFeaturesMonitor = [[FlutterDisplayFeaturesMonitor alloc]
+        initWithView:self.flutterView
+            onUpdate:^(const FlutterDisplayFeatureList& features) {
+              [weakSelf applyDisplayFeatures:features];
+            }];
+  }
+
   [super viewDidLoad];
 }
 
@@ -951,6 +965,9 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 
   [self.keyboardInsetManager invalidate];
   [self invalidateTouchRateCorrectionVSyncClient];
+  if (@available(iOS 27.1, *)) {
+    [_displayFeaturesMonitor invalidate];
+  }
 
   // TODO(cbracken): https://github.com/flutter/flutter/issues/156222
   // Ensure all delegates are weak and remove this.
@@ -1377,6 +1394,24 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 #pragma mark - Handle view resizing
 
+- (void)applyDisplayFeatures:(const FlutterDisplayFeatureList&)features {
+  const double scale = _viewportMetrics.device_pixel_ratio;
+  std::vector<double> bounds;
+  bounds.reserve(features.bounds.size());
+  for (double value : features.bounds) {
+    bounds.push_back(value * scale);
+  }
+  if (bounds == _viewportMetrics.physical_display_features_bounds &&
+      features.types == _viewportMetrics.physical_display_features_type &&
+      features.states == _viewportMetrics.physical_display_features_state) {
+    return;
+  }
+  _viewportMetrics.physical_display_features_bounds = std::move(bounds);
+  _viewportMetrics.physical_display_features_type = features.types;
+  _viewportMetrics.physical_display_features_state = features.states;
+  [self updateViewportMetricsIfNeeded];
+}
+
 - (void)updateViewportMetricsIfNeeded {
   if (_shouldIgnoreViewportMetricsUpdatesDuringRotation) {
     return;
@@ -1400,6 +1435,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self setViewportMetricsSize];
   [self checkAndUpdateAutoResizeConstraints];
   [self setViewportMetricsPaddings];
+  if (@available(iOS 27.1, *)) {
+    // Region frames move with the view even when the hinge does not.
+    [_displayFeaturesMonitor refresh];
+  }
   [self updateViewportMetricsIfNeeded];
 
   // There is no guarantee that UIKit will layout subviews when the application/scene is active.
