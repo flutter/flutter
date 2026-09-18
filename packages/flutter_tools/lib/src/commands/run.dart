@@ -701,7 +701,6 @@ class RunCommand extends RunCommandBase {
       analytics: globals.analytics,
       androidSdk: globals.androidSdk,
       androidWorkflow: android_workflow.androidWorkflow,
-      artifacts: globals.artifacts,
       deviceManager: globals.deviceManager,
       featureFlags: featureFlags,
       fileSystem: globals.fs,
@@ -713,6 +712,7 @@ class RunCommand extends RunCommandBase {
       stdio: globals.stdio,
       systemClock: globals.systemClock,
       terminal: globals.terminal,
+      toolContext: toolContext!,
     );
   }
 
