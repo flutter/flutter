@@ -622,7 +622,7 @@ void testMain() {
       final textField = textFieldSemantics.semanticRole! as SemanticTextField;
 
       expect(textField.editableElement.getAttribute('aria-label'), 'Search fruits');
-      expect(textField.editableElement.getAttribute('aria-description'), 'Search fruits');
+      expect(textField.editableElement.getAttribute('aria-description'), isNull);
     });
   });
 

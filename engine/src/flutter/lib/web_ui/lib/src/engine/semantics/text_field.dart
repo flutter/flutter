@@ -465,7 +465,7 @@ class SemanticTextField extends SemanticRole {
 
   void _updateHintDescription() {
     final String? hint = semanticsObject.hint;
-    if (hint != null && hint.trim().isNotEmpty) {
+    if (semanticsObject.hasLabel && hint != null && hint.trim().isNotEmpty) {
       editableElement.setAttribute('aria-description', hint);
     } else {
       editableElement.removeAttribute('aria-description');
