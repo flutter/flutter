@@ -21,8 +21,8 @@ SurfaceTransaction::SurfaceTransaction(ASurfaceTransaction* transaction)
 
 SurfaceTransaction::SurfaceTransaction(ASurfaceTransaction* transaction,
                                        std::function<void()> submit_callback)
-    : transaction_(WrappedSurfaceTransaction{
-          transaction, /*owned=*/false, std::move(submit_callback)}) {}
+    : transaction_(WrappedSurfaceTransaction{transaction, /*owned=*/false,
+                                             std::move(submit_callback)}) {}
 
 SurfaceTransaction::~SurfaceTransaction() = default;
 

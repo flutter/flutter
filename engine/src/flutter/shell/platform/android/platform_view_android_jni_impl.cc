@@ -2096,15 +2096,15 @@ PlatformViewAndroidJNIImpl::createTransactionWithSubmitCallback(
     return nullptr;
   }
 
-  // `ASurfaceTransaction_fromJava` does not take a reference on the Java
-  // object, so without a global ref here the transaction can be collected
-  // while the raster thread is still writing into the native handle.
-  std::shared_ptr<fml::jni::ScopedJavaGlobalRef<jobject>> global_tx =
-      std::make_shared<fml::jni::ScopedJavaGlobalRef<jobject>>(
-          env, transaction.obj());
-  fml::jni::JavaObjectWeakGlobalRef weak_java_object = java_object_;
-
   if (out_submit_callback != nullptr) {
+    // `ASurfaceTransaction_fromJava` does not take a reference on the Java
+    // object, so without a global ref here the transaction can be collected
+    // while the raster thread is still writing into the native handle.
+    std::shared_ptr<fml::jni::ScopedJavaGlobalRef<jobject>> global_tx =
+        std::make_shared<fml::jni::ScopedJavaGlobalRef<jobject>>(
+            env, transaction.obj());
+    fml::jni::JavaObjectWeakGlobalRef weak_java_object = java_object_;
+
     *out_submit_callback = [weak_java_object, global_tx]() {
       JNIEnv* cb_env = fml::jni::AttachCurrentThread();
       fml::jni::ScopedJavaLocalRef<jobject> cb_java_obj =
@@ -2114,8 +2114,12 @@ PlatformViewAndroidJNIImpl::createTransactionWithSubmitCallback(
                                global_tx->obj());
         FML_CHECK(fml::jni::CheckException(cb_env));
       }
-      global_tx->reset();
+      global_tx->Reset();
     };
+  } else {
+    env->CallVoidMethod(java_object.obj(), g_submit_transaction_method,
+                        transaction.obj());
+    FML_CHECK(fml::jni::CheckException(env));
   }
 
   return native_tx;
