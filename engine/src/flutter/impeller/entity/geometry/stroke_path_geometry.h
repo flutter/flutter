@@ -5,6 +5,8 @@
 #ifndef FLUTTER_IMPELLER_ENTITY_GEOMETRY_STROKE_PATH_GEOMETRY_H_
 #define FLUTTER_IMPELLER_ENTITY_GEOMETRY_STROKE_PATH_GEOMETRY_H_
 
+#include <memory>
+
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/dashed_line_path_source.h"
 #include "impeller/geometry/matrix.h"
@@ -60,6 +62,12 @@ class StrokeSegmentsGeometry : public Geometry {
   std::optional<Rect> GetStrokeCoverage(const Matrix& transform,
                                         const Rect& segment_bounds) const;
 
+  /// @brief An opaque, stable identity for this geometry's tessellated stroke
+  ///        output, or nullptr when caching is not possible.
+  virtual std::shared_ptr<const void> GetCacheIdentity() const {
+    return nullptr;
+  }
+
  private:
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
@@ -106,6 +114,9 @@ class StrokePathSourceGeometry : public StrokeSegmentsGeometry {
   void Dispatch(PathAndArcSegmentReceiver& receiver,
                 Tessellator& tessellator,
                 Scalar scale) const override;
+
+  // |StrokeSegmentsGeometry|
+  std::shared_ptr<const void> GetCacheIdentity() const override;
 };
 
 /// @brief A Geometry that produces fillable vertices representing the
