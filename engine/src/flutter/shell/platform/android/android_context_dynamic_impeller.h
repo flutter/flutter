@@ -19,9 +19,6 @@ namespace flutter {
 
 /// @brief An Impeller Android context that dynamically creates either an
 /// [AndroidContextGLImpeller] or an [AndroidContextVKImpeller].
-///
-/// The construction of these objects is deferred until [GetImpellerContext] is
-/// invoked. Up to this point, the reported backend will be kImpellerAutoselect.
 class AndroidContextDynamicImpeller : public AndroidContext {
  public:
   explicit AndroidContextDynamicImpeller(
@@ -101,14 +98,12 @@ class AndroidContextDynamicImpeller : public AndroidContext {
   // Signalled by |SetupImpellerContext| once a backend has been chosen.
   // Mutable so the const accessors above can wait on it.
   mutable fml::ManualResetWaitableEvent setup_complete_;
+#ifdef FML_DCHECK_IS_ON
   // The thread running |SetupImpellerContext|, recorded so |WaitForSetup| can
   // assert it is not being called from that same thread. Atomic because it is
   // read by waiters concurrently with the setup thread writing it.
-  //
-  // Only ever written in debug builds: both the stores and the assert that
-  // reads them live inside FML_DCHECK. In release builds this stays
-  // default-constructed, so do not add non-debug readers.
   std::atomic<std::thread::id> setup_thread_id_;
+#endif
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidContextDynamicImpeller);
 };

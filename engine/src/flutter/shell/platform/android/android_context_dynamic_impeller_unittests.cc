@@ -14,12 +14,6 @@
 namespace flutter {
 namespace testing {
 
-namespace {
-constexpr auto kSetupDelay = std::chrono::milliseconds(50);
-// Allow for timer granularity so the assertion does not flake.
-constexpr auto kMinObservedWait = std::chrono::milliseconds(40);
-}  // namespace
-
 TEST(AndroidContextDynamicImpellerTest, ContextsAreNullBeforeSetup) {
   auto context = std::make_shared<AndroidContextDynamicImpeller>(
       AndroidContext::ContextSettings{}, /*io_task_runner=*/nullptr);
