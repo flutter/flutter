@@ -189,7 +189,9 @@ void PlatformViewAndroid::NotifyCreated(
     latch.Wait();
   }
 
-  if (platform_view_) {
+  if (engine_) {
+    engine_->NotifyCreated();
+  } else if (platform_view_) {
     platform_view_->NotifyCreated();
   }
 }
@@ -212,7 +214,9 @@ void PlatformViewAndroid::NotifySurfaceWindowChanged(
 }
 
 void PlatformViewAndroid::NotifyDestroyed() {
-  if (platform_view_) {
+  if (engine_) {
+    engine_->NotifyDestroyed();
+  } else if (platform_view_) {
     platform_view_->NotifyDestroyed();
   }
 
@@ -259,7 +263,9 @@ void PlatformViewAndroid::DispatchPlatformMessage(JNIEnv* env,
 
   auto platform_message = std::make_unique<flutter::PlatformMessage>(
       std::move(name), std::move(message), std::move(response));
-  if (platform_view_) {
+  if (engine_) {
+    engine_->DispatchPlatformMessage(std::move(platform_message));
+  } else if (platform_view_) {
     platform_view_->DispatchPlatformMessage(std::move(platform_message));
   } else {
     delegate_.OnPlatformViewDispatchPlatformMessage(
@@ -278,7 +284,9 @@ void PlatformViewAndroid::DispatchEmptyPlatformMessage(JNIEnv* env,
 
   auto platform_message = std::make_unique<flutter::PlatformMessage>(
       std::move(name), std::move(response));
-  if (platform_view_) {
+  if (engine_) {
+    engine_->DispatchPlatformMessage(std::move(platform_message));
+  } else if (platform_view_) {
     platform_view_->DispatchPlatformMessage(std::move(platform_message));
   } else {
     delegate_.OnPlatformViewDispatchPlatformMessage(
@@ -306,7 +314,11 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
   // TODO(team-android): Remove implicit view assumption.
   // https://github.com/flutter/flutter/issues/142845
   if (env->IsSameObject(args, NULL)) {
-    if (platform_view_) {
+    if (engine_) {
+      engine_->DispatchSemanticsAction(
+          kImplicitViewId, node_id,
+          static_cast<flutter::SemanticsAction>(action), fml::MallocMapping());
+    } else if (platform_view_) {
       platform_view_->DispatchSemanticsAction(
           kImplicitViewId, node_id,
           static_cast<flutter::SemanticsAction>(action), fml::MallocMapping());
@@ -321,7 +333,11 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
   uint8_t* args_data = static_cast<uint8_t*>(env->GetDirectBufferAddress(args));
   auto args_vector = fml::MallocMapping::Copy(args_data, args_position);
 
-  if (platform_view_) {
+  if (engine_) {
+    engine_->DispatchSemanticsAction(
+        kImplicitViewId, node_id, static_cast<flutter::SemanticsAction>(action),
+        std::move(args_vector));
+  } else if (platform_view_) {
     platform_view_->DispatchSemanticsAction(
         kImplicitViewId, node_id, static_cast<flutter::SemanticsAction>(action),
         std::move(args_vector));
@@ -504,44 +520,61 @@ void PlatformViewAndroid::RequestDartDeferredLibrary(intptr_t loading_unit_id) {
   return;  // TODO(garyq): Call LoadDartDeferredLibraryFailure()
 }
 
-// |PlatformView|
 void PlatformViewAndroid::LoadDartDeferredLibrary(
     intptr_t loading_unit_id,
     std::unique_ptr<const fml::Mapping> snapshot_data,
     std::unique_ptr<const fml::Mapping> snapshot_instructions) {
-  delegate_.LoadDartDeferredLibrary(loading_unit_id, std::move(snapshot_data),
-                                    std::move(snapshot_instructions));
+  if (engine_) {
+    engine_->LoadDartDeferredLibrary(loading_unit_id, std::move(snapshot_data),
+                                     std::move(snapshot_instructions));
+  } else {
+    delegate_.LoadDartDeferredLibrary(loading_unit_id, std::move(snapshot_data),
+                                      std::move(snapshot_instructions));
+  }
 }
 
-// |PlatformView|
 void PlatformViewAndroid::LoadDartDeferredLibraryError(
     intptr_t loading_unit_id,
     const std::string& error_message,
     bool transient) {
-  delegate_.LoadDartDeferredLibraryError(loading_unit_id, error_message,
-                                         transient);
+  if (engine_) {
+    engine_->LoadDartDeferredLibraryError(loading_unit_id, error_message,
+                                          transient);
+  } else {
+    delegate_.LoadDartDeferredLibraryError(loading_unit_id, error_message,
+                                           transient);
+  }
 }
 
-// |PlatformView|
 void PlatformViewAndroid::UpdateAssetResolverByType(
     std::unique_ptr<AssetResolver> updated_asset_resolver,
     AssetResolver::AssetResolverType type) {
-  delegate_.UpdateAssetResolverByType(std::move(updated_asset_resolver), type);
+  if (engine_) {
+    engine_->UpdateAssetResolverByType(std::move(updated_asset_resolver), type);
+  } else {
+    delegate_.UpdateAssetResolverByType(std::move(updated_asset_resolver),
+                                        type);
+  }
 }
 
 void PlatformViewAndroid::InstallFirstFrameCallback() {
   // On Platform Task Runner.
-  delegate_.OnPlatformViewSetNextFrameCallback(
-      [platform_view = GetWeakPtr(),
-       platform_task_runner = task_runners_.GetPlatformTaskRunner()]() {
-        // On GPU Task Runner.
-        platform_task_runner->PostTask([platform_view]() {
-          // Back on Platform Task Runner.
-          if (platform_view) {
-            platform_view->FireFirstFrameCallback();
-          }
-        });
-      });
+  auto callback = [platform_view = GetWeakPtr(),
+                   platform_task_runner =
+                       task_runners_.GetPlatformTaskRunner()]() {
+    // On GPU Task Runner.
+    platform_task_runner->PostTask([platform_view]() {
+      // Back on Platform Task Runner.
+      if (platform_view) {
+        platform_view->FireFirstFrameCallback();
+      }
+    });
+  };
+  if (engine_) {
+    engine_->SetNextFrameCallback(callback);
+  } else {
+    delegate_.OnPlatformViewSetNextFrameCallback(callback);
+  }
 }
 
 void PlatformViewAndroid::FireFirstFrameCallback() {
@@ -567,8 +600,14 @@ void PlatformViewAndroid::SetPlatformView(
   platform_view_ = std::move(platform_view);
 }
 
+void PlatformViewAndroid::SetEngine(AndroidEngine* engine) {
+  engine_ = engine;
+}
+
 void PlatformViewAndroid::SetSemanticsEnabled(bool enabled) {
-  if (platform_view_) {
+  if (engine_) {
+    engine_->SetSemanticsEnabled(enabled);
+  } else if (platform_view_) {
     platform_view_->SetSemanticsEnabled(enabled);
   } else {
     delegate_.OnPlatformViewSetSemanticsEnabled(enabled);
@@ -576,7 +615,9 @@ void PlatformViewAndroid::SetSemanticsEnabled(bool enabled) {
 }
 
 void PlatformViewAndroid::SetAccessibilityFeatures(int32_t flags) {
-  if (platform_view_) {
+  if (engine_) {
+    engine_->SetAccessibilityFeatures(flags);
+  } else if (platform_view_) {
     platform_view_->SetAccessibilityFeatures(flags);
   } else {
     delegate_.OnPlatformViewSetAccessibilityFeatures(flags);
@@ -585,7 +626,9 @@ void PlatformViewAndroid::SetAccessibilityFeatures(int32_t flags) {
 
 void PlatformViewAndroid::SetViewportMetrics(int64_t view_id,
                                              const ViewportMetrics& metrics) {
-  if (platform_view_) {
+  if (engine_) {
+    engine_->SetViewportMetrics(view_id, metrics);
+  } else if (platform_view_) {
     platform_view_->SetViewportMetrics(view_id, metrics);
   } else {
     delegate_.OnPlatformViewSetViewportMetrics(view_id, metrics);
@@ -594,7 +637,9 @@ void PlatformViewAndroid::SetViewportMetrics(int64_t view_id,
 
 void PlatformViewAndroid::DispatchPointerDataPacket(
     std::unique_ptr<PointerDataPacket> packet) {
-  if (platform_view_) {
+  if (engine_) {
+    engine_->DispatchPointerDataPacket(std::move(packet));
+  } else if (platform_view_) {
     platform_view_->DispatchPointerDataPacket(std::move(packet));
   } else {
     delegate_.OnPlatformViewDispatchPointerDataPacket(std::move(packet));
@@ -603,7 +648,9 @@ void PlatformViewAndroid::DispatchPointerDataPacket(
 
 void PlatformViewAndroid::RegisterTexture(
     std::shared_ptr<flutter::Texture> texture) {
-  if (platform_view_) {
+  if (engine_) {
+    engine_->RegisterTexture(std::move(texture));
+  } else if (platform_view_) {
     platform_view_->RegisterTexture(std::move(texture));
   } else {
     delegate_.OnPlatformViewRegisterTexture(std::move(texture));
@@ -611,7 +658,9 @@ void PlatformViewAndroid::RegisterTexture(
 }
 
 void PlatformViewAndroid::UnregisterTexture(int64_t texture_id) {
-  if (platform_view_) {
+  if (engine_) {
+    engine_->UnregisterTexture(texture_id);
+  } else if (platform_view_) {
     platform_view_->UnregisterTexture(texture_id);
   } else {
     delegate_.OnPlatformViewUnregisterTexture(texture_id);
@@ -619,7 +668,9 @@ void PlatformViewAndroid::UnregisterTexture(int64_t texture_id) {
 }
 
 void PlatformViewAndroid::MarkTextureFrameAvailable(int64_t texture_id) {
-  if (platform_view_) {
+  if (engine_) {
+    engine_->MarkTextureFrameAvailable(texture_id);
+  } else if (platform_view_) {
     platform_view_->MarkTextureFrameAvailable(texture_id);
   } else {
     delegate_.OnPlatformViewMarkTextureFrameAvailable(texture_id);
@@ -627,7 +678,9 @@ void PlatformViewAndroid::MarkTextureFrameAvailable(int64_t texture_id) {
 }
 
 void PlatformViewAndroid::ScheduleFrame() {
-  if (platform_view_) {
+  if (engine_) {
+    engine_->ScheduleFrame();
+  } else if (platform_view_) {
     platform_view_->ScheduleFrame();
   } else {
     delegate_.OnPlatformViewScheduleFrame();
