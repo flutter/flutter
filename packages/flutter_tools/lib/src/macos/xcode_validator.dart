@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
+
 import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../build_info.dart';
@@ -20,13 +22,10 @@ For more information, please visit:
 
 class XcodeValidator extends DoctorValidator {
   XcodeValidator({
-    required Xcode xcode,
-    required IOSSimulatorUtils iosSimulatorUtils,
-    required UserMessages userMessages,
-  }) : _xcode = xcode,
-       _iosSimulatorUtils = iosSimulatorUtils,
-       _userMessages = userMessages,
-       super('Xcode - develop for iOS and macOS');
+    required this._xcode,
+    required this._iosSimulatorUtils,
+    required this._userMessages,
+  }) : super('Xcode - develop for iOS and macOS');
 
   final Xcode _xcode;
   final IOSSimulatorUtils _iosSimulatorUtils;

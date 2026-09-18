@@ -9,28 +9,24 @@ const String kApiDocsLink =
     'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html for more information.';
 
 void main() {
-  test(
-    'throws flutter error when tweening types that do not fully satisfy tween requirements - Object',
-    () {
-      final objectTween = Tween<Object>(begin: Object(), end: Object());
+  test('throws flutter error when tweening types that do not fully satisfy tween requirements - Object', () {
+    final objectTween = Tween<Object>(begin: Object(), end: Object());
 
-      expect(
-        () => objectTween.transform(0.1),
-        throwsA(
-          isA<FlutterError>().having(
-            (FlutterError error) =>
-                error.diagnostics.map((DiagnosticsNode node) => node.toString()),
-            'diagnostics',
-            <String>[
-              'Cannot lerp between "Instance of \'Object\'" and "Instance of \'Object\'".',
-              'The type Object might not fully implement `+`, `-`, and/or `*`. $kApiDocsLink',
-              'There may be a dedicated "ObjectTween" for this type, or you may need to create one.',
-            ],
-          ),
+    expect(
+      () => objectTween.transform(0.1),
+      throwsA(
+        isA<FlutterError>().having(
+          (FlutterError error) => error.diagnostics.map((DiagnosticsNode node) => node.toString()),
+          'diagnostics',
+          <String>[
+            'Cannot lerp between "Instance of \'Object\'" and "Instance of \'Object\'".',
+            'The type Object might not fully implement `+`, `-`, and/or `*`. $kApiDocsLink',
+            'There may be a dedicated "ObjectTween" for this type, or you may need to create one.',
+          ],
         ),
-      );
-    },
-  );
+      ),
+    );
+  });
 
   test(
     'throws flutter error when tweening types that do not fully satisfy tween requirements - Color',
@@ -81,28 +77,24 @@ void main() {
     },
   );
 
-  test(
-    'throws flutter error when tweening types that do not fully satisfy tween requirements - int',
-    () {
-      final colorTween = Tween<int>(begin: 0, end: 1);
+  test('throws flutter error when tweening types that do not fully satisfy tween requirements - int', () {
+    final colorTween = Tween<int>(begin: 0, end: 1);
 
-      expect(
-        () => colorTween.transform(0.1),
-        throwsA(
-          isA<FlutterError>().having(
-            (FlutterError error) =>
-                error.diagnostics.map((DiagnosticsNode node) => node.toString()),
-            'diagnostics',
-            <String>[
-              'Cannot lerp between "0" and "1".',
-              'The type int returned a double after multiplication with a double value. $kApiDocsLink',
-              'To lerp int values, consider IntTween or StepTween instead.',
-            ],
-          ),
+    expect(
+      () => colorTween.transform(0.1),
+      throwsA(
+        isA<FlutterError>().having(
+          (FlutterError error) => error.diagnostics.map((DiagnosticsNode node) => node.toString()),
+          'diagnostics',
+          <String>[
+            'Cannot lerp between "0" and "1".',
+            'The type int returned a double after multiplication with a double value. $kApiDocsLink',
+            'To lerp int values, consider IntTween or StepTween instead.',
+          ],
         ),
-      );
-    },
-  );
+      ),
+    );
+  });
 
   test('Can chain tweens', () {
     final tween = Tween<double>(begin: 0.30, end: 0.50);

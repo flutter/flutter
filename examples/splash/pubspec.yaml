@@ -1,19 +1,18 @@
 name: splash
 
 environment:
-  sdk: ^3.11.0-0
+  sdk: ^3.13.0-0
 
 resolution: workspace
 
 dependencies:
   flutter:
     sdk: flutter
-  material_ui: ^0.0.2
-
+  material_ui: ^1.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
 
-# PUBSPEC CHECKSUM: oescuq
+# PUBSPEC CHECKSUM: dvvsfu

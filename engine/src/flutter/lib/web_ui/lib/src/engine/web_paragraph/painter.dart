@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
@@ -20,12 +22,11 @@ typedef ParagraphImageGenerator = Uint8List Function();
 
 /// Resizes the global paint canvas to the given width and height and updates the device pixel ratio.
 ///
-/// The paint canvas is scaled by the device pixel ratio to avoid pixelation
-/// that would happen if it wasn't resized.
-void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
+/// The paint canvas is scaled by the device pixel ratio and canvas matrix scale to avoid pixelation.
+void _resizePaintCanvas(ui.Rect rect, double effectiveScaleX, double effectiveScaleY) {
   _paintCanvas.width = rect.width.ceil();
   _paintCanvas.height = rect.height.ceil();
-  _paintContext.scale(devicePixelRatio, devicePixelRatio);
+  _paintContext.scale(effectiveScaleX, effectiveScaleY);
 }
 
 /// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for a text block.
@@ -45,29 +46,147 @@ void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
   return (sourceRect, targetRect);
 }
 
-/// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for the entire paragraph
-(ui.Rect sourceRect, ui.Rect targetRect) _calculateParagraph(
+/// Represents the combined geometry of the canvas transformation matrix and device pixel ratio,
+/// providing physical-to-local coordinate snapping and projection for WebParagraph painting.
+@visibleForTesting
+class ParagraphTransform {
+  ParagraphTransform({
+    required this.effectiveScaleX,
+    required this.effectiveScaleY,
+    required this.transformX,
+    required this.transformY,
+    required this.devicePixelRatio,
+  });
+
+  factory ParagraphTransform.from(Float64List transform, double devicePixelRatio) {
+    if (transformKindOf(transform) == TransformKind.identity) {
+      return ParagraphTransform(
+        effectiveScaleX: devicePixelRatio,
+        effectiveScaleY: devicePixelRatio,
+        transformX: 0.0,
+        transformY: 0.0,
+        devicePixelRatio: devicePixelRatio,
+      );
+    }
+
+    final double matrixScaleX = math.sqrt(
+      transform[0] * transform[0] + transform[1] * transform[1],
+    );
+    final double matrixScaleY = math.sqrt(
+      transform[4] * transform[4] + transform[5] * transform[5],
+    );
+
+    return ParagraphTransform(
+      effectiveScaleX: devicePixelRatio * (matrixScaleX > 0 ? matrixScaleX : 1.0),
+      effectiveScaleY: devicePixelRatio * (matrixScaleY > 0 ? matrixScaleY : 1.0),
+      transformX: transform[12],
+      transformY: transform[13],
+      devicePixelRatio: devicePixelRatio,
+    );
+  }
+
+  final double effectiveScaleX;
+  final double effectiveScaleY;
+  final double transformX;
+  final double transformY;
+  final double devicePixelRatio;
+
+  /// Snaps a logical [offset] to the nearest whole integer device pixel on screen.
+  (double physicalX, double physicalY) snapOffset(ui.Offset offset) {
+    return (
+      (offset.dx * effectiveScaleX + transformX * devicePixelRatio).roundToDouble(),
+      (offset.dy * effectiveScaleY + transformY * devicePixelRatio).roundToDouble(),
+    );
+  }
+
+  /// Maps a physical screen rectangle back to local canvas coordinates.
+  ui.Rect toLocalRect({
+    required double physicalLeft,
+    required double physicalTop,
+    required double physicalWidth,
+    required double physicalHeight,
+  }) {
+    return ui.Rect.fromLTWH(
+      (physicalLeft - transformX * devicePixelRatio) / effectiveScaleX,
+      (physicalTop - transformY * devicePixelRatio) / effectiveScaleY,
+      physicalWidth / effectiveScaleX,
+      physicalHeight / effectiveScaleY,
+    );
+  }
+
+  /// Snaps a logical [rect] to whole integer physical device pixels,
+  /// returning the rectangle in local canvas coordinates.
+  ui.Rect snapRect(ui.Rect rect) {
+    final double physicalLeft = (rect.left * effectiveScaleX + transformX * devicePixelRatio)
+        .roundToDouble();
+    final double physicalTop = (rect.top * effectiveScaleY + transformY * devicePixelRatio)
+        .roundToDouble();
+    final double physicalRight = (rect.right * effectiveScaleX + transformX * devicePixelRatio)
+        .roundToDouble();
+    final double physicalBottom = (rect.bottom * effectiveScaleY + transformY * devicePixelRatio)
+        .roundToDouble();
+
+    return ui.Rect.fromLTRB(
+      (physicalLeft - transformX * devicePixelRatio) / effectiveScaleX,
+      (physicalTop - transformY * devicePixelRatio) / effectiveScaleY,
+      (physicalRight - transformX * devicePixelRatio) / effectiveScaleX,
+      (physicalBottom - transformY * devicePixelRatio) / effectiveScaleY,
+    );
+  }
+}
+
+/// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for the entire paragraph,
+/// as well as the translation shift on Canvas2D.
+@visibleForTesting
+(ui.Rect sourceRect, ui.Rect targetRect, ui.Offset canvas2dShift) calculateParagraph(
   WebParagraph paragraph,
   ui.Offset offset,
-  double devicePixelRatio,
+  ParagraphTransform transform,
 ) {
-  // Define the paragraph rect (using advances, not selected rects)
-  // Source rect must take in account the scaling
-  final sourceRect = ui.Rect.fromLTWH(
-    0,
-    0,
-    ((paragraph.paintBounds.width) * devicePixelRatio).ceilToDouble(),
-    ((paragraph.paintBounds.height) * devicePixelRatio).ceilToDouble(),
-  );
-  // Target rect will be scaled by the canvas transform, so we don't scale it here
-  final targetRect = ui.Rect.fromLTWH(
-    offset.dx + paragraph.paintBounds.left,
-    offset.dy + paragraph.paintBounds.top,
-    sourceRect.width / devicePixelRatio,
-    sourceRect.height / devicePixelRatio,
+  final (double physicalOffsetX, double physicalOffsetY) = transform.snapOffset(offset);
+
+  final physicalPaintBounds = ui.Rect.fromLTRB(
+    paragraph.paintBounds.left * transform.effectiveScaleX,
+    paragraph.paintBounds.top * transform.effectiveScaleY,
+    paragraph.paintBounds.right * transform.effectiveScaleX,
+    paragraph.paintBounds.bottom * transform.effectiveScaleY,
   );
 
-  return (sourceRect, targetRect);
+  // Add 2 physical pixels of safety padding so font antialiasing bleeding in all directions is not clipped
+  const kAntialiasingPadding = 2.0;
+
+  // Canvas2D translation shift (always integer device pixels, phase = 0.0)
+  // Include safety padding on the left and top so font antialiasing bleeding is not clipped
+  final double shiftPhysicalX = (-physicalPaintBounds.left + kAntialiasingPadding).ceilToDouble();
+  final double shiftPhysicalY = (-physicalPaintBounds.top + kAntialiasingPadding).ceilToDouble();
+
+  // Width and height include the shift (which contains left/top padding) plus right/bottom padding
+  final double physicalWidth = (shiftPhysicalX + physicalPaintBounds.right + kAntialiasingPadding)
+      .ceilToDouble();
+  final double physicalHeight = (shiftPhysicalY + physicalPaintBounds.bottom + kAntialiasingPadding)
+      .ceilToDouble();
+
+  // Source rect in physical device pixels (rasterized at effective DPR)
+  final sourceRect = ui.Rect.fromLTWH(0, 0, physicalWidth, physicalHeight);
+
+  // Target rect in local canvas units:
+  // Map physical integer destination coordinates back to local canvas space
+  final double screenLeft = physicalOffsetX - shiftPhysicalX;
+  final double screenTop = physicalOffsetY - shiftPhysicalY;
+  final ui.Rect targetRect = transform.toLocalRect(
+    physicalLeft: screenLeft,
+    physicalTop: screenTop,
+    physicalWidth: physicalWidth,
+    physicalHeight: physicalHeight,
+  );
+
+  // Convert shift to logical units for Canvas2D context translation
+  final canvas2dShift = ui.Offset(
+    shiftPhysicalX / transform.effectiveScaleX,
+    shiftPhysicalY / transform.effectiveScaleY,
+  );
+
+  return (sourceRect, targetRect, canvas2dShift);
 }
 
 /// Paints a [WebParagraph].
@@ -82,7 +201,15 @@ abstract class WebParagraphPainter {
   bool get hasCache;
   void clearCache();
 
-  void _paintAllBlocks(StyleElements styleElement, ui.Canvas canvas, ui.Offset offset) {
+  /// The number of times this painter has rasterized the paragraph, exposed for testing.
+  int get debugRasterizeCount => 0;
+
+  void _paintAllBlocks(
+    StyleElements styleElement,
+    ui.Canvas canvas,
+    ui.Offset offset,
+    ParagraphTransform transform,
+  ) {
     for (final TextLine line in _paragraph.getLayout().lines) {
       for (final LineBlock block in line.visualBlocks) {
         if (block is PlaceholderBlock) {
@@ -110,7 +237,7 @@ abstract class WebParagraphPainter {
               targetRect.width,
               block.multipliedHeight,
             );
-            _paintBlockBackground(canvas, correctedTargetRect, block.style.background!);
+            _paintBlockBackground(canvas, correctedTargetRect, block.style.background!, transform);
           case StyleElements.decorations:
           case StyleElements.shadows:
           case StyleElements.text:
@@ -121,18 +248,16 @@ abstract class WebParagraphPainter {
   }
 
   /// Paints the background of a [TextBlock] on a [ui.Canvas].
-  void _paintBlockBackground(ui.Canvas canvas, ui.Rect rect, ui.Paint paint) {
-    // We need to snap the block edges because Skia draws rectangles with subpixel accuracy
-    // and we end up with overlaps (this is only a problem when colors have transparency)
-    // or gaps between blocks (which looks unacceptable - vertical lines between blocks).
-    // Whether we snap to floor or ceil is irrelevant as long as we are consistent on both sides
-    // (and will possibly have problems when glyph boundaries are outside of advance rectangles)
-    final snappedRect = ui.Rect.fromLTRB(
-      rect.left.roundToDouble(),
-      rect.top.roundToDouble(),
-      rect.right.roundToDouble(),
-      rect.bottom.roundToDouble(),
-    );
+  void _paintBlockBackground(
+    ui.Canvas canvas,
+    ui.Rect rect,
+    ui.Paint paint,
+    ParagraphTransform transform,
+  ) {
+    // We snap the block edges to whole physical screen pixels to prevent
+    // subpixel rendering overlaps (which causes artifacts when colors have
+    // transparency) or gaps between blocks.
+    final ui.Rect snappedRect = transform.snapRect(rect);
     canvas.drawRect(snappedRect, paint);
   }
 
@@ -143,11 +268,14 @@ abstract class WebParagraphPainter {
     }
 
     final TextLayout layout = _paragraph.getLayout();
+    final Float64List canvasTransform = canvas.getTransform();
+    final double dpr = ui.window.devicePixelRatio;
+    final transform = ParagraphTransform.from(canvasTransform, dpr);
 
-    final (ui.Rect sourceRect, ui.Rect targetRect) = _calculateParagraph(
+    final (ui.Rect sourceRect, ui.Rect targetRect, ui.Offset canvas2dShift) = calculateParagraph(
       _paragraph,
       offset,
-      ui.window.devicePixelRatio,
+      transform,
     );
 
     const epsilon = 0.001;
@@ -157,18 +285,19 @@ abstract class WebParagraphPainter {
     }
 
     // Draw background blocks directly on the output canvas
-    // so it will be cached together with the text blocks on Canvas2D canvas
-    _paintAllBlocks(StyleElements.background, canvas, offset);
+    _paintAllBlocks(StyleElements.background, canvas, offset, transform);
 
     paintParagraphText(
       canvas,
       sourceRect,
       targetRect,
+      effectiveScaleX: transform.effectiveScaleX,
+      effectiveScaleY: transform.effectiveScaleY,
       generateParagraphImage: () {
-        _resizePaintCanvas(ui.window.devicePixelRatio, sourceRect);
+        _resizePaintCanvas(sourceRect, transform.effectiveScaleX, transform.effectiveScaleY);
 
-        // We only want to paint the actual paint bounds of the paragraph.
-        _paintContext.translate(-_paragraph.paintBounds.left, -_paragraph.paintBounds.top);
+        // We translate Canvas2D context by canvas2dShift in logical units
+        _paintContext.translate(canvas2dShift.dx, canvas2dShift.dy);
 
         // Fill out all the blocks on Canvas2D canvas
         DomCanvasParagraphPainter._fillAllBlocks(StyleElements.shadows, layout);
@@ -194,6 +323,8 @@ abstract class WebParagraphPainter {
     ui.Rect sourceRect,
     ui.Rect targetRect, {
     required ParagraphImageGenerator generateParagraphImage,
+    required double effectiveScaleX,
+    required double effectiveScaleY,
   });
 }
 
