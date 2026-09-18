@@ -676,6 +676,20 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   return isActive;
 }
 
+- (BOOL)stateIsForeground {
+  // [UIApplication sharedApplication API is not available for app extension.
+  UIApplication* flutterApplication = FlutterSharedApplication.application;
+
+  if (flutterApplication) {
+    return [self isApplicationStateMatching:UIApplicationStateActive
+                            withApplication:flutterApplication] ||
+           [self isApplicationStateMatching:UIApplicationStateInactive
+                            withApplication:flutterApplication];
+  }
+  return [self isSceneStateMatching:UISceneActivationStateForegroundActive] ||
+         [self isSceneStateMatching:UISceneActivationStateForegroundInactive];
+}
+
 - (BOOL)stateIsBackground {
   // [UIApplication sharedApplication API is not available for app extension.
   UIApplication* flutterApplication = FlutterSharedApplication.application;
@@ -735,6 +749,13 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
     self.platformViewsController.flutterView = nil;
     self.platformViewsController.flutterViewController = nil;
   }
+}
+
+- (void)createSurfaceIfReady {
+  if (!self.engine || !_viewportMetrics.physical_width) {
+    return;
+  }
+  [self surfaceUpdated:YES];
 }
 
 #pragma mark - UIViewController lifecycle notifications
@@ -1033,9 +1054,6 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 
 - (void)appOrSceneBecameActive {
   self.keyboardInsetManager.isKeyboardInOrTransitioningFromBackground = NO;
-  if (_viewportMetrics.physical_width) {
-    [self surfaceUpdated:YES];
-  }
   [self performSelector:@selector(goToApplicationLifecycle:)
              withObject:@"AppLifecycleState.resumed"
              afterDelay:0.0f];
@@ -1060,6 +1078,7 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 }
 
 - (void)appOrSceneWillEnterForeground {
+  [self createSurfaceIfReady];
   [self goToApplicationLifecycle:@"AppLifecycleState.inactive"];
 }
 
@@ -1407,8 +1426,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   // create the surface when the application/scene is actually active.
   // This must run after updateViewportMetrics so that the surface creation tasks are queued after
   // the viewport metrics update tasks.
-  if (firstViewBoundsUpdate && self.stateIsActive && self.engine) {
-    [self surfaceUpdated:YES];
+  if (firstViewBoundsUpdate && self.stateIsForeground) {
+    [self createSurfaceIfReady];
   }
 }
 
