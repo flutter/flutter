@@ -207,11 +207,7 @@ class CleanCommand extends FlutterCommand {
     }
     final Status deletionStatus = logger.startProgress('Deleting ${file.basename}...');
     try {
-      try {
-        file.deleteSync(recursive: true);
-      } finally {
-        deletionStatus.stop();
-      }
+      file.deleteSync(recursive: true);
     } on FileSystemException catch (error) {
       final String path = file.path;
       if (_toolContext.platform.isWindows) {
@@ -230,6 +226,8 @@ class CleanCommand extends FlutterCommand {
       } else {
         logger.printError('Failed to remove $path: $error');
       }
+    } finally {
+      deletionStatus.stop();
     }
   }
 
