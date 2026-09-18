@@ -3,15 +3,58 @@
 // found in the LICENSE file.
 
 #include "impeller/entity/render_target_cache.h"
+
+#include <algorithm>
+#include <cstdint>
+
 #include "impeller/core/formats.h"
 #include "impeller/renderer/render_target.h"
 
 namespace impeller {
 
+namespace {
+
+/// @brief Estimate the memory footprint of a render target.
+///
+///        Attachments routinely share a texture (the depth and stencil
+///        attachments are usually backed by the same texture), so each texture
+///        is only counted once.
+size_t GetRenderTargetByteSize(const RenderTarget& render_target) {
+  // A render target has at most a handful of attachments, so a linear scan is
+  // cheaper than a set.
+  std::vector<const Texture*> counted_textures;
+  size_t total = 0u;
+
+  auto add_texture = [&](const std::shared_ptr<Texture>& texture) {
+    if (!texture) {
+      return;
+    }
+    if (std::find(counted_textures.begin(), counted_textures.end(),
+                  texture.get()) != counted_textures.end()) {
+      return;
+    }
+    counted_textures.push_back(texture.get());
+    const TextureDescriptor& desc = texture->GetTextureDescriptor();
+    total += desc.GetByteSizeOfAllMipLevels() *
+             static_cast<size_t>(desc.sample_count);
+  };
+
+  render_target.IterateAllAttachments([&](const Attachment& attachment) {
+    add_texture(attachment.texture);
+    add_texture(attachment.resolve_texture);
+    return true;
+  });
+  return total;
+}
+
+}  // namespace
+
 RenderTargetCache::RenderTargetCache(std::shared_ptr<Allocator> allocator,
-                                     uint32_t keep_alive_frame_count)
+                                     uint32_t keep_alive_frame_count,
+                                     std::optional<size_t> cache_budget_bytes)
     : RenderTargetAllocator(std::move(allocator)),
-      keep_alive_frame_count_(keep_alive_frame_count) {}
+      keep_alive_frame_count_(keep_alive_frame_count),
+      cache_budget_bytes_(cache_budget_bytes) {}
 
 void RenderTargetCache::Start() {
   cache_disabled_count_ = 0;
@@ -33,6 +76,7 @@ void RenderTargetCache::End() {
     }
   }
   render_target_data_.swap(retain);
+  EvictLeastRecentlyUsedOverBudget();
 }
 
 void RenderTargetCache::DisableCache() {
@@ -80,6 +124,7 @@ RenderTarget RenderTargetCache::CreateOffscreen(
       if (!render_target_data.used_this_frame && other_config == config) {
         render_target_data.used_this_frame = true;
         render_target_data.keep_alive_frame_count = keep_alive_frame_count_;
+        render_target_data.last_used_generation = ++generation_;
         ColorAttachment color0 =
             render_target_data.render_target.GetColorAttachment(0);
         std::optional<DepthAttachment> depth =
@@ -99,12 +144,7 @@ RenderTarget RenderTargetCache::CreateOffscreen(
     return created_target;
   }
   if (CacheEnabled()) {
-    render_target_data_.push_back(RenderTargetData{
-        .used_this_frame = true,                            //
-        .keep_alive_frame_count = keep_alive_frame_count_,  //
-        .config = config,                                   //
-        .render_target = created_target                     //
-    });
+    InsertNewRenderTarget(config, created_target);
   }
   return created_target;
 }
@@ -139,6 +179,7 @@ RenderTarget RenderTargetCache::CreateOffscreenMSAA(
       if (!render_target_data.used_this_frame && other_config == config) {
         render_target_data.used_this_frame = true;
         render_target_data.keep_alive_frame_count = keep_alive_frame_count_;
+        render_target_data.last_used_generation = ++generation_;
         ColorAttachment color0 =
             render_target_data.render_target.GetColorAttachment(0);
         std::optional<DepthAttachment> depth =
@@ -159,14 +200,83 @@ RenderTarget RenderTargetCache::CreateOffscreenMSAA(
     return created_target;
   }
   if (CacheEnabled()) {
-    render_target_data_.push_back(RenderTargetData{
-        .used_this_frame = true,                            //
-        .keep_alive_frame_count = keep_alive_frame_count_,  //
-        .config = config,                                   //
-        .render_target = created_target                     //
-    });
+    InsertNewRenderTarget(config, created_target);
   }
   return created_target;
+}
+
+void RenderTargetCache::InsertNewRenderTarget(
+    const RenderTargetConfig& config,
+    const RenderTarget& render_target) {
+  size_t byte_size = GetRenderTargetByteSize(render_target);
+  largest_render_target_bytes_ =
+      std::max(largest_render_target_bytes_, byte_size);
+  render_target_data_.push_back(RenderTargetData{
+      .used_this_frame = true,                            //
+      .keep_alive_frame_count = keep_alive_frame_count_,  //
+      .last_used_generation = ++generation_,              //
+      .byte_size = byte_size,                             //
+      .config = config,                                   //
+      .render_target = render_target                      //
+  });
+}
+
+void RenderTargetCache::EvictLeastRecentlyUsedOverBudget() {
+  const size_t budget = GetCacheBudgetBytes();
+  size_t total_bytes = CachedTextureBytes();
+  if (total_bytes <= budget) {
+    return;
+  }
+
+  // Render targets used during this pass are still referenced by in flight
+  // work, so only idle render targets are eviction candidates. This makes the
+  // budget a soft limit: a pass whose working set alone exceeds the budget
+  // will exceed it.
+  std::vector<size_t> candidates;
+  candidates.reserve(render_target_data_.size());
+  for (size_t i = 0; i < render_target_data_.size(); i++) {
+    if (!render_target_data_[i].used_this_frame) {
+      candidates.push_back(i);
+    }
+  }
+  std::sort(candidates.begin(), candidates.end(), [&](size_t lhs, size_t rhs) {
+    return render_target_data_[lhs].last_used_generation <
+           render_target_data_[rhs].last_used_generation;
+  });
+
+  std::vector<bool> evicted(render_target_data_.size(), false);
+  for (size_t index : candidates) {
+    if (total_bytes <= budget) {
+      break;
+    }
+    total_bytes -= render_target_data_[index].byte_size;
+    evicted[index] = true;
+  }
+
+  std::vector<RenderTargetData> retain;
+  retain.reserve(render_target_data_.size());
+  for (size_t i = 0; i < render_target_data_.size(); i++) {
+    if (!evicted[i]) {
+      retain.push_back(std::move(render_target_data_[i]));
+    }
+  }
+  render_target_data_.swap(retain);
+}
+
+size_t RenderTargetCache::GetCacheBudgetBytes() const {
+  if (cache_budget_bytes_.has_value()) {
+    return cache_budget_bytes_.value();
+  }
+  return std::max(kMinimumCacheBudgetBytes,
+                  kCacheBudgetMultiplier * largest_render_target_bytes_);
+}
+
+size_t RenderTargetCache::CachedTextureBytes() const {
+  size_t total = 0u;
+  for (const RenderTargetData& td : render_target_data_) {
+    total += td.byte_size;
+  }
+  return total;
 }
 
 size_t RenderTargetCache::CachedTextureCount() const {
