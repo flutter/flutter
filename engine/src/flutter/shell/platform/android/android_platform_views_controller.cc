@@ -14,6 +14,113 @@
 namespace flutter {
 namespace android {
 
+namespace {
+
+template <typename T>
+void WriteBytes(std::vector<uint8_t>& buffer, const T& val) {
+  const uint8_t* ptr = reinterpret_cast<const uint8_t*>(&val);
+  buffer.insert(buffer.end(), ptr, ptr + sizeof(T));
+}
+
+void WriteInt32(std::vector<uint8_t>& buffer, int32_t val) {
+  WriteBytes(buffer, val);
+}
+
+void WriteInt64(std::vector<uint8_t>& buffer, int64_t val) {
+  WriteBytes(buffer, val);
+}
+
+void WriteDouble(std::vector<uint8_t>& buffer, double val) {
+  WriteBytes(buffer, val);
+}
+
+void WriteFloat(std::vector<uint8_t>& buffer, float val) {
+  WriteBytes(buffer, val);
+}
+
+std::vector<uint8_t> PackCreationParams(
+    const PlatformViewCreationParams& params) {
+  std::vector<uint8_t> payload;
+  WriteInt32(payload, static_cast<int32_t>(params.view_type.size()));
+  payload.insert(payload.end(), params.view_type.begin(),
+                 params.view_type.end());
+  WriteInt32(payload, static_cast<int32_t>(params.view_id));
+  WriteDouble(payload, params.width);
+  WriteDouble(payload, params.height);
+  WriteInt32(payload, params.direction);
+  WriteInt32(payload, static_cast<int32_t>(params.params.size()));
+  payload.insert(payload.end(), params.params.begin(), params.params.end());
+  return payload;
+}
+
+std::vector<uint8_t> PackResizeRequest(
+    const PlatformViewResizeRequest& request) {
+  std::vector<uint8_t> payload;
+  WriteInt32(payload, static_cast<int32_t>(request.view_id));
+  WriteDouble(payload, request.width);
+  WriteDouble(payload, request.height);
+  return payload;
+}
+
+std::vector<uint8_t> PackOffset(int64_t view_id, double top, double left) {
+  std::vector<uint8_t> payload;
+  WriteInt32(payload, static_cast<int32_t>(view_id));
+  WriteDouble(payload, top);
+  WriteDouble(payload, left);
+  return payload;
+}
+
+std::vector<uint8_t> PackDirection(int64_t view_id, int32_t direction) {
+  std::vector<uint8_t> payload;
+  WriteInt32(payload, static_cast<int32_t>(view_id));
+  WriteInt32(payload, direction);
+  return payload;
+}
+
+std::vector<uint8_t> PackInt32(int32_t val) {
+  std::vector<uint8_t> payload;
+  WriteInt32(payload, val);
+  return payload;
+}
+
+std::vector<uint8_t> PackTouch(const PlatformViewTouch& touch) {
+  std::vector<uint8_t> payload;
+  WriteInt32(payload, static_cast<int32_t>(touch.view_id));
+  WriteInt64(payload, touch.motion_event_id);
+  WriteInt32(payload, touch.action);
+  WriteInt32(payload, touch.pointer_count);
+  for (const auto& pointer : touch.pointers) {
+    WriteInt32(payload, pointer.pointer_id);
+    WriteFloat(payload, pointer.x);
+    WriteFloat(payload, pointer.y);
+    WriteFloat(payload, pointer.size);
+    WriteFloat(payload, pointer.pressure);
+    WriteFloat(payload, pointer.orientation);
+    WriteInt32(payload, pointer.tool_type);
+  }
+  WriteInt64(payload, touch.down_time);
+  WriteInt64(payload, touch.event_time);
+  WriteInt32(payload, touch.source);
+  WriteInt32(payload, touch.flags);
+  WriteInt32(payload, touch.meta_state);
+  WriteInt32(payload, touch.button_state);
+  WriteFloat(payload, touch.raw_x);
+  WriteFloat(payload, touch.raw_y);
+  return payload;
+}
+
+std::vector<uint8_t> PackOverlay(const PlatformViewOverlay& overlay) {
+  std::vector<uint8_t> payload;
+  WriteInt32(payload, overlay.surface_id);
+  WriteInt32(payload, overlay.x);
+  WriteInt32(payload, overlay.y);
+  WriteInt32(payload, overlay.width);
+  WriteInt32(payload, overlay.height);
+  return payload;
+}
+
+}  // namespace
+
 // =============================================================================
 // DefaultPlatformViewsProvider
 // =============================================================================
@@ -39,7 +146,7 @@ int64_t DefaultPlatformViewsProvider::CreatePlatformView(
     return -1;
   }
 
-  std::vector<uint8_t> payload = params.params;
+  std::vector<uint8_t> payload = PackCreationParams(params);
 
   switch (composition_type) {
     case PlatformViewCompositionType::kTextureLayer: {
@@ -69,8 +176,7 @@ bool DefaultPlatformViewsProvider::DisposePlatformView(int64_t view_id) {
   if (!jvm_invoker_) {
     return false;
   }
-  std::vector<uint8_t> payload(sizeof(int64_t));
-  std::memcpy(payload.data(), &view_id, sizeof(int64_t));
+  std::vector<uint8_t> payload = PackInt32(static_cast<int32_t>(view_id));
   return jvm_invoker_->InvokeVoidMethod("disposePlatformView", "(I)V", payload);
 }
 
@@ -81,8 +187,9 @@ bool DefaultPlatformViewsProvider::ResizePlatformView(
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->ResizePlatformView(request.view_id, request.width,
-                                          request.height);
+  std::vector<uint8_t> payload = PackResizeRequest(request);
+  return jvm_invoker_->InvokeVoidMethod("resizePlatformView", "(IDD)V",
+                                        payload);
 }
 
 bool DefaultPlatformViewsProvider::OffsetPlatformView(int64_t view_id,
@@ -93,7 +200,9 @@ bool DefaultPlatformViewsProvider::OffsetPlatformView(int64_t view_id,
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->OffsetPlatformView(view_id, top, left);
+  std::vector<uint8_t> payload = PackOffset(view_id, top, left);
+  return jvm_invoker_->InvokeVoidMethod("offsetPlatformView", "(IDD)V",
+                                        payload);
 }
 
 bool DefaultPlatformViewsProvider::SetDirection(int64_t view_id,
@@ -103,7 +212,9 @@ bool DefaultPlatformViewsProvider::SetDirection(int64_t view_id,
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->SetPlatformViewDirection(view_id, direction);
+  std::vector<uint8_t> payload = PackDirection(view_id, direction);
+  return jvm_invoker_->InvokeVoidMethod("setPlatformViewDirection", "(II)V",
+                                        payload);
 }
 
 bool DefaultPlatformViewsProvider::ClearFocus(int64_t view_id) {
@@ -112,9 +223,7 @@ bool DefaultPlatformViewsProvider::ClearFocus(int64_t view_id) {
   if (!jvm_invoker_) {
     return false;
   }
-  std::vector<uint8_t> payload(sizeof(int32_t));
-  int32_t id = static_cast<int32_t>(view_id);
-  std::memcpy(payload.data(), &id, sizeof(id));
+  std::vector<uint8_t> payload = PackInt32(static_cast<int32_t>(view_id));
   return jvm_invoker_->InvokeVoidMethod("clearPlatformViewFocus", "(I)V",
                                         payload);
 }
@@ -126,9 +235,11 @@ bool DefaultPlatformViewsProvider::DispatchTouchEvent(
   if (!jvm_invoker_) {
     return false;
   }
+  std::vector<uint8_t> payload = PackTouch(touch);
   return jvm_invoker_->InvokeVoidMethod(
       "onTouch",
-      "(Lio/flutter/embedding/engine/systemchannels/PlatformViewTouch;)V");
+      "(Lio/flutter/embedding/engine/systemchannels/PlatformViewTouch;)V",
+      payload);
 }
 
 bool DefaultPlatformViewsProvider::OnDisplayPlatformView(
@@ -138,10 +249,10 @@ bool DefaultPlatformViewsProvider::OnDisplayPlatformView(
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->OnDisplayPlatformView(
+  std::vector<uint8_t> payload = geometry.mutators_stack.Serialize();
+  return jvm_invoker_->PushPlatformViewMutators(
       geometry.view_id, geometry.x, geometry.y, geometry.width, geometry.height,
-      geometry.view_width, geometry.view_height, geometry.mutators_stack,
-      hcpp_enabled_);
+      geometry.view_width, geometry.view_height, payload);
 }
 
 bool DefaultPlatformViewsProvider::HidePlatformView(int64_t view_id) {
@@ -150,13 +261,10 @@ bool DefaultPlatformViewsProvider::HidePlatformView(int64_t view_id) {
   if (!jvm_invoker_) {
     return false;
   }
-  if (hcpp_enabled_) {
-    std::vector<uint8_t> payload(sizeof(int32_t));
-    int32_t id = static_cast<int32_t>(view_id);
-    std::memcpy(payload.data(), &id, sizeof(id));
-    return jvm_invoker_->InvokeVoidMethod("hidePlatformView2", "(I)V", payload);
-  }
-  return true;  // Safe no-op in non-HCPP mode
+  const char* method_name =
+      IsHcppEnabled() ? "hidePlatformView2" : "hidePlatformView";
+  std::vector<uint8_t> payload = PackInt32(static_cast<int32_t>(view_id));
+  return jvm_invoker_->InvokeVoidMethod(method_name, "(I)V", payload);
 }
 
 bool DefaultPlatformViewsProvider::SynchronizeToNativeViewHierarchy(
@@ -177,9 +285,6 @@ bool DefaultPlatformViewsProvider::OnBeginFrame() {
   if (!jvm_invoker_) {
     return false;
   }
-  if (hcpp_enabled_) {
-    return true;  // Safe no-op in HCPP mode
-  }
   return jvm_invoker_->InvokeVoidMethod("onBeginFrame", "()V");
 }
 
@@ -188,10 +293,8 @@ bool DefaultPlatformViewsProvider::OnEndFrame() {
   if (!jvm_invoker_) {
     return false;
   }
-  if (hcpp_enabled_) {
-    return jvm_invoker_->InvokeVoidMethod("endFrame2", "()V");
-  }
-  return jvm_invoker_->InvokeVoidMethod("onEndFrame", "()V");
+  const char* method_name = IsHcppEnabled() ? "endFrame2" : "onEndFrame";
+  return jvm_invoker_->InvokeVoidMethod(method_name, "()V");
 }
 
 std::optional<int32_t> DefaultPlatformViewsProvider::CreateOverlaySurface() {
@@ -199,7 +302,13 @@ std::optional<int32_t> DefaultPlatformViewsProvider::CreateOverlaySurface() {
   if (!jvm_invoker_) {
     return std::nullopt;
   }
-  return jvm_invoker_->CreateOverlaySurface(hcpp_enabled_);
+  const char* method_name =
+      IsHcppEnabled() ? "createOverlaySurface2Id" : "createOverlaySurfaceId";
+  int64_t id = jvm_invoker_->InvokeIntMethod(method_name, "()I");
+  if (id < 0) {
+    return std::nullopt;
+  }
+  return static_cast<int32_t>(id);
 }
 
 bool DefaultPlatformViewsProvider::DestroyOverlaySurfaces() {
@@ -208,10 +317,9 @@ bool DefaultPlatformViewsProvider::DestroyOverlaySurfaces() {
   if (!jvm_invoker_) {
     return false;
   }
-  if (hcpp_enabled_) {
-    return jvm_invoker_->InvokeVoidMethod("destroyOverlaySurface2", "()V");
-  }
-  return jvm_invoker_->InvokeVoidMethod("destroyOverlaySurfaces", "()V");
+  const char* method_name =
+      IsHcppEnabled() ? "destroyOverlaySurface2" : "destroyOverlaySurfaces";
+  return jvm_invoker_->InvokeVoidMethod(method_name, "()V");
 }
 
 bool DefaultPlatformViewsProvider::OnDisplayOverlaySurface(
@@ -222,8 +330,9 @@ bool DefaultPlatformViewsProvider::OnDisplayOverlaySurface(
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->OnDisplayOverlaySurface(
-      overlay.surface_id, overlay.x, overlay.y, overlay.width, overlay.height);
+  std::vector<uint8_t> payload = PackOverlay(overlay);
+  return jvm_invoker_->InvokeVoidMethod("onDisplayOverlaySurface", "(IIIII)V",
+                                        payload);
 }
 
 bool DefaultPlatformViewsProvider::ShowOverlaySurface(int32_t surface_id) {
@@ -232,10 +341,11 @@ bool DefaultPlatformViewsProvider::ShowOverlaySurface(int32_t surface_id) {
   if (!jvm_invoker_) {
     return false;
   }
-  if (hcpp_enabled_) {
+  if (IsHcppEnabled()) {
     return jvm_invoker_->InvokeVoidMethod("showOverlaySurface2", "()V");
   }
-  return true;  // Safe no-op in non-HCPP mode
+  // In HC v1, overlay surface visibility is determined during composition.
+  return true;
 }
 
 bool DefaultPlatformViewsProvider::HideOverlaySurface(int32_t surface_id) {
@@ -244,10 +354,11 @@ bool DefaultPlatformViewsProvider::HideOverlaySurface(int32_t surface_id) {
   if (!jvm_invoker_) {
     return false;
   }
-  if (hcpp_enabled_) {
+  if (IsHcppEnabled()) {
     return jvm_invoker_->InvokeVoidMethod("hideOverlaySurface2", "()V");
   }
-  return true;  // Safe no-op in non-HCPP mode
+  // In HC v1, overlay surface visibility is determined during composition.
+  return true;
 }
 
 bool DefaultPlatformViewsProvider::CreateTransaction() {
@@ -255,7 +366,8 @@ bool DefaultPlatformViewsProvider::CreateTransaction() {
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->CreateTransaction();
+  return jvm_invoker_->InvokeBooleanMethod("createPlatformViewTransaction",
+                                           "()Z");
 }
 
 bool DefaultPlatformViewsProvider::SwapTransactions() {
@@ -319,7 +431,11 @@ bool InMemoryPlatformViewsProvider::DisposePlatformView(int64_t view_id) {
   TRACE_EVENT1("flutter", "InMemoryPlatformViewsProvider::DisposePlatformView",
                "view_id", std::to_string(view_id).c_str());
   std::lock_guard<std::mutex> lock(mutex_);
-  created_views_.erase(view_id);
+  auto it = created_views_.find(view_id);
+  if (it == created_views_.end()) {
+    return false;
+  }
+  created_views_.erase(it);
   composition_types_.erase(view_id);
   offsets_.erase(view_id);
   directions_.erase(view_id);
@@ -593,7 +709,7 @@ size_t InMemoryPlatformViewsProvider::GetFocusClearedCount(
   return 0;
 }
 
-const std::vector<PlatformViewTouch>&
+std::vector<PlatformViewTouch>
 InMemoryPlatformViewsProvider::GetDispatchedTouches() const {
   std::lock_guard<std::mutex> lock(mutex_);
   return dispatched_touches_;
@@ -630,7 +746,7 @@ size_t InMemoryPlatformViewsProvider::GetOverlaySurfacesCount() const {
   return overlay_surfaces_.size();
 }
 
-const std::map<int32_t, PlatformViewOverlay>&
+std::map<int32_t, PlatformViewOverlay>
 InMemoryPlatformViewsProvider::GetDisplayedOverlays() const {
   std::lock_guard<std::mutex> lock(mutex_);
   return displayed_overlays_;
@@ -670,10 +786,11 @@ int64_t AndroidPlatformViewsController::CreatePlatformView(
     PlatformViewCompositionType composition_type) {
   TRACE_EVENT1("flutter", "AndroidPlatformViewsController::CreatePlatformView",
                "view_id", std::to_string(params.view_id).c_str());
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return -1;
   }
-  int64_t result = provider_->CreatePlatformView(params, composition_type);
+  int64_t result = provider->CreatePlatformView(params, composition_type);
   if (result >= 0) {
     std::lock_guard<std::mutex> lock(mutex_);
     active_composition_types_[params.view_id] = composition_type;
@@ -684,10 +801,19 @@ int64_t AndroidPlatformViewsController::CreatePlatformView(
 bool AndroidPlatformViewsController::DisposePlatformView(int64_t view_id) {
   TRACE_EVENT1("flutter", "AndroidPlatformViewsController::DisposePlatformView",
                "view_id", std::to_string(view_id).c_str());
-  if (!provider_) {
+  std::shared_ptr<PlatformViewsProvider> provider;
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (active_composition_types_.find(view_id) ==
+        active_composition_types_.end()) {
+      return false;
+    }
+    provider = provider_;
+  }
+  if (!provider) {
     return false;
   }
-  bool result = provider_->DisposePlatformView(view_id);
+  bool result = provider->DisposePlatformView(view_id);
   if (result) {
     std::lock_guard<std::mutex> lock(mutex_);
     active_geometries_.erase(view_id);
@@ -701,14 +827,15 @@ bool AndroidPlatformViewsController::ResizePlatformView(int64_t view_id,
                                                         double height) {
   TRACE_EVENT1("flutter", "AndroidPlatformViewsController::ResizePlatformView",
                "view_id", std::to_string(view_id).c_str());
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return false;
   }
   PlatformViewResizeRequest req;
   req.view_id = view_id;
   req.width = width;
   req.height = height;
-  return provider_->ResizePlatformView(req);
+  return provider->ResizePlatformView(req);
 }
 
 bool AndroidPlatformViewsController::OffsetPlatformView(int64_t view_id,
@@ -716,39 +843,43 @@ bool AndroidPlatformViewsController::OffsetPlatformView(int64_t view_id,
                                                         double left) {
   TRACE_EVENT1("flutter", "AndroidPlatformViewsController::OffsetPlatformView",
                "view_id", std::to_string(view_id).c_str());
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return false;
   }
-  return provider_->OffsetPlatformView(view_id, top, left);
+  return provider->OffsetPlatformView(view_id, top, left);
 }
 
 bool AndroidPlatformViewsController::SetDirection(int64_t view_id,
                                                   int32_t direction) {
   TRACE_EVENT1("flutter", "AndroidPlatformViewsController::SetDirection",
                "view_id", std::to_string(view_id).c_str());
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return false;
   }
-  return provider_->SetDirection(view_id, direction);
+  return provider->SetDirection(view_id, direction);
 }
 
 bool AndroidPlatformViewsController::ClearFocus(int64_t view_id) {
   TRACE_EVENT1("flutter", "AndroidPlatformViewsController::ClearFocus",
                "view_id", std::to_string(view_id).c_str());
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return false;
   }
-  return provider_->ClearFocus(view_id);
+  return provider->ClearFocus(view_id);
 }
 
 bool AndroidPlatformViewsController::DispatchTouchEvent(
     const PlatformViewTouch& touch) {
   TRACE_EVENT1("flutter", "AndroidPlatformViewsController::DispatchTouchEvent",
                "view_id", std::to_string(touch.view_id).c_str());
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return false;
   }
-  return provider_->DispatchTouchEvent(touch);
+  return provider->DispatchTouchEvent(touch);
 }
 
 bool AndroidPlatformViewsController::OnDisplayPlatformView(
@@ -763,7 +894,16 @@ bool AndroidPlatformViewsController::OnDisplayPlatformView(
   TRACE_EVENT1("flutter",
                "AndroidPlatformViewsController::OnDisplayPlatformView",
                "view_id", std::to_string(view_id).c_str());
-  if (!provider_) {
+  std::shared_ptr<PlatformViewsProvider> provider;
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (active_composition_types_.find(view_id) ==
+        active_composition_types_.end()) {
+      return false;
+    }
+    provider = provider_;
+  }
+  if (!provider) {
     return false;
   }
   PlatformViewGeometry geometry;
@@ -776,10 +916,13 @@ bool AndroidPlatformViewsController::OnDisplayPlatformView(
   geometry.view_height = view_height;
   geometry.mutators_stack = mutators_stack;
 
-  bool result = provider_->OnDisplayPlatformView(geometry);
+  bool result = provider->OnDisplayPlatformView(geometry);
   if (result) {
     std::lock_guard<std::mutex> lock(mutex_);
-    active_geometries_[view_id] = geometry;
+    if (active_composition_types_.find(view_id) !=
+        active_composition_types_.end()) {
+      active_geometries_[view_id] = geometry;
+    }
   }
   return result;
 }
@@ -795,6 +938,9 @@ bool AndroidPlatformViewsController::OnDisplayPlatformView(
   TRACE_EVENT1("flutter",
                "AndroidPlatformViewsController::OnDisplayPlatformView(struct)",
                "view_id", std::to_string(platform_view.identifier).c_str());
+  if (platform_view.struct_size < sizeof(FlutterPlatformView)) {
+    return false;
+  }
   AndroidMutatorsStack stack =
       AndroidMutatorsMapper::MapPlatformView(platform_view);
   return OnDisplayPlatformView(platform_view.identifier, x, y, width, height,
@@ -804,10 +950,11 @@ bool AndroidPlatformViewsController::OnDisplayPlatformView(
 bool AndroidPlatformViewsController::HidePlatformView(int64_t view_id) {
   TRACE_EVENT1("flutter", "AndroidPlatformViewsController::HidePlatformView",
                "view_id", std::to_string(view_id).c_str());
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return false;
   }
-  return provider_->HidePlatformView(view_id);
+  return provider->HidePlatformView(view_id);
 }
 
 bool AndroidPlatformViewsController::PushPlatformViewMutators(
@@ -817,11 +964,24 @@ bool AndroidPlatformViewsController::PushPlatformViewMutators(
     int32_t width,
     int32_t height,
     const AndroidMutatorsStack& mutators_stack) {
+  return PushPlatformViewMutators(view_id, x, y, width, height, width, height,
+                                  mutators_stack);
+}
+
+bool AndroidPlatformViewsController::PushPlatformViewMutators(
+    int64_t view_id,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height,
+    int32_t view_width,
+    int32_t view_height,
+    const AndroidMutatorsStack& mutators_stack) {
   TRACE_EVENT1("flutter",
                "AndroidPlatformViewsController::PushPlatformViewMutators",
                "view_id", std::to_string(view_id).c_str());
-  return OnDisplayPlatformView(view_id, x, y, width, height, width, height,
-                               mutators_stack);
+  return OnDisplayPlatformView(view_id, x, y, width, height, view_width,
+                               view_height, mutators_stack);
 }
 
 bool AndroidPlatformViewsController::PushPlatformViewMutators(
@@ -830,14 +990,29 @@ bool AndroidPlatformViewsController::PushPlatformViewMutators(
     int32_t y,
     int32_t width,
     int32_t height) {
+  return PushPlatformViewMutators(platform_view, x, y, width, height, width,
+                                  height);
+}
+
+bool AndroidPlatformViewsController::PushPlatformViewMutators(
+    const FlutterPlatformView& platform_view,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height,
+    int32_t view_width,
+    int32_t view_height) {
   TRACE_EVENT1(
       "flutter",
       "AndroidPlatformViewsController::PushPlatformViewMutators(struct)",
       "view_id", std::to_string(platform_view.identifier).c_str());
+  if (platform_view.struct_size < sizeof(FlutterPlatformView)) {
+    return false;
+  }
   AndroidMutatorsStack stack =
       AndroidMutatorsMapper::MapPlatformView(platform_view);
   return PushPlatformViewMutators(platform_view.identifier, x, y, width, height,
-                                  stack);
+                                  view_width, view_height, stack);
 }
 
 bool AndroidPlatformViewsController::SynchronizeToNativeViewHierarchy(
@@ -845,44 +1020,49 @@ bool AndroidPlatformViewsController::SynchronizeToNativeViewHierarchy(
   TRACE_EVENT0(
       "flutter",
       "AndroidPlatformViewsController::SynchronizeToNativeViewHierarchy");
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return false;
   }
-  return provider_->SynchronizeToNativeViewHierarchy(synchronize);
+  return provider->SynchronizeToNativeViewHierarchy(synchronize);
 }
 
 bool AndroidPlatformViewsController::OnBeginFrame() {
   TRACE_EVENT0("flutter", "AndroidPlatformViewsController::OnBeginFrame");
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return false;
   }
-  return provider_->OnBeginFrame();
+  return provider->OnBeginFrame();
 }
 
 bool AndroidPlatformViewsController::OnEndFrame() {
   TRACE_EVENT0("flutter", "AndroidPlatformViewsController::OnEndFrame");
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return false;
   }
-  return provider_->OnEndFrame();
+  return provider->OnEndFrame();
 }
 
 std::optional<int32_t> AndroidPlatformViewsController::CreateOverlaySurface() {
   TRACE_EVENT0("flutter",
                "AndroidPlatformViewsController::CreateOverlaySurface");
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return std::nullopt;
   }
-  return provider_->CreateOverlaySurface();
+  return provider->CreateOverlaySurface();
 }
 
 bool AndroidPlatformViewsController::DestroyOverlaySurfaces() {
   TRACE_EVENT0("flutter",
                "AndroidPlatformViewsController::DestroyOverlaySurfaces");
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return false;
   }
-  return provider_->DestroyOverlaySurfaces();
+  return provider->DestroyOverlaySurfaces();
 }
 
 bool AndroidPlatformViewsController::OnDisplayOverlaySurface(int32_t surface_id,
@@ -893,7 +1073,8 @@ bool AndroidPlatformViewsController::OnDisplayOverlaySurface(int32_t surface_id,
   TRACE_EVENT1("flutter",
                "AndroidPlatformViewsController::OnDisplayOverlaySurface",
                "surface_id", std::to_string(surface_id).c_str());
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return false;
   }
   PlatformViewOverlay overlay;
@@ -902,57 +1083,71 @@ bool AndroidPlatformViewsController::OnDisplayOverlaySurface(int32_t surface_id,
   overlay.y = y;
   overlay.width = width;
   overlay.height = height;
-  return provider_->OnDisplayOverlaySurface(overlay);
+  return provider->OnDisplayOverlaySurface(overlay);
 }
 
 bool AndroidPlatformViewsController::ShowOverlaySurface(int32_t surface_id) {
   TRACE_EVENT1("flutter", "AndroidPlatformViewsController::ShowOverlaySurface",
                "surface_id", std::to_string(surface_id).c_str());
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return false;
   }
-  return provider_->ShowOverlaySurface(surface_id);
+  return provider->ShowOverlaySurface(surface_id);
 }
 
 bool AndroidPlatformViewsController::HideOverlaySurface(int32_t surface_id) {
   TRACE_EVENT1("flutter", "AndroidPlatformViewsController::HideOverlaySurface",
                "surface_id", std::to_string(surface_id).c_str());
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return false;
   }
-  return provider_->HideOverlaySurface(surface_id);
+  return provider->HideOverlaySurface(surface_id);
 }
 
 bool AndroidPlatformViewsController::CreateTransaction() {
   TRACE_EVENT0("flutter", "AndroidPlatformViewsController::CreateTransaction");
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return false;
   }
-  return provider_->CreateTransaction();
+  return provider->CreateTransaction();
 }
 
 bool AndroidPlatformViewsController::SwapTransactions() {
   TRACE_EVENT0("flutter", "AndroidPlatformViewsController::SwapTransactions");
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return false;
   }
-  return provider_->SwapTransactions();
+  return provider->SwapTransactions();
 }
 
 bool AndroidPlatformViewsController::ApplyTransactions() {
   TRACE_EVENT0("flutter", "AndroidPlatformViewsController::ApplyTransactions");
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return false;
   }
-  return provider_->ApplyTransactions();
+  return provider->ApplyTransactions();
 }
 
 bool AndroidPlatformViewsController::IsHcppEnabled() const {
   TRACE_EVENT0("flutter", "AndroidPlatformViewsController::IsHcppEnabled");
-  if (!provider_) {
+  auto provider = GetProvider();
+  if (!provider) {
     return false;
   }
-  return provider_->IsHcppEnabled();
+  return provider->IsHcppEnabled();
+}
+
+void AndroidPlatformViewsController::SetHcppEnabled(bool enabled) {
+  TRACE_EVENT0("flutter", "AndroidPlatformViewsController::SetHcppEnabled");
+  auto provider = GetProvider();
+  if (provider) {
+    provider->SetHcppEnabled(enabled);
+  }
 }
 
 size_t AndroidPlatformViewsController::GetActiveViewsCount() const {
@@ -988,12 +1183,14 @@ AndroidPlatformViewsController::GetCompositionType(int64_t view_id) const {
 
 std::shared_ptr<PlatformViewsProvider>
 AndroidPlatformViewsController::GetProvider() const {
+  std::lock_guard<std::mutex> lock(mutex_);
   return provider_;
 }
 
 void AndroidPlatformViewsController::SetProvider(
     std::shared_ptr<PlatformViewsProvider> provider) {
   TRACE_EVENT0("flutter", "AndroidPlatformViewsController::SetProvider");
+  std::lock_guard<std::mutex> lock(mutex_);
   provider_ = provider ? std::move(provider)
                        : std::make_shared<DefaultPlatformViewsProvider>();
 }

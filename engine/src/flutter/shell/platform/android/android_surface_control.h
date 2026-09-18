@@ -49,6 +49,7 @@ struct AndroidSurfaceControlRect {
   int32_t Width() const { return right - left; }
   int32_t Height() const { return bottom - top; }
   bool IsEmpty() const { return left >= right || top >= bottom; }
+  bool IsValid() const { return left < right && top < bottom; }
 
   bool operator==(const AndroidSurfaceControlRect& other) const {
     return left == other.left && top == other.top && right == other.right &&
@@ -62,6 +63,9 @@ struct AndroidSurfaceControlRect {
 
 /// @brief Presentation and completion stats matching ASurfaceTransactionStats.
 struct AndroidSurfaceControlStats {
+  /// File descriptor of the previous release fence, or -1 if none.
+  /// The caller receiving this in an OnComplete callback takes ownership
+  /// and must close the file descriptor when done.
   int previous_release_fence_fd = -1;
   int64_t present_time_nanos = 0;
   int64_t latch_time_nanos = 0;
@@ -364,6 +368,7 @@ class DefaultAndroidSurfaceControl : public AndroidSurfaceControl {
   void* parent_handle_ = nullptr;
   uint64_t parent_id_ = 0;
   bool owns_handle_ = true;
+  std::atomic<int32_t> ref_count_{1};
   std::shared_ptr<DefaultAndroidSurfaceControlProvider> provider_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(DefaultAndroidSurfaceControl);
@@ -516,6 +521,10 @@ class DefaultAndroidSurfaceControlProvider
   mutable void* transaction_set_color_fn_ = nullptr;
   mutable void* transaction_set_on_complete_fn_ = nullptr;
   mutable void* stats_get_release_fence_fn_ = nullptr;
+  mutable void* stats_get_latch_time_fn_ = nullptr;
+  mutable void* stats_get_present_fence_fn_ = nullptr;
+  mutable void* stats_get_surface_controls_fn_ = nullptr;
+  mutable void* stats_release_surface_controls_fn_ = nullptr;
 
   FML_DISALLOW_COPY_AND_ASSIGN(DefaultAndroidSurfaceControlProvider);
 };

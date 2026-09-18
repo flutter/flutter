@@ -4,13 +4,13 @@
 
 #include "flutter/shell/platform/android/android_surface_control.h"
 
+#include <unistd.h>
 #include <chrono>
 #include <cstring>
 #include <utility>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/shell/platform/android/flutter_embedder_native.h"
 
 namespace flutter {
 namespace android {
@@ -63,8 +63,19 @@ typedef void (*ASurfaceTransaction_setOnComplete_fn)(
     void* transaction,
     void* context,
     ASurfaceTransaction_OnComplete_fn func);
+typedef int64_t (*ASurfaceTransactionStats_getLatchTime_fn)(void* stats);
+typedef int (*ASurfaceTransactionStats_getPresentFenceFd_fn)(void* stats);
+typedef void (*ASurfaceTransactionStats_getASurfaceControls_fn)(
+    void* stats,
+    void*** out_controls,
+    size_t* out_size);
+typedef void (*ASurfaceTransactionStats_releaseASurfaceControls_fn)(
+    void** controls);
 typedef int (*ASurfaceTransactionStats_getPreviousReleaseFenceFd_fn)(
-    void* stats);
+    void* stats,
+    void* surface_control);
+
+constexpr int32_t kDataspaceSrgbLinear = 142671872;
 
 // =============================================================================
 // DefaultAndroidSurfaceControl Implementation
@@ -95,6 +106,7 @@ DefaultAndroidSurfaceControl::~DefaultAndroidSurfaceControl() {
   if (owns_handle_ && handle_ && provider_) {
     provider_->Release(handle_);
     handle_ = nullptr;
+    owns_handle_ = false;
   }
 }
 
@@ -120,15 +132,17 @@ bool DefaultAndroidSurfaceControl::IsValid() const {
 
 void DefaultAndroidSurfaceControl::Acquire() {
   TRACE_EVENT0("flutter", "DefaultAndroidSurfaceControl::Acquire");
-  if (handle_ && provider_) {
-    provider_->Acquire(handle_);
-  }
+  ++ref_count_;
 }
 
 void DefaultAndroidSurfaceControl::Release() {
   TRACE_EVENT0("flutter", "DefaultAndroidSurfaceControl::Release");
-  if (handle_ && provider_) {
-    provider_->Release(handle_);
+  if (--ref_count_ <= 0) {
+    if (owns_handle_ && handle_ && provider_) {
+      provider_->Release(handle_);
+      handle_ = nullptr;
+      owns_handle_ = false;
+    }
   }
 }
 
@@ -144,7 +158,12 @@ bool DefaultAndroidSurfaceControl::RemoveFromParent() {
   if (!transaction->Reparent(this, nullptr)) {
     return false;
   }
-  return transaction->Apply();
+  bool applied = transaction->Apply();
+  if (applied) {
+    parent_handle_ = nullptr;
+    parent_id_ = 0;
+  }
+  return applied;
 }
 
 void* DefaultAndroidSurfaceControl::GetParentHandle() const {
@@ -237,6 +256,9 @@ bool DefaultAndroidSurfaceTransaction::SetGeometry(
   if (!handle_ || !surface_control || !provider_) {
     return false;
   }
+  if (!source.IsValid() || !destination.IsValid()) {
+    return false;
+  }
   return provider_->SetGeometry(handle_, surface_control->GetHandle(), &source,
                                 &destination, static_cast<int32_t>(transform));
 }
@@ -260,8 +282,12 @@ bool DefaultAndroidSurfaceTransaction::SetBufferAlpha(
   if (!handle_ || !surface_control || !provider_) {
     return false;
   }
+  if (!std::isfinite(alpha)) {
+    return false;
+  }
+  float clamped_alpha = std::clamp(alpha, 0.0f, 1.0f);
   return provider_->SetBufferAlpha(handle_, surface_control->GetHandle(),
-                                   alpha);
+                                   clamped_alpha);
 }
 
 bool DefaultAndroidSurfaceTransaction::SetColor(
@@ -305,7 +331,13 @@ bool DefaultAndroidSurfaceTransaction::Apply() {
   if (!handle_ || !provider_) {
     return false;
   }
-  return provider_->ApplyTransaction(handle_);
+  void* handle = handle_;
+  handle_ = nullptr;
+  bool result = provider_->ApplyTransaction(handle);
+  if (owns_handle_) {
+    provider_->DeleteTransaction(handle);
+  }
+  return result;
 }
 
 // =============================================================================
@@ -334,7 +366,7 @@ void DefaultAndroidSurfaceControlProvider::EnsureLoaded() const {
   loaded_ = true;
 
   if (!library_loader_) {
-    library_loader_ = FlutterEmbedderNative::GetDefaultLibraryLoader();
+    library_loader_ = OSLibraryLoader::GetDefaultLibraryLoader();
     if (!library_loader_) {
       library_loader_ = std::make_shared<DefaultOSLibraryLoader>();
     }
@@ -377,6 +409,14 @@ void DefaultAndroidSurfaceControlProvider::EnsureLoaded() const {
       libandroid_->ResolveSymbol("ASurfaceTransaction_setOnComplete");
   stats_get_release_fence_fn_ = libandroid_->ResolveSymbol(
       "ASurfaceTransactionStats_getPreviousReleaseFenceFd");
+  stats_get_latch_time_fn_ =
+      libandroid_->ResolveSymbol("ASurfaceTransactionStats_getLatchTime");
+  stats_get_present_fence_fn_ =
+      libandroid_->ResolveSymbol("ASurfaceTransactionStats_getPresentFenceFd");
+  stats_get_surface_controls_fn_ = libandroid_->ResolveSymbol(
+      "ASurfaceTransactionStats_getASurfaceControls");
+  stats_release_surface_controls_fn_ = libandroid_->ResolveSymbol(
+      "ASurfaceTransactionStats_releaseASurfaceControls");
 
   is_available_ =
       (create_from_window_fn_ != nullptr && release_fn_ != nullptr &&
@@ -608,6 +648,10 @@ bool DefaultAndroidSurfaceControlProvider::SetGeometry(
       !surface_control_handle) {
     return false;
   }
+  if (!source || !destination || !source->IsValid() ||
+      !destination->IsValid()) {
+    return false;
+  }
   auto func = reinterpret_cast<ASurfaceTransaction_setGeometry_fn>(
       transaction_set_geometry_fn_);
   func(transaction_handle, surface_control_handle, source, destination,
@@ -644,9 +688,13 @@ bool DefaultAndroidSurfaceControlProvider::SetBufferAlpha(
       !surface_control_handle) {
     return false;
   }
+  if (!std::isfinite(alpha)) {
+    return false;
+  }
+  float clamped_alpha = std::clamp(alpha, 0.0f, 1.0f);
   auto func = reinterpret_cast<ASurfaceTransaction_setBufferAlpha_fn>(
       transaction_set_buffer_alpha_fn_);
-  func(transaction_handle, surface_control_handle, alpha);
+  func(transaction_handle, surface_control_handle, clamped_alpha);
   return true;
 }
 
@@ -665,13 +713,19 @@ bool DefaultAndroidSurfaceControlProvider::SetColor(
   }
   auto func = reinterpret_cast<ASurfaceTransaction_setColor_fn>(
       transaction_set_color_fn_);
-  func(transaction_handle, surface_control_handle, r, g, b, alpha, 0);
+  func(transaction_handle, surface_control_handle, r, g, b, alpha,
+       kDataspaceSrgbLinear);
   return true;
 }
 
 struct SurfaceTransactionCallbackWrapper {
   std::function<void(const AndroidSurfaceControlStats&)> callback;
   ASurfaceTransactionStats_getPreviousReleaseFenceFd_fn get_fence_fn = nullptr;
+  ASurfaceTransactionStats_getLatchTime_fn get_latch_time_fn = nullptr;
+  ASurfaceTransactionStats_getPresentFenceFd_fn get_present_fence_fn = nullptr;
+  ASurfaceTransactionStats_getASurfaceControls_fn get_controls_fn = nullptr;
+  ASurfaceTransactionStats_releaseASurfaceControls_fn release_controls_fn =
+      nullptr;
 };
 
 static void OnSurfaceTransactionComplete(void* context, void* stats) {
@@ -680,14 +734,45 @@ static void OnSurfaceTransactionComplete(void* context, void* stats) {
     return;
   }
   AndroidSurfaceControlStats result;
-  if (wrapper->get_fence_fn && stats) {
-    result.previous_release_fence_fd = wrapper->get_fence_fn(stats);
+  if (stats) {
+    if (wrapper->get_latch_time_fn) {
+      result.latch_time_nanos = wrapper->get_latch_time_fn(stats);
+    }
+    if (wrapper->get_present_fence_fn) {
+      int present_fence = wrapper->get_present_fence_fn(stats);
+      if (present_fence >= 0) {
+        close(present_fence);
+      }
+    }
+    result.present_time_nanos = result.latch_time_nanos;
+    if (result.present_time_nanos <= 0) {
+      auto now = std::chrono::steady_clock::now().time_since_epoch();
+      result.present_time_nanos =
+          std::chrono::duration_cast<std::chrono::nanoseconds>(now).count();
+    }
+    if (wrapper->get_fence_fn && wrapper->get_controls_fn &&
+        wrapper->release_controls_fn) {
+      void** controls = nullptr;
+      size_t control_count = 0;
+      wrapper->get_controls_fn(stats, &controls, &control_count);
+      if (controls && control_count > 0) {
+        result.previous_release_fence_fd =
+            wrapper->get_fence_fn(stats, controls[0]);
+      }
+      if (controls) {
+        wrapper->release_controls_fn(controls);
+      }
+    }
+  } else {
+    auto now = std::chrono::steady_clock::now().time_since_epoch();
+    result.present_time_nanos =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(now).count();
   }
-  auto now = std::chrono::steady_clock::now().time_since_epoch();
-  result.present_time_nanos =
-      std::chrono::duration_cast<std::chrono::nanoseconds>(now).count();
   if (wrapper->callback) {
     wrapper->callback(result);
+  } else if (result.previous_release_fence_fd >= 0) {
+    close(result.previous_release_fence_fd);
+    result.previous_release_fence_fd = -1;
   }
   delete wrapper;
 }
@@ -707,6 +792,26 @@ bool DefaultAndroidSurfaceControlProvider::SetOnComplete(
     wrapper->get_fence_fn =
         reinterpret_cast<ASurfaceTransactionStats_getPreviousReleaseFenceFd_fn>(
             stats_get_release_fence_fn_);
+  }
+  if (stats_get_latch_time_fn_) {
+    wrapper->get_latch_time_fn =
+        reinterpret_cast<ASurfaceTransactionStats_getLatchTime_fn>(
+            stats_get_latch_time_fn_);
+  }
+  if (stats_get_present_fence_fn_) {
+    wrapper->get_present_fence_fn =
+        reinterpret_cast<ASurfaceTransactionStats_getPresentFenceFd_fn>(
+            stats_get_present_fence_fn_);
+  }
+  if (stats_get_surface_controls_fn_) {
+    wrapper->get_controls_fn =
+        reinterpret_cast<ASurfaceTransactionStats_getASurfaceControls_fn>(
+            stats_get_surface_controls_fn_);
+  }
+  if (stats_release_surface_controls_fn_) {
+    wrapper->release_controls_fn =
+        reinterpret_cast<ASurfaceTransactionStats_releaseASurfaceControls_fn>(
+            stats_release_surface_controls_fn_);
   }
   auto func = reinterpret_cast<ASurfaceTransaction_setOnComplete_fn>(
       transaction_set_on_complete_fn_);
@@ -902,6 +1007,9 @@ bool InMemoryAndroidSurfaceTransaction::SetGeometry(
   if (!handle_ || !surface_control || !provider_) {
     return false;
   }
+  if (!source.IsValid() || !destination.IsValid()) {
+    return false;
+  }
   return provider_->SetGeometry(handle_, surface_control->GetHandle(), &source,
                                 &destination, static_cast<int32_t>(transform));
 }
@@ -925,8 +1033,12 @@ bool InMemoryAndroidSurfaceTransaction::SetBufferAlpha(
   if (!handle_ || !surface_control || !provider_) {
     return false;
   }
+  if (!std::isfinite(alpha)) {
+    return false;
+  }
+  float clamped_alpha = std::clamp(alpha, 0.0f, 1.0f);
   return provider_->SetBufferAlpha(handle_, surface_control->GetHandle(),
-                                   alpha);
+                                   clamped_alpha);
 }
 
 bool InMemoryAndroidSurfaceTransaction::SetColor(
@@ -970,7 +1082,13 @@ bool InMemoryAndroidSurfaceTransaction::Apply() {
   if (!handle_ || !provider_) {
     return false;
   }
-  return provider_->ApplyTransaction(handle_);
+  void* handle = handle_;
+  handle_ = nullptr;
+  bool result = provider_->ApplyTransaction(handle);
+  if (owns_handle_) {
+    provider_->DeleteTransaction(handle);
+  }
+  return result;
 }
 
 // =============================================================================
@@ -1003,7 +1121,7 @@ InMemoryAndroidSurfaceControlProvider::CreateFromWindow(
   TRACE_EVENT0("flutter",
                "InMemoryAndroidSurfaceControlProvider::CreateFromWindow");
   std::lock_guard<std::mutex> lock(mutex_);
-  if (!is_available_ || creation_failure_ || !window) {
+  if (!is_available_ || creation_failure_) {
     return nullptr;
   }
 
@@ -1290,13 +1408,13 @@ bool InMemoryAndroidSurfaceControlProvider::SetGeometry(
   if (it == transactions_.end() || !surface_control_handle) {
     return false;
   }
+  if (!source || !destination || !source->IsValid() ||
+      !destination->IsValid()) {
+    return false;
+  }
   auto& update = it->second.updates[surface_control_handle];
-  if (source) {
-    update.source_rect = *source;
-  }
-  if (destination) {
-    update.destination_rect = *destination;
-  }
+  update.source_rect = *source;
+  update.destination_rect = *destination;
   update.transform = static_cast<AndroidSurfaceControlTransform>(transform);
   return true;
 }
@@ -1332,8 +1450,12 @@ bool InMemoryAndroidSurfaceControlProvider::SetBufferAlpha(
   if (it == transactions_.end() || !surface_control_handle) {
     return false;
   }
+  if (!std::isfinite(alpha)) {
+    return false;
+  }
+  float clamped_alpha = std::clamp(alpha, 0.0f, 1.0f);
   auto& update = it->second.updates[surface_control_handle];
-  update.alpha = alpha;
+  update.alpha = clamped_alpha;
   return true;
 }
 
