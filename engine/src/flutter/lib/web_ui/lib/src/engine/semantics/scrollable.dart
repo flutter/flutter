@@ -114,6 +114,13 @@ class SemanticScrollable extends SemanticRole {
   @override
   void update() {
     super.update();
+    semanticsObject.owner.addOneTimePostUpdateCallback(() {
+      if (!semanticsObject.hasLabel && _hasMenuAncestor()) {
+        setAriaRole('none');
+      } else {
+        setAriaRole('group');
+      }
+    });
     if (!_canScroll) {
       _cleanUp();
       return;
@@ -129,11 +136,6 @@ class SemanticScrollable extends SemanticRole {
     }
 
     semanticsObject.owner.addOneTimePostUpdateCallback(() {
-      if (!semanticsObject.hasLabel && _hasMenuAncestor()) {
-        setAriaRole('none');
-      } else {
-        setAriaRole('group');
-      }
       if (_canScroll) {
         final double? scrollPosition = semanticsObject.scrollPosition;
         assert(scrollPosition != null);
