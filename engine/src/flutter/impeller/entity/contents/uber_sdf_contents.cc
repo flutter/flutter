@@ -212,6 +212,7 @@ bool UberSDFContents::RenderSSBO(const ContentContext& renderer,
     // is unused in the shader.
     color_stops.resize(1);
   }
+  FML_DCHECK(!color_stops.empty());
   frag_info.colors_length = static_cast<Scalar>(color_stops.size());
 
   BufferView color_buffer = data_host_buffer.Emplace(
