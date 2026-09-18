@@ -75,7 +75,8 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       )
       ..addFlag(
         'cocoapods',
-        help: 'Produce a Flutter.podspec instead of an engine Flutter.xcframework (recommended if host app uses CocoaPods).',
+        help:
+            'Produce a Flutter.podspec instead of an engine Flutter.xcframework (recommended if host app uses CocoaPods).',
       )
       ..addFlag(
         'plugins',
@@ -86,7 +87,8 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       )
       ..addFlag(
         'static',
-        help: 'Build plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
+        help:
+            'Build plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
       )
       ..addOption(
         'output',
@@ -97,7 +99,8 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       ..addFlag(
         'force',
         abbr: 'f',
-        help: 'Force Flutter.podspec creation on the master channel. This is only intended for testing the tool itself.',
+        help:
+            'Force Flutter.podspec creation on the master channel. This is only intended for testing the tool itself.',
         hide: !verboseHelp,
       );
   }

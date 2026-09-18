@@ -22,18 +22,19 @@ import 'utils.dart';
 export 'package:dds/dds.dart'
     show DartDevelopmentServiceException, ExistingDartDevelopmentServiceException;
 
-typedef DDSLauncherCallback = Future<DartDevelopmentServiceLauncher> Function({
-  required Uri remoteVmServiceUri,
-  String? appName,
-  Uri? serviceUri,
-  bool enableAuthCodes,
-  bool serveDevTools,
-  Uri? devToolsServerAddress,
-  bool enableServicePortFallback,
-  List<String> cachedUserTags,
-  String? dartExecutable,
-  String? google3WorkspaceRoot,
-});
+typedef DDSLauncherCallback =
+    Future<DartDevelopmentServiceLauncher> Function({
+      required Uri remoteVmServiceUri,
+      String? appName,
+      Uri? serviceUri,
+      bool enableAuthCodes,
+      bool serveDevTools,
+      Uri? devToolsServerAddress,
+      bool enableServicePortFallback,
+      List<String> cachedUserTags,
+      String? dartExecutable,
+      String? google3WorkspaceRoot,
+    });
 
 typedef StartChromeCallback = Future<io.Process> Function(List<String> urls, {List<String> args});
 

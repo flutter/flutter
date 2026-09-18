@@ -71,8 +71,9 @@ void main() {
       final command = ShellCompletionCommand(toolContext: toolContext);
       const outputFile = 'bash-setup.sh';
       fs.file(outputFile).createSync();
-      await createTestCommandRunner(command)
-          .run(<String>['bash-completion', '--overwrite', outputFile]);
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['bash-completion', '--overwrite', outputFile]);
       expect(fs.isFileSync(outputFile), isTrue);
       expect(fs.file(outputFile).readAsStringSync(), contains('__flutter_completion'));
     });

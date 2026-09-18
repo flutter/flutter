@@ -243,8 +243,9 @@ void main() {
           toolContext: toolContext,
         );
 
-        await createTestCommandRunner(command)
-            .run(<String>['emulators', '--launch', 'pixel_6', '--cold']);
+        await createTestCommandRunner(
+          command,
+        ).run(<String>['emulators', '--launch', 'pixel_6', '--cold']);
 
         expect(launchCount, 1);
         expect(lastColdBoot, isTrue);
@@ -280,8 +281,9 @@ void main() {
           toolContext: toolContext,
         );
 
-        await createTestCommandRunner(command)
-            .run(<String>['emulators', '--create', '--name', 'my_custom_emulator']);
+        await createTestCommandRunner(
+          command,
+        ).run(<String>['emulators', '--create', '--name', 'my_custom_emulator']);
 
         expect(logger.statusText, contains("Emulator 'my_custom_emulator' created successfully."));
         expect(emulatorManager.lastCreatedName, 'my_custom_emulator');

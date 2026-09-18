@@ -377,8 +377,9 @@ STDERR STUFF
         setUpFakeXcodeBuildHandler('Debug', hasWorkspace: false),
       ]);
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--debug', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
 
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
@@ -457,7 +458,8 @@ STDERR STUFF
       expect(
         createTestCommandRunner(command).run(const <String>['build', 'macos', '--no-pub']),
         throwsToolExit(
-          message: '"build macos" is not currently supported. To enable, run "flutter config --enable-macos-desktop".',
+          message:
+              '"build macos" is not currently supported. To enable, run "flutter config --enable-macos-desktop".',
         ),
       );
     },
@@ -493,8 +495,9 @@ STDERR STUFF
       );
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--debug', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
       expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
       expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
       expect(testLogger.errorText, contains('STDOUT STUFF'));
@@ -588,8 +591,9 @@ STDERR STUFF
       );
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--debug', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -625,8 +629,9 @@ STDERR STUFF
       );
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--debug', '--no-pub', '-v']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub', '-v']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -663,8 +668,9 @@ STDERR STUFF
       );
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--profile', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--profile', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -701,8 +707,9 @@ STDERR STUFF
       );
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--release', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--release', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -855,8 +862,9 @@ STDERR STUFF
         flutterVersion: FakeFlutterVersion(),
       );
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--debug', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
 
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
@@ -1020,9 +1028,9 @@ STDERR STUFF
         ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
 
       expect(
-        () =>
-            createTestCommandRunner(command)
-                .run(const <String>['build', 'macos', '--no-pub', '--analyze-size']),
+        () => createTestCommandRunner(
+          command,
+        ).run(const <String>['build', 'macos', '--no-pub', '--analyze-size']),
         throwsA(
           isA<StateError>().having(
             (StateError err) => err.message,
@@ -1075,8 +1083,9 @@ STDERR STUFF
         ..createSync(recursive: true)
         ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--no-pub', '--analyze-size']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--no-pub', '--analyze-size']);
 
       expect(
         testLogger.statusText,
@@ -1158,8 +1167,9 @@ STDERR STUFF
 
 ''');
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--debug', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
 
       final File tempEntitlementFile = fileSystem.systemTempDirectory.childFile(
         'flutter_disable_sandbox_entitlement.rand0/DebugProfileWithDisabledSandboxing.entitlements',
@@ -1236,8 +1246,9 @@ STDERR STUFF
 
 ''');
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--release', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--release', '--no-pub']);
 
       final File tempEntitlementFile = fileSystem.systemTempDirectory.childFile(
         'flutter_disable_sandbox_entitlement.rand0/ReleaseWithDisabledSandboxing.entitlements',
@@ -1299,8 +1310,9 @@ STDERR STUFF
         flutterVersion: FakeFlutterVersion(),
       );
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--debug', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
     },
     overrides: <Type, Generator>{
       Platform: () => macosPlatform,
@@ -1338,8 +1350,9 @@ STDERR STUFF
         flutterVersion: FakeFlutterVersion(),
       );
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'macos', '--debug', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
     },
     overrides: <Type, Generator>{
       Platform: () => macosPlatform,
@@ -1473,8 +1486,9 @@ STDERR STUFF
         flutterVersion: FakeFlutterVersion(),
       );
 
-      await createTestCommandRunner(command)
-          .run(<String>['build', 'macos', '--release', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'macos', '--release', '--no-pub']);
 
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
@@ -1575,8 +1589,9 @@ STDERR STUFF
         flutterVersion: FakeFlutterVersion(),
       );
 
-      await createTestCommandRunner(command)
-          .run(<String>['build', 'macos', '--release', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'macos', '--release', '--no-pub']);
 
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
@@ -1617,8 +1632,9 @@ STDERR STUFF
         flutterVersion: FakeFlutterVersion(),
       );
 
-      await createTestCommandRunner(command)
-          .run(<String>['build', 'macos', '--release', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'macos', '--release', '--no-pub']);
 
       expect(
         testLogger.warningText,

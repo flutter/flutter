@@ -61,8 +61,9 @@ void main() {
       final termSignal = FakeProcessSignal();
       final intSignal = FakeProcessSignal();
       final command = LogsCommand(toolContext: toolContext, sigterm: termSignal, sigint: intSignal);
-      final Future<void> commandFuture = createTestCommandRunner(command)
-          .run(<String>['-d', deviceId, 'logs']);
+      final Future<void> commandFuture = createTestCommandRunner(
+        command,
+      ).run(<String>['-d', deviceId, 'logs']);
       intSignal.send(1);
       termSignal.send(1);
       await pumpEventQueue(times: 5);
@@ -85,8 +86,9 @@ void main() {
           sigint: intSignal,
         );
 
-        final Future<void> commandFuture = createTestCommandRunner(command)
-            .run(<String>['-d', deviceId, 'logs', '--no-adb-log-filtering']);
+        final Future<void> commandFuture = createTestCommandRunner(
+          command,
+        ).run(<String>['-d', deviceId, 'logs', '--no-adb-log-filtering']);
 
         intSignal.send(1);
         await commandFuture;
@@ -106,8 +108,9 @@ void main() {
       final intSignal = FakeProcessSignal();
       final command = LogsCommand(toolContext: toolContext, sigterm: termSignal, sigint: intSignal);
 
-      final Future<void> commandFuture = createTestCommandRunner(command)
-          .run(<String>['-d', deviceId, 'logs']);
+      final Future<void> commandFuture = createTestCommandRunner(
+        command,
+      ).run(<String>['-d', deviceId, 'logs']);
 
       intSignal.send(1);
       await commandFuture;
@@ -121,8 +124,9 @@ void main() {
       final termSignal = FakeProcessSignal();
       final intSignal = FakeProcessSignal();
       final command = LogsCommand(toolContext: toolContext, sigterm: termSignal, sigint: intSignal);
-      final Future<void> commandFuture = createTestCommandRunner(command)
-          .run(<String>['-d', deviceId, 'logs', '--clear']);
+      final Future<void> commandFuture = createTestCommandRunner(
+        command,
+      ).run(<String>['-d', deviceId, 'logs', '--clear']);
       termSignal.send(1);
       await pumpEventQueue(times: 5);
       await commandFuture;
@@ -137,8 +141,9 @@ void main() {
       final termSignal = FakeProcessSignal();
       final intSignal = FakeProcessSignal();
       final command = LogsCommand(toolContext: toolContext, sigterm: termSignal, sigint: intSignal);
-      final Future<void> commandFuture = createTestCommandRunner(command)
-          .run(<String>['-d', deviceId, 'logs']);
+      final Future<void> commandFuture = createTestCommandRunner(
+        command,
+      ).run(<String>['-d', deviceId, 'logs']);
       await pumpEventQueue(times: 5);
 
       logReader.addLine('App started successfully');
@@ -164,8 +169,9 @@ void main() {
         sigterm: termSignal,
         sigint: intSignal,
       );
-      final Future<void> commandFuture = createTestCommandRunner(command)
-          .run(<String>['-d', deviceId, 'logs']);
+      final Future<void> commandFuture = createTestCommandRunner(
+        command,
+      ).run(<String>['-d', deviceId, 'logs']);
       await pumpEventQueue(times: 5);
 
       expect(fakePackageFactory.getPackageForPlatformCalled, isTrue);
@@ -201,8 +207,9 @@ void main() {
       final termSignal = FakeProcessSignal();
       final intSignal = FakeProcessSignal();
       final command = LogsCommand(sigterm: termSignal, sigint: intSignal);
-      final Future<void> commandFuture = createTestCommandRunner(command)
-          .run(<String>['-d', deviceId, 'logs']);
+      final Future<void> commandFuture = createTestCommandRunner(
+        command,
+      ).run(<String>['-d', deviceId, 'logs']);
       await pumpEventQueue(times: 5);
 
       logReader.addLine('Ambient logger line');

@@ -664,7 +664,8 @@ abstract class FlutterCommand extends Command<void> {
   void usesDeviceUserOption() {
     argParser.addOption(
       FlutterOptions.kDeviceUser,
-      help: 'Identifier number for a user or work profile on Android only. Run "adb shell pm list users" for available identifiers.',
+      help:
+          'Identifier number for a user or work profile on Android only. Run "adb shell pm list users" for available identifiers.',
       valueHelp: '10',
     );
   }
@@ -672,7 +673,8 @@ abstract class FlutterCommand extends Command<void> {
   void usesDeviceTimeoutOption() {
     argParser.addOption(
       FlutterOptions.kDeviceTimeout,
-      help: 'Time in seconds to wait for devices to attach. Longer timeouts may be necessary for networked devices.',
+      help:
+          'Time in seconds to wait for devices to attach. Longer timeouts may be necessary for networked devices.',
       valueHelp: '10',
     );
   }
@@ -685,8 +687,10 @@ abstract class FlutterCommand extends Command<void> {
       allowed: <String>['attached', 'wireless', 'both'],
       allowedHelp: <String, String>{
         'both': 'Searches for both attached and wireless devices.',
-        'attached': 'Only searches for devices connected by USB or built-in (such as simulators/emulators, MacOS/Windows, Chrome)',
-        'wireless': 'Only searches for devices connected wirelessly. Discovering wireless devices may take longer.',
+        'attached':
+            'Only searches for devices connected by USB or built-in (such as simulators/emulators, MacOS/Windows, Chrome)',
+        'wireless':
+            'Only searches for devices connected wirelessly. Discovering wireless devices may take longer.',
       },
     );
   }
@@ -1055,10 +1059,12 @@ abstract class FlutterCommand extends Command<void> {
     );
 
     final List<String> experiments = getValue(CommonOptions.enableExperiment);
-    final List<String> extraGenSnapshotOptions = getValue(BuildInfoOptions.extraGenSnapshotOptions)
-        .toList();
-    final List<String> extraFrontEndOptions = getValue(BuildInfoOptions.extraFrontEndOptions)
-        .toList();
+    final List<String> extraGenSnapshotOptions = getValue(
+      BuildInfoOptions.extraGenSnapshotOptions,
+    ).toList();
+    final List<String> extraFrontEndOptions = getValue(
+      BuildInfoOptions.extraFrontEndOptions,
+    ).toList();
 
     if (experiments.isNotEmpty) {
       for (final expFlag in experiments) {
@@ -1336,8 +1342,9 @@ abstract class FlutterCommand extends Command<void> {
     });
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
-      final Iterable<String> defines = stringsArg(FlutterOptions.kDartDefinesOption)
-          .where((string) => string.isNotEmpty);
+      final Iterable<String> defines = stringsArg(
+        FlutterOptions.kDartDefinesOption,
+      ).where((string) => string.isNotEmpty);
       dartDefines.addAll(defines);
     }
 

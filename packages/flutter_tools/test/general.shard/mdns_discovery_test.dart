@@ -1264,8 +1264,9 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     if (T == IPAddressResourceRecord) {
       final String key = query.fullyQualifiedName;
       return Stream<IPAddressResourceRecord>.fromIterable(
-        ipResponse[key] ?? <IPAddressResourceRecord>[],
-      ) as Stream<T>;
+            ipResponse[key] ?? <IPAddressResourceRecord>[],
+          )
+          as Stream<T>;
     }
     throw UnsupportedError('Unsupported query type $T');
   }

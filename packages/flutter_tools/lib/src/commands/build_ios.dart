@@ -144,7 +144,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     argParser.addOption(
       'export-options-plist',
       valueHelp: 'ExportOptions.plist',
-      help: 'Export an IPA with these options. See "xcodebuild -h" for available exportOptionsPlist keys.',
+      help:
+          'Export an IPA with these options. See "xcodebuild -h" for available exportOptionsPlist keys.',
     );
   }
 
@@ -405,7 +406,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       validationMessages.add(
         _createValidationMessage(
           isValid: false,
-          message: 'Launch image is set to the default placeholder icon. Replace with unique launch image.',
+          message:
+              'Launch image is set to the default placeholder icon. Replace with unique launch image.',
         ),
       );
     }
@@ -603,9 +605,9 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       // Example:
       // error: exportArchive: exportOptionsPlist error for key 'method': expected one of {app-store, ad-hoc, enterprise, development, validation}, but found developmentasdasd
       // Error Domain=IDEFoundationErrorDomain Code=1 "exportOptionsPlist error for key 'method': expected one of {app-store, ad-hoc, enterprise, development, validation}, but found developmentasdasd" ...
-      LineSplitter.split(result.stderr)
-          .where((String line) => line.contains('error: '))
-          .forEach(errorMessage.writeln);
+      LineSplitter.split(
+        result.stderr,
+      ).where((String line) => line.contains('error: ')).forEach(errorMessage.writeln);
 
       logger.printError('Encountered error while creating the IPA:');
       logger.printError(errorMessage.toString());
@@ -962,10 +964,12 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   late final Future<BuildInfo> cachedBuildInfo = getBuildInfo();
 
   late final Future<BuildableIOSApp> buildableIOSApp = () async {
-    final app = await applicationPackages?.getPackageForPlatform(
-      TargetPlatform.ios,
-      buildInfo: await cachedBuildInfo,
-    ) as BuildableIOSApp?;
+    final app =
+        await applicationPackages?.getPackageForPlatform(
+              TargetPlatform.ios,
+              buildInfo: await cachedBuildInfo,
+            )
+            as BuildableIOSApp?;
 
     if (app == null) {
       throwToolExit('Application not configured for iOS');

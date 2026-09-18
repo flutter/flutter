@@ -41,8 +41,9 @@ void main() {
       ], workingDirectory: tempDir.path);
 
       try {
-        final StreamSubscription<String> subErr = transformToLines(process.stderr)
-            .listen((String line) {});
+        final StreamSubscription<String> subErr = transformToLines(
+          process.stderr,
+        ).listen((String line) {});
 
         final StreamSubscription<String> sub;
         sub = transformToLines(process.stdout).listen((String line) {
@@ -103,8 +104,9 @@ void main() {
       ], workingDirectory: tempDir.path);
 
       try {
-        final StreamSubscription<String> subErr = transformToLines(process.stderr)
-            .listen((String line) {});
+        final StreamSubscription<String> subErr = transformToLines(
+          process.stderr,
+        ).listen((String line) {});
 
         final StreamSubscription<String> sub;
         sub = transformToLines(process.stdout).listen((String line) {

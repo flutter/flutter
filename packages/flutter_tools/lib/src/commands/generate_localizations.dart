@@ -178,7 +178,8 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     );
     argParser.addFlag(
       'format',
-      help: 'When specified, the "dart format" command is run after generating the localization files.',
+      help:
+          'When specified, the "dart format" command is run after generating the localization files.',
     );
     argParser.addFlag(
       'use-escaping',

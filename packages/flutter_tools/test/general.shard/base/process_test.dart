@@ -463,15 +463,19 @@ void main() {
       expect(logger.statusText, contains(analytics.getConsentMessage));
     }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
 
-    testUsingContext('does not print analytics welcome message if Analytics instance indicates it should not be printed', () async {
-      setExitFunctionForTests((int exitCode) {});
+    testUsingContext(
+      'does not print analytics welcome message if Analytics instance indicates it should not be printed',
+      () async {
+        setExitFunctionForTests((int exitCode) {});
 
-      analytics.clientShowedMessage();
+        analytics.clientShowedMessage();
 
-      final shutdownHooks = ShutdownHooks();
-      await exitWithHooks(0, shutdownHooks: shutdownHooks);
-      expect(logger.statusText, isNot(contains(analytics.getConsentMessage)));
-    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
+        final shutdownHooks = ShutdownHooks();
+        await exitWithHooks(0, shutdownHooks: shutdownHooks);
+        expect(logger.statusText, isNot(contains(analytics.getConsentMessage)));
+      },
+      overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
+    );
 
     testUsingContext('[sync] exceptions thrown from a hook do not crash the tool', () async {
       setExitFunctionForTests((int exitCode) {});

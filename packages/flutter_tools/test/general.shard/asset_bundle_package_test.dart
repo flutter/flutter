@@ -98,11 +98,13 @@ $assetsSection
       }
     }
 
-    final assetManifest = const StandardMessageCodec().decodeMessage(
-      ByteData.sublistView(
-        Uint8List.fromList(await bundle.entries['AssetManifest.bin']!.contentsAsBytes()),
-      ),
-    ) as Map<Object?, Object?>;
+    final assetManifest =
+        const StandardMessageCodec().decodeMessage(
+              ByteData.sublistView(
+                Uint8List.fromList(await bundle.entries['AssetManifest.bin']!.contentsAsBytes()),
+              ),
+            )
+            as Map<Object?, Object?>;
 
     expect(assetManifest, expectedAssetManifest);
   }

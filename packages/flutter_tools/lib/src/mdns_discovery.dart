@@ -433,8 +433,9 @@ class MDnsVmServiceDiscovery {
 
   String _getAuthCode(String txtRecord) {
     const authCodePrefix = 'authCode=';
-    final Iterable<String> matchingRecords = LineSplitter.split(txtRecord)
-        .where((String record) => record.startsWith(authCodePrefix));
+    final Iterable<String> matchingRecords = LineSplitter.split(
+      txtRecord,
+    ).where((String record) => record.startsWith(authCodePrefix));
     if (matchingRecords.isEmpty) {
       return '';
     }

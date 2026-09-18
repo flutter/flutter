@@ -532,27 +532,33 @@ void main() {
   });
 
   group('ApkManifestData', () {
-    testWithoutContext('Parses manifest with an Activity that has enabled set to true, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
-        _aaptDataWithExplicitEnabledAndMainLauncherActivity,
-        BufferLogger.test(),
-      )!;
+    testWithoutContext(
+      'Parses manifest with an Activity that has enabled set to true, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER',
+      () {
+        final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+          _aaptDataWithExplicitEnabledAndMainLauncherActivity,
+          BufferLogger.test(),
+        )!;
 
-      expect(data, isNotNull);
-      expect(data.packageName, 'io.flutter.examples.hello_world');
-      expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
-    });
+        expect(data, isNotNull);
+        expect(data.packageName, 'io.flutter.examples.hello_world');
+        expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
+      },
+    );
 
-    testWithoutContext('Parses manifest with an Activity that has no value for its enabled field, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
-        _aaptDataWithDefaultEnabledAndMainLauncherActivity,
-        BufferLogger.test(),
-      )!;
+    testWithoutContext(
+      'Parses manifest with an Activity that has no value for its enabled field, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER',
+      () {
+        final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+          _aaptDataWithDefaultEnabledAndMainLauncherActivity,
+          BufferLogger.test(),
+        )!;
 
-      expect(data, isNotNull);
-      expect(data.packageName, 'io.flutter.examples.hello_world');
-      expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
-    });
+        expect(data, isNotNull);
+        expect(data.packageName, 'io.flutter.examples.hello_world');
+        expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
+      },
+    );
 
     testWithoutContext('Parses manifest with a dist namespace', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(
@@ -565,58 +571,70 @@ void main() {
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity');
     });
 
-    testWithoutContext('Error when parsing manifest with no Activity that has enabled set to true nor has no value for its enabled field', () {
-      final logger = BufferLogger.test();
-      final ApkManifestData? data = ApkManifestData.parseFromXmlDump(
-        _aaptDataWithNoEnabledActivity,
-        logger,
-      );
+    testWithoutContext(
+      'Error when parsing manifest with no Activity that has enabled set to true nor has no value for its enabled field',
+      () {
+        final logger = BufferLogger.test();
+        final ApkManifestData? data = ApkManifestData.parseFromXmlDump(
+          _aaptDataWithNoEnabledActivity,
+          logger,
+        );
 
-      expect(data, isNull);
-      expect(
-        logger.errorText,
-        'Error running io.flutter.examples.hello_world. Default activity not found\n',
-      );
-    });
+        expect(data, isNull);
+        expect(
+          logger.errorText,
+          'Error running io.flutter.examples.hello_world. Default activity not found\n',
+        );
+      },
+    );
 
-    testWithoutContext('Error when parsing manifest with no Activity that has action set to android.intent.action.MAIN', () {
-      final logger = BufferLogger.test();
-      final ApkManifestData? data = ApkManifestData.parseFromXmlDump(
-        _aaptDataWithNoMainActivity,
-        logger,
-      );
+    testWithoutContext(
+      'Error when parsing manifest with no Activity that has action set to android.intent.action.MAIN',
+      () {
+        final logger = BufferLogger.test();
+        final ApkManifestData? data = ApkManifestData.parseFromXmlDump(
+          _aaptDataWithNoMainActivity,
+          logger,
+        );
 
-      expect(data, isNull);
-      expect(
-        logger.errorText,
-        'Error running io.flutter.examples.hello_world. Default activity not found\n',
-      );
-    });
+        expect(data, isNull);
+        expect(
+          logger.errorText,
+          'Error running io.flutter.examples.hello_world. Default activity not found\n',
+        );
+      },
+    );
 
-    testWithoutContext('Error when parsing manifest with no Activity that has category set to android.intent.category.LAUNCHER', () {
-      final logger = BufferLogger.test();
-      final ApkManifestData? data = ApkManifestData.parseFromXmlDump(
-        _aaptDataWithNoLauncherActivity,
-        logger,
-      );
+    testWithoutContext(
+      'Error when parsing manifest with no Activity that has category set to android.intent.category.LAUNCHER',
+      () {
+        final logger = BufferLogger.test();
+        final ApkManifestData? data = ApkManifestData.parseFromXmlDump(
+          _aaptDataWithNoLauncherActivity,
+          logger,
+        );
 
-      expect(data, isNull);
-      expect(
-        logger.errorText,
-        'Error running io.flutter.examples.hello_world. Default activity not found\n',
-      );
-    });
+        expect(data, isNull);
+        expect(
+          logger.errorText,
+          'Error running io.flutter.examples.hello_world. Default activity not found\n',
+        );
+      },
+    );
 
-    testWithoutContext('Parsing manifest with Activity that has multiple category, android.intent.category.LAUNCHER and android.intent.category.DEFAULT', () {
-      final ApkManifestData data = ApkManifestData.parseFromXmlDump(
-        _aaptDataWithLauncherAndDefaultActivity,
-        BufferLogger.test(),
-      )!;
+    testWithoutContext(
+      'Parsing manifest with Activity that has multiple category, android.intent.category.LAUNCHER and android.intent.category.DEFAULT',
+      () {
+        final ApkManifestData data = ApkManifestData.parseFromXmlDump(
+          _aaptDataWithLauncherAndDefaultActivity,
+          BufferLogger.test(),
+        )!;
 
-      expect(data, isNotNull);
-      expect(data.packageName, 'io.flutter.examples.hello_world');
-      expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity');
-    });
+        expect(data, isNotNull);
+        expect(data.packageName, 'io.flutter.examples.hello_world');
+        expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity');
+      },
+    );
 
     testWithoutContext('Parses manifest with an ActivityAlias as the main launcher activity', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(
@@ -761,10 +779,12 @@ void main() {
 
     testUsingContext('returns null when there is no ios or .ios directory', () async {
       globals.fs.file('pubspec.yaml').createSync();
-      final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
-        null,
-      ) as BuildableIOSApp?;
+      final iosApp =
+          await IOSApp.fromIosProject(
+                FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+                null,
+              )
+              as BuildableIOSApp?;
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -772,10 +792,12 @@ void main() {
     testUsingContext('returns null when there is no Runner.xcodeproj', () async {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('ios/FooBar.xcodeproj').createSync(recursive: true);
-      final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
-        null,
-      ) as BuildableIOSApp?;
+      final iosApp =
+          await IOSApp.fromIosProject(
+                FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+                null,
+              )
+              as BuildableIOSApp?;
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -783,10 +805,12 @@ void main() {
     testUsingContext('returns null when there is no Runner.xcodeproj/project.pbxproj', () async {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('ios/Runner.xcodeproj').createSync(recursive: true);
-      final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
-        null,
-      ) as BuildableIOSApp?;
+      final iosApp =
+          await IOSApp.fromIosProject(
+                FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+                null,
+              )
+              as BuildableIOSApp?;
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -796,10 +820,12 @@ void main() {
       final Directory project = globals.fs.directory('ios/Runner.xcodeproj')
         ..createSync(recursive: true);
       project.childFile('project.pbxproj').createSync();
-      final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
-        null,
-      ) as BuildableIOSApp?;
+      final iosApp =
+          await IOSApp.fromIosProject(
+                FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+                null,
+              )
+              as BuildableIOSApp?;
 
       expect(iosApp, null);
     }, overrides: overrides);

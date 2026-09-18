@@ -50,8 +50,8 @@ class NoGlobalsInFlutterTools extends AnalysisRule {
           restrictedPaths?.map((String p) => p.replaceAll(r'\', '/')).toSet() ??
           defaultRestrictedPaths,
       super(
-        name: code.name,
         description: 'Verify that globals.dart is not imported in migrated flutter_tools files.',
+        name: code.name,
       );
 
   /// Diagnostic error emitted when a restricted file imports `globals.dart`.

@@ -4,12 +4,13 @@
 
 import 'dart:math' as math;
 
-typedef _OutputSender = void Function(
-  String category,
-  String message, {
-  bool? parseStackFrames,
-  int? variablesReference,
-});
+typedef _OutputSender =
+    void Function(
+      String category,
+      String message, {
+      bool? parseStackFrames,
+      int? variablesReference,
+    });
 
 /// Deserializes and formats a Flutter structured error.
 ///

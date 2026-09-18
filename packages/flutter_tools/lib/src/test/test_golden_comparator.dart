@@ -144,9 +144,9 @@ final class TestGoldenComparator {
     Uri goldenKey,
     bool? updateGoldens,
   ) async {
-    final File imageFile = await (await _tempDir.createTemp('image'))
-        .childFile('image')
-        .writeAsBytes(bytes);
+    final File imageFile = await (await _tempDir.createTemp(
+      'image',
+    )).childFile('image').writeAsBytes(bytes);
     final TestGoldenComparatorProcess? process = await _processForTestFile(testUri);
     if (process == null) {
       return 'process was null';

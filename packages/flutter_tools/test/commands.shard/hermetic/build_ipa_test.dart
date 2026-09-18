@@ -305,8 +305,9 @@ void main() {
       createCoreMockProjectFiles();
 
       expect(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'ipa', '--no-pub', '--debug', '--analyze-size']),
+        createTestCommandRunner(
+          command,
+        ).run(const <String>['build', 'ipa', '--no-pub', '--debug', '--analyze-size']),
         throwsToolExit(message: '--analyze-size" can only be used on release builds'),
       );
     },
@@ -353,8 +354,9 @@ void main() {
       createMinimalMockProjectFiles();
 
       await expectToolExitLater(
-        createTestCommandRunner(command)
-            .run(<String>['build', 'ipa', '--export-options-plist', 'bogus.plist', '--no-pub']),
+        createTestCommandRunner(
+          command,
+        ).run(<String>['build', 'ipa', '--export-options-plist', 'bogus.plist', '--no-pub']),
         contains('property list does not exist'),
       );
     },
@@ -375,8 +377,9 @@ void main() {
       createMinimalMockProjectFiles();
 
       await expectToolExitLater(
-        createTestCommandRunner(command)
-            .run(<String>['build', 'ipa', '--export-options-plist', bogus.path, '--no-pub']),
+        createTestCommandRunner(
+          command,
+        ).run(<String>['build', 'ipa', '--export-options-plist', bogus.path, '--no-pub']),
         contains('is not a file.'),
       );
     },
@@ -424,8 +427,9 @@ void main() {
         exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
       ]);
       createMinimalMockProjectFiles();
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'ipa', '--export-method', 'ad-hoc', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--export-method', 'ad-hoc', '--no-pub']);
 
       expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
       expect(logger.statusText, contains('Building ad-hoc IPA'));
@@ -454,8 +458,9 @@ void main() {
         ),
       ]);
       createMinimalMockProjectFiles();
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'ipa', '--export-method', 'development', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--export-method', 'development', '--no-pub']);
 
       const expectedIpaPlistContents = '''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -502,8 +507,9 @@ void main() {
         ),
       ]);
       createMinimalMockProjectFiles();
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'ipa', '--export-method', 'ad-hoc', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--export-method', 'ad-hoc', '--no-pub']);
 
       const expectedIpaPlistContents = '''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -550,8 +556,9 @@ void main() {
         ),
       ]);
       createMinimalMockProjectFiles();
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'ipa', '--export-method', 'app-store', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--export-method', 'app-store', '--no-pub']);
 
       const expectedIpaPlistContents = '''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -594,8 +601,9 @@ void main() {
         exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
       ]);
       createMinimalMockProjectFiles();
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'ipa', '--export-method', 'enterprise', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--export-method', 'enterprise', '--no-pub']);
       expect(logger.statusText, contains('Building enterprise IPA'));
     },
     overrides: <Type, Generator>{
@@ -623,8 +631,9 @@ void main() {
         ),
       ]);
       createMinimalMockProjectFiles();
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'ipa', '--export-method', 'enterprise', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--export-method', 'enterprise', '--no-pub']);
 
       const expectedIpaPlistContents = '''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -667,8 +676,9 @@ void main() {
         exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
       ]);
       createMinimalMockProjectFiles();
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'ipa', '--export-method', 'app-store', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--export-method', 'app-store', '--no-pub']);
       expect(logger.statusText, contains('Building App Store IPA'));
     },
     overrides: <Type, Generator>{
@@ -699,8 +709,9 @@ void main() {
         exportArchiveCommand(exportOptionsPlist: exportOptions.path),
       ]);
       final BuildCommand command = createBuildCommand();
-      await createTestCommandRunner(command)
-          .run(<String>['build', 'ipa', '--export-options-plist', exportOptions.path, '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'ipa', '--export-options-plist', exportOptions.path, '--no-pub']);
 
       expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
       expect(logger.statusText, contains('Building enterprise IPA'));
@@ -864,8 +875,9 @@ void main() {
       ]);
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'ipa', '--no-pub', '--export-method', 'ad-hoc']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--no-pub', '--export-method', 'ad-hoc']);
 
       const expectedIpaPlistContents = '''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -917,8 +929,9 @@ void main() {
       ]);
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'ipa', '--no-pub', '--export-method', 'enterprise']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--no-pub', '--export-method', 'enterprise']);
 
       const expectedIpaPlistContents = '''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -990,8 +1003,9 @@ void main() {
       ]);
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'ipa', '--no-pub', '--ci']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--no-pub', '--ci']);
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
@@ -1041,8 +1055,9 @@ void main() {
       ]);
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'ipa', '--no-pub', '--no-codesign']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--no-pub', '--no-codesign']);
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(logger.statusText, contains('Codesigning disabled with --no-codesign, skipping IPA'));
     },
@@ -1065,8 +1080,9 @@ void main() {
 
       fakeProcessManager.addCommand(setUpFakeXcodeBuildHandler());
       await expectToolExitLater(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'ipa', '--no-pub', '--analyze-size']),
+        createTestCommandRunner(
+          command,
+        ).run(const <String>['build', 'ipa', '--no-pub', '--analyze-size']),
         contains('Could not find app to analyze code size'),
       );
     },
@@ -1113,8 +1129,9 @@ void main() {
         exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
       ]);
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'ipa', '--no-pub', '--analyze-size']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--no-pub', '--analyze-size']);
 
       expect(logger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
       expect(logger.statusText, contains('dart devtools --appSizeBase='));
@@ -1148,8 +1165,9 @@ void main() {
       ]);
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(<String>['build', 'ipa', '--no-pub', '--export-options-plist', exportOptions.path]);
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'ipa', '--no-pub', '--export-options-plist', exportOptions.path]);
 
       expect(
         logger.statusText,

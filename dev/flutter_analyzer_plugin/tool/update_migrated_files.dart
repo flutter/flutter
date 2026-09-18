@@ -20,7 +20,8 @@ Set<String> findMigratedFiles(Directory flutterToolsDir) {
       continue;
     }
     for (final FileSystemEntity entity in dir.listSync(recursive: true)) {
-      if (entity case File(:final String path) when path.endsWith('.dart')) {
+      if (entity is File && entity.path.endsWith('.dart')) {
+        final String path = entity.path;
         final String relativePath = path
             .replaceAll(r'\', '/')
             .substring('${flutterToolsDir.path.replaceAll(r'\', '/')}/'.length);

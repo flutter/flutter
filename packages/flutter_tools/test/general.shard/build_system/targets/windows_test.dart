@@ -220,9 +220,9 @@ flutter:
           .childDirectory('flutter_assets')
           .childFile('AssetManifest.bin')
           .readAsBytesSync();
-      final assetManifest = const StandardMessageCodec().decodeMessage(
-        ByteData.sublistView(assetManifestData),
-      ) as Map<Object?, Object?>;
+      final assetManifest =
+          const StandardMessageCodec().decodeMessage(ByteData.sublistView(assetManifestData))
+              as Map<Object?, Object?>;
 
       expect(assetManifest.containsKey('assets/common/image.png'), isTrue);
       expect(assetManifest.containsKey('assets/strawberry/ice-cream.png'), isTrue);

@@ -409,7 +409,8 @@ void main() {
             '--no-release',
           ]),
           throwsToolExit(
-            message: 'The simulator build contains a code asset "package:project/asset1" that is not present in the physical device build.',
+            message:
+                'The simulator build contains a code asset "package:project/asset1" that is not present in the physical device build.',
           ),
         );
       },

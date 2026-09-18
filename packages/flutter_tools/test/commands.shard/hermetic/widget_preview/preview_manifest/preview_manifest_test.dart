@@ -47,11 +47,13 @@ void main() {
 
     testUsingContext('generates a valid manifest', () async {
       previewManifest.generate();
-      final manifest = json.decode(
-        rootProject.widgetPreviewScaffold
-            .childFile(PreviewManifest.previewManifestPath)
-            .readAsStringSync(),
-      ) as PreviewManifestContents;
+      final manifest =
+          json.decode(
+                rootProject.widgetPreviewScaffold
+                    .childFile(PreviewManifest.previewManifestPath)
+                    .readAsStringSync(),
+              )
+              as PreviewManifestContents;
 
       expect(manifest.containsKey(PreviewManifest.kPubspecHashes), true);
       expect(manifest.containsKey(PreviewManifest.kManifestVersion), true);
