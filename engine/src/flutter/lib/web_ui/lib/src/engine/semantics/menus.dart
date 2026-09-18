@@ -52,11 +52,15 @@ class SemanticMenu extends SemanticRole {
     }
     while (queue.isNotEmpty) {
       final int child = queue.removeAt(0);
-      if (tree[child] != null && _isMenuItem(tree[child]!)) {
+      final SemanticsObject? node = tree[child];
+      if (node != null && _isMenuItem(node)) {
         ids.add(child);
-      } else {
-        if (tree[child]?.childrenInTraversalOrder != null) {
-          queue.addAll(tree[child]!.childrenInTraversalOrder!);
+      } else if (node != null) {
+        if (node.semanticRole?.kind == EngineSemanticsRole.scrollable && !node.hasLabel) {
+          node.semanticRole!.setAriaRole('none');
+        }
+        if (node.childrenInTraversalOrder != null) {
+          queue.addAll(node.childrenInTraversalOrder!);
         }
       }
     }
@@ -113,11 +117,15 @@ class SemanticMenuBar extends SemanticRole {
     }
     while (queue.isNotEmpty) {
       final int child = queue.removeAt(0);
-      if (tree[child] != null && _isMenuItem(tree[child]!)) {
+      final SemanticsObject? node = tree[child];
+      if (node != null && _isMenuItem(node)) {
         ids.add(child);
-      } else {
-        if (tree[child]?.childrenInTraversalOrder != null) {
-          queue.addAll(tree[child]!.childrenInTraversalOrder!);
+      } else if (node != null) {
+        if (node.semanticRole?.kind == EngineSemanticsRole.scrollable && !node.hasLabel) {
+          node.semanticRole!.setAriaRole('none');
+        }
+        if (node.childrenInTraversalOrder != null) {
+          queue.addAll(node.childrenInTraversalOrder!);
         }
       }
     }

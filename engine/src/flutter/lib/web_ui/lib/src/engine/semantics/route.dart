@@ -100,6 +100,16 @@ class SemanticRouteBase extends SemanticRole {
 ///     of an explicit route label set on the route itself.
 class SemanticRoute extends SemanticRouteBase {
   SemanticRoute(SemanticsObject object) : super(EngineSemanticsRole.route, object);
+
+  @override
+  void update() {
+    super.update();
+    if (semanticsObject.namesRoute) {
+      setAriaRole('region');
+    } else {
+      removeAttribute('role');
+    }
+  }
 }
 
 /// Indicates the container as a pop dialog.
