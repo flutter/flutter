@@ -282,8 +282,7 @@ void FlutterMain::SetupDartVMServiceUriCallback(JNIEnv* env) {
   }
 
   fml::MessageLoop::EnsureInitializedForCurrentThread();
-  fml::RefPtr<fml::TaskRunner> platform_runner =
-      fml::MessageLoop::GetCurrent().GetTaskRunner();
+  platform_runner_ = fml::MessageLoop::GetCurrent().GetTaskRunner();
 
   FlutterVMServiceUriCallbackConfig config = {
       .struct_size = sizeof(FlutterVMServiceUriCallbackConfig),
@@ -308,7 +307,7 @@ void FlutterMain::SetupDartVMServiceUriCallback(JNIEnv* env) {
                                         java_uri.obj());
             });
           },
-      .user_data = platform_runner.get(),
+      .user_data = platform_runner_.get(),
   };
 
   FlutterEngineRegisterVMServiceUriCallback(&config, &vm_service_uri_callback_);

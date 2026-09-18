@@ -5,9 +5,23 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EMBEDDER_ANDROID_ENGINE_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EMBEDDER_ANDROID_ENGINE_H_
 
+#include <atomic>
+#include <cstdint>
 #include <memory>
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
+#include "flutter/display_list/geometry/dl_path.h"
+#include "flutter/flow/embedded_views.h"
+#include "flutter/shell/platform/android/android_compositor.h"
 #include "flutter/shell/platform/android/android_engine.h"
+#include "flutter/shell/platform/android/android_rendering_selector.h"
+#include "flutter/shell/platform/android/android_surface_manager.h"
+#include "flutter/shell/platform/android/android_task_runners.h"
+#include "flutter/shell/platform/android/apk_asset_provider.h"
+#include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 
@@ -16,12 +30,21 @@ namespace flutter {
 /**
  * @brief An implementation of AndroidEngine that routes engine operations
  * through the public C Embedder API (FlutterEngineProcTable / FlutterEngine)
- * and EmbedderEngine.
+ * and manages AndroidSurfaceManager, AndroidCompositor, and AndroidTaskRunners.
  */
 class EmbedderAndroidEngine final : public AndroidEngine {
  public:
-  EmbedderAndroidEngine(const TaskRunners& task_runners,
-                        std::unique_ptr<Shell> shell);
+  EmbedderAndroidEngine(
+      const TaskRunners& task_runners,
+      std::unique_ptr<Shell> shell,
+      const Settings& settings = Settings(),
+      std::shared_ptr<PlatformViewAndroidJNI> jni_facade = nullptr,
+      AndroidRenderingAPI android_rendering_api =
+          AndroidRenderingAPI::kImpellerOpenGLES);
+
+  EmbedderAndroidEngine(const Settings& settings,
+                        std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+                        AndroidRenderingAPI android_rendering_api);
 
   ~EmbedderAndroidEngine() override;
 
@@ -130,18 +153,172 @@ class EmbedderAndroidEngine final : public AndroidEngine {
       std::unique_ptr<AssetResolver> updated_asset_resolver,
       AssetResolver::AssetResolverType type) override;
 
+  // ---------------------------------------------------------------------------
+  // Standalone C-API Lifecycle & Subsystems (v7 alignment)
+  // ---------------------------------------------------------------------------
+  bool Run(std::unique_ptr<APKAssetProvider> asset_provider,
+           const std::string& entrypoint,
+           const std::string& library_url,
+           const std::vector<std::string>& entrypoint_args,
+           int64_t engine_id);
+
+  std::unique_ptr<EmbedderAndroidEngine> SpawnCAPI(
+      std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+      const std::string& entrypoint,
+      const std::string& library_url,
+      const std::string& initial_route,
+      const std::vector<std::string>& entrypoint_args,
+      int64_t engine_id) const;
+
+  void NotifySurfaceCreated(ANativeWindow* window, bool is_fake_window = false);
+  void NotifySurfaceChanged(size_t width, size_t height);
+  void NotifySurfaceWindowChanged(ANativeWindow* window,
+                                  bool is_fake_window = false);
+  void NotifySurfaceDestroyed();
+
+  void SetSurfaceControlEnabled(bool enabled);
+  bool IsSurfaceControlEnabled() const;
+
+  AndroidRenderingAPI GetRenderingAPI() const { return android_rendering_api_; }
+  std::shared_ptr<AndroidSurfaceManager> GetSurfaceManager() const {
+    return surface_manager_;
+  }
+  std::shared_ptr<AndroidCompositor> GetCompositor() const {
+    return compositor_;
+  }
+  std::shared_ptr<AndroidTaskRunners> GetAndroidTaskRunners() const {
+    return android_task_runners_;
+  }
+
+  void OnBeginFrame();
+  void OnPlatformViewPresented(int64_t view_id,
+                               const FlutterPoint& offset,
+                               const FlutterSize& size,
+                               size_t mutations_count,
+                               const FlutterPlatformViewMutation** mutations);
+  void OnFramePresented();
+
+  // ---------------------------------------------------------------------------
+  // Conversion & Serialization Helpers
+  // ---------------------------------------------------------------------------
+  static FlutterPointerPhase ToFlutterPointerPhase(int64_t change);
+  static FlutterPointerDeviceKind ToFlutterPointerDeviceKind(int64_t kind);
+  static FlutterPointerSignalKind ToFlutterPointerSignalKind(
+      int64_t signal_kind);
+  /// Rebuilds a `DlPath` from the flattened path the engine sends in a
+  /// platform view clip mutation.
+  static DlPath ToDlPath(const FlutterPath& path);
+  /// Replays embedder platform view mutations onto a `MutatorsStack` so that
+  /// they can be handed to the Java `FlutterMutatorsStack`.
+  static MutatorsStack ToMutatorsStack(
+      size_t mutations_count,
+      const FlutterPlatformViewMutation** mutations);
+
+  /// The display feature arrays to forward to the C API, rewritten so that the
+  /// engine always accepts them.
+  ///
+  /// `bounds` holds exactly `4 * type.size()` values, and `type` and `state`
+  /// always have the same length, so the three are consistent by construction
+  /// and the count the engine is given can be read off any of them.
+  struct DisplayFeatures {
+    std::vector<double> bounds;
+    std::vector<int32_t> type;
+    std::vector<int32_t> state;
+  };
+
+  /// The display features of |metrics|, normalized for the C API.
+  ///
+  /// The bounds, type and state arrays reach C++ as three independent Java
+  /// arrays. `FlutterRenderer` sizes all three from one feature count and only
+  /// ever writes known enum values, but `FlutterJNI::setViewportMetrics` is
+  /// public API and forwards whatever it is handed, so neither the lengths nor
+  /// the contents can be relied on here.
+  ///
+  /// The incoming bounds array is authoritative because it carries the
+  /// geometry the framework lays out around; a feature whose type or state is
+  /// missing or unusable is reported as "unknown" rather than dropped.
+  /// Features past |kFlutterMaxDisplayFeatures| are dropped, because the
+  /// engine rejects the whole metrics event once the count exceeds that limit.
+  ///
+  /// An unrecognized but non-negative state is deliberately passed through
+  /// rather than reset, because both the C API and `_decodeDisplayFeatures` in
+  /// `lib/ui/hooks.dart` treat it as forward compatible.
+  static DisplayFeatures NormalizeDisplayFeatures(
+      const ViewportMetrics& metrics);
+
+  /// The `FlutterWindowMetricsEvent` describing |metrics| for |view_id|.
+  ///
+  /// The returned event borrows all three display feature arrays from
+  /// |display_features|, which must therefore outlive it.
+  static FlutterWindowMetricsEvent ToFlutterWindowMetricsEvent(
+      int64_t view_id,
+      const ViewportMetrics& metrics,
+      const DisplayFeatures& display_features);
+
+  /// Binding the result of `NormalizeDisplayFeatures` directly to the
+  /// parameter above would leave the returned event pointing at arrays that
+  /// die at the end of the full expression.
+  static FlutterWindowMetricsEvent ToFlutterWindowMetricsEvent(
+      int64_t view_id,
+      const ViewportMetrics& metrics,
+      DisplayFeatures&& display_features) = delete;
+
+  static std::vector<FlutterPointerEvent> UnpackPointerDataPacket(
+      const uint8_t* buffer,
+      size_t position);
+  static void SerializeSemanticsUpdate(
+      const FlutterSemanticsUpdate2* update,
+      std::vector<uint8_t>& buffer,
+      std::vector<std::string>& strings,
+      std::vector<std::vector<uint8_t>>& string_attribute_args,
+      std::vector<uint8_t>& actions_buffer,
+      std::vector<std::string>& action_strings);
+
  private:
-  FlutterEngineProcTable proc_table_{};
-  std::unique_ptr<EmbedderEngine> embedder_engine_;
+  class CompositorDelegate;
 
   FLUTTER_API_SYMBOL(FlutterEngine) GetEngineHandle() const {
-    return reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(
-        embedder_engine_.get());
+    if (embedder_engine_) {
+      return reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(
+          embedder_engine_.get());
+    }
+    return c_api_engine_;
   }
 
   PlatformView::Delegate& GetDelegate() const {
     return static_cast<PlatformView::Delegate&>(embedder_engine_->GetShell());
   }
+
+  void InitializeSubsystems(const TaskRunners* existing_task_runners = nullptr);
+  void PopulateRendererConfig(FlutterRendererConfig* config);
+
+  FlutterEngineProcTable proc_table_{};
+  std::unique_ptr<EmbedderEngine> embedder_engine_;
+  FLUTTER_API_SYMBOL(FlutterEngine) c_api_engine_ = nullptr;
+  bool c_api_is_valid_ = false;
+  bool surface_attached_ = false;
+  bool surface_control_enabled_ = false;
+  std::atomic<bool> first_frame_presented_{false};
+
+  Settings settings_;
+  std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
+  AndroidRenderingAPI android_rendering_api_ =
+      AndroidRenderingAPI::kImpellerOpenGLES;
+
+  std::shared_ptr<AndroidTaskRunners> android_task_runners_;
+  std::shared_ptr<AndroidSurfaceManager> surface_manager_;
+  std::shared_ptr<CompositorDelegate> compositor_delegate_;
+  std::shared_ptr<AndroidCompositor> compositor_;
+  std::unique_ptr<APKAssetProvider> apk_asset_provider_;
+  FlutterAssetResolver asset_resolver_{};
+  const FlutterAssetResolver* asset_resolvers_array_[1] = {nullptr};
+
+  FlutterRendererConfig renderer_config_{};
+  FlutterCompositor embedder_compositor_{};
+  FlutterProjectArgs project_args_{};
+
+  std::mutex next_frame_callback_mutex_;
+  fml::closure next_frame_callback_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderAndroidEngine);
 };
