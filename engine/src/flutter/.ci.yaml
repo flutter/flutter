@@ -1,3 +1,6 @@
+# Copyright 2026 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 # Describes the targets run in continuous integration environment.
 #
 # Flutter infra uses this file to generate a checklist of tasks to be performed
