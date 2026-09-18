@@ -440,7 +440,7 @@ class FakeSocket extends Fake implements Socket {
 
   final Future<void> _done;
   final Stream<Uint8List> _stream;
-  final List<List<int>> addedData = <List<int>>[];
+  final addedData = <List<int>>[];
   bool closeCalled = false;
 
   @override

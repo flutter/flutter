@@ -383,7 +383,7 @@ Future<vm_service.VmService> createVmServiceDelegate(
   // Guard the incoming stream from raising unhandled socket errors into the Zone.
   // vm_service.VmService's inStream.listen does not provide an onError callback,
   // so any stream errors (such as SocketException on connection reset) must be handled here.
-  final Stream<dynamic> inStream = channel.handleError((Object error, StackTrace stackTrace) {
+  final Stream<Object?> inStream = channel.handleError((Object error, StackTrace stackTrace) {
     logger.printTrace('VM service WebSocket error: $error\n$stackTrace');
   });
   return vm_service.VmService(

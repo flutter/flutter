@@ -181,10 +181,7 @@ class DaemonStreams {
     : this(stdio.stdin, stdio.stdout, logger: logger);
 
   /// Creates a [DaemonStreams] that uses [Socket] as the underlying streams.
-  DaemonStreams.fromSocket(Socket socket, {required Logger logger})
-    : _outputSink = socket,
-      _logger = logger,
-      inputStream = DaemonInputStreamConverter(socket).convertedStream {
+  factory DaemonStreams.fromSocket(Socket socket, {required Logger logger}) {
     // We have to listen to socket.done. Otherwise when the connection is
     // reset, we will receive an uncatchable exception.
     // https://github.com/dart-lang/sdk/issues/25518
@@ -193,6 +190,7 @@ class DaemonStreams {
         logger.printTrace('Socket error: $error\n$stackTrace');
       }),
     );
+    return DaemonStreams(socket, socket, logger: logger);
   }
 
   /// Connects to a server and creates a [DaemonStreams] from the connection as the underlying streams.

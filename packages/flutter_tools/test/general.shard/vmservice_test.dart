@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -721,7 +722,7 @@ void main() {
   );
 
   testWithoutContext('createVmServiceDelegate handles socket reset error on WebSocket stream cleanly without uncaught zone errors', () async {
-    final streamController = StreamController<dynamic>();
+    final streamController = StreamController<Object?>();
     final fakeWebSocket = FakeWebSocket(stream: streamController.stream);
     openChannelForTesting = (
       String url, {
@@ -813,9 +814,7 @@ void main() {
         logger: logger,
       );
 
-      unawaited(
-        service.getVersion().then<void>((_) {}, onError: (Object error, StackTrace stackTrace) {}),
-      );
+      unawaited(service.getVersion().handleError((Object _, StackTrace _) {}));
       expect(logger.traceText, contains('Failed to send VM service message'));
 
       // Call dispose, which invokes disposeHandler (channel.close).
@@ -844,9 +843,7 @@ void main() {
       logger: logger,
     );
 
-    unawaited(
-      service.getVersion().then<void>((_) {}, onError: (Object error, StackTrace stackTrace) {}),
-    );
+    unawaited(service.getVersion().handleError((Object _, StackTrace _) {}));
     expect(
       logger.traceText,
       contains('Failed to send VM service message: Bad state: WebSocket is closed'),
@@ -928,13 +925,13 @@ Future<io.WebSocket> httpFailingWebSocketConnector(
 }
 
 class FakeWebSocket extends Fake implements io.WebSocket {
-  FakeWebSocket({Future<void>? done, Stream<dynamic>? stream})
+  FakeWebSocket({Future<void>? done, Stream<Object?>? stream})
     : _done = done ?? Completer<void>().future,
-      _stream = stream ?? const Stream<dynamic>.empty();
+      _stream = stream ?? const Stream<Object?>.empty();
 
   final Future<void> _done;
-  final Stream<dynamic> _stream;
-  final List<dynamic> addedMessages = <dynamic>[];
+  final Stream<Object?> _stream;
+  final addedMessages = <Object?>[];
   bool closed = false;
   bool throwOnAdd = false;
   bool throwOnClose = false;
@@ -942,8 +939,8 @@ class FakeWebSocket extends Fake implements io.WebSocket {
   Error? errorOnClose;
 
   @override
-  StreamSubscription<dynamic> listen(
-    void Function(dynamic data)? onData, {
+  StreamSubscription<Object?> listen(
+    void Function(Object? data)? onData, {
     Function? onError,
     void Function()? onDone,
     bool? cancelOnError,
@@ -952,7 +949,7 @@ class FakeWebSocket extends Fake implements io.WebSocket {
   }
 
   @override
-  Stream<dynamic> handleError(Function onError, {bool Function(dynamic error)? test}) {
+  Stream<Object?> handleError(Function onError, {bool Function(Object? error)? test}) {
     return _stream.handleError(onError, test: test);
   }
 
@@ -960,7 +957,7 @@ class FakeWebSocket extends Fake implements io.WebSocket {
   Future<void> get done => _done;
 
   @override
-  void add(dynamic data) {
+  void add(Object? data) {
     if (errorOnAdd != null) {
       throw errorOnAdd!;
     }

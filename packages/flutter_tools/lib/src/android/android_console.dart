@@ -38,7 +38,7 @@ class AndroidConsole {
     assert(_queue == null);
 
     unawaited(
-      _socket!.done.handleError((Object error, StackTrace stackTrace) {
+      _socket!.done.handleError((Object _, StackTrace _) {
         // Socket error, handled when reading or destroying.
       }),
     );
