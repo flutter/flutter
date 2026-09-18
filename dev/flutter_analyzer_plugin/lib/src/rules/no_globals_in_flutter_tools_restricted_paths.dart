@@ -249,7 +249,6 @@ const Set<String> defaultRestrictedPaths = <String>{
   'lib/src/test/test_time_recorder.dart',
   'lib/src/test/test_wrapper.dart',
   'lib/src/test/watcher.dart',
-  'lib/src/test/web_test_compiler.dart',
   'lib/src/tracing.dart',
   'lib/src/update_packages_pins.dart',
   'lib/src/web/bootstrap.dart',
