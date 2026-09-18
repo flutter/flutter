@@ -20,6 +20,7 @@
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/android_surface_manager.h"
 #include "flutter/shell/platform/android/android_task_runners.h"
+#include "flutter/shell/platform/android/android_vsync_waiter.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -189,6 +190,9 @@ class EmbedderAndroidEngine final : public AndroidEngine {
   std::shared_ptr<AndroidTaskRunners> GetAndroidTaskRunners() const {
     return android_task_runners_;
   }
+  std::shared_ptr<android::AndroidVsyncWaiter> GetVsyncWaiter() const {
+    return vsync_waiter_;
+  }
 
   void OnBeginFrame();
   void OnPlatformViewPresented(int64_t view_id,
@@ -306,6 +310,7 @@ class EmbedderAndroidEngine final : public AndroidEngine {
       AndroidRenderingAPI::kImpellerOpenGLES;
 
   std::shared_ptr<AndroidTaskRunners> android_task_runners_;
+  std::shared_ptr<android::AndroidVsyncWaiter> vsync_waiter_;
   std::shared_ptr<AndroidSurfaceManager> surface_manager_;
   std::shared_ptr<CompositorDelegate> compositor_delegate_;
   std::shared_ptr<AndroidCompositor> compositor_;

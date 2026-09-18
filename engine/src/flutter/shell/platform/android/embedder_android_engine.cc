@@ -264,6 +264,7 @@ void EmbedderAndroidEngine::InitializeSubsystems(
   }
   surface_manager_ =
       std::make_shared<AndroidSurfaceManager>(android_rendering_api_);
+  vsync_waiter_ = std::make_shared<android::AndroidVsyncWaiter>();
   compositor_delegate_ = std::make_shared<CompositorDelegate>(this);
   compositor_ = std::make_shared<AndroidCompositor>(surface_manager_,
                                                     compositor_delegate_);
@@ -998,6 +999,12 @@ bool EmbedderAndroidEngine::Run(
               std::move(actions_buffer), std::move(action_strings));
         }
       };
+  project_args_.vsync_callback = [](void* user_data, intptr_t baton) {
+    auto* engine = static_cast<EmbedderAndroidEngine*>(user_data);
+    if (engine != nullptr && engine->vsync_waiter_ != nullptr) {
+      engine->vsync_waiter_->AsyncWaitForVsync(baton);
+    }
+  };
 
   FlutterEngineResult result =
       proc_table_.Initialize(FLUTTER_ENGINE_VERSION, &renderer_config_,
@@ -1012,6 +1019,9 @@ bool EmbedderAndroidEngine::Run(
   asset_resolver_.destruction_callback = nullptr;
 
   android_task_runners_->SetEngine(c_api_engine_);
+  if (vsync_waiter_ != nullptr) {
+    vsync_waiter_->SetEngine(c_api_engine_);
+  }
 
   result = proc_table_.RunInitialized(c_api_engine_);
   if (result != kSuccess) {
@@ -1077,6 +1087,7 @@ std::unique_ptr<EmbedderAndroidEngine> EmbedderAndroidEngine::SpawnCAPI(
       project_args_.platform_message_callback;
   child->project_args_.update_semantics_callback2 =
       project_args_.update_semantics_callback2;
+  child->project_args_.vsync_callback = project_args_.vsync_callback;
 
   FlutterEngineSpawnConfig spawn_config = {};
   spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
@@ -1093,6 +1104,9 @@ std::unique_ptr<EmbedderAndroidEngine> EmbedderAndroidEngine::SpawnCAPI(
   }
   child->asset_resolver_.destruction_callback = nullptr;
   child->android_task_runners_->SetEngine(child->c_api_engine_);
+  if (child->vsync_waiter_ != nullptr) {
+    child->vsync_waiter_->SetEngine(child->c_api_engine_);
+  }
   child->c_api_is_valid_ = true;
   return child;
 }
