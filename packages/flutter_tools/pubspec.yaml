@@ -40,7 +40,7 @@ dependencies:
   intl: 0.20.3
   meta: 1.19.0
   multicast_dns: 0.3.3+1
-  mustache_template: 2.0.5
+  mustache_template: 2.0.6
   package_config: 2.2.0
   process: 5.0.6
   fake_async: 1.3.3
@@ -140,4 +140,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 2p419f
+# PUBSPEC CHECKSUM: 5eno1d
