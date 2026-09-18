@@ -22,12 +22,14 @@ import '../base/terminal.dart';
 import '../base/time.dart';
 import '../build_info.dart';
 import '../device.dart';
+import '../context/tool_context.dart';
 import '../resident_runner.dart';
 import '../vmservice.dart';
 import 'web_driver_service.dart';
 
 class FlutterDriverFactory {
   FlutterDriverFactory({
+    this.toolContext,
     required this._applicationPackageFactory,
     required this._artifacts,
     required this._dartSdkPath,
@@ -43,6 +45,7 @@ class FlutterDriverFactory {
     this._systemClock,
   });
 
+  final ToolContext? toolContext;
   final ApplicationPackageFactory _applicationPackageFactory;
   final Artifacts _artifacts;
   final String _dartSdkPath;
