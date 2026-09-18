@@ -3258,6 +3258,127 @@ void main() {
     // animation continues from the current visual offset.
     expect(yAfterUp, closeTo(yBeforeUp, 0.1));
   });
+
+  group('BottomSheet.bottomInset', () {
+    testWidgets(
+      'extends Material surface without enlarging logical layout, hit test, or semantics',
+      (WidgetTester tester) async {
+        final SemanticsHandle semantics = tester.ensureSemantics();
+        final AnimationController controller = BottomSheet.createAnimationController(tester)
+          ..value = 1.0;
+        addTearDown(controller.dispose);
+
+        const contentKey = ValueKey<String>('sheet content');
+        Color? builderMaterialColor;
+        var taps = 0;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Align(
+              alignment: Alignment.topCenter,
+              heightFactor: 1.0,
+              child: Semantics(
+                container: true,
+                child: BottomSheet(
+                  animationController: controller,
+                  bottomInset: 120.0,
+                  backgroundColor: Colors.red,
+                  constraints: const BoxConstraints(maxWidth: 300.0, maxHeight: 150.0),
+                  onClosing: () {},
+                  builder: (BuildContext context) {
+                    return Builder(
+                      builder: (BuildContext context) {
+                        builderMaterialColor = Material.of(context).color;
+                        return SizedBox(
+                          key: contentKey,
+                          width: double.infinity,
+                          height: 100.0,
+                          child: GestureDetector(onTap: () => taps++, child: const Text('Action')),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(builderMaterialColor, Colors.red);
+        expect(tester.getSize(find.byKey(contentKey)), const Size(300.0, 100.0));
+        expect(tester.getSize(find.byType(BottomSheet)), const Size(800.0, 100.0));
+        final Finder outerMaterial = find
+            .descendant(of: find.byType(BottomSheet), matching: find.byType(Material))
+            .first;
+        expect(tester.getSize(outerMaterial), const Size(300.0, 220.0));
+        expect(tester.getSemantics(find.byType(BottomSheet)).rect.height, 100.0);
+
+        // Taps in the extended bottomInset area (y = 150) do not hit the sheet.
+        await tester.tapAt(const Offset(400.0, 150.0));
+        expect(taps, 0);
+
+        // Taps in the logical sheet area (y = 50) hit the sheet content.
+        await tester.tapAt(const Offset(400.0, 50.0));
+        expect(taps, 1);
+        semantics.dispose();
+      },
+    );
+
+    testWidgets('preserves child state when bottomInset toggles between 0.0 and non-zero', (
+      WidgetTester tester,
+    ) async {
+      final focusNode = FocusNode();
+      final controller = TextEditingController(text: 'hello');
+      addTearDown(focusNode.dispose);
+      addTearDown(controller.dispose);
+
+      Widget buildSheet(double bottomInset) {
+        return MaterialApp(
+          home: Scaffold(
+            body: BottomSheet(
+              enableDrag: false,
+              bottomInset: bottomInset,
+              onClosing: () {},
+              builder: (BuildContext context) =>
+                  TextField(focusNode: focusNode, controller: controller),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildSheet(0.0));
+      final EditableTextState initialState = tester.state(find.byType(EditableText));
+
+      await tester.pumpWidget(buildSheet(100.0));
+      expect(tester.state(find.byType(EditableText)), same(initialState));
+
+      await tester.pumpWidget(buildSheet(0.0));
+      expect(tester.state(find.byType(EditableText)), same(initialState));
+    });
+
+    test('asserts bottomInset is non-negative and finite', () {
+      expect(
+        () => BottomSheet(bottomInset: -1.0, onClosing: () {}, builder: (_) => const SizedBox()),
+        throwsAssertionError,
+      );
+      expect(
+        () => BottomSheet(
+          bottomInset: double.infinity,
+          onClosing: () {},
+          builder: (_) => const SizedBox(),
+        ),
+        throwsAssertionError,
+      );
+      expect(
+        () => BottomSheet(
+          bottomInset: double.nan,
+          onClosing: () {},
+          builder: (_) => const SizedBox(),
+        ),
+        throwsAssertionError,
+      );
+    });
+  });
 }
 
 class _TestPage extends StatelessWidget {
