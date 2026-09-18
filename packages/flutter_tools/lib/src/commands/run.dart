@@ -327,9 +327,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     );
     return webDevServerConfig;
   }
-
-  
-  
 }
 
 class RunCommand extends RunCommandBase {
@@ -427,8 +424,6 @@ class RunCommand extends RunCommandBase {
   final DeviceManager? _deviceManager;
   final AppleContext _injectedAppleContext;
   final ToolContext _injectedToolContext;
-
-  
 
   AppleContext get appleContext => _injectedAppleContext;
 
@@ -996,8 +991,6 @@ typedef AnalyticsUsageValuesRecord = ({
 // provide AppleContext and ToolContext directly. This fallback context delegates to
 // globals.* to maintain backwards compatibility with existing Google3 commands.
 
-
 // TODO(bkonyi): This will be removed in a follow up PR once Google3 callers
 // provide AppleContext and ToolContext directly. This fallback context delegates to
 // globals.* to maintain backwards compatibility with existing Google3 commands.
-
