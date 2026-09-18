@@ -329,8 +329,7 @@ void testMain() {
       const expectedWordSpacing = 4.0;
       const expectedParagraphSpacing = 10.0;
 
-      style.text =
-          'html *{ line-height: 2 !important; word-spacing: 4px !important; letter-spacing: 1px !important; margin-bottom: 10px !important; }';
+      style.text = 'html *{ line-height: 2 !important; word-spacing: 4px !important; letter-spacing: 1px !important; margin-bottom: 10px !important; }';
       root.append(style);
       await waitForResizeObserver();
       expect(root.contains(style), isTrue);
@@ -712,6 +711,25 @@ void testMain() {
           ui.Locale('en'),
           ui.Locale.fromSubtags(languageCode: 'ar', scriptCode: 'Arab', countryCode: 'SA'),
           ui.Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
+          ui.Locale('de', 'DE'),
+        ]);
+      });
+
+      test('skips invalid tags such as en-US@posix and falls back to default locale', () {
+        // Chromium on Linux with LANG unset can report en-US@posix, which
+        // Intl.Locale rejects. The parse path must not throw during bootstrap.
+        EnginePlatformDispatcher.debugOverrideBrowserLanguages(['en-US@posix']);
+        addTearDown(() => EnginePlatformDispatcher.debugOverrideBrowserLanguages(null));
+
+        expect(EnginePlatformDispatcher.parseBrowserLanguages(), const [ui.Locale('en', 'US')]);
+      });
+
+      test('keeps valid locales when some browser language tags are invalid', () {
+        EnginePlatformDispatcher.debugOverrideBrowserLanguages(['en-US@posix', 'fr-FR', 'de-DE']);
+        addTearDown(() => EnginePlatformDispatcher.debugOverrideBrowserLanguages(null));
+
+        expect(EnginePlatformDispatcher.parseBrowserLanguages(), const [
+          ui.Locale('fr', 'FR'),
           ui.Locale('de', 'DE'),
         ]);
       });

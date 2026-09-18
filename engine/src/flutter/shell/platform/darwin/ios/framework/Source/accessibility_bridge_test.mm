@@ -1719,9 +1719,11 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
     bridge->AccessibilityObjectDidBecomeFocused(123);
 
     NSDictionary<NSString*, id>* annotatedEvent = @{@"type" : @"didGainFocus", @"nodeId" : @123};
-    NSData* encodedMessage = [[FlutterStandardMessageCodec sharedInstance] encode:annotatedEvent];
-
-    OCMVerify([messenger sendOnChannel:@"flutter/accessibility" message:encodedMessage]);
+    OCMVerify([messenger sendOnChannel:@"flutter/accessibility"
+                               message:[OCMArg checkWithBlock:^BOOL(NSData* message) {
+                                 return [[[FlutterStandardMessageCodec sharedInstance]
+                                     decode:message] isEqual:annotatedEvent];
+                               }]]);
     latch.Signal();
   });
   latch.Wait();

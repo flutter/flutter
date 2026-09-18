@@ -12,7 +12,7 @@ import 'package:test_reflective_loader/test_reflective_loader.dart';
 class NoDoubleClampTest extends AnalysisRuleTest {
   @override
   void setUp() {
-    Registry.ruleRegistry.registerWarningRule(NoDoubleClamp());
+    Registry.ruleRegistry.registerLintRule(NoDoubleClamp());
     super.setUp();
   }
 

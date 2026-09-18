@@ -174,12 +174,13 @@ FLUTTER_DARWIN_EXPORT
  * contains `main()`), using `main()` as the entrypoint (the default for Flutter projects),
  * and using "/" (the default route) as the initial route.
  *
- * The first call to this method will create a new Isolate. Subsequent calls will return
- * immediately and have no effect.
+ * The first call to this method creates a new Isolate and returns YES. Subsequent calls return
+ * NO immediately and have no effect.
  *
  * This method must be called on the main thread. See the `FlutterEngine` class documentation.
  *
- * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
+ * @return YES if this call started the engine; NO if it was already invoked, has been destroyed,
+ *   or could not be started.
  */
 - (BOOL)run NS_SWIFT_UI_ACTOR;
 
@@ -187,8 +188,8 @@ FLUTTER_DARWIN_EXPORT
  * Runs a Dart program on an Isolate from the main Dart library (i.e. the library that
  * contains `main()`), using "/" (the default route) as the initial route.
  *
- * The first call to this method will create a new Isolate. Subsequent calls will return
- * immediately and have no effect.
+ * The first call to this method creates a new Isolate and returns YES. Subsequent calls return
+ * NO immediately and have no effect.
  *
  * This method must be called on the main thread. See the `FlutterEngine` class documentation.
  *
@@ -197,7 +198,8 @@ FLUTTER_DARWIN_EXPORT
  *   nil) it will default to `main()`.  If it is not the app's main() function, that function must
  *   be decorated with `@pragma(vm:entry-point)` to ensure the method is not tree-shaken by the Dart
  *   compiler.
- * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
+ * @return YES if this call started the engine; NO if it was already invoked, has been destroyed,
+ *   or could not be started.
  */
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint NS_SWIFT_UI_ACTOR;
 
@@ -205,8 +207,8 @@ FLUTTER_DARWIN_EXPORT
  * Runs a Dart program on an Isolate from the main Dart library (i.e. the library that
  * contains `main()`).
  *
- * The first call to this method will create a new Isolate. Subsequent calls will return
- * immediately and have no effect.
+ * The first call to this method creates a new Isolate and returns YES. Subsequent calls return
+ * NO immediately and have no effect.
  *
  * This method must be called on the main thread. See the `FlutterEngine` class documentation.
  *
@@ -217,7 +219,8 @@ FLUTTER_DARWIN_EXPORT
  *   compiler.
  * @param initialRoute The name of the initial Flutter `Navigator` `Route` to load. If this is
  *   FlutterDefaultInitialRoute (or nil), it will default to the "/" route.
- * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
+ * @return YES if this call started the engine; NO if it was already invoked, has been destroyed,
+ *   or could not be started.
  */
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint
              initialRoute:(nullable NSString*)initialRoute NS_SWIFT_UI_ACTOR;
@@ -226,8 +229,8 @@ FLUTTER_DARWIN_EXPORT
  * Runs a Dart program on an Isolate using the specified entrypoint and Dart library,
  * which may not be the same as the library containing the Dart program's `main()` function.
  *
- * The first call to this method will create a new Isolate. Subsequent calls will return
- * immediately and have no effect.
+ * The first call to this method creates a new Isolate and returns YES. Subsequent calls return
+ * NO immediately and have no effect.
  *
  * This method must be called on the main thread. See the `FlutterEngine` class documentation.
  *
@@ -238,7 +241,8 @@ FLUTTER_DARWIN_EXPORT
  * @param uri The URI of the Dart library which contains the entrypoint method
  *   (example "package:foo_package/main.dart").  If nil, this will default to
  *   the same library as the `main()` function in the Dart program.
- * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
+ * @return YES if this call started the engine; NO if it was already invoked, has been destroyed,
+ *   or could not be started.
  */
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint
                libraryURI:(nullable NSString*)uri NS_SWIFT_UI_ACTOR;
@@ -247,8 +251,8 @@ FLUTTER_DARWIN_EXPORT
  * Runs a Dart program on an Isolate using the specified entrypoint and Dart library,
  * which may not be the same as the library containing the Dart program's `main()` function.
  *
- * The first call to this method will create a new Isolate. Subsequent calls will return
- * immediately and have no effect.
+ * The first call to this method creates a new Isolate and returns YES. Subsequent calls return
+ * NO immediately and have no effect.
  *
  * This method must be called on the main thread. See the `FlutterEngine` class documentation.
  *
@@ -261,7 +265,8 @@ FLUTTER_DARWIN_EXPORT
  *   default to the same library as the `main()` function in the Dart program.
  * @param initialRoute The name of the initial Flutter `Navigator` `Route` to load. If this is
  *   FlutterDefaultInitialRoute (or nil), it will default to the "/" route.
- * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
+ * @return YES if this call started the engine; NO if it was already invoked, has been destroyed,
+ *   or could not be started.
  */
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint
                libraryURI:(nullable NSString*)libraryURI
@@ -271,8 +276,8 @@ FLUTTER_DARWIN_EXPORT
  * Runs a Dart program on an Isolate using the specified entrypoint and Dart library,
  * which may not be the same as the library containing the Dart program's `main()` function.
  *
- * The first call to this method will create a new Isolate. Subsequent calls will return
- * immediately and have no effect.
+ * The first call to this method creates a new Isolate and returns YES. Subsequent calls return
+ * NO immediately and have no effect.
  *
  * This method must be called on the main thread. See the `FlutterEngine` class documentation.
  *
@@ -286,7 +291,8 @@ FLUTTER_DARWIN_EXPORT
  * @param initialRoute The name of the initial Flutter `Navigator` `Route` to load. If this is
  *   FlutterDefaultInitialRoute (or nil), it will default to the "/" route.
  * @param entrypointArgs Arguments passed as a list of string to Dart's entrypoint function.
- * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
+ * @return YES if this call started the engine; NO if it was already invoked, has been destroyed,
+ *   or could not be started.
  */
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint
                libraryURI:(nullable NSString*)libraryURI
@@ -300,6 +306,8 @@ FLUTTER_DARWIN_EXPORT
  * After sending this message, the object will be in an unusable state until it is deallocated.
  * Accessing properties or sending messages to it will result in undefined behavior or runtime
  * errors.
+ *
+ * The engine cannot be run again: `-run` and the `-runWithEntrypoint:` variants return `NO`.
  */
 - (void)destroyContext;
 
