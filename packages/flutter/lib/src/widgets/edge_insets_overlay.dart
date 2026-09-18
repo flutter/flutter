@@ -8,19 +8,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 import 'layout_builder.dart';
 import 'safe_area.dart';
 import 'slotted_render_object_widget.dart';
 
-/// The slots available for children managed by [EdgeInsetsOverlay].
+/// The slots available for children managed by [EdgeInsetsGeometryOverlay]
+/// (such as [EdgeInsetsOverlay] and [EdgeInsetsDirectionalOverlay]).
 ///
 /// See also:
 ///
-///  * [EdgeInsetsOverlay.paintOrder], which configures the order in which child
+///  * [EdgeInsetsGeometryOverlay.paintOrder], which configures the order in which child
 ///    and edge overlay widgets are painted and hit-tested.
 enum EdgeInsetsOverlaySlot {
-  /// The main content widget built by [EdgeInsetsOverlay.builder] that spans the
+  /// The main content widget built by [EdgeInsetsGeometryOverlay.builder] that spans the
   /// full available area beneath overlays.
   child,
 
@@ -37,22 +39,26 @@ enum EdgeInsetsOverlaySlot {
   bottom,
 }
 
-/// Represents an alignment point along a 1D axis for an edge overlay in [EdgeInsetsOverlay].
+/// Represents an alignment point along a 1D axis for an edge overlay in [EdgeInsetsGeometryOverlay].
 ///
 /// For overlays on the top or bottom edge, this represents the horizontal position
-/// along that edge (from left to right).
+/// along that edge. In [TextDirection.ltr] contexts, -1.0 represents the left edge
+/// and 1.0 represents the right edge. In [TextDirection.rtl] contexts, these are
+/// reversed: -1.0 represents the right edge (the start of the text direction)
+/// and 1.0 represents the left edge (the end).
 ///
 /// For overlays on the left or right edge, this represents the vertical position
 /// along that edge (from top to bottom).
 ///
 /// The distance is fractional:
-///  * -1.0 represents the start of the edge (left for top/bottom, top for left/right).
+///  * -1.0 represents the start of the edge (left for top/bottom in LTR, right in RTL; top for left/right).
 ///  * 0.0 represents the center of the edge.
-///  * 1.0 represents the end of the edge (right for top/bottom, bottom for left/right).
+///  * 1.0 represents the end of the edge (right for top/bottom in LTR, left in RTL; bottom for left/right).
 ///
 /// See also:
 ///
-///  * [Alignment], which represents a 2D point within a rectangle.
+///  * [Alignment], which represents a 2D point within a rectangle using physical coordinates.
+///  * [AlignmentDirectional], which represents a 2D point within a rectangle using directional coordinates.
 @immutable
 class EdgeOverlayAlignment {
   /// Creates an edge overlay alignment.
@@ -63,23 +69,43 @@ class EdgeOverlayAlignment {
 
   /// The fractional point along the edge.
   ///
-  ///  * -1.0 is the start of the edge (left for top/bottom, top for left/right).
+  ///  * -1.0 is the start of the edge.
   ///  * 0.0 is the center of the edge.
-  ///  * 1.0 is the end of the edge (right for top/bottom, bottom for left/right).
+  ///  * 1.0 is the end of the edge.
   final double value;
 
-  /// The start position along the edge (left for top/bottom, top for left/right).
-  static const EdgeOverlayAlignment start = EdgeOverlayAlignment(-1.0);
+  /// The start position along the edge (start of reading direction for top/bottom, top for left/right).
+  static const EdgeOverlayAlignment start = .new(-1.0);
 
   /// The center position along the edge.
-  static const EdgeOverlayAlignment center = EdgeOverlayAlignment(0.0);
+  static const EdgeOverlayAlignment center = .new(0.0);
 
-  /// The end position along the edge (right for top/bottom, bottom for left/right).
-  static const EdgeOverlayAlignment end = EdgeOverlayAlignment(1.0);
+  /// The end position along the edge (end of reading direction for top/bottom, bottom for left/right).
+  static const EdgeOverlayAlignment end = .new(1.0);
+
+  /// Resolves this alignment according to the given [TextDirection].
+  ///
+  /// If [direction] is [TextDirection.rtl], the alignment is inverted so that
+  /// [start] aligns with the right edge and [end] aligns with the left edge.
+  /// If [direction] is null or [TextDirection.ltr], returns this alignment unchanged.
+  EdgeOverlayAlignment resolve(TextDirection? direction) {
+    if (direction == .rtl) {
+      if (value == 0.0) {
+        return center;
+      }
+      return EdgeOverlayAlignment(-value);
+    }
+    return this;
+  }
 
   /// Returns the offset within [freeSpace] corresponding to this alignment.
-  double alongOffset(double freeSpace) {
-    return (freeSpace / 2.0) * (1.0 + value);
+  ///
+  /// If [textDirection] is [TextDirection.rtl], the alignment is resolved such
+  /// that [start] corresponds to the right side of [freeSpace] and [end]
+  /// corresponds to the left side.
+  double alongOffset(double freeSpace, {TextDirection? textDirection}) {
+    final double effectiveValue = resolve(textDirection).value;
+    return (freeSpace / 2.0) * (1.0 + effectiveValue);
   }
 
   /// Linearly interpolate between two [EdgeOverlayAlignment]s.
@@ -118,12 +144,12 @@ class EdgeOverlayAlignment {
   }
 }
 
-/// A configuration for an edge-docked overlay widget in [EdgeInsetsOverlay],
+/// A configuration for an edge-docked overlay widget in [EdgeInsetsGeometryOverlay],
 /// combining the [child] widget with its [alignment].
 @immutable
 class EdgeInsetsOverlaySide {
-  /// Creates a configuration for an edge overlay in [EdgeInsetsOverlay].
-  const EdgeInsetsOverlaySide({required this.child, this.alignment = EdgeOverlayAlignment.center});
+  /// Creates a configuration for an edge overlay in [EdgeInsetsGeometryOverlay].
+  const EdgeInsetsOverlaySide({required this.child, this.alignment = .center});
 
   /// The widget displayed for this edge overlay.
   final Widget child;
@@ -147,7 +173,7 @@ class EdgeInsetsOverlaySide {
 }
 
 /// Information about the measured dimensions and layout geometry of edge overlays
-/// in an [EdgeInsetsOverlay].
+/// in an [EdgeInsetsGeometryOverlay].
 ///
 /// Passed to [EdgeInsetsOverlayMetricsWidgetBuilder] to allow descendant widgets
 /// to adapt their layout, padding, or custom painting to active edge overlays.
@@ -155,19 +181,36 @@ class EdgeInsetsOverlaySide {
 class EdgeInsetsOverlayMetrics {
   /// Creates metrics describing the layout of edge overlays.
   const EdgeInsetsOverlayMetrics({
-    this.padding = .zero,
     this.sizes = const <EdgeInsetsOverlaySlot, Size>{},
     this.alignments = const <EdgeInsetsOverlaySlot, EdgeOverlayAlignment>{},
+    this.textDirection,
   });
 
   /// The interior padding occupied by edge overlays inside the content bounds.
-  final EdgeInsets padding;
+  EdgeInsets get padding => .fromLTRB(
+    leftSize?.width ?? 0.0,
+    topSize?.height ?? 0.0,
+    rightSize?.width ?? 0.0,
+    bottomSize?.height ?? 0.0,
+  );
+
+  /// The interior padding occupied by edge overlays inside the content bounds,
+  /// expressed as an [EdgeInsetsDirectional].
+  EdgeInsetsDirectional get directionalPadding => .fromSTEB(
+    startSize?.width ?? 0.0,
+    topSize?.height ?? 0.0,
+    endSize?.width ?? 0.0,
+    bottomSize?.height ?? 0.0,
+  );
 
   /// The measured full dimensions ([Size]) of each active edge overlay.
   final Map<EdgeInsetsOverlaySlot, Size> sizes;
 
   /// The alignments associated with each active edge overlay.
   final Map<EdgeInsetsOverlaySlot, EdgeOverlayAlignment> alignments;
+
+  /// The text direction used to resolve alignments along horizontal edges, or null if unspecified.
+  final TextDirection? textDirection;
 
   /// The measured size of the left overlay, or null if absent.
   Size? get leftSize => sizes[EdgeInsetsOverlaySlot.left];
@@ -181,6 +224,18 @@ class EdgeInsetsOverlayMetrics {
   /// The measured size of the bottom overlay, or null if absent.
   Size? get bottomSize => sizes[EdgeInsetsOverlaySlot.bottom];
 
+  /// The measured size of the start overlay according to [textDirection], or null if absent.
+  Size? get startSize => switch (textDirection) {
+    .rtl => rightSize,
+    .ltr || null => leftSize,
+  };
+
+  /// The measured size of the end overlay according to [textDirection], or null if absent.
+  Size? get endSize => switch (textDirection) {
+    .rtl => leftSize,
+    .ltr || null => rightSize,
+  };
+
   /// The alignment of the left overlay, or null if absent.
   EdgeOverlayAlignment? get leftAlignment => alignments[EdgeInsetsOverlaySlot.left];
 
@@ -192,6 +247,18 @@ class EdgeInsetsOverlayMetrics {
 
   /// The alignment of the bottom overlay, or null if absent.
   EdgeOverlayAlignment? get bottomAlignment => alignments[EdgeInsetsOverlaySlot.bottom];
+
+  /// The alignment of the start overlay according to [textDirection], or null if absent.
+  EdgeOverlayAlignment? get startAlignment => switch (textDirection) {
+    .rtl => rightAlignment,
+    .ltr || null => leftAlignment,
+  };
+
+  /// The alignment of the end overlay according to [textDirection], or null if absent.
+  EdgeOverlayAlignment? get endAlignment => switch (textDirection) {
+    .rtl => leftAlignment,
+    .ltr || null => rightAlignment,
+  };
 
   /// Whether an overlay widget is present at [slot].
   bool hasSlot(EdgeInsetsOverlaySlot slot) => sizes.containsKey(slot);
@@ -207,6 +274,18 @@ class EdgeInsetsOverlayMetrics {
 
   /// Whether an overlay widget is present at [EdgeInsetsOverlaySlot.bottom].
   bool get hasBottom => hasSlot(.bottom);
+
+  /// Whether an overlay widget is present at the start edge according to [textDirection].
+  bool get hasStart => switch (textDirection) {
+    .rtl => hasRight,
+    .ltr || null => hasLeft,
+  };
+
+  /// Whether an overlay widget is present at the end edge according to [textDirection].
+  bool get hasEnd => switch (textDirection) {
+    .rtl => hasLeft,
+    .ltr || null => hasRight,
+  };
 
   /// Computes the unobstructed interior [Rect] within the content bounds for the given [size], deflated by [padding].
   Rect innerBounds(Size size) => padding.deflateRect(Offset.zero & size);
@@ -232,7 +311,7 @@ class EdgeInsetsOverlayMetrics {
         sideSize.height,
       ),
       .top => Rect.fromLTWH(
-        alignment.alongOffset(contentSize.width - sideSize.width),
+        alignment.alongOffset(contentSize.width - sideSize.width, textDirection: textDirection),
         0.0,
         sideSize.width,
         sideSize.height,
@@ -244,7 +323,7 @@ class EdgeInsetsOverlayMetrics {
         sideSize.height,
       ),
       .bottom => Rect.fromLTWH(
-        alignment.alongOffset(contentSize.width - sideSize.width),
+        alignment.alongOffset(contentSize.width - sideSize.width, textDirection: textDirection),
         contentSize.height - sideSize.height,
         sideSize.width,
         sideSize.height,
@@ -265,35 +344,47 @@ class EdgeInsetsOverlayMetrics {
   /// Computes the bounding [Rect] of the bottom overlay for the given [contentSize], or null if absent.
   Rect? bottomRect(Size contentSize) => rectOf(.bottom, contentSize);
 
+  /// Computes the bounding [Rect] of the start overlay for the given [contentSize]
+  /// according to [textDirection], or null if absent.
+  Rect? startRect(Size contentSize) => switch (textDirection) {
+    .rtl => rightRect(contentSize),
+    .ltr || null => leftRect(contentSize),
+  };
+
+  /// Computes the bounding [Rect] of the end overlay for the given [contentSize]
+  /// according to [textDirection], or null if absent.
+  Rect? endRect(Size contentSize) => switch (textDirection) {
+    .rtl => leftRect(contentSize),
+    .ltr || null => rightRect(contentSize),
+  };
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     return other is EdgeInsetsOverlayMetrics &&
-        other.padding == padding &&
         mapEquals(other.sizes, sizes) &&
-        mapEquals(other.alignments, alignments);
+        mapEquals(other.alignments, alignments) &&
+        other.textDirection == textDirection;
   }
 
   @override
   int get hashCode => Object.hash(
-    padding,
-    sizes[EdgeInsetsOverlaySlot.child],
     sizes[EdgeInsetsOverlaySlot.left],
     sizes[EdgeInsetsOverlaySlot.top],
     sizes[EdgeInsetsOverlaySlot.right],
     sizes[EdgeInsetsOverlaySlot.bottom],
-    alignments[EdgeInsetsOverlaySlot.child],
     alignments[EdgeInsetsOverlaySlot.left],
     alignments[EdgeInsetsOverlaySlot.top],
     alignments[EdgeInsetsOverlaySlot.right],
     alignments[EdgeInsetsOverlaySlot.bottom],
+    textDirection,
   );
 
   @override
   String toString() =>
-      'EdgeInsetsOverlayMetrics(padding: $padding, sizes: $sizes, alignments: $alignments)';
+      'EdgeInsetsOverlayMetrics(padding: $padding, sizes: $sizes, alignments: $alignments, textDirection: $textDirection)';
 }
 
 /// Signature for building the main content of an [EdgeInsetsOverlay],
@@ -304,13 +395,127 @@ typedef EdgeInsetsOverlayWidgetBuilder = Widget Function(
   EdgeInsets overlayPadding,
 );
 
-/// Signature for building the main content of an [EdgeInsetsOverlay.metrics],
+/// Signature for building the main content of an [EdgeInsetsDirectionalOverlay],
+/// receiving the layout [constraints] and measured [overlayPadding] of active edge widgets.
+typedef EdgeInsetsDirectionalOverlayWidgetBuilder = Widget Function(
+  BuildContext context,
+  BoxConstraints constraints,
+  EdgeInsetsDirectional overlayPadding,
+);
+
+/// Signature for building the main content of an [EdgeInsetsGeometryOverlay.metrics]
+/// (such as [EdgeInsetsOverlay.metrics] or [EdgeInsetsDirectionalOverlay.metrics]),
 /// receiving the layout [constraints] and computed overlay [metrics].
 typedef EdgeInsetsOverlayMetricsWidgetBuilder = Widget Function(
   BuildContext context,
   BoxConstraints constraints,
   EdgeInsetsOverlayMetrics metrics,
 );
+
+/// Abstract base class for widgets that position edge-docked overlays around a
+/// main content widget, providing measured overlay dimensions to a builder callback.
+///
+/// Subclasses include:
+///
+///  * [EdgeInsetsOverlay], which positions overlays along physical edges ([EdgeInsetsOverlay.left],
+///    [EdgeInsetsOverlay.right], [top], and [bottom]) and provides the measured overlay dimensions
+///    as an [EdgeInsets].
+///  * [EdgeInsetsDirectionalOverlay], which positions overlays along reading-direction-aware
+///    edges ([EdgeInsetsDirectionalOverlay.start], [EdgeInsetsDirectionalOverlay.end], [top],
+///    and [bottom]) and provides the measured overlay dimensions as an [EdgeInsetsDirectional].
+///
+/// Both widgets allow the content child built by [builder] to expand across the full
+/// available area beneath the edge overlays. The measured dimensions of the active
+/// edge overlays are then provided to the [builder] callback, allowing descendant
+/// widgets (such as scroll views, map viewports, or custom painters) to adapt their
+/// interior padding or layout accordingly without clipping.
+///
+/// The painting and hit-testing order between the main content and the edge overlays
+/// can be configured using [paintOrder].
+///
+/// See also:
+///
+///  * [EdgeInsetsOverlay], for physical edge positioning (left and right).
+///  * [EdgeInsetsDirectionalOverlay], for directional edge positioning (start and end).
+///  * [EdgeInsetsOverlaySide], which pairs an overlay widget with its alignment.
+///  * [EdgeInsetsOverlayMetrics], which provides full layout geometry to [builder].
+///  * [EdgeInsetsGeometry], the base class for insets representing the dimensions
+///    calculated by these overlay widgets.
+abstract class EdgeInsetsGeometryOverlay extends StatelessWidget {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const EdgeInsetsGeometryOverlay({
+    super.key,
+    this.top,
+    this.bottom,
+    this.paintOrder = EdgeInsetsOverlaySlot.values,
+    this.textDirection,
+    required this.builder,
+  });
+
+  /// The overlay configuration to place at the top edge.
+  final EdgeInsetsOverlaySide? top;
+
+  /// The overlay configuration to place at the bottom edge.
+  final EdgeInsetsOverlaySide? bottom;
+
+  /// The order in which the child and edge overlay widgets are painted and hit-tested.
+  ///
+  /// The widgets are painted from first to last in this list. Later widgets in the
+  /// list paint on top of earlier ones and receive hit test events first.
+  ///
+  /// Defaults to [EdgeInsetsOverlaySlot.values].
+  final List<EdgeInsetsOverlaySlot> paintOrder;
+
+  /// The text direction with which to resolve directional alignments along horizontal edges.
+  ///
+  /// Defaults to the ambient [Directionality].
+  final TextDirection? textDirection;
+
+  /// Called to build the main content for [EdgeInsetsOverlaySlot.child],
+  /// receiving the layout [constraints] and computed [metrics] of active edge widgets.
+  final EdgeInsetsOverlayMetricsWidgetBuilder builder;
+
+  /// Builds the content child wrapped in a [LayoutBuilder] that unpacks
+  /// the overlay metrics from [_EdgeInsetsOverlayBoxConstraints].
+  @protected
+  Widget buildContent(BuildContext context) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        assert(
+          constraints is _EdgeInsetsOverlayBoxConstraints,
+          '$runtimeType builder received unexpected BoxConstraints. '
+          'Expected _EdgeInsetsOverlayBoxConstraints containing EdgeInsetsOverlayMetrics.',
+        );
+        if (constraints is! _EdgeInsetsOverlayBoxConstraints) {
+          return const SizedBox.shrink();
+        }
+
+        return builder(context, constraints, constraints.metrics);
+      },
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<EdgeInsetsOverlaySide?>('top', top, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<EdgeInsetsOverlaySide?>('bottom', bottom, defaultValue: null),
+    );
+    properties.add(
+      IterableProperty<EdgeInsetsOverlaySlot>(
+        'paintOrder',
+        paintOrder,
+        defaultValue: EdgeInsetsOverlaySlot.values,
+      ),
+    );
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(
+      ObjectFlagProperty<EdgeInsetsOverlayMetricsWidgetBuilder>.has('builder', builder),
+    );
+  }
+}
 
 /// A widget that positions edge-docked side widgets and a main content widget
 /// built by [builder], providing the measured overlay dimensions as [EdgeInsets].
@@ -328,10 +533,21 @@ typedef EdgeInsetsOverlayMetricsWidgetBuilder = Widget Function(
 ///
 /// See also:
 ///
+///  * [EdgeInsetsDirectionalOverlay], which positions overlays along reading-direction-aware
+///    edges ([EdgeInsetsDirectionalOverlay.start] and [EdgeInsetsDirectionalOverlay.end]).
+///  * [EdgeInsetsGeometryOverlay], the abstract base class for overlay widgets.
+///  * [EdgeInsetsOverlaySide], which configures an edge overlay along with its alignment.
+///  * [EdgeInsetsOverlayMetrics], which provides full layout geometry to [EdgeInsetsOverlay.metrics].
 ///  * [SafeArea], which insets its child to avoid operating system intrusions.
-class EdgeInsetsOverlay extends StatelessWidget {
+class EdgeInsetsOverlay extends EdgeInsetsGeometryOverlay {
   /// Creates a widget that positions edge-docked side widgets and a content widget
   /// built by [builder].
+  ///
+  /// The [left], [top], [right], and [bottom] widgets are automatically wrapped in
+  /// an [EdgeInsetsOverlaySide] with default centered alignment.
+  ///
+  /// The [builder] receives the measured [EdgeInsets] representing the thickness of
+  /// each active edge overlay.
   EdgeInsetsOverlay({
     Key? key,
     Widget? left,
@@ -339,6 +555,7 @@ class EdgeInsetsOverlay extends StatelessWidget {
     Widget? right,
     Widget? bottom,
     List<EdgeInsetsOverlaySlot> paintOrder = EdgeInsetsOverlaySlot.values,
+    TextDirection? textDirection,
     required EdgeInsetsOverlayWidgetBuilder builder,
   }) : this.metrics(
          key: key,
@@ -347,6 +564,7 @@ class EdgeInsetsOverlay extends StatelessWidget {
          right: right != null ? .new(child: right) : null,
          bottom: bottom != null ? .new(child: bottom) : null,
          paintOrder: paintOrder,
+         textDirection: textDirection,
          builder:
              (BuildContext context, BoxConstraints constraints, EdgeInsetsOverlayMetrics metrics) {
                return builder(context, constraints, metrics.padding);
@@ -355,68 +573,42 @@ class EdgeInsetsOverlay extends StatelessWidget {
 
   /// Creates a widget that positions edge-docked side widgets and a content widget
   /// built by [builder] using explicit [EdgeInsetsOverlaySide] configurations.
+  ///
+  /// The [builder] receives full [EdgeInsetsOverlayMetrics], providing detailed size,
+  /// alignment, and bounding rectangle information for every edge overlay.
   const EdgeInsetsOverlay.metrics({
     super.key,
     this.left,
-    this.top,
+    super.top,
     this.right,
-    this.bottom,
-    this.paintOrder = EdgeInsetsOverlaySlot.values,
-    required this.builder,
+    super.bottom,
+    super.paintOrder = EdgeInsetsOverlaySlot.values,
+    super.textDirection,
+    required super.builder,
   });
 
   /// The overlay configuration to place at the left edge.
   final EdgeInsetsOverlaySide? left;
 
-  /// The overlay configuration to place at the top edge.
-  final EdgeInsetsOverlaySide? top;
-
   /// The overlay configuration to place at the right edge.
   final EdgeInsetsOverlaySide? right;
 
-  /// The overlay configuration to place at the bottom edge.
-  final EdgeInsetsOverlaySide? bottom;
-
-  /// The order in which the child and edge overlay widgets are painted and hit-tested.
-  ///
-  /// The widgets are painted from first to last in this list. Later widgets in the
-  /// list paint on top of earlier ones and receive hit test events first.
-  ///
-  /// Defaults to [EdgeInsetsOverlaySlot.values].
-  final List<EdgeInsetsOverlaySlot> paintOrder;
-
-  /// Called to build the main content for [EdgeInsetsOverlaySlot.child],
-  /// receiving the layout [constraints] and computed [metrics] of active edge widgets.
-  final EdgeInsetsOverlayMetricsWidgetBuilder builder;
-
   @override
   Widget build(BuildContext context) {
-    final Widget finalChild = LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        assert(
-          constraints is _EdgeInsetsOverlayBoxConstraints,
-          'EdgeInsetsOverlay builder received unexpected BoxConstraints. '
-          'Expected _EdgeInsetsOverlayBoxConstraints containing EdgeInsetsOverlayMetrics.',
-        );
-        if (constraints is! _EdgeInsetsOverlayBoxConstraints) {
-          return const SizedBox.shrink();
-        }
-
-        return builder(context, constraints, constraints.metrics);
-      },
-    );
+    final TextDirection? effectiveTextDirection = textDirection ?? Directionality.maybeOf(context);
 
     return _EdgeInsetsOverlay(
       left: left?.child,
       top: top?.child,
       right: right?.child,
       bottom: bottom?.child,
-      leftAlignment: left?.alignment ?? EdgeOverlayAlignment.center,
-      topAlignment: top?.alignment ?? EdgeOverlayAlignment.center,
-      rightAlignment: right?.alignment ?? EdgeOverlayAlignment.center,
-      bottomAlignment: bottom?.alignment ?? EdgeOverlayAlignment.center,
+      leftAlignment: left?.alignment ?? .center,
+      topAlignment: top?.alignment ?? .center,
+      rightAlignment: right?.alignment ?? .center,
+      bottomAlignment: bottom?.alignment ?? .center,
       paintOrder: paintOrder,
-      child: finalChild,
+      textDirection: effectiveTextDirection,
+      child: buildContent(context),
     );
   }
 
@@ -424,21 +616,136 @@ class EdgeInsetsOverlay extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<EdgeInsetsOverlaySide?>('left', left, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsOverlaySide?>('top', top, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsOverlaySide?>('right', right, defaultValue: null));
-    properties.add(
-      DiagnosticsProperty<EdgeInsetsOverlaySide?>('bottom', bottom, defaultValue: null),
+  }
+}
+
+/// A widget that positions edge-docked side widgets using reading-direction-aware
+/// edges ([start] and [end]) and a main content widget built by [builder],
+/// providing the measured overlay dimensions as [EdgeInsetsDirectional].
+///
+/// The ambient [Directionality] (or explicit [textDirection]) determines whether
+/// [start] corresponds to the left or right edge, and whether [end] corresponds
+/// to the right or left edge.
+///
+/// The content built by [builder] expands to fill the entire available space,
+/// extending across any provided [top], [bottom], [start], or [end] widgets.
+/// The [EdgeInsetsDirectional] passed to [builder] represents the exact dimensions
+/// of the active side overlay widgets.
+///
+/// The relative paint and hit-test order between the main content and the edge
+/// widgets is configurable via [paintOrder].
+///
+/// This allows descendants to explicitly adapt their padding or layout (e.g. for
+/// map viewports, lists, or custom painters) while respecting internationalization
+/// and reading direction.
+///
+/// See also:
+///
+///  * [EdgeInsetsOverlay], which positions overlays along physical edges ([EdgeInsetsOverlay.left] and [EdgeInsetsOverlay.right]).
+///  * [EdgeInsetsGeometryOverlay], the abstract base class for overlay widgets.
+///  * [EdgeInsetsOverlaySide], which configures an edge overlay along with its alignment.
+///  * [EdgeInsetsOverlayMetrics], which provides full layout geometry to [EdgeInsetsDirectionalOverlay.metrics].
+///  * [Directionality], which provides ambient text direction.
+///  * [SafeArea], which insets its child to avoid operating system intrusions.
+class EdgeInsetsDirectionalOverlay extends EdgeInsetsGeometryOverlay {
+  /// Creates a widget that positions edge-docked side widgets and a content widget
+  /// built by [builder] using reading-direction-aware edges.
+  ///
+  /// The [start], [top], [end], and [bottom] widgets are automatically wrapped in
+  /// an [EdgeInsetsOverlaySide] with default centered alignment.
+  ///
+  /// The [builder] receives the measured [EdgeInsetsDirectional] representing the
+  /// thickness of each active edge overlay.
+  EdgeInsetsDirectionalOverlay({
+    Key? key,
+    Widget? start,
+    Widget? top,
+    Widget? end,
+    Widget? bottom,
+    List<EdgeInsetsOverlaySlot> paintOrder = EdgeInsetsOverlaySlot.values,
+    TextDirection? textDirection,
+    required EdgeInsetsDirectionalOverlayWidgetBuilder builder,
+  }) : this.metrics(
+         key: key,
+         start: start != null ? .new(child: start) : null,
+         top: top != null ? .new(child: top) : null,
+         end: end != null ? .new(child: end) : null,
+         bottom: bottom != null ? .new(child: bottom) : null,
+         paintOrder: paintOrder,
+         textDirection: textDirection,
+         builder:
+             (BuildContext context, BoxConstraints constraints, EdgeInsetsOverlayMetrics metrics) {
+               return builder(context, constraints, metrics.directionalPadding);
+             },
+       );
+
+  /// Creates a widget that positions edge-docked side widgets and a content widget
+  /// built by [builder] using explicit [EdgeInsetsOverlaySide] configurations.
+  ///
+  /// The [builder] receives full [EdgeInsetsOverlayMetrics], providing detailed size,
+  /// alignment, and bounding rectangle information for every edge overlay.
+  const EdgeInsetsDirectionalOverlay.metrics({
+    super.key,
+    this.start,
+    super.top,
+    this.end,
+    super.bottom,
+    super.paintOrder = EdgeInsetsOverlaySlot.values,
+    super.textDirection,
+    required super.builder,
+  });
+
+  /// The overlay configuration to place at the start edge.
+  final EdgeInsetsOverlaySide? start;
+
+  /// The overlay configuration to place at the end edge.
+  final EdgeInsetsOverlaySide? end;
+
+  @override
+  Widget build(BuildContext context) {
+    assert(textDirection != null || debugCheckHasDirectionality(context));
+    final TextDirection effectiveTextDirection =
+        textDirection ?? Directionality.maybeOf(context) ?? TextDirection.ltr;
+
+    final Widget? left;
+    final Widget? right;
+    final EdgeOverlayAlignment? leftAlignment;
+    final EdgeOverlayAlignment? rightAlignment;
+
+    switch (effectiveTextDirection) {
+      case .ltr:
+        left = start?.child;
+        right = end?.child;
+        leftAlignment = start?.alignment;
+        rightAlignment = end?.alignment;
+      case .rtl:
+        left = end?.child;
+        right = start?.child;
+        leftAlignment = end?.alignment;
+        rightAlignment = start?.alignment;
+    }
+
+    return _EdgeInsetsOverlay(
+      left: left,
+      top: top?.child,
+      right: right,
+      bottom: bottom?.child,
+      leftAlignment: leftAlignment ?? .center,
+      topAlignment: top?.alignment ?? .center,
+      rightAlignment: rightAlignment ?? .center,
+      bottomAlignment: bottom?.alignment ?? .center,
+      paintOrder: paintOrder,
+      textDirection: effectiveTextDirection,
+      child: buildContent(context),
     );
-    properties.add(
-      IterableProperty<EdgeInsetsOverlaySlot>(
-        'paintOrder',
-        paintOrder,
-        defaultValue: EdgeInsetsOverlaySlot.values,
-      ),
-    );
-    properties.add(
-      ObjectFlagProperty<EdgeInsetsOverlayMetricsWidgetBuilder>.has('builder', builder),
-    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<EdgeInsetsOverlaySide?>('start', start, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsOverlaySide?>('end', end, defaultValue: null));
   }
 }
 
@@ -450,11 +757,12 @@ class _EdgeInsetsOverlay
     this.right,
     this.bottom,
     required this.child,
-    this.leftAlignment = EdgeOverlayAlignment.center,
-    this.topAlignment = EdgeOverlayAlignment.center,
-    this.rightAlignment = EdgeOverlayAlignment.center,
-    this.bottomAlignment = EdgeOverlayAlignment.center,
+    this.leftAlignment = .center,
+    this.topAlignment = .center,
+    this.rightAlignment = .center,
+    this.bottomAlignment = .center,
     this.paintOrder = EdgeInsetsOverlaySlot.values,
+    this.textDirection,
   });
 
   final Widget? left;
@@ -467,6 +775,7 @@ class _EdgeInsetsOverlay
   final EdgeOverlayAlignment rightAlignment;
   final EdgeOverlayAlignment bottomAlignment;
   final List<EdgeInsetsOverlaySlot> paintOrder;
+  final TextDirection? textDirection;
 
   @override
   Iterable<EdgeInsetsOverlaySlot> get slots => EdgeInsetsOverlaySlot.values;
@@ -490,6 +799,7 @@ class _EdgeInsetsOverlay
       rightAlignment: rightAlignment,
       bottomAlignment: bottomAlignment,
       paintOrder: paintOrder,
+      textDirection: textDirection,
     );
   }
 
@@ -500,7 +810,8 @@ class _EdgeInsetsOverlay
       ..topAlignment = topAlignment
       ..rightAlignment = rightAlignment
       ..bottomAlignment = bottomAlignment
-      ..paintOrder = paintOrder;
+      ..paintOrder = paintOrder
+      ..textDirection = textDirection;
   }
 }
 
@@ -512,6 +823,7 @@ class _RenderEdgeInsetsOverlay extends RenderBox
     this._rightAlignment = .center,
     this._bottomAlignment = .center,
     this._paintOrder = EdgeInsetsOverlaySlot.values,
+    this._textDirection,
   }) : _resolvedPaintOrder = <EdgeInsetsOverlaySlot>{
          ..._paintOrder,
          ...EdgeInsetsOverlaySlot.values,
@@ -532,8 +844,18 @@ class _RenderEdgeInsetsOverlay extends RenderBox
   /// The content child spanning the full area beneath overlays.
   RenderBox? get contentChild => childForSlot(.child);
 
+  // The following uses sync* because the list of children must be generated
+  // lazily in the order specified by _resolvedPaintOrder preventing massive
+  // memory overhead from creating a full list of children at once.
   @override
-  Iterable<RenderBox> get children => _resolvedPaintOrder.map(childForSlot).nonNulls;
+  Iterable<RenderBox> get children sync* {
+    for (final EdgeInsetsOverlaySlot slot in _resolvedPaintOrder) {
+      final RenderBox? child = childForSlot(slot);
+      if (child != null) {
+        yield child;
+      }
+    }
+  }
 
   /// The alignment configuration for the left edge overlay.
   EdgeOverlayAlignment get leftAlignment => _leftAlignment;
@@ -576,6 +898,17 @@ class _RenderEdgeInsetsOverlay extends RenderBox
       return;
     }
     _bottomAlignment = value;
+    markNeedsLayout();
+  }
+
+  /// The text direction used to resolve alignments along horizontal edges.
+  TextDirection? get textDirection => _textDirection;
+  TextDirection? _textDirection;
+  set textDirection(TextDirection? value) {
+    if (_textDirection == value) {
+      return;
+    }
+    _textDirection = value;
     markNeedsLayout();
   }
 
@@ -657,50 +990,34 @@ class _RenderEdgeInsetsOverlay extends RenderBox
     final RenderBox? bottomChild = this.bottomChild;
     final RenderBox? contentChild = this.contentChild;
 
-    Size leftSize = .zero;
-    Size topSize = .zero;
-    Size rightSize = .zero;
-    Size bottomSize = .zero;
-
     final sizes = <EdgeInsetsOverlaySlot, Size>{};
     final alignments = <EdgeInsetsOverlaySlot, EdgeOverlayAlignment>{};
 
     if (leftChild != null) {
       leftChild.layout(constraints.loosen(), parentUsesSize: true);
-      leftSize = leftChild.size;
-      sizes[.left] = leftSize;
+      sizes[.left] = leftChild.size;
       alignments[.left] = leftAlignment;
     }
 
     if (topChild != null) {
       topChild.layout(constraints.loosen(), parentUsesSize: true);
-      topSize = topChild.size;
-      sizes[.top] = topSize;
+      sizes[.top] = topChild.size;
       alignments[.top] = topAlignment;
     }
 
     if (rightChild != null) {
       rightChild.layout(constraints.loosen(), parentUsesSize: true);
-      rightSize = rightChild.size;
-      sizes[.right] = rightSize;
+      sizes[.right] = rightChild.size;
       alignments[.right] = rightAlignment;
     }
 
     if (bottomChild != null) {
       bottomChild.layout(constraints.loosen(), parentUsesSize: true);
-      bottomSize = bottomChild.size;
-      sizes[.bottom] = bottomSize;
+      sizes[.bottom] = bottomChild.size;
       alignments[.bottom] = bottomAlignment;
     }
 
-    final EdgeInsets padding = .fromLTRB(
-      leftSize.width,
-      topSize.height,
-      rightSize.width,
-      bottomSize.height,
-    );
-
-    _metrics = .new(padding: padding, sizes: sizes, alignments: alignments);
+    _metrics = .new(sizes: sizes, alignments: alignments, textDirection: textDirection);
 
     if (contentChild != null) {
       contentChild.layout(
@@ -804,6 +1121,7 @@ class _RenderEdgeInsetsOverlay extends RenderBox
         defaultValue: EdgeInsetsOverlaySlot.values,
       ),
     );
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsOverlayMetrics>('metrics', metrics));
   }
 }
