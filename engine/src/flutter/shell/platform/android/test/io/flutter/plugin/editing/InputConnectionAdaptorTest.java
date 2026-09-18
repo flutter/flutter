@@ -1,5 +1,6 @@
 package io.flutter.plugin.editing;
 
+import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -22,6 +23,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.Selection;
@@ -35,6 +37,7 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.TextAttribute;
 import androidx.core.view.inputmethod.InputConnectionCompat;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -48,6 +51,7 @@ import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.util.FakeKeyEvent;
+import io.flutter.view.AccessibilityBridge;
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -66,6 +70,7 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowContentResolver;
 import org.robolectric.shadows.ShadowInputMethodManager;
+import org.robolectric.util.ReflectionHelpers;
 
 @Config(shadows = {InputConnectionAdaptorTest.TestImm.class})
 @RunWith(AndroidJUnit4.class)
@@ -1327,6 +1332,159 @@ public class InputConnectionAdaptorTest {
         editable,
         null,
         mockFlutterJNI);
+  }
+
+  private static InputConnectionAdaptor sampleInputConnectionAdaptorWithView(
+      View view, ListenableEditingState editable) {
+    if (view.getContext() == null) {
+      when(view.getContext()).thenReturn(ApplicationProvider.getApplicationContext());
+    }
+    TextInputChannel textInputChannel = mock(TextInputChannel.class);
+    ScribeChannel scribeChannel = mock(ScribeChannel.class);
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    return new InputConnectionAdaptor(
+        view,
+        0,
+        textInputChannel,
+        scribeChannel,
+        mock(KeyboardManager.class),
+        editable,
+        null,
+        mockFlutterJNI);
+  }
+
+  private static final int TEXT_CHANGE_TYPE_COMMITTED_BY_IME = 1;
+  private static final int TEXT_CHANGE_TYPE_IN_COMPOSITION = 2;
+  private static final int TEXT_CHANGE_TYPE_CONVERSION_SUGGESTION_SELECTED_BY_IME = 4;
+
+  @Test
+  public void testCommitText_withTextAttribute_callsAddImeTextChangeOnAPI37() {
+    int originalSdkInt = Build.VERSION.SDK_INT;
+    try {
+      ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", API_LEVELS.API_37);
+
+      AccessibilityBridge mockBridge = mock(AccessibilityBridge.class);
+      View mockView = mock(View.class);
+      when(mockView.getAccessibilityNodeProvider()).thenReturn(mockBridge);
+
+      ListenableEditingState editable = sampleEditable(0, 0, "");
+      InputConnectionAdaptor adaptor = sampleInputConnectionAdaptorWithView(mockView, editable);
+
+      TextAttribute textAttribute = new TextAttribute.Builder().build();
+
+      adaptor.commitText("hello", 1, textAttribute);
+
+      verify(mockBridge, times(1)).addImeTextChange("hello", TEXT_CHANGE_TYPE_COMMITTED_BY_IME);
+    } finally {
+      ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", originalSdkInt);
+    }
+  }
+
+  @Test
+  public void testCommitText_withNullTextAttribute_callsAddImeTextChangeOnAPI37() {
+    int originalSdkInt = Build.VERSION.SDK_INT;
+    try {
+      ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", API_LEVELS.API_37);
+
+      AccessibilityBridge mockBridge = mock(AccessibilityBridge.class);
+      View mockView = mock(View.class);
+      when(mockView.getAccessibilityNodeProvider()).thenReturn(mockBridge);
+
+      ListenableEditingState editable = sampleEditable(0, 0, "");
+      InputConnectionAdaptor adaptor = sampleInputConnectionAdaptorWithView(mockView, editable);
+
+      adaptor.commitText("hello", 1, null);
+
+      verify(mockBridge, times(1)).addImeTextChange("hello", TEXT_CHANGE_TYPE_COMMITTED_BY_IME);
+    } finally {
+      ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", originalSdkInt);
+    }
+  }
+
+  @Test
+  public void testSetComposingRegion_withTextAttribute_callsAddImeTextChangeOnAPI37() {
+    int originalSdkInt = Build.VERSION.SDK_INT;
+    try {
+      ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", API_LEVELS.API_37);
+
+      AccessibilityBridge mockBridge = mock(AccessibilityBridge.class);
+      View mockView = mock(View.class);
+      when(mockView.getAccessibilityNodeProvider()).thenReturn(mockBridge);
+
+      ListenableEditingState editable = sampleEditable(0, 0, "hello");
+      InputConnectionAdaptor adaptor = sampleInputConnectionAdaptorWithView(mockView, editable);
+
+      TextAttribute textAttribute = new TextAttribute.Builder().build();
+
+      adaptor.setComposingRegion(0, 5, textAttribute);
+
+      verify(mockBridge, times(1)).addImeTextChange("hello", TEXT_CHANGE_TYPE_IN_COMPOSITION);
+    } finally {
+      ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", originalSdkInt);
+    }
+  }
+
+  @Test
+  public void testSetComposingText_withTextAttribute_callsAddImeTextChangeOnAPI37() {
+    int originalSdkInt = Build.VERSION.SDK_INT;
+    try {
+      ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", API_LEVELS.API_37);
+
+      AccessibilityBridge mockBridge = mock(AccessibilityBridge.class);
+      View mockView = mock(View.class);
+      when(mockView.getAccessibilityNodeProvider()).thenReturn(mockBridge);
+
+      ListenableEditingState editable = sampleEditable(0, 0, "");
+      InputConnectionAdaptor adaptor = sampleInputConnectionAdaptorWithView(mockView, editable);
+
+      TextAttribute textAttribute = new TextAttribute.Builder().build();
+
+      adaptor.setComposingText("test", 1, textAttribute);
+
+      verify(mockBridge, times(1)).addImeTextChange("test", TEXT_CHANGE_TYPE_IN_COMPOSITION);
+    } finally {
+      ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", originalSdkInt);
+    }
+  }
+
+  @Test
+  public void testSetComposingText_withEmptyTextAndTextAttribute_callsAddImeTextChangeOnAPI37() {
+    int originalSdkInt = Build.VERSION.SDK_INT;
+    try {
+      ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", API_LEVELS.API_37);
+
+      AccessibilityBridge mockBridge = mock(AccessibilityBridge.class);
+      View mockView = mock(View.class);
+      when(mockView.getAccessibilityNodeProvider()).thenReturn(mockBridge);
+
+      ListenableEditingState editable = sampleEditable(0, 0, "initial");
+      InputConnectionAdaptor adaptor = sampleInputConnectionAdaptorWithView(mockView, editable);
+
+      TextAttribute textAttribute = new TextAttribute.Builder().build();
+
+      adaptor.setComposingText("", 1, textAttribute);
+
+      verify(mockBridge, times(1)).addImeTextChange("initial", TEXT_CHANGE_TYPE_IN_COMPOSITION);
+    } finally {
+      ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", originalSdkInt);
+    }
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_36)
+  public void testCommitText_withTextAttribute_doesNotCallAddImeTextChangePreAPI37() {
+    AccessibilityBridge mockBridge = mock(AccessibilityBridge.class);
+    View mockView = mock(View.class);
+    when(mockView.getAccessibilityNodeProvider()).thenReturn(mockBridge);
+
+    ListenableEditingState editable = sampleEditable(0, 0, "");
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptorWithView(mockView, editable);
+
+    TextAttribute textAttribute = new TextAttribute.Builder().build();
+
+    adaptor.commitText("hello", 1, textAttribute);
+
+    verify(mockBridge, never()).addImeTextChange(anyString(), anyInt());
   }
 
   private static class Emoji {
