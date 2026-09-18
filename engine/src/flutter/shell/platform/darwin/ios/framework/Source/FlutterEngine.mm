@@ -1190,10 +1190,9 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
        commitContentWithData:(NSData*)data
                     mimeType:(NSString*)mimeType
                   withClient:(int)client {
-  // The message the Android embedding sends for the same gesture, so both platforms arrive at
-  // TextInputClient.insertContent in one shape. The bytes travel as numbers because this channel is
-  // JSON, and `uri` is empty because a pasteboard item, unlike Android's content:// URI, has no
-  // name to give.
+  // Matches the message the Android embedder sends. The data is an array of numbers because this
+  // channel uses the JSON codec, and `uri` is empty because the pasteboard has no equivalent of
+  // Android's content:// URI.
   NSMutableArray<NSNumber*>* bytes = [NSMutableArray arrayWithCapacity:data.length];
   const uint8_t* buffer = static_cast<const uint8_t*>(data.bytes);
   for (NSUInteger i = 0; i < data.length; i++) {

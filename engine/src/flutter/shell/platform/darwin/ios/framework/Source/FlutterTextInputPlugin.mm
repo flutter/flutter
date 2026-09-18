@@ -792,6 +792,17 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 @property(nonatomic, readonly) UIView* hostView;
 @end
 
+// The pasteboard content to commit. `pasteboardType` is nil when there is nothing to commit.
+//
+// `mimeType` is the type the framework requested, not the preferred MIME type of
+// `pasteboardType`: image/jpg and image/jpeg share a UTType, and the framework only accepts the
+// string it requested.
+struct FlutterPasteboardContent {
+  NSUInteger itemIndex = 0;
+  NSString* pasteboardType = nil;
+  NSString* mimeType = nil;
+};
+
 @interface FlutterTextInputView ()
 @property(nonatomic, readonly, weak) FlutterTextInputPlugin* textInputPlugin;
 @property(nonatomic, copy) NSString* autofillId;
@@ -808,7 +819,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 @property(nonatomic, copy) NSString* temporarilyDeletedComposedCharacter;
 @property(nonatomic, assign) CGRect editMenuTargetRect;
 @property(nonatomic, strong) NSArray<NSDictionary*>* editMenuItems;
-// MIME types the framework side is willing to receive from a paste, from
+// The MIME types the framework accepts from a paste, from
 // ContentInsertionConfiguration.allowedMimeTypes. Empty when the field only accepts text.
 @property(nonatomic, copy) NSArray<NSString*>* contentCommitMimeTypes;
 
@@ -1367,9 +1378,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
   if (action == @selector(paste:)) {
-    // Non-string content is only pasteable into a field that asked for it, in a type it asked for.
-    // Anything else would reach the framework as a string it cannot make sense of.
-    return [UIPasteboard generalPasteboard].hasStrings || [self pasteboardTypeToCommit] != nil;
+    // Non-string content can only be pasted into a field that listed its MIME type.
+    return [UIPasteboard generalPasteboard].hasStrings ||
+           [self contentToCommit].pasteboardType != nil;
   } else if (action == @selector(copy:) || action == @selector(cut:) ||
              action == @selector(delete:)) {
     return [self textInRange:_selectedTextRange].length > 0;
@@ -1396,55 +1407,53 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)paste:(id)sender {
-  // Text first, so a pasteboard carrying both a picture and a caption for it keeps pasting what a
-  // text field has always pasted.
+  // Prefer text, so a pasteboard holding both text and an image pastes the text.
   NSString* pasteboardString = [UIPasteboard generalPasteboard].string;
   if (pasteboardString != nil) {
     [self insertText:pasteboardString];
     return;
   }
 
-  NSString* type = [self pasteboardTypeToCommit];
-  if (type == nil) {
+  FlutterPasteboardContent content = [self contentToCommit];
+  if (content.pasteboardType == nil) {
     return;
   }
-  NSData* data = [[UIPasteboard generalPasteboard] dataForPasteboardType:type];
-  if (data == nil) {
+  NSArray<NSData*>* data = [[UIPasteboard generalPasteboard]
+      dataForPasteboardType:content.pasteboardType
+                  inItemSet:[NSIndexSet indexSetWithIndex:content.itemIndex]];
+  if (data.firstObject == nil) {
     return;
   }
   [self.textInputDelegate flutterTextInputView:self
-                         commitContentWithData:data
-                                      mimeType:[self mimeTypeForPasteboardType:type]
+                         commitContentWithData:data.firstObject
+                                      mimeType:content.mimeType
                                     withClient:_textInputClient];
 }
 
-// The pasteboard type to hand to the framework, or nil when the pasteboard holds nothing this field
-// asked for. Types are tried in the order the framework listed them, so allowedMimeTypes doubles as
-// a preference order.
-- (NSString*)pasteboardTypeToCommit {
+// Returns the first pasteboard content matching one of the requested MIME types, in the order the
+// framework listed them.
+- (FlutterPasteboardContent)contentToCommit {
+  FlutterPasteboardContent content;
   if (self.contentCommitMimeTypes.count == 0) {
-    return nil;
+    return content;
   }
-  if (@available(iOS 14.0, *)) {
-    UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
-    for (NSString* mimeType in self.contentCommitMimeTypes) {
-      UTType* type = [UTType typeWithMIMEType:mimeType];
-      if (type != nil && [pasteboard containsPasteboardTypes:@[ type.identifier ]]) {
-        return type.identifier;
-      }
+  UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
+  for (NSString* mimeType in self.contentCommitMimeTypes) {
+    NSString* pasteboardType = [UTType typeWithMIMEType:mimeType].identifier;
+    if (pasteboardType == nil) {
+      continue;
+    }
+    // dataForPasteboardType: without an item set only reads the first item, which may not be the
+    // one that has the type.
+    NSIndexSet* items = [pasteboard itemSetWithPasteboardTypes:@[ pasteboardType ]];
+    if (items.count > 0) {
+      content.itemIndex = items.firstIndex;
+      content.pasteboardType = pasteboardType;
+      content.mimeType = mimeType;
+      return content;
     }
   }
-  return nil;
-}
-
-- (NSString*)mimeTypeForPasteboardType:(NSString*)pasteboardType {
-  if (@available(iOS 14.0, *)) {
-    NSString* mimeType = [UTType typeWithIdentifier:pasteboardType].preferredMIMEType;
-    if (mimeType != nil) {
-      return mimeType;
-    }
-  }
-  return pasteboardType;
+  return content;
 }
 
 - (void)delete:(id)sender {

@@ -193,6 +193,7 @@ source_set("flutter_framework_source") {
     "CoreVideo.framework",
     "IOSurface.framework",
     "QuartzCore.framework",
+    "UniformTypeIdentifiers.framework",
     "WebKit.framework",
     "UIKit.framework",
   ]
