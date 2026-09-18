@@ -98,12 +98,10 @@ class AndroidContextDynamicImpeller : public AndroidContext {
   // Signalled by |SetupImpellerContext| once a backend has been chosen.
   // Mutable so the const accessors above can wait on it.
   mutable fml::ManualResetWaitableEvent setup_complete_;
-#ifdef FML_DCHECK_IS_ON
   // The thread running |SetupImpellerContext|, recorded so |WaitForSetup| can
   // assert it is not being called from that same thread. Atomic because it is
   // read by waiters concurrently with the setup thread writing it.
   std::atomic<std::thread::id> setup_thread_id_;
-#endif
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidContextDynamicImpeller);
 };
