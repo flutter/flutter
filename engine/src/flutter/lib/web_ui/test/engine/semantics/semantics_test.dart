@@ -6533,17 +6533,31 @@ void _testLoadingSpinner() {
           label: 'Accessible child',
           rect: const ui.Rect.fromLTRB(0, 50, 100, 100),
         ),
+        tester.updateNode(
+          id: 3,
+          label: 'Blocked button',
+          flags: const ui.SemanticsFlags(
+            isButton: true,
+            isAccessibilityFocusBlocked: true,
+            isFocused: ui.Tristate.isFalse,
+          ),
+          rect: const ui.Rect.fromLTRB(0, 100, 100, 150),
+        ),
       ],
     );
     tester.apply();
 
     final SemanticsObject blockedContainer = tester.getSemanticsObject(0);
     final SemanticsObject blockedLeaf = tester.getSemanticsObject(1);
+    final SemanticsObject blockedButton = tester.getSemanticsObject(3);
     expect(blockedContainer.isFocusable, isFalse);
     expect(blockedContainer.element.getAttribute('role'), 'none');
     expect(blockedContainer.element.getAttribute('aria-label'), isNull);
     expect(blockedLeaf.element.getAttribute('aria-hidden'), 'true');
     expect(blockedLeaf.element.text, isEmpty);
+    expect(blockedButton.isFocusable, isFalse);
+    expect(blockedButton.element.getAttribute('aria-hidden'), 'true');
+    expect(blockedButton.element.getAttribute('tabindex'), isNull);
   });
 
   semantics().semanticsEnabled = false;

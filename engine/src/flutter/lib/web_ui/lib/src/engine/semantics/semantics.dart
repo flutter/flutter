@@ -893,6 +893,12 @@ abstract class SemanticRole {
   /// the object.
   @mustCallSuper
   void update() {
+    if (semanticsObject.isAccessibilityFocusBlocked && !semanticsObject.hasChildren) {
+      setAttribute('aria-hidden', 'true');
+    } else {
+      removeAttribute('aria-hidden');
+    }
+
     if (semanticsObject.isValidationResultDirty) {
       updateValidationResult();
     }
@@ -1077,15 +1083,12 @@ final class GenericRole extends SemanticRole {
     if (semanticsObject.isAccessibilityFocusBlocked) {
       if (semanticsObject.hasChildren) {
         setAriaRole('none');
-        removeAttribute('aria-hidden');
       } else {
         removeAttribute('role');
-        setAttribute('aria-hidden', 'true');
       }
       super.update();
       return;
     }
-    removeAttribute('aria-hidden');
 
     if (!semanticsObject.hasLabel) {
       // The node didn't get a more specific role, and it has no label. It is
