@@ -62,7 +62,7 @@ class DriveCommand extends RunCommandBase {
     @visibleForTesting this._flutterDriverFactory,
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
-    super.toolContext,
+    required super.toolContext,
     super.verboseHelp = false,
   }) {
     requiresPubspecYaml();
