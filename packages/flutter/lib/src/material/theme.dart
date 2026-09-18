@@ -274,6 +274,7 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
     super.duration = kThemeAnimationDuration,
     super.onEnd,
     required this.child,
+    super.animationBehavior,
   });
 
   /// Specifies the color and typography values for descendant widgets.

@@ -124,6 +124,7 @@ class CupertinoRadio<T> extends StatefulWidget {
     this.useCheckmarkStyle = false,
     this.enabled,
     this.groupRegistry,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// {@macro flutter.widget.RawRadio.value}
@@ -223,6 +224,11 @@ class CupertinoRadio<T> extends StatefulWidget {
   /// {@macro flutter.material.Radio.enabled}
   final bool? enabled;
 
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
+
   @override
   State<CupertinoRadio<T>> createState() => _CupertinoRadioState<T>();
 }
@@ -284,6 +290,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
       focusNode: _effectiveFocusNode,
       autofocus: widget.autofocus,
       enabled: _enabled,
+      animationBehavior: widget.animationBehavior,
       builder: (BuildContext context, ToggleableStateMixin state) {
         return _RadioPaint(
           activeColor: widget.activeColor,

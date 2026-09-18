@@ -246,6 +246,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.enableFeedback,
     this.landscapeLayout,
     this.useLegacyColorScheme = true,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(items.length >= 2),
        assert(
          items.every((BottomNavigationBarItem item) => item.label != null),
@@ -265,6 +266,11 @@ class BottomNavigationBar extends StatefulWidget {
   /// Defines the appearance of the button items that are arrayed within the
   /// bottom navigation bar.
   final List<BottomNavigationBarItem> items;
+
+  /// The behavior of the animation relative to the device's clock.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
 
   /// Called when one of the [items] is tapped.
   ///
@@ -799,8 +805,11 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     _circles.clear();
 
     _controllers = List<AnimationController>.generate(widget.items.length, (int index) {
-      return AnimationController(duration: kThemeAnimationDuration, vsync: this)
-        ..addListener(_rebuild);
+      return AnimationController(
+        duration: kThemeAnimationDuration,
+        vsync: this,
+        animationBehavior: widget.animationBehavior,
+      )..addListener(_rebuild);
     });
     _animations = List<CurvedAnimation>.generate(widget.items.length, (int index) {
       return CurvedAnimation(
@@ -868,7 +877,13 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   void _pushCircle(int index) {
     if (widget.items[index].backgroundColor != null) {
       _circles.add(
-        _Circle(state: this, index: index, color: widget.items[index].backgroundColor!, vsync: this)
+        _Circle(
+            state: this,
+            index: index,
+            color: widget.items[index].backgroundColor!,
+            vsync: this,
+            animationBehavior: widget.animationBehavior,
+          )
           ..controller.addStatusListener((AnimationStatus status) {
             if (status.isCompleted) {
               setState(() {
@@ -1188,8 +1203,13 @@ class _Circle {
     required this.index,
     required this.color,
     required TickerProvider vsync,
+    AnimationBehavior animationBehavior = AnimationBehavior.normal,
   }) {
-    controller = AnimationController(duration: kThemeAnimationDuration, vsync: vsync);
+    controller = AnimationController(
+      duration: kThemeAnimationDuration,
+      vsync: vsync,
+      animationBehavior: animationBehavior,
+    );
     animation = CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn);
     controller.forward();
   }

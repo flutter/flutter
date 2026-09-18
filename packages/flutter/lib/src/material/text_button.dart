@@ -92,6 +92,7 @@ class TextButton extends ButtonStyleButton {
     super.clipBehavior,
     super.statesController,
     super.isSemanticButton,
+    super.animationBehavior,
     required Widget super.child,
   }) : _addPadding = false;
 
@@ -117,6 +118,7 @@ class TextButton extends ButtonStyleButton {
     super.autofocus = false,
     super.clipBehavior = Clip.none,
     super.statesController,
+    super.animationBehavior,
     Widget? icon,
     required Widget label,
     IconAlignment? iconAlignment,

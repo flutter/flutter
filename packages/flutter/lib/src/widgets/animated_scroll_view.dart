@@ -89,6 +89,7 @@ class AnimatedList extends _AnimatedScrollView {
     super.padding,
     super.clipBehavior = Clip.hardEdge,
     super.scrollCacheExtent,
+    super.animationBehavior,
   }) : assert(initialItemCount >= 0);
 
   /// A scrolling container that animates items with separators when they are inserted or removed.
@@ -174,6 +175,7 @@ class AnimatedList extends _AnimatedScrollView {
     super.padding,
     super.clipBehavior = Clip.hardEdge,
     super.scrollCacheExtent,
+    super.animationBehavior,
   }) : assert(initialItemCount >= 0),
        super(
          initialItemCount: _computeChildCountWithSeparators(initialItemCount),
@@ -320,6 +322,7 @@ class AnimatedListState extends _AnimatedScrollViewState<AnimatedList> {
         key: _sliverAnimatedMultiBoxKey,
         itemBuilder: widget.itemBuilder,
         initialItemCount: widget.initialItemCount,
+        animationBehavior: widget.animationBehavior,
       ),
       widget.scrollDirection,
     );
@@ -398,6 +401,7 @@ class AnimatedGrid extends _AnimatedScrollView {
     super.padding,
     super.clipBehavior = Clip.hardEdge,
     super.scrollCacheExtent,
+    super.animationBehavior,
   }) : assert(initialItemCount >= 0);
 
   /// {@template flutter.widgets.AnimatedGrid.gridDelegate}
@@ -533,6 +537,7 @@ class AnimatedGridState extends _AnimatedScrollViewState<AnimatedGrid> {
         gridDelegate: widget.gridDelegate,
         itemBuilder: widget.itemBuilder,
         initialItemCount: widget.initialItemCount,
+        animationBehavior: widget.animationBehavior,
       ),
       widget.scrollDirection,
     );
@@ -556,7 +561,11 @@ abstract class _AnimatedScrollView extends StatefulWidget {
     this.padding,
     this.clipBehavior = Clip.hardEdge,
     this.scrollCacheExtent,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(initialItemCount >= 0);
+
+  /// {@macro flutter.animation.AnimationController.animationBehavior}
+  final AnimationBehavior animationBehavior;
 
   /// {@template flutter.widgets.AnimatedScrollView.itemBuilder}
   /// Called, as needed, to build children widgets.
@@ -993,6 +1002,7 @@ class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
     required super.itemBuilder,
     super.findChildIndexCallback,
     super.initialItemCount = 0,
+    super.animationBehavior,
   }) : assert(initialItemCount >= 0);
 
   @override
@@ -1140,6 +1150,7 @@ class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
     required this.gridDelegate,
     super.findChildIndexCallback,
     super.initialItemCount = 0,
+    super.animationBehavior,
   }) : assert(initialItemCount >= 0);
 
   @override
@@ -1261,7 +1272,11 @@ abstract class _SliverAnimatedMultiBoxAdaptor extends StatefulWidget {
     required this.itemBuilder,
     this.findChildIndexCallback,
     this.initialItemCount = 0,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(initialItemCount >= 0);
+
+  /// {@macro flutter.animation.AnimationController.animationBehavior}
+  final AnimationBehavior animationBehavior;
 
   /// {@macro flutter.widgets.AnimatedScrollView.itemBuilder}
   final AnimatedItemBuilder itemBuilder;
@@ -1386,7 +1401,11 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
       }
     }
 
-    final controller = AnimationController(duration: duration, vsync: this);
+    final controller = AnimationController(
+      duration: duration,
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
     final incomingItem = _ActiveItem.incoming(controller, itemIndex);
     setState(() {
       _incomingItems
@@ -1431,7 +1450,12 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
     final _ActiveItem? incomingItem = _removeActiveItemAt(_incomingItems, itemIndex);
     final AnimationController controller =
         incomingItem?.controller ??
-        AnimationController(duration: duration, value: 1.0, vsync: this);
+        AnimationController(
+          duration: duration,
+          value: 1.0,
+          vsync: this,
+          animationBehavior: widget.animationBehavior,
+        );
     final outgoingItem = _ActiveItem.outgoing(controller, itemIndex, builder);
     setState(() {
       _outgoingItems

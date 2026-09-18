@@ -94,6 +94,7 @@ class Scrollbar extends StatelessWidget {
     this.notificationPredicate,
     this.interactive,
     this.scrollbarOrientation,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// {@macro flutter.widgets.Scrollbar.child}
@@ -149,6 +150,9 @@ class Scrollbar extends StatelessWidget {
   /// {@macro flutter.widgets.Scrollbar.scrollbarOrientation}
   final ScrollbarOrientation? scrollbarOrientation;
 
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  final AnimationBehavior animationBehavior;
+
   @override
   Widget build(BuildContext context) {
     if (Theme.of(context).platform == TargetPlatform.iOS) {
@@ -161,6 +165,7 @@ class Scrollbar extends StatelessWidget {
         controller: controller,
         notificationPredicate: notificationPredicate,
         scrollbarOrientation: scrollbarOrientation,
+        animationBehavior: animationBehavior,
         child: child,
       );
     }
@@ -173,6 +178,7 @@ class Scrollbar extends StatelessWidget {
       notificationPredicate: notificationPredicate,
       interactive: interactive,
       scrollbarOrientation: scrollbarOrientation,
+      animationBehavior: animationBehavior,
       child: child,
     );
   }
@@ -189,6 +195,7 @@ class _MaterialScrollbar extends RawScrollbar {
     ScrollNotificationPredicate? notificationPredicate,
     super.interactive,
     super.scrollbarOrientation,
+    super.animationBehavior,
   }) : super(
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
@@ -317,6 +324,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     _hoverAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
+      animationBehavior: widget.animationBehavior,
     );
     _hoverAnimationController.addListener(() {
       updateScrollbarPainter();

@@ -65,7 +65,13 @@ class SliverFloatingHeader extends StatefulWidget {
   /// Create a floating header sliver that animates into view when the user
   /// scrolls forward, and disappears the user starts scrolling in the
   /// opposite direction.
-  const SliverFloatingHeader({super.key, this.animationStyle, this.snapMode, required this.child});
+  const SliverFloatingHeader({
+    super.key,
+    this.animationStyle,
+    this.snapMode,
+    this.animationBehavior = AnimationBehavior.normal,
+    required this.child,
+  });
 
   /// Non null properties override the default durations (300ms) and
   /// curves (Curves.easeInOut) for subsequent header animations.
@@ -79,6 +85,11 @@ class SliverFloatingHeader extends StatefulWidget {
   /// The default is [FloatingHeaderSnapMode.overlay]. This parameter doesn't
   /// modify an animation in progress, just subsequent animations.
   final FloatingHeaderSnapMode? snapMode;
+
+  /// The animation behavior for the [AnimationController] created when snapping.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
 
   /// The widget contained by this sliver.
   final Widget child;
@@ -97,6 +108,7 @@ class _SliverFloatingHeaderState extends State<SliverFloatingHeader>
       vsync: this,
       animationStyle: widget.animationStyle,
       snapMode: widget.snapMode,
+      animationBehavior: widget.animationBehavior,
       child: _SnapTrigger(widget.child),
     );
   }
@@ -147,11 +159,18 @@ class _SnapTriggerState extends State<_SnapTrigger> {
 }
 
 class _SliverFloatingHeader extends SingleChildRenderObjectWidget {
-  const _SliverFloatingHeader({this.vsync, this.animationStyle, this.snapMode, super.child});
+  const _SliverFloatingHeader({
+    this.vsync,
+    this.animationStyle,
+    this.snapMode,
+    this.animationBehavior = AnimationBehavior.normal,
+    super.child,
+  });
 
   final TickerProvider? vsync;
   final AnimationStyle? animationStyle;
   final FloatingHeaderSnapMode? snapMode;
+  final AnimationBehavior animationBehavior;
 
   @override
   _RenderSliverFloatingHeader createRenderObject(BuildContext context) {
@@ -159,6 +178,7 @@ class _SliverFloatingHeader extends SingleChildRenderObjectWidget {
       vsync: vsync,
       animationStyle: animationStyle,
       snapMode: snapMode,
+      animationBehavior: animationBehavior,
     );
   }
 
@@ -167,12 +187,18 @@ class _SliverFloatingHeader extends SingleChildRenderObjectWidget {
     renderObject
       ..vsync = vsync
       ..animationStyle = animationStyle
-      ..snapMode = snapMode;
+      ..snapMode = snapMode
+      ..animationBehavior = animationBehavior;
   }
 }
 
 class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
-  _RenderSliverFloatingHeader({this._vsync, this.animationStyle, this.snapMode});
+  _RenderSliverFloatingHeader({
+    this._vsync,
+    this.animationStyle,
+    this.snapMode,
+    this.animationBehavior = AnimationBehavior.normal,
+  });
 
   late Animation<double> snapAnimation;
   AnimationController? snapController;
@@ -203,6 +229,8 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
 
   FloatingHeaderSnapMode? snapMode;
 
+  AnimationBehavior animationBehavior;
+
   // Called each time the position's isScrollingNotifier indicates that user scrolling has
   // stopped or started, i.e. if the sliver "is scrolling".
   void isScrollingUpdate(ScrollPosition position) {
@@ -216,7 +244,7 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
         _ => true,
       };
       if (headerIsPartiallyVisible) {
-        snapController ??= AnimationController(vsync: vsync!)
+        snapController ??= AnimationController(vsync: vsync!, animationBehavior: animationBehavior)
           ..addListener(() {
             if (effectiveScrollOffset != snapAnimation.value) {
               effectiveScrollOffset = snapAnimation.value;
