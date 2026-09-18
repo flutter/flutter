@@ -521,14 +521,18 @@ class RunCommand extends RunCommandBase {
     String? androidEmbeddingVersion;
     final hostLanguage = <String>[];
     if (anyAndroidDevices) {
-      final AndroidProject androidProject = FlutterProject.current().android;
+      final AndroidProject androidProject = toolContext.projectFactory
+          .fromDirectory(toolContext.fs.currentDirectory)
+          .android;
       if (androidProject.existsSync()) {
         hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
         androidEmbeddingVersion = androidProject.getEmbeddingVersion().toString().split('.').last;
       }
     }
     if (anyIOSDevices) {
-      final IosProject iosProject = FlutterProject.current().ios;
+      final IosProject iosProject = toolContext.projectFactory
+          .fromDirectory(toolContext.fs.currentDirectory)
+          .ios;
       if (iosProject.exists) {
         final FileSystem fs = toolContext.fs;
         final Iterable<File> swiftFiles = iosProject.hostAppRoot
