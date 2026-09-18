@@ -56,6 +56,9 @@ const int kSystemCodeSharingViolation = 32;
 /// On Windows this is error code 33: ERROR_LOCK_VIOLATION.
 const int kSystemCodeLockViolation = 33;
 
+/// On Windows this is error code 145: ERROR_DIR_NOT_EMPTY.
+const int kSystemCodeDirNotEmpty = 145;
+
 /// On Windows this is error code 1224: ERROR_USER_MAPPED_FILE.
 const int kSystemCodeUserMappedSectionOpened = 1224;
 
@@ -1034,6 +1037,7 @@ bool _isWindowsTransientLock(int errorCode) {
   return errorCode == kSystemCodeAccessDenied ||
       errorCode == kSystemCodeSharingViolation ||
       errorCode == kSystemCodeLockViolation ||
+      errorCode == kSystemCodeDirNotEmpty ||
       errorCode == kSystemCodeUserMappedSectionOpened;
 }
 
@@ -1328,8 +1332,10 @@ void _onFileSystemException({
   final int errorCode = exception.osError?.errorCode ?? 0;
   if (platform.isWindows) {
     _handleWindowsException(exception, failureMessage, errorCode);
-  } else if (platform.isLinux || platform.isMacOS) {
+  } else if (platform.isLinux) {
     _handlePosixException(exception, failureMessage, errorCode, posixPermissionSuggestion);
+  } else if (platform.isMacOS) {
+    _handleMacOSException(exception, failureMessage, errorCode, posixPermissionSuggestion);
   }
 }
 
@@ -1350,12 +1356,31 @@ void _onProcessException({
   }
 }
 
+String _formatNameTooLongMessage(Exception e, String? message) =>
+    '${message != null ? "$message. " : ""}The filename or path is too long.\n'
+    '$e\n'
+    'Consider moving your project to a shorter path.';
+
+String _formatDirectoryNotEmptyMessage(Exception e, String? message) =>
+    '${message != null ? "$message. " : ""}The directory is not empty.\n'
+    '$e\n'
+    'This can happen if another process or background service (such as Finder, '
+    'Spotlight, or cloud sync) modified the directory while it was being deleted. '
+    'Try running "flutter clean" and try again.';
+
+String _formatOperationNotSupportedMessage(Exception e, String? message) =>
+    '${message != null ? "$message. " : ""}The file system does not support this operation (such as symbolic links).\n'
+    '$e\n'
+    'Please ensure that the project and Flutter SDK are located on a file system '
+    'that supports symbolic links (for example, ext4, APFS, or NTFS rather than exFAT or FAT32).';
+
 void _handlePosixException(
   Exception e,
   String? message,
   int errorCode,
-  String? posixPermissionSuggestion,
-) {
+  String? posixPermissionSuggestion, {
+  bool isLinux = true,
+}) {
   // From:
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h
@@ -1363,8 +1388,13 @@ void _handlePosixException(
   const eperm = 1;
   const enoent = 2;
   const eacces = 13;
+  const enotdir = 20;
+  const eisdir = 21;
   const enospc = 28;
   const erofs = 30;
+  const enametoolong = 36;
+  const enotempty = 39;
+  const eopnotsupp = 95;
   // Catch errors and bail when:
   final String? errorMessage = switch (errorCode) {
     enoent =>
@@ -1372,6 +1402,14 @@ void _handlePosixException(
           '\n$e\n'
           'This can sometimes happen if the file was deleted or moved while the tool was running.'
           ' Try running "flutter clean" and try again.',
+    enotdir =>
+      '${message != null ? "$message. " : ""}A component of the path is not a directory.'
+          '\n$e\n'
+          'Please ensure that the directory path is valid and refers to a directory.',
+    eisdir =>
+      '${message != null ? "$message. " : ""}The path refers to a directory rather than a file.'
+          '\n$e\n'
+          'Please ensure that the file path is valid and refers to a file.',
     enospc =>
       '$message. The target device is full.'
           '\n$e\n'
@@ -1403,6 +1441,9 @@ void _handlePosixException(
       }
       return errorBuffer.toString();
     }(),
+    enametoolong when isLinux => _formatNameTooLongMessage(e, message),
+    enotempty when isLinux => _formatDirectoryNotEmptyMessage(e, message),
+    eopnotsupp when isLinux => _formatOperationNotSupportedMessage(e, message),
     _ => null,
   };
   _throwFileSystemException(errorMessage);
@@ -1417,6 +1458,9 @@ void _handleMacOSException(
   // https://github.com/apple/darwin-xnu/blob/main/bsd/dev/dtrace/scripts/errno.d
   const ebadarch = 86;
   const eagain = 35;
+  const eopnotsupp = 45;
+  const enametoolong = 63;
+  const enotempty = 66;
   if (errorCode == ebadarch) {
     final errorBuffer = StringBuffer();
     if (message != null) {
@@ -1442,7 +1486,14 @@ void _handleMacOSException(
     );
     throwToolExit(errorBuffer.toString());
   }
-  _handlePosixException(e, message, errorCode, posixPermissionSuggestion);
+  final String? errorMessage = switch (errorCode) {
+    eopnotsupp => _formatOperationNotSupportedMessage(e, message),
+    enametoolong => _formatNameTooLongMessage(e, message),
+    enotempty => _formatDirectoryNotEmptyMessage(e, message),
+    _ => null,
+  };
+  _throwFileSystemException(errorMessage);
+  _handlePosixException(e, message, errorCode, posixPermissionSuggestion, isLinux: false);
 }
 
 void _handleWindowsException(Exception e, String? message, int errorCode) {
@@ -1455,12 +1506,17 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   const kSharingViolation = 32;
   const kLockViolation = 33;
   const kDeviceFull = 112;
+  const kInvalidName = 123;
+  const kDirNotEmpty = 145;
+  const kFilenameExcedRange = 206;
   const kDeviceDoesNotExist = 433;
   const kSystemIntegrityPolicyViolation = 454;
   const kFatalDeviceHardwareError = 483;
   const kUserMappedSectionOpened = 1224;
   const kAccessDisabledByPolicy = 1260;
   const kPrivilegeNotHeld = 1314;
+  const kInvalidReparseData = 4392;
+  const kReparseTagInvalid = 4393;
   const kApplicationControlPolicyBlocked = 4551;
 
   // Catch errors and bail when:
@@ -1478,6 +1534,20 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
       '$message. The target device is full.'
           '\n$e\n'
           'Free up space and try again.',
+    kInvalidName =>
+      '${message != null ? "$message. " : ""}The filename, directory name, or volume label syntax is incorrect.'
+          '\n$e\n'
+          'Please ensure that the path does not contain invalid characters or syntax.',
+    kDirNotEmpty =>
+      '${message != null ? "$message. " : ""}The directory is not empty.'
+          '\n$e\n'
+          'This can happen if another program (such as an antivirus scanner or file indexer) '
+          'is holding an open handle to a file inside the directory. '
+          'Try closing other programs or running "flutter clean" and try again.',
+    kFilenameExcedRange =>
+      '${message != null ? "$message. " : ""}The filename or extension is too long.'
+          '\n$e\n'
+          'Consider moving your project to a shorter path or enabling Windows Long Paths support.',
     kSharingViolation || kLockViolation || kUserMappedSectionOpened =>
       '$message. The file is being used by another program.'
           '\n$e\n'
@@ -1490,6 +1560,10 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
       '$message. The device was not found.'
           '\n$e\n'
           'Verify the device is mounted and try again.',
+    kInvalidReparseData || kReparseTagInvalid =>
+      '${message != null ? "$message. " : ""}The file or directory contains an invalid NTFS reparse point (symbolic link or cloud storage placeholder).'
+          '\n$e\n'
+          'If this project is in a cloud-synced folder (such as OneDrive), ensure all files are downloaded locally ("Always keep on this device") or move the project to a local directory.',
     kApplicationControlPolicyBlocked ||
     kAccessDisabledByPolicy ||
     kSystemIntegrityPolicyViolation =>
