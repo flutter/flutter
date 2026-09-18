@@ -353,6 +353,9 @@ void PlatformViewAndroid::UpdateSemantics(
     int64_t view_id,
     const flutter::SemanticsNodeUpdates& update,
     const flutter::CustomAccessibilityActionUpdates& actions) {
+  if (engine_ && engine_->UpdateSemantics(view_id, update, actions)) {
+    return;
+  }
   platform_view_android_delegate_.UpdateSemantics(update, actions);
 }
 
