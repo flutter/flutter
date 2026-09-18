@@ -518,8 +518,6 @@ LRESULT HostWindow::HandleMessage(HWND hwnd,
       return 0;
 
     case WM_WINDOWPOSCHANGED: {
-      // Win32 does not propagate a move to a window's owned windows, so shift
-      // the satellites anchored to this window by the same delta.
       auto const* const window_pos = reinterpret_cast<WINDOWPOS*>(lparam);
       if (window_pos && !(window_pos->flags & SWP_NOMOVE)) {
         for (HostWindow* const owned : GetOwnedWindows()) {
