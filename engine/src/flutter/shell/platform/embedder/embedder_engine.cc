@@ -344,6 +344,31 @@ bool EmbedderEngine::ScheduleFrame() {
   return true;
 }
 
+bool EmbedderEngine::LoadDartDeferredLibrary(
+    intptr_t loading_unit_id,
+    std::unique_ptr<const fml::Mapping> snapshot_data,
+    std::unique_ptr<const fml::Mapping> snapshot_instructions) {
+  if (!IsValid()) {
+    return false;
+  }
+  static_cast<PlatformView::Delegate&>(*shell_).LoadDartDeferredLibrary(
+      loading_unit_id, std::move(snapshot_data),
+      std::move(snapshot_instructions));
+  return true;
+}
+
+bool EmbedderEngine::LoadDartDeferredLibraryError(
+    intptr_t loading_unit_id,
+    const std::string& error_message,
+    bool transient) {
+  if (!IsValid()) {
+    return false;
+  }
+  static_cast<PlatformView::Delegate&>(*shell_).LoadDartDeferredLibraryError(
+      loading_unit_id, error_message, transient);
+  return true;
+}
+
 Shell& EmbedderEngine::GetShell() {
   FML_DCHECK(shell_);
   return *shell_.get();

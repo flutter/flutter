@@ -567,7 +567,7 @@ bool DartIsolate::LoadLoadingUnit(
                          /*transient*/ true);
     return false;
   }
-  loading_unit_snapshots_.insert(dart_snapshot);
+  GetIsolateGroupData().AddLoadingUnitSnapshot(dart_snapshot);
   return true;
 }
 
