@@ -48,6 +48,17 @@ extern NSNotificationName const FlutterViewControllerShowHomeIndicator;
  */
 @property(nonatomic, assign, readwrite) BOOL prefersStatusBarHidden;
 
+/**
+ * @brief How much of the top safe area inset the status bar accounts for, sampled on
+ *        iOS 26+ while the status bar is visible.
+ *
+ *        On iOS 26+, UIKit no longer reduces safeAreaInsets.top when the status bar is
+ *        hidden. |setViewportMetricsPaddings| subtracts this value to correct the stale
+ *        inset. It is 0 where the status bar is not the sole contributor to the inset,
+ *        such as on notch/Dynamic Island devices. Exposed for unit testing.
+ */
+@property(nonatomic, assign, readwrite) CGFloat statusBarInset;
+
 @property(nonatomic, readonly) FlutterPlatformViewsController* platformViewsController;
 
 @property(nonatomic, strong) FlutterAccessibilityFeatures* accessibilityFeatures;
