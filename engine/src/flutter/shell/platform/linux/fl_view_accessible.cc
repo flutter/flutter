@@ -169,6 +169,8 @@ void fl_view_accessible_handle_update_semantics(
     fl_accessible_node_set_flags(atk_node, node->flags2);
     fl_accessible_node_set_actions(atk_node, node->actions);
     fl_accessible_node_set_name(atk_node, node->label);
+    atk_object_set_description(ATK_OBJECT(atk_node),
+                               node->hint != nullptr ? node->hint : "");
     fl_accessible_node_set_extents(
         atk_node, node->rect.left + node->transform.transX,
         node->rect.top + node->transform.transY,

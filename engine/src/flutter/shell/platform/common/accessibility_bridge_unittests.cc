@@ -73,6 +73,43 @@ TEST(AccessibilityBridgeTest, BasicTest) {
   EXPECT_EQ(child2_node->GetName(), "child 2");
 }
 
+TEST(AccessibilityBridgeTest, ExposesHintAsDescription) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+
+  FlutterSemanticsNode2 node = CreateSemanticsNode(0, "Export");
+  node.hint = "Writes the visible range to a PNG file";
+
+  bridge->AddFlutterSemanticsNodeUpdate(node);
+  bridge->CommitUpdates();
+
+  auto platform_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  ASSERT_TRUE(platform_node);
+  EXPECT_EQ(platform_node->GetData().GetStringAttribute(
+                ax::mojom::StringAttribute::kDescription),
+            "Writes the visible range to a PNG file");
+
+  node.hint = "Writes the selected range to a PNG file";
+  bridge->AddFlutterSemanticsNodeUpdate(node);
+  bridge->CommitUpdates();
+
+  platform_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  ASSERT_TRUE(platform_node);
+  EXPECT_EQ(platform_node->GetData().GetStringAttribute(
+                ax::mojom::StringAttribute::kDescription),
+            "Writes the selected range to a PNG file");
+
+  node.hint = "";
+  bridge->AddFlutterSemanticsNodeUpdate(node);
+  bridge->CommitUpdates();
+
+  platform_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  ASSERT_TRUE(platform_node);
+  EXPECT_TRUE(platform_node->GetData()
+                  .GetStringAttribute(ax::mojom::StringAttribute::kDescription)
+                  .empty());
+}
+
 // Flutter used to assume that the accessibility root had ID 0.
 // In a multi-view world, each view has its own accessibility root
 // with a globally unique node ID.
