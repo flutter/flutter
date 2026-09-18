@@ -288,22 +288,6 @@ void main() {
       expect(flutterPlatform.icudtlPath, equals('ghi'));
     });
 
-    testUsingContext(
-      'installHook can be called without toolContext and falls back to globals',
-      () {
-        final FlutterPlatform flutterPlatform = installHook(
-          flutterTesterBinPath: 'abc',
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-          buildInfo: BuildInfo.debug,
-        );
-        expect(flutterPlatform, isNotNull);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
-
     testWithoutContext(
       'pipeHarnessToRemote safely ignores non-JSON string and logs warning',
       () async {

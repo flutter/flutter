@@ -27,6 +27,7 @@ class CoverageCollector extends TestWatcher {
     this.resolver,
     this.testTimeRecorder,
     this.verbose = true,
+    // ignore: prefer_initializing_formals
   }) : _toolContext = toolContext;
 
   final ToolContext _toolContext;
