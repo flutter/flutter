@@ -119,6 +119,11 @@ jobs:
           insert = '\n'.join(lines)
           mac.write_text(s.replace(marker, insert + 'TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {', 1))
           PY
+      - name: Format modified tests
+        run: |
+          clang-format -i \
+            engine/src/flutter/shell/platform/linux/fl_view_accessible_test.cc \
+            engine/src/flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformNodeDelegateMacTest.mm
       - name: Check whitespace
         run: git diff --check
       - name: Check C and C++ formatting
