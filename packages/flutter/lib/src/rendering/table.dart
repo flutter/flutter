@@ -653,12 +653,7 @@ class RenderTable extends RenderBox {
       return -1;
     }
 
-    int logicalColumnIndexForVisualIndex(int visualIndex) {
-      return switch (textDirection) {
-        TextDirection.ltr => visualIndex,
-        TextDirection.rtl => _columns - visualIndex - 1,
-      };
-    }
+    final bool isRtl = textDirection == TextDirection.rtl;
 
     int findColumnIndex(double left) {
       if (_columnLefts == null) {
@@ -666,7 +661,7 @@ class RenderTable extends RenderBox {
       }
       for (int i = _columnLefts!.length - 1; i >= 0; i--) {
         if (_columnLefts!.elementAt(i) <= left) {
-          return logicalColumnIndexForVisualIndex(i);
+          return isRtl ? _columns - i - 1 : i;
         }
       }
       return -1;
@@ -718,7 +713,7 @@ class RenderTable extends RenderBox {
       final cells = <SemanticsNode>[];
 
       for (var visualX = 0; visualX < columns; visualX++) {
-        final int x = logicalColumnIndexForVisualIndex(visualX);
+        final int x = isRtl ? _columns - visualX - 1 : visualX;
         final List<SemanticsNode> rawChildrens = rawCells[y][x];
         if (rawChildrens.isEmpty) {
           continue;
