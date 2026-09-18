@@ -957,6 +957,11 @@ typedef SliverHitTest = bool Function(
   required double crossAxisPosition,
 });
 
+/// Method signature for hit testing a [RenderSliver] child with an out-of-band position.
+///
+/// Used by [HitTestResult.addWithOutOfBandPosition].
+typedef SliverHitTestWithOutOfBandPosition = HitTestWithOutOfBandPosition<SliverHitTestResult>;
+
 /// The result of performing a hit test on [RenderSliver]s.
 ///
 /// An instance of this class is provided to [RenderSliver.hitTest] to record
@@ -1895,7 +1900,10 @@ abstract class RenderSliver extends RenderObject {
 
 /// Mixin for [RenderSliver] subclasses that provides some utility functions.
 mixin RenderSliverHelpers implements RenderSliver {
-  bool _getRightWayUp(SliverConstraints constraints) {
+  /// Returns whether the sliver's natural scroll direction points in the
+  /// coordinate system's positive direction.
+  @protected
+  bool isRightWayUp(SliverConstraints constraints) {
     final bool reversed = axisDirectionIsReversed(constraints.axisDirection);
     return switch (constraints.growthDirection) {
       GrowthDirection.forward => !reversed,
@@ -1920,7 +1928,7 @@ mixin RenderSliverHelpers implements RenderSliver {
     required double mainAxisPosition,
     required double crossAxisPosition,
   }) {
-    final bool rightWayUp = _getRightWayUp(constraints);
+    final bool rightWayUp = isRightWayUp(constraints);
     double delta = childMainAxisPosition(child);
     final double crossAxisDelta = childCrossAxisPosition(child);
     double absolutePosition = mainAxisPosition - delta;
@@ -1960,7 +1968,7 @@ mixin RenderSliverHelpers implements RenderSliver {
   /// Calling this for a child that is not visible is not valid.
   @protected
   void applyPaintTransformForBoxChild(RenderBox child, Matrix4 transform) {
-    final bool rightWayUp = _getRightWayUp(constraints);
+    final bool rightWayUp = isRightWayUp(constraints);
     double delta = childMainAxisPosition(child);
     final double crossAxisDelta = childCrossAxisPosition(child);
     switch (constraints.axis) {
