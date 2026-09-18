@@ -1396,6 +1396,11 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
     });
 
     controller.forward().then<void>((_) {
+      // The state may be disposed before this runs, in which case the
+      // controller was already disposed in dispose().
+      if (!mounted) {
+        return;
+      }
       _removeActiveItemAt(_incomingItems, incomingItem.itemIndex)!.controller!.dispose();
     });
   }
@@ -1440,6 +1445,11 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
     });
 
     controller.reverse().then<void>((void value) {
+      // The state may be disposed before this runs, in which case the
+      // controller was already disposed in dispose().
+      if (!mounted) {
+        return;
+      }
       _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex)!.controller!.dispose();
 
       // Decrement the incoming and outgoing item indices to account
