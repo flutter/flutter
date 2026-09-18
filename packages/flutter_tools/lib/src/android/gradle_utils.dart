@@ -17,7 +17,6 @@ import '../base/version.dart';
 import '../base/version_range.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import 'android_sdk.dart';
 
@@ -1161,11 +1160,18 @@ String getGradleVersionFor(String agpV) {
 /// this will fail with a [ToolExit].
 void updateLocalProperties({
   required FlutterProject project,
+  Analytics? analytics,
+  AndroidSdk? androidSdk,
   BuildInfo? buildInfo,
+  FileSystemUtils? fileSystemUtils,
+  Logger? logger,
   bool requireAndroidSdk = true,
 }) {
-  if (requireAndroidSdk && globals.androidSdk == null) {
-    exitWithNoSdkMessage();
+  if (requireAndroidSdk && androidSdk == null) {
+    exitWithNoSdkMessage(
+      analytics: analytics ?? const NoOpAnalytics(),
+      logger: logger ?? BufferLogger.test(),
+    );
   }
   final File localProperties = project.android.localPropertiesFile;
   var changed = false;
@@ -1190,9 +1196,12 @@ void updateLocalProperties({
     changed = true;
   }
 
-  final AndroidSdk? androidSdk = globals.androidSdk;
+  final FileSystemUtils fsUtils =
+      fileSystemUtils ??
+      FileSystemUtils(fileSystem: project.directory.fileSystem, platform: const LocalPlatform());
+
   if (androidSdk != null) {
-    changeIfNecessary('sdk.dir', globals.fsUtils.escapePath(androidSdk.directory.path));
+    changeIfNecessary('sdk.dir', fsUtils.escapePath(androidSdk.directory.path));
   }
 
   changeIfNecessary('flutter.sdk', globals.fsUtils.escapePath(globals.cache.flutterRoot));
@@ -1201,13 +1210,13 @@ void updateLocalProperties({
     final String? buildName = validatedBuildNameForPlatform(
       TargetPlatform.android_arm,
       buildInfo.buildName ?? project.manifest.buildName,
-      globals.logger,
+      logger ?? BufferLogger.test(),
     );
     changeIfNecessary('flutter.versionName', buildName);
     final String? buildNumber = validatedBuildNumberForPlatform(
       TargetPlatform.android_arm,
       buildInfo.buildNumber ?? project.manifest.buildNumber,
-      globals.logger,
+      logger ?? BufferLogger.test(),
     );
     changeIfNecessary('flutter.versionCode', buildNumber);
   }

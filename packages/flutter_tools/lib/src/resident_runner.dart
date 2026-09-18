@@ -36,6 +36,7 @@ import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
+import 'context/tool_context.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -367,6 +368,7 @@ class FlutterDevice {
       processManager: processManager,
       artifacts: effectiveArtifacts,
       buildMode: buildInfo.mode,
+      toolContext: _FallbackToolContext(),
     );
     return devFS!.create();
   }
@@ -2217,4 +2219,32 @@ class DevToolsServerAddress {
   Uri? get uri {
     return Uri(scheme: 'http', host: host, port: port);
   }
+}
+
+// TODO(bkonyi): This will be removed in a follow up PR once ResidentRunner is
+// migrated to accept ToolContext directly. This fallback context delegates to
+// globals.* to maintain backwards compatibility.
+class _FallbackToolContext implements ToolContext {
+  _FallbackToolContext();
+
+  @override
+  Artifacts get artifacts => globals.artifacts!;
+
+  @override
+  Config get config => globals.config;
+
+  @override
+  FileSystem get fs => globals.fs;
+
+  @override
+  Logger get logger => globals.logger;
+
+  @override
+  OperatingSystemUtils get os => globals.os;
+
+  @override
+  ProcessManager get processManager => globals.processManager;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

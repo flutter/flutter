@@ -106,7 +106,7 @@ interface class FlutterTestRunner {
             logger: globals.logger,
             fileSystem: globals.fs,
             platform: globals.platform,
-            artifacts: globals.artifacts!,
+            artifacts: globals.artifacts,
             processManager: globals.processManager,
             config: globals.config,
             shutdownHooks: globals.shutdownHooks,
