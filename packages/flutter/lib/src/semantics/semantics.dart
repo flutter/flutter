@@ -112,8 +112,9 @@ typedef SemanticsUpdateCallback = void Function(SemanticsUpdate update);
 ///
 /// Use [ChildSemanticsConfigurationsResultBuilder] to generate the return
 /// value.
-typedef ChildSemanticsConfigurationsDelegate =
-    ChildSemanticsConfigurationsResult Function(List<SemanticsConfiguration>);
+typedef ChildSemanticsConfigurationsDelegate = ChildSemanticsConfigurationsResult Function(
+  List<SemanticsConfiguration>,
+);
 
 /// Controls how accessibility focus is blocked.
 ///
@@ -2807,16 +2808,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
   ///
   /// Each semantic node has a unique identifier that is assigned when the node
   /// is created.
-  SemanticsNode({this.key, VoidCallback? showOnScreen})
-    : _id = _generateNewId(),
-      _showOnScreen = showOnScreen;
+  SemanticsNode({this.key, this._showOnScreen}) : _id = _generateNewId();
 
   /// Creates a semantic node to represent the root of the semantics tree.
   ///
   /// The root node is assigned an identifier of zero.
-  SemanticsNode.root({this.key, VoidCallback? showOnScreen, required SemanticsOwner owner})
-    : _id = 0,
-      _showOnScreen = showOnScreen {
+  SemanticsNode.root({this.key, this._showOnScreen, required SemanticsOwner owner}) : _id = 0 {
     attach(owner);
   }
 

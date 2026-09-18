@@ -26,6 +26,7 @@ import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../../web/bootstrap.dart';
 import '../../web/compile.dart';
+import '../../web/content_hash.dart';
 import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
 import '../../web/web_constants.dart';
@@ -41,6 +42,10 @@ import 'native_assets.dart';
 const String _kBundledFallbackRobotoFamily = 'Roboto';
 const String _kBundledFallbackRobotoAsset = 'fonts/fallback/Roboto-Regular.ttf';
 const String _kFontManifestJsonFile = 'FontManifest.json';
+const String _kLegacyWebDeprecationWarning =
+    'dart:html, dart:js, and legacy JS interop libraries are deprecated and planned for removal '
+    'from the Dart SDK in a future release. Migrate your project to '
+    'package:web and dart:js_interop.';
 
 /// Generates an entry point for a web target.
 // Keep this in sync with build_runner/resident_web_runner.dart
@@ -119,27 +124,6 @@ class WebEntrypointTarget extends Target {
 String hashAndRenameWebOutput({required File file, File? sourceMapFile}) =>
     _hashAndRenameWebOutput(file: file, sourceMapFile: sourceMapFile);
 
-const List<String> _kKnownHashedExtensions = <String>[
-  '.js.map',
-  '.wasm.map',
-  '.mjs.map',
-  '.js',
-  '.wasm',
-  '.mjs',
-];
-
-String _computeHashedBasename(String oldBasename, String contentHash, FileSystem fileSystem) {
-  final String doubleExt = fileSystem.path.extension(oldBasename, 2);
-  final String ext = _kKnownHashedExtensions.contains(doubleExt)
-      ? doubleExt
-      : fileSystem.path.extension(oldBasename);
-  if (ext.isNotEmpty) {
-    final String stem = oldBasename.substring(0, oldBasename.length - ext.length);
-    return '$stem.$contentHash$ext';
-  }
-  return '$oldBasename.$contentHash';
-}
-
 String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
   if (!file.existsSync()) {
     return file.basename;
@@ -153,7 +137,7 @@ String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
       .convert(file.readAsBytesSync())
       .toString()
       .substring(0, 8);
-  final String newBasename = _computeHashedBasename(file.basename, contentHash, file.fileSystem);
+  final String newBasename = computeHashedBasename(file.basename, contentHash, file.fileSystem);
 
   // The source map shares the binary's hash so the pair stays discoverable as
   // '<binary>.map'. A `.wasm` binary embeds its map name in a binary custom
@@ -801,7 +785,9 @@ class Dart2WasmTarget extends Dart2WebTarget {
       logger.printWarning('Wasm dry run findings:');
       logger.printWarning(stdout);
       logger.printWarning(
-        'Consider addressing these issues to enable wasm builds. See docs for more info: '
+        'Consider addressing these issues to enable wasm builds. '
+        '$_kLegacyWebDeprecationWarning\n'
+        'See docs for more info: '
         'https://docs.flutter.dev/platform-integration/web/wasm\n',
       );
       return _DryRunOutcome.findings;
@@ -895,12 +881,9 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final privatePackages = <String>{};
     for (final Package package in packageConfigPackages.packages) {
       final String packageName = package.name;
-      if (package.root.pathSegments.where((String s) => s.isNotEmpty).toList() case [
-        ...,
-        'hosted',
-        _,
-        final packageFolder,
-      ] when packageFolder.startsWith('$packageName-')) {
+      if (package.root.pathSegments.where((String s) => s.isNotEmpty).toList()
+          case [..., 'hosted', _, final packageFolder]
+          when packageFolder.startsWith('$packageName-')) {
         // Hosted package directories in .pub-cache follow '<packageName>-<version>'.
         // Substring past the package name and hyphen to extract the version.
         hostedPackages[packageName] = packageFolder.substring(packageName.length + 1);
@@ -1004,7 +987,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
         _kLegacyImportErrorPattern.hasMatch(stderr)) {
       environment.logger.printStatus(
         'Note: WebAssembly compilation failed due to legacy web imports.\n'
-        'Migrate your project from dart:html and package:js to package:web and dart:js_interop.\n'
+        '$_kLegacyWebDeprecationWarning\n'
         '$kWasmErrorsMoreInfo',
       );
     }
@@ -1105,6 +1088,9 @@ class WebReleaseBundle extends Target {
 
     createVersionFile(environment, environment.defines);
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
+    if (outputDirectory.existsSync()) {
+      outputDirectory.deleteSync(recursive: true);
+    }
     outputDirectory.createSync(recursive: true);
 
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
@@ -1117,7 +1103,26 @@ class WebReleaseBundle extends Target {
     );
     final Depfile bundledDepfile = _bundleLocalRobotoFallback(environment, depfile);
     final DepfileService depfileService = environment.depFileService;
-    depfileService.writeToFile(bundledDepfile, environment.buildDir.childFile('flutter_assets.d'));
+
+    final bool webContentHash = compileTargets.any(
+      (Dart2WebTarget t) => t.compilerConfig.webContentHash,
+    );
+    if (webContentHash) {
+      final Map<String, File> renamedOutputs = hashWebAssets(outputDirectory);
+      final List<File> updatedOutputs = bundledDepfile.outputs.map((File f) {
+        final String normalizedPath = environment.fileSystem.path.normalize(f.path);
+        return renamedOutputs[normalizedPath] ?? renamedOutputs[f.path] ?? f;
+      }).toList();
+      depfileService.writeToFile(
+        Depfile(bundledDepfile.inputs, updatedOutputs),
+        environment.buildDir.childFile('flutter_assets.d'),
+      );
+    } else {
+      depfileService.writeToFile(
+        bundledDepfile,
+        environment.buildDir.childFile('flutter_assets.d'),
+      );
+    }
 
     final Directory webResources = environment.projectDir.childDirectory('web');
     final List<File> inputResourceFiles = webResources
