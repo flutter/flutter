@@ -12,7 +12,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
 import '../android/android_workflow.dart';
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -273,11 +272,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     FileSystem? fileSystem,
     Logger? logger,
   }) async {
-    final FileSystem effectiveFs = fileSystem ?? toolContext.fs;
-    final Logger effectiveLogger = logger ?? toolContext!.logger;
     final WebDevServerConfig fileConfig = await WebDevServerConfig.loadFromFile(
-      fileSystem: effectiveFs,
-      logger: effectiveLogger,
+      fileSystem: fileSystem ?? toolContext!.fs,
+      logger: logger ?? toolContext!.logger,
     );
 
     final int? webPort = getValue(WebOptions.webPort);
@@ -786,8 +783,6 @@ class RunCommand extends RunCommandBase {
     final ToolContext(
       :FileSystem fs,
       :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
       :Signals signals,
       :SystemClock systemClock,
       :Terminal terminal,
@@ -848,7 +843,7 @@ class RunCommand extends RunCommandBase {
       if (!await device.supportsRuntimeMode(buildMode)) {
         throwToolExit(
           '${buildMode.uppercaseFriendlyName}'
-          'mode is not supported by ${device.displayName}.',
+          ' mode is not supported by ${device.displayName}.',
         );
       }
       if (hotMode) {
@@ -865,13 +860,9 @@ class RunCommand extends RunCommandBase {
       for (final Device device in devices!)
         await FlutterDevice.create(
           device,
-          artifacts: toolContext.artifacts,
           buildInfo: buildInfo,
-          fileSystem: fs,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
           target: targetFile,
+          toolContext: toolContext,
           userIdentifier: userIdentifier,
         ),
     ];
