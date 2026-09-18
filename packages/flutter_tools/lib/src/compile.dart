@@ -700,6 +700,10 @@ abstract interface class ResidentCompiler {
   /// kernel file.
   void reset();
 
+  /// The Dart defines passed to the compiler.
+  List<String> get dartDefines => const <String>[];
+  set dartDefines(List<String> defines) {}
+
   Future<Object> shutdown();
 }
 
@@ -740,7 +744,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
        frontendServerStarterPath = buildInfo.frontendServerStarterPath,
        _logger = logger,
        _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem),
-       dartDefines = buildInfo.dartDefines,
+       // Make a copy, we might need to modify it later.
+       dartDefines = List<String>.from(buildInfo.dartDefines),
        // This is a URI, not a file path, so the forward slash is correct even on Windows.
        sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/',
        // Make a copy, we might need to modify it later.
@@ -774,7 +779,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final bool assumeInitializeFromDillUpToDate;
   final String? frontendServerStarterPath;
   final List<String>? extraFrontEndOptions;
-  final List<String> dartDefines;
+  @override
+  List<String> dartDefines;
   final String? librariesSpec;
 
   @override
