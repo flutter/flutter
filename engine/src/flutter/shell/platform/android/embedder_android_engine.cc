@@ -105,6 +105,11 @@ void EmbedderAndroidEngine::InitializeSubsystems(
       std::make_shared<android::AndroidPlatformViewsController>();
   surface_control_provider_ =
       std::make_shared<android::DefaultAndroidSurfaceControlProvider>();
+  hardware_buffer_provider_ =
+      std::make_shared<android::DefaultAndroidHardwareBufferProvider>();
+  vulkan_texture_provider_ =
+      std::make_shared<android::DefaultAndroidVulkanTextureProvider>();
+  engine_group_ = std::make_shared<android::AndroidEngineGroup>();
   compositor_delegate_ = std::make_shared<CompositorDelegate>(this);
   compositor_ = std::make_shared<AndroidCompositor>(surface_manager_,
                                                     compositor_delegate_);
