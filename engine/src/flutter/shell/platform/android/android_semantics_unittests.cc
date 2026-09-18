@@ -280,26 +280,7 @@ TEST(AndroidSemanticsTest, SemanticsNodePackingAndBinaryVerification) {
       .flags2 = &flags,
       .heading_level = 1,
       .identifier = "submit_btn_42",
-      .role = kFlutterSemanticsRoleNone,
-      .link_url = nullptr,
-      .locale = nullptr,
-      .min_value = nullptr,
-      .max_value = nullptr,
-      .max_value_length = 0,
-      .current_value_length = static_cast<int32_t>(std::strlen("Active")),
-      .traversal_parent = -1,
-      .hit_test_transform =
-          {
-              .scaleX = 1.0,
-              .skewX = 0.0,
-              .transX = 15.0,
-              .skewY = 0.0,
-              .scaleY = 1.0,
-              .transY = 25.0,
-              .pers0 = 0.0,
-              .pers1 = 0.0,
-              .pers2 = 1.0,
-          },
+      .role = kFlutterSemanticsRoleMenuItem,
   };
 
   const FlutterSemanticsNode2* nodes[] = {&node};
@@ -336,7 +317,8 @@ TEST(AndroidSemanticsTest, SemanticsNodePackingAndBinaryVerification) {
   EXPECT_FLOAT_EQ(bufF32[p++], 150.0f);  // scrollPosition
   EXPECT_FLOAT_EQ(bufF32[p++], 500.0f);  // scrollExtentMax
   EXPECT_FLOAT_EQ(bufF32[p++], 0.0f);    // scrollExtentMin
-  EXPECT_EQ(buf32[p++], 0);              // role
+  EXPECT_EQ(buf32[p++],
+            static_cast<int32_t>(kFlutterSemanticsRoleMenuItem));  // role
 
   // Identifier string index
   int32_t id_str_idx = buf32[p++];
@@ -511,6 +493,185 @@ TEST(AndroidSemanticsTest, MultithreadedConcurrentMapping) {
   for (auto& f : futures) {
     f.get();
   }
+}
+
+TEST(AndroidSemanticsTest, MapCustomActionsWithNullActions) {
+  FlutterSemanticsCustomAction2 action1 = {
+      .struct_size = sizeof(FlutterSemanticsCustomAction2),
+      .id = 42,
+      .override_action = kFlutterSemanticsActionTap,
+      .label = "Action One",
+      .hint = "Hint One",
+  };
+  FlutterSemanticsCustomAction2 action2 = {
+      .struct_size = sizeof(FlutterSemanticsCustomAction2),
+      .id = 84,
+      .override_action = kFlutterSemanticsActionLongPress,
+      .label = "Action Two",
+      .hint = "Hint Two",
+  };
+
+  const FlutterSemanticsCustomAction2* actions[] = {&action1, nullptr,
+                                                    &action2};
+  EncodedCustomAccessibilityActions result =
+      AndroidSemanticsMapper::MapCustomActions(actions, 3);
+
+  // Exactly 2 actions written; buffer size must be 2 * kBytesPerAction (32
+  // bytes), with no trailing zero-bytes that would corrupt action 0 in
+  // AccessibilityBridge.
+  EXPECT_EQ(result.buffer.size(), 2 * AndroidSemanticsMapper::kBytesPerAction);
+  EXPECT_EQ(result.strings.size(), 4u);
+
+  const int32_t* int32_buf =
+      reinterpret_cast<const int32_t*>(result.buffer.data());
+  EXPECT_EQ(int32_buf[0], 42);
+  EXPECT_EQ(int32_buf[1], static_cast<int32_t>(kFlutterSemanticsActionTap));
+  EXPECT_EQ(int32_buf[2], 0);  // label index
+  EXPECT_EQ(int32_buf[3], 1);  // hint index
+
+  EXPECT_EQ(int32_buf[4], 84);
+  EXPECT_EQ(int32_buf[5],
+            static_cast<int32_t>(kFlutterSemanticsActionLongPress));
+  EXPECT_EQ(int32_buf[6], 2);  // label index
+  EXPECT_EQ(int32_buf[7], 3);  // hint index
+}
+
+TEST(AndroidSemanticsTest, MapNodesWithInvalidStructSize) {
+  FlutterSemanticsNode2 invalid_node = {};
+  invalid_node.struct_size = AndroidSemanticsMapper::kMinSemanticsNode2Size - 1;
+  invalid_node.id = 1;
+
+  const FlutterSemanticsNode2* nodes[] = {&invalid_node};
+  EncodedSemanticsUpdate result = AndroidSemanticsMapper::MapNodes(nodes, 1);
+  EXPECT_TRUE(result.empty());
+  EXPECT_TRUE(result.buffer.empty());
+
+  FlutterSemanticsUpdate2 update = {
+      .struct_size = sizeof(FlutterSemanticsUpdate2) - 1,
+      .node_count = 1,
+      .nodes = const_cast<FlutterSemanticsNode2**>(nodes),
+  };
+  EncodedSemanticsBatch batch =
+      AndroidSemanticsMapper::MapSemanticsUpdate(update);
+  EXPECT_TRUE(batch.empty());
+}
+
+TEST(AndroidSemanticsTest, MapNodesWithUnknownStringAttributeType) {
+  FlutterStringAttribute unknown_attr = {
+      .struct_size = sizeof(FlutterStringAttribute),
+      .start = 2,
+      .end = 5,
+      .type = static_cast<FlutterStringAttributeType>(999),
+  };
+  const FlutterStringAttribute* attrs[] = {&unknown_attr};
+
+  FlutterSemanticsNode2 node = {};
+  node.struct_size = sizeof(FlutterSemanticsNode2);
+  node.id = 7;
+  node.label = "Test Label";
+  node.label_attributes = attrs;
+  node.label_attribute_count = 1;
+
+  const FlutterSemanticsNode2* nodes[] = {&node};
+  EncodedSemanticsUpdate result = AndroidSemanticsMapper::MapNodes(nodes, 1);
+  EXPECT_FALSE(result.empty());
+  // The buffer size must be exactly kBytesPerNode + 1 *
+  // kBytesPerStringAttribute
+  EXPECT_EQ(result.buffer.size(),
+            AndroidSemanticsMapper::kBytesPerNode +
+                AndroidSemanticsMapper::kBytesPerStringAttribute);
+
+  const int32_t* int32_buf =
+      reinterpret_cast<const int32_t*>(result.buffer.data());
+  // Node ID is at position 0
+  EXPECT_EQ(int32_buf[0], 7);
+}
+
+TEST(AndroidSemanticsTest, MapNodesCountsExceedingCeilings) {
+  FlutterSemanticsNode2 large_child_node = {};
+  large_child_node.struct_size = sizeof(FlutterSemanticsNode2);
+  large_child_node.child_count =
+      AndroidSemanticsMapper::kMaxSemanticsChildren + 1;
+
+  const FlutterSemanticsNode2* nodes[] = {&large_child_node};
+  EncodedSemanticsUpdate result = AndroidSemanticsMapper::MapNodes(nodes, 1);
+  EXPECT_TRUE(result.empty());
+
+  FlutterSemanticsNode2 large_action_node = {};
+  large_action_node.struct_size = sizeof(FlutterSemanticsNode2);
+  large_action_node.custom_accessibility_actions_count =
+      AndroidSemanticsMapper::kMaxSemanticsActions + 1;
+
+  const FlutterSemanticsNode2* action_nodes[] = {&large_action_node};
+  result = AndroidSemanticsMapper::MapNodes(action_nodes, 1);
+  EXPECT_TRUE(result.empty());
+}
+
+TEST(AndroidSemanticsTest, SemanticsNodeBackwardCompatibilityWithoutRole) {
+  FlutterSemanticsFlags flags = {};
+  flags.struct_size = sizeof(FlutterSemanticsFlags);
+
+  // Simulate a legacy engine sending a node without the role or
+  // reserved_padding fields.
+  FlutterSemanticsNode2 legacy_node = {};
+  legacy_node.struct_size = AndroidSemanticsMapper::kMinSemanticsNode2Size;
+  legacy_node.id = 100;
+  legacy_node.flags2 = &flags;
+  // Initialize scroll metrics to non-zero values to ensure any pointer offset
+  // misalignment fails immediately instead of matching zero-initialization.
+  legacy_node.scroll_position = 10.0;
+  legacy_node.scroll_extent_max = 20.0;
+  legacy_node.scroll_extent_min = -1.0;
+  legacy_node.identifier = "legacy_identifier";
+
+  const FlutterSemanticsNode2* nodes[] = {&legacy_node};
+  EncodedSemanticsUpdate update = AndroidSemanticsMapper::MapNodes(nodes, 1);
+  EXPECT_FALSE(update.empty());
+
+  const int32_t* buf32 = reinterpret_cast<const int32_t*>(update.buffer.data());
+  size_t p = 0;
+  EXPECT_EQ(buf32[p++], 100);  // id
+  p += 2;                      // skip flags (int64: 2 words)
+  p += 12;  // skip actions, values, selections, scroll metrics (12 words)
+  EXPECT_EQ(buf32[p++],
+            0);  // role must fall back to kFlutterSemanticsRoleNone (0)
+
+  // Verify identifier string index is immediately next in buffer
+  int32_t id_str_idx = buf32[p++];
+  ASSERT_GE(id_str_idx, 0);
+  EXPECT_EQ(update.strings[id_str_idx], "legacy_identifier");
+
+  // Test that an invalid struct_size smaller than the minimum is rejected.
+  legacy_node.struct_size = AndroidSemanticsMapper::kMinSemanticsNode2Size - 1;
+  EncodedSemanticsUpdate invalid_update =
+      AndroidSemanticsMapper::MapNodes(nodes, 1);
+  EXPECT_TRUE(invalid_update.empty());
+}
+
+TEST(AndroidSemanticsTest, SemanticsNodeRoleOutOfBoundsSanitization) {
+  FlutterSemanticsFlags flags = {};
+  flags.struct_size = sizeof(FlutterSemanticsFlags);
+
+  // Test that out-of-bounds role values (> kFlutterSemanticsRoleRegion)
+  // are sanitized to kFlutterSemanticsRoleNone (0) to prevent JVM array
+  // indexing crashes.
+  FlutterSemanticsNode2 out_of_bounds_node = {};
+  out_of_bounds_node.struct_size = sizeof(FlutterSemanticsNode2);
+  out_of_bounds_node.id = 101;
+  out_of_bounds_node.flags2 = &flags;
+  out_of_bounds_node.role = static_cast<FlutterSemanticsRole>(999);
+  out_of_bounds_node.identifier = "sanitized_node";
+
+  const FlutterSemanticsNode2* nodes[] = {&out_of_bounds_node};
+  EncodedSemanticsUpdate update = AndroidSemanticsMapper::MapNodes(nodes, 1);
+  EXPECT_FALSE(update.empty());
+
+  const int32_t* buf32 = reinterpret_cast<const int32_t*>(update.buffer.data());
+  size_t p = 0;
+  EXPECT_EQ(buf32[p++], 101);  // id
+  p += 2;                      // skip flags (2 words)
+  p += 12;                     // skip 12 words
+  EXPECT_EQ(buf32[p++], 0);    // role must be sanitized to 0
 }
 
 }  // namespace testing
