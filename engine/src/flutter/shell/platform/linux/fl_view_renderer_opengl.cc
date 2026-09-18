@@ -4,8 +4,6 @@
 
 #include "flutter/shell/platform/linux/fl_view_renderer_opengl.h"
 
-#include <gdk/gdkwayland.h>
-
 #include "flutter/shell/platform/linux/fl_compositor_opengl.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_opengl_frame.h"
@@ -135,12 +133,7 @@ static void fl_view_renderer_opengl_realize(GtkWidget* widget) {
     return;
   }
 
-  // If using Wayland, then EGL is in use and we can access the frame
-  // from the Flutter context using EGLImage. If not (i.e. X11 using GLX)
-  // then we have to copy the texture via the CPU.
-  gboolean shareable =
-      GDK_IS_WAYLAND_DISPLAY(gtk_widget_get_display(GTK_WIDGET(self)));
-  self->frame = fl_opengl_frame_new(shareable);
+  self->frame = fl_opengl_frame_new();
   self->task_runner =
       FL_TASK_RUNNER(g_object_ref(fl_engine_get_task_runner(self->engine)));
   self->compositor =
@@ -169,6 +162,15 @@ static gboolean fl_view_renderer_opengl_draw(GtkWidget* widget, cairo_t* cr) {
     wait_for_frame(self, window, scale_factor);
   }
 
+  // The frame is drawn from an OpenGL texture, so make a context current that
+  // can access it. This is deliberately not cleared once the frame is drawn -
+  // GTK makes the context it needs current before using OpenGL but doesn't
+  // check that this succeeded, and then uses whatever context is current. If
+  // that is nothing it dereferences NULL and crashes.
+  //
+  // Leaving this context current gives GTK one to fall back on. It is created
+  // on the same window and shares with the context GTK would have used itself,
+  // so GTK can safely draw with it.
   if (self->render_context != nullptr) {
     gdk_gl_context_make_current(self->render_context);
   }
@@ -179,10 +181,6 @@ static gboolean fl_view_renderer_opengl_draw(GtkWidget* widget, cairo_t* cr) {
     size_t height = gdk_window_get_height(window) * scale_factor;
     result = fl_opengl_frame_draw(self->frame, cr, window, scale_factor, width,
                                   height);
-  }
-
-  if (self->render_context != nullptr) {
-    gdk_gl_context_clear_current();
   }
 
   g_mutex_unlock(&self->frame_mutex);

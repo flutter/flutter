@@ -290,6 +290,8 @@ void TestBindUniformBufferRange(size_t buffer_view_length,
 
   const GLuint kProgram = 1;
 
+  ON_CALL(*mock_gles_impl, IsProgram(kProgram))
+      .WillByDefault(::testing::Return(GL_TRUE));
   ON_CALL(*mock_gles_impl,
           GetProgramiv(/*program=*/kProgram,
                        /*pname=*/GL_ACTIVE_UNIFORM_BLOCKS, /*params=*/_))
