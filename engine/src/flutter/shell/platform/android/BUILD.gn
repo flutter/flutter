@@ -52,6 +52,7 @@ executable("flutter_shell_native_unittests") {
     "android_surface_manager_unittests.cc",
     "android_task_runners_unittests.cc",
     "apk_asset_provider_unittests.cc",
+    "embedder_android_engine_unittests.cc",
     "flutter_shell_native_unittests.cc",
     "image_lru_unittests.cc",
     "platform_view_android_jni_impl_unittests.cc",
