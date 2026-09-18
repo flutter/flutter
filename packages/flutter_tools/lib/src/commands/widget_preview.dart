@@ -25,6 +25,7 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/analysis.dart';
+import '../devfs.dart';
 import '../device.dart';
 import '../features.dart';
 import '../isolated/resident_web_runner.dart';
@@ -283,6 +284,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   );
 
   /// The currently running instance of the widget preview scaffold.
+  @visibleForTesting
+  ResidentRunner? get widgetPreviewApp => _widgetPreviewApp;
+  @visibleForTesting
+  set widgetPreviewApp(ResidentRunner? app) => _widgetPreviewApp = app;
   ResidentRunner? _widgetPreviewApp;
 
   /// The location of the widget_preview_scaffold for the current execution of the command.
@@ -447,10 +452,25 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
   }
 
+  @visibleForTesting
+  Future<OperationResult?> handleReload() async {
+    final OperationResult? result = await _widgetPreviewApp?.restart();
+    if (result case OperationResult(
+      isOk: false,
+      updateFSReport: UpdateFSReport(hotReloadRejected: true),
+    )) {
+      logger.printStatus(
+        'Hot reload rejected due to unsupported changes. Performing hot restart instead.',
+      );
+      return _widgetPreviewApp?.restart(fullRestart: true);
+    }
+    return result;
+  }
+
   void onLegacyChangeDetected(PreviewDependencyGraph previews) {
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(previews);
     logger.printStatus('Triggering reload based on change to preview set: $previews');
-    _widgetPreviewApp?.restart();
+    unawaited(handleReload());
   }
 
   void onHotRestartRequest() {
@@ -470,7 +490,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   void onChangeDetected(FlutterWidgetPreviews update) {
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(update);
     logger.printStatus('Triggering reload based on update to script: ${update.scriptUris}');
-    _widgetPreviewApp?.restart();
+    unawaited(handleReload());
   }
 
   /// Configures the Dart Tooling Daemon connection.

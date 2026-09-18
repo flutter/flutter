@@ -20,10 +20,12 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
@@ -139,6 +141,24 @@ class FakeCustomBrowserDevice extends Fake implements ChromiumDevice {
 
   @override
   String get displayName => 'Dartium';
+}
+
+class FakeResidentRunner extends Fake implements ResidentRunner {
+  final restartCalls = <bool>[];
+  OperationResult Function(bool fullRestart)? onRestart;
+
+  @override
+  Future<OperationResult> restart({
+    bool fullRestart = false,
+    bool pause = false,
+    String? reason,
+  }) async {
+    restartCalls.add(fullRestart);
+    if (onRestart != null) {
+      return onRestart!(fullRestart);
+    }
+    return OperationResult.ok;
+  }
 }
 
 extension on String {
@@ -1040,6 +1060,90 @@ List<_i1.WidgetPreview> previews() => [
           platform: platform,
           stdio: mockStdio,
         ),
+      },
+    );
+
+    testUsingContext(
+      'triggers hot restart if hot reload is rejected',
+      () async {
+        final command = WidgetPreviewCommand(
+          toolContext: FakeToolContext(
+            fs: fs,
+            logger: logger,
+            processManager: loggingProcessManager,
+            platform: platform,
+            artifacts: Artifacts.test(),
+          ),
+        );
+        final startCommand = command.subcommands['start']! as WidgetPreviewStartCommand;
+        final fakeResidentRunner = FakeResidentRunner();
+        fakeResidentRunner.onRestart = (bool fullRestart) {
+          if (!fullRestart) {
+            return OperationResult(
+              1,
+              'Failed to recompile application.',
+              updateFSReport: UpdateFSReport(hotReloadRejected: true),
+            );
+          }
+          return OperationResult.ok;
+        };
+        startCommand.widgetPreviewApp = fakeResidentRunner;
+
+        final OperationResult? result = await startCommand.handleReload();
+
+        final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
+        expect(fakeResidentRunner.restartCalls, <bool>[false, true]);
+        expect(result?.isOk, isTrue);
+        expect(
+          bufferLogger.statusText,
+          contains(
+            'Hot reload rejected due to unsupported changes. Performing hot restart instead.',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => fs,
+        Logger: () => logger,
+        ProcessManager: () => loggingProcessManager,
+      },
+    );
+
+    testUsingContext(
+      'does not trigger hot restart if hot reload succeeds',
+      () async {
+        final command = WidgetPreviewCommand(
+          toolContext: FakeToolContext(
+            fs: fs,
+            logger: logger,
+            processManager: loggingProcessManager,
+            platform: platform,
+            artifacts: Artifacts.test(),
+          ),
+        );
+        final startCommand = command.subcommands['start']! as WidgetPreviewStartCommand;
+        final fakeResidentRunner = FakeResidentRunner();
+        startCommand.widgetPreviewApp = fakeResidentRunner;
+
+        final OperationResult? result = await startCommand.handleReload();
+
+        final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
+        expect(fakeResidentRunner.restartCalls, <bool>[false]);
+        expect(result?.isOk, isTrue);
+        expect(
+          bufferLogger.statusText,
+          isNot(
+            contains(
+              'Hot reload rejected due to unsupported changes. Performing hot restart instead.',
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => fs,
+        Logger: () => logger,
+        ProcessManager: () => loggingProcessManager,
       },
     );
   });
