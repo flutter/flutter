@@ -25,22 +25,17 @@ jobs:
           from pathlib import Path
           p = Path('packages/flutter/lib/src/rendering/table.dart')
           s = p.read_text()
-          old = '''    int logicalColumnIndexForVisualIndex(int visualIndex) {
-      return switch (textDirection) {
-        TextDirection.ltr => visualIndex,
-        TextDirection.rtl => _columns - visualIndex - 1,
-      };
-    }
-
-    int findColumnIndex(double left) {'''
-          new = '''    final bool isRtl = textDirection == TextDirection.rtl;
-
-    int findColumnIndex(double left) {'''
-          if old not in s:
-              raise SystemExit('helper block not found')
-          s = s.replace(old, new, 1)
-          s = s.replace('return logicalColumnIndexForVisualIndex(i);', 'return isRtl ? _columns - i - 1 : i;', 1)
-          s = s.replace('final int x = logicalColumnIndexForVisualIndex(visualX);', 'final int x = isRtl ? _columns - visualX - 1 : visualX;', 1)
+          start = s.index('    int logicalColumnIndexForVisualIndex(int visualIndex) {')
+          end = s.index('    int findColumnIndex(double left) {', start)
+          s = s[:start] + '    final bool isRtl = textDirection == TextDirection.rtl;\n\n' + s[end:]
+          old_call = 'return logicalColumnIndexForVisualIndex(i);'
+          if old_call not in s:
+              raise SystemExit('findColumnIndex mapping call not found')
+          s = s.replace(old_call, 'return isRtl ? _columns - i - 1 : i;', 1)
+          old_loop = 'final int x = logicalColumnIndexForVisualIndex(visualX);'
+          if old_loop not in s:
+              raise SystemExit('visual loop mapping call not found')
+          s = s.replace(old_loop, 'final int x = isRtl ? _columns - visualX - 1 : visualX;', 1)
           p.write_text(s)
           PY
       - name: Format changed Dart files
