@@ -780,6 +780,7 @@ class RunCommand extends RunCommandBase {
   Daemon createMachineDaemon() {
     final Analytics analytics = this.analytics;
     final ToolContext(
+      :Artifacts artifacts,
       :FileSystem fs,
       :Logger logger,
       :OutputPreferences outputPreferences,
@@ -790,18 +791,19 @@ class RunCommand extends RunCommandBase {
       :AnsiTerminal terminal,
     ) = _toolContext;
     return Daemon.createMachineDaemon(
-      featureFlags: featureFlags,
-      logger: logger,
-      stdio: stdio,
       analytics: analytics,
       androidSdk: _androidContext?.androidSdk,
       androidWorkflow: _androidWorkflow,
+      artifacts: artifacts,
       deviceManager: _deviceManager,
+      featureFlags: featureFlags,
       fileSystem: fs,
       java: _androidContext?.java,
+      logger: logger,
       outputPreferences: outputPreferences,
       platform: platform,
       processManager: processManager,
+      stdio: stdio,
       systemClock: systemClock,
       terminal: terminal,
     );
