@@ -40,15 +40,17 @@ String downgradePositionalArgumentErrorMessage(List<String> args) {
 /// Additionally, if they had switched channels to stable before trying to downgrade,
 /// the command would fail since there was no previously recorded stable version.
 class DowngradeCommand extends FlutterCommand {
-  DowngradeCommand({required ToolContext super.toolContext, super.verboseHelp})
-    : _cache = toolContext.cache,
-      _fileSystem = toolContext.fs,
+  DowngradeCommand({required ToolContext toolContext, bool verboseHelp = false})
+    : _terminal = toolContext.terminal,
       _flutterVersion = toolContext.flutterVersion,
       _git = toolContext.git,
       _logger = toolContext.logger,
       _persistentToolState = toolContext.persistentToolState,
       _stdio = toolContext.stdio,
-      _terminal = toolContext.terminal {
+      _logger = toolContext.logger,
+      _fileSystem = toolContext.fs,
+      _git = toolContext.git,
+      super(toolContext: toolContext, verboseHelp: verboseHelp) {
     argParser.addOption(
       'working-directory',
       hide: !verboseHelp,
@@ -66,14 +68,13 @@ class DowngradeCommand extends FlutterCommand {
     );
   }
 
-  final Cache _cache;
-  final FileSystem _fileSystem;
-  FlutterVersion _flutterVersion;
-  final Git _git;
-  final Logger _logger;
-  final PersistentToolState _persistentToolState;
-  final Stdio _stdio;
   final Terminal _terminal;
+  FlutterVersion _flutterVersion;
+  final PersistentToolState _persistentToolState;
+  final Logger _logger;
+  final Git _git;
+  final Stdio _stdio;
+  final FileSystem _fileSystem;
 
   @override
   String get description => 'Downgrade Flutter to the last active version for the current channel.';
@@ -90,7 +91,10 @@ class DowngradeCommand extends FlutterCommand {
       throwToolExit(downgradePositionalArgumentErrorMessage(argResults!.rest), exitCode: 2);
     }
 
-    String workingDirectory = _cache.flutterRoot;
+    // Commands do not necessarily have access to the correct zone injected
+    // values when being created. Fields must be lazily instantiated in runCommand,
+    // at least until the zone injection is refactored.
+    String workingDirectory = Cache.flutterRoot!;
     if (argResults!.wasParsed('working-directory')) {
       workingDirectory = stringArg('working-directory')!;
       _flutterVersion = FlutterVersion(fs: _fileSystem, flutterRoot: workingDirectory, git: _git);

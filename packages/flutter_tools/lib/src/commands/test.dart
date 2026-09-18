@@ -7,6 +7,7 @@ import 'package:package_config/package_config_types.dart';
 
 import '../asset.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle_builder.dart';
@@ -68,7 +69,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     this.testRunner = const FlutterTestRunner(),
     this.verbose = false,
     this.nativeAssetsBuilder,
-  }) {
+  }) : _toolContext = toolContext,
+       _testRunner = testRunner ?? FlutterTestRunner(toolContext: toolContext),
+       super(toolContext: toolContext) {
     requiresPubspecYaml();
     usesPubOption();
     usesFrontendServerStarterPathOption(verboseHelp: verboseHelp);
@@ -324,7 +327,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   final TestWrapper testWrapper;
 
   /// Interface for running the tester process.
-  final FlutterTestRunner testRunner;
+  final FlutterTestRunner _testRunner;
 
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
 
@@ -362,7 +365,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) {
-    final List<Uri> testUris = argResults!.rest.map(_parseTestArgument).toList();
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+
+    final List<Uri> testUris = argResults!.rest
+        .map((String arg) => _parseTestArgument(arg, fs))
+        .toList();
     if (testUris.isEmpty) {
       // We don't scan the entire package, only the test/ subdirectory, so that
       // files with names like "hit_test.dart" don't get run.
@@ -419,7 +426,19 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (!globals.fs.isFileSync('pubspec.yaml')) {
+    final ToolContext(
+      :Artifacts artifacts,
+      :FileSystem fs,
+      :Logger logger,
+      :OperatingSystemUtils os,
+      :Platform platform,
+      :ProcessManager processManager,
+      :ProcessUtils processUtils,
+      :FlutterProjectFactory projectFactory,
+      :Stdio stdio,
+    ) = _toolContext;
+
+    if (!fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
         'Error: No pubspec.yaml file found in the current working directory.\n'
         'Run this command from the root of your project. Test files must be '
@@ -427,7 +446,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'directory (or one of its subdirectories).',
       );
     }
-    final FlutterProject flutterProject = FlutterProject.current();
+    final FlutterProject flutterProject = projectFactory.fromDirectory(fs.currentDirectory);
     final bool buildTestAssets = boolArg('test-assets');
     final List<String> names = stringsArg('name');
     final List<String> plainNames = stringsArg('plain-name');
@@ -606,12 +625,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         buildInfo.packageConfig,
       );
       collector = CoverageCollector(
-        verbose: !outputMachineFormat,
+        branchCoverage: boolArg('branch-coverage'),
         libraryNames: packagesToInclude,
         packagesPath: buildInfo.packageConfigPath,
         resolver: await CoverageCollector.getResolver(buildInfo.packageConfigPath),
         testTimeRecorder: testTimeRecorder,
-        branchCoverage: boolArg('branch-coverage'),
+        toolContext: _toolContext,
+        verbose: !outputMachineFormat,
       );
     }
 
@@ -671,7 +691,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final int result;
     if (experimentalFasterTesting) {
       assert(!isWeb && !_isIntegrationTest && _testFileUris.length > 1);
-      result = await testRunner.runTestsBySpawningLightweightEngines(
+      result = await _testRunner.runTestsBySpawningLightweightEngines(
         _testFileUris.toList(),
         debuggingOptions: debuggingOptions,
         names: names,
@@ -697,7 +717,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         nativeAssetsBuilder: nativeAssetsBuilder,
       );
     } else {
-      result = await testRunner.runTests(
+      result = await _testRunner.runTests(
         testWrapper,
         _testFileUris.toList(),
         debuggingOptions: debuggingOptions,
@@ -814,10 +834,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       throwToolExit('Error: Failed to build asset bundle');
     }
     if (_needsRebuild(assetBundle.entries, flavor)) {
+      final Config config = _toolContext.config;
       await writeBundle(
-        globals.fs.directory(
-          globals.fs.path.join(getBuildDirectory(globals.config, globals.fs), 'unit_test_assets'),
-        ),
+        fs.directory(fs.path.join(getBuildDirectory(config, fs), 'unit_test_assets')),
         assetBundle.entries,
         targetPlatform: TargetPlatform.tester,
         impellerStatus: impellerStatus,
@@ -829,12 +848,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         buildMode: buildMode,
       );
 
-      final File cachedFlavorFile = globals.fs.file(
-        globals.fs.path.join(
-          getBuildDirectory(globals.config, globals.fs),
-          'test_cache',
-          'flavor.txt',
-        ),
+      final File cachedFlavorFile = fs.file(
+        fs.path.join(getBuildDirectory(config, fs), 'test_cache', 'flavor.txt'),
       );
       if (cachedFlavorFile.existsSync()) {
         await cachedFlavorFile.delete();
@@ -851,12 +866,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     //  schema of the contents of the asset manifest file and the user does not
     //  perform a `flutter clean` after upgrading.
     //  See https://github.com/flutter/flutter/issues/128563.
-    final File manifest = globals.fs.file(
-      globals.fs.path.join(
-        getBuildDirectory(globals.config, globals.fs),
-        'unit_test_assets',
-        'AssetManifest.bin',
-      ),
+    final ToolContext(:Config config, :FileSystem fs) = _toolContext;
+    final File manifest = fs.file(
+      fs.path.join(getBuildDirectory(config, fs), 'unit_test_assets', 'AssetManifest.bin'),
     );
     if (!manifest.existsSync()) {
       return true;
@@ -876,12 +888,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       }
     }
 
-    final File cachedFlavorFile = globals.fs.file(
-      globals.fs.path.join(
-        getBuildDirectory(globals.config, globals.fs),
-        'test_cache',
-        'flavor.txt',
-      ),
+    final File cachedFlavorFile = fs.file(
+      fs.path.join(getBuildDirectory(config, fs), 'test_cache', 'flavor.txt'),
     );
     final String? cachedFlavor = cachedFlavorFile.existsSync()
         ? cachedFlavorFile.readAsStringSync()

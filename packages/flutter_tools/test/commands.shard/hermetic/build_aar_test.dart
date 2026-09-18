@@ -161,7 +161,6 @@ flutter:
       );
     },
     overrides: <Type, Generator>{
-      Cache: () => cache,
       FileSystem: () => fs,
       Platform: () => platform,
       ProcessManager: () => processManager,

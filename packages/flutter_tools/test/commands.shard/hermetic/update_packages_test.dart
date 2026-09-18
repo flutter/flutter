@@ -598,7 +598,7 @@ dependencies:
         Pub: () => pub,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
-        Cache: () => Cache.test(rootOverride: flutterSdk, processManager: processManager),
+        Cache: () => Cache.test(processManager: processManager),
         Logger: () => logger,
       },
     );

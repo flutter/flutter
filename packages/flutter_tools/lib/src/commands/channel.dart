@@ -106,7 +106,7 @@ class ChannelCommand extends FlutterCommand {
     logger.printStatus('Flutter channels:');
     final int result = await git.stream(
       <String>['branch', '-r'],
-      workingDirectory: _toolContext.cache.flutterRoot,
+      workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) {
         rawOutput.add(line);
         return null;
@@ -223,7 +223,6 @@ class ChannelCommand extends FlutterCommand {
     Cache? cache,
     bool force = false,
   }) async {
-    final String? flutterRoot = cache?.flutterRoot;
     // Get latest refs from upstream.
     RunResult runResult = await git.run(<String>['fetch'], workingDirectory: flutterRoot);
 

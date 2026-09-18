@@ -12,7 +12,6 @@ import '../artifacts.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
@@ -114,10 +113,10 @@ class TestCompiler {
   TestCompiler(
     BuildInfo buildInfo,
     this.flutterProject, {
+    required ToolContext toolContext,
     String? precompiledDillPath,
     this.testTimeRecorder,
-    ToolContext? toolContext,
-  }) : _toolContext = toolContext ?? const _FallbackToolContext(),
+  }) : _toolContext = toolContext,
        testFilePath =
            precompiledDillPath ?? _computeTestFilePath(toolContext, flutterProject, buildInfo),
        shouldCopyDillFile = precompiledDillPath == null {
@@ -144,12 +143,11 @@ class TestCompiler {
   }
 
   static String _computeTestFilePath(
-    ToolContext? toolContext,
+    ToolContext toolContext,
     FlutterProject? flutterProject,
     BuildInfo buildInfo,
   ) {
-    final ToolContext context = toolContext ?? const _FallbackToolContext();
-    final ToolContext(:Config config, :FileSystem fs) = context;
+    final ToolContext(:Config config, :FileSystem fs) = toolContext;
     return fs.path.join(
       flutterProject!.directory.path,
       getBuildDirectory(),
@@ -339,41 +337,4 @@ class TestCompiler {
       compilationQueue.removeAt(0);
     }
   }
-}
-
-// TODO(bkonyi): This will be removed in a follow up PR once Google3 callers
-// provide ToolContext directly. This fallback context delegates to globals.* to
-// maintain backwards compatibility with existing Google3 test runners.
-class _FallbackToolContext implements ToolContext {
-  const _FallbackToolContext();
-
-  @override
-  Artifacts get artifacts => globals.artifacts!;
-
-  @override
-  Config get config => globals.config;
-
-  @override
-  FileSystem get fs => globals.fs;
-
-  @override
-  Logger get logger => globals.logger;
-
-  @override
-  OperatingSystemUtils get os => globals.os;
-
-  @override
-  Platform get platform => globals.platform;
-
-  @override
-  ProcessManager get processManager => globals.processManager;
-
-  @override
-  ProcessUtils get processUtils => globals.processUtils;
-
-  @override
-  ShutdownHooks get shutdownHooks => globals.shutdownHooks;
-
-  @override
-  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

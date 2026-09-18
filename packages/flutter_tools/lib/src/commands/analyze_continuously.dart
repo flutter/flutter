@@ -40,11 +40,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
     if (isFlutterRepo) {
       final dependencies = PackageDependencyTracker();
-      dependencies.checkForConflictingDependencies(
-        repoPackages,
-        fileSystem: fileSystem,
-        flutterRoot: flutterRoot,
-      );
+      dependencies.checkForConflictingDependencies(repoPackages, fileSystem: fileSystem);
 
       directories = <String>[flutterRoot];
       analysisTarget = 'Flutter repository';

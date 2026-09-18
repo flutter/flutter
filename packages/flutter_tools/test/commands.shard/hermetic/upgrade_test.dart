@@ -37,7 +37,6 @@ void main() {
 
   CommandRunner<void> createRunner({FlutterVersion? flutterVersion}) {
     final toolContext = FakeToolContext(
-      cache: FakeCache(fileSystem: fileSystem, flutterRoot: flutterRoot),
       flutterVersion: flutterVersion,
       fs: fileSystem,
       logger: logger,

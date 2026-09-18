@@ -212,15 +212,17 @@ mixin CreateBase on FlutterCommand {
   Future<String> getOrganization() async {
     String? organization = stringArg('org');
     if (!argResults!.wasParsed('org')) {
-      final FlutterProject project = _context.projectFactory.fromDirectory(projectDir);
-      final Set<String> existingOrganizations = await project.organizationNames;
-      if (existingOrganizations.length == 1) {
-        organization = existingOrganizations.first;
-      } else if (existingOrganizations.length > 1) {
-        throwToolExit(
-          'Ambiguous organization in existing files: $existingOrganizations. '
-          'The --org command line argument must be specified to recreate project.',
-        );
+      if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
+        final FlutterProject project = _context.projectFactory.fromDirectory(projectDir);
+        final Set<String> existingOrganizations = await project.organizationNames;
+        if (existingOrganizations.length == 1) {
+          organization = existingOrganizations.first;
+        } else if (existingOrganizations.length > 1) {
+          throwToolExit(
+            'Ambiguous organization in existing files: $existingOrganizations. '
+            'The --org command line argument must be specified to recreate project.',
+          );
+        }
       }
     }
     if (organization == null) {
@@ -519,6 +521,7 @@ mixin CreateBase on FlutterCommand {
       overwrite: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
     );
+    _context.projectFactory.invalidate(directory);
     final FlutterProject project = _context.projectFactory.fromDirectory(directory);
     if (templateContext['android'] == true) {
       generatedCount += _injectGradleWrapper(project);

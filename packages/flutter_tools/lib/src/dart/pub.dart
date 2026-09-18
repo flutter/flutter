@@ -115,8 +115,6 @@ abstract class Pub {
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
-    Cache? cache,
-    String? flutterRoot,
     Stdio? stdio,
   }) {
     if (stdio != null) {
@@ -335,7 +333,6 @@ class _DefaultPub implements Pub {
         flutterRoot: _flutterRootPath,
         fs: _fileSystem,
         git: _git,
-        cache: _cache,
         platform: _platform,
       );
 

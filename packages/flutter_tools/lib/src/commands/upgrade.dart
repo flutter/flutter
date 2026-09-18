@@ -105,6 +105,7 @@ class UpgradeCommand extends FlutterCommand {
     _commandRunner.workingDirectory = workingDirectory ?? _toolContext.cache.flutterRoot;
     final Git git = _toolContext.git;
     final Platform platform = _toolContext.platform;
+
     return _commandRunner.runCommand(
       _parsePhaseFromContinueArg(),
       force: boolArg('force'),
@@ -282,11 +283,7 @@ class UpgradeCommandRunner {
   Future<void> flutterUpgradeContinue({required DateTime startedAt}) async {
     final int code = await _toolContext.processUtils.stream(
       [
-        _toolContext.fs.path.join(
-          workingDirectory ?? _toolContext.cache.flutterRoot,
-          'bin',
-          'flutter',
-        ),
+        _toolContext.fs.path.join(workingDirectory ?? Cache.flutterRoot!, 'bin', 'flutter'),
         'upgrade',
         '--continue',
         '--continue-started-at',

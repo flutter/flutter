@@ -244,7 +244,7 @@ class PackageDependencyTracker {
       message.writeln(
         'Make sure you have run "pub upgrade" in all the directories mentioned above.',
       );
-      if (hasConflictsAffectingFlutterRepo(fileSystem, flutterRoot)) {
+      if (hasConflictsAffectingFlutterRepo(fileSystem)) {
         message.writeln(
           'For packages in the flutter repository, try using "flutter update-packages" to do all of them at once.\n'
           'If you need to actually upgrade them, consider "flutter update-packages --force-upgrade". '

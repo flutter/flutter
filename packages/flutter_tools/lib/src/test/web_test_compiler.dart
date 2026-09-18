@@ -18,7 +18,6 @@ import '../bundle.dart';
 import '../cache.dart';
 import '../compile.dart';
 import '../dart/language_version.dart';
-import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
@@ -26,17 +25,7 @@ import 'test_config.dart';
 
 /// A web compiler for the test runner.
 class WebTestCompiler {
-  WebTestCompiler({
-    required this._artifacts,
-    required this._config,
-    required this._fileSystem,
-    required this._logger,
-    required this._platform,
-    required this._processManager,
-    required this._shutdownHooks,
-    this._cache,
-    this._flutterRoot,
-  });
+  WebTestCompiler({required this._toolContext});
 
   final Logger _logger;
   final FileSystem _fileSystem;

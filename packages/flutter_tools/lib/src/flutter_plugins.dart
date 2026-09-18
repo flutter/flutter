@@ -106,15 +106,8 @@ Future<Plugin?> _pluginFromPackage(
   required bool isDevDependency,
   FileSystem? fileSystem,
   PubspecCache? pubspecCache,
-  Logger? logger,
 }) async {
   final FileSystem fs = fileSystem ?? globals.fs;
-  Logger effectiveLogger;
-  try {
-    effectiveLogger = logger ?? globals.logger;
-  } on UnsupportedError {
-    effectiveLogger = BufferLogger.test();
-  }
   YamlMap? pubspec;
   // Use containsKey rather than a null check so that a cached null (meaning
   // "pubspec.yaml is missing or unparseable") is distinguished from a cache
@@ -130,10 +123,10 @@ Future<Plugin?> _pluginFromPackage(
       final Object? parsed = loadYaml(await pubspecFile.readAsString());
       pubspec = parsed is YamlMap ? parsed : null;
     } on YamlException catch (err) {
-      effectiveLogger.printTrace('Failed to parse plugin manifest for $name: $err');
+      globals.printTrace('Failed to parse plugin manifest for $name: $err');
       // Do nothing, potentially not a plugin.
     } on FileSystemException catch (err) {
-      effectiveLogger.printTrace('Failed to read plugin manifest for $name: $err');
+      globals.printTrace('Failed to read plugin manifest for $name: $err');
       // Do nothing, potentially not a plugin.
     }
   }
@@ -150,7 +143,7 @@ Future<Plugin?> _pluginFromPackage(
       : semver.VersionConstraint.parse(flutterConstraintText);
   final String packageRootPath = fs.path.fromUri(packageRoot);
   final dependencies = pubspec['dependencies'] as YamlMap?;
-  effectiveLogger.printTrace('Found plugin $name at $packageRootPath');
+  globals.printTrace('Found plugin $name at $packageRootPath');
   return Plugin.fromYaml(
     name,
     packageRootPath,
@@ -218,7 +211,6 @@ Future<List<Plugin>> findPlugins(
       isDevDependency: dependency.isExclusiveDevDependency,
       fileSystem: fs,
       pubspecCache: pubspecCache,
-      logger: logger,
     );
     if (plugin != null) {
       plugins.add(plugin);
@@ -1469,6 +1461,7 @@ Future<void> injectPlugins(
             templateRenderer: globals.templateRenderer,
             processUtils: globals.processUtils,
             config: globals.config,
+            logger: globals.logger,
           ),
           fileSystem: globals.fs,
           featureFlags: featureFlags,

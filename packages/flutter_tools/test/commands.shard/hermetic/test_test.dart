@@ -600,7 +600,7 @@ resolution: workspace
       'passes --preset through to package:test',
       () async {
         final fakePackageTest = FakePackageTest();
-        final testCommand = TestCommand(testWrapper: fakePackageTest);
+        final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(<String>['test', '--no-pub', '--preset=foo', '--preset=bar']);
@@ -620,7 +620,7 @@ resolution: workspace
       'passes -P through to package:test',
       () async {
         final fakePackageTest = FakePackageTest();
-        final testCommand = TestCommand(testWrapper: fakePackageTest);
+        final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(<String>['test', '--no-pub', '-Pfoo', '-Pbar']);
@@ -1614,7 +1614,7 @@ dev_dependencies:
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(testRunner: testRunner);
+        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>['test', '--no-pub', '--no-enable-hcpp']);
@@ -1631,7 +1631,7 @@ dev_dependencies:
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(testRunner: testRunner);
+        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>['test', '--no-pub']);
@@ -1797,7 +1797,7 @@ resolution: workspace
     () async {
       final testRunner = FakeFlutterTestRunner(0);
 
-      final testCommand = TestCommand(testRunner: testRunner);
+      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       await commandRunner.run(const <String>['test', '--name', r'^(?!Golden).+', '--no-pub']);
@@ -1811,7 +1811,7 @@ resolution: workspace
   );
 }
 
-class FakeFlutterTestRunner implements FlutterTestRunner {
+class FakeFlutterTestRunner extends Fake implements FlutterTestRunner {
   FakeFlutterTestRunner(this.exitCode, [this.leastRunTime, this.fakeVmServiceHost]);
 
   int exitCode;

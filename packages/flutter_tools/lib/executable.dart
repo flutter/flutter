@@ -255,7 +255,7 @@ List<FlutterCommand> generateCommands({
     fileSystem: toolDependencies.toolContext.fs,
   ),
   BuildCommand(
-    androidBuilder: AndroidGradleBuilder(
+    androidBuilder: AndroidGradleBuilder.fromContexts(
       analytics: toolDependencies.analytics,
       androidStudio: toolDependencies.androidContext.androidStudio,
       artifacts: toolDependencies.toolContext.artifacts,
@@ -356,6 +356,7 @@ List<FlutterCommand> generateCommands({
   ScreenshotCommand(toolContext: toolDependencies.toolContext),
   ShellCompletionCommand(toolContext: toolDependencies.toolContext),
   TestCommand(
+    toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
     verbose: verbose,
     nativeAssetsBuilder: toolDependencies.toolContext.nativeAssetsBuilder,
