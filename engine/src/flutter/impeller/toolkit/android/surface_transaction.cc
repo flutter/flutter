@@ -11,12 +11,18 @@
 namespace impeller::android {
 
 SurfaceTransaction::SurfaceTransaction()
-    : transaction_(
-          WrappedSurfaceTransaction{GetProcTable().ASurfaceTransaction_create(),
-                                    /*owned=*/true}) {}
+    : transaction_(WrappedSurfaceTransaction{
+          GetProcTable().ASurfaceTransaction_create(), /*owned=*/true,
+          /*submit_callback=*/nullptr}) {}
 
 SurfaceTransaction::SurfaceTransaction(ASurfaceTransaction* transaction)
-    : transaction_(WrappedSurfaceTransaction{transaction, /*owned=*/false}) {}
+    : transaction_(WrappedSurfaceTransaction{transaction, /*owned=*/false,
+                                             /*submit_callback=*/nullptr}) {}
+
+SurfaceTransaction::SurfaceTransaction(ASurfaceTransaction* transaction,
+                                       std::function<void()> submit_callback)
+    : transaction_(WrappedSurfaceTransaction{
+          transaction, /*owned=*/false, std::move(submit_callback)}) {}
 
 SurfaceTransaction::~SurfaceTransaction() = default;
 
@@ -53,7 +59,13 @@ bool SurfaceTransaction::Apply(OnCompleteCallback callback) {
   // the Java PlatformViewController and not as a part of the engine render
   // loop.
   if (!transaction_.get().owned) {
+    // All native writes into the transaction are done at this point. Hand it
+    // back to Java, which owns applying it.
+    std::function<void()> submit_cb = transaction_.get().submit_callback;
     transaction_.reset();
+    if (submit_cb) {
+      submit_cb();
+    }
     return true;
   }
 

@@ -80,6 +80,8 @@ static jfieldID g_jni_shell_holder_field = nullptr;
   V(g_on_display_overlay_surface_method, onDisplayOverlaySurface, "(IIIII)V") \
   V(g_create_transaction_method, createTransaction,                           \
     "()Landroid/view/SurfaceControl$Transaction;")                            \
+  V(g_submit_transaction_method, submitTransaction,                           \
+    "(Landroid/view/SurfaceControl$Transaction;)V")                           \
   V(g_swap_transaction_method, swapTransactions, "()V")                       \
   V(g_create_overlay_surface2_method, createOverlaySurface2,                  \
     "()Lio/flutter/embedding/engine/FlutterOverlaySurface;")                  \
@@ -2066,9 +2068,15 @@ bool PlatformViewAndroidJNIImpl::RequestDartDeferredLibrary(
 // New Platform View Support.
 
 ASurfaceTransaction* PlatformViewAndroidJNIImpl::createTransaction() {
+  return createTransactionWithSubmitCallback(nullptr);
+}
+
+ASurfaceTransaction*
+PlatformViewAndroidJNIImpl::createTransactionWithSubmitCallback(
+    std::function<void()>* out_submit_callback) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
-  auto java_object = java_object_.get(env);
+  fml::jni::ScopedJavaLocalRef<jobject> java_object = java_object_.get(env);
   if (java_object.is_null()) {
     return nullptr;
   }
@@ -2081,8 +2089,36 @@ ASurfaceTransaction* PlatformViewAndroidJNIImpl::createTransaction() {
   }
   FML_CHECK(fml::jni::CheckException(env));
 
-  return impeller::android::GetProcTable().ASurfaceTransaction_fromJava(
-      env, transaction.obj());
+  ASurfaceTransaction* native_tx =
+      impeller::android::GetProcTable().ASurfaceTransaction_fromJava(
+          env, transaction.obj());
+  if (native_tx == nullptr) {
+    return nullptr;
+  }
+
+  // `ASurfaceTransaction_fromJava` does not take a reference on the Java
+  // object, so without a global ref here the transaction can be collected
+  // while the raster thread is still writing into the native handle.
+  std::shared_ptr<fml::jni::ScopedJavaGlobalRef<jobject>> global_tx =
+      std::make_shared<fml::jni::ScopedJavaGlobalRef<jobject>>(
+          env, transaction.obj());
+  fml::jni::JavaObjectWeakGlobalRef weak_java_object = java_object_;
+
+  if (out_submit_callback != nullptr) {
+    *out_submit_callback = [weak_java_object, global_tx]() {
+      JNIEnv* cb_env = fml::jni::AttachCurrentThread();
+      fml::jni::ScopedJavaLocalRef<jobject> cb_java_obj =
+          weak_java_object.get(cb_env);
+      if (!cb_java_obj.is_null() && !global_tx->is_null()) {
+        cb_env->CallVoidMethod(cb_java_obj.obj(), g_submit_transaction_method,
+                               global_tx->obj());
+        FML_CHECK(fml::jni::CheckException(cb_env));
+      }
+      global_tx->reset();
+    };
+  }
+
+  return native_tx;
 }
 
 void PlatformViewAndroidJNIImpl::swapTransaction() {
