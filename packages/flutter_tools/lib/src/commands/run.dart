@@ -753,7 +753,6 @@ class RunCommand extends RunCommandBase {
   Daemon createMachineDaemon() {
     final Analytics analytics = this.analytics;
     final ToolContext(
-      :Artifacts artifacts,
       :FileSystem fs,
       :Logger logger,
       :OutputPreferences outputPreferences,
@@ -767,7 +766,6 @@ class RunCommand extends RunCommandBase {
       analytics: analytics,
       androidSdk: _androidContext?.androidSdk,
       androidWorkflow: _androidWorkflow,
-      artifacts: artifacts,
       deviceManager: _deviceManager,
       featureFlags: featureFlags,
       fileSystem: fs,
@@ -779,6 +777,7 @@ class RunCommand extends RunCommandBase {
       stdio: stdio,
       systemClock: systemClock,
       terminal: terminal,
+      toolContext: toolContext,
     );
   }
 
