@@ -316,6 +316,93 @@ void main() {
         const Rect.fromLTWH(0.0, 260.0, 60.0, 40.0),
       );
     });
+
+    testWidgets('respects TextDirection.rtl for horizontal edge alignments', (
+      WidgetTester tester,
+    ) async {
+      Widget buildWidget({required TextDirection textDirection, TextDirection? widgetDirection}) {
+        return Directionality(
+          textDirection: textDirection,
+          child: Align(
+            alignment: .topLeft,
+            child: EdgeInsetsOverlay.metrics(
+              textDirection: widgetDirection,
+              top: const EdgeInsetsOverlaySide(
+                alignment: .start,
+                child: SizedBox(key: ValueKey<String>('top'), width: 100.0, height: 40.0),
+              ),
+              bottom: const EdgeInsetsOverlaySide(
+                alignment: .end,
+                child: SizedBox(key: ValueKey<String>('bottom'), width: 100.0, height: 50.0),
+              ),
+              left: const EdgeInsetsOverlaySide(
+                alignment: .start,
+                child: SizedBox(key: ValueKey<String>('left'), width: 30.0, height: 80.0),
+              ),
+              right: const EdgeInsetsOverlaySide(
+                alignment: .end,
+                child: SizedBox(key: ValueKey<String>('right'), width: 40.0, height: 60.0),
+              ),
+              builder:
+                  (
+                    BuildContext context,
+                    BoxConstraints constraints,
+                    EdgeInsetsOverlayMetrics metrics,
+                  ) {
+                    return const SizedBox(width: 400.0, height: 300.0);
+                  },
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildWidget(textDirection: .rtl));
+
+      // In RTL, top overlay with start alignment is placed on the RIGHT (x = 400 - 100 = 300.0)
+      expect(
+        tester.getRect(find.byKey(const ValueKey<String>('top'))),
+        const Rect.fromLTWH(300.0, 0.0, 100.0, 40.0),
+      );
+
+      // In RTL, bottom overlay with end alignment is placed on the LEFT (x = 0.0)
+      expect(
+        tester.getRect(find.byKey(const ValueKey<String>('bottom'))),
+        const Rect.fromLTWH(0.0, 250.0, 100.0, 50.0),
+      );
+
+      // Left and right overlays (vertical) are NOT affected by TextDirection
+      // Left overlay with start alignment: y = 0.0, x = 0.0
+      expect(
+        tester.getRect(find.byKey(const ValueKey<String>('left'))),
+        const Rect.fromLTWH(0.0, 0.0, 30.0, 80.0),
+      );
+      // Right overlay with end alignment: y = 300 - 60 = 240.0, x = 400 - 40 = 360.0
+      expect(
+        tester.getRect(find.byKey(const ValueKey<String>('right'))),
+        const Rect.fromLTWH(360.0, 240.0, 40.0, 60.0),
+      );
+
+      // Dynamic update: change Directionality to LTR
+      await tester.pumpWidget(buildWidget(textDirection: TextDirection.ltr));
+
+      // In LTR, top overlay with start alignment is placed on the LEFT (x = 0.0)
+      expect(
+        tester.getRect(find.byKey(const ValueKey<String>('top'))),
+        const Rect.fromLTWH(0.0, 0.0, 100.0, 40.0),
+      );
+      // In LTR, bottom overlay with end alignment is placed on the RIGHT (x = 300.0)
+      expect(
+        tester.getRect(find.byKey(const ValueKey<String>('bottom'))),
+        const Rect.fromLTWH(300.0, 250.0, 100.0, 50.0),
+      );
+
+      // Explicit textDirection parameter overrides ambient Directionality
+      await tester.pumpWidget(buildWidget(textDirection: .ltr, widgetDirection: .rtl));
+      expect(
+        tester.getRect(find.byKey(const ValueKey<String>('top'))),
+        const Rect.fromLTWH(300.0, 0.0, 100.0, 40.0),
+      );
+    });
   });
 
   group('EdgeInsetsOverlay - Paint and Hit-Testing', () {
@@ -493,12 +580,11 @@ void main() {
                   child: const SizedBox(key: .new('left'), width: 60.0, height: 100.0),
                 ),
               ),
-              builder:
-                  (
-                    BuildContext context,
-                    BoxConstraints constraints,
-                    EdgeInsetsOverlayMetrics metrics,
-                  ) => const SizedBox(width: 300.0, height: 200.0),
+              builder: (
+                BuildContext context,
+                BoxConstraints constraints,
+                EdgeInsetsOverlayMetrics metrics,
+              ) => const SizedBox(width: 300.0, height: 200.0),
             ),
           ),
         ),
@@ -559,9 +645,11 @@ void main() {
         right: const .new(child: SizedBox(width: 60.0)),
         bottom: const .new(child: SizedBox(height: 70.0)),
         paintOrder: const <EdgeInsetsOverlaySlot>[.top, .left],
-        builder:
-            (BuildContext context, BoxConstraints constraints, EdgeInsetsOverlayMetrics metrics) =>
-                const SizedBox(),
+        builder: (
+          BuildContext context,
+          BoxConstraints constraints,
+          EdgeInsetsOverlayMetrics metrics,
+        ) => const SizedBox(),
       );
 
       widget.debugFillProperties(widgetBuilder);
@@ -593,12 +681,11 @@ void main() {
             right: const .new(alignment: .start, child: SizedBox(width: 60.0)),
             bottom: const .new(alignment: .end, child: SizedBox(height: 70.0)),
             paintOrder: const <EdgeInsetsOverlaySlot>[.bottom, .child],
-            builder:
-                (
-                  BuildContext context,
-                  BoxConstraints constraints,
-                  EdgeInsetsOverlayMetrics metrics,
-                ) => const SizedBox.expand(),
+            builder: (
+              BuildContext context,
+              BoxConstraints constraints,
+              EdgeInsetsOverlayMetrics metrics,
+            ) => const SizedBox.expand(),
           ),
         ),
       );
@@ -622,27 +709,53 @@ void main() {
     testWidgets('visitChildrenForSemantics visits children in paintOrder', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(
-        Directionality(
+      final topKey = UniqueKey();
+      final bottomKey = UniqueKey();
+      final childKey = UniqueKey();
+
+      Widget buildWidget(List<EdgeInsetsOverlaySlot> paintOrder) {
+        return Directionality(
           textDirection: .ltr,
           child: EdgeInsetsOverlay(
-            paintOrder: const <EdgeInsetsOverlaySlot>[.bottom, .top, .child],
-            top: const SizedBox(height: 50.0),
-            bottom: const SizedBox(height: 60.0),
-            builder:
-                (BuildContext context, BoxConstraints constraints, EdgeInsets overlayPadding) =>
-                    const SizedBox.expand(),
+            paintOrder: paintOrder,
+            top: SizedBox(key: topKey, height: 50.0),
+            bottom: SizedBox(key: bottomKey, height: 60.0),
+            builder: (
+              BuildContext context,
+              BoxConstraints constraints,
+              EdgeInsets overlayPadding,
+            ) => SizedBox.expand(key: childKey),
           ),
+        );
+      }
+
+      await tester.pumpWidget(buildWidget(const <EdgeInsetsOverlaySlot>[.bottom, .top, .child]));
+
+      final RenderBox renderObject = tester.renderObject(
+        find.byWidgetPredicate(
+          (Widget widget) => widget.runtimeType.toString() == '_EdgeInsetsOverlay',
         ),
       );
+      final RenderBox topRender = tester.renderObject(find.byKey(topKey));
+      final RenderBox bottomRender = tester.renderObject(find.byKey(bottomKey));
+      final RenderBox childRender = tester.renderObject(find.byType(LayoutBuilder));
 
-      final RenderBox renderObject = tester.renderObject(find.byType(EdgeInsetsOverlay));
       final visited = <RenderObject>[];
-      renderObject.visitChildrenForSemantics((RenderObject child) {
+      void visitor(RenderObject child) {
         visited.add(child);
-      });
+      }
 
-      expect(visited.length, 3);
+      renderObject.visitChildrenForSemantics(visitor);
+
+      expect(visited, <RenderObject>[bottomRender, topRender, childRender]);
+
+      // Rebuild with a different paintOrder and verify the visit order is updated.
+      await tester.pumpWidget(buildWidget(const <EdgeInsetsOverlaySlot>[.child, .top, .bottom]));
+
+      visited.clear();
+      renderObject.visitChildrenForSemantics(visitor);
+
+      expect(visited, <RenderObject>[childRender, topRender, bottomRender]);
     });
   });
 
@@ -653,12 +766,35 @@ void main() {
       expect(EdgeOverlayAlignment.end.value, 1.0);
     });
 
+    test('resolve with TextDirection', () {
+      expect(EdgeOverlayAlignment.start.resolve(.ltr), EdgeOverlayAlignment.start);
+      expect(EdgeOverlayAlignment.start.resolve(null), EdgeOverlayAlignment.start);
+      expect(EdgeOverlayAlignment.start.resolve(.rtl), EdgeOverlayAlignment.end);
+
+      expect(EdgeOverlayAlignment.end.resolve(.ltr), EdgeOverlayAlignment.end);
+      expect(EdgeOverlayAlignment.end.resolve(null), EdgeOverlayAlignment.end);
+      expect(EdgeOverlayAlignment.end.resolve(.rtl), EdgeOverlayAlignment.start);
+
+      expect(EdgeOverlayAlignment.center.resolve(.ltr), EdgeOverlayAlignment.center);
+      expect(EdgeOverlayAlignment.center.resolve(.rtl), EdgeOverlayAlignment.center);
+
+      const custom = EdgeOverlayAlignment(0.5);
+      expect(custom.resolve(.rtl), const EdgeOverlayAlignment(-0.5));
+    });
+
     test('alongOffset computation', () {
       expect(EdgeOverlayAlignment.start.alongOffset(100.0), 0.0);
       expect(EdgeOverlayAlignment.center.alongOffset(100.0), 50.0);
       expect(EdgeOverlayAlignment.end.alongOffset(100.0), 100.0);
       expect(const EdgeOverlayAlignment(-0.5).alongOffset(100.0), 25.0);
       expect(const EdgeOverlayAlignment(0.5).alongOffset(100.0), 75.0);
+
+      // Inverted in RTL
+      expect(EdgeOverlayAlignment.start.alongOffset(100.0, textDirection: .rtl), 100.0);
+      expect(EdgeOverlayAlignment.center.alongOffset(100.0, textDirection: .rtl), 50.0);
+      expect(EdgeOverlayAlignment.end.alongOffset(100.0, textDirection: .rtl), 0.0);
+      expect(const EdgeOverlayAlignment(-0.5).alongOffset(100.0, textDirection: .rtl), 75.0);
+      expect(const EdgeOverlayAlignment(0.5).alongOffset(100.0, textDirection: .rtl), 25.0);
     });
 
     test('lerp', () {
@@ -759,6 +895,11 @@ void main() {
       expect(metrics1, isNot(equals(Object())));
       expect(metrics1.toString(), contains('EdgeInsetsOverlayMetrics'));
 
+      const EdgeInsetsOverlayMetrics metricsLtr = .new(textDirection: .ltr);
+      const EdgeInsetsOverlayMetrics metricsRtl = .new(textDirection: .rtl);
+      expect(metricsLtr, isNot(equals(metricsRtl)));
+      expect(metricsRtl.toString(), contains('textDirection: TextDirection.rtl'));
+
       const EdgeInsetsOverlayMetrics metricsOrderA = .new(
         sizes: <EdgeInsetsOverlaySlot, Size>{.top: .new(100.0, 50.0), .left: .new(40.0, 80.0)},
         alignments: <EdgeInsetsOverlaySlot, EdgeOverlayAlignment>{.top: .start, .left: .end},
@@ -771,6 +912,29 @@ void main() {
       expect(metricsOrderA.hashCode, equals(metricsOrderB.hashCode));
     });
 
+    test('rectOf and topRect/bottomRect resolve with textDirection', () {
+      const EdgeInsetsOverlayMetrics metricsRtl = .new(
+        sizes: <EdgeInsetsOverlaySlot, Size>{.top: Size(100.0, 40.0), .bottom: Size(100.0, 40.0)},
+        alignments: <EdgeInsetsOverlaySlot, EdgeOverlayAlignment>{.top: .start, .bottom: .end},
+        textDirection: .rtl,
+      );
+      const contentSize = Size(400.0, 300.0);
+      // In RTL, start is right: x = 400 - 100 = 300
+      expect(metricsRtl.topRect(contentSize), const Rect.fromLTWH(300.0, 0.0, 100.0, 40.0));
+      // In RTL, end is left: x = 0
+      expect(metricsRtl.bottomRect(contentSize), const Rect.fromLTWH(0.0, 260.0, 100.0, 40.0));
+
+      const EdgeInsetsOverlayMetrics metricsLtr = .new(
+        sizes: <EdgeInsetsOverlaySlot, Size>{.top: Size(100.0, 40.0), .bottom: Size(100.0, 40.0)},
+        alignments: <EdgeInsetsOverlaySlot, EdgeOverlayAlignment>{.top: .start, .bottom: .end},
+        textDirection: .ltr,
+      );
+      // In LTR, start is left: x = 0
+      expect(metricsLtr.topRect(contentSize), const Rect.fromLTWH(0.0, 0.0, 100.0, 40.0));
+      // In LTR, end is right: x = 400 - 100 = 300
+      expect(metricsLtr.bottomRect(contentSize), const Rect.fromLTWH(300.0, 260.0, 100.0, 40.0));
+    });
+
     test('empty metrics returns null for rectOf and handles hasSlot correctly', () {
       const EdgeInsetsOverlayMetrics emptyMetrics = .new();
       expect(emptyMetrics.hasSlot(.left), isFalse);
@@ -778,22 +942,94 @@ void main() {
       expect(emptyMetrics.hasTop, isFalse);
       expect(emptyMetrics.hasRight, isFalse);
       expect(emptyMetrics.hasBottom, isFalse);
+      expect(emptyMetrics.hasStart, isFalse);
+      expect(emptyMetrics.hasEnd, isFalse);
       expect(emptyMetrics.leftSize, isNull);
       expect(emptyMetrics.topSize, isNull);
       expect(emptyMetrics.rightSize, isNull);
       expect(emptyMetrics.bottomSize, isNull);
+      expect(emptyMetrics.startSize, isNull);
+      expect(emptyMetrics.endSize, isNull);
       expect(emptyMetrics.leftAlignment, isNull);
       expect(emptyMetrics.topAlignment, isNull);
       expect(emptyMetrics.rightAlignment, isNull);
       expect(emptyMetrics.bottomAlignment, isNull);
+      expect(emptyMetrics.startAlignment, isNull);
+      expect(emptyMetrics.endAlignment, isNull);
       expect(emptyMetrics.leftRect(const .new(200.0, 200.0)), isNull);
       expect(emptyMetrics.topRect(const .new(200.0, 200.0)), isNull);
       expect(emptyMetrics.rightRect(const .new(200.0, 200.0)), isNull);
       expect(emptyMetrics.bottomRect(const .new(200.0, 200.0)), isNull);
+      expect(emptyMetrics.startRect(const .new(200.0, 200.0)), isNull);
+      expect(emptyMetrics.endRect(const .new(200.0, 200.0)), isNull);
       expect(
         emptyMetrics.rectOf(.child, const .new(200.0, 200.0)),
         const Rect.fromLTWH(0.0, 0.0, 200.0, 200.0),
       );
+    });
+
+    test('start and end APIs resolve according to textDirection', () {
+      const EdgeInsetsOverlayMetrics metricsLtr = .new(
+        sizes: <EdgeInsetsOverlaySlot, Size>{.left: Size(40.0, 100.0), .right: Size(50.0, 80.0)},
+        alignments: <EdgeInsetsOverlaySlot, EdgeOverlayAlignment>{.left: .start, .right: .end},
+        textDirection: .ltr,
+      );
+      const EdgeInsetsOverlayMetrics metricsRtl = .new(
+        sizes: <EdgeInsetsOverlaySlot, Size>{.left: Size(40.0, 100.0), .right: Size(50.0, 80.0)},
+        alignments: <EdgeInsetsOverlaySlot, EdgeOverlayAlignment>{.left: .start, .right: .end},
+        textDirection: .rtl,
+      );
+      const EdgeInsetsOverlayMetrics metricsUnspecified = .new(
+        sizes: <EdgeInsetsOverlaySlot, Size>{.left: Size(40.0, 100.0), .right: Size(50.0, 80.0)},
+        alignments: <EdgeInsetsOverlaySlot, EdgeOverlayAlignment>{.left: .start, .right: .end},
+      );
+
+      const contentSize = Size(400.0, 300.0);
+
+      // In LTR: start is left, end is right
+      expect(metricsLtr.hasStart, isTrue);
+      expect(metricsLtr.hasEnd, isTrue);
+      expect(metricsLtr.startSize, metricsLtr.leftSize);
+      expect(metricsLtr.endSize, metricsLtr.rightSize);
+      expect(metricsLtr.startAlignment, metricsLtr.leftAlignment);
+      expect(metricsLtr.endAlignment, metricsLtr.rightAlignment);
+      expect(metricsLtr.startRect(contentSize), metricsLtr.leftRect(contentSize));
+      expect(metricsLtr.endRect(contentSize), metricsLtr.rightRect(contentSize));
+
+      // In RTL: start is right, end is left
+      expect(metricsRtl.hasStart, isTrue);
+      expect(metricsRtl.hasEnd, isTrue);
+      expect(metricsRtl.startSize, metricsRtl.rightSize);
+      expect(metricsRtl.endSize, metricsRtl.leftSize);
+      expect(metricsRtl.startAlignment, metricsRtl.rightAlignment);
+      expect(metricsRtl.endAlignment, metricsRtl.leftAlignment);
+      expect(metricsRtl.startRect(contentSize), metricsRtl.rightRect(contentSize));
+      expect(metricsRtl.endRect(contentSize), metricsRtl.leftRect(contentSize));
+
+      // When textDirection is null: defaults to LTR
+      expect(metricsUnspecified.hasStart, isTrue);
+      expect(metricsUnspecified.hasEnd, isTrue);
+      expect(metricsUnspecified.startSize, metricsUnspecified.leftSize);
+      expect(metricsUnspecified.endSize, metricsUnspecified.rightSize);
+      expect(metricsUnspecified.startAlignment, metricsUnspecified.leftAlignment);
+      expect(metricsUnspecified.endAlignment, metricsUnspecified.rightAlignment);
+      expect(metricsUnspecified.startRect(contentSize), metricsUnspecified.leftRect(contentSize));
+      expect(metricsUnspecified.endRect(contentSize), metricsUnspecified.rightRect(contentSize));
+
+      // Asymmetric presence test
+      const EdgeInsetsOverlayMetrics leftOnlyRtl = .new(
+        sizes: <EdgeInsetsOverlaySlot, Size>{.left: Size(40.0, 100.0)},
+        textDirection: .rtl,
+      );
+      expect(leftOnlyRtl.hasStart, isFalse);
+      expect(leftOnlyRtl.hasEnd, isTrue);
+
+      const EdgeInsetsOverlayMetrics leftOnlyLtr = .new(
+        sizes: <EdgeInsetsOverlaySlot, Size>{.left: Size(40.0, 100.0)},
+        textDirection: .ltr,
+      );
+      expect(leftOnlyLtr.hasStart, isTrue);
+      expect(leftOnlyLtr.hasEnd, isFalse);
     });
 
     test('innerBounds computes correct rectangles', () {
@@ -846,12 +1082,16 @@ void main() {
       expect(metrics.topSize, const Size(120.0, 60.0));
       expect(metrics.rightSize, const Size(50.0, 80.0));
       expect(metrics.bottomSize, const Size(200.0, 70.0));
+      expect(metrics.startSize, const Size(40.0, 100.0));
+      expect(metrics.endSize, const Size(50.0, 80.0));
 
       // individual alignments
       expect(metrics.leftAlignment, EdgeOverlayAlignment.center);
       expect(metrics.topAlignment, EdgeOverlayAlignment.start);
       expect(metrics.rightAlignment, EdgeOverlayAlignment.end);
       expect(metrics.bottomAlignment, EdgeOverlayAlignment.center);
+      expect(metrics.startAlignment, EdgeOverlayAlignment.center);
+      expect(metrics.endAlignment, EdgeOverlayAlignment.end);
 
       // presence checks
       expect(metrics.hasSlot(.left), isTrue);
@@ -859,6 +1099,8 @@ void main() {
       expect(metrics.hasTop, isTrue);
       expect(metrics.hasRight, isTrue);
       expect(metrics.hasBottom, isTrue);
+      expect(metrics.hasStart, isTrue);
+      expect(metrics.hasEnd, isTrue);
 
       // innerBounds helper
       const Size contentSize = .new(400.0, 300.0);
@@ -869,6 +1111,8 @@ void main() {
       expect(metrics.topRect(contentSize), const Rect.fromLTWH(0.0, 0.0, 120.0, 60.0));
       expect(metrics.rightRect(contentSize), const Rect.fromLTWH(350.0, 220.0, 50.0, 80.0));
       expect(metrics.bottomRect(contentSize), const Rect.fromLTWH(100.0, 230.0, 200.0, 70.0));
+      expect(metrics.startRect(contentSize), const Rect.fromLTWH(0.0, 100.0, 40.0, 100.0));
+      expect(metrics.endRect(contentSize), const Rect.fromLTWH(350.0, 220.0, 50.0, 80.0));
       expect(metrics.rectOf(.child, contentSize), const Rect.fromLTWH(0.0, 0.0, 400.0, 300.0));
     });
   });

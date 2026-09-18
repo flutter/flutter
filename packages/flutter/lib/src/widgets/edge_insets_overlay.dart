@@ -40,19 +40,23 @@ enum EdgeInsetsOverlaySlot {
 /// Represents an alignment point along a 1D axis for an edge overlay in [EdgeInsetsOverlay].
 ///
 /// For overlays on the top or bottom edge, this represents the horizontal position
-/// along that edge (from left to right).
+/// along that edge. In [TextDirection.ltr] contexts, -1.0 represents the left edge
+/// and 1.0 represents the right edge. In [TextDirection.rtl] contexts, these are
+/// reversed: -1.0 represents the right edge (the start of the text direction)
+/// and 1.0 represents the left edge (the end).
 ///
 /// For overlays on the left or right edge, this represents the vertical position
 /// along that edge (from top to bottom).
 ///
 /// The distance is fractional:
-///  * -1.0 represents the start of the edge (left for top/bottom, top for left/right).
+///  * -1.0 represents the start of the edge (left for top/bottom in LTR, right in RTL; top for left/right).
 ///  * 0.0 represents the center of the edge.
-///  * 1.0 represents the end of the edge (right for top/bottom, bottom for left/right).
+///  * 1.0 represents the end of the edge (right for top/bottom in LTR, left in RTL; bottom for left/right).
 ///
 /// See also:
 ///
-///  * [Alignment], which represents a 2D point within a rectangle.
+///  * [Alignment], which represents a 2D point within a rectangle using physical coordinates.
+///  * [AlignmentDirectional], which represents a 2D point within a rectangle using directional coordinates.
 @immutable
 class EdgeOverlayAlignment {
   /// Creates an edge overlay alignment.
@@ -63,23 +67,43 @@ class EdgeOverlayAlignment {
 
   /// The fractional point along the edge.
   ///
-  ///  * -1.0 is the start of the edge (left for top/bottom, top for left/right).
+  ///  * -1.0 is the start of the edge.
   ///  * 0.0 is the center of the edge.
-  ///  * 1.0 is the end of the edge (right for top/bottom, bottom for left/right).
+  ///  * 1.0 is the end of the edge.
   final double value;
 
-  /// The start position along the edge (left for top/bottom, top for left/right).
+  /// The start position along the edge (start of reading direction for top/bottom, top for left/right).
   static const EdgeOverlayAlignment start = EdgeOverlayAlignment(-1.0);
 
   /// The center position along the edge.
   static const EdgeOverlayAlignment center = EdgeOverlayAlignment(0.0);
 
-  /// The end position along the edge (right for top/bottom, bottom for left/right).
+  /// The end position along the edge (end of reading direction for top/bottom, bottom for left/right).
   static const EdgeOverlayAlignment end = EdgeOverlayAlignment(1.0);
 
+  /// Resolves this alignment according to the given [TextDirection].
+  ///
+  /// If [direction] is [TextDirection.rtl], the alignment is inverted so that
+  /// [start] aligns with the right edge and [end] aligns with the left edge.
+  /// If [direction] is null or [TextDirection.ltr], returns this alignment unchanged.
+  EdgeOverlayAlignment resolve(TextDirection? direction) {
+    if (direction == .rtl) {
+      if (value == 0.0) {
+        return center;
+      }
+      return EdgeOverlayAlignment(-value);
+    }
+    return this;
+  }
+
   /// Returns the offset within [freeSpace] corresponding to this alignment.
-  double alongOffset(double freeSpace) {
-    return (freeSpace / 2.0) * (1.0 + value);
+  ///
+  /// If [textDirection] is [TextDirection.rtl], the alignment is resolved such
+  /// that [start] corresponds to the right side of [freeSpace] and [end]
+  /// corresponds to the left side.
+  double alongOffset(double freeSpace, {TextDirection? textDirection}) {
+    final double effectiveValue = resolve(textDirection).value;
+    return (freeSpace / 2.0) * (1.0 + effectiveValue);
   }
 
   /// Linearly interpolate between two [EdgeOverlayAlignment]s.
@@ -158,6 +182,7 @@ class EdgeInsetsOverlayMetrics {
     this.padding = .zero,
     this.sizes = const <EdgeInsetsOverlaySlot, Size>{},
     this.alignments = const <EdgeInsetsOverlaySlot, EdgeOverlayAlignment>{},
+    this.textDirection,
   });
 
   /// The interior padding occupied by edge overlays inside the content bounds.
@@ -168,6 +193,9 @@ class EdgeInsetsOverlayMetrics {
 
   /// The alignments associated with each active edge overlay.
   final Map<EdgeInsetsOverlaySlot, EdgeOverlayAlignment> alignments;
+
+  /// The text direction used to resolve alignments along horizontal edges, or null if unspecified.
+  final TextDirection? textDirection;
 
   /// The measured size of the left overlay, or null if absent.
   Size? get leftSize => sizes[EdgeInsetsOverlaySlot.left];
@@ -181,6 +209,18 @@ class EdgeInsetsOverlayMetrics {
   /// The measured size of the bottom overlay, or null if absent.
   Size? get bottomSize => sizes[EdgeInsetsOverlaySlot.bottom];
 
+  /// The measured size of the start overlay according to [textDirection], or null if absent.
+  Size? get startSize => switch (textDirection) {
+    .rtl => rightSize,
+    .ltr || null => leftSize,
+  };
+
+  /// The measured size of the end overlay according to [textDirection], or null if absent.
+  Size? get endSize => switch (textDirection) {
+    .rtl => leftSize,
+    .ltr || null => rightSize,
+  };
+
   /// The alignment of the left overlay, or null if absent.
   EdgeOverlayAlignment? get leftAlignment => alignments[EdgeInsetsOverlaySlot.left];
 
@@ -192,6 +232,18 @@ class EdgeInsetsOverlayMetrics {
 
   /// The alignment of the bottom overlay, or null if absent.
   EdgeOverlayAlignment? get bottomAlignment => alignments[EdgeInsetsOverlaySlot.bottom];
+
+  /// The alignment of the start overlay according to [textDirection], or null if absent.
+  EdgeOverlayAlignment? get startAlignment => switch (textDirection) {
+    .rtl => rightAlignment,
+    .ltr || null => leftAlignment,
+  };
+
+  /// The alignment of the end overlay according to [textDirection], or null if absent.
+  EdgeOverlayAlignment? get endAlignment => switch (textDirection) {
+    .rtl => leftAlignment,
+    .ltr || null => rightAlignment,
+  };
 
   /// Whether an overlay widget is present at [slot].
   bool hasSlot(EdgeInsetsOverlaySlot slot) => sizes.containsKey(slot);
@@ -207,6 +259,18 @@ class EdgeInsetsOverlayMetrics {
 
   /// Whether an overlay widget is present at [EdgeInsetsOverlaySlot.bottom].
   bool get hasBottom => hasSlot(.bottom);
+
+  /// Whether an overlay widget is present at the start edge according to [textDirection].
+  bool get hasStart => switch (textDirection) {
+    .rtl => hasRight,
+    .ltr || null => hasLeft,
+  };
+
+  /// Whether an overlay widget is present at the end edge according to [textDirection].
+  bool get hasEnd => switch (textDirection) {
+    .rtl => hasLeft,
+    .ltr || null => hasRight,
+  };
 
   /// Computes the unobstructed interior [Rect] within the content bounds for the given [size], deflated by [padding].
   Rect innerBounds(Size size) => padding.deflateRect(Offset.zero & size);
@@ -232,7 +296,7 @@ class EdgeInsetsOverlayMetrics {
         sideSize.height,
       ),
       .top => Rect.fromLTWH(
-        alignment.alongOffset(contentSize.width - sideSize.width),
+        alignment.alongOffset(contentSize.width - sideSize.width, textDirection: textDirection),
         0.0,
         sideSize.width,
         sideSize.height,
@@ -244,7 +308,7 @@ class EdgeInsetsOverlayMetrics {
         sideSize.height,
       ),
       .bottom => Rect.fromLTWH(
-        alignment.alongOffset(contentSize.width - sideSize.width),
+        alignment.alongOffset(contentSize.width - sideSize.width, textDirection: textDirection),
         contentSize.height - sideSize.height,
         sideSize.width,
         sideSize.height,
@@ -265,6 +329,20 @@ class EdgeInsetsOverlayMetrics {
   /// Computes the bounding [Rect] of the bottom overlay for the given [contentSize], or null if absent.
   Rect? bottomRect(Size contentSize) => rectOf(.bottom, contentSize);
 
+  /// Computes the bounding [Rect] of the start overlay for the given [contentSize]
+  /// according to [textDirection], or null if absent.
+  Rect? startRect(Size contentSize) => switch (textDirection) {
+    .rtl => rightRect(contentSize),
+    .ltr || null => leftRect(contentSize),
+  };
+
+  /// Computes the bounding [Rect] of the end overlay for the given [contentSize]
+  /// according to [textDirection], or null if absent.
+  Rect? endRect(Size contentSize) => switch (textDirection) {
+    .rtl => leftRect(contentSize),
+    .ltr || null => rightRect(contentSize),
+  };
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
@@ -273,13 +351,13 @@ class EdgeInsetsOverlayMetrics {
     return other is EdgeInsetsOverlayMetrics &&
         other.padding == padding &&
         mapEquals(other.sizes, sizes) &&
-        mapEquals(other.alignments, alignments);
+        mapEquals(other.alignments, alignments) &&
+        other.textDirection == textDirection;
   }
 
   @override
   int get hashCode => Object.hash(
     padding,
-    sizes[EdgeInsetsOverlaySlot.child],
     sizes[EdgeInsetsOverlaySlot.left],
     sizes[EdgeInsetsOverlaySlot.top],
     sizes[EdgeInsetsOverlaySlot.right],
@@ -289,11 +367,12 @@ class EdgeInsetsOverlayMetrics {
     alignments[EdgeInsetsOverlaySlot.top],
     alignments[EdgeInsetsOverlaySlot.right],
     alignments[EdgeInsetsOverlaySlot.bottom],
+    textDirection,
   );
 
   @override
   String toString() =>
-      'EdgeInsetsOverlayMetrics(padding: $padding, sizes: $sizes, alignments: $alignments)';
+      'EdgeInsetsOverlayMetrics(padding: $padding, sizes: $sizes, alignments: $alignments, textDirection: $textDirection)';
 }
 
 /// Signature for building the main content of an [EdgeInsetsOverlay],
@@ -339,6 +418,7 @@ class EdgeInsetsOverlay extends StatelessWidget {
     Widget? right,
     Widget? bottom,
     List<EdgeInsetsOverlaySlot> paintOrder = EdgeInsetsOverlaySlot.values,
+    TextDirection? textDirection,
     required EdgeInsetsOverlayWidgetBuilder builder,
   }) : this.metrics(
          key: key,
@@ -347,6 +427,7 @@ class EdgeInsetsOverlay extends StatelessWidget {
          right: right != null ? .new(child: right) : null,
          bottom: bottom != null ? .new(child: bottom) : null,
          paintOrder: paintOrder,
+         textDirection: textDirection,
          builder:
              (BuildContext context, BoxConstraints constraints, EdgeInsetsOverlayMetrics metrics) {
                return builder(context, constraints, metrics.padding);
@@ -362,6 +443,7 @@ class EdgeInsetsOverlay extends StatelessWidget {
     this.right,
     this.bottom,
     this.paintOrder = EdgeInsetsOverlaySlot.values,
+    this.textDirection,
     required this.builder,
   });
 
@@ -385,6 +467,11 @@ class EdgeInsetsOverlay extends StatelessWidget {
   /// Defaults to [EdgeInsetsOverlaySlot.values].
   final List<EdgeInsetsOverlaySlot> paintOrder;
 
+  /// The text direction with which to resolve directional alignments along horizontal edges.
+  ///
+  /// Defaults to the ambient [Directionality].
+  final TextDirection? textDirection;
+
   /// Called to build the main content for [EdgeInsetsOverlaySlot.child],
   /// receiving the layout [constraints] and computed [metrics] of active edge widgets.
   final EdgeInsetsOverlayMetricsWidgetBuilder builder;
@@ -406,6 +493,8 @@ class EdgeInsetsOverlay extends StatelessWidget {
       },
     );
 
+    final TextDirection? effectiveTextDirection = textDirection ?? Directionality.maybeOf(context);
+
     return _EdgeInsetsOverlay(
       left: left?.child,
       top: top?.child,
@@ -416,6 +505,7 @@ class EdgeInsetsOverlay extends StatelessWidget {
       rightAlignment: right?.alignment ?? EdgeOverlayAlignment.center,
       bottomAlignment: bottom?.alignment ?? EdgeOverlayAlignment.center,
       paintOrder: paintOrder,
+      textDirection: effectiveTextDirection,
       child: finalChild,
     );
   }
@@ -436,6 +526,7 @@ class EdgeInsetsOverlay extends StatelessWidget {
         defaultValue: EdgeInsetsOverlaySlot.values,
       ),
     );
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(
       ObjectFlagProperty<EdgeInsetsOverlayMetricsWidgetBuilder>.has('builder', builder),
     );
@@ -455,6 +546,7 @@ class _EdgeInsetsOverlay
     this.rightAlignment = EdgeOverlayAlignment.center,
     this.bottomAlignment = EdgeOverlayAlignment.center,
     this.paintOrder = EdgeInsetsOverlaySlot.values,
+    this.textDirection,
   });
 
   final Widget? left;
@@ -467,6 +559,7 @@ class _EdgeInsetsOverlay
   final EdgeOverlayAlignment rightAlignment;
   final EdgeOverlayAlignment bottomAlignment;
   final List<EdgeInsetsOverlaySlot> paintOrder;
+  final TextDirection? textDirection;
 
   @override
   Iterable<EdgeInsetsOverlaySlot> get slots => EdgeInsetsOverlaySlot.values;
@@ -490,6 +583,7 @@ class _EdgeInsetsOverlay
       rightAlignment: rightAlignment,
       bottomAlignment: bottomAlignment,
       paintOrder: paintOrder,
+      textDirection: textDirection,
     );
   }
 
@@ -500,7 +594,8 @@ class _EdgeInsetsOverlay
       ..topAlignment = topAlignment
       ..rightAlignment = rightAlignment
       ..bottomAlignment = bottomAlignment
-      ..paintOrder = paintOrder;
+      ..paintOrder = paintOrder
+      ..textDirection = textDirection;
   }
 }
 
@@ -512,6 +607,7 @@ class _RenderEdgeInsetsOverlay extends RenderBox
     this._rightAlignment = .center,
     this._bottomAlignment = .center,
     this._paintOrder = EdgeInsetsOverlaySlot.values,
+    this._textDirection,
   }) : _resolvedPaintOrder = <EdgeInsetsOverlaySlot>{
          ..._paintOrder,
          ...EdgeInsetsOverlaySlot.values,
@@ -532,8 +628,18 @@ class _RenderEdgeInsetsOverlay extends RenderBox
   /// The content child spanning the full area beneath overlays.
   RenderBox? get contentChild => childForSlot(.child);
 
+  // The following uses sync* because the list of children must be generated
+  // lazily in the order specified by _resolvedPaintOrder preventing massive
+  // memory overhead from creating a full list of children at once.
   @override
-  Iterable<RenderBox> get children => _resolvedPaintOrder.map(childForSlot).nonNulls;
+  Iterable<RenderBox> get children sync* {
+    for (final EdgeInsetsOverlaySlot slot in _resolvedPaintOrder) {
+      final RenderBox? child = childForSlot(slot);
+      if (child != null) {
+        yield child;
+      }
+    }
+  }
 
   /// The alignment configuration for the left edge overlay.
   EdgeOverlayAlignment get leftAlignment => _leftAlignment;
@@ -576,6 +682,17 @@ class _RenderEdgeInsetsOverlay extends RenderBox
       return;
     }
     _bottomAlignment = value;
+    markNeedsLayout();
+  }
+
+  /// The text direction used to resolve alignments along horizontal edges.
+  TextDirection? get textDirection => _textDirection;
+  TextDirection? _textDirection;
+  set textDirection(TextDirection? value) {
+    if (_textDirection == value) {
+      return;
+    }
+    _textDirection = value;
     markNeedsLayout();
   }
 
@@ -700,7 +817,12 @@ class _RenderEdgeInsetsOverlay extends RenderBox
       bottomSize.height,
     );
 
-    _metrics = .new(padding: padding, sizes: sizes, alignments: alignments);
+    _metrics = .new(
+      padding: padding,
+      sizes: sizes,
+      alignments: alignments,
+      textDirection: textDirection,
+    );
 
     if (contentChild != null) {
       contentChild.layout(
@@ -804,6 +926,7 @@ class _RenderEdgeInsetsOverlay extends RenderBox
         defaultValue: EdgeInsetsOverlaySlot.values,
       ),
     );
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsOverlayMetrics>('metrics', metrics));
   }
 }
