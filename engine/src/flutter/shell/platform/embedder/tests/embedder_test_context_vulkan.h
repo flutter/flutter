@@ -17,6 +17,12 @@ namespace testing {
 
 class EmbedderTestContextVulkan : public EmbedderTestContext {
  public:
+  using TestExternalTextureCallback =
+      std::function<bool(int64_t texture_id,
+                         size_t w,
+                         size_t h,
+                         FlutterVulkanExternalTexture* output)>;
+
   explicit EmbedderTestContextVulkan(std::string assets_path = "");
 
   ~EmbedderTestContextVulkan() override;
@@ -41,6 +47,13 @@ class EmbedderTestContextVulkan : public EmbedderTestContext {
     return vulkan_context_;
   }
 
+  void SetExternalTextureCallback(
+      TestExternalTextureCallback external_texture_frame_callback);
+
+  fml::RefPtr<TestVulkanContext> GetTestVulkanContext() const {
+    return vulkan_context_;
+  }
+
   static void* InstanceProcAddr(void* user_data,
                                 FlutterVulkanInstanceHandle instance,
                                 const char* name);
@@ -51,6 +64,8 @@ class EmbedderTestContextVulkan : public EmbedderTestContext {
 
   // |EmbedderTestContext|
   void SetupCompositor() override;
+
+  TestExternalTextureCallback external_texture_frame_callback_ = nullptr;
 
   // The TestVulkanContext destructor must be called _after_ the compositor is
   // freed.

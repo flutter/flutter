@@ -33,6 +33,7 @@ std::string DartCallbackCache::cache_path_;
 std::map<int64_t, DartCallbackRepresentation> DartCallbackCache::cache_;
 
 void DartCallbackCache::SetCachePath(const std::string& path) {
+  std::scoped_lock lock(mutex_);
   cache_path_ = fml::paths::JoinPaths({path, kCacheName});
 }
 
@@ -70,6 +71,29 @@ DartCallbackCache::GetCallbackInformation(int64_t handle) {
     return std::make_unique<DartCallbackRepresentation>(iterator->second);
   }
   return nullptr;
+}
+
+bool DartCallbackCache::GetCallbackStrings(int64_t handle,
+                                           const char** name,
+                                           const char** class_name,
+                                           const char** library_path) {
+  std::scoped_lock lock(mutex_);
+  auto iterator = cache_.find(handle);
+  if (iterator != cache_.end()) {
+    if (name != nullptr) {
+      *name = iterator->second.name.c_str();
+    }
+    if (class_name != nullptr) {
+      *class_name = iterator->second.class_name.empty()
+                        ? nullptr
+                        : iterator->second.class_name.c_str();
+    }
+    if (library_path != nullptr) {
+      *library_path = iterator->second.library_path.c_str();
+    }
+    return true;
+  }
+  return false;
 }
 
 void DartCallbackCache::SaveCacheToDisk() {
