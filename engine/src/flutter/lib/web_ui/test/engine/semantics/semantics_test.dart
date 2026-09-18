@@ -6467,6 +6467,99 @@ void _testLoadingSpinner() {
     expect(object.semanticRole?.kind, EngineSemanticsRole.loadingSpinner);
   });
 
+  test('preserves active DOM focus when ancestor role updates (#192792)', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          flags: const ui.SemanticsFlags(isTextField: true, isFocused: ui.Tristate.isTrue),
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+      ],
+    );
+    tester.apply();
+
+    final DomElement textFieldInput = owner().debugSemanticsTree![1]!.element.querySelector(
+      'input',
+    )!;
+    expect(domDocument.activeElement, textFieldInput);
+
+    // Trigger a role change on ancestor node 0 (e.g. GenericRole -> SemanticScrollable).
+    tester.updateNode(
+      id: 0,
+      flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
+      actions: 0 | ui.SemanticsAction.scrollUp.index,
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          flags: const ui.SemanticsFlags(isTextField: true, isFocused: ui.Tristate.isTrue),
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+      ],
+    );
+    tester.apply();
+
+    expect(domDocument.activeElement, textFieldInput);
+  });
+
+  test('respects isAccessibilityFocusBlocked on leaf and container nodes (#191484)', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      label: 'Blocked container',
+      flags: const ui.SemanticsFlags(
+        isAccessibilityFocusBlocked: true,
+        isFocused: ui.Tristate.isFalse,
+      ),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          label: 'Blocked leaf counter',
+          flags: const ui.SemanticsFlags(isAccessibilityFocusBlocked: true, isLiveRegion: true),
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+        tester.updateNode(
+          id: 2,
+          label: 'Accessible child',
+          rect: const ui.Rect.fromLTRB(0, 50, 100, 100),
+        ),
+        tester.updateNode(
+          id: 3,
+          label: 'Blocked button',
+          flags: const ui.SemanticsFlags(
+            isButton: true,
+            isAccessibilityFocusBlocked: true,
+            isFocused: ui.Tristate.isFalse,
+          ),
+          rect: const ui.Rect.fromLTRB(0, 100, 100, 150),
+        ),
+      ],
+    );
+    tester.apply();
+
+    final SemanticsObject blockedContainer = tester.getSemanticsObject(0);
+    final SemanticsObject blockedLeaf = tester.getSemanticsObject(1);
+    final SemanticsObject blockedButton = tester.getSemanticsObject(3);
+    expect(blockedContainer.isFocusable, isFalse);
+    expect(blockedContainer.element.getAttribute('role'), 'none');
+    expect(blockedContainer.element.getAttribute('aria-label'), isNull);
+    expect(blockedLeaf.element.getAttribute('aria-hidden'), 'true');
+    expect(blockedLeaf.element.text, isEmpty);
+    expect(blockedButton.isFocusable, isFalse);
+    expect(blockedButton.element.getAttribute('aria-hidden'), 'true');
+    expect(blockedButton.element.getAttribute('tabindex'), isNull);
+  });
+
   semantics().semanticsEnabled = false;
 }
 

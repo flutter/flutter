@@ -193,6 +193,7 @@ class AccessibilityFocusManager {
       return;
     }
 
+    target.element.removeAttribute('tabindex');
     target.element.removeEventListener('focus', target.domFocusListener);
     target.element.removeEventListener('blur', target.domBlurListener);
   }
