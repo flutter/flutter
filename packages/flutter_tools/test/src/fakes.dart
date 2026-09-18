@@ -1632,3 +1632,35 @@ class FakeAppleContext extends Fake implements AppleContext {
   late final XcodeProjectInterpreter xcodeProjectInterpreter =
       _xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter();
 }
+
+class TestToolContext extends Fake implements ToolContext {
+  TestToolContext({
+    Artifacts? artifacts,
+    FileSystem? fileSystem,
+    Logger? logger,
+    ProcessManager? processManager,
+    ProcessInfo? processInfo,
+  }) : _artifacts = artifacts,
+       _fs = fileSystem,
+       _logger = logger,
+       _processManager = processManager,
+       _processInfo = processInfo;
+// ignore: prefer_initializing_formals
+
+  final Artifacts? _artifacts;
+  final FileSystem? _fs;
+  final Logger? _logger;
+  final ProcessManager? _processManager;
+  final ProcessInfo? _processInfo;
+
+  @override
+  Artifacts get artifacts => _artifacts ?? globals.artifacts!;
+  @override
+  FileSystem get fs => _fs ?? globals.fs;
+  @override
+  Logger get logger => _logger ?? globals.logger;
+  @override
+  ProcessManager get processManager => _processManager ?? globals.processManager;
+  @override
+  ProcessInfo get processInfo => _processInfo ?? globals.processInfo;
+}

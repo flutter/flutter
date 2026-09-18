@@ -18,12 +18,14 @@ import '../base/process.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../device.dart';
+import '../context/tool_context.dart';
 import '../resident_runner.dart';
 import '../vmservice.dart';
 import 'web_driver_service.dart';
 
 class FlutterDriverFactory {
   FlutterDriverFactory({
+    this.toolContext,
     required this._applicationPackageFactory,
     required this._platform,
     required this._logger,
@@ -34,6 +36,7 @@ class FlutterDriverFactory {
     required this._devtoolsLauncher,
   });
 
+  final ToolContext? toolContext;
   final ApplicationPackageFactory _applicationPackageFactory;
   final Platform _platform;
   final Logger _logger;
@@ -47,6 +50,7 @@ class FlutterDriverFactory {
   DriverService createDriverService(bool web) {
     if (web) {
       return WebDriverService(
+        toolContext: toolContext,
         logger: _logger,
         terminal: _terminal,
         platform: _platform,

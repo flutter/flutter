@@ -169,6 +169,7 @@ class DaemonCommand extends FlutterCommand {
 @visibleForTesting
 class DaemonServer {
   DaemonServer({
+    this.toolContext,
     required this.logger,
     this.analytics,
     this.androidSdk,
@@ -190,6 +191,7 @@ class DaemonServer {
   });
 
   final int? port;
+  final ToolContext? toolContext;
 
   /// Stdout logger used to print general server-related errors.
   final Logger logger;
@@ -280,6 +282,7 @@ typedef CommandHandlerWithBinary = Future<Object?> Function(
 class Daemon {
   Daemon(
     this.connection, {
+    this.toolContext,
     Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
@@ -298,7 +301,8 @@ class Daemon {
     Stdio? stdio,
     SystemClock? systemClock,
     AnsiTerminal? terminal,
-  }) : _stdio = stdio,
+  }) : _toolContext = toolContext,
+       _stdio = stdio,
        _logger = logger ?? BufferLogger.test(),
        _fs =
            fileSystem ??
@@ -872,6 +876,7 @@ typedef RunOrAttach = Future<void> Function({
 class AppDomain extends Domain {
   AppDomain(
     Daemon daemon, {
+    this.toolContext,
     Analytics? analytics,
     Artifacts? artifacts,
     FileSystem? fileSystem,
@@ -881,7 +886,8 @@ class AppDomain extends Domain {
     ProcessManager? processManager,
     SystemClock? systemClock,
     AnsiTerminal? terminal,
-  }) : _artifacts = artifacts ?? daemon._artifacts,
+  }) : _toolContext = toolContext,
+       _artifacts = artifacts ?? daemon._artifacts,
        _processManager = processManager ?? const LocalProcessManager(),
        _fs = fileSystem ?? daemon._fs,
        _platform = platform ?? const LocalPlatform(),
@@ -910,6 +916,7 @@ class AppDomain extends Domain {
   final SystemClock _systemClock;
   final Logger _logger;
   final AnsiTerminal _terminal;
+  final ToolContext? _toolContext;
   final OutputPreferences _outputPreferences;
 
   static const _uuidGenerator = Uuid();

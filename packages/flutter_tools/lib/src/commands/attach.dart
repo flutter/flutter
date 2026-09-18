@@ -142,7 +142,6 @@ class AttachCommand extends FlutterCommand {
   final Logger _logger;
   final Terminal _terminal;
   final Signals _signals;
-  final Platform _platform;
   final ProcessInfo _processInfo;
   final FileSystem _fileSystem;
 
@@ -354,12 +353,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      artifacts: toolContext!.artifacts,
+      toolContext: toolContext!,
       buildInfo: buildInfo,
-      fileSystem: _fileSystem,
-      logger: _logger,
-      platform: _platform,
-      processManager: toolContext!.processManager,
       target: targetFile,
       targetModelOverride: TargetModel(stringArg('target-model')!),
       userIdentifier: userIdentifier,
