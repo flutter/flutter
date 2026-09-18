@@ -348,13 +348,14 @@ class FlutterDevice {
       vmService!,
       fsName,
       rootDirectory,
-      osUtils: osUtils,
-      fileSystem: fileSystem,
-      logger: logger,
-      processManager: processManager,
-      artifacts: artifacts,
       buildMode: buildInfo.mode,
-      toolContext: _FallbackToolContext(),
+      toolContext: _FlutterDeviceDevFSContext(
+        artifacts: artifacts,
+        fs: fileSystem,
+        logger: logger,
+        os: osUtils,
+        processManager: processManager,
+      ),
     );
     return devFS!.create();
   }
@@ -2208,30 +2209,24 @@ class DevToolsServerAddress {
   }
 }
 
-// TODO(bkonyi): This will be removed in a follow up PR once ResidentRunner is
-// migrated to accept ToolContext directly. This fallback context delegates to
-// globals.* to maintain backwards compatibility.
-class _FallbackToolContext implements ToolContext {
-  _FallbackToolContext();
-
+class _FlutterDeviceDevFSContext implements ToolContext {
+  _FlutterDeviceDevFSContext({
+    required this.artifacts,
+    required this.fs,
+    required this.logger,
+    required this.os,
+    required this.processManager,
+  });
   @override
-  Artifacts get artifacts => globals.artifacts!;
-
+  final Artifacts artifacts;
   @override
-  Config get config => globals.config;
-
+  final FileSystem fs;
   @override
-  FileSystem get fs => globals.fs;
-
+  final Logger logger;
   @override
-  Logger get logger => globals.logger;
-
+  final OperatingSystemUtils os;
   @override
-  OperatingSystemUtils get os => globals.os;
-
+  final ProcessManager processManager;
   @override
-  ProcessManager get processManager => globals.processManager;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }
