@@ -59,7 +59,7 @@ class BuildCommand extends FlutterCommand {
       :Platform platform,
       :ProcessManager processManager,
     ) = toolContext;
-    final Xcode? xcode = appleContext.xcode;
+    final Xcode xcode = appleContext.xcode;
 
     final codesign = DarwinAddToAppCodesigning.fromContexts(
       appleContext: appleContext,
