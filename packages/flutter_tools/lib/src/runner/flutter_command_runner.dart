@@ -608,6 +608,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
               commandPath: 'version',
               result: 'success',
               commandHasTerminal: stdio.hasTerminal,
+              hostArch: _toolContext.os.hostPlatform.cliName,
             ),
           );
           final FlutterVersion version = flutterVersion.fetchTagsAndGetVersion(clock: systemClock);
