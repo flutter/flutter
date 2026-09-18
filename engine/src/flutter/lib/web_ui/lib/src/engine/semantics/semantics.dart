@@ -1092,6 +1092,19 @@ final class GenericRole extends SemanticRole {
     //   In HTML text has no ARIA role. It's just a DOM node with text inside
     //   it. Previously, role="text" was used, but it was only supported by
     //   Safari, and it was removed starting Safari 17.
+    if (semanticsObject.isAccessibilityFocusBlocked) {
+      if (semanticsObject.hasChildren) {
+        setAriaRole('none');
+        removeAttribute('aria-hidden');
+      } else {
+        removeAttribute('role');
+        setAttribute('aria-hidden', 'true');
+      }
+      super.update();
+      return;
+    }
+    removeAttribute('aria-hidden');
+
     if (semanticsObject.hasChildren) {
       labelAndValue!.preferredRepresentation = LabelRepresentation.ariaLabel;
       setAriaRole('group');
@@ -1107,6 +1120,9 @@ final class GenericRole extends SemanticRole {
 
   @override
   bool focusAsRouteDefault() {
+    if (semanticsObject.isAccessibilityFocusBlocked) {
+      return false;
+    }
     // Case 1: current node has input focus. Let the input focus system decide
     // default focusability.
     if (semanticsObject.isFocusable) {
@@ -1735,8 +1751,11 @@ class SemanticsObject {
   /// Whether [actions] contains the given action.
   bool hasAction(ui.SemanticsAction action) => (_actions! & action.index) != 0;
 
+  /// Whether accessibility focus on this node is blocked.
+  bool get isAccessibilityFocusBlocked => flags.isAccessibilityFocusBlocked;
+
   /// Whether this object represents a widget that can receive input focus.
-  bool get isFocusable => flags.isFocused != ui.Tristate.none;
+  bool get isFocusable => flags.isFocused != ui.Tristate.none && !isAccessibilityFocusBlocked;
 
   /// Whether this object currently has input focus.
   ///
@@ -2354,6 +2373,11 @@ class SemanticsObject {
     SemanticRole? currentSemanticRole = semanticRole;
     final EngineSemanticsRole kind = _getEngineSemanticsRole();
     final DomElement? previousElement = semanticRole?.element;
+    final DomElement? previouslyFocusedElement = domDocument.activeElement;
+    final bool hadSubtreeFocus =
+        previouslyFocusedElement != null &&
+        previousElement != null &&
+        previousElement.contains(previouslyFocusedElement);
 
     if (currentSemanticRole != null) {
       if (currentSemanticRole.kind == kind) {
@@ -2384,15 +2408,24 @@ class SemanticsObject {
 
     // Reparent element.
     if (previousElement != element) {
+      final DomElement? parent = previousElement?.parent;
+      if (parent != null) {
+        parent.insertBefore(element, previousElement);
+      }
       if (_currentChildrenInRenderOrder != null) {
         for (final SemanticsObject child in _currentChildrenInRenderOrder!) {
           element.append(child.element);
         }
       }
-      final DomElement? parent = previousElement?.parent;
       if (parent != null) {
-        parent.insertBefore(element, previousElement);
         previousElement!.remove();
+      }
+      if (hadSubtreeFocus && domDocument.activeElement != previouslyFocusedElement) {
+        if (element.contains(previouslyFocusedElement)) {
+          previouslyFocusedElement.focusWithoutScroll();
+        } else {
+          element.focusWithoutScroll();
+        }
       }
     }
   }
