@@ -45,7 +45,9 @@ def _ExtractImportantEnvironment(output_of_set):
       'userprofile', # needed by vpython
       'vpython_virtualenv_root' # needed by vpython
       )
-  env = {}
+  env = {
+      'VPYTHON_BYPASS': 'manually managed python not supported by chrome operations',
+  }
   # This occasionally happens and leads to misleading SYSTEMROOT error messages
   # if not caught here.
   if output_of_set.count('=') == 0:

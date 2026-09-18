@@ -29,52 +29,9 @@
 #include "flutter/shell/platform/android/embedder_android_engine.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/shell_android_engine.h"
+#include "flutter/shell/platform/embedder/embedder_asset_resolver.h"
 
 namespace flutter {
-
-/// Inheriting ThreadConfigurer and use Android platform thread API to configure
-/// the thread priorities
-static void AndroidPlatformThreadConfigSetter(
-    const fml::Thread::ThreadConfig& config) {
-  // set thread name
-  fml::Thread::SetCurrentThreadName(config);
-  // set thread priority
-  switch (config.priority) {
-    case fml::Thread::ThreadPriority::kBackground: {
-      fml::RequestAffinity(fml::CpuAffinity::kEfficiency);
-      if (::setpriority(PRIO_PROCESS, 0, 10) != 0) {
-        FML_LOG(ERROR) << "Failed to set IO task runner priority";
-      }
-      break;
-    }
-    case fml::Thread::ThreadPriority::kDisplay: {
-      fml::RequestAffinity(fml::CpuAffinity::kNotEfficiency);
-      if (::setpriority(PRIO_PROCESS, 0, -1) != 0) {
-        FML_LOG(ERROR) << "Failed to set UI task runner priority";
-      }
-      break;
-    }
-    case fml::Thread::ThreadPriority::kRaster: {
-      fml::RequestAffinity(fml::CpuAffinity::kNotEfficiency);
-      // Android describes -8 as "most important display threads, for
-      // compositing the screen and retrieving input events". Conservatively
-      // set the raster thread to slightly lower priority than it.
-      if (::setpriority(PRIO_PROCESS, 0, -5) != 0) {
-        // Defensive fallback. Depending on the OEM, it may not be possible
-        // to set priority to -5.
-        if (::setpriority(PRIO_PROCESS, 0, -2) != 0) {
-          FML_LOG(ERROR) << "Failed to set raster task runner priority";
-        }
-      }
-      break;
-    }
-    default:
-      fml::RequestAffinity(fml::CpuAffinity::kNotPerformance);
-      if (::setpriority(PRIO_PROCESS, 0, 0) != 0) {
-        FML_LOG(ERROR) << "Failed to set priority";
-      }
-  }
-}
 static PlatformData GetDefaultPlatformData() {
   PlatformData platform_data;
   platform_data.lifecycle_state = "AppLifecycleState.detached";
@@ -190,8 +147,12 @@ AndroidShellHolder::AndroidShellHolder(
     });
 
     if (settings_.enable_embedder_api) {
-      engine_ = std::make_unique<EmbedderAndroidEngine>(task_runners,
-                                                        std::move(shell));
+      auto embedder_engine = std::make_unique<EmbedderAndroidEngine>(
+          task_runners, std::move(shell), settings_, jni_facade_,
+          android_rendering_api_);
+      embedder_engine->SetPlatformMessageHandler(
+          platform_view_android_->GetPlatformMessageHandler());
+      engine_ = std::move(embedder_engine);
     } else {
       engine_ = std::make_unique<ShellAndroidEngine>(std::move(shell));
     }
@@ -414,6 +375,11 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
   if (!spawned_engine) {
     return nullptr;
   }
+  if (settings_.enable_embedder_api) {
+    static_cast<EmbedderAndroidEngine*>(spawned_engine.get())
+        ->SetPlatformMessageHandler(
+            spawned_platform_view_android->GetPlatformMessageHandler());
+  }
   spawned_platform_view_android->SetEngine(spawned_engine.get());
 
   return std::unique_ptr<AndroidShellHolder>(new AndroidShellHolder(
@@ -433,14 +399,32 @@ void AndroidShellHolder::Launch(
     return;
   }
 
+  UpdateDisplayMetrics();
+
   apk_asset_provider_ = std::move(apk_asset_provider);
+  if (!apk_asset_provider_) {
+    if (settings_.enable_embedder_api) {
+      auto* embedder_engine =
+          static_cast<EmbedderAndroidEngine*>(engine_.get());
+      if (embedder_engine != nullptr) {
+        embedder_engine->Run(nullptr, entrypoint, libraryUrl, entrypoint_args,
+                             engine_id);
+      }
+    }
+    return;
+  }
+
   auto config = BuildRunConfiguration(entrypoint, libraryUrl, entrypoint_args);
   if (!config) {
     return;
   }
   config->SetEngineId(engine_id);
-  UpdateDisplayMetrics();
   engine_->RunEngine(std::move(config.value()));
+  if (settings_.enable_embedder_api) {
+    engine_->UpdateAssetResolverByType(
+        apk_asset_provider_->Clone(),
+        AssetResolver::AssetResolverType::kApkAssetProvider);
+  }
 }
 
 Rasterizer::Screenshot AndroidShellHolder::Screenshot(
@@ -482,7 +466,13 @@ std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
   }
 
   RunConfiguration config(std::move(isolate_configuration));
-  config.AddAssetResolver(apk_asset_provider_->Clone());
+  if (settings_.enable_embedder_api) {
+    auto cloned = apk_asset_provider_->Clone();
+    config.AddAssetResolver(std::make_unique<EmbedderAssetResolver>(
+        cloned->ToFlutterAssetResolver()));
+  } else {
+    config.AddAssetResolver(apk_asset_provider_->Clone());
+  }
 
   {
     if (!entrypoint.empty() && !libraryUrl.empty()) {

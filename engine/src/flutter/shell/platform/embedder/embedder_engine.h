@@ -16,6 +16,11 @@
 #include "flutter/shell/platform/embedder/embedder_external_texture_resolver.h"
 #include "flutter/shell/platform/embedder/embedder_image_generator.h"
 #include "flutter/shell/platform/embedder/embedder_thread_host.h"
+
+struct _FlutterPlatformMessageResponseHandle {
+  std::unique_ptr<flutter::PlatformMessage> message;
+};
+
 namespace flutter {
 
 struct ShellArgs;
@@ -73,6 +78,10 @@ class EmbedderEngine {
   bool NotifyCreated();
 
   bool NotifyDestroyed();
+
+  void SetRunConfiguration(RunConfiguration run_configuration);
+
+  bool HasValidRunConfiguration() const;
 
   bool RunRootIsolate();
 

@@ -2033,10 +2033,6 @@ MakeViewportMetricsFromWindowMetrics(
   return metrics;
 }
 
-struct _FlutterPlatformMessageResponseHandle {
-  std::unique_ptr<flutter::PlatformMessage> message;
-};
-
 struct LoadedElfDeleter {
   void operator()(Dart_LoadedElf* elf) {
     if (elf) {
@@ -3030,6 +3026,10 @@ FlutterEngineResult FlutterEngineRunInitialized(
   // The engine must not already be running. Initialize may only be called
   // once on an engine instance.
   if (embedder_engine->IsValid()) {
+    if (embedder_engine->HasValidRunConfiguration() &&
+        embedder_engine->RunRootIsolate()) {
+      return kSuccess;
+    }
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
   }
 
