@@ -65,16 +65,12 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        SizedBox(
-          height: 300.0,
+        Expanded(
           child: AndroidView(
             key: const ValueKey<String>('PlatformView'),
             viewType: 'simple_view',
             onPlatformViewCreated: onPlatformViewCreated,
           ),
-        ),
-        Expanded(
-          child: ListView.builder(itemBuilder: buildEventTile, itemCount: flutterViewEvents.length),
         ),
         Row(
           children: <Widget>[
@@ -88,10 +84,8 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
               child: ElevatedButton(
                 child: const Text('CLEAR'),
                 onPressed: () {
-                  setState(() {
-                    flutterViewEvents.clear();
-                    embeddedViewEvents.clear();
-                  });
+                  flutterViewEvents.clear();
+                  embeddedViewEvents.clear();
                 },
               ),
             ),
@@ -236,7 +230,6 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
         if (flutterViewEvents.length > kEventsBufferSize) {
           flutterViewEvents.removeLast();
         }
-        setState(() {});
     }
     return Future<dynamic>.value();
   }
@@ -249,68 +242,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
         if (embeddedViewEvents.length > kEventsBufferSize) {
           embeddedViewEvents.removeLast();
         }
-        setState(() {});
     }
     return Future<dynamic>.value();
-  }
-
-  Widget buildEventTile(BuildContext context, int index) {
-    if (embeddedViewEvents.length > index) {
-      return TouchEventDiff(flutterViewEvents[index], embeddedViewEvents[index]);
-    }
-    return Text('Unmatched event, action: ${flutterViewEvents[index]['action']}');
-  }
-}
-
-class TouchEventDiff extends StatelessWidget {
-  const TouchEventDiff(this.originalEvent, this.synthesizedEvent, {super.key});
-
-  final Map<String, dynamic> originalEvent;
-  final Map<String, dynamic> synthesizedEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    Color color;
-    final String diff = diffMotionEvents(originalEvent, synthesizedEvent);
-    String msg;
-    final action = synthesizedEvent['action'] as int;
-    final String actionName = getActionName(getActionMasked(action), action);
-    if (diff.isEmpty) {
-      color = Colors.green;
-      msg = 'Matched event (action $actionName)';
-    } else {
-      color = Colors.red;
-      msg = '[$actionName] $diff';
-    }
-    return GestureDetector(
-      onLongPress: () {
-        print('expected:');
-        prettyPrintEvent(originalEvent);
-        print('\nactual:');
-        prettyPrintEvent(synthesizedEvent);
-      },
-      child: Container(color: color, margin: const EdgeInsets.only(bottom: 2.0), child: Text(msg)),
-    );
-  }
-
-  void prettyPrintEvent(Map<String, dynamic> event) {
-    final buffer = StringBuffer();
-    final action = event['action'] as int;
-    final int maskedAction = getActionMasked(action);
-    final String actionName = getActionName(maskedAction, action);
-
-    buffer.write('$actionName ');
-    if (maskedAction == 5 || maskedAction == 6) {
-      buffer.write('pointer: ${getPointerIdx(action)} ');
-    }
-
-    final List<Map<dynamic, dynamic>> coords = (event['pointerCoords'] as List<dynamic>)
-        .cast<Map<dynamic, dynamic>>();
-    for (var i = 0; i < coords.length; i++) {
-      buffer.write(
-        'p$i x: ${coords[i]['x']} y: ${coords[i]['y']}, pressure: ${coords[i]['pressure']} ',
-      );
-    }
-    print(buffer);
   }
 }
