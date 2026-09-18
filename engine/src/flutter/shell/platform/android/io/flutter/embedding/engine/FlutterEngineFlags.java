@@ -153,6 +153,15 @@ public final class FlutterEngineFlags {
       new Flag("--enable-impeller=", "EnableImpeller", true);
 
   /**
+   * Enables the Android Embedder C-API architecture.
+   *
+   * <p>Allowed in release for architecture migration testing and rollback capability. Settable via
+   * the command line and manifest.
+   */
+  public static final Flag ENABLE_EMBEDDER_API =
+      new Flag("--enable-embedder-api=", "EnableEmbedderAPI", true);
+
+  /**
    * Specifies the backend to use for Impeller rendering.
    *
    * <p>Allowed in release to select a specific graphics backend for Impeller in production. Only
@@ -437,6 +446,7 @@ public final class FlutterEngineFlags {
               AOT_SHARED_LIBRARY_NAME,
               FLUTTER_ASSETS_DIR,
               ENABLE_IMPELLER,
+              ENABLE_EMBEDDER_API,
               IMPELLER_BACKEND,
               ENABLE_VULKAN_VALIDATION,
               START_PAUSED,

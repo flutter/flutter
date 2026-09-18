@@ -57,6 +57,9 @@ public class FlutterShellArgs {
   public static final String ARG_KEY_TOGGLE_IMPELLER = "enable-impeller";
   public static final String ARG_ENABLE_IMPELLER = "--enable-impeller=true";
   public static final String ARG_DISABLE_IMPELLER = "--enable-impeller=false";
+  public static final String ARG_KEY_ENABLE_EMBEDDER_API = "enable-embedder-api";
+  public static final String ARG_ENABLE_EMBEDDER_API = "--enable-embedder-api=true";
+  public static final String ARG_DISABLE_EMBEDDER_API = "--enable-embedder-api=false";
   /** Intent extra key that opts the engine into the Flutter GPU API. */
   public static final String ARG_KEY_ENABLE_FLUTTER_GPU = "enable-flutter-gpu";
 
@@ -147,6 +150,13 @@ public class FlutterShellArgs {
         args.add(ARG_ENABLE_IMPELLER);
       } else {
         args.add(ARG_DISABLE_IMPELLER);
+      }
+    }
+    if (intent.hasExtra(ARG_KEY_ENABLE_EMBEDDER_API)) {
+      if (intent.getBooleanExtra(ARG_KEY_ENABLE_EMBEDDER_API, false)) {
+        args.add(ARG_ENABLE_EMBEDDER_API);
+      } else {
+        args.add(ARG_DISABLE_EMBEDDER_API);
       }
     }
     if (intent.getBooleanExtra(ARG_KEY_ENABLE_FLUTTER_GPU, false)) {
