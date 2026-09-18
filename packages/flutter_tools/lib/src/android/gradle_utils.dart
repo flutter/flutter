@@ -18,8 +18,6 @@ import '../base/version_range.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../project.dart';
-import '../base/user_messages.dart';
-import '../base/platform.dart';
 import 'android_sdk.dart';
 
 // These are the versions used in the project templates.
@@ -1207,7 +1205,9 @@ void updateLocalProperties({
     changeIfNecessary('sdk.dir', fsUtils.escapePath(androidSdk.directory.path));
   }
 
-  changeIfNecessary('flutter.sdk', globals.fsUtils.escapePath(globals.cache.flutterRoot));
+  if (cache != null) {
+    changeIfNecessary('flutter.sdk', fsUtils.escapePath(cache.flutterRoot));
+  }
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
     final String? buildName = validatedBuildNameForPlatform(

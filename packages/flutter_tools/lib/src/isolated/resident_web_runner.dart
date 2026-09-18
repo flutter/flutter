@@ -25,7 +25,6 @@ import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_targets.dart';
-import '../cache.dart';
 import '../dart/language_version.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';

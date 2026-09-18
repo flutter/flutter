@@ -26,9 +26,9 @@ import 'test_config.dart';
 
 /// A web compiler for the test runner.
 class WebTestCompiler {
-  WebTestCompiler({required this._toolContext});
+  WebTestCompiler({required this.toolContext});
 
-  final ToolContext _toolContext;
+  final ToolContext toolContext;
 
   Future<File> _generateTestEntrypoint({
     required List<String> testFiles,
@@ -36,7 +36,7 @@ class WebTestCompiler {
     required Directory outputDirectory,
     required LanguageVersion languageVersion,
   }) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final List<WebTestInfo> testInfos = testFiles.map((String testFilePath) {
       final List<String> relativeTestSegments = fs.path.split(
         fs.path.relative(testFilePath, from: projectDirectory.childDirectory('test').path),
@@ -57,7 +57,7 @@ class WebTestCompiler {
       return (
         entryPoint: relativeTestSegments.join('/'),
         configFile: testConfigPath,
-        goldensUri: Uri.file(testFilePath),
+        goldensUri: fs.file(testFilePath).absolute.uri,
       );
     }).toList();
     return fs.file(fs.path.join(outputDirectory.path, 'main.dart'))
@@ -101,14 +101,15 @@ class WebTestCompiler {
   }) async {
     final ToolContext(
       :Artifacts artifacts,
+      :Cache cache,
       :Config config,
       :FileSystem fs,
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,
       :ShutdownHooks shutdownHooks,
-    ) = _toolContext;
-    final LanguageVersion languageVersion = currentLanguageVersion(fs, Cache.flutterRoot!);
+    ) = toolContext;
+    final LanguageVersion languageVersion = currentLanguageVersion(fs, cache.flutterRoot);
 
     final Directory outputDirectory = fs.directory(testOutputDir)..createSync(recursive: true);
     final File testFile = await _generateTestEntrypoint(
@@ -139,7 +140,7 @@ class WebTestCompiler {
       fileSystem: fs,
       shutdownHooks: shutdownHooks,
       config: config,
-      targetPlatform: .web_javascript,
+      targetPlatform: TargetPlatform.web_javascript,
     );
 
     final CompilerOutput? output = await residentCompiler.recompile(
@@ -174,16 +175,17 @@ class WebTestCompiler {
   }) async {
     final ToolContext(
       :Artifacts artifacts,
+      :Cache cache,
       :FileSystem fs,
       :Logger logger,
       :ProcessManager processManager,
-    ) = _toolContext;
+    ) = toolContext;
     final Directory outputDirectory = fs.directory(testOutputDir)..createSync(recursive: true);
     final File testFile = await _generateTestEntrypoint(
       testFiles: testFiles,
       projectDirectory: projectDirectory,
       outputDirectory: outputDirectory,
-      languageVersion: currentLanguageVersion(fs, Cache.flutterRoot!),
+      languageVersion: currentLanguageVersion(fs, cache.flutterRoot),
     );
 
     final String platformBinariesPath = artifacts

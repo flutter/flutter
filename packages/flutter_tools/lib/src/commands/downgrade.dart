@@ -41,15 +41,14 @@ String downgradePositionalArgumentErrorMessage(List<String> args) {
 /// the command would fail since there was no previously recorded stable version.
 class DowngradeCommand extends FlutterCommand {
   DowngradeCommand({required ToolContext toolContext, bool verboseHelp = false})
-    : _terminal = toolContext.terminal,
+    : _cache = toolContext.cache,
+      _terminal = toolContext.terminal,
       _flutterVersion = toolContext.flutterVersion,
       _git = toolContext.git,
       _logger = toolContext.logger,
       _persistentToolState = toolContext.persistentToolState,
       _stdio = toolContext.stdio,
-      _logger = toolContext.logger,
       _fileSystem = toolContext.fs,
-      _git = toolContext.git,
       super(toolContext: toolContext, verboseHelp: verboseHelp) {
     argParser.addOption(
       'working-directory',
@@ -68,6 +67,7 @@ class DowngradeCommand extends FlutterCommand {
     );
   }
 
+  final Cache _cache;
   final Terminal _terminal;
   FlutterVersion _flutterVersion;
   final PersistentToolState _persistentToolState;
@@ -94,7 +94,7 @@ class DowngradeCommand extends FlutterCommand {
     // Commands do not necessarily have access to the correct zone injected
     // values when being created. Fields must be lazily instantiated in runCommand,
     // at least until the zone injection is refactored.
-    String workingDirectory = Cache.flutterRoot!;
+    String workingDirectory = _cache.flutterRoot;
     if (argResults!.wasParsed('working-directory')) {
       workingDirectory = stringArg('working-directory')!;
       _flutterVersion = FlutterVersion(fs: _fileSystem, flutterRoot: workingDirectory, git: _git);

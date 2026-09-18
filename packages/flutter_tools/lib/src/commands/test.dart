@@ -4,16 +4,23 @@
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
+import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../asset.dart';
 import '../base/common.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../bundle_builder.dart';
+import '../context/tool_context.dart';
 import '../devfs.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -64,9 +71,10 @@ const _kIntegrationTestDirectory = 'integration_test';
 /// - https://flutter.dev/to/integration-testing
 class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
+    required ToolContext toolContext,
     bool verboseHelp = false,
     this.testWrapper = const TestWrapper(),
-    this.testRunner = const FlutterTestRunner(),
+    FlutterTestRunner? testRunner,
     this.verbose = false,
     this.nativeAssetsBuilder,
   }) : _toolContext = toolContext,
@@ -323,6 +331,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
 
+  final ToolContext _toolContext;
+
   /// The interface for starting and configuring the tester.
   final TestWrapper testWrapper;
 
@@ -373,11 +383,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (testUris.isEmpty) {
       // We don't scan the entire package, only the test/ subdirectory, so that
       // files with names like "hit_test.dart" don't get run.
-      final Directory testDir = globals.fs.directory('test');
+      final Directory testDir = fs.directory('test');
       if (!testDir.existsSync()) {
         throwToolExit('Test directory "${testDir.path}" not found.');
       }
-      _testFileUris.addAll(_findTests(testDir).map(Uri.file));
+      _testFileUris.addAll(_findTests(testDir, fs).map(Uri.file));
       if (_testFileUris.isEmpty) {
         throwToolExit(
           'Test directory "${testDir.path}" does not appear to contain any test files.\n'
@@ -389,10 +399,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         // Test files may have query strings to support name/line/col:
         //     flutter test test/foo.dart?name=a&line=1
         String testPath = uri.replace(query: '').toFilePath();
-        testPath = globals.fs.path.absolute(testPath);
-        testPath = globals.fs.path.normalize(testPath);
-        if (globals.fs.isDirectorySync(testPath)) {
-          _testFileUris.addAll(_findTests(globals.fs.directory(testPath)).map(Uri.file));
+        testPath = fs.path.absolute(testPath);
+        testPath = fs.path.normalize(testPath);
+        if (fs.isDirectorySync(testPath)) {
+          _testFileUris.addAll(_findTests(fs.directory(testPath), fs).map(Uri.file));
         } else {
           _testFileUris.add(Uri.file(testPath).replace(query: uri.query));
         }
@@ -405,11 +415,12 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         .map((Uri uri) => uri.replace(query: '').toFilePath())
         .toList();
     _isIntegrationTest = _shouldRunAsIntegrationTests(
-      globals.fs.currentDirectory.absolute.path,
+      fs.currentDirectory.absolute.path,
       testFilePaths,
+      fs,
     );
 
-    globals.printTrace(
+    logger.printTrace(
       'Found ${_testFileUris.length} files which will be executed as '
       '${_isIntegrationTest ? 'Integration' : 'Widget'} Tests.',
     );
@@ -461,7 +472,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
     TestTimeRecorder? testTimeRecorder;
     if (verbose) {
-      testTimeRecorder = TestTimeRecorder(globals.logger);
+      testTimeRecorder = TestTimeRecorder(logger);
     }
 
     if (buildInfo.packageConfig['test_api'] == null) {
@@ -479,13 +490,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (experimentalFasterTesting) {
       if (_isIntegrationTest || isWeb) {
         experimentalFasterTesting = false;
-        globals.printStatus(
+        logger.printStatus(
           '--experimental-faster-testing was parsed but will be ignored. This '
           'option is not supported when running integration tests or web tests.',
         );
       } else if (_testFileUris.length == 1) {
         experimentalFasterTesting = false;
-        globals.printStatus(
+        logger.printStatus(
           '--experimental-faster-testing was parsed but will be ignored. This '
           'option should not be used when running a single test file.',
         );
@@ -532,22 +543,22 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         impellerStatus: debuggingOptions.enableImpeller,
         buildMode: debuggingOptions.buildInfo.mode,
         packageConfigPath: buildInfo.packageConfigPath,
+        fs: fs,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
       );
     }
     if (buildTestAssets || nativeAssetsJson != null) {
-      testAssetPath = globals.fs.path.join(
-        flutterProject.directory.path,
-        'build',
-        'unit_test_assets',
-      );
+      testAssetPath = fs.path.join(flutterProject.directory.path, 'build', 'unit_test_assets');
     }
     if (nativeAssetsJson != null) {
-      final Directory testAssetDirectory = globals.fs.directory(testAssetPath);
+      final Directory testAssetDirectory = fs.directory(testAssetPath);
       if (!testAssetDirectory.existsSync()) {
         await testAssetDirectory.create(recursive: true);
       }
       final File nativeAssetsManifest = testAssetDirectory.childFile('NativeAssetsManifest.json');
-      await globals.fs.file(nativeAssetsJson).copy(nativeAssetsManifest.path);
+      await fs.file(nativeAssetsJson).copy(nativeAssetsManifest.path);
     }
 
     final String? concurrencyString = stringArg('concurrency');
@@ -560,7 +571,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
     if (_isIntegrationTest || isWeb) {
       if (argResults!.wasParsed('concurrency')) {
-        globals.printStatus(
+        logger.printStatus(
           '-j/--concurrency was parsed but will be ignored, this option is not '
           'supported when running Integration Tests or web tests.',
         );
@@ -570,7 +581,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       jobs = 1;
     } else if (experimentalFasterTesting) {
       if (argResults!.wasParsed('concurrency')) {
-        globals.printStatus(
+        logger.printStatus(
           '-j/--concurrency was parsed but will be ignored. This option is not '
           'compatible with --experimental-faster-testing.',
         );
@@ -600,7 +611,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
     final bool enableVmService = boolArg('enable-vmservice');
     if (experimentalFasterTesting && enableVmService) {
-      globals.printStatus(
+      logger.printStatus(
         '--enable-vmservice was parsed but will be ignored. This option is not '
         'compatible with --experimental-faster-testing.',
       );
@@ -611,7 +622,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       // [ipv6] is set when the user desires for the test harness server to use
       // IPv6, but a test harness server will not be started at all when
       // [experimentalFasterTesting] is set.
-      globals.printStatus(
+      logger.printStatus(
         '--ipv6 was parsed but will be ignored. This option is not compatible '
         'with --experimental-faster-testing.',
       );
@@ -637,7 +648,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
     TestWatcher? watcher;
     if (outputMachineFormat) {
-      watcher = EventPrinter(parent: collector, out: globals.stdio.stdout);
+      watcher = EventPrinter(parent: collector, out: stdio.stdout);
     } else if (collector != null) {
       watcher = collector;
     }
@@ -804,15 +815,15 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   /// Parses a test file/directory target passed as an argument and returns it
   /// as an absolute `file:///` [Uri] with optional querystring for name/line/col.
-  Uri _parseTestArgument(String arg) {
+  Uri _parseTestArgument(String arg, FileSystem fs) {
     // We can't parse Windows paths as URIs if they have query strings, so
     // parse the file and query parts separately.
     final int queryStart = arg.indexOf('?');
     String filePart = queryStart == -1 ? arg : arg.substring(0, queryStart);
     final String queryPart = queryStart == -1 ? '' : arg.substring(queryStart + 1);
 
-    filePart = globals.fs.path.absolute(filePart);
-    filePart = globals.fs.path.normalize(filePart);
+    filePart = fs.path.absolute(filePart);
+    filePart = fs.path.normalize(filePart);
 
     return Uri.file(filePart).replace(query: queryPart.isEmpty ? null : queryPart);
   }
@@ -822,6 +833,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     required ImpellerStatus impellerStatus,
     required BuildMode buildMode,
     required String packageConfigPath,
+    required FileSystem fs,
+    required ProcessManager processManager,
+    required Artifacts artifacts,
+    required Logger logger,
   }) async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int build = await assetBundle.build(
@@ -840,11 +855,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         assetBundle.entries,
         targetPlatform: TargetPlatform.tester,
         impellerStatus: impellerStatus,
-        processManager: globals.processManager,
-        fileSystem: globals.fs,
-        artifacts: globals.artifacts!,
-        logger: globals.logger,
-        projectDir: globals.fs.currentDirectory,
+        processManager: processManager,
+        fileSystem: fs,
+        artifacts: artifacts,
+        logger: logger,
+        projectDir: fs.currentDirectory,
         buildMode: buildMode,
       );
 
@@ -874,7 +889,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       return true;
     }
     final DateTime lastModified = manifest.lastModifiedSync();
-    final File pub = globals.fs.file('pubspec.yaml');
+    final File pub = fs.file('pubspec.yaml');
     if (pub.lastModifiedSync().isAfter(lastModified)) {
       return true;
     }
@@ -904,14 +919,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
 /// Searches [directory] and returns files that end with `_test.dart` as
 /// absolute paths.
-Iterable<String> _findTests(Directory directory) {
+Iterable<String> _findTests(Directory directory, FileSystem fs) {
   return directory
       .listSync(recursive: true, followLinks: false)
       .where(
         (FileSystemEntity entity) =>
-            entity.path.endsWith('_test.dart') && globals.fs.isFileSync(entity.path),
+            entity.path.endsWith('_test.dart') && fs.isFileSync(entity.path),
       )
-      .map((FileSystemEntity entity) => globals.fs.path.absolute(entity.path));
+      .map((FileSystemEntity entity) => fs.path.absolute(entity.path));
 }
 
 /// Returns true if there are files that are Integration Tests.
@@ -921,8 +936,8 @@ Iterable<String> _findTests(Directory directory) {
 ///
 /// Throws an exception if there are both Integration Tests and Widget Tests
 /// found in [testFiles].
-bool _shouldRunAsIntegrationTests(String currentDirectory, List<String> testFiles) {
-  final String integrationTestDirectory = globals.fs.path.join(
+bool _shouldRunAsIntegrationTests(String currentDirectory, List<String> testFiles, FileSystem fs) {
+  final String integrationTestDirectory = fs.path.join(
     currentDirectory,
     _kIntegrationTestDirectory,
   );

@@ -17,6 +17,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../compile.dart';
@@ -24,7 +25,6 @@ import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
 import '../vmservice.dart';
@@ -111,8 +111,8 @@ FlutterPlatform installHook({
     updateGoldens: updateGoldens,
     watcher: watcher,
   );
-  platformPluginRegistration(platform);
-  return platform;
+  platformPluginRegistration(platformInstance);
+  return platformInstance;
 }
 
 /// Generates the bootstrap entry point script that will be used to launch an
@@ -517,12 +517,12 @@ class FlutterPlatform extends PlatformPlugin {
   void _handleStartedDevice({required Uri? uri, required int testCount, required String testPath}) {
     final Logger logger = _toolContext.logger;
     if (uri != null) {
-      globals.printTrace('test $testCount: VM Service uri is available at $uri');
+      logger.printTrace('test $testCount: VM Service uri is available at $uri');
       if (_isIntegrationTest) {
         _listenToVmServiceForGoldens(uri: uri, testPath: testPath);
       }
     } else {
-      globals.printTrace('test $testCount: VM Service uri is not available');
+      logger.printTrace('test $testCount: VM Service uri is not available');
     }
     watcher?.handleStartedDevice(uri);
   }
@@ -636,7 +636,7 @@ class FlutterPlatform extends PlatformPlugin {
             precompiledDillPath: precompiledDillPath,
             testTimeRecorder: testTimeRecorder,
           );
-          final Uri uri = globals.fs.file(path).uri;
+          final Uri uri = fs.file(path).uri;
           // Trigger a compilation to initialize the resident compiler.
           unawaited(compiler!.compile(uri));
         }
@@ -663,7 +663,7 @@ class FlutterPlatform extends PlatformPlugin {
             toolContext: _toolContext,
             testTimeRecorder: testTimeRecorder,
           );
-          switch (await compiler!.compile(globals.fs.file(mainDart).uri)) {
+          switch (await compiler!.compile(fs.file(mainDart).uri)) {
             case TestCompilerComplete(:final String outputPath):
               mainDart = outputPath;
             case TestCompilerFailure(:final String? error):
@@ -791,15 +791,15 @@ class FlutterPlatform extends PlatformPlugin {
     // Prepare a temporary directory to store the Dart file that will talk to us.
     final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_test_listener.');
     finalizers.add(() async {
-      globals.printTrace('test $ourTestCount: deleting temporary directory');
+      logger.printTrace('test $ourTestCount: deleting temporary directory');
       tempDir.deleteSync(recursive: true);
     });
 
     // Prepare the Dart file that will talk to us and start the test.
-    final File listenerFile = globals.fs.file('${tempDir.path}/listener.dart');
+    final File listenerFile = fs.file('${tempDir.path}/listener.dart');
     listenerFile.createSync();
     listenerFile.writeAsStringSync(
-      _generateTestMain(testUrl: globals.fs.path.toUri(globals.fs.path.absolute(testPath))),
+      _generateTestMain(testUrl: fs.path.toUri(fs.path.absolute(testPath))),
     );
     return listenerFile.path;
   }
@@ -813,13 +813,13 @@ class FlutterPlatform extends PlatformPlugin {
     final LanguageVersion languageVersion = determineLanguageVersion(
       file,
       packageConfig[flutterProject!.manifest.appName],
-      globals.cache.flutterRoot,
+      _toolContext.cache.flutterRoot,
     );
     return generateTestBootstrap(
       testUrl: testUrl,
-      testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
+      testConfigFile: findTestConfigFile(fs.file(testUrl), logger),
       // This MUST be a file URI.
-      packageConfigUri: globals.fs.path.toUri(buildInfo.packageConfigPath),
+      packageConfigUri: fs.path.toUri(buildInfo.packageConfigPath),
       host: host!,
       updateGoldens: updateGoldens!,
       flutterTestDep: packageConfig['flutter_test'] != null,
@@ -903,14 +903,15 @@ Future<void> pipeHarnessToRemote({
   required int id,
   required StreamChannel<Object?> harnessChannel,
   required StreamChannel<String> remoteChannel,
+  required Logger logger,
 }) async {
-  globals.printTrace('test $id: Waiting for test harness or tests to finish');
+  logger.printTrace('test $id: Waiting for test harness or tests to finish');
 
   await Future.any<void>(<Future<void>>[
     harnessChannel.stream.map<String>(json.encode).pipe(remoteChannel.sink).then<void>((
       void value,
     ) {
-      globals.printTrace('test $id: Test process is no longer needed by test harness');
+      logger.printTrace('test $id: Test process is no longer needed by test harness');
     }),
     remoteChannel.stream
         .map<Object?>(json.decode)

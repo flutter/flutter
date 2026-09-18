@@ -343,33 +343,11 @@ class FlutterDevice {
   }
 
   Future<Uri?> setupDevFS(String fsName, Directory rootDirectory) {
-    final OperatingSystemUtils effectiveOsUtils =
-        osUtils ??
-        OperatingSystemUtils(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        );
-    final Artifacts effectiveArtifacts =
-        artifacts ??
-        globals.artifacts ??
-        CachedArtifacts(
-          fileSystem: fileSystem,
-          platform: platform,
-          cache: globals.cache,
-          operatingSystemUtils: effectiveOsUtils,
-        );
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
       vmService!,
       fsName,
       rootDirectory,
-      osUtils: effectiveOsUtils,
-      fileSystem: fileSystem,
-      logger: logger,
-      processManager: processManager,
-      artifacts: effectiveArtifacts,
       buildMode: buildInfo.mode,
       toolContext: _FlutterDeviceDevFSContext(
         artifacts: artifacts,
@@ -377,7 +355,6 @@ class FlutterDevice {
         logger: logger,
         os: osUtils,
         processManager: processManager,
-        cache: _cache ?? globals.cache,
       ),
     );
     return devFS!.create();
@@ -1139,7 +1116,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     cacheDir: _cache?.getRoot() ?? _fileSystem.directory('cache'),
     engineVersion: _flutterVersion?.engineRevision ?? 'engineVersion',
     fileSystem: _fileSystem,
-    flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
+    flutterRootDir: _fileSystem.directory(_cache?.flutterRoot),
     outputDir: _fileSystem.directory(getBuildDirectory()),
     processManager: _processManager,
     platform: _platform,
@@ -1891,7 +1868,7 @@ class TerminalHandler {
 
   void setupTerminal() {
     if (!_logger.quiet) {
-      logger.printStatus('');
+      _logger.printStatus('');
       residentRunner.printHelp(details: false);
     }
     _terminal.singleCharMode = true;
@@ -1912,7 +1889,7 @@ class TerminalHandler {
       _addSignalHandler(io.ProcessSignal.sigusr1, _handleSignal);
       _addSignalHandler(io.ProcessSignal.sigusr2, _handleSignal);
       if (_pidFile != null) {
-        logger.printTrace('Writing pid to: $_pidFile');
+        _logger.printTrace('Writing pid to: $_pidFile');
         _actualPidFile = _processInfo.writePidFile(_pidFile);
       }
     }
@@ -1923,7 +1900,7 @@ class TerminalHandler {
     assert(residentRunner.stayResident);
     if (_actualPidFile != null) {
       try {
-        logger.printTrace('Deleting pid file (${_actualPidFile!.path}).');
+        _logger.printTrace('Deleting pid file (${_actualPidFile!.path}).');
         _actualPidFile!.deleteSync();
       } on FileSystemException catch (error) {
         _logger.printWarning(
@@ -1949,7 +1926,7 @@ class TerminalHandler {
   /// This can be extended to support other layouts (AZERTY, QWERTZ, etc.) by
   /// adding entries to [keyboardLayoutMappings].
   Future<bool> _commonTerminalInputHandler(String character) async {
-    logger.printStatus(''); // the key the user tapped might be on this line
+    _logger.printStatus(''); // the key the user tapped might be on this line
     // Map non-Latin characters to Latin equivalents based on physical key position
     character = _mapKeyToLatin(character);
     switch (character) {
@@ -2005,7 +1982,7 @@ class TerminalHandler {
           throwToolExit(result.message);
         }
         if (!result.isOk) {
-          logger.printStatus('Try again after fixing the above error(s).', emphasis: true);
+          _logger.printStatus('Try again after fixing the above error(s).', emphasis: true);
         }
         return true;
       case 'R':
@@ -2018,7 +1995,7 @@ class TerminalHandler {
           throwToolExit(result.message);
         }
         if (!result.isOk) {
-          logger.printStatus('Try again after fixing the above error(s).', emphasis: true);
+          _logger.printStatus('Try again after fixing the above error(s).', emphasis: true);
         }
         return true;
       case 's':
@@ -2064,7 +2041,7 @@ class TerminalHandler {
     // When terminal doesn't support line mode, '\n' can sneak into the input.
     command = command.trim();
     if (_processingUserRequest) {
-      logger.printTrace('Ignoring terminal input: "$command" because we are busy.');
+      _logger.printTrace('Ignoring terminal input: "$command" because we are busy.');
       return;
     }
     _processingUserRequest = true;
@@ -2075,21 +2052,21 @@ class TerminalHandler {
     } catch (error, st) {
       // Don't print stack traces for known error types.
       if (error is! ToolExit) {
-        logger.printError('$error\n$st');
+        _logger.printError('$error\n$st');
       }
       await _cleanUp(null);
       rethrow;
     } finally {
       _processingUserRequest = false;
       if (_reportReady) {
-        logger.printStatus('ready');
+        _logger.printStatus('ready');
       }
     }
   }
 
   Future<void> _handleSignal(io.ProcessSignal signal) async {
     if (_processingUserRequest) {
-      logger.printTrace('Ignoring signal: "$signal" because we are busy.');
+      _logger.printTrace('Ignoring signal: "$signal" because we are busy.');
       return;
     }
     _processingUserRequest = true;
@@ -2239,7 +2216,6 @@ class _FlutterDeviceDevFSContext implements ToolContext {
     required this.logger,
     required this.os,
     required this.processManager,
-    required this.cache,
   });
   @override
   final Artifacts artifacts;
@@ -2251,8 +2227,6 @@ class _FlutterDeviceDevFSContext implements ToolContext {
   final OperatingSystemUtils os;
   @override
   final ProcessManager processManager;
-  @override
-  final Cache cache;
   @override
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }

@@ -502,80 +502,73 @@ void main() {
     }
   });
 
-  testWithoutContext(
-    'Coverage collector respects libraryNames in finalized report',
-    () async {
-      final fileSystem = LocalFileSystem.test(signals: FakeSignals());
-      Directory? tempDir;
-      try {
-        tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_coverage_collector_test.');
-        final File packagesFile = writeFooBarPackagesJson(tempDir);
-        tempDir.childFile('foo/foo.dart').createSync(recursive: true);
-        tempDir.childFile('bar/bar.dart').createSync(recursive: true);
+  testWithoutContext('Coverage collector respects libraryNames in finalized report', () async {
+    final fileSystem = LocalFileSystem.test(signals: FakeSignals());
+    Directory? tempDir;
+    try {
+      tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_coverage_collector_test.');
+      final File packagesFile = writeFooBarPackagesJson(tempDir);
+      tempDir.childFile('foo/foo.dart').createSync(recursive: true);
+      tempDir.childFile('bar/bar.dart').createSync(recursive: true);
 
-        final String packagesPath = packagesFile.path;
-        var collector = CoverageCollector(
-          libraryNames: <String>{'foo', 'bar'},
-          packagesPath: packagesPath,
-          resolver: await CoverageCollector.getResolver(packagesPath),
-          toolContext: FakeToolContext(
-            fs: fileSystem,
+      final String packagesPath = packagesFile.path;
+      var collector = CoverageCollector(
+        libraryNames: <String>{'foo', 'bar'},
+        packagesPath: packagesPath,
+        resolver: await CoverageCollector.getResolver(packagesPath),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          platform: const LocalPlatform(),
+          processUtils: ProcessUtils(
             logger: BufferLogger.test(),
-            os: FakeOperatingSystemUtils(),
-            platform: const LocalPlatform(),
-            processUtils: ProcessUtils(
-              logger: BufferLogger.test(),
-              processManager: FakeProcessManager.any(),
-            ),
+            processManager: FakeProcessManager.any(),
           ),
-          verbose: false,
-        );
-        await collector.collectCoverage(
-          TestTestDevice(),
-          serviceOverride: createFakeVmServiceHostWithFooAndBar(
-            libraryFilters: <String>['package:foo/', 'package:bar/'],
-          ).vmService,
-        );
+        ),
+        verbose: false,
+      );
+      await collector.collectCoverage(
+        TestTestDevice(),
+        serviceOverride: createFakeVmServiceHostWithFooAndBar(
+          libraryFilters: <String>['package:foo/', 'package:bar/'],
+        ).vmService,
+      );
 
-        String? report = await collector.finalizeCoverage();
-        expect(report, contains('foo.dart'));
-        expect(report, contains('bar.dart'));
+      String? report = await collector.finalizeCoverage();
+      expect(report, contains('foo.dart'));
+      expect(report, contains('bar.dart'));
 
-        collector = CoverageCollector(
-          libraryNames: <String>{'foo'},
-          packagesPath: packagesPath,
-          resolver: await CoverageCollector.getResolver(packagesPath),
-          toolContext: FakeToolContext(
-            fs: fileSystem,
+      collector = CoverageCollector(
+        libraryNames: <String>{'foo'},
+        packagesPath: packagesPath,
+        resolver: await CoverageCollector.getResolver(packagesPath),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          platform: const LocalPlatform(),
+          processUtils: ProcessUtils(
             logger: BufferLogger.test(),
-            os: FakeOperatingSystemUtils(),
-            platform: const LocalPlatform(),
-            processUtils: ProcessUtils(
-              logger: BufferLogger.test(),
-              processManager: FakeProcessManager.any(),
-            ),
+            processManager: FakeProcessManager.any(),
           ),
-          verbose: false,
-        );
-        await collector.collectCoverage(
-          TestTestDevice(),
-          serviceOverride: createFakeVmServiceHostWithFooAndBar(
-            libraryFilters: <String>['package:foo/'],
-          ).vmService,
-        );
+        ),
+        verbose: false,
+      );
+      await collector.collectCoverage(
+        TestTestDevice(),
+        serviceOverride: createFakeVmServiceHostWithFooAndBar(
+          libraryFilters: <String>['package:foo/'],
+        ).vmService,
+      );
 
-        report = await collector.finalizeCoverage();
-        expect(report, contains('foo.dart'));
-        expect(report, isNot(contains('bar.dart')));
-      } finally {
-        tempDir?.deleteSync(recursive: true);
-      }
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+      report = await collector.finalizeCoverage();
+      expect(report, contains('foo.dart'));
+      expect(report, isNot(contains('bar.dart')));
+    } finally {
+      tempDir?.deleteSync(recursive: true);
+    }
+  });
 
   testWithoutContext(
     'Coverage collector records test timings when provided TestTimeRecorder',

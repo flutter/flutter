@@ -106,7 +106,7 @@ class ChannelCommand extends FlutterCommand {
     logger.printStatus('Flutter channels:');
     final int result = await git.stream(
       <String>['branch', '-r'],
-      workingDirectory: Cache.flutterRoot,
+      workingDirectory: _toolContext.cache.flutterRoot,
       mapFunction: (String line) {
         rawOutput.add(line);
         return null;
@@ -172,9 +172,7 @@ class ChannelCommand extends FlutterCommand {
   }
 
   Future<void> _switchChannel(String branchName) async {
-    final Logger logger = _toolContext.logger;
-    final Git git = _toolContext.git;
-    final Cache cache = _toolContext.cache;
+    final ToolContext(:Cache cache, :Git git, :Logger logger) = _toolContext;
 
     logger.printStatus("Switching to flutter channel '$branchName'...");
     if (kObsoleteBranches.containsKey(branchName)) {
@@ -223,6 +221,7 @@ class ChannelCommand extends FlutterCommand {
     Cache? cache,
     bool force = false,
   }) async {
+    final String? flutterRoot = cache?.flutterRoot;
     // Get latest refs from upstream.
     RunResult runResult = await git.run(<String>['fetch'], workingDirectory: flutterRoot);
 

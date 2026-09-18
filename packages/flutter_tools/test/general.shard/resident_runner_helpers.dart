@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
@@ -30,7 +29,6 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
-import '../src/fakes.dart';
 
 final fakeUnpausedEvent = vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0);
 
@@ -182,7 +180,7 @@ class FakeDartDevelopmentServiceException implements DartDevelopmentServiceExcep
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(super.device, {Future<Uri>? vmServiceUri})
     : super(
-        toolContext: TestToolContext(fileSystem: globals.fs, logger: globals.logger, processManager: globals.processManager, artifacts: Artifacts.test()),
+        artifacts: Artifacts.test(),
         generator: FakeResidentCompiler(),
         targetPlatform: .unsupported,
         buildInfo: BuildInfo.debug,
@@ -325,7 +323,7 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     this.fakeDevFS, {
     Future<Uri>? vmServiceUri,
   }) : super(
-         toolContext: TestToolContext(fileSystem: globals.fs, logger: globals.logger, processManager: globals.processManager, artifacts: Artifacts.test()),
+         artifacts: Artifacts.test(),
          targetPlatform: .unsupported,
          buildInfo: buildInfo,
          generator: residentCompiler,

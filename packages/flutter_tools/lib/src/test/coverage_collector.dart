@@ -12,7 +12,6 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../context/tool_context.dart';
 import '../vmservice.dart';
-
 import 'test_device.dart';
 import 'test_time_recorder.dart';
 import 'watcher.dart';
@@ -253,16 +252,16 @@ class CoverageCollector extends TestWatcher {
 
     const baseCoverageData = 'coverage/lcov.base.info';
     if (mergeCoverageData) {
-      if (!globals.fs.isFileSync(baseCoverageData)) {
+      if (!fs.isFileSync(baseCoverageData)) {
         _logMessage('Missing "$baseCoverageData". Unable to merge coverage data.', error: true);
         return false;
       }
 
       if (_toolContext.os.which('lcov') == null) {
         var installMessage = 'Please install lcov.';
-        if (globals.platform.isLinux) {
+        if (platform.isLinux) {
           installMessage = 'Consider running "sudo apt-get install lcov".';
-        } else if (globals.platform.isMacOS) {
+        } else if (platform.isMacOS) {
           installMessage = 'Consider running "brew install lcov".';
         }
         _logMessage(
@@ -272,12 +271,12 @@ class CoverageCollector extends TestWatcher {
         return false;
       }
 
-      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+      final Directory tempDir = fs.systemTempDirectory.createTempSync(
         'flutter_tools_test_coverage.',
       );
       try {
         final File sourceFile = coverageFile.copySync(
-          globals.fs.path.join(tempDir.path, 'lcov.source.info'),
+          fs.path.join(tempDir.path, 'lcov.source.info'),
         );
         final RunResult result = _toolContext.processUtils.runSync(<String>[
           'lcov',

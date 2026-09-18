@@ -25,7 +25,6 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../project.dart';
-import '../context/tool_context.dart';
 import '../resident_runner.dart';
 import '../web/chrome_constants.dart';
 import '../web/web_runner.dart';

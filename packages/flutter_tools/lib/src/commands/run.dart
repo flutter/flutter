@@ -273,11 +273,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     FileSystem? fileSystem,
     Logger? logger,
   }) async {
-    final FileSystem effectiveFs = fileSystem ?? toolContext.fs;
-    final Logger effectiveLogger = logger ?? toolContext!.logger;
+    final FileSystem fs = fileSystem ?? toolContext!.fs;
+    final Logger resolvedLogger = logger ?? toolContext!.logger;
     final WebDevServerConfig fileConfig = await WebDevServerConfig.loadFromFile(
-      fileSystem: effectiveFs,
-      logger: effectiveLogger,
+      fileSystem: fs,
+      logger: resolvedLogger,
     );
 
     final int? webPort = getValue(WebOptions.webPort);

@@ -1640,17 +1640,12 @@ class FakeAppleContext extends Fake implements AppleContext {
 
 class TestToolContext extends Fake implements ToolContext {
   TestToolContext({
-    Artifacts? artifacts,
+    this._artifacts,
     FileSystem? fileSystem,
-    Logger? logger,
-    ProcessManager? processManager,
-    ProcessInfo? processInfo,
-  }) : _artifacts = artifacts,
-       _fs = fileSystem,
-       _logger = logger,
-       _processManager = processManager,
-       _processInfo = processInfo;
-  // ignore: prefer_initializing_formals
+    this._logger,
+    this._processManager,
+    this._processInfo,
+  }) : _fs = fileSystem;
 
   final Artifacts? _artifacts;
   final FileSystem? _fs;

@@ -246,7 +246,7 @@ List<FlutterCommand> generateCommands({
   ),
   AttachCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   BuildCommand(
-    androidBuilder: AndroidGradleBuilder.fromContexts(
+    androidBuilder: AndroidGradleBuilder(
       analytics: toolDependencies.analytics,
       androidStudio: toolDependencies.androidContext.androidStudio,
       artifacts: toolDependencies.toolContext.artifacts,

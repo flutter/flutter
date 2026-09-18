@@ -124,7 +124,6 @@ class ToolDependencies {
     FeatureFlags? featureFlags,
     FlutterVersion? flutterVersion,
     FileSystem? fs,
-    FlutterVersion? flutterVersion,
     Git? git,
     GradleUtils? gradleUtils,
     IOSSimulatorUtils? iosSimulatorUtils,

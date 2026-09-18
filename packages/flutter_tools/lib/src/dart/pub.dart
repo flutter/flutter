@@ -115,6 +115,8 @@ abstract class Pub {
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
+    Cache? cache,
+    String? flutterRoot,
     Stdio? stdio,
   }) {
     if (stdio != null) {

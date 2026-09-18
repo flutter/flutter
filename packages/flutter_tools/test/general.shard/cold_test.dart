@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/config.dart';
@@ -36,7 +35,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fakes.dart';
 
 ColdRunner createColdRunner(
   List<FlutterDevice> flutterDevices, {
@@ -375,12 +373,7 @@ class TestFlutterDevice extends FlutterDevice {
     Future<Uri>? vmServiceUri,
   }) : super(
          device,
-         toolContext: TestToolContext(
-           fileSystem: globals.fs,
-           logger: globals.logger,
-           processManager: globals.processManager,
-           artifacts: Artifacts.test(),
-         ),
+         artifacts: Artifacts.test(),
          targetPlatform: .unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,

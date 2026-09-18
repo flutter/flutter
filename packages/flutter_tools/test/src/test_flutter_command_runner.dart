@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -28,11 +29,11 @@ CommandRunner<void> createTestCommandRunner([
   ToolContext? toolContext,
   FeatureFlags? featureFlags,
 ]) {
-  final ToolContext? effectiveToolContext = toolContext ?? command?.toolContext;
+  final ToolContext? resolvedToolContext = toolContext ?? command?.toolContext;
   final runner = TestFlutterCommandRunner(
     analytics: analytics,
     featureFlags: featureFlags,
-    toolContext: effectiveToolContext,
+    toolContext: resolvedToolContext,
   );
   if (command != null) {
     runner.addCommand(command);
@@ -101,14 +102,10 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () {
-        Cache.flutterRoot ??= Cache.defaultFlutterRoot(
-          platform: toolContext.platform,
-          fileSystem: toolContext.fs,
-          userMessages: UserMessages(),
-        );
+        final Cache cache = toolContext.cache;
         // For compatibility with tests that set this to a relative path.
         final FileSystem fs = toolContext.fs;
-        Cache.flutterRoot = fs.path.normalize(fs.path.absolute(Cache.flutterRoot!));
+        cache.flutterRoot = fs.path.normalize(fs.path.absolute(cache.flutterRoot));
         return super.runCommand(topLevelResults);
       },
     );

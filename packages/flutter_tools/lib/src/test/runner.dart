@@ -3,17 +3,23 @@
 // found in the LICENSE file.
 
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
+import '../base/process.dart';
+import '../base/terminal.dart';
 import '../build_info.dart';
 import '../compile.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
 import '../web/chrome.dart';
@@ -83,11 +89,11 @@ interface class FlutterTestRunner {
     ) = _toolContext;
 
     // Configure package:test to use the Flutter engine for child processes.
-    final String flutterTesterBinPath = globals.artifacts!.getArtifactPath(Artifact.flutterTester);
+    final String flutterTesterBinPath = artifacts.getArtifactPath(Artifact.flutterTester);
 
     // Compute the command-line arguments for package:test.
     final testArgs = <String>[
-      if (!globals.terminal.supportsColor) '--no-color',
+      if (!terminal.supportsColor) '--no-color',
       if (debuggingOptions.startPaused) '--pause-after-load',
       if (machine) ...<String>['-r', 'json'] else if (reporter != null) ...<String>['-r', reporter],
       if (fileReporter != null) '--file-reporter=$fileReporter',
@@ -139,7 +145,7 @@ interface class FlutterTestRunner {
             processManager: processManager,
             operatingSystemUtils: os,
             browserFinder: findChromeExecutable,
-            logger: globals.logger,
+            logger: logger,
           ),
           crossOriginIsolation: debuggingOptions.webCrossOriginIsolation,
           flutterProject: flutterProject,
@@ -189,15 +195,15 @@ interface class FlutterTestRunner {
     );
 
     try {
-      globals.printTrace('running test package with arguments: $testArgs');
+      logger.printTrace('running test package with arguments: $testArgs');
       await testWrapper.main(testArgs);
 
       // test.main() sets dart:io's exitCode global.
-      globals.printTrace('test package returned with exit code $exitCode');
+      logger.printTrace('test package returned with exit code $exitCode');
 
       return exitCode;
     } finally {
-      await platform.close();
+      await platformInstance.close();
     }
   }
 
@@ -237,7 +243,7 @@ interface class FlutterTestRunner {
     // The flutter_tools package_config.json is guaranteed to include
     // package:ffi and package:test_core.
     final File flutterToolsPackageConfigFile = fs
-        .directory(fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'))
+        .directory(fs.path.join(toolContext.cache.flutterRoot, 'packages', 'flutter_tools'))
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
     final PackageConfig flutterToolsPackageConfig = PackageConfig.parseBytes(
@@ -303,7 +309,7 @@ import 'package:test_api/backend.dart'; // flutter_ignore: test_api_import
               ? sanitizedPath.replaceAll('/', r'\').replaceFirst(r'\', '')
               : sanitizedPath,
         ),
-        globals.logger,
+        logger,
       );
       if (testConfigFile != null) {
         final String sanitizedTestConfigImport = pathToImport(testConfigFile.path);
@@ -406,6 +412,7 @@ void main([dynamic sendPort]) {
     required File childTestIsolateSpawnerSourceFile,
     required File childTestIsolateSpawnerDillFile,
     required File rootTestIsolateSpawnerSourceFile,
+    required Platform platform,
   }) {
     final buffer = StringBuffer();
     buffer.writeln('''
@@ -532,7 +539,7 @@ class SpawnPlugin extends PlatformPlugin {
     SuiteConfiguration suiteConfig,
     Object message,
   ) async {
-    final String correctedPath = ${globals.platform.isWindows ? r'"/$path"' : 'path'};
+    final String correctedPath = ${platform.isWindows ? r'"/$path"' : 'path'};
     await launchIsolate(correctedPath);
 
     final StreamChannel<dynamic> channel = _channels[pathToImport(correctedPath)]!;
@@ -568,12 +575,12 @@ class SpawnPlugin extends PlatformPlugin {
     final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
 
     final ResidentCompiler residentCompiler = residentCompilerFactory.create(
-      targetPlatform: .tester,
-      artifacts: globals.artifacts!,
-      logger: globals.logger,
-      processManager: globals.processManager,
+      targetPlatform: TargetPlatform.tester,
+      artifacts: artifacts,
+      logger: logger,
+      processManager: processManager,
       buildInfo: buildInfo,
-      platform: globals.platform,
+      platform: platform,
       testCompilation: true,
       fileSystem: fs,
       shutdownHooks: shutdownHooks,
@@ -590,7 +597,7 @@ class SpawnPlugin extends PlatformPlugin {
     );
     residentCompiler.accept();
 
-    globals.printTrace(
+    logger.printTrace(
       'Compiling ${sourceFile.absolute.uri} took ${compilerTime.elapsedMilliseconds}ms',
     );
     testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
@@ -675,7 +682,7 @@ class SpawnPlugin extends PlatformPlugin {
 
     // Compute the command-line arguments for package:test.
     final packageTestArgs = <String>[
-      if (!globals.terminal.supportsColor) '--no-color',
+      if (!terminal.supportsColor) '--no-color',
       if (machine) ...<String>['-r', 'json'] else if (reporter != null) ...<String>['-r', reporter],
       if (fileReporter != null) '--file-reporter=$fileReporter',
       if (timeout != null) ...<String>['--timeout', timeout],
@@ -706,6 +713,7 @@ class SpawnPlugin extends PlatformPlugin {
       childTestIsolateSpawnerSourceFile: childTestIsolateSpawnerSourceFile,
       childTestIsolateSpawnerDillFile: childTestIsolateSpawnerDillFile,
       rootTestIsolateSpawnerSourceFile: rootTestIsolateSpawnerSourceFile,
+      platform: platform,
     );
 
     final BuildInfo buildInfo = debuggingOptions.buildInfo.copyWith(
@@ -729,7 +737,7 @@ class SpawnPlugin extends PlatformPlugin {
     );
 
     final command = <String>[
-      globals.artifacts!.getArtifactPath(Artifact.flutterTester),
+      artifacts.getArtifactPath(Artifact.flutterTester),
       '--disable-vm-service',
       if (icudtlPath != null) '--icu-data-file-path=$icudtlPath',
       '--enable-checked-mode',
@@ -751,36 +759,34 @@ class SpawnPlugin extends PlatformPlugin {
     //
     // If FLUTTER_TEST has not been set, assume from this context that this
     // call was invoked by the command 'flutter test'.
-    final String flutterTest = globals.platform.environment.containsKey('FLUTTER_TEST')
-        ? globals.platform.environment['FLUTTER_TEST']!
+    final String flutterTest = platform.environment.containsKey('FLUTTER_TEST')
+        ? platform.environment['FLUTTER_TEST']!
         : 'true';
     final environment = <String, String>{
       'FLUTTER_TEST': flutterTest,
       'FONTCONFIG_FILE': FontConfigManager().fontConfigFile.path,
       'APP_NAME': flutterProject.manifest.appName,
       'UNIT_TEST_ASSETS': ?testAssetDirectory,
-      if (nativeAssetsBuilder != null && globals.platform.isWindows)
+      if (nativeAssetsBuilder != null && platform.isWindows)
         'PATH':
-            '${nativeAssetsBuilder.windowsBuildDirectory(flutterProject)};${globals.platform.environment['PATH']}',
+            '${nativeAssetsBuilder.windowsBuildDirectory(flutterProject)};${platform.environment['PATH']}',
     };
 
-    globals.logger.printTrace(
+    logger.printTrace(
       'Starting flutter_tester process with command=$command, environment=$environment',
     );
     final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Run);
-    final Process process = await globals.processManager.start(command, environment: environment);
-    globals.logger.printTrace('Started flutter_tester process at pid ${process.pid}');
+    final Process process = await processManager.start(command, environment: environment);
+    logger.printTrace('Started flutter_tester process at pid ${process.pid}');
 
     for (final stream in <Stream<List<int>>>[process.stderr, process.stdout]) {
       // Use permissive decoder for test output which may contain invalid UTF-8
-      stream.transform<String>(utf8AllowMalformed.decoder).listen(globals.stdio.stdoutWrite);
+      stream.transform<String>(utf8AllowMalformed.decoder).listen(stdio.stdoutWrite);
     }
 
     return process.exitCode.then((int exitCode) {
       testTimeRecorder?.stop(TestTimePhases.Run, testTimeRecorderStopwatch!);
-      globals.logger.printTrace(
-        'flutter_tester process at pid ${process.pid} exited with code=$exitCode',
-      );
+      logger.printTrace('flutter_tester process at pid ${process.pid} exited with code=$exitCode');
       return exitCode;
     });
   }
