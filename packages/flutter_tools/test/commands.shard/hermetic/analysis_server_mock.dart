@@ -68,7 +68,28 @@ class MockLspServerProcess extends test_process_manager.FakeProcess {
     _writeRawOutput('The Dart VM service is listening on http://127.0.0.1:65155/ZkxDXuYz2Aw=/\n');
   }
 
+  /// Starts simulated analysis on the server.
+  void startSimulatedAnalysis() {
+    _simulateAnalysisStart();
+  }
+
+  /// Ends simulated analysis on the server.
+  void endSimulatedAnalysis() {
+    _simulateAnalysisEnd();
+  }
+
+  /// Sends a request from the server to the client.
+  void sendServerRequest(String method, Map<String, Object?> params, {required Object id}) {
+    _writeAsLspToStdout(
+      jsonEncode(<String, Object?>{'jsonrpc': '2.0', 'id': id, 'method': method, 'params': params}),
+    );
+  }
+
+  /// Optional callback invoked when the mock receives a request on stdin.
+  void Function(Map<String, Object?> request)? onRequest;
+
   Future<void> _handleRequest(Map<String, Object?> request) async {
+    onRequest?.call(request);
     switch (request['method']) {
       case 'initialize':
         _initializeRequestCompleter.complete(request);

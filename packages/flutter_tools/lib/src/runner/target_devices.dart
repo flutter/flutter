@@ -24,6 +24,8 @@ const _wirelesslyConnectedDevicesMessage = 'Wirelessly connected devices:';
 
 String _chooseDeviceOptionMessage(int option, String name, String deviceId) =>
     '[$option]: $name ($deviceId)';
+String _skipPromptWithDeviceIdMessage(String deviceId) =>
+    'To skip this prompt in the future, pass the device id to the "-d" flag, e.g. "-d $deviceId".';
 String _foundMultipleSpecifiedDevicesMessage(String deviceId) =>
     'Found multiple devices with name or id matching $deviceId:';
 String _foundSpecifiedDevicesMessage(int count, String deviceId) =>
@@ -66,11 +68,10 @@ class TargetDevices {
   }
 
   TargetDevices._private({
-    required DeviceManager deviceManager,
-    required Logger logger,
+    required this._deviceManager,
+    required this._logger,
     required this.deviceConnectionInterface,
-  }) : _deviceManager = deviceManager,
-       _logger = logger;
+  });
 
   final DeviceManager _deviceManager;
   final Logger _logger;
@@ -350,7 +351,9 @@ class TargetDevices {
     if (userInput.toLowerCase() == 'q') {
       throwToolExit('');
     }
-    return devices[int.parse(userInput) - 1];
+    final Device chosenDevice = devices[int.parse(userInput) - 1];
+    _logger.printStatus(_skipPromptWithDeviceIdMessage(chosenDevice.id));
+    return chosenDevice;
   }
 
   void _displayDeviceOptions(List<Device> devices) {
@@ -733,6 +736,11 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
 
     // Wait for user to select a device.
     chosenDevice = await futureChosenDevice;
+
+    // The hint is printed only after the device is chosen, so that it does
+    // not interfere with the lines cleared and reprinted once wireless
+    // devices have loaded.
+    _logger.printStatus(_skipPromptWithDeviceIdMessage(chosenDevice.id));
 
     // Update the [DeviceManager.specifiedDeviceId] so that the user will not
     // be prompted again.
