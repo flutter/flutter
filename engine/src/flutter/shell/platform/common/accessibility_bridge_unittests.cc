@@ -108,6 +108,16 @@ TEST(AccessibilityBridgeTest, ExposesHintAsDescription) {
   EXPECT_TRUE(platform_node->GetData()
                   .GetStringAttribute(ax::mojom::StringAttribute::kDescription)
                   .empty());
+
+  node.hint = nullptr;
+  bridge->AddFlutterSemanticsNodeUpdate(node);
+  bridge->CommitUpdates();
+
+  platform_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  ASSERT_TRUE(platform_node);
+  EXPECT_TRUE(platform_node->GetData()
+                  .GetStringAttribute(ax::mojom::StringAttribute::kDescription)
+                  .empty());
 }
 
 // Flutter used to assume that the accessibility root had ID 0.
