@@ -117,7 +117,6 @@ void main() {
                   AndroidSdk(
                     (fileSystem ?? globals.fs).directory(missingSdkPath()),
                     java: FakeJava(),
-                    fileSystem: fileSystem ?? globals.fs,
                   ),
             ),
         analytics: analytics ?? fakeAnalytics,
@@ -133,11 +132,7 @@ void main() {
         description,
         body,
         overrides: <Type, Generator>{
-          AndroidSdk: () => AndroidSdk(
-            fileSystem.directory(missingSdkPath()),
-            java: FakeJava(),
-            fileSystem: fileSystem,
-          ),
+          AndroidSdk: () => AndroidSdk(fileSystem.directory(missingSdkPath()), java: FakeJava()),
           ProcessManager: () => processManager,
           ...overrides,
         },
@@ -230,11 +225,7 @@ void main() {
               .childFile('source.properties')
               .createSync(recursive: true);
           fileSystem.directory(ndkPath('29.0.13846066-bad')).createSync(recursive: true);
-          return AndroidSdk(
-            fileSystem.directory(sdkPath()),
-            java: FakeJava(),
-            fileSystem: fileSystem,
-          );
+          return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
         },
         AndroidStudio: () => FakeAndroidStudio(),
       },
@@ -321,11 +312,7 @@ void main() {
               .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
               .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
               .createSync(recursive: true);
-          return AndroidSdk(
-            fileSystem.directory(sdkPath()),
-            java: FakeJava(),
-            fileSystem: fileSystem,
-          );
+          return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
         },
         AndroidStudio: () => FakeAndroidStudio(),
       },
@@ -416,11 +403,7 @@ void main() {
               .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
               .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
               .createSync(recursive: true);
-          return AndroidSdk(
-            fileSystem.directory(sdkPath()),
-            java: FakeJava(),
-            fileSystem: fileSystem,
-          );
+          return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
         },
         AndroidStudio: () => FakeAndroidStudio(),
       },
@@ -507,11 +490,7 @@ void main() {
               .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
               .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
               .createSync(recursive: true);
-          return AndroidSdk(
-            fileSystem.directory(sdkPath()),
-            java: FakeJava(),
-            fileSystem: fileSystem,
-          );
+          return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
         },
         AndroidStudio: () => FakeAndroidStudio(),
       },
@@ -1486,11 +1465,7 @@ void main() {
                 .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
                 .childFile(apkAnalyzerBinaryName)
                 .createSync(recursive: true);
-            return AndroidSdk(
-              fileSystem.directory(sdkPath()),
-              java: FakeJava(),
-              fileSystem: fileSystem,
-            );
+            return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
           },
           AndroidStudio: () => FakeAndroidStudio(),
           ProcessManager: () => processManager,
@@ -1557,11 +1532,7 @@ void main() {
                 .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
                 .childFile(apkAnalyzerBinaryName)
                 .createSync(recursive: true);
-            return AndroidSdk(
-              fileSystem.directory(sdkPath()),
-              java: FakeJava(),
-              fileSystem: fileSystem,
-            );
+            return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
           },
           AndroidStudio: () => FakeAndroidStudio(),
           ProcessManager: () => processManager,
@@ -1621,11 +1592,7 @@ void main() {
                 .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
                 .childFile(apkAnalyzerBinaryName)
                 .createSync(recursive: true);
-            return AndroidSdk(
-              fileSystem.directory(sdkPath()),
-              java: FakeJava(),
-              fileSystem: fileSystem,
-            );
+            return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
           },
           AndroidStudio: () => FakeAndroidStudio(),
         },
@@ -1639,11 +1606,7 @@ void main() {
               .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
               .childFile(apkAnalyzerBinaryName)
               .createSync(recursive: true);
-          final sdk = AndroidSdk(
-            fileSystem.directory(sdkPath()),
-            java: FakeJava(),
-            fileSystem: fileSystem,
-          );
+          final sdk = AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
           final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
             logger: logger,
@@ -1709,11 +1672,7 @@ void main() {
                 .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
                 .childFile(apkAnalyzerBinaryName)
                 .createSync(recursive: true);
-            return AndroidSdk(
-              fileSystem.directory(sdkPath()),
-              java: FakeJava(),
-              fileSystem: fileSystem,
-            );
+            return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
           },
           AndroidStudio: () => FakeAndroidStudio(),
         },
@@ -1727,11 +1686,7 @@ void main() {
               .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
               .childFile(apkAnalyzerBinaryName)
               .createSync(recursive: true);
-          final sdk = AndroidSdk(
-            fileSystem.directory(sdkPath()),
-            java: FakeJava(),
-            fileSystem: fileSystem,
-          );
+          final sdk = AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
           final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
             logger: logger,
@@ -2223,11 +2178,7 @@ Gradle Crashed
               .childFile('source.properties')
               .createSync(recursive: true);
           fileSystem.directory(ndkPath('29.0.13846066-bad')).createSync(recursive: true);
-          return AndroidSdk(
-            fileSystem.directory(sdkPath()),
-            java: FakeJava(),
-            fileSystem: fileSystem,
-          );
+          return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
         },
         AndroidStudio: () => FakeAndroidStudio(),
       },
@@ -3293,7 +3244,6 @@ Gradle Crashed
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
-            fileSystem: fileSystem,
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
@@ -3397,7 +3347,6 @@ Gradle Crashed
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
-            fileSystem: fileSystem,
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
@@ -3504,7 +3453,6 @@ Gradle Crashed
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
-            fileSystem: fileSystem,
           );
         },
         AndroidStudio: () => FakeAndroidStudio(),
