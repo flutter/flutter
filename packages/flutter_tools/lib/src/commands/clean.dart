@@ -207,9 +207,12 @@ class CleanCommand extends FlutterCommand {
     }
     final Status deletionStatus = logger.startProgress('Deleting ${file.basename}...');
     try {
-      file.deleteSync(recursive: true);
+      try {
+        file.deleteSync(recursive: true);
+      } finally {
+        deletionStatus.stop();
+      }
     } on FileSystemException catch (error) {
-      deletionStatus.stop();
       final String path = file.path;
       if (_toolContext.platform.isWindows) {
         if (await _tryStopGradleAndRetryDelete(file, project)) {
