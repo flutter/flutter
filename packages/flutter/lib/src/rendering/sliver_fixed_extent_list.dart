@@ -668,7 +668,10 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   @override
   BoxConstraints _getChildConstraints(int index) {
     final double? extent = _getOrCreateItemExtent(index);
-    assert(extent != null, 'The itemExtentBuilder must not return null for valid items being laid out.');
+    assert(
+      extent != null,
+      'The itemExtentBuilder must not return null for valid items being laid out.',
+    );
     final double validExtent = extent ?? 0.0;
     return constraints.asBoxConstraints(minExtent: validExtent, maxExtent: validExtent);
   }
