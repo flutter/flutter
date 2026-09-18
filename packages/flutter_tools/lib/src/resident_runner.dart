@@ -349,7 +349,7 @@ class FlutterDevice {
       fsName,
       rootDirectory,
       buildMode: buildInfo.mode,
-      toolContext: _FallbackToolContext(
+      toolContext: _FlutterDeviceDevFSContext(
         artifacts: artifacts,
         fs: fileSystem,
         logger: logger,
@@ -2209,36 +2209,24 @@ class DevToolsServerAddress {
   }
 }
 
-// TODO(bkonyi): This will be removed in a follow up PR once ResidentRunner is
-// migrated to accept ToolContext directly.
-class _FallbackToolContext implements ToolContext {
-  _FallbackToolContext({
+class _FlutterDeviceDevFSContext implements ToolContext {
+  _FlutterDeviceDevFSContext({
     required this.artifacts,
     required this.fs,
     required this.logger,
     required this.os,
     required this.processManager,
-    Config? config,
-  }) : config = config ?? Config.test();
-
+  });
   @override
   final Artifacts artifacts;
-
-  @override
-  final Config config;
-
   @override
   final FileSystem fs;
-
   @override
   final Logger logger;
-
   @override
   final OperatingSystemUtils os;
-
   @override
   final ProcessManager processManager;
-
   @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }
