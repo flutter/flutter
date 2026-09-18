@@ -552,6 +552,12 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     return dartExecutor;
   }
 
+  /** Returns the VM Service URI for this FlutterEngine instance. */
+  @Nullable
+  public String getVmServiceUri() {
+    return flutterJNI.getVmServiceUri();
+  }
+
   /**
    * The rendering system associated with this {@code FlutterEngine}.
    *

@@ -7,6 +7,7 @@
 
 #include <jni.h>
 
+#include <string>
 #include <vector>
 
 #include "flutter/fml/macros.h"
@@ -16,6 +17,9 @@ namespace fml {
 namespace jni {
 
 void InitJavaVM(JavaVM* vm);
+
+// Returns true if InitJavaVM has been called with a valid non-null JavaVM.
+bool HasJavaVM();
 
 // Returns a JNI environment for the current thread.
 // Attaches the thread to JNI if needed.
@@ -44,6 +48,9 @@ bool HasException(JNIEnv* env);
 
 bool ClearException(JNIEnv* env, bool silent = false);
 
+// Returns true if there is no pending exception (clean execution).
+// Returns false if an exception occurred, in which case the exception is logged
+// and cleared.
 bool CheckException(JNIEnv* env);
 std::string GetJavaExceptionInfo(JNIEnv* env, jthrowable java_throwable);
 

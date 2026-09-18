@@ -5,7 +5,10 @@
 #ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_ENGINE_H_
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_ENGINE_H_
 
+#include <atomic>
+#include <cstddef>
 #include <memory>
+#include <optional>
 #include <unordered_map>
 
 #include "flutter/fml/macros.h"
@@ -23,14 +26,23 @@ struct ShellArgs;
 class EmbedderEngine {
  public:
   EmbedderEngine(
-      std::unique_ptr<EmbedderThreadHost> thread_host,
+      std::shared_ptr<EmbedderThreadHost> thread_host,
       const TaskRunners& task_runners,
       const Settings& settings,
       RunConfiguration run_configuration,
       const Shell::CreateCallback<PlatformView>& on_create_platform_view,
       const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
       std::unique_ptr<EmbedderExternalTextureResolver>
-          external_texture_resolver);
+          external_texture_resolver,
+      std::optional<FlutterRendererConfig> renderer_config = std::nullopt);
+
+  EmbedderEngine(
+      std::shared_ptr<EmbedderThreadHost> thread_host,
+      const TaskRunners& task_runners,
+      std::unique_ptr<Shell> shell,
+      std::unique_ptr<EmbedderExternalTextureResolver>
+          external_texture_resolver,
+      std::optional<FlutterRendererConfig> renderer_config = std::nullopt);
 
   ~EmbedderEngine();
 
@@ -88,15 +100,46 @@ class EmbedderEngine {
 
   bool ScheduleFrame();
 
+  bool LoadDartDeferredLibrary(
+      int64_t loading_unit_id,
+      std::unique_ptr<const fml::Mapping> snapshot_data,
+      std::unique_ptr<const fml::Mapping> snapshot_instructions);
+
+  bool NotifyDartDeferredLibraryLoadError(int64_t loading_unit_id,
+                                          const std::string& error_message,
+                                          bool transient);
+
+  bool Screenshot(FlutterEngineScreenshotInfo* screenshot_out);
+
+  bool RegisterImageDecoder(ImageGeneratorFactory factory, int32_t priority);
+
   Shell& GetShell();
 
+  const std::optional<FlutterRendererConfig>& GetRendererConfig() const;
+
+  std::unique_ptr<EmbedderEngine> Spawn(
+      RunConfiguration run_configuration,
+      const std::string& initial_route,
+      const Shell::CreateCallback<PlatformView>& on_create_platform_view,
+      const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
+      std::unique_ptr<EmbedderExternalTextureResolver>
+          external_texture_resolver,
+      std::optional<FlutterRendererConfig> renderer_config) const;
+
+  void SetVMServiceServerStatusCallback(
+      FlutterVMServiceServerStatusCallback callback,
+      void* user_data);
+
  private:
-  std::unique_ptr<EmbedderThreadHost> thread_host_;
+  std::shared_ptr<EmbedderThreadHost> thread_host_;
   TaskRunners task_runners_;
-  RunConfiguration run_configuration_;
+  std::optional<RunConfiguration> run_configuration_;
   std::unique_ptr<ShellArgs> shell_args_;
   std::unique_ptr<Shell> shell_;
   std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver_;
+  std::optional<FlutterRendererConfig> renderer_config_;
+  std::optional<ptrdiff_t> vm_service_callback_handle_;
+  std::shared_ptr<std::atomic<bool>> vm_service_callback_active_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderEngine);
 };
