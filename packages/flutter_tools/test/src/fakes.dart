@@ -1645,7 +1645,7 @@ class TestToolContext extends Fake implements ToolContext {
        _logger = logger,
        _processManager = processManager,
        _processInfo = processInfo;
-// ignore: prefer_initializing_formals
+  // ignore: prefer_initializing_formals
 
   final Artifacts? _artifacts;
   final FileSystem? _fs;

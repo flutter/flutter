@@ -264,7 +264,12 @@ class TestFlutterDevice extends FlutterDevice {
     Future<Uri>? vmServiceUri,
   }) : super(
          device,
-         toolContext: TestToolContext(fileSystem: globals.fs, logger: globals.logger, processManager: globals.processManager, artifacts: Artifacts.test()),
+         toolContext: TestToolContext(
+           fileSystem: globals.fs,
+           logger: globals.logger,
+           processManager: globals.processManager,
+           artifacts: Artifacts.test(),
+         ),
          targetPlatform: .unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,
