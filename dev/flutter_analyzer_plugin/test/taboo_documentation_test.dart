@@ -5,9 +5,8 @@
 import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:flutter_analyzer_plugin/src/rules/taboo_documentation.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
-@reflectiveTest
 class TabooDocumentationTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -18,8 +17,7 @@ class TabooDocumentationTest extends AnalysisRuleTest {
   @override
   String get analysisRule => TabooDocumentation.code.name;
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_valid_doc_comment() async {
+  Future<void> testValidDocComment() async {
     const source = '''
 /// This is a valid documentation comment.
 /// It explains how the function works without taboo words.
@@ -28,8 +26,7 @@ void validFunction() {}
     await assertNoDiagnostics(source);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_non_doc_comments_ignored() async {
+  Future<void> testNonDocCommentsIgnored() async {
     const source = '''
 // Simply do this.
 // Note: this is a regular comment.
@@ -42,8 +39,7 @@ void validFunction() {}
     await assertNoDiagnostics(source);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_similar_words_allowed() async {
+  Future<void> testSimilarWordsAllowed() async {
     const source = '''
 /// Simplify this expression.
 /// Notebook entry.
@@ -53,8 +49,7 @@ void validFunction() {}
     await assertNoDiagnostics(source);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_taboo_simply() async {
+  Future<void> testTabooSimply() async {
     const source = '''
 /// Simply avoid this.
 void badFunction() {}
@@ -62,8 +57,7 @@ void badFunction() {}
     await assertDiagnostics(source, [lint(0, 22)]);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_taboo_simply_in_middle_of_sentence() async {
+  Future<void> testTabooSimplyInMiddleOfSentence() async {
     const source = '''
 /// You can simply call this function.
 void badFunction() {}
@@ -71,8 +65,7 @@ void badFunction() {}
     await assertDiagnostics(source, [lint(0, 38)]);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_note_allowed() async {
+  Future<void> testNoteAllowed() async {
     const source = '''
 /// Note: foo is allowed.
 /// Note that this is allowed.
@@ -81,8 +74,7 @@ void validFunction() {}
     await assertNoDiagnostics(source);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_taboo_case_insensitive() async {
+  Future<void> testTabooCaseInsensitive() async {
     const source = '''
 /// SIMPLY avoid this.
 void badFunction() {}
@@ -90,8 +82,7 @@ void badFunction() {}
     await assertDiagnostics(source, [lint(0, 22)]);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_taboo_multiline_doc_comment() async {
+  Future<void> testTabooMultilineDocComment() async {
     const source = '''
 /// First line is fine.
 /// and simply do that.
@@ -102,7 +93,20 @@ void badFunction() {}
 }
 
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(TabooDocumentationTest);
+  late TabooDocumentationTest testSuite;
+
+  setUp(() {
+    testSuite = TabooDocumentationTest()..setUp();
   });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('valid_doc_comment', () => testSuite.testValidDocComment());
+  test('non_doc_comments_ignored', () => testSuite.testNonDocCommentsIgnored());
+  test('similar_words_allowed', () => testSuite.testSimilarWordsAllowed());
+  test('taboo_simply', () => testSuite.testTabooSimply());
+  test('taboo_simply_in_middle_of_sentence', () => testSuite.testTabooSimplyInMiddleOfSentence());
+  test('note_allowed', () => testSuite.testNoteAllowed());
+  test('taboo_case_insensitive', () => testSuite.testTabooCaseInsensitive());
+  test('taboo_multiline_doc_comment', () => testSuite.testTabooMultilineDocComment());
 }

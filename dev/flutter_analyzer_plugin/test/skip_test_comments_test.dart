@@ -5,9 +5,8 @@
 import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:flutter_analyzer_plugin/src/rules/skip_test_comments.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
-@reflectiveTest
 class SkipTestCommentsTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -26,8 +25,7 @@ void main() {
 }
 ''';
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_skip_test_comments() async {
+  Future<void> testSkipTestComments() async {
     await assertDiagnostics(source, [
       lint(108, 10), // skip: true
     ]);
@@ -35,7 +33,13 @@ void main() {
 }
 
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(SkipTestCommentsTest);
+  late SkipTestCommentsTest testSuite;
+
+  setUp(() {
+    testSuite = SkipTestCommentsTest()..setUp();
   });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('skip_test_comments', () => testSuite.testSkipTestComments());
 }

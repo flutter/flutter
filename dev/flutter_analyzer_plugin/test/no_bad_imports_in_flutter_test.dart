@@ -7,11 +7,10 @@ import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/package_config_file_builder.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
 import 'package:flutter_analyzer_plugin/src/rules/no_bad_imports_in_flutter.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
 import 'package_mixins/meta_mixin.dart';
 
-@reflectiveTest
 class NoBadImportsInFlutterTest extends AnalysisRuleTest with MetaPackage {
   @override
   void setUp() {
@@ -38,13 +37,11 @@ import 'package:meta/meta.dart';
 class Foo {}
 ''';
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_no_bad_imports_in_flutter() async {
+  Future<void> testNoBadImportsInFlutter() async {
     await assertDiagnostics(source, <ExpectedDiagnostic>[lint(7, 24)]);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_recursive_self_import() async {
+  Future<void> testRecursiveSelfImport() async {
     await assertDiagnostics(
       '''
 import 'package:flutter/widgets.dart';
@@ -57,7 +54,14 @@ const int x = widget;
 }
 
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(NoBadImportsInFlutterTest);
+  late NoBadImportsInFlutterTest testSuite;
+
+  setUp(() {
+    testSuite = NoBadImportsInFlutterTest()..setUp();
   });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('no_bad_imports_in_flutter', () => testSuite.testNoBadImportsInFlutter());
+  test('recursive_self_import', () => testSuite.testRecursiveSelfImport());
 }

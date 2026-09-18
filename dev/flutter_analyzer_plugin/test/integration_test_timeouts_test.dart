@@ -5,9 +5,8 @@
 import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:flutter_analyzer_plugin/src/rules/integration_test_timeouts.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
-@reflectiveTest
 class IntegrationTestTimeoutsTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -35,14 +34,19 @@ void main() {
 }
 ''';
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_integration_test_timeouts() async {
+  Future<void> testIntegrationTestTimeouts() async {
     await assertDiagnostics(source, [lint(163, 4)]);
   }
 }
 
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(IntegrationTestTimeoutsTest);
+  late IntegrationTestTimeoutsTest testSuite;
+
+  setUp(() {
+    testSuite = IntegrationTestTimeoutsTest()..setUp();
   });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('integration_test_timeouts', () => testSuite.testIntegrationTestTimeouts());
 }

@@ -7,11 +7,10 @@ import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/package_config_file_builder.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
 import 'package:flutter_analyzer_plugin/src/rules/no_stopwatches.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
 import 'package_mixins/external_stopwatches_mixin.dart';
 
-@reflectiveTest
 class NoStopwatchesTest extends AnalysisRuleTest with ExternalStopwatchesPackage {
   @override
   void setUp() {
@@ -97,8 +96,7 @@ void testStopwatchIgnore(Stopwatch stopwatch) {
 }
 ''';
 
-  // ignore: unreachable_from_main, non_constant_identifier_names
-  Future<void> test_no_stopwatches() async {
+  Future<void> testNoStopwatches() async {
     await assertDiagnostics(source, <ExpectedDiagnostic>[
       lint(696, 9),
       lint(781, 9),
@@ -116,7 +114,13 @@ void testStopwatchIgnore(Stopwatch stopwatch) {
 }
 
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(NoStopwatchesTest);
+  late NoStopwatchesTest testSuite;
+
+  setUp(() {
+    testSuite = NoStopwatchesTest()..setUp();
   });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('no_stopwatches', () => testSuite.testNoStopwatches());
 }

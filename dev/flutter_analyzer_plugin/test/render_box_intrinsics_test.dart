@@ -6,9 +6,8 @@ import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
 import 'package:flutter_analyzer_plugin/src/rules/render_box_intrinsics.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
-@reflectiveTest
 class RenderBoxIntrinsicCalculationRuleTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -84,8 +83,7 @@ class RenderBoxSubclass2 extends RenderBox with ARenderBoxMixin {
 }
 ''';
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_render_box_intrinsics() async {
+  Future<void> testRenderBoxIntrinsics() async {
     await assertDiagnostics(source, <ExpectedDiagnostic>[
       lint(585, 24),
       lint(786, 24),
@@ -98,7 +96,13 @@ class RenderBoxSubclass2 extends RenderBox with ARenderBoxMixin {
 }
 
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(RenderBoxIntrinsicCalculationRuleTest);
+  late RenderBoxIntrinsicCalculationRuleTest testSuite;
+
+  setUp(() {
+    testSuite = RenderBoxIntrinsicCalculationRuleTest()..setUp();
   });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('render_box_intrinsics', () => testSuite.testRenderBoxIntrinsics());
 }

@@ -6,9 +6,8 @@ import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
 import 'package:flutter_analyzer_plugin/src/rules/no_double_clamp.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
-@reflectiveTest
 class NoDoubleClampTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -51,8 +50,7 @@ void testNoDoubleClamp(int input) {
 }
 ''';
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_no_double_clamp() async {
+  Future<void> testNoDoubleClamp() async {
     await assertDiagnostics(source, <ExpectedDiagnostic>[
       lint(553, 5),
       lint(617, 5),
@@ -65,7 +63,13 @@ void testNoDoubleClamp(int input) {
 }
 
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(NoDoubleClampTest);
+  late NoDoubleClampTest testSuite;
+
+  setUp(() {
+    testSuite = NoDoubleClampTest()..setUp();
   });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('no_double_clamp', () => testSuite.testNoDoubleClamp());
 }

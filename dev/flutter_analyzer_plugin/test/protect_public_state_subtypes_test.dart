@@ -7,12 +7,11 @@ import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/package_config_file_builder.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
 import 'package:flutter_analyzer_plugin/src/rules/protect_public_state_subtypes.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
 import 'package_mixins/meta_mixin.dart';
 import 'package_mixins/widgets_mixin.dart';
 
-@reflectiveTest
 class ProtectPublicStateSubtypesTest extends AnalysisRuleTest
     with MetaPackage, FlutterWidgetsPackage {
   @override
@@ -147,8 +146,7 @@ class MyWidgetStateValid extends State<MyWidget>{
 }
 ''';
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_protect_public_state_subtypes() async {
+  Future<void> testProtectPublicStateSubtypes() async {
     await assertDiagnostics(source, <ExpectedDiagnostic>[
       lint(224, 66),
       lint(294, 115),
@@ -165,7 +163,13 @@ class MyWidgetStateValid extends State<MyWidget>{
 }
 
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(ProtectPublicStateSubtypesTest);
+  late ProtectPublicStateSubtypesTest testSuite;
+
+  setUp(() {
+    testSuite = ProtectPublicStateSubtypesTest()..setUp();
   });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('protect_public_state_subtypes', () => testSuite.testProtectPublicStateSubtypes());
 }

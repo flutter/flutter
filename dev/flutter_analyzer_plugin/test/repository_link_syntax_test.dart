@@ -5,9 +5,8 @@
 import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:flutter_analyzer_plugin/src/rules/repository_link_syntax.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
-@reflectiveTest
 class RepositoryLinkSyntaxTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -18,8 +17,7 @@ class RepositoryLinkSyntaxTest extends AnalysisRuleTest {
   @override
   String get analysisRule => RepositoryLinkSyntax.code.name;
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_valid_repository_links() async {
+  Future<void> testValidRepositoryLinks() async {
     const source = r'''
 // https://github.com/flutter/flutter/tree/main/file1
 // https://flutter.googlesource.com/+/main/file1
@@ -46,8 +44,7 @@ void main() {
     await assertNoDiagnostics(source);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_banned_master_in_comments() async {
+  Future<void> testBannedMasterInComments() async {
     const source = '''
 // Check out https://android.googlesource.com/+/master/file1
 // Check out https://chromium.googlesource.com/+/master/file1
@@ -71,8 +68,7 @@ void main() {}
     ]);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_banned_master_in_string_literal() async {
+  Future<void> testBannedMasterInStringLiteral() async {
     const source = '''
 void main() {
   const String s = 'https://github.com/flutter/flutter/tree/master/file1';
@@ -81,8 +77,7 @@ void main() {
     await assertDiagnostics(source, [lint(33, 54)]);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_banned_master_in_interpolated_string() async {
+  Future<void> testBannedMasterInInterpolatedString() async {
     const source = r'''
 void main() {
   final String foo = 'bar';
@@ -92,8 +87,7 @@ void main() {
     await assertDiagnostics(source, [lint(61, 54)]);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_banned_master_in_adjacent_strings() async {
+  Future<void> testBannedMasterInAdjacentStrings() async {
     const source = '''
 void main() {
   const String s = 'https://github.com/flutter/'
@@ -105,7 +99,20 @@ void main() {
 }
 
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(RepositoryLinkSyntaxTest);
+  late RepositoryLinkSyntaxTest testSuite;
+
+  setUp(() {
+    testSuite = RepositoryLinkSyntaxTest()..setUp();
   });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('valid_repository_links', () => testSuite.testValidRepositoryLinks());
+  test('banned_master_in_comments', () => testSuite.testBannedMasterInComments());
+  test('banned_master_in_string_literal', () => testSuite.testBannedMasterInStringLiteral());
+  test(
+    'banned_master_in_interpolated_string',
+    () => testSuite.testBannedMasterInInterpolatedString(),
+  );
+  test('banned_master_in_adjacent_strings', () => testSuite.testBannedMasterInAdjacentStrings());
 }

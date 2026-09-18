@@ -3,15 +3,26 @@
 // found in the LICENSE file.
 
 import 'package:flutter_analyzer_plugin/src/flutter_analysis_rule.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(FlutterAnalysisRuleTest);
+  late FlutterAnalysisRuleTest testSuite;
+
+  setUp(() {
+    testSuite = FlutterAnalysisRuleTest();
   });
+
+  test('materialImplementationFiles', () => testSuite.testMaterialImplementationFiles());
+  test('materialTestFiles', () => testSuite.testMaterialTestFiles());
+  test('cupertinoImplementationFiles', () => testSuite.testCupertinoImplementationFiles());
+  test('cupertinoTestFiles', () => testSuite.testCupertinoTestFiles());
+  test(
+    'nonMaterialCupertinoFrameworkFiles',
+    () => testSuite.testNonMaterialCupertinoFrameworkFiles(),
+  );
+  test('inMemoryTestFiles', () => testSuite.testInMemoryTestFiles());
 }
 
-@reflectiveTest
 class FlutterAnalysisRuleTest {
   void _assertTrue(bool value, String message) {
     if (!value) {
@@ -25,8 +36,7 @@ class FlutterAnalysisRuleTest {
     }
   }
 
-  // ignore: non_constant_identifier_names
-  void test_materialImplementationFiles() {
+  void testMaterialImplementationFiles() {
     _assertTrue(
       FlutterAnalysisRule.isReadOnly('packages/flutter/lib/src/material/button.dart'),
       'Material button implementation',
@@ -41,8 +51,7 @@ class FlutterAnalysisRuleTest {
     );
   }
 
-  // ignore: non_constant_identifier_names
-  void test_materialTestFiles() {
+  void testMaterialTestFiles() {
     _assertTrue(
       FlutterAnalysisRule.isReadOnly('packages/flutter/test/material/button_test.dart'),
       'Material button test',
@@ -53,8 +62,7 @@ class FlutterAnalysisRuleTest {
     );
   }
 
-  // ignore: non_constant_identifier_names
-  void test_cupertinoImplementationFiles() {
+  void testCupertinoImplementationFiles() {
     _assertTrue(
       FlutterAnalysisRule.isReadOnly('packages/flutter/lib/src/cupertino/button.dart'),
       'Cupertino button implementation',
@@ -65,16 +73,14 @@ class FlutterAnalysisRuleTest {
     );
   }
 
-  // ignore: non_constant_identifier_names
-  void test_cupertinoTestFiles() {
+  void testCupertinoTestFiles() {
     _assertTrue(
       FlutterAnalysisRule.isReadOnly('packages/flutter/test/cupertino/button_test.dart'),
       'Cupertino button test',
     );
   }
 
-  // ignore: non_constant_identifier_names
-  void test_nonMaterialCupertinoFrameworkFiles() {
+  void testNonMaterialCupertinoFrameworkFiles() {
     _assertFalse(
       FlutterAnalysisRule.isReadOnly('packages/flutter/lib/src/widgets/framework.dart'),
       'Widgets framework file',
@@ -93,8 +99,7 @@ class FlutterAnalysisRuleTest {
     );
   }
 
-  // ignore: non_constant_identifier_names
-  void test_inMemoryTestFiles() {
+  void testInMemoryTestFiles() {
     _assertFalse(
       FlutterAnalysisRule.isReadOnly('/home/test/lib/test.dart'),
       'In-memory test lib file',

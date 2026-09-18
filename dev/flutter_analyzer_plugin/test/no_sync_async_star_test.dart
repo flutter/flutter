@@ -6,9 +6,8 @@ import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
 import 'package:flutter_analyzer_plugin/src/rules/no_sync_async_star.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
-@reflectiveTest
 class NoSyncAsyncStarTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -47,8 +46,7 @@ class NoSyncAsyncStarTest extends AnalysisRuleTest {
       }
 ''';
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_no_sync_async_star() async {
+  Future<void> testNoSyncAsyncStar() async {
     await assertDiagnostics(source, <ExpectedDiagnostic>[
       lint(source.indexOf(_fooDeclaration), _fooDeclaration.length),
       lint(source.indexOf(_barDeclaration), _barDeclaration.length),
@@ -58,7 +56,13 @@ class NoSyncAsyncStarTest extends AnalysisRuleTest {
 }
 
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(NoSyncAsyncStarTest);
+  late NoSyncAsyncStarTest testSuite;
+
+  setUp(() {
+    testSuite = NoSyncAsyncStarTest()..setUp();
   });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('no_sync_async_star', () => testSuite.testNoSyncAsyncStar());
 }

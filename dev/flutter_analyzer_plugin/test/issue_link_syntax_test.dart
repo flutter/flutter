@@ -5,9 +5,8 @@
 import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:flutter_analyzer_plugin/src/rules/issue_link_syntax.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
-@reflectiveTest
 class IssueLinkSyntaxTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -18,8 +17,7 @@ class IssueLinkSyntaxTest extends AnalysisRuleTest {
   @override
   String get analysisRule => IssueLinkSyntax.code.name;
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_valid_issue_links() async {
+  Future<void> testValidIssueLinks() async {
     const source = r'''
 // https://github.com/flutter/flutter/issues/new/choose
 // https://github.com/flutter/flutter/issues/new?template=02_bug.yml
@@ -35,8 +33,7 @@ void main() {
     await assertNoDiagnostics(source);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_direct_link_in_comment() async {
+  Future<void> testDirectLinkInComment() async {
     const source = '''
 // https://github.com/flutter/flutter/issues/new
 void main() {}
@@ -44,8 +41,7 @@ void main() {}
     await assertDiagnostics(source, [lint(0, 48)]);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_direct_link_in_string() async {
+  Future<void> testDirectLinkInString() async {
     const source = '''
 void main() {
   const String s = 'https://github.com/flutter/flutter/issues/new';
@@ -54,8 +50,7 @@ void main() {
     await assertDiagnostics(source, [lint(33, 47)]);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_invalid_template_in_string() async {
+  Future<void> testInvalidTemplateInString() async {
     const source = '''
 void main() {
   const String s = 'https://github.com/flutter/flutter/issues/new?template=invalid.yml';
@@ -64,8 +59,7 @@ void main() {
     await assertDiagnostics(source, [lint(33, 68)]);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_no_template_arg_in_string() async {
+  Future<void> testNoTemplateArgInString() async {
     const source = '''
 void main() {
   const String s = 'https://github.com/flutter/flutter/issues/new?title=bug';
@@ -74,8 +68,7 @@ void main() {
     await assertDiagnostics(source, [lint(33, 57)]);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_extra_query_params_in_string() async {
+  Future<void> testExtraQueryParamsInString() async {
     const source = '''
 void main() {
   const String s = 'https://github.com/flutter/flutter/issues/new?template=02_bug.yml&labels=p1';
@@ -84,8 +77,7 @@ void main() {
     await assertDiagnostics(source, [lint(33, 77)]);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_interpolated_invalid_issue_link() async {
+  Future<void> testInterpolatedInvalidIssueLink() async {
     const source = r'''
 void main() {
   final String foo = 'bar';
@@ -95,8 +87,7 @@ void main() {
     await assertDiagnostics(source, [lint(61, 52)]);
   }
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_adjacent_strings_invalid_link() async {
+  Future<void> testAdjacentStringsInvalidLink() async {
     const source = '''
 void main() {
   const String s = 'https://github.com/flutter/'
@@ -107,7 +98,6 @@ void main() {
   }
 }
 
-@reflectiveTest
 class IssueLinkSyntaxTestFileTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -121,8 +111,7 @@ class IssueLinkSyntaxTestFileTest extends AnalysisRuleTest {
   @override
   String get testFileName => 'sample_test.dart';
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_test_file_skipped() async {
+  Future<void> testTestFileSkipped() async {
     const source = '''
 // https://github.com/flutter/flutter/issues/new
 void main() {
@@ -134,8 +123,33 @@ void main() {
 }
 
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(IssueLinkSyntaxTest);
-    defineReflectiveTests(IssueLinkSyntaxTestFileTest);
+  group('IssueLinkSyntaxTest', () {
+    late IssueLinkSyntaxTest testSuite;
+
+    setUp(() {
+      testSuite = IssueLinkSyntaxTest()..setUp();
+    });
+
+    tearDown(() => testSuite.tearDown());
+
+    test('valid_issue_links', () => testSuite.testValidIssueLinks());
+    test('direct_link_in_comment', () => testSuite.testDirectLinkInComment());
+    test('direct_link_in_string', () => testSuite.testDirectLinkInString());
+    test('invalid_template_in_string', () => testSuite.testInvalidTemplateInString());
+    test('no_template_arg_in_string', () => testSuite.testNoTemplateArgInString());
+    test('extra_query_params_in_string', () => testSuite.testExtraQueryParamsInString());
+    test('interpolated_invalid_issue_link', () => testSuite.testInterpolatedInvalidIssueLink());
+    test('adjacent_strings_invalid_link', () => testSuite.testAdjacentStringsInvalidLink());
+  });
+  group('IssueLinkSyntaxTestFileTest', () {
+    late IssueLinkSyntaxTestFileTest testSuite;
+
+    setUp(() {
+      testSuite = IssueLinkSyntaxTestFileTest()..setUp();
+    });
+
+    tearDown(() => testSuite.tearDown());
+
+    test('test_file_skipped', () => testSuite.testTestFileSkipped());
   });
 }
