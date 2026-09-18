@@ -3220,8 +3220,13 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Escape key dismisses open RawTooltip', (WidgetTester tester) async {
+  testWidgets('Escape key dismisses open RawTooltip without moving focus', (
+    WidgetTester tester,
+  ) async {
     final key = GlobalKey<RawTooltipState>();
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -3234,7 +3239,10 @@ void main() {
                   semanticsTooltip: tooltipText,
                   tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                       const Text(tooltipText),
-                  child: const SizedBox(width: 100.0, height: 100.0),
+                  child: Focus(
+                    focusNode: focusNode,
+                    child: const SizedBox(width: 100.0, height: 100.0),
+                  ),
                 ),
               ),
             ),
@@ -3243,13 +3251,16 @@ void main() {
       ),
     );
 
+    focusNode.requestFocus();
     key.currentState!.ensureTooltipVisible();
     await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
     expect(find.text(tooltipText), findsOneWidget);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
     expect(find.text(tooltipText), findsNothing);
+    expect(focusNode.hasPrimaryFocus, isTrue);
   });
 }
 

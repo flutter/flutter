@@ -591,11 +591,13 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     assert(mounted);
     switch ((_animationStatus.isDismissed, status.isDismissed)) {
       case (false, true):
+        HardwareKeyboard.instance.removeHandler(_handleKeyEvent);
         RawTooltip._openedTooltips.remove(this);
         _overlayController.hide();
       case (true, false):
         _overlayController.show();
         RawTooltip._openedTooltips.add(this);
+        HardwareKeyboard.instance.addHandler(_handleKeyEvent);
         SemanticsService.tooltip(widget.semanticsTooltip ?? '');
       case (true, true) || (false, false):
         break;
@@ -825,7 +827,6 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     // if some other control is clicked on. Pointer events are dispatched to
     // global routes **after** other routes.
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handleGlobalPointerEvent);
-    HardwareKeyboard.instance.addHandler(_handleKeyEvent);
   }
 
   @protected
