@@ -189,21 +189,23 @@ void testMain() {
       expect(treesRenderedInView3.last, treesToRenderInView3.last);
     });
 
-    test('defaults to OffscreenCanvasRasterizer on Chrome and MultiSurfaceRasterizer on Firefox and Safari', () {
-      if (isChromium) {
-        expect(CanvasKitRenderer.instance.rasterizer, isA<OffscreenCanvasRasterizer>());
-      } else {
-        expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
-      }
+    test('always uses SingleSurfaceRasterizer', () {
+      expect(
+        CanvasKitRenderer.instance.rasterizer.runtimeType.toString(),
+        equals('SingleSurfaceRasterizer'),
+      );
     });
 
-    test('can be configured to always use MultiSurfaceRasterizer', () {
+    test('ignores canvasKitForceMultiSurfaceRasterizer and uses SingleSurfaceRasterizer', () {
       debugOverrideJsConfiguration(
         <String, Object?>{'canvasKitForceMultiSurfaceRasterizer': true}.jsify()
             as JsFlutterConfiguration?,
       );
       CanvasKitRenderer.instance.debugResetRasterizer();
-      expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
+      expect(
+        CanvasKitRenderer.instance.rasterizer.runtimeType.toString(),
+        equals('SingleSurfaceRasterizer'),
+      );
     });
   });
 }

@@ -981,6 +981,23 @@ extension type DomHTMLCanvasElement._(JSObject _) implements DomHTMLElement, Dom
 
   DomImageBitmapRenderingContext get contextBitmapRenderer =>
       getContext('bitmaprenderer')! as DomImageBitmapRenderingContext;
+
+  @JS('updateElementGeometry')
+  external void updateElementGeometry(DomElement element, JSAny? options);
+
+  @JS('clearElementGeometry')
+  external void clearElementGeometry(DomElement element);
+}
+
+extension DomHTMLCanvasElementDrawElementExtension on DomHTMLCanvasElement {
+  @JS('getElementTransform')
+  external DomDOMMatrix? getElementTransform(DomElement element, DomDOMMatrix drawTransform);
+
+  @JS('updateElementGeometry')
+  external void updateElementGeometry(DomElement element, JSAny? options);
+
+  @JS('clearElementGeometry')
+  external void clearElementGeometry(DomElement element);
 }
 
 @visibleForTesting
@@ -1003,6 +1020,26 @@ DomHTMLCanvasElement createDomCanvasElement({int? width, int? height}) {
   return canvas;
 }
 
+@JS('WebGLTexture')
+extension type WebGLTexture._(JSObject _) implements JSObject {}
+
+@JS('DOMMatrix')
+extension type DomDOMMatrix._(JSObject _) implements JSObject {
+  external factory DomDOMMatrix([JSAny? init]);
+}
+
+typedef DOMMatrix = DomDOMMatrix;
+
+extension type DomDrawElementOptions._(JSObject _) implements JSObject {
+  factory DomDrawElementOptions({DOMMatrix? canvasTransform}) {
+    final obj = JSObject();
+    if (canvasTransform != null) {
+      obj['canvasTransform'] = canvasTransform;
+    }
+    return DomDrawElementOptions._(obj);
+  }
+}
+
 @JS('WebGLRenderingContext')
 extension type WebGLContext._(JSObject _) implements JSObject {
   external int getParameter(int value);
@@ -1020,6 +1057,96 @@ extension type WebGLContext._(JSObject _) implements JSObject {
   }
 
   external bool isContextLost();
+
+  @JS('TEXTURE_2D')
+  external int get texture2D;
+
+  @JS('TEXTURE_BINDING_2D')
+  external int get textureBinding2D;
+
+  @JS('getParameter')
+  external JSAny? getParameterObject(int pname);
+
+  @JS('RGBA')
+  external int get rgba;
+
+  @JS('UNSIGNED_BYTE')
+  external int get unsignedByte;
+
+  @JS('TEXTURE_WRAP_S')
+  external int get textureWrapS;
+
+  @JS('TEXTURE_WRAP_T')
+  external int get textureWrapT;
+
+  @JS('TEXTURE_MIN_FILTER')
+  external int get textureMinFilter;
+
+  @JS('TEXTURE_MAG_FILTER')
+  external int get textureMagFilter;
+
+  @JS('CLAMP_TO_EDGE')
+  external int get clampToEdge;
+
+  @JS('LINEAR')
+  external int get linear;
+
+  @JS('RGBA8')
+  external int get rgba8;
+
+  @JS('isTexture')
+  external bool isTexture(WebGLTexture? texture);
+
+  @JS('createTexture')
+  external WebGLTexture? createTexture();
+
+  @JS('bindTexture')
+  external void bindTexture(int target, WebGLTexture? texture);
+
+  @JS('deleteTexture')
+  external void deleteTexture(WebGLTexture? texture);
+
+  @JS('texImage2D')
+  external void texImage2D(
+    int target,
+    int level,
+    int internalformat,
+    int width,
+    int height,
+    int border,
+    int format,
+    int type,
+    JSAny? pixels,
+  );
+
+  @JS('texParameteri')
+  external void texParameteri(int target, int pname, int param);
+
+  @JS('texElementImage2D')
+  external void texElementImage2D(int target, int internalformat, DomElement element);
+
+  @JS('texElementSubImage2D')
+  external void texElementSubImage2D(
+    int target,
+    int level,
+    int xoffset,
+    int yoffset,
+    DomElement element,
+  );
+}
+
+extension WebGLRenderingContextDrawElementExtension on WebGLContext {
+  @JS('texElementImage2D')
+  external void texElementImage2D(int target, int internalformat, DomElement element);
+
+  @JS('texElementSubImage2D')
+  external void texElementSubImage2D(
+    int target,
+    int level,
+    int xoffset,
+    int yoffset,
+    DomElement element,
+  );
 }
 
 extension type WebGLLoseContextExtension._(JSObject _) implements JSObject {

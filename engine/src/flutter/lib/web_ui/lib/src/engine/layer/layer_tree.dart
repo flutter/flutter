@@ -21,30 +21,24 @@ class LayerTree {
   /// pictures are registered with the raster cache as potential candidates
   /// to raster. If [ignoreRasterCache] is `true`, then there will be no
   /// attempt to register pictures to cache.
-  void preroll(Frame frame) {
-    final prerollVisitor = PrerollVisitor(frame.viewEmbedder);
+  void preroll([Frame? frame]) {
+    final prerollVisitor = PrerollVisitor();
     rootLayer.accept(prerollVisitor);
   }
 
   /// Performs a paint pass with a recording canvas for each picture in the
-  /// tree. This paint pass is just used to measure the bounds for each picture
-  /// so we can optimize the total number of canvases required.
-  void measure(Frame frame, BitmapSize size) {
-    final measureVisitor = MeasureVisitor(size, frame.viewEmbedder);
-    if (rootLayer.needsPainting) {
-      rootLayer.accept(measureVisitor);
-    }
-    measureVisitor.dispose();
+  /// tree.
+  void measure([Frame? frame, BitmapSize? size]) {
+    // No-op in single-surface HTML-in-Canvas compositing.
   }
 
-  /// Paints the layer tree into the given [frame].
-  void paint(Frame frame) {
-    final internalNodesCanvas = NWayCanvas();
-    final Iterable<LayerCanvas> overlayCanvases = frame.viewEmbedder!.getOptimizedCanvases();
-    overlayCanvases.forEach(internalNodesCanvas.addCanvas);
-    final paintVisitor = PaintVisitor(internalNodesCanvas, frame.viewEmbedder!);
-    if (rootLayer.needsPainting) {
-      rootLayer.accept(paintVisitor);
+  /// Paints the layer tree into the given [canvasOrFrame].
+  void paint(dynamic canvasOrFrame, [CkOnscreenSurface? surface]) {
+    if (canvasOrFrame is LayerCanvas) {
+      final paintVisitor = PaintVisitor(canvasOrFrame, surface);
+      if (rootLayer.needsPainting) {
+        rootLayer.accept(paintVisitor);
+      }
     }
   }
 
@@ -59,12 +53,10 @@ class LayerTree {
   ui.Picture flatten(ui.Size size) {
     final recorder = ui.PictureRecorder();
     final canvas = ui.Canvas(recorder, ui.Offset.zero & size);
-    final prerollVisitor = PrerollVisitor(null);
+    final prerollVisitor = PrerollVisitor();
     rootLayer.accept(prerollVisitor);
 
-    final internalNodesCanvas = NWayCanvas();
-    internalNodesCanvas.addCanvas(canvas as LayerCanvas);
-    final paintVisitor = PaintVisitor.forToImage(internalNodesCanvas, canvas);
+    final paintVisitor = PaintVisitor(canvas as LayerCanvas);
     if (rootLayer.needsPainting) {
       rootLayer.accept(paintVisitor);
     }
@@ -74,21 +66,13 @@ class LayerTree {
 
 /// A single frame to be rendered.
 class Frame {
-  Frame(this.viewEmbedder);
-
-  /// The platform view embedder.
-  final PlatformViewEmbedder? viewEmbedder;
+  Frame([Object? _]);
 
   /// Rasterize the given layer tree into this frame.
   bool raster(LayerTree layerTree, BitmapSize size, FrameTimingRecorder? recorder) {
     timeAction<void>(kProfilePrerollFrame, () {
       layerTree.preroll(this);
-      layerTree.measure(this, size);
-      viewEmbedder?.optimizeComposition();
       recorder?.recordBuildFinish();
-    });
-    timeAction<void>(kProfileApplyFrame, () {
-      layerTree.paint(this);
     });
     return true;
   }
@@ -97,7 +81,7 @@ class Frame {
 /// The state of the compositor, which is persisted between frames.
 class CompositorContext {
   /// Acquire a frame using this compositor's settings.
-  Frame acquireFrame(PlatformViewEmbedder? viewEmbedder) {
-    return Frame(viewEmbedder);
+  Frame acquireFrame([Object? _]) {
+    return Frame();
   }
 }
