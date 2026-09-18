@@ -105,6 +105,8 @@ enum class SemanticsRole : int32_t {
   kMain = 30,
   kNavigation = 31,
   kRegion = 32,
+  kListBox = 33,
+  kOption = 34,
 };
 
 /// C/C++ representation of `SemanticsValidationResult` defined in

@@ -625,6 +625,12 @@ enum EngineSemanticsRole {
 
   /// An area that represents a form.
   form,
+
+  /// A widget that allows the user to select one or more items from a list of choices.
+  listBox,
+
+  /// A selectable item in a [listBox].
+  option,
 }
 
 /// Responsible for setting the `role` ARIA attribute, for attaching
@@ -2248,6 +2254,10 @@ class SemanticsObject {
         return EngineSemanticsRole.list;
       case ui.SemanticsRole.listItem:
         return EngineSemanticsRole.listItem;
+      case ui.SemanticsRole.listBox:
+        return EngineSemanticsRole.listBox;
+      case ui.SemanticsRole.option:
+        return EngineSemanticsRole.option;
       case ui.SemanticsRole.complementary:
         return EngineSemanticsRole.complementary;
       case ui.SemanticsRole.contentInfo:
@@ -2318,6 +2328,8 @@ class SemanticsObject {
       EngineSemanticsRole.link => SemanticLink(this),
       EngineSemanticsRole.list => SemanticList(this),
       EngineSemanticsRole.listItem => SemanticListItem(this),
+      EngineSemanticsRole.listBox => SemanticListBox(this),
+      EngineSemanticsRole.option => SemanticOption(this),
       EngineSemanticsRole.heading => SemanticHeading(this),
       EngineSemanticsRole.header => SemanticHeader(this),
       EngineSemanticsRole.tab => SemanticTab(this),

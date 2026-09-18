@@ -652,6 +652,8 @@ enum SemanticsRole {
   main,
   navigation,
   region,
+  listBox,
+  option,
 }
 
 // Mirrors engine/src/flutter/lib/ui/semantics.dart

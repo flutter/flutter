@@ -182,6 +182,8 @@ sealed class _DebugSemanticsRoleChecks {
       SemanticsRole.status => _noLiveRegion,
       SemanticsRole.list => _noCheckRequired,
       SemanticsRole.listItem => _semanticsListItem,
+      SemanticsRole.listBox => _noCheckRequired,
+      SemanticsRole.option => _semanticsOption,
       SemanticsRole.complementary => _semanticsComplementary,
       SemanticsRole.contentInfo => _semanticsContentInfo,
       SemanticsRole.main => _semanticsMain,
@@ -457,6 +459,17 @@ sealed class _DebugSemanticsRoleChecks {
       );
     }
     return null;
+  }
+
+  static FlutterError? _semanticsOption(SemanticsNode node) {
+    SemanticsNode? currentNode = node;
+    while (currentNode?.parent != null) {
+      if (currentNode?.parent?.role == SemanticsRole.listBox) {
+        return null;
+      }
+      currentNode = currentNode?.parent;
+    }
+    return FlutterError('An option must be a descendant of a listBox');
   }
 
   static bool _isLandmarkRole(SemanticsData nodeData) =>

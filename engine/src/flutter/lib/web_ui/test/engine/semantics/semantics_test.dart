@@ -3403,6 +3403,62 @@ void _testSelectables() {
     semantics().semanticsEnabled = false;
   });
 
+  test(
+    'renders listBox and option with aria-selected and omits group on inner scrollable',
+    () async {
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+
+      final tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.listBox,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+        children: <SemanticsNodeUpdate>[
+          tester.updateNode(
+            id: 1,
+            flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
+            scrollExtentMax: 100.0,
+            scrollPosition: 0.0,
+            rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+            children: <SemanticsNodeUpdate>[
+              tester.updateNode(
+                id: 2,
+                role: ui.SemanticsRole.option,
+                label: 'apple',
+                hasTap: true,
+                flags: const ui.SemanticsFlags(isSelected: ui.Tristate.isTrue),
+                rect: const ui.Rect.fromLTRB(0, 0, 100, 30),
+              ),
+              tester.updateNode(
+                id: 3,
+                role: ui.SemanticsRole.option,
+                label: 'banana',
+                hasTap: true,
+                flags: const ui.SemanticsFlags(isSelected: ui.Tristate.isFalse),
+                rect: const ui.Rect.fromLTRB(0, 30, 100, 60),
+              ),
+            ],
+          ),
+        ],
+      );
+      tester.apply();
+
+      expectSemanticsTree(owner(), '''
+<sem role="listbox">
+    <sem role="none" style="overflow-y: scroll">
+        <sem role="option" aria-label="apple" aria-selected="true"></sem>
+        <sem role="option" aria-label="banana" aria-selected="false"></sem>
+        <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
+    </sem>
+</sem>
+''');
+
+      semantics().semanticsEnabled = false;
+    },
+  );
+
   test('Checkable takes precedence over selectable', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
