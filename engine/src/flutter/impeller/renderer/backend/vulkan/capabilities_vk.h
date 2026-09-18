@@ -310,6 +310,9 @@ class CapabilitiesVK final : public Capabilities,
   size_t GetMinimumStorageBufferAlignment() const override;
 
   // |Capabilities|
+  size_t GetMaxPushConstantSize() const override;
+
+  // |Capabilities|
   bool NeedsPartitionedHostBuffer() const override;
 
   //----------------------------------------------------------------------------

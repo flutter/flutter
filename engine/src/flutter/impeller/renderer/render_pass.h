@@ -6,6 +6,8 @@
 #define FLUTTER_IMPELLER_RENDERER_RENDER_PASS_H_
 
 #include <cstddef>
+#include <cstdint>
+#include <vector>
 
 #include "fml/status.h"
 #include "impeller/core/formats.h"
@@ -168,6 +170,32 @@ class RenderPass : public ResourceBinder {
   ///
   virtual bool SetIndexBuffer(BufferView index_buffer, IndexType index_type);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Set the data a pipeline's push constant block reads.
+  ///
+  ///             A pipeline has one block of push constant memory. A stage
+  ///             that declares a block always reads it from offset zero, so
+  ///             two stages declaring a block read the same bytes.
+  ///
+  ///             The value persists for the rest of the pass, or until it is
+  ///             set again.
+  ///
+  /// @param[in]  stage     The stage that declared the block.
+  /// @param[in]  slot      The reflected block.
+  /// @param[in]  metadata  The block's member layout. Required by backends
+  ///                       that lower push constants to plain uniforms.
+  /// @param[in]  data      The bytes to write. Must be at least
+  ///                       `slot.size_in_bytes` long.
+  /// @param[in]  length    The length of `data` in bytes.
+  ///
+  /// @return     Whether the data was recorded.
+  ///
+  virtual bool SetPushConstants(ShaderStage stage,
+                                const ShaderPushConstantSlot& slot,
+                                const ShaderMetadata* metadata,
+                                const uint8_t* data,
+                                size_t length);
+
   /// Record the currently pending command.
   virtual fml::Status Draw();
 
@@ -249,6 +277,8 @@ class RenderPass : public ResourceBinder {
   std::vector<BufferView> vertex_buffers_;
   std::vector<BufferResource> bound_buffers_;
   std::vector<TextureAndSampler> bound_textures_;
+  std::vector<PushConstantBinding> push_constants_;
+  std::vector<uint8_t> push_constant_data_;
   const Matrix orthographic_;
 
   //----------------------------------------------------------------------------
@@ -293,6 +323,7 @@ class RenderPass : public ResourceBinder {
   std::optional<size_t> bound_buffers_start_ = std::nullopt;
   std::optional<size_t> bound_textures_start_ = std::nullopt;
   std::optional<size_t> vertex_buffers_start_ = std::nullopt;
+  std::optional<size_t> push_constants_start_ = std::nullopt;
 };
 
 }  // namespace impeller

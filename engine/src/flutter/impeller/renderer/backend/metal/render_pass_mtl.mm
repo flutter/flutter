@@ -323,6 +323,24 @@ bool RenderPassMTL::SetIndexBuffer(BufferView index_buffer,
 }
 
 // |RenderPass|
+bool RenderPassMTL::SetPushConstants(ShaderStage stage,
+                                     const ShaderPushConstantSlot& slot,
+                                     const ShaderMetadata* metadata,
+                                     const uint8_t* data,
+                                     size_t length) {
+  if (data == nullptr || length < slot.size_in_bytes) {
+    VALIDATION_LOG << "Push constant data is smaller than the block declared "
+                      "by the shader.";
+    return false;
+  }
+  // Metal has no push constants. `setBytes` is the equivalent small-data path:
+  // the driver copies the bytes into an allocation it owns and binds it at the
+  // block's argument table index.
+  return pass_bindings_.SetBytes(stage, slot.ext_res_0, data,
+                                 slot.size_in_bytes);
+}
+
+// |RenderPass|
 fml::Status RenderPassMTL::Draw() {
   if (!has_valid_pipeline_) {
     return fml::Status(fml::StatusCode::kCancelled, "Invalid pipeline.");

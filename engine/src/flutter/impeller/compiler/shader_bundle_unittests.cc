@@ -219,6 +219,52 @@ TEST(ShaderBundleTest, GenerateShaderBundleFlatbufferProducesCorrectResult) {
   ASSERT_EQ(fragment->metal_desktop->inputs.size(), 0u);
 }
 
+TEST(ShaderBundleTest, GenerateShaderBundleFlatbufferReflectsPushConstants) {
+  std::string fixtures_path = flutter::testing::GetFixturesPath();
+  std::string config =
+      "{\"PushConstantsVertex\": {\"type\": \"vertex\", \"file\": \"" +
+      fixtures_path + "/flutter_gpu_push_constants.vert\"}}";
+
+  SourceOptions options;
+  options.target_platform = TargetPlatform::kRuntimeStageMetal;
+  options.source_language = SourceLanguage::kGLSL;
+
+  std::optional<fb::shaderbundle::ShaderBundleT> bundle =
+      GenerateShaderBundleFlatbuffer(config, options);
+  ASSERT_TRUE(bundle.has_value());
+
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+  const auto* vertex = FindByName(bundle->shaders, "PushConstantsVertex");
+  ASSERT_NE(vertex, nullptr);
+
+  // The block is reflected separately from the uniform structs.
+  EXPECT_EQ(vertex->metal_desktop->uniform_structs.size(), 0u);
+
+  const auto& block = vertex->metal_desktop->push_constants;
+  ASSERT_NE(block, nullptr);
+  // A push constant block reflects under its instance name, which is what the
+  // OpenGL ES backend has to match against.
+  EXPECT_STREQ(block->name.c_str(), "draw_info");
+  EXPECT_EQ(block->size_in_bytes, 80u);
+  ASSERT_EQ(block->fields.size(), 2u);
+
+  const auto& color = block->fields[0];
+  EXPECT_STREQ(color->name.c_str(), "color");
+  EXPECT_EQ(color->type, fb::shaderbundle::UniformDataType::kFloat);
+  EXPECT_EQ(color->offset_in_bytes, 0u);
+  EXPECT_EQ(color->element_size_in_bytes, 16u);
+  EXPECT_EQ(color->vec_size, 4u);
+  EXPECT_EQ(color->columns, 1u);
+
+  const auto& mvp = block->fields[1];
+  EXPECT_STREQ(mvp->name.c_str(), "mvp");
+  EXPECT_EQ(mvp->type, fb::shaderbundle::UniformDataType::kFloat);
+  EXPECT_EQ(mvp->offset_in_bytes, 16u);
+  EXPECT_EQ(mvp->element_size_in_bytes, 64u);
+  EXPECT_EQ(mvp->vec_size, 4u);
+  EXPECT_EQ(mvp->columns, 4u);
+}
+
 TEST(ShaderBundleTest,
      GenerateShaderBundleFlatbufferReportsSourceFilesAsDependencies) {
   std::string fixtures_path = flutter::testing::GetFixturesPath();

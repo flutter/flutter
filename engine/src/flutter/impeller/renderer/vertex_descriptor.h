@@ -55,11 +55,20 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
   void RegisterDescriptorSetLayouts(const DescriptorSetLayout desc_set_layout[],
                                     size_t count);
 
+  /// @brief Declare that `stage` reads `size_in_bytes` of push constant data.
+  ///
+  ///        Backends that need the pipeline layout to spell out its push
+  ///        constant usage (Vulkan) build it from these. A zero size registers
+  ///        nothing.
+  void RegisterPushConstantRange(ShaderStage stage, size_t size_in_bytes);
+
   const std::vector<ShaderStageIOSlot>& GetStageInputs() const;
 
   const std::vector<ShaderStageBufferLayout>& GetStageLayouts() const;
 
   const std::vector<DescriptorSetLayout>& GetDescriptorSetLayouts() const;
+
+  const std::vector<PushConstantRange>& GetPushConstantRanges() const;
 
   // |Comparable<VertexDescriptor>|
   std::size_t GetHash() const override;
@@ -73,6 +82,7 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
   std::vector<ShaderStageIOSlot> inputs_;
   std::vector<ShaderStageBufferLayout> layouts_;
   std::vector<DescriptorSetLayout> desc_set_layouts_;
+  std::vector<PushConstantRange> push_constant_ranges_;
   bool uses_input_attachments_ = false;
 
   VertexDescriptor(const VertexDescriptor&) = delete;

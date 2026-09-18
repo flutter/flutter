@@ -78,6 +78,30 @@ bool PassBindingsCacheMTL::SetBuffer(ShaderStage stage,
   return false;
 }
 
+bool PassBindingsCacheMTL::SetBytes(ShaderStage stage,
+                                    uint64_t index,
+                                    const void* bytes,
+                                    size_t length) {
+  if (index == kOptimizedOutBinding) {
+    // See SetBuffer: a dead-code-eliminated block has no argument-table slot.
+    return true;
+  }
+  // Metal binds a driver-owned allocation at this index, so a buffer bound
+  // here earlier is no longer what the shader reads.
+  buffers_[stage][index] = {nullptr, 0u};
+  switch (stage) {
+    case ShaderStage::kVertex:
+      [encoder_ setVertexBytes:bytes length:length atIndex:index];
+      return true;
+    case ShaderStage::kFragment:
+      [encoder_ setFragmentBytes:bytes length:length atIndex:index];
+      return true;
+    default:
+      VALIDATION_LOG << "Cannot set bytes on an unknown shader stage.";
+      return false;
+  }
+}
+
 bool PassBindingsCacheMTL::SetTexture(ShaderStage stage,
                                       uint64_t index,
                                       id<MTLTexture> texture) {

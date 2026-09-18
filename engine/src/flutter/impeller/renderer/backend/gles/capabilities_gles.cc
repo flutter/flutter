@@ -376,6 +376,10 @@ size_t CapabilitiesGLES::GetMinimumUniformAlignment() const {
   return 256;
 }
 
+size_t CapabilitiesGLES::GetMaxPushConstantSize() const {
+  return kDefaultMaxPushConstantSize;
+}
+
 bool CapabilitiesGLES::NeedsPartitionedHostBuffer() const {
 #ifdef FML_OS_EMSCRIPTEN
   // WebGL has special requirements here to keep indexes and other data
