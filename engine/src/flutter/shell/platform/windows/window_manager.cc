@@ -18,6 +18,7 @@
 #include "shell/platform/windows/flutter_windows_view.h"
 #include "shell/platform/windows/host_window.h"
 #include "shell/platform/windows/host_window_popup.h"
+#include "shell/platform/windows/host_window_satellite.h"
 #include "shell/platform/windows/host_window_tooltip.h"
 
 namespace flutter {
@@ -77,6 +78,21 @@ FlutterViewId WindowManager::CreatePopupWindow(
   auto window = HostWindow::CreatePopupWindow(
       this, engine_, request->preferred_constraints,
       request->get_position_callback, request->parent);
+  if (!window || !window->GetWindowHandle()) {
+    FML_LOG(ERROR) << "Failed to create host window";
+    return -1;
+  }
+  FlutterViewId const view_id = window->view_controller_->view()->view_id();
+  active_windows_[window->GetWindowHandle()] = std::move(window);
+  return view_id;
+}
+
+FlutterViewId WindowManager::CreateSatelliteWindow(
+    const SatelliteWindowCreationRequest* request) {
+  auto window = HostWindow::CreateSatelliteWindow(
+      this, engine_, request->preferred_size, request->preferred_constraints,
+      request->get_position_callback, request->parent, request->title,
+      request->sized_to_content, request->resizable);
   if (!window || !window->GetWindowHandle()) {
     FML_LOG(ERROR) << "Failed to create host window";
     return -1;
@@ -283,4 +299,27 @@ void InternalFlutterWindows_WindowManager_UpdatePopupPosition(HWND hwnd) {
   flutter::HostWindowPopup* popup_window =
       reinterpret_cast<flutter::HostWindowPopup*>(window);
   popup_window->UpdatePosition();
+}
+
+FLUTTER_EXPORT
+FlutterViewId InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+    int64_t engine_id,
+    const flutter::SatelliteWindowCreationRequest* request) {
+  flutter::FlutterWindowsEngine* engine =
+      flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
+  return engine->window_manager()->CreateSatelliteWindow(request);
+}
+
+FLUTTER_EXPORT
+void InternalFlutterWindows_WindowManager_SetSatelliteParent(
+    HWND satellite_hwnd,
+    HWND new_parent) {
+  flutter::HostWindow* window =
+      flutter::HostWindow::GetThisFromHandle(satellite_hwnd);
+  if (!window ||
+      window->GetArchetype() != flutter::WindowArchetype::kSatellite) {
+    return;
+  }
+  static_cast<flutter::HostWindowSatellite*>(window)->SetSatelliteParent(
+      new_parent);
 }

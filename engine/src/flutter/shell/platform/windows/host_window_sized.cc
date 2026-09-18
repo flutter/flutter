@@ -79,10 +79,13 @@ void HostWindowSized::ApplyContentSize(int32_t physical_width,
 }
 
 WindowRect HostWindowSized::GetWorkArea() const {
+  return GetWorkAreaForWindow(window_handle_);
+}
+
+WindowRect HostWindowSized::GetWorkAreaForWindow(HWND hwnd) {
   constexpr int32_t kDefaultWorkAreaSize = 10000;
   WindowRect work_area = {0, 0, kDefaultWorkAreaSize, kDefaultWorkAreaSize};
-  HMONITOR const monitor =
-      MonitorFromWindow(window_handle_, MONITOR_DEFAULTTONEAREST);
+  HMONITOR const monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
   if (monitor) {
     MONITORINFO monitor_info = {};
     monitor_info.cbSize = sizeof(monitor_info);
