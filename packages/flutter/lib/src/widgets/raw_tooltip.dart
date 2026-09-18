@@ -597,6 +597,16 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
       case (true, false):
         _overlayController.show();
         RawTooltip._openedTooltips.add(this);
+        // Register a global HardwareKeyboard handler while the tooltip is open
+        // rather than wrapping child in a Shortcuts widget or relying solely on
+        // WidgetsApp's root Focus handler (app.dart):
+        // 1. A local Shortcuts widget around RawTooltip.child only receives key
+        //    events when primaryFocus is inside RawTooltip.child, which misses
+        //    tooltips triggered by pointer hover when focus is elsewhere.
+        // 2. WidgetsApp's root Focus handler is an ancestor of route content, so
+        //    focused descendants that consume Escape (such as EditableText's
+        //    DoNothingAndStopPropagationTextIntent or RawMenuAnchor/DropdownMenu)
+        //    stop propagation before the event bubbles up to WidgetsApp.
         HardwareKeyboard.instance.addHandler(_handleKeyEvent);
         SemanticsService.tooltip(widget.semanticsTooltip ?? '');
       case (true, true) || (false, false):
