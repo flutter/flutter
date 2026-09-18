@@ -268,8 +268,10 @@ class DaemonServer {
 }
 
 typedef CommandHandler = Future<Object?>? Function(Map<String, Object?> args);
-typedef CommandHandlerWithBinary =
-    Future<Object?> Function(Map<String, Object?> args, Stream<List<int>>? binary);
+typedef CommandHandlerWithBinary = Future<Object?> Function(
+  Map<String, Object?> args,
+  Stream<List<int>>? binary,
+);
 
 class Daemon {
   Daemon(
