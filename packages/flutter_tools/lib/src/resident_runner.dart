@@ -377,6 +377,7 @@ class FlutterDevice {
         logger: logger,
         os: osUtils,
         processManager: processManager,
+        cache: _cache ?? globals.cache,
       ),
     );
     return devFS!.create();
@@ -2238,6 +2239,7 @@ class _FlutterDeviceDevFSContext implements ToolContext {
     required this.logger,
     required this.os,
     required this.processManager,
+    required this.cache,
   });
   @override
   final Artifacts artifacts;
@@ -2249,6 +2251,8 @@ class _FlutterDeviceDevFSContext implements ToolContext {
   final OperatingSystemUtils os;
   @override
   final ProcessManager processManager;
+  @override
+  final Cache cache;
   @override
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }
