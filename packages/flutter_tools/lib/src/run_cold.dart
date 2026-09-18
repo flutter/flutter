@@ -119,7 +119,8 @@ class ColdRunner extends ResidentRunner {
       if (device.vmService != null) {
         logger.printStatus('Tracing startup on ${device.device!.displayName}.');
         final String outputPath =
-            platform.environment[kFlutterTestOutputsDirEnvName] ?? getBuildDirectory();
+            platform.environment[kFlutterTestOutputsDirEnvName] ??
+            getBuildDirectory(config, fileSystem);
         await downloadStartupTrace(
           device.vmService!,
           awaitFirstFrame: awaitFirstFrameWhenTracing,
