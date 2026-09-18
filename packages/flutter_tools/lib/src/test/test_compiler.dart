@@ -230,7 +230,7 @@ class TestCompiler {
       fileSystem: fs,
       shutdownHooks: shutdownHooks,
       config: config,
-      targetPlatform: TargetPlatform.tester,
+      targetPlatform: .tester,
     );
     return residentCompiler;
   }

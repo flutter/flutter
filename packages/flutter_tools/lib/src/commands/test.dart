@@ -636,12 +636,12 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         buildInfo.packageConfig,
       );
       collector = CoverageCollector(
-        packagesPath: buildInfo.packageConfigPath,
-        toolContext: _toolContext,
         branchCoverage: boolArg('branch-coverage'),
         libraryNames: packagesToInclude,
+        packagesPath: buildInfo.packageConfigPath,
         resolver: await CoverageCollector.getResolver(buildInfo.packageConfigPath),
         testTimeRecorder: testTimeRecorder,
+        toolContext: _toolContext,
         verbose: !outputMachineFormat,
       );
     }

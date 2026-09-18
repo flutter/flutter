@@ -12,6 +12,10 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
@@ -137,10 +141,10 @@ Future<void> run(List<String> args) async {
         globals.fs.path.absolute(argResults[_kOptionPackages] as String),
       );
       collector = CoverageCollector(
-        packagesPath: packagesPath,
-        toolContext: dependencies.toolContext,
         libraryNames: libraryNames,
+        packagesPath: packagesPath,
         resolver: await CoverageCollector.getResolver(packagesPath),
+        toolContext: dependencies.toolContext,
       );
       if (!argResults.options.contains(_kOptionTestDirectory)) {
         throwToolExit('Use of --coverage requires setting --test-directory');
@@ -205,4 +209,24 @@ Future<void> run(List<String> args) async {
   // TODO(ianh): There's apparently some sort of lost async task keeping the
   // process open. Remove the next line once that's been resolved.
   exit(exitCode);
+}
+
+class _FuchsiaToolContext implements ToolContext {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
+  @override
+  FileSystem get fs => globals.fs;
+
+  @override
+  Logger get logger => globals.logger;
+
+  @override
+  OperatingSystemUtils get os => globals.os;
+
+  @override
+  Platform get platform => globals.platform;
+
+  @override
+  ProcessUtils get processUtils => globals.processUtils;
 }

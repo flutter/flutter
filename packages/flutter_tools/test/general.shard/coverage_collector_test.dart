@@ -370,7 +370,9 @@ void main() {
 
       final String packagesPath = packagesFile.path;
       final collector = CoverageCollector(
+        libraryNames: <String>{'foo', 'bar'},
         packagesPath: packagesPath,
+        resolver: await CoverageCollector.getResolver(packagesPath),
         toolContext: FakeToolContext(
           fs: fileSystem,
           logger: BufferLogger.test(),
@@ -381,8 +383,6 @@ void main() {
             processManager: FakeProcessManager.any(),
           ),
         ),
-        libraryNames: <String>{'foo', 'bar'},
-        resolver: await CoverageCollector.getResolver(packagesPath),
         verbose: false,
       );
       await collector.collectCoverage(
@@ -461,7 +461,9 @@ void main() {
 
       final String packagesPath = packagesFile.path;
       final collector = CoverageCollector(
+        libraryNames: <String>{'foo', 'bar'},
         packagesPath: packagesPath,
+        resolver: await CoverageCollector.getResolver(packagesPath),
         toolContext: FakeToolContext(
           fs: fileSystem,
           logger: BufferLogger.test(),
@@ -472,8 +474,6 @@ void main() {
             processManager: FakeProcessManager.any(),
           ),
         ),
-        libraryNames: <String>{'foo', 'bar'},
-        resolver: await CoverageCollector.getResolver(packagesPath),
         verbose: false,
       );
       await collector.collectCoverage(
@@ -513,7 +513,9 @@ void main() {
 
       final String packagesPath = packagesFile.path;
       var collector = CoverageCollector(
+        libraryNames: <String>{'foo', 'bar'},
         packagesPath: packagesPath,
+        resolver: await CoverageCollector.getResolver(packagesPath),
         toolContext: FakeToolContext(
           fs: fileSystem,
           logger: BufferLogger.test(),
@@ -524,8 +526,6 @@ void main() {
             processManager: FakeProcessManager.any(),
           ),
         ),
-        libraryNames: <String>{'foo', 'bar'},
-        resolver: await CoverageCollector.getResolver(packagesPath),
         verbose: false,
       );
       await collector.collectCoverage(
@@ -540,7 +540,9 @@ void main() {
       expect(report, contains('bar.dart'));
 
       collector = CoverageCollector(
+        libraryNames: <String>{'foo'},
         packagesPath: packagesPath,
+        resolver: await CoverageCollector.getResolver(packagesPath),
         toolContext: FakeToolContext(
           fs: fileSystem,
           logger: BufferLogger.test(),
@@ -551,8 +553,6 @@ void main() {
             processManager: FakeProcessManager.any(),
           ),
         ),
-        libraryNames: <String>{'foo'},
-        resolver: await CoverageCollector.getResolver(packagesPath),
         verbose: false,
       );
       await collector.collectCoverage(
@@ -586,7 +586,10 @@ void main() {
         final logger = LoggingLogger();
         final testTimeRecorder = TestTimeRecorder(logger);
         final collector = CoverageCollector(
+          libraryNames: <String>{'foo', 'bar'},
           packagesPath: packagesPath,
+          resolver: await CoverageCollector.getResolver(packagesPath),
+          testTimeRecorder: testTimeRecorder,
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: logger,
@@ -594,9 +597,6 @@ void main() {
             platform: const LocalPlatform(),
             processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.any()),
           ),
-          libraryNames: <String>{'foo', 'bar'},
-          resolver: await CoverageCollector.getResolver(packagesPath),
-          testTimeRecorder: testTimeRecorder,
           verbose: false,
         );
         await collector.collectCoverage(
@@ -772,14 +772,6 @@ void main() {
       });
 
       expect(fakeVmServiceHost.hasRemainingExpectations, false);
-    },
-  );
-
-  testUsingContext(
-    'Coverage collector can be constructed without toolContext and falls back to globals',
-    () {
-      final collector = CoverageCollector(packagesPath: 'packages_path');
-      expect(collector, isNotNull);
     },
   );
 }
