@@ -507,4 +507,56 @@ void main() {
     ); // rebuilt showC now depends on the inner model
     expect(find.text('a: 101 b: 102 c: null'), findsOneWidget); // inner model's a, b, c
   });
+
+  testWidgets('InheritedModel unconditional dependency sentinel handles aspect transitions', (
+    WidgetTester tester,
+  ) async {
+    var a = 1;
+    const b = 10;
+    var c = 100;
+    var subscribeAll = false;
+    var builds = 0;
+    late StateSetter updateTree;
+
+    final Widget child = Builder(
+      builder: (BuildContext context) {
+        builds += 1;
+        InheritedModel.inheritFrom<ABCModel>(context, aspect: 'a');
+        InheritedModel.inheritFrom<ABCModel>(context, aspect: 'b');
+        if (subscribeAll) {
+          InheritedModel.inheritFrom<ABCModel>(context);
+          // Subsequent aspect registrations after unconditional subscription should no-op.
+          InheritedModel.inheritFrom<ABCModel>(context, aspect: 'c');
+        }
+        return const SizedBox();
+      },
+    );
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          updateTree = setState;
+          return ABCModel(a: a, b: b, c: c, child: child);
+        },
+      ),
+    );
+    expect(builds, 1);
+
+    // Updating 'c' does not rebuild while only subscribed to 'a' and 'b'.
+    updateTree(() => c += 1);
+    await tester.pump();
+    expect(builds, 1);
+
+    // Upgrade to unconditional dependency (aspect == null) and verify 'c' changes now trigger rebuilds.
+    updateTree(() {
+      subscribeAll = true;
+      a += 1;
+    });
+    await tester.pump();
+    expect(builds, 2);
+
+    updateTree(() => c += 1);
+    await tester.pump();
+    expect(builds, 3);
+  });
 }

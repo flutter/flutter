@@ -222,16 +222,21 @@ class InheritedModelElement<T> extends InheritedElement {
 
   @override
   void updateDependencies(Element dependent, Object? aspect) {
-    final dependencies = getDependencies(dependent) as Set<T>?;
+    final dependencies = getDependencies(dependent) as Set<Object?>?;
     if (dependencies != null && dependencies.isEmpty) {
       return;
     }
 
     if (aspect == null) {
-      setDependencies(dependent, HashSet<T>());
+      setDependencies(dependent, const <Never>{});
+      return;
+    }
+
+    assert(aspect is T);
+    if (dependencies == null) {
+      setDependencies(dependent, HashSet<T>()..add(aspect as T));
     } else {
-      assert(aspect is T);
-      setDependencies(dependent, (dependencies ?? HashSet<T>())..add(aspect as T));
+      dependencies.add(aspect);
     }
   }
 
