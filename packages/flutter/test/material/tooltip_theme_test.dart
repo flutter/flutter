@@ -1540,6 +1540,23 @@ void main() {
     );
     expect(tester.element(textAncestors.first).size, equals(themeConstraints.biggest));
   });
+
+  testWidgets('Tooltip respects ignorePointer from the ambient theme', (WidgetTester tester) async {
+    final tooltipKey = GlobalKey<TooltipState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(tooltipTheme: const TooltipThemeData(ignorePointer: false)),
+        home: Tooltip(
+          key: tooltipKey,
+          message: tooltipText,
+          child: const SizedBox(width: 100, height: 100),
+        ),
+      ),
+    );
+
+    final RawTooltip rawTooltip = tester.widget<RawTooltip>(find.byType(RawTooltip));
+    expect(rawTooltip.ignorePointer, isFalse);
+  });
 }
 
 SemanticsNode findDebugSemantics(RenderObject object) {

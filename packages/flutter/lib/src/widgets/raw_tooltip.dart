@@ -808,6 +808,15 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     return true;
   }
 
+  bool _handleKeyEvent(KeyEvent event) {
+    if (event is KeyDownEvent &&
+        event.logicalKey == LogicalKeyboardKey.escape &&
+        RawTooltip._openedTooltips.isNotEmpty) {
+      return RawTooltip.dismissAllToolTips();
+    }
+    return false;
+  }
+
   @protected
   @override
   void initState() {
@@ -816,6 +825,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     // if some other control is clicked on. Pointer events are dispatched to
     // global routes **after** other routes.
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handleGlobalPointerEvent);
+    HardwareKeyboard.instance.addHandler(_handleKeyEvent);
   }
 
   @protected
@@ -873,6 +883,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   @override
   void dispose() {
     GestureBinding.instance.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
+    HardwareKeyboard.instance.removeHandler(_handleKeyEvent);
     RawTooltip._openedTooltips.remove(this);
     // _longPressRecognizer.dispose() and _tapRecognizer.dispose() may call
     // their registered onCancel callbacks if there's a gesture in progress.

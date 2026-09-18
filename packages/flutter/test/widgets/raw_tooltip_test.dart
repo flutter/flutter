@@ -3219,6 +3219,38 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(tooltipText), findsNothing);
   });
+
+  testWidgets('Escape key dismisses open RawTooltip', (WidgetTester tester) async {
+    final key = GlobalKey<RawTooltipState>();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) => Center(
+                child: RawTooltip(
+                  key: key,
+                  semanticsTooltip: tooltipText,
+                  tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                      const Text(tooltipText),
+                  child: const SizedBox(width: 100.0, height: 100.0),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    key.currentState!.ensureTooltipVisible();
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
 }
 
 Future<void> setWidgetForTooltipMode(
