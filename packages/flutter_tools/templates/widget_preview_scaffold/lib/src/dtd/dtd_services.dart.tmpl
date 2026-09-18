@@ -23,6 +23,8 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   static const kSetPreference = 'setPreference';
   static const kGetPreference = 'getPreference';
   static const kGetDevToolsUri = 'getDevToolsUri';
+  static const kCheckForHotRestartTriggerEvent =
+      'checkForHotRestartTriggerEvent';
 
   /// Error code for RpcException thrown when attempting to load a key from
   /// persistent preferences that doesn't have an entry.
@@ -123,6 +125,16 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
       (await _call(kGetDevToolsUri))!,
     );
     return Uri.parse(result.value!);
+  }
+
+  /// Checks if the current session was restarted automatically due to a
+  /// rejected hot reload.
+  Future<bool> checkForHotRestartTriggerEvent() async {
+    final response = await _call(kCheckForHotRestartTriggerEvent);
+    if (response == null) {
+      return false;
+    }
+    return BoolResponse.fromDTDResponse(response).value ?? false;
   }
 
   @override

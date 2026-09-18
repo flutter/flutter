@@ -130,6 +130,15 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake
   Future<Uri> getDevToolsUri() async {
     return Uri();
   }
+
+  bool hotRestartTriggerEvent = false;
+
+  @override
+  Future<bool> checkForHotRestartTriggerEvent() async {
+    final result = hotRestartTriggerEvent;
+    hotRestartTriggerEvent = false;
+    return result;
+  }
 }
 
 class TestWidgetPreviewScaffold extends WidgetPreviewScaffold {

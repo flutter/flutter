@@ -28,4 +28,29 @@ void main() {
       expect(dtdServices.hotRestartInvoked, true);
     },
   );
+
+  testWidgets(
+    'displays SnackBar when hot reload is rejected and hot restart is performed',
+    (tester) async {
+      final dtdServices = FakeWidgetPreviewScaffoldDtdServices()
+        ..hotRestartTriggerEvent = true;
+      final controller = FakeWidgetPreviewScaffoldController(
+        dtdServicesOverride: dtdServices,
+      );
+      await controller.initialize();
+      final widgetPreview = TestWidgetPreviewScaffold(controller: controller);
+
+      await tester.pumpWidget(widgetPreview);
+      await tester.pump();
+
+      expect(
+        find.text(
+          'Hot reload rejected due to unsupported changes. Performed a hot restart instead.',
+        ),
+        findsOneWidget,
+      );
+      expect(controller.hotReloadRejectedRestartedListenable.value, isFalse);
+      expect(dtdServices.hotRestartTriggerEvent, isFalse);
+    },
+  );
 }

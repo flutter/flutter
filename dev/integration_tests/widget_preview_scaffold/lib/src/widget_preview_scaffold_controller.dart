@@ -45,6 +45,9 @@ class WidgetPreviewScaffoldController {
       dtdServices.getDevToolsUri().then((uri) {
         devToolsUri = uri;
       }),
+      dtdServices.checkForHotRestartTriggerEvent().then((value) {
+        _hotReloadRejectedRestarted.value = value;
+      }),
     ]);
   }
 
@@ -55,6 +58,7 @@ class WidgetPreviewScaffoldController {
     _layoutType.dispose();
     _filterBySelectedFile.dispose();
     _searchQuery.dispose();
+    _hotReloadRejectedRestarted.dispose();
     for (final searchField in _searchFields) {
       searchField.dispose();
     }
@@ -151,6 +155,15 @@ class WidgetPreviewScaffoldController {
   /// Enable or disable the DevTools Widget Inspector.
   void toggleWidgetInspectorVisible() =>
       _widgetInspectorVisible.value = !_widgetInspectorVisible.value;
+
+  /// Set to true if the session was automatically restarted due to a rejected hot reload.
+  ValueListenable<bool> get hotReloadRejectedRestartedListenable =>
+      _hotReloadRejectedRestarted;
+  final _hotReloadRejectedRestarted = ValueNotifier<bool>(false);
+
+  /// Marks the hot reload rejected restart notification as shown.
+  void consumeHotReloadRejectedRestarted() =>
+      _hotReloadRejectedRestarted.value = false;
 
   /// The current set of previews to be displayed.
   ValueListenable<WidgetPreviewGroups> get filteredPreviewSetListenable =>

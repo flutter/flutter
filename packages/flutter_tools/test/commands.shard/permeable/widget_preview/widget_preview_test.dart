@@ -68,6 +68,9 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreview
   bool shouldThrow = false;
 
   @override
+  bool hotReloadRejectedTriggerEvent = false;
+
+  @override
   Future<FlutterWidgetPreviews> getFlutterWidgetPreviews() async {
     if (shouldThrow) {
       throw RpcException(123, 'Fake RPC Exception');
@@ -1087,12 +1090,14 @@ List<_i1.WidgetPreview> previews() => [
           }
           return OperationResult.ok;
         };
+        startCommand.dtdService = fakeDtdServices;
         startCommand.widgetPreviewApp = fakeResidentRunner;
 
         final OperationResult? result = await startCommand.handleReload();
 
         final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
         expect(fakeResidentRunner.restartCalls, <bool>[false, true]);
+        expect(fakeDtdServices.hotReloadRejectedTriggerEvent, isTrue);
         expect(result?.isOk, isTrue);
         expect(
           bufferLogger.statusText,
@@ -1123,12 +1128,14 @@ List<_i1.WidgetPreview> previews() => [
         );
         final startCommand = command.subcommands['start']! as WidgetPreviewStartCommand;
         final fakeResidentRunner = FakeResidentRunner();
+        startCommand.dtdService = fakeDtdServices;
         startCommand.widgetPreviewApp = fakeResidentRunner;
 
         final OperationResult? result = await startCommand.handleReload();
 
         final BufferLogger bufferLogger = asLogger<BufferLogger>(logger);
         expect(fakeResidentRunner.restartCalls, <bool>[false]);
+        expect(fakeDtdServices.hotReloadRejectedTriggerEvent, isFalse);
         expect(result?.isOk, isTrue);
         expect(
           bufferLogger.statusText,

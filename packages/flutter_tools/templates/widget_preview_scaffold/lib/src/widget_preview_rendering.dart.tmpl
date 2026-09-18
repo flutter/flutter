@@ -1123,6 +1123,7 @@ class WidgetPreviewScaffold extends StatefulWidget {
 
 class _WidgetPreviewScaffoldState extends State<WidgetPreviewScaffold> {
   WebViewController? _webViewController;
+  final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
   @override
   void initState() {
@@ -1131,11 +1132,45 @@ class _WidgetPreviewScaffoldState extends State<WidgetPreviewScaffold> {
       _webViewController = WebViewController()
         ..loadRequest(widget.controller.devToolsUri);
     }
+    widget.controller.hotReloadRejectedRestartedListenable.addListener(
+      _onHotReloadRejectedRestarted,
+    );
+    _onHotReloadRejectedRestarted();
+  }
+
+  @override
+  void dispose() {
+    widget.controller.hotReloadRejectedRestartedListenable.removeListener(
+      _onHotReloadRejectedRestarted,
+    );
+    super.dispose();
+  }
+
+  void _onHotReloadRejectedRestarted() {
+    if (!widget.controller.hotReloadRejectedRestartedListenable.value) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      widget.controller.consumeHotReloadRejectedRestarted();
+      _scaffoldMessengerKey.currentState
+        ?..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Hot reload rejected due to unsupported changes. Performed a hot restart instead.',
+            ),
+          ),
+        );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: _scaffoldMessengerKey,
       debugShowCheckedModeBanner: false,
       theme: themeFor(
         isDarkTheme: false,
@@ -1148,8 +1183,8 @@ class _WidgetPreviewScaffoldState extends State<WidgetPreviewScaffold> {
         theme: ThemeData.dark(),
       ),
       themeMode: widget.ideTheme.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      home: Material(
-        child: OutlineDecoration.onlyTop(
+      home: Scaffold(
+        body: OutlineDecoration.onlyTop(
           child: ValueListenableBuilder(
             valueListenable: widget.controller.widgetInspectorVisible,
             builder: (context, widgetInspectorVisible, previewView) {

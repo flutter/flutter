@@ -89,6 +89,7 @@ class WidgetPreviewDtdServices {
   static const kSetPreference = 'setPreference';
   static const kGetPreference = 'getPreference';
   static const kGetDevToolsUri = 'getDevToolsUri';
+  static const kCheckForHotRestartTriggerEvent = 'checkForHotRestartTriggerEvent';
 
   static const kWidgetPreviewConnectedEvent = 'Connected';
 
@@ -104,6 +105,7 @@ class WidgetPreviewDtdServices {
     (kSetPreference, _setPreference),
     (kGetPreference, _getPreference),
     (kGetDevToolsUri, _getDevToolsUri),
+    (kCheckForHotRestartTriggerEvent, _checkForHotRestartTriggerEvent),
   ];
 
   // END KEEP SYNCED
@@ -330,8 +332,20 @@ class WidgetPreviewDtdServices {
     };
   }
 
+  /// Set to `true` when a hot reload is rejected due to unsupported changes and an automatic
+  /// hot restart is performed instead.
+  ///
+  /// Consumed and reset when [kCheckForHotRestartTriggerEvent] is invoked by the scaffold.
+  bool hotReloadRejectedTriggerEvent = false;
+
   Future<Map<String, Object?>> _getDevToolsUri(Parameters _) async {
     return StringResponse((await _devToolsServerAddress.future).toString()).toJson();
+  }
+
+  Future<Map<String, Object?>> _checkForHotRestartTriggerEvent(Parameters _) async {
+    final bool result = hotReloadRejectedTriggerEvent;
+    hotReloadRejectedTriggerEvent = false;
+    return BoolResponse(result).toJson();
   }
 }
 

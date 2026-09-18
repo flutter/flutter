@@ -453,6 +453,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   }
 
   @visibleForTesting
+  WidgetPreviewDtdServices get dtdService => _dtdService;
+  @visibleForTesting
+  set dtdService(WidgetPreviewDtdServices service) => _dtdService = service;
+
+  @visibleForTesting
   Future<OperationResult?> handleReload() async {
     final OperationResult? result = await _widgetPreviewApp?.restart();
     if (result case OperationResult(
@@ -462,6 +467,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       logger.printStatus(
         'Hot reload rejected due to unsupported changes. Performing hot restart instead.',
       );
+      _dtdService.hotReloadRejectedTriggerEvent = true;
       return _widgetPreviewApp?.restart(fullRestart: true);
     }
     return result;

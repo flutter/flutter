@@ -171,5 +171,25 @@ void main() {
         });
       },
     );
+
+    testUsingContext(
+      'handles ${WidgetPreviewDtdServices.kCheckForHotRestartTriggerEvent} invocation',
+      () async {
+        dtdServer = await launchDtdServer();
+
+        final dtd = WidgetPreviewScaffoldDtdServices();
+        await dtd.connect(dtdUri: dtdServer.dtdUri);
+
+        // Initially false.
+        expect(await dtd.checkForHotRestartTriggerEvent(), false);
+
+        // Set flag on server and verify it returns true once and then resets to false.
+        dtdServer.hotReloadRejectedTriggerEvent = true;
+        expect(await dtd.checkForHotRestartTriggerEvent(), true);
+        expect(dtdServer.hotReloadRejectedTriggerEvent, false);
+        expect(await dtd.checkForHotRestartTriggerEvent(), false);
+      },
+      overrides: <Type, Generator>{ProcessManager: () => loggingProcessManager},
+    );
   });
 }
