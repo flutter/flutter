@@ -29,6 +29,7 @@ platform_properties:
 
   linux:
     properties:
+      presubmit_max_attempts: "3"
       dependencies: >-
         [
           {"dependency": "curl", "version": "version:8.20.0"}
@@ -46,6 +47,7 @@ platform_properties:
   # https://chrome-infra-packages.appspot.com/p/chromium/tools/android/avd/linux-amd64.
   linux_android_emu:
     properties:
+      presubmit_max_attempts: "3"
       contexts: >-
         [
           "android_virtual_device"
@@ -70,6 +72,7 @@ platform_properties:
   # of new combinations of dependencies.
   linux_android_emu_unstable:
     properties:
+      presubmit_max_attempts: "3"
       contexts: >-
         [
           "android_virtual_device"
@@ -95,6 +98,7 @@ platform_properties:
   # virtual display on API 36: https://github.com/flutter/flutter/issues/170024.
   linux_android_emu_vulkan_stable:
     properties:
+      presubmit_max_attempts: "3"
       contexts: >-
         [
           "android_virtual_device"
@@ -117,6 +121,7 @@ platform_properties:
 
   linux_build_test:
     properties:
+      presubmit_max_attempts: "3"
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
@@ -166,6 +171,7 @@ platform_properties:
 
   mac:
     properties:
+      presubmit_max_attempts: "3"
       contexts: >-
         [
           "osx_sdk"
@@ -183,6 +189,7 @@ platform_properties:
 
   mac_arm64:
     properties:
+      presubmit_max_attempts: "3"
       contexts: >-
         [
           "osx_sdk"
@@ -226,6 +233,7 @@ platform_properties:
 
   mac_x64:
     properties:
+      presubmit_max_attempts: "3"
       contexts: >-
         [
           "osx_sdk"
@@ -244,6 +252,7 @@ platform_properties:
 
   mac_build_test:
     properties:
+      presubmit_max_attempts: "3"
       contexts: >-
         [
           "osx_sdk"
@@ -344,6 +353,7 @@ platform_properties:
 
   windows:
     properties:
+      presubmit_max_attempts: "3"
       os: Windows-10
       device_type: none
 
