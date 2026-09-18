@@ -15,7 +15,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
@@ -212,8 +211,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   Platform get platform => toolContext.platform;
 
   ShutdownHooks get shutdownHooks => toolContext.shutdownHooks;
-
-  OperatingSystemUtils get os => toolContext.os;
 
   ProcessManager get processManager => toolContext.processManager;
 
@@ -574,16 +571,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       final String target = bundle.defaultMainPath;
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
-        artifacts: artifacts,
         buildInfo: debuggingOptions.buildInfo,
-        config: toolContext.config,
-        fileSystem: fs,
-        logger: logger,
-        osUtils: os,
-        platform: platform,
-        processManager: processManager,
         shutdownHooks: shutdownHooks,
         target: target,
+        toolContext: toolContext,
       );
 
       if (boolArg(kLaunchPreviewer)) {
