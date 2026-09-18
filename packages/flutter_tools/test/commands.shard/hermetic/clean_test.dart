@@ -21,6 +21,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -41,6 +42,7 @@ void main() {
     group('general', () {
       late MemoryFileSystem fs;
       late Directory buildDirectory;
+      late FakeStdio stdio;
 
       setUp(() {
         fs = MemoryFileSystem.test();
@@ -49,6 +51,7 @@ void main() {
         final Directory currentDirectory = fs.currentDirectory;
         buildDirectory = currentDirectory.childDirectory('build');
         buildDirectory.createSync(recursive: true);
+        stdio = FakeStdio();
       });
 
       testUsingContext(
@@ -96,6 +99,32 @@ void main() {
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Xcode: () => xcode,
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        },
+      );
+
+      testUsingContext(
+        '$CleanCommand stops progress status for each deleted directory',
+        () async {
+          setupProjectUnderTest(fs.currentDirectory, false);
+          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          await runner.run(<String>['clean']);
+
+          final String output = stdio.writtenToStdout.join();
+          expect(output, contains('Deleting build...'));
+          expect(output, contains('Deleting .dart_tool...'));
+          expect(output, contains('Deleting ephemeral...'));
+          expect(output.endsWith('\n'), isTrue);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          Logger: () => StdoutLogger(
+            terminal: AnsiTerminal(stdio: stdio, platform: FakePlatform()),
+            stdio: stdio,
+            outputPreferences: OutputPreferences.test(),
+          ),
           ProcessManager: () => FakeProcessManager.any(),
           Xcode: () => xcode,
           XcodeProjectInterpreter: () => xcodeProjectInterpreter,
