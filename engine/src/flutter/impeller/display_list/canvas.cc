@@ -333,7 +333,7 @@ CreateUberSDFGradientParameters(const ContentContext& renderer,
     return std::nullopt;
   }
 
-  if (renderer.GetContext()->GetCapabilities()->SupportsSSBO()) {
+  if (renderer.GetDeviceCapabilities().SupportsSSBO()) {
     gradient.colors = std::move(colors);
     gradient.stops = std::move(stops);
   } else {
