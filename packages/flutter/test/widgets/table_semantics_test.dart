@@ -48,12 +48,22 @@ void main() {
       expect(firstCell.role, SemanticsRole.cell);
       expect(firstCell.indexInParent, 0);
       expect(firstCell.rect.width, 80);
-      expect(MatrixUtils.getAsTranslation(firstCell.transform!), firstOffset);
+      expect(
+        firstCell.transform == null
+            ? Offset.zero
+            : MatrixUtils.getAsTranslation(firstCell.transform!),
+        firstOffset,
+      );
 
       expect(secondCell.role, SemanticsRole.cell);
       expect(secondCell.indexInParent, 1);
       expect(secondCell.rect.width, 120);
-      expect(MatrixUtils.getAsTranslation(secondCell.transform!), secondOffset);
+      expect(
+        secondCell.transform == null
+            ? Offset.zero
+            : MatrixUtils.getAsTranslation(secondCell.transform!),
+        secondOffset,
+      );
     });
   }
 }
