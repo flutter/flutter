@@ -5,7 +5,14 @@
 #include "impeller/tessellator/tessellator.h"
 #include <cstdint>
 #include <cstring>
+#include <deque>
+#include <memory>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
+#include "flutter/fml/hash_combine.h"
 #include "flutter/impeller/core/device_buffer.h"
 #include "flutter/impeller/tessellator/path_tessellator.h"
 
@@ -334,50 +341,181 @@ class ConvexTessellatorImpl : public Tessellator::ConvexTessellator {
                                 Scalar tolerance,
                                 bool supports_primitive_restart,
                                 bool supports_triangle_fan) override {
-    if (supports_primitive_restart) {
-      // Primitive Restart.
-      const auto [point_count, contour_count] =
-          PathTessellator::CountFillStorage(path, tolerance);
-      BufferView point_buffer = data_host_buffer.Emplace(
-          nullptr, sizeof(Point) * point_count, alignof(Point));
-      BufferView index_buffer = indexes_host_buffer.Emplace(
-          nullptr, sizeof(IndexT) * (point_count + contour_count),
-          alignof(IndexT));
+    std::shared_ptr<const void> identity = path.GetCacheIdentity();
+    const CacheKey key = {
+        /*identity=*/identity.get(),
+        /*tolerance=*/tolerance,
+        /*restart=*/supports_primitive_restart,
+        /*fan=*/supports_triangle_fan,
+    };
 
-      auto* points_ptr =
-          reinterpret_cast<Point*>(point_buffer.GetBuffer()->OnGetContents() +
-                                   point_buffer.GetRange().offset);
-      auto* indices_ptr =
-          reinterpret_cast<IndexT*>(index_buffer.GetBuffer()->OnGetContents() +
-                                    index_buffer.GetRange().offset);
-
-      auto tessellate_path = [&](auto& writer) {
-        PathTessellator::PathToFilledVertices(path, writer, tolerance);
-        FML_DCHECK(writer.GetPointCount() <= point_count);
-        FML_DCHECK(writer.GetIndexCount() <= (point_count + contour_count));
-        point_buffer.GetBuffer()->Flush(point_buffer.GetRange());
-        index_buffer.GetBuffer()->Flush(index_buffer.GetRange());
-
-        return VertexBuffer{
-            .vertex_buffer = std::move(point_buffer),
-            .index_buffer = std::move(index_buffer),
-            .vertex_count = writer.GetIndexCount(),
-            .index_type = IndexTypeFor<IndexT>(),
-        };
-      };
-
-      if (supports_triangle_fan) {
-        FanPathVertexWriter writer(points_ptr, indices_ptr);
-        return tessellate_path(writer);
-      } else {
-        StripPathVertexWriter writer(points_ptr, indices_ptr);
-        return tessellate_path(writer);
+    if (identity != nullptr) {
+      auto found = cache_.find(key);
+      if (found != cache_.end()) {
+        return Upload(found->second.points, found->second.indices,
+                      data_host_buffer, indexes_host_buffer);
       }
     }
 
-    DoTessellateConvexInternal(path, point_buffer_, index_buffer_, tolerance);
+    // Unique paths stay on the existing direct / GLES path. Cache only after
+    // the same key is seen a second time so one-shot DlPaths keep zero-copy
+    // uploads. The seen set stores raw keys (no shared_ptr); a recycled
+    // address may therefore cache on first use of a new path.
+    const bool cacheable = identity != nullptr;
+    const bool second_use = cacheable && seen_.find(key) != seen_.end();
+    if (!second_use) {
+      if (cacheable) {
+        RecordSeen(key);
+      }
+      if (supports_primitive_restart) {
+        return TessellateConvexDirect(
+            path, data_host_buffer, indexes_host_buffer, tolerance,
+            supports_primitive_restart, supports_triangle_fan);
+      }
+      DoTessellateConvexInternal(path, point_buffer_, index_buffer_, tolerance);
+      return Upload(point_buffer_, index_buffer_, data_host_buffer,
+                    indexes_host_buffer);
+    }
 
-    if (point_buffer_.empty()) {
+    if (supports_primitive_restart) {
+      TessellateConvexIntoVectors(path, tolerance, supports_triangle_fan);
+    } else {
+      DoTessellateConvexInternal(path, point_buffer_, index_buffer_, tolerance);
+    }
+
+    VertexBuffer result = Upload(point_buffer_, index_buffer_, data_host_buffer,
+                                 indexes_host_buffer);
+    if (!point_buffer_.empty() && point_buffer_.size() <= kMaxPointsPerEntry) {
+      CacheEntry entry;
+      entry.identity = std::move(identity);
+      entry.points.swap(point_buffer_);
+      entry.indices.swap(index_buffer_);
+      point_buffer_.reserve(2048);
+      index_buffer_.reserve(2048);
+      InsertCacheEntry(key, std::move(entry));
+    }
+    return result;
+  }
+
+  size_t GetCacheSizeForTesting() const override { return cache_.size(); }
+
+ private:
+  // The maximum number of tessellations retained per tessellator, and the
+  // total number of points across all retained tessellations. These bounds
+  // keep the memory used by the cache predictable for applications that draw
+  // many distinct paths. Keep these eviction bounds in sync with the stroke
+  // tessellation cache.
+  static constexpr size_t kMaxCacheEntries = 256u;
+  static constexpr size_t kMaxCachedPoints = 1u << 18;
+  static constexpr size_t kMaxPointsPerEntry = 1u << 14;
+
+  VertexBuffer TessellateConvexDirect(const PathSource& path,
+                                      HostBuffer& data_host_buffer,
+                                      HostBuffer& indexes_host_buffer,
+                                      Scalar tolerance,
+                                      bool supports_primitive_restart,
+                                      bool supports_triangle_fan) {
+    FML_DCHECK(supports_primitive_restart);
+    const auto [point_count, contour_count] =
+        PathTessellator::CountFillStorage(path, tolerance);
+    BufferView point_buffer = data_host_buffer.Emplace(
+        nullptr, sizeof(Point) * point_count, alignof(Point));
+    BufferView index_buffer = indexes_host_buffer.Emplace(
+        nullptr, sizeof(IndexT) * (point_count + contour_count),
+        alignof(IndexT));
+
+    auto* points_ptr =
+        reinterpret_cast<Point*>(point_buffer.GetBuffer()->OnGetContents() +
+                                 point_buffer.GetRange().offset);
+    auto* indices_ptr =
+        reinterpret_cast<IndexT*>(index_buffer.GetBuffer()->OnGetContents() +
+                                  index_buffer.GetRange().offset);
+
+    auto tessellate_path = [&](auto& writer) {
+      PathTessellator::PathToFilledVertices(path, writer, tolerance);
+      FML_DCHECK(writer.GetPointCount() <= point_count);
+      FML_DCHECK(writer.GetIndexCount() <= (point_count + contour_count));
+      point_buffer.GetBuffer()->Flush(point_buffer.GetRange());
+      index_buffer.GetBuffer()->Flush(index_buffer.GetRange());
+
+      return VertexBuffer{
+          .vertex_buffer = std::move(point_buffer),
+          .index_buffer = std::move(index_buffer),
+          .vertex_count = writer.GetIndexCount(),
+          .index_type = IndexTypeFor<IndexT>(),
+      };
+    };
+
+    if (supports_triangle_fan) {
+      FanPathVertexWriter<IndexT> writer(points_ptr, indices_ptr);
+      return tessellate_path(writer);
+    } else {
+      StripPathVertexWriter<IndexT> writer(points_ptr, indices_ptr);
+      return tessellate_path(writer);
+    }
+  }
+
+  void TessellateConvexIntoVectors(const PathSource& path,
+                                   Scalar tolerance,
+                                   bool supports_triangle_fan) {
+    const auto [point_count, contour_count] =
+        PathTessellator::CountFillStorage(path, tolerance);
+    point_buffer_.clear();
+    index_buffer_.clear();
+    point_buffer_.resize(point_count);
+    index_buffer_.resize(point_count + contour_count);
+
+    auto tessellate_into = [&](auto& writer) {
+      PathTessellator::PathToFilledVertices(path, writer, tolerance);
+      FML_DCHECK(writer.GetPointCount() <= point_count);
+      FML_DCHECK(writer.GetIndexCount() <= (point_count + contour_count));
+      point_buffer_.resize(writer.GetPointCount());
+      index_buffer_.resize(writer.GetIndexCount());
+    };
+
+    if (supports_triangle_fan) {
+      FanPathVertexWriter<IndexT> writer(point_buffer_.data(),
+                                         index_buffer_.data());
+      tessellate_into(writer);
+    } else {
+      StripPathVertexWriter<IndexT> writer(point_buffer_.data(),
+                                           index_buffer_.data());
+      tessellate_into(writer);
+    }
+  }
+
+  struct CacheKey {
+    const void* identity = nullptr;
+    Scalar tolerance = 0.0f;
+    bool restart = false;
+    bool fan = false;
+
+    bool operator==(const CacheKey& other) const {
+      return identity == other.identity && tolerance == other.tolerance &&
+             restart == other.restart && fan == other.fan;
+    }
+  };
+
+  struct CacheKeyHash {
+    size_t operator()(const CacheKey& key) const {
+      return fml::HashCombine(key.identity, key.tolerance, key.restart,
+                              key.fan);
+    }
+  };
+
+  struct CacheEntry {
+    // Keeps the source alive so its address cannot be reused by a different
+    // path while this entry is retained.
+    std::shared_ptr<const void> identity;
+    std::vector<Point> points;
+    std::vector<IndexT> indices;
+  };
+
+  VertexBuffer Upload(const std::vector<Point>& points,
+                      const std::vector<IndexT>& indices,
+                      HostBuffer& data_host_buffer,
+                      HostBuffer& indexes_host_buffer) {
+    if (points.empty() || indices.empty()) {
       return VertexBuffer{
           .vertex_buffer = {},
           .index_buffer = {},
@@ -387,24 +525,58 @@ class ConvexTessellatorImpl : public Tessellator::ConvexTessellator {
     }
 
     BufferView vertex_buffer = data_host_buffer.Emplace(
-        point_buffer_.data(), sizeof(Point) * point_buffer_.size(),
-        alignof(Point));
+        points.data(), sizeof(Point) * points.size(), alignof(Point));
 
     BufferView index_buffer = indexes_host_buffer.Emplace(
-        index_buffer_.data(), sizeof(IndexT) * index_buffer_.size(),
-        alignof(IndexT));
+        indices.data(), sizeof(IndexT) * indices.size(), alignof(IndexT));
 
     return VertexBuffer{
         .vertex_buffer = std::move(vertex_buffer),
         .index_buffer = std::move(index_buffer),
-        .vertex_count = index_buffer_.size(),
+        .vertex_count = indices.size(),
         .index_type = IndexTypeFor<IndexT>(),
     };
   }
 
- private:
+  void InsertCacheEntry(CacheKey key, CacheEntry entry) {
+    // Keep this eviction loop in sync with the stroke tessellation cache.
+    auto [it, inserted] = cache_.emplace(key, std::move(entry));
+    if (!inserted) {
+      return;
+    }
+    cached_points_ += it->second.points.size();
+    cache_order_.push_back(key);
+
+    while (!cache_order_.empty() && (cache_.size() > kMaxCacheEntries ||
+                                     cached_points_ > kMaxCachedPoints)) {
+      const CacheKey oldest = cache_order_.front();
+      cache_order_.pop_front();
+      auto found = cache_.find(oldest);
+      if (found != cache_.end()) {
+        cached_points_ -= found->second.points.size();
+        cache_.erase(found);
+      }
+    }
+  }
+
+  void RecordSeen(const CacheKey& key) {
+    if (!seen_.insert(key).second) {
+      return;
+    }
+    seen_order_.push_back(key);
+    while (seen_.size() > kMaxCacheEntries && !seen_order_.empty()) {
+      seen_.erase(seen_order_.front());
+      seen_order_.pop_front();
+    }
+  }
+
   std::vector<Point> point_buffer_;
   std::vector<IndexT> index_buffer_;
+  std::unordered_map<CacheKey, CacheEntry, CacheKeyHash> cache_;
+  std::deque<CacheKey> cache_order_;
+  std::unordered_set<CacheKey, CacheKeyHash> seen_;
+  std::deque<CacheKey> seen_order_;
+  size_t cached_points_ = 0u;
 };
 
 Tessellator::Tessellator(bool supports_32bit_primitive_indices)
@@ -420,6 +592,10 @@ Tessellator::~Tessellator() = default;
 
 std::vector<Point>& Tessellator::GetStrokePointCache() {
   return stroke_points_;
+}
+
+size_t Tessellator::GetFillTessellationCacheSizeForTesting() const {
+  return convex_tessellator_->GetCacheSizeForTesting();
 }
 
 Tessellator::Trigs Tessellator::GetTrigsForDeviceRadius(Scalar pixel_radius) {
