@@ -121,7 +121,7 @@ class SemanticIncrementable extends SemanticRole {
     super.update();
 
     final String? ariaLabel = element.getAttribute('aria-label');
-    if (ariaLabel != null && ariaLabel.isNotEmpty) {
+    if (ariaLabel != null && ariaLabel.trim().isNotEmpty) {
       _element.setAttribute('aria-label', ariaLabel);
     } else {
       _element.removeAttribute('aria-label');
