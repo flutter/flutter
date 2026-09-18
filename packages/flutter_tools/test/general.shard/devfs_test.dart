@@ -30,6 +30,7 @@ import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
+import '../src/context.dart';
 import '../src/fake_http_client.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
@@ -157,15 +158,12 @@ void main() {
         fakeVmServiceHost.vmService,
         'test',
         fileSystem.currentDirectory,
+        artifacts: Artifacts.test(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        osUtils: osUtils,
+        processManager: FakeProcessManager.empty(),
         buildMode: BuildMode.debug,
-        toolContext: FakeToolContext(
-          artifacts: Artifacts.test(),
-          fs: fileSystem,
-          logger: BufferLogger.test(),
-          os: osUtils,
-          processManager: FakeProcessManager.empty(),
-        ),
-        httpClient: FakeHttpClient.any(),
       );
       expect(() async => devFS.create(), throwsA(isA<DevFSException>()));
     },
@@ -183,15 +181,13 @@ void main() {
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
-      buildMode: BuildMode.debug,
-      toolContext: FakeToolContext(
-        artifacts: Artifacts.test(),
-        fs: fileSystem,
-        logger: BufferLogger.test(),
-        os: osUtils,
-        processManager: FakeProcessManager.empty(),
-      ),
+      osUtils: osUtils,
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
       httpClient: FakeHttpClient.any(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     expect(await devFS.create(), isNotNull);
@@ -227,14 +223,9 @@ void main() {
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
-      buildMode: BuildMode.debug,
-      toolContext: FakeToolContext(
-        artifacts: Artifacts.test(),
-        fs: fileSystem,
-        logger: BufferLogger.test(),
-        os: osUtils,
-        processManager: FakeProcessManager.empty(),
-      ),
+      osUtils: osUtils,
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
       httpClient: FakeHttpClient.list(<FakeRequest>[
         FakeRequest(
           Uri.parse('http://localhost'),
@@ -269,6 +260,9 @@ void main() {
         ),
       ]),
       uploadRetryThrottle: Duration.zero,
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
     await devFS.create();
 
@@ -298,15 +292,13 @@ void main() {
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
-      buildMode: BuildMode.debug,
-      toolContext: FakeToolContext(
-        artifacts: Artifacts.test(),
-        fs: fileSystem,
-        logger: BufferLogger.test(),
-        os: FakeOperatingSystemUtils(),
-        processManager: FakeProcessManager.empty(),
-      ),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
       httpClient: FakeHttpClient.any(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -345,15 +337,13 @@ void main() {
         fakeVmServiceHost.vmService,
         'test',
         fileSystem.currentDirectory,
-        buildMode: BuildMode.debug,
-        toolContext: FakeToolContext(
-          artifacts: Artifacts.test(),
-          fs: fileSystem,
-          logger: BufferLogger.test(),
-          os: FakeOperatingSystemUtils(),
-          processManager: FakeProcessManager.empty(),
-        ),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        osUtils: FakeOperatingSystemUtils(),
         httpClient: FakeHttpClient.any(),
+        processManager: FakeProcessManager.empty(),
+        artifacts: Artifacts.test(),
+        buildMode: BuildMode.debug,
       );
 
       await devFS.create();
@@ -393,15 +383,13 @@ void main() {
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
-      buildMode: BuildMode.debug,
-      toolContext: FakeToolContext(
-        artifacts: Artifacts.test(),
-        fs: fileSystem,
-        logger: BufferLogger.test(),
-        os: FakeOperatingSystemUtils(),
-        processManager: FakeProcessManager.empty(),
-      ),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
       httpClient: HttpClient(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -447,15 +435,13 @@ void main() {
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
-      buildMode: BuildMode.debug,
-      toolContext: FakeToolContext(
-        artifacts: Artifacts.test(),
-        fs: fileSystem,
-        logger: BufferLogger.test(),
-        os: FakeOperatingSystemUtils(),
-        processManager: FakeProcessManager.empty(),
-      ),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
       httpClient: FakeHttpClient.any(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -527,14 +513,9 @@ void main() {
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
-      buildMode: BuildMode.debug,
-      toolContext: FakeToolContext(
-        artifacts: Artifacts.test(),
-        fs: fileSystem,
-        logger: BufferLogger.test(),
-        os: FakeOperatingSystemUtils(),
-        processManager: FakeProcessManager.empty(),
-      ),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
       httpClient: FakeHttpClient.any(),
       stopwatchFactory: FakeStopwatchFactory(
         stopwatches: <String, Stopwatch>{
@@ -542,6 +523,9 @@ void main() {
           'transfer': FakeStopwatch()..elapsed = const Duration(seconds: 5),
         },
       ),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -568,7 +552,7 @@ void main() {
     expect(report.transferDuration, const Duration(seconds: 5));
   });
 
-  testWithoutContext('DevFS actually starts compile before processing bundle', () async {
+  testUsingContext('DevFS actually starts compile before processing bundle', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[createDevFSRequest],
@@ -581,16 +565,13 @@ void main() {
       fakeVmServiceHost.vmService,
       'test',
       fileSystem.currentDirectory,
-      buildMode: BuildMode.debug,
-      toolContext: FakeToolContext(
-        artifacts: Artifacts.test(),
-        config: Config.test(),
-        fs: fileSystem,
-        logger: logger,
-        os: FakeOperatingSystemUtils(),
-        processManager: FakeProcessManager.empty(),
-      ),
+      fileSystem: fileSystem,
+      logger: logger,
+      osUtils: FakeOperatingSystemUtils(),
       httpClient: FakeHttpClient.any(),
+      processManager: FakeProcessManager.empty(),
+      artifacts: Artifacts.test(),
+      buildMode: BuildMode.debug,
     );
 
     await devFS.create();
@@ -632,7 +613,7 @@ void main() {
       frontendServerStdErr(),
       frontendServerStdIn,
     );
-    final generatorStdoutHandler = StdoutHandler(logger: logger, fileSystem: fileSystem);
+    final generatorStdoutHandler = StdoutHandler(logger: testLogger, fileSystem: fileSystem);
 
     final residentCompiler = DefaultResidentCompiler(
       'sdkroot',
@@ -699,16 +680,13 @@ void main() {
         fakeVmServiceHost.vmService,
         'test',
         fileSystem.currentDirectory,
-        buildMode: BuildMode.debug,
-        toolContext: FakeToolContext(
-          artifacts: Artifacts.test(),
-          config: Config.test(),
-          fs: fileSystem,
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          processManager: FakeProcessManager.empty(),
-        ),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
         httpClient: FakeHttpClient.any(),
+        processManager: FakeProcessManager.empty(),
+        artifacts: Artifacts.test(),
+        buildMode: BuildMode.debug,
       );
 
       await devFS.create();
@@ -760,16 +738,13 @@ void main() {
         fakeVmServiceHost.vmService,
         'test',
         fileSystem.currentDirectory,
-        buildMode: BuildMode.debug,
-        toolContext: FakeToolContext(
-          artifacts: Artifacts.test(),
-          config: Config.test(),
-          fs: fileSystem,
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          processManager: FakeProcessManager.empty(),
-        ),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
         httpClient: FakeHttpClient.any(),
+        processManager: FakeProcessManager.empty(),
+        artifacts: Artifacts.test(),
+        buildMode: BuildMode.debug,
       );
 
       await devFS.create();
@@ -852,16 +827,13 @@ void main() {
         fakeVmServiceHost.vmService,
         'test',
         fileSystem.currentDirectory,
-        buildMode: BuildMode.debug,
-        toolContext: FakeToolContext(
-          artifacts: artifacts,
-          config: Config.test(),
-          fs: fileSystem,
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          processManager: processManager,
-        ),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
         httpClient: FakeHttpClient.any(),
+        processManager: processManager,
+        artifacts: artifacts,
+        buildMode: BuildMode.debug,
       );
 
       await devFS.create();
@@ -933,16 +905,13 @@ void main() {
         fakeVmServiceHost.vmService,
         'test',
         fileSystem.currentDirectory,
-        buildMode: BuildMode.debug,
-        toolContext: FakeToolContext(
-          artifacts: artifacts,
-          config: Config.test(),
-          fs: fileSystem,
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          processManager: processManager,
-        ),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
         httpClient: FakeHttpClient.any(),
+        processManager: processManager,
+        artifacts: artifacts,
+        buildMode: BuildMode.debug,
       );
 
       await devFS.create();

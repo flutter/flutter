@@ -177,20 +177,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
-  AndroidGradleBuilder.fromContexts({
-    required this._analytics,
-    required AndroidContext androidContext,
-    required ToolContext toolContext,
-  }) : _artifacts = toolContext.artifacts,
-       _fileSystem = toolContext.fs,
-       _gradleUtils = androidContext.gradleUtils,
-       _java = androidContext.java,
-       _logger = toolContext.logger,
-       _androidStudio = androidContext.androidStudio,
-       _androidSdk = androidContext.androidSdk,
-       _fileSystemUtils = toolContext.fileSystemUtils,
-       _processUtils = toolContext.processUtils;
-
   final Analytics _analytics;
   final Java? _java;
   final Logger _logger;

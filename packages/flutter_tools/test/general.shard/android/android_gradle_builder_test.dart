@@ -95,30 +95,22 @@ void main() {
       AndroidStudio? androidStudio,
       AndroidSdk? androidSdk,
     }) {
-      return AndroidGradleBuilder.fromContexts(
-        toolContext:
-            toolContext ??
-            FakeToolContext(
-              logger: logger,
-              processManager: processManager,
-              fs: fileSystem ?? globals.fs,
-              artifacts: artifacts,
-              platform: platform,
+      return AndroidGradleBuilder(
+        logger: logger!,
+        processManager: processManager!,
+        fileSystem: fileSystem ?? globals.fs,
+        artifacts: artifacts ?? FakeArtifacts(),
+        gradleUtils: gradleUtils ?? FakeGradleUtils(),
+        platform: platform ?? FakePlatform(),
+        androidStudio: androidStudio ?? FakeAndroidStudio(),
+        androidSdk:
+            androidSdk ??
+            AndroidSdk(
+              (fileSystem ?? globals.fs).directory(missingSdkPath()),
+              java: FakeJava(),
+              fileSystem: fileSystem ?? globals.fs,
             ),
-        androidContext:
-            androidContext ??
-            FakeAndroidContext(
-              java: java,
-              gradleUtils: gradleUtils,
-              androidStudio: androidStudio,
-              androidSdk:
-                  androidSdk ??
-                  AndroidSdk(
-                    (fileSystem ?? globals.fs).directory(missingSdkPath()),
-                    java: FakeJava(),
-                    fileSystem: fileSystem ?? globals.fs,
-                  ),
-            ),
+        java: java ?? FakeJava(),
         analytics: analytics ?? fakeAnalytics,
       );
     }
@@ -132,7 +124,7 @@ void main() {
         description,
         body,
         overrides: <Type, Generator>{
-          Cache: () => Cache.test(processManager: processManager, flutterRoot: ''),
+          Cache: () => Cache.test(processManager: processManager!, flutterRoot: ''),
           AndroidSdk: () => AndroidSdk(
             fileSystem.directory(missingSdkPath()),
             java: FakeJava(),
@@ -149,8 +141,8 @@ void main() {
       () async {
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
-          logger: logger,
-          processManager: processManager,
+          logger: logger!,
+          processManager: processManager!,
           fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
@@ -245,8 +237,8 @@ void main() {
       () async {
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
-          logger: logger,
-          processManager: processManager,
+          logger: logger!,
+          processManager: processManager!,
           fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
@@ -339,8 +331,8 @@ void main() {
 
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
-          logger: logger,
-          processManager: processManager,
+          logger: logger!,
+          processManager: processManager!,
           fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
@@ -431,8 +423,8 @@ void main() {
       () async {
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
-          logger: logger,
-          processManager: processManager,
+          logger: logger!,
+          processManager: processManager!,
           fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
@@ -520,8 +512,8 @@ void main() {
     testUsingContext('Can immediately tool exit on recognized exit code/stderr', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
@@ -624,7 +616,7 @@ void main() {
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: BufferLogger.test(verbose: true),
-          processManager: processManager,
+          processManager: processManager!,
           fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
@@ -696,8 +688,8 @@ void main() {
     testUsingContext('Can retry build on recognized exit code/stderr', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
@@ -796,8 +788,8 @@ void main() {
     testUsingContext('Gradle build retries with exponential backoff capped at kMaxRetryTime', () {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
@@ -897,8 +889,8 @@ void main() {
     testUsingContext('Converts recognized ProcessExceptions into tools exits', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
@@ -985,8 +977,8 @@ void main() {
     testUsingContext('rethrows unrecognized ProcessException', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
@@ -1050,8 +1042,8 @@ void main() {
     testUsingContext('logs success event after a successful retry', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
@@ -1155,8 +1147,8 @@ void main() {
     testUsingContext('performs code size analysis and sends analytics', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
@@ -1431,8 +1423,8 @@ void main() {
         () async {
           final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
-            logger: logger,
-            processManager: processManager,
+            logger: logger!,
+            processManager: processManager!,
             fileSystem: fileSystem,
             artifacts: Artifacts.test(),
             analytics: fakeAnalytics,
@@ -1502,8 +1494,8 @@ void main() {
         () async {
           final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
-            logger: logger,
-            processManager: processManager,
+            logger: logger!,
+            processManager: processManager!,
             fileSystem: fileSystem,
             artifacts: Artifacts.test(),
             analytics: fakeAnalytics,
@@ -1573,8 +1565,8 @@ void main() {
         () async {
           final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
-            logger: logger,
-            processManager: processManager,
+            logger: logger!,
+            processManager: processManager!,
             fileSystem: fileSystem,
             artifacts: Artifacts.test(),
             analytics: fakeAnalytics,
@@ -1646,8 +1638,8 @@ void main() {
           );
           final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
-            logger: logger,
-            processManager: processManager,
+            logger: logger!,
+            processManager: processManager!,
             fileSystem: fileSystem,
             artifacts: Artifacts.test(),
             analytics: fakeAnalytics,
@@ -1734,8 +1726,8 @@ void main() {
           );
           final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
-            logger: logger,
-            processManager: processManager,
+            logger: logger!,
+            processManager: processManager!,
             fileSystem: fileSystem,
             artifacts: Artifacts.test(),
             analytics: fakeAnalytics,
@@ -1798,8 +1790,8 @@ void main() {
     testUsingContext('indicates that an APK has been built successfully', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
@@ -1916,9 +1908,9 @@ android {
         project.android,
         androidSdk: sdk,
         fileSystem: fileSystem,
-        logger: logger,
-        processManager: processManager,
-        processUtils: ProcessUtils(processManager: processManager, logger: logger),
+        logger: logger!,
+        processManager: processManager!,
+        processUtils: ProcessUtils(processManager: processManager!, logger: logger),
         userMessages: UserMessages(),
         buildInfo: const BuildInfo(
           BuildMode.debug,
@@ -1936,8 +1928,8 @@ android {
       () async {
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
-          logger: logger,
-          processManager: processManager,
+          logger: logger!,
+          processManager: processManager!,
           fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
@@ -1988,8 +1980,8 @@ BuildVariant: paidProfile
     testUsingContext('getBuildOptions returns empty list if gradle returns error', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
@@ -2022,8 +2014,8 @@ Gradle Crashed
         );
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
-          logger: logger,
-          processManager: processManager,
+          logger: logger!,
+          processManager: processManager!,
           fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
@@ -2068,8 +2060,8 @@ Gradle Crashed
       () async {
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
-          logger: logger,
-          processManager: processManager,
+          logger: logger!,
+          processManager: processManager!,
           fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
@@ -2148,8 +2140,8 @@ Gradle Crashed
       () async {
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
-          logger: logger,
-          processManager: processManager,
+          logger: logger!,
+          processManager: processManager!,
           fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
@@ -2241,8 +2233,8 @@ Gradle Crashed
       });
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
@@ -2370,7 +2362,7 @@ Gradle Crashed
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: BufferLogger.test(verbose: true),
-          processManager: processManager,
+          processManager: processManager!,
           fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
@@ -2434,8 +2426,8 @@ Gradle Crashed
     testUsingContext('gradle exit code and stderr is forwarded to tool exit', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
@@ -2503,8 +2495,8 @@ Gradle Crashed
     testUsingContext('build apk uses selected local engine with arm32 ABI', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(
           localEngine: 'out/android_arm',
@@ -2590,8 +2582,8 @@ Gradle Crashed
     testUsingContext('build apk uses selected local engine with arm64 ABI', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(
           localEngine: 'out/android_arm64',
@@ -2681,8 +2673,8 @@ Gradle Crashed
     testUsingContext('build apk uses selected local engine with x64 ABI', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(
           localEngine: 'out/android_x64',
@@ -2769,8 +2761,8 @@ Gradle Crashed
     testUsingContext('honors --no-android-gradle-daemon setting', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
@@ -2830,8 +2822,8 @@ Gradle Crashed
     testUsingContext('honors --android-project-cache-dir setting', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
@@ -2891,8 +2883,8 @@ Gradle Crashed
     testUsingContext('build aar uses selected local engine with arm32 ABI', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(
           localEngine: 'out/android_arm',
@@ -2992,8 +2984,8 @@ Gradle Crashed
     testUsingContext('build aar uses selected local engine with x64 ABI', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(
           localEngine: 'out/android_arm64',
@@ -3096,8 +3088,8 @@ Gradle Crashed
     testUsingContext('build aar uses selected local engine on x64 ABI', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
+        logger: logger!,
+        processManager: processManager!,
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(
           localEngine: 'out/android_x64',
@@ -3198,8 +3190,8 @@ Gradle Crashed
       () async {
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
-          logger: logger,
-          processManager: processManager,
+          logger: logger!,
+          processManager: processManager!,
           fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
@@ -3305,8 +3297,8 @@ Gradle Crashed
       () async {
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
-          logger: logger,
-          processManager: processManager,
+          logger: logger!,
+          processManager: processManager!,
           fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
@@ -3409,8 +3401,8 @@ Gradle Crashed
       () async {
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
-          logger: logger,
-          processManager: processManager,
+          logger: logger!,
+          processManager: processManager!,
           fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,

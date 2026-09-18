@@ -69,10 +69,17 @@ class BuildCommand extends FlutterCommand {
     );
     final AndroidBuilder effectiveAndroidBuilder =
         androidBuilder ??
-        AndroidGradleBuilder.fromContexts(
+        AndroidGradleBuilder(
           analytics: analytics,
-          androidContext: androidContext,
-          toolContext: toolContext,
+          androidStudio: androidContext.androidStudio,
+          artifacts: toolContext.artifacts,
+          fileSystem: toolContext.fs,
+          gradleUtils: androidContext.gradleUtils,
+          java: androidContext.java,
+          logger: toolContext.logger,
+          platform: toolContext.platform,
+          processManager: toolContext.processManager,
+          androidSdk: androidContext.androidSdk,
         );
     _addSubcommand(
       BuildAarCommand(

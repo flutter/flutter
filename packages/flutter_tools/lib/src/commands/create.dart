@@ -22,20 +22,24 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../base/version_range.dart';
+import '../cache.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../darwin/darwin.dart';
+import '../features.dart';
+import '../globals.dart' as globals;
+import '../project.dart';
+import '../context/android_context.dart';
+import '../context/apple_context.dart';
+import '../context/tool_context.dart';
 import '../experimental/extension_arg_parser.dart';
 import '../experimental/templates.dart';
-import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
 import '../ios/code_signing.dart';
 import '../macos/swift_packages.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
-import 'create_base.dart';
 
 const kPlatformHelp =
     'The platforms supported by this project. '

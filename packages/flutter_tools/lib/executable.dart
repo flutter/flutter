@@ -255,10 +255,17 @@ List<FlutterCommand> generateCommands({
     fileSystem: toolDependencies.toolContext.fs,
   ),
   BuildCommand(
-    androidBuilder: AndroidGradleBuilder.fromContexts(
+    androidBuilder: AndroidGradleBuilder(
       analytics: toolDependencies.analytics,
-      androidContext: toolDependencies.androidContext,
-      toolContext: toolDependencies.toolContext,
+      androidStudio: toolDependencies.androidContext.androidStudio,
+      artifacts: toolDependencies.toolContext.artifacts,
+      fileSystem: toolDependencies.toolContext.fs,
+      gradleUtils: toolDependencies.androidContext.gradleUtils,
+      java: toolDependencies.androidContext.java,
+      logger: toolDependencies.toolContext.logger,
+      platform: toolDependencies.toolContext.platform,
+      processManager: toolDependencies.toolContext.processManager,
+      androidSdk: toolDependencies.androidContext.androidSdk,
     ),
     androidContext: toolDependencies.androidContext,
     appleContext: toolDependencies.appleContext,

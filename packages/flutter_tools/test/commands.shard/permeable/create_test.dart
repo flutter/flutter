@@ -5199,8 +5199,15 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
     // 3. It's non-trivial to use MemoryFileSystem.test(), we need real template files
     await io.IOOverrides.runZoned<Future<void>>(() async {
       globals.cache.flutterRoot = getFlutterRoot();
-      final CommandRunner<void> runner = createTestCommandRunner(CreateCommand());
-      await runner.run(['create', '--no-pub', '.']);
+      final CommandRunner<void> runner = createTestCommandRunner(
+        CreateCommand(
+          androidContext: FakeAndroidContext(),
+          appleContext: FakeAppleContext(),
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: DelegatingToolContext(fs: globals.fs),
+        ),
+      );
+      await runner.run(<String>['create', '--no-pub', '.']);
     }, getCurrentDirectory: () => out);
     expect(logger.statusText, isNot(contains(r'  $ cd')));
   }, overrides: {Logger: () => logger});

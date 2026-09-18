@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'artifacts.dart';
@@ -429,33 +430,35 @@ class DevFS {
     FlutterVmService serviceProtocol,
     this.fsName,
     this.rootDirectory, {
+    required Artifacts artifacts,
     required BuildMode buildMode,
-    required ToolContext toolContext,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required OperatingSystemUtils osUtils,
+    required ProcessManager processManager,
     HttpClient? httpClient,
     this._stopwatchFactory = const StopwatchFactory(),
     Duration? uploadRetryThrottle,
-  }) : _toolContext = toolContext,
-       _vmService = serviceProtocol,
+  }) : _vmService = serviceProtocol,
        _httpWriter = _DevFSHttpWriter(
          fsName,
          serviceProtocol,
-         osUtils: toolContext.os,
-         logger: toolContext.logger,
+         osUtils: osUtils,
+         logger: logger,
          uploadRetryThrottle: uploadRetryThrottle,
          httpClient: httpClient ?? HttpClient(),
        ),
        _assetTransformer = DevelopmentAssetTransformer(
          transformer: AssetTransformer(
-           processManager: toolContext.processManager,
-           fileSystem: toolContext.fs,
-           dartBinaryPath: toolContext.artifacts.getArtifactPath(Artifact.engineDartBinary),
+           processManager: processManager,
+           fileSystem: fileSystem,
+           dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
            buildMode: buildMode,
          ),
-         fileSystem: toolContext.fs,
-         logger: toolContext.logger,
+         fileSystem: fileSystem,
+         logger: logger,
        );
 
-  final ToolContext _toolContext;
   final FlutterVmService _vmService;
   final _DevFSHttpWriter _httpWriter;
   final StopwatchFactory _stopwatchFactory;

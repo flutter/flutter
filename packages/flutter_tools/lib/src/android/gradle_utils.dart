@@ -18,6 +18,8 @@ import '../base/version_range.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../project.dart';
+import '../base/user_messages.dart';
+import '../base/platform.dart';
 import 'android_sdk.dart';
 
 // These are the versions used in the project templates.
@@ -1159,6 +1161,7 @@ String getGradleVersionFor(String agpV) {
 /// If [requireAndroidSdk] is true (the default) and no Android SDK is found,
 /// this will fail with a [ToolExit].
 void updateLocalProperties({
+  Cache? cache,
   required FlutterProject project,
   Analytics? analytics,
   AndroidSdk? androidSdk,
@@ -1227,14 +1230,14 @@ void updateLocalProperties({
 }
 
 void exitWithNoSdkMessage({Analytics? analytics, Logger? logger}) {
-  (analytics ?? globals.analytics).send(
+  (analytics ?? const NoOpAnalytics()).send(
     Event.flutterBuildInfo(
       label: 'unsupported-project',
       buildType: 'gradle',
       error: 'android-sdk-not-found',
     ),
   );
-  final Logger effectiveLogger = logger ?? globals.logger;
+  final Logger effectiveLogger = logger ?? BufferLogger.test();
   throwToolExit(
     '${effectiveLogger.terminal.warningMark} No Android SDK found. '
     'Try setting the ANDROID_HOME environment variable.',
