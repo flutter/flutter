@@ -230,6 +230,7 @@ AndroidShellHolder::AndroidShellHolder(
 
 AndroidShellHolder::~AndroidShellHolder() {
   shell_.reset();
+  embedder_surface_ = nullptr;
   platform_view_android_.reset();
   thread_host_.reset();
 }
@@ -247,11 +248,11 @@ AndroidShellHolder::CreateDispatchTable(
     const fml::WeakPtr<PlatformViewAndroid>& platform_view) const {
   PlatformViewEmbedder::PlatformDispatchTable dispatch_table;
   dispatch_table.update_semantics_callback =
-      [platform_view](int64_t view_id, flutter::SemanticsNodeUpdates update,
-                      flutter::CustomAccessibilityActionUpdates actions) {
+      [platform_view](
+          int64_t view_id, const flutter::SemanticsNodeUpdates& update,
+          const flutter::CustomAccessibilityActionUpdates& actions) {
         if (platform_view) {
-          platform_view->UpdateSemantics(view_id, std::move(update),
-                                         std::move(actions));
+          platform_view->UpdateSemantics(view_id, update, actions);
         }
       };
   dispatch_table.platform_message_response_callback =
@@ -260,11 +261,6 @@ AndroidShellHolder::CreateDispatchTable(
           platform_view->HandlePlatformMessage(std::move(message));
         }
       };
-  dispatch_table.vsync_callback = [platform_view](intptr_t baton) {
-    if (platform_view) {
-      platform_view->OnVsyncCallback(baton);
-    }
-  };
   dispatch_table.compute_platform_resolved_locale_callback =
       [platform_view](const std::vector<std::string>& supported_locale_data)
       -> std::unique_ptr<std::vector<std::string>> {
@@ -321,6 +317,18 @@ AndroidShellHolder::CreateDispatchTable(
   dispatch_table.create_vsync_waiter_callback = [platform_view]() {
     return platform_view ? platform_view->CreateVSyncWaiter() : nullptr;
   };
+  dispatch_table.set_application_locale_callback =
+      [platform_view](std::string locale) {
+        if (platform_view) {
+          platform_view->SetApplicationLocale(std::move(locale));
+        }
+      };
+  dispatch_table.set_semantics_tree_enabled_callback =
+      [platform_view](bool enabled) {
+        if (platform_view) {
+          platform_view->SetSemanticsTreeEnabled(enabled);
+        }
+      };
   dispatch_table.custom_platform_message_handler =
       platform_view ? platform_view->GetPlatformMessageHandler() : nullptr;
   return dispatch_table;
