@@ -674,7 +674,7 @@ void main() async {
 
   test('toImage and toImageSync have identical contents', () async {
     // Note: on linux or vulkan this still seems to be different.
-    // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/108835
+    // TODO(andywolff): https://github.com/flutter/flutter/issues/193029
     if (Platform.isLinux || impellerBackend == 'vulkan') {
       return;
     }
