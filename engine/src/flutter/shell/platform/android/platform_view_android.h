@@ -14,6 +14,7 @@
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/snapshot_surface_producer.h"
+#include "flutter/shell/platform/android/android_engine.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/embedder_surface_android.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
@@ -173,6 +174,8 @@ class PlatformViewAndroid final {
 
   void SetPlatformView(fml::WeakPtr<PlatformView> platform_view);
 
+  void SetEngine(AndroidEngine* engine);
+
   void SetSemanticsEnabled(bool enabled);
 
   void SetAccessibilityFeatures(int32_t flags);
@@ -199,6 +202,7 @@ class PlatformViewAndroid final {
   std::unique_ptr<EmbedderSurfaceAndroid> owned_embedder_surface_;
   EmbedderSurfaceAndroid* embedder_surface_ = nullptr;
   fml::WeakPtr<PlatformView> platform_view_;
+  AndroidEngine* engine_ = nullptr;
 
   PlatformViewAndroidDelegate platform_view_android_delegate_;
 

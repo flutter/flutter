@@ -54,6 +54,12 @@ EmbedderEngine::EmbedderEngine(
       external_texture_resolver_(std::move(external_texture_resolver)),
       renderer_config_(renderer_config) {}
 
+EmbedderEngine::EmbedderEngine(const flutter::TaskRunners& task_runners,
+                               std::unique_ptr<Shell> shell)
+    : task_runners_(task_runners),
+      run_configuration_(nullptr),
+      shell_(std::move(shell)) {}
+
 EmbedderEngine::~EmbedderEngine() = default;
 
 bool EmbedderEngine::LaunchShell() {

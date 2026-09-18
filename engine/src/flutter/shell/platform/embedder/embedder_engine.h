@@ -42,6 +42,8 @@ class EmbedderEngine {
           external_texture_resolver,
       std::optional<FlutterRendererConfig> renderer_config = std::nullopt);
 
+  EmbedderEngine(const TaskRunners& task_runners, std::unique_ptr<Shell> shell);
+
   ~EmbedderEngine();
 
   bool LaunchShell();
@@ -117,16 +119,7 @@ class EmbedderEngine {
 
   Shell& GetShell();
 
-  const std::optional<FlutterRendererConfig>& GetRendererConfig() const;
-
-  std::unique_ptr<EmbedderEngine> Spawn(
-      RunConfiguration run_configuration,
-      const std::string& initial_route,
-      const Shell::CreateCallback<PlatformView>& on_create_platform_view,
-      const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
-      std::unique_ptr<EmbedderExternalTextureResolver>
-          external_texture_resolver,
-      std::optional<FlutterRendererConfig> renderer_config) const;
+  const std::unique_ptr<Shell>& GetShellPointer() const { return shell_; }
 
  private:
   std::shared_ptr<EmbedderThreadHost> thread_host_;

@@ -227,5 +227,31 @@ TEST(AndroidShellHolder, CreateWithUnMergedPlatformAndUIThread) {
       holder->GetShellForTesting()->GetTaskRunners().GetPlatformTaskRunner());
 }
 
+TEST(AndroidShellHolder, CreateWithEmbedderAPI) {
+  Settings settings;
+  settings.enable_software_rendering = false;
+  settings.enable_embedder_api = true;
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+  EXPECT_NE(holder.get(), nullptr);
+  EXPECT_TRUE(holder->IsValid());
+  EXPECT_NE(holder->GetEngineForTesting(), nullptr);
+  EXPECT_NE(holder->GetPlatformView().get(), nullptr);
+
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
+  holder->GetPlatformView()->NotifyCreated(window);
+
+  ViewportMetrics metrics{1.0, 800, 600, 22.0, 0};
+  holder->GetPlatformView()->SetViewportMetrics(0, metrics);
+  holder->NotifyLowMemoryWarning();
+  holder->GetPlatformView()->SetSemanticsEnabled(true);
+  holder->GetPlatformView()->SetAccessibilityFeatures(0);
+  holder->GetPlatformView()->MarkTextureFrameAvailable(0);
+  holder->GetPlatformView()->UnregisterTexture(0);
+  holder->GetPlatformView()->NotifyDestroyed();
+}
+
 }  // namespace testing
 }  // namespace flutter
