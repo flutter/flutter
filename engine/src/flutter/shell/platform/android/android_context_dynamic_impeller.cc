@@ -215,11 +215,13 @@ void AndroidContextDynamicImpeller::SetupImpellerContext() {
 void AndroidContextDynamicImpeller::WaitForSetup() const {
   // The thread performing setup cannot wait for setup to finish. Compiled out
   // of release builds.
+#ifdef FML_DCHECK_IS_ON
   FML_DCHECK(setup_thread_id_.load(std::memory_order_relaxed) !=
              std::this_thread::get_id())
       << "Deadlock: the thread running SetupImpellerContext() called "
          "RenderingApi(), which waits on that same setup. Read GetGLContext() "
          "or GetVKContext() directly from the raster thread instead.";
+#endif
   setup_complete_.Wait();
 }
 
