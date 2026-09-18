@@ -11,6 +11,7 @@
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/thread_host.h"
+#include "flutter/shell/platform/android/android_engine.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
@@ -102,13 +103,17 @@ class AndroidShellHolder {
 
   const std::shared_ptr<PlatformMessageHandler>& GetPlatformMessageHandler()
       const {
-    return shell_->GetPlatformMessageHandler();
+    return engine_->GetPlatformMessageHandler();
   }
 
   void UpdateDisplayMetrics();
 
   // Visible for testing.
-  const std::unique_ptr<Shell>& GetShellForTesting() const { return shell_; }
+  const std::unique_ptr<Shell>& GetShellForTesting() const {
+    return engine_->GetShellForTesting();
+  }
+
+  AndroidEngine* GetEngineForTesting() const { return engine_.get(); }
 
  private:
   const flutter::Settings settings_;
@@ -117,7 +122,7 @@ class AndroidShellHolder {
   std::unique_ptr<PlatformViewAndroid> platform_view_android_;
   EmbedderSurfaceAndroid* embedder_surface_ = nullptr;
   std::shared_ptr<ThreadHost> thread_host_;
-  std::unique_ptr<Shell> shell_;
+  std::unique_ptr<AndroidEngine> engine_;
   bool is_valid_ = false;
   uint64_t next_pointer_flow_id_ = 0;
   std::unique_ptr<APKAssetProvider> apk_asset_provider_;
@@ -137,7 +142,7 @@ class AndroidShellHolder {
   AndroidShellHolder(const flutter::Settings& settings,
                      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
                      const std::shared_ptr<ThreadHost>& thread_host,
-                     std::unique_ptr<Shell> shell,
+                     std::unique_ptr<AndroidEngine> engine,
                      std::unique_ptr<APKAssetProvider> apk_asset_provider,
                      const fml::WeakPtr<PlatformViewAndroid>& platform_view,
                      std::unique_ptr<PlatformViewAndroid> platform_view_android,
