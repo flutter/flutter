@@ -64,6 +64,8 @@ class EmbedderTest : public ThreadTest {
   EmbedderTestContext& GetMetalContext();
   EmbedderTestContext& GetSoftwareContext();
   EmbedderTestContext& GetVulkanContext();
+  /// The Vulkan context, set to render with Impeller.
+  EmbedderTestContext& GetVulkanImpellerContext();
 
   std::unique_ptr<EmbedderTestContext> gl_context_;
   std::unique_ptr<EmbedderTestContext> metal_context_;

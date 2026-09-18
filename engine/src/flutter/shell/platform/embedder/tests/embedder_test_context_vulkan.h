@@ -23,6 +23,9 @@ class EmbedderTestContextVulkan : public EmbedderTestContext {
   // |EmbedderTestContext|
   EmbedderTestContextType GetContextType() const override;
 
+  /// Render with Impeller instead of Skia. Set before the engine is launched.
+  void SetEnableImpeller(bool enable) { enable_impeller_ = enable; }
+
   // |EmbedderTestContext|
   size_t GetSurfacePresentCount() const override;
 
@@ -52,6 +55,7 @@ class EmbedderTestContextVulkan : public EmbedderTestContext {
 
   DlISize surface_size_;
   size_t present_count_ = 0;
+  bool enable_impeller_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestContextVulkan);
 };
