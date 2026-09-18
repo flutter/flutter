@@ -17,12 +17,15 @@ jobs:
           fetch-depth: 0
       - name: Fetch Flutter upstream tags
         run: git fetch https://github.com/flutter/flutter.git --tags --force
+      - name: Format targeted Dart files
+        run: ./bin/dart format packages/flutter/lib/src/rendering/table.dart packages/flutter/test/widgets/table_semantics_test.dart
       - name: Run targeted table semantics tests
         run: ./bin/flutter test packages/flutter/test/widgets/table_semantics_test.dart
-      - name: Remove temporary validation workflow
+      - name: Commit formatting and remove temporary validation workflow
         run: |
           git config user.name "Yazan Arafeh"
           git config user.email "32390922+yazanmg@users.noreply.github.com"
           git rm .github/workflows/pr192929-validation.yml
-          git commit -m "ci: remove temporary PR 192929 validation"
+          git add packages/flutter/lib/src/rendering/table.dart packages/flutter/test/widgets/table_semantics_test.dart
+          git commit -m "Format and validate RTL table semantics fix"
           git push origin HEAD:fix-rtl-table-semantics-index
