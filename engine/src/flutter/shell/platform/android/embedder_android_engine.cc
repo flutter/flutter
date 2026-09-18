@@ -304,6 +304,7 @@ void EmbedderAndroidEngine::InitializeSubsystems(
   }
   surface_manager_ =
       std::make_shared<AndroidSurfaceManager>(android_rendering_api_);
+  vsync_waiter_ = std::make_shared<android::AndroidVsyncWaiter>();
   compositor_delegate_ = std::make_shared<CompositorDelegate>(this);
   compositor_ = std::make_shared<AndroidCompositor>(surface_manager_,
                                                     compositor_delegate_);
@@ -344,6 +345,9 @@ EmbedderAndroidEngine::EmbedderAndroidEngine(
     embedder_engine_ =
         std::make_unique<EmbedderEngine>(task_runners, std::move(shell));
     android_task_runners_->SetEngine(GetEngineHandle());
+    if (vsync_waiter_ != nullptr) {
+      vsync_waiter_->SetEngine(GetEngineHandle());
+    }
     BindPlatformMessageHandler();
   }
 }
@@ -359,6 +363,12 @@ EmbedderAndroidEngine::EmbedderAndroidEngine(
 }
 
 EmbedderAndroidEngine::~EmbedderAndroidEngine() {
+  if (vsync_waiter_ != nullptr) {
+    vsync_waiter_->SetEngine(nullptr);
+  }
+  if (android_task_runners_ != nullptr) {
+    android_task_runners_->SetEngine(nullptr);
+  }
   if (platform_message_handler_) {
     static_cast<PlatformMessageHandlerAndroid*>(platform_message_handler_.get())
         ->SetEmbedderEngine(nullptr, {});
@@ -486,6 +496,9 @@ void EmbedderAndroidEngine::OnDisplayUpdates(
   for (const auto& display : displays) {
     if (!display) {
       continue;
+    }
+    if (vsync_waiter_ != nullptr && display->GetRefreshRate() > 0.0) {
+      vsync_waiter_->UpdateRefreshRate(display->GetRefreshRate());
     }
     FlutterEngineDisplay c_display = {};
     c_display.struct_size = sizeof(FlutterEngineDisplay);
@@ -873,6 +886,12 @@ bool EmbedderAndroidEngine::UpdateSemantics(
   return true;
 }
 
+void EmbedderAndroidEngine::OnVsyncCallback(intptr_t baton) {
+  if (vsync_waiter_ != nullptr) {
+    vsync_waiter_->AsyncWaitForVsync(baton);
+  }
+}
+
 void EmbedderAndroidEngine::RegisterTexture(
     std::shared_ptr<flutter::Texture> texture) {
   if (!IsValid() || !texture) {
@@ -1213,6 +1232,12 @@ bool EmbedderAndroidEngine::Run(
               std::move(string_attribute_args));
         }
       };
+  project_args_.vsync_callback = [](void* user_data, intptr_t baton) {
+    auto* engine = static_cast<EmbedderAndroidEngine*>(user_data);
+    if (engine != nullptr && engine->vsync_waiter_ != nullptr) {
+      engine->vsync_waiter_->AsyncWaitForVsync(baton);
+    }
+  };
 
   FlutterEngineResult result =
       proc_table_.Initialize(FLUTTER_ENGINE_VERSION, &renderer_config_,
@@ -1227,6 +1252,9 @@ bool EmbedderAndroidEngine::Run(
   asset_resolver_.destruction_callback = nullptr;
 
   android_task_runners_->SetEngine(c_api_engine_);
+  if (vsync_waiter_ != nullptr) {
+    vsync_waiter_->SetEngine(c_api_engine_);
+  }
   BindPlatformMessageHandler();
 
   result = proc_table_.RunInitialized(c_api_engine_);
@@ -1293,6 +1321,7 @@ std::unique_ptr<EmbedderAndroidEngine> EmbedderAndroidEngine::SpawnCAPI(
       project_args_.platform_message_callback;
   child->project_args_.update_semantics_callback2 =
       project_args_.update_semantics_callback2;
+  child->project_args_.vsync_callback = project_args_.vsync_callback;
 
   FlutterEngineSpawnConfig spawn_config = {};
   spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
@@ -1309,6 +1338,9 @@ std::unique_ptr<EmbedderAndroidEngine> EmbedderAndroidEngine::SpawnCAPI(
   }
   child->asset_resolver_.destruction_callback = nullptr;
   child->android_task_runners_->SetEngine(child->c_api_engine_);
+  if (child->vsync_waiter_ != nullptr) {
+    child->vsync_waiter_->SetEngine(child->c_api_engine_);
+  }
   child->BindPlatformMessageHandler();
   child->c_api_is_valid_ = true;
   return child;

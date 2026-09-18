@@ -596,7 +596,11 @@ void PlatformViewAndroid::SendChannelUpdate(const std::string& name,
 void PlatformViewAndroid::RequestViewFocusChange(
     const ViewFocusChangeRequest& request) {}
 
-void PlatformViewAndroid::OnVsyncCallback(intptr_t baton) {}
+void PlatformViewAndroid::OnVsyncCallback(intptr_t baton) {
+  if (engine_) {
+    engine_->OnVsyncCallback(baton);
+  }
+}
 
 void PlatformViewAndroid::SetPlatformView(
     fml::WeakPtr<PlatformView> platform_view) {
