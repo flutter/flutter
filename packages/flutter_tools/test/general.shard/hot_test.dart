@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -12,6 +11,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -249,7 +249,12 @@ name: my_app
           final devices = <FlutterDevice>[
             FlutterDevice(
               device,
-              toolContext: TestToolContext(fileSystem: globals.fs, logger: globals.logger, processManager: globals.processManager, artifacts: Artifacts.test()),
+              toolContext: TestToolContext(
+                fileSystem: globals.fs,
+                logger: globals.logger,
+                processManager: globals.processManager,
+                artifacts: Artifacts.test(),
+              ),
               targetPlatform: .unsupported,
               generator: residentCompiler,
               buildInfo: BuildInfo.debug,
@@ -281,7 +286,12 @@ name: my_app
           final devices = <FlutterDevice>[
             FlutterDevice(
               device,
-              toolContext: TestToolContext(fileSystem: globals.fs, logger: globals.logger, processManager: globals.processManager, artifacts: Artifacts.test()),
+              toolContext: TestToolContext(
+                fileSystem: globals.fs,
+                logger: globals.logger,
+                processManager: globals.processManager,
+                artifacts: Artifacts.test(),
+              ),
               targetPlatform: .unsupported,
               generator: residentCompiler,
               buildInfo: BuildInfo.debug,
