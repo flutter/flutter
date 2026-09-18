@@ -79,6 +79,9 @@ class PlatformViewEmbedder final : public PlatformView {
         request_dart_deferred_library_callback;               // optional
     GetScaledFontSizeCallback get_scaled_font_size_callback;  // optional
     CreateVSyncWaiterCallback create_vsync_waiter_callback;   // optional
+    std::function<void(std::string)>
+        set_application_locale_callback;                            // optional
+    std::function<void(bool)> set_semantics_tree_enabled_callback;  // optional
     std::shared_ptr<PlatformMessageHandler>
         custom_platform_message_handler;  // optional
   };
@@ -188,6 +191,12 @@ class PlatformViewEmbedder final : public PlatformView {
   // |PlatformView|
   double GetScaledFontSize(double unscaled_font_size,
                            int configuration_id) const override;
+
+  // |PlatformView|
+  void SetApplicationLocale(std::string locale) override;
+
+  // |PlatformView|
+  void SetSemanticsTreeEnabled(bool enabled) override;
 
   // |PlatformView|
   void SendChannelUpdate(const std::string& name, bool listening) override;
