@@ -117,14 +117,25 @@ void main() {
       expect(dependencies.toolContext.userMessages, isNotNull);
 
       // Verify AppleContext (lazy getters evaluated on access)
-      expect(dependencies.appleContext.cocoaPods, isNotNull);
-      expect(dependencies.appleContext.cocoapodsValidator, isNotNull);
-      expect(dependencies.appleContext.iosSimulatorUtils, isNotNull);
-      expect(dependencies.appleContext.iosWorkflow, isNotNull);
-      expect(dependencies.appleContext.plistParser, isNotNull);
-      expect(dependencies.appleContext.xcdevice, isNotNull);
-      expect(dependencies.appleContext.xcode, isNotNull);
-      expect(dependencies.appleContext.xcodeProjectInterpreter, isNotNull);
+      final AppleContext(
+        cocoaPods: CocoaPods cocoaPods,
+        cocoapodsValidator: CocoaPodsValidator cocoapodsValidator,
+        iosSimulatorUtils: IOSSimulatorUtils iosSimulatorUtils,
+        iosWorkflow: IOSWorkflow iosWorkflow,
+        plistParser: PlistParser plistParser,
+        xcdevice: XCDevice xcdevice,
+        xcode: Xcode xcode,
+        xcodeProjectInterpreter: XcodeProjectInterpreter xcodeProjectInterpreter,
+      ) = dependencies.appleContext;
+
+      expect(cocoaPods, isNotNull);
+      expect(cocoapodsValidator, isNotNull);
+      expect(iosSimulatorUtils, isNotNull);
+      expect(iosWorkflow, isNotNull);
+      expect(plistParser, isNotNull);
+      expect(xcdevice, isNotNull);
+      expect(xcode, isNotNull);
+      expect(xcodeProjectInterpreter, isNotNull);
 
       // Verify AndroidContext
       expect(dependencies.androidContext.gradleUtils, isNotNull);
@@ -217,14 +228,25 @@ void main() {
         xcodeProjectInterpreter: mockXcodeProjectInterpreter,
       );
 
-      expect(dependencies.appleContext.cocoaPods, same(mockCocoaPods));
-      expect(dependencies.appleContext.cocoapodsValidator, same(mockCocoaPodsValidator));
-      expect(dependencies.appleContext.iosSimulatorUtils, same(mockIOSSimulatorUtils));
-      expect(dependencies.appleContext.iosWorkflow, same(mockIOSWorkflow));
-      expect(dependencies.appleContext.plistParser, same(mockPlistParser));
-      expect(dependencies.appleContext.xcdevice, same(mockXCDevice));
-      expect(dependencies.appleContext.xcode, same(mockXcode));
-      expect(dependencies.appleContext.xcodeProjectInterpreter, same(mockXcodeProjectInterpreter));
+      final AppleContext(
+        cocoaPods: CocoaPods cocoaPods,
+        cocoapodsValidator: CocoaPodsValidator cocoapodsValidator,
+        iosSimulatorUtils: IOSSimulatorUtils iosSimulatorUtils,
+        iosWorkflow: IOSWorkflow iosWorkflow,
+        plistParser: PlistParser plistParser,
+        xcdevice: XCDevice xcdevice,
+        xcode: Xcode xcode,
+        xcodeProjectInterpreter: XcodeProjectInterpreter xcodeProjectInterpreter,
+      ) = dependencies.appleContext;
+
+      expect(cocoaPods, same(mockCocoaPods));
+      expect(cocoapodsValidator, same(mockCocoaPodsValidator));
+      expect(iosSimulatorUtils, same(mockIOSSimulatorUtils));
+      expect(iosWorkflow, same(mockIOSWorkflow));
+      expect(plistParser, same(mockPlistParser));
+      expect(xcdevice, same(mockXCDevice));
+      expect(xcode, same(mockXcode));
+      expect(xcodeProjectInterpreter, same(mockXcodeProjectInterpreter));
     });
   });
 
