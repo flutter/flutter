@@ -27,6 +27,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../src/common.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
+import '../src/fakes.dart';
 
 final fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
@@ -1285,7 +1286,7 @@ void main() {
     final residentRunner = FakeResidentRunner(
       FlutterDevice(
         FakeDevice(),
-        artifacts: Artifacts.test(),
+        toolContext: TestToolContext(fileSystem: fs, logger: testLogger, processInfo: processInfo, artifacts: Artifacts.test()),
         targetPlatform: .unsupported,
         buildInfo: BuildInfo.debug,
         generator: FakeResidentCompiler(),
@@ -1659,7 +1660,7 @@ TerminalHandler setUpTerminalHandler(
   final processInfo = ProcessInfo.test(MemoryFileSystem.test());
   final device = FlutterDevice(
     FakeDevice()..supportsScreenshot = supportsScreenshot,
-    artifacts: Artifacts.test(),
+    toolContext: TestToolContext(fileSystem: localFileSystem, logger: testLogger, processInfo: processInfo, artifacts: Artifacts.test()),
     buildInfo: BuildInfo(
       buildMode,
       '',
