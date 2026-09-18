@@ -1,0 +1,36 @@
+name: PR 192979 cleanup
+
+on:
+  push:
+    branches:
+      - fix-desktop-semantics-hint
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Revert unrelated formatter churn
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('engine/src/flutter/shell/platform/windows/flutter_windows_view_unittests.cc')
+          s = p.read_text()
+          old = 'FLUTTER_API_SYMBOL(FlutterEngine) * engine) {'
+          new = 'FLUTTER_API_SYMBOL(FlutterEngine)* engine) {'
+          if old not in s:
+              raise SystemExit('unrelated formatter change not found')
+          p.write_text(s.replace(old, new, 1))
+          PY
+          git diff --check
+      - name: Commit cleanup and remove temporary workflow
+        run: |
+          git config user.name "Yazan Arafeh"
+          git config user.email "32390922+yazanmg@users.noreply.github.com"
+          git add engine/src/flutter/shell/platform/windows/flutter_windows_view_unittests.cc
+          git rm .github/workflows/pr192979-cleanup.yml
+          git commit -m "Avoid unrelated Windows test formatting churn"
+          git push origin HEAD:fix-desktop-semantics-hint
