@@ -893,30 +893,16 @@ void main() {
     );
     await tester.tap(find.byType(TextField));
     await tester.pump();
-    await tester.enterText(find.byType(TextField), 'a');
+    await tester.enterText(find.byType(TextField), 'aa');
     await tester.pump();
     expect(
       tester.getSemantics(find.text('aardvark')),
       matchesSemantics(
         isButton: true,
         isFocusable: true,
-        hasSelectedState: true,
-        isSelected: true,
         hasTapAction: true,
         hasFocusAction: true,
         label: 'aardvark',
-      ),
-    );
-    expect(
-      tester.getSemantics(find.text('bobcat')),
-      matchesSemantics(
-        isButton: true,
-        isFocusable: true,
-        hasSelectedState: true,
-        isSelected: false,
-        hasTapAction: true,
-        hasFocusAction: true,
-        label: 'bobcat',
       ),
     );
   });

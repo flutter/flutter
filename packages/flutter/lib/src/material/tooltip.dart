@@ -551,8 +551,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         onTriggered: widget.onTriggered,
         dismissDelay: widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultExitDuration,
         positionDelegate: _getDefaultPositionDelegate,
-        ignorePointer:
-            widget.ignorePointer ?? _tooltipTheme.ignorePointer ?? widget.message != null,
+        ignorePointer: widget.ignorePointer ?? widget.message != null,
         child: effectiveChild,
       );
     }
