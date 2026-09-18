@@ -6,9 +6,6 @@ import 'dart:convert' show jsonEncode;
 
 import 'package:coverage/coverage.dart' show HitMap;
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/test_device.dart' show TestDevice;
 import 'package:flutter_tools/src/test/test_time_recorder.dart';
@@ -373,16 +370,7 @@ void main() {
         libraryNames: <String>{'foo', 'bar'},
         packagesPath: packagesPath,
         resolver: await CoverageCollector.getResolver(packagesPath),
-        toolContext: FakeToolContext(
-          fs: fileSystem,
-          logger: BufferLogger.test(),
-          os: FakeOperatingSystemUtils(),
-          platform: const LocalPlatform(),
-          processUtils: ProcessUtils(
-            logger: BufferLogger.test(),
-            processManager: FakeProcessManager.any(),
-          ),
-        ),
+        toolContext: FakeToolContext(fs: fileSystem),
         verbose: false,
       );
       await collector.collectCoverage(
@@ -464,16 +452,7 @@ void main() {
         libraryNames: <String>{'foo', 'bar'},
         packagesPath: packagesPath,
         resolver: await CoverageCollector.getResolver(packagesPath),
-        toolContext: FakeToolContext(
-          fs: fileSystem,
-          logger: BufferLogger.test(),
-          os: FakeOperatingSystemUtils(),
-          platform: const LocalPlatform(),
-          processUtils: ProcessUtils(
-            logger: BufferLogger.test(),
-            processManager: FakeProcessManager.any(),
-          ),
-        ),
+        toolContext: FakeToolContext(fs: fileSystem),
         verbose: false,
       );
       await collector.collectCoverage(
@@ -516,16 +495,7 @@ void main() {
         libraryNames: <String>{'foo', 'bar'},
         packagesPath: packagesPath,
         resolver: await CoverageCollector.getResolver(packagesPath),
-        toolContext: FakeToolContext(
-          fs: fileSystem,
-          logger: BufferLogger.test(),
-          os: FakeOperatingSystemUtils(),
-          platform: const LocalPlatform(),
-          processUtils: ProcessUtils(
-            logger: BufferLogger.test(),
-            processManager: FakeProcessManager.any(),
-          ),
-        ),
+        toolContext: FakeToolContext(fs: fileSystem),
         verbose: false,
       );
       await collector.collectCoverage(
@@ -543,16 +513,7 @@ void main() {
         libraryNames: <String>{'foo'},
         packagesPath: packagesPath,
         resolver: await CoverageCollector.getResolver(packagesPath),
-        toolContext: FakeToolContext(
-          fs: fileSystem,
-          logger: BufferLogger.test(),
-          os: FakeOperatingSystemUtils(),
-          platform: const LocalPlatform(),
-          processUtils: ProcessUtils(
-            logger: BufferLogger.test(),
-            processManager: FakeProcessManager.any(),
-          ),
-        ),
+        toolContext: FakeToolContext(fs: fileSystem),
         verbose: false,
       );
       await collector.collectCoverage(
@@ -590,13 +551,7 @@ void main() {
           packagesPath: packagesPath,
           resolver: await CoverageCollector.getResolver(packagesPath),
           testTimeRecorder: testTimeRecorder,
-          toolContext: FakeToolContext(
-            fs: fileSystem,
-            logger: logger,
-            os: FakeOperatingSystemUtils(),
-            platform: const LocalPlatform(),
-            processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.any()),
-          ),
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           verbose: false,
         );
         await collector.collectCoverage(

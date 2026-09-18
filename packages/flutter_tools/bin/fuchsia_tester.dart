@@ -204,7 +204,7 @@ Future<void> run(List<String> args) async {
 
 class _FuchsiaToolContext implements ToolContext {
   @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
   FileSystem get fs => globals.fs;

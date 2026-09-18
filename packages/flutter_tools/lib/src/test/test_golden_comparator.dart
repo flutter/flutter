@@ -8,18 +8,12 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import '../artifacts.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
-import '../base/process.dart';
 import '../base/utils.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
 import 'test_compiler.dart';
 import 'test_config.dart';
 
@@ -54,13 +48,12 @@ final class TestGoldenComparator {
     Logger? logger,
     ProcessManager? processManager,
     ToolContext? toolContext,
-  }) : _toolContext =
+  }) : assert(
+         toolContext != null || (fileSystem != null && logger != null && processManager != null),
+       ),
+       _toolContext =
            toolContext ??
-           _FallbackToolContext(
-             fileSystem: fileSystem,
-             logger: logger,
-             processManager: processManager,
-           ) {
+           _PartialToolContext(fs: fileSystem!, logger: logger!, processManager: processManager!) {
     _tempDir = _toolContext.fs.systemTempDirectory.createTempSync('flutter_web_platform.');
   }
 
@@ -368,39 +361,17 @@ void main() async {
   }
 }
 
-class _FallbackToolContext implements ToolContext {
-  _FallbackToolContext({this._fileSystem, this._logger, this._processManager});
-
-  final FileSystem? _fileSystem;
-  final Logger? _logger;
-  final ProcessManager? _processManager;
+class _PartialToolContext implements ToolContext {
+  _PartialToolContext({required this.fs, required this.logger, required this.processManager});
 
   @override
-  Artifacts get artifacts => globals.artifacts!;
+  final FileSystem fs;
 
   @override
-  Config get config => globals.config;
+  final Logger logger;
 
   @override
-  FileSystem get fs => _fileSystem ?? globals.fs;
-
-  @override
-  Logger get logger => _logger ?? globals.logger;
-
-  @override
-  OperatingSystemUtils get os => globals.os;
-
-  @override
-  Platform get platform => globals.platform;
-
-  @override
-  ProcessManager get processManager => _processManager ?? globals.processManager;
-
-  @override
-  ProcessUtils get processUtils => globals.processUtils;
-
-  @override
-  ShutdownHooks get shutdownHooks => globals.shutdownHooks;
+  final ProcessManager processManager;
 
   @override
   Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
