@@ -44,9 +44,6 @@ abstract class _SemanticMenuContainerBase extends SemanticRole {
       if (node != null && _isMenuItem(node)) {
         ids.add(child);
       } else if (node != null) {
-        if (node.semanticRole?.kind == EngineSemanticsRole.scrollable && !node.hasLabel) {
-          node.semanticRole!.setAriaRole('none');
-        }
         if (node.childrenInTraversalOrder != null) {
           queue.addAll(node.childrenInTraversalOrder!);
         }
