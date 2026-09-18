@@ -1207,7 +1207,17 @@ void updateLocalProperties({
     changeIfNecessary('sdk.dir', fsUtils.escapePath(androidSdk.directory.path));
   }
 
-  changeIfNecessary('flutter.sdk', globals.fsUtils.escapePath(globals.cache.flutterRoot));
+  changeIfNecessary(
+    'flutter.sdk',
+    fsUtils.escapePath(
+      cache?.flutterRoot ??
+          Cache.defaultFlutterRoot(
+            platform: const LocalPlatform(),
+            fileSystem: project.directory.fileSystem,
+            userMessages: UserMessages(),
+          ),
+    ),
+  );
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
     final String? buildName = validatedBuildNameForPlatform(

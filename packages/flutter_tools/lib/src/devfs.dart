@@ -448,6 +448,8 @@ class DevFS {
          uploadRetryThrottle: uploadRetryThrottle,
          httpClient: httpClient ?? HttpClient(),
        ),
+       _logger = logger,
+       _fileSystem = fileSystem,
        _assetTransformer = DevelopmentAssetTransformer(
          transformer: AssetTransformer(
            processManager: processManager,
@@ -466,6 +468,8 @@ class DevFS {
 
   final String fsName;
   final Directory rootDirectory;
+  final Logger _logger;
+  final FileSystem _fileSystem;
   final assetPathsToEvict = <String>{};
   final shaderPathsToEvict = <String>{};
 
@@ -494,7 +498,7 @@ class DevFS {
   }
 
   Future<Uri> create() async {
-    final Logger logger = _toolContext.logger;
+    final Logger logger = _logger;
     logger.printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
     try {
       final vm_service.Response response = await _vmService.createDevFS(fsName);
@@ -523,7 +527,7 @@ class DevFS {
   }
 
   Future<void> destroy() async {
-    final Logger logger = _toolContext.logger;
+    final Logger logger = _logger;
     logger.printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
     await _vmService.deleteDevFS(fsName);
     logger.printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
@@ -566,7 +570,8 @@ class DevFS {
     bool resetCompiler = false,
     File? dartPluginRegistrant,
   }) async {
-    final ToolContext(:Config config, :FileSystem fs, :Logger logger) = _toolContext;
+    final Logger logger = _logger;
+    final FileSystem fs = _fileSystem;
     final candidateCompileTime = DateTime.now();
     lastPackageConfig = packageConfig;
 
@@ -608,7 +613,7 @@ class DevFS {
       // await null to give time for telling the compiler to compile.
       await null;
 
-      final String assetDirectory = getAssetBuildDirectory(config, fs);
+      final String assetDirectory = getAssetBuildDirectory(null, fs);
       try {
         final int bundleSyncedBytes = await updateBundle(
           bundle: bundle,

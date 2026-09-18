@@ -35,6 +35,7 @@ import '../context/tool_context.dart';
 import '../experimental/extension_arg_parser.dart';
 import '../experimental/templates.dart';
 import '../flutter_manifest.dart';
+import 'create_base.dart';
 import '../flutter_project_metadata.dart';
 import '../ios/code_signing.dart';
 import '../macos/swift_packages.dart';
