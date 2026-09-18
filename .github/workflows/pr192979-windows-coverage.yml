@@ -1,0 +1,91 @@
+name: PR 192979 Windows native coverage
+
+on:
+  push:
+    branches:
+      - fix-desktop-semantics-hint
+
+permissions:
+  contents: write
+
+jobs:
+  add-and-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add Windows native accessibility coverage
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('engine/src/flutter/shell/platform/windows/flutter_windows_view_unittests.cc')
+          s = p.read_text()
+
+          old = ('  node.label = "name";\n'
+                 '  node.value = "value";\n'
+                 '  node.platform_view_id = -1;')
+          new = ('  node.label = "name";\n'
+                 '  node.value = "value";\n'
+                 '  node.hint = "description";\n'
+                 '  node.platform_view_id = -1;')
+          if old not in s:
+              raise SystemExit('Windows semantics node marker not found')
+          s = s.replace(old, new, 1)
+
+          old = ('  std::string value(_com_util::ConvertBSTRToString(bvalue));\n'
+                 '  EXPECT_EQ(value, "value");\n\n'
+                 '  // Verify node type is static text.')
+          new = ('  std::string value(_com_util::ConvertBSTRToString(bvalue));\n'
+                 '  EXPECT_EQ(value, "value");\n\n'
+                 '  // Verify the semantics hint is exposed as the accessible description.\n'
+                 '  BSTR bdescription = nullptr;\n'
+                 '  ASSERT_EQ(native_view->get_accDescription(varchild, &bdescription), S_OK);\n'
+                 '  std::string description(_com_util::ConvertBSTRToString(bdescription));\n'
+                 '  EXPECT_EQ(description, "description");\n\n'
+                 '  // Verify node type is static text.')
+          if old not in s:
+              raise SystemExit('MSAA value assertion marker not found')
+          s = s.replace(old, new, 1)
+
+          old = ('  value = _com_util::ConvertBSTRToString(varvalue.bstrVal);\n'
+                 '  EXPECT_EQ(value, "value");\n\n'
+                 '  // Verify node control type is text.')
+          new = ('  value = _com_util::ConvertBSTRToString(varvalue.bstrVal);\n'
+                 '  EXPECT_EQ(value, "value");\n\n'
+                 '  // Verify the AX description reaches UI Automation.\n'
+                 '  VARIANT vardescription{};\n'
+                 '  ASSERT_EQ(\n'
+                 '      uia_view->GetPropertyValue(UIA_FullDescriptionPropertyId, &vardescription), S_OK);\n'
+                 '  EXPECT_EQ(vardescription.vt, VT_BSTR);\n'
+                 '  description = _com_util::ConvertBSTRToString(vardescription.bstrVal);\n'
+                 '  EXPECT_EQ(description, "description");\n\n'
+                 '  // Verify node control type is text.')
+          if old not in s:
+              raise SystemExit('UIA value assertion marker not found')
+          s = s.replace(old, new, 1)
+          p.write_text(s)
+
+          mac = Path('engine/src/flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformNodeDelegateMacTest.mm')
+          s = mac.read_text()
+          s = s.replace('  [engine shutDownEngine];\n}\nTEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {',
+                        '  [engine shutDownEngine];\n}\n\nTEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {', 1)
+          mac.write_text(s)
+          PY
+      - name: Format modified platform tests
+        run: |
+          clang-format -i \
+            engine/src/flutter/shell/platform/windows/flutter_windows_view_unittests.cc \
+            engine/src/flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformNodeDelegateMacTest.mm
+      - name: Verify formatting and whitespace
+        run: |
+          git diff --check
+          clang-format --dry-run --Werror \
+            engine/src/flutter/shell/platform/windows/flutter_windows_view_unittests.cc \
+            engine/src/flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformNodeDelegateMacTest.mm
+      - name: Commit coverage and remove temporary workflow
+        run: |
+          git config user.name "Yazan Arafeh"
+          git config user.email "32390922+yazanmg@users.noreply.github.com"
+          git add engine/src/flutter/shell/platform/windows/flutter_windows_view_unittests.cc engine/src/flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformNodeDelegateMacTest.mm
+          git rm .github/workflows/pr192979-windows-coverage.yml
+          git commit -m "Add native Windows semantics hint coverage"
+          git push origin HEAD:fix-desktop-semantics-hint
