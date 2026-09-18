@@ -335,7 +335,6 @@ class _DefaultPub implements Pub {
         flutterRoot: _flutterRootPath,
         fs: _fileSystem,
         git: _git,
-        cache: _cache,
         platform: _platform,
       );
 

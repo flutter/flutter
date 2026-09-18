@@ -7,16 +7,21 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
+import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/dds.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
+import '../base/time.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../device.dart';
 import '../resident_runner.dart';
 import '../vmservice.dart';
@@ -24,44 +29,61 @@ import 'web_driver_service.dart';
 
 class FlutterDriverFactory {
   FlutterDriverFactory({
+    this.toolContext,
     required this._applicationPackageFactory,
-    required this._platform,
-    required this._logger,
-    required this._terminal,
-    required this._outputPreferences,
-    required this._processUtils,
+    required this._artifacts,
     required this._dartSdkPath,
     required this._devtoolsLauncher,
+    required this._fileSystem,
+    required this._logger,
+    required this._outputPreferences,
+    required this._platform,
+    required this._processManager,
+    required this._processUtils,
+    required this._terminal,
+    this._analytics,
+    this._systemClock,
   });
 
+  final ToolContext? toolContext;
   final ApplicationPackageFactory _applicationPackageFactory;
-  final Platform _platform;
-  final Logger _logger;
-  final Terminal _terminal;
-  final OutputPreferences _outputPreferences;
-  final ProcessUtils _processUtils;
+  final Artifacts _artifacts;
   final String _dartSdkPath;
   final DevtoolsLauncher _devtoolsLauncher;
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final OutputPreferences _outputPreferences;
+  final Platform _platform;
+  final ProcessManager _processManager;
+  final ProcessUtils _processUtils;
+  final Terminal _terminal;
+  final Analytics? _analytics;
+  final SystemClock? _systemClock;
 
   /// Create a driver service for running `flutter drive`.
   DriverService createDriverService(bool web) {
     if (web) {
       return WebDriverService(
-        logger: _logger,
-        terminal: _terminal,
-        platform: _platform,
-        outputPreferences: _outputPreferences,
-        processUtils: _processUtils,
+        artifacts: _artifacts,
         dartSdkPath: _dartSdkPath,
+        fileSystem: _fileSystem,
+        logger: _logger,
+        outputPreferences: _outputPreferences,
+        platform: _platform,
+        processManager: _processManager,
+        processUtils: _processUtils,
+        terminal: _terminal,
+        analytics: _analytics,
+        systemClock: _systemClock,
       );
     }
     return FlutterDriverService(
+      applicationPackageFactory: _applicationPackageFactory,
+      dartSdkPath: _dartSdkPath,
+      devtoolsLauncher: _devtoolsLauncher,
       logger: _logger,
       platform: _platform,
       processUtils: _processUtils,
-      dartSdkPath: _dartSdkPath,
-      applicationPackageFactory: _applicationPackageFactory,
-      devtoolsLauncher: _devtoolsLauncher,
     );
   }
 }
@@ -78,7 +100,6 @@ abstract class DriverService {
     String? userIdentifier,
     String? mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
-    Map<String, String> webDefines = const <String, String>{},
   });
 
   /// If --use-existing-app is provided, configured the correct VM Service URI.
@@ -112,11 +133,11 @@ abstract class DriverService {
 class FlutterDriverService extends DriverService {
   FlutterDriverService({
     required this._applicationPackageFactory,
+    required this._dartSdkPath,
+    required this._devtoolsLauncher,
     required this._logger,
     required this._platform,
     required this._processUtils,
-    required this._dartSdkPath,
-    required this._devtoolsLauncher,
     @visibleForTesting this._vmServiceConnector = connectToVmService,
     @visibleForTesting this._logFlushDelay = const Duration(milliseconds: 500),
   });
@@ -147,7 +168,6 @@ class FlutterDriverService extends DriverService {
     String? userIdentifier,
     Map<String, Object> platformArgs = const <String, Object>{},
     String? mainPath,
-    Map<String, String> webDefines = const <String, String>{},
   }) async {
     if (buildInfo.isRelease) {
       throwToolExit(

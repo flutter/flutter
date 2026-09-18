@@ -105,6 +105,7 @@ class UpgradeCommand extends FlutterCommand {
     _commandRunner.workingDirectory = workingDirectory ?? _toolContext.cache.flutterRoot;
     final Git git = _toolContext.git;
     final Platform platform = _toolContext.platform;
+
     return _commandRunner.runCommand(
       _parsePhaseFromContinueArg(),
       force: boolArg('force'),

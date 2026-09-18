@@ -69,13 +69,15 @@ void main() {
       ),
     ]);
     final compiler = WebTestCompiler(
-      artifacts: Artifacts.test(),
-      config: config,
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: FakePlatform(environment: <String, String>{}),
-      processManager: processManager,
-      shutdownHooks: FakeShutdownHooks(),
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        config: config,
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(environment: <String, String>{}),
+        processManager: processManager,
+        shutdownHooks: FakeShutdownHooks(),
+      ),
     );
 
     const buildInfo = BuildInfo(
@@ -139,13 +141,15 @@ void main() {
       ),
     ]);
     final compiler = WebTestCompiler(
-      artifacts: Artifacts.test(),
-      config: config,
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: FakePlatform(environment: <String, String>{}),
-      processManager: processManager,
-      shutdownHooks: FakeShutdownHooks(),
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        config: config,
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(environment: <String, String>{}),
+        processManager: processManager,
+        shutdownHooks: FakeShutdownHooks(),
+      ),
     );
 
     const buildInfo = BuildInfo(

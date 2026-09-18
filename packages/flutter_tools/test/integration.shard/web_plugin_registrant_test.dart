@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
+import 'package:flutter_tools/src/project.dart';
 
 import '../commands.shard/permeable/utils/project_testing_utils.dart';
 import '../src/common.dart';
@@ -279,7 +280,15 @@ Future<void> _createProject(Directory dir, List<String> createArgs) async {
     androidContext: FakeAndroidContext(),
     appleContext: FakeAppleContext(),
     templateRenderer: const MustacheTemplateRenderer(),
-    toolContext: DelegatingToolContext(fs: dir.fileSystem),
+    toolContext: FakeToolContext(
+      fs: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+      processManager: globals.processManager,
+      cache: globals.cache,
+      flutterVersion: FakeFlutterVersion(),
+      projectFactory: FlutterProjectFactory(fileSystem: globals.fs, logger: globals.logger),
+    ),
   );
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...createArgs, dir.path]);

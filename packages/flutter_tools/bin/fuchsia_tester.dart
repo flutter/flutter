@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -113,6 +114,14 @@ Future<void> run(List<String> args) async {
     // TODO(tvolkert): Remove once flutter_tester no longer looks for this.
     globals.fs.link(sdkRootDest.childFile('platform.dill').path).createSync('platform_strong.dill');
 
+    final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+      artifacts: globals.artifacts,
+      fs: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+      processManager: globals.processManager,
+    );
+
     Directory? testDirectory;
     CoverageCollector? collector;
     if (argResults['coverage'] as bool? ?? false) {
@@ -125,9 +134,10 @@ Future<void> run(List<String> args) async {
         globals.fs.path.absolute(argResults[_kOptionPackages] as String),
       );
       collector = CoverageCollector(
-        packagesPath: packagesPath,
         libraryNames: libraryNames,
+        packagesPath: packagesPath,
         resolver: await CoverageCollector.getResolver(packagesPath),
+        toolContext: dependencies.toolContext,
       );
       if (!argResults.options.contains(_kOptionTestDirectory)) {
         throwToolExit('Use of --coverage requires setting --test-directory');
@@ -155,7 +165,8 @@ Future<void> run(List<String> args) async {
         globals.fs.path.absolute(argResults[_kOptionPackages] as String),
       ),
     );
-    exitCode = await const FlutterTestRunner().runTests(
+    final testRunner = FlutterTestRunner(toolContext: dependencies.toolContext);
+    exitCode = await testRunner.runTests(
       const TestWrapper(),
       tests.keys.map(Uri.file).toList(),
       debuggingOptions: DebuggingOptions.enabled(buildInfo),

@@ -122,8 +122,8 @@ class ToolDependencies {
     Doctor? doctor,
     EmulatorManager? emulatorManager,
     FeatureFlags? featureFlags,
-    FileSystem? fs,
     FlutterVersion? flutterVersion,
+    FileSystem? fs,
     Git? git,
     GradleUtils? gradleUtils,
     IOSSimulatorUtils? iosSimulatorUtils,
@@ -361,14 +361,18 @@ class ToolDependencies {
         cocoapodsValidator ?? CocoaPodsValidator(finalCocoaPods, finalUserMessages);
 
     // Artifacts will be updated later if a local engine is used.
-    final finalArtifacts = DeferredArtifacts(
-      CachedArtifacts(
-        fileSystem: finalFS,
-        cache: finalCache,
-        platform: finalPlatform,
-        operatingSystemUtils: finalOS,
+    final Artifacts finalArtifacts = switch (artifacts) {
+      final DeferredArtifacts deferredArtifacts => deferredArtifacts,
+      final Artifacts providedArtifacts => DeferredArtifacts(providedArtifacts),
+      null => DeferredArtifacts(
+        CachedArtifacts(
+          fileSystem: finalFS,
+          cache: finalCache,
+          platform: finalPlatform,
+          operatingSystemUtils: finalOS,
+        ),
       ),
-    );
+    };
 
     final XCDevice finalXCDevice =
         xcdevice ??
