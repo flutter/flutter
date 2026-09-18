@@ -44,11 +44,21 @@ import '../widget_preview/preview_manifest.dart';
 import '../widget_preview/preview_pubspec_builder.dart';
 import 'create_base.dart';
 
+typedef ResidentRunnerFactory =
+    ResidentRunner Function(
+      FlutterDevice device, {
+      required DebuggingOptions debuggingOptions,
+      required FlutterProject flutterProject,
+      required String projectRootPath,
+      required String target,
+    });
+
 class WidgetPreviewCommand extends FlutterCommand {
   WidgetPreviewCommand({
     required super.toolContext,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
+    @visibleForTesting ResidentRunnerFactory? residentRunnerFactoryOverride,
     bool verboseHelp = false,
   }) {
     addSubcommand(
@@ -56,6 +66,7 @@ class WidgetPreviewCommand extends FlutterCommand {
         toolContext: toolContext,
         analysisServerFactoryOverride: analysisServerFactoryOverride,
         dtdServicesOverride: dtdServicesOverride,
+        residentRunnerFactoryOverride: residentRunnerFactoryOverride,
         verbose: verboseHelp,
       ),
     );
@@ -125,8 +136,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     required super.toolContext,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
+    @visibleForTesting ResidentRunnerFactory? residentRunnerFactoryOverride,
     this.verbose = false,
-  }) {
+  }) : _residentRunnerFactoryOverride = residentRunnerFactoryOverride {
     if (dtdServicesOverride != null) {
       _dtdService = dtdServicesOverride;
     }
@@ -262,6 +274,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   );
 
   late final Future<AnalysisServer> Function()? _analysisServerFactoryOverride;
+  final ResidentRunnerFactory? _residentRunnerFactoryOverride;
 
   late final PreviewCodeGenerator _previewCodeGenerator;
   late final _previewManifest = PreviewManifest(
@@ -284,6 +297,21 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   /// The currently running instance of the widget preview scaffold.
   ResidentRunner? _widgetPreviewApp;
+
+  @visibleForTesting
+  ResidentRunner? get widgetPreviewApp => _widgetPreviewApp;
+
+  bool _previewAppReady = false;
+  bool _isRestarting = false;
+  bool _pendingRestart = false;
+  bool _pendingFullRestart = false;
+  bool _appFinished = false;
+
+  @visibleForTesting
+  bool get previewAppReady => _previewAppReady;
+
+  @visibleForTesting
+  bool get isRestarting => _isRestarting;
 
   /// The location of the widget_preview_scaffold for the current execution of the command.
   ///
@@ -378,6 +406,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     final bool legacyDetection = boolArg('legacy-preview-detection');
 
     shutdownHooks.addShutdownHook(() async {
+      _appFinished = true;
       await _widgetPreviewApp?.exitApp();
       if (legacyDetection) {
         await _previewDetector.dispose();
@@ -447,15 +476,48 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
   }
 
+  Future<void> _triggerRestart({bool fullRestart = false}) async {
+    if (_appFinished || shutdownHooks.isShuttingDown) {
+      return;
+    }
+    if (!_previewAppReady) {
+      _pendingRestart = true;
+      _pendingFullRestart = _pendingFullRestart || fullRestart;
+      return;
+    }
+    if (_isRestarting) {
+      _pendingRestart = true;
+      _pendingFullRestart = _pendingFullRestart || fullRestart;
+      return;
+    }
+    _isRestarting = true;
+    try {
+      var currentFullRestart = fullRestart;
+      do {
+        final bool shouldFullRestart = _pendingFullRestart || currentFullRestart;
+        _pendingRestart = false;
+        _pendingFullRestart = false;
+        currentFullRestart = false;
+        try {
+          await _widgetPreviewApp?.restart(fullRestart: shouldFullRestart);
+        } on Object catch (e, st) {
+          logger.printTrace('Error during widget preview restart: $e\n$st');
+        }
+      } while (_pendingRestart && !_appFinished && !shutdownHooks.isShuttingDown);
+    } finally {
+      _isRestarting = false;
+    }
+  }
+
   void onLegacyChangeDetected(PreviewDependencyGraph previews) {
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(previews);
     logger.printStatus('Triggering reload based on change to preview set: $previews');
-    _widgetPreviewApp?.restart();
+    unawaited(_triggerRestart());
   }
 
   void onHotRestartRequest() {
     logger.printStatus('Triggering restart based on request from preview environment.');
-    _widgetPreviewApp?.restart(fullRestart: true);
+    unawaited(_triggerRestart(fullRestart: true));
   }
 
   Future<void> _onPubspecChangeDetected(String path) async {
@@ -464,13 +526,13 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       rootProject: project,
       updatedPubspecPath: path,
     );
-    await _widgetPreviewApp?.restart(fullRestart: true);
+    await _triggerRestart(fullRestart: true);
   }
 
   void onChangeDetected(FlutterWidgetPreviews update) {
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(update);
     logger.printStatus('Triggering reload based on update to script: ${update.scriptUris}');
-    _widgetPreviewApp?.restart();
+    unawaited(_triggerRestart());
   }
 
   /// Configures the Dart Tooling Daemon connection.
@@ -582,28 +644,36 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       if (boolArg(kLaunchPreviewer)) {
         final appStarted = Completer<void>();
         final connectionInfo = Completer<DebugConnectionInfo>();
-        _widgetPreviewApp = ResidentWebRunner(
-          flutterDevice,
-          target: target,
-          debuggingOptions: debuggingOptions,
-          analytics: analytics,
-          flutterProject: widgetPreviewScaffoldProject,
-          fileSystem: fs,
-          logger: logger,
-          terminal: terminal,
-          platform: platform,
-          outputPreferences: toolContext.outputPreferences,
-          systemClock: toolContext.systemClock,
-          // Explicitly provide the project root path rather than relying on the current directory
-          // as the current directory exists within $TMP. At least on MacOS, when setting the
-          // current directory to the widget_preview_scaffold project created under
-          // `/var/folders/...`, the underlying chdir call actually changes the directory to
-          // `/private/var/folders/...`. These directories are identical, but confuse the package
-          // config resolution logic.
-          // TODO(bkonyi): consider removing if we stop placing the scaffold in $TMP.
-          // See https://github.com/flutter/flutter/issues/179036
-          projectRootPath: widgetPreviewScaffoldProject.directory.absolute.path,
-        );
+        _widgetPreviewApp = _residentRunnerFactoryOverride != null
+            ? _residentRunnerFactoryOverride(
+                flutterDevice,
+                target: target,
+                debuggingOptions: debuggingOptions,
+                flutterProject: widgetPreviewScaffoldProject,
+                projectRootPath: widgetPreviewScaffoldProject.directory.absolute.path,
+              )
+            : ResidentWebRunner(
+                flutterDevice,
+                target: target,
+                debuggingOptions: debuggingOptions,
+                analytics: analytics,
+                flutterProject: widgetPreviewScaffoldProject,
+                fileSystem: fs,
+                logger: logger,
+                terminal: terminal,
+                platform: platform,
+                outputPreferences: toolContext.outputPreferences,
+                systemClock: toolContext.systemClock,
+                // Explicitly provide the project root path rather than relying on the current directory
+                // as the current directory exists within $TMP. At least on MacOS, when setting the
+                // current directory to the widget_preview_scaffold project created under
+                // `/var/folders/...`, the underlying chdir call actually changes the directory to
+                // `/private/var/folders/...`. These directories are identical, but confuse the package
+                // config resolution logic.
+                // TODO(bkonyi): consider removing if we stop placing the scaffold in $TMP.
+                // See https://github.com/flutter/flutter/issues/179036
+                projectRootPath: widgetPreviewScaffoldProject.directory.absolute.path,
+              );
         unawaited(
           _widgetPreviewApp!.run(
             appStartedCompleter: appStarted,
@@ -621,6 +691,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           devToolsServerAddress: devToolsServerAddress ?? debugConnection.devToolsUri!,
           applicationUri: debugConnection.wsUri!,
         );
+        _previewAppReady = true;
+        if (_pendingRestart && !_appFinished && !shutdownHooks.isShuttingDown) {
+          unawaited(_triggerRestart());
+        }
       }
     } on Exception catch (error) {
       throwToolExit(error.toString());
@@ -633,7 +707,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     previewAnalytics.reportLaunchTiming();
 
     // If _widgetPreviewApp is null --no-launch-previewer was provided so return success.
-    return _widgetPreviewApp?.waitForAppToFinish() ?? 0;
+    if (_widgetPreviewApp == null) {
+      return 0;
+    }
+    final int exitCode = await _widgetPreviewApp!.waitForAppToFinish();
+    _appFinished = true;
+    return exitCode;
   }
 }
 
