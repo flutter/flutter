@@ -360,7 +360,7 @@ void main() {
       expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
     });
 
-    testWithoutContext('when directory name is invalid', () async {
+    testWithoutContext('when directory name is invalid', () {
       final fileSystem = ErrorHandlingFileSystem(
         delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
         platform: windowsPlatform,
@@ -1873,12 +1873,13 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('Windows kDirectoryNameInvalid (267) throws clean ToolExit', () async {
+    testWithoutContext('Windows kDirectoryNameInvalid (267) throws clean ToolExit', () {
+      const kDirectoryNameInvalid = 267;
       final File file = windowsFileSystem.file('file');
       exceptionHandler.addError(
         file,
         FileSystemOp.read,
-        const FileSystemException('', '', OSError('', 267)), // kDirectoryNameInvalid
+        const FileSystemException('', '', OSError('', kDirectoryNameInvalid)),
       );
       expect(
         () => file.readAsStringSync(),
