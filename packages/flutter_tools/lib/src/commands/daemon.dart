@@ -14,12 +14,10 @@ import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
 import '../android/java.dart';
 import '../application_package.dart';
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/signals.dart';
@@ -27,7 +25,6 @@ import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -112,6 +109,7 @@ class DaemonCommand extends FlutterCommand {
       }
 
       await DaemonServer(
+        toolContext: toolContext,
         logger: StdoutLogger(
           terminal: terminal,
           stdio: stdio,
@@ -120,7 +118,6 @@ class DaemonCommand extends FlutterCommand {
         analytics: analytics,
         androidSdk: _androidSdk,
         androidWorkflow: _androidWorkflow,
-        artifacts: toolContext.artifacts,
         deviceManager: _deviceManager,
         featureFlags: featureFlags,
         fileSystem: fs,
@@ -140,9 +137,9 @@ class DaemonCommand extends FlutterCommand {
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
         logger: logger,
       ),
+      toolContext: toolContext,
       analytics: analytics,
       androidSdk: _androidSdk,
-      artifacts: toolContext.artifacts,
       androidWorkflow: _androidWorkflow,
       deviceManager: _deviceManager,
       featureFlags: featureFlags,
@@ -174,7 +171,6 @@ class DaemonServer {
     this.analytics,
     this.androidSdk,
     this.androidWorkflow,
-    this.artifacts,
     @visibleForTesting this._bind = ServerSocket.bind,
     this.deviceManager,
     required this.featureFlags,
@@ -199,7 +195,6 @@ class DaemonServer {
   // Logger that sends the message to the other end of daemon connection.
   final NotifyingLogger? notifyingLogger;
 
-  final Artifacts? artifacts;
   final FileSystem? fileSystem;
   final Platform? platform;
   final ProcessManager? processManager;
@@ -246,8 +241,8 @@ class DaemonServer {
           daemonStreams: DaemonStreams.fromSocket(socket, logger: logger),
           logger: logger,
         ),
+        toolContext: toolContext,
         notifyingLogger: notifyingLogger,
-        artifacts: artifacts,
         fileSystem: fileSystem,
         platform: platform,
         processManager: processManager,
@@ -268,7 +263,6 @@ class DaemonServer {
     });
 
     // Wait indefinitely until the server closes.
-    await subscription.asFuture<void>();
     await subscription.cancel();
   }
 }
@@ -282,11 +276,10 @@ typedef CommandHandlerWithBinary = Future<Object?> Function(
 class Daemon {
   Daemon(
     this.connection, {
-    this.toolContext,
+    ToolContext? toolContext,
     Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
-    Artifacts? artifacts,
     DeviceManager? deviceManager,
     required FeatureFlags featureFlags,
     FileSystem? fileSystem,
@@ -301,13 +294,11 @@ class Daemon {
     Stdio? stdio,
     SystemClock? systemClock,
     AnsiTerminal? terminal,
-  }) : _toolContext = toolContext,
-       _stdio = stdio,
+  }) : _stdio = stdio,
        _logger = logger ?? BufferLogger.test(),
        _fs =
            fileSystem ??
-           LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, ShutdownHooks()),
-       _artifacts = artifacts {
+           LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, ShutdownHooks()) {
     final Platform p = platform ?? const LocalPlatform();
     final ProcessManager pm = processManager ?? const LocalProcessManager();
     final AnsiTerminal term = terminal ?? AnsiTerminal(stdio: stdio ?? Stdio(), platform: p);
@@ -330,13 +321,12 @@ class Daemon {
     registerDomain(
       appDomain = AppDomain(
         this,
+        toolContext: toolContext,
         analytics: an,
-        artifacts: artifacts,
         fileSystem: _fs,
         logger: _logger,
         outputPreferences: prefs,
         platform: p,
-        processManager: pm,
         systemClock: clock,
         terminal: term,
       ),
@@ -373,13 +363,13 @@ class Daemon {
   }
 
   factory Daemon.createMachineDaemon({
+    ToolContext? toolContext,
     required FeatureFlags featureFlags,
     required Logger logger,
     required Stdio stdio,
     Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
-    Artifacts? artifacts,
     DeviceManager? deviceManager,
     FileSystem? fileSystem,
     Java? java,
@@ -394,13 +384,13 @@ class Daemon {
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
         logger: logger,
       ),
+      toolContext: toolContext,
       notifyingLogger: (logger is NotifyingLogger)
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
       logToStdout: true,
       stdio: stdio,
       logger: logger,
-      artifacts: artifacts,
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
@@ -421,7 +411,6 @@ class Daemon {
   final Stdio? _stdio;
   final Logger _logger;
   final FileSystem _fs;
-  final Artifacts? _artifacts;
 
   late DaemonDomain daemonDomain;
   late AppDomain appDomain;
@@ -876,20 +865,15 @@ typedef RunOrAttach = Future<void> Function({
 class AppDomain extends Domain {
   AppDomain(
     Daemon daemon, {
-    this.toolContext,
+    this._toolContext,
     Analytics? analytics,
-    Artifacts? artifacts,
     FileSystem? fileSystem,
     Logger? logger,
     OutputPreferences? outputPreferences,
     Platform? platform,
-    ProcessManager? processManager,
     SystemClock? systemClock,
     AnsiTerminal? terminal,
-  }) : _toolContext = toolContext,
-       _artifacts = artifacts ?? daemon._artifacts,
-       _processManager = processManager ?? const LocalProcessManager(),
-       _fs = fileSystem ?? daemon._fs,
+  }) : _fs = fileSystem ?? daemon._fs,
        _platform = platform ?? const LocalPlatform(),
        _analytics = analytics ?? const NoOpAnalytics(),
        _systemClock = systemClock ?? const SystemClock(),
@@ -908,8 +892,6 @@ class AppDomain extends Domain {
     registerHandler('detach', detach);
   }
 
-  final Artifacts? _artifacts;
-  final ProcessManager _processManager;
   final FileSystem _fs;
   final Platform _platform;
   final Analytics _analytics;
@@ -958,34 +940,8 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      artifacts:
-          _artifacts ??
-          CachedArtifacts(
-            fileSystem: _fs,
-            platform: _platform,
-            cache: Cache(
-              logger: _logger,
-              fileSystem: _fs,
-              platform: _platform,
-              osUtils: OperatingSystemUtils(
-                fileSystem: _fs,
-                logger: _logger,
-                platform: _platform,
-                processManager: _processManager,
-              ),
-            ),
-            operatingSystemUtils: OperatingSystemUtils(
-              fileSystem: _fs,
-              logger: _logger,
-              platform: _platform,
-              processManager: _processManager,
-            ),
-          ),
+      toolContext: _toolContext!,
       buildInfo: options.buildInfo,
-      fileSystem: _fs,
-      logger: _logger,
-      platform: _platform,
-      processManager: _processManager,
       target: target,
       userIdentifier: userIdentifier,
     );

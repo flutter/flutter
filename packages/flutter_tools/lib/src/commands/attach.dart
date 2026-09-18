@@ -5,17 +5,14 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
@@ -349,13 +346,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<ResidentRunner> _discoverVmServiceAndCreateResidentRunner({required Device device}) async {
-    final ToolContext(
-      :Artifacts artifacts,
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = _toolContext;
+    final Logger logger = _toolContext.logger;
 
     final Future<Uri> vmServiceUri = _discoverVmService(device: device);
     vmServiceUri.ignore();
@@ -364,14 +355,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      artifacts: artifacts,
       buildInfo: buildInfo,
-      fileSystem: fs,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
       target: targetFile,
       targetModelOverride: TargetModel(stringArg('target-model')!),
+      toolContext: _toolContext,
       userIdentifier: userIdentifier,
     );
     flutterDevice.vmServiceUri = vmServiceUri;
