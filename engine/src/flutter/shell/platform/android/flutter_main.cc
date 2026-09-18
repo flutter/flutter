@@ -16,6 +16,7 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/paths.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/paths_android.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
@@ -164,7 +165,14 @@ void FlutterMain::Init(JNIEnv* env,
 
     if (fml::IsFile(application_kernel_path)) {
       settings.application_kernel_asset = application_kernel_path;
+      if (settings.assets_path.empty()) {
+        settings.assets_path =
+            fml::paths::GetDirectoryName(application_kernel_path);
+      }
     }
+  }
+  if (settings.assets_path.empty() && appStoragePath != nullptr) {
+    settings.assets_path = fml::jni::JavaStringToString(env, appStoragePath);
   }
 
   settings.task_observer_add = [](intptr_t key, const fml::closure& callback) {
