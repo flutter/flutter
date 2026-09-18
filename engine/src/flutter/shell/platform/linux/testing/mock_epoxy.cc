@@ -387,10 +387,21 @@ EGLBoolean _eglQuerySurface(EGLDisplay dpy,
     return EGL_FALSE;
   }
 
-  // The mock surfaces have no size, so anything drawing to them will see a
-  // size change on the first frame.
+  // The mock surfaces have the size the test asked for, which is zero unless
+  // it was set, so anything drawing to them will see a size change on the
+  // first frame.
   if (value != nullptr) {
-    *value = 0;
+    switch (attribute) {
+      case EGL_WIDTH:
+        *value = mock->egl_surface_width;
+        break;
+      case EGL_HEIGHT:
+        *value = mock->egl_surface_height;
+        break;
+      default:
+        *value = 0;
+        break;
+    }
   }
 
   return bool_success();
@@ -423,6 +434,10 @@ EGLBoolean _eglSwapInterval(EGLDisplay dpy, EGLint interval) {
 EGLBoolean _eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
   if (!check_display(dpy) || !check_initialized(dpy)) {
     return EGL_FALSE;
+  }
+
+  if (mock) {
+    mock->eglSwapBuffers();
   }
 
   return bool_success();
@@ -500,6 +515,12 @@ void _glClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a) {
   mock->glClearColor(r, g, b, a);
 }
 
+void _glClear(GLbitfield mask) {
+  if (mock) {
+    mock->glClear(mask);
+  }
+}
+
 GLuint _glCreateShader(GLenum shaderType) {
   return 0;
 }
@@ -527,6 +548,12 @@ void _glDeleteTextures(GLsizei n, const GLuint* textures) {
 void _glFinish() {
   if (mock) {
     mock->glFinish();
+  }
+}
+
+void _glViewport(GLint x, GLint y, GLsizei width, GLsizei height) {
+  if (mock) {
+    mock->glViewport(x, y, width, height);
   }
 }
 
@@ -612,6 +639,12 @@ static void _glGetFramebufferAttachmentParameteriv(GLenum target,
   } else if (pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME) {
     auto it = framebuffer_renderbuffers.find(attachment);
     *params = (it != framebuffer_renderbuffers.end()) ? it->second : 0;
+  }
+}
+
+static void _glGetFloatv(GLenum pname, GLfloat* data) {
+  if (mock) {
+    mock->glGetFloatv(pname, data);
   }
 }
 
@@ -851,6 +884,7 @@ void (*epoxy_glDeleteFramebuffers)(GLsizei n, const GLuint* framebuffers);
 void (*expoxy_glDeleteShader)(GLuint shader);
 void (*epoxy_glDeleteTextures)(GLsizei n, const GLuint* textures);
 void (*epoxy_glFinish)();
+void (*epoxy_glViewport)(GLint x, GLint y, GLsizei width, GLsizei height);
 void (*epoxy_glFramebufferRenderbuffer)(GLenum target,
                                         GLenum attachment,
                                         GLenum renderbuffertarget,
@@ -944,6 +978,7 @@ static void library_init() {
   epoxy_glBindTexture = _glBindTexture;
   epoxy_glBlitFramebuffer = _glBlitFramebuffer;
   epoxy_glCompileShader = _glCompileShader;
+  epoxy_glClear = _glClear;
   epoxy_glClearColor = _glClearColor;
   epoxy_glCreateProgram = _glCreateProgram;
   epoxy_glCreateShader = _glCreateShader;
@@ -952,6 +987,7 @@ static void library_init() {
   epoxy_glDeleteShader = _glDeleteShader;
   epoxy_glDeleteTextures = _glDeleteTextures;
   epoxy_glFinish = _glFinish;
+  epoxy_glViewport = _glViewport;
   epoxy_glDisable = _glDisable;
   epoxy_glEnable = _glEnable;
   epoxy_glFramebufferRenderbuffer = _glFramebufferRenderbuffer;
@@ -963,6 +999,7 @@ static void library_init() {
   epoxy_glGenTextures = _glGenTextures;
   epoxy_glGetFramebufferAttachmentParameteriv =
       _glGetFramebufferAttachmentParameteriv;
+  epoxy_glGetFloatv = _glGetFloatv;
   epoxy_glGetIntegerv = _glGetIntegerv;
   epoxy_glGetProgramiv = _glGetProgramiv;
   epoxy_glGetProgramInfoLog = _glGetProgramInfoLog;

@@ -20,13 +20,10 @@ import '../runner/flutter_command.dart';
 class CleanCommand extends FlutterCommand {
   CleanCommand({
     required ToolContext toolContext,
-    required Xcode xcode,
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
-    bool verbose = false,
+    required this._xcode,
+    required this._xcodeProjectInterpreter,
+    this._verbose = false,
   }) : _toolContext = toolContext,
-       _xcode = xcode,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter,
-       _verbose = verbose,
        super(toolContext: toolContext) {
     requiresPubspecYaml();
     argParser.addOption(
@@ -212,7 +209,6 @@ class CleanCommand extends FlutterCommand {
     try {
       file.deleteSync(recursive: true);
     } on FileSystemException catch (error) {
-      deletionStatus.stop();
       final String path = file.path;
       if (_toolContext.platform.isWindows) {
         if (await _tryStopGradleAndRetryDelete(file, project)) {
@@ -230,6 +226,8 @@ class CleanCommand extends FlutterCommand {
       } else {
         logger.printError('Failed to remove $path: $error');
       }
+    } finally {
+      deletionStatus.stop();
     }
   }
 
