@@ -118,7 +118,8 @@ class Variants : public GenericVariants {
 
   void CreateDefault(const Context& context,
                      const ContentContextOptions& options,
-                     const std::vector<Scalar>& constants = {}) {
+                     const std::vector<Scalar>& constants = {},
+                     bool high_priority = false) {
     std::optional<PipelineDescriptor> desc =
         PipelineHandleT::Builder::MakeDefaultPipelineDescriptor(context,
                                                                 constants);
@@ -128,6 +129,7 @@ class Variants : public GenericVariants {
     }
     context.GetPipelineLibrary()->LogPipelineCreation(*desc);
     options.ApplyToPipelineDescriptor(*desc);
+    desc->SetHighPriority(high_priority);
     desc_ = desc;
     SetDefault(options, std::make_unique<PipelineHandleT>(context, desc_,
                                                           /*async=*/true));
@@ -632,18 +634,24 @@ ContentContext::ContentContext(
         *context_, options,
         {static_cast<Scalar>(
             GetContext()->GetCapabilities()->GetDefaultGlyphAtlasFormat() ==
-            PixelFormat::kA8UNormInt)});
-    pipelines_->solid_fill.CreateDefault(*context_, options);
-    pipelines_->texture.CreateDefault(*context_, options);
-    pipelines_->fast_gradient.CreateDefault(*context_, options);
-    pipelines_->circle.CreateDefault(*context_, options);
+            PixelFormat::kA8UNormInt)},
+        /*high_priority=*/true);
+    pipelines_->solid_fill.CreateDefault(*context_, options, {},
+                                         /*high_priority=*/true);
+    pipelines_->texture.CreateDefault(*context_, options, {},
+                                      /*high_priority=*/true);
+    pipelines_->fast_gradient.CreateDefault(*context_, options, {},
+                                            /*high_priority=*/true);
+    pipelines_->circle.CreateDefault(*context_, options, {},
+                                     /*high_priority=*/true);
     if (context_->GetFlags().use_sdfs) {
       pipelines_->uber_sdf.CreateDefault(*context_, options);
       pipelines_->complex_rse.CreateDefault(*context_, options);
     }
 
     if (context_->GetCapabilities()->SupportsSSBO()) {
-      pipelines_->linear_gradient_ssbo_fill.CreateDefault(*context_, options);
+      pipelines_->linear_gradient_ssbo_fill.CreateDefault(
+          *context_, options, {}, /*high_priority=*/true);
       pipelines_->radial_gradient_ssbo_fill.CreateDefault(*context_, options);
       pipelines_->conical_gradient_ssbo_fill.CreateDefault(*context_, options,
                                                            {3.0});
@@ -655,8 +663,8 @@ ContentContext::ContentContext(
           *context_, options, {0.0});
       pipelines_->sweep_gradient_ssbo_fill.CreateDefault(*context_, options);
     } else {
-      pipelines_->linear_gradient_uniform_fill.CreateDefault(*context_,
-                                                             options);
+      pipelines_->linear_gradient_uniform_fill.CreateDefault(
+          *context_, options, {}, /*high_priority=*/true);
       pipelines_->radial_gradient_uniform_fill.CreateDefault(*context_,
                                                              options);
       pipelines_->conical_gradient_uniform_fill.CreateDefault(*context_,
@@ -669,7 +677,8 @@ ContentContext::ContentContext(
           *context_, options);
       pipelines_->sweep_gradient_uniform_fill.CreateDefault(*context_, options);
 
-      pipelines_->linear_gradient_fill.CreateDefault(*context_, options);
+      pipelines_->linear_gradient_fill.CreateDefault(*context_, options, {},
+                                                     /*high_priority=*/true);
       pipelines_->radial_gradient_fill.CreateDefault(*context_, options);
       pipelines_->conical_gradient_fill.CreateDefault(*context_, options);
       pipelines_->conical_gradient_fill_radial.CreateDefault(*context_,
@@ -699,23 +708,30 @@ ContentContext::ContentContext(
     }
     clip_pipeline_descriptor->SetColorAttachmentDescriptors(
         std::move(clip_color_attachments));
+    // Clipping is on the critical path for the first frame. This call site
+    // builds its descriptor by hand rather than going through CreateDefault,
+    // so the priority has to be set directly.
+    clip_pipeline_descriptor->SetHighPriority(true);
     pipelines_->clip.SetDefault(
         options,
         std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
     pipelines_->texture_downsample.CreateDefault(
-        *context_, options_no_msaa_no_depth_stencil);
+        *context_, options_no_msaa_no_depth_stencil, {},
+        /*high_priority=*/true);
     pipelines_->texture_downsample_bounded.CreateDefault(
-        *context_, options_no_msaa_no_depth_stencil);
-    pipelines_->rrect_blur.CreateDefault(*context_, options_trianglestrip);
-    pipelines_->rsuperellipse_blur.CreateDefault(*context_,
-                                                 options_trianglestrip);
+        *context_, options_no_msaa_no_depth_stencil, {},
+        /*high_priority=*/true);
+    pipelines_->rrect_blur.CreateDefault(*context_, options_trianglestrip, {},
+                                         /*high_priority=*/true);
+    pipelines_->rsuperellipse_blur.CreateDefault(
+        *context_, options_trianglestrip, {}, /*high_priority=*/true);
     pipelines_->texture_strict_src.CreateDefault(*context_, options);
     pipelines_->tiled_texture.CreateDefault(*context_, options,
                                             {supports_decal});
     pipelines_->gaussian_blur.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil, {supports_decal});
-    pipelines_->border_mask_blur.CreateDefault(*context_,
-                                               options_trianglestrip);
+    pipelines_->border_mask_blur.CreateDefault(*context_, options_trianglestrip,
+                                               {}, /*high_priority=*/true);
     pipelines_->color_matrix_color_filter.CreateDefault(*context_,
                                                         options_trianglestrip);
     pipelines_->shadow_vertices_.CreateDefault(*context_, options);
@@ -733,7 +749,8 @@ ContentContext::ContentContext(
     pipelines_->destination_blend.CreateDefault(
         *context_, options_trianglestrip, porter_duff_constants[2]);
     pipelines_->source_over_blend.CreateDefault(
-        *context_, options_trianglestrip, porter_duff_constants[3]);
+        *context_, options_trianglestrip, porter_duff_constants[3],
+        /*high_priority=*/true);
     pipelines_->destination_over_blend.CreateDefault(
         *context_, options_trianglestrip, porter_duff_constants[4]);
     pipelines_->source_in_blend.CreateDefault(*context_, options_trianglestrip,
