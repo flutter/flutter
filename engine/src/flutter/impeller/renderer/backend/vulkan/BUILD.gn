@@ -137,6 +137,8 @@ impeller_component("vulkan") {
     "texture_source_vk.h",
     "texture_vk.cc",
     "texture_vk.h",
+    "texture_wrapper_vk.cc",
+    "texture_wrapper_vk.h",
     "tracked_objects_vk.cc",
     "tracked_objects_vk.h",
     "vertex_descriptor_vk.cc",

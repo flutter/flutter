@@ -16,42 +16,12 @@
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/surface_vk.h"
+#include "impeller/renderer/backend/vulkan/texture_wrapper_vk.h"
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/surface.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 
 namespace flutter {
-
-class WrappedTextureSourceVK : public impeller::TextureSourceVK {
- public:
-  explicit WrappedTextureSourceVK(impeller::vk::Image image,
-                                  impeller::vk::UniqueImageView image_view,
-                                  impeller::TextureDescriptor desc)
-      : TextureSourceVK(desc),
-        image_(image),
-        image_view_(std::move(image_view)) {}
-
-  ~WrappedTextureSourceVK() override = default;
-
- private:
-  impeller::vk::Image GetImage() const override { return image_; }
-
-  impeller::vk::ImageView GetImageView() const override {
-    return image_view_.get();
-  }
-
-  impeller::vk::ImageView GetRenderTargetView(
-      uint32_t mip_level,
-      uint32_t array_layer) const override {
-    // Swapchain images are always a single 2D mip and layer.
-    return image_view_.get();
-  }
-
-  bool IsSwapchainImage() const override { return true; }
-
-  impeller::vk::Image image_;
-  impeller::vk::UniqueImageView image_view_;
-};
 
 GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
     GPUSurfaceVulkanDelegate* delegate,
@@ -181,9 +151,6 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
       return nullptr;
     }
 
-    impeller::ContextVK& context_vk =
-        impeller::ContextVK::Cast(*impeller_context_);
-
     impeller::vk::Image vk_image =
         impeller::vk::Image(reinterpret_cast<VkImage>(flutter_image.image));
 
@@ -195,22 +162,9 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
     desc.compression_type = impeller::CompressionType::kLossless;
     desc.usage = impeller::TextureUsage::kRenderTarget;
 
-    impeller::vk::ImageViewCreateInfo view_info = {};
-    view_info.viewType = impeller::vk::ImageViewType::e2D;
-    view_info.format = ToVKImageFormat(desc.format);
-    view_info.subresourceRange.aspectMask =
-        impeller::vk::ImageAspectFlagBits::eColor;
-    view_info.subresourceRange.baseMipLevel = 0u;
-    view_info.subresourceRange.baseArrayLayer = 0u;
-    view_info.subresourceRange.levelCount = 1;
-    view_info.subresourceRange.layerCount = 1;
-    view_info.image = vk_image;
-
-    auto [result, image_view] =
-        context_vk.GetDevice().createImageViewUnique(view_info);
-    if (result != impeller::vk::Result::eSuccess) {
-      FML_LOG(ERROR) << "Failed to create image view for provided image: "
-                     << impeller::vk::to_string(result);
+    auto wrapped_onscreen =
+        impeller::WrapTextureSourceVK(impeller_context_, desc, vk_image);
+    if (!wrapped_onscreen) {
       return nullptr;
     }
 
@@ -222,8 +176,6 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
       transients_size_ = frame_size;
     }
 
-    auto wrapped_onscreen = std::make_shared<WrappedTextureSourceVK>(
-        vk_image, std::move(image_view), desc);
     auto surface = impeller::SurfaceVK::WrapSwapchainImage(
         transients_, wrapped_onscreen, [&]() -> bool { return true; });
     impeller::RenderTarget render_target = surface->GetRenderTarget();
