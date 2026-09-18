@@ -14,6 +14,9 @@
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
+#include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_backingstore_producer.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_compositor.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test_context_vulkan.h"
 #include "flutter/shell/platform/embedder/tests/embedder_unittests_util.h"
 #include "flutter/testing/testing.h"
@@ -98,6 +101,66 @@ static_assert(
 TEST_F(EmbedderTest, CanGetVulkanEmbedderContext) {
   auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
+}
+
+/// Vulkan backing stores under Impeller.
+///
+/// `CreateEmbedderRenderTarget` had no Impeller path for
+/// `kFlutterBackingStoreTypeVulkan`, so it returned no render target and
+/// rasterization failed on every frame -- the compositor's present callback was
+/// never reached. This is the regression test for that: it asserts the frame
+/// reaches the compositor as a Vulkan backing store, which is exactly what did
+/// not happen before.
+///
+/// Deliberately not a golden-image comparison. The failure being guarded
+/// against is "no frame at all", and asserting arrival keeps the test free of a
+/// per-backend fixture.
+TEST_F(EmbedderTest, CanRenderWithImpellerVulkan) {
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderConfigBuilder builder(context);
+
+  builder.AddCommandLineArgument("--enable-impeller");
+  builder.SetDartEntrypoint("render_impeller_test");
+  builder.SetSurface(DlISize(800, 600));
+  builder.SetCompositor();
+  builder.SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType::kVulkanImage);
+
+  fml::AutoResetWaitableEvent latch;
+  bool layer_was_a_vulkan_backing_store = false;
+  context.GetCompositor().SetNextPresentCallback(
+      [&](FlutterViewId view_id, const FlutterLayer** layers,
+          size_t layers_count) {
+        if (layers_count == 1u &&
+            layers[0]->type == kFlutterLayerContentTypeBackingStore &&
+            layers[0]->backing_store->type == kFlutterBackingStoreTypeVulkan) {
+          layer_was_a_vulkan_backing_store = true;
+        }
+        latch.Signal();
+      });
+
+  auto rendered_scene = context.GetNextSceneImage();
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  // Before the Impeller path existed this never fired: with no render target
+  // the frame was dropped ahead of the compositor. Bounded, so that failure
+  // reads as a failure rather than a hang until the suite timeout.
+  // WaitWithTimeout returns true when it timed out.
+  ASSERT_FALSE(latch.WaitWithTimeout(fml::TimeDelta::FromSeconds(30)))
+      << "no frame reached the compositor";
+  EXPECT_TRUE(layer_was_a_vulkan_backing_store);
+
+  ASSERT_TRUE(ImageMatchesFixture("impeller_test.png", rendered_scene));
 }
 
 TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
