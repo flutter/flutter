@@ -5,11 +5,17 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_TEXT_INPUT_PLUGIN_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_TEXT_INPUT_PLUGIN_H_
 
+#include <windows.h>
+
 #include <array>
+#include <chrono>
+#include <cstdint>
+#include <functional>
 #include <map>
 #include <memory>
 
 #include "flutter/fml/macros.h"
+#include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/geometry/geometry.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/method_channel.h"
@@ -18,18 +24,32 @@
 #include "flutter/shell/platform/common/text_input_model.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
+#include "flutter/shell/platform/windows/tsf_text_store.h"
 
 namespace flutter {
 
 class FlutterWindowsEngine;
+class OnScreenKeyboard;
+class TaskRunner;
+class TsfBridge;
 
 // Implements a text input plugin.
 //
 // Specifically handles window events within windows.
-class TextInputPlugin {
+class TextInputPlugin : public TsfTextStoreDelegate {
  public:
+  // Defers a non-editable TSF focus long enough for a field-to-field
+  // clearClient/setClient pair to retain the editable document.
+  static constexpr std::chrono::milliseconds kTsfFocusDebounce{300};
+
+  // |on_screen_keyboard| and |tsf_bridge| may be null in tests. Ownership
+  // remains with the engine.
   TextInputPlugin(flutter::BinaryMessenger* messenger,
-                  FlutterWindowsEngine* engine);
+                  FlutterWindowsEngine* engine,
+                  OnScreenKeyboard* on_screen_keyboard = nullptr,
+                  TsfBridge* tsf_bridge = nullptr,
+                  TaskRunner* task_runner = nullptr,
+                  std::function<HWND()> get_focus = ::GetFocus);
 
   virtual ~TextInputPlugin();
 
@@ -72,14 +92,46 @@ class TextInputPlugin {
 
   // Called when a view is removed from the engine.
   //
-  // If the removed view is the currently active view for text input, resets
-  // the active model and view id to prevent stale references. The implicit
-  // view is excluded from this reset.
+  // If the removed view is the currently active view for text input, dismisses
+  // the on-screen keyboard and resets the active model and view id to prevent
+  // stale references. The implicit view is excluded from this reset.
   void OnViewRemoved(FlutterViewId view_id);
+
+  // Records the device kind of the most recent pointer event.
+  //
+  // |TextInput.show| requests the on-screen keyboard only for touch or pen.
+  // Focus changes are owned by the framework's text-input lifecycle, not
+  // engine hit testing.
+  void SetLastPointerKind(FlutterPointerDeviceKind device_kind);
+
+  // Invalidates the pointer gesture for the active view when its HWND loses
+  // focus. Lifecycle show messages after refocus must not reuse a touch from
+  // the previous focus epoch.
+  void OnWindowUnfocused(HWND hwnd);
+
+  FlutterPointerDeviceKind last_pointer_kind() const {
+    return last_pointer_kind_;
+  }
+
+  // The on-screen keyboard, if one was injected.
+  OnScreenKeyboard* on_screen_keyboard() const { return on_screen_keyboard_; }
+
+  // |TsfTextStoreDelegate|
+  std::u16string GetTsfText() const override;
+  TextRange GetTsfSelection() const override;
+  void SetTsfSelection(const TextRange& range) override;
+  void ReplaceTsfText(const TextRange& range,
+                      const std::u16string& text) override;
+  void OnTsfComposeBegin() override;
+  void OnTsfComposeUpdate(const std::u16string& text, int cursor_pos) override;
+  void OnTsfComposeEnd() override;
+  Rect GetTsfCaretRect() const override;
+  HWND GetTsfWindowHandle() const override;
 
  private:
   // Allows modifying the TextInputPlugin in tests.
   friend class TextInputPluginModifier;
+  friend class EngineModifier;
 
   // Sends the current state of the given model to the Flutter engine.
   void SendStateUpdate(const TextInputModel& model);
@@ -100,11 +152,62 @@ class TextInputPlugin {
   // cursor rect in the PipelineOwner root coordinate system.
   Rect GetCursorRect() const;
 
+  // HWND of the active text-input view, or null if the view is missing.
+  HWND GetClientWindowHandle() const;
+
+  // Whether |hwnd| currently has Win32 focus.
+  bool ClientWindowHasFocus(HWND hwnd) const;
+
+  // Requests the on-screen keyboard if a client is attached, the last pointer
+  // was touch or pen, and the client HWND has focus.
+  void MaybeDisplayOnScreenKeyboard();
+
+  // Dismisses the on-screen keyboard if no text client is attached.
+  void MaybeDismissOnScreenKeyboard();
+
+  // Dismisses the on-screen keyboard for the active client view, if any.
+  void DismissOnScreenKeyboard();
+
+  // Focuses the TSF editable or non-editable document for the active view.
+  void FocusTsfEditable();
+  void FocusTsfNonEditable();
+  void AbortTsfComposition();
+
+  // Defers the non-editable document switch so a field-to-field
+  // clearClient/setClient pair does not hide the keyboard between fields.
+  void ScheduleTsfNonEditable();
+  void CancelPendingTsfNonEditable();
+
   // The MethodChannel used for communication with the Flutter engine.
   std::unique_ptr<flutter::MethodChannel<rapidjson::Document>> channel_;
 
   // The associated |FlutterWindowsEngine|.
   FlutterWindowsEngine* engine_;
+
+  // The on-screen keyboard used to show and hide the Windows touch keyboard.
+  //
+  // May be null in tests.
+  OnScreenKeyboard* on_screen_keyboard_ = nullptr;
+
+  // TSF IME bridge. May be null in tests or when TSF is unavailable.
+  TsfBridge* tsf_bridge_ = nullptr;
+
+  // Task runner used to defer TSF document changes. Owned by the engine in
+  // production and injectable for deterministic tests.
+  TaskRunner* task_runner_ = nullptr;
+
+  // Win32 focus lookup. Injectable so unit tests do not depend on OS focus.
+  std::function<HWND()> get_focus_;
+
+  // Device kind of the last pointer event. Mouse/unknown does not Display.
+  FlutterPointerDeviceKind last_pointer_kind_ = kFlutterPointerDeviceKindMouse;
+
+  // Whether |last_pointer_kind_| was recorded during the current HWND focus
+  // epoch.
+  bool pointer_gesture_is_valid_ = false;
+
+  // Incremented to cancel a deferred non-editable TSF document switch.
+  uint64_t tsf_focus_generation_ = 0;
 
   // The active client id.
   int client_id_;
@@ -142,6 +245,8 @@ class TextInputPlugin {
       0.0, 0.0, 0.0, 0.0,  //
       0.0, 0.0, 0.0, 0.0,  //
       0.0, 0.0, 0.0, 0.0};
+
+  fml::WeakPtrFactory<TextInputPlugin> weak_factory_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextInputPlugin);
 };

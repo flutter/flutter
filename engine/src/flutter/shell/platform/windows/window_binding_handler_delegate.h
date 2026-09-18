@@ -165,6 +165,10 @@ class WindowBindingHandlerDelegate {
   // Called when a window receives an event that may alter application lifecycle
   // state.
   virtual void OnWindowStateEvent(HWND hwnd, WindowStateEvent event) = 0;
+
+  // True when TSF owns the IME session for this view. When true, IMM32
+  // composition messages should not update the text model.
+  virtual bool IsTsfImeActive() const = 0;
 };
 
 }  // namespace flutter

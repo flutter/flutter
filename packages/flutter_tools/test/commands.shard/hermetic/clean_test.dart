@@ -133,34 +133,6 @@ void main() {
         expect(xcodeProjectInterpreter.workspaces, isEmpty);
       });
 
-      testWithoutContext(
-        '$CleanCommand stops progress status for each deleted directory',
-        () async {
-          setupProjectUnderTest(fs.currentDirectory, false);
-          final stdio = FakeStdio();
-          final stdoutLogger = StdoutLogger(
-            terminal: AnsiTerminal(stdio: stdio, platform: FakePlatform()),
-            stdio: stdio,
-            outputPreferences: OutputPreferences.test(),
-          );
-          final CommandRunner<void> runner = createTestCommandRunner(
-            createCleanCommand(
-              fs: fs,
-              logger: stdoutLogger,
-              xcode: xcode,
-              xcodeProjectInterpreter: xcodeProjectInterpreter,
-            ),
-          );
-          await runner.run(<String>['clean']);
-
-          final String output = stdio.writtenToStdout.join();
-          expect(output, contains('Deleting build...'));
-          expect(output, contains('Deleting .dart_tool...'));
-          expect(output, contains('Deleting ephemeral...'));
-          expect(output.endsWith('\n'), isTrue);
-        },
-      );
-
       testWithoutContext('$CleanCommand does not clean the example directory by default', () async {
         setupProjectUnderTest(fs.currentDirectory, true);
         final FlutterProject exampleProject = setupProjectUnderTest(

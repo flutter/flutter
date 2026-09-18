@@ -13,12 +13,35 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
+#include "flutter/shell/platform/windows/on_screen_keyboard.h"
 #include "flutter/shell/platform/windows/text_input_plugin.h"
+#include "flutter/shell/platform/windows/tsf_bridge.h"
 #include "flutter/third_party/accessibility/ax/platform/ax_platform_node_win.h"
 
 namespace flutter {
 
 namespace {
+
+// Bottom inset from the on-screen keyboard, clamped to [0, height].
+//
+// The text input plugin currently owns one active client and the keyboard
+// controller therefore exposes one active-view inset. When Windows multi-view
+// text input supports simultaneous clients, this state must be keyed by view.
+double ClampedKeyboardBottomInset(FlutterWindowsEngine* engine, size_t height) {
+  double bottom = 0.0;
+  if (OnScreenKeyboard* keyboard = engine->on_screen_keyboard()) {
+    bottom = keyboard->physical_bottom_inset();
+  }
+  if (bottom < 0.0) {
+    bottom = 0.0;
+  }
+  const double max_inset = static_cast<double>(height);
+  if (bottom > max_inset) {
+    bottom = max_inset;
+  }
+  return bottom;
+}
+
 // The windows API sends pressure as a normalized value between 0 and 1024
 // See
 // https://learn.microsoft.com/windows/win32/api/winuser/ns-winuser-pointer_pen_info
@@ -286,6 +309,9 @@ void FlutterWindowsView::OnPointerDown(double x,
                                        uint64_t buttons,
                                        uint32_t rotation,
                                        uint32_t pressure) {
+  if (engine_->text_input_plugin()) {
+    engine_->text_input_plugin()->SetLastPointerKind(device_kind);
+  }
   if (buttons != 0) {
     auto state = GetOrCreatePointerState(device_kind, device_id);
     state->buttons |= buttons;
@@ -426,6 +452,11 @@ void FlutterWindowsView::SendWindowMetrics(size_t width,
   event.pixel_ratio = pixel_ratio;
   event.display_id = display_id;
   event.view_id = view_id_;
+  event.physical_view_inset_top = 0.0;
+  event.physical_view_inset_right = 0.0;
+  event.physical_view_inset_left = 0.0;
+  event.physical_view_inset_bottom =
+      ClampedKeyboardBottomInset(engine_, height);
   engine_->SendWindowMetricsEvent(event);
 }
 
@@ -451,6 +482,11 @@ FlutterWindowMetricsEvent FlutterWindowsView::CreateWindowMetricsEvent() const {
   event.pixel_ratio = pixel_ratio;
   event.display_id = display_id;
   event.view_id = view_id_;
+  event.physical_view_inset_top = 0.0;
+  event.physical_view_inset_right = 0.0;
+  event.physical_view_inset_left = 0.0;
+  event.physical_view_inset_bottom =
+      ClampedKeyboardBottomInset(engine_, event.height);
 
   return event;
 }
@@ -920,7 +956,19 @@ void FlutterWindowsView::OnDwmCompositionChanged() {
 }
 
 void FlutterWindowsView::OnWindowStateEvent(HWND hwnd, WindowStateEvent event) {
+  if (event == WindowStateEvent::kUnfocus) {
+    if (TextInputPlugin* text_input = engine_->text_input_plugin()) {
+      text_input->OnWindowUnfocused(hwnd);
+    }
+    if (OnScreenKeyboard* keyboard = engine_->on_screen_keyboard()) {
+      keyboard->Dismiss(hwnd);
+    }
+  }
   engine_->OnWindowStateEvent(hwnd, event);
+}
+
+bool FlutterWindowsView::IsTsfImeActive() const {
+  return engine_->tsf_bridge() && engine_->tsf_bridge()->available();
 }
 
 bool FlutterWindowsView::Focus() {

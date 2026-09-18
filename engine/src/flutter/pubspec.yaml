@@ -179,8 +179,6 @@ dependency_overrides:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/boolean_selector
   cli_config:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/cli_config
-  cli_util:
-    path: ./third_party/dart/third_party/pkg/tools/pkgs/cli_util
   collection:
     path: ./third_party/dart/third_party/pkg/core/pkgs/collection
   convert:
