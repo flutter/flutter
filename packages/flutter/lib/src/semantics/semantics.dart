@@ -462,12 +462,12 @@ sealed class _DebugSemanticsRoleChecks {
   }
 
   static FlutterError? _semanticsOption(SemanticsNode node) {
-    SemanticsNode? currentNode = node;
-    while (currentNode?.parent != null) {
-      if (currentNode?.parent?.role == SemanticsRole.listBox) {
+    SemanticsNode? currentNode = node.parent;
+    while (currentNode != null) {
+      if (currentNode.role == SemanticsRole.listBox) {
         return null;
       }
-      currentNode = currentNode?.parent;
+      currentNode = currentNode.parent;
     }
     return FlutterError('An option must be a descendant of a listBox');
   }
