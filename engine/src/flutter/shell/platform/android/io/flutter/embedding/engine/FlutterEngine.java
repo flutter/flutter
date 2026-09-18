@@ -569,7 +569,19 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     return accessibilityChannel;
   }
 
-  /** System channel that sends Android lifecycle events to Flutter. */
+  /**
+   * System channel that sends Android lifecycle events to Flutter.
+   *
+   * <p>If this engine is not run within a {@code FlutterActivity} or {@code FlutterFragment}, the
+   * user must manually hook up the lifecycle events (e.g., in response to the Android
+   * Activity/Fragment lifecycles or focus changes) and notify the engine via the {@code
+   * LifecycleChannel}. Specifically, call {@link LifecycleChannel#appIsResumed()}, {@link
+   * LifecycleChannel#appIsInactive()}, {@link LifecycleChannel#appIsPaused()}, {@link
+   * LifecycleChannel#appIsDetached()}, {@link LifecycleChannel#aWindowIsFocused()}, and {@link
+   * LifecycleChannel#noWindowsAreFocused()} in response to host lifecycle events and window focus
+   * changes. Otherwise, Flutter's internal lifecycle state will not match the host application's
+   * state, which can cause issues such as paused rendering or missed events.
+   */
   @NonNull
   public LifecycleChannel getLifecycleChannel() {
     return lifecycleChannel;
