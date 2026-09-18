@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
@@ -662,7 +661,6 @@ class RunCommand extends RunCommandBase {
       :Logger logger,
       :OutputPreferences outputPreferences,
       :Platform platform,
-      :ProcessManager processManager,
       :SystemClock systemClock,
       :Terminal terminal,
     ) = toolContext;
@@ -696,7 +694,7 @@ class RunCommand extends RunCommandBase {
         osUtils: toolContext.os,
         outputPreferences: outputPreferences,
         platform: platform,
-        processManager: processManager,
+        processManager: toolContext.processManager,
         projectRootPath: stringArg('project-root'),
         stayResident: stayResident,
         terminal: terminal,
@@ -738,7 +736,7 @@ class RunCommand extends RunCommandBase {
       osUtils: toolContext.os,
       outputPreferences: outputPreferences,
       platform: platform,
-      processManager: processManager,
+      processManager: toolContext.processManager,
       stayResident: stayResident,
       terminal: terminal,
       traceStartup: traceStartup,
@@ -754,7 +752,6 @@ class RunCommand extends RunCommandBase {
       :Logger logger,
       :OutputPreferences outputPreferences,
       :Platform platform,
-      :ProcessManager processManager,
       :Stdio stdio,
       :SystemClock systemClock,
       :AnsiTerminal terminal,
@@ -770,7 +767,7 @@ class RunCommand extends RunCommandBase {
       logger: logger,
       outputPreferences: outputPreferences,
       platform: platform,
-      processManager: processManager,
+      processManager: toolContext.processManager,
       stdio: stdio,
       systemClock: systemClock,
       terminal: terminal,
