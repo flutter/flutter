@@ -57,10 +57,15 @@ VkResult QueueSubmit(VkQueue queue,
                                                    fence);
 }
 
+// Exact match against a string literal. Comparing N bytes includes the
+// terminator: comparing N - 1 matched any name the literal is a prefix of, so
+// "vkQueueSubmit" also claimed "vkQueueSubmit2" and swapped in a function with
+// the wrong signature once a dispatcher resolved both.
 template <size_t N>
 int StrcmpFixed(const char* str1, const char (&str2)[N]) {
-  return strncmp(str1, str2, N - 1);
+  return strncmp(str1, str2, N);
 }
+
 
 PFN_vkVoidFunction GetDeviceProcAddr(VkDevice device, const char* pName) {
   FML_DCHECK(g_vulkan_proc_info.get_device_proc_addr != nullptr);
