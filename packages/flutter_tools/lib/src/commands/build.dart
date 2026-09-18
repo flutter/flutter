@@ -5,7 +5,9 @@
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
+import '../android/gradle.dart';
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -44,6 +46,7 @@ class BuildCommand extends FlutterCommand {
     required FeatureFlags featureFlags,
     required TemplateRenderer templateRenderer,
     required ToolContext toolContext,
+    AndroidBuilder? androidBuilder,
     bool verboseHelp = false,
   }) : _appleContext = appleContext,
        super(toolContext: toolContext, verboseHelp: verboseHelp) {
@@ -64,6 +67,13 @@ class BuildCommand extends FlutterCommand {
       appleContext: appleContext,
       toolContext: toolContext,
     );
+    final AndroidBuilder effectiveAndroidBuilder =
+        androidBuilder ??
+        AndroidGradleBuilder.fromContexts(
+          analytics: analytics,
+          androidContext: androidContext,
+          toolContext: toolContext,
+        );
     _addSubcommand(
       BuildAarCommand(
         androidSdk: androidSdk,
@@ -72,8 +82,24 @@ class BuildCommand extends FlutterCommand {
         verboseHelp: verboseHelp,
       ),
     );
-    _addSubcommand(BuildApkCommand(logger: logger, verboseHelp: verboseHelp));
-    _addSubcommand(BuildAppBundleCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(
+      BuildApkCommand(
+        androidBuilder: effectiveAndroidBuilder,
+        androidContext: androidContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
+    _addSubcommand(
+      BuildAppBundleCommand(
+        androidBuilder: effectiveAndroidBuilder,
+        androidContext: androidContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
     _addSubcommand(
       BuildIOSCommand(
         appleContext: appleContext,
