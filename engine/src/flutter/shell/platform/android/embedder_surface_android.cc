@@ -79,9 +79,11 @@ EmbedderSurfaceAndroid::EmbedderSurfaceAndroid(
       jni_facade_(std::move(jni_facade)),
       task_runners_(task_runners),
       android_meets_hcpp_criteria_(android_meets_hcpp_criteria) {
-  surface_factory_ = std::make_shared<AndroidSurfaceFactoryImpl>(
-      android_context_, enable_impeller, lazy_shader_mode);
-  android_surface_ = surface_factory_->CreateSurface();
+  if (android_context_ && android_context_->IsValid()) {
+    surface_factory_ = std::make_shared<AndroidSurfaceFactoryImpl>(
+        android_context_, enable_impeller, lazy_shader_mode);
+    android_surface_ = surface_factory_->CreateSurface();
+  }
 }
 
 EmbedderSurfaceAndroid::EmbedderSurfaceAndroid(
@@ -200,12 +202,6 @@ void EmbedderSurfaceAndroid::NotifySurfaceWindowChanged(
 void EmbedderSurfaceAndroid::NotifyChanged(const DlISize& size) {
   if (android_surface_) {
     android_surface_->OnScreenSurfaceResize(size);
-  }
-}
-
-void EmbedderSurfaceAndroid::NotifyDestroyed() {
-  if (android_surface_) {
-    android_surface_->TeardownOnScreenContext();
   }
 }
 
