@@ -95,9 +95,8 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
       final T result = operation();
       if (result is Future) {
         return (result.whenComplete(() {
-              ErrorHandlingFileSystem._noExitOnFailure = previousValue;
-            }))
-            as T;
+          ErrorHandlingFileSystem._noExitOnFailure = previousValue;
+        })) as T;
       }
       ErrorHandlingFileSystem._noExitOnFailure = previousValue;
       return result;

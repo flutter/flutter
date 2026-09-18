@@ -298,9 +298,8 @@ class Cache {
       final String Function(String) dirname = fileSystem.path.dirname;
 
       if (platform.script.scheme == 'package') {
-        final String packageConfigPath = Uri.parse(
-          platform.packageConfig!,
-        ).toFilePath(windows: platform.isWindows);
+        final String packageConfigPath = Uri.parse(platform.packageConfig!)
+            .toFilePath(windows: platform.isWindows);
         return normalize(dirname(dirname(dirname(dirname(packageConfigPath)))));
       }
 

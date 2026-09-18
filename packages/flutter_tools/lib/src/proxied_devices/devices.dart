@@ -585,8 +585,11 @@ class _ProxiedForwardedPort extends ForwardedPort {
   }
 }
 
-typedef CreateSocketServer =
-    Future<ServerSocket> Function(Logger logger, int? hostPort, bool? ipv6);
+typedef CreateSocketServer = Future<ServerSocket> Function(
+  Logger logger,
+  int? hostPort,
+  bool? ipv6,
+);
 
 /// A [DevicePortForwarder] for a proxied device.
 ///

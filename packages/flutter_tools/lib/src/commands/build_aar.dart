@@ -131,9 +131,8 @@ class BuildAarCommand extends BuildSubCommand {
     }
     final androidBuildInfo = <AndroidBuildInfo>{};
 
-    final Iterable<CpuArch> targetArchitectures = getValue(
-      _targetPlatform,
-    ).map<CpuArch>(getCpuArchForName);
+    final Iterable<CpuArch> targetArchitectures = getValue(_targetPlatform)
+        .map<CpuArch>(getCpuArchForName);
 
     final String? buildNumberArg = getValue(CommonOptions.buildNumber);
     final String buildNumber = (buildNumberArg != null && buildNumberArg.isNotEmpty)

@@ -343,12 +343,15 @@ class CustomDeviceAppSession {
     if (packageName == null) {
       throwToolExit('Could not start app, name for $_appPackage is unknown.');
     }
-    final List<String> interpolated =
-        interpolateCommand(_device._config.runDebugCommand, <String, String>{
-          'remotePath': '/tmp/',
-          'appName': packageName,
-          'engineOptions': _getEngineOptionsForCmdline(debuggingOptions, traceStartup, route),
-        }, additionalReplacementValues: additionalReplacementValues);
+    final List<String> interpolated = interpolateCommand(
+      _device._config.runDebugCommand,
+      <String, String>{
+        'remotePath': '/tmp/',
+        'appName': packageName,
+        'engineOptions': _getEngineOptionsForCmdline(debuggingOptions, traceStartup, route),
+      },
+      additionalReplacementValues: additionalReplacementValues,
+    );
 
     final Process process = await _processUtils.start(interpolated);
     assert(_process == null);

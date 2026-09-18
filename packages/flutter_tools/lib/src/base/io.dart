@@ -419,12 +419,11 @@ class NetworkInterface implements io.NetworkInterface {
   String toString() => "NetworkInterface('$name', $addresses)";
 }
 
-typedef NetworkInterfaceLister =
-    Future<List<NetworkInterface>> Function({
-      bool includeLoopback,
-      bool includeLinkLocal,
-      io.InternetAddressType type,
-    });
+typedef NetworkInterfaceLister = Future<List<NetworkInterface>> Function({
+  bool includeLoopback,
+  bool includeLinkLocal,
+  io.InternetAddressType type,
+});
 
 NetworkInterfaceLister? _networkInterfaceListerOverride;
 

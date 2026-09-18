@@ -1159,18 +1159,17 @@ class HotRunner extends ResidentRunner {
   }
 }
 
-typedef ReloadSourcesHelper =
-    Future<OperationResult> Function(
-      HotRunner hotRunner,
-      List<FlutterDevice?> flutterDevices,
-      bool? pause,
-      Map<String, dynamic> firstReloadDetails,
-      String? targetPlatform,
-      String? sdkName,
-      bool? emulator,
-      String? reason,
-      Analytics analytics,
-    );
+typedef ReloadSourcesHelper = Future<OperationResult> Function(
+  HotRunner hotRunner,
+  List<FlutterDevice?> flutterDevices,
+  bool? pause,
+  Map<String, dynamic> firstReloadDetails,
+  String? targetPlatform,
+  String? sdkName,
+  bool? emulator,
+  String? reason,
+  Analytics analytics,
+);
 
 @visibleForTesting
 Future<OperationResult> defaultReloadSourcesHelper(
@@ -1195,27 +1194,25 @@ Future<OperationResult> defaultReloadSourcesHelper(
       pause: pause,
     );
     allReportsFutures.add(
-      Future.wait(reportFutures).then<DeviceReloadReport?>((
-        List<vm_service.ReloadReport> reports,
-      ) async {
-        // TODO(aam): Investigate why we are validating only first reload report,
-        // which seems to be current behavior
-        if (reports.isEmpty) {
-          return null;
-        }
-        final vm_service.ReloadReport firstReport = reports.first;
-        // Don't print errors because they will be printed further down when
-        // `validateReloadReport` is called again.
-        await device.updateReloadStatus(
-          HotRunner.validateReloadReport(firstReport, printErrors: false),
-        );
-        return DeviceReloadReport(device, reports);
-      }),
+      Future.wait(reportFutures)
+          .then<DeviceReloadReport?>((List<vm_service.ReloadReport> reports) async {
+            // TODO(aam): Investigate why we are validating only first reload report,
+            // which seems to be current behavior
+            if (reports.isEmpty) {
+              return null;
+            }
+            final vm_service.ReloadReport firstReport = reports.first;
+            // Don't print errors because they will be printed further down when
+            // `validateReloadReport` is called again.
+            await device.updateReloadStatus(
+              HotRunner.validateReloadReport(firstReport, printErrors: false),
+            );
+            return DeviceReloadReport(device, reports);
+          }),
     );
   }
-  final Iterable<DeviceReloadReport> reports = (await Future.wait(
-    allReportsFutures,
-  )).whereType<DeviceReloadReport>();
+  final Iterable<DeviceReloadReport> reports = (await Future.wait(allReportsFutures))
+      .whereType<DeviceReloadReport>();
   final vm_service.ReloadReport? reloadReport = reports.isEmpty ? null : reports.first.reports[0];
   if (reloadReport == null || !HotRunner.validateReloadReport(reloadReport)) {
     analytics.send(
@@ -1285,13 +1282,12 @@ class ReassembleResult {
   final bool shouldReportReloadTime;
 }
 
-typedef ReassembleHelper =
-    Future<ReassembleResult> Function(
-      List<FlutterDevice?> flutterDevices,
-      Map<FlutterDevice?, List<FlutterView>> viewCache,
-      void Function(String message)? onSlow,
-      String reloadMessage,
-    );
+typedef ReassembleHelper = Future<ReassembleResult> Function(
+  List<FlutterDevice?> flutterDevices,
+  Map<FlutterDevice?, List<FlutterView>> viewCache,
+  void Function(String message)? onSlow,
+  String reloadMessage,
+);
 
 Future<ReassembleResult> _defaultReassembleHelper(
   List<FlutterDevice?> flutterDevices,

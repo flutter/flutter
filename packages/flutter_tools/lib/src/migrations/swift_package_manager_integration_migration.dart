@@ -441,11 +441,9 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
 
     final String scriptText;
     if (_platform == FlutterDarwinPlatform.ios) {
-      scriptText =
-          r'scriptText = "/bin/sh &quot;$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh&quot; prepare&#10;">';
+      scriptText = r'scriptText = "/bin/sh &quot;$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh&quot; prepare&#10;">';
     } else {
-      scriptText =
-          r'scriptText = "&quot;$FLUTTER_ROOT&quot;/packages/flutter_tools/bin/macos_assemble.sh prepare&#10;">';
+      scriptText = r'scriptText = "&quot;$FLUTTER_ROOT&quot;/packages/flutter_tools/bin/macos_assemble.sh prepare&#10;">';
     }
 
     var newContent =

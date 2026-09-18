@@ -89,8 +89,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     parser.addOption(
       'description',
       defaultsTo: 'A new Flutter project.',
-      help:
-          'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
+      help: 'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
     );
     parser.addOption(
       'org',
@@ -120,8 +119,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
       abbr: 'a',
       defaultsTo: 'kotlin',
       allowed: <String>['java', 'kotlin'],
-      help:
-          'The language to use for Android-specific code, either Kotlin (recommended) or Java (legacy).',
+      help: 'The language to use for Android-specific code, either Kotlin (recommended) or Java (legacy).',
     );
     parser.addFlag(
       'skip-name-checks',

@@ -100,9 +100,10 @@ class MdnsVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
           hostVmservicePort: hostVmservicePort,
         );
 
-    return Stream<Uri?>.fromFuture(
-      mDNSDiscoveryFuture,
-    ).where((Uri? uri) => uri != null).cast<Uri>().asBroadcastStream();
+    return Stream<Uri?>.fromFuture(mDNSDiscoveryFuture)
+        .where((Uri? uri) => uri != null)
+        .cast<Uri>()
+        .asBroadcastStream();
   }
 }
 
