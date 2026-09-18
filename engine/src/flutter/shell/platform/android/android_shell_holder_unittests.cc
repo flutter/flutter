@@ -248,8 +248,20 @@ TEST(AndroidShellHolder, CreateWithEmbedderAPI) {
   holder->NotifyLowMemoryWarning();
   holder->GetPlatformView()->SetSemanticsEnabled(true);
   holder->GetPlatformView()->SetAccessibilityFeatures(0);
+  holder->GetEngineForTesting()->DispatchSemanticsAction(
+      0, 1, SemanticsAction::kTap, fml::MallocMapping());
   holder->GetPlatformView()->MarkTextureFrameAvailable(0);
   holder->GetPlatformView()->UnregisterTexture(0);
+  holder->GetPlatformView()->LoadDartDeferredLibrary(
+      1, std::make_unique<const fml::NonOwnedMapping>(nullptr, 0),
+      std::make_unique<const fml::NonOwnedMapping>(nullptr, 0));
+  holder->GetPlatformView()->LoadDartDeferredLibraryError(1, "error", true);
+
+  std::vector<std::unique_ptr<Display>> displays;
+  displays.push_back(std::make_unique<Display>(0, 60.0, 800.0, 600.0, 1.0));
+  holder->GetEngineForTesting()->OnDisplayUpdates(std::move(displays));
+  holder->GetEngineForTesting()->SetNextFrameCallback([]() {});
+  holder->Screenshot(Rasterizer::ScreenshotType::UncompressedImage, false);
   holder->GetPlatformView()->NotifyDestroyed();
 }
 
