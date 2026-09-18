@@ -1,0 +1,16 @@
+name: PR 192929 targeted validation
+
+on:
+  push:
+    branches:
+      - fix-rtl-table-semantics-index
+
+jobs:
+  table-semantics-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Run targeted table semantics tests
+        run: ./bin/flutter test packages/flutter/test/widgets/table_semantics_test.dart
