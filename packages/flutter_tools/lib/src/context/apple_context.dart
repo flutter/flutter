@@ -14,22 +14,15 @@ import '../macos/xcode.dart';
 /// Holds Apple-specific dependencies.
 class AppleContext {
   AppleContext({
-    required CocoaPods Function() cocoaPodsBuilder,
-    required CocoaPodsValidator Function() cocoapodsValidatorBuilder,
-    required IOSSimulatorUtils Function() iosSimulatorUtilsBuilder,
-    required IOSWorkflow Function() iosWorkflowBuilder,
-    required PlistParser Function() plistParserBuilder,
-    required XCDevice Function() xcdeviceBuilder,
-    required Xcode Function() xcodeBuilder,
-    required XcodeProjectInterpreter Function() xcodeProjectInterpreterBuilder,
-  }) : _cocoaPodsBuilder = cocoaPodsBuilder,
-       _cocoapodsValidatorBuilder = cocoapodsValidatorBuilder,
-       _iosSimulatorUtilsBuilder = iosSimulatorUtilsBuilder,
-       _iosWorkflowBuilder = iosWorkflowBuilder,
-       _plistParserBuilder = plistParserBuilder,
-       _xcdeviceBuilder = xcdeviceBuilder,
-       _xcodeBuilder = xcodeBuilder,
-       _xcodeProjectInterpreterBuilder = xcodeProjectInterpreterBuilder;
+    required this._cocoaPodsBuilder,
+    required this._cocoapodsValidatorBuilder,
+    required this._iosSimulatorUtilsBuilder,
+    required this._iosWorkflowBuilder,
+    required this._plistParserBuilder,
+    required this._xcdeviceBuilder,
+    required this._xcodeBuilder,
+    required this._xcodeProjectInterpreterBuilder,
+  });
 
   /// Interacts with and executes CocoaPods dependency management commands.
   late final CocoaPods cocoaPods = _cocoaPodsBuilder();
