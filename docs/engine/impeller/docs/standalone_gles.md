@@ -168,7 +168,7 @@ auto surface =
     );
 ```
 
-## Set the the Swap Callback
+## Set the Swap Callback
 
 The swap callback will get invoked when the renderer presents the surface. Remember in our list of things to do, we need to first tell the reactor worker to flush all pending OpenGL operations and then present the surface. Set the swap callback appropriately.
 
