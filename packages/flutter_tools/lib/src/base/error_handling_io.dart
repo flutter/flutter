@@ -1455,6 +1455,7 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   const kSharingViolation = 32;
   const kLockViolation = 33;
   const kDeviceFull = 112;
+  const kDirectoryNameInvalid = 267;
   const kDeviceDoesNotExist = 433;
   const kSystemIntegrityPolicyViolation = 454;
   const kFatalDeviceHardwareError = 483;
@@ -1470,6 +1471,10 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
           '\n$e\n'
           'This can sometimes happen if the file was deleted or moved while the tool was running.'
           ' Try running "flutter clean" and try again.',
+    kDirectoryNameInvalid =>
+      '${message != null ? "$message. " : ""}The directory name is invalid.'
+          '\n$e\n'
+          'Please ensure that the directory path is valid and refers to a directory.',
     kAccessDenied || kWriteProtect || kPrivilegeNotHeld =>
       '$message. The flutter tool cannot access the file or directory.\n'
           'Please ensure that the SDK and/or project is installed in a location '
