@@ -638,8 +638,8 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
     }
 
     int index = _itemOffsetCache.length - 1;
+    final int? childCount = childManager.estimatedChildCount;
     while (_itemOffsetCache[index] < scrollOffset) {
-      final int? childCount = childManager.estimatedChildCount;
       if (childCount != null && index >= childCount) {
         break;
       }
@@ -655,7 +655,7 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
     var result = high;
     while (low <= high) {
       final int mid = (low + high) ~/ 2;
-      if (_itemOffsetCache[mid] >= scrollOffset) {
+      if (_itemOffsetCache[mid] > scrollOffset) {
         result = mid;
         high = mid - 1;
       } else {
@@ -667,7 +667,9 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
 
   @override
   BoxConstraints _getChildConstraints(int index) {
-    final double extent = _getOrCreateItemExtent(index)!;
-    return constraints.asBoxConstraints(minExtent: extent, maxExtent: extent);
+    final double? extent = _getOrCreateItemExtent(index);
+    assert(extent != null, 'The itemExtentBuilder must not return null for valid items being laid out.');
+    final double validExtent = extent ?? 0.0;
+    return constraints.asBoxConstraints(minExtent: validExtent, maxExtent: validExtent);
   }
 }
