@@ -295,8 +295,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     FileSystem? fileSystem,
     Logger? logger,
   }) async {
-    final FileSystem effectiveFs = fileSystem ?? _toolContext.fs;
-    final Logger effectiveLogger = logger ?? _toolContext.logger;
+    final FileSystem effectiveFs = fileSystem ?? toolContext!.fs;
+    final Logger effectiveLogger = logger ?? toolContext!.logger;
     final WebDevServerConfig fileConfig = await WebDevServerConfig.loadFromFile(
       fileSystem: effectiveFs,
       logger: effectiveLogger,
@@ -327,20 +327,17 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     );
     return webDevServerConfig;
   }
-
-  ToolContext get _toolContext => toolContext ?? _fallbackToolContext;
-  late final ToolContext _fallbackToolContext = _FallbackToolContext();
 }
 
 class RunCommand extends RunCommandBase {
   RunCommand({
     this._androidContext,
     this._androidWorkflow,
-    AppleContext? appleContext,
+    required AppleContext appleContext,
     this._buildSystem,
     this._buildTargets,
     this._deviceManager,
-    ToolContext? toolContext,
+    required ToolContext toolContext,
     super.verboseHelp = false,
   }) : _injectedAppleContext = appleContext,
        _injectedToolContext = toolContext {
@@ -425,15 +422,13 @@ class RunCommand extends RunCommandBase {
   final BuildSystem? _buildSystem;
   final BuildTargets? _buildTargets;
   final DeviceManager? _deviceManager;
-  final AppleContext? _injectedAppleContext;
-  final ToolContext? _injectedToolContext;
+  final AppleContext _injectedAppleContext;
+  final ToolContext _injectedToolContext;
 
-  late final AppleContext _fallbackAppleContext = _FallbackAppleContext();
-
-  AppleContext get appleContext => _injectedAppleContext ?? _fallbackAppleContext;
+  AppleContext get appleContext => _injectedAppleContext;
 
   @override
-  ToolContext get toolContext => _injectedToolContext ?? super.toolContext ?? _fallbackToolContext;
+  ToolContext get toolContext => _injectedToolContext;
 
   DeviceManager? get deviceManager => _deviceManager;
 
@@ -561,7 +556,7 @@ class RunCommand extends RunCommandBase {
     if (anyIOSDevices) {
       final IosProject iosProject = FlutterProject.current().ios;
       if (iosProject.exists) {
-        final FileSystem fs = _toolContext.fs;
+        final FileSystem fs = toolContext!.fs;
         final Iterable<File> swiftFiles = iosProject.hostAppRoot
             .listSync(recursive: true, followLinks: false)
             .whereType<File>()
@@ -657,7 +652,7 @@ class RunCommand extends RunCommandBase {
       (Device device) => device.supportsFlavors,
     );
     if (flavor != null && !flavorsSupportedOnEveryDevice) {
-      final Logger logger = _toolContext.logger;
+      final Logger logger = toolContext.logger;
       logger.printWarning(
         '--flavor is only supported for Android, Linux, macOS, iOS, and Windows devices. '
         'Flavor-related features may not function properly and could '
@@ -667,12 +662,12 @@ class RunCommand extends RunCommandBase {
 
     if (argResults!.wasParsed('build')) {
       if (boolArg('build')) {
-        _toolContext.logger.printWarning(
+        toolContext.logger.printWarning(
           'The "--build" flag is deprecated and will be removed in a future release. '
           'Building is the default behavior, so this flag can be safely removed.',
         );
       } else {
-        _toolContext.logger.printWarning(
+        toolContext.logger.printWarning(
           'The "--no-build" flag is deprecated and will be removed in a future release. '
           'To use a prebuilt application, pass "--${FlutterOptions.kUseApplicationBinary}".',
         );
@@ -695,7 +690,7 @@ class RunCommand extends RunCommandBase {
       :ProcessManager processManager,
       :SystemClock systemClock,
       :Terminal terminal,
-    ) = _toolContext;
+    ) = toolContext;
     final Analytics analytics = this.analytics;
 
     final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
@@ -711,19 +706,19 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         analytics: analytics,
         applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
-        artifacts: _toolContext.artifacts,
+        artifacts: toolContext.artifacts,
         benchmarkMode: boolArg('benchmark'),
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
-        cache: _toolContext.cache,
-        config: _toolContext.config,
+        cache: toolContext.cache,
+        config: toolContext.config,
         dartBuilder: hookRunner,
         dillOutputPath: stringArg('output-dill'),
         fileSystem: fs,
-        flutterVersion: _toolContext.flutterVersion,
+        flutterVersion: toolContext.flutterVersion,
         logger: logger,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
-        osUtils: _toolContext.os,
+        osUtils: toolContext.os,
         outputPreferences: outputPreferences,
         platform: platform,
         processManager: processManager,
@@ -755,17 +750,17 @@ class RunCommand extends RunCommandBase {
       target: targetFile,
       analytics: analytics,
       applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
-      artifacts: _toolContext.artifacts,
+      artifacts: toolContext.artifacts,
       awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
       buildSystem: _buildSystem,
       buildTargets: _buildTargets,
-      cache: _toolContext.cache,
-      config: _toolContext.config,
+      cache: toolContext.cache,
+      config: toolContext.config,
       dartBuilder: hookRunner,
       fileSystem: fs,
-      flutterVersion: _toolContext.flutterVersion,
+      flutterVersion: toolContext.flutterVersion,
       logger: logger,
-      osUtils: _toolContext.os,
+      osUtils: toolContext.os,
       outputPreferences: outputPreferences,
       platform: platform,
       processManager: processManager,
@@ -780,6 +775,7 @@ class RunCommand extends RunCommandBase {
   Daemon createMachineDaemon() {
     final Analytics analytics = this.analytics;
     final ToolContext(
+      :Artifacts artifacts,
       :FileSystem fs,
       :Logger logger,
       :OutputPreferences outputPreferences,
@@ -788,20 +784,21 @@ class RunCommand extends RunCommandBase {
       :Stdio stdio,
       :SystemClock systemClock,
       :AnsiTerminal terminal,
-    ) = _toolContext;
+    ) = toolContext;
     return Daemon.createMachineDaemon(
-      featureFlags: featureFlags,
-      logger: logger,
-      stdio: stdio,
       analytics: analytics,
       androidSdk: _androidContext?.androidSdk,
       androidWorkflow: _androidWorkflow,
+      artifacts: artifacts,
       deviceManager: _deviceManager,
+      featureFlags: featureFlags,
       fileSystem: fs,
       java: _androidContext?.java,
+      logger: logger,
       outputPreferences: outputPreferences,
       platform: platform,
       processManager: processManager,
+      stdio: stdio,
       systemClock: systemClock,
       terminal: terminal,
     );
@@ -817,7 +814,7 @@ class RunCommand extends RunCommandBase {
       :Signals signals,
       :SystemClock systemClock,
       :Terminal terminal,
-    ) = _toolContext;
+    ) = toolContext;
     final ProcessInfo processInfo = this.processInfo;
 
     final BuildInfo buildInfo = await getBuildInfo();
@@ -891,7 +888,7 @@ class RunCommand extends RunCommandBase {
       for (final Device device in devices!)
         await FlutterDevice.create(
           device,
-          artifacts: _toolContext.artifacts,
+          artifacts: toolContext.artifacts,
           buildInfo: buildInfo,
           fileSystem: fs,
           logger: logger,
@@ -993,135 +990,7 @@ typedef AnalyticsUsageValuesRecord = ({
 // TODO(bkonyi): This will be removed in a follow up PR once Google3 callers
 // provide AppleContext and ToolContext directly. This fallback context delegates to
 // globals.* to maintain backwards compatibility with existing Google3 commands.
-class _FallbackAppleContext implements AppleContext {
-  _FallbackAppleContext();
-
-  @override
-  CocoaPods get cocoaPods => globals.cocoaPods!;
-
-  @override
-  CocoaPodsValidator get cocoapodsValidator => globals.cocoapodsValidator!;
-
-  @override
-  IOSSimulatorUtils get iosSimulatorUtils => globals.iosSimulatorUtils!;
-
-  @override
-  IOSWorkflow get iosWorkflow => globals.iosWorkflow!;
-
-  @override
-  PlistParser get plistParser => globals.plistParser;
-
-  @override
-  XCDevice get xcdevice => globals.xcdevice!;
-
-  @override
-  late final Xcode xcode =
-      globals.xcode ??
-      Xcode(
-        platform: globals.platform,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        fileSystem: globals.fs,
-        xcodeProjectInterpreter:
-            globals.xcodeProjectInterpreter ??
-            XcodeProjectInterpreter(
-              analytics: globals.analytics,
-              logger: globals.logger,
-              fileSystem: globals.fs,
-              platform: globals.platform,
-              processManager: globals.processManager,
-            ),
-        userMessages: globals.userMessages,
-      );
-
-  @override
-  XcodeProjectInterpreter get xcodeProjectInterpreter => globals.xcodeProjectInterpreter!;
-}
 
 // TODO(bkonyi): This will be removed in a follow up PR once Google3 callers
 // provide AppleContext and ToolContext directly. This fallback context delegates to
 // globals.* to maintain backwards compatibility with existing Google3 commands.
-class _FallbackToolContext implements ToolContext {
-  _FallbackToolContext();
-
-  @override
-  Artifacts get artifacts => globals.artifacts!;
-
-  @override
-  BotDetector get botDetector => globals.botDetector;
-
-  @override
-  Cache get cache => globals.cache;
-
-  @override
-  Config get config => globals.config;
-
-  @override
-  CustomDevicesConfig get customDevicesConfig => globals.customDevicesConfig;
-
-  @override
-  FileSystem get fs => globals.fs;
-
-  @override
-  FlutterVersion get flutterVersion => globals.flutterVersion;
-
-  @override
-  Git get git => globals.git;
-
-  @override
-  LocalEngineLocator get localEngineLocator => globals.localEngineLocator!;
-
-  @override
-  Logger get logger => globals.logger;
-
-  @override
-  TestCompilerNativeAssetsBuilder? get nativeAssetsBuilder => globals.nativeAssetsBuilder;
-
-  @override
-  OperatingSystemUtils get os => globals.os;
-
-  @override
-  OutputPreferences get outputPreferences => globals.outputPreferences;
-
-  @override
-  PersistentToolState get persistentToolState => globals.persistentToolState!;
-
-  @override
-  Platform get platform => globals.platform;
-
-  @override
-  PreRunValidator get preRunValidator => globals.preRunValidator;
-
-  @override
-  ProcessInfo get processInfo => globals.processInfo;
-
-  @override
-  ProcessManager get processManager => globals.processManager;
-
-  @override
-  ProcessUtils get processUtils => globals.processUtils;
-
-  @override
-  FlutterProjectFactory get projectFactory => globals.projectFactory;
-
-  @override
-  ShutdownHooks get shutdownHooks => globals.shutdownHooks;
-
-  @override
-  Signals get signals => globals.signals;
-
-  @override
-  Stdio get stdio => globals.stdio;
-
-  @override
-  SystemClock get systemClock => globals.systemClock;
-
-  @override
-  AnsiTerminal get terminal => globals.terminal;
-
-  @override
-  UserMessages get userMessages => globals.userMessages;
-
-  @override
-  late final FileSystemUtils fileSystemUtils = FileSystemUtils(fileSystem: fs, platform: platform);
-}
