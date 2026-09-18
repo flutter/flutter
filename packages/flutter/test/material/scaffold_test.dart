@@ -595,6 +595,63 @@ void main() {
       expect(tester.getSize(_keyboardSheetMaterial).height, 100.0);
       expect(tester.getBottomLeft(find.byKey(_keyboardSheetContentKey)).dy, 600.0);
     });
+
+    testWidgets(
+      'bottomNavigationBar keeps extended Material anchored at its top edge without discontinuity',
+      (WidgetTester tester) async {
+        for (final inset in <double>[0.0, 40.0, 80.0, 81.0, 200.0]) {
+          await _pumpKeyboardSheetScaffold(
+            tester,
+            inset: inset,
+            theme: ThemeData(
+              bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.red),
+            ),
+            sheet: const SizedBox(
+              key: _keyboardSheetContentKey,
+              width: double.infinity,
+              height: 100.0,
+            ),
+            bottomNavigationBar: const SizedBox(height: 80.0),
+          );
+          await tester.pumpAndSettle();
+          final double expectedContentBottom = 600.0 - math.max(80.0, inset);
+          expect(
+            tester.getBottomLeft(find.byKey(_keyboardSheetContentKey)).dy,
+            expectedContentBottom,
+          );
+          // The extended Material always terminates at the top of the 80px bottomNavigationBar (y = 520).
+          expect(tester.getBottomLeft(_keyboardSheetMaterial).dy, 520.0);
+          expect(
+            tester.getSize(_keyboardSheetMaterial).height,
+            100.0 + math.max(0.0, inset - 80.0),
+          );
+        }
+      },
+    );
+
+    testWidgets('Scaffold(bottomSheet: BottomSheet(...)) forwards sheet styling to keyboard area', (
+      WidgetTester tester,
+    ) async {
+      for (final color in <Color>[Colors.purple, Colors.orange]) {
+        await _pumpKeyboardSheetScaffold(
+          tester,
+          sheet: BottomSheet(
+            enableDrag: false,
+            backgroundColor: color,
+            constraints: const BoxConstraints.tightFor(width: 300.0),
+            onClosing: () {},
+            builder: (_) => const SizedBox(
+              key: _keyboardSheetContentKey,
+              width: double.infinity,
+              height: 100.0,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.getSize(_keyboardSheetMaterial), const Size(300.0, 300.0));
+        expect(await _keyboardPixel(tester, 400, 500), isSameColorAs(color));
+      }
+    });
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/103741
