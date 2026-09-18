@@ -865,4 +865,50 @@ void main() {
       },
     );
   });
+
+  group('DeferredArtifacts', () {
+    late Artifacts cached;
+    late Artifacts localEngine;
+
+    setUp(() {
+      final fileSystem = MemoryFileSystem.test();
+      cached = Artifacts.test(fileSystem: fileSystem);
+      localEngine = Artifacts.testLocalEngine(
+        localEngine: '/out/host_debug',
+        localEngineHost: '/out/host_debug',
+        fileSystem: fileSystem,
+      );
+    });
+
+    testWithoutContext('builds against the artifacts it was given', () {
+      final artifacts = DeferredArtifacts(cached);
+
+      expect(artifacts.usesLocalArtifacts, isFalse);
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterTester),
+        cached.getArtifactPath(Artifact.flutterTester),
+      );
+    });
+
+    testWithoutContext('builds against the artifacts it is resolved to', () {
+      final artifacts = DeferredArtifacts(cached);
+
+      artifacts.resolve(localEngine);
+
+      expect(artifacts.usesLocalArtifacts, isTrue);
+      expect(artifacts.localEngineInfo?.targetOutPath, '/out/host_debug');
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterTester),
+        localEngine.getArtifactPath(Artifact.flutterTester),
+      );
+    });
+
+    testWithoutContext('cannot be resolved twice', () {
+      final artifacts = DeferredArtifacts(cached);
+
+      artifacts.resolve(localEngine);
+
+      expect(() => artifacts.resolve(localEngine), throwsAssertionError);
+    });
+  });
 }

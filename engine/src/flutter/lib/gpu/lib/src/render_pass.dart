@@ -468,9 +468,18 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   }
 
   void bindUniform(UniformSlot slot, BufferView bufferView) {
+    // The slot's index is resolved once and cached, so steady-state binds
+    // pass an integer across the native boundary instead of the name.
+    int uniformStructIndex = slot._resolvedStructIndex;
+    if (uniformStructIndex < 0) {
+      throw Exception(
+        "Failed to bind uniform (no uniform struct named '${slot.uniformName}')",
+      );
+    }
     bool success = bufferView.buffer._bindAsUniform(
       this,
-      slot,
+      slot.shader,
+      uniformStructIndex,
       bufferView.offsetInBytes,
       bufferView.lengthInBytes,
     );
@@ -510,9 +519,15 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       );
     }
 
-    bool success = _bindTexture(
+    int uniformTextureIndex = slot._resolvedTextureIndex;
+    if (uniformTextureIndex < 0) {
+      throw Exception(
+        "Failed to bind texture (no texture named '${slot.uniformName}')",
+      );
+    }
+    bool success = _bindTextureIndexed(
       slot.shader,
-      slot.uniformName,
+      uniformTextureIndex,
       texture,
       sampler.minFilter.index,
       sampler.magFilter.index,
@@ -801,11 +816,11 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   );
 
   @Native<
-    Bool Function(Pointer<Void>, Pointer<Void>, Handle, Pointer<Void>, Int, Int)
-  >(symbol: 'InternalFlutterGpu_RenderPass_BindUniformDevice')
-  external bool _bindUniformDevice(
+    Bool Function(Pointer<Void>, Pointer<Void>, Int, Pointer<Void>, Int, Int)
+  >(symbol: 'InternalFlutterGpu_RenderPass_BindUniformDeviceIndexed')
+  external bool _bindUniformDeviceIndexed(
     Shader shader,
-    String uniformName,
+    int uniformStructIndex,
     DeviceBuffer buffer,
     int offsetInBytes,
     int lengthInBytes,
@@ -827,7 +842,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     Bool Function(
       Pointer<Void>,
       Pointer<Void>,
-      Handle,
+      Int,
       Pointer<Void>,
       Int,
       Int,
@@ -836,10 +851,10 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       Int,
       Int,
     )
-  >(symbol: 'InternalFlutterGpu_RenderPass_BindTexture')
-  external bool _bindTexture(
+  >(symbol: 'InternalFlutterGpu_RenderPass_BindTextureIndexed')
+  external bool _bindTextureIndexed(
     Shader shader,
-    String uniformName,
+    int uniformTextureIndex,
     Texture texture,
     int minFilter,
     int magFilter,

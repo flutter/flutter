@@ -4,6 +4,7 @@
 
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
@@ -13,21 +14,29 @@ import '../base/process.dart';
 /// See https://github.com/libimobiledevice/libusbmuxd.
 class IProxy {
   IProxy({
-    required String iproxyPath,
+    required Artifacts this._artifacts,
     required Logger logger,
     required ProcessManager processManager,
-    required MapEntry<String, String> dyLdLibEntry,
-  }) : _dyLdLibEntry = dyLdLibEntry,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
+    required this._dyLdLibEntry,
+  }) : _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _logger = logger,
-       _iproxyPath = iproxyPath;
+       _iproxyPath = null;
+
+  IProxy.fromPath({
+    required String this._iproxyPath,
+    required Logger logger,
+    required ProcessManager processManager,
+    required this._dyLdLibEntry,
+  }) : _processUtils = ProcessUtils(processManager: processManager, logger: logger),
+       _logger = logger,
+       _artifacts = null;
 
   /// Create a [IProxy] for testing.
   ///
   /// This specifies the path to iproxy as 'iproxy` and the dyLdLibEntry as
   /// 'DYLD_LIBRARY_PATH: /path/to/libs'.
   factory IProxy.test({required Logger logger, required ProcessManager processManager}) {
-    return IProxy(
+    return IProxy.fromPath(
       iproxyPath: 'iproxy',
       logger: logger,
       processManager: processManager,
@@ -35,15 +44,18 @@ class IProxy {
     );
   }
 
-  final String _iproxyPath;
+  final Artifacts? _artifacts;
+  final String? _iproxyPath;
   final ProcessUtils _processUtils;
   final Logger _logger;
   final MapEntry<String, String> _dyLdLibEntry;
 
+  String get iproxyPath => _iproxyPath ?? _artifacts!.getHostArtifact(HostArtifact.iproxy).path;
+
   Future<Process> forward(int devicePort, int hostPort, String deviceId) {
     // Usage: iproxy LOCAL_PORT:DEVICE_PORT --udid UDID
     return _processUtils.start(<String>[
-      _iproxyPath,
+      iproxyPath,
       '$hostPort:$devicePort',
       '--udid',
       deviceId,

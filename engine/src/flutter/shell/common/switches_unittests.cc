@@ -122,6 +122,40 @@ TEST(SwitchesTest, NoEnableImpeller) {
   }
 }
 
+TEST(SwitchesTest, NoEnableHcppAndSurfaceControl) {
+  {
+    // enable with value
+    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+        {"command", "--enable-hcpp-and-surface-control=true"});
+    EXPECT_TRUE(command_line.HasOption("enable-hcpp-and-surface-control"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_surface_control, true);
+  }
+  {
+    // enable without value
+    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+        {"command", "--enable-hcpp-and-surface-control"});
+    EXPECT_TRUE(command_line.HasOption("enable-hcpp-and-surface-control"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_surface_control, true);
+  }
+  {
+    // disable
+    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+        {"command", "--enable-hcpp-and-surface-control=false"});
+    EXPECT_TRUE(command_line.HasOption("enable-hcpp-and-surface-control"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_surface_control, false);
+  }
+  {
+    // default (absent)
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList({"command"});
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_surface_control, false);
+  }
+}
+
 TEST(SwitchesTest, ProfileStartup) {
   {
     fml::CommandLine command_line =
@@ -160,6 +194,19 @@ TEST(SwitchesTest, RequireMergedPlatformUIThread) {
   EXPECT_DEATH_IF_SUPPORTED(SettingsFromCommandLine(command_line, true),
                             "This platform does not support the "
                             "merged-platform-ui-thread=disabled flag");
+}
+
+// Ensure mergeAfterLaunch is passed correctly.
+//
+// This is a supported threading model even on some platforms (e.g. Android)
+// that enforce a merged platform/UI thread. For embedders where this isn't a
+// supported behavior, it can be blocked in the embedder itself.
+TEST(SwitchesTest, RequireMergedPlatformUIThreadAllowsMergeAfterLaunch) {
+  fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+      {"command", "--merged-platform-ui-thread=mergeAfterLaunch"});
+  Settings settings = SettingsFromCommandLine(command_line, true);
+  EXPECT_EQ(settings.merged_platform_ui_thread,
+            Settings::MergedPlatformUIThread::kMergeAfterLaunch);
 }
 #endif  // !OS_FUCHSIA
 

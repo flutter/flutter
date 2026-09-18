@@ -18,7 +18,7 @@ KHRSwapchainImageVK::KHRSwapchainImageVK(TextureDescriptor desc,
   view_info.subresourceRange.baseMipLevel = 0u;
   view_info.subresourceRange.baseArrayLayer = 0u;
   view_info.subresourceRange.levelCount = desc.mip_count;
-  view_info.subresourceRange.layerCount = ToArrayLayerCount(desc.type);
+  view_info.subresourceRange.layerCount = ToArrayLayerCount(desc);
 
   auto [view_result, view] = device.createImageViewUnique(view_info);
   if (view_result != vk::Result::eSuccess) {

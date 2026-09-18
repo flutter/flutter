@@ -59,7 +59,7 @@ class XCDevice {
     required Platform platform,
     required IProxy iproxy,
     required FileSystem fileSystem,
-    required Analytics analytics,
+    required this._analytics,
     required ShutdownHooks shutdownHooks,
     @visibleForTesting IOSCoreDeviceControl? coreDeviceControl,
     XcodeDebug? xcodeDebug,
@@ -95,8 +95,7 @@ class XCDevice {
              fileSystem: fileSystem,
            ),
        _iProxy = iproxy,
-       _xcode = xcode,
-       _analytics = analytics {
+       _xcode = xcode {
     shutdownHooks.addShutdownHook(dispose);
 
     _setupDeviceIdentifierByEventStream();
@@ -550,6 +549,9 @@ class XCDevice {
         var devModeEnabled = true;
         var isConnected = true;
         var isPaired = true;
+        final modelCode = device['modelCode'] as String?;
+        final operatingSystemVersion = device['operatingSystemVersion'] as String?;
+        final cpuArchitectureString = device['architecture'] as String?;
         final Map<String, Object?>? errorProperties = _errorProperties(device);
         if (errorProperties != null) {
           final String? errorMessage = _parseErrorMessage(errorProperties);
@@ -632,12 +634,16 @@ class XCDevice {
         deviceMap[identifier] = IOSDevice(
           identifier,
           name: name,
-          cpuArchitecture: _cpuArchitecture(device),
+          cpuArch: _cpuArchitecture(device),
+          cpuArchitectureString: cpuArchitectureString,
           connectionInterface: connectionInterface,
           isConnected: isConnected,
           sdkVersion: sdkVersionString,
+          modelCode: modelCode,
+          operatingSystemVersion: operatingSystemVersion,
           iProxy: _iProxy,
           fileSystem: globals.fs,
+          fileSystemUtils: globals.fsUtils,
           logger: _logger,
           analytics: globals.analytics,
           iosDeploy: _iosDeploy,
@@ -650,12 +656,15 @@ class XCDevice {
             fileSystem: globals.fs,
             processUtils: _processUtils,
             xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+            deviceVersion: Version.parse(sdkVersionString),
           ),
           xcodeDebug: _xcodeDebug,
+          xcode: _xcode,
           platform: globals.platform,
           devModeEnabled: devModeEnabled,
           isPaired: isPaired,
           isCoreDevice: coreDevice != null,
+          processUtils: _processUtils,
         );
       }
     }
@@ -724,21 +733,21 @@ class XCDevice {
     return null;
   }
 
-  DarwinArch _cpuArchitecture(Map<String, Object?> deviceProperties) {
-    DarwinArch? cpuArchitecture;
+  CpuArch _cpuArchitecture(Map<String, Object?> deviceProperties) {
+    CpuArch? cpuArchitecture;
     final Object? architecture = deviceProperties['architecture'];
     if (architecture is String) {
       try {
-        cpuArchitecture = getIOSArchForName(architecture);
+        cpuArchitecture = getCpuArchForName(architecture);
       } on Exception {
         // Fallback to default iOS architecture. Future-proof against a
         // theoretical version of Xcode that changes this string to something
         // slightly different like "ARM64", or armv7 variations like
         // armv7s and armv7f.
         if (architecture.startsWith('armv7')) {
-          cpuArchitecture = DarwinArch.armv7;
+          cpuArchitecture = CpuArch.armv7;
         } else {
-          cpuArchitecture = DarwinArch.arm64;
+          cpuArchitecture = CpuArch.arm64;
         }
         _logger.printWarning(
           'Unknown architecture $architecture, defaulting to '
@@ -746,7 +755,7 @@ class XCDevice {
         );
       }
     }
-    return cpuArchitecture ?? DarwinArch.arm64;
+    return cpuArchitecture ?? CpuArch.arm64;
   }
 
   /// Error message parsed from xcdevice. null if no error.

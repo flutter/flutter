@@ -7,8 +7,9 @@
 
 // In general, please prefer using full linked examples in API docs.
 //
-// For documentation on creating sample code, see ../../examples/api/README.md
-// See also our style guide's discussion on documentation and sample code:
+// For documentation on creating sample code, see
+// ../../packages/flutter/examples/api/README.md See also our style guide's
+// discussion on documentation and sample code:
 // https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md
 //
 // This tool is used to analyze smaller snippets of code in the API docs.
@@ -394,10 +395,9 @@ class _SnippetChecker {
     this._flutterPackages, {
     String? tempDirectory,
     this.verbose = false,
-    Directory? dartUiLocation,
+    this._dartUiLocation,
   }) : _tempDirectory = _createTempDirectory(tempDirectory),
-       _keepTmp = tempDirectory != null,
-       _dartUiLocation = dartUiLocation;
+       _keepTmp = tempDirectory != null;
 
   /// The prefix of each comment line
   static const String _dartDocPrefix = '///';
@@ -627,8 +627,7 @@ class _SnippetChecker {
         final ignorePreambleLinesOnly = <_Line>[];
         final preambleLines = <_Line>[];
         final customImports = <_Line>[];
-        var inExamplesCanAssumePreamble =
-            false; // Whether or not we're in the file-wide preamble section ("Examples can assume").
+        var inExamplesCanAssumePreamble = false; // Whether or not we're in the file-wide preamble section ("Examples can assume").
         var inToolSection = false; // Whether or not we're in a code snippet
         var inDartSection = false; // Whether or not we're in a '```dart' segment.
         var inOtherBlock = false; // Whether we're in some other '```' segment.
@@ -796,8 +795,7 @@ class _SnippetChecker {
     for (var index = 0; index < block.length; index += 1) {
       final Match? match = _ellipsisRegExp.matchAsPrefix(block[index]);
       if (match != null) {
-        hasEllipsis =
-            true; // in case the "..." is implying some overridden members, add an ignore to silence relevant warnings
+        hasEllipsis = true; // in case the "..." is implying some overridden members, add an ignore to silence relevant warnings
         break;
       }
     }
@@ -1008,13 +1006,13 @@ class _SnippetChecker {
 
     _copyPubspec(
       path.join(_contentDirectory.path, _pubspecName),
-      path.join(_flutterRoot, 'examples', 'api', _pubspecName),
+      path.join(_flutterRoot, 'packages', 'flutter', 'examples', 'api', _pubspecName),
     );
     final targetAnalysisOptions = File(path.join(_contentDirectory.path, 'analysis_options.yaml'));
     if (!targetAnalysisOptions.existsSync()) {
-      // Use the same analysis_options.yaml configuration that's used for examples/api.
+      // Use the same analysis_options.yaml configuration that's used for packages/flutter/examples/api.
       final sourceAnalysisOptions = File(
-        path.join(_flutterRoot, 'examples', 'api', 'analysis_options.yaml'),
+        path.join(_flutterRoot, 'packages', 'flutter', 'examples', 'api', 'analysis_options.yaml'),
       );
       if (!sourceAnalysisOptions.existsSync()) {
         throw 'Cannot find analysis_options.yaml at ${sourceAnalysisOptions.path}, which is also used to analyze code snippets.';
@@ -1028,7 +1026,7 @@ class _SnippetChecker {
   void _copyPubspec(String targetPath, String sourcePath) {
     final targetPubSpec = File(targetPath);
     if (!targetPubSpec.existsSync()) {
-      // Copying pubspec.yaml from examples/api into temp directory.
+      // Copying pubspec.yaml from packages/flutter/examples/api into temp directory.
       final sourcePubSpec = File(sourcePath);
       if (!sourcePubSpec.existsSync()) {
         throw 'Cannot find pubspec.yaml at ${sourcePubSpec.path}, which is also used to analyze code snippets.';

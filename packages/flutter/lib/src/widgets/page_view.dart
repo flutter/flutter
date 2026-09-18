@@ -553,6 +553,14 @@ class _ForceImplicitScrollPhysics extends ScrollPhysics {
 
   @override
   final bool allowImplicitScrolling;
+
+  @override
+  bool shouldUpdate(covariant _ForceImplicitScrollPhysics old) {
+    if (allowImplicitScrolling != old.allowImplicitScrolling) {
+      return true;
+    }
+    return super.shouldUpdate(old);
+  }
 }
 
 /// Scroll physics used by a [PageView].
@@ -572,6 +580,11 @@ class PageScrollPhysics extends ScrollPhysics {
   PageScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return PageScrollPhysics(parent: buildParent(ancestor));
   }
+
+  // Selection gestures such as dragging to select text must not scroll a
+  // PageView to an adjacent page, so edge scrolling is disallowed here.
+  @override
+  bool get allowSelectionEdgeScrolling => false;
 
   double _getPage(ScrollMetrics position) {
     if (position is _PagePosition) {

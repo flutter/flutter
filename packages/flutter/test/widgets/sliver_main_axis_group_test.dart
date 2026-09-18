@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'list_tile_tester.dart';
 import 'semantics_tester.dart';
 import 'sliver_utils.dart';
-import 'widgets_app_tester.dart';
 
 const double VIEWPORT_HEIGHT = 600;
 const double VIEWPORT_WIDTH = 300;
@@ -681,9 +680,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // At a scroll offset of 630, a normal scrolling header should be out of view.
-      final renderHeader =
-          tester.renderObject(find.byType(SliverPersistentHeader, skipOffstage: false))
-              as RenderSliverPersistentHeader;
+      final renderHeader = tester.renderObject(
+        find.byType(SliverPersistentHeader, skipOffstage: false),
+      ) as RenderSliverPersistentHeader;
       expect(renderHeader.constraints.scrollOffset, equals(630));
       expect(renderHeader.geometry!.layoutExtent, equals(0.0));
     },

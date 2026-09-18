@@ -19,7 +19,6 @@
 #import "flutter/shell/platform/darwin/ios/ios_external_view_embedder.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 #import "flutter/shell/platform/darwin/ios/platform_message_handler_ios.h"
-#import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
 @class FlutterViewController;
 
@@ -46,10 +45,8 @@ class PlatformViewIOS final : public PlatformView {
 
   explicit PlatformViewIOS(
       PlatformView::Delegate& delegate,
-      IOSRenderingAPI rendering_api,
       __weak FlutterPlatformViewsController* platform_views_controller,
       const flutter::TaskRunners& task_runners,
-      const std::shared_ptr<fml::ConcurrentTaskRunner>& worker_task_runner,
       const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch);
 
   ~PlatformViewIOS() override;
@@ -86,9 +83,6 @@ class PlatformViewIOS final : public PlatformView {
   PointerDataDispatcherMaker GetDispatcherMaker() override;
 
   // |PlatformView|
-  void SetSemanticsEnabled(bool enabled) override;
-
-  // |PlatformView|
   void SetSemanticsTreeEnabled(bool enabled) override;
 
   // |PlatformView|
@@ -102,9 +96,6 @@ class PlatformViewIOS final : public PlatformView {
 
   // |PlatformView|
   std::shared_ptr<impeller::Context> GetImpellerContext() const override;
-
-  // |PlatformView|
-  void SetAccessibilityFeatures(int32_t flags) override;
 
   // |PlatformView|
   void UpdateSemantics(int64_t view_id,

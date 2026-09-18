@@ -38,6 +38,32 @@ Future<String> _requestDataWithRetry(
   throw StateError('Should not reach here');
 }
 
+/// Creates a secondary window of [windowType], asserts its controller reports
+/// `isDestroyed == false`, destroys it, then asserts `isDestroyed == true`.
+///
+/// If the platform reports the window type is unsupported, the test is skipped.
+Future<void> _expectIsDestroyedTransition(FlutterDriver driver, String windowType) async {
+  final String createResponse = await _requestDataWithRetry(
+    driver,
+    jsonEncode({'type': 'create_window', 'window_type': windowType}),
+  );
+  if ((jsonDecode(createResponse) as Map<String, Object?>)['result'] == 'unsupported') {
+    markTestSkipped('$windowType windows are not supported on this platform.');
+    return;
+  }
+
+  String response = await _requestDataWithRetry(
+    driver,
+    jsonEncode({'type': 'is_window_destroyed'}),
+  );
+  expect((jsonDecode(response) as Map<String, Object?>)['isDestroyed'], false);
+
+  await _requestDataWithRetry(driver, jsonEncode({'type': 'destroy_window'}));
+
+  response = await _requestDataWithRetry(driver, jsonEncode({'type': 'is_window_destroyed'}));
+  expect((jsonDecode(response) as Map<String, Object?>)['isDestroyed'], true);
+}
+
 void main() {
   group('end-to-end test', () {
     late final FlutterDriver driver;
@@ -202,5 +228,25 @@ void main() {
       timeout: Timeout.none,
       testOn: 'linux',
     );
+
+    test('Regular window is not destroyed until closed', () async {
+      await _expectIsDestroyedTransition(driver, 'regular');
+    }, timeout: Timeout.none);
+
+    test('Dialog window is not destroyed until closed', () async {
+      await _expectIsDestroyedTransition(driver, 'dialog');
+    }, timeout: Timeout.none);
+
+    test('Tooltip window is not destroyed until closed', () async {
+      await _expectIsDestroyedTransition(driver, 'tooltip');
+    }, timeout: Timeout.none);
+
+    test('Popup window is not destroyed until closed', () async {
+      await _expectIsDestroyedTransition(driver, 'popup');
+    }, timeout: Timeout.none);
+
+    test('Satellite window is not destroyed until closed', () async {
+      await _expectIsDestroyedTransition(driver, 'satellite');
+    }, timeout: Timeout.none);
   });
 }

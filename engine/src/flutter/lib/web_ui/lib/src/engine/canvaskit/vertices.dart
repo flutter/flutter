@@ -6,53 +6,17 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
+import '../backend/vertices.dart';
 import 'canvaskit_api.dart';
-import 'native_memory.dart';
 
-class CkVertices implements ui.Vertices {
+class CkVertices implements BackendVertices {
   factory CkVertices(
-    ui.VertexMode mode,
-    List<ui.Offset> positions, {
-    List<ui.Offset>? textureCoordinates,
-    List<ui.Color>? colors,
-    List<int>? indices,
-  }) {
-    if (textureCoordinates != null && textureCoordinates.length != positions.length) {
-      throw ArgumentError('"positions" and "textureCoordinates" lengths must match.');
-    }
-    if (colors != null && colors.length != positions.length) {
-      throw ArgumentError('"positions" and "colors" lengths must match.');
-    }
-    if (indices != null && indices.any((int i) => i < 0 || i >= positions.length)) {
-      throw ArgumentError('"indices" values must be valid indices in the positions list.');
-    }
-
-    return CkVertices._(
-      toSkVertexMode(mode),
-      toFlatSkPoints(positions),
-      textureCoordinates != null ? toFlatSkPoints(textureCoordinates) : null,
-      colors != null ? toFlatColors(colors) : null,
-      indices != null ? toUint16List(indices) : null,
-    );
-  }
-
-  factory CkVertices.raw(
     ui.VertexMode mode,
     Float32List positions, {
     Float32List? textureCoordinates,
     Int32List? colors,
     Uint16List? indices,
   }) {
-    if (textureCoordinates != null && textureCoordinates.length != positions.length) {
-      throw ArgumentError('"positions" and "textureCoordinates" lengths must match.');
-    }
-    if (colors != null && colors.length * 2 != positions.length) {
-      throw ArgumentError('"positions" and "colors" lengths must match.');
-    }
-    if (indices != null && indices.any((int i) => i < 0 || i >= positions.length)) {
-      throw ArgumentError('"indices" values must be valid indices in the positions list.');
-    }
-
     Uint32List? unsignedColors;
     if (colors != null) {
       unsignedColors = colors.buffer.asUint32List(colors.offsetInBytes, colors.length);
@@ -67,44 +31,24 @@ class CkVertices implements ui.Vertices {
     );
   }
 
-  CkVertices._(this._mode, this._positions, this._textureCoordinates, this._colors, this._indices) {
-    // If [_positions] is empty, then [canvasKit.MakeVertices] will return
-    // `null`, which breaks our JS interop. So, if we see that [_positions] is
-    // empty, we do not create a [SkVertices] object and just treat this as
-    // an empty vertices. Drawing an empty Vertices object is a no-op.
-    if (_positions.isNotEmpty) {
-      final SkVertices skVertices = canvasKit.MakeVertices(
-        _mode,
-        _positions,
-        _textureCoordinates,
-        _colors,
-        _indices,
-      );
-      _ref = CkUniqueRef<SkVertices>(this, skVertices, 'Vertices');
-    } else {
-      _ref = null;
-    }
-  }
+  /// Creates a new `CkVertices` by calling the CanvasKit API.
+  ///
+  /// This constructor assumes that [positions] is not empty. `EngineVertices`
+  /// ensures this by checking `positions.isNotEmpty` before delegating to the backend.
+  /// If `positions` were empty, `canvasKit.MakeVertices` would return `null`,
+  /// causing JS interop errors.
+  CkVertices._(
+    SkVertexMode mode,
+    Float32List positions,
+    Float32List? textureCoordinates,
+    Uint32List? colors,
+    Uint16List? indices,
+  ) : skiaObject = canvasKit.MakeVertices(mode, positions, textureCoordinates, colors, indices);
 
-  final SkVertexMode _mode;
-  final Float32List _positions;
-  final Float32List? _textureCoordinates;
-  final Uint32List? _colors;
-  final Uint16List? _indices;
-  late final CkUniqueRef<SkVertices>? _ref;
-
-  SkVertices get skiaObject => _ref!.nativeObject;
-
-  bool get hasNoPoints => _ref == null;
-
-  bool _isDisposed = false;
+  final SkVertices skiaObject;
 
   @override
   void dispose() {
-    _ref?.dispose();
-    _isDisposed = true;
+    skiaObject.delete();
   }
-
-  @override
-  bool get debugDisposed => _isDisposed;
 }
