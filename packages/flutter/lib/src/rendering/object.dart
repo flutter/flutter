@@ -5925,7 +5925,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         // dirty, geometry, so this check misses it. That case is covered by
         // PipelineOwner._deferredNodesNeedingSemanticsGeometryUpdate.
         if (childSemantics.geometryDirty) {
-          renderObject.owner!._nodesNeedingSemanticsGeometryUpdate.add(childSemantics.renderObject);
+          childSemantics.renderObject.owner?._nodesNeedingSemanticsGeometryUpdate.add(
+            childSemantics.renderObject,
+          );
         }
         _children.add(childSemantics);
       } else {
@@ -6514,7 +6516,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   /// The [renderObject]'s semantics information has changed.
   void markNeedsUpdate() {
-    renderObject.owner!._nodesNeedingSemanticsGeometryUpdate.add(renderObject);
+    renderObject.owner?._nodesNeedingSemanticsGeometryUpdate.add(renderObject);
     final SemanticsNode? producedSemanticsNode = cachedSemanticsNode;
     // Dirty the semantics tree starting at `this` until we have reached a
     // RenderObject that is a semantics boundary. All semantics past this
