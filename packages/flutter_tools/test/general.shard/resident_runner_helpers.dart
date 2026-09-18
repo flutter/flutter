@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
@@ -20,6 +19,7 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -182,7 +182,12 @@ class FakeDartDevelopmentServiceException implements DartDevelopmentServiceExcep
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(super.device, {Future<Uri>? vmServiceUri})
     : super(
-        toolContext: TestToolContext(fileSystem: globals.fs, logger: globals.logger, processManager: globals.processManager, artifacts: Artifacts.test()),
+        toolContext: TestToolContext(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          artifacts: Artifacts.test(),
+        ),
         generator: FakeResidentCompiler(),
         targetPlatform: .unsupported,
         buildInfo: BuildInfo.debug,
@@ -325,7 +330,12 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     this.fakeDevFS, {
     Future<Uri>? vmServiceUri,
   }) : super(
-         toolContext: TestToolContext(fileSystem: globals.fs, logger: globals.logger, processManager: globals.processManager, artifacts: Artifacts.test()),
+         toolContext: TestToolContext(
+           fileSystem: globals.fs,
+           logger: globals.logger,
+           processManager: globals.processManager,
+           artifacts: Artifacts.test(),
+         ),
          targetPlatform: .unsupported,
          buildInfo: buildInfo,
          generator: residentCompiler,
