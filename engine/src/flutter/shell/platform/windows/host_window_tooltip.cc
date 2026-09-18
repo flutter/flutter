@@ -88,7 +88,7 @@ void HostWindowTooltip::UpdatePosition() {
   WindowRect work_area = GetWorkArea();
 
   IsolateScope scope(isolate_);
-  WindowRect rect;
+  WindowRect rect{};
   get_position_callback_(WindowSize{physical_width_, physical_height_},
                          WindowRect{parent_top_left.x, parent_top_left.y,
                                     parent_bottom_right.x - parent_top_left.x,

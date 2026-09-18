@@ -1676,7 +1676,7 @@ final class _PopupWindowCreationRequest extends ffi.Struct {
       ffi.Void Function(
         ffi.Pointer<_Size> childSize,
         ffi.Pointer<_Rect> parentRect,
-        ffi.Pointer<_Rect> outputRect,
+        ffi.Pointer<_Rect> displayRect,
         ffi.Pointer<_Rect> result,
       )
     >
