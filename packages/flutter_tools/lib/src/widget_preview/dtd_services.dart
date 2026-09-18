@@ -33,15 +33,16 @@ typedef DtdService = (String, DTDServiceCallback);
 /// Provides services, streams, and RPC invocations to interact with the Widget Preview Scaffold.
 class WidgetPreviewDtdServices {
   WidgetPreviewDtdServices({
-    required this.previewAnalytics,
+    required this.addUuidToServiceName,
+    required this.dtdLauncher,
     required this.fs,
     required this.logger,
-    required this.shutdownHooks,
-    required this.dtdLauncher,
     required this.onHotRestartPreviewerRequest,
+    required this.previewAnalytics,
     required this.project,
-    required this.addUuidToServiceName,
-  }) {
+    required this.shutdownHooks,
+    @visibleForTesting DartToolingDaemon? dtd,
+  }) : _dtd = dtd {
     shutdownHooks.addShutdownHook(() async {
       await _dtd?.close();
       await dtdLauncher.dispose();
@@ -213,15 +214,29 @@ class WidgetPreviewDtdServices {
     throw StateError('Failed to call getFlutterWidgetPreviewsForFile after $maxAttempts attempts.');
   }
 
+  Future<void>? _waitForLspServiceFuture;
+
   Future<void> _waitForLspService() async {
     if (_lspServiceAvailable) {
       return;
     }
+    final Future<void>? future = _waitForLspServiceFuture;
+    if (future != null) {
+      return future;
+    }
+    _waitForLspServiceFuture = _waitForLspServiceHelper();
+    try {
+      await _waitForLspServiceFuture;
+    } finally {
+      _waitForLspServiceFuture = null;
+    }
+  }
 
+  Future<void> _waitForLspServiceHelper() async {
     final lspRegisteredCompleter = Completer<void>();
 
     const kServiceStream = 'Service';
-    await _dtd!.streamListen(kServiceStream);
+    await _dtd!.safeStreamListen(kServiceStream);
     final StreamSubscription<DTDEvent> serviceSubscription = _dtd!.onEvent(kServiceStream).listen((
       DTDEvent event,
     ) {
@@ -287,7 +302,7 @@ class WidgetPreviewDtdServices {
       }
     });
     await Future.wait(<Future<void>>[
-      dtd.streamListen(widgetPreviewScaffoldStream),
+      dtd.safeStreamListen(widgetPreviewScaffoldStream),
       for (final (String method, DTDServiceCallback callback) in services)
         dtd
             .registerService(widgetPreviewService, method, callback)
@@ -378,4 +393,17 @@ class DtdLauncher {
   final ProcessManager processManager;
 
   Process? _dtdProcess;
+}
+
+extension on DartToolingDaemon {
+  /// A [streamListen] implementation that ignores already subscribed exceptions.
+  Future<void> safeStreamListen(String streamId) async {
+    try {
+      await streamListen(streamId);
+    } on RpcException catch (e) {
+      if (e.code != RpcErrorCodes.kStreamAlreadySubscribed) {
+        rethrow;
+      }
+    }
+  }
 }
