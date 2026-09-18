@@ -150,7 +150,7 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:Logger logger) = toolContext;
+    final Logger logger = toolContext.logger;
     if (androidSdk == null) {
       exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
