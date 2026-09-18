@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
@@ -40,7 +41,6 @@ import 'context/tool_context.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
 import 'hook_runner.dart' show FlutterHookRunner;
 import 'ios/application_package.dart';
 import 'ios/devices.dart';
@@ -54,74 +54,77 @@ import 'vmservice.dart';
 class FlutterDevice {
   FlutterDevice(
     this.device, {
+    required this.artifacts,
     required this.buildInfo,
-    required this.targetPlatform,
-    required this.generator,
     required this.developmentShaderCompiler,
-    this.userIdentifier,
-    @visibleForTesting this.logFlushDelay = const Duration(milliseconds: 500),
-    this.artifacts,
+    required this.generator,
+    required this.targetPlatform,
     FileSystem? fileSystem,
+    @visibleForTesting this.logFlushDelay = const Duration(milliseconds: 500),
     Logger? logger,
-    this.osUtils,
+    OperatingSystemUtils? osUtils,
     Platform? platform,
     ProcessManager? processManager,
-  }) : fileSystem = fileSystem ?? globals.fs,
-       logger = logger ?? globals.logger,
-       platform = platform ?? globals.platform,
-       processManager = processManager ?? globals.processManager;
+    this.userIdentifier,
+  }) : fileSystem = fileSystem ?? MemoryFileSystem.test(),
+       logger = logger ?? BufferLogger.test(),
+       osUtils =
+           osUtils ??
+           OperatingSystemUtils(
+             fileSystem: fileSystem ?? MemoryFileSystem.test(),
+             logger: logger ?? BufferLogger.test(),
+             platform: platform ?? const LocalPlatform(),
+             processManager: processManager ?? const LocalProcessManager(),
+           ),
+       platform = platform ?? const LocalPlatform(),
+       processManager = processManager ?? const LocalProcessManager();
 
   final Duration logFlushDelay;
 
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
     Device device, {
-    required String? target,
+    required Artifacts artifacts,
     required BuildInfo buildInfo,
+    required FileSystem fileSystem,
+    required Logger logger,
     required Platform platform,
-    String? userIdentifier,
-    TargetModel? targetModelOverride,
-    Artifacts? artifacts,
-    ProcessManager? processManager,
-    FileSystem? fileSystem,
-    Logger? logger,
-    ShutdownHooks? shutdownHooks,
+    required ProcessManager processManager,
+    required String? target,
     Config? config,
     OperatingSystemUtils? osUtils,
+    ShutdownHooks? shutdownHooks,
+    TargetModel? targetModelOverride,
+    String? userIdentifier,
   }) async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    final FileSystem effectiveFs = fileSystem ?? globals.fs;
-    final Logger effectiveLogger = logger ?? globals.logger;
-    final ProcessManager effectiveProcessManager = processManager ?? globals.processManager;
-    final OperatingSystemUtils effectiveOsUtils = osUtils ?? globals.os;
-    final Artifacts effectiveArtifacts =
-        artifacts ??
-        globals.artifacts ??
-        CachedArtifacts(
-          fileSystem: effectiveFs,
+    final OperatingSystemUtils effectiveOsUtils =
+        osUtils ??
+        OperatingSystemUtils(
+          fileSystem: fileSystem,
+          logger: logger,
           platform: platform,
-          cache: globals.cache,
-          operatingSystemUtils: effectiveOsUtils,
+          processManager: processManager,
         );
-    final Config effectiveConfig = config ?? globals.config;
-    final ShutdownHooks effectiveShutdownHooks = shutdownHooks ?? globals.shutdownHooks;
+    final Config effectiveConfig = config ?? Config.test();
+    final ShutdownHooks effectiveShutdownHooks = shutdownHooks ?? ShutdownHooks();
 
     final shaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: ShaderCompiler(
-        artifacts: effectiveArtifacts,
-        logger: effectiveLogger,
-        processManager: effectiveProcessManager,
-        fileSystem: effectiveFs,
+        artifacts: artifacts,
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
       ),
-      fileSystem: effectiveFs,
-      logger: effectiveLogger,
+      fileSystem: fileSystem,
+      logger: logger,
     );
 
     final ResidentCompiler generator = residentCompilerFactory.create(
-      artifacts: effectiveArtifacts,
-      processManager: effectiveProcessManager,
-      logger: effectiveLogger,
-      fileSystem: effectiveFs,
+      artifacts: artifacts,
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
       platform: platform,
       shutdownHooks: effectiveShutdownHooks,
       config: effectiveConfig,
@@ -137,10 +140,10 @@ class FlutterDevice {
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
       developmentShaderCompiler: shaderCompiler,
-      logger: effectiveLogger,
-      fileSystem: effectiveFs,
-      artifacts: effectiveArtifacts,
-      processManager: effectiveProcessManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      processManager: processManager,
       osUtils: effectiveOsUtils,
       platform: platform,
     );
@@ -152,9 +155,9 @@ class FlutterDevice {
   final BuildInfo buildInfo;
   final Logger logger;
   final FileSystem fileSystem;
-  final Artifacts? artifacts;
+  final Artifacts artifacts;
   final ProcessManager processManager;
-  final OperatingSystemUtils? osUtils;
+  final OperatingSystemUtils osUtils;
   final Platform platform;
   final String? userIdentifier;
   final DevelopmentShaderCompiler developmentShaderCompiler;
@@ -368,6 +371,13 @@ class FlutterDevice {
       processManager: processManager,
       artifacts: effectiveArtifacts,
       buildMode: buildInfo.mode,
+      toolContext: _FlutterDeviceDevFSContext(
+        artifacts: artifacts,
+        fs: fileSystem,
+        logger: logger,
+        os: osUtils,
+        processManager: processManager,
+      ),
     );
     return devFS!.create();
   }
@@ -994,57 +1004,52 @@ abstract class ResidentRunner extends ResidentHandlers {
     required this.debuggingOptions,
     required this.target,
     Analytics? analytics,
-    Artifacts? artifacts,
-    BuildSystem? buildSystem,
-    BuildTargets? buildTargets,
-    Cache? cache,
+    this._artifacts,
+    this._buildSystem,
+    this._buildTargets,
+    this._cache,
     CommandHelp? commandHelp,
-    Config? config,
+    this._config,
     this.dartBuilder,
     String? dillOutputPath,
     FileSystem? fileSystem,
-    FlutterVersion? flutterVersion,
+    this._flutterVersion,
     this.hotMode = true,
     Logger? logger,
     this.machine = false,
-    OperatingSystemUtils? osUtils,
+    this._osUtils,
     OutputPreferences? outputPreferences,
     Platform? platform,
     ProcessManager? processManager,
     String? projectRootPath,
     this.stayResident = true,
     Terminal? terminal,
-    Xcode? xcode,
-  }) : _analytics = analytics ?? globals.analytics,
-       _artifacts = artifacts ?? globals.artifacts,
-       _buildSystem = buildSystem ?? globals.buildSystem,
-       _buildTargets = buildTargets ?? globals.buildTargets,
-       _cache = cache ?? globals.cache,
-       _config = config ?? globals.config,
+    this._xcode,
+  }) : _analytics = analytics ?? const NoOpAnalytics(),
        _dillOutputPath = dillOutputPath,
-       _fileSystem = fileSystem ?? globals.fs,
-       _flutterVersion = flutterVersion ?? globals.flutterVersion,
-       _logger = logger ?? globals.logger,
-       _osUtils = osUtils ?? globals.os,
-       _outputPreferences = outputPreferences ?? globals.outputPreferences,
-       _platform = platform ?? globals.platform,
-       _processManager = processManager ?? globals.processManager,
-       _terminal = terminal ?? globals.terminal,
-       _xcode = xcode ?? globals.xcode,
-       mainPath = (fileSystem ?? globals.fs).file(target).absolute.path,
+       _fileSystem = fileSystem ?? MemoryFileSystem.test(),
+       _logger = logger ?? BufferLogger.test(),
+       _outputPreferences = outputPreferences ?? OutputPreferences.test(),
+       _platform = platform ?? const LocalPlatform(),
+       _processManager = processManager ?? const LocalProcessManager(),
+       _terminal = terminal ?? Terminal.test(),
+       mainPath = (fileSystem ?? MemoryFileSystem.test()).file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
-       projectRootPath = projectRootPath ?? (fileSystem ?? globals.fs).currentDirectory.path,
+       projectRootPath =
+           projectRootPath ?? (fileSystem ?? MemoryFileSystem.test()).currentDirectory.path,
        artifactDirectory = dillOutputPath == null
-           ? (fileSystem ?? globals.fs).systemTempDirectory.createTempSync('flutter_tool.')
-           : (fileSystem ?? globals.fs).file(dillOutputPath).parent,
+           ? (fileSystem ?? MemoryFileSystem.test()).systemTempDirectory.createTempSync(
+               'flutter_tool.',
+             )
+           : (fileSystem ?? MemoryFileSystem.test()).file(dillOutputPath).parent,
        assetBundle = AssetBundleFactory.instance.createBundle(),
        commandHelp =
            commandHelp ??
            CommandHelp(
-             logger: logger ?? globals.logger,
-             terminal: terminal ?? globals.terminal,
-             platform: platform ?? globals.platform,
-             outputPreferences: outputPreferences ?? globals.outputPreferences,
+             logger: logger ?? BufferLogger.test(),
+             terminal: terminal ?? Terminal.test(),
+             platform: platform ?? const LocalPlatform(),
+             outputPreferences: outputPreferences ?? OutputPreferences.test(),
            ) {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
@@ -1070,8 +1075,6 @@ abstract class ResidentRunner extends ResidentHandlers {
   Xcode? get xcode => _xcode;
   ProcessManager get processManager => _processManager;
   OperatingSystemUtils? get osUtils => _osUtils;
-  ProjectFileInvalidator get projectFileInvalidator =>
-      ProjectFileInvalidator(fileSystem: fileSystem, platform: platform, logger: logger);
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -1115,21 +1118,27 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   Artifacts get _defaultArtifacts =>
       _artifacts ??
-      globals.artifacts ??
       CachedArtifacts(
         fileSystem: _fileSystem,
         platform: _platform,
-        cache: _cache ?? globals.cache,
-        operatingSystemUtils: _osUtils ?? globals.os,
+        cache: _cache ?? Cache.test(fileSystem: _fileSystem, processManager: _processManager),
+        operatingSystemUtils:
+            _osUtils ??
+            OperatingSystemUtils(
+              fileSystem: _fileSystem,
+              logger: _logger,
+              platform: _platform,
+              processManager: _processManager,
+            ),
       );
 
   late final _environment = Environment(
     artifacts: _defaultArtifacts,
     logger: _logger,
-    cacheDir: (_cache ?? globals.cache).getRoot(),
-    engineVersion: (_flutterVersion ?? globals.flutterVersion).engineRevision,
+    cacheDir: _cache?.getRoot() ?? _fileSystem.directory('cache'),
+    engineVersion: _flutterVersion?.engineRevision ?? 'engineVersion',
     fileSystem: _fileSystem,
-    flutterRootDir: _fileSystem.directory((_cache ?? globals.cache).flutterRoot),
+    flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
     outputDir: _fileSystem.directory(getBuildDirectory()),
     processManager: _processManager,
     platform: _platform,
@@ -1346,7 +1355,9 @@ abstract class ResidentRunner extends ResidentHandlers {
         trackWidgetCreation: trackWidgetCreation,
         dartDefines: debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
-        config: _config ?? globals.config,
+        config:
+            _config ??
+            Config('settings', fileSystem: _fileSystem, logger: _logger, platform: _platform),
         fileSystem: _fileSystem,
         targetModel: targetModel,
       );
@@ -1753,7 +1764,7 @@ Future<String?> getMissingPackageHintForPlatform(
   TargetPlatform platform, {
   FileSystem? fileSystem,
 }) async {
-  final FileSystem effectiveFs = fileSystem ?? globals.fs;
+  final FileSystem effectiveFs = fileSystem ?? MemoryFileSystem.test();
   switch (platform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
@@ -2220,6 +2231,24 @@ class DevToolsServerAddress {
   }
 }
 
-// TODO(bkonyi): This will be removed in a follow up PR once ResidentRunner is
-// migrated to accept ToolContext directly. This fallback context delegates to
-// globals.* to maintain backwards compatibility.
+class _FlutterDeviceDevFSContext implements ToolContext {
+  _FlutterDeviceDevFSContext({
+    required this.artifacts,
+    required this.fs,
+    required this.logger,
+    required this.os,
+    required this.processManager,
+  });
+  @override
+  final Artifacts artifacts;
+  @override
+  final FileSystem fs;
+  @override
+  final Logger logger;
+  @override
+  final OperatingSystemUtils os;
+  @override
+  final ProcessManager processManager;
+  @override
+  dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
+}

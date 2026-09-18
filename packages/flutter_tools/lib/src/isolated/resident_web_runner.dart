@@ -24,6 +24,8 @@ import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/build_targets.dart';
+import '../cache.dart';
 import '../dart/language_version.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
@@ -114,19 +116,27 @@ class ResidentWebRunner extends ResidentRunner {
     required this._analytics,
     this._urlTunneller,
     this._webDefines = const <String, String>{},
+    BuildTargets? buildTargets,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        super(
          <FlutterDevice>[device],
          target: target ?? fileSystem.path.join('lib', 'main.dart'),
+         analytics: _analytics,
+         buildTargets: buildTargets ?? const BuildTargetsImpl(),
          commandHelp: CommandHelp(
            logger: logger,
-           terminal: terminal,
-           platform: platform,
            outputPreferences: outputPreferences,
+           platform: platform,
+           terminal: terminal,
          ),
          dartBuilder: hookRunner,
+         fileSystem: fileSystem,
+         logger: logger,
+         outputPreferences: outputPreferences,
+         platform: platform,
+         terminal: terminal,
        );
 
   final FileSystem _fileSystem;
@@ -775,6 +785,11 @@ class ResidentWebRunner extends ResidentRunner {
         return UpdateFSReport();
       }
     }
+    final projectFileInvalidator = ProjectFileInvalidator(
+      fileSystem: _fileSystem,
+      platform: _platform,
+      logger: _logger,
+    );
     final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
       lastCompiled: flutterDevice!.devFS!.lastCompiled,
       urisToMonitor: flutterDevice!.devFS!.sources,
