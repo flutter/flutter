@@ -273,7 +273,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     FileSystem? fileSystem,
     Logger? logger,
   }) async {
-    final FileSystem effectiveFs = fileSystem ?? toolContext!.fs;
+    final FileSystem effectiveFs = fileSystem ?? toolContext.fs;
     final Logger effectiveLogger = logger ?? toolContext!.logger;
     final WebDevServerConfig fileConfig = await WebDevServerConfig.loadFromFile(
       fileSystem: effectiveFs,
@@ -534,7 +534,7 @@ class RunCommand extends RunCommandBase {
     if (anyIOSDevices) {
       final IosProject iosProject = FlutterProject.current().ios;
       if (iosProject.exists) {
-        final FileSystem fs = toolContext!.fs;
+        final FileSystem fs = toolContext.fs;
         final Iterable<File> swiftFiles = iosProject.hostAppRoot
             .listSync(recursive: true, followLinks: false)
             .whereType<File>()
