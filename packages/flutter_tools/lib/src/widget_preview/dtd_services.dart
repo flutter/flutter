@@ -220,13 +220,16 @@ class WidgetPreviewDtdServices {
     if (_lspServiceAvailable) {
       return;
     }
-    await (_waitForLspServiceFuture ??= () async {
-      try {
-        await _waitForLspServiceHelper();
-      } finally {
-        _waitForLspServiceFuture = null;
-      }
-    }());
+    final Future<void>? future = _waitForLspServiceFuture;
+    if (future != null) {
+      return future;
+    }
+    _waitForLspServiceFuture = _waitForLspServiceHelper();
+    try {
+      await _waitForLspServiceFuture;
+    } finally {
+      _waitForLspServiceFuture = null;
+    }
   }
 
   Future<void> _waitForLspServiceHelper() async {
