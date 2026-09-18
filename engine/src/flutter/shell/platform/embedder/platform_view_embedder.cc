@@ -146,6 +146,40 @@ PlatformViewEmbedder::PlatformViewEmbedder(
 
 PlatformViewEmbedder::~PlatformViewEmbedder() = default;
 
+void PlatformViewEmbedder::NotifyCreated() {
+  if (platform_dispatch_table_.raster_context_setup_callback) {
+    fml::AutoResetWaitableEvent latch;
+    fml::TaskRunner::RunNowOrPostTask(
+        task_runners_.GetRasterTaskRunner(),
+        [&latch,
+         callback = platform_dispatch_table_.raster_context_setup_callback,
+         user_data = platform_dispatch_table_.raster_context_user_data]() {
+          callback(user_data);
+          latch.Signal();
+        });
+    latch.Wait();
+  }
+
+  PlatformView::NotifyCreated();
+}
+
+void PlatformViewEmbedder::NotifyDestroyed() {
+  PlatformView::NotifyDestroyed();
+
+  if (platform_dispatch_table_.raster_context_teardown_callback) {
+    fml::AutoResetWaitableEvent latch;
+    fml::TaskRunner::RunNowOrPostTask(
+        task_runners_.GetRasterTaskRunner(),
+        [&latch,
+         callback = platform_dispatch_table_.raster_context_teardown_callback,
+         user_data = platform_dispatch_table_.raster_context_user_data]() {
+          callback(user_data);
+          latch.Signal();
+        });
+    latch.Wait();
+  }
+}
+
 void PlatformViewEmbedder::UpdateSemantics(
     int64_t view_id,
     flutter::SemanticsNodeUpdates update,
@@ -274,6 +308,29 @@ void PlatformViewEmbedder::RequestDartDeferredLibrary(
     platform_dispatch_table_.request_dart_deferred_library_callback(
         loading_unit_id);
   }
+  if (platform_dispatch_table_.dart_deferred_library_loading_unit_callback !=
+      nullptr) {
+    platform_dispatch_table_.dart_deferred_library_loading_unit_callback(
+        static_cast<int64_t>(loading_unit_id));
+  }
+}
+
+// |PlatformView|
+void PlatformViewEmbedder::LoadDartDeferredLibrary(
+    intptr_t loading_unit_id,
+    std::unique_ptr<const fml::Mapping> snapshot_data,
+    std::unique_ptr<const fml::Mapping> snapshot_instructions) {
+  delegate_.LoadDartDeferredLibrary(loading_unit_id, std::move(snapshot_data),
+                                    std::move(snapshot_instructions));
+}
+
+// |PlatformView|
+void PlatformViewEmbedder::LoadDartDeferredLibraryError(
+    intptr_t loading_unit_id,
+    const std::string error_message,
+    bool transient) {
+  delegate_.LoadDartDeferredLibraryError(loading_unit_id, error_message,
+                                         transient);
 }
 
 // |PlatformView|

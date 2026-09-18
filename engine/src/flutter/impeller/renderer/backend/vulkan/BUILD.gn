@@ -44,6 +44,7 @@ impeller_component("vulkan_unittests") {
     "test/pipeline_compile_queue_vulkan_unittests.cc",
     "test/sampler_library_vk_unittests.cc",
     "test/swapchain_unittests.cc",
+    "texture_wrapper_vk_unittests.cc",
   ]
   deps = [
     ":mock_vulkan",
@@ -137,6 +138,8 @@ impeller_component("vulkan") {
     "texture_source_vk.h",
     "texture_vk.cc",
     "texture_vk.h",
+    "texture_wrapper_vk.cc",
+    "texture_wrapper_vk.h",
     "tracked_objects_vk.cc",
     "tracked_objects_vk.h",
     "vertex_descriptor_vk.cc",
