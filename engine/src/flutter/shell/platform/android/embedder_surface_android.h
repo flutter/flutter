@@ -86,8 +86,6 @@ class EmbedderSurfaceAndroid final : public EmbedderSurface {
 
   void NotifyChanged(const DlISize& size);
 
-  void NotifyDestroyed();
-
   void TeardownOnScreenContext();
 
   AndroidSurface* GetAndroidSurface() const;
@@ -98,9 +96,9 @@ class EmbedderSurfaceAndroid final : public EmbedderSurface {
 
  private:
   std::shared_ptr<flutter::AndroidContext> android_context_;
+  std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidSurfaceFactoryImpl> surface_factory_;
   std::unique_ptr<AndroidSurface> android_surface_;
-  std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   flutter::TaskRunners task_runners_;
   bool android_meets_hcpp_criteria_ = false;
 
