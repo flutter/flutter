@@ -18,6 +18,7 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
  */
 @interface FlutterInactiveTextInput : UIView <UITextInput>
 @property(nonatomic, copy) NSString* text;
+@property(nonatomic, getter=isSecureTextEntry) BOOL secureTextEntry;
 @end
 
 @implementation FlutterInactiveTextInput
@@ -30,6 +31,7 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
 @synthesize markedTextStyle = _markedTextStyle;
 @synthesize selectedTextRange = _selectedTextRange;
 @synthesize tokenizer = _tokenizer;
+@synthesize secureTextEntry = _secureTextEntry;
 
 - (BOOL)hasText {
   return self.text.length > 0;
@@ -211,6 +213,7 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
 - (void)setSemanticsNode:(const flutter::SemanticsNode*)node {
   [super setSemanticsNode:node];
   _inactive_text_input.text = @(node->value.data());
+  _inactive_text_input.secureTextEntry = [self node].flags.isObscured;
   flutter::AccessibilityBridgeIos* bridge = self.bridge;
   if (!bridge) {
     return;
@@ -326,6 +329,10 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
 }
 
 #pragma mark - UITextInput overrides
+
+- (BOOL)isSecureTextEntry {
+  return [[self textInputSurrogate] isSecureTextEntry];
+}
 
 - (NSString*)textInRange:(UITextRange*)range {
   return [[self textInputSurrogate] textInRange:range];
