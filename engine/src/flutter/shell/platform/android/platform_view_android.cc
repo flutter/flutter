@@ -53,7 +53,9 @@ namespace {
 static constexpr int kMinAPILevelHCPP = 34;
 static constexpr int64_t kImplicitViewId = 0;
 
-AndroidContext::ContextSettings CreateContextSettings(
+}  // namespace
+
+AndroidContext::ContextSettings PlatformViewAndroid::CreateContextSettings(
     const Settings& p_settings) {
   AndroidContext::ContextSettings settings;
   settings.enable_gpu_tracing = p_settings.enable_vulkan_gpu_tracing;
@@ -61,9 +63,15 @@ AndroidContext::ContextSettings CreateContextSettings(
   settings.enable_surface_control = p_settings.enable_surface_control;
   return settings;
 }
-}  // namespace
 
-static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
+bool PlatformViewAndroid::MeetsHCPPCriteria(const Settings& settings) {
+  return settings.enable_surface_control &&
+         android_get_device_api_level() >= kMinAPILevelHCPP &&
+         settings.enable_impeller;
+}
+
+std::shared_ptr<flutter::AndroidContext>
+PlatformViewAndroid::CreateAndroidContext(
     const flutter::TaskRunners& task_runners,
     AndroidRenderingAPI android_rendering_api,
     bool enable_opengl_gpu_tracing,
@@ -123,16 +131,35 @@ PlatformViewAndroid::PlatformViewAndroid(
     FML_CHECK(android_context_->IsValid())
         << "Could not create surface from invalid Android context.";
     android_meets_hcpp_criteria_ =
-        delegate.OnPlatformViewGetSettings().enable_surface_control &&
-        android_get_device_api_level() >= kMinAPILevelHCPP &&
-        delegate.OnPlatformViewGetSettings().enable_impeller;
-    embedder_surface_ = std::make_unique<EmbedderSurfaceAndroid>(
+        MeetsHCPPCriteria(delegate.OnPlatformViewGetSettings());
+    owned_embedder_surface_ = std::make_unique<EmbedderSurfaceAndroid>(
         android_context_, delegate, jni_facade_, task_runners_,
         android_meets_hcpp_criteria_);
+    embedder_surface_ = owned_embedder_surface_.get();
     FML_CHECK(embedder_surface_ && embedder_surface_->IsValid())
         << "Could not create an OpenGL, Vulkan or Software surface to set "
            "up "
            "rendering.";
+  }
+}
+
+PlatformViewAndroid::PlatformViewAndroid(
+    PlatformView::Delegate& delegate,
+    const flutter::TaskRunners& task_runners,
+    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
+    const std::shared_ptr<flutter::AndroidContext>& android_context,
+    EmbedderSurfaceAndroid* embedder_surface)
+    : PlatformView(delegate, task_runners),
+      jni_facade_(jni_facade),
+      android_context_(android_context),
+      embedder_surface_(embedder_surface),
+      platform_view_android_delegate_(jni_facade),
+      platform_message_handler_(new PlatformMessageHandlerAndroid(jni_facade)) {
+  if (android_context_) {
+    FML_CHECK(android_context_->IsValid())
+        << "Could not create surface from invalid Android context.";
+    android_meets_hcpp_criteria_ =
+        MeetsHCPPCriteria(delegate.OnPlatformViewGetSettings());
   }
 }
 
@@ -146,7 +173,7 @@ void PlatformViewAndroid::NotifyCreated(
     fml::AutoResetWaitableEvent latch;
     fml::TaskRunner::RunNowOrPostTask(
         task_runners_.GetRasterTaskRunner(),
-        [&latch, surface = embedder_surface_.get(),
+        [&latch, surface = embedder_surface_,
          native_window = std::move(native_window), jni_facade = jni_facade_]() {
           surface->NotifyCreated(native_window, jni_facade);
           latch.Signal();
@@ -154,7 +181,11 @@ void PlatformViewAndroid::NotifyCreated(
     latch.Wait();
   }
 
-  PlatformView::NotifyCreated();
+  if (platform_view_) {
+    platform_view_->NotifyCreated();
+  } else {
+    PlatformView::NotifyCreated();
+  }
 }
 
 void PlatformViewAndroid::NotifySurfaceWindowChanged(
@@ -163,7 +194,7 @@ void PlatformViewAndroid::NotifySurfaceWindowChanged(
     fml::AutoResetWaitableEvent latch;
     fml::TaskRunner::RunNowOrPostTask(
         task_runners_.GetRasterTaskRunner(),
-        [&latch, surface = embedder_surface_.get(),
+        [&latch, surface = embedder_surface_,
          native_window = std::move(native_window), jni_facade = jni_facade_]() {
           surface->NotifySurfaceWindowChanged(native_window, jni_facade);
           latch.Signal();
@@ -171,20 +202,27 @@ void PlatformViewAndroid::NotifySurfaceWindowChanged(
     latch.Wait();
   }
 
-  PlatformView::ScheduleFrame();
+  if (platform_view_) {
+    platform_view_->ScheduleFrame();
+  } else {
+    PlatformView::ScheduleFrame();
+  }
 }
 
 void PlatformViewAndroid::NotifyDestroyed() {
-  PlatformView::NotifyDestroyed();
+  if (platform_view_) {
+    platform_view_->NotifyDestroyed();
+  } else {
+    PlatformView::NotifyDestroyed();
+  }
 
   if (embedder_surface_) {
     fml::AutoResetWaitableEvent latch;
-    fml::TaskRunner::RunNowOrPostTask(
-        task_runners_.GetRasterTaskRunner(),
-        [&latch, surface = embedder_surface_.get()]() {
-          surface->TeardownOnScreenContext();
-          latch.Signal();
-        });
+    fml::TaskRunner::RunNowOrPostTask(task_runners_.GetRasterTaskRunner(),
+                                      [&latch, surface = embedder_surface_]() {
+                                        surface->TeardownOnScreenContext();
+                                        latch.Signal();
+                                      });
     latch.Wait();
   }
 }
@@ -196,7 +234,7 @@ void PlatformViewAndroid::NotifyChanged(const DlISize& size) {
   fml::AutoResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetRasterTaskRunner(),  //
-      [&latch, surface = embedder_surface_.get(), size]() {
+      [&latch, surface = embedder_surface_, size]() {
         surface->NotifyChanged(size);
         latch.Signal();
       });
@@ -471,7 +509,7 @@ void PlatformViewAndroid::UpdateAssetResolverByType(
 
 void PlatformViewAndroid::InstallFirstFrameCallback() {
   // On Platform Task Runner.
-  SetNextFrameCallback(
+  delegate_.OnPlatformViewSetNextFrameCallback(
       [platform_view = GetWeakPtr(),
        platform_task_runner = task_runners_.GetPlatformTaskRunner()]() {
         // On GPU Task Runner.
@@ -493,6 +531,19 @@ double PlatformViewAndroid::GetScaledFontSize(double unscaled_font_size,
                                               int configuration_id) const {
   return jni_facade_->FlutterViewGetScaledFontSize(unscaled_font_size,
                                                    configuration_id);
+}
+
+void PlatformViewAndroid::SendChannelUpdate(const std::string& name,
+                                            bool listening) {}
+
+void PlatformViewAndroid::RequestViewFocusChange(
+    const ViewFocusChangeRequest& request) {}
+
+void PlatformViewAndroid::OnVsyncCallback(intptr_t baton) {}
+
+void PlatformViewAndroid::SetPlatformView(
+    fml::WeakPtr<PlatformView> platform_view) {
+  platform_view_ = std::move(platform_view);
 }
 
 bool PlatformViewAndroid::IsSurfaceControlEnabled() const {
