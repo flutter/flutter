@@ -6586,9 +6586,13 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   }
 
   void _marksConflictsInMergeGroup(List<_SemanticsFragment> mergeGroup, {bool isMergeUp = false}) {
+    final wasConflicting = <_RenderObjectSemantics>{};
     final hasSiblingConflict = <_SemanticsFragment>{};
     for (var i = 0; i < mergeGroup.length; i += 1) {
       final _SemanticsFragment fragment = mergeGroup[i];
+      if (fragment is _RenderObjectSemantics && fragment._hasSiblingConflict) {
+        wasConflicting.add(fragment);
+      }
       // Remove old value
       fragment.markSiblingConfigurationConflict(false);
       if (fragment.configToMergeUp == null) {
@@ -6606,8 +6610,18 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         }
       }
     }
+    // A sibling conflict feeds shouldFormSemanticsNode, so gaining or losing one
+    // changes whether the fragment produces a semantics node of its own. What it
+    // has cached is stale until it is rebuilt.
     for (final fragment in hasSiblingConflict) {
       fragment.markSiblingConfigurationConflict(true);
+      if (fragment is _RenderObjectSemantics && !wasConflicting.remove(fragment)) {
+        fragment.markNeedsBuild();
+      }
+    }
+    // Whatever is left in wasConflicting stopped conflicting in this pass.
+    for (final fragment in wasConflicting) {
+      fragment.markNeedsBuild();
     }
   }
 
