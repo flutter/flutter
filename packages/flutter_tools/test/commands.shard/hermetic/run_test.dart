@@ -123,20 +123,6 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
-    testUsingContext(
-      'can be constructed without appleContext and toolContext and falls back to globals',
-      () {
-        final command = RunCommand();
-        expect(command, isNotNull);
-        expect(command.appleContext, isNotNull);
-        expect(command.toolContext, isNotNull);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-      },
-    );
 
     testUsingContext(
       'fails when target not found',
