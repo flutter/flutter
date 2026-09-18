@@ -15,6 +15,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Fetch Flutter upstream tags
+        run: git fetch https://github.com/flutter/flutter.git --tags --force
       - name: Run targeted table semantics tests
         run: ./bin/flutter test packages/flutter/test/widgets/table_semantics_test.dart
       - name: Remove temporary validation workflow
