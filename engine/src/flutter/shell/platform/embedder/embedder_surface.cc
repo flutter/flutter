@@ -10,6 +10,8 @@ EmbedderSurface::EmbedderSurface() = default;
 
 EmbedderSurface::~EmbedderSurface() = default;
 
+void EmbedderSurface::SetupImpellerContext() {}
+
 std::shared_ptr<impeller::Context> EmbedderSurface::CreateImpellerContext()
     const {
   return nullptr;
@@ -20,5 +22,15 @@ sk_sp<GrDirectContext> EmbedderSurface::CreateResourceContext() const {
 }
 
 void EmbedderSurface::ReleaseResourceContext() const {}
+
+std::shared_ptr<ExternalViewEmbedder>
+EmbedderSurface::CreateExternalViewEmbedder() {
+  return nullptr;
+}
+
+std::unique_ptr<SnapshotSurfaceProducer>
+EmbedderSurface::CreateSnapshotSurfaceProducer() {
+  return nullptr;
+}
 
 }  // namespace flutter
