@@ -49,9 +49,9 @@ class FlutterDevice {
     required this.generator,
     required this.developmentShaderCompiler,
     @visibleForTesting this.logFlushDelay = const Duration(milliseconds: 500),
-    Logger? logger,
+    this._logger,
     this.userIdentifier,
-  }) : _logger = logger ?? globals.logger;
+  });
 
   final Duration logFlushDelay;
 
@@ -61,6 +61,7 @@ class FlutterDevice {
     required String? target,
     required BuildInfo buildInfo,
     required Platform platform,
+    Logger? logger,
     String? userIdentifier,
     TargetModel? targetModelOverride,
   }) async {
@@ -96,7 +97,7 @@ class FlutterDevice {
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
       developmentShaderCompiler: shaderCompiler,
-      logger: globals.logger,
+      logger: logger,
     );
   }
 
@@ -106,7 +107,7 @@ class FlutterDevice {
   final BuildInfo buildInfo;
   final String? userIdentifier;
   final DevelopmentShaderCompiler developmentShaderCompiler;
-  final Logger _logger;
+  final Logger? _logger;
 
   DevFSWriter? devFSWriter;
   Future<Uri>? vmServiceUri;
@@ -328,7 +329,7 @@ class FlutterDevice {
         }
       },
       onError: (Object error, StackTrace stackTrace) {
-        _logger.printTrace('Error on device log stream: $error\n$stackTrace');
+        _logger?.printTrace('Error on device log stream: $error\n$stackTrace');
       },
     );
   }
