@@ -22,16 +22,12 @@
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 #include "flutter/fml/platform/android/scoped_java_ref.h"
-#else
-// Host-safe forward declarations for desktop / CI test builds
-struct AAsset;
-struct AAssetManager;
-#endif
+#include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
 
-/// @brief Internal interface for Android APK asset provider implementations.
-class APKAssetProviderInternal {
+class APKAssetProviderInternal
+    : public std::enable_shared_from_this<APKAssetProviderInternal> {
  public:
   virtual ~APKAssetProviderInternal() = default;
 
@@ -39,16 +35,15 @@ class APKAssetProviderInternal {
   virtual std::unique_ptr<fml::Mapping> GetAsMapping(
       const std::string& asset_name) const = 0;
 
-  /// @brief Resolves multiple assets matching a pattern in an optional
-  /// subdirectory.
-  virtual std::vector<std::unique_ptr<fml::Mapping>> GetAsMappings(
-      const std::string& asset_pattern,
-      const std::optional<std::string>& subdir) const {
-    return {};
-  }
+  // Returns a FlutterAssetResolver representing this asset provider for use
+  // with the Flutter Embedder C-API.
+  //
+  // Note: The instance must be managed by a std::shared_ptr (due to
+  // std::enable_shared_from_this).
+  virtual FlutterAssetResolver ToFlutterAssetResolver() const;
 
-  /// @brief Returns the base asset directory path.
-  virtual const std::string& GetDirectory() const = 0;
+ protected:
+  virtual ~APKAssetProviderInternal() = default;
 };
 
 /// @brief In-memory / host-safe implementation of APKAssetProviderInternal.
@@ -130,10 +125,20 @@ class APKAssetProvider final : public AssetResolver {
   /// tests). Callers must not delete the returned pointer.
   APKAssetProviderInternal* GetImpl() const { return impl_.get(); }
 
-  /// @brief Returns the base asset directory path.
-  const std::string& GetDirectory() const;
+  // Returns a FlutterAssetResolver representing this asset provider for use
+  // with the Flutter Embedder C-API.
+  FlutterAssetResolver ToFlutterAssetResolver() const;
 
-  // |AssetResolver|
+  // Creates a FlutterAssetResolver from a Java AssetManager jobject.
+  static FlutterAssetResolver CreateFlutterAssetResolver(JNIEnv* env,
+                                                         jobject asset_manager,
+                                                         std::string directory);
+
+  // Creates a FlutterAssetResolver from an NDK AAssetManager pointer.
+  static FlutterAssetResolver CreateFlutterAssetResolver(
+      AAssetManager* asset_manager,
+      std::string directory);
+
   bool operator==(const AssetResolver& other) const override;
 
   // |AssetResolver|

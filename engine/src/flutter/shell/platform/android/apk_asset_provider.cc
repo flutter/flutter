@@ -83,101 +83,64 @@ bool APKAssetMapping::IsDontNeedSafe() const {
   return true;
 }
 
-// =============================================================================
-// InMemoryAPKAssetProviderImpl Implementation
-// =============================================================================
+namespace {
 
-InMemoryAPKAssetProviderImpl::InMemoryAPKAssetProviderImpl(
-    std::string directory)
-    : directory_(std::move(directory)) {
-  TRACE_EVENT0("flutter",
-               "InMemoryAPKAssetProviderImpl::InMemoryAPKAssetProviderImpl");
-}
-
-InMemoryAPKAssetProviderImpl::~InMemoryAPKAssetProviderImpl() {
-  TRACE_EVENT0("flutter",
-               "InMemoryAPKAssetProviderImpl::~InMemoryAPKAssetProviderImpl");
-}
-
-void InMemoryAPKAssetProviderImpl::AddAsset(const std::string& asset_name,
-                                            std::vector<uint8_t> data) {
-  TRACE_EVENT1("flutter", "InMemoryAPKAssetProviderImpl::AddAsset", "name",
-               asset_name.c_str());
-  assets_[asset_name] = std::move(data);
-}
-
-void InMemoryAPKAssetProviderImpl::AddAsset(const std::string& asset_name,
-                                            const std::string& data) {
-  AddAsset(asset_name, std::vector<uint8_t>(data.begin(), data.end()));
-}
-
-void InMemoryAPKAssetProviderImpl::RemoveAsset(const std::string& asset_name) {
-  TRACE_EVENT1("flutter", "InMemoryAPKAssetProviderImpl::RemoveAsset", "name",
-               asset_name.c_str());
-  assets_.erase(asset_name);
-}
-
-void InMemoryAPKAssetProviderImpl::ClearAssets() {
-  TRACE_EVENT0("flutter", "InMemoryAPKAssetProviderImpl::ClearAssets");
-  assets_.clear();
-}
-
-std::unique_ptr<fml::Mapping> InMemoryAPKAssetProviderImpl::GetAsMapping(
-    const std::string& asset_name) const {
-  TRACE_EVENT1("flutter", "InMemoryAPKAssetProviderImpl::GetAsMapping", "name",
-               asset_name.c_str());
-  auto it = assets_.find(asset_name);
-  if (it != assets_.end()) {
-    return std::make_unique<fml::DataMapping>(it->second);
+std::string NormalizeAssetPath(const std::string& dir,
+                               const std::string& asset_name) {
+  std::string clean_asset = asset_name;
+  while (!clean_asset.empty() && clean_asset.front() == '/') {
+    clean_asset.erase(0, 1);
   }
-  if (!directory_.empty()) {
-    std::string prefixed = directory_ + "/" + asset_name;
-    it = assets_.find(prefixed);
-    if (it != assets_.end()) {
-      return std::make_unique<fml::DataMapping>(it->second);
+  std::string clean_dir = dir;
+  while (!clean_dir.empty() && clean_dir.back() == '/') {
+    clean_dir.pop_back();
+  }
+  while (!clean_dir.empty() && clean_dir.front() == '/') {
+    clean_dir.erase(0, 1);
+  }
+  if (clean_dir.empty()) {
+    return clean_asset;
+  }
+  if (clean_asset.rfind(clean_dir + "/", 0) == 0) {
+    return clean_asset;
+  }
+  return clean_dir + "/" + clean_asset;
+}
+
+AAsset* OpenAssetWithFallbacks(AAssetManager* asset_manager,
+                               const std::string& directory,
+                               const std::string& asset_name) {
+  if (!asset_manager) {
+    return nullptr;
+  }
+  std::string full_path = NormalizeAssetPath(directory, asset_name);
+  AAsset* asset =
+      AAssetManager_open(asset_manager, full_path.c_str(), AASSET_MODE_BUFFER);
+  if (!asset) {
+    std::string clean_asset = asset_name;
+    while (!clean_asset.empty() && clean_asset.front() == '/') {
+      clean_asset.erase(0, 1);
     }
-    if (asset_name.rfind(directory_ + "/", 0) == 0) {
-      std::string stripped = asset_name.substr(directory_.length() + 1);
-      it = assets_.find(stripped);
-      if (it != assets_.end()) {
-        return std::make_unique<fml::DataMapping>(it->second);
-      }
+    if (full_path.rfind("flutter_assets/", 0) != 0) {
+      std::string fallback_path = "flutter_assets/" + clean_asset;
+      asset = AAssetManager_open(asset_manager, fallback_path.c_str(),
+                                 AASSET_MODE_BUFFER);
+    } else if (clean_asset.rfind("flutter_assets/", 0) == 0 &&
+               clean_asset.length() > 15) {
+      std::string stripped = clean_asset.substr(15);
+      asset = AAssetManager_open(asset_manager, stripped.c_str(),
+                                 AASSET_MODE_BUFFER);
+    }
+    if (!asset && full_path != clean_asset) {
+      asset = AAssetManager_open(asset_manager, clean_asset.c_str(),
+                                 AASSET_MODE_BUFFER);
     }
   }
-  return nullptr;
+  return asset;
 }
 
-std::vector<std::unique_ptr<fml::Mapping>>
-InMemoryAPKAssetProviderImpl::GetAsMappings(
-    const std::string& asset_pattern,
-    const std::optional<std::string>& subdir) const {
-  TRACE_EVENT1("flutter", "InMemoryAPKAssetProviderImpl::GetAsMappings",
-               "pattern", asset_pattern.c_str());
-  std::vector<std::unique_ptr<fml::Mapping>> results;
-  std::string prefix =
-      subdir.has_value() && !subdir.value().empty() ? subdir.value() + "/" : "";
-  for (const auto& [name, data] : assets_) {
-    if (!prefix.empty() && name.rfind(prefix, 0) != 0) {
-      continue;
-    }
-    if (asset_pattern.empty() || asset_pattern == "*" ||
-        name.find(asset_pattern) != std::string::npos) {
-      results.push_back(std::make_unique<fml::DataMapping>(data));
-    }
-  }
-  return results;
-}
+}  // namespace
 
-const std::string& InMemoryAPKAssetProviderImpl::GetDirectory() const {
-  TRACE_EVENT0("flutter", "InMemoryAPKAssetProviderImpl::GetDirectory");
-  return directory_;
-}
-
-// =============================================================================
-// APKAssetProviderImpl Implementation
-// =============================================================================
-
-#if defined(__ANDROID__)
 class APKAssetProviderImpl : public APKAssetProviderInternal {
  public:
   explicit APKAssetProviderImpl(JNIEnv* env,
@@ -194,21 +157,8 @@ class APKAssetProviderImpl : public APKAssetProviderInternal {
 
   std::unique_ptr<fml::Mapping> GetAsMapping(
       const std::string& asset_name) const override {
-    TRACE_EVENT1("flutter", "APKAssetProviderImpl::GetAsMapping", "name",
-                 asset_name.c_str());
-    if (!asset_manager_) {
-      return nullptr;
-    }
-    std::string candidate_path = asset_name;
-    if (!directory_.empty() && asset_name.rfind(directory_ + "/", 0) != 0) {
-      candidate_path = directory_ + "/" + asset_name;
-    }
-    AAsset* asset = AAssetManager_open(asset_manager_, candidate_path.c_str(),
-                                       AASSET_MODE_BUFFER);
-    if (!asset && candidate_path != asset_name) {
-      asset = AAssetManager_open(asset_manager_, asset_name.c_str(),
-                                 AASSET_MODE_BUFFER);
-    }
+    AAsset* asset =
+        OpenAssetWithFallbacks(asset_manager_, directory_, asset_name);
     if (!asset) {
       return nullptr;
     }
@@ -378,6 +328,129 @@ bool APKAssetProvider::operator==(const AssetResolver& other) const {
     return false;
   }
   return impl_ == other_provider->impl_;
+}
+
+FlutterAssetResolver APKAssetProviderInternal::ToFlutterAssetResolver() const {
+  struct InternalContext {
+    std::shared_ptr<const APKAssetProviderInternal> internal;
+  };
+  auto* context = new InternalContext{shared_from_this()};
+
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = context;
+  resolver.find_asset_callback = [](void* user_data, const char* asset_name,
+                                    FlutterAsset* asset_out) -> bool {
+    if (!user_data || !asset_name || !asset_out) {
+      return false;
+    }
+    auto* ctx = static_cast<InternalContext*>(user_data);
+    auto mapping = ctx->internal->GetAsMapping(asset_name);
+    if (!mapping) {
+      return false;
+    }
+    asset_out->struct_size = sizeof(FlutterAsset);
+    asset_out->data = mapping->GetMapping();
+    asset_out->size = mapping->GetSize();
+    asset_out->user_data = mapping.release();
+    asset_out->asset_free_callback = [](void* user_data) {
+      if (user_data) {
+        delete static_cast<fml::Mapping*>(user_data);
+      }
+    };
+    return true;
+  };
+  resolver.is_valid_callback = [](void* user_data) -> bool {
+    return user_data != nullptr;
+  };
+  resolver.is_valid_after_change_callback = [](void* user_data) -> bool {
+    return true;
+  };
+  resolver.destruction_callback = [](void* user_data) {
+    if (user_data) {
+      delete static_cast<InternalContext*>(user_data);
+    }
+  };
+  return resolver;
+}
+
+FlutterAssetResolver APKAssetProvider::ToFlutterAssetResolver() const {
+  if (impl_) {
+    return impl_->ToFlutterAssetResolver();
+  }
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  return resolver;
+}
+
+FlutterAssetResolver APKAssetProvider::CreateFlutterAssetResolver(
+    JNIEnv* env,
+    jobject asset_manager,
+    std::string directory) {
+  auto impl = std::make_shared<APKAssetProviderImpl>(env, asset_manager,
+                                                     std::move(directory));
+  return impl->ToFlutterAssetResolver();
+}
+
+FlutterAssetResolver APKAssetProvider::CreateFlutterAssetResolver(
+    AAssetManager* asset_manager,
+    std::string directory) {
+  struct DirectContext {
+    AAssetManager* asset_manager;
+    std::string directory;
+  };
+  auto* context = new DirectContext{asset_manager, std::move(directory)};
+
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = context;
+  resolver.find_asset_callback = [](void* user_data, const char* asset_name,
+                                    FlutterAsset* asset_out) -> bool {
+    if (!user_data || !asset_name || !asset_out) {
+      return false;
+    }
+    auto* ctx = static_cast<DirectContext*>(user_data);
+    if (!ctx->asset_manager) {
+      return false;
+    }
+    AAsset* asset =
+        OpenAssetWithFallbacks(ctx->asset_manager, ctx->directory, asset_name);
+    if (!asset) {
+      return false;
+    }
+    const void* buffer = AAsset_getBuffer(asset);
+    off_t length = AAsset_getLength(asset);
+    if (!buffer && length > 0) {
+      AAsset_close(asset);
+      return false;
+    }
+    asset_out->struct_size = sizeof(FlutterAsset);
+    asset_out->data = static_cast<const uint8_t*>(buffer);
+    asset_out->size = static_cast<size_t>(length);
+    asset_out->user_data = asset;
+    asset_out->asset_free_callback = [](void* user_data) {
+      if (user_data) {
+        AAsset_close(static_cast<AAsset*>(user_data));
+      }
+    };
+    return true;
+  };
+  resolver.is_valid_callback = [](void* user_data) -> bool {
+    if (!user_data) {
+      return false;
+    }
+    auto* ctx = static_cast<DirectContext*>(user_data);
+    return ctx->asset_manager != nullptr;
+  };
+  resolver.is_valid_after_change_callback = [](void* user_data) -> bool {
+    return true;
+  };
+  resolver.destruction_callback = [](void* user_data) {
+    if (user_data) {
+      delete static_cast<DirectContext*>(user_data);
+    }
+  };
+  return resolver;
 }
 
 }  // namespace flutter

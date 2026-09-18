@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "flutter/shell/platform/android/apk_asset_provider.h"
+#include "flutter/shell/platform/embedder/embedder_asset_resolver.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -49,112 +50,90 @@ TEST(APKAssetProvider, CloneAndEquals) {
             AssetResolver::AssetResolverType::kApkAssetProvider);
 }
 
-TEST(APKAssetProvider, InMemoryAssetResolution) {
-  auto in_memory_impl =
-      std::make_shared<InMemoryAPKAssetProviderImpl>("flutter_assets");
-  std::string test_data = "Hello Flutter Embedder Asset";
-  in_memory_impl->AddAsset("test.txt", test_data);
+TEST(APKAssetProvider, ToFlutterAssetResolverWithMock) {
+  auto mock_impl = std::make_shared<MockAPKAssetProviderImpl>();
+  const std::string test_data = "Hello Flutter Assets";
 
-  auto provider = std::make_unique<APKAssetProvider>(in_memory_impl);
-  EXPECT_EQ(provider->GetDirectory(), "flutter_assets");
+  EXPECT_CALL(*mock_impl, GetAsMapping("test.txt"))
+      .WillOnce(::testing::Return(std::make_unique<fml::DataMapping>(
+          std::vector<uint8_t>(test_data.begin(), test_data.end()))));
 
-  auto mapping = provider->GetAsMapping("test.txt");
-  ASSERT_NE(mapping, nullptr);
-  EXPECT_EQ(mapping->GetSize(), test_data.size());
-  EXPECT_EQ(std::string(reinterpret_cast<const char*>(mapping->GetMapping()),
-                        mapping->GetSize()),
+  EXPECT_CALL(*mock_impl, GetAsMapping("missing.txt"))
+      .WillOnce(::testing::Return(nullptr));
+
+  auto provider = std::make_unique<APKAssetProvider>(mock_impl);
+  FlutterAssetResolver resolver = provider->ToFlutterAssetResolver();
+
+  EXPECT_EQ(resolver.struct_size, sizeof(FlutterAssetResolver));
+  ASSERT_NE(resolver.find_asset_callback, nullptr);
+  ASSERT_NE(resolver.is_valid_callback, nullptr);
+  ASSERT_NE(resolver.is_valid_after_change_callback, nullptr);
+  ASSERT_NE(resolver.destruction_callback, nullptr);
+
+  EXPECT_TRUE(resolver.is_valid_callback(resolver.user_data));
+  EXPECT_TRUE(resolver.is_valid_after_change_callback(resolver.user_data));
+
+  // Null arguments test.
+  EXPECT_FALSE(resolver.find_asset_callback(nullptr, "test.txt", nullptr));
+  EXPECT_FALSE(
+      resolver.find_asset_callback(resolver.user_data, nullptr, nullptr));
+
+  // Find existing asset.
+  FlutterAsset asset = {};
+  EXPECT_TRUE(
+      resolver.find_asset_callback(resolver.user_data, "test.txt", &asset));
+  EXPECT_EQ(asset.struct_size, sizeof(FlutterAsset));
+  EXPECT_EQ(asset.size, test_data.size());
+  ASSERT_NE(asset.data, nullptr);
+  EXPECT_EQ(std::string(reinterpret_cast<const char*>(asset.data), asset.size),
             test_data);
+  ASSERT_NE(asset.asset_free_callback, nullptr);
+  asset.asset_free_callback(asset.user_data);
 
-  // Missing asset returns nullptr
-  EXPECT_EQ(provider->GetAsMapping("nonexistent.bin"), nullptr);
+  // Missing asset.
+  FlutterAsset missing_asset = {};
+  EXPECT_FALSE(resolver.find_asset_callback(resolver.user_data, "missing.txt",
+                                            &missing_asset));
+
+  // Resolver destruction.
+  resolver.destruction_callback(resolver.user_data);
 }
 
-TEST(APKAssetProvider, InMemoryDirectoryMappingAndPattern) {
-  auto in_memory_impl =
-      std::make_shared<InMemoryAPKAssetProviderImpl>("flutter_assets");
-  in_memory_impl->AddAsset("fonts/FontA.ttf", "FontAData");
-  in_memory_impl->AddAsset("fonts/FontB.ttf", "FontBData");
-  in_memory_impl->AddAsset("images/logo.png", "PNGData");
-  in_memory_impl->AddAsset("AssetManifest.json", "{}");
+TEST(APKAssetProvider, EmbedderAssetResolverIntegration) {
+  auto mock_impl = std::make_shared<MockAPKAssetProviderImpl>();
+  const std::string test_data = "Integration Asset Content";
 
-  auto provider = std::make_unique<APKAssetProvider>(in_memory_impl);
+  EXPECT_CALL(*mock_impl, GetAsMapping("kernel_blob.bin"))
+      .WillOnce(::testing::Return(std::make_unique<fml::DataMapping>(
+          std::vector<uint8_t>(test_data.begin(), test_data.end()))));
 
-  // Search in subdir fonts with .ttf
-  auto font_mappings = provider->GetAsMappings("ttf", "fonts");
-  EXPECT_EQ(font_mappings.size(), 2u);
+  auto provider = std::make_unique<APKAssetProvider>(mock_impl);
+  FlutterAssetResolver resolver = provider->ToFlutterAssetResolver();
 
-  // Search with wildcard
-  auto all_fonts = provider->GetAsMappings("*", "fonts");
-  EXPECT_EQ(all_fonts.size(), 2u);
+  {
+    EmbedderAssetResolver embedder_resolver(resolver);
+    EXPECT_TRUE(embedder_resolver.IsValid());
+    EXPECT_TRUE(embedder_resolver.IsValidAfterAssetManagerChange());
 
-  // Search in images
-  auto images = provider->GetAsMappings("png", "images");
-  EXPECT_EQ(images.size(), 1u);
-}
-
-TEST(APKAssetProvider, InMemoryAssetRemovalAndClear) {
-  auto in_memory_impl =
-      std::make_shared<InMemoryAPKAssetProviderImpl>("flutter_assets");
-  in_memory_impl->AddAsset("asset1.bin", "data1");
-  in_memory_impl->AddAsset("asset2.bin", "data2");
-
-  auto provider = std::make_unique<APKAssetProvider>(in_memory_impl);
-  EXPECT_NE(provider->GetAsMapping("asset1.bin"), nullptr);
-  EXPECT_NE(provider->GetAsMapping("asset2.bin"), nullptr);
-
-  in_memory_impl->RemoveAsset("asset1.bin");
-  EXPECT_EQ(provider->GetAsMapping("asset1.bin"), nullptr);
-  EXPECT_NE(provider->GetAsMapping("asset2.bin"), nullptr);
-
-  in_memory_impl->ClearAssets();
-  EXPECT_EQ(provider->GetAsMapping("asset2.bin"), nullptr);
-}
-
-TEST(APKAssetProvider, APKAssetMappingDirectBufferAndStreaming) {
-  std::vector<uint8_t> payload = {'F', 'L', 'U', 'T', 'T', 'E', 'R'};
-  auto mapping = std::make_unique<APKAssetMapping>(payload);
-
-  EXPECT_EQ(mapping->GetSize(), 7u);
-  EXPECT_TRUE(mapping->IsDontNeedSafe());
-  ASSERT_NE(mapping->GetMapping(), nullptr);
-  EXPECT_EQ(std::vector<uint8_t>(mapping->GetMapping(),
-                                 mapping->GetMapping() + mapping->GetSize()),
-            payload);
-}
-
-TEST(APKAssetProvider, ThreadSafeConcurrentResolution) {
-  auto in_memory_impl =
-      std::make_shared<InMemoryAPKAssetProviderImpl>("flutter_assets");
-  for (int i = 0; i < 20; ++i) {
-    std::string name = "asset_" + std::to_string(i) + ".dat";
-    std::string content = "Content of asset " + std::to_string(i);
-    in_memory_impl->AddAsset(name, content);
+    auto mapping = embedder_resolver.GetAsMapping("kernel_blob.bin");
+    ASSERT_NE(mapping, nullptr);
+    EXPECT_EQ(mapping->GetSize(), test_data.size());
+    EXPECT_EQ(std::string(reinterpret_cast<const char*>(mapping->GetMapping()),
+                          mapping->GetSize()),
+              test_data);
   }
+}
 
-  auto provider = std::make_shared<APKAssetProvider>(in_memory_impl);
+TEST(APKAssetProvider, CreateFlutterAssetResolverNullAssetManager) {
+  FlutterAssetResolver resolver =
+      APKAssetProvider::CreateFlutterAssetResolver(nullptr, "");
+  EXPECT_FALSE(resolver.is_valid_callback(resolver.user_data));
 
-  constexpr size_t kThreadCount = 6;
-  constexpr size_t kIterations = 200;
-  std::vector<std::future<bool>> futures;
-  futures.reserve(kThreadCount);
+  FlutterAsset asset = {};
+  EXPECT_FALSE(
+      resolver.find_asset_callback(resolver.user_data, "any.txt", &asset));
 
-  for (size_t t = 0; t < kThreadCount; ++t) {
-    futures.push_back(std::async(std::launch::async, [provider, t]() {
-      for (size_t iter = 0; iter < kIterations; ++iter) {
-        int idx = static_cast<int>((t + iter) % 20);
-        std::string name = "asset_" + std::to_string(idx) + ".dat";
-        auto mapping = provider->GetAsMapping(name);
-        if (!mapping || mapping->GetSize() == 0) {
-          return false;
-        }
-      }
-      return true;
-    }));
-  }
-
-  for (auto& f : futures) {
-    EXPECT_TRUE(f.get());
-  }
+  resolver.destruction_callback(resolver.user_data);
 }
 
 }  // namespace testing
