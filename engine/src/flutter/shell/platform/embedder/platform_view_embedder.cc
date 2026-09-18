@@ -205,6 +205,9 @@ PlatformViewEmbedder::CreateSnapshotSurfaceProducer() {
 
 std::shared_ptr<impeller::Context> PlatformViewEmbedder::GetImpellerContext()
     const {
+  if (embedder_surface_ == nullptr) {
+    return nullptr;
+  }
   return embedder_surface_->CreateImpellerContext();
 }
 
@@ -236,7 +239,9 @@ void PlatformViewEmbedder::ReleaseResourceContext() const {
 // |PlatformView|
 std::unique_ptr<VsyncWaiter> PlatformViewEmbedder::CreateVSyncWaiter() {
   if (platform_dispatch_table_.create_vsync_waiter_callback) {
-    return platform_dispatch_table_.create_vsync_waiter_callback();
+    if (auto waiter = platform_dispatch_table_.create_vsync_waiter_callback()) {
+      return waiter;
+    }
   }
   if (!platform_dispatch_table_.vsync_callback) {
     // Superclass implementation creates a timer based fallback.
@@ -279,6 +284,20 @@ double PlatformViewEmbedder::GetScaledFontSize(double unscaled_font_size,
         unscaled_font_size, configuration_id);
   }
   return PlatformView::GetScaledFontSize(unscaled_font_size, configuration_id);
+}
+
+// |PlatformView|
+void PlatformViewEmbedder::SetApplicationLocale(std::string locale) {
+  if (platform_dispatch_table_.set_application_locale_callback != nullptr) {
+    platform_dispatch_table_.set_application_locale_callback(std::move(locale));
+  }
+}
+
+// |PlatformView|
+void PlatformViewEmbedder::SetSemanticsTreeEnabled(bool enabled) {
+  if (platform_dispatch_table_.set_semantics_tree_enabled_callback != nullptr) {
+    platform_dispatch_table_.set_semantics_tree_enabled_callback(enabled);
+  }
 }
 
 // |PlatformView|
