@@ -120,6 +120,13 @@ class SemanticIncrementable extends SemanticRole {
   void update() {
     super.update();
 
+    final String? ariaLabel = element.getAttribute('aria-label');
+    if (ariaLabel != null && ariaLabel.isNotEmpty) {
+      _element.setAttribute('aria-label', ariaLabel);
+    } else {
+      _element.removeAttribute('aria-label');
+    }
+
     switch (EngineSemantics.instance.gestureMode) {
       case GestureMode.browserGestures:
         _enableBrowserGestureHandling();

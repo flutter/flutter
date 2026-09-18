@@ -120,11 +120,13 @@ final class AriaLabelRepresentation extends LabelRepresentationBehavior {
     if (label == _previousLabel) {
       return;
     }
+    _previousLabel = label;
     owner.setAttribute('aria-label', label);
   }
 
   @override
   void cleanUp() {
+    _previousLabel = null;
     owner.removeAttribute('aria-label');
   }
 

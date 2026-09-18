@@ -438,10 +438,13 @@ class SemanticTextField extends SemanticRole {
       SemanticsTextEditingStrategy._instance?.activate(this);
     }
 
-    if (semanticsObject.hasLabel) {
-      if (semanticsObject.isLabelDirty) {
-        editableElement.setAttribute('aria-label', semanticsObject.label!);
-      }
+    final String? effectiveLabel = semanticsObject.hasLabel
+        ? semanticsObject.label
+        : (semanticsObject.hint != null && semanticsObject.hint!.trim().isNotEmpty
+              ? semanticsObject.hint
+              : null);
+    if (effectiveLabel != null && effectiveLabel.isNotEmpty) {
+      editableElement.setAttribute('aria-label', effectiveLabel);
     } else {
       editableElement.removeAttribute('aria-label');
     }
