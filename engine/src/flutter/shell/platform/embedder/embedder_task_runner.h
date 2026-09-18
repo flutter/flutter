@@ -10,6 +10,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/task_runner.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
 
@@ -43,6 +44,10 @@ class EmbedderTaskRunner final : public fml::TaskRunner {
     //--------------------------------------------------------------------------
     /// Performs user-designated cleanup on destruction.
     std::function<void()> destruction_callback;
+
+    //--------------------------------------------------------------------------
+    /// Sets the thread priority for the custom task runner thread.
+    std::function<void(FlutterThreadPriority priority)> thread_priority_setter;
   };
 
   //----------------------------------------------------------------------------
@@ -56,8 +61,12 @@ class EmbedderTaskRunner final : public fml::TaskRunner {
   ///
   /// @param[in]  table                The task runner dispatch table.
   /// @param[in]  embedder_identifier  The embedder identifier
+  /// @param[in]  priority             The thread priority for this task runner
   ///
-  EmbedderTaskRunner(DispatchTable table, size_t embedder_identifier);
+  EmbedderTaskRunner(
+      DispatchTable table,
+      size_t embedder_identifier,
+      FlutterThreadPriority priority = FlutterThreadPriority::kNormal);
 
   // |fml::TaskRunner|
   ~EmbedderTaskRunner() override;
@@ -73,20 +82,17 @@ class EmbedderTaskRunner final : public fml::TaskRunner {
   ///
   size_t GetEmbedderIdentifier() const;
 
+  /// Returns the configured thread priority for this task runner. This is
+  /// thread-safe and reflects the latest priority set via SetThreadPriority
+  /// or configured in FlutterTaskRunnerDescription.
+  FlutterThreadPriority GetThreadPriority() const { return priority_.load(); }
+
+  /// Sets the thread priority for this task runner and notifies the dispatcher.
+  void SetThreadPriority(FlutterThreadPriority priority);
+
   bool PostTask(uint64_t baton);
 
   intptr_t unique_id() const { return unique_id_; }
-
- private:
-  const size_t embedder_identifier_;
-  DispatchTable dispatch_table_;
-  std::mutex tasks_mutex_;
-  uint64_t last_baton_ = 0;
-  std::unordered_map<uint64_t, fml::closure> pending_tasks_;
-  fml::TaskQueueId placeholder_id_;
-  intptr_t unique_id_;
-
-  static std::atomic_intptr_t next_unique_id_;
 
   // |fml::TaskRunner|
   void PostTask(const fml::closure& task) override;
@@ -103,6 +109,18 @@ class EmbedderTaskRunner final : public fml::TaskRunner {
 
   // |fml::TaskRunner|
   fml::TaskQueueId GetTaskQueueId() override;
+
+ private:
+  const size_t embedder_identifier_;
+  DispatchTable dispatch_table_;
+  std::mutex tasks_mutex_;
+  uint64_t last_baton_ = 0;
+  std::unordered_map<uint64_t, fml::closure> pending_tasks_;
+  fml::TaskQueueId placeholder_id_;
+  intptr_t unique_id_;
+  std::atomic<FlutterThreadPriority> priority_;
+
+  static std::atomic_intptr_t next_unique_id_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTaskRunner);
 };

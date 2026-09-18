@@ -55,6 +55,8 @@ class PlatformViewEmbedder final : public PlatformView {
       std::function<void(const ViewFocusChangeRequest&)>;
   using RequestDartDeferredLibraryCallback =
       std::function<void(intptr_t loading_unit_id)>;
+  using DartDeferredLibraryLoadingUnitCallback =
+      std::function<void(int64_t loading_unit_id)>;
   using GetScaledFontSizeCallback =
       std::function<double(double unscaled_font_size, int configuration_id)>;
   using CreateVSyncWaiterCallback =
@@ -71,14 +73,19 @@ class PlatformViewEmbedder final : public PlatformView {
     ChanneUpdateCallback on_channel_update;                     // optional
     ViewFocusChangeRequestCallback
         view_focus_change_request_callback;  // optional
+    DartDeferredLibraryLoadingUnitCallback
+        dart_deferred_library_loading_unit_callback;          // optional
+    GetScaledFontSizeCallback get_scaled_font_size_callback;  // optional
+    VoidCallback raster_context_setup_callback = nullptr;     // optional
+    VoidCallback raster_context_teardown_callback = nullptr;  // optional
+    void* raster_context_user_data = nullptr;                 // optional
     PlatformMessageResponseCompletionCallback
         platform_message_response_completion_callback;  // optional
     PlatformMessageEmptyResponseCompletionCallback
         platform_message_empty_response_completion_callback;  // optional
     RequestDartDeferredLibraryCallback
-        request_dart_deferred_library_callback;               // optional
-    GetScaledFontSizeCallback get_scaled_font_size_callback;  // optional
-    CreateVSyncWaiterCallback create_vsync_waiter_callback;   // optional
+        request_dart_deferred_library_callback;              // optional
+    CreateVSyncWaiterCallback create_vsync_waiter_callback;  // optional
     std::function<void(std::string)>
         set_application_locale_callback;                            // optional
     std::function<void(bool)> set_semantics_tree_enabled_callback;  // optional
@@ -128,6 +135,12 @@ class PlatformViewEmbedder final : public PlatformView {
   ~PlatformViewEmbedder() override;
 
   // |PlatformView|
+  void NotifyCreated() override;
+
+  // |PlatformView|
+  void NotifyDestroyed() override;
+
+  // |PlatformView|
   void UpdateSemantics(
       int64_t view_id,
       flutter::SemanticsNodeUpdates update,
@@ -139,6 +152,17 @@ class PlatformViewEmbedder final : public PlatformView {
   // |PlatformView|
   std::shared_ptr<PlatformMessageHandler> GetPlatformMessageHandler()
       const override;
+
+  // |PlatformView|
+  void LoadDartDeferredLibrary(
+      intptr_t loading_unit_id,
+      std::unique_ptr<const fml::Mapping> snapshot_data,
+      std::unique_ptr<const fml::Mapping> snapshot_instructions) override;
+
+  // |PlatformView|
+  void LoadDartDeferredLibraryError(intptr_t loading_unit_id,
+                                    const std::string error_message,
+                                    bool transient) override;
 
   void InvokePlatformMessageResponseCallback(
       int response_id,
