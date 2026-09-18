@@ -18,6 +18,7 @@ import '../bundle.dart';
 import '../cache.dart';
 import '../compile.dart';
 import '../dart/language_version.dart';
+import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';

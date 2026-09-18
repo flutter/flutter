@@ -69,12 +69,12 @@ void main() {
       ),
     ]);
     final compiler = WebTestCompiler(
-      logger: logger,
-      fileSystem: fileSystem,
-      platform: FakePlatform(environment: <String, String>{}),
       artifacts: Artifacts.test(),
-      processManager: processManager,
       config: config,
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: FakePlatform(environment: <String, String>{}),
+      processManager: processManager,
       shutdownHooks: FakeShutdownHooks(),
     );
 
@@ -139,12 +139,12 @@ void main() {
       ),
     ]);
     final compiler = WebTestCompiler(
-      logger: logger,
-      fileSystem: fileSystem,
-      platform: FakePlatform(environment: <String, String>{}),
       artifacts: Artifacts.test(),
-      processManager: processManager,
       config: config,
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: FakePlatform(environment: <String, String>{}),
+      processManager: processManager,
       shutdownHooks: FakeShutdownHooks(),
     );
 

@@ -36,6 +36,7 @@ import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
+import 'context/tool_context.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -2218,3 +2219,7 @@ class DevToolsServerAddress {
     return Uri(scheme: 'http', host: host, port: port);
   }
 }
+
+// TODO(bkonyi): This will be removed in a follow up PR once ResidentRunner is
+// migrated to accept ToolContext directly. This fallback context delegates to
+// globals.* to maintain backwards compatibility.

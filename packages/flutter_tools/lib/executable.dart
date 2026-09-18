@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
 import 'src/android/android_workflow.dart' as android_workflow;
+import 'src/android/gradle.dart';
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -254,6 +255,18 @@ List<FlutterCommand> generateCommands({
     fileSystem: toolDependencies.toolContext.fs,
   ),
   BuildCommand(
+    androidBuilder: AndroidGradleBuilder(
+      analytics: toolDependencies.analytics,
+      androidStudio: toolDependencies.androidContext.androidStudio,
+      artifacts: toolDependencies.toolContext.artifacts,
+      fileSystem: toolDependencies.toolContext.fs,
+      gradleUtils: toolDependencies.androidContext.gradleUtils,
+      java: toolDependencies.androidContext.java,
+      logger: toolDependencies.toolContext.logger,
+      platform: toolDependencies.toolContext.platform,
+      processManager: toolDependencies.toolContext.processManager,
+      androidSdk: toolDependencies.androidContext.androidSdk,
+    ),
     androidContext: toolDependencies.androidContext,
     appleContext: toolDependencies.appleContext,
     buildSystem: toolDependencies.buildSystem,
@@ -277,7 +290,14 @@ List<FlutterCommand> generateCommands({
     extensionManager: extensionManager,
   ),
   CustomDevicesCommand(featureFlags: featureFlags, toolContext: toolDependencies.toolContext),
-  CreateCommand(verboseHelp: verboseHelp, extensionTemplateManager: extensionTemplateManager),
+  CreateCommand(
+    androidContext: toolDependencies.androidContext,
+    appleContext: toolDependencies.appleContext,
+    templateRenderer: const MustacheTemplateRenderer(),
+    toolContext: toolDependencies.toolContext,
+    extensionTemplateManager: extensionTemplateManager,
+    verboseHelp: verboseHelp,
+  ),
   DaemonCommand(
     androidContext: toolDependencies.androidContext,
     androidWorkflow: android_workflow.androidWorkflow,

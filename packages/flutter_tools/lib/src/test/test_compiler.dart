@@ -6,11 +6,19 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
+import 'package:process/process.dart';
 
+import '../artifacts.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
+import '../context/tool_context.dart';
 import '../dart/language_version.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -108,40 +116,52 @@ class TestCompiler {
     this.flutterProject, {
     String? precompiledDillPath,
     this.testTimeRecorder,
-  }) : testFilePath =
-           precompiledDillPath ??
-           globals.fs.path.join(
-             flutterProject!.directory.path,
-             getBuildDirectory(),
-             'test_cache',
-             getDefaultCachedKernelPath(
-               config: globals.config,
-               fileSystem: globals.fs,
-               trackWidgetCreation: buildInfo.trackWidgetCreation,
-               dartDefines: buildInfo.dartDefines,
-               targetModel: TargetModel.flutter,
-               extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-             ),
-           ),
+    ToolContext? toolContext,
+  }) : _toolContext = toolContext ?? const _FallbackToolContext(),
+       testFilePath =
+           precompiledDillPath ?? _computeTestFilePath(toolContext, flutterProject, buildInfo),
        shouldCopyDillFile = precompiledDillPath == null {
     this.buildInfo = buildInfo.copyWith(initializeFromDill: testFilePath);
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
-    final Directory outputDillDirectory = globals.fs.systemTempDirectory.createTempSync(
+    final Directory outputDillDirectory = fs.systemTempDirectory.createTempSync(
       'flutter_test_compiler.',
     );
     outputDill = outputDillDirectory.childFile('output.dill');
-    globals.printTrace(
+    logger.printTrace(
       'Compiler will use the following file as its incremental dill file: ${outputDill.path}',
     );
-    globals.printTrace('Listening to compiler controller...');
+    logger.printTrace('Listening to compiler controller...');
     compilerController.stream.listen(
       _onCompilationRequest,
       onDone: () {
-        globals.printTrace('Deleting ${outputDillDirectory.path}...');
+        logger.printTrace('Deleting ${outputDillDirectory.path}...');
         outputDillDirectory.deleteSync(recursive: true);
       },
+    );
+  }
+
+  static String _computeTestFilePath(
+    ToolContext? toolContext,
+    FlutterProject? flutterProject,
+    BuildInfo buildInfo,
+  ) {
+    final ToolContext context = toolContext ?? const _FallbackToolContext();
+    final ToolContext(:Config config, :FileSystem fs) = context;
+    return fs.path.join(
+      flutterProject!.directory.path,
+      getBuildDirectory(),
+      'test_cache',
+      getDefaultCachedKernelPath(
+        config: config,
+        fileSystem: fs,
+        trackWidgetCreation: buildInfo.trackWidgetCreation,
+        dartDefines: buildInfo.dartDefines,
+        targetModel: TargetModel.flutter,
+        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+      ),
     );
   }
 
@@ -152,6 +172,9 @@ class TestCompiler {
   final String testFilePath;
   final bool shouldCopyDillFile;
   final TestTimeRecorder? testTimeRecorder;
+  final ResidentCompilerFactory residentCompilerFactory = const ResidentCompilerFactory();
+
+  final ToolContext _toolContext;
 
   ResidentCompiler? compiler;
   late File outputDill;
@@ -190,16 +213,25 @@ class TestCompiler {
   /// Create the resident compiler used to compile the test.
   @visibleForTesting
   Future<ResidentCompiler?> createCompiler() async {
+    final ToolContext(
+      :Artifacts artifacts,
+      :Config config,
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+      :ShutdownHooks shutdownHooks,
+    ) = _toolContext;
     final ResidentCompiler residentCompiler = residentCompilerFactory.create(
-      artifacts: globals.artifacts!,
-      logger: globals.logger,
-      processManager: globals.processManager,
+      artifacts: artifacts,
+      logger: logger,
+      processManager: processManager,
       buildInfo: buildInfo,
-      platform: globals.platform,
+      platform: platform,
       testCompilation: true,
-      fileSystem: globals.fs,
-      shutdownHooks: globals.shutdownHooks,
-      config: globals.config,
+      fileSystem: fs,
+      shutdownHooks: shutdownHooks,
+      config: config,
       targetPlatform: .tester,
     );
     return residentCompiler;
@@ -215,9 +247,10 @@ class TestCompiler {
     if (!isEmpty) {
       return;
     }
+    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform) = _toolContext;
     while (compilationQueue.isNotEmpty) {
       final _CompilationRequest request = compilationQueue.first;
-      globals.printTrace('Compiling ${request.mainUri}');
+      logger.printTrace('Compiling ${request.mainUri}');
       final compilerTime = Stopwatch()..start();
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
       var firstCompile = false;
@@ -228,7 +261,7 @@ class TestCompiler {
 
       final invalidatedRegistrantFiles = <Uri>[];
       if (flutterProject != null) {
-        final File mainFile = globals.fs.file(request.mainUri);
+        final File mainFile = fs.file(request.mainUri);
         final LanguageVersion languageVersion = determineLanguageVersion(
           mainFile,
           buildInfo.packageConfig.packageOf(request.mainUri),
@@ -256,7 +289,7 @@ class TestCompiler {
         packageConfig: buildInfo.packageConfig,
         projectRootPath: flutterProject?.directory.absolute.path,
         checkDartPluginRegistry: true,
-        fs: globals.fs,
+        fs: fs,
       );
       final String? outputPath = compilerOutput?.outputFilename;
 
@@ -274,10 +307,10 @@ class TestCompiler {
         await _shutdown();
       } else {
         if (shouldCopyDillFile) {
-          final String path = request.mainUri.toFilePath(windows: globals.platform.isWindows);
-          final File outputFile = globals.fs.file(outputPath);
+          final String path = request.mainUri.toFilePath(windows: platform.isWindows);
+          final File outputFile = fs.file(outputPath);
           final File kernelReadyToRun = await outputFile.copy('$path.dill');
-          final File testCache = globals.fs.file(testFilePath);
+          final File testCache = fs.file(testFilePath);
           if (firstCompile ||
               !testCache.existsSync() ||
               (testCache.lengthSync() < outputFile.lengthSync())) {
@@ -300,10 +333,47 @@ class TestCompiler {
         compiler!.accept();
         compiler!.reset();
       }
-      globals.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
+      logger.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
       testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
       // Only remove now when we finished processing the element
       compilationQueue.removeAt(0);
     }
   }
+}
+
+// TODO(bkonyi): This will be removed in a follow up PR once Google3 callers
+// provide ToolContext directly. This fallback context delegates to globals.* to
+// maintain backwards compatibility with existing Google3 test runners.
+class _FallbackToolContext implements ToolContext {
+  const _FallbackToolContext();
+
+  @override
+  Artifacts get artifacts => globals.artifacts!;
+
+  @override
+  Config get config => globals.config;
+
+  @override
+  FileSystem get fs => globals.fs;
+
+  @override
+  Logger get logger => globals.logger;
+
+  @override
+  OperatingSystemUtils get os => globals.os;
+
+  @override
+  Platform get platform => globals.platform;
+
+  @override
+  ProcessManager get processManager => globals.processManager;
+
+  @override
+  ProcessUtils get processUtils => globals.processUtils;
+
+  @override
+  ShutdownHooks get shutdownHooks => globals.shutdownHooks;
+
+  @override
+  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
