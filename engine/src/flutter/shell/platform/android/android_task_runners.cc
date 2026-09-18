@@ -101,16 +101,20 @@ static void AndroidTaskRunnerPostTask(FlutterTask task,
         if (!state) {
           return;
         }
-        std::lock_guard lock(state->mutex);
-        if (state->destroyed) {
-          return;
+        FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
+        {
+          std::lock_guard lock(state->mutex);
+          if (state->destroyed) {
+            return;
+          }
+          if (!state->engine) {
+            // Staging queue for pre-startup tasks posted before SetEngine.
+            state->pending_tasks.emplace_back(runner, task);
+            return;
+          }
+          engine = state->engine;
         }
-        if (state->engine) {
-          FlutterEngineRunTask(state->engine, &task);
-        } else {
-          // Staging queue for pre-startup tasks posted before SetEngine.
-          state->pending_tasks.emplace_back(runner, task);
-        }
+        FlutterEngineRunTask(engine, &task);
       },
       time_point);
 }
@@ -188,9 +192,15 @@ void AndroidTaskRunners::SetEngine(FLUTTER_API_SYMBOL(FlutterEngine) engine) {
       if (!state) {
         return;
       }
-      std::lock_guard lock(state->mutex);
-      if (state->engine && !state->destroyed) {
-        FlutterEngineRunTask(state->engine, &task);
+      FLUTTER_API_SYMBOL(FlutterEngine) current_engine = nullptr;
+      {
+        std::lock_guard lock(state->mutex);
+        if (state->engine && !state->destroyed) {
+          current_engine = state->engine;
+        }
+      }
+      if (current_engine) {
+        FlutterEngineRunTask(current_engine, &task);
       }
     });
   }

@@ -97,6 +97,13 @@ class AndroidEngine {
 
   virtual void SetAccessibilityFeatures(int32_t flags) = 0;
 
+  virtual bool UpdateSemantics(
+      int64_t view_id,
+      const flutter::SemanticsNodeUpdates& update,
+      const flutter::CustomAccessibilityActionUpdates& actions) {
+    return false;
+  }
+
   virtual void RegisterTexture(std::shared_ptr<flutter::Texture> texture) = 0;
 
   virtual void UnregisterTexture(int64_t texture_id) = 0;

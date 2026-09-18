@@ -132,6 +132,15 @@ void EmbedderEngine::CollectThreadHost() {
   thread_host_.reset();
 }
 
+void EmbedderEngine::SetRunConfiguration(RunConfiguration run_configuration) {
+  run_configuration_.~RunConfiguration();
+  new (&run_configuration_) RunConfiguration(std::move(run_configuration));
+}
+
+bool EmbedderEngine::HasValidRunConfiguration() const {
+  return run_configuration_.IsValid();
+}
+
 bool EmbedderEngine::RunRootIsolate() {
   if (!IsValid() || !run_configuration_.IsValid()) {
     return false;

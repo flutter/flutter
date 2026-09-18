@@ -1342,6 +1342,11 @@ def main(argv):
       # On Windows, generate a Visual Studio project.
       command.append('--ide=vs')
       command.append('--ninja-executable=ninja')
+      command.append('--script-executable=python3')
+      angle_vpython3 = os.path.join(SRC_ROOT, 'flutter', 'third_party', 'angle', '.vpython3')
+      if os.path.exists(angle_vpython3):
+        with open(angle_vpython3, 'w') as vpython_file:
+          vpython_file.write('python_version: "3.11"\n')
 
   command.append('--export-compile-commands=default')
 
