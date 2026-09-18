@@ -1301,6 +1301,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
              shape: barShape,
              padding:
                  barPadding ??
+                 SearchBarTheme.of(context).padding ??
                  const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16.0)),
              leading: barLeading ?? const Icon(Icons.search),
              trailing: barTrailing,
