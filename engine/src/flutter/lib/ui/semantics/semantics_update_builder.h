@@ -41,6 +41,7 @@ class SemanticsUpdateBuilder
       int scrollChildren,
       int scrollIndex,
       int traversalParent,
+      int indexInParent,
       double scrollPosition,
       double scrollExtentMax,
       double scrollExtentMin,

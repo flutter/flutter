@@ -312,6 +312,7 @@ class SemanticsNodeUpdate {
     required this.scrollChildren,
     required this.scrollIndex,
     required this.traversalParent,
+    this.indexInParent = -1,
     required this.scrollPosition,
     required this.scrollExtentMax,
     required this.scrollExtentMin,
@@ -378,6 +379,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final int traversalParent;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final int indexInParent;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final double scrollPosition;
