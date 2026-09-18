@@ -305,7 +305,7 @@ abstract class FlutterCommand extends Command<void> {
 
   DeprecationBehavior get deprecationBehavior => DeprecationBehavior.none;
 
-  bool get shouldRunPub => _usesPubOption && boolArg('pub');
+  bool get shouldRunPub => _usesPubOption && getValue(CommonOptions.pub);
 
   bool get outputMachineFormat =>
       argParser.options.containsKey(FlutterGlobalOptions.kMachineFlag) &&
@@ -387,8 +387,8 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   String get targetFile {
-    if (argResults?.wasParsed('target') ?? false) {
-      return stringArg('target')!;
+    if (wasParsed(CommonOptions.target)) {
+      return getValue(CommonOptions.target);
     }
     final List<String>? rest = argResults?.rest;
     if (rest != null && rest.isNotEmpty) {
@@ -602,17 +602,14 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addPublishPort({bool enabledByDefault = true, bool verboseHelp = false}) {
-    argParser.addFlag(
-      'publish-port',
-      hide: !verboseHelp,
-      help:
-          'Publish the VM service port over mDNS. Disable to prevent the '
-          'local network permission app dialog in debug and profile build modes (iOS devices only).',
-      defaultsTo: enabledByDefault,
+    argParser.addDescriptor(
+      DebuggingOptionDescriptors.publishPortOption(enabledByDefault: enabledByDefault),
+      verboseHelp: verboseHelp,
     );
   }
 
-  Future<bool> get disablePortPublication async => !boolArg('publish-port');
+  Future<bool> get disablePortPublication async =>
+      !getValue(DebuggingOptionDescriptors.publishPort);
 
   void usesIpv6Flag({required bool verboseHelp}) {
     argParser.addDescriptor(DebuggingOptionDescriptors.ipv6, verboseHelp: verboseHelp);
@@ -920,18 +917,6 @@ abstract class FlutterCommand extends Command<void> {
 
   void usesFlavorOption() {
     BuildInfoOptions.flavor.addTo(argParser);
-  }
-
-  void usesDarwinCodeSignXCFrameworksOption() {
-    BuildInfoOptions.codesign.addTo(argParser);
-    argParser.addOption(
-      FlutterOptions.kCodesignIdentity,
-      help:
-          'The identity to use for code-signing XCFrameworks. If an identity is not provided and '
-          '"${FlutterOptions.kCodesign}" is enabled, a code signing identity will be selected '
-          "automatically from the Flutter app's Xcode project settings or Flutter config. To see "
-          'a list of valid identities run "security find-identity -p codesigning -v".',
-    );
   }
 
   void usesTrackWidgetCreation({bool hasEffect = true, required bool verboseHelp}) {
