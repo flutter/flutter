@@ -52,13 +52,13 @@ class FlutterDevice {
   FlutterDevice(
     this.device, {
     required this.buildInfo,
-    required ToolContext toolContext,
+    required this._toolContext,
     required this.developmentShaderCompiler,
     required this.generator,
     required this.targetPlatform,
     @visibleForTesting this.logFlushDelay = const Duration(milliseconds: 500),
     this.userIdentifier,
-  }) : _toolContext = toolContext;
+  });
 
   final Duration logFlushDelay;
 
