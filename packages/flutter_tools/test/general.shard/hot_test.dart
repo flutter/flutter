@@ -416,7 +416,12 @@ name: my_app
           final devices = <FlutterDevice>[
             FlutterDevice(
               device,
-              artifacts: Artifacts.test(),
+              toolContext: TestToolContext(
+                fileSystem: globals.fs,
+                logger: globals.logger,
+                processManager: globals.processManager,
+                artifacts: Artifacts.test(),
+              ),
               targetPlatform: .unsupported,
               generator: residentCompiler,
               buildInfo: BuildInfo.debug,
@@ -448,7 +453,12 @@ name: my_app
           final devices = <FlutterDevice>[
             FlutterDevice(
               device,
-              artifacts: Artifacts.test(),
+              toolContext: TestToolContext(
+                fileSystem: globals.fs,
+                logger: globals.logger,
+                processManager: globals.processManager,
+                artifacts: Artifacts.test(),
+              ),
               targetPlatform: .unsupported,
               generator: residentCompiler,
               buildInfo: BuildInfo.debug,

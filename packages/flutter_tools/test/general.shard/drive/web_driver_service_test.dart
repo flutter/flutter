@@ -8,6 +8,7 @@ import 'dart:io' as io;
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -28,6 +29,7 @@ import 'package:webdriver/sync_io.dart' as sync_io;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 final kChromeArgs = <String>[
   '--bwsi',
@@ -444,16 +446,23 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 
 WebDriverService setUpDriverService() {
   final logger = BufferLogger.test();
+  final fileSystem = MemoryFileSystem.test();
+  final processManager = FakeProcessManager.any();
   return WebDriverService(
-    artifacts: Artifacts.test(),
     dartSdkPath: 'dart',
-    fileSystem: MemoryFileSystem.test(),
+    fileSystem: fileSystem,
     logger: logger,
     outputPreferences: OutputPreferences.test(),
     platform: FakePlatform(),
-    processManager: FakeProcessManager.any(),
-    processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.any()),
+    processUtils: ProcessUtils(logger: logger, processManager: processManager),
     terminal: Terminal.test(),
+    toolContext: TestToolContext(
+      artifacts: Artifacts.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processInfo: ProcessInfo.test(fileSystem),
+      processManager: processManager,
+    ),
   );
 }
 

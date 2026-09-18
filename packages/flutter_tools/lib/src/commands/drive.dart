@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
-import 'package:process/process.dart';
 
 import '../android/android_device.dart';
 import '../application_package.dart';
@@ -311,7 +310,6 @@ class DriveCommand extends RunCommandBase {
       :Logger logger,
       :OutputPreferences outputPreferences,
       :Platform platform,
-      :ProcessManager processManager,
       :ProcessUtils processUtils,
       :SystemClock systemClock,
       :AnsiTerminal terminal,
@@ -351,16 +349,15 @@ class DriveCommand extends RunCommandBase {
 
     _flutterDriverFactory ??= FlutterDriverFactory(
       applicationPackageFactory: ApplicationPackageFactory.instance!,
-      artifacts: artifacts,
       dartSdkPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
       devtoolsLauncher: DevtoolsLauncher.instance!,
       fileSystem: fs,
       logger: logger,
       outputPreferences: outputPreferences,
       platform: platform,
-      processManager: processManager,
       processUtils: processUtils,
       terminal: terminal,
+      toolContext: _toolContext,
       analytics: analytics,
       systemClock: systemClock,
     );
