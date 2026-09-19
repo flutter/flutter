@@ -165,12 +165,40 @@ class CapturedAccessibilityAnnouncement {
 class _TestFlutterView implements FlutterView {
   _TestFlutterView({
     required this.controller,
-    required TestPlatformDispatcher platformDispatcher,
+    required this._platformDispatcher,
     this.constraints,
     this.onRender,
-  }) : _platformDispatcher = platformDispatcher,
-       _viewId = _nextViewId++ {
-    platformDispatcher.addTestView(this);
+  }) : _viewId = _nextViewId++;
+
+  /// Registers a view for [controller] and returns the [TestFlutterView] that
+  /// wraps it, without reporting the metrics change.
+  ///
+  /// The caller reports it, with [TestPlatformDispatcher.notifyMetricsChanged],
+  /// once it has assigned the result to its `rootView`. That field is late
+  /// initialized, and a metrics change wakes every [WidgetsBindingObserver]
+  /// synchronously, so notifying from here would expose a controller that has
+  /// no view yet.
+  ///
+  /// The returned adapter wraps the backing view rather than the other way
+  /// round, so that values set explicitly on it keep their precedence over
+  /// whatever the backing view reports. Every controller exposes this same
+  /// object to [View], to [MediaQuery], and to callers that read `rootView`
+  /// directly.
+  static TestFlutterView register({
+    required BaseWindowController controller,
+    required TestPlatformDispatcher platformDispatcher,
+    BoxConstraints? constraints,
+    void Function(Size? size)? onRender,
+  }) {
+    return platformDispatcher.addTestView(
+      _TestFlutterView(
+        controller: controller,
+        platformDispatcher: platformDispatcher,
+        constraints: constraints,
+        onRender: onRender,
+      ),
+      notify: false,
+    );
   }
 
   static int _nextViewId = 1;
@@ -318,11 +346,14 @@ class _TestWindowController extends WindowController with _ChildWindowHierarchyM
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    rootView = _TestFlutterView(
+    rootView = _TestFlutterView.register(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
     );
+    // Reported only now that rootView is assigned; see
+    // _TestFlutterView.register.
+    platformDispatcher.notifyMetricsChanged();
 
     // Automatically activate the window when created.
     activate();
@@ -422,10 +453,15 @@ class _TestWindowController extends WindowController with _ChildWindowHierarchyM
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
-    _delegate.onWindowDestroyed();
-    removeAllChildren();
-    windowingOwner.deactivateWindowController(this);
+    _destroyTestWindowController(
+      controller: this,
+      onWindowDestroyed: _delegate.onWindowDestroyed,
+      windowingOwner: windowingOwner,
+    );
   }
 }
 
@@ -463,6 +499,23 @@ void _removeChildFromParent(BaseWindowController? parent, BaseWindowController c
   }
 }
 
+void _destroyTestWindowController({
+  required BaseWindowController controller,
+  required VoidCallback onWindowDestroyed,
+  required _TestWindowingOwner windowingOwner,
+  BaseWindowController? parent,
+}) {
+  if (controller case final _ChildWindowHierarchyMixin hierarchy) {
+    hierarchy.removeAllChildren();
+  }
+  windowingOwner._platformDispatcher.removeTestView(controller.rootView);
+  windowingOwner.deactivateWindowController(controller);
+  if (parent != null) {
+    _removeChildFromParent(parent, controller);
+  }
+  onWindowDestroyed();
+}
+
 class _TestDialogWindowController extends DialogWindowController with _ChildWindowHierarchyMixin {
   _TestDialogWindowController({
     required this._delegate,
@@ -478,11 +531,14 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    rootView = _TestFlutterView(
+    rootView = _TestFlutterView.register(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
     );
+    // Reported only now that rootView is assigned; see
+    // _TestFlutterView.register.
+    platformDispatcher.notifyMetricsChanged();
     _addChildToParent(parent, this);
 
     // Automatically activate the window when created.
@@ -563,11 +619,16 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
-    _delegate.onWindowDestroyed();
-    removeAllChildren();
-    windowingOwner.deactivateWindowController(this);
-    _removeChildFromParent(_parent, this);
+    _destroyTestWindowController(
+      controller: this,
+      onWindowDestroyed: _delegate.onWindowDestroyed,
+      windowingOwner: windowingOwner,
+      parent: _parent,
+    );
   }
 }
 
@@ -582,7 +643,7 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
     required BaseWindowController parent,
   }) : _parent = parent,
        super.empty() {
-    rootView = _TestFlutterView(
+    rootView = _TestFlutterView.register(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
@@ -595,6 +656,9 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
         }
       },
     );
+    // Reported only now that rootView is assigned; see
+    // _TestFlutterView.register.
+    platformDispatcher.notifyMetricsChanged();
     _addChildToParent(parent, this);
   }
 
@@ -630,11 +694,16 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
-    _delegate.onWindowDestroyed();
-    removeAllChildren();
-    windowingOwner.deactivateWindowController(this);
-    _removeChildFromParent(parent, this);
+    _destroyTestWindowController(
+      controller: this,
+      onWindowDestroyed: _delegate.onWindowDestroyed,
+      windowingOwner: windowingOwner,
+      parent: parent,
+    );
   }
 }
 
@@ -649,7 +718,7 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
     required BaseWindowController parent,
   }) : _parent = parent,
        super.empty() {
-    rootView = _TestFlutterView(
+    rootView = _TestFlutterView.register(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
@@ -662,6 +731,9 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
         }
       },
     );
+    // Reported only now that rootView is assigned; see
+    // _TestFlutterView.register.
+    platformDispatcher.notifyMetricsChanged();
     _addChildToParent(parent, this);
   }
 
@@ -697,11 +769,16 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
-    _delegate.onWindowDestroyed();
-    removeAllChildren();
-    windowingOwner.deactivateWindowController(this);
-    _removeChildFromParent(parent, this);
+    _destroyTestWindowController(
+      controller: this,
+      onWindowDestroyed: _delegate.onWindowDestroyed,
+      windowingOwner: windowingOwner,
+      parent: parent,
+    );
   }
 
   @override
@@ -726,11 +803,14 @@ class _TestSatelliteWindowController extends SatelliteWindowController
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    rootView = _TestFlutterView(
+    rootView = _TestFlutterView.register(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
     );
+    // Reported only now that rootView is assigned; see
+    // _TestFlutterView.register.
+    platformDispatcher.notifyMetricsChanged();
     _addChildToParent(parent, this);
 
     // Automatically activate the window when created.
@@ -806,11 +886,16 @@ class _TestSatelliteWindowController extends SatelliteWindowController
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
-    _delegate.onWindowDestroyed();
-    removeAllChildren();
-    windowingOwner.deactivateWindowController(this);
-    _removeChildFromParent(_parent, this);
+    _destroyTestWindowController(
+      controller: this,
+      onWindowDestroyed: _delegate.onWindowDestroyed,
+      windowingOwner: windowingOwner,
+      parent: _parent,
+    );
   }
 }
 
@@ -1297,10 +1382,27 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       binding.setupHttpOverrides();
     }
     _testTextInput = TestTextInput(onCleared: _resetFocusedEditable);
+  }
 
+  @override
+  WindowingOwner createWindowingOwner() {
     if (isWindowingEnabled && registerTestWindowingOwner) {
-      windowingOwner = _TestWindowingOwner(platformDispatcher: platformDispatcher);
+      return _TestWindowingOwner(platformDispatcher: platformDispatcher);
     }
+    return super.createWindowingOwner();
+  }
+
+  /// Replaces [windowingOwner] with a new instance created by
+  /// [createWindowingOwner].
+  ///
+  /// A test that needs an owner of its own, rather than whichever one an
+  /// earlier test left installed, calls this first.
+  ///
+  /// The windows the previous owner created are not destroyed, and the views
+  /// they registered stay registered. A test that creates windows destroys them
+  /// itself.
+  void resetWindowingOwner() {
+    windowingOwner = createWindowingOwner();
   }
 
   @override
