@@ -31,5 +31,11 @@ flutter:
     - path: assets/free/
       flavors:
         - free
+    - path: configs/free/branch-config.json
+      flavors: [free]
+      bundle_path: assets/branch-config.json
+    - path: configs/paid/branch-config.json
+      flavors: [paid]
+      bundle_path: assets/branch-config.json
 
 # PUBSPEC CHECKSUM: rnq93o
