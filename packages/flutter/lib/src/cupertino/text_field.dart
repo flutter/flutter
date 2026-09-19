@@ -1052,17 +1052,15 @@ class CupertinoTextField extends StatefulWidget {
           BuildContext context,
           MagnifierController controller,
           ValueNotifier<MagnifierInfo> magnifierInfo,
-        ) {
-          switch (defaultTargetPlatform) {
-            case TargetPlatform.android:
-            case TargetPlatform.iOS:
-              return CupertinoTextMagnifier(controller: controller, magnifierInfo: magnifierInfo);
-            case TargetPlatform.fuchsia:
-            case TargetPlatform.linux:
-            case TargetPlatform.macOS:
-            case TargetPlatform.windows:
-              return null;
-          }
+        ) => switch (defaultTargetPlatform) {
+          TargetPlatform.android || TargetPlatform.iOS => CupertinoTextMagnifier(
+            controller: controller,
+            magnifierInfo: magnifierInfo,
+          ),
+          TargetPlatform.fuchsia ||
+          TargetPlatform.linux ||
+          TargetPlatform.macOS ||
+          TargetPlatform.windows => null,
         },
   );
 
@@ -1231,26 +1229,14 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
       });
     }
 
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.android:
-        if (cause == SelectionChangedCause.longPress) {
-          _editableText.bringIntoView(selection.extent);
-        }
+    if (cause == SelectionChangedCause.longPress) {
+      _editableText.bringIntoView(selection.extent);
     }
 
     switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.android:
+      case TargetPlatform.iOS || TargetPlatform.fuchsia || TargetPlatform.android:
         break;
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
+      case TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows:
         if (cause == SelectionChangedCause.drag) {
           _editableText.hideToolbar();
         }
@@ -1451,13 +1437,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
     VoidCallback? handleDidGainAccessibilityFocus;
     VoidCallback? handleDidLoseAccessibilityFocus;
     switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia:
         textSelectionControls ??= cupertinoTextSelectionHandleControls;
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
+      case TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows:
         textSelectionControls ??= cupertinoDesktopTextSelectionHandleControls;
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the TextField when it receives accessibility focus.
