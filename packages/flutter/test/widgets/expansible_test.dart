@@ -197,6 +197,110 @@ void main() {
     controller2.dispose();
   });
 
+  testWidgets(
+    'Respects lazyLoadChildren when not initially expanded',
+    (WidgetTester tester) async {
+      final controller = ExpansibleController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Expansible(
+            controller: controller,
+            lazyLoadChildren: true,
+            bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
+            headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+              onTap: controller.isExpanded ? controller.collapse : controller.expand,
+              child: const Text('Header'),
+            ),
+          ),
+        ),
+      );
+
+      // Body is not in the tree at all before first expansion, even though
+      // maintainState is true by default.
+      expect(find.text('Body', skipOffstage: false), findsNothing);
+
+      // First expansion mounts the body.
+      controller.expand();
+      await tester.pumpAndSettle();
+      expect(find.text('Body'), findsOneWidget);
+
+      // After collapsing, the body remains in the tree (offstage) because
+      // maintainState defaults to true and the widget has been expanded once.
+      controller.collapse();
+      await tester.pumpAndSettle();
+      expect(find.text('Body'), findsNothing);
+      expect(find.text('Body', skipOffstage: false), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'lazyLoadChildren builds body immediately when initially expanded',
+    (WidgetTester tester) async {
+      final controller = ExpansibleController();
+      controller.expand();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Expansible(
+            controller: controller,
+            lazyLoadChildren: true,
+            bodyBuilder: (BuildContext context, Animation<double> animation) =>
+                const Text('Body'),
+            headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+              onTap: controller.isExpanded ? controller.collapse : controller.expand,
+              child: const Text('Header'),
+            ),
+          ),
+        ),
+      );
+
+      // Initially expanded, so the body is built right away.
+      expect(find.text('Body'), findsOneWidget);
+
+      controller.collapse();
+      await tester.pumpAndSettle();
+      // Body persists in the tree because maintainState defaults to true.
+      expect(find.text('Body', skipOffstage: false), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'lazyLoadChildren with maintainState false still removes body when collapsed',
+    (WidgetTester tester) async {
+      final controller = ExpansibleController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Expansible(
+            controller: controller,
+            lazyLoadChildren: true,
+            maintainState: false,
+            bodyBuilder: (BuildContext context, Animation<double> animation) =>
+                const Text('Body'),
+            headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+              onTap: controller.isExpanded ? controller.collapse : controller.expand,
+              child: const Text('Header'),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Body', skipOffstage: false), findsNothing);
+
+      controller.expand();
+      await tester.pumpAndSettle();
+      expect(find.text('Body'), findsOneWidget);
+
+      controller.collapse();
+      await tester.pumpAndSettle();
+      expect(find.text('Body', skipOffstage: false), findsNothing);
+    },
+  );
+
   testWidgets('Respects animation duration and curves', (WidgetTester tester) async {
     final controller = ExpansibleController();
     await tester.pumpWidget(
