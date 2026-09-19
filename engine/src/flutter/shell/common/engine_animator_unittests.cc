@@ -300,7 +300,8 @@ TEST_F(EngineAnimatorTest, AnimatorAcceptsMultipleRenders) {
         engine_context->EngineTaskSync([&](Engine& engine) {
           engine.BeginFrame(frame_target_time, frame_number);
         });
-      });
+      })
+      .WillRepeatedly([](fml::TimePoint, uint64_t) {});
 
   native_latch.Reset();
   AddFfiNativeCallback("NotifyNative",

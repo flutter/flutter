@@ -24,6 +24,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyPrimaryResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterMetalLayer.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
@@ -1032,6 +1033,9 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 #pragma mark - Lifecycle shared
 
 - (void)appOrSceneBecameActive {
+  if ([self.flutterView.layer isKindOfClass:[FlutterMetalLayer class]]) {
+    [(FlutterMetalLayer*)self.flutterView.layer setApplicationActive:YES];
+  }
   self.keyboardInsetManager.isKeyboardInOrTransitioningFromBackground = NO;
   if (_viewportMetrics.physical_width) {
     [self surfaceUpdated:YES];
@@ -1042,6 +1046,9 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 }
 
 - (void)appOrSceneWillResignActive {
+  if ([self.flutterView.layer isKindOfClass:[FlutterMetalLayer class]]) {
+    [(FlutterMetalLayer*)self.flutterView.layer setApplicationActive:NO];
+  }
   [NSObject cancelPreviousPerformRequestsWithTarget:self
                                            selector:@selector(goToApplicationLifecycle:)
                                              object:@"AppLifecycleState.resumed"];
