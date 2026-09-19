@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
 #include <cassert>
 #include <memory>
 #include <optional>
+#include <string_view>
 
 #include "flutter/flutter_vma/flutter_skia_vma.h"
 #include "flutter/fml/logging.h"
@@ -22,6 +24,47 @@
 #include "vulkan/vulkan_core.h"
 
 namespace flutter::testing {
+
+namespace {
+
+/// The surface extensions Impeller requires of an embedder's instance:
+/// VK_KHR_surface plus at least one window-system extension. Neither is used to
+/// present here -- the tests render into images -- but Impeller refuses a
+/// context without them. Only extensions the ICD offers are returned, so an ICD
+/// without them still yields a context for the Skia tests.
+std::vector<std::string> SurfaceInstanceExtensions(
+    const vulkan::VulkanProcTable& vk) {
+  uint32_t count = 0;
+  if (vk.EnumerateInstanceExtensionProperties(nullptr, &count, nullptr) !=
+          VK_SUCCESS ||
+      count == 0) {
+    return {};
+  }
+  std::vector<VkExtensionProperties> properties(count);
+  if (vk.EnumerateInstanceExtensionProperties(
+          nullptr, &count, properties.data()) != VK_SUCCESS) {
+    return {};
+  }
+  const auto supported = [&](std::string_view name) {
+    return std::any_of(properties.begin(), properties.begin() + count,
+                       [&](const VkExtensionProperties& p) {
+                         return name == p.extensionName;
+                       });
+  };
+
+  if (!supported(VK_KHR_SURFACE_EXTENSION_NAME)) {
+    return {};
+  }
+  for (const char* wsi : {"VK_KHR_xcb_surface", "VK_KHR_xlib_surface",
+                          "VK_KHR_wayland_surface"}) {
+    if (supported(wsi)) {
+      return {VK_KHR_SURFACE_EXTENSION_NAME, wsi};
+    }
+  }
+  return {};
+}
+
+}  // namespace
 
 TestVulkanContext::TestVulkanContext() {
   // ---------------------------------------------------------------------------
@@ -46,8 +89,9 @@ TestVulkanContext::TestVulkanContext() {
     return;
   }
 
+  enabled_instance_extensions_ = SurfaceInstanceExtensions(*vk_);
   application_ = std::make_unique<vulkan::VulkanApplication>(
-      *vk_, "Flutter Unittests", std::vector<std::string>{},
+      *vk_, "Flutter Unittests", enabled_instance_extensions_,
       VK_MAKE_VERSION(1, 0, 0), VK_MAKE_VERSION(1, 1, 0), true);
   if (!application_->IsValid()) {
     FML_LOG(ERROR) << "Failed to initialize basic Vulkan state.";
@@ -58,10 +102,17 @@ TestVulkanContext::TestVulkanContext() {
     return;
   }
 
-  device_ = application_->AcquireFirstCompatibleLogicalDevice();
+  device_ = CreateLogicalDevice();
   if (!device_ || !device_->IsValid()) {
     FML_LOG(ERROR) << "Failed to create compatible logical device.";
     return;
+  }
+
+  for (const auto& name : enabled_instance_extensions_) {
+    enabled_instance_extension_names_.push_back(name.c_str());
+  }
+  for (const auto& name : enabled_device_extensions_) {
+    enabled_device_extension_names_.push_back(name.c_str());
   }
 
   // ---------------------------------------------------------------------------
@@ -105,6 +156,104 @@ TestVulkanContext::TestVulkanContext() {
       MakeDefaultContextOptions(ContextType::kRender, GrBackendApi::kVulkan);
   options.fReduceOpsTaskSplitting = GrContextOptions::Enable::kNo;
   context_ = GrDirectContexts::MakeVulkan(backend_context, options);
+}
+
+std::unique_ptr<vulkan::VulkanDevice> TestVulkanContext::CreateLogicalDevice() {
+  const VkInstance instance = application_->GetInstance();
+  uint32_t device_count = 0;
+  if (vk_->EnumeratePhysicalDevices(instance, &device_count, nullptr) !=
+          VK_SUCCESS ||
+      device_count == 0) {
+    return nullptr;
+  }
+  std::vector<VkPhysicalDevice> physical_devices(device_count);
+  if (vk_->EnumeratePhysicalDevices(instance, &device_count,
+                                    physical_devices.data()) != VK_SUCCESS) {
+    return nullptr;
+  }
+
+  // Impeller's embedder path also requires VK_KHR_swapchain on the device.
+  // The proc table cannot enumerate device extensions, so ask for it and fall
+  // back to a device without it if the ICD refuses.
+  const std::vector<std::vector<std::string>> attempts =
+      enabled_instance_extensions_.empty()
+          ? std::vector<std::vector<std::string>>{{}}
+          : std::vector<std::vector<std::string>>{
+                {VK_KHR_SWAPCHAIN_EXTENSION_NAME}, {}};
+
+  for (VkPhysicalDevice physical_device : physical_devices) {
+    uint32_t family_count = 0;
+    vk_->GetPhysicalDeviceQueueFamilyProperties(physical_device, &family_count,
+                                                nullptr);
+    std::vector<VkQueueFamilyProperties> families(family_count);
+    vk_->GetPhysicalDeviceQueueFamilyProperties(physical_device, &family_count,
+                                                families.data());
+    uint32_t queue_family = family_count;
+    for (uint32_t i = 0; i < family_count; i++) {
+      if (families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+        queue_family = i;
+        break;
+      }
+    }
+    if (queue_family == family_count) {
+      continue;
+    }
+
+    const float priority = 1.0f;
+    const VkDeviceQueueCreateInfo queue_info = {
+        .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+        .queueFamilyIndex = queue_family,
+        .queueCount = 1,
+        .pQueuePriorities = &priority,
+    };
+
+    for (const auto& extensions : attempts) {
+      std::vector<const char*> names;
+      names.reserve(extensions.size());
+      for (const auto& name : extensions) {
+        names.push_back(name.c_str());
+      }
+      const VkDeviceCreateInfo create_info = {
+          .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+          .queueCreateInfoCount = 1,
+          .pQueueCreateInfos = &queue_info,
+          .enabledExtensionCount = static_cast<uint32_t>(names.size()),
+          .ppEnabledExtensionNames = names.data(),
+      };
+      VkDevice device = VK_NULL_HANDLE;
+      if (vk_->CreateDevice(physical_device, &create_info, nullptr, &device) !=
+          VK_SUCCESS) {
+        continue;
+      }
+      if (!vk_->SetupDeviceProcAddresses(
+              vulkan::VulkanHandle<VkDevice>(device))) {
+        vk_->DestroyDevice(device, nullptr);
+        continue;
+      }
+      VkQueue queue = VK_NULL_HANDLE;
+      vk_->GetDeviceQueue(device, queue_family, 0, &queue);
+
+      auto result = std::make_unique<vulkan::VulkanDevice>(
+          *vk_, vulkan::VulkanHandle<VkPhysicalDevice>(physical_device),
+          vulkan::VulkanHandle<VkDevice>(device,
+                                         [vk = vk_](VkDevice d) {
+                                           vk->DeviceWaitIdle(d);
+                                           vk->DestroyDevice(d, nullptr);
+                                         }),
+          queue_family, vulkan::VulkanHandle<VkQueue>(queue));
+      if (!result->IsValid()) {
+        continue;
+      }
+      enabled_device_extensions_ = extensions;
+      if (extensions.empty() && !enabled_instance_extensions_.empty()) {
+        // Without the device extension Impeller cannot use this context, so
+        // the instance list would only mislead it.
+        enabled_instance_extensions_.clear();
+      }
+      return result;
+    }
+  }
+  return nullptr;
 }
 
 TestVulkanContext::~TestVulkanContext() {
