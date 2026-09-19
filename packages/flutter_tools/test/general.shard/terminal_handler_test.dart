@@ -54,6 +54,15 @@ final listViews = FakeVmServiceRequest(
   },
 );
 
+final fakeFlutterViewWithoutIsolate = FlutterView(id: 'a', uiIsolate: null);
+
+final listViewsWithoutIsolate = FakeVmServiceRequest(
+  method: kListViewsMethod,
+  jsonResponse: <String, Object>{
+    'views': <Object>[fakeFlutterViewWithoutIsolate.toJson()],
+  },
+);
+
 void main() {
   testWithoutContext('keyboard input handling single help character', () async {
     final testRunner = TestRunner();
@@ -412,6 +421,58 @@ void main() {
         supportsServiceProtocol: false,
       );
       await terminalHandler.processTerminalInput('f');
+    });
+
+    const debugDumpKeys = <String>['w', 't', 'L', 'f', 'S', 'U'];
+
+    testWithoutContext('debugDump* with null vmService does not crash', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+        <FakeVmServiceRequest>[],
+        nullVmService: true,
+      );
+      for (final key in debugDumpKeys) {
+        await terminalHandler.processTerminalInput(key);
+      }
+      expect(await terminalHandler.residentRunner.debugDumpApp(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpRenderTree(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpLayerTree(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpFocusTree(), isFalse);
+      expect(
+        await terminalHandler.residentRunner.debugDumpSemanticsTreeInTraversalOrder(),
+        isFalse,
+      );
+      expect(
+        await terminalHandler.residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder(),
+        isFalse,
+      );
+    });
+
+    testWithoutContext('debugDump* with null uiIsolate does not crash', () async {
+      for (final key in debugDumpKeys) {
+        final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+          listViewsWithoutIsolate,
+        ]);
+        await terminalHandler.processTerminalInput(key);
+      }
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+        List<FakeVmServiceRequest>.filled(
+          debugDumpKeys.length,
+          listViewsWithoutIsolate,
+          growable: true,
+        ),
+      );
+      expect(await terminalHandler.residentRunner.debugDumpApp(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpRenderTree(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpLayerTree(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpFocusTree(), isFalse);
+      expect(
+        await terminalHandler.residentRunner.debugDumpSemanticsTreeInTraversalOrder(),
+        isFalse,
+      );
+      expect(
+        await terminalHandler.residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder(),
+        isFalse,
+      );
     });
 
     testWithoutContext('o,O - debugTogglePlatform', () async {
