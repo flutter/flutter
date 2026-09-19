@@ -16,11 +16,11 @@ import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'cache.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'flutter_manifest.dart';
+import 'globals.dart' as globals;
 import 'license_collector.dart';
 import 'package_graph.dart';
 import 'project.dart';
@@ -134,13 +134,15 @@ abstract class AssetBundleFactory {
   static AssetBundleFactory get instance => context.get<AssetBundleFactory>()!;
 
   static AssetBundleFactory defaultInstance({
-    required Logger logger,
     required FileSystem fileSystem,
+    required Logger logger,
     required Platform platform,
+    String? flutterRoot,
     bool splitDeferredAssets = false,
   }) => _ManifestAssetBundleFactory(
-    logger: logger,
     fileSystem: fileSystem,
+    flutterRoot: flutterRoot,
+    logger: logger,
     platform: platform,
     splitDeferredAssets: splitDeferredAssets,
   );
@@ -201,15 +203,17 @@ abstract class AssetBundle {
 
 class _ManifestAssetBundleFactory implements AssetBundleFactory {
   _ManifestAssetBundleFactory({
-    required this._logger,
     required this._fileSystem,
+    required this._logger,
     required this._platform,
+    this._flutterRoot,
     this._splitDeferredAssets = false,
   });
 
   final Logger _logger;
   final FileSystem _fileSystem;
   final Platform _platform;
+  final String? _flutterRoot;
   final bool _splitDeferredAssets;
 
   @override
@@ -217,7 +221,7 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
     logger: _logger,
     fileSystem: _fileSystem,
     platform: _platform,
-    flutterRoot: Cache.flutterRoot!,
+    flutterRoot: _flutterRoot ?? globals.cache.flutterRoot,
     splitDeferredAssets: _splitDeferredAssets,
   );
 }

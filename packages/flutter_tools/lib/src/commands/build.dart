@@ -6,7 +6,6 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../android/android_builder.dart';
-import '../android/android_sdk.dart';
 import '../android/gradle.dart';
 import '../artifacts.dart';
 import '../base/file_system.dart';
@@ -60,31 +59,37 @@ class BuildCommand extends FlutterCommand {
       :Platform platform,
       :ProcessManager processManager,
     ) = toolContext;
-    final AppleContext(:Xcode? xcode) = appleContext;
-    final AndroidContext(:AndroidSdk? androidSdk) = androidContext;
-
+    final Xcode xcode = appleContext.xcode;
     final codesign = DarwinAddToAppCodesigning.fromContexts(
       appleContext: appleContext,
       toolContext: toolContext,
     );
-    final AndroidBuilder effectiveAndroidBuilder =
+    final AndroidBuilder builder =
         androidBuilder ??
-        AndroidGradleBuilder.fromContexts(
+        AndroidGradleBuilder(
           analytics: analytics,
-          androidContext: androidContext,
-          toolContext: toolContext,
+          androidStudio: androidContext.androidStudio,
+          artifacts: toolContext.artifacts,
+          fileSystem: toolContext.fs,
+          gradleUtils: androidContext.gradleUtils,
+          java: androidContext.java,
+          logger: toolContext.logger,
+          platform: toolContext.platform,
+          processManager: toolContext.processManager,
+          androidSdk: androidContext.androidSdk,
         );
     _addSubcommand(
       BuildAarCommand(
-        androidSdk: androidSdk,
-        fileSystem: fileSystem,
-        logger: logger,
+        androidBuilder: builder,
+        androidContext: androidContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
     );
     _addSubcommand(
       BuildApkCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: builder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
@@ -93,7 +98,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildAppBundleCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: builder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
@@ -162,7 +167,12 @@ class BuildCommand extends FlutterCommand {
       ),
     );
     _addSubcommand(
-      BuildWebCommand(fileSystem: fileSystem, logger: logger, verboseHelp: verboseHelp),
+      BuildWebCommand(
+        buildSystem: buildSystem,
+        featureFlags: featureFlags,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
     );
     _addSubcommand(
       BuildMacosCommand(
