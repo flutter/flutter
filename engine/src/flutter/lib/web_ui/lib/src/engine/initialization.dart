@@ -225,11 +225,59 @@ String _stripContentHash(String path) {
 
 String debugStripContentHash(String path) => _stripContentHash(path);
 
+Map<String, String> _contentHashedAssetMap = const <String, String>{};
+
+/// Resolves [asset] against the content-hashed asset lookup table loaded from
+/// `AssetManifest.bin.json` and `_flutter.buildConfig.extraAssets`.
+String resolveContentHashedAsset(String asset) {
+  return _contentHashedAssetMap[asset] ?? asset;
+}
+
+String _toOnDiskEncodedAssetPath(String assetPath) {
+  try {
+    final String decoded = Uri.decodeFull(assetPath);
+    return Uri(path: Uri.encodeFull(decoded)).path;
+  } on ArgumentError {
+    return assetPath;
+  }
+}
+
+void _indexAssetKeyVariants(Map<String, String> map, String key, String onDiskValue) {
+  map[key] = onDiskValue;
+  map[Uri.encodeFull(key)] = onDiskValue;
+  map[Uri(path: Uri.encodeFull(key)).path] = onDiskValue;
+  try {
+    final String decoded = Uri.decodeFull(key);
+    map[decoded] = onDiskValue;
+    map[Uri.encodeFull(decoded)] = onDiskValue;
+    map[Uri(path: Uri.encodeFull(decoded)).path] = onDiskValue;
+  } on ArgumentError {
+    // Ignore malformed percent-encoding in keys.
+  }
+}
+
+/// Updates the internal content-hash lookup table used by [ui_web.AssetManager.getAssetUrl].
+void setContentHashedAssetMap(Map<String, String> assetMap) {
+  if (assetMap.isEmpty) {
+    _contentHashedAssetMap = const <String, String>{};
+    return;
+  }
+  final normalized = <String, String>{};
+  for (final MapEntry<String, String> entry in assetMap.entries) {
+    final String key = entry.key;
+    final String rawValue = entry.value;
+    final String onDiskValue = _toOnDiskEncodedAssetPath(rawValue);
+    _indexAssetKeyVariants(normalized, key, onDiskValue);
+    _indexAssetKeyVariants(normalized, rawValue, onDiskValue);
+  }
+  _contentHashedAssetMap = normalized;
+}
+
 Future<void> debugLoadContentHashedAssetManifest(ui_web.AssetManager assetManager) =>
     _loadContentHashedAssetManifest(assetManager);
 
 Future<void> _loadContentHashedAssetManifest(ui_web.AssetManager assetManager) async {
-  assetManager.setAssetMap(const <String, String>{});
+  setContentHashedAssetMap(const <String, String>{});
   final String? manifestFile = flutter?.buildConfig?.assetManifest?.toDart;
   if (manifestFile == null || manifestFile.isEmpty) {
     return;
@@ -255,6 +303,19 @@ Future<void> _loadContentHashedAssetManifest(ui_web.AssetManager assetManager) a
       if (fontManifestFile != null && fontManifestFile.isNotEmpty) {
         assetMap['FontManifest.json'] = fontManifestFile;
       }
+      final JSObject? extraAssetsJs = flutter?.buildConfig?.extraAssets;
+      if (extraAssetsJs != null) {
+        final Object? dartifiedExtra = extraAssetsJs.dartify();
+        if (dartifiedExtra is Map<Object?, Object?>) {
+          for (final MapEntry<Object?, Object?> entry in dartifiedExtra.entries) {
+            final Object? k = entry.key;
+            final Object? v = entry.value;
+            if (k is String && v is String && v.isNotEmpty) {
+              assetMap[k] = v;
+            }
+          }
+        }
+      }
       for (final MapEntry<Object?, Object?> entry in decoded.entries) {
         final Object? key = entry.key;
         final Object? variants = entry.value;
@@ -264,24 +325,29 @@ Future<void> _loadContentHashedAssetManifest(ui_web.AssetManager assetManager) a
             if (v is Map<Object?, Object?>) {
               final variantAsset = v['asset'] as String?;
               if (variantAsset != null) {
+                final String onDiskVariant = _toOnDiskEncodedAssetPath(variantAsset);
                 if (v['dpr'] == null && primaryAsset == null) {
-                  primaryAsset = variantAsset;
+                  primaryAsset = onDiskVariant;
                 }
                 final String unhashedVariant = _stripContentHash(variantAsset);
-                assetMap.putIfAbsent(unhashedVariant, () => variantAsset);
+                assetMap.putIfAbsent(unhashedVariant, () => onDiskVariant);
+                assetMap.putIfAbsent(variantAsset, () => onDiskVariant);
               }
             }
           }
           final Object? firstVariant = variants.first;
           if (primaryAsset == null && firstVariant is Map<Object?, Object?>) {
-            primaryAsset = firstVariant['asset'] as String?;
+            final firstAsset = firstVariant['asset'] as String?;
+            if (firstAsset != null) {
+              primaryAsset = _toOnDiskEncodedAssetPath(firstAsset);
+            }
           }
           if (primaryAsset != null) {
             assetMap[key] = primaryAsset;
           }
         }
       }
-      assetManager.setAssetMap(assetMap);
+      setContentHashedAssetMap(assetMap);
     }
   } catch (e) {
     printWarning('Failed to load content-hashed asset manifest ($manifestFile): $e');

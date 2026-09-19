@@ -351,7 +351,7 @@ void main() {
   );
 
   testUsingContext(
-    'Rejects --web-content-hash when web/index.html references main.dart.js or loadEntrypoint',
+    'Rejects --web-content-hash when web/index.html or web/flutter_bootstrap.js is incompatible',
     () async {
       final BuildCommand buildCommand = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
@@ -375,35 +375,74 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
 
-      // 1. Direct script tag reference
-      fileSystem.currentDirectory
+      final File indexHtml = fileSystem.currentDirectory
           .childDirectory('web')
-          .childFile('index.html')
-          .writeAsStringSync('<html><body><script src="main.dart.js"></script></body></html>');
+          .childFile('index.html');
+      final File bootstrapJs = fileSystem.currentDirectory
+          .childDirectory('web')
+          .childFile('flutter_bootstrap.js');
+
+      // 1. Direct script tag reference in index.html
+      indexHtml.writeAsStringSync('<html><body><script src="main.dart.js"></script></body></html>');
       await expectLater(
         runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']),
         throwsToolExit(message: 'direct references to "main.dart.js"'),
       );
 
-      // 2. Deprecated loadEntrypoint API
-      fileSystem.currentDirectory
-          .childDirectory('web')
-          .childFile('index.html')
-          .writeAsStringSync(
-            '<html><body><script>_flutter.loader.loadEntrypoint({});</script></body></html>',
-          );
+      // 2. Deprecated loadEntrypoint API in index.html
+      indexHtml.writeAsStringSync(
+        '<html><body><script>_flutter.loader.loadEntrypoint({});</script></body></html>',
+      );
       await expectLater(
         runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']),
         throwsToolExit(message: 'deprecated "FlutterLoader.loadEntrypoint" API'),
       );
 
-      // 3. Comments mentioning main.dart.js do not cause failure
-      fileSystem.currentDirectory
-          .childDirectory('web')
-          .childFile('index.html')
-          .writeAsStringSync(
-            '<html><body><!-- Migrated from main.dart.js --><script src="flutter_bootstrap.js" async></script></body></html>',
-          );
+      // 3. index.html missing flutter_bootstrap.js / {{flutter_bootstrap_js}} / {{flutter_build_config}}
+      indexHtml.writeAsStringSync('<html><body><script src="flutter.js"></script></body></html>');
+      await expectLater(
+        runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']),
+        throwsToolExit(
+          message: 'does not reference "flutter_bootstrap.js", "{{flutter_bootstrap_js}}", or "{{flutter_build_config}}"',
+        ),
+      );
+
+      // 4. HTML and JS comments mentioning main.dart.js or loadEntrypoint do not cause failure
+      indexHtml.writeAsStringSync(
+        '<html><body>'
+        '<!-- Migrated from main.dart.js -->'
+        '<script>'
+        '// _flutter.loader.loadEntrypoint({});\n'
+        '/* main.dart.js */\n'
+        '</script>'
+        '<script src="flutter_bootstrap.js" async></script>'
+        '</body></html>',
+      );
+      await runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']);
+
+      // 5. Custom web/flutter_bootstrap.js missing {{flutter_build_config}}
+      bootstrapJs.writeAsStringSync('_flutter.loader.load();');
+      await expectLater(
+        runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']),
+        throwsToolExit(message: 'does not contain the "{{flutter_build_config}}" placeholder'),
+      );
+
+      // 6. Custom web/flutter_bootstrap.js referencing loadEntrypoint or main.dart.js
+      bootstrapJs.writeAsStringSync(
+        '{{flutter_build_config}}\n_flutter.loader.loadEntrypoint({});',
+      );
+      await expectLater(
+        runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']),
+        throwsToolExit(message: 'web/flutter_bootstrap.js contains direct references'),
+      );
+
+      // 7. Valid custom web/flutter_bootstrap.js with {{flutter_build_config}} and JS comments succeeds
+      bootstrapJs.writeAsStringSync(
+        '// Migrated from main.dart.js and loadEntrypoint\n'
+        '{{flutter_js}}\n'
+        '{{flutter_build_config}}\n'
+        '_flutter.loader.load();\n',
+      );
       await runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']);
     },
     overrides: <Type, Generator>{
@@ -448,6 +487,8 @@ void main() {
         ),
       );
       expect(logger.statusText, contains('with "Cache-Control: no-cache"'));
+      expect(logger.statusText, contains('When "--no-web-resources-cdn" is used'));
+      expect(logger.statusText, contains('canvaskit/**'));
     },
     overrides: <Type, Generator>{
       Platform: () => fakePlatform,
@@ -1336,6 +1377,11 @@ flutter:
 class UrlLauncherPlugin {}
 ''');
   fileSystem.file(fileSystem.path.join('lib', 'main.dart')).writeAsStringSync('void main() { }');
+  fileSystem
+      .file(fileSystem.path.join('web', 'index.html'))
+      .writeAsStringSync(
+        '<html><body><script src="flutter_bootstrap.js" async></script></body></html>',
+      );
 }
 
 class TestWebBuildCommand extends FlutterCommand {

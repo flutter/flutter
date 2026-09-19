@@ -110,25 +110,34 @@ void testMain() {
     });
   });
 
-  group('AssetManager getAssetUrl with setAssetMap (content hashing)', () {
+  group('AssetManager getAssetUrl with setContentHashedAssetMap (content hashing)', () {
     setUp(() {
       removeAssetBaseMeta();
-      ui_web.AssetManager().setAssetMap(const <String, String>{});
+      setContentHashedAssetMap(const <String, String>{});
     });
 
     tearDown(() {
-      ui_web.AssetManager().setAssetMap(const <String, String>{});
+      setContentHashedAssetMap(const <String, String>{});
     });
 
     test('resolves logical asset keys and manifest filenames to hashed paths', () {
       final assets = ui_web.AssetManager();
-      assets.setAssetMap(<String, String>{
+      // Note: `hashWebAssets` stores `Uri.decodeFull` paths (e.g.
+      // `'assets/sub dir/space file.99887766.txt'`) in `AssetManifest.bin.json`
+      // to match `_createAssetManifest`. `setContentHashedAssetMap` normalizes
+      // values to their on-disk `%20`-encoded paths so `getAssetUrl`'s final
+      // `Uri.encodeFull` produces `%2520` (double-encoded). When the browser
+      // requests `%2520`, the HTTP server URL-decodes it once to `%20`, which
+      // matches the physical `%20`-encoded filename written to `build/web/assets/`
+      // by `copyAssets` — and avoids `%252520` triple-encoding when `Image.asset`
+      // (`AssetImage`) passes the variant path through `PlatformAssetBundle`.
+      setContentHashedAssetMap(<String, String>{
         'AssetManifest.bin.json': 'AssetManifest.bin.12345678.json',
         'FontManifest.json': 'FontManifest.87654321.json',
         'NOTICES.Z': 'NOTICES.abcdef01.Z',
         'shaders/ink_sparkle.frag': 'shaders/ink_sparkle.fedcba98.frag',
         'assets/data/config.json': 'assets/data/config.53e706a7.json',
-        'assets/sub dir/space file.txt': 'assets/sub%20dir/space%20file.99887766.txt',
+        'assets/sub dir/space file.txt': 'assets/sub dir/space file.99887766.txt',
       });
 
       expect(
@@ -145,13 +154,24 @@ void testMain() {
         assets.getAssetUrl('assets/data/config.json'),
         'assets/assets/data/config.53e706a7.json',
       );
-      // Both unencoded and pre-encoded keys (from PlatformAssetBundle) resolve and encode once:
+      // Unencoded logical key, PlatformAssetBundle `%20`-encoded logical key,
+      // decoded hashed variant key, and PlatformAssetBundle `%20`-encoded hashed
+      // variant key (used by `Image.asset` / `AssetImage`) all resolve to `%2520`
+      // (never `%252520` triple-encoded):
       expect(
         assets.getAssetUrl('assets/sub dir/space file.txt'),
         'assets/assets/sub%2520dir/space%2520file.99887766.txt',
       );
       expect(
         assets.getAssetUrl('assets/sub%20dir/space%20file.txt'),
+        'assets/assets/sub%2520dir/space%2520file.99887766.txt',
+      );
+      expect(
+        assets.getAssetUrl('assets/sub dir/space file.99887766.txt'),
+        'assets/assets/sub%2520dir/space%2520file.99887766.txt',
+      );
+      expect(
+        assets.getAssetUrl('assets/sub%20dir/space%20file.99887766.txt'),
         'assets/assets/sub%2520dir/space%2520file.99887766.txt',
       );
       // Already-hashed variant keys pass through untouched:
@@ -179,7 +199,7 @@ void testMain() {
 
     test('debugLoadContentHashedAssetManifest clears stale asset mappings when buildConfig has no assetManifest', () async {
       final assets = ui_web.AssetManager();
-      assets.setAssetMap(<String, String>{
+      setContentHashedAssetMap(<String, String>{
         'assets/data/config.json': 'assets/data/config.53e706a7.json',
       });
       expect(

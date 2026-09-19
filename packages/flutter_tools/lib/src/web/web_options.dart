@@ -91,8 +91,11 @@ abstract final class WebOptions {
         'server must still serve "index.html" and "flutter_bootstrap.js" '
         'with revalidation (for example, '
         '"Cache-Control: no-cache") for a new deploy to be picked up. '
-        'Not supported with deferred imports. Custom "index.html" files '
-        'that reference "main.dart.js" directly, and the deprecated '
+        'When "--no-web-resources-cdn" is used, locally bundled '
+        '"canvaskit/**" files are not content-hashed ("urlHashed: false" in '
+        '"precache_manifest.json") and must not be served with "immutable" '
+        'caching. Not supported with deferred imports. Custom "index.html" '
+        'files that reference "main.dart.js" directly, and the deprecated '
         '"FlutterLoader.loadEntrypoint" JavaScript API, are incompatible '
         'with this flag.',
   );

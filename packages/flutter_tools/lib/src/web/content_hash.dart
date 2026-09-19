@@ -8,6 +8,7 @@ import 'package:crypto/crypto.dart' as crypto;
 import 'package:path/path.dart' as p; // flutter_ignore: package_path_import
 import 'package:standard_message_codec/standard_message_codec.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../convert.dart';
 
@@ -33,6 +34,7 @@ class WebAssetHashResult {
     required this.renamedFiles,
     this.assetManifestBinJson,
     this.fontManifestJson,
+    this.extraAssets = const <String, String>{},
   });
 
   /// Mapping from original file paths (and normalized paths) to their renamed
@@ -46,6 +48,12 @@ class WebAssetHashResult {
   /// The content-hashed filename of `FontManifest.json` (for example,
   /// `FontManifest.e5f60718.json`), if present.
   final String? fontManifestJson;
+
+  /// Non-manifest files in `build/web/assets/` (such as `NOTICES`, framework
+  /// shaders not listed in `AssetManifest.bin`, `AssetManifest.bin`, and
+  /// `AssetManifest.json`) mapped from their unhashed relative path to their
+  /// content-hashed relative path.
+  final Map<String, String> extraAssets;
 }
 
 String computeHashedBasename(String oldBasename, String contentHash, FileSystem fileSystem) {
@@ -71,6 +79,15 @@ WebAssetHashResult hashWebAssets(Directory assetsDir) {
     ..sort((File a, File b) => a.path.compareTo(b.path));
   final rawRenamedAssets = <String, String>{};
   final renamedAssets = <String, String>{};
+  final decodedRenamedAssets = <String, String>{};
+
+  String decodeSafe(String value) {
+    try {
+      return Uri.decodeFull(value);
+    } on ArgumentError {
+      return value;
+    }
+  }
 
   String hashAndRenameFile(File file, String posixRelativePath) {
     final String relativePath = fileSystem.path.relative(file.path, from: assetsDir.path);
@@ -85,6 +102,7 @@ WebAssetHashResult hashWebAssets(Directory assetsDir) {
     final newSegments = <String>[...segments.sublist(0, segments.length - 1), newBasename];
     final String newRelativePath = fileSystem.path.joinAll(newSegments);
     final String posixNewPath = p.posix.joinAll(newSegments);
+    final String decodedNewPath = decodeSafe(posixNewPath);
 
     // Rename the physical file on disk.
     final String newPath = fileSystem.path.join(assetsDir.path, newRelativePath);
@@ -95,17 +113,22 @@ WebAssetHashResult hashWebAssets(Directory assetsDir) {
     renamedFileMap[oldPath] = newFile;
     renamedFileMap[normalizedOldPath] = newFile;
 
-    // Map POSIX paths (for manifests). Handle raw, decoded, and encoded paths.
+    // Map POSIX paths:
+    // - `renamedAssets` maps to the on-disk `%20`-encoded path (used by FontManifest.json).
+    // - `decodedRenamedAssets` maps to the `Uri.decodeFull` path (used by AssetManifest.bin /
+    //   AssetManifest.json, matching `_createAssetManifest` in `asset.dart`).
     rawRenamedAssets[posixRelativePath] = posixNewPath;
     renamedAssets[posixRelativePath] = posixNewPath;
-    try {
-      final String decoded = Uri.decodeFull(posixRelativePath);
-      renamedAssets[decoded] = posixNewPath;
-    } on FormatException {
-      // Retain raw path if malformed percent escape sequence.
-    }
-    final String encoded = Uri.encodeFull(posixRelativePath);
-    renamedAssets[encoded] = posixNewPath;
+    decodedRenamedAssets[posixRelativePath] = decodedNewPath;
+
+    final String decodedOld = decodeSafe(posixRelativePath);
+    renamedAssets[decodedOld] = posixNewPath;
+    decodedRenamedAssets[decodedOld] = decodedNewPath;
+
+    final String encodedOld = Uri.encodeFull(posixRelativePath);
+    renamedAssets[encodedOld] = posixNewPath;
+    decodedRenamedAssets[encodedOld] = decodedNewPath;
+
     return posixNewPath;
   }
 
@@ -123,7 +146,20 @@ WebAssetHashResult hashWebAssets(Directory assetsDir) {
     hashAndRenameFile(file, posixRelativePath);
   }
 
+  final manifestCoveredTargets = <String>{};
+  void recordManifestTarget(String target) {
+    manifestCoveredTargets.add(target);
+    manifestCoveredTargets.add(Uri.encodeFull(target));
+    manifestCoveredTargets.add(Uri(path: Uri.encodeFull(target)).path);
+    final String decoded = decodeSafe(target);
+    manifestCoveredTargets.add(decoded);
+    manifestCoveredTargets.add(Uri.encodeFull(decoded));
+    manifestCoveredTargets.add(Uri(path: Uri.encodeFull(decoded)).path);
+  }
+
   // Pass 2a: Rewrite FontManifest.json and hash it on disk.
+  // FontManifest.json keeps the `%20`-encoded `posixNewPath` because `loadAssetFonts`
+  // in `web_ui` calls `assetManager.loadAsset` directly without `PlatformAssetBundle`.
   String? hashedFontManifestJson;
   final File fontManifest = assetsDir.childFile('FontManifest.json');
   if (fontManifest.existsSync()) {
@@ -155,10 +191,8 @@ WebAssetHashResult hashWebAssets(Directory assetsDir) {
     final Object? decodedJson = json.decode(assetManifestJson.readAsStringSync());
     if (decodedJson is Map<String, dynamic>) {
       final newManifest = <String, dynamic>{};
-      final existingTargets = <String>{};
       for (final MapEntry<String, dynamic> entry in decodedJson.entries) {
-        existingTargets.add(entry.key);
-        existingTargets.add(Uri.encodeFull(entry.key));
+        recordManifestTarget(entry.key);
         final Object? variants = entry.value;
         if (variants is! List<dynamic>) {
           newManifest[entry.key] = variants;
@@ -167,19 +201,13 @@ WebAssetHashResult hashWebAssets(Directory assetsDir) {
         final newVariants = <String>[];
         for (final Object? variant in variants) {
           if (variant is String) {
-            existingTargets.add(variant);
-            existingTargets.add(Uri.encodeFull(variant));
-            newVariants.add(renamedAssets[variant] ?? variant);
+            recordManifestTarget(variant);
+            newVariants.add(decodedRenamedAssets[variant] ?? variant);
           } else if (variant != null) {
             newVariants.add(variant.toString());
           }
         }
         newManifest[entry.key] = newVariants;
-      }
-      for (final MapEntry<String, String> entry in rawRenamedAssets.entries) {
-        if (!newManifest.containsKey(entry.key) && !existingTargets.contains(entry.key)) {
-          newManifest[entry.key] = <String>[entry.value];
-        }
       }
       assetManifestJson.writeAsStringSync(json.encode(newManifest));
     }
@@ -187,6 +215,10 @@ WebAssetHashResult hashWebAssets(Directory assetsDir) {
   }
 
   // Pass 2c: Rewrite AssetManifest.bin and AssetManifest.bin.json and hash both on disk.
+  // Do NOT insert non-manifest SDK files (`NOTICES`, framework shaders, `FontManifest.json`,
+  // `AssetManifest.bin`, etc.) into `AssetManifest.bin` or `AssetManifest.bin.json` so that
+  // `AssetManifest.loadFromAssetBundle(rootBundle).listAssets()` returns the exact same keys
+  // as a build without `--web-content-hash`.
   String? hashedAssetManifestBinJson;
   final File assetManifestBin = assetsDir.childFile('AssetManifest.bin');
   final File assetManifestBinJson = assetsDir.childFile('AssetManifest.bin.json');
@@ -196,11 +228,9 @@ WebAssetHashResult hashWebAssets(Directory assetsDir) {
     final Object? decoded = const StandardMessageCodec().decodeMessage(message);
     if (decoded is Map<Object?, Object?>) {
       final newManifest = <String, dynamic>{};
-      final existingTargets = <String>{};
       for (final MapEntry<Object?, Object?> entry in decoded.entries) {
         final key = entry.key.toString();
-        existingTargets.add(key);
-        existingTargets.add(Uri.encodeFull(key));
+        recordManifestTarget(key);
         final Object? variantsVal = entry.value;
         if (variantsVal is! List<Object?>) {
           newManifest[key] = variantsVal;
@@ -217,9 +247,8 @@ WebAssetHashResult hashWebAssets(Directory assetsDir) {
             final vKey = vEntry.key.toString();
             if (vKey == 'asset') {
               final vValue = vEntry.value.toString();
-              existingTargets.add(vValue);
-              existingTargets.add(Uri.encodeFull(vValue));
-              newVariantMap[vKey] = renamedAssets[vValue] ?? vValue;
+              recordManifestTarget(vValue);
+              newVariantMap[vKey] = decodedRenamedAssets[vValue] ?? vValue;
             } else {
               newVariantMap[vKey] = vEntry.value;
             }
@@ -228,34 +257,14 @@ WebAssetHashResult hashWebAssets(Directory assetsDir) {
         }
         newManifest[key] = newVariants;
       }
-      // Include any hashed files in build/web/assets/ not already covered by
-      // manifest entries (such as framework shaders, NOTICES, NOTICES.Z,
-      // FontManifest.json, and AssetManifest.json) so that runtime asset lookup
-      // can resolve every file in build/web/assets/.
-      for (final MapEntry<String, String> entry in rawRenamedAssets.entries) {
-        if (!newManifest.containsKey(entry.key) && !existingTargets.contains(entry.key)) {
-          newManifest[entry.key] = <Map<String, Object?>>[
-            <String, Object?>{'asset': entry.value},
-          ];
-        }
-      }
       final ByteData encoded = const StandardMessageCodec().encodeMessage(newManifest)!;
       final encodedBytes = Uint8List.sublistView(encoded);
       assetManifestBin.writeAsBytesSync(encodedBytes);
-      final String hashedAssetManifestBin = hashAndRenameFile(
-        assetManifestBin,
-        'AssetManifest.bin',
-      );
+      hashAndRenameFile(assetManifestBin, 'AssetManifest.bin');
 
-      // Update AssetManifest.bin.json (including the hashed AssetManifest.bin entry)
-      // and hash it on disk.
+      // Update AssetManifest.bin.json with the same manifest entries and hash it on disk.
       if (assetManifestBinJson.existsSync()) {
-        newManifest['AssetManifest.bin'] = <Map<String, Object?>>[
-          <String, Object?>{'asset': hashedAssetManifestBin},
-        ];
-        final ByteData binJsonEncoded = const StandardMessageCodec().encodeMessage(newManifest)!;
-        final binJsonBytes = Uint8List.sublistView(binJsonEncoded);
-        assetManifestBinJson.writeAsStringSync(json.encode(base64.encode(binJsonBytes)));
+        assetManifestBinJson.writeAsStringSync(json.encode(base64.encode(encodedBytes)));
         hashedAssetManifestBinJson = hashAndRenameFile(
           assetManifestBinJson,
           'AssetManifest.bin.json',
@@ -264,10 +273,26 @@ WebAssetHashResult hashWebAssets(Directory assetsDir) {
     }
   }
 
+  // Collect non-manifest files in `build/web/assets/` (such as `NOTICES`,
+  // framework shaders not listed in `pubspec.yaml`, `FontManifest.json`,
+  // `AssetManifest.bin`, and `AssetManifest.json`) into `extraAssets` for
+  // `_flutter.buildConfig`.
+  final extraAssets = <String, String>{};
+  for (final MapEntry<String, String> entry in rawRenamedAssets.entries) {
+    if (entry.key == 'AssetManifest.bin.json') {
+      continue;
+    }
+    if (!manifestCoveredTargets.contains(entry.key) &&
+        !manifestCoveredTargets.contains(decodeSafe(entry.key))) {
+      extraAssets[decodeSafe(entry.key)] = entry.value;
+    }
+  }
+
   return WebAssetHashResult(
     renamedFiles: renamedFileMap,
     assetManifestBinJson: hashedAssetManifestBinJson,
     fontManifestJson: hashedFontManifestJson,
+    extraAssets: extraAssets,
   );
 }
 
@@ -303,17 +328,32 @@ int? _findMatchingClosingBrace(String text, int openBraceIndex) {
   return null;
 }
 
-String _updateBuildConfigInContent(String content, WebAssetHashResult hashResult) {
+String _updateBuildConfigInContent(
+  String content,
+  WebAssetHashResult hashResult, {
+  required String filePath,
+}) {
+  final Iterable<Match> matches = _buildConfigPrefixPattern.allMatches(content);
+  if (matches.isEmpty) {
+    throwToolExit(
+      'Failed to inject content-hashed asset manifest into $filePath: '
+      '"_flutter.buildConfig" is not a JSON object assignment. '
+      'Ensure "{{flutter_build_config}}" is used.',
+    );
+  }
   final buffer = StringBuffer();
   var cursor = 0;
-  for (final Match match in _buildConfigPrefixPattern.allMatches(content)) {
+  for (final Match match in matches) {
     if (match.start < cursor) {
       continue;
     }
     final int openBraceIndex = match.end - 1;
     final int? closeBraceIndex = _findMatchingClosingBrace(content, openBraceIndex);
     if (closeBraceIndex == null) {
-      continue;
+      throwToolExit(
+        'Failed to inject content-hashed asset manifest into $filePath: '
+        'unterminated "_flutter.buildConfig" object.',
+      );
     }
     int endIndex = closeBraceIndex + 1;
     if (endIndex < content.length && content.codeUnitAt(endIndex) == 0x3B /* ; */ ) {
@@ -322,19 +362,28 @@ String _updateBuildConfigInContent(String content, WebAssetHashResult hashResult
     final String jsonPart = content.substring(openBraceIndex, closeBraceIndex + 1);
     try {
       final Object? decoded = json.decode(jsonPart);
-      if (decoded is Map<String, Object?>) {
-        final updatedMap = <String, Object?>{
-          ...decoded,
-          if (hashResult.assetManifestBinJson != null)
-            'assetManifest': hashResult.assetManifestBinJson,
-          if (hashResult.fontManifestJson != null) 'fontManifest': hashResult.fontManifestJson,
-        };
-        buffer.write(content.substring(cursor, match.start));
-        buffer.write('_flutter.buildConfig = ${json.encode(updatedMap)};');
-        cursor = endIndex;
+      if (decoded is! Map<String, Object?>) {
+        throwToolExit(
+          'Failed to inject content-hashed asset manifest into $filePath: '
+          '"_flutter.buildConfig" is not a JSON object.',
+        );
       }
-    } on FormatException {
-      // Leave unchanged if buildConfig is not valid JSON.
+      final updatedMap = <String, Object?>{
+        ...decoded,
+        if (hashResult.assetManifestBinJson != null)
+          'assetManifest': hashResult.assetManifestBinJson,
+        if (hashResult.fontManifestJson != null) 'fontManifest': hashResult.fontManifestJson,
+        if (hashResult.extraAssets.isNotEmpty) 'extraAssets': hashResult.extraAssets,
+      };
+      buffer.write(content.substring(cursor, match.start));
+      buffer.write('_flutter.buildConfig = ${json.encode(updatedMap)};');
+      cursor = endIndex;
+    } on FormatException catch (e) {
+      throwToolExit(
+        'Failed to inject content-hashed asset manifest into $filePath: '
+        '"_flutter.buildConfig" is not valid JSON ($e). '
+        'Ensure "{{flutter_build_config}}" is used.',
+      );
     }
   }
   if (cursor == 0) {
@@ -344,13 +393,16 @@ String _updateBuildConfigInContent(String content, WebAssetHashResult hashResult
   return buffer.toString();
 }
 
-/// Injects `"assetManifest"` and `"fontManifest"` into `_flutter.buildConfig`
-/// inside `flutter_bootstrap.js` and `index.html` in [outputDir].
+/// Injects `"assetManifest"`, `"fontManifest"`, and `"extraAssets"` into
+/// `_flutter.buildConfig` inside `flutter_bootstrap.js` and `index.html` in
+/// [outputDir].
 void injectManifestBuildConfig(Directory outputDir, WebAssetHashResult hashResult) {
   if (!outputDir.existsSync()) {
     return;
   }
-  if (hashResult.assetManifestBinJson == null && hashResult.fontManifestJson == null) {
+  if (hashResult.assetManifestBinJson == null &&
+      hashResult.fontManifestJson == null &&
+      hashResult.extraAssets.isEmpty) {
     return;
   }
   for (final File file in outputDir.listSync(recursive: true).whereType<File>()) {
@@ -362,9 +414,19 @@ void injectManifestBuildConfig(Directory outputDir, WebAssetHashResult hashResul
     if (!content.contains('_flutter.buildConfig')) {
       continue;
     }
-    final String updated = _updateBuildConfigInContent(content, hashResult);
+    final String updated = _updateBuildConfigInContent(content, hashResult, filePath: file.path);
     if (updated != content) {
       file.writeAsStringSync(updated);
+    }
+  }
+  if (hashResult.assetManifestBinJson != null) {
+    final File bootstrapFile = outputDir.childFile('flutter_bootstrap.js');
+    if (!bootstrapFile.existsSync() ||
+        !bootstrapFile.readAsStringSync().contains('"assetManifest"')) {
+      throwToolExit(
+        'Failed to inject content-hashed "assetManifest" into ${bootstrapFile.path}. '
+        'Ensure web/flutter_bootstrap.js contains the "{{flutter_build_config}}" placeholder.',
+      );
     }
   }
 }

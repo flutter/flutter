@@ -2211,6 +2211,9 @@ _flutter.loader.load();
         ..createSync(recursive: true);
       final File unrelated = environment.outputDir.childFile('flutter.js')
         ..createSync(recursive: true);
+      environment.outputDir.childFile('flutter_bootstrap.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('_flutter.buildConfig = {"engineRevision":"abc","builds":[]};\n');
 
       await WebReleaseBundle(<WebCompilerConfig>[
         const JsCompilerConfig(webContentHash: true),
@@ -2459,46 +2462,51 @@ flutter:
         (File f) => RegExp(r'^FontManifest\.[0-9a-f]{8}\.json$').hasMatch(f.basename),
       );
 
-      // Verify _flutter.buildConfig in flutter_bootstrap.js and index.html received the hashed manifest filenames
+      // Verify _flutter.buildConfig in flutter_bootstrap.js and index.html received the hashed manifest filenames and extraAssets
       final String bootstrapContent = environment.outputDir
           .childFile('flutter_bootstrap.js')
           .readAsStringSync();
       expect(bootstrapContent, contains('"assetManifest":"${assetManifestBinJson.basename}"'));
       expect(bootstrapContent, contains('"fontManifest":"${fontManifest.basename}"'));
+      expect(bootstrapContent, contains('"extraAssets":{'));
+      expect(bootstrapContent, contains('"AssetManifest.bin":"${assetManifestBin.basename}"'));
+      expect(bootstrapContent, contains('"FontManifest.json":"${fontManifest.basename}"'));
       final String indexHtmlContent = environment.outputDir
           .childFile('index.html')
           .readAsStringSync();
       expect(indexHtmlContent, contains('"assetManifest":"${assetManifestBinJson.basename}"'));
       expect(indexHtmlContent, contains('"fontManifest":"${fontManifest.basename}"'));
 
-      // Decode AssetManifest.bin and verify variant mappings
+      // Decode AssetManifest.bin and verify variant mappings (stored as Uri.decodeFull paths,
+      // without non-manifest SDK files like FontManifest.json or AssetManifest.bin)
       final Uint8List rawBytes = assetManifestBin.readAsBytesSync();
       final decodedManifest =
           const StandardMessageCodec().decodeMessage(ByteData.sublistView(rawBytes))!
               as Map<Object?, Object?>;
+      expect(decodedManifest.containsKey('FontManifest.json'), isFalse);
+      expect(decodedManifest.containsKey('AssetManifest.bin'), isFalse);
+      expect(decodedManifest.containsKey('NOTICES.Z'), isFalse);
       final List<Map<Object?, Object?>> logoVariants =
           (decodedManifest['images/logo.png']! as List<Object?>).cast<Map<Object?, Object?>>();
       expect(logoVariants, hasLength(2));
       expect(logoVariants[0]['asset'], 'images/logo.$logoHash.png');
       expect(logoVariants[1]['asset'], 'images/2.0x/logo.$logo2xHash.png');
       expect(logoVariants[1]['dpr'], 2.0);
+      final List<Map<Object?, Object?>> dealVariants =
+          (decodedManifest['images/100%_deal.png']! as List<Object?>).cast<Map<Object?, Object?>>();
+      expect(dealVariants[0]['asset'], 'images/100%_deal.$dealHash.png');
 
-      // Verify AssetManifest.bin.json decodes to the same variant mappings plus AssetManifest.bin
+      // Verify AssetManifest.bin.json decodes to the exact same clean manifest
       final Object? binJsonDecoded = json.decode(assetManifestBinJson.readAsStringSync());
       final binJsonBytes = ByteData.sublistView(base64.decode(binJsonDecoded! as String));
       final manifestFromBinJson =
           const StandardMessageCodec().decodeMessage(binJsonBytes)! as Map<Object?, Object?>;
+      expect(manifestFromBinJson.containsKey('FontManifest.json'), isFalse);
+      expect(manifestFromBinJson.containsKey('AssetManifest.bin'), isFalse);
+      expect(manifestFromBinJson.containsKey('NOTICES.Z'), isFalse);
       final List<Map<Object?, Object?>> logoVariantsFromBinJson =
           (manifestFromBinJson['images/logo.png']! as List<Object?>).cast<Map<Object?, Object?>>();
       expect(logoVariantsFromBinJson[0]['asset'], 'images/logo.$logoHash.png');
-      final List<Map<Object?, Object?>> binSelfVariants =
-          (manifestFromBinJson['AssetManifest.bin']! as List<Object?>)
-              .cast<Map<Object?, Object?>>();
-      expect(binSelfVariants[0]['asset'], assetManifestBin.basename);
-      final List<Map<Object?, Object?>> fontManifestVariants =
-          (manifestFromBinJson['FontManifest.json']! as List<Object?>)
-              .cast<Map<Object?, Object?>>();
-      expect(fontManifestVariants[0]['asset'], fontManifest.basename);
 
       // Verify FontManifest.json rewriting
       final decodedFonts = json.decode(fontManifest.readAsStringSync()) as List<dynamic>;
@@ -3054,6 +3062,35 @@ _flutter.loader.load({
       expect(
         dirA.childFile(resultA.assetManifestBinJson!).readAsStringSync(),
         equals(dirB.childFile(resultB.assetManifestBinJson!).readAsStringSync()),
+      );
+      expect(resultA.extraAssets, equals(resultB.extraAssets));
+    }),
+  );
+
+  test(
+    'injectManifestBuildConfig throws ToolExit when _flutter.buildConfig is malformed JSON or missing from flutter_bootstrap.js',
+    () => testbed.run(() {
+      const hashResult = WebAssetHashResult(
+        renamedFiles: <String, File>{},
+        assetManifestBinJson: 'AssetManifest.bin.deadbeef.json',
+      );
+
+      // 1. Missing _flutter.buildConfig in flutter_bootstrap.js
+      final File bootstrapFile = environment.outputDir.childFile('flutter_bootstrap.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('_flutter.loader.load();\n');
+      expect(
+        () => injectManifestBuildConfig(environment.outputDir, hashResult),
+        throwsToolExit(message: 'Failed to inject content-hashed "assetManifest"'),
+      );
+
+      // 2. Malformed _flutter.buildConfig (non-JSON JS expression)
+      bootstrapFile.writeAsStringSync(
+        '_flutter.buildConfig = { engineRevision: "unquotedKey" };\n',
+      );
+      expect(
+        () => injectManifestBuildConfig(environment.outputDir, hashResult),
+        throwsToolExit(message: '"_flutter.buildConfig" is not valid JSON'),
       );
     }),
   );

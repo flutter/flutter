@@ -13,6 +13,7 @@ import 'package:ui/src/engine.dart';
 extension type JSBuildConfig._(JSObject _) implements JSObject {
   external JSString? get assetManifest;
   external JSString? get fontManifest;
+  external JSObject? get extraAssets;
 }
 
 extension type FlutterJS._(JSObject _) implements JSObject {

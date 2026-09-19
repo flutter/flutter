@@ -27,42 +27,6 @@ class AssetManager {
 
   static const String _defaultAssetsDir = 'assets';
 
-  /// Static lookup table mapping logical asset keys to their content-hashed
-  /// relative paths when `--web-content-hash` is enabled.
-  ///
-  /// Stored statically so that both [engineAssetManager] and any standalone
-  /// [AssetManager] instances created by plugins or embedders resolve
-  /// content-hashed paths once loaded during engine initialization.
-  static Map<String, String> _contentHashedAssetMap = const <String, String>{};
-
-  /// Updates the content-hash lookup table from the decoded `AssetManifest.bin.json`.
-  ///
-  /// Called by the web engine during `initializeEngineServices()` when
-  /// `_flutter.buildConfig` specifies a content-hashed `assetManifest`.
-  void setAssetMap(Map<String, String> assetMap) {
-    if (assetMap.isEmpty) {
-      _contentHashedAssetMap = const <String, String>{};
-      return;
-    }
-    final normalized = <String, String>{};
-    for (final MapEntry<String, String> entry in assetMap.entries) {
-      final String key = entry.key;
-      final String value = entry.value;
-      normalized[key] = value;
-      normalized[Uri.encodeFull(key)] = value;
-      normalized[Uri(path: Uri.encodeFull(key)).path] = value;
-      try {
-        final String decoded = Uri.decodeFull(key);
-        normalized[decoded] = value;
-        normalized[Uri.encodeFull(decoded)] = value;
-        normalized[Uri(path: Uri.encodeFull(decoded)).path] = value;
-      } on ArgumentError {
-        // Ignore malformed percent-encoding in keys.
-      }
-    }
-    _contentHashedAssetMap = normalized;
-  }
-
   /// The directory containing the assets.
   final String assetsDir;
 
@@ -112,7 +76,7 @@ class AssetManager {
     if (Uri.parse(asset).hasScheme) {
       return Uri.encodeFull(asset);
     }
-    final String resolvedAsset = _contentHashedAssetMap[asset] ?? asset;
+    final String resolvedAsset = resolveContentHashedAsset(asset);
     return Uri.encodeFull('$_baseUrl$assetsDir/$resolvedAsset');
   }
 
