@@ -622,19 +622,32 @@ class RunCommand extends RunCommandBase {
     if (hotMode && !webMode) {
       return HotRunner(
         flutterDevices,
-        target: targetFile,
         debuggingOptions: debuggingOptions,
-        benchmarkMode: boolArg('benchmark'),
+        target: targetFile,
+        analytics: globals.analytics,
         applicationBinary: applicationBinaryPath == null
             ? null
             : globals.fs.file(applicationBinaryPath),
-        projectRootPath: stringArg('project-root'),
-        dillOutputPath: stringArg('output-dill'),
-        stayResident: stayResident,
-        analytics: globals.analytics,
-        nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+        artifacts: globals.artifacts,
+        benchmarkMode: boolArg('benchmark'),
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
+        cache: globals.cache,
+        config: globals.config,
         dartBuilder: hookRunner,
+        dillOutputPath: stringArg('output-dill'),
+        fileSystem: globals.fs,
+        flutterVersion: globals.flutterVersion,
         logger: globals.logger,
+        nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+        osUtils: globals.os,
+        outputPreferences: globals.outputPreferences,
+        platform: globals.platform,
+        processManager: globals.processManager,
+        projectRootPath: stringArg('project-root'),
+        stayResident: stayResident,
+        terminal: globals.terminal,
+        xcode: globals.xcode,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -655,15 +668,30 @@ class RunCommand extends RunCommandBase {
     }
     return ColdRunner(
       flutterDevices,
-      target: targetFile,
       debuggingOptions: debuggingOptions,
-      traceStartup: traceStartup,
-      awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
+      target: targetFile,
+      analytics: globals.analytics,
       applicationBinary: applicationBinaryPath == null
           ? null
           : globals.fs.file(applicationBinaryPath),
-      stayResident: stayResident,
+      artifacts: globals.artifacts,
+      awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
+      buildSystem: globals.buildSystem,
+      buildTargets: globals.buildTargets,
+      cache: globals.cache,
+      config: globals.config,
       dartBuilder: hookRunner,
+      fileSystem: globals.fs,
+      flutterVersion: globals.flutterVersion,
+      logger: globals.logger,
+      osUtils: globals.os,
+      outputPreferences: globals.outputPreferences,
+      platform: globals.platform,
+      processManager: globals.processManager,
+      stayResident: stayResident,
+      terminal: globals.terminal,
+      traceStartup: traceStartup,
+      xcode: globals.xcode,
     );
   }
 
@@ -684,6 +712,7 @@ class RunCommand extends RunCommandBase {
       stdio: globals.stdio,
       systemClock: globals.systemClock,
       terminal: globals.terminal,
+      toolContext: toolContext,
     );
   }
 
@@ -762,10 +791,10 @@ class RunCommand extends RunCommandBase {
       for (final Device device in devices!)
         await FlutterDevice.create(
           device,
-          target: targetFile,
+          toolContext: toolContext!,
           buildInfo: buildInfo,
+          target: targetFile,
           userIdentifier: userIdentifier,
-          platform: globals.platform,
         ),
     ];
 
