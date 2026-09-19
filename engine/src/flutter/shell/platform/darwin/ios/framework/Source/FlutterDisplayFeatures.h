@@ -42,7 +42,7 @@ struct FlutterReservedRegionInfo {
   CGRect frame;
   /// True for `.division` (the fold), false for `.occlusion` (a camera).
   bool isDivision;
-  /// A division is inactive, and zero width, while the device is flat.
+  /// A division is inactive while the device is flat. This lags the hinge.
   bool isActive;
 };
 
@@ -64,17 +64,33 @@ struct FlutterDisplayFeatureList {
 /// * Nothing is reported while the device is closed. `dart:ui` has no closed
 ///   posture, and with the device shut the view is on the cover display, which
 ///   has no fold.
+/// * A division is only reported while the hinge is partially open. The
+///   hinge status is immediate, but a region's `isActive` lags it: measured on
+///   the iPhone Duo simulator, a division still reads active inside the update
+///   handler that reports fully open, and clears a few milliseconds later with
+///   no further hinge update or layout pass to pick that up. Trusting it would
+///   leave a 40pt `postureFlat` fold splitting every dialog on a flat device.
 /// * Inactive regions are never reported.
 /// * A region whose shortest side is zero is never reported. Combined with
 ///   `postureHalfOpened` it would still satisfy
-///   `DisplayFeatureSubScreen.avoidBounds` and split the screen in two, and the
-///   fold division is exactly zero-width while the device is flat.
+///   `DisplayFeatureSubScreen.avoidBounds` and split the screen in two.
 /// * Occlusions become `cutout` with state `unknown`, which `dart:ui` asserts.
 /// * Divisions become `fold`, not `hinge`: the inner display is one continuous
 ///   panel with no physical gap between two separate screens.
 FlutterDisplayFeatureList FlutterDisplayFeaturesFromRegions(
     FlutterHingeStatus status,
     const std::vector<FlutterReservedRegionInfo>& regions);
+
+/// Whether the reserved regions have caught up with the hinge.
+///
+/// Regions lag the hinge and nothing announces when they catch up: folding the
+/// device, the division only becomes active about a second after the status
+/// reads partially open, once the hinge comes to rest. The view's bounds do not
+/// change, so no layout pass follows either. Returns false while the hinge is
+/// partially open and a division exists but is not active yet, which is the
+/// monitor's cue to read the regions again shortly.
+bool FlutterDisplayFeaturesRegionsAreSettled(FlutterHingeStatus status,
+                                             const std::vector<FlutterReservedRegionInfo>& regions);
 
 /// Delivers the current display features. Called on the main thread.
 typedef void (^FlutterDisplayFeaturesUpdateBlock)(const FlutterDisplayFeatureList& features);
@@ -98,6 +114,10 @@ API_AVAILABLE(ios(27.1))
 /// Re-reads the reserved regions and reports again. Call after a layout
 /// change, since region frames move with the view even when the hinge does
 /// not.
+///
+/// If the regions have not caught up with the hinge yet, this keeps re-reading
+/// at a short interval until they have, or until a bounded number of attempts
+/// is used up. A later call supersedes an earlier one.
 - (void)refresh;
 
 /// Stops observing and releases the interaction.

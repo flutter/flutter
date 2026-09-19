@@ -58,13 +58,22 @@ FlutterReservedRegionInfo Occlusion(bool active) {
   XCTAssertEqualWithAccuracy(features.bounds[3], kInnerHeight, 0.01);
 }
 
-- (void)testFullyOpenDivisionBecomesFlatFold {
+- (void)testFullyOpenReportsNoFoldEvenIfTheDivisionStillReadsActive {
+  // isActive lags the hinge: in the update that reports fully open the division
+  // still reads active, and nothing follows to correct it. A 40pt postureFlat
+  // fold would split every dialog on a device lying flat.
   FlutterDisplayFeatureList features =
       FlutterDisplayFeaturesFromRegions(FlutterHingeStatusFullyOpen, {Division(40, true)});
 
+  XCTAssertTrue(features.types.empty());
+}
+
+- (void)testFullyOpenStillReportsAnActiveOcclusion {
+  FlutterDisplayFeatureList features = FlutterDisplayFeaturesFromRegions(
+      FlutterHingeStatusFullyOpen, {Division(40, true), Occlusion(true)});
+
   XCTAssertEqual(features.types.size(), 1u);
-  XCTAssertEqual(features.types[0], FlutterDisplayFeatureTypeFold);
-  XCTAssertEqual(features.states[0], FlutterDisplayFeatureStatePostureFlat);
+  XCTAssertEqual(features.types[0], FlutterDisplayFeatureTypeCutout);
 }
 
 - (void)testClosedReportsNothing {
@@ -123,12 +132,43 @@ FlutterReservedRegionInfo Occlusion(bool active) {
   XCTAssertEqual(features.types[1], FlutterDisplayFeatureTypeCutout);
 }
 
-- (void)testUnknownStatusWithActiveDivisionReportsUnknownState {
+- (void)testUnknownStatusReportsNoFold {
   FlutterDisplayFeatureList features =
       FlutterDisplayFeaturesFromRegions(FlutterHingeStatusUnknown, {Division(40, true)});
 
-  XCTAssertEqual(features.types.size(), 1u);
-  XCTAssertEqual(features.states[0], FlutterDisplayFeatureStateUnknown);
+  XCTAssertTrue(features.types.empty());
+}
+
+#pragma mark - Settling
+
+- (void)testPartiallyOpenWithInactiveDivisionIsNotSettled {
+  // Folding the device: the status is already partially open but the division
+  // only becomes active once the hinge comes to rest.
+  XCTAssertFalse(FlutterDisplayFeaturesRegionsAreSettled(FlutterHingeStatusPartiallyOpen,
+                                                         {Division(40, false)}));
+}
+
+- (void)testPartiallyOpenWithActiveDivisionIsSettled {
+  XCTAssertTrue(FlutterDisplayFeaturesRegionsAreSettled(FlutterHingeStatusPartiallyOpen,
+                                                        {Division(40, true)}));
+}
+
+- (void)testPartiallyOpenWithoutADivisionIsSettled {
+  // Built against an older SDK, or a window with no fold in it: there is
+  // nothing to wait for.
+  XCTAssertTrue(FlutterDisplayFeaturesRegionsAreSettled(FlutterHingeStatusPartiallyOpen, {}));
+  XCTAssertTrue(
+      FlutterDisplayFeaturesRegionsAreSettled(FlutterHingeStatusPartiallyOpen, {Occlusion(false)}));
+}
+
+- (void)testOtherPosturesAreAlwaysSettled {
+  // No fold is reported outside partially open, so a stale isActive is moot.
+  XCTAssertTrue(
+      FlutterDisplayFeaturesRegionsAreSettled(FlutterHingeStatusFullyOpen, {Division(40, true)}));
+  XCTAssertTrue(
+      FlutterDisplayFeaturesRegionsAreSettled(FlutterHingeStatusClosed, {Division(40, false)}));
+  XCTAssertTrue(
+      FlutterDisplayFeaturesRegionsAreSettled(FlutterHingeStatusUnknown, {Division(40, false)}));
 }
 
 #pragma mark - Viewport metrics

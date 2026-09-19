@@ -32,13 +32,16 @@ FlutterDisplayFeatureList FlutterDisplayFeaturesFromRegions(
     FlutterDisplayFeatureType type;
     FlutterDisplayFeatureState state;
     if (region.isDivision) {
+      // The hinge status is immediate; isActive lags it and can still read true
+      // in the very update that reports fully open, with nothing following to
+      // correct it. The posture therefore decides whether there is a fold.
+      if (status != FlutterHingeStatusPartiallyOpen) {
+        continue;
+      }
       // The inner display is one continuous panel; there is no physical gap, so
       // this is a fold rather than a hinge.
       type = FlutterDisplayFeatureTypeFold;
-      state = status == FlutterHingeStatusPartiallyOpen
-                  ? FlutterDisplayFeatureStatePostureHalfOpened
-                  : (status == FlutterHingeStatusFullyOpen ? FlutterDisplayFeatureStatePostureFlat
-                                                           : FlutterDisplayFeatureStateUnknown);
+      state = FlutterDisplayFeatureStatePostureHalfOpened;
     } else {
       // dart:ui asserts that a cutout carries the unknown state.
       type = FlutterDisplayFeatureTypeCutout;
@@ -55,7 +58,29 @@ FlutterDisplayFeatureList FlutterDisplayFeaturesFromRegions(
   return result;
 }
 
+bool FlutterDisplayFeaturesRegionsAreSettled(
+    FlutterHingeStatus status,
+    const std::vector<FlutterReservedRegionInfo>& regions) {
+  if (status != FlutterHingeStatusPartiallyOpen) {
+    // Nothing is reported for a division in any other posture, so a stale
+    // isActive cannot matter.
+    return true;
+  }
+  for (const FlutterReservedRegionInfo& region : regions) {
+    if (region.isDivision && !region.isActive) {
+      return false;
+    }
+  }
+  return true;
+}
+
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 270100
+
+// How often, and for how long, the regions are re-read while they lag the
+// hinge. On the iPhone Duo simulator the division becomes active about one
+// second after the hinge reads partially open.
+static const NSTimeInterval kSettleInterval = 0.1;
+static const NSInteger kSettleAttempts = 30;
 
 // The hinge and reserved-region APIs are declared by the iOS 27.1 SDK. This
 // implementation is only compiled when building against that SDK or newer; the
@@ -66,6 +91,8 @@ FlutterDisplayFeatureList FlutterDisplayFeaturesFromRegions(
 @property(nonatomic, copy) FlutterDisplayFeaturesUpdateBlock onUpdate;
 @property(nonatomic, strong, nullable) UIHingeInteraction* interaction;
 @property(nonatomic, assign) FlutterHingeStatus status;
+// Bumped by every refresh so that an older settle loop stops itself.
+@property(nonatomic, assign) NSUInteger settleGeneration;
 @end
 
 @implementation FlutterDisplayFeaturesMonitor
@@ -98,15 +125,20 @@ FlutterDisplayFeatureList FlutterDisplayFeaturesFromRegions(
 }
 
 - (void)refresh {
+  self.settleGeneration++;
+  [self reportWithAttemptsLeft:kSettleAttempts generation:self.settleGeneration];
+}
+
+- (void)reportWithAttemptsLeft:(NSInteger)attemptsLeft generation:(NSUInteger)generation {
   UIView* view = self.view;
   if (!view) {
     return;
   }
 
   std::vector<FlutterReservedRegionInfo> regions;
-  // The fold is inactive and zero width while the device is flat, so it is
-  // requested with includeInactive; the mapping drops inactive regions itself
-  // but this keeps the query shape identical across postures.
+  // The fold is inactive while the device is flat, so it is requested with
+  // includeInactive: an inactive division under a partially open hinge is how
+  // a region that has not caught up yet is recognised.
   for (UIViewReservedRegion* region in
        [view reservedRegionsOfKind:UIViewReservedRegionKind.divisionRegionKind
                            options:UIViewReservedRegionQueryOptionsIncludeInactive]) {
@@ -122,9 +154,26 @@ FlutterDisplayFeatureList FlutterDisplayFeaturesFromRegions(
   if (self.onUpdate) {
     self.onUpdate(FlutterDisplayFeaturesFromRegions(self.status, regions));
   }
+
+  // Nothing announces when the regions catch up with the hinge, and the view's
+  // bounds do not change while folding, so neither a hinge update nor a layout
+  // pass is guaranteed to follow. Look again shortly.
+  if (attemptsLeft <= 0 || FlutterDisplayFeaturesRegionsAreSettled(self.status, regions)) {
+    return;
+  }
+  __weak FlutterDisplayFeaturesMonitor* weakSelf = self;
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kSettleInterval * NSEC_PER_SEC)),
+                 dispatch_get_main_queue(), ^{
+                   FlutterDisplayFeaturesMonitor* strongSelf = weakSelf;
+                   if (!strongSelf || strongSelf.settleGeneration != generation) {
+                     return;
+                   }
+                   [strongSelf reportWithAttemptsLeft:attemptsLeft - 1 generation:generation];
+                 });
 }
 
 - (void)invalidate {
+  self.settleGeneration++;
   if (self.interaction) {
     [self.view removeInteraction:self.interaction];
     self.interaction = nil;
