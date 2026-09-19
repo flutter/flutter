@@ -69,6 +69,20 @@ void main() {
     expect(defaultFlutterRoot, '/flutter');
   });
 
+  testWithoutContext('Cache can initialize flutter root from AOT snapshot location', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final String defaultFlutterRoot = Cache.defaultFlutterRoot(
+      fileSystem: fileSystem,
+      userMessages: UserMessages(),
+      platform: FakePlatform(
+        environment: <String, String>{},
+        script: Uri.parse('file:///flutter/bin/cache/flutter_tools.aot_snapshot'),
+      ),
+    );
+
+    expect(defaultFlutterRoot, '/flutter');
+  });
+
   testWithoutContext('Cache can initialize flutter root from script file', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final String defaultFlutterRoot = Cache.defaultFlutterRoot(
