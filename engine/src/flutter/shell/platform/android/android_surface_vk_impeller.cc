@@ -87,11 +87,14 @@ bool AndroidSurfaceVKImpeller::SetNativeWindow(
 
   impeller::CreateTransactionCB cb = [jni_facade = jni_facade]() {
     FML_CHECK(jni_facade) << "JNI was nullptr";
-    ASurfaceTransaction* tx = jni_facade->createTransaction();
+    std::function<void()> submit_callback;
+    ASurfaceTransaction* tx =
+        jni_facade->createTransactionWithSubmitCallback(&submit_callback);
     if (tx == nullptr) {
       return impeller::android::SurfaceTransaction();
     }
-    return impeller::android::SurfaceTransaction(tx);
+    return impeller::android::SurfaceTransaction(tx,
+                                                 std::move(submit_callback));
   };
 
   auto swapchain = impeller::SwapchainVK::Create(
