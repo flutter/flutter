@@ -7,7 +7,9 @@
 
 #include <cstring>
 #include <iostream>
+#include <map>
 #include <memory>
+#include <mutex>
 #include <set>
 #include <string>
 #include <vector>
@@ -52,6 +54,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -3738,6 +3741,60 @@ FlutterEngineResult FlutterEngineSetNextFrameCallback(
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineGetCallbackInformation(
+    int64_t handle,
+    FlutterCallbackInformation* callback_info_out) {
+  TRACE_EVENT0("flutter", "FlutterEngineGetCallbackInformation");
+  if (!callback_info_out) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Callback info output pointer was null.");
+  }
+  // Minimum required struct size for the initial revision of
+  // FlutterCallbackInformation (through library_path).
+  constexpr size_t kFlutterCallbackInformationMinStructSize =
+      offsetof(FlutterCallbackInformation, library_path) +
+      sizeof(FlutterCallbackInformation::library_path);
+  if (SAFE_ACCESS(callback_info_out, struct_size, 0) <
+      kFlutterCallbackInformationMinStructSize) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments, "FlutterCallbackInformation struct_size too small.");
+  }
+
+  // To guarantee thread safety across arbitrary worker threads, avoid
+  // thread-exit or exit-time heap use-after-free, and ensure stable string
+  // pointer lifetimes for consecutive resolutions, cache representations in a
+  // process-wide heap-allocated node map.
+  static auto* s_callback_cache_mutex = new std::mutex();
+  static auto* s_callback_cache =
+      new std::map<int64_t, flutter::DartCallbackRepresentation>();
+
+  std::lock_guard<std::mutex> lock(*s_callback_cache_mutex);
+  auto it = s_callback_cache->find(handle);
+  if (it == s_callback_cache->end()) {
+    auto callback_info =
+        flutter::DartCallbackCache::GetCallbackInformation(handle);
+    if (!callback_info) {
+      return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                                "Could not locate callback information.");
+    }
+    it = s_callback_cache->emplace(handle, std::move(*callback_info)).first;
+  }
+
+  const auto& info = it->second;
+  if (STRUCT_HAS_MEMBER(callback_info_out, name)) {
+    callback_info_out->name = info.name.c_str();
+  }
+  if (STRUCT_HAS_MEMBER(callback_info_out, class_name)) {
+    callback_info_out->class_name =
+        info.class_name.empty() ? nullptr : info.class_name.c_str();
+  }
+  if (STRUCT_HAS_MEMBER(callback_info_out, library_path)) {
+    callback_info_out->library_path = info.library_path.c_str();
+  }
+
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -3794,6 +3851,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(AddView, FlutterEngineAddView);
   SET_PROC(RemoveView, FlutterEngineRemoveView);
   SET_PROC(SendViewFocusEvent, FlutterEngineSendViewFocusEvent);
+  SET_PROC(GetCallbackInformation, FlutterEngineGetCallbackInformation);
 #undef SET_PROC
 
   return kSuccess;
