@@ -10,8 +10,14 @@ import 'dart:js_interop_unsafe';
 
 import 'package:ui/src/engine.dart';
 
+extension type JSBuildConfig._(JSObject _) implements JSObject {
+  external JSString? get assetManifest;
+  external JSString? get fontManifest;
+}
+
 extension type FlutterJS._(JSObject _) implements JSObject {
   external FlutterLoader? get loader;
+  external JSBuildConfig? get buildConfig;
 }
 
 // Both `flutter`, `loader`(_flutter.loader), must be checked for null before

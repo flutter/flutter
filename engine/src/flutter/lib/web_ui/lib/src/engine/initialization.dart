@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer' as developer;
+import 'dart:js_interop';
+import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
@@ -156,7 +159,11 @@ Future<void> initializeEngineServices({
   _setAssetManager(assetManager);
 
   Future<void> initializeRendererCallback() async => renderer.initialize();
-  await Future.wait<void>(<Future<void>>[initializeRendererCallback(), _downloadAssetFonts()]);
+  await Future.wait<void>(<Future<void>>[
+    initializeRendererCallback(),
+    _downloadAssetFonts(),
+    _loadContentHashedAssetManifest(ui_web.assetManager),
+  ]);
   _initializationState = DebugEngineInitializationState.initializedServices;
 }
 
@@ -206,6 +213,79 @@ void _setAssetManager(ui_web.AssetManager assetManager) {
   }
 
   _assetManager = assetManager;
+}
+
+final RegExp _hashedExtensionSuffixPattern = RegExp(
+  r'\.[0-9a-f]{8}((?:\.(?:js|wasm|mjs)\.map)|(?:\.[^./]+))?$',
+);
+
+String _stripContentHash(String path) {
+  return path.replaceFirstMapped(_hashedExtensionSuffixPattern, (Match m) => m.group(1) ?? '');
+}
+
+String debugStripContentHash(String path) => _stripContentHash(path);
+
+Future<void> debugLoadContentHashedAssetManifest(ui_web.AssetManager assetManager) =>
+    _loadContentHashedAssetManifest(assetManager);
+
+Future<void> _loadContentHashedAssetManifest(ui_web.AssetManager assetManager) async {
+  assetManager.setAssetMap(const <String, String>{});
+  final String? manifestFile = flutter?.buildConfig?.assetManifest?.toDart;
+  if (manifestFile == null || manifestFile.isEmpty) {
+    return;
+  }
+  try {
+    final response = await assetManager.loadAsset(manifestFile) as HttpFetchResponse;
+    if (!response.hasPayload) {
+      printWarning('Asset manifest does not exist at `${response.url}` - ignoring.');
+      return;
+    }
+    final Uint8List rawJsonBytes = await response.asUint8List();
+    final Object? base64String = json.decode(utf8.decode(rawJsonBytes));
+    if (base64String is! String) {
+      return;
+    }
+    final Uint8List messageBytes = base64.decode(base64String);
+    final Object? decoded = const StandardMessageCodec().decodeMessage(
+      ByteData.sublistView(messageBytes),
+    );
+    if (decoded is Map<Object?, Object?>) {
+      final assetMap = <String, String>{'AssetManifest.bin.json': manifestFile};
+      final String? fontManifestFile = flutter?.buildConfig?.fontManifest?.toDart;
+      if (fontManifestFile != null && fontManifestFile.isNotEmpty) {
+        assetMap['FontManifest.json'] = fontManifestFile;
+      }
+      for (final MapEntry<Object?, Object?> entry in decoded.entries) {
+        final Object? key = entry.key;
+        final Object? variants = entry.value;
+        if (key is String && variants is List<Object?> && variants.isNotEmpty) {
+          String? primaryAsset;
+          for (final Object? v in variants) {
+            if (v is Map<Object?, Object?>) {
+              final variantAsset = v['asset'] as String?;
+              if (variantAsset != null) {
+                if (v['dpr'] == null && primaryAsset == null) {
+                  primaryAsset = variantAsset;
+                }
+                final String unhashedVariant = _stripContentHash(variantAsset);
+                assetMap.putIfAbsent(unhashedVariant, () => variantAsset);
+              }
+            }
+          }
+          final Object? firstVariant = variants.first;
+          if (primaryAsset == null && firstVariant is Map<Object?, Object?>) {
+            primaryAsset = firstVariant['asset'] as String?;
+          }
+          if (primaryAsset != null) {
+            assetMap[key] = primaryAsset;
+          }
+        }
+      }
+      assetManager.setAssetMap(assetMap);
+    }
+  } catch (e) {
+    printWarning('Failed to load content-hashed asset manifest ($manifestFile): $e');
+  }
 }
 
 Future<void> _downloadAssetFonts() async {

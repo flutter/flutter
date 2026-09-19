@@ -1166,13 +1166,11 @@ void main() {
       expectHidden('no-frequency-based-minification');
       expectHidden('enable-experiment');
 
-      // Incomplete features are hidden until they are fully implemented.
-      expectHidden('web-content-hash');
-
       // Standard options are visible.
       expectVisible('web-resources-cdn');
       expectVisible('optimization-level');
       expectVisible('source-maps');
+      expectVisible('web-content-hash');
       expectVisible('csp');
       expectVisible('dart2js-optimization');
       expectVisible('wasm');
@@ -1221,13 +1219,11 @@ void main() {
       expectVisible('no-frequency-based-minification');
       expectVisible('enable-experiment');
 
-      // Incomplete features stay hidden even with verbose help.
-      expectHidden('web-content-hash');
-
       // Standard options remain visible.
       expectVisible('web-resources-cdn');
       expectVisible('optimization-level');
       expectVisible('source-maps');
+      expectVisible('web-content-hash');
       expectVisible('csp');
       expectVisible('dart2js-optimization');
       expectVisible('wasm');

@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
+import 'package:flutter_tools/src/web/content_hash.dart';
 import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 import 'package:flutter_tools/src/web_template.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
@@ -2332,11 +2333,19 @@ console.log(mapName);
   );
 
   test(
-    'WebReleaseBundle hashes physical assets, leaves unhashed assets and shaders unhashed, and updates manifests when webContentHash is true',
+    'WebReleaseBundle hashes all physical assets, shaders, NOTICES, and manifests and injects manifest filenames into buildConfig when webContentHash is true',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
       environment.projectDir.childDirectory('web').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync(recursive: true);
+      environment.outputDir.childFile('flutter_bootstrap.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('_flutter.buildConfig = {"engineRevision":"abc","builds":[]};\n');
+      environment.outputDir.childFile('index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          '<script>_flutter.buildConfig = {"engineRevision":"abc","builds":[]};</script>\n',
+        );
 
       // Create a pubspec.yaml with assets, variants, shaders, fonts, and notices.
       environment.projectDir.childFile('pubspec.yaml').writeAsStringSync('''
@@ -2387,6 +2396,10 @@ flutter:
       const fontHash = '6951bbd9'; // sha256 of [10,20,30]
       const dealHash = '21e721c3'; // sha256 of [99,100]
       const nestedNoticesHash = '642c7c36'; // sha256 of 'Nested notices'
+      final String shaderHash = crypto.sha256
+          .convert('void main() {}'.codeUnits)
+          .toString()
+          .substring(0, 8);
 
       await WebReleaseBundle(<WebCompilerConfig>[
         const JsCompilerConfig(webContentHash: true),
@@ -2394,7 +2407,7 @@ flutter:
 
       final Directory assetsDir = environment.outputDir.childDirectory('assets');
 
-      // Hashed assets
+      // Hashed assets (including shaders and NOTICES)
       expect(assetsDir.childDirectory('images').childFile('logo.$logoHash.png').existsSync(), true);
       expect(assetsDir.childDirectory('images').childFile('logo.png').existsSync(), false);
       expect(
@@ -2417,19 +2430,46 @@ flutter:
         assetsDir.childDirectory('nested').childFile('NOTICES.$nestedNoticesHash').existsSync(),
         true,
       );
+      expect(
+        assetsDir.childDirectory('shaders').childFile('ink_sparkle.$shaderHash.frag').existsSync(),
+        true,
+      );
+      expect(assetsDir.childDirectory('shaders').childFile('ink_sparkle.frag').existsSync(), false);
+      expect(
+        assetsDir.childDirectory('custom').childFile('blur.$shaderHash.FRAG').existsSync(),
+        true,
+      );
+      expect(assetsDir.childDirectory('custom').childFile('blur.FRAG').existsSync(), false);
+      expect(assetsDir.childFile('NOTICES').existsSync(), false);
+      expect(assetsDir.childFile('NOTICES.Z').existsSync(), false);
 
-      // Unhashed assets: root NOTICES and shaders
-      expect(assetsDir.childFile('NOTICES').existsSync(), true);
-      expect(assetsDir.childDirectory('shaders').childFile('ink_sparkle.frag').existsSync(), true);
-      expect(assetsDir.childDirectory('custom').childFile('blur.FRAG').existsSync(), true);
+      // Un-hashed manifest files must be removed and replaced by content-hashed manifest files
+      expect(assetsDir.childFile('AssetManifest.bin').existsSync(), false);
+      expect(assetsDir.childFile('AssetManifest.bin.json').existsSync(), false);
+      expect(assetsDir.childFile('FontManifest.json').existsSync(), false);
 
-      // Manifest files exist unhashed
-      final File assetManifestBin = assetsDir.childFile('AssetManifest.bin');
-      final File assetManifestBinJson = assetsDir.childFile('AssetManifest.bin.json');
-      final File fontManifest = assetsDir.childFile('FontManifest.json');
-      expect(assetManifestBin.existsSync(), true);
-      expect(assetManifestBinJson.existsSync(), true);
-      expect(fontManifest.existsSync(), true);
+      final List<File> rootAssetFiles = assetsDir.listSync().whereType<File>().toList();
+      final File assetManifestBin = rootAssetFiles.singleWhere(
+        (File f) => RegExp(r'^AssetManifest\.[0-9a-f]{8}\.bin$').hasMatch(f.basename),
+      );
+      final File assetManifestBinJson = rootAssetFiles.singleWhere(
+        (File f) => RegExp(r'^AssetManifest\.bin\.[0-9a-f]{8}\.json$').hasMatch(f.basename),
+      );
+      final File fontManifest = rootAssetFiles.singleWhere(
+        (File f) => RegExp(r'^FontManifest\.[0-9a-f]{8}\.json$').hasMatch(f.basename),
+      );
+
+      // Verify _flutter.buildConfig in flutter_bootstrap.js and index.html received the hashed manifest filenames
+      final String bootstrapContent = environment.outputDir
+          .childFile('flutter_bootstrap.js')
+          .readAsStringSync();
+      expect(bootstrapContent, contains('"assetManifest":"${assetManifestBinJson.basename}"'));
+      expect(bootstrapContent, contains('"fontManifest":"${fontManifest.basename}"'));
+      final String indexHtmlContent = environment.outputDir
+          .childFile('index.html')
+          .readAsStringSync();
+      expect(indexHtmlContent, contains('"assetManifest":"${assetManifestBinJson.basename}"'));
+      expect(indexHtmlContent, contains('"fontManifest":"${fontManifest.basename}"'));
 
       // Decode AssetManifest.bin and verify variant mappings
       final Uint8List rawBytes = assetManifestBin.readAsBytesSync();
@@ -2443,7 +2483,7 @@ flutter:
       expect(logoVariants[1]['asset'], 'images/2.0x/logo.$logo2xHash.png');
       expect(logoVariants[1]['dpr'], 2.0);
 
-      // Verify AssetManifest.bin.json decodes to the same variant mappings
+      // Verify AssetManifest.bin.json decodes to the same variant mappings plus AssetManifest.bin
       final Object? binJsonDecoded = json.decode(assetManifestBinJson.readAsStringSync());
       final binJsonBytes = ByteData.sublistView(base64.decode(binJsonDecoded! as String));
       final manifestFromBinJson =
@@ -2451,6 +2491,14 @@ flutter:
       final List<Map<Object?, Object?>> logoVariantsFromBinJson =
           (manifestFromBinJson['images/logo.png']! as List<Object?>).cast<Map<Object?, Object?>>();
       expect(logoVariantsFromBinJson[0]['asset'], 'images/logo.$logoHash.png');
+      final List<Map<Object?, Object?>> binSelfVariants =
+          (manifestFromBinJson['AssetManifest.bin']! as List<Object?>)
+              .cast<Map<Object?, Object?>>();
+      expect(binSelfVariants[0]['asset'], assetManifestBin.basename);
+      final List<Map<Object?, Object?>> fontManifestVariants =
+          (manifestFromBinJson['FontManifest.json']! as List<Object?>)
+              .cast<Map<Object?, Object?>>();
+      expect(fontManifestVariants[0]['asset'], fontManifest.basename);
 
       // Verify FontManifest.json rewriting
       final decodedFonts = json.decode(fontManifest.readAsStringSync()) as List<dynamic>;
@@ -2467,6 +2515,8 @@ flutter:
       expect(depfile.readAsStringSync(), contains('logo.$logoHash.png'));
       expect(depfile.readAsStringSync(), contains('logo.$logo2xHash.png'));
       expect(depfile.readAsStringSync(), contains('my_font.$fontHash.ttf'));
+      expect(depfile.readAsStringSync(), contains(assetManifestBinJson.basename));
+      expect(depfile.readAsStringSync(), contains(fontManifest.basename));
 
       // Test stale asset cleanup on rebuild: modify logo content
       logo.writeAsBytesSync(<int>[5, 6, 7, 8]);
@@ -2869,6 +2919,142 @@ flutter:
       await target.build(environment);
 
       expect(staleManifest, isNot(exists));
+    }),
+  );
+
+  test(
+    'injectManifestBuildConfig handles custom _flutter.buildConfig without trailing semicolon or with }; inside string literals',
+    () => testbed.run(() async {
+      final File bootstrapFile = environment.outputDir.childFile('flutter_bootstrap.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+_flutter.buildConfig = {
+  "engineRevision": "abc",
+  "customLiteral": "value with }; inside string",
+  "builds": [
+    {
+      "compileTarget": "dart2js",
+      "mainJsPath": "main.dart.12345678.js"
+    }
+  ]
+}
+_flutter.loader.load({
+  onEntrypointLoaded: async function(engineInitializer) {
+    const appRunner = await engineInitializer.initializeEngine();
+    await appRunner.runApp();
+  }
+});
+''');
+
+      injectManifestBuildConfig(
+        environment.outputDir,
+        const WebAssetHashResult(
+          renamedFiles: <String, File>{},
+          assetManifestBinJson: 'AssetManifest.bin.deadbeef.json',
+          fontManifestJson: 'FontManifest.cafebabe.json',
+        ),
+      );
+
+      final String updated = bootstrapFile.readAsStringSync();
+      expect(updated, contains('"assetManifest":"AssetManifest.bin.deadbeef.json"'));
+      expect(updated, contains('"fontManifest":"FontManifest.cafebabe.json"'));
+      expect(updated, contains('"customLiteral":"value with }; inside string"'));
+      expect(updated, contains('_flutter.loader.load({'));
+    }),
+  );
+
+  test(
+    'WebReleaseBundle includes templated index.html and flutter_bootstrap.js in inputs and outputs only when webContentHash is true',
+    () => testbed.run(() async {
+      final hashedBundle = WebReleaseBundle(const <WebCompilerConfig>[
+        JsCompilerConfig(webContentHash: true),
+      ], const NoOpAnalytics());
+      final unhashedBundle = WebReleaseBundle(const <WebCompilerConfig>[
+        JsCompilerConfig(),
+      ], const NoOpAnalytics());
+
+      environment.outputDir.childFile('index.html').createSync(recursive: true);
+      environment.outputDir.childFile('flutter_bootstrap.js').createSync(recursive: true);
+
+      final Set<String> hashedInputBasenames = hashedBundle
+          .resolveInputs(environment)
+          .sources
+          .map((File f) => f.basename)
+          .toSet();
+      final Set<String> hashedOutputBasenames = hashedBundle
+          .resolveOutputs(environment)
+          .sources
+          .map((File f) => f.basename)
+          .toSet();
+      expect(hashedInputBasenames, containsAll(<String>['index.html', 'flutter_bootstrap.js']));
+      expect(hashedOutputBasenames, containsAll(<String>['index.html', 'flutter_bootstrap.js']));
+
+      final Set<String> unhashedInputBasenames = unhashedBundle
+          .resolveInputs(environment)
+          .sources
+          .map((File f) => f.basename)
+          .toSet();
+      final Set<String> unhashedOutputBasenames = unhashedBundle
+          .resolveOutputs(environment)
+          .sources
+          .map((File f) => f.basename)
+          .toSet();
+      expect(unhashedInputBasenames, isNot(contains('index.html')));
+      expect(unhashedInputBasenames, isNot(contains('flutter_bootstrap.js')));
+      expect(unhashedOutputBasenames, isNot(contains('index.html')));
+      expect(unhashedOutputBasenames, isNot(contains('flutter_bootstrap.js')));
+    }),
+  );
+
+  test(
+    'hashWebAssets produces identical manifest hashes regardless of file creation order',
+    () => testbed.run(() {
+      final ByteData? initialBin = const StandardMessageCodec().encodeMessage(<Object?, Object?>{
+        'assets/logo.png': <Object?>[
+          <Object?, Object?>{'asset': 'assets/logo.png'},
+        ],
+      });
+      final Uint8List initialBinBytes = initialBin!.buffer.asUint8List(
+        initialBin.offsetInBytes,
+        initialBin.lengthInBytes,
+      );
+
+      final Directory dirA = environment.outputDir.childDirectory('dirA/assets')
+        ..createSync(recursive: true);
+      dirA.childFile('logo.png')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('logo');
+      dirA.childFile('shaders/stretch_effect.frag')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('stretch');
+      dirA.childFile('shaders/ink_sparkle.frag')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('sparkle');
+      dirA.childFile('AssetManifest.bin').writeAsBytesSync(initialBinBytes);
+      dirA.childFile('AssetManifest.bin.json').writeAsStringSync('""');
+
+      final Directory dirB = environment.outputDir.childDirectory('dirB/assets')
+        ..createSync(recursive: true);
+      dirB.childFile('logo.png')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('logo');
+      dirB.childFile('shaders/ink_sparkle.frag')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('sparkle');
+      dirB.childFile('shaders/stretch_effect.frag')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('stretch');
+      dirB.childFile('AssetManifest.bin').writeAsBytesSync(initialBinBytes);
+      dirB.childFile('AssetManifest.bin.json').writeAsStringSync('""');
+
+      final WebAssetHashResult resultA = hashWebAssets(dirA);
+      final WebAssetHashResult resultB = hashWebAssets(dirB);
+
+      expect(resultA.assetManifestBinJson, equals(resultB.assetManifestBinJson));
+      expect(
+        dirA.childFile(resultA.assetManifestBinJson!).readAsStringSync(),
+        equals(dirB.childFile(resultB.assetManifestBinJson!).readAsStringSync()),
+      );
     }),
   );
 }
