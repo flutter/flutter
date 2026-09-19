@@ -265,5 +265,22 @@ TEST(AndroidShellHolder, CreateWithEmbedderAPI) {
   holder->GetPlatformView()->NotifyDestroyed();
 }
 
+TEST(AndroidShellHolder, CreateWithLegacyShellAPI) {
+  Settings default_settings;
+  EXPECT_TRUE(default_settings.enable_embedder_api);
+
+  Settings settings;
+  settings.enable_software_rendering = false;
+  settings.enable_embedder_api = false;
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+  EXPECT_NE(holder.get(), nullptr);
+  EXPECT_TRUE(holder->IsValid());
+  EXPECT_FALSE(holder->GetSettings().enable_embedder_api);
+  EXPECT_NE(holder->GetEngineForTesting(), nullptr);
+  EXPECT_NE(holder->GetPlatformView().get(), nullptr);
+}
+
 }  // namespace testing
 }  // namespace flutter

@@ -98,8 +98,11 @@ void EmbedderAndroidEngine::InitializeSubsystems(
     android_task_runners_ = std::make_shared<AndroidTaskRunners>(
         "io.flutter", merge_platform_and_ui);
   }
+  AndroidRenderingAPI surface_manager_api = (existing_task_runners != nullptr)
+                                                ? AndroidRenderingAPI::kSoftware
+                                                : android_rendering_api_;
   surface_manager_ =
-      std::make_shared<AndroidSurfaceManager>(android_rendering_api_);
+      std::make_shared<AndroidSurfaceManager>(surface_manager_api);
   vsync_waiter_ = std::make_shared<android::AndroidVsyncWaiter>();
   platform_views_controller_ =
       std::make_shared<android::AndroidPlatformViewsController>();
@@ -601,26 +604,17 @@ void EmbedderAndroidEngine::RegisterTexture(
 }
 
 void EmbedderAndroidEngine::UnregisterTexture(int64_t texture_id) {
-  if (!IsValid()) {
+  if (!IsValid() || !proc_table_.UnregisterExternalTexture) {
     return;
   }
-  if (embedder_engine_) {
-    embedder_engine_->UnregisterTexture(texture_id);
-  } else if (proc_table_.UnregisterExternalTexture) {
-    proc_table_.UnregisterExternalTexture(GetEngineHandle(), texture_id);
-  }
+  proc_table_.UnregisterExternalTexture(GetEngineHandle(), texture_id);
 }
 
 void EmbedderAndroidEngine::MarkTextureFrameAvailable(int64_t texture_id) {
-  if (!IsValid()) {
+  if (!IsValid() || !proc_table_.MarkExternalTextureFrameAvailable) {
     return;
   }
-  if (embedder_engine_) {
-    embedder_engine_->MarkTextureFrameAvailable(texture_id);
-  } else if (proc_table_.MarkExternalTextureFrameAvailable) {
-    proc_table_.MarkExternalTextureFrameAvailable(GetEngineHandle(),
-                                                  texture_id);
-  }
+  proc_table_.MarkExternalTextureFrameAvailable(GetEngineHandle(), texture_id);
 }
 
 void EmbedderAndroidEngine::LoadDartDeferredLibrary(
