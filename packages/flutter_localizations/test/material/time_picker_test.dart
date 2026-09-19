@@ -37,13 +37,13 @@ void main() {
     );
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
-    final locales = <Locale>[
-      const Locale('en', 'US'), //'h:mm a'
-      const Locale('en', 'GB'), //'HH:mm'
-      const Locale('es', 'ES'), //'H:mm'
-      const Locale('fr', 'CA'), //'HH \'h\' mm'
-      const Locale('zh', 'ZH'), //'ah:mm'
-      const Locale('fa', 'IR'), //'H:mm' but RTL
+    const locales = <Locale>[
+      Locale('en', 'US'), //'h:mm a'
+      Locale('en', 'GB'), //'HH:mm'
+      Locale('es', 'ES'), //'H:mm'
+      Locale('fr', 'CA'), //'HH \'h\' mm'
+      Locale('zh', 'ZH'), //'ah:mm'
+      Locale('fa', 'IR'), //'H:mm' but RTL
     ];
 
     for (final locale in locales) {
@@ -122,13 +122,13 @@ void main() {
     );
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
-    final locales = <Locale>[
-      const Locale('en', 'US'), //'h:mm a'
-      const Locale('en', 'GB'), //'HH:mm'
-      const Locale('es', 'ES'), //'H:mm'
-      const Locale('fr', 'CA'), //'HH \'h\' mm'
-      const Locale('zh', 'ZH'), //'ah:mm'
-      const Locale('fa', 'IR'), //'H:mm' but RTL
+    const locales = <Locale>[
+      Locale('en', 'US'), //'h:mm a'
+      Locale('en', 'GB'), //'HH:mm'
+      Locale('es', 'ES'), //'H:mm'
+      Locale('fr', 'CA'), //'HH \'h\' mm'
+      Locale('zh', 'ZH'), //'ah:mm'
+      Locale('fa', 'IR'), //'H:mm' but RTL
     ];
 
     for (final locale in locales) {
@@ -202,13 +202,13 @@ void main() {
     );
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
-    final locales = <Locale>[
-      const Locale('en', 'US'), //'h:mm a'
-      const Locale('en', 'GB'), //'HH:mm'
-      const Locale('es', 'ES'), //'H:mm'
-      const Locale('fr', 'CA'), //'HH \'h\' mm'
-      const Locale('zh', 'ZH'), //'ah:mm'
-      const Locale('fa', 'IR'), //'H:mm' but RTL
+    const locales = <Locale>[
+      Locale('en', 'US'), //'h:mm a'
+      Locale('en', 'GB'), //'HH:mm'
+      Locale('es', 'ES'), //'H:mm'
+      Locale('fr', 'CA'), //'HH \'h\' mm'
+      Locale('zh', 'ZH'), //'ah:mm'
+      Locale('fa', 'IR'), //'H:mm' but RTL
     ];
 
     for (final locale in locales) {
@@ -292,13 +292,13 @@ void main() {
     );
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
-    final locales = <Locale>[
-      const Locale('en', 'US'), //'h:mm a'
-      const Locale('en', 'GB'), //'HH:mm'
-      const Locale('es', 'ES'), //'H:mm'
-      const Locale('fr', 'CA'), //'HH \'h\' mm'
-      const Locale('zh', 'ZH'), //'ah:mm'
-      const Locale('fa', 'IR'), //'H:mm' but RTL
+    const locales = <Locale>[
+      Locale('en', 'US'), //'h:mm a'
+      Locale('en', 'GB'), //'HH:mm'
+      Locale('es', 'ES'), //'H:mm'
+      Locale('fr', 'CA'), //'HH \'h\' mm'
+      Locale('zh', 'ZH'), //'ah:mm'
+      Locale('fa', 'IR'), //'H:mm' but RTL
     ];
 
     for (final locale in locales) {
@@ -372,13 +372,13 @@ void main() {
         .first;
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
-    final locales = <Locale>[
-      const Locale('en', 'US'), //'h:mm a'
-      const Locale('en', 'GB'), //'HH:mm'
-      const Locale('es', 'ES'), //'H:mm'
-      const Locale('fr', 'CA'), //'HH \'h\' mm'
-      const Locale('zh', 'ZH'), //'ah:mm'
-      const Locale('fa', 'IR'), //'H:mm' but RTL
+    const locales = <Locale>[
+      Locale('en', 'US'), //'h:mm a'
+      Locale('en', 'GB'), //'HH:mm'
+      Locale('es', 'ES'), //'H:mm'
+      Locale('fr', 'CA'), //'HH \'h\' mm'
+      Locale('zh', 'ZH'), //'ah:mm'
+      Locale('fa', 'IR'), //'H:mm' but RTL
     ];
 
     for (final locale in locales) {
@@ -457,13 +457,13 @@ void main() {
         .first;
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
-    final locales = <Locale>[
-      const Locale('en', 'US'), //'h:mm a'
-      const Locale('en', 'GB'), //'HH:mm'
-      const Locale('es', 'ES'), //'H:mm'
-      const Locale('fr', 'CA'), //'HH \'h\' mm'
-      const Locale('zh', 'ZH'), //'ah:mm'
-      const Locale('fa', 'IR'), //'H:mm' but RTL
+    const locales = <Locale>[
+      Locale('en', 'US'), //'h:mm a'
+      Locale('en', 'GB'), //'HH:mm'
+      Locale('es', 'ES'), //'H:mm'
+      Locale('fr', 'CA'), //'HH \'h\' mm'
+      Locale('zh', 'ZH'), //'ah:mm'
+      Locale('fa', 'IR'), //'H:mm' but RTL
     ];
 
     for (final locale in locales) {
