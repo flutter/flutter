@@ -148,6 +148,7 @@ typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval targetTime);
 @property(nonatomic, strong) UIView* mockView;
 @property(nonatomic, strong) FlutterEngine* mockEngine;
 @property(nonatomic, assign) CGFloat currentInset;
+@property(nonatomic, assign) BOOL keyboardVisible;
 @property(nonatomic, copy) void (^updateViewportMetricsBlock)(CGFloat inset);
 @property(nonatomic, assign) BOOL isViewLoaded;
 @property(nonatomic, assign) BOOL mockIsPadInSlideOverOrStageManagerMode;
@@ -175,6 +176,10 @@ typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval targetTime);
   if (self.updateViewportMetricsBlock) {
     self.updateViewportMetricsBlock(inset);
   }
+}
+
+- (void)updateViewportMetricsWithKeyboardVisibility:(BOOL)visible {
+  self.keyboardVisible = visible;
 }
 
 - (CGFloat)physicalViewInsetBottom {
@@ -451,6 +456,19 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMStub([viewControllerMock view]).andReturn(view);
 
   return view;
+}
+
+- (id)setupMockKeyboardLayoutGuide:(FlutterViewController*)viewControllerMock
+                          viewMock:(UIView*)mockView {
+  id mockKeyboardLayoutGuide = OCMClassMock([UIKeyboardLayoutGuide class]);
+  OCMStub([mockView keyboardLayoutGuide]).andReturn(mockKeyboardLayoutGuide);
+
+  // The keyboard inset manager reads the keyboard layout guide off the delegate's view only when
+  // the view is loaded, so load the view to make isViewLoaded return YES.
+  [viewControllerMock loadView];
+  [viewControllerMock viewDidLoad];
+
+  return mockKeyboardLayoutGuide;
 }
 
 - (void)testViewDidLoadWillInvokeCreateTouchRateCorrectionVSyncClient {
@@ -1084,6 +1102,170 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertNotNil(manager.keyboardAnimationVSyncClient);
 
   [manager invalidate];
+}
+
+- (void)expectEngine:(id)mockEngine toUpdateMetricsWithKeyboardVisible:(BOOL)expectedVisible {
+  OCMExpect([mockEngine updateViewportMetrics:flutter::ViewportMetrics()])
+      .ignoringNonObjectArgs()
+      .andDo(^(NSInvocation* invocation) {
+        flutter::ViewportMetrics metrics;
+        [invocation getArgument:&metrics atIndex:2];
+        XCTAssertEqual(
+            metrics.keyboard_visible, expectedVisible,
+            @"The ViewportMetrics keyboard_visible flag was expected to be %s, but was %s.",
+            expectedVisible ? "TRUE" : "FALSE", metrics.keyboard_visible ? "TRUE" : "FALSE");
+      });
+}
+
+- (void)testKeyboardVisibilityChangesFromVisibleToHidden {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  FlutterViewController* mockVC = OCMPartialMock(realVC);
+
+  UIScreen* screen = [self setUpMockScreen];
+  CGRect viewFrame = screen.bounds;
+  // setUpMockView returns a real UIView; partial mock it so keyboardLayoutGuide and
+  // safeAreaInsets can be stubbed.
+  id mockView = OCMPartialMock([self setUpMockView:mockVC
+                                            screen:screen
+                                         viewFrame:viewFrame
+                                    convertedFrame:viewFrame]);
+  id mockKeyboardLayoutGuide = [self setupMockKeyboardLayoutGuide:mockVC viewMock:mockView];
+  // On "iPad Mini (A17 Pro)" simulator, when the app is full screen, the bottom inset is 20.
+  OCMStub([mockView safeAreaInsets]).andReturn(UIEdgeInsetsMake(0, 0, 20, 0));
+
+  CGFloat screenWidth = screen.bounds.size.width;
+  CGFloat screenHeight = screen.bounds.size.height;
+  CGRect visibleKeyboardFrame = CGRectMake(0, screenHeight - 320, screenWidth, 320);
+  // A workaround for OCMStub not working on the same mock twice.
+  __block CGRect currentKeyboardFrame = visibleKeyboardFrame;
+  OCMStub([mockKeyboardLayoutGuide layoutFrame]).andDo(^(NSInvocation* inv) {
+    [inv setReturnValue:&currentKeyboardFrame];
+  });
+  NSNotification* showNotification =
+      [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
+                                    object:nil
+                                  userInfo:@{
+                                    @"UIKeyboardFrameEndUserInfoKey" : @(visibleKeyboardFrame),
+                                    @"UIKeyboardIsLocalUserInfoKey" : @(YES)
+                                  }];
+
+  [self expectEngine:mockEngine toUpdateMetricsWithKeyboardVisible:YES];
+  [mockVC.keyboardInsetManager handleKeyboardNotification:showNotification];
+  OCMVerifyAll(mockEngine);
+
+  // Normally, a hidden keyboard frame's height is equal to the safe area bottom inset.
+  CGRect hiddenKeyboardFrame = CGRectMake(0, screenHeight - 20, screenWidth, 20);
+  currentKeyboardFrame = hiddenKeyboardFrame;
+  NSNotification* hideNotification =
+      [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
+                                    object:nil
+                                  userInfo:@{
+                                    @"UIKeyboardFrameEndUserInfoKey" : @(hiddenKeyboardFrame),
+                                    @"UIKeyboardIsLocalUserInfoKey" : @(YES)
+                                  }];
+
+  [self expectEngine:mockEngine toUpdateMetricsWithKeyboardVisible:NO];
+  [mockVC.keyboardInsetManager handleKeyboardNotification:hideNotification];
+  OCMVerifyAll(mockEngine);
+}
+
+- (void)testKeyboardVisibilityChangesFromVisibleToHiddenWhenFloatingKeyboard {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  FlutterViewController* mockVC = OCMPartialMock(realVC);
+
+  UIScreen* screen = [self setUpMockScreen];
+  CGRect viewFrame = screen.bounds;
+  // setUpMockView returns a real UIView; partial mock it so keyboardLayoutGuide and
+  // safeAreaInsets can be stubbed.
+  id mockView = OCMPartialMock([self setUpMockView:mockVC
+                                            screen:screen
+                                         viewFrame:viewFrame
+                                    convertedFrame:viewFrame]);
+  id mockKeyboardLayoutGuide = [self setupMockKeyboardLayoutGuide:mockVC viewMock:mockView];
+  // On "iPad Mini (A17 Pro)" simulator, when the app is not full screen, the bottom inset is 10.
+  // (We use the "not-full-screen" configuration for this test to make sure
+  // the keyboard visibility is reported correctly in this edge case.)
+  OCMStub([mockView safeAreaInsets]).andReturn(UIEdgeInsetsMake(0, 0, 10, 0));
+
+  CGFloat screenWidth = screen.bounds.size.width;
+  CGFloat screenHeight = screen.bounds.size.height;
+  // A floating keyboard frame.
+  CGRect visibleKeyboardFrame =
+      CGRectMake((screenWidth - 500) / 2, (screenHeight - 500) / 2, 500, 500);
+  // A workaround for OCMStub not working on the same mock twice.
+  __block CGRect currentKeyboardFrame = visibleKeyboardFrame;
+  OCMStub([mockKeyboardLayoutGuide layoutFrame]).andDo(^(NSInvocation* inv) {
+    [inv setReturnValue:&currentKeyboardFrame];
+  });
+  NSNotification* showNotification =
+      [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
+                                    object:nil
+                                  userInfo:@{
+                                    @"UIKeyboardFrameEndUserInfoKey" : @(visibleKeyboardFrame),
+                                    @"UIKeyboardIsLocalUserInfoKey" : @(YES)
+                                  }];
+
+  [self expectEngine:mockEngine toUpdateMetricsWithKeyboardVisible:YES];
+  [mockVC.keyboardInsetManager handleKeyboardNotification:showNotification];
+  OCMVerifyAll(mockEngine);
+
+  // When a floating keyboard is hidden, its height becomes 11.
+  CGRect hiddenKeyboardFrame = CGRectMake(0, screenHeight - 11, screenWidth, 11);
+  currentKeyboardFrame = hiddenKeyboardFrame;
+  NSNotification* hideNotification =
+      [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
+                                    object:nil
+                                  userInfo:@{
+                                    @"UIKeyboardFrameEndUserInfoKey" : @(hiddenKeyboardFrame),
+                                    @"UIKeyboardIsLocalUserInfoKey" : @(YES)
+                                  }];
+
+  [self expectEngine:mockEngine toUpdateMetricsWithKeyboardVisible:NO];
+  [mockVC.keyboardInsetManager handleKeyboardNotification:hideNotification];
+  OCMVerifyAll(mockEngine);
+}
+
+- (void)testKeyboardVisibilityChangesWhenNotificationIsNotLocal {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  FlutterViewController* mockVC = OCMPartialMock(realVC);
+
+  UIScreen* screen = [self setUpMockScreen];
+  CGRect viewFrame = screen.bounds;
+  // setUpMockView returns a real UIView; partial mock it so keyboardLayoutGuide and
+  // safeAreaInsets can be stubbed.
+  id mockView = OCMPartialMock([self setUpMockView:mockVC
+                                            screen:screen
+                                         viewFrame:viewFrame
+                                    convertedFrame:viewFrame]);
+  id mockKeyboardLayoutGuide = [self setupMockKeyboardLayoutGuide:mockVC viewMock:mockView];
+
+  CGFloat screenWidth = screen.bounds.size.width;
+  CGFloat screenHeight = screen.bounds.size.height;
+  CGRect keyboardFrame = CGRectMake(0, screenHeight - 320, screenWidth, 320);
+  OCMStub([mockKeyboardLayoutGuide layoutFrame]).andReturn(keyboardFrame);
+  NSNotification* notification =
+      [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
+                                    object:nil
+                                  userInfo:@{
+                                    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+                                    @"UIKeyboardIsLocalUserInfoKey" : @(NO)
+                                  }];
+
+  [self expectEngine:mockEngine toUpdateMetricsWithKeyboardVisible:YES];
+  [mockVC.keyboardInsetManager handleKeyboardNotification:notification];
+  OCMVerifyAll(mockEngine);
 }
 
 - (void)testEnsureBottomInsetIsZeroWhenKeyboardDismissed {

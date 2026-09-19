@@ -790,6 +790,11 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
     [self.flutterView addGestureRecognizer:_rotationGestureRecognizer];
   }
 
+  // UIKeyboardLayoutGuide provides useful information about the keyboard frame; especially with
+  // followsUndockedKeyboard = YES, we can get the frame geometry in keyboard modes other than
+  // docked. The keyboard inset manager uses it to determine the keyboard visibility.
+  self.view.keyboardLayoutGuide.followsUndockedKeyboard = YES;
+
   [super viewDidLoad];
 }
 
@@ -2308,6 +2313,14 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 - (void)updateViewportMetricsWithInset:(CGFloat)inset {
   _viewportMetrics.physical_view_inset_bottom = inset;
+  [self updateViewportMetricsIfNeeded];
+}
+
+- (void)updateViewportMetricsWithKeyboardVisibility:(BOOL)visible {
+  if (_viewportMetrics.keyboard_visible == visible) {
+    return;
+  }
+  _viewportMetrics.keyboard_visible = visible;
   [self updateViewportMetricsIfNeeded];
 }
 
