@@ -111,19 +111,22 @@ FlutterDisplayFeatureList FlutterDisplayFeaturesFromRegions(
   // includeInactive; the mapping drops inactive regions itself, and this keeps
   // the query, and so the dependency UIKit tracks, identical across postures.
   for (UIViewReservedRegion* region in
-       [view reservedRegionsOfKind:UIViewReservedRegionKind.divisionRegionKind
+       [view reservedRegionsOfKind:[UIViewReservedRegionKind divisionRegionKind]
                            options:UIViewReservedRegionQueryOptionsIncludeInactive]) {
     regions.push_back({region.frame, /*isDivision=*/true, region.isActive});
   }
   // An occlusion is only active while that camera is in use.
   for (UIViewReservedRegion* region in
-       [view reservedRegionsOfKind:UIViewReservedRegionKind.occlusionRegionKind
+       [view reservedRegionsOfKind:[UIViewReservedRegionKind occlusionRegionKind]
                            options:UIViewReservedRegionQueryOptionsNone]) {
     regions.push_back({region.frame, /*isDivision=*/false, region.isActive});
   }
 
-  if (self.onUpdate) {
-    self.onUpdate(FlutterDisplayFeaturesFromRegions(self.status, regions));
+  // Held locally so that a handler which ends up invalidating this monitor
+  // cannot release the block while it is running.
+  FlutterDisplayFeaturesUpdateBlock onUpdate = self.onUpdate;
+  if (onUpdate) {
+    onUpdate(FlutterDisplayFeaturesFromRegions(self.status, regions));
   }
 }
 
@@ -133,6 +136,14 @@ FlutterDisplayFeatureList FlutterDisplayFeaturesFromRegions(
     self.interaction = nil;
   }
   self.onUpdate = nil;
+}
+
+- (void)dealloc {
+  // The owner is expected to call invalidate. This covers the case where it
+  // does not, so the interaction never outlives the monitor on a live view.
+  if (_interaction) {
+    [_view removeInteraction:_interaction];
+  }
 }
 
 @end
