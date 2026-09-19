@@ -189,24 +189,6 @@ void FlatlandConnection::AwaitVsync(FireCallbackCallback callback) {
   RunVsyncCallback(now, callback);
 }
 
-// This method is called from the UI thread.
-void FlatlandConnection::AwaitVsyncForSecondaryCallback(
-    FireCallbackCallback callback) {
-  TRACE_DURATION("flutter",
-                 "FlatlandConnection::AwaitVsyncForSecondaryCallback");
-
-  std::scoped_lock<std::mutex> lock(threadsafe_state_.mutex_);
-  const auto now = fml::TimePoint::Now();
-
-  // Initial case.
-  if (MaybeRunInitialVsyncCallback(now, callback)) {
-    return;
-  }
-
-  // Regular case.
-  RunVsyncCallback(now, callback);
-}
-
 // This method is called from the raster thread.
 void FlatlandConnection::OnError(
     fuchsia::ui::composition::FlatlandError error) {
