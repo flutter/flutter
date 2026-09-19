@@ -684,6 +684,7 @@ class RunCommand extends RunCommandBase {
       stdio: globals.stdio,
       systemClock: globals.systemClock,
       terminal: globals.terminal,
+      toolContext: toolContext,
     );
   }
 
@@ -762,10 +763,10 @@ class RunCommand extends RunCommandBase {
       for (final Device device in devices!)
         await FlutterDevice.create(
           device,
-          target: targetFile,
+          toolContext: toolContext!,
           buildInfo: buildInfo,
+          target: targetFile,
           userIdentifier: userIdentifier,
-          platform: globals.platform,
         ),
     ];
 

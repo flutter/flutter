@@ -18,6 +18,7 @@ import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
@@ -30,20 +31,22 @@ import 'drive_service.dart';
 /// An implementation of the driver service for web debug and release applications.
 class WebDriverService extends DriverService {
   WebDriverService({
-    required this._processUtils,
-    required this._dartSdkPath,
-    required this._platform,
+    this._toolContext,
     required this._logger,
     required this._terminal,
+    required this._platform,
     required this._outputPreferences,
+    required this._processUtils,
+    required this._dartSdkPath,
   });
 
-  final ProcessUtils _processUtils;
-  final String _dartSdkPath;
-  final Platform _platform;
+  final ToolContext? _toolContext;
   final Logger _logger;
   final Terminal _terminal;
+  final Platform _platform;
   final OutputPreferences _outputPreferences;
+  final ProcessUtils _processUtils;
+  final String _dartSdkPath;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -72,9 +75,10 @@ class WebDriverService extends DriverService {
   }) async {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      target: mainPath,
+      toolContext: _toolContext!,
       buildInfo: buildInfo,
-      platform: _platform,
+      target: mainPath,
+      userIdentifier: userIdentifier,
     );
     _residentRunner = webRunnerFactory!.createWebRunner(
       flutterDevice,

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/tracing.dart';
@@ -21,6 +23,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 
 void main() {
   testUsingContext('Exits with code 2 when HttpException is thrown '
@@ -260,8 +263,14 @@ class TestFlutterDevice extends FlutterDevice {
     required ResidentCompiler generator,
     Future<Uri>? vmServiceUri,
   }) : super(
-         targetPlatform: .unsupported,
          device,
+         toolContext: TestToolContext(
+           fileSystem: globals.fs,
+           logger: globals.logger,
+           processManager: globals.processManager,
+           artifacts: Artifacts.test(),
+         ),
+         targetPlatform: .unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,
          developmentShaderCompiler: const FakeShaderCompiler(),
