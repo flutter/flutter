@@ -61,24 +61,27 @@ fml::Status TextureSourceVK::SetLayout(const BarrierVK& barrier) const {
 void TextureSourceVK::SetCachedFrameData(const FramebufferAndRenderPass& data,
                                          SampleCount sample_count,
                                          uint32_t mip_level,
-                                         uint32_t slice) {
+                                         uint32_t slice,
+                                         uint64_t attachments_key) {
   for (auto& entry : frame_data_) {
     if (entry.sample_count == sample_count && entry.mip_level == mip_level &&
-        entry.slice == slice) {
+        entry.slice == slice && entry.attachments_key == attachments_key) {
       entry.data = data;
       return;
     }
   }
-  frame_data_.push_back({sample_count, mip_level, slice, data});
+  frame_data_.push_back(
+      {sample_count, mip_level, slice, attachments_key, data});
 }
 
 FramebufferAndRenderPass TextureSourceVK::GetCachedFrameData(
     SampleCount sample_count,
     uint32_t mip_level,
-    uint32_t slice) const {
+    uint32_t slice,
+    uint64_t attachments_key) const {
   for (const auto& entry : frame_data_) {
     if (entry.sample_count == sample_count && entry.mip_level == mip_level &&
-        entry.slice == slice) {
+        entry.slice == slice && entry.attachments_key == attachments_key) {
       return entry.data;
     }
   }
