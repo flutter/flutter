@@ -98,16 +98,18 @@ const cocoaPodsRecommendedVersion = Version.withText(1, 16, 2, '1.16.2');
 ///     installing iOS/macOS dependencies.
 class CocoaPods {
   CocoaPods({
+    required this._analytics,
     required FileSystem fileSystem,
-    required ProcessManager processManager,
-    required this._xcodeProjectInterpreter,
     required Logger logger,
     required Platform platform,
-    required this._analytics,
+    required ProcessManager processManager,
+    required this._xcodeProjectInterpreter,
+    this._cache,
     Abi? currentAbi,
+    this._flutterRoot,
   }) : _fileSystem = fileSystem,
-       _processManager = processManager,
        _logger = logger,
+       _processManager = processManager,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _operatingSystemUtils = OperatingSystemUtils(
          fileSystem: fileSystem,
@@ -124,6 +126,10 @@ class CocoaPods {
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final Logger _logger;
   final Analytics _analytics;
+  final Cache? _cache;
+  final String? _flutterRoot;
+
+  String get _flutterRootPath => _flutterRoot ?? _cache?.flutterRoot ?? '';
 
   Future<String?>? _versionText;
 
@@ -270,7 +276,7 @@ class CocoaPods {
     final podfileTemplateName = (xcodeProject is MacOSProject) ? 'Podfile-macos' : 'Podfile-ios';
     return _fileSystem.file(
       _fileSystem.path.join(
-        Cache.flutterRoot!,
+        _flutterRootPath,
         'packages',
         'flutter_tools',
         'templates',

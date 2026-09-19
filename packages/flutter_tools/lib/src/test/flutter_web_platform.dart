@@ -10,7 +10,6 @@ import 'package:http_multi_server/http_multi_server.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
-import 'package:process/process.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_web_socket/shelf_web_socket.dart';
@@ -25,7 +24,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
-import '../cache.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart' as globals;
@@ -60,7 +59,7 @@ shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOr
     return shelf.Response.ok(
       file.openRead(),
       headers: <String, String>{
-        'Content-Type': ?contentType,
+        if (contentType != null) 'Content-Type': contentType,
         if (needsCrossOriginIsolated) ...kCrossOriginIsolationHeaders,
       },
     );
@@ -81,25 +80,22 @@ class FlutterWebPlatform extends PlatformPlugin {
     required this.webMemoryFS,
     required FlutterProject flutterProject,
     required String flutterTesterBinPath,
-    required FileSystem fileSystem,
     required this._buildDirectory,
     required this._testDartJs,
     required this._testHostDartJs,
     required this._chromiumLauncher,
-    required this._logger,
-    required this._artifacts,
-    required ProcessManager processManager,
     required this.webRenderer,
     required this.useWasm,
     required this.crossOriginIsolation,
+    required this._toolContext,
     TestTimeRecorder? testTimeRecorder,
-  }) : _fileSystem = fileSystem {
+  }) {
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
         .add(
           createDirectoryHandler(
-            fileSystem.directory(
-              fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'),
+            _fileSystem.directory(
+              _fileSystem.path.join(_toolContext.cache.flutterRoot, 'packages', 'flutter_tools'),
             ),
             crossOriginIsolated: crossOriginIsolation,
           ),
@@ -111,38 +107,41 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(_handleTestRequest)
         .add(
           createDirectoryHandler(
-            fileSystem.directory(fileSystem.path.join(fileSystem.currentDirectory.path, 'test')),
+            _fileSystem.directory(_fileSystem.path.join(_fileSystem.currentDirectory.path, 'test')),
             crossOriginIsolated: crossOriginIsolation,
           ),
         )
         .add(_packageFilesHandler);
     _server.mount(cascade.handler);
     _testGoldenComparator = TestGoldenComparator(
-      compilerFactory: () =>
-          TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
+      compilerFactory: () => TestCompiler(
+        buildInfo,
+        flutterProject,
+        toolContext: _toolContext,
+        testTimeRecorder: testTimeRecorder,
+      ),
       flutterTesterBinPath: flutterTesterBinPath,
-      fileSystem: _fileSystem,
-      logger: _logger,
-      processManager: processManager,
+      toolContext: _toolContext,
       environment: <String, String>{
         // Chrome is the only supported browser currently.
         'FLUTTER_TEST_BROWSER': 'chrome',
         'FLUTTER_WEB_RENDERER': webRenderer.name,
         // Pass FLUTTER_ROOT so flutter_goldens can locate the cache directory and resolve repo paths.
-        if (Cache.flutterRoot case final String flutterRoot) 'FLUTTER_ROOT': flutterRoot,
+        'FLUTTER_ROOT': _toolContext.cache.flutterRoot,
       },
     );
   }
 
   final WebMemoryFS webMemoryFS;
   final BuildInfo buildInfo;
-  final FileSystem _fileSystem;
+  FileSystem get _fileSystem => _toolContext.fs;
   final Directory _buildDirectory;
   final File _testDartJs;
   final File _testHostDartJs;
+  final ToolContext _toolContext;
   final ChromiumLauncher _chromiumLauncher;
-  final Logger _logger;
-  final Artifacts? _artifacts;
+  Logger get _logger => _toolContext.logger;
+  Artifacts get _artifacts => _toolContext.artifacts;
   final bool updateGoldens;
   final _webSocketHandler = OneOffHandler();
   final _closeMemo = AsyncMemoizer<void>();
@@ -157,7 +156,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   final _suiteLock = Pool(1);
 
   BrowserManager? _browserManager;
-  late TestGoldenComparator _testGoldenComparator;
+  late final TestGoldenComparator _testGoldenComparator;
 
   static Future<shelf.Server> defaultServerFactory() async {
     return shelf_io.IOServer(await HttpMultiServer.loopback(0));
@@ -165,35 +164,31 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   static Future<FlutterWebPlatform> start(
     String root, {
-    bool updateGoldens = false,
-    bool pauseAfterLoad = false,
+    required BuildInfo buildInfo,
+    required Directory buildDirectory,
+    required ChromiumLauncher chromiumLauncher,
+    required bool crossOriginIsolation,
     required FlutterProject flutterProject,
     required String flutterTesterBinPath,
-    required BuildInfo buildInfo,
-    required WebMemoryFS webMemoryFS,
-    required FileSystem fileSystem,
-    required Directory buildDirectory,
-    required Logger logger,
-    required ChromiumLauncher chromiumLauncher,
-    required Artifacts? artifacts,
-    required ProcessManager processManager,
-    required WebRendererMode webRenderer,
+    required ToolContext toolContext,
     required bool useWasm,
-    required bool crossOriginIsolation,
+    required WebMemoryFS webMemoryFS,
+    required WebRendererMode webRenderer,
+    bool pauseAfterLoad = false,
+    Future<shelf.Server> Function() serverFactory = defaultServerFactory,
     TestTimeRecorder? testTimeRecorder,
     Uri? testPackageUri,
-    Future<shelf.Server> Function() serverFactory = defaultServerFactory,
+    bool updateGoldens = false,
   }) async {
     final shelf.Server server = await serverFactory();
     if (testPackageUri == null) {
       final PackageConfig packageConfig = await currentPackageConfig();
       testPackageUri = packageConfig['test']!.packageUriRoot;
     }
-    final File testDartJs = fileSystem.file(
-      fileSystem.path.join(testPackageUri.toFilePath(), 'dart.js'),
-    );
-    final File testHostDartJs = fileSystem.file(
-      fileSystem.path.join(
+    final FileSystem fs = toolContext.fs;
+    final File testDartJs = fs.file(fs.path.join(testPackageUri.toFilePath(), 'dart.js'));
+    final File testHostDartJs = fs.file(
+      fs.path.join(
         testPackageUri.toFilePath(),
         'src',
         'runner',
@@ -213,12 +208,9 @@ class FlutterWebPlatform extends PlatformPlugin {
       webMemoryFS: webMemoryFS,
       testDartJs: testDartJs,
       testHostDartJs: testHostDartJs,
-      fileSystem: fileSystem,
       buildDirectory: buildDirectory,
       chromiumLauncher: chromiumLauncher,
-      artifacts: artifacts,
-      logger: logger,
-      processManager: processManager,
+      toolContext: toolContext,
       webRenderer: webRenderer,
       useWasm: useWasm,
       crossOriginIsolation: crossOriginIsolation,
@@ -234,13 +226,19 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The ahem text file.
   File get _ahem => _fileSystem.file(
-    _fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'static', 'Ahem.ttf'),
+    _fileSystem.path.join(
+      _toolContext.cache.flutterRoot,
+      'packages',
+      'flutter_tools',
+      'static',
+      'Ahem.ttf',
+    ),
   );
 
   /// The require js binary.
   File get _requireJs => _fileSystem.file(
     _fileSystem.path.join(
-      _artifacts!.getArtifactPath(
+      _artifacts.getArtifactPath(
         Artifact.engineDartSdkPath,
         platform: TargetPlatform.web_javascript,
       ),
@@ -254,7 +252,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   /// The ddc module loader js binary.
   File get _ddcModuleLoaderJs => _fileSystem.file(
     _fileSystem.path.join(
-      _artifacts!.getArtifactPath(
+      _artifacts.getArtifactPath(
         Artifact.engineDartSdkPath,
         platform: TargetPlatform.web_javascript,
       ),
@@ -268,7 +266,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   /// The ddc to dart stack trace mapper.
   File get _stackTraceMapper => _fileSystem.file(
     _fileSystem.path.join(
-      _artifacts!.getArtifactPath(
+      _artifacts.getArtifactPath(
         Artifact.engineDartSdkPath,
         platform: TargetPlatform.web_javascript,
       ),
@@ -281,7 +279,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   File get _flutterJs => _fileSystem.file(
     _fileSystem.path.join(
-      _artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      _artifacts.getHostArtifact(HostArtifact.flutterJsDirectory).path,
       'flutter.js',
     ),
   );
@@ -296,7 +294,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         buildInfo.ddcModuleFormat == DdcModuleFormat.ddc
         ? kDdcLibraryBundleDartSdkJsArtifactMap
         : kAmdDartSdkJsArtifactMap;
-    return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
+    return _fileSystem.file(_artifacts.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   File get _dartSdkSourcemaps {
@@ -309,12 +307,12 @@ class FlutterWebPlatform extends PlatformPlugin {
         buildInfo.ddcModuleFormat == DdcModuleFormat.ddc
         ? kDdcLibraryBundleDartSdkJsMapArtifactMap
         : kAmdDartSdkJsMapArtifactMap;
-    return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
+    return _fileSystem.file(_artifacts.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   File _canvasKitFile(String relativePath) {
     final String canvasKitPath = _fileSystem.path.join(
-      _artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
+      _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
       'canvaskit',
     );
     final File canvasKitFile = _fileSystem.file(_fileSystem.path.join(canvasKitPath, relativePath));

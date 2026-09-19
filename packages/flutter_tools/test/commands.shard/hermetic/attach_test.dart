@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -21,6 +22,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/device_vm_service_discovery_for_attach.dart';
@@ -40,17 +42,8 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
-
-class FakeStdio extends Fake implements Stdio {
-  @override
-  bool stdinHasTerminal = false;
-}
-
-class FakeProcessInfo extends Fake implements ProcessInfo {
-  @override
-  int maxRss = 0;
-}
 
 void main() {
   tearDown(() {
@@ -63,10 +56,9 @@ void main() {
     late TestDeviceManager testDeviceManager;
     late Artifacts artifacts;
     late Stdio stdio;
-    late Terminal terminal;
+    late AnsiTerminal terminal;
     late Signals signals;
     late Platform platform;
-    late ProcessInfo processInfo;
 
     setUp(() {
       Cache.disableLocking();
@@ -77,11 +69,32 @@ void main() {
       testFileSystem.file(testFileSystem.path.join('lib', 'main.dart')).createSync();
       artifacts = Artifacts.test(fileSystem: testFileSystem);
       stdio = FakeStdio();
-      terminal = FakeTerminal();
+      terminal = AnsiTerminal(stdio: stdio, platform: platform);
       signals = FakeSignals();
-      processInfo = FakeProcessInfo();
       testDeviceManager = TestDeviceManager(logger: logger);
     });
+
+    AttachCommand createAttachCommand({
+      HotRunnerFactory? hotRunnerFactory,
+      bool verboseHelp = false,
+      ToolContext? toolContext,
+      Logger? commandLogger,
+    }) {
+      return AttachCommand(
+        toolContext:
+            toolContext ??
+            FakeToolContext(
+              fs: testFileSystem,
+              logger: commandLogger ?? context.get<Logger>() ?? logger,
+              platform: platform,
+              signals: signals,
+              stdio: stdio,
+              terminal: terminal,
+            ),
+        hotRunnerFactory: hotRunnerFactory,
+        verboseHelp: verboseHelp,
+      );
+    }
 
     group('with one device and no specified target file', () {
       const devicePort = 499;
@@ -140,18 +153,8 @@ void main() {
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-          await createTestCommandRunner(
-            AttachCommand(
-              hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
-            ),
-          ).run(<String>['attach']);
+          await createTestCommandRunner(createAttachCommand(hotRunnerFactory: hotRunnerFactory))
+              .run(<String>['attach']);
 
           await completer.future;
 
@@ -219,18 +222,8 @@ void main() {
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-          await createTestCommandRunner(
-            AttachCommand(
-              hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
-            ),
-          ).run(<String>['attach']);
+          await createTestCommandRunner(createAttachCommand(hotRunnerFactory: hotRunnerFactory))
+              .run(<String>['attach']);
           await completer.future;
           await Future.wait<void>(<Future<void>>[
             fakeLogReader.dispose(),
@@ -304,15 +297,16 @@ void main() {
             };
 
           await createTestCommandRunner(
-            AttachCommand(
+            createAttachCommand(
               hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
+              toolContext: DelegatingToolContext(
+                fs: testFileSystem,
+                logger: logger,
+                platform: platform,
+                signals: signals,
+                stdio: stdio,
+                terminal: terminal,
+              ),
             ),
           ).run(<String>[
             'attach',
@@ -370,18 +364,8 @@ void main() {
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-          await createTestCommandRunner(
-            AttachCommand(
-              hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
-            ),
-          ).run(<String>['attach']);
+          await createTestCommandRunner(createAttachCommand(hotRunnerFactory: hotRunnerFactory))
+              .run(<String>['attach']);
           await fakeLogReader.dispose();
 
           // Listen to the URI before checking port forwarder. Port forwarding
@@ -449,18 +433,8 @@ void main() {
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-          await createTestCommandRunner(
-            AttachCommand(
-              hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
-            ),
-          ).run(<String>['attach']);
+          await createTestCommandRunner(createAttachCommand(hotRunnerFactory: hotRunnerFactory))
+              .run(<String>['attach']);
           await fakeLogReader.dispose();
 
           // Listen to the URI before checking port forwarder. Port forwarding
@@ -533,18 +507,8 @@ void main() {
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-          await createTestCommandRunner(
-            AttachCommand(
-              hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
-            ),
-          ).run(<String>['attach', '--debug-port', '123']);
+          await createTestCommandRunner(createAttachCommand(hotRunnerFactory: hotRunnerFactory))
+              .run(<String>['attach', '--debug-port', '123']);
           await fakeLogReader.dispose();
 
           // Listen to the URI before checking port forwarder. Port forwarding
@@ -630,18 +594,8 @@ void main() {
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-          await createTestCommandRunner(
-            AttachCommand(
-              hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
-            ),
-          ).run(<String>['attach', '--debug-url', 'https://0.0.0.0:123']);
+          await createTestCommandRunner(createAttachCommand(hotRunnerFactory: hotRunnerFactory))
+              .run(<String>['attach', '--debug-url', 'https://0.0.0.0:123']);
           await fakeLogReader.dispose();
 
           // Listen to the URI before checking port forwarder. Port forwarding
@@ -728,17 +682,8 @@ void main() {
               completer.complete();
             }
           });
-          final Future<void> task = createTestCommandRunner(
-            AttachCommand(
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
-            ),
-          ).run(<String>['attach']);
+          final Future<void> task = createTestCommandRunner(createAttachCommand())
+              .run(<String>['attach']);
           await completer.future;
 
           expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
@@ -772,17 +717,7 @@ void main() {
           };
           testDeviceManager.devices = <Device>[device];
           expect(
-            () => createTestCommandRunner(
-              AttachCommand(
-                stdio: stdio,
-                logger: logger,
-                terminal: terminal,
-                signals: signals,
-                platform: platform,
-                processInfo: processInfo,
-                fileSystem: testFileSystem,
-              ),
-            ).run(<String>['attach']),
+            () => createTestCommandRunner(createAttachCommand()).run(<String>['attach']),
             throwsToolExit(),
           );
         },
@@ -822,16 +757,7 @@ void main() {
 
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-          final command = AttachCommand(
-            hotRunnerFactory: hotRunnerFactory,
-            stdio: stdio,
-            logger: logger,
-            terminal: terminal,
-            signals: signals,
-            platform: platform,
-            processInfo: processInfo,
-            fileSystem: testFileSystem,
-          );
+          final AttachCommand command = createAttachCommand(hotRunnerFactory: hotRunnerFactory);
           await createTestCommandRunner(command).run(<String>[
             'attach',
             '--filesystem-scheme',
@@ -870,15 +796,7 @@ void main() {
         () async {
           testDeviceManager.devices = <Device>[device];
 
-          final command = AttachCommand(
-            stdio: stdio,
-            logger: logger,
-            terminal: terminal,
-            signals: signals,
-            platform: platform,
-            processInfo: processInfo,
-            fileSystem: testFileSystem,
-          );
+          final AttachCommand command = createAttachCommand();
           await expectLater(
             createTestCommandRunner(command).run(<String>['attach', '--ipv6']),
             throwsToolExit(
@@ -927,18 +845,8 @@ void main() {
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-          await createTestCommandRunner(
-            AttachCommand(
-              hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
-            ),
-          ).run(<String>['attach', '--ipv6']);
+          await createTestCommandRunner(createAttachCommand(hotRunnerFactory: hotRunnerFactory))
+              .run(<String>['attach', '--ipv6']);
           await completer.future;
 
           expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
@@ -979,15 +887,7 @@ void main() {
           };
           testDeviceManager.devices = <Device>[device];
 
-          final command = AttachCommand(
-            stdio: stdio,
-            logger: logger,
-            terminal: terminal,
-            signals: signals,
-            platform: platform,
-            processInfo: processInfo,
-            fileSystem: testFileSystem,
-          );
+          final AttachCommand command = createAttachCommand();
           await expectLater(
             createTestCommandRunner(command).run(<String>['attach', '--vm-service-port', '100']),
             throwsToolExit(
@@ -1034,17 +934,8 @@ void main() {
               completer.complete();
             }
           });
-          final Future<void> task = createTestCommandRunner(
-            AttachCommand(
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
-            ),
-          ).run(<String>['attach', '--debug-port', '$devicePort']);
+          final Future<void> task = createTestCommandRunner(createAttachCommand())
+              .run(<String>['attach', '--debug-port', '$devicePort']);
           await completer.future;
 
           expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
@@ -1079,17 +970,8 @@ void main() {
               completer.complete();
             }
           });
-          final Future<void> task = createTestCommandRunner(
-            AttachCommand(
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
-            ),
-          ).run(<String>['attach', '--debug-port', '$devicePort', '--ipv6']);
+          final Future<void> task = createTestCommandRunner(createAttachCommand())
+              .run(<String>['attach', '--debug-port', '$devicePort', '--ipv6']);
           await completer.future;
 
           expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
@@ -1124,27 +1006,16 @@ void main() {
               completer.complete();
             }
           });
-          final Future<void> task =
-              createTestCommandRunner(
-                AttachCommand(
-                  stdio: stdio,
-                  logger: logger,
-                  terminal: terminal,
-                  signals: signals,
-                  platform: platform,
-                  processInfo: processInfo,
-                  fileSystem: testFileSystem,
-                ),
-              ).run(<String>[
-                'attach',
-                '--debug-port',
-                '$devicePort',
-                '--vm-service-port',
-                '$hostPort',
-                // Ensure DDS doesn't use hostPort by binding to a random port.
-                '--dds-port',
-                '0',
-              ]);
+          final Future<void> task = createTestCommandRunner(createAttachCommand()).run(<String>[
+            'attach',
+            '--debug-port',
+            '$devicePort',
+            '--vm-service-port',
+            '$hostPort',
+            // Ensure DDS doesn't use hostPort by binding to a random port.
+            '--dds-port',
+            '0',
+          ]);
           await completer.future;
 
           expect(portForwarder.forwardedPorts, isEmpty);
@@ -1175,28 +1046,17 @@ void main() {
               completer.complete();
             }
           });
-          final Future<void> task =
-              createTestCommandRunner(
-                AttachCommand(
-                  stdio: stdio,
-                  logger: logger,
-                  terminal: terminal,
-                  signals: signals,
-                  platform: platform,
-                  processInfo: processInfo,
-                  fileSystem: testFileSystem,
-                ),
-              ).run(<String>[
-                'attach',
-                '--debug-port',
-                '$devicePort',
-                '--vm-service-port',
-                '$hostPort',
-                '--ipv6',
-                // Ensure DDS doesn't use hostPort by binding to a random port.
-                '--dds-port',
-                '0',
-              ]);
+          final Future<void> task = createTestCommandRunner(createAttachCommand()).run(<String>[
+            'attach',
+            '--debug-port',
+            '$devicePort',
+            '--vm-service-port',
+            '$hostPort',
+            '--ipv6',
+            // Ensure DDS doesn't use hostPort by binding to a random port.
+            '--dds-port',
+            '0',
+          ]);
           await completer.future;
 
           expect(portForwarder.forwardedPorts, isEmpty);
@@ -1216,15 +1076,7 @@ void main() {
     testUsingContext(
       'exits when no device connected',
       () async {
-        final command = AttachCommand(
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        );
+        final AttachCommand command = createAttachCommand();
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach']),
           throwsToolExit(),
@@ -1244,17 +1096,8 @@ void main() {
         final device = FakeIOSDevice();
         testDeviceManager.devices = <Device>[device];
         expect(
-          createTestCommandRunner(
-            AttachCommand(
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
-            ),
-          ).run(<String>['attach', '--device-user', '10']),
+          createTestCommandRunner(createAttachCommand())
+              .run(<String>['attach', '--device-user', '10']),
           throwsToolExit(message: '--device-user is only supported for Android'),
         );
       },
@@ -1268,15 +1111,7 @@ void main() {
     testUsingContext(
       'exits when multiple devices connected',
       () async {
-        final command = AttachCommand(
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        );
+        final AttachCommand command = createAttachCommand();
         testDeviceManager.devices = <Device>[
           FakeAndroidDevice(id: 'xx1'),
           FakeAndroidDevice(id: 'yy2'),
@@ -1323,16 +1158,7 @@ void main() {
         testDeviceManager.devices = <Device>[device];
         testFileSystem.file('lib/main.dart').createSync();
 
-        final command = AttachCommand(
-          hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        );
+        final AttachCommand command = createAttachCommand(hotRunnerFactory: hotRunnerFactory);
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach']),
           throwsToolExit(message: 'Lost connection to device.'),
@@ -1370,16 +1196,7 @@ void main() {
         testDeviceManager.devices = <Device>[device];
         testFileSystem.file('lib/main.dart').createSync();
 
-        final command = AttachCommand(
-          hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        );
+        final AttachCommand command = createAttachCommand(hotRunnerFactory: hotRunnerFactory);
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach']),
           throwsToolExit(message: 'Lost connection to device.'),
@@ -1417,16 +1234,7 @@ void main() {
         testDeviceManager.devices = <Device>[device];
         testFileSystem.file('lib/main.dart').createSync();
 
-        final command = AttachCommand(
-          hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        );
+        final AttachCommand command = createAttachCommand(hotRunnerFactory: hotRunnerFactory);
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach']),
           throwsToolExit(message: 'Lost connection to device.'),
@@ -1465,16 +1273,7 @@ void main() {
         testDeviceManager.devices = <Device>[device];
         testFileSystem.file('lib/main.dart').createSync();
 
-        final command = AttachCommand(
-          hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        );
+        final AttachCommand command = createAttachCommand(hotRunnerFactory: hotRunnerFactory);
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach']),
           throwsA(isA<vm_service.RPCError>()),
@@ -1514,16 +1313,7 @@ void main() {
         testDeviceManager.devices = <Device>[device];
         testFileSystem.file('lib/main.dart').createSync();
 
-        final command = AttachCommand(
-          hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        );
+        final AttachCommand command = createAttachCommand(hotRunnerFactory: hotRunnerFactory);
         await createTestCommandRunner(command).run(<String>['attach', '--verbose']);
 
         // Ensure `HotRunner.attach` was only called once.
@@ -1549,17 +1339,7 @@ void main() {
           final device = FakeIOSSimulator();
           testDeviceManager.devices = <Device>[device];
           FakeAsync().run((FakeAsync fakeAsync) {
-            createTestCommandRunner(
-              AttachCommand(
-                stdio: stdio,
-                logger: logger,
-                terminal: terminal,
-                signals: signals,
-                platform: platform,
-                processInfo: processInfo,
-                fileSystem: testFileSystem,
-              ),
-            ).run(<String>['attach']);
+            createTestCommandRunner(createAttachCommand()).run(<String>['attach']);
 
             logger.expectedWarning =
                 'The Dart VM Service was not discovered after 30 seconds. '

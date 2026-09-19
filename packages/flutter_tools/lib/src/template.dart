@@ -13,6 +13,7 @@ import 'base/logger.dart';
 import 'base/template.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
+import 'globals.dart' as globals;
 
 /// The Kotlin keywords which are not Java keywords.
 /// They are escaped in Kotlin files.
@@ -22,12 +23,17 @@ const kReservedKotlinKeywords = <String>['when', 'in', 'is'];
 
 /// Provides the path where templates used by flutter_tools are stored.
 class TemplatePathProvider {
-  const TemplatePathProvider();
+  const TemplatePathProvider({this._cache, this._flutterRoot});
+
+  final Cache? _cache;
+  final String? _flutterRoot;
+
+  String get _flutterRootPath => _flutterRoot ?? _cache?.flutterRoot ?? globals.cache.flutterRoot;
 
   /// Returns the directory containing the 'name' template directory.
   Directory directoryInPackage(String name, FileSystem fileSystem) {
     final String templatesDir = fileSystem.path.join(
-      Cache.flutterRoot!,
+      _flutterRootPath,
       'packages',
       'flutter_tools',
       'templates',
@@ -40,7 +46,7 @@ class TemplatePathProvider {
   /// if 'name' is null, return the parent template directory.
   Future<Directory> imageDirectory(String? name, FileSystem fileSystem, Logger logger) async {
     final String toolPackagePath = fileSystem.path.join(
-      Cache.flutterRoot!,
+      _flutterRootPath,
       'packages',
       'flutter_tools',
     );
@@ -63,7 +69,7 @@ class TemplatePathProvider {
 }
 
 TemplatePathProvider get templatePathProvider =>
-    context.get<TemplatePathProvider>() ?? const TemplatePathProvider();
+    context.get<TemplatePathProvider>() ?? TemplatePathProvider(cache: globals.cache);
 
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the `.tmpl` extension. All files

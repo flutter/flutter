@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -19,12 +20,13 @@ void main() {
     () async {
       final logger = BufferLogger.test();
       final service = WebDriverService(
-        logger: logger,
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
-        processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.empty()),
         dartSdkPath: 'dart',
+        fileSystem: MemoryFileSystem.test(),
+        logger: logger,
+        outputPreferences: OutputPreferences.test(),
+        platform: FakePlatform(),
+        processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.empty()),
+        terminal: Terminal.test(),
       );
       const link = 'https://flutter.dev/to/integration-test-on-web';
       try {

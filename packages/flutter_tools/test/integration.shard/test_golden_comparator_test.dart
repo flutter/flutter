@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/test/test_golden_comparator.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import 'test_data/integration_tests_project.dart';
 
 /// Tests that [`TestGoldenComparator`] is working end-to-end-ish.
@@ -67,13 +68,12 @@ void main() {
         packageConfigPath: packageConfig.path,
       ),
       project,
+      toolContext: DelegatingToolContext(),
     );
     return TestGoldenComparator(
-      flutterTesterBinPath: globals.artifacts!.getArtifactPath(Artifact.flutterTester),
       compilerFactory: () => compiler,
-      logger: logger,
-      fileSystem: globals.fs,
-      processManager: globals.processManager,
+      flutterTesterBinPath: globals.artifacts!.getArtifactPath(Artifact.flutterTester),
+      toolContext: DelegatingToolContext(logger: logger),
     );
   }
 
