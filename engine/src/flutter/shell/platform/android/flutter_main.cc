@@ -142,7 +142,7 @@ bool FlutterMain::IsEmbedderAPIEnabled() {
   if (g_flutter_main) {
     return g_flutter_main->GetSettings().enable_embedder_api;
   }
-  return false;
+  return true;
 }
 
 void FlutterMain::SetEmbedderAPIEnabledForTesting(bool enabled) {

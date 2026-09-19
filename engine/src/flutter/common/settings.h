@@ -357,7 +357,11 @@ struct Settings {
   size_t resource_cache_max_bytes_threshold = 0;
 
   /// Enable embedder API on platforms that support it (iOS and Android).
+#if defined(FML_OS_ANDROID)
+  bool enable_embedder_api = true;
+#else
   bool enable_embedder_api = false;
+#endif
 
   /// Enable support for isolates that run on the platform thread.
   ///
