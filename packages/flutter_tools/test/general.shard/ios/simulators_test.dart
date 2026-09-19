@@ -458,6 +458,91 @@ void main() {
     });
   });
 
+  group('Simulator screen recording', () {
+    testWithoutContext('supports screen recording and records video successfully', () async {
+      final xcode = Xcode.test(processManager: FakeProcessManager.any());
+      final Logger logger = BufferLogger.test();
+      final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'simctl',
+            'io',
+            'x',
+            'recordVideo',
+            '--codec',
+            'h264',
+            '--force',
+            'recording.mp4',
+          ],
+          stderr: 'Recording started\n',
+        ),
+      ]);
+
+      final simControl = SimControl(
+        processManager: fakeProcessManager,
+        logger: logger,
+        xcode: xcode,
+      );
+      final deviceUnderTest = IOSSimulator(
+        'x',
+        cpuArch: CpuArch.x64,
+        name: 'iPhone SE',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+        logger: logger,
+      );
+
+      expect(deviceUnderTest.supportsScreenRecording, isTrue);
+
+      final File recording = MemoryFileSystem.test().file('recording.mp4');
+      await deviceUnderTest.startScreenRecording(recording);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('startScreenRecording throws ToolExit when simctl fails', () async {
+      final xcode = Xcode.test(processManager: FakeProcessManager.any());
+      final Logger logger = BufferLogger.test();
+      final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'simctl',
+            'io',
+            'x',
+            'recordVideo',
+            '--codec',
+            'h264',
+            '--force',
+            'recording.mp4',
+          ],
+          exitCode: 1,
+          stderr: 'simctl record error',
+        ),
+      ]);
+
+      final simControl = SimControl(
+        processManager: fakeProcessManager,
+        logger: logger,
+        xcode: xcode,
+      );
+      final deviceUnderTest = IOSSimulator(
+        'x',
+        cpuArch: CpuArch.x64,
+        name: 'iPhone SE',
+        simControl: simControl,
+        simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
+        logger: logger,
+      );
+
+      final File recording = MemoryFileSystem.test().file('recording.mp4');
+      expect(
+        () => deviceUnderTest.startScreenRecording(recording),
+        throwsToolExit(message: 'Screen recording failed (exit 1): simctl record error'),
+      );
+    });
+  });
+
   group('device log tool', () {
     late FakeProcessManager fakeProcessManager;
     late FakeSimControl simControl;
