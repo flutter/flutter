@@ -380,7 +380,7 @@ String _updateBuildConfigInContent(
   }
   final buffer = StringBuffer();
   var cursor = 0;
-  for (final Match match in matches) {
+  for (final match in matches) {
     if (match.start < cursor) {
       continue;
     }
