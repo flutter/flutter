@@ -191,8 +191,7 @@ void AndroidContextDynamicImpeller::SetupImpellerContext() {
   // DCHECK so this bookkeeping compiles out of release builds along with the
   // assert that consumes it. The store always evaluates to true.
 #ifdef FML_DCHECK_IS_ON
-  setup_thread_id_.store(std::this_thread::get_id(),
-                                     std::memory_order_relaxed));
+  setup_thread_id_.store(std::this_thread::get_id(), std::memory_order_relaxed);
 #endif
   vk_context_ = GetActualRenderingAPIForImpeller(android_get_device_api_level(),
                                                  settings_);
@@ -206,7 +205,7 @@ void AndroidContextDynamicImpeller::SetupImpellerContext() {
   // id and trip the assert in |WaitForSetup| spuriously. After this point the
   // raster thread may freely call |RenderingApi|, which no longer blocks.
 #ifdef FML_DCHECK_IS_ON
-  setup_thread_id_.store(std::thread::id(), std::memory_order_relaxed));
+  setup_thread_id_.store(std::thread::id(), std::memory_order_relaxed);
 #endif
   // Publish the backend selection to any thread blocked in |WaitForSetup|.
   setup_complete_.Signal();
