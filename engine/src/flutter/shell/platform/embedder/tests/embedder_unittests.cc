@@ -11,6 +11,7 @@
 #include "embedder.h"
 #include "embedder_engine.h"
 #include "flutter/common/constants.h"
+#include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/make_copyable.h"
@@ -4314,6 +4315,441 @@ TEST_F(EmbedderTest, PlatformThreadIsolatesWithCustomPlatformTaskRunner) {
 
   // Check that the FFI call was executed on the platform thread.
   ASSERT_EQ(platform_thread_id, ffi_call_thread_id);
+}
+
+TEST_F(EmbedderTest, CustomAssetResolverStructABI) {
+  EXPECT_EQ(sizeof(FlutterAsset), 5 * sizeof(void*));
+  EXPECT_EQ(sizeof(FlutterAsset), sizeof(void*) == 8 ? 40u : 20u);
+  EXPECT_EQ(sizeof(FlutterCustomAssetResolver), 6 * sizeof(void*));
+  EXPECT_EQ(sizeof(FlutterCustomAssetResolver), sizeof(void*) == 8 ? 48u : 24u);
+
+  EXPECT_EQ(offsetof(FlutterAsset, struct_size), 0u);
+  EXPECT_EQ(offsetof(FlutterAsset, data), sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterAsset, size),
+            offsetof(FlutterAsset, data) + sizeof(const uint8_t*));
+  EXPECT_EQ(offsetof(FlutterAsset, user_data),
+            offsetof(FlutterAsset, size) + sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterAsset, asset_free_callback),
+            offsetof(FlutterAsset, user_data) + sizeof(void*));
+
+  EXPECT_EQ(offsetof(FlutterCustomAssetResolver, struct_size), 0u);
+  EXPECT_EQ(offsetof(FlutterCustomAssetResolver, user_data), sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterCustomAssetResolver, find_asset_callback),
+            offsetof(FlutterCustomAssetResolver, user_data) + sizeof(void*));
+  EXPECT_EQ(offsetof(FlutterCustomAssetResolver, is_valid_callback),
+            offsetof(FlutterCustomAssetResolver, find_asset_callback) +
+                sizeof(void*));
+  EXPECT_EQ(
+      offsetof(FlutterCustomAssetResolver, is_valid_after_change_callback),
+      offsetof(FlutterCustomAssetResolver, is_valid_callback) + sizeof(void*));
+  EXPECT_EQ(
+      offsetof(FlutterCustomAssetResolver, destruction_callback),
+      offsetof(FlutterCustomAssetResolver, is_valid_after_change_callback) +
+          sizeof(void*));
+
+  EXPECT_EQ(offsetof(FlutterProjectArgs, custom_asset_resolver),
+            offsetof(FlutterProjectArgs, enable_wide_gamut) + sizeof(void*));
+}
+
+TEST_F(EmbedderTest, CustomAssetResolverProcTableEntry) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+  EXPECT_EQ(procs.UpdateCustomAssetResolver,
+            &FlutterEngineUpdateCustomAssetResolver);
+}
+
+TEST_F(EmbedderTest, CustomAssetResolverInvalidArguments) {
+  FlutterCustomAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterCustomAssetResolver);
+
+  // Null engine handle.
+  EXPECT_EQ(FlutterEngineUpdateCustomAssetResolver(nullptr, &resolver),
+            kInvalidArguments);
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+
+  // Invalid struct_size on FlutterProjectArgs::custom_asset_resolver should
+  // fail initialization.
+  {
+    EmbedderConfigBuilder bad_builder(context);
+    bad_builder.SetSurface(DlISize(1, 1));
+    FlutterCustomAssetResolver bad_init_resolver = {};
+    bad_init_resolver.struct_size = 4;
+    bad_builder.GetProjectArgs().custom_asset_resolver = &bad_init_resolver;
+    auto bad_engine = bad_builder.InitializeEngine();
+    EXPECT_FALSE(bad_engine.is_valid());
+  }
+
+  // is_valid_callback returning false during initialization should fail
+  // initialization and invoke destruction_callback.
+  {
+    std::atomic<int> destroyed{0};
+    EmbedderConfigBuilder invalid_builder(context);
+    invalid_builder.SetSurface(DlISize(1, 1));
+    FlutterCustomAssetResolver invalid_init_resolver = {};
+    invalid_init_resolver.struct_size = sizeof(FlutterCustomAssetResolver);
+    invalid_init_resolver.user_data = &destroyed;
+    invalid_init_resolver.is_valid_callback = [](void*) -> bool {
+      return false;
+    };
+    invalid_init_resolver.destruction_callback = [](void* user_data) {
+      (*static_cast<std::atomic<int>*>(user_data))++;
+    };
+    invalid_builder.GetProjectArgs().custom_asset_resolver =
+        &invalid_init_resolver;
+    auto invalid_engine = invalid_builder.InitializeEngine();
+    EXPECT_FALSE(invalid_engine.is_valid());
+    EXPECT_EQ(destroyed.load(), 1);
+  }
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Null resolver pointer.
+  EXPECT_EQ(FlutterEngineUpdateCustomAssetResolver(engine.get(), nullptr),
+            kInvalidArguments);
+
+  // Invalid struct_size.
+  FlutterCustomAssetResolver bad_size_resolver = {};
+  bad_size_resolver.struct_size = 4;
+  EXPECT_EQ(
+      FlutterEngineUpdateCustomAssetResolver(engine.get(), &bad_size_resolver),
+      kInvalidArguments);
+
+  // is_valid_callback returning false should return kInvalidArguments and
+  // invoke destruction_callback.
+  std::atomic<int> update_destroyed{0};
+  FlutterCustomAssetResolver invalid_update_resolver = {};
+  invalid_update_resolver.struct_size = sizeof(FlutterCustomAssetResolver);
+  invalid_update_resolver.user_data = &update_destroyed;
+  invalid_update_resolver.is_valid_callback = [](void*) -> bool {
+    return false;
+  };
+  invalid_update_resolver.destruction_callback = [](void* user_data) {
+    (*static_cast<std::atomic<int>*>(user_data))++;
+  };
+  EXPECT_EQ(FlutterEngineUpdateCustomAssetResolver(engine.get(),
+                                                   &invalid_update_resolver),
+            kInvalidArguments);
+  EXPECT_EQ(update_destroyed.load(), 1);
+
+  engine.reset();
+  PersistentCache::SetAssetManager(nullptr);
+}
+
+TEST_F(EmbedderTest, CustomAssetResolverLifecycleAndUpdate) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent isolate_latch;
+  context.AddIsolateCreateCallback(
+      [&isolate_latch]() { isolate_latch.Signal(); });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+
+  struct ResolverState {
+    std::atomic<int> is_valid_calls{0};
+    std::atomic<int> find_asset_calls{0};
+    std::atomic<int> asset_free_calls{0};
+    std::atomic<int> destruction_calls{0};
+    fml::AutoResetWaitableEvent destroyed_latch;
+  };
+
+  static constexpr const char kInitialPayload[] = "hello world";
+  static constexpr const char kUpdatedPayload[] = "updated asset";
+
+  ResolverState initial_state;
+  FlutterCustomAssetResolver initial_resolver = {};
+  initial_resolver.struct_size = sizeof(FlutterCustomAssetResolver);
+  initial_resolver.user_data = &initial_state;
+  initial_resolver.is_valid_callback = [](void* user_data) -> bool {
+    static_cast<ResolverState*>(user_data)->is_valid_calls++;
+    return true;
+  };
+  initial_resolver.find_asset_callback = [](void* user_data,
+                                            const char* asset_name,
+                                            FlutterAsset* asset_out) -> bool {
+    auto* state = static_cast<ResolverState*>(user_data);
+    state->find_asset_calls++;
+    if (std::string(asset_name) == "custom_test_asset.bin") {
+      asset_out->data = reinterpret_cast<const uint8_t*>(kInitialPayload);
+      asset_out->size = sizeof(kInitialPayload) - 1;
+      asset_out->user_data = state;
+      asset_out->asset_free_callback = [](void* free_user_data) {
+        static_cast<ResolverState*>(free_user_data)->asset_free_calls++;
+      };
+      return true;
+    }
+    return false;
+  };
+  initial_resolver.destruction_callback = [](void* user_data) {
+    auto* state = static_cast<ResolverState*>(user_data);
+    state->destruction_calls++;
+    state->destroyed_latch.Signal();
+  };
+
+  builder.GetProjectArgs().custom_asset_resolver = &initial_resolver;
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Wait for the root isolate to launch on the UI thread so that
+  // RunConfiguration has transferred ownership of initial_resolver to Engine.
+  isolate_latch.Wait();
+
+  EXPECT_GT(initial_state.is_valid_calls.load(), 0);
+  EXPECT_EQ(initial_state.destruction_calls.load(), 0);
+
+  // Verify asset resolution and asset_free_callback invocation through the
+  // engine's AssetManager on the UI thread.
+  auto* embedder_engine =
+      reinterpret_cast<flutter::EmbedderEngine*>(engine.get());
+  fml::AutoResetWaitableEvent mapping_latch;
+  embedder_engine->GetTaskRunners().GetUITaskRunner()->PostTask([&]() {
+    auto asset_manager =
+        embedder_engine->GetShell().GetEngine()->GetAssetManager();
+    ASSERT_NE(asset_manager, nullptr);
+    auto mapping = asset_manager->GetAsMapping("custom_test_asset.bin");
+    ASSERT_NE(mapping, nullptr);
+    EXPECT_FALSE(mapping->IsDontNeedSafe());
+    EXPECT_EQ(mapping->GetSize(), sizeof(kInitialPayload) - 1);
+    EXPECT_EQ(memcmp(mapping->GetMapping(), kInitialPayload,
+                     sizeof(kInitialPayload) - 1),
+              0);
+    EXPECT_EQ(initial_state.asset_free_calls.load(), 0);
+    mapping.reset();
+    EXPECT_EQ(initial_state.asset_free_calls.load(), 1);
+    mapping_latch.Signal();
+  });
+  mapping_latch.Wait();
+  EXPECT_GT(initial_state.find_asset_calls.load(), 0);
+
+  // Update the custom asset resolver at runtime and verify the initial
+  // resolver is destroyed upon replacement on the UI thread.
+  ResolverState updated_state;
+  FlutterCustomAssetResolver updated_resolver = {};
+  updated_resolver.struct_size = sizeof(FlutterCustomAssetResolver);
+  updated_resolver.user_data = &updated_state;
+  updated_resolver.is_valid_callback = [](void* user_data) -> bool {
+    static_cast<ResolverState*>(user_data)->is_valid_calls++;
+    return true;
+  };
+  updated_resolver.find_asset_callback = [](void* user_data,
+                                            const char* asset_name,
+                                            FlutterAsset* asset_out) -> bool {
+    auto* state = static_cast<ResolverState*>(user_data);
+    state->find_asset_calls++;
+    if (std::string(asset_name) == "updated_test_asset.bin") {
+      asset_out->data = reinterpret_cast<const uint8_t*>(kUpdatedPayload);
+      asset_out->size = sizeof(kUpdatedPayload) - 1;
+      asset_out->user_data = state;
+      asset_out->asset_free_callback = [](void* free_user_data) {
+        static_cast<ResolverState*>(free_user_data)->asset_free_calls++;
+      };
+      return true;
+    }
+    return false;
+  };
+  updated_resolver.destruction_callback = [](void* user_data) {
+    auto* state = static_cast<ResolverState*>(user_data);
+    state->destruction_calls++;
+    state->destroyed_latch.Signal();
+  };
+
+  ASSERT_EQ(
+      FlutterEngineUpdateCustomAssetResolver(engine.get(), &updated_resolver),
+      kSuccess);
+  initial_state.destroyed_latch.Wait();
+  EXPECT_EQ(initial_state.destruction_calls.load(), 1);
+  EXPECT_EQ(updated_state.destruction_calls.load(), 0);
+
+  // Verify the updated resolver resolves new assets and the old asset is no
+  // longer resolved by the custom resolver.
+  fml::AutoResetWaitableEvent updated_mapping_latch;
+  embedder_engine->GetTaskRunners().GetUITaskRunner()->PostTask([&]() {
+    auto asset_manager =
+        embedder_engine->GetShell().GetEngine()->GetAssetManager();
+    ASSERT_NE(asset_manager, nullptr);
+    EXPECT_EQ(asset_manager->GetAsMapping("custom_test_asset.bin"), nullptr);
+    auto mapping = asset_manager->GetAsMapping("updated_test_asset.bin");
+    ASSERT_NE(mapping, nullptr);
+    EXPECT_FALSE(mapping->IsDontNeedSafe());
+    EXPECT_EQ(mapping->GetSize(), sizeof(kUpdatedPayload) - 1);
+    mapping.reset();
+    EXPECT_EQ(updated_state.asset_free_calls.load(), 1);
+    updated_mapping_latch.Signal();
+  });
+  updated_mapping_latch.Wait();
+
+  // Shut down the engine and clear the PersistentCache static AssetManager
+  // reference so the AssetManager and updated_resolver are destroyed.
+  engine.reset();
+  PersistentCache::SetAssetManager(nullptr);
+  updated_state.destroyed_latch.Wait();
+  EXPECT_EQ(updated_state.destruction_calls.load(), 1);
+}
+
+TEST_F(EmbedderTest, CustomAssetResolverEdgeCasesAndDeferredDestruction) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent isolate_latch;
+  context.AddIsolateCreateCallback(
+      [&isolate_latch]() { isolate_latch.Signal(); });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+
+  struct EdgeCaseState {
+    std::atomic<int> is_valid_after_change_calls{0};
+    std::atomic<int> asset_free_calls{0};
+    std::atomic<int> destruction_calls{0};
+    std::atomic<int> asset_free_order{0};
+    std::atomic<int> destruction_order{0};
+    std::atomic<int> sequence{0};
+    fml::AutoResetWaitableEvent destroyed_latch;
+  };
+
+  static constexpr const uint8_t kAssetBytes[] = {0x01, 0x02, 0x03};
+
+  EdgeCaseState state_a;
+  FlutterCustomAssetResolver resolver_a = {};
+  resolver_a.struct_size = sizeof(FlutterCustomAssetResolver);
+  resolver_a.user_data = &state_a;
+  resolver_a.is_valid_after_change_callback = [](void* user_data) -> bool {
+    static_cast<EdgeCaseState*>(user_data)->is_valid_after_change_calls++;
+    return true;
+  };
+  resolver_a.find_asset_callback = [](void* user_data, const char* asset_name,
+                                      FlutterAsset* asset_out) -> bool {
+    auto* state = static_cast<EdgeCaseState*>(user_data);
+    std::string name(asset_name);
+    if (name == "valid_asset.bin") {
+      asset_out->data = kAssetBytes;
+      asset_out->size = sizeof(kAssetBytes);
+      asset_out->user_data = state;
+      asset_out->asset_free_callback = [](void* free_user_data) {
+        auto* s = static_cast<EdgeCaseState*>(free_user_data);
+        s->asset_free_calls++;
+        s->asset_free_order = ++s->sequence;
+      };
+      return true;
+    }
+    if (name == "empty_asset.bin") {
+      asset_out->data = nullptr;
+      asset_out->size = 0;
+      asset_out->user_data = state;
+      asset_out->asset_free_callback = [](void* free_user_data) {
+        static_cast<EdgeCaseState*>(free_user_data)->asset_free_calls++;
+      };
+      return true;
+    }
+    if (name == "null_data_nonzero_size.bin") {
+      asset_out->data = nullptr;
+      asset_out->size = 10;
+      asset_out->user_data = state;
+      asset_out->asset_free_callback = [](void* free_user_data) {
+        static_cast<EdgeCaseState*>(free_user_data)->asset_free_calls++;
+      };
+      return true;
+    }
+    if (name == "failed_with_free_cb.bin") {
+      asset_out->user_data = state;
+      asset_out->asset_free_callback = [](void* free_user_data) {
+        static_cast<EdgeCaseState*>(free_user_data)->asset_free_calls++;
+      };
+      return false;
+    }
+    return false;
+  };
+  resolver_a.destruction_callback = [](void* user_data) {
+    auto* state = static_cast<EdgeCaseState*>(user_data);
+    state->destruction_calls++;
+    state->destruction_order = ++state->sequence;
+    state->destroyed_latch.Signal();
+  };
+
+  builder.GetProjectArgs().custom_asset_resolver = &resolver_a;
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  isolate_latch.Wait();
+
+  auto* embedder_engine =
+      reinterpret_cast<flutter::EmbedderEngine*>(engine.get());
+
+  // Hold a mapping from resolver_a across a resolver replacement to test that
+  // destruction_callback is deferred until the mapping is freed.
+  std::unique_ptr<fml::Mapping> held_mapping;
+  fml::AutoResetWaitableEvent check_latch;
+  embedder_engine->GetTaskRunners().GetUITaskRunner()->PostTask([&]() {
+    auto asset_manager =
+        embedder_engine->GetShell().GetEngine()->GetAssetManager();
+    ASSERT_NE(asset_manager, nullptr);
+
+    // 1. Failed lookup with asset_free_callback set must invoke free callback.
+    EXPECT_EQ(state_a.asset_free_calls.load(), 0);
+    EXPECT_EQ(asset_manager->GetAsMapping("failed_with_free_cb.bin"), nullptr);
+    EXPECT_EQ(state_a.asset_free_calls.load(), 1);
+
+    // 2. Null data with non-zero size must return nullptr and invoke free
+    // callback.
+    EXPECT_EQ(asset_manager->GetAsMapping("null_data_nonzero_size.bin"),
+              nullptr);
+    EXPECT_EQ(state_a.asset_free_calls.load(), 2);
+
+    // 3. Empty asset (data == nullptr, size == 0) must return valid non-null
+    // GetMapping() and size 0.
+    auto empty_mapping = asset_manager->GetAsMapping("empty_asset.bin");
+    ASSERT_NE(empty_mapping, nullptr);
+    EXPECT_EQ(empty_mapping->GetSize(), 0u);
+    EXPECT_NE(empty_mapping->GetMapping(), nullptr);
+    empty_mapping.reset();
+    EXPECT_EQ(state_a.asset_free_calls.load(), 3);
+
+    // 4. Acquire a mapping to hold across resolver replacement.
+    held_mapping = asset_manager->GetAsMapping("valid_asset.bin");
+    ASSERT_NE(held_mapping, nullptr);
+    check_latch.Signal();
+  });
+  check_latch.Wait();
+
+  // Replace resolver_a with resolver_b while held_mapping is still alive.
+  EdgeCaseState state_b;
+  FlutterCustomAssetResolver resolver_b = {};
+  resolver_b.struct_size = sizeof(FlutterCustomAssetResolver);
+  resolver_b.user_data = &state_b;
+  resolver_b.destruction_callback = [](void* user_data) {
+    auto* state = static_cast<EdgeCaseState*>(user_data);
+    state->destruction_calls++;
+    state->destroyed_latch.Signal();
+  };
+
+  ASSERT_EQ(FlutterEngineUpdateCustomAssetResolver(engine.get(), &resolver_b),
+            kSuccess);
+
+  // Sync with the UI thread to ensure UpdateResolverByType has executed.
+  fml::AutoResetWaitableEvent ui_sync_latch;
+  embedder_engine->GetTaskRunners().GetUITaskRunner()->PostTask(
+      [&]() { ui_sync_latch.Signal(); });
+  ui_sync_latch.Wait();
+
+  // Because held_mapping is still alive, resolver_a's destruction_callback MUST
+  // NOT have been called yet!
+  EXPECT_EQ(state_a.destruction_calls.load(), 0);
+
+  // Now destroy held_mapping: asset_free_callback must run strictly BEFORE
+  // destruction_callback.
+  held_mapping.reset();
+  state_a.destroyed_latch.Wait();
+  EXPECT_EQ(state_a.asset_free_calls.load(), 4);
+  EXPECT_EQ(state_a.destruction_calls.load(), 1);
+  EXPECT_LT(state_a.asset_free_order.load(), state_a.destruction_order.load());
+
+  engine.reset();
+  PersistentCache::SetAssetManager(nullptr);
+  state_b.destroyed_latch.Wait();
+  EXPECT_EQ(state_b.destruction_calls.load(), 1);
 }
 
 }  // namespace testing
