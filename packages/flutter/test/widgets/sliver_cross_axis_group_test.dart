@@ -715,6 +715,126 @@ void main() {
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-20.0));
   });
 
+  testWidgets(
+    'Pinned SliverPersistentHeader in SliverCrossAxisGroup is not covered by a preceding pinned sliver',
+    (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      var tapCount = 0;
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: VIEWPORT_HEIGHT,
+              width: VIEWPORT_WIDTH,
+              child: CustomScrollView(
+                controller: controller,
+                slivers: <Widget>[
+                  SliverPersistentHeader(
+                    delegate: TestDelegate(minExtent: 50.0, maxExtent: 50.0),
+                    pinned: true,
+                  ),
+                  SliverCrossAxisGroup(
+                    slivers: <Widget>[
+                      SliverPersistentHeader(
+                        delegate: TestDelegate(
+                          minExtent: 30.0,
+                          maxExtent: 30.0,
+                          onTap: () => tapCount += 1,
+                        ),
+                        pinned: true,
+                      ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      controller.jumpTo(500.0);
+      await tester.pumpAndSettle();
+
+      final List<RenderSliverPersistentHeader> headers = tester
+          .renderObjectList<RenderSliverPersistentHeader>(find.byType(SliverPersistentHeader))
+          .toList();
+      final RenderSliverPersistentHeader header = headers.last;
+      // The preceding pinned sliver takes up 50.0 of overlap, so the pinned
+      // header inside the group has to be painted below it.
+      expect(header.geometry!.paintOrigin, equals(50.0));
+      expect(header.geometry!.paintExtent, equals(30.0));
+      expect((header.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(50.0));
+      expect(tester.getTopLeft(find.byType(Container).last).dy, equals(50.0));
+
+      // The header is hit testable where it is painted, and not where the
+      // preceding pinned sliver is painted.
+      await tester.tapAt(const Offset(50.0, 60.0));
+      await tester.pump();
+      expect(tapCount, equals(1));
+      await tester.tapAt(const Offset(50.0, 20.0));
+      await tester.pump();
+      expect(tapCount, equals(1));
+    },
+  );
+
+  testWidgets(
+    'Pinned SliverPersistentHeader in SliverCrossAxisGroup is not covered by a preceding pinned sliver when reversed',
+    (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: VIEWPORT_HEIGHT,
+              width: VIEWPORT_WIDTH,
+              child: CustomScrollView(
+                controller: controller,
+                reverse: true,
+                slivers: <Widget>[
+                  SliverPersistentHeader(
+                    delegate: TestDelegate(minExtent: 50.0, maxExtent: 50.0),
+                    pinned: true,
+                  ),
+                  SliverCrossAxisGroup(
+                    slivers: <Widget>[
+                      SliverPersistentHeader(
+                        delegate: TestDelegate(minExtent: 30.0, maxExtent: 30.0),
+                        pinned: true,
+                      ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      controller.jumpTo(500.0);
+      await tester.pumpAndSettle();
+
+      final List<RenderSliverPersistentHeader> headers = tester
+          .renderObjectList<RenderSliverPersistentHeader>(find.byType(SliverPersistentHeader))
+          .toList();
+      final RenderSliverPersistentHeader header = headers.last;
+      expect(header.geometry!.paintOrigin, equals(50.0));
+      // The pinned sliver is pinned to the bottom of the viewport, so the
+      // header inside the group sits right above it.
+      expect(
+        (header.parentData! as SliverPhysicalParentData).paintOffset.dy,
+        equals(VIEWPORT_HEIGHT - 50.0 - 30.0),
+      );
+      expect(
+        tester.getTopLeft(find.byType(Container).last).dy,
+        equals(VIEWPORT_HEIGHT - 50.0 - 30.0),
+      );
+    },
+  );
+
   testWidgets('SliverFloatingPersistentHeader is painted within bounds of SliverCrossAxisGroup', (
     WidgetTester tester,
   ) async {
@@ -1212,7 +1332,7 @@ Widget _buildSliverCrossAxisGroup({
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
-  TestDelegate({this.maxExtent = 60.0, this.minExtent = 60.0});
+  TestDelegate({this.maxExtent = 60.0, this.minExtent = 60.0, this.onTap});
 
   @override
   final double maxExtent;
@@ -1220,9 +1340,15 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
   @override
   final double minExtent;
 
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(height: maxExtent);
+    final Widget child = Container(height: maxExtent);
+    if (onTap == null) {
+      return child;
+    }
+    return GestureDetector(behavior: HitTestBehavior.opaque, onTap: onTap, child: child);
   }
 
   @override
