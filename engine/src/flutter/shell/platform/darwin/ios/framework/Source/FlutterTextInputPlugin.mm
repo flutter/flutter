@@ -826,6 +826,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   CGPoint _floatingCursorOffset;
   bool _enableInteractiveSelection;
   UITextInteraction* _textInteraction API_AVAILABLE(ios(13.0));
+  // The text input client this view last reported a closed connection for, or 0.
+  // See -becomeFirstResponder.
+  int _clientWithClosedConnection;
 }
 
 @synthesize tokenizer = _tokenizer;
@@ -837,6 +840,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     _textInputClient = 0;
     _selectionAffinity = kTextAffinityUpstream;
     _preventCursorDismissWhenResignFirstResponder = NO;
+    _clientWithClosedConnection = 0;
 
     // UITextInput
     _text = [[NSMutableString alloc] init];
@@ -1180,6 +1184,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)setTextInputClient:(int)client {
+  _clientWithClosedConnection = 0;
   _textInputClient = client;
   _hasPlaceholder = NO;
 }
@@ -1352,9 +1357,33 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   BOOL success = [super resignFirstResponder];
   if (success) {
     if (!_preventCursorDismissWhenResignFirstResponder) {
+      _clientWithClosedConnection = _textInputClient;
       [self.textInputDelegate flutterTextInputView:self
           didResignFirstResponderWithTextInputClient:_textInputClient];
     }
+  }
+  return success;
+}
+
+- (BOOL)becomeFirstResponder {
+  BOOL success = [super becomeFirstResponder];
+  if (success && _textInputClient != 0 && _clientWithClosedConnection == _textInputClient) {
+    // iOS takes first responder away from this view while system UI that handles
+    // text itself is up -- most notably the AutoFill sheets ("Hide My Email",
+    // password AutoFill) -- and gives it back once that UI is dismissed, at
+    // which point it inserts the text the user picked.
+    //
+    // The resignation was reported to the framework as a closed connection,
+    // which unfocused the text field and detached it, so the text would be
+    // discarded on arrival. Now that the same client has focus again, tell the
+    // framework to take the connection back. This message is sent on the same
+    // channel as the editing state updates that follow it, so the connection is
+    // restored before the inserted text arrives.
+    //
+    // See https://github.com/flutter/flutter/issues/157495.
+    _clientWithClosedConnection = 0;
+    [self.textInputDelegate flutterTextInputView:self
+        didReopenFirstResponderWithTextInputClient:_textInputClient];
   }
   return success;
 }

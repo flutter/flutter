@@ -3064,6 +3064,80 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   [self commitAutofillContextAndVerify];
 }
 
+#pragma mark - Connection reopening - Tests
+
+- (FlutterTextInputView*)focusedInputViewWithClient:(int)client {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+  [inputView setTextInputClient:client];
+  [inputView reloadInputViews];
+  XCTAssertTrue([inputView becomeFirstResponder]);
+  XCTAssertTrue(inputView.isFirstResponder);
+  return inputView;
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/157495.
+//
+// iOS takes first responder away while an AutoFill sheet such as "Hide My
+// Email" is up and gives it back when the sheet is dismissed, then inserts the
+// text the user picked. The framework has torn the connection down by then, so
+// it has to be told to take it back before that text arrives.
+- (void)testRegainingFirstResponderReopensTheConnection {
+  FlutterTextInputView* inputView = [self focusedInputViewWithClient:123];
+
+  XCTAssertTrue([inputView resignFirstResponder]);
+  OCMVerify([engine flutterTextInputView:inputView didResignFirstResponderWithTextInputClient:123]);
+
+  XCTAssertTrue([inputView becomeFirstResponder]);
+  OCMVerify([engine flutterTextInputView:inputView didReopenFirstResponderWithTextInputClient:123]);
+
+  [inputView removeFromSuperview];
+}
+
+- (void)testBecomingFirstResponderWithoutAPriorResignDoesNotReopen {
+  FlutterTextInputView* inputView = [self focusedInputViewWithClient:123];
+
+  OCMVerify(never(), [engine flutterTextInputView:inputView
+                         didReopenFirstResponderWithTextInputClient:123]);
+
+  [inputView removeFromSuperview];
+}
+
+- (void)testTheConnectionIsOnlyReopenedOnce {
+  FlutterTextInputView* inputView = [self focusedInputViewWithClient:123];
+
+  XCTAssertTrue([inputView resignFirstResponder]);
+  XCTAssertTrue([inputView becomeFirstResponder]);
+  OCMVerify(times(1), [engine flutterTextInputView:inputView
+                          didReopenFirstResponderWithTextInputClient:123]);
+
+  // Losing and regaining focus again without a new resign report must not
+  // reopen a connection the framework never closed.
+  [inputView resignFirstResponder];
+  [inputView becomeFirstResponder];
+  OCMVerify(times(2), [engine flutterTextInputView:inputView
+                          didReopenFirstResponderWithTextInputClient:123]);
+
+  [inputView removeFromSuperview];
+}
+
+// A new client means the framework attached a fresh connection, so an earlier
+// closed-connection report is stale and must not be reopened.
+- (void)testANewClientDoesNotReopenTheOldConnection {
+  FlutterTextInputView* inputView = [self focusedInputViewWithClient:123];
+
+  XCTAssertTrue([inputView resignFirstResponder]);
+  [inputView setTextInputClient:456];
+  XCTAssertTrue([inputView becomeFirstResponder]);
+
+  OCMVerify(never(), [engine flutterTextInputView:inputView
+                         didReopenFirstResponderWithTextInputClient:456]);
+  OCMVerify(never(), [engine flutterTextInputView:inputView
+                         didReopenFirstResponderWithTextInputClient:123]);
+
+  [inputView removeFromSuperview];
+}
+
 #pragma mark - Accessibility - Tests
 
 - (void)testUITextInputAccessibilityNotHiddenWhenKeyboardIsShownAndHidden {

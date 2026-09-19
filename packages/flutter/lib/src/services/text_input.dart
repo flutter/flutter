@@ -2212,6 +2212,25 @@ class TextInput {
       case 'TextInputClient.scribbleInteractionFinished':
         _scribbleInProgress = false;
         return;
+      case 'TextInputClient.onConnectionReopened':
+        // The platform gave text input focus back to a client whose connection
+        // it had already reported as closed, which happens on iOS when system
+        // UI that handles text itself -- an AutoFill sheet such as "Hide My
+        // Email" -- is dismissed. Take the same connection back instead of
+        // attaching a new one, so the text the platform is about to deliver
+        // still carries a client id this end recognizes.
+        // See https://github.com/flutter/flutter/issues/157495.
+        final args = methodCall.arguments as List<dynamic>;
+        final clientId = args[0] as int;
+        final TextInputConnection? closed = _lastConnection;
+        if (_currentConnection == null && closed != null && closed._id == clientId) {
+          _currentConnection = closed;
+          if (!closed._client.onFocusReceived()) {
+            // The client is gone or refused focus, so leave it detached.
+            _currentConnection = null;
+          }
+        }
+        return;
       case 'TextInputClient.onFocusReceived':
         final args = methodCall.arguments as List<dynamic>;
         final clientId = args[0] as int;
