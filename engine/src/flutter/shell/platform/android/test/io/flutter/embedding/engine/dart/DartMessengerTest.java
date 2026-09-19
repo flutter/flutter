@@ -16,7 +16,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.robolectric.Shadows.shadowOf;
+import static org.robolectric.shadows.ShadowLooper.shadowOf;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterJNI;
