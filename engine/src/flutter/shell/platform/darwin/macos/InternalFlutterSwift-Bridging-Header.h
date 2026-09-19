@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_INTERNALFLUTTERSWIFT_BRIDGING_HEADER_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_INTERNALFLUTTERSWIFT_BRIDGING_HEADER_H_
 
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon-Bridging-Header.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterMacOS.h"
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_INTERNALFLUTTERSWIFT_BRIDGING_HEADER_H_
