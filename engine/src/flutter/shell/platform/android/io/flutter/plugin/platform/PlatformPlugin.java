@@ -14,6 +14,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.view.HapticFeedbackConstants;
@@ -123,6 +124,11 @@ public class PlatformPlugin {
         public void setSystemUiOverlayStyle(
             @NonNull PlatformChannel.SystemChromeStyle systemUiOverlayStyle) {
           setSystemChromeSystemUIOverlayStyle(systemUiOverlayStyle);
+        }
+
+        @Override
+        public void setSystemGestureExclusionRects(@NonNull List<Rect> rects) {
+          PlatformPlugin.this.setSystemGestureExclusionRects(rects);
         }
 
         @Override
@@ -603,6 +609,14 @@ public class PlatformPlugin {
     }
 
     currentTheme = systemChromeStyle;
+  }
+
+  private void setSystemGestureExclusionRects(@NonNull List<Rect> rects) {
+    // System gesture exclusion rects are only supported starting in Android 10 (API 29), which is
+    // also when gesture navigation was introduced.
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
+      activity.getWindow().getDecorView().setSystemGestureExclusionRects(rects);
+    }
   }
 
   private void setFrameworkHandlesBack(boolean frameworkHandlesBack) {

@@ -1053,7 +1053,11 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
       MethodCall methodCall,
     ) async {
-      log.add(methodCall);
+      // Only record haptic feedback, since showing the selection handles also
+      // sends other platform messages, like system gesture exclusion rects.
+      if (methodCall.method == 'HapticFeedback.vibrate') {
+        log.add(methodCall);
+      }
       return null;
     });
     addTearDown(() {
