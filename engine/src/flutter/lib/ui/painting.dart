@@ -9123,7 +9123,7 @@ base class _NativeImageDescriptor extends NativeFieldWrapperClass1 implements Im
     } else if (targetWidth == null && targetHeight != null) {
       targetWidth = (targetHeight * (width / height)).round();
     } else if (targetHeight == null && targetWidth != null) {
-      targetHeight = targetWidth ~/ (width / height);
+      targetHeight = (targetWidth * (height / width)).round();
     }
     assert(targetWidth != null);
     assert(targetHeight != null);
