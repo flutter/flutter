@@ -791,22 +791,29 @@ class AssetsEntry {
     required this.uri,
     this.flavors = const <String>{},
     this.platforms = const <String>{},
+    this.environment = const <String, Set<String>>{},
     this.transformers = const <AssetTransformerEntry>[],
   });
 
   final Uri uri;
   final Set<String> flavors;
   final Set<String> platforms;
+  final Map<String, Set<String>> environment;
   final List<AssetTransformerEntry> transformers;
 
   Object? get descriptor {
-    if (transformers.isEmpty && flavors.isEmpty && platforms.isEmpty) {
+    if (transformers.isEmpty && flavors.isEmpty && platforms.isEmpty && environment.isEmpty) {
       return uri.toString();
     }
     return <String, Object?>{
       _pathKey: uri.toString(),
       if (flavors.isNotEmpty) _flavorKey: flavors.toList(),
       if (platforms.isNotEmpty) _platformsKey: platforms.toList(),
+      if (environment.isNotEmpty)
+        _environmentKey: environment.map(
+          (String key, Set<String> values) =>
+              MapEntry<String, Object>(key, values.length == 1 ? values.single : values.toList()),
+        ),
       if (transformers.isNotEmpty)
         _transformersKey: transformers.map((AssetTransformerEntry e) => e.descriptor).toList(),
     };
@@ -815,7 +822,14 @@ class AssetsEntry {
   static const _pathKey = 'path';
   static const _flavorKey = 'flavors';
   static const _platformsKey = 'platforms';
+  static const _environmentKey = 'environment';
   static const _transformersKey = 'transformers';
+
+  bool matchesEnvironment(Map<String, String> buildEnvironment) {
+    return environment.entries.every(
+      (MapEntry<String, Set<String>> entry) => entry.value.contains(buildEnvironment[entry.key]),
+    );
+  }
 
   static AssetsEntry? parseFromYaml(Object? yaml) {
     final (AssetsEntry? value, String? error) = parseFromYamlSafe(yaml);
@@ -865,12 +879,15 @@ class AssetsEntry {
       final (List<String>? platforms, List<String> platformsErrors) = _parsePlatformsSection(
         yaml[_platformsKey],
       );
+      final (Map<String, Set<String>>? environment, List<String> environmentErrors) =
+          _parseEnvironmentSection(yaml[_environmentKey]);
       final (List<AssetTransformerEntry>? transformers, List<String> transformersErrors) =
           _parseTransformersSection(yaml[_transformersKey]);
 
       final errors = <String>[
         ...flavorsErrors.map((String e) => 'In $_flavorKey section of asset "$path": $e'),
         ...platformsErrors.map((String e) => 'In $_platformsKey section of asset "$path": $e'),
+        ...environmentErrors.map((String e) => 'In $_environmentKey section of asset "$path": $e'),
         ...transformersErrors.map(
           (String e) => 'In $_transformersKey section of asset "$path": $e',
         ),
@@ -884,6 +901,7 @@ class AssetsEntry {
           uri: Uri(pathSegments: path.split('/')),
           flavors: Set<String>.from(flavors ?? <String>[]),
           platforms: Set<String>.from(platforms ?? <String>[]),
+          environment: environment ?? const <String, Set<String>>{},
           transformers: transformers ?? <AssetTransformerEntry>[],
         ),
         null,
@@ -940,6 +958,43 @@ class AssetsEntry {
     return (platforms, errors);
   }
 
+  static (Map<String, Set<String>>?, List<String> errors) _parseEnvironmentSection(Object? yaml) {
+    if (yaml == null) {
+      return (null, <String>[]);
+    }
+    if (yaml is! YamlMap) {
+      return (null, <String>['Expected environment to be a map, but got ${yaml.runtimeType}.']);
+    }
+
+    final environment = <String, Set<String>>{};
+    final errors = <String>[];
+    for (final MapEntry<Object?, Object?> entry in yaml.entries) {
+      final Object? key = entry.key;
+      if (key is! String) {
+        errors.add(
+          'Expected environment variable name to be a String, but got ${key.runtimeType}.',
+        );
+        continue;
+      }
+      final Object? value = entry.value;
+      if (value is String) {
+        environment[key] = <String>{value};
+        continue;
+      }
+      final (List<String>? values, List<String> valueErrors) = _parseList<String>(
+        value,
+        'environment variable "$key"',
+        'String',
+      );
+      if (valueErrors.isNotEmpty) {
+        errors.addAll(valueErrors);
+      } else {
+        environment[key] = values!.toSet();
+      }
+    }
+    return errors.isEmpty ? (environment, errors) : (null, errors);
+  }
+
   static (List<AssetTransformerEntry>?, List<String> errors) _parseTransformersSection(
     Object? yaml,
   ) {
@@ -982,7 +1037,15 @@ class AssetsEntry {
 
     return uri == other.uri &&
         setEquals(flavors, other.flavors) &&
-        setEquals(platforms, other.platforms);
+        setEquals(platforms, other.platforms) &&
+        _environmentEquals(environment, other.environment);
+  }
+
+  static bool _environmentEquals(Map<String, Set<String>> first, Map<String, Set<String>> second) {
+    return first.length == second.length &&
+        first.entries.every(
+          (MapEntry<String, Set<String>> entry) => setEquals(entry.value, second[entry.key]),
+        );
   }
 
   @override
@@ -990,12 +1053,18 @@ class AssetsEntry {
     uri.hashCode,
     Object.hashAllUnordered(flavors),
     Object.hashAllUnordered(platforms),
+    Object.hashAllUnordered(
+      environment.entries.map(
+        (MapEntry<String, Set<String>> entry) =>
+            Object.hash(entry.key, Object.hashAllUnordered(entry.value)),
+      ),
+    ),
     Object.hashAll(transformers),
   ]);
 
   @override
   String toString() =>
-      'AssetsEntry(uri: $uri, flavors: $flavors, platforms: $platforms, transformers: $transformers)';
+      'AssetsEntry(uri: $uri, flavors: $flavors, platforms: $platforms, environment: $environment, transformers: $transformers)';
 }
 
 /// Represents an entry in the "transformers" section of an asset.
