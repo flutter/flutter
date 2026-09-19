@@ -13,14 +13,18 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
+import 'package:flutter_tools/src/isolated/native_assets/test/native_assets.dart';
+import 'package:package_config/package_config_types.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import 'fake_native_assets_build_runner.dart';
 
 void main() {
@@ -512,6 +516,320 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       expect(staleFile, isNot(exists));
     },
   );
+
+  group('testCompilerBuildNativeAssets', () {
+    testUsingContext(
+      'falls back to manifest appName when package root does not match projectUri '
+      '(regression test for https://github.com/flutter/flutter/issues/192933)',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+      () async {
+        final Directory projectDir = fileSystem.directory('/my_app')..createSync(recursive: true);
+        fileSystem.currentDirectory = projectDir;
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_app
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+''');
+
+        // Place 'other_pkg' first in package_config and 'my_app' second with a
+        // non-matching root URI so tier 3 (manifestAppName in packageConfig) is
+        // isolated from tier 4 (first package in packageConfig).
+        final File packageConfigFile = writePackageConfigFiles(
+          directory: projectDir,
+          mainLibName: 'other_pkg',
+          mainLibRootUri: '../other_dir',
+          packages: <String, String>{'my_app': '../different_dir'},
+        );
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          packageConfigFile,
+          logger: logger,
+        );
+
+        expect(
+          findRunPackageName(
+            fileSystem: fileSystem,
+            manifestAppName: 'my_app',
+            packageConfig: packageConfig,
+            projectUri: projectDir.uri,
+          ),
+          'my_app',
+        );
+
+        final buildInfo = BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          packageConfigPath: packageConfigFile.path,
+          packageConfig: packageConfig,
+        );
+
+        final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
+        expect(result, isNotNull);
+        expect(fileSystem.file(result).existsSync(), isTrue);
+      },
+    );
+
+    testUsingContext(
+      'matches package root via canonicalized path when URIs differ',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+      () async {
+        final Directory projectDir = fileSystem.directory('/real_dir')..createSync(recursive: true);
+        final Link symlink = fileSystem.link('/symlink_dir')..createSync('/real_dir');
+        final Directory symlinkDir = fileSystem.directory(symlink.path);
+        fileSystem.currentDirectory = symlinkDir;
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: manifest_pkg
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+''');
+
+        // Use distinct names for the first package ('first_pkg'), the symlinked
+        // package ('symlink_pkg'), and the manifest package ('manifest_pkg') so
+        // only tier 2 (canonicalized path matching) resolves 'symlink_pkg'.
+        final File packageConfigFile = writePackageConfigFiles(
+          directory: projectDir,
+          mainLibName: 'first_pkg',
+          mainLibRootUri: '../first_dir',
+          packages: <String, String>{'symlink_pkg': '.', 'manifest_pkg': '../manifest_dir'},
+        );
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          packageConfigFile,
+          logger: logger,
+        );
+
+        expect(
+          findRunPackageName(
+            fileSystem: fileSystem,
+            manifestAppName: 'manifest_pkg',
+            packageConfig: packageConfig,
+            projectUri: symlinkDir.uri,
+          ),
+          'symlink_pkg',
+        );
+
+        final buildInfo = BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          packageConfigPath: packageConfigFile.path,
+          packageConfig: packageConfig,
+        );
+
+        final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
+        expect(result, isNotNull);
+        expect(fileSystem.file(result).existsSync(), isTrue);
+      },
+    );
+
+    testUsingContext(
+      'falls back to first package in package config when projectUri and manifest do not match',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+      () async {
+        final Directory projectDir = fileSystem.directory('/unmatched_app')
+          ..createSync(recursive: true);
+        fileSystem.currentDirectory = projectDir;
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: unknown_app
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+''');
+
+        final File packageConfigFile = writePackageConfigFiles(
+          directory: projectDir,
+          mainLibName: 'fallback_pkg',
+          mainLibRootUri: '../fallback_pkg',
+          packages: <String, String>{'second_pkg': '../second_pkg'},
+        );
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          packageConfigFile,
+          logger: logger,
+        );
+
+        expect(
+          findRunPackageName(
+            fileSystem: fileSystem,
+            manifestAppName: 'unknown_app',
+            packageConfig: packageConfig,
+            projectUri: projectDir.uri,
+          ),
+          'fallback_pkg',
+        );
+
+        final buildInfo = BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          packageConfigPath: packageConfigFile.path,
+          packageConfig: packageConfig,
+        );
+
+        final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
+        expect(result, isNotNull);
+        expect(fileSystem.file(result).existsSync(), isTrue);
+      },
+    );
+
+    testUsingContext(
+      'falls back to manifestAppName when packageConfig is empty',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+      () async {
+        final Directory projectDir = fileSystem.directory('/standalone_app')
+          ..createSync(recursive: true);
+        fileSystem.currentDirectory = projectDir;
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: standalone_app
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+''');
+
+        final File packageConfigFile = projectDir.childFile('.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"configVersion": 2, "packages": []}');
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          packageConfigFile,
+          logger: logger,
+        );
+
+        expect(
+          findRunPackageName(
+            fileSystem: fileSystem,
+            manifestAppName: 'standalone_app',
+            packageConfig: packageConfig,
+            projectUri: projectDir.uri,
+          ),
+          'standalone_app',
+        );
+
+        final buildInfo = BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          packageConfigPath: packageConfigFile.path,
+          packageConfig: packageConfig,
+        );
+
+        final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
+        expect(result, isNotNull);
+        expect(fileSystem.file(result).existsSync(), isTrue);
+      },
+    );
+
+    testUsingContext(
+      'returns null gracefully when no package can be resolved',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+      () async {
+        final Directory projectDir = fileSystem.directory('/empty_app')
+          ..createSync(recursive: true);
+        fileSystem.currentDirectory = projectDir;
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+''');
+
+        final File packageConfigFile = projectDir.childFile('.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"configVersion": 2, "packages": []}');
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          packageConfigFile,
+          logger: logger,
+        );
+
+        expect(
+          findRunPackageName(
+            fileSystem: fileSystem,
+            manifestAppName: '',
+            packageConfig: packageConfig,
+            projectUri: projectDir.uri,
+          ),
+          isNull,
+        );
+
+        final buildInfo = BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          packageConfigPath: packageConfigFile.path,
+          packageConfig: packageConfig,
+        );
+
+        final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
+        expect(result, isNull);
+      },
+    );
+
+    testUsingContext(
+      'prefers direct root URI match over manifest and first package',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+      () async {
+        final Directory projectDir = fileSystem.directory('/my_app')..createSync(recursive: true);
+        fileSystem.currentDirectory = projectDir;
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: manifest_pkg
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+''');
+
+        // Place 'first_pkg' first and 'manifest_pkg' third, while 'direct_pkg'
+        // matches projectDir.uri directly (tier 1).
+        final File packageConfigFile = writePackageConfigFiles(
+          directory: projectDir,
+          mainLibName: 'first_pkg',
+          mainLibRootUri: '../first_dir',
+          packages: <String, String>{'direct_pkg': '.', 'manifest_pkg': '../manifest_dir'},
+        );
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          packageConfigFile,
+          logger: logger,
+        );
+
+        expect(
+          findRunPackageName(
+            fileSystem: fileSystem,
+            manifestAppName: 'manifest_pkg',
+            packageConfig: packageConfig,
+            projectUri: projectDir.uri,
+          ),
+          'direct_pkg',
+        );
+
+        final buildInfo = BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          packageConfigPath: packageConfigFile.path,
+          packageConfig: packageConfig,
+        );
+
+        final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
+        expect(result, isNotNull);
+        expect(fileSystem.file(result).existsSync(), isTrue);
+      },
+    );
+  });
 }
 
 class _SetCCompilerConfigTarget extends FakeFlutterNativeAssetsBuildRunner {
