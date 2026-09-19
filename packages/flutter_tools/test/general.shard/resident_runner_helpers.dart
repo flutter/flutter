@@ -4,16 +4,22 @@
 
 import 'dart:async';
 
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -22,7 +28,9 @@ import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
+import '../src/fakes.dart';
 
 final fakeUnpausedEvent = vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0);
 
@@ -174,6 +182,12 @@ class FakeDartDevelopmentServiceException implements DartDevelopmentServiceExcep
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(super.device, {Future<Uri>? vmServiceUri})
     : super(
+        toolContext: TestToolContext(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          artifacts: Artifacts.test(),
+        ),
         generator: FakeResidentCompiler(),
         targetPlatform: .unsupported,
         buildInfo: BuildInfo.debug,
@@ -196,6 +210,18 @@ class ThrowingForwardingFileSystem extends ForwardingFileSystem {
 }
 
 class FakeFlutterDevice extends Fake implements FlutterDevice {
+  @override
+  Logger logger = BufferLogger.test();
+
+  @override
+  FileSystem fileSystem = MemoryFileSystem.test();
+
+  @override
+  Platform platform = const LocalPlatform();
+
+  @override
+  ProcessManager processManager = FakeProcessManager.any();
+
   FakeVmServiceHost? Function()? vmServiceHost;
   Uri? testUri;
   UpdateFSReport report = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
@@ -304,6 +330,12 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     this.fakeDevFS, {
     Future<Uri>? vmServiceUri,
   }) : super(
+         toolContext: TestToolContext(
+           fileSystem: globals.fs,
+           logger: globals.logger,
+           processManager: globals.processManager,
+           artifacts: Artifacts.test(),
+         ),
          targetPlatform: .unsupported,
          buildInfo: buildInfo,
          generator: residentCompiler,
