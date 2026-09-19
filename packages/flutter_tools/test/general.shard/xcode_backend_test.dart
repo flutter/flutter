@@ -1352,6 +1352,138 @@ void main() {
 
       expect(testContext.processManager.hasRemainingExpectations, isFalse);
     });
+
+    test(
+      'embed_and_thin for macos codesigns nested dynamic libraries in Frameworks directory first',
+      () {
+        final Directory buildDir = fileSystem.directory('/path/to/builds')
+          ..createSync(recursive: true);
+        final Directory flutterMacOSFramework = buildDir.childDirectory('FlutterMacOS.framework')
+          ..createSync();
+        flutterMacOSFramework
+            .childDirectory('Versions/A/Frameworks')
+            .childFile('libvmservice_snapshot.dylib')
+            .createSync(recursive: true);
+
+        final Directory targetBuildDir = fileSystem.directory('/path/to/target')
+          ..createSync(recursive: true);
+        const frameworksFolderPath = 'Contents/Frameworks';
+        const infoPlistPath = 'Runner.app/Info.plist';
+        fileSystem.file('${buildDir.path}/$infoPlistPath').createSync(recursive: true);
+        const appPath = '/path/to/my_flutter_app';
+        const platformDirPath = '$appPath/macos';
+        const buildMode = 'Profile';
+        const codesignIdentity = '12312313';
+        final testContext = TestContext(
+          <String>['embed_and_thin', 'macos'],
+          <String, String>{
+            'BUILT_PRODUCTS_DIR': buildDir.path,
+            'CONFIGURATION': buildMode,
+            'INFOPLIST_PATH': infoPlistPath,
+            'SOURCE_ROOT': platformDirPath,
+            'FLUTTER_APPLICATION_PATH': appPath,
+            'FLUTTER_BUILD_DIR': 'build',
+            'FLUTTER_ROOT': '/path/to/flutter',
+            'FLUTTER_BUILD_NAME': '1.0.0',
+            'FLUTTER_BUILD_NUMBER': '1',
+            'TARGET_BUILD_DIR': targetBuildDir.path,
+            'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
+            'EXPANDED_CODE_SIGN_IDENTITY': codesignIdentity,
+          },
+          commands: <FakeCommand>[
+            FakeCommand(
+              command: <String>[
+                'mkdir',
+                '-p',
+                '--',
+                targetBuildDir.childDirectory(frameworksFolderPath).path,
+              ],
+            ),
+            FakeCommand(
+              command: <String>[
+                'rsync',
+                '-8',
+                '-av',
+                '--delete',
+                '--filter',
+                '- .DS_Store',
+                buildDir.childDirectory('App.framework').path,
+                targetBuildDir.childDirectory(frameworksFolderPath).path,
+              ],
+            ),
+            FakeCommand(
+              command: <String>[
+                'codesign',
+                '--force',
+                '--verbose',
+                '--sign',
+                codesignIdentity,
+                '--',
+                targetBuildDir
+                    .childDirectory(frameworksFolderPath)
+                    .childFile('App.framework/App')
+                    .path,
+              ],
+            ),
+            FakeCommand(
+              command: <String>[
+                'rsync',
+                '-8',
+                '-av',
+                '--delete',
+                '--filter',
+                '- .DS_Store',
+                '--filter',
+                '- Headers',
+                '--filter',
+                '- Modules',
+                flutterMacOSFramework.path,
+                '${targetBuildDir.childDirectory(frameworksFolderPath).path}/',
+              ],
+              onRun: (_) {
+                targetBuildDir
+                    .childDirectory(frameworksFolderPath)
+                    .childDirectory('FlutterMacOS.framework/Versions/A/Frameworks')
+                    .childFile('libvmservice_snapshot.dylib')
+                    .createSync(recursive: true);
+              },
+            ),
+            FakeCommand(
+              command: <String>[
+                'codesign',
+                '--force',
+                '--verbose',
+                '--sign',
+                codesignIdentity,
+                '--',
+                targetBuildDir
+                    .childDirectory(frameworksFolderPath)
+                    .childDirectory('FlutterMacOS.framework/Versions/A/Frameworks')
+                    .childFile('libvmservice_snapshot.dylib')
+                    .path,
+              ],
+            ),
+            FakeCommand(
+              command: <String>[
+                'codesign',
+                '--force',
+                '--verbose',
+                '--sign',
+                codesignIdentity,
+                '--',
+                targetBuildDir
+                    .childDirectory(frameworksFolderPath)
+                    .childFile('FlutterMacOS.framework/FlutterMacOS')
+                    .path,
+              ],
+            ),
+          ],
+          fileSystem: fileSystem,
+        )..run();
+
+        expect(testContext.processManager.hasRemainingExpectations, isFalse);
+      },
+    );
   });
 
   group('validates generated build settings', () {
@@ -1417,6 +1549,11 @@ class TestContext extends Context {
   @override
   Directory directoryFromPath(String path) {
     return fileSystem.directory(path);
+  }
+
+  @override
+  File fileFromPath(String path) {
+    return fileSystem.file(path);
   }
 
   @override

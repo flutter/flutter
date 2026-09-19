@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -23,12 +24,7 @@ final windows = FakePlatform(operatingSystem: 'windows');
 
 void main() {
   testWithoutContext('LinuxDevice defaults', () async {
-    final device = LinuxDevice(
-      processManager: FakeProcessManager.any(),
-      logger: BufferLogger.test(),
-      fileSystem: MemoryFileSystem.test(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
-    );
+    final LinuxDevice device = setUpLinuxDevice();
 
     final linuxApp = PrebuiltLinuxApp(executable: 'foo');
     expect(await device.targetPlatform, TargetPlatform.linux_x64);
@@ -47,10 +43,7 @@ void main() {
   });
 
   testWithoutContext('LinuxDevice on arm64 hosts is arm64', () async {
-    final deviceArm64Host = LinuxDevice(
-      processManager: FakeProcessManager.any(),
-      logger: BufferLogger.test(),
-      fileSystem: MemoryFileSystem.test(),
+    final LinuxDevice deviceArm64Host = setUpLinuxDevice(
       operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
     );
     expect(await deviceArm64Host.targetPlatform, TargetPlatform.linux_arm64);
@@ -65,6 +58,7 @@ void main() {
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
+        artifacts: FakeArtifacts(),
       ).devices(),
       <Device>[],
     );
@@ -79,6 +73,7 @@ void main() {
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
+        artifacts: FakeArtifacts(),
       ).devices(),
       <Device>[],
     );
@@ -93,6 +88,7 @@ void main() {
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
+        artifacts: FakeArtifacts(),
       ).devices(),
       hasLength(1),
     );
@@ -107,6 +103,7 @@ void main() {
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
+        artifacts: FakeArtifacts(),
       ).wellKnownIds,
       <String>['linux'],
     );
@@ -121,6 +118,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
+      artifacts: FakeArtifacts(),
     ).discoverDevices(timeout: const Duration(seconds: 10));
     expect(devices, hasLength(1));
   });
@@ -131,15 +129,7 @@ void main() {
     fileSystem.directory('linux').createSync();
     final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
-    expect(
-      LinuxDevice(
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: fileSystem,
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-      ).isSupportedForProject(flutterProject),
-      true,
-    );
+    expect(setUpLinuxDevice(fileSystem: fileSystem).isSupportedForProject(flutterProject), true);
   });
 
   testWithoutContext('LinuxDevice.isSupportedForProject is false with no host app', () async {
@@ -147,32 +137,35 @@ void main() {
     fileSystem.file('pubspec.yaml').createSync();
     final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
-    expect(
-      LinuxDevice(
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: fileSystem,
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-      ).isSupportedForProject(flutterProject),
-      false,
-    );
+    expect(setUpLinuxDevice(fileSystem: fileSystem).isSupportedForProject(flutterProject), false);
   });
 
   testWithoutContext(
     'LinuxDevice.executablePathForDevice uses the correct package executable',
     () async {
       final mockApp = FakeLinuxApp();
-      final device = LinuxDevice(
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: MemoryFileSystem.test(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-      );
+      final LinuxDevice device = setUpLinuxDevice();
 
       expect(device.executablePathForDevice(mockApp, BuildInfo.debug), 'debug/executable');
       expect(device.executablePathForDevice(mockApp, BuildInfo.profile), 'profile/executable');
       expect(device.executablePathForDevice(mockApp, BuildInfo.release), 'release/executable');
     },
+  );
+}
+
+LinuxDevice setUpLinuxDevice({
+  FileSystem? fileSystem,
+  Logger? logger,
+  ProcessManager? processManager,
+  OperatingSystemUtils? operatingSystemUtils,
+  Artifacts? artifacts,
+}) {
+  return LinuxDevice(
+    fileSystem: fileSystem ?? MemoryFileSystem.test(),
+    logger: logger ?? BufferLogger.test(),
+    processManager: processManager ?? FakeProcessManager.any(),
+    operatingSystemUtils: operatingSystemUtils ?? FakeOperatingSystemUtils(),
+    artifacts: artifacts ?? FakeArtifacts(),
   );
 }
 
