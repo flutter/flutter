@@ -114,6 +114,13 @@ class SemanticScrollable extends SemanticRole {
   @override
   void update() {
     super.update();
+    semanticsObject.owner.addOneTimePostUpdateCallback(() {
+      if (!semanticsObject.hasLabel && _hasStructuredContainerAncestor()) {
+        setAriaRole('none');
+      } else {
+        setAriaRole('group');
+      }
+    });
     if (!_canScroll) {
       _cleanUp();
       return;
@@ -281,6 +288,19 @@ class SemanticScrollable extends SemanticRole {
       EngineSemantics.instance.removeGestureModeListener(_gestureModeListener!);
       _gestureModeListener = null;
     }
+  }
+
+  bool _hasStructuredContainerAncestor() {
+    SemanticsObject? current = semanticsObject.parent;
+    while (current != null) {
+      if (current.role == ui.SemanticsRole.menu ||
+          current.role == ui.SemanticsRole.menuBar ||
+          current.role == ui.SemanticsRole.listBox) {
+        return true;
+      }
+      current = current.parent;
+    }
+    return false;
   }
 
   @override
