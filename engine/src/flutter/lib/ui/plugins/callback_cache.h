@@ -35,6 +35,11 @@ class DartCallbackCache {
   static std::unique_ptr<DartCallbackRepresentation> GetCallbackInformation(
       int64_t handle);
 
+  static bool GetCallbackStrings(int64_t handle,
+                                 const char** name,
+                                 const char** class_name,
+                                 const char** library_path);
+
   static void LoadCacheFromDisk();
 
  private:
