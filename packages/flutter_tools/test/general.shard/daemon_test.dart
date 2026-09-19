@@ -3,10 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/daemon.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 
@@ -402,7 +405,66 @@ void main() {
         ),
       );
     });
+
+    testWithoutContext(
+      'DaemonStreams.fromSocket guards socket.done against socket reset errors',
+      () async {
+        final doneCompleter = Completer<void>();
+        final socket = FakeSocket(done: doneCompleter.future);
+        final daemonStreams = DaemonStreams.fromSocket(socket, logger: bufferLogger);
+        addTearDown(daemonStreams.dispose);
+
+        doneCompleter.completeError(
+          const SocketException(
+            'Error event raised in event handler : error condition has been reset',
+            port: 0,
+          ),
+        );
+        await pumpEventQueue();
+
+        expect(
+          bufferLogger.traceText,
+          contains(
+            'Socket error: SocketException: Error event raised in event handler : error condition has been reset, port = 0',
+          ),
+        );
+      },
+    );
   });
+}
+
+class FakeSocket extends Fake implements Socket {
+  FakeSocket({Future<void>? done, Stream<Uint8List>? stream})
+    : _done = done ?? Completer<void>().future,
+      _stream = stream ?? const Stream<Uint8List>.empty();
+
+  final Future<void> _done;
+  final Stream<Uint8List> _stream;
+  final addedData = <List<int>>[];
+  bool closeCalled = false;
+
+  @override
+  StreamSubscription<Uint8List> listen(
+    void Function(Uint8List event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
+    return _stream.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  }
+
+  @override
+  Future<void> get done => _done;
+
+  @override
+  void add(List<int> data) {
+    addedData.add(data);
+  }
+
+  @override
+  Future<void> close() async {
+    closeCalled = true;
+  }
 }
 
 class _DaemonMessageAndBinary {

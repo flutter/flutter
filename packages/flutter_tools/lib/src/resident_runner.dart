@@ -53,8 +53,9 @@ class FlutterDevice {
     required this.targetPlatform,
     required this.generator,
     required this.developmentShaderCompiler,
-    this.userIdentifier,
     @visibleForTesting this.logFlushDelay = const Duration(milliseconds: 500),
+    this._logger,
+    this.userIdentifier,
   });
 
   final Duration logFlushDelay;
@@ -65,6 +66,7 @@ class FlutterDevice {
     required String? target,
     required BuildInfo buildInfo,
     required Platform platform,
+    Logger? logger,
     String? userIdentifier,
     TargetModel? targetModelOverride,
   }) async {
@@ -100,6 +102,7 @@ class FlutterDevice {
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
       developmentShaderCompiler: shaderCompiler,
+      logger: logger,
     );
   }
 
@@ -109,6 +112,7 @@ class FlutterDevice {
   final BuildInfo buildInfo;
   final String? userIdentifier;
   final DevelopmentShaderCompiler developmentShaderCompiler;
+  final Logger? _logger;
 
   DevFSWriter? devFSWriter;
   Future<Uri>? vmServiceUri;
@@ -319,11 +323,16 @@ class FlutterDevice {
     } else {
       logStream = (await device!.getLogReader(app: package)).logLines;
     }
-    _loggingSubscription = logStream.listen((String line) {
-      if (!line.contains(globals.kVMServiceMessageRegExp)) {
-        globals.printStatus(line, wrap: false);
-      }
-    });
+    _loggingSubscription = logStream.listen(
+      (String line) {
+        if (!line.contains(globals.kVMServiceMessageRegExp)) {
+          globals.printStatus(line, wrap: false);
+        }
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        _logger?.printTrace('Error on device log stream: $error\n$stackTrace');
+      },
+    );
   }
 
   Future<void> stopEchoingDeviceLog() async {

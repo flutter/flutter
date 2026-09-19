@@ -225,13 +225,13 @@ class DaemonServer {
       // We have to listen to socket.done. Otherwise when the connection is
       // reset, we will receive an uncatchable exception.
       // https://github.com/dart-lang/sdk/issues/25518
-      final Future<void> socketDone = socket.done.then<void>(
-        (_) {},
-        onError: (Object error, StackTrace stackTrace) {
-          logger.printError('Socket error: $error');
-          logger.printTrace('$stackTrace');
-        },
-      );
+      final Future<void> socketDone = socket.done.handleError((
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        logger.printError('Socket error: $error');
+        logger.printTrace('$stackTrace');
+      });
       final daemon = Daemon(
         DaemonConnection(
           daemonStreams: DaemonStreams.fromSocket(socket, logger: logger),
