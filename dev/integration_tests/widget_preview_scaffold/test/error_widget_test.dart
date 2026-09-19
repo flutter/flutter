@@ -116,4 +116,37 @@ void main() {
     // occurred.
     expect(fakeDtdServices.navigationEvents, isEmpty);
   });
+
+  testWidgets('preview with unconstrained widget displays layout error', (
+    tester,
+  ) async {
+    final fakeDtdServices = FakeWidgetPreviewScaffoldDtdServices();
+    final controller = WidgetPreviewScaffoldController(
+      dtdServicesOverride: fakeDtdServices,
+      previews: () => [
+        WidgetPreview.test(
+          builder: () => const SizedBox.expand(child: Text('Oops')),
+          previewData: const Preview(),
+        ),
+      ],
+    );
+
+    if (controller.filterBySelectedFileListenable.value) {
+      await controller.toggleFilterBySelectedFile();
+    }
+    await controller.initialize();
+
+    await tester.pumpWidget(TestWidgetPreviewScaffold(controller: controller));
+
+    final Object? exception = tester.takeException();
+    expect(exception, isA<FlutterError>());
+    expect(
+      (exception! as FlutterError).message,
+      contains('A widget preview was rendered with unconstrained dimensions.'),
+    );
+
+    await tester.pump();
+    expect(find.byType(WidgetPreviewErrorWidget), findsOneWidget);
+    expect(find.textContaining('unconstrained dimensions'), findsOneWidget);
+  });
 }

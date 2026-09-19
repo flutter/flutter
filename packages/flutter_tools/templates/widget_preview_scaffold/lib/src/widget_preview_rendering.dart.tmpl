@@ -37,8 +37,9 @@ class WidgetPreviewErrorWidget extends StatelessWidget {
     super.key,
     required this.controller,
     required this.error,
-    required StackTrace stackTrace,
     required this.size,
+    required StackTrace stackTrace,
+    this.title = 'Failed to initialize widget tree: ',
   }) : trace = Trace.from(stackTrace).terse;
 
   final WidgetPreviewScaffoldController controller;
@@ -46,11 +47,14 @@ class WidgetPreviewErrorWidget extends StatelessWidget {
   /// The [Object] that was thrown, resulting in an unhandled exception.
   final Object error;
 
+  /// The size of the error widget.
+  final Size size;
+
   /// The stack trace identifying where [error] was thrown from.
   final Trace trace;
 
-  /// The size of the error widget.
-  final Size size;
+  /// The title displayed before the error message.
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -64,10 +68,7 @@ class WidgetPreviewErrorWidget extends StatelessWidget {
             Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(
-                    text: 'Failed to initialize widget tree: ',
-                    style: theme.boldTextStyle,
-                  ),
+                  TextSpan(text: title, style: theme.boldTextStyle),
                   TextSpan(text: error.toString(), style: theme.fixedFontStyle),
                 ],
               ),
@@ -321,6 +322,81 @@ class _WidgetPreviewGroupWidgetState extends State<WidgetPreviewGroupWidget> {
   }
 }
 
+/// Thrown when a widget preview fails layout due to unconstrained dimensions.
+class UnconstrainedWidgetPreviewException implements Exception {
+  const UnconstrainedWidgetPreviewException([this.message]);
+
+  final String? message;
+
+  @override
+  String toString() {
+    return message ??
+        'The widget preview has unconstrained dimensions (e.g. infinite width or height).\n'
+            'To preview this widget, specify a fixed size constraint via @Preview(size: Size(width, height)) '
+            'or wrap the widget in a SizedBox with explicit dimensions.';
+  }
+}
+
+bool _isUnconstrainedError(Object error) {
+  final message = error.toString();
+  return message.contains('forces an infinite width') ||
+      message.contains('forces an infinite height') ||
+      message.contains('unbounded height') ||
+      message.contains('unbounded width') ||
+      message.contains('incoming height constraints are unbounded') ||
+      message.contains('incoming width constraints are unbounded') ||
+      message.contains('BoxConstraints(unconstrained)');
+}
+
+bool _isUnconstrainedPreviewError(FlutterErrorDetails details) {
+  final exceptionStr = details.exceptionAsString();
+  if (_isUnconstrainedError(exceptionStr)) {
+    return true;
+  }
+  final contextDesc = details.context?.toDescription() ?? '';
+  if (contextDesc.contains('layout')) {
+    final collector = details.informationCollector;
+    if (collector != null) {
+      for (final node in collector()) {
+        final desc = node.toDescription();
+        if (desc.contains('BoxConstraints(unconstrained)') ||
+            desc.contains('BoxConstraints(w=Infinity') ||
+            desc.contains('BoxConstraints(h=Infinity') ||
+            desc.contains('additionalConstraints: BoxConstraints(w=Infinity') ||
+            desc.contains('additionalConstraints: BoxConstraints(h=Infinity')) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+FlutterErrorDetails _createUnconstrainedPreviewErrorDetails(
+  FlutterErrorDetails details,
+) {
+  return FlutterErrorDetails(
+    exception: FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary(
+        'A widget preview was rendered with unconstrained dimensions.',
+      ),
+      ErrorDescription(
+        'The previewed widget attempted to expand to an infinite size, but widget previews '
+        'are unconstrained by default so that self-sizing widgets do not stretch to fill the window.',
+      ),
+      ErrorHint(
+        'To resolve this error, specify a fixed size constraint in your @Preview annotation:\n'
+        '  @Preview(size: Size(width, height))\n'
+        'or wrap the widget in a widget with explicit dimensions (such as SizedBox or Container).',
+      ),
+    ]),
+    stack: details.stack,
+    library: 'widget_preview_scaffold',
+    context: ErrorDescription('during performLayout() of a widget preview'),
+    informationCollector: details.informationCollector,
+  );
+}
+
 class WidgetPreviewWidget extends StatefulWidget {
   const WidgetPreviewWidget({
     super.key,
@@ -348,6 +424,23 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
   final softRestartListenable = ValueNotifier<bool>(false);
   final key = GlobalKey();
 
+  Object? _layoutError;
+  StackTrace? _layoutStackTrace;
+
+  void _handleLayoutError(Object error, StackTrace stackTrace) {
+    if (_layoutError != null) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          _layoutError = error;
+          _layoutStackTrace = stackTrace;
+        });
+      }
+    });
+  }
+
   /// Returns the last size of the previewed widget.
   Size get lastChildSize =>
       (key.currentContext!.findRenderObject() as RenderBox).size;
@@ -355,6 +448,10 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
   @override
   void didUpdateWidget(WidgetPreviewWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.preview != widget.preview) {
+      _layoutError = null;
+      _layoutStackTrace = null;
+    }
 
     final previousBrightness = oldWidget.preview.brightness;
     final newBrightness = widget.preview.brightness;
@@ -388,6 +485,16 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       minHeight: previewerConstraints.maxHeight / 2.0,
       maxHeight: previewerConstraints.maxHeight / 2.0,
     );
+
+    if (_layoutError != null) {
+      return WidgetPreviewErrorWidget(
+        controller: widget.controller,
+        error: _layoutError!,
+        size: maxSizeConstraints.biggest,
+        stackTrace: _layoutStackTrace ?? StackTrace.current,
+        title: 'Failed to layout widget preview: ',
+      );
+    }
 
     bool errorThrownDuringTreeConstruction = false;
 
@@ -428,8 +535,8 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
           return WidgetPreviewErrorWidget(
             controller: widget.controller,
             error: error,
-            stackTrace: stackTrace,
             size: maxSizeConstraints.biggest,
+            stackTrace: stackTrace,
           );
         }
       },
@@ -463,11 +570,12 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
         }
         return child!;
       },
-      child: _WidgetPreviewWrapper(
-        previewerConstraints: maxSizeConstraints,
-        child: SizedBox(
-          width: size?.width == double.infinity ? null : size?.width,
-          height: size?.height == double.infinity ? null : size?.height,
+      child: SizedBox(
+        width: size?.width == double.infinity ? null : size?.width,
+        height: size?.height == double.infinity ? null : size?.height,
+        child: _WidgetPreviewWrapper(
+          onLayoutError: _handleLayoutError,
+          previewerConstraints: maxSizeConstraints,
           child: preview,
         ),
       ),
@@ -942,15 +1050,20 @@ class _ScaledLayoutRenderObject extends RenderShiftedBox {
 class _WidgetPreviewWrapper extends SingleChildRenderObjectWidget {
   const _WidgetPreviewWrapper({
     super.child,
+    this.onLayoutError,
     required this.previewerConstraints,
   });
 
   /// The size of the previewer render surface.
   final BoxConstraints previewerConstraints;
 
+  /// Callback invoked when an exception is thrown during child layout.
+  final void Function(Object error, StackTrace stackTrace)? onLayoutError;
+
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _WidgetPreviewWrapperBox(
+      onLayoutError: onLayoutError,
       previewerConstraints: previewerConstraints,
       child: null,
     );
@@ -961,7 +1074,9 @@ class _WidgetPreviewWrapper extends SingleChildRenderObjectWidget {
     BuildContext context,
     _WidgetPreviewWrapperBox renderObject,
   ) {
-    renderObject.setPreviewerConstraints(previewerConstraints);
+    renderObject
+      ..onLayoutError = onLayoutError
+      ..setPreviewerConstraints(previewerConstraints);
   }
 }
 
@@ -970,7 +1085,10 @@ class _WidgetPreviewWrapperBox extends RenderShiftedBox {
   _WidgetPreviewWrapperBox({
     required RenderBox? child,
     required this._previewerConstraints,
+    this.onLayoutError,
   }) : super(child);
+
+  void Function(Object error, StackTrace stackTrace)? onLayoutError;
 
   BoxConstraints _constraintOverride = const BoxConstraints();
   BoxConstraints _previewerConstraints;
@@ -1015,8 +1133,39 @@ class _WidgetPreviewWrapperBox extends RenderShiftedBox {
       return;
     }
     final updatedConstraints = _constraintOverride.enforce(constraints);
-    child.layout(updatedConstraints, parentUsesSize: true);
-    size = constraints.constrain(child.size);
+    try {
+      child.layout(updatedConstraints, parentUsesSize: true);
+      size = constraints.constrain(child.size);
+    } catch (error, stackTrace) {
+      final isUnconstrained =
+          (!updatedConstraints.hasBoundedWidth ||
+              !updatedConstraints.hasBoundedHeight) ||
+          _isUnconstrainedError(error);
+      final layoutError = isUnconstrained
+          ? const UnconstrainedWidgetPreviewException()
+          : error;
+      size = constraints.constrain(
+        _previewerConstraints.hasBoundedWidth &&
+                _previewerConstraints.hasBoundedHeight
+            ? _previewerConstraints.biggest
+            : const Size(400, 400),
+      );
+      onLayoutError?.call(layoutError, stackTrace);
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null && child!.hasSize) {
+      super.paint(context, offset);
+    }
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (child != null && child!.hasSize) {
+      super.visitChildrenForSemantics(visitor);
+    }
   }
 }
 
@@ -1123,14 +1272,34 @@ class WidgetPreviewScaffold extends StatefulWidget {
 
 class _WidgetPreviewScaffoldState extends State<WidgetPreviewScaffold> {
   WebViewController? _webViewController;
+  FlutterExceptionHandler? _originalOnError;
 
   @override
   void initState() {
     super.initState();
+    _originalOnError = FlutterError.onError;
+    FlutterError.onError = _handleFlutterError;
     if (widget.enableWebView) {
       _webViewController = WebViewController()
         ..loadRequest(widget.controller.devToolsUri);
     }
+  }
+
+  @override
+  void dispose() {
+    if (FlutterError.onError == _handleFlutterError) {
+      FlutterError.onError = _originalOnError;
+    }
+    super.dispose();
+  }
+
+  void _handleFlutterError(FlutterErrorDetails details) {
+    if (_isUnconstrainedPreviewError(details)) {
+      final customDetails = _createUnconstrainedPreviewErrorDetails(details);
+      (_originalOnError ?? FlutterError.presentError)(customDetails);
+      return;
+    }
+    (_originalOnError ?? FlutterError.presentError)(details);
   }
 
   @override
