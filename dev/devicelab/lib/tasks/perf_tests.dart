@@ -1376,9 +1376,6 @@ class PerfTest {
       await selectedDevice.toggleFixedPerformanceMode(true);
 
       final String deviceId = selectedDevice.deviceId;
-      final String? localEngine = localEngineFromEnv;
-      final String? localEngineHost = localEngineHostFromEnv;
-      final String? localEngineSrcPath = localEngineSrcPathFromEnv;
 
       if (createPlatforms.isNotEmpty) {
         // Ensure that the platform-specific manifests are freshly created and
@@ -1443,12 +1440,6 @@ class PerfTest {
         }
 
         final options = <String>[
-          if (localEngine != null) ...<String>['--local-engine', localEngine],
-          if (localEngineHost != null) ...<String>['--local-engine-host', localEngineHost],
-          if (localEngineSrcPath != null) ...<String>[
-            '--local-engine-src-path',
-            localEngineSrcPath,
-          ],
           '--no-android-gradle-daemon',
           '-v',
           '--verbose-system-logs',

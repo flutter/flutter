@@ -195,6 +195,25 @@ void EmbedderConfigBuilder::SetRenderTaskRunner(
   project_args_.custom_task_runners = &custom_task_runners_;
 }
 
+void EmbedderConfigBuilder::SetThreadPrioritySetter(
+    FlutterThreadPrioritySetter setter) {
+  custom_task_runners_.thread_priority_setter = setter;
+  project_args_.custom_task_runners = &custom_task_runners_;
+}
+
+void EmbedderConfigBuilder::SetThreadPrioritySetterWithUserData(
+    FlutterThreadPrioritySetterWithUserData setter,
+    void* user_data) {
+  custom_task_runners_.thread_priority_setter_with_user_data = setter;
+  custom_task_runners_.user_data = user_data;
+  project_args_.custom_task_runners = &custom_task_runners_;
+}
+
+FlutterCustomTaskRunners& EmbedderConfigBuilder::GetCustomTaskRunners() {
+  project_args_.custom_task_runners = &custom_task_runners_;
+  return custom_task_runners_;
+}
+
 void EmbedderConfigBuilder::SetPlatformMessageCallback(
     const std::function<void(const FlutterPlatformMessage*)>& callback) {
   context_.SetPlatformMessageCallback(callback);
