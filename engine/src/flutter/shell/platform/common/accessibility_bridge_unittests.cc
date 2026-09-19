@@ -14,6 +14,7 @@ namespace flutter {
 namespace testing {
 
 using ::testing::Contains;
+using ::testing::HasSubstr;
 
 FlutterSemanticsFlags kEmptyFlags = FlutterSemanticsFlags{};
 
@@ -475,6 +476,37 @@ TEST(AccessibilityBridgeTest, CanReparentNode) {
       Contains(ui::AXEventGenerator::Event::OTHER_ATTRIBUTE_CHANGED).Times(1));
   EXPECT_THAT(bridge->accessibility_events,
               Contains(ui::AXEventGenerator::Event::ROLE_CHANGED).Times(1));
+}
+
+// A root node can be present in the tree without having a parent. Malformed or
+// transient semantics updates must not make the reparenting check dereference
+// that null parent pointer.
+TEST(AccessibilityBridgeTest, IgnoresNodeWithoutParentWhenCheckingReparenting) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+
+  std::vector<int32_t> root_children{1};
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root", &root_children);
+  FlutterSemanticsNode2 child = CreateSemanticsNode(1, "child");
+
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->AddFlutterSemanticsNodeUpdate(child);
+  bridge->CommitUpdates();
+
+  ASSERT_NE(bridge->GetRootAsAXNode(), nullptr);
+  ASSERT_EQ(bridge->GetRootAsAXNode()->id(), 0);
+  ASSERT_EQ(bridge->GetRootAsAXNode()->parent(), nullptr);
+
+  // The root is already in the tree and has no parent. This malformed update
+  // exercises the guard in CreateRemoveReparentedNodesUpdate().
+  std::vector<int32_t> invalid_children{0};
+  child.child_count = static_cast<int32_t>(invalid_children.size());
+  child.children_in_traversal_order = invalid_children.data();
+
+  bridge->AddFlutterSemanticsNodeUpdate(child);
+  bridge->CommitUpdates();
+
+  EXPECT_THAT(bridge->GetTree()->error(), HasSubstr("reparented"));
 }
 
 // Verify that multiple nodes can be moved to new parents.
