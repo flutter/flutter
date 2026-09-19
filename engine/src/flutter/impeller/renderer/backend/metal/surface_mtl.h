@@ -63,7 +63,9 @@ class SurfaceMTL final : public Surface {
 
   /// Mark this surface as presenting with a transaction.
   ///
-  /// If true, [Present] will block on the scheduling of a command buffer.
+  /// If true, [Present] synchronizes command buffer scheduling before the
+  /// drawable is presented in the current transaction. Intermediate drawables
+  /// may be deferred until the frame boundary.
   void PresentWithTransaction(bool present_with_transaction) {
     present_with_transaction_ = present_with_transaction;
   }
