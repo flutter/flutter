@@ -1097,6 +1097,7 @@ void main() {
         (exception as AssertionError).message,
         contains('All routes returned by onGenerateInitialRoutes are not restorable.'),
       );
+      await tester.pumpWidget(const SizedBox());
     },
   );
 }
