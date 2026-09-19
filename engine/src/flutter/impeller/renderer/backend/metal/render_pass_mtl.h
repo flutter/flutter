@@ -41,6 +41,7 @@ class RenderPassMTL final : public RenderPass {
   bool has_valid_pipeline_ = false;
   bool has_label_ = false;
   BufferView index_buffer_ = {};
+  BufferView indirect_buffer_ = {};
   PrimitiveType primitive_type_ = {};
   MTLIndexType index_type_ = {};
 
@@ -87,6 +88,9 @@ class RenderPassMTL final : public RenderPass {
 
   // |RenderPass|
   bool SetIndexBuffer(BufferView index_buffer, IndexType index_type) override;
+
+  // |RenderPass|
+  bool SetIndirectBuffer(BufferView indirect_args) override;
 
   // |RenderPass|
   fml::Status Draw() override;

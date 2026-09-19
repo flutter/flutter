@@ -64,6 +64,7 @@ static PoolVMA CreateBufferPool(VmaAllocator allocator) {
                       vk::BufferUsageFlagBits::eIndexBuffer |
                       vk::BufferUsageFlagBits::eUniformBuffer |
                       vk::BufferUsageFlagBits::eStorageBuffer |
+                      vk::BufferUsageFlagBits::eIndirectBuffer |
                       vk::BufferUsageFlagBits::eTransferSrc |
                       vk::BufferUsageFlagBits::eTransferDst;
   buffer_info.size = 1u;  // doesn't matter
@@ -561,6 +562,7 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
                       vk::BufferUsageFlagBits::eIndexBuffer |
                       vk::BufferUsageFlagBits::eUniformBuffer |
                       vk::BufferUsageFlagBits::eStorageBuffer |
+                      vk::BufferUsageFlagBits::eIndirectBuffer |
                       vk::BufferUsageFlagBits::eTransferSrc |
                       vk::BufferUsageFlagBits::eTransferDst;
   buffer_info.size = desc.size;
