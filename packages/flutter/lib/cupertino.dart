@@ -19,7 +19,10 @@
 ///    for a catalog of all Cupertino widgets.
 ///  * [flutter.dev/widgets](https://docs.flutter.dev/ui/widgets)
 ///    for a catalog of commonly-used Flutter widgets.
-
+@Deprecated(
+  'Use package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 library cupertino;
 
 export 'src/cupertino/activity_indicator.dart';
