@@ -9,6 +9,7 @@
 #include <numeric>
 
 #include "flutter/fml/synchronization/waitable_event.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
 #include "flutter/testing/testing.h"
 
