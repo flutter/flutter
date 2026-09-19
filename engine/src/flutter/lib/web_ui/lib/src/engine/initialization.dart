@@ -277,8 +277,29 @@ Future<void> debugLoadContentHashedAssetManifest(ui_web.AssetManager assetManage
     _loadContentHashedAssetManifest(assetManager);
 
 Future<void> _loadContentHashedAssetManifest(ui_web.AssetManager assetManager) async {
-  setContentHashedAssetMap(const <String, String>{});
+  final assetMap = <String, String>{};
   final String? manifestFile = flutter?.buildConfig?.assetManifest?.toDart;
+  if (manifestFile != null && manifestFile.isNotEmpty) {
+    assetMap['AssetManifest.bin.json'] = manifestFile;
+  }
+  final String? fontManifestFile = flutter?.buildConfig?.fontManifest?.toDart;
+  if (fontManifestFile != null && fontManifestFile.isNotEmpty) {
+    assetMap['FontManifest.json'] = fontManifestFile;
+  }
+  final JSObject? extraAssetsJs = flutter?.buildConfig?.extraAssets;
+  if (extraAssetsJs != null) {
+    final Object? dartifiedExtra = extraAssetsJs.dartify();
+    if (dartifiedExtra is Map<Object?, Object?>) {
+      for (final MapEntry<Object?, Object?> entry in dartifiedExtra.entries) {
+        final Object? k = entry.key;
+        final Object? v = entry.value;
+        if (k is String && v is String && v.isNotEmpty) {
+          assetMap[k] = v;
+        }
+      }
+    }
+  }
+  setContentHashedAssetMap(assetMap);
   if (manifestFile == null || manifestFile.isEmpty) {
     return;
   }
@@ -298,24 +319,6 @@ Future<void> _loadContentHashedAssetManifest(ui_web.AssetManager assetManager) a
       ByteData.sublistView(messageBytes),
     );
     if (decoded is Map<Object?, Object?>) {
-      final assetMap = <String, String>{'AssetManifest.bin.json': manifestFile};
-      final String? fontManifestFile = flutter?.buildConfig?.fontManifest?.toDart;
-      if (fontManifestFile != null && fontManifestFile.isNotEmpty) {
-        assetMap['FontManifest.json'] = fontManifestFile;
-      }
-      final JSObject? extraAssetsJs = flutter?.buildConfig?.extraAssets;
-      if (extraAssetsJs != null) {
-        final Object? dartifiedExtra = extraAssetsJs.dartify();
-        if (dartifiedExtra is Map<Object?, Object?>) {
-          for (final MapEntry<Object?, Object?> entry in dartifiedExtra.entries) {
-            final Object? k = entry.key;
-            final Object? v = entry.value;
-            if (k is String && v is String && v.isNotEmpty) {
-              assetMap[k] = v;
-            }
-          }
-        }
-      }
       for (final MapEntry<Object?, Object?> entry in decoded.entries) {
         final Object? key = entry.key;
         final Object? variants = entry.value;

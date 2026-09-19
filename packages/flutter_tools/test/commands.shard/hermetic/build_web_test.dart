@@ -407,15 +407,17 @@ void main() {
         ),
       );
 
-      // 4. HTML and JS comments mentioning main.dart.js or loadEntrypoint do not cause failure
+      // 4. HTML and JS comments mentioning main.dart.js or loadEntrypoint (even when
+      // HTML prose contains apostrophes like "Kevin's App") do not cause failure
       indexHtml.writeAsStringSync(
-        '<html><body>'
-        '<!-- Migrated from main.dart.js -->'
-        '<script>'
+        '<html><head><title>Kevin\'s App</title></head><body>\n'
+        '<!-- <script src=\'main.dart.js\'></script> -->\n'
+        '<script>\n'
+        'const tpl = `https://example.com/path`;\n'
         '// _flutter.loader.loadEntrypoint({});\n'
         '/* main.dart.js */\n'
-        '</script>'
-        '<script src="flutter_bootstrap.js" async></script>'
+        '</script>\n'
+        '<script src="flutter_bootstrap.js" async></script>\n'
         '</body></html>',
       );
       await runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']);

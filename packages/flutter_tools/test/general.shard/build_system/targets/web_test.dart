@@ -3092,6 +3092,24 @@ _flutter.loader.load({
         () => injectManifestBuildConfig(environment.outputDir, hashResult),
         throwsToolExit(message: '"_flutter.buildConfig" is not valid JSON'),
       );
+
+      // 3. HTML/JS comments mentioning _flutter.buildConfig in index.html and
+      // flutter_bootstrap.js do not cause false-positive ToolExit
+      environment.outputDir.childFile('index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          '<!-- Note: _flutter.buildConfig is configured in flutter_bootstrap.js -->\n'
+          '<script src="flutter_bootstrap.js" async></script>\n',
+        );
+      bootstrapFile.writeAsStringSync(
+        '// Example: _flutter.buildConfig = { invalid: json };\n'
+        '_flutter.buildConfig = {"engineRevision":"abc","builds":[]};\n',
+      );
+      injectManifestBuildConfig(environment.outputDir, hashResult);
+      expect(
+        bootstrapFile.readAsStringSync(),
+        contains('"assetManifest":"AssetManifest.bin.deadbeef.json"'),
+      );
     }),
   );
 }

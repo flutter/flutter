@@ -9,6 +9,7 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../web/compile.dart';
+import '../web/content_hash.dart';
 import '../web/web_constants.dart';
 import '../web/web_options.dart';
 import '../web_template.dart';
@@ -213,28 +214,9 @@ class BuildWebCommand extends BuildSubCommand {
     return FlutterCommandResult.success();
   }
 
-  static final RegExp _commentOrStringRegex = RegExp(
-    r'<!--[\s\S]*?-->|/\*[\s\S]*?\*/|(?<!:)//[^\r\n]*|"(?:\\.|[^"\\])*"|'
-    "'"
-    r'(?:\\.|[^'
-    "'"
-    r'\\])*'
-    "'",
-  );
-
-  static String _stripHtmlAndJsComments(String content) {
-    return content.replaceAllMapped(_commentOrStringRegex, (Match match) {
-      final String token = match.group(0)!;
-      if (token.startsWith('<!--') || token.startsWith('/*') || token.startsWith('//')) {
-        return '';
-      }
-      return token;
-    });
-  }
-
   void _validateIndexHtmlForContentHash(File indexHtmlFile, {File? bootstrapJsFile}) {
     final String indexHtmlContent = indexHtmlFile.readAsStringSync();
-    final String uncommentedContent = _stripHtmlAndJsComments(indexHtmlContent);
+    final String uncommentedContent = stripHtmlAndJsComments(indexHtmlContent);
     if (uncommentedContent.contains('main.dart.js') ||
         uncommentedContent.contains('loadEntrypoint')) {
       throwToolExit(
@@ -258,7 +240,7 @@ class BuildWebCommand extends BuildSubCommand {
     }
     if (bootstrapJsFile != null) {
       final String bootstrapContent = bootstrapJsFile.readAsStringSync();
-      final String uncommentedBootstrap = _stripHtmlAndJsComments(bootstrapContent);
+      final String uncommentedBootstrap = stripHtmlAndJsComments(bootstrapContent);
       if (uncommentedBootstrap.contains('main.dart.js') ||
           uncommentedBootstrap.contains('loadEntrypoint')) {
         throwToolExit(

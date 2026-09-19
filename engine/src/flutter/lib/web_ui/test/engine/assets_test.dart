@@ -5,12 +5,17 @@
 @TestOn('browser')
 library;
 
+import 'dart:js_interop';
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/matchers.dart';
+
+@JS('_flutter')
+external set _testFlutter(JSAny? value);
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -209,6 +214,30 @@ void testMain() {
 
       await debugLoadContentHashedAssetManifest(assets);
       expect(assets.getAssetUrl('assets/data/config.json'), 'assets/assets/data/config.json');
+    });
+
+    test('debugLoadContentHashedAssetManifest registers fontManifest and extraAssets from _flutter.buildConfig', () async {
+      final assets = ui_web.AssetManager();
+      _testFlutter = <String, Object?>{
+        'buildConfig': <String, Object?>{
+          'fontManifest': 'FontManifest.87654321.json',
+          'extraAssets': <String, Object?>{
+            'NOTICES': 'NOTICES.abcdef01',
+            'shaders/ink_sparkle.frag': 'shaders/ink_sparkle.fedcba98.frag',
+          },
+        },
+      }.jsify();
+      try {
+        await debugLoadContentHashedAssetManifest(assets);
+        expect(assets.getAssetUrl('FontManifest.json'), 'assets/FontManifest.87654321.json');
+        expect(assets.getAssetUrl('NOTICES'), 'assets/NOTICES.abcdef01');
+        expect(
+          assets.getAssetUrl('shaders/ink_sparkle.frag'),
+          'assets/shaders/ink_sparkle.fedcba98.frag',
+        );
+      } finally {
+        _testFlutter = null;
+      }
     });
   });
 }

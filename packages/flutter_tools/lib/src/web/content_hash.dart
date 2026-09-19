@@ -296,7 +296,41 @@ WebAssetHashResult hashWebAssets(Directory assetsDir) {
   );
 }
 
-final RegExp _buildConfigPrefixPattern = RegExp(r'_flutter\.buildConfig\s*=\s*\{');
+final RegExp _htmlCommentRegex = RegExp(r'<!--[\s\S]*?-->');
+
+final RegExp _jsCommentOrStringRegex = RegExp(
+  r'/\*[\s\S]*?\*/|(?<!:)//[^\r\n]*|"(?:\\.|[^"\\\r\n])*"|'
+  "'"
+  r'(?:\\.|[^'
+  "'"
+  r'\\\r\n])*'
+  "'"
+  r'|`(?:\\.|[^`\\])*`',
+);
+
+/// Strips HTML (`<!-- ... -->`) and JavaScript (`/* ... */`, `// ...`) comments
+/// from [content] while preserving single-quoted, double-quoted, and template
+/// string literals.
+String stripHtmlAndJsComments(String content) {
+  final String withoutHtmlComments = content.replaceAll(_htmlCommentRegex, '');
+  return withoutHtmlComments.replaceAllMapped(_jsCommentOrStringRegex, (Match match) {
+    final String token = match.group(0)!;
+    if (token.startsWith('/*') || token.startsWith('//')) {
+      return '';
+    }
+    return token;
+  });
+}
+
+final RegExp _buildConfigTokenOrCommentRegex = RegExp(
+  r'<!--[\s\S]*?-->|/\*[\s\S]*?\*/|(?<!:)//[^\r\n]*|"(?:\\.|[^"\\\r\n])*"|'
+  "'"
+  r'(?:\\.|[^'
+  "'"
+  r'\\\r\n])*'
+  "'"
+  r'|`(?:\\.|[^`\\])*`|_flutter\.buildConfig\s*=\s*\{',
+);
 
 int? _findMatchingClosingBrace(String text, int openBraceIndex) {
   var depth = 0;
@@ -333,7 +367,10 @@ String _updateBuildConfigInContent(
   WebAssetHashResult hashResult, {
   required String filePath,
 }) {
-  final Iterable<Match> matches = _buildConfigPrefixPattern.allMatches(content);
+  final List<Match> matches = _buildConfigTokenOrCommentRegex
+      .allMatches(content)
+      .where((Match m) => m.group(0)!.startsWith('_flutter.buildConfig'))
+      .toList();
   if (matches.isEmpty) {
     throwToolExit(
       'Failed to inject content-hashed asset manifest into $filePath: '
@@ -411,7 +448,7 @@ void injectManifestBuildConfig(Directory outputDir, WebAssetHashResult hashResul
       continue;
     }
     final String content = file.readAsStringSync();
-    if (!content.contains('_flutter.buildConfig')) {
+    if (!stripHtmlAndJsComments(content).contains('_flutter.buildConfig')) {
       continue;
     }
     final String updated = _updateBuildConfigInContent(content, hashResult, filePath: file.path);
