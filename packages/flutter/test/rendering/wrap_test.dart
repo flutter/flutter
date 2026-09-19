@@ -180,6 +180,78 @@ void main() {
     expect(renderWrap.computeMinIntrinsicWidth(80), 80);
   });
 
+  test('Compute max intrinsic width includes spacing', () {
+    final children = <RenderBox>[
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(minWidth: 80, minHeight: 80),
+      ),
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(minWidth: 80, minHeight: 80),
+      ),
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(minWidth: 80, minHeight: 80),
+      ),
+    ];
+
+    final renderWrap = RenderWrap();
+
+    children.forEach(renderWrap.add);
+
+    renderWrap.spacing = 5;
+    renderWrap.runSpacing = 5;
+    renderWrap.direction = Axis.horizontal;
+
+    // Laying the children out in a single run needs 3 * 80 for the children and
+    // 2 * 5 for the spacing between them.
+    expect(renderWrap.computeMaxIntrinsicWidth(double.infinity), 250);
+    // Every child can be placed in its own run, so the spacing does not
+    // contribute to the minimum intrinsic width.
+    expect(renderWrap.computeMinIntrinsicWidth(double.infinity), 80);
+  });
+
+  test('Compute max intrinsic height includes spacing', () {
+    final children = <RenderBox>[
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(minWidth: 80, minHeight: 80),
+      ),
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(minWidth: 80, minHeight: 80),
+      ),
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(minWidth: 80, minHeight: 80),
+      ),
+    ];
+
+    final renderWrap = RenderWrap();
+
+    children.forEach(renderWrap.add);
+
+    renderWrap.spacing = 5;
+    renderWrap.runSpacing = 5;
+    renderWrap.direction = Axis.vertical;
+
+    expect(renderWrap.computeMaxIntrinsicHeight(double.infinity), 250);
+    expect(renderWrap.computeMinIntrinsicHeight(double.infinity), 80);
+  });
+
+  test('Compute max intrinsic extent does not add spacing for a single child', () {
+    final renderWrap = RenderWrap();
+    renderWrap.add(
+      RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints(minWidth: 80, minHeight: 80),
+      ),
+    );
+
+    renderWrap.spacing = 5;
+    renderWrap.runSpacing = 5;
+
+    renderWrap.direction = Axis.horizontal;
+    expect(renderWrap.computeMaxIntrinsicWidth(double.infinity), 80);
+
+    renderWrap.direction = Axis.vertical;
+    expect(renderWrap.computeMaxIntrinsicHeight(double.infinity), 80);
+  });
+
   test('Wrap respects clipBehavior', () {
     const viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     final context = TestClipPaintingContext();
