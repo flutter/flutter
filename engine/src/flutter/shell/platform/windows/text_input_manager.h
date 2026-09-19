@@ -29,10 +29,17 @@ namespace flutter {
 class TextInputManager {
  public:
   TextInputManager() noexcept = default;
-  virtual ~TextInputManager() = default;
+  virtual ~TextInputManager();
 
   // Sets the window handle with which the IME is associated.
   void SetWindowHandle(HWND window_handle);
+
+  // Enables or disables IME input for the associated window.
+  //
+  // Enabling associates a new application-owned input context. The previous
+  // open and conversion status are preserved across disabling and re-enabling
+  // the context.
+  virtual void SetImeEnabled(bool enabled);
 
   // Creates a new IME window and system caret.
   //
@@ -82,6 +89,13 @@ class TextInputManager {
   void AbortComposing();
 
  private:
+  // Restores the context replaced by |owned_ime_context_| and destroys the
+  // application-owned context.
+  bool DestroyOwnedImeContext();
+
+  // Creates and associates a new application-owned input context.
+  bool CreateAndAssociateImeContext();
+
   // Returns either the composing string or result string based on the value of
   // the |type| parameter.
   std::optional<std::u16string> GetString(int type) const;
@@ -95,6 +109,21 @@ class TextInputManager {
 
   // True if IME-based composing is active.
   bool ime_active_ = false;
+
+  // The last known open status of the input context. This is retained while
+  // the context is disassociated from the window.
+  std::optional<bool> ime_open_status_;
+
+  // The last known conversion and sentence modes. These are retained while
+  // the context is disassociated from the window.
+  std::optional<DWORD> ime_conversion_mode_;
+  std::optional<DWORD> ime_sentence_mode_;
+
+  // The application-owned context, its associated window, and the previous
+  // context that must be restored before it is destroyed.
+  HWND owned_ime_window_ = nullptr;
+  HIMC owned_ime_context_ = nullptr;
+  HIMC replaced_ime_context_ = nullptr;
 
   // The system caret rect.
   Rect caret_rect_ = {{0, 0}, {0, 0}};
