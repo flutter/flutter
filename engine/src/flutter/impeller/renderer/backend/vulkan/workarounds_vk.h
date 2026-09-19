@@ -36,6 +36,14 @@ struct WorkaroundsVK {
   ///      * https://github.com/flutter/flutter/issues/159876
   ///      * https://github.com/flutter/flutter/issues/160587
   bool broken_mipmap_generation = false;
+
+  /// Mesa's "dozen" (dzn) D3D12 translation layer reports a
+  /// minImageTransferGranularity of (0,0,0) and fails sub-region
+  /// buffer-to-image copies with VK_ERROR_OUT_OF_HOST_MEMORY at
+  /// vkEndCommandBuffer. When set, sub-region copies use a staging
+  /// image as intermediary: buffer -> staging (full copy) -> destination
+  /// via vkCmdCopyImage (not constrained by transfer granularity).
+  bool skip_sub_region_buffer_to_image_copy = false;
 };
 
 WorkaroundsVK GetWorkaroundsFromDriverInfo(DriverInfoVK& driver_info);
