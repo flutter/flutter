@@ -375,6 +375,7 @@ class NavigationDestination extends StatelessWidget {
     required this.label,
     this.tooltip,
     this.enabled = true,
+    this.textAlign,
   });
 
   /// The [Widget] (usually an [Icon]) that's displayed for this
@@ -420,6 +421,18 @@ class NavigationDestination extends StatelessWidget {
   ///
   /// Defaults to true.
   final bool enabled;
+
+  /// The horizontal alignment of the [label] text.
+  ///
+  /// This parameter sets the [TextAlign] for the [Text] widget that displays
+  /// the [label] below the icon in this [NavigationDestination].
+  ///
+  /// Use this to customize the label's appearance for specific layout
+  /// constraints or text direction requirements.
+  ///
+  /// If null, defaults to [TextAlign.center], following the Material Design
+  /// navigation bar accessibility guidelines.
+  final TextAlign? textAlign;
 
   @override
   Widget build(BuildContext context) {
@@ -509,7 +522,7 @@ class NavigationDestination extends StatelessWidget {
             // sizes. To opt out, wrap the [label] widget in a [MediaQuery] widget
             // with a different `TextScaler`.
             maxScaleFactor: _kMaxLabelTextScaleFactor,
-            child: Text(label, style: textStyle),
+            child: Text(label, style: textStyle, textAlign: textAlign ?? TextAlign.center),
           ),
         );
       },
