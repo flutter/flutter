@@ -62,10 +62,7 @@ source_set("InternalFlutterSwift") {
     "//flutter/shell/platform/darwin/macos/framework",  # For module.modulemap
   ]
   bridge_header = "InternalFlutterSwift-Bridging-Header.h"
-  sources = [
-    "framework/Source/FlutterRunLoop.swift",
-    "framework/Source/ResizeSynchronizer.swift",
-  ]
+  sources = [ "framework/Source/ResizeSynchronizer.swift" ]
   deps = [ "//flutter/shell/platform/darwin/common:framework_common" ]
   public = _flutter_framework_headers + framework_common_headers
 }

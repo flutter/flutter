@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @testable import InternalFlutterSwift
+import InternalFlutterSwiftCommon
 import Testing
 
 // Tests for `ResizeSynchronizer`.
