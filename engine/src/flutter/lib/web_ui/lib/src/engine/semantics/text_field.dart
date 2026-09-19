@@ -438,10 +438,13 @@ class SemanticTextField extends SemanticRole {
       SemanticsTextEditingStrategy._instance?.activate(this);
     }
 
-    if (semanticsObject.hasLabel) {
-      if (semanticsObject.isLabelDirty) {
-        editableElement.setAttribute('aria-label', semanticsObject.label!);
-      }
+    final String? label = semanticsObject.label;
+    final bool hasNonEmptyLabel = label != null && label.trim().isNotEmpty;
+    final String? hint = semanticsObject.hint;
+    final bool hasNonEmptyHint = hint != null && hint.trim().isNotEmpty;
+    final String? effectiveLabel = hasNonEmptyLabel ? label : (hasNonEmptyHint ? hint : null);
+    if (effectiveLabel != null) {
+      editableElement.setAttribute('aria-label', effectiveLabel);
     } else {
       editableElement.removeAttribute('aria-label');
     }
@@ -452,21 +455,16 @@ class SemanticTextField extends SemanticRole {
       editableElement.removeAttribute('aria-required');
     }
 
-    // Apply hint as aria-description on the editable element so screen readers
-    // announce it along with the input field. This enables form validation
-    // errors to be announced when the error text is passed via the hint property.
-    _updateHintDescription();
-
-    _updateInputType();
-  }
-
-  void _updateHintDescription() {
-    final String? hint = semanticsObject.hint;
-    if (hint != null && hint.trim().isNotEmpty) {
+    // Apply hint as aria-description on the editable element only when a
+    // distinct primary label is present so screen readers do not announce the
+    // hint twice when it is promoted to aria-label.
+    if (hasNonEmptyLabel && hasNonEmptyHint) {
       editableElement.setAttribute('aria-description', hint);
     } else {
       editableElement.removeAttribute('aria-description');
     }
+
+    _updateInputType();
   }
 
   void _updateEnabledState() {
