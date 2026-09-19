@@ -848,4 +848,120 @@ void testMain() {
       expect(myWindow.physicalSize, initialPhysicalSize);
     });
   });
+
+  group('viewPadding', () {
+    const dpr = 2.5;
+    // The insets a notched phone reports in portrait.
+    const double logicalTopInset = 44;
+    const double logicalBottomInset = 34;
+    late DomElement viewportMeta;
+    late String originalViewportContent;
+
+    setUp(() {
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
+
+      // Opt the page into a full-bleed layout, the way an app does by declaring
+      // `viewport-fit=cover` in its `index.html`.
+      viewportMeta = domDocument.querySelector('meta[name="viewport"][flt-viewport]')!;
+      originalViewportContent = viewportMeta.getAttribute('content')!;
+      viewportMeta.setAttribute('content', '$originalViewportContent, viewport-fit=cover');
+
+      // A desktop test browser reports no safe area of its own, so put the
+      // values of a notched phone in the probe that the engine measures.
+      final provider = myWindow.dimensionsProvider as FullPageDimensionsProvider;
+      provider.safeAreaProbe.style
+        ..setProperty('padding-top', '${logicalTopInset}px', 'important')
+        ..setProperty('padding-bottom', '${logicalBottomInset}px', 'important');
+    });
+
+    tearDown(() {
+      viewportMeta.setAttribute('content', originalViewportContent);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null);
+    });
+
+    test('reports the safe area of the device in the full page mode', () {
+      myWindow.debugForceResize();
+
+      expect(myWindow.viewPadding.top, logicalTopInset * dpr);
+      expect(myWindow.viewPadding.bottom, logicalBottomInset * dpr);
+      // Nothing else is covering the safe area, so `padding` matches it.
+      expect(myWindow.padding.top, logicalTopInset * dpr);
+      expect(myWindow.padding.bottom, logicalBottomInset * dpr);
+    });
+
+    test('is refreshed by a real browser resize, not just `debugForceResize`', () async {
+      // `_handleBrowserResize` is the only production path that refreshes the
+      // cached padding, so it is exercised here through an actual resize event
+      // rather than through the debug seam.
+      myWindow.debugForceResize();
+      expect(myWindow.viewPadding.bottom, logicalBottomInset * dpr);
+
+      // Simulate a rotation that takes the home indicator out of play.
+      final provider = myWindow.dimensionsProvider as FullPageDimensionsProvider;
+      provider.safeAreaProbe.style.setProperty('padding-bottom', '0px', 'important');
+
+      final Future<void> resized = myWindow.onResize.first;
+      (domWindow.visualViewport ?? domWindow).dispatchEvent(createDomEvent('Event', 'resize'));
+      await resized;
+
+      expect(myWindow.viewPadding.bottom, 0);
+    });
+
+    test('is zero when the app did not opt into a full-bleed layout', () {
+      viewportMeta.setAttribute('content', originalViewportContent);
+
+      myWindow.debugForceResize();
+
+      expect(myWindow.viewPadding.top, 0);
+      expect(myWindow.viewPadding.bottom, 0);
+      expect(myWindow.padding.bottom, 0);
+    });
+
+    test('is zero for a view embedded in a custom element', () {
+      final DomHTMLDivElement host = createDomHTMLDivElement();
+      domDocument.body!.append(host);
+      final view = EngineFlutterView(EnginePlatformDispatcher.instance, host);
+      addTearDown(() {
+        view.dispose();
+        host.remove();
+      });
+
+      expect(view.viewPadding.bottom, 0);
+      expect(view.padding.bottom, 0);
+    });
+  });
+
+  group('ViewPadding.minus', () {
+    const padding = ViewPadding(left: 10, top: 20, right: 30, bottom: 40);
+
+    test('leaves the padding alone when nothing is covering the view', () {
+      final ViewPadding result = padding.minus(
+        const ViewPadding(left: 0, top: 0, right: 0, bottom: 0),
+      );
+
+      expect(result.left, 10);
+      expect(result.top, 20);
+      expect(result.right, 30);
+      expect(result.bottom, 40);
+    });
+
+    test('subtracts an inset that partially covers the safe area', () {
+      // A keyboard that is shorter than the bottom safe area.
+      final ViewPadding result = padding.minus(
+        const ViewPadding(left: 0, top: 0, right: 0, bottom: 15),
+      );
+
+      expect(result.bottom, 25);
+    });
+
+    test('clamps to zero for an inset that fully covers the safe area', () {
+      // A keyboard that is taller than the bottom safe area.
+      final ViewPadding result = padding.minus(
+        const ViewPadding(left: 0, top: 0, right: 0, bottom: 400),
+      );
+
+      expect(result.bottom, 0, reason: 'Padding should never go negative.');
+      expect(result.top, 20, reason: 'The other sides should be untouched.');
+    });
+  });
 }
