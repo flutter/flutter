@@ -5344,6 +5344,86 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownSceneToOpenGLSurfaces) {
   ASSERT_EQ(context.GetSurfacePresentCount(), 0u);
 }
 
+TEST_F(EmbedderTest, CanRegisterAndResolveHardwareBufferExternalTextureGL) {
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
+  fml::AutoResetWaitableEvent isolate_latch;
+  context.AddIsolateCreateCallback(
+      [&isolate_latch]() { isolate_latch.Signal(); });
+
+  fml::AutoResetWaitableEvent frame_latch;
+  bool callback_invoked = false;
+  bool destruction_invoked = false;
+
+  context.GetRendererConfig()
+      .open_gl.hardware_buffer_external_texture_frame_callback =
+      [&](void* user_data, int64_t texture_id, size_t width, size_t height,
+          FlutterHardwareBufferExternalTexture* texture) -> bool {
+    callback_invoked = true;
+    texture->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+    texture->width = width;
+    texture->height = height;
+    texture->format = 1;
+    texture->fence_fd = -1;
+    texture->buffer = reinterpret_cast<FlutterHardwareBufferHandle>(0x9999);
+    texture->user_data = &destruction_invoked;
+    texture->destruction_callback = [](void* data) {
+      if (data) {
+        *static_cast<bool*>(data) = true;
+      }
+    };
+    frame_latch.Signal();
+    return true;
+  };
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetDartEntrypoint("render_texture_impeller_test");
+  builder.SetSurface(DlISize(800, 600));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  isolate_latch.Wait();
+
+  constexpr int64_t texture_id = 1;
+  flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
+  ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  frame_latch.Wait();
+  EXPECT_TRUE(callback_invoked);
+
+  ASSERT_TRUE(embedder_engine->UnregisterTexture(texture_id));
+  engine.reset();
+  EXPECT_TRUE(destruction_invoked);
+}
+
+TEST_F(EmbedderTest,
+       HardwareBufferExternalTextureConflictingCallbacksRejection) {
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+
+  // Configure BOTH gl_external_texture_frame_callback and
+  // hardware_buffer_external_texture_frame_callback.
+  context.GetRendererConfig().open_gl.gl_external_texture_frame_callback =
+      [](void* user_data, int64_t id, size_t width, size_t height,
+         FlutterOpenGLTexture* texture) -> bool { return false; };
+  context.GetRendererConfig()
+      .open_gl.hardware_buffer_external_texture_frame_callback =
+      [](void* user_data, int64_t id, size_t width, size_t height,
+         FlutterHardwareBufferExternalTexture* texture) -> bool {
+    return false;
+  };
+
+  auto engine = builder.InitializeEngine();
+  EXPECT_FALSE(engine.is_valid());
+}
+
 INSTANTIATE_TEST_SUITE_P(
     EmbedderTestGlVk,
     EmbedderTestMultiBackend,

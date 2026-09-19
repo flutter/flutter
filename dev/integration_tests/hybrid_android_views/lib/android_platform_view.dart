@@ -18,6 +18,7 @@ class AndroidPlatformView extends StatelessWidget {
     super.key,
     this.onPlatformViewCreated,
     this.useHybridComposition = false,
+    this.gestureRecognizers = const <Factory<OneSequenceGestureRecognizer>>{},
     required this.viewType,
   });
 
@@ -34,6 +35,9 @@ class AndroidPlatformView extends StatelessWidget {
   // Use hybrid composition.
   final bool useHybridComposition;
 
+  /// Which gestures should be forwarded to the platform view.
+  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
+
   @override
   Widget build(BuildContext context) {
     return PlatformViewLink(
@@ -41,7 +45,7 @@ class AndroidPlatformView extends StatelessWidget {
       surfaceFactory: (BuildContext context, PlatformViewController controller) {
         return AndroidViewSurface(
           controller: controller as AndroidViewController,
-          gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+          gestureRecognizers: gestureRecognizers,
           hitTestBehavior: PlatformViewHitTestBehavior.opaque,
         );
       },

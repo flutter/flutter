@@ -18,6 +18,7 @@
 #include "flutter/common/constants.h"
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/base32.h"
+#include "flutter/fml/closure.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/icu_util.h"
 #include "flutter/fml/log_settings.h"
@@ -300,8 +301,13 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
        shell = shell.get()]() {
         TRACE_EVENT0("flutter", "ShellSetupGPUSubsystem");
         std::unique_ptr<Rasterizer> rasterizer(on_create_rasterizer(*shell));
-        rasterizer->SetImpellerContext(impeller_context_future);
-        snapshot_delegate_promise.set_value(rasterizer->GetSnapshotDelegate());
+        if (rasterizer) {
+          rasterizer->SetImpellerContext(impeller_context_future);
+          snapshot_delegate_promise.set_value(
+              rasterizer->GetSnapshotDelegate());
+        } else {
+          snapshot_delegate_promise.set_value({});
+        }
         rasterizer_promise.set_value(std::move(rasterizer));
       });
 
@@ -338,6 +344,14 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   // to create the animator.
   auto vsync_waiter = platform_view->CreateVSyncWaiter();
   if (!vsync_waiter) {
+    auto rasterizer = rasterizer_future.get();
+    if (rasterizer) {
+      fml::TaskRunner::RunNowOrPostTask(
+          task_runners.GetRasterTaskRunner(),
+          fml::MakeCopyable([rasterizer = std::move(rasterizer)]() mutable {
+            rasterizer.reset();
+          }));
+    }
     return nullptr;
   }
 
@@ -435,10 +449,14 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                              runtime_stage_future));
       }));
 
+  auto engine = engine_future.get();
+  auto rasterizer = rasterizer_future.get();
+  auto io_manager = io_manager_future.get();
+
   if (!shell->Setup(std::move(platform_view),  //
-                    engine_future.get(),       //
-                    rasterizer_future.get(),   //
-                    io_manager_future.get())   //
+                    std::move(engine),         //
+                    std::move(rasterizer),     //
+                    io_manager)                //
   ) {
     return nullptr;
   }
@@ -626,7 +644,9 @@ Shell::~Shell() {
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetPlatformTaskRunner(),
       fml::MakeCopyable([this, &platiso_latch]() mutable {
-        engine_->ShutdownPlatformIsolates();
+        if (engine_) {
+          engine_->ShutdownPlatformIsolates();
+        }
         platiso_latch.Signal();
       }));
   platiso_latch.Wait();
@@ -868,6 +888,25 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   }
 
   if (!platform_view || !engine || !rasterizer || !io_manager) {
+    if (engine) {
+      fml::TaskRunner::RunNowOrPostTask(
+          task_runners_.GetUITaskRunner(),
+          fml::MakeCopyable(
+              [engine = std::move(engine)]() mutable { engine.reset(); }));
+    }
+    if (rasterizer) {
+      fml::TaskRunner::RunNowOrPostTask(
+          task_runners_.GetRasterTaskRunner(),
+          fml::MakeCopyable([rasterizer = std::move(rasterizer)]() mutable {
+            rasterizer.reset();
+          }));
+    }
+    if (io_manager) {
+      fml::TaskRunner::RunNowOrPostTask(
+          task_runners_.GetIOTaskRunner(),
+          fml::MakeCopyable(
+              [io_mgr = io_manager]() mutable { io_mgr.reset(); }));
+    }
     return false;
   }
 
@@ -1693,8 +1732,7 @@ void Shell::LoadDartDeferredLibrary(
     std::unique_ptr<const fml::Mapping> snapshot_data,
     std::unique_ptr<const fml::Mapping> snapshot_instructions) {
   task_runners_.GetUITaskRunner()->PostTask(fml::MakeCopyable(
-      [engine = engine_->GetWeakPtr(), loading_unit_id,
-       data = std::move(snapshot_data),
+      [engine = weak_engine_, loading_unit_id, data = std::move(snapshot_data),
        instructions = std::move(snapshot_instructions)]() mutable {
         if (engine) {
           engine->LoadDartDeferredLibrary(loading_unit_id, std::move(data),
@@ -2389,11 +2427,11 @@ Rasterizer::Screenshot Shell::Screenshot(
                                             screenshot_type,               //
                                             base64_encode                  //
   ]() {
+        fml::ScopedCleanupClosure cleanup([&latch]() { latch.Signal(); });
         if (rasterizer) {
           screenshot = rasterizer->ScreenshotLastLayerTree(screenshot_type,
                                                            base64_encode);
         }
-        latch.Signal();
       });
   latch.Wait();
   return screenshot;

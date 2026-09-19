@@ -8,17 +8,18 @@
 #include <type_traits>
 
 // Checks if the given struct contains a member, whether set or not.
-#define STRUCT_HAS_MEMBER(pointer, member)                           \
-  ((offsetof(std::remove_pointer<decltype(pointer)>::type, member) + \
-        sizeof(pointer->member) <=                                   \
-    pointer->struct_size))
+#define STRUCT_HAS_MEMBER(pointer, member)                            \
+  ((pointer) != nullptr &&                                            \
+   ((offsetof(std::remove_pointer<decltype(pointer)>::type, member) + \
+         sizeof((pointer)->member) <=                                 \
+     (pointer)->struct_size)))
 
-#define SAFE_ACCESS(pointer, member, default_value)                 \
-  ([=]() {                                                          \
-    if (STRUCT_HAS_MEMBER(pointer, member)) {                       \
-      return pointer->member;                                       \
-    }                                                               \
-    return static_cast<decltype(pointer->member)>((default_value)); \
+#define SAFE_ACCESS(pointer, member, default_value)                   \
+  ([=]() {                                                            \
+    if (STRUCT_HAS_MEMBER(pointer, member)) {                         \
+      return (pointer)->member;                                       \
+    }                                                                 \
+    return static_cast<decltype((pointer)->member)>((default_value)); \
   })()
 
 /// Checks if the member exists and is non-null.

@@ -4,7 +4,11 @@
 
 #include "flutter/fml/platform/android/jni_util.h"
 
+#if defined(__linux__) || defined(__ANDROID__)
 #include <sys/prctl.h>
+#elif defined(__APPLE__)
+#include <pthread.h>
+#endif
 
 #include <memory>
 #include <string>
@@ -44,10 +48,18 @@ JNIEnv* AttachCurrentThread() {
   JavaVMAttachArgs args;
   args.version = JNI_VERSION_1_4;
   args.group = nullptr;
-  // 16 is the maximum size for thread names on Android.
-  char thread_name[16];
+  // 16 is the maximum size for thread names on Linux/Android; Darwin allows up
+  // to 64.
+  char thread_name[64] = {0};
+#if defined(__linux__) || defined(__ANDROID__)
   int err = prctl(PR_GET_NAME, thread_name);
-  if (err < 0) {
+#elif defined(__APPLE__)
+  int err =
+      pthread_getname_np(pthread_self(), thread_name, sizeof(thread_name));
+#else
+  int err = -1;
+#endif
+  if (err != 0 || thread_name[0] == '\0') {
     args.name = nullptr;
   } else {
     args.name = thread_name;
