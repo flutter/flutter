@@ -383,6 +383,59 @@ void main() {
       expect(controller.value.canRedo, true);
     }, variant: TargetPlatformVariant.all());
 
+    // Regression test for https://github.com/flutter/flutter/issues/99186.
+    testWidgets('a change that is still throttled is recorded before an undo or a redo', (
+      WidgetTester tester,
+    ) async {
+      final value = ValueNotifier<int>(0);
+      addTearDown(value.dispose);
+      final controller = UndoHistoryController();
+      addTearDown(controller.dispose);
+      final key = GlobalKey<UndoHistoryState<int>>();
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: UndoHistory<int>(
+            key: key,
+            controller: controller,
+            value: value,
+            onTriggered: (int newValue) {
+              value.value = newValue;
+            },
+            focusNode: _focusNode,
+            child: Container(),
+          ),
+        ),
+      );
+
+      _focusNode.requestFocus();
+
+      // Wait for the throttling so that the initial value is recorded.
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // A redo before the throttling delay has elapsed must not revert the
+      // change, because there is nothing to redo.
+      value.value = 1;
+      await tester.pump();
+      key.currentState!.redo();
+      expect(value.value, 1);
+      expect(controller.value.canUndo, true);
+      expect(controller.value.canRedo, false);
+
+      // The change can be undone and redone even though it was undone before
+      // the throttling delay had elapsed.
+      value.value = 2;
+      await tester.pump();
+      key.currentState!.undo();
+      expect(value.value, 1);
+      expect(controller.value.canUndo, true);
+      expect(controller.value.canRedo, true);
+      key.currentState!.redo();
+      expect(value.value, 2);
+      expect(controller.value.canUndo, true);
+      expect(controller.value.canRedo, false);
+    }, variant: TargetPlatformVariant.all());
+
     testWidgets('ignores value changes pushed during onTriggered', (WidgetTester tester) async {
       final value = ValueNotifier<int>(0);
       addTearDown(value.dispose);
