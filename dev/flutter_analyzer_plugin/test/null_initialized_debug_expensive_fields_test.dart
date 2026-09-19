@@ -6,9 +6,8 @@ import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
 import 'package:flutter_analyzer_plugin/src/rules/null_initialized_debug_expensive_fields.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
-@reflectiveTest
 class NullInitializedDebugExpensiveFieldsTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -18,8 +17,9 @@ class NullInitializedDebugExpensiveFieldsTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => NullInitializedDebugExpensiveFields.code.name;
+}
 
-  static const String source = '''
+const String _source = '''
 class GoodClass {
   @_debugOnly
   final int? _foo = kDebugMode ? 1 : null;
@@ -62,18 +62,21 @@ abstract final class foundation {
 }
 ''';
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_null_initialized() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[
-      lint(122, 8),
-      lint(174, 4),
-      lint(228, 25),
-    ]);
-  }
-}
-
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(NullInitializedDebugExpensiveFieldsTest);
+  late NullInitializedDebugExpensiveFieldsTest testSuite;
+
+  setUp(() {
+    testSuite = NullInitializedDebugExpensiveFieldsTest();
+    testSuite.setUp();
+  });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('null initialized', () async {
+    await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[
+      testSuite.lint(122, 8),
+      testSuite.lint(174, 4),
+      testSuite.lint(228, 25),
+    ]);
   });
 }
