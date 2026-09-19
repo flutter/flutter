@@ -1356,12 +1356,14 @@ std::shared_ptr<Texture> DisplayListToTexture(
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
   context.GetTextShadowCache().MarkFrameStart();
+  context.GetGradientTextureCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
       context.GetTransientsDataBuffer().Reset();
       context.GetTransientsIndexesBuffer().Reset();
     }
     context.GetTextShadowCache().MarkFrameEnd();
+    context.GetGradientTextureCache().MarkFrameEnd();
     context.GetLazyGlyphAtlas()->ResetTextFrames();
     context.GetContext()->DisposeThreadLocalCachedResources();
   });
@@ -1404,11 +1406,13 @@ bool RenderToTarget(ContentContext& context,
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
   context.GetTextShadowCache().MarkFrameStart();
+  context.GetGradientTextureCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
       context.ResetTransientsBuffers();
     }
     context.GetTextShadowCache().MarkFrameEnd();
+    context.GetGradientTextureCache().MarkFrameEnd();
   });
 
   display_list->Dispatch(impeller_dispatcher, cull_rect);

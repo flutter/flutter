@@ -34,7 +34,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
-#include "impeller/entity/contents/gradient_generator.h"
+#include "impeller/entity/contents/gradient_texture_cache.h"
 #include "impeller/entity/contents/shadow_vertices_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
@@ -60,7 +60,6 @@
 #include "impeller/entity/save_layer_utils.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
-#include "impeller/geometry/gradient.h"
 #include "impeller/geometry/round_superellipse_param.h"
 #include "impeller/geometry/rounding_radii.h"
 #include "impeller/geometry/rstransform.h"
@@ -333,9 +332,8 @@ CreateUberSDFGradientParameters(const ContentContext& renderer,
     return std::nullopt;
   }
 
-  GradientData gradient_data = CreateGradientBuffer(colors, stops);
-  std::shared_ptr<Texture> texture =
-      CreateGradientTexture(gradient_data, renderer.GetContext());
+  std::shared_ptr<Texture> texture = renderer.GetGradientTextureCache().Lookup(
+      renderer.GetContext(), colors, stops);
   if (!texture) {
     return std::nullopt;
   }

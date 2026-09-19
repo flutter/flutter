@@ -567,7 +567,8 @@ ContentContext::ContentContext(
           context_->GetIdleWaiter(),
           context_->GetCapabilities()->GetMinimumUniformAlignment(),
           context_->GetSubmissionTracker())),
-      text_shadow_cache_(std::make_unique<TextShadowCache>()) {
+      text_shadow_cache_(std::make_unique<TextShadowCache>()),
+      gradient_texture_cache_(std::make_unique<GradientTextureCache>()) {
   if (!context_ || !context_->IsValid()) {
     return;
   }
