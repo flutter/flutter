@@ -55,8 +55,9 @@ class WrappedTextureSourceVK : public impeller::TextureSourceVK {
 
 GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
     GPUSurfaceVulkanDelegate* delegate,
-    std::shared_ptr<impeller::Context> context)
-    : delegate_(delegate) {
+    std::shared_ptr<impeller::Context> context,
+    bool render_to_surface)
+    : delegate_(delegate), render_to_surface_(render_to_surface) {
   if (!context || !context->IsValid()) {
     return;
   }
@@ -86,6 +87,28 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
   if (!IsValid()) {
     FML_LOG(ERROR) << "Vulkan surface was invalid.";
     return nullptr;
+  }
+
+  // Per-frame upkeep, not part of presenting: release this thread's cached
+  // command and descriptor pools whether or not a frame is acquired below.
+  // Skipping it when the compositor presents would leave the raster thread
+  // holding those pools for the life of the engine.
+  if (impeller_context_) {
+    impeller::ContextVK::Cast(*impeller_context_)
+        .DisposeThreadLocalCachedResources();
+  }
+
+  // Nothing to acquire or present when an external view embedder owns
+  // presentation: the compositor presents the layers. Without this the engine
+  // presents an unrendered root image after every composited frame, which on a
+  // scanout ring overwrites the frame just shown -- one good frame, then black.
+  if (!render_to_surface_) {
+    return std::make_unique<SurfaceFrame>(
+        nullptr, SurfaceFrame::FramebufferInfo{.supports_readback = true},
+        [](const SurfaceFrame& surface_frame, DlCanvas* canvas) {
+          return true;
+        },
+        [](const SurfaceFrame& surface_frame) { return true; }, size);
   }
 
   if (size.IsEmpty()) {
@@ -160,8 +183,6 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
 
     impeller::ContextVK& context_vk =
         impeller::ContextVK::Cast(*impeller_context_);
-
-    context_vk.DisposeThreadLocalCachedResources();
 
     impeller::vk::Image vk_image =
         impeller::vk::Image(reinterpret_cast<VkImage>(flutter_image.image));
