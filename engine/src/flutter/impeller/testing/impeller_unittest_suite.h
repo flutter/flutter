@@ -8,7 +8,7 @@
 namespace impeller {
 namespace testing {
 
-void ImpellerUnittestSetup();
+bool ImpellerUnittestSetup();
 
 }  // namespace testing
 }  // namespace impeller

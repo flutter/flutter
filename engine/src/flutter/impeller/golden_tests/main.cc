@@ -11,6 +11,7 @@
 #include "flutter/impeller/base/validation.h"
 #include "flutter/impeller/golden_tests/golden_digest.h"
 #include "flutter/impeller/golden_tests/working_directory.h"
+#include "flutter/impeller/playground/switches.h"
 #include "gtest/gtest.h"
 
 namespace {
@@ -37,16 +38,22 @@ int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   fml::CommandLine cmd = fml::CommandLineFromPlatformOrArgcArgv(argc, argv);
 
-  std::optional<std::string> working_dir;
-  for (const auto& option : cmd.options()) {
-    if (option.name == "working_dir") {
-      wordexp_t wordexp_result;
-      int code = wordexp(option.value.c_str(), &wordexp_result, 0);
-      FML_CHECK(code == 0);
-      FML_CHECK(wordexp_result.we_wordc != 0);
-      working_dir = wordexp_result.we_wordv[0];
-      wordfree(&wordexp_result);
-    }
+  if (!impeller::PlaygroundSwitches::InitCommandLineSwitches(cmd,
+                                                             "working_dir")) {
+    FML_LOG(ERROR) << "Playground switches setup failure";
+    return 1;
+  }
+
+  const impeller::PlaygroundSwitches& switches =
+      impeller::PlaygroundSwitches::CommandLineSwitches();
+  std::optional<std::string> working_dir = switches.golden_output_dir;
+  if (working_dir) {
+    wordexp_t wordexp_result;
+    int code = wordexp(working_dir.value().c_str(), &wordexp_result, 0);
+    FML_CHECK(code == 0);
+    FML_CHECK(wordexp_result.we_wordc != 0);
+    working_dir = wordexp_result.we_wordv[0];
+    wordfree(&wordexp_result);
   }
   if (!working_dir) {
     std::cout << "required argument \"working_dir\" is missing." << std::endl
@@ -55,7 +62,8 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  impeller::testing::WorkingDirectory::Instance()->SetPath(working_dir.value());
+  impeller::testing::WorkingDirectory::Instance()->SetPath(
+      switches.golden_output_dir.value());
   std::cout << "working directory: "
             << impeller::testing::WorkingDirectory::Instance()->GetPath()
             << std::endl;
