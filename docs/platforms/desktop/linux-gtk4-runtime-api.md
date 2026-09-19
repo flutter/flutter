@@ -24,6 +24,32 @@ state/property/relation updates, remain ordinary direct calls.
 
 ## Implementation
 
+### Host diagnostics
+
+Run `flutter doctor -v` to inspect the **GTK4 host capabilities** section.
+It reports the development package version from `pkg-config` separately from
+the GTK4 runtime loaded by a short-lived helper process. The helper uses the
+bundled Dart SDK and does not initialize GTK or open a display. It checks both
+the runtime version and the symbols needed for native accessibility traversal,
+accessible text, announcements, and DMA-BUF textures.
+
+These are host API prerequisites, not guarantees of engine feature enablement
+or screen-reader parity. In particular, GTK 4.8 can run the embedder but lacks
+the native traversal APIs used to export Flutter's semantic tree. DMA-BUF API
+availability does not establish GPU, compositor, buffer-format, or modifier
+compatibility; those checks still happen while the application runs.
+
+GTK3 remains the default Linux build-dependency check. With
+`flutter config --linux-gtk-default=gtk4`, doctor checks GTK4 development
+dependencies and warns when the GTK4 runtime is missing or too old. Missing
+optional APIs remain informational. Doctor uses this configured default, not a
+project's GTK selection or a previous `flutter run --linux-gtk` argument.
+
+The probe uses the current process environment's library search paths. An app
+in a container, sandbox, or bundle may load different libraries. Cross-build
+`pkg-config` metadata may also describe a sysroot rather than the host runtime.
+A probe failure is reported as unknown capability, not API absence.
+
 [fl_gtk4_runtime_api.h](../../../engine/src/flutter/shell/platform/linux/fl_gtk4_runtime_api.h)
 declares the internal function table, wrappers, opaque types, and private
 interface layouts.
