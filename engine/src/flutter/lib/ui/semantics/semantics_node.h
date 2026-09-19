@@ -170,7 +170,7 @@ struct SemanticsNode {
   int32_t headingLevel = 0;
 
   std::string linkUrl;
-  SemanticsRole role;
+  SemanticsRole role = SemanticsRole::kNone;
   SemanticsValidationResult validationResult = SemanticsValidationResult::kNone;
   // A locale string in BCP 47 format
   std::string locale;

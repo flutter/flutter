@@ -11,13 +11,22 @@
 #include "flutter/assets/asset_resolver.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
 
-class APKAssetProviderInternal {
+class APKAssetProviderInternal
+    : public std::enable_shared_from_this<APKAssetProviderInternal> {
  public:
   virtual std::unique_ptr<fml::Mapping> GetAsMapping(
       const std::string& asset_name) const = 0;
+
+  // Returns a FlutterAssetResolver representing this asset provider for use
+  // with the Flutter Embedder C-API.
+  //
+  // Note: The instance must be managed by a std::shared_ptr (due to
+  // std::enable_shared_from_this).
+  virtual FlutterAssetResolver ToFlutterAssetResolver() const;
 
  protected:
   virtual ~APKAssetProviderInternal() = default;
@@ -42,6 +51,20 @@ class APKAssetProvider final : public AssetResolver {
   // This method is intended for use in tests. Callers must not
   // delete the returned pointer.
   APKAssetProviderInternal* GetImpl() const { return impl_.get(); }
+
+  // Returns a FlutterAssetResolver representing this asset provider for use
+  // with the Flutter Embedder C-API.
+  FlutterAssetResolver ToFlutterAssetResolver() const;
+
+  // Creates a FlutterAssetResolver from a Java AssetManager jobject.
+  static FlutterAssetResolver CreateFlutterAssetResolver(JNIEnv* env,
+                                                         jobject asset_manager,
+                                                         std::string directory);
+
+  // Creates a FlutterAssetResolver from an NDK AAssetManager pointer.
+  static FlutterAssetResolver CreateFlutterAssetResolver(
+      AAssetManager* asset_manager,
+      std::string directory);
 
   bool operator==(const AssetResolver& other) const override;
 
