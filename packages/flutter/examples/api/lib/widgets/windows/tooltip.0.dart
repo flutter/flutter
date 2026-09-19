@@ -4,8 +4,6 @@
 
 // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
 // See: https://github.com/flutter/flutter/issues/177586
-// TODO(mattkae): refactor this example for better widget position tracking
-// This positioning logic is simpler than you might want in production. See https://github.com/flutter/flutter/issues/178829.
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
 import 'package:flutter/material.dart';
@@ -14,14 +12,19 @@ import 'package:flutter/src/widgets/_window_positioner.dart';
 
 void main() {
   try {
+    WidgetsFlutterBinding.ensureInitialized();
     runWidget(
-      Window(
-        controller: WindowController(
-          size: const Size(800, 600),
-          constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-          title: 'Example Window',
-        ),
-        child: const MaterialApp(home: MyApp()),
+      WindowManager(
+        initialWindows: <WindowEntry>[
+          WindowEntry(
+            controller: WindowController(
+              size: const Size(800, 600),
+              constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+              title: 'Example Window',
+            ),
+            builder: (BuildContext context) => const MaterialApp(home: MyApp()),
+          ),
+        ],
       ),
     );
   } on UnsupportedError catch (e) {
@@ -45,69 +48,64 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final GlobalKey _key = GlobalKey();
-  TooltipWindowController? _tooltipController;
+  final NestedWindowController _nestedWindowController =
+      NestedWindowController();
 
   @override
-  Widget build(BuildContext context) {
-    final List<Widget> children = <Widget>[
-      Text(
-        key: _key,
-        'Hover Me',
-        style: const TextStyle(color: Colors.white),
-      ),
-    ];
+  void dispose() {
+    _nestedWindowController.dispose();
+    super.dispose();
+  }
 
-    if (_tooltipController != null) {
-      children.add(
-        TooltipWindow(
-          controller: _tooltipController!,
-          child: Container(
-            padding: const .all(8),
-            color: Colors.black,
-            child: const Text(
-              'This is a tooltip',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return MouseRegion(
-      onEnter: (_) => setState(
-        () => _tooltipController = TooltipWindowController(
-          parent: WindowScope.of(context),
-          anchorRect: _getAnchorRect()!,
-          positioner: const WindowPositioner(
-            parentAnchor: WindowPositionerAnchor.right,
-            childAnchor: WindowPositionerAnchor.left,
-          ),
-        ),
+  WindowEntry _buildTooltipEntry(Rect? anchorRect) {
+    final TooltipWindowController tooltipController = TooltipWindowController(
+      parent: WindowScope.of(context),
+      anchorRect: anchorRect!,
+      positioner: const WindowPositioner(
+        parentAnchor: WindowPositionerAnchor.right,
+        childAnchor: WindowPositionerAnchor.left,
       ),
-      onExit: (_) => setState(() {
-        _tooltipController?.destroy();
-        _tooltipController = null;
-      }),
-      cursor: SystemMouseCursors.click,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        color: _tooltipController != null ? Colors.blueAccent : Colors.blue,
-        padding: const .all(12),
-        child: Row(children: children),
+    );
+    return WindowEntry(
+      controller: tooltipController,
+      builder: (BuildContext context) => Container(
+        padding: const .all(8),
+        color: Colors.black,
+        child: const Text(
+          'This is a tooltip',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
     );
   }
 
-  Rect? _getAnchorRect() {
-    final RenderBox? renderBox =
-        _key.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      final Offset position = renderBox.localToGlobal(Offset.zero);
-      final Size size = renderBox.size;
-      return position & size; // creates a Rect
-    }
-
-    return null;
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: NestedWindow(
+        controller: _nestedWindowController,
+        entryBuilder: _buildTooltipEntry,
+        child: MouseRegion(
+          onEnter: (_) => _nestedWindowController.show(),
+          onExit: (_) => _nestedWindowController.hide(),
+          cursor: SystemMouseCursors.click,
+          child: ListenableBuilder(
+            listenable: _nestedWindowController,
+            builder: (BuildContext context, Widget? child) => AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              color: _nestedWindowController.showing
+                  ? Colors.blueAccent
+                  : Colors.blue,
+              padding: const .all(12),
+              child: child,
+            ),
+            child: const Text(
+              'Hover Me',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
