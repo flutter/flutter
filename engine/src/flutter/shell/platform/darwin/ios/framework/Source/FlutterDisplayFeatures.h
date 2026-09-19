@@ -81,17 +81,6 @@ FlutterDisplayFeatureList FlutterDisplayFeaturesFromRegions(
     FlutterHingeStatus status,
     const std::vector<FlutterReservedRegionInfo>& regions);
 
-/// Whether the reserved regions have caught up with the hinge.
-///
-/// Regions lag the hinge and nothing announces when they catch up: folding the
-/// device, the division only becomes active about a second after the status
-/// reads partially open, once the hinge comes to rest. The view's bounds do not
-/// change, so no layout pass follows either. Returns false while the hinge is
-/// partially open and a division exists but is not active yet, which is the
-/// monitor's cue to read the regions again shortly.
-bool FlutterDisplayFeaturesRegionsAreSettled(FlutterHingeStatus status,
-                                             const std::vector<FlutterReservedRegionInfo>& regions);
-
 /// Delivers the current display features. Called on the main thread.
 typedef void (^FlutterDisplayFeaturesUpdateBlock)(const FlutterDisplayFeatureList& features);
 
@@ -111,13 +100,16 @@ API_AVAILABLE(ios(27.1))
     NS_DESIGNATED_INITIALIZER;
 - (instancetype)init NS_UNAVAILABLE;
 
-/// Re-reads the reserved regions and reports again. Call after a layout
-/// change, since region frames move with the view even when the hinge does
-/// not.
+/// Re-reads the reserved regions and reports again.
 ///
-/// If the regions have not caught up with the hinge yet, this keeps re-reading
-/// at a short interval until they have, or until a bounded number of attempts
-/// is used up. A later call supersedes an earlier one.
+/// This must be called from the view controller's `viewDidLayoutSubviews`.
+/// Reserved regions lag the hinge, and UIKit offers no notification for them;
+/// instead it tracks a read made during layout and runs layout again when the
+/// region changes. Measured on the iPhone Duo simulator: with the read inside
+/// `viewDidLayoutSubviews`, a layout pass follows every change of the division
+/// (about a second after the hinge reads partially open, and within 15 ms of
+/// it reading fully open). With the read made only outside layout, no layout
+/// pass follows at all, because the view's bounds do not change while folding.
 - (void)refresh;
 
 /// Stops observing and releases the interaction.

@@ -1436,7 +1436,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self checkAndUpdateAutoResizeConstraints];
   [self setViewportMetricsPaddings];
   if (@available(iOS 27.1, *)) {
-    // Region frames move with the view even when the hinge does not.
+    // This read has to happen during layout. Reserved regions lag the hinge and
+    // UIKit has no notification for them; it tracks a read made here and runs
+    // layout again when a region changes, which is the only signal there is
+    // while folding, since the view's bounds stay the same.
     [_displayFeaturesMonitor refresh];
   }
   [self updateViewportMetricsIfNeeded];

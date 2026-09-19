@@ -139,38 +139,6 @@ FlutterReservedRegionInfo Occlusion(bool active) {
   XCTAssertTrue(features.types.empty());
 }
 
-#pragma mark - Settling
-
-- (void)testPartiallyOpenWithInactiveDivisionIsNotSettled {
-  // Folding the device: the status is already partially open but the division
-  // only becomes active once the hinge comes to rest.
-  XCTAssertFalse(FlutterDisplayFeaturesRegionsAreSettled(FlutterHingeStatusPartiallyOpen,
-                                                         {Division(40, false)}));
-}
-
-- (void)testPartiallyOpenWithActiveDivisionIsSettled {
-  XCTAssertTrue(FlutterDisplayFeaturesRegionsAreSettled(FlutterHingeStatusPartiallyOpen,
-                                                        {Division(40, true)}));
-}
-
-- (void)testPartiallyOpenWithoutADivisionIsSettled {
-  // Built against an older SDK, or a window with no fold in it: there is
-  // nothing to wait for.
-  XCTAssertTrue(FlutterDisplayFeaturesRegionsAreSettled(FlutterHingeStatusPartiallyOpen, {}));
-  XCTAssertTrue(
-      FlutterDisplayFeaturesRegionsAreSettled(FlutterHingeStatusPartiallyOpen, {Occlusion(false)}));
-}
-
-- (void)testOtherPosturesAreAlwaysSettled {
-  // No fold is reported outside partially open, so a stale isActive is moot.
-  XCTAssertTrue(
-      FlutterDisplayFeaturesRegionsAreSettled(FlutterHingeStatusFullyOpen, {Division(40, true)}));
-  XCTAssertTrue(
-      FlutterDisplayFeaturesRegionsAreSettled(FlutterHingeStatusClosed, {Division(40, false)}));
-  XCTAssertTrue(
-      FlutterDisplayFeaturesRegionsAreSettled(FlutterHingeStatusUnknown, {Division(40, false)}));
-}
-
 #pragma mark - Viewport metrics
 
 // ViewportMetrics is a C++ struct passed by value, so its contents cannot be
