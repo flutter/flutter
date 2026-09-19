@@ -2912,6 +2912,15 @@ class _RenderLayoutBuilder extends RenderProxyBox
   @override
   @visibleForOverriding
   void layoutCallback() {
+    // The theater does not lay out the entries that are obstructed (offstage),
+    // so this box is not resized when the theater is, and the layout info
+    // cannot be computed reliably. Keep the previous layout info. This box
+    // will be resized and laid out with up-to-date constraints when the entry
+    // becomes visible again, and the frame callback scheduled in
+    // `performLayout` keeps refreshing the layout info in the meantime.
+    if (_layoutInfo != null && size != theater.size) {
+      return;
+    }
     _layoutInfo = _computeNewLayoutInfo();
     super.layoutCallback();
   }
