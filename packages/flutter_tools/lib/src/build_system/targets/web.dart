@@ -1031,16 +1031,27 @@ class WebReleaseBundle extends Target {
   Iterable<String> get buildPatternStems =>
       compileTargets.expand((Dart2WebTarget target) => target.buildPatternStems);
 
+  bool get _hasWebContentHash =>
+      compileTargets.any((Dart2WebTarget t) => t.compilerConfig.webContentHash);
+
   @override
   List<Source> get inputs => <Source>[
     const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     const Source.pattern('{BUILD_DIR}/${LinkHooks.resultFilename}'),
     ...buildPatternStems.map((String file) => Source.pattern('{BUILD_DIR}/$file')),
+    if (_hasWebContentHash) ...<Source>[
+      const Source.pattern('{OUTPUT_DIR}/*/index.html'),
+      const Source.pattern('{OUTPUT_DIR}/flutter_bootstrap.js'),
+    ],
   ];
 
   @override
   List<Source> get outputs => <Source>[
     ...buildPatternStems.map((String file) => Source.pattern('{OUTPUT_DIR}/$file')),
+    if (_hasWebContentHash) ...<Source>[
+      const Source.pattern('{OUTPUT_DIR}/*/index.html'),
+      const Source.pattern('{OUTPUT_DIR}/flutter_bootstrap.js'),
+    ],
   ];
 
   @override
@@ -1108,7 +1119,8 @@ class WebReleaseBundle extends Target {
       (Dart2WebTarget t) => t.compilerConfig.webContentHash,
     );
     if (webContentHash) {
-      final Map<String, File> renamedOutputs = hashWebAssets(outputDirectory);
+      final WebAssetHashResult hashResult = hashWebAssets(outputDirectory);
+      final Map<String, File> renamedOutputs = hashResult.renamedFiles;
       final List<File> updatedOutputs = bundledDepfile.outputs.map((File f) {
         final String normalizedPath = environment.fileSystem.path.normalize(f.path);
         return renamedOutputs[normalizedPath] ?? renamedOutputs[f.path] ?? f;
@@ -1117,6 +1129,7 @@ class WebReleaseBundle extends Target {
         Depfile(bundledDepfile.inputs, updatedOutputs),
         environment.buildDir.childFile('flutter_assets.d'),
       );
+      injectManifestBuildConfig(environment.outputDir, hashResult);
     } else {
       depfileService.writeToFile(
         bundledDepfile,
@@ -1532,12 +1545,21 @@ class WebServiceWorker extends Target {
         .where(
           (File file) =>
               !file.path.endsWith('flutter_service_worker.js') &&
+              !file.path.endsWith(kPrecacheManifestFile) &&
               !environment.fileSystem.path.basename(file.path).startsWith('.'),
         )
         .toList();
 
+    final bool webContentHash = compileConfigs.any(
+      (WebCompilerConfig config) => config.webContentHash,
+    );
+    final File? precacheManifestFile = updatePrecacheManifest(
+      environment.outputDir,
+      enabled: webContentHash,
+      useLocalCanvasKit: environment.defines[kUseLocalCanvasKitFlag] == 'true',
+    );
     final File serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
-    final depfile = Depfile(contents, <File>[serviceWorkerFile]);
+    final depfile = Depfile(contents, <File>[serviceWorkerFile, ?precacheManifestFile]);
     final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
       Artifact.flutterToolsFileGenerators,
     );
