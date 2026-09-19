@@ -59,22 +59,29 @@ void TimerThread::ScheduleAt(
 void TimerThread::TimerThreadMain() {
   std::unique_lock<std::mutex> lock(mutex_);
   while (callback_ != nullptr) {
-    cv_.wait_until(lock, next_fire_time_, [this]() {
-      return std::chrono::high_resolution_clock::now() >= next_fire_time_ ||
-             callback_ == nullptr;
-    });
-    auto scheduled_count = schedule_counter_;
-    if (callback_) {
-      lock.unlock();
-      callback_();
-      lock.lock();
+    const auto fire_time = next_fire_time_;
+    const auto scheduled_count = schedule_counter_;
+    const bool schedule_changed =
+        cv_.wait_until(lock, fire_time, [this, scheduled_count]() {
+          return callback_ == nullptr || schedule_counter_ != scheduled_count;
+        });
+    if (callback_ == nullptr) {
+      break;
     }
-    // If nothing was scheduled in the meanwhile park the timer.
-    if (scheduled_count == schedule_counter_ &&
-        next_fire_time_ <= std::chrono::high_resolution_clock::now()) {
-      next_fire_time_ =
-          std::chrono::time_point<std::chrono::high_resolution_clock>::max();
+    if (schedule_changed) {
+      // ScheduleAt may have moved the deadline earlier. Start a new wait so
+      // wait_until uses the updated time point.
+      continue;
     }
+
+    // Park the timer before invoking the callback so that a concurrent
+    // ScheduleAt can install the next deadline.
+    next_fire_time_ =
+        std::chrono::time_point<std::chrono::high_resolution_clock>::max();
+    auto callback = callback_;
+    lock.unlock();
+    callback();
+    lock.lock();
   }
 }
 
@@ -102,8 +109,6 @@ TaskRunnerWindow::TaskRunnerWindow() : timer_thread_([this]() { OnTimer(); }) {
     OutputDebugString(message);
     LocalFree(message);
   }
-
-  thread_id_ = GetCurrentThreadId();
 }
 
 TaskRunnerWindow::~TaskRunnerWindow() {

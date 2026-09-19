@@ -24,8 +24,10 @@
 #include "flutter/shell/platform/windows/display_manager.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
+#include "flutter/shell/platform/windows/on_screen_keyboard.h"
 #include "flutter/shell/platform/windows/system_utils.h"
 #include "flutter/shell/platform/windows/task_runner.h"
+#include "flutter/shell/platform/windows/tsf_bridge.h"
 #include "flutter/shell/platform/windows/window_manager.h"
 #include "flutter/third_party/accessibility/ax/ax_node.h"
 #include "shell/platform/windows/flutter_project_bundle.h"
@@ -697,19 +699,18 @@ void FlutterWindowsEngine::RemoveView(FlutterViewId view_id) {
     }
   }
 
+  // Reset text input while the view is still registered. This must happen
+  // before taking |views_mutex_| exclusively because text-input cleanup reads
+  // the view to obtain its HWND.
+  if (text_input_plugin_) {
+    text_input_plugin_->OnViewRemoved(view_id);
+  }
+
   {
     // The engine no longer presents to the view. Remove the view from the
     // embedder.
     std::unique_lock write_lock(views_mutex_);
-
     FML_DCHECK(views_.find(view_id) != views_.end());
-
-    // Reset text input state if the removed view is the active text input
-    // view, to prevent stale view references.
-    if (text_input_plugin_) {
-      text_input_plugin_->OnViewRemoved(view_id);
-    }
-
     views_.erase(view_id);
   }
 }
@@ -958,6 +959,21 @@ void FlutterWindowsEngine::InitializeKeyboard() {
         return MapVirtualKey(virtual_key,
                              extended ? MAPVK_VK_TO_VSC_EX : MAPVK_VK_TO_VSC);
       };
+
+  // Destroy the text plugin first so it cannot hold dangling keyboard/TSF
+  // pointers across recreation.
+  text_input_plugin_.reset();
+  on_screen_keyboard_.reset();
+  tsf_bridge_.reset();
+
+  tsf_bridge_ = CreateTsfBridge();
+  FML_DCHECK(tsf_bridge_);
+
+  on_screen_keyboard_ = CreateOnScreenKeyboard();
+  FML_DCHECK(on_screen_keyboard_);
+  on_screen_keyboard_->SetVisibilityChangedCallback(
+      [this]() { OnOnScreenKeyboardVisibilityChanged(); });
+
   keyboard_key_handler_ = std::move(CreateKeyboardKeyHandler(
       internal_plugin_messenger, get_key_state, map_vk_to_scan));
   text_input_plugin_ =
@@ -985,7 +1001,33 @@ FlutterWindowsEngine::CreateKeyboardKeyHandler(
 
 std::unique_ptr<TextInputPlugin> FlutterWindowsEngine::CreateTextInputPlugin(
     BinaryMessenger* messenger) {
-  return std::make_unique<TextInputPlugin>(messenger, this);
+  return std::make_unique<TextInputPlugin>(
+      messenger, this, on_screen_keyboard_.get(), tsf_bridge_.get());
+}
+
+std::unique_ptr<OnScreenKeyboard>
+FlutterWindowsEngine::CreateOnScreenKeyboard() {
+  return std::make_unique<OnScreenKeyboardWin>(task_runner_.get());
+}
+
+std::unique_ptr<TsfBridge> FlutterWindowsEngine::CreateTsfBridge() {
+  return std::make_unique<TsfBridgeWin>();
+}
+
+void FlutterWindowsEngine::OnOnScreenKeyboardVisibilityChanged() {
+  std::vector<FlutterWindowsView*> views;
+  {
+    std::shared_lock read_lock(views_mutex_);
+    views.reserve(views_.size());
+    for (const auto& [view_id, view] : views_) {
+      views.push_back(view);
+    }
+  }
+  for (FlutterWindowsView* view : views) {
+    if (view != nullptr) {
+      SendWindowMetricsEvent(view->CreateWindowMetricsEvent());
+    }
+  }
 }
 
 bool FlutterWindowsEngine::RegisterExternalTexture(int64_t texture_id) {

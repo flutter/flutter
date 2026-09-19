@@ -35,12 +35,14 @@
 #include "flutter/shell/platform/windows/host_window.h"
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
 #include "flutter/shell/platform/windows/keyboard_key_embedder_handler.h"
+#include "flutter/shell/platform/windows/on_screen_keyboard.h"
 #include "flutter/shell/platform/windows/platform_handler.h"
 #include "flutter/shell/platform/windows/platform_view_plugin.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/settings_plugin.h"
 #include "flutter/shell/platform/windows/task_runner.h"
 #include "flutter/shell/platform/windows/text_input_plugin.h"
+#include "flutter/shell/platform/windows/tsf_bridge.h"
 #include "flutter/shell/platform/windows/window_proc_delegate_manager.h"
 #include "flutter/shell/platform/windows/window_state.h"
 #include "flutter/shell/platform/windows/windows_lifecycle_manager.h"
@@ -204,6 +206,8 @@ class FlutterWindowsEngine {
     return keyboard_key_handler_.get();
   }
   TextInputPlugin* text_input_plugin() { return text_input_plugin_.get(); }
+  OnScreenKeyboard* on_screen_keyboard() { return on_screen_keyboard_.get(); }
+  TsfBridge* tsf_bridge() { return tsf_bridge_.get(); }
 
   // Sends the given message to the engine, calling |reply| with |user_data|
   // when a response is received from the engine if they are non-null.
@@ -355,6 +359,18 @@ class FlutterWindowsEngine {
   virtual std::unique_ptr<TextInputPlugin> CreateTextInputPlugin(
       BinaryMessenger* messenger);
 
+  // Creates the on-screen (touch) keyboard controller.
+  //
+  // Exposing this method allows unit tests to override in order to
+  // capture information.
+  virtual std::unique_ptr<OnScreenKeyboard> CreateOnScreenKeyboard();
+
+  // Creates the TSF IME bridge.
+  //
+  // Exposing this method allows unit tests to override in order to
+  // capture information.
+  virtual std::unique_ptr<TsfBridge> CreateTsfBridge();
+
   // Invoked by the engine right before the engine is restarted.
   //
   // This should reset necessary states to as if the engine has just been
@@ -391,6 +407,9 @@ class FlutterWindowsEngine {
   // This requires that a view is attached to the engine.
   // Calling this method again resets the keyboard state.
   void InitializeKeyboard();
+
+  // Re-sends window metrics so viewInsets pick up on-screen keyboard occlusion.
+  void OnOnScreenKeyboardVisibilityChanged();
 
   // Send the currently enabled accessibility features to the engine.
   void SendAccessibilityFeatures();
@@ -482,6 +501,12 @@ class FlutterWindowsEngine {
   // The manager that manages the lifecycle of |HostWindow|s, native
   // Win32 windows hosting a Flutter view in their client area.
   std::unique_ptr<WindowManager> window_manager_;
+
+  // On-screen (touch) keyboard controller.
+  std::unique_ptr<OnScreenKeyboard> on_screen_keyboard_;
+
+  // TSF IME bridge. Null-safe when TSF/COM is unavailable.
+  std::unique_ptr<TsfBridge> tsf_bridge_;
 
   // Handlers for text events from Windows.
   std::unique_ptr<TextInputPlugin> text_input_plugin_;
