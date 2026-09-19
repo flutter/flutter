@@ -339,7 +339,13 @@ Future<ui.Codec> engineInstantiateImageCodec(
       allowUpscaling: allowUpscaling,
     );
   } else {
-    if (!imageType.isAnimated && browserSupportsCreateImageBitmap) {
+    // The backend codec is the general fallback for anything the browser can't
+    // decode itself, but it can only handle animated images if it was built
+    // with the builtin codecs. When it wasn't, an animated image degrades to a
+    // still of its first frame rather than failing outright.
+    final bool backendCanDecode = !imageType.isAnimated || renderer.supportsAnimatedImages;
+    final bool preferBitmap = !imageType.isAnimated || !backendCanDecode;
+    if (preferBitmap && browserSupportsCreateImageBitmap) {
       final DomBlob blob = createDomBlob(<ByteBuffer>[list.buffer]);
       final DomImageBitmap originalBitmap = await createImageBitmap(blob);
       final int originalWidth = originalBitmap.width;
@@ -375,7 +381,7 @@ Future<ui.Codec> engineInstantiateImageCodec(
         targetHeight: targetHeight,
         allowUpscaling: allowUpscaling,
       );
-    } else {
+    } else if (backendCanDecode) {
       final BackendAnimatedImage backendAnimated = renderer.createAnimatedImage(
         list,
         targetWidth: targetWidth,
@@ -386,6 +392,12 @@ Future<ui.Codec> engineInstantiateImageCodec(
         targetWidth: targetWidth,
         targetHeight: targetHeight,
         allowUpscaling: allowUpscaling,
+      );
+    } else {
+      throw ImageCodecException(
+        'Failed to decode image: the browser does not support ImageDecoder or '
+        'createImageBitmap, and the ${renderer.rendererTag} renderer was built '
+        'without builtin image codecs.',
       );
     }
   }
@@ -502,14 +514,24 @@ Future<ui.Codec> engineInstantiateImageCodecFromUrl(
         rethrow;
       }
       return EngineCodec.browser(decoder);
-    } else if (!imageType.isAnimated && browserSupportsCreateImageBitmap) {
+    }
+
+    final bool backendCanDecode = !imageType.isAnimated || renderer.supportsAnimatedImages;
+    final bool preferBitmap = !imageType.isAnimated || !backendCanDecode;
+    if (preferBitmap && browserSupportsCreateImageBitmap) {
       final DomBlob blob = createDomBlob(<ByteBuffer>[buffer]);
       final DomImageBitmap bitmap = await createImageBitmap(blob);
       final ImageSource source = ImageBitmapImageSource(bitmap);
       return EngineCodec.staticImage(source);
-    } else {
+    } else if (backendCanDecode) {
       final BackendAnimatedImage backendAnimated = renderer.createAnimatedImage(list);
       return EngineCodec.skia(backendAnimated);
+    } else {
+      throw ImageCodecException(
+        'Failed to decode image from $url: the browser does not support '
+        'ImageDecoder or createImageBitmap, and the ${renderer.rendererTag} '
+        'renderer was built without builtin image codecs.',
+      );
     }
   }
 }
