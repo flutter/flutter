@@ -83,6 +83,12 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     addEnableHcppFlag(verboseHelp: verboseHelp);
 
     argParser
+      ..addOption(
+        'directory',
+        abbr: 'C',
+        help: 'Run this in the directory of the Flutter project.',
+        valueHelp: 'path',
+      )
       ..addFlag(
         'experimental-faster-testing',
         negatable: false,
@@ -318,6 +324,15 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
     addDdsOptions(verboseHelp: verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
+  }
+
+  @override
+  Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
+    final String? directory = stringArg('directory');
+    if (directory != null) {
+      globals.fs.currentDirectory = directory;
+    }
+    return super.verifyThenRunCommand(commandPath);
   }
 
   /// The interface for starting and configuring the tester.

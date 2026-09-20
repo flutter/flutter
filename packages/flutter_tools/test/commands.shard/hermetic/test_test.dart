@@ -172,6 +172,28 @@ dev_dependencies:
     },
   );
 
+  testUsingContext(
+    'changes directory when -C is passed',
+    () async {
+      final fakePackageTest = FakePackageTest();
+
+      final testCommand = TestCommand(testWrapper: fakePackageTest);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      fs.directory('some_dir').createSync();
+      fs.directory('some_dir').childFile('pubspec.yaml').createSync();
+
+      await commandRunner.run(const <String>['test', '-C', 'some_dir', '--no-pub']);
+
+      expect(fs.currentDirectory.path, equals(fs.directory('some_dir').path));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    },
+  );
+
   group('shard-index and total-shards', () {
     testUsingContext(
       'with the params they are Piped to package:test',
