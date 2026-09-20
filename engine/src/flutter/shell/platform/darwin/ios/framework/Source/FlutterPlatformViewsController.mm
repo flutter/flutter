@@ -764,7 +764,13 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     }
 
     self.hadPlatformViews = NO;
-    return background_frame->Submit();
+    BOOL result = background_frame->Submit();
+    if (self.onFrameSubmitted != nil) {
+      [self.taskRunner runNowOrPostTask:^{
+        self.onFrameSubmitted();
+      }];
+    }
+    return result;
   }
   self.hadPlatformViews = !self.compositionOrder.empty();
 
@@ -821,7 +827,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
     // This flutter view is never the last in a frame, since we always submit the
     // underlay view last.
-    frame->set_submit_info({.frame_boundary = false, .present_with_transaction = true});
+    frame->set_submit_info({.frame_boundary = false});
     layer->did_submit_last_frame = frame->Encode();
 
     didEncode &= layer->did_submit_last_frame;
@@ -839,7 +845,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   background_frame->set_submit_info({
       .frame_damage = previousSubmitInfo.frame_damage,
       .buffer_damage = previousSubmitInfo.buffer_damage,
-      .present_with_transaction = true,
   });
   background_frame->Encode();
   surfaceFrames.push_back(std::move(background_frame));
@@ -861,6 +866,9 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                 compositionOrder:compositionOrder
                     unusedLayers:unusedLayers
                    surfaceFrames:surfaceFrames];
+    if (self.onFrameSubmitted != nil) {
+      self.onFrameSubmitted();
+    }
   });
 
   [self.taskRunner runNowOrPostTask:^{

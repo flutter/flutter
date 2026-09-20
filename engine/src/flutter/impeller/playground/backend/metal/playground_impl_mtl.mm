@@ -129,7 +129,7 @@ std::unique_ptr<Surface> PlaygroundImplMTL::AcquireSurfaceFrame(
 
   auto drawable =
       SurfaceMTL::GetMetalDrawableAndValidate(context, data_->metal_layer);
-  return SurfaceMTL::MakeFromMetalLayerDrawable(context, drawable,
+  return SurfaceMTL::MakeFromMetalLayerDrawable(nullptr, context, drawable,
                                                 swapchain_transients_);
 }
 

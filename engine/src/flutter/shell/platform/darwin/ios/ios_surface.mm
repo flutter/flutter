@@ -28,9 +28,8 @@ std::unique_ptr<IOSSurface> IOSSurface::Create(const std::shared_ptr<IOSContext>
       );
     }
   }
-  // The layer MUST be a CAMetalLayer or FlutterMetalLayer, which overrides
-  // isKindOfClass to return true for the above check. Anything else means the
-  // rendering surface was misconfigured.
+  // The layer MUST be a CAMetalLayer. Anything else means the rendering
+  // surface was misconfigured.
   FML_CHECK(false) << "Expected a Metal-backed layer for iOS rendering.";
   FML_UNREACHABLE();
 }
