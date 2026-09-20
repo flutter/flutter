@@ -51,7 +51,8 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
                                fml::TimePoint frame_target_time) {
   FML_DCHECK(fml::TimePoint::Now() >= frame_start_time);
 
-  if (in_await_) {
+  if (task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread() &&
+      in_await_) {
     FML_LOG(ERROR) << "FireCallback called synchronously while in AwaitVSync.";
     FML_CHECK(false);
   }
