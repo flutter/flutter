@@ -11,9 +11,7 @@
 #import <TargetConditionals.h>
 
 #include "flutter/fml/logging.h"
-#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
-#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterMetalLayer.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -38,10 +36,6 @@ Class GetCoreAnimationLayerClass() {
          "does not expose a Metal device; enabling GPU passthrough may fix this.";
 
   if (@available(iOS METAL_IOS_VERSION_BASELINE, *)) {
-    // FlutterMetalLayer reports itself as a CAMetalLayer via -isKindOfClass:.
-    if ([FlutterMetalLayer enabled]) {
-      return [FlutterMetalLayer class];
-    }
     return [CAMetalLayer class];
   }
   FML_CHECK(false) << "Metal availability should already have been checked";

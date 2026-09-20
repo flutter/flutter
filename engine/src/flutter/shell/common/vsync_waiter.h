@@ -50,6 +50,8 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
   // latches when in response to this invocation. On vsync, they are meant to
   // invoke the |FireCallback| method once (and only once) with the appropriate
   // arguments. This method should not block the current thread.
+  //
+  // Subclass must not call FireCallback from within AwaitVSync().
   virtual void AwaitVSync() = 0;
 
   // Schedules the callback on the UI task runner. Needs to be invoked as close
@@ -60,6 +62,7 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
  private:
   std::mutex callback_mutex_;
   Callback callback_;
+  bool in_await_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiter);
 };

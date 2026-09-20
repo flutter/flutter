@@ -55,6 +55,7 @@ FLUTTER_ASSERT_ARC
       self->_colorSpaceRef = fml::CFRef(CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB));
       layer.colorspace = self->_colorSpaceRef;
     }
+    layer.presentsWithTransaction = YES;
   }
   return self;
 }

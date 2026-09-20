@@ -380,8 +380,18 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   }
 }
 
+- (void)onFrameSubmitted {
+  auto vsync_waiter = _shell->GetVsyncWaiter().lock();
+  auto vsync_waiter_ios = std::static_pointer_cast<flutter::VsyncWaiterIOS>(vsync_waiter);
+  vsync_waiter_ios->FrameSubmitted();
+}
+
 - (void)recreatePlatformViewsController {
   _platformViewsController = [[FlutterPlatformViewsController alloc] init];
+  __weak __typeof(self) weakSelf = self;
+  _platformViewsController.onFrameSubmitted = ^{
+    [weakSelf onFrameSubmitted];
+  };
 }
 
 - (void)dealloc {
@@ -583,6 +593,10 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
     self.flutterViewControllerWillDeallocObserver = nil;
     [self notifyLowMemory];
   }
+
+  auto vsync_waiter = _shell->GetVsyncWaiter().lock();
+  auto vsync_waiter_ios = std::static_pointer_cast<flutter::VsyncWaiterIOS>(vsync_waiter);
+  vsync_waiter_ios->UpdateFlutterView(self.viewController.view);
 }
 
 - (void)attachView {
@@ -1799,14 +1813,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 static BOOL FLTFlutterPluginRespondsToLegacyAppLifecycleSelectors(
     NSObject<FlutterPlugin>* delegate) {
   SEL selectors[] = {
-    @selector(applicationDidBecomeActive:),
-    @selector(applicationWillResignActive:),
-    @selector(applicationWillEnterForeground:),
-    @selector(applicationDidEnterBackground:),
-    @selector(application:continueUserActivity:restorationHandler:),
-    @selector(application:performActionForShortcutItem:completionHandler:),
-    @selector(application:openURL:options:),
-    @selector(application:performFetchWithCompletionHandler:),
+      @selector(applicationDidBecomeActive:),
+      @selector(applicationWillResignActive:),
+      @selector(applicationWillEnterForeground:),
+      @selector(applicationDidEnterBackground:),
+      @selector(application:continueUserActivity:restorationHandler:),
+      @selector(application:performActionForShortcutItem:completionHandler:),
+      @selector(application:openURL:options:),
+      @selector(application:performFetchWithCompletionHandler:),
   };
   for (SEL sel : selectors) {
     if ([delegate respondsToSelector:sel]) {

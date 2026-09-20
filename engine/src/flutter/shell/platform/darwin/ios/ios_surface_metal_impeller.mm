@@ -7,6 +7,7 @@
 #include "flutter/impeller/renderer/backend/metal/formats_mtl.h"
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/shell/gpu/gpu_surface_metal_impeller.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "impeller/typographer/typographer_context.h"
@@ -66,8 +67,15 @@ GPUCAMetalLayerHandle IOSSurfaceMetalImpeller::GetCAMetalLayer(const DlISize& fr
 
 // |GPUSurfaceMetalDelegate|
 bool IOSSurfaceMetalImpeller::PresentDrawable(GrMTLHandle drawable) const {
-  FML_DCHECK(false);
-  return false;
+  id<CAMetalDrawable> metal_drawable = (__bridge id<CAMetalDrawable>)drawable;
+  if ([NSThread isMainThread]) {
+    [metal_drawable present];
+  } else {
+    [FlutterRunLoop.mainRunLoop performBlock:^{
+      [metal_drawable present];
+    }];
+  }
+  return true;
 }
 
 // |GPUSurfaceMetalDelegate|

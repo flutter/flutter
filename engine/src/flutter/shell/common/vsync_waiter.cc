@@ -42,12 +42,19 @@ void VsyncWaiter::AsyncWaitForVsync(const Callback& callback) {
     }
     callback_ = callback;
   }
+  in_await_ = true;
   AwaitVSync();
+  in_await_ = false;
 }
 
 void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
                                fml::TimePoint frame_target_time) {
   FML_DCHECK(fml::TimePoint::Now() >= frame_start_time);
+
+  if (in_await_) {
+    FML_LOG(ERROR) << "FireCallback called synchronously while in AwaitVSync.";
+    FML_CHECK(false);
+  }
 
   Callback callback;
 
@@ -77,7 +84,8 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
 
     TRACE_FLOW_BEGIN("flutter", kVsyncFlowName, flow_identifier);
 
-    task_runners_.GetUITaskRunner()->PostTask(
+    fml::TaskRunner::RunNowOrPostTask(
+        task_runners_.GetUITaskRunner(),
         [callback, flow_identifier, frame_start_time, frame_target_time]() {
           FML_TRACE_EVENT_WITH_FLOW_IDS(
               "flutter", kVsyncTraceName, /*flow_id_count=*/1,
