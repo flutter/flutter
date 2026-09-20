@@ -4,11 +4,28 @@
 
 #include "impeller/renderer/backend/gles/pipeline_compile_queue_gles.h"
 
+#include <atomic>
+
+#include "flutter/fml/closure.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
 
 namespace impeller {
+
+namespace {
+// The queue whose job this thread runs right now. Two engines in one process
+// have a queue each, so the queue is part of the answer.
+thread_local const PipelineCompileQueueGLES* tls_running_queue = nullptr;
+}  // namespace
+
+int PipelineCompileQueueGLES::RunningJobCount() const {
+  return running_jobs_.load();
+}
+
+bool PipelineCompileQueueGLES::IsRunningJobOnCurrentThread() const {
+  return tls_running_queue == this;
+}
 
 std::shared_ptr<PipelineCompileQueueGLES> PipelineCompileQueueGLES::Create(
     std::shared_ptr<fml::BasicTaskRunner> worker_task_runner) {
@@ -49,7 +66,45 @@ void PipelineCompileQueueGLES::PostJob(const fml::closure& job) {
     return;
   }
 
-  worker_task_runner_->PostTask(job);
+  worker_task_runner_->PostTask([job, weak_queue = weak_from_this()]() {
+    auto queue =
+        std::static_pointer_cast<PipelineCompileQueueGLES>(weak_queue.lock());
+    if (!queue) {
+      // The queue is gone, so there is nothing to account the job to, and the
+      // job still runs as it did before.
+      job();
+      return;
+    }
+    const PipelineCompileQueueGLES* previous = tls_running_queue;
+    tls_running_queue = queue.get();
+    queue->running_jobs_.fetch_add(1);
+    fml::ScopedCleanupClosure restore([&queue, previous]() {
+      queue->running_jobs_.fetch_sub(1);
+      tls_running_queue = previous;
+    });
+    job();
+  });
+}
+
+bool PipelineCompileQueueGLES::IsProcessingJobs() const {
+  Lock lock(processing_mutex_);
+  return is_processing_;
+}
+
+void PipelineCompileQueueGLES::SetOnDrained(fml::closure on_drained) {
+  Lock lock(on_drained_mutex_);
+  on_drained_ = std::move(on_drained);
+}
+
+void PipelineCompileQueueGLES::NotifyDrained() {
+  fml::closure on_drained;
+  {
+    Lock lock(on_drained_mutex_);
+    on_drained = on_drained_;
+  }
+  if (on_drained) {
+    on_drained();
+  }
 }
 
 void PipelineCompileQueueGLES::DrainPendingJobs() {
@@ -57,12 +112,17 @@ void PipelineCompileQueueGLES::DrainPendingJobs() {
     if (auto queue = std::static_pointer_cast<PipelineCompileQueueGLES>(
             weak_queue.lock())) {
       queue->DoOneJob();
+      bool drained = false;
       {
         Lock lock(queue->processing_mutex_);
         if (!queue->HasPendingJobs()) {
           queue->is_processing_ = false;
-          return;
+          drained = true;
         }
+      }
+      if (drained) {
+        queue->NotifyDrained();
+        return;
       }
       queue->DrainPendingJobs();
     }
