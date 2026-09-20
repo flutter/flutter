@@ -19,8 +19,7 @@ import UIKit
 ///
 /// Callers obtain the singleton instance via `shared` and typically use
 /// `maxRefreshRateEnabledOnIPhone` and `displayRefreshRate` to configure a `CADisplayLink`'s
-/// `preferredFrameRateRange`, either indirectly through a `VSyncClient`'s initializer or, in the
-/// case of `FlutterMetalLayer`, by configuring its own `CADisplayLink` similarly. The primary
+/// `preferredFrameRateRange`, either indirectly through a `VSyncClient`'s initializer or. The primary
 /// consumer is `VsyncWaiterIOS`, the C++ engine's vsync entry point, which owns a long-lived
 /// `VSyncClient` and re-reads `displayRefreshRate` on every vsync to detect ceiling changes at
 /// runtime and propagate them to the core engine. `KeyboardInsetManager` and
