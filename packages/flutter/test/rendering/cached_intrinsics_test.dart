@@ -59,6 +59,36 @@ class RenderBadDryBaselineTestBox extends RenderTestBox {
   }
 }
 
+class RenderCountingDryLayoutTestBox extends RenderBox {
+  int dryLayoutCalls = 0;
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    dryLayoutCalls += 1;
+    return constraints.smallest;
+  }
+
+  @override
+  void performLayout() {
+    size = constraints.smallest;
+  }
+}
+
+class RenderCountingDryBaselineTestBox extends RenderBox {
+  int dryBaselineCalls = 0;
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    dryBaselineCalls += 1;
+    return constraints.biggest.height;
+  }
+
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+  }
+}
+
 class RenderCannotComputeDryBaselineTestBox extends RenderTestBox {
   bool shouldAssert = true;
   @override
@@ -117,6 +147,106 @@ void main() {
     expect(test.getMinIntrinsicWidth(200.0), equals(3.0));
     expect(test.getMinIntrinsicWidth(100.0), equals(2.0));
     expect(test.getMinIntrinsicWidth(0.0), equals(1.0));
+  });
+
+  group('Bounded layout caches', () {
+    // Regression tests for https://github.com/flutter/flutter/issues/193075:
+    // RenderBox's dry-layout/intrinsics memoization caches must not grow
+    // without bound, since nothing clears them just because a parent asks
+    // for the same computation with a series of different inputs (e.g. an
+    // InputDecorator computing a dry layout every time its incoming
+    // constraints change, such as while its ancestor is being resized).
+
+    // These tests deliberately avoid hard-coding the cache's exact bound:
+    // they only assert that (a) a realistic, moderate number of distinct
+    // queries within one pass all stay cached (so the bound doesn't
+    // regress to being too tight and defeat legitimate reuse), and (b) a
+    // sustained stream of never-before-seen inputs - as happens when an
+    // ancestor keeps resizing across many layout passes - eventually
+    // evicts the earliest entries rather than growing forever.
+    const int comfortableDistinctQueries = 50;
+    const int guaranteedEvictionQueries = 5000;
+
+    test('Cached intrinsics are evicted once enough distinct inputs accumulate', () {
+      final RenderTestBox test = RenderTestBox();
+
+      final List<double> comfortableResults = <double>[
+        for (int i = 0; i < comfortableDistinctQueries; i += 1) test.getMinIntrinsicWidth(i.toDouble()),
+      ];
+      // All of them are still cached: querying them again does not advance
+      // the underlying counter, i.e. computeMinIntrinsicWidth is not re-run.
+      for (int i = 0; i < comfortableDistinctQueries; i += 1) {
+        expect(test.getMinIntrinsicWidth(i.toDouble()), comfortableResults[i]);
+      }
+
+      for (int i = comfortableDistinctQueries; i < guaranteedEvictionQueries; i += 1) {
+        test.getMinIntrinsicWidth(i.toDouble());
+      }
+      final double valueBeforeRequery = test.value;
+      // The very first input queried must have been evicted by now, so this
+      // recomputes (and advances the counter) rather than returning the
+      // stale cached result from an unbounded cache.
+      test.getMinIntrinsicWidth(0.0);
+      expect(test.value, greaterThan(valueBeforeRequery));
+    });
+
+    test('Cached dry layout sizes are evicted once enough distinct inputs accumulate', () {
+      final test = RenderCountingDryLayoutTestBox();
+      BoxConstraints constraintsFor(int i) =>
+          BoxConstraints(minWidth: i.toDouble(), maxWidth: i.toDouble(), minHeight: i.toDouble(), maxHeight: i.toDouble());
+
+      for (int i = 0; i < comfortableDistinctQueries; i += 1) {
+        test.getDryLayout(constraintsFor(i));
+      }
+      expect(test.dryLayoutCalls, comfortableDistinctQueries);
+
+      // Still all cached: repeat queries don't recompute.
+      for (int i = 0; i < comfortableDistinctQueries; i += 1) {
+        test.getDryLayout(constraintsFor(i));
+      }
+      expect(test.dryLayoutCalls, comfortableDistinctQueries);
+
+      for (int i = comfortableDistinctQueries; i < guaranteedEvictionQueries; i += 1) {
+        test.getDryLayout(constraintsFor(i));
+      }
+      final int callsBeforeRequery = test.dryLayoutCalls;
+      // The first constraints queried must have been evicted by now, so
+      // this recomputes. Before the fix, this cache was never bounded, so
+      // it would still have been served from the (ever-growing) cache.
+      test.getDryLayout(constraintsFor(0));
+      expect(test.dryLayoutCalls, greaterThan(callsBeforeRequery));
+    });
+
+    test('Cached dry baselines are evicted once enough distinct inputs accumulate', () {
+      final test = RenderCountingDryBaselineTestBox();
+      const TextBaseline baseline = TextBaseline.alphabetic;
+      BoxConstraints constraintsFor(int i) => BoxConstraints(minHeight: i.toDouble(), maxHeight: i.toDouble());
+
+      for (int i = 0; i < comfortableDistinctQueries; i += 1) {
+        test.getDryBaseline(constraintsFor(i), baseline);
+      }
+      // getDryBaseline always additionally invokes computeDryBaseline once
+      // in an assert (to catch debugCannotComputeDryLayout misuse), on top
+      // of the memoized call, so a miss bumps the counter by 2.
+      expect(test.dryBaselineCalls, comfortableDistinctQueries * 2);
+
+      for (int i = 0; i < comfortableDistinctQueries; i += 1) {
+        test.getDryBaseline(constraintsFor(i), baseline);
+      }
+      // Still all cached: a repeat query only pays for the debug-mode
+      // consistency check (+1), not a real recomputation (+2).
+      expect(test.dryBaselineCalls, comfortableDistinctQueries * 3);
+
+      for (int i = comfortableDistinctQueries; i < guaranteedEvictionQueries; i += 1) {
+        test.getDryBaseline(constraintsFor(i), baseline);
+      }
+      final int callsBeforeRequery = test.dryBaselineCalls;
+      // The first constraints queried must have been evicted by now, so
+      // this recomputes: a +2 jump, not the +1 an unbounded cache's mere
+      // debug-consistency-check hit would produce.
+      test.getDryBaseline(constraintsFor(0), baseline);
+      expect(test.dryBaselineCalls, callsBeforeRequery + 2);
+    });
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/101179

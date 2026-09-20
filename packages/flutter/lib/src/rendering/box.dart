@@ -1057,7 +1057,15 @@ abstract class _CachedLayoutCalculation<Input extends Object, Output> {
 // forever - nothing calls markNeedsLayout (which is what clears this cache)
 // on an object just because a parent asked it for a dry layout or intrinsic
 // dimension with different inputs than before.
-const int _kMaxCachedLayoutResultsPerComputation = 3;
+//
+// This needs to stay well above the number of distinct inputs a single
+// layout pass can legitimately query - for example, RenderBox shares one
+// cache across all four intrinsic-dimension computations (min/max width,
+// min/max height), and a single pass can reasonably probe a double-digit
+// number of distinct values across those. 128 comfortably covers realistic
+// single-pass usage while still bounding the cache across the lifetime of
+// the render object.
+const int _kMaxCachedLayoutResultsPerComputation = 128;
 
 V _memoizeBounded<K extends Object, V>(Map<K, V> cache, K key, V Function() compute) {
   final V? cached = cache[key];
