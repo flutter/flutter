@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "flutter/fml/closure.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/task_runner_util.h"
@@ -372,6 +373,8 @@ void RunDeferredLink(bool fail_compile,
   state.fail_compile = fail_compile;
   state.fail_link = fail_link;
   deferred_links = &state;
+  fml::ScopedCleanupClosure reset_deferred_links(
+      []() { deferred_links = nullptr; });
   auto mock_gles = MockGLES::Init(
       std::vector<const char*>{"GL_KHR_parallel_shader_compile"},
       "OpenGL ES 3.0 (ANGLE 2.1.0)", DeferredLinkResolver);
