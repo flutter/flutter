@@ -6,6 +6,7 @@
 
 #include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/fml/logging.h"
+#include "flutter/shell/platform/embedder/embedder_struct_macros.h"
 #if IMPELLER_SUPPORTS_RENDERING
 #include "flutter/impeller/display_list/dl_image_impeller.h"      // nogncheck
 #include "flutter/impeller/renderer/backend/vulkan/texture_vk.h"  // nogncheck
@@ -73,15 +74,16 @@ EmbedderExternalTextureSourceVulkan::EmbedderExternalTextureSourceVulkan(
     const std::shared_ptr<impeller::Context>& p_context,
     FlutterVulkanExternalTexture* embedder_desc)
     : TextureSourceVK(ToTextureDescriptor(embedder_desc)),
-      destruction_callback_(embedder_desc->destruction_callback),
-      user_data_(embedder_desc->user_data) {
+      destruction_callback_(
+          SAFE_ACCESS(embedder_desc, destruction_callback, nullptr)),
+      user_data_(SAFE_ACCESS(embedder_desc, user_data, nullptr)) {
   const auto& context = impeller::ContextVK::Cast(*p_context);
   const auto& device = context.GetDevice();
-  texture_image_ =
-      impeller::vk::Image(reinterpret_cast<VkImage>(embedder_desc->image));
+  texture_image_ = impeller::vk::Image(
+      reinterpret_cast<VkImage>(SAFE_ACCESS(embedder_desc, image, 0)));
 
-  needs_yuv_conversion_ =
-      IsYuvFormat(static_cast<VkFormat>(embedder_desc->format));
+  needs_yuv_conversion_ = IsYuvFormat(
+      static_cast<VkFormat>(SAFE_ACCESS(embedder_desc, format, 0u)));
   std::shared_ptr<impeller::YUVConversionVK> yuv_conversion;
   if (needs_yuv_conversion_) {
     // Figure out how to perform YUV conversions.
@@ -141,12 +143,12 @@ static impeller::PixelFormat ToPixelFormat(uint32_t vk_format) {
 impeller::TextureDescriptor
 EmbedderExternalTextureSourceVulkan::ToTextureDescriptor(
     FlutterVulkanExternalTexture* embedder_desc) {
-  const auto size =
-      impeller::ISize{static_cast<int64_t>(embedder_desc->width),
-                      static_cast<int64_t>(embedder_desc->height)};
+  const auto size = impeller::ISize{
+      static_cast<int64_t>(SAFE_ACCESS(embedder_desc, width, 0)),
+      static_cast<int64_t>(SAFE_ACCESS(embedder_desc, height, 0))};
   impeller::TextureDescriptor desc;
   desc.storage_mode = impeller::StorageMode::kDevicePrivate;
-  desc.format = ToPixelFormat(embedder_desc->format);
+  desc.format = ToPixelFormat(SAFE_ACCESS(embedder_desc, format, 0u));
   desc.size = size;
   desc.type = impeller::TextureType::kTexture2D;
   desc.sample_count = impeller::SampleCount::kCount1;
@@ -163,8 +165,9 @@ EmbedderExternalTextureSourceVulkan::CreateYUVConversion(
   impeller::YUVConversionDescriptorVK conversion_chain;
   auto& conversion_info = conversion_chain.get();
 
-  conversion_info.format =
-      static_cast<impeller::vk::Format>(embedder_desc->format);
+  const auto vk_format =
+      static_cast<impeller::vk::Format>(SAFE_ACCESS(embedder_desc, format, 0u));
+  conversion_info.format = vk_format;
   conversion_info.ycbcrModel =
       impeller::vk::SamplerYcbcrModelConversion::eYcbcr709;
   conversion_info.ycbcrRange = impeller::vk::SamplerYcbcrRange::eItuFull;
@@ -176,8 +179,7 @@ EmbedderExternalTextureSourceVulkan::CreateYUVConversion(
   conversion_info.yChromaOffset = impeller::vk::ChromaLocation::eCositedEven;
 
   impeller::vk::FormatProperties format_props;
-  context.GetPhysicalDevice().getFormatProperties(
-      static_cast<impeller::vk::Format>(embedder_desc->format), &format_props);
+  context.GetPhysicalDevice().getFormatProperties(vk_format, &format_props);
 
   const bool supports_linear_filtering =
       !!(format_props.optimalTilingFeatures &
@@ -203,7 +205,8 @@ bool EmbedderExternalTextureSourceVulkan::CreateTextureImageView(
   auto& view_info = view_chain.get();
   view_info.image = texture_image_;
   view_info.viewType = impeller::vk::ImageViewType::e2D;
-  view_info.format = static_cast<impeller::vk::Format>(embedder_desc->format);
+  view_info.format =
+      static_cast<impeller::vk::Format>(SAFE_ACCESS(embedder_desc, format, 0u));
   view_info.subresourceRange.aspectMask =
       impeller::vk::ImageAspectFlagBits::eColor;
   view_info.subresourceRange.baseMipLevel = 0u;
@@ -339,26 +342,27 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureSkia(
   }
   context->flushAndSubmit();
   context->resetContext(kAll_GrBackendState);
-  std::unique_ptr<FlutterVulkanExternalTexture> texture =
+  std::unique_ptr<FlutterVulkanExternalTexture> texture_desc =
       external_texture_callback_(texture_id, size.width(), size.height());
 
-  if (!texture) {
+  if (!texture_desc) {
     return nullptr;
   }
 
+  FlutterVulkanExternalTexture* desc = texture_desc.get();
   size_t width = size.width();
   size_t height = size.height();
 
-  if (texture->width != 0 && texture->height != 0) {
-    width = texture->width;
-    height = texture->height;
+  if (SAFE_ACCESS(desc, width, 0) != 0 && SAFE_ACCESS(desc, height, 0) != 0) {
+    width = SAFE_ACCESS(desc, width, 0);
+    height = SAFE_ACCESS(desc, height, 0);
   }
 
-  VkFormat vk_format = static_cast<VkFormat>(texture->format);
+  VkFormat vk_format = static_cast<VkFormat>(SAFE_ACCESS(desc, format, 0u));
   bool is_yuv = IsYuvFormat(vk_format);
 
   GrVkImageInfo image_info = {
-      .fImage = reinterpret_cast<VkImage>(texture->image),
+      .fImage = reinterpret_cast<VkImage>(SAFE_ACCESS(desc, image, 0)),
       .fImageTiling = VK_IMAGE_TILING_OPTIMAL,
       .fImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
       .fFormat = vk_format,
@@ -395,23 +399,25 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureSkia(
 
   auto gr_backend_texture =
       GrBackendTextures::MakeVk(width, height, image_info);
-  SkImages::TextureReleaseProc release_proc = texture->destruction_callback;
-  auto image =
-      SkImages::BorrowTextureFrom(context,                   // context
-                                  gr_backend_texture,        // texture handle
-                                  kTopLeft_GrSurfaceOrigin,  // origin
-                                  color_type,                // color type
-                                  kPremul_SkAlphaType,       // alpha type
-                                  nullptr,                   // colorspace
-                                  release_proc,       // texture release proc
-                                  texture->user_data  // texture release context
-      );
+  SkImages::TextureReleaseProc release_proc =
+      SAFE_ACCESS(desc, destruction_callback, nullptr);
+  auto image = SkImages::BorrowTextureFrom(
+      context,                   // context
+      gr_backend_texture,        // texture handle
+      kTopLeft_GrSurfaceOrigin,  // origin
+      color_type,                // color type
+      kPremul_SkAlphaType,       // alpha type
+      nullptr,                   // colorspace
+      release_proc,              // texture release proc
+      SAFE_ACCESS(desc, user_data,
+                  nullptr)  // texture release context
+  );
 
   if (!image) {
     // In case Skia rejects the image, call the release proc so that
     // embedders can perform collection of intermediates.
     if (release_proc) {
-      release_proc(texture->user_data);
+      release_proc(SAFE_ACCESS(desc, user_data, nullptr));
     }
     return nullptr;
   }
@@ -430,9 +436,14 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureImpeller(
     return nullptr;
   }
 
-  if (texture_desc->width == 0 || texture_desc->height == 0) {
-    texture_desc->width = size.width();
-    texture_desc->height = size.height();
+  FlutterVulkanExternalTexture* desc = texture_desc.get();
+  if (SAFE_ACCESS(desc, width, 0) == 0 || SAFE_ACCESS(desc, height, 0) == 0) {
+    if (STRUCT_HAS_MEMBER(desc, width)) {
+      desc->width = size.width();
+    }
+    if (STRUCT_HAS_MEMBER(desc, height)) {
+      desc->height = size.height();
+    }
   }
 
   auto texture_source = std::make_shared<EmbedderExternalTextureSourceVulkan>(
