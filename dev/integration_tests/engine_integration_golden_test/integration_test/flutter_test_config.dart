@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+
 import 'package:flutter_goldens/flutter_goldens.dart' as flutter_goldens;
 
 /// Configures [goldenFileComparator] for the test suite using `package:flutter_goldens`.

@@ -10,11 +10,12 @@ environment:
 
 dependencies:
   analysis_server_plugin: any
-  analyzer: any
-  path: any
+  analyzer: 14.3.0
+  path: ^1.9.1
 
 dev_dependencies:
   analyzer_testing: any
+  test: any
   test_reflective_loader: any
 
-# PUBSPEC CHECKSUM: jdpqac
+# PUBSPEC CHECKSUM: 11rp55

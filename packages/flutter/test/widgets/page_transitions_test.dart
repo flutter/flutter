@@ -226,12 +226,11 @@ void main() {
 
     final PageRoute<void> route = PageRouteBuilder<void>(
       settings: const RouteSettings(name: '/page'),
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) => const Center(child: Text('page')),
+      pageBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) => const Center(child: Text('page')),
     );
 
     var popCount = 0;
