@@ -507,4 +507,60 @@ void main() {
     ); // rebuilt showC now depends on the inner model
     expect(find.text('a: 101 b: 102 c: null'), findsOneWidget); // inner model's a, b, c
   });
+
+  testWidgets('inheritFrom does not throw when lookup returns an unmounted InheritedElement', (
+    WidgetTester tester,
+  ) async {
+    late InheritedElement stale;
+    await tester.pumpWidget(
+      ABCModel(
+        a: 1,
+        child: Builder(
+          builder: (BuildContext context) {
+            stale = context.getElementForInheritedWidgetOfExactType<ABCModel>()!;
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+    expect(stale.mounted, isTrue);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(stale.mounted, isFalse);
+
+    await tester.pumpWidget(_StaleInheritedHost(stale: stale));
+    expect(tester.takeException(), isNull);
+    expect(find.text('null'), findsOneWidget);
+  });
+}
+
+/// Forwards InheritedModel lookups to an already-unmounted [InheritedElement],
+/// reproducing the release-mode map that still points at a defunct ancestor.
+class _StaleInheritedHost extends StatelessWidget {
+  const _StaleInheritedHost({required this.stale});
+
+  final InheritedElement stale;
+
+  @override
+  StatelessElement createElement() => _StaleInheritedHostElement(this);
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Text('${ABCModel.of(context, fieldName: 'a')?.a}'),
+    );
+  }
+}
+
+class _StaleInheritedHostElement extends StatelessElement {
+  _StaleInheritedHostElement(super.widget);
+
+  @override
+  InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
+    if (T == ABCModel) {
+      return (widget as _StaleInheritedHost).stale;
+    }
+    return super.getElementForInheritedWidgetOfExactType<T>();
+  }
 }

@@ -202,7 +202,6 @@ abstract class InheritedModel<T> extends InheritedWidget {
     // a model is found for which isSupportedAspect(aspect) is true.
     final models = <InheritedElement>[];
     _findModels<T>(context, aspect, models);
-    models.removeWhere((InheritedElement model) => !model.mounted);
     if (models.isEmpty) {
       return null;
     }
