@@ -150,7 +150,11 @@ abstract class InheritedModel<T> extends InheritedWidget {
     List<InheritedElement> results,
   ) {
     final InheritedElement? model = context.getElementForInheritedWidgetOfExactType<T>();
-    if (model == null) {
+    // Release builds can retain a stale InheritedElement whose widget was
+    // already cleared. Element.widget uses `_widget!`, which would throw.
+    // See https://github.com/flutter/flutter/issues/151834
+    // and https://github.com/flutter/flutter/issues/172289
+    if (model == null || !model.mounted) {
       return;
     }
 
@@ -198,6 +202,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
     // a model is found for which isSupportedAspect(aspect) is true.
     final models = <InheritedElement>[];
     _findModels<T>(context, aspect, models);
+    models.removeWhere((InheritedElement model) => !model.mounted);
     if (models.isEmpty) {
       return null;
     }
