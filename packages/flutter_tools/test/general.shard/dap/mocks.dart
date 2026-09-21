@@ -226,6 +226,8 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
     required FileSystem fileSystem,
     required Platform platform,
     Future<void>? customDebuggerInitialized,
+    Duration debuggerInitializationTimeout =
+        FlutterTestDebugAdapter.defaultDebuggerInitializationTimeout,
   }) {
     final stdinController = StreamController<List<int>>();
     final stdoutController = StreamController<List<int>>();
@@ -238,6 +240,7 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
       fileSystem: fileSystem,
       platform: platform,
       customDebuggerInitialized: customDebuggerInitialized,
+      debuggerInitializationTimeout: debuggerInitializationTimeout,
     );
   }
 
@@ -247,6 +250,7 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
     ByteStreamServerChannel channel, {
     required super.fileSystem,
     required super.platform,
+    super.debuggerInitializationTimeout,
     this.customDebuggerInitialized,
   }) : super(channel);
 
