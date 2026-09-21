@@ -27,7 +27,7 @@ import 'web_driver_service.dart';
 
 class FlutterDriverFactory {
   FlutterDriverFactory({
-    this.toolContext,
+    required this.toolContext,
     required this._applicationPackageFactory,
     required this._dartSdkPath,
     required this._devtoolsLauncher,
@@ -41,7 +41,7 @@ class FlutterDriverFactory {
     this._systemClock,
   });
 
-  final ToolContext? toolContext;
+  final ToolContext toolContext;
   final ApplicationPackageFactory _applicationPackageFactory;
   final String _dartSdkPath;
   final DevtoolsLauncher _devtoolsLauncher;

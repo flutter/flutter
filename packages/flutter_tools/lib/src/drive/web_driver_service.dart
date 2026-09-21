@@ -39,7 +39,7 @@ class WebDriverService extends DriverService {
     required this._platform,
     required this._processUtils,
     required this._terminal,
-    this._toolContext,
+    required this._toolContext,
     Analytics? analytics,
     SystemClock? systemClock,
   }) : _analytics = analytics ?? const NoOpAnalytics(),
@@ -52,7 +52,7 @@ class WebDriverService extends DriverService {
   final Platform _platform;
   final ProcessUtils _processUtils;
   final Terminal _terminal;
-  final ToolContext? _toolContext;
+  final ToolContext _toolContext;
   final Analytics _analytics;
   final SystemClock _systemClock;
 
@@ -85,7 +85,7 @@ class WebDriverService extends DriverService {
       device,
       buildInfo: buildInfo,
       target: mainPath,
-      toolContext: _toolContext!,
+      toolContext: _toolContext,
       userIdentifier: userIdentifier,
     );
     _residentRunner = webRunnerFactory!.createWebRunner(
