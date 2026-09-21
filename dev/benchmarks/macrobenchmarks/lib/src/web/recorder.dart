@@ -274,13 +274,17 @@ abstract class SceneBuilderRecorder extends Recorder {
         _profile!.recordAsync('drawFrameDuration', () async {
           final sceneBuilder = SceneBuilder();
           onDrawFrame(sceneBuilder);
-          _profile!.recordAsync('sceneBuildDuration', () async {
-            final Scene scene = sceneBuilder.build();
-            _profile!.recordAsync('windowRenderDuration', () async {
-              // On the web, render is asynchronous.
-              await (PlatformDispatcher.instance as dynamic).render(scene);
-            }, reported: false);
-          }, reported: false);
+          unawaited(
+            _profile!.recordAsync('sceneBuildDuration', () async {
+              final Scene scene = sceneBuilder.build();
+              unawaited(
+                _profile!.recordAsync('windowRenderDuration', () async {
+                  // On the web, render is asynchronous.
+                  await (PlatformDispatcher.instance as dynamic).render(scene);
+                }, reported: false),
+              );
+            }, reported: false),
+          );
         }, reported: true);
         endMeasureFrame();
 

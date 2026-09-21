@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:url_launcher/url_launcher.dart';
@@ -38,7 +40,7 @@ class UpdaterState extends State<Updater> {
     if (mounted) {
       final bool? wantsUpdate = await showDialog<bool>(context: context, builder: _buildDialog);
       if (wantsUpdate != null && updateUrl != null && wantsUpdate) {
-        launchUrl(Uri.parse(updateUrl));
+        unawaited(launchUrl(Uri.parse(updateUrl)));
       }
     }
   }

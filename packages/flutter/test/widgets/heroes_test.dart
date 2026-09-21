@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
@@ -654,10 +655,12 @@ Future<void> main() async {
     expect(find.byKey(key1), findsNothing);
     expect(find.byKey(key2), findsOneWidget);
 
-    showDialog<void>(
-      context: nav.currentContext!,
-      useRootNavigator: false,
-      builder: (BuildContext context) => const Text('dialog'),
+    unawaited(
+      showDialog<void>(
+        context: nav.currentContext!,
+        useRootNavigator: false,
+        builder: (BuildContext context) => const Text('dialog'),
+      ),
     );
     await tester.pumpAndSettle();
     expect(find.text('dialog'), findsOneWidget);
