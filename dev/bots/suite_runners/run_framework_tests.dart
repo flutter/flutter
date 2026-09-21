@@ -247,6 +247,7 @@ Future<void> frameworkTestsRunner() async {
     await runFixTests('flutter_test');
     await runFixTests('integration_test');
     await runFixTests('flutter_driver');
+    await runFixTests('flutter_localizations');
     await runPrivateTests();
 
     // Run java unit tests for integration_test
