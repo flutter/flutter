@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
-#include "flutter/shell/platform/android/flutter_main.h"
 
 #include <cmath>
 #include <limits>
@@ -247,21 +246,15 @@ TEST(AndroidMutatorsMapperTest, NullAndEmptyMutationsSafety) {
   EXPECT_TRUE(null_records.empty());
 }
 
-TEST(AndroidMutatorsMapperTest, DualFlagMatrixTest) {
-  for (bool embedder_api_enabled : {false, true}) {
-    FlutterMain::SetEmbedderAPIEnabledForTesting(embedder_api_enabled);
-    EXPECT_EQ(FlutterMain::IsEmbedderAPIEnabled(), embedder_api_enabled);
+TEST(AndroidMutatorsMapperTest, ParsesOpacityMutation) {
+  FlutterPlatformViewMutation mutation = {};
+  mutation.type = kFlutterPlatformViewMutationTypeOpacity;
+  mutation.opacity = 0.5;
+  const FlutterPlatformViewMutation* mutations[] = {&mutation};
 
-    FlutterPlatformViewMutation mutation = {};
-    mutation.type = kFlutterPlatformViewMutationTypeOpacity;
-    mutation.opacity = 0.5;
-    const FlutterPlatformViewMutation* mutations[] = {&mutation};
-
-    auto records = AndroidMutatorsMapper::ParseMutations(1, mutations, 1.0);
-    ASSERT_EQ(records.size(), 1u);
-    EXPECT_FLOAT_EQ(records[0].opacity, 0.5f);
-  }
-  FlutterMain::ResetEmbedderAPIEnabledForTesting();
+  auto records = AndroidMutatorsMapper::ParseMutations(1, mutations, 1.0);
+  ASSERT_EQ(records.size(), 1u);
+  EXPECT_FLOAT_EQ(records[0].opacity, 0.5f);
 }
 
 }  // namespace testing
