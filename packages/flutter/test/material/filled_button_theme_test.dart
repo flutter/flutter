@@ -108,9 +108,8 @@ void main() {
         },
       );
       return MaterialApp(
-        theme: ThemeData.from(
-          colorScheme: const ColorScheme.light(),
-        ).copyWith(filledButtonTheme: FilledButtonThemeData(style: overallStyle)),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light())
+            .copyWith(filledButtonTheme: FilledButtonThemeData(style: overallStyle)),
         home: Scaffold(
           body: Center(
             // If the FilledButtonTheme widget is present, it's used

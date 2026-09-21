@@ -786,6 +786,38 @@ void main() {
     );
 
     testUsingContext(
+      'reports the enable-hcpp feature flag to gradle as the injected default',
+      () async {
+        final command = DummyHcppFlutterCommand();
+        await createTestCommandRunner(command).run(<String>['dummy']);
+        final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.androidEnableHcpp, isTrue);
+        expect(buildInfo.toGradleConfig(), contains('-Penable-hcpp=true'));
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'an explicit --[no-]enable-hcpp overrides the enable-hcpp feature flag default',
+      () async {
+        final command = DummyHcppFlutterCommand();
+        await createTestCommandRunner(command).run(<String>['dummy', '--no-enable-hcpp']);
+        final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.androidEnableHcpp, isFalse);
+        expect(buildInfo.toGradleConfig(), contains('-Penable-hcpp=false'));
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
       'getBuildInfo defaults when no build options are registered on command',
       () async {
         final flutterCommand = DummyFlutterCommand();
@@ -2103,6 +2135,7 @@ Use the "flutter config" command to enable feature flags.''',
         'FLUTTER_ENABLED_FEATURE_FLAGS is set in dartDefines',
         () async {
           final flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+          createTestCommandRunner(flutterCommand);
           final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
             forcedBuildMode: BuildMode.debug,
           );
@@ -2320,6 +2353,10 @@ class FakeFeatureFlags implements FeatureFlags {
 
   @override
   bool isEnabled(Feature feature) => (feature as FakeFeature).enabled;
+
+  // Queried by getBuildInfo.
+  @override
+  bool get isHcppEnabled => false;
 
   @override
   Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

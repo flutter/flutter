@@ -6,17 +6,22 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'android/android_device.dart';
 import 'application_package.dart';
+import 'artifacts.dart';
 import 'asset.dart';
 import 'base/command_help.dart';
 import 'base/common.dart';
+import 'base/config.dart';
 import 'base/context.dart';
 import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
+import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/signals.dart';
 import 'base/terminal.dart';
@@ -28,6 +33,7 @@ import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
+import 'context/tool_context.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -234,22 +240,20 @@ class FlutterDevice {
     // shuts down, including after an error. If `done` completes before `connectToVmService`,
     // something went wrong that caused DDS to shutdown early.
     try {
-      service =
-          await Future.any<dynamic>(<Future<dynamic>>[
-                connectToVmService(
-                  debuggingOptions.enableDds ? (device!.dds.uri ?? vmServiceUri) : vmServiceUri,
-                  reloadSources: reloadSources,
-                  restart: restart,
-                  compileExpression: compileExpression,
-                  flutterProject: FlutterProject.current(),
-                  printStructuredErrorLogMethod: printStructuredErrorLogMethod,
-                  device: device,
-                  logger: globals.logger,
-                ),
-                if (!existingDds)
-                  device!.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
-              ])
-              as FlutterVmService?;
+      service = await Future.any<dynamic>(<Future<dynamic>>[
+        connectToVmService(
+          debuggingOptions.enableDds ? (device!.dds.uri ?? vmServiceUri) : vmServiceUri,
+          reloadSources: reloadSources,
+          restart: restart,
+          compileExpression: compileExpression,
+          flutterProject: FlutterProject.current(),
+          printStructuredErrorLogMethod: printStructuredErrorLogMethod,
+          device: device,
+          logger: globals.logger,
+        ),
+        if (!existingDds)
+          device!.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
+      ]) as FlutterVmService?;
     } on Exception catch (exception) {
       globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $exception');
       rethrow;
@@ -292,12 +296,8 @@ class FlutterDevice {
       vmService!,
       fsName,
       rootDirectory,
-      osUtils: globals.os,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      artifacts: globals.artifacts!,
       buildMode: buildInfo.mode,
+      toolContext: _FallbackToolContext(),
     );
     return devFS!.create();
   }
@@ -311,6 +311,11 @@ class FlutterDevice {
       logStream = (device! as IOSDevice)
           .getLogReader(app: package as IOSApp?, usingCISystem: debuggingOptions.usingCISystem)
           .logLines;
+    } else if (device is AndroidDevice) {
+      logStream = (await (device! as AndroidDevice).getLogReader(
+        app: package,
+        adbLogFiltering: debuggingOptions.adbLogFiltering,
+      )).logLines;
     } else {
       logStream = (await device!.getLogReader(app: package)).logLines;
     }
@@ -1621,18 +1626,13 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
 class TerminalHandler {
   TerminalHandler(
     this.residentRunner, {
-    required Logger logger,
-    required Terminal terminal,
-    required Signals signals,
-    required io.ProcessInfo processInfo,
-    required bool reportReady,
-    String? pidFile,
-  }) : _logger = logger,
-       _terminal = terminal,
-       _signals = signals,
-       _processInfo = processInfo,
-       _reportReady = reportReady,
-       _pidFile = pidFile;
+    required this._logger,
+    required this._terminal,
+    required this._signals,
+    required this._processInfo,
+    required this._reportReady,
+    this._pidFile,
+  });
 
   final Logger _logger;
   final Terminal _terminal;
@@ -2060,4 +2060,32 @@ class DevToolsServerAddress {
   Uri? get uri {
     return Uri(scheme: 'http', host: host, port: port);
   }
+}
+
+// TODO(bkonyi): This will be removed in a follow up PR once ResidentRunner is
+// migrated to accept ToolContext directly. This fallback context delegates to
+// globals.* to maintain backwards compatibility.
+class _FallbackToolContext implements ToolContext {
+  _FallbackToolContext();
+
+  @override
+  Artifacts get artifacts => globals.artifacts!;
+
+  @override
+  Config get config => globals.config;
+
+  @override
+  FileSystem get fs => globals.fs;
+
+  @override
+  Logger get logger => globals.logger;
+
+  @override
+  OperatingSystemUtils get os => globals.os;
+
+  @override
+  ProcessManager get processManager => globals.processManager;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
