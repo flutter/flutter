@@ -39,6 +39,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/fake_devices.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -142,14 +143,13 @@ void main() {
 
           await createTestCommandRunner(
             AttachCommand(
+              androidContext: null as dynamic,
+              appleContext: null as dynamic,
+              nativeAssetsContext: null as dynamic,
+              previewContext: null as dynamic,
+              toolContext: FakeToolContext(),
+              webContext: null as dynamic,
               hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
             ),
           ).run(<String>['attach']);
 
@@ -221,14 +221,13 @@ void main() {
 
           await createTestCommandRunner(
             AttachCommand(
+              androidContext: null as dynamic,
+              appleContext: null as dynamic,
+              nativeAssetsContext: null as dynamic,
+              previewContext: null as dynamic,
+              toolContext: FakeToolContext(),
+              webContext: null as dynamic,
               hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
             ),
           ).run(<String>['attach']);
           await completer.future;
@@ -305,14 +304,13 @@ void main() {
 
           await createTestCommandRunner(
             AttachCommand(
+              androidContext: null as dynamic,
+              appleContext: null as dynamic,
+              nativeAssetsContext: null as dynamic,
+              previewContext: null as dynamic,
+              toolContext: FakeToolContext(),
+              webContext: null as dynamic,
               hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
             ),
           ).run(<String>[
             'attach',
@@ -372,14 +370,13 @@ void main() {
 
           await createTestCommandRunner(
             AttachCommand(
+              androidContext: null as dynamic,
+              appleContext: null as dynamic,
+              nativeAssetsContext: null as dynamic,
+              previewContext: null as dynamic,
+              toolContext: FakeToolContext(),
+              webContext: null as dynamic,
               hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
             ),
           ).run(<String>['attach']);
           await fakeLogReader.dispose();
@@ -451,14 +448,13 @@ void main() {
 
           await createTestCommandRunner(
             AttachCommand(
+              androidContext: null as dynamic,
+              appleContext: null as dynamic,
+              nativeAssetsContext: null as dynamic,
+              previewContext: null as dynamic,
+              toolContext: FakeToolContext(),
+              webContext: null as dynamic,
               hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
             ),
           ).run(<String>['attach']);
           await fakeLogReader.dispose();
@@ -535,14 +531,13 @@ void main() {
 
           await createTestCommandRunner(
             AttachCommand(
+              androidContext: null as dynamic,
+              appleContext: null as dynamic,
+              nativeAssetsContext: null as dynamic,
+              previewContext: null as dynamic,
+              toolContext: FakeToolContext(),
+              webContext: null as dynamic,
               hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
             ),
           ).run(<String>['attach', '--debug-port', '123']);
           await fakeLogReader.dispose();
@@ -632,14 +627,13 @@ void main() {
 
           await createTestCommandRunner(
             AttachCommand(
+              androidContext: null as dynamic,
+              appleContext: null as dynamic,
+              nativeAssetsContext: null as dynamic,
+              previewContext: null as dynamic,
+              toolContext: FakeToolContext(),
+              webContext: null as dynamic,
               hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
             ),
           ).run(<String>['attach', '--debug-url', 'https://0.0.0.0:123']);
           await fakeLogReader.dispose();
@@ -730,13 +724,13 @@ void main() {
           });
           final Future<void> task = createTestCommandRunner(
             AttachCommand(
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
+              androidContext: null as dynamic,
+              appleContext: null as dynamic,
+              nativeAssetsContext: null as dynamic,
+              previewContext: null as dynamic,
+              toolContext: FakeToolContext(),
+              webContext: null as dynamic,
+              hotRunnerFactory: FakeHotRunnerFactory(),
             ),
           ).run(<String>['attach']);
           await completer.future;
@@ -774,13 +768,13 @@ void main() {
           expect(
             () => createTestCommandRunner(
               AttachCommand(
-                stdio: stdio,
-                logger: logger,
-                terminal: terminal,
-                signals: signals,
-                platform: platform,
-                processInfo: processInfo,
-                fileSystem: testFileSystem,
+                androidContext: null as dynamic,
+                appleContext: null as dynamic,
+                nativeAssetsContext: null as dynamic,
+                previewContext: null as dynamic,
+                toolContext: FakeToolContext(),
+                webContext: null as dynamic,
+                hotRunnerFactory: FakeHotRunnerFactory(),
               ),
             ).run(<String>['attach']),
             throwsToolExit(),
@@ -823,14 +817,13 @@ void main() {
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           final command = AttachCommand(
+            androidContext: null as dynamic,
+            appleContext: null as dynamic,
+            nativeAssetsContext: null as dynamic,
+            previewContext: null as dynamic,
+            toolContext: FakeToolContext(),
+            webContext: null as dynamic,
             hotRunnerFactory: hotRunnerFactory,
-            stdio: stdio,
-            logger: logger,
-            terminal: terminal,
-            signals: signals,
-            platform: platform,
-            processInfo: processInfo,
-            fileSystem: testFileSystem,
           );
           await createTestCommandRunner(command).run(<String>[
             'attach',
@@ -871,13 +864,13 @@ void main() {
           testDeviceManager.devices = <Device>[device];
 
           final command = AttachCommand(
-            stdio: stdio,
-            logger: logger,
-            terminal: terminal,
-            signals: signals,
-            platform: platform,
-            processInfo: processInfo,
-            fileSystem: testFileSystem,
+            androidContext: null as dynamic,
+            appleContext: null as dynamic,
+            nativeAssetsContext: null as dynamic,
+            previewContext: null as dynamic,
+            toolContext: FakeToolContext(),
+            webContext: null as dynamic,
+            hotRunnerFactory: FakeHotRunnerFactory(),
           );
           await expectLater(
             createTestCommandRunner(command).run(<String>['attach', '--ipv6']),
@@ -929,14 +922,13 @@ void main() {
 
           await createTestCommandRunner(
             AttachCommand(
+              androidContext: null as dynamic,
+              appleContext: null as dynamic,
+              nativeAssetsContext: null as dynamic,
+              previewContext: null as dynamic,
+              toolContext: FakeToolContext(),
+              webContext: null as dynamic,
               hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
             ),
           ).run(<String>['attach', '--ipv6']);
           await completer.future;
@@ -980,13 +972,13 @@ void main() {
           testDeviceManager.devices = <Device>[device];
 
           final command = AttachCommand(
-            stdio: stdio,
-            logger: logger,
-            terminal: terminal,
-            signals: signals,
-            platform: platform,
-            processInfo: processInfo,
-            fileSystem: testFileSystem,
+            androidContext: null as dynamic,
+            appleContext: null as dynamic,
+            nativeAssetsContext: null as dynamic,
+            previewContext: null as dynamic,
+            toolContext: FakeToolContext(),
+            webContext: null as dynamic,
+            hotRunnerFactory: FakeHotRunnerFactory(),
           );
           await expectLater(
             createTestCommandRunner(command).run(<String>['attach', '--vm-service-port', '100']),
@@ -1036,13 +1028,13 @@ void main() {
           });
           final Future<void> task = createTestCommandRunner(
             AttachCommand(
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
+              androidContext: null as dynamic,
+              appleContext: null as dynamic,
+              nativeAssetsContext: null as dynamic,
+              previewContext: null as dynamic,
+              toolContext: FakeToolContext(),
+              webContext: null as dynamic,
+              hotRunnerFactory: FakeHotRunnerFactory(),
             ),
           ).run(<String>['attach', '--debug-port', '$devicePort']);
           await completer.future;
@@ -1081,13 +1073,13 @@ void main() {
           });
           final Future<void> task = createTestCommandRunner(
             AttachCommand(
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
+              androidContext: null as dynamic,
+              appleContext: null as dynamic,
+              nativeAssetsContext: null as dynamic,
+              previewContext: null as dynamic,
+              toolContext: FakeToolContext(),
+              webContext: null as dynamic,
+              hotRunnerFactory: FakeHotRunnerFactory(),
             ),
           ).run(<String>['attach', '--debug-port', '$devicePort', '--ipv6']);
           await completer.future;
@@ -1127,13 +1119,13 @@ void main() {
           final Future<void> task =
               createTestCommandRunner(
                 AttachCommand(
-                  stdio: stdio,
-                  logger: logger,
-                  terminal: terminal,
-                  signals: signals,
-                  platform: platform,
-                  processInfo: processInfo,
-                  fileSystem: testFileSystem,
+                  androidContext: null as dynamic,
+                  appleContext: null as dynamic,
+                  nativeAssetsContext: null as dynamic,
+                  previewContext: null as dynamic,
+                  toolContext: FakeToolContext(),
+                  webContext: null as dynamic,
+                  hotRunnerFactory: FakeHotRunnerFactory(),
                 ),
               ).run(<String>[
                 'attach',
@@ -1178,13 +1170,13 @@ void main() {
           final Future<void> task =
               createTestCommandRunner(
                 AttachCommand(
-                  stdio: stdio,
-                  logger: logger,
-                  terminal: terminal,
-                  signals: signals,
-                  platform: platform,
-                  processInfo: processInfo,
-                  fileSystem: testFileSystem,
+                  androidContext: null as dynamic,
+                  appleContext: null as dynamic,
+                  nativeAssetsContext: null as dynamic,
+                  previewContext: null as dynamic,
+                  toolContext: FakeToolContext(),
+                  webContext: null as dynamic,
+                  hotRunnerFactory: FakeHotRunnerFactory(),
                 ),
               ).run(<String>[
                 'attach',
@@ -1217,13 +1209,13 @@ void main() {
       'exits when no device connected',
       () async {
         final command = AttachCommand(
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
+          androidContext: null as dynamic,
+          appleContext: null as dynamic,
+          nativeAssetsContext: null as dynamic,
+          previewContext: null as dynamic,
+          toolContext: FakeToolContext(),
+          webContext: null as dynamic,
+          hotRunnerFactory: FakeHotRunnerFactory(),
         );
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach']),
@@ -1246,13 +1238,13 @@ void main() {
         expect(
           createTestCommandRunner(
             AttachCommand(
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
+              androidContext: null as dynamic,
+              appleContext: null as dynamic,
+              nativeAssetsContext: null as dynamic,
+              previewContext: null as dynamic,
+              toolContext: FakeToolContext(),
+              webContext: null as dynamic,
+              hotRunnerFactory: FakeHotRunnerFactory(),
             ),
           ).run(<String>['attach', '--device-user', '10']),
           throwsToolExit(message: '--device-user is only supported for Android'),
@@ -1269,13 +1261,13 @@ void main() {
       'exits when multiple devices connected',
       () async {
         final command = AttachCommand(
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
+          androidContext: null as dynamic,
+          appleContext: null as dynamic,
+          nativeAssetsContext: null as dynamic,
+          previewContext: null as dynamic,
+          toolContext: FakeToolContext(),
+          webContext: null as dynamic,
+          hotRunnerFactory: FakeHotRunnerFactory(),
         );
         testDeviceManager.devices = <Device>[
           FakeAndroidDevice(id: 'xx1'),
@@ -1324,14 +1316,13 @@ void main() {
         testFileSystem.file('lib/main.dart').createSync();
 
         final command = AttachCommand(
+          androidContext: null as dynamic,
+          appleContext: null as dynamic,
+          nativeAssetsContext: null as dynamic,
+          previewContext: null as dynamic,
+          toolContext: FakeToolContext(),
+          webContext: null as dynamic,
           hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
         );
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach']),
@@ -1371,14 +1362,13 @@ void main() {
         testFileSystem.file('lib/main.dart').createSync();
 
         final command = AttachCommand(
+          androidContext: null as dynamic,
+          appleContext: null as dynamic,
+          nativeAssetsContext: null as dynamic,
+          previewContext: null as dynamic,
+          toolContext: FakeToolContext(),
+          webContext: null as dynamic,
           hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
         );
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach']),
@@ -1418,14 +1408,13 @@ void main() {
         testFileSystem.file('lib/main.dart').createSync();
 
         final command = AttachCommand(
+          androidContext: null as dynamic,
+          appleContext: null as dynamic,
+          nativeAssetsContext: null as dynamic,
+          previewContext: null as dynamic,
+          toolContext: FakeToolContext(),
+          webContext: null as dynamic,
           hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
         );
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach']),
@@ -1466,14 +1455,13 @@ void main() {
         testFileSystem.file('lib/main.dart').createSync();
 
         final command = AttachCommand(
+          androidContext: null as dynamic,
+          appleContext: null as dynamic,
+          nativeAssetsContext: null as dynamic,
+          previewContext: null as dynamic,
+          toolContext: FakeToolContext(),
+          webContext: null as dynamic,
           hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
         );
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach']),
@@ -1515,14 +1503,13 @@ void main() {
         testFileSystem.file('lib/main.dart').createSync();
 
         final command = AttachCommand(
+          androidContext: null as dynamic,
+          appleContext: null as dynamic,
+          nativeAssetsContext: null as dynamic,
+          previewContext: null as dynamic,
+          toolContext: FakeToolContext(),
+          webContext: null as dynamic,
           hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
         );
         await createTestCommandRunner(command).run(<String>['attach', '--verbose']);
 
@@ -1551,13 +1538,13 @@ void main() {
           FakeAsync().run((FakeAsync fakeAsync) {
             createTestCommandRunner(
               AttachCommand(
-                stdio: stdio,
-                logger: logger,
-                terminal: terminal,
-                signals: signals,
-                platform: platform,
-                processInfo: processInfo,
-                fileSystem: testFileSystem,
+                androidContext: null as dynamic,
+                appleContext: null as dynamic,
+                nativeAssetsContext: null as dynamic,
+                previewContext: null as dynamic,
+                toolContext: FakeToolContext(),
+                webContext: null as dynamic,
+                hotRunnerFactory: FakeHotRunnerFactory(),
               ),
             ).run(<String>['attach']);
 
