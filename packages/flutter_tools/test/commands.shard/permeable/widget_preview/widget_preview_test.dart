@@ -62,6 +62,9 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreview
   @override
   Future<void> launchAndConnect({required AnalysisServer analysisServer}) async {}
 
+  @override
+  Future<void> waitForAnalysis({Duration delay = const Duration(milliseconds: 100)}) async {}
+
   FlutterWidgetPreviews? nextUpdate;
   bool shouldThrow = false;
 

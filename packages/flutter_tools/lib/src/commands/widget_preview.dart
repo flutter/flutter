@@ -396,7 +396,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
       // Wait for the initial analysis to complete to ensure the analysis server
       // has registered the widget preview RPC methods.
-      await _lspPreviewDetector.analysisServer?.waitForAnalysis();
+      await _lspPreviewDetector.waitForAnalysis();
 
       _previewCodeGenerator.populateDtdConnectionInfo(
         dtdUri: _dtdService.dtdUri!,

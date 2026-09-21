@@ -35,6 +35,7 @@ class FakeDartToolingDaemon extends Fake implements DartToolingDaemon {
   int getRegisteredServicesCallCount = 0;
   int streamListenCallCount = 0;
   int streamCancelCallCount = 0;
+  int waitForAnalysisCallCount = 0;
   RegisteredServicesResponse registeredServicesResponse = const RegisteredServicesResponse(
     clientServices: [],
     dtdServices: <String>[],
@@ -89,6 +90,10 @@ class FakeDartToolingDaemon extends Fake implements DartToolingDaemon {
           'scriptUris': <String>[],
         },
       });
+    }
+    if (serviceName == 'Lsp' && methodName == 'dart/workspace/analysis/complete') {
+      waitForAnalysisCallCount++;
+      return DTDResponse('1', 'Null', <String, Object?>{'type': 'Null', 'result': null});
     }
     throw UnimplementedError('Unexpected call: $serviceName.$methodName');
   }
@@ -199,5 +204,19 @@ void main() {
 
     final FlutterWidgetPreviews result = await future;
     expect(result.previews, isEmpty);
+  });
+
+  testUsingContext('waitForAnalysis calls Lsp.dart/workspace/analysis/complete over DTD', () async {
+    const kServiceStream = 'Service';
+
+    final Future<void> future = dtdServices.waitForAnalysis(delay: Duration.zero);
+    await pumpEventQueue();
+
+    fakeDtd.postFakeEvent(kServiceStream, 'ServiceRegistered', <String, Object?>{
+      'service': WidgetPreviewDtdServices.kLspStream,
+    });
+
+    await future;
+    expect(fakeDtd.waitForAnalysisCallCount, 1);
   });
 }

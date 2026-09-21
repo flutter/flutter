@@ -214,6 +214,33 @@ class WidgetPreviewDtdServices {
     throw StateError('Failed to call getFlutterWidgetPreviewsForFile after $maxAttempts attempts.');
   }
 
+  /// Returns a [Future] that completes when the analysis server connected to DTD
+  /// has completed any in-progress initialization or analysis.
+  ///
+  /// This method will wait for [delay] before calling the server. If not
+  /// provided, defaults to 100ms.
+  Future<void> waitForAnalysis({Duration delay = const Duration(milliseconds: 100)}) async {
+    await _waitForLspService();
+    await Future<void>.delayed(delay);
+    const maxAttempts = 50;
+    for (var attempts = 0; attempts < maxAttempts; attempts++) {
+      try {
+        await _dtd!.call('Lsp', 'dart/workspace/analysis/complete');
+        return;
+      } on RpcException catch (e) {
+        if (e.code == -32601 && attempts < maxAttempts - 1) {
+          // Method not found
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+          continue;
+        }
+        rethrow;
+      }
+    }
+    throw StateError(
+      'Failed to call dart/workspace/analysis/complete after $maxAttempts attempts.',
+    );
+  }
+
   Future<void>? _waitForLspServiceFuture;
 
   Future<void> _waitForLspService() async {
