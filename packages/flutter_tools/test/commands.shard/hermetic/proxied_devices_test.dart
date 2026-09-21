@@ -70,6 +70,7 @@ void main() {
     testUsingContext('can list devices', () async {
       daemon = Daemon(
         serverDaemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: TestFeatureFlags(),
         fileSystem: MemoryFileSystem.test(),
@@ -93,6 +94,7 @@ void main() {
     testUsingContext('calls supportsRuntimeMode', () async {
       daemon = Daemon(
         serverDaemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: TestFeatureFlags(),
         fileSystem: MemoryFileSystem.test(),
@@ -115,6 +117,7 @@ void main() {
     testUsingContext('redirects logs', () async {
       daemon = Daemon(
         serverDaemonConnection,
+        toolContext: DelegatingToolContext(),
         notifyingLogger: notifyingLogger,
         featureFlags: TestFeatureFlags(),
         fileSystem: MemoryFileSystem.test(),
@@ -149,6 +152,7 @@ void main() {
       () async {
         daemon = Daemon(
           serverDaemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: TestFeatureFlags(),
           fileSystem: MemoryFileSystem.test(),
@@ -211,6 +215,7 @@ void main() {
       () async {
         daemon = Daemon(
           serverDaemonConnection,
+          toolContext: DelegatingToolContext(),
           notifyingLogger: notifyingLogger,
           featureFlags: TestFeatureFlags(),
           fileSystem: MemoryFileSystem.test(),

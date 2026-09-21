@@ -26,6 +26,7 @@ import 'package:webdriver/sync_io.dart' as sync_io;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 final kChromeArgs = <String>[
   '--bwsi',
@@ -464,6 +465,7 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 WebDriverService setUpDriverService() {
   final logger = BufferLogger.test();
   return WebDriverService(
+    toolContext: DelegatingToolContext(),
     logger: logger,
     terminal: Terminal.test(),
     platform: FakePlatform(),
