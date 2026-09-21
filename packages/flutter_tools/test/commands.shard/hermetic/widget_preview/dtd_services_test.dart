@@ -160,32 +160,29 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'mixed concurrent calls to getFlutterWidgetPreviews and getFlutterWidgetPreviewsForFile do not throw',
-    () async {
-      const kServiceStream = 'Service';
+  testUsingContext('mixed concurrent calls to getFlutterWidgetPreviews and getFlutterWidgetPreviewsForFile do not throw', () async {
+    const kServiceStream = 'Service';
 
-      final Future<FlutterWidgetPreviews> future1 = dtdServices.getFlutterWidgetPreviews();
-      final Future<FlutterWidgetPreviews> future2 = dtdServices.getFlutterWidgetPreviewsForFile(
-        filePath: fs.path.join('lib', 'main.dart'),
-      );
+    final Future<FlutterWidgetPreviews> future1 = dtdServices.getFlutterWidgetPreviews();
+    final Future<FlutterWidgetPreviews> future2 = dtdServices.getFlutterWidgetPreviewsForFile(
+      filePath: fs.path.join('lib', 'main.dart'),
+    );
 
-      await pumpEventQueue();
+    await pumpEventQueue();
 
-      fakeDtd.postFakeEvent(kServiceStream, 'ServiceRegistered', <String, Object?>{
-        'service': WidgetPreviewDtdServices.kLspStream,
-      });
+    fakeDtd.postFakeEvent(kServiceStream, 'ServiceRegistered', <String, Object?>{
+      'service': WidgetPreviewDtdServices.kLspStream,
+    });
 
-      final (FlutterWidgetPreviews result1, FlutterWidgetPreviews result2) = await (
-        future1,
-        future2,
-      ).wait;
-      expect(result1.previews, isEmpty);
-      expect(result2.previews, isEmpty);
-      expect(fakeDtd.streamListenCallCount, 1);
-      expect(fakeDtd.getRegisteredServicesCallCount, 1);
-    },
-  );
+    final (FlutterWidgetPreviews result1, FlutterWidgetPreviews result2) = await (
+      future1,
+      future2,
+    ).wait;
+    expect(result1.previews, isEmpty);
+    expect(result2.previews, isEmpty);
+    expect(fakeDtd.streamListenCallCount, 1);
+    expect(fakeDtd.getRegisteredServicesCallCount, 1);
+  });
 
   testUsingContext('getFlutterWidgetPreviews succeeds when stream is already subscribed', () async {
     const kServiceStream = 'Service';

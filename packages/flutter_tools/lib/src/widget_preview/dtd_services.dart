@@ -41,8 +41,8 @@ class WidgetPreviewDtdServices {
     required this.previewAnalytics,
     required this.project,
     required this.shutdownHooks,
-    @visibleForTesting DartToolingDaemon? dtd,
-  }) : _dtd = dtd {
+    @visibleForTesting this._dtd,
+  }) {
     shutdownHooks.addShutdownHook(() async {
       await _dtd?.close();
       await dtdLauncher.dispose();
