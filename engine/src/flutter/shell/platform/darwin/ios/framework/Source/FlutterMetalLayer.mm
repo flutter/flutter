@@ -181,6 +181,7 @@ static constexpr int64_t kActivationCompositingDelay = 1500 * NSEC_PER_MSEC;
 - (instancetype)init {
   if (self = [super init]) {
     self.opaque = YES;
+    self.presentsWithTransaction = YES;
     self.device = MTLCreateSystemDefaultDevice();
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _availableTextures = [[NSMutableSet alloc] init];
@@ -226,6 +227,11 @@ static constexpr int64_t kActivationCompositingDelay = 1500 * NSEC_PER_MSEC;
                    layer->_compositingHold = NO;
                    layer.opaque = layer->_requestedOpaque;
                  });
+}
+
+- (void)setPresentsWithTransaction:(BOOL)presentsWithTransaction {
+  // Keep the presentation mode stable when platform views are added or removed.
+  [super setPresentsWithTransaction:YES];
 }
 
 - (void)setDrawableSize:(CGSize)drawableSize {

@@ -67,6 +67,16 @@
 - (void)removeMetalLayer:(FlutterMetalLayer*)layer {
 }
 
+- (void)testAlwaysPresentsWithTransaction {
+  FlutterMetalLayer* layer = [self addMetalLayer];
+  XCTAssertTrue(layer.presentsWithTransaction);
+
+  layer.presentsWithTransaction = NO;
+  XCTAssertTrue(layer.presentsWithTransaction);
+
+  [self removeMetalLayer:layer];
+}
+
 // For unknown reason sometimes CI fails to create IOSurface. Bail out
 // to prevent flakiness.
 #define BAIL_IF_NO_DRAWABLE(drawable)                        \
