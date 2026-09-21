@@ -2675,4 +2675,200 @@ flutter:
       expect(configString, contains('"main.dart.89abcdef.wasm":'));
     }),
   );
+
+  test(
+    'WebServiceWorker emits precache_manifest.json and excludes non-runtime bloat when webContentHash is true',
+    () => testbed.run(() async {
+      final File fileGenerators =
+          environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators).isEmpty
+          ? environment.fileSystem.file('flutter_service_worker.js')
+          : environment.fileSystem.file(
+              environment.fileSystem.path.join(
+                environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators),
+                'js',
+                'flutter_service_worker.js',
+              ),
+            );
+      fileGenerators
+        ..createSync(recursive: true)
+        ..writeAsStringSync('// service worker stub');
+
+      const indexBytes = <int>[1, 2, 3, 4];
+      const bootstrapBytes = <int>[5, 6, 7, 8, 9];
+      const mainJsBytes = <int>[10, 20, 30, 40, 50, 60];
+      const logoBytes = <int>[70, 80, 90];
+      const manifestBinBytes = <int>[11, 22, 33];
+      const extensionlessAssetBytes = <int>[44, 55, 66];
+
+      final String indexHash = crypto.sha256.convert(indexBytes).toString().substring(0, 8);
+      final String bootstrapHash = crypto.sha256.convert(bootstrapBytes).toString().substring(0, 8);
+      final String mainJsHash = crypto.sha256.convert(mainJsBytes).toString().substring(0, 8);
+      final String logoHash = crypto.sha256.convert(logoBytes).toString().substring(0, 8);
+      final String manifestBinHash = crypto.sha256
+          .convert(manifestBinBytes)
+          .toString()
+          .substring(0, 8);
+      final String extensionlessHash = crypto.sha256
+          .convert(extensionlessAssetBytes)
+          .toString()
+          .substring(0, 8);
+
+      environment.outputDir.childFile('index.html')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(indexBytes);
+      environment.outputDir.childFile('flutter_bootstrap.js')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(bootstrapBytes);
+      environment.outputDir.childFile('main.dart.$mainJsHash.js')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(mainJsBytes);
+      environment.outputDir.childFile('assets/images/logo.$logoHash.png')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(logoBytes);
+      environment.outputDir.childFile('assets/AssetManifest.bin')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(manifestBinBytes);
+      environment.outputDir.childFile('assets/RAW_DATA.$extensionlessHash')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(extensionlessAssetBytes);
+
+      // Non-runtime files that must be excluded from precache_manifest.json:
+      environment.outputDir.childFile('main.dart.$mainJsHash.js.map')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{}');
+      environment.outputDir.childFile('main.dart.wasm.symbols')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('symbols');
+      environment.outputDir.childFile('main.dart.js.info.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{}');
+      environment.outputDir.childFile('.last_build_id')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('build-id');
+      environment.outputDir.childFile('canvaskit/canvaskit.wasm')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(<int>[0, 97, 115, 109]);
+
+      final target = WebServiceWorker(environment.fileSystem, const <WebCompilerConfig>[
+        JsCompilerConfig(webContentHash: true),
+      ], const NoOpAnalytics());
+      await target.build(environment);
+
+      final File manifestFile = environment.outputDir.childFile('precache_manifest.json');
+      expect(manifestFile, exists);
+
+      final decoded = jsonDecode(manifestFile.readAsStringSync()) as Map<String, Object?>;
+      expect(decoded['version'], 1);
+
+      final entries = decoded['entries']! as List<Object?>;
+      expect(entries, <Map<String, Object>>[
+        <String, Object>{
+          'url': 'assets/AssetManifest.bin',
+          'hash': manifestBinHash,
+          'size': manifestBinBytes.length,
+          'urlHashed': false,
+        },
+        <String, Object>{
+          'url': 'assets/RAW_DATA.$extensionlessHash',
+          'hash': extensionlessHash,
+          'size': extensionlessAssetBytes.length,
+          'urlHashed': true,
+        },
+        <String, Object>{
+          'url': 'assets/images/logo.$logoHash.png',
+          'hash': logoHash,
+          'size': logoBytes.length,
+          'urlHashed': true,
+        },
+        <String, Object>{
+          'url': 'flutter_bootstrap.js',
+          'hash': bootstrapHash,
+          'size': bootstrapBytes.length,
+          'urlHashed': false,
+        },
+        <String, Object>{
+          'url': 'index.html',
+          'hash': indexHash,
+          'size': indexBytes.length,
+          'urlHashed': false,
+        },
+        <String, Object>{
+          'url': 'main.dart.$mainJsHash.js',
+          'hash': mainJsHash,
+          'size': mainJsBytes.length,
+          'urlHashed': true,
+        },
+      ]);
+
+      final File serviceWorkerDepfile = environment.buildDir.childFile('service_worker.d');
+      expect(serviceWorkerDepfile, exists);
+      expect(serviceWorkerDepfile.readAsStringSync(), contains('precache_manifest.json:'));
+    }),
+  );
+
+  test(
+    'WebServiceWorker includes canvaskit in precache_manifest.json when kUseLocalCanvasKitFlag is true',
+    () => testbed.run(() async {
+      environment.defines[kUseLocalCanvasKitFlag] = 'true';
+      final File fileGenerators = environment.fileSystem.file(
+        environment.fileSystem.path.join(
+          environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators),
+          'js',
+          'flutter_service_worker.js',
+        ),
+      );
+      fileGenerators
+        ..createSync(recursive: true)
+        ..writeAsStringSync('// service worker stub');
+
+      const wasmBytes = <int>[0, 97, 115, 109];
+      final String wasmHash = crypto.sha256.convert(wasmBytes).toString().substring(0, 8);
+      environment.outputDir.childFile('canvaskit/canvaskit.wasm')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(wasmBytes);
+
+      final target = WebServiceWorker(environment.fileSystem, const <WebCompilerConfig>[
+        JsCompilerConfig(webContentHash: true),
+      ], const NoOpAnalytics());
+      await target.build(environment);
+
+      final File manifestFile = environment.outputDir.childFile('precache_manifest.json');
+      final decoded = jsonDecode(manifestFile.readAsStringSync()) as Map<String, Object?>;
+      expect(decoded['entries'], <Map<String, Object>>[
+        <String, Object>{
+          'url': 'canvaskit/canvaskit.wasm',
+          'hash': wasmHash,
+          'size': wasmBytes.length,
+          'urlHashed': false,
+        },
+      ]);
+    }),
+  );
+
+  test(
+    'WebServiceWorker deletes stale precache_manifest.json when webContentHash is false',
+    () => testbed.run(() async {
+      final File fileGenerators = environment.fileSystem.file(
+        environment.fileSystem.path.join(
+          environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators),
+          'js',
+          'flutter_service_worker.js',
+        ),
+      );
+      fileGenerators
+        ..createSync(recursive: true)
+        ..writeAsStringSync('// service worker stub');
+
+      final File staleManifest = environment.outputDir.childFile('precache_manifest.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"version":1,"entries":[]}');
+
+      final target = WebServiceWorker(environment.fileSystem, const <WebCompilerConfig>[
+        JsCompilerConfig(),
+      ], const NoOpAnalytics());
+      await target.build(environment);
+
+      expect(staleManifest, isNot(exists));
+    }),
+  );
 }

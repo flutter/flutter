@@ -4,8 +4,8 @@
 
 // NOTE: originally from package:devtools_app_shared
 
-import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:widget_preview_scaffold/src/utils/color_utils.dart';
 
 import 'ide_theme.dart';
