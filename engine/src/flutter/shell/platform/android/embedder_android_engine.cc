@@ -21,6 +21,7 @@
 #include "flutter/shell/platform/android/android_semantics_mapper.h"
 #include "flutter/shell/platform/android/android_window_metrics_mapper.h"
 #include "flutter/shell/platform/android/platform_message_handler_android.h"
+#include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/shell/platform/embedder/embedder_semantics_update.h"
 
 #if FML_OS_ANDROID
@@ -178,23 +179,15 @@ void EmbedderAndroidEngine::SetPlatformMessageHandler(
 
 EmbedderAndroidEngine::EmbedderAndroidEngine(
     const TaskRunners& task_runners,
-    std::unique_ptr<Shell> shell,
     const Settings& settings,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     AndroidRenderingAPI android_rendering_api)
     : settings_(settings),
       jni_facade_(std::move(jni_facade)),
-      android_rendering_api_(android_rendering_api) {
-  InitializeSubsystems(&task_runners);
-  if (shell) {
-    embedder_engine_ =
-        std::make_unique<EmbedderEngine>(task_runners, std::move(shell));
-    android_task_runners_->SetEngine(GetEngineHandle());
-    if (vsync_waiter_ != nullptr) {
-      vsync_waiter_->SetEngine(GetEngineHandle());
-    }
-    BindPlatformMessageHandler();
-  }
+      android_rendering_api_(android_rendering_api),
+      task_runners_(task_runners) {
+  InitializeSubsystems(&task_runners_.value());
+  BindPlatformMessageHandler();
 }
 
 EmbedderAndroidEngine::EmbedderAndroidEngine(
@@ -205,6 +198,12 @@ EmbedderAndroidEngine::EmbedderAndroidEngine(
       jni_facade_(std::move(jni_facade)),
       android_rendering_api_(android_rendering_api) {
   InitializeSubsystems(nullptr);
+  task_runners_.emplace("io.flutter",
+                        android_task_runners_->GetPlatformTaskRunner(),
+                        android_task_runners_->GetRasterTaskRunner(),
+                        android_task_runners_->GetUITaskRunner(),
+                        android_task_runners_->GetUITaskRunner());
+  BindPlatformMessageHandler();
 }
 
 EmbedderAndroidEngine::~EmbedderAndroidEngine() {
@@ -225,10 +224,7 @@ EmbedderAndroidEngine::~EmbedderAndroidEngine() {
     compositor_->SetPlatformViewDelegate(nullptr);
   }
 
-  if (embedder_engine_) {
-    embedder_engine_->CollectShell();
-    embedder_engine_.reset();
-  } else if (c_api_engine_ != nullptr) {
+  if (c_api_engine_ != nullptr) {
     if (surface_attached_) {
       proc_table_.NotifyDestroyed(c_api_engine_);
       surface_attached_ = false;
@@ -242,47 +238,27 @@ EmbedderAndroidEngine::~EmbedderAndroidEngine() {
 }
 
 bool EmbedderAndroidEngine::IsValid() const {
-  if (embedder_engine_) {
-    return embedder_engine_->IsValid();
+  if (c_api_engine_ != nullptr) {
+    return c_api_is_valid_;
   }
-  return c_api_is_valid_ && c_api_engine_ != nullptr;
+  return proc_table_.Initialize != nullptr && surface_manager_ != nullptr &&
+         surface_manager_->IsValid() && android_task_runners_ != nullptr &&
+         android_task_runners_->IsValid();
 }
 
 bool EmbedderAndroidEngine::IsSetup() const {
-  if (embedder_engine_) {
-    return embedder_engine_->GetShell().IsSetup();
-  }
   return IsValid();
 }
 
-void EmbedderAndroidEngine::RunEngine(RunConfiguration run_configuration) {
-  if (embedder_engine_) {
-    embedder_engine_->SetRunConfiguration(std::move(run_configuration));
-    if (proc_table_.RunInitialized) {
-      proc_table_.RunInitialized(GetEngineHandle());
-    } else {
-      embedder_engine_->RunRootIsolate();
-    }
-  }
-}
-
 std::unique_ptr<AndroidEngine> EmbedderAndroidEngine::Spawn(
-    RunConfiguration run_configuration,
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+    const std::string& entrypoint,
+    const std::string& library_url,
     const std::string& initial_route,
-    Shell::CreateCallback<PlatformView> on_create_platform_view,
-    Shell::CreateCallback<Rasterizer> on_create_rasterizer) const {
-  if (!embedder_engine_) {
-    return nullptr;
-  }
-  auto spawned_shell = embedder_engine_->GetShell().Spawn(
-      std::move(run_configuration), initial_route, on_create_platform_view,
-      on_create_rasterizer);
-  if (!spawned_shell) {
-    return nullptr;
-  }
-  return std::make_unique<EmbedderAndroidEngine>(
-      spawned_shell->GetTaskRunners(), std::move(spawned_shell), settings_,
-      jni_facade_, android_rendering_api_);
+    const std::vector<std::string>& entrypoint_args,
+    int64_t engine_id) const {
+  return SpawnCAPI(std::move(jni_facade), entrypoint, library_url,
+                   initial_route, entrypoint_args, engine_id);
 }
 
 Rasterizer::Screenshot EmbedderAndroidEngine::Screenshot(
@@ -328,7 +304,6 @@ void EmbedderAndroidEngine::NotifyLowMemoryWarning() {
   if (IsValid() && proc_table_.NotifyLowMemoryWarning) {
     proc_table_.NotifyLowMemoryWarning(GetEngineHandle());
   }
-  PersistentCache::GetCacheForProcess()->Purge();
 }
 
 void EmbedderAndroidEngine::OnDisplayUpdates(
@@ -358,40 +333,26 @@ void EmbedderAndroidEngine::OnDisplayUpdates(
   proc_table_.NotifyDisplayUpdate(GetEngineHandle(),
                                   kFlutterEngineDisplaysUpdateTypeStartup,
                                   c_displays.data(), c_displays.size());
-  if (embedder_engine_) {
-    embedder_engine_->GetShell().OnDisplayUpdates(std::move(displays));
-  }
 }
 
 const std::shared_ptr<PlatformMessageHandler>&
 EmbedderAndroidEngine::GetPlatformMessageHandler() const {
-  if (platform_message_handler_) {
-    return platform_message_handler_;
-  }
-  FML_CHECK(embedder_engine_);
-  return embedder_engine_->GetShell().GetPlatformMessageHandler();
+  return platform_message_handler_;
 }
 
 void EmbedderAndroidEngine::RegisterImageDecoder(ImageGeneratorFactory factory,
                                                  int32_t priority) {
-  if (embedder_engine_) {
-    embedder_engine_->RegisterImageGenerator(std::move(factory), priority);
+  if (c_api_engine_ != nullptr) {
+    reinterpret_cast<flutter::EmbedderEngine*>(c_api_engine_)
+        ->RegisterImageGenerator(std::move(factory), priority);
+  } else {
+    pending_image_generators_.push_back({std::move(factory), priority});
   }
 }
 
 const TaskRunners& EmbedderAndroidEngine::GetTaskRunners() const {
-  FML_CHECK(embedder_engine_);
-  return embedder_engine_->GetTaskRunners();
-}
-
-Shell& EmbedderAndroidEngine::GetShell() {
-  FML_CHECK(embedder_engine_);
-  return embedder_engine_->GetShell();
-}
-
-const std::unique_ptr<Shell>& EmbedderAndroidEngine::GetShellForTesting()
-    const {
-  return embedder_engine_->GetShellPointer();
+  FML_CHECK(task_runners_.has_value());
+  return task_runners_.value();
 }
 
 void EmbedderAndroidEngine::NotifyCreated() {
@@ -744,12 +705,6 @@ void EmbedderAndroidEngine::RegisterTexture(
   }
   if (c_api_engine_ != nullptr && proc_table_.RegisterExternalTexture) {
     proc_table_.RegisterExternalTexture(GetEngineHandle(), texture->Id());
-  } else if (embedder_engine_) {
-    if (auto platform_view = embedder_engine_->GetShell().GetPlatformView()) {
-      platform_view->RegisterTexture(std::move(texture));
-    } else {
-      GetDelegate().OnPlatformViewRegisterTexture(std::move(texture));
-    }
   }
 }
 
@@ -833,9 +788,6 @@ void EmbedderAndroidEngine::UpdateAssetResolverByType(
         c_resolver.destruction_callback != nullptr) {
       c_resolver.destruction_callback(c_resolver.user_data);
     }
-  } else if (embedder_engine_) {
-    GetDelegate().UpdateAssetResolverByType(std::move(updated_asset_resolver),
-                                            type);
   }
 }
 
@@ -1091,6 +1043,12 @@ bool EmbedderAndroidEngine::Run(
     return false;
   }
 
+  for (auto& pending : pending_image_generators_) {
+    reinterpret_cast<flutter::EmbedderEngine*>(c_api_engine_)
+        ->RegisterImageGenerator(std::move(pending.factory), pending.priority);
+  }
+  pending_image_generators_.clear();
+
   // FlutterEngineInitialize takes ownership of the asset resolver's destruction
   // callback via EmbedderAssetResolver. Clear our local pointer so our
   // destructor or error paths do not double-free it.
@@ -1133,8 +1091,7 @@ std::unique_ptr<EmbedderAndroidEngine> EmbedderAndroidEngine::SpawnCAPI(
                              android_task_runners_->GetUITaskRunner(),
                              android_task_runners_->GetUITaskRunner());
   auto child = std::make_unique<EmbedderAndroidEngine>(
-      parent_runners, nullptr, settings_, std::move(jni_facade),
-      android_rendering_api_);
+      parent_runners, settings_, std::move(jni_facade), android_rendering_api_);
 
   if (apk_asset_provider_ != nullptr) {
     child->apk_asset_provider_ = apk_asset_provider_->Clone();

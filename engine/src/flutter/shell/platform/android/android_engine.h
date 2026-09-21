@@ -11,27 +11,32 @@
 
 #include "flutter/assets/asset_resolver.h"
 #include "flutter/common/graphics/texture.h"
+#include "flutter/fml/build_config.h"
 #include "flutter/lib/ui/painting/image_generator_registry.h"
+#include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/shell/common/display.h"
-#include "flutter/shell/common/platform_view.h"
+#include "flutter/shell/common/platform_message_handler.h"
 #include "flutter/shell/common/rasterizer.h"
-#include "flutter/shell/common/run_configuration.h"
-#include "flutter/shell/common/shell.h"
+#include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
+#if FML_OS_ANDROID
+#include <android/native_window.h>
+#else
+typedef void ANativeWindow;
+#endif
+
 namespace flutter {
+
+class PlatformViewAndroidJNI;
 
 /**
  * @brief An interface for the Android embedder (both AndroidShellHolder and
  * PlatformViewAndroid) to interact with the Flutter engine.
- *
- * This abstraction allows the Android embedder to switch in-place between the
- * internal flutter::Shell / flutter::PlatformView implementation and the
- * public embedder.h API.
  */
 class AndroidEngine {
  public:
@@ -41,13 +46,19 @@ class AndroidEngine {
 
   virtual bool IsSetup() const = 0;
 
-  virtual void RunEngine(RunConfiguration run_configuration) = 0;
+  virtual bool Run(std::unique_ptr<APKAssetProvider> apk_asset_provider,
+                   const std::string& entrypoint,
+                   const std::string& library_url,
+                   const std::vector<std::string>& entrypoint_args,
+                   int64_t engine_id) = 0;
 
   virtual std::unique_ptr<AndroidEngine> Spawn(
-      RunConfiguration run_configuration,
+      std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+      const std::string& entrypoint,
+      const std::string& library_url,
       const std::string& initial_route,
-      Shell::CreateCallback<PlatformView> on_create_platform_view,
-      Shell::CreateCallback<Rasterizer> on_create_rasterizer) const = 0;
+      const std::vector<std::string>& entrypoint_args,
+      int64_t engine_id) const = 0;
 
   virtual Rasterizer::Screenshot Screenshot(Rasterizer::ScreenshotType type,
                                             bool base64_encode) = 0;
@@ -65,9 +76,17 @@ class AndroidEngine {
 
   virtual const TaskRunners& GetTaskRunners() const = 0;
 
-  virtual Shell& GetShell() = 0;
+  virtual void NotifySurfaceCreated(ANativeWindow* window,
+                                    bool is_fake_window = false) = 0;
 
-  virtual const std::unique_ptr<Shell>& GetShellForTesting() const = 0;
+  virtual void NotifySurfaceChanged(size_t width, size_t height) = 0;
+
+  virtual void NotifySurfaceWindowChanged(ANativeWindow* window,
+                                          bool is_fake_window = false) = 0;
+
+  virtual void NotifySurfaceDestroyed() = 0;
+
+  virtual bool IsSurfaceControlEnabled() const { return false; }
 
   // PlatformView / View-facing operations used by PlatformViewAndroid:
 
