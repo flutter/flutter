@@ -59,6 +59,15 @@ const int kSystemCodeLockViolation = 33;
 /// On Windows this is error code 1224: ERROR_USER_MAPPED_FILE.
 const int kSystemCodeUserMappedSectionOpened = 1224;
 
+/// On Linux this is errno 39: ENOTEMPTY: Directory not empty.
+const int kSystemCodeLinuxDirectoryNotEmpty = 39;
+
+/// On macOS this is errno 66: ENOTEMPTY: Directory not empty.
+///
+/// macOS does not share Linux's `ENOTEMPTY` value, so the two are tracked
+/// separately. Cf. `sys/errno.h` in the Darwin sources.
+const int kSystemCodeMacOSDirectoryNotEmpty = 66;
+
 /// On Windows this is error code 1314: ERROR_PRIVILEGE_NOT_HELD.
 const int kSystemCodePrivilegeNotHeld = 1314;
 
@@ -707,6 +716,7 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       failureMessage: 'Flutter failed to delete a directory at "${delegate.path}"',
       posixPermissionSuggestion: recursive ? null : _posixPermissionSuggestion(delegate.path),
       ignoreErrorCodes: const <int>[kSystemCodeCannotFindFile, kSystemCodePathNotFound],
+      retryOnDirectoryNotEmpty: recursive,
     );
   }
 
@@ -718,6 +728,7 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       failureMessage: 'Flutter failed to delete a directory at "${delegate.path}"',
       posixPermissionSuggestion: recursive ? null : _posixPermissionSuggestion(delegate.path),
       ignoreErrorCodes: const <int>[kSystemCodeCannotFindFile, kSystemCodePathNotFound],
+      retryOnDirectoryNotEmpty: recursive,
     );
   }
 
@@ -1001,29 +1012,41 @@ class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with F
 const _kNoExecutableFound =
     'The Flutter tool could not locate an executable with suitable permissions';
 
-List<Duration>? overrideWindowsRetryBackoffs;
+/// Overrides the exponential backoff used when retrying a transient file
+/// system error, for tests. A shorter-than-default list also caps the number
+/// of retries, and an empty list disables retrying altogether.
+List<Duration>? overrideRetryBackoffs;
 
-Duration? _getWindowsRetryDelay({
+/// The delay to wait before retrying an operation that failed with
+/// [errorCode], or null if the failure is not transient and the operation
+/// should not be retried.
+///
+/// [retryOnDirectoryNotEmpty] should only be set for recursive deletions, where
+/// "directory not empty" means another process raced the deletion rather than
+/// meaning the caller asked to remove a directory that has contents.
+Duration? _getRetryDelay({
   required Platform platform,
   required int errorCode,
   required int attempt,
   required List<int> ignoreErrorCodes,
+  required bool retryOnDirectoryNotEmpty,
 }) {
-  if (!platform.isWindows) {
-    return null;
-  }
   if (ignoreErrorCodes.contains(errorCode)) {
     return null;
   }
-  if (overrideWindowsRetryBackoffs != null) {
-    if (_isWindowsTransientLock(errorCode) && attempt < overrideWindowsRetryBackoffs!.length) {
-      return overrideWindowsRetryBackoffs![attempt];
-    }
+  final bool isTransient =
+      (platform.isWindows && _isWindowsTransientLock(errorCode)) ||
+      (retryOnDirectoryNotEmpty && _isDirectoryNotEmpty(platform, errorCode));
+  if (!isTransient) {
     return null;
+  }
+  final List<Duration>? overrides = overrideRetryBackoffs;
+  if (overrides != null) {
+    return attempt < overrides.length ? overrides[attempt] : null;
   }
   const maxAttempts = 5;
   const baseDelayMs = 50;
-  if (_isWindowsTransientLock(errorCode) && attempt < maxAttempts) {
+  if (attempt < maxAttempts) {
     final int delayMs = baseDelayMs * (1 << attempt); // 50ms, 100ms, 200ms, 400ms, 800ms
     return Duration(milliseconds: delayMs);
   }
@@ -1037,12 +1060,30 @@ bool _isWindowsTransientLock(int errorCode) {
       errorCode == kSystemCodeUserMappedSectionOpened;
 }
 
+/// Whether [errorCode] is the host platform's `ENOTEMPTY`.
+///
+/// A recursive deletion removes a directory's children before the directory
+/// itself, so it fails with `ENOTEMPTY` when another process writes into a
+/// directory in between. On macOS this is routinely caused by Spotlight,
+/// Finder, iCloud/Dropbox sync or Xcode writing into a directory the tool is
+/// deleting, so the deletion is worth retrying.
+bool _isDirectoryNotEmpty(Platform platform, int errorCode) {
+  if (platform.isMacOS) {
+    return errorCode == kSystemCodeMacOSDirectoryNotEmpty;
+  }
+  if (platform.isLinux) {
+    return errorCode == kSystemCodeLinuxDirectoryNotEmpty;
+  }
+  return false;
+}
+
 Future<T> _run<T>(
   Future<T> Function() op, {
   required Platform platform,
   String? failureMessage,
   String? posixPermissionSuggestion,
   List<int> ignoreErrorCodes = const <int>[],
+  bool retryOnDirectoryNotEmpty = false,
 }) async {
   var attempt = 0;
   while (true) {
@@ -1058,11 +1099,12 @@ Future<T> _run<T>(
       if (ignoreErrorCodes.contains(errorCode)) {
         rethrow;
       }
-      final Duration? delay = _getWindowsRetryDelay(
+      final Duration? delay = _getRetryDelay(
         platform: platform,
         errorCode: errorCode,
         attempt: attempt,
         ignoreErrorCodes: ignoreErrorCodes,
+        retryOnDirectoryNotEmpty: retryOnDirectoryNotEmpty,
       );
       if (delay != null) {
         attempt++;
@@ -1081,11 +1123,12 @@ Future<T> _run<T>(
       if (ignoreErrorCodes.contains(errorCode)) {
         rethrow;
       }
-      final Duration? delay = _getWindowsRetryDelay(
+      final Duration? delay = _getRetryDelay(
         platform: platform,
         errorCode: errorCode,
         attempt: attempt,
         ignoreErrorCodes: ignoreErrorCodes,
+        retryOnDirectoryNotEmpty: retryOnDirectoryNotEmpty,
       );
       if (delay != null) {
         attempt++;
@@ -1109,6 +1152,7 @@ T _runSync<T>(
   String? failureMessage,
   String? posixPermissionSuggestion,
   List<int> ignoreErrorCodes = const <int>[],
+  bool retryOnDirectoryNotEmpty = false,
 }) {
   var attempt = 0;
   while (true) {
@@ -1124,11 +1168,12 @@ T _runSync<T>(
       if (ignoreErrorCodes.contains(errorCode)) {
         rethrow;
       }
-      final Duration? delay = _getWindowsRetryDelay(
+      final Duration? delay = _getRetryDelay(
         platform: platform,
         errorCode: errorCode,
         attempt: attempt,
         ignoreErrorCodes: ignoreErrorCodes,
+        retryOnDirectoryNotEmpty: retryOnDirectoryNotEmpty,
       );
       if (delay != null) {
         attempt++;
@@ -1147,11 +1192,12 @@ T _runSync<T>(
       if (ignoreErrorCodes.contains(errorCode)) {
         rethrow;
       }
-      final Duration? delay = _getWindowsRetryDelay(
+      final Duration? delay = _getRetryDelay(
         platform: platform,
         errorCode: errorCode,
         attempt: attempt,
         ignoreErrorCodes: ignoreErrorCodes,
+        retryOnDirectoryNotEmpty: retryOnDirectoryNotEmpty,
       );
       if (delay != null) {
         attempt++;

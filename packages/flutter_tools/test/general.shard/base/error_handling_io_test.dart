@@ -49,7 +49,7 @@ ProcessManager createProcessManager({
 
 void main() {
   setUpAll(() {
-    overrideWindowsRetryBackoffs = const <Duration>[];
+    overrideRetryBackoffs = const <Duration>[];
   });
 
   testWithoutContext('deleteIfExists does not delete if file does not exist', () {
@@ -1862,8 +1862,8 @@ Please ensure that the SDK and/or project is installed in a location that has re
     late List<Duration>? originalBackoffs;
 
     setUp(() {
-      originalBackoffs = overrideWindowsRetryBackoffs;
-      overrideWindowsRetryBackoffs = const <Duration>[
+      originalBackoffs = overrideRetryBackoffs;
+      overrideRetryBackoffs = const <Duration>[
         Duration.zero,
         Duration.zero,
         Duration.zero,
@@ -1873,7 +1873,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
     });
 
     tearDown(() {
-      overrideWindowsRetryBackoffs = originalBackoffs;
+      overrideRetryBackoffs = originalBackoffs;
     });
 
     testWithoutContext('recovers from transient lock during retry loop (sync)', () {
@@ -1949,6 +1949,188 @@ Please ensure that the SDK and/or project is installed in a location that has re
       await file.writeAsString('content');
       expect(attemptsLeft, 0);
       expect(memoryFileSystem.file('/file').readAsStringSync(), 'content');
+    });
+  });
+
+  group('POSIX directory not empty retry', () {
+    // ENOTEMPTY. Linux and macOS do not agree on the value.
+    const linuxNotEmpty = 39;
+    const macOSNotEmpty = 66;
+
+    late List<Duration>? originalBackoffs;
+
+    setUp(() {
+      originalBackoffs = overrideRetryBackoffs;
+      overrideRetryBackoffs = const <Duration>[
+        Duration.zero,
+        Duration.zero,
+        Duration.zero,
+        Duration.zero,
+        Duration.zero,
+      ];
+    });
+
+    tearDown(() {
+      overrideRetryBackoffs = originalBackoffs;
+    });
+
+    /// A file system containing a non-empty `/dir` whose deletion fails with
+    /// [errorCode] the first [failures] times it is attempted, mimicking
+    /// another process writing into the directory mid-deletion.
+    ///
+    /// [attempts] is incremented once per deletion attempt.
+    ErrorHandlingFileSystem createFileSystem({
+      required Platform platform,
+      required int errorCode,
+      required int failures,
+      required void Function() onAttempt,
+    }) {
+      var remainingFailures = failures;
+      final memoryFileSystem = MemoryFileSystem.test(
+        opHandle: (String path, FileSystemOp op) {
+          if (path != '/dir' || op != FileSystemOp.delete) {
+            return;
+          }
+          onAttempt();
+          if (remainingFailures > 0) {
+            remainingFailures--;
+            throw FileSystemException(
+              'Deletion failed',
+              path,
+              OSError('Directory not empty', errorCode),
+            );
+          }
+        },
+      );
+      memoryFileSystem.directory('/dir').createSync();
+      memoryFileSystem.file('/dir/child').createSync();
+      return ErrorHandlingFileSystem(delegate: memoryFileSystem, platform: platform);
+    }
+
+    testWithoutContext('recursive delete recovers from ENOTEMPTY on macOS', () {
+      var attempts = 0;
+      final ErrorHandlingFileSystem fileSystem = createFileSystem(
+        platform: macOSPlatform,
+        errorCode: macOSNotEmpty,
+        failures: 3,
+        onAttempt: () => attempts++,
+      );
+
+      fileSystem.directory('/dir').deleteSync(recursive: true);
+
+      expect(attempts, 4);
+      expect(fileSystem.directory('/dir').existsSync(), false);
+    });
+
+    testWithoutContext('recursive delete recovers from ENOTEMPTY on Linux', () {
+      var attempts = 0;
+      final ErrorHandlingFileSystem fileSystem = createFileSystem(
+        platform: linuxPlatform,
+        errorCode: linuxNotEmpty,
+        failures: 3,
+        onAttempt: () => attempts++,
+      );
+
+      fileSystem.directory('/dir').deleteSync(recursive: true);
+
+      expect(attempts, 4);
+      expect(fileSystem.directory('/dir').existsSync(), false);
+    });
+
+    testWithoutContext('recursive delete recovers from ENOTEMPTY on macOS (async)', () async {
+      var attempts = 0;
+      final ErrorHandlingFileSystem fileSystem = createFileSystem(
+        platform: macOSPlatform,
+        errorCode: macOSNotEmpty,
+        failures: 3,
+        onAttempt: () => attempts++,
+      );
+
+      await fileSystem.directory('/dir').delete(recursive: true);
+
+      expect(attempts, 4);
+      expect(fileSystem.directory('/dir').existsSync(), false);
+    });
+
+    testWithoutContext('deleteIfExists recovers from ENOTEMPTY on macOS', () {
+      var attempts = 0;
+      final ErrorHandlingFileSystem fileSystem = createFileSystem(
+        platform: macOSPlatform,
+        errorCode: macOSNotEmpty,
+        failures: 3,
+        onAttempt: () => attempts++,
+      );
+
+      expect(
+        ErrorHandlingFileSystem.deleteIfExists(fileSystem.directory('/dir'), recursive: true),
+        true,
+      );
+      expect(attempts, 4);
+    });
+
+    testWithoutContext('recursive delete gives up once the retries are exhausted', () {
+      var attempts = 0;
+      final ErrorHandlingFileSystem fileSystem = createFileSystem(
+        platform: macOSPlatform,
+        errorCode: macOSNotEmpty,
+        failures: 100,
+        onAttempt: () => attempts++,
+      );
+
+      expect(
+        () => fileSystem.directory('/dir').deleteSync(recursive: true),
+        throwsA(isA<FileSystemException>()),
+      );
+      // The initial attempt plus one per configured backoff.
+      expect(attempts, 1 + overrideRetryBackoffs!.length);
+    });
+
+    testWithoutContext('a non-recursive delete is not retried', () {
+      var attempts = 0;
+      final ErrorHandlingFileSystem fileSystem = createFileSystem(
+        platform: macOSPlatform,
+        errorCode: macOSNotEmpty,
+        failures: 1,
+        onAttempt: () => attempts++,
+      );
+
+      // Deleting a directory that really does have contents is a genuine
+      // failure, not a race, so it must fail immediately.
+      expect(() => fileSystem.directory('/dir').deleteSync(), throwsA(isA<FileSystemException>()));
+      expect(attempts, 1);
+    });
+
+    testWithoutContext('the Linux ENOTEMPTY value is not retried on macOS', () {
+      var attempts = 0;
+      final ErrorHandlingFileSystem fileSystem = createFileSystem(
+        platform: macOSPlatform,
+        errorCode: linuxNotEmpty,
+        failures: 1,
+        onAttempt: () => attempts++,
+      );
+
+      // 39 is EDESTADDRREQ on macOS, not ENOTEMPTY.
+      expect(
+        () => fileSystem.directory('/dir').deleteSync(recursive: true),
+        throwsA(isA<FileSystemException>()),
+      );
+      expect(attempts, 1);
+    });
+
+    testWithoutContext('the macOS ENOTEMPTY value is not retried on Linux', () {
+      var attempts = 0;
+      final ErrorHandlingFileSystem fileSystem = createFileSystem(
+        platform: linuxPlatform,
+        errorCode: macOSNotEmpty,
+        failures: 1,
+        onAttempt: () => attempts++,
+      );
+
+      expect(
+        () => fileSystem.directory('/dir').deleteSync(recursive: true),
+        throwsA(isA<FileSystemException>()),
+      );
+      expect(attempts, 1);
     });
   });
 
