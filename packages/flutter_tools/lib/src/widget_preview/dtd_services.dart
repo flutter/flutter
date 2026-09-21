@@ -170,48 +170,16 @@ class WidgetPreviewDtdServices {
   }
 
   Future<FlutterWidgetPreviews> getFlutterWidgetPreviews() async {
-    await _waitForLspService();
-    const maxAttempts = 50;
-    for (var attempts = 0; attempts < maxAttempts; attempts++) {
-      try {
-        final DTDResponse result = await _dtd!.call(
-          'Lsp',
-          'dart/workspace/getFlutterWidgetPreviews',
-        );
-        return FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
-      } on RpcException catch (e) {
-        if (e.code == -32601 && attempts < maxAttempts - 1) {
-          // Method not found
-          await Future<void>.delayed(const Duration(milliseconds: 200));
-          continue;
-        }
-        rethrow;
-      }
-    }
-    throw StateError('Failed to call getFlutterWidgetPreviews after $maxAttempts attempts.');
+    final DTDResponse result = await _callLspService('dart/workspace/getFlutterWidgetPreviews');
+    return FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
   }
 
   Future<FlutterWidgetPreviews> getFlutterWidgetPreviewsForFile({required String filePath}) async {
-    await _waitForLspService();
-    const maxAttempts = 50;
-    for (var attempts = 0; attempts < maxAttempts; attempts++) {
-      try {
-        final DTDResponse result = await _dtd!.call(
-          'Lsp',
-          'dart/textDocument/getFlutterWidgetPreviews',
-          params: {'uri': Uri.file(filePath).toString()},
-        );
-        return FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
-      } on RpcException catch (e) {
-        if (e.code == -32601 && attempts < maxAttempts - 1) {
-          // Method not found
-          await Future<void>.delayed(const Duration(milliseconds: 200));
-          continue;
-        }
-        rethrow;
-      }
-    }
-    throw StateError('Failed to call getFlutterWidgetPreviewsForFile after $maxAttempts attempts.');
+    final DTDResponse result = await _callLspService(
+      'dart/textDocument/getFlutterWidgetPreviews',
+      params: <String, Object?>{'uri': Uri.file(filePath).toString()},
+    );
+    return FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
   }
 
   /// Returns a [Future] that completes when the analysis server connected to DTD
@@ -222,23 +190,24 @@ class WidgetPreviewDtdServices {
   Future<void> waitForAnalysis({Duration delay = const Duration(milliseconds: 100)}) async {
     await _waitForLspService();
     await Future<void>.delayed(delay);
+    await _callLspService('dart/workspace/analysis/complete');
+  }
+
+  Future<DTDResponse> _callLspService(String methodName, {Map<String, Object?>? params}) async {
+    await _waitForLspService();
     const maxAttempts = 50;
     for (var attempts = 0; attempts < maxAttempts; attempts++) {
       try {
-        await _dtd!.call('Lsp', 'dart/workspace/analysis/complete');
-        return;
+        return await _dtd!.call(kLspStream, methodName, params: params);
       } on RpcException catch (e) {
-        if (e.code == -32601 && attempts < maxAttempts - 1) {
-          // Method not found
+        if (e.code == RpcErrorCodes.kMethodNotFound && attempts < maxAttempts - 1) {
           await Future<void>.delayed(const Duration(milliseconds: 200));
           continue;
         }
         rethrow;
       }
     }
-    throw StateError(
-      'Failed to call dart/workspace/analysis/complete after $maxAttempts attempts.',
-    );
+    throw StateError('Failed to call $methodName after $maxAttempts attempts.');
   }
 
   Future<void>? _waitForLspServiceFuture;
