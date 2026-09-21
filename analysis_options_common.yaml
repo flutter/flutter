@@ -207,7 +207,7 @@ linter:
     - type_annotate_public_apis
     - type_init_formals
     - type_literal_in_constant_pattern
-    # - unawaited_futures # too many false positives, especially with the way AnimationController works
+    - unawaited_futures
     # - unintended_html_in_doc_comment # blocked on https://github.com/dart-lang/linter/issues/5065
     # - unnecessary_async # not yet tested
     - unnecessary_await_in_return
