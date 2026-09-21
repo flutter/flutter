@@ -616,6 +616,7 @@ abstract class ResidentHandlers {
         vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(isolateId: isolateId),
   );
 
+  /// Returns whether at least one Flutter view was dumped.
   Future<bool> _debugDumpTree(
     Future<String> Function(FlutterVmService vmService, String isolateId) dumpCall,
   ) async {
