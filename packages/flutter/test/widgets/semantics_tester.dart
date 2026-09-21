@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 export 'dart:ui' show SemanticsAction, SemanticsFlag, SemanticsFlags;
+
 export 'package:flutter/rendering.dart' show SemanticsData;
 
 const String _matcherHelp =
@@ -508,7 +509,7 @@ class TestSemantics {
       );
     }
 
-    if (controlsNodes != controlsNodes && !setEquals(controlsNodes, node.controlsNodes)) {
+    if (controlsNodes != null && !setEquals(controlsNodes, node.controlsNodes)) {
       return fail(
         'expected node id $id to controls nodes $controlsNodes but found controlling nodes ${node.controlsNodes}',
       );
@@ -715,7 +716,7 @@ class SemanticsTester {
       if (first[i] is LocaleStringAttribute &&
           (second[i] is! LocaleStringAttribute ||
               second[i].range != first[i].range ||
-              (second[i] as LocaleStringAttribute).locale !=
+              (first[i] as LocaleStringAttribute).locale !=
                   (second[i] as LocaleStringAttribute).locale)) {
         return false;
       }
@@ -1168,7 +1169,11 @@ class _IncludesNodeWith extends Matcher {
     this.maxValue,
   }) : assert(
          label != null ||
+             attributedLabel != null ||
              value != null ||
+             attributedValue != null ||
+             hint != null ||
+             attributedHint != null ||
              actions != null ||
              flags != null ||
              flagsCollection != null ||
@@ -1180,8 +1185,15 @@ class _IncludesNodeWith extends Matcher {
              scrollExtentMin != null ||
              maxValueLength != null ||
              currentValueLength != null ||
-             inputType != null,
-         minValue != null || maxValue != null,
+             inputType != null ||
+             minValue != null ||
+             maxValue != null,
+         'At least one matcher field must be non-null so the matcher checks for at least one '
+         'property of a semantics node. Pass any of `label`, `attributedLabel`, `value`, '
+         '`attributedValue`, `hint`, `attributedHint`, `actions`, `flags`, '
+         '`flagsCollection`, `tags`, `increasedValue`, `decreasedValue`, `scrollPosition`, '
+         '`scrollExtentMax`, `scrollExtentMin`, `maxValueLength`, `currentValueLength`, '
+         '`inputType`, `minValue`, or `maxValue`.',
        );
   final AttributedString? attributedLabel;
   final AttributedString? attributedValue;

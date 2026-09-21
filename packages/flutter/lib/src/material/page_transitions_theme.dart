@@ -757,9 +757,7 @@ class PageTransitionsTheme with Diagnosticable {
   /// By default the list of builders is: [ZoomPageTransitionsBuilder]
   /// for [TargetPlatform.android], [TargetPlatform.windows] and [TargetPlatform.linux]
   /// and [CupertinoPageTransitionsBuilder] for [TargetPlatform.iOS] and [TargetPlatform.macOS].
-  const PageTransitionsTheme({
-    Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders,
-  }) : _builders = builders;
+  const PageTransitionsTheme({this._builders = _defaultBuilders});
 
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders =
       <TargetPlatform, PageTransitionsBuilder>{
