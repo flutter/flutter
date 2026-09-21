@@ -26,6 +26,7 @@ import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../../web/bootstrap.dart';
 import '../../web/compile.dart';
+import '../../web/content_hash.dart';
 import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
 import '../../web/web_constants.dart';
@@ -123,27 +124,6 @@ class WebEntrypointTarget extends Target {
 String hashAndRenameWebOutput({required File file, File? sourceMapFile}) =>
     _hashAndRenameWebOutput(file: file, sourceMapFile: sourceMapFile);
 
-const List<String> _kKnownHashedExtensions = <String>[
-  '.js.map',
-  '.wasm.map',
-  '.mjs.map',
-  '.js',
-  '.wasm',
-  '.mjs',
-];
-
-String _computeHashedBasename(String oldBasename, String contentHash, FileSystem fileSystem) {
-  final String doubleExt = fileSystem.path.extension(oldBasename, 2);
-  final String ext = _kKnownHashedExtensions.contains(doubleExt)
-      ? doubleExt
-      : fileSystem.path.extension(oldBasename);
-  if (ext.isNotEmpty) {
-    final String stem = oldBasename.substring(0, oldBasename.length - ext.length);
-    return '$stem.$contentHash$ext';
-  }
-  return '$oldBasename.$contentHash';
-}
-
 String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
   if (!file.existsSync()) {
     return file.basename;
@@ -157,7 +137,7 @@ String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
       .convert(file.readAsBytesSync())
       .toString()
       .substring(0, 8);
-  final String newBasename = _computeHashedBasename(file.basename, contentHash, file.fileSystem);
+  final String newBasename = computeHashedBasename(file.basename, contentHash, file.fileSystem);
 
   // The source map shares the binary's hash so the pair stays discoverable as
   // '<binary>.map'. A `.wasm` binary embeds its map name in a binary custom
@@ -1108,6 +1088,9 @@ class WebReleaseBundle extends Target {
 
     createVersionFile(environment, environment.defines);
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
+    if (outputDirectory.existsSync()) {
+      outputDirectory.deleteSync(recursive: true);
+    }
     outputDirectory.createSync(recursive: true);
 
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
@@ -1120,7 +1103,26 @@ class WebReleaseBundle extends Target {
     );
     final Depfile bundledDepfile = _bundleLocalRobotoFallback(environment, depfile);
     final DepfileService depfileService = environment.depFileService;
-    depfileService.writeToFile(bundledDepfile, environment.buildDir.childFile('flutter_assets.d'));
+
+    final bool webContentHash = compileTargets.any(
+      (Dart2WebTarget t) => t.compilerConfig.webContentHash,
+    );
+    if (webContentHash) {
+      final Map<String, File> renamedOutputs = hashWebAssets(outputDirectory);
+      final List<File> updatedOutputs = bundledDepfile.outputs.map((File f) {
+        final String normalizedPath = environment.fileSystem.path.normalize(f.path);
+        return renamedOutputs[normalizedPath] ?? renamedOutputs[f.path] ?? f;
+      }).toList();
+      depfileService.writeToFile(
+        Depfile(bundledDepfile.inputs, updatedOutputs),
+        environment.buildDir.childFile('flutter_assets.d'),
+      );
+    } else {
+      depfileService.writeToFile(
+        bundledDepfile,
+        environment.buildDir.childFile('flutter_assets.d'),
+      );
+    }
 
     final Directory webResources = environment.projectDir.childDirectory('web');
     final List<File> inputResourceFiles = webResources
@@ -1530,12 +1532,21 @@ class WebServiceWorker extends Target {
         .where(
           (File file) =>
               !file.path.endsWith('flutter_service_worker.js') &&
+              !file.path.endsWith(kPrecacheManifestFile) &&
               !environment.fileSystem.path.basename(file.path).startsWith('.'),
         )
         .toList();
 
+    final bool webContentHash = compileConfigs.any(
+      (WebCompilerConfig config) => config.webContentHash,
+    );
+    final File? precacheManifestFile = updatePrecacheManifest(
+      environment.outputDir,
+      enabled: webContentHash,
+      useLocalCanvasKit: environment.defines[kUseLocalCanvasKitFlag] == 'true',
+    );
     final File serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
-    final depfile = Depfile(contents, <File>[serviceWorkerFile]);
+    final depfile = Depfile(contents, <File>[serviceWorkerFile, ?precacheManifestFile]);
     final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
       Artifact.flutterToolsFileGenerators,
     );
