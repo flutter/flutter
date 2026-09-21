@@ -428,21 +428,33 @@ TEST(AndroidShellHolder, RoutesOperationsThroughEmbedderProcTable) {
   proc_table.SendPlatformMessageResponse = orig_send_resp;
 }
 
-TEST(AndroidShellHolder, CreateWithLegacyShellAPI) {
-  Settings default_settings;
-  EXPECT_TRUE(default_settings.enable_embedder_api);
+// Android has no legacy path any more: `AndroidShellHolder` must always build
+// an `EmbedderAndroidEngine`, and must ignore `Settings::enable_embedder_api`,
+// which only applies to iOS.
+//
+// RTTI is disabled engine-wide, so rather than checking the dynamic type this
+// asserts on a property only the embedder engine has: a populated C API proc
+// table, resolved via `FlutterEngineGetProcAddresses`.
+TEST(AndroidShellHolder, AlwaysUsesEmbedderEngineRegardlessOfSettings) {
+  for (const bool enable_embedder_api : {false, true}) {
+    Settings settings;
+    settings.enable_software_rendering = false;
+    settings.enable_embedder_api = enable_embedder_api;
+    auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+    auto holder = std::make_unique<AndroidShellHolder>(
+        settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+    ASSERT_NE(holder.get(), nullptr);
+    ASSERT_TRUE(holder->IsValid());
 
-  Settings settings;
-  settings.enable_software_rendering = false;
-  settings.enable_embedder_api = false;
-  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
-  auto holder = std::make_unique<AndroidShellHolder>(
-      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
-  EXPECT_NE(holder.get(), nullptr);
-  EXPECT_TRUE(holder->IsValid());
-  EXPECT_FALSE(holder->GetSettings().enable_embedder_api);
-  EXPECT_NE(holder->GetEngineForTesting(), nullptr);
-  EXPECT_NE(holder->GetPlatformView().get(), nullptr);
+    auto* embedder_engine =
+        static_cast<EmbedderAndroidEngine*>(holder->GetEngineForTesting());
+    ASSERT_NE(embedder_engine, nullptr);
+    EXPECT_NE(embedder_engine->GetMutableProcTableForTesting().RunInitialized,
+              nullptr)
+        << "expected an embedder proc table with enable_embedder_api="
+        << enable_embedder_api;
+    EXPECT_NE(holder->GetPlatformView().get(), nullptr);
+  }
 }
 
 }  // namespace testing

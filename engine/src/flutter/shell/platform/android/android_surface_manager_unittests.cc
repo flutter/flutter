@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/android_surface_manager.h"
-#include "flutter/shell/platform/android/flutter_main.h"
 
 #include <thread>
 #include <vector>
@@ -153,45 +152,27 @@ TEST(AndroidSurfaceManagerTest, ConcurrentThreadSafety) {
 }
 
 class AndroidSurfaceManagerMultiBackendMatrixTest
-    : public ::testing::TestWithParam<std::tuple<bool, AndroidRenderingAPI>> {
+    : public ::testing::TestWithParam<AndroidRenderingAPI> {
  protected:
-  void SetUp() override {
-    embedder_api_enabled_ = std::get<0>(GetParam());
-    rendering_api_ = std::get<1>(GetParam());
-    FlutterMain::SetEmbedderAPIEnabledForTesting(embedder_api_enabled_);
-  }
+  void SetUp() override { rendering_api_ = GetParam(); }
 
-  void TearDown() override { FlutterMain::ResetEmbedderAPIEnabledForTesting(); }
-
-  bool embedder_api_enabled_ = false;
   AndroidRenderingAPI rendering_api_ = AndroidRenderingAPI::kImpellerOpenGLES;
 };
 
 static std::string SurfaceMatrixTestName(
-    const ::testing::TestParamInfo<std::tuple<bool, AndroidRenderingAPI>>&
-        info) {
-  bool flag = std::get<0>(info.param);
-  AndroidRenderingAPI api = std::get<1>(info.param);
-  std::string flag_name = flag ? "EmbedderAPI" : "Legacy";
-  std::string api_name;
-  switch (api) {
+    const ::testing::TestParamInfo<AndroidRenderingAPI>& info) {
+  switch (info.param) {
     case AndroidRenderingAPI::kSoftware:
-      api_name = "Software";
-      break;
+      return "Software";
     case AndroidRenderingAPI::kSkiaOpenGLES:
-      api_name = "SkiaOpenGLES";
-      break;
+      return "SkiaOpenGLES";
     case AndroidRenderingAPI::kImpellerOpenGLES:
-      api_name = "ImpellerOpenGLES";
-      break;
+      return "ImpellerOpenGLES";
     case AndroidRenderingAPI::kImpellerVulkan:
-      api_name = "ImpellerVulkan";
-      break;
+      return "ImpellerVulkan";
     case AndroidRenderingAPI::kImpellerAutoselect:
-      api_name = "ImpellerAutoselect";
-      break;
+      return "ImpellerAutoselect";
   }
-  return flag_name + "_" + api_name;
 }
 
 TEST_P(AndroidSurfaceManagerMultiBackendMatrixTest,
@@ -277,13 +258,11 @@ TEST_P(AndroidSurfaceManagerMultiBackendMatrixTest, ConcurrentOperations) {
 INSTANTIATE_TEST_SUITE_P(
     Matrix,
     AndroidSurfaceManagerMultiBackendMatrixTest,
-    ::testing::Combine(
-        ::testing::Values(false, true),
-        ::testing::Values(AndroidRenderingAPI::kSoftware,
-                          AndroidRenderingAPI::kSkiaOpenGLES,
-                          AndroidRenderingAPI::kImpellerOpenGLES,
-                          AndroidRenderingAPI::kImpellerVulkan,
-                          AndroidRenderingAPI::kImpellerAutoselect)),
+    ::testing::Values(AndroidRenderingAPI::kSoftware,
+                      AndroidRenderingAPI::kSkiaOpenGLES,
+                      AndroidRenderingAPI::kImpellerOpenGLES,
+                      AndroidRenderingAPI::kImpellerVulkan,
+                      AndroidRenderingAPI::kImpellerAutoselect),
     SurfaceMatrixTestName);
 
 }  // namespace testing
