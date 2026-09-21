@@ -30,6 +30,16 @@ class TestScrollPhysics extends ScrollPhysics {
 void main() {
   const kBlueColor = Color(0xFF0000FF);
 
+  test('ScrollPhysics.allowSelectionEdgeScrolling', () {
+    expect(const BouncingScrollPhysics().allowSelectionEdgeScrolling, isTrue);
+    expect(const PageScrollPhysics().allowSelectionEdgeScrolling, isFalse);
+    // Resolves through the parent chain so wrapped page physics still count.
+    expect(
+      const ClampingScrollPhysics(parent: PageScrollPhysics()).allowSelectionEdgeScrolling,
+      isFalse,
+    );
+  });
+
   test('ScrollPhysics applyTo()', () {
     const a = TestScrollPhysics(name: 'a');
     const b = TestScrollPhysics(name: 'b');
@@ -99,29 +109,26 @@ void main() {
     );
   });
 
-  test(
-    "ScrollPhysics scrolling subclasses - Creating the simulation doesn't alter the velocity for time 0",
-    () {
-      final ScrollMetrics position = FixedScrollMetrics(
-        minScrollExtent: 0.0,
-        maxScrollExtent: 100.0,
-        pixels: 20.0,
-        viewportDimension: 500.0,
-        axisDirection: AxisDirection.down,
-        devicePixelRatio: 3.0,
-      );
+  test("ScrollPhysics scrolling subclasses - Creating the simulation doesn't alter the velocity for time 0", () {
+    final ScrollMetrics position = FixedScrollMetrics(
+      minScrollExtent: 0.0,
+      maxScrollExtent: 100.0,
+      pixels: 20.0,
+      viewportDimension: 500.0,
+      axisDirection: AxisDirection.down,
+      devicePixelRatio: 3.0,
+    );
 
-      const bounce = BouncingScrollPhysics();
-      const clamp = ClampingScrollPhysics();
-      const page = PageScrollPhysics();
+    const bounce = BouncingScrollPhysics();
+    const clamp = ClampingScrollPhysics();
+    const page = PageScrollPhysics();
 
-      // Calls to createBallisticSimulation may happen on every frame (i.e. when the maxScrollExtent changes)
-      // Changing velocity for time 0 may cause a sudden, unwanted damping/speedup effect
-      expect(bounce.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
-      expect(clamp.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
-      expect(page.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
-    },
-  );
+    // Calls to createBallisticSimulation may happen on every frame (i.e. when the maxScrollExtent changes)
+    // Changing velocity for time 0 may cause a sudden, unwanted damping/speedup effect
+    expect(bounce.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
+    expect(clamp.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
+    expect(page.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
+  });
 
   group('BouncingScrollPhysics test', () {
     late BouncingScrollPhysics physicsUnderTest;
@@ -363,6 +370,70 @@ FlutterError
       ),
     );
     await tester.fling(find.text('Index 2'), const Offset(0.0, -300.0), 10000.0);
+  });
+
+  group('BouncingScrollPhysics selects correct spring for createBallisticSimulation', () {
+    test('on leading edge overscroll', () {
+      const physics = BouncingScrollPhysics();
+
+      final ScrollMetrics metrics = FixedScrollMetrics(
+        minScrollExtent: 0.0,
+        maxScrollExtent: 1000.0,
+        pixels: -500.0,
+        viewportDimension: 500.0,
+        axisDirection: AxisDirection.down,
+        devicePixelRatio: 1.0,
+      );
+
+      final Simulation simStationary = physics.createBallisticSimulation(metrics, 0.0)!;
+      final Simulation simMoving = physics.createBallisticSimulation(metrics, -100.0)!;
+
+      expect(simStationary, isA<BouncingScrollSimulation>());
+      expect(simMoving, isA<BouncingScrollSimulation>());
+
+      // Stationary simulation should follow the expected spring trajectory.
+      expect(simStationary.x(0.1), closeTo(-185.7511436536831, 0.01));
+      expect(simStationary.x(0.2), closeTo(-69.00628466755506, 0.01));
+      expect(simStationary.x(0.3), closeTo(-25.635736232654022, 0.01));
+      expect(simStationary.x(0.4), closeTo(-9.523639409892818, 0.01));
+
+      final double xStationary = simStationary.x(0.2);
+      final double xMoving = simMoving.x(0.2);
+
+      // Stationary and moving simulations should produce different positions.
+      expect(xStationary, isNot(closeTo(xMoving, precisionErrorTolerance)));
+    });
+
+    test('on trailing edge overscroll', () {
+      const physics = BouncingScrollPhysics();
+
+      final ScrollMetrics metrics = FixedScrollMetrics(
+        minScrollExtent: 0.0,
+        maxScrollExtent: 1000.0,
+        pixels: 1500.0,
+        viewportDimension: 500.0,
+        axisDirection: AxisDirection.down,
+        devicePixelRatio: 1.0,
+      );
+
+      final Simulation simStationary = physics.createBallisticSimulation(metrics, 0.0)!;
+      final Simulation simMoving = physics.createBallisticSimulation(metrics, -100.0)!;
+
+      expect(simStationary, isA<BouncingScrollSimulation>());
+      expect(simMoving, isA<BouncingScrollSimulation>());
+
+      // Stationary simulation should follow the expected spring trajectory.
+      expect(simStationary.x(0.1), closeTo(1185.7511436536831, 0.01));
+      expect(simStationary.x(0.2), closeTo(1069.006284667555, 0.01));
+      expect(simStationary.x(0.3), closeTo(1025.635736232654, 0.01));
+      expect(simStationary.x(0.4), closeTo(1009.5236394098928, 0.01));
+
+      final double xStationary = simStationary.x(0.2);
+      final double xMoving = simMoving.x(0.2);
+
+      // Stationary and moving simulations should produce different positions.
+      expect(xStationary, isNot(closeTo(xMoving, precisionErrorTolerance)));
+    });
   });
 
   testWidgets('ScrollPhysics updates position when shouldUpdate returns true', (

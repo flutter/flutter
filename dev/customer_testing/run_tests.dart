@@ -21,8 +21,7 @@ Future<bool> run(List<String> arguments) async {
     ..addOption(
       'repeat',
       defaultsTo: '1',
-      help:
-          'How many times to run each test. Set to a high value to look for flakes. If a test specifies a number of iterations, the lower of the two values is used.',
+      help: 'How many times to run each test. Set to a high value to look for flakes. If a test specifies a number of iterations, the lower of the two values is used.',
       valueHelp: 'count',
     )
     ..addOption(
@@ -34,8 +33,7 @@ Future<bool> run(List<String> arguments) async {
     ..addOption(
       'shard-index',
       defaultsTo: '0',
-      help:
-          'The current shard to run the tests with the range [0 .. shards - 1]. Used in continuous integration.',
+      help: 'The current shard to run the tests with the range [0 .. shards - 1]. Used in continuous integration.',
       valueHelp: 'count',
     )
     ..addFlag('skip-on-fetch-failure', help: 'Whether to skip tests that we fail to download.')
