@@ -71,11 +71,19 @@ class FlutterDevice {
     required BuildInfo buildInfo,
     required String? target,
     required ToolContext toolContext,
-    ShutdownHooks? shutdownHooks,
     TargetModel? targetModelOverride,
     String? userIdentifier,
   }) async {
-    final ToolContext(:artifacts, :config, :fs, :logger, :platform, :processManager) = toolContext;
+    final ToolContext(
+      :Artifacts artifacts,
+      :Config config,
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+      :ShutdownHooks shutdownHooks,
+    ) = toolContext;
+
     final TargetPlatform targetPlatform = await device.targetPlatform;
 
     final shaderCompiler = DevelopmentShaderCompiler(
@@ -95,7 +103,7 @@ class FlutterDevice {
       logger: logger,
       fileSystem: fs,
       platform: platform,
-      shutdownHooks: shutdownHooks ?? ShutdownHooks(),
+      shutdownHooks: shutdownHooks,
       config: config,
       targetPlatform: targetPlatform,
       buildInfo: buildInfo,
@@ -117,13 +125,7 @@ class FlutterDevice {
   final Device? device;
   final ResidentCompiler? generator;
   final BuildInfo buildInfo;
-  Logger get logger => _toolContext.logger;
-  FileSystem get fileSystem => _toolContext.fs;
   final ToolContext _toolContext;
-  Artifacts get artifacts => _toolContext.artifacts;
-  ProcessManager get processManager => _toolContext.processManager;
-  OperatingSystemUtils get osUtils => _toolContext.os;
-  Platform get platform => _toolContext.platform;
   final String? userIdentifier;
   final DevelopmentShaderCompiler developmentShaderCompiler;
 
@@ -154,6 +156,7 @@ class FlutterDevice {
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
   }) async {
+    final Logger logger = _toolContext.logger;
     this.vmServiceUri ??= Future<Uri>.value(vmServiceUri);
     // FYI, this message is used as a sentinel in tests.
     logger.printTrace('Connecting to service protocol: $vmServiceUri');
@@ -320,6 +323,7 @@ class FlutterDevice {
   }
 
   Future<void> startEchoingDeviceLog(DebuggingOptions debuggingOptions) async {
+    final Logger logger = _toolContext.logger;
     if (_loggingSubscription != null) {
       return;
     }
@@ -352,10 +356,11 @@ class FlutterDevice {
   }
 
   Future<int> runHot({required HotRunner hotRunner, String? route}) async {
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final prebuiltMode = hotRunner.applicationBinary != null;
     final String modeName = hotRunner.debuggingOptions.buildInfo.mode.friendlyName;
     logger.printStatus(
-      'Launching ${getDisplayPath(hotRunner.mainPath, fileSystem)} '
+      'Launching ${getDisplayPath(hotRunner.mainPath, fs)} '
       'on ${device!.displayName} in $modeName mode...',
     );
 
@@ -369,10 +374,7 @@ class FlutterDevice {
 
     if (applicationPackage == null) {
       var message = 'No application found for $targetPlatform.';
-      final String? hint = await getMissingPackageHintForPlatform(
-        targetPlatform,
-        fileSystem: fileSystem,
-      );
+      final String? hint = await getMissingPackageHintForPlatform(targetPlatform, fileSystem: fs);
       if (hint != null) {
         message += '\n$hint';
       }
@@ -410,6 +412,7 @@ class FlutterDevice {
   }
 
   Future<int> runCold({required ColdRunner coldRunner, String? route}) async {
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final TargetPlatform targetPlatform = await device!.targetPlatform;
     package = await ApplicationPackageFactory.instance!.getPackageForPlatform(
       targetPlatform,
@@ -420,10 +423,7 @@ class FlutterDevice {
 
     if (applicationPackage == null) {
       var message = 'No application found for $targetPlatform.';
-      final String? hint = await getMissingPackageHintForPlatform(
-        targetPlatform,
-        fileSystem: fileSystem,
-      );
+      final String? hint = await getMissingPackageHintForPlatform(targetPlatform, fileSystem: fs);
       if (hint != null) {
         message += '\n$hint';
       }
@@ -436,7 +436,7 @@ class FlutterDevice {
     final String modeName = coldRunner.debuggingOptions.buildInfo.mode.friendlyName;
     final prebuiltMode = coldRunner.applicationBinary != null;
     logger.printStatus(
-      'Launching ${getDisplayPath(coldRunner.mainPath, fileSystem)} '
+      'Launching ${getDisplayPath(coldRunner.mainPath, fs)} '
       'on ${device!.displayName} in $modeName mode...',
     );
 
@@ -478,6 +478,7 @@ class FlutterDevice {
     required List<Uri> invalidatedFiles,
     required PackageConfig packageConfig,
   }) async {
+    final Logger logger = _toolContext.logger;
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device!.displayName}...',
       progressId: 'devFS.update',
@@ -1696,15 +1697,14 @@ class OperationResultExtraTiming {
 
 Future<String?> getMissingPackageHintForPlatform(
   TargetPlatform platform, {
-  FileSystem? fileSystem,
+  required FileSystem fileSystem,
 }) async {
-  final FileSystem effectiveFs = fileSystem ?? MemoryFileSystem.test();
   switch (platform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
       final FlutterProject project = FlutterProject.current();
-      final String manifestPath = effectiveFs.path.relative(project.android.appManifestFile.path);
+      final String manifestPath = fileSystem.path.relative(project.android.appManifestFile.path);
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
     case TargetPlatform.ios:
       return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';

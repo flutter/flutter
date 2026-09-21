@@ -366,12 +366,25 @@ String describeLocale(String tag) {
 }
 
 /// Writes the header of each class which corresponds to a locale.
-String generateClassDeclaration(LocaleInfo locale, String classNamePrefix, String superClass) {
+String generateClassDeclaration(
+  LocaleInfo locale,
+  String classNamePrefix,
+  String superClass, {
+  String? deprecatedReplacementPackage,
+}) {
   final String camelCaseName = locale.camelCase();
+  final deprecation = deprecatedReplacementPackage != null
+      ? '''
+@Deprecated(
+  'Use $classNamePrefix$camelCaseName from $deprecatedReplacementPackage instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
+'''
+      : '';
   return '''
 
 /// The translations for ${describeLocale(locale.originalString)} (`${locale.originalString}`).
-class $classNamePrefix$camelCaseName extends $superClass {''';
+${deprecation}class $classNamePrefix$camelCaseName extends $superClass {''';
 }
 
 /// Return the input string as a Dart-parseable string.
