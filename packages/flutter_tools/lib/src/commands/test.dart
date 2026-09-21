@@ -330,6 +330,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
     final String? directory = stringArg('directory');
     if (directory != null) {
+      if (!globals.fs.isDirectorySync(directory)) {
+        throwToolExit('Directory "$directory" does not exist.');
+      }
       globals.fs.currentDirectory = directory;
     }
     return super.verifyThenRunCommand(commandPath);
