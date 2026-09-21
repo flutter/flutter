@@ -13,6 +13,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
@@ -63,10 +64,11 @@ import 'daemon.dart';
 /// also be provided.
 class AttachCommand extends FlutterCommand {
   AttachCommand({
-    required super.toolContext,
+    required ToolContext super.toolContext,
     HotRunnerFactory? hotRunnerFactory,
-    super.verboseHelp = false,
-  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory() {
+    bool verboseHelp = false,
+  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
+       _toolContext = toolContext {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -131,8 +133,10 @@ class AttachCommand extends FlutterCommand {
   }
 
   final HotRunnerFactory _hotRunnerFactory;
+  final ToolContext _toolContext;
 
-  ToolContext get _toolContext => toolContext!;
+  @override
+  ToolContext get toolContext => _toolContext;
 
   @override
   final name = 'attach';
@@ -245,7 +249,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     }
 
     final bool machineMode = boolArg(FlutterGlobalOptions.kMachineFlag);
-    final AnsiTerminal terminal = _toolContext.terminal;
 
     try {
       await (machineMode ? _attachDaemon(device: device) : _attach(device: device));
@@ -258,7 +261,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       // However we exited from the runner, ensure the terminal has line mode
       // and echo mode enabled before we return the user to the shell.
       try {
-        terminal.singleCharMode = false;
+        _toolContext.terminal.singleCharMode = false;
       } on StdinException {
         // Do nothing, if the STDIN handle is no longer available, there is nothing actionable for us to do at this point
       }
@@ -272,9 +275,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       :Logger logger,
       :ProcessInfo processInfo,
       :Signals signals,
-      :AnsiTerminal terminal,
+      :Terminal terminal,
     ) = _toolContext;
-
     terminal.usesTerminalUi = true;
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
     final onAppStart = Completer<void>.sync();
@@ -303,8 +305,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attachDaemon({required Device device}) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :Stdio stdio) = _toolContext;
-
+    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform, :Stdio stdio) =
+        _toolContext;
     final daemon = Daemon(
       DaemonConnection(
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
@@ -316,6 +318,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
       logToStdout: true,
       featureFlags: featureFlags,
+      platform: platform,
     );
 
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
@@ -347,7 +350,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   Future<ResidentRunner> _discoverVmServiceAndCreateResidentRunner({required Device device}) async {
     final Logger logger = _toolContext.logger;
-
     final Future<Uri> vmServiceUri = _discoverVmService(device: device);
     vmServiceUri.ignore();
 
@@ -355,10 +357,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
+      toolContext: _toolContext,
       buildInfo: buildInfo,
       target: targetFile,
       targetModelOverride: TargetModel(stringArg('target-model')!),
-      toolContext: _toolContext,
       userIdentifier: userIdentifier,
     );
     flutterDevice.vmServiceUri = vmServiceUri;
@@ -428,8 +430,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       logger: logger,
     );
 
-    logger.printStatus('Waiting for a connection from Flutter on ${device.displayName}...');
-    final Status discoveryStatus = logger.startSpinner(
+    _toolContext.logger.printStatus(
+      'Waiting for a connection from Flutter on ${device.displayName}...',
+    );
+    final Status discoveryStatus = _toolContext.logger.startSpinner(
       timeout: const Duration(seconds: 30),
       slowWarningCallback: () {
         // On iOS we rely on mDNS to find Dart VM Service.
