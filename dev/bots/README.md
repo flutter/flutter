@@ -12,7 +12,7 @@ The [LUCI](https://chromium.googlesource.com/infra/luci/luci-py/+/refs/heads/mai
 bots run the [`test.dart`](test.dart) script for each PR and submission. This
 does testing for the tools, for the framework, and (for submitted changes only)
 rebuilds and updates the main branch API docs [staging site](https://main-api.flutter.dev/).
-It is configured by two `.ci.yaml` files:
+The CI is configured by two `.ci.yaml` files:
 
 - framework: [`.ci.yaml`](../../.ci.yaml)
 - engine: [`engine/src/flutter/.ci.yaml`](../../engine/src/flutter/.ci.yaml)
