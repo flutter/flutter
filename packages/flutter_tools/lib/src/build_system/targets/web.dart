@@ -1040,8 +1040,8 @@ class WebReleaseBundle extends Target {
     const Source.pattern('{BUILD_DIR}/${LinkHooks.resultFilename}'),
     ...buildPatternStems.map((String file) => Source.pattern('{BUILD_DIR}/$file')),
     if (_hasWebContentHash) ...<Source>[
-      const Source.pattern('{OUTPUT_DIR}/*/index.html'),
-      const Source.pattern('{OUTPUT_DIR}/flutter_bootstrap.js'),
+      const Source.pattern('{OUTPUT_DIR}/index.html', optional: true),
+      const Source.pattern('{OUTPUT_DIR}/flutter_bootstrap.js', optional: true),
     ],
   ];
 
@@ -1049,7 +1049,7 @@ class WebReleaseBundle extends Target {
   List<Source> get outputs => <Source>[
     ...buildPatternStems.map((String file) => Source.pattern('{OUTPUT_DIR}/$file')),
     if (_hasWebContentHash) ...<Source>[
-      const Source.pattern('{OUTPUT_DIR}/*/index.html'),
+      const Source.pattern('{OUTPUT_DIR}/index.html'),
       const Source.pattern('{OUTPUT_DIR}/flutter_bootstrap.js'),
     ],
   ];

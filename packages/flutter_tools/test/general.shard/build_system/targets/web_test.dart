@@ -2981,21 +2981,23 @@ _flutter.loader.load({
         JsCompilerConfig(),
       ], const NoOpAnalytics());
 
-      environment.outputDir.childFile('index.html').createSync(recursive: true);
-      environment.outputDir.childFile('flutter_bootstrap.js').createSync(recursive: true);
+      final File indexHtml = environment.outputDir.childFile('index.html')
+        ..createSync(recursive: true);
+      final File bootstrapJs = environment.outputDir.childFile('flutter_bootstrap.js')
+        ..createSync(recursive: true);
 
-      final Set<String> hashedInputBasenames = hashedBundle
+      final Set<String> hashedInputPaths = hashedBundle
           .resolveInputs(environment)
           .sources
-          .map((File f) => f.basename)
+          .map((File f) => f.path)
           .toSet();
-      final Set<String> hashedOutputBasenames = hashedBundle
+      final Set<String> hashedOutputPaths = hashedBundle
           .resolveOutputs(environment)
           .sources
-          .map((File f) => f.basename)
+          .map((File f) => f.path)
           .toSet();
-      expect(hashedInputBasenames, containsAll(<String>['index.html', 'flutter_bootstrap.js']));
-      expect(hashedOutputBasenames, containsAll(<String>['index.html', 'flutter_bootstrap.js']));
+      expect(hashedInputPaths, containsAll(<String>[indexHtml.path, bootstrapJs.path]));
+      expect(hashedOutputPaths, containsAll(<String>[indexHtml.path, bootstrapJs.path]));
 
       final Set<String> unhashedInputBasenames = unhashedBundle
           .resolveInputs(environment)
@@ -3087,6 +3089,25 @@ _flutter.loader.load({
       // 2. Malformed _flutter.buildConfig (non-JSON JS expression)
       bootstrapFile.writeAsStringSync(
         '_flutter.buildConfig = { engineRevision: "unquotedKey" };\n',
+      );
+      expect(
+        () => injectManifestBuildConfig(environment.outputDir, hashResult),
+        throwsToolExit(message: '"_flutter.buildConfig" is not valid JSON'),
+      );
+
+      // 2b. Single-quoted and backtick string literals containing '{' inside
+      // _flutter.buildConfig should be skipped by brace matching so the outer
+      // closing '}' is matched and JSON decoding throws "is not valid JSON"
+      // rather than "could not find matching closing brace".
+      bootstrapFile.writeAsStringSync(
+        '_flutter.buildConfig = { \'note\': \'unmatched { in single quotes\', "builds": [] };\n',
+      );
+      expect(
+        () => injectManifestBuildConfig(environment.outputDir, hashResult),
+        throwsToolExit(message: '"_flutter.buildConfig" is not valid JSON'),
+      );
+      bootstrapFile.writeAsStringSync(
+        '_flutter.buildConfig = { `note`: `unmatched { in backticks`, "builds": [] };\n',
       );
       expect(
         () => injectManifestBuildConfig(environment.outputDir, hashResult),

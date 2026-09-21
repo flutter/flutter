@@ -334,22 +334,22 @@ final RegExp _buildConfigTokenOrCommentRegex = RegExp(
 
 int? _findMatchingClosingBrace(String text, int openBraceIndex) {
   var depth = 0;
-  var inString = false;
+  int? stringQuote;
   var escaped = false;
   for (var i = openBraceIndex; i < text.length; i++) {
     final int ch = text.codeUnitAt(i);
-    if (inString) {
+    if (stringQuote != null) {
       if (escaped) {
         escaped = false;
       } else if (ch == 0x5C /* \ */ ) {
         escaped = true;
-      } else if (ch == 0x22 /* " */ ) {
-        inString = false;
+      } else if (ch == stringQuote) {
+        stringQuote = null;
       }
       continue;
     }
-    if (ch == 0x22 /* " */ ) {
-      inString = true;
+    if (ch == 0x22 /* " */ || ch == 0x27 /* ' */ || ch == 0x60 /* ` */ ) {
+      stringQuote = ch;
     } else if (ch == 0x7B /* { */ ) {
       depth++;
     } else if (ch == 0x7D /* } */ ) {
@@ -466,92 +466,6 @@ void injectManifestBuildConfig(Directory outputDir, WebAssetHashResult hashResul
       );
     }
   }
-}
-
-/// The filename of the precache manifest generated for web content hashing.
-const String kPrecacheManifestFile = 'precache_manifest.json';
-
-bool _shouldExcludeFromPrecacheManifest({
-  required String posixUrl,
-  required String basename,
-  required List<String> segments,
-  required bool useLocalCanvasKit,
-}) {
-  if (basename.startsWith('.') ||
-      posixUrl == kPrecacheManifestFile ||
-      posixUrl == 'flutter_service_worker.js') {
-    return true;
-  }
-  if (basename.endsWith('.map') ||
-      basename.endsWith('.symbols') ||
-      basename.endsWith('.info.json')) {
-    return true;
-  }
-  if (!useLocalCanvasKit && segments.firstOrNull == 'canvaskit') {
-    return true;
-  }
-  return false;
-}
-
-/// Writes `precache_manifest.json` in [outputDir] when [enabled] is true, or
-/// removes any stale manifest file when [enabled] is false.
-File? updatePrecacheManifest(
-  Directory outputDir, {
-  required bool enabled,
-  required bool useLocalCanvasKit,
-}) {
-  final File manifestFile = outputDir.childFile(kPrecacheManifestFile);
-  if (!enabled) {
-    if (manifestFile.existsSync()) {
-      manifestFile.deleteSync();
-    }
-    return null;
-  }
-
-  if (!outputDir.existsSync()) {
-    return null;
-  }
-
-  final FileSystem fileSystem = outputDir.fileSystem;
-  final List<File> files = outputDir.listSync(recursive: true).whereType<File>().toList();
-
-  final entries = <Map<String, Object>>[];
-  for (final file in files) {
-    final String relativePath = fileSystem.path.relative(file.path, from: outputDir.path);
-    final List<String> segments = fileSystem.path.split(relativePath);
-    final String posixUrl = p.posix.joinAll(segments);
-    final String basename = segments.last;
-
-    if (_shouldExcludeFromPrecacheManifest(
-      posixUrl: posixUrl,
-      basename: basename,
-      segments: segments,
-      useLocalCanvasKit: useLocalCanvasKit,
-    )) {
-      continue;
-    }
-
-    final Uint8List bytes = file.readAsBytesSync();
-    final String shortHash = crypto.sha256.convert(bytes).toString().substring(0, 8);
-    final bool urlHashed = basename.contains('.$shortHash.') || basename.endsWith('.$shortHash');
-
-    entries.add(<String, Object>{
-      'url': posixUrl,
-      'hash': shortHash,
-      'size': bytes.length,
-      'urlHashed': urlHashed,
-    });
-  }
-
-  entries.sort(
-    (Map<String, Object> a, Map<String, Object> b) =>
-        (a['url']! as String).compareTo(b['url']! as String),
-  );
-
-  manifestFile.writeAsStringSync(
-    const JsonEncoder.withIndent('  ').convert(<String, Object>{'version': 1, 'entries': entries}),
-  );
-  return manifestFile;
 }
 
 /// The filename of the precache manifest generated for web content hashing.

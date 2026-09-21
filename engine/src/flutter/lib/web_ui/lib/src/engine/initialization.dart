@@ -310,7 +310,7 @@ Future<void> _loadContentHashedAssetManifest(ui_web.AssetManager assetManager) a
       return;
     }
     final Uint8List rawJsonBytes = await response.asUint8List();
-    final Object? base64String = json.decode(utf8.decode(rawJsonBytes));
+    final Object? base64String = utf8.decoder.fuse(json.decoder).convert(rawJsonBytes);
     if (base64String is! String) {
       return;
     }
