@@ -256,6 +256,7 @@ List<FlutterCommand> generateCommands({
     verboseHelp: verboseHelp,
   ),
   AttachCommand(
+    toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
     stdio: toolDependencies.toolContext.stdio,
     logger: toolDependencies.toolContext.logger,
@@ -326,6 +327,7 @@ List<FlutterCommand> generateCommands({
   ),
   DowngradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DriveCommand(
+    toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
     fileSystem: toolDependencies.toolContext.fs,
     logger: toolDependencies.toolContext.logger,

@@ -56,6 +56,7 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand({
+    super.toolContext,
     bool verboseHelp = false,
     @visibleForTesting this._flutterDriverFactory,
     @visibleForTesting
@@ -345,6 +346,7 @@ class DriveCommand extends RunCommandBase {
     final web = webDevServerConfig != null;
 
     _flutterDriverFactory ??= FlutterDriverFactory(
+      toolContext: toolContext!,
       applicationPackageFactory: ApplicationPackageFactory.instance!,
       logger: _logger,
       platform: _platform,
