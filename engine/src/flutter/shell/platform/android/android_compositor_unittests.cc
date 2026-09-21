@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/android_compositor.h"
-#include "flutter/shell/platform/android/flutter_main.h"
 
 #include <atomic>
 #include <thread>
@@ -373,36 +372,30 @@ TEST(AndroidCompositorTest, PopulateCompositorConfig) {
   compositor->PopulateCompositorConfig(nullptr);
 }
 
-TEST(AndroidCompositorTest, DualFlagMatrixTest) {
-  for (bool embedder_api_enabled : {false, true}) {
-    FlutterMain::SetEmbedderAPIEnabledForTesting(embedder_api_enabled);
-    EXPECT_EQ(FlutterMain::IsEmbedderAPIEnabled(), embedder_api_enabled);
+TEST(AndroidCompositorTest, BackingStoreRoundTrip) {
+  std::shared_ptr<AndroidSurfaceManager> surface_manager =
+      AndroidSurfaceManager::Create(AndroidRenderingAPI::kSkiaOpenGLES);
+  ASSERT_NE(surface_manager, nullptr);
+  EXPECT_TRUE(
+      surface_manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
 
-    std::shared_ptr<AndroidSurfaceManager> surface_manager =
-        AndroidSurfaceManager::Create(AndroidRenderingAPI::kSkiaOpenGLES);
-    ASSERT_NE(surface_manager, nullptr);
-    EXPECT_TRUE(
-        surface_manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
+  auto compositor = std::make_unique<AndroidCompositor>(surface_manager);
+  FlutterBackingStoreConfig config = {};
+  config.struct_size = sizeof(FlutterBackingStoreConfig);
+  config.size = FlutterSize{100.0, 100.0};
+  config.view_id = 0;
 
-    auto compositor = std::make_unique<AndroidCompositor>(surface_manager);
-    FlutterBackingStoreConfig config = {};
-    config.struct_size = sizeof(FlutterBackingStoreConfig);
-    config.size = FlutterSize{100.0, 100.0};
-    config.view_id = 0;
+  FlutterBackingStore bs = {};
+  EXPECT_TRUE(compositor->CreateBackingStore(&config, &bs));
 
-    FlutterBackingStore bs = {};
-    EXPECT_TRUE(compositor->CreateBackingStore(&config, &bs));
+  FlutterLayer layer = {};
+  layer.struct_size = sizeof(FlutterLayer);
+  layer.type = kFlutterLayerContentTypeBackingStore;
+  layer.backing_store = &bs;
+  const FlutterLayer* layers[] = {&layer};
 
-    FlutterLayer layer = {};
-    layer.struct_size = sizeof(FlutterLayer);
-    layer.type = kFlutterLayerContentTypeBackingStore;
-    layer.backing_store = &bs;
-    const FlutterLayer* layers[] = {&layer};
-
-    EXPECT_TRUE(compositor->PresentLayers(layers, 1));
-    EXPECT_TRUE(compositor->CollectBackingStore(&bs));
-  }
-  FlutterMain::ResetEmbedderAPIEnabledForTesting();
+  EXPECT_TRUE(compositor->PresentLayers(layers, 1));
+  EXPECT_TRUE(compositor->CollectBackingStore(&bs));
 }
 
 }  // namespace testing

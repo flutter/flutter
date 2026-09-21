@@ -28,7 +28,6 @@
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/embedder_android_engine.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
-#include "flutter/shell/platform/android/shell_android_engine.h"
 #include "flutter/shell/platform/embedder/embedder_asset_resolver.h"
 
 namespace flutter {
@@ -146,16 +145,13 @@ AndroidShellHolder::AndroidShellHolder(
       }
     });
 
-    if (settings_.enable_embedder_api) {
-      auto embedder_engine = std::make_unique<EmbedderAndroidEngine>(
-          task_runners, std::move(shell), settings_, jni_facade_,
-          android_rendering_api_);
-      embedder_engine->SetPlatformMessageHandler(
-          platform_view_android_->GetPlatformMessageHandler());
-      engine_ = std::move(embedder_engine);
-    } else {
-      engine_ = std::make_unique<ShellAndroidEngine>(std::move(shell));
-    }
+    auto embedder_engine = std::make_unique<EmbedderAndroidEngine>(
+        task_runners, std::move(shell), settings_, jni_facade_,
+        android_rendering_api_);
+    embedder_engine->SetPlatformMessageHandler(
+        platform_view_android_->GetPlatformMessageHandler());
+    engine_ = std::move(embedder_engine);
+
     platform_view_android_->SetEngine(engine_.get());
 
     engine_->RegisterImageDecoder(
@@ -288,17 +284,12 @@ AndroidShellHolder::CreateDispatchTable(
                                    unscaled_font_size, configuration_id)
                              : -1.0;
       };
-  if (settings_.enable_embedder_api) {
-    dispatch_table.vsync_callback = [platform_view](intptr_t baton) {
-      if (platform_view) {
-        platform_view->OnVsyncCallback(baton);
-      }
-    };
-  } else {
-    dispatch_table.create_vsync_waiter_callback = [platform_view]() {
-      return platform_view ? platform_view->CreateVSyncWaiter() : nullptr;
-    };
-  }
+  dispatch_table.vsync_callback = [platform_view](intptr_t baton) {
+    if (platform_view) {
+      platform_view->OnVsyncCallback(baton);
+    }
+  };
+
   dispatch_table.set_application_locale_callback =
       [platform_view](std::string locale) {
         if (platform_view) {
@@ -383,11 +374,10 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
   if (!spawned_engine) {
     return nullptr;
   }
-  if (settings_.enable_embedder_api) {
-    static_cast<EmbedderAndroidEngine*>(spawned_engine.get())
-        ->SetPlatformMessageHandler(
-            spawned_platform_view_android->GetPlatformMessageHandler());
-  }
+  static_cast<EmbedderAndroidEngine*>(spawned_engine.get())
+      ->SetPlatformMessageHandler(
+          spawned_platform_view_android->GetPlatformMessageHandler());
+
   spawned_platform_view_android->SetEngine(spawned_engine.get());
 
   return std::unique_ptr<AndroidShellHolder>(new AndroidShellHolder(
@@ -411,13 +401,10 @@ void AndroidShellHolder::Launch(
 
   apk_asset_provider_ = std::move(apk_asset_provider);
   if (!apk_asset_provider_) {
-    if (settings_.enable_embedder_api) {
-      auto* embedder_engine =
-          static_cast<EmbedderAndroidEngine*>(engine_.get());
-      if (embedder_engine != nullptr) {
-        embedder_engine->Run(nullptr, entrypoint, libraryUrl, entrypoint_args,
-                             engine_id);
-      }
+    auto* embedder_engine = static_cast<EmbedderAndroidEngine*>(engine_.get());
+    if (embedder_engine != nullptr) {
+      embedder_engine->Run(nullptr, entrypoint, libraryUrl, entrypoint_args,
+                           engine_id);
     }
     return;
   }
@@ -428,11 +415,12 @@ void AndroidShellHolder::Launch(
   }
   config->SetEngineId(engine_id);
   engine_->RunEngine(std::move(config.value()));
-  if (settings_.enable_embedder_api) {
-    engine_->UpdateAssetResolverByType(
-        apk_asset_provider_->Clone(),
-        AssetResolver::AssetResolverType::kApkAssetProvider);
-  }
+  // This must follow RunEngine: FlutterEngineRunInitialized is what creates
+  // Engine::asset_manager_ on the UI thread, and
+  // FlutterEngineUpdateAssetResolver requires a non-null asset manager.
+  engine_->UpdateAssetResolverByType(
+      apk_asset_provider_->Clone(),
+      AssetResolver::AssetResolverType::kApkAssetProvider);
 }
 
 Rasterizer::Screenshot AndroidShellHolder::Screenshot(
@@ -474,13 +462,9 @@ std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
   }
 
   RunConfiguration config(std::move(isolate_configuration));
-  if (settings_.enable_embedder_api) {
-    auto cloned = apk_asset_provider_->Clone();
-    config.AddAssetResolver(std::make_unique<EmbedderAssetResolver>(
-        cloned->ToFlutterAssetResolver()));
-  } else {
-    config.AddAssetResolver(apk_asset_provider_->Clone());
-  }
+  auto cloned = apk_asset_provider_->Clone();
+  config.AddAssetResolver(std::make_unique<EmbedderAssetResolver>(
+      cloned->ToFlutterAssetResolver()));
 
   {
     if (!entrypoint.empty() && !libraryUrl.empty()) {

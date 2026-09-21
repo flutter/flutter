@@ -175,8 +175,6 @@ source_set("flutter_shell_native_src") {
     "platform_view_android.h",
     "platform_view_android_jni_impl.cc",
     "platform_view_android_jni_impl.h",
-    "shell_android_engine.cc",
-    "shell_android_engine.h",
     "surface_texture_external_texture.cc",
     "surface_texture_external_texture.h",
     "surface_texture_external_texture_gl_impeller.cc",
