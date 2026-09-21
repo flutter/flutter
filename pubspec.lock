@@ -243,7 +243,7 @@ packages:
     source: hosted
     version: "1.0.9"
   cupertino_ui:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: cupertino_ui
       sha256: "2137c0d41f3b62cc4d3d2495e6c354bd6b6133cd21c6bb155736cc31dbd49a11"
@@ -727,7 +727,7 @@ packages:
     source: hosted
     version: "0.13.0"
   material_ui:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: material_ui
       sha256: "7ba1ca315d50a004791dbab290417c52a61466d56db2822fe3c5c2994903110c"
@@ -1163,14 +1163,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.20"
-  test_reflective_loader:
-    dependency: transitive
-    description:
-      name: test_reflective_loader
-      sha256: d828d5ca15179aaac2aaf8f510cf0a52ec28e0031681b044ec5e581a4b8002e7
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.0"
   typed_data:
     dependency: "direct main"
     description:

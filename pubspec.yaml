@@ -107,6 +107,7 @@ dependencies:
   crypto: 3.0.7
   csslib: 1.0.2
   cupertino_icons: 1.0.9
+  cupertino_ui: ^1.0.0
   fake_async: ^1.3.3
   ffi: 2.2.0
   file: 7.0.1
@@ -140,6 +141,7 @@ dependencies:
   logging: 1.3.0
   matcher: 0.12.20
   material_color_utilities: 0.13.0
+  material_ui: ^1.0.0
   meta: ^1.19.0
   metrics_center: 1.0.15
   mime: 2.1.0
@@ -224,4 +226,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: 3ta7l2
+# PUBSPEC CHECKSUM: obb563
