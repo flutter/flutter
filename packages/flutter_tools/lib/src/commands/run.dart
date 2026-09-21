@@ -34,7 +34,7 @@ import 'daemon.dart';
 
 /// Shared logic between `flutter run` and `flutter drive` commands.
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  RunCommandBase({required bool verboseHelp}) {
+  RunCommandBase({super.toolContext, required super.verboseHelp}) {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesDartDefineOption();
     usesWebDefineOption();
@@ -291,7 +291,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 }
 
 class RunCommand extends RunCommandBase {
-  RunCommand({bool verboseHelp = false}) : super(verboseHelp: verboseHelp) {
+  RunCommand({super.toolContext, bool verboseHelp = false}) : super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
@@ -684,7 +684,7 @@ class RunCommand extends RunCommandBase {
       stdio: globals.stdio,
       systemClock: globals.systemClock,
       terminal: globals.terminal,
-      toolContext: toolContext,
+      toolContext: toolContext!,
     );
   }
 

@@ -166,7 +166,7 @@ class DaemonCommand extends FlutterCommand {
 @visibleForTesting
 class DaemonServer {
   DaemonServer({
-    this.toolContext,
+    required this.toolContext,
     required this.logger,
     this.analytics,
     this.androidSdk,
@@ -187,7 +187,7 @@ class DaemonServer {
   });
 
   final int? port;
-  final ToolContext? toolContext;
+  final ToolContext toolContext;
 
   /// Stdout logger used to print general server-related errors.
   final Logger logger;
@@ -276,7 +276,7 @@ typedef CommandHandlerWithBinary = Future<Object?> Function(
 class Daemon {
   Daemon(
     this.connection, {
-    ToolContext? toolContext,
+    required ToolContext toolContext,
     Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
@@ -363,7 +363,7 @@ class Daemon {
   }
 
   factory Daemon.createMachineDaemon({
-    ToolContext? toolContext,
+    required ToolContext toolContext,
     required FeatureFlags featureFlags,
     required Logger logger,
     required Stdio stdio,
@@ -865,7 +865,7 @@ typedef RunOrAttach = Future<void> Function({
 class AppDomain extends Domain {
   AppDomain(
     Daemon daemon, {
-    this._toolContext,
+    required this._toolContext,
     Analytics? analytics,
     FileSystem? fileSystem,
     Logger? logger,
@@ -898,7 +898,7 @@ class AppDomain extends Domain {
   final SystemClock _systemClock;
   final Logger _logger;
   final AnsiTerminal _terminal;
-  final ToolContext? _toolContext;
+  final ToolContext _toolContext;
   final OutputPreferences _outputPreferences;
 
   static const _uuidGenerator = Uuid();
@@ -940,7 +940,7 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      toolContext: _toolContext!,
+      toolContext: _toolContext,
       buildInfo: options.buildInfo,
       target: target,
       userIdentifier: userIdentifier,
