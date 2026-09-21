@@ -202,8 +202,16 @@ class Rasterizer final : public SnapshotDelegate,
   ///             runner. All GPU resources are collected before this call
   ///             returns. Any context set up by the embedder to hold these
   ///             resources can be immediately collected as well.
-  ///
   ~Rasterizer();
+
+  //----------------------------------------------------------------------------
+  /// @brief      Sets an optional callback to be invoked on the raster thread
+  ///             when the rasterizer is destroyed (after GPU resources are
+  ///             torn down).
+  ///
+  /// @param[in]  teardown_callback  The callback to invoke upon teardown.
+  ///
+  void SetTeardownCallback(fml::closure teardown_callback);
 
   void SetImpellerContext(
       std::shared_ptr<impeller::ImpellerContextFuture> impeller_context);
@@ -797,6 +805,7 @@ class Rasterizer final : public SnapshotDelegate,
   fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger_;
   std::shared_ptr<ExternalViewEmbedder> external_view_embedder_;
   std::unique_ptr<SnapshotController> snapshot_controller_;
+  fml::closure teardown_callback_;
 
   // WeakPtrFactory must be the last member.
   fml::TaskRunnerAffineWeakPtrFactory<Rasterizer> weak_factory_;

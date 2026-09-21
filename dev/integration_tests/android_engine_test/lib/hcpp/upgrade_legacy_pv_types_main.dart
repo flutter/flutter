@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:android_driver_extensions/extension.dart';
 import 'package:flutter/foundation.dart';
@@ -20,6 +21,8 @@ void main() async {
     handler: (String? command) async {
       return json.encode(<String, Object?>{
         'supported': await HybridAndroidViewController.checkIfSupported(),
+        // Return process PID so driver test can filter logcat entries strictly to this process.
+        'pid': io.pid,
       });
     },
     commands: <CommandExtension>[nativeDriverCommands],
