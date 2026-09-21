@@ -1297,10 +1297,7 @@ void main() {
       FlutterError.onError = oldHandler;
 
       expect(errors, isNotEmpty);
-      expect(
-        errors.first.exception.toString(),
-        contains('must be declared as TableCell.none'),
-      );
+      expect(errors.first.exception.toString(), contains('must be declared as TableCell.none'));
     });
 
     testWidgets('Non-TableCell.none widget in rowSpan-covered position - throws error', (
@@ -1335,10 +1332,7 @@ void main() {
       FlutterError.onError = oldHandler;
 
       expect(errors, isNotEmpty);
-      expect(
-        errors.first.exception.toString(),
-        contains('must be declared as TableCell.none'),
-      );
+      expect(errors.first.exception.toString(), contains('must be declared as TableCell.none'));
     });
 
     testWidgets('TableCell with colSpan at last column - valid edge case', (
