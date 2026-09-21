@@ -6,6 +6,7 @@
 #include "flutter/shell/platform/windows/host_window_dialog.h"
 #include "flutter/shell/platform/windows/host_window_popup.h"
 #include "flutter/shell/platform/windows/host_window_regular.h"
+#include "flutter/shell/platform/windows/host_window_satellite.h"
 #include "flutter/shell/platform/windows/host_window_tooltip.h"
 
 #include <dwmapi.h>
@@ -225,6 +226,22 @@ std::unique_ptr<HostWindow> HostWindow::CreatePopupWindow(
       get_position_callback, parent));
 }
 
+std::unique_ptr<HostWindow> HostWindow::CreateSatelliteWindow(
+    WindowManager* window_manager,
+    FlutterWindowsEngine* engine,
+    const WindowSizeRequest& preferred_size,
+    const WindowConstraints& preferred_constraints,
+    GetWindowPositionCallback get_position_callback,
+    HWND parent,
+    LPCWSTR title,
+    bool sized_to_content,
+    bool resizable) {
+  return std::unique_ptr<HostWindowSatellite>(new HostWindowSatellite(
+      window_manager, engine, preferred_size,
+      FromWindowConstraints(preferred_constraints), get_position_callback,
+      parent, title, sized_to_content, resizable));
+}
+
 HostWindow::HostWindow(WindowManager* window_manager,
                        FlutterWindowsEngine* engine)
     : window_manager_(window_manager), engine_(engine) {}
@@ -282,17 +299,7 @@ void HostWindow::InitializeFlutterView(
   // of the window frame, not the window rectangle (which includes the
   // drop-shadow). This adjustment must be done post-creation since the frame
   // rectangle is only available after the window has been created.
-  RECT frame_rect;
-  DwmGetWindowAttribute(window_handle_, DWMWA_EXTENDED_FRAME_BOUNDS,
-                        &frame_rect, sizeof(frame_rect));
-  RECT window_rect;
-  GetWindowRect(window_handle_, &window_rect);
-  LONG const left_dropshadow_width = frame_rect.left - window_rect.left;
-  LONG const top_dropshadow_height = window_rect.top - frame_rect.top;
-  SetWindowPos(window_handle_, nullptr,
-               window_rect.left - left_dropshadow_width,
-               window_rect.top - top_dropshadow_height, 0, 0,
-               SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+  AlignOriginWithFrame();
 
   UpdateTheme(window_handle_);
 
@@ -302,14 +309,42 @@ void HostWindow::InitializeFlutterView(
   // doesn't see a blank window. Each view has its own first-frame callback,
   // so this works correctly for multi-window apps.
   view_controller_->view()->SetFirstFrameCallback(
-      [hwnd = window_handle_, cmd_show = params.nCmdShow]() {
-        if (::IsWindow(hwnd)) {
-          ShowWindow(hwnd, cmd_show);
+      [this, weak_alive = std::weak_ptr<int>(alive_), hwnd = window_handle_,
+       cmd_show = params.nCmdShow]() {
+        if (weak_alive.expired() || !::IsWindow(hwnd)) {
+          return;
         }
+        OnFirstFrame();
+        ShowWindow(hwnd, cmd_show);
       });
   archetype_ = params.archetype;
   SetWindowLongPtr(window_handle_, GWLP_USERDATA,
                    reinterpret_cast<LONG_PTR>(this));
+}
+
+void HostWindow::OnFirstFrame() {}
+
+void HostWindow::AlignOriginWithFrame() {
+  RECT frame_rect;
+  if (FAILED(DwmGetWindowAttribute(window_handle_, DWMWA_EXTENDED_FRAME_BOUNDS,
+                                   &frame_rect, sizeof(frame_rect)))) {
+    return;
+  }
+  RECT window_rect;
+  if (!GetWindowRect(window_handle_, &window_rect)) {
+    return;
+  }
+
+  LONG const left_dropshadow_width = frame_rect.left - window_rect.left;
+  LONG const top_dropshadow_height = window_rect.top - frame_rect.top;
+  if (left_dropshadow_width == 0 && top_dropshadow_height == 0) {
+    return;
+  }
+
+  SetWindowPos(window_handle_, nullptr,
+               window_rect.left - left_dropshadow_width,
+               window_rect.top - top_dropshadow_height, 0, 0,
+               SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE);
 }
 
 HostWindow::~HostWindow() {
@@ -486,6 +521,18 @@ LRESULT HostWindow::HandleMessage(HWND hwnd,
     case WM_ACTIVATE:
       HandleWindowActivation(hwnd, wparam);
       return 0;
+
+    case WM_WINDOWPOSCHANGED: {
+      auto const* const window_pos = reinterpret_cast<WINDOWPOS*>(lparam);
+      if (window_pos && !(window_pos->flags & SWP_NOMOVE)) {
+        for (HostWindow* const owned : GetOwnedWindows()) {
+          if (owned->GetArchetype() == WindowArchetype::kSatellite) {
+            static_cast<HostWindowSatellite*>(owned)->OnParentMoved();
+          }
+        }
+      }
+      break;
+    }
 
     case WM_DWMCOLORIZATIONCOLORCHANGED:
       UpdateTheme(hwnd);
@@ -793,6 +840,32 @@ std::optional<Size> HostWindow::GetWindowSizeForClientSize(
   }
 
   return flutter::Size{width, height};
+}
+
+std::optional<Size> HostWindow::GetInitialWindowSize(
+    FlutterWindowsEngine* engine,
+    const WindowSizeRequest& preferred_size,
+    const BoxConstraints& constraints,
+    DWORD window_style,
+    DWORD extended_window_style,
+    std::optional<HWND> const& owner_window,
+    bool sized_to_content) {
+  double client_width;
+  double client_height;
+  if (sized_to_content) {
+    // Use the minimum constraint as the initial window size. The window will
+    // be resized to match the rendered content after the first frame.
+    client_width = std::max(1.0, constraints.smallest().width());
+    client_height = std::max(1.0, constraints.smallest().height());
+  } else {
+    client_width = preferred_size.preferred_view_width;
+    client_height = preferred_size.preferred_view_height;
+  }
+
+  return GetWindowSizeForClientSize(
+      *engine->windows_proc_table(), Size(client_width, client_height),
+      constraints.smallest(), constraints.biggest(), window_style,
+      extended_window_style, owner_window);
 }
 
 void HostWindow::EnableRecursively(bool enable) {
