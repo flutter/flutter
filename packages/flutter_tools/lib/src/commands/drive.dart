@@ -56,14 +56,13 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand({
-    required ToolContext super.toolContext,
-    bool verboseHelp = false,
+    required ToolContext toolContext,
     @visibleForTesting this._flutterDriverFactory,
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
+    super.verboseHelp = false,
   }) : _toolContext = toolContext,
-       _fsUtils = FileSystemUtils(fileSystem: toolContext.fs, platform: toolContext.platform),
-       super(verboseHelp: verboseHelp) {
+       _fsUtils = FileSystemUtils(fileSystem: toolContext.fs, platform: toolContext.platform) {
     requiresPubspecYaml();
     addEnableExperimentation(hide: !verboseHelp);
 
