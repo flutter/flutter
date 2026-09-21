@@ -47,7 +47,7 @@ void PlatformMessageHandlerAndroid::InvokePlatformMessageResponseCallback(
     engine = embedder_engine_;
     send_response_fn = proc_table_.SendPlatformMessageResponse;
   }
-  if (engine != nullptr && send_response_fn != nullptr) {
+  if (send_response_fn != nullptr) {
     auto* handle = new FlutterPlatformMessageResponseHandle{
         std::make_unique<flutter::PlatformMessage>(
             "", std::move(message_response))};
@@ -85,7 +85,7 @@ void PlatformMessageHandlerAndroid::InvokePlatformMessageEmptyResponseCallback(
     engine = embedder_engine_;
     send_response_fn = proc_table_.SendPlatformMessageResponse;
   }
-  if (engine != nullptr && send_response_fn != nullptr) {
+  if (send_response_fn != nullptr) {
     auto* handle = new FlutterPlatformMessageResponseHandle{
         std::make_unique<flutter::PlatformMessage>(
             "", std::move(message_response))};
