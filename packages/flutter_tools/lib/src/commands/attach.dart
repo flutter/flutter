@@ -312,6 +312,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         daemonStreams: DaemonStreams.fromStdio(_stdio, logger: _logger),
         logger: _logger,
       ),
+      toolContext: toolContext!,
       notifyingLogger: (_logger is NotifyingLogger)
           ? _logger
           : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),

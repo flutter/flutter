@@ -12,6 +12,7 @@ import 'package:package_config/package_config_types.dart';
 
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
+import '../src/fakes.dart';
 
 void main() {
   testWithoutContext(
@@ -19,6 +20,7 @@ void main() {
     () async {
       final logger = BufferLogger.test();
       final service = WebDriverService(
+        toolContext: FakeToolContext(),
         logger: logger,
         terminal: Terminal.test(),
         platform: FakePlatform(),

@@ -2331,7 +2331,7 @@ class DaemonCapturingRunCommand extends RunCommand {
 }
 
 class CapturingAppDomain extends AppDomain {
-  CapturingAppDomain(super.daemon);
+  CapturingAppDomain(super.daemon) : super(toolContext: DelegatingToolContext());
 
   String? userIdentifier;
   bool? enableDevTools;

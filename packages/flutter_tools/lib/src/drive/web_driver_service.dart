@@ -31,7 +31,7 @@ import 'drive_service.dart';
 /// An implementation of the driver service for web debug and release applications.
 class WebDriverService extends DriverService {
   WebDriverService({
-    this._toolContext,
+    required this._toolContext,
     required this._logger,
     required this._terminal,
     required this._platform,
@@ -40,7 +40,7 @@ class WebDriverService extends DriverService {
     required this._dartSdkPath,
   });
 
-  final ToolContext? _toolContext;
+  final ToolContext _toolContext;
   final Logger _logger;
   final Terminal _terminal;
   final Platform _platform;
@@ -75,7 +75,7 @@ class WebDriverService extends DriverService {
   }) async {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      toolContext: _toolContext!,
+      toolContext: _toolContext,
       buildInfo: buildInfo,
       target: mainPath,
       userIdentifier: userIdentifier,
