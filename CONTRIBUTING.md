@@ -95,12 +95,16 @@ for how to set up your development environment, or ask in #hackers-test on Disco
 Developing for Flutter
 ----------------------
 
-If you prefer to write code, consider starting with the list of good
-first issues for [Flutter][flutter-gfi] or for [Flutter DevTools][devtools-gfi].
+If you prefer to write code, find an issue that interests
+you in [Flutter][flutter-issues] or [Flutter DevTools][devtools-issues].
 Reference the respective sections below for further instructions.
 
-[flutter-gfi]: https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22
-[devtools-gfi]: https://github.com/flutter/devtools/labels/good%20first%20issue
+If you are looking for guidance on good starter issues in a
+specific component, consider asking in the #hackers-new
+[Discord channel](./docs/contributing/Chat.md).
+
+[flutter-issues]: https://github.com/flutter/flutter/issues
+[devtools-issues]: https://github.com/flutter/devtools/issues
 
 ### Framework and Engine
 
@@ -129,10 +133,10 @@ presented.
    which includes advice for designing APIs for Flutter, and how to
    format code in the framework.
 
-5. [Flutter design doc template](https://flutter.dev/go/template),
-   which should be used when proposing a new technical design.  This is a good
+5. [Flutter RFC process](https://github.com/flutter/rfc),
+   which should be used when proposing a new technical design. This is a good
    practice to do before coding more intricate changes.
-   See also our [guidance for writing design docs](./docs/contributing/Design-Documents.md).
+   See also our [guidance for writing design docs and RFCs](./docs/contributing/Design-Documents.md).
 
 [![How to contribute to Flutter](https://img.youtube.com/vi/4yBgOBAOx_A/0.jpg)](https://www.youtube.com/watch?v=4yBgOBAOx_A)
 
@@ -159,6 +163,14 @@ might be interested in helping other developers complete their contributions by 
 incomplete patch from the list of [issues with partial patches][has-partial-patch].
 
 [has-partial-patch]: https://github.com/flutter/flutter/labels/has%20partial%20patch
+
+### Open Pull Request Limits
+
+To ensure our maintainers can provide timely and high-quality feedback, public Flutter repositories limit contributors without write access to **2 concurrent open pull requests per repository**.
+* **Draft PRs are exempt**: Work-in-progress draft PRs do not count toward your limit.
+* **Focus on Quality**: Once you reach the limit, please focus on merging or closing your existing PRs before opening new ones.
+
+For more details on pull request expectations and code review, see our [Tree hygiene](./docs/contributing/Tree-hygiene.md) guide.
 
 
 Reviewing Code

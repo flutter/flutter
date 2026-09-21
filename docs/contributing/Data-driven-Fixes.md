@@ -109,7 +109,7 @@ The transforms can be in any order, but to make it easier to maintain the file w
 
 ### transform
 
-A _transform_ describes a set of changes made to a single element in the API. It's represented as a map with seven keys: `title`, `date`, `bulkApply`, `element`, `oneOf`, `changes`, and `variables`.
+A _transform_ describes a set of changes made to a single element in the API. It's represented as a map with seven keys: `title`, `date`, `bulkApply`, `element` or `library`, `oneOf`, `changes`, and `variables`.
 
 The `title` key is required. The value of the `title` key is a string that is displayed in the IDE to describe the changes that will be made to the user's code. It's usually shown as a label in a menu, so it should be kept short. And because most APIs can be referenced in multiple ways, the description should be general enough to cover all of those cases. For example, if a method is renamed then the name will need to be updated both at invocation sites and anywhere the old method was being overridden. Using a title like “Invoke newMethod” wouldn't be appropriate for updating an override, so a better title would be “Rename to newMethod”, which would work for both cases.
 
@@ -117,7 +117,7 @@ The `date` key is required. The value of the `date` key is a string encoding of 
 
 The `bulkApply` key is optional. The value of the `bulkApply` key is a Boolean value indicating whether the transform should be applied when bulk fixes are being made. The default value is `true`. You need to disallow a transform from being used in a bulk fix tool in cases where there are multiple transforms for a single API. If there's a clear default, then you can allow that one transform to be applied.
 
-The `element` key is required. The value of the `element` key is an [element](#element) object. It specifies the element in the API that was changed, such as a class or a method.
+Either the `element` key or the `library` key is required, but it isn't valid to have both. The value of the `element` key is an [element](#element) object. It specifies the element in the API that was changed, such as a class or a method. The value of the [`library`](#library) key is the import uri of the library.
 
 Either the `oneOf` key or the `changes` key is required, but it isn't valid to have both. These keys are two different ways to specify the list of changes that will be applied when a reference to the element is found.
 
@@ -139,6 +139,24 @@ changes:
 ```
 
 You might find it useful to include a comment to provide more information about each transform, such as design documents, issues, or even PRs that motivated or implemented the change.
+
+### library
+
+A _library_ describes a single library. The uri of the library is specified as the value of the key. For example,
+you can specify a library `lib.dart` in package `p`:
+
+```yaml
+library: 'package:p/lib.dart'
+```
+Currently, the only transform that can be done on a library is a [`replacedBy`](#replacedby) change. For example, to replace a library `package:p/lib.dart` with a library
+`package:p2/p2lib.dart` in import statements, you would write:
+
+```yaml
+library: 'package:p/lib.dart'
+changes:
+  - kind: 'replacedBy'
+    newLibrary: 'package:p2/p2lib.dart'
+```
 
 ### element
 
@@ -365,7 +383,9 @@ argumentValue:
 
 #### replacedBy
 
-A _replacedBy_ change indicates that the specified element was replaced by another element. It has two keys: `kind` and `newElement`.
+A _replacedBy_ change can be used to replace a [library](#library), or an [element](#element).
+
+When used to replace an element, a _replacedBy_ change indicates that the specified element was replaced by another element. It has two keys: `kind` and `newElement`.
 
 The `newElement` key is required. The value of the `newElement` key is an [element](#element) representing the element that replaces the specified element.
 
@@ -398,6 +418,13 @@ As with constructors, if a static member is being replaced by another static mem
 There isn’t currently any way for the tool to detect whether a method, getter, or setter is static, so it’s possible to specify an instance member. As a result, specifying an instance member (as either the replaced or replacing element) might produce invalid changes for your users.
 
 Similarly, there isn’t currently any way for the tool to detect whether a top-level variable or a static field is `final` (which includes `const`). As a result, specifying a final element (as either the replaced or replacing element) might produce invalid changes for your users.
+
+When used to replace a library, a _replacedBy_ change has two keys: `kind` and `newLibrary`. This change is useful for migrations where an entire library has moved to a different package. For example, to replace a library import `package:p/lib.dart` with `package:p2/lib.dart`, you would write:
+
+```yaml
+kind: 'replacedBy'
+newLibrary: 'package:p2/lib.dart'
+```
 
 ### code template
 

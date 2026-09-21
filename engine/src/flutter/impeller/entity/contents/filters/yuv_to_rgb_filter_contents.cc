@@ -96,8 +96,6 @@ std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
         entity.GetShaderClipDepth(), pass,
         entity.GetTransform() * y_input_snapshot->transform *
             Matrix::MakeScale(Vector2(size)));
-    frame_info.texture_sampler_y_coord_scale =
-        y_input_snapshot->texture->GetYCoordScale();
 
     FS::FragInfo frag_info;
     frag_info.yuv_color_space = static_cast<Scalar>(yuv_color_space);

@@ -26,8 +26,9 @@
 #     * WidgetState: fix_widget_state.yaml
 version: 1
 transforms:
-  - title: 'migrate from flutter/material.dart to material_ui/material_ui.dart.'
-    date: 2026-05-08
+  # TODO(Piinks): Link eventual deprecation PR, add testing support once available.
+  - title: 'Migrate from flutter/material.dart to material_ui/material_ui.dart.'
+    date: 2026-07-08
     library: 'package:flutter/material.dart'
     changes:
       - kind: 'replacedBy'

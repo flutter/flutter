@@ -406,6 +406,30 @@ void main() {
     expect(unimplementedOutputString, contains('subtitle'));
   });
 
+  testWithoutContext('does not include inherited keys in untranslated messages file', () {
+    final String untranslatedMessagesFilePath = fs.path.join(
+      'lib',
+      'l10n',
+      'unimplemented_message_translations.json',
+    );
+    setupLocalizations(<String, String>{
+      'en': twoMessageArbFileString,
+      'en_US': singleMessageArbFileString,
+    }, untranslatedMessagesFile: untranslatedMessagesFilePath);
+    final String unimplementedOutputString = fs
+        .file(untranslatedMessagesFilePath)
+        .readAsStringSync();
+    try {
+      json.decode(unimplementedOutputString);
+    } on Exception {
+      fail('Parsing arb file should not fail');
+    }
+    // en_US misses 'subtitle', but it is present in 'en' (base/template).
+    // So it should NOT be in the untranslated messages file.
+    expect(unimplementedOutputString, isNot(contains('en_US')));
+    expect(unimplementedOutputString, isNot(contains('subtitle')));
+  });
+
   testWithoutContext('correctly creates an untranslated messages file when project directory is '
       'not the current directory', () {
     // Regression test for https://github.com/flutter/flutter/issues/174205
@@ -1058,41 +1082,38 @@ class AppLocalizationsEn extends AppLocalizations {
       },
     );
 
-    testWithoutContext(
-      'throws an error attempting to add preferred locales when there is no corresponding arb file for that locale',
-      () {
-        final Directory l10nDirectory =
-            fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-              ..createSync(recursive: true);
-        l10nDirectory.childFile('app_en.arb').writeAsStringSync(singleMessageArbFileString);
-        l10nDirectory.childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
-        l10nDirectory.childFile('app_zh.arb').writeAsStringSync(singleZhMessageArbFileString);
+    testWithoutContext('throws an error attempting to add preferred locales when there is no corresponding arb file for that locale', () {
+      final Directory l10nDirectory =
+          fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+            ..createSync(recursive: true);
+      l10nDirectory.childFile('app_en.arb').writeAsStringSync(singleMessageArbFileString);
+      l10nDirectory.childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
+      l10nDirectory.childFile('app_zh.arb').writeAsStringSync(singleZhMessageArbFileString);
 
-        const preferredSupportedLocale = <String>['am', 'es'];
-        expect(
-          () {
-            LocalizationsGenerator(
-              fileSystem: fs,
-              inputPathString: defaultL10nPath,
-              outputPathString: defaultL10nPath,
-              templateArbFileName: defaultTemplateArbFileName,
-              outputFileString: defaultOutputFileString,
-              classNameString: defaultClassNameString,
-              preferredSupportedLocales: preferredSupportedLocale,
-              logger: logger,
-              projectPathString: fs.currentDirectory.path,
-            ).loadResources();
-          },
-          throwsA(
-            isA<L10nException>().having(
-              (L10nException e) => e.message,
-              'message',
-              contains("The preferred supported locale, 'am', cannot be added."),
-            ),
+      const preferredSupportedLocale = <String>['am', 'es'];
+      expect(
+        () {
+          LocalizationsGenerator(
+            fileSystem: fs,
+            inputPathString: defaultL10nPath,
+            outputPathString: defaultL10nPath,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+            preferredSupportedLocales: preferredSupportedLocale,
+            logger: logger,
+            projectPathString: fs.currentDirectory.path,
+          ).loadResources();
+        },
+        throwsA(
+          isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains("The preferred supported locale, 'am', cannot be added."),
           ),
-        );
-      },
-    );
+        ),
+      );
+    });
 
     testWithoutContext('correctly sorts arbPathString alphabetically', () {
       final Directory l10nDirectory =
@@ -1458,23 +1479,20 @@ class AppLocalizationsEn extends AppLocalizations {
       );
     });
 
-    testWithoutContext(
-      'message without placeholders - should generate code comment with description and template message translation',
-      () {
-        setupLocalizations(<String, String>{
-          'en': singleMessageArbFileString,
-          'es': singleEsMessageArbFileString,
-        });
-        final String content = getGeneratedFileContent();
-        expect(content, contains('/// Title for the application.'));
-        expect(
-          content,
-          contains('''
+    testWithoutContext('message without placeholders - should generate code comment with description and template message translation', () {
+      setupLocalizations(<String, String>{
+        'en': singleMessageArbFileString,
+        'es': singleEsMessageArbFileString,
+      });
+      final String content = getGeneratedFileContent();
+      expect(content, contains('/// Title for the application.'));
+      expect(
+        content,
+        contains('''
   /// In en, this message translates to:
   /// **'Title'**'''),
-        );
-      },
-    );
+      );
+    });
 
     testWithoutContext('template message translation handles newline characters', () {
       setupLocalizations(<String, String>{
@@ -1497,11 +1515,9 @@ class AppLocalizationsEn extends AppLocalizations {
       );
     });
 
-    testWithoutContext(
-      'message with placeholders - should generate code comment with description and template message translation',
-      () {
-        setupLocalizations(<String, String>{
-          'en': r'''
+    testWithoutContext('message with placeholders - should generate code comment with description and template message translation', () {
+      setupLocalizations(<String, String>{
+        'en': r'''
 {
   "price": "The price of this item is: ${price}",
   "@price": {
@@ -1514,21 +1530,20 @@ class AppLocalizationsEn extends AppLocalizations {
     }
   }
 }''',
-          'es': r'''
+        'es': r'''
 {
   "price": "El precio de este artículo es: ${price}"
 }''',
-        });
-        final String content = getGeneratedFileContent();
-        expect(content, contains('/// The price of an online shopping cart item.'));
-        expect(
-          content,
-          contains(r'''
+      });
+      final String content = getGeneratedFileContent();
+      expect(content, contains('/// The price of an online shopping cart item.'));
+      expect(
+        content,
+        contains(r'''
   /// In en, this message translates to:
   /// **'The price of this item is: \${price}'**'''),
-        );
-      },
-    );
+      );
+    });
 
     testWithoutContext('should generate a file per language', () {
       setupLocalizations(<String, String>{
@@ -1547,6 +1562,53 @@ class AppLocalizationsEn extends AppLocalizations {
         contains('class AppLocalizationsEnCa extends AppLocalizationsEn'),
       );
       expect(() => getGeneratedFileContent(locale: 'en_US'), throwsException);
+    });
+
+    testWithoutContext('uses a script locale as the parent for a regional locale', () {
+      final String untranslatedMessagesFilePath = fs.path.join(
+        'lib',
+        'l10n',
+        'unimplemented_message_translations.json',
+      );
+      setupLocalizations(<String, String>{
+        'en': twoMessageArbFileString,
+        'zh': singleZhMessageArbFileString,
+        'zh_Hant': '''
+{
+  "subtitle": "副標題"
+}''',
+        'zh_Hant_HK': '{}',
+      }, untranslatedMessagesFile: untranslatedMessagesFilePath);
+
+      final String content = getGeneratedFileContent(locale: 'zh');
+      expect(content, contains('class AppLocalizationsZhHant extends AppLocalizationsZh'));
+      expect(content, contains('class AppLocalizationsZhHantHk extends AppLocalizationsZhHant'));
+      expect(content, contains('AppLocalizationsZhHant._withLocale(String locale): super(locale)'));
+      expect(content, contains("AppLocalizationsZhHantHk(): super._withLocale('zh_Hant_HK')"));
+
+      final untranslatedMessages = json.decode(
+        fs.file(untranslatedMessagesFilePath).readAsStringSync(),
+      ) as Map<String, Object?>;
+      expect(untranslatedMessages, <String, Object?>{
+        'zh': <String>['subtitle'],
+      });
+    });
+
+    testWithoutContext('selects parent locales for script and country combinations', () {
+      setupLocalizations(<String, String>{
+        'en': singleMessageArbFileString,
+        'sr': singleMessageArbFileString,
+        'sr_Cyrl_RS': singleMessageArbFileString,
+        'sr_Latn': singleMessageArbFileString,
+        'sr_Latn_RS': singleMessageArbFileString,
+        'sr_RS': singleMessageArbFileString,
+      });
+
+      final String content = getGeneratedFileContent(locale: 'sr');
+      expect(content, contains('class AppLocalizationsSrLatn extends AppLocalizationsSr'));
+      expect(content, contains('class AppLocalizationsSrRs extends AppLocalizationsSr'));
+      expect(content, contains('class AppLocalizationsSrLatnRs extends AppLocalizationsSrLatn'));
+      expect(content, contains('class AppLocalizationsSrCyrlRs extends AppLocalizationsSr'));
     });
 
     testWithoutContext(
@@ -2467,35 +2529,32 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         },
       );
 
-      testWithoutContext(
-        'should throw attempting to generate a plural message with incorrect format for placeholders',
-        () {
-          expect(
-            () {
-              setupLocalizations(<String, String>{
-                'en': '''
+      testWithoutContext('should throw attempting to generate a plural message with incorrect format for placeholders', () {
+        expect(
+          () {
+            setupLocalizations(<String, String>{
+              'en': '''
 {
   "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
   "@helloWorlds": {
     "placeholders": "Incorrectly a string, should be a map."
   }
 }''',
-              });
-            },
-            throwsA(
-              isA<L10nException>().having(
-                (L10nException e) => e.message,
-                'message',
-                allOf(
-                  contains('message "helloWorlds"'),
-                  contains('is not properly formatted'),
-                  contains('Ensure that it is a map with string valued keys'),
-                ),
+            });
+          },
+          throwsA(
+            isA<L10nException>().having(
+              (L10nException e) => e.message,
+              'message',
+              allOf(
+                contains('message "helloWorlds"'),
+                contains('is not properly formatted'),
+                contains('Ensure that it is a map with string valued keys'),
               ),
             ),
-          );
-        },
-      );
+          ),
+        );
+      });
     });
 
     group('select messages', () {
@@ -2518,35 +2577,32 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         },
       );
 
-      testWithoutContext(
-        'should throw attempting to generate a select message with incorrect format for placeholders',
-        () {
-          expect(
-            () {
-              setupLocalizations(<String, String>{
-                'en': '''
+      testWithoutContext('should throw attempting to generate a select message with incorrect format for placeholders', () {
+        expect(
+          () {
+            setupLocalizations(<String, String>{
+              'en': '''
 {
   "genderSelect": "{gender, select, female {She} male {He} other {they} }",
   "@genderSelect": {
     "placeholders": "Incorrectly a string, should be a map."
   }
 }''',
-              });
-            },
-            throwsA(
-              isA<L10nException>().having(
-                (L10nException e) => e.message,
-                'message',
-                allOf(
-                  contains('message "genderSelect"'),
-                  contains('is not properly formatted'),
-                  contains('Ensure that it is a map with string valued keys'),
-                ),
+            });
+          },
+          throwsA(
+            isA<L10nException>().having(
+              (L10nException e) => e.message,
+              'message',
+              allOf(
+                contains('message "genderSelect"'),
+                contains('is not properly formatted'),
+                contains('Ensure that it is a map with string valued keys'),
               ),
             ),
-          );
-        },
-      );
+          ),
+        );
+      });
 
       testWithoutContext(
         'should throw attempting to generate a select message with an incorrect message',
@@ -3011,29 +3067,26 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       );
     });
 
-    testWithoutContext(
-      'should throw when resource is missing resource attribute (isResourceAttributeRequired = true)',
-      () {
-        const arbFileWithMissingResourceAttribute = '''
+    testWithoutContext('should throw when resource is missing resource attribute (isResourceAttributeRequired = true)', () {
+      const arbFileWithMissingResourceAttribute = '''
 {
   "title": "Stocks"
 }''';
-        expect(
-          () {
-            setupLocalizations(<String, String>{
-              'en': arbFileWithMissingResourceAttribute,
-            }, areResourceAttributeRequired: true);
-          },
-          throwsA(
-            isA<L10nException>().having(
-              (L10nException e) => e.message,
-              'message',
-              contains('Resource attribute "@title" was not found'),
-            ),
+      expect(
+        () {
+          setupLocalizations(<String, String>{
+            'en': arbFileWithMissingResourceAttribute,
+          }, areResourceAttributeRequired: true);
+        },
+        throwsA(
+          isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains('Resource attribute "@title" was not found'),
           ),
-        );
-      },
-    );
+        ),
+      );
+    });
 
     group('checks for method/getter formatting', () {
       testWithoutContext('cannot contain non-alphanumeric symbols', () {
@@ -3457,8 +3510,7 @@ String helloNameAndAge({required String name, required int age}) {
           }
         }
       }
-    }
-    ''';
+    }''';
 
     setupLocalizations(<String, String>{'en': en, 'da': da});
 
@@ -3466,6 +3518,53 @@ String helloNameAndAge({required String name, required int age}) {
     expect(
       localizationsFile,
       containsIgnoringWhitespace(r'''String get test => 'No placeholder in here'''),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/192130.
+  testWithoutContext('throws an exception when placeholder type is invalid', () {
+    const maliciousArb = r'''
+{
+  "greeting": "Hello {user}",
+  "@greeting": {
+    "placeholders": {
+      "user": {
+        "type": "Object user) { print('bad'); return 'x'; } String injected("
+      }
+    }
+  }
+}''';
+    expect(
+      () => setupLocalizations(<String, String>{'en': maliciousArb}),
+      throwsA(
+        isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains('Invalid placeholder type'),
+        ),
+      ),
+    );
+
+    const genericInjectionArb = r'''
+{
+  "greeting": "Hello {user}",
+  "@greeting": {
+    "placeholders": {
+      "user": {
+        "type": "dynamic> foo) { print('bad'); } void bar<dynamic>"
+      }
+    }
+  }
+}''';
+    expect(
+      () => setupLocalizations(<String, String>{'en': genericInjectionArb}),
+      throwsA(
+        isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains('Invalid placeholder type'),
+        ),
+      ),
     );
   });
 }

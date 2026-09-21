@@ -225,6 +225,10 @@ inline CommandLine CommandLineFromIteratorsWithArgv0(const std::string& argv0,
 // Returns an empty optional if this is not supported on the host platform.
 //
 // This can be useful on platforms where argv may not be provided as UTF-8.
+#ifdef _WIN32
+CommandLine CommandLineFromWideArgv(int argc, const wchar_t* const* argv);
+#endif
+
 std::optional<CommandLine> CommandLineFromPlatform();
 
 // Builds a |CommandLine| from the usual argc/argv.

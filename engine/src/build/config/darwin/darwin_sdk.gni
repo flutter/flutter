@@ -49,7 +49,7 @@ declare_args() {
   ios_use_simulator = true
 
   # Version of iOS that we're targeting.
-  ios_deployment_target = "13.0"
+  ios_deployment_target = "15.0"
 
   # The path to the iOS device platform.
   ios_device_platform_path = ""
@@ -175,4 +175,13 @@ if (is_ios) {
           [ rebase_path("$mac_host_toolchain_path/usr/lib/swift/iphoneos") ]
     }
   }
+}
+
+darwin_target_arch = current_cpu
+if (darwin_target_arch == "x64") {
+  darwin_target_arch = "x86_64"
+}
+darwin_target_sim = ""
+if (is_ios && use_ios_simulator) {
+  darwin_target_sim = "-simulator"
 }

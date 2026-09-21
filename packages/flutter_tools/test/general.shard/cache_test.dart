@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi' show Abi;
+
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -31,14 +33,25 @@ const unameCommandForX64 = FakeCommand(command: <String>['uname', '-m'], stdout:
 const unameCommandForArm64 = FakeCommand(command: <String>['uname', '-m'], stdout: 'aarch64');
 
 void main() {
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
   late FakeProcessManager fakeProcessManager;
 
   setUp(() {
     fakeProcessManager = FakeProcessManager.empty();
   });
 
-  Cache createCache(Platform platform) {
-    return Cache.test(platform: platform, processManager: fakeProcessManager);
+  Cache createCache(Platform platform, {Abi? currentAbi}) {
+    return Cache.test(
+      platform: platform,
+      processManager: fakeProcessManager,
+      currentAbi: currentAbi,
+    );
   }
 
   group('Cache.checkLockAcquired', () {
@@ -147,6 +160,35 @@ void main() {
       await artifact.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
 
       expect(logger.warningText, contains('No known version for the artifact name "fake"'));
+    });
+
+    testWithoutContext('MaterialFonts continues on missing version file', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
+        'flutter_cache_test_artifact.',
+      );
+      final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync(
+        'flutter_cache_test_download.',
+      );
+      final Cache cache = FakeSecondaryCache()
+        ..version =
+            null // version is missing.
+        ..artifactDirectory = artifactDir
+        ..downloadDir = downloadDir;
+
+      final materialFonts = MaterialFonts(cache);
+      await materialFonts.update(
+        FakeArtifactUpdater(),
+        logger,
+        fileSystem,
+        FakeOperatingSystemUtils(),
+      );
+
+      expect(
+        logger.warningText,
+        contains('No known version for the artifact name "material_fonts"'),
+      );
     });
 
     testWithoutContext(
@@ -320,9 +362,8 @@ void main() {
     );
 
     testUsingContext('failed storage.googleapis.com download shows China warning', () async {
-      final InternetAddress address = (await InternetAddress.lookup(
-        'storage.googleapis.com',
-      )).first;
+      final InternetAddress address = (await InternetAddress.lookup('storage.googleapis.com'))
+          .first;
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
       final artifact2 = FakeSecondaryCachedArtifact()
         ..upToDate = false
@@ -411,11 +452,70 @@ void main() {
     expect(artifact.displayName, 'fake');
   });
 
-  testWithoutContext('ArtifactSet.downloadCount defaults to 1', () {
+  testWithoutContext('ArtifactSet.downloadCount defaults to 0', () {
+    final artifact = _FakeArtifactSet();
+
+    expect(artifact.downloadCount, 0);
+  });
+
+  testWithoutContext('CachedArtifact.downloadCount defaults to 1', () {
     final cache = Cache.test(processManager: FakeProcessManager.any());
     final artifact = FakeSimpleArtifact(cache);
 
     expect(artifact.downloadCount, 1);
+  });
+
+  testUsingContext('Cache.updateAll calculates progress only for downloading artifacts', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
+    final artifactUpdater = _FakeProgressRecordingArtifactUpdater();
+    final artifact1 = FakeSecondaryCachedArtifact()
+      ..upToDate = false
+      ..artifactName = 'downloading_1'
+      ..downloads = 2;
+    final artifact2 = _FakeArtifactSet(name: 'non_downloading')..upToDate = false;
+    final artifact3 = FakeSecondaryCachedArtifact()
+      ..upToDate = false
+      ..artifactName = 'downloading_2';
+
+    final cacheWithArtifacts = Cache.test(
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: <ArtifactSet>[artifact1, artifact2, artifact3],
+      artifactUpdater: artifactUpdater,
+      processManager: FakeProcessManager.any(),
+    );
+
+    await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+
+    expect(artifact1.didUpdate, true);
+    expect(artifact2.didUpdate, true);
+    expect(artifact3.didUpdate, true);
+    expect(logger.statusText, contains('[1/2] downloading_1'));
+    expect(artifactUpdater.progressContexts, <ProgressContext>[
+      (artifactIndex: 1, artifactTotal: 2, downloadTotal: 2, downloadIndex: 0),
+      (artifactIndex: 2, artifactTotal: 2, downloadTotal: 1, downloadIndex: 0),
+    ]);
+  });
+
+  testUsingContext('Cache.updateAll succeeds when all artifacts are non-downloading', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final artifactUpdater = _FakeProgressRecordingArtifactUpdater();
+    final artifact1 = _FakeArtifactSet(name: 'non_downloading_1')..upToDate = false;
+    final artifact2 = _FakeArtifactSet(name: 'non_downloading_2')..upToDate = false;
+
+    final cacheWithArtifacts = Cache.test(
+      fileSystem: fileSystem,
+      artifacts: <ArtifactSet>[artifact1, artifact2],
+      artifactUpdater: artifactUpdater,
+      processManager: FakeProcessManager.any(),
+    );
+
+    await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+
+    expect(artifact1.didUpdate, true);
+    expect(artifact2.didUpdate, true);
+    expect(artifactUpdater.progressContexts, isEmpty);
   });
 
   testWithoutContext(
@@ -981,13 +1081,12 @@ void main() {
         platform: FakePlatform(operatingSystem: 'macos'),
       );
       iosUsbArtifacts.location.createSync();
-      final File ideviceScreenshotFile = iosUsbArtifacts.location.childFile('idevicescreenshot')
+      final File ideviceSyslogFile = iosUsbArtifacts.location.childFile('idevicesyslog')
         ..createSync();
-      iosUsbArtifacts.location.childFile('idevicesyslog').createSync();
 
       expect(iosUsbArtifacts.isUpToDateInner(fileSystem), true);
 
-      ideviceScreenshotFile.deleteSync();
+      ideviceSyslogFile.deleteSync();
 
       expect(iosUsbArtifacts.isUpToDateInner(fileSystem), false);
     },
@@ -1085,7 +1184,7 @@ void main() {
   testWithoutContext('FontSubset artifacts on x64 linux', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 
-    final Cache cache = createCache(FakePlatform());
+    final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxX64);
     final artifacts = FontSubsetArtifacts(cache, platform: FakePlatform());
     cache.includeAllPlatforms = false;
 
@@ -1097,7 +1196,7 @@ void main() {
   testWithoutContext('FontSubset artifacts on arm64 linux', () {
     fakeProcessManager.addCommand(unameCommandForArm64);
 
-    final Cache cache = createCache(FakePlatform());
+    final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxArm64);
     final artifacts = FontSubsetArtifacts(cache, platform: FakePlatform());
     cache.includeAllPlatforms = false;
 
@@ -1107,7 +1206,10 @@ void main() {
   });
 
   testWithoutContext('FontSubset artifacts on windows', () {
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'windows'));
+    final Cache cache = createCache(
+      FakePlatform(operatingSystem: 'windows'),
+      currentAbi: Abi.windowsX64,
+    );
     final artifacts = FontSubsetArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'windows'),
@@ -1120,15 +1222,12 @@ void main() {
   });
 
   testWithoutContext('FontSubset artifacts on macos', () {
-    fakeProcessManager.addCommands(<FakeCommand>[
-      const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/sbin/sysctl'),
-      const FakeCommand(
-        command: <String>['sysctl', 'hw.optional.arm64'],
-        stdout: 'hw.optional.arm64: 0',
-      ),
-    ]);
+    fakeProcessManager.addCommands(<FakeCommand>[kWhichSysctlCommand, kx64CheckCommand]);
 
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'macos'));
+    final Cache cache = createCache(
+      FakePlatform(operatingSystem: 'macos'),
+      currentAbi: Abi.macosX64,
+    );
     final artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'macos'));
     cache.includeAllPlatforms = false;
 
@@ -1156,7 +1255,10 @@ void main() {
   testWithoutContext('FontSubset artifacts for all platforms on x64 hosts', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
+    final Cache cache = createCache(
+      FakePlatform(operatingSystem: 'fuchsia'),
+      currentAbi: Abi.linuxX64,
+    );
     final artifacts = FontSubsetArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'fuchsia'),
@@ -1173,7 +1275,10 @@ void main() {
   testWithoutContext('FontSubset artifacts for all platforms on arm64 hosts', () {
     fakeProcessManager.addCommand(unameCommandForArm64);
 
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
+    final Cache cache = createCache(
+      FakePlatform(operatingSystem: 'fuchsia'),
+      currentAbi: Abi.linuxArm64,
+    );
     final artifacts = FontSubsetArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'fuchsia'),
@@ -1248,7 +1353,7 @@ void main() {
   testWithoutContext('Linux desktop artifacts for x64 include profile and release artifacts', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 
-    final Cache cache = createCache(FakePlatform());
+    final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxX64);
     final artifacts = LinuxEngineArtifacts(cache, platform: FakePlatform());
 
     expect(artifacts.getBinaryDirs(), <List<String>>[
@@ -1261,7 +1366,7 @@ void main() {
   testWithoutContext('Linux desktop artifacts for arm64 include profile and release artifacts', () {
     fakeProcessManager.addCommand(unameCommandForArm64);
 
-    final Cache cache = createCache(FakePlatform());
+    final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxArm64);
     final artifacts = LinuxEngineArtifacts(cache, platform: FakePlatform());
 
     expect(artifacts.getBinaryDirs(), <List<String>>[
@@ -1342,55 +1447,52 @@ void main() {
     expect(logger.warningText, contains('Failed to delete some stamp files'));
   });
 
-  testWithoutContext(
-    'FlutterWebSdk fetches web artifacts and deletes previous directory contents',
-    () async {
-      final fileSystem = MemoryFileSystem.test();
-      final Directory internalDir = fileSystem.currentDirectory
-          .childDirectory('bin')
-          .childDirectory('internal');
-      final File canvasKitVersionFile = internalDir.childFile('canvaskit.version');
-      canvasKitVersionFile.createSync(recursive: true);
-      canvasKitVersionFile.writeAsStringSync('abcdefg');
+  testWithoutContext('FlutterWebSdk fetches web artifacts and deletes previous directory contents', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final Directory internalDir = fileSystem.currentDirectory
+        .childDirectory('bin')
+        .childDirectory('internal');
+    final File canvasKitVersionFile = internalDir.childFile('canvaskit.version');
+    canvasKitVersionFile.createSync(recursive: true);
+    canvasKitVersionFile.writeAsStringSync('abcdefg');
 
-      final Directory cacheDir = fileSystem.currentDirectory
-          .childDirectory('bin')
-          .childDirectory('cache');
-      final File engineVersionFile = cacheDir.childFile('engine.stamp');
-      engineVersionFile.createSync(recursive: true);
-      engineVersionFile.writeAsStringSync('hijklmnop');
+    final Directory cacheDir = fileSystem.currentDirectory
+        .childDirectory('bin')
+        .childDirectory('cache');
+    final File engineVersionFile = cacheDir.childFile('engine.stamp');
+    engineVersionFile.createSync(recursive: true);
+    engineVersionFile.writeAsStringSync('hijklmnop');
 
-      final cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
-      final Directory webCacheDirectory = cache.getWebSdkDirectory();
-      final artifactUpdater = FakeArtifactUpdater();
-      final webSdk = FlutterWebSdk(cache);
+    final cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
+    final Directory webCacheDirectory = cache.getWebSdkDirectory();
+    final artifactUpdater = FakeArtifactUpdater();
+    final webSdk = FlutterWebSdk(cache);
 
-      final messages = <String>[];
-      final downloads = <String>[];
-      final locations = <String>[];
-      artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
-        messages.add(message);
-        downloads.add(uri.toString());
-        locations.add(location.path);
-        location.createSync(recursive: true);
-        location.childFile('foo').createSync();
-      };
-      webCacheDirectory.childFile('bar').createSync(recursive: true);
+    final messages = <String>[];
+    final downloads = <String>[];
+    final locations = <String>[];
+    artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
+      messages.add(message);
+      downloads.add(uri.toString());
+      locations.add(location.path);
+      location.createSync(recursive: true);
+      location.childFile('foo').createSync();
+    };
+    webCacheDirectory.childFile('bar').createSync(recursive: true);
 
-      await webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
+    await webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
 
-      expect(messages, <String>['Web SDK']);
+    expect(messages, <String>['Web SDK']);
 
-      expect(downloads, <String>[
-        'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk.zip',
-      ]);
+    expect(downloads, <String>[
+      'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk.zip',
+    ]);
 
-      expect(locations, <String>['/bin/cache/flutter_web_sdk']);
+    expect(locations, <String>['/bin/cache/flutter_web_sdk']);
 
-      expect(webCacheDirectory.childFile('foo'), exists);
-      expect(webCacheDirectory.childFile('bar'), isNot(exists));
-    },
-  );
+    expect(webCacheDirectory.childFile('foo'), exists);
+    expect(webCacheDirectory.childFile('bar'), isNot(exists));
+  });
 
   testWithoutContext(
     'FlutterWebSdk CanvasKit URL can be overridden via FLUTTER_STORAGE_BASE_URL',
@@ -1795,9 +1897,11 @@ class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
   bool upToDate = false;
   bool didUpdate = false;
   Exception? updateException;
+  String artifactName = 'fake';
+  int downloads = 1;
 
   @override
-  String get name => 'fake';
+  String get name => artifactName;
 
   @override
   Future<bool> isUpToDate(FileSystem fileSystem) async => upToDate;
@@ -1820,10 +1924,10 @@ class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
   DevelopmentArtifact get developmentArtifact => DevelopmentArtifact.universal;
 
   @override
-  String get displayName => 'fake';
+  String get displayName => artifactName;
 
   @override
-  int get downloadCount => 1;
+  int get downloadCount => downloads;
 }
 
 class FakeIosUsbArtifacts extends Fake implements IosUsbArtifacts {
@@ -2049,4 +2153,57 @@ class FakeArtifactUpdaterDownload extends ArtifactUpdater {
   void addFiles(List<File> files) {
     downloadedFiles.addAll(files);
   }
+}
+
+class _FakeArtifactSet extends ArtifactSet {
+  _FakeArtifactSet({this.name = 'fake_set'}) : super(DevelopmentArtifact.universal);
+
+  @override
+  final String name;
+
+  bool didUpdate = false;
+  bool upToDate = false;
+
+  @override
+  Future<bool> isUpToDate(FileSystem fileSystem) async => upToDate;
+
+  @override
+  Future<void> update(
+    ArtifactUpdater artifactUpdater,
+    Logger logger,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils, {
+    bool offline = false,
+  }) async {
+    didUpdate = true;
+  }
+}
+
+typedef ProgressContext = ({
+  int artifactIndex,
+  int artifactTotal,
+  int downloadTotal,
+  int downloadIndex,
+});
+
+class _FakeProgressRecordingArtifactUpdater extends Fake implements ArtifactUpdater {
+  final progressContexts = <ProgressContext>[];
+
+  @override
+  void setProgressContext({
+    required int artifactIndex,
+    required int artifactTotal,
+    required int downloadTotal,
+    int downloadIndex = 0,
+  }) {
+    progressContexts.add((
+      artifactIndex: artifactIndex,
+      artifactTotal: artifactTotal,
+      downloadTotal: downloadTotal,
+      downloadIndex: downloadIndex,
+    ));
+  }
+
+  @override
+  void resetProgressContext() {}
 }

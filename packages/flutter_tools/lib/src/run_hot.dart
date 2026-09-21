@@ -84,24 +84,18 @@ class HotRunner extends ResidentRunner {
     this.benchmarkMode = false,
     this.applicationBinary,
     this.hostIsIde = false,
-    Logger? logger,
+    this._logger,
     super.projectRootPath,
     super.dillOutputPath,
     super.stayResident,
     super.machine,
-    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-    ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
-    ReassembleHelper reassembleHelper = _defaultReassembleHelper,
-    String? nativeAssetsYamlFile,
-    required Analytics analytics,
+    this._stopwatchFactory = const StopwatchFactory(),
+    this._reloadSourcesHelper = defaultReloadSourcesHelper,
+    this._reassembleHelper = _defaultReassembleHelper,
+    this._nativeAssetsYamlFile,
+    required this._analytics,
     super.dartBuilder,
-  }) : _stopwatchFactory = stopwatchFactory,
-       _reloadSourcesHelper = reloadSourcesHelper,
-       _reassembleHelper = reassembleHelper,
-       _nativeAssetsYamlFile = nativeAssetsYamlFile,
-       _analytics = analytics,
-       _logger = logger,
-       super(hotMode: true);
+  }) : super(hotMode: true);
 
   final StopwatchFactory _stopwatchFactory;
   final ReloadSourcesHelper _reloadSourcesHelper;
@@ -156,7 +150,7 @@ class HotRunner extends ResidentRunner {
       case 1:
         final Device device = flutterDevices.first.device!;
         final TargetPlatform targetPlatform = await device.targetPlatform;
-        _targetPlatformName = getNameForTargetPlatform(targetPlatform);
+        _targetPlatformName = targetPlatform.getName();
         _targetPlatforms.add(targetPlatform);
         _sdkName = await device.sdkNameAndVersion;
         _emulator = await device.isLocalEmulator;
@@ -1108,74 +1102,40 @@ class HotRunner extends ResidentRunner {
     );
   }
 
-  @visibleForTesting
-  Future<void> evictDirtyAssets() async {
-    final futures = <Future<void>>[];
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.devFS!.assetPathsToEvict.isEmpty && device.devFS!.shaderPathsToEvict.isEmpty) {
-        continue;
-      }
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
-
-      // If this is the first time we update the assets, make sure to call the setAssetDirectory
-      if (!device.devFS!.hasSetAssetDirectory) {
-        final Uri deviceAssetsDirectoryUri = device.devFS!.baseUri!.resolveUri(
-          globals.fs.path.toUri(getAssetBuildDirectory()),
-        );
-        await Future.wait<void>(
-          views.map<Future<void>>(
-            (FlutterView view) => device.vmService!.setAssetDirectory(
-              assetsDirectory: deviceAssetsDirectoryUri,
-              uiIsolateId: view.uiIsolate!.id,
-              viewId: view.id,
-              windows:
-                  (device.targetPlatform == TargetPlatform.tester && globals.platform.isWindows) ||
-                  device.targetPlatform == TargetPlatform.windows_x64 ||
-                  device.targetPlatform == TargetPlatform.windows_arm64,
-            ),
+  @override
+  Future<void> confirmAssetDirectory(FlutterDevice device, List<FlutterView> views) async {
+    if (!device.devFS!.hasSetAssetDirectory) {
+      final Uri deviceAssetsDirectoryUri = device.devFS!.baseUri!.resolveUri(
+        globals.fs.path.toUri(getAssetBuildDirectory()),
+      );
+      final List<FlutterView> activeViews = views
+          .where((FlutterView view) => view.uiIsolate != null)
+          .toList();
+      await Future.wait<void>(
+        activeViews.map<Future<void>>(
+          (FlutterView view) => device.vmService!.setAssetDirectory(
+            assetsDirectory: deviceAssetsDirectoryUri,
+            uiIsolateId: view.uiIsolate!.id,
+            viewId: view.id,
+            windows:
+                (device.targetPlatform == TargetPlatform.tester && globals.platform.isWindows) ||
+                device.targetPlatform == TargetPlatform.windows_x64 ||
+                device.targetPlatform == TargetPlatform.windows_arm64,
           ),
-        );
-        for (final view in views) {
-          globals.printTrace('Set asset directory in $view.');
-        }
-        device.devFS!.hasSetAssetDirectory = true;
+        ),
+      );
+      for (final view in activeViews) {
+        globals.printTrace('Set asset directory in $view.');
       }
-
-      if (views.first.uiIsolate == null) {
-        globals.printError('Application isolate not found for $device');
-        continue;
-      }
-
-      if (device.devFS!.didUpdateFontManifest) {
-        futures.add(
-          device.vmService!.reloadAssetFonts(
-            isolateId: views.first.uiIsolate!.id!,
-            viewId: views.first.id,
-          ),
-        );
-      }
-
-      for (final String assetPath in device.devFS!.assetPathsToEvict) {
-        futures.add(
-          device.vmService!.flutterEvictAsset(assetPath, isolateId: views.first.uiIsolate!.id!),
-        );
-      }
-      for (final String assetPath in device.devFS!.shaderPathsToEvict) {
-        futures.add(
-          device.vmService!.flutterEvictShader(assetPath, isolateId: views.first.uiIsolate!.id!),
-        );
-      }
-      device.devFS!.assetPathsToEvict.clear();
-      device.devFS!.shaderPathsToEvict.clear();
+      device.devFS!.hasSetAssetDirectory = true;
     }
-    await Future.wait<void>(futures);
   }
 
   @override
   Future<void> cleanupAfterSignal() async {
     await stopEchoingDeviceLog();
     await hotRunnerConfig!.runPreShutdownOperations();
-    shutdownDartDevelopmentService();
+    await shutdownDartDevelopmentService();
     if (stopAppDuringCleanup) {
       return exitApp();
     }
@@ -1199,18 +1159,17 @@ class HotRunner extends ResidentRunner {
   }
 }
 
-typedef ReloadSourcesHelper =
-    Future<OperationResult> Function(
-      HotRunner hotRunner,
-      List<FlutterDevice?> flutterDevices,
-      bool? pause,
-      Map<String, dynamic> firstReloadDetails,
-      String? targetPlatform,
-      String? sdkName,
-      bool? emulator,
-      String? reason,
-      Analytics analytics,
-    );
+typedef ReloadSourcesHelper = Future<OperationResult> Function(
+  HotRunner hotRunner,
+  List<FlutterDevice?> flutterDevices,
+  bool? pause,
+  Map<String, dynamic> firstReloadDetails,
+  String? targetPlatform,
+  String? sdkName,
+  bool? emulator,
+  String? reason,
+  Analytics analytics,
+);
 
 @visibleForTesting
 Future<OperationResult> defaultReloadSourcesHelper(
@@ -1235,27 +1194,25 @@ Future<OperationResult> defaultReloadSourcesHelper(
       pause: pause,
     );
     allReportsFutures.add(
-      Future.wait(reportFutures).then<DeviceReloadReport?>((
-        List<vm_service.ReloadReport> reports,
-      ) async {
-        // TODO(aam): Investigate why we are validating only first reload report,
-        // which seems to be current behavior
-        if (reports.isEmpty) {
-          return null;
-        }
-        final vm_service.ReloadReport firstReport = reports.first;
-        // Don't print errors because they will be printed further down when
-        // `validateReloadReport` is called again.
-        await device.updateReloadStatus(
-          HotRunner.validateReloadReport(firstReport, printErrors: false),
-        );
-        return DeviceReloadReport(device, reports);
-      }),
+      Future.wait(reportFutures)
+          .then<DeviceReloadReport?>((List<vm_service.ReloadReport> reports) async {
+            // TODO(aam): Investigate why we are validating only first reload report,
+            // which seems to be current behavior
+            if (reports.isEmpty) {
+              return null;
+            }
+            final vm_service.ReloadReport firstReport = reports.first;
+            // Don't print errors because they will be printed further down when
+            // `validateReloadReport` is called again.
+            await device.updateReloadStatus(
+              HotRunner.validateReloadReport(firstReport, printErrors: false),
+            );
+            return DeviceReloadReport(device, reports);
+          }),
     );
   }
-  final Iterable<DeviceReloadReport> reports = (await Future.wait(
-    allReportsFutures,
-  )).whereType<DeviceReloadReport>();
+  final Iterable<DeviceReloadReport> reports = (await Future.wait(allReportsFutures))
+      .whereType<DeviceReloadReport>();
   final vm_service.ReloadReport? reloadReport = reports.isEmpty ? null : reports.first.reports[0];
   if (reloadReport == null || !HotRunner.validateReloadReport(reloadReport)) {
     analytics.send(
@@ -1325,13 +1282,12 @@ class ReassembleResult {
   final bool shouldReportReloadTime;
 }
 
-typedef ReassembleHelper =
-    Future<ReassembleResult> Function(
-      List<FlutterDevice?> flutterDevices,
-      Map<FlutterDevice?, List<FlutterView>> viewCache,
-      void Function(String message)? onSlow,
-      String reloadMessage,
-    );
+typedef ReassembleHelper = Future<ReassembleResult> Function(
+  List<FlutterDevice?> flutterDevices,
+  Map<FlutterDevice?, List<FlutterView>> viewCache,
+  void Function(String message)? onSlow,
+  String reloadMessage,
+);
 
 Future<ReassembleResult> _defaultReassembleHelper(
   List<FlutterDevice?> flutterDevices,
@@ -1478,12 +1434,10 @@ class InvalidationResult {
 /// application to determine when they are dirty.
 class ProjectFileInvalidator {
   ProjectFileInvalidator({
-    required FileSystem fileSystem,
-    required Platform platform,
-    required Logger logger,
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _logger = logger;
+    required this._fileSystem,
+    required this._platform,
+    required this._logger,
+  });
 
   final FileSystem _fileSystem;
   final Platform _platform;
@@ -1520,6 +1474,20 @@ class ProjectFileInvalidator {
         if (_isNotInPubCache(uri)) uri,
     ];
     final invalidatedFiles = <Uri>[];
+
+    final bool Function(DateTime) isInvalidated;
+    if (_platform.isWindows) {
+      // On Windows, FileStat.modified truncates to second precision (via GetFileAttributesExW).
+      // However, lastCompiled is recorded with millisecond precision.
+      final lastCompiledTruncated = DateTime.fromMillisecondsSinceEpoch(
+        (lastCompiled.millisecondsSinceEpoch ~/ 1000) * 1000,
+        isUtc: lastCompiled.isUtc,
+      );
+      isInvalidated = (DateTime updatedAt) => !updatedAt.isBefore(lastCompiledTruncated);
+    } else {
+      isInvalidated = (DateTime updatedAt) => updatedAt.isAfter(lastCompiled);
+    }
+
     if (asyncScanning) {
       final pool = Pool(_kMaxPendingStats);
       final waitList = <Future<void>>[];
@@ -1536,7 +1504,7 @@ class ProjectFileInvalidator {
                         : _fileSystem.stat(uri.toFilePath(windows: _platform.isWindows)))
                     .then((FileStat stat) {
                       final DateTime updatedAt = stat.modified;
-                      if (updatedAt.isAfter(lastCompiled)) {
+                      if (isInvalidated(updatedAt)) {
                         invalidatedFiles.add(uri);
                       }
                     }),
@@ -1551,7 +1519,7 @@ class ProjectFileInvalidator {
         final DateTime updatedAt = uri.hasScheme && uri.scheme != 'file'
             ? _fileSystem.file(uri).statSync().modified
             : _fileSystem.statSync(uri.toFilePath(windows: _platform.isWindows)).modified;
-        if (updatedAt.isAfter(lastCompiled)) {
+        if (isInvalidated(updatedAt)) {
           invalidatedFiles.add(uri);
         }
       }
@@ -1561,7 +1529,7 @@ class ProjectFileInvalidator {
     final File packageFile = _fileSystem.file(packagesPath);
     final Uri packageUri = packageFile.uri;
     final DateTime updatedAt = packageFile.statSync().modified;
-    if (updatedAt.isAfter(lastCompiled)) {
+    if (isInvalidated(updatedAt)) {
       invalidatedFiles.add(packageUri);
     }
 

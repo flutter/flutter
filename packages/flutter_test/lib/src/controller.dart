@@ -14,6 +14,7 @@
 library;
 
 import 'dart:ui' as ui;
+
 import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -337,8 +338,6 @@ class SemanticsController {
   //
   // TODO(quncheng): If this method is modified, please also update the copy of
   // this method located in `packages/flutter/lib/src/widgets/_accessibility_evaluations.dart`.
-  // This private method will be removed once the feature flag
-  // `isAccessibilityEvaluationsEnabled` is turned on.
   bool _isImportantForAccessibility(SemanticsNode node) {
     if (node.isMergedIntoParent) {
       // If this node is merged, all its information are present on an ancestor
@@ -2448,6 +2447,13 @@ abstract class WidgetController {
   }
 
   /// Repeatedly drags `view` by `moveStep` until `finder` is visible.
+  ///
+  /// The `moveStep` is the offset by which the virtual finger moves on the
+  /// virtual screen between drags. Following the standard touch-input
+  /// convention, a negative [Offset.dy] swipes up (revealing items below), a
+  /// positive [Offset.dy] swipes down (revealing items above), a positive
+  /// [Offset.dx] swipes right (revealing items to the left), and a negative
+  /// [Offset.dx] swipes left (revealing items to the right).
   ///
   /// Between each drag, advances the clock by `duration`.
   ///

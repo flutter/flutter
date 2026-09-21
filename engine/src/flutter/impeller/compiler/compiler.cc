@@ -14,6 +14,7 @@
 #include <utility>
 
 #include "flutter/fml/paths.h"
+#include "flutter/third_party/re2/re2/re2.h"
 #include "impeller/base/allocation.h"
 #include "impeller/compiler/compiler_backend.h"
 #include "impeller/compiler/constants.h"
@@ -34,6 +35,67 @@ constexpr const char* kEGLImageExternalExtension = "GL_OES_EGL_image_external";
 constexpr const char* kEGLImageExternalExtension300 =
     "GL_OES_EGL_image_external_essl3";
 constexpr int kVerboseErrorLineThreshold = 6;
+
+// Set per pass by RenderPassGLES: +1.0 swapchain, -1.0 offscreen FBO. See
+// flutter/flutter#186554.
+constexpr const char* kYFlipUniformName = "_impeller_y_flip";
+constexpr const char* kUserMainName = "_impeller_user_main";
+
+bool IsGLTargetPlatform(TargetPlatform platform) {
+  return platform == TargetPlatform::kOpenGLES ||
+         platform == TargetPlatform::kOpenGLDesktop ||
+         platform == TargetPlatform::kRuntimeStageGLES ||
+         platform == TargetPlatform::kRuntimeStageGLES3;
+}
+
+// Wraps the SPIRV-Cross-emitted entry point so `gl_Position.y *=
+// _impeller_y_flip;` runs on every exit, including early returns. Renames
+// `void main(` to `void _impeller_user_main(` and appends a wrapper that
+// calls it then applies the flip.
+std::string InjectYFlipForGLESVertexShader(std::string source) {
+  // Anchor on leading newline; spirv-cross emits the entry point at file
+  // scope, so the match is unambiguous in its comment-free output.
+  constexpr std::string_view kMainPattern = "\nvoid main(";
+  const size_t main_pos = source.find(kMainPattern);
+  if (main_pos == std::string::npos) {
+    return source;
+  }
+  const std::string user_main_decl =
+      std::string("\nvoid ") + kUserMainName + "(";
+  source.replace(main_pos, kMainPattern.size(), user_main_decl);
+
+  std::string wrapper = "\nvoid main() {\n  ";
+  wrapper += kUserMainName;
+  wrapper += "();\n  gl_Position.y *= ";
+  wrapper += kYFlipUniformName;
+  wrapper += ";\n}\n";
+  source.append(wrapper);
+
+  // Declare the uniform after the last `precision` directive, falling
+  // back to right after `#version`, falling back to the top.
+  const std::string declaration =
+      std::string("\nuniform float ") + kYFlipUniformName + ";\n";
+  size_t inject_at = std::string::npos;
+  for (size_t pos = source.find("\nprecision "); pos != std::string::npos;
+       pos = source.find("\nprecision ", pos + 1)) {
+    const size_t eol = source.find('\n', pos + 1);
+    if (eol == std::string::npos) {
+      break;
+    }
+    inject_at = eol;
+  }
+  if (inject_at == std::string::npos) {
+    const size_t version_pos = source.find("#version");
+    if (version_pos != std::string::npos) {
+      inject_at = source.find('\n', version_pos);
+    }
+  }
+  if (inject_at == std::string::npos) {
+    inject_at = 0;
+  }
+  source.insert(inject_at, declaration);
+  return source;
+}
 }  // namespace
 
 // This value should be <= 7372. UBOs can be larger on some devices but a
@@ -180,10 +242,17 @@ static CompilerBackend CreateGLSLCompiler(const spirv_cross::ParsedIR& ir,
     sl_options.version = source_options.gles_language_version > 0
                              ? source_options.gles_language_version
                              : 100;
-    sl_options.es = true;
-    if (source_options.target_platform == TargetPlatform::kRuntimeStageGLES3) {
+    // If we have requested GLES3 and/or Compute Shaders,
+    // promote the language version accordingly
+    if (source_options.type == SourceType::kComputeShader &&
+        sl_options.version < 310) {
+      sl_options.version = 310;
+    } else if (source_options.target_platform ==
+                   TargetPlatform::kRuntimeStageGLES3 &&
+               sl_options.version < 300) {
       sl_options.version = 300;
     }
+    sl_options.es = true;
     if (source_options.require_framebuffer_fetch &&
         source_options.type == SourceType::kFragmentShader) {
       gl_compiler->remap_ext_framebuffer_fetch(0, 0, true);
@@ -199,6 +268,10 @@ static CompilerBackend CreateGLSLCompiler(const spirv_cross::ParsedIR& ir,
     sl_options.version = source_options.gles_language_version > 0
                              ? source_options.gles_language_version
                              : 120;
+    if (source_options.type == SourceType::kComputeShader &&
+        sl_options.version < 430) {
+      sl_options.version = 430;
+    }
     sl_options.es = false;
   }
   gl_compiler->set_common_options(sl_options);
@@ -325,6 +398,65 @@ void CanonicalizeUniformBlockInstanceNamesForGL(
   }
 }
 
+/// Strips C-style single-line (//...) and multi-line (/*...*/) comments from
+/// the GLSL shader source.
+static std::string StripComments(std::string_view source) {
+  std::string result(source);
+  static const re2::LazyRE2 kCommentPattern = {R"(//[^\n]*|/\*[\s\S]*?\*/)"};
+  re2::RE2::GlobalReplace(&result, *kCommentPattern, "");
+  return result;
+}
+
+/// Checks if the fragment shader source contains multiple return statements or
+/// an early return within the `main()` function.
+static bool CheckHasMultipleReturnsInMain(std::string_view source) {
+  std::string clean_source = StripComments(source);
+
+  // Match the declaration of main(...) {
+  static const re2::LazyRE2 kMainPattern = {R"((\bmain\s*\([^)]*\)\s*\{))"};
+  re2::StringPiece match;
+  if (!re2::RE2::PartialMatch(clean_source, *kMainPattern, &match)) {
+    return false;
+  }
+
+  size_t main_offset = match.data() - clean_source.data();
+  size_t open_brace = clean_source.find('{', main_offset);
+  if (open_brace == std::string::npos) {
+    return false;
+  }
+
+  // Find the matching closing brace for main().
+  int brace_depth = 1;
+  size_t pos = open_brace + 1;
+  while (pos < clean_source.size() && brace_depth > 0) {
+    char c = clean_source[pos];
+    if (c == '{') {
+      brace_depth++;
+    } else if (c == '}') {
+      brace_depth--;
+    }
+    pos++;
+  }
+
+  size_t main_body_len =
+      (pos > open_brace + 1) ? (pos - 1) - (open_brace + 1) : 0;
+  re2::StringPiece main_body(clean_source.data() + open_brace + 1,
+                             main_body_len);
+
+  static const re2::LazyRE2 kReturnPattern = {R"(\breturn\b)"};
+  return re2::RE2::PartialMatch(main_body, *kReturnPattern);
+}
+
+static bool CheckHasSamplers(const CompilerBackend& sl_compiler) {
+  if (!sl_compiler.GetCompiler()) {
+    return false;
+  }
+  auto resources = sl_compiler.GetCompiler()->get_shader_resources();
+  return !resources.sampled_images.empty() ||
+         !resources.separate_samplers.empty() ||
+         !resources.separate_images.empty();
+}
+
 }  // namespace
 
 Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
@@ -417,6 +549,10 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
           source_options.target_platform ==
               TargetPlatform::kRuntimeStageGLES3) {
         spirv_options.macro_definitions.push_back("IMPELLER_TARGET_OPENGLES");
+        // A temporary macro that allows fragment shader authors to target
+        // Flutter <= 3.44 before the OpenGLES flip was removed.
+        spirv_options.macro_definitions.push_back(
+            "IMPELLER_OPENGLES_UNFLIPPED_DEPRECATED");
       }
     } break;
     case TargetPlatform::kSkSL: {
@@ -499,6 +635,15 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
   // for Vulkan. The reflector needs information that is only valid after a
   // successful compilation call.
   auto sl_compilation_result_str = sl_compiler.GetCompiler()->compile();
+
+  // GL vertex shaders get a y-flip epilogue; see
+  // https://github.com/flutter/flutter/issues/186554.
+  if (IsGLTargetPlatform(source_options.target_platform) &&
+      source_options.type == SourceType::kVertexShader) {
+    sl_compilation_result_str =
+        InjectYFlipForGLESVertexShader(std::move(sl_compilation_result_str));
+  }
+
   auto sl_compilation_result =
       CreateMappingWithString(sl_compilation_result_str);
 
@@ -535,6 +680,22 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
     COMPILER_ERROR(error_stream_)
         << "Could not complete reflection on generated shader.";
     return;
+  }
+
+  std::string source_str(
+      reinterpret_cast<const char*>(source_mapping->GetMapping()),
+      source_mapping->GetSize());
+  if (source_options.type == SourceType::kFragmentShader &&
+      CheckHasSamplers(sl_compiler) &&
+      CheckHasMultipleReturnsInMain(source_str)) {
+    COMPILER_WARNING(warning_stream_)
+        << "Fragment shader uses texture samplers alongside multiple 'return' "
+           "statements in `main()`. "
+        << "This has the potential to cause compilation errors during shader "
+           "compilation on Windows. \n"
+        << "To avoid crashes on Windows, consider removing multiple 'return;' "
+           "statements in `main()`."
+        << "See https://github.com/flutter/flutter/issues/190809 for details.";
   }
 
   is_valid_ = true;
@@ -615,6 +776,10 @@ std::string Compiler::GetSourcePrefix() const {
 
 std::string Compiler::GetErrorMessages() const {
   return error_stream_.str();
+}
+
+std::string Compiler::GetWarningMessages() const {
+  return warning_stream_.str();
 }
 
 std::string Compiler::GetVerboseErrorMessages() const {

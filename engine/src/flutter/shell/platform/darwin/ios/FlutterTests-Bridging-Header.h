@@ -8,7 +8,4 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunnerTestHelper.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunners.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient+Testing.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient.h"
-
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FLUTTERTESTS_BRIDGING_HEADER_H_

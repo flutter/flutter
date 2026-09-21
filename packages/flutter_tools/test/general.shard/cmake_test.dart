@@ -85,6 +85,31 @@ void main() {
         r')',
       ]),
     );
+
+    // Without a flavor, no FLUTTER_APP_FLAVOR variable should be emitted.
+    expect(configLines, isNot(contains(startsWith('set(FLUTTER_APP_FLAVOR'))));
+  });
+
+  testWithoutContext('generates config with flavor', () async {
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
+    const buildInfo = BuildInfo(
+      BuildMode.release,
+      'apple',
+      treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
+    );
+    final environment = <String, String>{};
+
+    writeGeneratedCmakeConfig(_kTestFlutterRoot, cmakeProject, buildInfo, environment, logger);
+
+    final File cmakeConfig = cmakeProject.generatedCmakeConfigFile;
+
+    expect(cmakeConfig, exists);
+
+    final List<String> configLines = cmakeConfig.readAsLinesSync();
+
+    expect(configLines, contains(r'set(FLUTTER_APP_FLAVOR "apple" PARENT_SCOPE)'));
   });
 
   testWithoutContext('config escapes backslashes', () async {

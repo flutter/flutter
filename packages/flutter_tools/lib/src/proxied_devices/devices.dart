@@ -42,14 +42,11 @@ T _cast<T>(Object? object) {
 class ProxiedDevices extends PollingDeviceDiscovery {
   ProxiedDevices(
     this.connection, {
-    bool deltaFileTransfer = true,
-    bool enableDdsProxy = false,
+    this._deltaFileTransfer = true,
+    this._enableDdsProxy = false,
     required this.logger,
-    FileTransfer fileTransfer = const FileTransfer(),
-  }) : _deltaFileTransfer = deltaFileTransfer,
-       _enableDdsProxy = enableDdsProxy,
-       _fileTransfer = fileTransfer,
-       super('Proxied devices');
+    this._fileTransfer = const FileTransfer(),
+  }) : super('Proxied devices');
 
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
@@ -112,6 +109,10 @@ class ProxiedDevices extends PollingDeviceDiscovery {
     final DeviceConnectionInterface? connectionInterface = connectionInterfaceName != null
         ? getDeviceConnectionInterfaceForName(connectionInterfaceName)
         : null;
+    // Casting to `String?` to be backward compatible with old daemon version
+    // which is not sending the cpuArch. It can be changed to `String` when we
+    // no longer need the backward compatibility.
+    final String? cpuArch = _cast<String?>(device['cpuArch']);
     return ProxiedDevice(
       connection,
       _cast<String>(device['id']),
@@ -119,7 +120,8 @@ class ProxiedDevices extends PollingDeviceDiscovery {
       enableDdsProxy: _enableDdsProxy,
       category: Category.fromString(_cast<String>(device['category'])),
       platformType: PlatformType.fromString(_cast<String>(device['platformType'])),
-      targetPlatform: getTargetPlatformForName(_cast<String>(device['platform'])),
+      targetPlatform: TargetPlatform.fromName(_cast<String>(device['platform'])),
+      cpuArch: cpuArch != null ? CpuArch.fromName(cpuArch) : CpuArch.unknown,
       ephemeral: _cast<bool>(device['ephemeral']),
       isConnected: _cast<bool?>(device['isConnected']) ?? true,
       connectionInterface: connectionInterface ?? DeviceConnectionInterface.attached,
@@ -171,34 +173,27 @@ class ProxiedDevice extends Device {
   ProxiedDevice(
     this.connection,
     String id, {
-    bool deltaFileTransfer = true,
-    bool enableDdsProxy = false,
+    this._deltaFileTransfer = true,
+    this._enableDdsProxy = false,
     required super.category,
     required super.platformType,
-    required TargetPlatform targetPlatform,
+    required this._targetPlatform,
+    required this._cpuArch,
     required super.ephemeral,
     required this.isConnected,
     required this.connectionInterface,
     required this.name,
-    required bool isLocalEmulator,
-    required String? emulatorId,
-    required String sdkNameAndVersion,
+    required this._isLocalEmulator,
+    required this._emulatorId,
+    required this._sdkNameAndVersion,
     required this.supportsHotReload,
     required this.supportsHotRestart,
     required this.supportsFlutterExit,
     required this.supportsScreenshot,
-    required bool supportsHardwareRendering,
+    required this._supportsHardwareRendering,
     required super.logger,
-    FileTransfer fileTransfer = const FileTransfer(),
-  }) : _deltaFileTransfer = deltaFileTransfer,
-       _enableDdsProxy = enableDdsProxy,
-       _isLocalEmulator = isLocalEmulator,
-       _emulatorId = emulatorId,
-       _sdkNameAndVersion = sdkNameAndVersion,
-       _supportsHardwareRendering = supportsHardwareRendering,
-       _targetPlatform = targetPlatform,
-       _logger = logger,
-       _fileTransfer = fileTransfer,
+    this._fileTransfer = const FileTransfer(),
+  }) : _logger = logger,
        super(id);
 
   /// [DaemonConnection] used to communicate with the daemon.
@@ -268,6 +263,11 @@ class ProxiedDevice extends Device {
   @override
   Future<TargetPlatform> get targetPlatform async => _targetPlatform;
   TargetPlatform get targetPlatformSync => _targetPlatform;
+
+  final CpuArch _cpuArch;
+  @override
+  Future<CpuArch> get cpuArch async => _cpuArch;
+  CpuArch get cpuArchSync => _cpuArch;
 
   final String _sdkNameAndVersion;
   @override
@@ -481,7 +481,7 @@ class ProxiedDevice extends Device {
 
     final String id = _cast<String>(
       await connection.sendRequest('device.uploadApplicationPackage', <String, Object>{
-        'targetPlatform': getNameForTargetPlatform(_targetPlatform),
+        'targetPlatform': _targetPlatform.getName(),
         'applicationBinary': fileName,
       }),
     );
@@ -585,8 +585,11 @@ class _ProxiedForwardedPort extends ForwardedPort {
   }
 }
 
-typedef CreateSocketServer =
-    Future<ServerSocket> Function(Logger logger, int? hostPort, bool? ipv6);
+typedef CreateSocketServer = Future<ServerSocket> Function(
+  Logger logger,
+  int? hostPort,
+  bool? ipv6,
+);
 
 /// A [DevicePortForwarder] for a proxied device.
 ///
@@ -599,12 +602,10 @@ typedef CreateSocketServer =
 class ProxiedPortForwarder extends DevicePortForwarder {
   ProxiedPortForwarder(
     this.connection, {
-    String? deviceId,
-    required Logger logger,
-    @visibleForTesting CreateSocketServer createSocketServer = _defaultCreateServerSocket,
-  }) : _logger = logger,
-       _deviceId = deviceId,
-       _createSocketServer = createSocketServer;
+    this._deviceId,
+    required this._logger,
+    @visibleForTesting this._createSocketServer = _defaultCreateServerSocket,
+  });
 
   final String? _deviceId;
 
@@ -805,12 +806,10 @@ class ProxiedDartDevelopmentService
     this.connection,
     this.deviceId, {
     required this.logger,
-    required ProxiedPortForwarder proxiedPortForwarder,
-    required ProxiedPortForwarder devicePortForwarder,
+    required this._proxiedPortForwarder,
+    required this._devicePortForwarder,
     @visibleForTesting DartDevelopmentService? localDds,
-  }) : _proxiedPortForwarder = proxiedPortForwarder,
-       _devicePortForwarder = devicePortForwarder,
-       _localDds = localDds ?? DartDevelopmentService(logger: logger);
+  }) : _localDds = localDds ?? DartDevelopmentService(logger: logger);
 
   final String deviceId;
 
@@ -968,7 +967,7 @@ class ProxiedDartDevelopmentService
   @override
   Future<void> shutdown() async {
     if (_ddsStartedLocally) {
-      _localDds.shutdown();
+      await _localDds.shutdown();
       _ddsStartedLocally = false;
     } else {
       await connection.sendRequest('device.shutdownDartDevelopmentService', <String, Object?>{

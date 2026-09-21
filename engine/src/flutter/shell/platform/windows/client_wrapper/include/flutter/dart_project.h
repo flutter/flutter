@@ -46,6 +46,16 @@ enum class AccessibilityMode {
   IAccessibleEx,
 };
 
+// Configures the Impeller enablement switch.
+enum class ImpellerSwitch {
+  // Use the default Impeller enablement behavior.
+  Default,
+  // Enable Impeller.
+  Enabled,
+  // Disable Impeller.
+  Disabled,
+};
+
 // A set of Flutter and Dart assets used to initialize a Flutter engine.
 class DartProject {
  public:
@@ -134,6 +144,25 @@ class DartProject {
   // Defaults to AccessibilityMode::Defaults.
   AccessibilityMode accessibility_mode() const { return accessibility_mode_; }
 
+  // Sets the Impeller enablement switch.
+  void set_impeller_switch(ImpellerSwitch impeller_switch) {
+    impeller_switch_ = impeller_switch;
+  }
+
+  // Returns the Impeller enablement switch.
+  // Defaults to ImpellerSwitch::Default.
+  ImpellerSwitch impeller_switch() const { return impeller_switch_; }
+
+  // Sets whether the Flutter GPU API (package:flutter_gpu) is enabled.
+  // Flutter GPU requires the Impeller renderer.
+  void set_enable_flutter_gpu(bool enable_flutter_gpu) {
+    enable_flutter_gpu_ = enable_flutter_gpu;
+  }
+
+  // Returns whether the Flutter GPU API is enabled.
+  // Defaults to false.
+  bool enable_flutter_gpu() const { return enable_flutter_gpu_; }
+
  private:
   // Accessors for internals are private, so that they can be changed if more
   // flexible options for project structures are needed later without it
@@ -164,6 +193,10 @@ class DartProject {
   UIThreadPolicy ui_thread_policy_ = UIThreadPolicy::Default;
   // The accessibility implementation used by Flutter.
   AccessibilityMode accessibility_mode_ = AccessibilityMode::Default;
+  // The Impeller enablement switch.
+  ImpellerSwitch impeller_switch_ = ImpellerSwitch::Default;
+  // Whether the Flutter GPU API is enabled.
+  bool enable_flutter_gpu_ = false;
 };
 
 }  // namespace flutter

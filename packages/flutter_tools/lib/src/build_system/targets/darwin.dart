@@ -57,6 +57,28 @@ abstract class UnpackDarwin extends Target {
         '${result.stdout}\n---\n${result.stderr}',
       );
     }
+    final String copiedPath = environment.outputDir
+        .childDirectory(environment.fileSystem.path.basename(basePath))
+        .path;
+    try {
+      final ProcessResult chmodResult = await environment.processManager.run(<String>[
+        'chmod',
+        '-R',
+        'u+w',
+        copiedPath,
+      ]);
+      if (chmodResult.exitCode != 0) {
+        printXcodeWarning(
+          'Failed to make the framework writable. This may cause the build to '
+          'fail when using lipo.\nError: $copiedPath: ${chmodResult.stderr}',
+        );
+      }
+    } on ProcessException catch (e) {
+      printXcodeWarning(
+        'Failed to make the framework writable. This may cause the build to '
+        'fail when using lipo.\nError: $copiedPath: $e',
+      );
+    }
   }
 
   /// Verifies and destructively thins the framework binary found at [frameworkBinaryPath]
@@ -80,20 +102,22 @@ abstract class UnpackDarwin extends Target {
     ]);
     final lipoInfo = infoResult.stdout as String;
 
-    final ProcessResult verifyResult = await environment.processManager.run(<String>[
-      'lipo',
-      frameworkBinaryPath,
-      '-verify_arch',
-      ...archList,
-    ]);
+    for (final arch in archList) {
+      final ProcessResult verifyResult = await environment.processManager.run(<String>[
+        'lipo',
+        frameworkBinaryPath,
+        '-verify_arch',
+        arch,
+      ]);
 
-    if (verifyResult.exitCode != 0) {
-      throw Exception(
-        'Binary $frameworkBinaryPath does not contain architectures "$archs".\n'
-        '\n'
-        'lipo -info:\n'
-        '$lipoInfo',
-      );
+      if (verifyResult.exitCode != 0) {
+        throw Exception(
+          'Binary $frameworkBinaryPath does not contain architecture "$arch" (expected "$archs").\n'
+          '\n'
+          'lipo -info:\n'
+          '$lipoInfo',
+        );
+      }
     }
 
     // Skip thinning for non-fat executables.

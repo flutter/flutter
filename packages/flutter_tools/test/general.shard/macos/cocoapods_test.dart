@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi' show Abi;
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -29,6 +31,20 @@ import '../../src/throwing_pub.dart';
 enum _StdioStream { stdout, stderr }
 
 void main() {
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
+
+  // ARM host.
+  const kARMCheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    stdout: 'hw.optional.arm64: 1',
+  );
+
   late MemoryFileSystem fileSystem;
   late FakeProcessManager fakeProcessManager;
   late CocoaPods cocoaPodsUnderTest;
@@ -321,44 +337,39 @@ environement:
       },
     );
 
-    testUsingContext(
-      'does not include Pod config in xcconfig files, if flavor include present',
-      () async {
-        final FlutterProject projectUnderTest = setupProjectUnderTest();
-        projectUnderTest.ios.podfile
-          ..createSync()
-          ..writeAsStringSync('Existing Podfile');
+    testUsingContext('does not include Pod config in xcconfig files, if flavor include present', () async {
+      final FlutterProject projectUnderTest = setupProjectUnderTest();
+      projectUnderTest.ios.podfile
+        ..createSync()
+        ..writeAsStringSync('Existing Podfile');
 
-        const flavorDebugInclude =
-            '#include? "Pods/Target Support Files/Pods-Free App/Pods-Free App.debug free.xcconfig"';
-        projectUnderTest.ios.xcodeConfigFor('Debug')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(flavorDebugInclude);
-        const flavorReleaseInclude =
-            '#include? "Pods/Target Support Files/Pods-Free App/Pods-Free App.release free.xcconfig"';
-        projectUnderTest.ios.xcodeConfigFor('Release')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(flavorReleaseInclude);
+      const flavorDebugInclude =
+          '#include? "Pods/Target Support Files/Pods-Free App/Pods-Free App.debug free.xcconfig"';
+      projectUnderTest.ios.xcodeConfigFor('Debug')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(flavorDebugInclude);
+      const flavorReleaseInclude =
+          '#include? "Pods/Target Support Files/Pods-Free App/Pods-Free App.release free.xcconfig"';
+      projectUnderTest.ios.xcodeConfigFor('Release')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(flavorReleaseInclude);
 
-        final FlutterProject project = FlutterProject.fromDirectoryTest(
-          fileSystem.directory('project'),
-        );
-        await cocoaPodsUnderTest.setupPodfile(project.ios);
+      final FlutterProject project = FlutterProject.fromDirectoryTest(
+        fileSystem.directory('project'),
+      );
+      await cocoaPodsUnderTest.setupPodfile(project.ios);
 
-        final String debugContents = projectUnderTest.ios
-            .xcodeConfigFor('Debug')
-            .readAsStringSync();
-        // Redundant contains check, but this documents what we're testing--that the optional
-        // #include? doesn't get written in addition to the previous style #include.
-        expect(debugContents, isNot(contains('Pods-Runner/Pods-Runner.debug')));
-        expect(debugContents, equals(flavorDebugInclude));
-        final String releaseContents = projectUnderTest.ios
-            .xcodeConfigFor('Release')
-            .readAsStringSync();
-        expect(releaseContents, isNot(contains('Pods-Runner/Pods-Runner.release')));
-        expect(releaseContents, equals(flavorReleaseInclude));
-      },
-    );
+      final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
+      // Redundant contains check, but this documents what we're testing--that the optional
+      // #include? doesn't get written in addition to the previous style #include.
+      expect(debugContents, isNot(contains('Pods-Runner/Pods-Runner.debug')));
+      expect(debugContents, equals(flavorDebugInclude));
+      final String releaseContents = projectUnderTest.ios
+          .xcodeConfigFor('Release')
+          .readAsStringSync();
+      expect(releaseContents, isNot(contains('Pods-Runner/Pods-Runner.release')));
+      expect(releaseContents, equals(flavorReleaseInclude));
+    });
   });
 
   group('Update xcconfig', () {
@@ -509,21 +520,17 @@ environement:
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext(
-      'throws, if Podfile is missing.',
-      () async {
-        final FlutterProject projectUnderTest = setupProjectUnderTest();
-        await expectLater(
-          cocoaPodsUnderTest.processPods(
-            xcodeProject: projectUnderTest.ios,
-            buildMode: BuildMode.debug,
-          ),
-          throwsToolExit(message: 'Podfile missing'),
-        );
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
-    );
+    testUsingContext('throws, if Podfile is missing.', () async {
+      final FlutterProject projectUnderTest = setupProjectUnderTest();
+      await expectLater(
+        cocoaPodsUnderTest.processPods(
+          xcodeProject: projectUnderTest.ios,
+          buildMode: BuildMode.debug,
+        ),
+        throwsToolExit(message: 'Podfile missing'),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
     testUsingContext(
       "doesn't throw, if using Swift Package Manager and Podfile is missing.",
@@ -789,7 +796,7 @@ Pod::Spec.new do |s|
   s.source_files = 'Classes/**/*.{h,m}'
   s.dependency 'Flutter'
   s.static_framework = true
-  s.osx.deployment_target = '10.15'
+  s.osx.deployment_target = '12.0'
   s.ios.deployment_target = '15.0'
 end''');
 
@@ -1184,12 +1191,9 @@ end''');
     );
 
     final possibleErrors = <String, String>{
-      'symbol not found':
-          'LoadError - dlsym(0x7fbbeb6837d0, Init_ffi_c): symbol not found - /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1/lib/ffi_c.bundle',
-      'incompatible architecture':
-          "LoadError - (mach-o file, but is an incompatible architecture (have 'arm64', need 'x86_64')), '/usr/lib/ffi_c.bundle' (no such file) - /Library/Ruby/Gems/2.6.0/gems/ffi-1.15.4/lib/ffi_c.bundle",
-      'bus error':
-          '/Library/Ruby/Gems/2.6.0/gems/ffi-1.15.5/lib/ffi/library.rb:275: [BUG] Bus Error at 0x000000010072c000',
+      'symbol not found': 'LoadError - dlsym(0x7fbbeb6837d0, Init_ffi_c): symbol not found - /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1/lib/ffi_c.bundle',
+      'incompatible architecture': "LoadError - (mach-o file, but is an incompatible architecture (have 'arm64', need 'x86_64')), '/usr/lib/ffi_c.bundle' (no such file) - /Library/Ruby/Gems/2.6.0/gems/ffi-1.15.4/lib/ffi_c.bundle",
+      'bus error': '/Library/Ruby/Gems/2.6.0/gems/ffi-1.15.5/lib/ffi/library.rb:275: [BUG] Bus Error at 0x000000010072c000',
     };
     possibleErrors.forEach((String errorName, String cocoaPodsError) {
       void testToolExitsWithCocoapodsMessage(_StdioStream outputStream) {
@@ -1204,6 +1208,18 @@ end''');
               ..createSync()
               ..writeAsStringSync('Existing Podfile');
 
+            cocoaPodsUnderTest = CocoaPods(
+              fileSystem: fileSystem,
+              processManager: fakeProcessManager,
+              logger: logger,
+              platform: FakePlatform(operatingSystem: 'macos'),
+              xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+                processManager: fakeProcessManager,
+              ),
+              analytics: fakeAnalytics,
+              currentAbi: Abi.macosArm64,
+            );
+
             fakeProcessManager.addCommands(<FakeCommand>[
               FakeCommand(
                 command: const <String>['pod', 'install', '--verbose'],
@@ -1216,11 +1232,8 @@ end''');
                 stdout: outputStream == _StdioStream.stdout ? cocoaPodsError : '',
                 stderr: outputStream == _StdioStream.stderr ? cocoaPodsError : '',
               ),
-              const FakeCommand(command: <String>['which', 'sysctl']),
-              const FakeCommand(
-                command: <String>['sysctl', 'hw.optional.arm64'],
-                stdout: 'hw.optional.arm64: 1',
-              ),
+              kWhichSysctlCommand,
+              kARMCheckCommand,
             ]);
 
             await expectToolExitLater(
@@ -1254,17 +1267,26 @@ end''');
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
 
+      cocoaPodsUnderTest = CocoaPods(
+        fileSystem: fileSystem,
+        processManager: fakeProcessManager,
+        logger: logger,
+        platform: FakePlatform(operatingSystem: 'macos'),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: fakeProcessManager),
+        analytics: fakeAnalytics,
+        currentAbi: Abi.macosX64,
+      );
+
       fakeProcessManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',
           environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
           exitCode: 1,
-          stderr:
-              'LoadError - dlsym(0x7fbbeb6837d0, Init_ffi_c): symbol not found - /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1/lib/ffi_c.bundle',
+          stderr: 'LoadError - dlsym(0x7fbbeb6837d0, Init_ffi_c): symbol not found - /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1/lib/ffi_c.bundle',
         ),
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
       ]);
 
       // Capture Usage.test() events.
@@ -1448,19 +1470,16 @@ end''');
         FakeCommand(command: <String>['touch', 'project/ios/Podfile.lock']),
       ]);
 
-      final cocoaPodsUnderTestXcode143 = CocoaPods(
+      final cocoaPods = CocoaPods(
         fileSystem: fileSystem,
         processManager: fakeProcessManager,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: fakeProcessManager,
-          version: Version(14, 3, 0),
-        ),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: fakeProcessManager),
         analytics: fakeAnalytics,
       );
 
-      final bool didInstall = await cocoaPodsUnderTestXcode143.processPods(
+      final bool didInstall = await cocoaPods.processPods(
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
       );
@@ -1595,6 +1614,16 @@ end''');
           throwsToolExit(),
         );
         expect(logger.errorText, contains('Error: A dependency conflict has occurred because'));
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.appleUsageEvent(
+              workflow: 'cocoapod-swiftpm-interdependency-failure',
+              parameter: 'plugin_2_name',
+              result: 'plugin_1_name',
+            ),
+          ),
+        );
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,

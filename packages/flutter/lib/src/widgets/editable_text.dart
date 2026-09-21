@@ -83,8 +83,10 @@ export 'package:flutter/services.dart'
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
-typedef SelectionChangedCallback =
-    void Function(TextSelection selection, SelectionChangedCause? cause);
+typedef SelectionChangedCallback = void Function(
+  TextSelection selection,
+  SelectionChangedCause? cause,
+);
 
 /// Signature for the callback that reports the app private command results.
 typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
@@ -96,8 +98,10 @@ typedef AppPrivateCommandCallback = void Function(String action, Map<String, dyn
 ///
 ///  * [SelectableRegionContextMenuBuilder], which performs the same role for
 ///    [SelectableRegion].
-typedef EditableTextContextMenuBuilder =
-    Widget Function(BuildContext context, EditableTextState editableTextState);
+typedef EditableTextContextMenuBuilder = Widget Function(
+  BuildContext context,
+  EditableTextState editableTextState,
+);
 
 // Signature for a function that determines the target location of the given
 // [TextPosition] after applying the given [TextBoundary].
@@ -196,6 +200,14 @@ class _RenderCompositionCallback extends RenderProxyBox {
 /// between the framework and the input method. Consider using
 /// [TextInputFormatter]s instead for as-you-type text modification.
 ///
+/// [TextInputFormatter]s, such as those supplied to
+/// [EditableText.inputFormatters], only run when the user changes the text in
+/// the text field, for example using the keyboard or the text selection menu.
+/// They don't run when the text is changed programmatically through this
+/// controller, such as by setting [value] or [text], or by calling [clear].
+/// If a programmatically set value needs to be formatted, apply the
+/// formatting manually before updating the controller.
+///
 /// If both the [text] and [selection] properties need to be changed, set the
 /// controller's [value] instead. Setting [text] will clear the selection
 /// and composing range.
@@ -273,6 +285,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases. This property can
   /// be set from a listener added to this [TextEditingController].
+  ///
+  /// Setting this does not run [TextInputFormatter]s. Apply them manually if
+  /// needed.
   set text(String newText) {
     value = value.copyWith(
       text: newText,
@@ -281,6 +296,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     );
   }
 
+  /// Setting this does not run [TextInputFormatter]s. Apply them manually if
+  /// needed.
   @override
   set value(TextEditingValue newValue) {
     assert(
@@ -342,6 +359,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// If the new selection is outside the composing range, the composing range is
   /// cleared.
+  ///
+  /// Setting this does not run [TextInputFormatter]s. Apply them manually if
+  /// needed.
   set selection(TextSelection newSelection) {
     if (text.length < newSelection.end || text.length < newSelection.start) {
       throw FlutterError('invalid text selection: $newSelection');
@@ -361,6 +381,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
+  ///
+  /// Calling this method does not run [TextInputFormatter]s. Apply them
+  /// manually if needed.
   void clear() {
     value = const TextEditingValue(selection: TextSelection.collapsed(offset: 0));
   }
@@ -375,6 +398,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
+  ///
+  /// Calling this method does not run [TextInputFormatter]s. Apply them
+  /// manually if needed.
   void clearComposing() {
     value = value.copyWith(composing: TextRange.empty);
   }
@@ -838,7 +864,7 @@ class EditableText extends StatefulWidget {
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
     required this.style,
-    StrutStyle? strutStyle,
+    this._strutStyle,
     required this.cursorColor,
     required this.backgroundCursorColor,
     this.textAlign = TextAlign.start,
@@ -961,7 +987,6 @@ class EditableText extends StatefulWidget {
              spellCheckConfiguration.misspelledTextStyle != null,
          'spellCheckConfiguration must specify a misspelledTextStyle if spell check behavior is desired',
        ),
-       _strutStyle = strutStyle,
        keyboardType =
            keyboardType ?? _inferKeyboardType(autofillHints: autofillHints, maxLines: maxLines),
        inputFormatters = maxLines == 1
@@ -2023,14 +2048,14 @@ class EditableText extends StatefulWidget {
   /// This example shows how to customize the menu, in this case by keeping the
   /// default buttons for the platform but modifying their appearance.
   ///
-  /// ** See code in examples/api/lib/material/context_menu/editable_text_toolbar_builder.0.dart **
+  /// ** See code in examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.0.dart **
   /// {@end-tool}
   ///
   /// {@tool dartpad}
   /// This example shows how to show a custom button only when an email address
   /// is currently selected.
   ///
-  /// ** See code in examples/api/lib/material/context_menu/editable_text_toolbar_builder.1.dart **
+  /// ** See code in examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.1.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -2050,6 +2075,11 @@ class EditableText extends StatefulWidget {
   ///
   /// Specifies the [SpellCheckService] used to spell check text input and the
   /// [TextStyle] used to style text with misspelled words.
+  ///
+  /// Spell check is disabled for password input, including when [obscureText]
+  /// is true, [keyboardType] is [TextInputType.visiblePassword],
+  /// [TextInputType.password] is true, or [autofillHints] contains
+  /// [AutofillHints.password] or [AutofillHints.newPassword].
   ///
   /// If the [SpellCheckService] is left null, spell check is disabled by
   /// default unless the [DefaultSpellCheckService] is supported, in which case
@@ -2255,6 +2285,7 @@ class EditableText extends StatefulWidget {
             AutofillHints.countryName: TextInputType.name,
             AutofillHints.creditCardNumber: TextInputType.number, // Couldn't test.
             AutofillHints.email: TextInputType.emailAddress,
+            AutofillHints.emailOTPCode: TextInputType.text,
             AutofillHints.familyName: TextInputType.name,
             AutofillHints.fullStreetAddress: TextInputType.name,
             AutofillHints.givenName: TextInputType.name,
@@ -2317,6 +2348,7 @@ class EditableText extends StatefulWidget {
       AutofillHints.creditCardSecurityCode: TextInputType.number,
       AutofillHints.creditCardType: TextInputType.text,
       AutofillHints.email: TextInputType.emailAddress,
+      AutofillHints.emailOTPCode: TextInputType.text,
       AutofillHints.familyName: TextInputType.name,
       AutofillHints.fullStreetAddress: TextInputType.streetAddress,
       AutofillHints.gender: TextInputType.text,
@@ -2764,9 +2796,8 @@ class EditableTextState extends State<EditableText>
       return;
     }
     final String text = textEditingValue.text;
-    Clipboard.setData(
-      ClipboardData(text: selection.textInside(text)),
-    ).catchError(_reportClipboardError('while copying selection to clipboard'));
+    Clipboard.setData(ClipboardData(text: selection.textInside(text)))
+        .catchError(_reportClipboardError('while copying selection to clipboard'));
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
       hideToolbar(false);
@@ -2803,9 +2834,8 @@ class EditableTextState extends State<EditableText>
     if (selection.isCollapsed) {
       return;
     }
-    Clipboard.setData(
-      ClipboardData(text: selection.textInside(text)),
-    ).catchError(_reportClipboardError('while cutting selection to clipboard'));
+    Clipboard.setData(ClipboardData(text: selection.textInside(text)))
+        .catchError(_reportClipboardError('while cutting selection to clipboard'));
     _replaceText(ReplaceTextIntent(textEditingValue, '', selection, cause));
     if (cause == SelectionChangedCause.toolbar) {
       // Schedule a call to bringIntoView() after renderEditable updates.
@@ -3050,18 +3080,27 @@ class EditableTextState extends State<EditableText>
   /// If spell check is enabled, this will try to infer a value for
   /// the [SpellCheckService] if left unspecified.
   static SpellCheckConfiguration _inferSpellCheckConfiguration(
-    SpellCheckConfiguration? configuration,
-  ) {
+    SpellCheckConfiguration? configuration, {
+    required bool obscureText,
+    required TextInputType keyboardType,
+    required Iterable<String>? autofillHints,
+  }) {
     final SpellCheckService? spellCheckService = configuration?.spellCheckService;
     final bool spellCheckAutomaticallyDisabled =
-        configuration == null || configuration == const SpellCheckConfiguration.disabled();
+        _isPasswordInput(
+          obscureText: obscureText,
+          keyboardType: keyboardType,
+          autofillHints: autofillHints,
+        ) ||
+        configuration == null ||
+        configuration == const SpellCheckConfiguration.disabled();
     final bool spellCheckServiceIsConfigured =
         spellCheckService != null ||
         WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
     if (spellCheckAutomaticallyDisabled || !spellCheckServiceIsConfigured) {
       // Only enable spell check if a non-disabled configuration is provided
-      // and if that configuration does not specify a spell check service,
-      // a native spell checker must be supported.
+      // for non-password input and, if that configuration does not specify a
+      // spell check service, a native spell checker must be supported.
       assert(() {
         if (!spellCheckAutomaticallyDisabled && !spellCheckServiceIsConfigured) {
           FlutterError.reportError(
@@ -3086,6 +3125,20 @@ class EditableTextState extends State<EditableText>
     return configuration.copyWith(
       spellCheckService: spellCheckService ?? DefaultSpellCheckService(),
     );
+  }
+
+  static bool _isPasswordInput({
+    required bool obscureText,
+    required TextInputType keyboardType,
+    required Iterable<String>? autofillHints,
+  }) {
+    return obscureText ||
+        keyboardType == TextInputType.visiblePassword ||
+        keyboardType.password == true ||
+        (autofillHints?.any(
+              (String hint) => hint == AutofillHints.password || hint == AutofillHints.newPassword,
+            ) ??
+            false);
   }
 
   /// Returns the [ContextMenuButtonItem]s for the given [ToolbarOptions].
@@ -3284,7 +3337,12 @@ class EditableTextState extends State<EditableText>
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _cursorVisibilityNotifier.value = widget.showCursor;
-    _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
+    _spellCheckConfiguration = _inferSpellCheckConfiguration(
+      widget.spellCheckConfiguration,
+      obscureText: widget.obscureText,
+      keyboardType: widget.keyboardType,
+      autofillHints: widget.autofillHints,
+    );
     _appLifecycleListener = AppLifecycleListener(onResume: _onResume);
     _initProcessTextActions();
   }
@@ -3490,6 +3548,28 @@ class EditableTextState extends State<EditableText>
           _obscureLatestCharIndex = null;
         }
         _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
+      }
+    }
+
+    if (oldWidget.spellCheckConfiguration != widget.spellCheckConfiguration ||
+        oldWidget.obscureText != widget.obscureText ||
+        oldWidget.keyboardType != widget.keyboardType ||
+        !listEquals<String>(
+          oldWidget.autofillHints?.toList(growable: false),
+          widget.autofillHints?.toList(growable: false),
+        )) {
+      _spellCheckConfiguration = _inferSpellCheckConfiguration(
+        widget.spellCheckConfiguration,
+        obscureText: widget.obscureText,
+        keyboardType: widget.keyboardType,
+        autofillHints: widget.autofillHints,
+      );
+      if (spellCheckEnabled) {
+        if (textEditingValue.text.isNotEmpty) {
+          _performSpellCheck(textEditingValue.text);
+        }
+      } else {
+        spellCheckResults = null;
       }
     }
 
@@ -4194,8 +4274,7 @@ class EditableTextState extends State<EditableText>
       _openInputConnection();
     } else {
       _flagInternalFocus();
-      widget.focusNode
-          .requestFocus(); // This eventually calls _openInputConnection also, see _handleFocusChanged.
+      widget.focusNode.requestFocus(); // This eventually calls _openInputConnection also, see _handleFocusChanged.
     }
   }
 
@@ -4614,9 +4693,10 @@ class EditableTextState extends State<EditableText>
       final List<SuggestionSpan>? suggestions = await _spellCheckConfiguration.spellCheckService!
           .fetchSpellCheckSuggestions(localeForSpellChecking!, text);
 
-      if (suggestions == null || !mounted) {
+      if (suggestions == null || !mounted || !spellCheckEnabled) {
         // The request to fetch spell check suggestions was canceled due to ongoing request,
-        // or the widget was unmounted.
+        // the widget was unmounted, or spell check was disabled before the
+        // request completed.
         return;
       }
 
@@ -5873,9 +5953,8 @@ class EditableTextState extends State<EditableText>
                         // either case, glowing or stretching.
                         scrollBehavior:
                             widget.scrollBehavior ??
-                            ScrollConfiguration.of(
-                              context,
-                            ).copyWith(scrollbars: _isMultiline, overscroll: false),
+                            ScrollConfiguration.of(context)
+                                .copyWith(scrollbars: _isMultiline, overscroll: false),
                         viewportBuilder: (BuildContext context, ViewportOffset offset) {
                           return CompositedTransformTarget(
                             link: _toolbarLayerLink,

@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/bundle.dart' hide defaultManifestPath;
 import 'package:flutter_tools/src/bundle_builder.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
@@ -264,6 +265,38 @@ void main() {
       ),
       'build/95b595cca01caa5f0ca0a690339dd7f6.cache.dill.track.dill',
     );
+  });
+
+  testWithoutContext('TargetModel isolates getDefaultCachedKernelPath hash', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final config = Config.test();
+
+    final String pathWithFlutter = getDefaultCachedKernelPath(
+      trackWidgetCreation: true,
+      dartDefines: <String>[],
+      fileSystem: fileSystem,
+      config: config,
+      targetModel: TargetModel.flutter,
+    );
+
+    final String pathWithDartdevc = getDefaultCachedKernelPath(
+      trackWidgetCreation: true,
+      dartDefines: <String>[],
+      fileSystem: fileSystem,
+      config: config,
+      targetModel: TargetModel.dartdevc,
+    );
+
+    final String pathWithoutTarget = getDefaultCachedKernelPath(
+      trackWidgetCreation: true,
+      dartDefines: <String>[],
+      fileSystem: fileSystem,
+      config: config,
+    );
+
+    expect(pathWithFlutter, isNot(pathWithDartdevc));
+    expect(pathWithFlutter, isNot(pathWithoutTarget));
+    expect(pathWithDartdevc, isNot(pathWithoutTarget));
   });
 
   testUsingContext(

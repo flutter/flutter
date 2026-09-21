@@ -25,6 +25,9 @@ abstract class CkSurface extends Surface {
 
   final CanvasProvider _canvasProvider;
 
+  @override
+  bool get supportsPngEncoding => true;
+
   BitmapSize _currentSize = const BitmapSize(1, 1);
 
   /// The underlying Skia surface object.
@@ -234,13 +237,65 @@ abstract class CkSurface extends Surface {
   @override
   Future<ByteData?> rasterizeImage(ui.Image image, ui.ImageByteFormat format) async {
     await _initialized.future;
-    final ckImage = image as CkImage;
+
+    final EngineImage engineImage;
+    final SkImage skImage;
+    if (image case EngineImage(backendImage: CkImageDelegate(skImage: final imageRef))) {
+      engineImage = image;
+      skImage = imageRef;
+    } else {
+      throw ArgumentError('The image being rasterized must be a CanvasKit image.');
+    }
+
+    final SkAlphaType alphaType = format == ui.ImageByteFormat.rawStraightRgba
+        ? canvasKit.AlphaType.Unpremul
+        : canvasKit.AlphaType.Premul;
+
+    Uint8List? bytes;
+    if (format == ui.ImageByteFormat.rawRgba || format == ui.ImageByteFormat.rawStraightRgba) {
+      final imageInfo = SkImageInfo(
+        alphaType: alphaType,
+        colorType: canvasKit.ColorType.RGBA_8888,
+        colorSpace: SkColorSpaceSRGB,
+        width: skImage.width(),
+        height: skImage.height(),
+      );
+      bytes = skImage.readPixels(0, 0, imageInfo);
+    } else {
+      bytes = skImage.encodeToBytes(); // defaults to PNG 100%
+    }
+
+    if (bytes != null) {
+      return bytes.buffer.asByteData();
+    }
+
+    setSize(BitmapSize(engineImage.width, engineImage.height));
     final SkSurface skSurface = _skSurface!;
     final canvas = CkCanvas.fromSkCanvas(skSurface.getCanvas());
-    canvas.drawImage(ckImage, ui.Offset.zero, ui.Paint());
+
+    canvas.clear(const ui.Color(0x00000000));
+    final paint = CkPaint();
+
+    canvas.drawImage(engineImage, ui.Offset.zero, paint);
     final SkImage snapshot = skSurface.makeImageSnapshot();
-    final Uint8List? bytes = snapshot.encodeToBytes();
-    snapshot.delete();
+
+    try {
+      if (format == ui.ImageByteFormat.rawRgba || format == ui.ImageByteFormat.rawStraightRgba) {
+        final imageInfo = SkImageInfo(
+          alphaType: alphaType,
+          colorType: canvasKit.ColorType.RGBA_8888,
+          colorSpace: SkColorSpaceSRGB,
+          width: engineImage.width.toDouble(),
+          height: engineImage.height.toDouble(),
+        );
+        bytes = snapshot.readPixels(0, 0, imageInfo);
+      } else {
+        bytes = snapshot.encodeToBytes();
+      }
+    } finally {
+      snapshot.delete();
+    }
+
     return bytes?.buffer.asByteData();
   }
 
@@ -328,12 +383,24 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
 
   @override
   bool get isConnected =>
-      ((canvas as JSAny?).isA<DomHTMLCanvasElement>()) &&
+      (canvas as JSAny?).isA<DomHTMLCanvasElement>() &&
       (canvas as DomHTMLCanvasElement).isConnected!;
 
   @override
   void initialize() {
     // No extra initialization is required.
+  }
+
+  @override
+  void setIsOverlay(bool isOverlay) {
+    final DomCSSStyleDeclaration style = (canvas as DomHTMLCanvasElement).style;
+    if (isOverlay) {
+      if (style.position != 'absolute') {
+        style.position = 'absolute';
+      }
+    } else if (style.position == 'absolute') {
+      style.removeProperty('position');
+    }
   }
 
   @override

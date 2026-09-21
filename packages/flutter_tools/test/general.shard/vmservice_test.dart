@@ -81,8 +81,35 @@ void main() {
     expect(mockVMService.services, containsPair(kFlutterVersionServiceName, kFlutterToolAlias));
   });
 
+  testUsingContext('VM Service prints messages for connection failures', () {
+    final logger = BufferLogger.test();
+    FakeAsync().run((FakeAsync time) {
+      final Uri uri = Uri.parse('ws://127.0.0.1:12345/QqL7EFEDNG0=/ws');
+      unawaited(connectToVmService(uri, logger: logger));
+
+      time.elapse(const Duration(seconds: 5));
+      expect(logger.statusText, isEmpty);
+
+      time.elapse(const Duration(minutes: 2));
+
+      final String statusText = logger.statusText;
+      expect(
+        statusText,
+        containsIgnoringWhitespace(
+          'Connecting to the VM Service is taking longer than expected...',
+        ),
+      );
+      expect(statusText, containsIgnoringWhitespace('try re-running with --host-vmservice-port'));
+      expect(
+        statusText,
+        containsIgnoringWhitespace('Exception attempting to connect to the VM Service:'),
+      );
+      expect(statusText, containsIgnoringWhitespace('This was attempt #50. Will retry'));
+    });
+  }, overrides: <Type, Generator>{WebSocketConnector: () => failingWebSocketConnector});
+
   testUsingContext(
-    'VM Service prints messages for connection failures',
+    'VM Service prints messages for HttpException connection failures and retries',
     () {
       final logger = BufferLogger.test();
       FakeAsync().run((FakeAsync time) {
@@ -109,7 +136,7 @@ void main() {
         expect(statusText, containsIgnoringWhitespace('This was attempt #50. Will retry'));
       });
     },
-    overrides: <Type, Generator>{WebSocketConnector: () => failingWebSocketConnector},
+    overrides: <Type, Generator>{WebSocketConnector: () => httpFailingWebSocketConnector},
   );
 
   testWithoutContext('setAssetDirectory forwards arguments correctly', () async {
@@ -135,8 +162,7 @@ void main() {
 
     await flutterVmService.setAssetDirectory(
       assetsDirectory: Uri(
-        path:
-            'C:/Users/Tester/AppData/Local/Temp/hello_worldb42a6da5/hello_world/build/flutter_assets',
+        path: 'C:/Users/Tester/AppData/Local/Temp/hello_worldb42a6da5/hello_world/build/flutter_assets',
         scheme: 'file',
       ),
       viewId: 'abc',
@@ -151,8 +177,7 @@ void main() {
     expect(call.isolateId, 'def');
     expect(call.args, <String, String>{
       'viewId': 'abc',
-      'assetDirectory':
-          r'C:\Users\Tester\AppData\Local\Temp\hello_worldb42a6da5\hello_world\build\flutter_assets',
+      'assetDirectory': r'C:\Users\Tester\AppData\Local\Temp\hello_worldb42a6da5\hello_world\build\flutter_assets',
     });
   });
 
@@ -301,6 +326,21 @@ void main() {
     );
 
     expect(await fakeVmServiceHost.vmService.flutterDebugDumpFocusTree(isolateId: '1'), '');
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('reloadAssetFonts handles missing method', () async {
+    final fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        FakeVmServiceRequest(
+          method: '_flutter.reloadAssetFonts',
+          args: <String, Object>{'isolateId': '1', 'viewId': '2'},
+          error: FakeRPCError(code: vm_service.RPCErrorKind.kMethodNotFound.code),
+        ),
+      ],
+    );
+
+    await fakeVmServiceHost.vmService.reloadAssetFonts(isolateId: '1', viewId: '2');
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
@@ -530,31 +570,28 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'when the isolate stream is already subscribed, returns an isolate with the registered extensionRPC',
-      () async {
-        final fakeVmServiceHost = FakeVmServiceHost(
-          requests: <VmServiceExpectation>[
-            const FakeVmServiceRequest(
-              method: 'streamListen',
-              args: <String, Object>{'streamId': 'Isolate'},
-              // Stream already subscribed - https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#streamlisten
-              error: FakeRPCError(code: 103),
-            ),
-            listViewsRequest,
-            FakeVmServiceRequest(
-              method: 'getIsolate',
-              jsonResponse: isolate.toJson()..['extensionRPCs'] = <String>[kExtensionName],
-              args: <String, Object>{'isolateId': '1'},
-            ),
-          ],
-        );
+    testWithoutContext('when the isolate stream is already subscribed, returns an isolate with the registered extensionRPC', () async {
+      final fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Isolate'},
+            // Stream already subscribed - https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#streamlisten
+            error: FakeRPCError(code: 103),
+          ),
+          listViewsRequest,
+          FakeVmServiceRequest(
+            method: 'getIsolate',
+            jsonResponse: isolate.toJson()..['extensionRPCs'] = <String>[kExtensionName],
+            args: <String, Object>{'isolateId': '1'},
+          ),
+        ],
+      );
 
-        final vm_service.IsolateRef isolateRef = await fakeVmServiceHost.vmService
-            .findExtensionIsolate(kExtensionName);
-        expect(isolateRef.id, '1');
-      },
-    );
+      final vm_service.IsolateRef isolateRef = await fakeVmServiceHost.vmService
+          .findExtensionIsolate(kExtensionName);
+      expect(isolateRef.id, '1');
+    });
 
     testWithoutContext('returns an isolate with a extensionRPC that is registered later', () async {
       final fakeVmServiceHost = FakeVmServiceHost(
@@ -627,6 +664,16 @@ void main() {
     expect(processVmServiceMessage(event), 'Hello There');
   });
 
+  testWithoutContext('Can process log events containing a valid replacement character', () {
+    final event = vm_service.Event(
+      bytes: base64.encode(utf8ForTesting.encode('flutter: \u{FFFD}\n')),
+      timestamp: 0,
+      kind: vm_service.EventKind.kLogging,
+    );
+
+    expect(processVmServiceMessage(event), 'flutter: \u{FFFD}');
+  });
+
   testUsingContext('WebSocket URL construction uses correct URI join primitives', () async {
     final completer = Completer<String>();
     openChannelForTesting =
@@ -647,6 +694,31 @@ void main() {
     expect(await completer.future, 'ws://localhost:8181/foo/ws');
     openChannelForTesting = null;
   });
+
+  testWithoutContext(
+    'RPCErrorExtension detects DWDS-specific unregistered service extension errors',
+    () {
+      final unregisteredErrorNative = vm_service.RPCError(
+        'ext.flutter.evict',
+        vm_service.RPCErrorKind.kMethodNotFound.code,
+        'Method not found',
+      );
+      final unregisteredErrorDwds = vm_service.RPCError(
+        'ext.flutter.evict',
+        vm_service.RPCErrorKind.kInternalError.code,
+        'Service extension failed in some clients: Unexpected null value.',
+      );
+      final otherError = vm_service.RPCError(
+        'ext.flutter.evict',
+        vm_service.RPCErrorKind.kInternalError.code,
+        'Some other random error message',
+      );
+
+      expect(unregisteredErrorNative.isServiceExtensionUnregisteredError, isTrue);
+      expect(unregisteredErrorDwds.isServiceExtensionUnregisteredError, isTrue);
+      expect(otherError.isServiceExtensionUnregisteredError, isFalse);
+    },
+  );
 }
 
 class FakeVMService extends Fake implements vm_service.VmService {
@@ -701,4 +773,15 @@ Future<io.WebSocket> failingWebSocketConnector(
   Logger? logger,
 }) {
   throw const io.SocketException('Failed WebSocket connection');
+}
+
+/// A [WebSocketConnector] that always throws an [io.HttpException].
+Future<io.WebSocket> httpFailingWebSocketConnector(
+  String url, {
+  io.CompressionOptions? compression,
+  Logger? logger,
+}) {
+  throw const io.HttpException(
+    'Connection closed before full header was received, uri = http://127.0.0.1:63745/TjwUKCgX5S8=/ws',
+  );
 }

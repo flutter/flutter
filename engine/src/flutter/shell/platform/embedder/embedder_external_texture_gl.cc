@@ -71,15 +71,19 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTexture(
     const SkISize& size) {
   if (!!aiks_context) {
     return ResolveTextureImpeller(texture_id, aiks_context, size);
-  } else {
+  } else if (context) {
     return ResolveTextureSkia(texture_id, context, size);
   }
+  return nullptr;
 }
 
 sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureSkia(
     int64_t texture_id,
     GrDirectContext* context,
     const SkISize& size) {
+  if (!context) {
+    return nullptr;
+  }
   context->flushAndSubmit();
   context->resetContext(kAll_GrBackendState);
   std::unique_ptr<FlutterOpenGLTexture> texture =
@@ -183,9 +187,6 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
     FML_LOG(ERROR) << "Could not register destruction callback";
     return nullptr;
   }
-
-  image->SetCoordinateSystem(
-      impeller::TextureCoordinateSystem::kUploadFromHost);
 
   scoped_cleanup.Release();
 

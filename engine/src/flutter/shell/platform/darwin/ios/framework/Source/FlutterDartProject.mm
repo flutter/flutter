@@ -39,6 +39,15 @@ static BOOL DoesHardwareSupportWideGamut() {
   return result;
 }
 
+NSNumber* _Nullable FLTEnableWideGamutFromBundle(NSBundle* _Nullable bundle,
+                                                 NSBundle* _Nullable mainBundle) {
+  NSNumber* nsEnableWideGamut = [bundle objectForInfoDictionaryKey:@"FLTEnableWideGamut"];
+  if (nsEnableWideGamut == nil && bundle != mainBundle) {
+    nsEnableWideGamut = [mainBundle objectForInfoDictionaryKey:@"FLTEnableWideGamut"];
+  }
+  return nsEnableWideGamut;
+}
+
 flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* processInfoOrNil) {
   auto command_line = flutter::CommandLineFromNSProcessInfo(processInfoOrNil);
 
@@ -57,6 +66,10 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   }
 
   auto settings = flutter::SettingsFromCommandLine(command_line, true);
+
+  FML_CHECK(settings.merged_platform_ui_thread !=
+            flutter::Settings::MergedPlatformUIThread::kMergeAfterLaunch)
+      << "merged-platform-ui-thread=mergeAfterLaunch is not supported on iOS.";
 
   settings.task_observer_add = [](intptr_t key, const fml::closure& callback) {
     fml::TaskQueueId queue_id = fml::MessageLoop::GetCurrentTaskQueueId();
@@ -166,14 +179,11 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   // Removes unused function warning.
   (void)DoesHardwareSupportWideGamut;
 #else
-  NSNumber* nsEnableWideGamut = [mainBundle objectForInfoDictionaryKey:@"FLTEnableWideGamut"];
+  NSNumber* nsEnableWideGamut = FLTEnableWideGamutFromBundle(bundle, mainBundle);
   BOOL enableWideGamut =
       (nsEnableWideGamut ? nsEnableWideGamut.boolValue : YES) && DoesHardwareSupportWideGamut();
   settings.enable_wide_gamut = enableWideGamut;
 #endif
-
-  NSNumber* nsAntialiasLines = [mainBundle objectForInfoDictionaryKey:@"FLTAntialiasLines"];
-  settings.impeller_antialiased_lines = (nsAntialiasLines ? nsAntialiasLines.boolValue : NO);
 
   settings.warn_on_impeller_opt_out = true;
 
@@ -257,7 +267,14 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height * scale;
   settings.resource_cache_max_bytes_threshold = screenWidth * screenHeight * 12 * 4;
 
-  // Whether to enable ios embedder api.
+  // Whether to run the iOS embedder on top of the embedder API rather than `Shell` directly.
+  //
+  // This is an opt-in flag while we add support for running on top of the embedder API. Once the
+  // embedder API implementation reaches parity with the default implementation directly on `Shell`
+  // and friends, we'll eventually make this default and support opt-out, before being removed
+  // altogether.
+  //
+  // See: https://github.com/flutter/flutter/issues/112232
   NSNumber* enable_embedder_api =
       [mainBundle objectForInfoDictionaryKey:@"FLTEnableIOSEmbedderAPI"];
   // Change the default only if the option is present.

@@ -29,29 +29,37 @@ class XcodeProjectObjectVersionMigration extends ProjectMigrator {
     }
   }
 
+  final _replacements = <(RegExp original, String replacement, int newValue)>[
+    // objectVersion value has been 46, 50, 51, and 54 in the template.
+    (RegExp(r'objectVersion = (\d+);'), 'objectVersion = 54;', 54),
+    // LastUpgradeCheck is in the Xcode project file, not scheme file.
+    // Value has been 0730, 0800, 1020, 1300, 1430, and 1510 in the template.
+    (RegExp(r'LastUpgradeCheck = (\d+);'), 'LastUpgradeCheck = 1510;', 1510),
+    // LastUpgradeVersion is in the scheme file, not Xcode project file.
+    (RegExp(r'LastUpgradeVersion = "(\d+)"'), 'LastUpgradeVersion = "1510"', 1510),
+  ];
+
   @override
   String? migrateLine(String line) {
-    var updatedString = line;
-    final originalToReplacement = <Pattern, String>{
-      // objectVersion value has been 46, 50, 51, and 54 in the template.
-      RegExp(r'objectVersion = \d+;'): 'objectVersion = 54;',
-      // LastUpgradeCheck is in the Xcode project file, not scheme file.
-      // Value has been 0730, 0800, 1020, 1300, 1430, and 1510 in the template.
-      RegExp(r'LastUpgradeCheck = \d+;'): 'LastUpgradeCheck = 1510;',
-      // LastUpgradeVersion is in the scheme file, not Xcode project file.
-      RegExp(r'LastUpgradeVersion = "\d+"'): 'LastUpgradeVersion = "1510"',
-    };
+    var updatedLine = line;
 
-    originalToReplacement.forEach((Pattern original, String replacement) {
-      if (line.contains(original)) {
-        updatedString = line.replaceAll(original, replacement);
-        if (!migrationRequired && updatedString != line) {
-          // Only print once.
-          logger.printStatus('Updating project for Xcode compatibility.');
-        }
+    for (final (pattern, replacement, newValue) in _replacements) {
+      final RegExpMatch? match = pattern.firstMatch(line);
+      if (match == null) {
+        continue;
       }
-    });
+      // Skip if the value is already at or above the target
+      final int? currentValue = int.tryParse(match.group(1) ?? '');
+      if (currentValue != null && currentValue >= newValue) {
+        continue;
+      }
+      updatedLine = updatedLine.replaceFirst(pattern, replacement);
+      if (!migrationRequired && updatedLine != line) {
+        // Only print once.
+        logger.printStatus('Updating project for Xcode compatibility.');
+      }
+    }
 
-    return updatedString;
+    return updatedLine;
   }
 }

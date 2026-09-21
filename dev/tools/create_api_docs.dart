@@ -8,10 +8,10 @@ import 'dart:math' as math;
 
 import 'package:archive/archive_io.dart';
 import 'package:args/args.dart';
+import 'package:convert/convert.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
@@ -309,7 +309,7 @@ class Configurator {
   }
 
   void _createPageFooter(Directory footerPath, Version version) {
-    final String timestamp = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
+    final String timestamp = FixedDateTimeFormatter('YYYY-MM-DD hh:mm').encode(DateTime.now());
     String channel = FlutterInformation.instance.getBranchName();
     // Backward compatibility: Still support running on "master", but pretend it is "main".
     if (channel == 'master') {
@@ -1085,9 +1085,9 @@ Future<Process> runPubProcess({
 }
 
 List<String> findPackageNames(FileSystem filesystem) {
-  return findPackages(
-    filesystem,
-  ).map<String>((FileSystemEntity file) => path.basename(file.path)).toList();
+  return findPackages(filesystem)
+      .map<String>((FileSystemEntity file) => path.basename(file.path))
+      .toList();
 }
 
 /// Finds all packages in the Flutter SDK

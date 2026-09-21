@@ -5,8 +5,8 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
@@ -567,13 +567,12 @@ void _testPaintingContextLayerReuse<L extends Layer>(_LayerTestPaintCallback pai
   expect(box.paintedLayers[0], same(box.paintedLayers[1]));
 }
 
-typedef _LayerTestPaintCallback =
-    Layer? Function(
-      PaintingContextCallback painter,
-      PaintingContext context,
-      Offset offset,
-      Layer? oldLayer,
-    );
+typedef _LayerTestPaintCallback = Layer? Function(
+  PaintingContextCallback painter,
+  PaintingContext context,
+  Offset offset,
+  Layer? oldLayer,
+);
 
 class _TestCustomLayerBox extends RenderBox {
   _TestCustomLayerBox(this.painter);

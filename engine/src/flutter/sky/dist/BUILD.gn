@@ -15,9 +15,9 @@ if (is_android) {
 
     args = [
       "--source",
-      rebase_path(source),
+      rebase_path(source, root_build_dir),
       "--dest",
-      rebase_path(dest),
+      rebase_path(dest, root_build_dir),
     ]
 
     deps = [ "//flutter/sky/packages/sky_engine" ]

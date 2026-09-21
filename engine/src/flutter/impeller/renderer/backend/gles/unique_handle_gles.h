@@ -17,6 +17,8 @@ namespace impeller {
 ///
 class UniqueHandleGLES {
  public:
+  UniqueHandleGLES() = default;
+
   UniqueHandleGLES(std::shared_ptr<ReactorGLES> reactor, HandleType type);
 
   static UniqueHandleGLES MakeUntracked(std::shared_ptr<ReactorGLES> reactor,
@@ -27,18 +29,26 @@ class UniqueHandleGLES {
   ~UniqueHandleGLES();
 
   UniqueHandleGLES(UniqueHandleGLES&&);
+  UniqueHandleGLES& operator=(UniqueHandleGLES&&);
 
   UniqueHandleGLES(const UniqueHandleGLES&) = delete;
-
   UniqueHandleGLES& operator=(const UniqueHandleGLES&) = delete;
 
   const HandleGLES& Get() const;
 
   bool IsValid() const;
 
+  /// Collect the managed handle and replace it with a dead handle.
+  void Reset();
+
+  /// Release ownership of the handle.
+  HandleGLES Release();
+
  private:
   std::shared_ptr<ReactorGLES> reactor_ = nullptr;
   HandleGLES handle_ = HandleGLES::DeadHandle();
+
+  void CollectHandle();
 };
 
 }  // namespace impeller

@@ -15,11 +15,20 @@ const xcodeBackendPath = 'bin/xcode_backend.sh';
 const xcodeBackendErrorHeader =
     '========================================================================';
 
+// Settings normally supplied by the Generated Flutter xcconfig
+const generatedBuildSettings = <String, String>{
+  'FLUTTER_ROOT': '../..',
+  'FLUTTER_BUILD_DIR': 'build',
+  'FLUTTER_BUILD_NAME': '1.0.0',
+  'FLUTTER_BUILD_NUMBER': '1',
+};
+
 // Acceptable $CONFIGURATION/$FLUTTER_BUILD_MODE values should be debug, profile, or release
-const unknownConfiguration = <String, String>{'CONFIGURATION': 'Custom'};
+const unknownConfiguration = <String, String>{...generatedBuildSettings, 'CONFIGURATION': 'Custom'};
 
 // $FLUTTER_BUILD_MODE will override $CONFIGURATION
 const unknownFlutterBuildMode = <String, String>{
+  ...generatedBuildSettings,
   'FLUTTER_BUILD_MODE': 'Custom',
   'CONFIGURATION': 'Debug',
 };
@@ -119,45 +128,42 @@ void main() {
 
     for (final buildConfiguration in <String>['Debug', 'Profile']) {
       for (final verbose in <bool>[true, false]) {
-        test(
-          'add keys in $buildConfiguration under ${verbose ? 'verbose' : 'non-verbose'} mode',
-          () async {
-            infoPlist.writeAsStringSync(emptyPlist);
-            final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
+        test('add keys in $buildConfiguration under ${verbose ? 'verbose' : 'non-verbose'} mode', () async {
+          infoPlist.writeAsStringSync(emptyPlist);
+          final File pipe = buildDirectory.childFile('pipe')..createSync(recursive: true);
 
-            final ProcessResult result = await Process.run(
-              xcodeBackendPath,
-              <String>['test_vm_service_bonjour_service'],
-              environment: <String, String>{
-                'CONFIGURATION': buildConfiguration,
-                'BUILT_PRODUCTS_DIR': buildDirectory.path,
-                'INFOPLIST_PATH': 'Info.plist',
-                if (verbose) 'VERBOSE_SCRIPT_LOGGING': 'YES',
-                'SCRIPT_OUTPUT_STREAM_FILE': pipe.path,
-              },
-            );
+          final ProcessResult result = await Process.run(
+            xcodeBackendPath,
+            <String>['test_vm_service_bonjour_service'],
+            environment: <String, String>{
+              'CONFIGURATION': buildConfiguration,
+              'BUILT_PRODUCTS_DIR': buildDirectory.path,
+              'INFOPLIST_PATH': 'Info.plist',
+              if (verbose) 'VERBOSE_SCRIPT_LOGGING': 'YES',
+              'SCRIPT_OUTPUT_STREAM_FILE': pipe.path,
+            },
+          );
 
-            final String actualInfoPlist = infoPlist.readAsStringSync();
-            expect(actualInfoPlist, contains('NSBonjourServices'));
-            expect(actualInfoPlist, contains('dartVmService'));
-            expect(actualInfoPlist, contains('NSLocalNetworkUsageDescription'));
+          final String actualInfoPlist = infoPlist.readAsStringSync();
+          expect(actualInfoPlist, contains('NSBonjourServices'));
+          expect(actualInfoPlist, contains('dartVmService'));
+          expect(actualInfoPlist, contains('NSLocalNetworkUsageDescription'));
 
-            // Make sure no Xcode compilation error.
-            expect(result.stderr, isNot(startsWith('error:')));
+          // Make sure no Xcode compilation error.
+          expect(result.stderr, isNot(startsWith('error:')));
 
-            const plutilErrorMessage =
-                'Could not extract value, error: No value at that key path or invalid key path: NSBonjourServices';
-            expect(pipe.readAsStringSync(), isNot(contains(plutilErrorMessage)));
-            expect(result.stderr, isNot(contains(plutilErrorMessage)));
-            if (verbose) {
-              expect(result.stdout, contains(plutilErrorMessage));
-            } else {
-              expect(result.stdout, isNot(contains(plutilErrorMessage)));
-            }
+          const plutilErrorMessage =
+              'Could not extract value, error: No value at that key path or invalid key path: NSBonjourServices';
+          expect(pipe.readAsStringSync(), isNot(contains(plutilErrorMessage)));
+          expect(result.stderr, isNot(contains(plutilErrorMessage)));
+          if (verbose) {
+            expect(result.stdout, contains(plutilErrorMessage));
+          } else {
+            expect(result.stdout, isNot(contains(plutilErrorMessage)));
+          }
 
-            expect(result, const ProcessResultMatcher());
-          },
-        );
+          expect(result, const ProcessResultMatcher());
+        });
       }
     }
 

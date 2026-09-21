@@ -35,6 +35,11 @@ bool GoldenPlaygroundTest::OpenPlaygroundHere(
   return false;
 }
 
+bool GoldenPlaygroundTest::OpenPlaygroundHere(
+    const Playground::SinglePassCallback& callback) {
+  return false;
+}
+
 std::shared_ptr<Texture> GoldenPlaygroundTest::CreateTextureForFixture(
     const char* fixture_name,
     bool enable_mipmapping) const {
@@ -53,6 +58,10 @@ absl::StatusOr<RuntimeStage::Map> GoldenPlaygroundTest::OpenAssetAsRuntimeStage(
 }
 
 std::shared_ptr<Context> GoldenPlaygroundTest::GetContext() const {
+  return nullptr;
+}
+
+std::shared_ptr<Context> GoldenPlaygroundTest::MakeContext() const {
   return nullptr;
 }
 

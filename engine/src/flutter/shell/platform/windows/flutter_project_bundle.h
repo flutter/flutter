@@ -35,6 +35,12 @@ enum class FlutterAccessibilityMode {
   IAccessibleEx,
 };
 
+enum class FlutterImpellerSwitch {
+  Default,
+  Enabled,
+  Disabled,
+};
+
 // The data associated with a Flutter project needed to run it in an engine.
 class FlutterProjectBundle {
  public:
@@ -88,6 +94,12 @@ class FlutterProjectBundle {
     return accessibility_mode_;
   }
 
+  // Returns the Impeller enablement switch.
+  FlutterImpellerSwitch impeller_switch() const { return impeller_switch_; }
+
+  // Returns whether the Flutter GPU API is enabled.
+  bool enable_flutter_gpu() const { return enable_flutter_gpu_; }
+
  private:
   std::filesystem::path assets_path_;
   std::filesystem::path icu_path_;
@@ -112,6 +124,12 @@ class FlutterProjectBundle {
 
   // The current accessibility mode.
   FlutterAccessibilityMode accessibility_mode_;
+
+  // The Impeller enablement switch.
+  FlutterImpellerSwitch impeller_switch_ = FlutterImpellerSwitch::Default;
+
+  // Whether the Flutter GPU API is enabled.
+  bool enable_flutter_gpu_ = false;
 };
 
 }  // namespace flutter

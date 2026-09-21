@@ -6,6 +6,7 @@
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/command_buffer_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
@@ -58,13 +59,25 @@ class RenderPassGLESWithDiscardFrameBufferExtTest
     : public TestWithParam<DiscardFrameBufferParams> {};
 
 namespace {
-std::shared_ptr<ContextGLES> CreateFakeGLESContext() {
-  auto dummy_gl_procs = std::make_unique<ProcTableGLES>(kMockResolverGLES);
+std::shared_ptr<ContextGLES> CreateFakeGLESContext(
+    ProcTableGLES::Resolver resolver = kMockResolverGLES) {
+  auto dummy_gl_procs = std::make_unique<ProcTableGLES>(std::move(resolver));
   auto dummy_shader_library = std::vector<std::shared_ptr<fml::Mapping>>{};
   auto flags = Flags{};
   return ContextGLES::Create(flags, std::move(dummy_gl_procs),
                              dummy_shader_library, false);
 }
+
+struct RenderPassGLESContext {
+  std::shared_ptr<MockGLES> mock_gl;
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref;
+  std::shared_ptr<ContextGLES> context;
+  std::shared_ptr<MockWorker> dummy_worker;
+  std::shared_ptr<ReactorGLES> reactor;
+  std::shared_ptr<CommandBuffer> command_buffer;
+  std::shared_ptr<RenderPass> render_pass;
+  std::shared_ptr<PipelineGLES> pipeline;
+};
 }  // namespace
 
 TEST_P(RenderPassGLESWithDiscardFrameBufferExtTest, DiscardFramebufferExt) {
@@ -218,26 +231,21 @@ TEST(RenderPassGLESTest, ResolvingMultisampleTextureCachesResolveFBO) {
   }
 }
 
-class RenderPassGLESViewportTest : public ::testing::Test {
+class RenderPassGLESCommandTest : public ::testing::Test {
  protected:
-  struct RenderPassGLESContext {
-    std::shared_ptr<MockGLES> mock_gl;
-    testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref;
-    std::shared_ptr<ContextGLES> context;
-    std::shared_ptr<MockWorker> dummy_worker;
-    std::shared_ptr<ReactorGLES> reactor;
-    std::shared_ptr<CommandBuffer> command_buffer;
-    std::shared_ptr<RenderPass> render_pass;
-    std::shared_ptr<PipelineGLES> pipeline;
-  };
-
-  RenderPassGLESContext CreateRenderPassGLESContext() {
+  // Builds a mock OpenGL ES context with a render pass and a minimal
+  // pipeline. The [resolver] controls which GL entry points the backend can
+  // see, which is how a caller selects the hardware or emulated instancing
+  // path.
+  static RenderPassGLESContext CreateRenderPassGLESContext(
+      ProcTableGLES::Resolver resolver = kMockResolverGLES) {
     std::unique_ptr<NiceMock<MockGLESImpl>> mock_gl_impl =
         std::make_unique<NiceMock<MockGLESImpl>>();
     testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = *mock_gl_impl;
     std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gl_impl));
 
-    std::shared_ptr<ContextGLES> context = CreateFakeGLESContext();
+    std::shared_ptr<ContextGLES> context =
+        CreateFakeGLESContext(std::move(resolver));
     std::shared_ptr<MockWorker> dummy_worker = std::make_shared<MockWorker>();
     context->AddReactorWorker(dummy_worker);
     std::shared_ptr<ReactorGLES> reactor = context->GetReactor();
@@ -281,7 +289,7 @@ class RenderPassGLESViewportTest : public ::testing::Test {
   }
 };
 
-TEST_F(RenderPassGLESViewportTest, ViewportCachedAcrossCommands) {
+TEST_F(RenderPassGLESCommandTest, ViewportCachedAcrossCommands) {
   auto ctx = CreateRenderPassGLESContext();
   testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
   std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
@@ -311,13 +319,13 @@ TEST_F(RenderPassGLESViewportTest, ViewportCachedAcrossCommands) {
   // first override. We set a catch-all to 0 to ensure no other calls occur.
   EXPECT_CALL(mock_gl_impl_ref, Viewport(_, _, _, _)).Times(0);
   EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 0, 100, 100)).Times(1);
-  EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 50, 50, 50)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 0, 50, 50)).Times(1);
 
   EXPECT_TRUE(render_pass->EncodeCommands());
   EXPECT_TRUE(reactor->React());
 }
 
-TEST_F(RenderPassGLESViewportTest,
+TEST_F(RenderPassGLESCommandTest,
        CommandsWithoutViewportGetRenderPassViewport) {
   auto ctx = CreateRenderPassGLESContext();
   testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
@@ -344,7 +352,7 @@ TEST_F(RenderPassGLESViewportTest,
 
   EXPECT_CALL(mock_gl_impl_ref, Viewport(_, _, _, _)).Times(0);
   EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 0, 100, 100)).Times(2);
-  EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 50, 50, 50)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 0, 50, 50)).Times(1);
 
   EXPECT_TRUE(render_pass->EncodeCommands());
   EXPECT_TRUE(reactor->React());
@@ -353,7 +361,7 @@ TEST_F(RenderPassGLESViewportTest,
 // Sibling regression guard for the bug fixed alongside this test on the
 // Vulkan backend. The GLES backend has always honored the X offset; this
 // asserts that explicitly so a future change can't silently regress it.
-TEST_F(RenderPassGLESViewportTest, ViewportWithNonZeroXOffsetReachesGL) {
+TEST_F(RenderPassGLESCommandTest, ViewportWithNonZeroXOffsetReachesGL) {
   auto ctx = CreateRenderPassGLESContext();
   testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
   std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
@@ -369,6 +377,169 @@ TEST_F(RenderPassGLESViewportTest, ViewportWithNonZeroXOffsetReachesGL) {
 
   EXPECT_CALL(mock_gl_impl_ref, Viewport(_, _, _, _)).Times(0);
   EXPECT_CALL(mock_gl_impl_ref, Viewport(25, 0, 50, 100)).Times(1);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
+// When the driver exposes the hardware instancing entry points, a
+// non-indexed instanced command issues a single glDrawArraysInstanced call
+// that carries the instance count.
+TEST_F(RenderPassGLESCommandTest, HardwareInstancedArrayDraw) {
+  auto ctx = CreateRenderPassGLESContext();
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(3);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  render_pass->SetInstanceCount(4);
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  EXPECT_CALL(mock_gl_impl_ref,
+              DrawArraysInstanced(/*mode=*/_, /*first=*/0, /*count=*/3,
+                                  /*instancecount=*/4))
+      .Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, DrawArrays(_, _, _)).Times(0);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
+// The indexed counterpart: a hardware instanced indexed command issues a
+// single glDrawElementsInstanced call.
+TEST_F(RenderPassGLESCommandTest, HardwareInstancedElementsDraw) {
+  auto ctx = CreateRenderPassGLESContext();
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  DeviceBufferDescriptor index_desc;
+  index_desc.size = 6 * sizeof(uint16_t);
+  index_desc.storage_mode = StorageMode::kHostVisible;
+  auto index_buffer = std::static_pointer_cast<Context>(ctx.context)
+                          ->GetResourceAllocator()
+                          ->CreateBuffer(index_desc);
+  ASSERT_TRUE(index_buffer);
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(6);
+  ASSERT_TRUE(render_pass->SetIndexBuffer(
+      DeviceBuffer::AsBufferView(index_buffer), IndexType::k16bit));
+  render_pass->SetInstanceCount(4);
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  EXPECT_CALL(mock_gl_impl_ref,
+              DrawElementsInstanced(/*mode=*/_, /*count=*/6, /*type=*/_,
+                                    /*indices=*/_, /*instancecount=*/4))
+      .Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, DrawElements(_, _, _, _)).Times(0);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
+// When the hardware instancing entry points are missing, a non-indexed
+// instanced command is emulated by repeating the plain draw once per
+// instance.
+TEST_F(RenderPassGLESCommandTest, EmulatedInstancedArrayDraw) {
+  auto ctx = CreateRenderPassGLESContext(kMockResolverGLESWithoutInstancing);
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(3);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  render_pass->SetInstanceCount(4);
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  EXPECT_CALL(mock_gl_impl_ref,
+              DrawArrays(/*mode=*/_, /*first=*/0, /*count=*/3))
+      .Times(4);
+  EXPECT_CALL(mock_gl_impl_ref, DrawArraysInstanced(_, _, _, _)).Times(0);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
+// The indexed counterpart of the emulation path: the plain indexed draw is
+// repeated once per instance.
+TEST_F(RenderPassGLESCommandTest, EmulatedInstancedElementsDraw) {
+  auto ctx = CreateRenderPassGLESContext(kMockResolverGLESWithoutInstancing);
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  DeviceBufferDescriptor index_desc;
+  index_desc.size = 6 * sizeof(uint16_t);
+  index_desc.storage_mode = StorageMode::kHostVisible;
+  auto index_buffer = std::static_pointer_cast<Context>(ctx.context)
+                          ->GetResourceAllocator()
+                          ->CreateBuffer(index_desc);
+  ASSERT_TRUE(index_buffer);
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(6);
+  ASSERT_TRUE(render_pass->SetIndexBuffer(
+      DeviceBuffer::AsBufferView(index_buffer), IndexType::k16bit));
+  render_pass->SetInstanceCount(4);
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  EXPECT_CALL(mock_gl_impl_ref,
+              DrawElements(/*mode=*/_, /*count=*/6, /*type=*/_, /*indices=*/_))
+      .Times(4);
+  EXPECT_CALL(mock_gl_impl_ref, DrawElementsInstanced(_, _, _, _, _)).Times(0);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
+// Regression guard: a command with no instance count set draws a single
+// instance through the plain, non-instanced entry point.
+TEST_F(RenderPassGLESCommandTest, NonInstancedDrawIssuesSingleDrawArrays) {
+  auto ctx = CreateRenderPassGLESContext();
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(3);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  EXPECT_CALL(mock_gl_impl_ref,
+              DrawArrays(/*mode=*/_, /*first=*/0, /*count=*/3))
+      .Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, DrawArraysInstanced(_, _, _, _)).Times(0);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
+// A command with an explicit instance count of zero draws nothing, matching
+// the Metal and Vulkan backends.
+TEST_F(RenderPassGLESCommandTest, ZeroInstanceCountIssuesNoDraw) {
+  auto ctx = CreateRenderPassGLESContext();
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(3);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  render_pass->SetInstanceCount(0);
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  EXPECT_CALL(mock_gl_impl_ref, DrawArrays(_, _, _)).Times(0);
+  EXPECT_CALL(mock_gl_impl_ref, DrawArraysInstanced(_, _, _, _)).Times(0);
 
   EXPECT_TRUE(render_pass->EncodeCommands());
   EXPECT_TRUE(reactor->React());

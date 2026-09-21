@@ -146,7 +146,6 @@ group("flutter") {
       "//flutter/build/dart/test:gen_dartcli_call",
       "//flutter/build/dart/test:gen_executable_call",
       "//flutter/shell/testing",
-      "//flutter/tools/const_finder",
       "//flutter/tools/engine_tool:tests",
       "//flutter/tools/font_subset",
     ]
@@ -226,6 +225,10 @@ group("unittests") {
       "//flutter/third_party/tonic/tests:tonic_unittests",
       "//flutter/txt:txt_unittests",
     ]
+
+    if (!is_fuchsia) {
+      public_deps += [ "//flutter/lib/gpu:gpu_unittests" ]
+    }
 
     # The accessibility library only supports Mac and Windows at the moment.
     if (is_mac || is_win) {

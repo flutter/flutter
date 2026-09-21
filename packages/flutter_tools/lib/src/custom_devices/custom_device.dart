@@ -120,19 +120,15 @@ class CustomDeviceLogReader extends DeviceLogReader {
 /// A [DevicePortForwarder] that uses commands to forward / unforward a port.
 class CustomDevicePortForwarder extends DevicePortForwarder {
   CustomDevicePortForwarder({
-    required String deviceName,
-    required List<String> forwardPortCommand,
-    required RegExp forwardPortSuccessRegex,
+    required this._deviceName,
+    required this._forwardPortCommand,
+    required this._forwardPortSuccessRegex,
     this.numTries,
     required ProcessManager processManager,
     required Logger logger,
-    Map<String, String> additionalReplacementValues = const <String, String>{},
-  }) : _deviceName = deviceName,
-       _forwardPortCommand = forwardPortCommand,
-       _forwardPortSuccessRegex = forwardPortSuccessRegex,
-       _processManager = processManager,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
-       _additionalReplacementValues = additionalReplacementValues;
+    this._additionalReplacementValues = const <String, String>{},
+  }) : _processManager = processManager,
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
   final String _deviceName;
   final List<String> _forwardPortCommand;
@@ -245,13 +241,11 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
 class CustomDeviceAppSession {
   CustomDeviceAppSession({
     required this.name,
-    required CustomDevice device,
-    required ApplicationPackage appPackage,
+    required this._device,
+    required this._appPackage,
     required Logger logger,
     required ProcessManager processManager,
-  }) : _appPackage = appPackage,
-       _device = device,
-       _logger = logger,
+  }) : _logger = logger,
        _processManager = processManager,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        logReader = CustomDeviceLogReader(name);
@@ -303,6 +297,7 @@ class CustomDeviceAppSession {
         ],
         if (debuggingOptions.startPaused) 'start-paused=true',
         if (debuggingOptions.disableServiceAuthCodes) 'disable-service-auth-codes=true',
+        if (debuggingOptions.disableServiceOriginCheck) 'disable-service-origin-check=true',
         if (debuggingOptions.dartFlags.isNotEmpty) 'dart-flags=${debuggingOptions.dartFlags}',
         if (debuggingOptions.useTestFonts) 'use-test-fonts=true',
         if (debuggingOptions.verboseSystemLogs) 'verbose-logging=true',
@@ -348,12 +343,15 @@ class CustomDeviceAppSession {
     if (packageName == null) {
       throwToolExit('Could not start app, name for $_appPackage is unknown.');
     }
-    final List<String> interpolated =
-        interpolateCommand(_device._config.runDebugCommand, <String, String>{
-          'remotePath': '/tmp/',
-          'appName': packageName,
-          'engineOptions': _getEngineOptionsForCmdline(debuggingOptions, traceStartup, route),
-        }, additionalReplacementValues: additionalReplacementValues);
+    final List<String> interpolated = interpolateCommand(
+      _device._config.runDebugCommand,
+      <String, String>{
+        'remotePath': '/tmp/',
+        'appName': packageName,
+        'engineOptions': _getEngineOptionsForCmdline(debuggingOptions, traceStartup, route),
+      },
+      additionalReplacementValues: additionalReplacementValues,
+    );
 
     final Process process = await _processUtils.start(interpolated);
     assert(_process == null);
@@ -489,7 +487,7 @@ class CustomDevice extends Device {
   ///
   /// If [timeout] is not null and the process doesn't finish in time,
   /// it will be killed with a SIGTERM, false will be returned and the timeout
-  /// will be reported in the log using [Logger.printError]. If [timeout]
+  /// will be reported in the log using [Logger.printTrace]. If [timeout]
   /// is null, it's treated as if it's an infinite timeout.
   Future<bool> tryPing({
     Duration? timeout,
@@ -497,7 +495,13 @@ class CustomDevice extends Device {
   }) async {
     final List<String> interpolated = interpolateCommand(_config.pingCommand, replacementValues);
 
-    final RunResult result = await _processUtils.run(interpolated, timeout: timeout);
+    final RunResult result;
+    try {
+      result = await _processUtils.run(interpolated, timeout: timeout);
+    } on ProcessException catch (e) {
+      _logger.printTrace('Error pinging custom device $id: $e');
+      return false;
+    }
 
     if (result.exitCode != 0) {
       return false;
@@ -778,6 +782,16 @@ class CustomDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => _config.platform ?? TargetPlatform.linux_arm64;
 
   @override
+  Future<CpuArch> get cpuArch async {
+    // Custom devices only support Linux target platforms (see
+    // CustomDeviceConfig), so the arch is derived from that.
+    return switch (_config.platform) {
+      TargetPlatform.linux_x64 => CpuArch.x64,
+      _ => CpuArch.arm64,
+    };
+  }
+
+  @override
   Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {
     final String? appName = app.name;
     if (appName == null) {
@@ -794,13 +808,10 @@ class CustomDevices extends PollingDeviceDiscovery {
   /// given [CustomDevicesConfig].
   CustomDevices({
     required FeatureFlags featureFlags,
-    required ProcessManager processManager,
-    required Logger logger,
-    required CustomDevicesConfig config,
+    required this._processManager,
+    required this._logger,
+    required this._config,
   }) : _customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags),
-       _logger = logger,
-       _processManager = processManager,
-       _config = config,
        super('custom devices');
 
   final CustomDeviceWorkflow _customDeviceWorkflow;

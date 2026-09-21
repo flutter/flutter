@@ -115,6 +115,7 @@ std::unique_ptr<FlutterWindowsEngine> GetTestEngine() {
   properties.assets_path = L"C:\\foo\\flutter_assets";
   properties.icu_data_path = L"C:\\foo\\icudtl.dat";
   properties.aot_library_path = L"C:\\foo\\aot.so";
+  properties.impeller_switch = DefaultImpeller;
   FlutterProjectBundle project(properties);
   auto engine = std::make_unique<FlutterWindowsEngine>(project);
 
@@ -400,6 +401,16 @@ TEST(AccessibilityBridgeWindows, OnDocumentSelectionChanged) {
   ExpectWinEventFromAXEventOnFocusNode(
       1, ui::AXEventGenerator::Event::DOCUMENT_SELECTION_CHANGED,
       ax::mojom::Event::kDocumentSelectionChanged, 2);
+}
+
+TEST(AccessibilityBridgeWindows, OnAccessibilityEnabledChanged) {
+  ExpectWinEventFromAXEvent(1, ui::AXEventGenerator::Event::ENABLED_CHANGED,
+                            ax::mojom::Event::kStateChanged);
+}
+
+TEST(AccessibilityBridgeWindows, OnAccessibilityReadOnlyChanged) {
+  ExpectWinEventFromAXEvent(1, ui::AXEventGenerator::Event::READONLY_CHANGED,
+                            ax::mojom::Event::kStateChanged);
 }
 
 }  // namespace testing

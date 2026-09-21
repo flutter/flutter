@@ -30,6 +30,9 @@ void main() {
         'BUILT_PRODUCTS_DIR': buildDir.path,
         'CONFIGURATION': buildMode,
         'FLUTTER_ROOT': flutterRoot.path,
+        'FLUTTER_BUILD_DIR': 'build',
+        'FLUTTER_BUILD_NAME': '1.0.0',
+        'FLUTTER_BUILD_NUMBER': '1',
         'INFOPLIST_PATH': 'Info.plist',
       },
       commands: <FakeCommand>[
@@ -81,6 +84,9 @@ void main() {
             'ACTION': 'build',
             'BUILT_PRODUCTS_DIR': buildDir.path,
             'FLUTTER_ROOT': flutterRoot.path,
+            'FLUTTER_BUILD_DIR': 'build',
+            'FLUTTER_BUILD_NAME': '1.0.0',
+            'FLUTTER_BUILD_NUMBER': '1',
             'INFOPLIST_PATH': 'Info.plist',
           },
           commands: <FakeCommand>[],
@@ -105,6 +111,9 @@ void main() {
             'BUILT_PRODUCTS_DIR': buildDir.path,
             'CONFIGURATION': buildMode,
             'FLUTTER_ROOT': flutterRoot.path,
+            'FLUTTER_BUILD_DIR': 'build',
+            'FLUTTER_BUILD_NAME': '1.0.0',
+            'FLUTTER_BUILD_NUMBER': '1',
             'INFOPLIST_PATH': 'Info.plist',
           },
           commands: <FakeCommand>[
@@ -185,6 +194,9 @@ void main() {
             'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions,
             'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions,
             'FLUTTER_ROOT': flutterRoot.path,
+            'FLUTTER_BUILD_DIR': 'build',
+            'FLUTTER_BUILD_NAME': '1.0.0',
+            'FLUTTER_BUILD_NUMBER': '1',
             'FRONTEND_SERVER_STARTER_PATH': frontendServerStarterPath,
             'INFOPLIST_PATH': 'Info.plist',
             'SDKROOT': sdkRoot,
@@ -674,6 +686,9 @@ void main() {
             'ACTION': 'build',
             'BUILT_PRODUCTS_DIR': buildDir.path,
             'FLUTTER_ROOT': flutterRoot.path,
+            'FLUTTER_BUILD_DIR': 'build',
+            'FLUTTER_BUILD_NAME': '1.0.0',
+            'FLUTTER_BUILD_NUMBER': '1',
             'INFOPLIST_PATH': 'Info.plist',
           },
           commands: <FakeCommand>[
@@ -725,6 +740,9 @@ void main() {
             'BUILT_PRODUCTS_DIR': buildDir.path,
             'CONFIGURATION': buildMode,
             'FLUTTER_ROOT': flutterRoot.path,
+            'FLUTTER_BUILD_DIR': 'build',
+            'FLUTTER_BUILD_NAME': '1.0.0',
+            'FLUTTER_BUILD_NUMBER': '1',
             'INFOPLIST_PATH': 'Info.plist',
           },
           commands: <FakeCommand>[
@@ -795,6 +813,9 @@ void main() {
             'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions,
             'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions,
             'FLUTTER_ROOT': flutterRoot.path,
+            'FLUTTER_BUILD_DIR': 'build',
+            'FLUTTER_BUILD_NAME': '1.0.0',
+            'FLUTTER_BUILD_NUMBER': '1',
             'FRONTEND_SERVER_STARTER_PATH': frontendServerStarterPath,
             'INFOPLIST_PATH': 'Info.plist',
             'SDKROOT': sdkRoot,
@@ -858,6 +879,9 @@ void main() {
             'BUILT_PRODUCTS_DIR': buildDir.path,
             'CONFIGURATION': buildMode,
             'FLUTTER_ROOT': flutterRoot.path,
+            'FLUTTER_BUILD_DIR': 'build',
+            'FLUTTER_BUILD_NAME': '1.0.0',
+            'FLUTTER_BUILD_NUMBER': '1',
             'INFOPLIST_PATH': 'Info.plist',
             'ARCHS': 'arm64 x86_64',
             'ONLY_ACTIVE_ARCH': 'YES',
@@ -912,6 +936,9 @@ void main() {
             'BUILT_PRODUCTS_DIR': buildDir.path,
             'CONFIGURATION': buildMode,
             'FLUTTER_ROOT': flutterRoot.path,
+            'FLUTTER_BUILD_DIR': 'build',
+            'FLUTTER_BUILD_NAME': '1.0.0',
+            'FLUTTER_BUILD_NUMBER': '1',
             'INFOPLIST_PATH': 'Info.plist',
             'ARCHS': 'arm64',
             'ONLY_ACTIVE_ARCH': 'YES',
@@ -966,6 +993,9 @@ void main() {
             'BUILT_PRODUCTS_DIR': buildDir.path,
             'CONFIGURATION': buildMode,
             'FLUTTER_ROOT': flutterRoot.path,
+            'FLUTTER_BUILD_DIR': 'build',
+            'FLUTTER_BUILD_NAME': '1.0.0',
+            'FLUTTER_BUILD_NUMBER': '1',
             'INFOPLIST_PATH': 'Info.plist',
             'ARCHS': 'arm64 x86_64',
             'NATIVE_ARCH': 'arm64e',
@@ -1055,6 +1085,9 @@ void main() {
           'SOURCE_ROOT': platformDirPath,
           'FLUTTER_APPLICATION_PATH': appPath,
           'FLUTTER_BUILD_DIR': 'build',
+          'FLUTTER_ROOT': '/path/to/flutter',
+          'FLUTTER_BUILD_NAME': '1.0.0',
+          'FLUTTER_BUILD_NUMBER': '1',
           'TARGET_BUILD_DIR': targetBuildDir.path,
           'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
           'EXPANDED_CODE_SIGN_IDENTITY': '12312313',
@@ -1202,6 +1235,9 @@ void main() {
           'SOURCE_ROOT': platformDirPath,
           'FLUTTER_APPLICATION_PATH': appPath,
           'FLUTTER_BUILD_DIR': 'build',
+          'FLUTTER_ROOT': '/path/to/flutter',
+          'FLUTTER_BUILD_NAME': '1.0.0',
+          'FLUTTER_BUILD_NUMBER': '1',
           'TARGET_BUILD_DIR': targetBuildDir.path,
           'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
           'EXPANDED_CODE_SIGN_IDENTITY': codesignIdentity,
@@ -1317,6 +1353,43 @@ void main() {
       expect(testContext.processManager.hasRemainingExpectations, isFalse);
     });
   });
+
+  group('validates generated build settings', () {
+    for (final platform in platforms) {
+      final String platformName = platform.name;
+      test('build for $platformName exits with actionable error when settings are missing', () {
+        final context = TestContext(
+          <String>['build', platformName],
+          <String, String>{'ACTION': 'build'},
+          commands: <FakeCommand>[],
+          fileSystem: fileSystem,
+        );
+        expect(() => context.run(), throwsException);
+        // The actionable fix leads the message, since Xcode only shows the
+        // first line of an error by default.
+        expect(
+          context.stderr,
+          contains(
+            'error: Missing Flutter build settings. Run "flutter build $platformName '
+            '--config-only" to regenerate the Flutter xcconfig files, and verify the '
+            'build configuration for the current scheme includes '
+            '${platform == TargetPlatform.macos ? '#include "ephemeral/Flutter-Generated.xcconfig"' : '#include "Generated.xcconfig"'}.',
+          ),
+        );
+      });
+    }
+
+    test('build exits with error when only some settings are missing', () {
+      final context = TestContext(
+        <String>['build', 'ios'],
+        <String, String>{'FLUTTER_ROOT': '/path/to/flutter', 'FLUTTER_BUILD_DIR': 'build'},
+        commands: <FakeCommand>[],
+        fileSystem: fileSystem,
+      );
+      expect(() => context.run(), throwsException);
+      expect(context.stderr, contains('error: Missing Flutter build settings.'));
+    });
+  });
 }
 
 class TestContext extends Context {
@@ -1325,14 +1398,10 @@ class TestContext extends Context {
     Map<String, String> environment, {
     required this.fileSystem,
     required List<FakeCommand> commands,
-    File? scriptOutputStreamFile,
+    File? super.scriptOutputStreamFile,
     FakeProcessManager? fakeProcessManager,
   }) : processManager = fakeProcessManager ?? FakeProcessManager.list(commands),
-       super(
-         arguments: arguments,
-         environment: environment,
-         scriptOutputStreamFile: scriptOutputStreamFile,
-       );
+       super(arguments: arguments, environment: environment);
 
   final FileSystem fileSystem;
   final FakeProcessManager processManager;

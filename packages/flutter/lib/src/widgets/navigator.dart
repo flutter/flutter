@@ -60,8 +60,10 @@ typedef RouteFactory = Route<dynamic>? Function(RouteSettings settings);
 /// Creates a series of one or more routes.
 ///
 /// Used by [Navigator.onGenerateInitialRoutes].
-typedef RouteListFactory =
-    List<Route<dynamic>> Function(NavigatorState navigator, String initialRoute);
+typedef RouteListFactory = List<Route<dynamic>> Function(
+  NavigatorState navigator,
+  String initialRoute,
+);
 
 /// Creates a [Route] that is to be added to a [Navigator].
 ///
@@ -165,12 +167,11 @@ abstract class Route<T> extends _RoutePlaceholder {
   /// used instead.
   ///
   /// {@template flutter.widgets.navigator.Route.requestFocus}
-  /// If [requestFocus] is not provided, the value of [Navigator.requestFocus] is
+  /// If `requestFocus` is not provided, the value of [Navigator.requestFocus] is
   /// used instead.
   /// {@endtemplate}
-  Route({RouteSettings? settings, bool? requestFocus})
-    : _settings = settings ?? const RouteSettings(),
-      _requestFocus = requestFocus {
+  Route({RouteSettings? settings, this._requestFocus})
+    : _settings = settings ?? const RouteSettings() {
     assert(debugMaybeDispatchCreated('widgets', 'Route<T>', this));
   }
 
@@ -640,6 +641,28 @@ abstract class Route<T> extends _RoutePlaceholder {
   bool get isActive {
     return _navigator?._firstRouteEntryWhereOrNull(_RouteEntry.isRoutePredicate(this))?.isPresent ??
         false;
+  }
+
+  /// Asserts that the given [result] is of a type that can be consumed by this route.
+  ///
+  /// This is used by [Navigator] to provide a clear error message when a route is popped with a mismatched result type.
+  bool _debugCheckCanConsumeResult(Object? result, {required String methodName}) {
+    if (result is! T?) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary(
+          'A request was made to pop a route with a result of type ${result.runtimeType}, but the route expected a value of type $T.',
+        ),
+        ErrorDescription(
+          'This usually happens when the type provided to Navigator.$methodName() '
+          'is not a subtype of the type expected by the Route (e.g. DialogRoute<Null>), '
+          'or when a generic type is explicitly provided to a route creation method '
+          '(such as showRawDialog<T>()) but the popped value does not match this type.',
+        ),
+        DiagnosticsProperty<Route<Object?>>('The route was', this),
+        DiagnosticsProperty<Object?>('The provided result was', result),
+      ]);
+    }
+    return true;
   }
 }
 
@@ -1301,7 +1324,7 @@ const TraversalEdgeBehavior kDefaultRouteDirectionalTraversalEdgeBehavior =
 /// such as Android, the system UI will provide a back button (outside the
 /// bounds of your application) that will allow the user to navigate back
 /// to earlier routes in your application's stack. On platforms that don't
-/// have this build-in navigation mechanism, the use of an [AppBar] (typically
+/// have this built-in navigation mechanism, the use of an [AppBar] (typically
 /// used in the [Scaffold.appBar] property) can automatically add a back
 /// button for user navigation.
 ///
@@ -2024,9 +2047,8 @@ class Navigator extends StatefulWidget {
     TO? result,
     Object? arguments,
   }) {
-    return Navigator.of(
-      context,
-    ).pushReplacementNamed<T, TO>(routeName, arguments: arguments, result: result);
+    return Navigator.of(context)
+        .pushReplacementNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
   /// Replace the current route of the navigator that most tightly encloses the
@@ -2062,9 +2084,8 @@ class Navigator extends StatefulWidget {
     TO? result,
     Object? arguments,
   }) {
-    return Navigator.of(
-      context,
-    ).restorablePushReplacementNamed<T, TO>(routeName, arguments: arguments, result: result);
+    return Navigator.of(context)
+        .restorablePushReplacementNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
   /// Pop the current route off the navigator that most tightly encloses the
@@ -2121,9 +2142,8 @@ class Navigator extends StatefulWidget {
     TO? result,
     Object? arguments,
   }) {
-    return Navigator.of(
-      context,
-    ).popAndPushNamed<T, TO>(routeName, arguments: arguments, result: result);
+    return Navigator.of(context)
+        .popAndPushNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
   /// Pop the current route off the navigator that most tightly encloses the
@@ -2158,9 +2178,8 @@ class Navigator extends StatefulWidget {
     TO? result,
     Object? arguments,
   }) {
-    return Navigator.of(
-      context,
-    ).restorablePopAndPushNamed<T, TO>(routeName, arguments: arguments, result: result);
+    return Navigator.of(context)
+        .restorablePopAndPushNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
   /// Push the route with the given name onto the navigator that most tightly
@@ -2229,9 +2248,8 @@ class Navigator extends StatefulWidget {
     RoutePredicate predicate, {
     Object? arguments,
   }) {
-    return Navigator.of(
-      context,
-    ).pushNamedAndRemoveUntil<T>(newRouteName, predicate, arguments: arguments);
+    return Navigator.of(context)
+        .pushNamedAndRemoveUntil<T>(newRouteName, predicate, arguments: arguments);
   }
 
   /// Push the route with the given name onto the navigator that most tightly
@@ -2267,9 +2285,8 @@ class Navigator extends StatefulWidget {
     RoutePredicate predicate, {
     Object? arguments,
   }) {
-    return Navigator.of(
-      context,
-    ).restorablePushNamedAndRemoveUntil<T>(newRouteName, predicate, arguments: arguments);
+    return Navigator.of(context)
+        .restorablePushNamedAndRemoveUntil<T>(newRouteName, predicate, arguments: arguments);
   }
 
   /// Push the given route onto the navigator that most tightly encloses the
@@ -2439,9 +2456,8 @@ class Navigator extends StatefulWidget {
     TO? result,
     Object? arguments,
   }) {
-    return Navigator.of(
-      context,
-    ).restorablePushReplacement<T, TO>(routeBuilder, result: result, arguments: arguments);
+    return Navigator.of(context)
+        .restorablePushReplacement<T, TO>(routeBuilder, result: result, arguments: arguments);
   }
 
   /// Push the given route onto the navigator that most tightly encloses the
@@ -2535,9 +2551,8 @@ class Navigator extends StatefulWidget {
     RoutePredicate predicate, {
     Object? arguments,
   }) {
-    return Navigator.of(
-      context,
-    ).restorablePushAndRemoveUntil<T>(newRouteBuilder, predicate, arguments: arguments);
+    return Navigator.of(context)
+        .restorablePushAndRemoveUntil<T>(newRouteBuilder, predicate, arguments: arguments);
   }
 
   /// Replaces a route on the navigator that most tightly encloses the given
@@ -3006,11 +3021,7 @@ class Navigator extends StatefulWidget {
         return true;
       }());
       result.add(
-        navigator._routeNamed<dynamic>(
-          Navigator.defaultRouteName,
-          arguments: null,
-          allowNull: true,
-        ),
+        navigator._routeNamed(Navigator.defaultRouteName, arguments: null, allowNull: true),
       );
       final List<String> routeParts = initialRouteName.split('/');
       if (initialRouteName.isNotEmpty) {
@@ -3021,7 +3032,7 @@ class Navigator extends StatefulWidget {
             debugRouteNames!.add(routeName);
             return true;
           }());
-          result.add(navigator._routeNamed<dynamic>(routeName, arguments: null, allowNull: true));
+          result.add(navigator._routeNamed(routeName, arguments: null, allowNull: true));
         }
       }
       if (result.last == null) {
@@ -3045,9 +3056,7 @@ class Navigator extends StatefulWidget {
     } else if (initialRouteName != Navigator.defaultRouteName) {
       // If initialRouteName wasn't '/', then we try to get it with allowNull:true, so that if that fails,
       // we fall back to '/' (without allowNull:true, see below).
-      result.add(
-        navigator._routeNamed<dynamic>(initialRouteName, arguments: null, allowNull: true),
-      );
+      result.add(navigator._routeNamed(initialRouteName, arguments: null, allowNull: true));
     }
     // Null route might be a result of gap in initialRouteName
     //
@@ -3057,7 +3066,7 @@ class Navigator extends StatefulWidget {
     // result = ['A', 'A/B/C'].
     result.removeWhere((Route<dynamic>? route) => route == null);
     if (result.isEmpty) {
-      result.add(navigator._routeNamed<dynamic>(Navigator.defaultRouteName, arguments: null));
+      result.add(navigator._routeNamed(Navigator.defaultRouteName, arguments: null));
     }
     return result.cast<Route<dynamic>>();
   }
@@ -3749,20 +3758,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   bool get _usingPagesAPI => widget.pages != const <Page<dynamic>>[];
 
   void _handleHistoryChanged() {
-    final bool navigatorCanPop = canPop();
-    final bool routeBlocksPop;
-    if (!navigatorCanPop) {
-      final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
-      routeBlocksPop =
-          lastEntry != null && lastEntry.route.popDisposition == RoutePopDisposition.doNotPop;
-    } else {
-      routeBlocksPop = false;
-    }
-    final notification = NavigationNotification(canHandlePop: navigatorCanPop || routeBlocksPop);
     // Avoid dispatching a notification in the middle of a build.
     switch (SchedulerBinding.instance.schedulerPhase) {
       case SchedulerPhase.postFrameCallbacks:
-        notification.dispatch(context);
+        NavigationNotification(canHandlePop: _getNavigatorCanHandlePop()).dispatch(context);
       case SchedulerPhase.idle:
       case SchedulerPhase.midFrameMicrotasks:
       case SchedulerPhase.persistentCallbacks:
@@ -3771,9 +3770,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           if (!mounted) {
             return;
           }
-          notification.dispatch(context);
+          NavigationNotification(canHandlePop: _getNavigatorCanHandlePop()).dispatch(context);
         }, debugLabel: 'Navigator.dispatchNotification');
     }
+  }
+
+  bool _getNavigatorCanHandlePop() {
+    if (canPop()) {
+      return true;
+    }
+    final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+    return lastEntry != null && lastEntry.route.popDisposition == RoutePopDisposition.doNotPop;
   }
 
   bool _debugCheckPageApiParameters() {
@@ -4439,8 +4446,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _RouteEntry? next;
     _RouteEntry? entry = _history[index];
     _RouteEntry? previous = index > 0 ? _history[index - 1] : null;
-    var canRemoveOrAdd =
-        false; // Whether there is a fully opaque route on top to silently remove or add route underneath.
+    var canRemoveOrAdd = false; // Whether there is a fully opaque route on top to silently remove or add route underneath.
     Route<dynamic>?
     poppedRoute; // The route that should trigger didPopNext on the top active route.
     var seenTopActiveRoute = false; // Whether we've seen the route that would get didPopNext.
@@ -4665,7 +4671,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return index < _history.length ? _history[index] : null;
   }
 
-  Route<T?>? _routeNamed<T>(String name, {required Object? arguments, bool allowNull = false}) {
+  Route<Object?>? _routeNamed(String name, {required Object? arguments, bool allowNull = false}) {
     assert(!_debugLocked);
     if (allowNull && widget.onGenerateRoute == null) {
       return null;
@@ -4684,7 +4690,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       return true;
     }());
     final settings = RouteSettings(name: name, arguments: arguments);
-    var route = widget.onGenerateRoute!(settings) as Route<T?>?;
+    Route<Object?>? route = widget.onGenerateRoute!(settings);
     if (route == null && !allowNull) {
       assert(() {
         if (widget.onUnknownRoute == null) {
@@ -4705,7 +4711,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         }
         return true;
       }());
-      route = widget.onUnknownRoute!(settings) as Route<T?>?;
+      route = widget.onUnknownRoute!(settings);
       assert(() {
         if (route == null) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -4753,7 +4759,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @awaitNotRequired
   @optionalTypeArgs
   Future<T?> pushNamed<T extends Object?>(String routeName, {Object? arguments}) {
-    return push<T?>(_routeNamed<T>(routeName, arguments: arguments)!);
+    final Route<Object?> route = _routeNamed(routeName, arguments: arguments)!;
+    return push<Object?>(route).then((Object? result) => result as T?);
   }
 
   /// Push a named route onto the navigator.
@@ -4823,10 +4830,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     TO? result,
     Object? arguments,
   }) {
-    return pushReplacement<T?, TO>(
-      _routeNamed<T>(routeName, arguments: arguments)!,
+    return pushReplacement<Object?, Object?>(
+      _routeNamed(routeName, arguments: arguments)!,
       result: result,
-    );
+    ).then((Object? value) => value as T?);
   }
 
   /// Replace the current route of the navigator by pushing the route named
@@ -4967,7 +4974,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     RoutePredicate predicate, {
     Object? arguments,
   }) {
-    return pushAndRemoveUntil<T?>(_routeNamed<T>(newRouteName, arguments: arguments)!, predicate);
+    return pushAndRemoveUntil<Object?>(
+      _routeNamed(newRouteName, arguments: arguments)!,
+      predicate,
+    ).then((Object? result) => result as T?);
   }
 
   /// Push the route with the given name onto the navigator, and then remove all
@@ -5565,7 +5575,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       return false;
     }
     assert(lastEntry.route._isInstalledIn(this));
-
+    assert(lastEntry.route._debugCheckCanConsumeResult(result, methodName: 'maybePop'));
     // TODO(justinmc): When the deprecated willPop method is removed, delete
     // this code and use only popDisposition, below.
     if (await lastEntry.route.willPop() == RoutePopDisposition.doNotPop) {
@@ -5621,6 +5631,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @optionalTypeArgs
   void pop<T extends Object?>([T? result]) {
     assert(!_debugLocked);
+    assert(() {
+      final _RouteEntry? entry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+      return entry?.route._debugCheckCanConsumeResult(result, methodName: 'pop') ?? true;
+    }());
     assert(() {
       _debugLocked = true;
       return true;
@@ -5692,7 +5706,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         (_RouteEntry e) => _RouteEntry.isPresentPredicate(e) && e != candidate,
       );
 
-      if (next != null && !next.route.willHandlePopInternally && predicate(next.route)) {
+      if (next != null && !candidate.route.willHandlePopInternally && predicate(next.route)) {
         pop<T>(result);
       } else {
         pop();
@@ -5933,7 +5947,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         onNotification: (NavigationNotification notification) {
           // If the state of this Navigator does not change whether or not the
           // whole framework can pop, propagate the Notification as-is.
-          if (notification.canHandlePop || !canPop()) {
+          if (notification.canHandlePop || !_getNavigatorCanHandlePop()) {
             return false;
           }
           // Otherwise, dispatch a new Notification with the correct canPop and
@@ -6060,8 +6074,7 @@ class _NamedRestorationInformation extends _RestorationInformation {
 
   @override
   Route<dynamic> createRoute(NavigatorState navigator) {
-    final Route<dynamic> route = navigator._routeNamed<dynamic>(name, arguments: arguments)!;
-    return route;
+    return navigator._routeNamed(name, arguments: arguments)!;
   }
 }
 

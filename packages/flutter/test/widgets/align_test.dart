@@ -115,4 +115,16 @@ void main() {
     final RenderBox box = tester.renderObject<RenderBox>(find.byType(Align));
     expect(box.size.height, equals(50.0));
   });
+
+  testWidgets('Align does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: Align(child: Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(Align)), Size.zero);
+  });
 }

@@ -46,7 +46,7 @@ void main() {
             ..update(<String>['flutter', 'assets'], <String>[assets.keys.first])
             ..update(
               <String>['dependencies'],
-              <String, String>{'hooks': '^1.0.2', 'data_assets': '^0.19.6'},
+              <String, String>{'hooks': '^2.0.0', 'data_assets': '^0.20.0'},
             );
         });
 

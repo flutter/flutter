@@ -85,8 +85,6 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
 
     VS::FrameInfo frame_info;
     frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
-    frame_info.texture_sampler_y_coord_scale =
-        input_snapshot->texture->GetYCoordScale();
 
     auto transform = entity.GetTransform() * effect_transform.Basis();
     auto transformed_radius =

@@ -137,6 +137,7 @@ abstract class BundleLinuxAssets extends Target {
       dartHookResult: dartHookResult,
       targetPlatform: targetPlatform,
       buildMode: buildMode,
+      flavor: environment.defines[kFlavor],
       additionalContent: <String, DevFSContent>{
         'version.json': DevFSStringContent(versionInfo),
         'NativeAssetsManifest.json': DevFSFileContent(
@@ -202,7 +203,7 @@ class DebugBundleLinuxAssets extends BundleLinuxAssets {
   const DebugBundleLinuxAssets(super.targetPlatform);
 
   @override
-  String get name => 'debug_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
+  String get name => 'debug_bundle_${targetPlatform.getName()}_assets';
 
   @override
   List<Source> get inputs => <Source>[const Source.pattern('{BUILD_DIR}/app.dill')];
@@ -217,7 +218,7 @@ class ProfileBundleLinuxAssets extends BundleLinuxAssets {
   const ProfileBundleLinuxAssets(super.targetPlatform);
 
   @override
-  String get name => 'profile_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
+  String get name => 'profile_bundle_${targetPlatform.getName()}_assets';
 
   @override
   List<Source> get outputs => const <Source>[];
@@ -233,7 +234,7 @@ class ReleaseBundleLinuxAssets extends BundleLinuxAssets {
   const ReleaseBundleLinuxAssets(super.targetPlatform);
 
   @override
-  String get name => 'release_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
+  String get name => 'release_bundle_${targetPlatform.getName()}_assets';
 
   @override
   List<Source> get outputs => const <Source>[];

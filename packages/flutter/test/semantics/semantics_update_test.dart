@@ -19,6 +19,7 @@ typedef SemanticsNodeUpdateObservation = ({
   String hint,
   List<StringAttribute>? hintAttributes,
   Int32List childrenInTraversalOrder,
+  Int32List childrenInHitTestOrder,
   Float64List transform,
 });
 
@@ -267,6 +268,43 @@ void main() {
     handle.dispose();
   }, skip: kIsWeb); // intended: the web engine handles the transform calculation itself.
 
+  testWidgets(
+    'Semantics update does not leak nodes to hit-test order when traversal parent is missing',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      // Pumps a placeholder to trigger the warm up frame.
+      await tester.pumpWidget(const Placeholder(), phase: EnginePhase.build);
+      SemanticsUpdateBuilderSpy.observations.clear();
+
+      const identifier = '111';
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                traversalChildIdentifier: identifier,
+                child: const SizedBox.square(dimension: 10),
+              ),
+              const SizedBox.square(dimension: 10),
+            ],
+          ),
+        ),
+      );
+
+      // SemanticsNode#0 (root) should have 0 children in both traversal order and hit-test order.
+      final SemanticsNodeUpdateObservation? rootObservation =
+          SemanticsUpdateBuilderSpy.observations[0];
+      expect(rootObservation, isNotNull);
+      expect(rootObservation!.childrenInTraversalOrder, isEmpty);
+      expect(rootObservation.childrenInHitTestOrder, isEmpty);
+
+      SemanticsUpdateBuilderSpy.observations.clear();
+      handle.dispose();
+    },
+    skip: kIsWeb, // [intended] the web engine handles the tree grafting itself.
+  );
+
   testWidgets('Semantics update removes detached OverlayPortal traversal child', (
     WidgetTester tester,
   ) async {
@@ -413,6 +451,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
       value: value,
       valueAttributes: valueAttributes,
       childrenInTraversalOrder: childrenInTraversalOrder,
+      childrenInHitTestOrder: childrenInHitTestOrder,
       transform: transform,
     );
   }

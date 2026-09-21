@@ -12,10 +12,11 @@
 #define G_SETTINGS_ENABLE_BACKEND
 #include <gio/gsettingsbackend.h>
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-class FlGnomeSettingsTest : public ::testing::Test {
+class FlGnomeSettingsTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
     // force _g_io_modules_ensure_extension_points_registered() to get called

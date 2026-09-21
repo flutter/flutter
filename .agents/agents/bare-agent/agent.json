@@ -1,0 +1,7 @@
+{
+  "name": "bare-agent",
+  "description": "An agent that only inherits MCP servers and only includes proven reliable skills.",
+  "configPath": {
+    "relativePathToConfig": "config.yaml"
+  }
+}

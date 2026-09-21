@@ -18,9 +18,9 @@ namespace impeller {
 class WaitSetEntry {
  public:
   static std::shared_ptr<WaitSetEntry> Create(vk::UniqueFence p_fence,
-                                              const fml::closure& p_callback) {
+                                              fml::closure p_callback) {
     return std::shared_ptr<WaitSetEntry>(
-        new WaitSetEntry(std::move(p_fence), p_callback));
+        new WaitSetEntry(std::move(p_fence), std::move(p_callback)));
   }
 
   void UpdateSignalledStatus(const vk::Device& device) {
@@ -39,9 +39,8 @@ class WaitSetEntry {
   fml::ScopedCleanupClosure callback_;
   bool is_signalled_ = false;
 
-  WaitSetEntry(vk::UniqueFence p_fence, const fml::closure& p_callback)
-      : fence_(std::move(p_fence)),
-        callback_(fml::ScopedCleanupClosure{p_callback}) {}
+  WaitSetEntry(vk::UniqueFence p_fence, fml::closure p_callback)
+      : fence_(std::move(p_fence)), callback_(std::move(p_callback)) {}
 
   WaitSetEntry(const WaitSetEntry&) = delete;
 
@@ -61,21 +60,29 @@ FenceWaiterVK::~FenceWaiterVK() {
   Terminate();
 }
 
-bool FenceWaiterVK::AddFence(vk::UniqueFence fence,
-                             const fml::closure& callback) {
-  if (!fence || !callback) {
-    return false;
+fml::Status FenceWaiterVK::AddFence(
+    vk::UniqueFence fence,
+    const std::function<fml::Status(vk::Fence)>& submit_callback,
+    fml::closure completion_callback) {
+  if (!fence || !submit_callback || !completion_callback) {
+    return fml::Status(fml::StatusCode::kInvalidArgument, "Invalid arguments");
   }
   {
     // Maintain the invariant that terminate_ is accessed only under the lock.
     std::scoped_lock lock(wait_set_mutex_);
     if (terminate_) {
-      return false;
+      return fml::Status(fml::StatusCode::kCancelled,
+                         "Fence waiter is terminated");
     }
-    wait_set_.emplace_back(WaitSetEntry::Create(std::move(fence), callback));
+    auto submit_status = submit_callback(fence.get());
+    if (!submit_status.ok()) {
+      return submit_status;
+    }
+    wait_set_.emplace_back(
+        WaitSetEntry::Create(std::move(fence), std::move(completion_callback)));
   }
   wait_set_cv_.notify_one();
-  return true;
+  return fml::Status();
 }
 
 static std::vector<vk::Fence> GetFencesForWaitSet(const WaitSet& set) {

@@ -750,6 +750,9 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
     // behavior.
     // At time of change, Apple does not expose any other type of API or signal
     // that the X/Y axes have been flipped.
+    //
+    // The same conversion happens on Web for macOS, see:
+    // https://github.com/flutter/flutter/issues/159868
     double scaledDeltaX = -event.scrollingDeltaX * pixelsPerLine * scaleFactor;
     double scaledDeltaY = -event.scrollingDeltaY * pixelsPerLine * scaleFactor;
     if (event.modifierFlags & NSShiftKeyMask) {
@@ -795,19 +798,29 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   return std::make_shared<flutter::AccessibilityBridgeMac>(engine, self);
 }
 
+- (BOOL)enableWideGamut {
+  FlutterDartProject* project = _project ?: self.engine.project;
+  BOOL enableWideGamut = project.enableWideGamut;
+  if (self.engine) {
+    const std::vector<std::string>& switches = self.engine.switches;
+    if (std::find(switches.begin(), switches.end(), "--enable-impeller=false") != switches.end()) {
+      enableWideGamut = NO;
+    }
+  }
+  return enableWideGamut;
+}
+
 - (nonnull FlutterView*)createFlutterViewWithMTLDevice:(id<MTLDevice>)device
                                           commandQueue:(id<MTLCommandQueue>)commandQueue {
-  FlutterDartProject* project = _project ?: self.engine.project;
   return [[FlutterView alloc] initWithMTLDevice:device
                                    commandQueue:commandQueue
                                        delegate:self
                                  viewIdentifier:_viewIdentifier
-                                enableWideGamut:project.enableWideGamut];
+                                enableWideGamut:self.enableWideGamut];
 }
 
 - (void)updateWideGamutForScreen {
-  FlutterDartProject* project = _project ?: self.engine.project;
-  if (!project.enableWideGamut) {
+  if (!self.enableWideGamut) {
     return;
   }
   NSScreen* screen = self.view.window.screen;

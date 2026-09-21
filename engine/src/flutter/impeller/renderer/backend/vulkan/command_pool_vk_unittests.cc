@@ -5,6 +5,7 @@
 #include "flutter/testing/testing.h"  // IWYU pragma: keep.
 #include "fml/synchronization/waitable_event.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
+#include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 
@@ -234,6 +235,52 @@ TEST(CommandPoolRecyclerVKTest, RecyclerGlobalPoolMapSize) {
   pool.reset();
   recycler->Dispose();
   EXPECT_EQ(CommandPoolRecyclerVK::GetGlobalPoolCount(*context), 0);
+
+  context->Shutdown();
+}
+
+class MockDeviceHolder : public DeviceHolderVK {
+ public:
+  explicit MockDeviceHolder(vk::Device device) : device_(device) {}
+  const vk::Device& GetDevice() const override { return device_; }
+  const vk::PhysicalDevice& GetPhysicalDevice() const override {
+    return physical_device_;
+  }
+
+ private:
+  vk::Device device_;
+  vk::PhysicalDevice physical_device_;
+};
+
+TEST(CommandPoolVKTest, DestroysCleanlyIfDeviceIsDestroyed) {
+  auto const context = MockVulkanContextBuilder().Build();
+
+  // Create a vk::UniqueCommandPool
+  vk::CommandPoolCreateInfo info;
+  info.setQueueFamilyIndex(context->GetGraphicsQueue()->GetIndex().family);
+  info.setFlags(vk::CommandPoolCreateFlagBits::eTransient);
+
+  auto device = context->GetDevice();
+  auto [result, pool] = device.createCommandPoolUnique(info);
+  ASSERT_EQ(result, vk::Result::eSuccess);
+
+  auto device_holder = std::make_shared<MockDeviceHolder>(device);
+  std::weak_ptr<DeviceHolderVK> weak_device_holder = device_holder;
+
+  auto command_pool = std::make_unique<CommandPoolVK>(
+      std::move(pool), std::vector<vk::UniqueCommandBuffer>{}, context,
+      weak_device_holder);
+
+  // Now, destroy the device holder.
+  device_holder.reset();
+
+  // Now, destroy the command pool. Since the device holder is dead, this should
+  // NOT call vkDestroyCommandPool.
+  command_pool.reset();
+
+  auto const called = ReclaimAndGetMockVulkanFunctions(context);
+  EXPECT_EQ(std::count(called->begin(), called->end(), "vkDestroyCommandPool"),
+            0u);
 
   context->Shutdown();
 }

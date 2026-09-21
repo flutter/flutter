@@ -208,10 +208,9 @@ bool BlitPassMTL::OnCopyBufferToTextureCommand(
   auto source_size_mtl = MTLSizeMake(destination_region.GetWidth(),
                                      destination_region.GetHeight(), 1);
 
-  auto destination_bytes_per_pixel =
-      BytesPerPixelForPixelFormat(destination->GetTextureDescriptor().format);
   auto source_bytes_per_row =
-      destination_region.GetWidth() * destination_bytes_per_pixel;
+      BytesPerRowForTextureWidth(destination->GetTextureDescriptor().format,
+                                 destination_region.GetWidth());
 
 #ifdef IMPELLER_DEBUG
   if (is_metal_trace_active_) {

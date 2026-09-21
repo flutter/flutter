@@ -130,6 +130,5 @@ public class DeferredComponentChannel {
       }
       componentNameToResults.get(componentName).clear();
     }
-    return;
   }
 }

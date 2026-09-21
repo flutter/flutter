@@ -238,6 +238,26 @@ abstract class Gradient {
   /// Returns a new [Gradient] with each color set to the given opacity.
   Gradient withOpacity(double opacity);
 
+  /// Returns a copy of this gradient with all of its [colors] replaced by the
+  /// given `color`.
+  ///
+  /// The geometry of the gradient (such as its [stops] and the
+  /// subclass-specific positioning) is preserved, so the result paints as a
+  /// uniform `color`. This is useful to represent a solid color as a gradient,
+  /// for example when interpolating between a color and a gradient with [lerp].
+  ///
+  /// Subclasses should override this method to preserve their own geometry. The
+  /// base implementation returns a [LinearGradient]; this is sufficient because
+  /// a gradient with uniform colors paints as a solid color regardless of its
+  /// geometry.
+  Gradient fromColor(Color color) {
+    return LinearGradient(
+      colors: List<Color>.filled(colors.length, color),
+      stops: stops,
+      transform: transform,
+    );
+  }
+
   /// Linearly interpolates from another [Gradient] to `this`.
   ///
   /// When implementing this method in subclasses, return null if this class
@@ -450,6 +470,18 @@ class LinearGradient extends Gradient {
       begin: begin,
       end: end,
       colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)!).toList(),
+      stops: stops,
+      tileMode: tileMode,
+      transform: transform,
+    );
+  }
+
+  @override
+  LinearGradient fromColor(Color color) {
+    return LinearGradient(
+      begin: begin,
+      end: end,
+      colors: List<Color>.filled(colors.length, color),
       stops: stops,
       tileMode: tileMode,
       transform: transform,
@@ -742,6 +774,20 @@ class RadialGradient extends Gradient {
       center: center,
       radius: radius,
       colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)!).toList(),
+      stops: stops,
+      tileMode: tileMode,
+      focal: focal,
+      focalRadius: focalRadius,
+      transform: transform,
+    );
+  }
+
+  @override
+  RadialGradient fromColor(Color color) {
+    return RadialGradient(
+      center: center,
+      radius: radius,
+      colors: List<Color>.filled(colors.length, color),
       stops: stops,
       tileMode: tileMode,
       focal: focal,
@@ -1052,6 +1098,19 @@ class SweepGradient extends Gradient {
       startAngle: startAngle,
       endAngle: endAngle,
       colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)!).toList(),
+      stops: stops,
+      tileMode: tileMode,
+      transform: transform,
+    );
+  }
+
+  @override
+  SweepGradient fromColor(Color color) {
+    return SweepGradient(
+      center: center,
+      startAngle: startAngle,
+      endAngle: endAngle,
+      colors: List<Color>.filled(colors.length, color),
       stops: stops,
       tileMode: tileMode,
       transform: transform,

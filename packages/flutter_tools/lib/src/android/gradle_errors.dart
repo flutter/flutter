@@ -70,6 +70,7 @@ final gradleErrors = <GradleHandledError>[
   r8DexingBugInAgp73Handler,
   minSdkVersionHandler,
   transformInputIssueHandler,
+  javaHeapSpaceHandler,
   lockFileDepMissingHandler,
   minCompileSdkVersionHandler,
   incompatibleJavaAndAgpVersionsHandler,
@@ -346,6 +347,26 @@ final transformInputIssueHandler = GradleHandledError(
   eventLabel: 'transform-input-issue',
 );
 
+/// Handler when a Gradle task fails due to Java heap space exhaustion.
+@visibleForTesting
+final javaHeapSpaceHandler = GradleHandledError(
+  test: _lineMatcher(const <String>['Java heap space']),
+  handler:
+      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
+        final String textInBold = globals.logger.terminal.bolden(
+          'Adjust the maximum Java heap allocation according to the documentation:\n'
+          'https://docs.gradle.org/current/userguide/config_gradle.html#sec:configuring_jvm_memory',
+        );
+        globals.printBox(
+          '${globals.logger.terminal.warningMark} The Gradle build ran out of Java heap space.\n'
+          '$textInBold',
+          title: _boxTitle,
+        );
+        return GradleBuildStatus.exit;
+      },
+  eventLabel: 'java-heap-space',
+);
+
 /// Handler when a dependency is missing in the lockfile.
 @visibleForTesting
 final lockFileDepMissingHandler = GradleHandledError(
@@ -424,22 +445,21 @@ final _minCompileSdkVersionPattern = RegExp(r'The minCompileSdk \(([0-9]+)\) spe
 @visibleForTesting
 final minCompileSdkVersionHandler = GradleHandledError(
   test: _minCompileSdkVersionPattern.hasMatch,
-  handler:
-      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-        final Match? minCompileSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
-        assert(minCompileSdkVersionMatch?.groupCount == 1);
+  handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
+    final Match? minCompileSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
+    assert(minCompileSdkVersionMatch?.groupCount == 1);
 
-        final File gradleFile = project.android.appGradleFile;
-        globals.printBox(
-          '${globals.logger.terminal.warningMark} Your project requires a higher compileSdk version.\n'
-          'Fix this issue by bumping the compileSdk version in ${gradleFile.path}:\n'
-          'android {\n'
-          '  compileSdk ${minCompileSdkVersionMatch?.group(1)}\n'
-          '}',
-          title: _boxTitle,
-        );
-        return GradleBuildStatus.exit;
-      },
+    final File gradleFile = project.android.appGradleFile;
+    globals.printBox(
+      '${globals.logger.terminal.warningMark} Your project requires a higher compileSdk version.\n'
+      'Fix this issue by bumping the compileSdk version in ${gradleFile.path}:\n'
+      'android {\n'
+      '  compileSdk ${minCompileSdkVersionMatch?.group(1)}\n'
+      '}',
+      title: _boxTitle,
+    );
+    return GradleBuildStatus.exit;
+  },
   eventLabel: 'min-compile-sdk-version',
 );
 
@@ -655,6 +675,9 @@ final missingNdkSourcePropertiesFile = GradleHandledError(
     ${globals.logger.terminal.warningMark} This is likely due to a malformed download of the NDK.
     This can be fixed by deleting the local NDK copy at: $path
     and allowing the Android Gradle Plugin to automatically re-download it.
+
+    If this keeps happening after a clean retry, Flutter's tool-side Android NDK provisioning
+    may have failed or been skipped before Gradle fell back to AGP's automatic download path.
     ''', title: _boxTitle);
         return GradleBuildStatus.exit;
       },

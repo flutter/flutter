@@ -3,6 +3,7 @@
 - Regressions should be [reverted first](../infra/Landing-Changes-With-Autosubmit.md) and questions asked later. Bringing the tree to green is higher priority.
 - A breaking change is one that breaks the tests in the flutter/tests repo, and those need a migration guide.
 - Expect that a new patch will be reviewed within two weeks, unless it is fixing a P0 bug in which case it should be reviewed the same day. If it has not been reviewed in that timeframe, reach out on [Chat](Chat.md). Remember that reviewers are human beings with additional professional and personal responsibilities.
+- Contributors without write access are limited to **2 concurrent open pull requests** per repository (draft PRs are exempt). Focus on merging or closing existing PRs before opening new ones.
 
 ## Introduction
 
@@ -35,18 +36,16 @@ The general process for submitting code to a Flutter repository is as follows:
    we close the PR without landing it, so other people can take it over.
 
 3. Discuss your design on the issue. See [Design Documents](Design-Documents.md) for advice.
-   You may find it useful to create a Google Doc to
-   solicit feedback (use the template at [flutter.dev/go/template](https://flutter.dev/go/template)).
-   You may wish to e-mail the mailing list, or discuss the topic
-   on our [Chat](Chat.md) channels. The more buy-in you get from the rest of the
+   For larger architectural proposals or breaking changes, follow the [Flutter RFC process](https://github.com/flutter/rfc) (see [RFC 000.0002](https://github.com/flutter/rfc/blob/main/rfc/000.0002-flutter-rfc-review-process.md)).
+   You may wish to discuss the topic on our [Chat](Chat.md) channels. The more buy-in you get from the rest of the
    team (especially the relevant leads), the easier the rest of the process will be.
    You can put the label "proposal" on your issue to indicate that you have a design
    up for discussion in the issue.
 
 4. If the work you are doing affects our privacy surface, such as modifying how
    we collect analytics, crash logs, or the like, then please reach out to a Googler
-   to discuss your changes (you'll want to start a Google Doc to
-   solicit feedback, use the template at [flutter.dev/go/template](https://flutter.dev/go/template)),
+   to discuss your changes (you'll want to start an RFC or design doc to
+   solicit feedback, see [Design Documents](Design-Documents.md)),
    who will be happy to loop in one of our engineers who explicitly focus on privacy issues
    so that they're able to give feedback on the work you plan to do.
 
@@ -62,6 +61,10 @@ The general process for submitting code to a Flutter repository is as follows:
 
 6. Submit this branch as a PR to the relevant Flutter repository.
    _(See also: [Signing commits](./Signing-commits.md))_
+
+   To ensure maintainers can provide timely and high-quality feedback, contributors without write access are limited to **2 concurrent open pull requests** per public Flutter repository.
+   * **Draft PRs are exempt**: Work-in-progress draft PRs do not count toward your limit.
+   * **Focus on Quality**: Once you reach the limit, please focus on merging or closing your existing PRs before opening new ones.
 
    All submissions to Google Open Source projects need to follow
    [Google’s Contributor License Agreement (CLA)](https://cla.developers.google.com/),
@@ -506,7 +509,7 @@ In cases where these tests pass but we can nonetheless imagine reasonable scenar
 
 ### 2. Evaluate the breaking change
 
-If your change counts as a breaking change, seriously consider whether it is truly necessary and beneficial. Consider writing a [design document](Design-Documents.md). Discuss it with your code reviewer. Raise it in [Chat](Chat.md).
+If your change counts as a breaking change, seriously consider whether it is truly necessary and beneficial. Per the [RFC Threshold](https://github.com/flutter/rfc/blob/main/rfc/000.0002-flutter-rfc-review-process.md#when-to-write-an-rfc-the-threshold), breaking changes require a full design doc (RFC) in the [flutter/rfc](https://github.com/flutter/rfc) repository before coding the change. The RFC is categorized under the primary subsystem being changed (e.g. `130` for widgets, `210` for graphics; see [RFC 000.0001](https://github.com/flutter/rfc/blob/main/rfc/000.0001-flutter-architecture-and-reference-taxonomy.md) for taxonomy). Also review our guidance in [Design Documents](Design-Documents.md), discuss it with your code reviewer, and raise it in [Chat](Chat.md).
 
 ### 3. Prepare your change.
 
@@ -522,7 +525,7 @@ Stage your change and the documentation for your change. Typically this will be 
 
 If possible, include flutter fixes to aid users in migration. Whether or not the change is supported by flutter fix should be included in the migration guide. To learn about authoring fixes, see [Data driven Fixes](Data-driven-Fixes.md).
 
-**Use our [breaking change migration guide template](https://github.com/flutter/website/blob/main/src/content/release/breaking-changes/template.md)** (follow all the instructions in the comments) to create the migration guide that describes the change. Do not land the migration guide at this time. You will need to update it before you land it in the last step.
+**Use our [breaking change migration guide template](https://github.com/flutter/website/blob/main/sites/docs/src/content/release/breaking-changes/template.md)** (follow all the instructions in the comments) to create the migration guide that describes the change. Do not land the migration guide at this time. You will need to update it before you land it in the last step.
 
 ### 4. Land your change.
 
@@ -536,7 +539,7 @@ During this process, each individual PR does not break any tests, so it should n
 Once everything has landed:
 
 * update your migration guide based on your experience migrating everyone,
-* update the timeline on the guide, and push it to [the flutter.dev Web site](https://docs.flutter.dev/release/breaking-changes) (don't forget to update the [index](https://github.com/flutter/website/blob/main/src/content/release/breaking-changes/index.md) of that directory as well),
+* update the timeline on the guide, and push it to [the flutter.dev Web site](https://docs.flutter.dev/release/breaking-changes) (don't forget to update the [index](https://github.com/flutter/website/blob/main/sites/docs/src/content/release/breaking-changes/index.md) of that directory as well),
 * e-mail a copy to [flutter-announce@](https://groups.google.com/g/flutter-announce),
 * notify the `#announcements` channel on our [Chat](Chat.md), and
 * add the [**c: API break** label](https://github.com/flutter/flutter/labels/c%3A%20API%20break) to the relevant issues, so they get listed in the upcoming Release notes.

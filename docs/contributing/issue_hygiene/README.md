@@ -46,7 +46,7 @@ there could be information that has not been posted, ask on our Discord server i
 
 ### Issues are not always the best venue for discussions
 
-Discussions within an issue should remain focused on the topic, specifically about what the filed issue is and how to solve it. Broader discussions are best suited to happen on Discord (see [Chat](../Chat.md)) or in design docs using Google Docs (see [Design Documents](../Design-Documents.md)). This is because GitHub hides comments, doesn't have threading, notifications get lost in the swamp of other GitHub e-mails, etc.
+Discussions within an issue should remain focused on the topic, specifically about what the filed issue is and how to solve it. Broader discussions are best suited to happen on Discord (see [Chat](../Chat.md)) or in RFCs and design documents (see [Design Documents](../Design-Documents.md) and [flutter/rfc](https://github.com/flutter/rfc)). This is because GitHub hides comments, doesn't have threading, notifications get lost in the swamp of other GitHub e-mails, etc.
 
 If you move to another tool for part of the discussion, remember to add a summary of the discussion and document any decisions that took place. This allows people following the issue to keep updated and continue to participate.
 
@@ -285,9 +285,6 @@ careers.
 
 The `blocked` label can be used to indicate that a particular issue is unable to make progress until some other problem is resolved. This is particularly useful if you use your own list of assigned issues to drive your work.
 
-The `good first issue` label should be used on issues that seem like friendly introductions to contributing to Flutter. They should be relatively well-understood issues that are not controversial, do not require a design doc, and do not require a deep understanding of our stack, but are sufficiently involved that they at least require a basic test to be added.
-
-
 ## Milestones
 
 We do not use GitHub milestones to track work.
@@ -345,7 +342,7 @@ Do _not_ file bugs that meet the following criteria:
 If you have an idea that you would like to land, the recommended process is:
 
 1. [File a bug](https://github.com/flutter/flutter/issues/new/choose) describing the problem.
-2. Write a [design doc](https://flutter.dev/go/template) that references this problem and describes your solution.
+2. Write an [RFC or design document](../Design-Documents.md) (following the [Flutter RFC process](https://github.com/flutter/rfc)) that references this problem and describes your solution.
 3. Socialize your design on the bug you filed and on [Chat](../Chat.md). Collect feedback from various people.
 4. Once you have received feedback, if it is mostly positive, implement your idea and submit it. See the [Tree Hygiene](../Tree-hygiene.md) wiki page for details on submitting PRs.
 

@@ -18,14 +18,42 @@
 #include "impeller/typographer/glyph_atlas.h"
 
 namespace impeller {
+namespace {
+
+// On Linux we use FreeType and on Windows we use DirectWrite/GDI to rasterize
+// glyphs. Because we render in linear space, light text on a dark background
+// would look too thin without correction. To compensate, we calculate a
+// contrast/gamma correction factor based on the text color's luminance, which
+// is used in the shader to adjust the glyph's coverage.
+constexpr bool kPlatformGammaCorrectionDefault =
+#if FML_OS_LINUX || FML_OS_WIN
+    true;
+#else
+    false;
+#endif
+
+// The contrast/gamma exponent applied in the shader ranges from 1.0 for black
+// text to 1.0 + kMaxGammaCorrection for white text. This interpolates the
+// exponent based on the text color's luminance. On Linux, 1.2 equates to a
+// maximum 2.2 sRGB gamma. On Windows, DirectWrite and GDI employ higher base
+// gamma and contrast enhancement, so 1.6 is used to match Skia's perceived
+// visual weight and edge sharpness.
+constexpr Scalar kMaxGammaCorrection =
+#if FML_OS_WIN
+    1.6f;
+#else
+    1.2f;
+#endif
+
 Point SizeToPoint(Size size) {
   return Point(size.width, size.height);
 }
+}  // namespace
 
 using VS = GlyphAtlasPipeline::VertexShader;
 using FS = GlyphAtlasPipeline::FragmentShader;
 
-TextContents::TextContents() = default;
+TextContents::TextContents() {}
 
 TextContents::~TextContents() = default;
 
@@ -58,9 +86,7 @@ void TextContents::SetForceTextColor(bool value) {
 }
 
 std::optional<Rect> TextContents::GetCoverage(const Entity& entity) const {
-  const Matrix entity_offset_transform =
-      entity.GetTransform() * Matrix::MakeTranslation(position_);
-  return frame_->GetBounds().TransformBounds(entity_offset_transform);
+  return frame_->GetBounds().TransformBounds(entity.GetTransform());
 }
 
 void TextContents::SetTextProperties(
@@ -93,7 +119,7 @@ Scalar AttractToOne(Scalar x) {
 }  // namespace
 
 void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
-                                     const Matrix& entity_transform,
+                                     const Matrix& entity_offset_transform,
                                      const std::shared_ptr<TextFrame>& frame,
                                      Point position,
                                      const Matrix& screen_transform,
@@ -108,9 +134,6 @@ void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
 
   constexpr std::array<Point, 4> unit_points = {Point{0, 0}, Point{1, 0},
                                                 Point{0, 1}, Point{1, 1}};
-
-  Matrix entity_offset_transform =
-      entity_transform * Matrix::MakeTranslation(position);
 
   ISize atlas_size = atlas->GetTexture()->GetSize();
   bool is_translation_scale = entity_offset_transform.IsTranslationScaleOnly();
@@ -267,6 +290,16 @@ bool TextContents::Render(const ContentContext& renderer,
   frag_info.use_text_color = force_text_color_ ? 1.0 : 0.0;
   frag_info.text_color = ToVector(color.Premultiply());
   frag_info.is_color_glyph = type == GlyphAtlas::Type::kColorBitmap;
+  bool enable_gamma_correction = frame_->GetEnableGammaCorrection().value_or(
+      kPlatformGammaCorrectionDefault);
+  if (enable_gamma_correction) {
+    // Calculate relative luminance using Rec. 709 luma coefficients.
+    Scalar luma =
+        color.red * 0.2126f + color.green * 0.7152f + color.blue * 0.0722f;
+    frag_info.text_contrast = 1.0f + luma * kMaxGammaCorrection;
+  } else {
+    frag_info.text_contrast = 1.0f;
+  }
 
   FS::BindFragInfo(
       pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frag_info));

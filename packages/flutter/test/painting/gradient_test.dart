@@ -370,6 +370,80 @@ void main() {
     );
   });
 
+  test('LinearGradient.fromColor replaces all colors and preserves geometry', () {
+    const testGradient = LinearGradient(
+      begin: Alignment.bottomRight,
+      end: Alignment.topCenter,
+      colors: <Color>[Color(0xFFFFFFFF), Color(0xAF777777), Color(0x44444444)],
+      stops: <double>[0.0, 0.3, 1.0],
+      tileMode: TileMode.mirror,
+      transform: GradientRotation(1),
+    );
+    final LinearGradient actual = testGradient.fromColor(const Color(0xFF00FF00));
+
+    expect(
+      actual,
+      const LinearGradient(
+        begin: Alignment.bottomRight,
+        end: Alignment.topCenter,
+        colors: <Color>[Color(0xFF00FF00), Color(0xFF00FF00), Color(0xFF00FF00)],
+        stops: <double>[0.0, 0.3, 1.0],
+        tileMode: TileMode.mirror,
+        transform: GradientRotation(1),
+      ),
+    );
+  });
+
+  test('RadialGradient.fromColor replaces all colors and preserves geometry', () {
+    const testGradient = RadialGradient(
+      center: Alignment.topLeft,
+      radius: 0.25,
+      colors: <Color>[Color(0xFFFFFFFF), Color(0x44444444)],
+      focal: Alignment.centerRight,
+      focalRadius: 0.1,
+      tileMode: TileMode.mirror,
+      transform: GradientRotation(1),
+    );
+    final RadialGradient actual = testGradient.fromColor(const Color(0xFF00FF00));
+
+    expect(
+      actual,
+      const RadialGradient(
+        center: Alignment.topLeft,
+        radius: 0.25,
+        colors: <Color>[Color(0xFF00FF00), Color(0xFF00FF00)],
+        focal: Alignment.centerRight,
+        focalRadius: 0.1,
+        tileMode: TileMode.mirror,
+        transform: GradientRotation(1),
+      ),
+    );
+  });
+
+  test('SweepGradient.fromColor replaces all colors and preserves geometry', () {
+    const testGradient = SweepGradient(
+      center: Alignment.topLeft,
+      startAngle: 0.1,
+      endAngle: 2.0,
+      colors: <Color>[Color(0xFFFFFFFF), Color(0x44444444)],
+      tileMode: TileMode.repeated,
+      transform: GradientRotation(1),
+    );
+    final SweepGradient actual = testGradient.fromColor(const Color(0xFF00FF00));
+
+    expect(
+      actual,
+      const SweepGradient(
+        center: Alignment.topLeft,
+        startAngle: 0.1,
+        endAngle: 2.0,
+        colors: <Color>[Color(0xFF00FF00), Color(0xFF00FF00)],
+        tileMode: TileMode.repeated,
+        transform: GradientRotation(1),
+      ),
+    );
+  });
+
   test('LinearGradient.scale preserves transform', () {
     const testGradient = LinearGradient(
       begin: Alignment.bottomRight,

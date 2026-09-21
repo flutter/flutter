@@ -47,18 +47,14 @@ String getSDKNameForIOSEnvironmentType(EnvironmentType environmentType) {
 /// A utility class for interacting with Xcode command line tools.
 class Xcode {
   Xcode({
-    required Platform platform,
+    required this._platform,
     required ProcessManager processManager,
     required Logger logger,
-    required FileSystem fileSystem,
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
+    required this._fileSystem,
+    required this._xcodeProjectInterpreter,
     required UserMessages userMessages,
-    String? flutterRoot,
-  }) : _platform = platform,
-       _fileSystem = fileSystem,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter,
-       _userMessage = userMessages,
-       _flutterRoot = flutterRoot,
+    this._flutterRoot,
+  }) : _userMessage = userMessages,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _logger = logger;
 
@@ -200,7 +196,7 @@ class Xcode {
   /// to run it. `devicectl` is made available in Xcode 15.
   bool get isDevicectlInstalled {
     if (_isDevicectlInstalled == null) {
-      if (currentVersion == null || currentVersion!.major < 15) {
+      if (currentVersion == null) {
         _isDevicectlInstalled = false;
         return _isDevicectlInstalled!;
       }
@@ -235,11 +231,11 @@ class Xcode {
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
     XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
-    bool skipPackageUpdatesAndValidation = true,
+    bool skipPackageValidation = true,
   }) async => _xcodeProjectInterpreter.fetchDependenciesAndGenerateXcodebuildArgs(
     xcodeProject,
     buildDirectory,
-    skipPackageUpdatesAndValidation: skipPackageUpdatesAndValidation,
+    skipPackageValidation: skipPackageValidation,
   );
 
   Future<RunResult> cc(List<String> args) => _run('cc', args);
@@ -272,8 +268,16 @@ class Xcode {
     if (selectPath == null) {
       return null;
     }
-    final String appPath = _fileSystem.path.join(selectPath, 'Applications', 'Simulator.app');
-    return _fileSystem.directory(appPath).existsSync() ? appPath : null;
+    final String deviceHubPath = _fileSystem.path.join(
+      _fileSystem.path.dirname(selectPath),
+      'Applications',
+      'DeviceHub.app',
+    );
+    if (_fileSystem.directory(deviceHubPath).existsSync()) {
+      return deviceHubPath;
+    }
+    final String simulatorPath = _fileSystem.path.join(selectPath, 'Applications', 'Simulator.app');
+    return _fileSystem.directory(simulatorPath).existsSync() ? simulatorPath : null;
   }
 
   /// Gets the version number of the platform for the selected SDK.

@@ -32,35 +32,6 @@ flutter::Size ClampToVirtualScreen(flutter::Size size) {
                        std::clamp(size.height(), 0.0, virtual_screen_height));
 }
 
-void EnableTransparentWindowBackground(HWND hwnd,
-                                       flutter::WindowsProcTable const& win32) {
-  enum ACCENT_STATE { ACCENT_DISABLED = 0 };
-
-  struct ACCENT_POLICY {
-    ACCENT_STATE AccentState;
-    DWORD AccentFlags;
-    DWORD GradientColor;
-    DWORD AnimationId;
-  };
-
-  // Set the accent policy to disable window composition.
-  ACCENT_POLICY accent = {ACCENT_DISABLED, 2, static_cast<DWORD>(0), 0};
-  flutter::WindowsProcTable::WINDOWCOMPOSITIONATTRIBDATA data = {
-      .Attrib =
-          flutter::WindowsProcTable::WINDOWCOMPOSITIONATTRIB::WCA_ACCENT_POLICY,
-      .pvData = &accent,
-      .cbData = sizeof(accent)};
-  win32.SetWindowCompositionAttribute(hwnd, &data);
-
-  // Extend the frame into the client area and set the window's system
-  // backdrop type for visual effects.
-  MARGINS const margins = {-1};
-  win32.DwmExtendFrameIntoClientArea(hwnd, &margins);
-  INT effect_value = 1;
-  win32.DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &effect_value,
-                              sizeof(BOOL));
-}
-
 // Retrieves the calling thread's last-error code message as a string,
 // or a fallback message if the error message cannot be formatted.
 std::string GetLastErrorAsString() {
@@ -208,10 +179,13 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
     FlutterWindowsEngine* engine,
     const WindowSizeRequest& preferred_size,
     const WindowConstraints& preferred_constraints,
-    LPCWSTR title) {
-  return std::unique_ptr<HostWindow>(new HostWindowRegular(
-      window_manager, engine, preferred_size,
-      FromWindowConstraints(preferred_constraints), title));
+    LPCWSTR title,
+    bool sized_to_content,
+    bool resizable) {
+  return std::unique_ptr<HostWindow>(
+      new HostWindowRegular(window_manager, engine, preferred_size,
+                            FromWindowConstraints(preferred_constraints), title,
+                            sized_to_content, resizable));
 }
 
 std::unique_ptr<HostWindow> HostWindow::CreateDialogWindow(
@@ -220,11 +194,13 @@ std::unique_ptr<HostWindow> HostWindow::CreateDialogWindow(
     const WindowSizeRequest& preferred_size,
     const WindowConstraints& preferred_constraints,
     LPCWSTR title,
-    HWND parent) {
-  return std::unique_ptr<HostWindow>(
-      new HostWindowDialog(window_manager, engine, preferred_size,
-                           FromWindowConstraints(preferred_constraints), title,
-                           parent ? parent : std::optional<HWND>()));
+    HWND parent,
+    bool sized_to_content,
+    bool resizable) {
+  return std::unique_ptr<HostWindow>(new HostWindowDialog(
+      window_manager, engine, preferred_size,
+      FromWindowConstraints(preferred_constraints), title,
+      parent ? parent : std::optional<HWND>(), sized_to_content, resizable));
 }
 
 std::unique_ptr<HostWindow> HostWindow::CreateTooltipWindow(
@@ -377,6 +353,30 @@ void HostWindow::FocusRootViewOf(HostWindow* window) {
   }
 };
 
+void HostWindow::HandleWindowActivation(HWND hwnd, WPARAM wparam) {
+  if (LOWORD(wparam) == WA_INACTIVE) {
+    // The window is being deactivated; leave focus untouched. Focusing this
+    // window's view would call SetFocus on its content, which reactivates the
+    // window (SetFocus activates the parent of the focused window) and pulls it
+    // back to the top of the z-order, taking activation from the window that is
+    // being activated.
+    return;
+  }
+
+  if (!IsWindowEnabled(hwnd)) {
+    // Prevent a disabled window (e.g. the owner of a modal dialog) from being
+    // activated using the task switcher by redirecting focus and activation to
+    // the first enabled descendant.
+    if (HostWindow* const enabled_descendant = FindFirstEnabledDescendant()) {
+      SetActiveWindow(enabled_descendant->GetWindowHandle());
+      FocusRootViewOf(this);
+    }
+    return;
+  }
+
+  FocusRootViewOf(this);
+}
+
 LRESULT HostWindow::WndProc(HWND hwnd,
                             UINT message,
                             WPARAM wparam,
@@ -386,7 +386,6 @@ LRESULT HostWindow::WndProc(HWND hwnd,
     auto* const windows_proc_table =
         static_cast<WindowsProcTable*>(create_struct->lpCreateParams);
     windows_proc_table->EnableNonClientDpiScaling(hwnd);
-    EnableTransparentWindowBackground(hwnd, *windows_proc_table);
   } else if (HostWindow* const window = GetThisFromHandle(hwnd)) {
     return window->HandleMessage(hwnd, message, wparam, lparam);
   }
@@ -485,7 +484,7 @@ LRESULT HostWindow::HandleMessage(HWND hwnd,
     }
 
     case WM_ACTIVATE:
-      FocusRootViewOf(this);
+      HandleWindowActivation(hwnd, wparam);
       return 0;
 
     case WM_DWMCOLORIZATIONCOLORCHANGED:

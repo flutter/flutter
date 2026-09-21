@@ -36,7 +36,7 @@ struct _FlRenderableInterface {
  * @layers: layers to draw.
  * @layers_count: number of layers.
  *
- * present_layers a frame. This method can be called from any thread.
+ * Present a frame. This method can be called from any thread.
  */
 void fl_renderable_present_layers(FlRenderable* renderable,
                                   const FlutterLayer** layers,

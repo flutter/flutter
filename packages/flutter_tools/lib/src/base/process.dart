@@ -336,9 +336,7 @@ abstract class ProcessUtils {
 }
 
 class _DefaultProcessUtils implements ProcessUtils {
-  _DefaultProcessUtils({required ProcessManager processManager, required Logger logger})
-    : _processManager = processManager,
-      _logger = logger;
+  _DefaultProcessUtils({required this._processManager, required this._logger});
 
   final ProcessManager _processManager;
 
@@ -562,7 +560,7 @@ class _DefaultProcessUtils implements ProcessUtils {
       environment: environment,
     );
     final StreamSubscription<String> stdoutSubscription = process.stdout
-        .transform(utf8LineDecoder)
+        .transform(utf8AllowMalformedLineDecoder)
         .where((String line) => filter == null || filter.hasMatch(line))
         .listen((String line) {
           String? mappedLine = line;
@@ -581,7 +579,7 @@ class _DefaultProcessUtils implements ProcessUtils {
           }
         });
     final StreamSubscription<String> stderrSubscription = process.stderr
-        .transform(utf8LineDecoder)
+        .transform(utf8AllowMalformedLineDecoder)
         .where((String line) => filter == null || filter.hasMatch(line))
         .listen((String line) {
           String? mappedLine = line;

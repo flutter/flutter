@@ -40,6 +40,8 @@ Being in the GitHub "flutter-hackers" group gives you the following:
 
 * PRs will run their tests slightly faster.
 
+* Exemption from the 2 concurrent open pull request limit on public Flutter repositories.
+
 Being in the Discord "team" group gives you the following:
 
 * The ability to talk without rate-limiting on the #hackers-* channels.
@@ -103,7 +105,9 @@ This repository is also [mirrored on GitHub.](https://github.com/google/skia-bui
 
 # fcontrib.org accounts
 
-If you are a team member who wants to share design docs (see [Chat](Chat.md)) but you don't want to use your own personal account, you can ask a Flutter admin for an fcontrib.org account. Ping @Hixie or another admin in the #server-support channel on Discord.
+Historically, team members authoring design docs as Google Docs needed non-corporate accounts to share them publicly. Because design documents and RFCs are hosted in the [flutter/rfc](https://github.com/flutter/rfc) repository using standard GitHub accounts (see [Design Documents](Design-Documents.md)), `fcontrib.org` accounts are not used for design work.
+
+If a team member requires access to Flutter Google Workspace resources without using a personal account, an admin can provision an `fcontrib.org` account upon request in the #server-support channel on Discord.
 
 ## Process
 

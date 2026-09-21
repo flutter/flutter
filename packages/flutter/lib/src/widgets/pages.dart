@@ -29,8 +29,8 @@ abstract class PageRoute<T> extends ModalRoute<T> {
     super.directionalTraversalEdgeBehavior,
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
-    bool barrierDismissible = false,
-  }) : _barrierDismissible = barrierDismissible;
+    this._barrierDismissible = false,
+  });
 
   /// {@template flutter.widgets.PageRoute.fullscreenDialog}
   /// Whether this page route is a full-screen dialog.
@@ -113,6 +113,13 @@ class PageRouteBuilder<T> extends PageRoute<T> {
 
   /// {@template flutter.widgets.pageRouteBuilder.transitionsBuilder}
   /// Used to build the route's transitions.
+  ///
+  /// The [animation] argument drives this route's own entrance and exit
+  /// transition. The [secondaryAnimation] argument drives transitions for this
+  /// route when another route is pushed on top of it or popped from above it, if
+  /// both routes allow transition coordination. See
+  /// [TransitionRoute.canTransitionTo] and
+  /// [TransitionRoute.canTransitionFrom].
   ///
   /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
   /// {@endtemplate}

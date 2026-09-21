@@ -757,6 +757,34 @@ void main() {
     expect(environment.outputDir.childFile('preserved'), exists);
   });
 
+  testWithoutContext('trackSharedBuildDirectory does not delete shared hooks outputs', () {
+    environment.outputDir.childFile('.last_build_id').writeAsStringSync('foo');
+    final Directory otherBuildDir = environment.buildDir.parent.childDirectory('foo')
+      ..createSync(recursive: true);
+    final Directory sharedHooksDir =
+        environment.projectDir
+            .childDirectory('.dart_tool')
+            .childDirectory('hooks_runner')
+            .childDirectory('shared')
+          ..createSync(recursive: true);
+    final File sharedHookOutputFile = sharedHooksDir.childFile('some_output_file')..createSync();
+
+    otherBuildDir
+        .childFile('outputs.json')
+        .writeAsStringSync(json.encode(<String>[sharedHookOutputFile.absolute.path]));
+    FlutterBuildSystem(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(),
+    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, {});
+
+    expect(
+      environment.outputDir.childFile('.last_build_id').readAsStringSync(),
+      '6666cd76f96956469e7be39d750cc7d9',
+    );
+    expect(sharedHookOutputFile, exists);
+  });
+
   testWithoutContext(
     'multiple builds to the same output directory do no leave stale artifacts',
     () async {
@@ -884,6 +912,62 @@ void main() {
     expect(result.success, false);
     expect(result.exceptions.keys, containsAll(<String>['B', 'C']));
   });
+
+  testWithoutContext(
+    'BuildSystem.build does not delete shared hooks outputs from previous runs of the same target',
+    () async {
+      final fileSystem = MemoryFileSystem.test();
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        artifacts: Artifacts.test(),
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+      );
+
+      final Directory sharedHooksDir =
+          environment.projectDir
+              .childDirectory('.dart_tool')
+              .childDirectory('hooks_runner')
+              .childDirectory('shared')
+            ..createSync(recursive: true);
+      final File sharedHookOutputFile = sharedHooksDir.childFile('some_output_file')..createSync();
+
+      environment.buildDir.createSync(recursive: true);
+      final File normalOutputFile = environment.buildDir.childFile('normal_output')..createSync();
+
+      final target =
+          TestTarget((Environment environment) async {
+              sharedHooksDir.childFile('some_output_file').createSync(recursive: true);
+              environment.buildDir.childFile('normal_output').createSync(recursive: true);
+            })
+            ..name = 'test_target'
+            ..outputs = <Source>[
+              const Source.pattern('{PROJECT_DIR}/.dart_tool/hooks_runner/shared/some_output_file'),
+              const Source.pattern('{BUILD_DIR}/normal_output'),
+            ];
+
+      final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+
+      // First build.
+      BuildResult result = await buildSystem.build(target, environment);
+      expect(result.success, true);
+      expect(sharedHookOutputFile, exists);
+      expect(normalOutputFile, exists);
+
+      // Modify target to not have outputs.
+      target.outputs = <Source>[];
+
+      // Second build.
+      result = await buildSystem.build(target, environment);
+      expect(result.success, true);
+
+      // Normal output should be deleted.
+      expect(normalOutputFile, isNot(exists));
+      // Shared hook output should NOT be deleted.
+      expect(sharedHookOutputFile, exists);
+    },
+  );
 }
 
 BuildSystem setUpBuildSystem(FileSystem fileSystem, {FakePlatform? platform, Logger? logger}) {

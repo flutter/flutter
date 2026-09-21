@@ -31,7 +31,7 @@
                 "config": "ci/host_debug_test",
                 "targets": [
                     "flutter:unittests",
-                    "flutter/build/dart:copy_dart_sdk",
+                    "flutter/build/dart:dart_sdk",
                     "flutter/shell/testing",
                     "flutter/tools/path_ops"
                 ]
@@ -78,7 +78,7 @@
                 "config": "ci/host_profile_test",
                 "targets": [
                     "flutter:unittests",
-                    "flutter/build/dart:copy_dart_sdk",
+                    "flutter/build/dart:dart_sdk",
                     "flutter/shell/testing",
                     "flutter/tools/path_ops"
                 ]
@@ -131,7 +131,7 @@
                 "config": "ci/host_release_test",
                 "targets": [
                     "flutter:unittests",
-                    "flutter/build/dart:copy_dart_sdk",
+                    "flutter/build/dart:dart_sdk",
                     "flutter/display_list:display_list_benchmarks",
                     "flutter/display_list:display_list_builder_benchmarks",
                     "flutter/display_list:display_list_region_benchmarks",

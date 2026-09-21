@@ -104,19 +104,17 @@ FLUTTER_ASSERT_ARC
   NSString* errorMessage = [NSString
       stringWithFormat:@"Failed to register Dart VM Service port with mDNS with error %d.", err];
   [FlutterLogger logError:errorMessage];
-  if (@available(iOS 14.0, *)) {
-    errorMessage = [NSString
-        stringWithFormat:@"On iOS 14+, local network broadcast in apps need to be declared in "
-                          "the app's Info.plist. Debug and profile Flutter apps and modules host "
-                          "VM services on the local network to support debugging features such "
-                          "as hot reload and DevTools. To make your Flutter app or module "
-                          "attachable and debuggable, add a '%s' value to the 'NSBonjourServices' "
-                          "key in your Info.plist for the Debug/Profile configurations. For more "
-                          "information, see https://docs.flutter.dev/development/add-to-app/ios/"
-                          "project-setup#local-network-privacy-permissions",
-                         registrationType];
-    [FlutterLogger logError:errorMessage];
-  }
+  errorMessage = [NSString
+      stringWithFormat:@"On iOS 14+, local network broadcast in apps need to be declared in "
+                        "the app's Info.plist. Debug and profile Flutter apps and modules host "
+                        "VM services on the local network to support debugging features such "
+                        "as hot reload and DevTools. To make your Flutter app or module "
+                        "attachable and debuggable, add a '%s' value to the 'NSBonjourServices' "
+                        "key in your Info.plist for the Debug/Profile configurations. For more "
+                        "information, see https://docs.flutter.dev/development/add-to-app/ios/"
+                        "project-setup#local-network-privacy-permissions",
+                       registrationType];
+  [FlutterLogger logError:errorMessage];
 }
 
 static void DNSSD_API RegistrationCallback(DNSServiceRef sdRef,

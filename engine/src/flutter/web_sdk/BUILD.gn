@@ -8,7 +8,7 @@ import("//flutter/lib/web_ui/flutter_js/sources.gni")
 import("//flutter/web_sdk/web_sdk.gni")
 import("$dart_src/build/dart/dart_action.gni")
 
-web_ui_sources = exec_script("$dart_src/tools/list_dart_files.py",
+web_ui_sources = exec_script("list_dart_files.py",
                              [
                                "absolute",
                                rebase_path("//flutter/lib/web_ui/lib"),
@@ -402,8 +402,8 @@ if (!is_fuchsia) {
     if (is_wasm) {
       deps += [
         "//flutter/third_party/canvaskit:canvaskit_chromium_group",
-        "//flutter/third_party/canvaskit:canvaskit_experimental_webparagraph_group",
         "//flutter/third_party/canvaskit:canvaskit_group",
+        "//flutter/third_party/canvaskit:canvaskit_webparagraph_group",
         "//flutter/third_party/canvaskit:skwasm_group",
         "//flutter/third_party/canvaskit:skwasm_heavy_group",
         "//flutter/third_party/canvaskit:wimp_group",
@@ -428,15 +428,15 @@ if (!is_fuchsia) {
         "$root_out_dir/flutter_web_sdk/canvaskit/chromium/canvaskit.js",
         "$root_out_dir/flutter_web_sdk/canvaskit/chromium/canvaskit.js.symbols",
         "$root_out_dir/flutter_web_sdk/canvaskit/chromium/canvaskit.wasm",
-        "$root_out_dir/flutter_web_sdk/canvaskit/experimental_webparagraph/canvaskit.js",
-        "$root_out_dir/flutter_web_sdk/canvaskit/experimental_webparagraph/canvaskit.js.symbols",
-        "$root_out_dir/flutter_web_sdk/canvaskit/experimental_webparagraph/canvaskit.wasm",
         "$root_out_dir/flutter_web_sdk/canvaskit/skwasm.js",
         "$root_out_dir/flutter_web_sdk/canvaskit/skwasm.js.symbols",
         "$root_out_dir/flutter_web_sdk/canvaskit/skwasm.wasm",
         "$root_out_dir/flutter_web_sdk/canvaskit/skwasm_heavy.js",
         "$root_out_dir/flutter_web_sdk/canvaskit/skwasm_heavy.js.symbols",
         "$root_out_dir/flutter_web_sdk/canvaskit/skwasm_heavy.wasm",
+        "$root_out_dir/flutter_web_sdk/canvaskit/webparagraph/canvaskit.js",
+        "$root_out_dir/flutter_web_sdk/canvaskit/webparagraph/canvaskit.js.symbols",
+        "$root_out_dir/flutter_web_sdk/canvaskit/webparagraph/canvaskit.wasm",
         "$root_out_dir/flutter_web_sdk/canvaskit/wimp.js",
         "$root_out_dir/flutter_web_sdk/canvaskit/wimp.js.symbols",
         "$root_out_dir/flutter_web_sdk/canvaskit/wimp.wasm",

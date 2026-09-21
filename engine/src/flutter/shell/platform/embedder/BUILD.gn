@@ -460,7 +460,8 @@ shared_library("flutter_engine_library") {
     ldflags += [ "-Wl,-install_name,@rpath/FlutterEmbedder.framework/$_framework_binary_subpath" ]
   }
   if (is_linux) {
-    ldflags += [ "-Wl,--version-script=" + rebase_path("embedder_exports.lst") ]
+    ldflags += [ "-Wl,--version-script=" +
+                 rebase_path("embedder_exports.lst", root_build_dir) ]
   }
 
   deps = [ ":embedder" ]

@@ -41,8 +41,10 @@ typedef _TextBoundaryAtPosition = _TextBoundaryRecord Function(TextPosition posi
 
 /// Signature for a function that determines the [_TextBoundaryRecord] at the given
 /// [TextPosition], for the given [String].
-typedef _TextBoundaryAtPositionInText =
-    _TextBoundaryRecord Function(TextPosition position, String text);
+typedef _TextBoundaryAtPositionInText = _TextBoundaryRecord Function(
+  TextPosition position,
+  String text,
+);
 
 const String _kEllipsis = '\u2026';
 
@@ -336,7 +338,7 @@ class RenderParagraph extends RenderBox
     InlineSpan text, {
     TextAlign textAlign = TextAlign.start,
     required TextDirection textDirection,
-    bool softWrap = true,
+    this._softWrap = true,
     TextOverflow overflow = TextOverflow.clip,
     @Deprecated(
       'Use textScaler instead. '
@@ -351,17 +353,16 @@ class RenderParagraph extends RenderBox
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     ui.TextHeightBehavior? textHeightBehavior,
     List<RenderBox>? children,
-    Color? selectionColor,
+    this._selectionColor,
     SelectionRegistrar? registrar,
+    this._devicePixelRatio = 1.0,
   }) : assert(text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
          identical(textScaler, const _UnspecifiedTextScaler()) || textScaleFactor == 1.0,
          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
        ),
-       _softWrap = softWrap,
        _overflow = overflow,
-       _selectionColor = selectionColor,
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -663,6 +664,25 @@ class RenderParagraph extends RenderBox
     _textPainter.textScaler = value;
     _overflowShader = null;
     markNeedsLayout();
+  }
+
+  /// The number of device pixels for each logical pixel.
+  ///
+  /// This is used by some renderers (like WebParagraph on the web) to
+  /// regenerate the text bitmap when the scale changes.
+  double get devicePixelRatio => _devicePixelRatio;
+  double _devicePixelRatio;
+
+  set devicePixelRatio(double value) {
+    if (_devicePixelRatio == value) {
+      return;
+    }
+    _devicePixelRatio = value;
+    if (kIsWeb) {
+      // The `WebParagraph` implementation renders the paragraph as an image. After a
+      // `devicePixelRatio` change, the image needs to be regenerated or it would look blurry.
+      markNeedsPaint();
+    }
   }
 
   /// An optional maximum number of lines for the text to span, wrapping if
@@ -1475,6 +1495,7 @@ class RenderParagraph extends RenderBox
     );
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+    properties.add(DoubleProperty('devicePixelRatio', devicePixelRatio, defaultValue: 1.0));
   }
 }
 

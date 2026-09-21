@@ -1187,8 +1187,10 @@ class PlatformViewCreationParams {
 /// See also:
 ///
 ///  * [PlatformViewSurface], a common widget for presenting platform views.
-typedef PlatformViewSurfaceFactory =
-    Widget Function(BuildContext context, PlatformViewController controller);
+typedef PlatformViewSurfaceFactory = Widget Function(
+  BuildContext context,
+  PlatformViewController controller,
+);
 
 /// Constructs a [PlatformViewController].
 ///
@@ -1198,8 +1200,9 @@ typedef PlatformViewSurfaceFactory =
 /// See also:
 ///
 ///  * [PlatformViewLink], which links a platform view with the Flutter framework.
-typedef CreatePlatformViewCallback =
-    PlatformViewController Function(PlatformViewCreationParams params);
+typedef CreatePlatformViewCallback = PlatformViewController Function(
+  PlatformViewCreationParams params,
+);
 
 /// Links a platform view with the Flutter framework.
 ///
@@ -1242,11 +1245,10 @@ class PlatformViewLink extends StatefulWidget {
   ///  * [PlatformViewCreationParams] for how each parameter can be used when implementing `createPlatformView`.
   const PlatformViewLink({
     super.key,
-    required PlatformViewSurfaceFactory surfaceFactory,
-    required CreatePlatformViewCallback onCreatePlatformView,
+    required this._surfaceFactory,
+    required this._onCreatePlatformView,
     required this.viewType,
-  }) : _surfaceFactory = surfaceFactory,
-       _onCreatePlatformView = onCreatePlatformView;
+  });
 
   final PlatformViewSurfaceFactory _surfaceFactory;
   final CreatePlatformViewCallback _onCreatePlatformView;
@@ -1610,6 +1612,11 @@ class _PlatformViewPlaceholderBox extends RenderConstrainedBox {
     super.performLayout();
     // A call to `localToGlobal` requires waiting for a frame to render first.
     SchedulerBinding.instance.addPostFrameCallback((_) {
+      // The render object can be detached before this callback runs, for
+      // example when a viewport garbage-collects it during fast scrolling.
+      if (!attached) {
+        return;
+      }
       onLayout(size, localToGlobal(Offset.zero));
     }, debugLabel: 'PlatformViewPlaceholderBox.onLayout');
   }

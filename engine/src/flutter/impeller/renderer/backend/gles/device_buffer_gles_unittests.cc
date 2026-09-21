@@ -22,6 +22,49 @@ class TestWorker : public ReactorGLES::Worker {
 };
 }  // namespace
 
+// A Flush() that lands while BindAndUploadDataIfNecessary is mid-upload (as
+// happens when another thread writes to a host-visible buffer during the GL
+// upload) must not be discarded; the next bind must upload the new range.
+TEST(DeviceBufferGLESTest, FlushDuringUploadIsNotDiscarded) {
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+
+  DeviceBufferGLES* device_buffer_ptr = nullptr;
+  int upload_count = 0;
+  EXPECT_CALL(*mock_gles_impl, BufferSubData(_, _, _, _))
+      .Times(2)
+      .WillRepeatedly([&](GLenum target, GLintptr offset, GLsizeiptr size,
+                          const void* data) {
+        ++upload_count;
+        if (upload_count == 1) {
+          // Simulates a writer thread flushing new data during the upload.
+          device_buffer_ptr->Flush(Range{0, 4});
+        }
+      });
+
+  std::shared_ptr<MockGLES> mock_gles =
+      MockGLES::Init(std::move(mock_gles_impl));
+  ProcTableGLES::Resolver resolver = kMockResolverGLES;
+  auto proc_table = std::make_unique<ProcTableGLES>(resolver);
+  auto worker = std::make_shared<TestWorker>();
+  auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
+  reactor->AddWorker(worker);
+
+  auto backing_store = std::make_unique<Allocation>();
+  ASSERT_TRUE(backing_store->Truncate(Bytes{16}));
+  DeviceBufferGLES device_buffer(DeviceBufferDescriptor{.size = 16}, reactor,
+                                 std::move(backing_store));
+  device_buffer_ptr = &device_buffer;
+
+  device_buffer.Flush(Range{0, 4});
+  // First bind uploads the flushed range; the mock flushes again mid-upload.
+  EXPECT_TRUE(device_buffer.BindAndUploadDataIfNecessary(
+      DeviceBufferGLES::BindingType::kArrayBuffer));
+  // Second bind must see the mid-upload flush and upload again.
+  EXPECT_TRUE(device_buffer.BindAndUploadDataIfNecessary(
+      DeviceBufferGLES::BindingType::kArrayBuffer));
+  EXPECT_EQ(upload_count, 2);
+}
+
 TEST(DeviceBufferGLESTest, BindUniformData) {
   auto mock_gles_impl = std::make_unique<MockGLESImpl>();
 

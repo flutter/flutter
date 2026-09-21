@@ -544,10 +544,8 @@ static NSDictionary<UIApplicationOpenURLOptionsKey, id>* ConvertOptions(
     convertedOptions[UIApplicationOpenURLOptionsAnnotationKey] = options.annotation;
   }
   convertedOptions[UIApplicationOpenURLOptionsOpenInPlaceKey] = @(options.openInPlace);
-  if (@available(iOS 14.5, *)) {
-    if (options.eventAttribution) {
-      convertedOptions[UIApplicationOpenURLOptionsEventAttributionKey] = options.eventAttribution;
-    }
+  if (options.eventAttribution) {
+    convertedOptions[UIApplicationOpenURLOptionsEventAttributionKey] = options.eventAttribution;
   }
   return convertedOptions;
 }

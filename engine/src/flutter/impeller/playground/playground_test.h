@@ -27,6 +27,8 @@ class PlaygroundTest : public Playground,
 
   virtual ~PlaygroundTest();
 
+  static void SetupTestEnvironment();
+
   void SetUp() override;
 
   void TearDown() override;
@@ -43,6 +45,19 @@ class PlaygroundTest : public Playground,
   // |Playground|
   std::string GetWindowTitle() const override;
 
+  testing::GoldenDigestManager* GetGoldenDigestManager() const override;
+
+ protected:
+  /// @brief This method is overridden on a test suite basis and establishes
+  ///        whether a given set of tests is intended to generate goldens.
+  ///
+  /// The return value of this method is used to set the default value of
+  /// |Playground::ShouldWriteGoldenImage|, but an individual test is still
+  /// allowed to enable a golden image by calling |SetEnableWriteGolden|.
+  ///
+  /// @return false by default unless overridden in a subclass
+  virtual bool IsGoldenTestSuite() const;
+
  private:
   // |Playground|
   bool ShouldKeepRendering() const override;
@@ -56,6 +71,11 @@ class PlaygroundTest : public Playground,
   PlaygroundTest& operator=(const PlaygroundTest&) = delete;
 };
 
+class PlaygroundTestWithGoldens : public PlaygroundTest {
+ protected:
+  bool IsGoldenTestSuite() const override { return true; }
+};
+
 #define INSTANTIATE_PLAYGROUND_SUITE(playground)                             \
   [[maybe_unused]] const char* kYouInstantiated##playground##MultipleTimes = \
       "";                                                                    \
@@ -63,7 +83,8 @@ class PlaygroundTest : public Playground,
       Play, playground,                                                      \
       ::testing::Values(                                                     \
           PlaygroundBackend::kMetal, PlaygroundBackend::kMetalSDF,           \
-          PlaygroundBackend::kOpenGLES, PlaygroundBackend::kVulkan),         \
+          PlaygroundBackend::kOpenGLES, PlaygroundBackend::kOpenGLESSDF,     \
+          PlaygroundBackend::kVulkan),                                       \
       [](const ::testing::TestParamInfo<PlaygroundTest::ParamType>& info) {  \
         return PlaygroundBackendToString(info.param);                        \
       });

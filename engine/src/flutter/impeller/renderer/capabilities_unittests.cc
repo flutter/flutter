@@ -77,11 +77,54 @@ TEST(CapabilitiesTest, MaxRenderPassAttachmentSize) {
   EXPECT_EQ(mutated->GetMaximumRenderPassAttachmentSize(), ISize(100, 100));
 }
 
+TEST(CapabilitiesTest, SupportsTextureCompression) {
+  auto defaults = CapabilitiesBuilder().Build();
+  EXPECT_FALSE(
+      defaults->SupportsTextureCompression(CompressedTextureFamily::kBC));
+  EXPECT_FALSE(
+      defaults->SupportsTextureCompression(CompressedTextureFamily::kETC2));
+  EXPECT_FALSE(
+      defaults->SupportsTextureCompression(CompressedTextureFamily::kASTC));
+  EXPECT_FALSE(
+      defaults->SupportsTextureCompression(CompressedTextureFamily::kASTCHDR));
+
+  // Each family is gated independently.
+  auto mutated =
+      CapabilitiesBuilder()
+          .SetSupportsTextureCompression(CompressedTextureFamily::kETC2, true)
+          .Build();
+  EXPECT_FALSE(
+      mutated->SupportsTextureCompression(CompressedTextureFamily::kBC));
+  EXPECT_TRUE(
+      mutated->SupportsTextureCompression(CompressedTextureFamily::kETC2));
+  EXPECT_FALSE(
+      mutated->SupportsTextureCompression(CompressedTextureFamily::kASTC));
+  EXPECT_FALSE(
+      mutated->SupportsTextureCompression(CompressedTextureFamily::kASTCHDR));
+
+  // ASTC LDR and HDR are distinct families.
+  auto astc_hdr = CapabilitiesBuilder()
+                      .SetSupportsTextureCompression(
+                          CompressedTextureFamily::kASTCHDR, true)
+                      .Build();
+  EXPECT_FALSE(
+      astc_hdr->SupportsTextureCompression(CompressedTextureFamily::kASTC));
+  EXPECT_TRUE(
+      astc_hdr->SupportsTextureCompression(CompressedTextureFamily::kASTCHDR));
+}
+
 TEST(CapabilitiesTest, MinUniformAlignment) {
   auto defaults = CapabilitiesBuilder().Build();
   EXPECT_EQ(defaults->GetMinimumUniformAlignment(), 256u);
   auto mutated = CapabilitiesBuilder().SetMinimumUniformAlignment(16).Build();
   EXPECT_EQ(mutated->GetMinimumUniformAlignment(), 16u);
+}
+
+TEST(CapabilitiesTest, MaxSamplerAnisotropy) {
+  auto defaults = CapabilitiesBuilder().Build();
+  EXPECT_EQ(defaults->GetMaxSamplerAnisotropy(), 1u);
+  auto mutated = CapabilitiesBuilder().SetMaxSamplerAnisotropy(16).Build();
+  EXPECT_EQ(mutated->GetMaxSamplerAnisotropy(), 16u);
 }
 
 }  // namespace testing

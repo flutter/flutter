@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:archive/archive.dart';
-
 import '../application_package.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cmake.dart';
@@ -45,7 +44,9 @@ abstract class WindowsApp extends ApplicationPackage {
     final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_app.');
     try {
       globals.os.unzip(globals.fs.file(applicationBinary), tempDir);
-    } on ArchiveException {
+    } on ToolExit {
+      rethrow;
+    } on Exception {
       globals.printError('Invalid prebuilt Windows app. Unable to extract from archive.');
       return null;
     }
@@ -73,7 +74,7 @@ abstract class WindowsApp extends ApplicationPackage {
   @override
   String get displayName => id;
 
-  String executable(BuildMode buildMode, TargetPlatform targetPlatform);
+  String executable(BuildMode buildMode, TargetPlatform targetPlatform, [String? flavor]);
 }
 
 class PrebuiltWindowsApp extends WindowsApp implements PrebuiltApplicationPackage {
@@ -84,7 +85,8 @@ class PrebuiltWindowsApp extends WindowsApp implements PrebuiltApplicationPackag
   final String _executable;
 
   @override
-  String executable(BuildMode buildMode, TargetPlatform targetPlatform) => _executable;
+  String executable(BuildMode buildMode, TargetPlatform targetPlatform, [String? flavor]) =>
+      _executable;
 
   @override
   String get name => _executable;
@@ -100,10 +102,10 @@ class BuildableWindowsApp extends WindowsApp {
   final WindowsProject project;
 
   @override
-  String executable(BuildMode buildMode, TargetPlatform targetPlatform) {
+  String executable(BuildMode buildMode, TargetPlatform targetPlatform, [String? flavor]) {
     final String? binaryName = getCmakeExecutableName(project);
     return globals.fs.path.join(
-      getWindowsBuildDirectory(targetPlatform),
+      getWindowsBuildDirectory(targetPlatform, flavor),
       'runner',
       buildMode.uppercaseName,
       '$binaryName.exe',

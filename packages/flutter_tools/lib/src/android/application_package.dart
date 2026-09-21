@@ -66,7 +66,14 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       return null;
     }
 
-    final ApkManifestData? data = ApkManifestData.parseFromXmlDump(apptStdout, logger);
+    final ApkManifestData? data;
+    try {
+      data = ApkManifestData.parseFromXmlDump(apptStdout, logger);
+      // ignore: avoid_catches_without_on_clauses
+    } catch (error, stackTrace) {
+      logger.printError('Failed to parse manifest from APK: $error', stackTrace: stackTrace);
+      return null;
+    }
 
     if (data == null) {
       logger.printError('Unable to read manifest info from ${apk.path}.');
@@ -128,13 +135,19 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       if (apkFile.existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
         // the application Id, so we need to look at what was actually built.
-        return AndroidApk.fromApk(
+        final AndroidApk? builtApk = AndroidApk.fromApk(
           apkFile,
           androidSdk: androidSdk!,
           processManager: processManager,
           logger: logger,
           userMessages: userMessages,
           processUtils: processUtils,
+        );
+        if (builtApk != null) {
+          return builtApk;
+        }
+        logger.printWarning(
+          'Failed to extract manifest from APK: falling back to source AndroidManifest.xml',
         );
       }
       // The .apk hasn't been built yet, so we work with what we have. The run
@@ -189,12 +202,16 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     final String? packageId = manifests.first.getAttribute('package') ?? androidProject.namespace;
 
     String? launchActivity;
-    for (final XmlElement activity in document.findAllElements('activity')) {
+    final Iterable<XmlElement> activities = document
+        .findAllElements('activity')
+        .followedBy(document.findAllElements('activity-alias'));
+    for (final activity in activities) {
       final String? enabled = activity.getAttribute('android:enabled');
       if (enabled != null && enabled == 'false') {
         continue;
       }
 
+      var foundLauncher = false;
       for (final XmlElement element in activity.findElements('intent-filter')) {
         String? actionName = '';
         String? categoryName = '';
@@ -214,9 +231,15 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
             actionName.isNotEmpty &&
             categoryName.isNotEmpty) {
           final String? activityName = activity.getAttribute('android:name');
-          launchActivity = '$packageId/$activityName';
-          break;
+          if (packageId != null && activityName != null && activityName.isNotEmpty) {
+            launchActivity = '$packageId/$activityName';
+            foundLauncher = true;
+            break;
+          }
         }
+      }
+      if (foundLauncher) {
+        break;
       }
     }
 

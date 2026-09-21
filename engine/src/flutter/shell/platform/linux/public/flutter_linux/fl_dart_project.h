@@ -160,6 +160,43 @@ void fl_dart_project_set_ui_thread_policy(FlDartProject* project,
  */
 FlUIThreadPolicy fl_dart_project_get_ui_thread_policy(FlDartProject* project);
 
+/**
+ * fl_dart_project_set_enable_impeller:
+ * @project: an #FlDartProject.
+ * @enable_impeller: whether to enable the Impeller renderer.
+ *
+ * Sets whether the Impeller renderer should be enabled.
+ */
+void fl_dart_project_set_enable_impeller(FlDartProject* project,
+                                         gboolean enable_impeller);
+
+/**
+ * fl_dart_project_get_enable_impeller:
+ * @project: an #FlDartProject.
+ *
+ * Returns: %TRUE if the Impeller renderer is enabled.
+ */
+gboolean fl_dart_project_get_enable_impeller(FlDartProject* project);
+
+/**
+ * fl_dart_project_set_enable_flutter_gpu:
+ * @project: an #FlDartProject.
+ * @enable_flutter_gpu: whether to enable the Flutter GPU API.
+ *
+ * Sets whether the Flutter GPU API (package:flutter_gpu) should be enabled.
+ * Flutter GPU requires the Impeller renderer.
+ */
+void fl_dart_project_set_enable_flutter_gpu(FlDartProject* project,
+                                            gboolean enable_flutter_gpu);
+
+/**
+ * fl_dart_project_get_enable_flutter_gpu:
+ * @project: an #FlDartProject.
+ *
+ * Returns: %TRUE if the Flutter GPU API is enabled.
+ */
+gboolean fl_dart_project_get_enable_flutter_gpu(FlDartProject* project);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_PUBLIC_FLUTTER_LINUX_FL_DART_PROJECT_H_

@@ -112,8 +112,6 @@ struct _FlKeyboardManager {
       logical_to_mandatory_goals;
 
   GdkKeymap* keymap;
-  gulong keymap_keys_changed_cb_id;  // Signal connection ID for
-                                     // keymap-keys-changed
 
   GCancellable* cancellable;
 };
@@ -318,10 +316,6 @@ static void fl_keyboard_manager_dispose(GObject* object) {
   g_clear_object(&self->key_embedder_responder);
   g_clear_object(&self->key_channel_responder);
   g_clear_object(&self->derived_layout);
-  if (self->keymap_keys_changed_cb_id != 0) {
-    g_signal_handler_disconnect(self->keymap, self->keymap_keys_changed_cb_id);
-    self->keymap_keys_changed_cb_id = 0;
-  }
   g_clear_object(&self->cancellable);
 
   G_OBJECT_CLASS(fl_keyboard_manager_parent_class)->dispose(object);
@@ -348,8 +342,9 @@ static void fl_keyboard_manager_init(FlKeyboardManager* self) {
   }
 
   self->keymap = gdk_keymap_get_for_display(gdk_display_get_default());
-  self->keymap_keys_changed_cb_id = g_signal_connect_swapped(
-      self->keymap, "keys-changed", G_CALLBACK(keymap_keys_changed_cb), self);
+  g_signal_connect_object(self->keymap, "keys-changed",
+                          G_CALLBACK(keymap_keys_changed_cb), self,
+                          G_CONNECT_SWAPPED);
   self->cancellable = g_cancellable_new();
 }
 

@@ -181,8 +181,7 @@ void testMain() {
       expect(owner2.ref.nativeObject, nativeObject);
       expect(TestSkDeletableMock.deleteCount, 0);
       expect(
-        reason:
-            'The same owner cannot dispose its CountedRef more than once, even when CountedRef is still alive.',
+        reason: 'The same owner cannot dispose its CountedRef more than once, even when CountedRef is still alive.',
         () => owner1.dispose(),
         throwsA(isA<AssertionError>()),
       );

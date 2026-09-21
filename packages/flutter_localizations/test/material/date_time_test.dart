@@ -12,16 +12,16 @@ import 'package:intl/intl.dart';
 void main() {
   group(GlobalMaterialLocalizations, () {
     test('uses exact locale when exists', () async {
-      final localizations =
-          await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'PT'))
-              as GlobalMaterialLocalizations;
+      final localizations = await GlobalMaterialLocalizations.delegate.load(
+        const Locale('pt', 'PT'),
+      ) as GlobalMaterialLocalizations;
       expect(localizations.formatDecimal(10000), '10\u00A0000');
     });
 
     test('falls back to language code when exact locale is missing', () async {
-      final localizations =
-          await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'XX'))
-              as GlobalMaterialLocalizations;
+      final localizations = await GlobalMaterialLocalizations.delegate.load(
+        const Locale('pt', 'XX'),
+      ) as GlobalMaterialLocalizations;
       expect(localizations.formatDecimal(10000), '10.000');
     });
 
@@ -104,9 +104,9 @@ void main() {
 
     group('formatMinute', () {
       test('formats English', () async {
-        final localizations =
-            await GlobalMaterialLocalizations.delegate.load(const Locale('en', 'US'))
-                as GlobalMaterialLocalizations;
+        final localizations = await GlobalMaterialLocalizations.delegate.load(
+          const Locale('en', 'US'),
+        ) as GlobalMaterialLocalizations;
         expect(localizations.formatMinute(const TimeOfDay(hour: 1, minute: 32)), '32');
       });
     });
@@ -361,6 +361,27 @@ void main() {
 
     expect(dateFormat.locale, 'ga');
     expect(dateFormat.format(DateTime(2023, 4, 10, 2, 32)), equals('10 Aib 2023'));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/187767.
+  testWidgets('ar is initialized correctly when DateFormat is used', (WidgetTester tester) async {
+    late DateFormat dateFormat;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('ar'),
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        home: Builder(
+          builder: (BuildContext context) {
+            dateFormat = DateFormat.jm('ar');
+            return Container();
+          },
+        ),
+      ),
+    );
+
+    expect(dateFormat.locale, 'ar');
+    expect(dateFormat.format(DateTime(2026, 1, 1, 20, 30)), equals('٨:٣٠ م'));
   });
 }
 

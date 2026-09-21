@@ -60,7 +60,7 @@ void main() {
           '--filesystem-scheme',
           'org-dartlang-app',
           '--initialize-from-dill',
-          'build/cache.dill',
+          'build/471e67e273aac2e3e05542afef95ef7f.cache.dill',
           '--platform',
           'file:///HostArtifact.webPlatformKernelFolder/ddc_outline.dill',
           '--verbosity=error',
@@ -69,13 +69,15 @@ void main() {
       ),
     ]);
     final compiler = WebTestCompiler(
-      logger: logger,
-      fileSystem: fileSystem,
-      platform: FakePlatform(environment: <String, String>{}),
-      artifacts: Artifacts.test(),
-      processManager: processManager,
-      config: config,
-      shutdownHooks: FakeShutdownHooks(),
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        config: config,
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(environment: <String, String>{}),
+        processManager: processManager,
+        shutdownHooks: FakeShutdownHooks(),
+      ),
     );
 
     const buildInfo = BuildInfo(
@@ -139,13 +141,15 @@ void main() {
       ),
     ]);
     final compiler = WebTestCompiler(
-      logger: logger,
-      fileSystem: fileSystem,
-      platform: FakePlatform(environment: <String, String>{}),
-      artifacts: Artifacts.test(),
-      processManager: processManager,
-      config: config,
-      shutdownHooks: FakeShutdownHooks(),
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        config: config,
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(environment: <String, String>{}),
+        processManager: processManager,
+        shutdownHooks: FakeShutdownHooks(),
+      ),
     );
 
     const buildInfo = BuildInfo(
