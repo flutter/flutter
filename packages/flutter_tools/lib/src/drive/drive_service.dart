@@ -15,7 +15,6 @@ import '../base/dds.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/terminal.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
@@ -25,43 +24,30 @@ import 'web_driver_service.dart';
 
 class FlutterDriverFactory {
   FlutterDriverFactory({
-    required this.toolContext,
     required this._applicationPackageFactory,
-    required this._platform,
-    required this._logger,
-    required this._terminal,
-    required this._outputPreferences,
-    required this._processUtils,
     required this._dartSdkPath,
     required this._devtoolsLauncher,
-  });
+    required ToolContext toolContext,
+  }) : _processUtils = ProcessUtils(
+         processManager: toolContext.processManager,
+         logger: toolContext.logger,
+       ),
+       _toolContext = toolContext;
 
-  final ToolContext toolContext;
   final ApplicationPackageFactory _applicationPackageFactory;
-  final Platform _platform;
-  final Logger _logger;
-  final Terminal _terminal;
-  final OutputPreferences _outputPreferences;
-  final ProcessUtils _processUtils;
   final String _dartSdkPath;
   final DevtoolsLauncher _devtoolsLauncher;
+  final ProcessUtils _processUtils;
+  final ToolContext _toolContext;
 
   /// Create a driver service for running `flutter drive`.
   DriverService createDriverService(bool web) {
     if (web) {
-      return WebDriverService(
-        toolContext: toolContext,
-        logger: _logger,
-        terminal: _terminal,
-        platform: _platform,
-        outputPreferences: _outputPreferences,
-        processUtils: _processUtils,
-        dartSdkPath: _dartSdkPath,
-      );
+      return WebDriverService(toolContext: _toolContext, dartSdkPath: _dartSdkPath);
     }
     return FlutterDriverService(
-      logger: _logger,
-      platform: _platform,
+      logger: _toolContext.logger,
+      platform: _toolContext.platform,
       processUtils: _processUtils,
       dartSdkPath: _dartSdkPath,
       applicationPackageFactory: _applicationPackageFactory,

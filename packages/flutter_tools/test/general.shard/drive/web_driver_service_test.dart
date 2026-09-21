@@ -9,7 +9,6 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -463,16 +462,7 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 }
 
 WebDriverService setUpDriverService() {
-  final logger = BufferLogger.test();
-  return WebDriverService(
-    toolContext: DelegatingToolContext(),
-    logger: logger,
-    terminal: Terminal.test(),
-    platform: FakePlatform(),
-    outputPreferences: OutputPreferences.test(),
-    processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.any()),
-    dartSdkPath: 'dart',
-  );
+  return WebDriverService(toolContext: DelegatingToolContext(), dartSdkPath: 'dart');
 }
 
 class FakeDevice extends Fake implements Device {

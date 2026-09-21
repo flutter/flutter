@@ -311,13 +311,13 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
 class RunCommand extends RunCommandBase {
   RunCommand({
+    required AppleContext appleContext,
+    required ToolContext toolContext,
     this._androidContext,
     this._androidWorkflow,
-    required AppleContext appleContext,
     this._buildSystem,
     this._buildTargets,
     this._deviceManager,
-    required ToolContext toolContext,
     super.verboseHelp = false,
   }) : _injectedAppleContext = appleContext,
        _injectedToolContext = toolContext {
@@ -965,11 +965,3 @@ typedef AnalyticsUsageValuesRecord = ({
   String runTargetOsVersion,
   bool? runEnableHcpp,
 });
-
-// TODO(bkonyi): This will be removed in a follow up PR once Google3 callers
-// provide AppleContext and ToolContext directly. This fallback context delegates to
-// globals.* to maintain backwards compatibility with existing Google3 commands.
-
-// TODO(bkonyi): This will be removed in a follow up PR once Google3 callers
-// provide AppleContext and ToolContext directly. This fallback context delegates to
-// globals.* to maintain backwards compatibility with existing Google3 commands.
