@@ -1460,6 +1460,15 @@ class _RenderTheater extends RenderBox
   bool get sizedByParent => false;
 
   bool _layingOutSizeDeterminingChild = false;
+
+  // Cache these constraints so layout surrogates can lay out their deferred
+  // children without reading the theater's size during their own layout.
+  //
+  // Set before laying out the remaining children. While laying out the
+  // size-determining child, _layingOutSizeDeterminingChild prevents surrogates
+  // from reading uninitialized or stale constraints.
+  late BoxConstraints _nonPositionedChildConstraints;
+
   @override
   void performLayout() {
     RenderBox? sizeDeterminingChild;
@@ -1474,10 +1483,10 @@ class _RenderTheater extends RenderBox
     }
 
     // Equivalent to BoxConstraints used by RenderStack for StackFit.expand.
-    final nonPositionedChildConstraints = BoxConstraints.tight(size);
+    _nonPositionedChildConstraints = BoxConstraints.tight(size);
     for (final RenderBox child in _childrenInPaintOrder()) {
       if (child != sizeDeterminingChild) {
-        layoutChild(child, nonPositionedChildConstraints);
+        layoutChild(child, _nonPositionedChildConstraints);
       }
     }
   }
@@ -2796,11 +2805,7 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
     // constraints of the deferred child and resize / put it in the dirty list if
     // needed.
     if (!theater._layingOutSizeDeterminingChild) {
-      final BoxConstraints theaterConstraints = theater.constraints;
-      final Size boxSize = theaterConstraints.biggest.isFinite
-          ? theaterConstraints.biggest
-          : theater.size;
-      deferredChild._doLayoutFrom(this, constraints: BoxConstraints.tight(boxSize));
+      deferredChild._doLayoutFrom(this, constraints: theater._nonPositionedChildConstraints);
     }
   }
 }
