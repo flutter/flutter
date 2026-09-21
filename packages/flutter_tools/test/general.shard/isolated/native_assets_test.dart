@@ -672,53 +672,68 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
   });
 
   group('testCompilerBuildNativeAssets', () {
+    late FileSystem hostFileSystem;
+
+    setUp(() {
+      // FlutterNativeAssetsBuildRunnerImpl resolves Cache.flutterRoot and Uri.file(...)
+      // using the host platform's path conventions, so the test FileSystem style must
+      // match the host OS (Windows vs POSIX).
+      hostFileSystem = MemoryFileSystem.test(
+        style: const LocalPlatform().isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+      );
+    });
+
     testUsingContext(
       'falls back to manifest appName when package root does not match projectUri '
       '(regression test for https://github.com/flutter/flutter/issues/192933)',
       overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
+        FileSystem: () => hostFileSystem,
         ProcessManager: () => processManager,
       },
       () async {
-        // Set up the current project directory at '/my_app' with pubspec name 'my_app'.
-        final Directory projectDir = fileSystem.directory('/my_app')..createSync(recursive: true);
-        fileSystem.currentDirectory = projectDir;
+        final Directory rootDir = hostFileSystem.currentDirectory;
+
+        // Set up the current project directory at '<root>/my_app' with pubspec name 'my_app'.
+        final Directory projectDir = rootDir.childDirectory('my_app')..createSync(recursive: true);
+        hostFileSystem.currentDirectory = projectDir;
         projectDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_app
 environment:
   sdk: '>=3.2.0 <4.0.0'
 ''');
 
-        // Configure 'my_app' in '/different_dir' WITHOUT a build hook and WITHOUT
+        // Configure 'my_app' in '<root>/different_dir' WITHOUT a build hook and WITHOUT
         // a dependency on 'other_pkg'.
-        fileSystem.directory('/different_dir').createSync(recursive: true);
-        fileSystem.file('/different_dir/pubspec.yaml').writeAsStringSync('''
+        final Directory differentDir = rootDir.childDirectory('different_dir')
+          ..createSync(recursive: true);
+        differentDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_app
 environment:
   sdk: '>=3.2.0 <4.0.0'
 ''');
 
-        // Configure 'other_pkg' (listed first in package_config.json) in '/other_dir'
+        // Configure 'other_pkg' (listed first in package_config.json) in '<root>/other_dir'
         // WITH a 'hook/build.dart' script.
         // Because testCompilerBuildNativeAssets is invoked below without a fake
         // buildRunner, FlutterNativeAssetsBuildRunnerImpl constructs the real
         // PackageLayout and queries packagesWithBuildHooks() for runPackageName's
         // dependency subgraph. If runPackageName erroneously resolved to 'other_pkg',
-        // FlutterNativeAssetsBuildRunnerImpl would discover '/other_dir/hook/build.dart'
+        // FlutterNativeAssetsBuildRunnerImpl would discover '<root>/other_dir/hook/build.dart'
         // and attempt to spawn a Dart hook process via FakeProcessManager.empty(),
         // causing the test to fail. Resolving runPackageName to 'my_app' (Tier 3)
         // excludes 'other_pkg' from the package subgraph so no hook process is
         // spawned and native_assets.json is written cleanly.
-        fileSystem.directory('/other_dir/hook').createSync(recursive: true);
-        fileSystem.file('/other_dir/pubspec.yaml').writeAsStringSync('''
+        final Directory otherDir = rootDir.childDirectory('other_dir');
+        otherDir.childDirectory('hook').createSync(recursive: true);
+        otherDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: other_pkg
 environment:
   sdk: '>=3.2.0 <4.0.0'
 ''');
-        fileSystem.file('/other_dir/hook/build.dart').writeAsStringSync('void main() {}');
+        otherDir.childDirectory('hook').childFile('build.dart').writeAsStringSync('void main() {}');
 
-        // Neither 'other_pkg' ('/other_dir') nor 'my_app' ('/different_dir')
-        // matches projectDir.uri ('/my_app') in Tier 1 or Tier 2, forcing
+        // Neither 'other_pkg' ('<root>/other_dir') nor 'my_app' ('<root>/different_dir')
+        // matches projectDir.uri ('<root>/my_app') in Tier 1 or Tier 2, forcing
         // findRunPackageName to fall back to Tier 3 (manifestAppName: 'my_app').
         final File packageConfigFile = writePackageConfigFiles(
           directory: projectDir,
@@ -741,14 +756,14 @@ environment:
 
         final Uri? result = await testCompilerBuildNativeAssets(buildInfo);
         expect(result, isNotNull);
-        expect(fileSystem.file(result).existsSync(), isTrue);
+        expect(hostFileSystem.file(result).existsSync(), isTrue);
       },
     );
 
     testUsingContext(
       'logs warning and returns null gracefully when no package can be resolved',
       overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
+        FileSystem: () => hostFileSystem,
         Logger: () => logger,
         ProcessManager: () => processManager,
       },
@@ -758,9 +773,9 @@ environment:
         // contains no packages. All tiers in findRunPackageName fail and return
         // null, causing testCompilerBuildNativeAssets to log a diagnostic warning
         // and return null early.
-        final Directory projectDir = fileSystem.directory('/empty_app')
+        final Directory projectDir = hostFileSystem.currentDirectory.childDirectory('empty_app')
           ..createSync(recursive: true);
-        fileSystem.currentDirectory = projectDir;
+        hostFileSystem.currentDirectory = projectDir;
         projectDir.childFile('pubspec.yaml').writeAsStringSync('''
 environment:
   sdk: '>=3.2.0 <4.0.0'
