@@ -313,11 +313,11 @@ class ShaderCompiler {
         }
         return false;
       }
-      String? stderr = (result.stderr as String?)?.trim();
-      if (stderr != null && stderr.isNotEmpty) {
-        if (stderr.contains("multiple 'return'")) {
-          stderr = "$stderr\nThis combination can also cause multi-second compile times on Windows/ANGLE.";
-        }
+      final String? rawStderr = (result.stderr as String?)?.trim();
+      if (rawStderr != null && rawStderr.isNotEmpty) {
+        final String stderr = rawStderr.contains("multiple 'return'")
+            ? '$rawStderr\nThis combination can also cause multi-second compile times on Windows/ANGLE.'
+            : rawStderr;
         if (_loggedWarningShaders.add(input.path)) {
           _logger.printBox(stderr, title: 'Shader Warning');
         }
