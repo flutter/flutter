@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -29,7 +30,6 @@
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "flutter/shell/platform/embedder/embedder_engine.h"
 
 namespace flutter {
 
@@ -42,7 +42,6 @@ class EmbedderAndroidEngine final : public AndroidEngine {
  public:
   EmbedderAndroidEngine(
       const TaskRunners& task_runners,
-      std::unique_ptr<Shell> shell,
       const Settings& settings = Settings(),
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade = nullptr,
       AndroidRenderingAPI android_rendering_api =
@@ -61,14 +60,20 @@ class EmbedderAndroidEngine final : public AndroidEngine {
   bool IsSetup() const override;
 
   // |AndroidEngine|
-  void RunEngine(RunConfiguration run_configuration) override;
+  bool Run(std::unique_ptr<APKAssetProvider> asset_provider,
+           const std::string& entrypoint,
+           const std::string& library_url,
+           const std::vector<std::string>& entrypoint_args,
+           int64_t engine_id) override;
 
   // |AndroidEngine|
   std::unique_ptr<AndroidEngine> Spawn(
-      RunConfiguration run_configuration,
+      std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+      const std::string& entrypoint,
+      const std::string& library_url,
       const std::string& initial_route,
-      Shell::CreateCallback<PlatformView> on_create_platform_view,
-      Shell::CreateCallback<Rasterizer> on_create_rasterizer) const override;
+      const std::vector<std::string>& entrypoint_args,
+      int64_t engine_id) const override;
 
   // |AndroidEngine|
   Rasterizer::Screenshot Screenshot(Rasterizer::ScreenshotType type,
@@ -91,12 +96,6 @@ class EmbedderAndroidEngine final : public AndroidEngine {
 
   // |AndroidEngine|
   const TaskRunners& GetTaskRunners() const override;
-
-  // |AndroidEngine|
-  Shell& GetShell() override;
-
-  // |AndroidEngine|
-  const std::unique_ptr<Shell>& GetShellForTesting() const override;
 
   // |AndroidEngine|
   void NotifyCreated() override;
@@ -171,11 +170,6 @@ class EmbedderAndroidEngine final : public AndroidEngine {
   // ---------------------------------------------------------------------------
   // Standalone C-API Lifecycle & Subsystems (v7 alignment)
   // ---------------------------------------------------------------------------
-  bool Run(std::unique_ptr<APKAssetProvider> asset_provider,
-           const std::string& entrypoint,
-           const std::string& library_url,
-           const std::vector<std::string>& entrypoint_args,
-           int64_t engine_id);
 
   std::unique_ptr<EmbedderAndroidEngine> SpawnCAPI(
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
@@ -185,14 +179,15 @@ class EmbedderAndroidEngine final : public AndroidEngine {
       const std::vector<std::string>& entrypoint_args,
       int64_t engine_id) const;
 
-  void NotifySurfaceCreated(ANativeWindow* window, bool is_fake_window = false);
-  void NotifySurfaceChanged(size_t width, size_t height);
+  void NotifySurfaceCreated(ANativeWindow* window,
+                            bool is_fake_window = false) override;
+  void NotifySurfaceChanged(size_t width, size_t height) override;
   void NotifySurfaceWindowChanged(ANativeWindow* window,
-                                  bool is_fake_window = false);
-  void NotifySurfaceDestroyed();
+                                  bool is_fake_window = false) override;
+  void NotifySurfaceDestroyed() override;
 
   void SetSurfaceControlEnabled(bool enabled);
-  bool IsSurfaceControlEnabled() const;
+  bool IsSurfaceControlEnabled() const override;
 
   void SetPlatformMessageHandler(
       std::shared_ptr<PlatformMessageHandler> handler);
@@ -322,18 +317,7 @@ class EmbedderAndroidEngine final : public AndroidEngine {
   class CompositorDelegate;
 
   FLUTTER_API_SYMBOL(FlutterEngine) GetEngineHandle() const {
-    if (c_api_engine_) {
-      return c_api_engine_;
-    }
-    if (embedder_engine_) {
-      return reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(
-          embedder_engine_.get());
-    }
-    return nullptr;
-  }
-
-  PlatformView::Delegate& GetDelegate() const {
-    return static_cast<PlatformView::Delegate&>(embedder_engine_->GetShell());
+    return c_api_engine_;
   }
 
   void InitializeSubsystems(const TaskRunners* existing_task_runners = nullptr);
@@ -341,7 +325,6 @@ class EmbedderAndroidEngine final : public AndroidEngine {
   void PopulateRendererConfig(FlutterRendererConfig* config);
 
   FlutterEngineProcTable proc_table_{};
-  std::unique_ptr<EmbedderEngine> embedder_engine_;
   FLUTTER_API_SYMBOL(FlutterEngine) c_api_engine_ = nullptr;
   bool c_api_is_valid_ = false;
   bool surface_attached_ = false;
@@ -353,6 +336,13 @@ class EmbedderAndroidEngine final : public AndroidEngine {
   std::shared_ptr<PlatformMessageHandler> platform_message_handler_;
   AndroidRenderingAPI android_rendering_api_ =
       AndroidRenderingAPI::kImpellerOpenGLES;
+  std::optional<TaskRunners> task_runners_;
+
+  struct PendingImageGenerator {
+    ImageGeneratorFactory factory;
+    int32_t priority;
+  };
+  std::vector<PendingImageGenerator> pending_image_generators_;
 
   std::shared_ptr<AndroidTaskRunners> android_task_runners_;
   std::shared_ptr<android::AndroidVsyncWaiter> vsync_waiter_;

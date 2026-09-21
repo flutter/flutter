@@ -12,11 +12,8 @@
 #include <android/hardware_buffer_jni.h>
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/lib/ui/window/platform_message.h"
-#include "flutter/shell/common/platform_view.h"
-#include "flutter/shell/common/snapshot_surface_producer.h"
 #include "flutter/shell/platform/android/android_engine.h"
 #include "flutter/shell/platform/android/context/android_context.h"
-#include "flutter/shell/platform/android/embedder_surface_android.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_message_handler_android.h"
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
@@ -42,28 +39,10 @@ class PlatformViewAndroid final {
 
   static bool MeetsHCPPCriteria(const Settings& settings);
 
-  PlatformViewAndroid(PlatformView::Delegate& delegate,
-                      const flutter::TaskRunners& task_runners,
-                      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-                      AndroidRenderingAPI rendering_api);
-
-  //----------------------------------------------------------------------------
-  /// @brief      Creates a new PlatformViewAndroid but using an existing
-  ///             Android GPU context to create new surfaces. This maximizes
-  ///             resource sharing between 2 PlatformViewAndroids of 2 Shells.
-  ///
   PlatformViewAndroid(
-      PlatformView::Delegate& delegate,
       const flutter::TaskRunners& task_runners,
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
       const std::shared_ptr<flutter::AndroidContext>& android_context);
-
-  PlatformViewAndroid(
-      PlatformView::Delegate& delegate,
-      const flutter::TaskRunners& task_runners,
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-      const std::shared_ptr<flutter::AndroidContext>& android_context,
-      EmbedderSurfaceAndroid* embedder_surface);
 
   ~PlatformViewAndroid();
 
@@ -129,50 +108,32 @@ class PlatformViewAndroid final {
   /// @brief Whether the SurfaceControl based swapchain is enabled and active.
   bool IsSurfaceControlEnabled() const;
 
-  void SetupImpellerContext();
-
-  // |PlatformDispatchTable|
   void UpdateSemantics(
       int64_t view_id,
       const flutter::SemanticsNodeUpdates& update,
       const flutter::CustomAccessibilityActionUpdates& actions);
 
-  // |PlatformDispatchTable|
   void HandlePlatformMessage(std::unique_ptr<flutter::PlatformMessage> message);
 
-  // |PlatformDispatchTable|
   void OnPreEngineRestart() const;
 
-  // |PlatformDispatchTable|
-  std::unique_ptr<VsyncWaiter> CreateVSyncWaiter();
-
-  // |PlatformDispatchTable|
   std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocales(
       const std::vector<std::string>& supported_locale_data);
 
-  // |PlatformDispatchTable|
   void RequestDartDeferredLibrary(intptr_t loading_unit_id);
 
-  // |PlatformDispatchTable|
   double GetScaledFontSize(double unscaled_font_size,
                            int configuration_id) const;
 
-  // |PlatformDispatchTable|
   void SendChannelUpdate(const std::string& name, bool listening);
 
-  // |PlatformDispatchTable|
   void RequestViewFocusChange(const ViewFocusChangeRequest& request);
 
-  // |PlatformDispatchTable|
   void OnVsyncCallback(intptr_t baton);
 
-  // |PlatformDispatchTable|
   void SetApplicationLocale(std::string locale);
 
-  // |PlatformDispatchTable|
   void SetSemanticsTreeEnabled(bool enabled);
-
-  void SetPlatformView(fml::WeakPtr<PlatformView> platform_view);
 
   void SetEngine(AndroidEngine* engine);
 
@@ -195,31 +156,14 @@ class PlatformViewAndroid final {
   fml::WeakPtr<PlatformViewAndroid> GetWeakPtr() const;
 
  private:
-  PlatformView::Delegate& delegate_;
   const flutter::TaskRunners task_runners_;
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidContext> android_context_;
-  std::unique_ptr<EmbedderSurfaceAndroid> owned_embedder_surface_;
-  EmbedderSurfaceAndroid* embedder_surface_ = nullptr;
-  fml::WeakPtr<PlatformView> platform_view_;
   AndroidEngine* engine_ = nullptr;
 
   PlatformViewAndroidDelegate platform_view_android_delegate_;
 
   std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler_;
-  bool android_meets_hcpp_criteria_ = false;
-
-  std::unique_ptr<Surface> CreateRenderingSurface();
-
-  std::shared_ptr<ExternalViewEmbedder> CreateExternalViewEmbedder();
-
-  std::unique_ptr<SnapshotSurfaceProducer> CreateSnapshotSurfaceProducer();
-
-  sk_sp<GrDirectContext> CreateResourceContext() const;
-
-  void ReleaseResourceContext() const;
-
-  std::shared_ptr<impeller::Context> GetImpellerContext() const;
 
   void InstallFirstFrameCallback();
 

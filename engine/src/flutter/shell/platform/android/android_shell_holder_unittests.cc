@@ -207,9 +207,8 @@ TEST(AndroidShellHolder, CreateWithMergedPlatformAndUIThread) {
       nullptr, /*is_fake_window=*/true);
   holder->GetPlatformView()->NotifyCreated(window);
 
-  EXPECT_EQ(
-      holder->GetShellForTesting()->GetTaskRunners().GetUITaskRunner(),
-      holder->GetShellForTesting()->GetTaskRunners().GetPlatformTaskRunner());
+  EXPECT_EQ(holder->GetTaskRunners().GetUITaskRunner(),
+            holder->GetTaskRunners().GetPlatformTaskRunner());
 }
 
 TEST(AndroidShellHolder, CreateWithUnMergedPlatformAndUIThread) {
@@ -223,9 +222,8 @@ TEST(AndroidShellHolder, CreateWithUnMergedPlatformAndUIThread) {
       nullptr, /*is_fake_window=*/true);
   holder->GetPlatformView()->NotifyCreated(window);
 
-  EXPECT_NE(
-      holder->GetShellForTesting()->GetTaskRunners().GetUITaskRunner(),
-      holder->GetShellForTesting()->GetTaskRunners().GetPlatformTaskRunner());
+  EXPECT_NE(holder->GetTaskRunners().GetUITaskRunner(),
+            holder->GetTaskRunners().GetPlatformTaskRunner());
 }
 
 TEST(AndroidShellHolder, CreateWithEmbedderAPI) {
