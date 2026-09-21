@@ -342,7 +342,7 @@ late List<StackTrace> _creationStackTraces = <StackTrace>[];
 - **Scope**: `packages/flutter`
 - **Description**: Requires debug-only members (whose names start with `debug`, `_debug`, `Debug`, or `_Debug`) to be accessed only inside `assert(...)` statements/initializers, or inside other debug-only members.
 - **Rationale**: Symbols prefixed with `debug` or `_debug` exist for development-time diagnostics and assertions. Restricting their usage to `assert(...)` blocks ensures the logic and the storage are tree-shaken from profile and release builds.
-- **Limitations**: To the rule implementation simple, debug-only accesses guarded by control flows (such as `if (kDebugMode)` or `if (!kReleaseMode)`) will still be flagged. 
+- **Limitations**: To keep the rule's implementation simple, debug-only accesses guarded by control flows (such as `if (kDebugMode)` or `if (!kReleaseMode)`) will still be flagged. 
 Suppress intentional exceptions using `// ignore: access_debug_members_only_in_asserts`.
 
 ```dart
