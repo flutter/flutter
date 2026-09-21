@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @docImport 'dart:io'
+/// @docImport 'dart:io';
+library;
 
 /// Details about the Flutter version this app was compiled with,
 /// corresponding to the output of `flutter --version`.

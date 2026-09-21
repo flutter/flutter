@@ -1285,11 +1285,11 @@ void main() {
     final residentRunner = FakeResidentRunner(
       FlutterDevice(
         FakeDevice(),
-        toolContext: TestToolContext(
-          fileSystem: fs,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fs,
           logger: testLogger,
           processInfo: processInfo,
-          artifacts: Artifacts.test(),
         ),
         targetPlatform: .unsupported,
         buildInfo: BuildInfo.debug,
@@ -1664,11 +1664,11 @@ TerminalHandler setUpTerminalHandler(
   final processInfo = ProcessInfo.test(MemoryFileSystem.test());
   final device = FlutterDevice(
     FakeDevice()..supportsScreenshot = supportsScreenshot,
-    toolContext: TestToolContext(
-      fileSystem: localFileSystem,
+    toolContext: FakeToolContext(
+      artifacts: Artifacts.test(),
+      fs: localFileSystem,
       logger: testLogger,
       processInfo: processInfo,
-      artifacts: Artifacts.test(),
     ),
     buildInfo: BuildInfo(
       buildMode,
