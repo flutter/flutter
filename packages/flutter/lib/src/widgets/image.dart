@@ -194,8 +194,12 @@ Future<void> precacheImage(
 ///
 ///  * [Image.frameBuilder], which makes use of this signature in the [Image]
 ///    widget.
-typedef ImageFrameBuilder =
-    Widget Function(BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded);
+typedef ImageFrameBuilder = Widget Function(
+  BuildContext context,
+  Widget child,
+  int? frame,
+  bool wasSynchronouslyLoaded,
+);
 
 /// Signature used by [Image.loadingBuilder] to build a representation of the
 /// image's loading progress.
@@ -228,13 +232,19 @@ typedef ImageFrameBuilder =
 ///    widget.
 ///  * [ImageChunkListener], a lower-level signature for listening to raw
 ///    [ImageChunkEvent]s.
-typedef ImageLoadingBuilder =
-    Widget Function(BuildContext context, Widget child, ImageChunkEvent? loadingProgress);
+typedef ImageLoadingBuilder = Widget Function(
+  BuildContext context,
+  Widget child,
+  ImageChunkEvent? loadingProgress,
+);
 
 /// Signature used by [Image.errorBuilder] to create a replacement widget to
 /// render instead of the image.
-typedef ImageErrorWidgetBuilder =
-    Widget Function(BuildContext context, Object error, StackTrace? stackTrace);
+typedef ImageErrorWidgetBuilder = Widget Function(
+  BuildContext context,
+  Object error,
+  StackTrace? stackTrace,
+);
 
 /// A widget that displays an image.
 ///

@@ -357,6 +357,7 @@ android_java_sources = [
   "io/flutter/plugin/platform/PlatformPlugin.java",
   "io/flutter/plugin/platform/PlatformView.java",
   "io/flutter/plugin/platform/PlatformViewFactory.java",
+  "io/flutter/plugin/platform/PlatformViewGestureTracker.java",
   "io/flutter/plugin/platform/PlatformViewRegistry.java",
   "io/flutter/plugin/platform/PlatformViewRegistryImpl.java",
   "io/flutter/plugin/platform/PlatformViewRenderTarget.java",
@@ -700,11 +701,6 @@ action("pom_content_hash_embedding") {
     "--include-embedding-dependencies",
     "true",
   ]
-}
-
-# TODO(jsimmons): remove this placeholder when it is no longer used by the LUCI recipes
-group("robolectric_tests") {
-  deps = [ ":android_jar" ]
 }
 
 zip_bundle("android_symbols") {

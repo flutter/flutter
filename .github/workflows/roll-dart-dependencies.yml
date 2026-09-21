@@ -35,12 +35,12 @@ jobs:
       - name: Fetch upstream
         run: |
           git remote add upstream https://github.com/flutter/flutter.git
-          git fetch upstream $REF_NAME
+          git fetch upstream "$REF_NAME"
 
           BRANCH_NAME="sync-dart-$DART_HASH"
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$BRANCH_NAME" >> "$GITHUB_ENV"
 
-          git checkout -b "$BRANCH_NAME" upstream/$REF_NAME
+          git checkout -b "$BRANCH_NAME" "upstream/$REF_NAME"
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           REF_NAME: ${{ github.ref_name }}
@@ -54,9 +54,7 @@ jobs:
           echo "Fetching DEPS from $URL"
 
           # Googlesource returns base64 encoded text when format=TEXT is used
-          RESPONSE=$(curl -s -f "$URL")
-
-          if [ $? -ne 0 ]; then
+          if ! RESPONSE=$(curl -s -f "$URL"); then
             echo "::error::Failed to download DEPS file. Please verify the Dart hash: $DART_HASH"
             exit 1
           fi
@@ -99,11 +97,11 @@ jobs:
         run: |
           # Check if the root DEPS file has changed
           if git diff --exit-code DEPS; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-            echo "## ✅ Dart version already up to date" >> $GITHUB_STEP_SUMMARY
-            echo "The DEPS file is already up to date with Dart hash \`$DART_HASH\`." >> $GITHUB_STEP_SUMMARY
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "## ✅ Dart version already up to date" >> "$GITHUB_STEP_SUMMARY"
+            echo "The DEPS file is already up to date with Dart hash \`$DART_HASH\`." >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Create PR if Changed
@@ -118,14 +116,16 @@ jobs:
             --title "[$REF_NAME] Update Flutter DEPS to Dart $DART_HASH" \
             --body "This PR updates the transitive dependencies in the engine \`DEPS\` file based on Dart SDK hash \`$DART_HASH\`." \
             --repo flutter/flutter \
-            --base $REF_NAME \
-            --head flutteractionsbot:$BRANCH_NAME)
+            --base "$REF_NAME" \
+            --head "flutteractionsbot:$BRANCH_NAME")
 
           # Nice big PR Success Summary
-          echo "## 🚀 PR Created Successfully" >> $GITHUB_STEP_SUMMARY
-          echo "Updated dart dependencies to \`$DART_HASH\`." >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🔗 **View Pull Request:** $PR_URL" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## 🚀 PR Created Successfully"
+            echo "Updated dart dependencies to \`$DART_HASH\`."
+            echo ""
+            echo "🔗 **View Pull Request:** $PR_URL"
+          } >> "$GITHUB_STEP_SUMMARY"
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           DART_HASH: ${{ inputs.dart_hash }}

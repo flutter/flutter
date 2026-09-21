@@ -17,7 +17,6 @@ import '../base/version.dart';
 import '../base/version_range.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import 'android_sdk.dart';
 
@@ -218,14 +217,11 @@ const gradleWrapperPropertiesFilename = 'gradle-wrapper.properties';
 /// or constructing a Gradle project.
 class GradleUtils {
   GradleUtils({
-    required Platform platform,
-    required Logger logger,
-    required Cache cache,
-    required OperatingSystemUtils operatingSystemUtils,
-  }) : _platform = platform,
-       _logger = logger,
-       _cache = cache,
-       _operatingSystemUtils = operatingSystemUtils;
+    required this._platform,
+    required this._logger,
+    required this._cache,
+    required this._operatingSystemUtils,
+  });
 
   final Cache _cache;
   final Platform _platform;
@@ -1164,11 +1160,18 @@ String getGradleVersionFor(String agpV) {
 /// this will fail with a [ToolExit].
 void updateLocalProperties({
   required FlutterProject project,
+  Analytics? analytics,
+  AndroidSdk? androidSdk,
   BuildInfo? buildInfo,
+  FileSystemUtils? fileSystemUtils,
+  Logger? logger,
   bool requireAndroidSdk = true,
 }) {
-  if (requireAndroidSdk && globals.androidSdk == null) {
-    exitWithNoSdkMessage();
+  if (requireAndroidSdk && androidSdk == null) {
+    exitWithNoSdkMessage(
+      analytics: analytics ?? const NoOpAnalytics(),
+      logger: logger ?? BufferLogger.test(),
+    );
   }
   final File localProperties = project.android.localPropertiesFile;
   var changed = false;
@@ -1193,24 +1196,27 @@ void updateLocalProperties({
     changed = true;
   }
 
-  final AndroidSdk? androidSdk = globals.androidSdk;
+  final FileSystemUtils fsUtils =
+      fileSystemUtils ??
+      FileSystemUtils(fileSystem: project.directory.fileSystem, platform: const LocalPlatform());
+
   if (androidSdk != null) {
-    changeIfNecessary('sdk.dir', globals.fsUtils.escapePath(androidSdk.directory.path));
+    changeIfNecessary('sdk.dir', fsUtils.escapePath(androidSdk.directory.path));
   }
 
-  changeIfNecessary('flutter.sdk', globals.fsUtils.escapePath(Cache.flutterRoot!));
+  changeIfNecessary('flutter.sdk', fsUtils.escapePath(Cache.flutterRoot!));
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
     final String? buildName = validatedBuildNameForPlatform(
       TargetPlatform.android_arm,
       buildInfo.buildName ?? project.manifest.buildName,
-      globals.logger,
+      logger ?? BufferLogger.test(),
     );
     changeIfNecessary('flutter.versionName', buildName);
     final String? buildNumber = validatedBuildNumberForPlatform(
       TargetPlatform.android_arm,
       buildInfo.buildNumber ?? project.manifest.buildNumber,
-      globals.logger,
+      logger ?? BufferLogger.test(),
     );
     changeIfNecessary('flutter.versionCode', buildNumber);
   }
@@ -1220,8 +1226,9 @@ void updateLocalProperties({
   }
 }
 
-void exitWithNoSdkMessage() {
-  globals.analytics.send(
+/// Logs an analytics event indicating the Android SDK is missing and throws a [ToolExit].
+void exitWithNoSdkMessage({required Analytics analytics, required Logger logger}) {
+  analytics.send(
     Event.flutterBuildInfo(
       label: 'unsupported-project',
       buildType: 'gradle',
@@ -1229,7 +1236,7 @@ void exitWithNoSdkMessage() {
     ),
   );
   throwToolExit(
-    '${globals.logger.terminal.warningMark} No Android SDK found. '
+    '${logger.terminal.warningMark} No Android SDK found. '
     'Try setting the ANDROID_HOME environment variable.',
   );
 }

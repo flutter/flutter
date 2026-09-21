@@ -36,6 +36,7 @@ void main() async {
     nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
     await nativeDriver.configureForScreenshotTesting();
     await flutterDriver.waitUntilFirstFrameRasterized();
+    await nativeDriver.waitUntilFirstFrameDisplayed();
 
     // Double check that we are really probably testing using TLHC.
     // See https://github.com/flutter/flutter/blob/main/docs/platforms/android/Android-Platform-Views.md.
