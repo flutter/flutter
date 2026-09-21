@@ -41,13 +41,10 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 /// and install hooks for the host test platform ([TargetPlatform.tester]),
 /// writing the generated manifest to `build/native_assets/<os>/native_assets.json`.
 ///
-/// An optional [buildRunner] parameter may be provided for testing. Returns the
-/// [Uri] to the generated `native_assets.json` file, or `null` if native assets
-/// are disabled, unsupported on the host OS, or no package can be resolved.
-Future<Uri?> testCompilerBuildNativeAssets(
-  BuildInfo buildInfo, {
-  @visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner,
-}) async {
+/// Returns the [Uri] to the generated `native_assets.json` file, or `null` if
+/// native assets are disabled, unsupported on the host OS, or no package can
+/// be resolved.
+Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   final BuildInfo(
     :bool buildNativeAssets,
     :BuildMode mode,
@@ -75,25 +72,23 @@ Future<Uri?> testCompilerBuildNativeAssets(
   final String pubspecPath = Uri.file(packageConfigPath)
       .resolve('../$_pubspecYamlFileName')
       .toFilePath();
-  final FlutterNativeAssetsBuildRunner runner =
-      buildRunner ??
-      FlutterNativeAssetsBuildRunnerImpl(
-        packageConfigPath,
-        packageConfig,
-        globals.fs,
-        globals.logger,
-        globals.platform,
-        runPackageName,
-        pubspecPath,
-        includeDevDependencies: true,
-      );
+  final FlutterNativeAssetsBuildRunner buildRunner = FlutterNativeAssetsBuildRunnerImpl(
+    packageConfigPath,
+    packageConfig,
+    globals.fs,
+    globals.logger,
+    globals.platform,
+    runPackageName,
+    pubspecPath,
+    includeDevDependencies: true,
+  );
 
   if (!globals.platform.isMacOS && !globals.platform.isLinux && !globals.platform.isWindows) {
     await ensureNoNativeAssetsOrOsIsSupported(
       projectUri,
       const LocalPlatform().operatingSystem,
       globals.fs,
-      runner,
+      buildRunner,
     );
     return null;
   }
@@ -112,7 +107,7 @@ Future<Uri?> testCompilerBuildNativeAssets(
   // First perform the dart build.
   final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
     environmentDefines: environmentDefines,
-    buildRunner: runner,
+    buildRunner: buildRunner,
     targetPlatform: TargetPlatform.tester,
     projectUri: projectUri,
     fileSystem: globals.fs,

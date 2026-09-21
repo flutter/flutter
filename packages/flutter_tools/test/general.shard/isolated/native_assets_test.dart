@@ -522,12 +522,19 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
     testWithoutContext('prefers direct root URI match over manifestAppName', () {
       final FileSystem fs = MemoryFileSystem.test();
       final Uri projectUri = Uri.parse('file:///my_app/');
+
+      // Configure package_config with three competing entries:
+      // 1. 'aaa_first_dep': alphabetically first dependency at a different root URI.
+      // 2. 'direct_pkg': root URI directly matches projectUri (Tier 1).
+      // 3. 'manifest_pkg': name matches manifestAppName (Tier 3), but root URI differs.
       final packageConfig = PackageConfig(<Package>[
         Package('aaa_first_dep', Uri.parse('file:///pub_cache/aaa_first_dep/')),
         Package('direct_pkg', projectUri),
         Package('manifest_pkg', Uri.parse('file:///other_dir/')),
       ]);
 
+      // Tier 1 (direct root URI match) should select 'direct_pkg' before Tier 3
+      // ('manifest_pkg') is considered.
       expect(
         findRunPackageName(
           fileSystem: fs,
@@ -541,10 +548,18 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
 
     testWithoutContext('matches package root via canonicalized path when URIs differ', () {
       final FileSystem fs = MemoryFileSystem.test();
+      // Create the physical project directory at '/real_dir' and a symlink at
+      // '/symlink_dir' pointing to '/real_dir'.
       final Directory realDir = fs.directory('/real_dir')..createSync(recursive: true);
       final Link symlink = fs.link('/symlink_dir')..createSync('/real_dir');
       final Directory symlinkDir = fs.directory(symlink.path);
 
+      // In package_config, 'symlink_pkg' has root URI 'file:///real_dir/' while
+      // projectUri is 'file:///symlink_dir/'.
+      // Tier 1 (direct URI equality) does not match because the URI paths differ.
+      // Tier 2 resolves the filesystem symlink via resolveSymbolicLinksSync() and
+      // matches both URIs to '/real_dir', selecting 'symlink_pkg' over Tier 3
+      // ('manifest_pkg') and over 'aaa_first_dep'.
       final packageConfig = PackageConfig(<Package>[
         Package('aaa_first_dep', Uri.parse('file:///pub_cache/aaa_first_dep/')),
         Package('symlink_pkg', realDir.uri),
@@ -566,6 +581,12 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         'when no package root matches projectUri', () {
       final FileSystem fs = MemoryFileSystem.test();
       final Uri projectUri = Uri.parse('file:///unmatched_app/');
+
+      // Neither '_fe_analyzer_shared' nor 'args' matches projectUri directly
+      // (Tier 1) or via canonicalized path (Tier 2). Because pub sorts
+      // package_config.json alphabetically, picking packageConfig.packages.first
+      // would erroneously select '_fe_analyzer_shared'. Instead, Tier 3 falls
+      // back to manifestAppName ('my_app').
       final packageConfig = PackageConfig(<Package>[
         Package('_fe_analyzer_shared', Uri.parse('file:///pub_cache/_fe_analyzer_shared/')),
         Package('args', Uri.parse('file:///pub_cache/args/')),
@@ -584,6 +605,9 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
 
     testWithoutContext('falls back to manifestAppName when packageConfig is empty', () {
       final FileSystem fs = MemoryFileSystem.test();
+
+      // When packageConfig has no packages, Tiers 1 and 2 are skipped and Tier 3
+      // returns the non-empty manifestAppName ('standalone_app').
       expect(
         findRunPackageName(
           fileSystem: fs,
@@ -599,6 +623,10 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       'returns null when no package root matches and manifestAppName is empty',
       () {
         final FileSystem fs = MemoryFileSystem.test();
+
+        // 'args' does not match projectUri via Tier 1 or Tier 2, and manifestAppName
+        // is empty (e.g. a malformed or missing pubspec.yaml name field), so Tier 4
+        // returns null rather than selecting an arbitrary dependency.
         final packageConfig = PackageConfig(<Package>[
           Package('args', Uri.parse('file:///pub_cache/args/')),
         ]);
@@ -618,11 +646,18 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
     testWithoutContext(
       'catches FileSystemException during symlink resolution and falls back cleanly',
       () {
+        // Wrap the file system so directory.existsSync() is true but
+        // directory.resolveSymbolicLinksSync() throws a FileSystemException
+        // (simulating a symlink loop or broken link during Tier 2 canonicalization).
         final FileSystem fs = _ThrowingResolveLinksFileSystem(MemoryFileSystem.test());
         final packageConfig = PackageConfig(<Package>[
           Package('other_pkg', Uri.parse('file:///other_dir/')),
         ]);
 
+        // Tier 1 misses ('file:///broken_dir/' != 'file:///other_dir/').
+        // Tier 2 catches the FileSystemException during resolveSymbolicLinksSync(),
+        // falls back to the lexical path, and does not match 'other_pkg'.
+        // Tier 3 then cleanly returns 'fallback_app'.
         expect(
           findRunPackageName(
             fileSystem: fs,
@@ -645,6 +680,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         ProcessManager: () => processManager,
       },
       () async {
+        // Set up the current project directory at '/my_app' with pubspec name 'my_app'.
         final Directory projectDir = fileSystem.directory('/my_app')..createSync(recursive: true);
         fileSystem.currentDirectory = projectDir;
         projectDir.childFile('pubspec.yaml').writeAsStringSync('''
@@ -653,6 +689,37 @@ environment:
   sdk: '>=3.2.0 <4.0.0'
 ''');
 
+        // Configure 'my_app' in '/different_dir' WITHOUT a build hook and WITHOUT
+        // a dependency on 'other_pkg'.
+        fileSystem.directory('/different_dir').createSync(recursive: true);
+        fileSystem.file('/different_dir/pubspec.yaml').writeAsStringSync('''
+name: my_app
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+''');
+
+        // Configure 'other_pkg' (listed first in package_config.json) in '/other_dir'
+        // WITH a 'hook/build.dart' script.
+        // Because testCompilerBuildNativeAssets is invoked below without a fake
+        // buildRunner, FlutterNativeAssetsBuildRunnerImpl constructs the real
+        // PackageLayout and queries packagesWithBuildHooks() for runPackageName's
+        // dependency subgraph. If runPackageName erroneously resolved to 'other_pkg',
+        // FlutterNativeAssetsBuildRunnerImpl would discover '/other_dir/hook/build.dart'
+        // and attempt to spawn a Dart hook process via FakeProcessManager.empty(),
+        // causing the test to fail. Resolving runPackageName to 'my_app' (Tier 3)
+        // excludes 'other_pkg' from the package subgraph so no hook process is
+        // spawned and native_assets.json is written cleanly.
+        fileSystem.directory('/other_dir/hook').createSync(recursive: true);
+        fileSystem.file('/other_dir/pubspec.yaml').writeAsStringSync('''
+name: other_pkg
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+''');
+        fileSystem.file('/other_dir/hook/build.dart').writeAsStringSync('void main() {}');
+
+        // Neither 'other_pkg' ('/other_dir') nor 'my_app' ('/different_dir')
+        // matches projectDir.uri ('/my_app') in Tier 1 or Tier 2, forcing
+        // findRunPackageName to fall back to Tier 3 (manifestAppName: 'my_app').
         final File packageConfigFile = writePackageConfigFiles(
           directory: projectDir,
           mainLibName: 'other_pkg',
@@ -672,8 +739,7 @@ environment:
           packageConfig: packageConfig,
         );
 
-        final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
-        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo);
         expect(result, isNotNull);
         expect(fileSystem.file(result).existsSync(), isTrue);
       },
@@ -687,6 +753,11 @@ environment:
         ProcessManager: () => processManager,
       },
       () async {
+        // Create a project directory whose pubspec.yaml omits the 'name' field
+        // (so project.manifest.appName is empty) and whose package_config.json
+        // contains no packages. All tiers in findRunPackageName fail and return
+        // null, causing testCompilerBuildNativeAssets to log a diagnostic warning
+        // and return null early.
         final Directory projectDir = fileSystem.directory('/empty_app')
           ..createSync(recursive: true);
         fileSystem.currentDirectory = projectDir;
@@ -711,8 +782,7 @@ environment:
           packageConfig: packageConfig,
         );
 
-        final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
-        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
+        final Uri? result = await testCompilerBuildNativeAssets(buildInfo);
         expect(result, isNull);
         expect(
           logger.warningText,
