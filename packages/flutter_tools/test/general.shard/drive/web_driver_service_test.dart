@@ -462,7 +462,6 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 }
 
 WebDriverService setUpDriverService() {
-  final logger = BufferLogger.test();
   return WebDriverService(toolContext: DelegatingToolContext(), dartSdkPath: 'dart');
 }
 

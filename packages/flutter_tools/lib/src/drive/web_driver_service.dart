@@ -30,15 +30,12 @@ import 'drive_service.dart';
 
 /// An implementation of the driver service for web debug and release applications.
 class WebDriverService extends DriverService {
-  WebDriverService({
-    required String dartSdkPath,
-    required ToolContext toolContext,
-  }) : _dartSdkPath = dartSdkPath,
-       _processUtils = ProcessUtils(
-         processManager: toolContext.processManager,
-         logger: toolContext.logger,
-       ),
-       _toolContext = toolContext;
+  WebDriverService({required this._dartSdkPath, required ToolContext toolContext})
+    : _processUtils = ProcessUtils(
+        processManager: toolContext.processManager,
+        logger: toolContext.logger,
+      ),
+      _toolContext = toolContext;
 
   final ToolContext _toolContext;
   final ProcessUtils _processUtils;
@@ -69,7 +66,12 @@ class WebDriverService extends DriverService {
     Map<String, Object> platformArgs = const <String, Object>{},
     Map<String, String> webDefines = const <String, String>{},
   }) async {
-    final ToolContext(:Logger logger, :Terminal terminal, :Platform platform, :OutputPreferences outputPreferences) = _toolContext;
+    final ToolContext(
+      :Logger logger,
+      :Terminal terminal,
+      :Platform platform,
+      :OutputPreferences outputPreferences,
+    ) = _toolContext;
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       toolContext: _toolContext,
@@ -201,14 +203,14 @@ class WebDriverService extends DriverService {
         desired: getDesiredCapabilities(
           browser,
           headless,
-          platform: _platform,
+          platform: _toolContext.platform,
           webBrowserFlags: webBrowserFlags,
           chromeBinary: chromeBinary,
           mobileEmulation: mobileEmulation,
         ),
       );
     } on SocketException catch (error) {
-      _logger.printTrace('$error');
+      _toolContext.logger.printTrace('$error');
       throwToolExit(
         'Unable to start a WebDriver session for web testing.\n'
         'Make sure you have the correct WebDriver server (e.g. chromedriver) running at $driverPort.\n'
@@ -225,7 +227,7 @@ class WebDriverService extends DriverService {
     final int result = await _processUtils.stream(
       <String>[_dartSdkPath, ...arguments, testFile],
       environment: <String, String>{
-        ..._platform.environment,
+        ..._toolContext.platform.environment,
         'VM_SERVICE_URL': _webUri.toString(),
         ..._additionalDriverEnvironment(webDriver, browserName, androidEmulator),
       },
