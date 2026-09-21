@@ -82,24 +82,18 @@ class FlutterWebPlatform extends PlatformPlugin {
     required FlutterProject flutterProject,
     required String flutterTesterBinPath,
     required FileSystem fileSystem,
-    required Directory buildDirectory,
-    required File testDartJs,
-    required File testHostDartJs,
-    required ChromiumLauncher chromiumLauncher,
-    required Logger logger,
-    required Artifacts? artifacts,
+    required this._buildDirectory,
+    required this._testDartJs,
+    required this._testHostDartJs,
+    required this._chromiumLauncher,
+    required this._logger,
+    required this._artifacts,
     required ProcessManager processManager,
     required this.webRenderer,
     required this.useWasm,
     required this.crossOriginIsolation,
     TestTimeRecorder? testTimeRecorder,
-  }) : _fileSystem = fileSystem,
-       _buildDirectory = buildDirectory,
-       _testDartJs = testDartJs,
-       _testHostDartJs = testHostDartJs,
-       _chromiumLauncher = chromiumLauncher,
-       _logger = logger,
-       _artifacts = artifacts {
+  }) : _fileSystem = fileSystem {
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
         .add(
@@ -134,6 +128,8 @@ class FlutterWebPlatform extends PlatformPlugin {
         // Chrome is the only supported browser currently.
         'FLUTTER_TEST_BROWSER': 'chrome',
         'FLUTTER_WEB_RENDERER': webRenderer.name,
+        // Pass FLUTTER_ROOT so flutter_goldens can locate the cache directory and resolve repo paths.
+        if (Cache.flutterRoot case final String flutterRoot) 'FLUTTER_ROOT': flutterRoot,
       },
     );
   }
@@ -703,7 +699,6 @@ window.\$dartLoader.loader.nextAttempt();
         suiteConfig,
         message,
         onDone: () async {
-          cancelWatchdogs();
           lockResource.release();
           if (_logger.isVerbose) {
             _logger.printTrace('Test suite $relativePath finished.');
@@ -719,6 +714,7 @@ window.\$dartLoader.loader.nextAttempt();
       } else {
         suite = await loadFuture;
       }
+      cancelWatchdogs();
     } catch (_) {
       cancelWatchdogs();
       rethrow;
@@ -764,6 +760,12 @@ window.\$dartLoader.loader.nextAttempt();
       completer.future,
       headless: !_config.pauseAfterLoad,
       logger: _logger,
+      webBrowserFlags: const <String>[
+        // Enforce high-DPI (3x) device scale factor and standard window size
+        // to standardize rendering across platforms and match CI golden baselines.
+        '--force-device-scale-factor=3',
+        '--window-size=800,600',
+      ],
     );
   }
 
@@ -864,17 +866,25 @@ class BrowserManager {
     // the browser is still running code which means the user isn't debugging.
     _channel = MultiChannel<dynamic>(
       webSocket.cast<String>().transform(jsonDocument).changeStream((Stream<Object?> stream) {
-        return stream.map((Object? message) {
-          if (!_closed) {
-            _timer.reset();
-            _lastMessageTime = DateTime.now();
-          }
-          for (final RunnerSuiteController controller in _controllers) {
-            controller.setDebugging(false);
-          }
+        return stream
+            .handleError((Object error) {
+              final formatException = error as FormatException;
+              _logger.printWarning(
+                'Received unexpected non-JSON message from browser WebSocket: ${formatException.source}',
+              );
+              _logger.printTrace('JSON decode error: $formatException');
+            }, test: (error) => error is FormatException)
+            .map((Object? message) {
+              if (!_closed) {
+                _timer.reset();
+                _lastMessageTime = DateTime.now();
+              }
+              for (final RunnerSuiteController controller in _controllers) {
+                controller.setDebugging(false);
+              }
 
-          return message;
-        });
+              return message;
+            });
       }),
     );
 
@@ -1182,19 +1192,21 @@ class BrowserManager {
 
     final List<String> pendingAssetRequests = _networkTracker?.getStalledRequests() ?? <String>[];
 
-    if (isWsAlive && isCdpResponsive && pendingAssetRequests.isNotEmpty) {
-      report.writeln('  Diagnosis: [Iframe WASM/Asset Fetch Stalled]');
-      report.writeln(
-        '    Chrome host process is healthy and sending WS pings, but asset request(s) are pending in the browser:',
-      );
-      for (final req in pendingAssetRequests) {
-        report.writeln('      - $req');
+    if (isCdpResponsive) {
+      if (pendingAssetRequests.isNotEmpty) {
+        report.writeln('  Diagnosis: [Iframe WASM/Asset Fetch Stalled]');
+        report.writeln(
+          '    Chrome host process is healthy, but asset request(s) are pending in the browser:',
+        );
+        for (final req in pendingAssetRequests) {
+          report.writeln('      - $req');
+        }
+      } else {
+        report.writeln('  Diagnosis: [Iframe JS Execution Stalled]');
+        report.writeln(
+          '    Chrome host process is healthy and no network requests are pending, but the test iframe JS execution stalled.',
+        );
       }
-    } else if (isWsAlive && isCdpResponsive) {
-      report.writeln('  Diagnosis: [Iframe JS Execution Stalled]');
-      report.writeln(
-        '    Chrome host process is healthy and no network requests are pending, but the test iframe JS execution stalled.',
-      );
     } else {
       report.writeln('  Diagnosis: [Browser Process Freeze / Crash]');
       report.writeln('    Chrome process or main renderer thread is unresponsive or frozen.');

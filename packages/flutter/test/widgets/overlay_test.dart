@@ -883,8 +883,7 @@ void main() {
                 error.diagnostics[2].toStringDeep(),
                 equalsIgnoringHashCodes(
                   'The most common way to add an Overlay to an application is to\n'
-                  'include a MaterialApp, CupertinoApp or Navigator widget in the\n'
-                  'runApp() call.\n',
+                  'include a WidgetsApp or Navigator widget in the runApp() call.\n',
                 ),
               );
               expect(error.diagnostics[3], isA<DiagnosticsProperty<Widget>>());
@@ -898,8 +897,7 @@ void main() {
                   '   Container widgets require an Overlay widget ancestor for correct\n'
                   '   operation.\n'
                   '   The most common way to add an Overlay to an application is to\n'
-                  '   include a MaterialApp, CupertinoApp or Navigator widget in the\n'
-                  '   runApp() call.\n'
+                  '   include a WidgetsApp or Navigator widget in the runApp() call.\n'
                   '   The specific widget that failed to find an overlay was:\n'
                   '     Container\n'
                   '   The context from which that widget was searching for an overlay\n'
@@ -1675,8 +1673,7 @@ void main() {
         '   Some widgets require an Overlay widget ancestor for correct\n'
         '   operation.\n'
         '   The most common way to add an Overlay to an application is to\n'
-        '   include a MaterialApp, CupertinoApp or Navigator widget in the\n'
-        '   runApp() call.\n'
+        '   include a WidgetsApp or Navigator widget in the runApp() call.\n'
         '   The context from which that widget was searching for an overlay\n'
         '   was:\n'
         '     Builder\n',
@@ -1728,7 +1725,7 @@ void main() {
           '   An overlay lets widgets float on top of other widget children.\n'
           '   To introduce an Overlay widget, you can either directly include\n'
           '   one, or use a widget that contains an Overlay itself, such as a\n'
-          '   Navigator, WidgetApp, MaterialApp, or CupertinoApp.\n'
+          '   Navigator or WidgetsApp.\n'
           '   The specific widget that could not find a Overlay ancestor was:\n'
           '     Builder\n'
           '   The ancestors of this widget were:\n'

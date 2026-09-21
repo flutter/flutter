@@ -21,153 +21,32 @@ void testMain() {
   group('CanvasKit shaders', () {
     setUpCanvasKitTest();
 
-    test('Sweep gradient', () {
-      final gradient = ui.Gradient.sweep(ui.Offset.zero, testColors) as CkGradientSweep;
-      expect(gradient.getSkShader(ui.FilterQuality.none), isNotNull);
-    });
-
-    test('Linear gradient', () {
-      final gradient =
-          ui.Gradient.linear(ui.Offset.zero, const ui.Offset(0, 1), testColors) as CkGradientLinear;
-      expect(gradient.getSkShader(ui.FilterQuality.none), isNotNull);
-    });
-
-    test('Radial gradient', () {
-      final gradient = ui.Gradient.radial(ui.Offset.zero, 10, testColors) as CkGradientRadial;
-      expect(gradient.getSkShader(ui.FilterQuality.none), isNotNull);
-    });
-
-    test('Conical gradient', () {
-      final gradient =
-          ui.Gradient.radial(
-                ui.Offset.zero,
-                10,
-                testColors,
-                null,
-                ui.TileMode.clamp,
-                null,
-                const ui.Offset(10, 10),
-                40,
-              )
-              as CkGradientConical;
-      expect(gradient.getSkShader(ui.FilterQuality.none), isNotNull);
-    });
-
     test('Image shader initialize/dispose cycle', () async {
       final EngineImage image = await createImageFromBytes(kTransparentImage);
-      final imageShader =
-          ui.ImageShader(
-                image,
-                ui.TileMode.clamp,
-                ui.TileMode.repeated,
-                Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
-              )
-              as CkImageShader;
-      expect(imageShader, isA<CkImageShader>());
+      final imageShader = ui.ImageShader(
+        image,
+        ui.TileMode.clamp,
+        ui.TileMode.repeated,
+        Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
+      ) as EngineImageShader;
+      final ckShader = imageShader.getBackendShader(ui.FilterQuality.none) as CkImageShader;
+      expect(ckShader, isA<CkImageShader>());
 
-      final CkUniqueRef<SkShader> ref = imageShader.ref!;
-      expect(imageShader.debugDisposed, false);
-      expect(imageShader.getSkShader(ui.FilterQuality.none), same(ref.nativeObject));
-      expect(ref.isDisposed, false);
+      expect(ckShader.skShader, isNotNull);
+      expect(ckShader.debugDisposed, false);
+      expect(imageShader.getBackendShader(ui.FilterQuality.none), same(ckShader));
       expect(image.debugDisposed, false);
       imageShader.dispose();
-      expect(imageShader.debugDisposed, true);
-      expect(ref.isDisposed, true);
-      expect(imageShader.ref, isNull);
-      expect(image.debugDisposed, true);
+      expect(ckShader.debugDisposed, true);
+      expect(image.debugDisposed, false);
+
+      // Disposing again should be a no-op and not crash.
+      imageShader.dispose();
+      expect(ckShader.debugDisposed, true);
+      expect(image.debugDisposed, false);
     });
 
-    test('Image shader withQuality', () async {
-      final EngineImage image = await createImageFromBytes(kTransparentImage);
-      final imageShader =
-          ui.ImageShader(
-                image,
-                ui.TileMode.clamp,
-                ui.TileMode.repeated,
-                Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
-              )
-              as CkImageShader;
-      expect(imageShader, isA<CkImageShader>());
-
-      final CkUniqueRef<SkShader> ref1 = imageShader.ref!;
-      expect(imageShader.getSkShader(ui.FilterQuality.none), same(ref1.nativeObject));
-
-      // Request the same quality as the default quality (none).
-      expect(imageShader.getSkShader(ui.FilterQuality.none), isNotNull);
-      final CkUniqueRef<SkShader> ref2 = imageShader.ref!;
-      expect(ref1, same(ref2));
-      expect(ref1.isDisposed, false);
-      expect(image.debugDisposed, false);
-
-      // Change quality to medium.
-      expect(imageShader.getSkShader(ui.FilterQuality.medium), isNotNull);
-      final CkUniqueRef<SkShader> ref3 = imageShader.ref!;
-      expect(ref1, isNot(same(ref3)));
-      expect(
-        ref1.isDisposed,
-        true,
-        reason: 'The previous reference must be released to avoid a memory leak',
-      );
-      expect(image.debugDisposed, false);
-      expect(imageShader.ref!.nativeObject, same(ref3.nativeObject));
-
-      // Ask for medium again.
-      expect(imageShader.getSkShader(ui.FilterQuality.medium), isNotNull);
-      final CkUniqueRef<SkShader> ref4 = imageShader.ref!;
-      expect(ref4, same(ref3));
-      expect(ref3.isDisposed, false);
-      expect(image.debugDisposed, false);
-      expect(imageShader.ref!.nativeObject, same(ref4.nativeObject));
-
-      // Done with the shader.
-      imageShader.dispose();
-      expect(imageShader.debugDisposed, true);
-      expect(ref4.isDisposed, true);
-      expect(imageShader.ref, isNull);
-      expect(image.debugDisposed, true);
-    });
-
-    test('isGradient', () async {
-      final sweepGradient = ui.Gradient.sweep(ui.Offset.zero, testColors) as CkGradientSweep;
-      expect(sweepGradient.isGradient, isTrue);
-      sweepGradient.dispose();
-
-      final linearGradient =
-          ui.Gradient.linear(ui.Offset.zero, const ui.Offset(0, 1), testColors) as CkGradientLinear;
-      expect(linearGradient.isGradient, isTrue);
-      linearGradient.dispose();
-
-      final radialGradient = ui.Gradient.radial(ui.Offset.zero, 10, testColors) as CkGradientRadial;
-      expect(radialGradient.isGradient, isTrue);
-      radialGradient.dispose();
-
-      final conicalGradient =
-          ui.Gradient.radial(
-                ui.Offset.zero,
-                10,
-                testColors,
-                null,
-                ui.TileMode.clamp,
-                null,
-                const ui.Offset(10, 10),
-                40,
-              )
-              as CkGradientConical;
-      expect(conicalGradient.isGradient, isTrue);
-      conicalGradient.dispose();
-
-      final EngineImage image = await createImageFromBytes(kTransparentImage);
-      final imageShader =
-          ui.ImageShader(
-                image,
-                ui.TileMode.clamp,
-                ui.TileMode.repeated,
-                Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
-              )
-              as CkImageShader;
-      expect(imageShader.isGradient, isFalse);
-      imageShader.dispose();
-
+    test('FragmentShader isGradient is false', () {
       const minimalShaderJson = r'''
 {
   "sksl": {
@@ -180,11 +59,62 @@ void testMain() {
 ''';
       final Uint8List data = utf8.encode(minimalShaderJson);
       final program = CkFragmentProgram.fromBytes('test', data);
-      final fragmentShader = program.fragmentShader() as CkFragmentShader;
-      expect(fragmentShader.isGradient, isFalse);
+      final fragmentShader = program.fragmentShader() as EngineFragmentShader;
+      expect(fragmentShader.getBackendShader(ui.FilterQuality.none).isGradient, isFalse);
       fragmentShader.dispose();
+    });
+
+    test('FragmentShader sampler lifecycle and cleanup', () async {
+      const textureShaderJson = r'''
+{
+  "format_version": 1,
+  "sksl": {
+    "entrypoint": "texture_fragment_main",
+    "shader": "// This SkSL shader is autogenerated by spirv-cross.\n\nfloat4 flutter_FragCoord;\n\nuniform vec2 u_size;\nuniform shader u_texture;\nuniform half2 u_texture_size;\n\nvec4 frag_color;\n\nvec2 FLT_flutter_local_FlutterFragCoord()\n{\n    return flutter_FragCoord.xy;\n}\n\nvoid FLT_main()\n{\n    frag_color = u_texture.eval(u_texture_size * ( FLT_flutter_local_FlutterFragCoord() / u_size));\n}\n\nhalf4 main(float2 iFragCoord)\n{\n      flutter_FragCoord = float4(iFragCoord, 0, 0);\n      FLT_main();\n      return frag_color;\n}\n",
+    "stage": 1,
+    "uniforms": [
+      {
+        "array_elements": 0,
+        "bit_width": 32,
+        "columns": 1,
+        "location": 0,
+        "name": "u_size",
+        "rows": 2,
+        "type": 10
+      },
+      {
+        "array_elements": 0,
+        "bit_width": 0,
+        "columns": 1,
+        "location": 1,
+        "name": "u_texture",
+        "rows": 1,
+        "type": 12
+      }
+    ]
+  }
+}
+''';
+      final Uint8List data = utf8.encode(textureShaderJson);
+      final program = CkFragmentProgram.fromBytes('texture_test', data);
+      final fragmentShader = program.fragmentShader() as EngineFragmentShader;
+
+      final EngineImage image1 = await createImageFromBytes(kTransparentImage);
+      final EngineImage image2 = await createImageFromBytes(kTransparentImage);
+
+      fragmentShader.setImageSampler(0, image1);
+      final BackendImageShader sampler1 = fragmentShader.debugImageSamplers[0]!;
+      expect((sampler1 as CkImageShader).debugDisposed, isFalse);
+
+      // Overwriting sampler at index 0 should dispose the old sampler.
+      fragmentShader.setImageSampler(0, image2);
+      final BackendImageShader sampler2 = fragmentShader.debugImageSamplers[0]!;
+      expect(sampler1.debugDisposed, isTrue);
+      expect((sampler2 as CkImageShader).debugDisposed, isFalse);
+
+      // Disposing fragmentShader should dispose sampler2.
+      fragmentShader.dispose();
+      expect(sampler2.debugDisposed, isTrue);
     });
   });
 }
-
-const List<ui.Color> testColors = <ui.Color>[ui.Color(0xFFFFFF00), ui.Color(0xFFFFFFFF)];

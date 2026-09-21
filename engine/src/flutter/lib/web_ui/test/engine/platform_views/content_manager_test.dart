@@ -133,8 +133,7 @@ void testMain() {
         expect(
           content.getAttribute('slot'),
           innerSlot.getAttribute('name'),
-          reason:
-              'The slot attribute of the rendered content must match the name attribute of the SLOT of a given viewId',
+          reason: 'The slot attribute of the rendered content must match the name attribute of the SLOT of a given viewId',
         );
       });
 

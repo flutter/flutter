@@ -15,7 +15,8 @@ import 'package:meta/meta.dart';
 ///
 /// Unlike counterparts in Bazel and GN:
 /// - The package name is always a source-absolute path (i.e. starts with `//`).
-/// - Valid identifier characters are `a-zA-Z0-9_-`, not starting with a digit.
+/// - Valid identifier characters are `a-zA-Z0-9_-.`, not starting with a digit
+///   or a dot.
 /// - The target name is never empty, even when it is a default target.
 @immutable
 final class Label {
@@ -118,7 +119,7 @@ final class Label {
       final int j = package.indexOf('/', i);
       final String component = j == -1 ? package.substring(i) : package.substring(i, j);
       if (!_identifier.hasMatch(component)) {
-        return FormatException('Package name component must be a valid identifier.', package, i);
+        return FormatException('Package name component $_identifierRule', package, i);
       }
       if (j == -1) {
         return null;
@@ -129,12 +130,25 @@ final class Label {
 
   static FormatException? _checkTarget(String target) {
     if (!_identifier.hasMatch(target)) {
-      return FormatException('Target name must be a valid identifier.', target);
+      return FormatException('Target name $_identifierRule', target);
     }
     return null;
   }
 
-  static final RegExp _identifier = RegExp(r'^[a-zA-Z_][a-zA-Z0-9_-]*$');
+  static const String _identifierRule =
+      'must start with a letter or underscore and contain only letters, '
+      'digits, "_", "-", or ".".';
+
+  /// Identifiers allow a dot, which both halves of a label need.
+  ///
+  /// `testing/dart/BUILD.gn` derives a compile target from each test file name,
+  /// giving target names like `compile_gpu_test.dart`, and directories brought
+  /// in by `DEPS` carry a dot as well, as in
+  /// `//flutter/third_party/swiftshader/third_party/llvm-16.0:swiftshader_llvm`.
+  ///
+  /// The leading letter or underscore keeps `.`, `..` and `...` from passing as
+  /// a package name component.
+  static final RegExp _identifier = RegExp(r'^[a-zA-Z_][a-zA-Z0-9_.-]*$');
 }
 
 /// A generic target pattern that can be used to match multiple targets.

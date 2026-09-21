@@ -47,18 +47,14 @@ String getSDKNameForIOSEnvironmentType(EnvironmentType environmentType) {
 /// A utility class for interacting with Xcode command line tools.
 class Xcode {
   Xcode({
-    required Platform platform,
+    required this._platform,
     required ProcessManager processManager,
     required Logger logger,
-    required FileSystem fileSystem,
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
+    required this._fileSystem,
+    required this._xcodeProjectInterpreter,
     required UserMessages userMessages,
-    String? flutterRoot,
-  }) : _platform = platform,
-       _fileSystem = fileSystem,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter,
-       _userMessage = userMessages,
-       _flutterRoot = flutterRoot,
+    this._flutterRoot,
+  }) : _userMessage = userMessages,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _logger = logger;
 
@@ -200,7 +196,7 @@ class Xcode {
   /// to run it. `devicectl` is made available in Xcode 15.
   bool get isDevicectlInstalled {
     if (_isDevicectlInstalled == null) {
-      if (currentVersion == null || currentVersion!.major < 15) {
+      if (currentVersion == null) {
         _isDevicectlInstalled = false;
         return _isDevicectlInstalled!;
       }
