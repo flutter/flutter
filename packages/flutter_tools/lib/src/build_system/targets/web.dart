@@ -1532,12 +1532,21 @@ class WebServiceWorker extends Target {
         .where(
           (File file) =>
               !file.path.endsWith('flutter_service_worker.js') &&
+              !file.path.endsWith(kPrecacheManifestFile) &&
               !environment.fileSystem.path.basename(file.path).startsWith('.'),
         )
         .toList();
 
+    final bool webContentHash = compileConfigs.any(
+      (WebCompilerConfig config) => config.webContentHash,
+    );
+    final File? precacheManifestFile = updatePrecacheManifest(
+      environment.outputDir,
+      enabled: webContentHash,
+      useLocalCanvasKit: environment.defines[kUseLocalCanvasKitFlag] == 'true',
+    );
     final File serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
-    final depfile = Depfile(contents, <File>[serviceWorkerFile]);
+    final depfile = Depfile(contents, <File>[serviceWorkerFile, ?precacheManifestFile]);
     final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
       Artifact.flutterToolsFileGenerators,
     );
