@@ -6,9 +6,8 @@ import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
 import 'package:flutter_analyzer_plugin/src/rules/lazy_initialized_debug_expensive_fields.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
-@reflectiveTest
 class LazyInitializedDebugExpensiveFieldsTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -18,8 +17,9 @@ class LazyInitializedDebugExpensiveFieldsTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => LazyInitializedDebugExpensiveFields.code.name;
+}
 
-  static const String source = '''
+const String _source = '''
 class GoodClass {
   @_debugOnly
   late final int _foo = 1;
@@ -38,14 +38,17 @@ class BadClass {
 const _debugOnly = Object();
 ''';
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_lazy_initialized() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[lint(145, 33)]);
-  }
-}
-
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(LazyInitializedDebugExpensiveFieldsTest);
+  late LazyInitializedDebugExpensiveFieldsTest testSuite;
+
+  setUp(() {
+    testSuite = LazyInitializedDebugExpensiveFieldsTest();
+    testSuite.setUp();
+  });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('lazy initialized', () async {
+    await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[testSuite.lint(145, 33)]);
   });
 }
