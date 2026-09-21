@@ -1311,12 +1311,7 @@ flutter:
     () => testbed.run(() async {
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         FakeDevice(targetPlatform: TargetPlatform.web_javascript),
-        toolContext: TestToolContext(
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          artifacts: Artifacts.test(),
-        ),
+        toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
         buildInfo: BuildInfo.profile,
         target: 'lib/main.dart',
       );
@@ -1694,12 +1689,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: TestToolContext(
-                  fileSystem: globals.fs,
-                  logger: globals.logger,
-                  processManager: globals.processManager,
-                  artifacts: globals.artifacts,
-                ),
+                toolContext: DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1751,12 +1741,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: TestToolContext(
-                  fileSystem: globals.fs,
-                  logger: globals.logger,
-                  processManager: globals.processManager,
-                  artifacts: globals.artifacts,
-                ),
+                toolContext: DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1809,12 +1794,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: TestToolContext(
-                  fileSystem: globals.fs,
-                  logger: globals.logger,
-                  processManager: globals.processManager,
-                  artifacts: globals.artifacts,
-                ),
+                toolContext: DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1847,12 +1827,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: TestToolContext(
-                  fileSystem: globals.fs,
-                  logger: globals.logger,
-                  processManager: globals.processManager,
-                  artifacts: globals.artifacts,
-                ),
+                toolContext: DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1884,12 +1859,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: TestToolContext(
-                  fileSystem: globals.fs,
-                  logger: globals.logger,
-                  processManager: globals.processManager,
-                  artifacts: globals.artifacts,
-                ),
+                toolContext: DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1920,12 +1890,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                toolContext: TestToolContext(
-                  fileSystem: globals.fs,
-                  logger: globals.logger,
-                  processManager: globals.processManager,
-                  artifacts: globals.artifacts,
-                ),
+                toolContext: DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',

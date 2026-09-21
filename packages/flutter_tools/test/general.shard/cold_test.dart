@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/tracing.dart';
@@ -264,12 +263,7 @@ class TestFlutterDevice extends FlutterDevice {
     Future<Uri>? vmServiceUri,
   }) : super(
          device,
-         toolContext: TestToolContext(
-           fileSystem: globals.fs,
-           logger: globals.logger,
-           processManager: globals.processManager,
-           artifacts: Artifacts.test(),
-         ),
+         toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
          targetPlatform: .unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,
