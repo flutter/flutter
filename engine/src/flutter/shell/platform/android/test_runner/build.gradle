@@ -8,12 +8,14 @@ buildscript {
   }
 }
 
+plugins {
+  id "com.android.library"
+}
+
 repositories {
   google()
   mavenCentral()
 }
-
-apply plugin: "com.android.library"
 
 configurations {
   mockitoAgent
