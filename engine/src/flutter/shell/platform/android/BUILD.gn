@@ -96,15 +96,10 @@ executable("flutter_embedder_native_unittests") {
   visibility = [ "*" ]
   testonly = true
   sources = [
-    "android_engine_group_unittests.cc",
-    "android_hardware_buffer_unittests.cc",
-    "android_mutator_unittests.cc",
-    "android_semantics_unittests.cc",
-    "android_surface_control_unittests.cc",
-    "android_vm_init_unittests.cc",
-    "android_vsync_waiter_unittests.cc",
-    "android_vulkan_texture_unittests.cc",
-    "android_window_metrics_unittests.cc",
+    "android_context_dynamic_impeller_unittests.cc",
+    "android_context_gl_impeller_unittests.cc",
+    "android_image_generator_unittests.cc",
+    "android_shell_holder_unittests.cc",
     "apk_asset_provider_unittests.cc",
     "flutter_embedder_native_unittests.cc",
   ]
