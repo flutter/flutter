@@ -823,7 +823,7 @@ const kAdbShellGetprop = '''
 /// "avd name" requests with the supplied name.
 class FakeWorkingAndroidConsoleSocket extends Fake implements Socket {
   FakeWorkingAndroidConsoleSocket(this.avdName, {Future<void>? done})
-    : _done = done ?? Completer<void>().future {
+    : done = done ?? Completer<void>().future {
     _controller.add('Android Console: Welcome!\n');
     // Include OK in the same packet here. In the response to "avd name"
     // it's sent alone to ensure both are handled.
@@ -831,11 +831,10 @@ class FakeWorkingAndroidConsoleSocket extends Fake implements Socket {
   }
 
   final String avdName;
-  final Future<void> _done;
   final _controller = StreamController<String>();
 
   @override
-  Future<void> get done => _done;
+  final Future<void> done;
 
   @override
   Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) =>
@@ -863,7 +862,7 @@ class FakeUnresponsiveAndroidConsoleSocket extends Fake implements Socket {
   final _controller = StreamController<String>();
 
   @override
-  Future<void> get done => Completer<void>().future;
+  final Future<void> done = Completer<void>().future;
 
   @override
   Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) =>
@@ -888,7 +887,7 @@ class FakeDisconnectingAndroidConsoleSocket extends Fake implements Socket {
   final _controller = StreamController<String>();
 
   @override
-  Future<void> get done => Completer<void>().future;
+  final Future<void> done = Completer<void>().future;
 
   @override
   Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) =>

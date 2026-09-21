@@ -390,9 +390,9 @@ Future<vm_service.VmService> createVmServiceDelegate(
     logger.printTrace('Failed to send VM service message: $error\n$stackTrace');
     try {
       unawaited(channel.close().handleError((Object _, StackTrace _) {}));
-    } on Exception catch (_) {
+    } on Exception {
       // Ignore errors while closing a failed channel.
-    } on StateError catch (_) {
+    } on StateError {
       // Ignore errors while closing a failed channel.
     }
   }
@@ -409,12 +409,16 @@ Future<vm_service.VmService> createVmServiceDelegate(
       }
     },
     disposeHandler: () async {
+      void logCloseError(Object error, StackTrace stackTrace) {
+        logger.printTrace('Error closing VM service channel: $error\n$stackTrace');
+      }
+
       try {
         await channel.close();
       } on Exception catch (error, stackTrace) {
-        logger.printTrace('Error closing VM service channel: $error\n$stackTrace');
+        logCloseError(error, stackTrace);
       } on StateError catch (error, stackTrace) {
-        logger.printTrace('Error closing VM service channel: $error\n$stackTrace');
+        logCloseError(error, stackTrace);
       }
     },
   );
