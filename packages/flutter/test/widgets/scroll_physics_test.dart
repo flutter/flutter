@@ -577,6 +577,99 @@ FlutterError
     expect(identical(physicsB1, physicsC2), isTrue);
     expect(physicsB1.shouldUpdate(physicsC2), isFalse);
   });
+
+  testWidgets('ScrollPhysics supports shorthands for AlwaysScrollableScrollPhysics', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: .ltr,
+        child: ListView(physics: const .alwaysScrollable()),
+      ),
+    );
+
+    expect(
+      tester.widget<Scrollable>(find.byType(Scrollable)).physics,
+      isA<AlwaysScrollableScrollPhysics>(),
+    );
+  });
+
+  testWidgets('ScrollPhysics supports shorthands for BouncingScrollPhysics', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: .ltr,
+        child: ListView(physics: const .bouncing()),
+      ),
+    );
+
+    expect(
+      tester.widget<Scrollable>(find.byType(Scrollable)).physics,
+      isA<BouncingScrollPhysics>(),
+    );
+  });
+
+  testWidgets('ScrollPhysics supports shorthands for ClampingScrollPhysics', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: .ltr,
+        child: ListView(physics: const .clamping()),
+      ),
+    );
+
+    expect(
+      tester.widget<Scrollable>(find.byType(Scrollable)).physics,
+      isA<ClampingScrollPhysics>(),
+    );
+  });
+
+  testWidgets('ScrollPhysics supports shorthands for NeverScrollableScrollPhysics', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: .ltr,
+        child: ListView(physics: const .neverScrollable()),
+      ),
+    );
+
+    expect(
+      tester.widget<Scrollable>(find.byType(Scrollable)).physics,
+      isA<NeverScrollableScrollPhysics>(),
+    );
+  });
+
+  testWidgets('ScrollPhysics supports shorthands for PageScrollPhysics', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: .ltr,
+        child: ListView(physics: const .page()),
+      ),
+    );
+
+    expect(tester.widget<Scrollable>(find.byType(Scrollable)).physics, isA<PageScrollPhysics>());
+  });
+
+  testWidgets('ScrollPhysics supports shorthands for RangeMaintainingScrollPhysics', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: .ltr,
+        child: ListView(physics: const .rangeMaintaining()),
+      ),
+    );
+
+    expect(
+      tester.widget<Scrollable>(find.byType(Scrollable)).physics,
+      isA<RangeMaintainingScrollPhysics>(),
+    );
+  });
 }
 
 class ReactiveScrollPhysics extends ScrollPhysics {

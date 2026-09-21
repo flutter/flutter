@@ -22,7 +22,9 @@ import 'package:flutter/physics.dart';
 
 import 'binding.dart' show WidgetsBinding;
 import 'framework.dart';
+import 'list_wheel_scroll_view.dart' show FixedExtentScrollPhysics;
 import 'overscroll_indicator.dart';
+import 'page_view.dart' show PageScrollPhysics;
 import 'scroll_metrics.dart';
 import 'scroll_simulation.dart';
 import 'view.dart';
@@ -88,6 +90,27 @@ enum ScrollDecelerationRate {
 class ScrollPhysics {
   /// Creates an object with the default scroll physics.
   const ScrollPhysics({this.parent});
+
+  /// Creates a [AlwaysScrollableScrollPhysics] instance.
+  const factory ScrollPhysics.alwaysScrollable() = AlwaysScrollableScrollPhysics;
+
+  /// Creates a [BouncingScrollPhysics] instance.
+  const factory ScrollPhysics.bouncing() = BouncingScrollPhysics;
+
+  /// Creates a [ClampingScrollPhysics] instance.
+  const factory ScrollPhysics.clamping() = ClampingScrollPhysics;
+
+  /// Creates a [FixedExtentScrollPhysics] instance.
+  const factory ScrollPhysics.fixedExtent() = FixedExtentScrollPhysics;
+
+  /// Creates a [NeverScrollableScrollPhysics] instance.
+  const factory ScrollPhysics.neverScrollable() = NeverScrollableScrollPhysics;
+
+  /// Creates a [PageScrollPhysics] instance.
+  const factory ScrollPhysics.page() = PageScrollPhysics;
+
+  /// Creates a [RangeMaintainingScrollPhysics] instance.
+  const factory ScrollPhysics.rangeMaintaining() = RangeMaintainingScrollPhysics;
 
   /// If non-null, determines the default behavior for each method.
   ///
