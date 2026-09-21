@@ -714,10 +714,8 @@ window.\$dartLoader.loader.nextAttempt();
       } else {
         suite = await loadFuture;
       }
+    } finally {
       cancelWatchdogs();
-    } catch (_) {
-      cancelWatchdogs();
-      rethrow;
     }
 
     if (_closed) {
