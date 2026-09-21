@@ -43,11 +43,6 @@ import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-class FakeStdio extends Fake implements Stdio {
-  @override
-  bool stdinHasTerminal = false;
-}
-
 class FakeProcessInfo extends Fake implements ProcessInfo {
   @override
   int maxRss = 0;
@@ -69,10 +64,9 @@ void main() {
     late Platform platform;
     late ProcessInfo processInfo;
 
-    DelegatingToolContext createToolContext() => DelegatingToolContext(
-      artifacts: artifacts,
+    DelegatingToolContext createToolContext({Logger? loggerOverride}) => DelegatingToolContext(
       fs: testFileSystem,
-      logger: logger,
+      logger: loggerOverride ?? logger,
       platform: platform,
       processInfo: processInfo,
       signals: signals,
@@ -678,10 +672,7 @@ void main() {
             }
           });
           final Future<void> task = createTestCommandRunner(
-            AttachCommand(
-              toolContext: createToolContext(),
-              hotRunnerFactory: FakeHotRunnerFactory(),
-            ),
+            AttachCommand(toolContext: createToolContext()),
           ).run(<String>['attach']);
           await completer.future;
 
@@ -716,12 +707,9 @@ void main() {
           };
           testDeviceManager.devices = <Device>[device];
           expect(
-            () => createTestCommandRunner(
-              AttachCommand(
-                toolContext: createToolContext(),
-                hotRunnerFactory: FakeHotRunnerFactory(),
-              ),
-            ).run(<String>['attach']),
+            () =>
+                createTestCommandRunner(AttachCommand(toolContext: createToolContext()))
+                    .run(<String>['attach']),
             throwsToolExit(),
           );
         },
@@ -803,10 +791,7 @@ void main() {
         () async {
           testDeviceManager.devices = <Device>[device];
 
-          final command = AttachCommand(
-            toolContext: createToolContext(),
-            hotRunnerFactory: FakeHotRunnerFactory(),
-          );
+          final command = AttachCommand(toolContext: createToolContext());
           await expectLater(
             createTestCommandRunner(command).run(<String>['attach', '--ipv6']),
             throwsToolExit(
@@ -898,10 +883,7 @@ void main() {
           };
           testDeviceManager.devices = <Device>[device];
 
-          final command = AttachCommand(
-            toolContext: createToolContext(),
-            hotRunnerFactory: FakeHotRunnerFactory(),
-          );
+          final command = AttachCommand(toolContext: createToolContext());
           await expectLater(
             createTestCommandRunner(command).run(<String>['attach', '--vm-service-port', '100']),
             throwsToolExit(
@@ -949,10 +931,7 @@ void main() {
             }
           });
           final Future<void> task = createTestCommandRunner(
-            AttachCommand(
-              toolContext: createToolContext(),
-              hotRunnerFactory: FakeHotRunnerFactory(),
-            ),
+            AttachCommand(toolContext: createToolContext()),
           ).run(<String>['attach', '--debug-port', '$devicePort']);
           await completer.future;
 
@@ -989,10 +968,7 @@ void main() {
             }
           });
           final Future<void> task = createTestCommandRunner(
-            AttachCommand(
-              toolContext: createToolContext(),
-              hotRunnerFactory: FakeHotRunnerFactory(),
-            ),
+            AttachCommand(toolContext: createToolContext()),
           ).run(<String>['attach', '--debug-port', '$devicePort', '--ipv6']);
           await completer.future;
 
@@ -1029,12 +1005,7 @@ void main() {
             }
           });
           final Future<void> task =
-              createTestCommandRunner(
-                AttachCommand(
-                  toolContext: createToolContext(),
-                  hotRunnerFactory: FakeHotRunnerFactory(),
-                ),
-              ).run(<String>[
+              createTestCommandRunner(AttachCommand(toolContext: createToolContext())).run(<String>[
                 'attach',
                 '--debug-port',
                 '$devicePort',
@@ -1075,12 +1046,7 @@ void main() {
             }
           });
           final Future<void> task =
-              createTestCommandRunner(
-                AttachCommand(
-                  toolContext: createToolContext(),
-                  hotRunnerFactory: FakeHotRunnerFactory(),
-                ),
-              ).run(<String>[
+              createTestCommandRunner(AttachCommand(toolContext: createToolContext())).run(<String>[
                 'attach',
                 '--debug-port',
                 '$devicePort',
@@ -1110,10 +1076,7 @@ void main() {
     testUsingContext(
       'exits when no device connected',
       () async {
-        final command = AttachCommand(
-          toolContext: createToolContext(),
-          hotRunnerFactory: FakeHotRunnerFactory(),
-        );
+        final command = AttachCommand(toolContext: createToolContext(loggerOverride: testLogger));
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach']),
           throwsToolExit(),
@@ -1133,12 +1096,8 @@ void main() {
         final device = FakeIOSDevice();
         testDeviceManager.devices = <Device>[device];
         expect(
-          createTestCommandRunner(
-            AttachCommand(
-              toolContext: createToolContext(),
-              hotRunnerFactory: FakeHotRunnerFactory(),
-            ),
-          ).run(<String>['attach', '--device-user', '10']),
+          createTestCommandRunner(AttachCommand(toolContext: createToolContext()))
+              .run(<String>['attach', '--device-user', '10']),
           throwsToolExit(message: '--device-user is only supported for Android'),
         );
       },
@@ -1152,10 +1111,7 @@ void main() {
     testUsingContext(
       'exits when multiple devices connected',
       () async {
-        final command = AttachCommand(
-          toolContext: createToolContext(),
-          hotRunnerFactory: FakeHotRunnerFactory(),
-        );
+        final command = AttachCommand(toolContext: createToolContext(loggerOverride: testLogger));
         testDeviceManager.devices = <Device>[
           FakeAndroidDevice(id: 'xx1'),
           FakeAndroidDevice(id: 'yy2'),
@@ -1398,12 +1354,8 @@ void main() {
           final device = FakeIOSSimulator();
           testDeviceManager.devices = <Device>[device];
           FakeAsync().run((FakeAsync fakeAsync) {
-            createTestCommandRunner(
-              AttachCommand(
-                toolContext: createToolContext(),
-                hotRunnerFactory: FakeHotRunnerFactory(),
-              ),
-            ).run(<String>['attach']);
+            createTestCommandRunner(AttachCommand(toolContext: createToolContext()))
+                .run(<String>['attach']);
 
             logger.expectedWarning =
                 'The Dart VM Service was not discovered after 30 seconds. '

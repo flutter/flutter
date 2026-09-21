@@ -579,6 +579,7 @@ void main() {
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
+      Pub: () => FakePub(),
     },
   );
 
@@ -608,6 +609,7 @@ void main() {
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       DeviceManager: () => fakeDeviceManager,
+      Pub: () => FakePub(),
     },
   );
 
@@ -637,6 +639,7 @@ void main() {
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       DeviceManager: () => fakeDeviceManager,
+      Pub: () => FakePub(),
     },
   );
 
@@ -666,6 +669,7 @@ void main() {
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       DeviceManager: () => fakeDeviceManager,
+      Pub: () => FakePub(),
     },
   );
 
