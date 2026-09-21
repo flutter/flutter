@@ -269,7 +269,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   Future<void> _attach({required Device device}) async {
     final ToolContext(
-      :FileSystem fs,
       :Logger logger,
       :ProcessInfo processInfo,
       :Signals signals,
