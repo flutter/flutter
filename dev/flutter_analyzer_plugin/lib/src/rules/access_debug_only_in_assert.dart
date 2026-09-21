@@ -62,6 +62,12 @@ class _AccessDebugOnlyInAssertVisitor extends GeneralizingAstVisitor<void> {
   @override
   void visitAnnotation(Annotation node) {}
 
+  // Allow parameter names to start with debug.
+  @override
+  void visitFormalParameterList(FormalParameterList node) {}
+  @override
+  void visitRegularFormalParameter(RegularFormalParameter node) {}
+
   @override
   void visitVariableDeclarationList(VariableDeclarationList node) {
     if (node.variables.every((VariableDeclaration v) => v.name._isDebugOnlySymbol)) {
