@@ -50,7 +50,13 @@ import 'daemon.dart';
 
 /// Shared logic between `flutter run` and `flutter drive` commands.
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
+<<<<<<< HEAD
   RunCommandBase({required bool verboseHelp, super.outputPreferences, super.toolContext}) {
+=======
+  RunCommandBase({ToolContext? toolContext, required super.verboseHelp}) 
+    : _toolContext = toolContext ?? const _FallbackToolContext(),
+      super(toolContext: toolContext ?? const _FallbackToolContext()) {
+>>>>>>> di/22b-resident-runner
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesDartDefineOption();
     usesWebDefineOption();
@@ -106,6 +112,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addTestFlag(verboseHelp: verboseHelp);
     usesAdbLogFilteringOption(hide: !verboseHelp);
   }
+
+  final ToolContext _toolContext;
+
+  @override
+  ToolContext get toolContext => _toolContext;
 
   bool get traceStartup => getValue(DebuggingOptionDescriptors.traceStartup);
   bool get traceSystrace => getValue(DebuggingOptionDescriptors.traceSystrace);
@@ -310,6 +321,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 }
 
 class RunCommand extends RunCommandBase {
+<<<<<<< HEAD
   RunCommand({
     this._androidContext,
     this._androidWorkflow,
@@ -321,6 +333,9 @@ class RunCommand extends RunCommandBase {
     super.verboseHelp = false,
   }) : _injectedAppleContext = appleContext,
        _injectedToolContext = toolContext {
+=======
+  RunCommand({ToolContext? toolContext, bool verboseHelp = false}) : super(verboseHelp: verboseHelp, toolContext: toolContext) {
+>>>>>>> di/22b-resident-runner
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
