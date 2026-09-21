@@ -105,9 +105,11 @@ void main() {
 
   testWidgets('Mock AllMessagesHandler is set correctly', (WidgetTester tester) async {
     final binaryMessenger = TestDefaultBinaryMessenger(WorkingTestDelegate());
-    binaryMessenger.allMessagesHandler =
-        (String channel, MessageHandler? handler, ByteData? message) async =>
-            ByteData.sublistView(Uint8List.fromList(<int>[2, 3, 4]));
+    binaryMessenger.allMessagesHandler = (
+      String channel,
+      MessageHandler? handler,
+      ByteData? message,
+    ) async => ByteData.sublistView(Uint8List.fromList(<int>[2, 3, 4]));
 
     final ByteData? result = await binaryMessenger.send('', null);
     expect(result?.buffer.asUint8List(), Uint8List.fromList(<int>[2, 3, 4]));

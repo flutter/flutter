@@ -185,7 +185,7 @@ static const constexpr RenderTarget::AttachmentConfig kDefaultStencilConfig =
         .storage_mode = StorageMode::kDeviceTransient,
         .load_action = LoadAction::kDontCare,
         .store_action = StoreAction::kDontCare,
-    };
+};
 
 static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
     ContentContext& renderer,
@@ -930,7 +930,7 @@ bool Canvas::AttemptDrawLineSDF(const Point& p0,
                                 const Paint& paint,
                                 bool reuse_depth) {
   if (!renderer_.GetContext()->GetFlags().use_sdfs ||
-      !IsCompatibleWithSDFRendering(paint)) {
+      !IsCompatibleWithSDFRendering(paint, GetCurrentTransform())) {
     return false;
   }
   // Draw the line as a filled rectangle with width=line_length and
@@ -1069,7 +1069,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   }
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint)) {
+      IsCompatibleWithSDFRendering(paint, GetCurrentTransform())) {
     Rect effective_rect = rect;
     Color effective_color = paint.color;
 
@@ -1142,7 +1142,7 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint)) {
+      IsCompatibleWithSDFRendering(paint, GetCurrentTransform())) {
     UberSDFParameters params;
 
     if (paint.style == Paint::Style::kStroke) {
@@ -1230,7 +1230,8 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
   const RoundingRadii& radii = round_rect.GetRadii();
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint) && radii.AreAllCornersCircular()) {
+      IsCompatibleWithSDFRendering(paint, GetCurrentTransform()) &&
+      radii.AreAllCornersCircular()) {
     Color effective_color = paint.color;
     Rect bounds = round_rect.GetBounds();
 
@@ -1314,7 +1315,7 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint)) {
+      IsCompatibleWithSDFRendering(paint, GetCurrentTransform())) {
     // Try to draw using UberSDF.
     auto params = UberSDFParameters::MakeRoundedSuperellipse(
         /*color=*/paint.color, /*round_superellipse=*/round_superellipse,
@@ -1378,7 +1379,7 @@ void Canvas::DrawCircle(const Point& center,
   }
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint)) {
+      IsCompatibleWithSDFRendering(paint, GetCurrentTransform())) {
     auto params = UberSDFParameters::MakeCircle(
         /*color=*/paint.color, /*center=*/center, /*radius=*/radius,
         /*stroke=*/paint.GetStroke());
@@ -1774,11 +1775,9 @@ void Canvas::Save(uint32_t total_content_depth) {
 
   auto entry = CanvasStackEntry{};
   entry.transform = transform_stack_.back().transform;
-  entry.clip_depth = current_depth_ + total_content_depth;
+  entry.clip_depth = std::min<uint32_t>(current_depth_ + total_content_depth,
+                                        transform_stack_.back().clip_depth);
   entry.distributed_opacity = transform_stack_.back().distributed_opacity;
-  FML_DCHECK(entry.clip_depth <= transform_stack_.back().clip_depth)
-      << entry.clip_depth << " <=? " << transform_stack_.back().clip_depth
-      << " after allocating " << total_content_depth;
   entry.clip_height = transform_stack_.back().clip_height;
   entry.rendering_mode = Entity::RenderingMode::kDirect;
   transform_stack_.push_back(entry);
@@ -1941,7 +1940,7 @@ void Canvas::SaveLayer(const Paint& paint,
       // 3. The current render pass is for the onscreen pass.
       const bool should_use_onscreen =
           renderer_.GetDeviceCapabilities().SupportsFramebufferFetch() &&
-          backdrop_count_ == 0 && render_passes_.size() == 1u;
+          backdrop_count_ == 0 && render_passes_.size() == 1u && is_onscreen_;
       input_texture = FlipBackdrop(
           GetGlobalPassPosition(),                                //
           /*should_remove_texture=*/will_cache_backdrop_texture,  //
@@ -2027,10 +2026,8 @@ void Canvas::SaveLayer(const Paint& paint,
 
   CanvasStackEntry entry;
   entry.transform = transform_stack_.back().transform;
-  entry.clip_depth = current_depth_ + total_content_depth;
-  FML_DCHECK(entry.clip_depth <= transform_stack_.back().clip_depth)
-      << entry.clip_depth << " <=? " << transform_stack_.back().clip_depth
-      << " after allocating " << total_content_depth;
+  entry.clip_depth = std::min<uint32_t>(current_depth_ + total_content_depth,
+                                        transform_stack_.back().clip_depth);
   entry.clip_height = transform_stack_.back().clip_height;
   entry.rendering_mode = Entity::RenderingMode::kSubpassAppendSnapshotTransform;
   entry.did_round_out = did_round_out;
@@ -2075,9 +2072,16 @@ bool Canvas::Restore() {
   // to be overly conservative, but we need to jump the depth to
   // the clip depth so that the next rendering op will get a
   // larger depth (it will pre-increment the current_depth_ value).
-  FML_DCHECK(current_depth_ <= transform_stack_.back().clip_depth)
-      << current_depth_ << " <=? " << transform_stack_.back().clip_depth;
-  current_depth_ = transform_stack_.back().clip_depth;
+  //
+  // Only advance depth if clips were recorded and the allocated clip depth
+  // was finite. This prevents premature exhaustion of the parent pass depth
+  // budget.
+  if (transform_stack_.back().num_clips > 0 &&
+      transform_stack_.back().clip_depth < kMaxDepth) {
+    FML_DCHECK(current_depth_ <= transform_stack_.back().clip_depth)
+        << current_depth_ << " <=? " << transform_stack_.back().clip_depth;
+    current_depth_ = transform_stack_.back().clip_depth;
+  }
 
   if (IsSkipping()) {
     transform_stack_.pop_back();
@@ -2627,8 +2631,6 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
     return nullptr;
   }
 
-  // Restore any clips that were recorded before the backdrop filter was
-  // applied.
   auto& replay_entities = clip_coverage_stack_.GetReplayEntities();
   uint64_t current_depth =
       post_depth_increment ? current_depth_ - 1 : current_depth_;
@@ -2640,7 +2642,7 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
     SetClipScissor(replay.clip_coverage, current_render_pass,
                    global_pass_position);
     if (!replay.clip_contents.Render(renderer_, current_render_pass,
-                                     replay.clip_depth)) {
+                                     replay.clip_depth, replay.transform)) {
       VALIDATION_LOG << "Failed to render entity for clip restore.";
     }
   }
@@ -2752,11 +2754,15 @@ void Canvas::EndReplay() {
   Initialize(initial_cull_rect_);
 }
 
-bool Canvas::IsCompatibleWithSDFRendering(const Paint& paint) {
+bool Canvas::IsCompatibleWithSDFRendering(const Paint& paint,
+                                          const Matrix& transform) {
   if (!paint.anti_alias) {
     return false;
   }
   if (paint.mask_blur_descriptor.has_value()) {
+    return false;
+  }
+  if (transform.HasPerspective()) {
     return false;
   }
   switch (paint.blend_mode) {
