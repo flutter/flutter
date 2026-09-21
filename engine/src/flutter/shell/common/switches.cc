@@ -566,6 +566,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
       command_line.HasOption(FlagForSwitch(Switch::kImpellerLazyShaderMode));
   settings.impeller_use_sdfs =
       command_line.HasOption(FlagForSwitch(Switch::kImpellerUseSdFs));
+  settings.impeller_top_left_default_framebuffer_origin =
+      command_line.HasOption(
+          FlagForSwitch(Switch::kImpellerTopLeftDefaultFramebufferOrigin));
 
   return settings;
 }

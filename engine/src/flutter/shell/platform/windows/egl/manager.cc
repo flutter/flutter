@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/windows/egl/manager.h"
 
+#include <string_view>
 #include <vector>
 
 #include "flutter/fml/logging.h"
@@ -12,21 +13,44 @@
 namespace flutter {
 namespace egl {
 
+namespace {
+
+// Returns whether |extensions|, a space delimited extension list, contains
+// |name| as a whole entry.
+bool HasExtension(std::string_view extensions, std::string_view name) {
+  for (size_t start = 0; start <= extensions.size();) {
+    const size_t space = extensions.find(' ', start);
+    const size_t end =
+        space == std::string_view::npos ? extensions.size() : space;
+    if (extensions.substr(start, end - start) == name) {
+      return true;
+    }
+    if (space == std::string_view::npos) {
+      break;
+    }
+    start = space + 1;
+  }
+  return false;
+}
+
+}  // namespace
+
 int Manager::instance_count_ = 0;
 
-std::unique_ptr<Manager> Manager::Create(GpuPreference gpu_preference) {
+std::unique_ptr<Manager> Manager::Create(GpuPreference gpu_preference,
+                                         bool allow_inverted_surface) {
   std::unique_ptr<Manager> manager;
-  manager.reset(new Manager(gpu_preference));
+  manager.reset(new Manager(gpu_preference, allow_inverted_surface));
   if (!manager->IsValid()) {
     return nullptr;
   }
   return std::move(manager);
 }
 
-Manager::Manager(GpuPreference gpu_preference) {
+Manager::Manager(GpuPreference gpu_preference, bool allow_inverted_surface) {
   ++instance_count_;
 
-  if (!InitializeDisplay(gpu_preference)) {
+  if (!InitializeDisplay(gpu_preference, allow_inverted_surface)) {
     return;
   }
 
@@ -46,7 +70,8 @@ Manager::~Manager() {
   --instance_count_;
 }
 
-bool Manager::InitializeDisplay(GpuPreference gpu_preference) {
+bool Manager::InitializeDisplay(GpuPreference gpu_preference,
+                                bool allow_inverted_surface) {
   // If the request for a low power GPU is provided,
   // we will attempt to select GPU explicitly, via ANGLE extension
   // that allows to specify the GPU to use via LUID.
@@ -62,51 +87,63 @@ bool Manager::InitializeDisplay(GpuPreference gpu_preference) {
       break;
   }
 
-  // These are preferred display attributes and request ANGLE's D3D11
-  // renderer (use only in case of valid LUID returned from above).
-  const EGLint d3d11_display_attributes_with_luid[] = {
-      EGL_PLATFORM_ANGLE_TYPE_ANGLE,
-      EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE,
+  // EGL_ANGLE_surface_orientation and EGL_EXPERIMENTAL_PRESENT_PATH_FAST_ANGLE
+  // are mutually exclusive on ANGLE's D3D11 backend: the orientation extension
+  // is only advertised when present path fast is off, and SwapChain11 asserts
+  // that a non-default orientation is never combined with it.
+  //
+  // Both avoid ANGLE's intermediate offscreen texture, so they are equivalent
+  // in terms of allocations and presentation. They differ in how the default
+  // framebuffer's Y axis is handled. Present path fast preserves OpenGL's
+  // bottom-left origin and compensates by flipping, which forces any blit into
+  // the swapchain through a full-screen shader pass because D3D11 cannot flip
+  // during a copy. The inverted orientation instead exposes the D3D
+  // backbuffer's top-left origin directly, so an unflipped blit can be a plain
+  // copy or multisample resolve.
+  const bool request_present_path_fast = !allow_inverted_surface;
 
-      // EGL_PLATFORM_ANGLE_ENABLE_AUTOMATIC_TRIM_ANGLE is an option that will
-      // enable ANGLE to automatically call the IDXGIDevice3::Trim method on
-      // behalf of the application when it gets suspended.
-      EGL_PLATFORM_ANGLE_ENABLE_AUTOMATIC_TRIM_ANGLE,
-      EGL_TRUE,
-
-      // This extension allows angle to render directly on a D3D swapchain
-      // in the correct orientation on D3D11.
-      EGL_EXPERIMENTAL_PRESENT_PATH_ANGLE,
-      EGL_EXPERIMENTAL_PRESENT_PATH_FAST_ANGLE,
-
-      // Specify the LUID of the GPU to use.
-      EGL_PLATFORM_ANGLE_D3D_LUID_HIGH_ANGLE,
-      static_cast<EGLint>(luid.has_value() ? luid->HighPart : 0),
-      EGL_PLATFORM_ANGLE_D3D_LUID_LOW_ANGLE,
-      static_cast<EGLint>(luid.has_value() ? luid->LowPart : 0),
-      EGL_NONE,
-  };
-
-  // These are preferred display attributes and request ANGLE's D3D11
+  // Builds the preferred display attributes, which request ANGLE's D3D11
   // renderer. eglInitialize will only succeed with these attributes if the
   // hardware supports D3D11 Feature Level 10_0+.
-  const EGLint d3d11_display_attributes[] = {
-      EGL_PLATFORM_ANGLE_TYPE_ANGLE,
-      EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE,
+  auto build_d3d11_attributes = [&](bool with_luid) {
+    std::vector<EGLint> attributes = {
+        EGL_PLATFORM_ANGLE_TYPE_ANGLE,
+        EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE,
 
-      // EGL_PLATFORM_ANGLE_ENABLE_AUTOMATIC_TRIM_ANGLE is an option that will
-      // enable ANGLE to automatically call the IDXGIDevice3::Trim method on
-      // behalf of the application when it gets suspended.
-      EGL_PLATFORM_ANGLE_ENABLE_AUTOMATIC_TRIM_ANGLE,
-      EGL_TRUE,
+        // EGL_PLATFORM_ANGLE_ENABLE_AUTOMATIC_TRIM_ANGLE is an option that will
+        // enable ANGLE to automatically call the IDXGIDevice3::Trim method on
+        // behalf of the application when it gets suspended.
+        EGL_PLATFORM_ANGLE_ENABLE_AUTOMATIC_TRIM_ANGLE,
+        EGL_TRUE,
+    };
 
+    if (request_present_path_fast) {
       // This extension allows angle to render directly on a D3D swapchain
       // in the correct orientation on D3D11.
-      EGL_EXPERIMENTAL_PRESENT_PATH_ANGLE,
-      EGL_EXPERIMENTAL_PRESENT_PATH_FAST_ANGLE,
+      attributes.push_back(EGL_EXPERIMENTAL_PRESENT_PATH_ANGLE);
+      attributes.push_back(EGL_EXPERIMENTAL_PRESENT_PATH_FAST_ANGLE);
+    }
 
-      EGL_NONE,
+    if (with_luid) {
+      // Specify the LUID of the GPU to use.
+      attributes.push_back(EGL_PLATFORM_ANGLE_D3D_LUID_HIGH_ANGLE);
+      attributes.push_back(static_cast<EGLint>(luid->HighPart));
+      attributes.push_back(EGL_PLATFORM_ANGLE_D3D_LUID_LOW_ANGLE);
+      attributes.push_back(static_cast<EGLint>(luid->LowPart));
+    }
+
+    attributes.push_back(EGL_NONE);
+    return attributes;
   };
+
+  // These are preferred display attributes and request ANGLE's D3D11
+  // renderer (use only in case of valid LUID returned from above).
+  const std::vector<EGLint> d3d11_display_attributes_with_luid =
+      luid.has_value() ? build_d3d11_attributes(/*with_luid=*/true)
+                       : std::vector<EGLint>{};
+
+  const std::vector<EGLint> d3d11_display_attributes =
+      build_d3d11_attributes(/*with_luid=*/false);
 
   // These are used to request ANGLE's D3D11 renderer, with D3D11 Feature
   // Level 9_3.
@@ -136,9 +173,10 @@ bool Manager::InitializeDisplay(GpuPreference gpu_preference) {
 
   if (luid) {
     // If LUID value is present, obtain an adapter with that luid.
-    display_attributes_configs.push_back(d3d11_display_attributes_with_luid);
+    display_attributes_configs.push_back(
+        d3d11_display_attributes_with_luid.data());
   }
-  display_attributes_configs.push_back(d3d11_display_attributes);
+  display_attributes_configs.push_back(d3d11_display_attributes.data());
   display_attributes_configs.push_back(d3d11_fl_9_3_display_attributes);
   display_attributes_configs.push_back(d3d11_warp_display_attributes);
 
@@ -176,6 +214,20 @@ bool Manager::InitializeDisplay(GpuPreference gpu_preference) {
 
       // Try the next config.
       continue;
+    }
+
+    if (allow_inverted_surface) {
+      const char* extensions = ::eglQueryString(display_, EGL_EXTENSIONS);
+      if (extensions != nullptr &&
+          HasExtension(extensions, "EGL_ANGLE_surface_orientation")) {
+        surface_orientation_ = EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE;
+      } else {
+        // Rendering stays correct because |surface_origin_is_top_left| will
+        // report the default bottom-left origin, but the swapchain blit will
+        // go through ANGLE's full-screen shader pass.
+        FML_LOG(WARNING) << "EGL_ANGLE_surface_orientation is unavailable. "
+                            "Falling back to a bottom-left surface origin.";
+      }
     }
 
     return true;
@@ -294,6 +346,10 @@ bool Manager::IsValid() const {
   return is_valid_;
 }
 
+bool Manager::surface_origin_is_top_left() const {
+  return surface_orientation_ == EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE;
+}
+
 std::unique_ptr<WindowSurface> Manager::CreateWindowSurface(HWND hwnd,
                                                             size_t width,
                                                             size_t height) {
@@ -304,17 +360,21 @@ std::unique_ptr<WindowSurface> Manager::CreateWindowSurface(HWND hwnd,
   // Disable ANGLE's automatic surface resizing and provide an explicit size.
   // The surface will need to be destroyed and re-created if the HWND is
   // resized.
-  const EGLint surface_attributes[] = {EGL_FIXED_SIZE_ANGLE,
-                                       EGL_TRUE,
-                                       EGL_WIDTH,
-                                       static_cast<EGLint>(width),
-                                       EGL_HEIGHT,
-                                       static_cast<EGLint>(height),
-                                       EGL_NONE};
+  std::vector<EGLint> surface_attributes = {
+      EGL_FIXED_SIZE_ANGLE,       EGL_TRUE,   EGL_WIDTH,
+      static_cast<EGLint>(width), EGL_HEIGHT, static_cast<EGLint>(height),
+  };
+
+  if (surface_orientation_ != 0) {
+    surface_attributes.push_back(EGL_SURFACE_ORIENTATION_ANGLE);
+    surface_attributes.push_back(surface_orientation_);
+  }
+
+  surface_attributes.push_back(EGL_NONE);
 
   auto const surface = ::eglCreateWindowSurface(
       display_, config_, static_cast<EGLNativeWindowType>(hwnd),
-      surface_attributes);
+      surface_attributes.data());
   if (surface == EGL_NO_SURFACE) {
     LogEGLError("Surface creation failed.");
     return nullptr;
