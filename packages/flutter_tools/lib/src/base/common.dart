@@ -55,6 +55,13 @@ extension FutureErrorHandling<T> on Future<T> {
   ///
   /// Useful for guarding background sink/socket completion futures
   /// (e.g., `socket.done`, `sink.done`) against unhandled zone exceptions.
+  ///
+  /// This uses `Future.then` with a statically typed `(Object, StackTrace)`
+  /// `onError` callback rather than `Future.catchError` or `Future.onError`,
+  /// which are banned across `flutter_tools` by `AvoidFutureCatchError`
+  /// (`dev/bots/custom_rules/avoid_future_catcherror.dart`, added in
+  /// https://github.com/flutter/flutter/pull/130662) because they are not
+  /// statically type-safe (see https://github.com/dart-lang/sdk/issues/51248).
   Future<void> handleError(
     void Function(Object error, StackTrace stackTrace) onError, {
     bool Function(Object error)? test,
