@@ -19,9 +19,9 @@ import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/hook_runner.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -66,43 +66,29 @@ ColdRunner createColdRunner(
   bool traceStartup = false,
   Xcode? xcode,
 }) {
-  FileSystem? contextFs;
-  Platform? contextPlatform;
-  ProcessManager? contextPm;
-  Artifacts? contextArtifacts;
-  Logger? contextLogger;
-  try {
-    contextFs = globals.fs;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextPlatform = globals.platform;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextPm = globals.processManager;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextArtifacts = globals.artifacts;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextLogger = globals.logger;
-  } on Object {
-    // ignore
-  }
-
-  final FileSystem effectiveFs = fileSystem ?? (contextFs ?? MemoryFileSystem.test());
-  final Platform effectivePlatform = platform ?? (contextPlatform ?? const LocalPlatform());
-  final ProcessManager effectiveProcessManager =
-      processManager ?? (contextPm ?? FakeProcessManager.any());
-  final Artifacts effectiveArtifacts = artifacts ?? (contextArtifacts ?? Artifacts.test());
-  final Logger effectiveLogger = logger ?? (contextLogger ?? BufferLogger.test());
+  final ToolContext(
+    artifacts: contextArtifacts,
+    cache: contextCache,
+    config: contextConfig,
+    fs: contextFs,
+    logger: contextLogger,
+    os: contextOs,
+    outputPreferences: contextOutputPreferences,
+    platform: contextPlatform,
+    processManager: contextProcessManager,
+    terminal: contextTerminal,
+  ) = DelegatingToolContext(
+    artifacts: artifacts,
+    cache: cache,
+    config: config,
+    fs: fileSystem,
+    logger: logger,
+    os: osUtils,
+    outputPreferences: outputPreferences,
+    platform: platform,
+    processManager: processManager,
+    terminal: terminal as AnsiTerminal?,
+  );
 
   return ColdRunner(
     flutterDevices,
@@ -110,26 +96,26 @@ ColdRunner createColdRunner(
     target: target,
     analytics: analytics,
     applicationBinary: applicationBinary,
-    artifacts: effectiveArtifacts,
+    artifacts: contextArtifacts,
     awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
     buildSystem: buildSystem,
     buildTargets: buildTargets,
-    cache: cache ?? globals.cache,
+    cache: contextCache,
     commandHelp: commandHelp,
-    config: config ?? globals.config,
+    config: contextConfig,
     dartBuilder: dartBuilder,
     dillOutputPath: dillOutputPath,
-    fileSystem: effectiveFs,
+    fileSystem: contextFs,
     flutterVersion: flutterVersion,
-    logger: effectiveLogger,
+    logger: contextLogger,
     machine: machine,
-    osUtils: osUtils ?? globals.os,
-    outputPreferences: outputPreferences ?? globals.outputPreferences,
-    platform: effectivePlatform,
-    processManager: effectiveProcessManager,
+    osUtils: contextOs,
+    outputPreferences: contextOutputPreferences,
+    platform: contextPlatform,
+    processManager: contextProcessManager,
     projectRootPath: projectRootPath,
     stayResident: stayResident,
-    terminal: terminal ?? globals.terminal,
+    terminal: contextTerminal,
     traceStartup: traceStartup,
     xcode: xcode,
   );
@@ -374,12 +360,7 @@ class TestFlutterDevice extends FlutterDevice {
     Future<Uri>? vmServiceUri,
   }) : super(
          device,
-         toolContext: TestToolContext(
-           fileSystem: globals.fs,
-           logger: globals.logger,
-           processManager: globals.processManager,
-           artifacts: Artifacts.test(),
-         ),
+         toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
          targetPlatform: .unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,
