@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -411,8 +410,7 @@ void main() {
       () async {
         final doneCompleter = Completer<void>();
         final socket = FakeSocket(done: doneCompleter.future);
-        final daemonStreams = DaemonStreams.fromSocket(socket, logger: bufferLogger);
-        addTearDown(daemonStreams.dispose);
+        DaemonStreams.fromSocket(socket, logger: bufferLogger);
 
         doneCompleter.completeError(
           const SocketException(
@@ -434,37 +432,12 @@ void main() {
 }
 
 class FakeSocket extends Fake implements Socket {
-  FakeSocket({Future<void>? done, Stream<Uint8List>? stream})
-    : _done = done ?? Completer<void>().future,
-      _stream = stream ?? const Stream<Uint8List>.empty();
+  FakeSocket({Future<void>? done}) : _done = done ?? Completer<void>().future;
 
   final Future<void> _done;
-  final Stream<Uint8List> _stream;
-  final addedData = <List<int>>[];
-  bool closeCalled = false;
-
-  @override
-  StreamSubscription<Uint8List> listen(
-    void Function(Uint8List event)? onData, {
-    Function? onError,
-    void Function()? onDone,
-    bool? cancelOnError,
-  }) {
-    return _stream.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
-  }
 
   @override
   Future<void> get done => _done;
-
-  @override
-  void add(List<int> data) {
-    addedData.add(data);
-  }
-
-  @override
-  Future<void> close() async {
-    closeCalled = true;
-  }
 }
 
 class _DaemonMessageAndBinary {

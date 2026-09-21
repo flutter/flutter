@@ -386,19 +386,34 @@ Future<vm_service.VmService> createVmServiceDelegate(
   final Stream<Object?> inStream = channel.handleError((Object error, StackTrace stackTrace) {
     logger.printTrace('VM service WebSocket error: $error\n$stackTrace');
   });
+  void handleWriteError(Object error, StackTrace stackTrace) {
+    logger.printTrace('Failed to send VM service message: $error\n$stackTrace');
+    try {
+      unawaited(channel.close().handleError((Object _, StackTrace _) {}));
+    } on Exception catch (_) {
+      // Ignore errors while closing a failed channel.
+    } on StateError catch (_) {
+      // Ignore errors while closing a failed channel.
+    }
+  }
+
   return vm_service.VmService(
     inStream,
     (String message) {
       try {
         channel.add(message);
-      } on Object catch (error, stackTrace) {
-        logger.printTrace('Failed to send VM service message: $error\n$stackTrace');
+      } on Exception catch (error, stackTrace) {
+        handleWriteError(error, stackTrace);
+      } on StateError catch (error, stackTrace) {
+        handleWriteError(error, stackTrace);
       }
     },
     disposeHandler: () async {
       try {
         await channel.close();
-      } on Object catch (error, stackTrace) {
+      } on Exception catch (error, stackTrace) {
+        logger.printTrace('Error closing VM service channel: $error\n$stackTrace');
+      } on StateError catch (error, stackTrace) {
         logger.printTrace('Error closing VM service channel: $error\n$stackTrace');
       }
     },

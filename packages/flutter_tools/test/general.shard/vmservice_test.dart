@@ -796,9 +796,13 @@ void main() {
   testWithoutContext(
     'createVmServiceDelegate handles exception during write and close without throwing',
     () async {
+      const socketException = io.SocketException(
+        'Error event raised in event handler : error condition has been reset',
+        port: 0,
+      );
       final fakeWebSocket = FakeWebSocket()
-        ..throwOnAdd = true
-        ..throwOnClose = true;
+        ..errorOnAdd = socketException
+        ..errorOnClose = socketException;
       openChannelForTesting = (
         String url, {
         io.CompressionOptions? compression,
@@ -931,12 +935,9 @@ class FakeWebSocket extends Fake implements io.WebSocket {
 
   final Future<void> _done;
   final Stream<Object?> _stream;
-  final addedMessages = <Object?>[];
   bool closed = false;
-  bool throwOnAdd = false;
-  bool throwOnClose = false;
-  Error? errorOnAdd;
-  Error? errorOnClose;
+  Object? errorOnAdd;
+  Object? errorOnClose;
 
   @override
   StreamSubscription<Object?> listen(
@@ -959,28 +960,15 @@ class FakeWebSocket extends Fake implements io.WebSocket {
   @override
   void add(Object? data) {
     if (errorOnAdd != null) {
-      throw errorOnAdd!;
+      Error.throwWithStackTrace(errorOnAdd!, StackTrace.current);
     }
-    if (throwOnAdd) {
-      throw const io.SocketException(
-        'Error event raised in event handler : error condition has been reset',
-        port: 0,
-      );
-    }
-    addedMessages.add(data);
   }
 
   @override
   Future<void> close([int? code, String? reason]) async {
     closed = true;
     if (errorOnClose != null) {
-      throw errorOnClose!;
-    }
-    if (throwOnClose) {
-      throw const io.SocketException(
-        'Error event raised in event handler : error condition has been reset',
-        port: 0,
-      );
+      Error.throwWithStackTrace(errorOnClose!, StackTrace.current);
     }
   }
 }
