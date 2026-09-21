@@ -668,34 +668,31 @@ void main() {
     ) async {
       // Regression test for https://github.com/flutter/flutter/issues/192861.
       final controller = OverlayPortalController();
-      late final OverlayEntry overlayEntry;
+      const overlayChildKey = ValueKey<String>('overlay child');
+      double dimension = 100;
+      final overlayEntry = OverlayEntry(
+        canSizeOverlay: true,
+        builder: (BuildContext context) {
+          return SizedBox.square(
+            dimension: dimension,
+            child: Center(
+              child: OverlayPortal(
+                controller: controller,
+                overlayChildBuilder: (BuildContext context) => const SizedBox(key: overlayChildKey),
+                child: const SizedBox.square(dimension: 40),
+              ),
+            ),
+          );
+        },
+      );
       addTearDown(
         () => overlayEntry
           ..remove()
           ..dispose(),
       );
-      const overlayChildKey = ValueKey<String>('overlay child');
-      double dimension = 100;
       final Widget overlay = Overlay(
         alwaysSizeToContent: bounded,
-        initialEntries: <OverlayEntry>[
-          overlayEntry = OverlayEntry(
-            canSizeOverlay: true,
-            builder: (BuildContext context) {
-              return SizedBox.square(
-                dimension: dimension,
-                child: Center(
-                  child: OverlayPortal(
-                    controller: controller,
-                    overlayChildBuilder: (BuildContext context) =>
-                        const SizedBox(key: overlayChildKey),
-                    child: const SizedBox.square(dimension: 40),
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
+        initialEntries: <OverlayEntry>[overlayEntry],
       );
       await tester.pumpWidget(
         Directionality(
