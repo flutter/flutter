@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <string>
 
 #include "flutter/common/constants.h"
 #include "flutter/fml/platform/darwin/string_range_sanitization.h"
@@ -93,6 +94,19 @@ static flutter::TextRange RangeFromBaseExtent(NSNumber* base,
     return flutter::TextRange(0, 0);
   }
   return flutter::TextRange([base unsignedLongValue], [extent unsignedLongValue]);
+}
+
+// Returns |range| as a TextRange clamped to |length|.
+//
+// A selection made backwards is reported as a range whose length is negative
+// when read as a signed value, so the length is interpreted signed and the
+// direction of the range is preserved. A location of NSNotFound clamps to
+// |length|.
+static flutter::TextRange ClampNSRange(NSRange range, size_t length) {
+  const long text_length = static_cast<long>(length);
+  const long signed_length = std::clamp(static_cast<long>(range.length), -text_length, text_length);
+  const long base = std::clamp(static_cast<long>(range.location), 0L, text_length);
+  return flutter::TextRange(base, std::clamp(base + signed_length, 0L, text_length));
 }
 
 // Returns the autofill hint content type, if specified; otherwise nil.
@@ -535,6 +549,9 @@ static char markerKey;
 }
 
 - (void)setEditingState:(NSDictionary*)state {
+  if (_activeModel == nullptr) {
+    return;
+  }
   NSString* selectionAffinity = state[kSelectionAffinityKey];
   if (selectionAffinity != nil) {
     _textAffinity = [selectionAffinity isEqualToString:kTextAffinityUpstream]
@@ -543,13 +560,25 @@ static char markerKey;
   }
 
   NSString* text = state[kTextKey];
+  if (![text isKindOfClass:[NSString class]]) {
+    text = @"";
+  }
 
-  flutter::TextRange selected_range = RangeFromBaseExtent(
-      state[kSelectionBaseKey], state[kSelectionExtentKey], _activeModel->selection());
-  _activeModel->SetSelection(selected_range);
-
-  flutter::TextRange composing_range = RangeFromBaseExtent(
-      state[kComposingBaseKey], state[kComposingExtentKey], _activeModel->composing_range());
+  // The framework computes these ranges against its own copy of the text, which may be a different
+  // revision than the text it sends here, and the ranges are dropped entirely by |SetText| if they
+  // don't fit.
+  //
+  // Clamp them to the incoming text so a stale offset degrades the caret position rather than
+  // discarding the text update.
+  size_t text_length = text.length;
+  flutter::TextRange selected_range =
+      RangeFromBaseExtent(state[kSelectionBaseKey], state[kSelectionExtentKey],
+                          _activeModel->selection())
+          .ClampedTo(text_length);
+  flutter::TextRange composing_range =
+      RangeFromBaseExtent(state[kComposingBaseKey], state[kComposingExtentKey],
+                          _activeModel->composing_range())
+          .ClampedTo(text_length);
 
   const bool wasComposing = _activeModel->composing();
   _activeModel->SetText([text UTF8String], selected_range, composing_range);
@@ -772,17 +801,7 @@ static char markerKey;
   _eventProducedOutput |= true;
 
   if (range.location != NSNotFound) {
-    // The selected range can actually have negative numbers, since it can start
-    // at the end of the range if the user selected the text going backwards.
-    // Cast to a signed type to determine whether or not the selection is reversed.
-    long signedLength = static_cast<long>(range.length);
-    long location = range.location;
-    long textLength = _activeModel->text_range().end();
-
-    size_t base = std::clamp(location, 0L, textLength);
-    size_t extent = std::clamp(location + signedLength, 0L, textLength);
-
-    _activeModel->SetSelection(flutter::TextRange(base, extent));
+    _activeModel->SetSelection(ClampNSRange(range, _activeModel->text_range().end()));
   } else if (_activeModel->composing() &&
              !(_activeModel->composing_range() == _activeModel->selection())) {
     // When confirmed by Japanese IME, string replaces range of composing_range.
@@ -902,10 +921,11 @@ static char markerKey;
     // the case, because in situations where the replacementRange is actually
     // specified (i.e. when switching between characters equivalent after long
     // key press) the replacementRange is provided while there is no composition.
+    //
+    // The range is clamped to the text because SetComposingRange rejects ranges
+    // that don't fit.
     _activeModel->SetComposingRange(
-        flutter::TextRange(replacementRange.location,
-                           replacementRange.location + replacementRange.length),
-        0);
+        ClampNSRange(replacementRange, _activeModel->text_range().end()), 0);
   }
 
   flutter::TextRange composingBeforeChange = _activeModel->composing_range();
@@ -914,12 +934,20 @@ static char markerKey;
   // Input string may be NSString or NSAttributedString.
   BOOL isAttributedString = [string isKindOfClass:[NSAttributedString class]];
   const NSString* rawString = isAttributedString ? [string string] : string;
-  _activeModel->UpdateComposingText(
-      (const char16_t*)[rawString cStringUsingEncoding:NSUTF16StringEncoding],
-      flutter::TextRange(selectedRange.location, selectedRange.location + selectedRange.length));
+
+  // Copy the UTF-16 code units directly. The C string form truncates at an
+  // embedded NUL and returns NULL when the string cannot be converted.
+  std::u16string marked_text_utf16(rawString.length, u'\0');
+  [rawString getCharacters:reinterpret_cast<unichar*>(marked_text_utf16.data())
+                     range:NSMakeRange(0, marked_text_utf16.length())];
+
+  // selectedRange is provided by the IME. Re-clamp to the text.
+  // NSNotFound (no selection), clamps to end of the marked text.
+  _activeModel->UpdateComposingText(marked_text_utf16,
+                                    ClampNSRange(selectedRange, marked_text_utf16.length()));
 
   if (_enableDeltaModel) {
-    std::string marked_text = [rawString UTF8String];
+    std::string marked_text = rawString ? [rawString UTF8String] : "";
     [self updateEditStateWithDelta:flutter::TextEditingDelta(textBeforeChange,
                                                              selectionBeforeChange.collapsed()
                                                                  ? composingBeforeChange

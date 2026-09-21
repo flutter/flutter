@@ -33,6 +33,11 @@ final class NativeCommand extends Command {
   /// Gets whether the device is an emulator.
   static const NativeCommand getIsEmulator = NativeCommand('is_emulator');
 
+  /// Waits until the first frame is displayed on the native surface.
+  static const NativeCommand waitForFirstFrameDisplayed = NativeCommand(
+    'wait_for_first_frame_displayed',
+  );
+
   /// The method to call on the plugin.
   final String method;
 

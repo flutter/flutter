@@ -14,6 +14,7 @@
 		24E221DE21A28B23008ADF09 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 24E221D421A28B23008ADF09 /* MainViewController.m */; };
 		24E221E021A28B23008ADF09 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 24E221D721A28B23008ADF09 /* Launch Screen.storyboard */; };
 		24E221E221A28B36008ADF09 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24E221E121A28B36008ADF09 /* Assets.xcassets */; };
+		24E221E721A28B40008ADF09 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 24E221E621A28B40008ADF09 /* SceneDelegate.m */; };
 		DB9A200AFEB7AAE22B4E12E4 /* libPods-ios_add2app.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A318514E0307AE0FF0EFC76 /* libPods-ios_add2app.a */; };
 		F73B66B8262F6FE1002080A0 /* IntegrationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F73B66B7262F6FE1002080A0 /* IntegrationTests.m */; };
 /* End PBXBuildFile section */
@@ -41,6 +42,8 @@
 		24E221D421A28B23008ADF09 /* MainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
 		24E221D721A28B23008ADF09 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		24E221E121A28B36008ADF09 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		24E221E521A28B40008ADF09 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
+		24E221E621A28B40008ADF09 /* SceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SceneDelegate.m; sourceTree = "<group>"; };
 		7A318514E0307AE0FF0EFC76 /* libPods-ios_add2app.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ios_add2app.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		86B9DCFF5941A3BAC28862C3 /* libPods-ios_add2appTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ios_add2appTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A18D4CDABD6795975FD6B49F /* Pods-ios_add2app.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ios_add2app.release.xcconfig"; path = "Pods/Target Support Files/Pods-ios_add2app/Pods-ios_add2app.release.xcconfig"; sourceTree = "<group>"; };
@@ -102,6 +105,8 @@
 				24E221D421A28B23008ADF09 /* MainViewController.m */,
 				24E221B821A28A0B008ADF09 /* AppDelegate.h */,
 				24E221B921A28A0B008ADF09 /* AppDelegate.m */,
+				24E221E521A28B40008ADF09 /* SceneDelegate.h */,
+				24E221E621A28B40008ADF09 /* SceneDelegate.m */,
 				24E221C621A28A0C008ADF09 /* Info.plist */,
 				24E221C721A28A0C008ADF09 /* main.m */,
 			);
@@ -150,6 +155,7 @@
 				24E221B221A28A0B008ADF09 /* Frameworks */,
 				24E221B321A28A0B008ADF09 /* Resources */,
 				7FADF19EC61F97E525982780 /* [CP] Embed Pods Frameworks */,
+				E60026AD66E6FA84412ED3FF /* [CP-User] Embed Flutter Build ios_add2app_life_cycle_flutter Script */,
 			);
 			buildRules = (
 			);
@@ -168,7 +174,6 @@
 				F73B66A9262F6F87002080A0 /* Sources */,
 				F73B66AA262F6F87002080A0 /* Frameworks */,
 				F73B66AB262F6F87002080A0 /* Resources */,
-				B7873FC60D5B7AA97A1DE937 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -287,22 +292,15 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ios_add2app/Pods-ios_add2app-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		B7873FC60D5B7AA97A1DE937 /* [CP] Embed Pods Frameworks */ = {
+		E60026AD66E6FA84412ED3FF /* [CP-User] Embed Flutter Build ios_add2app_life_cycle_flutter Script */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ios_add2appTests/Pods-ios_add2appTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ios_add2appTests/Pods-ios_add2appTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
+			name = "[CP-User] Embed Flutter Build ios_add2app_life_cycle_flutter Script";
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ios_add2appTests/Pods-ios_add2appTests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
+			shellScript = "set -e\nset -u\nsource \"${SRCROOT}/flutterapp/.ios/Flutter/flutter_export_environment.sh\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh embed_and_thin";
 		};
 		F841B20A4BA845744CC6A838 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -337,6 +335,7 @@
 				24E221DE21A28B23008ADF09 /* MainViewController.m in Sources */,
 				24E221DD21A28B23008ADF09 /* FullScreenViewController.m in Sources */,
 				24E221BA21A28A0B008ADF09 /* AppDelegate.m in Sources */,
+				24E221E721A28B40008ADF09 /* SceneDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

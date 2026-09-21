@@ -131,12 +131,11 @@ void main() {
             }
           });
           final hotRunner = FakeHotRunner();
-          hotRunner.onAttach =
-              (
-                Completer<DebugConnectionInfo>? connectionInfoCompleter,
-                Completer<void>? appStartedCompleter,
-                bool enableDevTools,
-              ) async => 0;
+          hotRunner.onAttach = (
+            Completer<DebugConnectionInfo>? connectionInfoCompleter,
+            Completer<void>? appStartedCompleter,
+            bool enableDevTools,
+          ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
@@ -288,12 +287,11 @@ void main() {
             }
           });
           final hotRunner = FakeHotRunner();
-          hotRunner.onAttach =
-              (
-                Completer<DebugConnectionInfo>? connectionInfoCompleter,
-                Completer<void>? appStartedCompleter,
-                bool enableDevTools,
-              ) async => 0;
+          hotRunner.onAttach = (
+            Completer<DebugConnectionInfo>? connectionInfoCompleter,
+            Completer<void>? appStartedCompleter,
+            bool enableDevTools,
+          ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
           var passedArtifactTest = false;
@@ -363,12 +361,11 @@ void main() {
           );
           testDeviceManager.devices = <Device>[device];
           final hotRunner = FakeHotRunner();
-          hotRunner.onAttach =
-              (
-                Completer<DebugConnectionInfo>? connectionInfoCompleter,
-                Completer<void>? appStartedCompleter,
-                bool enableDevTools,
-              ) async => 0;
+          hotRunner.onAttach = (
+            Completer<DebugConnectionInfo>? connectionInfoCompleter,
+            Completer<void>? appStartedCompleter,
+            bool enableDevTools,
+          ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
@@ -390,7 +387,7 @@ void main() {
           // Listen to the URI before checking port forwarder. Port forwarding
           // is done as a side effect when generating the uri.
           final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-          final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
+          final Uri? vmServiceUri = await flutterDevice.vmServiceUri;
           expect(vmServiceUri.toString(), 'http://127.0.0.1:$hostPort/xyz/');
 
           expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
@@ -443,12 +440,11 @@ void main() {
           );
           testDeviceManager.devices = <Device>[device];
           final hotRunner = FakeHotRunner();
-          hotRunner.onAttach =
-              (
-                Completer<DebugConnectionInfo>? connectionInfoCompleter,
-                Completer<void>? appStartedCompleter,
-                bool enableDevTools,
-              ) async => 0;
+          hotRunner.onAttach = (
+            Completer<DebugConnectionInfo>? connectionInfoCompleter,
+            Completer<void>? appStartedCompleter,
+            bool enableDevTools,
+          ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
@@ -470,7 +466,7 @@ void main() {
           // Listen to the URI before checking port forwarder. Port forwarding
           // is done as a side effect when generating the uri.
           final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-          final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
+          final Uri? vmServiceUri = await flutterDevice.vmServiceUri;
           expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
 
           expect(portForwarder.forwardedPorts, isEmpty);
@@ -528,12 +524,11 @@ void main() {
           );
           testDeviceManager.devices = <Device>[device];
           final hotRunner = FakeHotRunner();
-          hotRunner.onAttach =
-              (
-                Completer<DebugConnectionInfo>? connectionInfoCompleter,
-                Completer<void>? appStartedCompleter,
-                bool enableDevTools,
-              ) async => 0;
+          hotRunner.onAttach = (
+            Completer<DebugConnectionInfo>? connectionInfoCompleter,
+            Completer<void>? appStartedCompleter,
+            bool enableDevTools,
+          ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
@@ -555,7 +550,7 @@ void main() {
           // Listen to the URI before checking port forwarder. Port forwarding
           // is done as a side effect when generating the uri.
           final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-          final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
+          final Uri? vmServiceUri = await flutterDevice.vmServiceUri;
           expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
 
           expect(portForwarder.forwardedPorts, isEmpty);
@@ -626,12 +621,11 @@ void main() {
           );
           testDeviceManager.devices = <Device>[device];
           final hotRunner = FakeHotRunner();
-          hotRunner.onAttach =
-              (
-                Completer<DebugConnectionInfo>? connectionInfoCompleter,
-                Completer<void>? appStartedCompleter,
-                bool enableDevTools,
-              ) async => 0;
+          hotRunner.onAttach = (
+            Completer<DebugConnectionInfo>? connectionInfoCompleter,
+            Completer<void>? appStartedCompleter,
+            bool enableDevTools,
+          ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
@@ -653,7 +647,7 @@ void main() {
           // Listen to the URI before checking port forwarder. Port forwarding
           // is done as a side effect when generating the uri.
           final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-          final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
+          final Uri? vmServiceUri = await flutterDevice.vmServiceUri;
           expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
 
           expect(portForwarder.forwardedPorts, isEmpty);
@@ -818,12 +812,11 @@ void main() {
           const outputDill = '/tmp/output.dill';
 
           final hotRunner = FakeHotRunner();
-          hotRunner.onAttach =
-              (
-                Completer<DebugConnectionInfo>? connectionInfoCompleter,
-                Completer<void>? appStartedCompleter,
-                bool enableDevTools,
-              ) async => 0;
+          hotRunner.onAttach = (
+            Completer<DebugConnectionInfo>? connectionInfoCompleter,
+            Completer<void>? appStartedCompleter,
+            bool enableDevTools,
+          ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
 
@@ -925,12 +918,11 @@ void main() {
             }
           });
           final hotRunner = FakeHotRunner();
-          hotRunner.onAttach =
-              (
-                Completer<DebugConnectionInfo>? connectionInfoCompleter,
-                Completer<void>? appStartedCompleter,
-                bool enableDevTools,
-              ) async => 0;
+          hotRunner.onAttach = (
+            Completer<DebugConnectionInfo>? connectionInfoCompleter,
+            Completer<void>? appStartedCompleter,
+            bool enableDevTools,
+          ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
@@ -1498,10 +1490,11 @@ void main() {
     testUsingContext(
       'does not try to attach to a new target when the original application disappears',
       () async {
-        // Regression test for https://github.com/flutter/flutter/issues/156692.
+        final fakeLogReader = FakeDeviceLogReader();
+        fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:1234');
         final device = FakeAndroidDevice(id: '1')
           ..portForwarder = const NoOpDevicePortForwarder()
-          ..onGetLogReader = () => NoOpDeviceLogReader('test');
+          ..onGetLogReader = () => fakeLogReader;
         final hotRunner = FakeHotRunner();
         final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
         var attachCount = 0;
@@ -1511,12 +1504,9 @@ void main() {
               Completer<void>? appStartedCompleter,
               bool enableDevTools,
             ) async {
-              // Mimic listening to the `vmServiceUris` stream for the FlutterDevice we're
-              // trying to attach to. Without the fix for
-              // https://github.com/flutter/flutter/issues/156692, calling `HotRunner.attach`
-              // multiple times would result in this stream being listened to again, causing a
-              // `StateError` to be thrown.
-              await hotRunner.flutterDevices.first.vmServiceUris!.toList();
+              // Mimic awaiting the `vmServiceUri` future for the FlutterDevice we're
+              // trying to attach to.
+              await hotRunner.flutterDevices.first.vmServiceUri;
               attachCount++;
               return 0;
             };
@@ -1908,7 +1898,11 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   DeviceLogReader Function()? onGetLogReader;
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+    bool adbLogFiltering = true,
+  }) {
     if (onGetLogReader == null) {
       throw UnimplementedError(
         'Called getLogReader but no onGetLogReader callback was supplied in the constructor to FakeAndroidDevice.',
@@ -1951,11 +1945,11 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
-    DevicePortForwarder? portForwarder,
+    this._portForwarder,
     this.onGetLogReader,
     this.connectionInterface = DeviceConnectionInterface.attached,
     this.majorSdkVersion = 0,
-  }) : _portForwarder = portForwarder;
+  });
 
   final DevicePortForwarder? _portForwarder;
   @override
@@ -2157,9 +2151,8 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     if (T == IPAddressResourceRecord) {
       final String key = query.fullyQualifiedName;
       return Stream<IPAddressResourceRecord>.fromIterable(
-            ipResponse[key] ?? <IPAddressResourceRecord>[],
-          )
-          as Stream<T>;
+        ipResponse[key] ?? <IPAddressResourceRecord>[],
+      ) as Stream<T>;
     }
     throw UnsupportedError('Unsupported query type $T');
   }

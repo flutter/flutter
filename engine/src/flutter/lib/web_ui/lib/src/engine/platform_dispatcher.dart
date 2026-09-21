@@ -623,10 +623,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         final arguments = decoded.arguments as Map<dynamic, dynamic>;
         switch (decoded.method) {
           case 'activateSystemCursor':
-            // TODO(mdebbar): Once the framework starts sending us a viewId, we
-            //                should use it to grab the correct view.
-            //                https://github.com/flutter/flutter/issues/140226
-            views.firstOrNull?.mouseCursor.activateSystemCursor(arguments.tryString('kind'));
+            final String? kind = arguments.tryString('kind');
+            for (final EngineFlutterView view in views) {
+              view.mouseCursor.activateSystemCursor(kind);
+            }
         }
         return;
 
@@ -1024,17 +1024,23 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
     final locales = <ui.Locale>[];
     for (final String language in languages) {
-      final domLocale = DomLocale(language);
-      locales.add(
-        ui.Locale.fromSubtags(
-          languageCode: domLocale.language,
-          scriptCode: domLocale.script,
-          countryCode: domLocale.region,
-        ),
-      );
+      try {
+        final domLocale = DomLocale(language);
+        locales.add(
+          ui.Locale.fromSubtags(
+            languageCode: domLocale.language,
+            scriptCode: domLocale.script,
+            countryCode: domLocale.region,
+          ),
+        );
+      } catch (_) {
+        // Skip tags Intl.Locale rejects (e.g. en-US@posix on Linux).
+      }
     }
 
-    assert(locales.isNotEmpty);
+    if (locales.isEmpty) {
+      return const <ui.Locale>[_defaultLocale];
+    }
     return locales;
   }
 

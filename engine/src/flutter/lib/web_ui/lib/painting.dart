@@ -367,8 +367,15 @@ abstract class Gradient implements Shader {
     TileMode tileMode = TileMode.clamp,
     Float64List? matrix4,
   ]) {
-    final Float32List? matrix = matrix4 == null ? null : engine.toMatrix32(matrix4);
-    return engine.renderer.createLinearGradient(from, to, colors, colorStops, tileMode, matrix);
+    _validateColorStops(colors, colorStops);
+    return engine.EngineGradient.linear(
+      from,
+      to,
+      colors,
+      colorStops,
+      tileMode,
+      matrix4 != null ? engine.toMatrix32(matrix4) : null,
+    );
   }
 
   factory Gradient.radial(
@@ -382,34 +389,18 @@ abstract class Gradient implements Shader {
     double focalRadius = 0.0,
   ]) {
     _validateColorStops(colors, colorStops);
-    // If focal is null or focal radius is null, this should be treated as a regular radial gradient
-    // If focal == center and the focal radius is 0.0, it's still a regular radial gradient
-    final Float32List? matrix32 = matrix4 != null ? engine.toMatrix32(matrix4) : null;
-    if (focal == null || (focal == center && focalRadius == 0.0)) {
-      return engine.renderer.createRadialGradient(
-        center,
-        radius,
-        colors,
-        colorStops,
-        tileMode,
-        matrix32,
-      );
-    } else {
-      assert(
-        center != Offset.zero || focal != Offset.zero,
-      ); // will result in exception(s) in Skia side
-      return engine.renderer.createConicalGradient(
-        focal,
-        focalRadius,
-        center,
-        radius,
-        colors,
-        colorStops,
-        tileMode,
-        matrix32,
-      );
-    }
+    return engine.EngineGradient.radial(
+      center,
+      radius,
+      colors,
+      colorStops,
+      tileMode,
+      matrix4 != null ? engine.toMatrix32(matrix4) : null,
+      focal,
+      focalRadius,
+    );
   }
+
   factory Gradient.sweep(
     Offset center,
     List<Color> colors, [
@@ -418,15 +409,18 @@ abstract class Gradient implements Shader {
     double startAngle = 0.0,
     double endAngle = math.pi * 2,
     Float64List? matrix4,
-  ]) => engine.renderer.createSweepGradient(
-    center,
-    colors,
-    colorStops,
-    tileMode,
-    startAngle,
-    endAngle,
-    matrix4 != null ? engine.toMatrix32(matrix4) : null,
-  );
+  ]) {
+    _validateColorStops(colors, colorStops);
+    return engine.EngineGradient.sweep(
+      center,
+      colors,
+      colorStops,
+      tileMode,
+      startAngle,
+      endAngle,
+      matrix4 != null ? engine.toMatrix32(matrix4) : null,
+    );
+  }
 }
 
 typedef ImageEventCallback = void Function(Image image);
@@ -651,19 +645,15 @@ class ImageFilter {
     double sigmaX = 0.0,
     double sigmaY = 0.0,
     TileMode? tileMode,
+    // ignore: avoid_unused_constructor_parameters
     Rect? bounds,
-  }) => engine.renderer.createBlurImageFilter(
-    sigmaX: sigmaX,
-    sigmaY: sigmaY,
-    tileMode: tileMode,
-    bounds: bounds,
-  );
+  }) => engine.EngineImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
 
   factory ImageFilter.dilate({double radiusX = 0.0, double radiusY = 0.0}) =>
-      engine.renderer.createDilateImageFilter(radiusX: radiusX, radiusY: radiusY);
+      engine.EngineImageFilter.dilate(radiusX: radiusX, radiusY: radiusY);
 
   factory ImageFilter.erode({double radiusX = 0.0, double radiusY = 0.0}) =>
-      engine.renderer.createErodeImageFilter(radiusX: radiusX, radiusY: radiusY);
+      engine.EngineImageFilter.erode(radiusX: radiusX, radiusY: radiusY);
 
   factory ImageFilter.matrix(
     Float64List matrix4, {
@@ -672,11 +662,19 @@ class ImageFilter {
     if (matrix4.length != 16) {
       throw ArgumentError('"matrix4" must have 16 entries.');
     }
-    return engine.renderer.createMatrixImageFilter(matrix4, filterQuality: filterQuality);
+    return engine.EngineImageFilter.matrix(matrix: matrix4, filterQuality: filterQuality);
   }
 
-  factory ImageFilter.compose({required ImageFilter outer, required ImageFilter inner}) =>
-      engine.renderer.composeImageFilters(outer: outer, inner: inner);
+  factory ImageFilter.compose({required ImageFilter outer, required ImageFilter inner}) {
+    engine.EngineImageFilter convert(ImageFilter filter) {
+      if (filter is engine.EngineColorFilter) {
+        return engine.EngineColorFilterImageFilter(colorFilter: filter);
+      }
+      return filter as engine.EngineImageFilter;
+    }
+
+    return engine.EngineImageFilter.compose(outer: convert(outer), inner: convert(inner));
+  }
 
   factory ImageFilter.shader(
     // ignore: avoid_unused_constructor_parameters
@@ -994,7 +992,7 @@ abstract class ImageShader implements Shader {
     TileMode tmy,
     Float64List matrix4, {
     FilterQuality? filterQuality,
-  }) => engine.renderer.createImageShader(image, tmx, tmy, matrix4, filterQuality);
+  }) => engine.EngineImageShader(image, tmx, tmy, matrix4, filterQuality: filterQuality);
 
   @override
   void dispose();

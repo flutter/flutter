@@ -8,10 +8,7 @@
 import 'package:flutter/src/widgets/_window.dart';
 import 'package:material_ui/material_ui.dart';
 
-void showWindowEditDialog({
-  required BuildContext context,
-  required WindowController controller,
-}) {
+void showWindowEditDialog({required BuildContext context, required WindowController controller}) {
   showDialog<void>(
     context: context,
     builder: (context) =>
