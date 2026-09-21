@@ -251,10 +251,14 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
         sk_sp<DisplayList> snapshot_display_list = display_list;
         if (layer_tree) {
           FML_DCHECK(picture_bounds == layer_tree->frame_size());
-          snapshot_display_list =
-              layer_tree->Flatten(DlRect::MakeWH(width, height),
-                                  snapshot_delegate->GetTextureRegistry(),
-                                  snapshot_delegate->GetGrContext());
+          auto aiks_context = is_impeller_enabled
+                                  ? snapshot_delegate->GetAiksContext()
+                                  : nullptr;
+          snapshot_display_list = layer_tree->Flatten(
+              DlRect::MakeWH(width, height),
+              snapshot_delegate->GetTextureRegistry(),
+              is_impeller_enabled ? nullptr : snapshot_delegate->GetGrContext(),
+              aiks_context.get());
         }
         if (is_impeller_enabled) {
 #if IMPELLER_SUPPORTS_RENDERING

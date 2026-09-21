@@ -59,7 +59,7 @@ class XCDevice {
     required Platform platform,
     required IProxy iproxy,
     required FileSystem fileSystem,
-    required Analytics analytics,
+    required this._analytics,
     required ShutdownHooks shutdownHooks,
     @visibleForTesting IOSCoreDeviceControl? coreDeviceControl,
     XcodeDebug? xcodeDebug,
@@ -95,8 +95,7 @@ class XCDevice {
              fileSystem: fileSystem,
            ),
        _iProxy = iproxy,
-       _xcode = xcode,
-       _analytics = analytics {
+       _xcode = xcode {
     shutdownHooks.addShutdownHook(dispose);
 
     _setupDeviceIdentifierByEventStream();
@@ -550,6 +549,9 @@ class XCDevice {
         var devModeEnabled = true;
         var isConnected = true;
         var isPaired = true;
+        final modelCode = device['modelCode'] as String?;
+        final operatingSystemVersion = device['operatingSystemVersion'] as String?;
+        final cpuArchitectureString = device['architecture'] as String?;
         final Map<String, Object?>? errorProperties = _errorProperties(device);
         if (errorProperties != null) {
           final String? errorMessage = _parseErrorMessage(errorProperties);
@@ -633,11 +635,15 @@ class XCDevice {
           identifier,
           name: name,
           cpuArch: _cpuArchitecture(device),
+          cpuArchitectureString: cpuArchitectureString,
           connectionInterface: connectionInterface,
           isConnected: isConnected,
           sdkVersion: sdkVersionString,
+          modelCode: modelCode,
+          operatingSystemVersion: operatingSystemVersion,
           iProxy: _iProxy,
           fileSystem: globals.fs,
+          fileSystemUtils: globals.fsUtils,
           logger: _logger,
           analytics: globals.analytics,
           iosDeploy: _iosDeploy,
@@ -650,6 +656,7 @@ class XCDevice {
             fileSystem: globals.fs,
             processUtils: _processUtils,
             xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+            deviceVersion: Version.parse(sdkVersionString),
           ),
           xcodeDebug: _xcodeDebug,
           xcode: _xcode,

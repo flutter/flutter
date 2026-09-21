@@ -14,11 +14,9 @@ import 'platform.dart';
 class BotDetector {
   BotDetector({
     required HttpClientFactory httpClientFactory,
-    required Platform platform,
-    required PersistentToolState persistentToolState,
-  }) : _platform = platform,
-       _azureDetector = AzureDetector(httpClientFactory: httpClientFactory),
-       _persistentToolState = persistentToolState;
+    required this._platform,
+    required this._persistentToolState,
+  }) : _azureDetector = AzureDetector(httpClientFactory: httpClientFactory);
 
   final Platform _platform;
   final AzureDetector _azureDetector;
@@ -33,16 +31,10 @@ class BotDetector {
         // When set, GA logs to a local file (normally for tests) so we don't need to filter.
         ||
         _platform.environment.containsKey('FLUTTER_ANALYTICS_LOG_FILE')) {
-      _persistentToolState.setIsRunningOnBot(false);
       return false;
     }
 
-    if (_persistentToolState.isRunningOnBot != null) {
-      return _persistentToolState.isRunningOnBot!;
-    }
-
-    final bool result =
-        _platform.environment['BOT'] == 'true'
+    if (_platform.environment['BOT'] == 'true'
         // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
         ||
         _platform.environment['TRAVIS'] == 'true' ||
@@ -72,10 +64,17 @@ class BotDetector {
         // Property when running on borg.
         ||
         _platform.environment.containsKey('BORG_ALLOC_DIR')
-        // Property when running on Azure.
+        // https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables
         ||
-        await _azureDetector.isRunningOnAzure;
+        _platform.environment.containsKey('TF_BUILD')) {
+      return true;
+    }
 
+    if (_persistentToolState.isRunningOnBot != null) {
+      return _persistentToolState.isRunningOnBot!;
+    }
+
+    final bool result = await _azureDetector.isRunningOnAzure;
     _persistentToolState.setIsRunningOnBot(result);
     return result;
   }
@@ -85,8 +84,7 @@ class BotDetector {
 // https://docs.microsoft.com/en-us/azure/virtual-machines/linux/instance-metadata-service
 @visibleForTesting
 class AzureDetector {
-  AzureDetector({required HttpClientFactory httpClientFactory})
-    : _httpClientFactory = httpClientFactory;
+  AzureDetector({required this._httpClientFactory});
 
   static const _serviceUrl = 'http://169.254.169.254/metadata/instance';
 

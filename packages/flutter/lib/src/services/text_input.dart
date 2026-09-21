@@ -44,9 +44,7 @@ export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 export 'autofill.dart' show AutofillConfiguration, AutofillScope;
 export 'text_editing.dart' show TextSelection;
-
-// TODO(a14n): the following export leads to Segmentation fault, see https://github.com/flutter/flutter/issues/106332
-// export 'text_editing_delta.dart' show TextEditingDelta;
+export 'text_editing_delta.dart' show TextEditingDelta;
 
 /// Indicates how to handle the intelligent replacement of dashes in text input.
 ///
@@ -102,13 +100,17 @@ enum SmartQuotesType {
 /// can specify whether it supports decimal numbers and/or signed numbers.
 @immutable
 class TextInputType {
-  const TextInputType._(this.index) : signed = null, decimal = null;
+  const TextInputType._(this.index) : signed = null, decimal = null, password = null;
 
   /// Optimize for numerical information.
   ///
   /// Requests a numeric keyboard with additional settings.
-  /// The [signed] and [decimal] parameters are optional.
-  const TextInputType.numberWithOptions({this.signed = false, this.decimal = false}) : index = 2;
+  /// The [signed], [decimal], and [password] parameters are optional.
+  const TextInputType.numberWithOptions({
+    this.signed = false,
+    this.decimal = false,
+    this.password = false,
+  }) : index = 2;
 
   /// Enum value index, corresponds to one of the [values].
   final int index;
@@ -124,6 +126,16 @@ class TextInputType {
   /// This flag is only used for the [number] input type, otherwise `null`.
   /// Use `const TextInputType.numberWithOptions(decimal: true)` to set this.
   final bool? decimal;
+
+  /// The number is a password.
+  ///
+  /// This flag is only used for the [number] input type, otherwise `null`.
+  /// Use `const TextInputType.numberWithOptions(password: true)` to set this.
+  ///
+  /// On Android, this adds
+  /// [TYPE_NUMBER_VARIATION_PASSWORD](https://developer.android.com/reference/android/text/InputType#TYPE_NUMBER_VARIATION_PASSWORD)
+  /// to the input type. It has no effect on iOS, web, or desktop platforms.
+  final bool? password;
 
   /// Optimize for textual information.
   ///
@@ -252,7 +264,12 @@ class TextInputType {
 
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{'name': _name, 'signed': signed, 'decimal': decimal};
+    return <String, dynamic>{
+      'name': _name,
+      'signed': signed,
+      'decimal': decimal,
+      'password': password,
+    };
   }
 
   @override
@@ -260,7 +277,8 @@ class TextInputType {
     return '${objectRuntimeType(this, 'TextInputType')}('
         'name: $_name, '
         'signed: $signed, '
-        'decimal: $decimal)';
+        'decimal: $decimal, '
+        'password: $password)';
   }
 
   @override
@@ -268,11 +286,12 @@ class TextInputType {
     return other is TextInputType &&
         other.index == index &&
         other.signed == signed &&
-        other.decimal == decimal;
+        other.decimal == decimal &&
+        other.password == password;
   }
 
   @override
-  int get hashCode => Object.hash(index, signed, decimal);
+  int get hashCode => Object.hash(index, signed, decimal, password);
 }
 
 /// An action the user has requested the text input control to perform.

@@ -286,7 +286,7 @@ class SnippetDartdocParser {
           }
           final RegExpMatch match = _filePointerRegex.firstMatch(trimmedLine)!;
           linkedFile = filesystem.file(
-            path.join(flutterRoot.absolute.path, match.namedGroup('file')),
+            path.join(flutterRoot.absolute.path, 'packages', 'flutter', match.namedGroup('file')),
           );
         } else {
           block.add(line.copyWith(text: line.text.replaceFirst(RegExp(r'\s*/// ?'), '')));
