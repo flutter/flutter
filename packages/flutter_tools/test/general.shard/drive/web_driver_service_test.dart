@@ -456,9 +456,9 @@ WebDriverService setUpDriverService() {
     platform: FakePlatform(),
     processUtils: ProcessUtils(logger: logger, processManager: processManager),
     terminal: Terminal.test(),
-    toolContext: TestToolContext(
+    toolContext: FakeToolContext(
       artifacts: Artifacts.test(),
-      fileSystem: fileSystem,
+      fs: fileSystem,
       logger: logger,
       processInfo: ProcessInfo.test(fileSystem),
       processManager: processManager,
