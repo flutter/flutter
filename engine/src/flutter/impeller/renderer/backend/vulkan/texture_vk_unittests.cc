@@ -19,20 +19,30 @@ namespace testing {
 namespace {
 
 // Qualcomm devices generate corrupt mip levels; ARM ones do not.
+constexpr std::string_view kAdrenoName = "Adreno (TM) 750";
+constexpr std::string_view kMaliName = "Mali-G51";
 constexpr uint32_t kQualcommVendorID = 0x168C;
 constexpr uint32_t kARMVendorID = 0x13B5;
 
-std::shared_ptr<ContextVK> MakeContext(std::string_view device_name,
-                                       uint32_t vendor_id) {
-  return MockVulkanContextBuilder()
-      .SetPhysicalPropertiesCallback(
-          [device_name, vendor_id](VkPhysicalDevice device,
-                                   VkPhysicalDeviceProperties* prop) {
-            prop->vendorID = vendor_id;
-            device_name.copy(prop->deviceName, device_name.size());
-            prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
-          })
-      .Build();
+void SetAdrenoProperties(VkPhysicalDevice device,
+                         VkPhysicalDeviceProperties* prop) {
+  prop->vendorID = kQualcommVendorID;
+  kAdrenoName.copy(prop->deviceName, kAdrenoName.size());
+  prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+}
+
+void SetMaliProperties(VkPhysicalDevice device,
+                       VkPhysicalDeviceProperties* prop) {
+  prop->vendorID = kARMVendorID;
+  kMaliName.copy(prop->deviceName, kMaliName.size());
+  prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+}
+
+std::shared_ptr<ContextVK> MakeContext(
+    void (*set_properties)(VkPhysicalDevice, VkPhysicalDeviceProperties*)) {
+  MockVulkanContextBuilder builder;
+  builder.SetPhysicalPropertiesCallback(set_properties);
+  return builder.Build();
 }
 
 std::shared_ptr<Texture> MakeTexture(const std::shared_ptr<ContextVK>& context,
@@ -49,7 +59,7 @@ std::shared_ptr<Texture> MakeTexture(const std::shared_ptr<ContextVK>& context,
 }  // namespace
 
 TEST(TextureVKTest, SampledViewDropsMipsGeneratedByABrokenDriver) {
-  auto const context = MakeContext("Adreno (TM) 750", kQualcommVendorID);
+  auto const context = MakeContext(SetAdrenoProperties);
   auto texture = MakeTexture(context, /*mip_count=*/4u);
   ASSERT_TRUE(texture);
   auto& texture_vk = TextureVK::Cast(*texture);
@@ -64,7 +74,7 @@ TEST(TextureVKTest, SampledViewDropsMipsGeneratedByABrokenDriver) {
 }
 
 TEST(TextureVKTest, SampledViewKeepsMipsOnAWorkingDriver) {
-  auto const context = MakeContext("Mali-G51", kARMVendorID);
+  auto const context = MakeContext(SetMaliProperties);
   auto texture = MakeTexture(context, /*mip_count=*/4u);
   ASSERT_TRUE(texture);
   auto& texture_vk = TextureVK::Cast(*texture);
@@ -74,7 +84,7 @@ TEST(TextureVKTest, SampledViewKeepsMipsOnAWorkingDriver) {
 }
 
 TEST(TextureVKTest, SampledViewIsTheFullViewWithoutMips) {
-  auto const context = MakeContext("Adreno (TM) 750", kQualcommVendorID);
+  auto const context = MakeContext(SetAdrenoProperties);
   auto texture = MakeTexture(context, /*mip_count=*/1u);
   ASSERT_TRUE(texture);
   auto& texture_vk = TextureVK::Cast(*texture);
