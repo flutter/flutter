@@ -62,8 +62,9 @@ class _AccessDebugMembersOnlyInAssertsVisitor extends GeneralizingAstVisitor<voi
   @override
   void visitAnnotation(Annotation node) {}
 
-  // This rule also ignores parameter names. This is for allowing the existing
-  // framework pattern where constructors can take user-spplied `debugLabel`s.
+  // This rule also ignores parameter names. This prevents the rule from flagging certain
+  // constructor declarations such as `LabeledGlobalKey(this._debugLabel);`
+  // Accessing the _debugLabel field will still get flagged which is intended.
   @override
   void visitFormalParameterList(FormalParameterList node) {}
 
