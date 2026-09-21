@@ -209,9 +209,7 @@ void main() {
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
       ]);
 
-      await fakeTextChannel.incoming!(
-        const MethodCall('TextInputClient.requestExistingInputState'),
-      );
+      fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState'));
 
       expect(fakeTextChannel.outgoingCalls.length, 3);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
@@ -232,9 +230,7 @@ void main() {
           MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
         ]);
 
-        await fakeTextChannel.incoming!(
-          const MethodCall('TextInputClient.requestExistingInputState'),
-        );
+        fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState'));
 
         expect(fakeTextChannel.outgoingCalls.length, 3);
         fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[

@@ -84,7 +84,7 @@ void main() {
     ); // t=0
     recordMetrics();
     final completer = Completer<void>();
-    unawaited(controller.forward().whenComplete(completer.complete));
+    controller.forward().whenComplete(completer.complete);
     expect(completer.isCompleted, isFalse);
     await tester.pump(); // t=0 again
     expect(completer.isCompleted, isFalse);

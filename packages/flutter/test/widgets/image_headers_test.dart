@@ -14,7 +14,7 @@ void main() {
   final client = MockHttpClient();
 
   testWidgets('Headers', (WidgetTester tester) async {
-    await HttpOverrides.runZoned<Future<void>>(
+    HttpOverrides.runZoned<Future<void>>(
       () async {
         await tester.pumpWidget(
           Image.network(

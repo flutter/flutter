@@ -84,7 +84,7 @@ class _TabbedComponentDemoScaffoldState extends State<TabbedComponentDemoScaffol
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else if (context.mounted) {
-      await showDialog<void>(
+      showDialog<void>(
         context: context,
         builder: (BuildContext context) {
           return SimpleDialog(

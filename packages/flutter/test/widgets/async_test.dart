@@ -334,7 +334,7 @@ void main() {
         findsOneWidget,
       );
       controller.add('4');
-      unawaited(controller.close());
+      controller.close();
       await eventFiring(tester);
       expect(
         find.text('AsyncSnapshot<String>(ConnectionState.done, 4, null, null)'),
@@ -536,7 +536,7 @@ void main() {
       controller.add('1');
       controller.addError('bad', StackTrace.fromString('trace'));
       controller.add('2');
-      unawaited(controller.close());
+      controller.close();
       await eventFiring(tester);
       expect(find.text('conn, data:1, error:bad stackTrace:trace, data:2, done'), findsOneWidget);
     });

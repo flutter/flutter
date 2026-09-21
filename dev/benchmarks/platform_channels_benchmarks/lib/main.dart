@@ -131,7 +131,6 @@ Future<void> _runTest({
   required int numMessages,
 }) async {
   print('running $name');
-  // ignore: unawaited_futures
   resetChannel.send(true);
   // Prime test.
   await test(1);
