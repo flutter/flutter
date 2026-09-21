@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/test/native_assets.dart';
 import 'package:package_config/package_config_types.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -517,6 +518,124 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
     },
   );
 
+  group('findRunPackageName', () {
+    testWithoutContext('prefers direct root URI match over manifestAppName', () {
+      final FileSystem fs = MemoryFileSystem.test();
+      final Uri projectUri = Uri.parse('file:///my_app/');
+      final packageConfig = PackageConfig(<Package>[
+        Package('aaa_first_dep', Uri.parse('file:///pub_cache/aaa_first_dep/')),
+        Package('direct_pkg', projectUri),
+        Package('manifest_pkg', Uri.parse('file:///other_dir/')),
+      ]);
+
+      expect(
+        findRunPackageName(
+          fileSystem: fs,
+          manifestAppName: 'manifest_pkg',
+          packageConfig: packageConfig,
+          projectUri: projectUri,
+        ),
+        'direct_pkg',
+      );
+    });
+
+    testWithoutContext('matches package root via canonicalized path when URIs differ', () {
+      final FileSystem fs = MemoryFileSystem.test();
+      final Directory realDir = fs.directory('/real_dir')..createSync(recursive: true);
+      final Link symlink = fs.link('/symlink_dir')..createSync('/real_dir');
+      final Directory symlinkDir = fs.directory(symlink.path);
+
+      final packageConfig = PackageConfig(<Package>[
+        Package('aaa_first_dep', Uri.parse('file:///pub_cache/aaa_first_dep/')),
+        Package('symlink_pkg', realDir.uri),
+        Package('manifest_pkg', Uri.parse('file:///manifest_dir/')),
+      ]);
+
+      expect(
+        findRunPackageName(
+          fileSystem: fs,
+          manifestAppName: 'manifest_pkg',
+          packageConfig: packageConfig,
+          projectUri: symlinkDir.uri,
+        ),
+        'symlink_pkg',
+      );
+    });
+
+    testWithoutContext('falls back to manifestAppName rather than first package in packageConfig '
+        'when no package root matches projectUri', () {
+      final FileSystem fs = MemoryFileSystem.test();
+      final Uri projectUri = Uri.parse('file:///unmatched_app/');
+      final packageConfig = PackageConfig(<Package>[
+        Package('_fe_analyzer_shared', Uri.parse('file:///pub_cache/_fe_analyzer_shared/')),
+        Package('args', Uri.parse('file:///pub_cache/args/')),
+      ]);
+
+      expect(
+        findRunPackageName(
+          fileSystem: fs,
+          manifestAppName: 'my_app',
+          packageConfig: packageConfig,
+          projectUri: projectUri,
+        ),
+        'my_app',
+      );
+    });
+
+    testWithoutContext('falls back to manifestAppName when packageConfig is empty', () {
+      final FileSystem fs = MemoryFileSystem.test();
+      expect(
+        findRunPackageName(
+          fileSystem: fs,
+          manifestAppName: 'standalone_app',
+          packageConfig: PackageConfig.empty,
+          projectUri: Uri.parse('file:///standalone_app/'),
+        ),
+        'standalone_app',
+      );
+    });
+
+    testWithoutContext(
+      'returns null when no package root matches and manifestAppName is empty',
+      () {
+        final FileSystem fs = MemoryFileSystem.test();
+        final packageConfig = PackageConfig(<Package>[
+          Package('args', Uri.parse('file:///pub_cache/args/')),
+        ]);
+
+        expect(
+          findRunPackageName(
+            fileSystem: fs,
+            manifestAppName: '',
+            packageConfig: packageConfig,
+            projectUri: Uri.parse('file:///empty_app/'),
+          ),
+          isNull,
+        );
+      },
+    );
+
+    testWithoutContext(
+      'catches FileSystemException during symlink resolution and falls back cleanly',
+      () {
+        final FileSystem fs = _ThrowingResolveLinksFileSystem(MemoryFileSystem.test());
+        final packageConfig = PackageConfig(<Package>[
+          Package('other_pkg', Uri.parse('file:///other_dir/')),
+        ]);
+
+        expect(
+          findRunPackageName(
+            fileSystem: fs,
+            manifestAppName: 'fallback_app',
+            packageConfig: packageConfig,
+            projectUri: Uri.parse('file:///broken_dir/'),
+          ),
+          'fallback_app',
+        );
+      },
+    );
+  });
+
   group('testCompilerBuildNativeAssets', () {
     testUsingContext(
       'falls back to manifest appName when package root does not match projectUri '
@@ -534,9 +653,6 @@ environment:
   sdk: '>=3.2.0 <4.0.0'
 ''');
 
-        // Place 'other_pkg' first in package_config and 'my_app' second with a
-        // non-matching root URI so tier 3 (manifestAppName in packageConfig) is
-        // isolated from tier 4 (first package in packageConfig).
         final File packageConfigFile = writePackageConfigFiles(
           directory: projectDir,
           mainLibName: 'other_pkg',
@@ -548,16 +664,6 @@ environment:
           logger: logger,
         );
 
-        expect(
-          findRunPackageName(
-            fileSystem: fileSystem,
-            manifestAppName: 'my_app',
-            packageConfig: packageConfig,
-            projectUri: projectDir.uri,
-          ),
-          'my_app',
-        );
-
         final buildInfo = BuildInfo(
           BuildMode.debug,
           '',
@@ -574,166 +680,10 @@ environment:
     );
 
     testUsingContext(
-      'matches package root via canonicalized path when URIs differ',
+      'logs warning and returns null gracefully when no package can be resolved',
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-      () async {
-        final Directory projectDir = fileSystem.directory('/real_dir')..createSync(recursive: true);
-        final Link symlink = fileSystem.link('/symlink_dir')..createSync('/real_dir');
-        final Directory symlinkDir = fileSystem.directory(symlink.path);
-        fileSystem.currentDirectory = symlinkDir;
-        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
-name: manifest_pkg
-environment:
-  sdk: '>=3.2.0 <4.0.0'
-''');
-
-        // Use distinct names for the first package ('first_pkg'), the symlinked
-        // package ('symlink_pkg'), and the manifest package ('manifest_pkg') so
-        // only tier 2 (canonicalized path matching) resolves 'symlink_pkg'.
-        final File packageConfigFile = writePackageConfigFiles(
-          directory: projectDir,
-          mainLibName: 'first_pkg',
-          mainLibRootUri: '../first_dir',
-          packages: <String, String>{'symlink_pkg': '.', 'manifest_pkg': '../manifest_dir'},
-        );
-        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-          packageConfigFile,
-          logger: logger,
-        );
-
-        expect(
-          findRunPackageName(
-            fileSystem: fileSystem,
-            manifestAppName: 'manifest_pkg',
-            packageConfig: packageConfig,
-            projectUri: symlinkDir.uri,
-          ),
-          'symlink_pkg',
-        );
-
-        final buildInfo = BuildInfo(
-          BuildMode.debug,
-          '',
-          treeShakeIcons: false,
-          packageConfigPath: packageConfigFile.path,
-          packageConfig: packageConfig,
-        );
-
-        final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
-        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
-        expect(result, isNotNull);
-        expect(fileSystem.file(result).existsSync(), isTrue);
-      },
-    );
-
-    testUsingContext(
-      'falls back to first package in package config when projectUri and manifest do not match',
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-      () async {
-        final Directory projectDir = fileSystem.directory('/unmatched_app')
-          ..createSync(recursive: true);
-        fileSystem.currentDirectory = projectDir;
-        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
-name: unknown_app
-environment:
-  sdk: '>=3.2.0 <4.0.0'
-''');
-
-        final File packageConfigFile = writePackageConfigFiles(
-          directory: projectDir,
-          mainLibName: 'fallback_pkg',
-          mainLibRootUri: '../fallback_pkg',
-          packages: <String, String>{'second_pkg': '../second_pkg'},
-        );
-        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-          packageConfigFile,
-          logger: logger,
-        );
-
-        expect(
-          findRunPackageName(
-            fileSystem: fileSystem,
-            manifestAppName: 'unknown_app',
-            packageConfig: packageConfig,
-            projectUri: projectDir.uri,
-          ),
-          'fallback_pkg',
-        );
-
-        final buildInfo = BuildInfo(
-          BuildMode.debug,
-          '',
-          treeShakeIcons: false,
-          packageConfigPath: packageConfigFile.path,
-          packageConfig: packageConfig,
-        );
-
-        final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
-        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
-        expect(result, isNotNull);
-        expect(fileSystem.file(result).existsSync(), isTrue);
-      },
-    );
-
-    testUsingContext(
-      'falls back to manifestAppName when packageConfig is empty',
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-      () async {
-        final Directory projectDir = fileSystem.directory('/standalone_app')
-          ..createSync(recursive: true);
-        fileSystem.currentDirectory = projectDir;
-        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
-name: standalone_app
-environment:
-  sdk: '>=3.2.0 <4.0.0'
-''');
-
-        final File packageConfigFile = projectDir.childFile('.dart_tool/package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('{"configVersion": 2, "packages": []}');
-        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-          packageConfigFile,
-          logger: logger,
-        );
-
-        expect(
-          findRunPackageName(
-            fileSystem: fileSystem,
-            manifestAppName: 'standalone_app',
-            packageConfig: packageConfig,
-            projectUri: projectDir.uri,
-          ),
-          'standalone_app',
-        );
-
-        final buildInfo = BuildInfo(
-          BuildMode.debug,
-          '',
-          treeShakeIcons: false,
-          packageConfigPath: packageConfigFile.path,
-          packageConfig: packageConfig,
-        );
-
-        final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
-        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
-        expect(result, isNotNull);
-        expect(fileSystem.file(result).existsSync(), isTrue);
-      },
-    );
-
-    testUsingContext(
-      'returns null gracefully when no package can be resolved',
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
+        Logger: () => logger,
         ProcessManager: () => processManager,
       },
       () async {
@@ -753,16 +703,6 @@ environment:
           logger: logger,
         );
 
-        expect(
-          findRunPackageName(
-            fileSystem: fileSystem,
-            manifestAppName: '',
-            packageConfig: packageConfig,
-            projectUri: projectDir.uri,
-          ),
-          isNull,
-        );
-
         final buildInfo = BuildInfo(
           BuildMode.debug,
           '',
@@ -774,59 +714,10 @@ environment:
         final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
         final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
         expect(result, isNull);
-      },
-    );
-
-    testUsingContext(
-      'prefers direct root URI match over manifest and first package',
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-      () async {
-        final Directory projectDir = fileSystem.directory('/my_app')..createSync(recursive: true);
-        fileSystem.currentDirectory = projectDir;
-        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
-name: manifest_pkg
-environment:
-  sdk: '>=3.2.0 <4.0.0'
-''');
-
-        // Place 'first_pkg' first and 'manifest_pkg' third, while 'direct_pkg'
-        // matches projectDir.uri directly (tier 1).
-        final File packageConfigFile = writePackageConfigFiles(
-          directory: projectDir,
-          mainLibName: 'first_pkg',
-          mainLibRootUri: '../first_dir',
-          packages: <String, String>{'direct_pkg': '.', 'manifest_pkg': '../manifest_dir'},
-        );
-        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-          packageConfigFile,
-          logger: logger,
-        );
-
         expect(
-          findRunPackageName(
-            fileSystem: fileSystem,
-            manifestAppName: 'manifest_pkg',
-            packageConfig: packageConfig,
-            projectUri: projectDir.uri,
-          ),
-          'direct_pkg',
+          logger.warningText,
+          contains('Could not determine run package name for native assets testing'),
         );
-
-        final buildInfo = BuildInfo(
-          BuildMode.debug,
-          '',
-          treeShakeIcons: false,
-          packageConfigPath: packageConfigFile.path,
-          packageConfig: packageConfig,
-        );
-
-        final fakeRunner = FakeFlutterNativeAssetsBuildRunner();
-        final Uri? result = await testCompilerBuildNativeAssets(buildInfo, buildRunner: fakeRunner);
-        expect(result, isNotNull);
-        expect(fileSystem.file(result).existsSync(), isTrue);
       },
     );
   });
@@ -841,5 +732,22 @@ class _SetCCompilerConfigTarget extends FakeFlutterNativeAssetsBuildRunner {
   Future<void> setCCompilerConfig(CodeAssetTarget target) async {
     await target.setCCompilerConfig();
     didSetCCompilerConfig = true;
+  }
+}
+
+class _ThrowingResolveLinksFileSystem extends ForwardingFileSystem {
+  _ThrowingResolveLinksFileSystem(super.delegate);
+
+  @override
+  Directory directory(Object? path) => _ThrowingResolveLinksDirectory();
+}
+
+class _ThrowingResolveLinksDirectory extends Fake implements Directory {
+  @override
+  bool existsSync() => true;
+
+  @override
+  String resolveSymbolicLinksSync() {
+    throw const FileSystemException('Cyclic link');
   }
 }

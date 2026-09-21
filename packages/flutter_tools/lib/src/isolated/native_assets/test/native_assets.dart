@@ -66,15 +66,15 @@ Future<Uri?> testCompilerBuildNativeAssets(
     projectUri: projectUri,
   );
   if (runPackageName == null) {
-    globals.logger.printTrace('Could not determine run package name for native assets testing.');
+    globals.logger.printWarning(
+      'Could not determine run package name for native assets testing '
+      '(projectUri: $projectUri, packageConfigPath: $packageConfigPath).',
+    );
     return null;
   }
-  final File pubspecFromPackageConfig = globals.fs.file(
-    Uri.file(packageConfigPath).resolve('../$_pubspecYamlFileName'),
-  );
-  final String pubspecPath = pubspecFromPackageConfig.existsSync()
-      ? pubspecFromPackageConfig.path
-      : project.directory.childFile(_pubspecYamlFileName).path;
+  final String pubspecPath = Uri.file(packageConfigPath)
+      .resolve('../$_pubspecYamlFileName')
+      .toFilePath();
   final FlutterNativeAssetsBuildRunner runner =
       buildRunner ??
       FlutterNativeAssetsBuildRunnerImpl(
@@ -145,10 +145,8 @@ Future<Uri?> testCompilerBuildNativeAssets(
 /// 1. A package in [packageConfig] whose `root` URI directly matches [projectUri].
 /// 2. A package in [packageConfig] whose canonicalized `root` path matches the
 ///    canonicalized path of [projectUri] (handling symlinks and trailing slashes).
-/// 3. [manifestAppName] if it is non-empty and exists in [packageConfig].
-/// 4. The first package in [packageConfig], if any.
-/// 5. [manifestAppName] if it is non-empty.
-/// 6. `null` if no package name can be determined.
+/// 3. [manifestAppName] if it is non-empty.
+/// 4. `null` if no package name can be determined.
 @visibleForTesting
 String? findRunPackageName({
   required FileSystem fileSystem,
@@ -165,7 +163,7 @@ String? findRunPackageName({
   }
 
   // 2. Canonicalized path match (handles symlinks, trailing slashes, etc.).
-  if (projectUri.isScheme(_fileScheme)) {
+  if (projectUri.isScheme(_fileScheme) && packageConfig.packages.isNotEmpty) {
     final String canonicalProjectDir = _canonicalizeUriPath(fileSystem, projectUri);
     final Package? pathMatch = packageConfig.packages.where((Package p) {
       if (!p.root.isScheme(_fileScheme)) {
@@ -178,20 +176,20 @@ String? findRunPackageName({
     }
   }
 
-  // 3. Match against project manifest app name if it exists in package config.
-  if (manifestAppName.isNotEmpty && packageConfig[manifestAppName] != null) {
-    return manifestAppName;
-  }
-
-  // 4. Fallback to the first package in the package config, or the project
-  // manifest app name if non-empty.
-  return packageConfig.packages.firstOrNull?.name ??
-      (manifestAppName.isNotEmpty ? manifestAppName : null);
+  // 3. Fallback to the project manifest app name if non-empty.
+  return manifestAppName.isNotEmpty ? manifestAppName : null;
 }
 
 String _canonicalizeUriPath(FileSystem fileSystem, Uri uri) {
   final String path = fileSystem.path.fromUri(uri);
   final Directory directory = fileSystem.directory(path);
-  final String resolvedPath = directory.existsSync() ? directory.resolveSymbolicLinksSync() : path;
+  var resolvedPath = path;
+  if (directory.existsSync()) {
+    try {
+      resolvedPath = directory.resolveSymbolicLinksSync();
+    } on FileSystemException {
+      // Fall back to the unresolved path if symlink resolution fails.
+    }
+  }
   return fileSystem.path.canonicalize(resolvedPath);
 }
