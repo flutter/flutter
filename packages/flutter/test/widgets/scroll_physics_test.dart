@@ -592,6 +592,19 @@ FlutterError
       tester.widget<Scrollable>(find.byType(Scrollable)).physics,
       isA<AlwaysScrollableScrollPhysics>(),
     );
+    expect(tester.widget<Scrollable>(find.byType(Scrollable)).physics?.parent, isNull);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: .ltr,
+        child: ListView(physics: const .alwaysScrollable(parent: ClampingScrollPhysics())),
+      ),
+    );
+
+    expect(
+      tester.widget<Scrollable>(find.byType(Scrollable)).physics?.parent,
+      isA<ClampingScrollPhysics>(),
+    );
   });
 
   testWidgets('ScrollPhysics supports shorthands for BouncingScrollPhysics', (
@@ -608,6 +621,19 @@ FlutterError
       tester.widget<Scrollable>(find.byType(Scrollable)).physics,
       isA<BouncingScrollPhysics>(),
     );
+    expect(tester.widget<Scrollable>(find.byType(Scrollable)).physics?.parent, isNull);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: .ltr,
+        child: ListView(physics: const .bouncing(parent: ClampingScrollPhysics())),
+      ),
+    );
+
+    expect(
+      tester.widget<Scrollable>(find.byType(Scrollable)).physics?.parent,
+      isA<ClampingScrollPhysics>(),
+    );
   });
 
   testWidgets('ScrollPhysics supports shorthands for ClampingScrollPhysics', (
@@ -622,6 +648,19 @@ FlutterError
 
     expect(
       tester.widget<Scrollable>(find.byType(Scrollable)).physics,
+      isA<ClampingScrollPhysics>(),
+    );
+    expect(tester.widget<Scrollable>(find.byType(Scrollable)).physics?.parent, isNull);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: .ltr,
+        child: ListView(physics: const .clamping(parent: ClampingScrollPhysics())),
+      ),
+    );
+
+    expect(
+      tester.widget<Scrollable>(find.byType(Scrollable)).physics?.parent,
       isA<ClampingScrollPhysics>(),
     );
   });
@@ -640,6 +679,19 @@ FlutterError
       tester.widget<Scrollable>(find.byType(Scrollable)).physics,
       isA<NeverScrollableScrollPhysics>(),
     );
+    expect(tester.widget<Scrollable>(find.byType(Scrollable)).physics?.parent, isNull);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: .ltr,
+        child: ListView(physics: const .neverScrollable(parent: ClampingScrollPhysics())),
+      ),
+    );
+
+    expect(
+      tester.widget<Scrollable>(find.byType(Scrollable)).physics?.parent,
+      isA<ClampingScrollPhysics>(),
+    );
   });
 
   testWidgets('ScrollPhysics supports shorthands for PageScrollPhysics', (
@@ -653,6 +705,19 @@ FlutterError
     );
 
     expect(tester.widget<Scrollable>(find.byType(Scrollable)).physics, isA<PageScrollPhysics>());
+    expect(tester.widget<Scrollable>(find.byType(Scrollable)).physics?.parent, isNull);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: .ltr,
+        child: ListView(physics: const .page(parent: ClampingScrollPhysics())),
+      ),
+    );
+
+    expect(
+      tester.widget<Scrollable>(find.byType(Scrollable)).physics?.parent,
+      isA<ClampingScrollPhysics>(),
+    );
   });
 
   testWidgets('ScrollPhysics supports shorthands for RangeMaintainingScrollPhysics', (
@@ -668,6 +733,19 @@ FlutterError
     expect(
       tester.widget<Scrollable>(find.byType(Scrollable)).physics,
       isA<RangeMaintainingScrollPhysics>(),
+    );
+    expect(tester.widget<Scrollable>(find.byType(Scrollable)).physics?.parent, isNull);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: .ltr,
+        child: ListView(physics: const .rangeMaintaining(parent: ClampingScrollPhysics())),
+      ),
+    );
+
+    expect(
+      tester.widget<Scrollable>(find.byType(Scrollable)).physics?.parent,
+      isA<ClampingScrollPhysics>(),
     );
   });
 }
