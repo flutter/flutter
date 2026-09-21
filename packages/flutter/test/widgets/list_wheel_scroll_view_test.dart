@@ -2059,4 +2059,21 @@ void main() {
       expect(tester.getSize(find.byType(ListWheelViewport)), Size.zero);
     },
   );
+
+  testWidgets('ScrollPhysics supports shorthands for FixedExtentScrollPhysics', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ListWheelScrollView(
+        itemExtent: 20.0,
+        physics: const .fixedExtent(),
+        children: <Widget>[for (int i = 0; i < 20; i++) const SizedBox()],
+      ),
+    );
+
+    expect(
+      tester.widget<ListWheelScrollView>(find.byType(ListWheelScrollView)).physics,
+      isA<FixedExtentScrollPhysics>(),
+    );
+  });
 }
