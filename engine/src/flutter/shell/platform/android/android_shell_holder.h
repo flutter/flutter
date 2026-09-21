@@ -7,16 +7,14 @@
 
 #include <memory>
 
+#include "flutter/common/task_runners.h"
 #include "flutter/fml/macros.h"
-#include "flutter/shell/common/run_configuration.h"
-#include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/android/android_engine.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
-#include "flutter/shell/platform/embedder/platform_view_embedder.h"
 
 namespace flutter {
 
@@ -109,8 +107,8 @@ class AndroidShellHolder {
   void UpdateDisplayMetrics();
 
   // Visible for testing.
-  const std::unique_ptr<Shell>& GetShellForTesting() const {
-    return engine_->GetShellForTesting();
+  const TaskRunners& GetTaskRunners() const {
+    return engine_->GetTaskRunners();
   }
 
   AndroidEngine* GetEngineForTesting() const { return engine_.get(); }
@@ -120,7 +118,6 @@ class AndroidShellHolder {
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   fml::WeakPtr<PlatformViewAndroid> platform_view_;
   std::unique_ptr<PlatformViewAndroid> platform_view_android_;
-  EmbedderSurfaceAndroid* embedder_surface_ = nullptr;
   std::shared_ptr<ThreadHost> thread_host_;
   std::unique_ptr<AndroidEngine> engine_;
   bool is_valid_ = false;
@@ -146,17 +143,7 @@ class AndroidShellHolder {
                      std::unique_ptr<APKAssetProvider> apk_asset_provider,
                      const fml::WeakPtr<PlatformViewAndroid>& platform_view,
                      std::unique_ptr<PlatformViewAndroid> platform_view_android,
-                     EmbedderSurfaceAndroid* embedder_surface,
                      AndroidRenderingAPI rendering_api);
-  static void ThreadDestructCallback(void* value);
-  PlatformViewEmbedder::PlatformDispatchTable CreateDispatchTable(
-      const fml::WeakPtr<PlatformViewAndroid>& platform_view) const;
-  std::optional<RunConfiguration> BuildRunConfiguration(
-      const std::string& entrypoint,
-      const std::string& libraryUrl,
-      const std::vector<std::string>& entrypoint_args) const;
-
-  bool IsNDKImageDecoderAvailable();
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidShellHolder);
 };
