@@ -92,25 +92,28 @@ class ScrollPhysics {
   const ScrollPhysics({this.parent});
 
   /// Creates a [AlwaysScrollableScrollPhysics] instance.
-  const factory ScrollPhysics.alwaysScrollable() = AlwaysScrollableScrollPhysics;
+  const factory ScrollPhysics.alwaysScrollable({ScrollPhysics? parent}) =
+      AlwaysScrollableScrollPhysics;
 
   /// Creates a [BouncingScrollPhysics] instance.
-  const factory ScrollPhysics.bouncing() = BouncingScrollPhysics;
+  const factory ScrollPhysics.bouncing({ScrollPhysics? parent}) = BouncingScrollPhysics;
 
   /// Creates a [ClampingScrollPhysics] instance.
-  const factory ScrollPhysics.clamping() = ClampingScrollPhysics;
+  const factory ScrollPhysics.clamping({ScrollPhysics? parent}) = ClampingScrollPhysics;
 
   /// Creates a [FixedExtentScrollPhysics] instance.
-  const factory ScrollPhysics.fixedExtent() = FixedExtentScrollPhysics;
+  const factory ScrollPhysics.fixedExtent({ScrollPhysics? parent}) = FixedExtentScrollPhysics;
 
   /// Creates a [NeverScrollableScrollPhysics] instance.
-  const factory ScrollPhysics.neverScrollable() = NeverScrollableScrollPhysics;
+  const factory ScrollPhysics.neverScrollable({ScrollPhysics? parent}) =
+      NeverScrollableScrollPhysics;
 
   /// Creates a [PageScrollPhysics] instance.
-  const factory ScrollPhysics.page() = PageScrollPhysics;
+  const factory ScrollPhysics.page({ScrollPhysics? parent}) = PageScrollPhysics;
 
   /// Creates a [RangeMaintainingScrollPhysics] instance.
-  const factory ScrollPhysics.rangeMaintaining() = RangeMaintainingScrollPhysics;
+  const factory ScrollPhysics.rangeMaintaining({ScrollPhysics? parent}) =
+      RangeMaintainingScrollPhysics;
 
   /// If non-null, determines the default behavior for each method.
   ///
