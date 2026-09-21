@@ -16,7 +16,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -57,15 +56,14 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand({
-    required ToolContext toolContext,
+    required ToolContext super.toolContext,
     bool verboseHelp = false,
-    @visibleForTesting FlutterDriverFactory? flutterDriverFactory,
+    @visibleForTesting this._flutterDriverFactory,
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
-  }) : _flutterDriverFactory = flutterDriverFactory,
-       _toolContext = toolContext,
+  }) : _toolContext = toolContext,
        _fsUtils = FileSystemUtils(fileSystem: toolContext.fs, platform: toolContext.platform),
-       super(verboseHelp: verboseHelp, toolContext: toolContext) {
+       super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     addEnableExperimentation(hide: !verboseHelp);
 
@@ -307,7 +305,13 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform, :Terminal terminal, :OutputPreferences outputPreferences) = _toolContext;
+    final ToolContext(
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :Terminal terminal,
+      :OutputPreferences outputPreferences,
+    ) = _toolContext;
     final String? testFile = _getTestFile();
     if (testFile == null) {
       throwToolExit(null);
@@ -405,7 +409,7 @@ class DriveCommand extends RunCommandBase {
 
       if (screenshot != null) {
         // If the test is sent a signal or times out, take a screenshot
-        _registerScreenshotCallbacks(device, _fileSystem.directory(screenshot));
+        _registerScreenshotCallbacks(device, fs.directory(screenshot));
       }
 
       final int testResult = await testResultFuture;
@@ -417,12 +421,12 @@ class DriveCommand extends RunCommandBase {
 
       if (testResult != 0 && screenshot != null) {
         // Take a screenshot while the app is still running.
-        await _takeScreenshot(device, _fileSystem.directory(screenshot));
+        await _takeScreenshot(device, fs.directory(screenshot));
         screenshotTaken = true;
       }
 
       if (_keepAppRunningWhenComplete) {
-        _logger.printStatus('Leaving the application running.');
+        logger.printStatus('Leaving the application running.');
       } else {
         await driverService.stop(userIdentifier: userIdentifier);
       }
@@ -433,7 +437,7 @@ class DriveCommand extends RunCommandBase {
       // On exceptions, including ToolExit, take a screenshot on the device
       // unless a screenshot was already taken on test failure.
       if (!screenshotTaken && screenshot != null) {
-        await _takeScreenshot(device, _fileSystem.directory(screenshot));
+        await _takeScreenshot(device, fs.directory(screenshot));
       }
       rethrow;
     }
@@ -522,9 +526,7 @@ class DriveCommand extends RunCommandBase {
     // for the corresponding test file relative to it.
     if (!fs.path.isRelative(appFile)) {
       if (!fs.path.isWithin(packageDir, appFile)) {
-        logger.printError(
-          'Application file $appFile is outside the package directory $packageDir',
-        );
+        logger.printError('Application file $appFile is outside the package directory $packageDir');
         return null;
       }
 

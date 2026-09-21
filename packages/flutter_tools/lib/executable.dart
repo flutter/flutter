@@ -255,16 +255,7 @@ List<FlutterCommand> generateCommands({
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
   ),
-  AttachCommand(
-    androidContext: toolDependencies.androidContext,
-    appleContext: toolDependencies.appleContext,
-    hotRunnerFactory: HotRunnerFactory(),
-    nativeAssetsContext: toolDependencies.nativeAssetsContext,
-    previewContext: toolDependencies.previewContext,
-    toolContext: toolDependencies.toolContext,
-    verboseHelp: verboseHelp,
-    webContext: toolDependencies.webContext,
-  ),
+  AttachCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   BuildCommand(
     androidBuilder: AndroidGradleBuilder.fromContexts(
       analytics: toolDependencies.analytics,
@@ -325,10 +316,7 @@ List<FlutterCommand> generateCommands({
     extensionManager: extensionManager,
   ),
   DowngradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
-  DriveCommand(
-    toolContext: toolDependencies.toolContext,
-    verboseHelp: verboseHelp,
-  ),
+  DriveCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   EmulatorsCommand(
     doctor: toolDependencies.doctor,
     emulatorManager: toolDependencies.emulatorManager,
