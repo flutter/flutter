@@ -284,6 +284,7 @@ executable("flutter_linux_unittests") {
     "fl_touch_manager_test.cc",
     "fl_value_test.cc",
     "fl_view_accessible_test.cc",
+    "fl_view_renderer_software_test.cc",
     "fl_view_renderer_subsurface_test.cc",
     "fl_view_test.cc",
     "fl_wayland_display_test.cc",
