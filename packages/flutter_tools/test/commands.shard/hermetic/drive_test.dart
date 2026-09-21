@@ -42,12 +42,12 @@ void main() {
   late FakeDeviceManager fakeDeviceManager;
   late FakeSignals signals;
 
-  DelegatingToolContext createToolContext() => DelegatingToolContext(
+  DelegatingToolContext createToolContext({Signals? signalsOverride}) => DelegatingToolContext(
     fs: fileSystem,
     logger: logger,
     outputPreferences: outputPreferences,
     platform: platform,
-    signals: signals,
+    signals: signalsOverride ?? signals,
   );
 
   setUp(() {
@@ -378,7 +378,7 @@ void main() {
     'drive --timeout takes screenshot and tool exits after timeout',
     () async {
       final command = DriveCommand(
-        toolContext: createToolContext(),
+        toolContext: createToolContext(signalsOverride: Signals.test()),
         flutterDriverFactory: FakeFlutterDriverFactory(),
       );
 
@@ -440,7 +440,7 @@ void main() {
       final signal = FakeProcessSignal();
       final signalUnderTest = ProcessSignal(signal);
       final command = DriveCommand(
-        toolContext: createToolContext(),
+        toolContext: createToolContext(signalsOverride: Signals.test()),
         flutterDriverFactory: FakeFlutterDriverFactory(
           onStartTest: () {
             signal.controller.add(signal);
