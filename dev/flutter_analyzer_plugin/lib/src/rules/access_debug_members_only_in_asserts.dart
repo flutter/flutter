@@ -23,12 +23,12 @@ extension _HasDebugPrefix on Token {
 /// `debug`, `_debug`, `Debug`, or `_Debug`) are only accessed inside
 /// `assert(...)` statements/initializers or inside another debug-only
 /// declaration.
-class AccessDebugOnlyInAssert extends FlutterAnalysisRule {
-  AccessDebugOnlyInAssert()
+class AccessDebugMembersOnlyInAsserts extends FlutterAnalysisRule {
+  AccessDebugMembersOnlyInAsserts()
     : super(name: code.name, description: 'No debug-only symbol access in production code.');
 
   static const LintCode code = LintCode(
-    'access_debug_only_in_assert',
+    'access_debug_members_only_in_asserts',
     '{0} accessed outside of an assert.',
     severity: DiagnosticSeverity.ERROR,
   );
@@ -38,17 +38,17 @@ class AccessDebugOnlyInAssert extends FlutterAnalysisRule {
 
   @override
   void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    registry.addCompilationUnit(this, _AccessDebugOnlyInAssertVisitor(this));
+    registry.addCompilationUnit(this, _AccessDebugMembersOnlyInAssertsVisitor(this));
   }
 }
 
-class _AccessDebugOnlyInAssertVisitor extends GeneralizingAstVisitor<void> {
-  _AccessDebugOnlyInAssertVisitor(this.rule);
+class _AccessDebugMembersOnlyInAssertsVisitor extends GeneralizingAstVisitor<void> {
+  _AccessDebugMembersOnlyInAssertsVisitor(this.rule);
 
   final AnalysisRule rule;
 
-  // Accessing debug symbols in asserts (either in the condition or the message)
-  // is allowed.
+  // Accessing debug symbols in asserts (either in the condition or in the message)
+  // is always allowed.
   @override
   void visitAssertInitializer(AssertInitializer node) {}
   @override
@@ -62,11 +62,10 @@ class _AccessDebugOnlyInAssertVisitor extends GeneralizingAstVisitor<void> {
   @override
   void visitAnnotation(Annotation node) {}
 
-  // Allow parameter names to start with debug.
+  // This rule also ignores parameter names. This is for allowing the existing
+  // framework pattern where constructors can take user-spplied `debugLabel`s.
   @override
   void visitFormalParameterList(FormalParameterList node) {}
-  @override
-  void visitRegularFormalParameter(RegularFormalParameter node) {}
 
   @override
   void visitVariableDeclarationList(VariableDeclarationList node) {
@@ -108,14 +107,6 @@ class _AccessDebugOnlyInAssertVisitor extends GeneralizingAstVisitor<void> {
       rule.reportAtToken(node.name, arguments: <Object>[node.name.lexeme]);
     }
     super.visitNamedType(node);
-  }
-
-  @override
-  void visitFieldFormalParameter(FieldFormalParameter node) {
-    if (node.name._isDebugOnlySymbol) {
-      rule.reportAtToken(node.name, arguments: <Object>[node.name.lexeme]);
-    }
-    super.visitFieldFormalParameter(node);
   }
 
   @override

@@ -27,7 +27,7 @@ This plugin replaces legacy regex-based and manual AST scripts (previously locat
     - [`protect_public_state_subtypes`](#protect_public_state_subtypes)
     - [`render_box_intrinsics`](#render_box_intrinsics)
     - [`lazy_initialized_debug_expensive_fields`](#lazy_initialized_debug_expensive_fields)
-    - [`access_debug_only_in_assert`](#access_debug_only_in_assert)
+    - [`access_debug_members_only_in_asserts`](#access_debug_members_only_in_asserts)
   - [Testing Rules](#testing-rules)
     - [`skip_test_comments`](#skip_test_comments)
     - [`integration_test_timeouts`](#integration_test_timeouts)
@@ -105,7 +105,7 @@ The analyzer requires all `analysis_options.yaml` files referencing `flutter_ana
 | [`protect_public_state_subtypes`](#protect_public_state_subtypes) | `ERROR` | Enabled | `packages/flutter` | Require `@protected` on overridden lifecycle methods in public `State` classes. |
 | [`render_box_intrinsics`](#render_box_intrinsics) | `ERROR` | Enabled | `packages/flutter/lib/src/rendering/` | Disallow calling `compute*` intrinsic methods directly (use `get*`). |
 | [`lazy_initialized_debug_expensive_fields`](#lazy_initialized_debug_expensive_fields) | `ERROR` | Enabled | `packages/flutter` | Require `@_debugOnly` fields to be lazy initialized (declared as `late final` with an initializer). |
-| [`access_debug_only_in_assert`](#access_debug_only_in_assert) | `ERROR` | Enabled | `packages/flutter` | Disallow accessing `debug*` / `_debug*` / `Debug*` / `_Debug*` symbols outside `assert(...)` or debug-only declarations. |
+| [`access_debug_members_only_in_asserts`](#access_debug_members_only_in_asserts) | `ERROR` | Enabled | `packages/flutter` | Disallow accessing `debug*` / `_debug*` / `Debug*` / `_Debug*` symbols outside `assert(...)` or debug-only declarations. |
 | [`skip_test_comments`](#skip_test_comments) | `ERROR` | Enabled | Test files | Require justification comments (e.g. `// [intended]` or issue link) for skipped tests. |
 | [`integration_test_timeouts`](#integration_test_timeouts) | `ERROR` | Enabled | `test_driver/` files | Require integration test files under `test_driver/` to set `timeout: Timeout.none`. |
 
@@ -337,20 +337,31 @@ late List<StackTrace> _creationStackTraces = <StackTrace>[];
 
 ---
 
-#### `access_debug_only_in_assert`
+#### `access_debug_members_only_in_asserts`
 - **Severity**: `ERROR`
 - **Scope**: `packages/flutter`
-- **Description**: Requires all debug-only symbols (whose names start with `debug`, `_debug`, `Debug`, or `_Debug`) are only accessed inside `assert(...)` statements/initializers or inside another debug-only declaration.
+- **Description**: Requires debug-only members (whose names start with `debug`, `_debug`, `Debug`, or `_Debug`) to be accessed only inside `assert(...)` statements/initializers, or inside other debug-only members.
+- **Rationale**: Symbols prefixed with `debug` or `_debug` exist for development-time diagnostics and assertions. Restricting their usage to `assert(...)` blocks ensures the logic and the storage are tree-shaken from profile and release builds.
+- **Limitations**: To the rule implementation simple, debug-only accesses guarded by control flows (such as `if (kDebugMode)` or `if (!kReleaseMode)`) will still be flagged. 
+Suppress intentional exceptions using `// ignore: access_debug_members_only_in_asserts`.
 
 ```dart
 // BAD:
+int debugGetValue() => 42;
 void doStuff() {
   final int value = debugGetValue();
 }
 
 // GOOD:
 void doStuff() {
+  // Allowed inside an assert.
   assert(debugGetValue() == 42);
+}
+
+// GOOD:
+void debugHelper() {
+  // Allowed inside another debug-only declaration.
+  debugGetValue();
 }
 ```
 

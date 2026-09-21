@@ -5,28 +5,24 @@
 import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
-import 'package:flutter_analyzer_plugin/src/rules/access_debug_only_in_assert.dart';
+import 'package:flutter_analyzer_plugin/src/rules/access_debug_members_only_in_asserts.dart';
 import 'package:test_reflective_loader/test_reflective_loader.dart';
 
 @reflectiveTest
-class AccessDebugOnlyInAssertTest extends AnalysisRuleTest {
+class AccessDebugMembersOnlyInAssertsTest extends AnalysisRuleTest {
   @override
   void setUp() {
-    Registry.ruleRegistry.registerLintRule(AccessDebugOnlyInAssert());
+    Registry.ruleRegistry.registerLintRule(AccessDebugMembersOnlyInAsserts());
     super.setUp();
-
-    newFile('$testPackageLibPath/debug_only_lib.dart', debugOnlyLibSource);
   }
 
   @override
-  String get analysisRule => AccessDebugOnlyInAssert.code.name;
+  String get analysisRule => AccessDebugMembersOnlyInAsserts.code.name;
 
-  static const String debugOnlyLibSource = '''
+  static const String debugOnlyAccessSource = '''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-library debug_only_lib;
 
 String debugGlobalVariable = '';
 
@@ -45,14 +41,6 @@ mixin DebugMixin {
 
   void debugMethod() { }
 }
-''';
-
-  static const String debugOnlyAccessSource = '''
-// Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-import 'debug_only_lib.dart';
 
 final ProductionClass x = ProductionClass();
 ProductionClass? xx;
@@ -157,8 +145,8 @@ class ProductionClass11 extends BaseWithDebugConstructor {
 }
 
 class ProductionClass5 {
-  ProductionClass5(this.debugOnlyField);                      // Bad: accessing debug-only field.
-  ProductionClass5.named(int value) : debugOnlyField = value; // Bad: accessing debug-only field.
+  ProductionClass5(this.debugOnlyField);                      // Good: formal parameters can start with debug.
+  ProductionClass5.named(int value) : debugOnlyField = value; // Bad: accessing debug-only field in initializer.
   ProductionClass5.debugNamed(this.debugOnlyField);           // Good: inside debug-only constructor.
 
   final int debugOnlyField;
@@ -190,44 +178,39 @@ void testConstructors() {
 ''';
 
   // ignore: non_constant_identifier_names
-  Future<void> test_debug_only_lib() async {
-    await assertNoDiagnostics(debugOnlyLibSource);
-  }
-
-  // ignore: non_constant_identifier_names
   Future<void> test_debug_only_access() async {
     await assertDiagnostics(debugOnlyAccessSource, <ExpectedDiagnostic>[
-      lint(332, 19, messageContains: 'debugGlobalVariable accessed outside of an assert.'),
-      lint(365, 19, messageContains: 'debugGlobalFunction accessed outside of an assert.'),
-      lint(410, 19, messageContains: 'debugGlobalFunction accessed outside of an assert.'),
-      lint(470, 19, messageContains: 'debugGlobalFunction accessed outside of an assert.'),
-      lint(498, 10, messageContains: 'DebugMixin accessed outside of an assert.'),
-      lint(509, 17, messageContains: 'debugStaticMethod accessed outside of an assert.'),
-      lint(536, 10, messageContains: 'DebugMixin accessed outside of an assert.'),
-      lint(547, 17, messageContains: 'debugStaticMethod accessed outside of an assert.'),
-      lint(570, 10, messageContains: 'debugField accessed outside of an assert.'),
-      lint(622, 10, messageContains: 'debugField accessed outside of an assert.'),
-      lint(672, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
-      lint(691, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
-      lint(708, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
-      lint(731, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
-      lint(753, 10, messageContains: 'debugField accessed outside of an assert.'),
-      lint(769, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
-      lint(786, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
-      lint(803, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
-      lint(823, 10, messageContains: 'debugField accessed outside of an assert.'),
-      lint(839, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
-      lint(856, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
-      lint(873, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
-      lint(905, 11, messageContains: 'debugMethod accessed outside of an assert.'),
-      lint(923, 24, messageContains: 'debugOnlyExtensionMethod accessed outside of an assert.'),
-      lint(970, 24, messageContains: 'debugOnlyExtensionMethod accessed outside of an assert.'),
-      lint(999, 13, messageContains: 'DebugOnlyEnum accessed outside of an assert.'),
-      lint(1054, 13, messageContains: 'DebugOnlyEnum accessed outside of an assert.'),
-      lint(1128, 15, messageContains: 'debugOnlyMethod accessed outside of an assert.'),
-      lint(2068, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
-      lint(2179, 15, messageContains: '_DebugOnlyClass accessed outside of an assert.'),
-      lint(2244, 15, messageContains: '_DebugOnlyClass accessed outside of an assert.'),
+      lint(628, 19, messageContains: 'debugGlobalVariable accessed outside of an assert.'),
+      lint(661, 19, messageContains: 'debugGlobalFunction accessed outside of an assert.'),
+      lint(706, 19, messageContains: 'debugGlobalFunction accessed outside of an assert.'),
+      lint(766, 19, messageContains: 'debugGlobalFunction accessed outside of an assert.'),
+      lint(794, 10, messageContains: 'DebugMixin accessed outside of an assert.'),
+      lint(805, 17, messageContains: 'debugStaticMethod accessed outside of an assert.'),
+      lint(832, 10, messageContains: 'DebugMixin accessed outside of an assert.'),
+      lint(843, 17, messageContains: 'debugStaticMethod accessed outside of an assert.'),
+      lint(866, 10, messageContains: 'debugField accessed outside of an assert.'),
+      lint(918, 10, messageContains: 'debugField accessed outside of an assert.'),
+      lint(968, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
+      lint(987, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
+      lint(1004, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
+      lint(1027, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
+      lint(1049, 10, messageContains: 'debugField accessed outside of an assert.'),
+      lint(1065, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
+      lint(1082, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
+      lint(1099, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
+      lint(1119, 10, messageContains: 'debugField accessed outside of an assert.'),
+      lint(1135, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
+      lint(1152, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
+      lint(1169, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
+      lint(1201, 11, messageContains: 'debugMethod accessed outside of an assert.'),
+      lint(1219, 24, messageContains: 'debugOnlyExtensionMethod accessed outside of an assert.'),
+      lint(1266, 24, messageContains: 'debugOnlyExtensionMethod accessed outside of an assert.'),
+      lint(1295, 13, messageContains: 'DebugOnlyEnum accessed outside of an assert.'),
+      lint(1350, 13, messageContains: 'DebugOnlyEnum accessed outside of an assert.'),
+      lint(1424, 15, messageContains: 'debugOnlyMethod accessed outside of an assert.'),
+      lint(2364, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
+      lint(2475, 15, messageContains: '_DebugOnlyClass accessed outside of an assert.'),
+      lint(2540, 15, messageContains: '_DebugOnlyClass accessed outside of an assert.'),
     ]);
   }
 
@@ -235,19 +218,18 @@ void testConstructors() {
   Future<void> test_debug_only_constructors() async {
     await assertDiagnostics(debugOnlyConstructorsSource, <ExpectedDiagnostic>[
       lint(337, 16, messageContains: 'debugConstructor accessed outside of an assert.'),
-      lint(448, 14, messageContains: 'debugOnlyField accessed outside of an assert.'),
-      lint(560, 14, messageContains: 'debugOnlyField accessed outside of an assert.'),
-      lint(1119, 10, messageContains: 'debugNamed accessed outside of an assert.'),
-      lint(1391, 16, messageContains: '_DebugOnlyClass2 accessed outside of an assert.'),
-      lint(1497, 10, messageContains: 'debugNamed accessed outside of an assert.'),
-      lint(1540, 16, messageContains: '_DebugOnlyClass2 accessed outside of an assert.'),
-      lint(1586, 10, messageContains: 'debugNamed accessed outside of an assert.'),
+      lint(573, 14, messageContains: 'debugOnlyField accessed outside of an assert.'),
+      lint(1147, 10, messageContains: 'debugNamed accessed outside of an assert.'),
+      lint(1419, 16, messageContains: '_DebugOnlyClass2 accessed outside of an assert.'),
+      lint(1525, 10, messageContains: 'debugNamed accessed outside of an assert.'),
+      lint(1568, 16, messageContains: '_DebugOnlyClass2 accessed outside of an assert.'),
+      lint(1614, 10, messageContains: 'debugNamed accessed outside of an assert.'),
     ]);
   }
 }
 
 void main() {
   defineReflectiveSuite(() {
-    defineReflectiveTests(AccessDebugOnlyInAssertTest);
+    defineReflectiveTests(AccessDebugMembersOnlyInAssertsTest);
   });
 }
