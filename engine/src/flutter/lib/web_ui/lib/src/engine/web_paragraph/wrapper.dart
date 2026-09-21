@@ -61,7 +61,7 @@ class TextWrapper {
         // The last element of `allClusters` is an artificial EOF cluster,
         // so `_layout.allClusters.length - 2` is the last text cluster.
         // In this special case we will add 2 lines (including an empty trailing line).
-        line.build(/*specialCase=*/ index == _layout.allClusters.length - 2);
+        line.build(hasTrailingNewline: index == _layout.allClusters.length - 2);
 
         if (line.reachedMaxLines()) {
           if (!line.reachedEndOfText()) {
@@ -112,7 +112,7 @@ class TextWrapper {
         // Add ellipsis if needed (and correct all the structures accordingly)
         line.ellipsize(index);
         // Add the line
-        line.build(false);
+        line.build(hasTrailingNewline: false);
         if (line.reachedMaxLines()) {
           if (!line.reachedEndOfText()) {
             _layout.paragraph.didExceedMaxLines = true;
@@ -138,14 +138,14 @@ class TextWrapper {
         line._minIntrinsicWidth = line._widthWhitespaces;
         line._longestLine = line._widthWhitespaces;
         line._maxLineWidthWithTrailingSpaces = line._widthWhitespaces;
-        line.build(false);
+        line.build(hasTrailingNewline: false);
         // Nothing to ellipsize in this case;
       }
       // Add the last line if there's anything left to add
       else if (line.isNotEmpty) {
         // Treat the end of text as a soft line break
         line.markSoftLineBreak(_layout.allClusters.length - 1);
-        line.build(false);
+        line.build(hasTrailingNewline: false);
         // This is the line line with the text that fits in the given width, no need to ellipsize it
       }
     }
@@ -358,7 +358,7 @@ class _LineBuilder {
   /// After calling [build], the line builder instance is ready for the next line.
   ///
   /// Returns the height of the line.
-  void build(bool specialCase) {
+  void build({required bool hasTrailingNewline}) {
     _longestLine = math.max(_longestLine, _widthConsumedText);
     _maxLineWidthWithTrailingSpaces = math.max(
       _maxLineWidthWithTrailingSpaces,
@@ -370,20 +370,20 @@ class _LineBuilder {
       ClusterRange(start: _whitespaceStart, end: _whitespaceEnd),
       ClusterRange(start: _whitespaceEnd, end: _newlineEnd),
       _top,
-      specialCase || reachedEndOfText() || reachedMaxLines(), // Force hard line break
+      isSyntheticEmptyLine: false,
     );
     _top += height;
 
     // Flutter wants to have another (empty) line if \n is the last codepoint in the text
     // This empty line gets in a way of detecting line visual runs (there isn't any)
-    if (specialCase) {
+    if (hasTrailingNewline) {
       if (!reachedMaxLines()) {
         _top += _layout.addLine(
           ClusterRange(start: _whitespaceEnd, end: _whitespaceEnd),
           ClusterRange(start: _whitespaceEnd, end: _whitespaceEnd),
           ClusterRange(start: _whitespaceEnd, end: _newlineEnd),
           _top,
-          true,
+          isSyntheticEmptyLine: true,
         );
       } else {
         _layout.paragraph.didExceedMaxLines = true;

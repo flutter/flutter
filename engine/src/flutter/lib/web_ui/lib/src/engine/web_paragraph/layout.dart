@@ -211,10 +211,9 @@ class TextLayout {
     ClusterRange contentRange,
     ClusterRange whitespaceRange,
     ClusterRange hardlineRange,
-    double top,
-    // Special case: text ends with \n which creates an empty line at the end
-    bool specialCase,
-  ) {
+    double top, {
+    required bool isSyntheticEmptyLine,
+  }) {
     assert(contentRange.end == whitespaceRange.start);
     assert(whitespaceRange.end == hardlineRange.start);
     if (WebParagraphDebug.logging) {
@@ -250,7 +249,7 @@ class TextLayout {
     final ui.TextRange hardlineTextRange = _mapping.toTextRange(hardlineRange);
     final allTextRange = ui.TextRange(
       start: contentTextRange.start,
-      end: specialCase ? hardlineRange.end : whitespaceTextRange.end,
+      end: isSyntheticEmptyLine ? hardlineRange.end : whitespaceTextRange.end,
     );
     // TODO(jlavrova): Should we use a TextLineBuilder pattern instead?
     final line = TextLine(
@@ -262,7 +261,6 @@ class TextLayout {
       whitespaceTextRange,
       hardlineTextRange,
       allTextRange,
-      hardlineTextRange.isNotEmpty || specialCase,
     );
 
     // Get logical bidi levels belonging to the line.
@@ -1365,8 +1363,11 @@ class TextLine {
     this.whitespacesRange,
     this.hardLineBreakRange,
     this.allLineTextRange,
-    this.hasHardLineBreak,
   );
+
+  /// True if this line ends with an explicit line break, or is the end of the
+  /// paragraph (matching dart:ui.LineMetrics and SkParagraph::endsWithHardLineBreak).
+  bool get hasHardLineBreak => hardLineBreakRange.isNotEmpty || lastLine;
 
   ui.LineMetrics getMetrics() {
     return ui.LineMetrics(
@@ -1396,7 +1397,6 @@ class TextLine {
   final ui.TextRange whitespacesRange;
   final ui.TextRange hardLineBreakRange;
   final ui.TextRange allLineTextRange;
-  final bool hasHardLineBreak;
   final int lineNumber;
   bool lastLine = false;
 
