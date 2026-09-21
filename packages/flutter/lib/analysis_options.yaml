@@ -4,6 +4,7 @@ plugins:
   flutter_analyzer_plugin:
     path: ../../../dev/flutter_analyzer_plugin
     diagnostics:
+      access_debug_only_in_assert: true
       no_double_clamp: true
       # There are existing violations in the framework code:
       # https://github.com/flutter/flutter/issues/192586
