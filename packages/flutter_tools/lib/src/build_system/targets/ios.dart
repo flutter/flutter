@@ -83,6 +83,11 @@ abstract class AotAssemblyBase extends Target {
       sdkRoot,
       environment.fileSystem,
     );
+    if (environmentType == null) {
+      throwToolExit(
+        'Unsupported iOS SDK root "$sdkRoot". Expected an iPhoneOS or iPhoneSimulator SDK.',
+      );
+    }
     if (environmentType == EnvironmentType.simulator) {
       throw Exception(
         'release/profile builds are only supported for physical devices. '
@@ -281,6 +286,11 @@ abstract class UnpackIOS extends UnpackDarwin {
       sdkRoot,
       environment.fileSystem,
     );
+    if (environmentType == null) {
+      throwToolExit(
+        'Unsupported iOS SDK root "$sdkRoot". Expected an iPhoneOS or iPhoneSimulator SDK.',
+      );
+    }
     await copyFramework(
       environment,
       environmentType: environmentType,
@@ -535,6 +545,11 @@ class DebugIosLLDBInit extends Target {
       sdkRoot,
       environment.fileSystem,
     );
+    if (environmentType == null) {
+      throwToolExit(
+        'Unsupported iOS SDK root "$sdkRoot". Expected an iPhoneOS or iPhoneSimulator SDK.',
+      );
+    }
 
     // LLDB Init File is only required for physical devices in debug mode.
     if (environmentType != EnvironmentType.physical) {
@@ -887,6 +902,11 @@ Future<void> _createStubAppFramework(
   ''');
 
     final EnvironmentType? environmentType = environmentTypeFromSdkroot(sdkRoot, fileSystem);
+    if (environmentType == null) {
+      throwToolExit(
+        'Unsupported iOS SDK root "$sdkRoot". Expected an iPhoneOS or iPhoneSimulator SDK.',
+      );
+    }
 
     await globals.xcode!.clang(<String>[
       '-x',
