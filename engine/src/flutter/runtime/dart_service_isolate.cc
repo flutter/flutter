@@ -122,6 +122,22 @@ bool DartServiceIsolate::RemoveServerStatusCallback(
   return true;
 }
 
+void DartServiceIsolate::TriggerServerStatusCallbackForTesting(
+    const std::string& uri) {
+  g_vm_service_uri = uri;
+  std::vector<DartServiceIsolate::DartVMServiceServerStateCallback>
+      callbacks_to_fire;
+  {
+    std::scoped_lock lock(callbacks_mutex_);
+    for (auto& callback : callbacks_) {
+      callbacks_to_fire.push_back(*callback.get());
+    }
+  }
+  for (const auto& callback_to_fire : callbacks_to_fire) {
+    callback_to_fire(uri);
+  }
+}
+
 void DartServiceIsolate::Shutdown(Dart_NativeArguments args) {
   // NO-OP.
 }

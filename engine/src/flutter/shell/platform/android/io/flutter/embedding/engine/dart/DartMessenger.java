@@ -217,16 +217,17 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
     Log.v(TAG, "Setting handler for channel '" + channel + "'");
 
     List<BufferedMessageInfo> list;
+    HandlerInfo handlerInfo;
     synchronized (handlersLock) {
-      messageHandlers.put(channel, new HandlerInfo(handler, dartMessengerTaskQueue));
+      handlerInfo = new HandlerInfo(handler, dartMessengerTaskQueue);
+      messageHandlers.put(channel, handlerInfo);
       list = bufferedMessages.remove(channel);
       if (list == null) {
         return;
       }
     }
     for (BufferedMessageInfo info : list) {
-      dispatchMessageToQueue(
-          channel, messageHandlers.get(channel), info.message, info.replyId, info.messageData);
+      dispatchMessageToQueue(channel, handlerInfo, info.message, info.replyId, info.messageData);
     }
   }
 
@@ -238,15 +239,20 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
   @Override
   public void disableBufferingIncomingMessages() {
     Map<String, List<BufferedMessageInfo>> pendingMessages;
+    Map<String, HandlerInfo> handlersSnapshot = new HashMap<>();
     synchronized (handlersLock) {
       enableBufferingIncomingMessages.set(false);
       pendingMessages = bufferedMessages;
       bufferedMessages = new HashMap<>();
+      for (String channel : pendingMessages.keySet()) {
+        handlersSnapshot.put(channel, messageHandlers.get(channel));
+      }
     }
-    for (Map.Entry<String, List<BufferedMessageInfo>> channel : pendingMessages.entrySet()) {
-      for (BufferedMessageInfo info : channel.getValue()) {
-        dispatchMessageToQueue(
-            channel.getKey(), null, info.message, info.replyId, info.messageData);
+    for (Map.Entry<String, List<BufferedMessageInfo>> entry : pendingMessages.entrySet()) {
+      final String channel = entry.getKey();
+      final HandlerInfo handlerInfo = handlersSnapshot.get(channel);
+      for (BufferedMessageInfo info : entry.getValue()) {
+        dispatchMessageToQueue(channel, handlerInfo, info.message, info.replyId, info.messageData);
       }
     }
   }

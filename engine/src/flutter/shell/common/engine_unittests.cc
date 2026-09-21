@@ -267,6 +267,61 @@ TEST_F(EngineTest, Create) {
   });
 }
 
+TEST_F(EngineTest, CreateWithRoute) {
+  PostUITaskSync([this] {
+    auto settings = settings_;
+    settings.route = "/testo";
+    auto engine = std::make_unique<Engine>(
+        /*delegate=*/delegate_,
+        /*dispatcher_maker=*/dispatcher_maker_,
+        /*image_decoder_task_runner=*/image_decoder_task_runner_,
+        /*task_runners=*/task_runners_,
+        /*settings=*/settings,
+        /*animator=*/std::move(animator_),
+        /*io_manager=*/io_manager_,
+        /*font_collection=*/std::make_shared<FontCollection>(),
+        /*runtime_controller=*/std::move(runtime_controller_),
+        /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
+
+    EXPECT_TRUE(engine);
+    EXPECT_EQ(engine->InitialRoute(), "/testo");
+    EXPECT_EQ(static_cast<RuntimeDelegate*>(engine.get())->DefaultRouteName(),
+              "/testo");
+  });
+}
+
+TEST_F(EngineTest, SpawnDoesNotInheritParentSettingsRoute) {
+  PostUITaskSync([this] {
+    MockRuntimeDelegate client;
+    auto mock_runtime_controller =
+        std::make_unique<MockRuntimeController>(client, task_runners_);
+    auto settings = settings_;
+    settings.route = "/parent_route";
+    auto vm_ref = DartVMRef::Create(settings);
+    EXPECT_CALL(*mock_runtime_controller, GetDartVM())
+        .WillRepeatedly(::testing::Return(vm_ref.get()));
+    auto engine = std::make_unique<Engine>(
+        /*delegate=*/delegate_,
+        /*dispatcher_maker=*/dispatcher_maker_,
+        /*image_decoder_task_runner=*/image_decoder_task_runner_,
+        /*task_runners=*/task_runners_,
+        /*settings=*/settings,
+        /*animator=*/std::move(animator_),
+        /*io_manager=*/io_manager_,
+        /*font_collection=*/std::make_shared<FontCollection>(),
+        /*runtime_controller=*/std::move(mock_runtime_controller),
+        /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
+
+    EXPECT_EQ(engine->InitialRoute(), "/parent_route");
+    auto spawn = engine->Spawn(delegate_, dispatcher_maker_, settings, nullptr,
+                               "", io_manager_, snapshot_delegate_, nullptr);
+    EXPECT_TRUE(spawn != nullptr);
+    EXPECT_EQ(spawn->InitialRoute(), "");
+    EXPECT_EQ(static_cast<RuntimeDelegate*>(spawn.get())->DefaultRouteName(),
+              "/");
+  });
+}
+
 TEST_F(EngineTest, DispatchPlatformMessageUnknown) {
   PostUITaskSync([this] {
     MockRuntimeDelegate client;

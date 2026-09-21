@@ -3395,7 +3395,7 @@ public class AccessibilityBridgeTest {
     }
   }
 
-  /// The encoding for semantics is described in platform_view_android.cc
+  /// The encoding for semantics is described in android_semantics_mapper.cc
   class TestSemanticsUpdate {
     TestSemanticsUpdate(ByteBuffer buffer, String[] strings, ByteBuffer[] stringAttributeArgs) {
       this.buffer = buffer;

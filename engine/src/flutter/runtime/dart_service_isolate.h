@@ -95,6 +95,16 @@ class DartServiceIsolate {
   ///
   static bool RemoveServerStatusCallback(CallbackHandle handle);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Trigger all registered server status callbacks with the given
+  ///             URI. For unit testing only.
+  ///
+  ///             This method is thread safe.
+  ///
+  /// @param[in]  uri  The VM Service URI.
+  ///
+  static void TriggerServerStatusCallbackForTesting(const std::string& uri);
+
  private:
   // Native entries.
   static void NotifyServerState(Dart_NativeArguments args);
