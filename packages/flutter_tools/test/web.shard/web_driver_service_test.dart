@@ -3,31 +3,17 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/drive/web_driver_service.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../src/common.dart';
-import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 void main() {
   testWithoutContext(
     'WebDriverService catches SocketExceptions cleanly and includes link to documentation',
     () async {
-      final logger = BufferLogger.test();
-      final service = WebDriverService(
-        toolContext: FakeToolContext(),
-        logger: logger,
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
-        processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.empty()),
-        dartSdkPath: 'dart',
-      );
+      final service = WebDriverService(toolContext: FakeToolContext(), dartSdkPath: 'dart');
       const link = 'https://flutter.dev/to/integration-test-on-web';
       try {
         await service.startTest(

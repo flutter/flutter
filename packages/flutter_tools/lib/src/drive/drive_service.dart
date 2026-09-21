@@ -15,7 +15,6 @@ import '../base/dds.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/terminal.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
@@ -25,14 +24,11 @@ import 'web_driver_service.dart';
 
 class FlutterDriverFactory {
   FlutterDriverFactory({
-    required ApplicationPackageFactory applicationPackageFactory,
-    required String dartSdkPath,
-    required DevtoolsLauncher devtoolsLauncher,
+    required this._applicationPackageFactory,
+    required this._dartSdkPath,
+    required this._devtoolsLauncher,
     required ToolContext toolContext,
-  }) : _applicationPackageFactory = applicationPackageFactory,
-       _dartSdkPath = dartSdkPath,
-       _devtoolsLauncher = devtoolsLauncher,
-       _processUtils = ProcessUtils(
+  }) : _processUtils = ProcessUtils(
          processManager: toolContext.processManager,
          logger: toolContext.logger,
        ),
@@ -47,19 +43,11 @@ class FlutterDriverFactory {
   /// Create a driver service for running `flutter drive`.
   DriverService createDriverService(bool web) {
     if (web) {
-      return WebDriverService(
-        toolContext: toolContext,
-        logger: _logger,
-        terminal: _terminal,
-        platform: _platform,
-        outputPreferences: _outputPreferences,
-        processUtils: _processUtils,
-        dartSdkPath: _dartSdkPath,
-      );
+      return WebDriverService(toolContext: _toolContext, dartSdkPath: _dartSdkPath);
     }
     return FlutterDriverService(
-      logger: _logger,
-      platform: _platform,
+      logger: _toolContext.logger,
+      platform: _toolContext.platform,
       processUtils: _processUtils,
       dartSdkPath: _dartSdkPath,
       applicationPackageFactory: _applicationPackageFactory,

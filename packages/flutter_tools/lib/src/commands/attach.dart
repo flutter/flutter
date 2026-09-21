@@ -18,6 +18,7 @@ import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../compile.dart';
+import '../context/tool_context.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
@@ -63,22 +64,11 @@ import 'daemon.dart';
 /// also be provided.
 class AttachCommand extends FlutterCommand {
   AttachCommand({
-    required AndroidContext androidContext,
-    required AppleContext appleContext,
-    required HotRunnerFactory? hotRunnerFactory,
-    required NativeAssetsContext nativeAssetsContext,
-    required PreviewContext previewContext,
-    required ToolContext toolContext,
-    required WebContext webContext,
+    required ToolContext super.toolContext,
+    HotRunnerFactory? hotRunnerFactory,
     bool verboseHelp = false,
-  }) : _androidContext = androidContext,
-       _appleContext = appleContext,
-       _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
-       _nativeAssetsContext = nativeAssetsContext,
-       _previewContext = previewContext,
-       _toolContext = toolContext,
-       _webContext = webContext,
-       super(toolContext: toolContext) {
+  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
+       _toolContext = toolContext {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -142,13 +132,8 @@ class AttachCommand extends FlutterCommand {
     usesAdbLogFilteringOption(hide: !verboseHelp);
   }
 
-  final AndroidContext _androidContext;
-  final AppleContext _appleContext;
   final HotRunnerFactory _hotRunnerFactory;
-  final NativeAssetsContext _nativeAssetsContext;
-  final PreviewContext _previewContext;
   final ToolContext _toolContext;
-  final WebContext _webContext;
 
   @override
   ToolContext get toolContext => _toolContext;
@@ -276,7 +261,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       // However we exited from the runner, ensure the terminal has line mode
       // and echo mode enabled before we return the user to the shell.
       try {
-        _terminal.singleCharMode = false;
+        _toolContext.terminal.singleCharMode = false;
       } on StdinException {
         // Do nothing, if the STDIN handle is no longer available, there is nothing actionable for us to do at this point
       }
@@ -286,7 +271,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attach({required Device device}) async {
-    final ToolContext(:Logger logger, :ProcessInfo processInfo, :Signals signals, :Terminal terminal) = _toolContext;
+    final ToolContext(
+      :Logger logger,
+      :ProcessInfo processInfo,
+      :Signals signals,
+      :Terminal terminal,
+    ) = _toolContext;
     terminal.usesTerminalUi = true;
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
     final onAppStart = Completer<void>.sync();
@@ -315,7 +305,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attachDaemon({required Device device}) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform, :Stdio stdio) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform, :Stdio stdio) =
+        _toolContext;
     final daemon = Daemon(
       DaemonConnection(
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
@@ -439,7 +430,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       logger: logger,
     );
 
-    _toolContext.logger.printStatus('Waiting for a connection from Flutter on ${device.displayName}...');
+    _toolContext.logger.printStatus(
+      'Waiting for a connection from Flutter on ${device.displayName}...',
+    );
     final Status discoveryStatus = _toolContext.logger.startSpinner(
       timeout: const Duration(seconds: 30),
       slowWarningCallback: () {
