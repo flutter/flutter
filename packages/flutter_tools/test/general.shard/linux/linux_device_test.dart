@@ -195,8 +195,7 @@ class FakeLinuxApp extends Fake implements LinuxApp {
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
-  FakeOperatingSystemUtils({HostPlatform hostPlatform = HostPlatform.linux_x64})
-    : _hostPlatform = hostPlatform;
+  FakeOperatingSystemUtils({this._hostPlatform = HostPlatform.linux_x64});
 
   final HostPlatform _hostPlatform;
 

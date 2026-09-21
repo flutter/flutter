@@ -799,77 +799,68 @@ void main() {
     skip: kIsWeb, // https://github.com/flutter/flutter/issues/102086
   );
 
-  test(
-    'RenderObject markNeedsPaint while repaint boundary, and then updated to no longer be a repaint boundary with '
-    'calling markNeedsCompositingBitsUpdate 1',
-    () {
-      final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
-      final renderBox = ConditionalRepaintBoundary(child: childBox);
-      // Ignore old layer.
-      childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
-        return oldLayer ?? TestOffsetLayerA();
-      };
+  test('RenderObject markNeedsPaint while repaint boundary, and then updated to no longer be a repaint boundary with '
+      'calling markNeedsCompositingBitsUpdate 1', () {
+    final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
+    final renderBox = ConditionalRepaintBoundary(child: childBox);
+    // Ignore old layer.
+    childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
+      return oldLayer ?? TestOffsetLayerA();
+    };
 
-      layout(renderBox, phase: EnginePhase.composite);
+    layout(renderBox, phase: EnginePhase.composite);
 
-      expect(childBox.paintCount, 1);
-      expect(renderBox.paintCount, 1);
+    expect(childBox.paintCount, 1);
+    expect(renderBox.paintCount, 1);
 
-      childBox.markNeedsPaint();
-      childBox.isRepaintBoundary = false;
-      childBox.markNeedsCompositingBitsUpdate();
+    childBox.markNeedsPaint();
+    childBox.isRepaintBoundary = false;
+    childBox.markNeedsCompositingBitsUpdate();
 
-      expect(() => pumpFrame(phase: EnginePhase.composite), returnsNormally);
-    },
-  );
+    expect(() => pumpFrame(phase: EnginePhase.composite), returnsNormally);
+  });
 
-  test(
-    'RenderObject markNeedsPaint while repaint boundary, and then updated to no longer be a repaint boundary with '
-    'calling markNeedsCompositingBitsUpdate 2',
-    () {
-      final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
-      final renderBox = ConditionalRepaintBoundary(child: childBox);
-      // Ignore old layer.
-      childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
-        return oldLayer ?? TestOffsetLayerA();
-      };
+  test('RenderObject markNeedsPaint while repaint boundary, and then updated to no longer be a repaint boundary with '
+      'calling markNeedsCompositingBitsUpdate 2', () {
+    final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
+    final renderBox = ConditionalRepaintBoundary(child: childBox);
+    // Ignore old layer.
+    childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
+      return oldLayer ?? TestOffsetLayerA();
+    };
 
-      layout(renderBox, phase: EnginePhase.composite);
+    layout(renderBox, phase: EnginePhase.composite);
 
-      expect(childBox.paintCount, 1);
-      expect(renderBox.paintCount, 1);
+    expect(childBox.paintCount, 1);
+    expect(renderBox.paintCount, 1);
 
-      childBox.isRepaintBoundary = false;
-      childBox.markNeedsCompositingBitsUpdate();
-      childBox.markNeedsPaint();
+    childBox.isRepaintBoundary = false;
+    childBox.markNeedsCompositingBitsUpdate();
+    childBox.markNeedsPaint();
 
-      expect(() => pumpFrame(phase: EnginePhase.composite), returnsNormally);
-    },
-  );
+    expect(() => pumpFrame(phase: EnginePhase.composite), returnsNormally);
+  });
 
-  test(
-    'RenderObject markNeedsPaint while repaint boundary, and then updated to no longer be a repaint boundary with '
-    'calling markNeedsCompositingBitsUpdate 3',
-    () {
-      final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
-      final renderBox = ConditionalRepaintBoundary(child: childBox);
-      // Ignore old layer.
-      childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
-        return oldLayer ?? TestOffsetLayerA();
-      };
+  test('RenderObject markNeedsPaint while repaint boundary, and then updated to no longer be a repaint boundary with '
+      'calling markNeedsCompositingBitsUpdate 3', () {
+    final childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
+    final renderBox = ConditionalRepaintBoundary(child: childBox);
+    // Ignore old layer.
+    childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
+      return oldLayer ?? TestOffsetLayerA();
+    };
 
-      layout(renderBox, phase: EnginePhase.composite);
+    layout(renderBox, phase: EnginePhase.composite);
 
-      expect(childBox.paintCount, 1);
-      expect(renderBox.paintCount, 1);
+    expect(childBox.paintCount, 1);
+    expect(renderBox.paintCount, 1);
 
-      childBox.isRepaintBoundary = false;
-      childBox.markNeedsCompositedLayerUpdate();
-      childBox.markNeedsCompositingBitsUpdate();
+    childBox.isRepaintBoundary = false;
+    childBox.markNeedsCompositedLayerUpdate();
+    childBox.markNeedsCompositingBitsUpdate();
 
-      expect(() => pumpFrame(phase: EnginePhase.composite), returnsNormally);
-    },
-  );
+    expect(() => pumpFrame(phase: EnginePhase.composite), returnsNormally);
+  });
 
   test('Offstage implements paintsChild correctly', () {
     final box = RenderConstrainedBox(
@@ -960,90 +951,78 @@ void main() {
     };
   }
 
-  test(
-    'RenderClipPath.debugPaintSize draws a path and a debug text when clipBehavior is not Clip.none',
-    () {
-      DebugPaintCallback debugPaintClipRect(Clip clip) {
-        final RenderBox child = RenderConstrainedBox(
-          additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200),
-        );
-        final renderClipPath = RenderClipPath(clipBehavior: clip, child: child);
-        return debugPaint(renderClipPath);
-      }
+  test('RenderClipPath.debugPaintSize draws a path and a debug text when clipBehavior is not Clip.none', () {
+    DebugPaintCallback debugPaintClipRect(Clip clip) {
+      final RenderBox child = RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200),
+      );
+      final renderClipPath = RenderClipPath(clipBehavior: clip, child: child);
+      return debugPaint(renderClipPath);
+    }
 
-      // RenderClipPath.debugPaintSize draws when clipBehavior is not Clip.none
-      expect(debugPaintClipRect(Clip.hardEdge), paintsExactlyCountTimes(#drawPath, 1));
-      expect(debugPaintClipRect(Clip.hardEdge), paintsExactlyCountTimes(#drawParagraph, 1));
+    // RenderClipPath.debugPaintSize draws when clipBehavior is not Clip.none
+    expect(debugPaintClipRect(Clip.hardEdge), paintsExactlyCountTimes(#drawPath, 1));
+    expect(debugPaintClipRect(Clip.hardEdge), paintsExactlyCountTimes(#drawParagraph, 1));
 
-      // RenderClipPath.debugPaintSize does not draw when clipBehavior is Clip.none
-      // Regression test for https://github.com/flutter/flutter/issues/105969
-      expect(debugPaintClipRect(Clip.none), paintsExactlyCountTimes(#drawPath, 0));
-      expect(debugPaintClipRect(Clip.none), paintsExactlyCountTimes(#drawParagraph, 0));
-    },
-  );
+    // RenderClipPath.debugPaintSize does not draw when clipBehavior is Clip.none
+    // Regression test for https://github.com/flutter/flutter/issues/105969
+    expect(debugPaintClipRect(Clip.none), paintsExactlyCountTimes(#drawPath, 0));
+    expect(debugPaintClipRect(Clip.none), paintsExactlyCountTimes(#drawParagraph, 0));
+  });
 
-  test(
-    'RenderClipRect.debugPaintSize draws a rect and a debug text when clipBehavior is not Clip.none',
-    () {
-      DebugPaintCallback debugPaintClipRect(Clip clip) {
-        final RenderBox child = RenderConstrainedBox(
-          additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200),
-        );
-        final renderClipRect = RenderClipRect(clipBehavior: clip, child: child);
-        return debugPaint(renderClipRect);
-      }
+  test('RenderClipRect.debugPaintSize draws a rect and a debug text when clipBehavior is not Clip.none', () {
+    DebugPaintCallback debugPaintClipRect(Clip clip) {
+      final RenderBox child = RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200),
+      );
+      final renderClipRect = RenderClipRect(clipBehavior: clip, child: child);
+      return debugPaint(renderClipRect);
+    }
 
-      // RenderClipRect.debugPaintSize draws when clipBehavior is not Clip.none
-      expect(debugPaintClipRect(Clip.hardEdge), paintsExactlyCountTimes(#drawRect, 1));
-      expect(debugPaintClipRect(Clip.hardEdge), paintsExactlyCountTimes(#drawParagraph, 1));
+    // RenderClipRect.debugPaintSize draws when clipBehavior is not Clip.none
+    expect(debugPaintClipRect(Clip.hardEdge), paintsExactlyCountTimes(#drawRect, 1));
+    expect(debugPaintClipRect(Clip.hardEdge), paintsExactlyCountTimes(#drawParagraph, 1));
 
-      // RenderClipRect.debugPaintSize does not draw when clipBehavior is Clip.none
-      expect(debugPaintClipRect(Clip.none), paintsExactlyCountTimes(#drawRect, 0));
-      expect(debugPaintClipRect(Clip.none), paintsExactlyCountTimes(#drawParagraph, 0));
-    },
-  );
+    // RenderClipRect.debugPaintSize does not draw when clipBehavior is Clip.none
+    expect(debugPaintClipRect(Clip.none), paintsExactlyCountTimes(#drawRect, 0));
+    expect(debugPaintClipRect(Clip.none), paintsExactlyCountTimes(#drawParagraph, 0));
+  });
 
-  test(
-    'RenderClipRRect.debugPaintSize draws a rounded rect and a debug text when clipBehavior is not Clip.none',
-    () {
-      DebugPaintCallback debugPaintClipRRect(Clip clip) {
-        final RenderBox child = RenderConstrainedBox(
-          additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200),
-        );
-        final renderClipRRect = RenderClipRRect(clipBehavior: clip, child: child);
-        return debugPaint(renderClipRRect);
-      }
+  test('RenderClipRRect.debugPaintSize draws a rounded rect and a debug text when clipBehavior is not Clip.none', () {
+    DebugPaintCallback debugPaintClipRRect(Clip clip) {
+      final RenderBox child = RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200),
+      );
+      final renderClipRRect = RenderClipRRect(clipBehavior: clip, child: child);
+      return debugPaint(renderClipRRect);
+    }
 
-      // RenderClipRRect.debugPaintSize draws when clipBehavior is not Clip.none
-      expect(debugPaintClipRRect(Clip.hardEdge), paintsExactlyCountTimes(#drawRRect, 1));
-      expect(debugPaintClipRRect(Clip.hardEdge), paintsExactlyCountTimes(#drawParagraph, 1));
+    // RenderClipRRect.debugPaintSize draws when clipBehavior is not Clip.none
+    expect(debugPaintClipRRect(Clip.hardEdge), paintsExactlyCountTimes(#drawRRect, 1));
+    expect(debugPaintClipRRect(Clip.hardEdge), paintsExactlyCountTimes(#drawParagraph, 1));
 
-      // RenderClipRRect.debugPaintSize does not draw when clipBehavior is Clip.none
-      expect(debugPaintClipRRect(Clip.none), paintsExactlyCountTimes(#drawRRect, 0));
-      expect(debugPaintClipRRect(Clip.none), paintsExactlyCountTimes(#drawParagraph, 0));
-    },
-  );
+    // RenderClipRRect.debugPaintSize does not draw when clipBehavior is Clip.none
+    expect(debugPaintClipRRect(Clip.none), paintsExactlyCountTimes(#drawRRect, 0));
+    expect(debugPaintClipRRect(Clip.none), paintsExactlyCountTimes(#drawParagraph, 0));
+  });
 
-  test(
-    'RenderClipOval.debugPaintSize draws a path and a debug text when clipBehavior is not Clip.none',
-    () {
-      DebugPaintCallback debugPaintClipOval(Clip clip) {
-        final RenderBox child = RenderConstrainedBox(
-          additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200),
-        );
-        final renderClipOval = RenderClipOval(clipBehavior: clip, child: child);
-        return debugPaint(renderClipOval);
-      }
+  test('RenderClipOval.debugPaintSize draws a path and a debug text when clipBehavior is not Clip.none', () {
+    DebugPaintCallback debugPaintClipOval(Clip clip) {
+      final RenderBox child = RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200),
+      );
+      final renderClipOval = RenderClipOval(clipBehavior: clip, child: child);
+      return debugPaint(renderClipOval);
+    }
 
-      // RenderClipOval.debugPaintSize draws when clipBehavior is not Clip.none
-      expect(debugPaintClipOval(Clip.hardEdge), paintsExactlyCountTimes(#drawPath, 1));
-      expect(debugPaintClipOval(Clip.hardEdge), paintsExactlyCountTimes(#drawParagraph, 1));
+    // RenderClipOval.debugPaintSize draws when clipBehavior is not Clip.none
+    expect(debugPaintClipOval(Clip.hardEdge), paintsExactlyCountTimes(#drawPath, 1));
+    expect(debugPaintClipOval(Clip.hardEdge), paintsExactlyCountTimes(#drawParagraph, 1));
 
-      // RenderClipOval.debugPaintSize does not draw when clipBehavior is Clip.none
-      expect(debugPaintClipOval(Clip.none), paintsExactlyCountTimes(#drawPath, 0));
-      expect(debugPaintClipOval(Clip.none), paintsExactlyCountTimes(#drawParagraph, 0));
-    },
-  );
+    // RenderClipOval.debugPaintSize does not draw when clipBehavior is Clip.none
+    expect(debugPaintClipOval(Clip.none), paintsExactlyCountTimes(#drawPath, 0));
+    expect(debugPaintClipOval(Clip.none), paintsExactlyCountTimes(#drawParagraph, 0));
+  });
 
   test('RenderProxyBox behavior can be mixed in along with another base class', () {
     final fancyProxyBox = RenderFancyProxyBox(fancy: 6);
@@ -1104,21 +1083,18 @@ void main() {
     );
   });
 
-  test(
-    'RenderProxyBoxMixin.computeDistanceToActualBaseline returns null when child is null or child has no baseline',
-    () {
-      final proxyNoChild = RenderProxyBox();
-      final parentNoChild = _TestBaselineParent(proxyNoChild);
-      layout(parentNoChild, constraints: BoxConstraints.tight(const Size(40.0, 20.0)));
-      expect(parentNoChild.childBaseline, isNull);
+  test('RenderProxyBoxMixin.computeDistanceToActualBaseline returns null when child is null or child has no baseline', () {
+    final proxyNoChild = RenderProxyBox();
+    final parentNoChild = _TestBaselineParent(proxyNoChild);
+    layout(parentNoChild, constraints: BoxConstraints.tight(const Size(40.0, 20.0)));
+    expect(parentNoChild.childBaseline, isNull);
 
-      final child = _RenderNoBaseline();
-      final proxyWithChild = RenderProxyBox(child);
-      final parentWithChild = _TestBaselineParent(proxyWithChild);
-      layout(parentWithChild, constraints: BoxConstraints.tight(const Size(40.0, 20.0)));
-      expect(parentWithChild.childBaseline, isNull);
-    },
-  );
+    final child = _RenderNoBaseline();
+    final proxyWithChild = RenderProxyBox(child);
+    final parentWithChild = _TestBaselineParent(proxyWithChild);
+    layout(parentWithChild, constraints: BoxConstraints.tight(const Size(40.0, 20.0)));
+    expect(parentWithChild.childBaseline, isNull);
+  });
 
   test('RenderProxyBoxMixin.computeDryBaseline returns null when child is null', () {
     final proxyNoChild = RenderProxyBox();
