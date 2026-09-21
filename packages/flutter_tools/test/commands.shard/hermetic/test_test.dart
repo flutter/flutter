@@ -55,6 +55,7 @@ void main() {
   late LoggingLogger logger;
 
   setUp(() {
+    Cache.flutterRoot = getFlutterRoot();
     fs = MemoryFileSystem.test(
       style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
     );
@@ -1833,7 +1834,7 @@ resolution: workspace
       final testCommand = TestCommand(testWrapper: fakePackageTest);
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
-      expect(
+      await expectLater(
         () => commandRunner.run(const <String>['test', '--no-pub', r'test\foo*bar_test.dart']),
         throwsToolExit(
           message: r'Invalid test path "test\foo*bar_test.dart": Illegal character in path',
