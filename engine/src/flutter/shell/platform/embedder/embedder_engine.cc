@@ -234,6 +234,15 @@ bool EmbedderEngine::RegisterTexture(int64_t texture) {
   return true;
 }
 
+bool EmbedderEngine::RegisterTexture(
+    std::shared_ptr<flutter::Texture> texture) {
+  if (!IsValid() || !texture) {
+    return false;
+  }
+  shell_->GetPlatformView()->RegisterTexture(std::move(texture));
+  return true;
+}
+
 bool EmbedderEngine::UnregisterTexture(int64_t texture) {
   if (!IsValid()) {
     return false;
