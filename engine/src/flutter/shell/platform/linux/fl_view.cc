@@ -436,17 +436,13 @@ static void realize_cb(FlView* self) {
     // rendering pass. Its realized GTK surface and current metrics are now
     // available, so explicitly request that bootstrap frame.
     self->needs_frame_after_realize = FALSE;
-    if (!fl_engine_schedule_frame(self->engine)) {
-      g_warning("Failed to schedule a frame after realizing Flutter view");
-    }
+    fl_engine_schedule_frame(self->engine);
     return;
   }
 
   if (self->needs_frame_after_realize) {
     self->needs_frame_after_realize = FALSE;
-    if (!fl_engine_schedule_frame(self->engine)) {
-      g_warning("Failed to schedule a frame after realizing Flutter view");
-    }
+    fl_engine_schedule_frame(self->engine);
   }
 
   GtkWidget* toplevel_window = fl_view_gtk4_get_toplevel_window(self);

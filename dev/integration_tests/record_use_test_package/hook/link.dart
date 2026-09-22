@@ -67,9 +67,7 @@ Set<String> _extractUsedPhrases(Recordings recordings) {
 
   for (final CallReference call in recordings.calls[translateDef] ?? const <CallReference>[]) {
     switch (call) {
-      case CallWithArguments(
-          positionalArguments: [StringConstant(:final value), ...],
-        ):
+      case CallWithArguments(positionalArguments: [StringConstant(:final value), ...]):
         usedPhrases.add(value);
       case _:
         throw UnsupportedError('Cannot determine which translations are used.');
@@ -86,27 +84,20 @@ Future<Map<String, dynamic>> _loadTranslations(EncodedAsset asset) async {
 Map<String, dynamic> _filterTranslations(
   Map<String, dynamic> allTranslations,
   Set<String> usedPhrases,
-) =>
-    {
-      for (final entry in allTranslations.entries)
-        if (usedPhrases.contains(entry.key)) entry.key: entry.value,
-    };
+) => {
+  for (final entry in allTranslations.entries)
+    if (usedPhrases.contains(entry.key)) entry.key: entry.value,
+};
 
 Future<void> _writeOutputAsset(
   LinkInput input,
   LinkOutputBuilder output,
   Map<String, dynamic> content,
 ) async {
-  final Uri filteredFile = input.outputDirectory.resolve(
-    'filtered_translations.json',
-  );
+  final Uri filteredFile = input.outputDirectory.resolve('filtered_translations.json');
   await File.fromUri(filteredFile).writeAsString(jsonEncode(content));
 
   output.assets.data.add(
-    DataAsset(
-      package: input.packageName,
-      name: 'data/translations.json',
-      file: filteredFile,
-    ),
+    DataAsset(package: input.packageName, name: 'data/translations.json', file: filteredFile),
   );
 }

@@ -196,6 +196,7 @@ template("aiks_unittests_component") {
       "//flutter/impeller/geometry:geometry_asserts",
       "//flutter/impeller/golden_tests:golden_playground_test",
       "//flutter/impeller/playground:playground_test",
+      "//flutter/impeller/renderer/testing:mocks",
       "//flutter/testing:testing_lib",
       "//flutter/txt",
     ]

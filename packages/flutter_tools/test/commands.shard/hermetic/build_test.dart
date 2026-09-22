@@ -4,10 +4,10 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
+import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_build_command.dart';
@@ -90,7 +91,7 @@ void main() {
     expect(command.buildInfo?.dartDefines, contains('$kLinuxGtkDartDefine=gtk4'));
   });
 
-  final MemoryFileSystem projectFileSystem = MemoryFileSystem.test();
+  final projectFileSystem = MemoryFileSystem.test();
 
   testUsingContext(
     'linux-gtk reads project default from manifest',
@@ -121,8 +122,8 @@ flutter:
     },
   );
 
-  final MemoryFileSystem globalConfigFileSystem = MemoryFileSystem.test();
-  final Config globalConfig = Config.test(
+  final globalConfigFileSystem = MemoryFileSystem.test();
+  final globalConfig = Config.test(
     name: Config.kFlutterSettings,
     directory: globalConfigFileSystem.directory('/'),
   );
@@ -302,9 +303,14 @@ class FakeBuildCommand extends BuildCommand {
     required super.buildSystem,
     required super.templateRenderer,
     required super.toolContext,
+    AndroidBuilder? androidBuilder,
     FeatureFlags? featureFlags,
     bool verboseHelp = false,
-  }) : super(featureFlags: featureFlags ?? TestFeatureFlags(), verboseHelp: verboseHelp) {
+  }) : super(
+         androidBuilder: androidBuilder ?? FakeAndroidBuilder(),
+         featureFlags: featureFlags ?? TestFeatureFlags(),
+         verboseHelp: verboseHelp,
+       ) {
     addSubcommand(FakeBuildSubcommand(logger: toolContext.logger, verboseHelp: verboseHelp));
   }
 
