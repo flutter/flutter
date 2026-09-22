@@ -46,9 +46,8 @@ class _DataTableExampleState extends State<DataTableExample> {
             ) {
               // All rows will have the same selected color.
               if (states.contains(WidgetState.selected)) {
-                return Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.08);
+                return Theme.of(context).colorScheme.primary
+                    .withValues(alpha: 0.08);
               }
               // Even rows will have a grey color.
               if (index.isEven) {

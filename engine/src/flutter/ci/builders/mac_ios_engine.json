@@ -13,7 +13,7 @@
     "builds": [
         {
             "drone_dimensions": [
-                "device_type=none",
+                "device_os=ignore_phone|none",
                 "os=Mac-15.7",
                 "cpu=arm64"
             ],
@@ -60,7 +60,7 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
+                "device_os=ignore_phone|none",
                 "os=Mac-15.7",
                 "cpu=arm64"
             ],
@@ -109,7 +109,7 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
+                "device_os=ignore_phone|none",
                 "os=Mac-15.7",
                 "cpu=arm64"
             ],
@@ -156,7 +156,7 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
+                "device_os=ignore_phone|none",
                 "os=Mac-15.7",
                 "cpu=arm64"
             ],
@@ -203,7 +203,7 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
+                "device_os=ignore_phone|none",
                 "os=Mac-15.7",
                 "cpu=arm64"
             ],
@@ -250,7 +250,7 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
+                "device_os=ignore_phone|none",
                 "os=Mac-15.7",
                 "cpu=arm64"
             ],
@@ -299,7 +299,7 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
+                "device_os=ignore_phone|none",
                 "os=Mac-15.7",
                 "cpu=arm64"
             ],
@@ -350,7 +350,7 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
+                "device_os=ignore_phone|none",
                 "os=Mac-15.7",
                 "cpu=arm64"
             ],
@@ -399,7 +399,7 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
+                "device_os=ignore_phone|none",
                 "os=Mac-15.7",
                 "cpu=arm64"
             ],
@@ -448,7 +448,7 @@
         },
         {
             "drone_dimensions": [
-                "device_type=none",
+                "device_os=ignore_phone|none",
                 "os=Mac-15.7",
                 "cpu=arm64"
             ],
