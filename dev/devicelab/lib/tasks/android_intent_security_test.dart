@@ -119,7 +119,7 @@ void main() {
 
       if (entrypointInjected) {
         return TaskResult.failure(
-          'Entrypoint injection was successful! The vulnerability is still present.',
+          'Entrypoint injection not prevented. The vulnerability is still present.',
         );
       }
 
@@ -224,7 +224,7 @@ void main() {
 
       if (routeInjectedActionView) {
         return TaskResult.failure(
-          'Route injection via malicious ACTION_VIEW intent was successful! The vulnerability is still present.',
+          'Route injection via malicious ACTION_VIEW intent was not prevented. The vulnerability is still present.',
         );
       }
 
@@ -271,7 +271,7 @@ void main() {
 
       if (routeInjectedNonActionView) {
         return TaskResult.failure(
-          'Route injection via malicious non-ACTION_VIEW intent was successful! The vulnerability is still present.',
+          'Route injection via malicious non-ACTION_VIEW intent was not prevented. The vulnerability is still present.',
         );
       }
 
