@@ -512,5 +512,66 @@ void main() {
         expect(horizontalController.offset, greaterThan(300.0));
       },
     );
+
+    testWidgets('7. FindInPageController exposes overridable shortcuts and semantic actions', (
+      WidgetTester tester,
+    ) async {
+      // Override default shortcuts: map F4 -> FindNextMatchIntent, Shift+F4 -> FindPreviousMatchIntent,
+      // and omit F3 so F3 is a no-op.
+      final FindInPageController controller = FindInPageController(
+        shortcuts: const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.f4): FindNextMatchIntent(),
+          SingleActivator(LogicalKeyboardKey.f4, shift: true): FindPreviousMatchIntent(),
+          SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
+        },
+      );
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectionArea(
+            enableSelection: false,
+            enableFind: true,
+            findController: controller,
+            child: const Scaffold(
+              body: Column(
+                children: <Widget>[Text('Alpha token'), Text('Beta token'), Text('Gamma token')],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      controller.open(initialQuery: 'token');
+      await tester.pumpAndSettle();
+      expect(controller.matchCount, 3);
+      expect(controller.activeMatchIndex, 0);
+
+      // F3 was omitted from custom shortcuts, so pressing F3 should NOT advance the match.
+      await tester.sendKeyEvent(LogicalKeyboardKey.f3);
+      await tester.pumpAndSettle();
+      expect(controller.activeMatchIndex, 0);
+
+      // Custom shortcut F4 advances to next match (index 1).
+      await tester.sendKeyEvent(LogicalKeyboardKey.f4);
+      await tester.pumpAndSettle();
+      expect(controller.activeMatchIndex, 1);
+
+      // Custom shortcut Shift+F4 returns to previous match (index 0).
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.f4);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.pumpAndSettle();
+      expect(controller.activeMatchIndex, 0);
+
+      // Updating controller.shortcuts dynamically restores defaultFindBarShortcuts (including F3).
+      controller.shortcuts = FindInPageController.defaultFindBarShortcuts;
+      await tester.pumpAndSettle();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.f3);
+      await tester.pumpAndSettle();
+      expect(controller.activeMatchIndex, 1);
+    });
   });
 }

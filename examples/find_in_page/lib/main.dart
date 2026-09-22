@@ -142,19 +142,24 @@ class _FindInPageDemoAppState extends State<FindInPageDemoApp> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                SizedBox(
-                  width: 160,
-                  child: TextField(
-                    controller: _headlessInputController,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
-                    decoration: const InputDecoration(
-                      isDense: true,
-                      hintText: 'Find in page...',
-                      hintStyle: TextStyle(color: Color(0xFF64748B)),
-                      border: InputBorder.none,
+                Shortcuts(
+                  shortcuts: controller.shortcuts,
+                  child: Actions(
+                    actions: controller.actions,
+                    child: SizedBox(
+                      width: 160,
+                      child: TextField(
+                        controller: _headlessInputController,
+                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          hintText: 'Find in page...',
+                          hintStyle: TextStyle(color: Color(0xFF64748B)),
+                          border: InputBorder.none,
+                        ),
+                        onChanged: (String v) => controller.query = v,
+                      ),
                     ),
-                    onChanged: (String v) => controller.query = v,
-                    onSubmitted: (_) => controller.nextMatch(),
                   ),
                 ),
                 Container(
@@ -292,18 +297,23 @@ class _FindInPageDemoAppState extends State<FindInPageDemoApp> {
                           const Icon(Icons.search, size: 16, color: Color(0xFF38BDF8)),
                           const SizedBox(width: 6),
                           Expanded(
-                            child: TextField(
-                              controller: _headlessInputController,
-                              focusNode: _headlessFocusNode,
-                              style: const TextStyle(color: Colors.white, fontSize: 13),
-                              decoration: const InputDecoration(
-                                isDense: true,
-                                hintText: 'AppBar Headless Find...',
-                                hintStyle: TextStyle(color: Color(0xFF64748B), fontSize: 12),
-                                border: InputBorder.none,
+                            child: Shortcuts(
+                              shortcuts: _findController.shortcuts,
+                              child: Actions(
+                                actions: _findController.actions,
+                                child: TextField(
+                                  controller: _headlessInputController,
+                                  focusNode: _headlessFocusNode,
+                                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                                  decoration: const InputDecoration(
+                                    isDense: true,
+                                    hintText: 'AppBar Headless Find...',
+                                    hintStyle: TextStyle(color: Color(0xFF64748B), fontSize: 12),
+                                    border: InputBorder.none,
+                                  ),
+                                  onChanged: (String v) => _findController.query = v,
+                                ),
                               ),
-                              onChanged: (String v) => _findController.query = v,
-                              onSubmitted: (_) => _findController.nextMatch(),
                             ),
                           ),
                           IconButton(
@@ -482,10 +492,8 @@ class _FindInPageDemoAppState extends State<FindInPageDemoApp> {
               findBarBuilder: switch (_uiStyle) {
                 FindUiStyle.defaultFloating => null, // Uses default SelectableRegionFindBar
                 FindUiStyle.customBottomBar => _buildCustomBottomFindBar,
-                FindUiStyle.headlessAppBar => (
-                  BuildContext _,
-                  FindInPageController _,
-                ) => const SizedBox.shrink(),
+                FindUiStyle.headlessAppBar =>
+                  (BuildContext _, FindInPageController _) => const SizedBox.shrink(),
               },
               child: Scrollbar(
                 controller: _scrollController,

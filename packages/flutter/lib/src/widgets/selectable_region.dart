@@ -35,6 +35,7 @@ import 'media_query.dart';
 import 'overlay.dart';
 import 'platform_selectable_region_context_menu.dart';
 import 'selection_container.dart';
+import 'shortcuts.dart';
 import 'tap_region.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
@@ -421,13 +422,6 @@ class SelectableRegionState extends State<SelectableRegion>
         this,
         granularity: TextGranularity.document,
       ),
-    ),
-    FindInPageIntent: CallbackAction<FindInPageIntent>(onInvoke: _handleFindInPage),
-    FindNextMatchIntent: CallbackAction<FindNextMatchIntent>(
-      onInvoke: (FindNextMatchIntent intent) => findController.nextMatch(),
-    ),
-    FindPreviousMatchIntent: CallbackAction<FindPreviousMatchIntent>(
-      onInvoke: (FindPreviousMatchIntent intent) => findController.previousMatch(),
     ),
     DismissIntent: CallbackAction<DismissIntent>(onInvoke: _handleDismiss),
   };
@@ -2002,17 +1996,6 @@ class SelectableRegionState extends State<SelectableRegion>
     _selectable = null;
   }
 
-  void _handleFindInPage(FindInPageIntent intent) {
-    if (!widget.enableFind) {
-      return;
-    }
-    final String? selectedText =
-        intent.initialQuery ?? _selectionDelegate.getSelectedContent()?.plainText;
-    findController.open(
-      initialQuery: (selectedText != null && selectedText.isNotEmpty) ? selectedText : null,
-    );
-  }
-
   void _handleDismiss(DismissIntent intent) {
     if (widget.enableFind && findController.isOpen) {
       findController.close(selectActiveMatch: widget.enableSelection);
@@ -2061,24 +2044,29 @@ class SelectableRegionState extends State<SelectableRegion>
       result = PlatformSelectableRegionContextMenu(child: result);
     }
     if (widget.enableFind) {
-      result = Stack(
-        alignment: AlignmentDirectional.topEnd,
-        children: <Widget>[
-          result,
-          ListenableBuilder(
-            listenable: findController,
-            builder: (BuildContext context, Widget? _) {
-              if (!findController.isOpen) {
-                return const SizedBox.shrink();
-              }
-              return SelectionContainer.disabled(
-                child:
-                    widget.findBarBuilder?.call(context, findController) ??
-                    SelectableRegionFindBar(controller: findController),
-              );
-            },
-          ),
-        ],
+      final Widget content = result;
+      result = ListenableBuilder(
+        listenable: findController,
+        builder: (BuildContext context, Widget? _) {
+          return Shortcuts(
+            shortcuts: findController.regionShortcuts,
+            child: Actions(
+              actions: findController.actions,
+              child: Stack(
+                alignment: AlignmentDirectional.topEnd,
+                children: <Widget>[
+                  content,
+                  if (findController.isOpen)
+                    SelectionContainer.disabled(
+                      child:
+                          widget.findBarBuilder?.call(context, findController) ??
+                          SelectableRegionFindBar(controller: findController),
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
       );
     }
     return TapRegion(
@@ -3988,9 +3976,109 @@ class SelectableSearchMatch {
 /// viewport scrolling for a [SelectableRegion] or [SelectionArea].
 class FindInPageController extends ChangeNotifier {
   /// Creates a [FindInPageController].
-  FindInPageController({String initialQuery = '', bool caseSensitive = false})
-    : _query = initialQuery,
-      _caseSensitive = caseSensitive;
+  ///
+  /// * [regionShortcuts] controls the keyboard shortcuts active on the enclosing
+  ///   [SelectableRegion] to invoke Find-in-Page (defaults to [defaultRegionShortcuts],
+  ///   which binds `Cmd+F` and `Ctrl+F` to [FindInPageIntent]). Pass `const {}` to
+  ///   disable automatic region-level shortcuts.
+  /// * [shortcuts] controls the keyboard shortcuts active when the Find bar is focused
+  ///   (defaults to [defaultFindBarShortcuts]).
+  FindInPageController({
+    String initialQuery = '',
+    bool caseSensitive = false,
+    Map<ShortcutActivator, Intent>? regionShortcuts,
+    Map<ShortcutActivator, Intent>? shortcuts,
+  }) : _query = initialQuery,
+       _caseSensitive = caseSensitive,
+       _regionShortcuts = regionShortcuts,
+       _shortcuts = shortcuts;
+
+  /// Default keyboard shortcuts active on the enclosing [SelectableRegion] to
+  /// invoke Find-in-Page (`Cmd+F` / `Ctrl+F`).
+  static const Map<ShortcutActivator, Intent> defaultRegionShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.keyF, meta: true): FindInPageIntent(),
+    SingleActivator(LogicalKeyboardKey.keyF, control: true): FindInPageIntent(),
+  };
+
+  Map<ShortcutActivator, Intent>? _regionShortcuts;
+
+  /// The active keyboard shortcuts map on the enclosing [SelectableRegion].
+  ///
+  /// Defaults to [defaultRegionShortcuts] if not overridden.
+  Map<ShortcutActivator, Intent> get regionShortcuts => _regionShortcuts ?? defaultRegionShortcuts;
+  set regionShortcuts(Map<ShortcutActivator, Intent>? value) {
+    if (_regionShortcuts == value) {
+      return;
+    }
+    _regionShortcuts = value;
+    notifyListeners();
+  }
+
+  /// Default keyboard shortcuts active when a Find-in-Page bar is focused.
+  ///
+  /// Includes:
+  /// * `Enter` / `NumpadEnter` / `F3` / `Cmd+G` / `Ctrl+G` -> [FindNextMatchIntent]
+  /// * `Shift+Enter` / `Shift+NumpadEnter` / `Shift+F3` / `Cmd+Shift+G` / `Ctrl+Shift+G` -> [FindPreviousMatchIntent]
+  /// * `Escape` -> [DismissIntent] (closes the Find bar and hands off selection)
+  static const Map<ShortcutActivator, Intent> defaultFindBarShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.enter): FindNextMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.numpadEnter): FindNextMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.enter, shift: true): FindPreviousMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.numpadEnter, shift: true): FindPreviousMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.f3): FindNextMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.f3, shift: true): FindPreviousMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.keyG, meta: true): FindNextMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.keyG, control: true): FindNextMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.keyG, meta: true, shift: true): FindPreviousMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.keyG, control: true, shift: true): FindPreviousMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
+  };
+
+  Map<ShortcutActivator, Intent>? _shortcuts;
+
+  /// The active keyboard shortcuts map for this controller's Find bar UI.
+  ///
+  /// Defaults to [defaultFindBarShortcuts] if not overridden.
+  Map<ShortcutActivator, Intent> get shortcuts => _shortcuts ?? defaultFindBarShortcuts;
+  set shortcuts(Map<ShortcutActivator, Intent>? value) {
+    if (_shortcuts == value) {
+      return;
+    }
+    _shortcuts = value;
+    notifyListeners();
+  }
+
+  /// Standard [Action]s mapped to this controller's [open], [nextMatch],
+  /// [previousMatch], and [close] operations.
+  ///
+  /// Can be passed directly to an [Actions] widget around a custom Find bar or
+  /// application [Scaffold].
+  late final Map<Type, Action<Intent>> actions = <Type, Action<Intent>>{
+    FindInPageIntent: CallbackAction<FindInPageIntent>(
+      onInvoke: (FindInPageIntent intent) {
+        open(initialQuery: intent.initialQuery);
+        return null;
+      },
+    ),
+    FindNextMatchIntent: CallbackAction<FindNextMatchIntent>(
+      onInvoke: (FindNextMatchIntent intent) {
+        nextMatch();
+        return null;
+      },
+    ),
+    FindPreviousMatchIntent: CallbackAction<FindPreviousMatchIntent>(
+      onInvoke: (FindPreviousMatchIntent intent) {
+        previousMatch();
+        return null;
+      },
+    ),
+    DismissIntent: CallbackAction<DismissIntent>(
+      onInvoke: (DismissIntent intent) {
+        close();
+        return null;
+      },
+    ),
+  };
 
   MultiSelectableSelectionContainerDelegate? _delegate;
   bool _enableSelection = true;
@@ -4327,10 +4415,16 @@ class FindInPageController extends ChangeNotifier {
 /// [SelectableRegion] when [FindInPageController.isOpen] is true.
 class SelectableRegionFindBar extends StatefulWidget {
   /// Creates a [SelectableRegionFindBar].
-  const SelectableRegionFindBar({super.key, required this.controller});
+  const SelectableRegionFindBar({super.key, required this.controller, this.shortcuts});
 
   /// The [FindInPageController] bound to this Find bar.
   final FindInPageController controller;
+
+  /// Optional keyboard shortcuts override for this Find bar.
+  ///
+  /// If null, defaults to [FindInPageController.shortcuts] (which itself
+  /// defaults to [FindInPageController.defaultFindBarShortcuts]).
+  final Map<ShortcutActivator, Intent>? shortcuts;
 
   @override
   State<SelectableRegionFindBar> createState() => _SelectableRegionFindBarState();
@@ -4346,45 +4440,13 @@ class _SelectableRegionFindBarState extends State<SelectableRegionFindBar> {
     super.initState();
     _lastOpenRequestCount = widget.controller.openRequestCount;
     _textController = TextEditingController(text: widget.controller.query);
-    _focusNode = FocusNode(debugLabel: 'SelectableRegionFindBar', onKeyEvent: _handleKeyEvent);
+    _focusNode = FocusNode(debugLabel: 'SelectableRegionFindBar');
     widget.controller.addListener(_syncControllerText);
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _focusAndSelectQuery();
       }
     });
-  }
-
-  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
-    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
-      return KeyEventResult.ignored;
-    }
-    final LogicalKeyboardKey key = event.logicalKey;
-    final bool isShift = HardwareKeyboard.instance.isShiftPressed;
-    final bool isMetaOrCtrl =
-        HardwareKeyboard.instance.isMetaPressed || HardwareKeyboard.instance.isControlPressed;
-
-    if (key == LogicalKeyboardKey.escape) {
-      widget.controller.close();
-      return KeyEventResult.handled;
-    }
-    if (key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter) {
-      if (isShift) {
-        widget.controller.previousMatch();
-      } else {
-        widget.controller.nextMatch();
-      }
-      return KeyEventResult.handled;
-    }
-    if (key == LogicalKeyboardKey.f3 || (key == LogicalKeyboardKey.keyG && isMetaOrCtrl)) {
-      if (isShift) {
-        widget.controller.previousMatch();
-      } else {
-        widget.controller.nextMatch();
-      }
-      return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
   }
 
   void _focusAndSelectQuery() {
@@ -4454,60 +4516,66 @@ class _SelectableRegionFindBarState extends State<SelectableRegionFindBar> {
       decoration: TextDecoration.none,
     );
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 10.0, right: 14.0),
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          color: Color(0xFFFFFFFF),
-          borderRadius: BorderRadius.all(Radius.circular(8.0)),
-          border: Border.fromBorderSide(BorderSide(color: Color(0xFF2563EB), width: 2.0)),
-          boxShadow: <BoxShadow>[
-            BoxShadow(color: Color(0x33000000), blurRadius: 12.0, offset: Offset(0, 4)),
-          ],
-        ),
+    return Shortcuts(
+      shortcuts: widget.shortcuts ?? widget.controller.shortcuts,
+      child: Actions(
+        actions: widget.controller.actions,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Flexible(
-                child: SizedBox(
-                  width: 140.0,
-                  child: EditableText(
-                    controller: _textController,
-                    focusNode: _focusNode,
-                    style: textStyle,
-                    cursorColor: const Color(0xFF1A73E8),
-                    backgroundCursorColor: const Color(0xFF9AA0A6),
-                    onChanged: (String value) => widget.controller.query = value,
+          padding: const EdgeInsets.only(top: 10.0, right: 14.0),
+          child: DecoratedBox(
+            decoration: const BoxDecoration(
+              color: Color(0xFFFFFFFF),
+              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              border: Border.fromBorderSide(BorderSide(color: Color(0xFF2563EB), width: 2.0)),
+              boxShadow: <BoxShadow>[
+                BoxShadow(color: Color(0x33000000), blurRadius: 12.0, offset: Offset(0, 4)),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Flexible(
+                    child: SizedBox(
+                      width: 140.0,
+                      child: EditableText(
+                        controller: _textController,
+                        focusNode: _focusNode,
+                        style: textStyle,
+                        cursorColor: const Color(0xFF1A73E8),
+                        backgroundCursorColor: const Color(0xFF9AA0A6),
+                        onChanged: (String value) => widget.controller.query = value,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 8.0),
-              RichText(
-                text: TextSpan(
-                  text: counterText,
-                  style: textStyle.copyWith(
-                    color: total == 0 && widget.controller.query.isNotEmpty
-                        ? const Color(0xFFD93025)
-                        : const Color(0xFF5F6368),
-                    fontWeight: FontWeight.w600,
+                  const SizedBox(width: 8.0),
+                  RichText(
+                    text: TextSpan(
+                      text: counterText,
+                      style: textStyle.copyWith(
+                        color: total == 0 && widget.controller.query.isNotEmpty
+                            ? const Color(0xFFD93025)
+                            : const Color(0xFF5F6368),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8.0),
+                  _FindBarButton(
+                    label: 'Aa',
+                    active: widget.controller.caseSensitive,
+                    onTap: () => widget.controller.caseSensitive = !widget.controller.caseSensitive,
+                  ),
+                  const SizedBox(width: 4.0),
+                  _FindBarButton(label: 'Prev', onTap: widget.controller.previousMatch),
+                  const SizedBox(width: 4.0),
+                  _FindBarButton(label: 'Next', onTap: widget.controller.nextMatch),
+                  const SizedBox(width: 4.0),
+                  _FindBarButton(label: 'X', onTap: widget.controller.close),
+                ],
               ),
-              const SizedBox(width: 8.0),
-              _FindBarButton(
-                label: 'Aa',
-                active: widget.controller.caseSensitive,
-                onTap: () => widget.controller.caseSensitive = !widget.controller.caseSensitive,
-              ),
-              const SizedBox(width: 4.0),
-              _FindBarButton(label: 'Prev', onTap: widget.controller.previousMatch),
-              const SizedBox(width: 4.0),
-              _FindBarButton(label: 'Next', onTap: widget.controller.nextMatch),
-              const SizedBox(width: 4.0),
-              _FindBarButton(label: 'X', onTap: widget.controller.close),
-            ],
+            ),
           ),
         ),
       ),
