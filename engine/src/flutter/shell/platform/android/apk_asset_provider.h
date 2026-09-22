@@ -198,6 +198,10 @@ class APKAssetProvider final : public AssetResolver {
   /// with the embedder C-API.
   FlutterCustomAssetResolver CreateCustomAssetResolver() const;
 
+  /// @brief Creates a FlutterAssetResolver bridge structure compatible with
+  /// FlutterProjectArgs::asset_resolvers.
+  FlutterAssetResolver ToFlutterAssetResolver() const;
+
   /// @brief Factory creating an AssetResolver from a
   /// FlutterCustomAssetResolver.
   static std::unique_ptr<AssetResolver> CreateAssetResolver(

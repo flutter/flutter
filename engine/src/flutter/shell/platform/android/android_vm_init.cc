@@ -376,6 +376,21 @@ AndroidVMInit::~AndroidVMInit() {
   }
 }
 
+namespace {
+std::mutex g_global_vm_args_mutex;
+std::optional<AndroidVMArgs> g_global_vm_args;
+}  // namespace
+
+void AndroidVMInit::SetGlobalVMArgs(const AndroidVMArgs& args) {
+  std::scoped_lock lock(g_global_vm_args_mutex);
+  g_global_vm_args = args;
+}
+
+std::optional<AndroidVMArgs> AndroidVMInit::GetGlobalVMArgs() {
+  std::scoped_lock lock(g_global_vm_args_mutex);
+  return g_global_vm_args;
+}
+
 bool AndroidVMInit::Init(const AndroidVMArgs& args) {
   TRACE_EVENT0("flutter", "AndroidVMInit::Init");
   std::scoped_lock lock(mutex_);

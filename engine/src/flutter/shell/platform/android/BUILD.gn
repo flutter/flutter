@@ -67,11 +67,14 @@ if (is_android) {
     visibility = [ "*" ]
     testonly = true
     sources = [
+      "android_compositor_unittests.cc",
       "android_engine_group_unittests.cc",
       "android_hardware_buffer_unittests.cc",
       "android_mutator_unittests.cc",
       "android_semantics_unittests.cc",
       "android_surface_control_unittests.cc",
+      "android_surface_manager_unittests.cc",
+      "android_task_runners_unittests.cc",
       "android_vm_init_unittests.cc",
       "android_vsync_waiter_unittests.cc",
       "android_vulkan_texture_unittests.cc",
@@ -91,13 +94,17 @@ if (is_android) {
   }
 
   config("jni_headers_config") {
-    include_dirs = [ "//flutter/shell/platform/android/jni/include" ]
+    if (!is_android) {
+      include_dirs = [ "//flutter/shell/platform/android/jni/include" ]
+    }
   }
 
   source_set("flutter_embedder_native_src") {
     visibility = [ ":*" ]
 
     sources = [
+      "android_compositor.cc",
+      "android_compositor.h",
       "android_engine_group.cc",
       "android_engine_group.h",
       "android_hardware_buffer.cc",
@@ -110,6 +117,10 @@ if (is_android) {
       "android_semantics_mapper.h",
       "android_surface_control.cc",
       "android_surface_control.h",
+      "android_surface_manager.cc",
+      "android_surface_manager.h",
+      "android_task_runners.cc",
+      "android_task_runners.h",
       "android_vm_init.cc",
       "android_vm_init.h",
       "android_vsync_waiter.cc",

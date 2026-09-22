@@ -115,10 +115,10 @@ typedef union jvalue {
 } jvalue;
 
 typedef enum jobjectRefType {
-  JNIInvalidRefType = 0,
-  JNILocalRefType = 1,
-  JNIGlobalRefType = 2,
-  JNIWeakGlobalRefType = 3
+  JNIInvalidRefType = 0,    // NOLINT(readability-identifier-naming)
+  JNILocalRefType = 1,      // NOLINT(readability-identifier-naming)
+  JNIGlobalRefType = 2,     // NOLINT(readability-identifier-naming)
+  JNIWeakGlobalRefType = 3  // NOLINT(readability-identifier-naming)
 } jobjectRefType;
 
 typedef struct {

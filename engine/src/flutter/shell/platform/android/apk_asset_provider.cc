@@ -328,6 +328,28 @@ class APKAssetProviderImpl : public APKAssetProviderInternal {
     AAsset* asset = AAssetManager_open(asset_manager_, full_path.c_str(),
                                        AASSET_MODE_BUFFER);
     if (!asset) {
+      std::string clean_asset = asset_name;
+      while (!clean_asset.empty() && clean_asset.front() == '/') {
+        clean_asset.erase(0, 1);
+      }
+      // Length of "flutter_assets/" prefix is 15 characters.
+      constexpr size_t kFlutterAssetsPrefixLen = 15;
+      if (full_path.rfind("flutter_assets/", 0) != 0) {
+        std::string fallback_path = "flutter_assets/" + clean_asset;
+        asset = AAssetManager_open(asset_manager_, fallback_path.c_str(),
+                                   AASSET_MODE_BUFFER);
+      } else if (clean_asset.rfind("flutter_assets/", 0) == 0 &&
+                 clean_asset.length() > kFlutterAssetsPrefixLen) {
+        std::string stripped = clean_asset.substr(kFlutterAssetsPrefixLen);
+        asset = AAssetManager_open(asset_manager_, stripped.c_str(),
+                                   AASSET_MODE_BUFFER);
+      }
+      if (!asset && full_path != clean_asset) {
+        asset = AAssetManager_open(asset_manager_, clean_asset.c_str(),
+                                   AASSET_MODE_BUFFER);
+      }
+    }
+    if (!asset) {
       return nullptr;
     }
 
@@ -500,6 +522,20 @@ FlutterCustomAssetResolver APKAssetProvider::CreateCustomAssetResolver() const {
       delete static_cast<std::shared_ptr<APKAssetProviderInternal>*>(user_data);
     }
   };
+  return resolver;
+}
+
+FlutterAssetResolver APKAssetProvider::ToFlutterAssetResolver() const {
+  TRACE_EVENT0("flutter", "APKAssetProvider::ToFlutterAssetResolver");
+  FlutterCustomAssetResolver custom = CreateCustomAssetResolver();
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = custom.user_data;
+  resolver.find_asset_callback = custom.find_asset_callback;
+  resolver.is_valid_callback = custom.is_valid_callback;
+  resolver.is_valid_after_change_callback =
+      custom.is_valid_after_change_callback;
+  resolver.destruction_callback = custom.destruction_callback;
   return resolver;
 }
 

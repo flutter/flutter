@@ -22,6 +22,7 @@
 #include "flutter/fml/platform/android/paths_android.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
+#include "flutter/shell/platform/android/android_vm_init.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
@@ -231,6 +232,53 @@ void FlutterMain::Init(JNIEnv* env,
   settings.dart_library_sources_kernel =
       make_mapping_callback(kPlatformStrongDill, kPlatformStrongDillSize);
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+
+  flutter::android::AndroidVMArgs vm_args;
+  vm_args.command_line_args = args;
+  if (settings.enable_impeller) {
+    vm_args.command_line_args.push_back("--enable-impeller=true");
+  } else {
+    vm_args.command_line_args.push_back("--enable-impeller=false");
+  }
+  vm_args.kernel_path = settings.application_kernel_asset;
+  vm_args.assets_path = settings.assets_path;
+  vm_args.app_storage_path = app_storage_path;
+  vm_args.engine_caches_path =
+      engineCachesPath ? fml::jni::JavaStringToString(env, engineCachesPath)
+                       : "";
+  vm_args.icu_data_path = settings.icu_data_path;
+  vm_args.init_time_millis = initTimeMillis;
+  vm_args.api_level = api_level;
+  vm_args.enable_impeller = settings.enable_impeller;
+#if !SLIMPELLER
+  vm_args.enable_software_rendering =
+      (android_rendering_api == AndroidRenderingAPI::kSoftware);
+#endif
+  if (android_rendering_api == AndroidRenderingAPI::kImpellerVulkan) {
+    vm_args.requested_rendering_backend = "vulkan";
+  } else if (android_rendering_api == AndroidRenderingAPI::kImpellerOpenGLES
+#if !SLIMPELLER
+             || android_rendering_api == AndroidRenderingAPI::kSkiaOpenGLES
+#endif
+  ) {
+    vm_args.requested_rendering_backend = "opengles";
+  }
+  vm_args.trace_systrace = settings.trace_systrace;
+  vm_args.enable_surface_control = settings.enable_surface_control;
+  vm_args.merged_platform_ui_thread =
+      (settings.merged_platform_ui_thread !=
+       Settings::MergedPlatformUIThread::kDisabled);
+  if (!settings.log_tag.empty()) {
+    vm_args.log_tag = settings.log_tag;
+  }
+  vm_args.dart_old_gen_heap_size = settings.old_gen_heap_size;
+  for (const auto& lib_path : settings.application_library_paths) {
+    if (fml::IsFile(lib_path)) {
+      vm_args.aot_library_path = lib_path;
+      break;
+    }
+  }
+  flutter::android::AndroidVMInit::SetGlobalVMArgs(vm_args);
 
   // Not thread safe. Will be removed when FlutterMain is refactored to no
   // longer be a singleton.
