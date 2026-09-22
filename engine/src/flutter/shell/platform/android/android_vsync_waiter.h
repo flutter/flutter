@@ -198,6 +198,34 @@ class AndroidVsyncWaiter
   static AndroidVsyncFrameInfo ComputeFramePacing(int64_t frame_time_nanos,
                                                   double refresh_rate_hz);
 
+  /// @brief Sets the global default display refresh rate in Hz
+  /// (e.g. 60.0, 90.0, 120.0).
+  static void SetGlobalRefreshRate(double refresh_rate_hz);
+
+  /// @brief Returns the global default display refresh rate in Hz.
+  static double GetGlobalRefreshRate();
+
+  /// @brief Registers a pending baton associated with a waiter instance for
+  /// asynchronous Java VSync notifications.
+  static void RegisterPendingJavaBaton(
+      intptr_t baton,
+      std::weak_ptr<AndroidVsyncWaiter> waiter);
+
+  /// @brief Unregisters a pending baton if the asynchronous request failed or
+  /// was cancelled.
+  static void UnregisterPendingJavaBaton(intptr_t baton);
+
+  /// @brief Callback invoked by FlutterJNI.nativeOnVsync when AChoreographer
+  /// signals a VSync on the Java side.
+  ///
+  /// @param frame_delay_nanos Delay between frame presentation request and
+  /// actual signal in nanoseconds.
+  /// @param refresh_period_nanos Display refresh interval in nanoseconds.
+  /// @param baton Cookie passed through from asyncWaitForVsync.
+  static void OnJavaVsync(int64_t frame_delay_nanos,
+                          int64_t refresh_period_nanos,
+                          intptr_t baton);
+
   /// @brief Sets the active display refresh rate in Hz (e.g. 60.0, 90.0,
   /// 120.0).
   void UpdateRefreshRate(double refresh_rate_hz);

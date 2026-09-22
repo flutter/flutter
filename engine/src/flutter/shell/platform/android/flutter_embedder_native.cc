@@ -4253,6 +4253,26 @@ static jboolean FlutterJNI_IsSurfaceControlEnabled(JNIEnv* env,
   return native_instance->IsHcppEnabled();
 }
 
+static void FlutterJNI_UpdateRefreshRate(JNIEnv* env,
+                                         jobject jcaller,
+                                         jfloat refresh_rate_fps) {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::FlutterJNI_UpdateRefreshRate",
+               "refresh_rate_fps", std::to_string(refresh_rate_fps).c_str());
+  AndroidVsyncWaiter::SetGlobalRefreshRate(
+      static_cast<double>(refresh_rate_fps));
+}
+
+static void FlutterJNI_OnVsync(JNIEnv* env,
+                               jobject jcaller,
+                               jlong frame_delay_nanos,
+                               jlong refresh_period_nanos,
+                               jlong cookie) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterJNI_OnVsync");
+  AndroidVsyncWaiter::OnJavaVsync(static_cast<int64_t>(frame_delay_nanos),
+                                  static_cast<int64_t>(refresh_period_nanos),
+                                  static_cast<intptr_t>(cookie));
+}
+
 bool FlutterEmbedderNative::RegisterJni(JNIEnv* env) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::RegisterJni");
   if (!env) {
@@ -4464,6 +4484,16 @@ bool FlutterEmbedderNative::RegisterJni(JNIEnv* env) {
           .name = "nativeIsSurfaceControlEnabled",
           .signature = "(J)Z",
           .fnPtr = reinterpret_cast<void*>(&FlutterJNI_IsSurfaceControlEnabled),
+      },
+      {
+          .name = "nativeUpdateRefreshRate",
+          .signature = "(F)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_UpdateRefreshRate),
+      },
+      {
+          .name = "nativeOnVsync",
+          .signature = "(JJJ)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_OnVsync),
       },
   };
 
