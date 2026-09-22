@@ -246,6 +246,20 @@ abstract class Dart2WebTarget extends Target {
       }
     }
   }
+
+  void _checkNoDeferredParts(Directory dir, RegExp partRegex) {
+    final bool hasDeferredParts = dir.listSync().whereType<File>().any(
+      (File file) => partRegex.hasMatch(file.basename),
+    );
+    if (hasDeferredParts) {
+      throwToolExit(
+        '"--web-content-hash" does not yet support deferred imports: '
+        'deferred part files keep unhashed names and can be served stale '
+        'from the browser cache alongside a new entrypoint. Remove the '
+        'deferred imports or build without "--web-content-hash".',
+      );
+    }
+  }
 }
 
 /// Compiles a web entry point with dart2js.
@@ -352,17 +366,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     }
     var finalOutputFile = outputJSFile;
     if (compilerConfig.webContentHash) {
-      final bool hasDeferredParts = environment.buildDir.listSync().whereType<File>().any(
-        (File file) => _partFileRegex.hasMatch(file.basename),
-      );
-      if (hasDeferredParts) {
-        throwToolExit(
-          '"--web-content-hash" does not yet support deferred imports: '
-          'deferred part files keep unhashed names and can be served stale '
-          'from the browser cache alongside a new entrypoint. Remove the '
-          'deferred imports or build without "--web-content-hash".',
-        );
-      }
+      _checkNoDeferredParts(environment.buildDir, _partFileRegex);
       final String newBasename = _hashAndRenameWebOutput(
         file: outputJSFile,
         sourceMapFile: compilerConfig.sourceMaps
@@ -577,17 +581,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       _checkForLegacyWebImports(environment, runResult.stdout, runResult.stderr);
       throwToolExit('Failed to compile application for the Web.');
     } else if (compilerConfig.webContentHash) {
-      final bool hasDeferredParts = environment.buildDir.listSync().whereType<File>().any(
-        (File file) => _partWasmRegex.hasMatch(file.basename),
-      );
-      if (hasDeferredParts) {
-        throwToolExit(
-          '"--web-content-hash" does not yet support deferred imports: '
-          'deferred part files keep unhashed names and can be served stale '
-          'from the browser cache alongside a new entrypoint. Remove the '
-          'deferred imports or build without "--web-content-hash".',
-        );
-      }
+      _checkNoDeferredParts(environment.buildDir, _partWasmRegex);
       final String newWasmBasename = _hashAndRenameWebOutput(
         file: outputWasmFile,
         sourceMapFile: compilerConfig.sourceMaps

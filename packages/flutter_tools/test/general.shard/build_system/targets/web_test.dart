@@ -2122,7 +2122,11 @@ _flutter.loader.load();
 
       await expectLater(
         Dart2JSTarget(const JsCompilerConfig(webContentHash: true)).build(environment),
-        throwsToolExit(message: 'deferred'),
+        throwsToolExit(
+          message:
+              '"--web-content-hash" does not yet support deferred imports: '
+              'deferred part files keep unhashed names',
+        ),
       );
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
@@ -2171,7 +2175,11 @@ _flutter.loader.load();
           const WasmCompilerConfig(webContentHash: true),
           const NoOpAnalytics(),
         ).build(environment),
-        throwsToolExit(message: 'deferred'),
+        throwsToolExit(
+          message:
+              '"--web-content-hash" does not yet support deferred imports: '
+              'deferred part files keep unhashed names',
+        ),
       );
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
