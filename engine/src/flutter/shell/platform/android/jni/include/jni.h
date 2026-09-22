@@ -1,14 +1,27 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+/*
+ * Copyright (C) 2006 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_JNI_INCLUDE_JNI_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_JNI_INCLUDE_JNI_H_
 
+#ifndef _JNI_H_
+#define _JNI_H_
+
 #include <stdarg.h>
 #include <stdint.h>
-
-// NOLINTBEGIN(readability-identifier-naming)
 
 /* Primitive types that match up with Java equivalents. */
 typedef uint8_t jboolean; /* unsigned 8 bits */
@@ -1723,6 +1736,6 @@ JNIEXPORT void JNI_OnUnload(JavaVM* vm, void* reserved);
 #define JNI_COMMIT 1 /* copy content, do not free buffer */
 #define JNI_ABORT 2  /* free buffer w/o copying back */
 
-// NOLINTEND(readability-identifier-naming)
+#endif  // _JNI_H_
 
 #endif  // FLUTTER_SHELL_PLATFORM_ANDROID_JNI_INCLUDE_JNI_H_

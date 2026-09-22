@@ -20,12 +20,51 @@ using ::testing::_;
 using ::testing::Eq;
 using ::testing::Return;
 
-class MockJvmInvokerForVMInit : public JvmInvoker {
+class MockJvmInvoker : public JvmInvoker {
  public:
   MOCK_METHOD(bool, EnsureAttachedToThread, (), (override));
   MOCK_METHOD(void, DetachFromThread, (), (override));
   MOCK_METHOD(bool, HasPendingException, (), (const, override));
   MOCK_METHOD(void, ClearPendingException, (), (override));
+
+  MOCK_METHOD(bool,
+              HandlePlatformMessage,
+              (const std::string& channel,
+               const uint8_t* message,
+               size_t message_size,
+               int32_t response_id,
+               int64_t message_data),
+              (override));
+
+  MOCK_METHOD(bool,
+              HandlePlatformMessageResponse,
+              (int32_t response_id, const uint8_t* data, size_t data_size),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateSemantics,
+              (const std::vector<uint8_t>& buffer,
+               const std::vector<std::string>& strings,
+               const std::vector<std::vector<uint8_t>>& string_attribute_args),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateCustomAccessibilityActions,
+              (const std::vector<uint8_t>& actions_buffer,
+               const std::vector<std::string>& action_strings),
+              (override));
+
+  MOCK_METHOD(bool, SetSemanticsTreeEnabled, (bool enabled), (override));
+  MOCK_METHOD(bool,
+              SetApplicationLocale,
+              (const std::string& locale),
+              (override));
+  MOCK_METHOD(bool, OnFirstFrame, (), (override));
+  MOCK_METHOD(bool, OnPreEngineRestart, (), (override));
+  MOCK_METHOD(bool,
+              RequestDartDeferredLibrary,
+              (int loading_unit_id),
+              (override));
 
   MOCK_METHOD(bool,
               InvokeVoidMethod,
@@ -70,6 +109,23 @@ class MockJvmInvokerForVMInit : public JvmInvoker {
               (override));
 
   MOCK_METHOD(bool, PostJvmTask, (std::function<void()> task), (override));
+
+  MOCK_METHOD(bool,
+              DecodeImage,
+              (const uint8_t* data, size_t size, int64_t generator_handle),
+              (override));
+
+  MOCK_METHOD(bool,
+              PushPlatformViewMutators,
+              (int64_t view_id,
+               int32_t x,
+               int32_t y,
+               int32_t width,
+               int32_t height,
+               int32_t view_width,
+               int32_t view_height,
+               const std::vector<uint8_t>& payload),
+              (override));
 };
 
 // ---------------------------------------------------------------------------
@@ -150,14 +206,39 @@ TEST(AndroidVMInitTest, InMemoryFontCollectionProviderOperations) {
 }
 
 TEST(AndroidVMInitTest, DefaultFontCollectionProviderOperations) {
-  DefaultFontCollectionProvider provider;
+  // 1. Dynamic resolution with mock library loader
+  auto mock_loader = std::make_shared<MockOSLibraryLoader>();
+  static bool prefetch_invoked = false;
+  prefetch_invoked = false;
+  auto mock_prefetch_fn = []() { prefetch_invoked = true; };
+  mock_loader->SetSymbol(OSLibraryLoader::kProcessGlobalScope,
+                         "FlutterPlatformPrefetchDefaultFontManager",
+                         reinterpret_cast<void*>(+mock_prefetch_fn));
 
-  EXPECT_FALSE(provider.IsPrefetched());
-  EXPECT_EQ(provider.GetPrefetchCount(), 0u);
+  DefaultFontCollectionProvider mock_provider(mock_loader);
+  EXPECT_FALSE(mock_provider.IsPrefetched());
+  EXPECT_EQ(mock_provider.GetPrefetchCount(), 0u);
+  EXPECT_FALSE(prefetch_invoked);
 
-  EXPECT_TRUE(provider.PrefetchDefaultFontManager());
-  EXPECT_TRUE(provider.IsPrefetched());
-  EXPECT_EQ(provider.GetPrefetchCount(), 1u);
+  EXPECT_TRUE(mock_provider.PrefetchDefaultFontManager());
+  EXPECT_TRUE(mock_provider.IsPrefetched());
+  EXPECT_EQ(mock_provider.GetPrefetchCount(), 1u);
+  EXPECT_TRUE(prefetch_invoked);
+
+  // 2. Fallback when symbol is absent
+  auto empty_loader = std::make_shared<MockOSLibraryLoader>();
+  DefaultFontCollectionProvider fallback_provider(empty_loader);
+  EXPECT_FALSE(fallback_provider.IsPrefetched());
+  EXPECT_TRUE(fallback_provider.PrefetchDefaultFontManager());
+  EXPECT_TRUE(fallback_provider.IsPrefetched());
+  EXPECT_EQ(fallback_provider.GetPrefetchCount(), 1u);
+
+  // 3. Default constructor with process global scope
+  DefaultFontCollectionProvider default_provider;
+  EXPECT_FALSE(default_provider.IsPrefetched());
+  EXPECT_TRUE(default_provider.PrefetchDefaultFontManager());
+  EXPECT_TRUE(default_provider.IsPrefetched());
+  EXPECT_EQ(default_provider.GetPrefetchCount(), 1u);
 }
 
 // ---------------------------------------------------------------------------
@@ -189,7 +270,7 @@ TEST(AndroidVMInitTest, InMemoryAOTProviderOperations) {
   EXPECT_EQ(provider.CreateAOTData(&source, &fail_data), kInvalidArguments);
 
   EXPECT_EQ(provider.CreateAOTData(nullptr, &fail_data), kInvalidArguments);
-  EXPECT_EQ(provider.CollectAOTData(nullptr), kInvalidArguments);
+  EXPECT_EQ(provider.CollectAOTData(nullptr), kSuccess);
 }
 
 TEST(AndroidVMInitTest, DefaultAOTProviderArgumentValidation) {
@@ -198,7 +279,7 @@ TEST(AndroidVMInitTest, DefaultAOTProviderArgumentValidation) {
 
   EXPECT_EQ(provider.CreateAOTData(nullptr, &out_data), kInvalidArguments);
   EXPECT_EQ(provider.CreateAOTData(nullptr, nullptr), kInvalidArguments);
-  EXPECT_EQ(provider.CollectAOTData(nullptr), kInvalidArguments);
+  EXPECT_EQ(provider.CollectAOTData(nullptr), kSuccess);
 }
 
 // ---------------------------------------------------------------------------
@@ -211,6 +292,7 @@ TEST(AndroidVMInitTest, AndroidProjectArgsHolderPopulation) {
   AndroidVMArgs vm_args;
   vm_args.command_line_args = {"--enable-checked-mode",
                                "--verify-entry-points"};
+  vm_args.assets_path = "/data/app/assets/flutter_assets";
   vm_args.icu_data_path = "/data/flutter/icudtl.dat";
   vm_args.engine_caches_path = "/data/user/0/com.example/cache";
   vm_args.is_persistent_cache_read_only = true;
@@ -239,6 +321,7 @@ TEST(AndroidVMInitTest, AndroidProjectArgsHolderPopulation) {
   EXPECT_STREQ(args->command_line_argv[2], "--verify-entry-points");
 
   // Verify paths and config
+  EXPECT_STREQ(args->assets_path, "/data/app/assets/flutter_assets");
   EXPECT_STREQ(args->icu_data_path, "/data/flutter/icudtl.dat");
   EXPECT_STREQ(args->persistent_cache_path, "/data/user/0/com.example/cache");
   EXPECT_TRUE(args->is_persistent_cache_read_only);
@@ -261,8 +344,24 @@ TEST(AndroidVMInitTest, AndroidProjectArgsHolderPopulation) {
 // AndroidVMInitTests
 // ---------------------------------------------------------------------------
 
+TEST(AndroidVMInitTest, AndroidVMInitIdempotency) {
+  auto aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
+  AndroidVMInit vm_init(nullptr, nullptr, aot_provider);
+
+  AndroidVMArgs args;
+  args.aot_library_path = "/data/app/lib/arm64/libapp.so";
+  EXPECT_TRUE(vm_init.Init(args));
+  EXPECT_EQ(aot_provider->GetCreateCount(), 1u);
+  EXPECT_EQ(aot_provider->GetCollectCount(), 0u);
+
+  // Calling Init again should be a safe idempotent no-op.
+  EXPECT_TRUE(vm_init.Init(args));
+  EXPECT_EQ(aot_provider->GetCreateCount(), 1u);
+  EXPECT_EQ(aot_provider->GetCollectCount(), 0u);
+}
+
 TEST(AndroidVMInitTest, AndroidVMInitLifecycleAndDispatch) {
-  auto mock_invoker = std::make_shared<MockJvmInvokerForVMInit>();
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
   auto font_provider = std::make_shared<InMemoryFontCollectionProvider>();
   auto aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
 

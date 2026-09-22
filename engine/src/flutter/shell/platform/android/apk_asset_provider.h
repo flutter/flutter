@@ -6,9 +6,12 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_APK_ASSET_PROVIDER_H_
 
 #include <cstddef>
+#include <cstdint>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <optional>
+#include <shared_mutex>
 #include <string>
 #include <vector>
 
@@ -18,16 +21,42 @@
 
 #include <jni.h>
 
-#if defined(__ANDROID__)
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
+/// @brief Custom asset resolver bridge structure for embedder integration.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterCustomAssetResolver).
+  size_t struct_size;
+  /// User data passed to all callbacks.
+  void* user_data;
+  /// Callback invoked to find and map an asset by name.
+  bool (*find_asset_callback)(void* user_data,
+                              const char* asset_name,
+                              FlutterAsset* asset_out);
+  /// Callback invoked to check whether this resolver is currently valid.
+  bool (*is_valid_callback)(void* user_data);
+  /// Callback invoked to check whether this resolver is valid after asset
+  /// manager change.
+  bool (*is_valid_after_change_callback)(void* user_data);
+  /// Callback invoked when the custom resolver is destroyed.
+  void (*destruction_callback)(void* user_data);
+} FlutterCustomAssetResolver;
+
+#if defined(__cplusplus)
+}  // extern "C"
+#endif
+
 namespace flutter {
 
-class APKAssetProviderInternal
-    : public std::enable_shared_from_this<APKAssetProviderInternal> {
+/// @brief Internal interface for Android APK asset provider implementations.
+class APKAssetProviderInternal {
  public:
   virtual ~APKAssetProviderInternal() = default;
 
@@ -35,15 +64,16 @@ class APKAssetProviderInternal
   virtual std::unique_ptr<fml::Mapping> GetAsMapping(
       const std::string& asset_name) const = 0;
 
-  // Returns a FlutterAssetResolver representing this asset provider for use
-  // with the Flutter Embedder C-API.
-  //
-  // Note: The instance must be managed by a std::shared_ptr (due to
-  // std::enable_shared_from_this).
-  virtual FlutterAssetResolver ToFlutterAssetResolver() const;
+  /// @brief Resolves multiple assets matching a pattern in an optional
+  /// subdirectory.
+  virtual std::vector<std::unique_ptr<fml::Mapping>> GetAsMappings(
+      const std::string& asset_pattern,
+      const std::optional<std::string>& subdir) const {
+    return {};
+  }
 
- protected:
-  virtual ~APKAssetProviderInternal() = default;
+  /// @brief Returns the base asset directory path.
+  virtual const std::string& GetDirectory() const = 0;
 };
 
 /// @brief In-memory / host-safe implementation of APKAssetProviderInternal.
@@ -81,8 +111,9 @@ class InMemoryAPKAssetProviderImpl : public APKAssetProviderInternal {
   const std::string& GetDirectory() const override;
 
  private:
-  std::string directory_;
-  std::map<std::string, std::vector<uint8_t>> assets_;
+  const std::string directory_;
+  mutable std::shared_mutex mutex_;
+  std::map<std::string, std::shared_ptr<const std::vector<uint8_t>>> assets_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(InMemoryAPKAssetProviderImpl);
 };
@@ -100,9 +131,44 @@ class APKAssetMapping : public fml::Mapping {
 
  private:
   [[maybe_unused]] AAsset* const asset_;
+  mutable std::mutex stream_mutex_;
   mutable std::vector<uint8_t> buffer_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(APKAssetMapping);
+};
+
+/// @brief AssetResolver implementation that wraps a FlutterCustomAssetResolver
+/// bridge for the C-API embedder engine.
+class CustomAssetResolverAdapter final : public AssetResolver {
+ public:
+  explicit CustomAssetResolverAdapter(FlutterCustomAssetResolver resolver);
+  ~CustomAssetResolverAdapter() override;
+
+  // |AssetResolver|
+  bool operator==(const AssetResolver& other) const override;
+
+  // |AssetResolver|
+  bool IsValid() const override;
+
+  // |AssetResolver|
+  bool IsValidAfterAssetManagerChange() const override;
+
+  // |AssetResolver|
+  AssetResolver::AssetResolverType GetType() const override;
+
+  // |AssetResolver|
+  std::unique_ptr<fml::Mapping> GetAsMapping(
+      const std::string& asset_name) const override;
+
+  // |AssetResolver|
+  std::vector<std::unique_ptr<fml::Mapping>> GetAsMappings(
+      const std::string& asset_pattern,
+      const std::optional<std::string>& subdir) const override;
+
+ private:
+  FlutterCustomAssetResolver resolver_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(CustomAssetResolverAdapter);
 };
 
 /// @brief AssetResolver implementation that resolves assets from an Android APK
@@ -125,20 +191,19 @@ class APKAssetProvider final : public AssetResolver {
   /// tests). Callers must not delete the returned pointer.
   APKAssetProviderInternal* GetImpl() const { return impl_.get(); }
 
-  // Returns a FlutterAssetResolver representing this asset provider for use
-  // with the Flutter Embedder C-API.
-  FlutterAssetResolver ToFlutterAssetResolver() const;
+  /// @brief Returns the base asset directory path.
+  const std::string& GetDirectory() const;
 
-  // Creates a FlutterAssetResolver from a Java AssetManager jobject.
-  static FlutterAssetResolver CreateFlutterAssetResolver(JNIEnv* env,
-                                                         jobject asset_manager,
-                                                         std::string directory);
+  /// @brief Creates a FlutterCustomAssetResolver bridge structure compatible
+  /// with the embedder C-API.
+  FlutterCustomAssetResolver CreateCustomAssetResolver() const;
 
-  // Creates a FlutterAssetResolver from an NDK AAssetManager pointer.
-  static FlutterAssetResolver CreateFlutterAssetResolver(
-      AAssetManager* asset_manager,
-      std::string directory);
+  /// @brief Factory creating an AssetResolver from a
+  /// FlutterCustomAssetResolver.
+  static std::unique_ptr<AssetResolver> CreateAssetResolver(
+      FlutterCustomAssetResolver resolver);
 
+  // |AssetResolver|
   bool operator==(const AssetResolver& other) const override;
 
   // |AssetResolver|

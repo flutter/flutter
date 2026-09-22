@@ -6,10 +6,6 @@
 
 #include <algorithm>
 #include <cstring>
-#include <iostream>
-#if defined(__ANDROID__)
-#include <android/log.h>
-#endif
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
@@ -18,51 +14,39 @@
 namespace flutter {
 namespace android {
 
-static FlutterEngineResult EngineCreateAOTData(
-    const FlutterEngineAOTDataSource* source,
-    FlutterEngineAOTData* data_out) {
-  static FlutterEngineProcTable s_procs = []() {
-    FlutterEngineProcTable procs = {};
-    procs.struct_size = sizeof(FlutterEngineProcTable);
-    FlutterEngineGetProcAddresses(&procs);
-    return procs;
-  }();
-  if (s_procs.CreateAOTData) {
-    return s_procs.CreateAOTData(source, data_out);
-  }
-  return kInternalInconsistency;
-}
+#include <sys/system_properties.h>
 
-static FlutterEngineResult EngineCollectAOTData(FlutterEngineAOTData data) {
-  static FlutterEngineProcTable s_procs = []() {
-    FlutterEngineProcTable procs = {};
-    procs.struct_size = sizeof(FlutterEngineProcTable);
-    FlutterEngineGetProcAddresses(&procs);
-    return procs;
-  }();
-  if (s_procs.CollectAOTData) {
-    return s_procs.CollectAOTData(data);
-  }
-  return kInternalInconsistency;
+static bool IsVivanteDevice() {
+  char product_model[PROP_VALUE_MAX];
+  __system_property_get("ro.hardware.egl", product_model);
+  return strcmp(product_model, "VIVANTE") == 0;
 }
 
 AndroidRenderingAPI SelectRenderingAPI(const AndroidVMArgs& args,
-                                       bool is_vivante) {
+                                       std::optional<bool> is_vivante) {
   TRACE_EVENT0("flutter", "SelectRenderingAPI");
 #if !SLIMPELLER
   if (args.enable_software_rendering) {
+    if (args.enable_impeller) {
+      FML_LOG(WARNING)
+          << "Impeller does not support software rendering. Either disable "
+             "software rendering or disable impeller.";
+    }
     return AndroidRenderingAPI::kSoftware;
   }
 
+#ifndef FLUTTER_RELEASE
   if (args.requested_rendering_backend == "opengles" && args.enable_impeller) {
     return AndroidRenderingAPI::kImpellerOpenGLES;
   }
   if (args.requested_rendering_backend == "vulkan" && args.enable_impeller) {
     return AndroidRenderingAPI::kImpellerVulkan;
   }
+#endif
 
+  bool vivante = is_vivante.value_or(IsVivanteDevice());
   if (args.enable_impeller &&
-      args.api_level >= kMinimumAndroidApiLevelForImpeller && !is_vivante) {
+      args.api_level >= kMinimumAndroidApiLevelForImpeller && !vivante) {
     return AndroidRenderingAPI::kImpellerAutoselect;
   }
 
@@ -78,7 +62,9 @@ AndroidRenderingAPI SelectRenderingAPI(const AndroidVMArgs& args,
 
 DefaultFontCollectionProvider::DefaultFontCollectionProvider(
     std::shared_ptr<OSLibraryLoader> library_loader)
-    : library_loader_(std::move(library_loader)) {
+    : library_loader_(library_loader
+                          ? std::move(library_loader)
+                          : FlutterEmbedderNative::GetDefaultLibraryLoader()) {
   TRACE_EVENT0("flutter",
                "DefaultFontCollectionProvider::DefaultFontCollectionProvider");
 }
@@ -91,6 +77,15 @@ DefaultFontCollectionProvider::~DefaultFontCollectionProvider() {
 bool DefaultFontCollectionProvider::PrefetchDefaultFontManager() {
   TRACE_EVENT0("flutter",
                "DefaultFontCollectionProvider::PrefetchDefaultFontManager");
+  if (library_loader_) {
+    using PrefetchDefaultFontManagerFn = void (*)();
+    auto fn = library_loader_->ResolveFunction<PrefetchDefaultFontManagerFn>(
+        OSLibraryLoader::kProcessGlobalScope,
+        "FlutterPlatformPrefetchDefaultFontManager");
+    if (fn) {
+      fn();
+    }
+  }
   is_prefetched_.store(true);
   prefetch_count_.fetch_add(1);
   return true;
@@ -177,16 +172,16 @@ FlutterEngineResult DefaultAndroidAOTProvider::CreateAOTData(
   if (!source || !data_out) {
     return kInvalidArguments;
   }
-  return EngineCreateAOTData(source, data_out);
+  return FlutterEmbedderNative::EngineCreateAOTData(source, data_out);
 }
 
 FlutterEngineResult DefaultAndroidAOTProvider::CollectAOTData(
     FlutterEngineAOTData data) {
   TRACE_EVENT0("flutter", "DefaultAndroidAOTProvider::CollectAOTData");
   if (!data) {
-    return kInvalidArguments;
+    return kSuccess;
   }
-  return EngineCollectAOTData(data);
+  return FlutterEmbedderNative::EngineCollectAOTData(data);
 }
 
 // ---------------------------------------------------------------------------
@@ -265,7 +260,7 @@ FlutterEngineResult InMemoryAndroidAOTProvider::CollectAOTData(
     FlutterEngineAOTData data) {
   TRACE_EVENT0("flutter", "InMemoryAndroidAOTProvider::CollectAOTData");
   if (!data) {
-    return kInvalidArguments;
+    return kSuccess;
   }
   std::scoped_lock lock(mutex_);
   collect_count_++;
@@ -294,10 +289,7 @@ void AndroidProjectArgsHolder::Populate(const AndroidVMArgs& args,
   argv_ptrs_.clear();
 
   // Executable name must be first entry in command_line_argv.
-  if (args.command_line_args.empty() ||
-      args.command_line_args.front() != "flutter") {
-    argv_strings_.push_back("flutter");
-  }
+  argv_strings_.push_back("flutter");
   for (const auto& arg : args.command_line_args) {
     argv_strings_.push_back(arg);
   }
@@ -305,12 +297,15 @@ void AndroidProjectArgsHolder::Populate(const AndroidVMArgs& args,
     argv_ptrs_.push_back(str.c_str());
   }
 
+  assets_path_ = args.assets_path;
   icu_data_path_ = args.icu_data_path;
   persistent_cache_path_ = args.engine_caches_path;
   log_tag_ = args.log_tag.empty() ? "flutter" : args.log_tag;
 
   memset(&project_args_, 0, sizeof(FlutterProjectArgs));
   project_args_.struct_size = sizeof(FlutterProjectArgs);
+  project_args_.assets_path =
+      assets_path_.empty() ? nullptr : assets_path_.c_str();
   project_args_.icu_data_path =
       icu_data_path_.empty() ? nullptr : icu_data_path_.c_str();
   project_args_.command_line_argc = static_cast<int>(argv_ptrs_.size());
@@ -339,20 +334,6 @@ void AndroidProjectArgsHolder::Populate(const AndroidVMArgs& args,
   project_args_.vsync_callback = &FlutterEmbedderNative::OnVsyncCallback;
   project_args_.update_semantics_callback2 =
       &FlutterEmbedderNative::OnUpdateSemantics2;
-  project_args_.log_message_callback = [](const char* tag, const char* message,
-                                          void* user_data) {
-#if defined(__ANDROID__)
-    __android_log_print(ANDROID_LOG_INFO, tag ? tag : "flutter", "%s",
-                        message ? message : "");
-#else
-    if (tag && strlen(tag) > 0) {
-      std::cout << tag << ": ";
-    }
-    if (message) {
-      std::cout << message << std::endl;
-    }
-#endif
-  };
 }
 
 const FlutterProjectArgs* AndroidProjectArgsHolder::GetProjectArgs() const {
@@ -398,6 +379,10 @@ AndroidVMInit::~AndroidVMInit() {
 bool AndroidVMInit::Init(const AndroidVMArgs& args) {
   TRACE_EVENT0("flutter", "AndroidVMInit::Init");
   std::scoped_lock lock(mutex_);
+  if (initialized_) {
+    FML_LOG(WARNING) << "AndroidVMInit::Init called more than once; ignoring.";
+    return true;
+  }
   vm_args_ = args;
   rendering_api_ = SelectRenderingAPI(vm_args_);
 
@@ -415,11 +400,12 @@ bool AndroidVMInit::Init(const AndroidVMArgs& args) {
     if (result != kSuccess) {
       FML_LOG(ERROR) << "Failed to create AOT data from elf library: "
                      << vm_args_.aot_library_path;
+      initialized_ = false;
       return false;
     }
   }
 
-  project_args_holder_->Populate(vm_args_, aot_data_, this);
+  project_args_holder_->Populate(vm_args_, aot_data_, nullptr);
 
   if (!vm_args_.vm_service_uri.empty()) {
     vm_service_uri_ = vm_args_.vm_service_uri;
@@ -437,6 +423,7 @@ bool AndroidVMInit::Init(const AndroidVMArgs& args) {
 
 bool AndroidVMInit::PrefetchDefaultFontManager() {
   TRACE_EVENT0("flutter", "AndroidVMInit::PrefetchDefaultFontManager");
+  std::scoped_lock lock(mutex_);
   if (font_provider_) {
     return font_provider_->PrefetchDefaultFontManager();
   }
@@ -490,6 +477,7 @@ FlutterEngineResult AndroidVMInit::CreateAOTData(
     const FlutterEngineAOTDataSource* source,
     FlutterEngineAOTData* data_out) {
   TRACE_EVENT0("flutter", "AndroidVMInit::CreateAOTData");
+  std::scoped_lock lock(mutex_);
   if (!aot_provider_) {
     return kInternalInconsistency;
   }
@@ -498,6 +486,7 @@ FlutterEngineResult AndroidVMInit::CreateAOTData(
 
 FlutterEngineResult AndroidVMInit::CollectAOTData(FlutterEngineAOTData data) {
   TRACE_EVENT0("flutter", "AndroidVMInit::CollectAOTData");
+  std::scoped_lock lock(mutex_);
   if (!aot_provider_) {
     return kInternalInconsistency;
   }
@@ -506,23 +495,27 @@ FlutterEngineResult AndroidVMInit::CollectAOTData(FlutterEngineAOTData data) {
 
 std::shared_ptr<FontCollectionProvider>
 AndroidVMInit::GetFontCollectionProvider() const {
+  std::scoped_lock lock(mutex_);
   return font_provider_;
 }
 
 void AndroidVMInit::SetFontCollectionProvider(
     std::shared_ptr<FontCollectionProvider> provider) {
   TRACE_EVENT0("flutter", "AndroidVMInit::SetFontCollectionProvider");
+  std::scoped_lock lock(mutex_);
   font_provider_ = provider ? std::move(provider)
                             : std::make_shared<DefaultFontCollectionProvider>();
 }
 
 std::shared_ptr<AndroidAOTProvider> AndroidVMInit::GetAOTProvider() const {
+  std::scoped_lock lock(mutex_);
   return aot_provider_;
 }
 
 void AndroidVMInit::SetAOTProvider(
     std::shared_ptr<AndroidAOTProvider> provider) {
   TRACE_EVENT0("flutter", "AndroidVMInit::SetAOTProvider");
+  std::scoped_lock lock(mutex_);
   aot_provider_ = provider ? std::move(provider)
                            : std::make_shared<DefaultAndroidAOTProvider>();
 }

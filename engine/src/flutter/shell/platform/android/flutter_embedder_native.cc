@@ -4,148 +4,26 @@
 
 #include "flutter/shell/platform/android/flutter_embedder_native.h"
 
-#include <iostream>
-#if defined(__ANDROID__)
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#include <GLES3/gl3.h>
-#include <android/log.h>
-#include <android/native_window.h>
 #include <android/native_window_jni.h>
-#endif
+#include <dlfcn.h>
+#include <algorithm>
+#include <cstring>
 
-#ifndef GL_TEXTURE_EXTERNAL_OES
-#define GL_TEXTURE_EXTERNAL_OES 0x8D65
-#endif
-#ifndef GL_RGBA8_OES
-#define GL_RGBA8_OES 0x8058
-#endif
+#include "unicode/uchar.h"
 
-#include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
-#include "flutter/fml/paths.h"
+#include "flutter/fml/mapping.h"
+#include "flutter/fml/native_library.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/shell/platform/android/flutter_main.h"
 
 namespace flutter {
 namespace android {
 
+std::mutex FlutterEmbedderNative::default_library_loader_mutex_;
 std::shared_ptr<OSLibraryLoader>
     FlutterEmbedderNative::default_library_loader_ = nullptr;
-
-DefaultCallbackCacheProvider::DefaultCallbackCacheProvider() {
-  TRACE_EVENT0("flutter",
-               "DefaultCallbackCacheProvider::DefaultCallbackCacheProvider");
-}
-
-DefaultCallbackCacheProvider::~DefaultCallbackCacheProvider() {
-  TRACE_EVENT0("flutter",
-               "DefaultCallbackCacheProvider::~DefaultCallbackCacheProvider");
-}
-
-static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
-static jfieldID g_jni_shell_holder_field = nullptr;
-static jmethodID g_jni_constructor = nullptr;
-static fml::jni::ScopedJavaGlobalRef<jclass>* g_java_long_class = nullptr;
-static jmethodID g_long_constructor = nullptr;
-static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_callback_info_class =
-    nullptr;
-static jmethodID g_flutter_callback_info_constructor = nullptr;
-static fml::jni::ScopedJavaGlobalRef<jclass>* g_weak_reference_class = nullptr;
-static jmethodID g_weak_reference_get = nullptr;
-static fml::jni::ScopedJavaGlobalRef<jclass>* g_surface_texture_wrapper_class =
-    nullptr;
-static jmethodID g_surface_texture_wrapper_attach_to_gl_context = nullptr;
-static jmethodID g_surface_texture_wrapper_update_tex_image = nullptr;
-static jmethodID g_surface_texture_wrapper_detach_from_gl_context = nullptr;
-static jmethodID g_surface_texture_wrapper_release = nullptr;
-
-static FlutterEngineResult EngineShutdown(FLUTTER_API_SYMBOL(FlutterEngine)
-                                              engine);
-
-static FlutterEngineResult GetCallbackInformationFromEngine(
-    int64_t handle,
-    FlutterCallbackInformation* info) {
-  static FlutterEngineProcTable s_procs = []() {
-    FlutterEngineProcTable procs = {};
-    procs.struct_size = sizeof(FlutterEngineProcTable);
-    FlutterEngineGetProcAddresses(&procs);
-    return procs;
-  }();
-  if (s_procs.GetCallbackInformation) {
-    return s_procs.GetCallbackInformation(handle, info);
-  }
-  return kInternalInconsistency;
-}
-
-std::optional<DartCallbackInfo>
-DefaultCallbackCacheProvider::GetCallbackInformation(int64_t handle) {
-  TRACE_EVENT0("flutter",
-               "DefaultCallbackCacheProvider::GetCallbackInformation");
-  FlutterCallbackInformation info = {};
-  info.struct_size = sizeof(FlutterCallbackInformation);
-  if (GetCallbackInformationFromEngine(handle, &info) == kSuccess) {
-    DartCallbackInfo result;
-    result.name = info.name ? info.name : "";
-    result.class_name = info.class_name ? info.class_name : "";
-    result.library_path = info.library_path ? info.library_path : "";
-    return result;
-  }
-  return std::nullopt;
-}
-
-InMemoryCallbackCacheProvider::InMemoryCallbackCacheProvider() {
-  TRACE_EVENT0("flutter",
-               "InMemoryCallbackCacheProvider::InMemoryCallbackCacheProvider");
-}
-
-InMemoryCallbackCacheProvider::~InMemoryCallbackCacheProvider() {
-  TRACE_EVENT0("flutter",
-               "InMemoryCallbackCacheProvider::~InMemoryCallbackCacheProvider");
-}
-
-void InMemoryCallbackCacheProvider::AddCallback(
-    int64_t handle,
-    const std::string& name,
-    const std::string& class_name,
-    const std::string& library_path) {
-  TRACE_EVENT0("flutter", "InMemoryCallbackCacheProvider::AddCallback");
-  std::scoped_lock lock(mutex_);
-  cache_[handle] = DartCallbackInfo{name, class_name, library_path};
-}
-
-void InMemoryCallbackCacheProvider::RemoveCallback(int64_t handle) {
-  TRACE_EVENT0("flutter", "InMemoryCallbackCacheProvider::RemoveCallback");
-  std::scoped_lock lock(mutex_);
-  cache_.erase(handle);
-}
-
-void InMemoryCallbackCacheProvider::Clear() {
-  TRACE_EVENT0("flutter", "InMemoryCallbackCacheProvider::Clear");
-  std::scoped_lock lock(mutex_);
-  cache_.clear();
-}
-
-size_t InMemoryCallbackCacheProvider::GetSize() const {
-  std::scoped_lock lock(mutex_);
-  return cache_.size();
-}
-
-std::optional<DartCallbackInfo>
-InMemoryCallbackCacheProvider::GetCallbackInformation(int64_t handle) {
-  TRACE_EVENT0("flutter",
-               "InMemoryCallbackCacheProvider::GetCallbackInformation");
-  std::scoped_lock lock(mutex_);
-  auto it = cache_.find(handle);
-  if (it != cache_.end()) {
-    return it->second;
-  }
-  return std::nullopt;
-}
 
 DefaultImageDecoderProvider::DefaultImageDecoderProvider(
     std::shared_ptr<JvmInvoker> jvm_invoker)
@@ -166,10 +44,7 @@ bool DefaultImageDecoderProvider::DecodeImage(const uint8_t* data,
   if (!jvm_invoker_ || !data || size == 0) {
     return false;
   }
-  std::vector<uint8_t> payload(data, data + size);
-  return jvm_invoker_->InvokeBooleanMethod(
-      "decodeImage", "(Ljava/nio/ByteBuffer;J)Landroid/graphics/Bitmap;",
-      payload);
+  return jvm_invoker_->DecodeImage(data, size, generator_handle);
 }
 
 void DefaultImageDecoderProvider::OnImageHeader(int64_t generator_handle,
@@ -177,6 +52,9 @@ void DefaultImageDecoderProvider::OnImageHeader(int64_t generator_handle,
                                                 int32_t height) {
   TRACE_EVENT0("flutter", "DefaultImageDecoderProvider::OnImageHeader");
   std::scoped_lock lock(mutex_);
+  if (headers_.size() >= kMaxHeaderCount) {
+    headers_.erase(headers_.begin());
+  }
   headers_[generator_handle] = ImageHeaderInfo{width, height};
 }
 
@@ -189,6 +67,12 @@ std::optional<ImageHeaderInfo> DefaultImageDecoderProvider::GetImageHeader(
     return it->second;
   }
   return std::nullopt;
+}
+
+void DefaultImageDecoderProvider::RemoveImageHeader(int64_t generator_handle) {
+  TRACE_EVENT0("flutter", "DefaultImageDecoderProvider::RemoveImageHeader");
+  std::scoped_lock lock(mutex_);
+  headers_.erase(generator_handle);
 }
 
 InMemoryImageDecoderProvider::InMemoryImageDecoderProvider() {
@@ -262,6 +146,12 @@ std::optional<ImageHeaderInfo> InMemoryImageDecoderProvider::GetImageHeader(
   return std::nullopt;
 }
 
+void InMemoryImageDecoderProvider::RemoveImageHeader(int64_t generator_handle) {
+  TRACE_EVENT0("flutter", "InMemoryImageDecoderProvider::RemoveImageHeader");
+  std::scoped_lock lock(mutex_);
+  headers_.erase(generator_handle);
+}
+
 EmbedderImageLRU::EmbedderImageLRU(size_t capacity)
     : capacity_(capacity > 0 ? capacity : kDefaultCapacity),
       entries_(capacity_) {
@@ -291,6 +181,7 @@ uint64_t EmbedderImageLRU::FindImage(uint64_t key) {
 void EmbedderImageLRU::UpdateKey(uint64_t image_handle, uint64_t key) {
   TRACE_EVENT0("flutter", "EmbedderImageLRU::UpdateKey");
   if (entries_[0].key == key) {
+    entries_[0].image_handle = image_handle;
     return;
   }
   size_t i = 1;
@@ -299,7 +190,10 @@ void EmbedderImageLRU::UpdateKey(uint64_t image_handle, uint64_t key) {
       break;
     }
   }
-  for (auto j = (i < capacity_ ? i : capacity_ - 1); j > 0; --j) {
+  if (i >= capacity_) {
+    return;
+  }
+  for (auto j = i; j > 0; --j) {
     entries_[j] = entries_[j - 1];
   }
   entries_[0] = Entry{.key = key, .image_handle = image_handle};
@@ -307,19 +201,19 @@ void EmbedderImageLRU::UpdateKey(uint64_t image_handle, uint64_t key) {
 
 uint64_t EmbedderImageLRU::AddImage(uint64_t image_handle, uint64_t key) {
   TRACE_EVENT0("flutter", "EmbedderImageLRU::AddImage");
+  if (key == 0) {
+    return 0;
+  }
   std::scoped_lock lock(mutex_);
-  uint64_t lru_key = entries_[capacity_ - 1].key;
-  bool updated_image = false;
   for (size_t i = 0; i < capacity_; ++i) {
-    if (entries_[i].key == lru_key) {
-      updated_image = true;
-      entries_[i] = Entry{.key = key, .image_handle = image_handle};
-      break;
+    if (entries_[i].key == key) {
+      entries_[i].image_handle = image_handle;
+      UpdateKey(image_handle, key);
+      return 0;
     }
   }
-  if (!updated_image) {
-    entries_[0] = Entry{.key = key, .image_handle = image_handle};
-  }
+  uint64_t lru_key = entries_[capacity_ - 1].key;
+  entries_[capacity_ - 1] = Entry{.key = key, .image_handle = image_handle};
   UpdateKey(image_handle, key);
   return lru_key;
 }
@@ -344,10 +238,7 @@ size_t EmbedderImageLRU::GetSize() const {
 }
 
 FlutterEmbedderNative::FlutterEmbedderNative()
-    : jvm_invoker_(std::make_shared<DefaultJvmInvoker>()),
-      callback_cache_(std::make_shared<DefaultCallbackCacheProvider>()),
-      image_decoder_(
-          std::make_shared<DefaultImageDecoderProvider>(jvm_invoker_)),
+    : jvm_invoker_(std::make_shared<AndroidJvmInvoker>()),
       image_lru_(std::make_shared<EmbedderImageLRU>()),
       platform_views_provider_(
           std::make_shared<DefaultPlatformViewsProvider>(jvm_invoker_)),
@@ -382,26 +273,25 @@ FlutterEmbedderNative::FlutterEmbedderNative()
       platform_views_controller_(
           std::make_shared<AndroidPlatformViewsController>(
               platform_views_provider_)),
-      jni_delegate_(std::make_shared<JniDelegate>(jvm_invoker_,
-                                                  callback_cache_,
-                                                  image_decoder_,
-                                                  platform_views_provider_,
-                                                  window_metrics_provider_,
-                                                  vsync_waiter_,
-                                                  vm_init_,
-                                                  hardware_buffer_provider_,
-                                                  vulkan_texture_provider_,
-                                                  surface_control_provider_,
-                                                  engine_group_provider_,
-                                                  engine_group_)),
+      jni_delegate_(std::make_shared<JniDelegate>(
+          jvm_invoker_,
+          std::make_shared<DefaultCallbackCacheProvider>(),
+          std::make_shared<DefaultImageDecoderProvider>(jvm_invoker_),
+          platform_views_provider_,
+          platform_views_controller_,
+          window_metrics_provider_,
+          vsync_waiter_,
+          vm_init_,
+          hardware_buffer_provider_,
+          vulkan_texture_provider_,
+          surface_control_provider_,
+          engine_group_provider_,
+          engine_group_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, nullptr)),
       asset_provider_(std::make_shared<APKAssetProvider>(
           std::make_shared<InMemoryAPKAssetProviderImpl>())) {
+  AttachWindowMetricsCallbacks();
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterEmbedderNative");
-  if (FlutterMain::IsInitialized() && platform_views_provider_) {
-    platform_views_provider_->SetHcppEnabled(
-        FlutterMain::Get().GetSettings().enable_surface_control);
-  }
   FML_DLOG(INFO)
       << "Initialized FlutterEmbedderNative with default components.";
 }
@@ -426,14 +316,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider,
     std::shared_ptr<AndroidEngineGroupProvider> engine_group_provider,
     std::shared_ptr<AndroidEngineGroup> engine_group)
-    : jvm_invoker_(std::move(jvm_invoker)),
-      callback_cache_(callback_cache
-                          ? std::move(callback_cache)
-                          : std::make_shared<DefaultCallbackCacheProvider>()),
-      image_decoder_(
-          image_decoder
-              ? std::move(image_decoder)
-              : std::make_shared<DefaultImageDecoderProvider>(jvm_invoker_)),
+    : jvm_invoker_(jvm_invoker ? std::move(jvm_invoker)
+                               : std::make_shared<AndroidJvmInvoker>()),
       image_lru_(image_lru ? std::move(image_lru)
                            : std::make_shared<EmbedderImageLRU>()),
       platform_views_provider_(
@@ -492,43 +376,70 @@ FlutterEmbedderNative::FlutterEmbedderNative(
       platform_views_controller_(
           std::make_shared<AndroidPlatformViewsController>(
               platform_views_provider_)),
-      jni_delegate_(std::make_shared<JniDelegate>(jvm_invoker_,
-                                                  callback_cache_,
-                                                  image_decoder_,
-                                                  platform_views_provider_,
-                                                  window_metrics_provider_,
-                                                  vsync_waiter_,
-                                                  vm_init_,
-                                                  hardware_buffer_provider_,
-                                                  vulkan_texture_provider_,
-                                                  surface_control_provider_,
-                                                  engine_group_provider_,
-                                                  engine_group_)),
+      jni_delegate_(std::make_shared<JniDelegate>(
+          jvm_invoker_,
+          std::move(callback_cache),
+          image_decoder
+              ? std::move(image_decoder)
+              : std::make_shared<DefaultImageDecoderProvider>(jvm_invoker_),
+          platform_views_provider_,
+          platform_views_controller_,
+          window_metrics_provider_,
+          vsync_waiter_,
+          vm_init_,
+          hardware_buffer_provider_,
+          vulkan_texture_provider_,
+          surface_control_provider_,
+          engine_group_provider_,
+          engine_group_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, legacy_delegate)),
       asset_provider_(
           asset_provider
               ? std::move(asset_provider)
               : std::make_shared<APKAssetProvider>(
                     std::make_shared<InMemoryAPKAssetProviderImpl>())) {
+  AttachWindowMetricsCallbacks();
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::FlutterEmbedderNative(custom)");
-  if (FlutterMain::IsInitialized() && platform_views_provider_) {
-    platform_views_provider_->SetHcppEnabled(
-        FlutterMain::Get().GetSettings().enable_surface_control);
-  }
   FML_DLOG(INFO) << "Initialized FlutterEmbedderNative with custom components.";
 }
 
 FlutterEmbedderNative::~FlutterEmbedderNative() {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::~FlutterEmbedderNative");
-  if (vsync_waiter_) {
-    vsync_waiter_->SetEngine(nullptr);
+  UnregisterImageDecoder();
+  auto engine = GetEngine();
+  if (engine) {
+    DeinitializeEngine(engine);
+    SetEngine(nullptr);
   }
-  if (engine_) {
-    EngineShutdown(engine_);
-    engine_ = nullptr;
+  std::lock_guard<std::mutex> pres_lock(presentation_mutex_);
+  std::lock_guard<std::mutex> surf_lock(surface_mutex_);
+  if (native_window_) {
+    ANativeWindow_release(native_window_);
+    native_window_ = nullptr;
   }
-  TeardownEGL();
+}
+
+void FlutterEmbedderNative::AttachJavaObject(JNIEnv* env, jobject flutterJNI) {
+  std::lock_guard<std::mutex> lock(java_object_mutex_);
+  if (env && flutterJNI) {
+    java_object_ =
+        std::make_shared<fml::jni::JavaObjectWeakGlobalRef>(env, flutterJNI);
+  } else {
+    java_object_ = nullptr;
+  }
+  if (jvm_invoker_) {
+    jvm_invoker_->SetJavaObject(java_object_);
+  }
+}
+
+fml::jni::ScopedJavaLocalRef<jobject> FlutterEmbedderNative::GetJavaObject(
+    JNIEnv* env) const {
+  std::lock_guard<std::mutex> lock(java_object_mutex_);
+  if (!java_object_ || !env) {
+    return fml::jni::ScopedJavaLocalRef<jobject>();
+  }
+  return java_object_->get(env);
 }
 
 bool FlutterEmbedderNative::IsQuarantineEnforced() {
@@ -547,6 +458,228 @@ size_t FlutterEmbedderNative::GetEmbedderVersion() {
   return FLUTTER_ENGINE_VERSION;
 }
 
+void FlutterEmbedderNative::SetNativeWindow(ANativeWindow* window) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetNativeWindow");
+  std::lock_guard<std::mutex> pres_lock(presentation_mutex_);
+  std::lock_guard<std::mutex> surf_lock(surface_mutex_);
+  if (native_window_ == window) {
+    return;
+  }
+  if (window) {
+    ANativeWindow_acquire(window);
+  }
+  if (native_window_) {
+    ANativeWindow_release(native_window_);
+  }
+  native_window_ = window;
+  if (jni_delegate_) {
+    jni_delegate_->SetNativeWindow(window);
+  }
+}
+
+ANativeWindow* FlutterEmbedderNative::GetNativeWindow() {
+  std::lock_guard<std::mutex> lock(surface_mutex_);
+  return native_window_;
+}
+
+ANativeWindow* FlutterEmbedderNative::AcquireNativeWindow() {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::AcquireNativeWindow");
+  std::lock_guard<std::mutex> lock(surface_mutex_);
+  if (native_window_) {
+    ANativeWindow_acquire(native_window_);
+  }
+  return native_window_;
+}
+
+bool FlutterEmbedderNative::BlitSoftwareRaster(
+    const void* allocation,
+    size_t row_bytes,
+    size_t height,
+    const SoftwareBuffer& dst_buffer) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::BlitSoftwareRaster");
+  if (!allocation || row_bytes < 4 || (row_bytes % 4 != 0) || height == 0) {
+    return false;
+  }
+  if (!dst_buffer.bits || dst_buffer.width <= 0 || dst_buffer.height <= 0 ||
+      dst_buffer.stride <= 0 || dst_buffer.stride < dst_buffer.width) {
+    return false;
+  }
+
+  const size_t src_width = row_bytes / 4;
+  const size_t copy_width_px =
+      std::min(src_width, static_cast<size_t>(dst_buffer.width));
+  const size_t copy_height =
+      std::min(height, static_cast<size_t>(dst_buffer.height));
+
+  const uint8_t* src_row = reinterpret_cast<const uint8_t*>(allocation);
+  uint8_t* dst_row = reinterpret_cast<uint8_t*>(dst_buffer.bits);
+
+  if (dst_buffer.format == kFormatRgba8888) {
+    const size_t copy_bytes_per_row = copy_width_px * 4;
+    const size_t dst_stride_bytes = dst_buffer.stride * 4;
+
+    for (size_t y = 0; y < copy_height; ++y) {
+      std::memcpy(dst_row, src_row, copy_bytes_per_row);
+
+      // Clear remaining row margin and stride padding
+      if (copy_bytes_per_row < dst_stride_bytes) {
+        std::memset(dst_row + copy_bytes_per_row, 0,
+                    dst_stride_bytes - copy_bytes_per_row);
+      }
+
+      src_row += row_bytes;
+      dst_row += dst_stride_bytes;
+    }
+
+    // Clear remaining bottom rows if destination buffer is taller than src
+    if (copy_height < static_cast<size_t>(dst_buffer.height)) {
+      const size_t remaining_rows =
+          static_cast<size_t>(dst_buffer.height) - copy_height;
+      std::memset(dst_row, 0, remaining_rows * dst_stride_bytes);
+    }
+
+    return true;
+  } else if (dst_buffer.format == kFormatRgbx8888) {
+    const size_t copy_bytes_per_row = copy_width_px * 4;
+    const size_t dst_stride_bytes = dst_buffer.stride * 4;
+
+    for (size_t y = 0; y < copy_height; ++y) {
+      const uint32_t* src_px = reinterpret_cast<const uint32_t*>(src_row);
+      uint32_t* dst_px = reinterpret_cast<uint32_t*>(dst_row);
+
+      for (size_t x = 0; x < copy_width_px; ++x) {
+        // Little endian: byte 0=R, 1=G, 2=B, 3=X. Force opaque alpha channel on
+        // RGBX.
+        dst_px[x] = src_px[x] | 0xFF000000;
+      }
+
+      // Clear remaining row margin and stride padding
+      if (copy_bytes_per_row < dst_stride_bytes) {
+        std::memset(dst_row + copy_bytes_per_row, 0,
+                    dst_stride_bytes - copy_bytes_per_row);
+      }
+
+      src_row += row_bytes;
+      dst_row += dst_stride_bytes;
+    }
+
+    // Clear remaining bottom rows if destination buffer is taller than src
+    if (copy_height < static_cast<size_t>(dst_buffer.height)) {
+      const size_t remaining_rows =
+          static_cast<size_t>(dst_buffer.height) - copy_height;
+      std::memset(dst_row, 0, remaining_rows * dst_stride_bytes);
+    }
+
+    return true;
+  } else if (dst_buffer.format == kFormatRgb565) {
+    const size_t copy_bytes_per_row = copy_width_px * 2;
+    const size_t dst_stride_bytes = dst_buffer.stride * 2;
+
+    for (size_t y = 0; y < copy_height; ++y) {
+      const uint32_t* src_px = reinterpret_cast<const uint32_t*>(src_row);
+      uint16_t* dst_px = reinterpret_cast<uint16_t*>(dst_row);
+
+      for (size_t x = 0; x < copy_width_px; ++x) {
+        uint32_t pixel = src_px[x];
+        // Premultiplied RGBA (Little Endian: R=byte0, G=byte1, B=byte2,
+        // A=byte3)
+        uint8_t r = pixel & 0xFF;
+        uint8_t g = (pixel >> 8) & 0xFF;
+        uint8_t b = (pixel >> 16) & 0xFF;
+        uint8_t a = (pixel >> 24) & 0xFF;
+
+        if (a > 0 && a < 255) {
+          r = static_cast<uint8_t>(std::min<uint32_t>(255, (r * 255) / a));
+          g = static_cast<uint8_t>(std::min<uint32_t>(255, (g * 255) / a));
+          b = static_cast<uint8_t>(std::min<uint32_t>(255, (b * 255) / a));
+        }
+
+        dst_px[x] = static_cast<uint16_t>(((r >> 3) << 11) | ((g >> 2) << 5) |
+                                          (b >> 3));
+      }
+
+      // Clear remaining row margin and stride padding
+      if (copy_bytes_per_row < dst_stride_bytes) {
+        std::memset(dst_row + copy_bytes_per_row, 0,
+                    dst_stride_bytes - copy_bytes_per_row);
+      }
+
+      src_row += row_bytes;
+      dst_row += dst_stride_bytes;
+    }
+
+    // Clear remaining bottom rows if destination buffer is taller than src
+    if (copy_height < static_cast<size_t>(dst_buffer.height)) {
+      const size_t remaining_rows =
+          static_cast<size_t>(dst_buffer.height) - copy_height;
+      std::memset(dst_row, 0, remaining_rows * dst_stride_bytes);
+    }
+
+    return true;
+  }
+
+  FML_LOG(ERROR) << "Unsupported buffer format for software presentation: "
+                 << dst_buffer.format;
+  return false;
+}
+
+bool FlutterEmbedderNative::PresentSoftware(const void* allocation,
+                                            size_t row_bytes,
+                                            size_t height) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::PresentSoftware");
+  if (!allocation || row_bytes == 0 || height == 0) {
+    return false;
+  }
+
+  std::lock_guard<std::mutex> pres_lock(presentation_mutex_);
+
+  ANativeWindow* window = nullptr;
+  {
+    std::lock_guard<std::mutex> lock(surface_mutex_);
+    if (!native_window_) {
+      return false;
+    }
+    window = native_window_;
+    ANativeWindow_acquire(window);
+  }
+
+  // RAII guard to guarantee ANativeWindow_release on all exit paths.
+  struct WindowReleaser {
+    ANativeWindow* win;
+    ~WindowReleaser() {
+      if (win) {
+        ANativeWindow_release(win);
+      }
+    }
+  } releaser{window};
+
+  ANativeWindow_Buffer native_buffer;
+  if (ANativeWindow_lock(window, &native_buffer, nullptr) != 0) {
+    FML_LOG(ERROR)
+        << "Failed to lock ANativeWindow buffer for software presentation.";
+    return false;
+  }
+
+  // RAII guard to guarantee ANativeWindow_unlockAndPost on all exit paths.
+  struct BufferUnlocker {
+    ANativeWindow* win;
+    ~BufferUnlocker() {
+      if (win) {
+        ANativeWindow_unlockAndPost(win);
+      }
+    }
+  } unlocker{window};
+
+  SoftwareBuffer buffer;
+  buffer.bits = native_buffer.bits;
+  buffer.width = native_buffer.width;
+  buffer.height = native_buffer.height;
+  buffer.stride = native_buffer.stride;
+  buffer.format = native_buffer.format;
+
+  return BlitSoftwareRaster(allocation, row_bytes, height, buffer);
+}
+
 bool FlutterEmbedderNative::IsEmbedderEnabled() {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::IsEmbedderEnabled");
   return true;
@@ -554,41 +687,28 @@ bool FlutterEmbedderNative::IsEmbedderEnabled() {
 
 void FlutterEmbedderNative::SetEmbedderEnabled(bool enabled) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetEmbedderEnabled");
-  JniRouter::SetEmbedderEnabled(enabled);
+  (void)enabled;
 }
 
 void FlutterEmbedderNative::SetDefaultLibraryLoader(
     std::shared_ptr<OSLibraryLoader> loader) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetDefaultLibraryLoader");
-  default_library_loader_ = std::move(loader);
+  std::shared_ptr<OSLibraryLoader> old_loader;
+  {
+    std::lock_guard<std::mutex> lock(default_library_loader_mutex_);
+    old_loader = std::move(default_library_loader_);
+    default_library_loader_ = std::move(loader);
+  }
 }
 
 std::shared_ptr<OSLibraryLoader>
 FlutterEmbedderNative::GetDefaultLibraryLoader() {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetDefaultLibraryLoader");
+  std::lock_guard<std::mutex> lock(default_library_loader_mutex_);
   if (!default_library_loader_) {
     default_library_loader_ = std::make_shared<DefaultOSLibraryLoader>();
   }
   return default_library_loader_;
-}
-
-static std::shared_ptr<AndroidVsyncWaiter> g_default_vsync_waiter = nullptr;
-
-void FlutterEmbedderNative::SetDefaultVsyncWaiter(
-    std::shared_ptr<AndroidVsyncWaiter> waiter) {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetDefaultVsyncWaiter");
-  g_default_vsync_waiter = std::move(waiter);
-}
-
-std::shared_ptr<AndroidVsyncWaiter>
-FlutterEmbedderNative::GetDefaultVsyncWaiter() {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetDefaultVsyncWaiter");
-  if (!g_default_vsync_waiter) {
-    g_default_vsync_waiter = std::make_shared<AndroidVsyncWaiter>(
-        std::make_shared<DefaultAndroidChoreographerProvider>(),
-        std::make_shared<DefaultJvmInvoker>());
-  }
-  return g_default_vsync_waiter;
 }
 
 std::shared_ptr<JniRouter> FlutterEmbedderNative::CreateDefaultRouter(
@@ -606,11 +726,12 @@ std::shared_ptr<JniRouter> FlutterEmbedderNative::CreateDefaultRouter(
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::CreateDefaultRouter");
   auto delegate = std::make_shared<JniDelegate>(
       std::move(invoker), nullptr, nullptr, std::move(platform_views_provider),
-      std::move(window_metrics_provider), std::move(vsync_waiter),
+      nullptr, std::move(window_metrics_provider), std::move(vsync_waiter),
       std::move(vm_init), std::move(hardware_buffer_provider),
       std::move(vulkan_texture_provider), std::move(surface_control_provider),
       std::move(engine_group_provider), std::move(engine_group));
-  return std::make_shared<JniRouter>(std::move(delegate), legacy_delegate);
+  (void)legacy_delegate;
+  return std::make_shared<JniRouter>(std::move(delegate));
 }
 
 std::shared_ptr<JniRouter> FlutterEmbedderNative::GetRouter() const {
@@ -632,23 +753,42 @@ std::shared_ptr<OSLibraryLoader> FlutterEmbedderNative::GetLibraryLoader()
 
 std::shared_ptr<APKAssetProvider> FlutterEmbedderNative::GetAssetProvider()
     const {
+  std::lock_guard<std::mutex> lock(asset_provider_mutex_);
   return asset_provider_;
 }
 
 void FlutterEmbedderNative::SetAssetProvider(
     std::shared_ptr<APKAssetProvider> provider) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetAssetProvider");
+  std::lock_guard<std::mutex> lock(asset_provider_mutex_);
   asset_provider_ = std::move(provider);
+}
+
+void FlutterEmbedderNative::UpdateJavaAssetManager(
+    JNIEnv* env,
+    jobject jasset_manager,
+    const std::string& asset_bundle_path) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::UpdateJavaAssetManager");
+  if (jasset_manager != nullptr) {
+    auto asset_provider = std::make_shared<APKAssetProvider>(
+        env, jasset_manager, asset_bundle_path);
+    SetAssetProvider(std::move(asset_provider));
+  }
 }
 
 std::unique_ptr<fml::Mapping> FlutterEmbedderNative::ResolveAsset(
     const std::string& asset_name) const {
   TRACE_EVENT1("flutter", "FlutterEmbedderNative::ResolveAsset", "name",
                asset_name.c_str());
-  if (!asset_provider_) {
+  std::shared_ptr<APKAssetProvider> provider;
+  {
+    std::lock_guard<std::mutex> lock(asset_provider_mutex_);
+    provider = asset_provider_;
+  }
+  if (!provider) {
     return nullptr;
   }
-  return asset_provider_->GetAsMapping(asset_name);
+  return provider->GetAsMapping(asset_name);
 }
 
 std::vector<std::unique_ptr<fml::Mapping>>
@@ -657,108 +797,79 @@ FlutterEmbedderNative::ResolveAssetMappings(
     const std::optional<std::string>& subdir) const {
   TRACE_EVENT1("flutter", "FlutterEmbedderNative::ResolveAssetMappings",
                "pattern", asset_pattern.c_str());
-  if (!asset_provider_) {
+  std::shared_ptr<APKAssetProvider> provider;
+  {
+    std::lock_guard<std::mutex> lock(asset_provider_mutex_);
+    provider = asset_provider_;
+  }
+  if (!provider) {
     return {};
   }
-  return asset_provider_->GetAsMappings(asset_pattern, subdir);
+  return provider->GetAsMappings(asset_pattern, subdir);
 }
 
-FlutterCustomAssetResolver FlutterEmbedderNative::CreateCustomAssetResolver() {
-  FlutterCustomAssetResolver resolver = {};
-  resolver.struct_size = sizeof(FlutterCustomAssetResolver);
-  resolver.user_data = this;
-  resolver.get_asset = [](const char* asset_name, const uint8_t** buffer_out,
-                          size_t* size_out, void** allocation_baton_out,
-                          void* user_data) -> bool {
-    auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
-    if (!native || !asset_name || !buffer_out || !size_out ||
-        !allocation_baton_out) {
-      return false;
-    }
-    auto mapping = native->ResolveAsset(asset_name);
-    if (!mapping || !mapping->GetMapping()) {
-      return false;
-    }
-    *buffer_out = mapping->GetMapping();
-    *size_out = mapping->GetSize();
-    *allocation_baton_out = mapping.release();
-    return true;
-  };
-  resolver.free_asset = [](void* allocation_baton, void* user_data) {
-    auto* mapping = reinterpret_cast<fml::Mapping*>(allocation_baton);
-    delete mapping;
-  };
-  return resolver;
+FlutterCustomAssetResolver FlutterEmbedderNative::CreateCustomAssetResolver()
+    const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::CreateCustomAssetResolver");
+  std::shared_ptr<APKAssetProvider> provider;
+  {
+    std::lock_guard<std::mutex> lock(asset_provider_mutex_);
+    provider = asset_provider_;
+  }
+  if (!provider) {
+    FlutterCustomAssetResolver resolver = {};
+    resolver.struct_size = sizeof(FlutterCustomAssetResolver);
+    return resolver;
+  }
+  return provider->CreateCustomAssetResolver();
 }
 
-static FlutterEngineResult EngineUpdateAssetResolver(
-    FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    const FlutterCustomAssetResolver* resolver) {
-  static FlutterEngineProcTable s_procs = []() {
-    FlutterEngineProcTable procs = {};
-    procs.struct_size = sizeof(FlutterEngineProcTable);
-    FlutterEngineGetProcAddresses(&procs);
-    return procs;
-  }();
-  if (s_procs.UpdateAssetResolver) {
-    return s_procs.UpdateAssetResolver(engine, resolver);
+std::unique_ptr<AssetResolver> FlutterEmbedderNative::CreateAssetResolver()
+    const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::CreateAssetResolver");
+  std::shared_ptr<APKAssetProvider> provider;
+  {
+    std::lock_guard<std::mutex> lock(asset_provider_mutex_);
+    provider = asset_provider_;
   }
-  return kInternalInconsistency;
-}
-
-void FlutterEmbedderNative::UpdateAssetManager(JNIEnv* env,
-                                               jobject jasset_manager,
-                                               const std::string& bundle_path) {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::UpdateAssetManager");
-  if (jasset_manager != nullptr) {
-    auto asset_provider =
-        std::make_shared<APKAssetProvider>(env, jasset_manager, bundle_path);
-    SetAssetProvider(std::move(asset_provider));
+  if (!provider) {
+    return nullptr;
   }
-  if (engine_) {
-    FlutterCustomAssetResolver custom_resolver = CreateCustomAssetResolver();
-    EngineUpdateAssetResolver(engine_, &custom_resolver);
-  }
-  GetRouter()->RouteAssetManagerChanged();
+  return provider->Clone();
 }
 
 std::shared_ptr<CallbackCacheProvider> FlutterEmbedderNative::GetCallbackCache()
     const {
-  return callback_cache_;
+  return jni_delegate_ ? jni_delegate_->GetCallbackCache() : nullptr;
 }
 
 void FlutterEmbedderNative::SetCallbackCache(
     std::shared_ptr<CallbackCacheProvider> provider) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetCallbackCache");
-  callback_cache_ = provider ? std::move(provider)
-                             : std::make_shared<DefaultCallbackCacheProvider>();
   if (jni_delegate_) {
-    jni_delegate_->SetCallbackCache(callback_cache_);
+    jni_delegate_->SetCallbackCache(std::move(provider));
   }
 }
 
 std::optional<DartCallbackInfo>
 FlutterEmbedderNative::LookupCallbackInformation(int64_t handle) const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::LookupCallbackInformation");
-  if (!callback_cache_) {
-    return std::nullopt;
+  if (jni_router_) {
+    return jni_router_->RouteLookupCallbackInformation(handle);
   }
-  return callback_cache_->GetCallbackInformation(handle);
+  return std::nullopt;
 }
 
 std::shared_ptr<ImageDecoderProvider>
 FlutterEmbedderNative::GetImageDecoderProvider() const {
-  return image_decoder_;
+  return jni_delegate_ ? jni_delegate_->GetImageDecoderProvider() : nullptr;
 }
 
 void FlutterEmbedderNative::SetImageDecoderProvider(
     std::shared_ptr<ImageDecoderProvider> provider) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetImageDecoderProvider");
-  image_decoder_ =
-      provider ? std::move(provider)
-               : std::make_shared<DefaultImageDecoderProvider>(jvm_invoker_);
   if (jni_delegate_) {
-    jni_delegate_->SetImageDecoderProvider(image_decoder_);
+    jni_delegate_->SetImageDecoderProvider(std::move(provider));
   }
 }
 
@@ -766,45 +877,65 @@ bool FlutterEmbedderNative::DecodeImage(const uint8_t* data,
                                         size_t size,
                                         int64_t generator_handle) const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::DecodeImage");
-  if (!image_decoder_) {
-    return false;
+  if (jni_router_) {
+    return jni_router_->RouteDecodeImage(data, size, generator_handle);
   }
-  return image_decoder_->DecodeImage(data, size, generator_handle);
+  return false;
 }
 
 void FlutterEmbedderNative::OnNativeImageHeader(int64_t generator_handle,
                                                 int32_t width,
                                                 int32_t height) const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::OnNativeImageHeader");
-  if (image_decoder_) {
-    image_decoder_->OnImageHeader(generator_handle, width, height);
+  if (jni_router_) {
+    jni_router_->RouteNativeImageHeader(generator_handle, width, height);
   }
 }
 
 std::optional<ImageHeaderInfo> FlutterEmbedderNative::GetImageHeader(
     int64_t generator_handle) const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetImageHeader");
-  if (image_decoder_) {
-    return image_decoder_->GetImageHeader(generator_handle);
+  if (jni_router_) {
+    return jni_router_->RouteGetImageHeader(generator_handle);
   }
   return std::nullopt;
 }
 
+void FlutterEmbedderNative::RemoveImageHeader(int64_t generator_handle) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::RemoveImageHeader");
+  if (jni_router_) {
+    jni_router_->RouteRemoveImageHeader(generator_handle);
+  }
+}
+
 static FlutterEngineResult RegisterImageDecoderWithEngine(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    FlutterImageDecoderCallback callback,
-    void* user_data,
-    int32_t priority) {
+    FlutterEmbedderNative* native,
+    int32_t priority,
+    FlutterImageDecoderRegistration* registration_out) {
   static FlutterEngineProcTable s_procs = []() {
     FlutterEngineProcTable procs = {};
     procs.struct_size = sizeof(FlutterEngineProcTable);
     FlutterEngineGetProcAddresses(&procs);
     return procs;
   }();
-  if (s_procs.RegisterImageDecoder) {
-    return s_procs.RegisterImageDecoder(engine, callback, user_data, priority);
+  if (registration_out) {
+    *registration_out = 1;
   }
-  return kInternalInconsistency;
+  if (s_procs.RegisterImageGenerator) {
+    FlutterImageGeneratorRegistrationInfo reg_info = {};
+    reg_info.struct_size = sizeof(FlutterImageGeneratorRegistrationInfo);
+    reg_info.priority = priority;
+    reg_info.user_data = native;
+    return s_procs.RegisterImageGenerator(engine, &reg_info);
+  }
+  return kSuccess;
+}
+
+static FlutterEngineResult UnregisterImageDecoderWithEngine(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterImageDecoderRegistration registration) {
+  return kSuccess;
 }
 
 FlutterEngineResult FlutterEmbedderNative::RegisterImageDecoder(
@@ -814,23 +945,44 @@ FlutterEngineResult FlutterEmbedderNative::RegisterImageDecoder(
   if (!engine) {
     return kInvalidArguments;
   }
-  auto callback = [](const uint8_t* data, size_t size,
-                     void* user_data) -> bool {
-    auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
-    if (!native) {
-      return false;
-    }
-    return native->DecodeImage(data, size, 0);
-  };
-  return RegisterImageDecoderWithEngine(engine, callback, this, priority);
+  std::scoped_lock lock(decoder_registration_mutex_, engine_mutex_);
+  if (registered_engine_ && decoder_registration_ != 0) {
+    UnregisterImageDecoderWithEngine(registered_engine_, decoder_registration_);
+    registered_engine_ = nullptr;
+    decoder_registration_ = 0;
+  }
+
+  FlutterImageDecoderRegistration reg_id = 0;
+  FlutterEngineResult result =
+      RegisterImageDecoderWithEngine(engine, this, priority, &reg_id);
+  if (result == kSuccess) {
+    registered_engine_ = engine;
+    decoder_registration_ = reg_id;
+  }
+  return result;
+}
+
+FlutterEngineResult FlutterEmbedderNative::UnregisterImageDecoder() {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::UnregisterImageDecoder");
+  std::scoped_lock lock(decoder_registration_mutex_, engine_mutex_);
+  if (!registered_engine_ || decoder_registration_ == 0) {
+    return kSuccess;
+  }
+  FlutterEngineResult result = UnregisterImageDecoderWithEngine(
+      registered_engine_, decoder_registration_);
+  registered_engine_ = nullptr;
+  decoder_registration_ = 0;
+  return result;
 }
 
 std::shared_ptr<EmbedderImageLRU> FlutterEmbedderNative::GetImageLRU() const {
+  std::lock_guard<std::mutex> lock(image_lru_mutex_);
   return image_lru_;
 }
 
 void FlutterEmbedderNative::SetImageLRU(std::shared_ptr<EmbedderImageLRU> lru) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetImageLRU");
+  std::lock_guard<std::mutex> lock(image_lru_mutex_);
   image_lru_ = lru ? std::move(lru) : std::make_shared<EmbedderImageLRU>();
 }
 
@@ -845,10 +997,6 @@ void FlutterEmbedderNative::SetPlatformViewsProvider(
   platform_views_provider_ =
       provider ? std::move(provider)
                : std::make_shared<DefaultPlatformViewsProvider>(jvm_invoker_);
-  if (FlutterMain::IsInitialized() && platform_views_provider_) {
-    platform_views_provider_->SetHcppEnabled(
-        FlutterMain::Get().GetSettings().enable_surface_control);
-  }
   if (platform_views_controller_) {
     platform_views_controller_->SetProvider(platform_views_provider_);
   }
@@ -953,6 +1101,9 @@ bool FlutterEmbedderNative::OnDisplayPlatformView(
   TRACE_EVENT1("flutter",
                "FlutterEmbedderNative::OnDisplayPlatformView(struct)",
                "view_id", std::to_string(platform_view.identifier).c_str());
+  if (platform_view.struct_size < sizeof(FlutterPlatformView)) {
+    return false;
+  }
   if (!jni_router_) {
     return false;
   }
@@ -1235,12 +1386,25 @@ bool FlutterEmbedderNative::PushPlatformViewMutators(
     int32_t width,
     int32_t height,
     const AndroidMutatorsStack& mutators_stack) const {
+  return PushPlatformViewMutators(view_id, x, y, width, height, width, height,
+                                  mutators_stack);
+}
+
+bool FlutterEmbedderNative::PushPlatformViewMutators(
+    int64_t view_id,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height,
+    int32_t view_width,
+    int32_t view_height,
+    const AndroidMutatorsStack& mutators_stack) const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::PushPlatformViewMutators");
   if (!jni_router_) {
     return false;
   }
-  return jni_router_->RoutePlatformViewMutators(view_id, x, y, width, height,
-                                                mutators_stack);
+  return jni_router_->RoutePlatformViewMutators(
+      view_id, x, y, width, height, view_width, view_height, mutators_stack);
 }
 
 bool FlutterEmbedderNative::PushPlatformViewMutators(
@@ -1249,13 +1413,28 @@ bool FlutterEmbedderNative::PushPlatformViewMutators(
     int32_t y,
     int32_t width,
     int32_t height) const {
+  return PushPlatformViewMutators(platform_view, x, y, width, height, width,
+                                  height);
+}
+
+bool FlutterEmbedderNative::PushPlatformViewMutators(
+    const FlutterPlatformView& platform_view,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height,
+    int32_t view_width,
+    int32_t view_height) const {
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::PushPlatformViewMutators(view)");
+  if (platform_view.struct_size < sizeof(FlutterPlatformView)) {
+    return false;
+  }
   if (!jni_router_) {
     return false;
   }
-  return jni_router_->RoutePlatformViewMutators(platform_view, x, y, width,
-                                                height);
+  return jni_router_->RoutePlatformViewMutators(
+      platform_view, x, y, width, height, view_width, view_height);
 }
 
 bool FlutterEmbedderNative::UpdateSemantics(
@@ -1296,27 +1475,6 @@ bool FlutterEmbedderNative::SetSemanticsEnabled(bool enabled) const {
     return false;
   }
   return jni_router_->RouteSemanticsEnabled(enabled);
-}
-
-bool FlutterEmbedderNative::DispatchSemanticsAction(
-    int32_t node_id,
-    FlutterSemanticsAction action,
-    const std::vector<uint8_t>& data,
-    int64_t view_id) const {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::DispatchSemanticsAction");
-  if (!jni_router_) {
-    return false;
-  }
-  return jni_router_->RouteDispatchSemanticsAction(node_id, action, data,
-                                                   view_id);
-}
-
-bool FlutterEmbedderNative::SetAccessibilityFeatures(int32_t flags) const {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetAccessibilityFeatures");
-  if (!jni_router_) {
-    return false;
-  }
-  return jni_router_->RouteSetAccessibilityFeatures(flags);
 }
 
 static FlutterEngineResult EngineUpdateSemanticsEnabled(
@@ -1372,6 +1530,9 @@ FlutterEngineResult FlutterEmbedderNative::UpdateAccessibilityFeatures(
 static FlutterEngineResult EngineSendSemanticsAction(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterSendSemanticsActionInfo* info) {
+  if (!info || info->struct_size < sizeof(FlutterSendSemanticsActionInfo)) {
+    return kInvalidArguments;
+  }
   static FlutterEngineProcTable s_procs = []() {
     FlutterEngineProcTable procs = {};
     procs.struct_size = sizeof(FlutterEngineProcTable);
@@ -1381,7 +1542,7 @@ static FlutterEngineResult EngineSendSemanticsAction(
   if (s_procs.SendSemanticsAction) {
     return s_procs.SendSemanticsAction(engine, info);
   }
-  if (s_procs.DispatchSemanticsAction && info) {
+  if (s_procs.DispatchSemanticsAction) {
     return s_procs.DispatchSemanticsAction(engine, info->node_id, info->action,
                                            info->data, info->data_length);
   }
@@ -1392,7 +1553,8 @@ FlutterEngineResult FlutterEmbedderNative::SendSemanticsAction(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterSendSemanticsActionInfo* info) const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SendSemanticsAction");
-  if (!engine || !info) {
+  if (!engine || !info ||
+      info->struct_size < sizeof(FlutterSendSemanticsActionInfo)) {
     return kInvalidArguments;
   }
   return EngineSendSemanticsAction(engine, info);
@@ -1446,6 +1608,10 @@ void FlutterEmbedderNative::OnUpdateSemantics2(
 static FlutterEngineResult EngineSendWindowMetricsEvent(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterWindowMetricsEvent* event) {
+  if (!engine || !event ||
+      event->struct_size < sizeof(FlutterWindowMetricsEvent)) {
+    return kInvalidArguments;
+  }
   static FlutterEngineProcTable s_procs = []() {
     FlutterEngineProcTable procs = {};
     procs.struct_size = sizeof(FlutterEngineProcTable);
@@ -1463,6 +1629,14 @@ static FlutterEngineResult EngineNotifyDisplayUpdate(
     FlutterEngineDisplaysUpdateType update_type,
     const FlutterEngineDisplay* displays,
     size_t display_count) {
+  if (!engine || !displays || display_count == 0) {
+    return kInvalidArguments;
+  }
+  for (size_t i = 0; i < display_count; ++i) {
+    if (displays[i].struct_size < sizeof(FlutterEngineDisplay)) {
+      return kInvalidArguments;
+    }
+  }
   static FlutterEngineProcTable s_procs = []() {
     FlutterEngineProcTable procs = {};
     procs.struct_size = sizeof(FlutterEngineProcTable);
@@ -1476,29 +1650,101 @@ static FlutterEngineResult EngineNotifyDisplayUpdate(
   return kInternalInconsistency;
 }
 
+void FlutterEmbedderNative::SetEngine(FLUTTER_API_SYMBOL(FlutterEngine)
+                                          engine) {
+  {
+    std::scoped_lock lock(engine_mutex_);
+    registered_engine_ = engine;
+  }
+  AttachWindowMetricsCallbacks();
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_);
+    if (vsync_waiter_) {
+      vsync_waiter_->SetEngine(engine);
+    }
+  }
+}
+
+FLUTTER_API_SYMBOL(FlutterEngine) FlutterEmbedderNative::GetEngine() const {
+  std::scoped_lock lock(engine_mutex_);
+  return registered_engine_;
+}
+
+void FlutterEmbedderNative::AttachWindowMetricsCallbacks() {
+  std::scoped_lock lock(window_metrics_provider_mutex_);
+  if (!window_metrics_provider_) {
+    return;
+  }
+  window_metrics_provider_->SetMetricsCallback(
+      [this](const AndroidViewportMetrics& metrics) -> bool {
+        FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
+        {
+          std::scoped_lock eng_lock(engine_mutex_);
+          engine = registered_engine_;
+        }
+        if (!engine) {
+          return true;
+        }
+        return SendWindowMetricsEvent(engine, metrics) == kSuccess;
+      });
+
+  window_metrics_provider_->SetDisplayUpdateCallback(
+      [this](const AndroidDisplayMetrics& metrics) -> bool {
+        FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
+        {
+          std::scoped_lock eng_lock(engine_mutex_);
+          engine = registered_engine_;
+        }
+        if (!engine) {
+          return true;
+        }
+        return NotifyDisplayUpdate(engine, metrics) == kSuccess;
+      });
+}
+
 std::shared_ptr<WindowMetricsProvider>
 FlutterEmbedderNative::GetWindowMetricsProvider() const {
+  std::scoped_lock lock(window_metrics_provider_mutex_);
   return window_metrics_provider_;
 }
 
 void FlutterEmbedderNative::SetWindowMetricsProvider(
     std::shared_ptr<WindowMetricsProvider> provider) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetWindowMetricsProvider");
-  window_metrics_provider_ =
-      provider ? std::move(provider)
-               : std::make_shared<DefaultWindowMetricsProvider>(jvm_invoker_);
+  {
+    std::scoped_lock lock(window_metrics_provider_mutex_);
+    window_metrics_provider_ =
+        provider ? std::move(provider)
+                 : std::make_shared<DefaultWindowMetricsProvider>(jvm_invoker_);
+  }
+  AttachWindowMetricsCallbacks();
   if (jni_delegate_) {
-    jni_delegate_->SetWindowMetricsProvider(window_metrics_provider_);
+    std::shared_ptr<WindowMetricsProvider> current_provider;
+    {
+      std::scoped_lock lock(window_metrics_provider_mutex_);
+      current_provider = window_metrics_provider_;
+    }
+    jni_delegate_->SetWindowMetricsProvider(current_provider);
   }
 }
 
 bool FlutterEmbedderNative::SetViewportMetrics(
     const AndroidViewportMetrics& metrics) const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetViewportMetrics");
+  {
+    std::lock_guard<std::mutex> lock(viewport_metrics_mutex_);
+    const_cast<FlutterEmbedderNative*>(this)->cached_viewport_metrics_ =
+        metrics;
+  }
   if (!jni_router_) {
     return false;
   }
   return jni_router_->RouteSetViewportMetrics(metrics);
+}
+
+AndroidViewportMetrics FlutterEmbedderNative::GetViewportMetrics() const {
+  std::lock_guard<std::mutex> lock(viewport_metrics_mutex_);
+  return cached_viewport_metrics_;
 }
 
 bool FlutterEmbedderNative::UpdateDisplayMetrics(
@@ -1539,12 +1785,47 @@ FlutterEngineDisplay FlutterEmbedderNative::TranslateDisplayMetrics(
 }
 
 FlutterEngineResult FlutterEmbedderNative::SendWindowMetricsEvent(
+    const FlutterWindowMetricsEvent* event) const {
+  FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
+  {
+    std::scoped_lock lock(engine_mutex_);
+    engine = registered_engine_;
+  }
+  if (!engine) {
+    return kInvalidArguments;
+  }
+  return SendWindowMetricsEvent(engine, event);
+}
+
+FlutterEngineResult FlutterEmbedderNative::SendWindowMetricsEvent(
+    const AndroidViewportMetrics& metrics) const {
+  FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
+  {
+    std::scoped_lock lock(engine_mutex_);
+    engine = registered_engine_;
+  }
+  if (!engine) {
+    return kInvalidArguments;
+  }
+  return SendWindowMetricsEvent(engine, metrics);
+}
+
+FlutterEngineResult FlutterEmbedderNative::SendWindowMetricsEvent(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterWindowMetricsEvent* event) const {
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::SendWindowMetricsEvent(event)");
-  if (!engine || !event) {
+  if (!engine || !event ||
+      event->struct_size < sizeof(FlutterWindowMetricsEvent)) {
     return kInvalidArguments;
+  }
+  SendWindowMetricsEventFn test_fn;
+  {
+    std::scoped_lock lock(engine_mutex_);
+    test_fn = send_window_metrics_event_fn_;
+  }
+  if (test_fn) {
+    return test_fn(engine, event);
   }
   return EngineSendWindowMetricsEvent(engine, event);
 }
@@ -1562,6 +1843,20 @@ FlutterEngineResult FlutterEmbedderNative::SendWindowMetricsEvent(
 }
 
 FlutterEngineResult FlutterEmbedderNative::NotifyDisplayUpdate(
+    const AndroidDisplayMetrics& display,
+    FlutterEngineDisplaysUpdateType update_type) const {
+  FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
+  {
+    std::scoped_lock lock(engine_mutex_);
+    engine = registered_engine_;
+  }
+  if (!engine) {
+    return kInvalidArguments;
+  }
+  return NotifyDisplayUpdate(engine, display, update_type);
+}
+
+FlutterEngineResult FlutterEmbedderNative::NotifyDisplayUpdate(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     FlutterEngineDisplaysUpdateType update_type,
     const FlutterEngineDisplay* displays,
@@ -1571,53 +1866,104 @@ FlutterEngineResult FlutterEmbedderNative::NotifyDisplayUpdate(
   if (!engine || (!displays && display_count > 0)) {
     return kInvalidArguments;
   }
+  for (size_t i = 0; i < display_count; ++i) {
+    if (displays[i].struct_size < sizeof(FlutterEngineDisplay)) {
+      return kInvalidArguments;
+    }
+  }
+  NotifyDisplayUpdateFn test_fn;
+  {
+    std::scoped_lock lock(engine_mutex_);
+    test_fn = notify_display_update_fn_;
+  }
+  if (test_fn) {
+    return test_fn(engine, update_type, displays, display_count);
+  }
   return EngineNotifyDisplayUpdate(engine, update_type, displays,
                                    display_count);
 }
 
 FlutterEngineResult FlutterEmbedderNative::NotifyDisplayUpdate(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    const AndroidDisplayMetrics& display) const {
+    const AndroidDisplayMetrics& display,
+    FlutterEngineDisplaysUpdateType update_type) const {
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::NotifyDisplayUpdate(display)");
   if (!engine) {
     return kInvalidArguments;
   }
   FlutterEngineDisplay engine_display = TranslateDisplayMetrics(display);
-  return NotifyDisplayUpdate(engine, kFlutterEngineDisplaysUpdateTypeStartup,
-                             &engine_display, 1);
+  return NotifyDisplayUpdate(engine, update_type, &engine_display, 1);
+}
+
+void FlutterEmbedderNative::SetSendWindowMetricsEventFnForTesting(
+    SendWindowMetricsEventFn fn) {
+  std::scoped_lock lock(engine_mutex_);
+  send_window_metrics_event_fn_ = std::move(fn);
+}
+
+void FlutterEmbedderNative::SetNotifyDisplayUpdateFnForTesting(
+    NotifyDisplayUpdateFn fn) {
+  std::scoped_lock lock(engine_mutex_);
+  notify_display_update_fn_ = std::move(fn);
 }
 
 std::shared_ptr<AndroidChoreographerProvider>
 FlutterEmbedderNative::GetChoreographerProvider() const {
+  std::scoped_lock lock(choreographer_provider_mutex_);
   return choreographer_provider_;
 }
 
 void FlutterEmbedderNative::SetChoreographerProvider(
     std::shared_ptr<AndroidChoreographerProvider> provider) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetChoreographerProvider");
-  choreographer_provider_ =
-      provider ? std::move(provider)
-               : std::make_shared<DefaultAndroidChoreographerProvider>(
-                     library_loader_);
-  if (vsync_waiter_) {
-    vsync_waiter_->SetChoreographerProvider(choreographer_provider_);
+  std::shared_ptr<AndroidChoreographerProvider> new_provider;
+  {
+    std::scoped_lock lock(choreographer_provider_mutex_);
+    choreographer_provider_ =
+        provider ? std::move(provider)
+                 : std::make_shared<DefaultAndroidChoreographerProvider>(
+                       library_loader_);
+    new_provider = choreographer_provider_;
+  }
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_);
+    if (vsync_waiter_) {
+      vsync_waiter_->SetChoreographerProvider(new_provider);
+    }
   }
 }
 
 std::shared_ptr<AndroidVsyncWaiter> FlutterEmbedderNative::GetVsyncWaiter()
     const {
+  std::scoped_lock lock(vsync_waiter_mutex_);
   return vsync_waiter_;
 }
 
 void FlutterEmbedderNative::SetVsyncWaiter(
     std::shared_ptr<AndroidVsyncWaiter> waiter) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetVsyncWaiter");
-  vsync_waiter_ = waiter ? std::move(waiter)
-                         : std::make_shared<AndroidVsyncWaiter>(
-                               choreographer_provider_, jvm_invoker_);
+  FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
+  {
+    std::scoped_lock eng_lock(engine_mutex_);
+    engine = registered_engine_;
+  }
+  std::shared_ptr<AndroidVsyncWaiter> new_waiter;
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_, choreographer_provider_mutex_);
+    vsync_waiter_ = waiter ? std::move(waiter)
+                           : std::make_shared<AndroidVsyncWaiter>(
+                                 choreographer_provider_, jvm_invoker_);
+    if (engine && vsync_waiter_) {
+      vsync_waiter_->SetEngine(engine);
+    }
+    if (notify_vsync_fn_ && vsync_waiter_) {
+      vsync_waiter_->SetNotifyVsyncFnForTesting(notify_vsync_fn_);
+    }
+    new_waiter = vsync_waiter_;
+  }
   if (jni_delegate_) {
-    jni_delegate_->SetVsyncWaiter(vsync_waiter_);
+    jni_delegate_->SetVsyncWaiter(new_waiter);
   }
 }
 
@@ -1630,11 +1976,38 @@ void FlutterEmbedderNative::OnVsyncCallback(void* user_data, intptr_t baton) {
   native->AsyncWaitForVsync(baton);
 }
 
+void FlutterEmbedderNative::OnPlatformMessageCallback(
+    const FlutterPlatformMessage* message,
+    void* user_data) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::OnPlatformMessageCallback");
+  if (!message || !user_data) {
+    return;
+  }
+  auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
+  std::vector<uint8_t> data;
+  if (message->message && message->message_size > 0) {
+    data.assign(message->message, message->message + message->message_size);
+  }
+  int32_t response_id = 0;
+  if (message->response_handle != nullptr) {
+    response_id = native->RegisterResponseHandle(message->response_handle);
+  }
+  if (native->GetRouter()) {
+    native->GetRouter()->RoutePlatformMessage(
+        message->channel ? message->channel : "", data, response_id);
+  }
+}
+
 bool FlutterEmbedderNative::AsyncWaitForVsync(intptr_t baton) const {
   TRACE_EVENT1("flutter", "FlutterEmbedderNative::AsyncWaitForVsync", "baton",
                std::to_string(baton).c_str());
-  if (vsync_waiter_) {
-    return vsync_waiter_->AsyncWaitForVsync(baton);
+  std::shared_ptr<AndroidVsyncWaiter> waiter;
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_);
+    waiter = vsync_waiter_;
+  }
+  if (waiter) {
+    return waiter->AsyncWaitForVsync(baton);
   }
   if (jni_router_) {
     return jni_router_->RouteAsyncWaitForVsync(baton);
@@ -1645,21 +2018,41 @@ bool FlutterEmbedderNative::AsyncWaitForVsync(intptr_t baton) const {
 void FlutterEmbedderNative::UpdateRefreshRate(double refresh_rate_hz) const {
   TRACE_EVENT1("flutter", "FlutterEmbedderNative::UpdateRefreshRate",
                "refresh_rate", std::to_string(refresh_rate_hz).c_str());
-  if (vsync_waiter_) {
-    vsync_waiter_->UpdateRefreshRate(refresh_rate_hz);
+  if (!std::isfinite(refresh_rate_hz) || refresh_rate_hz <= 0.0) {
+    refresh_rate_hz = 60.0;
+  } else {
+    refresh_rate_hz = std::clamp(refresh_rate_hz, 1.0, 1000.0);
+  }
+  std::shared_ptr<AndroidVsyncWaiter> waiter;
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_);
+    waiter = vsync_waiter_;
+  }
+  if (waiter) {
+    waiter->UpdateRefreshRate(refresh_rate_hz);
   }
 }
 
 double FlutterEmbedderNative::GetRefreshRate() const {
-  if (vsync_waiter_) {
-    return vsync_waiter_->GetRefreshRate();
+  std::shared_ptr<AndroidVsyncWaiter> waiter;
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_);
+    waiter = vsync_waiter_;
+  }
+  if (waiter) {
+    return waiter->GetRefreshRate();
   }
   return 60.0;
 }
 
 int64_t FlutterEmbedderNative::GetRefreshPeriodNanos() const {
-  if (vsync_waiter_) {
-    return vsync_waiter_->GetRefreshPeriodNanos();
+  std::shared_ptr<AndroidVsyncWaiter> waiter;
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_);
+    waiter = vsync_waiter_;
+  }
+  if (waiter) {
+    return waiter->GetRefreshPeriodNanos();
   }
   return static_cast<int64_t>(1000000000.0 / 60.0);
 }
@@ -1672,35 +2065,40 @@ AndroidVsyncFrameInfo FlutterEmbedderNative::ComputeFramePacing(
                                                 refresh_rate_hz);
 }
 
-static FlutterEngineResult EngineNotifyVsync(FLUTTER_API_SYMBOL(FlutterEngine)
-                                                 engine,
-                                             intptr_t baton,
-                                             uint64_t frame_start_time_nanos,
-                                             uint64_t frame_target_time_nanos) {
-  static FlutterEngineProcTable s_procs = []() {
-    FlutterEngineProcTable procs = {};
-    procs.struct_size = sizeof(FlutterEngineProcTable);
-    FlutterEngineGetProcAddresses(&procs);
-    return procs;
-  }();
-  if (s_procs.OnVsync) {
-    return s_procs.OnVsync(engine, baton, frame_start_time_nanos,
-                           frame_target_time_nanos);
-  }
-  return kInternalInconsistency;
-}
-
 FlutterEngineResult FlutterEmbedderNative::NotifyVsync(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     intptr_t baton,
     int64_t frame_start_time_nanos,
     int64_t frame_target_time_nanos) const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::NotifyVsync");
-  if (!engine) {
+  if (!engine || frame_start_time_nanos <= 0 ||
+      frame_target_time_nanos <= frame_start_time_nanos) {
     return kInvalidArguments;
   }
-  return EngineNotifyVsync(engine, baton, frame_start_time_nanos,
-                           frame_target_time_nanos);
+  NotifyVsyncFn fn;
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_);
+    fn = notify_vsync_fn_;
+  }
+  if (fn) {
+    return fn(engine, baton, static_cast<uint64_t>(frame_start_time_nanos),
+              static_cast<uint64_t>(frame_target_time_nanos));
+  }
+  return AndroidVsyncWaiter::NotifyVsyncToEngine(
+      engine, baton, static_cast<uint64_t>(frame_start_time_nanos),
+      static_cast<uint64_t>(frame_target_time_nanos));
+}
+
+void FlutterEmbedderNative::SetNotifyVsyncFnForTesting(NotifyVsyncFn fn) {
+  std::shared_ptr<AndroidVsyncWaiter> waiter;
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_);
+    notify_vsync_fn_ = fn;
+    waiter = vsync_waiter_;
+  }
+  if (waiter) {
+    waiter->SetNotifyVsyncFnForTesting(std::move(fn));
+  }
 }
 
 bool FlutterEmbedderNative::InitVM(const AndroidVMArgs& args) const {
@@ -1708,6 +2106,7 @@ bool FlutterEmbedderNative::InitVM(const AndroidVMArgs& args) const {
   if (jni_router_) {
     return jni_router_->RouteInitVM(args);
   }
+  std::scoped_lock lock(vm_init_mutex_);
   if (vm_init_) {
     return vm_init_->Init(args);
   }
@@ -1719,6 +2118,7 @@ bool FlutterEmbedderNative::PrefetchDefaultFontManager() const {
   if (jni_router_) {
     return jni_router_->RoutePrefetchDefaultFontManager();
   }
+  std::scoped_lock lock(vm_init_mutex_);
   if (vm_init_) {
     return vm_init_->PrefetchDefaultFontManager();
   }
@@ -1731,6 +2131,7 @@ bool FlutterEmbedderNative::SetVmServiceUri(const std::string& uri) const {
   if (jni_router_) {
     return jni_router_->RouteSetVmServiceUri(uri);
   }
+  std::scoped_lock lock(vm_init_mutex_);
   if (vm_init_) {
     return vm_init_->SetVmServiceUri(uri);
   }
@@ -1738,6 +2139,7 @@ bool FlutterEmbedderNative::SetVmServiceUri(const std::string& uri) const {
 }
 
 std::string FlutterEmbedderNative::GetVmServiceUri() const {
+  std::scoped_lock lock(vm_init_mutex_);
   if (vm_init_) {
     return vm_init_->GetVmServiceUri();
   }
@@ -1745,6 +2147,7 @@ std::string FlutterEmbedderNative::GetVmServiceUri() const {
 }
 
 bool FlutterEmbedderNative::IsVMInitialized() const {
+  std::scoped_lock lock(vm_init_mutex_);
   if (vm_init_) {
     return vm_init_->IsInitialized();
   }
@@ -1752,6 +2155,7 @@ bool FlutterEmbedderNative::IsVMInitialized() const {
 }
 
 std::optional<AndroidVMArgs> FlutterEmbedderNative::GetVMArgs() const {
+  std::scoped_lock lock(vm_init_mutex_);
   if (vm_init_) {
     return vm_init_->GetVMArgs();
   }
@@ -1759,6 +2163,7 @@ std::optional<AndroidVMArgs> FlutterEmbedderNative::GetVMArgs() const {
 }
 
 AndroidRenderingAPI FlutterEmbedderNative::GetSelectedRenderingAPI() const {
+  std::scoped_lock lock(vm_init_mutex_);
   if (vm_init_) {
     return vm_init_->GetSelectedRenderingAPI();
   }
@@ -1766,6 +2171,7 @@ AndroidRenderingAPI FlutterEmbedderNative::GetSelectedRenderingAPI() const {
 }
 
 const FlutterProjectArgs* FlutterEmbedderNative::GetProjectArgs() const {
+  std::scoped_lock lock(vm_init_mutex_);
   if (vm_init_) {
     return vm_init_->GetProjectArgs();
   }
@@ -1804,8 +2210,34 @@ static FlutterEngineResult EngineDeinitialize(FLUTTER_API_SYMBOL(FlutterEngine)
   return kInternalInconsistency;
 }
 
-static FlutterEngineResult EngineRunInitialized(
-    FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+FlutterEngineResult FlutterEmbedderNative::InitializeEngine(
+    const FlutterRendererConfig* config,
+    const FlutterProjectArgs* args,
+    void* user_data,
+    FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::InitializeEngine");
+  if (initialize_engine_fn_) {
+    return initialize_engine_fn_(config, args, user_data, engine_out);
+  }
+  if (!config || !args || !engine_out ||
+      args->struct_size < sizeof(FlutterProjectArgs)) {
+    return kInvalidArguments;
+  }
+  void* effective_user_data =
+      user_data ? user_data : const_cast<FlutterEmbedderNative*>(this);
+  return EngineInitialize(FLUTTER_ENGINE_VERSION, config, args,
+                          effective_user_data, engine_out);
+}
+
+FlutterEngineResult FlutterEmbedderNative::RunInitializedEngine(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::RunInitializedEngine");
+  if (!engine) {
+    return kInvalidArguments;
+  }
+  if (run_initialized_engine_fn_) {
+    return run_initialized_engine_fn_(engine);
+  }
   static FlutterEngineProcTable s_procs = []() {
     FlutterEngineProcTable procs = {};
     procs.struct_size = sizeof(FlutterEngineProcTable);
@@ -1818,100 +2250,444 @@ static FlutterEngineResult EngineRunInitialized(
   return kInternalInconsistency;
 }
 
-static FlutterEngineResult EngineShutdown(FLUTTER_API_SYMBOL(FlutterEngine)
-                                              engine) {
+FlutterEngineResult FlutterEmbedderNative::Launch(
+    const std::string& entrypoint,
+    const std::string& library_url,
+    const std::vector<std::string>& entrypoint_args,
+    int64_t engine_id) {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::Launch", "engine_id",
+               std::to_string(engine_id).c_str());
+
+  auto existing_engine = GetEngine();
+  if (existing_engine != nullptr) {
+    return RunInitializedEngine(existing_engine);
+  }
+
+  FlutterProjectArgs args = {};
+  args.struct_size = sizeof(FlutterProjectArgs);
+  args.engine_id = engine_id;
+  args.custom_dart_entrypoint =
+      entrypoint.empty() ? nullptr : entrypoint.c_str();
+
+  std::vector<const char*> c_args;
+  c_args.reserve(entrypoint_args.size());
+  for (const auto& arg : entrypoint_args) {
+    c_args.push_back(arg.c_str());
+  }
+  args.dart_entrypoint_argc = c_args.size();
+  args.dart_entrypoint_argv = c_args.data();
+
+  std::string asset_dir;
+  {
+    std::lock_guard<std::mutex> lock(asset_provider_mutex_);
+    if (asset_provider_) {
+      asset_dir = asset_provider_->GetDirectory();
+    }
+  }
+  if (!asset_dir.empty()) {
+    args.assets_path = asset_dir.c_str();
+  }
+
+  args.vsync_callback = &FlutterEmbedderNative::OnVsyncCallback;
+  args.platform_message_callback =
+      &FlutterEmbedderNative::OnPlatformMessageCallback;
+
+  FlutterRendererConfig config = {};
+  config.type = kOpenGL;
+  config.open_gl.struct_size = sizeof(config.open_gl);
+  config.open_gl.make_current = [](void* user_data) -> bool { return true; };
+  config.open_gl.clear_current = [](void* user_data) -> bool { return true; };
+  config.open_gl.present = [](void* user_data) -> bool { return true; };
+  config.open_gl.fbo_callback = [](void* user_data) -> uint32_t { return 0; };
+
+  FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
+  FlutterEngineResult init_result =
+      InitializeEngine(&config, &args, this, &engine);
+  if (init_result != kSuccess || engine == nullptr) {
+    return init_result;
+  }
+
+  SetEngine(engine);
+  return RunInitializedEngine(engine);
+}
+
+FlutterEngineResult FlutterEmbedderNative::ScheduleFrame() const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::ScheduleFrame");
+  auto engine = GetEngine();
+  if (!engine) {
+    return kInvalidArguments;
+  }
   static FlutterEngineProcTable s_procs = []() {
     FlutterEngineProcTable procs = {};
     procs.struct_size = sizeof(FlutterEngineProcTable);
     FlutterEngineGetProcAddresses(&procs);
     return procs;
   }();
-  if (s_procs.Shutdown) {
-    return s_procs.Shutdown(engine);
-  }
-  if (s_procs.Deinitialize) {
-    return s_procs.Deinitialize(engine);
+  if (s_procs.ScheduleFrame) {
+    return s_procs.ScheduleFrame(engine);
   }
   return kInternalInconsistency;
 }
 
-static FlutterEngineResult EngineSendPlatformMessage(
-    FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    const FlutterPlatformMessage* message) {
+FlutterEngineResult FlutterEmbedderNative::SendPointerEvents(
+    const FlutterPointerEvent* events,
+    size_t count) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SendPointerEvents", "count",
+               std::to_string(count).c_str());
+
+  if (send_pointer_event_fn_) {
+    return send_pointer_event_fn_(events, count);
+  }
+
+  auto engine = GetEngine();
+  if (!engine) {
+    return kSuccess;
+  }
+
   static FlutterEngineProcTable s_procs = []() {
     FlutterEngineProcTable procs = {};
     procs.struct_size = sizeof(FlutterEngineProcTable);
     FlutterEngineGetProcAddresses(&procs);
     return procs;
   }();
+
+  if (s_procs.SendPointerEvent) {
+    return s_procs.SendPointerEvent(engine, events, count);
+  }
+  return kInternalInconsistency;
+}
+
+FlutterEngineResult FlutterEmbedderNative::SendPointerDataPacket(
+    const uint8_t* buffer,
+    size_t size) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SendPointerDataPacket",
+               "size", std::to_string(size).c_str());
+
+  if (!buffer || size == 0) {
+    return kInvalidArguments;
+  }
+
+  constexpr size_t kBytesPerField = 8;
+  constexpr size_t kFieldCount = 36;
+  constexpr size_t kPacketEntrySize = kBytesPerField * kFieldCount;
+
+  if (size % kPacketEntrySize != 0) {
+    FML_LOG(ERROR) << "Invalid pointer data packet size: " << size
+                   << " (must be multiple of " << kPacketEntrySize << ")";
+    return kInvalidArguments;
+  }
+
+  size_t event_count = size / kPacketEntrySize;
+  std::vector<FlutterPointerEvent> events;
+  events.reserve(event_count);
+
+  for (size_t i = 0; i < event_count; ++i) {
+    const uint8_t* entry = buffer + (i * kPacketEntrySize);
+    const int64_t* int_fields = reinterpret_cast<const int64_t*>(entry);
+    const double* double_fields = reinterpret_cast<const double*>(entry);
+
+    FlutterPointerEvent event = {};
+    event.struct_size = sizeof(FlutterPointerEvent);
+
+    int64_t change = int_fields[2];
+    switch (change) {
+      case 0:
+        event.phase = kCancel;
+        break;
+      case 1:
+        event.phase = kAdd;
+        break;
+      case 2:
+        event.phase = kRemove;
+        break;
+      case 3:
+        event.phase = kHover;
+        break;
+      case 4:
+        event.phase = kDown;
+        break;
+      case 5:
+        event.phase = kMove;
+        break;
+      case 6:
+        event.phase = kUp;
+        break;
+      case 7:
+        event.phase = kPanZoomStart;
+        break;
+      case 8:
+        event.phase = kPanZoomUpdate;
+        break;
+      case 9:
+        event.phase = kPanZoomEnd;
+        break;
+      default:
+        event.phase = kCancel;
+        break;
+    }
+
+    int64_t kind = int_fields[3];
+    switch (kind) {
+      case 0:
+        event.device_kind = kFlutterPointerDeviceKindTouch;
+        break;
+      case 1:
+        event.device_kind = kFlutterPointerDeviceKindMouse;
+        break;
+      case 2:
+        event.device_kind = kFlutterPointerDeviceKindStylus;
+        break;
+      case 3:
+        event.device_kind = kFlutterPointerDeviceKindInvertedStylus;
+        break;
+      case 4:
+        event.device_kind = kFlutterPointerDeviceKindTrackpad;
+        break;
+      default:
+        event.device_kind = kFlutterPointerDeviceKindTouch;
+        break;
+    }
+
+    int64_t signal_kind = int_fields[4];
+    switch (signal_kind) {
+      case 0:
+        event.signal_kind = kFlutterPointerSignalKindNone;
+        break;
+      case 1:
+        event.signal_kind = kFlutterPointerSignalKindScroll;
+        break;
+      case 2:
+        event.signal_kind = kFlutterPointerSignalKindScrollInertiaCancel;
+        break;
+      case 3:
+        event.signal_kind = kFlutterPointerSignalKindScale;
+        break;
+      default:
+        event.signal_kind = kFlutterPointerSignalKindNone;
+        break;
+    }
+
+    event.timestamp = static_cast<size_t>(int_fields[1]);
+    event.device = static_cast<int32_t>(int_fields[5]);
+    event.x = double_fields[7];
+    event.y = double_fields[8];
+    event.buttons = int_fields[11];
+    event.pressure = double_fields[14];
+    event.pressure_min = double_fields[15];
+    event.pressure_max = double_fields[16];
+    event.distance = double_fields[17];
+    event.distance_max = double_fields[18];
+    event.size = double_fields[19];
+    event.radius_major = double_fields[20];
+    event.radius_minor = double_fields[21];
+    event.radius_min = double_fields[22];
+    event.radius_max = double_fields[23];
+    event.orientation = double_fields[24];
+    event.tilt = double_fields[25];
+    event.platform_data = int_fields[26];
+    event.embedder_id = int_fields[0];
+    event.scroll_delta_x = double_fields[27];
+    event.scroll_delta_y = double_fields[28];
+    event.pan_x = double_fields[29];
+    event.pan_y = double_fields[30];
+    event.scale = double_fields[33];
+    event.rotation = double_fields[34];
+    event.view_id = static_cast<FlutterViewId>(int_fields[35]);
+
+    events.push_back(event);
+  }
+
+  return SendPointerEvents(events.data(), events.size());
+}
+
+FlutterEngineResult FlutterEmbedderNative::SendPlatformMessage(
+    const std::string& channel,
+    const uint8_t* message,
+    size_t size,
+    int32_t response_id) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SendPlatformMessage",
+               "channel", channel.c_str());
+
+  if (send_platform_message_fn_) {
+    return send_platform_message_fn_(channel, message, size, response_id);
+  }
+
+  auto engine = GetEngine();
+  if (!engine) {
+    std::vector<uint8_t> data;
+    if (message && size > 0) {
+      data.assign(message, message + size);
+    }
+    if (jni_router_) {
+      jni_router_->RoutePlatformMessage(channel, data, response_id);
+    }
+    return kSuccess;
+  }
+
+  FlutterPlatformMessage msg = {};
+  msg.struct_size = sizeof(FlutterPlatformMessage);
+  msg.channel = channel.c_str();
+  msg.message = message;
+  msg.message_size = size;
+
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+
+  FlutterPlatformMessageResponseHandle* response_handle = nullptr;
+  if (response_id != 0 && s_procs.PlatformMessageCreateResponseHandle) {
+    struct ResponseUserData {
+      std::shared_ptr<JvmInvoker> invoker;
+      int32_t response_id;
+    };
+
+    auto* user_data = new ResponseUserData{jvm_invoker_, response_id};
+
+    FlutterEngineResult create_res =
+        s_procs.PlatformMessageCreateResponseHandle(
+            engine,
+            [](const uint8_t* data, size_t data_size, void* udata) {
+              auto* r_data = static_cast<ResponseUserData*>(udata);
+              if (r_data && r_data->invoker) {
+                r_data->invoker->HandlePlatformMessageResponse(
+                    r_data->response_id, data, data_size);
+              }
+              delete r_data;
+            },
+            user_data, &response_handle);
+
+    if (create_res == kSuccess) {
+      msg.response_handle = response_handle;
+    } else {
+      delete user_data;
+    }
+  }
+
+  FlutterEngineResult result = kInternalInconsistency;
   if (s_procs.SendPlatformMessage) {
-    return s_procs.SendPlatformMessage(engine, message);
+    result = s_procs.SendPlatformMessage(engine, &msg);
   }
-  return kInternalInconsistency;
+
+  if (response_handle && s_procs.PlatformMessageReleaseResponseHandle) {
+    s_procs.PlatformMessageReleaseResponseHandle(engine, response_handle);
+  }
+
+  return result;
 }
 
-static FlutterEngineResult EngineCreateResponseHandle(
-    FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    FlutterDataCallback data_callback,
-    void* user_data,
-    FlutterPlatformMessageResponseHandle** response_out) {
-  static FlutterEngineProcTable s_procs = []() {
-    FlutterEngineProcTable procs = {};
-    procs.struct_size = sizeof(FlutterEngineProcTable);
-    FlutterEngineGetProcAddresses(&procs);
-    return procs;
-  }();
-  if (s_procs.PlatformMessageCreateResponseHandle) {
-    return s_procs.PlatformMessageCreateResponseHandle(engine, data_callback,
-                                                       user_data, response_out);
-  }
-  return kInternalInconsistency;
-}
-
-static FlutterEngineResult EngineReleaseResponseHandle(
-    FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    FlutterPlatformMessageResponseHandle* response) {
-  static FlutterEngineProcTable s_procs = []() {
-    FlutterEngineProcTable procs = {};
-    procs.struct_size = sizeof(FlutterEngineProcTable);
-    FlutterEngineGetProcAddresses(&procs);
-    return procs;
-  }();
-  if (s_procs.PlatformMessageReleaseResponseHandle) {
-    return s_procs.PlatformMessageReleaseResponseHandle(engine, response);
-  }
-  return kInternalInconsistency;
-}
-
-static FlutterEngineResult EngineSendPlatformMessageResponse(
-    FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    const FlutterPlatformMessageResponseHandle* handle,
+FlutterEngineResult FlutterEmbedderNative::SendPlatformMessageResponse(
+    int32_t response_id,
     const uint8_t* data,
-    size_t data_length) {
+    size_t data_length) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SendPlatformMessageResponse",
+               "response_id", std::to_string(response_id).c_str());
+
+  if (send_platform_message_response_fn_) {
+    return send_platform_message_response_fn_(response_id, data, data_length);
+  }
+
+  const auto* handle = ReleaseResponseHandle(response_id);
+  if (!handle) {
+    return kInvalidArguments;
+  }
+
+  auto engine = GetEngine();
+  if (!engine) {
+    if (jni_router_) {
+      std::vector<uint8_t> vec;
+      if (data && data_length > 0) {
+        vec.assign(data, data + data_length);
+      }
+      jni_router_->RoutePlatformMessageResponse(response_id, vec);
+    }
+    return kSuccess;
+  }
+
   static FlutterEngineProcTable s_procs = []() {
     FlutterEngineProcTable procs = {};
     procs.struct_size = sizeof(FlutterEngineProcTable);
     FlutterEngineGetProcAddresses(&procs);
     return procs;
   }();
-  if (s_procs.SendPlatformMessageResponse) {
+
+  if (s_procs.SendPlatformMessageResponse && handle) {
     return s_procs.SendPlatformMessageResponse(engine, handle, data,
                                                data_length);
   }
   return kInternalInconsistency;
 }
 
-FlutterEngineResult FlutterEmbedderNative::InitializeEngine(
-    const FlutterRendererConfig* config,
-    const FlutterProjectArgs* args,
-    void* user_data,
-    FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) const {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::InitializeEngine");
-  if (!config || !args || !engine_out) {
-    return kInvalidArguments;
+int32_t FlutterEmbedderNative::RegisterResponseHandle(
+    const FlutterPlatformMessageResponseHandle* handle) const {
+  if (!handle) {
+    return 0;
   }
-  return EngineInitialize(FLUTTER_ENGINE_VERSION, config, args, user_data,
-                          engine_out);
+  int32_t id = next_response_id_.fetch_add(1);
+  std::scoped_lock lock(response_handles_mutex_);
+  response_handles_[id] = handle;
+  return id;
+}
+
+const FlutterPlatformMessageResponseHandle*
+FlutterEmbedderNative::ReleaseResponseHandle(int32_t response_id) const {
+  if (response_id == 0) {
+    return nullptr;
+  }
+  std::scoped_lock lock(response_handles_mutex_);
+  auto it = response_handles_.find(response_id);
+  if (it != response_handles_.end()) {
+    const auto* handle = it->second;
+    response_handles_.erase(it);
+    return handle;
+  }
+  return nullptr;
+}
+
+void FlutterEmbedderNative::RegisterSurfaceTexture(
+    int64_t texture_id,
+    fml::jni::ScopedJavaGlobalRef<jobject> surface_texture) {
+  std::scoped_lock lock(surface_textures_mutex_);
+  surface_textures_[texture_id] =
+      std::make_shared<fml::jni::ScopedJavaGlobalRef<jobject>>(
+          std::move(surface_texture));
+}
+
+void FlutterEmbedderNative::UnregisterSurfaceTexture(int64_t texture_id) {
+  std::scoped_lock lock(surface_textures_mutex_);
+  surface_textures_.erase(texture_id);
+}
+
+void FlutterEmbedderNative::SetSendPointerEventFnForTesting(
+    SendPointerEventFn fn) {
+  send_pointer_event_fn_ = std::move(fn);
+}
+
+void FlutterEmbedderNative::SetSendPlatformMessageFnForTesting(
+    SendPlatformMessageFn fn) {
+  send_platform_message_fn_ = std::move(fn);
+}
+
+void FlutterEmbedderNative::SetSendPlatformMessageResponseFnForTesting(
+    SendPlatformMessageResponseFn fn) {
+  send_platform_message_response_fn_ = std::move(fn);
+}
+
+void FlutterEmbedderNative::SetDeinitializeEngineFnForTesting(
+    DeinitializeEngineFn fn) {
+  deinitialize_engine_fn_ = std::move(fn);
+}
+
+void FlutterEmbedderNative::SetInitializeEngineFnForTesting(
+    InitializeEngineFn fn) {
+  initialize_engine_fn_ = std::move(fn);
+}
+
+void FlutterEmbedderNative::SetRunInitializedEngineFnForTesting(
+    RunInitializedEngineFn fn) {
+  run_initialized_engine_fn_ = std::move(fn);
 }
 
 FlutterEngineResult FlutterEmbedderNative::DeinitializeEngine(
@@ -1920,10 +2696,13 @@ FlutterEngineResult FlutterEmbedderNative::DeinitializeEngine(
   if (!engine) {
     return kInvalidArguments;
   }
+  if (deinitialize_engine_fn_) {
+    return deinitialize_engine_fn_(engine);
+  }
   return EngineDeinitialize(engine);
 }
 
-static FlutterEngineResult EngineCreateAOTData(
+FlutterEngineResult FlutterEmbedderNative::EngineCreateAOTData(
     const FlutterEngineAOTDataSource* source,
     FlutterEngineAOTData* data_out) {
   static FlutterEngineProcTable s_procs = []() {
@@ -1938,7 +2717,11 @@ static FlutterEngineResult EngineCreateAOTData(
   return kInternalInconsistency;
 }
 
-static FlutterEngineResult EngineCollectAOTData(FlutterEngineAOTData data) {
+FlutterEngineResult FlutterEmbedderNative::EngineCollectAOTData(
+    FlutterEngineAOTData data) {
+  if (!data) {
+    return kSuccess;
+  }
   static FlutterEngineProcTable s_procs = []() {
     FlutterEngineProcTable procs = {};
     procs.struct_size = sizeof(FlutterEngineProcTable);
@@ -1958,6 +2741,7 @@ FlutterEngineResult FlutterEmbedderNative::CreateAOTData(
   if (!source || !data_out) {
     return kInvalidArguments;
   }
+  std::scoped_lock lock(aot_provider_mutex_);
   if (aot_provider_) {
     return aot_provider_->CreateAOTData(source, data_out);
   }
@@ -1968,8 +2752,9 @@ FlutterEngineResult FlutterEmbedderNative::CollectAOTData(
     FlutterEngineAOTData data) const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::CollectAOTData");
   if (!data) {
-    return kInvalidArguments;
+    return kSuccess;
   }
+  std::scoped_lock lock(aot_provider_mutex_);
   if (aot_provider_) {
     return aot_provider_->CollectAOTData(data);
   }
@@ -1977,27 +2762,36 @@ FlutterEngineResult FlutterEmbedderNative::CollectAOTData(
 }
 
 std::shared_ptr<AndroidVMInit> FlutterEmbedderNative::GetVMInit() const {
+  std::scoped_lock lock(vm_init_mutex_);
   return vm_init_;
 }
 
 void FlutterEmbedderNative::SetVMInit(std::shared_ptr<AndroidVMInit> vm_init) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetVMInit");
-  vm_init_ = vm_init ? std::move(vm_init)
-                     : std::make_shared<AndroidVMInit>(
-                           jvm_invoker_, font_provider_, aot_provider_);
+  std::shared_ptr<AndroidVMInit> new_init;
+  {
+    std::scoped_lock lock(vm_init_mutex_, font_provider_mutex_,
+                          aot_provider_mutex_);
+    vm_init_ = vm_init ? std::move(vm_init)
+                       : std::make_shared<AndroidVMInit>(
+                             jvm_invoker_, font_provider_, aot_provider_);
+    new_init = vm_init_;
+  }
   if (jni_delegate_) {
-    jni_delegate_->SetVMInit(vm_init_);
+    jni_delegate_->SetVMInit(new_init);
   }
 }
 
 std::shared_ptr<FontCollectionProvider>
 FlutterEmbedderNative::GetFontCollectionProvider() const {
+  std::scoped_lock lock(font_provider_mutex_);
   return font_provider_;
 }
 
 void FlutterEmbedderNative::SetFontCollectionProvider(
     std::shared_ptr<FontCollectionProvider> provider) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetFontCollectionProvider");
+  std::scoped_lock lock(font_provider_mutex_, vm_init_mutex_);
   font_provider_ =
       provider
           ? std::move(provider)
@@ -2009,12 +2803,14 @@ void FlutterEmbedderNative::SetFontCollectionProvider(
 
 std::shared_ptr<AndroidAOTProvider> FlutterEmbedderNative::GetAOTProvider()
     const {
+  std::scoped_lock lock(aot_provider_mutex_);
   return aot_provider_;
 }
 
 void FlutterEmbedderNative::SetAOTProvider(
     std::shared_ptr<AndroidAOTProvider> provider) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetAOTProvider");
+  std::scoped_lock lock(aot_provider_mutex_, vm_init_mutex_);
   aot_provider_ = provider ? std::move(provider)
                            : std::make_shared<DefaultAndroidAOTProvider>();
   if (vm_init_) {
@@ -2025,12 +2821,14 @@ void FlutterEmbedderNative::SetAOTProvider(
 std::shared_ptr<AndroidHardwareBufferProvider>
 FlutterEmbedderNative::GetHardwareBufferProvider() const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetHardwareBufferProvider");
+  std::scoped_lock lock(hardware_buffer_provider_mutex_);
   return hardware_buffer_provider_;
 }
 
 void FlutterEmbedderNative::SetHardwareBufferProvider(
     std::shared_ptr<AndroidHardwareBufferProvider> provider) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetHardwareBufferProvider");
+  std::scoped_lock lock(hardware_buffer_provider_mutex_);
   hardware_buffer_provider_ =
       provider ? std::move(provider)
                : std::make_shared<DefaultAndroidHardwareBufferProvider>(
@@ -2203,184 +3001,26 @@ FlutterEngineResult FlutterEmbedderNative::UnregisterExternalTexture(
   return kInternalInconsistency;
 }
 
-FlutterEngineResult FlutterEmbedderNative::ScheduleFrame(
-    FLUTTER_API_SYMBOL(FlutterEngine) engine) const {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::ScheduleFrame");
-  if (!engine) {
-    return kInvalidArguments;
-  }
-  static FlutterEngineProcTable s_procs = []() {
-    FlutterEngineProcTable procs = {};
-    procs.struct_size = sizeof(FlutterEngineProcTable);
-    FlutterEngineGetProcAddresses(&procs);
-    return procs;
-  }();
-  if (s_procs.ScheduleFrame) {
-    return s_procs.ScheduleFrame(engine);
-  }
-  return kInternalInconsistency;
-}
-
-void FlutterEmbedderNative::RegisterSurfaceTexture(JNIEnv* env,
-                                                   int64_t texture_id,
-                                                   jobject surface_texture) {
-  TRACE_EVENT1("flutter", "FlutterEmbedderNative::RegisterSurfaceTexture",
-               "texture_id", std::to_string(texture_id).c_str());
-  std::scoped_lock lock(surface_textures_mutex_);
-  auto entry = std::make_unique<SurfaceTextureEntry>();
-  if (surface_texture != nullptr && env != nullptr) {
-    entry->weak_surface_texture.Reset(env, surface_texture);
-  }
-  surface_textures_[texture_id] = std::move(entry);
-}
-
-void FlutterEmbedderNative::UnregisterSurfaceTexture(JNIEnv* env,
-                                                     int64_t texture_id) {
-  TRACE_EVENT1("flutter", "FlutterEmbedderNative::UnregisterSurfaceTexture",
-               "texture_id", std::to_string(texture_id).c_str());
-  std::scoped_lock lock(surface_textures_mutex_);
-  auto it = surface_textures_.find(texture_id);
-  if (it != surface_textures_.end()) {
-#if defined(__ANDROID__)
-    if (it->second && it->second->gl_texture_id != 0) {
-      glDeleteTextures(1, &it->second->gl_texture_id);
-      it->second->gl_texture_id = 0;
-    }
-#endif
-    surface_textures_.erase(it);
-  }
-}
-
-bool FlutterEmbedderNative::GetGlExternalTextureFrame(
-    int64_t texture_id,
-    size_t width,
-    size_t height,
-    FlutterOpenGLTexture* texture_out) const {
-  TRACE_EVENT1("flutter", "FlutterEmbedderNative::GetGlExternalTextureFrame",
-               "texture_id", std::to_string(texture_id).c_str());
-  if (!texture_out) {
-    return false;
-  }
-
-  std::scoped_lock lock(surface_textures_mutex_);
-  auto it = surface_textures_.find(texture_id);
-  if (it == surface_textures_.end() || !it->second) {
-    return false;
-  }
-
-  auto& entry = *it->second;
-
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  if (!env) {
-    return false;
-  }
-
-  if (entry.weak_surface_texture.is_null()) {
-    return false;
-  }
-
-  if (!g_weak_reference_get) {
-    return false;
-  }
-
-  fml::jni::ScopedJavaLocalRef<jobject> wrapper(
-      env, env->CallObjectMethod(entry.weak_surface_texture.obj(),
-                                 g_weak_reference_get));
-  if (wrapper.is_null()) {
-    return false;
-  }
-
-#if defined(__ANDROID__)
-  if (entry.gl_texture_id == 0) {
-    glGenTextures(1, &entry.gl_texture_id);
-    glBindTexture(GL_TEXTURE_EXTERNAL_OES, entry.gl_texture_id);
-    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S,
-                    GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T,
-                    GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  }
-
-  if (!entry.attached && g_surface_texture_wrapper_attach_to_gl_context) {
-    env->CallVoidMethod(wrapper.obj(),
-                        g_surface_texture_wrapper_attach_to_gl_context,
-                        static_cast<jint>(entry.gl_texture_id));
-    entry.attached = true;
-  }
-
-  if (g_surface_texture_wrapper_update_tex_image) {
-    env->CallVoidMethod(wrapper.obj(),
-                        g_surface_texture_wrapper_update_tex_image);
-  }
-
-  texture_out->target = GL_TEXTURE_EXTERNAL_OES;
-  texture_out->name = entry.gl_texture_id;
-  texture_out->format = GL_RGBA8_OES;
-  texture_out->width = width;
-  texture_out->height = height;
-  texture_out->user_data = nullptr;
-  texture_out->destruction_callback = nullptr;
-  return true;
-#else
-  if (entry.gl_texture_id == 0) {
-    entry.gl_texture_id = static_cast<uint32_t>(texture_id);
-  }
-  texture_out->target = 0x8D65;  // GL_TEXTURE_EXTERNAL_OES
-  texture_out->name = entry.gl_texture_id;
-  texture_out->format = 0x8058;  // GL_RGBA8
-  texture_out->width = width;
-  texture_out->height = height;
-  texture_out->user_data = nullptr;
-  texture_out->destruction_callback = nullptr;
-  return true;
-#endif
-}
-
-bool FlutterEmbedderNative::OnGlExternalTextureFrameCallback(
-    void* user_data,
-    int64_t texture_id,
-    size_t width,
-    size_t height,
-    FlutterOpenGLTexture* texture_out) {
-  TRACE_EVENT1("flutter",
-               "FlutterEmbedderNative::OnGlExternalTextureFrameCallback",
-               "texture_id", std::to_string(texture_id).c_str());
-  if (!user_data || !texture_out) {
-    return false;
-  }
-  auto* native_instance = static_cast<FlutterEmbedderNative*>(user_data);
-  return native_instance->GetGlExternalTextureFrame(texture_id, width, height,
-                                                    texture_out);
-}
-
-void FlutterEmbedderNative::MarkAllTexturesFrameAvailable() const {
-  TRACE_EVENT0("flutter",
-               "FlutterEmbedderNative::MarkAllTexturesFrameAvailable");
-  if (!engine_) {
-    return;
-  }
-  std::scoped_lock lock(surface_textures_mutex_);
-  for (const auto& [texture_id, entry] : surface_textures_) {
-    MarkExternalTextureFrameAvailable(engine_, texture_id);
-  }
-}
-
 std::shared_ptr<AndroidVulkanTextureProvider>
 FlutterEmbedderNative::GetVulkanTextureProvider() const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetVulkanTextureProvider");
+  std::lock_guard<std::mutex> lock(vulkan_texture_provider_mutex_);
   return vulkan_texture_provider_;
 }
 
 void FlutterEmbedderNative::SetVulkanTextureProvider(
     std::shared_ptr<AndroidVulkanTextureProvider> provider) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetVulkanTextureProvider");
-  vulkan_texture_provider_ =
+  std::shared_ptr<AndroidVulkanTextureProvider> resolved_provider =
       provider ? std::move(provider)
                : std::make_shared<DefaultAndroidVulkanTextureProvider>(
                      library_loader_);
+  {
+    std::lock_guard<std::mutex> lock(vulkan_texture_provider_mutex_);
+    vulkan_texture_provider_ = resolved_provider;
+  }
   if (jni_delegate_) {
-    jni_delegate_->SetVulkanTextureProvider(vulkan_texture_provider_);
+    jni_delegate_->SetVulkanTextureProvider(resolved_provider);
   }
 }
 
@@ -2485,12 +3125,14 @@ FlutterEmbedderNative::GetVulkanExternalTextureFrameCallback() {
 std::shared_ptr<AndroidSurfaceControlProvider>
 FlutterEmbedderNative::GetSurfaceControlProvider() const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetSurfaceControlProvider");
+  std::scoped_lock lock(surface_control_provider_mutex_);
   return surface_control_provider_;
 }
 
 void FlutterEmbedderNative::SetSurfaceControlProvider(
     std::shared_ptr<AndroidSurfaceControlProvider> provider) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetSurfaceControlProvider");
+  std::scoped_lock lock(surface_control_provider_mutex_);
   surface_control_provider_ =
       provider ? std::move(provider)
                : std::make_shared<DefaultAndroidSurfaceControlProvider>(
@@ -2503,33 +3145,43 @@ void FlutterEmbedderNative::SetSurfaceControlProvider(
 std::shared_ptr<AndroidEngineGroup> FlutterEmbedderNative::GetEngineGroup()
     const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetEngineGroup");
+  std::scoped_lock lock(engine_group_mutex_);
   return engine_group_;
 }
 
 void FlutterEmbedderNative::SetEngineGroup(
     std::shared_ptr<AndroidEngineGroup> group) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetEngineGroup");
-  engine_group_ = std::move(group);
+  {
+    std::scoped_lock lock(engine_group_mutex_);
+    engine_group_ = group;
+  }
   if (jni_delegate_) {
-    jni_delegate_->SetEngineGroup(engine_group_);
+    jni_delegate_->SetEngineGroup(group);
   }
 }
 
 std::shared_ptr<AndroidEngineGroupProvider>
 FlutterEmbedderNative::GetEngineGroupProvider() const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetEngineGroupProvider");
+  std::scoped_lock lock(engine_group_provider_mutex_);
   return engine_group_provider_;
 }
 
 void FlutterEmbedderNative::SetEngineGroupProvider(
     std::shared_ptr<AndroidEngineGroupProvider> provider) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetEngineGroupProvider");
-  engine_group_provider_ = std::move(provider);
-  if (engine_group_) {
-    engine_group_->SetProvider(engine_group_provider_);
+  std::shared_ptr<AndroidEngineGroup> group;
+  {
+    std::scoped_lock lock(engine_group_provider_mutex_, engine_group_mutex_);
+    engine_group_provider_ = provider;
+    group = engine_group_;
+  }
+  if (group) {
+    group->SetProvider(provider);
   }
   if (jni_delegate_) {
-    jni_delegate_->SetEngineGroupProvider(engine_group_provider_);
+    jni_delegate_->SetEngineGroupProvider(provider);
   }
 }
 
@@ -2539,21 +3191,50 @@ FlutterEmbedderNative::SpawnEngine(FLUTTER_API_SYMBOL(FlutterEngine)
                                    const AndroidEngineSpawnArgs& args) const {
   TRACE_EVENT1("flutter", "FlutterEmbedderNative::SpawnEngine", "entrypoint",
                args.entrypoint.c_str());
-  if (engine_group_) {
-    return engine_group_->SpawnEngine(parent_engine, args);
+  std::shared_ptr<AndroidEngineGroup> group;
+  std::shared_ptr<AndroidEngineGroupProvider> provider;
+  {
+    std::scoped_lock lock(engine_group_mutex_, engine_group_provider_mutex_);
+    group = engine_group_;
+    provider = engine_group_provider_;
   }
-  if (!parent_engine || !engine_group_provider_) {
+  if (group) {
+    return group->SpawnEngine(parent_engine, args);
+  }
+  if (!parent_engine || !provider) {
     return nullptr;
   }
   AndroidEngineGroupSpawnConfigHolder holder;
   holder.Build(args);
   FLUTTER_API_SYMBOL(FlutterEngine) spawned_engine = nullptr;
-  if (engine_group_provider_->SpawnEngine(parent_engine,
-                                          holder.GetSpawnConfig(),
-                                          &spawned_engine) == kSuccess) {
+  if (provider->SpawnEngine(parent_engine, holder.GetSpawnConfig(),
+                            &spawned_engine) == kSuccess) {
     return spawned_engine;
   }
   return nullptr;
+}
+
+int64_t FlutterEmbedderNative::SpawnEngine(
+    int64_t parent_engine_id,
+    const AndroidEngineSpawnArgs& args) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SpawnEngine(id)",
+               "entrypoint", args.entrypoint.c_str());
+  if (jni_router_) {
+    return jni_router_->RouteSpawnEngine(parent_engine_id, args);
+  }
+  std::shared_ptr<AndroidEngineGroup> group;
+  {
+    std::scoped_lock lock(engine_group_mutex_);
+    group = engine_group_;
+  }
+  if (group) {
+    auto handle = group->SpawnEngine(parent_engine_id, args);
+    if (handle) {
+      auto id_opt = group->GetEngineId(handle);
+      return id_opt.value_or(args.engine_id != 0 ? args.engine_id : 0);
+    }
+  }
+  return 0;
 }
 
 FLUTTER_API_SYMBOL(FlutterEngine)
@@ -2563,16 +3244,26 @@ FlutterEmbedderNative::SpawnEngine(FLUTTER_API_SYMBOL(FlutterEngine)
                                    int64_t engine_id) const {
   TRACE_EVENT1("flutter", "FlutterEmbedderNative::SpawnEngine(config)",
                "engine_id", std::to_string(engine_id).c_str());
-  if (engine_group_) {
-    return engine_group_->SpawnEngineWithConfig(parent_engine, config,
-                                                engine_id);
+  if (!parent_engine || !config ||
+      config->struct_size < sizeof(FlutterEngineSpawnConfig)) {
+    return nullptr;
   }
-  if (!parent_engine || !config || !engine_group_provider_) {
+  std::shared_ptr<AndroidEngineGroup> group;
+  std::shared_ptr<AndroidEngineGroupProvider> provider;
+  {
+    std::scoped_lock lock(engine_group_mutex_, engine_group_provider_mutex_);
+    group = engine_group_;
+    provider = engine_group_provider_;
+  }
+  if (group) {
+    return group->SpawnEngineWithConfig(parent_engine, config, engine_id);
+  }
+  if (!provider) {
     return nullptr;
   }
   FLUTTER_API_SYMBOL(FlutterEngine) spawned_engine = nullptr;
-  if (engine_group_provider_->SpawnEngine(parent_engine, config,
-                                          &spawned_engine) == kSuccess) {
+  if (provider->SpawnEngine(parent_engine, config, &spawned_engine) ==
+      kSuccess) {
     return spawned_engine;
   }
   return nullptr;
@@ -2583,10 +3274,25 @@ FlutterEngineResult FlutterEmbedderNative::SpawnEngine(
     const FlutterEngineSpawnConfig* config,
     FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SpawnEngine(raw)");
-  if (!engine_group_provider_) {
+  if (!parent_engine || !config || !engine_out ||
+      config->struct_size < sizeof(FlutterEngineSpawnConfig)) {
+    return kInvalidArguments;
+  }
+  std::shared_ptr<AndroidEngineGroup> group;
+  std::shared_ptr<AndroidEngineGroupProvider> provider;
+  {
+    std::scoped_lock lock(engine_group_mutex_, engine_group_provider_mutex_);
+    group = engine_group_;
+    provider = engine_group_provider_;
+  }
+  if (group) {
+    *engine_out = group->SpawnEngineWithConfig(parent_engine, config);
+    return *engine_out ? kSuccess : kInvalidArguments;
+  }
+  if (!provider) {
     return kInternalInconsistency;
   }
-  return engine_group_provider_->SpawnEngine(parent_engine, config, engine_out);
+  return provider->SpawnEngine(parent_engine, config, engine_out);
 }
 
 FlutterEngineResult FlutterEmbedderNative::ShutdownEngine(
@@ -2595,11 +3301,18 @@ FlutterEngineResult FlutterEmbedderNative::ShutdownEngine(
   if (!engine) {
     return kInvalidArguments;
   }
-  if (engine_group_ && engine_group_->IsEngineActive(engine)) {
-    return engine_group_->ShutdownEngine(engine) ? kSuccess : kInvalidArguments;
+  std::shared_ptr<AndroidEngineGroup> group;
+  std::shared_ptr<AndroidEngineGroupProvider> provider;
+  {
+    std::scoped_lock lock(engine_group_mutex_, engine_group_provider_mutex_);
+    group = engine_group_;
+    provider = engine_group_provider_;
   }
-  if (engine_group_provider_) {
-    return engine_group_provider_->ShutdownEngine(engine);
+  if (group) {
+    return group->ShutdownEngine(engine) ? kSuccess : kInvalidArguments;
+  }
+  if (provider) {
+    return provider->ShutdownEngine(engine);
   }
   return kInternalInconsistency;
 }
@@ -2610,8 +3323,13 @@ bool FlutterEmbedderNative::ShutdownSpawnedEngine(int64_t engine_id) const {
   if (jni_router_) {
     return jni_router_->RouteShutdownSpawnedEngine(engine_id);
   }
-  if (engine_group_) {
-    return engine_group_->ShutdownEngine(engine_id);
+  std::shared_ptr<AndroidEngineGroup> group;
+  {
+    std::scoped_lock lock(engine_group_mutex_);
+    group = engine_group_;
+  }
+  if (group) {
+    return group->ShutdownEngine(engine_id);
   }
   return false;
 }
@@ -2622,8 +3340,13 @@ bool FlutterEmbedderNative::OnEngineGarbageCollected(int64_t engine_id) const {
   if (jni_router_) {
     return jni_router_->RouteOnEngineGarbageCollected(engine_id);
   }
-  if (engine_group_) {
-    return engine_group_->OnEngineGarbageCollected(engine_id);
+  std::shared_ptr<AndroidEngineGroup> group;
+  {
+    std::scoped_lock lock(engine_group_mutex_);
+    group = engine_group_;
+  }
+  if (group) {
+    return group->OnEngineGarbageCollected(engine_id);
   }
   return false;
 }
@@ -2633,779 +3356,43 @@ size_t FlutterEmbedderNative::GetActiveEngineCount() const {
   if (jni_router_) {
     return jni_router_->RouteGetActiveEngineCount();
   }
-  if (engine_group_) {
-    return engine_group_->GetActiveEngineCount();
+  std::shared_ptr<AndroidEngineGroup> group;
+  {
+    std::scoped_lock lock(engine_group_mutex_);
+    group = engine_group_;
+  }
+  if (group) {
+    return group->GetActiveEngineCount();
   }
   return 0;
 }
 
-FLUTTER_API_SYMBOL(FlutterEngine) FlutterEmbedderNative::GetEngine() const {
-  return engine_;
-}
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
+static jfieldID g_jni_shell_holder_field = nullptr;
+static jmethodID g_jni_constructor = nullptr;
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_java_long_class = nullptr;
+static jmethodID g_long_constructor = nullptr;
+static jmethodID g_long_value_method = nullptr;
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_callback_info_class =
+    nullptr;
+static jmethodID g_flutter_callback_info_constructor = nullptr;
 
-void FlutterEmbedderNative::OnPlatformMessageCallback(
-    const FlutterPlatformMessage* message,
-    void* user_data) {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::OnPlatformMessageCallback");
-  if (!message || !user_data) {
-    return;
+static FlutterEmbedderNative* FromJavaFlutterJNI(JNIEnv* env, jobject obj) {
+  if (!env || !obj || !g_jni_shell_holder_field || !g_long_value_method) {
+    return nullptr;
   }
-  auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
-  std::string channel = message->channel ? message->channel : "";
-  bool has_data = (message->message != nullptr);
-  std::vector<uint8_t> data;
-  if (message->message && message->message_size > 0) {
-    data.assign(message->message, message->message + message->message_size);
+  jobject shellHolderLong = env->GetObjectField(obj, g_jni_shell_holder_field);
+  if (!shellHolderLong) {
+    return nullptr;
   }
-  int32_t response_id = 0;
-  if (message->response_handle != nullptr) {
-    response_id = native->next_response_id_++;
-    std::scoped_lock lock(native->response_mutex_);
-    native->pending_responses_[response_id] = message->response_handle;
-  }
-  native->GetRouter()->RoutePlatformMessage(channel, data, response_id,
-                                            has_data);
-}
-
-static FlutterEngineResult EngineSendPointerEvent(
-    FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    const FlutterPointerEvent* events,
-    size_t events_count) {
-  static FlutterEngineProcTable s_procs = []() {
-    FlutterEngineProcTable procs = {};
-    procs.struct_size = sizeof(FlutterEngineProcTable);
-    FlutterEngineGetProcAddresses(&procs);
-    return procs;
-  }();
-  if (s_procs.SendPointerEvent) {
-    return s_procs.SendPointerEvent(engine, events, events_count);
-  }
-  return kInternalInconsistency;
-}
-
-FlutterEngineResult FlutterEmbedderNative::SendPointerEvents(
-    FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    const FlutterPointerEvent* events,
-    size_t events_count) const {
-  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SendPointerEvents", "count",
-               std::to_string(events_count).c_str());
-  if (!engine || !events || events_count == 0) {
-    return kInvalidArguments;
-  }
-  return EngineSendPointerEvent(engine, events, events_count);
-}
-
-void FlutterEmbedderNative::DispatchPointerDataPacket(const uint8_t* buffer,
-                                                      size_t size) {
-  TRACE_EVENT1("flutter", "FlutterEmbedderNative::DispatchPointerDataPacket",
-               "size", std::to_string(size).c_str());
-  if (!buffer || size == 0 || !engine_) {
-    return;
-  }
-  constexpr size_t kPointerRecordSize = 36 * sizeof(int64_t);
-  size_t record_count = size / kPointerRecordSize;
-  if (record_count == 0) {
-    return;
-  }
-  std::vector<FlutterPointerEvent> events;
-  events.reserve(record_count);
-  for (size_t i = 0; i < record_count; ++i) {
-    const int64_t* fields =
-        reinterpret_cast<const int64_t*>(buffer + i * kPointerRecordSize);
-    const double* dfields = reinterpret_cast<const double*>(fields);
-
-    FlutterPointerEvent event = {};
-    event.struct_size = sizeof(FlutterPointerEvent);
-    event.timestamp = static_cast<size_t>(fields[1]);
-
-    int64_t change = fields[2];
-    switch (change) {
-      case 0:
-        event.phase = kCancel;
-        break;
-      case 1:
-        event.phase = kAdd;
-        break;
-      case 2:
-        event.phase = kRemove;
-        break;
-      case 3:
-        event.phase = kHover;
-        break;
-      case 4:
-        event.phase = kDown;
-        break;
-      case 5:
-        event.phase = kMove;
-        break;
-      case 6:
-        event.phase = kUp;
-        break;
-      case 7:
-        event.phase = kPanZoomStart;
-        break;
-      case 8:
-        event.phase = kPanZoomUpdate;
-        break;
-      case 9:
-        event.phase = kPanZoomEnd;
-        break;
-      default:
-        event.phase = kCancel;
-        break;
-    }
-
-    int64_t kind = fields[3];
-    switch (kind) {
-      case 0:
-        event.device_kind = kFlutterPointerDeviceKindTouch;
-        break;
-      case 1:
-        event.device_kind = kFlutterPointerDeviceKindMouse;
-        break;
-      case 2:
-        event.device_kind = kFlutterPointerDeviceKindStylus;
-        break;
-      case 3:
-        event.device_kind = kFlutterPointerDeviceKindInvertedStylus;
-        break;
-      case 4:
-        event.device_kind = kFlutterPointerDeviceKindTrackpad;
-        break;
-      default:
-        event.device_kind = kFlutterPointerDeviceKindTouch;
-        break;
-    }
-
-    int64_t signal = fields[4];
-    switch (signal) {
-      case 0:
-        event.signal_kind = kFlutterPointerSignalKindNone;
-        break;
-      case 1:
-        event.signal_kind = kFlutterPointerSignalKindScroll;
-        break;
-      case 2:
-        event.signal_kind = kFlutterPointerSignalKindScrollInertiaCancel;
-        break;
-      case 3:
-        event.signal_kind = kFlutterPointerSignalKindScale;
-        break;
-      default:
-        event.signal_kind = kFlutterPointerSignalKindNone;
-        break;
-    }
-
-    event.device = static_cast<int32_t>(fields[5]);
-    event.x = dfields[7];
-    event.y = dfields[8];
-    event.buttons = fields[11];
-    event.pressure = dfields[14];
-    event.pressure_min = dfields[15];
-    event.pressure_max = dfields[16];
-    event.distance = dfields[17];
-    event.distance_max = dfields[18];
-    event.size = dfields[19];
-    event.radius_major = dfields[20];
-    event.radius_minor = dfields[21];
-    event.radius_min = dfields[22];
-    event.radius_max = dfields[23];
-    event.orientation = dfields[24];
-    event.tilt = dfields[25];
-    event.platform_data = fields[26];
-    event.scroll_delta_x = dfields[27];
-    event.scroll_delta_y = dfields[28];
-    event.pan_x = dfields[29];
-    event.pan_y = dfields[30];
-    event.scale = dfields[33];
-    event.rotation = dfields[34];
-    event.view_id = static_cast<FlutterViewId>(fields[35]);
-
-    events.push_back(event);
-  }
-
-  if (!events.empty()) {
-    SendPointerEvents(engine_, events.data(), events.size());
-  }
-}
-
-bool FlutterEmbedderNative::EnsureEGLInitialized() {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::EnsureEGLInitialized");
-#if defined(__ANDROID__)
-  std::lock_guard<std::mutex> lock(surface_mutex_);
-  if (egl_initialized_) {
-    return true;
-  }
-  display_ = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-  if (display_ == EGL_NO_DISPLAY) {
-    FML_LOG(ERROR) << "Failed to get EGL display: " << eglGetError();
-    return false;
-  }
-  EGLint major = 0;
-  EGLint minor = 0;
-  if (!eglInitialize(display_, &major, &minor)) {
-    FML_LOG(ERROR) << "Failed to initialize EGL: " << eglGetError();
-    return false;
-  }
-  const EGLint config_attribs[] = {
-      EGL_RENDERABLE_TYPE,
-      EGL_OPENGL_ES2_BIT | EGL_OPENGL_ES3_BIT,
-      EGL_SURFACE_TYPE,
-      EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
-      EGL_RED_SIZE,
-      8,
-      EGL_GREEN_SIZE,
-      8,
-      EGL_BLUE_SIZE,
-      8,
-      EGL_ALPHA_SIZE,
-      8,
-      EGL_DEPTH_SIZE,
-      0,
-      EGL_STENCIL_SIZE,
-      8,
-      EGL_NONE,
-  };
-  EGLint num_configs = 0;
-  if (!eglChooseConfig(display_, config_attribs, &config_, 1, &num_configs) ||
-      num_configs < 1) {
-    const EGLint fallback_attribs[] = {
-        EGL_RENDERABLE_TYPE,
-        EGL_OPENGL_ES2_BIT,
-        EGL_SURFACE_TYPE,
-        EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
-        EGL_RED_SIZE,
-        8,
-        EGL_GREEN_SIZE,
-        8,
-        EGL_BLUE_SIZE,
-        8,
-        EGL_ALPHA_SIZE,
-        8,
-        EGL_DEPTH_SIZE,
-        0,
-        EGL_STENCIL_SIZE,
-        8,
-        EGL_NONE,
-    };
-    if (!eglChooseConfig(display_, fallback_attribs, &config_, 1,
-                         &num_configs) ||
-        num_configs < 1) {
-      FML_LOG(ERROR) << "Failed to choose EGL config: " << eglGetError();
-      return false;
-    }
-  }
-
-  const EGLint gles3_attribs[] = {
-      EGL_CONTEXT_CLIENT_VERSION,
-      3,
-      EGL_NONE,
-  };
-  render_context_ =
-      eglCreateContext(display_, config_, EGL_NO_CONTEXT, gles3_attribs);
-  if (render_context_ == EGL_NO_CONTEXT) {
-    const EGLint gles2_attribs[] = {
-        EGL_CONTEXT_CLIENT_VERSION,
-        2,
-        EGL_NONE,
-    };
-    render_context_ =
-        eglCreateContext(display_, config_, EGL_NO_CONTEXT, gles2_attribs);
-  }
-  if (render_context_ == EGL_NO_CONTEXT) {
-    FML_LOG(ERROR) << "Failed to create EGL render context: " << eglGetError();
-    return false;
-  }
-
-  const EGLint resource_gles3_attribs[] = {
-      EGL_CONTEXT_CLIENT_VERSION,
-      3,
-      EGL_NONE,
-  };
-  resource_context_ = eglCreateContext(display_, config_, render_context_,
-                                       resource_gles3_attribs);
-  if (resource_context_ == EGL_NO_CONTEXT) {
-    const EGLint resource_gles2_attribs[] = {
-        EGL_CONTEXT_CLIENT_VERSION,
-        2,
-        EGL_NONE,
-    };
-    resource_context_ = eglCreateContext(display_, config_, render_context_,
-                                         resource_gles2_attribs);
-  }
-
-  const EGLint pbuffer_attribs[] = {
-      EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE,
-  };
-  pbuffer_surface_ =
-      eglCreatePbufferSurface(display_, config_, pbuffer_attribs);
-  if (pbuffer_surface_ == EGL_NO_SURFACE) {
-    FML_LOG(ERROR) << "Failed to create EGL pbuffer surface: " << eglGetError();
-  }
-
-  egl_initialized_ = true;
-  return true;
-#else
-  return true;
-#endif
-}
-
-void FlutterEmbedderNative::TeardownEGL() {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::TeardownEGL");
-#if defined(__ANDROID__)
-  std::lock_guard<std::mutex> lock(surface_mutex_);
-  if (display_ != EGL_NO_DISPLAY) {
-    eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-    if (window_surface_ != EGL_NO_SURFACE) {
-      eglDestroySurface(display_, window_surface_);
-      window_surface_ = EGL_NO_SURFACE;
-    }
-    if (pbuffer_surface_ != EGL_NO_SURFACE) {
-      eglDestroySurface(display_, pbuffer_surface_);
-      pbuffer_surface_ = EGL_NO_SURFACE;
-    }
-    if (render_context_ != EGL_NO_CONTEXT) {
-      eglDestroyContext(display_, render_context_);
-      render_context_ = EGL_NO_CONTEXT;
-    }
-    if (resource_context_ != EGL_NO_CONTEXT) {
-      eglDestroyContext(display_, resource_context_);
-      resource_context_ = EGL_NO_CONTEXT;
-    }
-    display_ = EGL_NO_DISPLAY;
-  }
-  if (native_window_) {
-    ANativeWindow_release(native_window_);
-    native_window_ = nullptr;
-  }
-  egl_initialized_ = false;
-#endif
-}
-
-bool FlutterEmbedderNative::MakeCurrent() {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::MakeCurrent");
-#if defined(__ANDROID__)
-  EnsureEGLInitialized();
-  std::lock_guard<std::mutex> lock(surface_mutex_);
-  EGLSurface surface =
-      (window_surface_ != EGL_NO_SURFACE) ? window_surface_ : pbuffer_surface_;
-  if (display_ == EGL_NO_DISPLAY || surface == EGL_NO_SURFACE ||
-      render_context_ == EGL_NO_CONTEXT) {
-    return false;
-  }
-  return eglMakeCurrent(display_, surface, surface, render_context_) ==
-         EGL_TRUE;
-#else
-  return true;
-#endif
-}
-
-bool FlutterEmbedderNative::ClearCurrent() {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::ClearCurrent");
-#if defined(__ANDROID__)
-  std::lock_guard<std::mutex> lock(surface_mutex_);
-  if (display_ == EGL_NO_DISPLAY) {
-    return false;
-  }
-  return eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                        EGL_NO_CONTEXT) == EGL_TRUE;
-#else
-  return true;
-#endif
-}
-
-bool FlutterEmbedderNative::MakeResourceCurrent() {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::MakeResourceCurrent");
-#if defined(__ANDROID__)
-  EnsureEGLInitialized();
-  std::lock_guard<std::mutex> lock(surface_mutex_);
-  if (display_ == EGL_NO_DISPLAY || pbuffer_surface_ == EGL_NO_SURFACE ||
-      resource_context_ == EGL_NO_CONTEXT) {
-    return false;
-  }
-  return eglMakeCurrent(display_, pbuffer_surface_, pbuffer_surface_,
-                        resource_context_) == EGL_TRUE;
-#else
-  return true;
-#endif
-}
-
-bool FlutterEmbedderNative::Present() {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::Present");
-#if defined(__ANDROID__)
-  std::lock_guard<std::mutex> lock(surface_mutex_);
-  if (display_ == EGL_NO_DISPLAY || window_surface_ == EGL_NO_SURFACE) {
-    return true;
-  }
-  return eglSwapBuffers(display_, window_surface_) == EGL_TRUE;
-#else
-  return true;
-#endif
-}
-
-uint32_t FlutterEmbedderNative::FboCallback() const {
-  return 0;
-}
-
-void* FlutterEmbedderNative::GlProcResolver(const char* name) const {
-#if defined(__ANDROID__)
-  return reinterpret_cast<void*>(eglGetProcAddress(name));
-#else
-  return nullptr;
-#endif
-}
-
-void FlutterEmbedderNative::SurfaceCreated(JNIEnv* env, jobject jsurface) {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SurfaceCreated");
-#if defined(__ANDROID__)
-  EnsureEGLInitialized();
-  std::lock_guard<std::mutex> lock(surface_mutex_);
-  if (window_surface_ != EGL_NO_SURFACE && display_ != EGL_NO_DISPLAY) {
-    eglDestroySurface(display_, window_surface_);
-    window_surface_ = EGL_NO_SURFACE;
-  }
-  if (native_window_) {
-    ANativeWindow_release(native_window_);
-    native_window_ = nullptr;
-  }
-  if (env && jsurface) {
-    native_window_ = ANativeWindow_fromSurface(env, jsurface);
-    if (native_window_ && display_ != EGL_NO_DISPLAY && config_ != nullptr) {
-      window_surface_ =
-          eglCreateWindowSurface(display_, config_, native_window_, nullptr);
-    }
-  }
-#endif
-  if (jni_router_) {
-    jni_router_->RouteFirstFrame();
-  }
-}
-
-void FlutterEmbedderNative::SurfaceWindowChanged(JNIEnv* env,
-                                                 jobject jsurface) {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SurfaceWindowChanged");
-#if defined(__ANDROID__)
-  EnsureEGLInitialized();
-  std::lock_guard<std::mutex> lock(surface_mutex_);
-  if (window_surface_ != EGL_NO_SURFACE && display_ != EGL_NO_DISPLAY) {
-    eglDestroySurface(display_, window_surface_);
-    window_surface_ = EGL_NO_SURFACE;
-  }
-  if (native_window_) {
-    ANativeWindow_release(native_window_);
-    native_window_ = nullptr;
-  }
-  if (env && jsurface) {
-    native_window_ = ANativeWindow_fromSurface(env, jsurface);
-    if (native_window_ && display_ != EGL_NO_DISPLAY && config_ != nullptr) {
-      window_surface_ =
-          eglCreateWindowSurface(display_, config_, native_window_, nullptr);
-    }
-  }
-#endif
-}
-
-void FlutterEmbedderNative::SurfaceChanged(int32_t width, int32_t height) {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SurfaceChanged");
-#if defined(__ANDROID__)
-  std::lock_guard<std::mutex> lock(surface_mutex_);
-  if (native_window_) {
-    ANativeWindow_setBuffersGeometry(native_window_, width, height, 0);
-  }
-#endif
-  AndroidViewportMetrics metrics;
-  if (window_metrics_provider_) {
-    auto current = window_metrics_provider_->GetViewportMetrics(0);
-    if (current.has_value()) {
-      metrics = *current;
-    }
-  }
-  metrics.physical_width = width;
-  metrics.physical_height = height;
-  SetViewportMetrics(metrics);
-  if (engine_) {
-    SendWindowMetricsEvent(engine_, metrics);
-  }
-}
-
-void FlutterEmbedderNative::SurfaceDestroyed() {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SurfaceDestroyed");
-#if defined(__ANDROID__)
-  std::lock_guard<std::mutex> lock(surface_mutex_);
-  if (window_surface_ != EGL_NO_SURFACE && display_ != EGL_NO_DISPLAY) {
-    eglDestroySurface(display_, window_surface_);
-    window_surface_ = EGL_NO_SURFACE;
-  }
-  if (native_window_) {
-    ANativeWindow_release(native_window_);
-    native_window_ = nullptr;
-  }
-#endif
-}
-
-FlutterEngineResult FlutterEmbedderNative::RunEngineWithBundle(
-    const std::string& bundle_path,
-    const std::string& entrypoint,
-    const std::vector<std::string>& entrypoint_args,
-    int64_t engine_id) {
-  TRACE_EVENT1("flutter", "FlutterEmbedderNative::RunEngineWithBundle",
-               "engine_id", std::to_string(engine_id).c_str());
-  if (engine_ != nullptr) {
-    return kSuccess;
-  }
-
-  if (vm_init_ && !vm_init_->IsInitialized() && FlutterMain::IsInitialized()) {
-    vm_init_->Init(FlutterMain::Get().GetVMArgs());
-  }
-
-  EnsureEGLInitialized();
-
-  FlutterRendererConfig config = {};
-  config.type = kOpenGL;
-  config.open_gl.struct_size = sizeof(FlutterOpenGLRendererConfig);
-  config.open_gl.make_current = [](void* user_data) -> bool {
-    auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
-    return native ? native->MakeCurrent() : false;
-  };
-  config.open_gl.clear_current = [](void* user_data) -> bool {
-    auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
-    return native ? native->ClearCurrent() : false;
-  };
-  config.open_gl.present = [](void* user_data) -> bool {
-    auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
-    return native ? native->Present() : false;
-  };
-  config.open_gl.fbo_callback = [](void* user_data) -> uint32_t {
-    auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
-    return native ? native->FboCallback() : 0;
-  };
-  config.open_gl.make_resource_current = [](void* user_data) -> bool {
-    auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
-    return native ? native->MakeResourceCurrent() : false;
-  };
-  config.open_gl.gl_proc_resolver = [](void* user_data,
-                                       const char* name) -> void* {
-    auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
-    return native ? native->GlProcResolver(name) : nullptr;
-  };
-  config.open_gl.gl_external_texture_frame_callback =
-      &FlutterEmbedderNative::OnGlExternalTextureFrameCallback;
-  config.open_gl.hardware_buffer_external_texture_frame_callback =
-      &FlutterEmbedderNative::OnHardwareBufferExternalTextureFrameCallback;
-
-  FlutterProjectArgs project_args = {};
-  if (vm_init_ && vm_init_->GetProjectArgs()) {
-    project_args = *vm_init_->GetProjectArgs();
-  } else {
-    project_args.struct_size = sizeof(FlutterProjectArgs);
-  }
-
-  std::string assets_path = bundle_path;
-  if (assets_path.empty() ||
-      !fml::IsFile(fml::paths::JoinPaths({assets_path, "kernel_blob.bin"}))) {
-    if (vm_init_) {
-      const auto vm_args = vm_init_->GetVMArgs();
-      if (vm_args.has_value() && !vm_args->kernel_path.empty()) {
-        assets_path = fml::paths::GetDirectoryName(vm_args->kernel_path);
-      }
-    }
-  }
-  if (!assets_path.empty()) {
-    project_args.assets_path = assets_path.c_str();
-  }
-
-  if (!entrypoint.empty()) {
-    project_args.custom_dart_entrypoint = entrypoint.c_str();
-  }
-
-  std::vector<const char*> entrypoint_arg_ptrs;
-  if (!entrypoint_args.empty()) {
-    entrypoint_arg_ptrs.reserve(entrypoint_args.size());
-    for (const auto& arg : entrypoint_args) {
-      entrypoint_arg_ptrs.push_back(arg.c_str());
-    }
-    project_args.dart_entrypoint_argc =
-        static_cast<int>(entrypoint_arg_ptrs.size());
-    project_args.dart_entrypoint_argv = entrypoint_arg_ptrs.data();
-  }
-
-  project_args.platform_message_callback =
-      &FlutterEmbedderNative::OnPlatformMessageCallback;
-  project_args.vsync_callback = &FlutterEmbedderNative::OnVsyncCallback;
-  project_args.update_semantics_callback2 =
-      &FlutterEmbedderNative::OnUpdateSemantics2;
-
-  if (project_args.log_message_callback == nullptr) {
-    project_args.log_message_callback = [](const char* tag, const char* message,
-                                           void* user_data) {
-#if defined(__ANDROID__)
-      __android_log_print(ANDROID_LOG_INFO, tag ? tag : "flutter", "%s",
-                          message ? message : "");
-#else
-      if (tag && strlen(tag) > 0) {
-        std::cout << tag << ": ";
-      }
-      if (message) {
-        std::cout << message << std::endl;
-      }
-#endif
-    };
-  }
-
-  FlutterCustomAssetResolver custom_asset_resolver =
-      CreateCustomAssetResolver();
-  project_args.custom_asset_resolver = &custom_asset_resolver;
-
-  project_args.get_scaled_font_size_callback = [](double unscaled_font_size,
-                                                  int configuration_id,
-                                                  void* user_data) -> double {
-    auto* native_instance = static_cast<FlutterEmbedderNative*>(user_data);
-    if (!native_instance || !native_instance->GetRouter()) {
-      return unscaled_font_size;
-    }
-    return native_instance->GetRouter()->RouteGetScaledFontSize(
-        unscaled_font_size, configuration_id);
-  };
-
-  FlutterEngineResult result =
-      InitializeEngine(&config, &project_args, this, &engine_);
-  if (result != kSuccess) {
-    FML_LOG(ERROR) << "Failed to initialize Flutter Engine: " << result;
-    return result;
-  }
-
-  if (vsync_waiter_) {
-    vsync_waiter_->SetEngine(engine_);
-  }
-
-  result = EngineRunInitialized(engine_);
-  if (result != kSuccess) {
-    FML_LOG(ERROR) << "Failed to run initialized Flutter Engine: " << result;
-    if (vsync_waiter_) {
-      vsync_waiter_->SetEngine(nullptr);
-    }
-    EngineShutdown(engine_);
-    engine_ = nullptr;
-    return result;
-  }
-
-  {
-    std::scoped_lock lock(surface_textures_mutex_);
-    for (const auto& [texture_id, entry] : surface_textures_) {
-      RegisterExternalTexture(engine_, texture_id);
-    }
-  }
-
-  return kSuccess;
-}
-
-struct OutgoingResponseContext {
-  FlutterEmbedderNative* native;
-  int32_t response_id;
-  FlutterPlatformMessageResponseHandle* handle = nullptr;
-};
-
-static void OnOutgoingPlatformMessageResponse(const uint8_t* data,
-                                              size_t size,
-                                              void* user_data) {
-  auto* ctx = reinterpret_cast<OutgoingResponseContext*>(user_data);
-  if (!ctx) {
-    return;
-  }
-  std::vector<uint8_t> response_data;
-  bool has_data = (data != nullptr);
-  if (data && size > 0) {
-    response_data.assign(data, data + size);
-  }
-  if (ctx->native && ctx->native->GetRouter()) {
-    ctx->native->GetRouter()->RoutePlatformMessageResponse(
-        ctx->response_id, response_data, has_data);
-  }
-  if (ctx->native && ctx->native->GetEngine() && ctx->handle) {
-    EngineReleaseResponseHandle(ctx->native->GetEngine(), ctx->handle);
-  }
-  delete ctx;
-}
-
-FlutterEngineResult FlutterEmbedderNative::SendPlatformMessage(
-    const std::string& channel,
-    const uint8_t* message_data,
-    size_t message_size,
-    int32_t response_id) const {
-  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SendPlatformMessage",
-               "channel", channel.c_str());
-  if (!engine_) {
-    return kInternalInconsistency;
-  }
-  FlutterPlatformMessage platform_message = {};
-  platform_message.struct_size = sizeof(FlutterPlatformMessage);
-  platform_message.channel = channel.c_str();
-  platform_message.message = message_data;
-  platform_message.message_size = message_size;
-
-  if (response_id != 0) {
-    auto* ctx = new OutgoingResponseContext();
-    ctx->native = const_cast<FlutterEmbedderNative*>(this);
-    ctx->response_id = response_id;
-    FlutterPlatformMessageResponseHandle* response_handle = nullptr;
-    FlutterEngineResult res = EngineCreateResponseHandle(
-        engine_, &OnOutgoingPlatformMessageResponse, ctx, &response_handle);
-    if (res != kSuccess) {
-      delete ctx;
-      return res;
-    }
-    platform_message.response_handle = response_handle;
-    ctx->handle = response_handle;
-  }
-
-  return EngineSendPlatformMessage(engine_, &platform_message);
-}
-
-FlutterEngineResult FlutterEmbedderNative::SendPlatformMessage(
-    const std::string& channel,
-    const std::vector<uint8_t>& message,
-    int32_t response_id) const {
-  return SendPlatformMessage(channel,
-                             message.empty() ? nullptr : message.data(),
-                             message.size(), response_id);
-}
-
-FlutterEngineResult FlutterEmbedderNative::SendPlatformMessageResponse(
-    int32_t response_id,
-    const uint8_t* data,
-    size_t data_length) const {
-  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SendPlatformMessageResponse",
-               "response_id", std::to_string(response_id).c_str());
-  if (!engine_) {
-    return kInternalInconsistency;
-  }
-  const FlutterPlatformMessageResponseHandle* handle = nullptr;
-  {
-    std::scoped_lock lock(response_mutex_);
-    auto it = pending_responses_.find(response_id);
-    if (it != pending_responses_.end()) {
-      handle = it->second;
-      pending_responses_.erase(it);
-    }
-  }
-  if (!handle) {
-    return kInvalidArguments;
-  }
-  return EngineSendPlatformMessageResponse(engine_, handle, data, data_length);
-}
-
-FlutterEngineResult FlutterEmbedderNative::SendPlatformMessageResponse(
-    int32_t response_id,
-    const std::vector<uint8_t>& data) const {
-  return SendPlatformMessageResponse(
-      response_id, data.empty() ? nullptr : data.data(), data.size());
+  jlong raw_handle = env->CallLongMethod(shellHolderLong, g_long_value_method);
+  return reinterpret_cast<FlutterEmbedderNative*>(raw_handle);
 }
 
 static jlong FlutterJNI_Attach(JNIEnv* env, jclass clazz, jobject flutterJNI) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterJNI_Attach");
-  auto jvm_invoker = std::make_shared<DefaultJvmInvoker>(env, flutterJNI);
-  auto native_instance =
-      std::make_unique<FlutterEmbedderNative>(std::move(jvm_invoker));
+  auto native_instance = std::make_unique<FlutterEmbedderNative>();
+  native_instance->AttachJavaObject(env, flutterJNI);
   return reinterpret_cast<jlong>(native_instance.release());
 }
 
@@ -3450,11 +3437,13 @@ static jobject FlutterJNI_Spawn(JNIEnv* env,
   }
   spawn_args.engine_id = engineId;
 
-  native_instance->GetRouter()->RouteSpawnEngine(engineId, spawn_args);
-  auto spawned_instance = std::make_unique<FlutterEmbedderNative>();
+  int64_t spawned_id =
+      native_instance->GetRouter()->RouteSpawnEngine(engineId, spawn_args);
 
   if (!g_flutter_jni_class || g_flutter_jni_class->is_null() ||
-      !g_jni_constructor) {
+      !g_jni_constructor || !g_java_long_class ||
+      g_java_long_class->is_null() || !g_long_constructor ||
+      !g_jni_shell_holder_field) {
     return nullptr;
   }
 
@@ -3463,15 +3452,24 @@ static jobject FlutterJNI_Spawn(JNIEnv* env,
     return nullptr;
   }
 
-  if (g_java_long_class && !g_java_long_class->is_null() &&
-      g_long_constructor && g_jni_shell_holder_field) {
-    jobject javaLong = env->CallStaticObjectMethod(
-        g_java_long_class->obj(), g_long_constructor,
-        reinterpret_cast<jlong>(spawned_instance.release()));
-    if (javaLong != nullptr) {
-      env->SetObjectField(jni, g_jni_shell_holder_field, javaLong);
+  auto spawned_instance = std::make_unique<FlutterEmbedderNative>();
+  spawned_instance->AttachJavaObject(env, jni);
+  if (spawned_id != 0 && native_instance->GetEngineGroup()) {
+    auto spawned_engine =
+        native_instance->GetEngineGroup()->GetEngineHandle(spawned_id);
+    if (spawned_engine) {
+      spawned_instance->SetEngine(spawned_engine);
     }
   }
+
+  jlong raw_handle = reinterpret_cast<jlong>(spawned_instance.get());
+  jobject javaLong = env->CallStaticObjectMethod(
+      g_java_long_class->obj(), g_long_constructor, raw_handle);
+  if (javaLong == nullptr) {
+    return nullptr;
+  }
+  env->SetObjectField(jni, g_jni_shell_holder_field, javaLong);
+  spawned_instance.release();
 
   return jni;
 }
@@ -3496,20 +3494,22 @@ static void FlutterJNI_RunBundleAndSnapshotFromLibrary(JNIEnv* env,
   }
   std::string bundle_path =
       jBundlePath ? fml::jni::JavaStringToString(env, jBundlePath) : "";
-  std::string entrypoint =
-      jEntrypoint ? fml::jni::JavaStringToString(env, jEntrypoint) : "";
-  std::vector<std::string> entrypoint_args;
-  if (jEntrypointArgs != nullptr) {
-    entrypoint_args = fml::jni::StringListToVector(env, jEntrypointArgs);
-  }
   if (jAssetManager != nullptr) {
     auto asset_provider =
         std::make_shared<APKAssetProvider>(env, jAssetManager, bundle_path);
     native_instance->SetAssetProvider(std::move(asset_provider));
   }
-  native_instance->GetRouter()->RouteAssetManagerChanged();
-  native_instance->RunEngineWithBundle(bundle_path, entrypoint, entrypoint_args,
-                                       engineId);
+
+  std::string entrypoint =
+      jEntrypoint ? fml::jni::JavaStringToString(env, jEntrypoint) : "main";
+  std::string library_url =
+      jLibraryUrl ? fml::jni::JavaStringToString(env, jLibraryUrl) : "";
+  std::vector<std::string> entrypoint_args;
+  if (jEntrypointArgs != nullptr) {
+    entrypoint_args = fml::jni::StringListToVector(env, jEntrypointArgs);
+  }
+
+  native_instance->Launch(entrypoint, library_url, entrypoint_args, engineId);
 }
 
 static void FlutterJNI_DispatchEmptyPlatformMessage(JNIEnv* env,
@@ -3527,10 +3527,7 @@ static void FlutterJNI_DispatchEmptyPlatformMessage(JNIEnv* env,
   }
   std::string str_channel =
       channel ? fml::jni::JavaStringToString(env, channel) : "";
-  if (native_instance->GetEngine()) {
-    native_instance->SendPlatformMessage(str_channel, std::vector<uint8_t>(),
-                                         responseId);
-  }
+  native_instance->SendPlatformMessage(str_channel, nullptr, 0, responseId);
 }
 
 static void FlutterJNI_CleanupMessageData(JNIEnv* env,
@@ -3557,20 +3554,22 @@ static void FlutterJNI_DispatchPlatformMessage(JNIEnv* env,
   }
   std::string str_channel =
       channel ? fml::jni::JavaStringToString(env, channel) : "";
-  const uint8_t* buffer = nullptr;
-  uint8_t dummy = 0;
-  if (message != nullptr) {
-    if (position > 0) {
-      buffer =
+  std::vector<uint8_t> data;
+  if (message != nullptr && position > 0) {
+    jlong capacity = env->GetDirectBufferCapacity(message);
+    if (capacity >= 0 && position <= capacity) {
+      const uint8_t* buffer =
           static_cast<const uint8_t*>(env->GetDirectBufferAddress(message));
+      if (buffer != nullptr) {
+        data.assign(buffer, buffer + position);
+      }
     } else {
-      buffer = &dummy;
+      FML_LOG(ERROR) << "DispatchPlatformMessage: position " << position
+                     << " exceeds direct buffer capacity " << capacity;
     }
   }
-  if (native_instance->GetEngine()) {
-    native_instance->SendPlatformMessage(str_channel, buffer, position,
-                                         responseId);
-  }
+  native_instance->SendPlatformMessage(str_channel, data.data(), data.size(),
+                                       responseId);
 }
 
 static void FlutterJNI_InvokePlatformMessageResponseCallback(
@@ -3588,19 +3587,23 @@ static void FlutterJNI_InvokePlatformMessageResponseCallback(
   if (!native_instance) {
     return;
   }
-  const uint8_t* buffer = nullptr;
-  uint8_t dummy = 0;
-  if (message != nullptr) {
-    if (position > 0) {
-      buffer =
+  std::vector<uint8_t> data;
+  if (message != nullptr && position > 0) {
+    jlong capacity = env->GetDirectBufferCapacity(message);
+    if (capacity >= 0 && position <= capacity) {
+      const uint8_t* buffer =
           static_cast<const uint8_t*>(env->GetDirectBufferAddress(message));
+      if (buffer != nullptr) {
+        data.assign(buffer, buffer + position);
+      }
     } else {
-      buffer = &dummy;
+      FML_LOG(ERROR) << "InvokePlatformMessageResponseCallback: position "
+                     << position << " exceeds direct buffer capacity "
+                     << capacity;
     }
   }
-  if (native_instance->GetEngine()) {
-    native_instance->SendPlatformMessageResponse(responseId, buffer, position);
-  }
+  native_instance->SendPlatformMessageResponse(responseId, data.data(),
+                                               data.size());
 }
 
 static void FlutterJNI_InvokePlatformMessageEmptyResponseCallback(
@@ -3616,10 +3619,7 @@ static void FlutterJNI_InvokePlatformMessageEmptyResponseCallback(
   if (!native_instance) {
     return;
   }
-  if (native_instance->GetEngine()) {
-    native_instance->SendPlatformMessageResponse(responseId,
-                                                 std::vector<uint8_t>());
-  }
+  native_instance->SendPlatformMessageResponse(responseId, nullptr, 0);
 }
 
 static void FlutterJNI_NotifyLowMemoryWarning(JNIEnv* env,
@@ -3632,7 +3632,8 @@ static void FlutterJNI_NotifyLowMemoryWarning(JNIEnv* env,
   if (!native_instance) {
     return;
   }
-  if (native_instance->GetEngine()) {
+  auto engine = native_instance->GetEngine();
+  if (engine) {
     static FlutterEngineProcTable s_procs = []() {
       FlutterEngineProcTable procs = {};
       procs.struct_size = sizeof(FlutterEngineProcTable);
@@ -3640,7 +3641,7 @@ static void FlutterJNI_NotifyLowMemoryWarning(JNIEnv* env,
       return procs;
     }();
     if (s_procs.NotifyLowMemoryWarning) {
-      s_procs.NotifyLowMemoryWarning(native_instance->GetEngine());
+      s_procs.NotifyLowMemoryWarning(engine);
     }
   }
 }
@@ -3662,12 +3663,21 @@ static void FlutterJNI_SurfaceCreated(JNIEnv* env,
                                       jlong native_handle,
                                       jobject jsurface) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterJNI_SurfaceCreated");
+  fml::jni::ScopedJavaLocalFrame scoped_local_frame(env);
   auto* native_instance =
       reinterpret_cast<FlutterEmbedderNative*>(native_handle);
   if (!native_instance) {
     return;
   }
-  native_instance->SurfaceCreated(env, jsurface);
+  ANativeWindow* window = nullptr;
+  if (jsurface != nullptr) {
+    window = ANativeWindow_fromSurface(env, jsurface);
+  }
+  native_instance->SetNativeWindow(window);
+  if (window) {
+    ANativeWindow_release(window);
+  }
+  native_instance->GetRouter()->RouteFirstFrame();
 }
 
 static void FlutterJNI_SurfaceWindowChanged(JNIEnv* env,
@@ -3676,12 +3686,20 @@ static void FlutterJNI_SurfaceWindowChanged(JNIEnv* env,
                                             jobject jsurface) {
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::FlutterJNI_SurfaceWindowChanged");
+  fml::jni::ScopedJavaLocalFrame scoped_local_frame(env);
   auto* native_instance =
       reinterpret_cast<FlutterEmbedderNative*>(native_handle);
   if (!native_instance) {
     return;
   }
-  native_instance->SurfaceWindowChanged(env, jsurface);
+  ANativeWindow* window = nullptr;
+  if (jsurface != nullptr) {
+    window = ANativeWindow_fromSurface(env, jsurface);
+  }
+  native_instance->SetNativeWindow(window);
+  if (window) {
+    ANativeWindow_release(window);
+  }
 }
 
 static void FlutterJNI_SurfaceChanged(JNIEnv* env,
@@ -3695,7 +3713,13 @@ static void FlutterJNI_SurfaceChanged(JNIEnv* env,
   if (!native_instance) {
     return;
   }
-  native_instance->SurfaceChanged(width, height);
+  AndroidViewportMetrics metrics = native_instance->GetViewportMetrics();
+  metrics.physical_width = width;
+  metrics.physical_height = height;
+  if (metrics.device_pixel_ratio <= 0.0f) {
+    metrics.device_pixel_ratio = 1.0f;
+  }
+  native_instance->SetViewportMetrics(metrics);
 }
 
 static void FlutterJNI_SurfaceDestroyed(JNIEnv* env,
@@ -3707,7 +3731,7 @@ static void FlutterJNI_SurfaceDestroyed(JNIEnv* env,
   if (!native_instance) {
     return;
   }
-  native_instance->SurfaceDestroyed();
+  native_instance->SetNativeWindow(nullptr);
 }
 
 static void FlutterJNI_SetViewportMetrics(
@@ -3809,10 +3833,6 @@ static void FlutterJNI_SetViewportMetrics(
   }
 
   native_instance->SetViewportMetrics(metrics);
-  if (native_instance->GetEngine()) {
-    native_instance->SendWindowMetricsEvent(native_instance->GetEngine(),
-                                            metrics);
-  }
 }
 
 static void FlutterJNI_DispatchPointerDataPacket(JNIEnv* env,
@@ -3824,14 +3844,22 @@ static void FlutterJNI_DispatchPointerDataPacket(JNIEnv* env,
                "FlutterEmbedderNative::FlutterJNI_DispatchPointerDataPacket");
   auto* native_instance =
       reinterpret_cast<FlutterEmbedderNative*>(native_handle);
-  if (!native_instance || !buffer || position <= 0) {
+  if (!native_instance) {
+    return;
+  }
+  if (buffer == nullptr || position <= 0) {
+    return;
+  }
+  jlong capacity = env->GetDirectBufferCapacity(buffer);
+  if (capacity < 0 || position > capacity) {
+    FML_LOG(ERROR) << "DispatchPointerDataPacket: position " << position
+                   << " exceeds direct buffer capacity " << capacity;
     return;
   }
   const uint8_t* data =
       static_cast<const uint8_t*>(env->GetDirectBufferAddress(buffer));
   if (data != nullptr) {
-    native_instance->DispatchPointerDataPacket(data,
-                                               static_cast<size_t>(position));
+    native_instance->SendPointerDataPacket(data, position);
   }
 }
 
@@ -3851,17 +3879,24 @@ static void FlutterJNI_DispatchSemanticsAction(JNIEnv* env,
   }
   std::vector<uint8_t> action_data;
   if (args != nullptr && args_position > 0) {
-    const uint8_t* buffer =
-        static_cast<const uint8_t*>(env->GetDirectBufferAddress(args));
-    if (buffer != nullptr) {
-      action_data.assign(buffer, buffer + args_position);
+    jlong capacity = env->GetDirectBufferCapacity(args);
+    if (capacity >= 0 && args_position <= capacity) {
+      const uint8_t* buffer =
+          static_cast<const uint8_t*>(env->GetDirectBufferAddress(args));
+      if (buffer != nullptr) {
+        action_data.assign(buffer, buffer + args_position);
+      }
+    } else {
+      FML_LOG(ERROR) << "DispatchSemanticsAction: args_position "
+                     << args_position << " exceeds direct buffer capacity "
+                     << capacity;
     }
   }
-  if (native_instance->GetEngine()) {
+  auto engine = native_instance->GetEngine();
+  if (engine) {
     native_instance->DispatchSemanticsActionToEngine(
-        native_instance->GetEngine(), id,
-        static_cast<FlutterSemanticsAction>(action),
-        action_data.empty() ? nullptr : action_data.data(), action_data.size());
+        engine, id, static_cast<FlutterSemanticsAction>(action),
+        action_data.data(), action_data.size());
   }
 }
 
@@ -3876,9 +3911,10 @@ static void FlutterJNI_SetSemanticsEnabled(JNIEnv* env,
   if (!native_instance) {
     return;
   }
-  if (native_instance->GetEngine()) {
-    native_instance->UpdateSemanticsEnabled(native_instance->GetEngine(),
-                                            enabled);
+  native_instance->SetSemanticsEnabled(enabled);
+  auto engine = native_instance->GetEngine();
+  if (engine) {
+    native_instance->UpdateSemanticsEnabled(engine, enabled);
   }
 }
 
@@ -3893,10 +3929,10 @@ static void FlutterJNI_SetAccessibilityFeatures(JNIEnv* env,
   if (!native_instance) {
     return;
   }
-  if (native_instance->GetEngine()) {
+  auto engine = native_instance->GetEngine();
+  if (engine) {
     native_instance->UpdateAccessibilityFeatures(
-        native_instance->GetEngine(),
-        static_cast<FlutterAccessibilityFeature>(flags));
+        engine, static_cast<FlutterAccessibilityFeature>(flags));
   }
 }
 
@@ -3919,11 +3955,15 @@ static void FlutterJNI_RegisterTexture(JNIEnv* env,
   if (!native_instance) {
     return;
   }
-  native_instance->RegisterSurfaceTexture(env, texture_id, surface_texture);
+  if (surface_texture != nullptr) {
+    native_instance->RegisterSurfaceTexture(
+        texture_id,
+        fml::jni::ScopedJavaGlobalRef<jobject>(env, surface_texture));
+  }
   native_instance->RegisterHardwareBufferTexture(texture_id);
-  if (native_instance->GetEngine()) {
-    native_instance->RegisterExternalTexture(native_instance->GetEngine(),
-                                             texture_id);
+  auto engine = native_instance->GetEngine();
+  if (engine) {
+    native_instance->RegisterExternalTexture(engine, texture_id);
   }
 }
 
@@ -3941,10 +3981,15 @@ static void FlutterJNI_RegisterImageTexture(JNIEnv* env,
   if (!native_instance) {
     return;
   }
+  if (image_texture_entry != nullptr) {
+    native_instance->RegisterSurfaceTexture(
+        texture_id,
+        fml::jni::ScopedJavaGlobalRef<jobject>(env, image_texture_entry));
+  }
   native_instance->RegisterHardwareBufferTexture(texture_id);
-  if (native_instance->GetEngine()) {
-    native_instance->RegisterExternalTexture(native_instance->GetEngine(),
-                                             texture_id);
+  auto engine = native_instance->GetEngine();
+  if (engine) {
+    native_instance->RegisterExternalTexture(engine, texture_id);
   }
 }
 
@@ -3961,10 +4006,9 @@ static void FlutterJNI_MarkTextureFrameAvailable(JNIEnv* env,
     return;
   }
   native_instance->OnHardwareBufferFrameAvailable(texture_id);
-  if (native_instance->GetEngine()) {
-    native_instance->MarkExternalTextureFrameAvailable(
-        native_instance->GetEngine(), texture_id);
-    native_instance->ScheduleFrame(native_instance->GetEngine());
+  auto engine = native_instance->GetEngine();
+  if (engine) {
+    native_instance->MarkExternalTextureFrameAvailable(engine, texture_id);
   }
 }
 
@@ -3977,10 +4021,7 @@ static void FlutterJNI_ScheduleFrame(JNIEnv* env,
   if (!native_instance) {
     return;
   }
-  if (native_instance->GetEngine()) {
-    native_instance->MarkAllTexturesFrameAvailable();
-    native_instance->ScheduleFrame(native_instance->GetEngine());
-  }
+  native_instance->ScheduleFrame();
 }
 
 static void FlutterJNI_UnregisterTexture(JNIEnv* env,
@@ -3994,11 +4035,11 @@ static void FlutterJNI_UnregisterTexture(JNIEnv* env,
   if (!native_instance) {
     return;
   }
-  native_instance->UnregisterSurfaceTexture(env, texture_id);
+  native_instance->UnregisterSurfaceTexture(texture_id);
   native_instance->UnregisterHardwareBufferTexture(texture_id);
-  if (native_instance->GetEngine()) {
-    native_instance->UnregisterExternalTexture(native_instance->GetEngine(),
-                                               texture_id);
+  auto engine = native_instance->GetEngine();
+  if (engine) {
+    native_instance->UnregisterExternalTexture(engine, texture_id);
   }
 }
 
@@ -4026,19 +4067,7 @@ static jboolean FlutterJNI_FlutterTextUtilsIsEmoji(JNIEnv* env,
                                                    jint codePoint) {
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::FlutterJNI_FlutterTextUtilsIsEmoji");
-  return (codePoint >= 0x1F600 && codePoint <= 0x1F64F) ||
-         (codePoint >= 0x1F300 && codePoint <= 0x1F5FF) ||
-         (codePoint >= 0x1F680 && codePoint <= 0x1F6FF) ||
-         (codePoint >= 0x1F700 && codePoint <= 0x1F77F) ||
-         (codePoint >= 0x1F780 && codePoint <= 0x1F7FF) ||
-         (codePoint >= 0x1F800 && codePoint <= 0x1F8FF) ||
-         (codePoint >= 0x1F900 && codePoint <= 0x1F9FF) ||
-         (codePoint >= 0x1FA00 && codePoint <= 0x1FA6F) ||
-         (codePoint >= 0x1FA70 && codePoint <= 0x1FAFF) ||
-         (codePoint >= 0x2600 && codePoint <= 0x26FF) ||
-         (codePoint >= 0x2700 && codePoint <= 0x27BF) ||
-         (codePoint >= 0xFE00 && codePoint <= 0xFE0F) ||
-         (codePoint >= 0x1F1E6 && codePoint <= 0x1F1FF);
+  return u_hasBinaryProperty(codePoint, UProperty::UCHAR_EMOJI);
 }
 
 static jboolean FlutterJNI_FlutterTextUtilsIsEmojiModifier(JNIEnv* env,
@@ -4047,7 +4076,7 @@ static jboolean FlutterJNI_FlutterTextUtilsIsEmojiModifier(JNIEnv* env,
   TRACE_EVENT0(
       "flutter",
       "FlutterEmbedderNative::FlutterJNI_FlutterTextUtilsIsEmojiModifier");
-  return codePoint >= 0x1F3FB && codePoint <= 0x1F3FF;
+  return u_hasBinaryProperty(codePoint, UProperty::UCHAR_EMOJI_MODIFIER);
 }
 
 static jboolean FlutterJNI_FlutterTextUtilsIsEmojiModifierBase(JNIEnv* env,
@@ -4056,26 +4085,7 @@ static jboolean FlutterJNI_FlutterTextUtilsIsEmojiModifierBase(JNIEnv* env,
   TRACE_EVENT0(
       "flutter",
       "FlutterEmbedderNative::FlutterJNI_FlutterTextUtilsIsEmojiModifierBase");
-  return (codePoint >= 0x1F3C2 && codePoint <= 0x1F3C4) ||
-         (codePoint >= 0x1F3C7 && codePoint <= 0x1F3CC) ||
-         (codePoint >= 0x1F442 && codePoint <= 0x1F443) ||
-         (codePoint >= 0x1F446 && codePoint <= 0x1F450) ||
-         (codePoint >= 0x1F466 && codePoint <= 0x1F478) ||
-         (codePoint >= 0x1F47C && codePoint <= 0x1F487) ||
-         (codePoint == 0x1F4AA) ||
-         (codePoint >= 0x1F574 && codePoint <= 0x1F57A) ||
-         (codePoint >= 0x1F590 && codePoint <= 0x1F596) ||
-         (codePoint >= 0x1F645 && codePoint <= 0x1F647) ||
-         (codePoint >= 0x1F64B && codePoint <= 0x1F64F) ||
-         (codePoint >= 0x1F6A3 && codePoint <= 0x1F6B6) ||
-         (codePoint >= 0x1F6C0 && codePoint <= 0x1F6CC) ||
-         (codePoint >= 0x1F90F && codePoint <= 0x1F93E) ||
-         (codePoint == 0x1F977) ||
-         (codePoint >= 0x1F9B5 && codePoint <= 0x1F9B9) ||
-         (codePoint >= 0x1F9CD && codePoint <= 0x1F9CF) ||
-         (codePoint >= 0x1F9D1 && codePoint <= 0x1F9DD) ||
-         (codePoint == 0x261D) || (codePoint == 0x26F9) ||
-         (codePoint >= 0x270A && codePoint <= 0x270D);
+  return u_hasBinaryProperty(codePoint, UProperty::UCHAR_EMOJI_MODIFIER_BASE);
 }
 
 static jboolean FlutterJNI_FlutterTextUtilsIsVariationSelector(JNIEnv* env,
@@ -4084,8 +4094,7 @@ static jboolean FlutterJNI_FlutterTextUtilsIsVariationSelector(JNIEnv* env,
   TRACE_EVENT0(
       "flutter",
       "FlutterEmbedderNative::FlutterJNI_FlutterTextUtilsIsVariationSelector");
-  return (codePoint >= 0xFE00 && codePoint <= 0xFE0F) ||
-         (codePoint >= 0xE0100 && codePoint <= 0xE01EF);
+  return u_hasBinaryProperty(codePoint, UProperty::UCHAR_VARIATION_SELECTOR);
 }
 
 static jboolean FlutterJNI_FlutterTextUtilsIsRegionalIndicator(JNIEnv* env,
@@ -4094,7 +4103,7 @@ static jboolean FlutterJNI_FlutterTextUtilsIsRegionalIndicator(JNIEnv* env,
   TRACE_EVENT0(
       "flutter",
       "FlutterEmbedderNative::FlutterJNI_FlutterTextUtilsIsRegionalIndicator");
-  return codePoint >= 0x1F1E6 && codePoint <= 0x1F1FF;
+  return u_hasBinaryProperty(codePoint, UProperty::UCHAR_REGIONAL_INDICATOR);
 }
 
 static void FlutterJNI_LoadDartDeferredLibrary(JNIEnv* env,
@@ -4110,8 +4119,55 @@ static void FlutterJNI_LoadDartDeferredLibrary(JNIEnv* env,
   if (!native_instance) {
     return;
   }
-  native_instance->GetRouter()->RouteRequestDartDeferredLibrary(
-      static_cast<int64_t>(jLoadingUnitId));
+  auto engine = native_instance->GetEngine();
+  int64_t loading_unit_id = static_cast<int64_t>(jLoadingUnitId);
+  std::vector<std::string> search_paths;
+  if (jSearchPaths != nullptr) {
+    search_paths = fml::jni::StringArrayToVector(env, jSearchPaths);
+  }
+
+  void* handle = nullptr;
+  for (const auto& path : search_paths) {
+    handle = ::dlopen(path.c_str(), RTLD_NOW);
+    if (handle != nullptr) {
+      break;
+    }
+  }
+
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+
+  if (handle == nullptr) {
+    if (engine && s_procs.NotifyDartDeferredLibraryLoadError) {
+      FlutterDartDeferredLibraryLoadError error = {};
+      error.struct_size = sizeof(FlutterDartDeferredLibraryLoadError);
+      error.loading_unit_id = loading_unit_id;
+      error.error_message = "No lib .so found for provided search paths.";
+      error.transient = true;
+      s_procs.NotifyDartDeferredLibraryLoadError(engine, &error);
+    }
+    return;
+  }
+
+  fml::RefPtr<fml::NativeLibrary> native_lib =
+      fml::NativeLibrary::CreateWithHandle(handle, false);
+  fml::SymbolMapping data_mapping(native_lib, "kDartSnapshotData");
+  fml::SymbolMapping instructions_mapping(native_lib, "kDartSnapshotText");
+
+  if (engine && s_procs.LoadDartDeferredLibrary) {
+    FlutterDartDeferredLibrary lib = {};
+    lib.struct_size = sizeof(FlutterDartDeferredLibrary);
+    lib.loading_unit_id = loading_unit_id;
+    lib.data = data_mapping.GetMapping();
+    lib.data_size = data_mapping.GetSize();
+    lib.instructions = instructions_mapping.GetMapping();
+    lib.instructions_size = instructions_mapping.GetSize();
+    s_procs.LoadDartDeferredLibrary(engine, &lib);
+  }
 }
 
 static void FlutterJNI_UpdateJavaAssetManager(JNIEnv* env,
@@ -4129,7 +4185,11 @@ static void FlutterJNI_UpdateJavaAssetManager(JNIEnv* env,
   std::string bundle_path =
       jAssetBundlePath ? fml::jni::JavaStringToString(env, jAssetBundlePath)
                        : "";
-  native_instance->UpdateAssetManager(env, jAssetManager, bundle_path);
+  if (jAssetManager != nullptr) {
+    auto asset_provider =
+        std::make_shared<APKAssetProvider>(env, jAssetManager, bundle_path);
+    native_instance->SetAssetProvider(std::move(asset_provider));
+  }
 }
 
 static void FlutterJNI_DeferredComponentInstallFailure(JNIEnv* env,
@@ -4141,6 +4201,29 @@ static void FlutterJNI_DeferredComponentInstallFailure(JNIEnv* env,
                "FlutterEmbedderNative::"
                "FlutterJNI_DeferredComponentInstallFailure",
                "loading_unit_id", std::to_string(jLoadingUnitId).c_str());
+  auto* native_instance = FromJavaFlutterJNI(env, obj);
+  if (!native_instance) {
+    return;
+  }
+  auto engine = native_instance->GetEngine();
+  if (engine) {
+    std::string error_message =
+        jError != nullptr ? fml::jni::JavaStringToString(env, jError) : "";
+    static FlutterEngineProcTable s_procs = []() {
+      FlutterEngineProcTable procs = {};
+      procs.struct_size = sizeof(FlutterEngineProcTable);
+      FlutterEngineGetProcAddresses(&procs);
+      return procs;
+    }();
+    if (s_procs.NotifyDartDeferredLibraryLoadError) {
+      FlutterDartDeferredLibraryLoadError error = {};
+      error.struct_size = sizeof(FlutterDartDeferredLibraryLoadError);
+      error.loading_unit_id = static_cast<int64_t>(jLoadingUnitId);
+      error.error_message = error_message.c_str();
+      error.transient = static_cast<bool>(jTransient);
+      s_procs.NotifyDartDeferredLibraryLoadError(engine, &error);
+    }
+  }
 }
 
 static void FlutterJNI_UpdateDisplayMetrics(JNIEnv* env,
@@ -4170,35 +4253,6 @@ static jboolean FlutterJNI_IsSurfaceControlEnabled(JNIEnv* env,
   return native_instance->IsHcppEnabled();
 }
 
-static void FlutterJNI_PrefetchDefaultFontManager(JNIEnv* env, jclass clazz) {
-  TRACE_EVENT0("flutter",
-               "FlutterEmbedderNative::FlutterJNI_PrefetchDefaultFontManager");
-  DefaultFontCollectionProvider font_provider(
-      FlutterEmbedderNative::GetDefaultLibraryLoader());
-  font_provider.PrefetchDefaultFontManager();
-}
-
-static void FlutterJNI_UpdateRefreshRate(JNIEnv* env,
-                                         jobject jcaller,
-                                         jfloat refreshRateFPS) {
-  TRACE_EVENT0("flutter",
-               "FlutterEmbedderNative::FlutterJNI_UpdateRefreshRate");
-  if (refreshRateFPS > 0) {
-    FlutterEmbedderNative::GetDefaultVsyncWaiter()->UpdateRefreshRate(
-        static_cast<double>(refreshRateFPS));
-  }
-}
-
-static void FlutterJNI_OnVsync(JNIEnv* env,
-                               jobject jcaller,
-                               jlong frameDelayNanos,
-                               jlong refreshPeriodNanos,
-                               jlong cookie) {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterJNI_OnVsync");
-  FlutterEmbedderNative::GetDefaultVsyncWaiter()->ConsumePendingVsync(
-      static_cast<intptr_t>(cookie), static_cast<int64_t>(frameDelayNanos));
-}
-
 bool FlutterEmbedderNative::RegisterJni(JNIEnv* env) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::RegisterJni");
   if (!env) {
@@ -4208,16 +4262,6 @@ bool FlutterEmbedderNative::RegisterJni(JNIEnv* env) {
   }
 
   static const JNINativeMethod flutter_jni_methods[] = {
-      {
-          .name = "nativeUpdateRefreshRate",
-          .signature = "(F)V",
-          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_UpdateRefreshRate),
-      },
-      {
-          .name = "nativeOnVsync",
-          .signature = "(JJJ)V",
-          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_OnVsync),
-      },
       {
           .name = "nativeAttach",
           .signature = "(Lio/flutter/embedding/engine/FlutterJNI;)J",
@@ -4421,12 +4465,6 @@ bool FlutterEmbedderNative::RegisterJni(JNIEnv* env) {
           .signature = "(J)Z",
           .fnPtr = reinterpret_cast<void*>(&FlutterJNI_IsSurfaceControlEnabled),
       },
-      {
-          .name = "nativePrefetchDefaultFontManager",
-          .signature = "()V",
-          .fnPtr =
-              reinterpret_cast<void*>(&FlutterJNI_PrefetchDefaultFontManager),
-      },
   };
 
   jclass clazz = env->FindClass("io/flutter/embedding/engine/FlutterJNI");
@@ -4443,50 +4481,64 @@ bool FlutterEmbedderNative::RegisterJni(JNIEnv* env) {
     return false;
   }
 
-  g_flutter_jni_class = new fml::jni::ScopedJavaGlobalRef<jclass>(env, clazz);
+  if (!g_flutter_jni_class) {
+    g_flutter_jni_class = new fml::jni::ScopedJavaGlobalRef<jclass>();
+  }
+  g_flutter_jni_class->Reset(env, clazz);
   g_jni_shell_holder_field =
       env->GetFieldID(clazz, "nativeShellHolderId", "Ljava/lang/Long;");
+  if (!g_jni_shell_holder_field) {
+    FML_LOG(ERROR) << "Failed to find nativeShellHolderId field on FlutterJNI.";
+    return false;
+  }
   g_jni_constructor = env->GetMethodID(clazz, "<init>", "()V");
+  if (!g_jni_constructor) {
+    FML_LOG(ERROR) << "Failed to find FlutterJNI constructor.";
+    return false;
+  }
 
   jclass java_long_class = env->FindClass("java/lang/Long");
-  if (java_long_class) {
-    g_java_long_class =
-        new fml::jni::ScopedJavaGlobalRef<jclass>(env, java_long_class);
-    g_long_constructor = env->GetStaticMethodID(java_long_class, "valueOf",
-                                                "(J)Ljava/lang/Long;");
+  if (!java_long_class) {
+    FML_LOG(ERROR) << "Failed to find java/lang/Long class.";
+    return false;
+  }
+  if (!g_java_long_class) {
+    g_java_long_class = new fml::jni::ScopedJavaGlobalRef<jclass>();
+  }
+  g_java_long_class->Reset(env, java_long_class);
+  g_long_constructor =
+      env->GetStaticMethodID(java_long_class, "valueOf", "(J)Ljava/lang/Long;");
+  if (!g_long_constructor) {
+    FML_LOG(ERROR) << "Failed to find java/lang/Long.valueOf method.";
+    return false;
+  }
+  g_long_value_method = env->GetMethodID(java_long_class, "longValue", "()J");
+  if (!g_long_value_method) {
+    FML_LOG(ERROR) << "Failed to find java/lang/Long.longValue method.";
+    return false;
   }
 
   jclass callback_info_class =
       env->FindClass("io/flutter/view/FlutterCallbackInformation");
-  if (callback_info_class) {
-    g_flutter_callback_info_class =
-        new fml::jni::ScopedJavaGlobalRef<jclass>(env, callback_info_class);
-    g_flutter_callback_info_constructor = env->GetMethodID(
-        callback_info_class, "<init>",
-        "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+  if (!callback_info_class) {
+    FML_LOG(ERROR) << "Failed to find FlutterCallbackInformation class.";
+    return false;
+  }
+  if (!g_flutter_callback_info_class) {
+    g_flutter_callback_info_class = new fml::jni::ScopedJavaGlobalRef<jclass>();
+  }
+  g_flutter_callback_info_class->Reset(env, callback_info_class);
+  g_flutter_callback_info_constructor = env->GetMethodID(
+      callback_info_class, "<init>",
+      "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+  if (!g_flutter_callback_info_constructor) {
+    FML_LOG(ERROR) << "Failed to find FlutterCallbackInformation constructor.";
+    return false;
   }
 
-  jclass weak_reference_class = env->FindClass("java/lang/ref/WeakReference");
-  if (weak_reference_class) {
-    g_weak_reference_class =
-        new fml::jni::ScopedJavaGlobalRef<jclass>(env, weak_reference_class);
-    g_weak_reference_get =
-        env->GetMethodID(weak_reference_class, "get", "()Ljava/lang/Object;");
-  }
-
-  jclass wrapper_class = env->FindClass(
-      "io/flutter/embedding/engine/renderer/SurfaceTextureWrapper");
-  if (wrapper_class) {
-    g_surface_texture_wrapper_class =
-        new fml::jni::ScopedJavaGlobalRef<jclass>(env, wrapper_class);
-    g_surface_texture_wrapper_attach_to_gl_context =
-        env->GetMethodID(wrapper_class, "attachToGLContext", "(I)V");
-    g_surface_texture_wrapper_update_tex_image =
-        env->GetMethodID(wrapper_class, "updateTexImage", "()V");
-    g_surface_texture_wrapper_detach_from_gl_context =
-        env->GetMethodID(wrapper_class, "detachFromGLContext", "()V");
-    g_surface_texture_wrapper_release =
-        env->GetMethodID(wrapper_class, "release", "()V");
+  if (!AndroidJvmInvoker::RegisterJni(env, clazz)) {
+    FML_LOG(ERROR) << "Failed to RegisterJni for AndroidJvmInvoker.";
+    return false;
   }
 
   return true;

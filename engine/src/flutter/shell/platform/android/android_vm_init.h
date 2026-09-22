@@ -32,6 +32,9 @@ struct AndroidVMArgs {
   /// Command-line argument strings passed to the engine (e.g. from FlutterJNI).
   std::vector<std::string> command_line_args;
 
+  /// Path to the Flutter assets directory containing project assets.
+  std::string assets_path;
+
   /// Path to the application kernel snapshot or dill asset (debug/JIT).
   std::string kernel_path;
 
@@ -96,6 +99,7 @@ struct AndroidVMArgs {
 
   bool operator==(const AndroidVMArgs& other) const {
     return command_line_args == other.command_line_args &&
+           assets_path == other.assets_path &&
            kernel_path == other.kernel_path &&
            app_storage_path == other.app_storage_path &&
            engine_caches_path == other.engine_caches_path &&
@@ -128,8 +132,9 @@ struct AndroidVMArgs {
 };
 
 /// @brief Determines the appropriate rendering API for the Android device.
-AndroidRenderingAPI SelectRenderingAPI(const AndroidVMArgs& args,
-                                       bool is_vivante = false);
+AndroidRenderingAPI SelectRenderingAPI(
+    const AndroidVMArgs& args,
+    std::optional<bool> is_vivante = std::nullopt);
 
 /// @brief Abstract interface for font collection prefetching.
 ///

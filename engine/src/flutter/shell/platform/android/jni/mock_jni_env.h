@@ -65,12 +65,6 @@ class MockableJNIEnv : public JNIEnv {
     jni_.CallObjectMethodV = WrapCallObjectMethodV;
     jni_.CallVoidMethod = WrapCallVoidMethod;
     jni_.CallVoidMethodV = WrapCallVoidMethodV;
-    jni_.CallIntMethod = WrapCallIntMethod;
-    jni_.CallIntMethodV = WrapCallIntMethodV;
-    jni_.CallFloatMethod = WrapCallFloatMethod;
-    jni_.CallFloatMethodV = WrapCallFloatMethodV;
-    jni_.CallBooleanMethod = WrapCallBooleanMethod;
-    jni_.CallBooleanMethodV = WrapCallBooleanMethodV;
     jni_.DeleteGlobalRef = WrapDeleteGlobalRef;
     jni_.DeleteLocalRef = WrapDeleteLocalRef;
     jni_.ExceptionCheck = WrapExceptionCheck;
@@ -86,8 +80,10 @@ class MockableJNIEnv : public JNIEnv {
     jni_.GetStaticMethodID = WrapGetStaticMethodID;
     jni_.NewGlobalRef = WrapNewGlobalRef;
     jni_.NewLocalRef = WrapNewLocalRef;
-    jni_.NewObject = WrapNewObject;
-    jni_.NewObjectV = WrapNewObjectV;
+    jni_.NewWeakGlobalRef = WrapNewWeakGlobalRef;
+    jni_.DeleteWeakGlobalRef = WrapDeleteWeakGlobalRef;
+    jni_.PushLocalFrame = WrapPushLocalFrame;
+    jni_.PopLocalFrame = WrapPopLocalFrame;
     jni_.RegisterNatives = WrapRegisterNatives;
     jni_.GetArrayLength = WrapGetArrayLength;
     jni_.GetIntArrayRegion = WrapGetIntArrayRegion;
@@ -105,9 +101,6 @@ class MockableJNIEnv : public JNIEnv {
 
   virtual jobject CallObjectMethodV(jobject, jmethodID, va_list) = 0;
   virtual void CallVoidMethodV(jobject, jmethodID, va_list) = 0;
-  virtual jint CallIntMethodV(jobject, jmethodID, va_list) = 0;
-  virtual jfloat CallFloatMethodV(jobject, jmethodID, va_list) = 0;
-  virtual jboolean CallBooleanMethodV(jobject, jmethodID, va_list) = 0;
   virtual void DeleteGlobalRef(jobject) = 0;
   virtual void DeleteLocalRef(jobject) = 0;
   virtual jboolean ExceptionCheck() = 0;
@@ -123,7 +116,10 @@ class MockableJNIEnv : public JNIEnv {
   virtual jmethodID GetStaticMethodID(jclass, const char*, const char*) = 0;
   virtual jobject NewGlobalRef(jobject) = 0;
   virtual jobject NewLocalRef(jobject) = 0;
-  virtual jobject NewObjectV(jclass, jmethodID, va_list) = 0;
+  virtual jweak NewWeakGlobalRef(jobject) = 0;
+  virtual void DeleteWeakGlobalRef(jweak) = 0;
+  virtual jint PushLocalFrame(jint capacity) = 0;
+  virtual jobject PopLocalFrame(jobject result) = 0;
   virtual jint RegisterNatives(jclass, const JNINativeMethod*, jint) = 0;
   virtual jsize GetArrayLength(jarray) = 0;
   virtual void GetIntArrayRegion(jintArray, jsize, jsize, jint*) = 0;
@@ -173,57 +169,6 @@ class MockableJNIEnv : public JNIEnv {
                                   jmethodID methodID,
                                   va_list args) {
     static_cast<MockableJNIEnv*>(env)->CallVoidMethodV(obj, methodID, args);
-  }
-  static jint WrapCallIntMethod(JNIEnv* env,
-                                jobject obj,
-                                jmethodID methodID,
-                                ...) {
-    va_list args;
-    va_start(args, methodID);
-    jint result = WrapCallIntMethodV(env, obj, methodID, args);
-    va_end(args);
-    return result;
-  }
-  static jint WrapCallIntMethodV(JNIEnv* env,
-                                 jobject obj,
-                                 jmethodID methodID,
-                                 va_list args) {
-    return static_cast<MockableJNIEnv*>(env)->CallIntMethodV(obj, methodID,
-                                                             args);
-  }
-  static jfloat WrapCallFloatMethod(JNIEnv* env,
-                                    jobject obj,
-                                    jmethodID methodID,
-                                    ...) {
-    va_list args;
-    va_start(args, methodID);
-    jfloat result = WrapCallFloatMethodV(env, obj, methodID, args);
-    va_end(args);
-    return result;
-  }
-  static jfloat WrapCallFloatMethodV(JNIEnv* env,
-                                     jobject obj,
-                                     jmethodID methodID,
-                                     va_list args) {
-    return static_cast<MockableJNIEnv*>(env)->CallFloatMethodV(obj, methodID,
-                                                               args);
-  }
-  static jboolean WrapCallBooleanMethod(JNIEnv* env,
-                                        jobject obj,
-                                        jmethodID methodID,
-                                        ...) {
-    va_list args;
-    va_start(args, methodID);
-    jboolean result = WrapCallBooleanMethodV(env, obj, methodID, args);
-    va_end(args);
-    return result;
-  }
-  static jboolean WrapCallBooleanMethodV(JNIEnv* env,
-                                         jobject obj,
-                                         jmethodID methodID,
-                                         va_list args) {
-    return static_cast<MockableJNIEnv*>(env)->CallBooleanMethodV(obj, methodID,
-                                                                 args);
   }
   static void WrapDeleteGlobalRef(JNIEnv* env, jobject globalRef) {
     static_cast<MockableJNIEnv*>(env)->DeleteGlobalRef(globalRef);
@@ -284,21 +229,17 @@ class MockableJNIEnv : public JNIEnv {
   static jobject WrapNewLocalRef(JNIEnv* env, jobject ref) {
     return static_cast<MockableJNIEnv*>(env)->NewLocalRef(ref);
   }
-  static jobject WrapNewObject(JNIEnv* env,
-                               jclass clazz,
-                               jmethodID methodID,
-                               ...) {
-    va_list args;
-    va_start(args, methodID);
-    jobject result = WrapNewObjectV(env, clazz, methodID, args);
-    va_end(args);
-    return result;
+  static jweak WrapNewWeakGlobalRef(JNIEnv* env, jobject ref) {
+    return static_cast<MockableJNIEnv*>(env)->NewWeakGlobalRef(ref);
   }
-  static jobject WrapNewObjectV(JNIEnv* env,
-                                jclass clazz,
-                                jmethodID methodID,
-                                va_list args) {
-    return static_cast<MockableJNIEnv*>(env)->NewObjectV(clazz, methodID, args);
+  static void WrapDeleteWeakGlobalRef(JNIEnv* env, jweak ref) {
+    static_cast<MockableJNIEnv*>(env)->DeleteWeakGlobalRef(ref);
+  }
+  static jint WrapPushLocalFrame(JNIEnv* env, jint capacity) {
+    return static_cast<MockableJNIEnv*>(env)->PushLocalFrame(capacity);
+  }
+  static jobject WrapPopLocalFrame(JNIEnv* env, jobject result) {
+    return static_cast<MockableJNIEnv*>(env)->PopLocalFrame(result);
   }
   static jint WrapRegisterNatives(JNIEnv* env,
                                   jclass clazz,
@@ -370,12 +311,20 @@ class MockableJNIEnv : public JNIEnv {
 class MockJNIEnv : public MockableJNIEnv {
  public:
   MockJNIEnv() {
+    ON_CALL(*this, NewWeakGlobalRef(::testing::_))
+        .WillByDefault(::testing::ReturnArg<0>());
+    ON_CALL(*this, DeleteWeakGlobalRef(::testing::_))
+        .WillByDefault(::testing::Return());
     ON_CALL(*this, PushLocalFrame(::testing::_))
         .WillByDefault(::testing::Return(0));
     ON_CALL(*this, PopLocalFrame(::testing::_))
         .WillByDefault(::testing::ReturnArg<0>());
-    ON_CALL(*this, ExceptionCheck())
-        .WillByDefault(::testing::Return(JNI_FALSE));
+    ON_CALL(*this, NewLocalRef(::testing::_))
+        .WillByDefault(::testing::ReturnArg<0>());
+    ON_CALL(*this, NewGlobalRef(::testing::_))
+        .WillByDefault(::testing::ReturnArg<0>());
+    ON_CALL(*this, CallVoidMethodV(::testing::_, ::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return());
   }
 
   MOCK_METHOD(jobject,
@@ -383,15 +332,6 @@ class MockJNIEnv : public MockableJNIEnv {
               (jobject, jmethodID, va_list),
               (override));
   MOCK_METHOD(void, CallVoidMethodV, (jobject, jmethodID, va_list), (override));
-  MOCK_METHOD(jint, CallIntMethodV, (jobject, jmethodID, va_list), (override));
-  MOCK_METHOD(jfloat,
-              CallFloatMethodV,
-              (jobject, jmethodID, va_list),
-              (override));
-  MOCK_METHOD(jboolean,
-              CallBooleanMethodV,
-              (jobject, jmethodID, va_list),
-              (override));
   MOCK_METHOD(void, DeleteGlobalRef, (jobject), (override));
   MOCK_METHOD(void, DeleteLocalRef, (jobject), (override));
   MOCK_METHOD(jboolean, ExceptionCheck, (), (override));
@@ -419,7 +359,10 @@ class MockJNIEnv : public MockableJNIEnv {
               (override));
   MOCK_METHOD(jobject, NewGlobalRef, (jobject), (override));
   MOCK_METHOD(jobject, NewLocalRef, (jobject), (override));
-  MOCK_METHOD(jobject, NewObjectV, (jclass, jmethodID, va_list), (override));
+  MOCK_METHOD(jweak, NewWeakGlobalRef, (jobject), (override));
+  MOCK_METHOD(void, DeleteWeakGlobalRef, (jweak), (override));
+  MOCK_METHOD(jint, PushLocalFrame, (jint), (override));
+  MOCK_METHOD(jobject, PopLocalFrame, (jobject), (override));
   MOCK_METHOD(jint,
               RegisterNatives,
               (jclass, const JNINativeMethod*, jint),

@@ -8,6 +8,7 @@
 #include <atomic>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -27,12 +28,27 @@ class LegacyJniDelegate {
   virtual ~LegacyJniDelegate() = default;
 
   virtual bool HandlePlatformMessage(const std::string& channel,
+                                     const uint8_t* message,
+                                     size_t message_size,
+                                     int32_t response_id,
+                                     int64_t message_data = 0) = 0;
+
+  virtual bool HandlePlatformMessage(const std::string& channel,
                                      const std::vector<uint8_t>& message,
-                                     int32_t response_id) = 0;
+                                     int32_t response_id,
+                                     int64_t message_data = 0) {
+    return HandlePlatformMessage(channel, message.data(), message.size(),
+                                 response_id, message_data);
+  }
 
   virtual bool HandlePlatformMessageResponse(int32_t response_id,
-                                             const std::vector<uint8_t>& data,
-                                             bool has_data = true) = 0;
+                                             const uint8_t* data,
+                                             size_t data_size) = 0;
+
+  virtual bool HandlePlatformMessageResponse(int32_t response_id,
+                                             const std::vector<uint8_t>& data) {
+    return HandlePlatformMessageResponse(response_id, data.data(), data.size());
+  }
 
   virtual bool SetApplicationLocale(const std::string& locale) = 0;
 
@@ -40,22 +56,24 @@ class LegacyJniDelegate {
 
   virtual bool OnPreEngineRestart() = 0;
 
-  virtual bool RequestDartDeferredLibrary(int64_t loading_unit_id) = 0;
+  virtual bool RequestDartDeferredLibrary(int loading_unit_id) = 0;
 
-  virtual bool InitVM(const AndroidVMArgs& args) = 0;
+  virtual bool InitVM(const AndroidVMArgs& args) { return true; }
 
-  virtual bool PrefetchDefaultFontManager() = 0;
+  virtual bool PrefetchDefaultFontManager() { return true; }
 
-  virtual bool SetVmServiceUri(const std::string& uri) = 0;
+  virtual bool SetVmServiceUri(const std::string& uri) { return true; }
 
   virtual int64_t SpawnEngine(int64_t parent_engine_id,
-                              const AndroidEngineSpawnArgs& args) = 0;
+                              const AndroidEngineSpawnArgs& args) {
+    return 0;
+  }
 
-  virtual bool ShutdownSpawnedEngine(int64_t engine_id) = 0;
+  virtual bool ShutdownSpawnedEngine(int64_t engine_id) { return false; }
 
-  virtual size_t GetActiveEngineCount() const = 0;
+  virtual size_t GetActiveEngineCount() const { return 0; }
 
-  virtual bool OnEngineGarbageCollected(int64_t engine_id) = 0;
+  virtual bool OnEngineGarbageCollected(int64_t engine_id) { return false; }
 };
 
 /// @brief Native JNI Routing Boundary that unconditionally executes through
@@ -76,13 +94,29 @@ class JniRouter {
       const std::shared_ptr<LegacyJniDelegate>& legacy_delegate = nullptr);
   virtual ~JniRouter();
 
-  /// @brief Checks whether the Embedder C-API pipeline is active
+  /// @brief Checks whether the Embedder C-API pipeline is active globally
+  /// (unconditionally true).
+  static bool IsGlobalEmbedderEnabled();
+
+  /// @brief Sets whether the Embedder C-API pipeline is active globally (no-op
+  /// post Phase 5.5).
+  static void SetGlobalEmbedderEnabled(bool enabled);
+
+  /// @brief Backward-compatible alias for IsGlobalEmbedderEnabled
   /// (unconditionally true).
   static bool IsEmbedderEnabled();
 
-  /// @brief Sets whether the Embedder C-API pipeline is active (no-op post
+  /// @brief Backward-compatible alias for SetGlobalEmbedderEnabled (no-op post
   /// Phase 5.5).
   static void SetEmbedderEnabled(bool enabled);
+
+  /// @brief Sets per-instance override for embedder routing (no-op post Phase
+  /// 5.5).
+  void SetInstanceEmbedderEnabled(std::optional<bool> enabled);
+
+  /// @brief Checks whether embedder pipeline is active for this router
+  /// instance (unconditionally true).
+  bool IsInstanceEmbedderEnabled() const;
 
   /// @brief Returns the active routing path (unconditionally
   /// RoutingPath::kEmbedder).
@@ -90,21 +124,32 @@ class JniRouter {
 
   // Routing entry points:
   bool RoutePlatformMessage(const std::string& channel,
+                            const uint8_t* message,
+                            size_t message_size,
+                            int32_t response_id,
+                            int64_t message_data = 0);
+
+  bool RoutePlatformMessage(const std::string& channel,
                             const std::vector<uint8_t>& message,
                             int32_t response_id,
-                            bool has_data = true);
+                            int64_t message_data = 0);
 
   bool RoutePlatformMessageResponse(int32_t response_id,
-                                    const std::vector<uint8_t>& data,
-                                    bool has_data = true);
+                                    const uint8_t* data,
+                                    size_t data_size);
 
-  bool RouteSemanticsUpdate(const std::vector<uint8_t>& buffer,
-                            const std::vector<std::string>& strings);
+  bool RoutePlatformMessageResponse(int32_t response_id,
+                                    const std::vector<uint8_t>& data);
 
   bool RouteSemanticsUpdate(
       const std::vector<uint8_t>& buffer,
       const std::vector<std::string>& strings,
       const std::vector<std::vector<uint8_t>>& string_attribute_args);
+
+  bool RouteSemanticsUpdate(const std::vector<uint8_t>& buffer,
+                            const std::vector<std::string>& strings) {
+    return RouteSemanticsUpdate(buffer, strings, {});
+  }
 
   bool RouteCustomAccessibilityActions(
       const std::vector<uint8_t>& actions_buffer,
@@ -112,14 +157,11 @@ class JniRouter {
 
   bool RouteSemanticsUpdate(const FlutterSemanticsUpdate2& update);
 
-  bool RouteSemanticsEnabled(bool enabled);
+  bool RouteSemanticsTreeEnabled(bool enabled);
 
-  bool RouteDispatchSemanticsAction(int32_t node_id,
-                                    FlutterSemanticsAction action,
-                                    const std::vector<uint8_t>& data = {},
-                                    int64_t view_id = 0);
-
-  bool RouteSetAccessibilityFeatures(int32_t flags);
+  bool RouteSemanticsEnabled(bool enabled) {
+    return RouteSemanticsTreeEnabled(enabled);
+  }
 
   bool RouteApplicationLocale(const std::string& locale);
 
@@ -130,7 +172,6 @@ class JniRouter {
   bool RouteVsync(int64_t frame_time_nanos, int64_t frame_target_time_nanos);
 
   bool RouteAsyncWaitForVsync(intptr_t baton);
-
   bool RouteSetViewportMetrics(const AndroidViewportMetrics& metrics);
 
   bool RouteUpdateDisplayMetrics(const AndroidDisplayMetrics& metrics);
@@ -146,12 +187,7 @@ class JniRouter {
                             double height,
                             double pixel_ratio);
 
-  bool RouteRequestDartDeferredLibrary(int64_t loading_unit_id);
-
-  bool RouteAssetManagerChanged();
-
-  double RouteGetScaledFontSize(double unscaled_font_size,
-                                int configuration_id) const;
+  bool RouteRequestDartDeferredLibrary(int loading_unit_id);
 
   std::optional<DartCallbackInfo> RouteLookupCallbackInformation(
       int64_t handle);
@@ -165,6 +201,8 @@ class JniRouter {
                               int32_t height);
 
   std::optional<ImageHeaderInfo> RouteGetImageHeader(int64_t generator_handle);
+
+  void RouteRemoveImageHeader(int64_t generator_handle);
 
   int64_t RouteCreatePlatformView(const PlatformViewCreationParams& params,
                                   PlatformViewCompositionType composition_type);
@@ -265,11 +303,28 @@ class JniRouter {
                                  int32_t height,
                                  const AndroidMutatorsStack& mutators_stack);
 
+  bool RoutePlatformViewMutators(int64_t view_id,
+                                 int32_t x,
+                                 int32_t y,
+                                 int32_t width,
+                                 int32_t height,
+                                 int32_t view_width,
+                                 int32_t view_height,
+                                 const AndroidMutatorsStack& mutators_stack);
+
   bool RoutePlatformViewMutators(const FlutterPlatformView& platform_view,
                                  int32_t x,
                                  int32_t y,
                                  int32_t width,
                                  int32_t height);
+
+  bool RoutePlatformViewMutators(const FlutterPlatformView& platform_view,
+                                 int32_t x,
+                                 int32_t y,
+                                 int32_t width,
+                                 int32_t height,
+                                 int32_t view_width,
+                                 int32_t view_height);
 
   bool RouteInitVM(const AndroidVMArgs& args);
 
@@ -325,6 +380,9 @@ class JniRouter {
   bool RouteOnEngineGarbageCollected(int64_t engine_id);
 
   std::shared_ptr<JniDelegate> GetEmbedderDelegate() const;
+
+  /// @brief Returns legacy delegate pointer (unconditionally nullptr post
+  /// Phase 5.5 Flag Obliteration).
   std::shared_ptr<LegacyJniDelegate> GetLegacyDelegate() const;
 
  private:

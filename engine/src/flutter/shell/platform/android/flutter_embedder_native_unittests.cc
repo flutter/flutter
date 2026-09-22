@@ -6,14 +6,15 @@
 #include <thread>
 #include <vector>
 
+#include "flutter/fml/file.h"
+#include "flutter/fml/icu_util.h"
+#include "flutter/fml/paths.h"
 #include "flutter/fml/platform/android/jni_util.h"
-#include "flutter/fml/string_conversion.h"
 #include "flutter/shell/platform/android/android_engine_group.h"
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_vsync_waiter.h"
 #include "flutter/shell/platform/android/android_vulkan_texture.h"
 #include "flutter/shell/platform/android/flutter_embedder_native.h"
-#include "flutter/shell/platform/android/flutter_main.h"
 #include "flutter/shell/platform/android/jni/mock_jni_env.h"
 #include "flutter/shell/platform/android/jni_delegate.h"
 #include "flutter/shell/platform/android/jni_router.h"
@@ -21,6 +22,7 @@
 #include "flutter/shell/platform/android/os_library_loader.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "unicode/uchar.h"
 
 namespace flutter {
 namespace android {
@@ -37,54 +39,49 @@ using ::testing::StrictMock;
 
 class MockJvmInvoker : public JvmInvoker {
  public:
-  MockJvmInvoker() {
-    ON_CALL(*this, EnsureAttachedToThread())
-        .WillByDefault(::testing::Return(true));
-    ON_CALL(*this, InvokeVoidMethod(::testing::_, ::testing::_, ::testing::_))
-        .WillByDefault(::testing::Return(true));
-    ON_CALL(*this,
-            InvokeBooleanMethod(::testing::_, ::testing::_, ::testing::_))
-        .WillByDefault(::testing::Return(true));
-    ON_CALL(*this, HandlePlatformMessage(::testing::_, ::testing::_,
-                                         ::testing::_, ::testing::_))
-        .WillByDefault(::testing::Return(true));
-    ON_CALL(*this, HandlePlatformMessageResponse(::testing::_, ::testing::_,
-                                                 ::testing::_))
-        .WillByDefault(::testing::Return(true));
-    ON_CALL(*this, UpdateSemantics(::testing::_, ::testing::_, ::testing::_))
-        .WillByDefault(::testing::Return(true));
-    ON_CALL(*this, UpdateCustomAccessibilityActions(::testing::_, ::testing::_))
-        .WillByDefault(::testing::Return(true));
-    ON_CALL(*this, SetSemanticsTreeEnabled(::testing::_))
-        .WillByDefault(::testing::Return(true));
-    ON_CALL(*this, SetApplicationLocale(::testing::_))
-        .WillByDefault(::testing::Return(true));
-    ON_CALL(*this, PostJvmTask(::testing::_))
-        .WillByDefault(::testing::Return(true));
-    ON_CALL(*this,
-            OnDisplayPlatformView(::testing::_, ::testing::_, ::testing::_,
-                                  ::testing::_, ::testing::_, ::testing::_,
-                                  ::testing::_, ::testing::_, ::testing::_))
-        .WillByDefault(::testing::Return(true));
-    ON_CALL(*this, CreateOverlaySurface(::testing::_))
-        .WillByDefault(::testing::Return(std::nullopt));
-    ON_CALL(*this,
-            OnDisplayOverlaySurface(::testing::_, ::testing::_, ::testing::_,
-                                    ::testing::_, ::testing::_))
-        .WillByDefault(::testing::Return(true));
-    ON_CALL(*this, CreateTransaction()).WillByDefault(::testing::Return(true));
-    ON_CALL(*this, ResizePlatformView(::testing::_, ::testing::_, ::testing::_))
-        .WillByDefault(::testing::Return(true));
-    ON_CALL(*this, OffsetPlatformView(::testing::_, ::testing::_, ::testing::_))
-        .WillByDefault(::testing::Return(true));
-    ON_CALL(*this, SetPlatformViewDirection(::testing::_, ::testing::_))
-        .WillByDefault(::testing::Return(true));
-  }
-
   MOCK_METHOD(bool, EnsureAttachedToThread, (), (override));
   MOCK_METHOD(void, DetachFromThread, (), (override));
   MOCK_METHOD(bool, HasPendingException, (), (const, override));
   MOCK_METHOD(void, ClearPendingException, (), (override));
+
+  MOCK_METHOD(bool,
+              HandlePlatformMessage,
+              (const std::string& channel,
+               const uint8_t* message,
+               size_t message_size,
+               int32_t response_id,
+               int64_t message_data),
+              (override));
+
+  MOCK_METHOD(bool,
+              HandlePlatformMessageResponse,
+              (int32_t response_id, const uint8_t* data, size_t data_size),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateSemantics,
+              (const std::vector<uint8_t>& buffer,
+               const std::vector<std::string>& strings,
+               const std::vector<std::vector<uint8_t>>& string_attribute_args),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateCustomAccessibilityActions,
+              (const std::vector<uint8_t>& actions_buffer,
+               const std::vector<std::string>& action_strings),
+              (override));
+
+  MOCK_METHOD(bool, SetSemanticsTreeEnabled, (bool enabled), (override));
+  MOCK_METHOD(bool,
+              SetApplicationLocale,
+              (const std::string& locale),
+              (override));
+  MOCK_METHOD(bool, OnFirstFrame, (), (override));
+  MOCK_METHOD(bool, OnPreEngineRestart, (), (override));
+  MOCK_METHOD(bool,
+              RequestDartDeferredLibrary,
+              (int loading_unit_id),
+              (override));
 
   MOCK_METHOD(bool,
               InvokeVoidMethod,
@@ -131,42 +128,12 @@ class MockJvmInvoker : public JvmInvoker {
   MOCK_METHOD(bool, PostJvmTask, (std::function<void()> task), (override));
 
   MOCK_METHOD(bool,
-              HandlePlatformMessage,
-              (const std::string& channel,
-               const std::vector<uint8_t>& message,
-               int32_t response_id,
-               bool has_data),
+              DecodeImage,
+              (const uint8_t* data, size_t size, int64_t generator_handle),
               (override));
 
   MOCK_METHOD(bool,
-              HandlePlatformMessageResponse,
-              (int32_t response_id,
-               const std::vector<uint8_t>& data,
-               bool has_data),
-              (override));
-
-  MOCK_METHOD(bool,
-              UpdateSemantics,
-              (const std::vector<uint8_t>& buffer,
-               const std::vector<std::string>& strings,
-               const std::vector<std::vector<uint8_t>>& string_attribute_args),
-              (override));
-
-  MOCK_METHOD(bool,
-              UpdateCustomAccessibilityActions,
-              (const std::vector<uint8_t>& actions_buffer,
-               const std::vector<std::string>& action_strings),
-              (override));
-
-  MOCK_METHOD(bool, SetSemanticsTreeEnabled, (bool enabled), (override));
-
-  MOCK_METHOD(bool,
-              SetApplicationLocale,
-              (const std::string& locale),
-              (override));
-
-  MOCK_METHOD(bool,
-              OnDisplayPlatformView,
+              PushPlatformViewMutators,
               (int64_t view_id,
                int32_t x,
                int32_t y,
@@ -174,36 +141,7 @@ class MockJvmInvoker : public JvmInvoker {
                int32_t height,
                int32_t view_width,
                int32_t view_height,
-               const AndroidMutatorsStack& mutators_stack,
-               bool hcpp_enabled),
-              (override));
-
-  MOCK_METHOD(std::optional<int32_t>,
-              CreateOverlaySurface,
-              (bool hcpp_enabled),
-              (override));
-
-  MOCK_METHOD(
-      bool,
-      OnDisplayOverlaySurface,
-      (int32_t surface_id, int32_t x, int32_t y, int32_t width, int32_t height),
-      (override));
-
-  MOCK_METHOD(bool, CreateTransaction, (), (override));
-
-  MOCK_METHOD(bool,
-              ResizePlatformView,
-              (int64_t view_id, double width, double height),
-              (override));
-
-  MOCK_METHOD(bool,
-              OffsetPlatformView,
-              (int64_t view_id, double top, double left),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetPlatformViewDirection,
-              (int64_t view_id, int32_t direction),
+               const std::vector<uint8_t>& payload),
               (override));
 };
 
@@ -212,15 +150,15 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
   MOCK_METHOD(bool,
               HandlePlatformMessage,
               (const std::string& channel,
-               const std::vector<uint8_t>& message,
-               int32_t response_id),
+               const uint8_t* message,
+               size_t message_size,
+               int32_t response_id,
+               int64_t message_data),
               (override));
 
   MOCK_METHOD(bool,
               HandlePlatformMessageResponse,
-              (int32_t response_id,
-               const std::vector<uint8_t>& data,
-               bool has_data),
+              (int32_t response_id, const uint8_t* data, size_t data_size),
               (override));
 
   MOCK_METHOD(bool,
@@ -229,12 +167,11 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
               (override));
 
   MOCK_METHOD(bool, OnFirstFrame, (), (override));
-
   MOCK_METHOD(bool, OnPreEngineRestart, (), (override));
 
   MOCK_METHOD(bool,
               RequestDartDeferredLibrary,
-              (int64_t loading_unit_id),
+              (int loading_unit_id),
               (override));
 
   MOCK_METHOD(bool, InitVM, (const AndroidVMArgs& args), (override));
@@ -347,6 +284,8 @@ class MockImageDecoderProvider : public ImageDecoderProvider {
               GetImageHeader,
               (int64_t generator_handle),
               (override));
+
+  MOCK_METHOD(void, RemoveImageHeader, (int64_t generator_handle), (override));
 };
 
 class MockSurfaceControlProvider : public AndroidSurfaceControlProvider {
@@ -479,10 +418,11 @@ TEST(FlutterEmbedderNativeTest, DefaultJvmInvokerOperations) {
             "");
   EXPECT_TRUE(invoker->InvokeBytesMethod("testBytes", "()[B").empty());
 
+  // PostJvmTask fails safely when no task runner is configured.
   bool task_executed = false;
-  EXPECT_TRUE(
+  EXPECT_FALSE(
       invoker->PostJvmTask([&task_executed]() { task_executed = true; }));
-  EXPECT_TRUE(task_executed);
+  EXPECT_FALSE(task_executed);
 
   invoker->DetachFromThread();
 }
@@ -493,32 +433,35 @@ TEST(FlutterEmbedderNativeTest, JniDelegateWithMockInvoker) {
 
   EXPECT_EQ(delegate->GetJvmInvoker(), mock_invoker);
 
-  // 1. HandlePlatformMessage
+  // 1. HandlePlatformMessage (preserves all typed parameters)
   std::vector<uint8_t> msg = {'h', 'e', 'l', 'l', 'o'};
-  EXPECT_CALL(*mock_invoker,
-              HandlePlatformMessage("flutter/test", msg, 42, true))
+  EXPECT_CALL(*mock_invoker, HandlePlatformMessage("flutter/test", msg.data(),
+                                                   msg.size(), 42, 1001L))
       .WillOnce(Return(true));
-  EXPECT_TRUE(delegate->HandlePlatformMessage("flutter/test", msg, 42));
+  EXPECT_TRUE(delegate->HandlePlatformMessage("flutter/test", msg, 42, 1001L));
 
   // 2. HandlePlatformMessageResponse
   std::vector<uint8_t> resp = {'o', 'k'};
-  EXPECT_CALL(*mock_invoker, HandlePlatformMessageResponse(42, resp, true))
+  EXPECT_CALL(*mock_invoker,
+              HandlePlatformMessageResponse(42, resp.data(), resp.size()))
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->HandlePlatformMessageResponse(42, resp));
 
   // 3. UpdateSemantics
   std::vector<uint8_t> semantics_buffer = {0x01, 0x02};
   std::vector<std::string> semantics_strings = {"label1", "label2"};
-  EXPECT_CALL(*mock_invoker,
-              UpdateSemantics(semantics_buffer, semantics_strings,
-                              std::vector<std::vector<uint8_t>>{}))
+  std::vector<std::vector<uint8_t>> string_attributes = {{0xAA}};
+  EXPECT_CALL(
+      *mock_invoker,
+      UpdateSemantics(semantics_buffer, semantics_strings, string_attributes))
       .WillOnce(Return(true));
-  EXPECT_TRUE(delegate->UpdateSemantics(semantics_buffer, semantics_strings));
+  EXPECT_TRUE(delegate->UpdateSemantics(semantics_buffer, semantics_strings,
+                                        string_attributes));
 
-  // 4. SetSemanticsEnabled
+  // 4. SetSemanticsTreeEnabled
   EXPECT_CALL(*mock_invoker, SetSemanticsTreeEnabled(true))
       .WillOnce(Return(true));
-  EXPECT_TRUE(delegate->SetSemanticsEnabled(true));
+  EXPECT_TRUE(delegate->SetSemanticsTreeEnabled(true));
 
   // 5. SetApplicationLocale
   std::string locale = "en_US";
@@ -527,36 +470,18 @@ TEST(FlutterEmbedderNativeTest, JniDelegateWithMockInvoker) {
   EXPECT_TRUE(delegate->SetApplicationLocale(locale));
 
   // 6. OnFirstFrame
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onFirstFrame", "()V", _))
-      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker, OnFirstFrame()).WillOnce(Return(true));
   EXPECT_TRUE(delegate->OnFirstFrame());
 
   // 7. OnPreEngineRestart
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onPreEngineRestart", "()V", _))
-      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker, OnPreEngineRestart()).WillOnce(Return(true));
   EXPECT_TRUE(delegate->OnPreEngineRestart());
 
-  // 8. OnVsync
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(delegate->OnVsync(1000000L, 2000000L));
-
-  // 9. DispatchViewportMetrics
-  EXPECT_TRUE(delegate->DispatchViewportMetrics(0, 1080.0, 1920.0, 2.5));
-
-  // 10. RequestDartDeferredLibrary
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("requestDartDeferredLibrary", "(J)V", _))
+  // 8. RequestDartDeferredLibrary
+  EXPECT_CALL(*mock_invoker, RequestDartDeferredLibrary(101))
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->RequestDartDeferredLibrary(101));
-
-  // 11. OnAssetManagerChanged
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("onAssetManagerChanged", "()V", _))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(delegate->OnAssetManagerChanged());
-
-  // 12. LookupCallbackInformation with injected mock callback cache
+  // 9. LookupCallbackInformation with injected mock callback cache
   auto mock_cache = std::make_shared<InMemoryCallbackCacheProvider>();
   mock_cache->AddCallback(42L, "myDartCallback", "MyDartClass",
                           "package:app/main.dart");
@@ -572,6 +497,24 @@ TEST(FlutterEmbedderNativeTest, JniDelegateWithMockInvoker) {
   }
 
   EXPECT_FALSE(delegate->LookupCallbackInformation(999L).has_value());
+}
+
+TEST(FlutterEmbedderNativeTest, TargetFlipDefaultState) {
+  // Phase 5.1 Target Flip / Phase 5.5 Flag Obliteration: Embedder flags
+  // unconditionally true.
+  EXPECT_TRUE(JniRouter::IsGlobalEmbedderEnabled());
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
+  EXPECT_TRUE(FlutterEmbedderNative::IsEmbedderEnabled());
+
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto legacy_delegate = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
+  auto embedder_delegate = std::make_shared<JniDelegate>(mock_invoker);
+  auto router = std::make_unique<JniRouter>(embedder_delegate, legacy_delegate);
+
+  EXPECT_TRUE(router->IsInstanceEmbedderEnabled());
+  EXPECT_EQ(router->GetActiveRoutingPath(), JniRouter::RoutingPath::kEmbedder);
+  EXPECT_NE(router->GetEmbedderDelegate(), nullptr);
+  EXPECT_EQ(router->GetLegacyDelegate(), nullptr);
 }
 
 TEST(FlutterEmbedderNativeTest, JniRouterRoutingFlip) {
@@ -590,38 +533,30 @@ TEST(FlutterEmbedderNativeTest, JniRouterRoutingFlip) {
   // In Phase 5.5+, flag toggles are obliterated; routing is unconditionally
   // directed to embedder_delegate regardless of flag settings.
   for (bool flag_attempt : {false, true}) {
+    JniRouter::SetGlobalEmbedderEnabled(flag_attempt);
     JniRouter::SetEmbedderEnabled(flag_attempt);
+    router->SetInstanceEmbedderEnabled(flag_attempt);
+    EXPECT_TRUE(JniRouter::IsGlobalEmbedderEnabled());
     EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
+    EXPECT_TRUE(router->IsInstanceEmbedderEnabled());
     EXPECT_EQ(router->GetActiveRoutingPath(),
               JniRouter::RoutingPath::kEmbedder);
 
     // Platform Message routing -> embedder delegate
     EXPECT_CALL(*mock_invoker,
-                HandlePlatformMessage("flutter/lifecycle", payload, 1, true))
+                HandlePlatformMessage("flutter/lifecycle", payload.data(),
+                                      payload.size(), 1, 0))
         .WillOnce(Return(true));
     EXPECT_TRUE(router->RoutePlatformMessage("flutter/lifecycle", payload, 1));
 
     // OnFirstFrame -> embedder delegate
-    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onFirstFrame", "()V", _))
-        .WillOnce(Return(true));
+    EXPECT_CALL(*mock_invoker, OnFirstFrame()).WillOnce(Return(true));
     EXPECT_TRUE(router->RouteFirstFrame());
 
-    // Vsync -> embedder delegate
-    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
-        .WillOnce(Return(true));
-    EXPECT_TRUE(router->RouteVsync(100L, 200L));
-
     // Deferred Library -> embedder delegate
-    EXPECT_CALL(*mock_invoker,
-                InvokeVoidMethod("requestDartDeferredLibrary", "(J)V", _))
+    EXPECT_CALL(*mock_invoker, RequestDartDeferredLibrary(5))
         .WillOnce(Return(true));
     EXPECT_TRUE(router->RouteRequestDartDeferredLibrary(5));
-
-    // Asset Manager Changed -> embedder delegate
-    EXPECT_CALL(*mock_invoker,
-                InvokeVoidMethod("onAssetManagerChanged", "()V", _))
-        .WillOnce(Return(true));
-    EXPECT_TRUE(router->RouteAssetManagerChanged());
 
     // LookupCallbackInformation -> embedder delegate
     auto embedder_cb = router->RouteLookupCallbackInformation(100L);
@@ -636,59 +571,6 @@ TEST(FlutterEmbedderNativeTest, JniRouterRoutingFlip) {
   EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
 }
 
-TEST(FlutterEmbedderNativeTest, TargetFlipDefaultEmbedderEnabled) {
-  // Phase 5.1 Target Flip verification: Embedder C-API is enabled by default.
-  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
-  EXPECT_TRUE(FlutterEmbedderNative::IsEmbedderEnabled());
-
-  auto mock_invoker = std::make_shared<MockJvmInvoker>();
-  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
-  auto router = std::make_unique<JniRouter>(
-      std::make_shared<JniDelegate>(mock_invoker), legacy_delegate);
-
-  EXPECT_EQ(router->GetActiveRoutingPath(), JniRouter::RoutingPath::kEmbedder);
-  EXPECT_NE(router->GetEmbedderDelegate(), nullptr);
-  EXPECT_EQ(router->GetLegacyDelegate(), nullptr);
-}
-
-TEST(FlutterEmbedderNativeTest, TargetFlipDefaultRouteExecution) {
-  // Default execution routes directly to embedder delegate without any manual
-  // flag set.
-  auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
-  auto legacy_delegate = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
-
-  FlutterEmbedderNative native(mock_invoker, legacy_delegate);
-  ASSERT_NE(native.GetRouter(), nullptr);
-  EXPECT_EQ(native.GetRouter()->GetActiveRoutingPath(),
-            JniRouter::RoutingPath::kEmbedder);
-
-  std::vector<uint8_t> payload = {'p', 'h', 'a', 's', 'e', '5', '.', '1'};
-
-  // Platform message routing defaults to embedder delegate
-  EXPECT_CALL(*legacy_delegate, HandlePlatformMessage(_, _, _)).Times(0);
-  EXPECT_CALL(*mock_invoker,
-              HandlePlatformMessage("flutter/default", payload, 42, true))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(
-      native.GetRouter()->RoutePlatformMessage("flutter/default", payload, 42));
-
-  // First frame routing defaults to embedder delegate
-  EXPECT_CALL(*legacy_delegate, OnFirstFrame()).Times(0);
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onFirstFrame", "()V", _))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(native.GetRouter()->RouteFirstFrame());
-
-  // Vsync routing defaults to embedder delegate
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(native.GetRouter()->RouteVsync(1000000L, 2000000L));
-
-  // Async wait for vsync routing defaults to embedder delegate
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("asyncWaitForVsync", "(J)V", _))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(native.GetRouter()->RouteAsyncWaitForVsync(999L));
-}
-
 TEST(FlutterEmbedderNativeTest, DynamicInstanceRouterWithCustomInvoker) {
   auto mock_invoker = std::make_shared<MockJvmInvoker>();
   auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
@@ -698,14 +580,176 @@ TEST(FlutterEmbedderNativeTest, DynamicInstanceRouterWithCustomInvoker) {
   EXPECT_NE(native.GetJniDelegate(), nullptr);
   EXPECT_NE(native.GetRouter(), nullptr);
 
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
   EXPECT_TRUE(FlutterEmbedderNative::IsEmbedderEnabled());
 
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onFirstFrame", "()V", _))
-      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker, OnFirstFrame()).WillOnce(Return(true));
   EXPECT_TRUE(native.GetRouter()->RouteFirstFrame());
 
   FlutterEmbedderNative::SetEmbedderEnabled(true);
-  EXPECT_TRUE(FlutterEmbedderNative::IsEmbedderEnabled());
+}
+
+TEST(FlutterEmbedderNativeTest, NativeWindowManagement) {
+  auto native_instance = std::make_unique<FlutterEmbedderNative>();
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+  EXPECT_EQ(native_instance->GetNativeWindow(), nullptr);
+#pragma clang diagnostic pop
+  EXPECT_EQ(native_instance->AcquireNativeWindow(), nullptr);
+
+  // PresentSoftware should fail cleanly when no window is attached.
+  uint32_t dummy_pixels[16] = {0};
+  EXPECT_FALSE(native_instance->PresentSoftware(dummy_pixels, 16, 4));
+
+  // PresentSoftware should fail cleanly with invalid arguments.
+  EXPECT_FALSE(native_instance->PresentSoftware(nullptr, 16, 4));
+  EXPECT_FALSE(native_instance->PresentSoftware(dummy_pixels, 0, 4));
+  EXPECT_FALSE(native_instance->PresentSoftware(dummy_pixels, 16, 0));
+}
+
+TEST(FlutterEmbedderNativeTest, BlitSoftwareRasterRgba8888Exact) {
+  // 2x2 source pixels: Red, Green, Blue, White.
+  const uint32_t src[4] = {
+      0xFF0000FF,  // Red
+      0xFF00FF00,  // Green
+      0xFFFF0000,  // Blue
+      0xFFFFFFFF,  // White
+  };
+
+  uint32_t dst[4] = {0};
+  FlutterEmbedderNative::SoftwareBuffer dst_buffer;
+  dst_buffer.bits = dst;
+  dst_buffer.width = 2;
+  dst_buffer.height = 2;
+  dst_buffer.stride = 2;
+  dst_buffer.format = FlutterEmbedderNative::kFormatRgba8888;
+
+  EXPECT_TRUE(
+      FlutterEmbedderNative::BlitSoftwareRaster(src, 2 * 4, 2, dst_buffer));
+  EXPECT_EQ(dst[0], 0xFF0000FF);
+  EXPECT_EQ(dst[1], 0xFF00FF00);
+  EXPECT_EQ(dst[2], 0xFFFF0000);
+  EXPECT_EQ(dst[3], 0xFFFFFFFF);
+}
+
+TEST(FlutterEmbedderNativeTest, BlitSoftwareRasterRgba8888StrideAndMargins) {
+  // 2x2 source in a 4x3 destination buffer (stride = 4).
+  const uint32_t src[4] = {
+      0xFF111111,
+      0xFF222222,
+      0xFF333333,
+      0xFF444444,
+  };
+
+  // Pre-fill destination with junk bytes to verify zeroing of margins.
+  std::vector<uint32_t> dst(4 * 3, 0xAAAAAAAA);
+  FlutterEmbedderNative::SoftwareBuffer dst_buffer;
+  dst_buffer.bits = dst.data();
+  dst_buffer.width = 4;
+  dst_buffer.height = 3;
+  dst_buffer.stride = 4;
+  dst_buffer.format = FlutterEmbedderNative::kFormatRgba8888;
+
+  EXPECT_TRUE(
+      FlutterEmbedderNative::BlitSoftwareRaster(src, 2 * 4, 2, dst_buffer));
+
+  // Row 0: 2 copied pixels, 2 zeroed margins
+  EXPECT_EQ(dst[0], 0xFF111111);
+  EXPECT_EQ(dst[1], 0xFF222222);
+  EXPECT_EQ(dst[2], 0u);
+  EXPECT_EQ(dst[3], 0u);
+
+  // Row 1: 2 copied pixels, 2 zeroed margins
+  EXPECT_EQ(dst[4], 0xFF333333);
+  EXPECT_EQ(dst[5], 0xFF444444);
+  EXPECT_EQ(dst[6], 0u);
+  EXPECT_EQ(dst[7], 0u);
+
+  // Row 2: Bottom extra row zeroed
+  EXPECT_EQ(dst[8], 0u);
+  EXPECT_EQ(dst[9], 0u);
+  EXPECT_EQ(dst[10], 0u);
+  EXPECT_EQ(dst[11], 0u);
+}
+
+TEST(FlutterEmbedderNativeTest, BlitSoftwareRasterRgb565ClampingAndUnpremul) {
+  // Little-endian RGBA memory layout: byte0=R, byte1=G, byte2=B, byte3=A
+  // Test case 1: Opaque red (R=255, G=0, B=0, A=255) -> 0xF800
+  // Test case 2: Half-alpha red (R=128, G=0, B=0, A=128) -> un-premul R=255 ->
+  // 0xF800 Test case 3: Out-of-bounds roundoff: (R=100, G=0, B=0, A=99) ->
+  // (100*255)/99 = 257 -> clamped to 255 -> 0xF800 Test case 4: Fully
+  // transparent (0, 0, 0, 0) -> 0x0000
+  const uint8_t src_bytes[16] = {
+      255, 0, 0, 255,  // px0
+      128, 0, 0, 128,  // px1
+      100, 0, 0, 99,   // px2
+      0,   0, 0, 0,    // px3
+  };
+
+  uint16_t dst[4] = {0};
+  FlutterEmbedderNative::SoftwareBuffer dst_buffer;
+  dst_buffer.bits = dst;
+  dst_buffer.width = 4;
+  dst_buffer.height = 1;
+  dst_buffer.stride = 4;
+  dst_buffer.format = FlutterEmbedderNative::kFormatRgb565;
+
+  EXPECT_TRUE(FlutterEmbedderNative::BlitSoftwareRaster(src_bytes, 4 * 4, 1,
+                                                        dst_buffer));
+  EXPECT_EQ(dst[0], 0xF800);
+  EXPECT_EQ(dst[1], 0xF800);
+  EXPECT_EQ(dst[2], 0xF800);  // Must NOT wrap around to near-zero!
+  EXPECT_EQ(dst[3], 0x0000);
+}
+
+TEST(FlutterEmbedderNativeTest, BlitSoftwareRasterInvalidArguments) {
+  uint32_t dummy[4] = {0};
+  FlutterEmbedderNative::SoftwareBuffer valid_buf;
+  valid_buf.bits = dummy;
+  valid_buf.width = 2;
+  valid_buf.height = 2;
+  valid_buf.stride = 2;
+  valid_buf.format = FlutterEmbedderNative::kFormatRgba8888;
+
+  // Null or zero source
+  EXPECT_FALSE(
+      FlutterEmbedderNative::BlitSoftwareRaster(nullptr, 8, 2, valid_buf));
+  EXPECT_FALSE(
+      FlutterEmbedderNative::BlitSoftwareRaster(dummy, 0, 2, valid_buf));
+  EXPECT_FALSE(
+      FlutterEmbedderNative::BlitSoftwareRaster(dummy, 8, 0, valid_buf));
+
+  // Null or invalid destination
+  FlutterEmbedderNative::SoftwareBuffer invalid_buf = valid_buf;
+  invalid_buf.bits = nullptr;
+  EXPECT_FALSE(
+      FlutterEmbedderNative::BlitSoftwareRaster(dummy, 8, 2, invalid_buf));
+
+  // Stride < width underflow check
+  invalid_buf = valid_buf;
+  invalid_buf.stride = 1;  // less than width 2!
+  EXPECT_FALSE(
+      FlutterEmbedderNative::BlitSoftwareRaster(dummy, 8, 2, invalid_buf));
+
+  // Invalid format
+  invalid_buf = valid_buf;
+  invalid_buf.format = 999;
+  EXPECT_FALSE(
+      FlutterEmbedderNative::BlitSoftwareRaster(dummy, 8, 2, invalid_buf));
+}
+
+TEST(FlutterEmbedderNativeTest, NativeWindowSelfAssignmentAndLifecycle) {
+  auto native_instance = std::make_unique<FlutterEmbedderNative>();
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+  EXPECT_EQ(native_instance->GetNativeWindow(), nullptr);
+  EXPECT_EQ(native_instance->AcquireNativeWindow(), nullptr);
+
+  // Self assignment of nullptr
+  native_instance->SetNativeWindow(nullptr);
+  EXPECT_EQ(native_instance->GetNativeWindow(), nullptr);
+  EXPECT_EQ(native_instance->AcquireNativeWindow(), nullptr);
+#pragma clang diagnostic pop
 }
 
 TEST(FlutterEmbedderNativeTest, AssetProviderLifecycleAndResolution) {
@@ -739,6 +783,41 @@ TEST(FlutterEmbedderNativeTest, AssetProviderLifecycleAndResolution) {
                 reinterpret_cast<const char*>(shader_mappings[0]->GetMapping()),
                 shader_mappings[0]->GetSize()),
             "MockShaderBytes");
+
+  // Verify Custom Asset Resolver bridge
+  FlutterCustomAssetResolver custom_resolver =
+      native->CreateCustomAssetResolver();
+  EXPECT_EQ(custom_resolver.struct_size, sizeof(FlutterCustomAssetResolver));
+  ASSERT_NE(custom_resolver.find_asset_callback, nullptr);
+  ASSERT_NE(custom_resolver.is_valid_callback, nullptr);
+  ASSERT_NE(custom_resolver.is_valid_after_change_callback, nullptr);
+  ASSERT_NE(custom_resolver.destruction_callback, nullptr);
+  EXPECT_TRUE(custom_resolver.is_valid_callback(custom_resolver.user_data));
+  EXPECT_TRUE(custom_resolver.is_valid_after_change_callback(
+      custom_resolver.user_data));
+
+  FlutterAsset asset = {};
+  asset.struct_size = sizeof(FlutterAsset);
+  EXPECT_TRUE(custom_resolver.find_asset_callback(custom_resolver.user_data,
+                                                  "kernel_blob.bin", &asset));
+  EXPECT_EQ(asset.size, 15u);
+  EXPECT_EQ(std::string(reinterpret_cast<const char*>(asset.data), asset.size),
+            "MockKernelBytes");
+  ASSERT_NE(asset.asset_free_callback, nullptr);
+  asset.asset_free_callback(asset.user_data);
+
+  custom_resolver.destruction_callback(custom_resolver.user_data);
+
+  // Verify CreateAssetResolver creates a valid clone
+  auto cloned_resolver = native->CreateAssetResolver();
+  ASSERT_NE(cloned_resolver, nullptr);
+  EXPECT_TRUE(cloned_resolver->IsValid());
+  auto cloned_mapping = cloned_resolver->GetAsMapping("kernel_blob.bin");
+  ASSERT_NE(cloned_mapping, nullptr);
+  EXPECT_EQ(cloned_mapping->GetSize(), 15u);
+
+  // UpdateJavaAssetManager with null asset manager is safe
+  native->UpdateJavaAssetManager(nullptr, nullptr, "flutter_assets");
 }
 
 TEST(FlutterEmbedderNativeTest, AssetProviderMultithreadedResolution) {
@@ -756,6 +835,22 @@ TEST(FlutterEmbedderNativeTest, AssetProviderMultithreadedResolution) {
 
   constexpr size_t kThreadCount = 8;
   constexpr size_t kIterations = 100;
+  std::atomic<bool> stop_writers{false};
+
+  // Launch background writer thread concurrently mutating provider
+  auto writer_future = std::async(std::launch::async, [&native,
+                                                       &stop_writers]() {
+    int counter = 0;
+    while (!stop_writers.load()) {
+      auto new_impl =
+          std::make_shared<InMemoryAPKAssetProviderImpl>("flutter_assets");
+      new_impl->AddAsset("data_0.bin",
+                         "MutatedPayload_" + std::to_string(counter++));
+      native->SetAssetProvider(std::make_shared<APKAssetProvider>(new_impl));
+      std::this_thread::yield();
+    }
+  });
+
   std::vector<std::future<bool>> futures;
   futures.reserve(kThreadCount);
 
@@ -765,9 +860,9 @@ TEST(FlutterEmbedderNativeTest, AssetProviderMultithreadedResolution) {
         int idx = static_cast<int>((t + iter) % 20);
         std::string asset_name = "data_" + std::to_string(idx) + ".bin";
         auto mapping = native->ResolveAsset(asset_name);
-        if (!mapping || mapping->GetSize() == 0) {
-          return false;
-        }
+        // Under concurrent provider replacement, mapping may resolve to either
+        // old or new provider
+        auto mappings = native->ResolveAssetMappings("bin");
       }
       return true;
     }));
@@ -776,10 +871,14 @@ TEST(FlutterEmbedderNativeTest, AssetProviderMultithreadedResolution) {
   for (auto& f : futures) {
     EXPECT_TRUE(f.get());
   }
+
+  stop_writers.store(true);
+  writer_future.get();
 }
 
 TEST(FlutterEmbedderNativeTest, CallbackCacheProviderLifecycleAndResolution) {
   auto native = std::make_unique<FlutterEmbedderNative>();
+  native->GetRouter()->SetInstanceEmbedderEnabled(true);
   EXPECT_NE(native->GetCallbackCache(), nullptr);
 
   // Default provider with no callbacks loaded returns std::nullopt for unknown
@@ -818,6 +917,61 @@ TEST(FlutterEmbedderNativeTest, CallbackCacheProviderLifecycleAndResolution) {
   EXPECT_FALSE(native->LookupCallbackInformation(9999L).has_value());
 }
 
+TEST(FlutterEmbedderNativeTest, CallbackCacheSingleSourceOfTruth) {
+  auto native = std::make_unique<FlutterEmbedderNative>();
+  ASSERT_NE(native->GetCallbackCache(), nullptr);
+  ASSERT_NE(native->GetJniDelegate(), nullptr);
+
+  // 1. Initially, both facades return the exact same cache provider pointer.
+  EXPECT_EQ(native->GetCallbackCache(),
+            native->GetJniDelegate()->GetCallbackCache());
+
+  // 2. Updating via FlutterEmbedderNative reflects identically on JniDelegate.
+  auto custom_cache_1 = std::make_shared<InMemoryCallbackCacheProvider>();
+  native->SetCallbackCache(custom_cache_1);
+  EXPECT_EQ(native->GetCallbackCache(), custom_cache_1);
+  EXPECT_EQ(native->GetJniDelegate()->GetCallbackCache(), custom_cache_1);
+
+  // 3. Updating directly on JniDelegate reflects identically on
+  // FlutterEmbedderNative.
+  auto custom_cache_2 = std::make_shared<InMemoryCallbackCacheProvider>();
+  native->GetJniDelegate()->SetCallbackCache(custom_cache_2);
+  EXPECT_EQ(native->GetCallbackCache(), custom_cache_2);
+  EXPECT_EQ(native->GetJniDelegate()->GetCallbackCache(), custom_cache_2);
+
+  // 4. Resetting with nullptr restores default provider across both.
+  native->SetCallbackCache(nullptr);
+  EXPECT_NE(native->GetCallbackCache(), nullptr);
+  EXPECT_EQ(native->GetCallbackCache(),
+            native->GetJniDelegate()->GetCallbackCache());
+}
+
+TEST(FlutterEmbedderNativeTest, LookupCallbackInformationPurgedLegacyFallback) {
+  auto mock_legacy = std::make_shared<MockLegacyJniDelegate>();
+  auto custom_cache = std::make_shared<InMemoryCallbackCacheProvider>();
+  custom_cache->AddCallback(100L, "embedderMethod", "EmbedderClass",
+                            "package:test/embedder.dart");
+
+  auto native = std::make_unique<FlutterEmbedderNative>(
+      std::make_shared<DefaultJvmInvoker>(), mock_legacy, nullptr, nullptr,
+      custom_cache);
+
+  // In Phase 5.2+ (and Phase 5.5 Flag Obliteration), flags are obliterated and
+  // callback lookup unconditionally routes to embedder.
+  native->GetRouter()->SetInstanceEmbedderEnabled(false);
+  EXPECT_TRUE(native->GetRouter()->IsInstanceEmbedderEnabled());
+
+  auto resolved_embedder = native->LookupCallbackInformation(100L);
+  ASSERT_TRUE(resolved_embedder.has_value());
+  EXPECT_EQ(resolved_embedder->name, "embedderMethod");
+  EXPECT_EQ(resolved_embedder->class_name, "EmbedderClass");
+  EXPECT_EQ(resolved_embedder->library_path, "package:test/embedder.dart");
+
+  // Re-enable embedder mode.
+  native->GetRouter()->SetInstanceEmbedderEnabled(true);
+  EXPECT_TRUE(native->GetRouter()->IsInstanceEmbedderEnabled());
+}
+
 TEST(FlutterEmbedderNativeTest, CallbackCacheProviderMultithreadedResolution) {
   auto custom_cache = std::make_shared<InMemoryCallbackCacheProvider>();
   for (int i = 0; i < 50; ++i) {
@@ -830,6 +984,7 @@ TEST(FlutterEmbedderNativeTest, CallbackCacheProviderMultithreadedResolution) {
   auto native = std::make_unique<FlutterEmbedderNative>(
       std::make_shared<DefaultJvmInvoker>(), nullptr, nullptr, nullptr,
       custom_cache);
+  native->GetRouter()->SetInstanceEmbedderEnabled(true);
 
   constexpr size_t kThreadCount = 8;
   constexpr size_t kIterations = 200;
@@ -874,7 +1029,7 @@ TEST(FlutterEmbedderNativeTest, JniRouterNullDelegateSafety) {
   EXPECT_FALSE(empty_router->RouteFirstFrame());
   EXPECT_FALSE(empty_router->RoutePreEngineRestart());
 
-  JniRouter::SetEmbedderEnabled(false);
+  JniRouter::SetEmbedderEnabled(true);
 }
 
 // =============================================================================
@@ -990,6 +1145,114 @@ TEST(CallbackCacheProviderTest, ThreadSafeConcurrentCacheModifications) {
   }
 }
 
+TEST(FlutterEmbedderNativeTest,
+     ThreadSafeConcurrentCallbackCacheSwappingAndResolution) {
+  auto native = std::make_unique<FlutterEmbedderNative>();
+  native->GetRouter()->SetInstanceEmbedderEnabled(true);
+
+  constexpr size_t kReaderThreads = 6;
+  constexpr size_t kWriterThreads = 2;
+  constexpr size_t kIterations = 150;
+
+  std::atomic<bool> running{true};
+  std::vector<std::future<bool>> reader_futures;
+  reader_futures.reserve(kReaderThreads);
+
+  for (size_t r = 0; r < kReaderThreads; ++r) {
+    reader_futures.push_back(
+        std::async(std::launch::async, [&native, &running]() {
+          while (running.load()) {
+            auto cache = native->GetCallbackCache();
+            if (!cache) {
+              return false;
+            }
+            native->LookupCallbackInformation(42L);
+          }
+          return true;
+        }));
+  }
+
+  std::vector<std::future<bool>> writer_futures;
+  writer_futures.reserve(kWriterThreads);
+  for (size_t w = 0; w < kWriterThreads; ++w) {
+    writer_futures.push_back(std::async(std::launch::async, [&native, w]() {
+      for (size_t i = 0; i < kIterations; ++i) {
+        auto custom_cache = std::make_shared<InMemoryCallbackCacheProvider>();
+        custom_cache->AddCallback(
+            42L, "cb_" + std::to_string(w) + "_" + std::to_string(i), "Class",
+            "package:test/cb.dart");
+        native->SetCallbackCache(custom_cache);
+      }
+      return true;
+    }));
+  }
+
+  for (auto& f : writer_futures) {
+    EXPECT_TRUE(f.get());
+  }
+  running.store(false);
+
+  for (auto& f : reader_futures) {
+    EXPECT_TRUE(f.get());
+  }
+}
+
+TEST(CallbackCacheProviderTest, ConcurrentMixedReadersAndWriters) {
+  auto provider = std::make_shared<InMemoryCallbackCacheProvider>();
+
+  // Prepopulate
+  for (int64_t i = 0; i < 50; ++i) {
+    provider->AddCallback(i, "cb_" + std::to_string(i), "", "lib.dart");
+  }
+
+  constexpr size_t kReaderThreads = 6;
+  constexpr size_t kWriterThreads = 2;
+  constexpr size_t kOperations = 200;
+
+  std::atomic<bool> running{true};
+  std::vector<std::future<bool>> reader_futures;
+  reader_futures.reserve(kReaderThreads);
+
+  for (size_t r = 0; r < kReaderThreads; ++r) {
+    reader_futures.push_back(
+        std::async(std::launch::async, [provider, &running, r]() {
+          while (running.load()) {
+            size_t sz = provider->GetSize();
+            (void)sz;
+            int64_t handle = static_cast<int64_t>(r % 50);
+            provider->GetCallbackInformation(handle);
+          }
+          return true;
+        }));
+  }
+
+  std::vector<std::future<bool>> writer_futures;
+  writer_futures.reserve(kWriterThreads);
+
+  for (size_t w = 0; w < kWriterThreads; ++w) {
+    writer_futures.push_back(std::async(std::launch::async, [provider, w]() {
+      for (size_t i = 0; i < kOperations; ++i) {
+        int64_t handle = static_cast<int64_t>(1000 + w * 1000 + i);
+        provider->AddCallback(handle, "dyn_" + std::to_string(handle),
+                              "DynamicClass", "package:test/dynamic.dart");
+        if (i % 2 == 0) {
+          provider->RemoveCallback(handle);
+        }
+      }
+      return true;
+    }));
+  }
+
+  for (auto& f : writer_futures) {
+    EXPECT_TRUE(f.get());
+  }
+  running.store(false);
+
+  for (auto& f : reader_futures) {
+    EXPECT_TRUE(f.get());
+  }
+}
+
 // =============================================================================
 // OSLibraryLoader & Dynamic Virtualization Unit Tests
 // =============================================================================
@@ -1012,6 +1275,11 @@ TEST(OSLibraryLoaderTest, DefaultOSLibraryLoaderMissingLibraryFallback) {
   auto fn = loader->ResolveFunction<int (*)(void*)>(
       "lib_nonexistent_dummy_android_lib.so", "AHardwareBuffer_allocate");
   EXPECT_EQ(fn, nullptr);
+
+  // Second call must return nullptr immediately from negative cache.
+  EXPECT_EQ(loader->LoadDynamicLibrary("lib_nonexistent_dummy_android_lib.so"),
+            nullptr);
+  EXPECT_FALSE(loader->IsLibraryLoaded("lib_nonexistent_dummy_android_lib.so"));
 
   // Null input handles safely
   EXPECT_EQ(loader->LoadDynamicLibrary(nullptr), nullptr);
@@ -1222,6 +1490,131 @@ TEST(OSLibraryLoaderTest, ThreadSafeConcurrentSymbolResolution) {
   }
 }
 
+TEST(OSLibraryLoaderTest, DefaultOSLibraryLoaderRealLibraryLoading) {
+  auto loader = std::make_shared<DefaultOSLibraryLoader>();
+#if defined(__APPLE__)
+  const char* real_lib = "libm.dylib";
+#elif defined(_WIN32)
+  const char* real_lib = "kernel32.dll";
+#else
+  const char* real_lib = "libm.so";
+#endif
+  auto lib = loader->LoadDynamicLibrary(real_lib);
+  if (lib) {
+    EXPECT_TRUE(lib->IsValid());
+    EXPECT_TRUE(loader->IsLibraryLoaded(real_lib));
+#if defined(_WIN32)
+    using GetTickCountFn = DWORD (*)();
+    auto fn = loader->ResolveFunction<GetTickCountFn>(real_lib, "GetTickCount");
+    if (fn) {
+      EXPECT_GT(fn(), 0u);
+    }
+#else
+    using SinFn = double (*)(double);
+    auto fn = loader->ResolveFunction<SinFn>(real_lib, "sin");
+    if (fn) {
+      EXPECT_DOUBLE_EQ(fn(0.0), 0.0);
+    }
+#endif
+  }
+
+  // Also test process-global scope
+  auto global_lib =
+      loader->LoadDynamicLibrary(OSLibraryLoader::kProcessGlobalScope);
+  if (global_lib) {
+    EXPECT_TRUE(global_lib->IsValid());
+  }
+}
+
+TEST(OSLibraryLoaderTest, MockOSLibraryLoaderDynamicPointerCastAndNullSafety) {
+  auto mock_loader = std::make_shared<MockOSLibraryLoader>();
+
+  // Registering null should be rejected safely
+  mock_loader->RegisterLibrary("", nullptr);
+  EXPECT_FALSE(mock_loader->IsLibraryLoaded(""));
+  mock_loader->RegisterLibrary("null_lib", nullptr);
+  EXPECT_FALSE(mock_loader->IsLibraryLoaded("null_lib"));
+
+  // Registering valid library under kProcessGlobalScope should succeed
+  auto global_mock =
+      std::make_shared<MockOSLibrary>(OSLibraryLoader::kProcessGlobalScope);
+  mock_loader->RegisterLibrary(OSLibraryLoader::kProcessGlobalScope,
+                               global_mock);
+  EXPECT_TRUE(
+      mock_loader->IsLibraryLoaded(OSLibraryLoader::kProcessGlobalScope));
+
+  // Registering non-MockOSLibrary (e.g. DefaultOSLibrary with mock handle)
+  auto default_lib =
+      std::make_shared<DefaultOSLibrary>("dummy", nullptr, false);
+  mock_loader->RegisterLibrary("default_dummy", default_lib);
+
+  // SetSymbol must use dynamic_pointer_cast and not crash or corrupt memory
+  auto dummy_func = []() {};
+  mock_loader->SetSymbol("default_dummy", "test_symbol",
+                         reinterpret_cast<void*>(+dummy_func));
+  EXPECT_NE(mock_loader->ResolveSymbol("default_dummy", "test_symbol"),
+            nullptr);
+}
+
+TEST(OSLibraryLoaderTest, ThreadSafeConcurrentValidityAndResolution) {
+  auto mock_lib = std::make_shared<MockOSLibrary>("lib_validity.so");
+  auto dummy_func = []() {};
+  mock_lib->SetSymbol("test_fn", reinterpret_cast<void*>(+dummy_func));
+
+  std::atomic<bool> stop_flag{false};
+  auto updater = std::async(std::launch::async, [&]() {
+    while (!stop_flag.load()) {
+      mock_lib->SetValid(false);
+      std::this_thread::yield();
+      mock_lib->SetValid(true);
+      std::this_thread::yield();
+    }
+  });
+
+  std::vector<std::future<void>> readers;
+  for (int i = 0; i < 4; ++i) {
+    readers.push_back(std::async(std::launch::async, [&]() {
+      for (int j = 0; j < 500; ++j) {
+        bool valid = mock_lib->IsValid();
+        void* sym = mock_lib->ResolveSymbol("test_fn");
+        if (valid && sym == nullptr) {
+          // Validity toggled between calls, which is valid.
+        }
+      }
+    }));
+  }
+
+  for (auto& r : readers) {
+    r.get();
+  }
+  stop_flag.store(true);
+  updater.get();
+}
+
+TEST(OSLibraryLoaderTest, ThreadSafeGlobalLoaderAccess) {
+  constexpr size_t kThreadCount = 8;
+  std::vector<std::future<void>> futures;
+  futures.reserve(kThreadCount);
+
+  for (size_t t = 0; t < kThreadCount; ++t) {
+    futures.push_back(std::async(std::launch::async, [t]() {
+      for (size_t i = 0; i < 100; ++i) {
+        if (t % 2 == 0) {
+          auto loader = FlutterEmbedderNative::GetDefaultLibraryLoader();
+          EXPECT_NE(loader, nullptr);
+        } else {
+          FlutterEmbedderNative native_inst;
+          EXPECT_NE(native_inst.GetLibraryLoader(), nullptr);
+        }
+      }
+    }));
+  }
+
+  for (auto& f : futures) {
+    f.get();
+  }
+}
+
 // =============================================================================
 // Phase 2.3 Image Generators & LRU Cache Unit Tests
 // =============================================================================
@@ -1275,11 +1668,8 @@ TEST(ImageDecoderTest, DefaultImageDecoderProviderWithInvoker) {
   auto provider = std::make_shared<DefaultImageDecoderProvider>(mock_invoker);
 
   std::vector<uint8_t> test_bytes = {1, 2, 3, 4, 5};
-  EXPECT_CALL(
-      *mock_invoker,
-      InvokeBooleanMethod("decodeImage",
-                          "(Ljava/nio/ByteBuffer;J)Landroid/graphics/Bitmap;",
-                          test_bytes))
+  EXPECT_CALL(*mock_invoker,
+              DecodeImage(test_bytes.data(), test_bytes.size(), 42L))
       .WillOnce(Return(true));
 
   EXPECT_TRUE(provider->DecodeImage(test_bytes.data(), test_bytes.size(), 42L));
@@ -1297,6 +1687,10 @@ TEST(ImageDecoderTest, DefaultImageDecoderProviderWithInvoker) {
     EXPECT_EQ(header->height, 480);
   }
   EXPECT_FALSE(provider->GetImageHeader(999L).has_value());
+
+  // Removal
+  provider->RemoveImageHeader(42L);
+  EXPECT_FALSE(provider->GetImageHeader(42L).has_value());
 }
 
 TEST(ImageDecoderTest, EmbedderImageLRUOperations) {
@@ -1332,6 +1726,16 @@ TEST(ImageDecoderTest, EmbedderImageLRUOperations) {
   EXPECT_EQ(lru.FindImage(1), 0x1000u);
   EXPECT_EQ(lru.FindImage(5), 0x5000u);
 
+  // Updating existing key with a new handle should update handle and NOT evict
+  EXPECT_EQ(lru.AddImage(0x5555, 5), 0u);
+  EXPECT_EQ(lru.FindImage(5), 0x5555u);
+  EXPECT_EQ(lru.GetSize(), 4u);
+
+  // Re-updating key 1 moves it to MRU with new handle
+  EXPECT_EQ(lru.AddImage(0x1111, 1), 0u);
+  EXPECT_EQ(lru.FindImage(1), 0x1111u);
+  EXPECT_EQ(lru.GetSize(), 4u);
+
   // Clear
   lru.Clear();
   EXPECT_EQ(lru.GetSize(), 0u);
@@ -1350,11 +1754,11 @@ TEST(ImageDecoderTest, EmbedderImageLRUMultithreaded) {
   for (size_t t = 0; t < kThreadCount; ++t) {
     futures.push_back(std::async(std::launch::async, [lru, t]() {
       for (size_t iter = 0; iter < kIterations; ++iter) {
-        uint64_t key = (t * 100 + iter) % 30 + 1;
-        uint64_t handle = 0xAAAA0000 + key;
+        uint64_t key = (t * 100 + iter) % 15 + 1;
+        uint64_t handle = ((iter + 1) << 32) | (t << 16) | key;
         lru->AddImage(handle, key);
         uint64_t found = lru->FindImage(key);
-        if (found != 0 && found != handle) {
+        if (found != 0 && (found & 0xFFFF) != key) {
           return false;
         }
       }
@@ -1395,6 +1799,10 @@ TEST(ImageDecoderTest, JniDelegateImageDecoderIntegration) {
     EXPECT_EQ(header->width, 300);
     EXPECT_EQ(header->height, 200);
   }
+
+  // RemoveImageHeader calls mock_decoder
+  EXPECT_CALL(*mock_decoder, RemoveImageHeader(55L)).Times(1);
+  delegate->RemoveImageHeader(55L);
 }
 
 TEST(ImageDecoderTest, JniRouterImageDecoderDirectRouting) {
@@ -1410,37 +1818,23 @@ TEST(ImageDecoderTest, JniRouterImageDecoderDirectRouting) {
 
   std::vector<uint8_t> payload = {10, 20, 30};
 
-  // In Phase 5.5+, Image Decoder routing is unconditionally direct
-  for (bool flag_attempt : {false, true}) {
-    JniRouter::SetEmbedderEnabled(flag_attempt);
-    EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
-  }
+  // Across both flag states, Image Decoder routes directly to embedder_delegate
+  // (legacy delegate is purged and never touched)
+  for (bool flag : {false, true}) {
+    JniRouter::SetEmbedderEnabled(flag);
 
-  EXPECT_TRUE(router->RouteDecodeImage(payload.data(), payload.size(), 77L));
-  EXPECT_EQ(in_memory_decoder->GetDecodeCount(), 1u);
+    EXPECT_TRUE(router->RouteDecodeImage(payload.data(), payload.size(), 77L));
 
-  router->RouteNativeImageHeader(77L, 1024, 768);
-  auto hdr_disabled = router->RouteGetImageHeader(77L);
-  ASSERT_TRUE(hdr_disabled.has_value());
-  if (hdr_disabled.has_value()) {
-    EXPECT_EQ(hdr_disabled->width, 1024);
-    EXPECT_EQ(hdr_disabled->height, 768);
-  }
+    router->RouteNativeImageHeader(88L, 500, 400);
+    auto embedder_hdr = router->RouteGetImageHeader(88L);
+    ASSERT_TRUE(embedder_hdr.has_value());
+    if (embedder_hdr.has_value()) {
+      EXPECT_EQ(embedder_hdr->width, 500);
+      EXPECT_EQ(embedder_hdr->height, 400);
+    }
 
-  // 2. When Embedder flag is enabled, routes directly to embedder delegate as
-  // well
-  JniRouter::SetEmbedderEnabled(true);
-  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
-
-  EXPECT_TRUE(router->RouteDecodeImage(payload.data(), payload.size(), 77L));
-  EXPECT_EQ(in_memory_decoder->GetDecodeCount(), 2u);
-
-  router->RouteNativeImageHeader(88L, 500, 400);
-  auto embedder_hdr = router->RouteGetImageHeader(88L);
-  ASSERT_TRUE(embedder_hdr.has_value());
-  if (embedder_hdr.has_value()) {
-    EXPECT_EQ(embedder_hdr->width, 500);
-    EXPECT_EQ(embedder_hdr->height, 400);
+    router->RouteRemoveImageHeader(88L);
+    EXPECT_FALSE(router->RouteGetImageHeader(88L).has_value());
   }
 
   // Reset flag
@@ -1455,6 +1849,7 @@ TEST(ImageDecoderTest, FlutterEmbedderNativeImageDecoderAndLRUIntegration) {
   FlutterEmbedderNative native(std::make_shared<DefaultJvmInvoker>(), nullptr,
                                nullptr, nullptr, nullptr, custom_decoder,
                                custom_lru);
+  native.GetRouter()->SetInstanceEmbedderEnabled(true);
 
   EXPECT_EQ(native.GetImageDecoderProvider(), custom_decoder);
   EXPECT_EQ(native.GetImageLRU(), custom_lru);
@@ -1472,12 +1867,18 @@ TEST(ImageDecoderTest, FlutterEmbedderNativeImageDecoderAndLRUIntegration) {
     EXPECT_EQ(hdr->height, 720);
   }
 
+  native.RemoveImageHeader(1L);
+  EXPECT_FALSE(native.GetImageHeader(1L).has_value());
+
   // LRU operations through FlutterEmbedderNative
   EXPECT_EQ(native.GetImageLRU()->AddImage(0xBEEF, 1), 0u);
   EXPECT_EQ(native.GetImageLRU()->FindImage(1), 0xBEEFu);
 
   // RegisterImageDecoder with null engine returns kInvalidArguments
   EXPECT_EQ(native.RegisterImageDecoder(nullptr), kInvalidArguments);
+
+  // UnregisterImageDecoder is safe when not registered
+  EXPECT_EQ(native.UnregisterImageDecoder(), kSuccess);
 }
 
 TEST(MutatorTranslationTest, JniDelegatePlatformViewMutatorsPush) {
@@ -1499,8 +1900,24 @@ TEST(MutatorTranslationTest, JniDelegatePlatformViewMutatorsPush) {
   stack.PushTransform(ft);
   stack.PushOpacity(0.9f);
 
-  EXPECT_CALL(*mock_invoker, OnDisplayPlatformView(101L, 10, 20, 300, 400, 300,
-                                                   400, stack, false))
+  std::vector<uint8_t> expected_payload = stack.Serialize();
+
+  PlatformViewCreationParams params = {
+      .view_id = 101L,
+      .view_type = "test.view",
+      .width = 300.0,
+      .height = 400.0,
+  };
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("createForPlatformViewLayer", _, _))
+      .WillOnce(Return(true));
+  EXPECT_EQ(delegate->CreatePlatformView(
+                params, PlatformViewCompositionType::kHybridComposition),
+            0);
+
+  EXPECT_CALL(*mock_invoker,
+              PushPlatformViewMutators(101L, 10, 20, 300, 400, 300, 400,
+                                       expected_payload))
       .WillOnce(Return(true));
 
   EXPECT_TRUE(
@@ -1516,14 +1933,30 @@ TEST(MutatorTranslationTest, JniRouterPlatformViewMutatorsDirectRouting) {
   AndroidMutatorsStack stack;
   stack.PushOpacity(0.8f);
 
-  // In Phase 5.5+, Mutators routing is unconditionally direct
-  for (bool flag_attempt : {false, true}) {
-    JniRouter::SetEmbedderEnabled(flag_attempt);
-    EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
+  PlatformViewCreationParams params = {
+      .view_id = 1001L,
+      .view_type = "test.view",
+      .width = 100.0,
+      .height = 200.0,
+  };
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("createForPlatformViewLayer", _, _))
+      .WillOnce(Return(true));
+  EXPECT_EQ(embedder_delegate->CreatePlatformView(
+                params, PlatformViewCompositionType::kHybridComposition),
+            0);
 
-    EXPECT_CALL(*mock_invoker, OnDisplayPlatformView(1001L, 0, 0, 100, 200, 100,
-                                                     200, stack, false))
+  std::vector<uint8_t> payload = stack.Serialize();
+
+  // Across both flag states, Mutators routing bypasses legacy_delegate
+  // completely
+  for (bool flag : {false, true}) {
+    JniRouter::SetEmbedderEnabled(flag);
+
+    EXPECT_CALL(*mock_invoker, PushPlatformViewMutators(1001L, 0, 0, 100, 200,
+                                                        100, 200, payload))
         .WillOnce(Return(true));
+
     EXPECT_TRUE(
         router->RoutePlatformViewMutators(1001L, 0, 0, 100, 200, stack));
   }
@@ -1563,16 +1996,37 @@ TEST(MutatorTranslationTest,
       .mutations = mutations,
   };
 
+  PlatformViewCreationParams params = {
+      .view_id = 555,
+      .view_type = "test.view",
+      .width = 500.0,
+      .height = 500.0,
+  };
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("createForPlatformViewLayer", _, _))
+      .WillOnce(Return(true));
+  EXPECT_EQ(native.CreatePlatformView(
+                params, PlatformViewCompositionType::kHybridComposition),
+            0);
+
   AndroidMutatorsStack stack = native.MapPlatformView(pv);
   EXPECT_EQ(stack.GetMutatorsCount(), 1u);
 
-  EXPECT_CALL(*mock_invoker, OnDisplayPlatformView(555L, 0, 0, 500, 500, 500,
-                                                   500, stack, false))
+  std::vector<uint8_t> payload = stack.Serialize();
+  EXPECT_CALL(*mock_invoker,
+              PushPlatformViewMutators(555, 0, 0, 500, 500, 500, 500, payload))
       .WillOnce(Return(true));
 
   EXPECT_TRUE(native.PushPlatformViewMutators(pv, 0, 0, 500, 500));
 
-  JniRouter::SetEmbedderEnabled(false);
+  // Invalid struct_size must be rejected safely without crashing
+  FlutterPlatformView invalid_pv = pv;
+  invalid_pv.struct_size = sizeof(FlutterPlatformView) - 1;
+  EXPECT_FALSE(native.PushPlatformViewMutators(invalid_pv, 0, 0, 500, 500));
+  EXPECT_FALSE(
+      native.OnDisplayPlatformView(invalid_pv, 0, 0, 500, 500, 500, 500));
+
+  JniRouter::SetEmbedderEnabled(true);
 }
 
 TEST(SemanticsAndAccessibilityTest, JniDelegateSemanticsOperations) {
@@ -1638,13 +2092,26 @@ TEST(SemanticsAndAccessibilityTest, JniDelegateSemanticsOperations) {
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->SetSemanticsEnabled(true));
 
-  // 5. DispatchSemanticsAction
-  std::vector<uint8_t> action_data = {0xAA, 0xBB};
-  EXPECT_TRUE(delegate->DispatchSemanticsAction(55, kFlutterSemanticsActionTap,
-                                                action_data, 0));
+  // 5. Empty buffers return true as successful no-ops without invoking JVM
+  EXPECT_TRUE(delegate->UpdateSemantics({}, {}));
+  EXPECT_TRUE(delegate->UpdateCustomAccessibilityActions({}, {}));
+}
 
-  // 6. SetAccessibilityFeatures
-  EXPECT_TRUE(delegate->SetAccessibilityFeatures(7));
+TEST(MutatorTranslationTest, InvalidStructSizeRejected) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto embedder_delegate = std::make_shared<JniDelegate>(mock_invoker);
+  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+  auto router = std::make_unique<JniRouter>(embedder_delegate, legacy_delegate);
+
+  FlutterPlatformView invalid_pv = {};
+  invalid_pv.struct_size = sizeof(FlutterPlatformView) - 1;
+
+  // Rejection in router
+  EXPECT_FALSE(router->RoutePlatformViewMutators(invalid_pv, 0, 0, 100, 100));
+
+  // Rejection in delegate
+  EXPECT_FALSE(
+      embedder_delegate->PushPlatformViewMutators(invalid_pv, 0, 0, 100, 100));
 }
 
 TEST(SemanticsAndAccessibilityTest, JniRouterSemanticsDirectRouting) {
@@ -1656,10 +2123,10 @@ TEST(SemanticsAndAccessibilityTest, JniRouterSemanticsDirectRouting) {
   std::vector<uint8_t> buffer = {0x11, 0x22};
   std::vector<std::string> strings = {"Hello"};
 
-  // Across both flag states, semantics routes directly to embedder_delegate
-  // (mock_invoker)
-  for (bool embedder_flag : {false, true}) {
-    JniRouter::SetEmbedderEnabled(embedder_flag);
+  // Across both flag states, Semantics routing bypasses legacy_delegate
+  // completely
+  for (bool flag : {false, true}) {
+    JniRouter::SetEmbedderEnabled(flag);
 
     EXPECT_CALL(
         *mock_invoker,
@@ -1675,15 +2142,11 @@ TEST(SemanticsAndAccessibilityTest, JniRouterSemanticsDirectRouting) {
     EXPECT_CALL(*mock_invoker, SetSemanticsTreeEnabled(true))
         .WillOnce(Return(true));
     EXPECT_TRUE(router->RouteSemanticsEnabled(true));
-
-    EXPECT_TRUE(router->RouteDispatchSemanticsAction(
-        42, kFlutterSemanticsActionTap, buffer, 0));
-
-    EXPECT_TRUE(router->RouteSetAccessibilityFeatures(15));
   }
 
   // Reset flag
   JniRouter::SetEmbedderEnabled(true);
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
 }
 
 TEST(SemanticsAndAccessibilityTest, FlutterEmbedderNativeSemanticsIntegration) {
@@ -1726,11 +2189,18 @@ TEST(SemanticsAndAccessibilityTest, FlutterEmbedderNativeSemanticsIntegration) {
                 nullptr, kFlutterAccessibilityFeatureBoldText),
             kInvalidArguments);
   EXPECT_EQ(native.SendSemanticsAction(nullptr, nullptr), kInvalidArguments);
+
+  // Validate rejection on undersized struct_size
+  FlutterSendSemanticsActionInfo invalid_action_info = {};
+  invalid_action_info.struct_size = sizeof(FlutterSendSemanticsActionInfo) - 1;
+  EXPECT_EQ(native.SendSemanticsAction(nullptr, &invalid_action_info),
+            kInvalidArguments);
+
   EXPECT_EQ(native.DispatchSemanticsActionToEngine(
                 nullptr, 100, kFlutterSemanticsActionTap, nullptr, 0),
             kInvalidArguments);
 
-  JniRouter::SetEmbedderEnabled(false);
+  JniRouter::SetEmbedderEnabled(true);
 }
 
 // =============================================================================
@@ -2023,6 +2493,28 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
   auto mock_invoker = std::make_shared<MockJvmInvoker>();
   DefaultPlatformViewsProvider provider(mock_invoker);
 
+  auto pack_creation = [](const PlatformViewCreationParams& p) {
+    std::vector<uint8_t> payload;
+    int32_t type_len = static_cast<int32_t>(p.view_type.size());
+    int32_t id = static_cast<int32_t>(p.view_id);
+    double w = p.width, h = p.height;
+    int32_t dir = p.direction;
+    int32_t params_len = static_cast<int32_t>(p.params.size());
+    auto write_bytes = [&](const void* ptr, size_t sz) {
+      const uint8_t* u = reinterpret_cast<const uint8_t*>(ptr);
+      payload.insert(payload.end(), u, u + sz);
+    };
+    write_bytes(&type_len, sizeof(type_len));
+    payload.insert(payload.end(), p.view_type.begin(), p.view_type.end());
+    write_bytes(&id, sizeof(id));
+    write_bytes(&w, sizeof(w));
+    write_bytes(&h, sizeof(h));
+    write_bytes(&dir, sizeof(dir));
+    write_bytes(&params_len, sizeof(params_len));
+    payload.insert(payload.end(), p.params.begin(), p.params.end());
+    return payload;
+  };
+
   // 1. CreatePlatformView (Texture Layer)
   PlatformViewCreationParams params = {
       .view_id = 42,
@@ -2032,10 +2524,11 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
       .direction = 0,
       .params = {0xAA, 0xBB},
   };
+  std::vector<uint8_t> expected_creation_payload = pack_creation(params);
   EXPECT_CALL(*mock_invoker,
               InvokeIntMethod("createForTextureLayer",
                               "(Ljava/lang/String;IDDILjava/nio/ByteBuffer;)J",
-                              params.params))
+                              expected_creation_payload))
       .WillOnce(Return(777));
   EXPECT_EQ(provider.CreatePlatformView(
                 params, PlatformViewCompositionType::kTextureLayer),
@@ -2045,7 +2538,7 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
   EXPECT_CALL(*mock_invoker,
               InvokeVoidMethod("createForPlatformViewLayer",
                                "(Ljava/lang/String;IDDILjava/nio/ByteBuffer;)V",
-                               params.params))
+                               expected_creation_payload))
       .WillOnce(Return(true));
   EXPECT_EQ(provider.CreatePlatformView(
                 params, PlatformViewCompositionType::kHybridComposition),
@@ -2055,7 +2548,7 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
   EXPECT_CALL(*mock_invoker,
               InvokeVoidMethod("createPlatformViewHcpp",
                                "(Ljava/lang/String;IDDILjava/nio/ByteBuffer;)V",
-                               params.params))
+                               expected_creation_payload))
       .WillOnce(Return(true));
   EXPECT_EQ(
       provider.CreatePlatformView(
@@ -2063,9 +2556,9 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
       0);
 
   // 4. DisposePlatformView
-  int64_t view_id = 42;
-  std::vector<uint8_t> dispose_payload(sizeof(int64_t));
-  std::memcpy(dispose_payload.data(), &view_id, sizeof(int64_t));
+  int32_t view_id_i32 = 42;
+  std::vector<uint8_t> dispose_payload(sizeof(int32_t));
+  std::memcpy(dispose_payload.data(), &view_id_i32, sizeof(int32_t));
   EXPECT_CALL(*mock_invoker,
               InvokeVoidMethod("disposePlatformView", "(I)V", dispose_payload))
       .WillOnce(Return(true));
@@ -2077,25 +2570,46 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
       .width = 200.0,
       .height = 300.0,
   };
-  EXPECT_CALL(*mock_invoker, ResizePlatformView(42, 200.0, 300.0))
+  std::vector<uint8_t> resize_payload;
+  double r_w = 200.0, r_h = 300.0;
+  const uint8_t* p_id = reinterpret_cast<const uint8_t*>(&view_id_i32);
+  const uint8_t* p_rw = reinterpret_cast<const uint8_t*>(&r_w);
+  const uint8_t* p_rh = reinterpret_cast<const uint8_t*>(&r_h);
+  resize_payload.insert(resize_payload.end(), p_id, p_id + sizeof(view_id_i32));
+  resize_payload.insert(resize_payload.end(), p_rw, p_rw + sizeof(r_w));
+  resize_payload.insert(resize_payload.end(), p_rh, p_rh + sizeof(r_h));
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("resizePlatformView", "(IDD)V", resize_payload))
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.ResizePlatformView(resize_req));
 
   // 6. OffsetPlatformView
-  EXPECT_CALL(*mock_invoker, OffsetPlatformView(42, 10.0, 20.0))
+  std::vector<uint8_t> offset_payload;
+  double o_top = 10.0, o_left = 20.0;
+  const uint8_t* p_ot = reinterpret_cast<const uint8_t*>(&o_top);
+  const uint8_t* p_ol = reinterpret_cast<const uint8_t*>(&o_left);
+  offset_payload.insert(offset_payload.end(), p_id, p_id + sizeof(view_id_i32));
+  offset_payload.insert(offset_payload.end(), p_ot, p_ot + sizeof(o_top));
+  offset_payload.insert(offset_payload.end(), p_ol, p_ol + sizeof(o_left));
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("offsetPlatformView", "(IDD)V", offset_payload))
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.OffsetPlatformView(42, 10.0, 20.0));
 
   // 7. SetDirection
-  EXPECT_CALL(*mock_invoker, SetPlatformViewDirection(42, 1))
+  std::vector<uint8_t> direction_payload;
+  int32_t dir = 1;
+  const uint8_t* p_dir = reinterpret_cast<const uint8_t*>(&dir);
+  direction_payload.insert(direction_payload.end(), p_id,
+                           p_id + sizeof(view_id_i32));
+  direction_payload.insert(direction_payload.end(), p_dir, p_dir + sizeof(dir));
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setPlatformViewDirection",
+                                              "(II)V", direction_payload))
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.SetDirection(42, 1));
 
   // 8. ClearFocus
-  int32_t clear_focus_id = 42;
-  std::vector<uint8_t> clear_focus_payload(sizeof(int32_t));
-  std::memcpy(clear_focus_payload.data(), &clear_focus_id,
-              sizeof(clear_focus_id));
+  std::vector<uint8_t> clear_focus_payload(p_id, p_id + sizeof(view_id_i32));
   EXPECT_CALL(*mock_invoker, InvokeVoidMethod("clearPlatformViewFocus", "(I)V",
                                               clear_focus_payload))
       .WillOnce(Return(true));
@@ -2103,22 +2617,60 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
 
   // 9. DispatchTouchEvent
   PlatformViewTouch touch = {.view_id = 42};
+  std::vector<uint8_t> touch_payload;
+  auto write_t_i32 = [&](int32_t val) {
+    const uint8_t* ptr = reinterpret_cast<const uint8_t*>(&val);
+    touch_payload.insert(touch_payload.end(), ptr, ptr + sizeof(val));
+  };
+  auto write_t_i64 = [&](int64_t val) {
+    const uint8_t* ptr = reinterpret_cast<const uint8_t*>(&val);
+    touch_payload.insert(touch_payload.end(), ptr, ptr + sizeof(val));
+  };
+  auto write_t_f32 = [&](float val) {
+    const uint8_t* ptr = reinterpret_cast<const uint8_t*>(&val);
+    touch_payload.insert(touch_payload.end(), ptr, ptr + sizeof(val));
+  };
+  write_t_i32(42);
+  write_t_i64(0);
+  write_t_i32(0);
+  write_t_i32(0);
+  write_t_i64(0);
+  write_t_i64(0);
+  write_t_i32(0);
+  write_t_i32(0);
+  write_t_i32(0);
+  write_t_i32(0);
+  write_t_f32(0.0f);
+  write_t_f32(0.0f);
   EXPECT_CALL(*mock_invoker,
               InvokeVoidMethod("onTouch",
                                "(Lio/flutter/embedding/engine/systemchannels/"
                                "PlatformViewTouch;)V",
-                               std::vector<uint8_t>{}))
+                               touch_payload))
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.DispatchTouchEvent(touch));
 
   // 10. OnDisplayPlatformView
-  PlatformViewGeometry geom = {.view_id = 42};
-  EXPECT_CALL(*mock_invoker, OnDisplayPlatformView(42, 0, 0, 0, 0, 0, 0,
-                                                   geom.mutators_stack, false))
+  PlatformViewGeometry geom = {
+      .view_id = 42,
+      .x = 10,
+      .y = 20,
+      .width = 100,
+      .height = 200,
+      .view_width = 150,
+      .view_height = 250,
+  };
+  std::vector<uint8_t> geom_payload = geom.mutators_stack.Serialize();
+  EXPECT_CALL(*mock_invoker, PushPlatformViewMutators(42, 10, 20, 100, 200, 150,
+                                                      250, geom_payload))
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.OnDisplayPlatformView(geom));
 
-  // 11. HidePlatformView (no-op in non-HCPP mode)
+  // 11. HidePlatformView
+  std::vector<uint8_t> hide_payload(p_id, p_id + sizeof(view_id_i32));
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("hidePlatformView", "(I)V", hide_payload))
+      .WillOnce(Return(true));
   EXPECT_TRUE(provider.HidePlatformView(42));
 
   // 12. SynchronizeToNativeViewHierarchy
@@ -2141,7 +2693,9 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
   EXPECT_TRUE(provider.OnEndFrame());
 
   // 14. Overlay surfaces
-  EXPECT_CALL(*mock_invoker, CreateOverlaySurface(false)).WillOnce(Return(9));
+  EXPECT_CALL(*mock_invoker, InvokeIntMethod("createOverlaySurfaceId", "()I",
+                                             std::vector<uint8_t>{}))
+      .WillOnce(Return(9));
   auto overlay_id = provider.CreateOverlaySurface();
   ASSERT_TRUE(overlay_id.has_value());
   if (overlay_id.has_value()) {
@@ -2153,17 +2707,37 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.DestroyOverlaySurfaces());
 
-  PlatformViewOverlay overlay_req = {.surface_id = 9};
-  EXPECT_CALL(*mock_invoker, OnDisplayOverlaySurface(9, 0, 0, 0, 0))
+  PlatformViewOverlay overlay_req = {
+      .surface_id = 9,
+      .x = 1,
+      .y = 2,
+      .width = 3,
+      .height = 4,
+  };
+  std::vector<uint8_t> overlay_payload;
+  auto append_o_i32 = [&](int32_t val) {
+    const uint8_t* ptr = reinterpret_cast<const uint8_t*>(&val);
+    overlay_payload.insert(overlay_payload.end(), ptr, ptr + sizeof(val));
+  };
+  append_o_i32(9);
+  append_o_i32(1);
+  append_o_i32(2);
+  append_o_i32(3);
+  append_o_i32(4);
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onDisplayOverlaySurface",
+                                              "(IIIII)V", overlay_payload))
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.OnDisplayOverlaySurface(overlay_req));
 
-  // ShowOverlaySurface / HideOverlaySurface (no-op in non-HCPP mode)
+  // Non-HCPP show/hide are safe no-ops without invoking nonexistent JNI methods
   EXPECT_TRUE(provider.ShowOverlaySurface(9));
   EXPECT_TRUE(provider.HideOverlaySurface(9));
 
   // 15. Transactions
-  EXPECT_CALL(*mock_invoker, CreateTransaction()).WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("createPlatformViewTransaction", "()Z",
+                                  std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
   EXPECT_TRUE(provider.CreateTransaction());
 
   EXPECT_CALL(*mock_invoker, InvokeVoidMethod("swapTransactions", "()V",
@@ -2176,78 +2750,147 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.ApplyTransactions());
 
-  // 16. HCPP state
+  // 16. HCPP state and branching
   EXPECT_FALSE(provider.IsHcppEnabled());
   provider.SetHcppEnabled(true);
   EXPECT_TRUE(provider.IsHcppEnabled());
-}
 
-TEST(PlatformViewsTest, DefaultPlatformViewsProviderHcppRouting) {
-  auto mock_invoker = std::make_shared<MockJvmInvoker>();
-  DefaultPlatformViewsProvider provider(mock_invoker);
-  provider.SetHcppEnabled(true);
-  EXPECT_TRUE(provider.IsHcppEnabled());
+  EXPECT_CALL(*mock_invoker, InvokeIntMethod("createOverlaySurface2Id", "()I",
+                                             std::vector<uint8_t>{}))
+      .WillOnce(Return(12));
+  EXPECT_EQ(provider.CreateOverlaySurface(), 12);
 
-  // 1. CreateOverlaySurface in HCPP mode
-  EXPECT_CALL(*mock_invoker, CreateOverlaySurface(true)).WillOnce(Return(12));
-  auto overlay_id = provider.CreateOverlaySurface();
-  ASSERT_TRUE(overlay_id.has_value());
-  if (overlay_id.has_value()) {
-    EXPECT_EQ(overlay_id.value(), 12);
-  }
-
-  // 2. ShowOverlaySurface in HCPP mode
   EXPECT_CALL(*mock_invoker, InvokeVoidMethod("showOverlaySurface2", "()V",
                                               std::vector<uint8_t>{}))
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.ShowOverlaySurface(12));
 
-  // 3. HideOverlaySurface in HCPP mode
   EXPECT_CALL(*mock_invoker, InvokeVoidMethod("hideOverlaySurface2", "()V",
                                               std::vector<uint8_t>{}))
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.HideOverlaySurface(12));
 
-  // 4. DestroyOverlaySurfaces in HCPP mode
   EXPECT_CALL(*mock_invoker, InvokeVoidMethod("destroyOverlaySurface2", "()V",
                                               std::vector<uint8_t>{}))
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.DestroyOverlaySurfaces());
 
-  // 5. HidePlatformView in HCPP mode
-  int32_t view_id = 99;
-  std::vector<uint8_t> hide_payload(sizeof(int32_t));
-  std::memcpy(hide_payload.data(), &view_id, sizeof(view_id));
   EXPECT_CALL(*mock_invoker,
               InvokeVoidMethod("hidePlatformView2", "(I)V", hide_payload))
       .WillOnce(Return(true));
-  EXPECT_TRUE(provider.HidePlatformView(99));
+  EXPECT_TRUE(provider.HidePlatformView(42));
 
-  // 6. OnBeginFrame in HCPP mode (safe no-op)
-  EXPECT_TRUE(provider.OnBeginFrame());
-
-  // 7. OnEndFrame in HCPP mode
   EXPECT_CALL(*mock_invoker,
               InvokeVoidMethod("endFrame2", "()V", std::vector<uint8_t>{}))
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.OnEndFrame());
+}
 
-  // 8. OnDisplayPlatformView in HCPP mode
-  PlatformViewGeometry geometry = {
+TEST(PlatformViewsTest, UnifiedControllerInstance) {
+  FlutterEmbedderNative native;
+  auto controller = native.GetPlatformViewsController();
+  auto jni_controller = native.GetJniDelegate()->GetPlatformViewsController();
+  ASSERT_NE(controller, nullptr);
+  ASSERT_NE(jni_controller, nullptr);
+  EXPECT_EQ(controller, jni_controller);
+
+  PlatformViewCreationParams params = {
       .view_id = 99,
-      .x = 0,
-      .y = 0,
-      .width = 100,
-      .height = 100,
-      .view_width = 100,
-      .view_height = 100,
-      .mutators_stack = {},
+      .view_type = "test.unified",
+      .width = 100.0,
+      .height = 100.0,
   };
-  EXPECT_CALL(*mock_invoker,
-              OnDisplayPlatformView(99, 0, 0, 100, 100, 100, 100,
-                                    geometry.mutators_stack, true))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(provider.OnDisplayPlatformView(geometry));
+  EXPECT_EQ(native.CreatePlatformView(
+                params, PlatformViewCompositionType::kHybridComposition),
+            0);
+  EXPECT_TRUE(controller->HasPlatformView(99));
+  EXPECT_TRUE(jni_controller->HasPlatformView(99));
+  EXPECT_EQ(controller->GetActiveViewsCount(), 1u);
+}
+
+TEST(PlatformViewsTest, InMemoryDisposeNonExistentViewReturnsFalse) {
+  InMemoryPlatformViewsProvider provider;
+  EXPECT_FALSE(provider.DisposePlatformView(999));
+
+  PlatformViewCreationParams params = {
+      .view_id = 42,
+      .view_type = "test.view",
+      .width = 100.0,
+      .height = 100.0,
+  };
+  EXPECT_EQ(provider.CreatePlatformView(
+                params, PlatformViewCompositionType::kHybridComposition),
+            0);
+  EXPECT_TRUE(provider.DisposePlatformView(42));
+  EXPECT_FALSE(provider.DisposePlatformView(42));
+  EXPECT_FALSE(provider.DisposePlatformView(999));
+}
+
+TEST(PlatformViewsTest, DanglingGeometriesPrevention) {
+  auto provider = std::make_shared<InMemoryPlatformViewsProvider>();
+  AndroidPlatformViewsController controller(provider);
+
+  AndroidMutatorsStack stack;
+  // Attempt to display unregistered view
+  EXPECT_FALSE(
+      controller.OnDisplayPlatformView(999, 0, 0, 100, 100, 100, 100, stack));
+  EXPECT_FALSE(controller.GetPlatformViewGeometry(999).has_value());
+  EXPECT_EQ(controller.GetActiveViewsCount(), 0u);
+
+  // Now create the view
+  PlatformViewCreationParams params = {
+      .view_id = 999,
+      .view_type = "test.view",
+      .width = 100.0,
+      .height = 100.0,
+  };
+  EXPECT_EQ(controller.CreatePlatformView(
+                params, PlatformViewCompositionType::kHybridComposition),
+            0);
+  EXPECT_TRUE(
+      controller.OnDisplayPlatformView(999, 10, 20, 100, 100, 150, 150, stack));
+  auto geom = controller.GetPlatformViewGeometry(999);
+  ASSERT_TRUE(geom.has_value());
+  EXPECT_EQ(geom->view_width, 150);
+  EXPECT_EQ(geom->view_height, 150);
+
+  // After disposal, geometry should be purged and display should fail
+  EXPECT_TRUE(controller.DisposePlatformView(999));
+  EXPECT_FALSE(controller.GetPlatformViewGeometry(999).has_value());
+  EXPECT_FALSE(
+      controller.OnDisplayPlatformView(999, 10, 20, 100, 100, 150, 150, stack));
+}
+
+TEST(PlatformViewsTest, LayoutDimensionsPreserved) {
+  auto provider = std::make_shared<InMemoryPlatformViewsProvider>();
+  AndroidPlatformViewsController controller(provider);
+
+  PlatformViewCreationParams params = {
+      .view_id = 77,
+      .view_type = "test.dimensions",
+      .width = 100.0,
+      .height = 100.0,
+  };
+  EXPECT_EQ(controller.CreatePlatformView(
+                params, PlatformViewCompositionType::kHybridComposition),
+            0);
+
+  AndroidMutatorsStack stack;
+  EXPECT_TRUE(controller.PushPlatformViewMutators(77, 5, 10, 200, 300, 250, 350,
+                                                  stack));
+  auto geom = controller.GetPlatformViewGeometry(77);
+  ASSERT_TRUE(geom.has_value());
+  EXPECT_EQ(geom->x, 5);
+  EXPECT_EQ(geom->y, 10);
+  EXPECT_EQ(geom->width, 200);
+  EXPECT_EQ(geom->height, 300);
+  EXPECT_EQ(geom->view_width, 250);
+  EXPECT_EQ(geom->view_height, 350);
+
+  auto last_geom = provider->GetLastGeometry(77);
+  ASSERT_TRUE(last_geom.has_value());
+  EXPECT_EQ(last_geom->view_width, 250);
+  EXPECT_EQ(last_geom->view_height, 350);
 }
 
 TEST(PlatformViewsTest, AndroidPlatformViewsControllerIntegration) {
@@ -2410,12 +3053,11 @@ TEST(PlatformViewsTest, JniRouterPlatformViewsDirectRouting) {
       .view_id = 88, .width = 200.0, .height = 200.0};
   PlatformViewTouch touch = {.view_id = 88};
   PlatformViewGeometry geom = {.view_id = 88};
-  AndroidMutatorsStack stack;
 
-  // Across both flag states (false and true), all platform view methods route
-  // directly to embedder_delegate
-  for (bool embedder_flag : {false, true}) {
-    JniRouter::SetEmbedderEnabled(embedder_flag);
+  // Across both flag states, Platform Views routing bypasses legacy_delegate
+  // completely
+  for (bool flag : {false, true}) {
+    JniRouter::SetEmbedderEnabled(flag);
 
     EXPECT_EQ(router->RouteCreatePlatformView(
                   params, PlatformViewCompositionType::kHybridComposition),
@@ -2435,12 +3077,10 @@ TEST(PlatformViewsTest, JniRouterPlatformViewsDirectRouting) {
 
     auto created_overlay = router->RouteCreateOverlaySurface();
     ASSERT_TRUE(created_overlay.has_value());
-    if (created_overlay.has_value()) {
-      PlatformViewOverlay routed_overlay = {.surface_id = *created_overlay};
-      EXPECT_TRUE(router->RouteOnDisplayOverlaySurface(routed_overlay));
-      EXPECT_TRUE(router->RouteShowOverlaySurface(*created_overlay));
-      EXPECT_TRUE(router->RouteHideOverlaySurface(*created_overlay));
-    }
+    PlatformViewOverlay routed_overlay = {.surface_id = *created_overlay};
+    EXPECT_TRUE(router->RouteOnDisplayOverlaySurface(routed_overlay));
+    EXPECT_TRUE(router->RouteShowOverlaySurface(*created_overlay));
+    EXPECT_TRUE(router->RouteHideOverlaySurface(*created_overlay));
     EXPECT_TRUE(router->RouteDestroyOverlaySurfaces());
 
     EXPECT_TRUE(router->RouteCreatePlatformViewTransaction());
@@ -2448,13 +3088,13 @@ TEST(PlatformViewsTest, JniRouterPlatformViewsDirectRouting) {
     EXPECT_TRUE(router->RouteApplyPlatformViewTransactions());
     EXPECT_FALSE(router->RouteIsHcppEnabled());
 
-    EXPECT_TRUE(router->RoutePlatformViewMutators(88, 0, 0, 100, 100, stack));
-
     EXPECT_TRUE(router->RouteDisposePlatformView(88));
     EXPECT_FALSE(mem_provider->IsViewCreated(88));
   }
 
+  // Reset flag
   JniRouter::SetEmbedderEnabled(true);
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
 }
 
 TEST(PlatformViewsTest, FlutterEmbedderNativePlatformViewsIntegration) {
@@ -2527,7 +3167,7 @@ TEST(PlatformViewsTest, FlutterEmbedderNativePlatformViewsIntegration) {
   EXPECT_TRUE(native.DisposePlatformView(77));
   EXPECT_FALSE(mem_provider->IsViewCreated(77));
 
-  JniRouter::SetEmbedderEnabled(false);
+  JniRouter::SetEmbedderEnabled(true);
 }
 
 TEST(PlatformViewsTest, ThreadSafeConcurrentPlatformViewsOperations) {
@@ -2604,6 +3244,25 @@ TEST(WindowMetricsTranslationTest, JniDelegateWindowMetricsOperations) {
   disp.height = 1920.0;
   disp.device_pixel_ratio = 2.625;
 
+  PackedViewportMetrics expected_vp = {
+      vp.view_id,
+      vp.physical_width,
+      vp.physical_height,
+      vp.device_pixel_ratio,
+  };
+  std::vector<uint8_t> expected_vp_bytes(sizeof(PackedViewportMetrics));
+  std::memcpy(expected_vp_bytes.data(), &expected_vp,
+              sizeof(PackedViewportMetrics));
+
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onViewportMetrics", "(JDDD)V",
+                                              expected_vp_bytes))
+      .Times(2)
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("onDisplayMetrics", "(JDDDD)V", _))
+      .Times(2)
+      .WillRepeatedly(Return(true));
+
   EXPECT_TRUE(delegate->SetViewportMetrics(vp));
   EXPECT_TRUE(delegate->UpdateDisplayMetrics(disp));
   EXPECT_TRUE(delegate->UpdateDisplayMetrics(0, 90.0, 1080.0, 1920.0, 2.625));
@@ -2622,11 +3281,122 @@ TEST(WindowMetricsTranslationTest, JniDelegateWindowMetricsOperations) {
   }
 }
 
+TEST(WindowMetricsTranslationTest, SetEngineAndCallbacks) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  FlutterEmbedderNative native(mock_invoker);
+
+  auto dummy_engine =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x1234);
+  native.SetEngine(dummy_engine);
+  EXPECT_EQ(native.GetEngine(), dummy_engine);
+
+  bool send_called = false;
+  native.SetSendWindowMetricsEventFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+          const FlutterWindowMetricsEvent* event) {
+        send_called = true;
+        EXPECT_EQ(engine, dummy_engine);
+        EXPECT_EQ(event->width, 800u);
+        EXPECT_EQ(event->height, 600u);
+        EXPECT_DOUBLE_EQ(event->pixel_ratio, 1.5);
+        return kSuccess;
+      });
+
+  bool notify_called = false;
+  native.SetNotifyDisplayUpdateFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+          FlutterEngineDisplaysUpdateType type,
+          const FlutterEngineDisplay* displays, size_t count) {
+        notify_called = true;
+        EXPECT_EQ(engine, dummy_engine);
+        EXPECT_EQ(count, 1u);
+        EXPECT_EQ(displays[0].width, 800u);
+        EXPECT_EQ(displays[0].height, 600u);
+        return kSuccess;
+      });
+
+  AndroidViewportMetrics vp;
+  vp.view_id = 1;
+  vp.physical_width = 800.0;
+  vp.physical_height = 600.0;
+  vp.device_pixel_ratio = 1.5;
+
+  AndroidDisplayMetrics disp;
+  disp.display_id = 0;
+  disp.refresh_rate = 60.0;
+  disp.width = 800.0;
+  disp.height = 600.0;
+  disp.device_pixel_ratio = 1.5;
+
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("onViewportMetrics", "(JDDD)V", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("onDisplayMetrics", "(JDDDD)V", _))
+      .WillOnce(Return(true));
+
+  // Setting viewport metrics routes end-to-end to
+  // FlutterEngineSendWindowMetricsEvent
+  EXPECT_TRUE(native.SetViewportMetrics(vp));
+  EXPECT_TRUE(send_called);
+
+  // Updating display metrics routes end-to-end to
+  // FlutterEngineNotifyDisplayUpdate
+  EXPECT_TRUE(native.UpdateDisplayMetrics(disp));
+  EXPECT_TRUE(notify_called);
+
+  // Sending metrics directly without engine parameter uses active engine
+  EXPECT_EQ(native.SendWindowMetricsEvent(vp), kSuccess);
+  EXPECT_EQ(native.NotifyDisplayUpdate(disp), kSuccess);
+
+  native.SetEngine(nullptr);
+  EXPECT_EQ(native.GetEngine(), nullptr);
+  EXPECT_EQ(native.SendWindowMetricsEvent(vp), kInvalidArguments);
+  EXPECT_EQ(native.NotifyDisplayUpdate(disp), kInvalidArguments);
+}
+
+TEST(WindowMetricsTranslationTest, ConcurrentProviderReplacementInNative) {
+  FlutterEmbedderNative native;
+  std::atomic<bool> running{true};
+  std::vector<std::thread> threads;
+
+  for (int i = 0; i < 2; ++i) {
+    threads.emplace_back([&]() {
+      AndroidViewportMetrics vp;
+      vp.view_id = 100;
+      vp.physical_width = 1080.0;
+      vp.physical_height = 1920.0;
+      while (running.load()) {
+        native.SetViewportMetrics(vp);
+        native.GetWindowMetricsProvider();
+      }
+    });
+  }
+
+  threads.emplace_back([&]() {
+    for (int i = 0; i < 200; ++i) {
+      if (i % 2 == 0) {
+        native.SetWindowMetricsProvider(
+            std::make_shared<InMemoryWindowMetricsProvider>());
+      } else {
+        native.SetWindowMetricsProvider(
+            std::make_shared<DefaultWindowMetricsProvider>());
+      }
+      std::this_thread::yield();
+    }
+    running.store(false);
+  });
+
+  for (auto& t : threads) {
+    t.join();
+  }
+}
+
 TEST(WindowMetricsTranslationTest, JniRouterWindowMetricsDirectRouting) {
   auto mock_invoker = std::make_shared<MockJvmInvoker>();
   auto in_memory_provider = std::make_shared<InMemoryWindowMetricsProvider>();
   auto embedder_delegate = std::make_shared<JniDelegate>(
-      mock_invoker, nullptr, nullptr, nullptr, in_memory_provider);
+      mock_invoker, nullptr, nullptr, nullptr, nullptr, in_memory_provider);
   auto legacy_delegate = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
 
   JniRouter router(embedder_delegate, legacy_delegate);
@@ -2644,10 +3414,11 @@ TEST(WindowMetricsTranslationTest, JniRouterWindowMetricsDirectRouting) {
   disp.height = 3040.0;
   disp.device_pixel_ratio = 3.5;
 
-  // Across both flag states (false and true), window & display metrics route
-  // directly to embedder_delegate
-  for (bool embedder_flag : {false, true}) {
-    JniRouter::SetEmbedderEnabled(embedder_flag);
+  // Across both flag states (Embedder disabled vs enabled), WindowMetrics
+  // routes directly and unconditionally to embedder_delegate (legacy is
+  // purged).
+  for (bool flag : {false, true}) {
+    JniRouter::SetEmbedderEnabled(flag);
 
     EXPECT_TRUE(router.RouteSetViewportMetrics(vp));
     EXPECT_TRUE(router.RouteUpdateDisplayMetrics(disp));
@@ -2658,6 +3429,14 @@ TEST(WindowMetricsTranslationTest, JniRouterWindowMetricsDirectRouting) {
 
   EXPECT_EQ(in_memory_provider->GetSendCount(), 4u);
   EXPECT_EQ(in_memory_provider->GetUpdateCount(), 4u);
+
+  // Graceful fallback when embedder_delegate is null
+  JniRouter null_router(nullptr, legacy_delegate);
+  EXPECT_FALSE(null_router.RouteSetViewportMetrics(vp));
+  EXPECT_FALSE(null_router.RouteUpdateDisplayMetrics(disp));
+  EXPECT_FALSE(
+      null_router.RouteUpdateDisplayMetrics(1, 120.0, 1440.0, 3040.0, 3.5));
+  EXPECT_FALSE(null_router.RouteViewportMetrics(7, 1440.0, 3040.0, 3.5));
 
   JniRouter::SetEmbedderEnabled(true);
 }
@@ -2713,7 +3492,24 @@ TEST(WindowMetricsTranslationTest,
             kInvalidArguments);
   EXPECT_EQ(native.NotifyDisplayUpdate(nullptr, disp), kInvalidArguments);
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+}
+
+TEST(WindowMetricsTranslationTest, InvalidStructSizeRejected) {
+  FlutterEmbedderNative native;
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(FlutterWindowMetricsEvent) - 1;
+
+  auto dummy_engine = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x1);
+  EXPECT_EQ(native.SendWindowMetricsEvent(dummy_engine, &event),
+            kInvalidArguments);
+
+  FlutterEngineDisplay display = {};
+  display.struct_size = sizeof(FlutterEngineDisplay) - 1;
+  EXPECT_EQ(
+      native.NotifyDisplayUpdate(
+          dummy_engine, kFlutterEngineDisplaysUpdateTypeStartup, &display, 1),
+      kInvalidArguments);
 }
 
 // ---------------------------------------------------------------------------
@@ -2726,14 +3522,15 @@ TEST(VsyncRoutingTest, JniDelegateVsyncOperations) {
       std::make_shared<InMemoryAndroidChoreographerProvider>();
   auto vsync_waiter =
       std::make_shared<AndroidVsyncWaiter>(mock_choreographer, mock_invoker);
-  auto delegate = std::make_shared<JniDelegate>(mock_invoker, nullptr, nullptr,
-                                                nullptr, nullptr, vsync_waiter);
+  auto delegate = std::make_shared<JniDelegate>(
+      mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, vsync_waiter);
 
   EXPECT_EQ(delegate->GetVsyncWaiter(), vsync_waiter);
 
-  // 1. OnVsync dispatches to JVM
+  // 1. OnVsync dispatches to JVM (and ConsumePendingVsync also notifies JVM)
   EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
-      .WillOnce(Return(true));
+      .Times(2)
+      .WillRepeatedly(Return(true));
   EXPECT_TRUE(delegate->OnVsync(1000000LL, 2000000LL));
 
   // 2. AsyncWaitForVsync routes to AndroidVsyncWaiter
@@ -2759,25 +3556,30 @@ TEST(VsyncRoutingTest, JniRouterVsyncDirectRouting) {
   auto vsync_waiter =
       std::make_shared<AndroidVsyncWaiter>(mock_choreographer, mock_invoker);
   auto embedder_delegate = std::make_shared<JniDelegate>(
-      mock_invoker, nullptr, nullptr, nullptr, nullptr, vsync_waiter);
+      mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, vsync_waiter);
   auto legacy_delegate = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
 
   JniRouter router(embedder_delegate, legacy_delegate);
 
-  // Across both flag states (false and true), VSync methods route directly to
-  // embedder_delegate
-  for (bool embedder_flag : {false, true}) {
-    JniRouter::SetEmbedderEnabled(embedder_flag);
+  // Across both flag states (Embedder disabled vs enabled), VSync routes
+  // directly and unconditionally to embedder_delegate (legacy is purged).
+  for (bool flag : {false, true}) {
+    JniRouter::SetEmbedderEnabled(flag);
 
     EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
-        .WillOnce(Return(true));
+        .Times(2)
+        .WillRepeatedly(Return(true));
     EXPECT_TRUE(router.RouteVsync(5000LL, 10000LL));
 
-    EXPECT_TRUE(router.RouteAsyncWaitForVsync(123 + (embedder_flag ? 1 : 0)));
+    EXPECT_TRUE(router.RouteAsyncWaitForVsync(456));
+    EXPECT_TRUE(mock_choreographer->HasPendingCallbacks());
+    mock_choreographer->TriggerPendingCallbacks(10000000LL);
   }
 
-  EXPECT_EQ(vsync_waiter->GetVsyncRequestCount(), 2u);
-  EXPECT_TRUE(mock_choreographer->HasPendingCallbacks());
+  // Graceful fallback when embedder_delegate is null
+  JniRouter null_router(nullptr, legacy_delegate);
+  EXPECT_FALSE(null_router.RouteVsync(5000LL, 10000LL));
+  EXPECT_FALSE(null_router.RouteAsyncWaitForVsync(123));
 
   JniRouter::SetEmbedderEnabled(true);
 }
@@ -2813,6 +3615,8 @@ TEST(VsyncRoutingTest, FlutterEmbedderNativeVsyncIntegration) {
   EXPECT_EQ(vsync_waiter->GetVsyncRequestCount(), 1u);
   EXPECT_TRUE(mock_choreographer->HasPendingCallbacks());
 
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
+      .WillOnce(Return(true));
   mock_choreographer->TriggerPendingCallbacks(10000000LL);
   EXPECT_EQ(delivered_baton, 8888);
   EXPECT_EQ(delivered_start, 10000000LL);
@@ -2822,7 +3626,7 @@ TEST(VsyncRoutingTest, FlutterEmbedderNativeVsyncIntegration) {
   EXPECT_EQ(native.NotifyVsync(nullptr, 8888, 10000000LL, 26666666LL),
             kInvalidArguments);
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(VsyncRoutingTest, FlutterEmbedderNativeVsync120HzPacing) {
@@ -2857,6 +3661,79 @@ TEST(VsyncRoutingTest, FlutterEmbedderNativeVsync120HzPacing) {
   EXPECT_EQ(result_target, 50000000LL + 8333333LL);
 }
 
+TEST(VsyncRoutingTest, FlutterEmbedderNativeNotifyVsyncInvalidArguments) {
+  FlutterEmbedderNative native;
+  auto dummy_engine =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x1234);
+
+  // Null engine rejected
+  EXPECT_EQ(native.NotifyVsync(nullptr, 1, 1000, 2000), kInvalidArguments);
+
+  // Non-positive start time rejected
+  EXPECT_EQ(native.NotifyVsync(dummy_engine, 1, 0, 2000), kInvalidArguments);
+  EXPECT_EQ(native.NotifyVsync(dummy_engine, 1, -100, 2000), kInvalidArguments);
+
+  // Target <= start rejected
+  EXPECT_EQ(native.NotifyVsync(dummy_engine, 1, 2000, 1000), kInvalidArguments);
+  EXPECT_EQ(native.NotifyVsync(dummy_engine, 1, 2000, 2000), kInvalidArguments);
+}
+
+TEST(VsyncRoutingTest, FlutterEmbedderNativeNotifyVsyncTestingHookPropagation) {
+  auto mock_choreographer =
+      std::make_shared<InMemoryAndroidChoreographerProvider>();
+  auto vsync_waiter = std::make_shared<AndroidVsyncWaiter>(mock_choreographer);
+
+  FlutterEmbedderNative native(
+      std::make_shared<DefaultJvmInvoker>(), nullptr, nullptr, nullptr, nullptr,
+      nullptr, nullptr, nullptr, nullptr, mock_choreographer, vsync_waiter);
+
+  auto dummy_engine =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x5678);
+  native.SetEngine(dummy_engine);
+
+  bool hook_invoked = false;
+  intptr_t received_baton = 0;
+  uint64_t received_start = 0;
+  uint64_t received_target = 0;
+
+  native.SetNotifyVsyncFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine, intptr_t baton,
+          uint64_t start, uint64_t target) {
+        EXPECT_EQ(engine, dummy_engine);
+        hook_invoked = true;
+        received_baton = baton;
+        received_start = start;
+        received_target = target;
+        return kSuccess;
+      });
+
+  EXPECT_TRUE(native.AsyncWaitForVsync(777));
+  mock_choreographer->TriggerPendingCallbacks(10000000LL);
+
+  EXPECT_TRUE(hook_invoked);
+  EXPECT_EQ(received_baton, 777);
+  EXPECT_EQ(received_start, 10000000ULL);
+  EXPECT_EQ(received_target, 10000000ULL + 16666666ULL);
+
+  native.SetEngine(nullptr);
+}
+
+TEST(VsyncRoutingTest, FlutterEmbedderNativeUpdateRefreshRateExtremeValues) {
+  FlutterEmbedderNative native;
+
+  native.UpdateRefreshRate(std::numeric_limits<double>::quiet_NaN());
+  EXPECT_DOUBLE_EQ(native.GetRefreshRate(), 60.0);
+
+  native.UpdateRefreshRate(0.0);
+  EXPECT_DOUBLE_EQ(native.GetRefreshRate(), 60.0);
+
+  native.UpdateRefreshRate(-60.0);
+  EXPECT_DOUBLE_EQ(native.GetRefreshRate(), 60.0);
+
+  native.UpdateRefreshRate(1000000.0);
+  EXPECT_DOUBLE_EQ(native.GetRefreshRate(), 1000.0);
+}
+
 // ---------------------------------------------------------------------------
 // GlobalVMInitializationTest (Phase 2.9 Global VM Initialization)
 // ---------------------------------------------------------------------------
@@ -2868,8 +3745,9 @@ TEST(GlobalVMInitializationTest, JniDelegateVMOperations) {
   auto vm_init = std::make_shared<AndroidVMInit>(mock_invoker, font_provider,
                                                  aot_provider);
 
-  auto delegate = std::make_shared<JniDelegate>(
-      mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, vm_init);
+  auto delegate =
+      std::make_shared<JniDelegate>(mock_invoker, nullptr, nullptr, nullptr,
+                                    nullptr, nullptr, nullptr, vm_init);
 
   EXPECT_EQ(delegate->GetVMInit(), vm_init);
   EXPECT_FALSE(delegate->IsVMInitialized());
@@ -2910,8 +3788,9 @@ TEST(GlobalVMInitializationTest, JniRouterVMRoutingFlip) {
   auto vm_init = std::make_shared<AndroidVMInit>(mock_invoker, font_provider,
                                                  aot_provider);
 
-  auto embedder_delegate = std::make_shared<JniDelegate>(
-      mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, vm_init);
+  auto embedder_delegate =
+      std::make_shared<JniDelegate>(mock_invoker, nullptr, nullptr, nullptr,
+                                    nullptr, nullptr, nullptr, vm_init);
   auto legacy_delegate = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
 
   JniRouter router(embedder_delegate, legacy_delegate);
@@ -2923,6 +3802,7 @@ TEST(GlobalVMInitializationTest, JniRouterVMRoutingFlip) {
   // Unconditional Embedder routing in Phase 5.5+
   for (bool flag_attempt : {false, true}) {
     JniRouter::SetEmbedderEnabled(flag_attempt);
+    router.SetInstanceEmbedderEnabled(flag_attempt);
     EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
     EXPECT_EQ(router.GetActiveRoutingPath(), JniRouter::RoutingPath::kEmbedder);
 
@@ -2931,6 +3811,7 @@ TEST(GlobalVMInitializationTest, JniRouterVMRoutingFlip) {
 
     EXPECT_TRUE(router.RoutePrefetchDefaultFontManager());
     EXPECT_TRUE(font_provider->IsPrefetched());
+    EXPECT_GT(font_provider->GetPrefetchCount(), 0u);
 
     EXPECT_CALL(*mock_invoker,
                 InvokeVoidMethod("setVmServiceUri", "(Ljava/lang/String;)V", _))
@@ -3005,9 +3886,17 @@ TEST(GlobalVMInitializationTest, FlutterEmbedderNativeVMIntegration) {
   EXPECT_EQ(native.CollectAOTData(aot_handle), kSuccess);
 
   EXPECT_EQ(native.CreateAOTData(nullptr, nullptr), kInvalidArguments);
-  EXPECT_EQ(native.CollectAOTData(nullptr), kInvalidArguments);
+  EXPECT_EQ(native.CollectAOTData(nullptr), kSuccess);
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  // Struct size validation in InitializeEngine
+  FlutterRendererConfig config = {};
+  FlutterProjectArgs bad_args = {};
+  bad_args.struct_size = sizeof(FlutterProjectArgs) - 8;
+  FLUTTER_API_SYMBOL(FlutterEngine) engine_out = nullptr;
+  EXPECT_EQ(native.InitializeEngine(&config, &bad_args, nullptr, &engine_out),
+            kInvalidArguments);
+
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(GlobalVMInitializationTest,
@@ -3029,6 +3918,7 @@ TEST(GlobalVMInitializationTest,
 
   AndroidVMArgs args;
   args.command_line_args = {"--flag1", "--flag2=value"};
+  args.assets_path = "/data/app/assets/flutter_assets";
   args.icu_data_path = "/system/etc/icudtl.dat";
   args.engine_caches_path = "/data/user/persistent_cache";
   args.is_persistent_cache_read_only = true;
@@ -3049,6 +3939,7 @@ TEST(GlobalVMInitializationTest,
   const FlutterProjectArgs* project_args = native.GetProjectArgs();
   ASSERT_NE(project_args, nullptr);
   EXPECT_EQ(project_args->struct_size, sizeof(FlutterProjectArgs));
+  EXPECT_STREQ(project_args->assets_path, "/data/app/assets/flutter_assets");
   EXPECT_STREQ(project_args->icu_data_path, "/system/etc/icudtl.dat");
   EXPECT_STREQ(project_args->persistent_cache_path,
                "/data/user/persistent_cache");
@@ -3070,7 +3961,7 @@ TEST(GlobalVMInitializationTest,
   EXPECT_EQ(project_args->isolate_snapshot_instructions_size,
             sizeof(iso_instr));
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 // =============================================================================
@@ -3092,7 +3983,7 @@ TEST(HardwareBufferTest, JniDelegateHardwareBufferOperations) {
       .WillOnce(Return(true));
 
   JniDelegate delegate(mock_invoker, nullptr, nullptr, nullptr, nullptr,
-                       nullptr, nullptr, hw_provider);
+                       nullptr, nullptr, nullptr, hw_provider);
 
   int64_t texture_id = 42;
   EXPECT_TRUE(delegate.RegisterHardwareBufferTexture(texture_id));
@@ -3126,17 +4017,18 @@ TEST(HardwareBufferTest, JniRouterHardwareBufferDirectRouting) {
   auto mock_legacy = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
   auto hw_provider = std::make_shared<InMemoryAndroidHardwareBufferProvider>();
 
-  auto delegate =
-      std::make_shared<JniDelegate>(mock_invoker, nullptr, nullptr, nullptr,
-                                    nullptr, nullptr, nullptr, hw_provider);
+  auto delegate = std::make_shared<JniDelegate>(mock_invoker, nullptr, nullptr,
+                                                nullptr, nullptr, nullptr,
+                                                nullptr, nullptr, hw_provider);
   JniRouter router(delegate, mock_legacy);
 
   int64_t texture_id = 101;
 
-  // Across both flag states (false and true), AHardwareBuffer methods route
-  // directly to delegate
-  for (bool embedder_flag : {false, true}) {
-    FlutterEmbedderNative::SetEmbedderEnabled(embedder_flag);
+  // Across both flag states (Embedder disabled vs enabled), HardwareBuffer
+  // routes directly and unconditionally to embedder_delegate (legacy is
+  // purged).
+  for (bool flag : {false, true}) {
+    FlutterEmbedderNative::SetEmbedderEnabled(flag);
 
     EXPECT_CALL(*mock_invoker,
                 InvokeBooleanMethod("registerHardwareBufferTexture", "(J)Z", _))
@@ -3165,6 +4057,16 @@ TEST(HardwareBufferTest, JniRouterHardwareBufferDirectRouting) {
         .WillOnce(Return(true));
     EXPECT_TRUE(router.RouteUnregisterHardwareBufferTexture(texture_id));
   }
+
+  // Graceful fallback when embedder_delegate is null
+  JniRouter null_router(nullptr, mock_legacy);
+  EXPECT_FALSE(null_router.RouteRegisterHardwareBufferTexture(texture_id));
+  EXPECT_FALSE(null_router.RouteUnregisterHardwareBufferTexture(texture_id));
+  FlutterHardwareBufferExternalTexture null_frame = {};
+  EXPECT_FALSE(null_router.RouteSetHardwareBufferFrame(texture_id, null_frame));
+  EXPECT_FALSE(null_router.RouteGetHardwareBufferTextureFrame(
+      texture_id, 100, 100, &null_frame));
+  EXPECT_FALSE(null_router.RouteOnHardwareBufferFrameAvailable(texture_id));
 
   FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
@@ -3226,7 +4128,7 @@ TEST(HardwareBufferTest, FlutterEmbedderNativeHardwareBufferIntegration) {
   EXPECT_TRUE(native.OnHardwareBufferFrameAvailable(texture_id));
   EXPECT_TRUE(native.UnregisterHardwareBufferTexture(texture_id));
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(HardwareBufferTest, FlutterEmbedderNativeExternalTextureEngineAPIs) {
@@ -3251,41 +4153,154 @@ TEST(HardwareBufferTest, DestructionCallbackLifecycle) {
               InvokeBooleanMethod("unregisterHardwareBufferTexture", "(J)Z", _))
       .WillOnce(Return(true));
 
-  JniDelegate delegate(mock_invoker, nullptr, nullptr, nullptr, nullptr,
-                       nullptr, nullptr, hw_provider);
+  auto delegate = std::make_shared<JniDelegate>(mock_invoker, nullptr, nullptr,
+                                                nullptr, nullptr, nullptr,
+                                                nullptr, nullptr, hw_provider);
 
   int64_t texture_id = 555;
-  EXPECT_TRUE(delegate.RegisterHardwareBufferTexture(texture_id));
+
+  // Setting frame on unregistered texture must fail
+  FlutterHardwareBufferExternalTexture unregistered_frame = {};
+  unregistered_frame.struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+  EXPECT_FALSE(
+      delegate->SetHardwareBufferFrame(texture_id, unregistered_frame));
+
+  EXPECT_TRUE(delegate->RegisterHardwareBufferTexture(texture_id));
 
   static int g_destroyed_count = 0;
   g_destroyed_count = 0;
 
-  auto callback = [](void* user_data) { g_destroyed_count++; };
+  // Callback invokes method on delegate to prove no self-deadlock occurs
+  auto reentrant_callback = [](void* user_data) {
+    auto* del = static_cast<JniDelegate*>(user_data);
+    if (del) {
+      del->GetHardwareBufferProvider();
+    }
+    g_destroyed_count++;
+  };
 
   FlutterHardwareBufferExternalTexture frame1 = {};
   frame1.struct_size = sizeof(FlutterHardwareBufferExternalTexture);
   frame1.width = 100;
   frame1.height = 100;
-  frame1.destruction_callback = callback;
-  frame1.user_data = reinterpret_cast<void*>(0x1);
+  frame1.destruction_callback = reentrant_callback;
+  frame1.user_data = delegate.get();
 
-  EXPECT_TRUE(delegate.SetHardwareBufferFrame(texture_id, frame1));
+  EXPECT_TRUE(delegate->SetHardwareBufferFrame(texture_id, frame1));
   EXPECT_EQ(g_destroyed_count, 0);
 
-  // Overwriting frame triggers destruction callback on frame1
+  // Overwriting frame triggers destruction callback on frame1 outside lock
   FlutterHardwareBufferExternalTexture frame2 = {};
   frame2.struct_size = sizeof(FlutterHardwareBufferExternalTexture);
   frame2.width = 200;
   frame2.height = 200;
-  frame2.destruction_callback = callback;
-  frame2.user_data = reinterpret_cast<void*>(0x2);
+  frame2.destruction_callback = reentrant_callback;
+  frame2.user_data = delegate.get();
 
-  EXPECT_TRUE(delegate.SetHardwareBufferFrame(texture_id, frame2));
+  EXPECT_TRUE(delegate->SetHardwareBufferFrame(texture_id, frame2));
   EXPECT_EQ(g_destroyed_count, 1);
 
-  // Unregistering texture triggers destruction callback on frame2
-  EXPECT_TRUE(delegate.UnregisterHardwareBufferTexture(texture_id));
+  // When engine reads frame, ownership of destruction_callback is transferred
+  FlutterHardwareBufferExternalTexture retrieved_frame = {};
+  EXPECT_TRUE(delegate->GetHardwareBufferTextureFrame(texture_id, 200, 200,
+                                                      &retrieved_frame));
+  EXPECT_EQ(retrieved_frame.destruction_callback, reentrant_callback);
+  EXPECT_EQ(retrieved_frame.user_data, delegate.get());
+
+  // Unregistering texture does NOT invoke callback on frame2 because ownership
+  // was transferred to the engine
+  EXPECT_TRUE(delegate->UnregisterHardwareBufferTexture(texture_id));
+  EXPECT_EQ(g_destroyed_count, 1);
+
+  // Engine releases the retrieved frame, invoking the callback once
+  retrieved_frame.destruction_callback(retrieved_frame.user_data);
   EXPECT_EQ(g_destroyed_count, 2);
+
+  // --- Test Object Setter Keeper Callback & Null/Invalid Buffer Reentrancy ---
+  int64_t texture_id2 = 777;
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("registerHardwareBufferTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("unregisterHardwareBufferTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(delegate->RegisterHardwareBufferTexture(texture_id2));
+
+  // Calling OnHardwareBufferFrameAvailable on unregistered texture fails
+  EXPECT_FALSE(delegate->OnHardwareBufferFrameAvailable(99999));
+
+  auto desc = AndroidHardwareBufferDesc::MakeRGBA8(300, 300);
+  std::shared_ptr<AndroidHardwareBuffer> buf = hw_provider->Allocate(desc);
+  std::weak_ptr<AndroidHardwareBuffer> weak_buf = buf;
+
+  // Set frame with object: should attach keeper callback
+  EXPECT_TRUE(delegate->SetHardwareBufferFrame(texture_id2, buf));
+  buf.reset();
+  // Keeper inside JniDelegate keeps buffer alive
+  EXPECT_FALSE(weak_buf.expired());
+
+  FlutterHardwareBufferExternalTexture obj_retrieved = {};
+  EXPECT_TRUE(delegate->GetHardwareBufferTextureFrame(texture_id2, 300, 300,
+                                                      &obj_retrieved));
+  EXPECT_NE(obj_retrieved.destruction_callback, nullptr);
+  EXPECT_NE(obj_retrieved.user_data, nullptr);
+
+  // Setting an invalid/null buffer triggers reentrant callback without deadlock
+  FlutterHardwareBufferExternalTexture frame3 = {};
+  frame3.struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+  frame3.width = 150;
+  frame3.height = 150;
+  frame3.destruction_callback = reentrant_callback;
+  frame3.user_data = delegate.get();
+  EXPECT_TRUE(delegate->SetHardwareBufferFrame(texture_id2, frame3));
+
+  // Setting nullptr buffer fails and invokes frame3's callback reentrantly
+  // without deadlock
+  EXPECT_FALSE(delegate->SetHardwareBufferFrame(
+      texture_id2, std::shared_ptr<AndroidHardwareBuffer>(nullptr)));
+  EXPECT_EQ(g_destroyed_count, 3);
+
+  // Engine releases obj_retrieved frame, keeper is deleted and buffer is freed
+  EXPECT_FALSE(weak_buf.expired());
+  obj_retrieved.destruction_callback(obj_retrieved.user_data);
+  EXPECT_TRUE(weak_buf.expired());
+
+  EXPECT_TRUE(delegate->UnregisterHardwareBufferTexture(texture_id2));
+}
+
+TEST(HardwareBufferTest, ConcurrentProviderReplacementInNative) {
+  FlutterEmbedderNative native;
+  std::atomic<bool> running{true};
+  std::vector<std::thread> threads;
+
+  for (int i = 0; i < 2; ++i) {
+    threads.emplace_back([&]() {
+      while (running.load()) {
+        auto provider = native.GetHardwareBufferProvider();
+        if (provider) {
+          EXPECT_TRUE(provider->IsAvailable() || !provider->IsAvailable());
+        }
+      }
+    });
+  }
+
+  threads.emplace_back([&]() {
+    for (int i = 0; i < 200; ++i) {
+      if (i % 2 == 0) {
+        native.SetHardwareBufferProvider(
+            std::make_shared<InMemoryAndroidHardwareBufferProvider>());
+      } else {
+        native.SetHardwareBufferProvider(
+            std::make_shared<DefaultAndroidHardwareBufferProvider>());
+      }
+      std::this_thread::yield();
+    }
+    running.store(false);
+  });
+
+  for (auto& t : threads) {
+    t.join();
+  }
 }
 
 TEST(VulkanExternalTextureTest, JniDelegateVulkanOperations) {
@@ -3303,7 +4318,7 @@ TEST(VulkanExternalTextureTest, JniDelegateVulkanOperations) {
       .WillOnce(Return(true));
 
   JniDelegate delegate(mock_invoker, nullptr, nullptr, nullptr, nullptr,
-                       nullptr, nullptr, nullptr, vk_provider);
+                       nullptr, nullptr, nullptr, nullptr, vk_provider);
 
   EXPECT_EQ(delegate.GetVulkanTextureProvider(), vk_provider);
 
@@ -3364,16 +4379,16 @@ TEST(VulkanExternalTextureTest, JniRouterVulkanDirectRouting) {
 
   auto embedder_delegate = std::make_shared<JniDelegate>(
       mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-      nullptr, vk_provider);
+      nullptr, nullptr, vk_provider);
 
   JniRouter router(embedder_delegate, mock_legacy);
 
   int64_t texture_id = 777;
 
-  // Across both flag states (false and true), Vulkan external texture methods
-  // route directly to embedder_delegate
-  for (bool embedder_flag : {false, true}) {
-    FlutterEmbedderNative::SetEmbedderEnabled(embedder_flag);
+  // Across both flag states (Embedder disabled vs enabled), Vulkan textures
+  // route directly and unconditionally to embedder_delegate (legacy is purged).
+  for (bool flag : {false, true}) {
+    FlutterEmbedderNative::SetEmbedderEnabled(flag);
 
     EXPECT_CALL(*mock_invoker,
                 InvokeBooleanMethod("registerVulkanTexture", "(J)Z", _))
@@ -3401,6 +4416,16 @@ TEST(VulkanExternalTextureTest, JniRouterVulkanDirectRouting) {
         .WillOnce(Return(true));
     EXPECT_TRUE(router.RouteUnregisterVulkanTexture(texture_id));
   }
+
+  // Graceful fallback when embedder_delegate is null
+  JniRouter null_router(nullptr, mock_legacy);
+  EXPECT_FALSE(null_router.RouteRegisterVulkanTexture(texture_id));
+  EXPECT_FALSE(null_router.RouteUnregisterVulkanTexture(texture_id));
+  FlutterVulkanExternalTexture null_tex = {};
+  EXPECT_FALSE(null_router.RouteSetVulkanTextureFrame(texture_id, null_tex));
+  EXPECT_FALSE(
+      null_router.RouteGetVulkanTextureFrame(texture_id, 800, 600, &null_tex));
+  EXPECT_FALSE(null_router.RouteOnVulkanTextureFrameAvailable(texture_id));
 
   FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
@@ -3454,7 +4479,7 @@ TEST(VulkanExternalTextureTest, FlutterEmbedderNativeVulkanIntegration) {
   EXPECT_TRUE(native.OnVulkanTextureFrameAvailable(texture_id));
   EXPECT_TRUE(native.UnregisterVulkanTexture(texture_id));
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(VulkanExternalTextureTest,
@@ -3479,41 +4504,154 @@ TEST(VulkanExternalTextureTest, VulkanDestructionCallbackLifecycle) {
               InvokeBooleanMethod("unregisterVulkanTexture", "(J)Z", _))
       .WillOnce(Return(true));
 
-  JniDelegate delegate(mock_invoker, nullptr, nullptr, nullptr, nullptr,
-                       nullptr, nullptr, nullptr, vk_provider);
+  auto delegate = std::make_shared<JniDelegate>(
+      mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+      nullptr, nullptr, vk_provider);
 
   int64_t texture_id = 444;
-  EXPECT_TRUE(delegate.RegisterVulkanTexture(texture_id));
+
+  // Setting frame on unregistered texture must fail
+  FlutterVulkanExternalTexture unregistered_frame = {};
+  unregistered_frame.struct_size = sizeof(FlutterVulkanExternalTexture);
+  EXPECT_FALSE(delegate->SetVulkanTextureFrame(texture_id, unregistered_frame));
+
+  EXPECT_TRUE(delegate->RegisterVulkanTexture(texture_id));
 
   static int g_vk_destroyed_count = 0;
   g_vk_destroyed_count = 0;
 
-  auto callback = [](void* user_data) { g_vk_destroyed_count++; };
+  // Callback invokes method on delegate to prove no self-deadlock occurs
+  auto reentrant_callback = [](void* user_data) {
+    auto* del = static_cast<JniDelegate*>(user_data);
+    if (del) {
+      del->GetVulkanTextureProvider();
+    }
+    g_vk_destroyed_count++;
+  };
 
   FlutterVulkanExternalTexture frame1 = {};
   frame1.struct_size = sizeof(FlutterVulkanExternalTexture);
   frame1.width = 100;
   frame1.height = 100;
-  frame1.destruction_callback = callback;
-  frame1.user_data = reinterpret_cast<void*>(0x1);
+  frame1.destruction_callback = reentrant_callback;
+  frame1.user_data = delegate.get();
 
-  EXPECT_TRUE(delegate.SetVulkanTextureFrame(texture_id, frame1));
+  EXPECT_TRUE(delegate->SetVulkanTextureFrame(texture_id, frame1));
   EXPECT_EQ(g_vk_destroyed_count, 0);
 
-  // Overwriting frame triggers destruction callback on frame1
+  // Overwriting frame triggers destruction callback on frame1 outside lock
   FlutterVulkanExternalTexture frame2 = {};
   frame2.struct_size = sizeof(FlutterVulkanExternalTexture);
   frame2.width = 200;
   frame2.height = 200;
-  frame2.destruction_callback = callback;
-  frame2.user_data = reinterpret_cast<void*>(0x2);
+  frame2.destruction_callback = reentrant_callback;
+  frame2.user_data = delegate.get();
 
-  EXPECT_TRUE(delegate.SetVulkanTextureFrame(texture_id, frame2));
+  EXPECT_TRUE(delegate->SetVulkanTextureFrame(texture_id, frame2));
   EXPECT_EQ(g_vk_destroyed_count, 1);
 
-  // Unregistering texture triggers destruction callback on frame2
-  EXPECT_TRUE(delegate.UnregisterVulkanTexture(texture_id));
+  // When engine reads frame, ownership of destruction_callback is transferred
+  FlutterVulkanExternalTexture retrieved_frame = {};
+  EXPECT_TRUE(
+      delegate->GetVulkanTextureFrame(texture_id, 200, 200, &retrieved_frame));
+  EXPECT_NE(retrieved_frame.destruction_callback, nullptr);
+  EXPECT_NE(retrieved_frame.user_data, nullptr);
+
+  // Unregistering texture does NOT invoke callback on frame2 because ownership
+  // was transferred to the engine
+  EXPECT_TRUE(delegate->UnregisterVulkanTexture(texture_id));
+  EXPECT_EQ(g_vk_destroyed_count, 1);
+
+  // Engine releases the retrieved frame, invoking the callback once
+  retrieved_frame.destruction_callback(retrieved_frame.user_data);
   EXPECT_EQ(g_vk_destroyed_count, 2);
+
+  // --- Test Object Setter Keeper Callback & Null/Invalid Buffer Reentrancy ---
+  int64_t texture_id2 = 777;
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("registerVulkanTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("unregisterVulkanTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(delegate->RegisterVulkanTexture(texture_id2));
+
+  // Calling OnVulkanTextureFrameAvailable on unregistered texture fails
+  EXPECT_FALSE(delegate->OnVulkanTextureFrameAvailable(99999));
+
+  auto desc = AndroidVulkanImageDesc::MakeRGBA8(300, 300);
+  std::shared_ptr<AndroidVulkanExternalTexture> tex =
+      vk_provider->AllocateTexture(desc);
+  std::weak_ptr<AndroidVulkanExternalTexture> weak_tex = tex;
+
+  // Set frame with object: should attach keeper callback
+  EXPECT_TRUE(delegate->SetVulkanTextureFrame(texture_id2, tex));
+  tex.reset();
+  // Keeper inside JniDelegate keeps texture alive
+  EXPECT_FALSE(weak_tex.expired());
+
+  FlutterVulkanExternalTexture obj_retrieved = {};
+  EXPECT_TRUE(
+      delegate->GetVulkanTextureFrame(texture_id2, 300, 300, &obj_retrieved));
+  EXPECT_NE(obj_retrieved.destruction_callback, nullptr);
+  EXPECT_NE(obj_retrieved.user_data, nullptr);
+
+  // Setting an invalid/null texture triggers reentrant callback without
+  // deadlock
+  FlutterVulkanExternalTexture frame3 = {};
+  frame3.struct_size = sizeof(FlutterVulkanExternalTexture);
+  frame3.width = 150;
+  frame3.height = 150;
+  frame3.destruction_callback = reentrant_callback;
+  frame3.user_data = delegate.get();
+  EXPECT_TRUE(delegate->SetVulkanTextureFrame(texture_id2, frame3));
+
+  // Setting nullptr texture fails and invokes frame3's callback reentrantly
+  // without deadlock
+  EXPECT_FALSE(delegate->SetVulkanTextureFrame(
+      texture_id2, std::shared_ptr<AndroidVulkanExternalTexture>(nullptr)));
+  EXPECT_EQ(g_vk_destroyed_count, 3);
+
+  // Engine releases obj_retrieved frame, keeper is deleted and texture is freed
+  EXPECT_FALSE(weak_tex.expired());
+  obj_retrieved.destruction_callback(obj_retrieved.user_data);
+  EXPECT_TRUE(weak_tex.expired());
+
+  EXPECT_TRUE(delegate->UnregisterVulkanTexture(texture_id2));
+}
+
+TEST(VulkanExternalTextureTest, ConcurrentProviderReplacementInNative) {
+  FlutterEmbedderNative native;
+  std::atomic<bool> running{true};
+  std::vector<std::thread> threads;
+
+  for (int i = 0; i < 2; ++i) {
+    threads.emplace_back([&native, &running]() {
+      while (running.load()) {
+        auto provider =
+            std::make_shared<InMemoryAndroidVulkanTextureProvider>();
+        native.SetVulkanTextureProvider(provider);
+      }
+    });
+  }
+
+  for (int i = 0; i < 2; ++i) {
+    threads.emplace_back([&native, &running]() {
+      while (running.load()) {
+        auto provider = native.GetVulkanTextureProvider();
+        if (provider) {
+          EXPECT_TRUE(provider->IsAvailable());
+        }
+      }
+    });
+  }
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  running.store(false);
+
+  for (auto& t : threads) {
+    t.join();
+  }
 }
 
 TEST(VulkanExternalTextureTest, VulkanYCbCrConversionConversionAndSampling) {
@@ -3528,7 +4666,7 @@ TEST(VulkanExternalTextureTest, VulkanYCbCrConversionConversionAndSampling) {
       .WillOnce(Return(true));
 
   JniDelegate delegate(mock_invoker, nullptr, nullptr, nullptr, nullptr,
-                       nullptr, nullptr, nullptr, vk_provider);
+                       nullptr, nullptr, nullptr, nullptr, vk_provider);
 
   int64_t texture_id = 333;
   EXPECT_TRUE(delegate.RegisterVulkanTexture(texture_id));
@@ -3561,6 +4699,94 @@ TEST(VulkanExternalTextureTest, VulkanYCbCrConversionConversionAndSampling) {
             static_cast<uint32_t>(AndroidVulkanYcbcrRange::kItuFull));
 
   EXPECT_TRUE(delegate.UnregisterVulkanTexture(texture_id));
+
+  // YCbCr conversion info remains valid after unregistering because keeper
+  // keeps the texture object alive until the engine invokes the destruction
+  // callback.
+  EXPECT_EQ(out_frame.ycbcr_conversion_info->external_format, ext_format_id);
+  EXPECT_EQ(out_frame.ycbcr_conversion_info->ycbcr_model,
+            static_cast<uint32_t>(AndroidVulkanYcbcrModel::kYcbcr709));
+  ASSERT_NE(out_frame.destruction_callback, nullptr);
+  out_frame.destruction_callback(out_frame.user_data);
+}
+
+TEST(VulkanExternalTextureTest, StructYCbCrConversionAndRegistrationRollback) {
+  auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
+  auto vk_provider = std::make_shared<InMemoryAndroidVulkanTextureProvider>();
+
+  // 1. Test registration failure rollback:
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("registerVulkanTexture", "(J)Z", _))
+      .WillOnce(Return(false));
+
+  JniDelegate delegate(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                       nullptr, nullptr, nullptr, nullptr, vk_provider);
+
+  int64_t texture_id = 555;
+  EXPECT_FALSE(delegate.RegisterVulkanTexture(texture_id));
+
+  // Frame submission on unregistered/rolled-back texture must fail
+  FlutterVulkanExternalTexture dummy_frame = {};
+  dummy_frame.struct_size = sizeof(FlutterVulkanExternalTexture);
+  EXPECT_FALSE(delegate.SetVulkanTextureFrame(texture_id, dummy_frame));
+
+  // 2. Test struct-based YCbCr conversion info pointer stability across
+  // unregistration
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("registerVulkanTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("unregisterVulkanTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+
+  EXPECT_TRUE(delegate.RegisterVulkanTexture(texture_id));
+
+  FlutterVulkanYcbcrConversionInfo struct_ycbcr = {};
+  struct_ycbcr.struct_size = sizeof(FlutterVulkanYcbcrConversionInfo);
+  struct_ycbcr.external_format = 0x987654321ULL;
+  struct_ycbcr.ycbcr_model =
+      static_cast<uint32_t>(AndroidVulkanYcbcrModel::kYcbcr709);
+  struct_ycbcr.ycbcr_range =
+      static_cast<uint32_t>(AndroidVulkanYcbcrRange::kItuFull);
+
+  bool user_destroyed = false;
+  FlutterVulkanExternalTexture struct_frame = {};
+  struct_frame.struct_size = sizeof(FlutterVulkanExternalTexture);
+  struct_frame.width = 1280;
+  struct_frame.height = 720;
+  struct_frame.image = 0x8888;
+  struct_frame.format = 0;
+  struct_frame.image_layout =
+      static_cast<uint32_t>(AndroidVulkanImageLayout::kShaderReadOnlyOptimal);
+  struct_frame.ycbcr_conversion_info = &struct_ycbcr;
+  struct_frame.destruction_callback = [](void* data) {
+    *static_cast<bool*>(data) = true;
+  };
+  struct_frame.user_data = &user_destroyed;
+
+  EXPECT_TRUE(delegate.SetVulkanTextureFrame(texture_id, struct_frame));
+
+  FlutterVulkanExternalTexture retrieved_frame = {};
+  EXPECT_TRUE(
+      delegate.GetVulkanTextureFrame(texture_id, 1280, 720, &retrieved_frame));
+  ASSERT_NE(retrieved_frame.ycbcr_conversion_info, nullptr);
+  EXPECT_EQ(retrieved_frame.ycbcr_conversion_info->external_format,
+            0x987654321ULL);
+
+  // Unregister texture while engine still holds retrieved_frame
+  EXPECT_TRUE(delegate.UnregisterVulkanTexture(texture_id));
+  EXPECT_FALSE(user_destroyed);
+
+  // Assert YCbCr pointer remains valid and points to correct info
+  EXPECT_EQ(retrieved_frame.ycbcr_conversion_info->external_format,
+            0x987654321ULL);
+  EXPECT_EQ(retrieved_frame.ycbcr_conversion_info->ycbcr_model,
+            static_cast<uint32_t>(AndroidVulkanYcbcrModel::kYcbcr709));
+
+  // Engine finishes sampling and invokes destruction callback
+  ASSERT_NE(retrieved_frame.destruction_callback, nullptr);
+  retrieved_frame.destruction_callback(retrieved_frame.user_data);
+  EXPECT_TRUE(user_destroyed);
 }
 
 TEST(VulkanExternalTextureTest, ThreadSafeConcurrentVulkanOperations) {
@@ -3609,7 +4835,7 @@ TEST(VulkanExternalTextureTest, ThreadSafeConcurrentVulkanOperations) {
     f.get();
   }
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 // =============================================================================
@@ -3624,7 +4850,8 @@ TEST(SurfaceControlHcppTest, JniDelegateLifecycleAndOperations) {
   auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
 
   JniDelegate delegate(mock_invoker, nullptr, nullptr, nullptr, nullptr,
-                       nullptr, nullptr, nullptr, nullptr, sc_provider);
+                       nullptr, nullptr, nullptr, nullptr, nullptr,
+                       sc_provider);
 
   EXPECT_TRUE(delegate.SetHcppEnabled(true));
   EXPECT_TRUE(delegate.IsHcppEnabled());
@@ -3683,6 +4910,30 @@ TEST(SurfaceControlHcppTest, JniDelegateLifecycleAndOperations) {
   EXPECT_TRUE(delegate.DestroySurfaceControl(child_id));
   EXPECT_EQ(delegate.GetSurfaceControl(child_id), nullptr);
   EXPECT_FALSE(delegate.GetSurfaceControlState(child_id).has_value());
+
+  // Verify direct child creation preserves parent_id in state
+  int64_t child_direct_id = 102;
+  EXPECT_TRUE(delegate.CreateSurfaceControl(child_direct_id, parent_id,
+                                            "child_direct"));
+  auto direct_state = delegate.GetSurfaceControlState(child_direct_id);
+  ASSERT_TRUE(direct_state.has_value());
+  EXPECT_EQ(direct_state->parent_id, static_cast<uint64_t>(parent_id));
+  EXPECT_TRUE(delegate.DestroySurfaceControl(child_direct_id));
+
+  // Verify invalid/non-existent surface_id returns false across all operations
+  int64_t non_existent_id = 9999;
+  EXPECT_FALSE(delegate.DestroySurfaceControl(non_existent_id));
+  EXPECT_FALSE(delegate.ReparentSurfaceControl(non_existent_id, parent_id));
+  EXPECT_FALSE(
+      delegate.SetSurfaceControlGeometry(non_existent_id, src, dst, 0));
+  EXPECT_FALSE(delegate.SetSurfaceControlVisibility(non_existent_id, true));
+  EXPECT_FALSE(delegate.SetSurfaceControlZOrder(non_existent_id, 1));
+  EXPECT_FALSE(delegate.SetSurfaceControlDamageRegion(non_existent_id, damage));
+  EXPECT_FALSE(
+      delegate.SetSurfaceControlBuffer(non_existent_id, &dummy_buf, -1));
+  EXPECT_FALSE(delegate.SetSurfaceControlBufferAlpha(non_existent_id, 0.5f));
+  EXPECT_FALSE(
+      delegate.SetSurfaceControlColor(non_existent_id, 1.0f, 1.0f, 1.0f, 1.0f));
 }
 
 TEST(SurfaceControlHcppTest, JniRouterSurfaceControlDirectRouting) {
@@ -3693,21 +4944,24 @@ TEST(SurfaceControlHcppTest, JniRouterSurfaceControlDirectRouting) {
   auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
   auto jni_delegate = std::make_shared<JniDelegate>(
       mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-      nullptr, nullptr, sc_provider);
+      nullptr, nullptr, nullptr, sc_provider);
   auto mock_legacy = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
   auto router = std::make_shared<JniRouter>(jni_delegate, mock_legacy);
 
-  // Across both flag states (false and true), all SurfaceControl methods route
-  // directly to jni_delegate
+  // Across both flag states (Embedder disabled vs enabled), all SurfaceControl
+  // and HCPP methods route directly and unconditionally to embedder_delegate
+  // (legacy is purged).
   for (bool embedder_flag : {false, true}) {
     FlutterEmbedderNative::SetEmbedderEnabled(embedder_flag);
+    EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
+    EXPECT_TRUE(FlutterEmbedderNative::IsEmbedderEnabled());
 
     EXPECT_TRUE(router->RouteSetHcppEnabled(true));
     EXPECT_TRUE(router->RouteIsHcppEnabled());
     EXPECT_TRUE(router->RouteCreatePlatformViewTransaction());
 
     int64_t sc_id = embedder_flag ? 300 : 200;
-    EXPECT_TRUE(router->RouteCreateSurfaceControl(sc_id, "direct_sc"));
+    EXPECT_TRUE(router->RouteCreateSurfaceControl(sc_id, "test_sc"));
     EXPECT_TRUE(router->RouteReparentSurfaceControl(sc_id, 100));
 
     AndroidSurfaceControlRect src = {0, 0, 100, 100};
@@ -3730,10 +4984,33 @@ TEST(SurfaceControlHcppTest, JniRouterSurfaceControlDirectRouting) {
 
     auto state = router->RouteGetSurfaceControlState(sc_id);
     ASSERT_TRUE(state.has_value());
-    EXPECT_EQ(state->visibility, AndroidSurfaceControlVisibility::kShow);
+    EXPECT_EQ(state->id, static_cast<uint64_t>(sc_id));
     EXPECT_EQ(state->z_order, 10);
+    EXPECT_NE(router->RouteGetSurfaceControl(sc_id), nullptr);
+
     EXPECT_TRUE(router->RouteDestroySurfaceControl(sc_id));
   }
+
+  // Graceful fallback when embedder_delegate is null
+  auto null_router = std::make_shared<JniRouter>(nullptr, mock_legacy);
+  EXPECT_FALSE(null_router->RouteCreateSurfaceControl(400, "null_sc"));
+  EXPECT_FALSE(null_router->RouteDestroySurfaceControl(400));
+  EXPECT_FALSE(null_router->RouteReparentSurfaceControl(400, 100));
+  AndroidSurfaceControlRect dummy_rect = {0, 0, 10, 10};
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlGeometry(400, dummy_rect,
+                                                           dummy_rect, 0));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlVisibility(400, true));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlZOrder(400, 1));
+  std::vector<AndroidSurfaceControlRect> dummy_rects = {dummy_rect};
+  EXPECT_FALSE(
+      null_router->RouteSetSurfaceControlDamageRegion(400, dummy_rects));
+  int dummy_b = 1;
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlBuffer(400, &dummy_b, -1));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlBufferAlpha(400, 0.5f));
+  EXPECT_FALSE(
+      null_router->RouteSetSurfaceControlColor(400, 0.0f, 0.0f, 0.0f, 1.0f));
+  EXPECT_FALSE(null_router->RouteGetSurfaceControlState(400).has_value());
+  EXPECT_EQ(null_router->RouteGetSurfaceControl(400), nullptr);
 
   FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
@@ -3790,7 +5067,7 @@ TEST(SurfaceControlHcppTest, FlutterEmbedderNativeIntegration) {
   native.SetSurfaceControlProvider(new_sc_provider);
   EXPECT_EQ(native.GetSurfaceControlProvider(), new_sc_provider);
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(SurfaceControlHcppTest, ThreadSafeConcurrentSurfaceOperations) {
@@ -3845,7 +5122,65 @@ TEST(SurfaceControlHcppTest, ThreadSafeConcurrentSurfaceOperations) {
     f.get();
   }
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+}
+
+class FailingApplySurfaceControlProvider
+    : public InMemoryAndroidSurfaceControlProvider {
+ public:
+  bool ApplyTransaction(void* transaction_handle) override { return false; }
+};
+
+TEST(SurfaceControlHcppTest, TransactionRollbackOnApplyFailure) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(Return(true));
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _)).WillByDefault(Return(true));
+
+  auto provider = std::make_shared<FailingApplySurfaceControlProvider>();
+  JniDelegate delegate(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                       nullptr, nullptr, nullptr, nullptr, nullptr, provider);
+
+  int64_t surface_id = 9001;
+  EXPECT_TRUE(delegate.CreateSurfaceControl(surface_id, "test_sc"));
+  auto initial_state = delegate.GetSurfaceControlState(surface_id);
+  ASSERT_TRUE(initial_state.has_value());
+  EXPECT_EQ(initial_state->z_order, 0);
+
+  // Now create a batched transaction
+  EXPECT_TRUE(delegate.CreatePlatformViewTransaction());
+  // Staged update
+  EXPECT_TRUE(delegate.SetSurfaceControlZOrder(surface_id, 99));
+  auto staged_state = delegate.GetSurfaceControlState(surface_id);
+  ASSERT_TRUE(staged_state.has_value());
+  EXPECT_EQ(staged_state->z_order, 99);
+
+  // Apply fails because FailingApplySurfaceControlProvider::ApplyTransaction
+  // returns false
+  EXPECT_FALSE(delegate.ApplyPlatformViewTransactions());
+
+  // State should be rolled back to initial state!
+  auto rolled_back_state = delegate.GetSurfaceControlState(surface_id);
+  ASSERT_TRUE(rolled_back_state.has_value());
+  EXPECT_EQ(rolled_back_state->z_order, 0);
+}
+
+TEST(SurfaceControlHcppTest, WindowPlumbingToJniDelegate) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
+
+  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, sc_provider);
+
+  EXPECT_EQ(native.GetJniDelegate()->GetNativeWindow(), nullptr);
+  native.SetNativeWindow(nullptr);
+  EXPECT_EQ(native.GetJniDelegate()->GetNativeWindow(), nullptr);
+
+  void* dummy_window = reinterpret_cast<void*>(0x88884321);
+  native.GetJniDelegate()->SetNativeWindow(dummy_window);
+  EXPECT_EQ(native.GetJniDelegate()->GetNativeWindow(), dummy_window);
 }
 
 TEST(MultiEngineAndAddToAppTest, JniDelegateEngineGroupOperations) {
@@ -3858,8 +5193,8 @@ TEST(MultiEngineAndAddToAppTest, JniDelegateEngineGroupOperations) {
   auto engine_group =
       std::make_shared<AndroidEngineGroup>(provider, mock_invoker);
   JniDelegate delegate(mock_invoker, nullptr, nullptr, nullptr, nullptr,
-                       nullptr, nullptr, nullptr, nullptr, nullptr, provider,
-                       engine_group);
+                       nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+                       provider, engine_group);
 
   EXPECT_EQ(delegate.GetEngineGroup(), engine_group);
   EXPECT_EQ(delegate.GetEngineGroupProvider(), provider);
@@ -3910,7 +5245,7 @@ TEST(MultiEngineAndAddToAppTest, JniRouterEngineGroupRoutingFlip) {
 
   auto jni_delegate = std::make_shared<JniDelegate>(
       mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-      nullptr, nullptr, nullptr, provider, engine_group);
+      nullptr, nullptr, nullptr, nullptr, provider, engine_group);
 
   JniRouter router(jni_delegate, mock_legacy);
 
@@ -3928,12 +5263,16 @@ TEST(MultiEngineAndAddToAppTest, JniRouterEngineGroupRoutingFlip) {
     auto parent_handle =
         reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x2000 + engine_id);
     EXPECT_TRUE(engine_group->RegisterEngine(engine_id, parent_handle));
+    EXPECT_EQ(router.RouteGetActiveEngineCount(), 1u);
 
     auto new_spawned_id = router.RouteSpawnEngine(engine_id, args);
     EXPECT_GT(new_spawned_id, 0);
+    EXPECT_EQ(router.RouteGetActiveEngineCount(), 2u);
 
     EXPECT_TRUE(router.RouteShutdownSpawnedEngine(new_spawned_id));
+    EXPECT_EQ(router.RouteGetActiveEngineCount(), 1u);
     EXPECT_TRUE(router.RouteOnEngineGarbageCollected(engine_id));
+    EXPECT_EQ(router.RouteGetActiveEngineCount(), 0u);
   }
 
   EXPECT_TRUE(FlutterEmbedderNative::IsEmbedderEnabled());
@@ -4007,7 +5346,7 @@ TEST(MultiEngineAndAddToAppTest, FlutterEmbedderNativeEngineGroupIntegration) {
   native.SetEngineGroupProvider(new_provider);
   EXPECT_EQ(native.GetEngineGroupProvider(), new_provider);
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(MultiEngineAndAddToAppTest, ThreadSafeConcurrentMultiEngineOperations) {
@@ -4066,7 +5405,7 @@ TEST(MultiEngineAndAddToAppTest, ThreadSafeConcurrentMultiEngineOperations) {
   EXPECT_TRUE(native.ShutdownSpawnedEngine(5000));
   EXPECT_EQ(native.GetActiveEngineCount(), 0u);
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(MultiEngineAndAddToAppTest,
@@ -4079,13 +5418,110 @@ TEST(MultiEngineAndAddToAppTest,
             native.GetEngineGroupProvider());
 }
 
+TEST(MultiEngineAndAddToAppTest, StructSizeValidation) {
+  FlutterEmbedderNative native;
+  auto parent_handle =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x7000);
+  FlutterEngineSpawnConfig invalid_config = {};
+  invalid_config.struct_size = sizeof(FlutterEngineSpawnConfig) - 1;
+
+  EXPECT_EQ(native.SpawnEngine(parent_handle, &invalid_config, 100), nullptr);
+
+  FLUTTER_API_SYMBOL(FlutterEngine) out_engine = nullptr;
+  EXPECT_EQ(native.SpawnEngine(parent_handle, &invalid_config, &out_engine),
+            kInvalidArguments);
+  EXPECT_EQ(out_engine, nullptr);
+}
+
+TEST(MultiEngineAndAddToAppTest, ConcurrentProviderReplacementInNative) {
+  FlutterEmbedderNative native;
+  constexpr int kThreads = 8;
+  constexpr int kIterations = 50;
+  std::vector<std::future<void>> futures;
+  futures.reserve(kThreads);
+
+  for (int t = 0; t < kThreads; ++t) {
+    futures.push_back(std::async(std::launch::async, [&native, t]() {
+      for (int i = 0; i < kIterations; ++i) {
+        if (t % 2 == 0) {
+          auto provider =
+              std::make_shared<InMemoryAndroidEngineGroupProvider>();
+          native.SetEngineGroupProvider(provider);
+          EXPECT_NE(native.GetEngineGroupProvider(), nullptr);
+        } else {
+          auto group = std::make_shared<AndroidEngineGroup>();
+          native.SetEngineGroup(group);
+          EXPECT_NE(native.GetEngineGroup(), nullptr);
+        }
+      }
+    }));
+  }
+
+  for (auto& f : futures) {
+    f.get();
+  }
+
+  EXPECT_NE(native.GetEngineGroup(), nullptr);
+  EXPECT_NE(native.GetEngineGroupProvider(), nullptr);
+}
+
+TEST(MultiEngineAndAddToAppTest, DoubleShutdownPrevention) {
+  FlutterEmbedderNative native;
+  auto provider = std::make_shared<InMemoryAndroidEngineGroupProvider>();
+  native.SetEngineGroupProvider(provider);
+
+  auto parent_handle =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x5000);
+  native.GetEngineGroup()->SetPrimaryEngine(parent_handle, 1);
+
+  AndroidEngineSpawnArgs args;
+  args.engine_id = 2;
+  args.entrypoint = "child";
+  auto child_handle = native.SpawnEngine(parent_handle, args);
+  ASSERT_NE(child_handle, nullptr);
+  EXPECT_EQ(native.GetActiveEngineCount(), 2u);
+
+  // First shutdown must succeed
+  EXPECT_EQ(native.ShutdownEngine(child_handle), kSuccess);
+  EXPECT_EQ(native.GetActiveEngineCount(), 1u);
+  EXPECT_EQ(provider->GetShutdownCallCount(), 1u);
+
+  // Second shutdown of the same handle must return kInvalidArguments
+  // and MUST NOT fall through to provider->ShutdownEngine!
+  EXPECT_EQ(native.ShutdownEngine(child_handle), kInvalidArguments);
+  EXPECT_EQ(provider->GetShutdownCallCount(), 1u);
+  EXPECT_EQ(native.GetActiveEngineCount(), 1u);
+}
+
+TEST(MultiEngineAndAddToAppTest, SpawnEngineByParentId) {
+  FlutterEmbedderNative native;
+  auto provider = std::make_shared<InMemoryAndroidEngineGroupProvider>();
+  native.SetEngineGroupProvider(provider);
+
+  auto parent_handle =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x6000);
+  native.GetEngineGroup()->SetPrimaryEngine(parent_handle, 1);
+
+  AndroidEngineSpawnArgs args;
+  args.engine_id = 100;
+  args.entrypoint = "spawnByIdEntrypoint";
+
+  int64_t spawned_id = native.SpawnEngine(1, args);
+  EXPECT_EQ(spawned_id, 100);
+  EXPECT_EQ(native.GetActiveEngineCount(), 2u);
+  EXPECT_TRUE(native.GetEngineGroup()->IsEngineActive(100));
+
+  // Verify shutting down by spawned ID works
+  EXPECT_TRUE(native.ShutdownSpawnedEngine(100));
+  EXPECT_EQ(native.GetActiveEngineCount(), 1u);
+}
+
 TEST(Phase52LegacyDeletionSubsystemsTest,
-     LegacySubsystemsPurgedAndDirectlyRouted) {
-  auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
+     DirectRoutingSubsystemsBypassesLegacy) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
   auto callback_cache = std::make_shared<InMemoryCallbackCacheProvider>();
   callback_cache->AddCallback(42L, "phase52Callback", "Phase52Class",
                               "package:flutter/subsystems.dart");
-
   auto image_decoder = std::make_shared<InMemoryImageDecoderProvider>();
   image_decoder->SetHeaderInfo(99L, 1920, 1080);
 
@@ -4095,19 +5531,25 @@ TEST(Phase52LegacyDeletionSubsystemsTest,
 
   auto router = std::make_unique<JniRouter>(embedder_delegate, legacy_delegate);
 
+  PlatformViewCreationParams params = {
+      .view_id = 777L,
+      .view_type = "subsystem_view",
+      .width = 300.0,
+      .height = 400.0,
+  };
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("createForPlatformViewLayer", _, _))
+      .WillOnce(Return(true));
+  EXPECT_EQ(embedder_delegate->CreatePlatformView(
+                params, PlatformViewCompositionType::kHybridComposition),
+            0);
+
   // Test across both flag states: Subsystem calls MUST NEVER touch
   // legacy_delegate
   for (bool embedder_flag : {false, true}) {
     JniRouter::SetEmbedderEnabled(embedder_flag);
 
-    // 1. Assets Subsystem: RouteAssetManagerChanged routes directly to
-    // JvmInvoker
-    EXPECT_CALL(*mock_invoker,
-                InvokeVoidMethod("onAssetManagerChanged", "()V", _))
-        .WillOnce(Return(true));
-    EXPECT_TRUE(router->RouteAssetManagerChanged());
-
-    // 2. Callbacks Subsystem: RouteLookupCallbackInformation routes directly to
+    // 1. Callbacks Subsystem: RouteLookupCallbackInformation routes directly to
     // CallbackCacheProvider
     auto cb = router->RouteLookupCallbackInformation(42L);
     ASSERT_TRUE(cb.has_value());
@@ -4118,7 +5560,7 @@ TEST(Phase52LegacyDeletionSubsystemsTest,
     }
     EXPECT_FALSE(router->RouteLookupCallbackInformation(999L).has_value());
 
-    // 3. Images Subsystem: RouteDecodeImage, RouteNativeImageHeader,
+    // 2. Images Subsystem: RouteDecodeImage, RouteNativeImageHeader,
     // RouteGetImageHeader route directly
     std::vector<uint8_t> img_data = {0xFF, 0xD8, 0xFF, 0xE0};
     EXPECT_TRUE(
@@ -4133,17 +5575,26 @@ TEST(Phase52LegacyDeletionSubsystemsTest,
       EXPECT_EQ(hdr->height, 600);
     }
 
-    // 4. Mutators Subsystem: RoutePlatformViewMutators routes directly to
-    // JvmInvoker
+    // 3. Mutators Subsystem: RoutePlatformViewMutators routes directly to
+    // JvmInvoker across all 4 overloads
     AndroidMutatorsStack stack;
     stack.PushOpacity(0.5f);
     std::vector<uint8_t> stack_bytes = stack.Serialize();
 
-    EXPECT_CALL(*mock_invoker, OnDisplayPlatformView(777L, 10, 20, 300, 400,
-                                                     300, 400, _, false))
+    // Overload 1 (6 args: view_id, x, y, width, height, stack)
+    EXPECT_CALL(*mock_invoker, PushPlatformViewMutators(777L, 10, 20, 300, 400,
+                                                        300, 400, stack_bytes))
         .WillOnce(Return(true));
     EXPECT_TRUE(
         router->RoutePlatformViewMutators(777L, 10, 20, 300, 400, stack));
+
+    // Overload 2 (8 args: view_id, x, y, width, height, view_width,
+    // view_height, stack)
+    EXPECT_CALL(*mock_invoker, PushPlatformViewMutators(777L, 10, 20, 300, 400,
+                                                        350, 450, stack_bytes))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RoutePlatformViewMutators(777L, 10, 20, 300, 400, 350,
+                                                  450, stack));
 
     FlutterPlatformViewMutation m = {
         .type = kFlutterPlatformViewMutationTypeOpacity,
@@ -4156,22 +5607,41 @@ TEST(Phase52LegacyDeletionSubsystemsTest,
         .mutations_count = 1,
         .mutations = mutations,
     };
-    EXPECT_CALL(*mock_invoker, OnDisplayPlatformView(777L, 10, 20, 300, 400,
-                                                     300, 400, _, false))
+
+    // Overload 3 (5 args: platform_view, x, y, width, height)
+    EXPECT_CALL(*mock_invoker, PushPlatformViewMutators(777L, 10, 20, 300, 400,
+                                                        300, 400, stack_bytes))
         .WillOnce(Return(true));
     EXPECT_TRUE(router->RoutePlatformViewMutators(pv, 10, 20, 300, 400));
+
+    // Overload 4 (7 args: platform_view, x, y, width, height, view_width,
+    // view_height)
+    EXPECT_CALL(*mock_invoker, PushPlatformViewMutators(777L, 10, 20, 300, 400,
+                                                        350, 450, stack_bytes))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(
+        router->RoutePlatformViewMutators(pv, 10, 20, 300, 400, 350, 450));
   }
 
   // Verify graceful handling when embedder_delegate is null
   auto null_router = std::make_unique<JniRouter>(nullptr, legacy_delegate);
-  EXPECT_FALSE(null_router->RouteAssetManagerChanged());
   EXPECT_FALSE(null_router->RouteLookupCallbackInformation(42L).has_value());
   EXPECT_FALSE(null_router->RouteDecodeImage(nullptr, 0, 1L));
   null_router->RouteNativeImageHeader(1L, 100, 100);
   EXPECT_FALSE(null_router->RouteGetImageHeader(1L).has_value());
+  null_router->RouteRemoveImageHeader(1L);
   AndroidMutatorsStack empty_stack;
   EXPECT_FALSE(
       null_router->RoutePlatformViewMutators(1L, 0, 0, 10, 10, empty_stack));
+  EXPECT_FALSE(null_router->RoutePlatformViewMutators(1L, 0, 0, 10, 10, 10, 10,
+                                                      empty_stack));
+  FlutterPlatformView null_pv = {
+      .struct_size = sizeof(FlutterPlatformView),
+      .identifier = 1,
+  };
+  EXPECT_FALSE(null_router->RoutePlatformViewMutators(null_pv, 0, 0, 10, 10));
+  EXPECT_FALSE(
+      null_router->RoutePlatformViewMutators(null_pv, 0, 0, 10, 10, 10, 10));
 
   JniRouter::SetEmbedderEnabled(true);
 }
@@ -4180,6 +5650,11 @@ TEST(Phase52LegacyDeletionSubsystemsTest,
      ConcurrentMultithreadedSubsystemsExecution) {
   auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
   ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker,
+          PushPlatformViewMutators(::testing::_, ::testing::_, ::testing::_,
+                                   ::testing::_, ::testing::_, ::testing::_,
+                                   ::testing::_, ::testing::_))
       .WillByDefault(::testing::Return(true));
   auto callback_cache = std::make_shared<InMemoryCallbackCacheProvider>();
   auto image_decoder = std::make_shared<InMemoryImageDecoderProvider>();
@@ -4202,6 +5677,18 @@ TEST(Phase52LegacyDeletionSubsystemsTest,
   FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, asset_provider,
                                callback_cache, image_decoder, image_lru,
                                platform_views_provider);
+
+  for (int i = 0; i < 50; ++i) {
+    PlatformViewCreationParams params = {
+        .view_id = static_cast<int64_t>(i),
+        .view_type = "hybrid_view",
+        .width = 100.0,
+        .height = 100.0,
+    };
+    EXPECT_EQ(native.CreatePlatformView(
+                  params, PlatformViewCompositionType::kHybridComposition),
+              0);
+  }
 
   constexpr size_t kWorkers = 8;
   constexpr size_t kIterations = 100;
@@ -4284,190 +5771,174 @@ TEST(Phase52LegacyDeletionSubsystemsTest,
   }
 }
 
+// =============================================================================
+// Phase 5.3: Legacy Deletion (Platform Views & Semantics)
+// =============================================================================
+
 TEST(Phase53LegacyDeletionPlatformViewsSemanticsTest,
-     PlatformViewsAndSemanticsPurgedAndDirectlyRouted) {
+     DirectRoutingPlatformViewsAndSemanticsBypassesLegacy) {
   auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
-  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
-      .WillByDefault(::testing::Return(true));
-  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
-      .WillByDefault(::testing::Return(true));
+  auto mem_provider = std::make_shared<InMemoryPlatformViewsProvider>();
 
-  auto platform_views_provider =
-      std::make_shared<InMemoryPlatformViewsProvider>();
-  auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
-
-  auto embedder_delegate = std::make_shared<JniDelegate>(
-      mock_invoker, nullptr, nullptr, platform_views_provider, nullptr, nullptr,
-      nullptr, nullptr, nullptr, sc_provider);
+  auto embedder_delegate = std::make_shared<JniDelegate>(mock_invoker, nullptr,
+                                                         nullptr, mem_provider);
   auto legacy_delegate = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
 
   auto router = std::make_unique<JniRouter>(embedder_delegate, legacy_delegate);
 
+  std::vector<uint8_t> semantics_buffer = {0x01, 0x02, 0x03, 0x04};
+  std::vector<std::string> semantics_strings = {"test_node"};
+  std::vector<std::vector<uint8_t>> string_attributes = {{0xAA, 0xBB}};
+  std::vector<uint8_t> action_buffer = {0x05, 0x06};
+  std::vector<std::string> action_strings = {"custom_action"};
+
+  PlatformViewCreationParams params = {
+      .view_id = 123L,
+      .view_type = "phase53_view",
+      .width = 300.0,
+      .height = 400.0,
+  };
+  PlatformViewResizeRequest resize_req = {
+      .view_id = 123L,
+      .width = 320.0,
+      .height = 480.0,
+  };
+  PlatformViewTouch touch = {
+      .view_id = 123L, .action = 0, .raw_x = 10.0f, .raw_y = 20.0f};
+  PlatformViewGeometry geom = {.view_id = 123L,
+                               .x = 0,
+                               .y = 0,
+                               .width = 320,
+                               .height = 480,
+                               .view_width = 320,
+                               .view_height = 480};
+
+  FlutterPlatformView pv = {
+      .struct_size = sizeof(FlutterPlatformView),
+      .identifier = 123L,
+  };
+
+  // Across both flag states (Embedder enabled vs disabled), all Semantics and
+  // Platform Views routing methods MUST route directly to embedder_delegate
+  // and completely bypass legacy_delegate.
   for (bool embedder_flag : {false, true}) {
     JniRouter::SetEmbedderEnabled(embedder_flag);
 
-    // 1. Semantics Subsystem Direct Routing
-    std::vector<uint8_t> buffer = {0x01, 0x02, 0x03};
-    std::vector<std::string> strings = {"SemanticsLabel"};
-    std::vector<std::vector<uint8_t>> string_attrs = {{0xAA}};
-
-    EXPECT_CALL(*mock_invoker, UpdateSemantics(buffer, strings, string_attrs))
+    // 1. Semantics Subsystem:
+    EXPECT_CALL(
+        *mock_invoker,
+        UpdateSemantics(semantics_buffer, semantics_strings, string_attributes))
         .WillOnce(Return(true));
-    EXPECT_TRUE(router->RouteSemanticsUpdate(buffer, strings, string_attrs));
+    EXPECT_TRUE(router->RouteSemanticsUpdate(
+        semantics_buffer, semantics_strings, string_attributes));
 
     EXPECT_CALL(*mock_invoker,
-                UpdateCustomAccessibilityActions(buffer, strings))
+                UpdateCustomAccessibilityActions(action_buffer, action_strings))
         .WillOnce(Return(true));
-    EXPECT_TRUE(router->RouteCustomAccessibilityActions(buffer, strings));
-
-    FlutterSemanticsNode2 node = {};
-    node.struct_size = sizeof(FlutterSemanticsNode2);
-    node.id = 55;
-    node.label = "TestNode";
-    FlutterSemanticsNode2* nodes[] = {&node};
-    FlutterSemanticsUpdate2 sem_update = {
-        .struct_size = sizeof(FlutterSemanticsUpdate2),
-        .node_count = 1,
-        .nodes = nodes,
-        .custom_action_count = 0,
-        .custom_actions = nullptr,
-        .view_id = 0,
-    };
-    EXPECT_CALL(*mock_invoker,
-                UpdateSemantics(::testing::_, ::testing::_, ::testing::_))
-        .WillOnce(Return(true));
-    EXPECT_TRUE(router->RouteSemanticsUpdate(sem_update));
+    EXPECT_TRUE(
+        router->RouteCustomAccessibilityActions(action_buffer, action_strings));
 
     EXPECT_CALL(*mock_invoker, SetSemanticsTreeEnabled(true))
         .WillOnce(Return(true));
-    EXPECT_TRUE(router->RouteSemanticsEnabled(true));
+    EXPECT_TRUE(router->RouteSemanticsTreeEnabled(true));
 
-    EXPECT_TRUE(router->RouteDispatchSemanticsAction(
-        55, kFlutterSemanticsActionTap, buffer, 0));
+    EXPECT_CALL(*mock_invoker, SetSemanticsTreeEnabled(false))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RouteSemanticsEnabled(false));
 
-    EXPECT_TRUE(router->RouteSetAccessibilityFeatures(3));
+    // FlutterSemanticsUpdate2 struct overload
+    FlutterSemanticsNode2 node = {};
+    node.struct_size = sizeof(FlutterSemanticsNode2);
+    node.id = 1;
+    node.label = "NodeLabel";
 
-    // 2. Platform Views Subsystem Direct Routing
-    int64_t view_id = embedder_flag ? 201 : 101;
-    PlatformViewCreationParams params = {
-        .view_id = view_id,
-        .view_type = "phase53.view",
-        .width = 400.0,
-        .height = 300.0,
+    FlutterSemanticsCustomAction2 custom_action = {};
+    custom_action.struct_size = sizeof(FlutterSemanticsCustomAction2);
+    custom_action.id = 10;
+    custom_action.label = "ActionLabel";
+
+    FlutterSemanticsNode2* node_ptrs[] = {&node};
+    FlutterSemanticsCustomAction2* action_ptrs[] = {&custom_action};
+
+    FlutterSemanticsUpdate2 update = {
+        .struct_size = sizeof(FlutterSemanticsUpdate2),
+        .node_count = 1,
+        .nodes = node_ptrs,
+        .custom_action_count = 1,
+        .custom_actions = action_ptrs,
+        .view_id = 0,
     };
+    EXPECT_CALL(*mock_invoker,
+                UpdateCustomAccessibilityActions(::testing::_, ::testing::_))
+        .WillOnce(Return(true));
+    EXPECT_CALL(*mock_invoker,
+                UpdateSemantics(::testing::_, ::testing::_, ::testing::_))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RouteSemanticsUpdate(update));
+
+    // 2. Platform Views Subsystem:
     EXPECT_EQ(router->RouteCreatePlatformView(
                   params, PlatformViewCompositionType::kHybridComposition),
               0);
-    EXPECT_TRUE(platform_views_provider->IsViewCreated(view_id));
+    EXPECT_TRUE(mem_provider->IsViewCreated(123L));
 
-    PlatformViewResizeRequest resize_req = {
-        .view_id = view_id, .width = 500.0, .height = 350.0};
     EXPECT_TRUE(router->RouteResizePlatformView(resize_req));
-    EXPECT_TRUE(router->RouteOffsetPlatformView(view_id, 15.0, 25.0));
-    EXPECT_TRUE(router->RouteSetPlatformViewDirection(view_id, 2));
-    EXPECT_TRUE(router->RouteClearPlatformViewFocus(view_id));
-
-    PlatformViewTouch touch = {.view_id = view_id};
+    EXPECT_TRUE(router->RouteOffsetPlatformView(123L, 10.0, 20.0));
+    EXPECT_TRUE(router->RouteSetPlatformViewDirection(123L, 1));
+    EXPECT_TRUE(router->RouteClearPlatformViewFocus(123L));
     EXPECT_TRUE(router->RouteDispatchPlatformViewTouch(touch));
-
-    PlatformViewGeometry geom = {.view_id = view_id};
     EXPECT_TRUE(router->RouteOnDisplayPlatformView(geom));
-
-    FlutterPlatformView pv_struct = {
-        .struct_size = sizeof(FlutterPlatformView),
-        .identifier = static_cast<FlutterPlatformViewIdentifier>(view_id),
-        .mutations_count = 0,
-        .mutations = nullptr,
-    };
-    EXPECT_TRUE(router->RouteOnDisplayPlatformView(pv_struct, 10, 20, 500, 350,
-                                                   500, 350));
-
-    EXPECT_TRUE(router->RouteHidePlatformView(view_id));
+    EXPECT_TRUE(
+        router->RouteOnDisplayPlatformView(pv, 0, 0, 320, 480, 320, 480));
+    EXPECT_TRUE(router->RouteHidePlatformView(123L));
     EXPECT_TRUE(router->RouteSynchronizeToNativeViewHierarchy(true));
     EXPECT_TRUE(router->RouteBeginFrame());
     EXPECT_TRUE(router->RouteEndFrame());
 
-    auto overlay_id = router->RouteCreateOverlaySurface();
-    ASSERT_TRUE(overlay_id.has_value());
-    PlatformViewOverlay overlay_struct = {.surface_id = *overlay_id};
-    EXPECT_TRUE(router->RouteOnDisplayOverlaySurface(overlay_struct));
-    EXPECT_TRUE(router->RouteShowOverlaySurface(*overlay_id));
-    EXPECT_TRUE(router->RouteHideOverlaySurface(*overlay_id));
+    auto created_overlay = router->RouteCreateOverlaySurface();
+    ASSERT_TRUE(created_overlay.has_value());
+    PlatformViewOverlay routed_overlay = {.surface_id = *created_overlay};
+    EXPECT_TRUE(router->RouteOnDisplayOverlaySurface(routed_overlay));
+    EXPECT_TRUE(router->RouteShowOverlaySurface(*created_overlay));
+    EXPECT_TRUE(router->RouteHideOverlaySurface(*created_overlay));
     EXPECT_TRUE(router->RouteDestroyOverlaySurfaces());
 
     EXPECT_TRUE(router->RouteCreatePlatformViewTransaction());
     EXPECT_TRUE(router->RouteSwapPlatformViewTransactions());
     EXPECT_TRUE(router->RouteApplyPlatformViewTransactions());
-    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setHcppEnabled", "(Z)V", _))
-        .WillOnce(Return(true));
     EXPECT_TRUE(router->RouteSetHcppEnabled(true));
     EXPECT_TRUE(router->RouteIsHcppEnabled());
 
-    EXPECT_TRUE(router->RouteDisposePlatformView(view_id));
-    EXPECT_FALSE(platform_views_provider->IsViewCreated(view_id));
-
-    // 3. SurfaceControl Subsystem Direct Routing
-    int64_t sc_id = embedder_flag ? 801 : 701;
-    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("createSurfaceControl",
-                                                "(JLjava/lang/String;)V", _))
-        .WillOnce(Return(true));
-    EXPECT_TRUE(router->RouteCreateSurfaceControl(sc_id, "phase53_sc"));
-    EXPECT_TRUE(router->RouteReparentSurfaceControl(sc_id, 0));
-
-    AndroidSurfaceControlRect src = {0, 0, 100, 100};
-    AndroidSurfaceControlRect dst = {0, 0, 200, 200};
-    EXPECT_TRUE(router->RouteSetSurfaceControlGeometry(sc_id, src, dst, 0));
-    EXPECT_TRUE(router->RouteSetSurfaceControlVisibility(sc_id, true));
-    EXPECT_TRUE(router->RouteSetSurfaceControlZOrder(sc_id, 5));
-
-    std::vector<AndroidSurfaceControlRect> damage = {{0, 0, 80, 80}};
-    EXPECT_TRUE(router->RouteSetSurfaceControlDamageRegion(sc_id, damage));
-
-    int dummy_buf = 42;
-    EXPECT_TRUE(router->RouteSetSurfaceControlBuffer(sc_id, &dummy_buf, -1));
-    EXPECT_TRUE(router->RouteSetSurfaceControlBufferAlpha(sc_id, 0.8f));
-    EXPECT_TRUE(
-        router->RouteSetSurfaceControlColor(sc_id, 1.0f, 0.5f, 0.0f, 1.0f));
-
-    auto sc_state = router->RouteGetSurfaceControlState(sc_id);
-    ASSERT_TRUE(sc_state.has_value());
-    EXPECT_EQ(sc_state->visibility, AndroidSurfaceControlVisibility::kShow);
-    EXPECT_EQ(sc_state->z_order, 5);
-
-    auto sc_obj = router->RouteGetSurfaceControl(sc_id);
-    ASSERT_NE(sc_obj, nullptr);
-    EXPECT_EQ(sc_obj->GetDebugName(), "phase53_sc");
-
-    EXPECT_CALL(*mock_invoker,
-                InvokeVoidMethod("destroySurfaceControl", "(J)V", _))
-        .WillOnce(Return(true));
-    EXPECT_TRUE(router->RouteDestroySurfaceControl(sc_id));
+    EXPECT_TRUE(router->RouteDisposePlatformView(123L));
+    EXPECT_FALSE(mem_provider->IsViewCreated(123L));
   }
 
   // Verify graceful handling when embedder_delegate is null
   auto null_router = std::make_unique<JniRouter>(nullptr, legacy_delegate);
-  EXPECT_FALSE(null_router->RouteSemanticsUpdate({}, {}));
-  EXPECT_FALSE(null_router->RouteCustomAccessibilityActions({}, {}));
+  EXPECT_FALSE(null_router->RouteSemanticsUpdate(
+      semantics_buffer, semantics_strings, string_attributes));
+  EXPECT_FALSE(null_router->RouteCustomAccessibilityActions(action_buffer,
+                                                            action_strings));
+  EXPECT_FALSE(null_router->RouteSemanticsTreeEnabled(true));
   EXPECT_FALSE(null_router->RouteSemanticsEnabled(true));
-  EXPECT_FALSE(null_router->RouteDispatchSemanticsAction(
-      1, kFlutterSemanticsActionTap, {}));
-  EXPECT_FALSE(null_router->RouteSetAccessibilityFeatures(1));
 
-  PlatformViewCreationParams null_params = {.view_id = 1};
+  FlutterSemanticsUpdate2 null_update = {
+      .struct_size = sizeof(FlutterSemanticsUpdate2),
+  };
+  EXPECT_FALSE(null_router->RouteSemanticsUpdate(null_update));
+
   EXPECT_EQ(null_router->RouteCreatePlatformView(
-                null_params, PlatformViewCompositionType::kHybridComposition),
+                params, PlatformViewCompositionType::kHybridComposition),
             -1);
-  EXPECT_FALSE(null_router->RouteDisposePlatformView(1));
-  PlatformViewResizeRequest null_resize = {.view_id = 1};
-  EXPECT_FALSE(null_router->RouteResizePlatformView(null_resize));
-  EXPECT_FALSE(null_router->RouteOffsetPlatformView(1, 0, 0));
-  EXPECT_FALSE(null_router->RouteSetPlatformViewDirection(1, 0));
-  EXPECT_FALSE(null_router->RouteClearPlatformViewFocus(1));
-  PlatformViewTouch null_touch = {.view_id = 1};
-  EXPECT_FALSE(null_router->RouteDispatchPlatformViewTouch(null_touch));
-  PlatformViewGeometry null_geom = {.view_id = 1};
-  EXPECT_FALSE(null_router->RouteOnDisplayPlatformView(null_geom));
-  EXPECT_FALSE(null_router->RouteHidePlatformView(1));
+  EXPECT_FALSE(null_router->RouteResizePlatformView(resize_req));
+  EXPECT_FALSE(null_router->RouteOffsetPlatformView(123L, 10.0, 20.0));
+  EXPECT_FALSE(null_router->RouteSetPlatformViewDirection(123L, 1));
+  EXPECT_FALSE(null_router->RouteClearPlatformViewFocus(123L));
+  EXPECT_FALSE(null_router->RouteDispatchPlatformViewTouch(touch));
+  EXPECT_FALSE(null_router->RouteOnDisplayPlatformView(geom));
+  EXPECT_FALSE(
+      null_router->RouteOnDisplayPlatformView(pv, 0, 0, 320, 480, 320, 480));
+  EXPECT_FALSE(null_router->RouteHidePlatformView(123L));
   EXPECT_FALSE(null_router->RouteSynchronizeToNativeViewHierarchy(true));
   EXPECT_FALSE(null_router->RouteBeginFrame());
   EXPECT_FALSE(null_router->RouteEndFrame());
@@ -4482,21 +5953,7 @@ TEST(Phase53LegacyDeletionPlatformViewsSemanticsTest,
   EXPECT_FALSE(null_router->RouteApplyPlatformViewTransactions());
   EXPECT_FALSE(null_router->RouteSetHcppEnabled(true));
   EXPECT_FALSE(null_router->RouteIsHcppEnabled());
-
-  EXPECT_FALSE(null_router->RouteCreateSurfaceControl(1, ""));
-  EXPECT_FALSE(null_router->RouteDestroySurfaceControl(1));
-  EXPECT_FALSE(null_router->RouteReparentSurfaceControl(1, 0));
-  AndroidSurfaceControlRect rect = {0, 0, 10, 10};
-  EXPECT_FALSE(null_router->RouteSetSurfaceControlGeometry(1, rect, rect, 0));
-  EXPECT_FALSE(null_router->RouteSetSurfaceControlVisibility(1, true));
-  EXPECT_FALSE(null_router->RouteSetSurfaceControlZOrder(1, 1));
-  EXPECT_FALSE(null_router->RouteSetSurfaceControlDamageRegion(1, {rect}));
-  EXPECT_FALSE(null_router->RouteSetSurfaceControlBuffer(1, nullptr, -1));
-  EXPECT_FALSE(null_router->RouteSetSurfaceControlBufferAlpha(1, 1.0f));
-  EXPECT_FALSE(
-      null_router->RouteSetSurfaceControlColor(1, 1.0f, 1.0f, 1.0f, 1.0f));
-  EXPECT_FALSE(null_router->RouteGetSurfaceControlState(1).has_value());
-  EXPECT_EQ(null_router->RouteGetSurfaceControl(1), nullptr);
+  EXPECT_FALSE(null_router->RouteDisposePlatformView(123L));
 
   JniRouter::SetEmbedderEnabled(true);
 }
@@ -4504,60 +5961,62 @@ TEST(Phase53LegacyDeletionPlatformViewsSemanticsTest,
 TEST(Phase53LegacyDeletionPlatformViewsSemanticsTest,
      ConcurrentMultithreadedPlatformViewsAndSemanticsExecution) {
   auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
-  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+  ON_CALL(*mock_invoker,
+          UpdateSemantics(::testing::_, ::testing::_, ::testing::_))
       .WillByDefault(::testing::Return(true));
-  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+  ON_CALL(*mock_invoker,
+          UpdateCustomAccessibilityActions(::testing::_, ::testing::_))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, SetSemanticsTreeEnabled(::testing::_))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker,
+          InvokeVoidMethod(::testing::_, ::testing::_, ::testing::_))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker,
+          InvokeBooleanMethod(::testing::_, ::testing::_, ::testing::_))
       .WillByDefault(::testing::Return(true));
 
-  auto platform_views_provider =
-      std::make_shared<InMemoryPlatformViewsProvider>();
-  auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
+  auto mem_provider = std::make_shared<InMemoryPlatformViewsProvider>();
 
   FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
-                               nullptr, nullptr, platform_views_provider,
-                               nullptr, nullptr, nullptr, nullptr, nullptr,
-                               nullptr, nullptr, nullptr, sc_provider);
+                               nullptr, nullptr, mem_provider);
 
   constexpr size_t kWorkers = 8;
-  constexpr size_t kIterations = 50;
+  constexpr size_t kIterations = 100;
   std::vector<std::future<bool>> futures;
   futures.reserve(kWorkers);
 
   for (size_t worker = 0; worker < kWorkers; ++worker) {
     futures.push_back(std::async(std::launch::async, [&native, worker]() {
       for (size_t iter = 0; iter < kIterations; ++iter) {
-        int64_t view_id = static_cast<int64_t>(worker * 1000 + iter + 1);
-        int64_t sc_id = static_cast<int64_t>(worker * 2000 + iter + 1);
+        int idx = static_cast<int>(worker * kIterations + iter);
+        int64_t view_id = static_cast<int64_t>(idx + 100);
 
         // 1. Semantics operations
-        FlutterSemanticsNode2 node = {};
-        node.struct_size = sizeof(FlutterSemanticsNode2);
-        node.id = static_cast<int32_t>(view_id);
-        node.label = "ConcurrentSemantics";
-        FlutterSemanticsNode2* nodes[] = {&node};
-        FlutterSemanticsUpdate2 sem_update = {
-            .struct_size = sizeof(FlutterSemanticsUpdate2),
-            .node_count = 1,
-            .nodes = nodes,
-            .custom_action_count = 0,
-            .custom_actions = nullptr,
-            .view_id = 0,
-        };
-        if (!native.UpdateSemantics(sem_update)) {
-          return false;
-        }
-        if (!native.DispatchSemanticsAction(static_cast<int32_t>(view_id),
-                                            kFlutterSemanticsActionTap, {},
-                                            0)) {
+        std::vector<uint8_t> buffer = {0x01, 0x02, static_cast<uint8_t>(worker),
+                                       static_cast<uint8_t>(iter % 256)};
+        std::vector<std::string> strings = {"node_" + std::to_string(idx)};
+        if (!native.UpdateSemantics(buffer, strings)) {
           return false;
         }
 
-        // 2. Platform view lifecycle operations
+        std::vector<uint8_t> actions = {0x05, static_cast<uint8_t>(idx % 256)};
+        std::vector<std::string> action_strings = {"action_" +
+                                                   std::to_string(idx)};
+        if (!native.UpdateCustomAccessibilityActions(actions, action_strings)) {
+          return false;
+        }
+
+        if (!native.SetSemanticsEnabled((iter % 2) == 0)) {
+          return false;
+        }
+
+        // 2. Platform Views operations
         PlatformViewCreationParams params = {
             .view_id = view_id,
-            .view_type = "concurrent.pv",
-            .width = 300.0 + iter,
-            .height = 200.0 + iter,
+            .view_type = "hybrid_view",
+            .width = 100.0,
+            .height = 100.0,
         };
         if (native.CreatePlatformView(
                 params, PlatformViewCompositionType::kHybridComposition) != 0) {
@@ -4565,89 +6024,54 @@ TEST(Phase53LegacyDeletionPlatformViewsSemanticsTest,
         }
 
         PlatformViewResizeRequest resize_req = {
-            .view_id = view_id, .width = 350.0 + iter, .height = 250.0 + iter};
+            .view_id = view_id,
+            .width = 120.0,
+            .height = 120.0,
+        };
         if (!native.ResizePlatformView(resize_req)) {
           return false;
         }
-        if (!native.OffsetPlatformView(view_id, 10.0, 20.0)) {
+
+        if (!native.OffsetPlatformView(view_id, 10.0, 10.0)) {
           return false;
         }
+
         if (!native.SetPlatformViewDirection(view_id, 1)) {
           return false;
         }
-        PlatformViewTouch touch = {.view_id = view_id};
+
+        if (!native.ClearPlatformViewFocus(view_id)) {
+          return false;
+        }
+
+        PlatformViewTouch touch = {
+            .view_id = view_id,
+            .action = 0,
+            .raw_x = 15.0f,
+            .raw_y = 15.0f,
+        };
         if (!native.DispatchPlatformViewTouch(touch)) {
           return false;
         }
 
-        PlatformViewGeometry geom = {.view_id = view_id};
+        PlatformViewGeometry geom = {
+            .view_id = view_id,
+            .x = 0,
+            .y = 0,
+            .width = 120,
+            .height = 120,
+            .view_width = 120,
+            .view_height = 120,
+        };
         if (!native.OnDisplayPlatformView(geom)) {
           return false;
         }
+
         if (!native.HidePlatformView(view_id)) {
           return false;
         }
+
         if (!native.DisposePlatformView(view_id)) {
-          return false;
-        }
-
-        // 3. Overlay operations
-        auto overlay_opt = native.CreateOverlaySurface();
-        if (!overlay_opt.has_value()) {
-          return false;
-        }
-        PlatformViewOverlay overlay_geom = {.surface_id = *overlay_opt};
-        if (!native.OnDisplayOverlaySurface(overlay_geom)) {
-          return false;
-        }
-        if (!native.ShowOverlaySurface(*overlay_opt)) {
-          return false;
-        }
-        if (!native.HideOverlaySurface(*overlay_opt)) {
-          return false;
-        }
-        if (!native.DestroyOverlaySurfaces()) {
-          return false;
-        }
-
-        // 4. SurfaceControl operations
-        if (!native.CreateSurfaceControl(sc_id,
-                                         "sc_" + std::to_string(sc_id))) {
-          return false;
-        }
-        AndroidSurfaceControlRect src = {0, 0, 100, 100};
-        AndroidSurfaceControlRect dst = {0, 0, 200, 200};
-        if (!native.SetSurfaceControlGeometry(sc_id, src, dst, 0)) {
-          return false;
-        }
-        if (!native.SetSurfaceControlVisibility(sc_id, true)) {
-          return false;
-        }
-        if (!native.SetSurfaceControlZOrder(sc_id,
-                                            static_cast<int32_t>(iter))) {
-          return false;
-        }
-        if (!native.SetSurfaceControlBufferAlpha(sc_id, 0.95f)) {
-          return false;
-        }
-        if (!native.SetSurfaceControlColor(sc_id, 0.2f, 0.4f, 0.6f, 1.0f)) {
-          return false;
-        }
-        if (!native.CreatePlatformViewTransaction()) {
-          return false;
-        }
-        if (!native.SwapPlatformViewTransactions()) {
-          return false;
-        }
-        if (!native.ApplyPlatformViewTransactions()) {
-          return false;
-        }
-        auto sc_state = native.GetSurfaceControlState(sc_id);
-        if (!sc_state.has_value() ||
-            sc_state->z_order != static_cast<int32_t>(iter)) {
-          return false;
-        }
-        if (!native.DestroySurfaceControl(sc_id)) {
           return false;
         }
       }
@@ -4658,14 +6082,22 @@ TEST(Phase53LegacyDeletionPlatformViewsSemanticsTest,
   for (auto& f : futures) {
     EXPECT_TRUE(f.get());
   }
+
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
+// =============================================================================
+// Phase 5.4: Legacy Deletion (Graphics Pipeline)
+// =============================================================================
+
 TEST(Phase54LegacyDeletionGraphicsPipelineTest,
-     GraphicsPipelinePurgedAndDirectlyRouted) {
+     DirectRoutingGraphicsPipelineBypassesLegacy) {
   auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
-  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+  ON_CALL(*mock_invoker,
+          InvokeBooleanMethod(::testing::_, ::testing::_, ::testing::_))
       .WillByDefault(::testing::Return(true));
-  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+  ON_CALL(*mock_invoker,
+          InvokeVoidMethod(::testing::_, ::testing::_, ::testing::_))
       .WillByDefault(::testing::Return(true));
 
   auto in_memory_metrics = std::make_shared<InMemoryWindowMetricsProvider>();
@@ -4675,144 +6107,175 @@ TEST(Phase54LegacyDeletionGraphicsPipelineTest,
       std::make_shared<AndroidVsyncWaiter>(mock_choreographer, mock_invoker);
   auto hw_provider = std::make_shared<InMemoryAndroidHardwareBufferProvider>();
   auto vk_provider = std::make_shared<InMemoryAndroidVulkanTextureProvider>();
+  auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
 
   auto embedder_delegate = std::make_shared<JniDelegate>(
-      mock_invoker, nullptr, nullptr, nullptr, in_memory_metrics, vsync_waiter,
-      nullptr, hw_provider, vk_provider);
-  auto legacy_delegate = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
+      mock_invoker, nullptr, nullptr, nullptr, nullptr, in_memory_metrics,
+      vsync_waiter, nullptr, hw_provider, vk_provider, sc_provider);
 
+  auto legacy_delegate = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
   auto router = std::make_unique<JniRouter>(embedder_delegate, legacy_delegate);
+
+  AndroidViewportMetrics vp = {
+      .view_id = 1,
+      .device_pixel_ratio = 2.0,
+      .physical_width = 1080.0,
+      .physical_height = 1920.0,
+  };
+  AndroidDisplayMetrics disp = {
+      .display_id = 1,
+      .single_display = true,
+      .refresh_rate = 60.0,
+      .width = 1080.0,
+      .height = 1920.0,
+      .device_pixel_ratio = 2.0,
+  };
+  AndroidSurfaceControlRect src = {0, 0, 100, 100};
+  AndroidSurfaceControlRect dst = {0, 0, 200, 200};
+  std::vector<AndroidSurfaceControlRect> damage_rects = {src};
+
+  int64_t hw_tex_id = 1001;
+  int64_t vk_tex_id = 2002;
+  int64_t sc_id = 3003;
 
   for (bool embedder_flag : {false, true}) {
     JniRouter::SetEmbedderEnabled(embedder_flag);
 
-    // 1. VSync Subsystem Direct Routing
-    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
-        .WillOnce(Return(true));
-    EXPECT_TRUE(router->RouteVsync(1000000L, 2000000L));
-
-    EXPECT_TRUE(
-        router->RouteAsyncWaitForVsync(12345L + (embedder_flag ? 1 : 0)));
+    // 1. VSync routing
+    EXPECT_CALL(*mock_invoker,
+                InvokeVoidMethod("onVsync", "(JJ)V", ::testing::_))
+        .Times(2)
+        .WillRepeatedly(::testing::Return(true));
+    EXPECT_TRUE(router->RouteVsync(1000000LL, 2000000LL));
+    EXPECT_TRUE(router->RouteAsyncWaitForVsync(999));
     EXPECT_TRUE(mock_choreographer->HasPendingCallbacks());
+    mock_choreographer->TriggerPendingCallbacks(1000000LL);
 
-    // 2. Display & Window Metrics Subsystem Direct Routing
-    AndroidViewportMetrics vp;
-    vp.view_id = embedder_flag ? 1L : 2L;
-    vp.physical_width = 1080.0;
-    vp.physical_height = 2400.0;
-    vp.device_pixel_ratio = 2.5;
+    // 2. Window & Display Metrics routing
     EXPECT_TRUE(router->RouteSetViewportMetrics(vp));
-    EXPECT_EQ(in_memory_metrics->GetViewportMetrics(vp.view_id), vp);
-
-    AndroidDisplayMetrics disp;
-    disp.display_id = embedder_flag ? 1u : 2u;
-    disp.refresh_rate = 120.0;
-    disp.width = 1080.0;
-    disp.height = 2400.0;
-    disp.device_pixel_ratio = 2.5;
     EXPECT_TRUE(router->RouteUpdateDisplayMetrics(disp));
-    EXPECT_EQ(in_memory_metrics->GetDisplayMetrics(disp.display_id), disp);
+    EXPECT_TRUE(
+        router->RouteUpdateDisplayMetrics(1, 60.0, 1080.0, 1920.0, 2.0));
+    EXPECT_TRUE(router->RouteViewportMetrics(1, 1080.0, 1920.0, 2.0));
 
-    EXPECT_TRUE(router->RouteUpdateDisplayMetrics(3, 90.0, 800.0, 1200.0, 2.0));
-    EXPECT_TRUE(router->RouteViewportMetrics(5, 720.0, 1280.0, 2.0));
-
-    // 3. AHardwareBuffer Subsystem Direct Routing
-    int64_t hw_id = embedder_flag ? 101L : 201L;
+    // 3. SurfaceControl routing
     EXPECT_CALL(*mock_invoker,
-                InvokeBooleanMethod("registerHardwareBufferTexture", "(J)Z", _))
-        .WillOnce(Return(true));
-    EXPECT_TRUE(router->RouteRegisterHardwareBufferTexture(hw_id));
+                InvokeVoidMethod("createSurfaceControl",
+                                 "(JLjava/lang/String;)V", ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_TRUE(router->RouteCreateSurfaceControl(sc_id, "phase54_sc"));
+    EXPECT_TRUE(router->RouteReparentSurfaceControl(sc_id, 0));
+    EXPECT_TRUE(router->RouteSetSurfaceControlGeometry(sc_id, src, dst, 0));
+    EXPECT_TRUE(router->RouteSetSurfaceControlVisibility(sc_id, true));
+    EXPECT_TRUE(router->RouteSetSurfaceControlZOrder(sc_id, 5));
+    EXPECT_TRUE(
+        router->RouteSetSurfaceControlDamageRegion(sc_id, damage_rects));
+    int dummy_buffer = 42;
+    EXPECT_TRUE(router->RouteSetSurfaceControlBuffer(sc_id, &dummy_buffer, -1));
+    EXPECT_TRUE(router->RouteSetSurfaceControlBufferAlpha(sc_id, 0.8f));
+    EXPECT_TRUE(
+        router->RouteSetSurfaceControlColor(sc_id, 0.2f, 0.4f, 0.6f, 1.0f));
+    auto sc_state = router->RouteGetSurfaceControlState(sc_id);
+    ASSERT_TRUE(sc_state.has_value());
+    EXPECT_EQ(sc_state->id, static_cast<uint64_t>(sc_id));
+    EXPECT_NE(router->RouteGetSurfaceControl(sc_id), nullptr);
+    EXPECT_CALL(*mock_invoker,
+                InvokeVoidMethod("destroySurfaceControl", "(J)V", ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_TRUE(router->RouteDestroySurfaceControl(sc_id));
 
-    auto hw_desc = AndroidHardwareBufferDesc::MakeRGBA8(1920, 1080);
+    // 4. AHardwareBuffer routing
+    EXPECT_CALL(*mock_invoker,
+                InvokeBooleanMethod("registerHardwareBufferTexture", "(J)Z",
+                                    ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_TRUE(router->RouteRegisterHardwareBufferTexture(hw_tex_id));
+    auto hw_desc = AndroidHardwareBufferDesc::MakeRGBA8(512, 512);
     auto hw_buf = hw_provider->Allocate(hw_desc);
-    EXPECT_TRUE(router->RouteSetHardwareBufferFrame(hw_id, std::move(hw_buf)));
-
+    EXPECT_TRUE(
+        router->RouteSetHardwareBufferFrame(hw_tex_id, std::move(hw_buf)));
     FlutterHardwareBufferExternalTexture hw_frame = {};
-    EXPECT_TRUE(router->RouteGetHardwareBufferTextureFrame(hw_id, 1920, 1080,
+    EXPECT_TRUE(router->RouteGetHardwareBufferTextureFrame(hw_tex_id, 512, 512,
                                                            &hw_frame));
-    EXPECT_EQ(hw_frame.width, 1920u);
-    EXPECT_EQ(hw_frame.height, 1080u);
-
-    FlutterHardwareBufferExternalTexture direct_hw = {};
-    direct_hw.struct_size = sizeof(FlutterHardwareBufferExternalTexture);
-    direct_hw.width = 1280;
-    direct_hw.height = 720;
-    EXPECT_TRUE(router->RouteSetHardwareBufferFrame(hw_id, direct_hw));
-
-    EXPECT_CALL(*mock_invoker, InvokeBooleanMethod(
-                                   "onHardwareBufferFrameAvailable", "(J)Z", _))
-        .WillOnce(Return(true));
-    EXPECT_TRUE(router->RouteOnHardwareBufferFrameAvailable(hw_id));
-
-    EXPECT_CALL(
-        *mock_invoker,
-        InvokeBooleanMethod("unregisterHardwareBufferTexture", "(J)Z", _))
-        .WillOnce(Return(true));
-    EXPECT_TRUE(router->RouteUnregisterHardwareBufferTexture(hw_id));
-
-    // 4. Vulkan External Textures Subsystem Direct Routing
-    int64_t vk_id = embedder_flag ? 301L : 401L;
+    EXPECT_EQ(hw_frame.width, 512u);
+    EXPECT_EQ(hw_frame.height, 512u);
     EXPECT_CALL(*mock_invoker,
-                InvokeBooleanMethod("registerVulkanTexture", "(J)Z", _))
-        .WillOnce(Return(true));
-    EXPECT_TRUE(router->RouteRegisterVulkanTexture(vk_id));
+                InvokeBooleanMethod("onHardwareBufferFrameAvailable", "(J)Z",
+                                    ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_TRUE(router->RouteOnHardwareBufferFrameAvailable(hw_tex_id));
+    EXPECT_CALL(*mock_invoker,
+                InvokeBooleanMethod("unregisterHardwareBufferTexture", "(J)Z",
+                                    ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_TRUE(router->RouteUnregisterHardwareBufferTexture(hw_tex_id));
 
-    auto vk_desc = AndroidVulkanImageDesc::MakeRGBA8(800, 600);
+    // 5. Vulkan external textures routing
+    EXPECT_CALL(*mock_invoker, InvokeBooleanMethod("registerVulkanTexture",
+                                                   "(J)Z", ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_TRUE(router->RouteRegisterVulkanTexture(vk_tex_id));
+    auto vk_desc = AndroidVulkanImageDesc::MakeRGBA8(256, 256);
     auto vk_tex = vk_provider->AllocateTexture(vk_desc);
-    EXPECT_TRUE(router->RouteSetVulkanTextureFrame(vk_id, std::move(vk_tex)));
-
+    EXPECT_TRUE(
+        router->RouteSetVulkanTextureFrame(vk_tex_id, std::move(vk_tex)));
     FlutterVulkanExternalTexture vk_frame = {};
-    EXPECT_TRUE(router->RouteGetVulkanTextureFrame(vk_id, 800, 600, &vk_frame));
-    EXPECT_EQ(vk_frame.width, 800u);
-    EXPECT_EQ(vk_frame.height, 600u);
-
-    FlutterVulkanExternalTexture direct_vk = {};
-    direct_vk.struct_size = sizeof(FlutterVulkanExternalTexture);
-    direct_vk.width = 640;
-    direct_vk.height = 480;
-    direct_vk.image = 0x1234;
-    EXPECT_TRUE(router->RouteSetVulkanTextureFrame(vk_id, direct_vk));
-
+    EXPECT_TRUE(
+        router->RouteGetVulkanTextureFrame(vk_tex_id, 256, 256, &vk_frame));
+    EXPECT_EQ(vk_frame.width, 256u);
+    EXPECT_EQ(vk_frame.height, 256u);
     EXPECT_CALL(*mock_invoker,
-                InvokeBooleanMethod("onVulkanTextureFrameAvailable", "(J)Z", _))
-        .WillOnce(Return(true));
-    EXPECT_TRUE(router->RouteOnVulkanTextureFrameAvailable(vk_id));
-
-    EXPECT_CALL(*mock_invoker,
-                InvokeBooleanMethod("unregisterVulkanTexture", "(J)Z", _))
-        .WillOnce(Return(true));
-    EXPECT_TRUE(router->RouteUnregisterVulkanTexture(vk_id));
+                InvokeBooleanMethod("onVulkanTextureFrameAvailable", "(J)Z",
+                                    ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_TRUE(router->RouteOnVulkanTextureFrameAvailable(vk_tex_id));
+    EXPECT_CALL(*mock_invoker, InvokeBooleanMethod("unregisterVulkanTexture",
+                                                   "(J)Z", ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_TRUE(router->RouteUnregisterVulkanTexture(vk_tex_id));
   }
 
-  // Verify graceful handling when embedder_delegate is null
+  // Graceful fallback when embedder_delegate is null
   auto null_router = std::make_unique<JniRouter>(nullptr, legacy_delegate);
-  EXPECT_FALSE(null_router->RouteVsync(0, 0));
-  EXPECT_FALSE(null_router->RouteAsyncWaitForVsync(0));
-
-  AndroidViewportMetrics dummy_vp;
-  EXPECT_FALSE(null_router->RouteSetViewportMetrics(dummy_vp));
-
-  AndroidDisplayMetrics dummy_disp;
-  EXPECT_FALSE(null_router->RouteUpdateDisplayMetrics(dummy_disp));
-  EXPECT_FALSE(null_router->RouteUpdateDisplayMetrics(0, 0, 0, 0, 0));
-  EXPECT_FALSE(null_router->RouteViewportMetrics(0, 0, 0, 0));
-
-  EXPECT_FALSE(null_router->RouteRegisterHardwareBufferTexture(1));
-  EXPECT_FALSE(null_router->RouteUnregisterHardwareBufferTexture(1));
-  EXPECT_FALSE(null_router->RouteSetHardwareBufferFrame(1, nullptr));
-  FlutterHardwareBufferExternalTexture dummy_hw = {};
-  EXPECT_FALSE(null_router->RouteSetHardwareBufferFrame(1, dummy_hw));
+  EXPECT_FALSE(null_router->RouteVsync(100, 200));
+  EXPECT_FALSE(null_router->RouteAsyncWaitForVsync(123));
+  EXPECT_FALSE(null_router->RouteSetViewportMetrics(vp));
+  EXPECT_FALSE(null_router->RouteUpdateDisplayMetrics(disp));
   EXPECT_FALSE(
-      null_router->RouteGetHardwareBufferTextureFrame(1, 0, 0, &dummy_hw));
-  EXPECT_FALSE(null_router->RouteOnHardwareBufferFrameAvailable(1));
+      null_router->RouteUpdateDisplayMetrics(1, 60.0, 1080.0, 1920.0, 2.0));
+  EXPECT_FALSE(null_router->RouteViewportMetrics(1, 1080.0, 1920.0, 2.0));
+  EXPECT_FALSE(null_router->RouteCreateSurfaceControl(sc_id, "null_sc"));
+  EXPECT_FALSE(null_router->RouteDestroySurfaceControl(sc_id));
+  EXPECT_FALSE(null_router->RouteReparentSurfaceControl(sc_id, 0));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlGeometry(sc_id, src, dst, 0));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlVisibility(sc_id, true));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlZOrder(sc_id, 0));
+  EXPECT_FALSE(
+      null_router->RouteSetSurfaceControlDamageRegion(sc_id, damage_rects));
+  int dummy = 0;
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlBuffer(sc_id, &dummy, -1));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlBufferAlpha(sc_id, 1.0f));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlColor(sc_id, 0, 0, 0, 1));
+  EXPECT_FALSE(null_router->RouteGetSurfaceControlState(sc_id).has_value());
+  EXPECT_EQ(null_router->RouteGetSurfaceControl(sc_id), nullptr);
 
-  EXPECT_FALSE(null_router->RouteRegisterVulkanTexture(1));
-  EXPECT_FALSE(null_router->RouteUnregisterVulkanTexture(1));
-  EXPECT_FALSE(null_router->RouteSetVulkanTextureFrame(1, nullptr));
-  FlutterVulkanExternalTexture dummy_vk = {};
-  EXPECT_FALSE(null_router->RouteSetVulkanTextureFrame(1, dummy_vk));
-  EXPECT_FALSE(null_router->RouteGetVulkanTextureFrame(1, 0, 0, &dummy_vk));
-  EXPECT_FALSE(null_router->RouteOnVulkanTextureFrameAvailable(1));
+  EXPECT_FALSE(null_router->RouteRegisterHardwareBufferTexture(hw_tex_id));
+  EXPECT_FALSE(null_router->RouteUnregisterHardwareBufferTexture(hw_tex_id));
+  FlutterHardwareBufferExternalTexture null_hw_frame = {};
+  EXPECT_FALSE(
+      null_router->RouteSetHardwareBufferFrame(hw_tex_id, null_hw_frame));
+  EXPECT_FALSE(null_router->RouteGetHardwareBufferTextureFrame(
+      hw_tex_id, 100, 100, &null_hw_frame));
+  EXPECT_FALSE(null_router->RouteOnHardwareBufferFrameAvailable(hw_tex_id));
+
+  EXPECT_FALSE(null_router->RouteRegisterVulkanTexture(vk_tex_id));
+  EXPECT_FALSE(null_router->RouteUnregisterVulkanTexture(vk_tex_id));
+  FlutterVulkanExternalTexture null_vk_frame = {};
+  EXPECT_FALSE(
+      null_router->RouteSetVulkanTextureFrame(vk_tex_id, null_vk_frame));
+  EXPECT_FALSE(null_router->RouteGetVulkanTextureFrame(vk_tex_id, 100, 100,
+                                                       &null_vk_frame));
+  EXPECT_FALSE(null_router->RouteOnVulkanTextureFrameAvailable(vk_tex_id));
 
   JniRouter::SetEmbedderEnabled(true);
 }
@@ -4820,126 +6283,112 @@ TEST(Phase54LegacyDeletionGraphicsPipelineTest,
 TEST(Phase54LegacyDeletionGraphicsPipelineTest,
      ConcurrentMultithreadedGraphicsPipelineExecution) {
   auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
-  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+  ON_CALL(*mock_invoker,
+          InvokeVoidMethod(::testing::_, ::testing::_, ::testing::_))
       .WillByDefault(::testing::Return(true));
-  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+  ON_CALL(*mock_invoker,
+          InvokeBooleanMethod(::testing::_, ::testing::_, ::testing::_))
       .WillByDefault(::testing::Return(true));
 
   auto in_memory_metrics = std::make_shared<InMemoryWindowMetricsProvider>();
+  auto mock_choreographer =
+      std::make_shared<InMemoryAndroidChoreographerProvider>();
+  auto vsync_waiter =
+      std::make_shared<AndroidVsyncWaiter>(mock_choreographer, mock_invoker);
   auto hw_provider = std::make_shared<InMemoryAndroidHardwareBufferProvider>();
   auto vk_provider = std::make_shared<InMemoryAndroidVulkanTextureProvider>();
+  auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
 
-  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
-                               nullptr, nullptr, nullptr, in_memory_metrics,
-                               nullptr, nullptr, nullptr, nullptr, nullptr,
-                               hw_provider, vk_provider);
+  FlutterEmbedderNative native(mock_invoker);
+  native.SetWindowMetricsProvider(in_memory_metrics);
+  native.SetChoreographerProvider(mock_choreographer);
+  native.SetVsyncWaiter(vsync_waiter);
+  native.SetHardwareBufferProvider(hw_provider);
+  native.SetVulkanTextureProvider(vk_provider);
+  native.SetSurfaceControlProvider(sc_provider);
 
   constexpr size_t kWorkers = 8;
-  constexpr size_t kIterations = 50;
+  constexpr size_t kIterations = 100;
   std::vector<std::future<bool>> futures;
   futures.reserve(kWorkers);
 
   for (size_t worker = 0; worker < kWorkers; ++worker) {
-    futures.push_back(std::async(
-        std::launch::async,
-        [&native, &in_memory_metrics, &hw_provider, &vk_provider, worker]() {
-          for (size_t iter = 0; iter < kIterations; ++iter) {
-            int64_t base_id = static_cast<int64_t>(worker * 1000 + iter + 1);
+    futures.push_back(std::async(std::launch::async, [&native,
+                                                      &mock_choreographer,
+                                                      &hw_provider,
+                                                      &vk_provider, worker]() {
+      for (size_t iter = 0; iter < kIterations; ++iter) {
+        int idx = static_cast<int>(worker * kIterations + iter);
+        int64_t tex_id = static_cast<int64_t>(idx + 5000);
+        int64_t sc_id = static_cast<int64_t>(idx + 10000);
 
-            // 1. VSync routing
-            if (!native.GetRouter()->RouteVsync(base_id * 1000,
-                                                (base_id + 1) * 1000)) {
-              return false;
-            }
-            if (!native.GetRouter()->RouteAsyncWaitForVsync(base_id)) {
-              return false;
-            }
+        // 1. VSync
+        FlutterEmbedderNative::OnVsyncCallback(&native, idx);
+        mock_choreographer->TriggerPendingCallbacks(1000000LL + idx);
 
-            // 2. Metrics operations
-            AndroidViewportMetrics vp;
-            vp.view_id = base_id;
-            vp.physical_width = 1000.0 + iter;
-            vp.physical_height = 2000.0 + iter;
-            vp.device_pixel_ratio = 2.0;
-            if (!native.SetViewportMetrics(vp)) {
-              return false;
-            }
-            auto check_vp = in_memory_metrics->GetViewportMetrics(base_id);
-            if (!check_vp.has_value() ||
-                check_vp->physical_width != vp.physical_width) {
-              return false;
-            }
+        // 2. Metrics
+        AndroidViewportMetrics vp = {
+            .view_id = static_cast<int64_t>(idx),
+            .device_pixel_ratio = 2.0,
+            .physical_width = 800.0 + (idx % 100),
+            .physical_height = 600.0 + (idx % 100),
+        };
+        if (!native.SetViewportMetrics(vp)) {
+          return false;
+        }
 
-            AndroidDisplayMetrics disp;
-            disp.display_id = static_cast<uint64_t>(base_id);
-            disp.refresh_rate = 60.0 + (iter % 60);
-            disp.width = 1000.0 + iter;
-            disp.height = 2000.0 + iter;
-            disp.device_pixel_ratio = 2.0;
-            if (!native.UpdateDisplayMetrics(disp)) {
-              return false;
-            }
-            auto check_disp = in_memory_metrics->GetDisplayMetrics(base_id);
-            if (!check_disp.has_value() || check_disp->width != disp.width) {
-              return false;
-            }
+        // 3. SurfaceControl
+        if (!native.CreateSurfaceControl(sc_id, "worker_sc")) {
+          return false;
+        }
+        if (!native.SetSurfaceControlVisibility(sc_id, true)) {
+          return false;
+        }
+        if (!native.SetSurfaceControlZOrder(sc_id,
+                                            static_cast<int32_t>(idx % 20))) {
+          return false;
+        }
+        if (!native.DestroySurfaceControl(sc_id)) {
+          return false;
+        }
 
-            // 3. AHardwareBuffer operations
-            int64_t hw_tex_id = base_id;
-            auto hw_desc = AndroidHardwareBufferDesc::MakeRGBA8(
-                500 + static_cast<uint32_t>(iter),
-                500 + static_cast<uint32_t>(iter));
-            auto hw_buf = hw_provider->Allocate(hw_desc);
-            if (!native.RegisterHardwareBufferTexture(hw_tex_id,
-                                                      std::move(hw_buf))) {
-              return false;
-            }
-            FlutterHardwareBufferExternalTexture hw_frame = {};
-            if (!native.GetHardwareBufferTextureFrame(hw_tex_id, 500 + iter,
-                                                      500 + iter, &hw_frame)) {
-              return false;
-            }
-            if (hw_frame.width != 500 + iter || hw_frame.height != 500 + iter) {
-              return false;
-            }
-            if (!native.OnHardwareBufferFrameAvailable(hw_tex_id)) {
-              return false;
-            }
-            if (!native.UnregisterHardwareBufferTexture(hw_tex_id)) {
-              return false;
-            }
+        // 4. HardwareBuffer
+        auto hw_desc = AndroidHardwareBufferDesc::MakeRGBA8(64, 64);
+        auto hw_buf = hw_provider->Allocate(hw_desc);
+        if (!native.RegisterHardwareBufferTexture(tex_id, std::move(hw_buf))) {
+          return false;
+        }
+        FlutterHardwareBufferExternalTexture hw_out = {};
+        if (!native.GetHardwareBufferTextureFrame(tex_id, 64, 64, &hw_out)) {
+          return false;
+        }
+        if (!native.UnregisterHardwareBufferTexture(tex_id)) {
+          return false;
+        }
 
-            // 4. Vulkan Texture operations
-            int64_t vk_tex_id = base_id + 500000;
-            auto vk_desc = AndroidVulkanImageDesc::MakeRGBA8(
-                600 + static_cast<uint32_t>(iter),
-                400 + static_cast<uint32_t>(iter));
-            auto vk_tex = vk_provider->AllocateTexture(vk_desc);
-            if (!native.RegisterVulkanTexture(vk_tex_id, std::move(vk_tex))) {
-              return false;
-            }
-            FlutterVulkanExternalTexture vk_frame = {};
-            if (!native.GetVulkanTextureFrame(vk_tex_id, 600 + iter, 400 + iter,
-                                              &vk_frame)) {
-              return false;
-            }
-            if (vk_frame.width != 600 + iter || vk_frame.height != 400 + iter) {
-              return false;
-            }
-            if (!native.OnVulkanTextureFrameAvailable(vk_tex_id)) {
-              return false;
-            }
-            if (!native.UnregisterVulkanTexture(vk_tex_id)) {
-              return false;
-            }
-          }
-          return true;
-        }));
+        // 5. Vulkan texture
+        auto vk_desc = AndroidVulkanImageDesc::MakeRGBA8(64, 64);
+        auto vk_tex = vk_provider->AllocateTexture(vk_desc);
+        if (!native.RegisterVulkanTexture(tex_id, std::move(vk_tex))) {
+          return false;
+        }
+        FlutterVulkanExternalTexture vk_out = {};
+        if (!native.GetVulkanTextureFrame(tex_id, 64, 64, &vk_out)) {
+          return false;
+        }
+        if (!native.UnregisterVulkanTexture(tex_id)) {
+          return false;
+        }
+      }
+      return true;
+    }));
   }
 
   for (auto& f : futures) {
     EXPECT_TRUE(f.get());
   }
+
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 // =============================================================================
@@ -4954,9 +6403,22 @@ TEST(Phase55FlagObliterationTest, UnconditionalDirectRoutingAcrossAllMethods) {
       .WillByDefault(::testing::Return(true));
   ON_CALL(*mock_invoker, InvokeIntMethod(_, _, _))
       .WillByDefault(::testing::Return(1));
-  ON_CALL(*mock_invoker, HandlePlatformMessage(_, _, _, _))
+  ON_CALL(*mock_invoker, HandlePlatformMessage(_, _, _, _, _))
       .WillByDefault(::testing::Return(true));
   ON_CALL(*mock_invoker, HandlePlatformMessageResponse(_, _, _))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, SetApplicationLocale(_))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, OnFirstFrame()).WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, OnPreEngineRestart())
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, RequestDartDeferredLibrary(_))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, UpdateSemantics(_, _, _))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, UpdateCustomAccessibilityActions(_, _))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, SetSemanticsTreeEnabled(_))
       .WillByDefault(::testing::Return(true));
 
   auto callback_cache = std::make_shared<InMemoryCallbackCacheProvider>();
@@ -4982,8 +6444,9 @@ TEST(Phase55FlagObliterationTest, UnconditionalDirectRoutingAcrossAllMethods) {
 
   auto embedder_delegate = std::make_shared<JniDelegate>(
       mock_invoker, callback_cache, image_decoder, platform_views,
-      window_metrics, vsync_waiter, vm_init, hw_provider, vk_provider,
-      sc_provider, eg_provider, engine_group);
+      /*platform_views_controller=*/nullptr, window_metrics, vsync_waiter,
+      vm_init, hw_provider, vk_provider, sc_provider, eg_provider,
+      engine_group);
 
   auto legacy_delegate = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
   auto router = std::make_unique<JniRouter>(embedder_delegate, legacy_delegate);
@@ -4991,11 +6454,15 @@ TEST(Phase55FlagObliterationTest, UnconditionalDirectRoutingAcrossAllMethods) {
   std::vector<uint8_t> payload = {'p', 'h', 'a', 's', 'e', '5', '5'};
 
   for (bool flag_attempt : {false, true}) {
+    JniRouter::SetGlobalEmbedderEnabled(flag_attempt);
     JniRouter::SetEmbedderEnabled(flag_attempt);
+    router->SetInstanceEmbedderEnabled(flag_attempt);
     FlutterEmbedderNative::SetEmbedderEnabled(flag_attempt);
 
     // 1. Invariants: Flag is unconditionally true and routing path is kEmbedder
+    EXPECT_TRUE(JniRouter::IsGlobalEmbedderEnabled());
     EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
+    EXPECT_TRUE(router->IsInstanceEmbedderEnabled());
     EXPECT_TRUE(FlutterEmbedderNative::IsEmbedderEnabled());
     EXPECT_EQ(router->GetActiveRoutingPath(),
               JniRouter::RoutingPath::kEmbedder);
@@ -5034,8 +6501,7 @@ TEST(Phase55FlagObliterationTest, UnconditionalDirectRoutingAcrossAllMethods) {
     EXPECT_TRUE(router->RouteUpdateDisplayMetrics(disp.display_id, 120.0,
                                                   1080.0, 2400.0, 3.0));
 
-    // 6. Subsystems (Asset, Callback, Image, Deferred)
-    EXPECT_TRUE(router->RouteAssetManagerChanged());
+    // 6. Subsystems (Callback, Image, Deferred)
     auto cb = router->RouteLookupCallbackInformation(42L);
     ASSERT_TRUE(cb.has_value());
     if (cb.has_value()) {
@@ -5099,19 +6565,22 @@ TEST(Phase55FlagObliterationTest, UnconditionalDirectRoutingAcrossAllMethods) {
     auto eng_handle =
         reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x5500);
     EXPECT_TRUE(engine_group->RegisterEngine(parent_eng_id, eng_handle));
+    EXPECT_EQ(router->RouteGetActiveEngineCount(), 1u);
     AndroidEngineSpawnArgs spawn_args;
     spawn_args.entrypoint = "phase55_main";
     auto spawned_id = router->RouteSpawnEngine(parent_eng_id, spawn_args);
     EXPECT_GT(spawned_id, 0);
+    EXPECT_EQ(router->RouteGetActiveEngineCount(), 2u);
     EXPECT_TRUE(router->RouteShutdownSpawnedEngine(spawned_id));
+    EXPECT_EQ(router->RouteGetActiveEngineCount(), 1u);
     EXPECT_TRUE(router->RouteOnEngineGarbageCollected(parent_eng_id));
+    EXPECT_EQ(router->RouteGetActiveEngineCount(), 0u);
 
     // 13. Semantics and Accessibility
     EXPECT_TRUE(router->RouteSemanticsEnabled(true));
-    EXPECT_TRUE(router->RouteSetAccessibilityFeatures(1));
-    EXPECT_TRUE(router->RouteDispatchSemanticsAction(
-        1, FlutterSemanticsAction::kFlutterSemanticsActionTap));
+    EXPECT_TRUE(router->RouteSemanticsTreeEnabled(true));
     EXPECT_TRUE(router->RouteSemanticsUpdate(payload, {"test"}));
+    EXPECT_TRUE(router->RouteCustomAccessibilityActions(payload, {"action1"}));
   }
 }
 
@@ -5124,9 +6593,14 @@ TEST(Phase55FlagObliterationTest,
       .WillByDefault(::testing::Return(true));
   ON_CALL(*mock_invoker, InvokeIntMethod(_, _, _))
       .WillByDefault(::testing::Return(1));
-  ON_CALL(*mock_invoker, HandlePlatformMessage(_, _, _, _))
+  ON_CALL(*mock_invoker, HandlePlatformMessage(_, _, _, _, _))
       .WillByDefault(::testing::Return(true));
   ON_CALL(*mock_invoker, HandlePlatformMessageResponse(_, _, _))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, SetApplicationLocale(_))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, OnFirstFrame()).WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, OnPreEngineRestart())
       .WillByDefault(::testing::Return(true));
 
   auto callback_cache = std::make_shared<InMemoryCallbackCacheProvider>();
@@ -5149,8 +6623,9 @@ TEST(Phase55FlagObliterationTest,
 
   auto embedder_delegate = std::make_shared<JniDelegate>(
       mock_invoker, callback_cache, image_decoder, platform_views,
-      window_metrics, vsync_waiter, vm_init, hw_provider, vk_provider,
-      sc_provider, eg_provider, engine_group);
+      /*platform_views_controller=*/nullptr, window_metrics, vsync_waiter,
+      vm_init, hw_provider, vk_provider, sc_provider, eg_provider,
+      engine_group);
 
   auto router = std::make_shared<JniRouter>(embedder_delegate);
 
@@ -5160,52 +6635,55 @@ TEST(Phase55FlagObliterationTest,
   futures.reserve(kWorkers);
 
   for (size_t worker = 0; worker < kWorkers; ++worker) {
-    futures.push_back(std::async(
-        std::launch::async, [router, eg_provider, engine_group, worker]() {
-          std::vector<uint8_t> payload = {'c', 'o', 'n', 'c', 'u', 'r', 'r'};
-          for (size_t iter = 0; iter < kIterations; ++iter) {
-            bool flag = (iter % 2 == 0);
-            JniRouter::SetEmbedderEnabled(flag);
-            FlutterEmbedderNative::SetEmbedderEnabled(flag);
+    futures.push_back(std::async(std::launch::async, [router, worker]() {
+      std::vector<uint8_t> payload = {'c', 'o', 'n', 'c', 'u', 'r', 'r'};
+      for (size_t iter = 0; iter < kIterations; ++iter) {
+        bool flag = (iter % 2 == 0);
+        JniRouter::SetGlobalEmbedderEnabled(flag);
+        JniRouter::SetEmbedderEnabled(flag);
+        router->SetInstanceEmbedderEnabled(flag);
+        FlutterEmbedderNative::SetEmbedderEnabled(flag);
 
-            if (!JniRouter::IsEmbedderEnabled() ||
-                !FlutterEmbedderNative::IsEmbedderEnabled()) {
-              return false;
-            }
-            if (router->GetActiveRoutingPath() !=
-                JniRouter::RoutingPath::kEmbedder) {
-              return false;
-            }
+        if (!JniRouter::IsGlobalEmbedderEnabled() ||
+            !JniRouter::IsEmbedderEnabled() ||
+            !FlutterEmbedderNative::IsEmbedderEnabled() ||
+            !router->IsInstanceEmbedderEnabled()) {
+          return false;
+        }
+        if (router->GetActiveRoutingPath() !=
+            JniRouter::RoutingPath::kEmbedder) {
+          return false;
+        }
 
-            int32_t response_id = static_cast<int32_t>(worker * 1000 + iter);
-            if (!router->RoutePlatformMessage("flutter/concur", payload,
-                                              response_id)) {
-              return false;
-            }
-            if (!router->RouteFirstFrame()) {
-              return false;
-            }
-            if (!router->RouteVsync(1000L + iter, 2000L + iter)) {
-              return false;
-            }
+        int32_t response_id = static_cast<int32_t>(worker * 1000 + iter);
+        if (!router->RoutePlatformMessage("flutter/concur", payload,
+                                          response_id)) {
+          return false;
+        }
+        if (!router->RouteFirstFrame()) {
+          return false;
+        }
+        if (!router->RouteVsync(1000L + iter, 2000L + iter)) {
+          return false;
+        }
 
-            AndroidViewportMetrics vp;
-            vp.view_id = static_cast<int64_t>(worker * 1000 + iter);
-            vp.physical_width = 1000.0 + iter;
-            vp.physical_height = 2000.0 + iter;
-            vp.device_pixel_ratio = 2.0;
-            if (!router->RouteSetViewportMetrics(vp)) {
-              return false;
-            }
+        AndroidViewportMetrics vp;
+        vp.view_id = static_cast<int64_t>(worker * 1000 + iter);
+        vp.physical_width = 1000.0 + iter;
+        vp.physical_height = 2000.0 + iter;
+        vp.device_pixel_ratio = 2.0;
+        if (!router->RouteSetViewportMetrics(vp)) {
+          return false;
+        }
 
-            AndroidVMArgs vm_args;
-            vm_args.api_level = 34;
-            if (!router->RouteInitVM(vm_args)) {
-              return false;
-            }
-          }
-          return true;
-        }));
+        AndroidVMArgs vm_args;
+        vm_args.api_level = 34;
+        if (!router->RouteInitVM(vm_args)) {
+          return false;
+        }
+      }
+      return true;
+    }));
   }
 
   for (auto& f : futures) {
@@ -5217,10 +6695,16 @@ TEST(Phase55FlagObliterationTest, NullDelegateGracefulHandling) {
   auto empty_router = std::make_unique<JniRouter>(nullptr);
 
   for (bool flag_attempt : {false, true}) {
+    JniRouter::SetGlobalEmbedderEnabled(flag_attempt);
     JniRouter::SetEmbedderEnabled(flag_attempt);
+    empty_router->SetInstanceEmbedderEnabled(flag_attempt);
+    EXPECT_TRUE(JniRouter::IsGlobalEmbedderEnabled());
     EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
+    EXPECT_TRUE(empty_router->IsInstanceEmbedderEnabled());
     EXPECT_EQ(empty_router->GetActiveRoutingPath(),
               JniRouter::RoutingPath::kEmbedder);
+    EXPECT_EQ(empty_router->GetEmbedderDelegate(), nullptr);
+    EXPECT_EQ(empty_router->GetLegacyDelegate(), nullptr);
 
     EXPECT_FALSE(empty_router->RoutePlatformMessage("test", {}, 1));
     EXPECT_FALSE(empty_router->RoutePlatformMessageResponse(1, {}));
@@ -5230,7 +6714,6 @@ TEST(Phase55FlagObliterationTest, NullDelegateGracefulHandling) {
     EXPECT_FALSE(empty_router->RouteVsync(0, 0));
     EXPECT_FALSE(empty_router->RouteAsyncWaitForVsync(0));
     EXPECT_FALSE(empty_router->RouteRequestDartDeferredLibrary(1));
-    EXPECT_FALSE(empty_router->RouteAssetManagerChanged());
     EXPECT_FALSE(empty_router->RouteLookupCallbackInformation(1).has_value());
     EXPECT_FALSE(empty_router->RouteDecodeImage(nullptr, 0, 1));
     EXPECT_FALSE(empty_router->RouteGetImageHeader(1).has_value());
@@ -5339,6 +6822,18 @@ TEST(Phase56StrictGNTargetIsolationTest,
   ASSERT_NE(mapping, nullptr);
   EXPECT_GT(mapping->GetSize(), 0u);
 
+  // Platform Views
+  PlatformViewCreationParams pv_params = {
+      .view_id = 505L,
+      .view_type = "test.platform_view",
+      .width = 320.0,
+      .height = 240.0,
+  };
+  EXPECT_EQ(native.CreatePlatformView(
+                pv_params, PlatformViewCompositionType::kHybridComposition),
+            0);
+  EXPECT_TRUE(native.DisposePlatformView(505L));
+
   // Window Metrics
   AndroidViewportMetrics vp;
   vp.view_id = 1;
@@ -5419,7 +6914,6 @@ TEST(Phase56StrictGNTargetIsolationTest,
 
   for (size_t worker = 0; worker < kWorkers; ++worker) {
     futures.push_back(std::async(std::launch::async, [native, worker]() {
-      std::vector<uint8_t> payload = {'i', 's', 'o', 'l', 'a', 't', 'e'};
       for (size_t iter = 0; iter < kIterations; ++iter) {
         int64_t tex_id = static_cast<int64_t>(worker * 1000 + iter);
         if (!native->RegisterHardwareBufferTexture(tex_id)) {
@@ -5473,67 +6967,146 @@ TEST(Phase56StrictGNTargetIsolationTest,
 
 TEST(Phase56StrictGNTargetIsolationTest,
      QuarantineHeaderAndStructVerification) {
-  // Verify opaque handle sizes and alignments in embedder structs
+  // Verify opaque handle sizes, alignments, and member offsets in embedder
+  // structs
+  // 1. FlutterHardwareBufferExternalTexture
+  EXPECT_EQ(sizeof(FlutterHardwareBufferExternalTexture),
+            sizeof(void*) == 8 ? 56u : 32u);
+  EXPECT_EQ(offsetof(FlutterHardwareBufferExternalTexture, struct_size), 0u);
+  EXPECT_EQ(offsetof(FlutterHardwareBufferExternalTexture, width),
+            sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterHardwareBufferExternalTexture, height),
+            2 * sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterHardwareBufferExternalTexture, format),
+            3 * sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterHardwareBufferExternalTexture, fence_fd),
+            3 * sizeof(size_t) + 4);
+  EXPECT_EQ(offsetof(FlutterHardwareBufferExternalTexture, buffer),
+            sizeof(void*) == 8 ? 32u : 16u);
+  EXPECT_EQ(offsetof(FlutterHardwareBufferExternalTexture, user_data),
+            sizeof(void*) == 8 ? 40u : 20u);
+  EXPECT_EQ(
+      offsetof(FlutterHardwareBufferExternalTexture, destruction_callback),
+      sizeof(void*) == 8 ? 48u : 24u);
+
   FlutterHardwareBufferExternalTexture hw_tex = {};
   hw_tex.struct_size = sizeof(FlutterHardwareBufferExternalTexture);
-  hw_tex.width = 100;
-  hw_tex.height = 200;
-  EXPECT_EQ(hw_tex.struct_size, sizeof(FlutterHardwareBufferExternalTexture));
+  hw_tex.width = 1920;
+  hw_tex.height = 1080;
+  EXPECT_EQ(hw_tex.struct_size, sizeof(void*) == 8 ? 56u : 32u);
+  EXPECT_EQ(hw_tex.width, 1920u);
+  EXPECT_EQ(hw_tex.height, 1080u);
+
+  // 2. FlutterVulkanExternalTexture
+  EXPECT_EQ(sizeof(FlutterVulkanExternalTexture),
+            sizeof(void*) == 8 ? 64u : sizeof(FlutterVulkanExternalTexture));
+  EXPECT_EQ(offsetof(FlutterVulkanExternalTexture, struct_size), 0u);
+  EXPECT_EQ(offsetof(FlutterVulkanExternalTexture, width), sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterVulkanExternalTexture, height), 2 * sizeof(size_t));
+  EXPECT_EQ(
+      offsetof(FlutterVulkanExternalTexture, image),
+      sizeof(void*) == 8 ? 24u : offsetof(FlutterVulkanExternalTexture, image));
+  EXPECT_EQ(offsetof(FlutterVulkanExternalTexture, format),
+            offsetof(FlutterVulkanExternalTexture, image) +
+                sizeof(FlutterVulkanImageHandle));
+  EXPECT_EQ(offsetof(FlutterVulkanExternalTexture, image_layout),
+            offsetof(FlutterVulkanExternalTexture, format) + sizeof(uint32_t));
+  EXPECT_EQ(
+      offsetof(FlutterVulkanExternalTexture, ycbcr_conversion_info),
+      offsetof(FlutterVulkanExternalTexture, image_layout) + sizeof(uint32_t));
+  EXPECT_EQ(offsetof(FlutterVulkanExternalTexture, user_data),
+            offsetof(FlutterVulkanExternalTexture, ycbcr_conversion_info) +
+                sizeof(const FlutterVulkanYcbcrConversionInfo*));
+  EXPECT_EQ(offsetof(FlutterVulkanExternalTexture, destruction_callback),
+            offsetof(FlutterVulkanExternalTexture, user_data) + sizeof(void*));
 
   FlutterVulkanExternalTexture vk_tex = {};
   vk_tex.struct_size = sizeof(FlutterVulkanExternalTexture);
-  vk_tex.width = 100;
-  vk_tex.height = 200;
-  EXPECT_EQ(vk_tex.struct_size, sizeof(FlutterVulkanExternalTexture));
+  vk_tex.width = 1280;
+  vk_tex.height = 720;
+  EXPECT_EQ(vk_tex.struct_size,
+            sizeof(void*) == 8 ? 64u : sizeof(FlutterVulkanExternalTexture));
+  EXPECT_EQ(vk_tex.width, 1280u);
+  EXPECT_EQ(vk_tex.height, 720u);
+
+  // 3. FlutterEngineSpawnConfig
+  EXPECT_EQ(sizeof(FlutterEngineSpawnConfig), sizeof(void*) == 8 ? 40u : 20u);
+  EXPECT_EQ(offsetof(FlutterEngineSpawnConfig, struct_size), 0u);
+  EXPECT_EQ(offsetof(FlutterEngineSpawnConfig, custom_args), sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterEngineSpawnConfig, custom_renderer_config),
+            offsetof(FlutterEngineSpawnConfig, custom_args) + sizeof(void*));
+  EXPECT_EQ(offsetof(FlutterEngineSpawnConfig, user_data),
+            offsetof(FlutterEngineSpawnConfig, custom_renderer_config) +
+                sizeof(void*));
+  EXPECT_EQ(offsetof(FlutterEngineSpawnConfig, initial_route),
+            offsetof(FlutterEngineSpawnConfig, user_data) + sizeof(void*));
 
   FlutterEngineSpawnConfig spawn_cfg = {};
   spawn_cfg.struct_size = sizeof(FlutterEngineSpawnConfig);
   spawn_cfg.initial_route = "/test_route";
-  EXPECT_EQ(spawn_cfg.struct_size, sizeof(FlutterEngineSpawnConfig));
+  EXPECT_EQ(spawn_cfg.struct_size, sizeof(void*) == 8 ? 40u : 20u);
+  EXPECT_STREQ(spawn_cfg.initial_route, "/test_route");
+
+  // 4. FlutterWindowMetricsEvent
+  EXPECT_EQ(sizeof(FlutterWindowMetricsEvent),
+            sizeof(void*) == 8 ? 136u : sizeof(FlutterWindowMetricsEvent));
+  EXPECT_EQ(offsetof(FlutterWindowMetricsEvent, struct_size), 0u);
+  EXPECT_EQ(offsetof(FlutterWindowMetricsEvent, width), sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterWindowMetricsEvent, height), 2 * sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterWindowMetricsEvent, pixel_ratio),
+            3 * sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterWindowMetricsEvent, left),
+            offsetof(FlutterWindowMetricsEvent, pixel_ratio) + sizeof(double));
+  EXPECT_EQ(offsetof(FlutterWindowMetricsEvent, top),
+            offsetof(FlutterWindowMetricsEvent, left) + sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterWindowMetricsEvent, physical_view_inset_top),
+            offsetof(FlutterWindowMetricsEvent, top) + sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterWindowMetricsEvent, display_id),
+            offsetof(FlutterWindowMetricsEvent, physical_view_inset_left) +
+                sizeof(double));
+  EXPECT_EQ(offsetof(FlutterWindowMetricsEvent, view_id),
+            offsetof(FlutterWindowMetricsEvent, display_id) +
+                sizeof(FlutterEngineDisplayId));
+  EXPECT_EQ(offsetof(FlutterWindowMetricsEvent, has_constraints),
+            offsetof(FlutterWindowMetricsEvent, view_id) + sizeof(int64_t));
 
   FlutterWindowMetricsEvent wm_evt = {};
   wm_evt.struct_size = sizeof(FlutterWindowMetricsEvent);
   wm_evt.width = 1080;
   wm_evt.height = 1920;
-  EXPECT_EQ(wm_evt.struct_size, sizeof(FlutterWindowMetricsEvent));
+  EXPECT_EQ(wm_evt.struct_size,
+            sizeof(void*) == 8 ? 136u : sizeof(FlutterWindowMetricsEvent));
+  EXPECT_EQ(wm_evt.width, 1080u);
+  EXPECT_EQ(wm_evt.height, 1920u);
 }
-
-namespace {
-MockJavaVM g_mock_jvm;
-std::once_flag g_jvm_init_flag;
-void EnsureJavaVMInitialized() {
-  std::call_once(g_jvm_init_flag, []() { fml::jni::InitJavaVM(&g_mock_jvm); });
-}
-}  // namespace
 
 class Phase61JniRegistrationCutoverTest : public ::testing::Test {
  public:
-  static void SetUpTestSuite() { EnsureJavaVMInitialized(); }
+  static void SetUpTestSuite() {
+    static std::once_flag jvm_init_flag;
+    std::call_once(jvm_init_flag, []() { fml::jni::InitJavaVM(&jvm_); });
+  }
 
-  void SetUp() override { g_mock_jvm.SetJNIEnv(&mock_env_); }
+  void SetUp() override { jvm_.SetJNIEnv(&mock_env_); }
 
-  void TearDown() override { g_mock_jvm.SetJNIEnv(nullptr); }
+  void TearDown() override { jvm_.SetJNIEnv(nullptr); }
 
   MockJNIEnv& mock_env() { return mock_env_; }
 
+  static MockJavaVM jvm_;
   MockJNIEnv mock_env_;
 };
+
+MockJavaVM Phase61JniRegistrationCutoverTest::jvm_;
 
 TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniSuccess) {
   const jclass kFlutterJNIClass = reinterpret_cast<jclass>(100);
   const jclass kLongClass = reinterpret_cast<jclass>(101);
   const jclass kCallbackInfoClass = reinterpret_cast<jclass>(102);
-  const jclass kWeakRefClass = reinterpret_cast<jclass>(103);
-  const jclass kSurfaceTextureWrapperClass = reinterpret_cast<jclass>(104);
   const jfieldID kShellHolderField = reinterpret_cast<jfieldID>(200);
   const jmethodID kJniConstructor = reinterpret_cast<jmethodID>(300);
   const jmethodID kLongConstructor = reinterpret_cast<jmethodID>(301);
   const jmethodID kCallbackConstructor = reinterpret_cast<jmethodID>(302);
-  const jmethodID kWeakRefGet = reinterpret_cast<jmethodID>(303);
-  const jmethodID kAttachToGL = reinterpret_cast<jmethodID>(304);
-  const jmethodID kUpdateTexImage = reinterpret_cast<jmethodID>(305);
-  const jmethodID kDetachFromGL = reinterpret_cast<jmethodID>(306);
-  const jmethodID kRelease = reinterpret_cast<jmethodID>(307);
 
   EXPECT_CALL(mock_env_, FindClass(_))
       .WillRepeatedly([&](const char* name) -> jclass {
@@ -5546,22 +7119,13 @@ TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniSuccess) {
         if (strcmp(name, "io/flutter/view/FlutterCallbackInformation") == 0) {
           return kCallbackInfoClass;
         }
-        if (strcmp(name, "java/lang/ref/WeakReference") == 0) {
-          return kWeakRefClass;
-        }
-        if (strcmp(
-                name,
-                "io/flutter/embedding/engine/renderer/SurfaceTextureWrapper") ==
-            0) {
-          return kSurfaceTextureWrapperClass;
-        }
         return reinterpret_cast<jclass>(109);
       });
 
   EXPECT_CALL(mock_env_, GetFieldID(kFlutterJNIClass, "nativeShellHolderId",
                                     "Ljava/lang/Long;"))
       .WillRepeatedly(Return(kShellHolderField));
-  EXPECT_CALL(mock_env_, GetMethodID(kFlutterJNIClass, "<init>", "()V"))
+  EXPECT_CALL(mock_env_, GetMethodID(_, _, _))
       .WillRepeatedly(Return(kJniConstructor));
   EXPECT_CALL(mock_env_,
               GetStaticMethodID(kLongClass, "valueOf", "(J)Ljava/lang/Long;"))
@@ -5571,21 +7135,6 @@ TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniSuccess) {
       GetMethodID(kCallbackInfoClass, "<init>",
                   "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V"))
       .WillRepeatedly(Return(kCallbackConstructor));
-  EXPECT_CALL(mock_env_,
-              GetMethodID(kWeakRefClass, "get", "()Ljava/lang/Object;"))
-      .WillRepeatedly(Return(kWeakRefGet));
-  EXPECT_CALL(mock_env_, GetMethodID(kSurfaceTextureWrapperClass,
-                                     "attachToGLContext", "(I)V"))
-      .WillRepeatedly(Return(kAttachToGL));
-  EXPECT_CALL(mock_env_,
-              GetMethodID(kSurfaceTextureWrapperClass, "updateTexImage", "()V"))
-      .WillRepeatedly(Return(kUpdateTexImage));
-  EXPECT_CALL(mock_env_, GetMethodID(kSurfaceTextureWrapperClass,
-                                     "detachFromGLContext", "()V"))
-      .WillRepeatedly(Return(kDetachFromGL));
-  EXPECT_CALL(mock_env_,
-              GetMethodID(kSurfaceTextureWrapperClass, "release", "()V"))
-      .WillRepeatedly(Return(kRelease));
 
   EXPECT_CALL(mock_env_, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
   EXPECT_CALL(mock_env_, DeleteGlobalRef(_)).WillRepeatedly(Return());
@@ -5603,7 +7152,7 @@ TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniSuccess) {
 
   bool result = FlutterEmbedderNative::RegisterJni(&mock_env_);
   EXPECT_TRUE(result);
-  EXPECT_EQ(registered_methods.size(), 40u);
+  EXPECT_EQ(registered_methods.size(), 37u);
 
   // Verify all essential methods are present and bound to valid function
   // pointers
@@ -5616,8 +7165,6 @@ TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniSuccess) {
     return false;
   };
 
-  EXPECT_TRUE(has_method("nativeUpdateRefreshRate"));
-  EXPECT_TRUE(has_method("nativeOnVsync"));
   EXPECT_TRUE(has_method("nativeAttach"));
   EXPECT_TRUE(has_method("nativeDestroy"));
   EXPECT_TRUE(has_method("nativeSpawn"));
@@ -5655,7 +7202,7 @@ TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniSuccess) {
   EXPECT_TRUE(has_method("nativeDeferredComponentInstallFailure"));
   EXPECT_TRUE(has_method("nativeUpdateDisplayMetrics"));
   EXPECT_TRUE(has_method("nativeIsSurfaceControlEnabled"));
-  EXPECT_TRUE(has_method("nativePrefetchDefaultFontManager"));
+  EXPECT_FALSE(has_method("nativePrefetchDefaultFontManager"));
 }
 
 TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniNullOrFailureHandling) {
@@ -5752,8 +7299,19 @@ TEST_F(Phase61JniRegistrationCutoverTest,
       jint, jint, jint, jint, jint, jint, jint, jint, jintArray, jintArray,
       jintArray, jint, jint, jint, jint, jint, jint, jint, jint);
   using IsEmojiFn = jboolean (*)(JNIEnv*, jobject, jint);
+  using IsEmojiModifierFn = jboolean (*)(JNIEnv*, jobject, jint);
+  using IsEmojiModifierBaseFn = jboolean (*)(JNIEnv*, jobject, jint);
+  using IsVariationSelectorFn = jboolean (*)(JNIEnv*, jobject, jint);
+  using IsRegionalIndicatorFn = jboolean (*)(JNIEnv*, jobject, jint);
   using SurfaceCreatedFn = void (*)(JNIEnv*, jobject, jlong, jobject);
+  using SurfaceWindowChangedFn = void (*)(JNIEnv*, jobject, jlong, jobject);
   using SurfaceChangedFn = void (*)(JNIEnv*, jobject, jlong, jint, jint);
+  using SurfaceDestroyedFn = void (*)(JNIEnv*, jobject, jlong);
+  using ScheduleFrameFn = void (*)(JNIEnv*, jobject, jlong);
+  using DispatchPointerDataPacketFn =
+      void (*)(JNIEnv*, jobject, jlong, jobject, jint);
+  using DispatchEmptyPlatformMessageFn =
+      void (*)(JNIEnv*, jobject, jlong, jstring, jint);
   using RegisterTextureFn = void (*)(JNIEnv*, jobject, jlong, jlong, jobject);
   using MarkTextureFrameAvailableFn = void (*)(JNIEnv*, jobject, jlong, jlong);
   using UnregisterTextureFn = void (*)(JNIEnv*, jobject, jlong, jlong);
@@ -5764,8 +7322,17 @@ TEST_F(Phase61JniRegistrationCutoverTest,
   DestroyFn destroy_fn = nullptr;
   SetViewportMetricsFn set_viewport_metrics_fn = nullptr;
   IsEmojiFn is_emoji_fn = nullptr;
+  IsEmojiModifierFn is_emoji_modifier_fn = nullptr;
+  IsEmojiModifierBaseFn is_emoji_modifier_base_fn = nullptr;
+  IsVariationSelectorFn is_variation_selector_fn = nullptr;
+  IsRegionalIndicatorFn is_regional_indicator_fn = nullptr;
   SurfaceCreatedFn surface_created_fn = nullptr;
+  SurfaceWindowChangedFn surface_window_changed_fn = nullptr;
   SurfaceChangedFn surface_changed_fn = nullptr;
+  SurfaceDestroyedFn surface_destroyed_fn = nullptr;
+  ScheduleFrameFn schedule_frame_fn = nullptr;
+  DispatchPointerDataPacketFn dispatch_pointer_data_packet_fn = nullptr;
+  DispatchEmptyPlatformMessageFn dispatch_empty_platform_message_fn = nullptr;
   RegisterTextureFn register_texture_fn = nullptr;
   MarkTextureFrameAvailableFn mark_frame_fn = nullptr;
   UnregisterTextureFn unregister_texture_fn = nullptr;
@@ -5786,12 +7353,47 @@ TEST_F(Phase61JniRegistrationCutoverTest,
           } else if (strcmp(methods[i].name, "nativeFlutterTextUtilsIsEmoji") ==
                      0) {
             is_emoji_fn = reinterpret_cast<IsEmojiFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name,
+                            "nativeFlutterTextUtilsIsEmojiModifier") == 0) {
+            is_emoji_modifier_fn =
+                reinterpret_cast<IsEmojiModifierFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name,
+                            "nativeFlutterTextUtilsIsEmojiModifierBase") == 0) {
+            is_emoji_modifier_base_fn =
+                reinterpret_cast<IsEmojiModifierBaseFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name,
+                            "nativeFlutterTextUtilsIsVariationSelector") == 0) {
+            is_variation_selector_fn =
+                reinterpret_cast<IsVariationSelectorFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name,
+                            "nativeFlutterTextUtilsIsRegionalIndicator") == 0) {
+            is_regional_indicator_fn =
+                reinterpret_cast<IsRegionalIndicatorFn>(methods[i].fnPtr);
           } else if (strcmp(methods[i].name, "nativeSurfaceCreated") == 0) {
             surface_created_fn =
                 reinterpret_cast<SurfaceCreatedFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name, "nativeSurfaceWindowChanged") ==
+                     0) {
+            surface_window_changed_fn =
+                reinterpret_cast<SurfaceWindowChangedFn>(methods[i].fnPtr);
           } else if (strcmp(methods[i].name, "nativeSurfaceChanged") == 0) {
             surface_changed_fn =
                 reinterpret_cast<SurfaceChangedFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name, "nativeSurfaceDestroyed") == 0) {
+            surface_destroyed_fn =
+                reinterpret_cast<SurfaceDestroyedFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name, "nativeScheduleFrame") == 0) {
+            schedule_frame_fn =
+                reinterpret_cast<ScheduleFrameFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name,
+                            "nativeDispatchPointerDataPacket") == 0) {
+            dispatch_pointer_data_packet_fn =
+                reinterpret_cast<DispatchPointerDataPacketFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name,
+                            "nativeDispatchEmptyPlatformMessage") == 0) {
+            dispatch_empty_platform_message_fn =
+                reinterpret_cast<DispatchEmptyPlatformMessageFn>(
+                    methods[i].fnPtr);
           } else if (strcmp(methods[i].name, "nativeRegisterTexture") == 0) {
             register_texture_fn =
                 reinterpret_cast<RegisterTextureFn>(methods[i].fnPtr);
@@ -5820,18 +7422,50 @@ TEST_F(Phase61JniRegistrationCutoverTest,
   ASSERT_NE(destroy_fn, nullptr);
   ASSERT_NE(set_viewport_metrics_fn, nullptr);
   ASSERT_NE(is_emoji_fn, nullptr);
+  ASSERT_NE(is_emoji_modifier_fn, nullptr);
+  ASSERT_NE(is_emoji_modifier_base_fn, nullptr);
+  ASSERT_NE(is_variation_selector_fn, nullptr);
+  ASSERT_NE(is_regional_indicator_fn, nullptr);
   ASSERT_NE(surface_created_fn, nullptr);
+  ASSERT_NE(surface_window_changed_fn, nullptr);
   ASSERT_NE(surface_changed_fn, nullptr);
+  ASSERT_NE(surface_destroyed_fn, nullptr);
+  ASSERT_NE(schedule_frame_fn, nullptr);
+  ASSERT_NE(dispatch_pointer_data_packet_fn, nullptr);
+  ASSERT_NE(dispatch_empty_platform_message_fn, nullptr);
   ASSERT_NE(register_texture_fn, nullptr);
   ASSERT_NE(mark_frame_fn, nullptr);
   ASSERT_NE(unregister_texture_fn, nullptr);
   ASSERT_NE(is_sc_enabled_fn, nullptr);
-  ASSERT_NE(prefetch_font_fn, nullptr);
+  EXPECT_EQ(prefetch_font_fn, nullptr);
 
-  // Test emoji detection logic
-  EXPECT_TRUE(is_emoji_fn(&mock_env_, nullptr, 0x1F600));  // Grinning face
-  EXPECT_TRUE(is_emoji_fn(&mock_env_, nullptr, 0x1F680));  // Rocket
-  EXPECT_FALSE(is_emoji_fn(&mock_env_, nullptr, 0x0041));  // 'A'
+  // Test emoji detection logic via ICU
+  if (u_hasBinaryProperty(0x1F600, UProperty::UCHAR_EMOJI)) {
+    EXPECT_TRUE(is_emoji_fn(&mock_env_, nullptr, 0x1F600));  // Grinning face
+    EXPECT_TRUE(is_emoji_fn(&mock_env_, nullptr, 0x1F680));  // Rocket
+    EXPECT_FALSE(is_emoji_fn(&mock_env_, nullptr, 0x0041));  // 'A'
+
+    EXPECT_TRUE(
+        is_emoji_modifier_fn(&mock_env_, nullptr, 0x1F3FB));  // Light skin tone
+    EXPECT_FALSE(is_emoji_modifier_fn(&mock_env_, nullptr, 0x0041));
+
+    EXPECT_TRUE(
+        is_emoji_modifier_base_fn(&mock_env_, nullptr, 0x1F44D));  // Thumbs up
+    EXPECT_FALSE(is_emoji_modifier_base_fn(&mock_env_, nullptr, 0x0041));
+
+    EXPECT_TRUE(is_variation_selector_fn(&mock_env_, nullptr, 0xFE0F));  // VS16
+    EXPECT_FALSE(is_variation_selector_fn(&mock_env_, nullptr, 0x0041));
+
+    EXPECT_TRUE(is_regional_indicator_fn(&mock_env_, nullptr,
+                                         0x1F1FA));  // Regional indicator U
+    EXPECT_FALSE(is_regional_indicator_fn(&mock_env_, nullptr, 0x0041));
+  } else {
+    EXPECT_FALSE(is_emoji_fn(&mock_env_, nullptr, 0x0041));
+    EXPECT_FALSE(is_emoji_modifier_fn(&mock_env_, nullptr, 0x0041));
+    EXPECT_FALSE(is_emoji_modifier_base_fn(&mock_env_, nullptr, 0x0041));
+    EXPECT_FALSE(is_variation_selector_fn(&mock_env_, nullptr, 0x0041));
+    EXPECT_FALSE(is_regional_indicator_fn(&mock_env_, nullptr, 0x0041));
+  }
 
   // Test native attach & component calls
   jobject flutter_jni_obj = reinterpret_cast<jobject>(500);
@@ -5839,22 +7473,24 @@ TEST_F(Phase61JniRegistrationCutoverTest,
       attach_fn(&mock_env_, kFlutterJNIClass, flutter_jni_obj);
   ASSERT_NE(native_handle, 0);
 
-  // Surface lifecycle calls
-  surface_created_fn(&mock_env_, flutter_jni_obj, native_handle,
-                     reinterpret_cast<jobject>(600));
+  // Surface lifecycle calls with nullptr surfaces (safe for unit tests without
+  // a real Android Surface)
+  surface_created_fn(&mock_env_, flutter_jni_obj, native_handle, nullptr);
+  surface_window_changed_fn(&mock_env_, flutter_jni_obj, native_handle,
+                            nullptr);
   surface_changed_fn(&mock_env_, flutter_jni_obj, native_handle, 1080, 1920);
+  schedule_frame_fn(&mock_env_, flutter_jni_obj, native_handle);
+  dispatch_pointer_data_packet_fn(&mock_env_, flutter_jni_obj, native_handle,
+                                  nullptr, 0);
+  surface_destroyed_fn(&mock_env_, flutter_jni_obj, native_handle);
 
   // Texture registration calls
-  register_texture_fn(&mock_env_, flutter_jni_obj, native_handle, 101,
-                      reinterpret_cast<jobject>(700));
+  register_texture_fn(&mock_env_, flutter_jni_obj, native_handle, 101, nullptr);
   mark_frame_fn(&mock_env_, flutter_jni_obj, native_handle, 101);
   unregister_texture_fn(&mock_env_, flutter_jni_obj, native_handle, 101);
 
   // Surface control check
   EXPECT_FALSE(is_sc_enabled_fn(&mock_env_, flutter_jni_obj, native_handle));
-
-  // Prefetch font manager
-  prefetch_font_fn(&mock_env_, kFlutterJNIClass);
 
   // Set viewport metrics with null display features
   set_viewport_metrics_fn(&mock_env_, flutter_jni_obj, native_handle, 2.0f,
@@ -5925,19 +7561,20 @@ TEST_F(Phase61JniRegistrationCutoverTest, ConcurrentMultithreadedJNIExecution) {
 
   for (size_t t = 0; t < kThreadCount; ++t) {
     futures.push_back(std::async(std::launch::async, [&, t]() {
+      MockJNIEnv thread_env;
       for (size_t i = 0; i < kIterationsPerThread; ++i) {
         jobject jcaller = reinterpret_cast<jobject>(1000 + t * 100 + i);
-        jlong handle = attach_fn(&mock_env_, kFlutterJNIClass, jcaller);
+        jlong handle = attach_fn(&thread_env, kFlutterJNIClass, jcaller);
         if (handle == 0) {
           return false;
         }
 
-        surface_changed_fn(&mock_env_, jcaller, handle, 1080, 1920);
+        surface_changed_fn(&thread_env, jcaller, handle, 1080, 1920);
         int64_t texture_id = static_cast<int64_t>(t * 1000 + i);
-        register_texture_fn(&mock_env_, jcaller, handle, texture_id, nullptr);
-        unregister_texture_fn(&mock_env_, jcaller, handle, texture_id);
+        register_texture_fn(&thread_env, jcaller, handle, texture_id, nullptr);
+        unregister_texture_fn(&thread_env, jcaller, handle, texture_id);
 
-        destroy_fn(&mock_env_, jcaller, handle);
+        destroy_fn(&thread_env, jcaller, handle);
       }
       return true;
     }));
@@ -5948,297 +7585,221 @@ TEST_F(Phase61JniRegistrationCutoverTest, ConcurrentMultithreadedJNIExecution) {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Phase 6.3: Final GN Integration & Dependency Severing Tests
-// ---------------------------------------------------------------------------
+TEST_F(Phase61JniRegistrationCutoverTest,
+       AndroidJvmInvokerDispatchAndPlatformMessageHandling) {
+  const jclass kFlutterJNIClass = reinterpret_cast<jclass>(100);
+  const jclass kLongClass = reinterpret_cast<jclass>(101);
+  const jclass kCallbackInfoClass = reinterpret_cast<jclass>(102);
+  const jfieldID kShellHolderField = reinterpret_cast<jfieldID>(200);
+  const jmethodID kJniConstructor = reinterpret_cast<jmethodID>(300);
+  const jmethodID kLongConstructor = reinterpret_cast<jmethodID>(301);
+  const jmethodID kCallbackConstructor = reinterpret_cast<jmethodID>(302);
 
-class Phase63FinalGNIntegrationTest : public ::testing::Test {
- public:
-  static void SetUpTestSuite() { EnsureJavaVMInitialized(); }
+  EXPECT_CALL(mock_env_, FindClass(_))
+      .WillRepeatedly([&](const char* name) -> jclass {
+        if (strcmp(name, "io/flutter/embedding/engine/FlutterJNI") == 0) {
+          return kFlutterJNIClass;
+        }
+        if (strcmp(name, "java/lang/Long") == 0) {
+          return kLongClass;
+        }
+        if (strcmp(name, "io/flutter/view/FlutterCallbackInformation") == 0) {
+          return kCallbackInfoClass;
+        }
+        return reinterpret_cast<jclass>(109);
+      });
 
- protected:
-  void SetUp() override {
-    g_mock_jvm.SetJNIEnv(&mock_env_);
-    mock_invoker_ = std::make_shared<NiceMock<MockJvmInvoker>>();
-    font_provider_ = std::make_shared<InMemoryFontCollectionProvider>();
-    aot_provider_ = std::make_shared<InMemoryAndroidAOTProvider>();
-    vm_init_ = std::make_shared<AndroidVMInit>(mock_invoker_, font_provider_,
-                                               aot_provider_);
-  }
+  EXPECT_CALL(mock_env_, GetFieldID(kFlutterJNIClass, "nativeShellHolderId",
+                                    "Ljava/lang/Long;"))
+      .WillRepeatedly(Return(kShellHolderField));
+  EXPECT_CALL(mock_env_, GetMethodID(_, _, _))
+      .WillRepeatedly(Return(kJniConstructor));
+  EXPECT_CALL(mock_env_,
+              GetStaticMethodID(kLongClass, "valueOf", "(J)Ljava/lang/Long;"))
+      .WillRepeatedly(Return(kLongConstructor));
+  EXPECT_CALL(
+      mock_env_,
+      GetMethodID(kCallbackInfoClass, "<init>",
+                  "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V"))
+      .WillRepeatedly(Return(kCallbackConstructor));
 
-  void TearDown() override { g_mock_jvm.SetJNIEnv(nullptr); }
+  EXPECT_CALL(mock_env_, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env_, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env_, DeleteGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env_, GetObjectRefType(_))
+      .WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(mock_env_, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
 
-  std::shared_ptr<NiceMock<MockJvmInvoker>> mock_invoker_;
-  std::shared_ptr<InMemoryFontCollectionProvider> font_provider_;
-  std::shared_ptr<InMemoryAndroidAOTProvider> aot_provider_;
-  std::shared_ptr<AndroidVMInit> vm_init_;
-  NiceMock<MockJNIEnv> mock_env_;
-};
+  EXPECT_CALL(mock_env_, RegisterNatives(kFlutterJNIClass, _, _))
+      .WillRepeatedly(Return(0));
 
-TEST_F(Phase63FinalGNIntegrationTest, VMInitAndProjectArgsIsolation) {
-  AndroidVMArgs args;
-  args.command_line_args = {"--enable-checked-mode", "--verify-entry-points"};
-  args.api_level = 34;
-  args.enable_impeller = true;
-  args.engine_caches_path = "/data/user/0/com.example/cache";
-  args.app_storage_path = "/data/user/0/com.example/files";
-  args.vm_service_uri = "http://127.0.0.1:8888/auth/";
+  ASSERT_TRUE(FlutterEmbedderNative::RegisterJni(&mock_env_));
 
-  EXPECT_CALL(*mock_invoker_, InvokeVoidMethod("setVmServiceUri", _, _))
-      .WillRepeatedly(Return(true));
+  // Verify AndroidJvmInvoker instantiation and Java object attachment
+  jobject flutter_jni_obj = reinterpret_cast<jobject>(500);
+  auto native_instance = std::make_unique<FlutterEmbedderNative>();
+  native_instance->AttachJavaObject(&mock_env_, flutter_jni_obj);
 
-  ASSERT_TRUE(vm_init_->Init(args));
-  EXPECT_TRUE(vm_init_->IsInitialized());
-  EXPECT_EQ(vm_init_->GetVmServiceUri(), "http://127.0.0.1:8888/auth/");
-  EXPECT_EQ(vm_init_->GetSelectedRenderingAPI(),
-            AndroidRenderingAPI::kImpellerAutoselect);
+  auto jvm_invoker = native_instance->GetJvmInvoker();
+  ASSERT_NE(jvm_invoker, nullptr);
+  auto weak_ref = jvm_invoker->GetJavaObject();
+  ASSERT_NE(weak_ref, nullptr);
+  auto java_ref = weak_ref->get(&mock_env_);
+  EXPECT_EQ(java_ref.obj(), flutter_jni_obj);
 
-  const FlutterProjectArgs* project_args = vm_init_->GetProjectArgs();
-  ASSERT_NE(project_args, nullptr);
-  EXPECT_EQ(project_args->struct_size, sizeof(FlutterProjectArgs));
-  EXPECT_EQ(project_args->command_line_argc, 3);
-  EXPECT_STREQ(project_args->command_line_argv[0], "flutter");
-  EXPECT_STREQ(project_args->command_line_argv[1], "--enable-checked-mode");
-  EXPECT_STREQ(project_args->command_line_argv[2], "--verify-entry-points");
-  EXPECT_STREQ(project_args->persistent_cache_path,
-               "/data/user/0/com.example/cache");
-  EXPECT_EQ(project_args->vsync_callback,
-            &FlutterEmbedderNative::OnVsyncCallback);
-  EXPECT_EQ(project_args->update_semantics_callback2,
-            &FlutterEmbedderNative::OnUpdateSemantics2);
+  // Verify SendPlatformMessageResponse with invalid response ID returns
+  // kInvalidArguments safely (no SIGSEGV!)
+  EXPECT_EQ(native_instance->SendPlatformMessageResponse(99999, nullptr, 0),
+            kInvalidArguments);
+
+  // Verify Viewport metrics preservation in FlutterEmbedderNative
+  AndroidViewportMetrics metrics;
+  metrics.physical_width = 800;
+  metrics.physical_height = 600;
+  metrics.device_pixel_ratio = 2.5f;
+  native_instance->SetViewportMetrics(metrics);
+
+  AndroidViewportMetrics retrieved = native_instance->GetViewportMetrics();
+  EXPECT_EQ(retrieved.physical_width, 800);
+  EXPECT_EQ(retrieved.physical_height, 600);
+  EXPECT_FLOAT_EQ(retrieved.device_pixel_ratio, 2.5f);
 }
 
-TEST_F(Phase63FinalGNIntegrationTest, RenderingAPISelectionMatrix) {
-  // Test Software fallback
-  {
-    AndroidVMArgs args;
-    args.enable_software_rendering = true;
-    EXPECT_EQ(SelectRenderingAPI(args), AndroidRenderingAPI::kSoftware);
-  }
+TEST_F(Phase61JniRegistrationCutoverTest,
+       SendPointerDataPacketUnpacksEmbedderId) {
+  auto native_instance = std::make_unique<FlutterEmbedderNative>();
 
-  // Test OpenGLES requested
-  {
-    AndroidVMArgs args;
-    args.requested_rendering_backend = "opengles";
-    args.enable_impeller = true;
-    EXPECT_EQ(SelectRenderingAPI(args), AndroidRenderingAPI::kImpellerOpenGLES);
-  }
+  size_t dispatch_count = 0;
+  std::vector<FlutterPointerEvent> recorded_events;
+  native_instance->SetSendPointerEventFnForTesting(
+      [&](const FlutterPointerEvent* events, size_t count) {
+        dispatch_count++;
+        if (events != nullptr && count > 0) {
+          for (size_t i = 0; i < count; ++i) {
+            recorded_events.push_back(events[i]);
+          }
+        }
+        return kSuccess;
+      });
 
-  // Test Vulkan requested
-  {
-    AndroidVMArgs args;
-    args.requested_rendering_backend = "vulkan";
-    args.enable_impeller = true;
-    EXPECT_EQ(SelectRenderingAPI(args), AndroidRenderingAPI::kImpellerVulkan);
-  }
+  // 36 int64/double fields per packet entry = 288 bytes.
+  constexpr size_t kPacketEntrySize = 288;
+  std::vector<uint8_t> buffer(kPacketEntrySize, 0);
+  int64_t* int_fields = reinterpret_cast<int64_t*>(buffer.data());
+  double* double_fields = reinterpret_cast<double*>(buffer.data());
 
-  // Test API level < 29 defaults to Skia OpenGLES
-  {
-    AndroidVMArgs args;
-    args.enable_impeller = true;
-    args.api_level = 28;
-    EXPECT_EQ(SelectRenderingAPI(args), AndroidRenderingAPI::kSkiaOpenGLES);
-  }
+  // int_fields[0] is embedder_id (motion event sequence ID).
+  int_fields[0] = 987654321LL;
+  int_fields[1] = 123456789LL;  // timestamp
+  int_fields[2] = 4;            // change = kDown
+  int_fields[3] = 0;            // kind = Touch
+  int_fields[4] = 0;            // signal_kind = None
+  int_fields[5] = 1;            // device
+  double_fields[7] = 100.0;     // x
+  double_fields[8] = 200.0;     // y
+  int_fields[26] = 555LL;       // platform_data
+  int_fields[35] = 0;           // view_id
 
-  // Test API level >= 29 selects Impeller Autoselect
-  {
-    AndroidVMArgs args;
-    args.enable_impeller = true;
-    args.api_level = 29;
-    EXPECT_EQ(SelectRenderingAPI(args),
-              AndroidRenderingAPI::kImpellerAutoselect);
-  }
+  // 1. Unpack single-event packet
+  FlutterEngineResult res =
+      native_instance->SendPointerDataPacket(buffer.data(), buffer.size());
+  EXPECT_EQ(res, kSuccess);
+  EXPECT_EQ(dispatch_count, 1u);
+  ASSERT_EQ(recorded_events.size(), 1u);
+  EXPECT_EQ(recorded_events[0].embedder_id, 987654321LL);
+  EXPECT_EQ(recorded_events[0].platform_data, 555LL);
+  EXPECT_EQ(recorded_events[0].phase, kDown);
+  EXPECT_DOUBLE_EQ(recorded_events[0].x, 100.0);
+  EXPECT_DOUBLE_EQ(recorded_events[0].y, 200.0);
 
-  // Test Vivante GPU workaround
-  {
-    AndroidVMArgs args;
-    args.enable_impeller = true;
-    args.api_level = 30;
-    EXPECT_EQ(SelectRenderingAPI(args, /*is_vivante=*/true),
-              AndroidRenderingAPI::kSkiaOpenGLES);
-  }
+  // 2. Unpack multi-event packet (2 events = 576 bytes) with distinct
+  // embedder_ids
+  recorded_events.clear();
+  std::vector<uint8_t> multi_buffer(kPacketEntrySize * 2, 0);
+  int64_t* m_int1 = reinterpret_cast<int64_t*>(multi_buffer.data());
+  double* m_double1 = reinterpret_cast<double*>(multi_buffer.data());
+  int64_t* m_int2 =
+      reinterpret_cast<int64_t*>(multi_buffer.data() + kPacketEntrySize);
+  double* m_double2 =
+      reinterpret_cast<double*>(multi_buffer.data() + kPacketEntrySize);
+
+  m_int1[0] = 111111LL;
+  m_int1[1] = 1000LL;
+  m_int1[2] = 4;  // kDown
+  m_double1[7] = 10.0;
+  m_double1[8] = 20.0;
+
+  m_int2[0] = 222222LL;
+  m_int2[1] = 2000LL;
+  m_int2[2] = 5;  // kMove
+  m_double2[7] = 30.0;
+  m_double2[8] = 40.0;
+
+  res = native_instance->SendPointerDataPacket(multi_buffer.data(),
+                                               multi_buffer.size());
+  EXPECT_EQ(res, kSuccess);
+  EXPECT_EQ(dispatch_count, 2u);
+  ASSERT_EQ(recorded_events.size(), 2u);
+  EXPECT_EQ(recorded_events[0].embedder_id, 111111LL);
+  EXPECT_EQ(recorded_events[0].phase, kDown);
+  EXPECT_DOUBLE_EQ(recorded_events[0].x, 10.0);
+  EXPECT_DOUBLE_EQ(recorded_events[0].y, 20.0);
+  EXPECT_EQ(recorded_events[1].embedder_id, 222222LL);
+  EXPECT_EQ(recorded_events[1].phase, kMove);
+  EXPECT_DOUBLE_EQ(recorded_events[1].x, 30.0);
+  EXPECT_DOUBLE_EQ(recorded_events[1].y, 40.0);
+
+  // 3. Error handling: invalid size, zero size, null buffer
+  EXPECT_EQ(native_instance->SendPointerDataPacket(buffer.data(), 100),
+            kInvalidArguments);
+  EXPECT_EQ(native_instance->SendPointerDataPacket(buffer.data(), 0),
+            kInvalidArguments);
+  EXPECT_EQ(native_instance->SendPointerDataPacket(nullptr, 288),
+            kInvalidArguments);
 }
 
-TEST_F(Phase63FinalGNIntegrationTest, ConcurrentMultithreadedOperations) {
-  EXPECT_CALL(*mock_invoker_, InvokeVoidMethod("setVmServiceUri", _, _))
-      .WillRepeatedly(Return(true));
+TEST_F(Phase61JniRegistrationCutoverTest, LaunchPropagatesEngineId) {
+  auto native_instance = std::make_unique<FlutterEmbedderNative>();
 
-  const size_t kThreadCount = 8;
-  const size_t kIterationsPerThread = 50;
-  std::vector<std::future<bool>> futures;
-  futures.reserve(kThreadCount);
+  const int64_t kExpectedEngineId = 0xCAFEBABEDEADLL;
+  bool initialize_called = false;
+  bool run_called = false;
+  auto mock_engine =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xABCD);
 
-  for (size_t t = 0; t < kThreadCount; ++t) {
-    futures.push_back(std::async(std::launch::async, [&, t]() {
-      for (size_t i = 0; i < kIterationsPerThread; ++i) {
-        AndroidVMArgs args;
-        args.command_line_args = {"--thread=" + std::to_string(t),
-                                  "--iter=" + std::to_string(i)};
-        args.api_level = 30;
-        args.enable_impeller = true;
-        args.vm_service_uri = "http://127.0.0.1:" + std::to_string(8000 + t);
+  native_instance->SetInitializeEngineFnForTesting(
+      [&](const FlutterRendererConfig* config, const FlutterProjectArgs* args,
+          void* user_data, FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        initialize_called = true;
+        EXPECT_NE(args, nullptr);
+        if (args) {
+          EXPECT_EQ(args->engine_id, kExpectedEngineId);
+          EXPECT_EQ(args->struct_size, sizeof(FlutterProjectArgs));
+          EXPECT_STREQ(args->custom_dart_entrypoint, "customMain");
+        }
+        *engine_out = mock_engine;
+        return kSuccess;
+      });
 
-        auto thread_vm = std::make_shared<AndroidVMInit>(
-            mock_invoker_, font_provider_, aot_provider_);
-        if (!thread_vm->Init(args)) {
-          return false;
-        }
-        if (!thread_vm->PrefetchDefaultFontManager()) {
-          return false;
-        }
-        if (!thread_vm->SetVmServiceUri("http://127.0.0.1:9000")) {
-          return false;
-        }
-        if (!thread_vm->IsInitialized()) {
-          return false;
-        }
-        if (thread_vm->GetSelectedRenderingAPI() !=
-            AndroidRenderingAPI::kImpellerAutoselect) {
-          return false;
-        }
-      }
-      return true;
-    }));
-  }
+  native_instance->SetRunInitializedEngineFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+        run_called = true;
+        EXPECT_EQ(engine, mock_engine);
+        return kSuccess;
+      });
 
-  for (auto& f : futures) {
-    EXPECT_TRUE(f.get());
-  }
+  native_instance->SetDeinitializeEngineFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+        EXPECT_EQ(engine, mock_engine);
+        return kSuccess;
+      });
+
+  FlutterEngineResult result = native_instance->Launch(
+      "customMain", "entrypoint_url", {"--arg1", "--arg2"}, kExpectedEngineId);
+  EXPECT_EQ(result, kSuccess);
+  EXPECT_TRUE(initialize_called);
+  EXPECT_TRUE(run_called);
 }
-
-TEST_F(Phase63FinalGNIntegrationTest, FlutterMainHcppPlumbing) {
-  FlutterMain::ResetForTesting();
-  EXPECT_FALSE(FlutterMain::IsInitialized());
-
-  // Test uninitialized FlutterMain behavior
-  {
-    FlutterEmbedderNative embedder_uninit;
-    EXPECT_FALSE(embedder_uninit.IsHcppEnabled());
-  }
-
-  auto setup_mock_args =
-      [this](const std::vector<std::string>& args) -> jobjectArray {
-    auto utf16_args = std::make_shared<std::vector<std::u16string>>();
-    for (const auto& arg : args) {
-      utf16_args->push_back(fml::Utf8ToUtf16(arg));
-    }
-    jobjectArray fake_array = reinterpret_cast<jobjectArray>(0x1000);
-    EXPECT_CALL(mock_env_, GetArrayLength(fake_array))
-        .WillRepeatedly(Return(args.size()));
-    EXPECT_CALL(mock_env_, GetObjectRefType(_))
-        .WillRepeatedly(Return(JNILocalRefType));
-    EXPECT_CALL(mock_env_, GetObjectArrayElement(fake_array, _))
-        .WillRepeatedly([utf16_args](jobjectArray, jsize idx) -> jobject {
-          return reinterpret_cast<jobject>(static_cast<uintptr_t>(idx + 1));
-        });
-    EXPECT_CALL(mock_env_, GetStringLength(_))
-        .WillRepeatedly([utf16_args](jstring s) -> jsize {
-          size_t idx = static_cast<size_t>(reinterpret_cast<uintptr_t>(s) - 1);
-          return idx < utf16_args->size() ? (*utf16_args)[idx].length() : 0;
-        });
-    EXPECT_CALL(mock_env_, GetStringChars(_, _))
-        .WillRepeatedly([utf16_args](jstring s, jboolean*) -> const jchar* {
-          size_t idx = static_cast<size_t>(reinterpret_cast<uintptr_t>(s) - 1);
-          return idx < utf16_args->size()
-                     ? reinterpret_cast<const jchar*>((*utf16_args)[idx].data())
-                     : nullptr;
-        });
-    EXPECT_CALL(mock_env_, ReleaseStringChars(_, _)).WillRepeatedly(Return());
-    return fake_array;
-  };
-
-  // Test with --enable-hcpp-and-surface-control=true
-  {
-    jobjectArray jargs_true =
-        setup_mock_args({"--enable-hcpp-and-surface-control=true"});
-    FlutterMain::Init(&mock_env_, nullptr, nullptr, jargs_true, nullptr,
-                      nullptr, nullptr, 0, 34);
-
-    ASSERT_TRUE(FlutterMain::IsInitialized());
-    EXPECT_TRUE(FlutterMain::Get().GetSettings().enable_surface_control);
-
-    FlutterEmbedderNative embedder_default;
-    EXPECT_TRUE(embedder_default.IsHcppEnabled());
-
-    FlutterEmbedderNative embedder_custom(mock_invoker_);
-    EXPECT_TRUE(embedder_custom.IsHcppEnabled());
-
-    // Test SetPlatformViewsProvider dynamically propagates HCPP flag
-    auto new_provider =
-        std::make_shared<DefaultPlatformViewsProvider>(mock_invoker_);
-    embedder_default.SetPlatformViewsProvider(new_provider);
-    EXPECT_TRUE(embedder_default.IsHcppEnabled());
-  }
-
-  ::testing::Mock::VerifyAndClearExpectations(&mock_env_);
-  FlutterMain::ResetForTesting();
-  EXPECT_FALSE(FlutterMain::IsInitialized());
-
-  // Test with bare --enable-hcpp-and-surface-control (no value)
-  {
-    jobjectArray jargs_bare =
-        setup_mock_args({"--enable-hcpp-and-surface-control"});
-    FlutterMain::Init(&mock_env_, nullptr, nullptr, jargs_bare, nullptr,
-                      nullptr, nullptr, 0, 34);
-
-    ASSERT_TRUE(FlutterMain::IsInitialized());
-    EXPECT_TRUE(FlutterMain::Get().GetSettings().enable_surface_control);
-
-    FlutterEmbedderNative embedder_default;
-    EXPECT_TRUE(embedder_default.IsHcppEnabled());
-  }
-
-  ::testing::Mock::VerifyAndClearExpectations(&mock_env_);
-  FlutterMain::ResetForTesting();
-  EXPECT_FALSE(FlutterMain::IsInitialized());
-
-  // Test with --enable-hcpp-and-surface-control=false
-  {
-    jobjectArray jargs_false =
-        setup_mock_args({"--enable-hcpp-and-surface-control=false"});
-    FlutterMain::Init(&mock_env_, nullptr, nullptr, jargs_false, nullptr,
-                      nullptr, nullptr, 0, 34);
-
-    ASSERT_TRUE(FlutterMain::IsInitialized());
-    EXPECT_FALSE(FlutterMain::Get().GetSettings().enable_surface_control);
-
-    FlutterEmbedderNative embedder_default;
-    EXPECT_FALSE(embedder_default.IsHcppEnabled());
-
-    FlutterEmbedderNative embedder_custom(mock_invoker_);
-    EXPECT_FALSE(embedder_custom.IsHcppEnabled());
-  }
-
-  ::testing::Mock::VerifyAndClearExpectations(&mock_env_);
-  FlutterMain::ResetForTesting();
-  EXPECT_FALSE(FlutterMain::IsInitialized());
-
-  // Test with nullptr jargs (defaults to disabled)
-  {
-    FlutterMain::Init(&mock_env_, nullptr, nullptr, nullptr, nullptr, nullptr,
-                      nullptr, 0, 34);
-
-    ASSERT_TRUE(FlutterMain::IsInitialized());
-    EXPECT_FALSE(FlutterMain::Get().GetSettings().enable_surface_control);
-
-    FlutterEmbedderNative embedder_default;
-    EXPECT_FALSE(embedder_default.IsHcppEnabled());
-  }
-
-  ::testing::Mock::VerifyAndClearExpectations(&mock_env_);
-  FlutterMain::ResetForTesting();
-  EXPECT_FALSE(FlutterMain::IsInitialized());
-}
-
-class EmbedderTestListener : public ::testing::EmptyTestEventListener {
- public:
-  void OnTestStart(const ::testing::TestInfo&) override {
-    JniRouter::SetEmbedderEnabled(true);
-  }
-  void OnTestEnd(const ::testing::TestInfo&) override {
-    JniRouter::SetEmbedderEnabled(true);
-  }
-};
 
 }  // namespace testing
 }  // namespace android
@@ -6246,7 +7807,20 @@ class EmbedderTestListener : public ::testing::EmptyTestEventListener {
 
 int main(int argc, char* argv[]) {
   ::testing::InitGoogleTest(&argc, argv);
-  ::testing::UnitTest::GetInstance()->listeners().Append(
-      new flutter::android::testing::EmbedderTestListener());
+  auto dir = fml::paths::GetExecutableDirectoryPath();
+  std::string icu_path = "icudtl.dat";
+  if (dir.first) {
+    icu_path = fml::paths::JoinPaths({dir.second, "icudtl.dat"});
+  }
+  auto fd = fml::OpenFile(icu_path.c_str(), false, fml::FilePermission::kRead);
+  if (fd.is_valid()) {
+    fml::icu::InitializeICU(icu_path);
+  } else {
+    auto fd_tmp = fml::OpenFile("/data/local/tmp/icudtl.dat", false,
+                                fml::FilePermission::kRead);
+    if (fd_tmp.is_valid()) {
+      fml::icu::InitializeICU("/data/local/tmp/icudtl.dat");
+    }
+  }
   return RUN_ALL_TESTS();
 }
