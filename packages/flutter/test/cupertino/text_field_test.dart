@@ -1978,8 +1978,7 @@ void main() {
 
   testWidgets('Tapping on a collapsed selection toggles the toolbar', (WidgetTester tester) async {
     final controller = TextEditingController(
-      text:
-          'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neigse Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
+      text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neigse Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
     addTearDown(controller.dispose);
     // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
@@ -2059,66 +2058,63 @@ void main() {
     expectNoCupertinoToolbar();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
 
-  testWidgets('Tapping on a non-collapsed selection toggles the toolbar and retains the selection', (
-    WidgetTester tester,
-  ) async {
-    final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
-    addTearDown(controller.dispose);
-    // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Center(child: CupertinoTextField(controller: controller)),
-      ),
-    );
+  testWidgets(
+    'Tapping on a non-collapsed selection toggles the toolbar and retains the selection',
+    (WidgetTester tester) async {
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
+      addTearDown(controller.dispose);
+      // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
+      );
 
-    final Offset vPos = textOffsetToPosition(tester, 29); // Index of 'Bonav|enture'.
-    final Offset ePos =
-        textOffsetToPosition(tester, 35) +
-        const Offset(
-          7.0,
-          0.0,
-        ); // Index of 'Bonaventure|' + Offset(7.0,0), which taps slightly to the right of the end of the text.
-    final Offset wPos = textOffsetToPosition(tester, 3); // Index of 'Atw|ater'.
+      final Offset vPos = textOffsetToPosition(tester, 29); // Index of 'Bonav|enture'.
+      final Offset ePos = textOffsetToPosition(tester, 35) + const Offset(7.0, 0.0); // Index of 'Bonaventure|' + Offset(7.0,0), which taps slightly to the right of the end of the text.
+      final Offset wPos = textOffsetToPosition(tester, 3); // Index of 'Atw|ater'.
 
-    // This tap just puts the cursor somewhere different than where the double
-    // tap will occur to test that the double tap moves the existing cursor first.
-    await tester.tapAt(wPos);
-    await tester.pump(const Duration(milliseconds: 500));
+      // This tap just puts the cursor somewhere different than where the double
+      // tap will occur to test that the double tap moves the existing cursor first.
+      await tester.tapAt(wPos);
+      await tester.pump(const Duration(milliseconds: 500));
 
-    await tester.tapAt(vPos);
-    await tester.pump(const Duration(milliseconds: 50));
-    // First tap moved the cursor.
-    expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, 35);
-    await tester.tapAt(vPos);
-    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+      await tester.tapAt(vPos);
+      await tester.pump(const Duration(milliseconds: 50));
+      // First tap moved the cursor.
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 35);
+      await tester.tapAt(vPos);
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
-    // Second tap selects the word around the cursor.
-    expect(controller.selection, const TextSelection(baseOffset: 24, extentOffset: 35));
+      // Second tap selects the word around the cursor.
+      expect(controller.selection, const TextSelection(baseOffset: 24, extentOffset: 35));
 
-    expectCupertinoToolbarForPartialSelection();
+      expectCupertinoToolbarForPartialSelection();
 
-    // Tap the selected word to hide the toolbar and retain the selection.
-    await tester.tapAt(vPos);
-    await tester.pumpAndSettle();
-    expect(controller.selection, const TextSelection(baseOffset: 24, extentOffset: 35));
-    expect(find.byType(CupertinoButton), findsNothing);
+      // Tap the selected word to hide the toolbar and retain the selection.
+      await tester.tapAt(vPos);
+      await tester.pumpAndSettle();
+      expect(controller.selection, const TextSelection(baseOffset: 24, extentOffset: 35));
+      expect(find.byType(CupertinoButton), findsNothing);
 
-    // Tap the selected word to show the toolbar and retain the selection.
-    await tester.tapAt(vPos);
-    await tester.pumpAndSettle();
-    expect(controller.selection, const TextSelection(baseOffset: 24, extentOffset: 35));
+      // Tap the selected word to show the toolbar and retain the selection.
+      await tester.tapAt(vPos);
+      await tester.pumpAndSettle();
+      expect(controller.selection, const TextSelection(baseOffset: 24, extentOffset: 35));
 
-    expectCupertinoToolbarForPartialSelection();
+      expectCupertinoToolbarForPartialSelection();
 
-    // Tap past the selected word to move the cursor and hide the toolbar.
-    await tester.tapAt(ePos);
-    await tester.pumpAndSettle();
-    expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, 35);
+      // Tap past the selected word to move the cursor and hide the toolbar.
+      await tester.tapAt(ePos);
+      await tester.pumpAndSettle();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 35);
 
-    expect(find.byType(CupertinoButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
+      expect(find.byType(CupertinoButton), findsNothing);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
+  );
 
   testWidgets(
     'double tap selects word for non-Apple platforms',
