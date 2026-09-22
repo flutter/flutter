@@ -4,15 +4,15 @@
 
 package io.flutter.embedding.android;
 
-import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_ID;
-import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
+import io.flutter.embedding.android.FlutterActivityLaunchConfigs;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -424,7 +424,7 @@ public class FlutterActivityTest {
         Robolectric.buildActivity(FlutterActivity.class, intent);
     FlutterActivity flutterActivity = activityController.get();
     Bundle bundle = new Bundle();
-    bundle.putBoolean(HANDLE_DEEPLINKING_META_DATA_KEY, true);
+    bundle.putBoolean(FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY, true);
     FlutterActivity spyFlutterActivity = spy(flutterActivity);
     when(spyFlutterActivity.getMetaData()).thenReturn(bundle);
     assertTrue(spyFlutterActivity.shouldHandleDeeplinking());
@@ -439,7 +439,7 @@ public class FlutterActivityTest {
         Robolectric.buildActivity(FlutterActivity.class, intent);
     FlutterActivity flutterActivity = activityController.get();
     Bundle bundle = new Bundle();
-    bundle.putBoolean(HANDLE_DEEPLINKING_META_DATA_KEY, false);
+    bundle.putBoolean(FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY, false);
     FlutterActivity spyFlutterActivity = spy(flutterActivity);
     when(spyFlutterActivity.getMetaData()).thenReturn(bundle);
     assertFalse(spyFlutterActivity.shouldHandleDeeplinking());
@@ -713,7 +713,12 @@ public class FlutterActivityTest {
     FlutterActivity flutterActivity = activityController.get();
 
     try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
-      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(true);
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_ID)))
+          .thenReturn("my_cached_engine");
       assertEquals("my_cached_engine", flutterActivity.getCachedEngineId());
     }
   }
@@ -726,7 +731,12 @@ public class FlutterActivityTest {
     FlutterActivity flutterActivity = activityController.get();
 
     try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
-      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(false);
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_ID)))
+          .thenReturn(null);
       assertNull(flutterActivity.getCachedEngineId());
     }
   }
@@ -742,7 +752,12 @@ public class FlutterActivityTest {
     FlutterActivity flutterActivity = activityController.get();
 
     try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
-      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(true);
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_GROUP_ID)))
+          .thenReturn("my_cached_engine_group");
       assertEquals("my_cached_engine_group", flutterActivity.getCachedEngineGroupId());
     }
   }
@@ -758,7 +773,12 @@ public class FlutterActivityTest {
     FlutterActivity flutterActivity = activityController.get();
 
     try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
-      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(false);
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_GROUP_ID)))
+          .thenReturn(null);
       assertNull(flutterActivity.getCachedEngineGroupId());
     }
   }
@@ -774,7 +794,12 @@ public class FlutterActivityTest {
     FlutterActivity flutterActivity = activityController.get();
 
     try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
-      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(true);
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT)))
+          .thenReturn("custom_entrypoint");
       assertEquals("custom_entrypoint", flutterActivity.getDartEntrypointFunctionName());
     }
   }
@@ -790,7 +815,12 @@ public class FlutterActivityTest {
     FlutterActivity flutterActivity = activityController.get();
 
     try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
-      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(false);
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT)))
+          .thenReturn(null);
       assertEquals("main", flutterActivity.getDartEntrypointFunctionName());
     }
   }
@@ -806,7 +836,12 @@ public class FlutterActivityTest {
     FlutterActivity flutterActivity = activityController.get();
 
     try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
-      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(true);
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetSerializableExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT_ARGS)))
+          .thenReturn(new ArrayList<String>(Arrays.asList("foo", "bar")));
       assertEquals(Arrays.asList("foo", "bar"), flutterActivity.getDartEntrypointArgs());
     }
   }
@@ -822,7 +857,12 @@ public class FlutterActivityTest {
     FlutterActivity flutterActivity = activityController.get();
 
     try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
-      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(false);
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetSerializableExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT_ARGS)))
+          .thenReturn(null);
       assertNull(flutterActivity.getDartEntrypointArgs());
     }
   }
@@ -835,7 +875,12 @@ public class FlutterActivityTest {
     FlutterActivity flutterActivity = activityController.get();
 
     try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
-      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(true);
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE)))
+          .thenReturn("/custom/route");
       assertEquals("/custom/route", flutterActivity.getInitialRoute());
     }
   }
@@ -848,7 +893,12 @@ public class FlutterActivityTest {
     FlutterActivity flutterActivity = activityController.get();
 
     try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
-      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(false);
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE)))
+          .thenReturn(null);
       assertNull(flutterActivity.getInitialRoute());
     }
   }
@@ -866,7 +916,12 @@ public class FlutterActivityTest {
     when(flutterActivity.getMetaData()).thenReturn(bundle);
 
     try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
-      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(false);
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE)))
+          .thenReturn(null);
       assertEquals("/meta/route", flutterActivity.getInitialRoute());
     }
   }
@@ -887,7 +942,12 @@ public class FlutterActivityTest {
     when(flutterActivity.getMetaData()).thenReturn(bundle);
 
     try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
-      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(false);
+      mockedIntentUtils
+          .when(
+              () ->
+                  IntentUtils.safeGetStringExtra(
+                      any(), eq(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT)))
+          .thenReturn(null);
       assertEquals("meta_entrypoint", flutterActivity.getDartEntrypointFunctionName());
     }
   }
