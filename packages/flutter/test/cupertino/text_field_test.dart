@@ -828,8 +828,6 @@ void main() {
 
       expect(tester.getSize(find.byType(CupertinoTextField)), const Size(200, 38));
     },
-    // TODO(mdebbar): Strut styles support.
-    skip: isBrowser, // https://github.com/flutter/flutter/issues/32243
   );
 
   testWidgets(
@@ -852,8 +850,6 @@ void main() {
 
       expect(tester.getSize(find.byType(CupertinoTextField)), const Size(200, 68));
     },
-    // TODO(mdebbar): Strut styles support.
-    skip: isBrowser, // https://github.com/flutter/flutter/issues/32243
   );
 
   testWidgets('default text field has a border', (WidgetTester tester) async {

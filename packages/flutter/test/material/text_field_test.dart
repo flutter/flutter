@@ -14269,7 +14269,6 @@ void main() {
         const Size(800, 174),
       );
     },
-    skip: isBrowser, // TODO(mdebbar): https://github.com/flutter/flutter/issues/32243
   );
 
   testWidgets(
@@ -14295,7 +14294,6 @@ void main() {
         const Size(800, 48),
       );
     },
-    skip: isBrowser, // TODO(mdebbar): https://github.com/flutter/flutter/issues/32243
   );
 
   testWidgets(
@@ -14323,7 +14321,6 @@ void main() {
         const Size(800, 78),
       );
     },
-    skip: isBrowser, // TODO(mdebbar): https://github.com/flutter/flutter/issues/32243
   );
 
   testWidgets('Caret center position', (WidgetTester tester) async {

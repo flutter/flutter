@@ -125,7 +125,7 @@ void main() {
     await pump(FloatingActionButtonLocation.centerDocked);
     await tester.pumpAndSettle();
     await expectLater(find.byKey(key), matchesGoldenFile('m2_bottom_app_bar.custom_shape.2.png'));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
+  });
 
   testWidgets('Material3 - Custom shape', (WidgetTester tester) async {
     final Key key = UniqueKey();
@@ -163,7 +163,7 @@ void main() {
     await pump(FloatingActionButtonLocation.centerDocked);
     await tester.pumpAndSettle();
     await expectLater(find.byKey(key), matchesGoldenFile('m3_bottom_app_bar.custom_shape.2.png'));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
+  });
 
   testWidgets('Custom Padding', (WidgetTester tester) async {
     const customPadding = EdgeInsets.all(10);

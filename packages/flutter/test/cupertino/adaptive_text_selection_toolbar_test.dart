@@ -65,7 +65,6 @@ void main() {
       }
     },
     variant: TargetPlatformVariant.all(),
-    skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
   );
 
   testWidgets(
@@ -86,7 +85,6 @@ void main() {
 
       expect(find.byKey(key), findsOneWidget);
     },
-    skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
   );
 
   testWidgets(
@@ -288,7 +286,6 @@ void main() {
       expect(tester.getSize(find.byType(CupertinoAdaptiveTextSelectionToolbar)), Size.zero);
       expect(tester.takeException(), isNull);
     },
-    skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
     variant: TargetPlatformVariant.all(),
   );
 }
