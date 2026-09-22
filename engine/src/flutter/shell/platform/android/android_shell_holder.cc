@@ -52,7 +52,7 @@ AndroidShellHolder::AndroidShellHolder(
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     AndroidRenderingAPI android_rendering_api)
     : settings_(settings),
-      jni_facade_(jni_facade),
+      jni_facade_(std::move(jni_facade)),
       android_rendering_api_(android_rendering_api) {
   static size_t thread_host_count = 1;
   auto thread_label = std::to_string(thread_host_count++);
@@ -127,7 +127,7 @@ AndroidShellHolder::AndroidShellHolder(
   platform_view_ = platform_view_android_->GetWeakPtr();
 
   auto embedder_engine = std::make_unique<EmbedderAndroidEngine>(
-      task_runners, settings_, jni_facade_, engine_rendering_api);
+      task_runners, settings_, jni_facade_, android_rendering_api_);
   embedder_engine->SetPlatformMessageHandler(
       platform_view_android_->GetPlatformMessageHandler());
   engine_ = std::move(embedder_engine);
@@ -188,7 +188,7 @@ const flutter::Settings& AndroidShellHolder::GetSettings() const {
 }
 
 std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
-    std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
     const std::string& entrypoint,
     const std::string& libraryUrl,
     const std::string& initial_route,

@@ -40,7 +40,7 @@ namespace flutter {
  */
 class EmbedderAndroidEngine final : public AndroidEngine {
  public:
-  EmbedderAndroidEngine(
+  explicit EmbedderAndroidEngine(
       const TaskRunners& task_runners,
       const Settings& settings = Settings(),
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade = nullptr,
@@ -366,6 +366,7 @@ class EmbedderAndroidEngine final : public AndroidEngine {
   FlutterRendererConfig renderer_config_{};
   FlutterCompositor embedder_compositor_{};
   FlutterProjectArgs project_args_{};
+  FlutterEngineAOTData aot_data_ = nullptr;
 
   std::mutex next_frame_callback_mutex_;
   fml::closure next_frame_callback_;
