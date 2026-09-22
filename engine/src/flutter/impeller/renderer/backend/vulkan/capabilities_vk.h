@@ -286,6 +286,9 @@ class CapabilitiesVK final : public Capabilities,
   bool SupportsFramebufferRenderMipmap() const override;
 
   // |Capabilities|
+  bool SupportsVertexFormat(VertexAttributeFormat format) const override;
+
+  // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override;
 
   // |Capabilities|
