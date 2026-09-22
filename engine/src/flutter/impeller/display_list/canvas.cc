@@ -2004,7 +2004,7 @@ void Canvas::SaveLayer(const Paint& paint,
         backdrop_entity.SetBlendMode(paint.blend_mode);
 
         backdrop_entity.Render(renderer_, GetCurrentRenderPass());
-        Save(0);
+        Save(total_content_depth);
         return;
       }
     }
