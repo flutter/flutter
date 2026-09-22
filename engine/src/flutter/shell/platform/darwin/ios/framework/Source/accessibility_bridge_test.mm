@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <set>
+#include <vector>
+
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
@@ -1839,7 +1842,10 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode node_one;
   node_one.id = 1;
   node_one.label = "route1";
+  node_one.rect = SkRect::MakeLTRB(0, 0, 100, 100);
   node_one.scrollPosition = 0.0;
+  node_one.scrollExtentMin = 0.0;
+  node_one.scrollExtentMax = 100.0;
   first_update[node_one.id] = node_one;
   flutter::SemanticsNode root_node;
   root_node.id = kRootNodeId;
@@ -1860,18 +1866,282 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode new_node_one;
   new_node_one.id = 1;
   new_node_one.label = "route1";
-  new_node_one.scrollPosition = 1.0;
+  new_node_one.rect = SkRect::MakeLTRB(0, 0, 100, 100);
+  new_node_one.scrollPosition = 100.0;
+  new_node_one.scrollExtentMin = 0.0;
+  new_node_one.scrollExtentMax = 100.0;
   second_update[new_node_one.id] = new_node_one;
   bridge->UpdateSemantics(/*nodes=*/second_update, /*actions=*/actions);
-  SemanticsObject* focusObject = accessibility_notifications[0][@"argument"];
-  // Since we have focused on the node 1 right before the scrolling, the bridge should refocus the
-  // node 1.
-  XCTAssertEqual([focusObject uid], 1);
+
   XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
                  UIAccessibilityPageScrolledNotification);
+  // UIAccessibilityPageScrolledNotification requires an NSString describing the
+  // new scroll position. Posting an element here produces no speech at all.
+  id argument = accessibility_notifications[0][@"argument"];
+  XCTAssertTrue([argument isKindOfClass:[NSString class]]);
+  XCTAssertEqualObjects(argument, @"page 2 of 2");
+  // The previously focused object is still in the tree, so focus must not be
+  // disturbed by an additional layout-changed notification.
+  XCTAssertEqual([accessibility_notifications count], 1ul);
 }
 
-- (void)testAnnouncesScrollChangeDoesCallNativeAccessibility {
+// https://github.com/flutter/flutter/issues/189285: a real scroll also moves
+// its children, which must not suppress the scroll announcement.
+- (void)testAnnouncesScrollChangeEvenWhenLayoutAlsoChanged {
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+
+  NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
+      [[NSMutableArray alloc] init];
+  auto ios_delegate = std::make_unique<flutter::MockIosDelegate>();
+  ios_delegate->on_PostAccessibilityNotification_ =
+      [accessibility_notifications](UIAccessibilityNotifications notification, id argument) {
+        [accessibility_notifications addObject:@{
+          @"notification" : @(notification),
+          @"argument" : argument ? argument : [NSNull null],
+        }];
+      };
+  __block auto bridge =
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
+                                                     /*platform_view=*/platform_view.get(),
+                                                     /*platform_views_controller=*/nil,
+                                                     /*ios_delegate=*/std::move(ios_delegate));
+
+  flutter::CustomAccessibilityActionUpdates actions;
+  flutter::SemanticsNodeUpdates first_update;
+
+  flutter::SemanticsNode scrollable;
+  scrollable.id = 1;
+  scrollable.flags.hasImplicitScrolling = true;
+  scrollable.rect = SkRect::MakeLTRB(0, 0, 100, 100);
+  scrollable.scrollPosition = 0.0;
+  scrollable.scrollExtentMin = 0.0;
+  scrollable.scrollExtentMax = 100.0;
+  scrollable.childrenInTraversalOrder = {2};
+  scrollable.childrenInHitTestOrder = {2};
+  first_update[scrollable.id] = scrollable;
+
+  // A row inside the scrollable. Scrolling moves it, which is what sets
+  // `layoutChanged` in a real application.
+  flutter::SemanticsNode row;
+  row.id = 2;
+  row.label = "row";
+  row.rect = SkRect::MakeLTRB(0, 0, 100, 50);
+  first_update[row.id] = row;
+
+  flutter::SemanticsNode root_node;
+  root_node.id = kRootNodeId;
+  root_node.label = "root";
+  root_node.childrenInTraversalOrder = {1};
+  root_node.childrenInHitTestOrder = {1};
+  first_update[root_node.id] = root_node;
+  bridge->UpdateSemantics(/*nodes=*/first_update, /*actions=*/actions);
+
+  [accessibility_notifications removeAllObjects];
+
+  // Focus the row so it is still in the tree after the scroll.
+  bridge->AccessibilityObjectDidBecomeFocused(2);
+
+  flutter::SemanticsNodeUpdates second_update;
+  flutter::SemanticsNode scrolled = scrollable;
+  scrolled.scrollPosition = 100.0;
+  second_update[scrolled.id] = scrolled;
+
+  // The row moves up as the list scrolls: this is the layout change that used
+  // to mask the scroll notification entirely.
+  flutter::SemanticsNode moved_row = row;
+  moved_row.rect = SkRect::MakeLTRB(0, -50, 100, 0);
+  second_update[moved_row.id] = moved_row;
+
+  bridge->UpdateSemantics(/*nodes=*/second_update, /*actions=*/actions);
+
+  XCTAssertEqual([accessibility_notifications count], 1ul);
+  XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
+                 UIAccessibilityPageScrolledNotification);
+  XCTAssertEqualObjects(accessibility_notifications[0][@"argument"], @"page 2 of 2");
+}
+
+- (void)testScrollAnnouncementCountsOnlyVisibleRows {
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+
+  NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
+      [[NSMutableArray alloc] init];
+  auto ios_delegate = std::make_unique<flutter::MockIosDelegate>();
+  ios_delegate->on_PostAccessibilityNotification_ =
+      [accessibility_notifications](UIAccessibilityNotifications notification, id argument) {
+        [accessibility_notifications addObject:@{
+          @"notification" : @(notification),
+          @"argument" : argument ? argument : [NSNull null],
+        }];
+      };
+  __block auto bridge =
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
+                                                     /*platform_view=*/platform_view.get(),
+                                                     /*platform_views_controller=*/nil,
+                                                     /*ios_delegate=*/std::move(ios_delegate));
+
+  flutter::CustomAccessibilityActionUpdates actions;
+
+  // Rows 4-5 and 9-10 are hidden cache extent rows; only 6-8 are on screen.
+  const std::vector<int32_t> rows = {10, 11, 12, 13, 14, 15, 16};
+  const std::set<int32_t> hidden_rows = {10, 11, 15, 16};
+  auto make_scrollable = [&rows](double position) {
+    flutter::SemanticsNode node;
+    node.id = 1;
+    node.label = "route1";
+    node.flags.hasImplicitScrolling = true;
+    node.rect = SkRect::MakeLTRB(0, 0, 100, 100);
+    node.scrollPosition = position;
+    node.scrollChildren = 50;
+    node.scrollIndex = 5;  // Index of the first row that is not hidden.
+    node.childrenInTraversalOrder = rows;
+    node.childrenInHitTestOrder = rows;
+    return node;
+  };
+
+  flutter::SemanticsNodeUpdates first_update;
+  first_update[1] = make_scrollable(0.0);
+  for (int32_t row : rows) {
+    flutter::SemanticsNode row_node;
+    row_node.id = row;
+    row_node.label = "row";
+    row_node.rect = SkRect::MakeLTRB(0, 0, 100, 20);
+    row_node.flags.isHidden = hidden_rows.count(row) > 0;
+    first_update[row] = row_node;
+  }
+  flutter::SemanticsNode root_node;
+  root_node.id = kRootNodeId;
+  root_node.label = "root";
+  root_node.childrenInTraversalOrder = {1};
+  root_node.childrenInHitTestOrder = {1};
+  first_update[root_node.id] = root_node;
+  bridge->UpdateSemantics(/*nodes=*/first_update, /*actions=*/actions);
+  [accessibility_notifications removeAllObjects];
+
+  flutter::SemanticsNodeUpdates second_update;
+  second_update[1] = make_scrollable(1.0);
+  bridge->UpdateSemantics(/*nodes=*/second_update, /*actions=*/actions);
+
+  XCTAssertEqual(accessibility_notifications.count, 1ul);
+  XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
+                 UIAccessibilityPageScrolledNotification);
+  // Counting the hidden rows as well would give "rows 6 to 12 of 50".
+  XCTAssertEqualObjects(accessibility_notifications[0][@"argument"], @"rows 6 to 8 of 50");
+}
+
+- (void)testScrollAnnouncementPageNumbering {
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+
+  NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
+      [[NSMutableArray alloc] init];
+  auto ios_delegate = std::make_unique<flutter::MockIosDelegate>();
+  ios_delegate->on_PostAccessibilityNotification_ =
+      [accessibility_notifications](UIAccessibilityNotifications notification, id argument) {
+        [accessibility_notifications addObject:@{
+          @"notification" : @(notification),
+          @"argument" : argument ? argument : [NSNull null],
+        }];
+      };
+  __block auto bridge =
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
+                                                     /*platform_view=*/platform_view.get(),
+                                                     /*platform_views_controller=*/nil,
+                                                     /*ios_delegate=*/std::move(ios_delegate));
+
+  flutter::CustomAccessibilityActionUpdates actions;
+
+  // A 100 point viewport over 250 points of content: two and a half screens,
+  // which is three pages.
+  auto make_scrollable = [](double position, double extent_max = 150.0) {
+    flutter::SemanticsNode node;
+    node.id = 1;
+    node.label = "route1";
+    node.flags.hasImplicitScrolling = true;
+    node.rect = SkRect::MakeLTRB(0, 0, 100, 100);
+    node.scrollPosition = position;
+    node.scrollExtentMin = 0.0;
+    node.scrollExtentMax = extent_max;
+    return node;
+  };
+
+  flutter::SemanticsNodeUpdates first_update;
+  first_update[1] = make_scrollable(0.0);
+  flutter::SemanticsNode root_node;
+  root_node.id = kRootNodeId;
+  root_node.label = "root";
+  root_node.childrenInTraversalOrder = {1};
+  root_node.childrenInHitTestOrder = {1};
+  first_update[root_node.id] = root_node;
+  bridge->UpdateSemantics(/*nodes=*/first_update, /*actions=*/actions);
+  [accessibility_notifications removeAllObjects];
+
+  // One VoiceOver three-finger scroll moves 0.8 of the viewport.
+  flutter::SemanticsNodeUpdates second_update;
+  second_update[1] = make_scrollable(80.0);
+  bridge->UpdateSemantics(/*nodes=*/second_update, /*actions=*/actions);
+
+  // The next one hits the end of the content.
+  flutter::SemanticsNodeUpdates third_update;
+  third_update[1] = make_scrollable(150.0);
+  bridge->UpdateSemantics(/*nodes=*/third_update, /*actions=*/actions);
+
+  // The content becomes exactly three pages, but with the kind of rounding
+  // error layout produces.
+  flutter::SemanticsNodeUpdates fourth_update;
+  fourth_update[1] = make_scrollable(0.0, 200.0000001);
+  bridge->UpdateSemantics(/*nodes=*/fourth_update, /*actions=*/actions);
+
+  XCTAssertEqual(accessibility_notifications.count, 3ul);
+  XCTAssertEqualObjects(accessibility_notifications[0][@"argument"], @"page 2 of 3");
+  // Deriving the page from position / viewport would say "page 2 of 3" here:
+  // the last page would be unreachable.
+  XCTAssertEqualObjects(accessibility_notifications[1][@"argument"], @"page 3 of 3");
+  // Without a tolerance the rounding error adds a phantom page: "page 1 of 4".
+  XCTAssertEqualObjects(accessibility_notifications[2][@"argument"], @"page 1 of 3");
+}
+
+- (void)testDoesNotRepeatIdenticalScrollAnnouncements {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -1911,7 +2181,10 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   node_one.id = 1;
   node_one.label = "route1";
   node_one.flags.hasImplicitScrolling = true;
+  node_one.rect = SkRect::MakeLTRB(0, 0, 100, 100);
   node_one.scrollPosition = 0.0;
+  node_one.scrollChildren = 50;
+  node_one.scrollIndex = 0;
   first_update[node_one.id] = node_one;
   flutter::SemanticsNode root_node;
   root_node.id = kRootNodeId;
@@ -1920,28 +2193,47 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   root_node.childrenInHitTestOrder = {1};
   first_update[root_node.id] = root_node;
   bridge->UpdateSemantics(/*nodes=*/first_update, /*actions=*/actions);
-
-  // The first update will trigger a scroll announcement, but we are not interested in it.
   [accessibility_notifications removeAllObjects];
 
-  // Simulates the focusing on the node 1.
   bridge->AccessibilityObjectDidBecomeFocused(1);
 
-  flutter::SemanticsNodeUpdates second_update;
-  // Simulates the scrolling on the node 1.
-  flutter::SemanticsNode new_node_one;
-  new_node_one.id = 1;
-  new_node_one.label = "route1";
-  new_node_one.flags.hasImplicitScrolling = true;
-  new_node_one.scrollPosition = 1.0;
-  second_update[new_node_one.id] = new_node_one;
-  bridge->UpdateSemantics(/*nodes=*/second_update, /*actions=*/actions);
-  SemanticsObject* focusObject = accessibility_notifications[0][@"argument"];
-  // Make sure refocus event is sent with the nativeAccessibility of node_one
-  // which is a FlutterSemanticsScrollView.
-  XCTAssertTrue([focusObject isKindOfClass:[FlutterSemanticsScrollView class]]);
+  // Several frames of one scroll, with the same visible rows.
+  const double bounce_positions[] = {-16.2274, -15.0858, -14.0063};
+  for (double position : bounce_positions) {
+    flutter::SemanticsNodeUpdates frame;
+    flutter::SemanticsNode bouncing;
+    bouncing.id = 1;
+    bouncing.label = "route1";
+    bouncing.flags.hasImplicitScrolling = true;
+    bouncing.rect = SkRect::MakeLTRB(0, 0, 100, 100);
+    bouncing.scrollPosition = position;
+    bouncing.scrollChildren = 50;
+    bouncing.scrollIndex = 0;
+    frame[bouncing.id] = bouncing;
+    bridge->UpdateSemantics(/*nodes=*/frame, /*actions=*/actions);
+  }
+
+  // Three frames, one announcement.
+  XCTAssertEqual([accessibility_notifications count], 1ul);
   XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
                  UIAccessibilityPageScrolledNotification);
+  XCTAssertEqualObjects(accessibility_notifications[0][@"argument"], @"rows 1 to 1 of 50");
+
+  // A scroll that actually changes the visible rows must still be announced.
+  flutter::SemanticsNodeUpdates scrolled_update;
+  flutter::SemanticsNode scrolled;
+  scrolled.id = 1;
+  scrolled.label = "route1";
+  scrolled.flags.hasImplicitScrolling = true;
+  scrolled.rect = SkRect::MakeLTRB(0, 0, 100, 100);
+  scrolled.scrollPosition = 100.0;
+  scrolled.scrollChildren = 50;
+  scrolled.scrollIndex = 5;
+  scrolled_update[scrolled.id] = scrolled;
+  bridge->UpdateSemantics(/*nodes=*/scrolled_update, /*actions=*/actions);
+
+  XCTAssertEqual([accessibility_notifications count], 2ul);
+  XCTAssertEqualObjects(accessibility_notifications[1][@"argument"], @"rows 6 to 6 of 50");
 }
 
 - (void)testAnnouncesIgnoresRouteChangesWhenModal {
