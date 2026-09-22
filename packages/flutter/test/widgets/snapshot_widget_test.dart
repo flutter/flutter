@@ -315,17 +315,17 @@ void main() {
       ),
     );
 
-    final ui.Image imageWhenDisabled =
-        (tester.renderObject(find.byKey(repaintBoundaryKey)) as RenderRepaintBoundary)
-            .toImageSync();
+    final ui.Image imageWhenDisabled = (tester.renderObject(
+      find.byKey(repaintBoundaryKey),
+    ) as RenderRepaintBoundary).toImageSync();
     addTearDown(imageWhenDisabled.dispose);
 
     controller.allowSnapshotting = true;
     await tester.pump();
 
-    final ui.Image imageWhenEnabled =
-        (tester.renderObject(find.byKey(repaintBoundaryKey)) as RenderRepaintBoundary)
-            .toImageSync();
+    final ui.Image imageWhenEnabled = (tester.renderObject(
+      find.byKey(repaintBoundaryKey),
+    ) as RenderRepaintBoundary).toImageSync();
     addTearDown(imageWhenEnabled.dispose);
 
     await expectLater(imageWhenEnabled, matchesReferenceImage(imageWhenDisabled));
