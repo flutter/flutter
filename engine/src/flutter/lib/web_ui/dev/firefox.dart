@@ -69,6 +69,7 @@ user_pref("dom.disable_open_during_load", false);
 user_pref("dom.max_script_run_time", 0);
 user_pref("trailhead.firstrun.branches", "nofirstrun-empty");
 user_pref("browser.aboutwelcome.enabled", false);
+// Enable software WebGL on GPU-less Linux CI runners for Skwasm UI suites.
 user_pref("webgl.force-enabled", true);
 user_pref("gfx.webrender.software", true);
 ''';
