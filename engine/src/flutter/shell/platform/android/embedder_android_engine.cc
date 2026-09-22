@@ -14,6 +14,7 @@
 
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
+#include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/native_library.h"
 #include "flutter/fml/paths.h"
@@ -25,6 +26,7 @@
 
 #if FML_OS_ANDROID
 #include <EGL/egl.h>
+#include <android/api-level.h>
 #include <android/log.h>
 #include "flutter/fml/platform/android/jni_util.h"
 #endif
@@ -32,6 +34,14 @@
 namespace flutter {
 
 namespace {
+
+static int GetDeviceApiLevel() {
+#if FML_OS_ANDROID
+  return android_get_device_api_level();
+#else
+  return 0;
+#endif
+}
 
 constexpr size_t kPointerDataFieldCount = 36;
 constexpr size_t kBytesPerField = 8;
@@ -233,6 +243,10 @@ EmbedderAndroidEngine::~EmbedderAndroidEngine() {
   } else if (asset_resolver_.destruction_callback != nullptr) {
     asset_resolver_.destruction_callback(asset_resolver_.user_data);
     asset_resolver_.destruction_callback = nullptr;
+  }
+  if (aot_data_ != nullptr && proc_table_.CollectAOTData != nullptr) {
+    proc_table_.CollectAOTData(aot_data_);
+    aot_data_ = nullptr;
   }
 }
 
@@ -486,8 +500,11 @@ void EmbedderAndroidEngine::RegisterImageDecoder(ImageGeneratorFactory factory,
 }
 
 const TaskRunners& EmbedderAndroidEngine::GetTaskRunners() const {
-  FML_CHECK(task_runners_.has_value());
-  return task_runners_.value();
+  if (task_runners_.has_value()) {
+    return task_runners_.value();
+  }
+  FML_LOG(FATAL) << "TaskRunners not initialized";
+  FML_UNREACHABLE();
 }
 
 void EmbedderAndroidEngine::NotifyCreated() {
@@ -1064,8 +1081,41 @@ bool EmbedderAndroidEngine::Run(
     project_args_.log_tag = settings_.log_tag.c_str();
   }
 
+  if (proc_table_.CreateAOTData != nullptr) {
+    for (const auto& lib_path : settings_.application_library_paths) {
+      if (fml::IsFile(lib_path)) {
+        FlutterEngineAOTDataSource source = {};
+        source.type = kFlutterEngineAOTDataSourceTypeElfPath;
+        source.elf_path = lib_path.c_str();
+        if (proc_table_.CreateAOTData(&source, &aot_data_) == kSuccess) {
+          project_args_.aot_data = aot_data_;
+          break;
+        }
+      }
+    }
+  }
+
   std::vector<std::string> cmd_strings;
   cmd_strings.push_back("flutter");
+  for (const auto& lib_path : settings_.application_library_paths) {
+    cmd_strings.push_back("--aot-shared-library-name=" + lib_path);
+  }
+  if (!settings_.vm_snapshot_data_path.empty()) {
+    cmd_strings.push_back("--vm-snapshot-data-path=" +
+                          settings_.vm_snapshot_data_path);
+  }
+  if (!settings_.vm_snapshot_instr_path.empty()) {
+    cmd_strings.push_back("--vm-snapshot-instr-path=" +
+                          settings_.vm_snapshot_instr_path);
+  }
+  if (!settings_.isolate_snapshot_data_path.empty()) {
+    cmd_strings.push_back("--isolate-snapshot-data-path=" +
+                          settings_.isolate_snapshot_data_path);
+  }
+  if (!settings_.isolate_snapshot_instr_path.empty()) {
+    cmd_strings.push_back("--isolate-snapshot-instr-path=" +
+                          settings_.isolate_snapshot_instr_path);
+  }
   bool impeller_active =
       (android_rendering_api_ == AndroidRenderingAPI::kImpellerAutoselect ||
        android_rendering_api_ == AndroidRenderingAPI::kImpellerOpenGLES ||
@@ -1345,7 +1395,14 @@ void EmbedderAndroidEngine::SetSurfaceControlEnabled(bool enabled) {
 }
 
 bool EmbedderAndroidEngine::IsSurfaceControlEnabled() const {
-  return surface_control_enabled_;
+  if (surface_control_enabled_) {
+    return true;
+  }
+  bool api_supports_vulkan =
+      (android_rendering_api_ == AndroidRenderingAPI::kImpellerVulkan ||
+       android_rendering_api_ == AndroidRenderingAPI::kImpellerAutoselect);
+  return settings_.enable_surface_control && settings_.enable_impeller &&
+         api_supports_vulkan && (GetDeviceApiLevel() >= 34);
 }
 
 void EmbedderAndroidEngine::OnBeginFrame() {

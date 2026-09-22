@@ -46,10 +46,10 @@ class PlatformViewAndroid final {
 
   ~PlatformViewAndroid();
 
-  void NotifyCreated(fml::RefPtr<AndroidNativeWindow> native_window);
+  void NotifyCreated(const fml::RefPtr<AndroidNativeWindow>& native_window);
 
   void NotifySurfaceWindowChanged(
-      fml::RefPtr<AndroidNativeWindow> native_window);
+      const fml::RefPtr<AndroidNativeWindow>& native_window);
 
   void NotifyChanged(const DlISize& size);
 

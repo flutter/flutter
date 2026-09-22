@@ -75,7 +75,7 @@ class AndroidShellHolder {
   ///             nullptr when a new Shell can't be created.
   ///
   std::unique_ptr<AndroidShellHolder> Spawn(
-      std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
       const std::string& entrypoint,
       const std::string& libraryUrl,
       const std::string& initial_route,
