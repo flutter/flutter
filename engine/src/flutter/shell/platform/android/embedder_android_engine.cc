@@ -12,7 +12,6 @@
 #include <mutex>
 #include <utility>
 
-#include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
@@ -850,40 +849,129 @@ void EmbedderAndroidEngine::OnVsyncCallback(intptr_t baton) {
   }
 }
 
-void EmbedderAndroidEngine::RegisterTexture(
-    std::shared_ptr<flutter::Texture> texture) {
-  if (!IsValid() || !texture) {
-    return;
+void EmbedderAndroidEngine::RegisterExternalTexture(
+    int64_t texture_id,
+    const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture) {
+  TRACE_EVENT0("flutter", "EmbedderAndroidEngine::RegisterExternalTexture");
+  {
+    std::lock_guard<std::mutex> lock(external_textures_mutex_);
+    external_textures_[texture_id] = std::make_unique<ExternalTextureEntry>(
+        ExternalTextureEntry::Type::kSurfaceTexture, texture_id,
+        surface_texture, false);
   }
-  if (proc_table_.RegisterTexture) {
-    auto texture_holder = new std::shared_ptr<flutter::Texture>(texture);
-    proc_table_.RegisterTexture(GetEngineHandle(), texture_holder);
+  if (IsValid() && proc_table_.RegisterExternalTexture) {
+    proc_table_.RegisterExternalTexture(GetEngineHandle(), texture_id);
   }
-  if (proc_table_.RegisterExternalTexture) {
-    proc_table_.RegisterExternalTexture(GetEngineHandle(), texture->Id());
+}
+
+void EmbedderAndroidEngine::RegisterImageTexture(
+    int64_t texture_id,
+    const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
+    bool reset_on_background) {
+  TRACE_EVENT0("flutter", "EmbedderAndroidEngine::RegisterImageTexture");
+  {
+    std::lock_guard<std::mutex> lock(external_textures_mutex_);
+    external_textures_[texture_id] = std::make_unique<ExternalTextureEntry>(
+        ExternalTextureEntry::Type::kImageTexture, texture_id,
+        image_texture_entry, reset_on_background);
   }
-  if (!c_api_is_valid_) {
-    pending_textures_.push_back(texture);
+  if (IsValid() && proc_table_.RegisterExternalTexture) {
+    proc_table_.RegisterExternalTexture(GetEngineHandle(), texture_id);
   }
 }
 
 void EmbedderAndroidEngine::UnregisterTexture(int64_t texture_id) {
-  if (proc_table_.UnregisterExternalTexture) {
+  TRACE_EVENT0("flutter", "EmbedderAndroidEngine::UnregisterTexture");
+  if (IsValid() && proc_table_.UnregisterExternalTexture) {
     proc_table_.UnregisterExternalTexture(GetEngineHandle(), texture_id);
   }
-  pending_textures_.erase(
-      std::remove_if(pending_textures_.begin(), pending_textures_.end(),
-                     [texture_id](const auto& texture) {
-                       return texture && texture->Id() == texture_id;
-                     }),
-      pending_textures_.end());
+  {
+    std::lock_guard<std::mutex> lock(external_textures_mutex_);
+    external_textures_.erase(texture_id);
+  }
 }
 
 void EmbedderAndroidEngine::MarkTextureFrameAvailable(int64_t texture_id) {
-  if (proc_table_.MarkExternalTextureFrameAvailable) {
+  TRACE_EVENT0("flutter", "EmbedderAndroidEngine::MarkTextureFrameAvailable");
+  if (IsValid() && proc_table_.MarkExternalTextureFrameAvailable) {
     proc_table_.MarkExternalTextureFrameAvailable(GetEngineHandle(),
                                                   texture_id);
   }
+}
+
+bool EmbedderAndroidEngine::OnGLExternalTextureFrame(
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterOpenGLTexture* texture_out) {
+  TRACE_EVENT0("flutter", "EmbedderAndroidEngine::OnGLExternalTextureFrame");
+  if (texture_out == nullptr) {
+    return false;
+  }
+  std::lock_guard<std::mutex> lock(external_textures_mutex_);
+  auto it = external_textures_.find(texture_id);
+  if (it == external_textures_.end()) {
+    return false;
+  }
+  texture_out->target = 0x8D65;  // GL_TEXTURE_EXTERNAL_OES
+  texture_out->name = 0;
+  texture_out->format = 0x8058;  // GL_RGBA8
+  texture_out->user_data = nullptr;
+  texture_out->destruction_callback = nullptr;
+  texture_out->width = width;
+  texture_out->height = height;
+  return true;
+}
+
+bool EmbedderAndroidEngine::OnHardwareBufferExternalTextureFrame(
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterHardwareBufferExternalTexture* texture_out) {
+  TRACE_EVENT0("flutter",
+               "EmbedderAndroidEngine::OnHardwareBufferExternalTextureFrame");
+  if (texture_out == nullptr) {
+    return false;
+  }
+  std::lock_guard<std::mutex> lock(external_textures_mutex_);
+  auto it = external_textures_.find(texture_id);
+  if (it == external_textures_.end()) {
+    return false;
+  }
+  texture_out->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+  texture_out->width = width;
+  texture_out->height = height;
+  texture_out->format = 1;  // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM
+  texture_out->fence_fd = -1;
+  texture_out->buffer = nullptr;
+  texture_out->user_data = nullptr;
+  texture_out->destruction_callback = nullptr;
+  return true;
+}
+
+bool EmbedderAndroidEngine::OnVulkanExternalTextureFrame(
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterVulkanExternalTexture* texture_out) {
+  TRACE_EVENT0("flutter",
+               "EmbedderAndroidEngine::OnVulkanExternalTextureFrame");
+  if (texture_out == nullptr) {
+    return false;
+  }
+  std::lock_guard<std::mutex> lock(external_textures_mutex_);
+  auto it = external_textures_.find(texture_id);
+  if (it == external_textures_.end()) {
+    return false;
+  }
+  texture_out->struct_size = sizeof(FlutterVulkanExternalTexture);
+  texture_out->width = width;
+  texture_out->height = height;
+  texture_out->image = 0;
+  texture_out->format = 0;
+  texture_out->user_data = nullptr;
+  texture_out->destruction_callback = nullptr;
+  return true;
 }
 
 void EmbedderAndroidEngine::LoadDartDeferredLibrary(
@@ -1029,6 +1117,21 @@ void EmbedderAndroidEngine::PopulateRendererConfig(
         return proc_library ? static_cast<void*>(const_cast<uint8_t*>(
                                   proc_library->ResolveSymbol(name)))
                             : nullptr;
+      };
+      config->open_gl.gl_external_texture_frame_callback =
+          [](void* user_data, int64_t texture_id, size_t width, size_t height,
+             FlutterOpenGLTexture* texture_out) -> bool {
+        auto* engine = static_cast<EmbedderAndroidEngine*>(user_data);
+        return engine != nullptr && engine->OnGLExternalTextureFrame(
+                                        texture_id, width, height, texture_out);
+      };
+      config->open_gl.hardware_buffer_external_texture_frame_callback =
+          [](void* user_data, int64_t texture_id, size_t width, size_t height,
+             FlutterHardwareBufferExternalTexture* texture_out) -> bool {
+        auto* engine = static_cast<EmbedderAndroidEngine*>(user_data);
+        return engine != nullptr &&
+               engine->OnHardwareBufferExternalTextureFrame(
+                   texture_id, width, height, texture_out);
       };
       break;
   }
@@ -1266,10 +1369,14 @@ bool EmbedderAndroidEngine::Run(
 
   c_api_is_valid_ = true;
 
-  for (auto& pending : pending_textures_) {
-    RegisterTexture(std::move(pending));
+  {
+    std::lock_guard<std::mutex> lock(external_textures_mutex_);
+    if (proc_table_.RegisterExternalTexture) {
+      for (const auto& [id, entry] : external_textures_) {
+        proc_table_.RegisterExternalTexture(GetEngineHandle(), id);
+      }
+    }
   }
-  pending_textures_.clear();
 
   if (surface_attached_) {
     proc_table_.NotifyCreated(c_api_engine_);

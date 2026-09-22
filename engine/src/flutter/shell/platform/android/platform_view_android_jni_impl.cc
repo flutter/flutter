@@ -572,14 +572,10 @@ static void RegisterImageTexture(JNIEnv* env,
                                  jlong texture_id,
                                  jobject image_texture_entry,
                                  jboolean reset_on_background) {
-  ImageExternalTexture::ImageLifecycle lifecycle =
-      reset_on_background ? ImageExternalTexture::ImageLifecycle::kReset
-                          : ImageExternalTexture::ImageLifecycle::kKeepAlive;
-
   ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterImageTexture(
       static_cast<int64_t>(texture_id),                                  //
       fml::jni::ScopedJavaGlobalRef<jobject>(env, image_texture_entry),  //
-      lifecycle                                                          //
+      reset_on_background                                                //
   );
 }
 

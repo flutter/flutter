@@ -10,7 +10,6 @@
 #include <utility>
 
 #include "common/settings.h"
-#include "flutter/common/graphics/texture.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
@@ -20,23 +19,17 @@
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/android_surface_dynamic_impeller.h"
 #include "flutter/shell/platform/android/android_surface_gl_impeller.h"
-#include "flutter/shell/platform/android/image_external_texture_gl_impeller.h"
-#include "flutter/shell/platform/android/surface_texture_external_texture_gl_impeller.h"
-#include "flutter/shell/platform/android/surface_texture_external_texture_vk_impeller.h"
 
 #if !SLIMPELLER
 #include "flutter/shell/platform/android/android_context_gl_skia.h"
 #include "flutter/shell/platform/android/android_surface_gl_skia.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
-#include "flutter/shell/platform/android/image_external_texture_gl_skia.h"
-#include "flutter/shell/platform/android/surface_texture_external_texture_gl_skia.h"
 #endif  // !SLIMPELLER
 
 #include "fml/logging.h"
 #include "impeller/display_list/aiks_context.h"
 #if IMPELLER_ENABLE_VULKAN  // b/258506856 for why this is behind an if
 #include "flutter/shell/platform/android/android_surface_vk_impeller.h"
-#include "flutter/shell/platform/android/image_external_texture_vk_impeller.h"
 #endif
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
@@ -244,93 +237,18 @@ void PlatformViewAndroid::SetSemanticsTreeEnabled(bool enabled) {
 void PlatformViewAndroid::RegisterExternalTexture(
     int64_t texture_id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture) {
-  std::shared_ptr<impeller::Context> impeller_context;
   if (engine_) {
-    impeller_context = engine_->GetImpellerContext();
-  }
-  if (!impeller_context && android_context_) {
-    impeller_context = android_context_->GetImpellerContext();
-  }
-  switch (android_context_->RenderingApi()) {
-    case AndroidRenderingAPI::kImpellerOpenGLES:
-      // Impeller GLES.
-      RegisterTexture(std::make_shared<SurfaceTextureExternalTextureGLImpeller>(
-          std::static_pointer_cast<impeller::ContextGLES>(impeller_context),
-          texture_id,       //
-          surface_texture,  //
-          jni_facade_       //
-          ));
-      break;
-#if !SLIMPELLER
-    case AndroidRenderingAPI::kSkiaOpenGLES:
-      // Legacy GL.
-      RegisterTexture(std::make_shared<SurfaceTextureExternalTextureGLSkia>(
-          texture_id,       //
-          surface_texture,  //
-          jni_facade_       //
-          ));
-      break;
-    case AndroidRenderingAPI::kSoftware:
-      FML_LOG(INFO) << "Software rendering does not support external textures.";
-      break;
-#endif  // !SLIMPELLER
-    case AndroidRenderingAPI::kImpellerVulkan:
-      FML_LOG(IMPORTANT)
-          << "Flutter recommends migrating plugins that create and "
-             "register surface textures to the new surface producer "
-             "API. See https://docs.flutter.dev/release/breaking-changes/"
-             "android-surface-plugins";
-      RegisterTexture(std::make_shared<SurfaceTextureExternalTextureVKImpeller>(
-          std::static_pointer_cast<impeller::ContextVK>(impeller_context),
-          texture_id,       //
-          surface_texture,  //
-          jni_facade_       //
-          ));
-      break;
-    case AndroidRenderingAPI::kImpellerAutoselect:
-    default:
-      FML_CHECK(false);
-      break;
+    engine_->RegisterExternalTexture(texture_id, surface_texture);
   }
 }
 
 void PlatformViewAndroid::RegisterImageTexture(
     int64_t texture_id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
-    ImageExternalTexture::ImageLifecycle lifecycle) {
-  std::shared_ptr<impeller::Context> impeller_context;
+    bool reset_on_background) {
   if (engine_) {
-    impeller_context = engine_->GetImpellerContext();
-  }
-  if (!impeller_context && android_context_) {
-    impeller_context = android_context_->GetImpellerContext();
-  }
-  switch (android_context_->RenderingApi()) {
-#if !SLIMPELLER
-    case AndroidRenderingAPI::kSkiaOpenGLES:
-      // Legacy GL.
-      RegisterTexture(std::make_shared<ImageExternalTextureGLSkia>(
-          std::static_pointer_cast<AndroidContextGLSkia>(android_context_),
-          texture_id, image_texture_entry, jni_facade_, lifecycle));
-      break;
-    case AndroidRenderingAPI::kSoftware:
-      FML_LOG(INFO) << "Software rendering does not support external textures.";
-      break;
-#endif  // !SLIMPELLER
-    case AndroidRenderingAPI::kImpellerOpenGLES:
-      // Impeller GLES.
-      RegisterTexture(std::make_shared<ImageExternalTextureGLImpeller>(
-          std::static_pointer_cast<impeller::ContextGLES>(impeller_context),
-          texture_id, image_texture_entry, jni_facade_, lifecycle));
-      break;
-    case AndroidRenderingAPI::kImpellerVulkan:
-      RegisterTexture(std::make_shared<ImageExternalTextureVKImpeller>(
-          std::static_pointer_cast<impeller::ContextVK>(impeller_context),
-          texture_id, image_texture_entry, jni_facade_, lifecycle));
-      break;
-    case AndroidRenderingAPI::kImpellerAutoselect:
-      FML_CHECK(false);
-      break;
+    engine_->RegisterImageTexture(texture_id, image_texture_entry,
+                                  reset_on_background);
   }
 }
 
@@ -443,13 +361,6 @@ void PlatformViewAndroid::DispatchPointerDataPacket(
     std::unique_ptr<PointerDataPacket> packet) {
   if (engine_) {
     engine_->DispatchPointerDataPacket(std::move(packet));
-  }
-}
-
-void PlatformViewAndroid::RegisterTexture(
-    std::shared_ptr<flutter::Texture> texture) {
-  if (engine_) {
-    engine_->RegisterTexture(std::move(texture));
   }
 }
 
