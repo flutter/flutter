@@ -94,6 +94,12 @@ struct AndroidVMArgs {
   /// Whether systrace tracing is enabled.
   bool trace_systrace = false;
 
+  /// Whether SurfaceControl (HC++) is enabled.
+  bool enable_surface_control = false;
+
+  /// Whether platform and UI threads are merged.
+  bool merged_platform_ui_thread = false;
+
   /// Initial VM service URI (if available).
   std::string vm_service_uri;
 
@@ -127,6 +133,8 @@ struct AndroidVMArgs {
            enable_impeller == other.enable_impeller &&
            enable_software_rendering == other.enable_software_rendering &&
            trace_systrace == other.trace_systrace &&
+           enable_surface_control == other.enable_surface_control &&
+           merged_platform_ui_thread == other.merged_platform_ui_thread &&
            vm_service_uri == other.vm_service_uri;
   }
 };
@@ -296,6 +304,13 @@ class AndroidVMInit {
       std::shared_ptr<FontCollectionProvider> font_provider = nullptr,
       std::shared_ptr<AndroidAOTProvider> aot_provider = nullptr);
   virtual ~AndroidVMInit();
+
+  /// @brief Sets the process-global VM initialization arguments from
+  /// FlutterMain::Init.
+  static void SetGlobalVMArgs(const AndroidVMArgs& args);
+
+  /// @brief Returns the process-global VM initialization arguments if set.
+  static std::optional<AndroidVMArgs> GetGlobalVMArgs();
 
   /// @brief Initializes the global VM settings and configurations.
   bool Init(const AndroidVMArgs& args);
