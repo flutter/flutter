@@ -181,6 +181,7 @@ void ShellTest::SetViewportMetrics(Shell* shell, double width, double height) {
       0,                      // gesture inset right
       0,                      // gesture inset bottom
       0,                      // gesture inset left
+      false,                  // keyboard visibility
       22,                     // physical touch slop
       std::vector<double>(),  // display features bounds
       std::vector<int>(),     // display features type

@@ -502,6 +502,481 @@ void main() {
     expect(offsetAfter, isNot(0.0));
   });
 
+  group('Keyboard visibility when a route becomes top-most again', () {
+    late GlobalKey<NavigatorState> navigatorKey;
+
+    setUp(() {
+      navigatorKey = GlobalKey<NavigatorState>();
+    });
+
+    Widget buildPage() {
+      return MaterialApp(
+        navigatorKey: navigatorKey,
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              EditableText(
+                controller: controller,
+                focusNode: focusNode,
+                style: const TextStyle(),
+                cursorColor: Colors.red,
+                backgroundCursorColor: Colors.grey,
+              ),
+              TextButton(
+                onPressed: () async {
+                  if (navigatorKey.currentState == null) {
+                    return;
+                  }
+                  await navigatorKey.currentState!.push(
+                    MaterialPageRoute<void>(builder: (_) => const Text('New Route')),
+                  );
+                },
+                child: const Text('Push Route'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    void check(
+      WidgetTester tester, {
+      required bool editableFocused,
+      required bool keyboardVisible,
+    }) {
+      expect(focusNode.hasFocus, editableFocused ? isTrue : isFalse);
+      expect(tester.testTextInput.isVisible, keyboardVisible ? isTrue : isFalse);
+    }
+
+    Future<void> pushRouteThenPop(WidgetTester tester) async {
+      // Push a new route.
+      await tester.tap(find.text('Push Route'));
+      await tester.pumpAndSettle();
+      expect(find.text('New Route'), findsOne);
+      check(tester, editableFocused: false, keyboardVisible: false);
+
+      // Pop the route.
+      navigatorKey.currentState!.pop();
+      await tester.pumpAndSettle();
+      expect(find.text('New Route'), findsNothing);
+    }
+
+    testWidgets('Restores the previous visibility on pop', (WidgetTester tester) async {
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(buildPage());
+
+      await tester.tap(find.byType(EditableText));
+      tester.view.keyboardVisible = true;
+      check(tester, editableFocused: true, keyboardVisible: true);
+
+      await pushRouteThenPop(tester);
+      // Check the focus state and the keyboard visibility are the same as before
+      // pushing the new route.
+      check(tester, editableFocused: true, keyboardVisible: true);
+
+      // Simulate the user only hiding the keyboard, without the editable text
+      // losing the focus.
+      tester.testTextInput.hide();
+      tester.view.keyboardVisible = false;
+      check(tester, editableFocused: true, keyboardVisible: false);
+
+      await pushRouteThenPop(tester);
+      // Check the focus state and the keyboard visibility are the same as before
+      // pushing the new route.
+      check(tester, editableFocused: true, keyboardVisible: false);
+    }, variant: TargetPlatformVariant.mobile());
+
+    testWidgets('Reopens when visibility cannot be determined', (WidgetTester tester) async {
+      // On configurations where the platform cannot determine the soft
+      // keyboard's visibility (e.g. undocked keyboards on older Android
+      // versions), FlutterView.keyboardVisible is always false. That must not
+      // suppress reopening the keyboard on pop.
+      await tester.pumpWidget(buildPage());
+
+      // The view never reports keyboardVisible == true in this test.
+      await tester.tap(find.byType(EditableText));
+      check(tester, editableFocused: true, keyboardVisible: true);
+
+      await pushRouteThenPop(tester);
+      // Check the focus state and the keyboard visibility are the same as before
+      // pushing the new route.
+      check(tester, editableFocused: true, keyboardVisible: true);
+
+      // Simulate the user only hiding the keyboard, without the editable text
+      // losing the focus.
+      tester.testTextInput.hide();
+      check(tester, editableFocused: true, keyboardVisible: false);
+
+      await pushRouteThenPop(tester);
+      // Since the view could not report the keyboard visibility, the keyboard
+      // reopens even though the last reported value was false.
+      check(tester, editableFocused: true, keyboardVisible: true);
+    }, variant: TargetPlatformVariant.mobile());
+
+    testWidgets('Reopens on a direct tap when focus was not restored', (WidgetTester tester) async {
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(buildPage());
+
+      await tester.tap(find.byType(EditableText));
+      tester.view.keyboardVisible = true;
+      check(tester, editableFocused: true, keyboardVisible: true);
+
+      // Simulate the user only hiding the keyboard, without the editable text
+      // losing the focus.
+      tester.testTextInput.hide();
+      tester.view.keyboardVisible = false;
+      check(tester, editableFocused: true, keyboardVisible: false);
+
+      // Push a new route.
+      await tester.tap(find.text('Push Route'));
+      await tester.pumpAndSettle();
+      expect(find.text('New Route'), findsOne);
+      check(tester, editableFocused: false, keyboardVisible: false);
+
+      // Pop the route with a user gesture (like the iOS back swipe), which
+      // does not restore focus to the editable text.
+      navigatorKey.currentState!.didStartUserGesture();
+      navigatorKey.currentState!.pop();
+      await tester.pumpAndSettle();
+      navigatorKey.currentState!.didStopUserGesture();
+      await tester.pumpAndSettle();
+      expect(find.text('New Route'), findsNothing);
+      check(tester, editableFocused: false, keyboardVisible: false);
+
+      // A direct tap on the editable text must always show the keyboard, even
+      // though it was hidden before the route was pushed.
+      await tester.tap(find.byType(EditableText));
+      await tester.pump();
+      check(tester, editableFocused: true, keyboardVisible: true);
+    }, variant: TargetPlatformVariant.mobile());
+
+    testWidgets('Restores the previous visibility with nested navigators', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: navigatorKey,
+          home: Scaffold(
+            body: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<void>(
+                  settings: settings,
+                  builder: (BuildContext context) {
+                    return Column(
+                      children: <Widget>[
+                        EditableText(
+                          controller: controller,
+                          focusNode: focusNode,
+                          style: const TextStyle(),
+                          cursorColor: Colors.red,
+                          backgroundCursorColor: Colors.grey,
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            // Push on the root navigator, above the nested one.
+                            await navigatorKey.currentState!.push(
+                              MaterialPageRoute<void>(builder: (_) => const Text('New Route')),
+                            );
+                          },
+                          child: const Text('Push Route'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      tester.view.keyboardVisible = true;
+      check(tester, editableFocused: true, keyboardVisible: true);
+
+      // Push on (and pop from) the root navigator, while the editable text
+      // lives in the nested navigator.
+      await pushRouteThenPop(tester);
+      // The keyboard reopens, as it was visible before pushing the route.
+      check(tester, editableFocused: true, keyboardVisible: true);
+
+      // Simulate the user only hiding the keyboard, without the editable text
+      // losing the focus.
+      tester.testTextInput.hide();
+      tester.view.keyboardVisible = false;
+      check(tester, editableFocused: true, keyboardVisible: false);
+
+      await pushRouteThenPop(tester);
+      // The keyboard stays hidden, as it was before pushing the route.
+      check(tester, editableFocused: true, keyboardVisible: false);
+    }, variant: TargetPlatformVariant.mobile());
+
+    testWidgets('Restores the previous visibility when the route above is removed, not popped', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(buildPage());
+
+      Route<void> pushRoute() {
+        final route = MaterialPageRoute<void>(builder: (_) => const Text('New Route'));
+        navigatorKey.currentState!.push(route);
+        return route;
+      }
+
+      await tester.tap(find.byType(EditableText));
+      tester.view.keyboardVisible = true;
+      check(tester, editableFocused: true, keyboardVisible: true);
+
+      Route<void> route = pushRoute();
+      await tester.pumpAndSettle();
+      expect(find.text('New Route'), findsOne);
+      check(tester, editableFocused: false, keyboardVisible: false);
+
+      // Remove the route instead of popping it. The home route becomes the
+      // top-most route again.
+      navigatorKey.currentState!.removeRoute(route);
+      await tester.pumpAndSettle();
+      expect(find.text('New Route'), findsNothing);
+      // The keyboard reopens, as it was visible before pushing the route.
+      check(tester, editableFocused: true, keyboardVisible: true);
+
+      // Simulate the user only hiding the keyboard, without the editable text
+      // losing the focus.
+      tester.testTextInput.hide();
+      tester.view.keyboardVisible = false;
+      check(tester, editableFocused: true, keyboardVisible: false);
+
+      route = pushRoute();
+      await tester.pumpAndSettle();
+      check(tester, editableFocused: false, keyboardVisible: false);
+
+      navigatorKey.currentState!.removeRoute(route);
+      await tester.pumpAndSettle();
+      // The keyboard stays hidden, as it was before pushing the route.
+      check(tester, editableFocused: true, keyboardVisible: false);
+    }, variant: TargetPlatformVariant.mobile());
+
+    testWidgets('Restores the previous visibility when the top page is removed declaratively', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(tester.view.reset);
+
+      const newPage = MaterialPage<void>(key: ValueKey<String>('new'), child: Text('New Route'));
+      final pages = <Page<void>>[
+        MaterialPage<void>(
+          key: const ValueKey<String>('home'),
+          child: Column(
+            children: <Widget>[
+              EditableText(
+                controller: controller,
+                focusNode: focusNode,
+                style: const TextStyle(),
+                cursorColor: Colors.red,
+                backgroundCursorColor: Colors.grey,
+              ),
+            ],
+          ),
+        ),
+      ];
+
+      late StateSetter setPages;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              setPages = setState;
+              return Navigator(
+                pages: List<Page<void>>.of(pages),
+                onDidRemovePage: (Page<Object?> page) {
+                  pages.remove(page);
+                },
+              );
+            },
+          ),
+        ),
+      );
+
+      Future<void> addPageThenRemove() async {
+        // Add a page on top of the home page.
+        setPages(() => pages.add(newPage));
+        await tester.pumpAndSettle();
+        expect(find.text('New Route'), findsOne);
+        check(tester, editableFocused: false, keyboardVisible: false);
+
+        // Remove it declaratively. The home page becomes the top-most one again.
+        setPages(() => pages.remove(newPage));
+        await tester.pumpAndSettle();
+        expect(find.text('New Route'), findsNothing);
+      }
+
+      await tester.tap(find.byType(EditableText));
+      tester.view.keyboardVisible = true;
+      check(tester, editableFocused: true, keyboardVisible: true);
+
+      await addPageThenRemove();
+      // The keyboard reopens, as it was visible before adding the page.
+      check(tester, editableFocused: true, keyboardVisible: true);
+
+      // Simulate the user only hiding the keyboard, without the editable text
+      // losing the focus.
+      tester.testTextInput.hide();
+      tester.view.keyboardVisible = false;
+      check(tester, editableFocused: true, keyboardVisible: false);
+
+      await addPageThenRemove();
+      // The keyboard stays hidden, as it was before adding the page.
+      check(tester, editableFocused: true, keyboardVisible: false);
+    }, variant: TargetPlatformVariant.mobile());
+  });
+
+  group('Editable text visibility when a route becomes top-most again', () {
+    late GlobalKey<NavigatorState> navigatorKey;
+    late ScrollController scrollController;
+
+    setUp(() {
+      navigatorKey = GlobalKey<NavigatorState>();
+      scrollController = ScrollController();
+    });
+
+    tearDown(() {
+      scrollController.dispose();
+    });
+
+    Widget buildPage() {
+      return MaterialApp(
+        navigatorKey: navigatorKey,
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: Column(
+                    children: <Widget>[
+                      EditableText(
+                        controller: controller,
+                        focusNode: focusNode,
+                        style: const TextStyle(),
+                        cursorColor: Colors.red,
+                        backgroundCursorColor: Colors.grey,
+                      ),
+                      Container(height: 2400.0, color: Colors.black12),
+                    ],
+                  ),
+                ),
+              ),
+              // Below the scroll view, so that it stays tappable when the
+              // editable text is scrolled out of view.
+              TextButton(
+                onPressed: () async {
+                  if (navigatorKey.currentState == null) {
+                    return;
+                  }
+                  await navigatorKey.currentState!.push(
+                    MaterialPageRoute<void>(builder: (_) => const Text('New Route')),
+                  );
+                },
+                child: const Text('Push Route'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Future<void> pushRouteThenPop(WidgetTester tester) async {
+      // Push a new route.
+      await tester.tap(find.text('Push Route'));
+      await tester.pumpAndSettle();
+      expect(find.text('New Route'), findsOne);
+      expect(focusNode.hasFocus, isFalse);
+
+      // Pop the route.
+      navigatorKey.currentState!.pop();
+      await tester.pumpAndSettle();
+      expect(find.text('New Route'), findsNothing);
+    }
+
+    testWidgets('Stays out of view on pop when the keyboard was hidden', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(buildPage());
+
+      await tester.tap(find.byType(EditableText));
+      tester.view.keyboardVisible = true;
+      await tester.pump();
+      expect(focusNode.hasFocus, isTrue);
+
+      // The user hides the keyboard without unfocusing the editable text, and
+      // scrolls it out of view.
+      tester.testTextInput.hide();
+      tester.view.keyboardVisible = false;
+      await tester.pump();
+      scrollController.jumpTo(600.0);
+      await tester.pump();
+      expect(find.byType(EditableText).hitTestable(), findsNothing);
+
+      await pushRouteThenPop(tester);
+
+      // Focus is restored without reopening the keyboard and without bringing
+      // the editable text into view.
+      expect(focusNode.hasFocus, isTrue);
+      expect(tester.testTextInput.isVisible, isFalse);
+      expect(find.byType(EditableText).hitTestable(), findsNothing);
+      expect(scrollController.offset, 600.0);
+    }, variant: TargetPlatformVariant.mobile());
+
+    testWidgets('Comes into view on pop when the keyboard was visible', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(buildPage());
+
+      await tester.tap(find.byType(EditableText));
+      tester.view.keyboardVisible = true;
+      tester.view.viewInsets = const FakeViewPadding(bottom: 500);
+      await tester.pump();
+      expect(focusNode.hasFocus, isTrue);
+
+      // The user scrolls the focused editable text out of view, then pushes a
+      // new route, which closes the keyboard.
+      scrollController.jumpTo(600.0);
+      await tester.pump();
+      expect(find.byType(EditableText).hitTestable(), findsNothing);
+      await tester.tap(find.text('Push Route'));
+      await tester.pumpAndSettle();
+      tester.view.keyboardVisible = false;
+      tester.view.viewInsets = FakeViewPadding.zero;
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, isFalse);
+
+      // Pop the route. The keyboard reopens, as it was visible before the
+      // push, but the pop itself does not bring the editable text into view.
+      navigatorKey.currentState!.pop();
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, isTrue);
+      expect(tester.testTextInput.isVisible, isTrue);
+      expect(find.byType(EditableText).hitTestable(), findsNothing);
+      expect(scrollController.offset, 600.0);
+
+      // Once the reopened keyboard's insets arrive, the editable text is
+      // brought into view, above the keyboard.
+      tester.view.keyboardVisible = true;
+      tester.view.viewInsets = const FakeViewPadding(bottom: 200);
+      await tester.pump();
+      expect(find.byType(EditableText).hitTestable(), findsOne);
+      expect(scrollController.offset, lessThan(600.0));
+    }, variant: TargetPlatformVariant.mobile());
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/34538.
   testWidgets('RTL arabic correct caret placement after trailing whitespace', (
     WidgetTester tester,
