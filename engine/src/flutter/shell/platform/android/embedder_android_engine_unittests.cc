@@ -21,7 +21,9 @@ TEST(EmbedderAndroidEngineTest, LifecycleAndInitialState) {
   EmbedderAndroidEngine engine(Settings(), jni,
                                AndroidRenderingAPI::kImpellerOpenGLES);
 
-  EXPECT_FALSE(engine.IsValid());
+  // Once subsystems (task runners, surface manager, proc table) are
+  // initialized, the engine is valid and ready to run.
+  EXPECT_TRUE(engine.IsValid());
   EXPECT_EQ(engine.GetRenderingAPI(), AndroidRenderingAPI::kImpellerOpenGLES);
   EXPECT_NE(engine.GetSurfaceManager(), nullptr);
   EXPECT_NE(engine.GetCompositor(), nullptr);

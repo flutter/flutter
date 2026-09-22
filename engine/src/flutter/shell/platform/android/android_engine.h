@@ -30,6 +30,10 @@
 typedef void ANativeWindow;
 #endif
 
+namespace impeller {
+class Context;
+}  // namespace impeller
+
 namespace flutter {
 
 class PlatformViewAndroidJNI;
@@ -41,6 +45,10 @@ class PlatformViewAndroidJNI;
 class AndroidEngine {
  public:
   virtual ~AndroidEngine() = default;
+
+  virtual std::shared_ptr<impeller::Context> GetImpellerContext() const {
+    return nullptr;
+  }
 
   virtual bool IsValid() const = 0;
 

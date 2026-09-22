@@ -197,6 +197,7 @@ class EmbedderAndroidEngine final : public AndroidEngine {
   }
 
   AndroidRenderingAPI GetRenderingAPI() const { return android_rendering_api_; }
+  std::shared_ptr<impeller::Context> GetImpellerContext() const override;
   std::shared_ptr<AndroidSurfaceManager> GetSurfaceManager() const {
     return surface_manager_;
   }
@@ -343,6 +344,7 @@ class EmbedderAndroidEngine final : public AndroidEngine {
     int32_t priority;
   };
   std::vector<PendingImageGenerator> pending_image_generators_;
+  std::vector<std::shared_ptr<flutter::Texture>> pending_textures_;
 
   std::shared_ptr<AndroidTaskRunners> android_task_runners_;
   std::shared_ptr<android::AndroidVsyncWaiter> vsync_waiter_;
