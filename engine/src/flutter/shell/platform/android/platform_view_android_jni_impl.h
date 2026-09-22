@@ -132,8 +132,6 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
 
   void swapTransaction() override;
 
-  void applyTransaction() override;
-
   std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
   createOverlaySurface2() override;
 

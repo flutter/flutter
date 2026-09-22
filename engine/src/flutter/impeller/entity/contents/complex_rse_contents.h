@@ -13,6 +13,7 @@
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/rect.h"
+#include "impeller/geometry/round_superellipse.h"
 #include "impeller/geometry/round_superellipse_param.h"
 #include "impeller/geometry/stroke_parameters.h"
 
@@ -25,8 +26,7 @@ class ComplexRoundedSuperellipseContents : public ColorSourceContents {
  public:
   static std::unique_ptr<ComplexRoundedSuperellipseContents> Make(
       Color color,
-      const Rect& bounds,
-      const RoundSuperellipseParam& round_superellipse_params,
+      const RoundSuperellipse& round_superellipse,
       std::optional<StrokeParameters> stroke);
 
   bool Render(const ContentContext& renderer,
@@ -40,8 +40,7 @@ class ComplexRoundedSuperellipseContents : public ColorSourceContents {
  private:
   explicit ComplexRoundedSuperellipseContents(
       Color color,
-      const Rect& bounds,
-      const RoundSuperellipseParam& round_superellipse_params,
+      const RoundSuperellipse& round_superellipse,
       std::optional<StrokeParameters> stroke);
 
   Color color_;

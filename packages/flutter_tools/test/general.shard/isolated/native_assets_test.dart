@@ -251,6 +251,81 @@ void main() {
   );
 
   testUsingContext(
+    'Native assets: unused code assets are tree-shaken during linking when not recorded as used',
+    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
+    () async {
+      final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+      final Uri nonFlutterTesterAssetUri = environment.buildDir
+          .childFile(InstallCodeAssets.nativeAssetsFilename)
+          .uri;
+      await packageConfig.parent.create();
+      await packageConfig.create();
+
+      final File unusedSoFile = environment.projectDir.childFile('unused.so');
+      unusedSoFile.writeAsBytesSync(<int>[]);
+      final File usedSoFile = environment.projectDir.childFile('used.so');
+      usedSoFile.writeAsBytesSync(<int>[]);
+
+      CodeAsset makeCodeAsset(String name, Uri file, LinkMode linkMode) =>
+          CodeAsset(package: 'bar', name: name, linkMode: linkMode, file: file);
+
+      final environmentDefines = <String, String>{kBuildMode: BuildMode.release.cliName};
+      final DartHooksResult result = await runFlutterSpecificHooks(
+        environmentDefines: environmentDefines,
+        targetPlatform: TargetPlatform.linux_x64,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: FakeFlutterNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <String>['bar'],
+          buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+            codeAssetsForLinking: <String, List<CodeAsset>>{
+              'package:bar': <CodeAsset>[
+                makeCodeAsset('unused', unusedSoFile.uri, DynamicLoadingBundled()),
+                makeCodeAsset('used', usedSoFile.uri, DynamicLoadingBundled()),
+              ],
+            },
+          ),
+          // Link hook receives both assets, but tree-shakes 'unused' and only outputs 'used'.
+          linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+            codeAssets: <CodeAsset>[makeCodeAsset('used', usedSoFile.uri, DynamicLoadingBundled())],
+          ),
+        ),
+        buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
+        buildDataAssets: true,
+        recordedUsesFile: null,
+      );
+
+      expect(
+        result.codeAssets.map((FlutterCodeAsset c) => c.codeAsset.file!.toString()).toList(),
+        <String>[usedSoFile.uri.toString()],
+      );
+
+      final List<File> installedFiles = await installCodeAssets(
+        dartHookResult: result,
+        environmentDefines: environmentDefines,
+        targetPlatform: TargetPlatform.linux_x64,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        nativeAssetsFileUri: nonFlutterTesterAssetUri,
+        targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/linux/'),
+      );
+
+      // Verify installed files only contain native_assets.json and used.so, but not unused.so.
+      expect(
+        installedFiles.map(
+          (File f) => f.path.split(RegExp(r'[/\\]')).lastWhere((String s) => s.isNotEmpty),
+        ),
+        unorderedEquals(<String>[InstallCodeAssets.nativeAssetsFilename, 'used.so']),
+      );
+      final File nativeAssetsJsonFile = fileSystem.file(nonFlutterTesterAssetUri);
+      expect(nativeAssetsJsonFile, exists);
+      final String jsonContent = nativeAssetsJsonFile.readAsStringSync();
+      expect(jsonContent, contains('package:bar/used'));
+      expect(jsonContent, isNot(contains('package:bar/unused')));
+    },
+  );
+
+  testUsingContext(
     'Native assets: duplicate assets throws tool exit listing duplicate IDs',
     overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
     () async {

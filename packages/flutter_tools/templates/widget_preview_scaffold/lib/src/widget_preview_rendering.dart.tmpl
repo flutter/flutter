@@ -6,11 +6,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widget_previews.dart';
 
+import 'package:material_ui/material_ui.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -217,7 +217,7 @@ class PreviewWidgetElement extends StatelessElement {
   PreviewWidgetElement(super.widget);
 }
 
-class WidgetPreviewGroupWidget extends StatelessWidget {
+class WidgetPreviewGroupWidget extends StatefulWidget {
   const WidgetPreviewGroupWidget({
     super.key,
     required this.controller,
@@ -235,6 +235,14 @@ class WidgetPreviewGroupWidget extends StatelessWidget {
   // TODO(bkonyi): inherit this from the theme.
   static const _kCardRadius = Radius.circular(12);
 
+  @override
+  State<WidgetPreviewGroupWidget> createState() =>
+      _WidgetPreviewGroupWidgetState();
+}
+
+class _WidgetPreviewGroupWidgetState extends State<WidgetPreviewGroupWidget> {
+  final _bucket = PageStorageBucket();
+
   Widget _buildGridViewFlex(List<WidgetPreview> previews) {
     return Wrap(
       spacing: WidgetPreviewGroupWidget._gridSpacing,
@@ -242,7 +250,7 @@ class WidgetPreviewGroupWidget extends StatelessWidget {
       alignment: WrapAlignment.start,
       children: [
         for (final WidgetPreview preview in previews)
-          WidgetPreviewWidget(controller: controller, preview: preview),
+          WidgetPreviewWidget(controller: widget.controller, preview: preview),
       ],
     );
   }
@@ -253,7 +261,7 @@ class WidgetPreviewGroupWidget extends StatelessWidget {
         for (final preview in previews)
           Center(
             child: WidgetPreviewWidget(
-              controller: controller,
+              controller: widget.controller,
               preview: preview,
             ),
           ),
@@ -269,7 +277,9 @@ class WidgetPreviewGroupWidget extends StatelessWidget {
         data: ListTileTheme.of(context).copyWith(
           dense: true,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(_kCardRadius),
+            borderRadius: BorderRadius.all(
+              WidgetPreviewGroupWidget._kCardRadius,
+            ),
           ),
         ),
         child: Theme(
@@ -277,20 +287,31 @@ class WidgetPreviewGroupWidget extends StatelessWidget {
           // expanded ExpansionTile.
           data: theme.copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
-            key: PageStorageKey(group.name),
-            title: Text(group.name),
+            key: PageStorageKey(widget.group.name),
+            title: Text(widget.group.name),
             initiallyExpanded: true,
             children: [
-              ValueListenableBuilder<LayoutType>(
-                valueListenable: controller.layoutTypeListenable,
-                builder: (context, selectedLayout, _) {
-                  return switch (selectedLayout) {
-                    LayoutType.gridView => _buildGridViewFlex(group.previews),
-                    LayoutType.listView => _buildVerticalListView(
-                      group.previews,
-                    ),
-                  };
-                },
+              // Wrap children in a PageStorage to create a storage boundary.
+              // Without this, descendant scrollables (which search ancestor
+              // elements for a PageStorageKey when restoring scroll offset)
+              // inherit the PageStorageKey from the ExpansionTile and attempt
+              // to read the ExpansionTile's boolean expansion state as a double,
+              // throwing a TypeError (see https://github.com/flutter/flutter/issues/191242).
+              PageStorage(
+                bucket: _bucket,
+                child: ValueListenableBuilder<LayoutType>(
+                  valueListenable: widget.controller.layoutTypeListenable,
+                  builder: (context, selectedLayout, _) {
+                    return switch (selectedLayout) {
+                      LayoutType.gridView => _buildGridViewFlex(
+                        widget.group.previews,
+                      ),
+                      LayoutType.listView => _buildVerticalListView(
+                        widget.group.previews,
+                      ),
+                    };
+                  },
+                ),
               ),
             ],
           ),

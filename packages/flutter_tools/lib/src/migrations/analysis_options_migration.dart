@@ -13,10 +13,9 @@ import '../project.dart';
 
 /// Migrates analysis_options.yaml to exclude build and platform directories.
 class AnalysisOptionsMigration extends ProjectMigrator {
-  AnalysisOptionsMigration(FlutterProject project, super.logger, {PackageConfig? packageConfig})
+  AnalysisOptionsMigration(FlutterProject project, super.logger, {this._packageConfig})
     : _project = project,
-      _analysisOptionsFile = project.directory.childFile('analysis_options.yaml'),
-      _packageConfig = packageConfig;
+      _analysisOptionsFile = project.directory.childFile('analysis_options.yaml');
 
   final FlutterProject _project;
   final File _analysisOptionsFile;
@@ -87,6 +86,15 @@ class AnalysisOptionsMigration extends ProjectMigrator {
         final exclude = analyzer['exclude'] as Object?;
         if (exclude is! YamlList) {
           editor.update(<String>['analyzer', 'exclude'], missingExcludes);
+        } else if (exclude.style == CollectionStyle.FLOW) {
+          // Workaround for https://github.com/dart-lang/tools/issues/2532.
+          // Appending to a multiline flow-style list with a trailing comma crashes YamlEditor.
+          // Instead, rewrite the entire exclude list as a block list.
+          final newExcludes = <Object?>[
+            ...exclude,
+            ...missingExcludes.where((String item) => !exclude.contains(item)),
+          ];
+          editor.update(<String>['analyzer', 'exclude'], newExcludes);
         } else {
           for (final missingExclude in missingExcludes) {
             if (!exclude.contains(missingExclude)) {

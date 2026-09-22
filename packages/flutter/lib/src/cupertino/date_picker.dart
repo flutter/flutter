@@ -77,8 +77,11 @@ const Widget _endSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(capSt
 
 /// Defines a function signature for creating a widget that serves as a selection overlay,
 /// given the current context, the selected item's index, and the total number of columns.
-typedef SelectionOverlayBuilder =
-    Widget? Function(BuildContext context, {required int columnCount, required int selectedIndex});
+typedef SelectionOverlayBuilder = Widget? Function(
+  BuildContext context, {
+  required int columnCount,
+  required int selectedIndex,
+});
 
 // Lays out the date picker based on how much space each single column needs.
 //
@@ -624,12 +627,11 @@ class CupertinoDatePicker extends StatefulWidget {
   }
 }
 
-typedef _ColumnBuilder =
-    Widget Function(
-      double offAxisFraction,
-      TransitionBuilder itemPositioningBuilder,
-      Widget? selectionOverlay,
-    );
+typedef _ColumnBuilder = Widget Function(
+  double offAxisFraction,
+  TransitionBuilder itemPositioningBuilder,
+  Widget? selectionOverlay,
+);
 
 class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   // Fraction of the farthest column's vanishing point vs its width. Eyeballed

@@ -8,9 +8,9 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -800,7 +800,7 @@ class FakeThrowingFlutterVersion extends FakeFlutterVersion {
 }
 
 class FakeFlutterFeatures extends FeatureFlags {
-  const FakeFlutterFeatures(this.allFeatures, {required bool enabled}) : _enabled = enabled;
+  const FakeFlutterFeatures(this.allFeatures, {required this._enabled});
   final bool _enabled;
 
   @override
@@ -843,9 +843,6 @@ class FakeFlutterFeatures extends FeatureFlags {
   bool get isWindowingEnabled => _enabled;
 
   @override
-  bool get isAccessibilityEvaluationsEnabled => _enabled;
-
-  @override
   bool get isLLDBDebuggingEnabled => _enabled;
 
   @override
@@ -859,6 +856,9 @@ class FakeFlutterFeatures extends FeatureFlags {
 
   @override
   bool get isMacOSArm64OnlyEnabled => _enabled;
+
+  @override
+  bool get isHcppEnabled => _enabled;
 
   @override
   bool get isToolExtensionsEnabled => _enabled;

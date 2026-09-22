@@ -4140,14 +4140,13 @@ void main() {
 
     final focusIntentWithCallback = RequestFocusIntent(
       nodeA,
-      requestFocusCallback:
-          (
-            FocusNode node, {
-            double? alignment,
-            ScrollPositionAlignmentPolicy? alignmentPolicy,
-            Curve? curve,
-            Duration? duration,
-          }) => calledCallback = true,
+      requestFocusCallback: (
+        FocusNode node, {
+        double? alignment,
+        ScrollPositionAlignmentPolicy? alignmentPolicy,
+        Curve? curve,
+        Duration? duration,
+      }) => calledCallback = true,
     );
 
     RequestFocusAction().invoke(focusIntentWithCallback);
@@ -4401,12 +4400,11 @@ class TestPage<T> extends Page<T> {
   Route<T> createRoute(BuildContext context) {
     return PageRouteBuilder<T>(
       settings: this,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) => child,
+      pageBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) => child,
     );
   }
 }

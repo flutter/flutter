@@ -901,9 +901,8 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    Scrollable.of(
-      find.byType(SizedBox).evaluate().first,
-    ).position.activity!.delegate.goBallistic(4000);
+    Scrollable.of(find.byType(SizedBox).evaluate().first).position.activity!.delegate
+        .goBallistic(4000);
 
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
@@ -984,9 +983,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final ScrollPosition position = Scrollable.of(
-        find.byType(SizedBox).evaluate().first,
-      ).position;
+      final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first)
+          .position;
 
       expect(find.byKey(const ValueKey<String>('Cheap box 0')), findsOneWidget);
       expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsNothing);
@@ -1781,8 +1779,7 @@ void main() {
       expect(
         onRespondCalls,
         equals([false]),
-        reason:
-            'ONLY the horizontal child should have handled the event and called respond(false). Vertical parent should NOT have called respond(true) because the event was handled by the child',
+        reason: 'ONLY the horizontal child should have handled the event and called respond(false). Vertical parent should NOT have called respond(true) because the event was handled by the child',
       );
     },
   );
@@ -1796,6 +1793,43 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(Scrollable)), Size.zero);
+  });
+
+  testWidgets('Scrollable short-circuits shouldUpdate when physics reference is identical', (
+    WidgetTester tester,
+  ) async {
+    const ScrollPhysics sharedPhysics = BouncingScrollPhysics();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Scrollable(
+          physics: sharedPhysics,
+          viewportBuilder: (BuildContext context, ViewportOffset offset) {
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    final ScrollPhysics initialPhysics = scrollable.position.physics;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Scrollable(
+          physics: sharedPhysics,
+          viewportBuilder: (BuildContext context, ViewportOffset offset) {
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    final ScrollPhysics currentPhysics = scrollable.position.physics;
+
+    expect(identical(initialPhysics, currentPhysics), isTrue);
   });
 }
 
