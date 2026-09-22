@@ -16,15 +16,15 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
 FLUTTER_ASSERT_ARC
 
 namespace {
-constexpr int64_t kSecondaryFlutterViewId = flutter::kFlutterImplicitViewId + 1;
-constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
+constexpr int64_t kPrimaryFlutterViewId = 1;
+constexpr int64_t kSecondaryFlutterViewId = 2;
+constexpr int64_t kTertiaryFlutterViewId = 3;
 }  // namespace
 
 namespace flutter {
@@ -238,6 +238,29 @@ flutter::FakeDelegate fake_delegate;
   XCTAssertNil(platform_view->GetOwnerViewController());
 }
 
+- (void)testSetViewControllerRejectsExplicitControllerInMultiView {
+  FlutterEngineWithFakePlatformView* engine =
+      [[FlutterEngineWithFakePlatformView alloc] initWithName:@"tester"];
+  engine.fakePlatformView = platform_view.get();
+  [engine enableMultiView];
+  FlutterViewController* controller = [[FlutterViewController alloc] initWithEngine:engine
+                                                                            nibName:nil
+                                                                             bundle:nil];
+
+  XCTAssertThrowsSpecificNamed([engine setViewController:controller], NSException,
+                               NSInternalInconsistencyException);
+}
+
+- (void)testSetViewControllerRejectsNilInMultiView {
+  FlutterEngineWithFakePlatformView* engine =
+      [[FlutterEngineWithFakePlatformView alloc] initWithName:@"tester"];
+  engine.fakePlatformView = platform_view.get();
+  [engine enableMultiView];
+
+  XCTAssertThrowsSpecificNamed([engine setViewController:nil], NSException,
+                               NSInternalInconsistencyException);
+}
+
 - (void)testEnableMultiViewAssignsIncrementingIdentifiersAndLookup {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"tester"];
   id mockEngine = OCMPartialMock(engine);
@@ -245,49 +268,94 @@ flutter::FakeDelegate fake_delegate;
 
   [engine enableMultiView];
 
-  FlutterViewController* implicitViewController =
+  FlutterViewController* primaryViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   FlutterViewController* secondaryViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   FlutterViewController* tertiaryViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
 
-  XCTAssertEqual(implicitViewController.viewIdentifier, flutter::kFlutterImplicitViewId);
+  XCTAssertEqual(primaryViewController.viewIdentifier, kPrimaryFlutterViewId);
   XCTAssertEqual(secondaryViewController.viewIdentifier, kSecondaryFlutterViewId);
   XCTAssertEqual(tertiaryViewController.viewIdentifier, kTertiaryFlutterViewId);
 
-  XCTAssertEqual(engine.viewController, implicitViewController);
-  XCTAssertEqual([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId],
-                 implicitViewController);
+  XCTAssertNil(engine.viewController);
+  XCTAssertNil([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId]);
+  XCTAssertNil(platform_view->GetOwnerViewController());
+  XCTAssertEqual([engine viewControllerForIdentifier:kPrimaryFlutterViewId], primaryViewController);
   XCTAssertEqual([engine viewControllerForIdentifier:kSecondaryFlutterViewId],
                  secondaryViewController);
   XCTAssertEqual([engine viewControllerForIdentifier:kTertiaryFlutterViewId],
                  tertiaryViewController);
 
-  XCTAssertEqual(fake_delegate.added_view_ids_.size(), 2UL);
-  XCTAssertEqual(fake_delegate.added_view_ids_[0], kSecondaryFlutterViewId);
-  XCTAssertEqual(fake_delegate.added_view_ids_[1], kTertiaryFlutterViewId);
+  XCTAssertTrue((fake_delegate.added_view_ids_ == std::vector<int64_t>{kPrimaryFlutterViewId,
+                                                                       kSecondaryFlutterViewId,
+                                                                       kTertiaryFlutterViewId}));
 }
 
-- (void)testRemovingImplicitViewInMultiViewDoesNotReuseIdentifier {
+- (void)testEnableMultiViewRejectsAttachedImplicitController {
+  FlutterEngineWithFakePlatformView* engine =
+      [[FlutterEngineWithFakePlatformView alloc] initWithName:@"tester"];
+  engine.fakePlatformView = platform_view.get();
+  FlutterViewController* controller = [[FlutterViewController alloc] initWithEngine:engine
+                                                                            nibName:nil
+                                                                             bundle:nil];
+
+  XCTAssertThrowsSpecificNamed([engine enableMultiView], NSException,
+                               NSInternalInconsistencyException);
+  XCTAssertEqual(engine.viewController, controller);
+  XCTAssertEqual(controller.viewIdentifier, flutter::kFlutterImplicitViewId);
+  XCTAssertTrue(fake_delegate.added_view_ids_.empty());
+}
+
+- (void)testEnableMultiViewIsIdempotent {
+  FlutterEngineWithFakePlatformView* engine =
+      [[FlutterEngineWithFakePlatformView alloc] initWithName:@"tester"];
+  engine.fakePlatformView = platform_view.get();
+  [engine enableMultiView];
+  FlutterViewController* primary = [[FlutterViewController alloc] initWithEngine:engine
+                                                                         nibName:nil
+                                                                          bundle:nil];
+  XCTAssertNoThrow([engine enableMultiView]);
+  FlutterViewController* secondary = [[FlutterViewController alloc] initWithEngine:engine
+                                                                           nibName:nil
+                                                                            bundle:nil];
+
+  XCTAssertEqual(primary.viewIdentifier, kPrimaryFlutterViewId);
+  XCTAssertEqual(secondary.viewIdentifier, kSecondaryFlutterViewId);
+  XCTAssertTrue((fake_delegate.added_view_ids_ ==
+                 std::vector<int64_t>{kPrimaryFlutterViewId, kSecondaryFlutterViewId}));
+}
+
+- (void)testRemovingAllExplicitViewsDoesNotReuseIdentifiers {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"tester"];
   id mockEngine = OCMPartialMock(engine);
   OCMStub([mockEngine platformView]).andReturn(platform_view.get());
 
   [engine enableMultiView];
 
-  FlutterViewController* implicitViewController =
+  FlutterViewController* primaryViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   FlutterViewController* secondaryViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   XCTAssertEqual(secondaryViewController.viewIdentifier, kSecondaryFlutterViewId);
 
-  [engine removeViewController:implicitViewController.viewIdentifier];
+  [engine removeViewController:primaryViewController.viewIdentifier];
+  XCTAssertNil([engine viewControllerForIdentifier:kPrimaryFlutterViewId]);
+  XCTAssertEqual([engine viewControllerForIdentifier:kSecondaryFlutterViewId],
+                 secondaryViewController);
+  [engine removeViewController:secondaryViewController.viewIdentifier];
+  XCTAssertNil([engine viewControllerForIdentifier:kSecondaryFlutterViewId]);
   XCTAssertNil([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId]);
+  XCTAssertTrue((fake_delegate.removed_view_ids_ ==
+                 std::vector<int64_t>{kPrimaryFlutterViewId, kSecondaryFlutterViewId}));
 
   FlutterViewController* tertiaryViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   XCTAssertEqual(tertiaryViewController.viewIdentifier, kTertiaryFlutterViewId);
+  XCTAssertEqual([engine viewControllerForIdentifier:kTertiaryFlutterViewId],
+                 tertiaryViewController);
+  XCTAssertNil(engine.viewController);
 }
 
 - (void)testNotifyDestroyedOnlyDestroysPlatformViewWhenLastViewIsRemoved {
@@ -297,15 +365,15 @@ flutter::FakeDelegate fake_delegate;
 
   [engine enableMultiView];
 
-  FlutterViewController* implicitViewController =
+  FlutterViewController* primaryViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   FlutterViewController* secondaryViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
 
-  [implicitViewController loadViewIfNeeded];
+  [primaryViewController loadViewIfNeeded];
   [secondaryViewController loadViewIfNeeded];
 
-  [engine notifyViewRenderingSurfaceCreated:flutter::kFlutterImplicitViewId];
+  [engine notifyViewRenderingSurfaceCreated:kPrimaryFlutterViewId];
   XCTAssertEqual(fake_delegate.on_platform_view_created_calls_, 1);
 
   [engine notifyViewRenderingSurfaceCreated:kSecondaryFlutterViewId];
@@ -314,7 +382,7 @@ flutter::FakeDelegate fake_delegate;
   [engine notifyViewRenderingSurfaceDestroyed:kSecondaryFlutterViewId];
   XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 0);
 
-  [engine notifyViewRenderingSurfaceDestroyed:flutter::kFlutterImplicitViewId];
+  [engine notifyViewRenderingSurfaceDestroyed:kPrimaryFlutterViewId];
   XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 1);
 }
 
@@ -324,13 +392,13 @@ flutter::FakeDelegate fake_delegate;
   OCMStub([mockEngine platformView]).andReturn(platform_view.get());
   [engine enableMultiView];
 
-  FlutterViewController* implicitViewController =
+  FlutterViewController* primaryViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   FlutterViewController* secondaryViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
-  [implicitViewController loadViewIfNeeded];
+  [primaryViewController loadViewIfNeeded];
   [secondaryViewController loadViewIfNeeded];
-  [engine notifyViewRenderingSurfaceCreated:flutter::kFlutterImplicitViewId];
+  [engine notifyViewRenderingSurfaceCreated:kPrimaryFlutterViewId];
   [engine notifyViewRenderingSurfaceCreated:kSecondaryFlutterViewId];
 
   [engine removeViewController:kSecondaryFlutterViewId];
@@ -342,49 +410,49 @@ flutter::FakeDelegate fake_delegate;
   [engine notifyViewRenderingSurfaceDestroyed:kSecondaryFlutterViewId];
   XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 0);
 
-  [engine setViewController:nil];
+  [engine removeViewController:kPrimaryFlutterViewId];
   XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 1);
+  XCTAssertTrue((fake_delegate.removed_view_ids_ ==
+                 std::vector<int64_t>{kSecondaryFlutterViewId, kPrimaryFlutterViewId}));
 }
 
-- (void)testReplacingImplicitControllerKeepsSecondarySurface {
+- (void)testReplacingExplicitControllerKeepsSecondarySurface {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"tester"];
   id mockEngine = OCMPartialMock(engine);
   OCMStub([mockEngine platformView]).andReturn(platform_view.get());
   [engine enableMultiView];
 
-  FlutterViewController* implicitViewController =
+  FlutterViewController* primaryViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   FlutterViewController* secondaryViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
-  [implicitViewController loadViewIfNeeded];
+  [primaryViewController loadViewIfNeeded];
   [secondaryViewController loadViewIfNeeded];
-  [engine notifyViewRenderingSurfaceCreated:flutter::kFlutterImplicitViewId];
+  [engine notifyViewRenderingSurfaceCreated:kPrimaryFlutterViewId];
   [engine notifyViewRenderingSurfaceCreated:kSecondaryFlutterViewId];
 
-  id replacementController = OCMClassMock([FlutterViewController class]);
-  UIView* replacementView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
-  OCMStub([replacementController isViewLoaded]).andReturn(YES);
-  OCMStub([replacementController view]).andReturn(replacementView);
-  OCMStub([replacementController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
-  [engine setViewController:replacementController];
+  [engine removeViewController:kPrimaryFlutterViewId];
+  FlutterViewController* replacementController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  [replacementController loadViewIfNeeded];
+  XCTAssertEqual(replacementController.viewIdentifier, kTertiaryFlutterViewId);
   XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 0);
 
-  [engine notifyViewRenderingSurfaceCreated:flutter::kFlutterImplicitViewId];
+  [engine notifyViewRenderingSurfaceCreated:kTertiaryFlutterViewId];
   XCTAssertEqual(fake_delegate.on_platform_view_created_calls_, 1);
   [engine removeViewController:kSecondaryFlutterViewId];
   XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 0);
-  [engine setViewController:nil];
+  [engine removeViewController:kTertiaryFlutterViewId];
   XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 1);
 }
 
-- (void)testViewControllerDeallocationWaitsForViewRemoval {
+- (void)testFirstViewControllerDeallocationWaitsForViewRemoval {
   FlutterEngineWithFakePlatformView* engine =
       [[FlutterEngineWithFakePlatformView alloc] initWithName:@"tester"];
   engine.fakePlatformView = platform_view.get();
   [engine enableMultiView];
 
-  FlutterViewController* implicitViewController =
-      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  FlutterViewController* secondaryViewController = nil;
   __weak FlutterViewController* weakViewController = nil;
   __weak CALayer* weakLayer = nil;
   __weak id<NSObject> weakObserver = nil;
@@ -397,27 +465,32 @@ flutter::FakeDelegate fake_delegate;
     });
   };
   @autoreleasepool {
-    FlutterViewController* secondaryViewController =
+    FlutterViewController* primaryViewController =
         [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
-    weakViewController = secondaryViewController;
-    [secondaryViewController loadViewIfNeeded];
-    weakLayer = secondaryViewController.view.layer;
-    weakObserver = engine.flutterViewControllerWillDeallocObservers[@(kSecondaryFlutterViewId)];
+    secondaryViewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                    nibName:nil
+                                                                     bundle:nil];
+    weakViewController = primaryViewController;
+    [primaryViewController loadViewIfNeeded];
+    weakLayer = primaryViewController.view.layer;
+    weakObserver = engine.flutterViewControllerWillDeallocObservers[@(kPrimaryFlutterViewId)];
     XCTAssertNotNil(weakObserver);
-    [engine notifyViewRenderingSurfaceCreated:kSecondaryFlutterViewId];
+    [engine notifyViewRenderingSurfaceCreated:kPrimaryFlutterViewId];
     XCTAssertEqual(fake_delegate.on_platform_view_created_calls_, 1);
-    secondaryViewController = nil;
+    primaryViewController = nil;
   }
 
   XCTAssertNil(weakViewController);
   XCTAssertNil(weakLayer);
   XCTAssertNil(weakObserver);
-  XCTAssertNil(engine.flutterViewControllerWillDeallocObservers[@(kSecondaryFlutterViewId)]);
+  XCTAssertNil(engine.flutterViewControllerWillDeallocObservers[@(kPrimaryFlutterViewId)]);
   XCTAssertEqual(engine.flutterViewControllerWillDeallocObservers.count, 1UL);
-  XCTAssertNil([engine viewControllerForIdentifier:kSecondaryFlutterViewId]);
-  XCTAssertEqual(engine.viewController, implicitViewController);
+  XCTAssertNil([engine viewControllerForIdentifier:kPrimaryFlutterViewId]);
+  XCTAssertNil(engine.viewController);
+  XCTAssertEqual([engine viewControllerForIdentifier:kSecondaryFlutterViewId],
+                 secondaryViewController);
   XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 1);
-  XCTAssertTrue(fake_delegate.removed_view_ids_ == std::vector<int64_t>{kSecondaryFlutterViewId});
+  XCTAssertTrue(fake_delegate.removed_view_ids_ == std::vector<int64_t>{kPrimaryFlutterViewId});
   fake_delegate.remove_view_handler_ = nullptr;
 }
 
@@ -520,7 +593,7 @@ flutter::FakeDelegate fake_delegate;
 
   [engine enableMultiView];
 
-  FlutterViewController* implicitViewController =
+  FlutterViewController* primaryViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   FlutterViewController* secondaryViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
@@ -529,8 +602,7 @@ flutter::FakeDelegate fake_delegate;
 
   [engine removeViewController:secondaryViewController.viewIdentifier];
 
-  XCTAssertEqual([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId],
-                 implicitViewController);
+  XCTAssertEqual([engine viewControllerForIdentifier:kPrimaryFlutterViewId], primaryViewController);
   XCTAssertNil([engine viewControllerForIdentifier:secondaryViewController.viewIdentifier]);
   XCTAssertEqual([engine viewControllerForIdentifier:tertiaryViewController.viewIdentifier],
                  tertiaryViewController);
@@ -545,25 +617,32 @@ flutter::FakeDelegate fake_delegate;
 
   [engine enableMultiView];
 
-  FlutterViewController* implicitViewController =
+  FlutterViewController* primaryViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   FlutterViewController* secondaryViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
-  XCTAssertEqual(implicitViewController.viewIdentifier, flutter::kFlutterImplicitViewId);
+  XCTAssertEqual(primaryViewController.viewIdentifier, kPrimaryFlutterViewId);
 
   flutter::ViewportMetrics metrics = {};
   metrics.physical_width = 320;
   metrics.physical_height = 480;
 
-  [engine updateViewportMetrics:metrics viewIdentifier:secondaryViewController.viewIdentifier];
+  [engine updateViewportMetrics:metrics viewIdentifier:flutter::kFlutterImplicitViewId];
+  XCTAssertEqual(fake_delegate.viewport_metrics_calls_, 0);
+
+  [engine updateViewportMetrics:metrics viewIdentifier:primaryViewController.viewIdentifier];
   XCTAssertEqual(fake_delegate.viewport_metrics_calls_, 1);
+  XCTAssertEqual(fake_delegate.last_viewport_metrics_view_id_, kPrimaryFlutterViewId);
+
+  [engine updateViewportMetrics:metrics viewIdentifier:secondaryViewController.viewIdentifier];
+  XCTAssertEqual(fake_delegate.viewport_metrics_calls_, 2);
   XCTAssertEqual(fake_delegate.last_viewport_metrics_view_id_,
                  secondaryViewController.viewIdentifier);
 
   const FlutterViewIdentifier unregisteredFlutterViewId =
       secondaryViewController.viewIdentifier + 1;
   [engine updateViewportMetrics:metrics viewIdentifier:unregisteredFlutterViewId];
-  XCTAssertEqual(fake_delegate.viewport_metrics_calls_, 1);
+  XCTAssertEqual(fake_delegate.viewport_metrics_calls_, 2);
 }
 
 @end

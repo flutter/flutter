@@ -134,8 +134,12 @@ NS_ASSUME_NONNULL_BEGIN
  *  - When multiview is disabled, the engine will only assign views to the
  *    implicit view ID. The implicit view ID can be reused if and only if the
  *    implicit view ID is unassigned.
- *  - When multiview is enabled, the engine will assign views to a
- *    self-incrementing ID.
+ *  - When multiview is enabled, the engine assigns explicit view IDs starting
+ *    at 1. IDs are never reused, and no controller is assigned to the implicit view.
+ *
+ * Enable multiview before attaching a view controller. Dart code must use
+ * `runWidget` with explicit `View` widgets instead of `runApp`, which targets
+ * the implicit view.
  *
  * Calling enableMultiView when multiview is already enabled is a noop.
  *
@@ -143,17 +147,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)enableMultiView;
 
 /**
- * Attach a view controller to the engine as its default controller.
+ * Attach a view controller to the engine.
  *
- * Since FlutterEngine can only handle the implicit view for now, the given
- * controller will always be assigned to the implicit view, if there isn't an
- * implicit view yet. If the engine already has an implicit view, this call
- * throws an assertion.
+ * In single-view mode the controller is assigned to the implicit view. In
+ * multi-view mode it is assigned a new explicit view ID.
  *
  * The engine holds a weak reference to the attached view controller.
- *
- * If the given view controller is already attached to an engine, this call
- * throws an assertion.
  */
 - (void)addViewController:(FlutterViewController*)viewController;
 

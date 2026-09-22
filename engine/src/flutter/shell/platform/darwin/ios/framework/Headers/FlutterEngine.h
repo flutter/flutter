@@ -311,14 +311,18 @@ FLUTTER_DARWIN_EXPORT
 - (void)ensureSemanticsEnabled;
 
 /**
- * Sets the `FlutterViewController` for this instance.  The FlutterEngine must be
+ * Sets the implicit `FlutterViewController` for this instance.  The FlutterEngine must be
  * running (e.g. a successful call to `-runWithEntrypoint:` or `-runWithEntrypoint:libraryURI`)
- * before calling this method. Callers may pass nil to remove the viewController
- * and have the engine run headless in the current process.
+ * before calling this method. In single-view mode, callers may pass nil to remove the
+ * viewController and have the engine run headless in the current process.
  *
- * A FlutterEngine can only have one `FlutterViewController` at a time. If there is
- * already a `FlutterViewController` associated with this instance, this method will replace
- * the engine's current viewController with the newly specified one.
+ * In single-view mode, a FlutterEngine can only have one `FlutterViewController` at a time. If
+ * there is already a `FlutterViewController` associated with this instance, this method will
+ * replace the engine's current viewController with the newly specified one.
+ *
+ * In multi-view mode, this property is nil. Calling the setter, including with nil,
+ * is unsupported and triggers an assertion in debug builds.
+ * Explicit view controllers are managed separately by their view identifiers.
  *
  * Setting the viewController will signal the engine to start animations and drawing, and unsetting
  * it will signal the engine to stop animations and drawing.  However, neither will impact the state

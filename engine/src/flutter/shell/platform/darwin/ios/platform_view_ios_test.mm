@@ -540,10 +540,14 @@ class InvalidIOSContext : public IOSContext {
   id messenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   id engine = OCMClassMock([FlutterEngine class]);
 
-  id flutterViewController = OCMClassMock([FlutterViewController class]);
-
-  OCMStub([flutterViewController isViewLoaded]).andReturn(NO);
-  OCMStub([flutterViewController engine]).andReturn(engine);
+  id implicitViewController = OCMClassMock([FlutterViewController class]);
+  id explicitViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([implicitViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
+  OCMStub([explicitViewController viewIdentifier]).andReturn(kSecondaryFlutterViewId);
+  for (id controller in @[ implicitViewController, explicitViewController ]) {
+    OCMStub([controller isViewLoaded]).andReturn(NO);
+    OCMStub([controller engine]).andReturn(engine);
+  }
   OCMStub([engine binaryMessenger]).andReturn(messenger);
 
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
@@ -557,8 +561,16 @@ class InvalidIOSContext : public IOSContext {
   thread_task_runner->PostTask([&] {
     std::string locale = "en-US";
     platform_view->SetApplicationLocale(locale);
-    platform_view->SetOwnerViewController(flutterViewController);
-    OCMVerify([flutterViewController setApplicationLocale:@"en-US"]);
+    platform_view->AddOwnerViewController(explicitViewController);
+    OCMVerify([explicitViewController setApplicationLocale:@"en-US"]);
+
+    platform_view->SetOwnerViewController(implicitViewController);
+    OCMVerify(times(1), [implicitViewController setApplicationLocale:@"en-US"]);
+    OCMVerify(times(1), [explicitViewController setApplicationLocale:@"en-US"]);
+
+    platform_view->SetApplicationLocale("fr-FR");
+    OCMVerify([implicitViewController setApplicationLocale:@"fr-FR"]);
+    OCMVerify([explicitViewController setApplicationLocale:@"fr-FR"]);
     latch.Signal();
   });
   latch.Wait();

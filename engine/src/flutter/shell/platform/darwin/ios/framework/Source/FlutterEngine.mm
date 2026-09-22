@@ -280,7 +280,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   _labelPrefix = [labelPrefix copy];
   _dartProject = project ?: [[FlutterDartProject alloc] init];
   _viewControllers = [NSMapTable weakToWeakObjectsMapTable];
-  _nextViewIdentifier = flutter::kFlutterImplicitViewId;
+  _nextViewIdentifier = 1;
 
   _enableEmbedderAPI = _dartProject.settings.enable_embedder_api;
   if (_enableEmbedderAPI) {
@@ -325,7 +325,11 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)enableMultiView {
-  _multiViewEnabled = true;
+  if (!_multiViewEnabled) {
+    NSAssert(self.viewController == nil,
+             @"Multiview can only be enabled before adding any view controllers.");
+    _multiViewEnabled = YES;
+  }
 }
 
 + (FlutterEngine*)engineForIdentifier:(int64_t)identifier {
@@ -571,6 +575,10 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)setViewController:(FlutterViewController*)viewController {
+  NSAssert(!_multiViewEnabled, @"setViewController: is only supported in single-view mode.");
+  if (_multiViewEnabled) {
+    return;
+  }
   FML_DCHECK(self.platformView);
   if (viewController != nil) {
     // Swap the existing `FlutterViewController` for backward compatibly.
@@ -674,8 +682,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
     self.viewController = controller;
   } else {
-    // When multiview is enabled, the engine will assign views to a self-incrementing ID.
-    // The implicit view ID can not be reused.
+    // Explicit view IDs start at 1 and are never reused. The implicit view remains unassigned.
     FlutterViewIdentifier viewIdentifier = _nextViewIdentifier++;
     [self registerViewController:controller forIdentifier:viewIdentifier];
   }

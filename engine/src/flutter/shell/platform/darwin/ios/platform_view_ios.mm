@@ -240,8 +240,6 @@ void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner
   if (owner_controller != nil) {
     AddOwnerViewController(owner_controller);
   }
-
-  ApplyLocaleToOwnerController();
 }
 
 void PlatformViewIOS::AddOwnerViewController(__weak FlutterViewController* owner_controller) {
@@ -250,6 +248,8 @@ void PlatformViewIOS::AddOwnerViewController(__weak FlutterViewController* owner
   FlutterViewIdentifier viewIdentifier = owner_controller.viewIdentifier;
   FML_DCHECK([view_controllers_ objectForKey:@(viewIdentifier)] == nil);
   [view_controllers_ setObject:owner_controller forKey:@(viewIdentifier)];
+  owner_controller.applicationLocale =
+      application_locale_.empty() ? nil : @(application_locale_.data());
 
   if (semantics_tree_enabled_) {
     accessibility_bridges_[viewIdentifier] =
