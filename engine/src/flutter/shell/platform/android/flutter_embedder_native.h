@@ -20,12 +20,15 @@
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
+#include "flutter/shell/platform/android/android_compositor.h"
 #include "flutter/shell/platform/android/android_engine_group.h"
 #include "flutter/shell/platform/android/android_hardware_buffer.h"
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_semantics_mapper.h"
 #include "flutter/shell/platform/android/android_surface_control.h"
+#include "flutter/shell/platform/android/android_surface_manager.h"
+#include "flutter/shell/platform/android/android_task_runners.h"
 #include "flutter/shell/platform/android/android_vm_init.h"
 #include "flutter/shell/platform/android/android_vsync_waiter.h"
 #include "flutter/shell/platform/android/android_vulkan_texture.h"
@@ -833,7 +836,7 @@ class FlutterEmbedderNative {
   /// reference.
   void RegisterSurfaceTexture(
       int64_t texture_id,
-      fml::jni::ScopedJavaGlobalRef<jobject> surface_texture);
+      const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture);
 
   /// @brief Unregisters an external SurfaceTexture.
   void UnregisterSurfaceTexture(int64_t texture_id);
@@ -1033,7 +1036,7 @@ class FlutterEmbedderNative {
   std::shared_ptr<AndroidEngineGroup> GetEngineGroup() const;
 
   /// @brief Sets or replaces the AndroidEngineGroup.
-  void SetEngineGroup(std::shared_ptr<AndroidEngineGroup> group);
+  void SetEngineGroup(const std::shared_ptr<AndroidEngineGroup>& group);
 
   /// @brief Returns the AndroidEngineGroupProvider managed by this native
   /// instance.
@@ -1041,7 +1044,7 @@ class FlutterEmbedderNative {
 
   /// @brief Sets or replaces the AndroidEngineGroupProvider.
   void SetEngineGroupProvider(
-      std::shared_ptr<AndroidEngineGroupProvider> provider);
+      const std::shared_ptr<AndroidEngineGroupProvider>& provider);
 
   /// @brief Spawns a new FlutterEngine from parent with spawn args via C-API.
   FLUTTER_API_SYMBOL(FlutterEngine)
@@ -1080,9 +1083,62 @@ class FlutterEmbedderNative {
   /// @brief Returns active engine count in the group.
   size_t GetActiveEngineCount() const;
 
+  /// @brief Notifies the surface manager and running engine that a surface was
+  /// created.
+  void NotifySurfaceCreated(ANativeWindow* window, bool is_fake_window = false);
+
+  /// @brief Notifies the surface manager and running engine that the surface
+  /// window changed.
+  void NotifySurfaceWindowChanged(ANativeWindow* window,
+                                  bool is_fake_window = false);
+
+  /// @brief Notifies the running engine that the surface dimensions changed.
+  void NotifySurfaceChanged(int32_t width, int32_t height);
+
+  /// @brief Notifies the running engine and surface manager that the surface
+  /// was destroyed.
+  void NotifySurfaceDestroyed();
+
+  /// @brief Populates the FlutterRendererConfig for C-API initialization.
+  void PopulateRendererConfig(FlutterRendererConfig* config);
+
+  /// @brief Spawns a child FlutterEmbedderNative sharing task runners and
+  /// assets.
+  std::unique_ptr<FlutterEmbedderNative> SpawnChild(
+      JNIEnv* env,
+      jobject child_jni,
+      const AndroidEngineSpawnArgs& args);
+
+  /// @brief Returns the managed AndroidSurfaceManager.
+  std::shared_ptr<AndroidSurfaceManager> GetSurfaceManager() const {
+    return surface_manager_;
+  }
+
+  /// @brief Returns the managed AndroidCompositor.
+  std::shared_ptr<AndroidCompositor> GetCompositor() const {
+    return compositor_;
+  }
+
+  /// @brief Returns the managed AndroidTaskRunners.
+  std::shared_ptr<AndroidTaskRunners> GetTaskRunners() const {
+    return android_task_runners_;
+  }
+
  private:
+  class CompositorDelegate;
+
   static std::mutex default_library_loader_mutex_;
   static std::shared_ptr<OSLibraryLoader> default_library_loader_;
+
+  void InitializeRuntimeSubsystems();
+  void HandleCompositorBeginFrame();
+  void HandleCompositorPlatformViewPresented(
+      int64_t view_id,
+      const FlutterPoint& offset,
+      const FlutterSize& size,
+      size_t mutations_count,
+      const FlutterPlatformViewMutation** mutations);
+  void HandleCompositorFramePresented();
 
   std::mutex surface_mutex_;
   std::mutex presentation_mutex_;
@@ -1127,6 +1183,29 @@ class FlutterEmbedderNative {
   std::shared_ptr<JniDelegate> jni_delegate_;
   std::shared_ptr<JniRouter> jni_router_;
   std::shared_ptr<APKAssetProvider> asset_provider_;
+
+  std::shared_ptr<AndroidTaskRunners> android_task_runners_;
+  std::shared_ptr<AndroidSurfaceManager> surface_manager_;
+  std::shared_ptr<CompositorDelegate> compositor_delegate_;
+  std::shared_ptr<AndroidCompositor> compositor_;
+  FlutterRendererConfig renderer_config_{};
+  FlutterCompositor embedder_compositor_{};
+  FlutterProjectArgs project_args_{};
+  std::string custom_entrypoint_storage_;
+  std::string custom_library_url_storage_;
+  std::vector<std::string> entrypoint_args_storage_;
+  std::vector<const char*> entrypoint_argv_ptrs_;
+  std::vector<std::string> command_line_args_storage_;
+  std::vector<const char*> command_line_argv_ptrs_;
+  std::vector<std::unique_ptr<FlutterAssetResolver>> asset_resolvers_storage_;
+  std::vector<const FlutterAssetResolver*> asset_resolver_ptrs_;
+  std::string assets_path_storage_;
+  std::string icu_data_path_storage_;
+  std::string persistent_cache_path_storage_;
+  std::string log_tag_storage_;
+  FlutterEngineAOTData aot_data_ = nullptr;
+  std::atomic<bool> surface_attached_{false};
+  std::atomic<bool> first_frame_presented_{false};
 
   mutable std::mutex decoder_registration_mutex_;
   FLUTTER_API_SYMBOL(FlutterEngine) registered_engine_ = nullptr;

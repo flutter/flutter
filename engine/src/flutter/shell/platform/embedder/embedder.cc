@@ -2826,7 +2826,15 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   if (SAFE_ACCESS(args, custom_dart_entrypoint, nullptr) != nullptr) {
     auto dart_entrypoint = std::string{args->custom_dart_entrypoint};
     if (!dart_entrypoint.empty()) {
-      run_configuration.SetEntrypoint(std::move(dart_entrypoint));
+      std::string dart_entrypoint_library;
+      if (command_line.GetOptionValue("dart-entrypoint-library",
+                                      &dart_entrypoint_library) &&
+          !dart_entrypoint_library.empty()) {
+        run_configuration.SetEntrypointAndLibrary(
+            std::move(dart_entrypoint), std::move(dart_entrypoint_library));
+      } else {
+        run_configuration.SetEntrypoint(std::move(dart_entrypoint));
+      }
     }
   }
 
