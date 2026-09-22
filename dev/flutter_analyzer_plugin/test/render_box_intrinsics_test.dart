@@ -6,9 +6,8 @@ import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
 import 'package:flutter_analyzer_plugin/src/rules/render_box_intrinsics.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
-@reflectiveTest
 class RenderBoxIntrinsicCalculationRuleTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -18,8 +17,9 @@ class RenderBoxIntrinsicCalculationRuleTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => RenderBoxIntrinsicCalculationRule.code.name;
+}
 
-  static const String source = '''
+const String _source = '''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -84,21 +84,24 @@ class RenderBoxSubclass2 extends RenderBox with ARenderBoxMixin {
 }
 ''';
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_render_box_intrinsics() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[
-      lint(585, 24),
-      lint(786, 24),
-      lint(980, 18),
-      lint(1079, 16),
-      lint(1264, 31),
-      lint(1488, 25),
-    ]);
-  }
-}
-
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(RenderBoxIntrinsicCalculationRuleTest);
+  late RenderBoxIntrinsicCalculationRuleTest testSuite;
+
+  setUp(() {
+    testSuite = RenderBoxIntrinsicCalculationRuleTest();
+    testSuite.setUp();
+  });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('render box intrinsics', () async {
+    await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[
+      testSuite.lint(585, 24),
+      testSuite.lint(786, 24),
+      testSuite.lint(980, 18),
+      testSuite.lint(1079, 16),
+      testSuite.lint(1264, 31),
+      testSuite.lint(1488, 25),
+    ]);
   });
 }
