@@ -506,7 +506,12 @@ class IOSSimulator extends Device {
       );
       // Launch the app only after the log stream is ready; otherwise the
       // Dart VM Service URL it logs on startup can be missed.
-      await logReader._ready.future.timeout(const Duration(seconds: 30));
+      const timeout = Duration(seconds: 30);
+      await logReader._ready.future.timeout(
+        timeout,
+        onTimeout: () =>
+            throw TimeoutException('The iOS simulator log stream did not start.', timeout),
+      );
     }
 
     // Launch the updated application in the simulator.
