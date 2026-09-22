@@ -5,8 +5,10 @@
 #include "flutter/shell/platform/android/android_vsync_waiter.h"
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <cstring>
+#include <unordered_map>
 #include <utility>
 
 #include "flutter/fml/logging.h"
@@ -308,6 +310,67 @@ void InMemoryAndroidChoreographerProvider::ClearPendingCallbacks() {
 // AndroidVsyncWaiter Implementation
 // =============================================================================
 
+// Static state for display refresh rate and pending Java VSync requests:
+// Default display refresh rate in Hz for standard mobile panels.
+static constexpr double kDefaultRefreshRateHz = 60.0;
+// Minimum supported refresh rate in Hz (hardware minimum limit).
+static constexpr double kMinRefreshRateHz = 1.0;
+// Maximum supported refresh rate in Hz (hardware display upper bound).
+static constexpr double kMaxRefreshRateHz = 1000.0;
+
+static std::atomic<double> g_global_refresh_rate{kDefaultRefreshRateHz};
+static std::mutex g_pending_batons_mutex;
+static std::unordered_map<intptr_t, std::weak_ptr<AndroidVsyncWaiter>>
+    g_pending_batons;
+
+void AndroidVsyncWaiter::SetGlobalRefreshRate(double refresh_rate_hz) {
+  if (!std::isfinite(refresh_rate_hz) || refresh_rate_hz <= 0.0) {
+    refresh_rate_hz = kDefaultRefreshRateHz;
+  } else {
+    refresh_rate_hz =
+        std::clamp(refresh_rate_hz, kMinRefreshRateHz, kMaxRefreshRateHz);
+  }
+  g_global_refresh_rate.store(refresh_rate_hz);
+}
+
+double AndroidVsyncWaiter::GetGlobalRefreshRate() {
+  return g_global_refresh_rate.load();
+}
+
+void AndroidVsyncWaiter::RegisterPendingJavaBaton(
+    intptr_t baton,
+    std::weak_ptr<AndroidVsyncWaiter> waiter) {
+  std::scoped_lock lock(g_pending_batons_mutex);
+  g_pending_batons[baton] = std::move(waiter);
+}
+
+void AndroidVsyncWaiter::UnregisterPendingJavaBaton(intptr_t baton) {
+  std::scoped_lock lock(g_pending_batons_mutex);
+  g_pending_batons.erase(baton);
+}
+
+void AndroidVsyncWaiter::OnJavaVsync(int64_t frame_delay_nanos,
+                                     int64_t refresh_period_nanos,
+                                     intptr_t baton) {
+  TRACE_EVENT0("flutter", "AndroidVsyncWaiter::OnJavaVsync");
+  std::shared_ptr<AndroidVsyncWaiter> waiter;
+  {
+    std::scoped_lock lock(g_pending_batons_mutex);
+    auto it = g_pending_batons.find(baton);
+    if (it != g_pending_batons.end()) {
+      waiter = it->second.lock();
+      g_pending_batons.erase(it);
+    }
+  }
+
+  int64_t now_nanos = fml::TimePoint::Now().ToEpochDelta().ToNanoseconds();
+  int64_t frame_time_nanos = now_nanos - frame_delay_nanos;
+
+  if (waiter) {
+    waiter->ConsumePendingVsync(baton, frame_time_nanos, refresh_period_nanos);
+  }
+}
+
 AndroidVsyncWaiter::AndroidVsyncWaiter(
     std::shared_ptr<AndroidChoreographerProvider> choreographer_provider,
     std::shared_ptr<JvmInvoker> jvm_invoker)
@@ -315,7 +378,8 @@ AndroidVsyncWaiter::AndroidVsyncWaiter(
           choreographer_provider
               ? std::move(choreographer_provider)
               : std::make_shared<DefaultAndroidChoreographerProvider>()),
-      jvm_invoker_(std::move(jvm_invoker)) {
+      jvm_invoker_(std::move(jvm_invoker)),
+      refresh_rate_hz_(GetGlobalRefreshRate()) {
   TRACE_EVENT0("flutter", "AndroidVsyncWaiter::AndroidVsyncWaiter");
 }
 
@@ -363,9 +427,17 @@ bool AndroidVsyncWaiter::AsyncWaitForVsync(intptr_t baton) {
 
   if (invoker) {
     int64_t baton_64 = static_cast<int64_t>(baton);
+    std::weak_ptr<AndroidVsyncWaiter> weak_this = weak_from_this();
+    RegisterPendingJavaBaton(baton, weak_this);
     std::vector<uint8_t> payload(sizeof(int64_t));
     std::memcpy(payload.data(), &baton_64, sizeof(int64_t));
-    return invoker->InvokeVoidMethod("asyncWaitForVsync", "(J)V", payload);
+    bool invoked =
+        invoker->InvokeVoidMethod("asyncWaitForVsync", "(J)V", payload);
+    if (!invoked) {
+      UnregisterPendingJavaBaton(baton);
+    } else {
+      return true;
+    }
   }
 
   // Self-contained fallback for simulation / test environments
@@ -492,9 +564,10 @@ void AndroidVsyncWaiter::UpdateRefreshRate(double refresh_rate_hz) {
   TRACE_EVENT1("flutter", "AndroidVsyncWaiter::UpdateRefreshRate",
                "refresh_rate", std::to_string(refresh_rate_hz).c_str());
   if (!std::isfinite(refresh_rate_hz) || refresh_rate_hz <= 0.0) {
-    refresh_rate_hz = 60.0;
+    refresh_rate_hz = kDefaultRefreshRateHz;
   } else {
-    refresh_rate_hz = std::clamp(refresh_rate_hz, 1.0, 1000.0);
+    refresh_rate_hz =
+        std::clamp(refresh_rate_hz, kMinRefreshRateHz, kMaxRefreshRateHz);
   }
   std::scoped_lock lock(mutex_);
   refresh_rate_hz_ = refresh_rate_hz;
