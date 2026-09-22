@@ -56,9 +56,10 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager) {
   self->shader = fl_compositor_opengl_shader_new(opengl_manager);
 
   // Determine once whether glBlitFramebuffer is available on this driver.
-  fl_opengl_manager_make_current(opengl_manager);
+  fl_opengl_manager_make_platform_current(opengl_manager);
   self->can_blit = fl_opengl_manager_can_blit(opengl_manager);
   self->can_fence = fl_opengl_manager_can_fence(opengl_manager);
+  fl_opengl_manager_clear_current(opengl_manager);
 
   return self;
 }
