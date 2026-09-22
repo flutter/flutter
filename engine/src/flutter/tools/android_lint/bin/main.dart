@@ -93,7 +93,8 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
       'FlutterActivity.java',
       'FlutterFragmentActivity.java',
       'FlutterEngineConnectionRegistry.java',
-      'FlutterShellArgs.java', // FlutterShellArgs will be removed as part of https://github.com/flutter/flutter/issues/190461.
+      'FlutterActivityAndFragmentDelegate.java', // TODO(camsim99): Remove as part of https://github.com/flutter/flutter/issues/190461.
+      'FlutterShellArgs.java', // TODO(camsim99): Remove as part of https://github.com/flutter/flutter/issues/190461.
       'ProcessTextPlugin.java', // Exempted because it safely parses the result of startActivityForResult.
       'IntentUtils.java',
     ];
@@ -109,7 +110,7 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
       final file = File(entity.path);
       final List<String> lines = file.readAsLinesSync();
       final intentExtraRegex = RegExp(
-        r'\.get(Boolean(Array)?|Bundle|Byte(Array)?|Char(Sequence)?(Array|ArrayList)?|Double(Array)?|Float(Array)?|Int(Array)?|IntegerArrayList|Long(Array)?|Parcelable(Array|ArrayList)?|Serializable|Short(Array)?|String(Array|ArrayList)?)Extra\(',
+        r'\.get((Boolean(Array)?|Bundle|Byte(Array)?|Char(Sequence)?(Array|ArrayList)?|Double(Array)?|Float(Array)?|Int(Array)?|IntegerArrayList|Long(Array)?|Parcelable(Array|ArrayList)?|Serializable|Short(Array)?|String(Array|ArrayList)?)Extra|Extras)\(',
       );
       for (var i = 0; i < lines.length; i++) {
         if (intentExtraRegex.hasMatch(lines[i])) {
