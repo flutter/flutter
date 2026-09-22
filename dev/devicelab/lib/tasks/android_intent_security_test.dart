@@ -74,7 +74,15 @@ void main() {
       section('Build APK for entrypoint test');
       await _buildApk(tempDir, 'release');
 
-      final String apkPath = path.join(tempDir.path, 'app', 'build', 'app', 'outputs', 'flutter-apk', 'app-release.apk');
+      final String apkPath = path.join(
+        tempDir.path,
+        'app',
+        'build',
+        'app',
+        'outputs',
+        'flutter-apk',
+        'app-release.apk',
+      );
       await _installApk(device, org, apkPath);
 
       section('Test entrypoint injection via cold start');
