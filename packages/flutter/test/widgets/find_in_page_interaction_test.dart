@@ -17,19 +17,21 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
-            home: SelectionArea(
+            home: FindInPageScope(
               enableSelection: false,
               enableFind: true,
-              findController: controller,
-              child: const Scaffold(
-                body: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text('0: flute prelude'),
-                    Text('1: fluid dynamics'),
-                    Text('2: fluke occurrence'),
-                    Text('3: flutter framework'),
-                  ],
+              controller: controller,
+              child: const SelectionArea(
+                child: Scaffold(
+                  body: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text('0: flute prelude'),
+                      Text('1: fluid dynamics'),
+                      Text('2: fluke occurrence'),
+                      Text('3: flutter framework'),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -106,13 +108,15 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
-            home: SelectionArea(
+            home: FindInPageScope(
               enableSelection: false,
               enableFind: true,
-              findController: controller,
-              child: const Scaffold(
-                body: Column(
-                  children: <Widget>[Text('Alpha Dart'), Text('Beta Dart'), Text('Gamma Dart')],
+              controller: controller,
+              child: const SelectionArea(
+                child: Scaffold(
+                  body: Column(
+                    children: <Widget>[Text('Alpha Dart'), Text('Beta Dart'), Text('Gamma Dart')],
+                  ),
                 ),
               ),
             ),
@@ -212,13 +216,15 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
-            home: SelectionArea(
+            home: FindInPageScope(
               enableSelection: true,
               enableFind: true,
-              findController: selectableController,
-              child: const Scaffold(
-                body: Column(
-                  children: <Widget>[Text('First Skwasm item'), Text('Second Skwasm item')],
+              controller: selectableController,
+              child: const SelectionArea(
+                child: Scaffold(
+                  body: Column(
+                    children: <Widget>[Text('First Skwasm item'), Text('Second Skwasm item')],
+                  ),
                 ),
               ),
             ),
@@ -255,15 +261,13 @@ void main() {
           contains(const TextSelection(baseOffset: 7, extentOffset: 13)),
         );
 
-        // Part B: enableSelection: false ("Find-Only" mode must NOT leave a stranded selection on close).
+        // Part B: SelectableRegion.findOnly ("Find-Only" mode must NOT leave a stranded selection on close).
         final FindInPageController findOnlyController = FindInPageController();
         addTearDown(findOnlyController.dispose);
 
         await tester.pumpWidget(
           MaterialApp(
-            home: SelectionArea(
-              enableSelection: false,
-              enableFind: true,
+            home: SelectableRegion.findOnly(
               findController: findOnlyController,
               child: const Scaffold(
                 body: Column(
@@ -302,18 +306,20 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
-            home: SelectionArea(
+            home: FindInPageScope(
               enableSelection: true,
               enableFind: true,
-              findController: controller,
-              child: const Scaffold(
-                body: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text('Line 0: CanvasKit renderer'),
-                    Text('Line 1: CanvasKit pipeline'),
-                    Text('Line 2: CanvasKit compositor'),
-                  ],
+              controller: controller,
+              child: const SelectionArea(
+                child: Scaffold(
+                  body: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text('Line 0: CanvasKit renderer'),
+                      Text('Line 1: CanvasKit pipeline'),
+                      Text('Line 2: CanvasKit compositor'),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -370,23 +376,25 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
-            home: SelectionArea(
+            home: FindInPageScope(
               enableSelection: false,
               enableFind: true,
-              findController: controller,
-              child: Scaffold(
-                body: StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setState) {
-                    outerSetState = setState;
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const Text('Header: initial timeout log'),
-                        Text(dynamicLine, key: const ValueKey<String>('dynamic')),
-                        if (showThirdLine) const Text('Footer: final timeout warning'),
-                      ],
-                    );
-                  },
+              controller: controller,
+              child: SelectionArea(
+                child: Scaffold(
+                  body: StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                      outerSetState = setState;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          const Text('Header: initial timeout log'),
+                          Text(dynamicLine, key: const ValueKey<String>('dynamic')),
+                          if (showThirdLine) const Text('Footer: final timeout warning'),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -451,29 +459,31 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
-            home: SelectionArea(
+            home: FindInPageScope(
               enableSelection: false,
               enableFind: true,
-              findController: controller,
-              child: Scaffold(
-                body: SingleChildScrollView(
-                  controller: verticalController,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const SizedBox(height: 24, child: Text('Visible Target Alpha')),
-                        const SizedBox(height: 24, child: Text('Visible Target Beta')),
-                        const SizedBox(height: 500),
-                        SingleChildScrollView(
-                          controller: horizontalController,
-                          scrollDirection: Axis.horizontal,
-                          child: const Row(
-                            children: <Widget>[SizedBox(width: 700), Text('Far 2D Target Omega')],
+              controller: controller,
+              child: SelectionArea(
+                child: Scaffold(
+                  body: SingleChildScrollView(
+                    controller: verticalController,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          const SizedBox(height: 24, child: Text('Visible Target Alpha')),
+                          const SizedBox(height: 24, child: Text('Visible Target Beta')),
+                          const SizedBox(height: 500),
+                          SingleChildScrollView(
+                            controller: horizontalController,
+                            scrollDirection: Axis.horizontal,
+                            child: const Row(
+                              children: <Widget>[SizedBox(width: 700), Text('Far 2D Target Omega')],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -529,13 +539,15 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: SelectionArea(
+          home: FindInPageScope(
             enableSelection: false,
             enableFind: true,
-            findController: controller,
-            child: const Scaffold(
-              body: Column(
-                children: <Widget>[Text('Alpha token'), Text('Beta token'), Text('Gamma token')],
+            controller: controller,
+            child: const SelectionArea(
+              child: Scaffold(
+                body: Column(
+                  children: <Widget>[Text('Alpha token'), Text('Beta token'), Text('Gamma token')],
+                ),
               ),
             ),
           ),

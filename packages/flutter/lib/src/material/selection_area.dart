@@ -54,28 +54,8 @@ class SelectionArea extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
     this.onSelectionChanged,
-    this.enableSelection = true,
-    this.enableFind = true,
-    this.findController,
-    this.findBarBuilder,
     required this.child,
   });
-
-  /// Whether pointer/keyboard selection is enabled in this area.
-  ///
-  /// When false and [enableFind] is true, [Text] widgets in the subtree still
-  /// participate in Find-in-Page (`Cmd+F` / `Ctrl+F`) without altering mouse
-  /// cursors or competing for drag gestures.
-  final bool enableSelection;
-
-  /// Whether Find-in-Page (`Cmd+F` / `Ctrl+F`) is enabled in this area.
-  final bool enableFind;
-
-  /// Optional controller to programmatically drive Find-in-Page queries and matches.
-  final FindInPageController? findController;
-
-  /// Optional builder for the Find-in-Page bar overlay when [findController] is open.
-  final SelectableRegionFindBarBuilder? findBarBuilder;
 
   /// The configuration for the magnifier in the selection region.
   ///
@@ -159,10 +139,6 @@ class SelectionAreaState extends State<SelectionArea> {
       magnifierConfiguration:
           widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
       onSelectionChanged: widget.onSelectionChanged,
-      enableSelection: widget.enableSelection,
-      enableFind: widget.enableFind,
-      findController: widget.findController,
-      findBarBuilder: widget.findBarBuilder,
       child: widget.child,
     );
   }

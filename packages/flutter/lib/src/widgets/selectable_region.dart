@@ -261,6 +261,25 @@ class SelectableRegion extends StatefulWidget {
     required this.child,
   });
 
+  /// Creates a [SelectableRegion] in "Find-Only" mode (`enableSelection: false`,
+  /// `enableFind: true`, `selectionControls: emptyTextSelectionControls`).
+  ///
+  /// In this mode, [Text] and [RichText] widgets in [child] register with this
+  /// region for Find-in-Page (`Cmd+F` / `Ctrl+F`) highlighting and scrolling
+  /// without altering button mouse cursors or competing for drag gestures.
+  SelectableRegion.findOnly({
+    super.key,
+    this.focusNode,
+    this.findController,
+    this.findBarBuilder,
+    required this.child,
+  }) : selectionControls = emptyTextSelectionControls,
+       contextMenuBuilder = null,
+       magnifierConfiguration = TextMagnifierConfiguration.disabled,
+       onSelectionChanged = null,
+       enableSelection = false,
+       enableFind = true;
+
   /// Whether user pointer/keyboard text selection is enabled in this region.
   ///
   /// When false and [enableFind] is true, [Text] widgets in the subtree still
@@ -427,10 +446,44 @@ class SelectableRegionState extends State<SelectableRegion>
   };
 
   FindInPageController? _localFindController;
+  FindInPageScope? _findScope;
+  FindInPageController? _attachedFindController;
+
+  bool get _effectiveEnableSelection => _findScope?.enableSelection ?? widget.enableSelection;
+
+  bool get _effectiveEnableFind => _findScope?.enableFind ?? widget.enableFind;
+
+  SelectableRegionFindBarBuilder? get _effectiveFindBarBuilder =>
+      widget.findBarBuilder ?? _findScope?.findBarBuilder;
 
   /// The [FindInPageController] managing Find-in-Page state for this region.
   FindInPageController get findController =>
-      widget.findController ?? (_localFindController ??= FindInPageController());
+      widget.findController ??
+      _findScope?.controller ??
+      (_localFindController ??= FindInPageController());
+
+  void _syncFindControllerAttachment() {
+    final FindInPageController target = findController;
+    if (_attachedFindController != target) {
+      _attachedFindController?._detach(_selectionDelegate);
+      if (target != _localFindController && _localFindController != null) {
+        _localFindController!._detach(_selectionDelegate);
+        _localFindController!.dispose();
+        _localFindController = null;
+      }
+      _attachedFindController = target;
+      target._attach(
+        _selectionDelegate,
+        enableSelection: _effectiveEnableSelection,
+        regionFocusNode: _focusNode,
+      );
+    } else {
+      target._updateHostConfig(
+        enableSelection: _effectiveEnableSelection,
+        regionFocusNode: _focusNode,
+      );
+    }
+  }
 
   final Map<Type, GestureRecognizerFactory> _gestureRecognizers =
       <Type, GestureRecognizerFactory>{};
@@ -494,11 +547,7 @@ class SelectableRegionState extends State<SelectableRegion>
   void initState() {
     super.initState();
     _focusNode.addListener(_handleFocusChanged);
-    findController._attach(
-      _selectionDelegate,
-      enableSelection: widget.enableSelection,
-      regionFocusNode: _focusNode,
-    );
+    _syncFindControllerAttachment();
     _initMouseGestureRecognizer();
     _initTouchGestureRecognizer();
     // Right clicks.
@@ -523,6 +572,8 @@ class SelectableRegionState extends State<SelectableRegion>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _findScope = FindInPageScope.maybeOf(context);
+    _syncFindControllerAttachment();
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
@@ -550,19 +601,6 @@ class SelectableRegionState extends State<SelectableRegion>
   @override
   void didUpdateWidget(SelectableRegion oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.findController != oldWidget.findController) {
-      oldWidget.findController?._detach(_selectionDelegate);
-      if (oldWidget.findController == null && widget.findController != null) {
-        _localFindController?._detach(_selectionDelegate);
-        _localFindController?.dispose();
-        _localFindController = null;
-      }
-      findController._attach(
-        _selectionDelegate,
-        enableSelection: widget.enableSelection,
-        regionFocusNode: _focusNode,
-      );
-    }
     if (widget.focusNode != oldWidget.focusNode) {
       if (oldWidget.focusNode == null && widget.focusNode != null) {
         _localFocusNode?.removeListener(_handleFocusChanged);
@@ -576,10 +614,7 @@ class SelectableRegionState extends State<SelectableRegion>
         _handleFocusChanged();
       }
     }
-    findController._updateHostConfig(
-      enableSelection: widget.enableSelection,
-      regionFocusNode: _focusNode,
-    );
+    _syncFindControllerAttachment();
   }
 
   Action<T> _makeOverridable<T extends Intent>(Action<T> defaultAction) {
@@ -1997,8 +2032,8 @@ class SelectableRegionState extends State<SelectableRegion>
   }
 
   void _handleDismiss(DismissIntent intent) {
-    if (widget.enableFind && findController.isOpen) {
-      findController.close(selectActiveMatch: widget.enableSelection);
+    if (_effectiveEnableFind && findController.isOpen) {
+      findController.close(selectActiveMatch: _effectiveEnableSelection);
       return;
     }
     _hideToolbarIfVisible(intent);
@@ -2012,6 +2047,8 @@ class SelectableRegionState extends State<SelectableRegion>
     if (kIsWeb) {
       PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
     }
+    _attachedFindController?._detach(_selectionDelegate);
+    _attachedFindController = null;
     widget.findController?._detach(_selectionDelegate);
     _localFindController?._detach(_selectionDelegate);
     _localFindController?.dispose();
@@ -2038,12 +2075,12 @@ class SelectableRegionState extends State<SelectableRegion>
       selectionStatusNotifier: _selectionStatusNotifier,
       child: SelectionContainer(registrar: this, delegate: _selectionDelegate, child: widget.child),
     );
-    if (!widget.enableSelection) {
+    if (!_effectiveEnableSelection) {
       result = DefaultSelectionStyle.merge(mouseCursor: MouseCursor.defer, child: result);
     } else if (_webContextMenuEnabled) {
       result = PlatformSelectableRegionContextMenu(child: result);
     }
-    if (widget.enableFind) {
+    if (_effectiveEnableFind) {
       final Widget content = result;
       result = ListenableBuilder(
         listenable: findController,
@@ -2059,7 +2096,7 @@ class SelectableRegionState extends State<SelectableRegion>
                   if (findController.isOpen)
                     SelectionContainer.disabled(
                       child:
-                          widget.findBarBuilder?.call(context, findController) ??
+                          _effectiveFindBarBuilder?.call(context, findController) ??
                           SelectableRegionFindBar(controller: findController),
                     ),
                 ],
@@ -2078,14 +2115,14 @@ class SelectableRegionState extends State<SelectableRegion>
         //
         // Tapping outside the selectable region does not unfocus
         // the region on non-web platforms, or when Find-in-Page is active.
-        if (kIsWeb && !(widget.enableFind && findController.isOpen)) {
+        if (kIsWeb && !(_effectiveEnableFind && findController.isOpen)) {
           _focusNode.unfocus();
         }
       },
       child: CompositedTransformTarget(
         link: _toolbarLayerLink,
         child: RawGestureDetector(
-          gestures: widget.enableSelection
+          gestures: _effectiveEnableSelection
               ? _gestureRecognizers
               : const <Type, GestureRecognizerFactory>{},
           behavior: HitTestBehavior.translucent,
@@ -2095,7 +2132,7 @@ class SelectableRegionState extends State<SelectableRegion>
             child: Focus.withExternalFocusNode(
               includeSemantics: false,
               focusNode: _focusNode,
-              autofocus: widget.enableFind,
+              autofocus: _effectiveEnableFind,
               child: result,
             ),
           ),
@@ -3970,6 +4007,54 @@ class SelectableSearchMatch {
 
   @override
   int get hashCode => Object.hash(selectable, range.startOffset, range.endOffset, text);
+}
+
+/// An [InheritedWidget] that configures Find-in-Page (`Cmd+F` / `Ctrl+F`)
+/// behavior for a descendant [SelectableRegion] or [SelectionArea].
+///
+/// Wrapping a [SelectionArea] or [SelectableRegion] in a [FindInPageScope]
+/// attaches a [FindInPageController], custom [findBarBuilder], or "Find-Only"
+/// mode (`enableSelection: false`) via ambient context lookup without requiring
+/// constructor parameters on [SelectionArea].
+class FindInPageScope extends InheritedWidget {
+  /// Creates a [FindInPageScope].
+  const FindInPageScope({
+    super.key,
+    this.controller,
+    this.enableFind = true,
+    this.enableSelection,
+    this.findBarBuilder,
+    required super.child,
+  });
+
+  /// The [FindInPageController] to attach to the descendant [SelectableRegion].
+  final FindInPageController? controller;
+
+  /// Whether Find-in-Page (`Cmd+F` / `Ctrl+F`) is enabled in the descendant
+  /// [SelectableRegion].
+  final bool enableFind;
+
+  /// Optional override for whether pointer/keyboard text selection is enabled
+  /// in the descendant [SelectableRegion] (e.g. `false` for "Find-Only" mode
+  /// inside a [SelectionArea]).
+  final bool? enableSelection;
+
+  /// Optional builder for the Find-in-Page bar overlay when [controller] is open.
+  final SelectableRegionFindBarBuilder? findBarBuilder;
+
+  /// Returns the closest enclosing [FindInPageScope] in [context], or `null`
+  /// if none is present.
+  static FindInPageScope? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<FindInPageScope>();
+  }
+
+  @override
+  bool updateShouldNotify(FindInPageScope oldWidget) {
+    return controller != oldWidget.controller ||
+        enableFind != oldWidget.enableFind ||
+        enableSelection != oldWidget.enableSelection ||
+        findBarBuilder != oldWidget.findBarBuilder;
+  }
 }
 
 /// Controls Find-in-Page (`Cmd+F` / `Ctrl+F`) search state, highlight painting, and

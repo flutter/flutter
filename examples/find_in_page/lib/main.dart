@@ -485,379 +485,388 @@ class _FindInPageDemoAppState extends State<FindInPageDemoApp> {
                 ),
               ),
             ),
-            body: SelectionArea(
+            body: FindInPageScope(
               enableSelection: _enableSelection,
               enableFind: true,
-              findController: _findController,
+              controller: _findController,
               findBarBuilder: switch (_uiStyle) {
                 FindUiStyle.defaultFloating => null, // Uses default SelectableRegionFindBar
                 FindUiStyle.customBottomBar => _buildCustomBottomFindBar,
                 FindUiStyle.headlessAppBar =>
                   (BuildContext _, FindInPageController _) => const SizedBox.shrink(),
               },
-              child: Scrollbar(
-                controller: _scrollController,
-                thumbVisibility: true,
-                child: ListView(
+              child: SelectionArea(
+                child: Scrollbar(
                   controller: _scrollController,
-                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 80),
-                  children: <Widget>[
-                    // Section 1: Pluggable Architecture Explanation
-                    Card(
-                      elevation: 0,
-                      color: const Color(0xFFEFF6FF),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: Color(0xFFBFDBFE)),
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              '1. Pluggable Invocation & Headless Controller (SelectionArea + FindInPageController)',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1E3A8A),
-                              ),
-                            ),
-                            SizedBox(height: 6),
-                            Text(
-                              'SelectableRegion is NOT hard-wired to a single shortcut or UI! '
-                              'Your app controls how Find is invoked (try pressing Cmd+F, Ctrl+F, Cmd+K, or "/" '
-                              'right now!) and how the UI is rendered (switch between the Default Floating FindBar, '
-                              'a Custom Bottom Pill via findBarBuilder, or a completely Headless AppBar input). '
-                              'Finding a needle in a haystack highlights passive matches in yellow (#66FFEB3B) '
-                              'and the active needle in orange (#CCFF9800).',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Color(0xFF1E293B),
-                                height: 1.45,
-                              ),
-                            ),
-                          ],
+                  thumbVisibility: true,
+                  child: ListView(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 80),
+                    children: <Widget>[
+                      // Section 1: Pluggable Architecture Explanation
+                      Card(
+                        elevation: 0,
+                        color: const Color(0xFFEFF6FF),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(color: Color(0xFFBFDBFE)),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Section 2: RichText + WidgetSpan inline badges
-                    Card(
-                      elevation: 0,
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: Color(0xFFE2E8F0)),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            const Text(
-                              '2. RichText with Inline WidgetSpan Badges (U+FFFC Offset Alignment)',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0F172A),
+                        child: const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                '1. Pluggable Invocation & Headless Controller (SelectionArea + FindInPageController)',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1E3A8A),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 10),
-                            Text.rich(
-                              TextSpan(
-                                style: const TextStyle(
+                              SizedBox(height: 6),
+                              Text(
+                                'SelectableRegion is NOT hard-wired to a single shortcut or UI! '
+                                'Your app controls how Find is invoked (try pressing Cmd+F, Ctrl+F, Cmd+K, or "/" '
+                                'right now!) and how the UI is rendered (switch between the Default Floating FindBar, '
+                                'a Custom Bottom Pill via findBarBuilder, or a completely Headless AppBar input). '
+                                'Finding a needle in a haystack highlights passive matches in yellow (#66FFEB3B) '
+                                'and the active needle in orange (#CCFF9800).',
+                                style: TextStyle(
                                   fontSize: 14,
-                                  color: Color(0xFF334155),
-                                  height: 1.6,
+                                  color: Color(0xFF1E293B),
+                                  height: 1.45,
                                 ),
-                                children: <InlineSpan>[
-                                  const TextSpan(
-                                    text: 'Before inline WidgetSpan badge: lowercase needle and ',
-                                  ),
-                                  WidgetSpan(
-                                    alignment: PlaceholderAlignment.middle,
-                                    child: Container(
-                                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFDBEAFE),
-                                        borderRadius: BorderRadius.circular(999),
-                                        border: Border.all(color: const Color(0xFF93C5FD)),
-                                      ),
-                                      child: const Text(
-                                        'BADGE needle',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                          color: Color(0xFF1D4ED8),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const TextSpan(
-                                    text:
-                                        ' after WidgetSpan badge: uppercase NEEDLE and mixed-case Needle! '
-                                        'Because each _SelectableFragment paints its own local text range, '
-                                        'character offsets never drift across embedded widgets.',
-                                  ),
-                                ],
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                    // Section 3: Interactive Buttons & Chips
-                    Card(
-                      elevation: 0,
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: Color(0xFFE2E8F0)),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Row(
-                              children: <Widget>[
-                                const Expanded(
-                                  child: Text(
-                                    '3. Interactive Buttons & Chips (Hover & Click Preserved)',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF0F172A),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF1F5F9),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    'Button Clicks: $_buttonClickCount',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xFF475569),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Hover over the buttons and chips below: in Find-Only mode '
-                              '(enableSelection: false), plain text keeps the normal arrow cursor while '
-                              'buttons keep their pointer hand cursor and click handlers—yet their labels '
-                              'still participate in Find-in-Page!',
-                              style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
-                            ),
-                            const SizedBox(height: 12),
-                            Wrap(
-                              spacing: 12,
-                              runSpacing: 10,
-                              children: <Widget>[
-                                ElevatedButton.icon(
-                                  onPressed: () => setState(() => _buttonClickCount++),
-                                  icon: const Icon(Icons.touch_app, size: 18),
-                                  label: const Text('Elevated needle Action'),
-                                ),
-                                FilledButton.tonalIcon(
-                                  onPressed: () => setState(() => _buttonClickCount++),
-                                  icon: const Icon(Icons.bolt, size: 18),
-                                  label: const Text('Tonal NEEDLE Button'),
-                                ),
-                                OutlinedButton(
-                                  onPressed: () => setState(() => _buttonClickCount++),
-                                  child: const Text('Outlined Needle Control'),
-                                ),
-                                const Chip(
-                                  avatar: Icon(Icons.tag, size: 16),
-                                  label: Text('Chip: needle-v1.0'),
-                                ),
-                              ],
-                            ),
-                          ],
+                      // Section 2: RichText + WidgetSpan inline badges
+                      Card(
+                        elevation: 0,
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(color: Color(0xFFE2E8F0)),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Section 4: DataTable
-                    Card(
-                      elevation: 0,
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: Color(0xFFE2E8F0)),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            const Text(
-                              '4. Structured DataTable Cells & Multi-Column Traversal',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0F172A),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: DataTable(
-                                headingRowColor: WidgetStateProperty.all(const Color(0xFFF8FAFC)),
-                                columns: const <DataColumn>[
-                                  DataColumn(label: Text('Subsystem')),
-                                  DataColumn(label: Text('Role in Cmd+F (needle)')),
-                                  DataColumn(label: Text('Highlight Layer')),
-                                ],
-                                rows: const <DataRow>[
-                                  DataRow(
-                                    cells: <DataCell>[
-                                      DataCell(Text('RenderParagraph')),
-                                      DataCell(
-                                        Text('Exposes getPlainText() & showRangeOnScreen(needle)'),
-                                      ),
-                                      DataCell(
-                                        Text('Direct Canvas.drawRect inside _SelectableFragment'),
-                                      ),
-                                    ],
-                                  ),
-                                  DataRow(
-                                    cells: <DataCell>[
-                                      DataCell(Text('SelectionArea')),
-                                      DataCell(
-                                        Text(
-                                          'enableSelection: false + enableFind: true (Find-Only NEEDLE)',
-                                        ),
-                                      ),
-                                      DataCell(
-                                        Text(
-                                          'Pluggable findBarBuilder or Headless FindInPageController',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  DataRow(
-                                    cells: <DataCell>[
-                                      DataCell(Text('App Shortcuts')),
-                                      DataCell(
-                                        Text('User-configured Cmd+F / Ctrl+F / Cmd+K / "/" needle'),
-                                      ),
-                                      DataCell(
-                                        Text(
-                                          'Decoupled from SelectableRegion via Actions/Controller',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Section 5: Off-screen Scrollable List items
-                    Card(
-                      elevation: 0,
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: Color(0xFFE2E8F0)),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            const Text(
-                              '5. Off-Screen Scrollable Items (Press Enter / Cmd+G / ↓ to Auto-Scroll!)',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0F172A),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              'Step through matches using Enter, Cmd+G, or the ↑/↓ buttons '
-                              'to watch RenderObject.showOnScreen scroll each target glyph box '
-                              'smoothly into the viewport:',
-                              style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
-                            ),
-                            const SizedBox(height: 12),
-                            for (int i = 1; i <= 24; i++)
-                              Container(
-                                margin: const EdgeInsets.only(bottom: 8),
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                decoration: BoxDecoration(
-                                  color: i % 4 == 0
-                                      ? const Color(0xFFFEFCE8)
-                                      : const Color(0xFFF8FAFC),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: i % 4 == 0
-                                        ? const Color(0xFFFDE047)
-                                        : const Color(0xFFE2E8F0),
-                                  ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              const Text(
+                                '2. RichText with Inline WidgetSpan Badges (U+FFFC Offset Alignment)',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0F172A),
                                 ),
-                                child: Row(
-                                  children: <Widget>[
-                                    Container(
-                                      width: 32,
-                                      height: 24,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFE2E8F0),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        '#$i',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF334155),
+                              ),
+                              const SizedBox(height: 10),
+                              Text.rich(
+                                TextSpan(
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xFF334155),
+                                    height: 1.6,
+                                  ),
+                                  children: <InlineSpan>[
+                                    const TextSpan(
+                                      text: 'Before inline WidgetSpan badge: lowercase needle and ',
+                                    ),
+                                    WidgetSpan(
+                                      alignment: PlaceholderAlignment.middle,
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFDBEAFE),
+                                          borderRadius: BorderRadius.circular(999),
+                                          border: Border.all(color: const Color(0xFF93C5FD)),
+                                        ),
+                                        child: const Text(
+                                          'BADGE needle',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w700,
+                                            color: Color(0xFF1D4ED8),
+                                          ),
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        i % 4 == 0
-                                            ? 'Off-screen #$i — Match target: hidden needle in scrollable SliverList row #$i (uppercase NEEDLE check)'
-                                            : 'Off-screen #$i — Standard telemetry log row with no default keyword match',
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          color: Color(0xFF1E293B),
-                                        ),
-                                      ),
+                                    const TextSpan(
+                                      text:
+                                          ' after WidgetSpan badge: uppercase NEEDLE and mixed-case Needle! '
+                                          'Because each _SelectableFragment paints its own local text range, '
+                                          'character offsets never drift across embedded widgets.',
                                     ),
                                   ],
                                 ),
                               ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 16),
+
+                      // Section 3: Interactive Buttons & Chips
+                      Card(
+                        elevation: 0,
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Row(
+                                children: <Widget>[
+                                  const Expanded(
+                                    child: Text(
+                                      '3. Interactive Buttons & Chips (Hover & Click Preserved)',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF0F172A),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF1F5F9),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      'Button Clicks: $_buttonClickCount',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF475569),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Hover over the buttons and chips below: in Find-Only mode '
+                                '(enableSelection: false), plain text keeps the normal arrow cursor while '
+                                'buttons keep their pointer hand cursor and click handlers—yet their labels '
+                                'still participate in Find-in-Page!',
+                                style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                              ),
+                              const SizedBox(height: 12),
+                              Wrap(
+                                spacing: 12,
+                                runSpacing: 10,
+                                children: <Widget>[
+                                  ElevatedButton.icon(
+                                    onPressed: () => setState(() => _buttonClickCount++),
+                                    icon: const Icon(Icons.touch_app, size: 18),
+                                    label: const Text('Elevated needle Action'),
+                                  ),
+                                  FilledButton.tonalIcon(
+                                    onPressed: () => setState(() => _buttonClickCount++),
+                                    icon: const Icon(Icons.bolt, size: 18),
+                                    label: const Text('Tonal NEEDLE Button'),
+                                  ),
+                                  OutlinedButton(
+                                    onPressed: () => setState(() => _buttonClickCount++),
+                                    child: const Text('Outlined Needle Control'),
+                                  ),
+                                  const Chip(
+                                    avatar: Icon(Icons.tag, size: 16),
+                                    label: Text('Chip: needle-v1.0'),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Section 4: DataTable
+                      Card(
+                        elevation: 0,
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              const Text(
+                                '4. Structured DataTable Cells & Multi-Column Traversal',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0F172A),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: DataTable(
+                                  headingRowColor: WidgetStateProperty.all(const Color(0xFFF8FAFC)),
+                                  columns: const <DataColumn>[
+                                    DataColumn(label: Text('Subsystem')),
+                                    DataColumn(label: Text('Role in Cmd+F (needle)')),
+                                    DataColumn(label: Text('Highlight Layer')),
+                                  ],
+                                  rows: const <DataRow>[
+                                    DataRow(
+                                      cells: <DataCell>[
+                                        DataCell(Text('RenderParagraph')),
+                                        DataCell(
+                                          Text(
+                                            'Exposes getPlainText() & showRangeOnScreen(needle)',
+                                          ),
+                                        ),
+                                        DataCell(
+                                          Text('Direct Canvas.drawRect inside _SelectableFragment'),
+                                        ),
+                                      ],
+                                    ),
+                                    DataRow(
+                                      cells: <DataCell>[
+                                        DataCell(Text('SelectionArea')),
+                                        DataCell(
+                                          Text(
+                                            'enableSelection: false + enableFind: true (Find-Only NEEDLE)',
+                                          ),
+                                        ),
+                                        DataCell(
+                                          Text(
+                                            'Pluggable findBarBuilder or Headless FindInPageController',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    DataRow(
+                                      cells: <DataCell>[
+                                        DataCell(Text('App Shortcuts')),
+                                        DataCell(
+                                          Text(
+                                            'User-configured Cmd+F / Ctrl+F / Cmd+K / "/" needle',
+                                          ),
+                                        ),
+                                        DataCell(
+                                          Text(
+                                            'Decoupled from SelectableRegion via Actions/Controller',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Section 5: Off-screen Scrollable List items
+                      Card(
+                        elevation: 0,
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              const Text(
+                                '5. Off-Screen Scrollable Items (Press Enter / Cmd+G / ↓ to Auto-Scroll!)',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0F172A),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              const Text(
+                                'Step through matches using Enter, Cmd+G, or the ↑/↓ buttons '
+                                'to watch RenderObject.showOnScreen scroll each target glyph box '
+                                'smoothly into the viewport:',
+                                style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                              ),
+                              const SizedBox(height: 12),
+                              for (int i = 1; i <= 24; i++)
+                                Container(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: i % 4 == 0
+                                        ? const Color(0xFFFEFCE8)
+                                        : const Color(0xFFF8FAFC),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: i % 4 == 0
+                                          ? const Color(0xFFFDE047)
+                                          : const Color(0xFFE2E8F0),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: <Widget>[
+                                      Container(
+                                        width: 32,
+                                        height: 24,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFE2E8F0),
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          '#$i',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF334155),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          i % 4 == 0
+                                              ? 'Off-screen #$i — Match target: hidden needle in scrollable SliverList row #$i (uppercase NEEDLE check)'
+                                              : 'Off-screen #$i — Standard telemetry log row with no default keyword match',
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            color: Color(0xFF1E293B),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
