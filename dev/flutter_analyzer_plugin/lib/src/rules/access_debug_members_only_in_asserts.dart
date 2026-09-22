@@ -113,7 +113,7 @@ class _AccessDebugMembersOnlyInAssertsVisitor extends GeneralizingAstVisitor<voi
 
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
-    if (node.token._isDebugOnlySymbol) {
+    if (!node.inDeclarationContext() && node.token._isDebugOnlySymbol) {
       rule.reportAtNode(node, arguments: <Object>[node.name]);
     }
   }
