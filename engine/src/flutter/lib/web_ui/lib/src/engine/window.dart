@@ -68,6 +68,7 @@ class EngineFlutterView implements ui.FlutterView {
     // The embeddingStrategy will take care of cleaning up the rootElement on
     // hot restart.
     embeddingStrategy.attachViewRoot(dom.rootElement);
+    _addAccessibilityPlaceholder();
     pointerBinding = PointerBinding(this);
     _resizeSubscription = onResize.listen(_handleBrowserResize);
     _globalHtmlAttributes.applyAttributes(
@@ -99,6 +100,23 @@ class EngineFlutterView implements ui.FlutterView {
   /// Whether this [EngineFlutterView] has been disposed or not.
   bool isDisposed = false;
 
+  /// Whether this view asked for a placeholder to enable accessibility.
+  ///
+  /// False when semantics was already enabled at the time the view was
+  /// created, as there is nothing left to enable.
+  bool _hasAccessibilityPlaceholder = false;
+
+  void _addAccessibilityPlaceholder() {
+    final EngineSemantics engineSemantics = EngineSemantics.instance;
+    if (engineSemantics.semanticsEnabled) {
+      return;
+    }
+    // Where the placeholder ends up is decided by the semantics helper, which
+    // puts it inside the view on mobile and on the page on desktop.
+    engineSemantics.semanticsHelper.addPlaceholderForView(dom.rootElement);
+    _hasAccessibilityPlaceholder = true;
+  }
+
   /// Disposes of the [EngineFlutterView] instance and undoes all of its DOM
   /// tree and any event listeners.
   @mustCallSuper
@@ -110,6 +128,10 @@ class EngineFlutterView implements ui.FlutterView {
     _resizeSubscription.cancel();
     dimensionsProvider.close();
     pointerBinding.dispose();
+    if (_hasAccessibilityPlaceholder) {
+      EngineSemantics.instance.semanticsHelper.removePlaceholderForView(dom.rootElement);
+      _hasAccessibilityPlaceholder = false;
+    }
     dom.rootElement.remove();
     // TODO(harryterkelsen): What should we do about this in multi-view?
     renderer.clearFragmentProgramCache();
