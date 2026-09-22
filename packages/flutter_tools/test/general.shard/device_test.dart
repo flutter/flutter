@@ -1255,6 +1255,12 @@ void main() {
                 'Flag "$key" in DebuggingOptions is missing from AndroidEngineCliFlags.allFlags',
           );
         }
+
+        // Verify that flags passed directly to AndroidDevice.startApp are in AndroidEngineCliFlags.allFlags.
+        expect(
+          AndroidEngineCliFlags.allFlags,
+          containsAll(<String>[AndroidEngineCliFlags.route, AndroidEngineCliFlags.traceStartup]),
+        );
       },
     );
   });
