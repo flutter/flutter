@@ -286,55 +286,51 @@ void main() {
     },
   );
 
-  testWidgets(
-    'SnapshotWidget should have same result when enabled',
-    (WidgetTester tester) async {
-      addTearDown(tester.view.reset);
+  testWidgets('SnapshotWidget should have same result when enabled', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
 
-      tester.view
-        ..physicalSize = const Size(10, 10)
-        ..devicePixelRatio = 1;
+    tester.view
+      ..physicalSize = const Size(10, 10)
+      ..devicePixelRatio = 1;
 
-      const repaintBoundaryKey = ValueKey<String>('boundary');
-      final controller = SnapshotController();
-      addTearDown(controller.dispose);
+    const repaintBoundaryKey = ValueKey<String>('boundary');
+    final controller = SnapshotController();
+    addTearDown(controller.dispose);
 
-      await tester.pumpWidget(
-        RepaintBoundary(
-          key: repaintBoundaryKey,
-          child: TestWidgetsApp(
-            home: Container(
-              color: kBlackColor,
-              padding: const EdgeInsets.only(right: 0.6, bottom: 0.6),
-              child: SnapshotWidget(
-                controller: controller,
-                child: Container(
-                  margin: const EdgeInsets.only(right: 0.4, bottom: 0.4),
-                  color: kBlueColor,
-                ),
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: repaintBoundaryKey,
+        child: TestWidgetsApp(
+          home: Container(
+            color: kBlackColor,
+            padding: const EdgeInsets.only(right: 0.6, bottom: 0.6),
+            child: SnapshotWidget(
+              controller: controller,
+              child: Container(
+                margin: const EdgeInsets.only(right: 0.4, bottom: 0.4),
+                color: kBlueColor,
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      final ui.Image imageWhenDisabled = (tester.renderObject(
-        find.byKey(repaintBoundaryKey),
-      ) as RenderRepaintBoundary).toImageSync();
-      addTearDown(imageWhenDisabled.dispose);
+    final ui.Image imageWhenDisabled =
+        (tester.renderObject(find.byKey(repaintBoundaryKey)) as RenderRepaintBoundary)
+            .toImageSync();
+    addTearDown(imageWhenDisabled.dispose);
 
-      controller.allowSnapshotting = true;
-      await tester.pump();
+    controller.allowSnapshotting = true;
+    await tester.pump();
 
-      final ui.Image imageWhenEnabled = (tester.renderObject(
-        find.byKey(repaintBoundaryKey),
-      ) as RenderRepaintBoundary).toImageSync();
-      addTearDown(imageWhenEnabled.dispose);
+    final ui.Image imageWhenEnabled =
+        (tester.renderObject(find.byKey(repaintBoundaryKey)) as RenderRepaintBoundary)
+            .toImageSync();
+    addTearDown(imageWhenEnabled.dispose);
 
-      await expectLater(imageWhenEnabled, matchesReferenceImage(imageWhenDisabled));
-    },
-    skip: impellerEnabled,
-  );
+    await expectLater(imageWhenEnabled, matchesReferenceImage(imageWhenDisabled));
+  }, skip: impellerEnabled);
 
   test('SnapshotPainter dispatches memory events', () async {
     await expectLater(
