@@ -70,6 +70,7 @@ void main() {
               'hotReload': true,
               'hotRestart': true,
               'screenshot': false,
+              'screenRecording': false,
               'flutterExit': false,
               'hardwareRendering': false,
               'startPaused': true,

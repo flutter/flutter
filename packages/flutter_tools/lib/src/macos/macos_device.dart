@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -13,6 +11,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../project.dart';
