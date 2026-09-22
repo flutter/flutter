@@ -18,15 +18,16 @@ import 'dimensions_provider.dart';
 /// and should be cached as needed. Every call to every method on this class
 /// WILL perform actual DOM measurements.
 class FullPageDimensionsProvider extends DimensionsProvider {
-  /// Constructs a global [FullPageDimensionsProvider].
+  /// Constructs a [FullPageDimensionsProvider] for the given [viewDomWindow].
   ///
-  /// Doesn't need any parameters, because all the measurements come from the
-  /// globally available [DomVisualViewport].
-  FullPageDimensionsProvider() {
+  /// When no window is provided, the global [domWindow] is used.
+  FullPageDimensionsProvider({DomWindow? viewDomWindow, DomDocument? viewDomDocument})
+    : _domWindow = viewDomWindow ?? domWindow,
+      _domDocument = viewDomDocument ?? domDocument {
     // Determine what 'resize' event we'll be listening to.
     // This is needed for older browsers (Firefox < 91, Safari < 13)
     // TODO(dit): Clean this up, https://github.com/flutter/flutter/issues/117105
-    final DomEventTarget resizeEventTarget = domWindow.visualViewport ?? domWindow;
+    final DomEventTarget resizeEventTarget = _domWindow.visualViewport ?? _domWindow;
 
     // Subscribe to the 'resize' event, and convert it to a ui.Size stream.
     _domResizeSubscription = DomSubscription(
@@ -35,6 +36,9 @@ class FullPageDimensionsProvider extends DimensionsProvider {
       createDomEventListener(_onVisualViewportResize),
     );
   }
+
+  final DomWindow _domWindow;
+  final DomDocument _domDocument;
 
   late DomSubscription _domResizeSubscription;
   final StreamController<ui.Size?> _onResizeStreamController =
@@ -65,7 +69,7 @@ class FullPageDimensionsProvider extends DimensionsProvider {
   ui.Size computePhysicalSize() {
     late double windowInnerWidth;
     late double windowInnerHeight;
-    final DomVisualViewport? viewport = domWindow.visualViewport;
+    final DomVisualViewport? viewport = _domWindow.visualViewport;
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
 
     if (viewport != null) {
@@ -78,8 +82,8 @@ class FullPageDimensionsProvider extends DimensionsProvider {
         /// accurate physical size. VisualViewport api is only used during
         /// text editing to make sure inset is correctly reported to
         /// framework.
-        final double docWidth = domDocument.documentElement!.clientWidth;
-        final double docHeight = domDocument.documentElement!.clientHeight;
+        final double docWidth = _domDocument.documentElement!.clientWidth;
+        final double docHeight = _domDocument.documentElement!.clientHeight;
         windowInnerWidth = docWidth * devicePixelRatio;
         windowInnerHeight = docHeight * devicePixelRatio;
       } else {
@@ -87,8 +91,8 @@ class FullPageDimensionsProvider extends DimensionsProvider {
         windowInnerHeight = viewport.height! * devicePixelRatio;
       }
     } else {
-      windowInnerWidth = domWindow.innerWidth! * devicePixelRatio;
-      windowInnerHeight = domWindow.innerHeight! * devicePixelRatio;
+      windowInnerWidth = _domWindow.innerWidth! * devicePixelRatio;
+      windowInnerHeight = _domWindow.innerHeight! * devicePixelRatio;
     }
     return ui.Size(windowInnerWidth, windowInnerHeight);
   }
@@ -96,17 +100,17 @@ class FullPageDimensionsProvider extends DimensionsProvider {
   @override
   ViewPadding computeKeyboardInsets(double physicalHeight, bool isEditingOnMobile) {
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
-    final DomVisualViewport? viewport = domWindow.visualViewport;
+    final DomVisualViewport? viewport = _domWindow.visualViewport;
     late double windowInnerHeight;
 
     if (viewport != null) {
       if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs && !isEditingOnMobile) {
-        windowInnerHeight = domDocument.documentElement!.clientHeight * devicePixelRatio;
+        windowInnerHeight = _domDocument.documentElement!.clientHeight * devicePixelRatio;
       } else {
         windowInnerHeight = viewport.height! * devicePixelRatio;
       }
     } else {
-      windowInnerHeight = domWindow.innerHeight! * devicePixelRatio;
+      windowInnerHeight = _domWindow.innerHeight! * devicePixelRatio;
     }
     final double bottomPadding = physicalHeight - windowInnerHeight;
 

@@ -75,6 +75,10 @@ class AppBootstrap {
         assert(configuration.multiViewEnabled, 'Cannot addView when multiView is not enabled');
         return viewManager.createAndRegisterView(options).viewId;
       },
+      adoptView: (int viewId, JsFlutterViewOptions options) {
+        assert(configuration.multiViewEnabled, 'Cannot adoptView when multiView is not enabled');
+        return viewManager.adoptView(viewId, options);
+      },
       removeView: (int viewId) {
         assert(configuration.multiViewEnabled, 'Cannot removeView when multiView is not enabled');
         return viewManager.disposeAndUnregisterView(viewId);

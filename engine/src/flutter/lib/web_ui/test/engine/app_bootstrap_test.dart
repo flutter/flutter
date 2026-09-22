@@ -96,5 +96,29 @@ void testMain() {
       app.removeView(viewId);
       expect(bootstrap.viewManager[viewId], isNull);
     });
+
+    test('adoptView updates the host element and preserves the view', () async {
+      final bootstrap = AppBootstrap(initializeEngine: mockInit, runApp: mockRunApp);
+
+      final FlutterEngineInitializer engineInitializer = bootstrap.prepareEngineInitializer();
+
+      final FlutterAppRunner appInitializer = await engineInitializer.initializeEngine(
+        JsFlutterConfiguration(multiViewEnabled: true),
+      );
+      final FlutterApp app = await appInitializer.runApp();
+      final DomElement originalHost = createDomElement('div');
+      final int viewId = app.addView(JsFlutterViewOptions(hostElement: originalHost));
+      final EngineFlutterView? view = bootstrap.viewManager[viewId];
+      expect(view, isNotNull);
+
+      final DomElement newHost = createDomElement('div');
+      app.adoptView(viewId, JsFlutterViewOptions(hostElement: newHost));
+
+      expect(view!.embeddingStrategy.hostElement, newHost);
+      expect(view.dom.rootElement.parent, newHost);
+
+      app.removeView(viewId);
+      expect(bootstrap.viewManager[viewId], isNull);
+    });
   });
 }

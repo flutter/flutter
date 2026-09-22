@@ -21,7 +21,7 @@ void main() {
 void doTests() {
   group('DomManager', () {
     test('DOM tree looks right', () {
-      final domManager = DomManager(devicePixelRatio: 3.0);
+      final domManager = DomManager(devicePixelRatio: 3.0, document: domDocument);
 
       // Check tag names.
 
@@ -51,7 +51,7 @@ void doTests() {
     });
 
     test('hide placeholder text for textfield', () {
-      final domManager = DomManager(devicePixelRatio: 3.0);
+      final domManager = DomManager(devicePixelRatio: 3.0, document: domDocument);
       domDocument.body!.append(domManager.rootElement);
 
       final DomHTMLInputElement regularTextField = createDomHTMLInputElement();
@@ -93,12 +93,12 @@ void doTests() {
 
       attachShadow = null; // Break ShadowDOM
 
-      expect(() => DomManager(devicePixelRatio: 3.0), throwsAssertionError);
+      expect(() => DomManager(devicePixelRatio: 3.0, document: domDocument), throwsAssertionError);
       attachShadow = oldAttachShadow; // Restore ShadowDOM
     });
 
     test('Initializes and attaches a shadow root', () {
-      final domManager = DomManager(devicePixelRatio: 3.0);
+      final domManager = DomManager(devicePixelRatio: 3.0, document: domDocument);
 
       expect(domManager.renderingHost.isA<DomShadowRoot>(), isTrue);
       expect(domManager.renderingHost.host, domManager.platformViewsHost);
@@ -115,7 +115,7 @@ void doTests() {
     });
 
     test('Attaches a stylesheet to the shadow root', () {
-      final domManager = DomManager(devicePixelRatio: 3.0);
+      final domManager = DomManager(devicePixelRatio: 3.0, document: domDocument);
       final DomElement? style = domManager.renderingHost.querySelector('#flt-internals-stylesheet');
 
       expect(style, isNotNull);
@@ -124,7 +124,7 @@ void doTests() {
     });
 
     test('setScene', () {
-      final domManager = DomManager(devicePixelRatio: 3.0);
+      final domManager = DomManager(devicePixelRatio: 3.0, document: domDocument);
 
       final DomElement sceneHost = domManager.renderingHost.querySelector('flt-scene-host')!;
 

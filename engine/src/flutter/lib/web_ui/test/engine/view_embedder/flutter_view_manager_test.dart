@@ -110,6 +110,71 @@ Future<void> doTests() async {
       });
     });
 
+    group('adoptView', () {
+      test('adopts view into a new host element and preserves the DOM tree', () {
+        final DomElement originalHost = createDomHTMLDivElement();
+        final view = EngineFlutterView(platformDispatcher, originalHost);
+        final int viewId = view.viewId;
+        final originalOptions = JsFlutterViewOptions(hostElement: originalHost);
+
+        viewManager.registerView(view, jsViewOptions: originalOptions);
+        expect(viewManager.getHostElement(viewId), originalHost);
+
+        // Capture the original root element and a child so we can verify they
+        // survive the adoption without being recreated.
+        final DomElement originalRoot = view.dom.rootElement;
+        final DomElement originalChild = createDomHTMLDivElement();
+        originalRoot.appendChild(originalChild);
+
+        final DomElement newHost = createDomHTMLDivElement();
+        final newOptions = JsFlutterViewOptions(hostElement: newHost);
+        final JsFlutterViewOptions? result = viewManager.adoptView(viewId, newOptions);
+
+        expect(result, newOptions);
+        expect(viewManager.getHostElement(viewId), newHost);
+        expect(view.embeddingStrategy.hostElement, newHost);
+        expect(view.dom.rootElement.parent, newHost);
+        // The root element and its children must be the same instances after
+        // the adoption; the strategy should update its host, not recreate the tree.
+        expect(view.dom.rootElement, same(originalRoot));
+        expect(view.dom.rootElement.contains(originalChild), isTrue);
+        expect(originalHost.contains(view.dom.rootElement), isFalse);
+
+        view.dispose();
+      });
+
+      test('fires onViewAdopted event', () async {
+        final DomElement originalHost = createDomHTMLDivElement();
+        final view = EngineFlutterView(platformDispatcher, originalHost);
+        final int viewId = view.viewId;
+
+        viewManager.registerView(view);
+
+        final Stream<int> onViewAdopted = viewManager.onViewAdopted.timeout(
+          const Duration(milliseconds: 100),
+          onTimeout: (EventSink<int> sink) => sink.close(),
+        );
+        final Future<List<int>> viewAdoptedEvents = onViewAdopted.toList();
+
+        final DomElement newHost = createDomHTMLDivElement();
+        viewManager.adoptView(viewId, JsFlutterViewOptions(hostElement: newHost));
+
+        expect(viewAdoptedEvents, completes);
+        final List<int> adoptedViewIds = await viewAdoptedEvents;
+        expect(adoptedViewIds, listEqual(<int>[viewId]));
+
+        view.dispose();
+      });
+
+      test('returns null for unknown viewId', () {
+        final DomElement host = createDomHTMLDivElement();
+        expect(
+          viewManager.adoptView(12345, JsFlutterViewOptions(hostElement: host)),
+          isNull,
+        );
+      });
+    });
+
     group('findViewForElement', () {
       test('finds view for root and descendant elements', () {
         final DomElement host = createDomElement('div');

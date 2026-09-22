@@ -27,7 +27,11 @@ import 'dimensions_provider.dart';
 /// to be effective.
 class CustomElementDimensionsProvider extends DimensionsProvider {
   /// Creates a [CustomElementDimensionsProvider] from a [_hostElement].
-  CustomElementDimensionsProvider(this._hostElement, {Stream<double>? onDprChange}) {
+  CustomElementDimensionsProvider(
+    this._hostElement, {
+    Stream<double>? onDprChange,
+    DomWindow? viewDomWindow,
+  }) : _domWindow = viewDomWindow ?? domWindow {
     // Send a resize event when the page DPR changes.
     _dprChangeStreamSubscription = onDprChange?.listen((_) {
       _broadcastSize(null);
@@ -45,7 +49,7 @@ class CustomElementDimensionsProvider extends DimensionsProvider {
 
     assert(() {
       if (_hostElementResizeObserver == null) {
-        domWindow.console.warn(
+        _domWindow.console.warn(
           'ResizeObserver API not supported. '
           'Flutter will not resize with its hostElement.',
         );
@@ -61,6 +65,9 @@ class CustomElementDimensionsProvider extends DimensionsProvider {
 
   // The host element that will be used to retrieve (and observe) app size measurements.
   final DomElement _hostElement;
+
+  // The window that owns the host element.
+  final DomWindow _domWindow;
 
   // Handle resize events
   late DomResizeObserver? _hostElementResizeObserver;
