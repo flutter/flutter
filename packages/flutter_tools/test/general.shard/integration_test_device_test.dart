@@ -374,6 +374,83 @@ void main() {
   );
 
   testUsingContext(
+    'kill() does not call uninstallApp or stopApp when device.startApp returns LaunchResult.failed()',
+    () async {
+      final trackingDevice = FakeDeviceTrackingUninstall(launchResult: LaunchResult.failed());
+      final testDevice = IntegrationTestTestDevice(
+        id: 1,
+        device: trackingDevice,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        userIdentifier: '',
+        compileExpression: null,
+      );
+
+      await expectLater(testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
+      await testDevice.kill();
+
+      expect(trackingDevice.uninstallAppCalled, isFalse);
+      expect(trackingDevice.stopAppCalled, isFalse);
+      expect(testDevice.finished, completes);
+    },
+    overrides: <Type, Generator>{ApplicationPackageFactory: () => FakeApplicationPackageFactory()},
+  );
+
+  testUsingContext(
+    'kill() calls uninstallApp but not stopApp when device.startApp returns LaunchResult.failed(appInstalled: true)',
+    () async {
+      final trackingDevice = FakeDeviceTrackingUninstall(
+        launchResult: LaunchResult.failed(appInstalled: true),
+      );
+      final testDevice = IntegrationTestTestDevice(
+        id: 1,
+        device: trackingDevice,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        userIdentifier: '',
+        compileExpression: null,
+      );
+
+      await expectLater(testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
+      await testDevice.kill();
+
+      expect(trackingDevice.uninstallAppCalled, isTrue);
+      expect(trackingDevice.stopAppCalled, isFalse);
+      expect(testDevice.finished, completes);
+    },
+    overrides: <Type, Generator>{ApplicationPackageFactory: () => FakeApplicationPackageFactory()},
+  );
+
+  testUsingContext(
+    'kill() does not call uninstallApp or stopApp when device.startApp throws an exception',
+    () async {
+      final trackingDevice = FakeDeviceTrackingUninstall(onStartAppThrows: true);
+      final testDevice = IntegrationTestTestDevice(
+        id: 1,
+        device: trackingDevice,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        userIdentifier: '',
+        compileExpression: null,
+      );
+
+      await expectLater(
+        testDevice.start('entrypointPath'),
+        throwsA(
+          isA<Exception>().having(
+            (Exception e) => e.toString(),
+            'message',
+            contains('Gradle build failed'),
+          ),
+        ),
+      );
+      await testDevice.kill();
+
+      expect(trackingDevice.uninstallAppCalled, isFalse);
+      expect(trackingDevice.stopAppCalled, isFalse);
+      expect(testDevice.finished, completes);
+    },
+    overrides: <Type, Generator>{ApplicationPackageFactory: () => FakeApplicationPackageFactory()},
+  );
+
+  testUsingContext(
     'Can handle closing of the VM service',
     () async {
       final StreamChannel<String> channel = await testDevice.start('entrypointPath');
@@ -413,15 +490,49 @@ class FakeApplicationPackage extends Fake implements ApplicationPackage {
 }
 
 class FakeDeviceTrackingUninstall extends FakeDevice {
-  FakeDeviceTrackingUninstall()
+  FakeDeviceTrackingUninstall({LaunchResult? launchResult, this.onStartAppThrows = false})
     : super(
         'ephemeral',
         'ephemeral',
         type: PlatformType.android,
-        launchResult: LaunchResult.succeeded(vmServiceUri: vmServiceUri),
+        launchResult: launchResult ?? LaunchResult.succeeded(vmServiceUri: vmServiceUri),
       );
 
+  final bool onStartAppThrows;
   bool uninstallAppCalled = false;
+  bool stopAppCalled = false;
+
+  @override
+  Future<LaunchResult> startApp(
+    ApplicationPackage? package, {
+    String? mainPath,
+    String? route,
+    DebuggingOptions? debuggingOptions,
+    Map<String, dynamic>? platformArgs,
+    bool prebuiltApplication = false,
+    bool ipv6 = false,
+    String? userIdentifier,
+  }) async {
+    if (onStartAppThrows) {
+      throw Exception('Gradle build failed');
+    }
+    return super.startApp(
+      package,
+      mainPath: mainPath,
+      route: route,
+      debuggingOptions: debuggingOptions,
+      platformArgs: platformArgs,
+      prebuiltApplication: prebuiltApplication,
+      ipv6: ipv6,
+      userIdentifier: userIdentifier,
+    );
+  }
+
+  @override
+  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
+    stopAppCalled = true;
+    return true;
+  }
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {

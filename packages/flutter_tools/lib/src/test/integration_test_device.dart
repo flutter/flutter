@@ -38,6 +38,20 @@ class IntegrationTestTestDevice implements TestDevice {
   late final _ddsLauncher = DartDevelopmentService(logger: globals.logger);
 
   ApplicationPackage? _applicationPackage;
+
+  /// Whether the application has been installed on the device.
+  ///
+  /// This ensures that [kill] only uninstalls the app if it was actually
+  /// installed by this run. If the build or installation fails (e.g., Gradle
+  /// build failure), uninstalling could inadvertently remove a pre-existing
+  /// application installed on the user's device.
+  bool _appInstalled = false;
+
+  /// Whether the application has been successfully started on the device.
+  ///
+  /// This ensures that [kill] only attempts to stop the app if it was actually
+  /// started by this run.
+  bool _appStarted = false;
   final _finished = Completer<void>();
   final _gotProcessVmServiceUri = Completer<Uri>();
 
@@ -63,9 +77,13 @@ class IntegrationTestTestDevice implements TestDevice {
       debuggingOptions: debuggingOptions,
       userIdentifier: userIdentifier,
     );
+    if (launchResult.appInstalled) {
+      _appInstalled = true;
+    }
     if (!launchResult.started) {
       throw TestDeviceException('Unable to start the app on the device.', StackTrace.current);
     }
+    _appStarted = true;
     Uri? vmServiceUri = launchResult.vmServiceUri;
     if (vmServiceUri == null) {
       throw TestDeviceException(
@@ -143,10 +161,14 @@ class IntegrationTestTestDevice implements TestDevice {
   Future<void> kill() async {
     final ApplicationPackage? applicationPackage = _applicationPackage;
     if (applicationPackage != null) {
-      if (!await device.stopApp(applicationPackage, userIdentifier: userIdentifier)) {
-        globals.printTrace('Could not stop the Integration Test app.');
+      if (_appStarted) {
+        _appStarted = false;
+        if (!await device.stopApp(applicationPackage, userIdentifier: userIdentifier)) {
+          globals.printTrace('Could not stop the Integration Test app.');
+        }
       }
-      if (debuggingOptions.uninstallApp) {
+      if (_appInstalled && debuggingOptions.uninstallApp) {
+        _appInstalled = false;
         if (!await device.uninstallApp(applicationPackage, userIdentifier: userIdentifier)) {
           globals.printTrace('Could not uninstall the Integration Test app.');
         }

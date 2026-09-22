@@ -643,7 +643,7 @@ class AndroidDevice extends Device {
       RegExp(r'(Error:|Error type|Security\s?exception)', caseSensitive: false),
     )) {
       _logger.printError(result.trim(), wrap: false);
-      return LaunchResult.failed();
+      return LaunchResult.failed(appInstalled: true);
     }
 
     _package = builtPackage;
@@ -663,13 +663,13 @@ class AndroidDevice extends Device {
             'Error waiting for a debug connection: '
             'The log reader stopped unexpectedly',
           );
-          return LaunchResult.failed();
+          return LaunchResult.failed(appInstalled: true);
         }
       }
       return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
     } on Exception catch (error) {
       _logger.printError('Error waiting for a debug connection: $error');
-      return LaunchResult.failed();
+      return LaunchResult.failed(appInstalled: true);
     } finally {
       await vmServiceDiscovery?.cancel();
     }

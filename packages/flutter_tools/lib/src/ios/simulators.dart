@@ -526,7 +526,7 @@ class IOSSimulator extends Device {
       await _simControl.launch(id, bundleIdentifier, launchArguments);
     } on Exception catch (error) {
       globals.printError('$error');
-      return LaunchResult.failed();
+      return LaunchResult.failed(appInstalled: true);
     }
 
     if (!debuggingOptions.debuggingEnabled) {
@@ -551,7 +551,7 @@ class IOSSimulator extends Device {
     } finally {
       await vmServiceDiscovery?.cancel();
     }
-    return LaunchResult.failed();
+    return LaunchResult.failed(appInstalled: true);
   }
 
   Future<void> _setupUpdatedApplicationBundle(
