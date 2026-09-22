@@ -12,7 +12,6 @@
 #include <mutex>
 #include <utility>
 
-#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/native_library.h"
@@ -1521,152 +1520,6 @@ void EmbedderAndroidEngine::OnBeginFrame() {
   }
 }
 
-DlPath EmbedderAndroidEngine::ToDlPath(const FlutterPath& path) {
-  // This is the inverse of `EmbedderPathReceiver` in
-  // `shell/platform/embedder/embedder_layers.cc`, which flattens a `DlPath`
-  // into the `FlutterPath` handed to embedders.
-  DlPathBuilder builder;
-  builder.SetFillType(path.fill_type == kFlutterPathFillTypeEvenOdd
-                          ? DlPathFillType::kOdd
-                          : DlPathFillType::kNonZero);
-
-  if (path.struct_size < sizeof(FlutterPath) || path.segments == nullptr) {
-    return builder.TakePath();
-  }
-
-  auto to_point = [](const FlutterPoint& point) {
-    return DlPoint(static_cast<DlScalar>(point.x),
-                   static_cast<DlScalar>(point.y));
-  };
-
-  for (size_t i = 0; i < path.segments_count; ++i) {
-    const FlutterPathSegment& segment = path.segments[i];
-    switch (segment.verb) {
-      case kFlutterPathVerbMove:
-        builder.MoveTo(to_point(segment.points[0]));
-        break;
-      case kFlutterPathVerbLine:
-        builder.LineTo(to_point(segment.points[0]));
-        break;
-      case kFlutterPathVerbQuad:
-        builder.QuadraticCurveTo(to_point(segment.points[0]),
-                                 to_point(segment.points[1]));
-        break;
-      case kFlutterPathVerbConic:
-        builder.ConicCurveTo(to_point(segment.points[0]),
-                             to_point(segment.points[1]),
-                             static_cast<DlScalar>(segment.conic_weight));
-        break;
-      case kFlutterPathVerbCubic:
-        builder.CubicCurveTo(to_point(segment.points[0]),
-                             to_point(segment.points[1]),
-                             to_point(segment.points[2]));
-        break;
-      case kFlutterPathVerbClose:
-        builder.Close();
-        break;
-    }
-  }
-
-  return builder.TakePath();
-}
-
-MutatorsStack EmbedderAndroidEngine::ToMutatorsStack(
-    size_t mutations_count,
-    const FlutterPlatformViewMutation** mutations) {
-  MutatorsStack mutators_stack;
-  if (mutations == nullptr) {
-    return mutators_stack;
-  }
-
-  for (size_t i = 0; i < mutations_count; ++i) {
-    const FlutterPlatformViewMutation* m = mutations[i];
-    if (m == nullptr) {
-      continue;
-    }
-    switch (m->type) {
-      case kFlutterPlatformViewMutationTypeTransformation: {
-        const auto& t = m->transformation;
-        mutators_stack.PushTransform(DlMatrix::MakeColumn(
-            static_cast<float>(t.scaleX), static_cast<float>(t.skewY), 0.0f,
-            static_cast<float>(t.pers0), static_cast<float>(t.skewX),
-            static_cast<float>(t.scaleY), 0.0f, static_cast<float>(t.pers1),
-            0.0f, 0.0f, 1.0f, 0.0f, static_cast<float>(t.transX),
-            static_cast<float>(t.transY), 0.0f, static_cast<float>(t.pers2)));
-        break;
-      }
-      case kFlutterPlatformViewMutationTypeClipRect: {
-        const auto& r = m->clip_rect;
-        mutators_stack.PushClipRect(DlRect::MakeLTRB(
-            static_cast<float>(r.left), static_cast<float>(r.top),
-            static_cast<float>(r.right), static_cast<float>(r.bottom)));
-        break;
-      }
-      case kFlutterPlatformViewMutationTypeClipRoundedRect: {
-        const auto& rr = m->clip_rounded_rect;
-        DlRoundingRadii radii;
-        radii.top_left =
-            DlSize(static_cast<float>(rr.upper_left_corner_radius.width),
-                   static_cast<float>(rr.upper_left_corner_radius.height));
-        radii.top_right =
-            DlSize(static_cast<float>(rr.upper_right_corner_radius.width),
-                   static_cast<float>(rr.upper_right_corner_radius.height));
-        radii.bottom_right =
-            DlSize(static_cast<float>(rr.lower_right_corner_radius.width),
-                   static_cast<float>(rr.lower_right_corner_radius.height));
-        radii.bottom_left =
-            DlSize(static_cast<float>(rr.lower_left_corner_radius.width),
-                   static_cast<float>(rr.lower_left_corner_radius.height));
-        mutators_stack.PushClipRRect(DlRoundRect::MakeRectRadii(
-            DlRect::MakeLTRB(static_cast<float>(rr.rect.left),
-                             static_cast<float>(rr.rect.top),
-                             static_cast<float>(rr.rect.right),
-                             static_cast<float>(rr.rect.bottom)),
-            radii));
-        break;
-      }
-      case kFlutterPlatformViewMutationTypeOpacity: {
-        uint8_t alpha =
-            static_cast<uint8_t>(std::clamp(m->opacity, 0.0, 1.0) * 255.0);
-        mutators_stack.PushOpacity(alpha);
-        break;
-      }
-      case kFlutterPlatformViewMutationTypeClipRoundSuperellipse: {
-        const auto& rse = m->clip_round_superellipse;
-        DlRoundingRadii radii;
-        radii.top_left =
-            DlSize(static_cast<float>(rse.upper_left_corner_radius.width),
-                   static_cast<float>(rse.upper_left_corner_radius.height));
-        radii.top_right =
-            DlSize(static_cast<float>(rse.upper_right_corner_radius.width),
-                   static_cast<float>(rse.upper_right_corner_radius.height));
-        radii.bottom_right =
-            DlSize(static_cast<float>(rse.lower_right_corner_radius.width),
-                   static_cast<float>(rse.lower_right_corner_radius.height));
-        radii.bottom_left =
-            DlSize(static_cast<float>(rse.lower_left_corner_radius.width),
-                   static_cast<float>(rse.lower_left_corner_radius.height));
-        mutators_stack.PushClipRSE(DlRoundSuperellipse::MakeRectRadii(
-            DlRect::MakeLTRB(static_cast<float>(rse.rect.left),
-                             static_cast<float>(rse.rect.top),
-                             static_cast<float>(rse.rect.right),
-                             static_cast<float>(rse.rect.bottom)),
-            radii));
-        break;
-      }
-      case kFlutterPlatformViewMutationTypeClipPath: {
-        mutators_stack.PushClipPath(ToDlPath(m->clip_path));
-        break;
-      }
-        // No `default:` arm. Every mutation type must be handled explicitly so
-        // that -Wswitch fails the build when a new one is added, rather than
-        // the mutation being silently dropped.
-    }
-  }
-
-  return mutators_stack;
-}
-
 void EmbedderAndroidEngine::OnPlatformViewPresented(
     int64_t view_id,
     const FlutterPoint& offset,
@@ -1682,7 +1535,8 @@ void EmbedderAndroidEngine::OnPlatformViewPresented(
   int height = static_cast<int>(std::round(size.height));
   bool is_surface_control = IsSurfaceControlEnabled();
 
-  MutatorsStack mutators_stack = ToMutatorsStack(mutations_count, mutations);
+  android::AndroidMutatorsStack mutators_stack =
+      android::AndroidMutatorsMapper::MapMutations(mutations, mutations_count);
 
   android_task_runners_->GetPlatformTaskRunner()->PostTask(
       [jni = jni_facade_, is_surface_control, view_id, x, y, width, height,

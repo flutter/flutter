@@ -6,7 +6,6 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_SURFACE_ANDROID_SURFACE_H_
 
 #include <memory>
-#include "flutter/flow/embedded_views.h"
 #include "flutter/flow/surface.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/context/android_context.h"

@@ -677,16 +677,6 @@ bool AndroidMutator::operator==(const AndroidMutator& other) const {
 // AndroidMutatorsStack Implementation
 // ============================================================================
 
-AndroidMutatorsStack::AndroidMutatorsStack() {
-  TRACE_EVENT0("flutter", "AndroidMutatorsStack::AndroidMutatorsStack");
-  final_matrix_ = AndroidMatrix3x3::Identity();
-  final_opacity_ = 1.0f;
-}
-
-AndroidMutatorsStack::~AndroidMutatorsStack() {
-  TRACE_EVENT0("flutter", "AndroidMutatorsStack::~AndroidMutatorsStack");
-}
-
 void AndroidMutatorsStack::PushTransform(const AndroidMatrix3x3& matrix) {
   TRACE_EVENT0("flutter", "AndroidMutatorsStack::PushTransform(matrix)");
   mutators_.push_back(AndroidMutator::MakeTransform(matrix));
@@ -966,10 +956,25 @@ std::optional<AndroidMutator> AndroidMutatorsMapper::MapMutation(
       return AndroidMutator::MakeClipRRect(
           AndroidRoundedRect::FromFlutterRoundedRect(
               mutation.clip_rounded_rect));
+    case kFlutterPlatformViewMutationTypeClipRoundSuperellipse: {
+      FlutterRoundedRect rrect;
+      rrect.rect = mutation.clip_round_superellipse.rect;
+      rrect.upper_left_corner_radius =
+          mutation.clip_round_superellipse.upper_left_corner_radius;
+      rrect.upper_right_corner_radius =
+          mutation.clip_round_superellipse.upper_right_corner_radius;
+      rrect.lower_right_corner_radius =
+          mutation.clip_round_superellipse.lower_right_corner_radius;
+      rrect.lower_left_corner_radius =
+          mutation.clip_round_superellipse.lower_left_corner_radius;
+      return AndroidMutator::MakeClipRRect(
+          AndroidRoundedRect::FromFlutterRoundedRect(rrect));
+    }
     case kFlutterPlatformViewMutationTypeTransformation:
       return AndroidMutator::MakeTransform(
           AndroidMatrix3x3::FromFlutterTransformation(mutation.transformation));
-    default:
+    case kFlutterPlatformViewMutationTypeClipPath:
+      // Vector clip paths are not currently supported by AndroidMutator.
       break;
   }
   return std::nullopt;

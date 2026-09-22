@@ -13,12 +13,15 @@ source_set("jni") {
 
   public_configs = [ "//flutter:config" ]
 
+  public_deps = [
+    "//flutter/shell/platform/android:android_mutators_mapper",
+    "//flutter/skia",
+  ]
+
   deps = [
-    "//flutter/flow",
     "//flutter/fml",
     "//flutter/lib/ui",
     "//flutter/shell/platform/android/surface:native_window",
-    "//flutter/skia",
   ]
 }
 
