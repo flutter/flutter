@@ -19,7 +19,6 @@
 #import "flutter/shell/platform/darwin/ios/ios_external_view_embedder.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 #import "flutter/shell/platform/darwin/ios/platform_message_handler_ios.h"
-#import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
 @class FlutterViewController;
 
@@ -46,10 +45,8 @@ class PlatformViewIOS final : public PlatformView {
 
   explicit PlatformViewIOS(
       PlatformView::Delegate& delegate,
-      IOSRenderingAPI rendering_api,
       __weak FlutterPlatformViewsController* platform_views_controller,
       const flutter::TaskRunners& task_runners,
-      const std::shared_ptr<fml::ConcurrentTaskRunner>& worker_task_runner,
       const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch);
 
   ~PlatformViewIOS() override;
@@ -73,8 +70,10 @@ class PlatformViewIOS final : public PlatformView {
    *
    * Can be used to perform late initialization after `FlutterViewController`'s
    * init.
+   *
+   * The `previousView` is the Flutter view that was attached before this one, if any.
    */
-  void attachView();
+  void attachView(FlutterView* previousView = nil);
 
   /**
    * Called through when an external texture such as video or camera is
@@ -84,9 +83,6 @@ class PlatformViewIOS final : public PlatformView {
 
   // |PlatformView|
   PointerDataDispatcherMaker GetDispatcherMaker() override;
-
-  // |PlatformView|
-  void SetSemanticsEnabled(bool enabled) override;
 
   // |PlatformView|
   void SetSemanticsTreeEnabled(bool enabled) override;
@@ -102,9 +98,6 @@ class PlatformViewIOS final : public PlatformView {
 
   // |PlatformView|
   std::shared_ptr<impeller::Context> GetImpellerContext() const override;
-
-  // |PlatformView|
-  void SetAccessibilityFeatures(int32_t flags) override;
 
   // |PlatformView|
   void UpdateSemantics(int64_t view_id,
@@ -142,6 +135,9 @@ class PlatformViewIOS final : public PlatformView {
 
  private:
   void ApplyLocaleToOwnerController();
+  void EnsureAccessibilityBridge();
+  void PostSemanticsUpdateNotification();
+
   /// Smart pointer for use with objective-c observers.
   /// This guarantees we remove the observer.
   class ScopedObserver {
@@ -165,6 +161,7 @@ class PlatformViewIOS final : public PlatformView {
   std::shared_ptr<IOSContext> ios_context_;
   __weak FlutterPlatformViewsController* platform_views_controller_;
   std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
+  bool semantics_tree_enabled_ = false;
   ScopedObserver dealloc_view_controller_observer_;
   std::vector<std::string> platform_resolved_locale_;
   std::shared_ptr<PlatformMessageHandlerIos> platform_message_handler_;

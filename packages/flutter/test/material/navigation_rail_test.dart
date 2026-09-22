@@ -6360,9 +6360,7 @@ double? _labelOpacity(WidgetTester tester, String text) {
   }
 
   final FadeTransition fadeTransitionWidget = tester.widget<FadeTransition>(
-    find
-        .ancestor(of: find.text(text), matching: find.byType(FadeTransition))
-        .first, // first because there's also a FadeTransition from the MaterialPageRoute, which is up the tree
+    find.ancestor(of: find.text(text), matching: find.byType(FadeTransition)).first, // first because there's also a FadeTransition from the MaterialPageRoute, which is up the tree
   );
   return fadeTransitionWidget.opacity.value;
 }

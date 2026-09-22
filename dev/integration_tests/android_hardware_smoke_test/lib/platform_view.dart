@@ -23,10 +23,9 @@ enum PlatformViewMode {
 /// A custom widget embedding a native Android TextView inside the Flutter
 /// layout hierarchy using the specified [PlatformViewMode] and drawing a Flutter overlay on top.
 class AndroidPlatformView extends StatelessWidget {
-  const AndroidPlatformView({super.key, required this.mode, this.onCreated});
+  const AndroidPlatformView({super.key, required this.mode});
 
   final PlatformViewMode mode;
-  final VoidCallback? onCreated;
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +82,6 @@ class AndroidPlatformView extends StatelessWidget {
               return controller
                 ..addOnPlatformViewCreatedListener((int id) {
                   params.onPlatformViewCreated(id);
-                  onCreated?.call();
                 })
                 ..create();
             },

@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -24,6 +25,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -75,7 +77,10 @@ void main() {
       List<String>? args,
       List<String>? globalArgs,
     }) async {
-      final command = PackagesCommand();
+      final command = PackagesCommand(
+        buildSystem: globals.buildSystem,
+        toolContext: DelegatingToolContext(),
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         ...?globalArgs,
@@ -459,6 +464,52 @@ workspace:
     );
 
     testUsingContext(
+      'get does not generate platform tooling for a non-Flutter workspace root',
+      // Regression test for https://github.com/flutter/flutter/issues/189550.
+      () async {
+        tempDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: workspace
+environment:
+  sdk: ^3.7.0-0
+workspace:
+  - flutter_project
+''');
+        // A stray platform directory in the plain Dart workspace root must not
+        // be populated with Flutter project files.
+        tempDir.childDirectory('ios').createSync();
+        tempDir.childDirectory('android').createSync();
+        final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub']);
+        final File pubspecFile = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
+        final pubspecYaml = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
+        final pubspec = <String, Object?>{
+          ...pubspecYaml.value.cast<String, Object?>(),
+          'resolution': 'workspace',
+          'environment': <String, Object?>{'sdk': '^3.5.0-0'},
+        };
+        pubspecFile.writeAsStringSync(jsonEncode(pubspec));
+        await runCommandIn(tempDir.path, 'get');
+
+        expectDependenciesResolved(tempDir.path);
+        expect(tempDir.childDirectory('ios').listSync(), isEmpty);
+        expect(tempDir.childDirectory('android').listSync(), isEmpty);
+        // The Flutter app member of the workspace is still processed.
+        expectExists(projectPath, 'ios/Flutter/Generated.xcconfig');
+      },
+      overrides: <Type, Generator>{
+        Stdio: () => mockStdio,
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
+        Analytics: () => fakeAnalytics,
+      },
+    );
+
+    testUsingContext(
       'get generates files into lib/l10n',
       () async {
         final String projectPath = await createProject(
@@ -510,9 +561,8 @@ flutter:
         final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesNumberPlugins'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesNumberPlugins'],
           0,
         );
       },
@@ -547,9 +597,8 @@ flutter:
 
         // A plugin example depends on the plugin itself, and integration_test.
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesNumberPlugins'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesNumberPlugins'],
           2,
         );
       },
@@ -576,9 +625,8 @@ flutter:
         final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesProjectModule'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesProjectModule'],
           false,
         );
       },
@@ -608,9 +656,8 @@ flutter:
         final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesProjectModule'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesProjectModule'],
           true,
         );
       },
@@ -637,9 +684,8 @@ flutter:
         final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
-          (await getCommand.unifiedAnalyticsUsageValues(
-            'pub/get',
-          )).eventData['packagesAndroidEmbeddingVersion'],
+          (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+              .eventData['packagesAndroidEmbeddingVersion'],
           'v2',
         );
       },
@@ -801,7 +847,12 @@ flutter:
             ],
           ),
         );
-        await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
+        await createTestCommandRunner(
+          PackagesCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: DelegatingToolContext(),
+          ),
+        ).run(<String>['packages', 'test']);
 
         expect(processManager, hasNoRemainingExpectations);
       },
@@ -839,7 +890,12 @@ flutter:
             ],
           ),
         );
-        await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
+        await createTestCommandRunner(
+          PackagesCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: DelegatingToolContext(),
+          ),
+        ).run(<String>['packages', 'test']);
 
         expect(processManager, hasNoRemainingExpectations);
       },
@@ -880,7 +936,10 @@ flutter:
           ),
         );
         await createTestCommandRunner(
-          PackagesCommand(),
+          PackagesCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: DelegatingToolContext(),
+          ),
         ).run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
 
         expect(processManager, hasNoRemainingExpectations);
@@ -920,7 +979,10 @@ flutter:
           ),
         );
         await createTestCommandRunner(
-          PackagesCommand(),
+          PackagesCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: DelegatingToolContext(),
+          ),
         ).run(<String>['packages', '--verbose', 'pub', 'token', 'list']);
 
         expect(processManager, hasNoRemainingExpectations);
@@ -957,7 +1019,12 @@ flutter:
             stdin: IOSink(StreamController<List<int>>().sink),
           ),
         );
-        await createTestCommandRunner(PackagesCommand()).run(<String>['pub', 'upgrade', '-h']);
+        await createTestCommandRunner(
+          PackagesCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: DelegatingToolContext(),
+          ),
+        ).run(<String>['pub', 'upgrade', '-h']);
 
         expect(processManager, hasNoRemainingExpectations);
       },

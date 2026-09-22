@@ -17,6 +17,7 @@ import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -81,24 +82,18 @@ class FlutterWebPlatform extends PlatformPlugin {
     required FlutterProject flutterProject,
     required String flutterTesterBinPath,
     required FileSystem fileSystem,
-    required Directory buildDirectory,
-    required File testDartJs,
-    required File testHostDartJs,
-    required ChromiumLauncher chromiumLauncher,
-    required Logger logger,
-    required Artifacts? artifacts,
+    required this._buildDirectory,
+    required this._testDartJs,
+    required this._testHostDartJs,
+    required this._chromiumLauncher,
+    required this._logger,
+    required this._artifacts,
     required ProcessManager processManager,
     required this.webRenderer,
     required this.useWasm,
     required this.crossOriginIsolation,
     TestTimeRecorder? testTimeRecorder,
-  }) : _fileSystem = fileSystem,
-       _buildDirectory = buildDirectory,
-       _testDartJs = testDartJs,
-       _testHostDartJs = testHostDartJs,
-       _chromiumLauncher = chromiumLauncher,
-       _logger = logger,
-       _artifacts = artifacts {
+  }) : _fileSystem = fileSystem {
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
         .add(
@@ -133,6 +128,8 @@ class FlutterWebPlatform extends PlatformPlugin {
         // Chrome is the only supported browser currently.
         'FLUTTER_TEST_BROWSER': 'chrome',
         'FLUTTER_WEB_RENDERER': webRenderer.name,
+        // Pass FLUTTER_ROOT so flutter_goldens can locate the cache directory and resolve repo paths.
+        if (Cache.flutterRoot case final String flutterRoot) 'FLUTTER_ROOT': flutterRoot,
       },
     );
   }
@@ -448,9 +445,13 @@ window.\$dartLoader.loader.nextAttempt();
         headers: <String, String>{'Content-Type': 'text/javascript'},
       );
     } else if (request.requestedUri.path.contains('main.dart.wasm')) {
+      final File wasmFile = _buildDirectory.childFile('main.dart.wasm');
       return shelf.Response.ok(
-        _buildDirectory.childFile('main.dart.wasm').openRead(),
-        headers: <String, String>{'Content-Type': 'application/wasm'},
+        wasmFile.openRead(),
+        headers: <String, String>{
+          HttpHeaders.contentTypeHeader: 'application/wasm',
+          HttpHeaders.contentLengthHeader: wasmFile.lengthSync().toString(),
+        },
       );
     } else {
       return shelf.Response.notFound('Not Found');
@@ -538,7 +539,11 @@ window.\$dartLoader.loader.nextAttempt();
     final File canvasKitFile = _canvasKitFile(relativePath);
     return shelf.Response.ok(
       canvasKitFile.openRead(),
-      headers: <String, Object>{HttpHeaders.contentTypeHeader: contentType},
+      headers: <String, Object>{
+        HttpHeaders.contentTypeHeader: contentType,
+        HttpHeaders.cacheControlHeader: 'public, max-age=3600',
+        HttpHeaders.contentLengthHeader: canvasKitFile.lengthSync().toString(),
+      },
     );
   }
 
@@ -628,7 +633,6 @@ window.\$dartLoader.loader.nextAttempt();
     if (_logger.isVerbose) {
       _logger.printTrace('Loading test suite $relativePath.');
     }
-
     final PoolResource lockResource = await _suiteLock.request();
 
     final Runtime browser = platform.runtime;
@@ -699,6 +703,13 @@ window.\$dartLoader.loader.nextAttempt();
       hostUrl,
       completer.future,
       headless: !_config.pauseAfterLoad,
+      logger: _logger,
+      webBrowserFlags: const <String>[
+        // Enforce high-DPI (3x) device scale factor and standard window size
+        // to standardize rendering across platforms and match CI golden baselines.
+        '--force-device-scale-factor=3',
+        '--window-size=800,600',
+      ],
     );
   }
 
@@ -760,7 +771,18 @@ class OneOffHandler {
 class BrowserManager {
   /// Creates a new BrowserManager that communicates with [_browser] over
   /// [webSocket].
-  BrowserManager._(this._browser, this._runtime, WebSocketChannel webSocket) {
+  BrowserManager._(this._browser, this._runtime, WebSocketChannel webSocket, this._logger) {
+    unawaited(
+      _browser.onExit.then((int exitCode) {
+        if (!_closed) {
+          _logger.printError(
+            'Chrome browser process (PID: ${_browser.pid}) '
+            'exited unexpectedly with code $exitCode during test execution.',
+          );
+        }
+      }),
+    );
+
     // The duration should be short enough that the debugging console is open as
     // soon as the user is done setting breakpoints, but long enough that a test
     // doing a lot of synchronous work doesn't trigger a false positive.
@@ -777,16 +799,24 @@ class BrowserManager {
     // the browser is still running code which means the user isn't debugging.
     _channel = MultiChannel<dynamic>(
       webSocket.cast<String>().transform(jsonDocument).changeStream((Stream<Object?> stream) {
-        return stream.map((Object? message) {
-          if (!_closed) {
-            _timer.reset();
-          }
-          for (final RunnerSuiteController controller in _controllers) {
-            controller.setDebugging(false);
-          }
+        return stream
+            .handleError((Object error) {
+              final formatException = error as FormatException;
+              _logger.printWarning(
+                'Received unexpected non-JSON message from browser WebSocket: ${formatException.source}',
+              );
+              _logger.printTrace('JSON decode error: $formatException');
+            }, test: (error) => error is FormatException)
+            .map((Object? message) {
+              if (!_closed) {
+                _timer.reset();
+              }
+              for (final RunnerSuiteController controller in _controllers) {
+                controller.setDebugging(false);
+              }
 
-          return message;
-        });
+              return message;
+            });
       }),
     );
 
@@ -797,6 +827,7 @@ class BrowserManager {
   /// The browser instance that this is connected to via [_channel].
   final Chromium _browser;
   final Runtime _runtime;
+  final Logger _logger;
 
   /// The channel used to communicate with the browser.
   ///
@@ -859,11 +890,34 @@ class BrowserManager {
     bool debug = false,
     bool headless = true,
     List<String> webBrowserFlags = const <String>[],
+    required Logger logger,
   }) async {
     final Chromium chrome = await chromiumLauncher.launch(
       url.toString(),
       headless: headless,
       webBrowserFlags: webBrowserFlags,
+    );
+    unawaited(
+      Future<void>(() async {
+        try {
+          final ChromeTab? tab = await chrome.chromeConnection.getTab(
+            (ChromeTab tab) => tab.url.contains('index.html'),
+            retryFor: const Duration(seconds: 5),
+          );
+          if (tab != null) {
+            final WipConnection connection = await tab.connect();
+            await connection.runtime.enable();
+            connection.runtime.onConsoleAPICalled.listen((ConsoleAPIEvent event) {
+              logger.printStatus(
+                '[BROWSER CONSOLE] [${event.type}]: ${event.args.map((RemoteObject a) => a.value ?? a.description).join(" ")}',
+              );
+            });
+            connection.runtime.onExceptionThrown.listen((ExceptionThrownEvent event) {
+              logger.printStatus('[BROWSER EXCEPTION]: ${event.exceptionDetails}');
+            });
+          }
+        } on Object catch (_) {}
+      }),
     );
     final completer = Completer<BrowserManager>();
 
@@ -888,7 +942,7 @@ class BrowserManager {
           if (completer.isCompleted) {
             return;
           }
-          completer.complete(BrowserManager._(chrome, runtime, webSocket));
+          completer.complete(BrowserManager._(chrome, runtime, webSocket, logger));
         },
         onError: (Object error, StackTrace stackTrace) {
           chrome.close();

@@ -30,6 +30,9 @@ class FlutterPlatformNodeDelegateMac : public FlutterPlatformNodeDelegate {
   void NodeDataChanged(const ui::AXNodeData& old_node_data,
                        const ui::AXNodeData& new_node_data) override;
 
+  // |ui::AXPlatformNodeDelegateBase|
+  const ui::AXNodeData& GetData() const override;
+
   //---------------------------------------------------------------------------
   /// @brief      Gets the live region text of this node in UTF-8 format. This
   ///             is useful to determine the changes in between semantics
@@ -55,6 +58,7 @@ class FlutterPlatformNodeDelegateMac : public FlutterPlatformNodeDelegate {
   ui::AXPlatformNode* ax_platform_node_;
   std::weak_ptr<AccessibilityBridge> bridge_;
   __weak FlutterViewController* view_controller_;
+  mutable ui::AXNodeData cached_data_;
 
   gfx::RectF ConvertBoundsFromLocalToScreen(
       const gfx::RectF& local_bounds) const;

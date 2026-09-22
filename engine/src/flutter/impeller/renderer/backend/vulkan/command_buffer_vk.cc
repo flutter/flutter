@@ -41,8 +41,7 @@ bool CommandBufferVK::IsValid() const {
   return true;
 }
 
-bool CommandBufferVK::OnSubmitCommands(bool block_on_schedule,
-                                       CompletionCallback callback) {
+bool CommandBufferVK::OnSubmitCommands(CompletionCallback callback) {
   FML_UNREACHABLE()
 }
 

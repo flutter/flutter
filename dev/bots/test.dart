@@ -143,10 +143,15 @@ Future<void> main(List<String> args) async {
           runAndroidEngineTests(impellerBackend: ImpellerBackend.vulkan),
       'android_engine_opengles_tests': () =>
           runAndroidEngineTests(impellerBackend: ImpellerBackend.opengles),
+      'android_engine_hcpp_tests': runAndroidEngineHcppTests,
       'android_hardware_smoke_vulkan_tests': () =>
           runAndroidHardwareSmokeTests(backend: ImpellerBackend.vulkan),
       'android_hardware_smoke_opengles_tests': () =>
           runAndroidHardwareSmokeTests(backend: ImpellerBackend.opengles),
+      'android_hardware_smoke_vulkan_instrumented_tests': () =>
+          runAndroidHardwareSmokeTests(backend: ImpellerBackend.vulkan, runInstrumented: true),
+      'android_hardware_smoke_opengles_instrumented_tests': () =>
+          runAndroidHardwareSmokeTests(backend: ImpellerBackend.opengles, runInstrumented: true),
       'flutter_plugins': flutterPackagesRunner,
       'skp_generator': skpGeneratorTestsRunner,
       'customer_testing': customerTestingRunner,
@@ -156,8 +161,7 @@ Future<void> main(List<String> args) async {
       'docs': docsRunner,
       'verify_binaries_codesigned': verifyCodesignedTestRunner,
       'verify_binaries_pre_codesigned': verifyPreCodesignedTestRunner,
-      kTestHarnessShardName:
-          testHarnessTestsRunner, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
+      kTestHarnessShardName: testHarnessTestsRunner, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
   } catch (error, stackTrace) {
     foundError(<String>[
@@ -191,9 +195,10 @@ Future<void> _runGeneralToolTests() async {
 }
 
 Future<void> _runCommandsToolTests() async {
-  final List<File> allFiles = Directory(
-    path.join(_toolsPath, 'test', 'commands.shard'),
-  ).listSync(recursive: true).whereType<File>().toList();
+  final List<File> allFiles = Directory(path.join(_toolsPath, 'test', 'commands.shard'))
+      .listSync(recursive: true)
+      .whereType<File>()
+      .toList();
   final allTests = <String>[];
   for (final file in allFiles) {
     if (file.path.endsWith('_test.dart')) {
@@ -209,9 +214,10 @@ Future<void> _runCommandsToolTests() async {
 }
 
 Future<void> _runWebToolTests() async {
-  final List<File> allFiles = Directory(
-    path.join(_toolsPath, 'test', 'web.shard'),
-  ).listSync(recursive: true).whereType<File>().toList();
+  final List<File> allFiles = Directory(path.join(_toolsPath, 'test', 'web.shard'))
+      .listSync(recursive: true)
+      .whereType<File>()
+      .toList();
   final allTests = <String>[];
   for (final file in allFiles) {
     if (file.path.endsWith('_test.dart')) {
@@ -226,14 +232,8 @@ Future<void> _runWebToolTests() async {
   );
 }
 
-Future<void> _runToolHostCrossArchTests() {
-  return runDartTest(
-    _toolsPath,
-    // These are integration tests
-    forceSingleCore: true,
-    testPaths: <String>[path.join('test', 'host_cross_arch.shard')],
-  );
-}
+// TODO(jmagman): https://github.com/flutter/flutter/issues/189302 remove when it gets to stable.
+Future<void> _runToolHostCrossArchTests() async {}
 
 Future<void> _runIntegrationToolTests() async {
   final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'integration.shard'))

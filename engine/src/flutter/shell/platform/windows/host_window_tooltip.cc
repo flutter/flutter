@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/windows/host_window_tooltip.h"
 #include <cstdio>
+#include <memory>
 #include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
 #include "shell/platform/windows/window_manager.h"
 
@@ -87,19 +88,19 @@ void HostWindowTooltip::UpdatePosition() {
   WindowRect work_area = GetWorkArea();
 
   IsolateScope scope(isolate_);
-  auto rect = get_position_callback_(
-      WindowSize{physical_width_, physical_height_},
-      WindowRect{parent_top_left.x, parent_top_left.y,
-                 parent_bottom_right.x - parent_top_left.x,
-                 parent_bottom_right.y - parent_top_left.y},
-      work_area);
-  SetWindowPos(window_handle_, nullptr, rect->left, rect->top, rect->width,
-               rect->height, SWP_NOACTIVATE | SWP_NOOWNERZORDER);
-  free(rect);
+  WindowRect rect{};
+  get_position_callback_(WindowSize{physical_width_, physical_height_},
+                         WindowRect{parent_top_left.x, parent_top_left.y,
+                                    parent_bottom_right.x - parent_top_left.x,
+                                    parent_bottom_right.y - parent_top_left.y},
+                         work_area, rect);
+
+  SetWindowPos(window_handle_, nullptr, rect.left, rect.top, rect.width,
+               rect.height, SWP_NOACTIVATE | SWP_NOOWNERZORDER);
 
   // The positioner constrained the dimensions more than current size, apply
   // positioner constraints.
-  if (rect->width < physical_width_ || rect->height < physical_height_) {
+  if (rect.width < physical_width_ || rect.height < physical_height_) {
     auto metrics_event = view_controller_->view()->CreateWindowMetricsEvent();
     view_controller_->engine()->SendWindowMetricsEvent(metrics_event);
   }

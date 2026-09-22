@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../system_context_menu_utils.dart';
 import '../widgets/clipboard_utils.dart';
-import '../widgets/widgets_app_tester.dart';
 import 'text_input_utils.dart';
 
 void main() {

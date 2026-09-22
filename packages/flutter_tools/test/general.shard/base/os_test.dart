@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ffi' show Abi;
-import 'package:archive/archive.dart';
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -37,9 +37,9 @@ void main() {
     fakeProcessManager = FakeProcessManager.empty();
   });
 
-  OperatingSystemUtils createOSUtils(Platform platform, {Abi? currentAbi}) {
+  OperatingSystemUtils createOSUtils(Platform platform, {Abi? currentAbi, FileSystem? fileSystem}) {
     return OperatingSystemUtils(
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem ?? MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: platform,
       processManager: fakeProcessManager,
@@ -173,6 +173,61 @@ void main() {
         currentAbi: Abi.macosArm64,
       );
       expect(utils.hostPlatform, HostPlatform.darwin_arm64);
+    });
+
+    testWithoutContext('macOS ARM64 with FLUTTER_HOST_ARCH=x64 override', () async {
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(
+          operatingSystem: 'macos',
+          environment: <String, String>{'FLUTTER_HOST_ARCH': 'x64'},
+        ),
+        currentAbi: Abi.macosArm64,
+      );
+      expect(utils.hostPlatform, HostPlatform.darwin_x64);
+    });
+
+    testWithoutContext('macOS x64 with FLUTTER_HOST_ARCH=arm64 override', () async {
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(
+          operatingSystem: 'macos',
+          environment: <String, String>{'FLUTTER_HOST_ARCH': 'arm64'},
+        ),
+        currentAbi: Abi.macosX64,
+      );
+      expect(utils.hostPlatform, HostPlatform.darwin_arm64);
+    });
+
+    testWithoutContext('Linux x64 with FLUTTER_HOST_ARCH=arm64 override', () async {
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(environment: <String, String>{'FLUTTER_HOST_ARCH': 'arm64'}),
+        currentAbi: Abi.linuxX64,
+      );
+      expect(utils.hostPlatform, HostPlatform.linux_arm64);
+    });
+
+    testWithoutContext('FLUTTER_HOST_ARCH override is case-insensitive', () async {
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(environment: <String, String>{'FLUTTER_HOST_ARCH': 'ARM64'}),
+        currentAbi: Abi.linuxX64,
+      );
+      expect(utils.hostPlatform, HostPlatform.linux_arm64);
+    });
+
+    testWithoutContext('unrecognized FLUTTER_HOST_ARCH override is ignored', () async {
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(environment: <String, String>{'FLUTTER_HOST_ARCH': 'sparc'}),
+        currentAbi: Abi.linuxX64,
+      );
+      expect(utils.hostPlatform, HostPlatform.linux_x64);
+    });
+
+    testWithoutContext('hostPlatformOverride property takes precedence', () async {
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(operatingSystem: 'macos'),
+        currentAbi: Abi.macosArm64,
+      );
+      utils.hostPlatformOverride = HostPlatform.darwin_x64;
+      expect(utils.hostPlatform, HostPlatform.darwin_x64);
     });
 
     testWithoutContext('unsupported throws', () async {
@@ -353,73 +408,200 @@ void main() {
       expect(utils.name, 'Pretty Name');
     });
 
-    // See https://snyk.io/research/zip-slip-vulnerability for more context
-    testWithoutContext('Windows validates paths when unzipping', () {
-      // on POSIX systems we use the `unzip` binary, which will fail to extract
-      // files with paths outside the target directory
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
-      final fs = MemoryFileSystem.test();
-      final File fakeZipFile = fs.file('archive.zip');
-      final Directory targetDirectory = fs.directory('output')..createSync(recursive: true);
-      const content = 'hello, world!';
-      final archive = Archive()
-        ..addFile(
-          // This file would be extracted outside of the target extraction dir
-          ArchiveFile(r'..\..\..\Target File.txt', content.length, content.codeUnits),
-        );
-      final List<int> zipData = ZipEncoder().encode(archive)!;
-      fakeZipFile.writeAsBytesSync(zipData);
-      expect(
-        () => utils.unzip(fakeZipFile, targetDirectory),
-        throwsA(
-          isA<StateError>().having(
-            (StateError error) => error.message,
-            'correct error message',
-            contains('Tried to extract the file '),
+    group('unzip on Windows', () {
+      testWithoutContext('unzips with tar when tar is available', () {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final Directory targetDirectory = fileSystem.directory('output')
+          ..createSync(recursive: true);
+        final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>['tar', '-xf', fakeZipFile.path, '-C', targetDirectory.path],
           ),
-        ),
+        );
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        utils.unzip(fakeZipFile, targetDirectory);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('creates target directory if it does not exist', () {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final Directory targetDirectory = fileSystem.directory('nonexistent_output');
+        expect(targetDirectory.existsSync(), isFalse);
+        final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>['tar', '-xf', fakeZipFile.path, '-C', targetDirectory.path],
+          ),
+        );
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        utils.unzip(fakeZipFile, targetDirectory);
+        expect(targetDirectory.existsSync(), isTrue);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('falls back to powershell when tar is not available', () {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final Directory targetDirectory = fileSystem.directory('output')
+          ..createSync(recursive: true);
+        final File fakeZipFile = fileSystem.file("archive's.zip")..createSync();
+        fakeProcessManager.excludedExecutables.add('tar');
+        const command =
+            r"$ErrorActionPreference = 'Stop'; "
+            "Expand-Archive -LiteralPath 'archive''s.zip' -DestinationPath 'output' -Force";
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>['powershell', '-NoProfile', '-NonInteractive', '-Command', command],
+          ),
+        );
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        utils.unzip(fakeZipFile, targetDirectory);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('falls back to pwsh when tar and powershell are not available', () {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final Directory targetDirectory = fileSystem.directory('output')
+          ..createSync(recursive: true);
+        final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
+        fakeProcessManager.excludedExecutables.addAll(<String>['tar', 'powershell']);
+        const command =
+            r"$ErrorActionPreference = 'Stop'; "
+            "Expand-Archive -LiteralPath 'archive.zip' -DestinationPath 'output' -Force";
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>['pwsh', '-NoProfile', '-NonInteractive', '-Command', command],
+          ),
+        );
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        utils.unzip(fakeZipFile, targetDirectory);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext(
+        'throws ToolExit when neither tar nor powershell nor pwsh is available',
+        () {
+          final FileSystem fileSystem = MemoryFileSystem.test();
+          final Directory targetDirectory = fileSystem.directory('output')
+            ..createSync(recursive: true);
+          final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
+          fakeProcessManager.excludedExecutables.addAll(<String>['tar', 'powershell', 'pwsh']);
+
+          final OperatingSystemUtils utils = createOSUtils(
+            FakePlatform(operatingSystem: 'windows'),
+            fileSystem: fileSystem,
+          );
+          expect(
+            () => utils.unzip(fakeZipFile, targetDirectory),
+            throwsToolExit(
+              message:
+                  'Missing "tar" or "powershell" tool. Unable to extract ${fakeZipFile.path}.\n'
+                  'Ensure System32 and PowerShell are on the PATH.',
+            ),
+          );
+        },
       );
     });
 
-    // Regression test for https://github.com/flutter/flutter/issues/185794.
-    // A canonical archive entry that resolves to a sibling directory sharing
-    // a name prefix with the extraction root (e.g. `<target>-sibling/x.txt`)
-    // must NOT be accepted: the previous `startsWith` check on canonical
-    // paths returned true for sibling directories with a name that started
-    // with the target's name.
-    testWithoutContext(
-      'Windows rejects archive entries that escape into a sibling directory with a name prefix',
-      () {
-        final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
-        final fs = MemoryFileSystem.test();
-        final File fakeZipFile = fs.file('archive.zip');
-        // Extract into `<cwd>/cache/windows-x64`. A crafted archive entry of
-        // `../windows-x64-profile/poc_marker.txt` resolves to
-        // `<cwd>/cache/windows-x64-profile/poc_marker.txt`, a sibling of the
-        // target whose canonical path shares the `windows-x64` prefix.
-        final Directory targetDirectory = fs.directory('cache/windows-x64')
+    group('unpack on Windows', () {
+      testWithoutContext('unpacks with tar when tar is available', () {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final Directory targetDirectory = fileSystem.directory('output')
           ..createSync(recursive: true);
-        const content = 'malicious';
-        final archive = Archive()
-          ..addFile(
-            ArchiveFile('../windows-x64-profile/poc_marker.txt', content.length, content.codeUnits),
-          );
-        final List<int> zipData = ZipEncoder().encode(archive)!;
-        fakeZipFile.writeAsBytesSync(zipData);
-        expect(
-          () => utils.unzip(fakeZipFile, targetDirectory),
-          throwsA(
-            isA<StateError>().having(
-              (StateError error) => error.message,
-              'correct error message',
-              contains('Tried to extract the file '),
-            ),
+        final File fakeTarFile = fileSystem.file('archive.tar.gz')..createSync();
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>['tar', '-xf', fakeTarFile.path, '-C', targetDirectory.path],
           ),
         );
-        // The sibling file must not have been written.
-        expect(fs.file('cache/windows-x64-profile/poc_marker.txt').existsSync(), isFalse);
-      },
-    );
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        utils.unpack(fakeTarFile, targetDirectory);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('creates target directory if it does not exist', () {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final Directory targetDirectory = fileSystem.directory('nonexistent_output');
+        expect(targetDirectory.existsSync(), isFalse);
+        final File fakeTarFile = fileSystem.file('archive.tar.gz')..createSync();
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>['tar', '-xf', fakeTarFile.path, '-C', targetDirectory.path],
+          ),
+        );
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        utils.unpack(fakeTarFile, targetDirectory);
+        expect(targetDirectory.existsSync(), isTrue);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('throws ToolExit when tar is not available', () {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final Directory targetDirectory = fileSystem.directory('output')
+          ..createSync(recursive: true);
+        final File fakeTarFile = fileSystem.file('archive.tar.gz')..createSync();
+        fakeProcessManager.excludedExecutables.add('tar');
+
+        final OperatingSystemUtils utils = createOSUtils(
+          FakePlatform(operatingSystem: 'windows'),
+          fileSystem: fileSystem,
+        );
+        expect(
+          () => utils.unpack(fakeTarFile, targetDirectory),
+          throwsToolExit(
+            message:
+                'Missing "tar" tool. Unable to extract ${fakeTarFile.path}.\n'
+                'Ensure System32 is on the PATH.',
+          ),
+        );
+      });
+    });
+  });
+
+  group('HostPlatform.fromOsAndArch', () {
+    testWithoutContext('maps supported OS and architecture combinations', () {
+      expect(HostPlatform.fromOsAndArch('macos', 'x64'), HostPlatform.darwin_x64);
+      expect(HostPlatform.fromOsAndArch('macos', 'arm64'), HostPlatform.darwin_arm64);
+      expect(HostPlatform.fromOsAndArch('linux', 'x64'), HostPlatform.linux_x64);
+      expect(HostPlatform.fromOsAndArch('linux', 'arm64'), HostPlatform.linux_arm64);
+      expect(HostPlatform.fromOsAndArch('linux', 'riscv64'), HostPlatform.linux_riscv64);
+      expect(HostPlatform.fromOsAndArch('windows', 'x64'), HostPlatform.windows_x64);
+      expect(HostPlatform.fromOsAndArch('windows', 'arm64'), HostPlatform.windows_arm64);
+    });
+
+    testWithoutContext('matches the architecture case-insensitively', () {
+      expect(HostPlatform.fromOsAndArch('macos', 'ARM64'), HostPlatform.darwin_arm64);
+    });
+
+    testWithoutContext('returns null for unsupported combinations', () {
+      expect(HostPlatform.fromOsAndArch('macos', 'riscv64'), isNull);
+      expect(HostPlatform.fromOsAndArch('fuchsia', 'x64'), isNull);
+      expect(HostPlatform.fromOsAndArch('linux', 'sparc'), isNull);
+    });
   });
 
   testWithoutContext('If unzip fails, include stderr in exception text', () {

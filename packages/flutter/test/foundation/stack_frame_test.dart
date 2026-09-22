@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'capture_output.dart';
 
 void main() {
   test('Parses line', () {
@@ -59,14 +63,70 @@ void main() {
   // stack overflow, but the browser cannot - running this test in a browser
   // will cause it to become unresponsive.
 
-  test('Traces from package:stack_trace throw assertion', () {
-    try {
-      StackFrame.fromStackString(mangledStackString);
-      assert(false, 'StackFrame.fromStackString did not throw on a mangled stack trace');
-    } catch (e) {
-      expect(e, isA<AssertionError>());
-      expect('$e', contains('Got a stack frame from package:stack_trace'));
-    }
+  test('Traces from package:stack_trace parse without throwing', () {
+    // Regression test for https://github.com/flutter/flutter/issues/179018.
+    // package:stack_trace emits a literal
+    // '===== asynchronous gap ===========================' line between
+    // chained stacks; this parser used to assert on it. It is now treated as
+    // an asynchronous-suspension marker so callers like [debugPrintStack] do
+    // not crash on stacks that carry that format.
+    final List<StackFrame> frames = StackFrame.fromStackString(mangledStackString);
+    expect(frames, contains(StackFrame.asynchronousSuspension));
+    expect(frames, isNot(isEmpty));
+  });
+
+  test('Async-gap marker parses to asynchronousSuspension', () {
+    expect(
+      StackFrame.fromStackTraceLine('===== asynchronous gap ==========================='),
+      StackFrame.asynchronousSuspension,
+    );
+  });
+
+  test('Near-miss async-gap markers are not parsed as asynchronousSuspension', () {
+    expect(
+      StackFrame.fromStackTraceLine('===== asynchronous gap =========================='),
+      isNull,
+    );
+    expect(
+      StackFrame.fromStackTraceLine('===== asynchronous gap =========================== '),
+      isNull,
+    );
+    expect(
+      StackFrame.fromStackTraceLine('===== asynchronous frame ==========================='),
+      isNull,
+    );
+  });
+
+  test('debugPrintStack does not throw on a stack carrying an async-gap marker', () {
+    // Regression test for https://github.com/flutter/flutter/issues/179018.
+    final List<String> printed = captureOutput(() {
+      debugPrintStack(
+        label: 'ParallelWaitError-style stack',
+        stackTrace: StackTrace.fromString(mangledStackString),
+      );
+    });
+    expect(printed, isNotEmpty);
+  });
+
+  test('debugPrintStack does not throw on a ParallelWaitError stack', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/179018.
+    StackTrace? parallelWaitStack;
+    final printed = <String>[];
+    await (_function1(), _function2()).wait.then<void>(
+      (_) {},
+      onError: (Object error, StackTrace stack) {
+        expect(error, isA<ParallelWaitError<(void, void), (AsyncError?, AsyncError?)>>());
+        parallelWaitStack = stack;
+        expect(stack.toString(), contains('===== asynchronous gap ==========================='));
+        printed.addAll(
+          captureOutput(() {
+            debugPrintStack(label: error.toString(), stackTrace: stack);
+          }),
+        );
+      },
+    );
+    expect(parallelWaitStack, isNotNull);
+    expect(printed, isNotEmpty);
   });
 
   test('Can parse web constructor invocation with unknown class name', () {
@@ -91,6 +151,15 @@ void main() {
   test('Parses to null for wrong format.', () {
     expect(StackFrame.fromStackTraceLine('wrong stack trace format'), null);
   });
+}
+
+Future<void> _function1() async {
+  await Future<void>.delayed(Duration.zero);
+}
+
+Future<void> _function2() async {
+  await Future<void>.delayed(Duration.zero);
+  throw Exception('function2');
 }
 
 const String stackString = '''
@@ -175,8 +244,7 @@ const List<StackFrame> stackFrames = <StackFrame>[
     packagePath: 'src/widgets/framework.dart',
     line: 4303,
     column: 15,
-    source:
-        '#5      ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:4303:15)',
+    source: '#5      ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:4303:15)',
   ),
   StackFrame(
     number: 6,
@@ -336,8 +404,7 @@ const List<StackFrame> asyncStackFrames = <StackFrame>[
     packagePath: '/path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart',
     line: 40,
     column: 57,
-    source:
-        '#0      getSampleStack.<anonymous closure> (file:///path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart:40:57)',
+    source: '#0      getSampleStack.<anonymous closure> (file:///path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart:40:57)',
   ),
   StackFrame(
     number: 1,
@@ -359,8 +426,7 @@ const List<StackFrame> asyncStackFrames = <StackFrame>[
     packagePath: '/path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart',
     line: 40,
     column: 10,
-    source:
-        '#2      getSampleStack (file:///path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart:40:10)',
+    source: '#2      getSampleStack (file:///path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart:40:10)',
   ),
   StackFrame(
     number: 3,
@@ -370,8 +436,7 @@ const List<StackFrame> asyncStackFrames = <StackFrame>[
     packagePath: '/path/to/flutter/packages/flutter/foundation/error_reporting_test.dart',
     line: 46,
     column: 40,
-    source:
-        '#3      main (file:///path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart:46:40)',
+    source: '#3      main (file:///path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart:46:40)',
   ),
   StackFrame(
     number: 4,
@@ -392,8 +457,7 @@ const List<StackFrame> asyncStackFrames = <StackFrame>[
     packagePath: '/temp/path.whatever/listener.dart',
     line: 47,
     column: 18,
-    source:
-        '#5      main.<anonymous closure>.<anonymous closure> (file:///temp/path.whatever/listener.dart:47:18)',
+    source: '#5      main.<anonymous closure>.<anonymous closure> (file:///temp/path.whatever/listener.dart:47:18)',
   ),
   StackFrame(
     number: 6,
@@ -456,8 +520,7 @@ const List<StackFrame> asyncStackFrames = <StackFrame>[
     packagePath: 'src/remote_listener.dart',
     line: 124,
     column: 26,
-    source:
-        '#11     RemoteListener.start.<anonymous closure>.<anonymous closure>.<anonymous closure> (package:test_api/src/remote_listener.dart:124:26)',
+    source: '#11     RemoteListener.start.<anonymous closure>.<anonymous closure>.<anonymous closure> (package:test_api/src/remote_listener.dart:124:26)',
   ),
   StackFrame.asynchronousSuspension,
   StackFrame(
@@ -510,8 +573,7 @@ const List<StackFrame> asyncStackFrames = <StackFrame>[
     packagePath: 'src/remote_listener.dart',
     line: 70,
     column: 9,
-    source:
-        '#16     RemoteListener.start.<anonymous closure>.<anonymous closure> (package:test_api/src/remote_listener.dart:70:9)',
+    source: '#16     RemoteListener.start.<anonymous closure>.<anonymous closure> (package:test_api/src/remote_listener.dart:70:9)',
   ),
   StackFrame(
     number: 17,
@@ -563,8 +625,7 @@ const List<StackFrame> asyncStackFrames = <StackFrame>[
     packagePath: 'src/backend/stack_trace_formatter.dart',
     line: 41,
     column: 31,
-    source:
-        '#21     StackTraceFormatter.asCurrent (package:test_api/src/backend/stack_trace_formatter.dart:41:31)',
+    source: '#21     StackTraceFormatter.asCurrent (package:test_api/src/backend/stack_trace_formatter.dart:41:31)',
   ),
   StackFrame(
     number: 22,
@@ -575,8 +636,7 @@ const List<StackFrame> asyncStackFrames = <StackFrame>[
     packagePath: 'src/remote_listener.dart',
     line: 69,
     column: 29,
-    source:
-        '#22     RemoteListener.start.<anonymous closure> (package:test_api/src/remote_listener.dart:69:29)',
+    source: '#22     RemoteListener.start.<anonymous closure> (package:test_api/src/remote_listener.dart:69:29)',
   ),
   StackFrame(
     number: 23,
@@ -628,8 +688,7 @@ const List<StackFrame> asyncStackFrames = <StackFrame>[
     packagePath: 'src/suite_channel_manager.dart',
     line: 34,
     column: 31,
-    source:
-        '#27     SuiteChannelManager.asCurrent (package:test_api/src/suite_channel_manager.dart:34:31)',
+    source: '#27     SuiteChannelManager.asCurrent (package:test_api/src/suite_channel_manager.dart:34:31)',
   ),
   StackFrame(
     number: 28,
@@ -894,8 +953,7 @@ const List<StackFrame> webStackTraceFrames = <StackFrame>[
     packagePath: 'lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart',
     line: 196,
     column: 49,
-    source:
-        'package:dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart 196:49  throw_',
+    source: 'package:dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart 196:49  throw_',
   ),
   StackFrame(
     number: -1,
@@ -906,8 +964,7 @@ const List<StackFrame> webStackTraceFrames = <StackFrame>[
     packagePath: 'main.dart',
     line: 4,
     column: 3,
-    source:
-        'package:assertions/main.dart 4:3                                                      blah',
+    source: 'package:assertions/main.dart 4:3                                                      blah',
   ),
   StackFrame(
     number: -1,
@@ -918,8 +975,7 @@ const List<StackFrame> webStackTraceFrames = <StackFrame>[
     packagePath: 'main.dart',
     line: 8,
     column: 5,
-    source:
-        r'package:assertions/main.dart 8:5                                                      main$',
+    source: r'package:assertions/main.dart 8:5                                                      main$',
   ),
   StackFrame(
     number: -1,
@@ -930,8 +986,7 @@ const List<StackFrame> webStackTraceFrames = <StackFrame>[
     packagePath: 'main_web_entrypoint.dart',
     line: 9,
     column: 3,
-    source:
-        r'package:assertions/main_web_entrypoint.dart 9:3                                       main$',
+    source: r'package:assertions/main_web_entrypoint.dart 9:3                                       main$',
   ),
   StackFrame(
     number: -1,
@@ -942,8 +997,7 @@ const List<StackFrame> webStackTraceFrames = <StackFrame>[
     packagePath: 'lib/_internal/js_dev_runtime/patch/async_patch.dart',
     line: 47,
     column: 50,
-    source:
-        'package:dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 47:50            onValue',
+    source: 'package:dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 47:50            onValue',
   ),
   StackFrame(
     number: -1,
@@ -954,8 +1008,7 @@ const List<StackFrame> webStackTraceFrames = <StackFrame>[
     packagePath: 'lib/async/zone.dart',
     line: 1381,
     column: 54,
-    source:
-        'package:dart-sdk/lib/async/zone.dart 1381:54                                          runUnary',
+    source: 'package:dart-sdk/lib/async/zone.dart 1381:54                                          runUnary',
   ),
   StackFrame(
     number: -1,
@@ -966,8 +1019,7 @@ const List<StackFrame> webStackTraceFrames = <StackFrame>[
     packagePath: '<unknown>',
     line: 210,
     column: 5,
-    source:
-        'object_test.dart 210:5                                                                performLayout',
+    source: 'object_test.dart 210:5                                                                performLayout',
   ),
   StackFrame(
     number: -1,
@@ -978,8 +1030,7 @@ const List<StackFrame> webStackTraceFrames = <StackFrame>[
     packagePath: 'lib/async/future_impl.dart',
     line: 140,
     column: 18,
-    source:
-        'package:dart-sdk/lib/async/future_impl.dart 140:18                                    handleValue',
+    source: 'package:dart-sdk/lib/async/future_impl.dart 140:18                                    handleValue',
   ),
   StackFrame(
     number: -1,
@@ -990,8 +1041,7 @@ const List<StackFrame> webStackTraceFrames = <StackFrame>[
     packagePath: 'lib/async/future_impl.dart',
     line: 682,
     column: 44,
-    source:
-        'package:dart-sdk/lib/async/future_impl.dart 682:44                                    handleValueCallback',
+    source: 'package:dart-sdk/lib/async/future_impl.dart 682:44                                    handleValueCallback',
   ),
   StackFrame(
     number: -1,
@@ -1002,8 +1052,7 @@ const List<StackFrame> webStackTraceFrames = <StackFrame>[
     packagePath: 'lib/async/future_impl.dart',
     line: 711,
     column: 32,
-    source:
-        'package:dart-sdk/lib/async/future_impl.dart 711:32                                    _propagateToListeners',
+    source: 'package:dart-sdk/lib/async/future_impl.dart 711:32                                    _propagateToListeners',
   ),
   StackFrame(
     number: -1,
@@ -1014,8 +1063,7 @@ const List<StackFrame> webStackTraceFrames = <StackFrame>[
     packagePath: 'lib/async/future_impl.dart',
     line: 391,
     column: 9,
-    source:
-        'package:dart-sdk/lib/async/future_impl.dart 391:9                                     callback',
+    source: 'package:dart-sdk/lib/async/future_impl.dart 391:9                                     callback',
   ),
   StackFrame(
     number: -1,
@@ -1026,8 +1074,7 @@ const List<StackFrame> webStackTraceFrames = <StackFrame>[
     packagePath: 'lib/async/schedule_microtask.dart',
     line: 43,
     column: 11,
-    source:
-        'package:dart-sdk/lib/async/schedule_microtask.dart 43:11                              _microtaskLoop',
+    source: 'package:dart-sdk/lib/async/schedule_microtask.dart 43:11                              _microtaskLoop',
   ),
   StackFrame(
     number: -1,
@@ -1038,8 +1085,7 @@ const List<StackFrame> webStackTraceFrames = <StackFrame>[
     packagePath: 'lib/async/schedule_microtask.dart',
     line: 52,
     column: 5,
-    source:
-        'package:dart-sdk/lib/async/schedule_microtask.dart 52:5                               _startMicrotaskLoop',
+    source: 'package:dart-sdk/lib/async/schedule_microtask.dart 52:5                               _startMicrotaskLoop',
   ),
   StackFrame(
     number: -1,
@@ -1050,7 +1096,6 @@ const List<StackFrame> webStackTraceFrames = <StackFrame>[
     packagePath: 'lib/_internal/js_dev_runtime/patch/async_patch.dart',
     line: 168,
     column: 15,
-    source:
-        'package:dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 168:15           <fn>',
+    source: 'package:dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 168:15           <fn>',
   ),
 ];

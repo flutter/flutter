@@ -8,10 +8,12 @@
 #include <utility>
 
 #include "flutter/common/task_runners.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/shell_io_manager.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 
@@ -31,20 +33,14 @@ PlatformViewIOS::PlatformViewIOS(PlatformView::Delegate& delegate,
 
 PlatformViewIOS::PlatformViewIOS(
     PlatformView::Delegate& delegate,
-    IOSRenderingAPI rendering_api,
     __weak FlutterPlatformViewsController* platform_views_controller,
     const flutter::TaskRunners& task_runners,
-    const std::shared_ptr<fml::ConcurrentTaskRunner>& worker_task_runner,
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch)
-    : PlatformViewIOS(delegate,
-                      IOSContext::Create(rendering_api,
-                                         delegate.OnPlatformViewGetSettings().enable_impeller
-                                             ? IOSRenderingBackend::kImpeller
-                                             : IOSRenderingBackend::kSkia,
-                                         is_gpu_disabled_sync_switch,
-                                         delegate.OnPlatformViewGetSettings()),
-                      platform_views_controller,
-                      task_runners) {}
+    : PlatformViewIOS(
+          delegate,
+          IOSContext::Create(is_gpu_disabled_sync_switch, delegate.OnPlatformViewGetSettings()),
+          platform_views_controller,
+          task_runners) {}
 
 PlatformViewIOS::~PlatformViewIOS() = default;
 
@@ -60,28 +56,38 @@ FlutterViewController* PlatformViewIOS::GetOwnerViewController() const {
 void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner_controller) {
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
   std::lock_guard<std::mutex> guard(ios_surface_mutex_);
+  FlutterView* previousView = static_cast<FlutterView*>(owner_controller_.viewIfLoaded);
   if (ios_surface_ || !owner_controller) {
     NotifyDestroyed();
     ios_surface_.reset();
-    accessibility_bridge_.reset();
   }
   owner_controller_ = owner_controller;
   ApplyLocaleToOwnerController();
 
-  // Add an observer that will clear out the owner_controller_ ivar and
-  // the accessibility_bridge_ in case the view controller is deleted.
+  // Clear the owner and rebind the accessibility bridge to nil when the view controller is deleted.
   dealloc_view_controller_observer_.reset([[NSNotificationCenter defaultCenter]
       addObserverForName:FlutterViewControllerWillDealloc
                   object:owner_controller_
                    queue:[NSOperationQueue mainQueue]
               usingBlock:^(NSNotification* note) {
                 // Implicit copy of 'this' is fine.
-                accessibility_bridge_.reset();
+                if (accessibility_bridge_) {
+                  FlutterViewController* deallocatingController =
+                      static_cast<FlutterViewController*>(note.object);
+                  FlutterView* deallocatingView =
+                      static_cast<FlutterView*>(deallocatingController.viewIfLoaded);
+                  accessibility_bridge_->SetViewController(nil, deallocatingView);
+                }
                 owner_controller_ = nil;
               }]);
 
   if (owner_controller_ && owner_controller_.isViewLoaded) {
-    this->attachView();
+    this->attachView(previousView);
+  } else {
+    EnsureAccessibilityBridge();
+    if (accessibility_bridge_) {
+      accessibility_bridge_->SetViewController(owner_controller_, previousView);
+    }
   }
   // Do not call `NotifyCreated()` here - let FlutterViewController take care
   // of that when its Viewport is sized.  If `NotifyCreated()` is called here,
@@ -89,7 +95,7 @@ void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner
   // a framebuffer that will not be able to completely attach.
 }
 
-void PlatformViewIOS::attachView() {
+void PlatformViewIOS::attachView(FlutterView* previousView) {
   FML_DCHECK(owner_controller_);
   FML_DCHECK(owner_controller_.isViewLoaded) << "FlutterViewController's view should be loaded "
                                                 "before attaching to PlatformViewIOS.";
@@ -98,9 +104,12 @@ void PlatformViewIOS::attachView() {
   ios_surface_ = IOSSurface::Create(ios_context_, ca_layer);
   FML_DCHECK(ios_surface_ != nullptr);
 
+  EnsureAccessibilityBridge();
   if (accessibility_bridge_) {
-    accessibility_bridge_ = std::make_unique<AccessibilityBridge>(
-        owner_controller_, this, owner_controller_.platformViewsController);
+    accessibility_bridge_->SetViewController(owner_controller_, previousView);
+    if (accessibility_bridge_->HasSemantics()) {
+      PostSemanticsUpdateNotification();
+    }
   }
 }
 
@@ -138,24 +147,21 @@ std::shared_ptr<impeller::Context> PlatformViewIOS::GetImpellerContext() const {
 }
 
 // |PlatformView|
-void PlatformViewIOS::SetSemanticsEnabled(bool enabled) {
-  PlatformView::SetSemanticsEnabled(enabled);
-}
-
-// |PlatformView|
-void PlatformViewIOS::SetAccessibilityFeatures(int32_t flags) {
-  PlatformView::SetAccessibilityFeatures(flags);
-}
-
-// |PlatformView|
 void PlatformViewIOS::UpdateSemantics(int64_t view_id,
                                       flutter::SemanticsNodeUpdates update,
                                       flutter::CustomAccessibilityActionUpdates actions) {
-  FML_DCHECK(owner_controller_);
-  if (accessibility_bridge_) {
-    accessibility_bridge_.get()->UpdateSemantics(std::move(update), actions);
-    [[NSNotificationCenter defaultCenter] postNotificationName:FlutterSemanticsUpdateNotification
-                                                        object:owner_controller_];
+  EnsureAccessibilityBridge();
+  if (!accessibility_bridge_) {
+    return;
+  }
+  accessibility_bridge_.get()->UpdateSemantics(std::move(update), actions);
+  if (owner_controller_ && owner_controller_.isViewLoaded) {
+    // The bridge can cache semantics before the owner FlutterView is loaded. For example, a
+    // pre-warmed engine can receive semantics before FlutterViewController.loadView, when
+    // viewIfLoaded is still nil. Only notify observers after the semantics are applied to a loaded
+    // UIKit view, so accessibilityElements are ready to inspect. If cached semantics are applied
+    // later by attachView, attachView posts this same notification.
+    PostSemanticsUpdateNotification();
   }
 }
 
@@ -167,13 +173,9 @@ void PlatformViewIOS::SetApplicationLocale(std::string locale) {
 
 // |PlatformView|
 void PlatformViewIOS::SetSemanticsTreeEnabled(bool enabled) {
-  FML_DCHECK(owner_controller_);
+  semantics_tree_enabled_ = enabled;
   if (enabled) {
-    if (accessibility_bridge_) {
-      return;
-    }
-    accessibility_bridge_ =
-        std::make_unique<AccessibilityBridge>(owner_controller_, this, platform_views_controller_);
+    EnsureAccessibilityBridge();
   } else {
     accessibility_bridge_.reset();
   }
@@ -181,7 +183,7 @@ void PlatformViewIOS::SetSemanticsTreeEnabled(bool enabled) {
 
 // |PlatformView|
 std::unique_ptr<VsyncWaiter> PlatformViewIOS::CreateVSyncWaiter() {
-  return std::make_unique<VsyncWaiterIOS>(task_runners_);
+  return std::make_unique<VsyncWaiterIOS>(task_runners_, FlutterDisplayLinkManager.shared);
 }
 
 // |PlatformView|
@@ -232,10 +234,22 @@ std::unique_ptr<std::vector<std::string>> PlatformViewIOS::ComputePlatformResolv
   return out;
 }
 
+void PlatformViewIOS::PostSemanticsUpdateNotification() {
+  [[NSNotificationCenter defaultCenter] postNotificationName:FlutterSemanticsUpdateNotification
+                                                      object:owner_controller_];
+}
+
 void PlatformViewIOS::ApplyLocaleToOwnerController() {
   if (owner_controller_) {
     owner_controller_.applicationLocale =
         application_locale_.empty() ? nil : @(application_locale_.data());
+  }
+}
+
+void PlatformViewIOS::EnsureAccessibilityBridge() {
+  if (semantics_tree_enabled_ && !accessibility_bridge_ && owner_controller_) {
+    accessibility_bridge_ =
+        std::make_unique<AccessibilityBridge>(owner_controller_, this, platform_views_controller_);
   }
 }
 

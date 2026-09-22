@@ -12,7 +12,7 @@ class Mock{{pluginDartClass}}Platform
 }
 
 void main() {
-  final {{pluginDartClass}}Platform initialPlatform = {{pluginDartClass}}Platform.instance;
+  final initialPlatform = {{pluginDartClass}}Platform.instance;
 
   test('$MethodChannel{{pluginDartClass}} is the default instance', () {
     expect(initialPlatform, isInstanceOf<MethodChannel{{pluginDartClass}}>());

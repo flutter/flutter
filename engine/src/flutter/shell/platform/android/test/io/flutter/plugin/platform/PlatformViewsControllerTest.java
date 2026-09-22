@@ -256,8 +256,8 @@ public class PlatformViewsControllerTest {
 
     fakeVdController1.resize(10, 10, null);
 
-    assertEquals(fakeVdController1.presentation != presentation, true);
-    assertEquals(presentation.isShowing(), false);
+    assertNotSame(fakeVdController1.presentation, presentation);
+    assertFalse(presentation.isShowing());
   }
 
   @Test
@@ -965,8 +965,6 @@ public class PlatformViewsControllerTest {
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void createPlatformViewMessage_setsAndroidViewLayoutDirection() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
-    PlatformViewsControllerDelegator platformViewsControllerDelegator =
-        new PlatformViewsControllerDelegator(platformViewsController, null);
     platformViewsController.setSoftwareRendering(true);
 
     int platformViewId = 0;
@@ -1020,8 +1018,8 @@ public class PlatformViewsControllerTest {
     verify(androidView, times(2)).setLayoutParams(layoutParamsCaptor.capture());
 
     List<FrameLayout.LayoutParams> capturedLayoutParams = layoutParamsCaptor.getAllValues();
-    assertEquals(capturedLayoutParams.get(0).width, 1);
-    assertEquals(capturedLayoutParams.get(0).height, 1);
+    assertEquals(1, capturedLayoutParams.get(0).width);
+    assertEquals(1, capturedLayoutParams.get(0).height);
   }
 
   @Test
@@ -1073,7 +1071,7 @@ public class PlatformViewsControllerTest {
     // Simulate create call from the framework.
     createPlatformView(
         jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ false);
-    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+    assertEquals(1, ShadowFlutterJNI.getResponses().size());
 
     assertFalse(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
   }
@@ -1098,7 +1096,7 @@ public class PlatformViewsControllerTest {
 
     // Simulate create call from the framework.
     createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
-    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+    assertEquals(1, ShadowFlutterJNI.getResponses().size());
 
     assertFalse(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
   }
@@ -1192,7 +1190,7 @@ public class PlatformViewsControllerTest {
     // Simulate create call from the framework.
     createPlatformView(
         jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ false);
-    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+    assertEquals(1, ShadowFlutterJNI.getResponses().size());
 
     assertThrows(
         IllegalStateException.class,
@@ -1222,7 +1220,7 @@ public class PlatformViewsControllerTest {
 
     // Simulate create call from the framework.
     createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
-    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+    assertEquals(1, ShadowFlutterJNI.getResponses().size());
 
     assertThrows(
         IllegalStateException.class,
@@ -1253,7 +1251,7 @@ public class PlatformViewsControllerTest {
 
     // Simulate create call from the framework.
     createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
-    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+    assertEquals(1, ShadowFlutterJNI.getResponses().size());
 
     // Simulate set direction call from the framework.
     setLayoutDirection(jni, platformViewsController, platformViewId, 1);
@@ -1262,7 +1260,7 @@ public class PlatformViewsControllerTest {
     // The limit value of reply message will be equal to 2 if the layout direction is set
     // successfully, otherwise it will be much more than 2 due to the reply message contains
     // an error message wrapped with exception detail information.
-    assertEquals(ShadowFlutterJNI.getResponses().get(0).limit(), 2);
+    assertEquals(2, ShadowFlutterJNI.getResponses().get(0).limit());
   }
 
   @Test
@@ -1299,8 +1297,90 @@ public class PlatformViewsControllerTest {
         ArgumentCaptor.forClass(FrameLayout.LayoutParams.class);
     verify(androidView, times(1)).setLayoutParams(layoutParamsCaptor.capture());
 
-    assertEquals(layoutParamsCaptor.getValue().width, 10);
-    assertEquals(layoutParamsCaptor.getValue().height, 20);
+    assertEquals(10, layoutParamsCaptor.getValue().width);
+    assertEquals(20, layoutParamsCaptor.getValue().height);
+  }
+
+  // Regression test for https://github.com/flutter/flutter/issues/189834.
+  //
+  // The buffer size reported back to the framework is used to size the texture the platform view
+  // is drawn into. Rounding it to a whole logical pixel makes the texture up to half a logical
+  // pixel narrower than the widget, leaving a line of Flutter content visible along the right and
+  // bottom edges.
+  @Test
+  @Config(
+      qualifiers = "420dpi",
+      shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void resizeAndroidView_reportsFractionalBufferSize() {
+    // 420dpi is a display density of 2.625, which does not evenly divide a 1080px wide screen.
+    final double density = 2.625;
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    int platformViewId = 0;
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    final View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+
+    createPlatformView(
+        jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ false);
+
+    reset(androidView);
+    when(androidView.getLayoutParams()).thenReturn(new FrameLayout.LayoutParams(0, 0));
+
+    // A platform view that exactly covers a 1080x1080 region of the screen.
+    final double logicalSize = 1080 / density;
+    resize(jni, platformViewsController, platformViewId, logicalSize, logicalSize);
+
+    // The render target is 1080 physical pixels, so the buffer is exactly logicalSize logical
+    // pixels. Before this was reported as a double it came back as 411 rather than 411.42857.
+    final Map<String, Object> bufferSize = lastResponse();
+    assertEquals(logicalSize, (double) bufferSize.get("width"), 1e-9);
+    assertEquals(logicalSize, (double) bufferSize.get("height"), 1e-9);
+  }
+
+  // The render target is only ever grown, never shrunk, so that a smooth keyboard animation does
+  // not resize the texture on every frame. That means the buffer can be larger than the view, and
+  // the framework needs to be told the real size: it sizes the texture with it and clips the
+  // texture to the widget, rather than scaling the buffer down onto the widget.
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void resizeAndroidView_reportsUnshrunkBufferSize() {
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    int platformViewId = 0;
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    final View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+
+    createPlatformView(
+        jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ false);
+
+    reset(androidView);
+    when(androidView.getLayoutParams()).thenReturn(new FrameLayout.LayoutParams(0, 0));
+
+    // Grow the view, which grows the render target to match.
+    resize(jni, platformViewsController, platformViewId, 400.0, 400.0);
+    assertEquals(400.0, (double) lastResponse().get("width"), 1e-9);
+
+    // Shrinking the view leaves the render target alone, so the reported buffer stays at 400.
+    resize(jni, platformViewsController, platformViewId, 200.0, 200.0);
+    final Map<String, Object> bufferSize = lastResponse();
+    assertEquals(400.0, (double) bufferSize.get("width"), 1e-9);
+    assertEquals(400.0, (double) bufferSize.get("height"), 1e-9);
   }
 
   @Test
@@ -1512,7 +1592,7 @@ public class PlatformViewsControllerTest {
     // Simulate create call from the framework.
     createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
     assertTrue(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
-    assertEquals(flutterView.getChildCount(), 2);
+    assertEquals(2, flutterView.getChildCount());
 
     // Simulate first frame from the framework.
     jni.onFirstFrame();
@@ -1521,7 +1601,7 @@ public class PlatformViewsControllerTest {
 
     // Simulate dispose call from the framework.
     disposePlatformView(jni, platformViewsController, platformViewId);
-    assertEquals(flutterView.getChildCount(), 1);
+    assertEquals(1, flutterView.getChildCount());
   }
 
   @Test
@@ -1740,7 +1820,7 @@ public class PlatformViewsControllerTest {
         /* viewHeight=*/ 10,
         /* mutatorsStack=*/ new FlutterMutatorsStack());
 
-    assertEquals(flutterView.getChildCount(), 3);
+    assertEquals(3, flutterView.getChildCount());
 
     final View view = flutterView.getChildAt(1);
     assertTrue(view instanceof FlutterImageView);
@@ -1790,8 +1870,8 @@ public class PlatformViewsControllerTest {
         /* viewHeight=*/ 10,
         /* mutatorsStack=*/ new FlutterMutatorsStack());
 
-    assertEquals(flutterView.getChildCount(), 2);
-    assertTrue(!(flutterView.getChildAt(0) instanceof PlatformOverlayView));
+    assertEquals(2, flutterView.getChildCount());
+    assertFalse(flutterView.getChildAt(0) instanceof PlatformOverlayView);
     assertTrue(flutterView.getChildAt(1) instanceof FlutterMutatorView);
 
     // Simulate dispose call from the framework.
@@ -1868,18 +1948,18 @@ public class PlatformViewsControllerTest {
     platformViewsController.onDisplayOverlaySurface(platformViewId, 0, 0, 10, 10);
 
     // This will contain three views: Background ImageView、PlatformView、Overlay ImageView
-    assertEquals(flutterView.getChildCount(), 3);
+    assertEquals(3, flutterView.getChildCount());
 
     FlutterImageView imageView = flutterView.getCurrentImageSurface();
 
     // Make sure the ImageView is inside the current FlutterView.
-    assertTrue(imageView != null);
+    assertNotNull(imageView);
     assertTrue(flutterView.indexOfChild(imageView) != -1);
 
     // Make sure the overlayView is inside the current FlutterView
     assertTrue(platformViewsController.getOverlayLayerViews().size() != 0);
     PlatformOverlayView overlayView = platformViewsController.getOverlayLayerViews().get(0);
-    assertTrue(overlayView != null);
+    assertNotNull(overlayView);
     assertTrue(flutterView.indexOfChild(overlayView) != -1);
 
     // Simulate in a new frame, there's no PlatformView, which is called
@@ -1891,19 +1971,169 @@ public class PlatformViewsControllerTest {
     // Invoke all registered `FlutterUiDisplayListener` callback
     jni.onFirstFrame();
 
-    assertEquals(null, flutterView.getCurrentImageSurface());
+    assertNull(flutterView.getCurrentImageSurface());
 
     // Make sure the background ImageVIew is not in the FlutterView
-    assertTrue(flutterView.indexOfChild(imageView) == -1);
+    assertEquals(-1, flutterView.indexOfChild(imageView));
 
     // Make sure the overlay ImageVIew is not in the FlutterView
-    assertTrue(flutterView.indexOfChild(overlayView) == -1);
+    assertEquals(-1, flutterView.indexOfChild(overlayView));
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onRejectGesture_informsMutatorViewFlutterWonGesture_forHybridComposition() {
+    final PlatformViewsController platformViewsController = new PlatformViewsController();
+    final int platformViewId = 0;
+
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    final View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+
+    createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
+    assertTrue(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
+
+    final FlutterMutatorView parent = platformViewsController.getPlatformViewParent(platformViewId);
+    assertNotNull(parent);
+    assertFalse(parent.getFlutterWonGesture());
+
+    // Without active gesture, rejectGesture has no effect.
+    final Map<String, Object> idleArgs = new HashMap<>();
+    idleArgs.put("id", platformViewId);
+    idleArgs.put("gestureId", 100L);
+    jni.handlePlatformMessage(
+        "flutter/platform_views",
+        encodeMethodCall(new MethodCall("rejectGesture", idleArgs)),
+        /*replyId=*/ 0,
+        /*messageData=*/ 0);
+    assertFalse(parent.getFlutterWonGesture());
+
+    // Start active gesture with downTime 100.
+    final MotionEvent downEvent =
+        MotionEvent.obtain(100, 100, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
+    final MotionEventTracker.MotionEventId eventId =
+        MotionEventTracker.getInstance().track(downEvent);
+    parent.onTouchEvent(downEvent);
+
+    // Mismatched gestureId does not set flutterWonGesture.
+    final Map<String, Object> mismatchArgs = new HashMap<>();
+    mismatchArgs.put("id", platformViewId);
+    mismatchArgs.put("gestureId", 99999L);
+    jni.handlePlatformMessage(
+        "flutter/platform_views",
+        encodeMethodCall(new MethodCall("rejectGesture", mismatchArgs)),
+        /*replyId=*/ 0,
+        /*messageData=*/ 0);
+    assertFalse(parent.getFlutterWonGesture());
+
+    // Send rejectGesture via channel with matching gestureId.
+    final Map<String, Object> args = new HashMap<>();
+    args.put("id", platformViewId);
+    args.put("gestureId", eventId.getId());
+    final MethodCall rejectCall = new MethodCall("rejectGesture", args);
+    jni.handlePlatformMessage(
+        "flutter/platform_views", encodeMethodCall(rejectCall), /*replyId=*/ 0, /*messageData=*/ 0);
+
+    assertTrue(parent.getFlutterWonGesture());
+
+    // Subsequent ACTION_MOVE triggers unbuffered dispatch and consumes flutterWonGesture.
+    final MotionEvent moveEvent =
+        MotionEvent.obtain(100, 101, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0);
+    parent.onTouchEvent(moveEvent);
+    assertFalse(parent.getFlutterWonGesture());
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onRejectGesture_informsViewWrapperFlutterWonGesture_forTextureLayer() {
+    final PlatformViewsController platformViewsController = new PlatformViewsController();
+    final int platformViewId = 0;
+
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    final View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+
+    createPlatformView(
+        jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ false);
+
+    final PlatformViewWrapper wrapper = platformViewsController.getViewWrapper(platformViewId);
+    assertNotNull(wrapper);
+    assertFalse(wrapper.getFlutterWonGesture());
+
+    // Without active gesture, rejectGesture has no effect.
+    final Map<String, Object> idleArgs = new HashMap<>();
+    idleArgs.put("id", platformViewId);
+    idleArgs.put("gestureId", 100L);
+    jni.handlePlatformMessage(
+        "flutter/platform_views",
+        encodeMethodCall(new MethodCall("rejectGesture", idleArgs)),
+        /*replyId=*/ 0,
+        /*messageData=*/ 0);
+    assertFalse(wrapper.getFlutterWonGesture());
+
+    // Start active gesture with downTime 100.
+    final MotionEvent downEvent =
+        MotionEvent.obtain(100, 100, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
+    final MotionEventTracker.MotionEventId eventId =
+        MotionEventTracker.getInstance().track(downEvent);
+    wrapper.onTouchEvent(downEvent);
+
+    // Mismatched gestureId does not set flutterWonGesture.
+    final Map<String, Object> mismatchArgs = new HashMap<>();
+    mismatchArgs.put("id", platformViewId);
+    mismatchArgs.put("gestureId", 99999L);
+    jni.handlePlatformMessage(
+        "flutter/platform_views",
+        encodeMethodCall(new MethodCall("rejectGesture", mismatchArgs)),
+        /*replyId=*/ 0,
+        /*messageData=*/ 0);
+    assertFalse(wrapper.getFlutterWonGesture());
+
+    // Send rejectGesture via channel with matching gestureId.
+    final Map<String, Object> args = new HashMap<>();
+    args.put("id", platformViewId);
+    args.put("gestureId", eventId.getId());
+    final MethodCall rejectCall = new MethodCall("rejectGesture", args);
+    jni.handlePlatformMessage(
+        "flutter/platform_views", encodeMethodCall(rejectCall), /*replyId=*/ 0, /*messageData=*/ 0);
+
+    assertTrue(wrapper.getFlutterWonGesture());
+
+    // Subsequent ACTION_MOVE triggers unbuffered dispatch and consumes flutterWonGesture.
+    final MotionEvent moveEvent =
+        MotionEvent.obtain(100, 101, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0);
+    wrapper.onTouchEvent(moveEvent);
+    assertFalse(wrapper.getFlutterWonGesture());
   }
 
   private static ByteBuffer encodeMethodCall(MethodCall call) {
     final ByteBuffer buffer = StandardMethodCodec.INSTANCE.encodeMethodCall(call);
     buffer.rewind();
     return buffer;
+  }
+
+  /** Decodes the reply to the most recent platform message, which all use a reply id of 0. */
+  @SuppressWarnings("unchecked")
+  private static Map<String, Object> lastResponse() {
+    final ByteBuffer response = ShadowFlutterJNI.getResponses().get(0);
+    response.position(0);
+    return (Map<String, Object>) StandardMethodCodec.INSTANCE.decodeEnvelope(response);
   }
 
   private static void createPlatformView(
@@ -2070,6 +2300,9 @@ public class PlatformViewsControllerTest {
               @Override
               public SurfaceProducer createSurfaceProducer(SurfaceLifecycle lifecycle) {
                 return new SurfaceProducer() {
+                  private int width = 0;
+                  private int height = 0;
+
                   @Override
                   public void setCallback(SurfaceProducer.Callback cb) {}
 
@@ -2083,16 +2316,19 @@ public class PlatformViewsControllerTest {
 
                   @Override
                   public int getWidth() {
-                    return 0;
+                    return width;
                   }
 
                   @Override
                   public int getHeight() {
-                    return 0;
+                    return height;
                   }
 
                   @Override
-                  public void setSize(int width, int height) {}
+                  public void setSize(int width, int height) {
+                    this.width = width;
+                    this.height = height;
+                  }
 
                   @Override
                   public Surface getSurface() {

@@ -72,9 +72,9 @@ abstract class AotAssemblyBase extends Target {
     final targetPlatform = TargetPlatform.fromName(environmentTargetPlatform);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
-    final List<DarwinArch> darwinArchs =
-        environment.defines[kIosArchs]?.split(' ').map(getIOSArchForName).toList() ??
-        <DarwinArch>[DarwinArch.arm64];
+    final List<CpuArch> cpuArchs =
+        environment.defines[kIosArchs]?.split(' ').map(getCpuArchForName).toList() ??
+        <CpuArch>[CpuArch.arm64];
     if (targetPlatform != TargetPlatform.ios) {
       throw Exception('aot_assembly is only supported for iOS applications.');
     }
@@ -94,15 +94,15 @@ abstract class AotAssemblyBase extends Target {
     // If we're building multiple iOS archs the binaries need to be lipo'd
     // together.
     final pending = <Future<int>>[];
-    for (final darwinArch in darwinArchs) {
+    for (final cpuArch in cpuArchs) {
       final archExtraGenSnapshotOptions = List<String>.of(extraGenSnapshotOptions);
       if (codeSizeDirectory != null) {
         final File codeSizeFile = environment.fileSystem
             .directory(codeSizeDirectory)
-            .childFile('snapshot.${darwinArch.name}.json');
+            .childFile('snapshot.${cpuArch.darwinArchName}.json');
         final File precompilerTraceFile = environment.fileSystem
             .directory(codeSizeDirectory)
-            .childFile('trace.${darwinArch.name}.json');
+            .childFile('trace.${cpuArch.darwinArchName}.json');
         archExtraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
         archExtraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
       }
@@ -111,8 +111,8 @@ abstract class AotAssemblyBase extends Target {
           platform: targetPlatform,
           buildMode: buildMode,
           mainPath: environment.buildDir.childFile('app.dill').path,
-          outputPath: environment.fileSystem.path.join(buildOutputPath, darwinArch.name),
-          darwinArch: darwinArch,
+          outputPath: environment.fileSystem.path.join(buildOutputPath, cpuArch.darwinArchName),
+          cpuArch: cpuArch,
           sdkRoot: sdkRoot,
           quiet: true,
           splitDebugInfo: splitDebugInfo,
@@ -129,7 +129,7 @@ abstract class AotAssemblyBase extends Target {
     // Combine the app lib into a fat framework.
     await Lipo.create(
       environment,
-      darwinArchs,
+      cpuArchs,
       relativePath: 'App.framework/App',
       inputDir: buildOutputPath,
     );
@@ -137,7 +137,7 @@ abstract class AotAssemblyBase extends Target {
     // And combine the dSYM for each architecture too, if it was created.
     await Lipo.create(
       environment,
-      darwinArchs,
+      cpuArchs,
       relativePath: 'App.framework.dSYM/Contents/Resources/DWARF/App',
       inputDir: buildOutputPath,
       // Don't fail if the dSYM wasn't created (i.e. during a debug build).

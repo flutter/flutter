@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
@@ -38,7 +37,7 @@ class BundleBuilder {
     String? applicationKernelFilePath,
     String? depfilePath,
     String? assetDirPath,
-    @visibleForTesting BuildSystem? buildSystem,
+    BuildSystem? buildSystem,
   }) async {
     project ??= FlutterProject.current();
     mainPath ??= defaultMainPath;
@@ -81,7 +80,9 @@ class BundleBuilder {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
         globals.printError(
           'Target ${measurement.target} failed: ${measurement.exception}',
-          stackTrace: measurement.fatal ? measurement.stackTrace : null,
+          stackTrace: (measurement.fatal && measurement.exception is! ToolExit)
+              ? measurement.stackTrace
+              : null,
         );
       }
       throwToolExit('Failed to build bundle.');

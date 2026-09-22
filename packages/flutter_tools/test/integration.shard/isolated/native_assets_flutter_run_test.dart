@@ -122,4 +122,108 @@ void main() {
       });
     }
   }
+
+  if (platform.isMacOS) {
+    // Regression test for https://github.com/flutter/flutter/issues/190799.
+    //
+    // A bundled code asset is stamped with the install name
+    // `@rpath/<name>.framework/<name>`. While NativeAssetsManifest.json records
+    // a different string, dyld cannot recognise the library it already has by
+    // name and identifies it by file instead. That identity holds only until
+    // the file is replaced, which is what rebuilding does to a bundle a debug
+    // instance is still running, and the next `@Native` binding to resolve then
+    // maps a second copy of the asset with its own copy of the library's state.
+    testWithoutContext('code asset is not mapped twice when its file is replaced', () async {
+      await inTempDir((Directory tempDirectory) async {
+        final Directory packageDirectory = await createTestProject(
+          packageName,
+          tempDirectory,
+          withProcessGlobalState: true,
+        );
+        final Directory exampleDirectory = packageDirectory.childDirectory('example');
+        final File mainFile = exampleDirectory.childDirectory('lib').childFile('main.dart');
+        mainFile.writeAsStringSync(_mainDart(loadState: false));
+
+        Object? replaceError;
+        final ProcessTestResult result = await runFlutter(
+          <String>['run', '-dmacos', '--debug'],
+          exampleDirectory.path,
+          <Transition>[
+            // Both patterns have to match before the file is replaced: the app
+            // has to have stored something through the copy it loaded first.
+            Multiple.contains(
+              <Pattern>['Flutter run key commands.', _storedMarker],
+              handler: (String line) {
+                try {
+                  replaceWithCopy(bundledFrameworkBinaryMacOS(exampleDirectory, 'debug'));
+                  // Reloading a `build` that reads the state back resolves a
+                  // binding that has not been resolved yet, so the asset is
+                  // looked up again now that its file is a different one.
+                  mainFile.writeAsStringSync(_mainDart(loadState: true));
+                } on Object catch (error) {
+                  replaceError = error;
+                }
+                return 'r';
+              },
+            ),
+            Barrier.contains('Performing hot reload...'),
+            // The app prints from `build`, so its line and the tool's summary
+            // of the reload can arrive in either order.
+            Multiple.contains(<Pattern>[
+              _loadedMarker,
+              RegExp('Reloaded .*'),
+            ], handler: (String line) => 'q'),
+            Barrier.contains('Application finished.'),
+          ],
+        );
+        // A handler cannot use `expect`, so the failure is carried out here.
+        expect(replaceError, isNull, reason: 'failed to replace the bundled framework');
+        if (result.exitCode != 0) {
+          throw Exception(
+            'flutter run failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+          );
+        }
+        // Mapped twice, the second copy has nothing stored in it and reading
+        // the state back takes the app down before it prints anything.
+        expect(result.stdout.join('\n'), contains('$_loadedMarker 42'));
+      });
+    });
+  }
+}
+
+const _storedMarker = 'native asset state stored';
+const _loadedMarker = 'native asset state loaded:';
+
+/// An app that stores state in the code asset, and reads it back again on a hot
+/// reload once [loadState] is set.
+String _mainDart({required bool loadState}) {
+  final loadLine = loadState ? "    print('$_loadedMarker \${asset.loadState()}');" : '';
+  return '''
+import 'package:flutter/widgets.dart';
+import 'package:$packageName/$packageName.dart' as asset;
+
+void main() => runApp(const StateProbe());
+
+class StateProbe extends StatefulWidget {
+  const StateProbe({super.key});
+
+  @override
+  State<StateProbe> createState() => _StateProbeState();
+}
+
+class _StateProbeState extends State<StateProbe> {
+  @override
+  void initState() {
+    super.initState();
+    asset.storeState(42);
+    print('$_storedMarker');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+$loadLine
+    return const SizedBox();
+  }
+}
+''';
 }
