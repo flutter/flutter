@@ -848,11 +848,29 @@ class TextLayout {
     return ui.TextRange(start: start, end: end);
   }
 
-  ui.TextRange getLineBoundary(int codepointPosition) {
+  ui.TextRange getLineBoundary(ui.TextPosition position) {
+    final int codepointPosition = position.offset;
+    for (var i = 0; i < lines.length; i++) {
+      final ui.TextRange range = lines[i].allLineTextRange;
+      if (range.start <= codepointPosition && codepointPosition < range.end) {
+        // At a soft wrap the start of this line is also the end of the previous
+        // one, and an upstream position belongs to the previous line. After a
+        // hard break there is no such ambiguity, because the newline is part of
+        // the previous line's range, so the flag decides rather than adjacency.
+        if (position.affinity == ui.TextAffinity.upstream &&
+            codepointPosition == range.start &&
+            i > 0 &&
+            !lines[i - 1].hardLineBreak) {
+          return lines[i - 1].allLineTextRange;
+        }
+        return range;
+      }
+    }
+    // The ranges are half-open, so the end of the text is in no line. It belongs
+    // to the first line that ends there, which skips any empty line after it.
     for (final TextLine line in lines) {
-      if (line.allLineTextRange.start <= codepointPosition &&
-          line.allLineTextRange.end > codepointPosition) {
-        return ui.TextRange(start: line.allLineTextRange.start, end: line.allLineTextRange.end);
+      if (line.allLineTextRange.end == codepointPosition) {
+        return line.allLineTextRange;
       }
     }
     return ui.TextRange.empty;
