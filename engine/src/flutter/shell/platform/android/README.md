@@ -138,17 +138,17 @@ The C++ code for the Android embedder is located in
 
 Some notable files include:
 
-- [`context/android_context.h`](./context/android_context.h): Holds state that
-  is shared across Android surfaces.
-- [`jni/platform_view_android_jni.h`](./jni/platform_view_android_jni.h): Allows
-  calling Java code running in the JVM.
+- [`flutter_embedder_native.h`](./flutter_embedder_native.h): The main C-API entry point
+  and lifecycle coordinator for the Android embedder.
+- [`jni_router.h`](./jni_router.h): Routes incoming JNI calls to the C-API embedder backend.
+- [`jvm_invoker.h`](./jvm_invoker.h): Invokes Java callbacks on FlutterJNI via the JVM.
+- [`android_surface_control.h`](./android_surface_control.h): Manages hardware rendering
+  surfaces and transactions via ASurfaceControl.
 - [`AndroidManifest.xml`](./AndroidManifest.xml): Used by [`android_lint`](../../../tools/android_lint/).
 - [`BUILD.gn`](./BUILD.gn): Used by GN to build the C++-side embedder tests and
   the `flutter.jar` file for the engine.
-- [`ndk_helpers.h`](./ndk_helpers.h): Helper functions for dynamically loading
+- [`os_library_loader.h`](./os_library_loader.h): Helper functions for dynamically loading
   and calling Android NDK (C/C++) functions.
-- [`platform_view_android.h`](./platform_view_android.h): The main entry point
-  for the Android embedder.
 
 See [VSCode with C/C++ Intellisense](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Setting-up-the-Engine-development-environment.md#vscode-with-cc-intellisense-cc)
 for how to use the [`clangd`](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) extension to get C++ code
