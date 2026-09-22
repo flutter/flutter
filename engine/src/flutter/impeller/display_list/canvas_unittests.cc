@@ -19,7 +19,6 @@
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
-#include "impeller/renderer/command.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/testing/mocks.h"
@@ -823,14 +822,9 @@ TEST_P(AiksTest, BackdropFlipWithoutOffscreenMSAASkipsSelfDraw) {
       Paint{.color = Color::Orange(), .blend_mode = BlendMode::kScreen});
 
   // The pass loads and writes the texture the backdrop is read from, so
-  // restoring the backdrop would sample the texture the pass draws to.
-  size_t backdrop_restores = 0;
-  for (const Command& command : canvas->GetCurrentRenderPass().GetCommands()) {
-    if (command.label.find("MSAA backdrop") != std::string::npos) {
-      backdrop_restores++;
-    }
-  }
-  EXPECT_EQ(backdrop_restores, 0u);
+  // restoring the backdrop would sample the texture the pass draws to and
+  // the blend is the only draw the pass needs.
+  EXPECT_EQ(canvas->GetCurrentRenderPass().GetCommands().size(), 1u);
 
   canvas->Restore();
 }
