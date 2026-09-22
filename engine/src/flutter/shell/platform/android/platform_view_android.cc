@@ -115,7 +115,7 @@ PlatformViewAndroid::PlatformViewAndroid(
 PlatformViewAndroid::~PlatformViewAndroid() = default;
 
 void PlatformViewAndroid::NotifyCreated(
-    fml::RefPtr<AndroidNativeWindow> native_window) {
+    const fml::RefPtr<AndroidNativeWindow>& native_window) {
   if (engine_ && native_window) {
     engine_->NotifySurfaceCreated(native_window->handle(),
                                   native_window->IsFakeWindow());
@@ -125,7 +125,7 @@ void PlatformViewAndroid::NotifyCreated(
 }
 
 void PlatformViewAndroid::NotifySurfaceWindowChanged(
-    fml::RefPtr<AndroidNativeWindow> native_window) {
+    const fml::RefPtr<AndroidNativeWindow>& native_window) {
   if (engine_ && native_window) {
     engine_->NotifySurfaceWindowChanged(native_window->handle(),
                                         native_window->IsFakeWindow());

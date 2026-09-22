@@ -7,6 +7,10 @@
 #include <tuple>
 #include <vector>
 
+#if FML_OS_ANDROID
+#include <android/api-level.h>
+#endif
+
 #include "flutter/shell/platform/android/embedder_android_engine.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "flutter/shell/platform/android/jni/jni_mock.h"
@@ -29,6 +33,36 @@ TEST(EmbedderAndroidEngineTest, LifecycleAndInitialState) {
   EXPECT_NE(engine.GetCompositor(), nullptr);
   EXPECT_NE(engine.GetAndroidTaskRunners(), nullptr);
   EXPECT_FALSE(engine.IsSurfaceControlEnabled());
+}
+
+TEST(EmbedderAndroidEngineTest, SurfaceControlEnablement) {
+  auto jni = std::make_shared<JNIMock>();
+
+  // Disabled by default when surface control is not requested.
+  EmbedderAndroidEngine engine_default(Settings(), jni,
+                                       AndroidRenderingAPI::kImpellerVulkan);
+  EXPECT_FALSE(engine_default.IsSurfaceControlEnabled());
+
+  // Explicit override enables.
+  engine_default.SetSurfaceControlEnabled(true);
+  EXPECT_TRUE(engine_default.IsSurfaceControlEnabled());
+
+  // Enabled via settings when criteria (surface control + impeller + vulkan)
+  // are satisfied.
+  Settings settings;
+  settings.enable_surface_control = true;
+  settings.enable_impeller = true;
+  EmbedderAndroidEngine engine_hcpp(settings, jni,
+                                    AndroidRenderingAPI::kImpellerVulkan);
+#if FML_OS_ANDROID
+  if (android_get_device_api_level() >= 34) {
+    EXPECT_TRUE(engine_hcpp.IsSurfaceControlEnabled());
+  } else {
+    EXPECT_FALSE(engine_hcpp.IsSurfaceControlEnabled());
+  }
+#else
+  EXPECT_FALSE(engine_hcpp.IsSurfaceControlEnabled());
+#endif
 }
 
 TEST(EmbedderAndroidEngineTest, SurfaceLifecycleTransitions) {
