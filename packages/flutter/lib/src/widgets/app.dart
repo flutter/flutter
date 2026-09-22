@@ -35,6 +35,7 @@ import 'raw_tooltip.dart';
 import 'restoration.dart';
 import 'router.dart';
 import 'scrollable_helpers.dart';
+import 'selectable_region.dart';
 import 'semantics_debugger.dart';
 import 'shared_app_data.dart';
 import 'shortcuts.dart';
@@ -1274,6 +1275,13 @@ class WidgetsApp extends StatefulWidget {
     // Dismissal
     SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
 
+    // Find in page
+    SingleActivator(LogicalKeyboardKey.keyF, control: true): FindInPageIntent(),
+    SingleActivator(LogicalKeyboardKey.keyG, control: true): FindNextMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.keyG, control: true, shift: true): FindPreviousMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.f3): FindNextMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.f3, shift: true): FindPreviousMatchIntent(),
+
     // Keyboard traversal.
     SingleActivator(LogicalKeyboardKey.tab): NextFocusIntent(),
     SingleActivator(LogicalKeyboardKey.tab, shift: true): PreviousFocusIntent(),
@@ -1323,6 +1331,16 @@ class WidgetsApp extends StatefulWidget {
     // Dismissal
     SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
 
+    // Find in page
+    SingleActivator(LogicalKeyboardKey.keyF, control: true): FindInPageIntent(),
+    SingleActivator(LogicalKeyboardKey.keyF, meta: true): FindInPageIntent(),
+    SingleActivator(LogicalKeyboardKey.keyG, control: true): FindNextMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.keyG, meta: true): FindNextMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.keyG, control: true, shift: true): FindPreviousMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.keyG, meta: true, shift: true): FindPreviousMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.f3): FindNextMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.f3, shift: true): FindPreviousMatchIntent(),
+
     // Keyboard traversal.
     SingleActivator(LogicalKeyboardKey.tab): NextFocusIntent(),
     SingleActivator(LogicalKeyboardKey.tab, shift: true): PreviousFocusIntent(),
@@ -1352,6 +1370,13 @@ class WidgetsApp extends StatefulWidget {
 
     // Dismissal
     SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
+
+    // Find in page
+    SingleActivator(LogicalKeyboardKey.keyF, meta: true): FindInPageIntent(),
+    SingleActivator(LogicalKeyboardKey.keyG, meta: true): FindNextMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.keyG, meta: true, shift: true): FindPreviousMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.f3): FindNextMatchIntent(),
+    SingleActivator(LogicalKeyboardKey.f3, shift: true): FindPreviousMatchIntent(),
 
     // Keyboard traversal
     SingleActivator(LogicalKeyboardKey.tab): NextFocusIntent(),

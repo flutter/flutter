@@ -1521,6 +1521,8 @@ class _SelectableFragment
   final RenderParagraph paragraph;
   final String fullText;
 
+  SelectionHighlightRanges _searchHighlights = SelectionHighlightRanges.empty;
+
   TextPosition? _textSelectionStart;
   TextPosition? _textSelectionEnd;
 
@@ -1654,6 +1656,32 @@ class _SelectableFragment
           directionallyExtendSelection.isEnd,
           directionallyExtendSelection.direction,
         );
+      case SelectionEventType.searchHighlight:
+        final searchEvent = event as SearchHighlightSelectionEvent;
+        final SelectionHighlightRanges next =
+            searchEvent.highlights[this] ?? SelectionHighlightRanges.empty;
+        if (_searchHighlights != next) {
+          _searchHighlights = next;
+          paragraph.markNeedsPaint();
+        }
+        result = SelectionResult.none;
+      case SelectionEventType.selectContentRange:
+        final selectRangeEvent = event as SelectContentRangeEvent;
+        if (selectRangeEvent.target == null || selectRangeEvent.target == this) {
+          final int start = (range.start + selectRangeEvent.range.startOffset).clamp(
+            range.start,
+            range.end,
+          );
+          final int end = (range.start + selectRangeEvent.range.endOffset).clamp(
+            range.start,
+            range.end,
+          );
+          _textSelectionStart = TextPosition(offset: start);
+          _textSelectionEnd = TextPosition(offset: end);
+          result = SelectionResult.end;
+        } else {
+          result = _handleClearSelection();
+        }
     }
 
     if (existingSelectionStart != _textSelectionStart ||
@@ -1661,6 +1689,33 @@ class _SelectableFragment
       _didChangeSelection();
     }
     return result;
+  }
+
+  @override
+  String getPlainText() => fullText.substring(range.start, range.end);
+
+  @override
+  List<Rect> getBoxesForRange(SelectedContentRange contentRange) {
+    final int start = (range.start + contentRange.startOffset).clamp(range.start, range.end);
+    final int end = (range.start + contentRange.endOffset).clamp(range.start, range.end);
+    final selection = TextSelection(baseOffset: start, extentOffset: end);
+    return <Rect>[
+      for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) textBox.toRect(),
+    ];
+  }
+
+  @override
+  void showRangeOnScreen([SelectedContentRange? contentRange]) {
+    final List<Rect> boxes = contentRange != null ? getBoxesForRange(contentRange) : boundingBoxes;
+    if (boxes.isNotEmpty) {
+      Rect target = boxes.first;
+      for (var i = 1; i < boxes.length; i++) {
+        target = target.expandToInclude(boxes[i]);
+      }
+      paragraph.showOnScreen(descendant: paragraph, rect: target.inflate(6.0));
+    } else {
+      paragraph.showOnScreen();
+    }
   }
 
   @override
@@ -3620,6 +3675,24 @@ class _SelectableFragment
   }
 
   void paintSelection(PaintingContext context, Offset offset) {
+    if (_searchHighlights.passiveRanges.isNotEmpty) {
+      final passivePaint = Paint()
+        ..style = PaintingStyle.fill
+        ..color = _searchHighlights.passiveColor;
+      for (final SelectedContentRange matchRange in _searchHighlights.passiveRanges) {
+        for (final Rect rect in getBoxesForRange(matchRange)) {
+          context.canvas.drawRect(rect.shift(offset), passivePaint);
+        }
+      }
+    }
+    if (_searchHighlights.activeRange case final SelectedContentRange activeRange) {
+      final activePaint = Paint()
+        ..style = PaintingStyle.fill
+        ..color = _searchHighlights.activeColor;
+      for (final Rect rect in getBoxesForRange(activeRange)) {
+        context.canvas.drawRect(rect.shift(offset), activePaint);
+      }
+    }
     if (_textSelectionStart == null || _textSelectionEnd == null) {
       return;
     }

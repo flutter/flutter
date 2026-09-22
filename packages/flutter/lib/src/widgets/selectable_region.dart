@@ -21,8 +21,11 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'actions.dart';
 import 'basic.dart';
+import 'container.dart';
 import 'context_menu_button_item.dart';
 import 'debug.dart';
+import 'default_selection_style.dart';
+import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -36,6 +39,7 @@ import 'tap_region.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
 import 'text_selection_toolbar_anchors.dart';
+import 'transitions.dart';
 
 // Examples can assume:
 // late GlobalKey key;
@@ -248,9 +252,30 @@ class SelectableRegion extends StatefulWidget {
     this.focusNode,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.onSelectionChanged,
+    this.enableSelection = true,
+    this.enableFind = true,
+    this.findController,
+    this.findBarBuilder,
     required this.selectionControls,
     required this.child,
   });
+
+  /// Whether user pointer/keyboard text selection is enabled in this region.
+  ///
+  /// When false and [enableFind] is true, [Text] widgets in the subtree still
+  /// register with this region for Find-in-Page (`Cmd+F` / `Ctrl+F`) highlighting
+  /// and scrolling without changing mouse cursors to [SystemMouseCursors.text]
+  /// or competing for drag gestures.
+  final bool enableSelection;
+
+  /// Whether Find-in-Page (`Cmd+F` / `Ctrl+F`) is enabled in this region.
+  final bool enableFind;
+
+  /// Optional controller to programmatically drive Find-in-Page queries and matches.
+  final FindInPageController? findController;
+
+  /// Optional builder for the Find-in-Page bar overlay when [findController] is open.
+  final SelectableRegionFindBarBuilder? findBarBuilder;
 
   /// The configuration for the magnifier used with selections in this region.
   ///
@@ -397,8 +422,21 @@ class SelectableRegionState extends State<SelectableRegion>
         granularity: TextGranularity.document,
       ),
     ),
-    DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideToolbarIfVisible),
+    FindInPageIntent: CallbackAction<FindInPageIntent>(onInvoke: _handleFindInPage),
+    FindNextMatchIntent: CallbackAction<FindNextMatchIntent>(
+      onInvoke: (FindNextMatchIntent intent) => findController.nextMatch(),
+    ),
+    FindPreviousMatchIntent: CallbackAction<FindPreviousMatchIntent>(
+      onInvoke: (FindPreviousMatchIntent intent) => findController.previousMatch(),
+    ),
+    DismissIntent: CallbackAction<DismissIntent>(onInvoke: _handleDismiss),
   };
+
+  FindInPageController? _localFindController;
+
+  /// The [FindInPageController] managing Find-in-Page state for this region.
+  FindInPageController get findController =>
+      widget.findController ?? (_localFindController ??= FindInPageController());
 
   final Map<Type, GestureRecognizerFactory> _gestureRecognizers =
       <Type, GestureRecognizerFactory>{};
@@ -457,6 +495,7 @@ class SelectableRegionState extends State<SelectableRegion>
   void initState() {
     super.initState();
     _focusNode.addListener(_handleFocusChanged);
+    findController._attach(_selectionDelegate);
     _initMouseGestureRecognizer();
     _initTouchGestureRecognizer();
     // Right clicks.
@@ -508,6 +547,15 @@ class SelectableRegionState extends State<SelectableRegion>
   @override
   void didUpdateWidget(SelectableRegion oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.findController != oldWidget.findController) {
+      oldWidget.findController?._detach(_selectionDelegate);
+      if (oldWidget.findController == null && widget.findController != null) {
+        _localFindController?._detach(_selectionDelegate);
+        _localFindController?.dispose();
+        _localFindController = null;
+      }
+      findController._attach(_selectionDelegate);
+    }
     if (widget.focusNode != oldWidget.focusNode) {
       if (oldWidget.focusNode == null && widget.focusNode != null) {
         _localFocusNode?.removeListener(_handleFocusChanged);
@@ -1937,6 +1985,25 @@ class SelectableRegionState extends State<SelectableRegion>
     _selectable = null;
   }
 
+  void _handleFindInPage(FindInPageIntent intent) {
+    if (!widget.enableFind) {
+      return;
+    }
+    final String? selectedText =
+        intent.initialQuery ?? _selectionDelegate.getSelectedContent()?.plainText;
+    findController.open(
+      initialQuery: (selectedText != null && selectedText.isNotEmpty) ? selectedText : null,
+    );
+  }
+
+  void _handleDismiss(DismissIntent intent) {
+    if (widget.enableFind && findController.isOpen) {
+      findController.close(selectActiveMatch: widget.enableSelection);
+      return;
+    }
+    _hideToolbarIfVisible(intent);
+  }
+
   @protected
   @override
   void dispose() {
@@ -1945,6 +2012,10 @@ class SelectableRegionState extends State<SelectableRegion>
     if (kIsWeb) {
       PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
     }
+    widget.findController?._detach(_selectionDelegate);
+    _localFindController?._detach(_selectionDelegate);
+    _localFindController?.dispose();
+    _localFindController = null;
     _selectionDelegate.dispose();
     _selectionStatusNotifier.dispose();
     // In case dispose was triggered before gesture end, remove the magnifier
@@ -1967,8 +2038,31 @@ class SelectableRegionState extends State<SelectableRegion>
       selectionStatusNotifier: _selectionStatusNotifier,
       child: SelectionContainer(registrar: this, delegate: _selectionDelegate, child: widget.child),
     );
-    if (_webContextMenuEnabled) {
+    if (!widget.enableSelection) {
+      result = DefaultSelectionStyle.merge(mouseCursor: MouseCursor.defer, child: result);
+    } else if (_webContextMenuEnabled) {
       result = PlatformSelectableRegionContextMenu(child: result);
+    }
+    if (widget.enableFind) {
+      result = Stack(
+        alignment: AlignmentDirectional.topEnd,
+        children: <Widget>[
+          result,
+          ListenableBuilder(
+            listenable: findController,
+            builder: (BuildContext context, Widget? _) {
+              if (!findController.isOpen) {
+                return const SizedBox.shrink();
+              }
+              return SelectionContainer.disabled(
+                child:
+                    widget.findBarBuilder?.call(context, findController) ??
+                    SelectableRegionFindBar(controller: findController),
+              );
+            },
+          ),
+        ],
+      );
     }
     return TapRegion(
       groupId: SelectableRegion,
@@ -1978,15 +2072,17 @@ class SelectableRegionState extends State<SelectableRegion>
         // be dismissed.
         //
         // Tapping outside the selectable region does not unfocus
-        // the region on non-web platforms.
-        if (kIsWeb) {
+        // the region on non-web platforms, or when Find-in-Page is active.
+        if (kIsWeb && !(widget.enableFind && findController.isOpen)) {
           _focusNode.unfocus();
         }
       },
       child: CompositedTransformTarget(
         link: _toolbarLayerLink,
         child: RawGestureDetector(
-          gestures: _gestureRecognizers,
+          gestures: widget.enableSelection
+              ? _gestureRecognizers
+              : const <Type, GestureRecognizerFactory>{},
           behavior: HitTestBehavior.translucent,
           excludeFromSemantics: true,
           child: Actions(
@@ -1994,6 +2090,7 @@ class SelectableRegionState extends State<SelectableRegion>
             child: Focus.withExternalFocusNode(
               includeSemantics: false,
               focusNode: _focusNode,
+              autofocus: widget.enableFind,
               child: result,
             ),
           ),
@@ -2314,6 +2411,9 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
       case SelectionEventType.directionallyExtendSelection:
         didReceiveSelectionEventFor(selectable: selectable);
         ensureChildUpdated(selectable);
+      case SelectionEventType.searchHighlight:
+      case SelectionEventType.selectContentRange:
+        break;
     }
     return super.dispatchSelectionEventToChild(selectable, event);
   }
@@ -2424,6 +2524,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
   bool _extendSelectionInProgress = false;
 
+  VoidCallback? _onSelectablesChanged;
+
+  static int _flushingDepth = 0;
+
   @override
   void add(Selectable selectable) {
     assert(!selectables.contains(selectable));
@@ -2457,13 +2561,19 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
           return;
         }
         _scheduledSelectableUpdate = false;
-        _updateSelectables();
+        _flushingDepth += 1;
+        try {
+          _updateSelectables();
+        } finally {
+          _flushingDepth -= 1;
+        }
       }
 
-      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.postFrameCallbacks) {
+      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.postFrameCallbacks ||
+          _flushingDepth > 0) {
         // A new task can be scheduled as a result of running the scheduled task
         // from another MultiSelectableSelectionContainerDelegate. This can
-        // happen if nesting two SelectionContainers. The selectable can be
+        // happen if nesting two or more SelectionContainers. The selectable can be
         // safely updated in the same frame in this case.
         scheduleMicrotask(runScheduledTask);
       } else {
@@ -2551,7 +2661,12 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   @protected
   @mustCallSuper
   void didChangeSelectables() {
+    final SelectionGeometry previousGeometry = _selectionGeometry;
     _updateSelectionGeometry();
+    if (_selectionGeometry == previousGeometry) {
+      notifyListeners();
+    }
+    _onSelectablesChanged?.call();
   }
 
   @override
@@ -2641,7 +2756,12 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     if (_isHandlingSelectionEvent) {
       return;
     }
+    final SelectionGeometry previousGeometry = _selectionGeometry;
     _updateSelectionGeometry();
+    if (_selectionGeometry == previousGeometry) {
+      notifyListeners();
+    }
+    _onSelectablesChanged?.call();
   }
 
   /// Gets the combined [SelectionGeometry] for child [Selectable]s.
@@ -2859,6 +2979,26 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   @override
   int get contentLength =>
       selectables.fold<int>(0, (int sum, Selectable selectable) => sum + selectable.contentLength);
+
+  @override
+  String getPlainText() {
+    if (_additions.isNotEmpty) {
+      _flushAdditions();
+    }
+    selectables.sort(compareOrder);
+    return selectables.map((Selectable selectable) => selectable.getPlainText()).join();
+  }
+
+  @override
+  List<Selectable> getLeafSelectables() {
+    if (_additions.isNotEmpty) {
+      _flushAdditions();
+    }
+    selectables.sort(compareOrder);
+    return <Selectable>[
+      for (final Selectable selectable in selectables) ...selectable.getLeafSelectables(),
+    ];
+  }
 
   /// This method calculates a local [SelectedContentRange] based on the list
   /// of [selections] that are accumulated from the [Selectable] children under this
@@ -3187,6 +3327,15 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
   @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
+    if (event.type == SelectionEventType.searchHighlight) {
+      if (_additions.isNotEmpty) {
+        _flushAdditions();
+      }
+      for (final Selectable selectable in selectables) {
+        dispatchSelectionEventToChild(selectable, event);
+      }
+      return SelectionResult.end;
+    }
     final selectionWillBeInProgress = event is! ClearSelectionEvent;
     if (!_selectionInProgress && selectionWillBeInProgress) {
       // Sort the selectable every time a selection start.
@@ -3218,6 +3367,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       case SelectionEventType.directionallyExtendSelection:
         _extendSelectionInProgress = true;
         result = handleDirectionallyExtendSelection(event as DirectionallyExtendSelectionEvent);
+      case SelectionEventType.searchHighlight:
+      case SelectionEventType.selectContentRange:
+        result = SelectionResult.end;
     }
     _isHandlingSelectionEvent = false;
     _updateSelectionGeometry();
@@ -3728,5 +3880,517 @@ final class SelectionListenerNotifier extends ChangeNotifier {
   @override
   void addListener(VoidCallback listener) {
     super.addListener(listener);
+  }
+}
+
+/// An [Intent] to open the Find-in-Page bar in the enclosing [SelectableRegion] or [SelectionArea].
+class FindInPageIntent extends Intent {
+  /// Creates a [FindInPageIntent].
+  const FindInPageIntent({this.initialQuery});
+
+  /// Optional initial query text to populate when opening the Find bar.
+  final String? initialQuery;
+}
+
+/// An [Intent] to advance to the next Find-in-Page match.
+class FindNextMatchIntent extends Intent {
+  /// Creates a [FindNextMatchIntent].
+  const FindNextMatchIntent();
+}
+
+/// An [Intent] to return to the previous Find-in-Page match.
+class FindPreviousMatchIntent extends Intent {
+  /// Creates a [FindPreviousMatchIntent].
+  const FindPreviousMatchIntent();
+}
+
+/// Signature for building a custom Find-in-Page bar inside a [SelectableRegion].
+typedef SelectableRegionFindBarBuilder = Widget Function(
+  BuildContext context,
+  FindInPageController controller,
+);
+
+/// Represents a single substring match within a leaf [Selectable] inside a [SelectableRegion].
+@immutable
+class SelectableSearchMatch {
+  /// Creates a [SelectableSearchMatch].
+  const SelectableSearchMatch({required this.selectable, required this.range, required this.text});
+
+  /// The leaf [Selectable] (typically backed by a [RenderParagraph]) containing the match.
+  final Selectable selectable;
+
+  /// The character offset range of the match within [selectable].
+  final SelectedContentRange range;
+
+  /// The matched substring.
+  final String text;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is SelectableSearchMatch &&
+        other.selectable == selectable &&
+        other.range.startOffset == range.startOffset &&
+        other.range.endOffset == range.endOffset &&
+        other.text == text;
+  }
+
+  @override
+  int get hashCode => Object.hash(selectable, range.startOffset, range.endOffset, text);
+}
+
+/// Controls Find-in-Page (`Cmd+F` / `Ctrl+F`) search state, highlight painting, and
+/// viewport scrolling for a [SelectableRegion] or [SelectionArea].
+class FindInPageController extends ChangeNotifier {
+  /// Creates a [FindInPageController].
+  FindInPageController({String initialQuery = '', bool caseSensitive = false})
+    : _query = initialQuery,
+      _caseSensitive = caseSensitive;
+
+  MultiSelectableSelectionContainerDelegate? _delegate;
+
+  bool _isOpen = false;
+
+  /// Whether the Find-in-Page bar is currently open.
+  bool get isOpen => _isOpen;
+
+  String _query;
+
+  /// The current search query string.
+  String get query => _query;
+  set query(String value) {
+    if (_query == value) {
+      return;
+    }
+    _query = value;
+    _recomputeMatches(scrollToActive: true);
+    notifyListeners();
+  }
+
+  bool _caseSensitive;
+
+  /// Whether substring matching is case-sensitive.
+  bool get caseSensitive => _caseSensitive;
+  set caseSensitive(bool value) {
+    if (_caseSensitive == value) {
+      return;
+    }
+    _caseSensitive = value;
+    _recomputeMatches(scrollToActive: true);
+    notifyListeners();
+  }
+
+  List<SelectableSearchMatch> _matches = const <SelectableSearchMatch>[];
+
+  /// All matches currently found across registered [Selectable]s in screen reading order.
+  List<SelectableSearchMatch> get matches => _matches;
+
+  /// Total number of matches for [query].
+  int get matchCount => _matches.length;
+
+  int _activeMatchIndex = -1;
+
+  /// The 0-based index of the currently active match, or `-1` if there are no matches.
+  int get activeMatchIndex => _activeMatchIndex;
+
+  /// The currently active [SelectableSearchMatch], or `null` if [activeMatchIndex] is `-1`.
+  SelectableSearchMatch? get activeMatch =>
+      (_activeMatchIndex >= 0 && _activeMatchIndex < _matches.length)
+      ? _matches[_activeMatchIndex]
+      : null;
+
+  int _openRequestCount = 0;
+
+  /// Incremented each time [open] is invoked so [SelectableRegionFindBar] can
+  /// re-focus and select the query even if [isOpen] was already true.
+  int get openRequestCount => _openRequestCount;
+
+  bool _isRecomputing = false;
+
+  void _attach(MultiSelectableSelectionContainerDelegate delegate) {
+    if (_delegate == delegate) {
+      return;
+    }
+    _delegate?._onSelectablesChanged = null;
+    _delegate = delegate;
+    _delegate!._onSelectablesChanged = _handleSelectablesChanged;
+    if (_isOpen && _query.isNotEmpty) {
+      _recomputeMatches(scrollToActive: false);
+    }
+  }
+
+  void _detach(MultiSelectableSelectionContainerDelegate delegate) {
+    if (_delegate != delegate) {
+      return;
+    }
+    _delegate!._onSelectablesChanged = null;
+    _delegate = null;
+  }
+
+  void _handleSelectablesChanged() {
+    if (!_isOpen || _query.isEmpty || _isRecomputing) {
+      return;
+    }
+    _recomputeMatches(scrollToActive: false);
+    notifyListeners();
+  }
+
+  /// Opens the Find-in-Page overlay and optionally populates [initialQuery].
+  void open({String? initialQuery}) {
+    final bool wasOpen = _isOpen;
+    _isOpen = true;
+    _openRequestCount += 1;
+    if (initialQuery != null && initialQuery.isNotEmpty) {
+      _query = initialQuery;
+    }
+    _recomputeMatches(scrollToActive: !wasOpen || initialQuery != null);
+    notifyListeners();
+  }
+
+  /// Closes the Find-in-Page overlay, clears search highlights, and optionally
+  /// converts the active match into the live selection.
+  void close({bool selectActiveMatch = true}) {
+    if (!_isOpen && _matches.isEmpty) {
+      return;
+    }
+    final SelectableSearchMatch? currentMatch = activeMatch;
+    _isOpen = false;
+    _clearAllHighlights();
+    if (selectActiveMatch && currentMatch != null) {
+      currentMatch.selectable.dispatchSelectionEvent(
+        SelectContentRangeEvent(range: currentMatch.range),
+      );
+    }
+    _matches = const <SelectableSearchMatch>[];
+    _activeMatchIndex = -1;
+    notifyListeners();
+  }
+
+  /// Advances to the next match (wrapping around to index 0 after the last match)
+  /// and scrolls the enclosing [Scrollable] so the active match is visible.
+  void nextMatch() {
+    if (_matches.isEmpty) {
+      return;
+    }
+    _activeMatchIndex = (_activeMatchIndex + 1) % _matches.length;
+    _pushHighlightsToSelectables();
+    activeMatch?.selectable.showRangeOnScreen(activeMatch!.range);
+    notifyListeners();
+  }
+
+  /// Moves to the previous match (wrapping around to the last match from index 0)
+  /// and scrolls the enclosing [Scrollable] so the active match is visible.
+  void previousMatch() {
+    if (_matches.isEmpty) {
+      return;
+    }
+    _activeMatchIndex = (_activeMatchIndex - 1 + _matches.length) % _matches.length;
+    _pushHighlightsToSelectables();
+    activeMatch?.selectable.showRangeOnScreen(activeMatch!.range);
+    notifyListeners();
+  }
+
+  void _recomputeMatches({required bool scrollToActive}) {
+    if (_isRecomputing) {
+      return;
+    }
+    final MultiSelectableSelectionContainerDelegate? delegate = _delegate;
+    if (delegate == null || !_isOpen || _query.isEmpty) {
+      _clearAllHighlights();
+      _matches = const <SelectableSearchMatch>[];
+      _activeMatchIndex = -1;
+      return;
+    }
+
+    _isRecomputing = true;
+    try {
+      final SelectableSearchMatch? previousActive = activeMatch;
+      final List<Selectable> leaves = delegate.getLeafSelectables();
+      final List<SelectableSearchMatch> found = <SelectableSearchMatch>[];
+      final String needle = _caseSensitive ? _query : _query.toLowerCase();
+
+      for (final Selectable selectable in leaves) {
+        final String rawText = selectable.getPlainText();
+        if (rawText.isEmpty) {
+          continue;
+        }
+        final String haystack = _caseSensitive ? rawText : rawText.toLowerCase();
+        int searchFrom = 0;
+        while (searchFrom <= haystack.length - needle.length) {
+          final int matchStart = haystack.indexOf(needle, searchFrom);
+          if (matchStart == -1) {
+            break;
+          }
+          final int matchEnd = matchStart + needle.length;
+          found.add(
+            SelectableSearchMatch(
+              selectable: selectable,
+              range: SelectedContentRange(startOffset: matchStart, endOffset: matchEnd),
+              text: rawText.substring(matchStart, matchEnd),
+            ),
+          );
+          searchFrom = matchStart + max(1, needle.length);
+        }
+      }
+
+      _matches = List<SelectableSearchMatch>.unmodifiable(found);
+      if (_matches.isEmpty) {
+        _activeMatchIndex = -1;
+      } else if (previousActive != null) {
+        final int preservedIndex = _matches.indexOf(previousActive);
+        _activeMatchIndex = preservedIndex != -1
+            ? preservedIndex
+            : _activeMatchIndex.clamp(0, _matches.length - 1);
+      } else {
+        _activeMatchIndex = 0;
+      }
+
+      _pushHighlightsToSelectables();
+      if (scrollToActive && activeMatch != null) {
+        activeMatch!.selectable.showRangeOnScreen(activeMatch!.range);
+      }
+    } finally {
+      _isRecomputing = false;
+    }
+  }
+
+  void _pushHighlightsToSelectables() {
+    final MultiSelectableSelectionContainerDelegate? delegate = _delegate;
+    if (delegate == null) {
+      return;
+    }
+    final List<Selectable> leaves = delegate.getLeafSelectables();
+    final Map<Selectable, List<SelectedContentRange>> passiveBySelectable =
+        <Selectable, List<SelectedContentRange>>{};
+    for (final SelectableSearchMatch match in _matches) {
+      (passiveBySelectable[match.selectable] ??= <SelectedContentRange>[]).add(match.range);
+    }
+    final SelectableSearchMatch? current = activeMatch;
+    final Map<Selectable, SelectionHighlightRanges> highlightsMap =
+        <Selectable, SelectionHighlightRanges>{
+          for (final Selectable selectable in leaves)
+            selectable: SelectionHighlightRanges(
+              passiveRanges: passiveBySelectable[selectable] ?? const <SelectedContentRange>[],
+              activeRange: current?.selectable == selectable ? current!.range : null,
+            ),
+        };
+    final SearchHighlightSelectionEvent event = SearchHighlightSelectionEvent(
+      highlights: highlightsMap,
+    );
+    for (final Selectable selectable in leaves) {
+      selectable.dispatchSelectionEvent(event);
+    }
+  }
+
+  void _clearAllHighlights() {
+    final MultiSelectableSelectionContainerDelegate? delegate = _delegate;
+    if (delegate == null) {
+      return;
+    }
+    const SearchHighlightSelectionEvent clearEvent = SearchHighlightSelectionEvent();
+    for (final Selectable selectable in delegate.getLeafSelectables()) {
+      selectable.dispatchSelectionEvent(clearEvent);
+    }
+  }
+}
+
+/// Default floating Find-in-Page bar rendered in the top-right corner of a
+/// [SelectableRegion] when [FindInPageController.isOpen] is true.
+class SelectableRegionFindBar extends StatefulWidget {
+  /// Creates a [SelectableRegionFindBar].
+  const SelectableRegionFindBar({super.key, required this.controller});
+
+  /// The [FindInPageController] bound to this Find bar.
+  final FindInPageController controller;
+
+  @override
+  State<SelectableRegionFindBar> createState() => _SelectableRegionFindBarState();
+}
+
+class _SelectableRegionFindBarState extends State<SelectableRegionFindBar> {
+  late final TextEditingController _textController;
+  late final FocusNode _focusNode;
+  int _lastOpenRequestCount = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    _lastOpenRequestCount = widget.controller.openRequestCount;
+    _textController = TextEditingController(text: widget.controller.query);
+    _focusNode = FocusNode(debugLabel: 'SelectableRegionFindBar');
+    widget.controller.addListener(_syncControllerText);
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _focusAndSelectQuery();
+      }
+    });
+  }
+
+  void _focusAndSelectQuery() {
+    _focusNode.requestFocus();
+    void selectAll() {
+      if (!mounted) {
+        return;
+      }
+      final String currentText = _textController.text;
+      if (currentText.isNotEmpty) {
+        _textController.value = _textController.value.copyWith(
+          selection: TextSelection(baseOffset: 0, extentOffset: currentText.length),
+          composing: TextRange.empty,
+        );
+      }
+    }
+
+    selectAll();
+    SchedulerBinding.instance.addPostFrameCallback((_) => selectAll());
+  }
+
+  @override
+  void didUpdateWidget(SelectableRegionFindBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller.removeListener(_syncControllerText);
+      widget.controller.addListener(_syncControllerText);
+      _syncControllerText();
+    }
+  }
+
+  void _syncControllerText() {
+    final bool reopenTriggered = widget.controller.openRequestCount != _lastOpenRequestCount;
+    _lastOpenRequestCount = widget.controller.openRequestCount;
+    if (_textController.text != widget.controller.query) {
+      _textController.value = TextEditingValue(
+        text: widget.controller.query,
+        selection: reopenTriggered
+            ? TextSelection(baseOffset: 0, extentOffset: widget.controller.query.length)
+            : TextSelection.collapsed(offset: widget.controller.query.length),
+      );
+    } else if (reopenTriggered) {
+      _focusAndSelectQuery();
+    }
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_syncControllerText);
+    _textController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final int total = widget.controller.matchCount;
+    final int current = total == 0 ? 0 : widget.controller.activeMatchIndex + 1;
+    final String counterText = '$current / $total';
+    const textStyle = TextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 13.0,
+      color: Color(0xFF1F1F1F),
+      decoration: TextDecoration.none,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 10.0, right: 14.0),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          color: Color(0xFFFFFFFF),
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+          border: Border.fromBorderSide(BorderSide(color: Color(0xFF2563EB), width: 2.0)),
+          boxShadow: <BoxShadow>[
+            BoxShadow(color: Color(0x33000000), blurRadius: 12.0, offset: Offset(0, 4)),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              SizedBox(
+                width: 140.0,
+                child: EditableText(
+                  controller: _textController,
+                  focusNode: _focusNode,
+                  style: textStyle,
+                  cursorColor: const Color(0xFF1A73E8),
+                  backgroundCursorColor: const Color(0xFF9AA0A6),
+                  onChanged: (String value) => widget.controller.query = value,
+                  onSubmitted: (String _) => widget.controller.nextMatch(),
+                ),
+              ),
+              const SizedBox(width: 8.0),
+              RichText(
+                text: TextSpan(
+                  text: counterText,
+                  style: textStyle.copyWith(
+                    color: total == 0 && widget.controller.query.isNotEmpty
+                        ? const Color(0xFFD93025)
+                        : const Color(0xFF5F6368),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8.0),
+              _FindBarButton(
+                label: 'Aa',
+                active: widget.controller.caseSensitive,
+                onTap: () => widget.controller.caseSensitive = !widget.controller.caseSensitive,
+              ),
+              const SizedBox(width: 4.0),
+              _FindBarButton(label: 'Prev', onTap: widget.controller.previousMatch),
+              const SizedBox(width: 4.0),
+              _FindBarButton(label: 'Next', onTap: widget.controller.nextMatch),
+              const SizedBox(width: 4.0),
+              _FindBarButton(label: 'X', onTap: widget.controller.close),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FindBarButton extends StatelessWidget {
+  const _FindBarButton({required this.label, required this.onTap, this.active = false});
+
+  final String label;
+  final VoidCallback onTap;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: active ? const Color(0xFFE8F0FE) : const Color(0xFFF1F3F4),
+          borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+          border: Border.fromBorderSide(
+            BorderSide(color: active ? const Color(0xFF1A73E8) : const Color(0xFFDADCE0)),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+          child: RichText(
+            text: TextSpan(
+              text: label,
+              style: TextStyle(
+                fontFamily: 'Roboto',
+                fontSize: 11.0,
+                fontWeight: FontWeight.w700,
+                color: active ? const Color(0xFF1A73E8) : const Color(0xFF3C4043),
+                decoration: TextDecoration.none,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -114,6 +114,9 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 
   /// The length of the content in this object.
   int get contentLength;
+
+  /// Gets the full plain text content of this object, even when unselected.
+  String getPlainText() => '';
 }
 
 /// This class stores the range information of the selection under a [Selectable]
@@ -245,6 +248,16 @@ mixin Selectable implements SelectionHandler {
   /// A list of [Rect]s that represent the bounding box of this [Selectable]
   /// in local coordinates.
   List<Rect> get boundingBoxes;
+
+  /// Returns a list of [Rect]s in local coordinates enclosing [range].
+  List<Rect> getBoxesForRange(SelectedContentRange range) => const <Rect>[];
+
+  /// Scrolls enclosing scrollable viewports so that [range] (or the entire
+  /// [Selectable] if [range] is null) is visible on screen.
+  void showRangeOnScreen([SelectedContentRange? range]) {}
+
+  /// Returns the leaf [Selectable]s represented by this object in reading order.
+  List<Selectable> getLeafSelectables() => <Selectable>[this];
 
   /// Disposes resources held by the mixer.
   void dispose();
@@ -412,6 +425,82 @@ enum SelectionEventType {
 
   /// An event that extends the selection in a specific direction.
   directionallyExtendSelection,
+
+  /// An event to update Find-in-Page highlight ranges across [Selectable]s.
+  searchHighlight,
+
+  /// An event to select a specific character range in a [Selectable].
+  selectContentRange,
+}
+
+/// Represents Find-in-Page highlight ranges within a [Selectable].
+@immutable
+class SelectionHighlightRanges {
+  /// Creates a set of Find-in-Page highlight ranges.
+  const SelectionHighlightRanges({
+    this.passiveRanges = const <SelectedContentRange>[],
+    this.activeRange,
+    this.passiveColor = const Color(0x66FFEB3B),
+    this.activeColor = const Color(0xCCFF9800),
+  });
+
+  /// An empty highlight set.
+  static const SelectionHighlightRanges empty = SelectionHighlightRanges();
+
+  /// Ranges to highlight as passive search matches (e.g. yellow).
+  final List<SelectedContentRange> passiveRanges;
+
+  /// The currently focused search match range (e.g. orange), if any lies in this [Selectable].
+  final SelectedContentRange? activeRange;
+
+  /// Fill color used for passive match rectangles.
+  final Color passiveColor;
+
+  /// Fill color used for the active match rectangle.
+  final Color activeColor;
+
+  /// Whether there are no search highlights to paint.
+  bool get isEmpty => passiveRanges.isEmpty && activeRange == null;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is SelectionHighlightRanges &&
+        listEquals(other.passiveRanges, passiveRanges) &&
+        other.activeRange == activeRange &&
+        other.passiveColor == passiveColor &&
+        other.activeColor == activeColor;
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(Object.hashAll(passiveRanges), activeRange, passiveColor, activeColor);
+}
+
+/// Dispatched to update Find-in-Page highlight ranges across [Selectable]s.
+class SearchHighlightSelectionEvent extends SelectionEvent {
+  /// Creates a [SearchHighlightSelectionEvent].
+  const SearchHighlightSelectionEvent({
+    this.highlights = const <Selectable, SelectionHighlightRanges>{},
+  }) : super._(SelectionEventType.searchHighlight);
+
+  /// Map from leaf [Selectable] to its [SelectionHighlightRanges].
+  final Map<Selectable, SelectionHighlightRanges> highlights;
+}
+
+/// Dispatched to programmatically select a specific character offset range.
+class SelectContentRangeEvent extends SelectionEvent {
+  /// Creates a [SelectContentRangeEvent].
+  const SelectContentRangeEvent({this.target, required this.range})
+    : super._(SelectionEventType.selectContentRange);
+
+  /// Optional target [Selectable] to restrict the selection to.
+  final Selectable? target;
+
+  /// The character range to select.
+  final SelectedContentRange range;
 }
 
 /// The unit of how selection handles move in text.

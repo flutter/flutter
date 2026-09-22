@@ -751,31 +751,32 @@ class Text extends StatelessWidget {
     };
     late Widget result;
     if (registrar != null) {
-      result = MouseRegion(
-        cursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
-        child: _SelectableTextContainer(
-          textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
-          textDirection:
-              textDirection, // RichText uses Directionality.of to obtain a default if this is null.
-          locale:
-              locale, // RichText uses Localizations.localeOf to obtain a default if this is null
-          softWrap: softWrap ?? defaultTextStyle.softWrap,
-          overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
-          textScaler: textScaler,
-          maxLines: maxLines ?? defaultTextStyle.maxLines,
-          strutStyle: effectiveStrutStyle,
-          textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
-          textHeightBehavior:
-              textHeightBehavior ??
-              defaultTextStyle.textHeightBehavior ??
-              DefaultTextHeightBehavior.maybeOf(context),
-          selectionColor:
-              selectionColor ??
-              DefaultSelectionStyle.of(context).selectionColor ??
-              DefaultSelectionStyle.defaultColor,
-          text: effectiveTextSpan,
-        ),
+      final MouseCursor effectiveCursor =
+          DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text;
+      result = _SelectableTextContainer(
+        textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
+        textDirection:
+            textDirection, // RichText uses Directionality.of to obtain a default if this is null.
+        locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
+        softWrap: softWrap ?? defaultTextStyle.softWrap,
+        overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
+        textScaler: textScaler,
+        maxLines: maxLines ?? defaultTextStyle.maxLines,
+        strutStyle: effectiveStrutStyle,
+        textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
+        textHeightBehavior:
+            textHeightBehavior ??
+            defaultTextStyle.textHeightBehavior ??
+            DefaultTextHeightBehavior.maybeOf(context),
+        selectionColor:
+            selectionColor ??
+            DefaultSelectionStyle.of(context).selectionColor ??
+            DefaultSelectionStyle.defaultColor,
+        text: effectiveTextSpan,
       );
+      if (effectiveCursor != MouseCursor.defer) {
+        result = MouseRegion(cursor: effectiveCursor, child: result);
+      }
     } else {
       result = RichText(
         textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
