@@ -233,8 +233,6 @@ class PlatformViewAndroidJNI {
 
   virtual void swapTransaction() = 0;
 
-  virtual void applyTransaction() = 0;
-
   virtual std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
   createOverlaySurface2() = 0;
 

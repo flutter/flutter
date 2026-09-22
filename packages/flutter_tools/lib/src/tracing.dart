@@ -21,7 +21,7 @@ const kFirstFrameBuiltEventName = 'Widgets built first useful frame';
 const kFirstFrameRasterizedEventName = 'Rasterized first useful frame';
 
 class Tracing {
-  Tracing({required this.vmService, required Logger logger}) : _logger = logger;
+  Tracing({required this.vmService, required this._logger});
 
   static const String firstUsefulFrameEventName = kFirstFrameRasterizedEventName;
 
