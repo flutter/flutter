@@ -39,6 +39,20 @@ source_set("image_generator") {
   ]
 }
 
+source_set("android_mutators_mapper") {
+  sources = [
+    "android_mutators_mapper.cc",
+    "android_mutators_mapper.h",
+  ]
+
+  public_configs = [ "//flutter:config" ]
+
+  deps = [
+    "//flutter/fml",
+    "//flutter/shell/platform/embedder:embedder_as_internal_library",
+  ]
+}
+
 executable("flutter_shell_native_unittests") {
   visibility = [ "*" ]
   testonly = true
@@ -118,8 +132,6 @@ source_set("flutter_shell_native_src") {
     "android_environment_gl.h",
     "android_hardware_buffer.cc",
     "android_hardware_buffer.h",
-    "android_mutators_mapper.cc",
-    "android_mutators_mapper.h",
     "android_platform_views_controller.cc",
     "android_platform_views_controller.h",
     "android_semantics_mapper.cc",
@@ -200,11 +212,11 @@ source_set("flutter_shell_native_src") {
 
   public_deps = [
     ":android_gpu_configuration",
+    ":android_mutators_mapper",
     ":image_generator",
     "//flutter/assets",
     "//flutter/common",
     "//flutter/common/graphics",
-    "//flutter/flow",
     "//flutter/fml",
     "//flutter/impeller",
     "//flutter/impeller/toolkit/android",

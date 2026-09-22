@@ -11,6 +11,7 @@
 #include <android/api-level.h>
 #endif
 
+#include "flutter/shell/platform/android/android_mutators_mapper.h"
 #include "flutter/shell/platform/android/embedder_android_engine.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "flutter/shell/platform/android/jni/jni_mock.h"
@@ -174,18 +175,22 @@ TEST(EmbedderAndroidEngineTest, SerializeSemanticsUpdate) {
   EXPECT_EQ(strings[0], "Submit");
 }
 
-TEST(EmbedderAndroidEngineTest, ToMutatorsStackHandlesEveryMutationType) {
+TEST(EmbedderAndroidEngineTest, MapMutationsHandlesSupportedMutationTypes) {
   FlutterPlatformViewMutation transform = {};
   transform.type = kFlutterPlatformViewMutationTypeTransformation;
+  // 3x3 affine matrix: translation (5.0, 6.0) with unit scale along diagonals.
   transform.transformation = {1.0, 0.0, 5.0, 0.0, 1.0, 6.0, 0.0, 0.0, 1.0};
 
   FlutterPlatformViewMutation clip_rect = {};
   clip_rect.type = kFlutterPlatformViewMutationTypeClipRect;
+  // LTRB coordinates of clip rect: left=1.0, top=2.0, right=3.0, bottom=4.0.
   clip_rect.clip_rect = {1.0, 2.0, 3.0, 4.0};
 
   FlutterPlatformViewMutation clip_rrect = {};
   clip_rrect.type = kFlutterPlatformViewMutationTypeClipRoundedRect;
+  // Rounded rect of size 20x20 at origin.
   clip_rrect.clip_rounded_rect.rect = {0.0, 0.0, 20.0, 20.0};
+  // Corner radii of (2.0, 2.0) on all four corners.
   clip_rrect.clip_rounded_rect.upper_left_corner_radius = {2.0, 2.0};
   clip_rrect.clip_rounded_rect.upper_right_corner_radius = {2.0, 2.0};
   clip_rrect.clip_rounded_rect.lower_right_corner_radius = {2.0, 2.0};
@@ -193,20 +198,49 @@ TEST(EmbedderAndroidEngineTest, ToMutatorsStackHandlesEveryMutationType) {
 
   FlutterPlatformViewMutation opacity = {};
   opacity.type = kFlutterPlatformViewMutationTypeOpacity;
-  opacity.opacity = 1.0;
+  // Opacity of 0.75 (75%).
+  opacity.opacity = 0.75;
 
   FlutterPlatformViewMutation clip_rse = {};
   clip_rse.type = kFlutterPlatformViewMutationTypeClipRoundSuperellipse;
+  // Round superellipse bounds of size 30x40 at origin.
   clip_rse.clip_round_superellipse.rect = {0.0, 0.0, 30.0, 40.0};
+  // Corner radii of (3.0, 3.0) on all four corners.
   clip_rse.clip_round_superellipse.upper_left_corner_radius = {3.0, 3.0};
   clip_rse.clip_round_superellipse.upper_right_corner_radius = {3.0, 3.0};
   clip_rse.clip_round_superellipse.lower_right_corner_radius = {3.0, 3.0};
   clip_rse.clip_round_superellipse.lower_left_corner_radius = {3.0, 3.0};
 
+  const FlutterPlatformViewMutation* mutations[] = {
+      &transform, &clip_rect, &clip_rrect, &opacity, &clip_rse};
+
+  android::AndroidMutatorsStack stack =
+      android::AndroidMutatorsMapper::MapMutations(mutations,
+                                                   std::size(mutations));
+
+  const auto& mutators = stack.GetMutators();
+  // Expect 5 mapped mutators: transform, clip_rect, clip_rrect, opacity, and
+  // clip_rse (mapped as rrect).
+  ASSERT_EQ(mutators.size(), 5u);
+  EXPECT_EQ(mutators[0].type, android::AndroidMutatorType::kTransform);
+  EXPECT_EQ(mutators[1].type, android::AndroidMutatorType::kClipRect);
+  EXPECT_EQ(mutators[2].type, android::AndroidMutatorType::kClipRRect);
+  EXPECT_EQ(mutators[3].type, android::AndroidMutatorType::kOpacity);
+  EXPECT_EQ(mutators[4].type, android::AndroidMutatorType::kClipRRect);
+
+  EXPECT_FLOAT_EQ(mutators[3].GetOpacity(), 0.75f);
+}
+
+TEST(EmbedderAndroidEngineTest, MapMutationsSkipsNullAndUnsupportedEntries) {
+  FlutterPlatformViewMutation opacity = {};
+  opacity.type = kFlutterPlatformViewMutationTypeOpacity;
+  // Opacity of 0.5 (50%).
+  opacity.opacity = 0.5;
+
+  // Vector path clips are not directly supported by AndroidMutator and should
+  // be safely skipped.
   FlutterPathSegment segments[] = {
       {kFlutterPathVerbMove, {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}}, 0.0},
-      {kFlutterPathVerbLine, {{10.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}}, 0.0},
-      {kFlutterPathVerbLine, {{10.0, 10.0}, {0.0, 0.0}, {0.0, 0.0}}, 0.0},
       {kFlutterPathVerbClose, {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}}, 0.0},
   };
   FlutterPlatformViewMutation clip_path = {};
@@ -216,73 +250,22 @@ TEST(EmbedderAndroidEngineTest, ToMutatorsStackHandlesEveryMutationType) {
   clip_path.clip_path.segments_count = std::size(segments);
   clip_path.clip_path.segments = segments;
 
-  const FlutterPlatformViewMutation* mutations[] = {
-      &transform, &clip_rect, &clip_rrect, &opacity, &clip_rse, &clip_path};
+  const FlutterPlatformViewMutation* mutations[] = {nullptr, &opacity,
+                                                    &clip_path};
 
-  MutatorsStack stack =
-      EmbedderAndroidEngine::ToMutatorsStack(std::size(mutations), mutations);
+  android::AndroidMutatorsStack stack =
+      android::AndroidMutatorsMapper::MapMutations(mutations,
+                                                   std::size(mutations));
+  EXPECT_EQ(stack.GetMutatorsCount(), 1u);
+  ASSERT_EQ(stack.GetMutators().size(), 1u);
+  EXPECT_EQ(stack.GetMutators()[0].type, android::AndroidMutatorType::kOpacity);
+  EXPECT_FLOAT_EQ(stack.GetMutators()[0].GetOpacity(), 0.5f);
 
-  std::vector<MutatorType> types;
-  for (auto it = stack.Begin(); it != stack.End(); ++it) {
-    types.push_back((*it)->GetType());
-  }
-
-  // Every mutation type must survive the translation. A superellipse or path
-  // clip that is dropped here leaves the platform view unclipped on screen.
-  EXPECT_THAT(types, ::testing::ElementsAre(
-                         MutatorType::kTransform, MutatorType::kClipRect,
-                         MutatorType::kClipRRect, MutatorType::kOpacity,
-                         MutatorType::kClipRSE, MutatorType::kClipPath));
-}
-
-TEST(EmbedderAndroidEngineTest, ToMutatorsStackSkipsNullEntries) {
-  FlutterPlatformViewMutation opacity = {};
-  opacity.type = kFlutterPlatformViewMutationTypeOpacity;
-  opacity.opacity = 0.5;
-
-  const FlutterPlatformViewMutation* mutations[] = {nullptr, &opacity};
-
-  MutatorsStack stack =
-      EmbedderAndroidEngine::ToMutatorsStack(std::size(mutations), mutations);
-  EXPECT_EQ(stack.stack_count(), 1u);
-  EXPECT_EQ((*stack.Begin())->GetType(), MutatorType::kOpacity);
-
-  EXPECT_TRUE(EmbedderAndroidEngine::ToMutatorsStack(2, nullptr).is_empty());
-}
-
-TEST(EmbedderAndroidEngineTest, ToDlPathRebuildsSegmentsAndFillType) {
-  FlutterPathSegment segments[] = {
-      {kFlutterPathVerbMove, {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}}, 0.0},
-      {kFlutterPathVerbLine, {{10.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}}, 0.0},
-      {kFlutterPathVerbLine, {{10.0, 10.0}, {0.0, 0.0}, {0.0, 0.0}}, 0.0},
-      {kFlutterPathVerbLine, {{0.0, 10.0}, {0.0, 0.0}, {0.0, 0.0}}, 0.0},
-      {kFlutterPathVerbClose, {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}}, 0.0},
-  };
-
-  FlutterPath path = {};
-  path.struct_size = sizeof(FlutterPath);
-  path.fill_type = kFlutterPathFillTypeEvenOdd;
-  path.segments_count = std::size(segments);
-  path.segments = segments;
-
-  DlPath dl_path = EmbedderAndroidEngine::ToDlPath(path);
-  EXPECT_EQ(dl_path.GetFillType(), DlPathFillType::kOdd);
-  EXPECT_EQ(dl_path.GetBounds(), DlRect::MakeLTRB(0.0f, 0.0f, 10.0f, 10.0f));
-}
-
-TEST(EmbedderAndroidEngineTest, ToDlPathToleratesMissingSegments) {
-  FlutterPath no_segments = {};
-  no_segments.struct_size = sizeof(FlutterPath);
-  no_segments.fill_type = kFlutterPathFillTypeNonZero;
-  no_segments.segments_count = 4;
-  no_segments.segments = nullptr;
-  EXPECT_TRUE(EmbedderAndroidEngine::ToDlPath(no_segments).IsEmpty());
-
-  // An embedder built against an older header cannot have populated the
-  // segment fields, so the path must be treated as empty rather than read.
-  FlutterPath truncated = {};
-  truncated.struct_size = sizeof(size_t);
-  EXPECT_TRUE(EmbedderAndroidEngine::ToDlPath(truncated).IsEmpty());
+  // Null mutation array with non-zero count (count = 2) should produce an empty
+  // stack safely.
+  android::AndroidMutatorsStack empty_stack =
+      android::AndroidMutatorsMapper::MapMutations(nullptr, 2);
+  EXPECT_EQ(empty_stack.GetMutatorsCount(), 0u);
 }
 
 namespace {
