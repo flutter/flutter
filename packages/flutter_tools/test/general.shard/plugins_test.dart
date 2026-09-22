@@ -2271,6 +2271,50 @@ iosPrefix: "FLT; evilInjectedCall(); //"
         );
       });
 
+      testUsingContext('Plugin.fromYaml rejects a non-string default_package', () async {
+        // Regression test for https://github.com/flutter/flutter/issues/162150.
+        // An empty `default_package:` entry used to reach a String cast and
+        // crash the tool with a type error.
+        const malformedYaml = '''
+platforms:
+  android:
+    default_package:
+''';
+        expect(
+          () => Plugin.fromYaml(
+            'malformed_plugin',
+            '',
+            loadYaml(malformedYaml) as YamlMap,
+            null,
+            const <String>[],
+            fileSystem: globals.fs,
+            isDevDependency: false,
+          ),
+          throwsToolExit(message: 'Invalid "android" plugin specification.'),
+        );
+      });
+
+      testUsingContext('Plugin.fromYaml rejects a non-string dartPluginClass', () async {
+        const malformedYaml = '''
+platforms:
+  linux:
+    pluginClass: SamplePlugin
+    dartPluginClass:
+''';
+        expect(
+          () => Plugin.fromYaml(
+            'malformed_plugin',
+            '',
+            loadYaml(malformedYaml) as YamlMap,
+            null,
+            const <String>[],
+            fileSystem: globals.fs,
+            isDevDependency: false,
+          ),
+          throwsToolExit(message: 'Invalid "linux" plugin specification.'),
+        );
+      });
+
       testUsingContext(
         'Plugin.fromYaml reports every invalid legacy-format field at once',
         () async {

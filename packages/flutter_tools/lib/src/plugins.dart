@@ -309,6 +309,10 @@ class Plugin {
     }
   }
 
+  /// Whether [yaml] declares [key] with a value that is not a string.
+  static bool _hasNonStringValue(YamlMap yaml, String key) =>
+      yaml.containsKey(key) && yaml[key] is! String;
+
   static List<String> _validateMultiPlatformYaml({required YamlMap parentMap}) {
     final Object? platforms = parentMap['platforms'];
     if (platforms is! YamlMap?) {
@@ -329,7 +333,16 @@ class Plugin {
       if (yamlValue is! YamlMap) {
         return true;
       }
-      if (yamlValue.containsKey('default_package')) {
+      // These entries are cast to String while the plugin is constructed, so a
+      // non-string value has to be rejected here. Otherwise a malformed
+      // pubspec crashes the tool with a type error instead of reporting the
+      // bad specification.
+      if (_hasNonStringValue(yamlValue, kDefaultPackage) ||
+          _hasNonStringValue(yamlValue, kDartPluginClass) ||
+          _hasNonStringValue(yamlValue, kDartFileName)) {
+        return true;
+      }
+      if (yamlValue.containsKey(kDefaultPackage)) {
         return false;
       }
       return !validate(yamlValue);
