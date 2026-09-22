@@ -10,7 +10,9 @@
 #define GL_GLEXT_PROTOTYPES
 #include <GLES2/gl2ext.h>
 
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/impeller/display_list/aiks_context.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/surface_context_vk.h"
@@ -192,19 +194,21 @@ SurfaceTextureExternalTextureVKImpeller::GetCachedTextureSource(
   }
   cached_texture_source_ = nullptr;
 
-  android::HardwareBufferDescriptor ahb_descriptor;
-  ahb_descriptor.format = android::HardwareBufferFormat::kR8G8B8A8UNormInt;
+  impeller::android::HardwareBufferDescriptor ahb_descriptor;
+  ahb_descriptor.format =
+      impeller::android::HardwareBufferFormat::kR8G8B8A8UNormInt;
   ahb_descriptor.size = size.Max(ISize{1u, 1u});
   ahb_descriptor.usage =
-      android::HardwareBufferUsageFlags::kFrameBufferAttachment |
-      android::HardwareBufferUsageFlags::kSampledImage;
+      impeller::android::HardwareBufferUsageFlags::kFrameBufferAttachment |
+      impeller::android::HardwareBufferUsageFlags::kSampledImage;
 
   if (!ahb_descriptor.IsAllocatable()) {
     VALIDATION_LOG << "Invalid hardware buffer texture descriptor.";
     return nullptr;
   }
 
-  auto ahb = std::make_unique<android::HardwareBuffer>(ahb_descriptor);
+  auto ahb =
+      std::make_unique<impeller::android::HardwareBuffer>(ahb_descriptor);
   if (!ahb->IsValid()) {
     VALIDATION_LOG << "Could not allocate hardware buffer.";
     return nullptr;

@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "flutter/display_list/effects/dl_color_source.h"
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkColorType.h"
