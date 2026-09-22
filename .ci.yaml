@@ -735,7 +735,6 @@ targets:
   - name: Linux flavors_test_linux
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       xvfb: "1"
