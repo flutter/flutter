@@ -115,7 +115,7 @@
     return NO;
   }
 
-  // Ignore keyboard notifications related to other apps or view controllers.
+  // Ignore notifications from other apps, other screens, or detached delegates.
   if ([self isKeyboardNotificationForDifferentView:notification]) {
     return YES;
   }
@@ -133,7 +133,12 @@
     return YES;
   }
   id<FlutterKeyboardInsetManagerDelegate> delegate = self.delegate;
-  return (id)delegate.engine.viewController != (id)delegate;
+  // Keyboard frames use the coordinate space of the screen that contains the keyboard.
+  if ([notification.object isKindOfClass:[UIScreen class]] &&
+      notification.object != delegate.flutterScreenIfViewLoaded) {
+    return YES;
+  }
+  return (id)[delegate.engine viewControllerForIdentifier:delegate.viewIdentifier] != (id)delegate;
 }
 
 - (FlutterKeyboardMode)calculateKeyboardAttachMode:(NSNotification*)notification {

@@ -73,6 +73,7 @@ constexpr FlutterViewIdentifier kSecondaryFlutterViewId = flutter::kFlutterImpli
 @property(nonatomic, strong) UIScreen* mockScreen;
 @property(nonatomic, strong) UIView* mockView;
 @property(nonatomic, strong) FlutterEngine* mockEngine;
+@property(nonatomic, assign) FlutterViewIdentifier viewIdentifier;
 @property(nonatomic, assign) CGFloat currentInset;
 @property(nonatomic, copy) void (^updateViewportMetricsBlock)(CGFloat inset);
 @property(nonatomic, assign) BOOL isViewLoaded;
@@ -242,6 +243,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 @interface FlutterViewController (Tests) <FlutterKeyboardInsetManagerDelegate>
 
+@property(nonatomic, readonly) FlutterView* flutterView;
 @property(nonatomic, assign) double targetViewInsetBottom;
 @property(nonatomic, assign) BOOL keyboardAnimationIsShowing;
 @property(nonatomic, strong) FlutterVSyncClient* keyboardAnimationVSyncClient;
@@ -536,7 +538,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
   // Stub the mock engine to return the mock view controller to pass
   // isKeyboardNotificationForDifferentView
-  OCMStub([self.mockEngine viewController]).andReturn(viewControllerMock);
+  OCMStub([self.mockEngine viewControllerForIdentifier:viewController.viewIdentifier])
+      .andReturn(viewControllerMock);
 
   // Use custom mock for manager to avoid OCMock andDo block issues with C++ interop
   FlutterKeyboardInsetManagerMock* managerMock = [[FlutterKeyboardInsetManagerMock alloc]
@@ -942,6 +945,76 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [managerMock handleKeyboardNotification:notification];
   XCTAssertTrue(managerMock.targetViewInsetBottom == 320 * screen.scale);
   XCTAssertTrue(managerMock.didCallStartKeyboardAnimation);
+}
+
+- (void)testKeyboardNotificationsUpdateRegisteredExplicitViews {
+  UIScreen* screen = [self setUpMockScreen];
+  id otherScreen = OCMClassMock([UIScreen class]);
+  CGFloat screenWidth = CGRectGetWidth(screen.bounds);
+  CGFloat screenHeight = CGRectGetHeight(screen.bounds);
+  for (NSNumber* viewId in @[ @(kSecondaryFlutterViewId), @(kSecondaryFlutterViewId + 1) ]) {
+    TestKeyboardInsetDelegate* delegate = [[TestKeyboardInsetDelegate alloc] init];
+    delegate.viewIdentifier = viewId.longLongValue;
+    delegate.mockEngine = self.mockEngine;
+    delegate.isViewLoaded = YES;
+    delegate.mockScreen = screen;
+    delegate.mockView = [[UIView alloc] initWithFrame:screen.bounds];
+    delegate.mockConvertedViewRect = screen.bounds;
+    __block id registeredController = delegate;
+    OCMStub([self.mockEngine viewControllerForIdentifier:delegate.viewIdentifier])
+        .andDo(^(NSInvocation* invocation) {
+          [invocation setReturnValue:&registeredController];
+        });
+    FlutterKeyboardInsetManager* manager =
+        [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate];
+    id managerMock = OCMPartialMock(manager);
+    OCMStub([managerMock startKeyBoardAnimation:0.25]);
+    NSMutableDictionary* userInfo = [@{
+      UIKeyboardFrameEndUserInfoKey : @(CGRectMake(0, screenHeight - 320, screenWidth, 320)),
+      UIKeyboardAnimationDurationUserInfoKey : @0.25,
+      UIKeyboardIsLocalUserInfoKey : @YES,
+    } mutableCopy];
+
+    [manager handleKeyboardNotification:[NSNotification
+                                            notificationWithName:UIKeyboardWillShowNotification
+                                                          object:otherScreen
+                                                        userInfo:userInfo]];
+    XCTAssertEqual(manager.targetViewInsetBottom, 0);
+
+    [manager handleKeyboardNotification:[NSNotification
+                                            notificationWithName:UIKeyboardWillShowNotification
+                                                          object:screen
+                                                        userInfo:userInfo]];
+    XCTAssertEqual(manager.targetViewInsetBottom, 320 * screen.scale);
+
+    userInfo[UIKeyboardFrameEndUserInfoKey] =
+        @(CGRectMake(0, screenHeight - 200, screenWidth, 200));
+    [manager
+        handleKeyboardNotification:[NSNotification
+                                       notificationWithName:UIKeyboardWillChangeFrameNotification
+                                                     object:nil
+                                                   userInfo:userInfo]];
+    XCTAssertEqual(manager.targetViewInsetBottom, 200 * screen.scale);
+
+    registeredController = nil;
+    userInfo[UIKeyboardFrameEndUserInfoKey] =
+        @(CGRectMake(0, screenHeight - 100, screenWidth, 100));
+    [manager
+        handleKeyboardNotification:[NSNotification
+                                       notificationWithName:UIKeyboardWillChangeFrameNotification
+                                                     object:nil
+                                                   userInfo:userInfo]];
+    XCTAssertEqual(manager.targetViewInsetBottom, 200 * screen.scale);
+
+    userInfo[UIKeyboardAnimationDurationUserInfoKey] = @0;
+    [manager handleKeyboardNotification:[NSNotification
+                                            notificationWithName:UIKeyboardWillHideNotification
+                                                          object:otherScreen
+                                                        userInfo:userInfo]];
+    XCTAssertEqual(manager.targetViewInsetBottom, 0);
+    [managerMock stopMocking];
+  }
+  [otherScreen stopMocking];
 }
 
 - (void)testEnsureBottomInsetIsZeroWhenKeyboardDismissed {

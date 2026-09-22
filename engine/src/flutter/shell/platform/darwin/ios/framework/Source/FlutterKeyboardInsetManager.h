@@ -7,6 +7,8 @@
 
 #import <UIKit/UIKit.h>
 
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+
 @class FlutterEngine;
 @class FlutterKeyboardInsetManager;
 
@@ -38,6 +40,11 @@
  * @brief Returns the engine associated with the delegate.
  */
 - (FlutterEngine*)engine;
+
+/**
+ * @brief Returns the view identifier registered with the engine.
+ */
+- (FlutterViewIdentifier)viewIdentifier;
 
 /**
  * @brief Returns the UIScreen associated with the Flutter view, if the view is loaded.
@@ -99,8 +106,8 @@
  *   layout.
  *
  * * View lifecycle:
- *   Notifications are ignored if the associated view is not loaded or if the delegate is not the
- *   active view controller.
+ *   Notifications are ignored if the associated view is not loaded or if the delegate is no longer
+ *   registered with the engine for its view identifier.
  *
  * @see [FlutterViewController], which owns this manager and acts as its delegate.
  */
