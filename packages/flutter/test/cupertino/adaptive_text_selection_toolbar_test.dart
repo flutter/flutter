@@ -31,56 +31,63 @@ void main() {
     );
   });
 
-  testWidgets('Builds the right toolbar on each platform, including web, and shows buttonItems', (
-    WidgetTester tester,
-  ) async {
-    const buttonText = 'Click me';
+  testWidgets(
+    'Builds the right toolbar on each platform, including web, and shows buttonItems',
+    (WidgetTester tester) async {
+      const buttonText = 'Click me';
 
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Center(
-          child: CupertinoAdaptiveTextSelectionToolbar.buttonItems(
-            anchors: const TextSelectionToolbarAnchors(primaryAnchor: Offset.zero),
-            buttonItems: <ContextMenuButtonItem>[
-              ContextMenuButtonItem(label: buttonText, onPressed: () {}),
-            ],
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoAdaptiveTextSelectionToolbar.buttonItems(
+              anchors: const TextSelectionToolbarAnchors(primaryAnchor: Offset.zero),
+              buttonItems: <ContextMenuButtonItem>[
+                ContextMenuButtonItem(label: buttonText, onPressed: () {}),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(find.text(buttonText), findsOneWidget);
+      expect(find.text(buttonText), findsOneWidget);
 
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-        expect(find.byType(CupertinoTextSelectionToolbar), findsOneWidget);
-        expect(find.byType(CupertinoDesktopTextSelectionToolbar), findsNothing);
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
-        expect(find.byType(CupertinoDesktopTextSelectionToolbar), findsOneWidget);
-    }
-  }, variant: TargetPlatformVariant.all());
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
+          expect(find.byType(CupertinoTextSelectionToolbar), findsOneWidget);
+          expect(find.byType(CupertinoDesktopTextSelectionToolbar), findsNothing);
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
+          expect(find.byType(CupertinoDesktopTextSelectionToolbar), findsOneWidget);
+      }
+    },
+    variant: TargetPlatformVariant.all(),
+    skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
+  );
 
-  testWidgets('Can build children directly as well', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+  testWidgets(
+    'Can build children directly as well',
+    (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey();
 
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Center(
-          child: CupertinoAdaptiveTextSelectionToolbar(
-            anchors: const TextSelectionToolbarAnchors(primaryAnchor: Offset.zero),
-            children: <Widget>[Container(key: key)],
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoAdaptiveTextSelectionToolbar(
+              anchors: const TextSelectionToolbarAnchors(primaryAnchor: Offset.zero),
+              children: <Widget>[Container(key: key)],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(find.byKey(key), findsOneWidget);
-  });
+      expect(find.byKey(key), findsOneWidget);
+    },
+    skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
+  );
 
   testWidgets(
     'Can build from EditableTextState',
@@ -264,21 +271,24 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('Builds empty toolbar when children and buttonItems are null', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      const CupertinoApp(
-        home: Center(
-          child: CupertinoAdaptiveTextSelectionToolbar(
-            anchors: TextSelectionToolbarAnchors(primaryAnchor: Offset.zero),
-            children: null,
+  testWidgets(
+    'Builds empty toolbar when children and buttonItems are null',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoAdaptiveTextSelectionToolbar(
+              anchors: TextSelectionToolbarAnchors(primaryAnchor: Offset.zero),
+              children: null,
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(tester.getSize(find.byType(CupertinoAdaptiveTextSelectionToolbar)), Size.zero);
-    expect(tester.takeException(), isNull);
-  }, variant: TargetPlatformVariant.all());
+      expect(tester.getSize(find.byType(CupertinoAdaptiveTextSelectionToolbar)), Size.zero);
+      expect(tester.takeException(), isNull);
+    },
+    skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
+    variant: TargetPlatformVariant.all(),
+  );
 }

@@ -809,42 +809,52 @@ void main() {
     expect(tester.getSize(find.byType(CupertinoTextField)), const Size(200, 65));
   });
 
-  testWidgets('strut height override', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints.loose(const Size(200, 200)),
-            child: const CupertinoTextField(
-              maxLines: 3,
-              strutStyle: StrutStyle(fontSize: 8, forceStrutHeight: true),
+  testWidgets(
+    'strut height override',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints.loose(const Size(200, 200)),
+              child: const CupertinoTextField(
+                maxLines: 3,
+                strutStyle: StrutStyle(fontSize: 8, forceStrutHeight: true),
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(tester.getSize(find.byType(CupertinoTextField)), const Size(200, 38));
-  });
+      expect(tester.getSize(find.byType(CupertinoTextField)), const Size(200, 38));
+    },
+    // TODO(mdebbar): Strut styles support.
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/32243
+  );
 
-  testWidgets('strut forces field taller', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints.loose(const Size(200, 200)),
-            child: const CupertinoTextField(
-              maxLines: 3,
-              style: TextStyle(fontSize: 10),
-              strutStyle: StrutStyle(fontSize: 18, forceStrutHeight: true),
+  testWidgets(
+    'strut forces field taller',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints.loose(const Size(200, 200)),
+              child: const CupertinoTextField(
+                maxLines: 3,
+                style: TextStyle(fontSize: 10),
+                strutStyle: StrutStyle(fontSize: 18, forceStrutHeight: true),
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(tester.getSize(find.byType(CupertinoTextField)), const Size(200, 68));
-  });
+      expect(tester.getSize(find.byType(CupertinoTextField)), const Size(200, 68));
+    },
+    // TODO(mdebbar): Strut styles support.
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/32243
+  );
 
   testWidgets('default text field has a border', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoApp(home: Center(child: CupertinoTextField())));
