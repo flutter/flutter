@@ -419,7 +419,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     AxisDirection axisDirection = AxisDirection.down,
     required AxisDirection crossAxisDirection,
     required ViewportOffset offset,
-    double anchor = 0.0,
     @Deprecated(
       'Use scrollCacheExtent instead. '
       'This feature was deprecated after v3.41.0-0.0.pre.',
@@ -433,13 +432,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     ScrollCacheExtent? scrollCacheExtent,
     SliverPaintOrder paintOrder = SliverPaintOrder.firstIsTop,
     Clip clipBehavior = Clip.hardEdge,
-  }) : assert(anchor >= 0.0 && anchor <= 1.0),
-       assert(axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection)),
+  }) : assert(axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection)),
        assert(cacheExtent != null || cacheExtentStyle == CacheExtentStyle.pixel),
        _axisDirection = axisDirection,
        _crossAxisDirection = crossAxisDirection,
        _offset = offset,
-       _anchor = anchor,
        _scrollCacheExtent =
            scrollCacheExtent ??
            switch (cacheExtentStyle) {
@@ -625,8 +622,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// on the left edge of the viewport.
   ///
   /// {@macro flutter.rendering.GrowthDirection.sample}
-  double get anchor => _anchor;
-  double _anchor;
+  double get anchor => 0.0;
 
   /// This value is set during layout based on the [scrollCacheExtent].
   ///
@@ -1477,15 +1473,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     super.showOnScreen(rect: newRect, duration: duration, curve: curve);
   }
 
-  set anchor(double value) {
-    assert(value >= 0.0 && value <= 1.0);
-    if (value == _anchor) {
-      return;
-    }
-    _anchor = value;
-    markNeedsLayout();
-  }
-
   /// Make (a portion of) the given `descendant` of the given `viewport` fully
   /// visible in the `viewport` by manipulating the provided [ViewportOffset]
   /// `offset`.
@@ -1597,7 +1584,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     super.axisDirection,
     required super.crossAxisDirection,
     required super.offset,
-    super.anchor,
+    double anchor = 0.0,
     List<RenderSliver>? children,
     RenderSliver? center,
     super.cacheExtent,
@@ -1605,7 +1592,12 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     super.scrollCacheExtent,
     super.paintOrder,
     super.clipBehavior,
-  }) : assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
+  }) : assert(
+         anchor >= 0.0 && anchor <= 1.0,
+         'The anchor must be between 0.0 and 1.0, inclusive, but was $anchor.',
+       ),
+       assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
+       _anchor = anchor,
        _center = center {
     addAll(children);
     if (center == null && firstChild != null) {
@@ -1649,6 +1641,21 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   static const SemanticsTag excludeFromScrolling = SemanticsTag(
     'RenderViewport.excludeFromScrolling',
   );
+
+  @override
+  double get anchor => _anchor;
+  double _anchor;
+  set anchor(double value) {
+    assert(
+      value >= 0.0 && value <= 1.0,
+      'The anchor must be between 0.0 and 1.0, inclusive, but was $anchor',
+    );
+    if (value == _anchor) {
+      return;
+    }
+    _anchor = value;
+    markNeedsLayout();
+  }
 
   @override
   void setupParentData(RenderObject child) {
@@ -2020,7 +2027,6 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     super.axisDirection,
     required super.crossAxisDirection,
     required super.offset,
-    super.anchor,
     super.paintOrder,
     super.clipBehavior,
     super.scrollCacheExtent,
