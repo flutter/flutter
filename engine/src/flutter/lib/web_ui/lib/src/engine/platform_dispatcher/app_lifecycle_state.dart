@@ -114,10 +114,7 @@ class _BrowserAppLifecycleState extends AppLifecycleState {
 
   void _attachView(EngineFlutterView view) {
     assert(!_trackers.containsKey(view.viewId), 'View ${view.viewId} is already being tracked.');
-    final tracker = _ViewLifecycleTracker(
-      view: view,
-      onStateChanged: _updateAggregateState,
-    );
+    final tracker = _ViewLifecycleTracker(view: view, onStateChanged: _updateAggregateState);
     _trackers[view.viewId] = tracker;
     _updateAggregateState();
   }

@@ -42,10 +42,7 @@ abstract class DimensionsProvider {
         viewDomWindow: domWindow,
       );
     } else {
-      return FullPageDimensionsProvider(
-        viewDomWindow: domWindow,
-        viewDomDocument: domDocument,
-      );
+      return FullPageDimensionsProvider(viewDomWindow: domWindow, viewDomDocument: domDocument);
     }
   }
 

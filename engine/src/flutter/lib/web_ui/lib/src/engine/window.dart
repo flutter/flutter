@@ -267,10 +267,10 @@ class EngineFlutterView implements ui.FlutterView {
   late final ContextMenu contextMenu = ContextMenu(dom.rootElement);
 
   final Map<DomDocument, DomManager> _dom = {};
-  DomManager get dom => _dom.putIfAbsent(viewDomDocument, () => DomManager(
-    devicePixelRatio: devicePixelRatio,
-    document: viewDomDocument,
-  ));
+  DomManager get dom => _dom.putIfAbsent(
+    viewDomDocument,
+    () => DomManager(devicePixelRatio: devicePixelRatio, document: viewDomDocument),
+  );
 
   late PointerBinding pointerBinding;
 

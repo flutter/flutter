@@ -168,10 +168,7 @@ Future<void> doTests() async {
 
       test('returns null for unknown viewId', () {
         final DomElement host = createDomHTMLDivElement();
-        expect(
-          viewManager.adoptView(12345, JsFlutterViewOptions(hostElement: host)),
-          isNull,
-        );
+        expect(viewManager.adoptView(12345, JsFlutterViewOptions(hostElement: host)), isNull);
       });
     });
 
