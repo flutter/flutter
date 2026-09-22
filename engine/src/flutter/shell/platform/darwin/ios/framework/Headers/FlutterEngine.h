@@ -320,8 +320,11 @@ FLUTTER_DARWIN_EXPORT
  * there is already a `FlutterViewController` associated with this instance, this method will
  * replace the engine's current viewController with the newly specified one.
  *
- * In multi-view mode, this property is nil. Calling the setter, including with nil,
- * is unsupported and triggers an assertion in debug builds.
+ * In multi-view mode, the getter prefers a controller that is the first responder or whose view
+ * hierarchy contains it. The view must be attached to a window. Otherwise, it prefers a controller
+ * attached to a key window, then any window, and finally the only registered controller. It returns
+ * nil if none qualify. Calling the setter, including with nil, is unsupported and triggers an
+ * assertion in debug builds.
  * Explicit view controllers are managed separately by their view identifiers.
  *
  * Setting the viewController will signal the engine to start animations and drawing, and unsetting

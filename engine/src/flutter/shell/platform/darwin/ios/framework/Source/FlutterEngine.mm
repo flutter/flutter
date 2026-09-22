@@ -589,7 +589,21 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (FlutterViewController*)viewController {
-  return [self viewControllerForIdentifier:flutter::kFlutterImplicitViewId];
+  if (!_multiViewEnabled) {
+    return [self viewControllerForIdentifier:flutter::kFlutterImplicitViewId];
+  }
+  NSArray<FlutterViewController*>* controllers = _viewControllers.objectEnumerator.allObjects;
+  FlutterViewController* attachedController = nil;
+  for (FlutterViewController* controller in controllers) {
+    UIView* view = controller.viewIfLoaded;
+    if (view.window && (controller.isFirstResponder || view.flutterFirstResponder)) {
+      return controller;
+    }
+    if (view.window && (!attachedController || view.window.isKeyWindow)) {
+      attachedController = controller;
+    }
+  }
+  return attachedController ?: (controllers.count == 1 ? controllers.firstObject : nil);
 }
 
 - (void)removeFlutterViewControllerWillDeallocObserverForIdentifier:

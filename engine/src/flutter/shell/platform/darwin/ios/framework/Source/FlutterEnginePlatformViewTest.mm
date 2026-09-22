@@ -327,6 +327,62 @@ flutter::FakeDelegate fake_delegate;
                  std::vector<int64_t>{kPrimaryFlutterViewId, kSecondaryFlutterViewId}));
 }
 
+- (void)testViewControllerPrefersFirstResponderThenKeyWindow {
+  FlutterEngineWithFakePlatformView* engine =
+      [[FlutterEngineWithFakePlatformView alloc] initWithName:@"tester"];
+  engine.fakePlatformView = platform_view.get();
+  [engine enableMultiView];
+  XCTAssertNil(engine.viewController);
+  FlutterViewController* primary = [[FlutterViewController alloc] initWithEngine:engine
+                                                                         nibName:nil
+                                                                          bundle:nil];
+  XCTAssertEqual(engine.viewController, primary);
+  FlutterViewController* secondary = [[FlutterViewController alloc] initWithEngine:engine
+                                                                           nibName:nil
+                                                                            bundle:nil];
+  XCTAssertNil(engine.viewController);
+  id primaryMock = OCMPartialMock(primary);
+  id secondaryMock = OCMPartialMock(secondary);
+  UIWindow* window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, 400, 800)];
+  UIWindow* keyWindow = [[UIWindow alloc] initWithFrame:window.bounds];
+  id keyWindowMock = OCMPartialMock(keyWindow);
+  OCMStub([keyWindowMock isKeyWindow]).andReturn(YES);
+  UIView* primaryView = [[UIView alloc] initWithFrame:window.bounds];
+  [keyWindow addSubview:primaryView];
+  OCMStub([primaryMock viewIfLoaded]).andReturn(primaryView);
+  UIView* secondaryView = [[UIView alloc] initWithFrame:window.bounds];
+  [window addSubview:secondaryView];
+  OCMStub([secondaryMock viewIfLoaded]).andReturn(secondaryView);
+
+  XCTAssertEqual(engine.viewController, primary);
+  [window addSubview:primaryView];
+  [keyWindow addSubview:secondaryView];
+  XCTAssertEqual(engine.viewController, secondary);
+  [keyWindow addSubview:primaryView];
+  [window addSubview:secondaryView];
+
+  UITextField* textField = [[UITextField alloc] init];
+  [secondaryView addSubview:textField];
+  id textFieldMock = OCMPartialMock(textField);
+  OCMStub([textFieldMock isFirstResponder]).andReturn(YES);
+
+  XCTAssertEqual(engine.viewController, secondary);
+  XCTAssertNil([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId]);
+
+  [secondaryView removeFromSuperview];
+  XCTAssertEqual(engine.viewController, primary);
+  [window addSubview:secondaryView];
+
+  [engine removeViewController:secondary.viewIdentifier];
+  XCTAssertEqual(engine.viewController, primary);
+  [engine removeViewController:primary.viewIdentifier];
+  XCTAssertNil(engine.viewController);
+  [textFieldMock stopMocking];
+  [keyWindowMock stopMocking];
+  [primaryMock stopMocking];
+  [secondaryMock stopMocking];
+}
+
 - (void)testRemovingAllExplicitViewsDoesNotReuseIdentifiers {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"tester"];
   id mockEngine = OCMPartialMock(engine);
@@ -355,7 +411,7 @@ flutter::FakeDelegate fake_delegate;
   XCTAssertEqual(tertiaryViewController.viewIdentifier, kTertiaryFlutterViewId);
   XCTAssertEqual([engine viewControllerForIdentifier:kTertiaryFlutterViewId],
                  tertiaryViewController);
-  XCTAssertNil(engine.viewController);
+  XCTAssertEqual(engine.viewController, tertiaryViewController);
 }
 
 - (void)testNotifyDestroyedOnlyDestroysPlatformViewWhenLastViewIsRemoved {
@@ -486,7 +542,7 @@ flutter::FakeDelegate fake_delegate;
   XCTAssertNil(engine.flutterViewControllerWillDeallocObservers[@(kPrimaryFlutterViewId)]);
   XCTAssertEqual(engine.flutterViewControllerWillDeallocObservers.count, 1UL);
   XCTAssertNil([engine viewControllerForIdentifier:kPrimaryFlutterViewId]);
-  XCTAssertNil(engine.viewController);
+  XCTAssertEqual(engine.viewController, secondaryViewController);
   XCTAssertEqual([engine viewControllerForIdentifier:kSecondaryFlutterViewId],
                  secondaryViewController);
   XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 1);
