@@ -204,23 +204,25 @@ bool TextInputModel::DeleteSurrounding(int offset_from_cursor, int count) {
   size_t start = selection_.extent();
   if (offset_from_cursor < 0) {
     for (int i = 0; i < -offset_from_cursor; i++) {
-      // If requested start is before the available text then reduce the
-      // number of characters to delete.
-      if (start == editable_range().start()) {
+      // If the requested start is at or before the beginning of the
+      // available text then reduce the number of characters to delete. A step
+      // of 2 (crossing a surrogate pair) can land before the start of the
+      // range rather than exactly on it.
+      if (start <= editable_range().start()) {
         count = i;
         break;
       }
       start -= IsTrailingSurrogate(text_.at(start - 1)) ? 2 : 1;
     }
   } else {
-    for (int i = 0; i < offset_from_cursor && start != max_pos; i++) {
+    for (int i = 0; i < offset_from_cursor && start < max_pos; i++) {
       start += IsLeadingSurrogate(text_.at(start)) ? 2 : 1;
     }
   }
 
   auto end = start;
-  for (int i = 0; i < count && end != max_pos; i++) {
-    end += IsLeadingSurrogate(text_.at(start)) ? 2 : 1;
+  for (int i = 0; i < count && end < max_pos; i++) {
+    end += IsLeadingSurrogate(text_.at(end)) ? 2 : 1;
   }
 
   if (start == end) {
@@ -233,9 +235,24 @@ bool TextInputModel::DeleteSurrounding(int offset_from_cursor, int count) {
   // Cursor moves only if deleted area is before it.
   selection_ = TextRange(offset_from_cursor <= 0 ? start : selection_.start());
 
-  // Adjust composing range.
+  // Adjust composing range: a bound inside the deleted span collapses to its
+  // start, a bound after it shifts back by the deleted length, and a bound
+  // before it is unaffected. The deleted span can extend past the composing
+  // range's stored bounds when a surrogate pair straddles them, so shifting
+  // the end unconditionally could underflow, and the start needs the same
+  // treatment when the span extends past it in the other direction.
   if (composing_) {
-    composing_range_.set_end(composing_range_.end() - deleted_length);
+    auto clamp_to_deletion = [start, end, deleted_length](size_t pos) {
+      if (pos <= start) {
+        return pos;
+      }
+      if (pos >= end) {
+        return pos - deleted_length;
+      }
+      return start;
+    };
+    composing_range_.set_base(clamp_to_deletion(composing_range_.base()));
+    composing_range_.set_extent(clamp_to_deletion(composing_range_.extent()));
   }
   return true;
 }

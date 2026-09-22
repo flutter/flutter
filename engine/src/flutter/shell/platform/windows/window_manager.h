@@ -70,9 +70,10 @@ struct DialogWindowCreationRequest {
   bool resizable = true;
 };
 
-typedef WindowRect* (*GetWindowPositionCallback)(const WindowSize& child_size,
-                                                 const WindowRect& parent_rect,
-                                                 const WindowRect& output_rect);
+typedef void (*GetWindowPositionCallback)(const WindowSize& child_size,
+                                          const WindowRect& parent_rect,
+                                          const WindowRect& display_rect,
+                                          WindowRect& output_rect);
 
 struct TooltipWindowCreationRequest {
   WindowConstraints preferred_constraints;
