@@ -259,6 +259,9 @@ mixin Selectable implements SelectionHandler {
   /// Returns the leaf [Selectable]s represented by this object in reading order.
   List<Selectable> getLeafSelectables() => <Selectable>[this];
 
+  /// Selects the given [range] within [target] if [target] is managed by this [Selectable].
+  bool selectRangeForSelectable(Selectable target, SelectedContentRange range) => false;
+
   /// Disposes resources held by the mixer.
   void dispose();
 }

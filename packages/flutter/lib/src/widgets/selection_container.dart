@@ -228,6 +228,14 @@ class _SelectionContainerState extends State<SelectionContainer>
   }
 
   @override
+  bool selectRangeForSelectable(Selectable target, SelectedContentRange range) {
+    if (widget._disabled) {
+      return false;
+    }
+    return widget.delegate!.selectRangeForSelectable(target, range);
+  }
+
+  @override
   Size get size => (context.findRenderObject()! as RenderBox).size;
 
   @override
@@ -293,6 +301,9 @@ abstract class SelectionContainerDelegate implements SelectionHandler, Selection
 
   /// Returns the ordered leaf [Selectable]s managed by this delegate.
   List<Selectable> getLeafSelectables() => const <Selectable>[];
+
+  /// Selects the given [range] within [target] if [target] is managed by this delegate.
+  bool selectRangeForSelectable(Selectable target, SelectedContentRange range) => false;
 
   /// Gets the paint transform from the [Selectable] child to
   /// [SelectionContainer] of this delegate.

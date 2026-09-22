@@ -445,6 +445,11 @@ class SelectableRegionState extends State<SelectableRegion>
   final LayerLink _endHandleLayerLink = LayerLink();
   final LayerLink _toolbarLayerLink = LayerLink();
   final StaticSelectionContainerDelegate _selectionDelegate = StaticSelectionContainerDelegate();
+
+  /// The [MultiSelectableSelectionContainerDelegate] managed by this [SelectableRegionState].
+  @visibleForTesting
+  MultiSelectableSelectionContainerDelegate get selectionDelegate => _selectionDelegate;
+
   // there should only ever be one selectable, which is the SelectionContainer.
   Selectable? _selectable;
 
@@ -495,7 +500,11 @@ class SelectableRegionState extends State<SelectableRegion>
   void initState() {
     super.initState();
     _focusNode.addListener(_handleFocusChanged);
-    findController._attach(_selectionDelegate);
+    findController._attach(
+      _selectionDelegate,
+      enableSelection: widget.enableSelection,
+      regionFocusNode: _focusNode,
+    );
     _initMouseGestureRecognizer();
     _initTouchGestureRecognizer();
     // Right clicks.
@@ -554,7 +563,11 @@ class SelectableRegionState extends State<SelectableRegion>
         _localFindController?.dispose();
         _localFindController = null;
       }
-      findController._attach(_selectionDelegate);
+      findController._attach(
+        _selectionDelegate,
+        enableSelection: widget.enableSelection,
+        regionFocusNode: _focusNode,
+      );
     }
     if (widget.focusNode != oldWidget.focusNode) {
       if (oldWidget.focusNode == null && widget.focusNode != null) {
@@ -569,6 +582,10 @@ class SelectableRegionState extends State<SelectableRegion>
         _handleFocusChanged();
       }
     }
+    findController._updateHostConfig(
+      enableSelection: widget.enableSelection,
+      regionFocusNode: _focusNode,
+    );
   }
 
   Action<T> _makeOverridable<T extends Intent>(Action<T> defaultAction) {
@@ -3124,6 +3141,32 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     }
   }
 
+  @override
+  bool selectRangeForSelectable(Selectable target, SelectedContentRange range) {
+    if (_additions.isNotEmpty) {
+      _flushAdditions();
+    }
+    for (var i = 0; i < selectables.length; i++) {
+      final Selectable child = selectables[i];
+      if (child == target) {
+        _clearSelectables(skipIndex: i);
+        dispatchSelectionEventToChild(child, SelectContentRangeEvent(range: range));
+        currentSelectionStartIndex = i;
+        currentSelectionEndIndex = i;
+        _updateSelectionGeometry();
+        return true;
+      }
+      if (child.selectRangeForSelectable(target, range)) {
+        _clearSelectables(skipIndex: i);
+        currentSelectionStartIndex = i;
+        currentSelectionEndIndex = i;
+        _updateSelectionGeometry();
+        return true;
+      }
+    }
+    return false;
+  }
+
   SelectionResult _handleSelectBoundary(SelectionEvent event) {
     assert(
       event is SelectWordSelectionEvent || event is SelectParagraphSelectionEvent,
@@ -3950,6 +3993,13 @@ class FindInPageController extends ChangeNotifier {
       _caseSensitive = caseSensitive;
 
   MultiSelectableSelectionContainerDelegate? _delegate;
+  bool _enableSelection = true;
+  FocusNode? _regionFocusNode;
+
+  Selectable? _pendingAnchorSelectable;
+  int _pendingAnchorStartOffset = -1;
+  int _lastActiveLeafOrderIndex = -1;
+  int _lastActiveStartOffset = 0;
 
   bool _isOpen = false;
 
@@ -4009,7 +4059,13 @@ class FindInPageController extends ChangeNotifier {
 
   bool _isRecomputing = false;
 
-  void _attach(MultiSelectableSelectionContainerDelegate delegate) {
+  void _attach(
+    MultiSelectableSelectionContainerDelegate delegate, {
+    required bool enableSelection,
+    required FocusNode regionFocusNode,
+  }) {
+    _enableSelection = enableSelection;
+    _regionFocusNode = regionFocusNode;
     if (_delegate == delegate) {
       return;
     }
@@ -4021,12 +4077,18 @@ class FindInPageController extends ChangeNotifier {
     }
   }
 
+  void _updateHostConfig({required bool enableSelection, required FocusNode regionFocusNode}) {
+    _enableSelection = enableSelection;
+    _regionFocusNode = regionFocusNode;
+  }
+
   void _detach(MultiSelectableSelectionContainerDelegate delegate) {
     if (_delegate != delegate) {
       return;
     }
     _delegate!._onSelectablesChanged = null;
     _delegate = null;
+    _regionFocusNode = null;
   }
 
   void _handleSelectablesChanged() {
@@ -4038,33 +4100,55 @@ class FindInPageController extends ChangeNotifier {
   }
 
   /// Opens the Find-in-Page overlay and optionally populates [initialQuery].
+  ///
+  /// If [initialQuery] is omitted and the attached [SelectableRegion] currently
+  /// has an uncollapsed single-line text selection, the query is seeded from the
+  /// selected text and anchored to the selected occurrence.
   void open({String? initialQuery}) {
     final bool wasOpen = _isOpen;
     _isOpen = true;
     _openRequestCount += 1;
+    var seededFromSelection = false;
     if (initialQuery != null && initialQuery.isNotEmpty) {
       _query = initialQuery;
+    } else if (_enableSelection && _delegate != null) {
+      final String? selectedText = _delegate!.getSelectedContent()?.plainText.trim();
+      if (selectedText != null && selectedText.isNotEmpty && !selectedText.contains('\n')) {
+        for (final Selectable leaf in _delegate!.getLeafSelectables()) {
+          final SelectedContentRange? range = leaf.getSelection();
+          if (leaf.value.hasSelection && range != null) {
+            _pendingAnchorSelectable = leaf;
+            _pendingAnchorStartOffset = min(range.startOffset, range.endOffset);
+            break;
+          }
+        }
+        _query = selectedText;
+        seededFromSelection = true;
+        _delegate!.dispatchSelectionEvent(const ClearSelectionEvent());
+      }
     }
-    _recomputeMatches(scrollToActive: !wasOpen || initialQuery != null);
+    _recomputeMatches(scrollToActive: !wasOpen || initialQuery != null || seededFromSelection);
     notifyListeners();
   }
 
-  /// Closes the Find-in-Page overlay, clears search highlights, and optionally
-  /// converts the active match into the live selection.
+  /// Closes the Find-in-Page overlay, clears search highlights, and (when selection
+  /// is enabled on the host [SelectableRegion]) converts the active match into the
+  /// live selection while returning focus to the [SelectableRegion].
   void close({bool selectActiveMatch = true}) {
     if (!_isOpen && _matches.isEmpty) {
       return;
     }
     final SelectableSearchMatch? currentMatch = activeMatch;
     _isOpen = false;
+    _regionFocusNode?.requestFocus();
     _clearAllHighlights();
-    if (selectActiveMatch && currentMatch != null) {
-      currentMatch.selectable.dispatchSelectionEvent(
-        SelectContentRangeEvent(range: currentMatch.range),
-      );
+    if (selectActiveMatch && _enableSelection && currentMatch != null) {
+      _delegate?.selectRangeForSelectable(currentMatch.selectable, currentMatch.range);
     }
     _matches = const <SelectableSearchMatch>[];
     _activeMatchIndex = -1;
+    _lastActiveLeafOrderIndex = -1;
+    _lastActiveStartOffset = 0;
     notifyListeners();
   }
 
@@ -4075,6 +4159,7 @@ class FindInPageController extends ChangeNotifier {
       return;
     }
     _activeMatchIndex = (_activeMatchIndex + 1) % _matches.length;
+    _syncActiveAnchor(_delegate?.getLeafSelectables());
     _pushHighlightsToSelectables();
     activeMatch?.selectable.showRangeOnScreen(activeMatch!.range);
     notifyListeners();
@@ -4087,9 +4172,21 @@ class FindInPageController extends ChangeNotifier {
       return;
     }
     _activeMatchIndex = (_activeMatchIndex - 1 + _matches.length) % _matches.length;
+    _syncActiveAnchor(_delegate?.getLeafSelectables());
     _pushHighlightsToSelectables();
     activeMatch?.selectable.showRangeOnScreen(activeMatch!.range);
     notifyListeners();
+  }
+
+  void _syncActiveAnchor(List<Selectable>? leaves) {
+    final SelectableSearchMatch? current = activeMatch;
+    if (current == null || leaves == null) {
+      _lastActiveLeafOrderIndex = -1;
+      _lastActiveStartOffset = 0;
+      return;
+    }
+    _lastActiveLeafOrderIndex = leaves.indexOf(current.selectable);
+    _lastActiveStartOffset = current.range.startOffset;
   }
 
   void _recomputeMatches({required bool scrollToActive}) {
@@ -4101,6 +4198,10 @@ class FindInPageController extends ChangeNotifier {
       _clearAllHighlights();
       _matches = const <SelectableSearchMatch>[];
       _activeMatchIndex = -1;
+      _lastActiveLeafOrderIndex = -1;
+      _lastActiveStartOffset = 0;
+      _pendingAnchorSelectable = null;
+      _pendingAnchorStartOffset = -1;
       return;
     }
 
@@ -4108,6 +4209,9 @@ class FindInPageController extends ChangeNotifier {
     try {
       final SelectableSearchMatch? previousActive = activeMatch;
       final List<Selectable> leaves = delegate.getLeafSelectables();
+      final Map<Selectable, int> leafIndexBySelectable = <Selectable, int>{
+        for (int i = 0; i < leaves.length; i++) leaves[i]: i,
+      };
       final List<SelectableSearchMatch> found = <SelectableSearchMatch>[];
       final String needle = _caseSensitive ? _query : _query.toLowerCase();
 
@@ -4138,14 +4242,37 @@ class FindInPageController extends ChangeNotifier {
       _matches = List<SelectableSearchMatch>.unmodifiable(found);
       if (_matches.isEmpty) {
         _activeMatchIndex = -1;
+      } else if (_pendingAnchorSelectable != null) {
+        final int seededIndex = _matches.indexWhere(
+          (SelectableSearchMatch m) =>
+              m.selectable == _pendingAnchorSelectable &&
+              m.range.startOffset == _pendingAnchorStartOffset,
+        );
+        _activeMatchIndex = seededIndex != -1 ? seededIndex : 0;
       } else if (previousActive != null) {
-        final int preservedIndex = _matches.indexOf(previousActive);
-        _activeMatchIndex = preservedIndex != -1
-            ? preservedIndex
-            : _activeMatchIndex.clamp(0, _matches.length - 1);
+        int anchorLeafIndex = leafIndexBySelectable[previousActive.selectable] ?? -1;
+        int anchorStartOffset = previousActive.range.startOffset;
+        if (anchorLeafIndex == -1 && _lastActiveLeafOrderIndex >= 0) {
+          anchorLeafIndex = _lastActiveLeafOrderIndex;
+          anchorStartOffset = _lastActiveStartOffset;
+        }
+        if (anchorLeafIndex >= 0) {
+          final int forwardOrSameIndex = _matches.indexWhere((SelectableSearchMatch m) {
+            final int mLeafIndex = leafIndexBySelectable[m.selectable] ?? -1;
+            return (mLeafIndex == anchorLeafIndex && m.range.startOffset >= anchorStartOffset) ||
+                mLeafIndex > anchorLeafIndex;
+          });
+          _activeMatchIndex = forwardOrSameIndex != -1 ? forwardOrSameIndex : 0;
+        } else {
+          _activeMatchIndex = _activeMatchIndex.clamp(0, _matches.length - 1);
+        }
       } else {
         _activeMatchIndex = 0;
       }
+
+      _pendingAnchorSelectable = null;
+      _pendingAnchorStartOffset = -1;
+      _syncActiveAnchor(leaves);
 
       _pushHighlightsToSelectables();
       if (scrollToActive && activeMatch != null) {
@@ -4219,13 +4346,45 @@ class _SelectableRegionFindBarState extends State<SelectableRegionFindBar> {
     super.initState();
     _lastOpenRequestCount = widget.controller.openRequestCount;
     _textController = TextEditingController(text: widget.controller.query);
-    _focusNode = FocusNode(debugLabel: 'SelectableRegionFindBar');
+    _focusNode = FocusNode(debugLabel: 'SelectableRegionFindBar', onKeyEvent: _handleKeyEvent);
     widget.controller.addListener(_syncControllerText);
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _focusAndSelectQuery();
       }
     });
+  }
+
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    final LogicalKeyboardKey key = event.logicalKey;
+    final bool isShift = HardwareKeyboard.instance.isShiftPressed;
+    final bool isMetaOrCtrl =
+        HardwareKeyboard.instance.isMetaPressed || HardwareKeyboard.instance.isControlPressed;
+
+    if (key == LogicalKeyboardKey.escape) {
+      widget.controller.close();
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter) {
+      if (isShift) {
+        widget.controller.previousMatch();
+      } else {
+        widget.controller.nextMatch();
+      }
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.f3 || (key == LogicalKeyboardKey.keyG && isMetaOrCtrl)) {
+      if (isShift) {
+        widget.controller.previousMatch();
+      } else {
+        widget.controller.nextMatch();
+      }
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
   }
 
   void _focusAndSelectQuery() {
@@ -4311,16 +4470,17 @@ class _SelectableRegionFindBarState extends State<SelectableRegionFindBar> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              SizedBox(
-                width: 140.0,
-                child: EditableText(
-                  controller: _textController,
-                  focusNode: _focusNode,
-                  style: textStyle,
-                  cursorColor: const Color(0xFF1A73E8),
-                  backgroundCursorColor: const Color(0xFF9AA0A6),
-                  onChanged: (String value) => widget.controller.query = value,
-                  onSubmitted: (String _) => widget.controller.nextMatch(),
+              Flexible(
+                child: SizedBox(
+                  width: 140.0,
+                  child: EditableText(
+                    controller: _textController,
+                    focusNode: _focusNode,
+                    style: textStyle,
+                    cursorColor: const Color(0xFF1A73E8),
+                    backgroundCursorColor: const Color(0xFF9AA0A6),
+                    onChanged: (String value) => widget.controller.query = value,
+                  ),
                 ),
               ),
               const SizedBox(width: 8.0),
