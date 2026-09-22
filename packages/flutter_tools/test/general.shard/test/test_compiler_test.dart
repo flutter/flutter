@@ -4,11 +4,15 @@
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
@@ -18,6 +22,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/logging_logger.dart';
 import '../../src/package_config.dart';
 import '../../src/throwing_pub.dart';
@@ -389,15 +394,34 @@ environment:
   );
 }
 
-/// Override the creation of the Resident Compiler to simplify testing.
 class FakeTestCompiler extends TestCompiler {
   FakeTestCompiler(
     super.buildInfo,
     super.flutterProject,
     this.residentCompiler, {
+    Artifacts? artifacts,
+    Config? config,
+    FileSystem? fileSystem,
+    Logger? logger,
+    Platform? platform,
     super.precompiledDillPath,
+    ProcessManager? processManager,
+    ShutdownHooks? shutdownHooks,
     super.testTimeRecorder,
-  });
+    ToolContext? toolContext,
+  }) : super(
+         toolContext:
+             toolContext ??
+             FakeToolContext(
+               artifacts: artifacts ?? FakeArtifacts(),
+               config: config ?? Config.test(),
+               fs: fileSystem ?? (flutterProject?.directory.fileSystem ?? MemoryFileSystem.test()),
+               logger: logger ?? BufferLogger.test(),
+               platform: platform ?? FakePlatform(),
+               processManager: processManager ?? FakeProcessManager.any(),
+               shutdownHooks: shutdownHooks ?? FakeShutdownHooks(),
+             ),
+       );
 
   final FakeResidentCompiler? residentCompiler;
 
