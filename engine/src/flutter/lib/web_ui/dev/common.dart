@@ -217,8 +217,11 @@ class LuciConfig {
     final json = jsonDecode(contextJson) as Map<String, Object?>;
     final LuciRealm realm = switch ((json['realm'] as Map<String, Object?>?)?['name']) {
       'flutter:prod' => LuciRealm.Prod,
+      'flutter:prod.shadow' => LuciRealm.Prod,
       'flutter:staging' => LuciRealm.Staging,
+      'flutter:staging.shadow' => LuciRealm.Staging,
       'flutter:try' => LuciRealm.Try,
+      'flutter:try.shadow' => LuciRealm.Try,
       _ => LuciRealm.Unknown,
     };
     return LuciConfig(realm);
