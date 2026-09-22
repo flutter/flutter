@@ -106,9 +106,18 @@ AndroidShellHolder::AndroidShellHolder(
 
   auto io_task_runner_adapter =
       std::make_shared<BasicTaskRunnerAdapter>(task_runners.GetIOTaskRunner());
+  // EmbedderAndroidEngine currently uses AndroidSurfaceManager which presents
+  // via OpenGL ES. Ensure AndroidContext matches the engine's actual rendering
+  // backend so external textures (ImageExternalTexture, SurfaceTexture) align
+  // with the embedder surface.
+  AndroidRenderingAPI engine_rendering_api = android_rendering_api_;
+  if (engine_rendering_api == AndroidRenderingAPI::kImpellerVulkan ||
+      engine_rendering_api == AndroidRenderingAPI::kImpellerAutoselect) {
+    engine_rendering_api = AndroidRenderingAPI::kImpellerOpenGLES;
+  }
   std::shared_ptr<AndroidContext> android_context =
       PlatformViewAndroid::CreateAndroidContext(
-          task_runners, android_rendering_api_,
+          task_runners, engine_rendering_api,
           settings_.enable_opengl_gpu_tracing,
           PlatformViewAndroid::CreateContextSettings(settings_),
           io_task_runner_adapter);
@@ -118,7 +127,7 @@ AndroidShellHolder::AndroidShellHolder(
   platform_view_ = platform_view_android_->GetWeakPtr();
 
   auto embedder_engine = std::make_unique<EmbedderAndroidEngine>(
-      task_runners, settings_, jni_facade_, android_rendering_api_);
+      task_runners, settings_, jni_facade_, engine_rendering_api);
   embedder_engine->SetPlatformMessageHandler(
       platform_view_android_->GetPlatformMessageHandler());
   engine_ = std::move(embedder_engine);

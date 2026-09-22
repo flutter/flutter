@@ -5,6 +5,8 @@
 #include "flutter/shell/platform/android/surface_texture_external_texture_gl_impeller.h"
 
 #include "flutter/impeller/display_list/dl_image_impeller.h"
+#include "impeller/display_list/aiks_context.h"
+#include "impeller/renderer/backend/gles/context_gles.h"
 
 namespace flutter {
 
@@ -31,8 +33,18 @@ void SurfaceTextureExternalTextureGLImpeller::ProcessFrame(
     desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
     desc.size = {1, 1};
     desc.mip_count = 1;
+    std::shared_ptr<impeller::ContextGLES> impeller_context = impeller_context_;
+    if (context.aiks_context && context.aiks_context->GetContext() &&
+        context.aiks_context->GetContext()->GetBackendType() ==
+            impeller::Context::BackendType::kOpenGLES) {
+      impeller_context = std::static_pointer_cast<impeller::ContextGLES>(
+          context.aiks_context->GetContext());
+    }
+    if (!impeller_context) {
+      return;
+    }
     texture_ = std::make_shared<impeller::TextureGLES>(
-        impeller_context_->GetReactor(), desc);
+        impeller_context->GetReactor(), desc);
     // The contents will be initialized later in the call to `Attach` instead of
     // by Impeller.
     texture_->MarkContentsInitialized();

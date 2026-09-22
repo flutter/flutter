@@ -13,6 +13,7 @@
 #include "flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/texture_vk.h"
 #include "flutter/impeller/toolkit/android/hardware_buffer.h"
+#include "impeller/display_list/aiks_context.h"
 
 namespace flutter {
 
@@ -61,18 +62,30 @@ void ImageExternalTextureVKImpeller::ProcessFrame(PaintContext& context,
     return;
   }
 
+  std::shared_ptr<impeller::ContextVK> impeller_context = impeller_context_;
+  if (context.aiks_context && context.aiks_context->GetContext() &&
+      context.aiks_context->GetContext()->GetBackendType() ==
+          impeller::Context::BackendType::kVulkan) {
+    impeller_context = std::static_pointer_cast<impeller::ContextVK>(
+        context.aiks_context->GetContext());
+  }
+  if (!impeller_context) {
+    CloseHardwareBuffer(hardware_buffer);
+    return;
+  }
+
   auto texture_source = std::make_shared<impeller::AHBTextureSourceVK>(
-      impeller_context_, latest_hardware_buffer, hb_desc.value());
+      impeller_context, latest_hardware_buffer, hb_desc.value());
   if (!texture_source->IsValid()) {
     CloseHardwareBuffer(hardware_buffer);
     return;
   }
 
   auto texture =
-      std::make_shared<impeller::TextureVK>(impeller_context_, texture_source);
+      std::make_shared<impeller::TextureVK>(impeller_context, texture_source);
   // Transition the layout to shader read.
   {
-    auto buffer = impeller_context_->CreateCommandBuffer();
+    auto buffer = impeller_context->CreateCommandBuffer();
     impeller::CommandBufferVK& buffer_vk =
         impeller::CommandBufferVK::Cast(*buffer);
 
@@ -91,7 +104,7 @@ void ImageExternalTextureVKImpeller::ProcessFrame(PaintContext& context,
     if (!texture->SetLayout(barrier)) {
       return;
     }
-    if (!impeller_context_->GetCommandQueue()->Submit({buffer}).ok()) {
+    if (!impeller_context->GetCommandQueue()->Submit({buffer}).ok()) {
       return;
     }
   }
