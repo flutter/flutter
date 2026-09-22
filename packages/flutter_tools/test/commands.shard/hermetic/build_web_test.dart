@@ -410,8 +410,8 @@ void main() {
       // 4. HTML and JS comments mentioning main.dart.js or loadEntrypoint (even when
       // HTML prose contains apostrophes like "Kevin's App") do not cause failure
       indexHtml.writeAsStringSync(
-        '<html><head><title>Kevin\'s App</title></head><body>\n'
-        '<!-- <script src=\'main.dart.js\'></script> -->\n'
+        "<html><head><title>Kevin's App</title></head><body>\n"
+        "<!-- <script src='main.dart.js'></script> -->\n"
         '<script>\n'
         'const tpl = `https://example.com/path`;\n'
         '// _flutter.loader.loadEntrypoint({});\n'

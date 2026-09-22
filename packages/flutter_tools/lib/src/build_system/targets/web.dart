@@ -525,6 +525,8 @@ class Dart2WasmTarget extends Dart2WebTarget {
         _mainWasmMapRegex,
         _mainMjsRegex,
         _mainMjsMapRegex,
+        _partWasmRegex,
+        _partWasmMapRegex,
       ]);
     }
     final Artifacts artifacts = environment.artifacts;
@@ -575,6 +577,17 @@ class Dart2WasmTarget extends Dart2WebTarget {
       _checkForLegacyWebImports(environment, runResult.stdout, runResult.stderr);
       throwToolExit('Failed to compile application for the Web.');
     } else if (compilerConfig.webContentHash) {
+      final bool hasDeferredParts = environment.buildDir.listSync().whereType<File>().any(
+        (File file) => _partWasmRegex.hasMatch(file.basename),
+      );
+      if (hasDeferredParts) {
+        throwToolExit(
+          '"--web-content-hash" does not yet support deferred imports: '
+          'deferred part files keep unhashed names and can be served stale '
+          'from the browser cache alongside a new entrypoint. Remove the '
+          'deferred imports or build without "--web-content-hash".',
+        );
+      }
       final String newWasmBasename = _hashAndRenameWebOutput(
         file: outputWasmFile,
         sourceMapFile: compilerConfig.sourceMaps

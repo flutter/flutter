@@ -2128,6 +2128,55 @@ _flutter.loader.load();
   );
 
   test(
+    'Dart2WasmTarget build with webContentHash tool-exits when deferred part files are present',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      final File depFile = environment.buildDir.childFile('dart2wasm.d');
+      final File wasmFile = environment.buildDir.childFile('main.dart.wasm');
+      final File mjsFile = environment.buildDir.childFile('main.dart.mjs');
+      final wasmBytes = <int>[0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00];
+      const mjsContent = 'export function main() {}\n';
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            ..._kDart2WasmLinuxArgs,
+            '-Ddart.vm.profile=false',
+            '-Ddart.vm.product=true',
+            '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
+            '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
+            '--extra-compiler-option=--import-shared-memory',
+            '--extra-compiler-option=--shared-memory-max-pages=32768',
+            '-DFLUTTER_WEB_USE_SKIA=false',
+            '-DFLUTTER_WEB_USE_SKWASM=true',
+            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+            '--extra-compiler-option=--depfile=${depFile.absolute.path}',
+            '--recorded-uses=${environment.buildDir.childFile('recorded_uses_wasm.json').absolute.path}',
+            '-O2',
+            '--strip-wasm',
+            '--minify',
+            '-o',
+            wasmFile.absolute.path,
+            environment.buildDir.childFile('main.dart').absolute.path,
+          ],
+          onRun: (_) {
+            wasmFile.writeAsBytesSync(wasmBytes);
+            mjsFile.writeAsStringSync(mjsContent);
+            environment.buildDir.childFile('main.dart_module1.wasm').writeAsBytesSync(wasmBytes);
+          },
+        ),
+      );
+
+      await expectLater(
+        Dart2WasmTarget(
+          const WasmCompilerConfig(webContentHash: true),
+          const NoOpAnalytics(),
+        ).build(environment),
+        throwsToolExit(message: 'deferred'),
+      );
+    }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
+  );
+
+  test(
     'Dart2WasmTarget build with webContentHash renames outputs and rewrites dart2wasm.d',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
