@@ -264,7 +264,7 @@ static void SurfaceCreated(JNIEnv* env,
   fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(
       ANativeWindow_fromSurface(env, jsurface));
-  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyCreated(std::move(window));
+  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyCreated(window);
 }
 
 static void SurfaceWindowChanged(JNIEnv* env,
@@ -277,8 +277,7 @@ static void SurfaceWindowChanged(JNIEnv* env,
   fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(
       ANativeWindow_fromSurface(env, jsurface));
-  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifySurfaceWindowChanged(
-      std::move(window));
+  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifySurfaceWindowChanged(window);
 }
 
 static void SurfaceChanged(JNIEnv* env,
