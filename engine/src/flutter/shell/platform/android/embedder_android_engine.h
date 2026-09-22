@@ -343,6 +343,7 @@ class EmbedderAndroidEngine final : public AndroidEngine {
     int32_t priority;
   };
   std::vector<PendingImageGenerator> pending_image_generators_;
+  std::vector<std::shared_ptr<flutter::Texture>> pending_textures_;
 
   std::shared_ptr<AndroidTaskRunners> android_task_runners_;
   std::shared_ptr<android::AndroidVsyncWaiter> vsync_waiter_;
