@@ -418,18 +418,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   private final AccessibilityManager.TouchExplorationStateChangeListener
       touchExplorationStateChangeListener;
 
-  // Listener that is notified when the high contrast mode is turned on/off.
-  private interface ContrastChangedListener {
-    void onContrastChanged(float contrast);
-  }
-
-  private final ContrastChangedListener highContrastObserver =
-      (Build.VERSION.SDK_INT >= API_LEVELS.API_34)
-          ? (ContrastChangedListener & UiModeManager.ContrastChangeListener)
-              contrast -> setHighContrastFlag()
-          : contrast -> {
-            /* no-op */
-          };
+  // Listener that is notified when the high contrast mode is turned on/off on API 34+.
+  // Stored as an Object to avoid class-verification issues on pre-API 34 devices.
+  private final Object highContrastObserver;
 
   // Listener that is notified when the invert colors flag is turned on/off.
   private final AccessibilityFeatureObserver invertColorsObserver;
@@ -612,8 +603,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // Initialize and register contrast listener
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
+      highContrastObserver =
+          Api34Impl.registerHighContrastObserver(rootAccessibilityView.getContext(), this);
       setHighContrastFlag();
-      registerHighContrastObserver(rootAccessibilityView.getContext());
+    } else {
+      highContrastObserver = null;
     }
 
     platformViewsAccessibilityDelegate.attachAccessibilityBridge(this);
@@ -651,8 +645,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         touchExplorationStateChangeListener);
     contentResolver.unregisterContentObserver(animationScaleObserver);
     contentResolver.unregisterContentObserver(invertColorsObserver);
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
-      unregisterHighContrastObserver(rootAccessibilityView.getContext());
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_34 && highContrastObserver != null) {
+      Api34Impl.unregisterHighContrastObserver(
+          rootAccessibilityView.getContext(), highContrastObserver);
     }
     accessibilityChannel.setAccessibilityMessageHandler(null);
   }
@@ -721,24 +716,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   }
 
   @RequiresApi(API_LEVELS.API_34)
-  private void registerHighContrastObserver(Context context) {
-    UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
-    if (uiModeManager != null) {
-      uiModeManager.addContrastChangeListener(
-          context.getMainExecutor(), (UiModeManager.ContrastChangeListener) highContrastObserver);
-    }
-  }
-
-  @RequiresApi(API_LEVELS.API_34)
-  private void unregisterHighContrastObserver(Context context) {
-    UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
-    if (uiModeManager != null) {
-      uiModeManager.removeContrastChangeListener(
-          (UiModeManager.ContrastChangeListener) highContrastObserver);
-    }
-  }
-
-  @RequiresApi(API_LEVELS.API_34)
   private void setHighContrastFlag() {
     Context context = rootAccessibilityView.getContext();
     UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
@@ -748,13 +725,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return;
     }
 
-    float uiContrast = uiModeManager.getContrast();
     // TODO(https://github.com/flutter/flutter/issues/182863): Move contrast value to a separate API
     // as Android supports a range from -1.0 to 1.0, not just a boolean state.
-
-    // 0.0 (standard), 0.5 (medium), 1.0 (high)
-    // Any enhancement above standard is considered high contrast
-    boolean isHighContrastEnabled = uiContrast > 0.0f;
+    boolean isHighContrastEnabled = Api34Impl.isHighContrast(uiModeManager);
 
     updateAccessibilityFeature(AccessibilityFeature.HIGH_CONTRAST, isHighContrastEnabled);
   }
@@ -2997,6 +2970,44 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       int fontWeightAdjustment = configuration.fontWeightAdjustment;
       return fontWeightAdjustment != Configuration.FONT_WEIGHT_ADJUSTMENT_UNDEFINED
           && fontWeightAdjustment >= BOLD_TEXT_WEIGHT_ADJUSTMENT;
+    }
+  }
+
+  /**
+   * Isolates API-34 references so that ART's class verifier does not attempt to resolve them when
+   * loading {@link AccessibilityBridge} on older API levels. Without this separation, the verifier
+   * attempts to resolve {@link UiModeManager.ContrastChangeListener} at class-load time, causing a
+   * {@link NoClassDefFoundError} crash on pre-API 34 devices (issue #192231).
+   */
+  @RequiresApi(API_LEVELS.API_34)
+  private static class Api34Impl {
+    @DoNotInline
+    static Object registerHighContrastObserver(
+        @NonNull Context context, @NonNull AccessibilityBridge bridge) {
+      UiModeManager uiModeManager =
+          (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
+      if (uiModeManager == null) {
+        return null;
+      }
+      UiModeManager.ContrastChangeListener listener = contrast -> bridge.setHighContrastFlag();
+      uiModeManager.addContrastChangeListener(context.getMainExecutor(), listener);
+      return listener;
+    }
+
+    @DoNotInline
+    static void unregisterHighContrastObserver(@NonNull Context context, @NonNull Object observer) {
+      UiModeManager uiModeManager =
+          (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
+      if (uiModeManager != null && observer instanceof UiModeManager.ContrastChangeListener) {
+        uiModeManager.removeContrastChangeListener((UiModeManager.ContrastChangeListener) observer);
+      }
+    }
+
+    @DoNotInline
+    static boolean isHighContrast(@NonNull UiModeManager uiModeManager) {
+      // 0.0 (standard), 0.5 (medium), 1.0 (high)
+      // Any enhancement above standard is considered high contrast
+      return uiModeManager.getContrast() > 0.0f;
     }
   }
 }
