@@ -63,11 +63,11 @@ void main() {
       final device = AndroidDevice(
         '1234',
         modelID: 'TestModel',
-        fileSystem: fileSystem,
+        _fileSystem: fileSystem,
         processManager: processManager,
         logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        androidSdk: androidSdk,
+        _platform: FakePlatform(),
+        _androidSdk: androidSdk,
       );
       final File apkFile = fileSystem.file('app-release.apk')..createSync();
       final apk = AndroidApk(
@@ -136,11 +136,11 @@ void main() {
       final device = AndroidDevice(
         '1234',
         modelID: 'TestModel',
-        fileSystem: fileSystem,
+        _fileSystem: fileSystem,
         processManager: processManager,
         logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        androidSdk: androidSdk,
+        _platform: FakePlatform(),
+        _androidSdk: androidSdk,
       );
       final File apkFile = fileSystem.file('app-release.apk')..createSync();
       final apk = AndroidApk(
@@ -237,11 +237,11 @@ void main() {
       final device = AndroidDevice(
         '1234',
         modelID: 'TestModel',
-        fileSystem: fileSystem,
+        _fileSystem: fileSystem,
         processManager: processManager,
         logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        androidSdk: androidSdk,
+        _platform: FakePlatform(),
+        _androidSdk: androidSdk,
       );
       final File apkFile = fileSystem.file('app-release.apk')..createSync();
       final apk = AndroidApk(
@@ -337,11 +337,11 @@ void main() {
       final device = AndroidDevice(
         '1234',
         modelID: 'TestModel',
-        fileSystem: fileSystem,
+        _fileSystem: fileSystem,
         processManager: processManager,
         logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        androidSdk: androidSdk,
+        _platform: FakePlatform(),
+        _androidSdk: androidSdk,
       );
       final File apkFile = fileSystem.file('app-release.apk')..createSync();
       final apk = AndroidApk(
@@ -436,11 +436,11 @@ void main() {
       final device = AndroidDevice(
         '1234',
         modelID: 'TestModel',
-        fileSystem: fileSystem,
+        _fileSystem: fileSystem,
         processManager: processManager,
         logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        androidSdk: androidSdk,
+        _platform: FakePlatform(),
+        _androidSdk: androidSdk,
       );
       final File apkFile = fileSystem.file('app-release.apk')..createSync();
       final apk = AndroidApk(
@@ -534,11 +534,11 @@ void main() {
     final device = AndroidDevice(
       '1234',
       modelID: 'TestModel',
-      fileSystem: fileSystem,
+      _fileSystem: fileSystem,
       processManager: processManager,
       logger: BufferLogger.test(),
-      platform: FakePlatform(),
-      androidSdk: androidSdk,
+      _platform: FakePlatform(),
+      _androidSdk: androidSdk,
     );
     final File apkFile = fileSystem.file('app-debug.apk')..createSync();
     final apk = AndroidApk(
@@ -680,11 +680,11 @@ void main() {
     final device = AndroidDevice(
       '1234',
       modelID: 'TestModel',
-      fileSystem: fileSystem,
+      _fileSystem: fileSystem,
       processManager: processManager,
       logger: BufferLogger.test(),
-      platform: FakePlatform(),
-      androidSdk: androidSdk,
+      _platform: FakePlatform(),
+      _androidSdk: androidSdk,
     );
     final File apkFile = fileSystem.file('app-release.apk')..createSync();
     final apk = AndroidApk(
@@ -751,11 +751,11 @@ void main() {
       final device = AndroidDevice(
         '1234',
         modelID: 'TestModel',
-        fileSystem: fileSystem,
+        _fileSystem: fileSystem,
         processManager: processManager,
         logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        androidSdk: androidSdk,
+        _platform: FakePlatform(),
+        _androidSdk: androidSdk,
       );
       final File apkFile = fileSystem.file('app-release.apk')..createSync();
       final apk = AndroidApk(
@@ -830,11 +830,11 @@ void main() {
         final device = AndroidDevice(
           '1234',
           modelID: 'TestModel',
-          fileSystem: fileSystem,
+          _fileSystem: fileSystem,
           processManager: processManager,
           logger: BufferLogger.test(),
-          platform: FakePlatform(),
-          androidSdk: androidSdk,
+          _platform: FakePlatform(),
+          _androidSdk: androidSdk,
         );
         final File apkFile = fileSystem.file('app-release.apk')..createSync();
         final apk = AndroidApk(
@@ -930,11 +930,11 @@ void main() {
         final device = AndroidDevice(
           '1234',
           modelID: 'TestModel',
-          fileSystem: fileSystem,
+          _fileSystem: fileSystem,
           processManager: processManager,
           logger: BufferLogger.test(),
-          platform: FakePlatform(),
-          androidSdk: androidSdk,
+          _platform: FakePlatform(),
+          _androidSdk: androidSdk,
         );
         final File apkFile = fileSystem.file('app-release.apk')..createSync();
         final apk = AndroidApk(
@@ -1038,11 +1038,11 @@ void main() {
         final device = AndroidDevice(
           '1234',
           modelID: 'TestModel',
-          fileSystem: fileSystem,
+          _fileSystem: fileSystem,
           processManager: processManager,
           logger: BufferLogger.test(),
-          platform: FakePlatform(),
-          androidSdk: androidSdk,
+          _platform: FakePlatform(),
+          _androidSdk: androidSdk,
         );
         final File apkFile = fileSystem.file('app-release.apk')..createSync();
         final apk = AndroidApk(
@@ -1114,11 +1114,11 @@ void main() {
         final device = AndroidDevice(
           '1234',
           modelID: 'TestModel',
-          fileSystem: fileSystem,
+          _fileSystem: fileSystem,
           processManager: processManager,
           logger: BufferLogger.test(),
-          platform: FakePlatform(),
-          androidSdk: androidSdk,
+          _platform: FakePlatform(),
+          _androidSdk: androidSdk,
         );
         final File apkFile = fileSystem.file('app-release.apk')..createSync();
         final apk = AndroidApk(
