@@ -1352,10 +1352,7 @@ void main() {
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
       final error = exception! as FlutterError;
-      expect(
-        error.message,
-        'Slider value (150.0) must be between minValue (0.0) and maxValue (100.0)',
-      );
+      expect(error.message, 'Slider value (150) must be between minValue (0) and maxValue (100)');
     });
 
     testWidgets('failure case, min > max', (WidgetTester tester) async {
@@ -1374,7 +1371,7 @@ void main() {
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
       final error = exception! as FlutterError;
-      expect(error.message, 'Slider minValue (100.0) must be less than maxValue (0.0)');
+      expect(error.message, 'Slider minValue (100) must be less than maxValue (0)');
     });
 
     testWidgets('failure case, invalid value', (WidgetTester tester) async {
@@ -1426,6 +1423,25 @@ void main() {
         ),
       );
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('failure case, percentage value out of range', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.slider,
+            value: '150%',
+            minValue: '0',
+            maxValue: '100',
+            child: const SizedBox.square(dimension: 1),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final error = exception! as FlutterError;
+      expect(error.message, 'Slider percentage value (150%) must be between 0% and 100%');
     });
   });
 }
