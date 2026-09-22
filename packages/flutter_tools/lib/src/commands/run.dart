@@ -473,7 +473,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         if (intentFlags.isNotEmpty) {
           throwToolExit(
             'Running a prebuilt APK with --${FlutterOptions.kUseApplicationBinary} in release mode with flags used to configure the Flutter Android engine '
-            '(${intentFlags.join(', ')}) is no longer supported. Define the required flags via the Android manifest instead. See '
+            '(${intentFlags.map((String flag) => '--$flag').join(', ')}) is no longer supported. Define the required flags via the Android manifest instead. See '
             'https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries for more details.',
           );
         }
