@@ -4301,6 +4301,19 @@ FlutterEngineResult FlutterEngineRegisterExternalTexture(
     int64_t texture_identifier);
 
 //------------------------------------------------------------------------------
+/// @brief      Registers a platform texture instance with the engine.
+///
+/// @param[in]  engine   A running engine instance.
+/// @param[in]  texture  Opaque pointer to the texture instance.
+///
+/// @return     The result of the call.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineRegisterTexture(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    void* texture);
+
+//------------------------------------------------------------------------------
 /// @brief      Unregister a previous texture registration.
 ///
 /// @see        FlutterEngineRegisterExternalTexture()
@@ -5052,6 +5065,9 @@ typedef FlutterEngineResult (*FlutterEngineSendPlatformMessageResponseFnPtr)(
 typedef FlutterEngineResult (*FlutterEngineRegisterExternalTextureFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     int64_t texture_identifier);
+typedef FlutterEngineResult (*FlutterEngineRegisterTextureFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    void* texture);
 typedef FlutterEngineResult (*FlutterEngineUnregisterExternalTextureFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     int64_t texture_identifier);
@@ -5193,6 +5209,7 @@ typedef struct {
       PlatformMessageReleaseResponseHandle;
   FlutterEngineSendPlatformMessageResponseFnPtr SendPlatformMessageResponse;
   FlutterEngineRegisterExternalTextureFnPtr RegisterExternalTexture;
+  FlutterEngineRegisterTextureFnPtr RegisterTexture;
   FlutterEngineUnregisterExternalTextureFnPtr UnregisterExternalTexture;
   FlutterEngineMarkExternalTextureFrameAvailableFnPtr
       MarkExternalTextureFrameAvailable;

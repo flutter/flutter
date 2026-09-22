@@ -3590,6 +3590,25 @@ FlutterEngineResult FlutterEngineRegisterExternalTexture(
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineRegisterTexture(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    void* texture) {
+  if (engine == nullptr || texture == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Engine handle or texture was invalid.");
+  }
+
+  auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  auto* texture_ptr = static_cast<std::shared_ptr<flutter::Texture>*>(texture);
+  embedder_engine->GetShell().GetPlatformView()->RegisterTexture(*texture_ptr);
+  delete texture_ptr;
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineUnregisterExternalTexture(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     int64_t texture_identifier) {
@@ -4970,6 +4989,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(SendPlatformMessageResponse,
            FlutterEngineSendPlatformMessageResponse);
   SET_PROC(RegisterExternalTexture, FlutterEngineRegisterExternalTexture);
+  SET_PROC(RegisterTexture, FlutterEngineRegisterTexture);
   SET_PROC(UnregisterExternalTexture, FlutterEngineUnregisterExternalTexture);
   SET_PROC(MarkExternalTextureFrameAvailable,
            FlutterEngineMarkExternalTextureFrameAvailable);

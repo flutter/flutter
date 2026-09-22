@@ -21,7 +21,6 @@
 #include "flutter/shell/platform/android/android_semantics_mapper.h"
 #include "flutter/shell/platform/android/android_window_metrics_mapper.h"
 #include "flutter/shell/platform/android/platform_message_handler_android.h"
-#include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/shell/platform/embedder/embedder_semantics_update.h"
 
 #if FML_OS_ANDROID
@@ -342,9 +341,145 @@ EmbedderAndroidEngine::GetPlatformMessageHandler() const {
 
 void EmbedderAndroidEngine::RegisterImageDecoder(ImageGeneratorFactory factory,
                                                  int32_t priority) {
-  if (c_api_engine_ != nullptr) {
-    reinterpret_cast<flutter::EmbedderEngine*>(c_api_engine_)
-        ->RegisterImageGenerator(std::move(factory), priority);
+  if (c_api_engine_ != nullptr &&
+      proc_table_.RegisterImageGenerator != nullptr) {
+    FlutterImageGeneratorRegistrationInfo registration_info = {};
+    registration_info.struct_size =
+        sizeof(FlutterImageGeneratorRegistrationInfo);
+    registration_info.priority = priority;
+    registration_info.user_data = new ImageGeneratorFactory(std::move(factory));
+    registration_info.destruction_callback = [](void* user_data) {
+      delete static_cast<ImageGeneratorFactory*>(user_data);
+    };
+    registration_info.create_generator =
+        [](const uint8_t* buffer, size_t buffer_size, void* user_data,
+           FlutterImageGenerator* generator_out) -> bool {
+      if (!buffer || buffer_size == 0 || !user_data || !generator_out) {
+        return false;
+      }
+      auto* factory_ptr = static_cast<ImageGeneratorFactory*>(user_data);
+      auto sk_data = SkData::MakeWithCopy(buffer, buffer_size);
+      auto generator = (*factory_ptr)(std::move(sk_data));
+      if (!generator) {
+        return false;
+      }
+      std::memset(generator_out, 0, sizeof(FlutterImageGenerator));
+      generator_out->struct_size = sizeof(FlutterImageGenerator);
+      generator_out->user_data =
+          new std::shared_ptr<ImageGenerator>(std::move(generator));
+      generator_out->destruction_callback = [](void* user_data) {
+        delete static_cast<std::shared_ptr<ImageGenerator>*>(user_data);
+      };
+      generator_out->get_info =
+          [](void* user_data, FlutterImageGeneratorInfo* info_out) -> bool {
+        if (!user_data || !info_out) {
+          return false;
+        }
+        auto& gen = *static_cast<std::shared_ptr<ImageGenerator>*>(user_data);
+        const SkImageInfo& info = gen->GetInfo();
+        info_out->width = info.width();
+        info_out->height = info.height();
+        switch (info.alphaType()) {
+          case kOpaque_SkAlphaType:
+            info_out->alpha_type = kFlutterImageGeneratorAlphaTypeOpaque;
+            break;
+          case kPremul_SkAlphaType:
+            info_out->alpha_type = kFlutterImageGeneratorAlphaTypePremul;
+            break;
+          case kUnpremul_SkAlphaType:
+            info_out->alpha_type = kFlutterImageGeneratorAlphaTypeUnpremul;
+            break;
+          default:
+            info_out->alpha_type = kFlutterImageGeneratorAlphaTypeUnknown;
+            break;
+        }
+        switch (info.colorType()) {
+          case kRGBA_8888_SkColorType:
+            info_out->color_type = kFlutterImageGeneratorColorTypeRGBA8888;
+            break;
+          case kBGRA_8888_SkColorType:
+            info_out->color_type = kFlutterImageGeneratorColorTypeBGRA8888;
+            break;
+          default:
+            info_out->color_type = kFlutterImageGeneratorColorTypeUnknown;
+            break;
+        }
+        return true;
+      };
+      generator_out->get_pixels =
+          [](void* user_data, const FlutterImageGeneratorInfo* info,
+             void* pixels, size_t row_bytes, uint32_t frame_index,
+             int64_t prior_frame) -> bool {
+        if (!user_data || !pixels) {
+          return false;
+        }
+        auto& gen = *static_cast<std::shared_ptr<ImageGenerator>*>(user_data);
+        SkColorType color_type =
+            (info &&
+             info->color_type == kFlutterImageGeneratorColorTypeBGRA8888)
+                ? kBGRA_8888_SkColorType
+                : kRGBA_8888_SkColorType;
+        SkAlphaType alpha_type = kPremul_SkAlphaType;
+        if (info) {
+          if (info->alpha_type == kFlutterImageGeneratorAlphaTypeOpaque) {
+            alpha_type = kOpaque_SkAlphaType;
+          } else if (info->alpha_type ==
+                     kFlutterImageGeneratorAlphaTypeUnpremul) {
+            alpha_type = kUnpremul_SkAlphaType;
+          }
+        }
+        SkImageInfo sk_info =
+            SkImageInfo::Make(info ? info->width : gen->GetInfo().width(),
+                              info ? info->height : gen->GetInfo().height(),
+                              color_type, alpha_type);
+        std::optional<unsigned int> prior_opt =
+            prior_frame >= 0 ? std::optional<unsigned int>(prior_frame)
+                             : std::nullopt;
+        return gen->GetPixels(sk_info, pixels, row_bytes, frame_index,
+                              prior_opt);
+      };
+      generator_out->get_frame_count = [](void* user_data) -> uint32_t {
+        if (!user_data) {
+          return 0;
+        }
+        auto& gen = *static_cast<std::shared_ptr<ImageGenerator>*>(user_data);
+        return gen->GetFrameCount();
+      };
+      generator_out->get_play_count = [](void* user_data) -> uint32_t {
+        if (!user_data) {
+          return 0;
+        }
+        auto& gen = *static_cast<std::shared_ptr<ImageGenerator>*>(user_data);
+        return gen->GetPlayCount();
+      };
+      generator_out->get_frame_info =
+          [](void* user_data, uint32_t frame_index,
+             FlutterImageGeneratorFrameInfo* frame_info_out) -> bool {
+        if (!user_data || !frame_info_out) {
+          return false;
+        }
+        auto& gen = *static_cast<std::shared_ptr<ImageGenerator>*>(user_data);
+        auto frame_info = gen->GetFrameInfo(frame_index);
+        frame_info_out->disposal_method =
+            static_cast<FlutterImageGeneratorDisposalMethod>(
+                frame_info.disposal_method);
+        return true;
+      };
+      generator_out->get_scaled_dimensions =
+          [](void* user_data, float desired_scale, uint32_t* scaled_width_out,
+             uint32_t* scaled_height_out) -> bool {
+        if (!user_data || !scaled_width_out || !scaled_height_out) {
+          return false;
+        }
+        auto& gen = *static_cast<std::shared_ptr<ImageGenerator>*>(user_data);
+        SkISize scaled = gen->GetScaledDimensions(desired_scale);
+        *scaled_width_out = scaled.width();
+        *scaled_height_out = scaled.height();
+        return true;
+      };
+      return true;
+    };
+    proc_table_.RegisterImageGenerator(GetEngineHandle(), &registration_info);
   } else {
     pending_image_generators_.push_back({std::move(factory), priority});
   }
@@ -703,12 +838,15 @@ void EmbedderAndroidEngine::RegisterTexture(
   if (!IsValid() || !texture) {
     return;
   }
+  if (proc_table_.RegisterTexture) {
+    auto texture_holder = new std::shared_ptr<flutter::Texture>(texture);
+    proc_table_.RegisterTexture(GetEngineHandle(), texture_holder);
+  }
   if (proc_table_.RegisterExternalTexture) {
     proc_table_.RegisterExternalTexture(GetEngineHandle(), texture->Id());
   }
-  if (c_api_engine_ != nullptr) {
-    reinterpret_cast<flutter::EmbedderEngine*>(c_api_engine_)
-        ->RegisterTexture(std::move(texture));
+  if (!c_api_is_valid_) {
+    pending_textures_.push_back(texture);
   }
 }
 
@@ -716,6 +854,12 @@ void EmbedderAndroidEngine::UnregisterTexture(int64_t texture_id) {
   if (proc_table_.UnregisterExternalTexture) {
     proc_table_.UnregisterExternalTexture(GetEngineHandle(), texture_id);
   }
+  pending_textures_.erase(
+      std::remove_if(pending_textures_.begin(), pending_textures_.end(),
+                     [texture_id](const auto& texture) {
+                       return texture && texture->Id() == texture_id;
+                     }),
+      pending_textures_.end());
 }
 
 void EmbedderAndroidEngine::MarkTextureFrameAvailable(int64_t texture_id) {
@@ -1048,8 +1192,7 @@ bool EmbedderAndroidEngine::Run(
   }
 
   for (auto& pending : pending_image_generators_) {
-    reinterpret_cast<flutter::EmbedderEngine*>(c_api_engine_)
-        ->RegisterImageGenerator(std::move(pending.factory), pending.priority);
+    RegisterImageDecoder(std::move(pending.factory), pending.priority);
   }
   pending_image_generators_.clear();
 
@@ -1072,6 +1215,11 @@ bool EmbedderAndroidEngine::Run(
   }
 
   c_api_is_valid_ = true;
+
+  for (auto& pending : pending_textures_) {
+    RegisterTexture(std::move(pending));
+  }
+  pending_textures_.clear();
 
   if (surface_attached_) {
     proc_table_.NotifyCreated(c_api_engine_);
