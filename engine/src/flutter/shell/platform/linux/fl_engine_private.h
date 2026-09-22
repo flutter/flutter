@@ -106,16 +106,6 @@ FlDisplayMonitor* fl_engine_get_display_monitor(FlEngine* engine);
 gboolean fl_engine_start(FlEngine* engine, GError** error);
 
 /**
- * fl_engine_schedule_frame:
- * @engine: an #FlEngine.
- *
- * Requests that the engine render another frame.
- *
- * Returns: %TRUE if the request was accepted.
- */
-gboolean fl_engine_schedule_frame(FlEngine* engine);
-
-/**
  * fl_engine_get_embedder_api:
  * @engine: an #FlEngine.
  *
@@ -258,6 +248,15 @@ void fl_engine_set_platform_message_handler(
     FlEnginePlatformMessageHandler handler,
     gpointer user_data,
     GDestroyNotify destroy_notify);
+
+/**
+ * fl_engine_schedule_frame:
+ * @engine: an #FlEngine.
+ *
+ * Asks the engine to render another frame. Used when a view needs the current
+ * frame again, e.g. because it wasn't able to use the last one.
+ */
+void fl_engine_schedule_frame(FlEngine* engine);
 
 /**
  * fl_engine_send_window_metrics_event:

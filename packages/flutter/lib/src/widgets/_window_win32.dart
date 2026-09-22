@@ -771,10 +771,11 @@ class DialogWindowControllerWin32 extends DialogWindowController with BaseWindow
   }
 }
 
-typedef _GetWindowPositionNative = ffi.Pointer<_Rect> Function(
+typedef _GetWindowPositionNative = ffi.Void Function(
   ffi.Pointer<_Size> childSize,
   ffi.Pointer<_Rect> parentRect,
-  ffi.Pointer<_Rect> outputRect,
+  ffi.Pointer<_Rect> displayRect,
+  ffi.Pointer<_Rect> result, // output parameter
 );
 
 /// Implementation of [TooltipWindowController] for the Windows platform.
@@ -841,12 +842,12 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   @internal
   bool get isDestroyed => _destroyed;
 
-  ffi.Pointer<_Rect> _handleGetWindowPosition(
+  void _handleGetWindowPosition(
     ffi.Pointer<_Size> childSize,
     ffi.Pointer<_Rect> parentRect,
-    ffi.Pointer<_Rect> outputRect,
+    ffi.Pointer<_Rect> displayRect,
+    ffi.Pointer<_Rect> result,
   ) {
-    final ffi.Pointer<_Rect> result = _owner.allocator<_Rect>();
     final double scale = PlatformDispatcher.instance.views
         .firstWhere((FlutterView view) => view.viewId == rootView.viewId)
         .devicePixelRatio;
@@ -865,13 +866,12 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
         parentRect.ref.top.toDouble(),
       ),
       parentRect: parentRect.ref.toRect(),
-      displayRect: outputRect.ref.toRect(),
+      displayRect: displayRect.ref.toRect(),
     );
     result.ref.left = targetRect.left.toInt();
     result.ref.top = targetRect.top.toInt();
     result.ref.width = targetRect.width.toInt();
     result.ref.height = targetRect.height.toInt();
-    return result;
   }
 
   /// Returns HWND pointer to the top level window.
@@ -1035,10 +1035,11 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
   @internal
   bool get isDestroyed => _destroyed;
 
-  ffi.Pointer<_Rect> _handleGetWindowPosition(
+  void _handleGetWindowPosition(
     ffi.Pointer<_Size> childSize,
     ffi.Pointer<_Rect> parentRect,
-    ffi.Pointer<_Rect> outputRect,
+    ffi.Pointer<_Rect> displayRect,
+    ffi.Pointer<_Rect> result,
   ) {
     final double scale = PlatformDispatcher.instance.views
         .firstWhere((FlutterView view) => view.viewId == rootView.viewId)
@@ -1058,14 +1059,12 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
         parentRect.ref.top.toDouble(),
       ),
       parentRect: parentRect.ref.toRect(),
-      displayRect: outputRect.ref.toRect(),
+      displayRect: displayRect.ref.toRect(),
     );
-    final ffi.Pointer<_Rect> result = _owner.allocator<_Rect>();
     result.ref.left = targetRect.left.toInt();
     result.ref.top = targetRect.top.toInt();
     result.ref.width = targetRect.width.toInt();
     result.ref.height = targetRect.height.toInt();
-    return result;
   }
 
   /// Returns HWND pointer to the top level window.
@@ -1380,10 +1379,11 @@ class _Win32PlatformInterface {
     HWND parent,
     ffi.Pointer<
       ffi.NativeFunction<
-        ffi.Pointer<_Rect> Function(
+        ffi.Void Function(
           ffi.Pointer<_Size> childSize,
           ffi.Pointer<_Rect> parentRect,
-          ffi.Pointer<_Rect> outputRect,
+          ffi.Pointer<_Rect> displayRect,
+          ffi.Pointer<_Rect> result, // output parameter
         )
       >
     >
@@ -1416,10 +1416,11 @@ class _Win32PlatformInterface {
     HWND parent,
     ffi.Pointer<
       ffi.NativeFunction<
-        ffi.Pointer<_Rect> Function(
+        ffi.Void Function(
           ffi.Pointer<_Size> childSize,
           ffi.Pointer<_Rect> parentRect,
-          ffi.Pointer<_Rect> outputRect,
+          ffi.Pointer<_Rect> displayRect,
+          ffi.Pointer<_Rect> result, // output parameter
         )
       >
     >
@@ -1656,10 +1657,11 @@ final class _TooltipWindowCreationRequest extends ffi.Struct {
   external HWND parent;
   external ffi.Pointer<
     ffi.NativeFunction<
-      ffi.Pointer<_Rect> Function(
+      ffi.Void Function(
         ffi.Pointer<_Size> childSize,
         ffi.Pointer<_Rect> parentRect,
-        ffi.Pointer<_Rect> outputRect,
+        ffi.Pointer<_Rect> displayRect,
+        ffi.Pointer<_Rect> result,
       )
     >
   >
@@ -1671,10 +1673,11 @@ final class _PopupWindowCreationRequest extends ffi.Struct {
   external HWND parent;
   external ffi.Pointer<
     ffi.NativeFunction<
-      ffi.Pointer<_Rect> Function(
+      ffi.Void Function(
         ffi.Pointer<_Size> childSize,
         ffi.Pointer<_Rect> parentRect,
-        ffi.Pointer<_Rect> outputRect,
+        ffi.Pointer<_Rect> displayRect,
+        ffi.Pointer<_Rect> result,
       )
     >
   >

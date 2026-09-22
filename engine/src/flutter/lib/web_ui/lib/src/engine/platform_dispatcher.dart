@@ -37,7 +37,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     registerHotRestartListener(dispose);
     _appLifecycleState.addListener(_setAppLifecycleState);
     _viewFocusBinding.init();
-    domDocument.body?.prepend(accessibilityPlaceholder);
     _onViewDisposedListener = viewManager.onViewDisposed.listen((_) {
       // Send a metrics changed event to the framework when a view is disposed.
       // View creation/resize is handled by the `_didResize` handler in the
@@ -89,10 +88,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   static EnginePlatformDispatcher get instance => _instance;
   static final EnginePlatformDispatcher _instance = EnginePlatformDispatcher();
 
-  @visibleForTesting
-  DomElement get accessibilityPlaceholder =>
-      EngineSemantics.instance.semanticsHelper.accessibilityPlaceholder;
-
   PlatformConfiguration configuration = PlatformConfiguration(
     locales: parseBrowserLanguages(),
     textScaleFactor: findBrowserTextScaleFactor(),
@@ -114,7 +109,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _removeLocaleChangedListener();
     _appLifecycleState.removeListener(_setAppLifecycleState);
     _viewFocusBinding.dispose();
-    accessibilityPlaceholder.remove();
     _onViewDisposedListener.cancel();
     viewManager.dispose();
   }
@@ -1024,17 +1018,23 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
     final locales = <ui.Locale>[];
     for (final String language in languages) {
-      final domLocale = DomLocale(language);
-      locales.add(
-        ui.Locale.fromSubtags(
-          languageCode: domLocale.language,
-          scriptCode: domLocale.script,
-          countryCode: domLocale.region,
-        ),
-      );
+      try {
+        final domLocale = DomLocale(language);
+        locales.add(
+          ui.Locale.fromSubtags(
+            languageCode: domLocale.language,
+            scriptCode: domLocale.script,
+            countryCode: domLocale.region,
+          ),
+        );
+      } catch (_) {
+        // Skip tags Intl.Locale rejects (e.g. en-US@posix on Linux).
+      }
     }
 
-    assert(locales.isNotEmpty);
+    if (locales.isEmpty) {
+      return const <ui.Locale>[_defaultLocale];
+    }
     return locales;
   }
 

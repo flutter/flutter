@@ -942,13 +942,6 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   return TRUE;
 }
 
-gboolean fl_engine_schedule_frame(FlEngine* self) {
-  g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
-  g_return_val_if_fail(self->engine != nullptr, FALSE);
-
-  return self->embedder_api.ScheduleFrame(self->engine) == kSuccess;
-}
-
 FlutterEngineProcTable* fl_engine_get_embedder_api(FlEngine* self) {
   return &(self->embedder_api);
 }
@@ -1190,6 +1183,18 @@ GBytes* fl_engine_send_platform_message_finish(FlEngine* self,
   g_return_val_if_fail(g_task_is_valid(result, self), FALSE);
 
   return static_cast<GBytes*>(g_task_propagate_pointer(G_TASK(result), error));
+}
+
+void fl_engine_schedule_frame(FlEngine* self) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->engine == nullptr) {
+    return;
+  }
+
+  if (self->embedder_api.ScheduleFrame(self->engine) != kSuccess) {
+    g_warning("Failed to schedule frame");
+  }
 }
 
 void fl_engine_send_window_metrics_event(FlEngine* self,

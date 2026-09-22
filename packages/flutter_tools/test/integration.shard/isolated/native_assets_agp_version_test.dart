@@ -16,7 +16,7 @@ import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 
 /// The AGP versions to run these tests against.
-final agpVersions = <String>['8.4.0'];
+final agpVersions = <String>['9.1.0'];
 
 /// The build modes to target for each flutter command that supports passing
 /// a build mode.

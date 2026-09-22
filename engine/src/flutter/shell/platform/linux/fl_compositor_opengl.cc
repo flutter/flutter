@@ -458,15 +458,8 @@ static gboolean fl_compositor_opengl_present_layers_gtk3(
     size_t layers_count) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
 
-  if (layers_count == 0) {
-    return TRUE;
-  }
-
-  const size_t width = layers[0]->size.width;
-  const size_t height = layers[0]->size.height;
-  if (width == 0 || height == 0) {
-    return TRUE;
-  }
+  const size_t width = layers_count > 0 ? layers[0]->size.width : 0;
+  const size_t height = layers_count > 0 ? layers[0]->size.height : 0;
 
   GLint saved_texture_binding;
   glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture_binding);
@@ -488,6 +481,8 @@ static gboolean fl_compositor_opengl_present_layers_gtk3(
   glGetIntegerv(GL_BLEND_DST_RGB, &saved_dst_rgb);
   GLint saved_dst_alpha;
   glGetIntegerv(GL_BLEND_DST_ALPHA, &saved_dst_alpha);
+  GLfloat saved_clear_color[4] = {0.0, 0.0, 0.0, 0.0};
+  glGetFloatv(GL_COLOR_CLEAR_VALUE, saved_clear_color);
 
   GLuint vao;
   glGenVertexArrays(1, &vao);
@@ -507,6 +502,9 @@ static gboolean fl_compositor_opengl_present_layers_gtk3(
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glUseProgram(self->program);
   glDisable(GL_SCISSOR_TEST);
+
+  glClearColor(0.0, 0.0, 0.0, 0.0);
+  glClear(GL_COLOR_BUFFER_BIT);
 
   gboolean first_layer = TRUE;
   for (size_t i = 0; i < layers_count; ++i) {
@@ -543,6 +541,9 @@ static gboolean fl_compositor_opengl_present_layers_gtk3(
   } else {
     glDisable(GL_SCISSOR_TEST);
   }
+
+  glClearColor(saved_clear_color[0], saved_clear_color[1], saved_clear_color[2],
+               saved_clear_color[3]);
   glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
   glBindVertexArray(saved_vao_binding);
   glBindBuffer(GL_ARRAY_BUFFER, saved_array_buffer_binding);

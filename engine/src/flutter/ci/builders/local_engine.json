@@ -1063,7 +1063,8 @@
       "name": "macos/wasm_release",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-15.7"
+        "os=Mac-15.7",
+        "cpu=arm64"
       ],
       "gclient_variables": {
         "download_android_deps": false,
@@ -1099,7 +1100,8 @@
       "name": "macos/wasm_debug_unopt",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-15.7"
+        "os=Mac-15.7",
+        "cpu=arm64"
       ],
       "gclient_variables": {
         "download_android_deps": false,

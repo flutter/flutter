@@ -44,6 +44,7 @@ class MockEpoxy {
   MOCK_METHOD(EGLint,
               eglWaitSyncKHR,
               (EGLDisplay dpy, EGLSyncKHR sync, EGLint flags));
+  MOCK_METHOD(void, glClear, (GLbitfield mask));
   MOCK_METHOD(void, glClearColor, (GLfloat r, GLfloat g, GLfloat b, GLfloat a));
   MOCK_METHOD(void,
               glBlitFramebuffer,
@@ -89,6 +90,7 @@ class MockEpoxy {
                GLuint texture,
                GLint level,
                GLsizei samples));
+  MOCK_METHOD(void, glGetFloatv, (GLenum pname, GLfloat* data));
   MOCK_METHOD(void, glGetIntegerv, (GLenum pname, GLint* data));
   MOCK_METHOD(const GLubyte*, glGetString, (GLenum pname));
   MOCK_METHOD(void,
@@ -132,6 +134,7 @@ class MockEpoxy {
   MOCK_METHOD(void,
               glViewport,
               (GLint x, GLint y, GLsizei width, GLsizei height));
+  MOCK_METHOD(void, eglSwapBuffers, ());
 
   // The size reported for EGL surfaces. Zero by default, so anything drawing
   // to a mock surface sees a size change on its first frame.

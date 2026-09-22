@@ -143,6 +143,7 @@ Future<void> main(List<String> args) async {
           runAndroidEngineTests(impellerBackend: ImpellerBackend.vulkan),
       'android_engine_opengles_tests': () =>
           runAndroidEngineTests(impellerBackend: ImpellerBackend.opengles),
+      'android_engine_hcpp_tests': runAndroidEngineHcppTests,
       'android_hardware_smoke_vulkan_tests': () =>
           runAndroidHardwareSmokeTests(backend: ImpellerBackend.vulkan),
       'android_hardware_smoke_opengles_tests': () =>

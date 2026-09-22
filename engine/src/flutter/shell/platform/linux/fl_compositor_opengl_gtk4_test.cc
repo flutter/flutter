@@ -5,6 +5,7 @@
 #include "gmock/gmock.h"
 
 #include "flutter/shell/platform/linux/fl_compositor_opengl_private.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "flutter/shell/platform/linux/testing/mock_epoxy.h"
@@ -18,9 +19,9 @@ class FlCompositorOpenGLGtk4Test : public flutter::testing::LinuxTest {
 };
 
 TEST_F(FlCompositorOpenGLGtk4Test, SharedGLTextureFallbackUsesFence) {
-  g_autoptr(FlCompositorOpenGL) compositor = FL_COMPOSITOR_OPENGL(
-      g_object_new(fl_compositor_opengl_get_type(), nullptr));
-  compositor->shareable = TRUE;
+  g_autoptr(FlOpenGLManager) manager = fl_opengl_manager_new();
+  g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(
+      fl_engine_get_task_runner(engine), manager, TRUE);
   // Force the direct GdkGLTexture fallback independently of the test process
   // environment and of GTK's DMA-BUF support.
   compositor->dmabuf_disabled = TRUE;
@@ -34,9 +35,9 @@ TEST_F(FlCompositorOpenGLGtk4Test, SharedGLTextureFallbackUsesFence) {
 
 TEST_F(FlCompositorOpenGLGtk4Test,
        SharedGLTextureFallbackWithoutFencesCompletesFrame) {
-  g_autoptr(FlCompositorOpenGL) compositor = FL_COMPOSITOR_OPENGL(
-      g_object_new(fl_compositor_opengl_get_type(), nullptr));
-  compositor->shareable = TRUE;
+  g_autoptr(FlOpenGLManager) manager = fl_opengl_manager_new();
+  g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(
+      fl_engine_get_task_runner(engine), manager, TRUE);
   compositor->dmabuf_disabled = TRUE;
 
   EXPECT_CALL(epoxy, epoxy_has_egl_extension(::testing::_, ::testing::_))
@@ -48,9 +49,9 @@ TEST_F(FlCompositorOpenGLGtk4Test,
 }
 
 TEST_F(FlCompositorOpenGLGtk4Test, ReadbackDoesNotSynchronizeTwice) {
-  g_autoptr(FlCompositorOpenGL) compositor = FL_COMPOSITOR_OPENGL(
-      g_object_new(fl_compositor_opengl_get_type(), nullptr));
-  compositor->shareable = FALSE;
+  g_autoptr(FlOpenGLManager) manager = fl_opengl_manager_new();
+  g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(
+      fl_engine_get_task_runner(engine), manager, FALSE);
 
   EXPECT_CALL(epoxy, glFinish()).Times(0);
 
