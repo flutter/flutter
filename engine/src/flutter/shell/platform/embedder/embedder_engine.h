@@ -96,6 +96,8 @@ class EmbedderEngine {
 
   bool RegisterTexture(int64_t texture);
 
+  bool RegisterTexture(std::shared_ptr<flutter::Texture> texture);
+
   bool UnregisterTexture(int64_t texture);
 
   bool MarkTextureFrameAvailable(int64_t texture);
@@ -143,8 +145,6 @@ class EmbedderEngine {
                                     bool base64_encode) const;
 
   Shell& GetShell();
-
-  const std::unique_ptr<Shell>& GetShellPointer() const { return shell_; }
 
   void SetRendererConfig(const FlutterRendererConfig& config) {
     renderer_config_ = config;
