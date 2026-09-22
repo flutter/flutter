@@ -824,7 +824,10 @@ public class FlutterFragmentActivity extends FragmentActivity
   @NonNull
   public String getDartEntrypointFunctionName() {
     if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT)) {
-      return IntentUtils.safeGetStringExtra(this, EXTRA_DART_ENTRYPOINT);
+      String entrypoint = IntentUtils.safeGetStringExtra(this, EXTRA_DART_ENTRYPOINT);
+      if (entrypoint != null) {
+        return entrypoint;
+      }
     }
 
     try {
@@ -908,13 +911,17 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   protected String getInitialRoute() {
     if (getIntent().hasExtra(EXTRA_INITIAL_ROUTE)) {
-      return IntentUtils.safeGetStringExtra(this, EXTRA_INITIAL_ROUTE);
+      String route = IntentUtils.safeGetStringExtra(this, EXTRA_INITIAL_ROUTE);
+      if (route != null) {
+        return route;
+      }
     }
 
     try {
-      return FlutterActivityLaunchConfigs.getInitialRoute(getIntent(), this, getMetaData());
+      return FlutterActivityLaunchConfigs.getInitialRouteFromCommandLineOrManifest(
+          this, getMetaData());
     } catch (PackageManager.NameNotFoundException e) {
-      return FlutterActivityLaunchConfigs.getInitialRoute(getIntent(), this, null);
+      return FlutterActivityLaunchConfigs.getInitialRouteFromCommandLineOrManifest(this, null);
     }
   }
 
