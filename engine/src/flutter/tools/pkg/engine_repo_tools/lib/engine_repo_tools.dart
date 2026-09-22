@@ -295,8 +295,9 @@ final class Output {
   /// The directory containing the output target.
   final io.Directory path;
 
-  /// The `compile_commands.json` file that should exist for this output target.
+  /// The GN `compile_commands.json` for this output target.
   ///
+  /// This is GN's database, and includes C, C++ and Objective-C++ targets.
   /// The file may not exist.
   io.File get compileCommandsJson {
     return io.File(p.join(path.path, 'compile_commands.json'));

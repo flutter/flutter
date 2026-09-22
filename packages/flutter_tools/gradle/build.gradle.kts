@@ -49,6 +49,10 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     }
 }
 
+// The AGP version to compile and test against. Namespaced with `flutter.internal.` to
+// avoid collision with user app properties when evaluated as an included build.
+val agpVersion: String = providers.gradleProperty("flutter.internal.agpVersion").getOrElse("8.11.1")
+
 dependencies {
     // Versions available https://mvnrepository.com/artifact/androidx.annotation/annotation-jvm.
     // Version release notes https://developer.android.com/jetpack/androidx/releases/annotation
@@ -61,13 +65,13 @@ dependencies {
     // All kotlinx implementation dependencies must work with the oldest kotlin supported versions.
     // Defined in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
-    // When bumping, also update:
+    // When bumping the default agpVersion above, also update:
     //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
     //  * ndkVersion constant in packages/flutter_tools/lib/src/android/gradle_utils.dart
     //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
-    compileOnly("com.android.tools.build:gradle:8.11.1")
+    compileOnly("com.android.tools.build:gradle:$agpVersion")
 
     testImplementation(kotlin("test"))
-    testImplementation("com.android.tools.build:gradle:8.11.1")
+    testImplementation("com.android.tools.build:gradle:$agpVersion")
     testImplementation("io.mockk:mockk:1.13.16")
 }

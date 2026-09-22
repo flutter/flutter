@@ -59,7 +59,7 @@ class CopyArtifactsStep implements PipelineStep {
       'storage.googleapis.com',
       '${realmComponent}flutter_infra_release/flutter/${realm == LuciRealm.Try ? gitRevision : contentHash}/flutter-web-sdk.zip',
     );
-    final http.Response response = await http.Client().get(url);
+    final http.Response response = await http.get(url);
     if (response.statusCode != 200) {
       throw ToolExit(
         'Could not download flutter-web-sdk.zip from cloud bucket at URL: $url. Response status code: ${response.statusCode}',
@@ -196,13 +196,16 @@ class CopyArtifactsStep implements PipelineStep {
       'assets',
       'fallback_fonts',
     );
-    for (final io.File file in fallbackFontsSource.listSync(recursive: true).whereType<io.File>()) {
-      final String relativePath = pathlib.relative(file.path, from: fallbackFontsSource.path);
-      final destinationFile = io.File(pathlib.join(fallbackFontsDestinationPath, relativePath));
-      if (!destinationFile.parent.existsSync()) {
-        destinationFile.parent.createSync(recursive: true);
+    if (fallbackFontsSource.existsSync()) {
+      for (final io.File file
+          in fallbackFontsSource.listSync(recursive: true).whereType<io.File>()) {
+        final String relativePath = pathlib.relative(file.path, from: fallbackFontsSource.path);
+        final destinationFile = io.File(pathlib.join(fallbackFontsDestinationPath, relativePath));
+        if (!destinationFile.parent.existsSync()) {
+          destinationFile.parent.createSync(recursive: true);
+        }
+        file.copySync(destinationFile.path);
       }
-      file.copySync(destinationFile.path);
     }
   }
 
@@ -218,43 +221,53 @@ class CopyArtifactsStep implements PipelineStep {
       ),
     );
 
-    for (final io.File imageFile in testImagesDir.listSync(recursive: true).whereType<io.File>()) {
-      // Skip files that are used by Skia to test handling of invalid input.
-      final String imageBaseName = pathlib.basename(imageFile.path);
-      if (imageBaseName.contains('invalid') || imageBaseName.contains('missing_eof')) {
-        continue;
+    if (testImagesDir.existsSync()) {
+      for (final io.File imageFile
+          in testImagesDir.listSync(recursive: true).whereType<io.File>()) {
+        // Skip files that are used by Skia to test handling of invalid input.
+        final String imageBaseName = pathlib.basename(imageFile.path);
+        if (imageBaseName.contains('invalid') || imageBaseName.contains('missing_eof')) {
+          continue;
+        }
+        final destination = io.File(
+          pathlib.join(
+            environment.webTestsArtifactsDir.path,
+            'test_images',
+            pathlib.relative(imageFile.path, from: testImagesDir.path),
+          ),
+        );
+        destination.createSync(recursive: true);
+        await imageFile.copy(destination.path);
       }
-      final destination = io.File(
-        pathlib.join(
-          environment.webTestsArtifactsDir.path,
-          'test_images',
-          pathlib.relative(imageFile.path, from: testImagesDir.path),
-        ),
-      );
-      destination.createSync(recursive: true);
-      await imageFile.copy(destination.path);
     }
   }
 
   Future<void> copyFlutterJsFiles(String sourcePath) async {
-    final flutterJsInputDirectory = io.Directory(sourcePath);
+    var flutterJsInputDirectory = io.Directory(sourcePath);
+    if (!flutterJsInputDirectory.existsSync()) {
+      flutterJsInputDirectory = io.Directory(
+        pathlib.join(environment.webUiRootDir.path, 'flutter_js', 'src'),
+      );
+    }
     final String targetDirectoryPath = pathlib.join(
       environment.webTestsArtifactsDir.path,
       'flutter_js',
     );
 
-    for (final io.File sourceFile
-        in flutterJsInputDirectory.listSync(recursive: true).whereType<io.File>()) {
-      final String relativePath = pathlib.relative(
-        sourceFile.path,
-        from: flutterJsInputDirectory.path,
-      );
-      final String targetPath = pathlib.join(targetDirectoryPath, relativePath);
-      final targetFile = io.File(targetPath);
-      if (!targetFile.parent.existsSync()) {
-        targetFile.parent.createSync(recursive: true);
+    if (flutterJsInputDirectory.existsSync()) {
+      for (final io.File sourceFile
+          in flutterJsInputDirectory.listSync(recursive: true).whereType<io.File>()) {
+        final String relativePath = pathlib.relative(
+          sourceFile.path,
+          from: flutterJsInputDirectory.path,
+        );
+        final String targetPath = pathlib.join(targetDirectoryPath, relativePath);
+        final targetFile = io.File(targetPath);
+        if (!targetFile.parent.existsSync()) {
+          targetFile.parent.createSync(recursive: true);
+        }
+        sourceFile.copySync(targetPath);
       }
-      sourceFile.copySync(targetPath);
     }
   }
 
@@ -281,9 +294,7 @@ class CopyArtifactsStep implements PipelineStep {
           // they are optional.
           continue;
         }
-        {
-          throw ToolExit('Built artifact not found at path "$sourceFile".');
-        }
+        throw ToolExit('Built artifact not found at path "$sourceFile".');
       }
       await targetFile.create(recursive: true);
       await sourceFile.copy(targetFile.path);

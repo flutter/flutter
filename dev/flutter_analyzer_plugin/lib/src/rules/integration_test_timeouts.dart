@@ -6,11 +6,14 @@ import 'package:analyzer/analysis_rule/analysis_rule.dart';
 import 'package:analyzer/analysis_rule/rule_context.dart';
 import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
-/// Integration tests in flutter test_driver must have `timeout: Timeout.none`.
-class IntegrationTestTimeouts extends AnalysisRule {
+import '../flutter_analysis_rule.dart';
+
+/// Integration tests must specify `timeout: Timeout.none` to prevent them from getting stuck.
+class IntegrationTestTimeouts extends FlutterAnalysisRule {
   IntegrationTestTimeouts() : super(name: code.name, description: ruleDescription);
 
   static const String ruleDescription =
@@ -27,9 +30,15 @@ class IntegrationTestTimeouts extends AnalysisRule {
   DiagnosticCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final String filePath = context.definingUnit.file.path;
-    if (!filePath.contains('test_driver') && !filePath.contains('test.dart')) {
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
+    if (!filePath.contains('/home/test') && !filePath.contains('/dev/')) {
+      return;
+    }
+    if (!filePath.contains('test_driver') ||
+        (!filePath.endsWith('_test.dart') &&
+            !filePath.endsWith('util.dart') &&
+            !filePath.endsWith('test.dart'))) {
       return;
     }
     final visitor = _Visitor(this);
@@ -48,10 +57,10 @@ class _Visitor extends SimpleAstVisitor<void> {
       methodName: SimpleIdentifier(name: 'test'),
       :final ArgumentList argumentList,
     )) {
-      final bool hasTimeoutNone = argumentList.arguments.any((Expression argument) {
-        if (argument case NamedExpression(
-          name: Label(label: SimpleIdentifier(name: 'timeout')),
-          expression: PrefixedIdentifier(
+      final bool hasTimeoutNone = argumentList.arguments.any((Argument argument) {
+        if (argument case NamedArgument(
+          name: Token(lexeme: 'timeout'),
+          argumentExpression: PrefixedIdentifier(
             prefix: SimpleIdentifier(name: 'Timeout'),
             identifier: SimpleIdentifier(name: 'none'),
           ),

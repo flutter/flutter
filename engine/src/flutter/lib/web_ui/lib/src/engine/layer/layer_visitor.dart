@@ -175,6 +175,14 @@ class PrerollVisitor extends LayerVisitor<void> {
 
   @override
   void visitPicture(PictureLayer picture) {
+    if (picture.picture.isDisposed) {
+      // The picture was disposed before the layer could be painted.
+      // Just ignore it then.
+      picture.paintBounds = ui.Rect.zero;
+      picture.isCulled = true;
+      return;
+    }
+
     picture.paintBounds = picture.picture.cullRect.shift(picture.offset);
     // The picture may have been culled on a previous frame, but has since
     // scrolled back into the clip region. Reset the `isCulled` flag.
@@ -422,9 +430,8 @@ class MeasureVisitor extends LayerVisitor<void> {
 
     // Get the picture bounds using the measuring canvas.
     final localTransform = Float32List.fromList(measuringCanvas.getTransform());
-    ui.Rect transformedBounds = Matrix4.fromFloat32List(
-      localTransform,
-    ).transformRect(picture.picture.cullRect);
+    ui.Rect transformedBounds = Matrix4.fromFloat32List(localTransform)
+        .transformRect(picture.picture.cullRect);
     // Modify the bounds with the image filters.
     for (final EngineImageFilter imageFilter in imageFilterStack.reversed) {
       transformedBounds = imageFilter.filterBounds(transformedBounds);
@@ -895,7 +902,7 @@ class DebugInfoVisitor extends LayerVisitor<Map<String, dynamic>> {
 
   @override
   Map<String, dynamic> visitPicture(PictureLayer picture) {
-    final ui.Rect cullRect = picture.picture.cullRect;
+    final ui.Rect cullRect = picture.picture.isDisposed ? ui.Rect.zero : picture.picture.cullRect;
     return <String, dynamic>{
       'type': 'picture',
       'offset': {'x': picture.offset.dx, 'y': picture.offset.dy},

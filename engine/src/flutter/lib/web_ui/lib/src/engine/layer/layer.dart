@@ -241,7 +241,9 @@ class PictureLayer extends Layer {
 
   @override
   void dispose() {
-    picture.dispose();
+    if (!picture.isDisposed) {
+      picture.dispose();
+    }
     super.dispose();
   }
 }
