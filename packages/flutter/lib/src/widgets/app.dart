@@ -35,7 +35,6 @@ import 'raw_tooltip.dart';
 import 'restoration.dart';
 import 'router.dart';
 import 'scrollable_helpers.dart';
-import 'selectable_region.dart';
 import 'semantics_debugger.dart';
 import 'shared_app_data.dart';
 import 'shortcuts.dart';

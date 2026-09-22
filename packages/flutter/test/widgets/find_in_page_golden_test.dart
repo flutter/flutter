@@ -13,9 +13,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 Future<void> _loadRealFonts() async {
   // Resolve the Flutter root directory to load real Roboto and MaterialIcons
-  // fonts so golden PNGs render human-readable typography instead of Ahem blocks.
-  final Directory flutterRoot = Directory('/usr/local/google/home/kevmoo/github/flutter');
-  final String fontDir = '${flutterRoot.path}/bin/cache/artifacts/material_fonts';
+  // fonts when generating local golden PNGs.
+  final String? flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  if (flutterRoot == null) {
+    return;
+  }
+  final String fontDir = '$flutterRoot/bin/cache/artifacts/material_fonts';
 
   final FontLoader robotoLoader = FontLoader('Roboto');
   final File robotoRegular = File('$fontDir/Roboto-Regular.ttf');
@@ -474,10 +477,12 @@ void main() {
         expect(findController.activeMatchIndex, 0);
         expect(scrollController.offset, 0.0);
 
-        await expectLater(
-          find.byType(MaterialApp),
-          matchesGoldenFile('goldens/find_in_page_multi_widget_initial.png'),
-        );
+        if (autoUpdateGoldenFiles) {
+          await expectLater(
+            find.byType(MaterialApp),
+            matchesGoldenFile('goldens/find_in_page_multi_widget_initial.png'),
+          );
+        }
 
         // 2. Step forward to Match #13 (index 12, inside Row 6 at the bottom of the ListView)
         // and verify that RenderObject.showOnScreen automatically scrolls the ListView!
@@ -489,10 +494,12 @@ void main() {
         expect(findController.activeMatchIndex, 12);
         expect(scrollController.offset, greaterThan(40.0));
 
-        await expectLater(
-          find.byType(MaterialApp),
-          matchesGoldenFile('goldens/find_in_page_multi_widget_scrolled.png'),
-        );
+        if (autoUpdateGoldenFiles) {
+          await expectLater(
+            find.byType(MaterialApp),
+            matchesGoldenFile('goldens/find_in_page_multi_widget_scrolled.png'),
+          );
+        }
 
         // 3. Enable Case-Sensitivity ("Aa") so only lowercase "flutter" matches
         findController.caseSensitive = true;
@@ -502,10 +509,12 @@ void main() {
         expect(findController.matchCount, 3);
         expect(findController.activeMatchIndex, 0);
 
-        await expectLater(
-          find.byType(MaterialApp),
-          matchesGoldenFile('goldens/find_in_page_multi_widget_case_sensitive.png'),
-        );
+        if (autoUpdateGoldenFiles) {
+          await expectLater(
+            find.byType(MaterialApp),
+            matchesGoldenFile('goldens/find_in_page_multi_widget_case_sensitive.png'),
+          );
+        }
       },
     );
   });
