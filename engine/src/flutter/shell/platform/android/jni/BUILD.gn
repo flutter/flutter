@@ -5,6 +5,36 @@
 import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
 
+source_set("jni") {
+  sources = [
+    "platform_view_android_jni.cc",
+    "platform_view_android_jni.h",
+  ]
+
+  public_configs = [ "//flutter:config" ]
+
+  public_deps = [
+    "//flutter/shell/platform/android:android_mutators_mapper",
+    "//flutter/skia",
+  ]
+
+  deps = [
+    "//flutter/fml",
+    "//flutter/lib/ui",
+    "//flutter/shell/platform/android/surface:native_window",
+  ]
+}
+
+source_set("jni_mock") {
+  testonly = true
+
+  sources = [ "jni_mock.h" ]
+
+  public_configs = [ "//flutter:config" ]
+
+  deps = [ ":jni" ]
+}
+
 source_set("mock_jni_env") {
   testonly = true
 

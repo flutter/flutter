@@ -213,8 +213,12 @@ struct AndroidMutator {
 /// Mutator Stack.
 class AndroidMutatorsStack {
  public:
-  AndroidMutatorsStack();
-  ~AndroidMutatorsStack();
+  AndroidMutatorsStack() = default;
+  ~AndroidMutatorsStack() = default;
+  AndroidMutatorsStack(const AndroidMutatorsStack&) = default;
+  AndroidMutatorsStack(AndroidMutatorsStack&&) noexcept = default;
+  AndroidMutatorsStack& operator=(const AndroidMutatorsStack&) = default;
+  AndroidMutatorsStack& operator=(AndroidMutatorsStack&&) noexcept = default;
 
   void PushTransform(const AndroidMatrix3x3& matrix);
   void PushTransform(const FlutterTransformation& transform);

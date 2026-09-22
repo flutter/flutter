@@ -14,8 +14,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "flutter/display_list/geometry/dl_path.h"
-#include "flutter/flow/embedded_views.h"
 #include "flutter/shell/platform/android/android_compositor.h"
 #include "flutter/shell/platform/android/android_engine.h"
 #include "flutter/shell/platform/android/android_engine_group.h"
@@ -265,14 +263,6 @@ class EmbedderAndroidEngine final : public AndroidEngine {
   static FlutterPointerDeviceKind ToFlutterPointerDeviceKind(int64_t kind);
   static FlutterPointerSignalKind ToFlutterPointerSignalKind(
       int64_t signal_kind);
-  /// Rebuilds a `DlPath` from the flattened path the engine sends in a
-  /// platform view clip mutation.
-  static DlPath ToDlPath(const FlutterPath& path);
-  /// Replays embedder platform view mutations onto a `MutatorsStack` so that
-  /// they can be handed to the Java `FlutterMutatorsStack`.
-  static MutatorsStack ToMutatorsStack(
-      size_t mutations_count,
-      const FlutterPlatformViewMutation** mutations);
 
   /// The display feature arrays to forward to the C API, rewritten so that the
   /// engine always accepts them.
