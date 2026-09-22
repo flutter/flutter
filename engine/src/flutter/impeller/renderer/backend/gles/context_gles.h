@@ -50,6 +50,8 @@ class ContextGLES final : public Context,
   const std::shared_ptr<GpuSubmissionTracker>& GetMutableSubmissionTracker()
       const;
 
+  void SetCapabilities(const std::shared_ptr<const Capabilities>& capabilities);
+
  private:
   std::shared_ptr<ReactorGLES> reactor_;
   std::shared_ptr<GpuSubmissionTracker> submission_tracker_ =

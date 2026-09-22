@@ -2608,6 +2608,20 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
   RenderPass& current_render_pass =
       *render_passes_.back().GetInlinePassContext()->GetRenderPass();
 
+  // Drawing input_texture into itself is a feedback loop, and ANGLE on D3D11
+  // samples zeros. Without offscreen MSAA the pass writes to input_texture and
+  // LoadAction::kLoad already put the backdrop there. DidLoadPreviousContents()
+  // would not say which texture the pass writes to, so we compare attachment 0.
+  const ColorAttachment color0 = render_passes_.back()
+                                     .GetEntityPassTarget()
+                                     ->GetRenderTarget()
+                                     .GetColorAttachment(0);
+  const bool contents_already_present = color0.texture == input_texture;
+  FML_DCHECK(!contents_already_present ||
+             color0.load_action == LoadAction::kLoad)
+      << "A pass writing to the backdrop texture must load it, otherwise the "
+         "backdrop is dropped from the frame.";
+
   // Eagerly restore the BDF contents.
 
   // If the pass context returns a backdrop texture, we need to draw it to the
@@ -2615,20 +2629,22 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
   // memory than storing/loading large MSAA textures. Also, it's not possible
   // to blit the non-MSAA resolve texture of the previous pass to MSAA
   // textures (let alone a transient one).
-  Rect size_rect = Rect::MakeSize(input_texture->GetSize());
-  auto msaa_backdrop_contents = TextureContents::MakeRect(size_rect);
-  msaa_backdrop_contents->SetStencilEnabled(false);
-  msaa_backdrop_contents->SetLabel("MSAA backdrop");
-  msaa_backdrop_contents->SetSourceRect(size_rect);
-  msaa_backdrop_contents->SetTexture(input_texture);
+  if (!contents_already_present) {
+    Rect size_rect = Rect::MakeSize(input_texture->GetSize());
+    auto msaa_backdrop_contents = TextureContents::MakeRect(size_rect);
+    msaa_backdrop_contents->SetStencilEnabled(false);
+    msaa_backdrop_contents->SetLabel("MSAA backdrop");
+    msaa_backdrop_contents->SetSourceRect(size_rect);
+    msaa_backdrop_contents->SetTexture(input_texture);
 
-  Entity msaa_backdrop_entity;
-  msaa_backdrop_entity.SetContents(std::move(msaa_backdrop_contents));
-  msaa_backdrop_entity.SetBlendMode(BlendMode::kSrc);
-  msaa_backdrop_entity.SetClipDepth(std::numeric_limits<uint32_t>::max());
-  if (!msaa_backdrop_entity.Render(renderer_, current_render_pass)) {
-    VALIDATION_LOG << "Failed to render MSAA backdrop entity.";
-    return nullptr;
+    Entity msaa_backdrop_entity;
+    msaa_backdrop_entity.SetContents(std::move(msaa_backdrop_contents));
+    msaa_backdrop_entity.SetBlendMode(BlendMode::kSrc);
+    msaa_backdrop_entity.SetClipDepth(std::numeric_limits<uint32_t>::max());
+    if (!msaa_backdrop_entity.Render(renderer_, current_render_pass)) {
+      VALIDATION_LOG << "Failed to render MSAA backdrop entity.";
+      return nullptr;
+    }
   }
 
   auto& replay_entities = clip_coverage_stack_.GetReplayEntities();
