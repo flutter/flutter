@@ -61,6 +61,30 @@ class FrameService {
   bool get isFrameScheduled => _isFrameScheduled;
   bool _isFrameScheduled = false;
 
+  /// The set of windows that host Flutter views.
+  ///
+  /// [scheduleFrame] will prefer to call [requestAnimationFrame] on a visible
+  /// window in this set, so that rendering continues when the original browser
+  /// tab is hidden but a view is visible in a Document Picture-in-Picture
+  /// window.
+  final Set<DomWindow> _registeredWindows = <DomWindow>{};
+
+  /// Registers [window] as a window that hosts Flutter views.
+  void registerWindow(DomWindow window) {
+    _registeredWindows.add(window);
+  }
+
+  /// Unregisters [window].
+  void unregisterWindow(DomWindow window) {
+    _registeredWindows.remove(window);
+  }
+
+  /// The windows currently registered for frame scheduling.
+  ///
+  /// This is intended for testing only.
+  @visibleForTesting
+  Set<DomWindow> get debugRegisteredWindows => _registeredWindows;
+
   /// Whether the engine and framework are in the middle of rendering a frame.
   ///
   /// Some DOM events can be triggered synchronously with DOM mutations, such as
@@ -94,7 +118,7 @@ class FrameService {
 
     _isFrameScheduled = true;
 
-    domWindow.requestAnimationFrame((JSNumber highResTime) {
+    _pickWindowForFrame().requestAnimationFrame((JSNumber highResTime) {
       // Reset immediately for two reasons:
       //
       // * While drawing a frame the framework may attempt to schedule a new
@@ -172,6 +196,21 @@ class FrameService {
         onFinishedRenderingFrame?.call();
       }
     });
+  }
+
+  /// Picks a [DomWindow] on which to schedule the next animation frame.
+  ///
+  /// Prefers a visible registered window so that rendering continues when the
+  /// original tab is hidden but a Flutter view is visible in another window
+  /// (e.g. Document Picture-in-Picture). Falls back to the global [domWindow]
+  /// when no windows are registered.
+  DomWindow _pickWindowForFrame() {
+    for (final DomWindow window in _registeredWindows) {
+      if ((window.document as DomHTMLDocument).visibilityState == 'visible') {
+        return window;
+      }
+    }
+    return _registeredWindows.isNotEmpty ? _registeredWindows.first : domWindow;
   }
 
   void _renderFrame(double highResTime) {

@@ -13,6 +13,7 @@ import '../engine.dart' show DimensionsProvider, registerHotRestartListener, ren
 import 'browser_detection.dart';
 import 'display.dart';
 import 'dom.dart';
+import 'frame_service.dart';
 import 'initialization.dart';
 import 'js_interop/js_app.dart';
 import 'mouse/context_menu.dart';
@@ -63,8 +64,18 @@ class EngineFlutterView implements ui.FlutterView {
     DomElement? hostElement, {
     JsViewConstraints? viewConstraints,
   }) : _jsViewConstraints = viewConstraints,
-       embeddingStrategy = EmbeddingStrategy.create(hostElement: hostElement),
-       dimensionsProvider = DimensionsProvider.create(hostElement: hostElement) {
+       viewDomWindow = _computeDomWindow(hostElement),
+       viewDomDocument = _computeDomDocument(hostElement),
+       embeddingStrategy = EmbeddingStrategy.create(
+         hostElement: hostElement,
+         domWindow: _computeDomWindow(hostElement),
+         domDocument: _computeDomDocument(hostElement),
+       ),
+       dimensionsProvider = DimensionsProvider.create(
+         hostElement: hostElement,
+         domWindow: _computeDomWindow(hostElement),
+         domDocument: _computeDomDocument(hostElement),
+       ) {
     // The embeddingStrategy will take care of cleaning up the rootElement on
     // hot restart.
     embeddingStrategy.attachViewRoot(dom.rootElement);
@@ -76,7 +87,32 @@ class EngineFlutterView implements ui.FlutterView {
       rendererTag: renderer.rendererTag,
       buildMode: buildMode,
     );
+    FrameService.instance.registerWindow(viewDomWindow);
     registerHotRestartListener(dispose);
+  }
+
+  /// The [DomWindow] that contains this view.
+  ///
+  /// For views embedded in a custom host element, this is the window of the
+  /// document that owns the host element. For the implicit view or when the
+  /// host element cannot be resolved, this falls back to the global
+  /// [domWindow].
+  ///
+  /// This is mutable to support moving a view to a different window, such as
+  /// a Document Picture-in-Picture window.
+  DomWindow viewDomWindow;
+
+  /// The [DomHTMLDocument] that contains this view.
+  ///
+  /// See [viewDomWindow] for how this is resolved.
+  DomHTMLDocument viewDomDocument;
+
+  static DomWindow _computeDomWindow(DomElement? hostElement) {
+    return hostElement?.ownerDocument?.defaultView ?? domWindow;
+  }
+
+  static DomHTMLDocument _computeDomDocument(DomElement? hostElement) {
+    return (hostElement?.ownerDocument ?? domDocument) as DomHTMLDocument;
   }
 
   static EngineFlutterWindow implicit(
@@ -91,9 +127,12 @@ class EngineFlutterView implements ui.FlutterView {
   final EnginePlatformDispatcher platformDispatcher;
 
   /// Abstracts all the DOM manipulations required to embed a Flutter view in a user-supplied `hostElement`.
-  final EmbeddingStrategy embeddingStrategy;
+  ///
+  /// This is mutable to support moving a view to a different host element,
+  /// such as when entering Document Picture-in-Picture.
+  EmbeddingStrategy embeddingStrategy;
 
-  late final StreamSubscription<ui.Size?> _resizeSubscription;
+  late StreamSubscription<ui.Size?> _resizeSubscription;
 
   final ViewConfiguration _viewConfiguration = const ViewConfiguration();
 
@@ -125,6 +164,7 @@ class EngineFlutterView implements ui.FlutterView {
       return;
     }
     isDisposed = true;
+    FrameService.instance.unregisterWindow(viewDomWindow);
     _resizeSubscription.cancel();
     dimensionsProvider.close();
     pointerBinding.dispose();
@@ -156,14 +196,68 @@ class EngineFlutterView implements ui.FlutterView {
   /// Sets the locale for this view.
   ///
   /// This method is typically called by the Flutter framework after it has
-  /// resolved the application's locale. It configures the view to reflect
-  /// the given locale, which is important for accessibility and for the
-  /// browser.
+  /// resolved the application's locale. It configures the view to reflect the
+  /// given locale, which is important for accessibility and for the browser.
   void setLocale(ui.Locale locale) {
     embeddingStrategy.setLocale(locale);
   }
 
-  late final GlobalHtmlAttributes _globalHtmlAttributes = GlobalHtmlAttributes(
+  /// Notifies the engine that this view has been adopted by [newHostElement].
+  ///
+  /// This is used by Document Picture-in-Picture support, where the host element
+  /// (and its owning window/document) changes after the view has already been
+  /// created. The view's [viewId], DOM tree, and framework state are preserved;
+  /// only the embedding container and per-window event listeners are updated.
+  ///
+  /// The caller is responsible for ensuring that [newHostElement] is attached to
+  /// the DOM of the target document.
+  void adoptTo(DomElement newHostElement) {
+    final DomHTMLDocument newDomDocument = _computeDomDocument(newHostElement);
+    final DomWindow newDomWindow = _computeDomWindow(newHostElement);
+
+    if (newDomWindow != viewDomWindow || newDomDocument != viewDomDocument) {
+      FrameService.instance.unregisterWindow(viewDomWindow);
+      viewDomWindow = newDomWindow;
+      viewDomDocument = newDomDocument;
+      FrameService.instance.registerWindow(viewDomWindow);
+    }
+
+    // Update the embedding strategy to use the new host element without
+    // recreating it, so the existing DOM tree (including platform views and
+    // text selection state) is preserved.
+    embeddingStrategy.updateHostElement(newHostElement, dom.rootElement);
+
+    // Recreate global HTML attributes so they are applied to the new host.
+    _globalHtmlAttributes = GlobalHtmlAttributes(
+      rootElement: dom.rootElement,
+      hostElement: embeddingStrategy.hostElement,
+    );
+    _globalHtmlAttributes.applyAttributes(
+      viewId: viewId,
+      rendererTag: renderer.rendererTag,
+      buildMode: buildMode,
+    );
+
+    // Switch resize/dimensions provider to the new window.
+    _resizeSubscription.cancel();
+    dimensionsProvider.close();
+    dimensionsProvider = DimensionsProvider.create(
+      hostElement: embeddingStrategy.hostElement,
+      domWindow: newDomWindow,
+      domDocument: newDomDocument,
+    );
+    _resizeSubscription = onResize.listen(_handleBrowserResize);
+
+    // Pointer binding listens on the embedding strategy's global event target,
+    // so it must be recreated for the new target.
+    pointerBinding.dispose();
+    pointerBinding = PointerBinding(this);
+
+    // Notify the framework that this view's metrics have changed.
+    platformDispatcher.invokeOnMetricsChanged();
+  }
+
+  late GlobalHtmlAttributes _globalHtmlAttributes = GlobalHtmlAttributes(
     rootElement: dom.rootElement,
     hostElement: embeddingStrategy.hostElement,
   );
@@ -172,9 +266,13 @@ class EngineFlutterView implements ui.FlutterView {
 
   late final ContextMenu contextMenu = ContextMenu(dom.rootElement);
 
-  late final DomManager dom = DomManager(devicePixelRatio: devicePixelRatio);
+  final Map<DomDocument, DomManager> _dom = {};
+  DomManager get dom => _dom.putIfAbsent(
+    viewDomDocument,
+    () => DomManager(devicePixelRatio: devicePixelRatio, document: viewDomDocument),
+  );
 
-  late final PointerBinding pointerBinding;
+  late PointerBinding pointerBinding;
 
   @override
   ViewConstraints get physicalConstraints {
@@ -307,7 +405,7 @@ class EngineFlutterView implements ui.FlutterView {
   double get devicePixelRatio => display.devicePixelRatio;
 
   @visibleForTesting
-  final DimensionsProvider dimensionsProvider;
+  DimensionsProvider dimensionsProvider;
 
   Stream<ui.Size?> get onResize => dimensionsProvider.onResize;
 
