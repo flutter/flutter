@@ -799,6 +799,80 @@ TEST(AndroidVsyncWaiterTest, ConsumePendingVsyncNotifiesJvmInvoker) {
   EXPECT_EQ(received_target, 50000000LL + 16666666LL);
 }
 
+TEST(AndroidVsyncWaiterTest, GlobalRefreshRateConfiguration) {
+  // Save previous rate to restore after test.
+  double original_rate = AndroidVsyncWaiter::GetGlobalRefreshRate();
+
+  // Test setting a 120Hz high refresh rate.
+  constexpr double kTargetHighRefreshRate = 120.0;
+  AndroidVsyncWaiter::SetGlobalRefreshRate(kTargetHighRefreshRate);
+  EXPECT_DOUBLE_EQ(AndroidVsyncWaiter::GetGlobalRefreshRate(),
+                   kTargetHighRefreshRate);
+
+  // New waiters should pick up the configured global refresh rate.
+  auto waiter = std::make_shared<AndroidVsyncWaiter>();
+  EXPECT_DOUBLE_EQ(waiter->GetRefreshRate(), kTargetHighRefreshRate);
+
+  // Invalid non-positive rates should fall back to standard 60.0 Hz.
+  constexpr double kInvalidRate = -10.0;
+  constexpr double kFallbackRate = 60.0;
+  AndroidVsyncWaiter::SetGlobalRefreshRate(kInvalidRate);
+  EXPECT_DOUBLE_EQ(AndroidVsyncWaiter::GetGlobalRefreshRate(), kFallbackRate);
+
+  // Restore original rate to avoid side effects on subsequent tests.
+  AndroidVsyncWaiter::SetGlobalRefreshRate(original_rate);
+}
+
+TEST(AndroidVsyncWaiterTest, OnJavaVsyncRoutesThroughPendingBaton) {
+  auto mock_choreographer =
+      std::make_shared<InMemoryAndroidChoreographerProvider>();
+  // Mark choreographer unavailable to exercise the JVM invoker fallback path.
+  mock_choreographer->SetAvailable(false);
+
+  auto mock_invoker = std::make_shared<MockVsyncJvmInvoker>();
+  auto waiter =
+      std::make_shared<AndroidVsyncWaiter>(mock_choreographer, mock_invoker);
+
+  int64_t captured_cookie = 0;
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod(::testing::StrEq("asyncWaitForVsync"),
+                               ::testing::StrEq("(J)V"), ::testing::_))
+      .WillOnce([&](const std::string& method, const std::string& sig,
+                    const std::vector<uint8_t>& payload) {
+        EXPECT_EQ(payload.size(), sizeof(int64_t));
+        std::memcpy(&captured_cookie, payload.data(), sizeof(int64_t));
+        return true;
+      });
+
+  constexpr intptr_t kBaton = 0xCAFE;
+  EXPECT_TRUE(waiter->AsyncWaitForVsync(kBaton));
+  EXPECT_EQ(captured_cookie, static_cast<int64_t>(kBaton));
+
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod(::testing::StrEq("onVsync"),
+                               ::testing::StrEq("(JJ)V"), ::testing::_))
+      .WillOnce(::testing::Return(true));
+
+  bool vsync_result_fired = false;
+  intptr_t result_baton = 0;
+  waiter->SetVsyncResultCallback(
+      [&](intptr_t b, int64_t start_time, int64_t target_time) {
+        vsync_result_fired = true;
+        result_baton = b;
+      });
+
+  // Simulate Java calling back via FlutterJNI.nativeOnVsync.
+  // 1,000,000 nanoseconds represents a 1ms frame scheduling delay.
+  constexpr int64_t kFrameDelayNanos = 1000000;
+  // 16,666,666 nanoseconds represents a standard ~60Hz frame interval.
+  constexpr int64_t kRefreshPeriodNanos = 16666666;
+  AndroidVsyncWaiter::OnJavaVsync(kFrameDelayNanos, kRefreshPeriodNanos,
+                                  captured_cookie);
+
+  EXPECT_TRUE(vsync_result_fired);
+  EXPECT_EQ(result_baton, kBaton);
+}
+
 }  // namespace testing
 }  // namespace android
 }  // namespace flutter
