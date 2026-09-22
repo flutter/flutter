@@ -188,7 +188,9 @@ class WidgetSpan extends PlaceholderSpan {
 
   @override
   InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
-    if (position.offset == offset.value) {
+    final int endOffset = offset.value + 1;
+    if (position.offset == offset.value ||
+        position.offset == endOffset && position.affinity == TextAffinity.upstream) {
       return this;
     }
     offset.increment(1);
