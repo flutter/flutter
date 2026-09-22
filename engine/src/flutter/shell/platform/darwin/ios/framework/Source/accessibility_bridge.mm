@@ -56,13 +56,9 @@ AccessibilityBridge::AccessibilityBridge(
          initWithName:@"flutter/accessibility"
       binaryMessenger:view_controller_.engine.binaryMessenger
                 codec:[FlutterStandardMessageCodec sharedInstance]];
-  [accessibility_channel_ setMessageHandler:^(id message, FlutterReply reply) {
-    HandleEvent((NSDictionary*)message);
-  }];
 }
 
 AccessibilityBridge::~AccessibilityBridge() {
-  [accessibility_channel_ setMessageHandler:nil];
   clearState();
 }
 
@@ -355,6 +351,10 @@ SemanticsObject* AccessibilityBridge::FindFirstFocusable(SemanticsObject* parent
     }
   }
   return nil;
+}
+
+bool AccessibilityBridge::HasSemanticsNode(int32_t node_id) const {
+  return objects_[@(node_id)] != nil;
 }
 
 void AccessibilityBridge::HandleEvent(NSDictionary<NSString*, id>* annotatedEvent) {

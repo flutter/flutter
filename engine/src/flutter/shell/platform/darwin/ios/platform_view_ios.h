@@ -127,6 +127,10 @@ class PlatformViewIOS final : public PlatformView {
                        flutter::SemanticsNodeUpdates update,
                        flutter::CustomAccessibilityActionUpdates actions) override;
 
+  /// Routes an accessibility channel event to the bridge for its Flutter view.
+  /// Returns whether an owning bridge was found.
+  bool HandleAccessibilityEvent(NSDictionary<NSString*, id>* event);
+
   // |PlatformView|
   void SetApplicationLocale(std::string locale) override;
 

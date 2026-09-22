@@ -1580,10 +1580,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
 
   OCMStub([flutterViewController engine]).andReturn(engine);
   OCMStub([engine binaryMessenger]).andReturn(messenger);
-  FlutterBinaryMessengerConnection connection = 123;
-  OCMStub([messenger setMessageHandlerOnChannel:@"flutter/accessibility"
-                           binaryMessageHandler:[OCMArg any]])
-      .andReturn(connection);
 
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -1602,8 +1598,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                                        /*platform_view=*/platform_view.get(),
                                                        /*platform_views_controller=*/nil);
     XCTAssertTrue(bridge.get());
-    OCMVerify([messenger setMessageHandlerOnChannel:@"flutter/accessibility"
-                               binaryMessageHandler:[OCMArg isNotNil]]);
+    OCMVerify(never(), [messenger setMessageHandlerOnChannel:@"flutter/accessibility"
+                                        binaryMessageHandler:[OCMArg any]]);
 
     bridge->AccessibilityObjectDidBecomeFocused(123);
 
@@ -1638,10 +1634,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   OCMStub([secondaryFlutterViewController viewIdentifier]).andReturn(kSecondaryFlutterViewId);
   OCMStub([secondaryFlutterViewController engine]).andReturn(sharedEngine);
   OCMStub([sharedEngine binaryMessenger]).andReturn(messenger);
-  FlutterBinaryMessengerConnection connection = 123;
-  OCMStub([messenger setMessageHandlerOnChannel:@"flutter/accessibility"
-                           binaryMessageHandler:[OCMArg any]])
-      .andReturn(connection);
 
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
@@ -1670,8 +1662,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
 
   NSDictionary<NSString*, id>* annotatedEvent = @{@"type" : @"didGainFocus", @"nodeId" : @123};
   NSData* encodedMessage = [[FlutterStandardMessageCodec sharedInstance] encode:annotatedEvent];
-  OCMVerify([messenger setMessageHandlerOnChannel:@"flutter/accessibility"
-                             binaryMessageHandler:[OCMArg isNotNil]]);
+  OCMVerify(never(), [messenger setMessageHandlerOnChannel:@"flutter/accessibility"
+                                      binaryMessageHandler:[OCMArg any]]);
   OCMVerify([messenger sendOnChannel:@"flutter/accessibility" message:encodedMessage]);
 
   XCTAssertEqual(mock_delegate.dispatched_semantics_action_calls_, 1);
@@ -2373,7 +2365,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   XCTAssertEqual([accessibility_notifications count], 0ul);
 }
 
-- (void)testAccessibilityMessageAfterDeletion {
+- (void)testAccessibilityBridgeDeletionDoesNotChangeMessageHandler {
   flutter::MockDelegate mock_delegate;
   auto thread = std::make_unique<fml::Thread>("AccessibilityBridgeTest");
   auto thread_task_runner = thread->GetTaskRunner();
@@ -2410,13 +2402,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                                        /*platform_view=*/platform_view.get(),
                                                        /*platform_views_controller=*/nil);
     XCTAssertTrue(bridge.get());
-    OCMVerify([messenger setMessageHandlerOnChannel:@"flutter/accessibility"
-                               binaryMessageHandler:[OCMArg isNotNil]]);
     bridge.reset();
     latch.Signal();
   });
   latch.Wait();
-  OCMVerify([messenger cleanUpConnection:connection]);
+  OCMVerify(never(), [messenger setMessageHandlerOnChannel:@"flutter/accessibility"
+                                      binaryMessageHandler:[OCMArg any]]);
+  OCMVerify(never(), [messenger cleanUpConnection:connection]);
   [engine stopMocking];
 }
 

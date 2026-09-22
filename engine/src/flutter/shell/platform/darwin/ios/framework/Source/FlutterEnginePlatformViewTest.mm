@@ -97,6 +97,11 @@ class FakeDelegate : public PlatformView::Delegate {
 }  // namespace
 }  // namespace flutter
 
+@interface FlutterEngine (MultiViewTests)
+- (void)setUpChannels;
+- (void)resetChannels;
+@end
+
 // Avoid retaining view controllers through OCMock's recorded invocations.
 @interface FlutterEngineWithFakePlatformView : FlutterEngine
 @property(nonatomic, assign) flutter::PlatformViewIOS* fakePlatformView;
@@ -381,6 +386,102 @@ flutter::FakeDelegate fake_delegate;
   [keyWindowMock stopMocking];
   [primaryMock stopMocking];
   [secondaryMock stopMocking];
+}
+
+- (void)testAccessibilityFocusFindsTheOwningExplicitView {
+  FlutterEngineWithFakePlatformView* engine =
+      [[FlutterEngineWithFakePlatformView alloc] initWithName:@"tester"];
+  engine.fakePlatformView = platform_view.get();
+  engine.fakeBinaryMessenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  [engine enableMultiView];
+  FlutterViewController* primary = [[FlutterViewController alloc] initWithEngine:engine
+                                                                         nibName:nil
+                                                                          bundle:nil];
+  FlutterViewController* secondary = [[FlutterViewController alloc] initWithEngine:engine
+                                                                           nibName:nil
+                                                                            bundle:nil];
+  [primary loadViewIfNeeded];
+  [secondary loadViewIfNeeded];
+  platform_view->SetSemanticsTreeEnabled(true);
+  constexpr int32_t kPrimaryNodeId = 10;
+  constexpr int32_t kSecondaryNodeId = 20;
+  for (FlutterViewController* controller in @[ primary, secondary ]) {
+    flutter::SemanticsNode root;
+    root.id = 0;
+    flutter::SemanticsNode child;
+    child.id = controller == primary ? kPrimaryNodeId : kSecondaryNodeId;
+    child.label = "Focusable node";
+    root.childrenInTraversalOrder = {child.id};
+    root.childrenInHitTestOrder = {child.id};
+    platform_view->UpdateSemantics(controller.viewIdentifier, {{0, root}, {child.id, child}}, {});
+  }
+  // The Framework's FocusSemanticEvent includes a nodeId and an empty data dictionary.
+  XCTAssertTrue(platform_view->HandleAccessibilityEvent(
+      @{@"type" : @"focus", @"data" : @{}, @"nodeId" : @(kPrimaryNodeId)}));
+  XCTAssertTrue(platform_view->HandleAccessibilityEvent(
+      @{@"type" : @"focus", @"data" : @{}, @"nodeId" : @(kSecondaryNodeId)}));
+  XCTAssertFalse(platform_view->HandleAccessibilityEvent(
+      @{@"type" : @"focus", @"data" : @{}, @"nodeId" : @99}));
+  // Root IDs are shared across trees and require an explicit view ID.
+  XCTAssertFalse(platform_view->HandleAccessibilityEvent(
+      @{@"type" : @"focus", @"data" : @{}, @"nodeId" : @0}));
+  XCTAssertTrue(platform_view->HandleAccessibilityEvent(
+      @{@"type" : @"focus", @"data" : @{@"viewId" : @(secondary.viewIdentifier)}, @"nodeId" : @0}));
+
+  [engine removeViewController:primary.viewIdentifier];
+
+  XCTAssertFalse(platform_view->HandleAccessibilityEvent(
+      @{@"type" : @"focus", @"data" : @{}, @"nodeId" : @(kPrimaryNodeId)}));
+  XCTAssertTrue(platform_view->HandleAccessibilityEvent(
+      @{@"type" : @"focus", @"data" : @{}, @"nodeId" : @(kSecondaryNodeId)}));
+}
+
+- (void)testAccessibilityHandlerSurvivesViewRemovalAndBridgeRecreation {
+  FlutterEngineWithFakePlatformView* engine =
+      [[FlutterEngineWithFakePlatformView alloc] initWithName:@"tester"];
+  engine.fakePlatformView = platform_view.get();
+  id messenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  engine.fakeBinaryMessenger = messenger;
+  __block FlutterBinaryMessageHandler handler;
+  FlutterBinaryMessengerConnection connection = 123;
+  OCMStub([messenger setMessageHandlerOnChannel:@"flutter/accessibility"
+                           binaryMessageHandler:[OCMArg any]])
+      .andReturn(connection)
+      .andDo(^(NSInvocation* invocation) {
+        __unsafe_unretained FlutterBinaryMessageHandler argument;
+        [invocation getArgument:&argument atIndex:3];
+        handler = [argument copy];
+      });
+  OCMStub([messenger cleanUpConnection:connection]).andDo(^(NSInvocation* invocation) {
+    handler = nil;
+  });
+  [engine setUpChannels];
+  [engine enableMultiView];
+  FlutterViewController* primary = [[FlutterViewController alloc] initWithEngine:engine
+                                                                         nibName:nil
+                                                                          bundle:nil];
+  FlutterViewController* secondary = [[FlutterViewController alloc] initWithEngine:engine
+                                                                           nibName:nil
+                                                                            bundle:nil];
+  platform_view->SetSemanticsTreeEnabled(true);
+  [engine removeViewController:secondary.viewIdentifier];
+  [primary loadViewIfNeeded];
+  XCTAssertNotNil(handler);
+
+  __block BOOL replied = NO;
+  NSData* message = [[FlutterStandardMessageCodec sharedInstance] encode:@{
+    @"type" : @"announce",
+    @"data" : @{@"message" : @"Still available", @"viewId" : @(primary.viewIdentifier)}
+  }];
+  handler(message, ^(NSData* reply) {
+    replied = YES;
+  });
+  XCTAssertTrue(replied);
+  [engine resetChannels];
+  XCTAssertNil(handler);
+  OCMVerify(times(1), [messenger setMessageHandlerOnChannel:@"flutter/accessibility"
+                                       binaryMessageHandler:[OCMArg any]]);
+  OCMVerify(times(1), [messenger cleanUpConnection:connection]);
 }
 
 - (void)testRemovingAllExplicitViewsDoesNotReuseIdentifiers {

@@ -160,6 +160,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 @property(nonatomic, strong) FlutterMethodChannel* scribbleChannel;
 @property(nonatomic, strong) FlutterMethodChannel* spellCheckChannel;
 @property(nonatomic, strong) FlutterBasicMessageChannel* lifecycleChannel;
+@property(nonatomic, strong) FlutterBasicMessageChannel* accessibilityChannel;
 @property(nonatomic, strong) FlutterBasicMessageChannel* systemChannel;
 @property(nonatomic, strong) FlutterBasicMessageChannel* settingsChannel;
 @property(nonatomic, strong) FlutterBasicMessageChannel* keyEventChannel;
@@ -748,6 +749,8 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)resetChannels {
+  [self.accessibilityChannel setMessageHandler:nil];
+  self.accessibilityChannel = nil;
   self.localizationChannel = nil;
   self.navigationChannel = nil;
   self.restorationChannel = nil;
@@ -852,6 +855,18 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
       [[FlutterBasicMessageChannel alloc] initWithName:@"flutter/lifecycle"
                                        binaryMessenger:self.binaryMessenger
                                                  codec:[FlutterStringCodec sharedInstance]];
+
+  self.accessibilityChannel = [[FlutterBasicMessageChannel alloc]
+         initWithName:@"flutter/accessibility"
+      binaryMessenger:self.binaryMessenger
+                codec:[FlutterStandardMessageCodec sharedInstance]];
+  [self.accessibilityChannel setMessageHandler:^(id message, FlutterReply reply) {
+    FlutterEngine* engine = weakSelf;
+    if (engine.platformView) {
+      engine.platformView->HandleAccessibilityEvent(message);
+    }
+    reply(nil);
+  }];
 
   self.systemChannel =
       [[FlutterBasicMessageChannel alloc] initWithName:@"flutter/system"

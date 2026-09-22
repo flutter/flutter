@@ -55,6 +55,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
 
   void UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
                        const flutter::CustomAccessibilityActionUpdates& actions);
+  bool HasSemanticsNode(int32_t node_id) const;
   void HandleEvent(NSDictionary<NSString*, id>* annotatedEvent);
   void DispatchSemanticsAction(int32_t id, flutter::SemanticsAction action) override;
   void DispatchSemanticsAction(int32_t id,

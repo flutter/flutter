@@ -356,6 +356,35 @@ void PlatformViewIOS::UpdateSemantics(int64_t view_id,
   }
 }
 
+bool PlatformViewIOS::HandleAccessibilityEvent(NSDictionary<NSString*, id>* event) {
+  NSNumber* view_id = event[@"data"][@"viewId"];
+  NSNumber* node_id = event[@"nodeId"];
+  AccessibilityBridge* target = nullptr;
+  if (!view_id && node_id) {
+    // Framework focus events carry a node ID but no view ID. Find the tree that owns the node.
+    for (const auto& [identifier, bridge] : accessibility_bridges_) {
+      if (bridge->HasSemanticsNode(node_id.intValue)) {
+        // Root node IDs can occur in more than one tree. Do not focus an arbitrary view.
+        if (target) {
+          return false;
+        }
+        target = bridge.get();
+      }
+    }
+  } else {
+    auto bridge = accessibility_bridges_.find(view_id ? view_id.longLongValue
+                                                      : flutter::kFlutterImplicitViewId);
+    if (bridge != accessibility_bridges_.end()) {
+      target = bridge->second.get();
+    }
+  }
+  if (!target) {
+    return false;
+  }
+  target->HandleEvent(event);
+  return true;
+}
+
 // |PlatformView|
 void PlatformViewIOS::SetApplicationLocale(std::string locale) {
   application_locale_ = std::move(locale);
