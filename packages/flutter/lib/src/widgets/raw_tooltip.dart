@@ -35,8 +35,10 @@ const AnimationStyle _kDefaultAnimationStyle = AnimationStyle(
 /// and hide animation. This can be used to drive animations that sync up with
 /// the tooltip overlay child show/hide animation, for example to fade the
 /// tooltip in and out.
-typedef TooltipComponentBuilder =
-    Widget Function(BuildContext context, Animation<double> animation);
+typedef TooltipComponentBuilder = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+);
 
 /// Signature for computing the position of a tooltip.
 ///
@@ -589,11 +591,23 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     assert(mounted);
     switch ((_animationStatus.isDismissed, status.isDismissed)) {
       case (false, true):
+        HardwareKeyboard.instance.removeHandler(_handleKeyEvent);
         RawTooltip._openedTooltips.remove(this);
         _overlayController.hide();
       case (true, false):
         _overlayController.show();
         RawTooltip._openedTooltips.add(this);
+        // Register a global HardwareKeyboard handler while the tooltip is open
+        // rather than wrapping child in a Shortcuts widget or relying solely on
+        // WidgetsApp's root Focus handler (app.dart):
+        // 1. A local Shortcuts widget around RawTooltip.child only receives key
+        //    events when primaryFocus is inside RawTooltip.child, which misses
+        //    tooltips triggered by pointer hover when focus is elsewhere.
+        // 2. WidgetsApp's root Focus handler is an ancestor of route content, so
+        //    focused descendants that consume Escape (such as EditableText's
+        //    DoNothingAndStopPropagationTextIntent or RawMenuAnchor/DropdownMenu)
+        //    stop propagation before the event bubbles up to WidgetsApp.
+        HardwareKeyboard.instance.addHandler(_handleKeyEvent);
         SemanticsService.tooltip(widget.semanticsTooltip ?? '');
       case (true, true) || (false, false):
         break;
@@ -806,6 +820,15 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     return true;
   }
 
+  bool _handleKeyEvent(KeyEvent event) {
+    if (event is KeyDownEvent &&
+        event.logicalKey == LogicalKeyboardKey.escape &&
+        RawTooltip._openedTooltips.isNotEmpty) {
+      return RawTooltip.dismissAllToolTips();
+    }
+    return false;
+  }
+
   @protected
   @override
   void initState() {
@@ -871,6 +894,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   @override
   void dispose() {
     GestureBinding.instance.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
+    HardwareKeyboard.instance.removeHandler(_handleKeyEvent);
     RawTooltip._openedTooltips.remove(this);
     // _longPressRecognizer.dispose() and _tapRecognizer.dispose() may call
     // their registered onCancel callbacks if there's a gesture in progress.
@@ -886,6 +910,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     super.dispose();
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     // If message is empty then no need to create a tooltip overlay to show

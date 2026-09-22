@@ -27,15 +27,13 @@ G_DECLARE_FINAL_TYPE(FlOpenGLFrame, fl_opengl_frame, FL, OPENGL_FRAME, GObject)
 
 /**
  * fl_opengl_frame_new:
- * @shareable: %TRUE if the frame can be shared between OpenGL contexts (EGL),
- * %FALSE if it must be copied via CPU memory (GLX).
  *
- * Creates a new object that manages the framebuffer (and CPU pixel copy when
- * not shareable) a rendered frame is composited into.
+ * Creates a new object that manages the framebuffer and CPU pixel copy a
+ * rendered frame is composited into.
  *
  * Returns: a new #FlOpenGLFrame.
  */
-FlOpenGLFrame* fl_opengl_frame_new(gboolean shareable);
+FlOpenGLFrame* fl_opengl_frame_new();
 
 /**
  * fl_opengl_frame_composite:
@@ -45,8 +43,8 @@ FlOpenGLFrame* fl_opengl_frame_new(gboolean shareable);
  * @layers_count: number of layers.
  *
  * Composites @layers into the frame, (re)creating the underlying framebuffer to
- * match the frame size and copying the result into CPU memory when the frame is
- * not shareable. Must be called with an OpenGL context current.
+ * match the frame size and copying the result into CPU memory. Must be called
+ * with an OpenGL context current.
  */
 void fl_opengl_frame_composite(FlOpenGLFrame* frame,
                                FlCompositorOpenGL* compositor,

@@ -6,6 +6,7 @@
 
 #include "GLES3/gl3.h"
 #include "fml/logging.h"
+#include "impeller/base/thread_safety.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "impeller/renderer/backend/gles/test/mock_gles.h"
 
@@ -358,6 +359,13 @@ GLboolean mockIsTexture(GLuint texture) {
 static_assert(CheckSameSignature<decltype(mockIsTexture),  //
                                  decltype(glIsTexture)>::value);
 
+GLboolean mockIsProgram(GLuint program) {
+  return CallMockMethod(&IMockGLESImpl::IsProgram, program);
+}
+
+static_assert(CheckSameSignature<decltype(mockIsProgram),  //
+                                 decltype(glIsProgram)>::value);
+
 GLenum mockCheckFramebufferStatus(GLenum target) {
   return CallMockMethod(&IMockGLESImpl::CheckFramebufferStatus, target);
 }
@@ -462,7 +470,7 @@ static_assert(CheckSameSignature<decltype(mockVertexAttribDivisor),  //
                                  decltype(glVertexAttribDivisor)>::value);
 
 // static
-std::shared_ptr<MockGLES> MockGLES::Init(
+IPLR_NO_THREAD_SAFETY_ANALYSIS std::shared_ptr<MockGLES> MockGLES::Init(
     std::unique_ptr<MockGLESImpl> impl,
     const std::optional<std::vector<const char*>>& extensions,
     const char* version_string) {
@@ -483,7 +491,7 @@ std::shared_ptr<MockGLES> MockGLES::Init(
   return mock_gles;
 }
 
-std::shared_ptr<MockGLES> MockGLES::Init(
+IPLR_NO_THREAD_SAFETY_ANALYSIS std::shared_ptr<MockGLES> MockGLES::Init(
     const std::optional<std::vector<const char*>>& extensions,
     const char* version_string,
     ProcTableGLES::Resolver resolver) {
@@ -561,6 +569,8 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockBufferSubData);
   } else if (strcmp(name, "glIsTexture") == 0) {
     return reinterpret_cast<void*>(mockIsTexture);
+  } else if (strcmp(name, "glIsProgram") == 0) {
+    return reinterpret_cast<void*>(mockIsProgram);
   } else if (strcmp(name, "glCheckFramebufferStatus") == 0) {
     return reinterpret_cast<void*>(mockCheckFramebufferStatus);
   } else if (strcmp(name, "glReadPixels") == 0) {

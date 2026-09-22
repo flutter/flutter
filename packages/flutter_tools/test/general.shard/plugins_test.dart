@@ -497,7 +497,10 @@ dependencies:
               .writeAsBytesSync(Uint8List.fromList(<int>[0xff, 0xfe, 0xfd]));
 
           // The tool must not crash when a plugin's pubspec.yaml cannot be read.
-          final Future<List<Plugin>> pluginsFuture = findPlugins(flutterProject);
+          final Future<List<Plugin>> pluginsFuture = findPlugins(
+            flutterProject,
+            logger: BufferLogger.test(),
+          );
           await expectLater(pluginsFuture, completes);
 
           // The unreadable plugin is skipped, but the readable one is still found.
@@ -2009,6 +2012,71 @@ flutter:
           FeatureFlags: () => featureFlags,
         },
       );
+
+      testUsingContext(
+        'createPluginSymlinks repairs broken symlinks without failing',
+        () async {
+          linuxProject.exists = true;
+          windowsProject.exists = true;
+          final Directory pluginDir = createFakePlugin(fs);
+          await refreshPluginsList(flutterProject);
+
+          final links = <Link>[
+            linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
+            windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
+          ];
+          for (final link in links) {
+            link.deleteSync();
+            link.createSync('/non_existent_target_path');
+          }
+          createPluginSymlinks(flutterProject);
+
+          for (final link in links) {
+            expect(link, exists);
+            expect(fs.path.normalize(link.targetSync()), fs.path.normalize(pluginDir.path));
+          }
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => featureFlags,
+        },
+      );
+
+      testUsingContext(
+        'createPluginSymlinks replaces existing files with symlinks without failing',
+        () async {
+          linuxProject.exists = true;
+          windowsProject.exists = true;
+          final Directory pluginDir = createFakePlugin(fs);
+          await refreshPluginsList(flutterProject);
+
+          final files = <File>[
+            linuxProject.pluginSymlinkDirectory.childFile('some_plugin'),
+            windowsProject.pluginSymlinkDirectory.childFile('some_plugin'),
+          ];
+          for (final file in files) {
+            ErrorHandlingFileSystem.deleteIfExists(file, recursive: true);
+            file.createSync(recursive: true);
+            file.writeAsStringSync('stale content');
+          }
+          createPluginSymlinks(flutterProject);
+
+          final links = <Link>[
+            linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
+            windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
+          ];
+          for (final link in links) {
+            expect(link, exists);
+            expect(fs.path.normalize(link.targetSync()), fs.path.normalize(pluginDir.path));
+          }
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => featureFlags,
+        },
+      );
     });
 
     group('pubspec', () {
@@ -2203,31 +2271,34 @@ iosPrefix: "FLT; evilInjectedCall(); //"
         );
       });
 
-      testUsingContext('Plugin.fromYaml reports every invalid legacy-format field at once', () async {
-        const maliciousYaml = '''
+      testUsingContext(
+        'Plugin.fromYaml reports every invalid legacy-format field at once',
+        () async {
+          const maliciousYaml = '''
 androidPackage: "com.example.evil.Payload.run(); //"
 pluginClass: "Evil(); evilInjectedCall(); //"
 iosPrefix: "FLT; evilInjectedCall(); //"
 ''';
-        expect(
-          () => Plugin.fromYaml(
-            'evil_legacy_plugin',
-            '',
-            loadYaml(maliciousYaml) as YamlMap,
-            null,
-            const <String>[],
-            fileSystem: globals.fs,
-            isDevDependency: false,
-          ),
-          throwsToolExit(
-            message:
-                'Invalid plugin specification evil_legacy_plugin.\n'
-                'The "androidPackage" must be a valid identifier, optionally with dot-separated segments.\n'
-                'The "iosPrefix" must be a valid identifier, optionally with dot-separated segments.\n'
-                'The "pluginClass" must be a valid identifier, optionally with dot-separated segments.',
-          ),
-        );
-      });
+          expect(
+            () => Plugin.fromYaml(
+              'evil_legacy_plugin',
+              '',
+              loadYaml(maliciousYaml) as YamlMap,
+              null,
+              const <String>[],
+              fileSystem: globals.fs,
+              isDevDependency: false,
+            ),
+            throwsToolExit(
+              message:
+                  'Invalid plugin specification evil_legacy_plugin.\n'
+                  'The "androidPackage" must be a valid identifier, optionally with dot-separated segments.\n'
+                  'The "iosPrefix" must be a valid identifier, optionally with dot-separated segments.\n'
+                  'The "pluginClass" must be a valid identifier, optionally with dot-separated segments.',
+            ),
+          );
+        },
+      );
 
       testUsingContext('Plugin.fromYaml accepts a legacy-format plugin declaration', () async {
         const legacyYaml = '''
@@ -3268,27 +3339,24 @@ flutter:
       }
     });
 
-    test(
-      'packages absent from PackageConfig have no entry, distinguishing them from packages with missing pubspec.yaml',
-      () async {
-        final PackageConfig config = makePackageConfig(<String>['in_resolution']);
-        fs.file(config.packages.first.root.resolve('pubspec.yaml'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync('name: in_resolution\n');
+    test('packages absent from PackageConfig have no entry, distinguishing them from packages with missing pubspec.yaml', () async {
+      final PackageConfig config = makePackageConfig(<String>['in_resolution']);
+      fs.file(config.packages.first.root.resolve('pubspec.yaml'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('name: in_resolution\n');
 
-        final PubspecCache cache = await buildPubspecCache(config, fileSystem: fs);
+      final PubspecCache cache = await buildPubspecCache(config, fileSystem: fs);
 
-        // Package in resolution with pubspec
-        // this means that the key is present and the value is non-null.
-        expect(cache.containsKey('file:///pkgs/in_resolution/'), isTrue);
-        expect(cache['file:///pkgs/in_resolution/'], isNotNull);
+      // Package in resolution with pubspec
+      // this means that the key is present and the value is non-null.
+      expect(cache.containsKey('file:///pkgs/in_resolution/'), isTrue);
+      expect(cache['file:///pkgs/in_resolution/'], isNotNull);
 
-        // Package NOT in resolution (e.g. example-only dep)
-        // this means that the key is absent entirely.
-        // containsKey must return false so callers can fall back to disk reads.
-        expect(cache.containsKey('file:///pkgs/example_only_plugin/'), isFalse);
-      },
-    );
+      // Package NOT in resolution (e.g. example-only dep)
+      // this means that the key is absent entirely.
+      // containsKey must return false so callers can fall back to disk reads.
+      expect(cache.containsKey('file:///pkgs/example_only_plugin/'), isFalse);
+    });
   });
 }
 
