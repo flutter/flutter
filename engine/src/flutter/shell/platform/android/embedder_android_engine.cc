@@ -698,26 +698,76 @@ void EmbedderAndroidEngine::OnVsyncCallback(intptr_t baton) {
   }
 }
 
+std::shared_ptr<impeller::Context> EmbedderAndroidEngine::GetImpellerContext()
+    const {
+  if (c_api_engine_ != nullptr) {
+    auto* embedder_engine =
+        reinterpret_cast<flutter::EmbedderEngine*>(c_api_engine_);
+    if (const auto& shell = embedder_engine->GetShellPointer()) {
+      if (auto platform_view = shell->GetPlatformView()) {
+        return platform_view->GetImpellerContext();
+      }
+    }
+  }
+  return nullptr;
+}
+
 void EmbedderAndroidEngine::RegisterTexture(
     std::shared_ptr<flutter::Texture> texture) {
   if (!IsValid() || !texture) {
     return;
   }
-  if (c_api_engine_ != nullptr && proc_table_.RegisterExternalTexture) {
-    proc_table_.RegisterExternalTexture(GetEngineHandle(), texture->Id());
+  if (c_api_engine_ != nullptr) {
+    auto* embedder_engine =
+        reinterpret_cast<flutter::EmbedderEngine*>(c_api_engine_);
+    if (const auto& shell = embedder_engine->GetShellPointer()) {
+      if (auto platform_view = shell->GetPlatformView()) {
+        if (proc_table_.RegisterExternalTexture) {
+          proc_table_.RegisterExternalTexture(GetEngineHandle(), texture->Id());
+        }
+        platform_view->RegisterTexture(std::move(texture));
+        return;
+      }
+    }
   }
+  pending_textures_.push_back(std::move(texture));
 }
 
 void EmbedderAndroidEngine::UnregisterTexture(int64_t texture_id) {
-  if (IsValid() && proc_table_.UnregisterExternalTexture) {
+  if (proc_table_.UnregisterExternalTexture) {
     proc_table_.UnregisterExternalTexture(GetEngineHandle(), texture_id);
+  }
+  if (c_api_engine_ != nullptr) {
+    auto* embedder_engine =
+        reinterpret_cast<flutter::EmbedderEngine*>(c_api_engine_);
+    if (const auto& shell = embedder_engine->GetShellPointer()) {
+      if (auto platform_view = shell->GetPlatformView()) {
+        platform_view->UnregisterTexture(texture_id);
+      }
+    }
+  } else {
+    pending_textures_.erase(
+        std::remove_if(pending_textures_.begin(), pending_textures_.end(),
+                       [texture_id](const auto& texture) {
+                         return texture && texture->Id() == texture_id;
+                       }),
+        pending_textures_.end());
   }
 }
 
 void EmbedderAndroidEngine::MarkTextureFrameAvailable(int64_t texture_id) {
-  if (IsValid() && proc_table_.MarkExternalTextureFrameAvailable) {
+  if (proc_table_.MarkExternalTextureFrameAvailable) {
     proc_table_.MarkExternalTextureFrameAvailable(GetEngineHandle(),
                                                   texture_id);
+  }
+  if (c_api_engine_ != nullptr) {
+    auto* embedder_engine =
+        reinterpret_cast<flutter::EmbedderEngine*>(c_api_engine_);
+    if (const auto& shell = embedder_engine->GetShellPointer()) {
+      if (auto platform_view = shell->GetPlatformView()) {
+        platform_view->MarkTextureFrameAvailable(texture_id);
+      }
+    }
   }
 }
 
@@ -1068,6 +1118,23 @@ bool EmbedderAndroidEngine::Run(
   }
 
   c_api_is_valid_ = true;
+
+  if (auto* embedder_engine =
+          reinterpret_cast<flutter::EmbedderEngine*>(c_api_engine_)) {
+    if (const auto& shell = embedder_engine->GetShellPointer()) {
+      if (auto platform_view = shell->GetPlatformView()) {
+        for (auto& pending : pending_textures_) {
+          if (proc_table_.RegisterExternalTexture) {
+            proc_table_.RegisterExternalTexture(GetEngineHandle(),
+                                                pending->Id());
+          }
+          platform_view->RegisterTexture(std::move(pending));
+        }
+      }
+    }
+  }
+  pending_textures_.clear();
+
   if (surface_attached_) {
     proc_table_.NotifyCreated(c_api_engine_);
     proc_table_.ScheduleFrame(c_api_engine_);
