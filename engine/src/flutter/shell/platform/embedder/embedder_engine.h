@@ -96,8 +96,6 @@ class EmbedderEngine {
 
   bool RegisterTexture(int64_t texture);
 
-  bool RegisterTexture(std::shared_ptr<flutter::Texture> texture);
-
   bool UnregisterTexture(int64_t texture);
 
   bool MarkTextureFrameAvailable(int64_t texture);
