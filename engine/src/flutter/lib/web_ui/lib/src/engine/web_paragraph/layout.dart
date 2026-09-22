@@ -249,7 +249,7 @@ class TextLayout {
     final ui.TextRange hardlineTextRange = _mapping.toTextRange(hardlineRange);
     final allTextRange = ui.TextRange(
       start: contentTextRange.start,
-      end: isSyntheticEmptyLine ? hardlineRange.end : whitespaceTextRange.end,
+      end: isSyntheticEmptyLine ? hardlineTextRange.end : whitespaceTextRange.end,
     );
     // TODO(jlavrova): Should we use a TextLineBuilder pattern instead?
     final line = TextLine(

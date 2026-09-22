@@ -370,7 +370,7 @@ class _LineBuilder {
       ClusterRange(start: _whitespaceStart, end: _whitespaceEnd),
       ClusterRange(start: _whitespaceEnd, end: _newlineEnd),
       _top,
-      isSyntheticEmptyLine: false,
+      isSyntheticEmptyLine: hasTrailingNewline,
     );
     _top += height;
 
