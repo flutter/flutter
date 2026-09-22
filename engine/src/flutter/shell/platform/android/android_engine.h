@@ -10,8 +10,8 @@
 #include <vector>
 
 #include "flutter/assets/asset_resolver.h"
-#include "flutter/common/graphics/texture.h"
 #include "flutter/fml/build_config.h"
+#include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/lib/ui/painting/image_generator_registry.h"
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
@@ -133,7 +133,14 @@ class AndroidEngine {
 
   virtual void OnVsyncCallback(intptr_t baton) {}
 
-  virtual void RegisterTexture(std::shared_ptr<flutter::Texture> texture) = 0;
+  virtual void RegisterExternalTexture(
+      int64_t texture_id,
+      const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture) = 0;
+
+  virtual void RegisterImageTexture(
+      int64_t texture_id,
+      const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
+      bool reset_on_background) = 0;
 
   virtual void UnregisterTexture(int64_t texture_id) = 0;
 

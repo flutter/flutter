@@ -492,5 +492,99 @@ TEST(EmbedderAndroidEngineTest,
   ExpectEngineWouldAcceptDisplayFeatures(truncated_event, truncated_features);
 }
 
+TEST(EmbedderAndroidEngineTest, ExternalTextureRegistrationAndCallbacks) {
+  auto jni = std::make_shared<JNIMock>();
+  EmbedderAndroidEngine engine(Settings(), jni,
+                               AndroidRenderingAPI::kImpellerOpenGLES);
+
+  static int64_t s_registered_id = -1;
+  static int64_t s_unregistered_id = -1;
+  static int64_t s_marked_id = -1;
+
+  s_registered_id = -1;
+  s_unregistered_id = -1;
+  s_marked_id = -1;
+
+  auto& proc_table = engine.GetMutableProcTableForTesting();
+  proc_table.RegisterExternalTexture = [](FLUTTER_API_SYMBOL(FlutterEngine),
+                                          int64_t id) -> FlutterEngineResult {
+    s_registered_id = id;
+    return kSuccess;
+  };
+  proc_table.UnregisterExternalTexture = [](FLUTTER_API_SYMBOL(FlutterEngine),
+                                            int64_t id) -> FlutterEngineResult {
+    s_unregistered_id = id;
+    return kSuccess;
+  };
+  proc_table.MarkExternalTextureFrameAvailable =
+      [](FLUTTER_API_SYMBOL(FlutterEngine), int64_t id) -> FlutterEngineResult {
+    s_marked_id = id;
+    return kSuccess;
+  };
+
+  fml::jni::ScopedJavaGlobalRef<jobject> dummy_ref;
+
+  // 1. Register SurfaceTexture.
+  constexpr int64_t kSurfaceTextureId = 101;  // Arbitrary texture ID.
+  engine.RegisterExternalTexture(kSurfaceTextureId, dummy_ref);
+  EXPECT_EQ(s_registered_id, kSurfaceTextureId);
+
+  // 2. Query GL external texture frame callback.
+  constexpr size_t kFrameWidth = 1920;   // Test frame width in pixels.
+  constexpr size_t kFrameHeight = 1080;  // Test frame height in pixels.
+  constexpr uint32_t kExpectedGLTarget =
+      0x8D65;  // GL_TEXTURE_EXTERNAL_OES token.
+  constexpr uint32_t kExpectedGLFormat =
+      0x8058;  // GL_RGBA8 sized internal format token.
+
+  FlutterOpenGLTexture gl_texture = {};
+  EXPECT_TRUE(engine.OnGLExternalTextureFrame(kSurfaceTextureId, kFrameWidth,
+                                              kFrameHeight, &gl_texture));
+  EXPECT_EQ(gl_texture.width, kFrameWidth);
+  EXPECT_EQ(gl_texture.height, kFrameHeight);
+  EXPECT_EQ(gl_texture.target, kExpectedGLTarget);
+  EXPECT_EQ(gl_texture.format, kExpectedGLFormat);
+
+  // 3. Query HardwareBuffer external texture frame callback.
+  constexpr size_t kHwFrameWidth = 1280;  // Test hardware buffer width in px.
+  constexpr size_t kHwFrameHeight = 720;  // Test hardware buffer height in px.
+  constexpr int32_t kNoFence = -1;  // Negative indicates no sync fence fd.
+
+  FlutterHardwareBufferExternalTexture hw_texture = {};
+  EXPECT_TRUE(engine.OnHardwareBufferExternalTextureFrame(
+      kSurfaceTextureId, kHwFrameWidth, kHwFrameHeight, &hw_texture));
+  EXPECT_EQ(hw_texture.width, kHwFrameWidth);
+  EXPECT_EQ(hw_texture.height, kHwFrameHeight);
+  EXPECT_EQ(hw_texture.fence_fd, kNoFence);
+
+  // 4. Query unregistered texture ID returns false.
+  constexpr int64_t kUnknownTextureId = 999;  // Non-existent texture ID.
+  EXPECT_FALSE(engine.OnGLExternalTextureFrame(kUnknownTextureId, kFrameWidth,
+                                               kFrameHeight, &gl_texture));
+  EXPECT_FALSE(engine.OnHardwareBufferExternalTextureFrame(
+      kUnknownTextureId, kHwFrameWidth, kHwFrameHeight, &hw_texture));
+
+  // 5. Register ImageTexture.
+  constexpr int64_t kImageTextureId = 202;  // Arbitrary image texture ID.
+  constexpr size_t kImageFrameWidth = 640;  // Test image frame width in pixels.
+  constexpr size_t kImageFrameHeight =
+      480;  // Test image frame height in pixels.
+  engine.RegisterImageTexture(kImageTextureId, dummy_ref,
+                              /*reset_on_background=*/true);
+  EXPECT_EQ(s_registered_id, kImageTextureId);
+  EXPECT_TRUE(engine.OnGLExternalTextureFrame(kImageTextureId, kImageFrameWidth,
+                                              kImageFrameHeight, &gl_texture));
+
+  // 6. Mark frame available.
+  engine.MarkTextureFrameAvailable(kSurfaceTextureId);
+  EXPECT_EQ(s_marked_id, kSurfaceTextureId);
+
+  // 7. Unregister texture.
+  engine.UnregisterTexture(kSurfaceTextureId);
+  EXPECT_EQ(s_unregistered_id, kSurfaceTextureId);
+  EXPECT_FALSE(engine.OnGLExternalTextureFrame(kSurfaceTextureId, kFrameWidth,
+                                               kFrameHeight, &gl_texture));
+}
+
 }  // namespace testing
 }  // namespace flutter

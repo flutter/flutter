@@ -19,7 +19,6 @@
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
-#include "shell/platform/android/image_external_texture.h"
 
 namespace flutter {
 
@@ -78,7 +77,7 @@ class PlatformViewAndroid final {
   void RegisterImageTexture(
       int64_t texture_id,
       const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
-      ImageExternalTexture::ImageLifecycle lifecycle);
+      bool reset_on_background);
 
   void LoadDartDeferredLibrary(
       intptr_t loading_unit_id,
@@ -144,8 +143,6 @@ class PlatformViewAndroid final {
   void SetViewportMetrics(int64_t view_id, const ViewportMetrics& metrics);
 
   void DispatchPointerDataPacket(std::unique_ptr<PointerDataPacket> packet);
-
-  void RegisterTexture(std::shared_ptr<flutter::Texture> texture);
 
   void UnregisterTexture(int64_t texture_id);
 

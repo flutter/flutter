@@ -143,7 +143,15 @@ class EmbedderAndroidEngine final : public AndroidEngine {
   void OnVsyncCallback(intptr_t baton) override;
 
   // |AndroidEngine|
-  void RegisterTexture(std::shared_ptr<flutter::Texture> texture) override;
+  void RegisterExternalTexture(
+      int64_t texture_id,
+      const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture) override;
+
+  // |AndroidEngine|
+  void RegisterImageTexture(
+      int64_t texture_id,
+      const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
+      bool reset_on_background) override;
 
   // |AndroidEngine|
   void UnregisterTexture(int64_t texture_id) override;
@@ -236,6 +244,19 @@ class EmbedderAndroidEngine final : public AndroidEngine {
                                size_t mutations_count,
                                const FlutterPlatformViewMutation** mutations);
   void OnFramePresented();
+  bool OnGLExternalTextureFrame(int64_t texture_id,
+                                size_t width,
+                                size_t height,
+                                FlutterOpenGLTexture* texture_out);
+  bool OnHardwareBufferExternalTextureFrame(
+      int64_t texture_id,
+      size_t width,
+      size_t height,
+      FlutterHardwareBufferExternalTexture* texture_out);
+  bool OnVulkanExternalTextureFrame(int64_t texture_id,
+                                    size_t width,
+                                    size_t height,
+                                    FlutterVulkanExternalTexture* texture_out);
 
   // ---------------------------------------------------------------------------
   // Conversion & Serialization Helpers
@@ -343,7 +364,29 @@ class EmbedderAndroidEngine final : public AndroidEngine {
     int32_t priority;
   };
   std::vector<PendingImageGenerator> pending_image_generators_;
-  std::vector<std::shared_ptr<flutter::Texture>> pending_textures_;
+
+  struct ExternalTextureEntry {
+    enum class Type {
+      kSurfaceTexture,
+      kImageTexture,
+    };
+    Type type = Type::kSurfaceTexture;
+    int64_t id = 0;
+    fml::jni::ScopedJavaGlobalRef<jobject> java_object;
+    bool reset_on_background = false;
+
+    ExternalTextureEntry(Type p_type,
+                         int64_t p_id,
+                         const fml::jni::ScopedJavaGlobalRef<jobject>& p_object,
+                         bool p_reset_on_background)
+        : type(p_type),
+          id(p_id),
+          java_object(p_object),
+          reset_on_background(p_reset_on_background) {}
+  };
+  mutable std::mutex external_textures_mutex_;
+  std::unordered_map<int64_t, std::unique_ptr<ExternalTextureEntry>>
+      external_textures_;
 
   std::shared_ptr<AndroidTaskRunners> android_task_runners_;
   std::shared_ptr<android::AndroidVsyncWaiter> vsync_waiter_;
