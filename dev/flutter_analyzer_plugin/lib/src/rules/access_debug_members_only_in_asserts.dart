@@ -14,8 +14,9 @@ import '../flutter_analysis_rule.dart';
 
 extension _HasDebugPrefix on Token {
   bool get _isDebugOnlySymbol {
-    final String lowerCased = lexeme.toLowerCase();
-    return lowerCased.startsWith('debug') || lowerCased.startsWith('_debug');
+    final String name = lexeme;
+    final searchStartIndex = name.startsWith('_') ? 1 : 0;
+    return name.startsWith('debug', searchStartIndex) || name.startsWith('Debug', searchStartIndex);
   }
 }
 
