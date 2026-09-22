@@ -368,9 +368,9 @@ class ConvexTessellatorImpl : public Tessellator::ConvexTessellator {
         RecordSeen(key);
       }
       if (supports_primitive_restart) {
-        return TessellateConvexDirect(
-            path, data_host_buffer, indexes_host_buffer, tolerance,
-            supports_primitive_restart, supports_triangle_fan);
+        return TessellateConvexDirect(path, data_host_buffer,
+                                      indexes_host_buffer, tolerance,
+                                      supports_triangle_fan);
       }
       DoTessellateConvexInternal(path, point_buffer_, index_buffer_, tolerance);
       return Upload(point_buffer_, index_buffer_, data_host_buffer,
@@ -413,9 +413,7 @@ class ConvexTessellatorImpl : public Tessellator::ConvexTessellator {
                                       HostBuffer& data_host_buffer,
                                       HostBuffer& indexes_host_buffer,
                                       Scalar tolerance,
-                                      bool supports_primitive_restart,
                                       bool supports_triangle_fan) {
-    FML_DCHECK(supports_primitive_restart);
     const auto [point_count, contour_count] =
         PathTessellator::CountFillStorage(path, tolerance);
     BufferView point_buffer = data_host_buffer.Emplace(
