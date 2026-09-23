@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_COMPOSITOR_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_COMPOSITOR_H_
 
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <mutex>
@@ -33,6 +34,17 @@ class AndroidCompositorPlatformViewDelegate {
       const FlutterSize& size,
       size_t mutations_count,
       const FlutterPlatformViewMutation** mutations) = 0;
+
+  /// Invoked when an overlay backing store is encountered in the frame
+  /// composition stack above a platform view.
+  virtual void OnOverlayPresented(size_t overlay_index,
+                                  const FlutterPoint& offset,
+                                  const FlutterSize& size) {}
+
+  /// Returns native window for overlay surface at overlay_index.
+  virtual ANativeWindow* GetOverlayWindow(size_t overlay_index) {
+    return nullptr;
+  }
 
   /// Invoked after all layers in a frame have been presented.
   virtual void OnFramePresented() = 0;
@@ -83,8 +95,14 @@ class AndroidCompositor {
   size_t GetPresentedFrameCount() const;
   size_t GetLastPresentedLayersCount() const;
   size_t GetLastPresentedPlatformViewsCount() const;
+  size_t GetLastPresentedOverlaysCount() const;
 
  private:
+  struct OffscreenTracker {
+    AndroidSurfaceManager::OffscreenFBO fbo;
+  };
+  std::atomic<size_t> backing_stores_created_in_frame_{0};
+
   const std::shared_ptr<AndroidSurfaceManager> surface_manager_;
   std::shared_ptr<AndroidCompositorPlatformViewDelegate>
       platform_view_delegate_;
@@ -93,6 +111,7 @@ class AndroidCompositor {
   size_t presented_frame_count_ = 0;
   size_t last_presented_layers_count_ = 0;
   size_t last_presented_platform_views_count_ = 0;
+  size_t last_presented_overlays_count_ = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidCompositor);
 };

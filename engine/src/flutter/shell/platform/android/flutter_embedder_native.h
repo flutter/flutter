@@ -43,6 +43,8 @@
 
 #include <android/native_window.h>
 
+struct AHardwareBuffer;
+
 namespace flutter {
 namespace android {
 
@@ -859,6 +861,16 @@ class FlutterEmbedderNative {
   /// @brief Unregisters an external SurfaceTexture.
   void UnregisterSurfaceTexture(int64_t texture_id);
 
+  /// @brief Registers an external ImageConsumer with its Java global reference.
+  void RegisterImageTexture(
+      int64_t texture_id,
+      const std::shared_ptr<fml::jni::ScopedJavaGlobalRef<jobject>>&
+          image_texture_entry,
+      bool reset_on_background);
+
+  /// @brief Unregisters an external ImageConsumer.
+  void UnregisterImageTexture(int64_t texture_id);
+
   /// @brief Registers an opaque C-API response handle and assigns an integer
   /// ID.
   int32_t RegisterResponseHandle(
@@ -1159,6 +1171,10 @@ class FlutterEmbedderNative {
       const FlutterSize& size,
       size_t mutations_count,
       const FlutterPlatformViewMutation** mutations);
+  void HandleCompositorOverlayPresented(size_t overlay_index,
+                                        const FlutterPoint& offset,
+                                        const FlutterSize& size);
+  ANativeWindow* GetOverlayWindow(size_t overlay_index);
   void HandleCompositorFramePresented();
 
   std::mutex surface_mutex_;
@@ -1247,6 +1263,25 @@ class FlutterEmbedderNative {
       surface_textures_;
   mutable std::unordered_map<int64_t, uint32_t> surface_texture_gl_ids_;
   mutable std::unordered_set<int64_t> surface_texture_attached_;
+
+  struct ImageTextureEntry {
+    std::shared_ptr<fml::jni::ScopedJavaGlobalRef<jobject>> weak_entry;
+    bool reset_on_background = false;
+    uint32_t gl_texture_id = 0;
+    void* current_egl_image = nullptr;
+    void* current_egl_display = nullptr;
+    std::unique_ptr<AndroidHardwareBuffer> current_buffer;
+  };
+
+  mutable std::mutex image_textures_mutex_;
+  std::unordered_map<int64_t, ImageTextureEntry> image_textures_;
+
+  struct OverlaySurfaceState {
+    std::mutex mutex;
+    std::vector<int32_t> surface_ids;
+  };
+  std::shared_ptr<OverlaySurfaceState> overlay_surface_state_ =
+      std::make_shared<OverlaySurfaceState>();
 
   mutable std::mutex response_handles_mutex_;
   mutable std::unordered_map<int32_t,

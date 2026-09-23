@@ -247,6 +247,8 @@ class JniRouter {
 
   bool RouteHideOverlaySurface(int32_t surface_id);
 
+  ANativeWindow* RouteGetOverlayWindow(int32_t id) const;
+
   bool RouteSetHcppEnabled(bool enabled);
 
   bool RouteCreatePlatformViewTransaction();

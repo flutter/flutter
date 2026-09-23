@@ -454,6 +454,16 @@ bool JniRouter::RouteHideOverlaySurface(int32_t surface_id) {
   return false;
 }
 
+ANativeWindow* JniRouter::RouteGetOverlayWindow(int32_t id) const {
+  TRACE_EVENT1("flutter", "JniRouter::RouteGetOverlayWindow", "id",
+               std::to_string(id).c_str());
+  if (embedder_delegate_ && embedder_delegate_->GetPlatformViewsController()) {
+    return embedder_delegate_->GetPlatformViewsController()->GetOverlayWindow(
+        id);
+  }
+  return nullptr;
+}
+
 bool JniRouter::RouteCreatePlatformViewTransaction() {
   TRACE_EVENT0("flutter", "JniRouter::RouteCreatePlatformViewTransaction");
   if (embedder_delegate_) {

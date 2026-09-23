@@ -396,6 +396,14 @@ void DefaultPlatformViewsProvider::SetHcppEnabled(bool enabled) {
   hcpp_enabled_ = enabled;
 }
 
+ANativeWindow* DefaultPlatformViewsProvider::GetOverlayWindow(int32_t id) {
+  TRACE_EVENT0("flutter", "DefaultPlatformViewsProvider::GetOverlayWindow");
+  if (jvm_invoker_) {
+    return jvm_invoker_->GetOverlayWindow(id);
+  }
+  return nullptr;
+}
+
 // =============================================================================
 // InMemoryPlatformViewsProvider
 // =============================================================================
@@ -610,6 +618,11 @@ void InMemoryPlatformViewsProvider::SetHcppEnabled(bool enabled) {
   TRACE_EVENT0("flutter", "InMemoryPlatformViewsProvider::SetHcppEnabled");
   std::lock_guard<std::mutex> lock(mutex_);
   hcpp_enabled_ = enabled;
+}
+
+ANativeWindow* InMemoryPlatformViewsProvider::GetOverlayWindow(int32_t id) {
+  TRACE_EVENT0("flutter", "InMemoryPlatformViewsProvider::GetOverlayWindow");
+  return nullptr;
 }
 
 void InMemoryPlatformViewsProvider::SetNextTextureId(int64_t texture_id) {
@@ -1166,6 +1179,16 @@ void AndroidPlatformViewsController::SetHcppEnabled(bool enabled) {
   if (provider) {
     provider->SetHcppEnabled(enabled);
   }
+}
+
+ANativeWindow* AndroidPlatformViewsController::GetOverlayWindow(
+    int32_t id) const {
+  TRACE_EVENT0("flutter", "AndroidPlatformViewsController::GetOverlayWindow");
+  auto provider = GetProvider();
+  if (provider) {
+    return provider->GetOverlayWindow(id);
+  }
+  return nullptr;
 }
 
 size_t AndroidPlatformViewsController::GetActiveViewsCount() const {

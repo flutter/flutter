@@ -9,6 +9,8 @@
 #include <mutex>
 #include <optional>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/macros.h"
@@ -28,7 +30,7 @@ typedef void* EGLConfig;
 typedef void* EGLContext;
 typedef void* EGLSurface;
 typedef int32_t EGLint;
-typedef void ANativeWindow;
+struct ANativeWindow;
 #ifndef EGL_NO_DISPLAY
 #define EGL_NO_DISPLAY ((EGLDisplay)0)
 #endif
@@ -105,6 +107,9 @@ class AndroidSurfaceManager {
   /// Returns the EGLDisplay handle.
   EGLDisplay GetEGLDisplay() const;
 
+  /// Returns the EGLConfig handle.
+  EGLConfig GetEGLConfig() const { return egl_config_; }
+
   /// Returns the resource EGLContext handle.
   EGLContext GetResourceContext() const;
 
@@ -127,6 +132,33 @@ class AndroidSurfaceManager {
   /// FlutterEngineInitialize/FlutterEngineRun.
   void PopulateSoftwareRendererConfig(FlutterSoftwareRendererConfig* config);
 
+  // ---------------------------------------------------------------------------
+  // Overlay Surface & Offscreen Framebuffer Management
+  // ---------------------------------------------------------------------------
+
+  struct OffscreenFBO {
+    uint32_t fbo = 0;
+    uint32_t texture = 0;
+    size_t width = 0;
+    size_t height = 0;
+  };
+
+  /// Acquires an offscreen framebuffer object for rendering overlays.
+  OffscreenFBO AcquireOffscreenFBO(size_t width, size_t height);
+
+  /// Releases an offscreen framebuffer object back to the pool.
+  void ReleaseOffscreenFBO(const OffscreenFBO& fbo);
+
+  /// Blits the contents of offscreen_fbo to overlay_window and swaps its
+  /// buffers.
+  bool BlitAndSwapOverlaySurface(ANativeWindow* overlay_window,
+                                 uint32_t offscreen_fbo,
+                                 size_t width,
+                                 size_t height);
+
+  /// Destroys all cached overlay EGLSurfaces.
+  void DestroyOverlaySurfaces();
+
  private:
   const AndroidRenderingAPI rendering_api_;
   mutable std::mutex window_mutex_;
@@ -143,6 +175,14 @@ class AndroidSurfaceManager {
   EGLSurface egl_onscreen_pbuffer_surface_ = EGL_NO_SURFACE;
   EGLSurface egl_resource_pbuffer_surface_ = EGL_NO_SURFACE;
   bool has_surfaceless_context_ = false;
+
+  mutable std::mutex offscreen_fbo_mutex_;
+  std::vector<OffscreenFBO> offscreen_fbo_pool_;
+
+  mutable std::mutex overlay_surfaces_mutex_;
+#if FML_OS_ANDROID
+  std::unordered_map<ANativeWindow*, EGLSurface> overlay_egl_surfaces_;
+#endif
 
   bool InitializeEGL();
   void TeardownEGL();

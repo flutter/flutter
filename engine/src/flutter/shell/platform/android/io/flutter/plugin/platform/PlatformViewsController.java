@@ -1460,4 +1460,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   public SparseArray<PlatformOverlayView> getOverlayLayerViews() {
     return overlayLayerViews;
   }
+
+  /**
+   * Sets whether the FlutterView render surface should be converted to an ImageView when adding
+   * platform views using Hybrid Composition.
+   */
+  public void synchronizeToNativeViewHierarchy(boolean yes) {
+    this.synchronizeToNativeViewHierarchy = yes;
+  }
 }
