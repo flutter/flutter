@@ -211,10 +211,15 @@ platform_properties:
           {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
       device_type: none
-      mac_model: "Macmini8,1"
+      # Benchmarks are pinned to a single Mac model so that timing metrics are
+      # comparable across runs. Macmini9,1 is the Apple Silicon (M1) Mac mini;
+      # the Intel Macmini8,1 bots are being turned down
+      # (https://flutter.dev/go/macos-intel-deprecation).
+      mac_model: "Macmini9,1"
+      cpu: arm64
       os: Mac-15.7
       tags: >
-        ["devicelab", "hostonly", "mac"]
+        ["devicelab", "hostonly", "mac", "arm64"]
       $flutter/osx_sdk : >-
         {
           "sdk_version": "17c52"
@@ -735,9 +740,9 @@ targets:
   - name: Linux flavors_test_linux
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
+      xvfb: "1"
       dependencies: >-
         [
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
@@ -1828,6 +1833,18 @@ targets:
     timeout: 60
     properties:
       shard: android_engine_vulkan_tests
+      tags: >
+         ["framework", "hostonly", "shard", "linux"]
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+        ]
+
+  - name: Linux_android_emu_vulkan_stable android_engine_hcpp_tests
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: android_engine_hcpp_tests
       tags: >
          ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
@@ -5350,13 +5367,12 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: backdrop_filter_perf_ios__timeline_summary
 
-  - name: Mac_arm64_ios basic_material_app_ios__compile
+  - name: Mac_benchmark basic_material_app_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
       task_name: basic_material_app_ios__compile
 
   - name: Mac channels_integration_test_ios
@@ -5425,7 +5441,6 @@ targets:
   - name: Mac external_ui_integration_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5461,13 +5476,16 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: flavors_test_ios
 
-  - name: Mac_arm64_ios flutter_gallery_ios__compile
+  - name: Mac_benchmark flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
-      tags: >
-        ["devicelab", "ios", "mac", "arm64"]
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       task_name: flutter_gallery_ios__compile
 
   - name: Mac_ios flutter_gallery_ios__start_up
@@ -5488,22 +5506,20 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_view_ios__start_up
 
-  - name: Mac_arm64_ios hello_world_ios__compile
+  - name: Mac_benchmark hello_world_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
-      tags: >
-        ["devicelab", "ios", "mac", "arm64"]
       task_name: hello_world_ios__compile
 
-  - name: Mac_arm64_ios imitation_game_flutter
+  - name: Mac_benchmark imitation_game_flutter
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
-      tags: >
-        ["devicelab", "ios", "mac", "arm64"]
       task_name: imitation_game_flutter__compile
 
   - name: Mac_arm64_ios imitation_game_swiftui
@@ -5671,7 +5687,6 @@ targets:
   - name: Mac hello_world_impeller_ios_sdfs
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-

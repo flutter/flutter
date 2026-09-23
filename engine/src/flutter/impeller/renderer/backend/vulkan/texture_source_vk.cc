@@ -18,6 +18,10 @@ std::shared_ptr<YUVConversionVK> TextureSourceVK::GetYUVConversion() const {
   return nullptr;
 }
 
+vk::ImageView TextureSourceVK::GetBaseMipImageView() const {
+  return VK_NULL_HANDLE;
+}
+
 vk::ImageLayout TextureSourceVK::GetLayout() const {
   return layout_;
 }

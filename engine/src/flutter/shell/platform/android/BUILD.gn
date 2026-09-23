@@ -43,6 +43,7 @@ executable("flutter_shell_native_unittests") {
   visibility = [ "*" ]
   testonly = true
   sources = [
+    "android_context_dynamic_impeller_unittests.cc",
     "android_context_gl_impeller_unittests.cc",
     "android_image_generator_unittests.cc",
     "android_shell_holder_unittests.cc",
@@ -391,6 +392,7 @@ android_java_sources = [
   "io/flutter/view/MenuRoleConfigurator.java",
   "io/flutter/view/ProgressBarRoleConfigurator.java",
   "io/flutter/view/RoleConfiguratorFactory.java",
+  "io/flutter/view/SliderRoleConfigurator.java",
   "io/flutter/view/TextureRegistry.java",
   "io/flutter/view/VsyncWaiter.java",
 ]
