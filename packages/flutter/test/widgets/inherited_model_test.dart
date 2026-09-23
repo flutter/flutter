@@ -517,16 +517,18 @@ void main() {
     var subscribeAll = false;
     var builds = 0;
     late StateSetter updateTree;
+    late BuildContext childContext;
 
     final Widget child = Builder(
       builder: (BuildContext context) {
         builds += 1;
-        InheritedModel.inheritFrom<ABCModel>(context, aspect: 'a');
-        InheritedModel.inheritFrom<ABCModel>(context, aspect: 'b');
+        childContext = context;
+        InheritedModel.inheritFrom<_TrackingABCModel>(context, aspect: 'a');
+        InheritedModel.inheritFrom<_TrackingABCModel>(context, aspect: 'b');
         if (subscribeAll) {
-          InheritedModel.inheritFrom<ABCModel>(context);
+          InheritedModel.inheritFrom<_TrackingABCModel>(context);
           // Subsequent aspect registrations after unconditional subscription should no-op.
-          InheritedModel.inheritFrom<ABCModel>(context, aspect: 'c');
+          InheritedModel.inheritFrom<_TrackingABCModel>(context, aspect: 'c');
         }
         return const SizedBox();
       },
@@ -536,27 +538,68 @@ void main() {
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           updateTree = setState;
-          return ABCModel(a: a, b: b, c: c, child: child);
+          return _TrackingABCModel(a: a, b: b, c: c, child: child);
         },
       ),
     );
+    final _TrackingInheritedModelElement modelElement = tester
+        .element<_TrackingInheritedModelElement>(find.byType(_TrackingABCModel));
+    final dependentElement = childContext as Element;
+
     expect(builds, 1);
+    // Registering two aspects ('a' and 'b') only calls setDependencies once (when
+    // initializing the HashSet) and mutates the existing set in-place for 'b'.
+    expect(modelElement.setDependenciesCalls, 1);
+    expect(modelElement.readDependencies(dependentElement), <String>{'a', 'b'});
+
+    // Rebuilding the dependent for 'a' mutates the existing set in-place without
+    // calling setDependencies again.
+    updateTree(() => a += 1);
+    await tester.pump();
+    expect(builds, 2);
+    expect(modelElement.setDependenciesCalls, 1);
 
     // Updating 'c' does not rebuild while only subscribed to 'a' and 'b'.
     updateTree(() => c += 1);
     await tester.pump();
-    expect(builds, 1);
+    expect(builds, 2);
 
-    // Upgrade to unconditional dependency (aspect == null) and verify 'c' changes now trigger rebuilds.
+    // Upgrade to unconditional dependency (aspect == null): stores canonical
+    // `const <Never>{}` and ignores subsequent `aspect: 'c'` registration without
+    // throwing UnsupportedError on the unmodifiable set.
     updateTree(() {
       subscribeAll = true;
       a += 1;
     });
     await tester.pump();
-    expect(builds, 2);
+    expect(builds, 3);
+    expect(modelElement.setDependenciesCalls, 2);
+    expect(identical(modelElement.readDependencies(dependentElement), const <Never>{}), isTrue);
 
     updateTree(() => c += 1);
     await tester.pump();
-    expect(builds, 3);
+    expect(builds, 4);
+    expect(modelElement.setDependenciesCalls, 2);
   });
+}
+
+class _TrackingABCModel extends ABCModel {
+  const _TrackingABCModel({super.a, super.b, super.c, required super.child});
+
+  @override
+  _TrackingInheritedModelElement createElement() => _TrackingInheritedModelElement(this);
+}
+
+class _TrackingInheritedModelElement extends InheritedModelElement<String> {
+  _TrackingInheritedModelElement(super.widget);
+
+  int setDependenciesCalls = 0;
+
+  @override
+  void setDependencies(Element dependent, Object? value) {
+    setDependenciesCalls += 1;
+    super.setDependencies(dependent, value);
+  }
+
+  Object? readDependencies(Element dependent) => getDependencies(dependent);
 }

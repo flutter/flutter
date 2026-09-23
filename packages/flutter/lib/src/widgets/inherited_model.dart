@@ -222,7 +222,14 @@ class InheritedModelElement<T> extends InheritedElement {
 
   @override
   void updateDependencies(Element dependent, Object? aspect) {
+    // Typed as Set<Object?>? rather than Set<T>? to avoid a runtime generic
+    // subtype cast on lookup and a caller-side covariant parameter check on
+    // `dependencies.add(aspect)` below. Type safety is still enforced by
+    // `assert(aspect is T)` and the underlying `HashSet<T>` instance.
     final dependencies = getDependencies(dependent) as Set<Object?>?;
+    // An empty set (stored as `const <Never>{}` when `aspect == null`) marks an
+    // unconditional dependency on all aspects, so subsequent aspect additions
+    // return early here and never mutate `const <Never>{}`.
     if (dependencies != null && dependencies.isEmpty) {
       return;
     }
