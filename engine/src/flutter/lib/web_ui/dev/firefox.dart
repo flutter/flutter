@@ -169,11 +169,8 @@ user_pref("security.sandbox.content.level", 0);
 
   static Future<String?>? _virtualDisplayFuture;
 
-  /// Ensures an X11 `DISPLAY` is available on Linux so headless Firefox can
-  /// initialize EGL/GLX backed by Mesa `llvmpipe` (`swrast`) for WebGL2.
-  ///
-  /// On GPU-less Linux CI containers where `DISPLAY` is unset, `firefox --headless`
-  /// fails `XOpenDisplay(NULL)` and returns `null` from `canvas.getContext('webgl2')`.
+  /// Creates a virtual X display on Linux when `DISPLAY` is unset so headless
+  /// Firefox can initialize WebGL.
   static Future<String?> _ensureLinuxDisplay() {
     if (!Platform.isLinux) {
       return Future<String?>.value();
@@ -196,8 +193,8 @@ user_pref("security.sandbox.content.level", 0);
             '-nolisten',
             'tcp',
           ], mode: ProcessStartMode.detached);
-          for (var i = 0; i < 50 && !socketFile.existsSync(); i++) {
-            await Future<void>.delayed(const Duration(milliseconds: 20));
+          for (var i = 0; i < 10 && !socketFile.existsSync(); i++) {
+            await Future<void>.delayed(const Duration(milliseconds: 500));
           }
         } on Object catch (error) {
           print('[Firefox] Failed to start Xvfb on $display: $error');
