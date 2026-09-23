@@ -331,8 +331,20 @@ public class FlutterFragment extends Fragment
       return this;
     }
 
-    /** Any special configuration arguments for the Flutter engine */
+    /** Any special configuration arguments for the Flutter engine. */
     @NonNull
+    public NewEngineFragmentBuilder flutterEngineFlags(@NonNull List<String> flags) {
+      this.shellArgs = new FlutterShellArgs(flags);
+      return this;
+    }
+
+    /**
+     * Any special configuration arguments for the Flutter engine.
+     *
+     * @deprecated Use {@link #flutterEngineFlags(List)} instead.
+     */
+    @NonNull
+    @Deprecated
     public NewEngineFragmentBuilder flutterShellArgs(@NonNull FlutterShellArgs shellArgs) {
       this.shellArgs = shellArgs;
       return this;
@@ -1347,6 +1359,15 @@ public class FlutterFragment extends Fragment
     }
   }
 
+  private boolean isGetFlutterShellArgsOverridden() {
+    try {
+      return getClass().getMethod("getFlutterShellArgs").getDeclaringClass()
+          != FlutterFragment.class;
+    } catch (NoSuchMethodException | SecurityException e) {
+      return false;
+    }
+  }
+
   /**
    * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by {@link
    * FlutterActivityAndFragmentDelegate} to obtain Flutter shell arguments when initializing
@@ -1354,19 +1375,39 @@ public class FlutterFragment extends Fragment
    */
   @Override
   @NonNull
+  @SuppressWarnings("deprecation")
   public List<String> getFlutterEngineFlags() {
-    String[] flutterShellArgsArray = getArguments().getStringArray(ARG_FLUTTER_INITIALIZATION_ARGS);
+    if (isGetFlutterShellArgsOverridden()) {
+      Log.w(
+          TAG,
+          "FlutterShellArgs is deprecated and will soon be removed. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries.");
+      return Arrays.asList(getFlutterShellArgs().toArray());
+    }
+    String[] flutterShellArgsArray =
+        getArguments() != null
+            ? getArguments().getStringArray(ARG_FLUTTER_INITIALIZATION_ARGS)
+            : null;
     return Arrays.asList(flutterShellArgsArray != null ? flutterShellArgsArray : new String[] {});
   }
 
+  /**
+   * Returns the {@link FlutterShellArgs} that should be used when initializing Flutter.
+   *
+   * @deprecated Use {@link #getFlutterEngineFlags()} instead.
+   */
   @Override
   @NonNull
   @Deprecated
   public FlutterShellArgs getFlutterShellArgs() {
     Log.w(
         TAG,
-        "FlutterShellArgs is deprecated. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries");
-    return new FlutterShellArgs(getFlutterEngineFlags());
+        "FlutterShellArgs is deprecated and will soon be removed. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries.");
+    String[] flutterShellArgsArray =
+        getArguments() != null
+            ? getArguments().getStringArray(ARG_FLUTTER_INITIALIZATION_ARGS)
+            : null;
+    return new FlutterShellArgs(
+        flutterShellArgsArray != null ? flutterShellArgsArray : new String[] {});
   }
 
   /**

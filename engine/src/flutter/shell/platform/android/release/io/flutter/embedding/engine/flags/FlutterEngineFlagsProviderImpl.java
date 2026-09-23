@@ -22,4 +22,10 @@ public final class FlutterEngineFlagsProviderImpl implements FlutterEngineFlagsP
     // Release builds do not support engine flag configuration via Intent.
     return Collections.emptyList();
   }
+
+  @Override
+  public boolean isSoftwareRenderingEnabled(@Nullable Intent intent) {
+    // Release builds do not support engine flag configuration via Intent.
+    return false;
+  }
 }

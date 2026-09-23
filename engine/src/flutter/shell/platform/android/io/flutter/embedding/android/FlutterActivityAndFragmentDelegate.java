@@ -29,11 +29,11 @@ import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
-import io.flutter.embedding.engine.FlutterEngineFlags;
 import io.flutter.embedding.engine.FlutterEngineGroup;
 import io.flutter.embedding.engine.FlutterEngineGroupCache;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.flags.FlutterEngineFlags;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.view.SensitiveContentPlugin;
@@ -333,10 +333,13 @@ import java.util.Set;
         "No preferred FlutterEngine was provided. Creating a new FlutterEngine for"
             + " this FlutterFragment.");
 
-    warnIfEngineFlagsSetViaIntent(host.getActivity().getIntent());
+    if (host.getActivity() != null && host.getActivity().getIntent() != null) {
+      warnIfEngineFlagsSetViaIntent(host.getActivity().getIntent());
+    }
     FlutterEngineGroup group =
         engineGroup == null
-            ? new FlutterEngineGroup(host.getContext(), host.getFlutterShellArgs().toArray())
+            ? new FlutterEngineGroup(
+                host.getContext(), host.getFlutterEngineFlags().toArray(new String[0]))
             : engineGroup;
     flutterEngine =
         group.createAndRunEngine(
@@ -350,8 +353,8 @@ import java.util.Set;
   // As part of https://github.com/flutter/flutter/issues/180686, the ability
   // to set engine flags via Intent extras will be removed, so warn
   // developers that engine shell arguments set that way will be ignored.
-  private void warnIfEngineFlagsSetViaIntent(@NonNull Intent intent) {
-    if (intent.getExtras() == null) {
+  private void warnIfEngineFlagsSetViaIntent(@Nullable Intent intent) {
+    if (intent == null || intent.getExtras() == null) {
       return;
     }
 
@@ -1121,9 +1124,7 @@ import java.util.Set;
 
     /** Returns the engine arguments that should be used when initializing Flutter. */
     @NonNull
-    default List<String> getFlutterEngineFlags() {
-      return Arrays.asList(getFlutterShellArgs().toArray());
-    }
+    List<String> getFlutterEngineFlags();
 
     /**
      * Returns the {@link FlutterShellArgs} that should be used when initializing Flutter.
@@ -1132,7 +1133,9 @@ import java.util.Set;
      */
     @NonNull
     @Deprecated
-    FlutterShellArgs getFlutterShellArgs();
+    default FlutterShellArgs getFlutterShellArgs() {
+      return new FlutterShellArgs(getFlutterEngineFlags());
+    }
 
     /**
      * Returns the ID of a statically cached {@link io.flutter.embedding.engine.FlutterEngine} to

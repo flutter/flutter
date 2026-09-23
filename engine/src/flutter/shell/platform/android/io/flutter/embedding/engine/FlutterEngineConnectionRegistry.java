@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
 import io.flutter.Log;
 import io.flutter.embedding.android.ExclusiveAppComponent;
+import io.flutter.embedding.engine.flags.FlutterEngineFlagsProviderImpl;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.PluginRegistry;
@@ -328,9 +329,11 @@ import java.util.Set;
 
   private void attachToActivityInternal(@NonNull Activity activity, @NonNull Lifecycle lifecycle) {
     this.activityPluginBinding = new FlutterEngineActivityPluginBinding(activity, lifecycle);
-    final Intent intent = activity.getIntent();
 
-    boolean useSoftwareRendering = flutterLoader.getSofwareRenderingEnabledViaManifest();
+    boolean useSoftwareRendering =
+        flutterLoader.getSofwareRenderingEnabledViaManifest()
+            || FlutterEngineFlagsProviderImpl.INSTANCE.isSoftwareRenderingEnabled(
+                activity.getIntent());
 
     flutterEngine.getPlatformViewsController().setSoftwareRendering(useSoftwareRendering);
 

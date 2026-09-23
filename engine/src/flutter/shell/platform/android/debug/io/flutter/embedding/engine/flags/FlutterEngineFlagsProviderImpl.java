@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import io.flutter.embedding.engine.FlutterEngineFlags;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,5 +51,13 @@ public final class FlutterEngineFlagsProviderImpl implements FlutterEngineFlagsP
     }
 
     return args;
+  }
+
+  @Override
+  public boolean isSoftwareRenderingEnabled(@Nullable Intent intent) {
+    if (intent == null) {
+      return false;
+    }
+    return getFlags(intent).contains(FlutterEngineFlags.ENABLE_SOFTWARE_RENDERING.engineArgument);
   }
 }

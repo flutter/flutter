@@ -31,11 +31,18 @@ Use the manifest when:
 Use the command line when:
 
 - You want to quickly experiment with a flag for a single run of your app.
-- You need to override a flag that is already set in the manifest temporarily for debugging
-  or testing purposes.
+- You need to override a value or toggle flag that is already set in the manifest temporarily
+  for debugging or testing purposes.
 
-**Note: If a flag is specified both on the command line and in the manifest,
-the command-line value takes precedence at runtime.**
+**Note on precedence:**
+
+- **Flags that take values or toggles** (e.g., `--enable-impeller=true|false` or `--trace-to-file=<path>`):
+  The command-line value takes precedence over the manifest value at runtime.
+- **Presence-only boolean flags** (e.g., `--enable-software-rendering`, `--trace-startup`, `--verbose-logging`):
+  These flags enable a feature if specified in either the manifest or the command line.
+  They cannot be disabled from the command line if already enabled in the manifest.
+  If you need them enabled only for specific builds, specify them in variant-specific manifests
+  (e.g., `src/debug/AndroidManifest.xml`).
 
 See below for details on using each method.
 

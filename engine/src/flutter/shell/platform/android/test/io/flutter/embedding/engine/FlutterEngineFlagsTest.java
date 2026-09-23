@@ -9,6 +9,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import io.flutter.embedding.engine.flags.FlutterEngineFlags;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import org.junit.Test;

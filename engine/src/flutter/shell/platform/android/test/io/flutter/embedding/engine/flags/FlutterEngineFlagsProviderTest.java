@@ -5,6 +5,7 @@
 package io.flutter.embedding.engine.flags;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Intent;
@@ -98,7 +99,7 @@ public class FlutterEngineFlagsProviderTest {
 
     // Toggle flags
     intent.putExtra("enable-impeller", true);
-    intent.putExtra("enable-hcpp-and-surface-control", false);
+    intent.putExtra("leak-vm", false);
 
     List<String> args = FlutterEngineFlagsProviderImpl.INSTANCE.getFlags(intent);
     HashSet<String> argValues = new HashSet<>(args);
@@ -106,7 +107,7 @@ public class FlutterEngineFlagsProviderTest {
     assertEquals(3, argValues.size());
     assertTrue(argValues.contains("--profile-microtasks"));
     assertTrue(argValues.contains("--enable-impeller=true"));
-    assertTrue(argValues.contains("--enable-hcpp-and-surface-control=false"));
+    assertTrue(argValues.contains("--leak-vm=false"));
   }
 
   @Test
@@ -114,5 +115,18 @@ public class FlutterEngineFlagsProviderTest {
     Intent intent = new Intent();
     List<String> args = FlutterEngineFlagsProviderImpl.INSTANCE.getFlags(intent);
     assertEquals(0, args.size());
+  }
+
+  @Test
+  public void itDetectsSoftwareRenderingEnabled() {
+    Intent intent = new Intent();
+    intent.putExtra("enable-software-rendering", true);
+    assertTrue(FlutterEngineFlagsProviderImpl.INSTANCE.isSoftwareRenderingEnabled(intent));
+
+    intent.putExtra("enable-software-rendering", false);
+    assertFalse(FlutterEngineFlagsProviderImpl.INSTANCE.isSoftwareRenderingEnabled(intent));
+
+    assertFalse(FlutterEngineFlagsProviderImpl.INSTANCE.isSoftwareRenderingEnabled(new Intent()));
+    assertFalse(FlutterEngineFlagsProviderImpl.INSTANCE.isSoftwareRenderingEnabled(null));
   }
 }

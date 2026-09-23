@@ -10,7 +10,7 @@ import '../framework/framework.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
-TaskFunction createAndroidStripsIntentParsingInReleaseTest() {
+TaskFunction createAndroidIntentParsingTest() {
   return () async {
     final Device device = await devices.workingDevice;
     await device.unlock();
