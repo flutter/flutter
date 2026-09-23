@@ -337,12 +337,17 @@ bool AndroidSurfaceControl::PresentBackingStore(
   // double-close.
   scoped_fence.Release();
 
+  NotifyFirstFrame();
+
+  return true;
+}
+
+bool AndroidSurfaceControl::NotifyFirstFrame() {
   bool is_first_frame = !first_frame_dispatched_.exchange(true);
   if (is_first_frame && jni_delegate_ != nullptr) {
     jni_delegate_->OnFirstFrame();
   }
-
-  return true;
+  return is_first_frame;
 }
 
 bool AndroidSurfaceControl::CommitTransaction(FlutterViewId view_id) {

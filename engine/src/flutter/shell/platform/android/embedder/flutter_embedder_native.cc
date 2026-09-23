@@ -7,6 +7,10 @@
 #if !defined(_WIN32)
 #include <dlfcn.h>
 #endif
+#if defined(__ANDROID__)
+#include <android/native_window.h>
+#endif
+#include <algorithm>
 #include <cstring>
 #include <unordered_set>
 #include <utility>
@@ -138,11 +142,17 @@ FlutterEmbedderNative::FlutterEmbedderNative(
   is_valid_ = ResolveDefaultProcTable(&embedder_api_);
   surface_control_ =
       std::make_unique<AndroidSurfaceControl>(jni_delegate_, embedder_api_);
+#if defined(__ANDROID__)
+  surface_control_->SetTextureUpdateCallback(
+      [this]() { UpdateAllJavaTextures(); });
+#endif
   vsync_waiter_ =
       std::make_unique<AndroidChoreographerVsync>(jni_delegate_, embedder_api_);
   external_texture_manager_ =
       std::make_unique<AndroidHardwareBufferExternalTexture>(jni_delegate_,
                                                              embedder_api_);
+  platform_views_controller_ = std::make_unique<AndroidPlatformViewsController>(
+      jni_delegate_, surface_control_.get());
 }
 
 FlutterEmbedderNative::FlutterEmbedderNative(
@@ -160,10 +170,18 @@ FlutterEmbedderNative::FlutterEmbedderNative(
           std::make_unique<AndroidHardwareBufferExternalTexture>(
               jni_delegate_,
               embedder_api_)),
+      platform_views_controller_(
+          std::make_unique<AndroidPlatformViewsController>(
+              jni_delegate_,
+              surface_control_.get())),
       is_valid_(proc_table.Initialize != nullptr &&
                 proc_table.RunInitialized != nullptr &&
                 proc_table.Shutdown != nullptr) {
   RegisterEmbedderHandle(this);
+#if defined(__ANDROID__)
+  surface_control_->SetTextureUpdateCallback(
+      [this]() { UpdateAllJavaTextures(); });
+#endif
 }
 
 FlutterEmbedderNative::FlutterEmbedderNative(
@@ -183,8 +201,16 @@ FlutterEmbedderNative::FlutterEmbedderNative(
           std::make_unique<AndroidHardwareBufferExternalTexture>(
               jni_delegate_,
               embedder_api_)),
+      platform_views_controller_(
+          std::make_unique<AndroidPlatformViewsController>(
+              jni_delegate_,
+              surface_control_.get())),
       is_valid_(spawned_engine != nullptr) {
   RegisterEmbedderHandle(this);
+#if defined(__ANDROID__)
+  surface_control_->SetTextureUpdateCallback(
+      [this]() { UpdateAllJavaTextures(); });
+#endif
 }
 
 FlutterEmbedderNative::~FlutterEmbedderNative() {
@@ -241,8 +267,12 @@ bool FlutterEmbedderNative::Launch(
   renderer_config.type = kSoftware;
   renderer_config.software.struct_size = sizeof(FlutterSoftwareRendererConfig);
   renderer_config.software.surface_present_callback =
-      [](void* /*user_data*/, const void* /*allocation*/, size_t /*row_bytes*/,
-         size_t /*height*/) -> bool { return true; };
+      [](void* user_data, const void* allocation, size_t row_bytes,
+         size_t height) -> bool {
+    auto* self = static_cast<FlutterEmbedderNative*>(user_data);
+    return self != nullptr &&
+           self->PresentSoftware(allocation, row_bytes, height);
+  };
 
   std::vector<const char*> dart_args_ptrs;
   dart_args_ptrs.reserve(entrypoint_args.size());
@@ -267,6 +297,19 @@ bool FlutterEmbedderNative::Launch(
   project_args.request_dart_deferred_library_callback =
       &FlutterEmbedderNative::OnRequestDartDeferredLibraryCallback;
   project_args.vsync_callback = &FlutterEmbedderNative::OnVsyncRequestCallback;
+
+  FlutterCompositor compositor = {};
+  compositor.struct_size = sizeof(FlutterCompositor);
+  compositor.user_data = platform_views_controller_.get();
+  compositor.create_backing_store_callback =
+      &AndroidPlatformViewsController::OnCreateBackingStoreCallback;
+  compositor.collect_backing_store_callback =
+      &AndroidPlatformViewsController::OnCollectBackingStoreCallback;
+  compositor.present_view_callback =
+      &AndroidPlatformViewsController::OnPresentViewCallback;
+  if (platform_views_controller_ != nullptr) {
+    project_args.compositor = &compositor;
+  }
 
   if (embedder_api_.RunsAOTCompiledDartCode != nullptr &&
       embedder_api_.RunsAOTCompiledDartCode()) {
@@ -364,8 +407,12 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::Spawn(
   renderer_config.type = kSoftware;
   renderer_config.software.struct_size = sizeof(FlutterSoftwareRendererConfig);
   renderer_config.software.surface_present_callback =
-      [](void* /*user_data*/, const void* /*allocation*/, size_t /*row_bytes*/,
-         size_t /*height*/) -> bool { return true; };
+      [](void* user_data, const void* allocation, size_t row_bytes,
+         size_t height) -> bool {
+    auto* self = static_cast<FlutterEmbedderNative*>(user_data);
+    return self != nullptr &&
+           self->PresentSoftware(allocation, row_bytes, height);
+  };
 
   std::vector<const char*> dart_args_ptrs;
   dart_args_ptrs.reserve(entrypoint_args.size());
@@ -415,6 +462,62 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::Spawn(
   child->engine_ = spawned_engine;
   child->is_valid_ = true;
   return child;
+}
+
+bool FlutterEmbedderNative::CopySoftwarePixels(const void* src,
+                                               size_t row_bytes,
+                                               size_t height,
+                                               const SoftwareBufferView& dst) {
+  if (src == nullptr || dst.bits == nullptr || dst.stride <= 0 ||
+      dst.height <= 0 || row_bytes == 0 || height == 0) {
+    return false;
+  }
+  const size_t bpp = (dst.format == 4 /* WINDOW_FORMAT_RGB_565 */) ? 2 : 4;
+  const size_t buffer_row_bytes = static_cast<size_t>(dst.stride) * bpp;
+  const size_t copy_rows = std::min(height, static_cast<size_t>(dst.height));
+  const size_t copy_bytes_per_row = std::min(row_bytes, buffer_row_bytes);
+  const auto* src_bytes = static_cast<const uint8_t*>(src);
+  auto* dst_bytes = static_cast<uint8_t*>(dst.bits);
+
+  for (size_t y = 0; y < copy_rows; ++y) {
+    std::memcpy(dst_bytes + y * buffer_row_bytes, src_bytes + y * row_bytes,
+                copy_bytes_per_row);
+  }
+  return true;
+}
+
+bool FlutterEmbedderNative::PresentSoftware(const void* allocation,
+                                            size_t row_bytes,
+                                            size_t height) {
+  if (allocation == nullptr || row_bytes == 0 || height == 0) {
+    return false;
+  }
+#if defined(__ANDROID__)
+  UpdateAllJavaTextures();
+  if (surface_control_ != nullptr) {
+    uintptr_t handle = surface_control_->GetNativeWindowHandle(0);
+    if (handle != 0 && handle != 1) {
+      auto* window = reinterpret_cast<ANativeWindow*>(handle);
+      ANativeWindow_Buffer buffer;
+      if (ANativeWindow_lock(window, &buffer, nullptr) == 0) {
+        SoftwareBufferView dst_view;
+        dst_view.bits = buffer.bits;
+        dst_view.format = buffer.format;
+        dst_view.stride = buffer.stride;
+        dst_view.height = buffer.height;
+        CopySoftwarePixels(allocation, row_bytes, height, dst_view);
+        ANativeWindow_unlockAndPost(window);
+      }
+    }
+  }
+#endif
+  if (jni_delegate_ != nullptr) {
+    bool is_first = !first_frame_dispatched_.exchange(true);
+    if (is_first) {
+      jni_delegate_->OnFirstFrame();
+    }
+  }
+  return true;
 }
 
 bool FlutterEmbedderNative::NotifySurfaceCreated(

@@ -1,9 +1,9 @@
 {
   "active_migration": "RFC 410: Android Embedder C-API Migration",
   "branch_slug": "android-embedder-migration-v10",
-  "current_branch": "android-embedder-migration-v10/2.3-hardware-buffer",
-  "phase": "Phase 2.3: AndroidHardwareBufferExternalTexture & Zero-Copy YCbCr Import",
-  "active_component": "shell/platform/android/embedder/android_hardware_buffer_external_texture.h",
+  "current_branch": "android-embedder-migration-v10/2.4-platform-views",
+  "phase": "Phase 2.4: AndroidPlatformViewsController & Multi-View Value Capture",
+  "active_component": "shell/platform/android/embedder/android_platform_views_controller.h",
   "active_adrs": [
     "ADR-0000",
     "ADR-0001",
@@ -20,7 +20,7 @@
   ],
   "ratchet_state": {
     "total_allowed_internal_headers": 67,
-    "active_subsystem": "AndroidHardwareBufferExternalTexture & YCbCr Zero-Copy",
+    "active_subsystem": "AndroidPlatformViewsController & Multi-View Value Capture",
     "subsystem_remaining": 67
   },
   "invariants": [
@@ -32,7 +32,7 @@
     "Per-view frame state captured by value in present_view_callback",
     "Zero Shell::Create or AndroidShellHolder when EnableAndroidEmbedderApi is true"
   ],
-  "last_verified_build": "flutter_embedder_native_unittests (16/16 PASSED) + check_android_embedder_deps.dart (PASS)",
+  "last_verified_build": "flutter_embedder_native_unittests (35/35 PASSED) + check_android_embedder_deps.dart (PASS)",
   "failing_tests": [],
-  "next_immediate_action": "Implement Milestone 2.4 (AndroidPlatformViewsController & Multi-View Value Capture)"
+  "next_immediate_action": "Verify full stacked PR chain (pr_chain.dart verify) and execute on-device/host verification"
 }

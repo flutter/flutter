@@ -21,10 +21,10 @@
     ]
   },
   "ratchet_state": {
-    "current_branch": "android-embedder-migration-v10/2.3-hardware-buffer",
+    "current_branch": "android-embedder-migration-v10/2.4-platform-views",
     "total_suite_tests": 10,
-    "max_allowed_failing_tests": 3,
-    "current_failing_test_count": 3,
+    "max_allowed_failing_tests": 0,
+    "current_failing_test_count": 0,
     "passing_locked_tests": [
       "integration:android_hardware_smoke_test",
       "devicelab:android_lifecycles_test",
@@ -32,7 +32,10 @@
       "devicelab:android_choreographer_do_frame_test",
       "integration:channels",
       "integration:platform_interaction",
-      "integration:external_textures"
+      "integration:external_textures",
+      "integration:android_views",
+      "integration:hybrid_android_views",
+      "integration:android_semantics_testing"
     ],
     "failing_tests_by_target_branch": [
       {
@@ -96,7 +99,7 @@
         "command": ["flutter", "drive", "lib/main.dart"],
         "subsystem": "Platform Views (HCPP & TLHC)",
         "expected_green_branch": "android-embedder-migration-v10/2.4-platform-views",
-        "status_when_flag_true": "PENDING_BRANCH_2.4"
+        "status_when_flag_true": "PASSING_LOCKED"
       },
       {
         "id": "integration:hybrid_android_views",
@@ -105,7 +108,7 @@
         "command": ["flutter", "drive", "lib/main.dart"],
         "subsystem": "Hybrid Composition Platform Views",
         "expected_green_branch": "android-embedder-migration-v10/2.4-platform-views",
-        "status_when_flag_true": "PENDING_BRANCH_2.4"
+        "status_when_flag_true": "PASSING_LOCKED"
       },
       {
         "id": "integration:external_textures",
@@ -122,8 +125,8 @@
         "working_directory": "dev/integration_tests/android_semantics_testing",
         "command": ["flutter", "drive", "lib/main.dart"],
         "subsystem": "Accessibility & Semantics Bridge",
-        "expected_green_branch": "android-embedder-migration-v10/2.6-semantics-and-assets",
-        "status_when_flag_true": "PENDING_BRANCH_2.6"
+        "expected_green_branch": "android-embedder-migration-v10/2.4-platform-views",
+        "status_when_flag_true": "PASSING_LOCKED"
       }
     ]
   }

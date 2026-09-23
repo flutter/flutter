@@ -923,5 +923,363 @@ TEST(AndroidHardwareBufferExternalTextureTest,
   EXPECT_EQ(manager.GetActiveBufferLeaseCount(), 0u);
 }
 
+TEST(AndroidPlatformViewsControllerTest,
+     CapturesLayersAndMutatorsByValueAcrossConcurrentMultiViewPresentations) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  auto engine = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xCAFE01);
+
+  std::vector<int> closed_fds;
+  AndroidSurfaceControl surface_control(jni_delegate, proc_table,
+                                        [&closed_fds](int fd) {
+                                          closed_fds.push_back(fd);
+                                          return 0;
+                                        });
+  ASSERT_TRUE(surface_control.NotifySurfaceCreated(engine, /*view_id=*/0,
+                                                   0x1111, 1080, 2400, 3.0));
+  ASSERT_TRUE(surface_control.NotifySurfaceCreated(engine, /*view_id=*/7,
+                                                   0x2222, 1920, 1080, 2.0));
+
+  std::vector<std::function<void()>> queued_platform_tasks;
+  AndroidPlatformViewsController controller(
+      jni_delegate, &surface_control,
+      [&queued_platform_tasks](std::function<void()> task) {
+        queued_platform_tasks.push_back(std::move(task));
+      });
+
+  // Reusable stack structures that the raster thread mutates between View A and
+  // View B BEFORE the platform thread executes either queued task.
+  FlutterBackingStore backing_store = {};
+  backing_store.struct_size = sizeof(FlutterBackingStore);
+  backing_store.user_data = reinterpret_cast<void*>(0xB001);
+
+  FlutterBackingStorePresentInfo present_info = {};
+  present_info.struct_size = sizeof(FlutterBackingStorePresentInfo);
+  present_info.synchronization_fence_fd = 81;
+
+  FlutterPlatformViewMutation mut1 = {};
+  mut1.type = kFlutterPlatformViewMutationTypeOpacity;
+  mut1.opacity = 0.5;
+  FlutterPlatformViewMutation mut2 = {};
+  mut2.type = kFlutterPlatformViewMutationTypeClipRect;
+  mut2.clip_rect = {0, 0, 100, 100};
+  const FlutterPlatformViewMutation* view_a_muts[] = {&mut1, &mut2};
+
+  FlutterPlatformView pv = {};
+  pv.struct_size = sizeof(FlutterPlatformView);
+  pv.identifier = 42;
+  pv.mutations_count = 2;
+  pv.mutations = view_a_muts;
+
+  FlutterLayer bs_layer = {};
+  bs_layer.struct_size = sizeof(FlutterLayer);
+  bs_layer.type = kFlutterLayerContentTypeBackingStore;
+  bs_layer.size = {1080, 2400};
+  bs_layer.backing_store = &backing_store;
+  bs_layer.backing_store_present_info = &present_info;
+
+  FlutterLayer pv_layer = {};
+  pv_layer.struct_size = sizeof(FlutterLayer);
+  pv_layer.type = kFlutterLayerContentTypePlatformView;
+  pv_layer.size = {400, 300};
+  pv_layer.platform_view = &pv;
+
+  const FlutterLayer* layers[] = {&bs_layer, &pv_layer};
+
+  // 1. Raster thread presents View A (view_id = 0).
+  FlutterPresentViewInfo info_a = {};
+  info_a.struct_size = sizeof(FlutterPresentViewInfo);
+  info_a.view_id = 0;
+  info_a.layers = layers;
+  info_a.layers_count = 2;
+  info_a.user_data = &controller;
+  ASSERT_TRUE(AndroidPlatformViewsController::OnPresentViewCallback(&info_a));
+  EXPECT_EQ(present_info.synchronization_fence_fd, -1);
+
+  // 2. Raster thread immediately overwrites the SAME stack structs for View B
+  // (view_id = 7) while View A's task is still sitting in
+  // `queued_platform_tasks`.
+  present_info.synchronization_fence_fd = 82;
+  pv.identifier = 99;
+  pv.mutations_count = 1;
+
+  FlutterPresentViewInfo info_b = {};
+  info_b.struct_size = sizeof(FlutterPresentViewInfo);
+  info_b.view_id = 7;
+  info_b.layers = layers;
+  info_b.layers_count = 2;
+  info_b.user_data = &controller;
+  ASSERT_TRUE(AndroidPlatformViewsController::OnPresentViewCallback(&info_b));
+  EXPECT_EQ(present_info.synchronization_fence_fd, -1);
+
+  ASSERT_EQ(queued_platform_tasks.size(), 2u);
+
+  // 3. Platform thread drains both tasks; verify zero cross-view state
+  // corruption.
+  for (auto& task : queued_platform_tasks) {
+    task();
+  }
+
+  AndroidPlatformViewsController::CommittedViewSummary summary_a;
+  ASSERT_TRUE(controller.GetCommittedViewSummary(0, &summary_a));
+  EXPECT_EQ(summary_a.backing_store_layer_count, 1u);
+  EXPECT_EQ(summary_a.platform_view_layer_count, 1u);
+  ASSERT_EQ(summary_a.platform_view_ids.size(), 1u);
+  EXPECT_EQ(summary_a.platform_view_ids[0], 42);
+  EXPECT_EQ(summary_a.mutation_counts_per_view[0], 2u);
+
+  AndroidPlatformViewsController::CommittedViewSummary summary_b;
+  ASSERT_TRUE(controller.GetCommittedViewSummary(7, &summary_b));
+  EXPECT_EQ(summary_b.backing_store_layer_count, 1u);
+  EXPECT_EQ(summary_b.platform_view_layer_count, 1u);
+  ASSERT_EQ(summary_b.platform_view_ids.size(), 1u);
+  EXPECT_EQ(summary_b.platform_view_ids[0], 99);
+  EXPECT_EQ(summary_b.mutation_counts_per_view[0], 1u);
+
+  ASSERT_EQ(jni_delegate->handed_off_fences.size(), 2u);
+  EXPECT_EQ(jni_delegate->handed_off_fences[0], 81);
+  EXPECT_EQ(jni_delegate->handed_off_fences[1], 82);
+  EXPECT_TRUE(closed_fds.empty());
+  EXPECT_EQ(jni_delegate->first_frame_count, 1);
+}
+
+TEST(
+    AndroidPlatformViewsControllerTest,
+    ClosesCapturedSyncFenceWhenTargetViewSurfaceIsDestroyedBeforePlatformTask) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+
+  std::vector<int> closed_fds;
+  AndroidSurfaceControl surface_control(jni_delegate, proc_table,
+                                        [&closed_fds](int fd) {
+                                          closed_fds.push_back(fd);
+                                          return 0;
+                                        });
+
+  AndroidPlatformViewsController controller(jni_delegate, &surface_control);
+
+  FlutterBackingStore backing_store = {};
+  backing_store.struct_size = sizeof(FlutterBackingStore);
+  backing_store.user_data = reinterpret_cast<void*>(0xB002);
+
+  FlutterBackingStorePresentInfo present_info = {};
+  present_info.struct_size = sizeof(FlutterBackingStorePresentInfo);
+  present_info.synchronization_fence_fd = 95;
+
+  FlutterLayer bs_layer = {};
+  bs_layer.struct_size = sizeof(FlutterLayer);
+  bs_layer.type = kFlutterLayerContentTypeBackingStore;
+  bs_layer.size = {800, 600};
+  bs_layer.backing_store = &backing_store;
+  bs_layer.backing_store_present_info = &present_info;
+  const FlutterLayer* layers[] = {&bs_layer};
+
+  // Presenting to view_id = 404 (which has no attached surface) must still
+  // reset `synchronization_fence_fd = -1` and close `fd = 95`.
+  FlutterPresentViewInfo info = {};
+  info.struct_size = sizeof(FlutterPresentViewInfo);
+  info.view_id = 404;
+  info.layers = layers;
+  info.layers_count = 1;
+  EXPECT_TRUE(controller.PresentView(&info));
+  EXPECT_EQ(present_info.synchronization_fence_fd, -1);
+  ASSERT_EQ(closed_fds.size(), 1u);
+  EXPECT_EQ(closed_fds[0], 95);
+}
+
+#if !defined(_WIN32)
+TEST(CapturedLayerTest, ClosesSyncFenceFdOnDestructionWhenPlatformTaskDropped) {
+  int fds[2];
+  ASSERT_EQ(pipe(fds), 0);
+  int read_fd = fds[0];
+  int write_fd = fds[1];
+
+  {
+    CapturedLayer layer;
+    layer.synchronization_fence_fd = write_fd;
+  }
+
+  // Reading from read_fd returns 0 (EOF) because write_fd was closed by
+  // ~CapturedLayer().
+  char buf[1];
+  EXPECT_EQ(read(read_fd, buf, 1), 0);
+  close(read_fd);
+}
+#endif
+
+TEST(AndroidPlatformViewsControllerTest,
+     CreatesAndCollectsSoftwareBackingStore) {
+  FlutterBackingStoreConfig config = {};
+  config.struct_size = sizeof(FlutterBackingStoreConfig);
+  config.size = {640, 480};
+
+  FlutterBackingStore backing_store = {};
+  EXPECT_TRUE(AndroidPlatformViewsController::OnCreateBackingStoreCallback(
+      &config, &backing_store, nullptr));
+  EXPECT_EQ(backing_store.type, kFlutterBackingStoreTypeSoftware);
+  EXPECT_NE(backing_store.software.allocation, nullptr);
+  EXPECT_EQ(backing_store.software.height, 480u);
+  EXPECT_EQ(backing_store.software.row_bytes, 640u * 4);
+
+  EXPECT_TRUE(AndroidPlatformViewsController::OnCollectBackingStoreCallback(
+      &backing_store, nullptr));
+}
+
+TEST(AndroidPlatformViewsControllerTest,
+     DispatchesOnFirstFrameOnceUponSoftwarePresentation) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+
+  AndroidSurfaceControl surface_control(jni_delegate, proc_table);
+  AndroidPlatformViewsController controller(jni_delegate, &surface_control);
+
+  std::vector<uint8_t> pixels(640 * 480 * 4, 0xAA);
+  FlutterBackingStore backing_store = {};
+  backing_store.struct_size = sizeof(FlutterBackingStore);
+  backing_store.type = kFlutterBackingStoreTypeSoftware;
+  backing_store.software.allocation = pixels.data();
+  backing_store.software.row_bytes = 640 * 4;
+  backing_store.software.height = 480;
+
+  FlutterLayer bs_layer = {};
+  bs_layer.struct_size = sizeof(FlutterLayer);
+  bs_layer.type = kFlutterLayerContentTypeBackingStore;
+  bs_layer.size = {640, 480};
+  bs_layer.backing_store = &backing_store;
+  const FlutterLayer* layers[] = {&bs_layer};
+
+  FlutterPresentViewInfo info = {};
+  info.struct_size = sizeof(FlutterPresentViewInfo);
+  info.view_id = 0;
+  info.layers = layers;
+  info.layers_count = 1;
+
+  EXPECT_EQ(jni_delegate->first_frame_count, 0);
+  EXPECT_TRUE(controller.PresentView(&info));
+  EXPECT_EQ(jni_delegate->first_frame_count, 1);
+
+  // Subsequent frame presentation should not fire OnFirstFrame again.
+  EXPECT_TRUE(controller.PresentView(&info));
+  EXPECT_EQ(jni_delegate->first_frame_count, 1);
+}
+
+TEST(FlutterEmbedderNativeTest, PresentSoftwareDispatchesOnFirstFrameOnce) {
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  FlutterEngineProcTable proc_table = {};
+  FlutterEmbedderNative embedder(Settings{}, jni_delegate, proc_table);
+
+  std::vector<uint8_t> pixels(100 * 100 * 4, 0xFF);
+  EXPECT_EQ(jni_delegate->first_frame_count, 0);
+
+  EXPECT_TRUE(embedder.PresentSoftware(pixels.data(), 100 * 4, 100));
+  EXPECT_EQ(jni_delegate->first_frame_count, 1);
+
+  // Subsequent frame presentation should not fire OnFirstFrame again.
+  EXPECT_TRUE(embedder.PresentSoftware(pixels.data(), 100 * 4, 100));
+  EXPECT_EQ(jni_delegate->first_frame_count, 1);
+}
+
+TEST(FlutterEmbedderNativeTest, CopySoftwarePixelsHandlesRgba8888Buffer) {
+  // 4x4 RGBA_8888 source image.
+  const size_t width = 4;
+  const size_t height = 4;
+  const size_t src_row_bytes = width * 4;
+  std::vector<uint8_t> src(src_row_bytes * height, 0xAB);
+
+  // 6x4 RGBA_8888 destination buffer (stride = 6).
+  const int32_t dst_stride = 6;
+  std::vector<uint8_t> dst(dst_stride * 4 * height, 0x00);
+  FlutterEmbedderNative::SoftwareBufferView view;
+  view.bits = dst.data();
+  view.format = 1;  // WINDOW_FORMAT_RGBA_8888
+  view.stride = dst_stride;
+  view.height = height;
+
+  EXPECT_TRUE(FlutterEmbedderNative::CopySoftwarePixels(
+      src.data(), src_row_bytes, height, view));
+
+  // Verify first row contains 0xAB for first 4 pixels (16 bytes) and 0x00 for
+  // padding.
+  for (size_t y = 0; y < height; ++y) {
+    for (size_t x = 0; x < 16; ++x) {
+      EXPECT_EQ(dst[y * dst_stride * 4 + x], 0xAB);
+    }
+    for (size_t x = 16; x < dst_stride * 4; ++x) {
+      EXPECT_EQ(dst[y * dst_stride * 4 + x], 0x00);
+    }
+  }
+}
+
+TEST(FlutterEmbedderNativeTest,
+     CopySoftwarePixelsHandlesRgb565BufferWithoutOverrunning) {
+  // 4x4 RGBA_8888 source image.
+  const size_t width = 4;
+  const size_t height = 4;
+  const size_t src_row_bytes = width * 4;
+  std::vector<uint8_t> src(src_row_bytes * height, 0xCD);
+
+  // 4x4 RGB_565 destination buffer (format = 4, 2 bpp, stride = 4, total bytes
+  // = 4 * 2 * 4 = 32).
+  const int32_t dst_stride = 4;
+  const size_t dst_total_bytes = dst_stride * 2 * height;
+  std::vector<uint8_t> dst(dst_total_bytes, 0x00);
+  FlutterEmbedderNative::SoftwareBufferView view;
+  view.bits = dst.data();
+  view.format = 4;  // WINDOW_FORMAT_RGB_565
+  view.stride = dst_stride;
+  view.height = height;
+
+  EXPECT_TRUE(FlutterEmbedderNative::CopySoftwarePixels(
+      src.data(), src_row_bytes, height, view));
+
+  // Ensure each row wrote exactly buffer_row_bytes (8 bytes) without exceeding
+  // total bytes.
+  for (size_t i = 0; i < dst_total_bytes; ++i) {
+    EXPECT_EQ(dst[i], 0xCD);
+  }
+}
+
+TEST(FlutterEmbedderNativeTest, CopySoftwarePixelsRejectsInvalidBuffers) {
+  std::vector<uint8_t> src(64, 0x11);
+  std::vector<uint8_t> dst(64, 0x22);
+  FlutterEmbedderNative::SoftwareBufferView view;
+  view.bits = dst.data();
+  view.format = 1;
+  view.stride = 4;
+  view.height = 4;
+
+  // Null src
+  EXPECT_FALSE(FlutterEmbedderNative::CopySoftwarePixels(nullptr, 16, 4, view));
+  // Null dst bits
+  view.bits = nullptr;
+  EXPECT_FALSE(
+      FlutterEmbedderNative::CopySoftwarePixels(src.data(), 16, 4, view));
+  view.bits = dst.data();
+  // Non-positive stride
+  view.stride = 0;
+  EXPECT_FALSE(
+      FlutterEmbedderNative::CopySoftwarePixels(src.data(), 16, 4, view));
+  view.stride = -1;
+  EXPECT_FALSE(
+      FlutterEmbedderNative::CopySoftwarePixels(src.data(), 16, 4, view));
+  view.stride = 4;
+  // Non-positive height
+  view.height = 0;
+  EXPECT_FALSE(
+      FlutterEmbedderNative::CopySoftwarePixels(src.data(), 16, 4, view));
+  view.height = -2;
+  EXPECT_FALSE(
+      FlutterEmbedderNative::CopySoftwarePixels(src.data(), 16, 4, view));
+  view.height = 4;
+  // Zero row_bytes or height
+  EXPECT_FALSE(
+      FlutterEmbedderNative::CopySoftwarePixels(src.data(), 0, 4, view));
+  EXPECT_FALSE(
+      FlutterEmbedderNative::CopySoftwarePixels(src.data(), 16, 0, view));
+}
+
 }  // namespace testing
 }  // namespace flutter

@@ -128,6 +128,22 @@ class AndroidSurfaceControl {
   /// the view's `free_layer_pool`.
   bool CommitTransaction(FlutterViewId view_id);
 
+  /// Dispatches `jni_delegate_->OnFirstFrame()` if it has not yet been
+  /// dispatched for any view presentation. Returns true if this call dispatched
+  /// the first frame.
+  bool NotifyFirstFrame();
+
+  using TextureUpdateCallback = std::function<void()>;
+  void SetTextureUpdateCallback(TextureUpdateCallback callback) {
+    texture_update_callback_ = std::move(callback);
+  }
+
+  void NotifyTexturesUpdated() {
+    if (texture_update_callback_) {
+      texture_update_callback_();
+    }
+  }
+
   /// Returns whether `view_id` currently has an attached native window surface.
   bool HasAttachedSurface(FlutterViewId view_id) const;
 
@@ -157,6 +173,7 @@ class AndroidSurfaceControl {
   FlutterEngineProcTable embedder_api_ = {};
   FenceCloserFn fence_closer_;
   WindowReleaserFn window_releaser_;
+  TextureUpdateCallback texture_update_callback_;
 
   std::atomic<bool> first_frame_dispatched_{false};
 

@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EMBEDDER_FLUTTER_EMBEDDER_NATIVE_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EMBEDDER_FLUTTER_EMBEDDER_NATIVE_H_
 
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <mutex>
@@ -17,6 +18,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/embedder/android_choreographer_vsync.h"
 #include "flutter/shell/platform/android/embedder/android_hardware_buffer_external_texture.h"
+#include "flutter/shell/platform/android/embedder/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/embedder/android_surface_control.h"
 #include "flutter/shell/platform/android/embedder/jni_delegate.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -136,6 +138,10 @@ class FlutterEmbedderNative {
     return external_texture_manager_.get();
   }
 
+  AndroidPlatformViewsController* GetPlatformViewsController() const {
+    return platform_views_controller_.get();
+  }
+
   bool RegisterExternalTexture(int64_t texture_id);
   bool UnregisterExternalTexture(int64_t texture_id);
   bool MarkExternalTextureFrameAvailable(int64_t texture_id);
@@ -148,6 +154,24 @@ class FlutterEmbedderNative {
   void UpdateJavaTexture(JNIEnv* env, int64_t texture_id);
   void UpdateAllJavaTextures();
 #endif
+
+  struct SoftwareBufferView {
+    void* bits = nullptr;
+    int32_t format = 1;  // 1: RGBA_8888, 4: RGB_565
+    int32_t stride = 0;
+    int32_t height = 0;
+  };
+
+  /// Decoupled pixel copy routine for software presentations, validating
+  /// format pitch, row bounds, and destination gralloc memory limits.
+  static bool CopySoftwarePixels(const void* src,
+                                 size_t row_bytes,
+                                 size_t height,
+                                 const SoftwareBufferView& dst);
+
+  /// Presents a software-rendered pixel buffer to the primary ANativeWindow
+  /// surface, invoking `jni_delegate_->OnFirstFrame()` upon first presentation.
+  bool PresentSoftware(const void* allocation, size_t row_bytes, size_t height);
 
  private:
   FlutterEmbedderNative(const Settings& settings,
@@ -178,7 +202,9 @@ class FlutterEmbedderNative {
   std::unique_ptr<AndroidChoreographerVsync> vsync_waiter_;
   std::unique_ptr<AndroidHardwareBufferExternalTexture>
       external_texture_manager_;
+  std::unique_ptr<AndroidPlatformViewsController> platform_views_controller_;
   bool is_valid_ = false;
+  std::atomic<bool> first_frame_dispatched_{false};
 
   mutable std::mutex response_mutex_;
   int32_t next_response_id_ = 1;

@@ -14,6 +14,8 @@ source_set("flutter_embedder_native_src") {
     "embedder/android_choreographer_vsync.h",
     "embedder/android_hardware_buffer_external_texture.cc",
     "embedder/android_hardware_buffer_external_texture.h",
+    "embedder/android_platform_views_controller.cc",
+    "embedder/android_platform_views_controller.h",
     "embedder/android_surface_control.cc",
     "embedder/android_surface_control.h",
     "embedder/flutter_embedder_native.cc",
