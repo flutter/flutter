@@ -659,6 +659,122 @@ void main() {
     expect(tester.takeException(), null);
   });
 
+  testWidgets('Floating cursor Update without a Start anchors instead of throwing', (
+    WidgetTester tester,
+  ) async {
+    const text = 'hello world this is fun and cool and awesome!';
+    controller.text = text;
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: _grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
+
+    expect(controller.selection.baseOffset, 29);
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+
+    // No Start: the text input connection changed hands mid-drag. The first
+    // Update sets the origin.
+    editableTextState.updateFloatingCursor(
+      RawFloatingCursorPoint(state: FloatingCursorDragState.Update, offset: const Offset(20, 20)),
+    );
+    expect(tester.takeException(), null);
+
+    // Moves the cursor relative to that origin.
+    editableTextState.updateFloatingCursor(
+      RawFloatingCursorPoint(state: FloatingCursorDragState.Update, offset: const Offset(-250, 20)),
+    );
+    expect(tester.takeException(), null);
+    expect(controller.selection.baseOffset, 29);
+
+    editableTextState.updateFloatingCursor(
+      RawFloatingCursorPoint(state: FloatingCursorDragState.End),
+    );
+
+    await tester.pumpAndSettle();
+    // The cursor has been set, as if the drag had started at the first Update.
+    expect(controller.selection.baseOffset, 10);
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('Floating cursor Update without a Start after the reset animation does not throw', (
+    WidgetTester tester,
+  ) async {
+    const text = 'hello world this is fun and cool and awesome!';
+    controller.text = text;
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: _grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    editableTextState.updateFloatingCursor(
+      RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)),
+    );
+    editableTextState.updateFloatingCursor(
+      RawFloatingCursorPoint(state: FloatingCursorDragState.End),
+    );
+
+    // The reset animation completes and clears the drag origin.
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 29);
+
+    // One more Update trails the End.
+    editableTextState.updateFloatingCursor(
+      RawFloatingCursorPoint(state: FloatingCursorDragState.Update, offset: const Offset(20, 20)),
+    );
+    expect(tester.takeException(), null);
+
+    editableTextState.updateFloatingCursor(
+      RawFloatingCursorPoint(state: FloatingCursorDragState.End),
+    );
+
+    await tester.pumpAndSettle();
+    // The cursor did not change.
+    expect(controller.selection.baseOffset, 29);
+    expect(tester.takeException(), null);
+  });
+
   testWidgets("Drag the floating cursor, it won't blink.", (WidgetTester tester) async {
     const text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
