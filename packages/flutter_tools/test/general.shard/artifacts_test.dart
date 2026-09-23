@@ -238,22 +238,22 @@ void main() {
     testWithoutContext('Precompiled web DDC stable SDK artifact paths are correct', () {
       expect(
         artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCStableSdk).path,
-        'root/bin/cache/flutter_web_sdk/ddc/stable/dart_sdk.js',
+        'root/bin/cache/flutter_web_sdk/kernel/ddc/stable/dart_sdk.js',
       );
       expect(
         artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCStableSdkSourcemaps).path,
-        'root/bin/cache/flutter_web_sdk/ddc/stable/dart_sdk.js.map',
+        'root/bin/cache/flutter_web_sdk/kernel/ddc/stable/dart_sdk.js.map',
       );
     });
 
     testWithoutContext('Precompiled web DDC canary SDK artifact paths are correct', () {
       expect(
         artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdk).path,
-        'root/bin/cache/flutter_web_sdk/ddc/canary/dart_sdk.js',
+        'root/bin/cache/flutter_web_sdk/kernel/ddc/canary/dart_sdk.js',
       );
       expect(
         artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdkSourcemaps).path,
-        'root/bin/cache/flutter_web_sdk/ddc/canary/dart_sdk.js.map',
+        'root/bin/cache/flutter_web_sdk/kernel/ddc/canary/dart_sdk.js.map',
       );
     });
 
