@@ -145,7 +145,8 @@ TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
   EXPECT_TRUE(g_vulkan_proc_info.did_call_queue_submit);
 }
 
-static std::optional<TestVulkanImage> CreateVulkanTextureWithPixels(
+namespace {
+std::optional<TestVulkanImage> CreateVulkanTextureWithPixels(
     const fml::RefPtr<TestVulkanContext>& context,
     int width,
     int height) {
@@ -198,7 +199,7 @@ static std::optional<TestVulkanImage> CreateVulkanTextureWithPixels(
 
 // Creates a BGRA VkImage and draws red/blue content into it, similar to
 // CreateVulkanTextureWithPixels but using VK_FORMAT_B8G8R8A8_UNORM.
-static std::optional<TestVulkanImage> CreateVulkanTextureWithPixelsBGRA(
+std::optional<TestVulkanImage> CreateVulkanTextureWithPixelsBGRA(
     const fml::RefPtr<TestVulkanContext>& context,
     int width,
     int height) {
@@ -249,6 +250,24 @@ static std::optional<TestVulkanImage> CreateVulkanTextureWithPixelsBGRA(
 
   return std::move(image_result.value());
 }
+
+std::optional<TestVulkanImage> CreateVulkanTextureNV12(
+    const fml::RefPtr<TestVulkanContext>& context,
+    int width,
+    int height) {
+  auto nv12_mapping = testing::OpenFixtureAsMapping("texture.nv12");
+  if (!nv12_mapping || nv12_mapping->GetSize() == 0) {
+    FML_LOG(ERROR) << "Could not load texture.nv12 fixture.";
+    return std::nullopt;
+  }
+
+  size_t y_size = static_cast<size_t>(width) * height;
+  const uint8_t* y_data = nv12_mapping->GetMapping();
+  const uint8_t* uv_data = y_data + y_size;
+
+  return context->CreateNV12Image({width, height}, y_data, uv_data);
+}
+}  // namespace
 
 TEST_F(EmbedderTest, RenderTextureWithImpellerVulkan) {
   constexpr int kWidth = 800;
@@ -625,23 +644,6 @@ TEST_F(EmbedderTest, RenderBGRATextureWithSkiaVulkan) {
   // BGRA-to-SkColorType mapping should prevent channel swapping.
   ASSERT_TRUE(
       ImageMatchesFixture("external_texture_impeller.png", rendered_scene));
-}
-
-static std::optional<TestVulkanImage> CreateVulkanTextureNV12(
-    const fml::RefPtr<TestVulkanContext>& context,
-    int width,
-    int height) {
-  auto nv12_mapping = testing::OpenFixtureAsMapping("texture.nv12");
-  if (!nv12_mapping || nv12_mapping->GetSize() == 0) {
-    FML_LOG(ERROR) << "Could not load texture.nv12 fixture.";
-    return std::nullopt;
-  }
-
-  size_t y_size = static_cast<size_t>(width) * height;
-  const uint8_t* y_data = nv12_mapping->GetMapping();
-  const uint8_t* uv_data = y_data + y_size;
-
-  return context->CreateNV12Image({width, height}, y_data, uv_data);
 }
 
 TEST_F(EmbedderTest, RenderNV12TextureWithImpellerVulkan) {
