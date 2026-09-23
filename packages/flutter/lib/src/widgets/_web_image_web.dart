@@ -135,21 +135,14 @@ class RenderWebImage extends RenderShiftedBox {
   /// Creates a new [RenderWebImage].
   RenderWebImage({
     RenderBox? child,
-    required web.HTMLImageElement image,
-    double? width,
-    double? height,
-    BoxFit? fit,
-    AlignmentGeometry alignment = Alignment.center,
-    bool matchTextDirection = false,
-    TextDirection? textDirection,
-  }) : _image = image,
-       _width = width,
-       _height = height,
-       _fit = fit,
-       _alignment = alignment,
-       _matchTextDirection = matchTextDirection,
-       _textDirection = textDirection,
-       super(child);
+    required this._image,
+    this._width,
+    this._height,
+    this._fit,
+    this._alignment = Alignment.center,
+    this._matchTextDirection = false,
+    this._textDirection,
+  }) : super(child);
 
   Alignment? _resolvedAlignment;
   bool? _flipHorizontally;

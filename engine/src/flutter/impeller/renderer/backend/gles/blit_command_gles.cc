@@ -210,6 +210,12 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
     return false;
   }
   const auto& gl = reactor.GetProcTable();
+  // Arm erratum EN_ID 1,792,661: force a binding change before uploading to
+  // a reused shared texture name. See
+  // https://github.com/flutter/flutter/issues/190640.
+  if (gl.GetCapabilities()->NeedsTextureUploadRebind()) {
+    gl.BindTexture(texture_type, 0u);
+  }
   gl.BindTexture(texture_type, gl_handle.value());
   const GLvoid* tex_data =
       source.GetBuffer()->OnGetContents() + source.GetRange().offset;
