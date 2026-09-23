@@ -4,6 +4,7 @@
 
 #include "impeller/display_list/dl_golden_unittests.h"
 
+#include <memory>
 #include <utility>
 
 #include "display_list/dl_color.h"
@@ -11,10 +12,12 @@
 #include "display_list/geometry/dl_geometry_types.h"
 #include "display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/dl_builder.h"
+#include "flutter/fml/closure.h"
 #include "flutter/impeller/display_list/testing/render_text_in_canvas.h"
 #include "flutter/impeller/display_list/testing/rmse.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
+#include "impeller/renderer/testing/mocks.h"
 
 namespace flutter {
 namespace testing {
@@ -648,6 +651,99 @@ TEST_P(DlGoldenTest, SubpixelScaledTranslated) {
         << i;
   }
   EXPECT_EQ(intensity[4].x - intensity[0].x, 1);
+}
+
+// Advanced blends on devices without framebuffer fetch are rendered in an
+// offscreen subpass whose render target has an integral size. The texture
+// coordinates used to sample the inputs must describe exactly the rect that
+// render target covers; if they describe the full, fractional coverage instead,
+// the contents are scaled by trunc(w)/w on every blend. Stacking blends makes
+// that error accumulate into a visible drift, which is what this test checks.
+// Lighten is idempotent, so any number of stacked blends must produce the same
+// image as a single one.
+//
+// Regression test for https://github.com/flutter/flutter/issues/192980.
+TEST_P(DlGoldenTest, StackedOffscreenAdvancedBlendsDoNotResample) {
+  if (GetParam() != PlaygroundBackend::kMetal) {
+    GTEST_SKIP()
+        << "This backend doesn't yet support setting device capabilities.";
+  }
+
+  std::shared_ptr<const impeller::Capabilities> old_capabilities =
+      GetContext()->GetCapabilities();
+  auto mock_capabilities =
+      std::make_shared<impeller::testing::MockCapabilities>();
+  EXPECT_CALL(*mock_capabilities, SupportsFramebufferFetch())
+      .Times(::testing::AnyNumber())
+      .WillRepeatedly(::testing::Return(false));
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultColorFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultStencilFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              GetDefaultDepthStencilFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsOffscreenMSAA);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsImplicitResolvingMSAA);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsReadFromResolve);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsSSBO);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsCompute);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsTextureToTextureBlits);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultGlyphAtlasFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsTriangleFan);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsDecalSamplerAddressMode);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsPrimitiveRestart);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetMinimumUniformAlignment);
+  ASSERT_TRUE(SetCapabilities(mock_capabilities).ok());
+  // The playground context is shared across tests, so the mocked capabilities
+  // have to be undone however this test exits.
+  fml::ScopedCleanupClosure restore_capabilities([&]() {
+    EXPECT_TRUE(SetCapabilities(std::const_pointer_cast<impeller::Capabilities>(
+                                    old_capabilities))
+                    .ok());
+  });
+
+  auto draw = [](DlCanvas* canvas, int blend_count) {
+    canvas->DrawColor(DlColor(0xFF404040));
+    // The per-draw blend path computes its coverage from the whole pass, so
+    // the coverage is only fractional through floating point error in the
+    // transform. A 0.4x scale (which the ColorFilterAdvancedBlendNoFbFetch
+    // golden also uses) does not round trip exactly through its inverse and
+    // leaves a 2048 pixel pass at 2047.99988, which the ISize conversion
+    // truncates. A pure scale keeps the origin at exactly zero, isolating the
+    // size mismatch from compositing at a fractional origin.
+    canvas->Scale(0.4f, 0.4f);
+
+    // A backdrop with a hard vertical edge for the blends to resample.
+    DlPaint backdrop;
+    backdrop.setColor(DlColor(0xFFA0A0A0));
+    canvas->DrawRect(DlRect::MakeLTRB(750, 0, 5120, 3840), backdrop);
+
+    DlPaint blend;
+    blend.setColor(DlColor(0xFF808080));
+    blend.setBlendMode(DlBlendMode::kLighten);
+    for (int i = 0; i < blend_count; ++i) {
+      canvas->DrawRect(DlRect::MakeLTRB(250, 250, 1750, 1250), blend);
+    }
+  };
+
+  auto make_screenshot = [&](int blend_count) {
+    DisplayListBuilder builder;
+    draw(&builder, blend_count);
+    return MakeScreenshot(builder.Build());
+  };
+
+  std::unique_ptr<impeller::testing::Screenshot> once = make_screenshot(1);
+  if (!once) {
+    GTEST_SKIP() << "making screenshots not supported.";
+  }
+  std::unique_ptr<impeller::testing::Screenshot> stacked = make_screenshot(30);
+  ASSERT_TRUE(stacked);
+
+  double rmse = RMSE(once.get(), stacked.get());
+  // Without the fix the thirty stacked blends drift the backdrop edge by
+  // several pixels and the RMSE is about 5.75; with it the images are equal.
+  EXPECT_LT(rmse, 1.0) << "rmse: " << rmse;
 }
 
 }  // namespace testing
