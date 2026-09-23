@@ -1145,12 +1145,6 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
     int wParam,
     int lParam,
   ) {
-    // Once destruction has started, skip all other messages to avoid
-    // accessing the window handle after it has been invalidated.
-    if (_destroyed) {
-      return null;
-    }
-
     if (message == _WM_ACTIVATE) {
       // If focus has changed for a window that is managed by this application
       // AND the new focus is neither the parent window nor a descendant of the
