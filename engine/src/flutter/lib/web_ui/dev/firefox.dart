@@ -63,19 +63,24 @@ class Firefox extends Browser {
     return Firefox._(
       BrowserProcess(() async {
         // Using a profile on opening will prevent popups related to profiles.
-        const profile = '''
+        final profile =
+            '''
 user_pref("browser.shell.checkDefaultBrowser", false);
 user_pref("dom.disable_open_during_load", false);
 user_pref("dom.max_script_run_time", 0);
 user_pref("trailhead.firstrun.branches", "nofirstrun-empty");
 user_pref("browser.aboutwelcome.enabled", false);
-// Enable software WebGL on GPU-less Linux CI runners for Skwasm UI suites.
+// Ensure WebGL is enabled, using the hardware GPU when available and allowing
+// fallback to software rendering when no GPU is present.
 user_pref("webgl.force-enabled", true);
 user_pref("webgl.disabled", false);
 user_pref("webgl.disable-fail-if-major-performance-caveat", true);
+${isCi ? '''
+// GPU-less Linux CI containers require software WebRender and disabled content
+// sandboxes to initialize Mesa llvmpipe (swrast) in headless mode.
 user_pref("gfx.webrender.software", true);
 user_pref("security.sandbox.content.level", 0);
-''';
+''' : ''}''';
 
         final temporaryProfileDirectory = Directory(
           path.join(environment.webUiDartToolDir.path, 'firefox_profile'),
@@ -126,11 +131,13 @@ user_pref("security.sandbox.content.level", 0);
           environment: <String, String>{
             ...Platform.environment,
             if (!debug) 'MOZ_HEADLESS': '1',
-            'LIBGL_ALWAYS_SOFTWARE': '1',
-            'MOZ_DISABLE_CONTENT_SANDBOX': '1',
-            'MOZ_DISABLE_GPU_SANDBOX': '1',
-            'MOZ_DISABLE_RDD_SANDBOX': '1',
-            'MOZ_DISABLE_SOCKET_PROCESS_SANDBOX': '1',
+            if (isCi) ...<String, String>{
+              'LIBGL_ALWAYS_SOFTWARE': '1',
+              'MOZ_DISABLE_CONTENT_SANDBOX': '1',
+              'MOZ_DISABLE_GPU_SANDBOX': '1',
+              'MOZ_DISABLE_RDD_SANDBOX': '1',
+              'MOZ_DISABLE_SOCKET_PROCESS_SANDBOX': '1',
+            },
           },
         );
         process.stdout
