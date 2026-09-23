@@ -266,25 +266,32 @@ test-suites:
     run-config: safari
     artifact-deps: [ canvaskit ]
 
+  # Desktop Safari on LUCI Mac-15.7 bots is Safari 18.6, which lacks Wasm
+  # js-string builtins (shipped in Safari 26.2 / macOS 26.2). Keep disabled in
+  # CI until Mac tester bots upgrade to macOS 26.2+.
   - name: safari-dart2wasm-canvaskit-engine
     test-bundle: dart2wasm-canvaskit-engine
     run-config: safari-wasm
     artifact-deps: [ canvaskit ]
+    enable-ci: false
 
   - name: safari-dart2wasm-skwasm-ui
     test-bundle: dart2wasm-skwasm-ui
     run-config: safari-wasm
     artifact-deps: [ skwasm ]
+    enable-ci: false
 
   - name: safari-coi-dart2wasm-skwasm-ui
     test-bundle: dart2wasm-skwasm-ui
     run-config: safari-coi-wasm
     artifact-deps: [ skwasm ]
+    enable-ci: false
 
   - name: safari-coi-dart2wasm-skwasm-skwasm
     test-bundle: dart2wasm-skwasm-skwasm
     run-config: safari-coi-wasm
     artifact-deps: [ skwasm ]
+    enable-ci: false
 
   - name: chrome-dart2wasm-canvaskit-engine
     test-bundle: dart2wasm-canvaskit-engine

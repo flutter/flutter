@@ -71,7 +71,10 @@ user_pref("trailhead.firstrun.branches", "nofirstrun-empty");
 user_pref("browser.aboutwelcome.enabled", false);
 // Enable software WebGL on GPU-less Linux CI runners for Skwasm UI suites.
 user_pref("webgl.force-enabled", true);
+user_pref("webgl.disabled", false);
+user_pref("webgl.disable-fail-if-major-performance-caveat", true);
 user_pref("gfx.webrender.software", true);
+user_pref("security.sandbox.content.level", 0);
 ''';
 
         final temporaryProfileDirectory = Directory(
@@ -117,7 +120,19 @@ user_pref("gfx.webrender.software", true);
           '--start-debugger-server $kDevtoolsPort',
         ];
 
-        final Process process = await Process.start(installation.executable, args);
+        final Process process = await Process.start(
+          installation.executable,
+          args,
+          environment: <String, String>{
+            ...Platform.environment,
+            if (!debug) 'MOZ_HEADLESS': '1',
+            'LIBGL_ALWAYS_SOFTWARE': '1',
+            'MOZ_DISABLE_CONTENT_SANDBOX': '1',
+            'MOZ_DISABLE_GPU_SANDBOX': '1',
+            'MOZ_DISABLE_RDD_SANDBOX': '1',
+            'MOZ_DISABLE_SOCKET_PROCESS_SANDBOX': '1',
+          },
+        );
         process.stdout
             .transform<String>(const Utf8Decoder(allowMalformed: true))
             .listen((String string) => print('[Firefox:stdout] $string'));
