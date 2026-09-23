@@ -312,52 +312,44 @@ android.builtInKotlin=false
           );
         });
 
-        testUsingContext(
-          'skip if Built-in Kotlin flag uses a nonstandard separator and exists',
-          () async {
-            topLevelGradlePropertiesFile.writeAsStringSync('''
+        testUsingContext('skip if Built-in Kotlin flag uses a nonstandard separator and exists', () async {
+          topLevelGradlePropertiesFile.writeAsStringSync('''
 android.builtInKotlin    false
 ''');
-            expect(
-              topLevelGradlePropertiesFile.readAsStringSync().contains(
-                'android.builtInKotlin    false',
-              ),
-              isTrue,
-            );
-            final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
+          expect(
+            topLevelGradlePropertiesFile.readAsStringSync().contains(
+              'android.builtInKotlin    false',
+            ),
+            isTrue,
+          );
+          final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
 
-            await androidProjectMigration.migrate();
-            expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
-            expect(
-              bufferLogger.traceText,
-              contains(
-                'The developer has already configured the Built-In Kotlin flag, skipping migration.',
-              ),
-            );
-          },
-        );
+          await androidProjectMigration.migrate();
+          expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
+          expect(
+            bufferLogger.traceText,
+            contains(
+              'The developer has already configured the Built-In Kotlin flag, skipping migration.',
+            ),
+          );
+        });
 
-        testUsingContext(
-          'create gradle.properties file and add the Built-in Kotlin flag if gradle.properties file is missing',
-          () async {
-            final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
-            expect(topLevelGradlePropertiesFile.existsSync(), isFalse);
-            await androidProjectMigration.migrate();
-            expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
-            expect(
-              bufferLogger.traceText,
-              contains(
-                'The gradle.properties file was not found. Creating it with a disabled Built-in Kotlin flag.',
-              ),
-            );
-            expect(
-              topLevelGradlePropertiesFile.readAsStringSync().contains(
-                'android.builtInKotlin=false',
-              ),
-              isTrue,
-            );
-          },
-        );
+        testUsingContext('create gradle.properties file and add the Built-in Kotlin flag if gradle.properties file is missing', () async {
+          final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
+          expect(topLevelGradlePropertiesFile.existsSync(), isFalse);
+          await androidProjectMigration.migrate();
+          expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
+          expect(
+            bufferLogger.traceText,
+            contains(
+              'The gradle.properties file was not found. Creating it with a disabled Built-in Kotlin flag.',
+            ),
+          );
+          expect(
+            topLevelGradlePropertiesFile.readAsStringSync().contains('android.builtInKotlin=false'),
+            isTrue,
+          );
+        });
 
         testUsingContext(
           'logs an error if the gradle.properties file cannot be written to',
@@ -535,25 +527,22 @@ android.newDsl  :  false
           );
         });
 
-        testUsingContext(
-          'create gradle.properties file and add the new DSL flag if gradle.properties file is missing',
-          () async {
-            final androidProjectMigration = DisableNewDslMigration(project, bufferLogger);
-            expect(topLevelGradlePropertiesFile.existsSync(), isFalse);
-            await androidProjectMigration.migrate();
-            expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
-            expect(
-              bufferLogger.traceText,
-              contains(
-                'The gradle.properties file was not found. Creating it with a disabled new DSL flag.',
-              ),
-            );
-            expect(
-              topLevelGradlePropertiesFile.readAsStringSync().contains('android.newDsl=false'),
-              isTrue,
-            );
-          },
-        );
+        testUsingContext('create gradle.properties file and add the new DSL flag if gradle.properties file is missing', () async {
+          final androidProjectMigration = DisableNewDslMigration(project, bufferLogger);
+          expect(topLevelGradlePropertiesFile.existsSync(), isFalse);
+          await androidProjectMigration.migrate();
+          expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
+          expect(
+            bufferLogger.traceText,
+            contains(
+              'The gradle.properties file was not found. Creating it with a disabled new DSL flag.',
+            ),
+          );
+          expect(
+            topLevelGradlePropertiesFile.readAsStringSync().contains('android.newDsl=false'),
+            isTrue,
+          );
+        });
 
         testUsingContext(
           'logs an error if the gradle.properties file cannot be written to',

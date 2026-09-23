@@ -83,6 +83,9 @@ class Environment {
   /// Path to the engine's "src" directory.
   final io.Directory engineSrcDir;
 
+  /// Path to the root flutter directory (which itself contains `engine/src/flutter`).
+  final io.Directory flutterRootDir;
+
   /// Path to the engine's "tools" directory.
   final io.Directory engineToolsDir;
 
@@ -132,11 +135,10 @@ class Environment {
     'dart2wasm.dart',
   );
 
-  /// Path to the root flutter directory (which itself contains `engine/src/flutter`).
-  final io.Directory flutterRootDir;
-
   /// Path to where github.com/flutter/engine is checked out inside the engine workspace.
   io.Directory get flutterDirectory => io.Directory(pathlib.join(engineSrcDir.path, 'flutter'));
+
+  /// Path to the engine's "web_sdk" directory.
   io.Directory get webSdkRootDir => io.Directory(pathlib.join(flutterDirectory.path, 'web_sdk'));
 
   /// Path to the "web_engine_tester" package.
@@ -148,6 +150,7 @@ class Environment {
   /// This is where compiled test output goes.
   io.Directory get webUiBuildDir => io.Directory(pathlib.join(outDir.path, 'web_tests'));
 
+  /// Path to artifacts generated for web tests.
   io.Directory get webTestsArtifactsDir =>
       io.Directory(pathlib.join(webUiBuildDir.path, 'artifacts'));
 
@@ -157,7 +160,7 @@ class Environment {
   /// Path to the ".dart_tool" directory living under `engine/src/flutter`.
   ///
   /// This is a designated area for tool downloads which can be used by
-  /// multiple platforms. For exampe: Flutter repo for e2e tests.
+  /// multiple platforms. For example: Flutter repo for e2e tests.
   io.Directory get engineDartToolDir =>
       io.Directory(pathlib.join(engineSrcDir.path, 'flutter', '.dart_tool'));
 
@@ -179,4 +182,8 @@ class Environment {
   /// bucket by LUCI.
   io.Directory get webUiTestResultsDirectory =>
       io.Directory(pathlib.join(webUiDartToolDir.path, 'test_results'));
+
+  /// Path to the directory for caching web goldens baselines and comparison failures.
+  io.Directory get webUiGoldensCacheDirectory =>
+      io.Directory(pathlib.join(webUiDartToolDir.path, 'web_goldens_cache'));
 }

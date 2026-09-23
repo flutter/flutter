@@ -95,10 +95,10 @@ packages:
     dependency: transitive
     description:
       name: vector_math
-      sha256: f36f9f3be64c6198714492bb455c11056e33e2f85d9a0b676a48301e44fdcf47
+      sha256: "92b9910f66ed1057fd4da7b040ae7c74cafacf885bdc81be496928d5049b032d"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.2"
+    version: "2.4.3"
   web:
     dependency: transitive
     description:
@@ -108,4 +108,4 @@ packages:
     source: hosted
     version: "1.1.1"
 sdks:
-  dart: ">=3.11.0 <4.0.0"
+  dart: ">=3.13.0-0 <4.0.0"

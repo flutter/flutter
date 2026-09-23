@@ -30,7 +30,7 @@ class PluginPlatformConfig {
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
-  FlutterManifest._({required Logger logger}) : _logger = logger;
+  FlutterManifest._({required this._logger});
 
   /// Returns an empty manifest.
   factory FlutterManifest.empty({required Logger logger}) = FlutterManifest._;
