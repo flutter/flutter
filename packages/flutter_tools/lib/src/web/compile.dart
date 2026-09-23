@@ -229,28 +229,24 @@ enum WebRendererMode {
   }
 }
 
-/// The correct precompiled artifact to use for each build and render mode for DDC with AMD modules.
-// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-const kAmdDartSdkJsArtifactMap = <WebRendererMode, HostArtifact>{
-  WebRendererMode.canvaskit: HostArtifact.webPrecompiledAmdCanvaskitSdk,
+/// The correct precompiled artifact to use for each build and render mode for stable DDC.
+const kDDCStableSdkArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCStableSdk,
 };
 
-/// The correct source map artifact to use for each build and render mode for DDC with AMD modules.
-// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-const kAmdDartSdkJsMapArtifactMap = <WebRendererMode, HostArtifact>{
-  WebRendererMode.canvaskit: HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps,
+/// The correct source map artifact to use for each build and render mode for stable DDC.
+const kDDCStableSdkSourcemapsArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCStableSdkSourcemaps,
 };
 
-/// The correct precompiled artifact to use for each build and render mode for
-/// DDC with DDC library bundle module format.
-const kDdcLibraryBundleDartSdkJsArtifactMap = <WebRendererMode, HostArtifact>{
-  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk,
+/// The correct precompiled artifact to use for each build and render mode for canary DDC.
+const kDDCCanarySdkArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCCanarySdk,
 };
 
-/// The correct source map artifact to use for each build and render mode for
-/// DDC with DDC library bundle module format.
-const kDdcLibraryBundleDartSdkJsMapArtifactMap = <WebRendererMode, HostArtifact>{
-  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps,
+/// The correct source map artifact to use for each build and render mode for canary DDC.
+const kDDCCanarySdkSourcemapArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCCanarySdkSourcemaps,
 };
 
 String _buildEventAnalyticsSettings({required List<WebCompilerConfig> configs}) {

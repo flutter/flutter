@@ -235,32 +235,27 @@ void main() {
       },
     );
 
-    testWithoutContext('Precompiled web AMD module system artifact paths are correct', () {
+    testWithoutContext('Precompiled web DDC stable SDK artifact paths are correct', () {
       expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdk).path,
-        'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js',
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCStableSdk).path,
+        'root/bin/cache/flutter_web_sdk/ddc/stable/dart_sdk.js',
       );
       expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps).path,
-        'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js.map',
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCStableSdkSourcemaps).path,
+        'root/bin/cache/flutter_web_sdk/ddc/stable/dart_sdk.js.map',
       );
     });
 
-    testWithoutContext(
-      'Precompiled web DDC library bundle module system artifact paths are correct',
-      () {
-        expect(
-          artifacts.getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk).path,
-          'root/bin/cache/flutter_web_sdk/kernel/ddcLibraryBundle-canvaskit/dart_sdk.js',
-        );
-        expect(
-          artifacts
-              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps)
-              .path,
-          'root/bin/cache/flutter_web_sdk/kernel/ddcLibraryBundle-canvaskit/dart_sdk.js.map',
-        );
-      },
-    );
+    testWithoutContext('Precompiled web DDC canary SDK artifact paths are correct', () {
+      expect(
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdk).path,
+        'root/bin/cache/flutter_web_sdk/ddc/canary/dart_sdk.js',
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdkSourcemaps).path,
+        'root/bin/cache/flutter_web_sdk/ddc/canary/dart_sdk.js.map',
+      );
+    });
 
     testWithoutContext('getEngineType', () {
       expect(artifacts.getEngineType(TargetPlatform.android_arm, BuildMode.debug), 'android-arm');

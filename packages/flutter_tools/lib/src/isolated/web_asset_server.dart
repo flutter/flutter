@@ -792,15 +792,15 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 
   File get _resolveDartSdkJsFile {
     final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = _ddcModuleSystem
-        ? kDdcLibraryBundleDartSdkJsArtifactMap
-        : kAmdDartSdkJsArtifactMap;
+        ? kDDCCanarySdkArtifactMap
+        : kDDCStableSdkArtifactMap;
     return fileSystem.file(globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   File get _resolveDartSdkJsMapFile {
     final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = _ddcModuleSystem
-        ? kDdcLibraryBundleDartSdkJsMapArtifactMap
-        : kAmdDartSdkJsMapArtifactMap;
+        ? kDDCCanarySdkSourcemapArtifactMap
+        : kDDCStableSdkArtifactMap;
     return fileSystem.file(globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
