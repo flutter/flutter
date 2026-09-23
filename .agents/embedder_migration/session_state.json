@@ -5,7 +5,17 @@
   "phase": "Phase 0: LLM Configuration, Skills, and PR Chain Setup",
   "active_component": "pr-chain-manager",
   "active_adrs": [
-    "ADR-0000"
+    "ADR-0000",
+    "ADR-0001",
+    "ADR-0002",
+    "ADR-0003",
+    "ADR-0004",
+    "ADR-0005",
+    "ADR-0006",
+    "ADR-0007",
+    "ADR-0008",
+    "ADR-0009",
+    "ADR-0010"
   ],
   "ratchet_state": {
     "total_allowed_internal_headers": 98,
