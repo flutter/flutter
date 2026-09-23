@@ -613,9 +613,9 @@ void main() {
         expect(controller.matchCount, 3);
         expect(controller.activeMatchIndex, 0);
 
-        // Click 'Next' button with mouse while enableSelection: true.
+        // Click '↓' (next match) button with mouse while enableSelection: true.
         // FindBar EditableText MUST retain focus so subsequent Enter key events still work.
-        await tester.tap(find.text('Next', findRichText: true));
+        await tester.tap(find.text('↓', findRichText: true));
         await tester.pumpAndSettle();
         expect(controller.activeMatchIndex, 1);
         expect(findInput.focusNode.hasFocus, isTrue);
@@ -628,9 +628,9 @@ void main() {
         expect(controller.activeMatchIndex, 1);
         expect(findInput.focusNode.hasFocus, isTrue);
 
-        // Click 'X' (close) button with mouse -> closes FindBar, selects active match ('Engine' in Beta),
+        // Click '×' (close) button with mouse -> closes FindBar, selects active match ('Engine' in Beta),
         // and fires SelectableRegion.onSelectionChanged!
-        await tester.tap(find.text('X', findRichText: true));
+        await tester.tap(find.text('×', findRichText: true));
         await tester.pumpAndSettle();
         expect(controller.isOpen, isFalse);
         expect(recordedSelections, contains('Engine'));
@@ -870,6 +870,71 @@ void main() {
 
         expect(controller2.isOpen, isFalse);
         expect(find.byType(SelectableRegionFindBar), findsNothing);
+      },
+    );
+
+    testWidgets(
+      '14. DefaultSelectionStyle searchHighlightColor/activeSearchHighlightColor, open()/close() selection orthogonality, and alwaysNeedsCompositing optimization',
+      (WidgetTester tester) async {
+        final controller = FindInPageController();
+        addTearDown(controller.dispose);
+        SelectedContent? currentSelection;
+
+        const customPassive = Color(0x5500FF00);
+        const customActive = Color(0xAAFF00FF);
+
+        await tester.pumpWidget(
+          DefaultSelectionStyle(
+            searchHighlightColor: customPassive,
+            activeSearchHighlightColor: customActive,
+            child: _buildTestApp(
+              enableSelection: true,
+              controller: controller,
+              onSelectionChanged: (SelectedContent? content) {
+                currentSelection = content;
+              },
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[Text('Line one target word\nLine two target word')],
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // 1. Verify DefaultSelectionStyle colors propagate to RenderParagraph and alwaysNeedsCompositing is false when unselected!
+        final RenderParagraph firstParagraph = tester.renderObject<RenderParagraph>(
+          find.descendant(
+            of: find.text('Line one target word\nLine two target word'),
+            matching: find.byType(RichText),
+          ),
+        );
+        expect(firstParagraph.searchHighlightColor, customPassive);
+        expect(firstParagraph.activeSearchHighlightColor, customActive);
+        expect(firstParagraph.alwaysNeedsCompositing, isFalse);
+
+        // 2. Select all (multi-line selection across both lines) and verify open() clears the multi-line selection!
+        final SelectableRegionState regionState = tester.state<SelectableRegionState>(
+          find.byType(SelectableRegion),
+        );
+        regionState.selectAll();
+        await tester.pumpAndSettle();
+        expect(currentSelection?.plainText, contains('\n'));
+        expect(firstParagraph.alwaysNeedsCompositing, isTrue);
+
+        controller.open(initialQuery: 'target');
+        await tester.pumpAndSettle();
+        expect(currentSelection, isNull);
+        expect(firstParagraph.alwaysNeedsCompositing, isFalse);
+
+        // 3. Make a manual selection while the FindBar is open, then call close() -> manual selection is preserved!
+        regionState.selectAll();
+        await tester.pumpAndSettle();
+        expect(currentSelection?.plainText, contains('Line one target word'));
+
+        controller.close();
+        await tester.pumpAndSettle();
+        expect(currentSelection?.plainText, contains('Line one target word'));
       },
     );
   });

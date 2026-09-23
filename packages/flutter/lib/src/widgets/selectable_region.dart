@@ -4254,6 +4254,25 @@ class FindInPageController extends ChangeNotifier {
   int get openRequestCount => _openRequestCount;
 
   bool _isRecomputing = false;
+  List<(Selectable, String)>? _lastSelectableTextSnapshot;
+
+  bool _matchesLastTextSnapshot(MultiSelectableSelectionContainerDelegate delegate) {
+    final List<(Selectable, String)>? snapshot = _lastSelectableTextSnapshot;
+    if (snapshot == null) {
+      return false;
+    }
+    final List<Selectable> leaves = _getOrderedLeafSelectables(delegate);
+    if (leaves.length != snapshot.length) {
+      return false;
+    }
+    for (var i = 0; i < leaves.length; i++) {
+      final (Selectable expectedSelectable, String expectedText) = snapshot[i];
+      if (!identical(leaves[i], expectedSelectable) || leaves[i].getPlainText() != expectedText) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   void _attach(
     MultiSelectableSelectionContainerDelegate delegate, {
@@ -4267,6 +4286,7 @@ class FindInPageController extends ChangeNotifier {
     }
     _delegate?._onSelectablesChanged = null;
     _delegate = delegate;
+    _lastSelectableTextSnapshot = null;
     _delegate!._onSelectablesChanged = _handleSelectablesChanged;
     if (_isOpen && _query.isNotEmpty) {
       _recomputeMatches(scrollToActive: false);
@@ -4285,6 +4305,7 @@ class FindInPageController extends ChangeNotifier {
     _clearAllHighlights();
     _delegate!._onSelectablesChanged = null;
     _delegate = null;
+    _lastSelectableTextSnapshot = null;
     _regionFocusNode = null;
   }
 
@@ -4293,12 +4314,17 @@ class FindInPageController extends ChangeNotifier {
     _clearAllHighlights();
     _delegate?._onSelectablesChanged = null;
     _delegate = null;
+    _lastSelectableTextSnapshot = null;
     _regionFocusNode = null;
     super.dispose();
   }
 
   void _handleSelectablesChanged() {
     if (!_isOpen || _query.isEmpty || _isRecomputing) {
+      return;
+    }
+    final MultiSelectableSelectionContainerDelegate? delegate = _delegate;
+    if (delegate != null && _matchesLastTextSnapshot(delegate)) {
       return;
     }
     _recomputeMatches(scrollToActive: false);
@@ -4309,7 +4335,8 @@ class FindInPageController extends ChangeNotifier {
   ///
   /// If [initialQuery] is omitted and the attached [SelectableRegion] currently
   /// has an uncollapsed single-line text selection, the query is seeded from the
-  /// selected text and anchored to the selected occurrence.
+  /// selected text and anchored to the selected occurrence. Any pre-existing
+  /// selection in the [SelectableRegion] is cleared upon opening.
   void open({String? initialQuery}) {
     final bool wasOpen = _isOpen;
     _isOpen = true;
@@ -4317,6 +4344,9 @@ class FindInPageController extends ChangeNotifier {
     var seededFromSelection = false;
     if (initialQuery != null && initialQuery.isNotEmpty) {
       _query = initialQuery;
+      if (_enableSelection && (_delegate?.value.hasSelection ?? false)) {
+        _delegate!.dispatchSelectionEvent(const ClearSelectionEvent());
+      }
     } else if (_enableSelection && _delegate != null) {
       final String? rawSelected = _delegate!.getSelectedContent()?.plainText;
       final String? selectedText = rawSelected?.trim();
@@ -4335,6 +4365,8 @@ class FindInPageController extends ChangeNotifier {
         }
         _query = selectedText;
         seededFromSelection = true;
+      }
+      if (_delegate!.value.hasSelection) {
         _delegate!.dispatchSelectionEvent(const ClearSelectionEvent());
       }
     }
@@ -4343,7 +4375,8 @@ class FindInPageController extends ChangeNotifier {
   }
 
   /// Closes the Find-in-Page overlay, clears search highlights, and (when selection
-  /// is enabled on the host [SelectableRegion]) converts the active match into the
+  /// is enabled on the host [SelectableRegion] and the user has not made a separate
+  /// manual selection while the Find bar was open) converts the active match into the
   /// live selection while returning focus to the [SelectableRegion].
   void close({bool selectActiveMatch = true}) {
     if (!_isOpen && _matches.isEmpty) {
@@ -4353,10 +4386,14 @@ class FindInPageController extends ChangeNotifier {
     _isOpen = false;
     _regionFocusNode?.requestFocus();
     _clearAllHighlights();
-    if (selectActiveMatch && _enableSelection && currentMatch != null) {
+    if (selectActiveMatch &&
+        _enableSelection &&
+        currentMatch != null &&
+        !(_delegate?.value.hasSelection ?? false)) {
       _delegate?.selectRangeForSelectable(currentMatch.selectable, currentMatch.range);
     }
     _matches = const <SelectableSearchMatch>[];
+    _lastSelectableTextSnapshot = null;
     _activeMatchIndex = -1;
     _lastActiveLeafOrderIndex = -1;
     _lastActiveStartOffset = 0;
@@ -4432,6 +4469,7 @@ class FindInPageController extends ChangeNotifier {
     if (delegate == null || !_isOpen || _query.isEmpty) {
       _clearAllHighlights();
       _matches = const <SelectableSearchMatch>[];
+      _lastSelectableTextSnapshot = null;
       _activeMatchIndex = -1;
       _lastActiveLeafOrderIndex = -1;
       _lastActiveStartOffset = 0;
@@ -4444,6 +4482,9 @@ class FindInPageController extends ChangeNotifier {
     try {
       final SelectableSearchMatch? previousActive = activeMatch;
       final List<Selectable> leaves = _getOrderedLeafSelectables(delegate);
+      _lastSelectableTextSnapshot = <(Selectable, String)>[
+        for (final Selectable s in leaves) (s, s.getPlainText()),
+      ];
       final leafIndexBySelectable = <Selectable, int>{
         for (int i = 0; i < leaves.length; i++) leaves[i]: i,
       };
@@ -4647,7 +4688,6 @@ class _SelectableRegionFindBarState extends State<SelectableRegionFindBar> {
     final int current = total == 0 ? 0 : widget.controller.activeMatchIndex + 1;
     final counterText = '$current / $total';
     const textStyle = TextStyle(
-      fontFamily: 'Roboto',
       fontSize: 13.0,
       color: Color(0xFF1F1F1F),
       decoration: TextDecoration.none,
@@ -4705,11 +4745,11 @@ class _SelectableRegionFindBarState extends State<SelectableRegionFindBar> {
                     onTap: () => widget.controller.caseSensitive = !widget.controller.caseSensitive,
                   ),
                   const SizedBox(width: 4.0),
-                  _FindBarButton(label: 'Prev', onTap: widget.controller.previousMatch),
+                  _FindBarButton(label: '↑', onTap: widget.controller.previousMatch),
                   const SizedBox(width: 4.0),
-                  _FindBarButton(label: 'Next', onTap: widget.controller.nextMatch),
+                  _FindBarButton(label: '↓', onTap: widget.controller.nextMatch),
                   const SizedBox(width: 4.0),
-                  _FindBarButton(label: 'X', onTap: widget.controller.close),
+                  _FindBarButton(label: '×', onTap: widget.controller.close),
                 ],
               ),
             ),
@@ -4746,7 +4786,6 @@ class _FindBarButton extends StatelessWidget {
             text: TextSpan(
               text: label,
               style: TextStyle(
-                fontFamily: 'Roboto',
                 fontSize: 11.0,
                 fontWeight: FontWeight.w700,
                 color: active ? const Color(0xFF1A73E8) : const Color(0xFF3C4043),

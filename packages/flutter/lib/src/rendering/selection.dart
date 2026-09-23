@@ -443,24 +443,16 @@ class SelectionHighlightRanges {
   const SelectionHighlightRanges({
     this.passiveRanges = const <SelectedContentRange>[],
     this.activeRange,
-    this.passiveColor = const Color(0x66FFEB3B),
-    this.activeColor = const Color(0xCCFF9800),
   });
 
   /// An empty highlight set.
   static const SelectionHighlightRanges empty = SelectionHighlightRanges();
 
-  /// Ranges to highlight as passive search matches (e.g. yellow).
+  /// Ranges to highlight as passive search matches.
   final List<SelectedContentRange> passiveRanges;
 
-  /// The currently focused search match range (e.g. orange), if any lies in this [Selectable].
+  /// The currently focused search match range, if any lies in this [Selectable].
   final SelectedContentRange? activeRange;
-
-  /// Fill color used for passive match rectangles.
-  final Color passiveColor;
-
-  /// Fill color used for the active match rectangle.
-  final Color activeColor;
 
   /// Whether there are no search highlights to paint.
   bool get isEmpty => passiveRanges.isEmpty && activeRange == null;
@@ -472,14 +464,11 @@ class SelectionHighlightRanges {
     }
     return other is SelectionHighlightRanges &&
         listEquals(other.passiveRanges, passiveRanges) &&
-        other.activeRange == activeRange &&
-        other.passiveColor == passiveColor &&
-        other.activeColor == activeColor;
+        other.activeRange == activeRange;
   }
 
   @override
-  int get hashCode =>
-      Object.hash(Object.hashAll(passiveRanges), activeRange, passiveColor, activeColor);
+  int get hashCode => Object.hash(Object.hashAll(passiveRanges), activeRange);
 }
 
 /// The unit of how selection handles move in text.

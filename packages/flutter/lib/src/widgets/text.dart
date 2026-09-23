@@ -750,9 +750,9 @@ class Text extends StatelessWidget {
       (null, null) => MediaQuery.textScalerOf(context),
     };
     late Widget result;
+    final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
     if (registrar != null) {
-      final MouseCursor effectiveCursor =
-          DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text;
+      final MouseCursor effectiveCursor = selectionStyle.mouseCursor ?? SystemMouseCursors.text;
       result = _SelectableTextContainer(
         textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
         textDirection:
@@ -769,9 +769,13 @@ class Text extends StatelessWidget {
             defaultTextStyle.textHeightBehavior ??
             DefaultTextHeightBehavior.maybeOf(context),
         selectionColor:
-            selectionColor ??
-            DefaultSelectionStyle.of(context).selectionColor ??
-            DefaultSelectionStyle.defaultColor,
+            selectionColor ?? selectionStyle.selectionColor ?? DefaultSelectionStyle.defaultColor,
+        searchHighlightColor:
+            selectionStyle.searchHighlightColor ??
+            DefaultSelectionStyle.defaultSearchHighlightColor,
+        activeSearchHighlightColor:
+            selectionStyle.activeSearchHighlightColor ??
+            DefaultSelectionStyle.defaultActiveSearchHighlightColor,
         text: effectiveTextSpan,
       );
       if (effectiveCursor != MouseCursor.defer) {
@@ -794,9 +798,13 @@ class Text extends StatelessWidget {
             defaultTextStyle.textHeightBehavior ??
             DefaultTextHeightBehavior.maybeOf(context),
         selectionColor:
-            selectionColor ??
-            DefaultSelectionStyle.of(context).selectionColor ??
-            DefaultSelectionStyle.defaultColor,
+            selectionColor ?? selectionStyle.selectionColor ?? DefaultSelectionStyle.defaultColor,
+        searchHighlightColor:
+            selectionStyle.searchHighlightColor ??
+            DefaultSelectionStyle.defaultSearchHighlightColor,
+        activeSearchHighlightColor:
+            selectionStyle.activeSearchHighlightColor ??
+            DefaultSelectionStyle.defaultActiveSearchHighlightColor,
         text: effectiveTextSpan,
       );
     }
@@ -869,6 +877,8 @@ class _SelectableTextContainer extends StatefulWidget {
     required this.textWidthBasis,
     this.textHeightBehavior,
     required this.selectionColor,
+    required this.searchHighlightColor,
+    required this.activeSearchHighlightColor,
   });
 
   final TextSpan text;
@@ -883,6 +893,8 @@ class _SelectableTextContainer extends StatefulWidget {
   final TextWidthBasis textWidthBasis;
   final ui.TextHeightBehavior? textHeightBehavior;
   final Color selectionColor;
+  final Color searchHighlightColor;
+  final Color activeSearchHighlightColor;
 
   @override
   State<_SelectableTextContainer> createState() => _SelectableTextContainerState();
@@ -923,6 +935,8 @@ class _SelectableTextContainerState extends State<_SelectableTextContainer> {
         textWidthBasis: widget.textWidthBasis,
         textHeightBehavior: widget.textHeightBehavior,
         selectionColor: widget.selectionColor,
+        searchHighlightColor: widget.searchHighlightColor,
+        activeSearchHighlightColor: widget.activeSearchHighlightColor,
         text: widget.text,
       ),
     );
@@ -944,6 +958,8 @@ class _RichText extends StatelessWidget {
     required this.textWidthBasis,
     this.textHeightBehavior,
     required this.selectionColor,
+    required this.searchHighlightColor,
+    required this.activeSearchHighlightColor,
   });
 
   final GlobalKey? textKey;
@@ -959,6 +975,8 @@ class _RichText extends StatelessWidget {
   final TextWidthBasis textWidthBasis;
   final ui.TextHeightBehavior? textHeightBehavior;
   final Color selectionColor;
+  final Color searchHighlightColor;
+  final Color activeSearchHighlightColor;
 
   @override
   Widget build(BuildContext context) {
@@ -977,6 +995,8 @@ class _RichText extends StatelessWidget {
       textHeightBehavior: textHeightBehavior,
       selectionRegistrar: registrar,
       selectionColor: selectionColor,
+      searchHighlightColor: searchHighlightColor,
+      activeSearchHighlightColor: activeSearchHighlightColor,
       text: text,
     );
   }

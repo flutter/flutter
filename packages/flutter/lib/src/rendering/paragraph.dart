@@ -354,6 +354,8 @@ class RenderParagraph extends RenderBox
     ui.TextHeightBehavior? textHeightBehavior,
     List<RenderBox>? children,
     this._selectionColor,
+    this._searchHighlightColor,
+    this._activeSearchHighlightColor,
     SelectionRegistrar? registrar,
     this._devicePixelRatio = 1.0,
   }) : assert(text.debugAssertIsValid()),
@@ -549,7 +551,12 @@ class RenderParagraph extends RenderBox
   }
 
   @override
-  bool get alwaysNeedsCompositing => _lastSelectableFragments?.isNotEmpty ?? false;
+  bool get alwaysNeedsCompositing =>
+      _lastSelectableFragments?.any(
+        (_SelectableFragment fragment) =>
+            fragment._textSelectionStart != null && fragment._textSelectionEnd != null,
+      ) ??
+      false;
 
   @override
   void markNeedsLayout() {
@@ -771,6 +778,44 @@ class RenderParagraph extends RenderBox
     _selectionColor = value;
     if (_lastSelectableFragments?.any(
           (_SelectableFragment fragment) => fragment.value.hasSelection,
+        ) ??
+        false) {
+      markNeedsPaint();
+    }
+  }
+
+  /// The color to use when painting passive Find-in-Page matches.
+  ///
+  /// Defaults to `Color(0x66FFEB3B)` if null.
+  Color? get searchHighlightColor => _searchHighlightColor;
+  Color? _searchHighlightColor;
+
+  set searchHighlightColor(Color? value) {
+    if (_searchHighlightColor == value) {
+      return;
+    }
+    _searchHighlightColor = value;
+    if (_lastSelectableFragments?.any(
+          (_SelectableFragment fragment) => fragment._searchHighlights.passiveRanges.isNotEmpty,
+        ) ??
+        false) {
+      markNeedsPaint();
+    }
+  }
+
+  /// The color to use when painting the active Find-in-Page match.
+  ///
+  /// Defaults to `Color(0xCCFF9800)` if null.
+  Color? get activeSearchHighlightColor => _activeSearchHighlightColor;
+  Color? _activeSearchHighlightColor;
+
+  set activeSearchHighlightColor(Color? value) {
+    if (_activeSearchHighlightColor == value) {
+      return;
+    }
+    _activeSearchHighlightColor = value;
+    if (_lastSelectableFragments?.any(
+          (_SelectableFragment fragment) => fragment._searchHighlights.activeRange != null,
         ) ??
         false) {
       markNeedsPaint();
@@ -1712,7 +1757,13 @@ class _SelectableFragment
       for (var i = 1; i < boxes.length; i++) {
         target = target.expandToInclude(boxes[i]);
       }
-      paragraph.showOnScreen(descendant: paragraph, rect: target.inflate(6.0));
+      final paddedTarget = Rect.fromLTRB(
+        target.left - 8.0,
+        target.top - 56.0,
+        target.right + 8.0,
+        target.bottom + 24.0,
+      );
+      paragraph.showOnScreen(descendant: paragraph, rect: paddedTarget);
     } else {
       paragraph.showOnScreen();
     }
@@ -1740,6 +1791,7 @@ class _SelectableFragment
   }
 
   void _didChangeSelection() {
+    paragraph.markNeedsCompositingBitsUpdate();
     paragraph.markNeedsPaint();
     _updateSelectionGeometry();
   }
@@ -3678,7 +3730,7 @@ class _SelectableFragment
     if (_searchHighlights.passiveRanges.isNotEmpty) {
       final passivePaint = Paint()
         ..style = PaintingStyle.fill
-        ..color = _searchHighlights.passiveColor;
+        ..color = paragraph.searchHighlightColor ?? const Color(0x66FFEB3B);
       for (final SelectedContentRange matchRange in _searchHighlights.passiveRanges) {
         for (final Rect rect in getBoxesForRange(matchRange)) {
           context.canvas.drawRect(rect.shift(offset), passivePaint);
@@ -3688,7 +3740,7 @@ class _SelectableFragment
     if (_searchHighlights.activeRange case final SelectedContentRange activeRange) {
       final activePaint = Paint()
         ..style = PaintingStyle.fill
-        ..color = _searchHighlights.activeColor;
+        ..color = paragraph.activeSearchHighlightColor ?? const Color(0xCCFF9800);
       for (final Rect rect in getBoxesForRange(activeRange)) {
         context.canvas.drawRect(rect.shift(offset), activePaint);
       }
