@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_ENTITY_CONTENTS_UBER_SDF_CONTENTS_H_
 
 #include <memory>
+#include <optional>
 
 #include "flutter/impeller/entity/contents/color_source_contents.h"
 #include "flutter/impeller/entity/contents/contents.h"

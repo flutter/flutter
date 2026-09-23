@@ -4098,12 +4098,13 @@ class EditableTextState extends State<EditableText>
   bool get _hasFocus => widget.focusNode.hasFocus;
   bool get _isMultiline => widget.maxLines != 1;
 
-  /// Flag to track whether this [EditableText] was in focus when [onTapOutside]
-  /// was called.
+  /// Flag to track whether this [EditableText] was in focus when
+  /// [EditableText.onTapOutside] was called.
   ///
-  /// This is used to determine whether [onTapUpOutside] should be called.
-  /// The reason [_hasFocus] can't be used directly is because [onTapOutside]
-  /// might unfocus this [EditableText] and block the [onTapUpOutside] call.
+  /// This is used to determine whether [EditableText.onTapUpOutside] should be
+  /// called. The reason [_hasFocus] can't be used directly is because
+  /// [EditableText.onTapOutside] might unfocus this [EditableText] and block
+  /// the [EditableText.onTapUpOutside] call.
   bool _hadFocusOnTapDown = false;
 
   // Finds the closest scroll offset to the current scroll offset that fully

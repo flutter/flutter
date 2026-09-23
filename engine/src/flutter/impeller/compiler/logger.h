@@ -42,6 +42,9 @@ class AutoLogger {
 #define COMPILER_ERROR_NO_PREFIX(stream) \
   ::impeller::compiler::AutoLogger(stream)
 
+#define COMPILER_WARNING(stream) \
+  ::impeller::compiler::AutoLogger(stream) << "[WARNING] " << GetSourcePrefix()
+
 }  // namespace compiler
 }  // namespace impeller
 
