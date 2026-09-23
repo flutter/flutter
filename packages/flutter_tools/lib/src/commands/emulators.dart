@@ -19,9 +19,9 @@ class EmulatorsCommand extends FlutterCommand {
   EmulatorsCommand({
     required this._doctor,
     required this._emulatorManager,
-    required ToolContext toolContext,
+    required ToolContext super.toolContext,
     super.verboseHelp,
-  }) : super(toolContext: toolContext) {
+  }) {
     argParser.addOption('launch', help: 'The full or partial ID of the emulator to launch.');
     argParser.addFlag(
       'cold',
