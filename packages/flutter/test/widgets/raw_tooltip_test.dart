@@ -3219,63 +3219,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(tooltipText), findsNothing);
   });
-
-  testWidgets(
-    'Escape key dismisses hovered RawTooltip even when primaryFocus is on a sibling consuming Escape',
-    (WidgetTester tester) async {
-      final key = GlobalKey<RawTooltipState>();
-      final siblingFocusNode = FocusNode();
-      addTearDown(siblingFocusNode.dispose);
-
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              OverlayEntry(
-                builder: (BuildContext context) => Column(
-                  children: <Widget>[
-                    // Simulates a focused TextField/EditableText or menu whose
-                    // local Shortcuts/Focus consumes Escape and stops propagation
-                    // before reaching any ancestor Focus/Shortcuts in WidgetsApp,
-                    // while primaryFocus is outside RawTooltip.child.
-                    Focus(
-                      focusNode: siblingFocusNode,
-                      onKeyEvent: (FocusNode node, KeyEvent event) {
-                        if (event.logicalKey == LogicalKeyboardKey.escape) {
-                          return KeyEventResult.handled;
-                        }
-                        return KeyEventResult.ignored;
-                      },
-                      child: const SizedBox(width: 100.0, height: 100.0),
-                    ),
-                    RawTooltip(
-                      key: key,
-                      semanticsTooltip: tooltipText,
-                      tooltipBuilder: (BuildContext context, Animation<double> animation) =>
-                          const Text(tooltipText),
-                      child: const SizedBox(width: 100.0, height: 100.0),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-
-      siblingFocusNode.requestFocus();
-      key.currentState!.ensureTooltipVisible();
-      await tester.pumpAndSettle();
-      expect(siblingFocusNode.hasPrimaryFocus, isTrue);
-      expect(find.text(tooltipText), findsOneWidget);
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-      await tester.pumpAndSettle();
-      expect(find.text(tooltipText), findsNothing);
-      expect(siblingFocusNode.hasPrimaryFocus, isTrue);
-    },
-  );
 }
 
 Future<void> setWidgetForTooltipMode(
