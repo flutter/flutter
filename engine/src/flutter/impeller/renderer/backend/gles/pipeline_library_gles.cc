@@ -620,13 +620,13 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
       promise->set_value(nullptr);
       return;
     }
-    const bool result = reactor->AddOperation([promise,        //
-                                               weak_this,      //
-                                               descriptor,     //
-                                               vert_function,  //
-                                               frag_function,  //
-                                               threadsafe,          //
-                                               weak_compile_queue   //
+    const bool result = reactor->AddOperation([promise,            //
+                                               weak_this,          //
+                                               descriptor,         //
+                                               vert_function,      //
+                                               frag_function,      //
+                                               threadsafe,         //
+                                               weak_compile_queue  //
     ](const ReactorGLES& reactor) {
       // The job that runs this holds the queue, so the lock succeeds while a
       // job of it runs on this thread.

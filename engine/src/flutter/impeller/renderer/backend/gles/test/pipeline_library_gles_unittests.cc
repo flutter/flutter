@@ -290,14 +290,18 @@ void GL_APIENTRY DeferredLinkProgram(GLuint program) {
   deferred_links->linked[program] =
       !deferred_links->fail_compile && !deferred_links->fail_link;
 }
-void GL_APIENTRY DeferredGetShaderiv(GLuint shader, GLenum pname, GLint* value) {
+void GL_APIENTRY DeferredGetShaderiv(GLuint shader,
+                                     GLenum pname,
+                                     GLint* value) {
   *value = 0;
   if (pname == GL_COMPILE_STATUS) {
     deferred_links->compile_queries++;
     *value = deferred_links->shaders[shader] ? GL_TRUE : GL_FALSE;
   }
 }
-void GL_APIENTRY DeferredGetProgramiv(GLuint program, GLenum pname, GLint* value) {
+void GL_APIENTRY DeferredGetProgramiv(GLuint program,
+                                      GLenum pname,
+                                      GLint* value) {
   *value = 0;
   if (pname == GL_LINK_STATUS) {
     deferred_links->link_queries++;
@@ -313,13 +317,14 @@ void GL_APIENTRY DeferredDeleteShader(GLuint shader) {
 GLboolean GL_APIENTRY DeferredIsProgram(GLuint program) {
   return program != 0 ? GL_TRUE : GL_FALSE;
 }
-GLint GL_APIENTRY DeferredGetUniformLocation(GLuint program, const GLchar* name) {
+GLint GL_APIENTRY DeferredGetUniformLocation(GLuint program,
+                                             const GLchar* name) {
   return -1;
 }
 void GL_APIENTRY DeferredGetText(GLuint object,
-                              GLsizei size,
-                              GLsizei* length,
-                              GLchar* text) {
+                                 GLsizei size,
+                                 GLsizei* length,
+                                 GLchar* text) {
   if (length) {
     *length = 0;
   }
@@ -364,8 +369,8 @@ void* DeferredLinkResolver(const char* name) {
 }
 
 void RunDeferredLink(bool fail_compile,
-                        bool fail_link,
-                        bool abandon_before_check = false) {
+                     bool fail_link,
+                     bool abandon_before_check = false) {
   if (std::thread::hardware_concurrency() < 4) {
     GTEST_SKIP() << "The pending limit must allow at least 2 pipelines";
   }
@@ -375,9 +380,9 @@ void RunDeferredLink(bool fail_compile,
   deferred_links = &state;
   fml::ScopedCleanupClosure reset_deferred_links(
       []() { deferred_links = nullptr; });
-  auto mock_gles = MockGLES::Init(
-      std::vector<const char*>{"GL_KHR_parallel_shader_compile"},
-      "OpenGL ES 3.0 (ANGLE 2.1.0)", DeferredLinkResolver);
+  auto mock_gles =
+      MockGLES::Init(std::vector<const char*>{"GL_KHR_parallel_shader_compile"},
+                     "OpenGL ES 3.0 (ANGLE 2.1.0)", DeferredLinkResolver);
   auto runner = std::make_shared<DeferredLinkRunner>();
   auto context = ContextGLES::Create(
       Flags{}, std::make_unique<ProcTableGLES>(DeferredLinkResolver),
@@ -461,8 +466,7 @@ void RunDeferredLink(bool fail_compile,
     ASSERT_NE(retry.Get(), nullptr);
     EXPECT_EQ(state.programs, 2);
   }
-
-}  // namespace
+}
 
 TEST(PipelineLibraryGLESDeferredTest, DefersStatusAndSharesPendingProgram) {
   RunDeferredLink(false, false);
@@ -476,7 +480,8 @@ TEST(PipelineLibraryGLESDeferredTest, FailedLinkRejectsBothSharedPipelines) {
   RunDeferredLink(false, true);
 }
 
-TEST(PipelineLibraryGLESDeferredTest, AbandonedFailedLinkDoesNotPoisonProgramCache) {
+TEST(PipelineLibraryGLESDeferredTest,
+     AbandonedFailedLinkDoesNotPoisonProgramCache) {
   RunDeferredLink(false, true, true);
 }
 
@@ -490,9 +495,9 @@ class UnstartedShaderFunction final : public ShaderFunction {
 
 TEST(PipelineLibraryGLESDeferredTest,
      ResolvesUnstartedPipelinesWhenTheRunnerDiscardsJobs) {
-  auto mock_gles = MockGLES::Init(
-      std::vector<const char*>{"GL_KHR_parallel_shader_compile"},
-      "OpenGL ES 3.0 (ANGLE 2.1.0)");
+  auto mock_gles =
+      MockGLES::Init(std::vector<const char*>{"GL_KHR_parallel_shader_compile"},
+                     "OpenGL ES 3.0 (ANGLE 2.1.0)");
   fml::Thread io_thread;
   auto runner = std::make_shared<fml::ConditionalBasicTaskRunner>(
       io_thread.GetTaskRunner(), []() { return false; });
@@ -528,7 +533,6 @@ TEST(PipelineLibraryGLESDeferredTest,
   }
 }
 
-
-}
+}  // namespace
 
 }  // namespace impeller::testing

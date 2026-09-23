@@ -10,10 +10,10 @@
 
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
-#include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/task_runner_util.h"
 #include "flutter/fml/thread.h"
+#include "flutter/fml/time/time_delta.h"
 #include "flutter/testing/testing.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 
@@ -293,10 +293,10 @@ TEST(PipelineCompileQueueGLESTest, ReportsRunningJobOnlyInsideJobs) {
 TEST(PipelineCompileQueueGLESTest, JobsOfOneQueueAreInvisibleToAnother) {
   fml::Thread first_thread;
   fml::Thread second_thread;
-  auto first = PipelineCompileQueueGLES::Create(
-      CreateBasicTaskRunner(first_thread));
-  auto second = PipelineCompileQueueGLES::Create(
-      CreateBasicTaskRunner(second_thread));
+  auto first =
+      PipelineCompileQueueGLES::Create(CreateBasicTaskRunner(first_thread));
+  auto second =
+      PipelineCompileQueueGLES::Create(CreateBasicTaskRunner(second_thread));
   ASSERT_NE(first, nullptr);
   ASSERT_NE(second, nullptr);
 
