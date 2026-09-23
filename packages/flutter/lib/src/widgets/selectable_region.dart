@@ -4777,6 +4777,7 @@ class _SelectableRegionFindBarState extends State<SelectableRegionFindBar> {
     );
 
     return Shortcuts(
+      includeSemantics: false,
       shortcuts: widget.shortcuts ?? widget.controller.shortcuts,
       child: Actions(
         actions: widget.controller.actions,
@@ -4810,14 +4811,21 @@ class _SelectableRegionFindBarState extends State<SelectableRegionFindBar> {
                     ),
                   ),
                   const SizedBox(width: 8.0),
-                  RichText(
-                    text: TextSpan(
-                      text: counterText,
-                      style: textStyle.copyWith(
-                        color: total == 0 && widget.controller.query.isNotEmpty
-                            ? const Color(0xFFD93025)
-                            : const Color(0xFF5F6368),
-                        fontWeight: FontWeight.w600,
+                  Semantics(
+                    container: true,
+                    liveRegion: true,
+                    label: total == 0 ? 'No matches' : 'Match $current of $total',
+                    child: ExcludeSemantics(
+                      child: RichText(
+                        text: TextSpan(
+                          text: counterText,
+                          style: textStyle.copyWith(
+                            color: total == 0 && widget.controller.query.isNotEmpty
+                                ? const Color(0xFFD93025)
+                                : const Color(0xFF5F6368),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
                   ),

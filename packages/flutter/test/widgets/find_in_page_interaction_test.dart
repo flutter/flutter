@@ -1041,5 +1041,49 @@ void main() {
         expect(viewport.cacheExtent, 250.0);
       },
     );
+
+    testWidgets(
+      '16. SelectableRegionFindBar exposes Semantics(liveRegion: true) match counter for screen readers',
+      (WidgetTester tester) async {
+        final controller = FindInPageController();
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          _buildTestApp(
+            controller: controller,
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[Text('Alpha token'), Text('Beta token'), Text('Gamma token')],
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        controller.open(initialQuery: 'token');
+        await tester.pumpAndSettle();
+
+        expect(find.bySemanticsLabel('Match 1 of 3'), findsOneWidget);
+        expect(
+          tester
+              .getSemantics(find.bySemanticsLabel('Match 1 of 3'))
+              .hasFlag(SemanticsFlag.isLiveRegion),
+          isTrue,
+        );
+
+        controller.nextMatch();
+        await tester.pumpAndSettle();
+        expect(find.bySemanticsLabel('Match 2 of 3'), findsOneWidget);
+
+        controller.query = 'nonexistent';
+        await tester.pumpAndSettle();
+        expect(find.bySemanticsLabel('No matches'), findsOneWidget);
+        expect(
+          tester
+              .getSemantics(find.bySemanticsLabel('No matches'))
+              .hasFlag(SemanticsFlag.isLiveRegion),
+          isTrue,
+        );
+      },
+    );
   });
 }
