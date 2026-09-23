@@ -2861,6 +2861,53 @@ TEST(PlatformViewsTest, DanglingGeometriesPrevention) {
       controller.OnDisplayPlatformView(999, 10, 20, 100, 100, 150, 150, stack));
 }
 
+TEST(PlatformViewsTest, PushPlatformViewMutatorsForJavaManagedViews) {
+  auto provider = std::make_shared<InMemoryPlatformViewsProvider>();
+  AndroidPlatformViewsController controller(provider);
+
+  // View ID 501 is not registered via CreatePlatformView (simulating a platform
+  // view instantiated through Java PlatformViewsController or
+  // PlatformViewsController2). The C-API explicit OnDisplayPlatformView should
+  // reject it to enforce C-API registration semantics.
+  AndroidMutatorsStack stack;
+  // Offset x: 10 pixels from left, y: 20 pixels from top.
+  constexpr int32_t kViewX = 10;
+  constexpr int32_t kViewY = 20;
+  // Composed bounding box: 200 pixels width by 300 pixels height.
+  constexpr int32_t kComposedWidth = 200;
+  constexpr int32_t kComposedHeight = 300;
+  // Original layout bounds: 250 pixels width by 350 pixels height.
+  constexpr int32_t kLayoutWidth = 250;
+  constexpr int32_t kLayoutHeight = 350;
+  // Arbitrary unregistered platform view ID for testing.
+  constexpr int64_t kJavaManagedViewId = 501;
+
+  EXPECT_FALSE(controller.OnDisplayPlatformView(
+      kJavaManagedViewId, kViewX, kViewY, kComposedWidth, kComposedHeight,
+      kLayoutWidth, kLayoutHeight, stack));
+
+  // During frame compositing, the engine presents any platform view layer
+  // via PushPlatformViewMutators, which must succeed and dispatch to the
+  // provider.
+  EXPECT_TRUE(controller.PushPlatformViewMutators(
+      kJavaManagedViewId, kViewX, kViewY, kComposedWidth, kComposedHeight,
+      kLayoutWidth, kLayoutHeight, stack));
+
+  auto geom = controller.GetPlatformViewGeometry(kJavaManagedViewId);
+  ASSERT_TRUE(geom.has_value());
+  EXPECT_EQ(geom->x, kViewX);
+  EXPECT_EQ(geom->y, kViewY);
+  EXPECT_EQ(geom->width, kComposedWidth);
+  EXPECT_EQ(geom->height, kComposedHeight);
+  EXPECT_EQ(geom->view_width, kLayoutWidth);
+  EXPECT_EQ(geom->view_height, kLayoutHeight);
+
+  auto provider_geom = provider->GetLastGeometry(kJavaManagedViewId);
+  ASSERT_TRUE(provider_geom.has_value());
+  EXPECT_EQ(provider_geom->view_width, kLayoutWidth);
+  EXPECT_EQ(provider_geom->view_height, kLayoutHeight);
+}
+
 TEST(PlatformViewsTest, LayoutDimensionsPreserved) {
   auto provider = std::make_shared<InMemoryPlatformViewsProvider>();
   AndroidPlatformViewsController controller(provider);

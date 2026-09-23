@@ -980,8 +980,26 @@ bool AndroidPlatformViewsController::PushPlatformViewMutators(
   TRACE_EVENT1("flutter",
                "AndroidPlatformViewsController::PushPlatformViewMutators",
                "view_id", std::to_string(view_id).c_str());
-  return OnDisplayPlatformView(view_id, x, y, width, height, view_width,
-                               view_height, mutators_stack);
+  auto provider = GetProvider();
+  if (!provider) {
+    return false;
+  }
+  PlatformViewGeometry geometry;
+  geometry.view_id = view_id;
+  geometry.x = x;
+  geometry.y = y;
+  geometry.width = width;
+  geometry.height = height;
+  geometry.view_width = view_width;
+  geometry.view_height = view_height;
+  geometry.mutators_stack = mutators_stack;
+
+  bool result = provider->OnDisplayPlatformView(geometry);
+  if (result) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    active_geometries_[view_id] = geometry;
+  }
+  return result;
 }
 
 bool AndroidPlatformViewsController::PushPlatformViewMutators(
