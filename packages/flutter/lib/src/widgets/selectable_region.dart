@@ -503,11 +503,13 @@ class SelectableRegionState extends State<SelectableRegion>
         _selectionDelegate,
         enableSelection: _effectiveEnableSelection,
         regionFocusNode: _focusNode,
+        regionContext: context,
       );
     } else {
       target._updateHostConfig(
         enableSelection: _effectiveEnableSelection,
         regionFocusNode: _focusNode,
+        regionContext: context,
       );
     }
     _scheduleFallbackFocusIfNeeded();
@@ -4088,9 +4090,14 @@ class FindInPageController extends ChangeNotifier {
   ///   disable automatic region-level shortcuts.
   /// * [shortcuts] controls the keyboard shortcuts active when the Find bar is focused
   ///   (defaults to [defaultFindBarShortcuts]).
+  /// * [scannerCacheExtent] controls the minimum [RenderViewport.cacheExtent] (in
+  ///   logical pixels) applied to descendant [RenderViewport]s while [isOpen] is true
+  ///   (defaults to [defaultScannerCacheExtent], `10000.0`), allowing off-screen sliver
+  ///   children above and below the fold to be laid out without painting.
   FindInPageController({
     String initialQuery = '',
     bool caseSensitive = false,
+    this.scannerCacheExtent = defaultScannerCacheExtent,
     Map<ShortcutActivator, Intent>? regionShortcuts,
     Map<ShortcutActivator, Intent>? shortcuts,
   }) : _query = initialQuery,
@@ -4100,6 +4107,14 @@ class FindInPageController extends ChangeNotifier {
        _regionShortcuts = regionShortcuts,
        // ignore: prefer_initializing_formals
        _shortcuts = shortcuts;
+
+  /// Default [RenderViewport.cacheExtent] (in logical pixels) applied to descendant
+  /// [RenderViewport]s while [isOpen] is true ("Scanner Mode").
+  static const double defaultScannerCacheExtent = 10000.0;
+
+  /// The minimum [RenderViewport.cacheExtent] (in logical pixels) applied to
+  /// descendant [RenderViewport]s while [isOpen] is true.
+  final double scannerCacheExtent;
 
   /// Default keyboard shortcuts active on the enclosing [SelectableRegion] to
   /// invoke Find-in-Page (`Cmd+F` / `Ctrl+F`).
@@ -4211,7 +4226,13 @@ class FindInPageController extends ChangeNotifier {
       return;
     }
     _query = value;
+    if (_isOpen) {
+      _activateScannerMode();
+    }
     _recomputeMatches(scrollToActive: true);
+    if (_isOpen && _query.isNotEmpty && _matches.isEmpty) {
+      _pendingScrollToActiveOnNextMatch = true;
+    }
     notifyListeners();
   }
 
@@ -4254,7 +4275,45 @@ class FindInPageController extends ChangeNotifier {
   int get openRequestCount => _openRequestCount;
 
   bool _isRecomputing = false;
+  bool _pendingScrollToActiveOnNextMatch = false;
+  BuildContext? _regionContext;
+  final Map<RenderViewport, double?> _savedViewportCacheExtents = <RenderViewport, double?>{};
   List<(Selectable, String)>? _lastSelectableTextSnapshot;
+
+  bool _activateScannerMode() {
+    final RenderObject? root = _regionContext?.findRenderObject();
+    if (root == null || scannerCacheExtent <= 0) {
+      return false;
+    }
+    var expandedAny = false;
+    void visit(RenderObject node) {
+      if (node is RenderViewport &&
+          node.cacheExtentStyle == CacheExtentStyle.pixel &&
+          (node.cacheExtent ?? 0.0) < scannerCacheExtent) {
+        _savedViewportCacheExtents.putIfAbsent(node, () => node.cacheExtent);
+        node.cacheExtent = scannerCacheExtent;
+        expandedAny = true;
+      }
+      node.visitChildren(visit);
+    }
+
+    visit(root);
+    if (expandedAny) {
+      SchedulerBinding.instance.ensureVisualUpdate();
+    }
+    return expandedAny;
+  }
+
+  void _restoreScannerMode() {
+    for (final MapEntry<RenderViewport, double?> entry in _savedViewportCacheExtents.entries) {
+      final RenderViewport viewport = entry.key;
+      if (viewport.attached) {
+        viewport.cacheExtent = entry.value;
+      }
+    }
+    _savedViewportCacheExtents.clear();
+    _pendingScrollToActiveOnNextMatch = false;
+  }
 
   bool _matchesLastTextSnapshot(MultiSelectableSelectionContainerDelegate delegate) {
     final List<(Selectable, String)>? snapshot = _lastSelectableTextSnapshot;
@@ -4278,9 +4337,11 @@ class FindInPageController extends ChangeNotifier {
     MultiSelectableSelectionContainerDelegate delegate, {
     required bool enableSelection,
     required FocusNode regionFocusNode,
+    BuildContext? regionContext,
   }) {
     _enableSelection = enableSelection;
     _regionFocusNode = regionFocusNode;
+    _regionContext = regionContext;
     if (_delegate == delegate) {
       return;
     }
@@ -4288,34 +4349,46 @@ class FindInPageController extends ChangeNotifier {
     _delegate = delegate;
     _lastSelectableTextSnapshot = null;
     _delegate!._onSelectablesChanged = _handleSelectablesChanged;
-    if (_isOpen && _query.isNotEmpty) {
-      _recomputeMatches(scrollToActive: false);
+    if (_isOpen) {
+      _activateScannerMode();
+      if (_query.isNotEmpty) {
+        _recomputeMatches(scrollToActive: false);
+      }
     }
   }
 
-  void _updateHostConfig({required bool enableSelection, required FocusNode regionFocusNode}) {
+  void _updateHostConfig({
+    required bool enableSelection,
+    required FocusNode regionFocusNode,
+    BuildContext? regionContext,
+  }) {
     _enableSelection = enableSelection;
     _regionFocusNode = regionFocusNode;
+    _regionContext = regionContext;
   }
 
   void _detach(MultiSelectableSelectionContainerDelegate delegate) {
     if (_delegate != delegate) {
       return;
     }
+    _restoreScannerMode();
     _clearAllHighlights();
     _delegate!._onSelectablesChanged = null;
     _delegate = null;
     _lastSelectableTextSnapshot = null;
     _regionFocusNode = null;
+    _regionContext = null;
   }
 
   @override
   void dispose() {
+    _restoreScannerMode();
     _clearAllHighlights();
     _delegate?._onSelectablesChanged = null;
     _delegate = null;
     _lastSelectableTextSnapshot = null;
     _regionFocusNode = null;
+    _regionContext = null;
     super.dispose();
   }
 
@@ -4327,7 +4400,11 @@ class FindInPageController extends ChangeNotifier {
     if (delegate != null && _matchesLastTextSnapshot(delegate)) {
       return;
     }
-    _recomputeMatches(scrollToActive: false);
+    final bool shouldScroll = _pendingScrollToActiveOnNextMatch;
+    _recomputeMatches(scrollToActive: shouldScroll);
+    if (_matches.isNotEmpty) {
+      _pendingScrollToActiveOnNextMatch = false;
+    }
     notifyListeners();
   }
 
@@ -4341,6 +4418,7 @@ class FindInPageController extends ChangeNotifier {
     final bool wasOpen = _isOpen;
     _isOpen = true;
     _openRequestCount += 1;
+    final bool expandedViewportCache = _activateScannerMode();
     var seededFromSelection = false;
     if (initialQuery != null && initialQuery.isNotEmpty) {
       _query = initialQuery;
@@ -4370,7 +4448,11 @@ class FindInPageController extends ChangeNotifier {
         _delegate!.dispatchSelectionEvent(const ClearSelectionEvent());
       }
     }
-    _recomputeMatches(scrollToActive: !wasOpen || initialQuery != null || seededFromSelection);
+    final bool shouldScroll = !wasOpen || initialQuery != null || seededFromSelection;
+    _recomputeMatches(scrollToActive: shouldScroll);
+    if (shouldScroll && _query.isNotEmpty && (_matches.isEmpty || expandedViewportCache)) {
+      _pendingScrollToActiveOnNextMatch = true;
+    }
     notifyListeners();
   }
 
@@ -4392,6 +4474,7 @@ class FindInPageController extends ChangeNotifier {
         !(_delegate?.value.hasSelection ?? false)) {
       _delegate?.selectRangeForSelectable(currentMatch.selectable, currentMatch.range);
     }
+    _restoreScannerMode();
     _matches = const <SelectableSearchMatch>[];
     _lastSelectableTextSnapshot = null;
     _activeMatchIndex = -1;

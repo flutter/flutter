@@ -937,5 +937,109 @@ void main() {
         expect(currentSelection?.plainText, contains('Line one target word'));
       },
     );
+
+    testWidgets(
+      '15. Viewport Scanner Mode (scannerCacheExtent) prevents ListView match-count drop (26 -> 12) when scrolling down and finds unmounted top WidgetSpan when searching upward from bottom',
+      (WidgetTester tester) async {
+        final controller = FindInPageController();
+        final scrollController = ScrollController();
+        addTearDown(controller.dispose);
+        addTearDown(scrollController.dispose);
+
+        await tester.binding.setSurfaceSize(const Size(400, 300));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+
+        await tester.pumpWidget(
+          _buildTestApp(
+            enableSelection: true,
+            controller: controller,
+            child: SizedBox(
+              height: 300,
+              child: ListView.builder(
+                controller: scrollController,
+                cacheExtent: 250.0,
+                itemCount: 26,
+                itemExtent: 120.0,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == 0) {
+                    return const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text.rich(
+                        TextSpan(
+                          children: <InlineSpan>[
+                            TextSpan(text: 'Header '),
+                            WidgetSpan(child: Text('Top WidgetSpan needle')),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                  return Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('Row #$index needle item'),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final RenderViewport viewport = tester.renderObject<RenderViewport>(find.byType(Viewport));
+        expect(viewport.cacheExtent, 250.0);
+
+        // Part A (Harry's scenario): Open FindBar at top with 'needle'.
+        // Scanner Mode expands cacheExtent so all 26 items are laid out and discovered!
+        controller.open(initialQuery: 'needle');
+        await tester.pumpAndSettle();
+        expect(viewport.cacheExtent, FindInPageController.defaultScannerCacheExtent);
+        expect(controller.matchCount, 26);
+        expect(controller.activeMatchIndex, 0);
+
+        // Step all the way down to match 26 (index 25) at the bottom of the 3,120px ListView.
+        for (var i = 1; i < 26; i++) {
+          controller.nextMatch();
+          await tester.pumpAndSettle();
+          // Match count MUST remain 26 (never dropping to 12 as top items scroll past 250px)!
+          expect(controller.matchCount, 26);
+          expect(controller.activeMatchIndex, i);
+        }
+        expect(scrollController.offset, greaterThan(2400.0));
+
+        // Pressing nextMatch() on match 26 / 26 MUST wrap around to match 1 (index 0) at the very top!
+        controller.nextMatch();
+        await tester.pumpAndSettle();
+        expect(controller.matchCount, 26);
+        expect(controller.activeMatchIndex, 0);
+        expect(scrollController.offset, lessThan(50.0));
+
+        // Close FindBar -> restores original cacheExtent (250.0).
+        controller.close();
+        await tester.pumpAndSettle();
+        expect(viewport.cacheExtent, 250.0);
+
+        // Part B (David's scenario): Scroll to the very bottom while FindBar is CLOSED.
+        scrollController.jumpTo(scrollController.position.maxScrollExtent);
+        await tester.pumpAndSettle();
+        expect(scrollController.offset, greaterThan(2700.0));
+        // Confirm that with cacheExtent: 250.0, item 0 ('Top WidgetSpan needle') is unmounted!
+        expect(find.text('Top WidgetSpan needle'), findsNothing);
+
+        // Now open FindBar at the bottom searching upward for 'WidgetSpan'!
+        controller.open(initialQuery: 'WidgetSpan');
+        await tester.pumpAndSettle();
+
+        // Scanner Mode lays out the off-screen top items, finds 'WidgetSpan' at index 0,
+        // and scrolls the ListView all the way UP to the top!
+        expect(controller.matchCount, 1);
+        expect(controller.activeMatchIndex, 0);
+        expect(scrollController.offset, lessThan(50.0));
+        expect(find.text('Top WidgetSpan needle'), findsOneWidget);
+
+        controller.close();
+        await tester.pumpAndSettle();
+        expect(viewport.cacheExtent, 250.0);
+      },
+    );
   });
 }
