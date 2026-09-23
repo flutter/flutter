@@ -553,6 +553,12 @@ enum SemanticsRole {
   /// For more information, see:
   /// https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/region_role
   region,
+
+  /// The slider role is for range input widgets where the user selects a value from within given minimum and maximum values.
+  ///
+  /// For more information, see:
+  /// https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/slider_role
+  slider,
 }
 
 /// Describe the type of data for an input field.
