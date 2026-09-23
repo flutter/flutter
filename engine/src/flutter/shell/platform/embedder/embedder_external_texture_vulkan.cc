@@ -29,9 +29,10 @@
 
 namespace flutter {
 
+namespace {
 // Returns true if the given VkFormat is a multi-planar YUV format that
 // requires a sampler YCbCr conversion.
-static bool IsYuvFormat(VkFormat format) {
+bool IsYuvFormat(VkFormat format) {
   switch (format) {
     // 8-bit multi-planar formats.
     case VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM:
@@ -66,6 +67,59 @@ static bool IsYuvFormat(VkFormat format) {
       return false;
   }
 }
+
+SkColorType ToSkColorType(VkFormat format) {
+  switch (format) {
+    case VK_FORMAT_R8G8B8A8_UNORM:
+      return kRGBA_8888_SkColorType;
+    case VK_FORMAT_R8G8B8A8_SRGB:
+      return kSRGBA_8888_SkColorType;
+    case VK_FORMAT_B8G8R8A8_UNORM:
+      return kBGRA_8888_SkColorType;
+    case VK_FORMAT_R16G16B16A16_SFLOAT:
+      return kRGBA_F16_SkColorType;
+    case VK_FORMAT_R32G32B32A32_SFLOAT:
+      return kRGBA_F32_SkColorType;
+    case VK_FORMAT_R8_UNORM:
+      return kR8_unorm_SkColorType;
+    case VK_FORMAT_R8G8_UNORM:
+      return kR8G8_unorm_SkColorType;
+    default:
+      return kUnknown_SkColorType;
+  }
+}
+
+#if IMPELLER_SUPPORTS_RENDERING
+impeller::PixelFormat ToPixelFormat(uint32_t vk_format) {
+  switch (vk_format) {
+    case VK_FORMAT_R8G8B8A8_UNORM:
+      return impeller::PixelFormat::kR8G8B8A8UNormInt;
+    case VK_FORMAT_R8G8B8A8_SRGB:
+      return impeller::PixelFormat::kR8G8B8A8UNormIntSRGB;
+    case VK_FORMAT_B8G8R8A8_UNORM:
+      return impeller::PixelFormat::kB8G8R8A8UNormInt;
+    case VK_FORMAT_B8G8R8A8_SRGB:
+      return impeller::PixelFormat::kB8G8R8A8UNormIntSRGB;
+    case VK_FORMAT_R32G32B32A32_SFLOAT:
+      return impeller::PixelFormat::kR32G32B32A32Float;
+    case VK_FORMAT_R16G16B16A16_SFLOAT:
+      return impeller::PixelFormat::kR16G16B16A16Float;
+    case VK_FORMAT_S8_UINT:
+      return impeller::PixelFormat::kS8UInt;
+    case VK_FORMAT_D24_UNORM_S8_UINT:
+      return impeller::PixelFormat::kD24UnormS8Uint;
+    case VK_FORMAT_D32_SFLOAT_S8_UINT:
+      return impeller::PixelFormat::kD32FloatS8UInt;
+    case VK_FORMAT_R8_UNORM:
+      return impeller::PixelFormat::kR8UNormInt;
+    case VK_FORMAT_R8G8_UNORM:
+      return impeller::PixelFormat::kR8G8UNormInt;
+    default:
+      return impeller::PixelFormat::kUnknown;
+  }
+}
+#endif  // IMPELLER_SUPPORTS_RENDERING
+}  // namespace
 
 // --- EmbedderExternalTextureSourceVulkan ---
 #if IMPELLER_SUPPORTS_RENDERING
@@ -108,35 +162,6 @@ EmbedderExternalTextureSourceVulkan::~EmbedderExternalTextureSourceVulkan() {
   texture_image_view_.reset();
   if (destruction_callback_) {
     destruction_callback_(user_data_);
-  }
-}
-
-static impeller::PixelFormat ToPixelFormat(uint32_t vk_format) {
-  switch (vk_format) {
-    case VK_FORMAT_R8G8B8A8_UNORM:
-      return impeller::PixelFormat::kR8G8B8A8UNormInt;
-    case VK_FORMAT_R8G8B8A8_SRGB:
-      return impeller::PixelFormat::kR8G8B8A8UNormIntSRGB;
-    case VK_FORMAT_B8G8R8A8_UNORM:
-      return impeller::PixelFormat::kB8G8R8A8UNormInt;
-    case VK_FORMAT_B8G8R8A8_SRGB:
-      return impeller::PixelFormat::kB8G8R8A8UNormIntSRGB;
-    case VK_FORMAT_R32G32B32A32_SFLOAT:
-      return impeller::PixelFormat::kR32G32B32A32Float;
-    case VK_FORMAT_R16G16B16A16_SFLOAT:
-      return impeller::PixelFormat::kR16G16B16A16Float;
-    case VK_FORMAT_S8_UINT:
-      return impeller::PixelFormat::kS8UInt;
-    case VK_FORMAT_D24_UNORM_S8_UINT:
-      return impeller::PixelFormat::kD24UnormS8Uint;
-    case VK_FORMAT_D32_SFLOAT_S8_UINT:
-      return impeller::PixelFormat::kD32FloatS8UInt;
-    case VK_FORMAT_R8_UNORM:
-      return impeller::PixelFormat::kR8UNormInt;
-    case VK_FORMAT_R8G8_UNORM:
-      return impeller::PixelFormat::kR8G8UNormInt;
-    default:
-      return impeller::PixelFormat::kUnknown;
   }
 }
 
@@ -262,27 +287,6 @@ EmbedderExternalTextureSourceVulkan::GetYUVConversion() const {
   return needs_yuv_conversion_ ? yuv_conversion_ : nullptr;
 }
 #endif  // IMPELLER_SUPPORTS_RENDERING
-
-static SkColorType ToSkColorType(VkFormat format) {
-  switch (format) {
-    case VK_FORMAT_R8G8B8A8_UNORM:
-      return kRGBA_8888_SkColorType;
-    case VK_FORMAT_R8G8B8A8_SRGB:
-      return kSRGBA_8888_SkColorType;
-    case VK_FORMAT_B8G8R8A8_UNORM:
-      return kBGRA_8888_SkColorType;
-    case VK_FORMAT_R16G16B16A16_SFLOAT:
-      return kRGBA_F16_SkColorType;
-    case VK_FORMAT_R32G32B32A32_SFLOAT:
-      return kRGBA_F32_SkColorType;
-    case VK_FORMAT_R8_UNORM:
-      return kR8_unorm_SkColorType;
-    case VK_FORMAT_R8G8_UNORM:
-      return kR8G8_unorm_SkColorType;
-    default:
-      return kUnknown_SkColorType;
-  }
-}
 
 // --- EmbedderExternalTextureVulkan ---
 
