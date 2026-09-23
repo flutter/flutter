@@ -1,0 +1,16 @@
+{
+  "embedder-pre-commit-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/local/google/home/boetger/src/flutter/bin/dart /usr/local/google/home/boetger/src/flutter/.agents/skills/pr-chain-manager/scripts/hook_pre_commit.dart",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
