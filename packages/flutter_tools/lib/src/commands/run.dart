@@ -9,8 +9,8 @@ import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
-import '../android/android_workflow.dart' as android_workflow;
 import '../android/android_engine_cli_flags.dart';
+import '../android/android_workflow.dart' as android_workflow;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
