@@ -292,25 +292,27 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   @protected
   void validatePrebuiltAndroidApplicationFlags() {
+    // First, verify the build mode.
+    if (getBuildMode() != BuildMode.release) {
+      return;
+    }
+
+    // Then, verify an Android prebuilt application is being run.
     final String? applicationBinary =
         argParser.options.containsKey(FlutterOptions.kUseApplicationBinary)
         ? stringArg(FlutterOptions.kUseApplicationBinary)
         : null;
     if (applicationBinary != null && applicationBinary.toLowerCase().endsWith('.apk')) {
-      final BuildMode buildMode = getBuildMode();
-      if (buildMode == BuildMode.release) {
-        final Iterable<String> intentFlags = AndroidEngineCliFlags.allFlags.where(
-          (String flag) =>
-              argParser.options.containsKey(flag) && argResults?.wasParsed(flag) == true,
-        );
+      final Iterable<String> intentFlags = AndroidEngineCliFlags.allFlags.where(
+        (String flag) => argParser.options.containsKey(flag) && argResults?.wasParsed(flag) == true,
+      );
 
-        if (intentFlags.isNotEmpty) {
-          throwToolExit(
-            'Running a prebuilt APK with --${FlutterOptions.kUseApplicationBinary} in release mode with flags used to configure the Flutter Android engine '
-            '(${intentFlags.map((String flag) => '--$flag').join(', ')}) is no longer supported. Define the required flags via the Android manifest instead. See '
-            'https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries for more details.',
-          );
-        }
+      if (intentFlags.isNotEmpty) {
+        throwToolExit(
+          'Running a prebuilt APK with --${FlutterOptions.kUseApplicationBinary} in release mode with flags used to configure the Flutter Android engine '
+          '(${intentFlags.map((String flag) => '--$flag').join(', ')}) is no longer supported. Define the required flags via the Android manifest instead. See '
+          'https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries for more details.',
+        );
       }
     }
   }
@@ -568,8 +570,9 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<void> validateCommand() async {
-    // Validate that prebuilt applications use engine configuration flags legally.
     if (runningWithPrebuiltApplication) {
+      // For Android prebuilt applications run in release mode, validate that engine configuration flags
+      // are not passed.
       validatePrebuiltAndroidApplicationFlags();
     } else {
       await super.validateCommand();
