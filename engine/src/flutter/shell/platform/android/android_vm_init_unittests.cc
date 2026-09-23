@@ -467,6 +467,60 @@ TEST(AndroidVMInitTest, MultithreadedConcurrentVMInitOperations) {
             kThreadCount * kIterationsPerThread);
 }
 
+TEST(AndroidVMInitTest, ParseHcppFlagMatrix) {
+  // Test all affirmative flag variations enabling HCPP / SurfaceControl.
+  const std::vector<std::string> affirmative_flags = {
+      "--enable-surface-control",
+      "--enable-surface-control=true",
+      "--enable-surface-control=1",
+      "--enable-hcpp-and-surface-control",
+      "--enable-hcpp-and-surface-control=true",
+      "--enable-hcpp-and-surface-control=1",
+      "--enable-hcpp",
+      "--enable-hcpp=true",
+      "--enable-hcpp=1",
+  };
+  for (const auto& flag : affirmative_flags) {
+    auto result = ParseHcppFlag(flag);
+    ASSERT_TRUE(result.has_value()) << "Expected flag to be parsed: " << flag;
+    EXPECT_TRUE(*result) << "Expected flag to enable HCPP: " << flag;
+  }
+
+  // Test all negative flag variations disabling HCPP / SurfaceControl.
+  const std::vector<std::string> negative_flags = {
+      "--enable-surface-control=false",
+      "--enable-surface-control=0",
+      "--enable-hcpp-and-surface-control=false",
+      "--enable-hcpp-and-surface-control=0",
+      "--enable-hcpp=false",
+      "--enable-hcpp=0",
+      "--no-enable-surface-control",
+      "--no-enable-hcpp-and-surface-control",
+      "--no-enable-hcpp",
+  };
+  for (const auto& flag : negative_flags) {
+    auto result = ParseHcppFlag(flag);
+    ASSERT_TRUE(result.has_value()) << "Expected flag to be parsed: " << flag;
+    EXPECT_FALSE(*result) << "Expected flag to disable HCPP: " << flag;
+  }
+
+  // Test unrelated or non-matching flags.
+  const std::vector<std::string> unrelated_flags = {
+      "",
+      "--enable-impeller",
+      "--enable-impeller=true",
+      "--enable-surface-control-invalid",
+      "--enable-hcpp-suffix",
+      "--no-enable-hcpp-other",
+      "enable-surface-control",
+  };
+  for (const auto& flag : unrelated_flags) {
+    auto result = ParseHcppFlag(flag);
+    EXPECT_FALSE(result.has_value())
+        << "Expected flag to return nullopt: " << flag;
+  }
+}
+
 }  // namespace testing
 }  // namespace android
 }  // namespace flutter

@@ -16,6 +16,29 @@ namespace android {
 
 #include <sys/system_properties.h>
 
+std::optional<bool> ParseHcppFlag(std::string_view arg) {
+  if (arg == "--enable-surface-control" ||
+      arg == "--enable-surface-control=true" ||
+      arg == "--enable-surface-control=1" ||
+      arg == "--enable-hcpp-and-surface-control" ||
+      arg == "--enable-hcpp-and-surface-control=true" ||
+      arg == "--enable-hcpp-and-surface-control=1" || arg == "--enable-hcpp" ||
+      arg == "--enable-hcpp=true" || arg == "--enable-hcpp=1") {
+    return true;
+  }
+  if (arg == "--enable-surface-control=false" ||
+      arg == "--enable-surface-control=0" ||
+      arg == "--enable-hcpp-and-surface-control=false" ||
+      arg == "--enable-hcpp-and-surface-control=0" ||
+      arg == "--enable-hcpp=false" || arg == "--enable-hcpp=0" ||
+      arg == "--no-enable-surface-control" ||
+      arg == "--no-enable-hcpp-and-surface-control" ||
+      arg == "--no-enable-hcpp") {
+    return false;
+  }
+  return std::nullopt;
+}
+
 static bool IsVivanteDevice() {
   char product_model[PROP_VALUE_MAX];
   __system_property_get("ro.hardware.egl", product_model);

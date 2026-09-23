@@ -12,6 +12,7 @@
 #include <mutex>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "flutter/fml/macros.h"
@@ -22,6 +23,15 @@
 
 namespace flutter {
 namespace android {
+
+/// @brief Parses SurfaceControl and HCPP flags from a single command-line
+/// argument.
+/// @param arg The argument string to inspect (e.g.,
+/// "--enable-hcpp-and-surface-control=true").
+/// @return true if the argument enables HCPP/SurfaceControl, false if it
+/// disables it,
+///         or std::nullopt if the argument is unrelated.
+std::optional<bool> ParseHcppFlag(std::string_view arg);
 
 /// @brief Minimum Android API level required for Impeller autoselection.
 constexpr int kMinimumAndroidApiLevelForImpeller = 29;
