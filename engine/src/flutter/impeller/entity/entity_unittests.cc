@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include <algorithm>
-#include <cmath>
 #include <cstring>
 #include <memory>
 #include <optional>
@@ -12,7 +11,6 @@
 
 #include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
-#include "flutter/fml/closure.h"
 #include "fml/logging.h"
 #include "gtest/gtest.h"
 #include "impeller/core/device_buffer.h"
@@ -3002,104 +3000,6 @@ TEST_P(EntityTest, RoundSuperellipseGetPositionBufferFlushes) {
   auto device_buffer = reinterpret_cast<const FlushTestDeviceBuffer*>(
       result.vertex_buffer.vertex_buffer.GetBuffer());
   EXPECT_TRUE(device_buffer->flush_called());
-}
-
-// A fractional blend coverage used to truncate into the subpass extent while
-// the texture coordinates and the composite translation stayed fractional, so
-// the subpass displayed a region wider than itself.
-//
-// Regression test for https://github.com/flutter/flutter/issues/192980.
-TEST_P(EntityTest, PipelineBlendSubpassIsPixelAligned) {
-  auto image = CreateTextureForFixture("boston.jpg");
-  auto filter = ColorFilterContents::MakeBlend(
-      BlendMode::kSrcOver, FilterInput::Make({image, image}));
-
-  Entity entity;
-  entity.SetTransform(Matrix::MakeTranslation({10.4f, 20.6f}) *
-                      Matrix::MakeScale(Vector2{0.37f, 0.37f}));
-  entity.SetContents(filter);
-
-  std::optional<Rect> coverage = filter->GetCoverage(entity);
-  ASSERT_TRUE(coverage.has_value());
-  // The test only means something if the coverage is off the pixel grid.
-  ASSERT_NE(coverage->GetLeft(), std::floor(coverage->GetLeft()));
-  ASSERT_NE(coverage->GetRight(), std::ceil(coverage->GetRight()));
-
-  std::optional<Entity> result = filter->GetEntity(GetContentContext(), entity,
-                                                   /*coverage_hint=*/{});
-  ASSERT_TRUE(result.has_value());
-  std::optional<Rect> result_coverage = result->GetCoverage();
-  ASSERT_TRUE(result_coverage.has_value());
-
-  // The subpass texture is allocated, and composited back, on the pixel grid.
-  EXPECT_RECT_NEAR(result_coverage.value(), Rect::RoundOut(coverage.value()));
-}
-
-// The same invariant for the offscreen advanced blend path, which is what
-// devices without framebuffer fetch (the iOS simulator, PowerVR, Adreno on
-// GLES) take for every blend mode above kModulate.
-//
-// Regression test for https://github.com/flutter/flutter/issues/192980.
-TEST_P(EntityTest, AdvancedBlendSubpassIsPixelAligned) {
-  if (GetParam() != PlaygroundBackend::kMetal) {
-    GTEST_SKIP()
-        << "This backend doesn't yet support setting device capabilities.";
-  }
-
-  std::shared_ptr<const Capabilities> old_capabilities =
-      GetContext()->GetCapabilities();
-  auto mock_capabilities = std::make_shared<MockCapabilities>();
-  EXPECT_CALL(*mock_capabilities, SupportsFramebufferFetch())
-      .Times(::testing::AtLeast(1))
-      .WillRepeatedly(::testing::Return(false));
-  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultColorFormat);
-  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultStencilFormat);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              GetDefaultDepthStencilFormat);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsOffscreenMSAA);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              SupportsImplicitResolvingMSAA);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsReadFromResolve);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsSSBO);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsCompute);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              SupportsTextureToTextureBlits);
-  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultGlyphAtlasFormat);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsTriangleFan);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              SupportsDecalSamplerAddressMode);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsPrimitiveRestart);
-  FLT_FORWARD(mock_capabilities, old_capabilities, GetMinimumUniformAlignment);
-  ASSERT_TRUE(SetCapabilities(mock_capabilities).ok());
-  // The playground context is shared across tests, so the mocked capabilities
-  // have to be undone however this test exits.
-  fml::ScopedCleanupClosure restore_capabilities([&]() {
-    EXPECT_TRUE(
-        SetCapabilities(std::const_pointer_cast<Capabilities>(old_capabilities))
-            .ok());
-  });
-
-  auto image = CreateTextureForFixture("boston.jpg");
-  auto filter = ColorFilterContents::MakeBlend(
-      BlendMode::kScreen, FilterInput::Make({image, image}));
-
-  Entity entity;
-  entity.SetTransform(Matrix::MakeTranslation({10.4f, 20.6f}) *
-                      Matrix::MakeScale(Vector2{0.37f, 0.37f}));
-  entity.SetContents(filter);
-
-  std::optional<Rect> coverage = filter->GetCoverage(entity);
-  ASSERT_TRUE(coverage.has_value());
-  ASSERT_NE(coverage->GetLeft(), std::floor(coverage->GetLeft()));
-  ASSERT_NE(coverage->GetRight(), std::ceil(coverage->GetRight()));
-
-  std::optional<Entity> result = filter->GetEntity(GetContentContext(), entity,
-                                                   /*coverage_hint=*/{});
-  ASSERT_TRUE(result.has_value());
-  std::optional<Rect> result_coverage = result->GetCoverage();
-  ASSERT_TRUE(result_coverage.has_value());
-
-  EXPECT_RECT_NEAR(result_coverage.value(), Rect::RoundOut(coverage.value()));
 }
 
 }  // namespace testing

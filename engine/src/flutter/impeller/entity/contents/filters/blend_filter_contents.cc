@@ -116,17 +116,39 @@ static std::optional<Entity> AdvancedBlend(
     return std::nullopt;
   }
 
-  // Snap to the pixel grid so the texture coordinates, the subpass extent and
-  // the composite translation all describe the same rect. Canvas::SaveLayer
-  // aligns subpass textures for the same reason.
-  const Rect snapped_coverage = Rect::RoundOut(coverage);
+  Rect subpass_coverage = coverage;
+  if (entity.GetContents()) {
+    auto coverage_hint = entity.GetContents()->GetCoverageHint();
+
+    if (coverage_hint.has_value()) {
+      auto maybe_subpass_coverage =
+          subpass_coverage.Intersection(*coverage_hint);
+      if (!maybe_subpass_coverage.has_value()) {
+        return std::nullopt;  // Nothing to render.
+      }
+
+      subpass_coverage = *maybe_subpass_coverage;
+    }
+  }
+
+  // The subpass render target is allocated with an integral size, so it only
+  // covers this much of |subpass_coverage|. The texture coordinates must
+  // describe the same rect as the quad, which spans the render target: if they
+  // describe the full, fractional coverage instead, the contents are scaled by
+  // the ratio between the two, and that ratio changes from frame to frame for
+  // animated content.
+  const Rect render_target_coverage = Rect::MakeOriginSize(
+      subpass_coverage.GetOrigin(), Size(ISize(subpass_coverage.GetSize())));
+  if (render_target_coverage.IsEmpty()) {
+    return std::nullopt;  // Nothing to render.
+  }
 
   auto dst_snapshot =
       inputs[0]->GetSnapshot("AdvancedBlend(Dst)", renderer, entity);
   if (!dst_snapshot.has_value()) {
     return std::nullopt;
   }
-  auto maybe_dst_uvs = dst_snapshot->GetCoverageUVs(snapped_coverage);
+  auto maybe_dst_uvs = dst_snapshot->GetCoverageUVs(render_target_coverage);
   if (!maybe_dst_uvs.has_value()) {
     return std::nullopt;
   }
@@ -143,7 +165,7 @@ static std::optional<Entity> AdvancedBlend(
       }
       return Entity::FromSnapshot(dst_snapshot.value(), entity.GetBlendMode());
     }
-    auto maybe_src_uvs = src_snapshot->GetCoverageUVs(snapped_coverage);
+    auto maybe_src_uvs = src_snapshot->GetCoverageUVs(render_target_coverage);
     if (!maybe_src_uvs.has_value()) {
       if (!dst_snapshot.has_value()) {
         return std::nullopt;
@@ -151,21 +173,6 @@ static std::optional<Entity> AdvancedBlend(
       return Entity::FromSnapshot(dst_snapshot.value(), entity.GetBlendMode());
     }
     src_uvs = maybe_src_uvs.value();
-  }
-
-  Rect subpass_coverage = snapped_coverage;
-  if (entity.GetContents()) {
-    auto coverage_hint = entity.GetContents()->GetCoverageHint();
-
-    if (coverage_hint.has_value()) {
-      auto maybe_subpass_coverage =
-          subpass_coverage.Intersection(Rect::RoundOut(*coverage_hint));
-      if (!maybe_subpass_coverage.has_value()) {
-        return std::nullopt;  // Nothing to render.
-      }
-
-      subpass_coverage = *maybe_subpass_coverage;
-    }
   }
 
   //----------------------------------------------------------------------------
@@ -176,8 +183,7 @@ static std::optional<Entity> AdvancedBlend(
                                                  RenderPass& pass) {
     auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
-    // The quad spans the rect the texture coordinates were derived from.
-    Size size = snapped_coverage.GetSize();
+    auto size = pass.GetRenderTargetSize();
 
     std::array<typename VS::PerVertexData, 4> vertices = {
         typename VS::PerVertexData{Point(0, 0), dst_uvs[0], src_uvs[0]},
@@ -232,9 +238,10 @@ static std::optional<Entity> AdvancedBlend(
     auto blend_uniform = data_host_buffer.EmplaceUniform(blend_info);
     FS::BindBlendInfo(pass, blend_uniform);
 
-    frame_info.mvp = pass.GetOrthographicTransform() *
-                     Matrix::MakeTranslation(snapped_coverage.GetOrigin() -
-                                             subpass_coverage.GetOrigin());
+    frame_info.mvp =
+        pass.GetOrthographicTransform() *
+        Matrix::MakeTranslation(render_target_coverage.GetOrigin() -
+                                subpass_coverage.GetOrigin());
 
     auto uniform_view = data_host_buffer.EmplaceUniform(frame_info);
     VS::BindFrameInfo(pass, uniform_view);
@@ -521,14 +528,13 @@ static std::optional<Entity> PipelineBlend(
     return std::nullopt;  // Nothing to render.
   }
 
-  // Snap to the pixel grid, as in AdvancedBlend above.
-  Rect subpass_coverage = Rect::RoundOut(coverage);
+  Rect subpass_coverage = coverage;
   if (entity.GetContents()) {
     auto coverage_hint = entity.GetContents()->GetCoverageHint();
 
     if (coverage_hint.has_value()) {
       auto maybe_subpass_coverage =
-          subpass_coverage.Intersection(Rect::RoundOut(*coverage_hint));
+          subpass_coverage.Intersection(*coverage_hint);
       if (!maybe_subpass_coverage.has_value()) {
         return std::nullopt;  // Nothing to render.
       }
