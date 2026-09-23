@@ -809,6 +809,7 @@ public class FlutterJNI {
   public void setPlatformViewsController(@NonNull PlatformViewsController platformViewsController) {
     ensureRunningOnMainThread();
     this.platformViewsController = platformViewsController;
+    platformViewsController.synchronizeToNativeViewHierarchy(false);
   }
 
   @UiThread
@@ -1345,6 +1346,15 @@ public class FlutterJNI {
           "platformViewsController must be set before attempting to destroy an overlay surface");
     }
     platformViewsController.destroyOverlaySurfaces();
+  }
+
+  @SuppressWarnings("unused")
+  @UiThread
+  public void synchronizeToNativeViewHierarchy(boolean yes) {
+    ensureRunningOnMainThread();
+    if (platformViewsController != null) {
+      platformViewsController.synchronizeToNativeViewHierarchy(yes);
+    }
   }
 
   @SuppressWarnings("unused")

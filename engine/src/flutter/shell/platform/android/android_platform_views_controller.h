@@ -240,6 +240,9 @@ class PlatformViewsProvider {
 
   /// @brief Sets whether HC++ presentation is supported and enabled.
   virtual void SetHcppEnabled(bool enabled) {}
+
+  /// @brief Returns native window for overlay surface id if available.
+  virtual ANativeWindow* GetOverlayWindow(int32_t id) { return nullptr; }
 };
 
 /// @brief Default JNI/JVM backed PlatformViewsProvider.
@@ -273,6 +276,7 @@ class DefaultPlatformViewsProvider : public PlatformViewsProvider {
   bool SwapTransactions() override;
   bool ApplyTransactions() override;
   bool IsHcppEnabled() const override;
+  ANativeWindow* GetOverlayWindow(int32_t id) override;
 
   void SetHcppEnabled(bool enabled) override;
 
@@ -313,6 +317,7 @@ class InMemoryPlatformViewsProvider : public PlatformViewsProvider {
   bool SwapTransactions() override;
   bool ApplyTransactions() override;
   bool IsHcppEnabled() const override;
+  ANativeWindow* GetOverlayWindow(int32_t id) override;
 
   void SetHcppEnabled(bool enabled) override;
   void SetNextTextureId(int64_t texture_id);
@@ -453,6 +458,7 @@ class AndroidPlatformViewsController {
   bool ApplyTransactions();
   bool IsHcppEnabled() const;
   void SetHcppEnabled(bool enabled);
+  ANativeWindow* GetOverlayWindow(int32_t id) const;
 
   size_t GetActiveViewsCount() const;
   bool HasPlatformView(int64_t view_id) const;

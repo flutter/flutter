@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/android/android_surface_manager.h"
 
+#include <dlfcn.h>
 #include <thread>
 #include <vector>
 
@@ -52,6 +53,95 @@ TEST(AndroidSurfaceManagerTest, SetAndClearNativeWindowFake) {
   manager->ClearNativeWindow();
   EXPECT_FALSE(manager->IsFakeWindow());
   EXPECT_EQ(manager->GetNativeWindow(), nullptr);
+}
+
+TEST(AndroidSurfaceManagerTest, RealImageReaderNativeWindowTest) {
+#if FML_OS_ANDROID
+  void* mediandk = dlopen("libmediandk.so", RTLD_NOW);
+  if (!mediandk) {
+    GTEST_SKIP() << "libmediandk.so not available";
+  }
+  typedef struct AImageReader AImageReader;
+  typedef int32_t (*AImageReader_newWithUsage_fn)(
+      int32_t width, int32_t height, int32_t format, uint64_t usage,
+      int32_t maxImages, AImageReader** reader);
+  typedef int32_t (*AImageReader_getWindow_fn)(AImageReader* reader,
+                                               ANativeWindow** window);
+  typedef void (*AImageReader_delete_fn)(AImageReader* reader);
+
+  auto newWithUsage = reinterpret_cast<AImageReader_newWithUsage_fn>(
+      dlsym(mediandk, "AImageReader_newWithUsage"));
+  auto getWindow = reinterpret_cast<AImageReader_getWindow_fn>(
+      dlsym(mediandk, "AImageReader_getWindow"));
+  auto deleteReader = reinterpret_cast<AImageReader_delete_fn>(
+      dlsym(mediandk, "AImageReader_delete"));
+
+  if (!newWithUsage || !getWindow || !deleteReader) {
+    dlclose(mediandk);
+    GTEST_SKIP() << "AImageReader APIs not available";
+  }
+
+  // AIMAGE_FORMAT_RGBA_8888 = 1
+  // AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE = 1 << 8
+  // AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT = 1 << 9
+  constexpr uint64_t kUsage = (1ULL << 8) | (1ULL << 9);
+  AImageReader* reader = nullptr;
+  int32_t status = newWithUsage(640, 480, 1, kUsage, 3, &reader);
+  ASSERT_EQ(status, 0) << "Failed to create AImageReader: " << status;
+  ASSERT_NE(reader, nullptr);
+
+  ANativeWindow* window = nullptr;
+  status = getWindow(reader, &window);
+  ASSERT_EQ(status, 0);
+  ASSERT_NE(window, nullptr);
+
+  auto manager =
+      AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_NE(manager, nullptr);
+
+  bool set_result = manager->SetNativeWindow(window);
+  std::cout << "SetNativeWindow result: " << set_result << std::endl;
+  EXPECT_TRUE(set_result);
+
+  EGLint visual_id = -1;
+  eglGetConfigAttrib(manager->GetEGLDisplay(), manager->GetEGLConfig(),
+                     EGL_NATIVE_VISUAL_ID, &visual_id);
+  std::cout << "EGL_NATIVE_VISUAL_ID: " << visual_id << std::endl;
+
+  int geo_res = ANativeWindow_setBuffersGeometry(window, 0, 0, visual_id);
+  std::cout << "ANativeWindow_setBuffersGeometry(window) result: " << geo_res
+            << std::endl;
+
+  if (set_result) {
+    EXPECT_TRUE(manager->MakeCurrent());
+    EXPECT_TRUE(manager->Present());
+    // Leave context current! Do not clear!
+  }
+
+  // Create second ImageReader
+  AImageReader* reader2 = nullptr;
+  status = newWithUsage(640, 480, 1, kUsage, 3, &reader2);
+  ASSERT_EQ(status, 0);
+  ANativeWindow* window2 = nullptr;
+  status = getWindow(reader2, &window2);
+  ASSERT_EQ(status, 0);
+
+  // Now call SetNativeWindow(window2) from another thread (simulating UI
+  // thread)!
+  bool thread_set_result = false;
+  std::thread ui_thread([&]() {
+    thread_set_result = manager->SetNativeWindow(window2);
+    std::cout << "Thread SetNativeWindow(window2) result: " << thread_set_result
+              << std::endl;
+  });
+  ui_thread.join();
+  EXPECT_TRUE(thread_set_result);
+
+  manager->ClearNativeWindow();
+  deleteReader(reader);
+  deleteReader(reader2);
+  dlclose(mediandk);
+#endif
 }
 
 TEST(AndroidSurfaceManagerTest, SoftwarePresentValidation) {
@@ -253,6 +343,43 @@ TEST_P(AndroidSurfaceManagerMultiBackendMatrixTest, ConcurrentOperations) {
   EXPECT_TRUE(manager->MakeCurrent());
   EXPECT_TRUE(manager->Present());
   EXPECT_TRUE(manager->ClearCurrent());
+}
+
+TEST(AndroidSurfaceManagerTest, OffscreenFBOLifecycleAndPool) {
+  auto manager =
+      AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_NE(manager, nullptr);
+
+  // 100x200 dimensions for test FBO.
+  constexpr size_t kWidth = 100;
+  constexpr size_t kHeight = 200;
+
+  auto fbo1 = manager->AcquireOffscreenFBO(kWidth, kHeight);
+  EXPECT_NE(fbo1.fbo, 0u);
+  EXPECT_EQ(fbo1.width, kWidth);
+  EXPECT_EQ(fbo1.height, kHeight);
+
+  // Acquire second FBO with different dimensions.
+  constexpr size_t kOtherWidth = 300;
+  constexpr size_t kOtherHeight = 400;
+  auto fbo2 = manager->AcquireOffscreenFBO(kOtherWidth, kOtherHeight);
+  EXPECT_NE(fbo2.fbo, 0u);
+  EXPECT_NE(fbo1.fbo, fbo2.fbo);
+
+  // Release fbo1 back to pool.
+  manager->ReleaseOffscreenFBO(fbo1);
+
+  // Re-acquire matching dimensions should reuse fbo1.
+  auto fbo1_reused = manager->AcquireOffscreenFBO(kWidth, kHeight);
+  EXPECT_EQ(fbo1_reused.fbo, fbo1.fbo);
+
+  manager->ReleaseOffscreenFBO(fbo1_reused);
+  manager->ReleaseOffscreenFBO(fbo2);
+
+  // Test BlitAndSwapOverlaySurface stub on host.
+  EXPECT_TRUE(
+      manager->BlitAndSwapOverlaySurface(nullptr, fbo1.fbo, kWidth, kHeight));
+  manager->DestroyOverlaySurfaces();
 }
 
 INSTANTIATE_TEST_SUITE_P(

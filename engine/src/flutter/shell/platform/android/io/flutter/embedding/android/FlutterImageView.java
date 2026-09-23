@@ -251,7 +251,15 @@ public class FlutterImageView extends View implements RenderSurface {
       updateCurrentBitmap();
     }
     if (currentBitmap != null) {
-      canvas.drawBitmap(currentBitmap, 0, 0, null);
+      if (canvas.isHardwareAccelerated()) {
+        canvas.drawBitmap(currentBitmap, 0, 0, null);
+      } else {
+        Bitmap copyBitmap = currentBitmap.copy(Bitmap.Config.ARGB_8888, false);
+        if (copyBitmap != null) {
+          canvas.drawBitmap(copyBitmap, 0, 0, null);
+          copyBitmap.recycle();
+        }
+      }
     }
   }
 

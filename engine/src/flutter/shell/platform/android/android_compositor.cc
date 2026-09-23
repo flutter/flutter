@@ -7,6 +7,7 @@
 #include "flutter/shell/platform/android/android_compositor.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <new>
 
@@ -79,11 +80,25 @@ bool AndroidCompositor::CreateBackingStore(
     case AndroidRenderingAPI::kImpellerAutoselect:
     case AndroidRenderingAPI::kImpellerVulkan: {
       backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
-      backing_store_out->user_data = this;
       backing_store_out->open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
       // 0x8058 is GL_RGBA8, required by embedder.cc format conversion.
       backing_store_out->open_gl.framebuffer.target = 0x8058;
-      backing_store_out->open_gl.framebuffer.name = surface_manager_->GetFBO();
+
+      size_t width = static_cast<size_t>(std::round(config->size.width));
+      size_t height = static_cast<size_t>(std::round(config->size.height));
+
+      if (backing_stores_created_in_frame_ == 0) {
+        backing_store_out->user_data = nullptr;
+        backing_store_out->open_gl.framebuffer.name =
+            surface_manager_->GetFBO();
+      } else {
+        auto offscreen = surface_manager_->AcquireOffscreenFBO(width, height);
+        auto* tracker = new OffscreenTracker{offscreen};
+        backing_store_out->user_data = tracker;
+        backing_store_out->open_gl.framebuffer.name = offscreen.fbo;
+      }
+      backing_stores_created_in_frame_++;
+
       backing_store_out->open_gl.framebuffer.user_data = nullptr;
       backing_store_out->open_gl.framebuffer.destruction_callback = nullptr;
       return true;
@@ -100,6 +115,11 @@ bool AndroidCompositor::CollectBackingStore(
   if (renderer->type == kFlutterBackingStoreTypeSoftware &&
       renderer->user_data != nullptr) {
     delete[] static_cast<const uint8_t*>(renderer->user_data);
+  } else if (renderer->type == kFlutterBackingStoreTypeOpenGL &&
+             renderer->user_data != nullptr) {
+    auto* tracker = static_cast<OffscreenTracker*>(renderer->user_data);
+    surface_manager_->ReleaseOffscreenFBO(tracker->fbo);
+    delete tracker;
   }
   return true;
 }
@@ -128,6 +148,8 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
 
   bool present_success = true;
   size_t platform_views_count = 0;
+  size_t overlays_count = 0;
+  backing_stores_created_in_frame_ = 0;
 
   for (size_t i = 0; i < layers_count; ++i) {
     const FlutterLayer* layer = layers[i];
@@ -137,20 +159,41 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
 
     if (layer->type == kFlutterLayerContentTypeBackingStore) {
       if (layer->backing_store != nullptr) {
-        if (layer->backing_store->type == kFlutterBackingStoreTypeSoftware) {
-          bool res = surface_manager_->PresentSoftware(
-              layer->backing_store->software.allocation,
-              layer->backing_store->software.row_bytes,
-              layer->backing_store->software.height);
-          if (!res && !surface_manager_->IsFakeWindow()) {
-            present_success = false;
+        if (platform_views_count == 0) {
+          if (layer->backing_store->type == kFlutterBackingStoreTypeSoftware) {
+            bool res = surface_manager_->PresentSoftware(
+                layer->backing_store->software.allocation,
+                layer->backing_store->software.row_bytes,
+                layer->backing_store->software.height);
+            if (!res && !surface_manager_->IsFakeWindow()) {
+              present_success = false;
+            }
+          } else if (layer->backing_store->type ==
+                     kFlutterBackingStoreTypeOpenGL) {
+            bool res = surface_manager_->Present();
+            if (!res && !surface_manager_->IsFakeWindow()) {
+              present_success = false;
+            }
           }
-        } else if (layer->backing_store->type ==
-                   kFlutterBackingStoreTypeOpenGL) {
-          bool res = surface_manager_->Present();
-          if (!res && !surface_manager_->IsFakeWindow()) {
-            present_success = false;
+        } else {
+          if (layer->backing_store->type == kFlutterBackingStoreTypeOpenGL) {
+            ANativeWindow* overlay_window = nullptr;
+            if (delegate != nullptr) {
+              overlay_window = delegate->GetOverlayWindow(overlays_count);
+            }
+            if (overlay_window != nullptr) {
+              surface_manager_->BlitAndSwapOverlaySurface(
+                  overlay_window,
+                  layer->backing_store->open_gl.framebuffer.name,
+                  static_cast<size_t>(std::round(layer->size.width)),
+                  static_cast<size_t>(std::round(layer->size.height)));
+            }
           }
+          if (delegate != nullptr) {
+            delegate->OnOverlayPresented(overlays_count, layer->offset,
+                                         layer->size);
+          }
+          overlays_count++;
         }
       }
     } else if (layer->type == kFlutterLayerContentTypePlatformView) {
@@ -173,6 +216,7 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
   {
     std::lock_guard<std::mutex> lock(present_mutex_);
     last_presented_platform_views_count_ = platform_views_count;
+    last_presented_overlays_count_ = overlays_count;
   }
 
   // If the surface was detached concurrently, avoid crashing or failing fatally
@@ -215,7 +259,7 @@ void AndroidCompositor::PopulateCompositorConfig(
         renderer);
   };
   compositor_out->present_layers_callback = nullptr;
-  compositor_out->avoid_backing_store_cache = false;
+  compositor_out->avoid_backing_store_cache = true;
   compositor_out->present_view_callback =
       [](const FlutterPresentViewInfo* info) -> bool {
     if (info == nullptr || info->user_data == nullptr) {
@@ -238,6 +282,11 @@ size_t AndroidCompositor::GetLastPresentedLayersCount() const {
 size_t AndroidCompositor::GetLastPresentedPlatformViewsCount() const {
   std::lock_guard<std::mutex> lock(present_mutex_);
   return last_presented_platform_views_count_;
+}
+
+size_t AndroidCompositor::GetLastPresentedOverlaysCount() const {
+  std::lock_guard<std::mutex> lock(present_mutex_);
+  return last_presented_overlays_count_;
 }
 
 }  // namespace flutter
