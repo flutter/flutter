@@ -551,7 +551,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       // Have to set this first before unfocusing, since it checks this to cull
       // unfocusable, previously-focused children.
       _canRequestFocus = value;
-      if (!value && (hasFocus || _manager?._markedForFocus == this)) {
+      if (!value && hasFocus) {
         unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
       }
       _manager?._markPropertiesChanged(this);
@@ -1987,6 +1987,17 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     // A node has requested to be the next focus, and isn't already the primary
     // focus.
     if (_markedForFocus != null && _markedForFocus != _primaryFocus) {
+    // The pending node might no longer be able to receive focus.
+    // Find another valid node to focus on. If none is found, use the
+    // current primary focus, or the root scope as a last fallback.
+      if (!_markedForFocus!.canRequestFocus) {
+        _markedForFocus!.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
+        if (_markedForFocus == null || !_markedForFocus!.canRequestFocus) {
+          _markedForFocus = _primaryFocus != null && _primaryFocus!.canRequestFocus
+              ? _primaryFocus
+              : rootScope;
+        }
+      }
       final Set<FocusNode> previousPath = previousFocus?.ancestors.toSet() ?? <FocusNode>{};
       final Set<FocusNode> nextPath = _markedForFocus!.ancestors.toSet();
       // Notify nodes that are newly focused.
