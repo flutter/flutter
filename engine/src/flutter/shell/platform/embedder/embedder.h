@@ -985,9 +985,9 @@ typedef struct {
   VoidCallback destruction_callback;
   /// Optional parameters for texture height/width, default is 0, non-zero means
   /// the texture has the specified width/height.
-  /// Width of the texture.
+  /// Physical width of the texture.
   size_t width;
-  /// Height of the texture.
+  /// Physical height of the texture.
   size_t height;
 } FlutterVulkanExternalTexture;
 
