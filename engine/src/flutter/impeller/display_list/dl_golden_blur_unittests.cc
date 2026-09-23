@@ -9,7 +9,7 @@
 #include "flutter/impeller/display_list/testing/render_text_in_canvas.h"
 #include "flutter/impeller/display_list/testing/rmse.h"
 #include "flutter/impeller/geometry/round_rect.h"
-#include "flutter/impeller/golden_tests/screenshot.h"
+#include "flutter/impeller/testing/screenshot.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 
@@ -31,12 +31,14 @@ TEST_P(DlGoldenTest, TextBlurMaskFilterRespectCTM) {
                                /*respect_ctm=*/true);
     ASSERT_TRUE(RenderTextInCanvasSkia(canvas, "hello world",
                                        "Roboto-Regular.ttf",  //
-                                       DlPoint(101, 101), options));
+                                       DlPoint(101, 101), options)
+                    .ok());
     options.mask_filter = nullptr;
     options.color = DlColor::kRed();
     ASSERT_TRUE(RenderTextInCanvasSkia(canvas, "hello world",
                                        "Roboto-Regular.ttf",  //
-                                       DlPoint(100, 100), options));
+                                       DlPoint(100, 100), options)
+                    .ok());
   };
 
   DisplayListBuilder builder;
@@ -58,12 +60,14 @@ TEST_P(DlGoldenTest, TextBlurMaskFilterDisrespectCTM) {
                                /*respect_ctm=*/false);
     ASSERT_TRUE(RenderTextInCanvasSkia(canvas, "hello world",
                                        "Roboto-Regular.ttf",  //
-                                       DlPoint(101, 101), options));
+                                       DlPoint(101, 101), options)
+                    .ok());
     options.mask_filter = nullptr;
     options.color = DlColor::kRed();
     ASSERT_TRUE(RenderTextInCanvasSkia(canvas, "hello world",
                                        "Roboto-Regular.ttf",  //
-                                       DlPoint(100, 100), options));
+                                       DlPoint(100, 100), options)
+                    .ok());
   };
 
   DisplayListBuilder builder;

@@ -61,7 +61,7 @@ FLUTTER_ASSERT_ARC
 
 - (id<UIFocusEnvironment>)parentFocusEnvironment {
   // The root SemanticsObject node's parent is the FlutterView.
-  return self.parent.focusItem ?: ([self isAccessibilityBridgeAlive] ? self.bridge->view() : nil);
+  return self.parent.focusItem ?: [self bridgeView];
 }
 
 - (NSArray<id<UIFocusEnvironment>>*)preferredFocusEnvironments {
@@ -89,7 +89,7 @@ FLUTTER_ASSERT_ARC
 // See also the `coordinateSpace` implementation.
 // TODO(LongCatIsLooong): use CoreGraphics types.
 - (CGRect)frame {
-  if (![self isAccessibilityBridgeAlive]) {
+  if (!self.bridge) {
     return CGRectZero;
   }
   SkPoint quad[4] = {SkPoint::Make(self.node.rect.left(), self.node.rect.top()),
@@ -134,7 +134,8 @@ FLUTTER_ASSERT_ARC
   // UIFocusItem is not inside of a scroll view).
   //
   // Screen can be nil if the FlutterView is covered by another native view.
-  CGFloat scale = (self.bridge->view().window.screen ?: UIScreen.mainScreen).scale;
+  UIView* view = self.bridgeView;
+  CGFloat scale = (view.window.screen ?: UIScreen.mainScreen).scale;
   return CGRectMake(unscaledRect.origin.x / scale, unscaledRect.origin.y / scale,
                     unscaledRect.size.width / scale, unscaledRect.size.height / scale);
 }
@@ -162,8 +163,7 @@ FLUTTER_ASSERT_ARC
 
 - (id<UICoordinateSpace>)coordinateSpace {
   // A regular SemanticsObject uses the same coordinate space as its parent.
-  return self.parent.coordinateSpace
-             ?: ([self isAccessibilityBridgeAlive] ? self.bridge->view() : nil);
+  return self.parent.coordinateSpace ?: [self bridgeView];
 }
 
 @end
@@ -214,7 +214,8 @@ FLUTTER_ASSERT_ARC
   [super setContentOffset:contentOffset];
   // Do no send flutter::SemanticsAction::kScrollToOffset if it's triggered
   // by a framework update.
-  if (![self.semanticsObject isAccessibilityBridgeAlive] || !self.isDoingSystemScrolling) {
+  flutter::AccessibilityBridgeIos* bridge = self.semanticsObject.bridge;
+  if (!bridge || !self.isDoingSystemScrolling) {
     return;
   }
 
@@ -222,9 +223,9 @@ FLUTTER_ASSERT_ARC
   FlutterStandardTypedData* offsetData = [FlutterStandardTypedData
       typedDataWithFloat64:[NSData dataWithBytes:&offset length:sizeof(offset)]];
   NSData* encoded = [[FlutterStandardMessageCodec sharedInstance] encode:offsetData];
-  self.semanticsObject.bridge->DispatchSemanticsAction(
-      self.semanticsObject.uid, flutter::SemanticsAction::kScrollToOffset,
-      fml::MallocMapping::Copy(encoded.bytes, encoded.length));
+  bridge->DispatchSemanticsAction(self.semanticsObject.uid,
+                                  flutter::SemanticsAction::kScrollToOffset,
+                                  fml::MallocMapping::Copy(encoded.bytes, encoded.length));
 }
 
 - (BOOL)canBecomeFocused {

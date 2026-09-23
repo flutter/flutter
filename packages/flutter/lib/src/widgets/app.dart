@@ -15,8 +15,6 @@ import 'dart:collection' show HashMap;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import '../foundation/_features.dart' show isWindowingEnabled;
-import '_window.dart' show WindowManager;
 
 import 'actions.dart';
 import 'banner.dart';
@@ -69,8 +67,10 @@ export 'dart:ui' show Locale;
 ///  * [LocaleResolutionCallback], which takes only one default locale (instead of a list)
 ///    and is attempted only after this callback fails or is null. [LocaleListResolutionCallback]
 ///    is recommended over [LocaleResolutionCallback].
-typedef LocaleListResolutionCallback =
-    Locale? Function(List<Locale>? locales, Iterable<Locale> supportedLocales);
+typedef LocaleListResolutionCallback = Locale? Function(
+  List<Locale>? locales,
+  Iterable<Locale> supportedLocales,
+);
 
 /// {@template flutter.widgets.LocaleResolutionCallback}
 /// The signature of [WidgetsApp.localeResolutionCallback].
@@ -98,8 +98,10 @@ typedef LocaleListResolutionCallback =
 ///  * [LocaleListResolutionCallback], which takes a list of preferred locales (instead of one locale).
 ///    Resolutions by [LocaleListResolutionCallback] take precedence over [LocaleResolutionCallback].
 /// {@endtemplate}
-typedef LocaleResolutionCallback =
-    Locale? Function(Locale? locale, Iterable<Locale> supportedLocales);
+typedef LocaleResolutionCallback = Locale? Function(
+  Locale? locale,
+  Iterable<Locale> supportedLocales,
+);
 
 /// The default locale resolution algorithm.
 ///
@@ -808,7 +810,8 @@ class WidgetsApp extends StatefulWidget {
   /// [Localizations], consider [onGenerateTitle] instead.
   ///
   /// The [builder] callback is passed two arguments, the [BuildContext] (as
-  /// `context`) and a [Navigator] or [Router] widget (as `child`).
+  /// `context`) and a [FocusScope] widget enclosing the [Navigator] or [Router]
+  /// (as `child`).
   ///
   /// If no routes are provided to the regular [WidgetsApp] constructor using
   /// [home], [routes], [onGenerateRoute], or [onUnknownRoute], the `child` will
@@ -1689,33 +1692,33 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       );
     } else if (_usesNavigator) {
       assert(_navigator != null);
-      routing = FocusScope(
-        debugLabel: 'Navigator Scope',
-        autofocus: true,
-        child: Navigator(
-          clipBehavior: Clip.none,
-          restorationScopeId: 'nav',
-          key: _navigator,
-          initialRoute: _initialRouteName,
-          onGenerateRoute: _onGenerateRoute,
-          onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
-              ? Navigator.defaultGenerateInitialRoutes
-              : (NavigatorState navigator, String initialRouteName) {
-                  return widget.onGenerateInitialRoutes!(initialRouteName);
-                },
-          onUnknownRoute: _onUnknownRoute,
-          observers: widget.navigatorObservers!,
-          routeTraversalEdgeBehavior: kIsWeb
-              ? TraversalEdgeBehavior.leaveFlutterView
-              : TraversalEdgeBehavior.parentScope,
-          reportsRouteUpdateToEngine: true,
-        ),
+      routing = Navigator(
+        clipBehavior: Clip.none,
+        restorationScopeId: 'nav',
+        key: _navigator,
+        initialRoute: _initialRouteName,
+        onGenerateRoute: _onGenerateRoute,
+        onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
+            ? Navigator.defaultGenerateInitialRoutes
+            : (NavigatorState navigator, String initialRouteName) {
+                return widget.onGenerateInitialRoutes!(initialRouteName);
+              },
+        onUnknownRoute: _onUnknownRoute,
+        observers: widget.navigatorObservers!,
+        routeTraversalEdgeBehavior: kIsWeb
+            ? TraversalEdgeBehavior.leaveFlutterView
+            : TraversalEdgeBehavior.parentScope,
+        reportsRouteUpdateToEngine: true,
       );
     } else if (_usesRouterWithConfig) {
       routing = Router<Object>.withConfig(
         restorationScopeId: 'router',
         config: widget.routerConfig!,
       );
+    }
+
+    if (routing != null) {
+      routing = FocusScope(debugLabel: 'Navigator Scope', autofocus: true, child: routing);
     }
 
     Widget result;
@@ -1728,10 +1731,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     } else {
       assert(routing != null);
       result = routing!;
-    }
-
-    if (isWindowingEnabled) {
-      result = WindowManager(child: result);
     }
 
     if (widget.textStyle != null) {

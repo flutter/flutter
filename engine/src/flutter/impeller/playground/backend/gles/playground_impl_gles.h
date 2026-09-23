@@ -17,12 +17,14 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
  public:
   struct ShareableContext;
 
-  explicit PlaygroundImplGLES(PlaygroundSwitches switches);
+  explicit PlaygroundImplGLES(const PlaygroundSwitches& switches);
 
   ~PlaygroundImplGLES();
 
   fml::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities) override;
+
+  static void OnTearDownTestEnvironment();
 
  private:
   class ReactorWorker;
@@ -64,6 +66,12 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
 
   static std::unique_ptr<ShareableContext> MakeShareableContext(
       const PlaygroundSwitches& switches);
+
+  // These store longer-term shared contexts that are shared between
+  // tests in the playground suite while the flags that affect the
+  // construction of the context remain consistent.
+  static std::unique_ptr<ShareableContext> shared_context_msaa_;
+  static std::unique_ptr<ShareableContext> shared_context_sdf_;
 
   RuntimeStageBackend GetRuntimeStageBackend() const override;
 

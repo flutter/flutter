@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 class TestScrollPosition extends ScrollPositionWithSingleContext {
   TestScrollPosition({
@@ -254,21 +253,19 @@ void main() {
     expect(view.primary, isNull);
   });
 
-  testWidgets(
-    'Vertical SingleChildScrollViews use PrimaryScrollController by default on mobile',
-    (WidgetTester tester) async {
-      final controller = ScrollController();
-      addTearDown(controller.dispose);
-      await tester.pumpWidget(
-        primaryScrollControllerBoilerplate(
-          child: const SingleChildScrollView(),
-          controller: controller,
-        ),
-      );
-      expect(controller.hasClients, isTrue);
-    },
-    variant: TargetPlatformVariant.mobile(),
-  );
+  testWidgets('Vertical SingleChildScrollViews use PrimaryScrollController by default on mobile', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      primaryScrollControllerBoilerplate(
+        child: const SingleChildScrollView(),
+        controller: controller,
+      ),
+    );
+    expect(controller.hasClients, isTrue);
+  }, variant: TargetPlatformVariant.mobile());
 
   testWidgets(
     "Vertical SingleChildScrollViews don't use PrimaryScrollController by default on desktop",

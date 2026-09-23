@@ -11,6 +11,7 @@
 #include "impeller/base/comparable.h"
 #include "impeller/base/thread.h"
 #include "impeller/core/sampler.h"
+#include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_vk.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
@@ -75,10 +76,11 @@ class YUVConversionVK final {
  private:
   friend class YUVConversionLibraryVK;
 
+  std::weak_ptr<DeviceHolderVK> device_holder_;
   YUVConversionDescriptorVK chain_;
   vk::UniqueSamplerYcbcrConversion conversion_;
 
-  YUVConversionVK(const vk::Device& device,
+  YUVConversionVK(const std::shared_ptr<DeviceHolderVK>& device_holder,
                   const YUVConversionDescriptorVK& chain);
 };
 

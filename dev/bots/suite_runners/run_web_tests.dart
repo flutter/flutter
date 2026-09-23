@@ -178,6 +178,9 @@ class WebTestsSuite {
         useWasm: false,
       ),
 
+      () => _runWebE2eTest('deferred_loading_integration', buildMode: 'release', useWasm: false),
+      () => _runWebE2eTest('deferred_loading_integration', buildMode: 'release', useWasm: true),
+
       () => _runWebTreeshakeTest(),
 
       () => _runFlutterDriverWebTest(
@@ -247,7 +250,7 @@ class WebTestsSuite {
   }
 
   Future<void> runWebSkwasmUnitTests() {
-    return _runWebUnitTests(useWasm: true, webShardCount: 8);
+    return _runWebUnitTests(useWasm: true, webShardCount: 2);
   }
 
   /// Runs one of the `dev/integration_tests/web_e2e_tests` tests.
@@ -587,7 +590,7 @@ class WebTestsSuite {
     //
     // We make sure the last shard ends in _last so it's easier to catch mismatches
     // between `.ci.yaml` and `test.dart`.
-    subshards['${webShardCount - 1}_last'] = () async {
+    Future<void> lastShardRunner() async {
       await _runFlutterWebTest(
         flutterPackageDirectory.path,
         allTests.sublist((webShardCount - 1) * testsPerShard, allTests.length),
@@ -599,7 +602,10 @@ class WebTestsSuite {
       await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter_driver'), <String>[
         path.join('test', 'src', 'web_tests', 'web_extension_test.dart'),
       ], useWasm);
-    };
+    }
+
+    subshards['${webShardCount - 1}'] = lastShardRunner;
+    subshards['${webShardCount - 1}_last'] = lastShardRunner;
 
     await selectSubshard(subshards);
   }

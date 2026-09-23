@@ -129,6 +129,8 @@ void Rasterizer::Teardown() {
       }
 #endif  //  !SLIMPELLER
     }
+    context_switch.reset();
+    surface_->ClearRenderContext();
     surface_.reset();
   }
 

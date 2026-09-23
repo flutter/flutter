@@ -57,9 +57,13 @@ std::unique_ptr<Surface> KHRSwapchainVK::AcquireNextDrawable(
 
   TRACE_EVENT0("impeller", __FUNCTION__);
 
-  auto result = impl_->AcquireNextDrawable();
-  if (!result.out_of_date && size_ == impl_->GetSize()) {
-    return std::move(result.surface);
+  // Do not call AcquireNextDrawable if the impl_ has a mismatched size.
+  // Acquiring an image without presenting it can cause leaks.
+  if (size_ == impl_->GetSize()) {
+    auto result = impl_->AcquireNextDrawable();
+    if (!result.out_of_date) {
+      return std::move(result.surface);
+    }
   }
 
 // When the swapchain says its out-of-date, we attempt to read the underlying

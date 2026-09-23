@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
+
 import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -282,6 +283,8 @@ void main() {
         () {
           gradle_utils.updateLocalProperties(
             project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+            analytics: globals.analytics,
+            logger: globals.logger,
           );
         },
         throwsToolExit(
@@ -625,6 +628,44 @@ flutter:
         );
 
         expect(isAppUsingAndroidX(androidDirectory), isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'returns false for commented-out AndroidX properties',
+      () async {
+        final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_android.',
+        );
+
+        androidDirectory
+            .childFile('gradle.properties')
+            .writeAsStringSync('#android.useAndroidX=true');
+
+        expect(isAppUsingAndroidX(androidDirectory), isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'returns true when AndroidX property has spaces around the separator',
+      () async {
+        final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_android.',
+        );
+
+        androidDirectory
+            .childFile('gradle.properties')
+            .writeAsStringSync('android.useAndroidX = true');
+
+        expect(isAppUsingAndroidX(androidDirectory), isTrue);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fs,

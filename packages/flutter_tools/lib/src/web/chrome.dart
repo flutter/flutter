@@ -18,6 +18,9 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
+import 'chrome_constants.dart';
+
+export 'chrome_constants.dart';
 
 /// An environment variable used to override the location of Google Chrome.
 const kChromeEnvironment = 'CHROME_EXECUTABLE';
@@ -48,6 +51,25 @@ const kWindowsEdgeExecutable = r'Microsoft\Edge\Application\msedge.exe';
 ///
 ///     Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: _dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen <= GL(dl_tls_generation)' failed!
 const _kGlibcError = 'Inconsistency detected by ld.so';
+
+/// Filters out non-fatal D-Bus connection error messages emitted by Chromium.
+///
+/// Headless Linux Chrome attempts to query Linux D-Bus desktop services (such as
+/// system theme, desktop notifications, and keyrings) when `DBUS_SESSION_BUS_ADDRESS`
+/// is missing or disabled. Chromium logs non-fatal fallback notices to stderr via
+/// `LOG(ERROR)` in `dbus/bus.cc` (see
+/// https://chromium.googlesource.com/chromium/src/+/refs/heads/main/dbus/bus.cc#405)
+/// and `dbus/object_proxy.cc`.
+///
+/// We filter out these benign D-Bus lines to prevent stderr log noise in CI,
+/// following the industry standard pattern used by open source projects to filter
+/// E2E test logs (e.g. https://github.com/kitelev/exocortex/blob/4290cdade669034e5f71c892fb3e1908c5a2fe12/packages/obsidian-plugin/docker-entrypoint-e2e.sh#L48-L49).
+bool _isDbusError(String line) {
+  return line.contains('ERROR:dbus/bus.cc') ||
+      line.contains('ERROR:dbus/object_proxy.cc') ||
+      line.contains('Failed to connect to the bus') ||
+      line.contains('org.freedesktop.DBus');
+}
 
 typedef BrowserFinder = String Function(Platform, FileSystem);
 
@@ -109,18 +131,13 @@ String findEdgeExecutable(Platform platform, FileSystem fileSystem) {
 /// A launcher for Chromium browsers with devtools configured.
 class ChromiumLauncher {
   ChromiumLauncher({
-    required FileSystem fileSystem,
-    required Platform platform,
-    required ProcessManager processManager,
-    required OperatingSystemUtils operatingSystemUtils,
-    required BrowserFinder browserFinder,
-    required Logger logger,
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _processManager = processManager,
-       _operatingSystemUtils = operatingSystemUtils,
-       _browserFinder = browserFinder,
-       _logger = logger;
+    required this._fileSystem,
+    required this._platform,
+    required this._processManager,
+    required this._operatingSystemUtils,
+    required this._browserFinder,
+    required this._logger,
+  });
 
   final FileSystem _fileSystem;
   final Platform _platform;
@@ -235,6 +252,11 @@ class ChromiumLauncher {
       // When the DevTools has focus we don't want to slow down the application.
       '--disable-background-timer-throttling',
       '--disable-renderer-backgrounding',
+      '--disable-background-networking',
+      '--disable-sync',
+      '--disable-client-side-phishing-detection',
+      '--disable-notifications',
+      ...kGcmDisabledFlags,
       // Since we are using a temp profile, disable features that slow the
       // Chrome launch.
       '--disable-extensions',
@@ -263,12 +285,9 @@ class ChromiumLauncher {
       if (headless) ...<String>[
         '--no-sandbox',
         '--headless',
-        '--window-size=1024,1024',
-        '--disable-background-networking',
-        '--disable-sync',
-        '--disable-client-side-phishing-detection',
-        '--disable-notifications',
-        '--disable-features=GCM',
+        // Only supply default 1024x1024 window size if caller has not specified a custom --window-size.
+        if (!webBrowserFlags.any((String flag) => flag.startsWith('--window-size=')))
+          '--window-size=1024,1024',
         if (_platform.isLinux) ...<String>[
           '--use-gl=angle',
           '--use-angle=swiftshader',
@@ -342,6 +361,9 @@ class ChromiumLauncher {
 
       final StreamSubscription<String> stderrSub = process.stderr.transform(utf8LineDecoder).listen(
         (String line) {
+          if (_isDbusError(line)) {
+            return;
+          }
           addLog('CHROME STDERR', line);
           if (line.contains(_kGlibcError)) {
             hitGlibcBug = true;
@@ -527,14 +549,11 @@ class Chromium {
     this.debugPort,
     this.chromeConnection, {
     this.url,
-    required Process process,
-    required ChromiumLauncher chromiumLauncher,
-    required Logger logger,
-    List<String> logBuffer = const <String>[],
-  }) : _process = process,
-       _chromiumLauncher = chromiumLauncher,
-       _logger = logger,
-       _logBuffer = logBuffer {
+    required this._process,
+    required this._chromiumLauncher,
+    required this._logger,
+    this._logBuffer = const <String>[],
+  }) {
     unawaited(
       _process.exitCode.then((int code) {
         if (!_didClose && code != 0) {

@@ -16,7 +16,8 @@ import 'debug.dart';
 import 'framework.dart';
 import 'scroll_notification.dart';
 
-export 'package:flutter/rendering.dart' show AxisDirection, GrowthDirection, SliverPaintOrder;
+export 'package:flutter/rendering.dart'
+    show AxisDirection, GrowthDirection, ScrollCacheExtent, SliverPaintOrder;
 
 /// A widget through which a portion of larger content can be viewed, typically
 /// in combination with a [Scrollable].
@@ -194,8 +195,7 @@ class Viewport extends MultiChildRenderObjectWidget {
             context,
             why:
                 "to determine the cross-axis direction when the viewport has an 'up' axisDirection",
-            alternative:
-                "Alternatively, consider specifying the 'crossAxisDirection' argument on the Viewport.",
+            alternative: "Alternatively, consider specifying the 'crossAxisDirection' argument on the Viewport.",
           ),
         );
         return textDirectionToAxisDirection(Directionality.of(context));
@@ -205,10 +205,8 @@ class Viewport extends MultiChildRenderObjectWidget {
         assert(
           debugCheckHasDirectionality(
             context,
-            why:
-                "to determine the cross-axis direction when the viewport has a 'down' axisDirection",
-            alternative:
-                "Alternatively, consider specifying the 'crossAxisDirection' argument on the Viewport.",
+            why: "to determine the cross-axis direction when the viewport has a 'down' axisDirection",
+            alternative: "Alternatively, consider specifying the 'crossAxisDirection' argument on the Viewport.",
           ),
         );
         return textDirectionToAxisDirection(Directionality.of(context));

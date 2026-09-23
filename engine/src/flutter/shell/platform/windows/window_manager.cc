@@ -86,26 +86,54 @@ FlutterViewId WindowManager::CreatePopupWindow(
   return view_id;
 }
 
-void WindowManager::OnEngineShutdown() {
-  // Don't send any more messages to isolate.
+void WindowManager::OnPreEngineRestart() {
+  // The isolate state will be completely lost after a hot restart, so notifying
+  // the isolate about destroying windows does not have any benefits. On the
+  // contrary it can cause the old isolate to shut down the application because
+  // all windows will be destroyed.
   on_message_ = nullptr;
-  std::vector<HWND> active_handles;
-  active_handles.reserve(active_windows_.size());
-  for (auto& [hwnd, window] : active_windows_) {
-    active_handles.push_back(hwnd);
-  }
-  for (auto hwnd : active_handles) {
+  OnEngineShutdown();
+}
+
+void WindowManager::OnEngineShutdown() {
+  // Destroy the windows before clearing |on_message_| so the WM_DESTROY
+  // round-trip reaches the isolate. Otherwise per-view Dart controllers
+  // never observe destruction and may issue follow-up FFI calls (e.g.
+  // updatePosition) with stale handles after the engine is torn down.
+  //
+  // Destroying single window may result in removal of child entries from the
+  // map so this loop is safer than iterating over the map.
+  while (!active_windows_.empty()) {
+    auto it = active_windows_.begin();
     // This will destroy the window, which will in turn remove the
     // HostWindow from map when handling WM_NCDESTROY inside
     // HandleMessage.
-    InternalFlutterWindows_WindowManager_OnDestroyWindow(hwnd);
+    InternalFlutterWindows_WindowManager_OnDestroyWindow(it->first);
   }
+
+  // Don't send any more messages to isolate.
+  on_message_ = nullptr;
 }
 
 std::optional<LRESULT> WindowManager::HandleMessage(HWND hwnd,
                                                     UINT message,
                                                     WPARAM wparam,
                                                     LPARAM lparam) {
+  if (message == WM_DESTROY) {
+    // Destroying parent HWND will transitively destroy child HWND, including
+    // the FlutterView HWND. That causes a problem because the raster thread
+    // may require the Flutterview HWND to be alive until Engine RemoveView
+    // completes. To ensure that the FlutterView HWND is removed from the
+    // parent window. The FlutterView HWND will be destroyed later inside
+    // FlutterWindow::Destroy.
+    HostWindow* window = HostWindow::GetThisFromHandle(hwnd);
+    if (window) {
+      auto handle = window->GetFlutterViewWindowHandle();
+      ShowWindow(handle, SW_HIDE);
+      SetParent(handle, nullptr);
+    }
+  }
+
   if (message == WM_NCDESTROY) {
     active_windows_.erase(hwnd);
     return std::nullopt;
@@ -129,7 +157,7 @@ std::optional<LRESULT> WindowManager::HandleMessage(HWND hwnd,
                                    .handled = false};
 
   // Not initialized yet.
-  if (!isolate_) {
+  if (!isolate_ || on_message_ == nullptr) {
     return std::nullopt;
   }
 
@@ -215,23 +243,7 @@ void InternalFlutterWindows_WindowManager_SetWindowSize(
 }
 
 void InternalFlutterWindows_WindowManager_OnDestroyWindow(HWND hwnd) {
-  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
-  HWND flutter_view_handle = nullptr;
-  if (window) {
-    // First reparent the FlutterView to null parent. Otherwise destroying
-    // the window HWND will immediately destroy the FlutterView HWND as well,
-    // which will cause crash when raster thread tries to reallocate surface.
-    // The FlutterView may only be destroyed safely when
-    // FlutterWindowsEngine::RemoveView finishes.
-    flutter_view_handle = window->GetFlutterViewWindowHandle();
-    ShowWindow(flutter_view_handle, SW_HIDE);
-    SetParent(flutter_view_handle, nullptr);
-  }
   DestroyWindow(hwnd);
-  if (flutter_view_handle) {
-    // Now the flutter view HWND can be destroyed safely.
-    DestroyWindow(flutter_view_handle);
-  }
 }
 
 void InternalFlutterWindows_WindowManager_SetWindowConstraints(

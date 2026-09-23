@@ -77,6 +77,9 @@ class CapabilitiesGLES final
 
   bool IsANGLE() const;
 
+  /// Whether uploads must reset a stale shared-context texture binding.
+  bool NeedsTextureUploadRebind() const;
+
   /// @brief Whether this is an ES GL variant or (if false) desktop GL.
   bool IsES() const;
 
@@ -91,6 +94,13 @@ class CapabilitiesGLES final
   ///        the GL_APPLE_texture_max_level extension. Without it a partial mip
   ///        chain cannot be made mipmap complete and samples as black.
   bool SupportsTextureMaxLevel() const;
+
+  /// @brief Whether 2D array textures (`GL_TEXTURE_2D_ARRAY`, `sampler2DArray`)
+  ///        are available. Core on desktop GL 3.0+ and OpenGL ES 3.0+, and also
+  ///        available below them through GL_EXT_texture_array (desktop GL 2.x)
+  ///        or GL_NV_texture_array (OpenGL ES 2.0). When absent, callers must
+  ///        fall back to a texture atlas.
+  bool SupportsTextureArray() const;
 
   // |Capabilities|
   bool SupportsOffscreenMSAA() const override;
@@ -173,6 +183,8 @@ class CapabilitiesGLES final
   bool supports_implicit_msaa_ = false;
   bool supports_32bit_primitive_indices_ = false;
   bool supports_texture_max_level_ = false;
+  bool supports_texture_array_ = false;
+  bool needs_texture_upload_rebind_ = false;
   bool is_angle_ = false;
   bool is_es_ = false;
   bool supports_texture_compression_bc_ = false;

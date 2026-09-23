@@ -9,8 +9,8 @@ import 'package:file/memory.dart';
 import 'package:path/path.dart' as path;
 
 import '../check_tests_cross_imports.dart';
-import '../utils.dart';
 import 'common.dart';
+import 'cross_imports_checker_test_utils.dart';
 
 void main() {
   late TestsCrossImportChecker checker;
@@ -136,7 +136,7 @@ void main() {
         }, shouldHaveErrors: true);
         final String lines = <String>[
           '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-          '║ Huzzah! The following tests in $libraryName no longer contain cross imports!',
+          '║ Huzzah! The following files in $libraryName no longer contain cross imports!',
           '║   $excludedSample',
           '║ However, they now need to be removed from the',
           '║ $knownCrossImportsListName list in the script /dev/bots/check_tests_cross_imports.dart.',
@@ -332,78 +332,8 @@ void main() {
   }
 }
 
-typedef AsyncVoidCallback = Future<void> Function();
-
-Future<String> capture(AsyncVoidCallback callback, {bool shouldHaveErrors = false}) async {
-  final buffer = StringBuffer();
-  final PrintCallback oldPrint = print;
-  try {
-    print = (Object? line) {
-      buffer.writeln(line);
-    };
-    await callback();
-    expect(
-      hasError,
-      shouldHaveErrors,
-      reason: buffer.isEmpty
-          ? '(No output to report.)'
-          : hasError
-          ? 'Unexpected errors:\n$buffer'
-          : 'Unexpected success:\n$buffer',
-    );
-  } finally {
-    print = oldPrint;
-    resetErrorStatus();
-  }
-  if (stdout.supportsAnsiEscapes) {
-    // Remove ANSI escapes when this test is running on a terminal.
-    return buffer.toString().replaceAll(RegExp(r'(\x9B|\x1B\[)[0-?]{1,3}[ -/]*[@-~]'), '');
-  } else {
-    return buffer.toString();
-  }
-}
-
 /// Returns whether the given [libraryName] matches the Cupertino library under `flutter/test`.
 bool isCupertino(String libraryName) => libraryName == 'packages/flutter/test/cupertino';
-
-File getFile(String filepath, Directory directory) {
-  final String platformFilepath = filepath.replaceAll('/', Platform.pathSeparator);
-  final String searchPattern = directory.basename + Platform.pathSeparator;
-  // Don't use `lastIndexOf`, as for files in test fixes
-  // i.e. `packages/flutter_test/test_fixes/flutter_test/matchers.dart`
-  // the overlap index could appear multiple times.
-  // Only take the first one.
-  final int overlapIndex = platformFilepath.indexOf(searchPattern);
-
-  if (overlapIndex < 0) {
-    throw ArgumentError('filepath $filepath must be located in directory ${directory.path}.');
-  }
-
-  final String filename = platformFilepath.substring(overlapIndex + searchPattern.length);
-  return directory.childFile(filename);
-}
-
-/// Writes [importString] into the given file.
-///
-/// The default [importString] is `import 'package:flutter/material.dart';`.
-void writeImport(File file, [String importString = "import 'package:flutter/material.dart';"]) {
-  file
-    ..createSync(recursive: true)
-    ..writeAsStringSync(importString);
-}
-
-/// Writes [importString] into the given [filePaths] in [inDirectory].
-///
-/// The default [importString] is `import 'package:flutter/material.dart';`.
-void writeImportInFiles(
-  Iterable<String> filePaths, {
-  required Directory inDirectory,
-  String importString = "import 'package:flutter/material.dart';",
-}) {
-  for (final filepath in filePaths) {
-    writeImport(getFile(filepath, inDirectory), importString);
-  }
-}
 
 // A utility that keeps track of the directories under test,
 // to avoid having to late initialize them individually in `setUp()`.

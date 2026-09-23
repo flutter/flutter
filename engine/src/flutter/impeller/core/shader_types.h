@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <optional>
 #include <string_view>
 #include <vector>
@@ -129,6 +130,17 @@ struct ShaderMetadata {
   std::string name;
   std::vector<ShaderStructMemberMetadata> members;
 };
+
+/// @brief The `ext_res_0` / `texture_index` stamped on a resource slot whose
+///        backing the shader compiler dead-code-eliminated.
+///
+/// SPIRV-Cross returns `~0u` from `get_automatic_msl_resource_binding` for a
+/// resource dropped from the compiled Metal shader, so a slot carrying this
+/// value has no argument-table index. It must be skipped, never bound: Metal's
+/// `setFragment/VertexTexture:atIndex:` has no bounds check and crashes on an
+/// out-of-range index. The GLES backend already skips optimized-out bindings.
+inline constexpr uint32_t kOptimizedOutBinding =
+    std::numeric_limits<uint32_t>::max();
 
 /// @brief Metadata required to bind a buffer.
 ///

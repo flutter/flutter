@@ -326,6 +326,16 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
       switches.push_back("--enable-impeller=false");
     }
   }
+  if (project_->enable_flutter_gpu()) {
+    if (std::find(switches.begin(), switches.end(), "--enable-flutter-gpu") ==
+            switches.end() &&
+        std::find(switches.begin(), switches.end(),
+                  "--enable-flutter-gpu=true") == switches.end()) {
+      // Flutter GPU was enabled programmatically, so forward the switch to
+      // the engine.
+      switches.push_back("--enable-flutter-gpu");
+    }
+  }
   std::transform(
       switches.begin(), switches.end(), std::back_inserter(argv),
       [](const std::string& arg) -> const char* { return arg.c_str(); });
@@ -563,7 +573,12 @@ std::unique_ptr<FlutterWindowsView> FlutterWindowsEngine::CreateView(
     std::unique_ptr<WindowBindingHandler> window,
     bool is_sized_to_content,
     const BoxConstraints& box_constraints,
+    bool allow_implicit_view,
     FlutterWindowsViewSizingDelegate* sizing_delegate) {
+  if (!allow_implicit_view && next_view_id_ == kImplicitViewId) {
+    ++next_view_id_;
+  }
+
   auto view_id = next_view_id_;
   auto view = std::make_unique<FlutterWindowsView>(
       view_id, this, std::move(window), is_sized_to_content, box_constraints,
@@ -1045,6 +1060,7 @@ void FlutterWindowsEngine::UpdateSemanticsEnabled(bool enabled) {
 void FlutterWindowsEngine::OnPreEngineRestart() {
   // Reset the keyboard's state on hot restart.
   InitializeKeyboard();
+  window_manager_->OnPreEngineRestart();
 }
 
 std::string FlutterWindowsEngine::GetExecutableName() const {

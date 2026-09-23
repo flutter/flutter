@@ -97,6 +97,12 @@ class StadiumBorder extends OutlinedBorder {
   }
 
   @override
+  bool hitTest(Rect rect, Offset position, {TextDirection? textDirection}) {
+    final radius = Radius.circular(rect.shortestSide / 2.0);
+    return RRect.fromRectAndRadius(rect, radius).contains(position);
+  }
+
+  @override
   void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {
     final radius = Radius.circular(rect.shortestSide / 2.0);
     canvas.drawRRect(RRect.fromRectAndRadius(rect, radius), paint);
@@ -249,6 +255,11 @@ class _StadiumToCircleBorder extends OutlinedBorder {
   }
 
   @override
+  bool hitTest(Rect rect, Offset position, {TextDirection? textDirection}) {
+    return _adjustBorderRadius(rect).toRRect(_adjustRect(rect)).contains(position);
+  }
+
+  @override
   void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {
     canvas.drawRRect(_adjustBorderRadius(rect).toRRect(_adjustRect(rect)), paint);
   }
@@ -389,6 +400,15 @@ class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
   @override
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
     return Path()..addRRect(_adjustBorderRadius(rect).resolve(textDirection).toRRect(rect));
+  }
+
+  @override
+  bool hitTest(Rect rect, Offset position, {TextDirection? textDirection}) {
+    final BorderRadius adjustedBorderRadius = _adjustBorderRadius(rect).resolve(textDirection);
+    if (adjustedBorderRadius == BorderRadius.zero) {
+      return rect.contains(position);
+    }
+    return adjustedBorderRadius.toRRect(rect).contains(position);
   }
 
   @override

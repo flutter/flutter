@@ -53,6 +53,16 @@ void trackInputAction(String? inputAction) {
   lastInputAction = inputAction;
 }
 
+List<PlatformMessage> connectionClosedMessages(PlatformMessagesSpy spy) {
+  return spy.messages
+      .where(
+        (PlatformMessage message) =>
+            message.channel == 'flutter/textinput' &&
+            message.methodName == 'TextInputClient.onConnectionClosed',
+      )
+      .toList();
+}
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -69,6 +79,15 @@ Future<void> testMain() async {
     editingDeltaState = null;
     lastInputAction = null;
     cleanTextEditingStrategy();
+    // Tests in this file drive the global `textEditing` singleton via
+    // `TextInputShow`, which is a no-op while `isEditing` is already true.
+    // Nothing else here resets it: `cleanTextEditingStrategy` only disables the
+    // test-local strategy, and `clearBackUpDomElementIfExists` removes the DOM
+    // element without touching singleton state. Leaving it set makes the next
+    // test's `TextInputShow` silently do nothing.
+    if (textEditing.isEditing) {
+      textEditing.stopEditing();
+    }
     cleanTestFlags();
     clearBackUpDomElementIfExists();
     await waitForTextStrategyStopPropagation();
@@ -102,6 +121,8 @@ Future<void> testMain() async {
       editingStrategy = GloballyPositionedTextEditingStrategy(testTextEditing);
       testTextEditing.debugTextEditingStrategyOverride = editingStrategy;
       testTextEditing.configuration = singlelineConfig;
+      editingStrategy!.debugDocumentHasFocusOverride = null;
+      editingStrategy!.debugDocumentVisibilityStateOverride = null;
     });
 
     test('Creates element when enabled and removes it when disabled', () async {
@@ -649,6 +670,7 @@ Future<void> testMain() async {
       expect(domDocument.activeElement, textEditing.strategy.domElement);
 
       final DomEvent event = createDomEvent('Event', 'blur');
+      editingStrategy!.debugDocumentHasFocusOverride = true;
       editingStrategy!.handleBlur(event);
 
       expect(spy.messages, hasLength(1));
@@ -658,66 +680,300 @@ Future<void> testMain() async {
       spy.tearDown();
     });
 
-    test(
-      'keeps focus within window/iframe when the focus moves within the flutter view in Chrome and Firefox but not Safari',
-      () async {
-        final spy = PlatformMessagesSpy();
-        spy.setUp();
+    test('defers closing input connection when document loses focus', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
 
-        textEditing.configuration = singlelineConfig;
+      textEditing.configuration = singlelineConfig;
 
-        final showCompleter = Completer<void>();
-        textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
-        await showCompleter.future;
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
 
-        // The "setSizeAndTransform" message has to be here before we call
-        // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
-        // we don't put the input element into the DOM until we get its correct
-        // dimensions from the framework.
-        final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
-          150,
-          50,
-          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
-        );
-        textEditing.channel.handleTextInput(
-          codec.encodeMethodCall(setSizeAndTransform),
-          (ByteData? data) {},
-        );
+      expect(textEditing.isEditing, isTrue);
 
-        expect(textEditing.isEditing, isTrue);
+      editingStrategy!.debugDocumentHasFocusOverride = false;
+      editingStrategy!.debugDocumentVisibilityStateOverride = 'visible';
 
+      final DomEvent event = createDomEvent('Event', 'blur');
+      editingStrategy!.handleBlur(event);
+
+      expect(connectionClosedMessages(spy), isEmpty);
+
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      final List<PlatformMessage> closedMessages = connectionClosedMessages(spy);
+      expect(closedMessages, hasLength(1));
+      expect(closedMessages.single.methodArguments, <dynamic>[
+        null, // Client ID
+      ]);
+
+      spy.tearDown();
+    });
+
+    test('keeps input connection open when blurred page becomes hidden', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+
+      expect(textEditing.isEditing, isTrue);
+
+      editingStrategy!.debugDocumentHasFocusOverride = false;
+      editingStrategy!.debugDocumentVisibilityStateOverride = 'visible';
+
+      final DomEvent event = createDomEvent('Event', 'blur');
+      editingStrategy!.handleBlur(event);
+
+      expect(connectionClosedMessages(spy), isEmpty);
+
+      editingStrategy!.debugDocumentVisibilityStateOverride = 'hidden';
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      expect(connectionClosedMessages(spy), isEmpty);
+      expect(textEditing.isEditing, isTrue);
+
+      spy.tearDown();
+    });
+
+    test('keeps input connection open when document quickly regains focus', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+
+      expect(textEditing.isEditing, isTrue);
+
+      editingStrategy!.debugDocumentHasFocusOverride = false;
+      editingStrategy!.debugDocumentVisibilityStateOverride = 'visible';
+
+      final DomEvent event = createDomEvent('Event', 'blur');
+      editingStrategy!.handleBlur(event);
+
+      expect(connectionClosedMessages(spy), isEmpty);
+
+      editingStrategy!.debugDocumentHasFocusOverride = true;
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      expect(connectionClosedMessages(spy), isEmpty);
+      expect(textEditing.isEditing, isTrue);
+
+      spy.tearDown();
+    });
+
+    // On iOS WebKit, a native caret or selection drag transiently blurs the
+    // hidden input with `relatedTarget == null` and refocuses it a frame later.
+    // The connection close is deferred so that refocus cancels it; otherwise the
+    // keyboard dismisses mid-drag.
+    // Regression test for https://github.com/flutter/flutter/issues/189744
+    test('keeps the text connection open on iOS when the input refocuses after a '
+        'null-relatedTarget blur', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+      expect(textEditing.isEditing, isTrue);
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
+
+      final DomHTMLElement input = textEditing.strategy.domElement!;
+      debugEmulateIosSafari = true;
+      textEditing.strategy.debugDocumentHasFocusOverride = true;
+      // Pinned so a browser reporting the page hidden cannot make this pass for
+      // the wrong reason: the refocus is what must skip the close, not the
+      // visibility bail-out.
+      textEditing.strategy.debugDocumentVisibilityStateOverride = 'visible';
+      // Blur the element for real so `document.activeElement` moves, then
+      // invoke the handler directly. Browsers differ on whether a dispatched
+      // blur reaches `handleBlur` at all: `SafariDesktopTextEditingStrategy`
+      // does not subscribe to `blur`. The neighbouring tests in this group
+      // invoke it directly for the same reason. Where the listener does fire,
+      // the extra call just cancels and re-arms the same timer.
+      input.blur();
+      textEditing.strategy.handleBlur(createDomEvent('Event', 'blur'));
+      // The immediate refocus, as WebKit does mid-drag, must skip the close.
+      input.focusWithoutScroll();
+      // Focus is the one condition the deferral reads live, with no debug
+      // override, so assert it took effect before relying on it below.
+      expect(domDocument.activeElement, input);
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(connectionClosedMessages(spy), isEmpty);
+      expect(textEditing.isEditing, isTrue);
+
+      spy.tearDown();
+    });
+
+    // The Done button and tapping away also blur with `relatedTarget == null`,
+    // but do not refocus, so the deferred close must still fire.
+    test('closes the text connection on iOS when the input is not refocused '
+        'after a null-relatedTarget blur', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+      expect(textEditing.isEditing, isTrue);
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
+
+      final DomHTMLElement input = textEditing.strategy.domElement!;
+      debugEmulateIosSafari = true;
+      textEditing.strategy.debugDocumentHasFocusOverride = true;
+      // Pin visibility as well. The deferred close bails out when the page
+      // reports hidden, and headless browsers disagree about what an offscreen
+      // test page reports, so leaving it unpinned makes the result depend on
+      // the host browser.
+      textEditing.strategy.debugDocumentVisibilityStateOverride = 'visible';
+      // Blur the element for real so `document.activeElement` moves, then
+      // invoke the handler directly. Browsers differ on whether a dispatched
+      // blur reaches `handleBlur` at all: `SafariDesktopTextEditingStrategy`
+      // does not subscribe to `blur`. The neighbouring tests in this group
+      // invoke it directly for the same reason. Where the listener does fire,
+      // the extra call just cancels and re-arms the same timer.
+      input.blur();
+      textEditing.strategy.handleBlur(createDomEvent('Event', 'blur'));
+      // The deferral bails out if the input regained focus, so assert the blur
+      // took effect. A browser that refocuses fails here with a clear message
+      // instead of an empty message list below.
+      expect(domDocument.activeElement, isNot(input));
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(connectionClosedMessages(spy), hasLength(1));
+
+      spy.tearDown();
+    });
+
+    // The deferral is iOS-only: elsewhere a null-relatedTarget blur closes
+    // immediately.
+    test('closes the text connection immediately off iOS on a null-relatedTarget '
+        'blur', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+      expect(textEditing.isEditing, isTrue);
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
+
+      textEditing.strategy.debugDocumentHasFocusOverride = true;
+      textEditing.strategy.handleBlur(createDomEvent('Event', 'blur'));
+      expect(connectionClosedMessages(spy), hasLength(1));
+
+      spy.tearDown();
+    });
+
+    // If the page is backgrounded (a tab switch) after the deferred close is
+    // scheduled, the connection must stay open, matching the issue 155265 policy.
+    test('keeps the text connection open on iOS when the page hides before the '
+        'deferred close fires', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+      expect(textEditing.isEditing, isTrue);
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
+
+      final DomHTMLElement input = textEditing.strategy.domElement!;
+      debugEmulateIosSafari = true;
+      textEditing.strategy.debugDocumentHasFocusOverride = true;
+      // Blur without refocusing schedules the deferred close, then the page
+      // is hidden before it fires.
+      // Blur the element for real so `document.activeElement` moves, then
+      // invoke the handler directly. Browsers differ on whether a dispatched
+      // blur reaches `handleBlur` at all: `SafariDesktopTextEditingStrategy`
+      // does not subscribe to `blur`. The neighbouring tests in this group
+      // invoke it directly for the same reason. Where the listener does fire,
+      // the extra call just cancels and re-arms the same timer.
+      input.blur();
+      textEditing.strategy.handleBlur(createDomEvent('Event', 'blur'));
+      textEditing.strategy.debugDocumentVisibilityStateOverride = 'hidden';
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(connectionClosedMessages(spy), isEmpty);
+      expect(textEditing.isEditing, isTrue);
+
+      spy.tearDown();
+    });
+
+    test('keeps focus within window/iframe when the focus moves within the flutter view in Chrome and Firefox but not Safari', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+      editingStrategy!.debugDocumentHasFocusOverride = true;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+
+      // The "setSizeAndTransform" message has to be here before we call
+      // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+      // we don't put the input element into the DOM until we get its correct
+      // dimensions from the framework.
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      );
+      textEditing.channel.handleTextInput(
+        codec.encodeMethodCall(setSizeAndTransform),
+        (ByteData? data) {},
+      );
+
+      expect(textEditing.isEditing, isTrue);
+
+      if (isFirefox || isSafari) {
+        expect(domDocument.activeElement, anyOf(textEditing.strategy.domElement, domDocument.body));
+      } else {
         expect(domDocument.activeElement, textEditing.strategy.domElement);
+      }
 
-        final EngineFlutterView flutterView = EnginePlatformDispatcher.instance.viewManager
-            .findViewForElement(textEditing.strategy.domElement)!;
+      final EngineFlutterView flutterView = EnginePlatformDispatcher.instance.implicitView!;
 
-        flutterView.dom.rootElement.focusWithoutScroll();
-        expect(spy.messages, isEmpty);
+      flutterView.dom.rootElement.focusWithoutScroll();
+      expect(spy.messages, isEmpty);
 
-        if (isSafari) {
-          // In Safari the web engine does not respond to blur, so there's no
-          // expectation that the input element keep focus.
-          expect(domDocument.activeElement, flutterView.dom.rootElement);
-        } else if (isFirefox) {
-          // This is a mysterious behavior in Firefox. Even though the engine does
-          // call <input>.focus() the browser doesn't move focus to the target
-          // element. This only happens in the test harness. When testing
-          // manually, Firefox happily moves focus to the input element.
-          //
-          // We've seen cases in LUCI where Firefox behaves like Chrome (sets focus on the input
-          // element). But when running locally, we are seeing the wrong behavior explained in the
-          // comment above. To work around this, the test will accept both behaviors for now.
-          expect(
-            domDocument.activeElement,
-            anyOf(textEditing.strategy.domElement, flutterView.dom.rootElement),
-          );
-        } else {
-          expect(domDocument.activeElement, textEditing.strategy.domElement);
-        }
+      if (isSafari) {
+        // In Safari the web engine does not respond to blur, so there's no
+        // expectation that the input element keep focus.
+        expect(domDocument.activeElement, flutterView.dom.rootElement);
+      } else if (isFirefox) {
+        // This is a mysterious behavior in Firefox. Even though the engine does
+        // call <input>.focus() the browser doesn't move focus to the target
+        // element. This only happens in the test harness. When testing
+        // manually, Firefox happily moves focus to the input element.
+        //
+        // We've seen cases in LUCI where Firefox behaves like Chrome (sets focus on the input
+        // element). But when running locally, we are seeing the wrong behavior explained in the
+        // comment above. To work around this, the test will accept both behaviors for now.
+        expect(
+          domDocument.activeElement,
+          anyOf(textEditing.strategy.domElement, flutterView.dom.rootElement),
+        );
+      } else {
+        expect(domDocument.activeElement, textEditing.strategy.domElement);
+      }
 
-        spy.tearDown();
-      },
-    );
+      spy.tearDown();
+    });
   });
 
   group('IOSTextEditingStrategy scrollIntoView for embedded scenarios', () {
@@ -1098,50 +1354,40 @@ Future<void> testMain() async {
       expect(spy.messages, isEmpty);
     });
 
-    test(
-      'setClient, setEditingState, setSizeAndTransform, show - input element is put into the DOM Safari Desktop',
-      () async {
-        editingStrategy = SafariDesktopTextEditingStrategy(textEditing!);
-        textEditing!.debugTextEditingStrategyOverride = editingStrategy;
-        final setClient = MethodCall('TextInput.setClient', <dynamic>[
-          123,
-          flutterSinglelineConfig,
-        ]);
-        sendFrameworkMessage(codec.encodeMethodCall(setClient));
+    test('setClient, setEditingState, setSizeAndTransform, show - input element is put into the DOM Safari Desktop', () async {
+      editingStrategy = SafariDesktopTextEditingStrategy(textEditing!);
+      textEditing!.debugTextEditingStrategyOverride = editingStrategy;
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
 
-        const show = MethodCall('TextInput.show');
-        sendFrameworkMessage(codec.encodeMethodCall(show));
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
 
-        // Editing shouldn't have started yet.
-        expect(domDocument.activeElement, domDocument.body);
+      // Editing shouldn't have started yet.
+      expect(domDocument.activeElement, domDocument.body);
 
-        // The "setSizeAndTransform" message has to be here before we call
-        // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
-        // we don't put the input element into the DOM until we get its correct
-        // dimensions from the framework.
-        final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
-          150,
-          50,
-          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
-        );
-        sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+      // The "setSizeAndTransform" message has to be here before we call
+      // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+      // we don't put the input element into the DOM until we get its correct
+      // dimensions from the framework.
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
 
-        const setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
-          'text': 'abcd',
-          'selectionBase': 2,
-          'selectionExtent': 3,
-          'composingBase': -1,
-          'composingExtent': -1,
-        });
-        sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+      const setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'abcd',
+        'selectionBase': 2,
+        'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
-        expect(
-          defaultTextEditingRoot.ownerDocument?.activeElement,
-          textEditing!.strategy.domElement,
-        );
-      },
-      skip: !isSafari,
-    );
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement, textEditing!.strategy.domElement);
+    }, skip: !isSafari);
 
     test('setClient, setEditingState, show, updateConfig, clearClient', () {
       final setClient = MethodCall('TextInput.setClient', <dynamic>[
@@ -1638,8 +1884,7 @@ Future<void> testMain() async {
       expect(
         domDocument.activeElement,
         implicitViewRootElement,
-        reason:
-            'Receiving another client via setClient should stop editing, hence should remove the previous active element.',
+        reason: 'Receiving another client via setClient should stop editing, hence should remove the previous active element.',
       );
 
       // Confirm that [HybridTextEditing] didn't send any messages.
@@ -4375,6 +4620,9 @@ void cleanTextEditingStrategy() {
 void cleanTestFlags() {
   ui_web.browser.debugBrowserEngineOverride = null;
   ui_web.browser.debugOperatingSystemOverride = null;
+  debugEmulateIosSafari = false;
+  textEditing.strategy.debugDocumentHasFocusOverride = null;
+  textEditing.strategy.debugDocumentVisibilityStateOverride = null;
 }
 
 void checkInputEditingState(DomElement? element, String text, int start, int end) {

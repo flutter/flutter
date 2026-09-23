@@ -14,7 +14,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'button_tester.dart';
 import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 Future<void> pumpTest(
   WidgetTester tester,
@@ -497,33 +496,31 @@ void main() {
     expect(getScrollOffset(tester), 0.0);
   });
 
-  testWidgets(
-    'Engine is notified of ignored pointer signals (no scroll physics)',
-    (WidgetTester tester) async {
-      await pumpTest(tester, debugDefaultTargetPlatformOverride, scrollable: false);
-      final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
-      final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
-      // Create a hover event so that |testPointer| has a location when generating the scroll.
-      testPointer.hover(scrollEventLocation);
+  testWidgets('Engine is notified of ignored pointer signals (no scroll physics)', (
+    WidgetTester tester,
+  ) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride, scrollable: false);
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
 
-      var allowedPlatformDefault = false;
-      await tester.sendEventToBinding(
-        testPointer.scroll(
-          const Offset(0.0, 20.0),
-          onRespond: ({required bool allowPlatformDefault}) {
-            allowedPlatformDefault = allowPlatformDefault;
-          },
-        ),
-      );
+    var allowedPlatformDefault = false;
+    await tester.sendEventToBinding(
+      testPointer.scroll(
+        const Offset(0.0, 20.0),
+        onRespond: ({required bool allowPlatformDefault}) {
+          allowedPlatformDefault = allowPlatformDefault;
+        },
+      ),
+    );
 
-      expect(
-        allowedPlatformDefault,
-        isTrue,
-        reason: 'Engine should be notified of ignored scroll pointer signals.',
-      );
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    expect(
+      allowedPlatformDefault,
+      isTrue,
+      reason: 'Engine should be notified of ignored scroll pointer signals.',
+    );
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('Engine is notified of accepted and rejected scroll events', (
     WidgetTester tester,
@@ -703,39 +700,37 @@ void main() {
     expect(getScrollOffset(tester), 20.0);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets(
-    'Still scrolls horizontally when other keys are pressed at the same time',
-    (WidgetTester tester) async {
-      await pumpTest(
-        tester,
-        debugDefaultTargetPlatformOverride,
-        scrollDirection: Axis.horizontal,
-        axisModifier: <LogicalKeyboardKey>{LogicalKeyboardKey.altLeft},
-      );
+  testWidgets('Still scrolls horizontally when other keys are pressed at the same time', (
+    WidgetTester tester,
+  ) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+      axisModifier: <LogicalKeyboardKey>{LogicalKeyboardKey.altLeft},
+    );
 
-      final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
-      final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
-      // Create a hover event so that |testPointer| has a location when generating the scroll.
-      testPointer.hover(scrollEventLocation);
-      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
-      // Vertical input not accepted
-      expect(getScrollOffset(tester), 0.0);
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
 
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.space);
-      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
-      // Vertical flipped & accepted.
-      expect(getScrollOffset(tester), 20.0);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.space);
-      await tester.pump();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.space);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical flipped & accepted.
+    expect(getScrollOffset(tester), 20.0);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.space);
+    await tester.pump();
 
-      await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
-      // Vertical input not accepted
-      expect(getScrollOffset(tester), 20.0);
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 20.0);
+  }, variant: TargetPlatformVariant.all());
 
   group('setCanDrag to false with active drag gesture: ', () {
     Future<void> pumpTestWidget(WidgetTester tester, {required bool canDrag}) {
@@ -906,9 +901,8 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    Scrollable.of(
-      find.byType(SizedBox).evaluate().first,
-    ).position.activity!.delegate.goBallistic(4000);
+    Scrollable.of(find.byType(SizedBox).evaluate().first).position.activity!.delegate
+        .goBallistic(4000);
 
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
@@ -989,9 +983,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final ScrollPosition position = Scrollable.of(
-        find.byType(SizedBox).evaluate().first,
-      ).position;
+      final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first)
+          .position;
 
       expect(find.byKey(const ValueKey<String>('Cheap box 0')), findsOneWidget);
       expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsNothing);
@@ -1786,11 +1779,58 @@ void main() {
       expect(
         onRespondCalls,
         equals([false]),
-        reason:
-            'ONLY the horizontal child should have handled the event and called respond(false). Vertical parent should NOT have called respond(true) because the event was handled by the child',
+        reason: 'ONLY the horizontal child should have handled the event and called respond(false). Vertical parent should NOT have called respond(true) because the event was handled by the child',
       );
     },
   );
+
+  testWidgets('Scrollable does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scrollable(viewportBuilder: (_, _) => const Placeholder())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Scrollable)), Size.zero);
+  });
+
+  testWidgets('Scrollable short-circuits shouldUpdate when physics reference is identical', (
+    WidgetTester tester,
+  ) async {
+    const ScrollPhysics sharedPhysics = BouncingScrollPhysics();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Scrollable(
+          physics: sharedPhysics,
+          viewportBuilder: (BuildContext context, ViewportOffset offset) {
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    final ScrollPhysics initialPhysics = scrollable.position.physics;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Scrollable(
+          physics: sharedPhysics,
+          viewportBuilder: (BuildContext context, ViewportOffset offset) {
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    final ScrollPhysics currentPhysics = scrollable.position.physics;
+
+    expect(identical(initialPhysics, currentPhysics), isTrue);
+  });
 }
 
 // ignore: must_be_immutable

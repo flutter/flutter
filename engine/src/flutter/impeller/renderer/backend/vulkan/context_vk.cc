@@ -470,7 +470,6 @@ void ContextVK::Setup(Settings settings) {
       std::make_unique<DriverInfoVK>(device_holder->physical_device);
   workarounds_ = GetWorkaroundsFromDriverInfo(*driver_info);
   caps->ApplyWorkarounds(workarounds_);
-  sampler_library->ApplyWorkarounds(workarounds_);
 
   device_holder_ = std::move(device_holder);
   idle_waiter_vk_ = std::make_shared<IdleWaiterVK>(device_holder_);
@@ -522,6 +521,16 @@ bool ContextVK::IsValid() const {
 
 std::shared_ptr<Allocator> ContextVK::GetResourceAllocator() const {
   return allocator_;
+}
+
+std::shared_ptr<const GpuSubmissionTracker> ContextVK::GetSubmissionTracker()
+    const {
+  return submission_tracker_;
+}
+
+const std::shared_ptr<GpuSubmissionTracker>&
+ContextVK::GetMutableSubmissionTracker() const {
+  return submission_tracker_;
 }
 
 std::shared_ptr<ShaderLibrary> ContextVK::GetShaderLibrary() const {

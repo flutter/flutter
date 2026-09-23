@@ -12,11 +12,11 @@ impeller_component("golden_playground_test") {
 
   deps = [
     ":digest",
-    ":screenshot",
     "//flutter/display_list",
     "//flutter/fml",
     "//flutter/impeller/display_list",
     "//flutter/impeller/playground",
+    "//flutter/impeller/testing:screenshot",
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
     "//flutter/testing:testing_lib",
   ]
@@ -24,7 +24,7 @@ impeller_component("golden_playground_test") {
   if (is_mac) {
     sources += [ "golden_playground_test_mac.cc" ]
     deps += [
-      ":metal_screenshot",
+      ":metal_golden_screenshot",
       "//third_party/abseil-cpp/absl/base:no_destructor",
     ]
   } else {
@@ -45,33 +45,27 @@ impeller_component("digest") {
   deps = [ "//flutter/fml" ]
 }
 
-impeller_component("screenshot") {
-  testonly = true
-  sources = [ "screenshot.h" ]
-}
-
 if (is_mac) {
-  impeller_component("metal_screenshot") {
+  impeller_component("metal_golden_screenshot") {
     testonly = true
 
     sources = [
-      "metal_screenshot.h",
-      "metal_screenshot.mm",
-      "metal_screenshotter.h",
-      "metal_screenshotter.mm",
-      "screenshotter.h",
-      "vulkan_screenshotter.h",
-      "vulkan_screenshotter.mm",
+      "golden_screenshotter.h",
+      "metal_golden_screenshotter.h",
+      "metal_golden_screenshotter.mm",
+      "vulkan_golden_screenshotter.h",
+      "vulkan_golden_screenshotter.mm",
     ]
 
     deps = [
-      ":screenshot",
       "//flutter/display_list",
       "//flutter/fml",
       "//flutter/impeller/display_list",
       "//flutter/impeller/playground",
       "//flutter/impeller/renderer/backend/metal",
       "//flutter/impeller/renderer/backend/vulkan",
+      "//flutter/impeller/testing:metal_screenshot",
+      "//flutter/impeller/testing:screenshot",
     ]
   }
 
@@ -87,7 +81,7 @@ if (is_mac) {
 
     deps = [
       ":digest",
-      ":metal_screenshot",
+      ":metal_golden_screenshot",
       "//flutter/display_list",
       "//flutter/impeller/display_list",
       "//flutter/impeller/display_list:aiks_unittests_golden",
