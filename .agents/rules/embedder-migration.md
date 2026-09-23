@@ -46,3 +46,7 @@ Every `git commit` is gated by `.agents/skills/pr-chain-manager/scripts/pre_comm
 - **Android SDK Lint (`.java`, `.kt`)**: Must pass `engine/src/flutter/tools/android_lint/bin/main.dart`.
 - **Perfetto Trace**: Pre-commit worker timings are recorded to `/tmp/flutter_pre_commit_trace.json`.
 
+## 7. Feature-Flag Shell Isolation, Perfetto Proof & Integration Ratchet (ADR-0011)
+- **Zero `Shell::Create` When Flag is `true`**: When `EnableAndroidEmbedderApi` (`--enable-android-embedder-api`) is `true`, **NO `flutter::Shell` object, `Shell::Create` call, or `AndroidShellHolder` instance** may exist in the Android Embedder path. `AndroidShellHolder` must assert `FML_CHECK(!use_embedder_api)`. The engine must initialize strictly via `embedder_api_.Initialize(...)` (`FlutterEngineInitialize`).
+- **Perfetto & Logcat Verification on Connected Device**: Verify on a connected Android device using real tests from `dev/integration_tests/` and `dev/devicelab/` (NEVER just unit tests) via `dart .agents/skills/embedder-flag-and-integration-verifier/scripts/verify_embedder_flag_and_ratchet.dart`.
+- **Monotonic Integration Failure Ratchet**: Captured Perfetto traces and `adb logcat` must prove `[EMBEDDER_API_PROOF] path=C_EMBEDDER_API` and `FlutterEmbedderNative::Initialize[C-API]` with zero `Shell::Create` calls on every test run (passing or failing). Failing integration test counts in `.agents/embedder_migration/integration_test_ratchet.json` must monotonically decrease across the branch chain (`failing(branch_i) <= failing(branch_{i-1})`).

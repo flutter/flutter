@@ -110,6 +110,7 @@ Future<CheckResult> _runRfc410InvariantAudit(
       r'SendPlatformMessage|NotifyCreated|NotifyDestroyed|OnVsync|'
       r'ScheduleFrame|UpdateSemanticsEnabled|RegisterExternalTexture)\s*\(',
     );
+    final shellIsolationPattern = RegExp(r'\b(Shell::Create|AndroidShellHolder)\b');
 
     for (final relPath in stagedAndroidCppFiles) {
       final file = File('$flutterRoot/$relPath');
@@ -119,19 +120,29 @@ Future<CheckResult> _runRfc410InvariantAudit(
       final List<String> lines = file.readAsLinesSync();
       for (var i = 0; i < lines.length; i++) {
         final String line = lines[i];
+        final String trimmed = line.trim();
         if (line.contains('nogncheck')) {
           violations.add(
             '$relPath:${i + 1}: Prohibited "// nogncheck" escape hatch detected (violates ADR-0000).',
           );
         }
-        // Check modular embedder files for direct static C-API symbol linkage.
+        // Check modular embedder files for direct static C-API symbol linkage and Shell::Create ban.
         if ((relPath.contains('embedder') || relPath.contains('flutter_embedder_native')) &&
             !relPath.endsWith('_unittests.cc') &&
-            directApiPattern.hasMatch(line)) {
-          violations.add(
-            '$relPath:${i + 1}: Direct static C-API call detected: "${line.trim()}". '
-            'Route through FlutterEngineProcTable (embedder_api_) per ADR-0001.',
-          );
+            !trimmed.startsWith('//') &&
+            !trimmed.startsWith('*')) {
+          if (directApiPattern.hasMatch(line)) {
+            violations.add(
+              '$relPath:${i + 1}: Direct static C-API call detected: "$trimmed". '
+              'Route through FlutterEngineProcTable (embedder_api_) per ADR-0001.',
+            );
+          }
+          if (shellIsolationPattern.hasMatch(line)) {
+            violations.add(
+              '$relPath:${i + 1}: Forbidden Shell::Create or AndroidShellHolder reference on C-API path: "$trimmed". '
+              'No flutter::Shell may exist when the feature flag is true per ADR-0011.',
+            );
+          }
         }
       }
     }
@@ -185,6 +196,8 @@ Future<void> main(List<String> args) async {
   const etBin = '$engineFlutterDir/bin/et';
   const gnBin = '$engineFlutterDir/third_party/gn/gn';
   const prChainScript = '$flutterRoot/.agents/skills/pr-chain-manager/scripts/pr_chain.dart';
+  const flagRatchetScript =
+      '$flutterRoot/.agents/skills/embedder-flag-and-integration-verifier/scripts/verify_embedder_flag_and_ratchet.dart';
 
   final env = Map<String, String>.from(Platform.environment);
   final String existingPath = env['PATH'] ?? '';
@@ -252,6 +265,20 @@ Future<void> main(List<String> args) async {
         category: 'git-chain',
         executable: dartBin,
         arguments: <String>[prChainScript, 'verify'],
+        workingDirectory: flutterRoot,
+        environment: env,
+      ),
+    );
+  }
+
+  // Task 1b: Feature Flag Shell Isolation & Integration Test Ratchet (ADR-0011)
+  if (File(flagRatchetScript).existsSync()) {
+    tasks.add(
+      CheckTask(
+        name: 'Feature Flag Shell Isolation & Integration Ratchet (ADR-0011)',
+        category: 'flag-ratchet',
+        executable: dartBin,
+        arguments: <String>[flagRatchetScript, 'verify-ratchet'],
         workingDirectory: flutterRoot,
         environment: env,
       ),

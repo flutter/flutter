@@ -39,3 +39,9 @@ No implementation shortcuts or temporary workarounds may violate these rules.
 ## 7. Mandatory Perfetto Tracing Invariant
 - Every native JNI entrypoint, task runner trampoline, vsync callback, and surface lifecycle transition must emit a `TRACE_EVENT("flutter", ...)` slice.
 - Cross-thread async hops must emit flow events visible in Perfetto traces.
+
+## 8. Feature-Flag Shell Isolation, Perfetto Proof & Integration Ratchet Invariant (ADR-0011)
+- **Zero `Shell::Create` / `AndroidShellHolder` When Flag is `true`**: When the feature flag (`io.flutter.embedding.android.EnableAndroidEmbedderApi` / `--enable-android-embedder-api`) is `true`, **NO `flutter::Shell` object, `Shell::Create` call, or `AndroidShellHolder` instance** may exist in the Android Embedder path (`shell/platform/android/`). `AndroidShellHolder::AndroidShellHolder` must guard with `FML_CHECK(!use_embedder_api)`.
+- **Perfetto & Logcat Proof**: Engine initialization via C-API must emit `TRACE_EVENT0("flutter", "FlutterEmbedderNative::Initialize[C-API]")` and `FML_LOG(IMPORTANT) << "[EMBEDDER_API_PROOF] path=C_EMBEDDER_API proc_table=FlutterEngineInitialize shell_holder=NONE";`.
+- **Real-Device Integration & DeviceLab Verification**: Must be verified on a connected Android device using `dev/integration_tests/*` and `dev/devicelab/*` (not merely unit tests) via `dart .agents/skills/embedder-flag-and-integration-verifier/scripts/verify_embedder_flag_and_ratchet.dart`.
+- **Monotonic Integration Failure Ratchet**: Tracked in `.agents/embedder_migration/integration_test_ratchet.json`. Even if an unmigrated subsystem's integration test fails when the flag is `true`, its Perfetto trace and logcat must prove `path=C_EMBEDDER_API` (zero `Shell::Create`), and the total number of failing integration tests must monotonically decrease across stacked branches (`failing_count(branch_i) <= failing_count(branch_{i-1})`) with zero regressions in `passing_locked_tests`.

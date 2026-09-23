@@ -38,7 +38,7 @@ void AndroidPlatformViewsController::OnPresentView(
       CaptureLayersByValue(layers, layers_count);
 
   platform_task_runner_->PostTask(
-      [this, view_id, layers = std::move(captured_layers)]() {
+      [this, view_id, layers = std::move(captured_layers)] () {
         ApplyViewMutations(view_id, layers);
       });
 }

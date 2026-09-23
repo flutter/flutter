@@ -43,15 +43,15 @@ flowchart LR
 TEST(AndroidSurfaceControlTest, SynchronousSurfaceDestructionContract) {
   auto mock_jni = std::make_shared<MockJniDelegate>();
   FlutterEngineProcTable mock_proc_table = {};
-  
+
   bool notify_destroyed_called = false;
-  mock_proc_table.NotifyDestroyed = [](FlutterEngine engine) -> FlutterEngineResult {
+  mock_proc_table.NotifyDestroyed = [] (FlutterEngine engine) -> FlutterEngineResult {
     return kSuccess;
   };
 
   AndroidSurfaceControl surface_control(mock_jni, mock_proc_table);
   surface_control.OnSurfaceCreated(/*view_id=*/0, /*native_window=*/nullptr);
-  
+
   // Verify synchronous destruction
   EXPECT_TRUE(surface_control.OnSurfaceDestroyed(/*view_id=*/0));
 }

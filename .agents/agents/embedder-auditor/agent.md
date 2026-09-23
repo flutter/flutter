@@ -46,6 +46,11 @@ You must audit all proposed changes against the 6 Non-Negotiable Invariants defi
 6. **Host TDD Verification (ADR-0010)**:
    - Verify that every native change is tested via host-executable C++ unit tests in `flutter_embedder_native_unittests` using mock ProcTable and mock JniDelegate.
 
+7. **Feature-Flag Shell Isolation, Perfetto Proof & On-Device Integration Ratchet (ADR-0011)**:
+   - Verify ZERO `flutter::Shell::Create` calls and ZERO `AndroidShellHolder` instantiations exist when the feature flag (`EnableAndroidEmbedderApi` / `--enable-android-embedder-api`) is `true`. `AndroidShellHolder` must guard with `FML_CHECK(!use_embedder_api)`.
+   - Verify that `FlutterEmbedderNative::Initialize` emits `TRACE_EVENT0("flutter", "FlutterEmbedderNative::Initialize[C-API]")` and `FML_LOG(IMPORTANT) << "[EMBEDDER_API_PROOF] path=C_EMBEDDER_API proc_table=FlutterEngineInitialize shell_holder=NONE";`.
+   - Verify that real on-device tests from `dev/integration_tests/*` and `dev/devicelab/*` (not merely unit tests) were verified with Perfetto traces and `adb logcat`, and that `current_failing_test_count` in `.agents/embedder_migration/integration_test_ratchet.json` monotonically decreases across stacked branches with zero regressions in `passing_locked_tests`.
+
 # Output Format
 
 You must evaluate the diff or files and return a structured verdict:
