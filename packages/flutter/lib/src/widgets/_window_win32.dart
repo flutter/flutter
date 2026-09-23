@@ -1145,34 +1145,10 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
     int wParam,
     int lParam,
   ) {
-    // WM_DESTROY is dispatched by the engine after destroyWindow is called.
-    // It must be handled even after _destroyed is set by destroy().
-    if (message == _WM_DESTROY) {
-      final bool wasAlreadyDestroyed = _destroyed;
-      _destroyed = true;
-      if (!wasAlreadyDestroyed) {
-        notifyListeners();
-      }
-      _onGetWindowPosition.close();
-      _owner._removeMessageHandler(this);
-      _delegate.onWindowDestroyed();
-      return 0;
-    }
-
     // Once destruction has started, skip all other messages to avoid
     // accessing the window handle after it has been invalidated.
     if (_destroyed) {
       return null;
-    }
-
-    if (view.viewId == parent.rootView.viewId) {
-      if (message == _WM_SIZE) {
-        // Popups should close when their parent window is resized.
-        // Queue the destroy on a microtask to avoid destroying the window
-        // while processing its message.
-        scheduleMicrotask(destroy);
-        return null;
-      }
     }
 
     if (message == _WM_ACTIVATE) {
@@ -1190,6 +1166,24 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
         scheduleMicrotask(destroy);
       }
       return null;
+    }
+
+    if (view.viewId != rootView.viewId) {
+      return null;
+    }
+
+    // WM_DESTROY is dispatched by the engine after destroyWindow is called.
+    // It must be handled even after _destroyed is set by destroy().
+    if (message == _WM_DESTROY) {
+      final bool wasAlreadyDestroyed = _destroyed;
+      _destroyed = true;
+      if (!wasAlreadyDestroyed) {
+        notifyListeners();
+      }
+      _onGetWindowPosition.close();
+      _owner._removeMessageHandler(this);
+      _delegate.onWindowDestroyed();
+      return 0;
     }
 
     return null;
