@@ -343,6 +343,39 @@ class PRChainManager {
     }
 
     stdout.writeln('All branches pushed successfully!');
+
+    // Automatically check for an active PR associated with the pushed chain
+    // and advise/trigger the presubmit-monitor-loop skill.
+    await _triggerPresubmitMonitorForChain(chain);
+  }
+
+  Future<void> _triggerPresubmitMonitorForChain(List<BranchInfo> chain) async {
+    for (final BranchInfo b in chain.reversed) {
+      final ProcessResult prView = await Process.run('gh', <String>[
+        'pr',
+        'view',
+        b.name,
+        '--repo',
+        'flutter/flutter',
+        '--json',
+        'number',
+      ]);
+      if (prView.exitCode == 0) {
+        final data = jsonDecode(prView.stdout as String) as Map<String, dynamic>;
+        final prNumber = data['number'] as int?;
+        if (prNumber != null) {
+          stdout.writeln();
+          stdout.writeln('====================================================');
+          stdout.writeln('Associated Pull Request detected: #$prNumber for branch ${b.name}');
+          stdout.writeln('Presubmit monitor command:');
+          stdout.writeln(
+            'dart .agents/skills/presubmit-monitor-loop/scripts/presubmit_monitor_loop.dart $prNumber',
+          );
+          stdout.writeln('====================================================');
+          return;
+        }
+      }
+    }
   }
 
   /// Syncs GitHub PR base branches using the gh CLI.

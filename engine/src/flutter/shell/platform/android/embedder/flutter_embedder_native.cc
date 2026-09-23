@@ -10,8 +10,6 @@
 #endif
 #if defined(__ANDROID__)
 #include <android/log.h>
-#endif
-#if defined(__ANDROID__)
 #include <android/native_window.h>
 #endif
 #include <algorithm>
@@ -360,7 +358,13 @@ bool FlutterEmbedderNative::Launch(
   if (settings_.use_test_fonts) {
     cmd_args_storage.push_back("--use-test-fonts");
   }
-  if (settings_.enable_impeller) {
+  if (renderer_config.type == kSoftware) {
+    // Software renderer uses Skia software rasterization. Impeller requires a
+    // GPU backend (Vulkan/OpenGL) and cannot rasterize to a software Skia
+    // canvas. When running with kSoftware, disable Impeller so text and
+    // display lists use Skia-compatible primitives (DlTextSkia).
+    cmd_args_storage.push_back("--enable-impeller=false");
+  } else if (settings_.enable_impeller) {
     cmd_args_storage.push_back("--enable-impeller=true");
   } else {
     cmd_args_storage.push_back("--enable-impeller=false");

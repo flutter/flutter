@@ -117,6 +117,10 @@ class FlutterEmbedderNative {
   /// `FlutterEmbedderNative` instance.
   static FlutterEmbedderNative* FromHandle(int64_t handle);
 
+  /// Registers all `io.flutter.embedding.engine.FlutterJNI` native JNI method
+  /// bindings directly to `FlutterEmbedderNative` (RFC 410.0000 Phase 4).
+  static bool RegisterJni(JNIEnv* env);
+
   FlutterEmbedderNative(const Settings& settings,
                         std::shared_ptr<JniDelegate> jni_delegate);
 

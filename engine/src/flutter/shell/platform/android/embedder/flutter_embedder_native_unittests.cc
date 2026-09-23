@@ -166,6 +166,7 @@ struct FakeProcTableState {
   int update_accessibility_features_calls = 0;
   int schedule_frame_calls = 0;
   size_t last_pointer_event_count = 0;
+  FlutterWindowMetricsEvent last_window_metrics_event = {};
   FlutterPointerPhase last_pointer_phase = kCancel;
   std::vector<FlutterPointerEvent> last_pointer_events;
   FlutterAccessibilityFeature last_accessibility_flags =
@@ -367,8 +368,11 @@ FlutterEngineProcTable CreateFakeProcTable(FakeProcTableState* state) {
 
   table.SendWindowMetricsEvent =
       [](FLUTTER_API_SYMBOL(FlutterEngine) /*engine*/,
-         const FlutterWindowMetricsEvent* /*event*/) {
+         const FlutterWindowMetricsEvent* event) {
         g_fake_state->send_window_metrics_calls++;
+        if (event != nullptr) {
+          g_fake_state->last_window_metrics_event = *event;
+        }
         return kSuccess;
       };
 
@@ -798,6 +802,39 @@ TEST(FlutterEmbedderNativeTest,
 
   EXPECT_TRUE(embedder.UnregisterExternalTexture(/*texture_id=*/101));
   EXPECT_EQ(state.unregister_external_texture_calls, 1);
+}
+
+TEST(FlutterEmbedderNativeTest,
+     SafelyDispatchesWindowMetricsWithDisplayFeatures) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  Settings settings;
+
+  FlutterEmbedderNative embedder(settings, jni_delegate, proc_table);
+  ASSERT_TRUE(embedder.Launch("/assets", "/icudtl.dat", "main", "", {},
+                              /*engine_id=*/1));
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(FlutterWindowMetricsEvent);
+  event.width = 1080;
+  event.height = 1920;
+  event.pixel_ratio = 2.0;
+
+  double bounds[] = {0.0, 100.0, 1080.0, 120.0};
+  int32_t types[] = {1};
+  int32_t states[] = {1};
+
+  event.has_extended_metrics = true;
+  event.display_features_count = 1;
+  event.display_features_bounds = bounds;
+  event.display_features_type = types;
+  event.display_features_state = states;
+
+  EXPECT_TRUE(embedder.SendWindowMetricsEvent(event));
+  EXPECT_EQ(state.send_window_metrics_calls, 1);
+  EXPECT_EQ(state.last_window_metrics_event.display_features_count, 1u);
+  EXPECT_EQ(state.last_window_metrics_event.display_features_bounds, bounds);
 }
 
 TEST(AndroidSurfaceControlTest,

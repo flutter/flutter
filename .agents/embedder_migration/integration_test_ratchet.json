@@ -21,7 +21,7 @@
     ]
   },
   "ratchet_state": {
-    "current_branch": "android-embedder-migration-v10/2.5-semantics-and-assets",
+    "current_branch": "android-embedder-migration-v10/4.0-legacy-purge",
     "total_suite_tests": 10,
     "max_allowed_failing_tests": 0,
     "current_failing_test_count": 0,

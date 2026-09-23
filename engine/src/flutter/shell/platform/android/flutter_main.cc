@@ -5,29 +5,33 @@
 #define FML_USED_ON_EMBEDDER
 
 #include <android/log.h>
+#include <dlfcn.h>
 #include <sys/system_properties.h>
 #include <cstring>
 #include <optional>
 #include <string>
 #include <vector>
 
-#include "common/settings.h"
+#include "flutter/common/settings.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/paths_android.h"
-#include "flutter/lib/ui/plugins/callback_cache.h"
-#include "flutter/runtime/dart_vm.h"
-#include "flutter/shell/common/switches.h"
-#include "flutter/shell/platform/android/android_context_vk_impeller.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
-#include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/flutter_main.h"
-#include "impeller/base/validation.h"
-#include "impeller/toolkit/android/proc_table.h"
 #include "txt/platform.h"
+
+namespace flutter {
+class DartCallbackCache {
+ public:
+  static void SetCachePath(const std::string& path);
+  static void LoadCacheFromDisk();
+};
+Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
+                                 bool has_default_values = false);
+}  // namespace flutter
 
 namespace flutter {
 
@@ -122,9 +126,11 @@ void FlutterMain::Init(JNIEnv* env,
   // Turn systracing on if ATrace_isEnabled is true and the user did not already
   // request systracing
   if (!settings.trace_systrace) {
-    settings.trace_systrace =
-        impeller::android::GetProcTable().TraceIsEnabled();
-    if (settings.trace_systrace) {
+    using ATraceIsEnabledProc = bool (*)();
+    static auto a_trace_is_enabled = reinterpret_cast<ATraceIsEnabledProc>(
+        dlsym(RTLD_DEFAULT, "ATrace_isEnabled"));
+    if (a_trace_is_enabled != nullptr && a_trace_is_enabled()) {
+      settings.trace_systrace = true;
       __android_log_print(
           ANDROID_LOG_INFO, "Flutter",
           "ATrace was enabled at startup. Flutter and Dart "
@@ -171,7 +177,8 @@ void FlutterMain::Init(JNIEnv* env,
 
   flutter::DartCallbackCache::LoadCacheFromDisk();
 
-  if (!flutter::DartVM::IsRunningPrecompiledCode() && kernelPath) {
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+  if (kernelPath) {
     // Check to see if the appropriate kernel files are present and configure
     // settings accordingly.
     auto application_kernel_path =
@@ -181,6 +188,7 @@ void FlutterMain::Init(JNIEnv* env,
       settings.application_kernel_asset = application_kernel_path;
     }
   }
+#endif
 
   settings.task_observer_add = [](intptr_t key, const fml::closure& callback) {
     fml::TaskQueueId queue_id = fml::MessageLoop::GetCurrentTaskQueueId();
@@ -244,10 +252,16 @@ void FlutterMain::SetupDartVMServiceUriCallback(JNIEnv* env) {
   fml::RefPtr<fml::TaskRunner> platform_runner =
       fml::MessageLoop::GetCurrent().GetTaskRunner();
 
-  vm_service_uri_callback_ = DartServiceIsolate::AddServerStatusCallback(
-      [platform_runner, set_uri](const std::string& uri) {
-        platform_runner->PostTask([uri, set_uri] { set_uri(uri); });
-      });
+  using AddServerStatusCallbackProc =
+      ptrdiff_t (*)(std::function<void(const std::string& vm_service_uri)>);
+  auto add_callback = reinterpret_cast<AddServerStatusCallbackProc>(
+      dlsym(RTLD_DEFAULT, "DartServiceIsolate_AddServerStatusCallback"));
+  if (add_callback != nullptr) {
+    vm_service_uri_callback_ =
+        add_callback([platform_runner, set_uri](const std::string& uri) {
+          platform_runner->PostTask([uri, set_uri] { set_uri(uri); });
+        });
+  }
 }
 
 static void PrefetchDefaultFontManager(JNIEnv* env, jclass jcaller) {
