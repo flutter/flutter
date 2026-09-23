@@ -71,13 +71,23 @@ SamplerBinding SetupGradientParameters(
     const ContentContext& renderer,
     FS::FragInfo& frag_info) {
   FML_DCHECK(gradient.texture);
-  frag_info.gradient_start = gradient.start;
-  frag_info.gradient_end = gradient.end;
   frag_info.tile_mode = static_cast<Scalar>(gradient.tile_mode);
   auto texture_size = gradient.texture->GetSize();
   FML_DCHECK(!texture_size.IsEmpty());
-  frag_info.half_texel =
-      Point(0.5f, 0.5f) / Point(texture_size.width, texture_size.height);
+  frag_info.half_texel = 0.5f / texture_size.width;
+
+  if (gradient.type == UberSDFParameters::GradientParameters::Type::kLinear) {
+    Point delta = gradient.end - gradient.start;
+    Scalar length_sq = delta.x * delta.x + delta.y * delta.y;
+    frag_info.gradient_coords =
+        Vector4(gradient.start.x, gradient.start.y, delta.x, delta.y);
+    frag_info.inv_gradient_length = length_sq > 0.0f ? 1.0f / length_sq : 0.0f;
+  } else {
+    frag_info.gradient_coords =
+        Vector4(gradient.start.x, gradient.start.y, 0.0f, 0.0f);
+    frag_info.inv_gradient_length =
+        gradient.end.x > 0.0f ? 1.0f / gradient.end.x : 0.0f;
+  }
 
   SamplerDescriptor sampler_desc;
   sampler_desc.min_filter = MinMagFilter::kLinear;
@@ -116,6 +126,8 @@ bool UberSDFContents::Render(const ContentContext& renderer,
       params_.color.WithAlpha(params_.color.alpha * GetOpacityFactor());
   frag_info.center = params_.center;
   frag_info.size = params_.size;
+  Vector2 pixel_size = entity.GetTransform().GetTransformedPixelSize();
+  frag_info.pixel_size = Point(pixel_size.x, pixel_size.y);
   frag_info.stroked = params_.stroke ? 1.0f : 0.0f;
   frag_info.stroke_width = params_.stroke ? params_.stroke->width : 0.0f;
   frag_info.stroke_join =
@@ -126,6 +138,10 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   frag_info.circle_center_top = params_.circle_center_top;
   frag_info.circle_center_right = params_.circle_center_right;
   frag_info.radii = params_.radii;
+  frag_info.gradient_coords = Vector4();
+  frag_info.half_texel = 0.0f;
+  frag_info.tile_mode = 0.0f;
+  frag_info.inv_gradient_length = 0.0f;
 
   SamplerBinding sampler_binding;
   if (params_.gradient) {
@@ -137,9 +153,6 @@ bool UberSDFContents::Render(const ContentContext& renderer,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
   }
 
-  auto geometry_result =
-      GetGeometry()->GetPositionBuffer(renderer, entity, pass);
-
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
         return renderer.GetUberSDFPipeline(options);
@@ -149,20 +162,13 @@ bool UberSDFContents::Render(const ContentContext& renderer,
       this, GetGeometry(), renderer, entity, pass, pipeline_callback,
       frame_info,
       /*bind_fragment_callback=*/
-      [&frag_info, &data_host_buffer,
-       sampler_binding = std::move(sampler_binding)](RenderPass& pass) {
+      [&frag_info, &data_host_buffer, &sampler_binding](RenderPass& pass) {
         FS::BindColorSourceSampler(pass, sampler_binding.texture,
                                    sampler_binding.sampler);
         FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
         pass.SetCommandLabel("UberSDF");
         return true;
-      },
-      /*force_stencil=*/false,
-      /*create_geom_callback=*/
-      [geometry_result = std::move(geometry_result)](
-          const ContentContext& renderer, const Entity& entity,
-          RenderPass& pass,
-          const Geometry* geometry) { return geometry_result; });
+      });
 }
 
 std::optional<Rect> UberSDFContents::GetCoverage(const Entity& entity) const {

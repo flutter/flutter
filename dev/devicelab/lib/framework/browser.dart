@@ -82,7 +82,7 @@ class Chrome {
     // If the Chrome process quits before it was asked to quit, notify the
     // error listener.
     _chromeProcess.exitCode.then((int exitCode) {
-      if (!_isStopped) {
+      if (!_isStopped && exitCode != 0) {
         _onError('Chrome process exited prematurely with exit code $exitCode');
       }
     });
@@ -92,7 +92,7 @@ class Chrome {
   ///
   /// The [onError] callback is called with an error message when the Chrome
   /// process encounters an error. In particular, [onError] is called when the
-  /// Chrome process exits prematurely, i.e. before [stop] is called.
+  /// Chrome process exits prematurely, i.e. before [stop] or [disconnect] is called.
   static Future<Chrome> launch(
     ChromeOptions options, {
     String? workingDirectory,
@@ -167,7 +167,7 @@ class Chrome {
   ///
   /// The [onError] callback is called with an error message when the Chrome
   /// process encounters an error. In particular, [onError] is called when the
-  /// Chrome process exits prematurely, i.e. before [stop] is called.
+  /// Chrome process exits prematurely, i.e. before [stop] or [disconnect] is called.
   static Future<Chrome> connect(
     io.Process chromeProcess,
     ChromeOptions options, {
@@ -270,10 +270,15 @@ class Chrome {
     await _debugConnection?.page.reload(ignoreCache: ignoreCache);
   }
 
-  /// Stops the Chrome process.
-  void stop() {
+  /// Disconnects from the Chrome process without killing it.
+  void disconnect() {
     _isStopped = true;
     _tracingSubscription?.cancel();
+  }
+
+  /// Stops the Chrome process.
+  void stop() {
+    disconnect();
     _chromeProcess.kill();
   }
 }
