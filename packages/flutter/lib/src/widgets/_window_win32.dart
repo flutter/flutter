@@ -61,9 +61,9 @@ See: https://github.com/flutter/flutter/issues/30701.
 /// Abstract handler class for Windows messages.
 ///
 /// Implementations of this class should register with
-/// [WindowingOwnerWin32.addMessageHandler] to begin receiving messages.
+/// [WindowingOwnerWin32._addMessageHandler] to begin receiving messages.
 /// When finished handling messages, implementations should deregister
-/// themselves with [WindowingOwnerWin32.removeMessageHandler].
+/// themselves with [WindowingOwnerWin32._removeMessageHandler].
 abstract class _WindowsMessageHandler {
   /// Handles a window message.
   ///
@@ -130,9 +130,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
 
   final List<_WindowsMessageHandler> _messageHandlers = <_WindowsMessageHandler>[];
 
-  /// The [Allocator] used for allocating native memory in this owner.
-  ///
-  /// This can be overridden via the [WindowingOwnerWin32.test] constructor.
+  /// The [ffi.Allocator] used for allocating native memory in this owner.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -1837,12 +1835,12 @@ extension _Utf16Pointer on ffi.Pointer<_Utf16> {
   }
 }
 
-/// Extension method for converting a [String] to a `Pointer<Utf16>`.
+/// Extension method for converting a [String] to a `Pointer<_Utf16>`.
 extension _StringUtf16Pointer on String {
-  /// Creates a zero-terminated [Utf16] code-unit array from this String.
+  /// Creates a zero-terminated [_Utf16] code-unit array from this String.
   ///
   /// If this [String] contains NUL characters, converting it back to a string
-  /// using [Utf16Pointer.toDartString] will truncate the result if a length is
+  /// using [_Utf16Pointer.toDartString] will truncate the result if a length is
   /// not passed.
   ///
   /// Returns an [allocator]-allocated pointer to the result.
