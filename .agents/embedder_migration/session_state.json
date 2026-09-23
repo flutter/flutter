@@ -1,0 +1,26 @@
+{
+  "active_migration": "RFC 410: Android Embedder C-API Migration",
+  "branch_slug": "android-embedder-migration-v10",
+  "current_branch": "android-embedder-migration-v10/0.0-llm-configuration",
+  "phase": "Phase 0: LLM Configuration, Skills, and PR Chain Setup",
+  "active_component": "pr-chain-manager",
+  "active_adrs": [
+    "ADR-0000"
+  ],
+  "ratchet_state": {
+    "total_allowed_internal_headers": 98,
+    "active_subsystem": "none",
+    "subsystem_remaining": 98
+  },
+  "invariants": [
+    "Strict PR chain naming slug: android-embedder-migration-v10/*",
+    "All downstream branches rebased onto parent branch before merge",
+    "Compile with defines = [ 'FLUTTER_ENGINE_NO_PROTOTYPES' ]",
+    "Route all C-API calls through FlutterEngineProcTable",
+    "Strict ownership and closing of synchronization_fence_fd",
+    "Per-view frame state captured by value in present_view_callback"
+  ],
+  "last_verified_build": "dart pr_chain.dart status (clean)",
+  "failing_tests": [],
+  "next_immediate_action": "Commit Phase 0 branch and prepare Phase 1: 1.0-embedder-c-api-extensions"
+}
