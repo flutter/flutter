@@ -264,6 +264,8 @@ static_assert(std::is_trivially_destructible_v<ExternalTextureConfig>);
 
 ExternalTextureConfig g_external_texture_config;
 
+void* g_last_texture_user_data = nullptr;
+
 bool ExternalTextureFrameCallback(void* user_data,
                                   int64_t texture_id,
                                   size_t width,
@@ -283,6 +285,7 @@ bool ExternalTextureFrameCallback(void* user_data,
   texture->destruction_callback =
       g_external_texture_config.destruction_callback;
   texture->user_data = img;
+  g_last_texture_user_data = img;
   texture->width = width;
   texture->height = height;
   return true;
@@ -298,11 +301,11 @@ void SetExternalTexture(
       ExternalTextureFrameCallback;
 }
 
-bool g_texture_destruction_callback_called = false;
+void* g_destroyed_texture_user_data = nullptr;
 
 void DeleteTestVulkanImageAndTrack(void* user_data) {
+  g_destroyed_texture_user_data = user_data;
   delete static_cast<TestVulkanImage*>(user_data);
-  g_texture_destruction_callback_called = true;
 }
 
 void ConfigureTextureTest(EmbedderTestContextVulkan& context,
@@ -420,7 +423,7 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkanDestructCallback) {
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
   ConfigureTextureTest(context, builder, latch, /*enable_impeller=*/true);
-  g_texture_destruction_callback_called = false;
+  g_destroyed_texture_user_data = nullptr;
   SetExternalTexture(context, CreateRGBATestImage, VK_FORMAT_R8G8B8A8_UNORM,
                      DeleteTestVulkanImageAndTrack);
 
@@ -428,13 +431,12 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkanDestructCallback) {
   UniqueEngine engine = LaunchEngineAndScheduleFrames(builder);
   ASSERT_TRUE(engine.is_valid());
   WaitAndVerifyFrame(latch, rendered_scene, "external_texture_impeller.png");
+  void* first_frame_user_data = g_last_texture_user_data;
+  ASSERT_NE(first_frame_user_data, nullptr);
 
-  // Render a second frame.
   RenderFrame(engine, latch);
 
-  // After the second frame completes, the backend will have collected the
-  // handle of the first frame's texture and called its destruction callback.
-  EXPECT_TRUE(g_texture_destruction_callback_called);
+  EXPECT_EQ(g_destroyed_texture_user_data, first_frame_user_data);
 }
 
 TEST_F(EmbedderTest, RenderTextureWithSkiaVulkanDestructCallback) {
@@ -443,7 +445,7 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkanDestructCallback) {
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
   ConfigureTextureTest(context, builder, latch, /*enable_impeller=*/false);
-  g_texture_destruction_callback_called = false;
+  g_destroyed_texture_user_data = nullptr;
   SetExternalTexture(context, CreateRGBATestImage, VK_FORMAT_R8G8B8A8_UNORM,
                      DeleteTestVulkanImageAndTrack);
 
@@ -451,13 +453,12 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkanDestructCallback) {
   UniqueEngine engine = LaunchEngineAndScheduleFrames(builder);
   ASSERT_TRUE(engine.is_valid());
   WaitAndVerifyFrame(latch, rendered_scene, "external_texture_impeller.png");
+  void* first_frame_user_data = g_last_texture_user_data;
+  ASSERT_NE(first_frame_user_data, nullptr);
 
-  // Render a second frame.
   RenderFrame(engine, latch);
 
-  // After the second frame completes, the backend will have collected the
-  // handle of the first frame's texture and called its destruction callback.
-  EXPECT_TRUE(g_texture_destruction_callback_called);
+  EXPECT_EQ(g_destroyed_texture_user_data, first_frame_user_data);
 }
 
 // Tests that a BGRA external texture renders correctly (red/blue channels
@@ -473,8 +474,6 @@ TEST_F(EmbedderTest, RenderBGRATextureWithImpellerVulkan) {
   std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
   UniqueEngine engine = LaunchEngineAndScheduleFrames(builder);
   ASSERT_TRUE(engine.is_valid());
-  // The rendered scene should match the same fixture as RGBA since the
-  // BGRA-to-SkColorType mapping should prevent channel swapping.
   WaitAndVerifyFrame(latch, rendered_scene, "external_texture_impeller.png");
 }
 
@@ -491,8 +490,6 @@ TEST_F(EmbedderTest, RenderBGRATextureWithSkiaVulkan) {
   std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
   UniqueEngine engine = LaunchEngineAndScheduleFrames(builder);
   ASSERT_TRUE(engine.is_valid());
-  // The rendered scene should match the same fixture as RGBA since the
-  // BGRA-to-SkColorType mapping should prevent channel swapping.
   WaitAndVerifyFrame(latch, rendered_scene, "external_texture_impeller.png");
 }
 TEST_F(EmbedderTest, RenderNV12TextureWithImpellerVulkan) {
