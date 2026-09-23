@@ -105,6 +105,11 @@ void main() {
     expect(() => readRecordedUses(buildDir), throwsFormatException);
   });
 
+  testWithoutContext('throws on a file with the wrong structure', () {
+    write('recorded_uses.json', '{"definitions": [1]}');
+    expect(() => readRecordedUses(buildDir), throwsFormatException);
+  });
+
   testWithoutContext('throws on a file that is not a JSON object', () {
     write('recorded_uses.json', '[]');
     expect(() => readRecordedUses(buildDir), throwsFormatException);

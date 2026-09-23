@@ -44,7 +44,9 @@ Recordings? readRecordedUses(Directory buildDir) {
     final Recordings recordings;
     try {
       recordings = Recordings.fromJson(data);
-    } on Exception catch (e) {
+    } on Object catch (e) {
+      // A malformed file can make it throw a TypeError or a RangeError, not
+      // only a FormatException.
       throw FormatException('Failed to parse recorded uses file: $e');
     }
     merged = merged == null ? recordings : merged + recordings;
