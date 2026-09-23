@@ -2,38 +2,62 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+Widget _buildTestApp({
+  required Widget child,
+  FindInPageController? controller,
+  bool enableSelection = false,
+  bool enableFind = true,
+  ValueChanged<SelectedContent?>? onSelectionChanged,
+}) {
+  return WidgetsApp(
+    color: const Color(0xFF0B57D0),
+    builder: (BuildContext context, Widget? navigator) {
+      return Overlay(
+        initialEntries: <OverlayEntry>[
+          OverlayEntry(
+            builder: (BuildContext context) {
+              return FindInPageScope(
+                enableSelection: enableSelection,
+                enableFind: enableFind,
+                controller: controller,
+                child: SelectableRegion(
+                  selectionControls: emptyTextSelectionControls,
+                  onSelectionChanged: onSelectionChanged,
+                  child: child,
+                ),
+              );
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 
 void main() {
   group('Find-in-Page Non-Golden Interaction & State-Machine Tests', () {
     testWidgets(
       '1. Incremental typing ("flu" -> "flut" -> "flu") preserves active match anchor and advances forward in reading order',
       (WidgetTester tester) async {
-        final FindInPageController controller = FindInPageController();
+        final controller = FindInPageController();
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: FindInPageScope(
-              enableSelection: false,
-              enableFind: true,
-              controller: controller,
-              child: const SelectionArea(
-                child: Scaffold(
-                  body: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text('0: flute prelude'),
-                      Text('1: fluid dynamics'),
-                      Text('2: fluke occurrence'),
-                      Text('3: flutter framework'),
-                    ],
-                  ),
-                ),
-              ),
+          _buildTestApp(
+            controller: controller,
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('0: flute prelude'),
+                Text('1: fluid dynamics'),
+                Text('2: fluke occurrence'),
+                Text('3: flutter framework'),
+              ],
             ),
           ),
         );
@@ -103,22 +127,14 @@ void main() {
     testWidgets(
       '2. Built-in FindBar keyboard navigation: Enter, Shift+Enter, F3, Shift+F3, Ctrl+G, repeated open() SelectAll, and Escape',
       (WidgetTester tester) async {
-        final FindInPageController controller = FindInPageController();
+        final controller = FindInPageController();
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: FindInPageScope(
-              enableSelection: false,
-              enableFind: true,
-              controller: controller,
-              child: const SelectionArea(
-                child: Scaffold(
-                  body: Column(
-                    children: <Widget>[Text('Alpha Dart'), Text('Beta Dart'), Text('Gamma Dart')],
-                  ),
-                ),
-              ),
+          _buildTestApp(
+            controller: controller,
+            child: const Column(
+              children: <Widget>[Text('Alpha Dart'), Text('Beta Dart'), Text('Gamma Dart')],
             ),
           ),
         );
@@ -210,23 +226,16 @@ void main() {
     testWidgets(
       '3. Escape / close() selection handoff: selects active match when enableSelection: true, and leaves zero selection when enableSelection: false',
       (WidgetTester tester) async {
-        // Part A: enableSelection: true (transfers active match into SelectionArea selection).
-        final FindInPageController selectableController = FindInPageController();
+        // Part A: enableSelection: true (transfers active match into SelectableRegion selection).
+        final selectableController = FindInPageController();
         addTearDown(selectableController.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: FindInPageScope(
-              enableSelection: true,
-              enableFind: true,
-              controller: selectableController,
-              child: const SelectionArea(
-                child: Scaffold(
-                  body: Column(
-                    children: <Widget>[Text('First Skwasm item'), Text('Second Skwasm item')],
-                  ),
-                ),
-              ),
+          _buildTestApp(
+            enableSelection: true,
+            controller: selectableController,
+            child: const Column(
+              children: <Widget>[Text('First Skwasm item'), Text('Second Skwasm item')],
             ),
           ),
         );
@@ -262,19 +271,32 @@ void main() {
         );
 
         // Part B: SelectableRegion.findOnly ("Find-Only" mode must NOT leave a stranded selection on close).
-        final FindInPageController findOnlyController = FindInPageController();
+        final findOnlyController = FindInPageController();
         addTearDown(findOnlyController.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion.findOnly(
-              findController: findOnlyController,
-              child: const Scaffold(
-                body: Column(
-                  children: <Widget>[Text('First Impeller item'), Text('Second Impeller item')],
-                ),
-              ),
-            ),
+          WidgetsApp(
+            color: const Color(0xFF0B57D0),
+            onGenerateRoute: (RouteSettings settings) {
+              return PageRouteBuilder<void>(
+                pageBuilder:
+                    (
+                      BuildContext context,
+                      Animation<double> animation,
+                      Animation<double> secondaryAnimation,
+                    ) {
+                      return SelectableRegion.findOnly(
+                        findController: findOnlyController,
+                        child: const Column(
+                          children: <Widget>[
+                            Text('First Impeller item'),
+                            Text('Second Impeller item'),
+                          ],
+                        ),
+                      );
+                    },
+              );
+            },
           ),
         );
         await tester.pumpAndSettle();
@@ -301,27 +323,20 @@ void main() {
     testWidgets(
       '4. Seeding query from current page selection on open(): populates FindBar with selected text and anchors activeMatchIndex to selected occurrence',
       (WidgetTester tester) async {
-        final FindInPageController controller = FindInPageController();
+        final controller = FindInPageController();
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: FindInPageScope(
-              enableSelection: true,
-              enableFind: true,
-              controller: controller,
-              child: const SelectionArea(
-                child: Scaffold(
-                  body: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text('Line 0: CanvasKit renderer'),
-                      Text('Line 1: CanvasKit pipeline'),
-                      Text('Line 2: CanvasKit compositor'),
-                    ],
-                  ),
-                ),
-              ),
+          _buildTestApp(
+            enableSelection: true,
+            controller: controller,
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('Line 0: CanvasKit renderer'),
+                Text('Line 1: CanvasKit pipeline'),
+                Text('Line 2: CanvasKit compositor'),
+              ],
             ),
           ),
         );
@@ -367,36 +382,28 @@ void main() {
     testWidgets(
       '5. Live in-place Text mutation (setState) and widget removal while FindBar is open automatically recompute matches and highlights',
       (WidgetTester tester) async {
-        final FindInPageController controller = FindInPageController();
+        final controller = FindInPageController();
         addTearDown(controller.dispose);
 
-        String dynamicLine = 'Status: healthy';
-        bool showThirdLine = true;
+        var dynamicLine = 'Status: healthy';
+        var showThirdLine = true;
         late StateSetter outerSetState;
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: FindInPageScope(
-              enableSelection: false,
-              enableFind: true,
-              controller: controller,
-              child: SelectionArea(
-                child: Scaffold(
-                  body: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                      outerSetState = setState;
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          const Text('Header: initial timeout log'),
-                          Text(dynamicLine, key: const ValueKey<String>('dynamic')),
-                          if (showThirdLine) const Text('Footer: final timeout warning'),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ),
+          _buildTestApp(
+            controller: controller,
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                outerSetState = setState;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const Text('Header: initial timeout log'),
+                    Text(dynamicLine, key: const ValueKey<String>('dynamic')),
+                    if (showThirdLine) const Text('Footer: final timeout warning'),
+                  ],
+                );
+              },
             ),
           ),
         );
@@ -432,24 +439,23 @@ void main() {
         );
 
         // Now remove the third line while it is the active match (index 3 of 4).
-        controller.nextMatch(); // ensure we are on the last match ('Footer: final timeout warning')
-        await tester.pumpAndSettle();
+        expect(controller.activeMatchIndex, 3);
         outerSetState(() {
           showThirdLine = false;
         });
         await tester.pumpAndSettle();
 
         expect(controller.matchCount, 3);
-        expect(controller.activeMatchIndex, inInclusiveRange(0, 2));
+        expect(controller.activeMatchIndex, 2);
       },
     );
 
     testWidgets(
       '6. Viewport scroll invariants: zero scroll jitter when activeMatch is already visible, and dual-axis (2D) auto-scroll when off-screen',
       (WidgetTester tester) async {
-        final FindInPageController controller = FindInPageController();
-        final ScrollController verticalController = ScrollController();
-        final ScrollController horizontalController = ScrollController();
+        final controller = FindInPageController();
+        final verticalController = ScrollController();
+        final horizontalController = ScrollController();
         addTearDown(controller.dispose);
         addTearDown(verticalController.dispose);
         addTearDown(horizontalController.dispose);
@@ -458,34 +464,26 @@ void main() {
         addTearDown(() => tester.binding.setSurfaceSize(null));
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: FindInPageScope(
-              enableSelection: false,
-              enableFind: true,
-              controller: controller,
-              child: SelectionArea(
-                child: Scaffold(
-                  body: SingleChildScrollView(
-                    controller: verticalController,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          const SizedBox(height: 24, child: Text('Visible Target Alpha')),
-                          const SizedBox(height: 24, child: Text('Visible Target Beta')),
-                          const SizedBox(height: 500),
-                          SingleChildScrollView(
-                            controller: horizontalController,
-                            scrollDirection: Axis.horizontal,
-                            child: const Row(
-                              children: <Widget>[SizedBox(width: 700), Text('Far 2D Target Omega')],
-                            ),
-                          ),
-                        ],
+          _buildTestApp(
+            controller: controller,
+            child: SingleChildScrollView(
+              controller: verticalController,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const SizedBox(height: 24, child: Text('Visible Target Alpha')),
+                    const SizedBox(height: 24, child: Text('Visible Target Beta')),
+                    const SizedBox(height: 500),
+                    SingleChildScrollView(
+                      controller: horizontalController,
+                      scrollDirection: Axis.horizontal,
+                      child: const Row(
+                        children: <Widget>[SizedBox(width: 700), Text('Far 2D Target Omega')],
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -526,9 +524,7 @@ void main() {
     testWidgets('7. FindInPageController exposes overridable shortcuts and semantic actions', (
       WidgetTester tester,
     ) async {
-      // Override default shortcuts: map F4 -> FindNextMatchIntent, Shift+F4 -> FindPreviousMatchIntent,
-      // and omit F3 so F3 is a no-op.
-      final FindInPageController controller = FindInPageController(
+      final controller = FindInPageController(
         shortcuts: const <ShortcutActivator, Intent>{
           SingleActivator(LogicalKeyboardKey.f4): FindNextMatchIntent(),
           SingleActivator(LogicalKeyboardKey.f4, shift: true): FindPreviousMatchIntent(),
@@ -538,18 +534,10 @@ void main() {
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: FindInPageScope(
-            enableSelection: false,
-            enableFind: true,
-            controller: controller,
-            child: const SelectionArea(
-              child: Scaffold(
-                body: Column(
-                  children: <Widget>[Text('Alpha token'), Text('Beta token'), Text('Gamma token')],
-                ),
-              ),
-            ),
+        _buildTestApp(
+          controller: controller,
+          child: const Column(
+            children: <Widget>[Text('Alpha token'), Text('Beta token'), Text('Gamma token')],
           ),
         ),
       );
@@ -585,5 +573,304 @@ void main() {
       await tester.pumpAndSettle();
       expect(controller.activeMatchIndex, 1);
     });
+
+    testWidgets(
+      '8. Clicking FindBar Next/Prev/Aa/X buttons when enableSelection: true preserves FindBar focus, avoids background selection leaks, and fires onSelectionChanged on close',
+      (WidgetTester tester) async {
+        final controller = FindInPageController();
+        addTearDown(controller.dispose);
+        final recordedSelections = <String?>[];
+
+        await tester.pumpWidget(
+          _buildTestApp(
+            enableSelection: true,
+            controller: controller,
+            onSelectionChanged: (SelectedContent? content) {
+              recordedSelections.add(content?.plainText);
+            },
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('Alpha Engine token'),
+                Text('Beta Engine token'),
+                Text('Gamma engine token'),
+              ],
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        controller.open(initialQuery: 'Engine');
+        await tester.pumpAndSettle();
+
+        final EditableText findInput = tester.widget<EditableText>(
+          find.descendant(
+            of: find.byType(SelectableRegionFindBar),
+            matching: find.byType(EditableText),
+          ),
+        );
+        expect(findInput.focusNode.hasFocus, isTrue);
+        expect(controller.matchCount, 3);
+        expect(controller.activeMatchIndex, 0);
+
+        // Click 'Next' button with mouse while enableSelection: true.
+        // FindBar EditableText MUST retain focus so subsequent Enter key events still work.
+        await tester.tap(find.text('Next', findRichText: true));
+        await tester.pumpAndSettle();
+        expect(controller.activeMatchIndex, 1);
+        expect(findInput.focusNode.hasFocus, isTrue);
+
+        // Click 'Aa' (case-sensitive toggle) -> matches drop from 3 to 2 ('Alpha Engine', 'Beta Engine').
+        await tester.tap(find.text('Aa', findRichText: true));
+        await tester.pumpAndSettle();
+        expect(controller.caseSensitive, isTrue);
+        expect(controller.matchCount, 2);
+        expect(controller.activeMatchIndex, 1);
+        expect(findInput.focusNode.hasFocus, isTrue);
+
+        // Click 'X' (close) button with mouse -> closes FindBar, selects active match ('Engine' in Beta),
+        // and fires SelectableRegion.onSelectionChanged!
+        await tester.tap(find.text('X', findRichText: true));
+        await tester.pumpAndSettle();
+        expect(controller.isOpen, isFalse);
+        expect(recordedSelections, contains('Engine'));
+      },
+    );
+
+    testWidgets(
+      r'9. Unicode case-insensitive search handles length-changing characters (Turkish dotted İ -> i\u0307) without RangeError or offset drift',
+      (WidgetTester tester) async {
+        final controller = FindInPageController();
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          _buildTestApp(
+            enableSelection: true,
+            controller: controller,
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[Text('İstanbul İİİ flutter'), Text('Emoji 🚀🔥 flutter')],
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // 'İ'.toLowerCase() is 2 UTF-16 code units ('i\u0307'), whereas 'İ' is 1 code unit.
+        // Searching for 'flutter' at the end of 'İstanbul İİİ flutter' must NOT throw RangeError
+        // and must highlight the exact UTF-16 range 13..20 ('flutter').
+        controller.open(initialQuery: 'flutter');
+        await tester.pumpAndSettle();
+
+        expect(controller.matchCount, 2);
+        expect(controller.matches[0].text, 'flutter');
+        expect(
+          controller.matches[0].range,
+          const SelectedContentRange(startOffset: 13, endOffset: 20),
+        );
+        expect(controller.matches[1].text, 'flutter');
+      },
+    );
+
+    testWidgets(
+      '10. Multi-line Text.rich with inline WidgetSpan orders matches in true visual reading order',
+      (WidgetTester tester) async {
+        final controller = FindInPageController();
+        addTearDown(controller.dispose);
+
+        await tester.binding.setSurfaceSize(const Size(320, 300));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+
+        await tester.pumpWidget(
+          _buildTestApp(
+            controller: controller,
+            child: const SizedBox(
+              width: 280,
+              child: Text.rich(
+                TextSpan(
+                  children: <InlineSpan>[
+                    TextSpan(text: 'Start token1 '),
+                    WidgetSpan(child: Text('Inline token2 chip')),
+                    TextSpan(
+                      text: ' and a long trailing sentence that wraps onto the second line with token3 at the end.',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        controller.open(initialQuery: 'token');
+        await tester.pumpAndSettle();
+
+        expect(controller.matchCount, 3);
+        // Match 0 is in fragment 0 ('Start token1 '), Match 1 is in WidgetSpan ('Inline token2 chip'),
+        // and Match 2 is in fragment 1 on the wrapped second line ('... token3 at the end.').
+        expect(
+          controller.matches.map((SelectableSearchMatch m) => m.selectable.getPlainText()).toList(),
+          <String>[
+            'Start token1 ',
+            'Inline token2 chip',
+            ' and a long trailing sentence that wraps onto the second line with token3 at the end.',
+          ],
+        );
+      },
+    );
+
+    testWidgets(
+      '11. Descendant EditableText(autofocus: true) inside SelectableRegion retains primary autofocus on mount',
+      (WidgetTester tester) async {
+        final controller = FindInPageController();
+        final childFocusNode = FocusNode(debugLabel: 'ChildEditableText');
+        final childTextController = TextEditingController();
+        addTearDown(controller.dispose);
+        addTearDown(childFocusNode.dispose);
+        addTearDown(childTextController.dispose);
+
+        await tester.pumpWidget(
+          _buildTestApp(
+            enableSelection: true,
+            controller: controller,
+            child: Column(
+              children: <Widget>[
+                const Text('Searchable header text'),
+                EditableText(
+                  controller: childTextController,
+                  focusNode: childFocusNode,
+                  autofocus: true,
+                  style: const TextStyle(fontSize: 14, color: Color(0xFF000000)),
+                  cursorColor: const Color(0xFF000000),
+                  backgroundCursorColor: const Color(0xFF888888),
+                ),
+              ],
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // SelectableRegion must NOT steal or discard childFocusNode's autofocus request.
+        expect(childFocusNode.hasPrimaryFocus, isTrue);
+      },
+    );
+
+    testWidgets(
+      '12. Selection seeding with leading whitespace anchors to selected occurrence and re-focuses FindBar when already open',
+      (WidgetTester tester) async {
+        final controller = FindInPageController();
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          _buildTestApp(
+            enableSelection: true,
+            controller: controller,
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[Text('Row 0: WasmGC engine'), Text('Row 1: WasmGC runtime')],
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Open FindBar initially with 'Row'.
+        controller.open(initialQuery: 'Row');
+        await tester.pumpAndSettle();
+        expect(controller.query, 'Row');
+
+        // Now select ' WasmGC ' (with leading and trailing spaces, offset 6..14) in Row 1,
+        // which also moves focus away from the FindBar.
+        final SelectableRegionState regionState = tester.state<SelectableRegionState>(
+          find.byType(SelectableRegion),
+        );
+        final List<Selectable> leaves = regionState.selectionDelegate.getLeafSelectables();
+        regionState.selectionDelegate.selectRangeForSelectable(
+          leaves[1],
+          const SelectedContentRange(startOffset: 6, endOffset: 14),
+        );
+        regionState.widget.focusNode?.requestFocus();
+        await tester.pump();
+
+        // Invoke controller.open() (Cmd+F) while FindBar is already open.
+        controller.open();
+        await tester.pumpAndSettle();
+
+        expect(controller.query, 'WasmGC');
+        expect(controller.activeMatchIndex, 1);
+        final EditableText findInput = tester.widget<EditableText>(
+          find.descendant(
+            of: find.byType(SelectableRegionFindBar),
+            matching: find.byType(EditableText),
+          ),
+        );
+        expect(findInput.focusNode.hasFocus, isTrue);
+      },
+    );
+
+    testWidgets(
+      '13. FindInPageController detach, enableFind: false toggle, and dispose clean up highlights cleanly',
+      (WidgetTester tester) async {
+        final controller1 = FindInPageController();
+        final controller2 = FindInPageController();
+        addTearDown(controller2.dispose);
+
+        var activeController = controller1;
+        var enableFind = true;
+        late StateSetter outerSetState;
+
+        await tester.pumpWidget(
+          WidgetsApp(
+            color: const Color(0xFF0B57D0),
+            builder: (BuildContext context, Widget? navigator) {
+              return Overlay(
+                initialEntries: <OverlayEntry>[
+                  OverlayEntry(
+                    builder: (BuildContext context) {
+                      return StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setState) {
+                          outerSetState = setState;
+                          return FindInPageScope(
+                            controller: activeController,
+                            enableFind: enableFind,
+                            child: SelectableRegion(
+                              selectionControls: emptyTextSelectionControls,
+                              child: const Text('Persistent highlight check'),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        controller1.open(initialQuery: 'highlight');
+        await tester.pumpAndSettle();
+        expect(controller1.matchCount, 1);
+
+        // Swap controller1 -> controller2 and dispose controller1.
+        outerSetState(() {
+          activeController = controller2;
+        });
+        await tester.pumpAndSettle();
+        controller1.dispose();
+
+        // Now open controller2 and toggle enableFind -> false while open.
+        controller2.open(initialQuery: 'highlight');
+        await tester.pumpAndSettle();
+        expect(controller2.isOpen, isTrue);
+
+        outerSetState(() {
+          enableFind = false;
+        });
+        await tester.pumpAndSettle();
+
+        expect(controller2.isOpen, isFalse);
+        expect(find.byType(SelectableRegionFindBar), findsNothing);
+      },
+    );
   });
 }

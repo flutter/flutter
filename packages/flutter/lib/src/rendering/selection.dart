@@ -249,6 +249,12 @@ mixin Selectable implements SelectionHandler {
   /// in local coordinates.
   List<Rect> get boundingBoxes;
 
+  @override
+  String getPlainText() => '';
+
+  /// Updates the active and passive Find-in-Page highlight ranges painted by this [Selectable].
+  void setSearchHighlights(SelectionHighlightRanges highlights) {}
+
   /// Returns a list of [Rect]s in local coordinates enclosing [range].
   List<Rect> getBoxesForRange(SelectedContentRange range) => const <Rect>[];
 
@@ -428,12 +434,6 @@ enum SelectionEventType {
 
   /// An event that extends the selection in a specific direction.
   directionallyExtendSelection,
-
-  /// An event to update Find-in-Page highlight ranges across [Selectable]s.
-  searchHighlight,
-
-  /// An event to select a specific character range in a [Selectable].
-  selectContentRange,
 }
 
 /// Represents Find-in-Page highlight ranges within a [Selectable].
@@ -480,30 +480,6 @@ class SelectionHighlightRanges {
   @override
   int get hashCode =>
       Object.hash(Object.hashAll(passiveRanges), activeRange, passiveColor, activeColor);
-}
-
-/// Dispatched to update Find-in-Page highlight ranges across [Selectable]s.
-class SearchHighlightSelectionEvent extends SelectionEvent {
-  /// Creates a [SearchHighlightSelectionEvent].
-  const SearchHighlightSelectionEvent({
-    this.highlights = const <Selectable, SelectionHighlightRanges>{},
-  }) : super._(SelectionEventType.searchHighlight);
-
-  /// Map from leaf [Selectable] to its [SelectionHighlightRanges].
-  final Map<Selectable, SelectionHighlightRanges> highlights;
-}
-
-/// Dispatched to programmatically select a specific character offset range.
-class SelectContentRangeEvent extends SelectionEvent {
-  /// Creates a [SelectContentRangeEvent].
-  const SelectContentRangeEvent({this.target, required this.range})
-    : super._(SelectionEventType.selectContentRange);
-
-  /// Optional target [Selectable] to restrict the selection to.
-  final Selectable? target;
-
-  /// The character range to select.
-  final SelectedContentRange range;
 }
 
 /// The unit of how selection handles move in text.

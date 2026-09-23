@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -60,7 +64,7 @@ class _FindInPageDemoAppState extends State<FindInPageDemoApp> {
 
   void _handleUserConfiguredShortcut(String key, bool shift) {
     if (key == 'f' || key == 'k') {
-      final String label = key == 'f' ? 'Cmd+F / Ctrl+F' : 'Cmd+K / Ctrl+K';
+      final label = key == 'f' ? 'Cmd+F / Ctrl+F' : 'Cmd+K / Ctrl+K';
       _invokeFind(
         initialQuery: _findController.query.isEmpty ? 'needle' : null,
         triggerName: label,
@@ -487,7 +491,6 @@ class _FindInPageDemoAppState extends State<FindInPageDemoApp> {
             ),
             body: FindInPageScope(
               enableSelection: _enableSelection,
-              enableFind: true,
               controller: _findController,
               findBarBuilder: switch (_uiStyle) {
                 FindUiStyle.defaultFloating => null, // Uses default SelectableRegionFindBar

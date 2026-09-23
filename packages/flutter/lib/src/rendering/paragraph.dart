@@ -1656,32 +1656,6 @@ class _SelectableFragment
           directionallyExtendSelection.isEnd,
           directionallyExtendSelection.direction,
         );
-      case SelectionEventType.searchHighlight:
-        final searchEvent = event as SearchHighlightSelectionEvent;
-        final SelectionHighlightRanges next =
-            searchEvent.highlights[this] ?? SelectionHighlightRanges.empty;
-        if (_searchHighlights != next) {
-          _searchHighlights = next;
-          paragraph.markNeedsPaint();
-        }
-        result = SelectionResult.none;
-      case SelectionEventType.selectContentRange:
-        final selectRangeEvent = event as SelectContentRangeEvent;
-        if (selectRangeEvent.target == null || selectRangeEvent.target == this) {
-          final int start = (range.start + selectRangeEvent.range.startOffset).clamp(
-            range.start,
-            range.end,
-          );
-          final int end = (range.start + selectRangeEvent.range.endOffset).clamp(
-            range.start,
-            range.end,
-          );
-          _textSelectionStart = TextPosition(offset: start);
-          _textSelectionEnd = TextPosition(offset: end);
-          result = SelectionResult.end;
-        } else {
-          result = _handleClearSelection();
-        }
     }
 
     if (existingSelectionStart != _textSelectionStart ||
@@ -1693,6 +1667,32 @@ class _SelectableFragment
 
   @override
   String getPlainText() => fullText.substring(range.start, range.end);
+
+  @override
+  void setSearchHighlights(SelectionHighlightRanges highlights) {
+    if (_searchHighlights != highlights) {
+      _searchHighlights = highlights;
+      paragraph.markNeedsPaint();
+    }
+  }
+
+  @override
+  bool selectRangeForSelectable(Selectable target, SelectedContentRange contentRange) {
+    if (target != this) {
+      return false;
+    }
+    final TextPosition? existingSelectionStart = _textSelectionStart;
+    final TextPosition? existingSelectionEnd = _textSelectionEnd;
+    final int start = (range.start + contentRange.startOffset).clamp(range.start, range.end);
+    final int end = (range.start + contentRange.endOffset).clamp(range.start, range.end);
+    _textSelectionStart = TextPosition(offset: start);
+    _textSelectionEnd = TextPosition(offset: end);
+    if (existingSelectionStart != _textSelectionStart ||
+        existingSelectionEnd != _textSelectionEnd) {
+      _didChangeSelection();
+    }
+    return true;
+  }
 
   @override
   List<Rect> getBoxesForRange(SelectedContentRange contentRange) {

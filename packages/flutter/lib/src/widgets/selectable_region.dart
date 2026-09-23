@@ -462,8 +462,35 @@ class SelectableRegionState extends State<SelectableRegion>
       _findScope?.controller ??
       (_localFindController ??= FindInPageController());
 
+  bool _scheduledFallbackFocus = false;
+
+  void _scheduleFallbackFocusIfNeeded() {
+    if (!_effectiveEnableFind || _scheduledFallbackFocus) {
+      return;
+    }
+    _scheduledFallbackFocus = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      scheduleMicrotask(() {
+        _scheduledFallbackFocus = false;
+        if (!mounted || !_effectiveEnableFind) {
+          return;
+        }
+        FocusManager.instance.applyFocusChangesIfNeeded();
+        final FocusScopeNode scope = FocusScope.of(context);
+        if (scope.focusedChild == null && !_focusNode.hasFocus) {
+          _focusNode.requestFocus();
+        }
+      });
+    }, debugLabel: 'SelectableRegion.fallbackFindFocus');
+  }
+
   void _syncFindControllerAttachment() {
     final FindInPageController target = findController;
+    if (!_effectiveEnableFind &&
+        _attachedFindController != null &&
+        _attachedFindController!.isOpen) {
+      _attachedFindController!.close(selectActiveMatch: false);
+    }
     if (_attachedFindController != target) {
       _attachedFindController?._detach(_selectionDelegate);
       if (target != _localFindController && _localFindController != null) {
@@ -483,6 +510,7 @@ class SelectableRegionState extends State<SelectableRegion>
         regionFocusNode: _focusNode,
       );
     }
+    _scheduleFallbackFocusIfNeeded();
   }
 
   final Map<Type, GestureRecognizerFactory> _gestureRecognizers =
@@ -661,6 +689,7 @@ class SelectableRegionState extends State<SelectableRegion>
       _selectionOverlay?.dispose();
       _selectionOverlay = null;
     }
+    _updateSelectedContentIfNeeded();
   }
 
   // gestures.
@@ -2080,24 +2109,37 @@ class SelectableRegionState extends State<SelectableRegion>
     } else if (_webContextMenuEnabled) {
       result = PlatformSelectableRegionContextMenu(child: result);
     }
+    result = RawGestureDetector(
+      gestures: _effectiveEnableSelection
+          ? _gestureRecognizers
+          : const <Type, GestureRecognizerFactory>{},
+      behavior: HitTestBehavior.translucent,
+      excludeFromSemantics: true,
+      child: result,
+    );
     if (_effectiveEnableFind) {
-      final Widget content = result;
+      final content = result;
       result = ListenableBuilder(
         listenable: findController,
         builder: (BuildContext context, Widget? _) {
           return Shortcuts(
+            includeSemantics: false,
             shortcuts: findController.regionShortcuts,
             child: Actions(
               actions: findController.actions,
               child: Stack(
-                alignment: AlignmentDirectional.topEnd,
+                fit: StackFit.passthrough,
                 children: <Widget>[
                   content,
                   if (findController.isOpen)
-                    SelectionContainer.disabled(
-                      child:
-                          _effectiveFindBarBuilder?.call(context, findController) ??
-                          SelectableRegionFindBar(controller: findController),
+                    PositionedDirectional(
+                      top: 0,
+                      end: 0,
+                      child: SelectionContainer.disabled(
+                        child:
+                            _effectiveFindBarBuilder?.call(context, findController) ??
+                            SelectableRegionFindBar(controller: findController),
+                      ),
                     ),
                 ],
               ),
@@ -2121,20 +2163,12 @@ class SelectableRegionState extends State<SelectableRegion>
       },
       child: CompositedTransformTarget(
         link: _toolbarLayerLink,
-        child: RawGestureDetector(
-          gestures: _effectiveEnableSelection
-              ? _gestureRecognizers
-              : const <Type, GestureRecognizerFactory>{},
-          behavior: HitTestBehavior.translucent,
-          excludeFromSemantics: true,
-          child: Actions(
-            actions: _actions,
-            child: Focus.withExternalFocusNode(
-              includeSemantics: false,
-              focusNode: _focusNode,
-              autofocus: _effectiveEnableFind,
-              child: result,
-            ),
+        child: Actions(
+          actions: _actions,
+          child: Focus.withExternalFocusNode(
+            includeSemantics: false,
+            focusNode: _focusNode,
+            child: result,
           ),
         ),
       ),
@@ -2435,6 +2469,15 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
   }
 
   @override
+  bool selectRangeForSelectable(Selectable target, SelectedContentRange range) {
+    final bool result = super.selectRangeForSelectable(target, range);
+    if (result) {
+      didReceiveSelectionBoundaryEvents();
+    }
+    return result;
+  }
+
+  @override
   SelectionResult dispatchSelectionEventToChild(Selectable selectable, SelectionEvent event) {
     switch (event.type) {
       case SelectionEventType.startEdgeUpdate:
@@ -2453,9 +2496,6 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
       case SelectionEventType.directionallyExtendSelection:
         didReceiveSelectionEventFor(selectable: selectable);
         ensureChildUpdated(selectable);
-      case SelectionEventType.searchHighlight:
-      case SelectionEventType.selectContentRange:
-        break;
     }
     return super.dispatchSelectionEventToChild(selectable, event);
   }
@@ -3173,14 +3213,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     }
     for (var i = 0; i < selectables.length; i++) {
       final Selectable child = selectables[i];
-      if (child == target) {
-        _clearSelectables(skipIndex: i);
-        dispatchSelectionEventToChild(child, SelectContentRangeEvent(range: range));
-        currentSelectionStartIndex = i;
-        currentSelectionEndIndex = i;
-        _updateSelectionGeometry();
-        return true;
-      }
       if (child.selectRangeForSelectable(target, range)) {
         _clearSelectables(skipIndex: i);
         currentSelectionStartIndex = i;
@@ -3395,15 +3427,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
   @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
-    if (event.type == SelectionEventType.searchHighlight) {
-      if (_additions.isNotEmpty) {
-        _flushAdditions();
-      }
-      for (final Selectable selectable in selectables) {
-        dispatchSelectionEventToChild(selectable, event);
-      }
-      return SelectionResult.end;
-    }
     final selectionWillBeInProgress = event is! ClearSelectionEvent;
     if (!_selectionInProgress && selectionWillBeInProgress) {
       // Sort the selectable every time a selection start.
@@ -3435,9 +3458,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       case SelectionEventType.directionallyExtendSelection:
         _extendSelectionInProgress = true;
         result = handleDirectionallyExtendSelection(event as DirectionallyExtendSelectionEvent);
-      case SelectionEventType.searchHighlight:
-      case SelectionEventType.selectContentRange:
-        result = SelectionResult.end;
     }
     _isHandlingSelectionEvent = false;
     _updateSelectionGeometry();
@@ -4074,8 +4094,11 @@ class FindInPageController extends ChangeNotifier {
     Map<ShortcutActivator, Intent>? regionShortcuts,
     Map<ShortcutActivator, Intent>? shortcuts,
   }) : _query = initialQuery,
+       // ignore: prefer_initializing_formals
        _caseSensitive = caseSensitive,
+       // ignore: prefer_initializing_formals
        _regionShortcuts = regionShortcuts,
+       // ignore: prefer_initializing_formals
        _shortcuts = shortcuts;
 
   /// Default keyboard shortcuts active on the enclosing [SelectableRegion] to
@@ -4259,9 +4282,19 @@ class FindInPageController extends ChangeNotifier {
     if (_delegate != delegate) {
       return;
     }
+    _clearAllHighlights();
     _delegate!._onSelectablesChanged = null;
     _delegate = null;
     _regionFocusNode = null;
+  }
+
+  @override
+  void dispose() {
+    _clearAllHighlights();
+    _delegate?._onSelectablesChanged = null;
+    _delegate = null;
+    _regionFocusNode = null;
+    super.dispose();
   }
 
   void _handleSelectablesChanged() {
@@ -4285,13 +4318,18 @@ class FindInPageController extends ChangeNotifier {
     if (initialQuery != null && initialQuery.isNotEmpty) {
       _query = initialQuery;
     } else if (_enableSelection && _delegate != null) {
-      final String? selectedText = _delegate!.getSelectedContent()?.plainText.trim();
-      if (selectedText != null && selectedText.isNotEmpty && !selectedText.contains('\n')) {
-        for (final Selectable leaf in _delegate!.getLeafSelectables()) {
+      final String? rawSelected = _delegate!.getSelectedContent()?.plainText;
+      final String? selectedText = rawSelected?.trim();
+      if (rawSelected != null &&
+          selectedText != null &&
+          selectedText.isNotEmpty &&
+          !selectedText.contains('\n')) {
+        final int trimLeftOffset = rawSelected.length - rawSelected.trimLeft().length;
+        for (final Selectable leaf in _getOrderedLeafSelectables(_delegate!)) {
           final SelectedContentRange? range = leaf.getSelection();
           if (leaf.value.hasSelection && range != null) {
             _pendingAnchorSelectable = leaf;
-            _pendingAnchorStartOffset = min(range.startOffset, range.endOffset);
+            _pendingAnchorStartOffset = min(range.startOffset, range.endOffset) + trimLeftOffset;
             break;
           }
         }
@@ -4332,7 +4370,7 @@ class FindInPageController extends ChangeNotifier {
       return;
     }
     _activeMatchIndex = (_activeMatchIndex + 1) % _matches.length;
-    _syncActiveAnchor(_delegate?.getLeafSelectables());
+    _syncActiveAnchor(_delegate != null ? _getOrderedLeafSelectables(_delegate!) : null);
     _pushHighlightsToSelectables();
     activeMatch?.selectable.showRangeOnScreen(activeMatch!.range);
     notifyListeners();
@@ -4345,7 +4383,7 @@ class FindInPageController extends ChangeNotifier {
       return;
     }
     _activeMatchIndex = (_activeMatchIndex - 1 + _matches.length) % _matches.length;
-    _syncActiveAnchor(_delegate?.getLeafSelectables());
+    _syncActiveAnchor(_delegate != null ? _getOrderedLeafSelectables(_delegate!) : null);
     _pushHighlightsToSelectables();
     activeMatch?.selectable.showRangeOnScreen(activeMatch!.range);
     notifyListeners();
@@ -4360,6 +4398,30 @@ class FindInPageController extends ChangeNotifier {
     }
     _lastActiveLeafOrderIndex = leaves.indexOf(current.selectable);
     _lastActiveStartOffset = current.range.startOffset;
+  }
+
+  static List<Selectable> _getOrderedLeafSelectables(
+    MultiSelectableSelectionContainerDelegate delegate,
+  ) {
+    final leaves = List<Selectable>.of(delegate.getLeafSelectables());
+    leaves.sort((Selectable a, Selectable b) {
+      final List<Rect> boxesA = a.boundingBoxes;
+      final List<Rect> boxesB = b.boundingBoxes;
+      if (boxesA.isEmpty || boxesB.isEmpty) {
+        return 0;
+      }
+      final Rect rectA = MatrixUtils.transformRect(a.getTransformTo(null), boxesA.first);
+      final Rect rectB = MatrixUtils.transformRect(b.getTransformTo(null), boxesB.first);
+      final int vertical = MultiSelectableSelectionContainerDelegate._compareVertically(
+        rectA,
+        rectB,
+      );
+      if (vertical != 0) {
+        return vertical;
+      }
+      return MultiSelectableSelectionContainerDelegate._compareHorizontally(rectA, rectB);
+    });
+    return leaves;
   }
 
   void _recomputeMatches({required bool scrollToActive}) {
@@ -4381,34 +4443,29 @@ class FindInPageController extends ChangeNotifier {
     _isRecomputing = true;
     try {
       final SelectableSearchMatch? previousActive = activeMatch;
-      final List<Selectable> leaves = delegate.getLeafSelectables();
-      final Map<Selectable, int> leafIndexBySelectable = <Selectable, int>{
+      final List<Selectable> leaves = _getOrderedLeafSelectables(delegate);
+      final leafIndexBySelectable = <Selectable, int>{
         for (int i = 0; i < leaves.length; i++) leaves[i]: i,
       };
-      final List<SelectableSearchMatch> found = <SelectableSearchMatch>[];
-      final String needle = _caseSensitive ? _query : _query.toLowerCase();
+      final found = <SelectableSearchMatch>[];
+      final pattern = RegExp(RegExp.escape(_query), caseSensitive: _caseSensitive);
 
-      for (final Selectable selectable in leaves) {
+      for (final selectable in leaves) {
         final String rawText = selectable.getPlainText();
         if (rawText.isEmpty) {
           continue;
         }
-        final String haystack = _caseSensitive ? rawText : rawText.toLowerCase();
-        int searchFrom = 0;
-        while (searchFrom <= haystack.length - needle.length) {
-          final int matchStart = haystack.indexOf(needle, searchFrom);
-          if (matchStart == -1) {
-            break;
+        for (final RegExpMatch match in pattern.allMatches(rawText)) {
+          if (match.start == match.end) {
+            continue;
           }
-          final int matchEnd = matchStart + needle.length;
           found.add(
             SelectableSearchMatch(
               selectable: selectable,
-              range: SelectedContentRange(startOffset: matchStart, endOffset: matchEnd),
-              text: rawText.substring(matchStart, matchEnd),
+              range: SelectedContentRange(startOffset: match.start, endOffset: match.end),
+              text: rawText.substring(match.start, match.end),
             ),
           );
-          searchFrom = matchStart + max(1, needle.length);
         }
       }
 
@@ -4419,7 +4476,7 @@ class FindInPageController extends ChangeNotifier {
         final int seededIndex = _matches.indexWhere(
           (SelectableSearchMatch m) =>
               m.selectable == _pendingAnchorSelectable &&
-              m.range.startOffset == _pendingAnchorStartOffset,
+              m.range.startOffset >= _pendingAnchorStartOffset,
         );
         _activeMatchIndex = seededIndex != -1 ? seededIndex : 0;
       } else if (previousActive != null) {
@@ -4435,7 +4492,7 @@ class FindInPageController extends ChangeNotifier {
             return (mLeafIndex == anchorLeafIndex && m.range.startOffset >= anchorStartOffset) ||
                 mLeafIndex > anchorLeafIndex;
           });
-          _activeMatchIndex = forwardOrSameIndex != -1 ? forwardOrSameIndex : 0;
+          _activeMatchIndex = forwardOrSameIndex != -1 ? forwardOrSameIndex : (_matches.length - 1);
         } else {
           _activeMatchIndex = _activeMatchIndex.clamp(0, _matches.length - 1);
         }
@@ -4462,25 +4519,18 @@ class FindInPageController extends ChangeNotifier {
       return;
     }
     final List<Selectable> leaves = delegate.getLeafSelectables();
-    final Map<Selectable, List<SelectedContentRange>> passiveBySelectable =
-        <Selectable, List<SelectedContentRange>>{};
+    final passiveBySelectable = <Selectable, List<SelectedContentRange>>{};
     for (final SelectableSearchMatch match in _matches) {
       (passiveBySelectable[match.selectable] ??= <SelectedContentRange>[]).add(match.range);
     }
     final SelectableSearchMatch? current = activeMatch;
-    final Map<Selectable, SelectionHighlightRanges> highlightsMap =
-        <Selectable, SelectionHighlightRanges>{
-          for (final Selectable selectable in leaves)
-            selectable: SelectionHighlightRanges(
-              passiveRanges: passiveBySelectable[selectable] ?? const <SelectedContentRange>[],
-              activeRange: current?.selectable == selectable ? current!.range : null,
-            ),
-        };
-    final SearchHighlightSelectionEvent event = SearchHighlightSelectionEvent(
-      highlights: highlightsMap,
-    );
-    for (final Selectable selectable in leaves) {
-      selectable.dispatchSelectionEvent(event);
+    for (final selectable in leaves) {
+      selectable.setSearchHighlights(
+        SelectionHighlightRanges(
+          passiveRanges: passiveBySelectable[selectable] ?? const <SelectedContentRange>[],
+          activeRange: current?.selectable == selectable ? current!.range : null,
+        ),
+      );
     }
   }
 
@@ -4489,9 +4539,8 @@ class FindInPageController extends ChangeNotifier {
     if (delegate == null) {
       return;
     }
-    const SearchHighlightSelectionEvent clearEvent = SearchHighlightSelectionEvent();
     for (final Selectable selectable in delegate.getLeafSelectables()) {
-      selectable.dispatchSelectionEvent(clearEvent);
+      selectable.setSearchHighlights(SelectionHighlightRanges.empty);
     }
   }
 }
@@ -4564,7 +4613,7 @@ class _SelectableRegionFindBarState extends State<SelectableRegionFindBar> {
   }
 
   void _syncControllerText() {
-    final bool reopenTriggered = widget.controller.openRequestCount != _lastOpenRequestCount;
+    final reopenTriggered = widget.controller.openRequestCount != _lastOpenRequestCount;
     _lastOpenRequestCount = widget.controller.openRequestCount;
     if (_textController.text != widget.controller.query) {
       _textController.value = TextEditingValue(
@@ -4573,6 +4622,9 @@ class _SelectableRegionFindBarState extends State<SelectableRegionFindBar> {
             ? TextSelection(baseOffset: 0, extentOffset: widget.controller.query.length)
             : TextSelection.collapsed(offset: widget.controller.query.length),
       );
+      if (reopenTriggered) {
+        _focusAndSelectQuery();
+      }
     } else if (reopenTriggered) {
       _focusAndSelectQuery();
     }
@@ -4593,7 +4645,7 @@ class _SelectableRegionFindBarState extends State<SelectableRegionFindBar> {
   Widget build(BuildContext context) {
     final int total = widget.controller.matchCount;
     final int current = total == 0 ? 0 : widget.controller.activeMatchIndex + 1;
-    final String counterText = '$current / $total';
+    final counterText = '$current / $total';
     const textStyle = TextStyle(
       fontFamily: 'Roboto',
       fontSize: 13.0,
