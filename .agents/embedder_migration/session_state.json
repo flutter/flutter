@@ -1,9 +1,9 @@
 {
   "active_migration": "RFC 410: Android Embedder C-API Migration",
   "branch_slug": "android-embedder-migration-v10",
-  "current_branch": "android-embedder-migration-v10/1.0-embedder-c-api-extensions",
-  "phase": "Phase 1: Embedder C-API Extensions (embedder.h / embedder.cc)",
-  "active_component": "shell/platform/embedder/embedder.h",
+  "current_branch": "android-embedder-migration-v10/2.0-gn-firewall-modularization",
+  "phase": "Phase 2: GN Firewall, Modular Partitioning & Feature Flag Shell Isolation",
+  "active_component": "shell/platform/android/embedder/flutter_embedder_native.h",
   "active_adrs": [
     "ADR-0000",
     "ADR-0001",
@@ -19,9 +19,9 @@
     "ADR-0011"
   ],
   "ratchet_state": {
-    "total_allowed_internal_headers": 98,
-    "active_subsystem": "none",
-    "subsystem_remaining": 98
+    "total_allowed_internal_headers": 67,
+    "active_subsystem": "GN Firewall & FlutterEmbedderNative Coordinator",
+    "subsystem_remaining": 67
   },
   "invariants": [
     "Strict PR chain naming slug: android-embedder-migration-v10/*",
@@ -32,7 +32,7 @@
     "Per-view frame state captured by value in present_view_callback",
     "Zero Shell::Create or AndroidShellHolder when EnableAndroidEmbedderApi is true"
   ],
-  "last_verified_build": "dart pr_chain.dart status (clean)",
+  "last_verified_build": "flutter_embedder_native_unittests (6/6 PASSED) + check_android_embedder_deps.py (PASS)",
   "failing_tests": [],
-  "next_immediate_action": "Implement and verify Phase 1 C-API extensions in embedder.h, embedder.cc, and embedder_unittests.cc"
+  "next_immediate_action": "Implement Milestone 2.1 (AndroidSurfaceControl & HCPP sync-fence handoff)"
 }

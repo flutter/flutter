@@ -269,7 +269,10 @@ DEF_SWITCH(kLeakVm,
            "this value to false.")
 DEF_SWITCH(kEnableEmbedderApi,
            "enable-embedder-api",
-           "Enable the embedder api. Defaults to false. iOS only.")
+           "Enable the embedder api. Defaults to false.")
+DEF_SWITCH(kEnableAndroidEmbedderApi,
+           "enable-android-embedder-api",
+           "Enable the Android Embedder C-API. Defaults to false.")
 DEF_SWITCH(kEnablePlatformIsolates,
            "enable-platform-isolates",
            "Enable support for isolates that run on the platform thread.")

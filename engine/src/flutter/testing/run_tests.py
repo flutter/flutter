@@ -481,6 +481,7 @@ def run_cc_tests(
     unittests += [
         # https://github.com/google/googletest/issues/2490
         make_test('android_external_view_embedder_unittests'),
+        make_test('flutter_embedder_native_unittests'),
         make_test('jni_unittests'),
         make_test('platform_view_android_delegate_unittests'),
         # https://github.com/flutter/flutter/issues/36295

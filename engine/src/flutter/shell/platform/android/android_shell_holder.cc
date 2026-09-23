@@ -17,6 +17,7 @@
 #include "flutter/fml/cpu_affinity.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/painting/image_generator_registry.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/run_configuration.h"
@@ -86,6 +87,13 @@ AndroidShellHolder::AndroidShellHolder(
     : settings_(settings),
       jni_facade_(jni_facade),
       android_rendering_api_(android_rendering_api) {
+  FML_CHECK(!settings_.enable_embedder_api)
+      << "FATAL: AndroidShellHolder / Shell::Create invoked when Embedder API "
+         "feature flag is true!";
+  TRACE_EVENT0("flutter", "AndroidShellHolder::Initialize[LEGACY-SHELL]");
+  FML_LOG(IMPORTANT)
+      << "[EMBEDDER_API_PROOF] path=LEGACY_SHELL shell_create=ACTIVE";
+
   static size_t thread_host_count = 1;
   auto thread_label = std::to_string(thread_host_count++);
 

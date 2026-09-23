@@ -463,9 +463,24 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
       command_line.HasOption(FlagForSwitch(Switch::kEnableOpenGlgpuTracing));
   settings.enable_vulkan_gpu_tracing =
       command_line.HasOption(FlagForSwitch(Switch::kEnableVulkanGpuTracing));
-
-  settings.enable_embedder_api =
-      command_line.HasOption(FlagForSwitch(Switch::kEnableEmbedderApi));
+  {
+    std::string enable_embedder_api_value;
+    if (command_line.GetOptionValue(FlagForSwitch(Switch::kEnableEmbedderApi),
+                                    &enable_embedder_api_value)) {
+      settings.enable_embedder_api = enable_embedder_api_value.empty() ||
+                                     "true" == enable_embedder_api_value;
+    } else if (command_line.GetOptionValue(
+                   FlagForSwitch(Switch::kEnableAndroidEmbedderApi),
+                   &enable_embedder_api_value)) {
+      settings.enable_embedder_api = enable_embedder_api_value.empty() ||
+                                     "true" == enable_embedder_api_value;
+    } else {
+      settings.enable_embedder_api =
+          command_line.HasOption(FlagForSwitch(Switch::kEnableEmbedderApi)) ||
+          command_line.HasOption(
+              FlagForSwitch(Switch::kEnableAndroidEmbedderApi));
+    }
+  }
 
   settings.prefetched_default_font_manager = command_line.HasOption(
       FlagForSwitch(Switch::kPrefetchedDefaultFontManager));

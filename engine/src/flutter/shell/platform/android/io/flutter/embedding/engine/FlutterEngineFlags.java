@@ -241,6 +241,19 @@ public final class FlutterEngineFlags {
       new Flag("--impeller-lazy-shader-mode", "ImpellerLazyShaderInitialization", true);
 
   /**
+   * Enables the Android Embedder C-API migration path (RFC 410.0000).
+   *
+   * <p>Settable via the command line (--enable-android-embedder-api) and the manifest
+   * (io.flutter.embedding.android.EnableAndroidEmbedderApi).
+   */
+  public static final Flag ENABLE_ANDROID_EMBEDDER_API =
+      new Flag("--enable-android-embedder-api", "EnableAndroidEmbedderApi", true);
+
+  /** Enables the Embedder C-API path (--enable-embedder-api). */
+  public static final Flag ENABLE_EMBEDDER_API =
+      new Flag("--enable-embedder-api", "EnableEmbedderApi", true);
+
+  /**
    * Fake flag used for integration testing of the Android embedding processing engine flags.
    *
    * <p>Settable via the command line and the manifest.
@@ -468,7 +481,9 @@ public final class FlutterEngineFlags {
               IMPELLER_LAZY_SHADER_MODER,
               IMPELLER_OPENGL_GPU_TRACING,
               IMPELLER_VULKAN_GPU_TRACING,
-              ENABLE_HCPP));
+              ENABLE_HCPP,
+              ENABLE_ANDROID_EMBEDDER_API,
+              ENABLE_EMBEDDER_API));
 
   // Flags that have been turned off.
   private static final List<Flag> DISABLED_FLAGS =
