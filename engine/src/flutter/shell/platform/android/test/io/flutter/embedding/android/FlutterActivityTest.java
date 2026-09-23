@@ -115,7 +115,10 @@ public class FlutterActivityTest {
     // Set to framework handling and then recreate the activity and check the state is preserved.
     flutterActivityScenario.onActivity(activity -> activity.setFrameworkHandlesBack(true));
     flutterActivityScenario.onActivity(
-        activity -> activity.getIntent().putExtra(EXTRA_CACHED_ENGINE_ID, "my_cached_engine"));
+        activity ->
+            activity
+                .getIntent()
+                .putExtra(FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_ID, "my_cached_engine"));
 
     flutterActivityScenario.recreate();
     flutterActivityScenario.onActivity(activity -> assertTrue(activity.hasRegisteredBackCallback));
