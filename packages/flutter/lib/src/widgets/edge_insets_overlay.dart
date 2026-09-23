@@ -430,8 +430,26 @@ typedef EdgeInsetsOverlayMetricsWidgetBuilder = Widget Function(
 /// widgets (such as scroll views, map viewports, or custom painters) to adapt their
 /// interior padding or layout accordingly without clipping.
 ///
-/// The painting and hit-testing order between the main content and the edge overlays
-/// can be configured using [paintOrder].
+/// ## Overlapping edge overlays and paint order
+///
+/// Similar to [Stack] with multiple edge-aligned [Positioned] widgets, edge
+/// overlays are positioned independently along each edge across the full bounds
+/// and are not partitioned sequentially. If multiple edge overlays intersect
+/// (for example, a [top] bar and a [left] rail sharing the top-left corner),
+/// they will overlap.
+///
+/// The relative painting and hit-testing order between the main content and the
+/// edge overlays is configured using [paintOrder]. Widgets appearing later in
+/// [paintOrder] are painted on top of earlier ones and receive pointer hit-test
+/// events first.
+///
+/// ## Intrinsic dimensions and dry layout
+///
+/// Because [builder] is evaluated inside a [LayoutBuilder] to receive layout-time
+/// overlay metrics, intrinsic dimensions cannot be calculated ahead of layout.
+/// Querying intrinsic dimensions or computing dry layout on this widget delegates
+/// to the underlying [LayoutBuilder], which will throw an exception in accordance
+/// with [LayoutBuilder]'s standard contract.
 ///
 /// See also:
 ///
@@ -461,10 +479,14 @@ abstract class EdgeInsetsGeometryOverlay extends StatelessWidget {
 
   /// The order in which the child and edge overlay widgets are painted and hit-tested.
   ///
-  /// The widgets are painted from first to last in this list. Later widgets in the
+  /// Similar to children of a [Stack], edge overlays positioned along intersecting
+  /// edges (such as a top bar and a left rail) will overlap at their corner intersection.
+  /// The widgets are painted from first to last in this list: later widgets in the
   /// list paint on top of earlier ones and receive hit test events first.
   ///
-  /// Defaults to [EdgeInsetsOverlaySlot.values].
+  /// Defaults to [EdgeInsetsOverlaySlot.values], painting in order: [EdgeInsetsOverlaySlot.child],
+  /// [EdgeInsetsOverlaySlot.left], [EdgeInsetsOverlaySlot.top], [EdgeInsetsOverlaySlot.right],
+  /// and [EdgeInsetsOverlaySlot.bottom].
   final List<EdgeInsetsOverlaySlot> paintOrder;
 
   /// The text direction with which to resolve directional alignments along horizontal edges.
@@ -478,6 +500,9 @@ abstract class EdgeInsetsGeometryOverlay extends StatelessWidget {
 
   /// Builds the content child wrapped in a [LayoutBuilder] that unpacks
   /// the overlay metrics from [_EdgeInsetsOverlayBoxConstraints].
+  ///
+  /// Intrinsic dimensions and dry layout are not supported because they are
+  /// delegated to the underlying [LayoutBuilder].
   @protected
   Widget buildContent(BuildContext context) {
     return LayoutBuilder(
@@ -525,8 +550,9 @@ abstract class EdgeInsetsGeometryOverlay extends StatelessWidget {
 /// The [EdgeInsets] passed to [builder] represents the exact dimensions of the
 /// active side overlay widgets.
 ///
-/// The relative paint and hit-test order between the main content and the edge
-/// widgets is configurable via [paintOrder].
+/// Similar to [Stack], edge overlays are positioned independently and will overlap
+/// at corners if adjacent overlays are provided. The relative paint and hit-test
+/// order between the main content and the edge widgets is configurable via [paintOrder].
 ///
 /// This allows descendants to explicitly adapt their padding or layout (e.g. for
 /// map viewports, lists, or custom painters).
@@ -633,8 +659,9 @@ class EdgeInsetsOverlay extends EdgeInsetsGeometryOverlay {
 /// The [EdgeInsetsDirectional] passed to [builder] represents the exact dimensions
 /// of the active side overlay widgets.
 ///
-/// The relative paint and hit-test order between the main content and the edge
-/// widgets is configurable via [paintOrder].
+/// Similar to [Stack], edge overlays are positioned independently and will overlap
+/// at corners if adjacent overlays are provided. The relative paint and hit-test
+/// order between the main content and the edge widgets is configurable via [paintOrder].
 ///
 /// This allows descendants to explicitly adapt their padding or layout (e.g. for
 /// map viewports, lists, or custom painters) while respecting internationalization
@@ -933,6 +960,10 @@ class _RenderEdgeInsetsOverlay extends RenderBox
   /// The latest computed metrics for the active overlays.
   EdgeInsetsOverlayMetrics get metrics => _metrics;
   EdgeInsetsOverlayMetrics _metrics = const .new();
+
+  // Intrinsic dimensions and dry layout are intentionally delegated to [contentChild]
+  // (which is backed by [LayoutBuilder]). In accordance with [LayoutBuilder]'s contract,
+  // attempting to compute intrinsic dimensions or dry layout will throw.
 
   @override
   double computeMinIntrinsicWidth(double height) {
