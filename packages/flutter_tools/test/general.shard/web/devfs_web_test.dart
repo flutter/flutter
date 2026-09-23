@@ -863,10 +863,10 @@ void main() {
     final Uri uri = await webDevFS.create();
     webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
     final String webPrecompiledCanvaskitSdk = globals.artifacts!
-        .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk)
+        .getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdk)
         .path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
-        .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps)
+        .getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdkSourcemaps)
         .path;
     globals.fs.currentDirectory.childDirectory('lib').childFile('web_entrypoint.dart')
       ..createSync(recursive: true)
@@ -1283,10 +1283,10 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('GENERATED');
     final String webPrecompiledCanvaskitSdk = globals.artifacts!
-        .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk)
+        .getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdk)
         .path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
-        .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps)
+        .getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdkSourcemaps)
         .path;
     final String flutterJs = globals.fs.path.join(
       globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
@@ -1922,10 +1922,10 @@ const config = {
       ..createSync(recursive: true)
       ..writeAsStringSync('GENERATED');
     final String webPrecompiledCanvaskitSdk = globals.artifacts!
-        .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk)
+        .getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdk)
         .path;
     final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
-        .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps)
+        .getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdkSourcemaps)
         .path;
     final String flutterJs = globals.fs.path.join(
       globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
