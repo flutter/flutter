@@ -36,3 +36,13 @@ When operating within the `android-embedder-migration-v10/*` branch slug or modi
 - When upstream changes occur, cascade rebases downstream using:
   `dart .agents/skills/pr-chain-manager/scripts/pr_chain.dart rebase`
 - Push using `--force-with-lease`.
+
+## 6. Pre-Commit Linting, Formatting & Static Analysis
+Every `git commit` is gated by `.agents/skills/pr-chain-manager/scripts/pre_commit_linter.dart` (via both `.git/hooks/pre-commit` and the Jetski `PreToolUse` hook). Before committing, ensure all applicable checks pass:
+- **Dart Files (`.dart`)**: Must pass `dart format --output=none --set-exit-if-changed` and `dart analyze --fatal-infos`.
+- **Engine Formatting (`engine/src/flutter/*`)**: Must pass `et format --dry-run` (covers `clang-format` for C++/ObjC/Shaders, C++ `#ifndef` header guards & license headers, `gn format` for `.gn`/`.gni`, `google-java-format` for `.java`, `yapf` for `.py`, and trailing whitespace). Run `et format` to auto-fix.
+- **C/C++ Static Analysis (`.cc`, `.h`, `.cpp`, `.mm`)**: Must pass `clang-tidy` via `engine/src/flutter/tools/clang_tidy/bin/main.dart` across both `android_debug_unopt` and `host_debug_unopt` compilation databases.
+- **GN Build Graph & Header Firewall (`.gn`, `.gni`, `.cc`, `.h`)**: Must pass `gn check` on `out/android_debug_unopt` and `out/host_debug_unopt` (`check_includes = true`).
+- **Android SDK Lint (`.java`, `.kt`)**: Must pass `engine/src/flutter/tools/android_lint/bin/main.dart`.
+- **Perfetto Trace**: Pre-commit worker timings are recorded to `/tmp/flutter_pre_commit_trace.json`.
+
