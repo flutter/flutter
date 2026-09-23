@@ -131,10 +131,23 @@ void FlutterMain::Init(JNIEnv* env,
   auto command_line = fml::CommandLineFromIterators(args.begin(), args.end());
 
   auto settings = SettingsFromCommandLine(command_line, true);
-  if (command_line.HasOption("enable-surface-control")) {
+  if (command_line.HasOption("enable-surface-control") ||
+      command_line.HasOption("enable-hcpp-and-surface-control") ||
+      command_line.HasOption("enable-hcpp")) {
     std::string val;
-    command_line.GetOptionValue("enable-surface-control", &val);
-    settings.enable_surface_control = val.empty() || val == "true";
+    if (command_line.GetOptionValue("enable-hcpp-and-surface-control", &val) ||
+        command_line.GetOptionValue("enable-surface-control", &val) ||
+        command_line.GetOptionValue("enable-hcpp", &val)) {
+      settings.enable_surface_control =
+          val.empty() || val == "true" || val == "1";
+    } else {
+      settings.enable_surface_control = true;
+    }
+  }
+  if (command_line.HasOption("no-enable-surface-control") ||
+      command_line.HasOption("no-enable-hcpp-and-surface-control") ||
+      command_line.HasOption("no-enable-hcpp")) {
+    settings.enable_surface_control = false;
   }
 
   // Turn systracing on if ATrace_isEnabled is true and the user did not already
