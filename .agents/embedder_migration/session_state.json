@@ -1,9 +1,9 @@
 {
   "active_migration": "RFC 410: Android Embedder C-API Migration",
   "branch_slug": "android-embedder-migration-v10",
-  "current_branch": "android-embedder-migration-v10/2.4-platform-views",
-  "phase": "Phase 2.4: AndroidPlatformViewsController & Multi-View Value Capture",
-  "active_component": "shell/platform/android/embedder/android_platform_views_controller.h",
+  "current_branch": "android-embedder-migration-v10/2.5-semantics-and-assets",
+  "phase": "Phase 2.5: AndroidSemanticsBridge & AndroidDeferredLibraryLoader (Zero-Copy mmap/munmap)",
+  "active_component": "shell/platform/android/embedder/android_semantics_and_assets.h",
   "active_adrs": [
     "ADR-0000",
     "ADR-0001",
@@ -20,7 +20,7 @@
   ],
   "ratchet_state": {
     "total_allowed_internal_headers": 67,
-    "active_subsystem": "AndroidPlatformViewsController & Multi-View Value Capture",
+    "active_subsystem": "AndroidSemanticsBridge & AndroidDeferredLibraryLoader",
     "subsystem_remaining": 67
   },
   "invariants": [
@@ -34,5 +34,5 @@
   ],
   "last_verified_build": "flutter_embedder_native_unittests (35/35 PASSED) + check_android_embedder_deps.dart (PASS)",
   "failing_tests": [],
-  "next_immediate_action": "Verify full stacked PR chain (pr_chain.dart verify) and execute on-device/host verification"
+  "next_immediate_action": "Execute Phase 3 C-API cutover (3.0-c-api-cutover) and live device verification on Pixel_9_Pro_Fold"
 }

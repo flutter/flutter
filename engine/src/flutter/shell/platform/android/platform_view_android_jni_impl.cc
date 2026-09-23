@@ -600,9 +600,33 @@ static void SetViewportMetrics(JNIEnv* env,
   };
 
   if (auto* embedder = FlutterEmbedderNative::FromHandle(shell_holder)) {
-    embedder->SendWindowMetrics(static_cast<size_t>(physicalWidth),
-                                static_cast<size_t>(physicalHeight),
-                                static_cast<double>(devicePixelRatio));
+    FlutterWindowMetricsEvent event = {};
+    event.struct_size = sizeof(FlutterWindowMetricsEvent);
+    event.width = static_cast<size_t>(physicalWidth > 0 ? physicalWidth : 0);
+    event.height = static_cast<size_t>(physicalHeight > 0 ? physicalHeight : 0);
+    event.pixel_ratio = static_cast<double>(devicePixelRatio);
+    event.view_id = kFlutterImplicitViewId;
+    event.physical_view_inset_top = static_cast<double>(physicalViewInsetTop);
+    event.physical_view_inset_right =
+        static_cast<double>(physicalViewInsetRight);
+    event.physical_view_inset_bottom =
+        static_cast<double>(physicalViewInsetBottom);
+    event.physical_view_inset_left = static_cast<double>(physicalViewInsetLeft);
+    if (physicalMinWidth > 0 || physicalMaxWidth > 0 || physicalMinHeight > 0 ||
+        physicalMaxHeight > 0) {
+      event.has_constraints = true;
+      event.min_width_constraint =
+          static_cast<size_t>(physicalMinWidth > 0 ? physicalMinWidth : 0);
+      event.max_width_constraint = static_cast<size_t>(
+          physicalMaxWidth > 0 ? physicalMaxWidth
+                               : (physicalWidth > 0 ? physicalWidth : 0));
+      event.min_height_constraint =
+          static_cast<size_t>(physicalMinHeight > 0 ? physicalMinHeight : 0);
+      event.max_height_constraint = static_cast<size_t>(
+          physicalMaxHeight > 0 ? physicalMaxHeight
+                                : (physicalHeight > 0 ? physicalHeight : 0));
+    }
+    embedder->SendWindowMetricsEvent(event);
     return;
   }
 

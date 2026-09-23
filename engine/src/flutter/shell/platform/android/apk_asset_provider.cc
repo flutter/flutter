@@ -4,7 +4,9 @@
 
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 
+#if !defined(_WIN32)
 #include <unistd.h>
+#endif
 
 #include <algorithm>
 #include <sstream>

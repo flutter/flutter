@@ -104,6 +104,21 @@ void FlutterMain::Init(JNIEnv* env,
 
   auto settings = SettingsFromCommandLine(command_line, true);
 
+#ifdef FML_OS_ANDROID
+  if (!settings.enable_embedder_api) {
+    char prop_value[PROP_VALUE_MAX] = {};
+    if (__system_property_get("debug.flutter.enable_embedder_api", prop_value) >
+        0) {
+      if (strcmp(prop_value, "true") == 0 || strcmp(prop_value, "1") == 0) {
+        settings.enable_embedder_api = true;
+      }
+    }
+  }
+  if (settings.enable_embedder_api) {
+    settings.trace_systrace = true;
+  }
+#endif  // FML_OS_ANDROID
+
   // Turn systracing on if ATrace_isEnabled is true and the user did not already
   // request systracing
   if (!settings.trace_systrace) {

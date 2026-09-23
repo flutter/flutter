@@ -19,6 +19,7 @@
 #include "flutter/shell/platform/android/embedder/android_choreographer_vsync.h"
 #include "flutter/shell/platform/android/embedder/android_hardware_buffer_external_texture.h"
 #include "flutter/shell/platform/android/embedder/android_platform_views_controller.h"
+#include "flutter/shell/platform/android/embedder/android_semantics_and_assets.h"
 #include "flutter/shell/platform/android/embedder/android_surface_control.h"
 #include "flutter/shell/platform/android/embedder/jni_delegate.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -104,6 +105,9 @@ class FlutterEmbedderNative {
                          double pixel_ratio,
                          int64_t view_id = 0);
 
+  /// Sends a fully populated FlutterWindowMetricsEvent to the engine.
+  bool SendWindowMetricsEvent(const FlutterWindowMetricsEvent& event);
+
   /// Sends a platform message from Android to Dart via `embedder_api_`.
   bool SendPlatformMessage(const std::string& channel,
                            const uint8_t* bytes,
@@ -140,6 +144,14 @@ class FlutterEmbedderNative {
 
   AndroidPlatformViewsController* GetPlatformViewsController() const {
     return platform_views_controller_.get();
+  }
+
+  AndroidSemanticsBridge* GetSemanticsBridge() const {
+    return semantics_bridge_.get();
+  }
+
+  AndroidDeferredLibraryLoader* GetDeferredLibraryLoader() const {
+    return deferred_library_loader_.get();
   }
 
   bool RegisterExternalTexture(int64_t texture_id);
@@ -191,6 +203,9 @@ class FlutterEmbedderNative {
 
   static void OnVsyncRequestCallback(void* user_data, intptr_t baton);
 
+  static void OnSemanticsUpdate2Callback(const FlutterSemanticsUpdate2* update,
+                                         void* user_data);
+
   void HandleEnginePlatformMessage(const FlutterPlatformMessage* message);
 
   Settings settings_;
@@ -203,6 +218,8 @@ class FlutterEmbedderNative {
   std::unique_ptr<AndroidHardwareBufferExternalTexture>
       external_texture_manager_;
   std::unique_ptr<AndroidPlatformViewsController> platform_views_controller_;
+  std::unique_ptr<AndroidSemanticsBridge> semantics_bridge_;
+  std::unique_ptr<AndroidDeferredLibraryLoader> deferred_library_loader_;
   bool is_valid_ = false;
   std::atomic<bool> first_frame_dispatched_{false};
 

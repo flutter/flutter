@@ -21,28 +21,32 @@
     ]
   },
   "ratchet_state": {
-    "current_branch": "android-embedder-migration-v10/2.4-platform-views",
+    "current_branch": "android-embedder-migration-v10/2.5-semantics-and-assets",
     "total_suite_tests": 10,
     "max_allowed_failing_tests": 0,
     "current_failing_test_count": 0,
     "passing_locked_tests": [
-      "integration:android_hardware_smoke_test",
+      "devicelab:android_choreographer_do_frame_test",
       "devicelab:android_lifecycles_test",
       "integration:android_engine_test",
-      "devicelab:android_choreographer_do_frame_test",
-      "integration:channels",
-      "integration:platform_interaction",
-      "integration:external_textures",
+      "integration:android_hardware_smoke_test",
+      "integration:android_semantics_testing",
       "integration:android_views",
+      "integration:channels",
+      "integration:external_textures",
       "integration:hybrid_android_views",
-      "integration:android_semantics_testing"
+      "integration:platform_interaction"
     ],
     "failing_tests_by_target_branch": [
       {
         "id": "integration:android_hardware_smoke_test",
         "type": "dev/integration_tests",
         "working_directory": "dev/integration_tests/android_hardware_smoke_test",
-        "command": ["flutter", "drive", "--target=test_driver/main.dart"],
+        "command": [
+          "flutter",
+          "test",
+          "integration_test/integration_test_wrapper.dart"
+        ],
         "subsystem": "Engine Lifecycle & Surface Availability",
         "expected_green_branch": "android-embedder-migration-v10/2.1-surface-control",
         "status_when_flag_true": "PASSING_LOCKED"
@@ -51,7 +55,11 @@
         "id": "integration:android_engine_test",
         "type": "dev/integration_tests",
         "working_directory": "dev/integration_tests/android_engine_test",
-        "command": ["flutter", "drive", "lib/main.dart"],
+        "command": [
+          "flutter",
+          "drive",
+          "lib/engine_handle.dart"
+        ],
         "subsystem": "Engine Lifecycle & Multi-Engine Spawning",
         "expected_green_branch": "android-embedder-migration-v10/2.2-choreographer-vsync",
         "status_when_flag_true": "PASSING_LOCKED"
@@ -60,7 +68,13 @@
         "id": "devicelab:android_choreographer_do_frame_test",
         "type": "dev/devicelab",
         "working_directory": "dev/devicelab",
-        "command": ["dart", "bin/test_runner.dart", "test", "-t", "android_choreographer_do_frame_test"],
+        "command": [
+          "dart",
+          "bin/test_runner.dart",
+          "test",
+          "-t",
+          "android_choreographer_do_frame_test"
+        ],
         "subsystem": "Vsync Provider & Choreographer",
         "expected_green_branch": "android-embedder-migration-v10/2.2-choreographer-vsync",
         "status_when_flag_true": "PASSING_LOCKED"
@@ -69,7 +83,13 @@
         "id": "devicelab:android_lifecycles_test",
         "type": "dev/devicelab",
         "working_directory": "dev/devicelab",
-        "command": ["dart", "bin/test_runner.dart", "test", "-t", "android_lifecycles_test"],
+        "command": [
+          "dart",
+          "bin/test_runner.dart",
+          "test",
+          "-t",
+          "android_lifecycles_test"
+        ],
         "subsystem": "Activity/Fragment Lifecycle & Surface Reattachment",
         "expected_green_branch": "android-embedder-migration-v10/2.1-surface-control",
         "status_when_flag_true": "PASSING_LOCKED"
@@ -78,7 +98,11 @@
         "id": "integration:channels",
         "type": "dev/integration_tests",
         "working_directory": "dev/integration_tests/channels",
-        "command": ["flutter", "drive", "lib/main.dart"],
+        "command": [
+          "flutter",
+          "drive",
+          "lib/main.dart"
+        ],
         "subsystem": "Platform Channels & Background Task Queues",
         "expected_green_branch": "android-embedder-migration-v10/2.3-hardware-buffer",
         "status_when_flag_true": "PASSING_LOCKED"
@@ -87,7 +111,11 @@
         "id": "integration:platform_interaction",
         "type": "dev/integration_tests",
         "working_directory": "dev/integration_tests/platform_interaction",
-        "command": ["flutter", "drive", "lib/main.dart"],
+        "command": [
+          "flutter",
+          "drive",
+          "lib/main.dart"
+        ],
         "subsystem": "Platform Interaction & System Channels",
         "expected_green_branch": "android-embedder-migration-v10/2.3-hardware-buffer",
         "status_when_flag_true": "PASSING_LOCKED"
@@ -96,7 +124,11 @@
         "id": "integration:android_views",
         "type": "dev/integration_tests",
         "working_directory": "dev/integration_tests/android_views",
-        "command": ["flutter", "drive", "lib/main.dart"],
+        "command": [
+          "flutter",
+          "drive",
+          "lib/main.dart"
+        ],
         "subsystem": "Platform Views (HCPP & TLHC)",
         "expected_green_branch": "android-embedder-migration-v10/2.4-platform-views",
         "status_when_flag_true": "PASSING_LOCKED"
@@ -105,7 +137,11 @@
         "id": "integration:hybrid_android_views",
         "type": "dev/integration_tests",
         "working_directory": "dev/integration_tests/hybrid_android_views",
-        "command": ["flutter", "drive", "lib/main.dart"],
+        "command": [
+          "flutter",
+          "drive",
+          "lib/main.dart"
+        ],
         "subsystem": "Hybrid Composition Platform Views",
         "expected_green_branch": "android-embedder-migration-v10/2.4-platform-views",
         "status_when_flag_true": "PASSING_LOCKED"
@@ -114,7 +150,11 @@
         "id": "integration:external_textures",
         "type": "dev/integration_tests",
         "working_directory": "dev/integration_tests/external_textures",
-        "command": ["flutter", "drive", "lib/frame_rate_main.dart"],
+        "command": [
+          "flutter",
+          "drive",
+          "lib/frame_rate_main.dart"
+        ],
         "subsystem": "External Textures & AHardwareBuffer",
         "expected_green_branch": "android-embedder-migration-v10/2.3-hardware-buffer",
         "status_when_flag_true": "PASSING_LOCKED"
@@ -123,7 +163,11 @@
         "id": "integration:android_semantics_testing",
         "type": "dev/integration_tests",
         "working_directory": "dev/integration_tests/android_semantics_testing",
-        "command": ["flutter", "drive", "lib/main.dart"],
+        "command": [
+          "flutter",
+          "drive",
+          "lib/main.dart"
+        ],
         "subsystem": "Accessibility & Semantics Bridge",
         "expected_green_branch": "android-embedder-migration-v10/2.4-platform-views",
         "status_when_flag_true": "PASSING_LOCKED"

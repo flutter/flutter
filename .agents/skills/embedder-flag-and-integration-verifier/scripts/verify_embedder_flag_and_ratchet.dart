@@ -251,8 +251,68 @@ Future<void> _runDeviceSuite(List<String> args) async {
     exit(1);
   }
 
-  final String deviceId = connectedDevices.first.split('\t').first;
+  String? requestedDevice;
+  var localEngine = 'android_debug_unopt_arm64';
+  var localEngineHost = 'host_debug_unopt';
+  String? filterTestId;
+  final extraTestArgs = <String>[];
+  for (var i = 0; i < args.length; i++) {
+    final String arg = args[i];
+    if (arg == '--update-ratchet') {
+      continue;
+    } else if (arg == '--device' && i + 1 < args.length) {
+      requestedDevice = args[++i];
+    } else if (arg.startsWith('--device=')) {
+      requestedDevice = arg.substring('--device='.length);
+    } else if (arg == '--local-engine' && i + 1 < args.length) {
+      localEngine = args[++i];
+    } else if (arg.startsWith('--local-engine=')) {
+      localEngine = arg.substring('--local-engine='.length);
+    } else if (arg == '--local-engine-host' && i + 1 < args.length) {
+      localEngineHost = args[++i];
+    } else if (arg.startsWith('--local-engine-host=')) {
+      localEngineHost = arg.substring('--local-engine-host='.length);
+    } else if (arg == '--test' && i + 1 < args.length) {
+      filterTestId = args[++i];
+    } else if (arg.startsWith('--test=')) {
+      filterTestId = arg.substring('--test='.length);
+    } else {
+      extraTestArgs.add(arg);
+    }
+  }
+
+  final String deviceId = requestedDevice ?? connectedDevices.first.split('\t').first;
   stdout.writeln('==> Connected Android Device: $deviceId');
+  stdout.writeln('==> Forcing screen to stay awake and unlocked...');
+  await Process.run('adb', <String>['-s', deviceId, 'shell', 'svc', 'power', 'stayon', 'true']);
+  await Process.run('adb', <String>[
+    '-s',
+    deviceId,
+    'shell',
+    'settings',
+    'put',
+    'system',
+    'screen_off_timeout',
+    '2147483647',
+  ]);
+  await Process.run('adb', <String>[
+    '-s',
+    deviceId,
+    'shell',
+    'input',
+    'keyevent',
+    'KEYCODE_WAKEUP',
+  ]);
+  await Process.run('adb', <String>['-s', deviceId, 'shell', 'wm', 'dismiss-keyguard']);
+  await Process.run('adb', <String>['-s', deviceId, 'logcat', '-G', '16M']);
+  await Process.run('adb', <String>[
+    '-s',
+    deviceId,
+    'shell',
+    'setprop',
+    'debug.flutter.enable_embedder_api',
+    'true',
+  ]);
 
   final ratchetFile = File(_ratchetPath);
   final root = jsonDecode(ratchetFile.readAsStringSync()) as Map<String, Object?>;
@@ -275,27 +335,50 @@ Future<void> _runDeviceSuite(List<String> args) async {
   for (final item in suiteTests) {
     final testMap = item! as Map<String, Object?>;
     final id = testMap['id']! as String;
+    if (filterTestId != null && id != filterTestId) {
+      continue;
+    }
     final workDir = '$_flutterRoot/${testMap['working_directory']! as String}';
     final List<String> baseCmd = (testMap['command']! as List<Object?>).cast<String>();
 
     stdout.writeln('\n==> Running [$id] in $workDir with Feature Flag = TRUE...');
 
+    // 0. Keep screen awake, unlocked, and feature flag enabled before each test
+    await Process.run('adb', <String>[
+      '-s',
+      deviceId,
+      'shell',
+      'input',
+      'keyevent',
+      'KEYCODE_WAKEUP',
+    ]);
+    await Process.run('adb', <String>['-s', deviceId, 'shell', 'wm', 'dismiss-keyguard']);
+    await Process.run('adb', <String>[
+      '-s',
+      deviceId,
+      'shell',
+      'setprop',
+      'debug.flutter.enable_embedder_api',
+      'true',
+    ]);
+
     // 1. Clear logcat buffer before launching test
     await Process.run('adb', <String>['-s', deviceId, 'logcat', '-c']);
 
-    // 2. Start background Perfetto trace on the Android device (15s window)
+    // 2. Start background Perfetto trace on the Android device (180s ring buffer)
     const perfettoConfig = '''
-buffers: { size_kb: 16384 fill_policy: RING_BUFFER }
+buffers: { size_kb: 32768 fill_policy: RING_BUFFER }
 data_sources: {
   config {
     name: "linux.ftrace"
     ftrace_config {
-      atrace_categories: "flutter"
+      atrace_categories: "gfx"
+      atrace_categories: "view"
       atrace_apps: "*"
     }
   }
 }
-duration_ms: 15000
+duration_ms: 180000
 ''';
     final Process perfettoProc = await Process.start('adb', <String>[
       '-s',
@@ -311,12 +394,23 @@ duration_ms: 15000
     perfettoProc.stdin.writeln(perfettoConfig);
     await perfettoProc.stdin.close();
 
-    // 3. Execute the integration/devicelab test
-    final ProcessResult testRes = await Process.run(baseCmd.first, <String>[
+    // 3. Execute the integration/devicelab test with local engine and device ID
+    final cmdArgs = <String>[
       ...baseCmd.skip(1),
-      ...args,
-    ], workingDirectory: workDir);
+      '-d',
+      deviceId,
+      '--local-engine=$localEngine',
+      '--local-engine-host=$localEngineHost',
+      ...extraTestArgs,
+    ];
+    final ProcessResult testRes = await Process.run(
+      baseCmd.first,
+      cmdArgs,
+      workingDirectory: workDir,
+    );
 
+    // Stop Perfetto gracefully so it flushes the ring buffer to disk
+    await Process.run('adb', <String>['-s', deviceId, 'shell', 'killall', '-2', 'perfetto']);
     await perfettoProc.exitCode;
 
     // 4. Pull Perfetto trace and capture logcat

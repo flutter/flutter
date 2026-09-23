@@ -157,6 +157,9 @@ struct FakeProcTableState {
   int register_external_texture_calls = 0;
   int unregister_external_texture_calls = 0;
   int mark_external_texture_frame_available_calls = 0;
+  int update_semantics_enabled_calls = 0;
+  int dispatch_semantics_action_calls = 0;
+  bool fail_load_deferred_library = false;
 
   intptr_t last_on_vsync_baton = 0;
   uint64_t last_on_vsync_start_nanos = 0;
@@ -168,7 +171,10 @@ struct FakeProcTableState {
   bool last_does_handle_on_platform_thread = true;
   FlutterPlatformMessageCallback2 saved_message_callback2 = nullptr;
   FlutterRequestDartDeferredLibraryCallback saved_deferred_callback = nullptr;
+  FlutterUpdateSemanticsCallback2 saved_semantics_callback2 = nullptr;
   VsyncCallback saved_vsync_callback = nullptr;
+  VoidCallback saved_deferred_destruction_callback = nullptr;
+  void* saved_deferred_destruction_user_data = nullptr;
   void* saved_user_data = nullptr;
   std::string last_spawn_entrypoint;
   std::string last_spawn_route;
@@ -191,6 +197,7 @@ FlutterEngineProcTable CreateFakeProcTable(FakeProcTableState* state) {
     g_fake_state->saved_message_callback2 = args->platform_message_callback2;
     g_fake_state->saved_deferred_callback =
         args->request_dart_deferred_library_callback;
+    g_fake_state->saved_semantics_callback2 = args->update_semantics_callback2;
     g_fake_state->saved_vsync_callback = args->vsync_callback;
     g_fake_state->saved_user_data = user_data;
     g_fake_state->passed_aot_data = args->aot_data;
@@ -260,8 +267,31 @@ FlutterEngineProcTable CreateFakeProcTable(FakeProcTableState* state) {
 
   table.LoadDartDeferredLibrary =
       [](FLUTTER_API_SYMBOL(FlutterEngine) /*engine*/,
-         const FlutterDartDeferredLibrary* /*library*/) {
+         const FlutterDartDeferredLibrary* library) {
         g_fake_state->load_deferred_library_calls++;
+        if (g_fake_state->fail_load_deferred_library) {
+          return kInvalidArguments;
+        }
+        if (library != nullptr) {
+          g_fake_state->saved_deferred_destruction_callback =
+              library->destruction_callback;
+          g_fake_state->saved_deferred_destruction_user_data =
+              library->user_data;
+        }
+        return kSuccess;
+      };
+
+  table.UpdateSemanticsEnabled =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) /*engine*/, bool /*enabled*/) {
+        g_fake_state->update_semantics_enabled_calls++;
+        return kSuccess;
+      };
+
+  table.DispatchSemanticsAction =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) /*engine*/, uint64_t /*id*/,
+         FlutterSemanticsAction /*action*/, const uint8_t* /*data*/,
+         size_t /*data_length*/) {
+        g_fake_state->dispatch_semantics_action_calls++;
         return kSuccess;
       };
 
@@ -390,6 +420,7 @@ TEST(FlutterEmbedderNativeTest,
     EXPECT_FALSE(state.last_does_handle_on_platform_thread);
     EXPECT_NE(state.saved_message_callback2, nullptr);
     EXPECT_NE(state.saved_deferred_callback, nullptr);
+    EXPECT_NE(state.saved_semantics_callback2, nullptr);
   }
 
   EXPECT_EQ(state.deinitialize_calls, 1);
@@ -478,6 +509,38 @@ TEST(FlutterEmbedderNativeTest,
   ASSERT_NE(state.saved_deferred_callback, nullptr);
   state.saved_deferred_callback(7, state.saved_user_data);
   EXPECT_EQ(jni_delegate->requested_loading_unit_id, 7);
+}
+
+TEST(FlutterEmbedderNativeTest,
+     RoutesSemanticsUpdate2CallbackToSemanticsBridge) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  Settings settings;
+
+  FlutterEmbedderNative embedder(settings, jni_delegate, proc_table);
+  ASSERT_TRUE(embedder.Launch("/assets", "/icudtl.dat", "main", "", {},
+                              /*engine_id=*/1));
+  ASSERT_NE(state.saved_semantics_callback2, nullptr);
+
+  FlutterSemanticsNode2 node = {};
+  node.struct_size = sizeof(FlutterSemanticsNode2);
+  node.id = 123;
+  FlutterSemanticsNode2* nodes[] = {&node};
+
+  FlutterSemanticsUpdate2 update = {};
+  update.struct_size = sizeof(FlutterSemanticsUpdate2);
+  update.view_id = 0;
+  update.node_count = 1;
+  update.nodes = nodes;
+
+  state.saved_semantics_callback2(&update, state.saved_user_data);
+
+  AndroidSemanticsBridge::SerializedSemanticsBatch batch;
+  ASSERT_TRUE(embedder.GetSemanticsBridge()->GetLastBatchForView(0, &batch));
+  EXPECT_EQ(batch.node_count, 1u);
+  ASSERT_EQ(batch.node_ids.size(), 1u);
+  EXPECT_EQ(batch.node_ids[0], 123);
 }
 
 TEST(FlutterEmbedderNativeTest, SpawnsChildEngineSharingParentVmViaProcTable) {
@@ -1279,6 +1342,116 @@ TEST(FlutterEmbedderNativeTest, CopySoftwarePixelsRejectsInvalidBuffers) {
       FlutterEmbedderNative::CopySoftwarePixels(src.data(), 0, 4, view));
   EXPECT_FALSE(
       FlutterEmbedderNative::CopySoftwarePixels(src.data(), 16, 0, view));
+}
+
+TEST(AndroidSemanticsAndAssetsTest,
+     SerializesSemanticsUpdate2BatchAndDispatchesActionsViaProcTable) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  auto engine = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xCAFE01);
+
+  AndroidSemanticsBridge bridge(jni_delegate, proc_table);
+  EXPECT_TRUE(bridge.SetSemanticsEnabled(engine, true));
+  EXPECT_EQ(state.update_semantics_enabled_calls, 1);
+
+  EXPECT_TRUE(bridge.DispatchSemanticsAction(
+      engine, /*node_id=*/12, kFlutterSemanticsActionTap, nullptr, 0));
+  EXPECT_EQ(state.dispatch_semantics_action_calls, 1);
+
+  FlutterSemanticsNode2 node0 = {};
+  node0.struct_size = sizeof(FlutterSemanticsNode2);
+  node0.id = 0;
+  FlutterSemanticsNode2 node1 = {};
+  node1.struct_size = sizeof(FlutterSemanticsNode2);
+  node1.id = 12;
+  FlutterSemanticsNode2* nodes[] = {&node0, &node1};
+
+  FlutterSemanticsCustomAction2 action0 = {};
+  action0.struct_size = sizeof(FlutterSemanticsCustomAction2);
+  action0.id = 7;
+  FlutterSemanticsCustomAction2* actions[] = {&action0};
+
+  FlutterSemanticsUpdate2 update = {};
+  update.struct_size = sizeof(FlutterSemanticsUpdate2);
+  update.node_count = 2;
+  update.nodes = nodes;
+  update.custom_action_count = 1;
+  update.custom_actions = actions;
+  update.view_id = 0;
+
+  AndroidSemanticsBridge::OnSemanticsUpdate2Callback(&update, &bridge);
+
+  AndroidSemanticsBridge::SerializedSemanticsBatch batch;
+  ASSERT_TRUE(bridge.GetLastBatchForView(0, &batch));
+  EXPECT_EQ(batch.node_count, 2u);
+  EXPECT_EQ(batch.custom_action_count, 1u);
+  ASSERT_EQ(batch.node_ids.size(), 2u);
+  EXPECT_EQ(batch.node_ids[0], 0);
+  EXPECT_EQ(batch.node_ids[1], 12);
+  ASSERT_EQ(batch.action_ids.size(), 1u);
+  EXPECT_EQ(batch.action_ids[0], 7);
+}
+
+TEST(AndroidSemanticsAndAssetsTest,
+     PinsMappedDeferredLibraryBuffersUntilDestructionCallbackIsInvoked) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto engine = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xCAFE01);
+
+  std::vector<intptr_t> unmapped_units;
+  AndroidDeferredLibraryLoader loader(
+      proc_table,
+      [&unmapped_units](intptr_t unit_id, const uint8_t* /*data*/,
+                        size_t /*data_sz*/, const uint8_t* /*instr*/,
+                        size_t /*instr_sz*/) {
+        unmapped_units.push_back(unit_id);
+      });
+
+  const uint8_t fake_data[] = {0xDA, 0x7A};
+  const uint8_t fake_instr[] = {0xC0, 0xDE};
+
+  ASSERT_TRUE(loader.LoadMappedDeferredLibrary(engine, /*loading_unit_id=*/5,
+                                               fake_data, sizeof(fake_data),
+                                               fake_instr, sizeof(fake_instr)));
+  EXPECT_EQ(state.load_deferred_library_calls, 1);
+
+  // Invariant (ADR-0009): Buffers remain pinned while Dart VM holds the lease!
+  EXPECT_EQ(loader.GetActiveMappedUnitCount(), 1u);
+  EXPECT_TRUE(unmapped_units.empty());
+
+  // When Dart VM finishes and invokes `destruction_callback`, `munmap`
+  // triggers.
+  ASSERT_NE(state.saved_deferred_destruction_callback, nullptr);
+  state.saved_deferred_destruction_callback(
+      state.saved_deferred_destruction_user_data);
+  EXPECT_EQ(loader.GetActiveMappedUnitCount(), 0u);
+  ASSERT_EQ(unmapped_units.size(), 1u);
+  EXPECT_EQ(unmapped_units[0], 5);
+}
+
+TEST(AndroidSemanticsAndAssetsTest,
+     UnmapsDeferredLibraryImmediatelyWhenProcTableLoadFails) {
+  FakeProcTableState state;
+  state.fail_load_deferred_library = true;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto engine = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xCAFE01);
+
+  std::vector<intptr_t> unmapped_units;
+  AndroidDeferredLibraryLoader loader(
+      proc_table,
+      [&unmapped_units](intptr_t unit_id, const uint8_t* /*data*/,
+                        size_t /*data_sz*/, const uint8_t* /*instr*/,
+                        size_t /*instr_sz*/) {
+        unmapped_units.push_back(unit_id);
+      });
+
+  const uint8_t fake_data[] = {0x01};
+  EXPECT_FALSE(loader.LoadMappedDeferredLibrary(
+      engine, /*loading_unit_id=*/9, fake_data, sizeof(fake_data), nullptr, 0));
+  EXPECT_EQ(loader.GetActiveMappedUnitCount(), 0u);
+  ASSERT_EQ(unmapped_units.size(), 1u);
+  EXPECT_EQ(unmapped_units[0], 9);
 }
 
 }  // namespace testing

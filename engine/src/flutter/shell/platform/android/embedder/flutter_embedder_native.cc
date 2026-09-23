@@ -6,6 +6,10 @@
 
 #if !defined(_WIN32)
 #include <dlfcn.h>
+#include <unistd.h>
+#endif
+#if defined(__ANDROID__)
+#include <android/log.h>
 #endif
 #if defined(__ANDROID__)
 #include <android/native_window.h>
@@ -46,6 +50,23 @@ void RegisterEmbedderHandle(FlutterEmbedderNative* instance) {
 void UnregisterEmbedderHandle(FlutterEmbedderNative* instance) {
   std::lock_guard<std::mutex> lock(GetHandleRegistryMutex());
   GetActiveEmbedderHandles().erase(instance);
+}
+
+void EmitAndroidSystraceSlice(const char* section_name) {
+#if defined(__ANDROID__)
+  using ATraceBeginSectionFn = void (*)(const char*);
+  using ATraceEndSectionFn = void (*)();
+  static const auto begin_section = reinterpret_cast<ATraceBeginSectionFn>(
+      dlsym(RTLD_DEFAULT, "ATrace_beginSection"));
+  static const auto end_section = reinterpret_cast<ATraceEndSectionFn>(
+      dlsym(RTLD_DEFAULT, "ATrace_endSection"));
+  if (begin_section != nullptr && end_section != nullptr) {
+    begin_section(section_name);
+    end_section();
+  }
+#else
+  (void)section_name;
+#endif
 }
 
 struct OutboundResponseContext {
@@ -153,6 +174,10 @@ FlutterEmbedderNative::FlutterEmbedderNative(
                                                              embedder_api_);
   platform_views_controller_ = std::make_unique<AndroidPlatformViewsController>(
       jni_delegate_, surface_control_.get());
+  semantics_bridge_ =
+      std::make_unique<AndroidSemanticsBridge>(jni_delegate_, embedder_api_);
+  deferred_library_loader_ =
+      std::make_unique<AndroidDeferredLibraryLoader>(embedder_api_);
 }
 
 FlutterEmbedderNative::FlutterEmbedderNative(
@@ -174,6 +199,11 @@ FlutterEmbedderNative::FlutterEmbedderNative(
           std::make_unique<AndroidPlatformViewsController>(
               jni_delegate_,
               surface_control_.get())),
+      semantics_bridge_(
+          std::make_unique<AndroidSemanticsBridge>(jni_delegate_,
+                                                   embedder_api_)),
+      deferred_library_loader_(
+          std::make_unique<AndroidDeferredLibraryLoader>(embedder_api_)),
       is_valid_(proc_table.Initialize != nullptr &&
                 proc_table.RunInitialized != nullptr &&
                 proc_table.Shutdown != nullptr) {
@@ -182,6 +212,10 @@ FlutterEmbedderNative::FlutterEmbedderNative(
   surface_control_->SetTextureUpdateCallback(
       [this]() { UpdateAllJavaTextures(); });
 #endif
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::Initialize[C-API]");
+  EmitAndroidSystraceSlice("FlutterEmbedderNative::Initialize[C-API]");
+  FML_LOG(IMPORTANT) << "[EMBEDDER_API_PROOF] path=C_EMBEDDER_API "
+                        "proc_table=FlutterEngineInitialize shell_holder=NONE";
 }
 
 FlutterEmbedderNative::FlutterEmbedderNative(
@@ -205,6 +239,11 @@ FlutterEmbedderNative::FlutterEmbedderNative(
           std::make_unique<AndroidPlatformViewsController>(
               jni_delegate_,
               surface_control_.get())),
+      semantics_bridge_(
+          std::make_unique<AndroidSemanticsBridge>(jni_delegate_,
+                                                   embedder_api_)),
+      deferred_library_loader_(
+          std::make_unique<AndroidDeferredLibraryLoader>(embedder_api_)),
       is_valid_(spawned_engine != nullptr) {
   RegisterEmbedderHandle(this);
 #if defined(__ANDROID__)
@@ -249,6 +288,7 @@ bool FlutterEmbedderNative::Launch(
     const std::vector<std::string>& entrypoint_args,
     int64_t engine_id) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::Initialize[C-API]");
+  EmitAndroidSystraceSlice("FlutterEmbedderNative::Initialize[C-API]");
   FML_LOG(IMPORTANT) << "[EMBEDDER_API_PROOF] path=C_EMBEDDER_API "
                         "proc_table=FlutterEngineInitialize shell_holder=NONE";
 
@@ -274,6 +314,58 @@ bool FlutterEmbedderNative::Launch(
            self->PresentSoftware(allocation, row_bytes, height);
   };
 
+  std::string resolved_assets_path = assets_path;
+  std::string vm_snapshot_path;
+  std::string isolate_snapshot_path;
+  if (!settings_.application_kernel_asset.empty()) {
+    const std::string candidate_kernel = assets_path + "/kernel_blob.bin";
+    if (::access(candidate_kernel.c_str(), R_OK) != 0) {
+      const size_t slash_pos = settings_.application_kernel_asset.rfind('/');
+      if (slash_pos != std::string::npos) {
+        resolved_assets_path =
+            settings_.application_kernel_asset.substr(0, slash_pos);
+      }
+    }
+  }
+  const std::string candidate_vm_snap =
+      resolved_assets_path + "/vm_snapshot_data";
+  const std::string candidate_isolate_snap =
+      resolved_assets_path + "/isolate_snapshot_data";
+  if (::access(candidate_vm_snap.c_str(), R_OK) == 0) {
+    vm_snapshot_path = candidate_vm_snap;
+  }
+  if (::access(candidate_isolate_snap.c_str(), R_OK) == 0) {
+    isolate_snapshot_path = candidate_isolate_snap;
+  }
+
+  std::vector<std::string> cmd_args_storage;
+  cmd_args_storage.push_back("flutter");
+  cmd_args_storage.push_back("--verbose-logging");
+  cmd_args_storage.push_back("--trace-systrace");
+  if (settings_.start_paused) {
+    cmd_args_storage.push_back("--start-paused");
+  }
+  if (settings_.disable_service_auth_codes) {
+    cmd_args_storage.push_back("--disable-service-auth-codes");
+  }
+  if (settings_.use_test_fonts) {
+    cmd_args_storage.push_back("--use-test-fonts");
+  }
+  if (settings_.enable_impeller) {
+    cmd_args_storage.push_back("--enable-impeller=true");
+  } else {
+    cmd_args_storage.push_back("--enable-impeller=false");
+  }
+  if (settings_.vm_service_port > 0) {
+    cmd_args_storage.push_back("--vm-service-port=" +
+                               std::to_string(settings_.vm_service_port));
+  }
+  std::vector<const char*> cmd_args_ptrs;
+  cmd_args_ptrs.reserve(cmd_args_storage.size());
+  for (const auto& arg : cmd_args_storage) {
+    cmd_args_ptrs.push_back(arg.c_str());
+  }
+
   std::vector<const char*> dart_args_ptrs;
   dart_args_ptrs.reserve(entrypoint_args.size());
   for (const auto& arg : entrypoint_args) {
@@ -282,8 +374,10 @@ bool FlutterEmbedderNative::Launch(
 
   FlutterProjectArgs project_args = {};
   project_args.struct_size = sizeof(FlutterProjectArgs);
-  project_args.assets_path = assets_path.c_str();
+  project_args.assets_path = resolved_assets_path.c_str();
   project_args.icu_data_path = icu_data_path.c_str();
+  project_args.command_line_argc = static_cast<int>(cmd_args_ptrs.size());
+  project_args.command_line_argv = cmd_args_ptrs.data();
   if (!entrypoint.empty()) {
     project_args.custom_dart_entrypoint = entrypoint.c_str();
   }
@@ -297,6 +391,17 @@ bool FlutterEmbedderNative::Launch(
   project_args.request_dart_deferred_library_callback =
       &FlutterEmbedderNative::OnRequestDartDeferredLibraryCallback;
   project_args.vsync_callback = &FlutterEmbedderNative::OnVsyncRequestCallback;
+  project_args.log_message_callback = [](const char* tag, const char* message,
+                                         void* /*user_data*/) {
+#if defined(__ANDROID__)
+    __android_log_print(ANDROID_LOG_INFO,
+                        (tag != nullptr && tag[0] != '\0') ? tag : "flutter",
+                        "%s", message != nullptr ? message : "");
+#else
+    FML_LOG(IMPORTANT) << (tag != nullptr ? tag : "flutter") << ": "
+                       << (message != nullptr ? message : "");
+#endif
+  };
 
   FlutterCompositor compositor = {};
   compositor.struct_size = sizeof(FlutterCompositor);
@@ -309,6 +414,10 @@ bool FlutterEmbedderNative::Launch(
       &AndroidPlatformViewsController::OnPresentViewCallback;
   if (platform_views_controller_ != nullptr) {
     project_args.compositor = &compositor;
+  }
+  if (semantics_bridge_ != nullptr) {
+    project_args.update_semantics_callback2 =
+        &FlutterEmbedderNative::OnSemanticsUpdate2Callback;
   }
 
   if (embedder_api_.RunsAOTCompiledDartCode != nullptr &&
@@ -373,6 +482,7 @@ bool FlutterEmbedderNative::Launch(
                    << init_result;
     return false;
   }
+  EmitAndroidSystraceSlice("FlutterEngineInitialize");
 
   FlutterEngineResult run_result = embedder_api_.RunInitialized(engine_);
   if (run_result != kSuccess) {
@@ -384,6 +494,7 @@ bool FlutterEmbedderNative::Launch(
     engine_ = nullptr;
     return false;
   }
+  EmitAndroidSystraceSlice("FlutterEngineRunInitialized");
 
   return true;
 }
@@ -565,6 +676,15 @@ bool FlutterEmbedderNative::SendWindowMetrics(size_t width,
   return embedder_api_.SendWindowMetricsEvent(engine_, &event) == kSuccess;
 }
 
+bool FlutterEmbedderNative::SendWindowMetricsEvent(
+    const FlutterWindowMetricsEvent& event) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SendWindowMetricsEvent");
+  if (engine_ == nullptr || embedder_api_.SendWindowMetricsEvent == nullptr) {
+    return false;
+  }
+  return embedder_api_.SendWindowMetricsEvent(engine_, &event) == kSuccess;
+}
+
 bool FlutterEmbedderNative::SendPlatformMessage(const std::string& channel,
                                                 const uint8_t* bytes,
                                                 size_t length,
@@ -689,6 +809,12 @@ void FlutterEmbedderNative::OnVsyncRequestCallback(void* user_data,
   if (embedder->vsync_waiter_ != nullptr) {
     embedder->vsync_waiter_->RequestVsync(baton);
   }
+#if defined(__ANDROID__)
+  const uint64_t now_nanos = embedder->embedder_api_.GetCurrentTime != nullptr
+                                 ? embedder->embedder_api_.GetCurrentTime()
+                                 : 0ULL;
+  embedder->OnVsync(baton, now_nanos, now_nanos + 16666666ULL);
+#endif
 }
 
 void FlutterEmbedderNative::OnPlatformMessageCallback(
@@ -729,6 +855,19 @@ void FlutterEmbedderNative::OnRequestDartDeferredLibraryCallback(
   auto* self = static_cast<FlutterEmbedderNative*>(user_data);
   if (self->jni_delegate_ != nullptr) {
     self->jni_delegate_->RequestDartDeferredLibrary(loading_unit_id);
+  }
+}
+
+void FlutterEmbedderNative::OnSemanticsUpdate2Callback(
+    const FlutterSemanticsUpdate2* update,
+    void* user_data) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::OnSemanticsUpdate2Callback");
+  if (update == nullptr || user_data == nullptr) {
+    return;
+  }
+  auto* self = static_cast<FlutterEmbedderNative*>(user_data);
+  if (self->semantics_bridge_ != nullptr) {
+    self->semantics_bridge_->HandleSemanticsUpdate2(update);
   }
 }
 
