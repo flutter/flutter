@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../runner/options/common_options.dart';
 import '../runner/options/option_bundle.dart';
 import '../runner/options/option_descriptor.dart';
 import '../web_template.dart';
@@ -79,22 +80,22 @@ abstract final class WebOptions {
         'application.',
   );
 
-  // Hidden while content hashing is incomplete: only compiled entrypoints are
-  // hashed today. Un-hide once static assets (flutter/flutter#191915) and the
-  // service worker precache manifest (flutter/flutter#191916) are also hashed,
-  // so that enabling the flag covers everything a deploy caches.
   static const webContentHash = FlagOptionDescriptor(
     name: 'web-content-hash',
-    hide: true,
     help:
-        'Include a content hash in the filenames of the compiled web '
-        'entrypoints (for example, "main.dart.<hash>.js") so that browsers '
-        'fetch new versions after a deploy instead of serving stale cached '
-        'files. The web server must still serve "index.html" and '
-        '"flutter_bootstrap.js" with revalidation (for example, '
+        'Include a content hash in the filenames of compiled web '
+        'entrypoints (for example, "main.dart.<hash>.js") and static '
+        'assets in "assets/", and emit a "precache_manifest.json" file '
+        'so that browsers and custom service workers fetch new versions '
+        'after a deploy instead of serving stale cached files. The web '
+        'server must still serve "index.html" and "flutter_bootstrap.js" '
+        'with revalidation (for example, '
         '"Cache-Control: no-cache") for a new deploy to be picked up. '
-        'Not supported with deferred imports. Custom "index.html" files '
-        'that reference "main.dart.js" directly, and the deprecated '
+        'When "--no-web-resources-cdn" is used, locally bundled '
+        '"canvaskit/**" files are not content-hashed ("urlHashed: false" in '
+        '"precache_manifest.json") and must not be served with "immutable" '
+        'caching. Not supported with deferred imports. Custom "index.html" '
+        'files that reference "main.dart.js" directly, and the deprecated '
         '"FlutterLoader.loadEntrypoint" JavaScript API, are incompatible '
         'with this flag.',
   );
@@ -348,6 +349,7 @@ class WebCoreOptionsBundle extends OptionBundle {
     WebOptions.optimizationLevel,
     WebOptions.sourceMaps,
     WebOptions.webContentHash,
+    CommonOptions.outputDir,
   ];
 }
 
@@ -365,6 +367,7 @@ class WebJsOptionsBundle extends OptionBundle {
     WebOptions.dumpInfo,
     WebOptions.minifyJs,
     WebOptions.noFrequencyBasedMinification,
+    CommonOptions.nativeNullAssertions,
   ];
 }
 
