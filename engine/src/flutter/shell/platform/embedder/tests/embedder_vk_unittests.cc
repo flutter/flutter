@@ -112,14 +112,16 @@ static_assert(
 }  // namespace
 
 TEST_F(EmbedderTest, CanGetVulkanEmbedderContext) {
-  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderTestContextVulkan& context =
+      GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
 }
 
 TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
   fml::AutoResetWaitableEvent latch;
 
-  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderTestContextVulkan& context =
+      GetEmbedderContext<EmbedderTestContextVulkan>();
   context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
   context.SetVulkanInstanceProcAddressCallback(
       [](void* user_data, FlutterVulkanInstanceHandle instance,
@@ -137,7 +139,7 @@ TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(DlISize(1024, 1024));
-  auto engine = builder.LaunchEngine();
+  UniqueEngine engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
   // Wait for the root isolate to launch.
   latch.Wait();
@@ -151,7 +153,8 @@ std::optional<TestVulkanImage> CreateVulkanTextureWithPixels(
     int width,
     int height,
     VkFormat format = VK_FORMAT_R8G8B8A8_UNORM) {
-  auto image_result = context->CreateImage({width, height}, format);
+  std::optional<TestVulkanImage> image_result =
+      context->CreateImage({width, height}, format);
   if (!image_result.has_value()) {
     FML_LOG(ERROR) << "Could not create VkImage for external texture.";
     return std::nullopt;
@@ -174,7 +177,8 @@ std::optional<TestVulkanImage> CreateVulkanTextureWithPixels(
       .fSampleCount = 1,
       .fLevelCount = 1,
   };
-  auto backend_texture = GrBackendTextures::MakeVk(width, height, image_info);
+  GrBackendTexture backend_texture =
+      GrBackendTextures::MakeVk(width, height, image_info);
 
   SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
   sk_sp<SkSurface> surface = SkSurfaces::WrapBackendTexture(
@@ -187,7 +191,7 @@ std::optional<TestVulkanImage> CreateVulkanTextureWithPixels(
     return std::nullopt;
   }
 
-  auto canvas = surface->getCanvas();
+  SkCanvas* canvas = surface->getCanvas();
   // Top half red.
   SkPaint red_paint;
   red_paint.setColor(SK_ColorRED);
@@ -207,7 +211,8 @@ std::optional<TestVulkanImage> CreateVulkanTextureNV12(
     const fml::RefPtr<TestVulkanContext>& context,
     int width,
     int height) {
-  auto nv12_mapping = testing::OpenFixtureAsMapping("texture.nv12");
+  std::unique_ptr<fml::Mapping> nv12_mapping =
+      testing::OpenFixtureAsMapping("texture.nv12");
   if (!nv12_mapping || nv12_mapping->GetSize() == 0) {
     FML_LOG(ERROR) << "Could not load texture.nv12 fixture.";
     return std::nullopt;
@@ -224,7 +229,8 @@ std::optional<TestVulkanImage> CreateVulkanTextureNV12(
 TEST_F(EmbedderTest, RenderTextureWithImpellerVulkan) {
   constexpr int kWidth = 800;
   constexpr int kHeight = 600;
-  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderTestContextVulkan& context =
+      GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
   ON_CALL(context.PresentCallbackMock(), Call()).WillByDefault([&] {
@@ -234,14 +240,14 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkan) {
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
-  auto image_result =
+  std::optional<TestVulkanImage> image_result =
       CreateVulkanTextureWithPixels(context.vulkan_context(), kWidth, kHeight);
   ASSERT_TRUE(image_result.has_value());
 
   static TestVulkanImage* s_texture_image = nullptr;
   s_texture_image = &image_result.value();
 
-  auto rendered_scene = context.GetNextSceneImage();
+  std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
          FlutterVulkanExternalTexture* texture) -> bool {
@@ -254,7 +260,7 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkan) {
     return true;
   };
 
-  auto engine = builder.LaunchEngine();
+  UniqueEngine engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
 
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
@@ -286,7 +292,8 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkan) {
 TEST_F(EmbedderTest, RenderTextureWithSkiaVulkan) {
   constexpr int kWidth = 800;
   constexpr int kHeight = 600;
-  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderTestContextVulkan& context =
+      GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
   ON_CALL(context.PresentCallbackMock(), Call()).WillByDefault([&] {
@@ -295,14 +302,14 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkan) {
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
-  auto image_result =
+  std::optional<TestVulkanImage> image_result =
       CreateVulkanTextureWithPixels(context.vulkan_context(), kWidth, kHeight);
   ASSERT_TRUE(image_result.has_value());
 
   static TestVulkanImage* s_texture_image = nullptr;
   s_texture_image = &image_result.value();
 
-  auto rendered_scene = context.GetNextSceneImage();
+  std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
          FlutterVulkanExternalTexture* texture) -> bool {
@@ -315,7 +322,7 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkan) {
     return true;
   };
 
-  auto engine = builder.LaunchEngine();
+  UniqueEngine engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
 
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
@@ -347,7 +354,8 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkan) {
 TEST_F(EmbedderTest, RenderTextureWithImpellerVulkanDestructCallback) {
   constexpr int kWidth = 800;
   constexpr int kHeight = 600;
-  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderTestContextVulkan& context =
+      GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
   ON_CALL(context.PresentCallbackMock(), Call()).WillByDefault([&] {
@@ -357,11 +365,11 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkanDestructCallback) {
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
-  auto rendered_scene = context.GetNextSceneImage();
+  std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
 
   static bool destruction_callback_called = false;
-  static auto destruction_callback = [](void* user_data) {
-    auto* img = static_cast<TestVulkanImage*>(user_data);
+  static VoidCallback destruction_callback = [](void* user_data) {
+    TestVulkanImage* img = static_cast<TestVulkanImage*>(user_data);
     delete img;
     destruction_callback_called = true;
   };
@@ -369,14 +377,16 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkanDestructCallback) {
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
          FlutterVulkanExternalTexture* texture) -> bool {
-    auto* embedder_test_context =
+    EmbedderTestContextVulkan* embedder_test_context =
         static_cast<EmbedderTestContextVulkan*>(user_data);
-    auto texture_image = CreateVulkanTextureWithPixels(
-        embedder_test_context->vulkan_context(), kWidth, kHeight);
+    std::optional<TestVulkanImage> texture_image =
+        CreateVulkanTextureWithPixels(embedder_test_context->vulkan_context(),
+                                      kWidth, kHeight);
     if (!texture_image.has_value()) {
       return false;
     }
-    auto* img = new TestVulkanImage(std::move(texture_image.value()));
+    TestVulkanImage* img =
+        new TestVulkanImage(std::move(texture_image.value()));
     texture->image = reinterpret_cast<uint64_t>(img->GetImage());
     texture->format = VK_FORMAT_R8G8B8A8_UNORM;
     texture->destruction_callback = destruction_callback;
@@ -386,7 +396,7 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkanDestructCallback) {
     return true;
   };
 
-  auto engine = builder.LaunchEngine();
+  UniqueEngine engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
 
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
@@ -418,7 +428,8 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkanDestructCallback) {
 TEST_F(EmbedderTest, RenderTextureWithSkiaVulkanDestructCallback) {
   constexpr int kWidth = 800;
   constexpr int kHeight = 600;
-  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderTestContextVulkan& context =
+      GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
   ON_CALL(context.PresentCallbackMock(), Call()).WillByDefault([&] {
@@ -427,11 +438,11 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkanDestructCallback) {
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
-  auto rendered_scene = context.GetNextSceneImage();
+  std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
 
   static bool destruction_callback_called = false;
-  static auto destruction_callback = [](void* user_data) {
-    auto* img = static_cast<TestVulkanImage*>(user_data);
+  static VoidCallback destruction_callback = [](void* user_data) {
+    TestVulkanImage* img = static_cast<TestVulkanImage*>(user_data);
     delete img;
     destruction_callback_called = true;
   };
@@ -439,14 +450,16 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkanDestructCallback) {
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
          FlutterVulkanExternalTexture* texture) -> bool {
-    auto* embedder_test_context =
+    EmbedderTestContextVulkan* embedder_test_context =
         static_cast<EmbedderTestContextVulkan*>(user_data);
-    auto texture_image = CreateVulkanTextureWithPixels(
-        embedder_test_context->vulkan_context(), kWidth, kHeight);
+    std::optional<TestVulkanImage> texture_image =
+        CreateVulkanTextureWithPixels(embedder_test_context->vulkan_context(),
+                                      kWidth, kHeight);
     if (!texture_image.has_value()) {
       return false;
     }
-    auto* img = new TestVulkanImage(std::move(texture_image.value()));
+    TestVulkanImage* img =
+        new TestVulkanImage(std::move(texture_image.value()));
     texture->image = reinterpret_cast<uint64_t>(img->GetImage());
     texture->format = VK_FORMAT_R8G8B8A8_UNORM;
     texture->destruction_callback = destruction_callback;
@@ -456,7 +469,7 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkanDestructCallback) {
     return true;
   };
 
-  auto engine = builder.LaunchEngine();
+  UniqueEngine engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
 
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
@@ -490,7 +503,8 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkanDestructCallback) {
 TEST_F(EmbedderTest, RenderBGRATextureWithImpellerVulkan) {
   constexpr int kWidth = 800;
   constexpr int kHeight = 600;
-  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderTestContextVulkan& context =
+      GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
   ON_CALL(context.PresentCallbackMock(), Call()).WillByDefault([&] {
@@ -500,14 +514,14 @@ TEST_F(EmbedderTest, RenderBGRATextureWithImpellerVulkan) {
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
-  auto image_result = CreateVulkanTextureWithPixels(
+  std::optional<TestVulkanImage> image_result = CreateVulkanTextureWithPixels(
       context.vulkan_context(), kWidth, kHeight, VK_FORMAT_B8G8R8A8_UNORM);
   ASSERT_TRUE(image_result.has_value());
 
   static TestVulkanImage* s_texture_image = nullptr;
   s_texture_image = &image_result.value();
 
-  auto rendered_scene = context.GetNextSceneImage();
+  std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
          FlutterVulkanExternalTexture* texture) -> bool {
@@ -520,7 +534,7 @@ TEST_F(EmbedderTest, RenderBGRATextureWithImpellerVulkan) {
     return true;
   };
 
-  auto engine = builder.LaunchEngine();
+  UniqueEngine engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
 
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
@@ -547,7 +561,8 @@ TEST_F(EmbedderTest, RenderBGRATextureWithImpellerVulkan) {
 TEST_F(EmbedderTest, RenderBGRATextureWithSkiaVulkan) {
   constexpr int kWidth = 800;
   constexpr int kHeight = 600;
-  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderTestContextVulkan& context =
+      GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
   ON_CALL(context.PresentCallbackMock(), Call()).WillByDefault([&] {
@@ -556,14 +571,14 @@ TEST_F(EmbedderTest, RenderBGRATextureWithSkiaVulkan) {
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
-  auto image_result = CreateVulkanTextureWithPixels(
+  std::optional<TestVulkanImage> image_result = CreateVulkanTextureWithPixels(
       context.vulkan_context(), kWidth, kHeight, VK_FORMAT_B8G8R8A8_UNORM);
   ASSERT_TRUE(image_result.has_value());
 
   static TestVulkanImage* s_texture_image = nullptr;
   s_texture_image = &image_result.value();
 
-  auto rendered_scene = context.GetNextSceneImage();
+  std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
          FlutterVulkanExternalTexture* texture) -> bool {
@@ -576,7 +591,7 @@ TEST_F(EmbedderTest, RenderBGRATextureWithSkiaVulkan) {
     return true;
   };
 
-  auto engine = builder.LaunchEngine();
+  UniqueEngine engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
 
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
@@ -601,7 +616,8 @@ TEST_F(EmbedderTest, RenderBGRATextureWithSkiaVulkan) {
 TEST_F(EmbedderTest, RenderNV12TextureWithImpellerVulkan) {
   constexpr int kWidth = 800;
   constexpr int kHeight = 600;
-  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderTestContextVulkan& context =
+      GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
   ON_CALL(context.PresentCallbackMock(), Call()).WillByDefault([&] {
@@ -611,7 +627,7 @@ TEST_F(EmbedderTest, RenderNV12TextureWithImpellerVulkan) {
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
-  auto image_result =
+  std::optional<TestVulkanImage> image_result =
       CreateVulkanTextureNV12(context.vulkan_context(), kWidth, kHeight);
   if (!image_result.has_value()) {
     GTEST_SKIP() << "NV12 format not supported by the Vulkan device.";
@@ -620,7 +636,7 @@ TEST_F(EmbedderTest, RenderNV12TextureWithImpellerVulkan) {
   static TestVulkanImage* s_texture_image = nullptr;
   s_texture_image = &image_result.value();
 
-  auto rendered_scene = context.GetNextSceneImage();
+  std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
          FlutterVulkanExternalTexture* texture) -> bool {
@@ -633,7 +649,7 @@ TEST_F(EmbedderTest, RenderNV12TextureWithImpellerVulkan) {
     return true;
   };
 
-  auto engine = builder.LaunchEngine();
+  UniqueEngine engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
 
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
@@ -655,7 +671,8 @@ TEST_F(EmbedderTest, RenderNV12TextureWithImpellerVulkan) {
 TEST_F(EmbedderTest, RenderNV12TextureWithSkiaVulkan) {
   constexpr int kWidth = 800;
   constexpr int kHeight = 600;
-  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderTestContextVulkan& context =
+      GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
   ON_CALL(context.PresentCallbackMock(), Call()).WillByDefault([&] {
@@ -664,7 +681,7 @@ TEST_F(EmbedderTest, RenderNV12TextureWithSkiaVulkan) {
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
-  auto image_result =
+  std::optional<TestVulkanImage> image_result =
       CreateVulkanTextureNV12(context.vulkan_context(), kWidth, kHeight);
   if (!image_result.has_value()) {
     GTEST_SKIP() << "NV12 format not supported by the Vulkan device.";
@@ -673,7 +690,7 @@ TEST_F(EmbedderTest, RenderNV12TextureWithSkiaVulkan) {
   static TestVulkanImage* s_texture_image = nullptr;
   s_texture_image = &image_result.value();
 
-  auto rendered_scene = context.GetNextSceneImage();
+  std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
          FlutterVulkanExternalTexture* texture) -> bool {
@@ -686,7 +703,7 @@ TEST_F(EmbedderTest, RenderNV12TextureWithSkiaVulkan) {
     return true;
   };
 
-  auto engine = builder.LaunchEngine();
+  UniqueEngine engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
 
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
