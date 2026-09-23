@@ -149,14 +149,15 @@ class _SettingsPageState extends State<SettingsPage> {
       SettingsListItem<CustomTextDirection?>(
         title: localizations.settingsTextDirection,
         selectedOption: options.customTextDirection,
-        optionsMap:
-            Map<CustomTextDirection?, DisplayOption>.of(<CustomTextDirection?, DisplayOption>{
-              CustomTextDirection.localeBased: DisplayOption(
-                localizations.settingsTextDirectionLocaleBased,
-              ),
-              CustomTextDirection.ltr: DisplayOption(localizations.settingsTextDirectionLTR),
-              CustomTextDirection.rtl: DisplayOption(localizations.settingsTextDirectionRTL),
-            }),
+        optionsMap: Map<CustomTextDirection?, DisplayOption>.of(
+          <CustomTextDirection?, DisplayOption>{
+            CustomTextDirection.localeBased: DisplayOption(
+              localizations.settingsTextDirectionLocaleBased,
+            ),
+            CustomTextDirection.ltr: DisplayOption(localizations.settingsTextDirectionLTR),
+            CustomTextDirection.rtl: DisplayOption(localizations.settingsTextDirectionRTL),
+          },
+        ),
         onOptionChanged: (CustomTextDirection? newTextDirection) =>
             GalleryOptions.update(context, options.copyWith(customTextDirection: newTextDirection)),
         onTapSetting: () => onTapSetting(_ExpandableSetting.textDirection),
@@ -305,10 +306,8 @@ class SettingsAttribution extends StatelessWidget {
         ),
         child: SelectableText(
           GalleryLocalizations.of(context)!.settingsAttribution,
-          style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-            fontSize: 12,
-            color: Theme.of(context).colorScheme.onSecondary,
-          ),
+          style: Theme.of(context).textTheme.bodyLarge!
+              .copyWith(fontSize: 12, color: Theme.of(context).colorScheme.onSecondary),
           textAlign: isDesktop ? TextAlign.end : TextAlign.start,
         ),
       ),

@@ -216,12 +216,18 @@ abstract class Renderer {
   }) async {
     var textureSource = object;
     final originalTextureSource = object;
-    final bool needsClone = !transferOwnership || (isMultiThreaded && !_isTransferable(object));
+    final bool isVideoFrame = object.isA<VideoFrame>();
+    // Although VideoFrame is transferable across threads, drawing directly from a
+    // VideoFrame to a WebGL texture can result in incorrect orientation due to EXIF
+    // metadata handling. Converting it to an ImageBitmap avoids this problem.
+    final bool needsClone =
+        isVideoFrame || !transferOwnership || (isMultiThreaded && !_isTransferable(object));
     if (needsClone) {
-      textureSource = (await createImageBitmap(
-        object,
-        bounds: (x: 0, y: 0, width: width, height: height),
-      )).toJSAnyShallow;
+      textureSource =
+          (await (isVideoFrame
+                  ? createImageBitmap(object)
+                  : createImageBitmap(object, bounds: (x: 0, y: 0, width: width, height: height))))
+              .toJSAnyShallow;
       if (transferOwnership) {
         if (originalTextureSource.isA<VideoFrame>()) {
           (originalTextureSource as VideoFrame).close();
@@ -254,7 +260,7 @@ abstract class Renderer {
   }
 
   bool _isTransferable(JSAny object) =>
-      object.isA<DomImageBitmap>() || object.isA<VideoFrame>() || object.isA<DomOffscreenCanvas>();
+      object.isA<DomImageBitmap>() || object.isA<DomOffscreenCanvas>() || object.isA<VideoFrame>();
 
   Future<ui.Codec> instantiateImageCodec(
     Uint8List list, {

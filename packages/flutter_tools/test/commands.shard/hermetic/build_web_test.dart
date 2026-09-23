@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/web/compile.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_build_command.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
@@ -53,7 +54,7 @@ void main() {
     () async {
       fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildCommand(
+        createFakeBuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -95,7 +96,7 @@ void main() {
     'Refuses to build for web when feature is disabled',
     () async {
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildCommand(
+        createFakeBuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: MemoryFileSystem.test(),
@@ -119,8 +120,7 @@ void main() {
       expect(
         () => runner.run(<String>['build', 'web', '--no-pub']),
         throwsToolExit(
-          message:
-              '"build web" is not currently supported. To enable, run "flutter config --enable-web".',
+          message: '"build web" is not currently supported. To enable, run "flutter config --enable-web".',
         ),
       );
     },
@@ -135,7 +135,7 @@ void main() {
   testUsingContext(
     'Setup for a web build with default output directory',
     () async {
-      final buildCommand = BuildCommand(
+      final BuildCommand buildCommand = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -175,30 +175,27 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(environment.defines, <String, String>{
-          'TargetFile': 'lib/main.dart',
-          'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
-          'BuildMode': 'release',
-          'DartDefines':
-              'Zm9vPWE=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-          'DartObfuscation': 'false',
-          'TrackWidgetCreation': 'false',
-          'TreeShakeIcons': 'true',
-          'UseLocalCanvasKit': 'true',
-        });
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(environment.defines, <String, String>{
+              'TargetFile': 'lib/main.dart',
+              'HasWebPlugins': 'true',
+              'ServiceWorkerStrategy': 'offline-first',
+              'BuildMode': 'release',
+              'DartDefines': 'Zm9vPWE=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              'DartObfuscation': 'false',
+              'TrackWidgetCreation': 'false',
+              'TreeShakeIcons': 'true',
+              'UseLocalCanvasKit': 'true',
+            });
+          }),
     },
   );
 
   testUsingContext(
     'Passes --web-define values to environment defines with prefix',
     () async {
-      final buildCommand = BuildCommand(
+      final BuildCommand buildCommand = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -246,10 +243,268 @@ void main() {
     },
   );
 
+  for (final useWasm in <bool>[false, true]) {
+    // The build system receives only the top-level WebServiceWorker target, so
+    // the compile targets are found by walking the dependency graph. A flag
+    // asserted after the run proves the expectations actually executed.
+    var sawCompileTargets = false;
+    void expectContentHashConfigs(Target target, Environment environment) {
+      if (target is WebReleaseBundle) {
+        expect(target.compileTargets, isNotEmpty);
+        for (final Dart2WebTarget compileTarget in target.compileTargets) {
+          expect(compileTarget.compilerConfig.webContentHash, true);
+        }
+        sawCompileTargets = true;
+      }
+      for (final Target dependency in target.dependencies) {
+        expectContentHashConfigs(dependency, environment);
+      }
+    }
+
+    testUsingContext(
+      'Passes --web-content-hash flag to compiler configs (wasm: $useWasm)',
+      () async {
+        final BuildCommand buildCommand = createFakeBuildCommand(
+          androidSdk: FakeAndroidSdk(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          fileSystem: fileSystem,
+          logger: logger,
+          osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
+        );
+        final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+        setupFileSystemForEndToEndTest(fileSystem);
+        await runner.run(<String>[
+          'build',
+          'web',
+          '--no-pub',
+          '--web-content-hash',
+          if (useWasm) '--wasm',
+        ]);
+        expect(sawCompileTargets, isTrue);
+      },
+      overrides: <Type, Generator>{
+        Platform: () => fakePlatform,
+        FileSystem: () => fileSystem,
+        FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+        ProcessManager: () => processManager,
+        BuildSystem: () =>
+            TestBuildSystem.all(BuildResult(success: true), expectContentHashConfigs),
+      },
+    );
+  }
+
+  testUsingContext(
+    'Rejects --web-content-hash combined with --enable-wasm-deferred-loading',
+    () async {
+      final BuildCommand buildCommand = createFakeBuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+      setupFileSystemForEndToEndTest(fileSystem);
+      await expectLater(
+        runner.run(<String>[
+          'build',
+          'web',
+          '--no-pub',
+          '--wasm',
+          '--web-content-hash',
+          '--enable-wasm-deferred-loading',
+        ]),
+        throwsToolExit(message: 'deferred loading'),
+      );
+    },
+    overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      FileSystem: () => fileSystem,
+      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+      ProcessManager: () => processManager,
+      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+    },
+  );
+
+  testUsingContext(
+    'Rejects --web-content-hash when web/index.html or web/flutter_bootstrap.js is incompatible',
+    () async {
+      final BuildCommand buildCommand = createFakeBuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+      setupFileSystemForEndToEndTest(fileSystem);
+
+      final File indexHtml = fileSystem.currentDirectory
+          .childDirectory('web')
+          .childFile('index.html');
+      final File bootstrapJs = fileSystem.currentDirectory
+          .childDirectory('web')
+          .childFile('flutter_bootstrap.js');
+
+      // 1. Direct script tag reference in index.html
+      indexHtml.writeAsStringSync('<html><body><script src="main.dart.js"></script></body></html>');
+      await expectLater(
+        runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']),
+        throwsToolExit(message: 'direct references to "main.dart.js"'),
+      );
+
+      // 2. Deprecated loadEntrypoint API in index.html
+      indexHtml.writeAsStringSync(
+        '<html><body><script>_flutter.loader.loadEntrypoint({});</script></body></html>',
+      );
+      await expectLater(
+        runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']),
+        throwsToolExit(message: 'deprecated "FlutterLoader.loadEntrypoint" API'),
+      );
+
+      // 3. index.html missing flutter_bootstrap.js / {{flutter_bootstrap_js}} / {{flutter_build_config}}
+      indexHtml.writeAsStringSync('<html><body><script src="flutter.js"></script></body></html>');
+      await expectLater(
+        runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']),
+        throwsToolExit(
+          message: 'does not reference "flutter_bootstrap.js", "{{flutter_bootstrap_js}}", or "{{flutter_build_config}}"',
+        ),
+      );
+
+      // 4. HTML and JS comments mentioning main.dart.js or loadEntrypoint (even when
+      // HTML prose contains apostrophes like "Kevin's App") do not cause failure
+      indexHtml.writeAsStringSync(
+        "<html><head><title>Kevin's App</title></head><body>\n"
+        "<!-- <script src='main.dart.js'></script> -->\n"
+        '<script>\n'
+        'const tpl = `https://example.com/path`;\n'
+        '// _flutter.loader.loadEntrypoint({});\n'
+        '/* main.dart.js */\n'
+        '</script>\n'
+        '<script src="flutter_bootstrap.js" async></script>\n'
+        '</body></html>',
+      );
+      await runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']);
+
+      // 5. Custom web/flutter_bootstrap.js missing {{flutter_build_config}}
+      bootstrapJs.writeAsStringSync('_flutter.loader.load();');
+      await expectLater(
+        runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']),
+        throwsToolExit(message: 'does not contain the "{{flutter_build_config}}" placeholder'),
+      );
+
+      // 6. Custom web/flutter_bootstrap.js referencing loadEntrypoint or main.dart.js
+      bootstrapJs.writeAsStringSync(
+        '{{flutter_build_config}}\n_flutter.loader.loadEntrypoint({});',
+      );
+      await expectLater(
+        runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']),
+        throwsToolExit(message: 'web/flutter_bootstrap.js contains direct references'),
+      );
+
+      // 7. Valid custom web/flutter_bootstrap.js with {{flutter_build_config}} and JS comments succeeds
+      bootstrapJs.writeAsStringSync(
+        '// Migrated from main.dart.js and loadEntrypoint\n'
+        '{{flutter_js}}\n'
+        '{{flutter_build_config}}\n'
+        '_flutter.loader.load();\n',
+      );
+      await runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      FileSystem: () => fileSystem,
+      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+      ProcessManager: () => processManager,
+      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+    },
+  );
+
+  testUsingContext(
+    'Prints serving guidance tip when --web-content-hash is used',
+    () async {
+      final BuildCommand buildCommand = createFakeBuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+      setupFileSystemForEndToEndTest(fileSystem);
+      await runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']);
+
+      expect(
+        logger.statusText,
+        contains(
+          'Serving tip: Configure your web host to serve "index.html" and "flutter_bootstrap.js"',
+        ),
+      );
+      expect(logger.statusText, contains('with "Cache-Control: no-cache"'));
+      expect(logger.statusText, contains('When "--no-web-resources-cdn" is used'));
+      expect(logger.statusText, contains('canvaskit/**'));
+    },
+    overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      FileSystem: () => fileSystem,
+      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+      ProcessManager: () => processManager,
+      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+    },
+  );
+
   testUsingContext(
     'Builds successfully without --web-define',
     () async {
-      final buildCommand = BuildCommand(
+      final BuildCommand buildCommand = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -296,7 +551,7 @@ void main() {
     'Infers target entrypoint correctly from --target',
     () async {
       // Regression test for https://github.com/flutter/flutter/issues/136830.
-      final buildCommand = BuildCommand(
+      final BuildCommand buildCommand = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -335,23 +590,20 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(environment.defines, <String, String>{
-          'TargetFile': 'lib/a.dart',
-          'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
-          'BuildMode': 'release',
-          'DartDefines':
-              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-          'DartObfuscation': 'false',
-          'TrackWidgetCreation': 'false',
-          'TreeShakeIcons': 'true',
-          'UseLocalCanvasKit': 'true',
-        });
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(environment.defines, <String, String>{
+              'TargetFile': 'lib/a.dart',
+              'HasWebPlugins': 'true',
+              'ServiceWorkerStrategy': 'offline-first',
+              'BuildMode': 'release',
+              'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              'DartObfuscation': 'false',
+              'TrackWidgetCreation': 'false',
+              'TreeShakeIcons': 'true',
+              'UseLocalCanvasKit': 'true',
+            });
+          }),
     },
   );
 
@@ -359,7 +611,7 @@ void main() {
     'Infers target entrypoint correctly from positional argument list',
     () async {
       // Regression test for https://github.com/flutter/flutter/issues/136830.
-      final buildCommand = BuildCommand(
+      final BuildCommand buildCommand = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -398,30 +650,27 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(environment.defines, <String, String>{
-          'TargetFile': 'lib/a.dart',
-          'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
-          'BuildMode': 'release',
-          'DartDefines':
-              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-          'DartObfuscation': 'false',
-          'TrackWidgetCreation': 'false',
-          'TreeShakeIcons': 'true',
-          'UseLocalCanvasKit': 'true',
-        });
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(environment.defines, <String, String>{
+              'TargetFile': 'lib/a.dart',
+              'HasWebPlugins': 'true',
+              'ServiceWorkerStrategy': 'offline-first',
+              'BuildMode': 'release',
+              'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              'DartObfuscation': 'false',
+              'TrackWidgetCreation': 'false',
+              'TreeShakeIcons': 'true',
+              'UseLocalCanvasKit': 'true',
+            });
+          }),
     },
   );
 
   testUsingContext(
     'Does not allow -O0 optimization level',
     () async {
-      final buildCommand = BuildCommand(
+      final BuildCommand buildCommand = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -472,7 +721,7 @@ void main() {
   testUsingContext(
     'Setup for a web build with a user specified output directory',
     () async {
-      final buildCommand = BuildCommand(
+      final BuildCommand buildCommand = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -516,23 +765,20 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(environment.defines, <String, String>{
-          'TargetFile': 'lib/main.dart',
-          'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
-          'BuildMode': 'release',
-          'DartDefines':
-              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-          'DartObfuscation': 'false',
-          'TrackWidgetCreation': 'false',
-          'TreeShakeIcons': 'true',
-          'UseLocalCanvasKit': 'true',
-        });
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(environment.defines, <String, String>{
+              'TargetFile': 'lib/main.dart',
+              'HasWebPlugins': 'true',
+              'ServiceWorkerStrategy': 'offline-first',
+              'BuildMode': 'release',
+              'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              'DartObfuscation': 'false',
+              'TrackWidgetCreation': 'false',
+              'TreeShakeIcons': 'true',
+              'UseLocalCanvasKit': 'true',
+            });
+          }),
     },
   );
 
@@ -967,6 +1213,7 @@ void main() {
       expectVisible('web-resources-cdn');
       expectVisible('optimization-level');
       expectVisible('source-maps');
+      expectVisible('web-content-hash');
       expectVisible('csp');
       expectVisible('dart2js-optimization');
       expectVisible('wasm');
@@ -1019,6 +1266,7 @@ void main() {
       expectVisible('web-resources-cdn');
       expectVisible('optimization-level');
       expectVisible('source-maps');
+      expectVisible('web-content-hash');
       expectVisible('csp');
       expectVisible('dart2js-optimization');
       expectVisible('wasm');
@@ -1038,7 +1286,7 @@ void main() {
     () async {
       fileSystem.file(fileSystem.path.join('web')).deleteSync(recursive: true);
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildCommand(
+        createFakeBuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -1131,6 +1379,11 @@ flutter:
 class UrlLauncherPlugin {}
 ''');
   fileSystem.file(fileSystem.path.join('lib', 'main.dart')).writeAsStringSync('void main() { }');
+  fileSystem
+      .file(fileSystem.path.join('web', 'index.html'))
+      .writeAsStringSync(
+        '<html><body><script src="flutter_bootstrap.js" async></script></body></html>',
+      );
 }
 
 class TestWebBuildCommand extends FlutterCommand {

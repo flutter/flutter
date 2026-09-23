@@ -132,11 +132,6 @@ List<String> generateMethodParameters(
 }
 
 // Similar to above, but is used for passing arguments into helper functions.
-List<String> generateMethodArguments(Message message) {
-  return message.templatePlaceholders.values
-      .map((Placeholder placeholder) => placeholder.name)
-      .toList();
-}
 
 String generateDateFormattingLogic(Message message, LocaleInfo locale) {
   if (message.templatePlaceholders.isEmpty) {
@@ -350,9 +345,8 @@ String _generateLookupByScriptCode(
             _addSpaces(
               localesWithScriptCodes
                   .map((LocaleInfo locale) {
-                    return generateSwitchClauseTemplate(
-                      locale,
-                    ).replaceAll('@(case)', locale.scriptCode!);
+                    return generateSwitchClauseTemplate(locale)
+                        .replaceAll('@(case)', locale.scriptCode!);
                   })
                   .join('\n'),
               spaces: 8,
@@ -394,9 +388,8 @@ String _generateLookupByCountryCode(
             _addSpaces(
               localesWithCountryCodes
                   .map((LocaleInfo locale) {
-                    return generateSwitchClauseTemplate(
-                      locale,
-                    ).replaceAll('@(case)', locale.countryCode!);
+                    return generateSwitchClauseTemplate(locale)
+                        .replaceAll('@(case)', locale.countryCode!);
                   })
                   .join('\n'),
               spaces: 4,
