@@ -224,6 +224,10 @@ std::optional<TestVulkanImage> CreateVulkanTextureNV12(
 
   return context->CreateNV12Image({width, height}, y_data, uv_data);
 }
+
+void DeleteTestVulkanImage(void* user_data) {
+  delete static_cast<TestVulkanImage*>(user_data);
+}
 }  // namespace
 
 TEST_F(EmbedderTest, RenderTextureWithImpellerVulkan) {
@@ -240,21 +244,24 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkan) {
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
-  std::optional<TestVulkanImage> image_result =
-      CreateVulkanTextureWithPixels(context.vulkan_context(), kWidth, kHeight);
-  ASSERT_TRUE(image_result.has_value());
-
-  static TestVulkanImage* s_texture_image = nullptr;
-  s_texture_image = &image_result.value();
-
   std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
          FlutterVulkanExternalTexture* texture) -> bool {
-    texture->image = reinterpret_cast<uint64_t>(s_texture_image->GetImage());
+    EmbedderTestContextVulkan* embedder_test_context =
+        static_cast<EmbedderTestContextVulkan*>(user_data);
+    std::optional<TestVulkanImage> texture_image =
+        CreateVulkanTextureWithPixels(embedder_test_context->vulkan_context(),
+                                      kWidth, kHeight);
+    if (!texture_image.has_value()) {
+      return false;
+    }
+    TestVulkanImage* img =
+        new TestVulkanImage(std::move(texture_image.value()));
+    texture->image = reinterpret_cast<uint64_t>(img->GetImage());
     texture->format = VK_FORMAT_R8G8B8A8_UNORM;
-    texture->destruction_callback = nullptr;
-    texture->user_data = nullptr;
+    texture->destruction_callback = DeleteTestVulkanImage;
+    texture->user_data = img;
     texture->width = width;
     texture->height = height;
     return true;
@@ -302,21 +309,24 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkan) {
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
-  std::optional<TestVulkanImage> image_result =
-      CreateVulkanTextureWithPixels(context.vulkan_context(), kWidth, kHeight);
-  ASSERT_TRUE(image_result.has_value());
-
-  static TestVulkanImage* s_texture_image = nullptr;
-  s_texture_image = &image_result.value();
-
   std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
          FlutterVulkanExternalTexture* texture) -> bool {
-    texture->image = reinterpret_cast<uint64_t>(s_texture_image->GetImage());
+    EmbedderTestContextVulkan* embedder_test_context =
+        static_cast<EmbedderTestContextVulkan*>(user_data);
+    std::optional<TestVulkanImage> texture_image =
+        CreateVulkanTextureWithPixels(embedder_test_context->vulkan_context(),
+                                      kWidth, kHeight);
+    if (!texture_image.has_value()) {
+      return false;
+    }
+    TestVulkanImage* img =
+        new TestVulkanImage(std::move(texture_image.value()));
+    texture->image = reinterpret_cast<uint64_t>(img->GetImage());
     texture->format = VK_FORMAT_R8G8B8A8_UNORM;
-    texture->destruction_callback = nullptr;
-    texture->user_data = nullptr;
+    texture->destruction_callback = DeleteTestVulkanImage;
+    texture->user_data = img;
     texture->width = width;
     texture->height = height;
     return true;
@@ -514,21 +524,25 @@ TEST_F(EmbedderTest, RenderBGRATextureWithImpellerVulkan) {
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
-  std::optional<TestVulkanImage> image_result = CreateVulkanTextureWithPixels(
-      context.vulkan_context(), kWidth, kHeight, VK_FORMAT_B8G8R8A8_UNORM);
-  ASSERT_TRUE(image_result.has_value());
-
-  static TestVulkanImage* s_texture_image = nullptr;
-  s_texture_image = &image_result.value();
-
   std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
          FlutterVulkanExternalTexture* texture) -> bool {
-    texture->image = reinterpret_cast<uint64_t>(s_texture_image->GetImage());
+    EmbedderTestContextVulkan* embedder_test_context =
+        static_cast<EmbedderTestContextVulkan*>(user_data);
+    std::optional<TestVulkanImage> texture_image =
+        CreateVulkanTextureWithPixels(embedder_test_context->vulkan_context(),
+                                      kWidth, kHeight,
+                                      VK_FORMAT_B8G8R8A8_UNORM);
+    if (!texture_image.has_value()) {
+      return false;
+    }
+    TestVulkanImage* img =
+        new TestVulkanImage(std::move(texture_image.value()));
+    texture->image = reinterpret_cast<uint64_t>(img->GetImage());
     texture->format = VK_FORMAT_B8G8R8A8_UNORM;
-    texture->destruction_callback = nullptr;
-    texture->user_data = nullptr;
+    texture->destruction_callback = DeleteTestVulkanImage;
+    texture->user_data = img;
     texture->width = width;
     texture->height = height;
     return true;
@@ -571,21 +585,25 @@ TEST_F(EmbedderTest, RenderBGRATextureWithSkiaVulkan) {
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
-  std::optional<TestVulkanImage> image_result = CreateVulkanTextureWithPixels(
-      context.vulkan_context(), kWidth, kHeight, VK_FORMAT_B8G8R8A8_UNORM);
-  ASSERT_TRUE(image_result.has_value());
-
-  static TestVulkanImage* s_texture_image = nullptr;
-  s_texture_image = &image_result.value();
-
   std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
          FlutterVulkanExternalTexture* texture) -> bool {
-    texture->image = reinterpret_cast<uint64_t>(s_texture_image->GetImage());
+    EmbedderTestContextVulkan* embedder_test_context =
+        static_cast<EmbedderTestContextVulkan*>(user_data);
+    std::optional<TestVulkanImage> texture_image =
+        CreateVulkanTextureWithPixels(embedder_test_context->vulkan_context(),
+                                      kWidth, kHeight,
+                                      VK_FORMAT_B8G8R8A8_UNORM);
+    if (!texture_image.has_value()) {
+      return false;
+    }
+    TestVulkanImage* img =
+        new TestVulkanImage(std::move(texture_image.value()));
+    texture->image = reinterpret_cast<uint64_t>(img->GetImage());
     texture->format = VK_FORMAT_B8G8R8A8_UNORM;
-    texture->destruction_callback = nullptr;
-    texture->user_data = nullptr;
+    texture->destruction_callback = DeleteTestVulkanImage;
+    texture->user_data = img;
     texture->width = width;
     texture->height = height;
     return true;
@@ -627,23 +645,33 @@ TEST_F(EmbedderTest, RenderNV12TextureWithImpellerVulkan) {
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
-  std::optional<TestVulkanImage> image_result =
-      CreateVulkanTextureNV12(context.vulkan_context(), kWidth, kHeight);
-  if (!image_result.has_value()) {
-    GTEST_SKIP() << "NV12 format not supported by the Vulkan device.";
+  // Probe NV12 support on the test thread so that GTEST_SKIP works; the
+  // texture itself is created per frame in the callback below.
+  {
+    std::optional<TestVulkanImage> probe_image =
+        CreateVulkanTextureNV12(context.vulkan_context(), kWidth, kHeight);
+    if (!probe_image.has_value()) {
+      GTEST_SKIP() << "NV12 format not supported by the Vulkan device.";
+    }
   }
-
-  static TestVulkanImage* s_texture_image = nullptr;
-  s_texture_image = &image_result.value();
 
   std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
          FlutterVulkanExternalTexture* texture) -> bool {
-    texture->image = reinterpret_cast<uint64_t>(s_texture_image->GetImage());
+    EmbedderTestContextVulkan* embedder_test_context =
+        static_cast<EmbedderTestContextVulkan*>(user_data);
+    std::optional<TestVulkanImage> texture_image = CreateVulkanTextureNV12(
+        embedder_test_context->vulkan_context(), kWidth, kHeight);
+    if (!texture_image.has_value()) {
+      return false;
+    }
+    TestVulkanImage* img =
+        new TestVulkanImage(std::move(texture_image.value()));
+    texture->image = reinterpret_cast<uint64_t>(img->GetImage());
     texture->format = VK_FORMAT_G8_B8R8_2PLANE_420_UNORM;
-    texture->destruction_callback = nullptr;
-    texture->user_data = nullptr;
+    texture->destruction_callback = DeleteTestVulkanImage;
+    texture->user_data = img;
     texture->width = width;
     texture->height = height;
     return true;
@@ -681,23 +709,33 @@ TEST_F(EmbedderTest, RenderNV12TextureWithSkiaVulkan) {
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
-  std::optional<TestVulkanImage> image_result =
-      CreateVulkanTextureNV12(context.vulkan_context(), kWidth, kHeight);
-  if (!image_result.has_value()) {
-    GTEST_SKIP() << "NV12 format not supported by the Vulkan device.";
+  // Probe NV12 support on the test thread so that GTEST_SKIP works; the
+  // texture itself is created per frame in the callback below.
+  {
+    std::optional<TestVulkanImage> probe_image =
+        CreateVulkanTextureNV12(context.vulkan_context(), kWidth, kHeight);
+    if (!probe_image.has_value()) {
+      GTEST_SKIP() << "NV12 format not supported by the Vulkan device.";
+    }
   }
-
-  static TestVulkanImage* s_texture_image = nullptr;
-  s_texture_image = &image_result.value();
 
   std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
          FlutterVulkanExternalTexture* texture) -> bool {
-    texture->image = reinterpret_cast<uint64_t>(s_texture_image->GetImage());
+    EmbedderTestContextVulkan* embedder_test_context =
+        static_cast<EmbedderTestContextVulkan*>(user_data);
+    std::optional<TestVulkanImage> texture_image = CreateVulkanTextureNV12(
+        embedder_test_context->vulkan_context(), kWidth, kHeight);
+    if (!texture_image.has_value()) {
+      return false;
+    }
+    TestVulkanImage* img =
+        new TestVulkanImage(std::move(texture_image.value()));
+    texture->image = reinterpret_cast<uint64_t>(img->GetImage());
     texture->format = VK_FORMAT_G8_B8R8_2PLANE_420_UNORM;
-    texture->destruction_callback = nullptr;
-    texture->user_data = nullptr;
+    texture->destruction_callback = DeleteTestVulkanImage;
+    texture->user_data = img;
     texture->width = width;
     texture->height = height;
     return true;
