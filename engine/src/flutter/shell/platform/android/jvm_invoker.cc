@@ -4,8 +4,11 @@
 
 #include "flutter/shell/platform/android/jvm_invoker.h"
 
+#include <cstring>
+
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/shell/platform/android/android_mutators_mapper.h"
 
 namespace flutter {
 namespace android {
@@ -263,6 +266,32 @@ static jmethodID g_update_semantics_method = nullptr;
 static jmethodID g_update_custom_accessibility_actions_method = nullptr;
 static jmethodID g_set_semantics_tree_enabled_method = nullptr;
 
+static jmethodID g_on_display_platform_view_method = nullptr;
+static jmethodID g_on_display_platform_view2_method = nullptr;
+static jmethodID g_on_begin_frame_method = nullptr;
+static jmethodID g_on_end_frame_method = nullptr;
+static jmethodID g_end_frame2_method = nullptr;
+static jmethodID g_create_overlay_surface_method = nullptr;
+static jmethodID g_create_overlay_surface2_method = nullptr;
+static jmethodID g_destroy_overlay_surfaces_method = nullptr;
+static jmethodID g_destroy_overlay_surface2_method = nullptr;
+static jmethodID g_show_overlay_surface2_method = nullptr;
+static jmethodID g_hide_overlay_surface2_method = nullptr;
+static jmethodID g_create_transaction_method = nullptr;
+static jmethodID g_swap_transactions_method = nullptr;
+static jmethodID g_hide_platform_view2_method = nullptr;
+static jmethodID g_on_display_overlay_surface_method = nullptr;
+
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_mutators_stack_class = nullptr;
+static jmethodID g_mutators_stack_init = nullptr;
+static jmethodID g_mutators_stack_push_transform = nullptr;
+static jmethodID g_mutators_stack_push_cliprect = nullptr;
+static jmethodID g_mutators_stack_push_cliprrect = nullptr;
+static jmethodID g_mutators_stack_push_opacity = nullptr;
+
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_overlay_surface_class = nullptr;
+static jmethodID g_overlay_surface_get_id_method = nullptr;
+
 bool AndroidJvmInvoker::RegisterJni(JNIEnv* env, jclass clazz) {
   if (!env || !clazz) {
     return false;
@@ -285,6 +314,79 @@ bool AndroidJvmInvoker::RegisterJni(JNIEnv* env, jclass clazz) {
                        "(Ljava/nio/ByteBuffer;[Ljava/lang/String;)V");
   g_set_semantics_tree_enabled_method =
       env->GetMethodID(clazz, "setSemanticsTreeEnabled", "(Z)V");
+
+  g_on_display_platform_view_method =
+      env->GetMethodID(clazz, "onDisplayPlatformView",
+                       "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"
+                       "FlutterMutatorsStack;)V");
+  g_on_display_platform_view2_method =
+      env->GetMethodID(clazz, "onDisplayPlatformView2",
+                       "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"
+                       "FlutterMutatorsStack;)V");
+  g_on_begin_frame_method = env->GetMethodID(clazz, "onBeginFrame", "()V");
+  g_on_end_frame_method = env->GetMethodID(clazz, "onEndFrame", "()V");
+  g_end_frame2_method = env->GetMethodID(clazz, "endFrame2", "()V");
+  g_create_overlay_surface_method =
+      env->GetMethodID(clazz, "createOverlaySurface",
+                       "()Lio/flutter/embedding/engine/FlutterOverlaySurface;");
+  g_create_overlay_surface2_method =
+      env->GetMethodID(clazz, "createOverlaySurface2",
+                       "()Lio/flutter/embedding/engine/FlutterOverlaySurface;");
+  g_destroy_overlay_surfaces_method =
+      env->GetMethodID(clazz, "destroyOverlaySurfaces", "()V");
+  g_destroy_overlay_surface2_method =
+      env->GetMethodID(clazz, "destroyOverlaySurface2", "()V");
+  g_show_overlay_surface2_method =
+      env->GetMethodID(clazz, "showOverlaySurface2", "()V");
+  g_hide_overlay_surface2_method =
+      env->GetMethodID(clazz, "hideOverlaySurface2", "()V");
+  g_create_transaction_method =
+      env->GetMethodID(clazz, "createTransaction",
+                       "()Landroid/view/SurfaceControl$Transaction;");
+  g_swap_transactions_method =
+      env->GetMethodID(clazz, "swapTransactions", "()V");
+  g_hide_platform_view2_method =
+      env->GetMethodID(clazz, "hidePlatformView2", "(I)V");
+  g_on_display_overlay_surface_method =
+      env->GetMethodID(clazz, "onDisplayOverlaySurface", "(IIIII)V");
+
+  if (env->ExceptionCheck()) {
+    env->ExceptionClear();
+  }
+
+  jclass local_stack_class = env->FindClass(
+      "io/flutter/embedding/engine/mutatorsstack/FlutterMutatorsStack");
+  if (local_stack_class) {
+    g_mutators_stack_class =
+        new fml::jni::ScopedJavaGlobalRef<jclass>(env, local_stack_class);
+    env->DeleteLocalRef(local_stack_class);
+    g_mutators_stack_init =
+        env->GetMethodID(g_mutators_stack_class->obj(), "<init>", "()V");
+    g_mutators_stack_push_transform = env->GetMethodID(
+        g_mutators_stack_class->obj(), "pushTransform", "([F)V");
+    g_mutators_stack_push_cliprect = env->GetMethodID(
+        g_mutators_stack_class->obj(), "pushClipRect", "(FFFF)V");
+    g_mutators_stack_push_cliprrect = env->GetMethodID(
+        g_mutators_stack_class->obj(), "pushClipRRect", "(FFFF[F)V");
+    g_mutators_stack_push_opacity =
+        env->GetMethodID(g_mutators_stack_class->obj(), "pushOpacity", "(F)V");
+  }
+  if (env->ExceptionCheck()) {
+    env->ExceptionClear();
+  }
+
+  jclass local_surf_class =
+      env->FindClass("io/flutter/embedding/engine/FlutterOverlaySurface");
+  if (local_surf_class) {
+    g_overlay_surface_class =
+        new fml::jni::ScopedJavaGlobalRef<jclass>(env, local_surf_class);
+    env->DeleteLocalRef(local_surf_class);
+    g_overlay_surface_get_id_method =
+        env->GetMethodID(g_overlay_surface_class->obj(), "getId", "()I");
+  }
+  if (env->ExceptionCheck()) {
+    env->ExceptionClear();
+  }
 
   return g_handle_platform_message_method != nullptr &&
          g_handle_platform_message_response_method != nullptr &&
@@ -320,24 +422,68 @@ AndroidJvmInvoker::GetJavaObject() const {
   return java_object_;
 }
 
+fml::jni::ScopedJavaLocalRef<jobject> AndroidJvmInvoker::GetJavaObjectLocalRef(
+    JNIEnv*& env) const {
+  {
+    std::lock_guard<std::mutex> lock(java_object_mutex_);
+    if (!java_object_) {
+      env = nullptr;
+      return fml::jni::ScopedJavaLocalRef<jobject>();
+    }
+  }
+  env = fml::jni::AttachCurrentThread();
+  if (!env) {
+    return fml::jni::ScopedJavaLocalRef<jobject>();
+  }
+  std::lock_guard<std::mutex> lock(java_object_mutex_);
+  if (!java_object_) {
+    return fml::jni::ScopedJavaLocalRef<jobject>();
+  }
+  return java_object_->get(env);
+}
+
 bool AndroidJvmInvoker::EnsureAttachedToThread() {
   TRACE_EVENT0("flutter", "AndroidJvmInvoker::EnsureAttachedToThread");
+  {
+    std::lock_guard<std::mutex> lock(java_object_mutex_);
+    if (!java_object_) {
+      return false;
+    }
+  }
   return fml::jni::AttachCurrentThread() != nullptr;
 }
 
 void AndroidJvmInvoker::DetachFromThread() {
   TRACE_EVENT0("flutter", "AndroidJvmInvoker::DetachFromThread");
+  {
+    std::lock_guard<std::mutex> lock(java_object_mutex_);
+    if (!java_object_) {
+      return;
+    }
+  }
   fml::jni::DetachFromVM();
 }
 
 bool AndroidJvmInvoker::HasPendingException() const {
   TRACE_EVENT0("flutter", "AndroidJvmInvoker::HasPendingException");
+  {
+    std::lock_guard<std::mutex> lock(java_object_mutex_);
+    if (!java_object_) {
+      return false;
+    }
+  }
   JNIEnv* env = fml::jni::AttachCurrentThread();
   return env && env->ExceptionCheck();
 }
 
 void AndroidJvmInvoker::ClearPendingException() {
   TRACE_EVENT0("flutter", "AndroidJvmInvoker::ClearPendingException");
+  {
+    std::lock_guard<std::mutex> lock(java_object_mutex_);
+    if (!java_object_) {
+      return;
+    }
+  }
   JNIEnv* env = fml::jni::AttachCurrentThread();
   if (env) {
     env->ExceptionClear();
@@ -351,17 +497,9 @@ bool AndroidJvmInvoker::HandlePlatformMessage(const std::string& channel,
                                               int64_t message_data) {
   TRACE_EVENT1("flutter", "AndroidJvmInvoker::HandlePlatformMessage", "channel",
                channel.c_str());
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  if (!env) {
-    return false;
-  }
-  fml::jni::ScopedJavaLocalRef<jobject> java_object;
-  {
-    std::lock_guard<std::mutex> lock(java_object_mutex_);
-    if (java_object_) {
-      java_object = java_object_->get(env);
-    }
-  }
+  JNIEnv* env = nullptr;
+  fml::jni::ScopedJavaLocalRef<jobject> java_object =
+      GetJavaObjectLocalRef(env);
   if (java_object.is_null()) {
     return true;
   }
@@ -404,17 +542,9 @@ bool AndroidJvmInvoker::HandlePlatformMessageResponse(int32_t response_id,
                                                       const uint8_t* data,
                                                       size_t data_size) {
   TRACE_EVENT0("flutter", "AndroidJvmInvoker::HandlePlatformMessageResponse");
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  if (!env) {
-    return false;
-  }
-  fml::jni::ScopedJavaLocalRef<jobject> java_object;
-  {
-    std::lock_guard<std::mutex> lock(java_object_mutex_);
-    if (java_object_) {
-      java_object = java_object_->get(env);
-    }
-  }
+  JNIEnv* env = nullptr;
+  fml::jni::ScopedJavaLocalRef<jobject> java_object =
+      GetJavaObjectLocalRef(env);
   if (java_object.is_null()) {
     return true;
   }
@@ -440,17 +570,9 @@ bool AndroidJvmInvoker::UpdateSemantics(
     const std::vector<std::string>& strings,
     const std::vector<std::vector<uint8_t>>& string_attribute_args) {
   TRACE_EVENT0("flutter", "AndroidJvmInvoker::UpdateSemantics");
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  if (!env) {
-    return false;
-  }
-  fml::jni::ScopedJavaLocalRef<jobject> java_object;
-  {
-    std::lock_guard<std::mutex> lock(java_object_mutex_);
-    if (java_object_) {
-      java_object = java_object_->get(env);
-    }
-  }
+  JNIEnv* env = nullptr;
+  fml::jni::ScopedJavaLocalRef<jobject> java_object =
+      GetJavaObjectLocalRef(env);
   if (java_object.is_null()) {
     return true;
   }
@@ -477,17 +599,9 @@ bool AndroidJvmInvoker::UpdateCustomAccessibilityActions(
     const std::vector<std::string>& action_strings) {
   TRACE_EVENT0("flutter",
                "AndroidJvmInvoker::UpdateCustomAccessibilityActions");
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  if (!env) {
-    return false;
-  }
-  fml::jni::ScopedJavaLocalRef<jobject> java_object;
-  {
-    std::lock_guard<std::mutex> lock(java_object_mutex_);
-    if (java_object_) {
-      java_object = java_object_->get(env);
-    }
-  }
+  JNIEnv* env = nullptr;
+  fml::jni::ScopedJavaLocalRef<jobject> java_object =
+      GetJavaObjectLocalRef(env);
   if (java_object.is_null()) {
     return true;
   }
@@ -509,17 +623,9 @@ bool AndroidJvmInvoker::UpdateCustomAccessibilityActions(
 
 bool AndroidJvmInvoker::SetSemanticsTreeEnabled(bool enabled) {
   TRACE_EVENT0("flutter", "AndroidJvmInvoker::SetSemanticsTreeEnabled");
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  if (!env) {
-    return false;
-  }
-  fml::jni::ScopedJavaLocalRef<jobject> java_object;
-  {
-    std::lock_guard<std::mutex> lock(java_object_mutex_);
-    if (java_object_) {
-      java_object = java_object_->get(env);
-    }
-  }
+  JNIEnv* env = nullptr;
+  fml::jni::ScopedJavaLocalRef<jobject> java_object =
+      GetJavaObjectLocalRef(env);
   if (java_object.is_null()) {
     return true;
   }
@@ -535,17 +641,9 @@ bool AndroidJvmInvoker::SetSemanticsTreeEnabled(bool enabled) {
 bool AndroidJvmInvoker::SetApplicationLocale(const std::string& locale) {
   TRACE_EVENT1("flutter", "AndroidJvmInvoker::SetApplicationLocale", "locale",
                locale.c_str());
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  if (!env) {
-    return false;
-  }
-  fml::jni::ScopedJavaLocalRef<jobject> java_object;
-  {
-    std::lock_guard<std::mutex> lock(java_object_mutex_);
-    if (java_object_) {
-      java_object = java_object_->get(env);
-    }
-  }
+  JNIEnv* env = nullptr;
+  fml::jni::ScopedJavaLocalRef<jobject> java_object =
+      GetJavaObjectLocalRef(env);
   if (java_object.is_null()) {
     return true;
   }
@@ -561,17 +659,9 @@ bool AndroidJvmInvoker::SetApplicationLocale(const std::string& locale) {
 
 bool AndroidJvmInvoker::OnFirstFrame() {
   TRACE_EVENT0("flutter", "AndroidJvmInvoker::OnFirstFrame");
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  if (!env) {
-    return false;
-  }
-  fml::jni::ScopedJavaLocalRef<jobject> java_object;
-  {
-    std::lock_guard<std::mutex> lock(java_object_mutex_);
-    if (java_object_) {
-      java_object = java_object_->get(env);
-    }
-  }
+  JNIEnv* env = nullptr;
+  fml::jni::ScopedJavaLocalRef<jobject> java_object =
+      GetJavaObjectLocalRef(env);
   if (java_object.is_null()) {
     return true;
   }
@@ -584,17 +674,9 @@ bool AndroidJvmInvoker::OnFirstFrame() {
 
 bool AndroidJvmInvoker::OnPreEngineRestart() {
   TRACE_EVENT0("flutter", "AndroidJvmInvoker::OnPreEngineRestart");
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  if (!env) {
-    return false;
-  }
-  fml::jni::ScopedJavaLocalRef<jobject> java_object;
-  {
-    std::lock_guard<std::mutex> lock(java_object_mutex_);
-    if (java_object_) {
-      java_object = java_object_->get(env);
-    }
-  }
+  JNIEnv* env = nullptr;
+  fml::jni::ScopedJavaLocalRef<jobject> java_object =
+      GetJavaObjectLocalRef(env);
   if (java_object.is_null()) {
     return true;
   }
@@ -640,6 +722,160 @@ bool AndroidJvmInvoker::PushPlatformViewMutators(
     const std::vector<uint8_t>& payload) {
   TRACE_EVENT1("flutter", "AndroidJvmInvoker::PushPlatformViewMutators",
                "view_id", std::to_string(view_id).c_str());
+  JNIEnv* env = nullptr;
+  fml::jni::ScopedJavaLocalRef<jobject> java_object =
+      GetJavaObjectLocalRef(env);
+  if (java_object.is_null()) {
+    return true;
+  }
+
+  jobject j_stack = nullptr;
+  if (g_mutators_stack_class && g_mutators_stack_init) {
+    j_stack =
+        env->NewObject(g_mutators_stack_class->obj(), g_mutators_stack_init);
+  }
+  if (j_stack == nullptr) {
+    jclass local_class = env->FindClass(
+        "io/flutter/embedding/engine/mutatorsstack/FlutterMutatorsStack");
+    if (local_class) {
+      jmethodID init_id = env->GetMethodID(local_class, "<init>", "()V");
+      if (init_id) {
+        j_stack = env->NewObject(local_class, init_id);
+      }
+      env->DeleteLocalRef(local_class);
+    }
+  }
+
+  if (j_stack && !payload.empty()) {
+    auto maybe_stack =
+        AndroidMutatorsStack::Deserialize(payload.data(), payload.size());
+    if (maybe_stack.has_value()) {
+      for (const auto& m : maybe_stack->GetMutators()) {
+        switch (m.type) {
+          case AndroidMutatorType::kTransform: {
+            const auto& mat = m.GetMatrix();
+            // 3x3 2D affine transformation matrix elements.
+            constexpr size_t kMatrixElements = 9;
+            fml::jni::ScopedJavaLocalRef<jfloatArray> arr(
+                env, env->NewFloatArray(kMatrixElements));
+            env->SetFloatArrayRegion(arr.obj(), 0, kMatrixElements, mat.values);
+            jmethodID push_transform = g_mutators_stack_push_transform;
+            if (!push_transform) {
+              jclass stack_cls = env->GetObjectClass(j_stack);
+              push_transform =
+                  env->GetMethodID(stack_cls, "pushTransform", "([F)V");
+              env->DeleteLocalRef(stack_cls);
+            }
+            if (push_transform) {
+              env->CallVoidMethod(j_stack, push_transform, arr.obj());
+            }
+            break;
+          }
+          case AndroidMutatorType::kClipRect: {
+            const auto& r = m.GetRect();
+            jmethodID push_cliprect = g_mutators_stack_push_cliprect;
+            if (!push_cliprect) {
+              jclass stack_cls = env->GetObjectClass(j_stack);
+              push_cliprect =
+                  env->GetMethodID(stack_cls, "pushClipRect", "(FFFF)V");
+              env->DeleteLocalRef(stack_cls);
+            }
+            if (push_cliprect) {
+              env->CallVoidMethod(
+                  j_stack, push_cliprect, static_cast<jfloat>(r.left),
+                  static_cast<jfloat>(r.top), static_cast<jfloat>(r.right),
+                  static_cast<jfloat>(r.bottom));
+            }
+            break;
+          }
+          case AndroidMutatorType::kClipRRect: {
+            const auto& rr = m.GetRRect();
+            // 4 corner radii pairs (x, y).
+            constexpr size_t kRadiiElements = 8;
+            fml::jni::ScopedJavaLocalRef<jfloatArray> arr(
+                env, env->NewFloatArray(kRadiiElements));
+            env->SetFloatArrayRegion(arr.obj(), 0, kRadiiElements, rr.radii);
+            jmethodID push_cliprrect = g_mutators_stack_push_cliprrect;
+            if (!push_cliprrect) {
+              jclass stack_cls = env->GetObjectClass(j_stack);
+              push_cliprrect =
+                  env->GetMethodID(stack_cls, "pushClipRRect", "(FFFF[F)V");
+              env->DeleteLocalRef(stack_cls);
+            }
+            if (push_cliprrect) {
+              env->CallVoidMethod(
+                  j_stack, push_cliprrect, static_cast<jfloat>(rr.rect.left),
+                  static_cast<jfloat>(rr.rect.top),
+                  static_cast<jfloat>(rr.rect.right),
+                  static_cast<jfloat>(rr.rect.bottom), arr.obj());
+            }
+            break;
+          }
+          case AndroidMutatorType::kOpacity: {
+            jmethodID push_opacity = g_mutators_stack_push_opacity;
+            if (!push_opacity) {
+              jclass stack_cls = env->GetObjectClass(j_stack);
+              push_opacity = env->GetMethodID(stack_cls, "pushOpacity", "(F)V");
+              env->DeleteLocalRef(stack_cls);
+            }
+            if (push_opacity) {
+              env->CallVoidMethod(j_stack, push_opacity,
+                                  static_cast<jfloat>(m.GetOpacity()));
+            }
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  jclass jni_class = env->GetObjectClass(java_object.obj());
+  bool is_hcpp = false;
+  if (jni_class) {
+    jfieldID pvc2_field = env->GetFieldID(
+        jni_class, "platformViewsController2",
+        "Lio/flutter/plugin/platform/PlatformViewsController2;");
+    if (pvc2_field) {
+      jobject pvc2 = env->GetObjectField(java_object.obj(), pvc2_field);
+      if (pvc2 != nullptr) {
+        is_hcpp = true;
+        env->DeleteLocalRef(pvc2);
+      }
+    }
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+    }
+  }
+
+  jmethodID target_method = is_hcpp ? g_on_display_platform_view2_method
+                                    : g_on_display_platform_view_method;
+  if (!target_method && jni_class) {
+    const char* name =
+        is_hcpp ? "onDisplayPlatformView2" : "onDisplayPlatformView";
+    target_method = env->GetMethodID(jni_class, name,
+                                     "(IIIIIIILio/flutter/embedding/engine/"
+                                     "mutatorsstack/FlutterMutatorsStack;)V");
+  }
+
+  if (target_method) {
+    env->CallVoidMethod(
+        java_object.obj(), target_method, static_cast<jint>(view_id),
+        static_cast<jint>(x), static_cast<jint>(y), static_cast<jint>(width),
+        static_cast<jint>(height), static_cast<jint>(view_width),
+        static_cast<jint>(view_height), j_stack);
+  }
+
+  if (j_stack) {
+    env->DeleteLocalRef(j_stack);
+  }
+  if (jni_class) {
+    env->DeleteLocalRef(jni_class);
+  }
+
+  if (env->ExceptionCheck()) {
+    env->ExceptionClear();
+    return false;
+  }
   return true;
 }
 
@@ -648,6 +884,131 @@ bool AndroidJvmInvoker::InvokeVoidMethod(const std::string& method_name,
                                          const std::vector<uint8_t>& payload) {
   TRACE_EVENT1("flutter", "AndroidJvmInvoker::InvokeVoidMethod", "method",
                method_name.c_str());
+  JNIEnv* env = nullptr;
+  fml::jni::ScopedJavaLocalRef<jobject> java_object =
+      GetJavaObjectLocalRef(env);
+  if (java_object.is_null()) {
+    return true;
+  }
+
+  jclass clazz = env->GetObjectClass(java_object.obj());
+  if (!clazz) {
+    return false;
+  }
+
+  if (signature == "()V") {
+    jmethodID method = nullptr;
+    if (method_name == "onBeginFrame") {
+      method = g_on_begin_frame_method;
+    } else if (method_name == "onEndFrame") {
+      method = g_on_end_frame_method;
+    } else if (method_name == "endFrame2") {
+      method = g_end_frame2_method;
+    } else if (method_name == "destroyOverlaySurfaces") {
+      method = g_destroy_overlay_surfaces_method;
+    } else if (method_name == "destroyOverlaySurface2") {
+      method = g_destroy_overlay_surface2_method;
+    } else if (method_name == "showOverlaySurface2") {
+      method = g_show_overlay_surface2_method;
+    } else if (method_name == "hideOverlaySurface2") {
+      method = g_hide_overlay_surface2_method;
+    } else if (method_name == "swapTransactions") {
+      method = g_swap_transactions_method;
+    }
+    if (!method) {
+      method = env->GetMethodID(clazz, method_name.c_str(), "()V");
+    }
+    if (method) {
+      env->CallVoidMethod(java_object.obj(), method);
+    }
+  } else if (signature == "(I)V") {
+    int32_t val = 0;
+    if (payload.size() >= sizeof(int32_t)) {
+      memcpy(&val, payload.data(), sizeof(int32_t));
+    }
+    jmethodID method = nullptr;
+    if (method_name == "hidePlatformView2") {
+      method = g_hide_platform_view2_method;
+    }
+    if (!method) {
+      method = env->GetMethodID(clazz, method_name.c_str(), "(I)V");
+    }
+    if (method) {
+      env->CallVoidMethod(java_object.obj(), method, static_cast<jint>(val));
+    }
+  } else if (signature == "(Z)V") {
+    bool b = !payload.empty() && payload[0] != 0;
+    jmethodID method = env->GetMethodID(clazz, method_name.c_str(), "(Z)V");
+    if (method) {
+      env->CallVoidMethod(java_object.obj(), method, static_cast<jboolean>(b));
+    }
+  } else if (signature == "(IIIII)V") {
+    // 5 parameters for onDisplayOverlaySurface: id, x, y, width, height.
+    constexpr size_t kOverlayFieldCount = 5;
+    if (payload.size() >= sizeof(int32_t) * kOverlayFieldCount) {
+      int32_t s_id, x, y, w, h;
+      constexpr size_t kOffsetSurfaceId = 0;
+      constexpr size_t kOffsetX = sizeof(int32_t) * 1;
+      constexpr size_t kOffsetY = sizeof(int32_t) * 2;
+      constexpr size_t kOffsetWidth = sizeof(int32_t) * 3;
+      constexpr size_t kOffsetHeight = sizeof(int32_t) * 4;
+      memcpy(&s_id, payload.data() + kOffsetSurfaceId, sizeof(int32_t));
+      memcpy(&x, payload.data() + kOffsetX, sizeof(int32_t));
+      memcpy(&y, payload.data() + kOffsetY, sizeof(int32_t));
+      memcpy(&w, payload.data() + kOffsetWidth, sizeof(int32_t));
+      memcpy(&h, payload.data() + kOffsetHeight, sizeof(int32_t));
+      jmethodID method = g_on_display_overlay_surface_method;
+      if (!method) {
+        method = env->GetMethodID(clazz, method_name.c_str(), "(IIIII)V");
+      }
+      if (method) {
+        env->CallVoidMethod(java_object.obj(), method, s_id, x, y, w, h);
+      }
+    }
+  } else if (signature == "(JJ)V") {
+    // 2 parameters for onVsync: frame_nanos, target_time_nanos.
+    constexpr size_t kVsyncFieldCount = 2;
+    if (payload.size() >= sizeof(int64_t) * kVsyncFieldCount) {
+      int64_t f_nanos, t_nanos;
+      constexpr size_t kOffsetFrameNanos = 0;
+      constexpr size_t kOffsetTargetNanos = sizeof(int64_t) * 1;
+      memcpy(&f_nanos, payload.data() + kOffsetFrameNanos, sizeof(int64_t));
+      memcpy(&t_nanos, payload.data() + kOffsetTargetNanos, sizeof(int64_t));
+      jmethodID method = env->GetMethodID(clazz, method_name.c_str(), "(JJ)V");
+      if (method) {
+        env->CallVoidMethod(java_object.obj(), method,
+                            static_cast<jlong>(f_nanos),
+                            static_cast<jlong>(t_nanos));
+      }
+    }
+  } else if (signature == "(J)V") {
+    if (payload.size() >= sizeof(int64_t)) {
+      int64_t val;
+      memcpy(&val, payload.data(), sizeof(int64_t));
+      jmethodID method = env->GetMethodID(clazz, method_name.c_str(), "(J)V");
+      if (method) {
+        env->CallVoidMethod(java_object.obj(), method, static_cast<jlong>(val));
+      }
+    }
+  } else if (signature == "(Ljava/lang/String;)V") {
+    std::string str(reinterpret_cast<const char*>(payload.data()),
+                    payload.size());
+    jstring jstr = env->NewStringUTF(str.c_str());
+    jmethodID method =
+        env->GetMethodID(clazz, method_name.c_str(), "(Ljava/lang/String;)V");
+    if (method) {
+      env->CallVoidMethod(java_object.obj(), method, jstr);
+    }
+    if (jstr) {
+      env->DeleteLocalRef(jstr);
+    }
+  }
+
+  env->DeleteLocalRef(clazz);
+  if (env->ExceptionCheck()) {
+    env->ExceptionClear();
+    return false;
+  }
   return true;
 }
 
@@ -657,6 +1018,59 @@ bool AndroidJvmInvoker::InvokeBooleanMethod(
     const std::vector<uint8_t>& payload) {
   TRACE_EVENT1("flutter", "AndroidJvmInvoker::InvokeBooleanMethod", "method",
                method_name.c_str());
+  JNIEnv* env = nullptr;
+  fml::jni::ScopedJavaLocalRef<jobject> java_object =
+      GetJavaObjectLocalRef(env);
+  if (java_object.is_null()) {
+    return true;
+  }
+
+  if (method_name == "createPlatformViewTransaction") {
+    jclass clazz = env->GetObjectClass(java_object.obj());
+    if (!clazz) {
+      return false;
+    }
+    jmethodID method = g_create_transaction_method;
+    if (!method) {
+      method = env->GetMethodID(clazz, "createTransaction",
+                                "()Landroid/view/SurfaceControl$Transaction;");
+    }
+    env->DeleteLocalRef(clazz);
+    if (!method) {
+      if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+      }
+      return false;
+    }
+    jobject tx = env->CallObjectMethod(java_object.obj(), method);
+    bool success = (tx != nullptr);
+    if (tx) {
+      env->DeleteLocalRef(tx);
+    }
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+      return false;
+    }
+    return success;
+  }
+
+  if (signature == "()Z") {
+    jclass clazz = env->GetObjectClass(java_object.obj());
+    if (clazz) {
+      jmethodID method = env->GetMethodID(clazz, method_name.c_str(), "()Z");
+      bool res = false;
+      if (method) {
+        res = env->CallBooleanMethod(java_object.obj(), method);
+      }
+      env->DeleteLocalRef(clazz);
+      if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+        return false;
+      }
+      return res;
+    }
+  }
+
   return true;
 }
 
@@ -666,6 +1080,83 @@ int64_t AndroidJvmInvoker::InvokeIntMethod(
     const std::vector<uint8_t>& payload) {
   TRACE_EVENT1("flutter", "AndroidJvmInvoker::InvokeIntMethod", "method",
                method_name.c_str());
+  JNIEnv* env = nullptr;
+  fml::jni::ScopedJavaLocalRef<jobject> java_object =
+      GetJavaObjectLocalRef(env);
+  if (java_object.is_null()) {
+    return 0;
+  }
+
+  if (method_name == "createOverlaySurfaceId" ||
+      method_name == "createOverlaySurface2Id") {
+    jclass clazz = env->GetObjectClass(java_object.obj());
+    if (!clazz) {
+      return -1;
+    }
+    bool is_v2 = (method_name == "createOverlaySurface2Id");
+    jmethodID create_method = is_v2 ? g_create_overlay_surface2_method
+                                    : g_create_overlay_surface_method;
+    if (!create_method) {
+      const char* name =
+          is_v2 ? "createOverlaySurface2" : "createOverlaySurface";
+      create_method = env->GetMethodID(
+          clazz, name, "()Lio/flutter/embedding/engine/FlutterOverlaySurface;");
+    }
+    env->DeleteLocalRef(clazz);
+    if (!create_method) {
+      if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+      }
+      return -1;
+    }
+
+    jobject surface_obj =
+        env->CallObjectMethod(java_object.obj(), create_method);
+    if (!surface_obj) {
+      if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+      }
+      return -1;
+    }
+
+    jmethodID get_id_method = g_overlay_surface_get_id_method;
+    if (!get_id_method) {
+      jclass surf_class = env->GetObjectClass(surface_obj);
+      if (surf_class) {
+        get_id_method = env->GetMethodID(surf_class, "getId", "()I");
+        env->DeleteLocalRef(surf_class);
+      }
+    }
+
+    int32_t id = -1;
+    if (get_id_method) {
+      id = env->CallIntMethod(surface_obj, get_id_method);
+    }
+    env->DeleteLocalRef(surface_obj);
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+      return -1;
+    }
+    return id;
+  }
+
+  if (signature == "()I") {
+    jclass clazz = env->GetObjectClass(java_object.obj());
+    if (clazz) {
+      jmethodID method = env->GetMethodID(clazz, method_name.c_str(), "()I");
+      int64_t result = 0;
+      if (method) {
+        result = env->CallIntMethod(java_object.obj(), method);
+      }
+      env->DeleteLocalRef(clazz);
+      if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+        return 0;
+      }
+      return result;
+    }
+  }
+
   return 0;
 }
 
