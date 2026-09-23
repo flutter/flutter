@@ -389,6 +389,10 @@ static void SurfaceCreated(JNIEnv* env,
     ANativeWindow* window = nullptr;
     if (jsurface != nullptr) {
       window = ANativeWindow_fromSurface(env, jsurface);
+      if (window != nullptr) {
+        ANativeWindow_setBuffersGeometry(window, 0, 0,
+                                         1 /* WINDOW_FORMAT_RGBA_8888 */);
+      }
     }
     embedder->NotifySurfaceCreated(reinterpret_cast<uintptr_t>(window));
 #else
@@ -418,6 +422,10 @@ static void SurfaceWindowChanged(JNIEnv* env,
     ANativeWindow* window = nullptr;
     if (jsurface != nullptr) {
       window = ANativeWindow_fromSurface(env, jsurface);
+      if (window != nullptr) {
+        ANativeWindow_setBuffersGeometry(window, 0, 0,
+                                         1 /* WINDOW_FORMAT_RGBA_8888 */);
+      }
     }
     embedder->NotifySurfaceCreated(reinterpret_cast<uintptr_t>(window));
 #else
@@ -612,19 +620,26 @@ static void SetViewportMetrics(JNIEnv* env,
     event.physical_view_inset_bottom =
         static_cast<double>(physicalViewInsetBottom);
     event.physical_view_inset_left = static_cast<double>(physicalViewInsetLeft);
-    if (physicalMinWidth > 0 || physicalMaxWidth > 0 || physicalMinHeight > 0 ||
-        physicalMaxHeight > 0) {
+    const bool valid_width_constraints =
+        physicalMaxWidth > 0 && physicalMaxWidth >= physicalMinWidth &&
+        physicalWidth >= physicalMinWidth && physicalWidth <= physicalMaxWidth;
+    const bool valid_height_constraints =
+        physicalMaxHeight > 0 && physicalMaxHeight >= physicalMinHeight &&
+        physicalHeight >= physicalMinHeight &&
+        physicalHeight <= physicalMaxHeight;
+
+    if (valid_width_constraints && valid_height_constraints) {
       event.has_constraints = true;
-      event.min_width_constraint =
-          static_cast<size_t>(physicalMinWidth > 0 ? physicalMinWidth : 0);
-      event.max_width_constraint = static_cast<size_t>(
-          physicalMaxWidth > 0 ? physicalMaxWidth
-                               : (physicalWidth > 0 ? physicalWidth : 0));
-      event.min_height_constraint =
-          static_cast<size_t>(physicalMinHeight > 0 ? physicalMinHeight : 0);
-      event.max_height_constraint = static_cast<size_t>(
-          physicalMaxHeight > 0 ? physicalMaxHeight
-                                : (physicalHeight > 0 ? physicalHeight : 0));
+      event.min_width_constraint = static_cast<size_t>(physicalMinWidth);
+      event.max_width_constraint = static_cast<size_t>(physicalMaxWidth);
+      event.min_height_constraint = static_cast<size_t>(physicalMinHeight);
+      event.max_height_constraint = static_cast<size_t>(physicalMaxHeight);
+    } else {
+      event.has_constraints = false;
+      event.min_width_constraint = 0;
+      event.max_width_constraint = 0;
+      event.min_height_constraint = 0;
+      event.max_height_constraint = 0;
     }
     embedder->SendWindowMetricsEvent(event);
     return;
@@ -741,10 +756,13 @@ static void DispatchPointerDataPacket(JNIEnv* env,
                                       jlong shell_holder,
                                       jobject buffer,
                                       jint position) {
-  if (FlutterEmbedderNative::FromHandle(shell_holder) != nullptr) {
+  uint8_t* data = static_cast<uint8_t*>(env->GetDirectBufferAddress(buffer));
+  if (auto* embedder = FlutterEmbedderNative::FromHandle(shell_holder)) {
+    if (data != nullptr && position > 0) {
+      embedder->DispatchPointerDataPacket(data, static_cast<size_t>(position));
+    }
     return;
   }
-  uint8_t* data = static_cast<uint8_t*>(env->GetDirectBufferAddress(buffer));
   auto packet = std::make_unique<flutter::PointerDataPacket>(data, position);
   ANDROID_SHELL_HOLDER->GetPlatformView()->DispatchPointerDataPacket(
       std::move(packet));
@@ -757,7 +775,13 @@ static void DispatchSemanticsAction(JNIEnv* env,
                                     jint action,
                                     jobject args,
                                     jint args_position) {
-  if (FlutterEmbedderNative::FromHandle(shell_holder) != nullptr) {
+  if (auto* embedder = FlutterEmbedderNative::FromHandle(shell_holder)) {
+    const uint8_t* args_data =
+        args != nullptr
+            ? static_cast<const uint8_t*>(env->GetDirectBufferAddress(args))
+            : nullptr;
+    embedder->DispatchSemanticsAction(id, action, args_data,
+                                      static_cast<size_t>(args_position));
     return;
   }
   ANDROID_SHELL_HOLDER->GetPlatformView()->DispatchSemanticsAction(
@@ -773,7 +797,8 @@ static void SetSemanticsEnabled(JNIEnv* env,
                                 jobject jcaller,
                                 jlong shell_holder,
                                 jboolean enabled) {
-  if (FlutterEmbedderNative::FromHandle(shell_holder) != nullptr) {
+  if (auto* embedder = FlutterEmbedderNative::FromHandle(shell_holder)) {
+    embedder->SetSemanticsEnabled(enabled);
     return;
   }
   ANDROID_SHELL_HOLDER->GetPlatformView()->SetSemanticsEnabled(enabled);
@@ -783,7 +808,8 @@ static void SetAccessibilityFeatures(JNIEnv* env,
                                      jobject jcaller,
                                      jlong shell_holder,
                                      jint flags) {
-  if (FlutterEmbedderNative::FromHandle(shell_holder) != nullptr) {
+  if (auto* embedder = FlutterEmbedderNative::FromHandle(shell_holder)) {
+    embedder->SetAccessibilityFeatures(flags);
     return;
   }
   ANDROID_SHELL_HOLDER->GetPlatformView()->SetAccessibilityFeatures(flags);
@@ -798,7 +824,8 @@ static void RegisterTexture(JNIEnv* env,
                             jlong shell_holder,
                             jlong texture_id,
                             jobject surface_texture) {
-  if (FlutterEmbedderNative::FromHandle(shell_holder) != nullptr) {
+  if (auto* embedder = FlutterEmbedderNative::FromHandle(shell_holder)) {
+    embedder->RegisterExternalTexture(static_cast<int64_t>(texture_id));
     return;
   }
   ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterExternalTexture(
@@ -813,7 +840,8 @@ static void RegisterImageTexture(JNIEnv* env,
                                  jlong texture_id,
                                  jobject image_texture_entry,
                                  jboolean reset_on_background) {
-  if (FlutterEmbedderNative::FromHandle(shell_holder) != nullptr) {
+  if (auto* embedder = FlutterEmbedderNative::FromHandle(shell_holder)) {
+    embedder->RegisterExternalTexture(static_cast<int64_t>(texture_id));
     return;
   }
   ImageExternalTexture::ImageLifecycle lifecycle =
@@ -831,7 +859,8 @@ static void UnregisterTexture(JNIEnv* env,
                               jobject jcaller,
                               jlong shell_holder,
                               jlong texture_id) {
-  if (FlutterEmbedderNative::FromHandle(shell_holder) != nullptr) {
+  if (auto* embedder = FlutterEmbedderNative::FromHandle(shell_holder)) {
+    embedder->UnregisterExternalTexture(static_cast<int64_t>(texture_id));
     return;
   }
   ANDROID_SHELL_HOLDER->GetPlatformView()->UnregisterTexture(
@@ -842,7 +871,9 @@ static void MarkTextureFrameAvailable(JNIEnv* env,
                                       jobject jcaller,
                                       jlong shell_holder,
                                       jlong texture_id) {
-  if (FlutterEmbedderNative::FromHandle(shell_holder) != nullptr) {
+  if (auto* embedder = FlutterEmbedderNative::FromHandle(shell_holder)) {
+    embedder->MarkExternalTextureFrameAvailable(
+        static_cast<int64_t>(texture_id));
     return;
   }
   ANDROID_SHELL_HOLDER->GetPlatformView()->MarkTextureFrameAvailable(
@@ -850,7 +881,8 @@ static void MarkTextureFrameAvailable(JNIEnv* env,
 }
 
 static void ScheduleFrame(JNIEnv* env, jobject jcaller, jlong shell_holder) {
-  if (FlutterEmbedderNative::FromHandle(shell_holder) != nullptr) {
+  if (auto* embedder = FlutterEmbedderNative::FromHandle(shell_holder)) {
+    embedder->ScheduleFrame();
     return;
   }
   ANDROID_SHELL_HOLDER->GetPlatformView()->ScheduleFrame();

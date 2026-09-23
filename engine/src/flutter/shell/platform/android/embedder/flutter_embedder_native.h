@@ -38,6 +38,66 @@ typedef struct _JNIEnv JNIEnv;
 
 namespace flutter {
 
+struct alignas(8) RawAndroidPointerData {
+  enum class Change : int64_t {
+    kCancel,
+    kAdd,
+    kRemove,
+    kHover,
+    kDown,
+    kMove,
+    kUp,
+    kPanZoomStart,
+    kPanZoomUpdate,
+    kPanZoomEnd,
+  };
+
+  enum class DeviceKind : int64_t {
+    kTouch,
+    kMouse,
+    kStylus,
+    kInvertedStylus,
+    kTrackpad,
+  };
+
+  int64_t embedder_id;
+  int64_t time_stamp;
+  Change change;
+  DeviceKind kind;
+  int64_t signal_kind;
+  int64_t device;
+  int64_t pointer_identifier;
+  double physical_x;
+  double physical_y;
+  double physical_delta_x;
+  double physical_delta_y;
+  int64_t buttons;
+  int64_t obscured;
+  int64_t synthesized;
+  double pressure;
+  double pressure_min;
+  double pressure_max;
+  double distance;
+  double distance_max;
+  double size;
+  double radius_major;
+  double radius_minor;
+  double radius_min;
+  double radius_max;
+  double orientation;
+  double tilt;
+  int64_t platformData;
+  double scroll_delta_x;
+  double scroll_delta_y;
+  double pan_x;
+  double pan_y;
+  double pan_delta_x;
+  double pan_delta_y;
+  double scale;
+  double rotation;
+  int64_t view_id;
+};
+
 //------------------------------------------------------------------------------
 /// @brief      Pure C Embedder API coordinator for the Android Embedder
 ///             (RFC 410.0000, ADR-0001, ADR-0002, ADR-0011).
@@ -203,6 +263,28 @@ class FlutterEmbedderNative {
   /// Presents a software-rendered pixel buffer to the primary ANativeWindow
   /// surface, invoking `jni_delegate_->OnFirstFrame()` upon first presentation.
   bool PresentSoftware(const void* allocation, size_t row_bytes, size_t height);
+
+  /// Dispatches pointer data packet bytes from Java to the engine via
+  /// `embedder_api_.SendPointerEvent`.
+  bool DispatchPointerDataPacket(const uint8_t* data, size_t size);
+
+  /// Dispatches a semantics action to the engine via
+  /// `embedder_api_.DispatchSemanticsAction`.
+  bool DispatchSemanticsAction(int32_t id,
+                               int32_t action,
+                               const uint8_t* args_data,
+                               size_t args_size);
+
+  /// Updates whether semantics are enabled via
+  /// `embedder_api_.UpdateSemanticsEnabled`.
+  bool SetSemanticsEnabled(bool enabled);
+
+  /// Updates accessibility feature flags via
+  /// `embedder_api_.UpdateAccessibilityFeatures`.
+  bool SetAccessibilityFeatures(int32_t flags);
+
+  /// Schedules a frame to be rendered via `embedder_api_.ScheduleFrame`.
+  bool ScheduleFrame();
 
  private:
   FlutterEmbedderNative(const Settings& settings,

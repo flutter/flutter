@@ -1,9 +1,9 @@
 {
   "active_migration": "RFC 410: Android Embedder C-API Migration",
   "branch_slug": "android-embedder-migration-v10",
-  "current_branch": "android-embedder-migration-v10/2.5-semantics-and-assets",
-  "phase": "Phase 2.5: AndroidSemanticsBridge & AndroidDeferredLibraryLoader (Zero-Copy mmap/munmap)",
-  "active_component": "shell/platform/android/embedder/android_semantics_and_assets.h",
+  "current_branch": "android-embedder-migration-v10/3.0-c-api-cutover",
+  "phase": "Phase 3: Direct JNI Registration and Complete C-API Cutover",
+  "active_component": "shell/platform/android/platform_view_android_jni_impl.cc",
   "active_adrs": [
     "ADR-0000",
     "ADR-0001",

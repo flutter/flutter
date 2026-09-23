@@ -950,6 +950,7 @@ void FlutterEmbedderNative::HandleEnginePlatformMessage(
   }
 }
 
+<<<<<<< HEAD
 #if defined(__ANDROID__)
 void FlutterEmbedderNative::RegisterJavaTexture(JNIEnv* env,
                                                 int64_t texture_id,
@@ -1138,5 +1139,133 @@ void FlutterEmbedderNative::UpdateAllJavaTextures() {
   }
 }
 #endif
+
+bool FlutterEmbedderNative::DispatchPointerDataPacket(const uint8_t* data,
+                                                      size_t size) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::DispatchPointerDataPacket");
+  if (embedder_api_.SendPointerEvent == nullptr || engine_ == nullptr ||
+      data == nullptr || size < sizeof(RawAndroidPointerData)) {
+    return false;
+  }
+  const size_t count = size / sizeof(RawAndroidPointerData);
+  const auto* pointer_data =
+      reinterpret_cast<const RawAndroidPointerData*>(data);
+  std::vector<FlutterPointerEvent> events;
+  events.reserve(count);
+  for (size_t i = 0; i < count; ++i) {
+    const auto& pd = pointer_data[i];
+    FlutterPointerEvent event = {};
+    event.struct_size = sizeof(FlutterPointerEvent);
+    switch (pd.change) {
+      case RawAndroidPointerData::Change::kCancel:
+        event.phase = kCancel;
+        break;
+      case RawAndroidPointerData::Change::kAdd:
+        event.phase = kAdd;
+        break;
+      case RawAndroidPointerData::Change::kRemove:
+        event.phase = kRemove;
+        break;
+      case RawAndroidPointerData::Change::kHover:
+        event.phase = kHover;
+        break;
+      case RawAndroidPointerData::Change::kDown:
+        event.phase = kDown;
+        break;
+      case RawAndroidPointerData::Change::kMove:
+        event.phase = kMove;
+        break;
+      case RawAndroidPointerData::Change::kUp:
+        event.phase = kUp;
+        break;
+      case RawAndroidPointerData::Change::kPanZoomStart:
+        event.phase = kPanZoomStart;
+        break;
+      case RawAndroidPointerData::Change::kPanZoomUpdate:
+        event.phase = kPanZoomUpdate;
+        break;
+      case RawAndroidPointerData::Change::kPanZoomEnd:
+        event.phase = kPanZoomEnd;
+        break;
+    }
+    event.timestamp = static_cast<size_t>(pd.time_stamp);
+    event.x = pd.physical_x;
+    event.y = pd.physical_y;
+    event.device = static_cast<int32_t>(pd.device);
+    event.signal_kind = static_cast<FlutterPointerSignalKind>(pd.signal_kind);
+    event.scroll_delta_x = pd.scroll_delta_x;
+    event.scroll_delta_y = pd.scroll_delta_y;
+    switch (pd.kind) {
+      case RawAndroidPointerData::DeviceKind::kTouch:
+        event.device_kind = kFlutterPointerDeviceKindTouch;
+        break;
+      case RawAndroidPointerData::DeviceKind::kMouse:
+        event.device_kind = kFlutterPointerDeviceKindMouse;
+        break;
+      case RawAndroidPointerData::DeviceKind::kStylus:
+        event.device_kind = kFlutterPointerDeviceKindStylus;
+        break;
+      case RawAndroidPointerData::DeviceKind::kInvertedStylus:
+        event.device_kind = kFlutterPointerDeviceKindInvertedStylus;
+        break;
+      case RawAndroidPointerData::DeviceKind::kTrackpad:
+        event.device_kind = kFlutterPointerDeviceKindTrackpad;
+        break;
+    }
+    event.buttons = pd.buttons;
+    event.pan_x = pd.pan_x;
+    event.pan_y = pd.pan_y;
+    event.scale = pd.scale;
+    event.rotation = pd.rotation;
+    event.view_id = pd.view_id;
+    event.pressure = pd.pressure;
+    event.pressure_min = pd.pressure_min;
+    event.pressure_max = pd.pressure_max;
+    events.push_back(event);
+  }
+  return embedder_api_.SendPointerEvent(engine_, events.data(),
+                                        events.size()) == kSuccess;
+}
+
+bool FlutterEmbedderNative::DispatchSemanticsAction(int32_t id,
+                                                    int32_t action,
+                                                    const uint8_t* args_data,
+                                                    size_t args_size) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::DispatchSemanticsAction");
+  if (embedder_api_.DispatchSemanticsAction == nullptr || engine_ == nullptr) {
+    return false;
+  }
+  return embedder_api_.DispatchSemanticsAction(
+             engine_, static_cast<uint64_t>(id),
+             static_cast<FlutterSemanticsAction>(action), args_data,
+             args_size) == kSuccess;
+}
+
+bool FlutterEmbedderNative::SetSemanticsEnabled(bool enabled) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetSemanticsEnabled");
+  if (embedder_api_.UpdateSemanticsEnabled == nullptr || engine_ == nullptr) {
+    return false;
+  }
+  return embedder_api_.UpdateSemanticsEnabled(engine_, enabled) == kSuccess;
+}
+
+bool FlutterEmbedderNative::SetAccessibilityFeatures(int32_t flags) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetAccessibilityFeatures");
+  if (embedder_api_.UpdateAccessibilityFeatures == nullptr ||
+      engine_ == nullptr) {
+    return false;
+  }
+  return embedder_api_.UpdateAccessibilityFeatures(
+             engine_, static_cast<FlutterAccessibilityFeature>(flags)) ==
+         kSuccess;
+}
+
+bool FlutterEmbedderNative::ScheduleFrame() {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::ScheduleFrame");
+  if (embedder_api_.ScheduleFrame == nullptr || engine_ == nullptr) {
+    return false;
+  }
+  return embedder_api_.ScheduleFrame(engine_) == kSuccess;
+}
 
 }  // namespace flutter

@@ -162,6 +162,13 @@ struct FakeProcTableState {
   int update_asset_resolver_calls = 0;
   size_t last_asset_resolvers_count = 0;
   const FlutterAssetResolver* last_asset_resolver = nullptr;
+  int send_pointer_event_calls = 0;
+  int update_accessibility_features_calls = 0;
+  int schedule_frame_calls = 0;
+  size_t last_pointer_event_count = 0;
+  FlutterPointerPhase last_pointer_phase = kCancel;
+  FlutterAccessibilityFeature last_accessibility_flags =
+      static_cast<FlutterAccessibilityFeature>(0);
   bool fail_load_deferred_library = false;
 
   intptr_t last_on_vsync_baton = 0;
@@ -443,6 +450,29 @@ FlutterEngineProcTable CreateFakeProcTable(FakeProcTableState* state) {
         return kSuccess;
       };
 
+  table.SendPointerEvent = [](FLUTTER_API_SYMBOL(FlutterEngine) /*engine*/,
+                              const FlutterPointerEvent* events, size_t count) {
+    g_fake_state->send_pointer_event_calls++;
+    g_fake_state->last_pointer_event_count = count;
+    if (events != nullptr && count > 0) {
+      g_fake_state->last_pointer_phase = events[0].phase;
+    }
+    return kSuccess;
+  };
+
+  table.UpdateAccessibilityFeatures =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) /*engine*/,
+         FlutterAccessibilityFeature flags) {
+        g_fake_state->update_accessibility_features_calls++;
+        g_fake_state->last_accessibility_flags = flags;
+        return kSuccess;
+      };
+
+  table.ScheduleFrame = [](FLUTTER_API_SYMBOL(FlutterEngine) /*engine*/) {
+    g_fake_state->schedule_frame_calls++;
+    return kSuccess;
+  };
+
   return table;
 }
 
@@ -696,6 +726,75 @@ TEST(FlutterEmbedderNativeTest, CreatesAndCollectsAOTDataInReleaseMode) {
   EXPECT_EQ(state.collect_aot_data_calls, 1);
   EXPECT_EQ(state.last_collected_aot_data,
             reinterpret_cast<FlutterEngineAOTData>(0xDEADBEEF));
+}
+
+TEST(FlutterEmbedderNativeTest,
+     ForwardsPointerEventsAndSemanticsAndScheduleFrameToProcTable) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  Settings settings;
+
+  FlutterEmbedderNative embedder(settings, jni_delegate, proc_table);
+  ASSERT_TRUE(embedder.Launch("/assets", "/icudtl.dat", "main", "", {},
+                              /*engine_id=*/1));
+
+  // Synthesize a packed RawAndroidPointerData packet.
+  RawAndroidPointerData packet = {};
+  packet.time_stamp = 123456789;
+  packet.change = RawAndroidPointerData::Change::kDown;
+  packet.kind = RawAndroidPointerData::DeviceKind::kTouch;
+  packet.physical_x = 540.0;
+  packet.physical_y = 960.0;
+  packet.device = 1;
+  packet.view_id = 0;
+
+  EXPECT_TRUE(embedder.DispatchPointerDataPacket(
+      reinterpret_cast<const uint8_t*>(&packet), sizeof(packet)));
+  EXPECT_EQ(state.send_pointer_event_calls, 1);
+  EXPECT_EQ(state.last_pointer_event_count, 1u);
+  EXPECT_EQ(state.last_pointer_phase, kDown);
+
+  // Semantics & accessibility features.
+  uint8_t action_data[] = {1, 2, 3};
+  EXPECT_TRUE(embedder.DispatchSemanticsAction(
+      /*id=*/42, /*action=*/static_cast<int32_t>(kFlutterSemanticsActionTap),
+      action_data, sizeof(action_data)));
+  EXPECT_EQ(state.dispatch_semantics_action_calls, 1);
+
+  EXPECT_TRUE(embedder.SetSemanticsEnabled(true));
+  EXPECT_EQ(state.update_semantics_enabled_calls, 1);
+
+  EXPECT_TRUE(embedder.SetAccessibilityFeatures(
+      kFlutterAccessibilityFeatureAccessibleNavigation));
+  EXPECT_EQ(state.update_accessibility_features_calls, 1);
+  EXPECT_EQ(state.last_accessibility_flags,
+            kFlutterAccessibilityFeatureAccessibleNavigation);
+
+  // Frame scheduling.
+  EXPECT_TRUE(embedder.ScheduleFrame());
+  EXPECT_EQ(state.schedule_frame_calls, 1);
+}
+
+TEST(FlutterEmbedderNativeTest,
+     RegistersAndUnregistersExternalTexturesViaProcTable) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  Settings settings;
+
+  FlutterEmbedderNative embedder(settings, jni_delegate, proc_table);
+  ASSERT_TRUE(embedder.Launch("/assets", "/icudtl.dat", "main", "", {},
+                              /*engine_id=*/1));
+
+  EXPECT_TRUE(embedder.RegisterExternalTexture(/*texture_id=*/101));
+  EXPECT_EQ(state.register_external_texture_calls, 1);
+
+  EXPECT_TRUE(embedder.MarkExternalTextureFrameAvailable(/*texture_id=*/101));
+  EXPECT_EQ(state.mark_external_texture_frame_available_calls, 1);
+
+  EXPECT_TRUE(embedder.UnregisterExternalTexture(/*texture_id=*/101));
+  EXPECT_EQ(state.unregister_external_texture_calls, 1);
 }
 
 TEST(AndroidSurfaceControlTest,
