@@ -149,6 +149,11 @@ struct FakeProcTableState {
   FlutterEngineAOTData last_collected_aot_data = nullptr;
   FlutterEngineAOTData passed_aot_data = nullptr;
 
+  int on_vsync_calls = 0;
+
+  intptr_t last_on_vsync_baton = 0;
+  uint64_t last_on_vsync_start_nanos = 0;
+  uint64_t last_on_vsync_target_nanos = 0;
   FlutterViewId last_added_view_id = 0;
   FlutterViewId last_removed_view_id = 0;
   FlutterGpuAvailability last_gpu_availability =
@@ -156,6 +161,7 @@ struct FakeProcTableState {
   bool last_does_handle_on_platform_thread = true;
   FlutterPlatformMessageCallback2 saved_message_callback2 = nullptr;
   FlutterRequestDartDeferredLibraryCallback saved_deferred_callback = nullptr;
+  VsyncCallback saved_vsync_callback = nullptr;
   void* saved_user_data = nullptr;
   std::string last_spawn_entrypoint;
   std::string last_spawn_route;
@@ -178,6 +184,7 @@ FlutterEngineProcTable CreateFakeProcTable(FakeProcTableState* state) {
     g_fake_state->saved_message_callback2 = args->platform_message_callback2;
     g_fake_state->saved_deferred_callback =
         args->request_dart_deferred_library_callback;
+    g_fake_state->saved_vsync_callback = args->vsync_callback;
     g_fake_state->saved_user_data = user_data;
     g_fake_state->passed_aot_data = args->aot_data;
     *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xCAFE01);
@@ -302,6 +309,16 @@ FlutterEngineProcTable CreateFakeProcTable(FakeProcTableState* state) {
       res.user_data = info->user_data;
       info->remove_view_callback(&res);
     }
+    return kSuccess;
+  };
+
+  table.OnVsync = [](FLUTTER_API_SYMBOL(FlutterEngine) /*engine*/,
+                     intptr_t baton, uint64_t frame_start_time_nanos,
+                     uint64_t frame_target_time_nanos) {
+    g_fake_state->on_vsync_calls++;
+    g_fake_state->last_on_vsync_baton = baton;
+    g_fake_state->last_on_vsync_start_nanos = frame_start_time_nanos;
+    g_fake_state->last_on_vsync_target_nanos = frame_target_time_nanos;
     return kSuccess;
   };
 
@@ -707,6 +724,75 @@ TEST(AndroidSurfaceControlTest, DispatchesOnFirstFrameOnceUponPresentation) {
       /*view_id=*/0, /*layer_id=*/1, /*hardware_buffer_handle=*/0x2222,
       /*width=*/1080, /*height=*/2400, &present_info2));
   EXPECT_EQ(jni_delegate->first_frame_count, 1);
+}
+
+TEST(AndroidChoreographerVsyncTest,
+     RoutesEngineVsyncCallbackToChoreographerProviderAndReturnsFrameTimes) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  Settings settings;
+
+  FlutterEmbedderNative embedder(settings, jni_delegate, proc_table);
+  ASSERT_TRUE(embedder.Launch("/assets", "/icudtl.dat", "main", "", {},
+                              /*engine_id=*/1));
+  ASSERT_NE(state.saved_vsync_callback, nullptr);
+
+  // Engine requests vsync with baton 0x55AA.
+  state.saved_vsync_callback(state.saved_user_data, 0x55AA);
+  EXPECT_EQ(jni_delegate->last_vsync_baton, 0x55AA);
+  EXPECT_EQ(embedder.GetVsyncWaiter()->GetPendingBatonCount(), 1u);
+
+  // Choreographer fires frame callback.
+  EXPECT_TRUE(embedder.OnVsync(0x55AA, 100000000ULL, 116666666ULL));
+  EXPECT_EQ(state.on_vsync_calls, 1);
+  EXPECT_EQ(state.last_on_vsync_baton, 0x55AA);
+  EXPECT_EQ(state.last_on_vsync_start_nanos, 100000000ULL);
+  EXPECT_EQ(state.last_on_vsync_target_nanos, 116666666ULL);
+  EXPECT_EQ(embedder.GetVsyncWaiter()->GetPendingBatonCount(), 0u);
+}
+
+TEST(AndroidChoreographerVsyncTest,
+     ComputesTargetDeadlineFromVariableRefreshRateWhenZeroTargetProvided) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  auto engine = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xCAFE01);
+  AndroidChoreographerVsync vsync(jni_delegate, proc_table,
+                                  /*initial_refresh_rate_fps=*/120.0);
+  EXPECT_EQ(vsync.GetRefreshPeriodNanos(), 8333333ULL);
+
+  vsync.RequestVsync(0x77);
+  EXPECT_TRUE(vsync.OnChoreographerFrame(engine, 0x77, 50000000ULL, 0ULL));
+  EXPECT_EQ(state.on_vsync_calls, 1);
+  EXPECT_EQ(state.last_on_vsync_start_nanos, 50000000ULL);
+  EXPECT_EQ(state.last_on_vsync_target_nanos, 50000000ULL + 8333333ULL);
+}
+
+TEST(AndroidChoreographerVsyncTest,
+     RejectsDuplicateOrCancelledVsyncBatonsWithoutInvokingProcTable) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  auto engine = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xCAFE01);
+
+  AndroidChoreographerVsync vsync(jni_delegate, proc_table, 60.0);
+  vsync.RequestVsync(0x88);
+  EXPECT_TRUE(
+      vsync.OnChoreographerFrame(engine, 0x88, 1000000ULL, 17666666ULL));
+  EXPECT_EQ(state.on_vsync_calls, 1);
+
+  // Duplicate firing of the same baton 0x88 must be rejected.
+  EXPECT_FALSE(
+      vsync.OnChoreographerFrame(engine, 0x88, 2000000ULL, 18666666ULL));
+  EXPECT_EQ(state.on_vsync_calls, 1);
+
+  // Cancelled baton before firing must also be rejected.
+  vsync.RequestVsync(0x99);
+  vsync.CancelPendingBatons();
+  EXPECT_FALSE(
+      vsync.OnChoreographerFrame(engine, 0x99, 3000000ULL, 19666666ULL));
+  EXPECT_EQ(state.on_vsync_calls, 1);
 }
 
 }  // namespace testing

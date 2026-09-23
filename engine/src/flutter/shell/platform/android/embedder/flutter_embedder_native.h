@@ -14,6 +14,7 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/android/embedder/android_choreographer_vsync.h"
 #include "flutter/shell/platform/android/embedder/android_surface_control.h"
 #include "flutter/shell/platform/android/embedder/jni_delegate.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -120,6 +121,10 @@ class FlutterEmbedderNative {
     return surface_control_.get();
   }
 
+  AndroidChoreographerVsync* GetVsyncWaiter() const {
+    return vsync_waiter_.get();
+  }
+
  private:
   FlutterEmbedderNative(const Settings& settings,
                         std::shared_ptr<JniDelegate> jni_delegate,
@@ -136,6 +141,8 @@ class FlutterEmbedderNative {
   static void OnRequestDartDeferredLibraryCallback(intptr_t loading_unit_id,
                                                    void* user_data);
 
+  static void OnVsyncRequestCallback(void* user_data, intptr_t baton);
+
   void HandleEnginePlatformMessage(const FlutterPlatformMessage* message);
 
   Settings settings_;
@@ -144,6 +151,7 @@ class FlutterEmbedderNative {
   FLUTTER_API_SYMBOL(FlutterEngine) engine_ = nullptr;
   FlutterEngineAOTData aot_data_ = nullptr;
   std::unique_ptr<AndroidSurfaceControl> surface_control_;
+  std::unique_ptr<AndroidChoreographerVsync> vsync_waiter_;
   bool is_valid_ = false;
 
   mutable std::mutex response_mutex_;

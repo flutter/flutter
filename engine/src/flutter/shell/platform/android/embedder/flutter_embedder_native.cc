@@ -74,6 +74,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
   is_valid_ = ResolveDefaultProcTable(&embedder_api_);
   surface_control_ =
       std::make_unique<AndroidSurfaceControl>(jni_delegate_, embedder_api_);
+  vsync_waiter_ =
+      std::make_unique<AndroidChoreographerVsync>(jni_delegate_, embedder_api_);
 }
 
 FlutterEmbedderNative::FlutterEmbedderNative(
@@ -85,6 +87,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
       embedder_api_(proc_table),
       surface_control_(std::make_unique<AndroidSurfaceControl>(jni_delegate_,
                                                                embedder_api_)),
+      vsync_waiter_(std::make_unique<AndroidChoreographerVsync>(jni_delegate_,
+                                                                embedder_api_)),
       is_valid_(proc_table.Initialize != nullptr &&
                 proc_table.RunInitialized != nullptr &&
                 proc_table.Shutdown != nullptr) {
@@ -102,6 +106,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
       engine_(spawned_engine),
       surface_control_(std::make_unique<AndroidSurfaceControl>(jni_delegate_,
                                                                embedder_api_)),
+      vsync_waiter_(std::make_unique<AndroidChoreographerVsync>(jni_delegate_,
+                                                                embedder_api_)),
       is_valid_(spawned_engine != nullptr) {
   RegisterEmbedderHandle(this);
 }
@@ -109,6 +115,9 @@ FlutterEmbedderNative::FlutterEmbedderNative(
 FlutterEmbedderNative::~FlutterEmbedderNative() {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::~FlutterEmbedderNative");
   UnregisterEmbedderHandle(this);
+  if (vsync_waiter_ != nullptr) {
+    vsync_waiter_->CancelPendingBatons();
+  }
   if (engine_ != nullptr) {
     if (embedder_api_.Deinitialize != nullptr) {
       embedder_api_.Deinitialize(engine_);
@@ -175,6 +184,7 @@ bool FlutterEmbedderNative::Launch(
       &FlutterEmbedderNative::OnPlatformMessageCallback;
   project_args.request_dart_deferred_library_callback =
       &FlutterEmbedderNative::OnRequestDartDeferredLibraryCallback;
+  project_args.vsync_callback = &FlutterEmbedderNative::OnVsyncRequestCallback;
 
   if (embedder_api_.RunsAOTCompiledDartCode != nullptr &&
       embedder_api_.RunsAOTCompiledDartCode()) {
@@ -455,11 +465,23 @@ bool FlutterEmbedderNative::OnVsync(intptr_t baton,
                                     uint64_t frame_start_time_nanos,
                                     uint64_t frame_target_time_nanos) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::OnVsync");
-  if (engine_ == nullptr || embedder_api_.OnVsync == nullptr) {
+  if (engine_ == nullptr || vsync_waiter_ == nullptr) {
     return false;
   }
-  return embedder_api_.OnVsync(engine_, baton, frame_start_time_nanos,
-                               frame_target_time_nanos) == kSuccess;
+  return vsync_waiter_->OnChoreographerFrame(
+      engine_, baton, frame_start_time_nanos, frame_target_time_nanos);
+}
+
+void FlutterEmbedderNative::OnVsyncRequestCallback(void* user_data,
+                                                   intptr_t baton) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::OnVsyncRequestCallback");
+  if (user_data == nullptr) {
+    return;
+  }
+  auto* embedder = static_cast<FlutterEmbedderNative*>(user_data);
+  if (embedder->vsync_waiter_ != nullptr) {
+    embedder->vsync_waiter_->RequestVsync(baton);
+  }
 }
 
 void FlutterEmbedderNative::OnPlatformMessageCallback(

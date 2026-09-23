@@ -21,13 +21,15 @@
     ]
   },
   "ratchet_state": {
-    "current_branch": "android-embedder-migration-v10/2.1-surface-control",
+    "current_branch": "android-embedder-migration-v10/2.2-choreographer-vsync",
     "total_suite_tests": 10,
-    "max_allowed_failing_tests": 8,
-    "current_failing_test_count": 8,
+    "max_allowed_failing_tests": 6,
+    "current_failing_test_count": 6,
     "passing_locked_tests": [
       "integration:android_hardware_smoke_test",
-      "devicelab:android_lifecycles_test"
+      "devicelab:android_lifecycles_test",
+      "integration:android_engine_test",
+      "devicelab:android_choreographer_do_frame_test"
     ],
     "failing_tests_by_target_branch": [
       {
@@ -45,8 +47,8 @@
         "working_directory": "dev/integration_tests/android_engine_test",
         "command": ["flutter", "drive", "lib/main.dart"],
         "subsystem": "Engine Lifecycle & Multi-Engine Spawning",
-        "expected_green_branch": "android-embedder-migration-v10/2.2-engine-lifecycle-and-surface",
-        "status_when_flag_true": "PENDING_BRANCH_2.2"
+        "expected_green_branch": "android-embedder-migration-v10/2.2-choreographer-vsync",
+        "status_when_flag_true": "PASSING_LOCKED"
       },
       {
         "id": "devicelab:android_choreographer_do_frame_test",
@@ -54,8 +56,8 @@
         "working_directory": "dev/devicelab",
         "command": ["dart", "bin/test_runner.dart", "test", "-t", "android_choreographer_do_frame_test"],
         "subsystem": "Vsync Provider & Choreographer",
-        "expected_green_branch": "android-embedder-migration-v10/2.2-engine-lifecycle-and-surface",
-        "status_when_flag_true": "PENDING_BRANCH_2.2"
+        "expected_green_branch": "android-embedder-migration-v10/2.2-choreographer-vsync",
+        "status_when_flag_true": "PASSING_LOCKED"
       },
       {
         "id": "devicelab:android_lifecycles_test",

@@ -1,9 +1,9 @@
 {
   "active_migration": "RFC 410: Android Embedder C-API Migration",
   "branch_slug": "android-embedder-migration-v10",
-  "current_branch": "android-embedder-migration-v10/2.1-surface-control",
-  "phase": "Phase 2.1: AndroidSurfaceControl, Synchronous Surface Destruction & HCPP Sync Fence Ownership",
-  "active_component": "shell/platform/android/embedder/android_surface_control.h",
+  "current_branch": "android-embedder-migration-v10/2.2-choreographer-vsync",
+  "phase": "Phase 2.2: AndroidChoreographerVsync & Variable Refresh Rate Frame Pacing",
+  "active_component": "shell/platform/android/embedder/android_choreographer_vsync.h",
   "active_adrs": [
     "ADR-0000",
     "ADR-0001",
@@ -20,7 +20,7 @@
   ],
   "ratchet_state": {
     "total_allowed_internal_headers": 67,
-    "active_subsystem": "AndroidSurfaceControl & HCPP Sync-Fence Ownership",
+    "active_subsystem": "AndroidChoreographerVsync & Frame Pacing",
     "subsystem_remaining": 67
   },
   "invariants": [
@@ -32,7 +32,7 @@
     "Per-view frame state captured by value in present_view_callback",
     "Zero Shell::Create or AndroidShellHolder when EnableAndroidEmbedderApi is true"
   ],
-  "last_verified_build": "flutter_embedder_native_unittests (10/10 PASSED) + check_android_embedder_deps.dart (PASS)",
+  "last_verified_build": "flutter_embedder_native_unittests (13/13 PASSED) + check_android_embedder_deps.dart (PASS)",
   "failing_tests": [],
-  "next_immediate_action": "Implement Milestone 2.2 (AndroidChoreographerVsyncWaiter & frame pacing)"
+  "next_immediate_action": "Implement Milestone 2.3 (AndroidHardwareBufferExternalTexture & YCbCr zero-copy import)"
 }
