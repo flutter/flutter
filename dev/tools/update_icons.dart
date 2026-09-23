@@ -148,6 +148,7 @@ const Set<String> _iconsMirroredWhenRTL = <String>{
   'note',
   'open_in',
   'playlist_add',
+  'prompt_suggestion',
   'queue_music',
   'redo',
   'reply',
@@ -300,9 +301,9 @@ ArgResults _handleArguments(List<String> args) {
 }
 
 Map<String, String> stringToTokenPairMap(String codepointData) {
-  final Iterable<String> cleanData = LineSplitter.split(
-    codepointData,
-  ).map((String line) => line.trim()).where((String line) => line.isNotEmpty);
+  final Iterable<String> cleanData = LineSplitter.split(codepointData)
+      .map((String line) => line.trim())
+      .where((String line) => line.isNotEmpty);
 
   final pairs = <String, String>{};
 

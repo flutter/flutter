@@ -2,14 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:logging/logging.dart' as logging;
-import 'package:package_config/package_config.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../dart/package_map.dart';
 import '../web_template.dart';
 
 /// Logs [event] to [logger].
@@ -26,15 +22,6 @@ void log(Logger logger, logging.LogRecord event) {
   } else {
     logger.printTrace('${event.loggerName}: ${event.message}$error');
   }
-}
-
-/// Finds and returns the directory of the Dart Web Development Service (DWDS).
-///
-/// This function locates the `dwds` package directory using the current
-/// package configuration.
-Future<Directory> loadDwdsDirectory(FileSystem fileSystem, Logger logger) async {
-  final PackageConfig packageConfig = await currentPackageConfig();
-  return fileSystem.directory(packageConfig['dwds']!.packageUriRoot);
 }
 
 /// Removes the [basePath] from the beginning of [path].

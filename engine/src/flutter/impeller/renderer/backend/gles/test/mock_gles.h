@@ -102,6 +102,7 @@ class IMockGLESImpl {
                              GLsizeiptr size,
                              const void* data) {}
   virtual GLboolean IsTexture(GLuint texture) { return true; }
+  virtual GLboolean IsProgram(GLuint program) { return true; }
   virtual void DiscardFramebufferEXT(GLenum target,
                                      GLsizei numAttachments,
                                      const GLenum* attachments) {};
@@ -277,6 +278,7 @@ class MockGLESImpl : public IMockGLESImpl {
       (GLenum target, GLintptr offset, GLsizeiptr size, const void* data),
       (override));
   MOCK_METHOD(GLboolean, IsTexture, (GLuint texture), (override));
+  MOCK_METHOD(GLboolean, IsProgram, (GLuint program), (override));
   MOCK_METHOD(void,
               DiscardFramebufferEXT,
               (GLenum target,
@@ -362,7 +364,8 @@ class MockGLES final {
   static std::shared_ptr<MockGLES> Init(
       std::unique_ptr<MockGLESImpl> impl,
       const std::optional<std::vector<const char*>>& extensions = std::nullopt,
-      const char* version_string = "OpenGL ES 3.0");
+      const char* version_string = "OpenGL ES 3.0",
+      const char* renderer_string = "");
 
   /// @brief      Returns an initialized |MockGLES| instance.
   ///
@@ -372,7 +375,8 @@ class MockGLES final {
   static std::shared_ptr<MockGLES> Init(
       const std::optional<std::vector<const char*>>& extensions = std::nullopt,
       const char* version_string = "OpenGL ES 3.0",
-      ProcTableGLES::Resolver resolver = kMockResolverGLES);
+      ProcTableGLES::Resolver resolver = kMockResolverGLES,
+      const char* renderer_string = "");
 
   /// @brief      Returns a configured |ProcTableGLES| instance.
   const ProcTableGLES& GetProcTable() const { return proc_table_; }
