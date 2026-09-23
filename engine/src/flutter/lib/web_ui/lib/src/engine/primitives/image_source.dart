@@ -76,7 +76,9 @@ sealed class ImageSource {
 /// An [ImageSource] implementation wrapping a WebCodecs [VideoFrame].
 class VideoFrameImageSource extends ImageSource {
   /// Creates a [VideoFrameImageSource] wrapping the given [videoFrame].
-  VideoFrameImageSource(this.videoFrame);
+  VideoFrameImageSource(this.videoFrame)
+    : width = videoFrame.displayWidth.toInt(),
+      height = videoFrame.displayHeight.toInt();
 
   /// The wrapped WebCodecs [VideoFrame] object.
   final VideoFrame videoFrame;
@@ -87,10 +89,10 @@ class VideoFrameImageSource extends ImageSource {
   }
 
   @override
-  int get height => videoFrame.displayHeight.toInt();
+  final int height;
 
   @override
-  int get width => videoFrame.displayWidth.toInt();
+  final int width;
 
   @override
   DomCanvasImageSource get canvasImageSource => videoFrame;
@@ -123,7 +125,7 @@ class ImageElementImageSource extends ImageSource {
 /// An [ImageSource] implementation wrapping an HTML5 [DomImageBitmap].
 class ImageBitmapImageSource extends ImageSource {
   /// Creates an [ImageBitmapImageSource] wrapping the given [imageBitmap].
-  ImageBitmapImageSource(this.imageBitmap);
+  ImageBitmapImageSource(this.imageBitmap) : width = imageBitmap.width, height = imageBitmap.height;
 
   /// The wrapped [DomImageBitmap] object.
   final DomImageBitmap imageBitmap;
@@ -135,10 +137,10 @@ class ImageBitmapImageSource extends ImageSource {
   }
 
   @override
-  int get height => imageBitmap.height;
+  final int height;
 
   @override
-  int get width => imageBitmap.width;
+  final int width;
 
   @override
   DomCanvasImageSource get canvasImageSource => imageBitmap;
