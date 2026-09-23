@@ -14,6 +14,7 @@ import 'utils/date_localizations.dart' as util;
 import 'widgets_localizations.dart';
 
 // Examples can assume:
+// // ignore_for_file: deprecated_member_use
 // import 'package:flutter_localizations/flutter_localizations.dart';
 // import 'package:flutter/cupertino.dart';
 
@@ -54,12 +55,20 @@ import 'widgets_localizations.dart';
 ///
 ///  * [DefaultCupertinoLocalizations], which provides US English localizations
 ///    for Cupertino widgets.
+@Deprecated(
+  'Use GlobalCupertinoLocalizations from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   /// Initializes an object that defines the Cupertino widgets' localized
   /// strings for the given `localeName`.
   ///
   /// The remaining '*Format' arguments uses the intl package to provide
   /// [DateFormat] configurations for the `localeName`.
+  @Deprecated(
+    'Use GlobalCupertinoLocalizations from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const GlobalCupertinoLocalizations({
     required this._localeName,
     required this._fullYearFormat,
