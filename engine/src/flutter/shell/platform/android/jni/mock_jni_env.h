@@ -53,6 +53,11 @@ class MockableJNIEnv : public JNIEnv {
     // Replace the JNIEnv's function table with wrappers that invoke the
     // mockable virtual methods in this class.
     functions = &jni_;
+    jni_.GetObjectClass = WrapGetObjectClass;
+    jni_.CallBooleanMethod = WrapCallBooleanMethod;
+    jni_.CallBooleanMethodV = WrapCallBooleanMethodV;
+    jni_.CallIntMethod = WrapCallIntMethod;
+    jni_.CallIntMethodV = WrapCallIntMethodV;
     jni_.CallObjectMethod = WrapCallObjectMethod;
     jni_.CallObjectMethodV = WrapCallObjectMethodV;
     jni_.CallVoidMethod = WrapCallVoidMethod;
@@ -80,6 +85,9 @@ class MockableJNIEnv : public JNIEnv {
     jni_.GetIntArrayRegion = WrapGetIntArrayRegion;
   }
 
+  virtual jclass GetObjectClass(jobject) = 0;
+  virtual jboolean CallBooleanMethodV(jobject, jmethodID, va_list) = 0;
+  virtual jint CallIntMethodV(jobject, jmethodID, va_list) = 0;
   virtual jobject CallObjectMethodV(jobject, jmethodID, va_list) = 0;
   virtual void CallVoidMethodV(jobject, jmethodID, va_list) = 0;
   virtual void DeleteGlobalRef(jobject) = 0;
@@ -105,6 +113,44 @@ class MockableJNIEnv : public JNIEnv {
   virtual void GetIntArrayRegion(jintArray, jsize, jsize, jint*) = 0;
 
  private:
+  static jclass WrapGetObjectClass(JNIEnv* env, jobject obj) {
+    return static_cast<MockableJNIEnv*>(env)->GetObjectClass(obj);
+  }
+  static jboolean WrapCallBooleanMethod(JNIEnv* env,
+                                        jobject obj,
+                                        jmethodID methodID,
+                                        ...) {
+    va_list args;
+    va_start(args, methodID);
+    jboolean result = WrapCallBooleanMethodV(env, obj, methodID, args);
+    va_end(args);
+    return result;
+  }
+  static jboolean WrapCallBooleanMethodV(JNIEnv* env,
+                                         jobject obj,
+                                         jmethodID methodID,
+                                         va_list args) {
+    return static_cast<MockableJNIEnv*>(env)->CallBooleanMethodV(obj, methodID,
+                                                                 args);
+  }
+  static jint WrapCallIntMethod(JNIEnv* env,
+                                jobject obj,
+                                jmethodID methodID,
+                                ...) {
+    va_list args;
+    va_start(args, methodID);
+    jint result = WrapCallIntMethodV(env, obj, methodID, args);
+    va_end(args);
+    return result;
+  }
+  static jint WrapCallIntMethodV(JNIEnv* env,
+                                 jobject obj,
+                                 jmethodID methodID,
+                                 va_list args) {
+    return static_cast<MockableJNIEnv*>(env)->CallIntMethodV(obj, methodID,
+                                                             args);
+  }
+
   static jobject WrapCallObjectMethod(JNIEnv* env,
                                       jobject obj,
                                       jmethodID methodID,
@@ -244,8 +290,24 @@ class MockJNIEnv : public MockableJNIEnv {
         .WillByDefault(::testing::ReturnArg<0>());
     ON_CALL(*this, CallVoidMethodV(::testing::_, ::testing::_, ::testing::_))
         .WillByDefault(::testing::Return());
+    // 0x64 (100 in decimal) represents the mock FlutterJNI class reference in
+    // tests.
+    constexpr uintptr_t kMockDefaultClassRef = 0x64;
+    ON_CALL(*this, GetObjectClass(::testing::_))
+        .WillByDefault(
+            ::testing::Return(reinterpret_cast<jclass>(kMockDefaultClassRef)));
+    ON_CALL(*this, CallBooleanMethodV(::testing::_, ::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(JNI_TRUE));
+    ON_CALL(*this, CallIntMethodV(::testing::_, ::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(0));
   }
 
+  MOCK_METHOD(jclass, GetObjectClass, (jobject), (override));
+  MOCK_METHOD(jboolean,
+              CallBooleanMethodV,
+              (jobject, jmethodID, va_list),
+              (override));
+  MOCK_METHOD(jint, CallIntMethodV, (jobject, jmethodID, va_list), (override));
   MOCK_METHOD(jobject,
               CallObjectMethodV,
               (jobject, jmethodID, va_list),

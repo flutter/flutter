@@ -245,6 +245,10 @@ size_t EmbedderImageLRU::GetSize() const {
   return count;
 }
 
+static jmethodID g_weak_reference_get_method = nullptr;
+static jmethodID g_attach_to_gl_context_method = nullptr;
+static jmethodID g_update_tex_image_method = nullptr;
+
 class FlutterEmbedderNative::CompositorDelegate
     : public AndroidCompositorPlatformViewDelegate {
  public:
@@ -446,16 +450,82 @@ void FlutterEmbedderNative::PopulateRendererConfig(
         if (!self || !texture_out) {
           return false;
         }
-        std::scoped_lock lock(self->surface_textures_mutex_);
-        if (self->surface_textures_.find(texture_id) ==
-            self->surface_textures_.end()) {
-          return false;
+        std::shared_ptr<fml::jni::ScopedJavaGlobalRef<jobject>> java_ref;
+        uint32_t gl_tex_id = 0;
+        bool need_attach = false;
+        {
+          std::scoped_lock lock(self->surface_textures_mutex_);
+          auto it = self->surface_textures_.find(texture_id);
+          if (it == self->surface_textures_.end()) {
+            return false;
+          }
+          java_ref = it->second;
+          auto gl_it = self->surface_texture_gl_ids_.find(texture_id);
+          if (gl_it != self->surface_texture_gl_ids_.end()) {
+            gl_tex_id = gl_it->second;
+          } else {
+            typedef void (*PFNGLGENTEXTURESPROC)(int, uint32_t*);
+            static PFNGLGENTEXTURESPROC gen_textures_fn =
+                reinterpret_cast<PFNGLGENTEXTURESPROC>(
+                    self->renderer_config_.open_gl.gl_proc_resolver(
+                        nullptr, "glGenTextures"));
+            if (gen_textures_fn) {
+              gen_textures_fn(1, &gl_tex_id);
+            }
+            self->surface_texture_gl_ids_[texture_id] = gl_tex_id;
+            need_attach = true;
+          }
+          if (self->surface_texture_attached_.find(texture_id) ==
+              self->surface_texture_attached_.end()) {
+            need_attach = true;
+          }
         }
+
+        if (java_ref && java_ref->obj()) {
+          JNIEnv* env = fml::jni::AttachCurrentThread();
+          if (env) {
+            jobject target_obj = java_ref->obj();
+            fml::jni::ScopedJavaLocalRef<jobject> local_target;
+            if (g_weak_reference_get_method) {
+              jobject deref = env->CallObjectMethod(
+                  target_obj, g_weak_reference_get_method);
+              if (deref) {
+                local_target.Reset(env, deref);
+                target_obj = deref;
+              }
+            }
+            if (target_obj) {
+              if (!g_attach_to_gl_context_method ||
+                  !g_update_tex_image_method) {
+                jclass cls = env->GetObjectClass(target_obj);
+                if (cls) {
+                  g_attach_to_gl_context_method =
+                      env->GetMethodID(cls, "attachToGLContext", "(I)V");
+                  g_update_tex_image_method =
+                      env->GetMethodID(cls, "updateTexImage", "()V");
+                }
+              }
+              if (need_attach && g_attach_to_gl_context_method) {
+                env->CallVoidMethod(target_obj, g_attach_to_gl_context_method,
+                                    static_cast<jint>(gl_tex_id));
+                std::scoped_lock lock(self->surface_textures_mutex_);
+                self->surface_texture_attached_.insert(texture_id);
+              }
+              if (g_update_tex_image_method) {
+                env->CallVoidMethod(target_obj, g_update_tex_image_method);
+              }
+            }
+            if (env->ExceptionCheck()) {
+              env->ExceptionClear();
+            }
+          }
+        }
+
         // GL_TEXTURE_EXTERNAL_OES target and GL_RGBA8 format constants.
         constexpr uint32_t kGlTextureExternalOes = 0x8D65;
         constexpr uint32_t kGlRgba8 = 0x8058;
         texture_out->target = kGlTextureExternalOes;
-        texture_out->name = 0;
+        texture_out->name = gl_tex_id;
         texture_out->format = kGlRgba8;
         texture_out->user_data = nullptr;
         texture_out->destruction_callback = nullptr;
@@ -524,6 +594,9 @@ FlutterEmbedderNative::FlutterEmbedderNative()
           std::make_shared<InMemoryAPKAssetProviderImpl>())) {
   InitializeRuntimeSubsystems();
   AttachWindowMetricsCallbacks();
+  if (auto vm_args = GetVMArgs(); vm_args.has_value()) {
+    SetHcppEnabled(vm_args->enable_surface_control);
+  }
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterEmbedderNative");
   FML_DLOG(INFO)
       << "Initialized FlutterEmbedderNative with default components.";
@@ -633,6 +706,9 @@ FlutterEmbedderNative::FlutterEmbedderNative(
                     std::make_shared<InMemoryAPKAssetProviderImpl>())) {
   InitializeRuntimeSubsystems();
   AttachWindowMetricsCallbacks();
+  if (auto vm_args = GetVMArgs(); vm_args.has_value()) {
+    SetHcppEnabled(vm_args->enable_surface_control);
+  }
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::FlutterEmbedderNative(custom)");
   FML_DLOG(INFO) << "Initialized FlutterEmbedderNative with custom components.";
@@ -2649,6 +2725,7 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
       entrypoint_argv_ptrs_.empty() ? nullptr : entrypoint_argv_ptrs_.data();
 
   AndroidVMArgs vm_args = GetVMArgs().value_or(AndroidVMArgs{});
+  SetHcppEnabled(vm_args.enable_surface_control);
 
   command_line_args_storage_ = vm_args.command_line_args;
   if (command_line_args_storage_.empty()) {
@@ -2828,6 +2905,7 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::SpawnChild(
   }
 
   child->InitializeRuntimeSubsystems();
+  child->SetHcppEnabled(IsHcppEnabled());
   child->PopulateRendererConfig(&child->renderer_config_);
   child->compositor_->PopulateCompositorConfig(&child->embedder_compositor_);
 
@@ -2915,6 +2993,19 @@ FlutterEngineResult FlutterEmbedderNative::ScheduleFrame() const {
     FlutterEngineGetProcAddresses(&procs);
     return procs;
   }();
+  if (s_procs.MarkExternalTextureFrameAvailable) {
+    std::vector<int64_t> texture_ids;
+    {
+      std::scoped_lock lock(surface_textures_mutex_);
+      for (const auto& [id, _] : surface_textures_) {
+        texture_ids.push_back(id);
+      }
+    }
+    for (int64_t id : texture_ids) {
+      s_procs.MarkExternalTextureFrameAvailable(engine, id);
+    }
+  }
+
   if (s_procs.ScheduleFrame) {
     return s_procs.ScheduleFrame(engine);
   }
@@ -3244,11 +3335,31 @@ void FlutterEmbedderNative::RegisterSurfaceTexture(
   std::scoped_lock lock(surface_textures_mutex_);
   surface_textures_[texture_id] =
       std::make_shared<fml::jni::ScopedJavaGlobalRef<jobject>>(surface_texture);
+  surface_texture_attached_.erase(texture_id);
 }
 
 void FlutterEmbedderNative::UnregisterSurfaceTexture(int64_t texture_id) {
-  std::scoped_lock lock(surface_textures_mutex_);
-  surface_textures_.erase(texture_id);
+  uint32_t gl_id = 0;
+  {
+    std::scoped_lock lock(surface_textures_mutex_);
+    surface_textures_.erase(texture_id);
+    surface_texture_attached_.erase(texture_id);
+    auto it = surface_texture_gl_ids_.find(texture_id);
+    if (it != surface_texture_gl_ids_.end()) {
+      gl_id = it->second;
+      surface_texture_gl_ids_.erase(it);
+    }
+  }
+  if (gl_id != 0 && renderer_config_.open_gl.gl_proc_resolver) {
+    typedef void (*PFNGLDELETETEXTURESPROC)(int, const uint32_t*);
+    static PFNGLDELETETEXTURESPROC delete_textures_fn =
+        reinterpret_cast<PFNGLDELETETEXTURESPROC>(
+            renderer_config_.open_gl.gl_proc_resolver(nullptr,
+                                                      "glDeleteTextures"));
+    if (delete_textures_fn) {
+      delete_textures_fn(1, &gl_id);
+    }
+  }
 }
 
 void FlutterEmbedderNative::SetSendPointerEventFnForTesting(
@@ -4488,6 +4599,11 @@ static void FlutterJNI_SetViewportMetrics(
     if (typeSize > 0) {
       std::vector<int> types(typeSize);
       env->GetIntArrayRegion(javaDisplayFeaturesType, 0, typeSize, &types[0]);
+      for (auto& t : types) {
+        if (t < 0 || t > 3) {
+          t = 0;
+        }
+      }
       metrics.display_features_type.assign(types.begin(), types.end());
     }
   }
@@ -4498,6 +4614,11 @@ static void FlutterJNI_SetViewportMetrics(
       std::vector<int> states(stateSize);
       env->GetIntArrayRegion(javaDisplayFeaturesState, 0, stateSize,
                              &states[0]);
+      for (auto& s : states) {
+        if (s < 0) {
+          s = 0;
+        }
+      }
       metrics.display_features_state.assign(states.begin(), states.end());
     }
   }
@@ -5241,6 +5362,23 @@ bool FlutterEmbedderNative::RegisterJni(JNIEnv* env) {
   if (!g_flutter_callback_info_constructor) {
     FML_LOG(ERROR) << "Failed to find FlutterCallbackInformation constructor.";
     return false;
+  }
+
+  jclass weak_ref_class = env->FindClass("java/lang/ref/WeakReference");
+  if (weak_ref_class) {
+    g_weak_reference_get_method =
+        env->GetMethodID(weak_ref_class, "get", "()Ljava/lang/Object;");
+  }
+  jclass wrapper_class = env->FindClass(
+      "io/flutter/embedding/engine/renderer/SurfaceTextureWrapper");
+  if (wrapper_class) {
+    g_attach_to_gl_context_method =
+        env->GetMethodID(wrapper_class, "attachToGLContext", "(I)V");
+    g_update_tex_image_method =
+        env->GetMethodID(wrapper_class, "updateTexImage", "()V");
+  }
+  if (env->ExceptionCheck()) {
+    env->ExceptionClear();
   }
 
   if (!AndroidJvmInvoker::RegisterJni(env, clazz)) {
