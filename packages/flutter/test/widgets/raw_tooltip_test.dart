@@ -3227,43 +3227,35 @@ void main() {
       final siblingFocusNode = FocusNode();
       addTearDown(siblingFocusNode.dispose);
       var siblingReceivedEscape = false;
-      final entry = OverlayEntry(
-        builder: (BuildContext context) => Column(
-          children: <Widget>[
-            // Simulates a focused TextField/EditableText or menu whose
-            // local Shortcuts/Focus consumes Escape and stops propagation
-            // before reaching any ancestor Focus/Shortcuts in WidgetsApp,
-            // while primaryFocus is outside RawTooltip.child.
-            Focus(
-              focusNode: siblingFocusNode,
-              onKeyEvent: (FocusNode node, KeyEvent event) {
-                if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
-                  siblingReceivedEscape = true;
-                  return KeyEventResult.handled;
-                }
-                return KeyEventResult.ignored;
-              },
-              child: const SizedBox(width: 100.0, height: 100.0),
-            ),
-            RawTooltip(
-              key: key,
-              semanticsTooltip: tooltipText,
-              tooltipBuilder: (BuildContext context, Animation<double> animation) =>
-                  const Text(tooltipText),
-              child: const SizedBox(width: 100.0, height: 100.0),
-            ),
-          ],
-        ),
-      );
-      addTearDown(() {
-        entry.remove();
-        entry.dispose();
-      });
 
       await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Overlay(initialEntries: <OverlayEntry>[entry]),
+        TestWidgetsApp(
+          home: Column(
+            children: <Widget>[
+              // Simulates a focused TextField/EditableText or menu whose
+              // local Shortcuts/Focus consumes Escape and stops propagation
+              // before reaching any ancestor Focus/Shortcuts in WidgetsApp,
+              // while primaryFocus is outside RawTooltip.child.
+              Focus(
+                focusNode: siblingFocusNode,
+                onKeyEvent: (FocusNode node, KeyEvent event) {
+                  if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+                    siblingReceivedEscape = true;
+                    return KeyEventResult.handled;
+                  }
+                  return KeyEventResult.ignored;
+                },
+                child: const SizedBox(width: 100.0, height: 100.0),
+              ),
+              RawTooltip(
+                key: key,
+                semanticsTooltip: tooltipText,
+                tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                    const Text(tooltipText),
+                child: const SizedBox(width: 100.0, height: 100.0),
+              ),
+            ],
+          ),
         ),
       );
 
@@ -3288,7 +3280,7 @@ void main() {
   );
 
   testWidgets(
-    'Escape key dismisses open RawTooltip inside WidgetsApp without invoking ancestor DismissIntent',
+    'Escape key dismisses open RawTooltip inside WidgetsApp without invoking ancestor DismissIntent, including during reverse animation',
     (WidgetTester tester) async {
       final key = GlobalKey<RawTooltipState>();
       var dismissIntentInvoked = false;
@@ -3326,19 +3318,59 @@ void main() {
       expect(find.text(tooltipText), findsOneWidget);
       expect(dismissIntentInvoked, isFalse);
 
-      // First Escape dismisses only the RawTooltip and does not invoke
-      // DismissIntent (e.g. ModalRoute / DatePickerDialog dismissal).
+      // First Escape starts dismissing the RawTooltip (75ms reverse animation)
+      // and does not invoke DismissIntent.
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pump();
+      expect(find.text(tooltipText), findsOneWidget);
+      expect(dismissIntentInvoked, isFalse);
+
+      // Second Escape sent while the tooltip is already animating out is not
+      // swallowed by the reversing tooltip and invokes DismissIntent.
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
       expect(find.text(tooltipText), findsNothing);
-      expect(dismissIntentInvoked, isFalse);
-
-      // Second Escape (with no open tooltip) invokes DismissIntent.
-      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-      await tester.pumpAndSettle();
       expect(dismissIntentInvoked, isTrue);
     },
   );
+
+  testWidgets('Escape key dismisses open RawTooltip when primaryFocus is null', (
+    WidgetTester tester,
+  ) async {
+    final key = GlobalKey<RawTooltipState>();
+    // Use a bare Overlay without WidgetsApp or Focus widgets so
+    // FocusManager.instance.primaryFocus remains null and exercises the
+    // HardwareKeyboard fallback handler.
+    final entry = OverlayEntry(
+      builder: (BuildContext context) => RawTooltip(
+        key: key,
+        semanticsTooltip: tooltipText,
+        tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+            const Text(tooltipText),
+        child: const SizedBox(width: 100.0, height: 100.0),
+      ),
+    );
+    addTearDown(() {
+      entry.remove();
+      entry.dispose();
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(initialEntries: <OverlayEntry>[entry]),
+      ),
+    );
+
+    key.currentState!.ensureTooltipVisible();
+    await tester.pumpAndSettle();
+    expect(FocusManager.instance.primaryFocus, isNull);
+    expect(find.text(tooltipText), findsOneWidget);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
 }
 
 Future<void> setWidgetForTooltipMode(

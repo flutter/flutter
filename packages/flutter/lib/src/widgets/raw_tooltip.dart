@@ -494,11 +494,14 @@ class RawTooltip extends StatefulWidget {
     }
     // Avoid concurrent modification.
     final List<RawTooltipState> openedTooltips = _openedTooltips.toList();
+    var dismissed = false;
     for (final state in openedTooltips) {
       assert(state.mounted);
-      state._scheduleDismissTooltip();
+      if (state._scheduleDismissTooltip()) {
+        dismissed = true;
+      }
     }
-    return true;
+    return dismissed;
   }
 
   @override
@@ -608,10 +611,11 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
           //    descendants (e.g. EditableText) or ancestor ModalRoute
           //    DismissIntent handlers (e.g. closing DatePickerDialog while a
           //    button tooltip is hovered).
-          // 2. HardwareKeyboard.addHandler alone runs before FocusManager, which
-          //    would empty _openedTooltips before WidgetsApp's root Focus handler
-          //    checks RawTooltip.dismissAllToolTips(), allowing Escape to fall
-          //    through to WidgetsApp's DismissIntent shortcut.
+          // 2. KeyEventManager always dispatches to FocusManager.handleKeyMessage
+          //    even when a HardwareKeyboard handler returns true, and
+          //    FocusManager.handleKeyMessage is a no-op when primaryFocus is null,
+          //    so HardwareKeyboard.addHandler is used only as a fallback when
+          //    primaryFocus is null.
           FocusManager.instance.addEarlyKeyEventHandler(_handleEarlyKeyEvent);
           HardwareKeyboard.instance.addHandler(_handleHardwareKeyEvent);
         }
@@ -647,7 +651,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     }
   }
 
-  void _scheduleDismissTooltip({Duration withDelay = Duration.zero}) {
+  bool _scheduleDismissTooltip({Duration withDelay = Duration.zero}) {
     assert(mounted);
     assert(
       !(_timer?.isActive ?? false) || _backingController?.status != AnimationStatus.reverse,
@@ -666,7 +670,9 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
       } else {
         _controller.reverse();
       }
+      return true;
     }
+    return false;
   }
 
   void _handlePointerDown(PointerDownEvent event) {
