@@ -120,6 +120,12 @@ std::optional<LRESULT> WindowManager::HandleMessage(HWND hwnd,
                                                     WPARAM wparam,
                                                     LPARAM lparam) {
   if (message == WM_DESTROY) {
+    // Destroying parent HWND will transitively destroy child HWND, including
+    // the FlutterView HWND. That causes a problem because the raster thread
+    // may require the Flutterview HWND to be alive until Engine RemoveView
+    // completes. To ensure that the FlutterView HWND is removed from the
+    // parent window. The FlutterView HWND will be destroyed later inside
+    // FlutterWindow::Destroy.
     HostWindow* window = HostWindow::GetThisFromHandle(hwnd);
     if (window) {
       auto handle = window->GetFlutterViewWindowHandle();
