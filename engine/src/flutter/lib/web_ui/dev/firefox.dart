@@ -56,6 +56,47 @@ class FirefoxEnvironment implements BrowserEnvironment {
 ///
 /// Any errors starting or running the process are reported through [onExit].
 class Firefox extends Browser {
+  static Future<String?>? _virtualDisplayFuture;
+
+  /// Ensures an X11 `DISPLAY` is available on Linux so headless Firefox can
+  /// initialize EGL/GLX backed by Mesa `llvmpipe` (`swrast`) for WebGL2.
+  ///
+  /// On GPU-less Linux CI containers where `DISPLAY` is unset, `firefox --headless`
+  /// fails `XOpenDisplay(NULL)` and returns `null` from `canvas.getContext('webgl2')`.
+  static Future<String?> _ensureLinuxDisplay() {
+    if (!Platform.isLinux) {
+      return Future<String?>.value(null);
+    }
+    final String? existingDisplay = Platform.environment['DISPLAY'];
+    if (existingDisplay != null && existingDisplay.isNotEmpty) {
+      return Future<String?>.value(existingDisplay);
+    }
+    return _virtualDisplayFuture ??= () async {
+      const String display = ':99';
+      final File socketFile = File('/tmp/.X11-unix/X99');
+      if (!socketFile.existsSync()) {
+        try {
+          await Process.start('Xvfb', <String>[
+            display,
+            '-screen',
+            '0',
+            '1280x800x24',
+            '-ac',
+            '-nolisten',
+            'tcp',
+          ], mode: ProcessStartMode.detached);
+          for (int i = 0; i < 50 && !socketFile.existsSync(); i++) {
+            await Future<void>.delayed(const Duration(milliseconds: 20));
+          }
+        } on Object catch (error) {
+          print('[Firefox] Failed to start Xvfb on $display: $error');
+          return null;
+        }
+      }
+      return display;
+    }();
+  }
+
   /// Starts a new instance of Firefox open to the given [url], which may be a
   /// [Uri] or a [String].
   factory Firefox(Uri url, BrowserInstallation installation, {bool debug = false}) {
@@ -125,11 +166,13 @@ user_pref("security.sandbox.content.level", 0);
           '--start-debugger-server $kDevtoolsPort',
         ];
 
+        final String? linuxDisplay = await _ensureLinuxDisplay();
         final Process process = await Process.start(
           installation.executable,
           args,
           environment: <String, String>{
             ...Platform.environment,
+            if (linuxDisplay != null) 'DISPLAY': linuxDisplay,
             if (!debug) 'MOZ_HEADLESS': '1',
             if (isCi) ...<String, String>{
               'LIBGL_ALWAYS_SOFTWARE': '1',
