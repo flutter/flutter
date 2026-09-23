@@ -131,7 +131,7 @@ TEST_F(WindowManagerTest, CreateRegularWindow) {
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateRegularWindow(
           engine_id(), regular_creation_request());
-  EXPECT_EQ(view_id, 0);
+  EXPECT_EQ(view_id, 1);
 }
 
 TEST_F(WindowManagerTest, GetWindowHandle) {
@@ -356,7 +356,7 @@ TEST_F(WindowManagerTest, CreateModelessDialogWindow) {
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateDialogWindow(
           engine_id(), &creation_request);
-  EXPECT_EQ(view_id, 0);
+  EXPECT_EQ(view_id, 1);
 }
 
 TEST_F(WindowManagerTest, CreateModalDialogWindow) {
@@ -383,7 +383,7 @@ TEST_F(WindowManagerTest, CreateModalDialogWindow) {
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateDialogWindow(
           engine_id(), &creation_request);
-  EXPECT_EQ(view_id, 1);
+  EXPECT_EQ(view_id, 2);
 
   const HWND window_handle =
       InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
@@ -926,7 +926,7 @@ TEST_F(WindowManagerTest, CreateRegularWindowSizedToContent) {
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateRegularWindow(
           engine_id(), &creation_request);
-  EXPECT_GE(view_id, 0);
+  EXPECT_GE(view_id, 1);
 }
 
 // TODO(team-windows): Fix flakes. See:
