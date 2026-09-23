@@ -1636,8 +1636,8 @@ void main() async {
     expect(texture.layerCount, 8);
     expect(texture.sliceCount, 8);
 
-    final Uint8List layer = Uint8List(4 * 4 * 4);
-    for (int slice = 0; slice < texture.sliceCount; slice++) {
+    final layer = Uint8List(4 * 4 * 4);
+    for (var slice = 0; slice < texture.sliceCount; slice++) {
       layer.fillRange(0, layer.length, 0x10 * (slice + 1));
       texture.overwrite(layer.buffer.asByteData(), slice: slice);
     }
@@ -1667,7 +1667,7 @@ void main() async {
 
     // Each layer is a solid gray with a distinct, ascending intensity so the
     // check below is independent of RGBA/BGRA channel order.
-    const List<int> layerValues = <int>[0x28, 0x78, 0xDC];
+    const layerValues = <int>[0x28, 0x78, 0xDC];
     final gpu.Texture texture = gpu.gpuContext.createTexture(
       gpu.StorageMode.hostVisible,
       4,
@@ -1675,14 +1675,14 @@ void main() async {
       textureType: gpu.TextureType.texture2DArray,
       layerCount: layerValues.length,
     );
-    final Uint8List layer = Uint8List(4 * 4 * 4);
-    for (int slice = 0; slice < layerValues.length; slice++) {
+    final layer = Uint8List(4 * 4 * 4);
+    for (var slice = 0; slice < layerValues.length; slice++) {
       layer.fillRange(0, layer.length, layerValues[slice]);
       texture.overwrite(layer.buffer.asByteData(), slice: slice);
     }
 
     final gpu.RenderPipeline pipeline = await createArrayTextureRenderPipeline();
-    for (int slice = 0; slice < layerValues.length; slice++) {
+    for (var slice = 0; slice < layerValues.length; slice++) {
       final RenderPassState state = createSimpleRenderPass();
       state.renderPass.bindPipeline(pipeline);
 
