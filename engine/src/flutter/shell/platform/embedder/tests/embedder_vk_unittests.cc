@@ -149,18 +149,24 @@ namespace {
 std::optional<TestVulkanImage> CreateVulkanTextureWithPixels(
     const fml::RefPtr<TestVulkanContext>& context,
     int width,
-    int height) {
-  auto image_result = context->CreateImage({width, height});
+    int height,
+    VkFormat format = VK_FORMAT_R8G8B8A8_UNORM) {
+  auto image_result = context->CreateImage({width, height}, format);
   if (!image_result.has_value()) {
     FML_LOG(ERROR) << "Could not create VkImage for external texture.";
     return std::nullopt;
   }
 
+  SkColorType color_type = kRGBA_8888_SkColorType;
+  if (format == VK_FORMAT_B8G8R8A8_UNORM) {
+    color_type = kBGRA_8888_SkColorType;
+  }
+
   GrVkImageInfo image_info = {
       .fImage = image_result.value().GetImage(),
       .fImageTiling = VK_IMAGE_TILING_OPTIMAL,
       .fImageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-      .fFormat = VK_FORMAT_R8G8B8A8_UNORM,
+      .fFormat = format,
       .fImageUsageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
                           VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
                           VK_IMAGE_USAGE_TRANSFER_DST_BIT |
@@ -173,65 +179,11 @@ std::optional<TestVulkanImage> CreateVulkanTextureWithPixels(
   SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
   sk_sp<SkSurface> surface = SkSurfaces::WrapBackendTexture(
       context->GetGrDirectContext().get(), backend_texture,
-      kTopLeft_GrSurfaceOrigin, 1, kRGBA_8888_SkColorType,
-      SkColorSpace::MakeSRGB(), &surface_properties, nullptr, nullptr);
+      kTopLeft_GrSurfaceOrigin, 1, color_type, SkColorSpace::MakeSRGB(),
+      &surface_properties, nullptr, nullptr);
 
   if (!surface) {
     FML_LOG(ERROR) << "Could not wrap VkImage as SkSurface for drawing.";
-    return std::nullopt;
-  }
-
-  auto canvas = surface->getCanvas();
-  // Top half red.
-  SkPaint red_paint;
-  red_paint.setColor(SK_ColorRED);
-  canvas->drawRect(SkRect::MakeWH(width, height / 2), red_paint);
-  // Bottom half blue.
-  SkPaint blue_paint;
-  blue_paint.setColor(SK_ColorBLUE);
-  canvas->drawRect(SkRect::MakeXYWH(0, height / 2, width, height / 2),
-                   blue_paint);
-
-  context->GetGrDirectContext()->flushAndSubmit();
-
-  return std::move(image_result.value());
-}
-
-// Creates a BGRA VkImage and draws red/blue content into it, similar to
-// CreateVulkanTextureWithPixels but using VK_FORMAT_B8G8R8A8_UNORM.
-std::optional<TestVulkanImage> CreateVulkanTextureWithPixelsBGRA(
-    const fml::RefPtr<TestVulkanContext>& context,
-    int width,
-    int height) {
-  auto image_result =
-      context->CreateImage({width, height}, VK_FORMAT_B8G8R8A8_UNORM);
-  if (!image_result.has_value()) {
-    FML_LOG(ERROR) << "Could not create BGRA VkImage for external texture.";
-    return std::nullopt;
-  }
-
-  GrVkImageInfo image_info = {
-      .fImage = image_result.value().GetImage(),
-      .fImageTiling = VK_IMAGE_TILING_OPTIMAL,
-      .fImageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-      .fFormat = VK_FORMAT_B8G8R8A8_UNORM,
-      .fImageUsageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                          VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
-                          VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-                          VK_IMAGE_USAGE_SAMPLED_BIT,
-      .fSampleCount = 1,
-      .fLevelCount = 1,
-  };
-  auto backend_texture = GrBackendTextures::MakeVk(width, height, image_info);
-
-  SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
-  sk_sp<SkSurface> surface = SkSurfaces::WrapBackendTexture(
-      context->GetGrDirectContext().get(), backend_texture,
-      kTopLeft_GrSurfaceOrigin, 1, kBGRA_8888_SkColorType,
-      SkColorSpace::MakeSRGB(), &surface_properties, nullptr, nullptr);
-
-  if (!surface) {
-    FML_LOG(ERROR) << "Could not wrap BGRA VkImage as SkSurface for drawing.";
     return std::nullopt;
   }
 
@@ -548,8 +500,8 @@ TEST_F(EmbedderTest, RenderBGRATextureWithImpellerVulkan) {
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
-  auto image_result = CreateVulkanTextureWithPixelsBGRA(
-      context.vulkan_context(), kWidth, kHeight);
+  auto image_result = CreateVulkanTextureWithPixels(
+      context.vulkan_context(), kWidth, kHeight, VK_FORMAT_B8G8R8A8_UNORM);
   ASSERT_TRUE(image_result.has_value());
 
   static TestVulkanImage* s_texture_image = nullptr;
@@ -604,8 +556,8 @@ TEST_F(EmbedderTest, RenderBGRATextureWithSkiaVulkan) {
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
-  auto image_result = CreateVulkanTextureWithPixelsBGRA(
-      context.vulkan_context(), kWidth, kHeight);
+  auto image_result = CreateVulkanTextureWithPixels(
+      context.vulkan_context(), kWidth, kHeight, VK_FORMAT_B8G8R8A8_UNORM);
   ASSERT_TRUE(image_result.has_value());
 
   static TestVulkanImage* s_texture_image = nullptr;
