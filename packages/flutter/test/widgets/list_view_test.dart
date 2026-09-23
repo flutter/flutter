@@ -1186,4 +1186,40 @@ void main() {
     );
     expect(tester.getSize(find.byType(ListView)), Size.zero);
   });
+
+  testWidgets(
+    'ListView.separated itemExtentBuilder works with different extents for items and separators',
+    (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView.separated(
+            controller: controller,
+            itemCount: 10,
+            itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
+              return index.isEven ? 100.0 : 10.0; // 100 for items, 10 for separators
+            },
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(height: 100.0, child: Text('Item $index'));
+            },
+            separatorBuilder: (BuildContext context, int index) {
+              return SizedBox(height: 10.0, child: Text('Separator $index'));
+            },
+          ),
+        ),
+      );
+
+      expect(find.text('Item 0'), findsOneWidget);
+      expect(find.text('Separator 0'), findsOneWidget);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(find.text('Item 6'), findsNothing);
+
+      controller.jumpTo(200.0);
+      await tester.pump();
+      expect(find.text('Item 0'), findsNothing);
+      expect(find.text('Item 1'), findsOneWidget);
+    },
+  );
 }
