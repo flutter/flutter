@@ -534,9 +534,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   void restoreScrollOffset() {
     if (!hasPixels) {
-      final value =
-          PageStorage.maybeOf(context.storageContext)?.readState(context.storageContext) as double?;
-      if (value != null) {
+      final Object? value = PageStorage.maybeOf(
+        context.storageContext,
+      )?.readState(context.storageContext);
+      if (value is double) {
         correctPixels(value);
       }
     }

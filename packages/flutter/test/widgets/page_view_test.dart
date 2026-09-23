@@ -1021,6 +1021,43 @@ void main() {
     expect(controller2.page, 0);
   });
 
+  testWidgets('PageView ignores a non-double value in PageStorage', (WidgetTester tester) async {
+    final bucket = PageStorageBucket();
+    const key = PageStorageKey<String>('PageView');
+    // Another widget under the same key saved a bool in the slot the PageView
+    // restores from.
+    await tester.pumpWidget(
+      PageStorage(
+        bucket: bucket,
+        child: Builder(
+          key: key,
+          builder: (BuildContext context) {
+            bucket.writeState(context, true);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    final controller = PageController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageStorage(
+          bucket: bucket,
+          child: PageView(
+            key: key,
+            controller: controller,
+            children: const <Widget>[Placeholder(), Placeholder(), Placeholder()],
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(controller.page, 0);
+  });
+
   testWidgets('PageView exposes semantics of children', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
 

@@ -383,14 +383,30 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     return widget.animationStyle?.reverseCurve ?? widget.reverseCurve;
   }
 
+  // Only persist the expansion state when this widget, or the widget that built
+  // it (such as ExpansionTile), has a PageStorageKey. Without one the state
+  // would land in the slot of some ancestor and collide with other widgets.
+  bool get _hasPageStorageKey {
+    if (widget.key is PageStorageKey) {
+      return true;
+    }
+    var parentHasKey = false;
+    context.visitAncestorElements((Element element) {
+      parentHasKey = element.widget.key is PageStorageKey;
+      return false;
+    });
+    return parentHasKey;
+  }
+
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(duration: _duration, vsync: this);
-    // PageStorage is untyped and the same slot can be written by other widgets,
-    // such as a Scrollable that saves a double. Only use the stored value if it
-    // is a bool, otherwise fall back to the controller's state.
-    final Object? storedExpansionState = PageStorage.maybeOf(context)?.readState(context);
+    // The slot is shared with other widgets under the same PageStorageKey, such
+    // as a Scrollable, so the stored value is not always a bool.
+    final Object? storedExpansionState = _hasPageStorageKey
+        ? PageStorage.maybeOf(context)?.readState(context)
+        : null;
     final bool initiallyExpanded = switch (storedExpansionState) {
       bool isExpanded => isExpanded,
       _ => widget.controller.isExpanded,
@@ -458,7 +474,9 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
           });
         });
       }
-      PageStorage.maybeOf(context)?.writeState(context, widget.controller.isExpanded);
+      if (_hasPageStorageKey) {
+        PageStorage.maybeOf(context)?.writeState(context, widget.controller.isExpanded);
+      }
     });
   }
 
