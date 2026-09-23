@@ -332,6 +332,98 @@ flutter::FakeDelegate fake_delegate;
                  std::vector<int64_t>{kPrimaryFlutterViewId, kSecondaryFlutterViewId}));
 }
 
+- (void)testRemovingViewClearsOnlyItsEngineInputClient {
+  FlutterEngineWithFakePlatformView* engine =
+      [[FlutterEngineWithFakePlatformView alloc] initWithName:@"tester"];
+  engine.fakePlatformView = platform_view.get();
+  engine.fakeBinaryMessenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  [engine setUpChannels];
+  [engine enableMultiView];
+  FlutterViewController* primary = [[FlutterViewController alloc] initWithEngine:engine
+                                                                         nibName:nil
+                                                                          bundle:nil];
+  FlutterViewController* secondary = [[FlutterViewController alloc] initWithEngine:engine
+                                                                           nibName:nil
+                                                                            bundle:nil];
+  [engine.textInputPlugin
+      handleMethodCall:[FlutterMethodCall
+                           methodCallWithMethodName:@"TextInput.setClient"
+                                          arguments:@[
+                                            @123, @{
+                                              @"viewId" : @(secondary.viewIdentifier),
+                                              @"inputType" : @{@"name" : @"TextInputType.text"},
+                                            }
+                                          ]]
+                result:^(id result){
+                }];
+  XCTAssertEqual(engine.textInputPlugin.currentViewController, secondary);
+
+  [engine removeViewController:primary.viewIdentifier];
+  XCTAssertEqual(engine.textInputPlugin.currentViewController, secondary);
+  [engine removeViewController:secondary.viewIdentifier];
+  XCTAssertNil(engine.textInputPlugin.currentViewController);
+  XCTAssertNil(engine.textInputPlugin.textInputView.superview);
+}
+
+- (void)testImplicitViewDetachNotifiesDartBeforeReattachment {
+  FlutterEngineWithFakePlatformView* engine =
+      [[FlutterEngineWithFakePlatformView alloc] initWithName:@"tester"];
+  engine.fakePlatformView = platform_view.get();
+  id messenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  engine.fakeBinaryMessenger = messenger;
+  [engine setUpChannels];
+  FlutterViewController* controller = [[FlutterViewController alloc] initWithEngine:engine
+                                                                            nibName:nil
+                                                                             bundle:nil];
+  [controller loadViewIfNeeded];
+  id mockController = OCMPartialMock(controller);
+  OCMStub([mockController touchesBegan:[OCMArg any] withEvent:[OCMArg any]]);
+  OCMStub([mockController touchesMoved:[OCMArg any] withEvent:[OCMArg any]]);
+  OCMStub([mockController touchesEnded:[OCMArg any] withEvent:[OCMArg any]]);
+  for (NSNumber* client in @[ @123, @456 ]) {
+    engine.viewController = controller;
+    [engine.textInputPlugin
+        handleMethodCall:[FlutterMethodCall
+                             methodCallWithMethodName:@"TextInput.setClient"
+                                            arguments:@[
+                                              client, @{
+                                                @"viewId" : @0,
+                                                @"inputType" : @{@"name" : @"TextInputType.text"},
+                                              }
+                                            ]]
+                  result:^(id result){
+                  }];
+    XCTAssertEqual(engine.textInputPlugin.currentViewController, controller);
+    XCTAssertTrue(engine.textInputPlugin.textInputView.canBecomeFirstResponder);
+    [engine.textInputPlugin
+        handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.show"
+                                                           arguments:nil]
+                  result:^(id result){
+                  }];
+    FlutterTextInputView* inputView = (FlutterTextInputView*)engine.textInputPlugin.textInputView;
+    [inputView touchesBegan:[NSSet set] withEvent:nil];
+    [inputView touchesMoved:[NSSet set] withEvent:nil];
+    [inputView touchesEnded:[NSSet set] withEvent:nil];
+
+    FlutterMethodCall* connectionClosed =
+        [FlutterMethodCall methodCallWithMethodName:@"TextInputClient.onConnectionClosed"
+                                          arguments:@[ client ]];
+    NSData* message = [[FlutterJSONMethodCodec sharedInstance] encodeMethodCall:connectionClosed];
+    OCMExpect([messenger sendOnChannel:@"flutter/textinput" message:message]);
+
+    engine.viewController = nil;
+
+    OCMVerifyAll(messenger);
+    XCTAssertNil(engine.textInputPlugin.currentViewController);
+    XCTAssertFalse(engine.textInputPlugin.textInputView.canBecomeFirstResponder);
+  }
+  XCTAssertTrue(fake_delegate.removed_view_ids_.empty());
+  OCMVerify(times(2), [mockController touchesBegan:[OCMArg any] withEvent:[OCMArg any]]);
+  OCMVerify(times(2), [mockController touchesMoved:[OCMArg any] withEvent:[OCMArg any]]);
+  OCMVerify(times(2), [mockController touchesEnded:[OCMArg any] withEvent:[OCMArg any]]);
+  [mockController stopMocking];
+}
+
 - (void)testViewControllerPrefersFirstResponderThenKeyWindow {
   FlutterEngineWithFakePlatformView* engine =
       [[FlutterEngineWithFakePlatformView alloc] initWithName:@"tester"];

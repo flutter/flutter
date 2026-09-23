@@ -654,6 +654,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)deregisterViewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  [self.textInputPlugin removeViewControllerWithIdentifier:viewIdentifier];
   [self removeFlutterViewControllerWillDeallocObserverForIdentifier:viewIdentifier];
   {
     if (viewIdentifier != flutter::kFlutterImplicitViewId) {
@@ -705,6 +706,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
 - (void)removeViewController:(FlutterViewIdentifier)viewIdentifier {
   if ([_viewControllers count] == 1 && !_allowHeadlessExecution) {
+    [self.textInputPlugin removeViewControllerWithIdentifier:viewIdentifier];
     [self destroyContext];
   } else if (self.platformView) {
     [self deregisterViewControllerForIdentifier:viewIdentifier];
@@ -729,7 +731,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 - (void)notifyViewControllerDeallocated:(FlutterViewIdentifier)viewIdentifier {
   [self.lifecycleChannel sendMessage:@"AppLifecycleState.detached"];
   [self removeViewController:viewIdentifier];
-  [self.textInputPlugin resetViewResponder];
 }
 
 - (void)destroyContext {

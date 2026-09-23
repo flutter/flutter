@@ -68,6 +68,16 @@ constexpr FlutterViewIdentifier kSecondaryFlutterViewId = flutter::kFlutterImpli
 @property(nonatomic, strong) UITextField* textField;
 @end
 
+@interface FlutterTextInputPluginWeakDelegate : NSObject <FlutterTextInputPluginDelegate>
+@property(nonatomic, weak) FlutterViewController* viewController;
+@end
+
+@implementation FlutterTextInputPluginWeakDelegate
+- (FlutterViewController*)viewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  return self.viewController;
+}
+@end
+
 @interface FlutterTextInputPlugin ()
 @property(nonatomic, assign) FlutterTextInputView* activeView;
 @property(nonatomic, readonly) UIView* inputHider;
@@ -303,6 +313,8 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
   XCTAssertEqual(textInputPlugin.currentViewController, secondaryViewController);
   XCTAssertEqual([textInputPlugin hostView], secondaryViewController.view);
+  [self setTextInputShow];
+  XCTAssertEqual((id)textInputPlugin.activeView.viewResponder, secondaryViewController);
 }
 
 - (void)testSetClientSwitchesBetweenImplicitAndSecondaryViewControllers {
@@ -353,6 +365,101 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   [self setClientClear];
 
   XCTAssertNil(textInputPlugin.currentViewController);
+}
+
+- (void)testRemovingInactiveViewPreservesCurrentInputClient {
+  [self setClientId:123 configuration:self.mutableTemplateCopy];
+  [self setTextInputShow];
+  FlutterTextInputView* inputView = textInputPlugin.activeView;
+  UIView* inputSuperview = inputView.superview;
+  OCMReject([engine flutterTextInputView:inputView didResignFirstResponderWithTextInputClient:123]);
+
+  [textInputPlugin removeViewControllerWithIdentifier:kSecondaryFlutterViewId];
+
+  XCTAssertEqual(textInputPlugin.currentViewController, viewController);
+  XCTAssertEqual(textInputPlugin.activeView, inputView);
+  XCTAssertEqual(inputView.superview, inputSuperview);
+  XCTAssertTrue(inputView.canBecomeFirstResponder);
+}
+
+- (void)testRemovingCurrentViewClearsInputStateWithoutDartClearClient {
+  FlutterViewController* secondaryViewController = [[FlutterViewController alloc] init];
+  OCMStub([engine viewControllerForIdentifier:kSecondaryFlutterViewId])
+      .andReturn(secondaryViewController);
+  NSMutableDictionary* configuration = self.mutablePasswordTemplateCopy;
+  configuration[@"viewId"] = @(kSecondaryFlutterViewId);
+  configuration[@"autofill"] = @{
+    @"uniqueIdentifier" : @"password",
+    @"hints" : @[ UITextContentTypePassword ],
+    @"editingValue" : @{@"text" : @""},
+  };
+  configuration[@"fields"] = @[ [configuration copy] ];
+  [self setClientId:123 configuration:configuration];
+  [self setTextInputShow];
+  FlutterTextInputView* inputView = textInputPlugin.activeView;
+  XCTAssertNotNil(inputView.superview);
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 1UL);
+  OCMExpect([engine flutterTextInputView:inputView didResignFirstResponderWithTextInputClient:123]);
+
+  [textInputPlugin removeViewControllerWithIdentifier:kSecondaryFlutterViewId];
+
+  OCMVerifyAll(engine);
+  XCTAssertNil(textInputPlugin.currentViewController);
+  XCTAssertNil([textInputPlugin hostView]);
+  XCTAssertNil(inputView.superview);
+  XCTAssertNil(textInputPlugin.inputHider.superview);
+  XCTAssertFalse(inputView.isFirstResponder);
+  XCTAssertFalse(inputView.canBecomeFirstResponder);
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 0UL);
+  [self setClientId:456 configuration:self.mutableTemplateCopy];
+  XCTAssertEqual(textInputPlugin.currentViewController, viewController);
+}
+
+- (void)testRemovingImplicitViewClosesConnectionEvenWithoutFirstResponder {
+  [self setClientId:123 configuration:self.mutableTemplateCopy];
+  FlutterTextInputView* inputView = textInputPlugin.activeView;
+  XCTAssertFalse(inputView.isFirstResponder);
+  OCMExpect([engine flutterTextInputView:inputView didResignFirstResponderWithTextInputClient:123]);
+
+  [textInputPlugin removeViewControllerWithIdentifier:flutter::kFlutterImplicitViewId];
+
+  OCMVerifyAll(engine);
+  XCTAssertNil(textInputPlugin.currentViewController);
+  XCTAssertFalse(inputView.canBecomeFirstResponder);
+  [self setClientId:456 configuration:self.mutableTemplateCopy];
+  XCTAssertEqual(textInputPlugin.currentViewController, viewController);
+  XCTAssertTrue(textInputPlugin.activeView.canBecomeFirstResponder);
+}
+
+- (void)testRemovingDeallocatedViewClearsInputStateUsingItsIdentifier {
+  FlutterTextInputPluginWeakDelegate* delegate = [[FlutterTextInputPluginWeakDelegate alloc] init];
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate
+                                                                  textInputDelegate:engine];
+  FlutterTextInputView* inputView;
+  @autoreleasepool {
+    FlutterViewController* controller = [[FlutterViewController alloc] init];
+    delegate.viewController = controller;
+    [plugin handleMethodCall:[FlutterMethodCall
+                                 methodCallWithMethodName:@"TextInput.setClient"
+                                                arguments:@[ @123, self.mutableTemplateCopy ]]
+                      result:^(id result){
+                      }];
+    inputView = plugin.activeView;
+    XCTAssertNotNil(inputView.superview);
+    [inputView setMarkedText:@"x" selectedRange:NSMakeRange(0, 1)];
+    [inputView setMarkedRect:CGRectMake(1, 1, 10, 10)];
+  }
+  XCTAssertNil(delegate.viewController);
+  XCTAssertNil(plugin.currentViewController);
+
+  [plugin removeViewControllerWithIdentifier:flutter::kFlutterImplicitViewId];
+
+  XCTAssertNil(inputView.superview);
+  XCTAssertNil(plugin.inputHider.superview);
+  XCTAssertNil([plugin hostView]);
+  XCTAssertFalse(inputView.canBecomeFirstResponder);
+  XCTAssertNoThrow(
+      [inputView firstRectForRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]]);
 }
 
 - (void)testPropagatePressEventsToSecondaryViewController {
@@ -3328,10 +3435,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertNotNil(activeView);
 }
 
-- (void)testFlutterTextInputPluginHostViewNilCrash {
+- (void)testFlutterTextInputPluginHostViewCanBeNil {
   FlutterTextInputPlugin* myInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:engine
                                                                          textInputDelegate:engine];
-  XCTAssertThrows([myInputPlugin hostView], @"Throws exception if host view is nil");
+  XCTAssertNil([myInputPlugin hostView]);
 }
 
 - (void)testFlutterTextInputPluginHostViewNotNil {

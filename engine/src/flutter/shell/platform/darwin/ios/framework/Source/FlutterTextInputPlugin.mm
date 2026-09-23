@@ -2523,6 +2523,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
    * The FlutterViewController to manage input for.
    */
   __weak FlutterViewController* _currentViewController;
+  // Keep the identifier even after the weak controller is cleared during deallocation.
+  NSNumber* _textInputViewIdentifier;
 }
 
 // The current password-autofillable input fields that have yet to be saved.
@@ -2601,6 +2603,32 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   [_autofillContext removeAllObjects];
   [self clearTextInputClient];
   [self hideTextInput];
+  _textInputViewIdentifier = nil;
+}
+
+- (void)removeViewControllerWithIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  if ((id)_viewResponder == [_textInputPluginDelegate viewControllerForIdentifier:viewIdentifier]) {
+    [self resetViewResponder];
+  }
+  if (![_textInputViewIdentifier isEqualToNumber:@(viewIdentifier)]) {
+    return;
+  }
+  // A native detach does not dispose the Dart input connection, especially for the implicit view.
+  // Notify it before clearing the client ID, even if UIKit has already resigned the responder.
+  if (_activeView.textInputClient != 0) {
+    [_textInputDelegate flutterTextInputView:_activeView
+        didResignFirstResponderWithTextInputClient:_activeView.textInputClient];
+  }
+  [self resetAllClientIds];
+  [self reset];
+  [self cleanUpViewHierarchy:YES clearText:YES delayRemoval:NO];
+  [_inputHider removeFromSuperview];
+  [self dismissKeyboardScreenshot];
+  _keyboardView = nil;
+  [_keyboardViewContainer removeFromSuperview];
+  _cachedFirstResponder = nil;
+  [_scribbleElements removeAllObjects];
+  _activeView.viewResponder = nil;
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
@@ -2776,7 +2804,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (BOOL)showEditMenu:(NSDictionary*)args API_AVAILABLE(ios(16.0)) {
-  if (!self.activeView.isFirstResponder) {
+  if (!self.activeView.isFirstResponder || !self.hostView) {
     return NO;
   }
   NSDictionary<NSString*, NSNumber*>* encodedTargetRect = args[@"targetRect"];
@@ -2863,7 +2891,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)showTextInput {
-  _activeView.viewResponder = _viewResponder;
+  _activeView.viewResponder = (id<FlutterViewResponder>)_currentViewController;
   [self addToInputParentViewIfNeeded:_activeView];
   [_activeView becomeFirstResponder];
 }
@@ -2933,6 +2961,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   }
   _currentViewController = [_textInputPluginDelegate viewControllerForIdentifier:viewId];
   FML_DCHECK(_currentViewController != nil);
+  _textInputViewIdentifier = @(viewId);
 
   [self resetAllClientIds];
 
@@ -3080,12 +3109,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 // The UIView to add FlutterTextInputViews to.
 - (UIView*)hostView {
-  UIView* host = _currentViewController.view;
-  NSAssert(host != nullptr,
-           @"The application must have a host view since the keyboard client "
-           @"must be part of the responder chain to function. The host view controller is %@",
-           _currentViewController);
-  return host;
+  // UIKit can query the input view after its Flutter view has been removed.
+  return _currentViewController.view;
 }
 
 // The UIView to add FlutterTextInputViews to.

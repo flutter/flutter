@@ -67,6 +67,9 @@ typedef NS_ENUM(NSInteger, FlutterScribbleInteractionStatus) {
  */
 - (void)reset;
 
+/** Releases input state owned by a Flutter view that is being removed. */
+- (void)removeViewControllerWithIdentifier:(FlutterViewIdentifier)viewIdentifier;
+
 /**
  * The `UITextInput` implementation used to control text entry.
  *
