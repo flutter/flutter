@@ -30,8 +30,8 @@
 namespace flutter {
 
 namespace {
-// Returns true if the given VkFormat is a multi-planar YUV format that
-// requires a sampler YCbCr conversion.
+/// Returns true if the given VkFormat is a multi-planar YUV format that
+/// requires a sampler YCbCr conversion.
 bool IsYuvFormat(VkFormat format) {
   switch (format) {
     // 8-bit multi-planar formats.
@@ -131,8 +131,8 @@ EmbedderExternalTextureSourceVulkan::EmbedderExternalTextureSourceVulkan(
       destruction_callback_(
           SAFE_ACCESS(embedder_desc, destruction_callback, nullptr)),
       user_data_(SAFE_ACCESS(embedder_desc, user_data, nullptr)) {
-  const auto& context = impeller::ContextVK::Cast(*p_context);
-  const auto& device = context.GetDevice();
+  const impeller::ContextVK& context = impeller::ContextVK::Cast(*p_context);
+  const impeller::vk::Device& device = context.GetDevice();
   texture_image_ = impeller::vk::Image(
       reinterpret_cast<VkImage>(SAFE_ACCESS(embedder_desc, image, 0)));
 
@@ -140,7 +140,6 @@ EmbedderExternalTextureSourceVulkan::EmbedderExternalTextureSourceVulkan(
       static_cast<VkFormat>(SAFE_ACCESS(embedder_desc, format, 0u)));
   std::shared_ptr<impeller::YUVConversionVK> yuv_conversion;
   if (needs_yuv_conversion_) {
-    // Figure out how to perform YUV conversions.
     yuv_conversion = CreateYUVConversion(context, embedder_desc);
     if (!yuv_conversion || !yuv_conversion->IsValid()) {
       VALIDATION_LOG << "Failed to create yuv conversion";
@@ -168,7 +167,7 @@ EmbedderExternalTextureSourceVulkan::~EmbedderExternalTextureSourceVulkan() {
 impeller::TextureDescriptor
 EmbedderExternalTextureSourceVulkan::ToTextureDescriptor(
     FlutterVulkanExternalTexture* embedder_desc) {
-  const auto size = impeller::ISize{
+  const impeller::ISize size = impeller::ISize{
       static_cast<int64_t>(SAFE_ACCESS(embedder_desc, width, 0)),
       static_cast<int64_t>(SAFE_ACCESS(embedder_desc, height, 0))};
   impeller::TextureDescriptor desc;
@@ -188,9 +187,10 @@ EmbedderExternalTextureSourceVulkan::CreateYUVConversion(
     const impeller::ContextVK& context,
     FlutterVulkanExternalTexture* embedder_desc) {
   impeller::YUVConversionDescriptorVK conversion_chain;
-  auto& conversion_info = conversion_chain.get();
+  impeller::vk::SamplerYcbcrConversionCreateInfo& conversion_info =
+      conversion_chain.get();
 
-  const auto vk_format =
+  const impeller::vk::Format vk_format =
       static_cast<impeller::vk::Format>(SAFE_ACCESS(embedder_desc, format, 0u));
   conversion_info.format = vk_format;
   conversion_info.ycbcrModel =
@@ -227,7 +227,7 @@ bool EmbedderExternalTextureSourceVulkan::CreateTextureImageView(
   impeller::vk::StructureChain<impeller::vk::ImageViewCreateInfo,
                                impeller::vk::SamplerYcbcrConversionInfo>
       view_chain;
-  auto& view_info = view_chain.get();
+  impeller::vk::ImageViewCreateInfo& view_info = view_chain.get();
   view_info.image = texture_image_;
   view_info.viewType = impeller::vk::ImageViewType::e2D;
   view_info.format =
@@ -245,7 +245,8 @@ bool EmbedderExternalTextureSourceVulkan::CreateTextureImageView(
   } else {
     view_chain.unlink<impeller::vk::SamplerYcbcrConversionInfo>();
   }
-  auto image_view = device.createImageViewUnique(view_info);
+  impeller::vk::ResultValue<impeller::vk::UniqueImageView> image_view =
+      device.createImageViewUnique(view_info);
   if (image_view.result != impeller::vk::Result::eSuccess) {
     return false;
   }
@@ -401,11 +402,11 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureSkia(
   SkColorType color_type =
       is_yuv ? kRGB_888x_SkColorType : ToSkColorType(vk_format);
 
-  auto gr_backend_texture =
+  GrBackendTexture gr_backend_texture =
       GrBackendTextures::MakeVk(width, height, image_info);
   SkImages::TextureReleaseProc release_proc =
       SAFE_ACCESS(desc, destruction_callback, nullptr);
-  auto image = SkImages::BorrowTextureFrom(
+  sk_sp<SkImage> image = SkImages::BorrowTextureFrom(
       context,                   // context
       gr_backend_texture,        // texture handle
       kTopLeft_GrSurfaceOrigin,  // origin
@@ -450,15 +451,17 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureImpeller(
     }
   }
 
-  auto texture_source = std::make_shared<EmbedderExternalTextureSourceVulkan>(
-      aiks_context->GetContext(), texture_desc.get());
+  std::shared_ptr<EmbedderExternalTextureSourceVulkan> texture_source =
+      std::make_shared<EmbedderExternalTextureSourceVulkan>(
+          aiks_context->GetContext(), texture_desc.get());
 
   if (!texture_source->IsValid()) {
     return nullptr;
   }
 
-  auto texture = std::make_shared<impeller::TextureVK>(
-      aiks_context->GetContext(), texture_source);
+  std::shared_ptr<impeller::TextureVK> texture =
+      std::make_shared<impeller::TextureVK>(aiks_context->GetContext(),
+                                            texture_source);
 
   return impeller::DlImageImpeller::Make(texture);
 }
