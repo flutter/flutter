@@ -5,40 +5,17 @@
 import 'package:process/process.dart';
 
 import '../application_package.dart';
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
-import '../build_system/build_system.dart';
-import '../build_system/targets/common.dart';
 import '../bundle_builder.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../project.dart';
-
-/// Copies the AOT-compiled application library into the asset build
-/// directory as `app.so`, matching what the Rust runner is told to load in
-/// release mode. Also depends on the normal release asset-copy target so
-/// fonts, the asset manifest, and icon tree-shaking stay in sync with the
-/// kernel that `app.so` was compiled from; without it the assets directory
-/// would keep whatever a previous (e.g. debug) build left behind.
-class _RustAotBundle extends CopyFlutterAotBundle {
-  const _RustAotBundle(this.targetPlatform);
-
-  final TargetPlatform targetPlatform;
-
-  @override
-  String get name => 'rust_shell_aot_bundle';
-
-  @override
-  List<Target> get dependencies => <Target>[
-    const ReleaseCopyFlutterBundle(),
-    AotElfRelease(targetPlatform),
-  ];
-}
+import 'build_rust.dart';
 
 /// The local Linux host running an application through the Rust shell.
 class RustShellDevice extends DesktopDevice {
@@ -87,36 +64,15 @@ class RustShellDevice extends DesktopDevice {
     required BuildInfo buildInfo,
     bool usingCISystem = false,
   }) async {
-    if (!supportsRuntimeMode(buildInfo.mode)) {
-      throwToolExit('The Flutter Rust shell currently supports debug and release modes only.');
-    }
-    final FlutterProject project = FlutterProject.current();
-    final Directory runner = project.directory.childDirectory('runner-rs');
-    final File manifest = runner.childFile('Cargo.toml');
-    if (!manifest.existsSync()) {
-      throwToolExit(
-        'Rust-shell project is missing ${manifest.path}. '
-        'Run `flutter create --shell=rust --platforms=linux .` first.',
-      );
-    }
-
-    final releaseMode = buildInfo.mode == BuildMode.release;
-    await _bundleBuilder.build(
-      platform: TargetPlatform.linux_x64,
-      buildInfo: buildInfo,
-      project: project,
+    await buildRust(
+      FlutterProject.current(),
+      buildInfo,
       mainPath: mainPath,
-      target: releaseMode ? const _RustAotBundle(TargetPlatform.linux_x64) : null,
+      bundleBuilder: _bundleBuilder,
+      processUtils: _processUtils,
+      logger: _logger,
+      fileSystem: _fileSystem,
     );
-    _logger.printStatus('Building Rust shell runner...');
-    final arguments = <String>['cargo', 'build', if (releaseMode) '--release'];
-    if (runner.childFile('Cargo.lock').existsSync()) {
-      arguments.add('--locked');
-    }
-    final int result = await _processUtils.stream(arguments, workingDirectory: runner.path);
-    if (result != 0) {
-      throwToolExit('Unable to build the Rust shell runner.');
-    }
   }
 
   @override

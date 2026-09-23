@@ -32,6 +32,7 @@ import 'build_ios_framework.dart';
 import 'build_linux.dart';
 import 'build_macos.dart';
 import 'build_macos_framework.dart';
+import 'build_rust.dart';
 import 'build_swift_package.dart';
 import 'build_web.dart';
 import 'build_windows.dart';
@@ -194,6 +195,7 @@ class BuildCommand extends FlutterCommand {
         ),
       ),
     );
+    _addSubcommand(BuildRustCommand(toolContext: toolContext, verboseHelp: verboseHelp));
   }
 
   void _addSubcommand(BuildSubCommand command) {
