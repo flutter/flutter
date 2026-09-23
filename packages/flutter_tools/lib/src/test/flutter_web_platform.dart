@@ -659,28 +659,37 @@ window.\$dartLoader.loader.nextAttempt();
       timeoutCompleter = Completer<Never>();
 
       watchdogTimer45s = Timer(const Duration(seconds: 45), () async {
-        if (_browserManager != null) {
-          final String diagnostic = await _browserManager!.diagnoseHang();
-          _logger.printStatus(diagnostic);
+        try {
+          if (_browserManager != null) {
+            final String diagnostic = await _browserManager!.diagnoseHang();
+            _logger.printStatus(diagnostic);
+          }
+        } on Object catch (e, st) {
+          _logger.printTrace('Failed to diagnose hang during 45s warning: $e\n$st');
         }
       });
 
       watchdogTimer3m = Timer(const Duration(minutes: 3), () async {
-        if (_browserManager != null) {
-          final String diagnostic = await _browserManager!.diagnoseHang();
-          _logger.printError(
-            '[flutter_tools] Hard timeout of 3 minutes reached for test suite $relativePath.\n'
-            '$diagnostic',
-          );
-        }
-        if (timeoutCompleter != null && !timeoutCompleter.isCompleted) {
-          try {
-            throwToolExit(
-              'Test suite $relativePath timed out after 3 minutes (stalled CanvasKit WASM fetch or unresponsive browser). '
-              'Exiting to prevent LUCI bot hanging.',
+        try {
+          if (_browserManager != null) {
+            final String diagnostic = await _browserManager!.diagnoseHang();
+            _logger.printError(
+              '[flutter_tools] Hard timeout of 3 minutes reached for test suite $relativePath.\n'
+              '$diagnostic',
             );
-          } catch (e, st) {
-            timeoutCompleter.completeError(e, st);
+          }
+        } on Object catch (e, st) {
+          _logger.printError('[flutter_tools] Failed to diagnose hang: $e\n$st');
+        } finally {
+          if (timeoutCompleter != null && !timeoutCompleter.isCompleted) {
+            try {
+              throwToolExit(
+                'Test suite $relativePath timed out after 3 minutes (stalled CanvasKit WASM fetch or unresponsive browser). '
+                'Exiting to prevent LUCI bot hanging.',
+              );
+            } catch (e, st) {
+              timeoutCompleter.completeError(e, st);
+            }
           }
         }
       });
@@ -1233,8 +1242,10 @@ class BrowserManager {
 
 /// Tracks active network requests via Chrome DevTools Protocol to identify pending or stalled asset fetches.
 class CdpNetworkTracker {
+  /// Creates a [CdpNetworkTracker] using the provided [connection].
   CdpNetworkTracker(this.connection);
 
+  /// The connection to the Chrome DevTools Protocol.
   final WipConnection connection;
   final Map<String, _PendingRequestInfo> _pendingRequests = <String, _PendingRequestInfo>{};
   StreamSubscription<WipEvent>? _subscription;
