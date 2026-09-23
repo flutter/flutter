@@ -76,6 +76,7 @@ struct FlutterWindowCreationRequest {
   struct FlutterWindowSize size;
   bool has_constraints;
   struct FlutterWindowConstraints constraints;
+  bool resizable;
   int64_t parent_view_id;
   void (*on_should_close)();
   void (*on_will_close)();

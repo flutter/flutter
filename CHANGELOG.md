@@ -32,6 +32,12 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.47 Changes
 
+### [3.47.3](https://github.com/flutter/flutter/releases/tag/3.47.3)
+- [flutter/191045](https://github.com/flutter/flutter/issues/191045) When calling Actions.handler on all platforms, null was always returned.
+- [flutter/181315](https://github.com/flutter/flutter/issues/181315) When using Impeller on Android devices with B-Series PowerVR GPUs, visual oddities and performance drops can be experienced.
+- [flutter/191176](https://github.com/flutter/flutter/issues/191176) When building for macOS or iOS on machines with missing or incomplete Xcode installations, flutter_tools displays an actionable error message instead of crashing with an unhandled ProcessException.
+- [flutter/191487](https://github.com/flutter/flutter/issues/191487) When using Android SDK Command-line Tools 23.0+ for Android, flutter doctor incorrectly reports "Android license status unknown".
+
 ### [3.47.2](https://github.com/flutter/flutter/releases/tag/3.47.2)
 - [flutter/191179](https://github.com/flutter/flutter/issues/191179) When WebSocket upgrade fails during DDS startup on web, handle the `DartDevelopmentServiceException` gracefully instead of crashing.
 - [flutter/190518](https://github.com/flutter/flutter/pull/190518) Fix memory leak caused by processing touch events on Linux.
@@ -68,6 +74,13 @@ Learn about what's new in this release in [the blog post](https://flutter.dev/bl
 
 
 ## Flutter 3.44 Changes
+
+### [3.44.9](https://github.com/flutter/flutter/releases/tag/3.44.9)
+- [flutter/186366](https://github.com/flutter/flutter/issues/186366) When debugging an iOS app, if the app crashes, the Flutter CLI and tests that crash will hang.
+
+### [3.44.8](https://github.com/flutter/flutter/releases/tag/3.44.8)
+- [flutter/188346](https://github.com/flutter/flutter/issues/188346) When building on macOS or iOS using the Xcode 27 toolchain, the build will fail due to a lipo verification error.
+- [flutter/184286](https://github.com/flutter/flutter/issues/184286) On some devices with vendor-modified Android 11 ROMs, `AccessibilityBridge.java` field fails to resolve.
 
 ### [3.44.7](https://github.com/flutter/flutter/releases/tag/3.44.7)
 - [flutter/188161](https://github.com/flutter/flutter/issues/188161) Fixes a resource leak that sometimes caused crashes when using external textures on some GPUs (such as Arm Mali).

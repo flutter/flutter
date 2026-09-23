@@ -756,4 +756,16 @@ void main() {
       );
     },
   );
+
+  testWidgets('Stack does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: Stack(children: <Widget>[Placeholder()])),
+      ),
+    );
+    expect(tester.getSize(find.byType(Stack)), Size.zero);
+  });
 }

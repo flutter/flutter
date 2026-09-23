@@ -940,7 +940,23 @@ class MockSemanticsEnabler implements SemanticsEnabler {
   bool get isWaitingToEnableSemantics => throw UnimplementedError();
 
   @override
-  DomElement get accessibilityPlaceholder => throw UnimplementedError();
+  List<DomElement> get placeholders => throw UnimplementedError();
+
+  @override
+  DomElement? placeholderHostFor(DomElement viewRoot) => throw UnimplementedError();
+
+  @override
+  void removeAllPlaceholders() {}
+
+  @override
+  void addPlaceholderForView(DomElement viewRoot) {
+    throw UnimplementedError();
+  }
+
+  @override
+  void removePlaceholderForView(DomElement viewRoot) {
+    throw UnimplementedError();
+  }
 
   @override
   void updatePlaceholderLabel(String message) {
@@ -1801,8 +1817,7 @@ void _testContainer() {
       expect(
         element.style.pointerEvents,
         'none',
-        reason:
-            'Framework declaration (Tier 1) should take precedence over interactive behaviors (Tier 2)',
+        reason: 'Framework declaration (Tier 1) should take precedence over interactive behaviors (Tier 2)',
       );
     });
 
@@ -2430,9 +2445,9 @@ void _testVerticalScrolling() {
     final expectedOffset = Float64List(2);
     expectedOffset[0] = 0.0;
     expectedOffset[1] = 20.0;
-    var message =
-        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
-            as Float64List;
+    var message = const StandardMessageCodec().decodeMessage(
+      capturedEvent.arguments! as ByteData,
+    ) as Float64List;
     expect(message, expectedOffset);
 
     // Update scrollPosition to scrollTop value.
@@ -2459,9 +2474,9 @@ void _testVerticalScrolling() {
     expect(capturedEvent.arguments, isNotNull);
     expectedOffset[0] = 0.0;
     expectedOffset[1] = 5.0;
-    message =
-        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
-            as Float64List;
+    message = const StandardMessageCodec().decodeMessage(
+      capturedEvent.arguments! as ByteData,
+    ) as Float64List;
     expect(message, expectedOffset);
   });
 
@@ -2658,9 +2673,9 @@ void _testHorizontalScrolling() {
     final expectedOffset = Float64List(2);
     expectedOffset[0] = 20.0;
     expectedOffset[1] = 0.0;
-    var message =
-        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
-            as Float64List;
+    var message = const StandardMessageCodec().decodeMessage(
+      capturedEvent.arguments! as ByteData,
+    ) as Float64List;
     expect(message, expectedOffset);
 
     // Update scrollPosition to scrollLeft value.
@@ -2687,9 +2702,9 @@ void _testHorizontalScrolling() {
     expect(capturedEvent.arguments, isNotNull);
     expectedOffset[0] = 5.0;
     expectedOffset[1] = 0.0;
-    message =
-        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
-            as Float64List;
+    message = const StandardMessageCodec().decodeMessage(
+      capturedEvent.arguments! as ByteData,
+    ) as Float64List;
     expect(message, expectedOffset);
   });
 }
