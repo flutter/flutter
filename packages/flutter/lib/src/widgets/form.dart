@@ -76,6 +76,7 @@ class Form extends StatefulWidget {
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
+    this.enabled = true,
   }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
        assert(
          onPopInvokedWithResult == null || onPopInvoked == null,
@@ -220,6 +221,25 @@ class Form extends StatefulWidget {
   /// {@macro flutter.widgets.FormField.autovalidateMode}
   final AutovalidateMode autovalidateMode;
 
+  /// Whether the form fields in this form are able to receive user input.
+  ///
+  /// When false, every [FormField] whose nearest enclosing [Form] is this one
+  /// is disabled, even if its own [FormField.enabled] is true, and neither
+  /// this form nor those fields are auto validated, regardless of
+  /// [autovalidateMode] and [FormField.autovalidateMode]. A nested [Form] is
+  /// governed by its own [enabled] value.
+  ///
+  /// [FormField] itself does not block user input. A [FormField.builder]
+  /// should use [FormFieldState.isEnabled] to decide whether the input widget
+  /// it builds is enabled.
+  ///
+  /// Explicit calls to [FormState.save], [FormState.reset],
+  /// [FormState.validate], and [FormState.validateGranularly] still apply to
+  /// every field of a disabled form.
+  ///
+  /// Defaults to true.
+  final bool enabled;
+
   void _callPopInvoked(bool didPop, Object? result) {
     if (onPopInvokedWithResult != null) {
       onPopInvokedWithResult!(didPop, result);
@@ -277,7 +297,8 @@ class FormState extends State<Form> {
   Widget build(BuildContext context) {
     final bool hasError = _fields.any((FormFieldState<dynamic> field) => field.hasError);
 
-    switch (widget.autovalidateMode) {
+    // A disabled form is not auto validated.
+    switch (widget.enabled ? widget.autovalidateMode : AutovalidateMode.disabled) {
       case AutovalidateMode.always:
         _validate(View.of(context));
       case AutovalidateMode.onUserInteraction:
@@ -293,18 +314,21 @@ class FormState extends State<Form> {
         break;
     }
 
+    final Widget formScope = _FormScope(
+      formState: this,
+      generation: _generation,
+      enabled: widget.enabled,
+      child: widget.child,
+    );
     final Widget form;
     if (widget.canPop != null || (widget.onPopInvokedWithResult ?? widget.onPopInvoked) != null) {
       form = PopScope<Object?>(
         canPop: widget.canPop ?? true,
         onPopInvokedWithResult: widget._callPopInvoked,
-        child: _FormScope(formState: this, generation: _generation, child: widget.child),
+        child: formScope,
       );
     } else {
-      form = WillPopScope(
-        onWillPop: widget.onWillPop,
-        child: _FormScope(formState: this, generation: _generation, child: widget.child),
-      );
+      form = WillPopScope(onWillPop: widget.onWillPop, child: formScope);
     }
     return Semantics(
       container: true,
@@ -451,9 +475,13 @@ class FormState extends State<Form> {
 }
 
 class _FormScope extends InheritedWidget {
-  const _FormScope({required super.child, required FormState formState, required int generation})
-    : _formState = formState,
-      _generation = generation;
+  const _FormScope({
+    required super.child,
+    required FormState formState,
+    required int generation,
+    required this.enabled,
+  }) : _formState = formState,
+       _generation = generation;
 
   final FormState _formState;
 
@@ -461,11 +489,16 @@ class _FormScope extends InheritedWidget {
   /// to rebuild the form.
   final int _generation;
 
+  /// The [Form.enabled] value this widget was built with. This lets us know
+  /// when to rebuild the form fields after it changes.
+  final bool enabled;
+
   /// The [Form] associated with this widget.
   Form get form => _formState.widget;
 
   @override
-  bool updateShouldNotify(_FormScope old) => _generation != old._generation;
+  bool updateShouldNotify(_FormScope old) =>
+      _generation != old._generation || enabled != old.enabled;
 }
 
 /// Signature for validating a form field.
@@ -600,6 +633,10 @@ class FormField<T> extends StatefulWidget {
   /// Defaults to true. If [autovalidateMode] is not [AutovalidateMode.disabled],
   /// the field will be auto validated. Likewise, if this field is false, the widget
   /// will not be validated regardless of [autovalidateMode].
+  ///
+  /// A field whose nearest enclosing [Form] has [Form.enabled] set to false is
+  /// also disabled, even if this is true. Use [FormFieldState.isEnabled] to
+  /// determine whether the field is effectively enabled.
   final bool enabled;
 
   /// Used to enable/disable this form field auto validation and update its
@@ -675,6 +712,17 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   ///
   ///  * [FormField.forceErrorText], which also may update [errorText] and [hasError].
   bool get isValid => widget.forceErrorText == null && widget.validator?.call(_value) == null;
+
+  /// Whether this field is able to receive user input.
+  ///
+  /// This is true only if [FormField.enabled] is true and the nearest
+  /// enclosing [Form], if any, has [Form.enabled] set to true.
+  ///
+  /// [FormField] itself does not block user input. A [FormField.builder]
+  /// should use this value, rather than [FormField.enabled], to decide whether
+  /// the input widget it builds is enabled, so that disabling the enclosing
+  /// [Form] also disables this field.
+  bool get isEnabled => widget.enabled && (Form.maybeOf(context)?.widget.enabled ?? true);
 
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
@@ -804,11 +852,12 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    switch (Form.maybeOf(context)?.widget.autovalidateMode) {
+    final FormState? form = Form.maybeOf(context);
+    switch (form?.widget.autovalidateMode) {
       case AutovalidateMode.always:
         WidgetsBinding.instance.addPostFrameCallback((_) {
           // If the form is already validated, don't validate again.
-          if (widget.enabled && !hasError && !isValid) {
+          if (widget.enabled && form!.widget.enabled && !hasError && !isValid) {
             validate();
           }
         });
@@ -832,7 +881,10 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   @protected
   @override
   Widget build(BuildContext context) {
-    if (widget.enabled) {
+    final FormState? form = Form.maybeOf(context);
+    final bool isFormEnabled = form?.widget.enabled ?? true;
+
+    if (widget.enabled && isFormEnabled) {
       switch (widget.autovalidateMode) {
         case AutovalidateMode.always:
           _validate();
@@ -850,7 +902,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       }
     }
 
-    Form.maybeOf(context)?._register(this);
+    form?._register(this);
 
     final Widget child = Semantics(
       validationResult: hasError
@@ -859,14 +911,16 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       child: widget.builder(this),
     );
 
-    if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.onUnfocus &&
+    if (form?.widget.autovalidateMode == AutovalidateMode.onUnfocus &&
             widget.autovalidateMode != AutovalidateMode.always ||
         widget.autovalidateMode == AutovalidateMode.onUnfocus) {
       return Focus(
         canRequestFocus: false,
         skipTraversal: true,
         onFocusChange: (bool value) {
-          if (!value) {
+          // A field loses focus when its form is disabled, which must not
+          // trigger validation.
+          if (!value && (form?.widget.enabled ?? true)) {
             setState(() {
               _validate();
             });

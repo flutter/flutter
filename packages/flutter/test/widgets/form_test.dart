@@ -2142,6 +2142,273 @@ void main() {
       'animal': 'dog',
     });
   });
+
+  group('Form.enabled', () {
+    testWidgets('FormFieldState.isEnabled combines FormField.enabled and Form.enabled', (
+      WidgetTester tester,
+    ) async {
+      final fieldKey = GlobalKey<FormFieldState<String>>();
+
+      Future<bool> isEnabled({bool? formEnabled, required bool fieldEnabled}) async {
+        final Widget field = FormField<String>(
+          key: fieldKey,
+          enabled: fieldEnabled,
+          builder: (FormFieldState<String> field) => const SizedBox(),
+        );
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: formEnabled == null ? field : Form(enabled: formEnabled, child: field),
+          ),
+        );
+        return fieldKey.currentState!.isEnabled;
+      }
+
+      expect(const Form(child: SizedBox()).enabled, isTrue);
+
+      expect(await isEnabled(fieldEnabled: true), isTrue);
+      expect(await isEnabled(fieldEnabled: false), isFalse);
+      expect(await isEnabled(formEnabled: true, fieldEnabled: true), isTrue);
+      expect(await isEnabled(formEnabled: true, fieldEnabled: false), isFalse);
+      expect(await isEnabled(formEnabled: false, fieldEnabled: true), isFalse);
+      expect(await isEnabled(formEnabled: false, fieldEnabled: false), isFalse);
+    });
+
+    testWidgets('Changing Form.enabled rebuilds its form fields', (WidgetTester tester) async {
+      final isEnabledValues = <bool>[];
+      // The same widget instance is reused, so the field only rebuilds when the
+      // Form notifies its dependents.
+      final Widget field = FormField<String>(
+        builder: (FormFieldState<String> field) {
+          isEnabledValues.add(field.isEnabled);
+          return const SizedBox();
+        },
+      );
+      var formEnabled = true;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return Form(enabled: formEnabled, child: field);
+            },
+          ),
+        ),
+      );
+      expect(isEnabledValues, <bool>[true]);
+
+      setState(() {
+        formEnabled = false;
+      });
+      await tester.pump();
+      expect(isEnabledValues, <bool>[true, false]);
+
+      setState(() {
+        formEnabled = true;
+      });
+      await tester.pump();
+      expect(isEnabledValues, <bool>[true, false, true]);
+    });
+
+    testWidgets('A disabled Form does not auto validate with Form.autovalidateMode', (
+      WidgetTester tester,
+    ) async {
+      var validatorCalls = 0;
+      var formEnabled = false;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return Form(
+                enabled: formEnabled,
+                autovalidateMode: AutovalidateMode.always,
+                child: FormField<String>(
+                  validator: (String? value) {
+                    validatorCalls += 1;
+                    return 'error';
+                  },
+                  builder: (FormFieldState<String> field) => Text(field.errorText ?? ''),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      // Flush the post-frame callback that validates fields of an
+      // AutovalidateMode.always Form.
+      await tester.pump();
+      expect(validatorCalls, 0);
+      expect(find.text('error'), findsNothing);
+
+      // Rebuild the Form now that its fields are registered with it.
+      setState(() {});
+      await tester.pump();
+      expect(validatorCalls, 0);
+      expect(find.text('error'), findsNothing);
+
+      setState(() {
+        formEnabled = true;
+      });
+      await tester.pump();
+      expect(validatorCalls, greaterThan(0));
+      expect(find.text('error'), findsOneWidget);
+    });
+
+    testWidgets('A disabled Form does not auto validate with FormField.autovalidateMode', (
+      WidgetTester tester,
+    ) async {
+      var validatorCalls = 0;
+
+      Future<void> pumpForm({required bool enabled}) {
+        return tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Form(
+              enabled: enabled,
+              child: FormField<String>(
+                autovalidateMode: AutovalidateMode.always,
+                validator: (String? value) {
+                  validatorCalls += 1;
+                  return 'error';
+                },
+                builder: (FormFieldState<String> field) => Text(field.errorText ?? ''),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await pumpForm(enabled: false);
+      expect(validatorCalls, 0);
+      expect(find.text('error'), findsNothing);
+
+      await pumpForm(enabled: true);
+      expect(validatorCalls, greaterThan(0));
+      expect(find.text('error'), findsOneWidget);
+    });
+
+    testWidgets('Disabling a Form does not validate fields that lose focus', (
+      WidgetTester tester,
+    ) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      var validatorCalls = 0;
+      var formEnabled = true;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return Form(
+                enabled: formEnabled,
+                autovalidateMode: AutovalidateMode.onUnfocus,
+                child: FormField<String>(
+                  validator: (String? value) {
+                    validatorCalls += 1;
+                    return 'error';
+                  },
+                  builder: (FormFieldState<String> field) => Focus(
+                    focusNode: focusNode,
+                    canRequestFocus: field.isEnabled,
+                    child: Text(field.errorText ?? ''),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(focusNode.hasFocus, isTrue);
+
+      // Disabling the form makes the field give up focus.
+      setState(() {
+        formEnabled = false;
+      });
+      await tester.pump();
+      expect(focusNode.hasFocus, isFalse);
+      expect(validatorCalls, 0);
+      expect(find.text('error'), findsNothing);
+    });
+
+    testWidgets('FormState.validate validates the fields of a disabled Form', (
+      WidgetTester tester,
+    ) async {
+      final formKey = GlobalKey<FormState>();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Form(
+            key: formKey,
+            enabled: false,
+            child: FormField<String>(
+              validator: (String? value) => 'error',
+              builder: (FormFieldState<String> field) => Text(field.errorText ?? ''),
+            ),
+          ),
+        ),
+      );
+      expect(find.text('error'), findsNothing);
+
+      expect(formKey.currentState!.validate(), isFalse);
+      await tester.pump();
+      expect(find.text('error'), findsOneWidget);
+    });
+
+    testWidgets('Only the nearest Form.enabled applies to a FormField', (
+      WidgetTester tester,
+    ) async {
+      final outerFieldKey = GlobalKey<FormFieldState<String>>();
+      final innerFieldKey = GlobalKey<FormFieldState<String>>();
+
+      Future<void> pumpForms({required bool outerEnabled, required bool innerEnabled}) {
+        return tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Form(
+              enabled: outerEnabled,
+              child: Column(
+                children: <Widget>[
+                  FormField<String>(
+                    key: outerFieldKey,
+                    builder: (FormFieldState<String> field) => const SizedBox(),
+                  ),
+                  Form(
+                    enabled: innerEnabled,
+                    child: FormField<String>(
+                      key: innerFieldKey,
+                      builder: (FormFieldState<String> field) => const SizedBox(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
+      await pumpForms(outerEnabled: false, innerEnabled: true);
+      expect(outerFieldKey.currentState!.isEnabled, isFalse);
+      expect(innerFieldKey.currentState!.isEnabled, isTrue);
+
+      await pumpForms(outerEnabled: true, innerEnabled: false);
+      expect(outerFieldKey.currentState!.isEnabled, isTrue);
+      expect(innerFieldKey.currentState!.isEnabled, isFalse);
+    });
+  });
 }
 
 class _PlatformAnnounceScenario {
