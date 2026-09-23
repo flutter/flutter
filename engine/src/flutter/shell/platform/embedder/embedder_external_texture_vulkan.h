@@ -24,7 +24,7 @@ class EmbedderExternalTextureSourceVulkan final
  public:
   EmbedderExternalTextureSourceVulkan(
       const std::shared_ptr<impeller::Context>& context,
-      FlutterVulkanExternalTexture* embedder_desc);
+      const FlutterVulkanExternalTexture* embedder_desc);
 
   // |TextureSourceVK|
   ~EmbedderExternalTextureSourceVulkan() override;
@@ -51,13 +51,13 @@ class EmbedderExternalTextureSourceVulkan final
  private:
   bool CreateTextureImageView(
       const impeller::vk::Device& device,
-      FlutterVulkanExternalTexture* embedder_desc,
+      const FlutterVulkanExternalTexture* embedder_desc,
       const std::shared_ptr<impeller::YUVConversionVK>& yuv_conversion_wrapper);
   impeller::TextureDescriptor ToTextureDescriptor(
-      FlutterVulkanExternalTexture* embedder_desc);
+      const FlutterVulkanExternalTexture* embedder_desc);
   std::shared_ptr<impeller::YUVConversionVK> CreateYUVConversion(
       const impeller::ContextVK& context,
-      FlutterVulkanExternalTexture* embedder_desc);
+      const FlutterVulkanExternalTexture* embedder_desc);
   std::shared_ptr<impeller::YUVConversionVK> yuv_conversion_ = {};
   bool needs_yuv_conversion_ = false;
   bool is_swapchain_image_ = false;
@@ -83,6 +83,10 @@ class EmbedderExternalTextureVulkan : public flutter::Texture {
   ~EmbedderExternalTextureVulkan();
 
  private:
+  // The callback is owned by EmbedderExternalTextureResolver (itself owned
+  // by EmbedderEngine). It is only invoked from Paint(), which only runs
+  // while the engine is alive and the resolver exists, so the reference is
+  // always valid when used.
   const ExternalTextureCallback& external_texture_callback_;
 
   sk_sp<DlImage> last_image_;

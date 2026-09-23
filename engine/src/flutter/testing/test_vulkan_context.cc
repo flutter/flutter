@@ -7,6 +7,7 @@
 #include <optional>
 
 #include "flutter/flutter_vma/flutter_skia_vma.h"
+#include "flutter/fml/closure.h"
 #include "flutter/fml/logging.h"
 #include "flutter/shell/common/context_options.h"
 #include "flutter/testing/test_vulkan_context.h"
@@ -322,6 +323,11 @@ std::optional<TestVulkanImage> TestVulkanContext::CreateNV12Image(
     return std::nullopt;
   }
 
+  fml::ScopedCleanupClosure destroy_staging_buffer(
+      [&vk = vk_, &device = device_, &staging_buffer]() {
+        vk->DestroyBuffer(device->GetHandle(), staging_buffer, nullptr);
+      });
+
   VkMemoryRequirements buffer_mem_req;
   vk_->GetBufferMemoryRequirements(device_->GetHandle(), staging_buffer,
                                    &buffer_mem_req);
@@ -335,7 +341,6 @@ std::optional<TestVulkanImage> TestVulkanContext::CreateNV12Image(
   if (!host_visible_index.has_value()) {
     FML_LOG(ERROR) << "No host visible/coherent memory type found for staging "
                       "buffer.";
-    vk_->DestroyBuffer(device_->GetHandle(), staging_buffer, nullptr);
     return std::nullopt;
   }
   buffer_alloc_info.memoryTypeIndex = host_visible_index.value();
@@ -344,9 +349,13 @@ std::optional<TestVulkanImage> TestVulkanContext::CreateNV12Image(
   if (VK_CALL_LOG_ERROR(vk_->AllocateMemory(
           device_->GetHandle(), &buffer_alloc_info, nullptr, &buffer_memory)) !=
       VK_SUCCESS) {
-    vk_->DestroyBuffer(device_->GetHandle(), staging_buffer, nullptr);
     return std::nullopt;
   }
+
+  fml::ScopedCleanupClosure free_buffer_memory(
+      [&vk = vk_, &device = device_, &buffer_memory]() {
+        vk->FreeMemory(device->GetHandle(), buffer_memory, nullptr);
+      });
 
   vk_->BindBufferMemory(device_->GetHandle(), staging_buffer, buffer_memory, 0);
 
@@ -354,8 +363,6 @@ std::optional<TestVulkanImage> TestVulkanContext::CreateNV12Image(
   void* mapped = nullptr;
   if (VK_CALL_LOG_ERROR(vk_->MapMemory(device_->GetHandle(), buffer_memory, 0,
                                        total_staging_size, 0, &mapped))) {
-    vk_->FreeMemory(device_->GetHandle(), buffer_memory, nullptr);
-    vk_->DestroyBuffer(device_->GetHandle(), staging_buffer, nullptr);
     return std::nullopt;
   }
   memcpy(mapped, y_data, y_size);
@@ -371,10 +378,13 @@ std::optional<TestVulkanImage> TestVulkanContext::CreateNV12Image(
   VkCommandPool command_pool;
   if (VK_CALL_LOG_ERROR(vk_->CreateCommandPool(device_->GetHandle(), &pool_info,
                                                nullptr, &command_pool))) {
-    vk_->FreeMemory(device_->GetHandle(), buffer_memory, nullptr);
-    vk_->DestroyBuffer(device_->GetHandle(), staging_buffer, nullptr);
     return std::nullopt;
   }
+
+  fml::ScopedCleanupClosure destroy_command_pool(
+      [&vk = vk_, &device = device_, &command_pool]() {
+        vk->DestroyCommandPool(device->GetHandle(), command_pool, nullptr);
+      });
 
   VkCommandBufferAllocateInfo cmd_alloc_info = {
       .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
@@ -473,14 +483,8 @@ std::optional<TestVulkanImage> TestVulkanContext::CreateNV12Image(
   vk_->QueueSubmit(device_->GetQueueHandle(), 1, &submit_info, VK_NULL_HANDLE);
   vk_->QueueWaitIdle(device_->GetQueueHandle());
 
-  // Cleanup staging resources.
-  vk_->DestroyCommandPool(device_->GetHandle(), command_pool, nullptr);
-  vk_->FreeMemory(device_->GetHandle(), buffer_memory, nullptr);
-  vk_->DestroyBuffer(device_->GetHandle(), staging_buffer, nullptr);
-
   result.context_ =
       fml::RefPtr<TestVulkanContext>(const_cast<TestVulkanContext*>(this));
-
   return result;
 }
 
