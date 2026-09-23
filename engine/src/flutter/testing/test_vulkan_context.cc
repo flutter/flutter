@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <bit>
 #include <cassert>
 #include <memory>
 #include <optional>
@@ -114,6 +113,29 @@ TestVulkanContext::~TestVulkanContext() {
   }
 }
 
+namespace {
+
+std::optional<uint32_t> FindMemoryTypeIndex(
+    const vulkan::VulkanProcTable& vk,
+    VkPhysicalDevice physical_device,
+    uint32_t memory_type_bits,
+    VkMemoryPropertyFlags required_properties) {
+  VkPhysicalDeviceMemoryProperties memory_properties;
+  vk.GetPhysicalDeviceMemoryProperties(physical_device, &memory_properties);
+  for (uint32_t i = 0; i < memory_properties.memoryTypeCount; i++) {
+    if ((memory_type_bits & (1u << i)) == 0) {
+      continue;
+    }
+    if ((memory_properties.memoryTypes[i].propertyFlags &
+         required_properties) == required_properties) {
+      return i;
+    }
+  }
+  return std::nullopt;
+}
+
+}  // namespace
+
 std::optional<TestVulkanImage> TestVulkanContext::CreateImage(
     const DlISize& size) const {
   return CreateImage(size, VK_FORMAT_R8G8B8A8_UNORM);
@@ -161,13 +183,14 @@ std::optional<TestVulkanImage> TestVulkanContext::CreateImage(
   VkMemoryAllocateInfo alloc_info{};
   alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   alloc_info.allocationSize = mem_req.size;
-  uint32_t device_local_bits =
-      mem_req.memoryTypeBits & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-  if (device_local_bits == 0) {
+  std::optional<uint32_t> memory_type_index = FindMemoryTypeIndex(
+      *vk_, device_->GetPhysicalDeviceHandle(), mem_req.memoryTypeBits,
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+  if (!memory_type_index.has_value()) {
     FML_LOG(ERROR) << "No device local memory type found for image.";
     return std::nullopt;
   }
-  alloc_info.memoryTypeIndex = std::countr_zero(device_local_bits);
+  alloc_info.memoryTypeIndex = memory_type_index.value();
 
   VkDeviceMemory memory;
   if (VK_CALL_LOG_ERROR(vk_->AllocateMemory(device_->GetHandle(), &alloc_info,
@@ -254,13 +277,14 @@ std::optional<TestVulkanImage> TestVulkanContext::CreateNV12Image(
   VkMemoryAllocateInfo alloc_info{};
   alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   alloc_info.allocationSize = mem_req.size;
-  uint32_t nv12_device_local_bits =
-      mem_req.memoryTypeBits & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-  if (nv12_device_local_bits == 0) {
+  std::optional<uint32_t> nv12_memory_type_index = FindMemoryTypeIndex(
+      *vk_, device_->GetPhysicalDeviceHandle(), mem_req.memoryTypeBits,
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+  if (!nv12_memory_type_index.has_value()) {
     FML_LOG(ERROR) << "No device local memory type found for NV12 image.";
     return std::nullopt;
   }
-  alloc_info.memoryTypeIndex = std::countr_zero(nv12_device_local_bits);
+  alloc_info.memoryTypeIndex = nv12_memory_type_index.value();
 
   VkDeviceMemory memory;
   if (VK_CALL_LOG_ERROR(vk_->AllocateMemory(device_->GetHandle(), &alloc_info,
@@ -304,16 +328,17 @@ std::optional<TestVulkanImage> TestVulkanContext::CreateNV12Image(
   VkMemoryAllocateInfo buffer_alloc_info{};
   buffer_alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   buffer_alloc_info.allocationSize = buffer_mem_req.size;
-  uint32_t host_visible_bits =
-      buffer_mem_req.memoryTypeBits & (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-  if (host_visible_bits == 0) {
+  std::optional<uint32_t> host_visible_index = FindMemoryTypeIndex(
+      *vk_, device_->GetPhysicalDeviceHandle(), buffer_mem_req.memoryTypeBits,
+      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+  if (!host_visible_index.has_value()) {
     FML_LOG(ERROR) << "No host visible/coherent memory type found for staging "
                       "buffer.";
     vk_->DestroyBuffer(device_->GetHandle(), staging_buffer, nullptr);
     return std::nullopt;
   }
-  buffer_alloc_info.memoryTypeIndex = std::countr_zero(host_visible_bits);
+  buffer_alloc_info.memoryTypeIndex = host_visible_index.value();
 
   VkDeviceMemory buffer_memory;
   if (VK_CALL_LOG_ERROR(vk_->AllocateMemory(

@@ -148,6 +148,10 @@ TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
 }
 
 namespace {
+constexpr int kWidth = 800;
+constexpr int kHeight = 600;
+constexpr int texture_id = 1;
+
 std::optional<TestVulkanImage> CreateVulkanTextureWithPixels(
     const fml::RefPtr<TestVulkanContext>& context,
     int width,
@@ -231,8 +235,6 @@ void DeleteTestVulkanImage(void* user_data) {
 }  // namespace
 
 TEST_F(EmbedderTest, RenderTextureWithImpellerVulkan) {
-  constexpr int kWidth = 800;
-  constexpr int kHeight = 600;
   EmbedderTestContextVulkan& context =
       GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
@@ -272,7 +274,6 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkan) {
 
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
 
-  constexpr int texture_id = 1;
   ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
 
   FlutterWindowMetricsEvent event = {};
@@ -297,8 +298,6 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkan) {
 }
 
 TEST_F(EmbedderTest, RenderTextureWithSkiaVulkan) {
-  constexpr int kWidth = 800;
-  constexpr int kHeight = 600;
   EmbedderTestContextVulkan& context =
       GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
@@ -337,7 +336,6 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkan) {
 
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
 
-  constexpr int texture_id = 1;
   ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
 
   FlutterWindowMetricsEvent event = {};
@@ -362,8 +360,6 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkan) {
 }
 
 TEST_F(EmbedderTest, RenderTextureWithImpellerVulkanDestructCallback) {
-  constexpr int kWidth = 800;
-  constexpr int kHeight = 600;
   EmbedderTestContextVulkan& context =
       GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
@@ -411,7 +407,6 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkanDestructCallback) {
 
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
 
-  constexpr int texture_id = 1;
   ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
 
   // Send a window metrics event so frames may be scheduled.
@@ -436,8 +431,6 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkanDestructCallback) {
 }
 
 TEST_F(EmbedderTest, RenderTextureWithSkiaVulkanDestructCallback) {
-  constexpr int kWidth = 800;
-  constexpr int kHeight = 600;
   EmbedderTestContextVulkan& context =
       GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
@@ -484,7 +477,6 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkanDestructCallback) {
 
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
 
-  constexpr int texture_id = 1;
   ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
 
   // Send a window metrics event so frames may be scheduled.
@@ -511,8 +503,6 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkanDestructCallback) {
 // Tests that a BGRA external texture renders correctly (red/blue channels
 // are not swapped) when using the Impeller backend.
 TEST_F(EmbedderTest, RenderBGRATextureWithImpellerVulkan) {
-  constexpr int kWidth = 800;
-  constexpr int kHeight = 600;
   EmbedderTestContextVulkan& context =
       GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
@@ -553,7 +543,6 @@ TEST_F(EmbedderTest, RenderBGRATextureWithImpellerVulkan) {
 
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
 
-  constexpr int texture_id = 1;
   ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
 
   FlutterWindowMetricsEvent event = {};
@@ -573,8 +562,6 @@ TEST_F(EmbedderTest, RenderBGRATextureWithImpellerVulkan) {
 // Tests that a BGRA external texture renders correctly (red/blue channels
 // are not swapped) when using the Skia backend.
 TEST_F(EmbedderTest, RenderBGRATextureWithSkiaVulkan) {
-  constexpr int kWidth = 800;
-  constexpr int kHeight = 600;
   EmbedderTestContextVulkan& context =
       GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
@@ -614,7 +601,6 @@ TEST_F(EmbedderTest, RenderBGRATextureWithSkiaVulkan) {
 
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
 
-  constexpr int texture_id = 1;
   ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
 
   FlutterWindowMetricsEvent event = {};
@@ -632,8 +618,6 @@ TEST_F(EmbedderTest, RenderBGRATextureWithSkiaVulkan) {
 }
 
 TEST_F(EmbedderTest, RenderNV12TextureWithImpellerVulkan) {
-  constexpr int kWidth = 800;
-  constexpr int kHeight = 600;
   EmbedderTestContextVulkan& context =
       GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
@@ -682,7 +666,6 @@ TEST_F(EmbedderTest, RenderNV12TextureWithImpellerVulkan) {
 
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
 
-  constexpr int texture_id = 1;
   ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
 
   FlutterWindowMetricsEvent event = {};
@@ -693,12 +676,11 @@ TEST_F(EmbedderTest, RenderNV12TextureWithImpellerVulkan) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
   latch.Wait();
-  ASSERT_TRUE(ImageMatchesFixture("external_texture_nv12.png", rendered_scene));
+  ASSERT_TRUE(ImageMatchesFixture("external_texture_nv12.png", rendered_scene,
+                                  kWidth * 2));
 }
 
 TEST_F(EmbedderTest, RenderNV12TextureWithSkiaVulkan) {
-  constexpr int kWidth = 800;
-  constexpr int kHeight = 600;
   EmbedderTestContextVulkan& context =
       GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
@@ -746,7 +728,6 @@ TEST_F(EmbedderTest, RenderNV12TextureWithSkiaVulkan) {
 
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
 
-  constexpr int texture_id = 1;
   ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
 
   FlutterWindowMetricsEvent event = {};
@@ -757,7 +738,8 @@ TEST_F(EmbedderTest, RenderNV12TextureWithSkiaVulkan) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
   latch.Wait();
-  ASSERT_TRUE(ImageMatchesFixture("external_texture_nv12.png", rendered_scene));
+  ASSERT_TRUE(ImageMatchesFixture("external_texture_nv12.png", rendered_scene,
+                                  kWidth * 2));
 }
 
 }  // namespace testing
