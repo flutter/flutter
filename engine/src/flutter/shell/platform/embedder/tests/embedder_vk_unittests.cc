@@ -20,6 +20,7 @@
 #include "flutter/testing/test_vulkan_image.h"
 #include "flutter/testing/test_vulkan_surface.h"
 #include "flutter/testing/testing.h"
+#include "gmock/gmock.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -145,7 +146,7 @@ TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
 }
 
 static std::optional<TestVulkanImage> CreateVulkanTextureWithPixels(
-    fml::RefPtr<TestVulkanContext> context,
+    const fml::RefPtr<TestVulkanContext>& context,
     int width,
     int height) {
   auto image_result = context->CreateImage({width, height});
@@ -198,7 +199,7 @@ static std::optional<TestVulkanImage> CreateVulkanTextureWithPixels(
 // Creates a BGRA VkImage and draws red/blue content into it, similar to
 // CreateVulkanTextureWithPixels but using VK_FORMAT_B8G8R8A8_UNORM.
 static std::optional<TestVulkanImage> CreateVulkanTextureWithPixelsBGRA(
-    fml::RefPtr<TestVulkanContext> context,
+    const fml::RefPtr<TestVulkanContext>& context,
     int width,
     int height) {
   auto image_result =
@@ -255,7 +256,9 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkan) {
   auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
-  context.SetVulkanPresentCallback([&]() { latch.Signal(); });
+  ON_CALL(context.PresentCallbackMock(), Call()).WillByDefault([&] {
+    latch.Signal();
+  });
   builder.AddCommandLineArgument("--enable-impeller");
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
@@ -315,7 +318,9 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkan) {
   auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
-  context.SetVulkanPresentCallback([&]() { latch.Signal(); });
+  ON_CALL(context.PresentCallbackMock(), Call()).WillByDefault([&] {
+    latch.Signal();
+  });
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
@@ -374,7 +379,9 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkanDestructCallback) {
   auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
-  context.SetVulkanPresentCallback([&]() { latch.Signal(); });
+  ON_CALL(context.PresentCallbackMock(), Call()).WillByDefault([&] {
+    latch.Signal();
+  });
   builder.AddCommandLineArgument("--enable-impeller");
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
@@ -443,7 +450,9 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkanDestructCallback) {
   auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
-  context.SetVulkanPresentCallback([&]() { latch.Signal(); });
+  ON_CALL(context.PresentCallbackMock(), Call()).WillByDefault([&] {
+    latch.Signal();
+  });
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
@@ -513,7 +522,9 @@ TEST_F(EmbedderTest, RenderBGRATextureWithImpellerVulkan) {
   auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
-  context.SetVulkanPresentCallback([&]() { latch.Signal(); });
+  ON_CALL(context.PresentCallbackMock(), Call()).WillByDefault([&] {
+    latch.Signal();
+  });
   builder.AddCommandLineArgument("--enable-impeller");
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
@@ -568,7 +579,9 @@ TEST_F(EmbedderTest, RenderBGRATextureWithSkiaVulkan) {
   auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
-  context.SetVulkanPresentCallback([&]() { latch.Signal(); });
+  ON_CALL(context.PresentCallbackMock(), Call()).WillByDefault([&] {
+    latch.Signal();
+  });
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 
@@ -615,7 +628,7 @@ TEST_F(EmbedderTest, RenderBGRATextureWithSkiaVulkan) {
 }
 
 static std::optional<TestVulkanImage> CreateVulkanTextureNV12(
-    fml::RefPtr<TestVulkanContext> context,
+    const fml::RefPtr<TestVulkanContext>& context,
     int width,
     int height) {
   auto nv12_mapping = testing::OpenFixtureAsMapping("texture.nv12");
@@ -637,7 +650,9 @@ TEST_F(EmbedderTest, RenderNV12TextureWithImpellerVulkan) {
   auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
-  context.SetVulkanPresentCallback([&]() { latch.Signal(); });
+  ON_CALL(context.PresentCallbackMock(), Call()).WillByDefault([&] {
+    latch.Signal();
+  });
   builder.AddCommandLineArgument("--enable-impeller");
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
@@ -689,7 +704,9 @@ TEST_F(EmbedderTest, RenderNV12TextureWithSkiaVulkan) {
   auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
   EmbedderConfigBuilder builder(context);
   fml::AutoResetWaitableEvent latch;
-  context.SetVulkanPresentCallback([&]() { latch.Signal(); });
+  ON_CALL(context.PresentCallbackMock(), Call()).WillByDefault([&] {
+    latch.Signal();
+  });
   builder.SetDartEntrypoint("render_texture_impeller_test");
   builder.SetSurface(DlISize(kWidth, kHeight));
 

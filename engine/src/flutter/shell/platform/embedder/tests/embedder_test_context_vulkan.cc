@@ -86,11 +86,6 @@ void EmbedderTestContextVulkan::SetVulkanInstanceProcAddressCallback(
   renderer_config_.vulkan.get_instance_proc_address_callback = callback;
 }
 
-void EmbedderTestContextVulkan::SetVulkanPresentCallback(
-    VulkanPresentCallback callback) {
-  vulkan_present_callback_ = std::move(callback);
-}
-
 size_t EmbedderTestContextVulkan::GetSurfacePresentCount() const {
   return present_count_;
 }
@@ -102,9 +97,7 @@ VkImage EmbedderTestContextVulkan::GetNextImage(const DlISize& size) {
 bool EmbedderTestContextVulkan::PresentImage(VkImage image) {
   FireRootSurfacePresentCallbackIfPresent(
       [&]() { return surface_->GetSurfaceSnapshot(); });
-  if (vulkan_present_callback_) {
-    vulkan_present_callback_();
-  }
+  present_callback_mock_.Call();
   present_count_++;
   return true;
 }
