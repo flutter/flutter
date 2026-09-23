@@ -89,7 +89,7 @@ typedef _FocusTarget = ({
 });
 
 enum AccessibilityFocusManagerEvent {
-  /// No event has happend for the target element.
+  /// No event has happened for the target element.
   nothing,
 
   /// The engine requested focus on the DOM element, possibly because the

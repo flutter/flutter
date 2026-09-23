@@ -965,7 +965,7 @@ class _ButtonSanitizer {
   _SanitizedDetails sanitizeMoveEvent({required int buttons}) {
     final int newPressedButtons = _htmlButtonsToFlutterButtons(buttons);
     // This could happen when the user clicks RMB then moves the mouse quickly.
-    // The brower sends a move event with `buttons:2` even though there's no
+    // The browser sends a move event with `buttons:2` even though there's no
     // buttons down yet.
     if (_pressedButtons == 0 && newPressedButtons != 0) {
       return _SanitizedDetails(change: ui.PointerChange.hover, buttons: _pressedButtons);

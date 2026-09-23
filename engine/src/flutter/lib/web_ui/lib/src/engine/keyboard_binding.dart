@@ -350,7 +350,7 @@ class KeyboardConverter {
   // invoked before that.
   //
   // Returns a callback that cancels the schedule. Disposal of
-  // `KeyBoardConverter` also cancels the shedule automatically.
+  // `KeyBoardConverter` also cancels the schedule automatically.
   _VoidCallback _scheduleAsyncEvent(
     Duration duration,
     ValueGetter<ui.KeyData> getData,

@@ -67,7 +67,7 @@ Future<BrowserInstallation> getEdgeInstallation(
 
 /// `MicrosoftEdgeLauncher` is an executable for launching Edge.
 ///
-/// It is useful for starting Edge from comand line or from a
+/// It is useful for starting Edge from command line or from a
 /// batch script.
 ///
 /// See: https://github.com/MicrosoftEdge/edge-launcher
