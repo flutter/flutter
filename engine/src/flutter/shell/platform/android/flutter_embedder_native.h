@@ -14,6 +14,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "flutter/fml/macros.h"
@@ -1224,6 +1225,8 @@ class FlutterEmbedderNative {
   std::unordered_map<int64_t,
                      std::shared_ptr<fml::jni::ScopedJavaGlobalRef<jobject>>>
       surface_textures_;
+  mutable std::unordered_map<int64_t, uint32_t> surface_texture_gl_ids_;
+  mutable std::unordered_set<int64_t> surface_texture_attached_;
 
   mutable std::mutex response_handles_mutex_;
   mutable std::unordered_map<int32_t,

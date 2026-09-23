@@ -162,12 +162,66 @@ AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(
     event.min_height_constraint = min_h;
     event.max_height_constraint = max_h;
   } else {
-    event.has_constraints = false;
     event.min_width_constraint = event.width;
     event.max_width_constraint = event.width;
     event.min_height_constraint = event.height;
     event.max_height_constraint = event.height;
   }
+
+  // Populate extended metrics and display features.
+  event.has_extended_metrics = true;
+  event.physical_padding_top = SafeDimension(metrics.physical_padding_top);
+  event.physical_padding_right = SafeDimension(metrics.physical_padding_right);
+  event.physical_padding_bottom =
+      SafeDimension(metrics.physical_padding_bottom);
+  event.physical_padding_left = SafeDimension(metrics.physical_padding_left);
+
+  double gesture_inset_top = SafeDimension(metrics.system_gesture_inset_top);
+  double gesture_inset_right =
+      SafeDimension(metrics.system_gesture_inset_right);
+  double gesture_inset_bottom =
+      SafeDimension(metrics.system_gesture_inset_bottom);
+  double gesture_inset_left = SafeDimension(metrics.system_gesture_inset_left);
+
+  event.physical_system_gesture_inset_top = std::max(0.0, gesture_inset_top);
+  event.physical_system_gesture_inset_right =
+      std::max(0.0, gesture_inset_right);
+  event.physical_system_gesture_inset_bottom =
+      std::max(0.0, gesture_inset_bottom);
+  event.physical_system_gesture_inset_left = std::max(0.0, gesture_inset_left);
+
+  event.physical_touch_slop = metrics.physical_touch_slop;
+
+  // Each display feature requires 4 bounds coordinates (left, top, right,
+  // bottom).
+  constexpr size_t kCoordinatesPerFeature = 4;
+  size_t feature_count = std::min({
+      metrics.display_features_bounds.size() / kCoordinatesPerFeature,
+      metrics.display_features_type.size(),
+      metrics.display_features_state.size(),
+      kMaxDisplayFeatures,
+  });
+
+  if (feature_count > 0) {
+    event.display_features_count = feature_count;
+    event.display_features_bounds = metrics.display_features_bounds.data();
+    event.display_features_type = metrics.display_features_type.data();
+    event.display_features_state = metrics.display_features_state.data();
+  } else {
+    event.display_features_count = 0;
+    event.display_features_bounds = nullptr;
+    event.display_features_type = nullptr;
+    event.display_features_state = nullptr;
+  }
+
+  event.physical_display_corner_radius_top_left =
+      metrics.physical_display_corner_radius_top_left;
+  event.physical_display_corner_radius_top_right =
+      metrics.physical_display_corner_radius_top_right;
+  event.physical_display_corner_radius_bottom_right =
+      metrics.physical_display_corner_radius_bottom_right;
+  event.physical_display_corner_radius_bottom_left =
+      metrics.physical_display_corner_radius_bottom_left;
 
   return event;
 }

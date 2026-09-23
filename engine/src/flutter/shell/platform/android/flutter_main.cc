@@ -131,6 +131,11 @@ void FlutterMain::Init(JNIEnv* env,
   auto command_line = fml::CommandLineFromIterators(args.begin(), args.end());
 
   auto settings = SettingsFromCommandLine(command_line, true);
+  if (command_line.HasOption("enable-surface-control")) {
+    std::string val;
+    command_line.GetOptionValue("enable-surface-control", &val);
+    settings.enable_surface_control = val.empty() || val == "true";
+  }
 
   // Turn systracing on if ATrace_isEnabled is true and the user did not already
   // request systracing

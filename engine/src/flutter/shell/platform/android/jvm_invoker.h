@@ -382,6 +382,9 @@ class AndroidJvmInvoker : public JvmInvoker {
   bool PostJvmTask(std::function<void()> task) override;
 
  private:
+  fml::jni::ScopedJavaLocalRef<jobject> GetJavaObjectLocalRef(
+      JNIEnv*& env) const;
+
   mutable std::mutex java_object_mutex_;
   std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> java_object_;
   fml::RefPtr<fml::TaskRunner> platform_task_runner_;
