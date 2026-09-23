@@ -246,8 +246,13 @@ size_t EmbedderImageLRU::GetSize() const {
 }
 
 static jmethodID g_weak_reference_get_method = nullptr;
-static jmethodID g_attach_to_gl_context_method = nullptr;
-static jmethodID g_update_tex_image_method = nullptr;
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_surface_texture_wrapper_class =
+    nullptr;
+static jmethodID g_wrapper_attach_to_gl_context_method = nullptr;
+static jmethodID g_wrapper_update_tex_image_method = nullptr;
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_surface_texture_class = nullptr;
+static jmethodID g_st_attach_to_gl_context_method = nullptr;
+static jmethodID g_st_update_tex_image_method = nullptr;
 
 class FlutterEmbedderNative::CompositorDelegate
     : public AndroidCompositorPlatformViewDelegate {
@@ -495,24 +500,35 @@ void FlutterEmbedderNative::PopulateRendererConfig(
               }
             }
             if (target_obj) {
-              if (!g_attach_to_gl_context_method ||
-                  !g_update_tex_image_method) {
-                jclass cls = env->GetObjectClass(target_obj);
-                if (cls) {
-                  g_attach_to_gl_context_method =
-                      env->GetMethodID(cls, "attachToGLContext", "(I)V");
-                  g_update_tex_image_method =
-                      env->GetMethodID(cls, "updateTexImage", "()V");
+              if (g_surface_texture_wrapper_class &&
+                  !g_surface_texture_wrapper_class->is_null() &&
+                  env->IsInstanceOf(target_obj,
+                                    g_surface_texture_wrapper_class->obj())) {
+                if (need_attach && g_wrapper_attach_to_gl_context_method) {
+                  env->CallVoidMethod(target_obj,
+                                      g_wrapper_attach_to_gl_context_method,
+                                      static_cast<jint>(gl_tex_id));
+                  std::scoped_lock lock(self->surface_textures_mutex_);
+                  self->surface_texture_attached_.insert(texture_id);
                 }
-              }
-              if (need_attach && g_attach_to_gl_context_method) {
-                env->CallVoidMethod(target_obj, g_attach_to_gl_context_method,
-                                    static_cast<jint>(gl_tex_id));
-                std::scoped_lock lock(self->surface_textures_mutex_);
-                self->surface_texture_attached_.insert(texture_id);
-              }
-              if (g_update_tex_image_method) {
-                env->CallVoidMethod(target_obj, g_update_tex_image_method);
+                if (g_wrapper_update_tex_image_method) {
+                  env->CallVoidMethod(target_obj,
+                                      g_wrapper_update_tex_image_method);
+                }
+              } else if (g_surface_texture_class &&
+                         !g_surface_texture_class->is_null() &&
+                         env->IsInstanceOf(target_obj,
+                                           g_surface_texture_class->obj())) {
+                if (need_attach && g_st_attach_to_gl_context_method) {
+                  env->CallVoidMethod(target_obj,
+                                      g_st_attach_to_gl_context_method,
+                                      static_cast<jint>(gl_tex_id));
+                  std::scoped_lock lock(self->surface_textures_mutex_);
+                  self->surface_texture_attached_.insert(texture_id);
+                }
+                if (g_st_update_tex_image_method) {
+                  env->CallVoidMethod(target_obj, g_st_update_tex_image_method);
+                }
               }
             }
             if (env->ExceptionCheck()) {
@@ -4772,11 +4788,6 @@ static void FlutterJNI_RegisterImageTexture(JNIEnv* env,
   if (!native_instance) {
     return;
   }
-  if (image_texture_entry != nullptr) {
-    native_instance->RegisterSurfaceTexture(
-        texture_id,
-        fml::jni::ScopedJavaGlobalRef<jobject>(env, image_texture_entry));
-  }
   native_instance->RegisterHardwareBufferTexture(texture_id);
   auto engine = native_instance->GetEngine();
   if (engine) {
@@ -5372,10 +5383,31 @@ bool FlutterEmbedderNative::RegisterJni(JNIEnv* env) {
   jclass wrapper_class = env->FindClass(
       "io/flutter/embedding/engine/renderer/SurfaceTextureWrapper");
   if (wrapper_class) {
-    g_attach_to_gl_context_method =
+    if (!g_surface_texture_wrapper_class) {
+      g_surface_texture_wrapper_class =
+          new fml::jni::ScopedJavaGlobalRef<jclass>();
+    }
+    g_surface_texture_wrapper_class->Reset(env, wrapper_class);
+    g_wrapper_attach_to_gl_context_method =
         env->GetMethodID(wrapper_class, "attachToGLContext", "(I)V");
-    g_update_tex_image_method =
+    g_wrapper_update_tex_image_method =
         env->GetMethodID(wrapper_class, "updateTexImage", "()V");
+  }
+  if (env->ExceptionCheck()) {
+    env->ExceptionClear();
+  }
+
+  jclass surface_texture_class =
+      env->FindClass("android/graphics/SurfaceTexture");
+  if (surface_texture_class) {
+    if (!g_surface_texture_class) {
+      g_surface_texture_class = new fml::jni::ScopedJavaGlobalRef<jclass>();
+    }
+    g_surface_texture_class->Reset(env, surface_texture_class);
+    g_st_attach_to_gl_context_method =
+        env->GetMethodID(surface_texture_class, "attachToGLContext", "(I)V");
+    g_st_update_tex_image_method =
+        env->GetMethodID(surface_texture_class, "updateTexImage", "()V");
   }
   if (env->ExceptionCheck()) {
     env->ExceptionClear();

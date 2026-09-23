@@ -62,6 +62,7 @@ class MockableJNIEnv : public JNIEnv {
     // mockable virtual methods in this class.
     functions = &jni_;
     jni_.GetObjectClass = WrapGetObjectClass;
+    jni_.IsInstanceOf = WrapIsInstanceOf;
     jni_.CallBooleanMethod = WrapCallBooleanMethod;
     jni_.CallBooleanMethodV = WrapCallBooleanMethodV;
     jni_.CallIntMethod = WrapCallIntMethod;
@@ -131,23 +132,14 @@ class MockableJNIEnv : public JNIEnv {
   virtual jint RegisterNatives(jclass, const JNINativeMethod*, jint) = 0;
   virtual jsize GetArrayLength(jarray) = 0;
   virtual void GetIntArrayRegion(jintArray, jsize, jsize, jint*) = 0;
-  virtual jobject GetObjectArrayElement(jobjectArray, jsize) = 0;
-  virtual jsize GetStringLength(jstring) = 0;
-  virtual const jchar* GetStringChars(jstring, jboolean*) = 0;
-  virtual void ReleaseStringChars(jstring, const jchar*) = 0;
-  virtual jfloatArray NewFloatArray(jsize) = 0;
-  virtual void SetFloatArrayRegion(jfloatArray,
-                                   jsize,
-                                   jsize,
-                                   const jfloat*) = 0;
-  virtual jint PushLocalFrame(jint) = 0;
-  virtual jobject PopLocalFrame(jobject) = 0;
-  virtual jobject NewDirectByteBuffer(void*, jlong) = 0;
-  virtual jstring NewStringUTF(const char*) = 0;
+  virtual jboolean IsInstanceOf(jobject obj, jclass clazz) = 0;
 
  private:
   static jclass WrapGetObjectClass(JNIEnv* env, jobject obj) {
     return static_cast<MockableJNIEnv*>(env)->GetObjectClass(obj);
+  }
+  static jboolean WrapIsInstanceOf(JNIEnv* env, jobject obj, jclass clazz) {
+    return static_cast<MockableJNIEnv*>(env)->IsInstanceOf(obj, clazz);
   }
   static jboolean WrapCallBooleanMethod(JNIEnv* env,
                                         jobject obj,
@@ -381,9 +373,12 @@ class MockJNIEnv : public MockableJNIEnv {
         .WillByDefault(::testing::Return(JNI_TRUE));
     ON_CALL(*this, CallIntMethodV(::testing::_, ::testing::_, ::testing::_))
         .WillByDefault(::testing::Return(0));
+    ON_CALL(*this, IsInstanceOf(::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(JNI_FALSE));
   }
 
   MOCK_METHOD(jclass, GetObjectClass, (jobject), (override));
+  MOCK_METHOD(jboolean, IsInstanceOf, (jobject, jclass), (override));
   MOCK_METHOD(jboolean,
               CallBooleanMethodV,
               (jobject, jmethodID, va_list),
