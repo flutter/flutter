@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import Foundation
-import InternalFlutterSwiftCommon
+@testable import InternalFlutterSwiftCommon
 import Testing
-import test_utils_swift
+@testable import test_utils_swift
 
 @Suite struct LoggerTests {
 

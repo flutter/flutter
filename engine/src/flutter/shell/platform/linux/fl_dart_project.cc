@@ -16,6 +16,7 @@ struct _FlDartProject {
 
   FlUIThreadPolicy ui_thread_policy;
   gboolean enable_impeller;
+  gboolean enable_flutter_gpu;
 };
 
 G_DEFINE_TYPE(FlDartProject, fl_dart_project, G_TYPE_OBJECT)
@@ -144,4 +145,17 @@ G_MODULE_EXPORT
 gboolean fl_dart_project_get_enable_impeller(FlDartProject* project) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(project), FALSE);
   return project->enable_impeller;
+}
+
+G_MODULE_EXPORT
+void fl_dart_project_set_enable_flutter_gpu(FlDartProject* project,
+                                            gboolean enable_flutter_gpu) {
+  g_return_if_fail(FL_IS_DART_PROJECT(project));
+  project->enable_flutter_gpu = enable_flutter_gpu;
+}
+
+G_MODULE_EXPORT
+gboolean fl_dart_project_get_enable_flutter_gpu(FlDartProject* project) {
+  g_return_val_if_fail(FL_IS_DART_PROJECT(project), FALSE);
+  return project->enable_flutter_gpu;
 }

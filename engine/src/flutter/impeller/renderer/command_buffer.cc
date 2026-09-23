@@ -15,8 +15,7 @@ CommandBuffer::CommandBuffer(std::weak_ptr<const Context> context)
 
 CommandBuffer::~CommandBuffer() = default;
 
-bool CommandBuffer::SubmitCommands(bool block_on_schedule,
-                                   const CompletionCallback& callback) {
+bool CommandBuffer::SubmitCommands(const CompletionCallback& callback) {
   if (!IsValid()) {
     // Already committed or was never valid. Either way, this is caller error.
     if (callback) {
@@ -24,11 +23,23 @@ bool CommandBuffer::SubmitCommands(bool block_on_schedule,
     }
     return false;
   }
-  return OnSubmitCommands(block_on_schedule, callback);
+  return OnSubmitCommands(callback);
 }
 
-bool CommandBuffer::SubmitCommands(bool block_on_schedule) {
-  return SubmitCommands(block_on_schedule, nullptr);
+CommandBuffer::SubmitResult CommandBuffer::SubmitCommandsWithReceipt(
+    const CompletionCallback& callback) {
+  if (!IsValid()) {
+    if (callback) {
+      callback(Status::kError);
+    }
+    return SubmitResult(false);
+  }
+  return OnSubmitCommandsWithReceipt(callback);
+}
+
+CommandBuffer::SubmitResult CommandBuffer::OnSubmitCommandsWithReceipt(
+    CompletionCallback callback) {
+  return SubmitResult(OnSubmitCommands(std::move(callback)));
 }
 
 void CommandBuffer::WaitUntilCompleted() {

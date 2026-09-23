@@ -41,13 +41,29 @@ class MockViewEmbedder : public ExternalViewEmbedder {
   // |ExternalViewEmbedder|
   DlCanvas* CompositeEmbeddedView(int64_t view_id) override;
 
+  // |ExternalViewEmbedder|
+  void PushClipRectToVisitedPlatformViews(const DlRect& clip_rect) override;
+
+  // |ExternalViewEmbedder|
+  void PushClipRRectToVisitedPlatformViews(
+      const DlRoundRect& clip_rrect) override;
+
+  // |ExternalViewEmbedder|
+  void PushClipRSuperellipseToVisitedPlatformViews(
+      const DlRoundSuperellipse& clip_rse) override;
+
+  // |ExternalViewEmbedder|
+  void PushClipPathToVisitedPlatformViews(const DlPath& clip_path) override;
+
   std::vector<int64_t> prerolled_views() const { return prerolled_views_; }
   std::vector<int64_t> painted_views() const { return painted_views_; }
+  std::vector<Mutator> pushed_clips() const { return pushed_clips_; }
 
  private:
   std::deque<DlCanvas*> contexts_;
   std::vector<int64_t> prerolled_views_;
   std::vector<int64_t> painted_views_;
+  std::vector<Mutator> pushed_clips_;
 };
 
 }  // namespace testing

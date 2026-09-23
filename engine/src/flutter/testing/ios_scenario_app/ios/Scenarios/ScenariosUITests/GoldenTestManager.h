@@ -11,7 +11,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern NSDictionary* launchArgsMap;
 const extern double kDefaultRmseThreshold;
 
 // Manages a `GoldenPlatformViewTests`.
@@ -24,9 +23,10 @@ const extern double kDefaultRmseThreshold;
 @property(readonly, copy, nonatomic) NSString* identifier;
 @property(readonly, copy, nonatomic) NSString* launchArg;
 
-// Initilize with launchArg.
+// Initialize with a launch argument.
 //
-// Crahes if the launchArg is not mapped in `Appdelegate.launchArgsMap`.
+// The golden identifier is derived from `launchArg` by dropping the leading "--" and
+// replacing "-" with "_"; `SceneDelegate` derives the scenario name the same way.
 - (instancetype)initWithLaunchArg:(NSString*)launchArg;
 
 // Take a sceenshot of the test app and check it has the same pixels with

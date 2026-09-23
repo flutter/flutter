@@ -304,7 +304,7 @@ TEST(SurfacePool, DestroyLayersFrameSizeChanged) {
   ASSERT_TRUE(pool->HasLayers());
 }
 
-TEST(SurfacePool, DestroyLayersFrameSizeChangedNew) {
+TEST(SurfacePool, DoesNotDestroyLayersFrameSizeChangedNew) {
   auto pool = std::make_unique<SurfacePool>(/*use_new_surface_methods=*/true);
   auto jni_mock = std::make_shared<JNIMock>();
 
@@ -320,6 +320,9 @@ TEST(SurfacePool, DestroyLayersFrameSizeChangedNew) {
         EXPECT_CALL(*android_surface_mock, CreateGPUSurface(gr_context.get()));
         EXPECT_CALL(*android_surface_mock, SetNativeWindow(window, _));
         EXPECT_CALL(*android_surface_mock, IsValid()).WillOnce(Return(true));
+        EXPECT_CALL(*android_surface_mock,
+                    OnScreenSurfaceResize(DlISize(20, 20)))
+            .Times(1);
         return android_surface_mock;
       });
   pool->SetFrameSize(DlISize(10, 10));
@@ -332,21 +335,20 @@ TEST(SurfacePool, DestroyLayersFrameSizeChangedNew) {
 
   ASSERT_FALSE(pool->HasLayers());
 
-  pool->GetLayer(gr_context.get(), *android_context, jni_mock, surface_factory);
+  auto layer_1 = pool->GetLayer(gr_context.get(), *android_context, jni_mock,
+                                surface_factory);
 
   ASSERT_TRUE(pool->HasLayers());
+  ASSERT_NE(nullptr, layer_1);
 
+  pool->RecycleLayers();
   pool->SetFrameSize(DlISize(20, 20));
-  EXPECT_CALL(*jni_mock, destroyOverlaySurface2()).Times(1);
-  EXPECT_CALL(*jni_mock, createOverlaySurface2())
-      .Times(1)
-      .WillOnce(Return(
-          ByMove(std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
-              1, window))));
-  pool->GetLayer(gr_context.get(), *android_context, jni_mock, surface_factory);
+  auto layer_2 = pool->GetLayer(gr_context.get(), *android_context, jni_mock,
+                                surface_factory);
 
   ASSERT_TRUE(pool->GetUnusedLayers().empty());
   ASSERT_TRUE(pool->HasLayers());
+  ASSERT_EQ(layer_1, layer_2);
 }
 
 }  // namespace testing

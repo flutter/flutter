@@ -12,7 +12,7 @@
 #include "fml/synchronization/count_down_latch.h"
 #include "runtime/dart_vm_lifecycle.h"
 
-// CREATE_NATIVE_ENTRY is leaky by design
+// CREATE_FFI_LAMBDA is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
 namespace flutter::testing {

@@ -1324,12 +1324,22 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return;
   }
 
+  FlutterFMLTaskRunner* platformTaskRunner = self.engine.platformTaskRunner;
+  if (platformTaskRunner == nil) {
+    // The engine has no platform task runner until its shell is created, and the vsync client
+    // dereferences the task runner we hand it. Losing the smoothing the correction client provides
+    // is better than dereferencing null.
+    [FlutterLogger logWarning:@"Unable to correct touch rate: the engine has no platform task "
+                              @"runner."];
+    return;
+  }
+
   void (^callback)(CFTimeInterval, CFTimeInterval) =
       ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
         // Do nothing in this block. Just trigger system to callback touch events with correct rate.
       };
   _touchRateCorrectionVSyncClient = [[FlutterVSyncClient alloc]
-                initWithTaskRunner:self.engine.platformTaskRunner
+                initWithTaskRunner:platformTaskRunner
       isVariableRefreshRateEnabled:self.displayLinkManager.maxRefreshRateEnabledOnIPhone
                     maxRefreshRate:self.displayLinkManager.displayRefreshRate
                           callback:callback];

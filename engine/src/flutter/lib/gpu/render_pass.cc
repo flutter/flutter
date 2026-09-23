@@ -105,10 +105,51 @@ bool RenderPass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
 }
 
 void RenderPass::SetPipeline(fml::RefPtr<RenderPipeline> pipeline) {
+  if (render_pipeline_.get() == pipeline.get()) {
+    return;
+  }
   pipeline_state_dirty_ = true;
   // On debug this makes a difference, but not on release builds.
   // NOLINTNEXTLINE(performance-move-const-arg)
   render_pipeline_ = std::move(pipeline);
+}
+
+// The setters below assign through the pipeline descriptor directly rather
+// than through GetPipelineDescriptor, which would dirty the state
+// unconditionally. Callers re-send the same fixed-function state ahead of
+// most draws, and dirtying on a redundant assignment would rebuild the
+// pipeline for every one of them.
+
+void RenderPass::SetCullMode(impeller::CullMode mode) {
+  if (pipeline_descriptor_.GetCullMode() == mode) {
+    return;
+  }
+  pipeline_descriptor_.SetCullMode(mode);
+  pipeline_state_dirty_ = true;
+}
+
+void RenderPass::SetWindingOrder(impeller::WindingOrder order) {
+  if (pipeline_descriptor_.GetWindingOrder() == order) {
+    return;
+  }
+  pipeline_descriptor_.SetWindingOrder(order);
+  pipeline_state_dirty_ = true;
+}
+
+void RenderPass::SetPrimitiveType(impeller::PrimitiveType type) {
+  if (pipeline_descriptor_.GetPrimitiveType() == type) {
+    return;
+  }
+  pipeline_descriptor_.SetPrimitiveType(type);
+  pipeline_state_dirty_ = true;
+}
+
+void RenderPass::SetPolygonMode(impeller::PolygonMode mode) {
+  if (pipeline_descriptor_.GetPolygonMode() == mode) {
+    return;
+  }
+  pipeline_descriptor_.SetPolygonMode(mode);
+  pipeline_state_dirty_ = true;
 }
 
 void RenderPass::ClearBindings() {
@@ -728,36 +769,26 @@ void InternalFlutterGpu_RenderPass_SetStencilConfig(
 void InternalFlutterGpu_RenderPass_SetCullMode(
     flutter::gpu::RenderPass* wrapper,
     int cull_mode) {
-  impeller::PipelineDescriptor& pipeline_descriptor =
-      wrapper->GetPipelineDescriptor();
-  pipeline_descriptor.SetCullMode(flutter::gpu::ToImpellerCullMode(cull_mode));
+  wrapper->SetCullMode(flutter::gpu::ToImpellerCullMode(cull_mode));
 }
 
 void InternalFlutterGpu_RenderPass_SetPrimitiveType(
     flutter::gpu::RenderPass* wrapper,
     int primitive_type) {
-  impeller::PipelineDescriptor& pipeline_descriptor =
-      wrapper->GetPipelineDescriptor();
-  pipeline_descriptor.SetPrimitiveType(
+  wrapper->SetPrimitiveType(
       flutter::gpu::ToImpellerPrimitiveType(primitive_type));
 }
 
 void InternalFlutterGpu_RenderPass_SetWindingOrder(
     flutter::gpu::RenderPass* wrapper,
     int winding_order) {
-  impeller::PipelineDescriptor& pipeline_descriptor =
-      wrapper->GetPipelineDescriptor();
-  pipeline_descriptor.SetWindingOrder(
-      flutter::gpu::ToImpellerWindingOrder(winding_order));
+  wrapper->SetWindingOrder(flutter::gpu::ToImpellerWindingOrder(winding_order));
 }
 
 void InternalFlutterGpu_RenderPass_SetPolygonMode(
     flutter::gpu::RenderPass* wrapper,
     int polygon_mode) {
-  impeller::PipelineDescriptor& pipeline_descriptor =
-      wrapper->GetPipelineDescriptor();
-  pipeline_descriptor.SetPolygonMode(
-      flutter::gpu::ToImpellerPolygonMode(polygon_mode));
+  wrapper->SetPolygonMode(flutter::gpu::ToImpellerPolygonMode(polygon_mode));
 }
 
 bool InternalFlutterGpu_RenderPass_Draw(flutter::gpu::RenderPass* wrapper,

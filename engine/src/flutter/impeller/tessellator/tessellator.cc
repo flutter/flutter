@@ -506,20 +506,24 @@ EllipticalVertexGenerator Tessellator::StrokedCircle(
     const Point& center,
     Scalar radius,
     Scalar half_width) {
-  if (half_width > 0) {
-    auto divisions = ComputeQuadrantDivisions(
-        view_transform.GetMaxBasisLengthXY() * radius + half_width);
-    return EllipticalVertexGenerator(Tessellator::GenerateStrokedCircle,
-                                     GetTrigsForDivisions(divisions),
-                                     PrimitiveType::kTriangleStrip, 8,
-                                     {
-                                         .reference_centers = {center, center},
-                                         .radii = {radius, radius},
-                                         .half_width = half_width,
-                                     });
-  } else {
+  if (half_width <= 0) {
     return FilledCircle(view_transform, center, radius);
   }
+  if (half_width >= radius) {
+    // Identical to a filled circle whose radius reaches the outer edge of the
+    // stroke.
+    return FilledCircle(view_transform, center, radius + half_width);
+  }
+  auto divisions = ComputeQuadrantDivisions(
+      view_transform.GetMaxBasisLengthXY() * (radius + half_width));
+  return EllipticalVertexGenerator(Tessellator::GenerateStrokedCircle,
+                                   GetTrigsForDivisions(divisions),
+                                   PrimitiveType::kTriangleStrip, 8,
+                                   {
+                                       .reference_centers = {center, center},
+                                       .radii = {radius, radius},
+                                       .half_width = half_width,
+                                   });
 }
 
 ArcVertexGenerator ArcVertexGenerator::MakeFilled(
@@ -858,7 +862,12 @@ void Tessellator::GenerateStrokedArc(
     const TessellatedVertexProc& proc) {
   Point center = oval_bounds.GetCenter();
   Size base_radii = oval_bounds.GetSize() * 0.5f;
+
+  // A stroke width wider than the radii would cross the center and
+  // self-intersect. Clamp inner edge to center.
   Size inner_radii = base_radii - Size(half_width, half_width);
+  inner_radii = inner_radii.Max(Size(0.0f, 0.0f));
+
   Size outer_radii = base_radii + Size(half_width, half_width);
 
   // Starting cap

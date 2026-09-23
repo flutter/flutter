@@ -22,8 +22,7 @@ CommandQueueVK::~CommandQueueVK() = default;
 
 fml::Status CommandQueueVK::Submit(
     const std::vector<std::shared_ptr<CommandBuffer>>& buffers,
-    const CompletionCallback& completion_callback,
-    bool block_on_schedule) {
+    const CompletionCallback& completion_callback) {
   if (buffers.empty()) {
     return fml::Status(fml::StatusCode::kInvalidArgument,
                        "No command buffers provided.");
@@ -102,6 +101,14 @@ fml::Status CommandQueueVK::Submit(
   }
   reset.Release();
   return fml::Status();
+}
+
+CommandQueue::SubmitResult CommandQueueVK::SubmitWithReceipt(
+    const std::shared_ptr<CommandBuffer>& buffer,
+    const CompletionCallback& completion_callback) {
+  return {
+      .status = Submit({buffer}, completion_callback),
+  };
 }
 
 }  // namespace impeller
