@@ -424,10 +424,10 @@ AndroidJvmInvoker::GetJavaObject() const {
 
 fml::jni::ScopedJavaLocalRef<jobject> AndroidJvmInvoker::GetJavaObjectLocalRef(
     JNIEnv*& env) const {
+  env = nullptr;
   {
     std::lock_guard<std::mutex> lock(java_object_mutex_);
     if (!java_object_) {
-      env = nullptr;
       return fml::jni::ScopedJavaLocalRef<jobject>();
     }
   }
@@ -437,6 +437,7 @@ fml::jni::ScopedJavaLocalRef<jobject> AndroidJvmInvoker::GetJavaObjectLocalRef(
   }
   std::lock_guard<std::mutex> lock(java_object_mutex_);
   if (!java_object_) {
+    env = nullptr;
     return fml::jni::ScopedJavaLocalRef<jobject>();
   }
   return java_object_->get(env);
@@ -500,7 +501,7 @@ bool AndroidJvmInvoker::HandlePlatformMessage(const std::string& channel,
   JNIEnv* env = nullptr;
   fml::jni::ScopedJavaLocalRef<jobject> java_object =
       GetJavaObjectLocalRef(env);
-  if (java_object.is_null()) {
+  if (!env || java_object.is_null()) {
     return true;
   }
   if (!g_handle_platform_message_method) {
@@ -545,7 +546,7 @@ bool AndroidJvmInvoker::HandlePlatformMessageResponse(int32_t response_id,
   JNIEnv* env = nullptr;
   fml::jni::ScopedJavaLocalRef<jobject> java_object =
       GetJavaObjectLocalRef(env);
-  if (java_object.is_null()) {
+  if (!env || java_object.is_null()) {
     return true;
   }
   if (!g_handle_platform_message_response_method) {
@@ -573,7 +574,7 @@ bool AndroidJvmInvoker::UpdateSemantics(
   JNIEnv* env = nullptr;
   fml::jni::ScopedJavaLocalRef<jobject> java_object =
       GetJavaObjectLocalRef(env);
-  if (java_object.is_null()) {
+  if (!env || java_object.is_null()) {
     return true;
   }
   if (!g_update_semantics_method) {
@@ -602,7 +603,7 @@ bool AndroidJvmInvoker::UpdateCustomAccessibilityActions(
   JNIEnv* env = nullptr;
   fml::jni::ScopedJavaLocalRef<jobject> java_object =
       GetJavaObjectLocalRef(env);
-  if (java_object.is_null()) {
+  if (!env || java_object.is_null()) {
     return true;
   }
   if (!g_update_custom_accessibility_actions_method) {
@@ -626,7 +627,7 @@ bool AndroidJvmInvoker::SetSemanticsTreeEnabled(bool enabled) {
   JNIEnv* env = nullptr;
   fml::jni::ScopedJavaLocalRef<jobject> java_object =
       GetJavaObjectLocalRef(env);
-  if (java_object.is_null()) {
+  if (!env || java_object.is_null()) {
     return true;
   }
   if (!g_set_semantics_tree_enabled_method) {
@@ -644,7 +645,7 @@ bool AndroidJvmInvoker::SetApplicationLocale(const std::string& locale) {
   JNIEnv* env = nullptr;
   fml::jni::ScopedJavaLocalRef<jobject> java_object =
       GetJavaObjectLocalRef(env);
-  if (java_object.is_null()) {
+  if (!env || java_object.is_null()) {
     return true;
   }
   if (!g_set_application_locale_method) {
@@ -662,7 +663,7 @@ bool AndroidJvmInvoker::OnFirstFrame() {
   JNIEnv* env = nullptr;
   fml::jni::ScopedJavaLocalRef<jobject> java_object =
       GetJavaObjectLocalRef(env);
-  if (java_object.is_null()) {
+  if (!env || java_object.is_null()) {
     return true;
   }
   if (!g_on_first_frame_method) {
@@ -677,7 +678,7 @@ bool AndroidJvmInvoker::OnPreEngineRestart() {
   JNIEnv* env = nullptr;
   fml::jni::ScopedJavaLocalRef<jobject> java_object =
       GetJavaObjectLocalRef(env);
-  if (java_object.is_null()) {
+  if (!env || java_object.is_null()) {
     return true;
   }
   if (!g_on_engine_restart_method) {
@@ -725,7 +726,7 @@ bool AndroidJvmInvoker::PushPlatformViewMutators(
   JNIEnv* env = nullptr;
   fml::jni::ScopedJavaLocalRef<jobject> java_object =
       GetJavaObjectLocalRef(env);
-  if (java_object.is_null()) {
+  if (!env || java_object.is_null()) {
     return true;
   }
 
@@ -887,7 +888,7 @@ bool AndroidJvmInvoker::InvokeVoidMethod(const std::string& method_name,
   JNIEnv* env = nullptr;
   fml::jni::ScopedJavaLocalRef<jobject> java_object =
       GetJavaObjectLocalRef(env);
-  if (java_object.is_null()) {
+  if (!env || java_object.is_null()) {
     return true;
   }
 
@@ -1021,7 +1022,7 @@ bool AndroidJvmInvoker::InvokeBooleanMethod(
   JNIEnv* env = nullptr;
   fml::jni::ScopedJavaLocalRef<jobject> java_object =
       GetJavaObjectLocalRef(env);
-  if (java_object.is_null()) {
+  if (!env || java_object.is_null()) {
     return true;
   }
 
@@ -1083,7 +1084,7 @@ int64_t AndroidJvmInvoker::InvokeIntMethod(
   JNIEnv* env = nullptr;
   fml::jni::ScopedJavaLocalRef<jobject> java_object =
       GetJavaObjectLocalRef(env);
-  if (java_object.is_null()) {
+  if (!env || java_object.is_null()) {
     return 0;
   }
 
