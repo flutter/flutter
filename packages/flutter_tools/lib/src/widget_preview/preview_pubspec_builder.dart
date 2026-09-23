@@ -53,6 +53,7 @@ class PreviewPubspecBuilder {
     'flutter_lints',
     'google_fonts',
     'json_rpc_2',
+    'material_ui',
     'path',
     'stack_trace',
     'url_launcher',
