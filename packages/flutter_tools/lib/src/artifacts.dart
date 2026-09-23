@@ -1516,12 +1516,12 @@ FileSystemEntity _resolveWebArtifact(
     case HostArtifact.webPrecompiledDDCStableSdk:
     case HostArtifact.webPrecompiledDDCStableSdkSourcemaps:
       return fileSystem.file(
-        fileSystem.path.join(webSdkPath, 'ddc', 'stable', artifact.getFileName(platform)),
+        fileSystem.path.join(webSdkPath, 'kernel', 'ddc', 'stable', artifact.getFileName(platform)),
       );
     case HostArtifact.webPrecompiledDDCCanarySdk:
     case HostArtifact.webPrecompiledDDCCanarySdkSourcemaps:
       return fileSystem.file(
-        fileSystem.path.join(webSdkPath, 'ddc', 'canary', artifact.getFileName(platform)),
+        fileSystem.path.join(webSdkPath, 'kernel', 'ddc', 'canary', artifact.getFileName(platform)),
       );
     case HostArtifact.iosDeploy:
     case HostArtifact.idevicesyslog:
