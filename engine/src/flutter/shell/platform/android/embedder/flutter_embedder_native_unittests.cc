@@ -89,15 +89,17 @@ class MockJniDelegate : public JniDelegate {
                                         uint32_t* out_width,
                                         uint32_t* out_height) override {
     if (out_width != nullptr) {
-      *out_width = 100;
+      *out_width = 1920;
     }
     if (out_height != nullptr) {
-      *out_height = 100;
+      *out_height = 1080;
     }
-    return 0x2002;
+    return next_hardware_buffer_handle++;
   }
 
-  void ReleaseHardwareBuffer(uintptr_t /*hardware_buffer_handle*/) override {}
+  void ReleaseHardwareBuffer(uintptr_t hardware_buffer_handle) override {
+    released_hardware_buffers.push_back(hardware_buffer_handle);
+  }
 
   void RequestVsync(intptr_t baton) override { last_vsync_baton = baton; }
 
@@ -116,11 +118,13 @@ class MockJniDelegate : public JniDelegate {
   intptr_t last_vsync_baton = 0;
 
   uintptr_t next_surface_control_handle = 0x1001;
+  uintptr_t next_hardware_buffer_handle = 0x2002;
   bool allow_set_buffer = true;
   uintptr_t last_set_buffer_surface_control = 0;
   uintptr_t last_set_buffer_hardware_buffer = 0;
   std::vector<std::string> created_surface_controls;
   std::vector<uintptr_t> released_surface_controls;
+  std::vector<uintptr_t> released_hardware_buffers;
   std::vector<int> handed_off_fences;
   int apply_transaction_calls = 0;
 };
@@ -150,6 +154,9 @@ struct FakeProcTableState {
   FlutterEngineAOTData passed_aot_data = nullptr;
 
   int on_vsync_calls = 0;
+  int register_external_texture_calls = 0;
+  int unregister_external_texture_calls = 0;
+  int mark_external_texture_frame_available_calls = 0;
 
   intptr_t last_on_vsync_baton = 0;
   uint64_t last_on_vsync_start_nanos = 0;
@@ -321,6 +328,27 @@ FlutterEngineProcTable CreateFakeProcTable(FakeProcTableState* state) {
     g_fake_state->last_on_vsync_target_nanos = frame_target_time_nanos;
     return kSuccess;
   };
+
+  table.RegisterExternalTexture =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) /*engine*/,
+         int64_t /*texture_identifier*/) {
+        g_fake_state->register_external_texture_calls++;
+        return kSuccess;
+      };
+
+  table.UnregisterExternalTexture =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) /*engine*/,
+         int64_t /*texture_identifier*/) {
+        g_fake_state->unregister_external_texture_calls++;
+        return kSuccess;
+      };
+
+  table.MarkExternalTextureFrameAvailable =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) /*engine*/,
+         int64_t /*texture_identifier*/) {
+        g_fake_state->mark_external_texture_frame_available_calls++;
+        return kSuccess;
+      };
 
   return table;
 }
@@ -793,6 +821,106 @@ TEST(AndroidChoreographerVsyncTest,
   EXPECT_FALSE(
       vsync.OnChoreographerFrame(engine, 0x99, 3000000ULL, 19666666ULL));
   EXPECT_EQ(state.on_vsync_calls, 1);
+}
+
+TEST(
+    AndroidHardwareBufferExternalTextureTest,
+    AcquiresZeroCopyVulkanHardwareBufferWithYcbcrInfoAndReleasesViaDestructionCallback) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  Settings settings;
+
+  FlutterEmbedderNative embedder(settings, jni_delegate, proc_table);
+  ASSERT_TRUE(embedder.Launch("/assets", "/icudtl.dat", "main", "", {},
+                              /*engine_id=*/1));
+
+  constexpr int64_t kCameraTextureId = 101;
+  EXPECT_TRUE(embedder.RegisterExternalTexture(kCameraTextureId));
+  EXPECT_EQ(state.register_external_texture_calls, 1);
+
+  FlutterVulkanYcbcrConversionInfo ycbcr = {};
+  ycbcr.struct_size = sizeof(FlutterVulkanYcbcrConversionInfo);
+  ycbcr.external_format = 0x506;  // Vendor NV12 / YUV420 external format
+  ycbcr.ycbcr_model = 2;
+  ycbcr.ycbcr_range = 1;
+  embedder.GetExternalTextureManager()->SetTextureYcbcrConversionInfo(
+      kCameraTextureId, ycbcr);
+
+  FlutterTransformation uv_transform = {1.0, 0.0, 0.0, 0.0, -1.0,
+                                        1.0, 0.0, 0.0, 1.0};
+  embedder.GetExternalTextureManager()->SetTextureUvTransform(kCameraTextureId,
+                                                              uv_transform);
+
+  EXPECT_TRUE(embedder.MarkExternalTextureFrameAvailable(kCameraTextureId));
+  EXPECT_EQ(state.mark_external_texture_frame_available_calls, 1);
+
+  FlutterVulkanExternalTexture vk_texture = {};
+  ASSERT_TRUE(
+      embedder.GetExternalTextureManager()->AcquireVulkanExternalTextureFrame(
+          kCameraTextureId, 1920, 1080, &vk_texture));
+
+  EXPECT_EQ(vk_texture.type, kFlutterVulkanExternalTextureTypeAHardwareBuffer);
+  EXPECT_EQ(reinterpret_cast<uintptr_t>(vk_texture.hardware_buffer), 0x2002u);
+  EXPECT_EQ(vk_texture.width, 1920u);
+  EXPECT_EQ(vk_texture.height, 1080u);
+  ASSERT_NE(vk_texture.ycbcr_conversion_info, nullptr);
+  EXPECT_EQ(vk_texture.ycbcr_conversion_info->external_format, 0x506u);
+  EXPECT_DOUBLE_EQ(vk_texture.uv_transform.scaleY, -1.0);
+  EXPECT_DOUBLE_EQ(vk_texture.uv_transform.transY, 1.0);
+  EXPECT_EQ(embedder.GetExternalTextureManager()->GetActiveBufferLeaseCount(),
+            1u);
+  EXPECT_TRUE(jni_delegate->released_hardware_buffers.empty());
+
+  // Invoking the destruction callback releases the AHardwareBuffer lease.
+  ASSERT_NE(vk_texture.destruction_callback, nullptr);
+  vk_texture.destruction_callback(vk_texture.user_data);
+  EXPECT_EQ(embedder.GetExternalTextureManager()->GetActiveBufferLeaseCount(),
+            0u);
+  ASSERT_EQ(jni_delegate->released_hardware_buffers.size(), 1u);
+  EXPECT_EQ(jni_delegate->released_hardware_buffers[0], 0x2002u);
+
+  EXPECT_TRUE(embedder.UnregisterExternalTexture(kCameraTextureId));
+  EXPECT_EQ(state.unregister_external_texture_calls, 1);
+}
+
+TEST(AndroidHardwareBufferExternalTextureTest,
+     PopulatesOpenGLTexture2WithUvTransformationMatrix) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  auto engine = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xCAFE01);
+
+  AndroidHardwareBufferExternalTexture manager(jni_delegate, proc_table);
+  ASSERT_TRUE(manager.RegisterTexture(engine, /*texture_id=*/202));
+  manager.SetOpenGLTextureName(202, 0x8D65, /*gl_texture_name=*/42);
+  FlutterTransformation uv = {0.0, 1.0, 0.0, -1.0, 0.0, 1.0, 0.0, 0.0, 1.0};
+  manager.SetTextureUvTransform(202, uv);
+
+  FlutterOpenGLTexture2 gl_texture = {};
+  ASSERT_TRUE(
+      manager.AcquireOpenGLExternalTextureFrame(202, 1280, 720, &gl_texture));
+  EXPECT_EQ(gl_texture.target, 0x8D65u);
+  EXPECT_EQ(gl_texture.name, 42u);
+  EXPECT_EQ(gl_texture.width, 1280u);
+  EXPECT_EQ(gl_texture.height, 720u);
+  EXPECT_DOUBLE_EQ(gl_texture.uv_transform.skewX, 1.0);
+  EXPECT_DOUBLE_EQ(gl_texture.uv_transform.skewY, -1.0);
+}
+
+TEST(AndroidHardwareBufferExternalTextureTest,
+     ImmediatelyReleasesHardwareBufferIfTextureWasUnregisteredBeforePull) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+
+  AndroidHardwareBufferExternalTexture manager(jni_delegate, proc_table);
+  FlutterVulkanExternalTexture vk_texture = {};
+  EXPECT_FALSE(manager.AcquireVulkanExternalTextureFrame(
+      /*texture_id=*/999, 640, 480, &vk_texture));
+  ASSERT_EQ(jni_delegate->released_hardware_buffers.size(), 1u);
+  EXPECT_EQ(jni_delegate->released_hardware_buffers[0], 0x2002u);
+  EXPECT_EQ(manager.GetActiveBufferLeaseCount(), 0u);
 }
 
 }  // namespace testing

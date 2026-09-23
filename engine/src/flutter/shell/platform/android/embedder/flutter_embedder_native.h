@@ -10,14 +10,21 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/embedder/android_choreographer_vsync.h"
+#include "flutter/shell/platform/android/embedder/android_hardware_buffer_external_texture.h"
 #include "flutter/shell/platform/android/embedder/android_surface_control.h"
 #include "flutter/shell/platform/android/embedder/jni_delegate.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+
+#if defined(__ANDROID__)
+#include <jni.h>
+#include "flutter/fml/platform/android/scoped_java_ref.h"
+#endif
 
 namespace flutter {
 
@@ -125,6 +132,23 @@ class FlutterEmbedderNative {
     return vsync_waiter_.get();
   }
 
+  AndroidHardwareBufferExternalTexture* GetExternalTextureManager() const {
+    return external_texture_manager_.get();
+  }
+
+  bool RegisterExternalTexture(int64_t texture_id);
+  bool UnregisterExternalTexture(int64_t texture_id);
+  bool MarkExternalTextureFrameAvailable(int64_t texture_id);
+
+#if defined(__ANDROID__)
+  void RegisterJavaTexture(JNIEnv* env,
+                           int64_t texture_id,
+                           jobject texture_obj);
+  void UnregisterJavaTexture(int64_t texture_id);
+  void UpdateJavaTexture(JNIEnv* env, int64_t texture_id);
+  void UpdateAllJavaTextures();
+#endif
+
  private:
   FlutterEmbedderNative(const Settings& settings,
                         std::shared_ptr<JniDelegate> jni_delegate,
@@ -152,12 +176,21 @@ class FlutterEmbedderNative {
   FlutterEngineAOTData aot_data_ = nullptr;
   std::unique_ptr<AndroidSurfaceControl> surface_control_;
   std::unique_ptr<AndroidChoreographerVsync> vsync_waiter_;
+  std::unique_ptr<AndroidHardwareBufferExternalTexture>
+      external_texture_manager_;
   bool is_valid_ = false;
 
   mutable std::mutex response_mutex_;
   int32_t next_response_id_ = 1;
   std::unordered_map<int32_t, const FlutterPlatformMessageResponseHandle*>
       pending_responses_;
+
+#if defined(__ANDROID__)
+  mutable std::mutex java_textures_mutex_;
+  std::unordered_map<int64_t, fml::jni::ScopedJavaGlobalRef<jobject>>
+      java_textures_;
+  std::unordered_set<int64_t> attached_java_textures_;
+#endif
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterEmbedderNative);
 };
