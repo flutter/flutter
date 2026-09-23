@@ -21,11 +21,14 @@
     ]
   },
   "ratchet_state": {
-    "current_branch": "android-embedder-migration-v10/2.0-gn-firewall-modularization",
+    "current_branch": "android-embedder-migration-v10/2.1-surface-control",
     "total_suite_tests": 10,
-    "max_allowed_failing_tests": 10,
-    "current_failing_test_count": 10,
-    "passing_locked_tests": [],
+    "max_allowed_failing_tests": 8,
+    "current_failing_test_count": 8,
+    "passing_locked_tests": [
+      "integration:android_hardware_smoke_test",
+      "devicelab:android_lifecycles_test"
+    ],
     "failing_tests_by_target_branch": [
       {
         "id": "integration:android_hardware_smoke_test",
@@ -33,8 +36,8 @@
         "working_directory": "dev/integration_tests/android_hardware_smoke_test",
         "command": ["flutter", "drive", "--target=test_driver/main.dart"],
         "subsystem": "Engine Lifecycle & Surface Availability",
-        "expected_green_branch": "android-embedder-migration-v10/2.2-engine-lifecycle-and-surface",
-        "status_when_flag_true": "PENDING_BRANCH_2.2"
+        "expected_green_branch": "android-embedder-migration-v10/2.1-surface-control",
+        "status_when_flag_true": "PASSING_LOCKED"
       },
       {
         "id": "integration:android_engine_test",
@@ -60,8 +63,8 @@
         "working_directory": "dev/devicelab",
         "command": ["dart", "bin/test_runner.dart", "test", "-t", "android_lifecycles_test"],
         "subsystem": "Activity/Fragment Lifecycle & Surface Reattachment",
-        "expected_green_branch": "android-embedder-migration-v10/2.2-engine-lifecycle-and-surface",
-        "status_when_flag_true": "PENDING_BRANCH_2.2"
+        "expected_green_branch": "android-embedder-migration-v10/2.1-surface-control",
+        "status_when_flag_true": "PASSING_LOCKED"
       },
       {
         "id": "integration:channels",

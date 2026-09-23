@@ -72,6 +72,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     : settings_(settings), jni_delegate_(std::move(jni_delegate)) {
   RegisterEmbedderHandle(this);
   is_valid_ = ResolveDefaultProcTable(&embedder_api_);
+  surface_control_ =
+      std::make_unique<AndroidSurfaceControl>(jni_delegate_, embedder_api_);
 }
 
 FlutterEmbedderNative::FlutterEmbedderNative(
@@ -81,6 +83,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     : settings_(settings),
       jni_delegate_(std::move(jni_delegate)),
       embedder_api_(proc_table),
+      surface_control_(std::make_unique<AndroidSurfaceControl>(jni_delegate_,
+                                                               embedder_api_)),
       is_valid_(proc_table.Initialize != nullptr &&
                 proc_table.RunInitialized != nullptr &&
                 proc_table.Shutdown != nullptr) {
@@ -96,6 +100,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
       jni_delegate_(std::move(jni_delegate)),
       embedder_api_(proc_table),
       engine_(spawned_engine),
+      surface_control_(std::make_unique<AndroidSurfaceControl>(jni_delegate_,
+                                                               embedder_api_)),
       is_valid_(spawned_engine != nullptr) {
   RegisterEmbedderHandle(this);
 }
@@ -319,20 +325,23 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::Spawn(
   return child;
 }
 
-bool FlutterEmbedderNative::NotifySurfaceCreated() {
+bool FlutterEmbedderNative::NotifySurfaceCreated(
+    uintptr_t native_window_handle) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::NotifySurfaceCreated");
-  if (engine_ == nullptr || embedder_api_.NotifyCreated == nullptr) {
+  if (engine_ == nullptr || surface_control_ == nullptr) {
     return false;
   }
-  return embedder_api_.NotifyCreated(engine_) == kSuccess;
+  return surface_control_->NotifySurfaceCreated(
+      engine_, /*view_id=*/0, native_window_handle, /*width=*/0,
+      /*height=*/0, /*pixel_ratio=*/1.0);
 }
 
 bool FlutterEmbedderNative::NotifySurfaceDestroyed() {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::NotifySurfaceDestroyed");
-  if (engine_ == nullptr || embedder_api_.NotifyDestroyed == nullptr) {
+  if (engine_ == nullptr || surface_control_ == nullptr) {
     return false;
   }
-  return embedder_api_.NotifyDestroyed(engine_) == kSuccess;
+  return surface_control_->NotifySurfaceDestroyed(engine_, /*view_id=*/0);
 }
 
 bool FlutterEmbedderNative::SetGpuAvailability(

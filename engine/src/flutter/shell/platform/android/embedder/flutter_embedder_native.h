@@ -14,6 +14,7 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/android/embedder/android_surface_control.h"
 #include "flutter/shell/platform/android/embedder/jni_delegate.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
@@ -77,7 +78,7 @@ class FlutterEmbedderNative {
       int64_t engine_id) const;
 
   /// Notifies the engine that a rendering surface has been created (ADR-0007).
-  bool NotifySurfaceCreated();
+  bool NotifySurfaceCreated(uintptr_t native_window_handle = 1);
 
   /// Synchronously notifies the engine that the rendering surface has been
   /// destroyed before returning to Android OS (ADR-0007, Invariant 5).
@@ -115,6 +116,10 @@ class FlutterEmbedderNative {
                uint64_t frame_start_time_nanos,
                uint64_t frame_target_time_nanos);
 
+  AndroidSurfaceControl* GetSurfaceControl() const {
+    return surface_control_.get();
+  }
+
  private:
   FlutterEmbedderNative(const Settings& settings,
                         std::shared_ptr<JniDelegate> jni_delegate,
@@ -138,6 +143,7 @@ class FlutterEmbedderNative {
   FlutterEngineProcTable embedder_api_ = {};
   FLUTTER_API_SYMBOL(FlutterEngine) engine_ = nullptr;
   FlutterEngineAOTData aot_data_ = nullptr;
+  std::unique_ptr<AndroidSurfaceControl> surface_control_;
   bool is_valid_ = false;
 
   mutable std::mutex response_mutex_;

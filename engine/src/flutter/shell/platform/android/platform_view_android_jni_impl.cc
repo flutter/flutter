@@ -384,7 +384,16 @@ static void SurfaceCreated(JNIEnv* env,
                            jlong shell_holder,
                            jobject jsurface) {
   if (auto* embedder = FlutterEmbedderNative::FromHandle(shell_holder)) {
+#if defined(__ANDROID__)
+    fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
+    ANativeWindow* window = nullptr;
+    if (jsurface != nullptr) {
+      window = ANativeWindow_fromSurface(env, jsurface);
+    }
+    embedder->NotifySurfaceCreated(reinterpret_cast<uintptr_t>(window));
+#else
     embedder->NotifySurfaceCreated();
+#endif
     return;
   }
   // Note: This frame ensures that any local references used by
@@ -401,7 +410,19 @@ static void SurfaceWindowChanged(JNIEnv* env,
                                  jlong shell_holder,
                                  jobject jsurface) {
   if (auto* embedder = FlutterEmbedderNative::FromHandle(shell_holder)) {
+    // Invariant 5 & Embedder API state machine: surface must be destroyed
+    // synchronously before attaching a new native window.
+    embedder->NotifySurfaceDestroyed();
+#if defined(__ANDROID__)
+    fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
+    ANativeWindow* window = nullptr;
+    if (jsurface != nullptr) {
+      window = ANativeWindow_fromSurface(env, jsurface);
+    }
+    embedder->NotifySurfaceCreated(reinterpret_cast<uintptr_t>(window));
+#else
     embedder->NotifySurfaceCreated();
+#endif
     return;
   }
   // Note: This frame ensures that any local references used by

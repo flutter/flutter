@@ -57,21 +57,33 @@ class MockJniDelegate : public JniDelegate {
     requested_loading_unit_id = loading_unit_id;
   }
 
-  uintptr_t CreateSurfaceControl(const std::string& /*debug_name*/,
+  uintptr_t CreateSurfaceControl(const std::string& debug_name,
                                  int32_t /*width*/,
                                  int32_t /*height*/) override {
-    return 0x1001;
+    created_surface_controls.push_back(debug_name);
+    return next_surface_control_handle++;
   }
 
-  void ReleaseSurfaceControl(uintptr_t /*surface_control_handle*/) override {}
+  void ReleaseSurfaceControl(uintptr_t surface_control_handle) override {
+    released_surface_controls.push_back(surface_control_handle);
+  }
 
-  bool SetBufferWithFence(uintptr_t /*surface_control_handle*/,
-                          uintptr_t /*hardware_buffer_handle*/,
-                          int /*fence_fd*/) override {
+  bool SetBufferWithFence(uintptr_t surface_control_handle,
+                          uintptr_t hardware_buffer_handle,
+                          int fence_fd) override {
+    if (!allow_set_buffer) {
+      return false;
+    }
+    last_set_buffer_surface_control = surface_control_handle;
+    last_set_buffer_hardware_buffer = hardware_buffer_handle;
+    handed_off_fences.push_back(fence_fd);
     return true;
   }
 
-  bool ApplyTransaction() override { return true; }
+  bool ApplyTransaction() override {
+    apply_transaction_calls++;
+    return true;
+  }
 
   uintptr_t AcquireLatestHardwareBuffer(int64_t /*texture_id*/,
                                         uint32_t* out_width,
@@ -102,6 +114,15 @@ class MockJniDelegate : public JniDelegate {
   int engine_restart_count = 0;
   intptr_t requested_loading_unit_id = -1;
   intptr_t last_vsync_baton = 0;
+
+  uintptr_t next_surface_control_handle = 0x1001;
+  bool allow_set_buffer = true;
+  uintptr_t last_set_buffer_surface_control = 0;
+  uintptr_t last_set_buffer_hardware_buffer = 0;
+  std::vector<std::string> created_surface_controls;
+  std::vector<uintptr_t> released_surface_controls;
+  std::vector<int> handed_off_fences;
+  int apply_transaction_calls = 0;
 };
 
 struct FakeProcTableState {
@@ -112,6 +133,9 @@ struct FakeProcTableState {
   int notify_created_calls = 0;
   int notify_destroyed_calls = 0;
   int set_gpu_availability_calls = 0;
+  int send_window_metrics_calls = 0;
+  int add_view_calls = 0;
+  int remove_view_calls = 0;
   int spawn_calls = 0;
   int send_platform_message_calls = 0;
   int send_platform_message_response_calls = 0;
@@ -125,6 +149,8 @@ struct FakeProcTableState {
   FlutterEngineAOTData last_collected_aot_data = nullptr;
   FlutterEngineAOTData passed_aot_data = nullptr;
 
+  FlutterViewId last_added_view_id = 0;
+  FlutterViewId last_removed_view_id = 0;
   FlutterGpuAvailability last_gpu_availability =
       kFlutterGpuAvailabilityAvailable;
   bool last_does_handle_on_platform_thread = true;
@@ -244,6 +270,41 @@ FlutterEngineProcTable CreateFakeProcTable(FakeProcTableState* state) {
     return kSuccess;
   };
 
+  table.SendWindowMetricsEvent =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) /*engine*/,
+         const FlutterWindowMetricsEvent* /*event*/) {
+        g_fake_state->send_window_metrics_calls++;
+        return kSuccess;
+      };
+
+  table.AddView = [](FLUTTER_API_SYMBOL(FlutterEngine) /*engine*/,
+                     const FlutterAddViewInfo* info) {
+    g_fake_state->add_view_calls++;
+    g_fake_state->last_added_view_id = info->view_id;
+    if (info->add_view_callback != nullptr) {
+      FlutterAddViewResult res = {};
+      res.struct_size = sizeof(FlutterAddViewResult);
+      res.added = true;
+      res.user_data = info->user_data;
+      info->add_view_callback(&res);
+    }
+    return kSuccess;
+  };
+
+  table.RemoveView = [](FLUTTER_API_SYMBOL(FlutterEngine) /*engine*/,
+                        const FlutterRemoveViewInfo* info) {
+    g_fake_state->remove_view_calls++;
+    g_fake_state->last_removed_view_id = info->view_id;
+    if (info->remove_view_callback != nullptr) {
+      FlutterRemoveViewResult res = {};
+      res.struct_size = sizeof(FlutterRemoveViewResult);
+      res.removed = true;
+      res.user_data = info->user_data;
+      info->remove_view_callback(&res);
+    }
+    return kSuccess;
+  };
+
   return table;
 }
 
@@ -312,6 +373,28 @@ TEST(FlutterEmbedderNativeTest,
 
   EXPECT_TRUE(embedder.NotifySurfaceDestroyed());
   EXPECT_EQ(state.notify_destroyed_calls, 1);
+}
+
+TEST(FlutterEmbedderNativeTest,
+     NotifySurfaceCreatedPassesNativeWindowHandleToSurfaceControl) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  Settings settings;
+
+  FlutterEmbedderNative embedder(settings, jni_delegate, proc_table);
+  ASSERT_TRUE(embedder.Launch("/assets", "/icudtl.dat", "main", "", {},
+                              /*engine_id=*/1));
+
+  EXPECT_TRUE(embedder.NotifySurfaceCreated(/*native_window_handle=*/0x5555));
+  EXPECT_EQ(state.notify_created_calls, 1);
+  ASSERT_NE(embedder.GetSurfaceControl(), nullptr);
+  EXPECT_EQ(embedder.GetSurfaceControl()->GetNativeWindowHandle(0),
+            static_cast<uintptr_t>(0x5555));
+  EXPECT_TRUE(embedder.NotifySurfaceDestroyed());
+  EXPECT_EQ(state.notify_destroyed_calls, 1);
+  EXPECT_EQ(embedder.GetSurfaceControl()->GetNativeWindowHandle(0),
+            static_cast<uintptr_t>(0));
 }
 
 TEST(FlutterEmbedderNativeTest,
@@ -415,6 +498,215 @@ TEST(FlutterEmbedderNativeTest, CreatesAndCollectsAOTDataInReleaseMode) {
   EXPECT_EQ(state.collect_aot_data_calls, 1);
   EXPECT_EQ(state.last_collected_aot_data,
             reinterpret_cast<FlutterEngineAOTData>(0xDEADBEEF));
+}
+
+TEST(AndroidSurfaceControlTest,
+     CreatesAndDestroysPrimaryAndSecondaryViewSurfacesSynchronously) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  auto engine = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xCAFE01);
+
+  AndroidSurfaceControl surface_control(jni_delegate, proc_table);
+
+  // Primary view (view_id == 0) uses NotifyCreated / NotifyDestroyed.
+  EXPECT_TRUE(surface_control.NotifySurfaceCreated(
+      engine, /*view_id=*/0, /*native_window_handle=*/0x1111, /*width=*/1080,
+      /*height=*/2400, /*pixel_ratio=*/3.0));
+  EXPECT_TRUE(surface_control.HasAttachedSurface(0));
+  EXPECT_EQ(state.notify_created_calls, 1);
+  EXPECT_EQ(state.send_window_metrics_calls, 1);
+
+  // Secondary presentation view (view_id == 7) uses AddView / RemoveView.
+  EXPECT_TRUE(surface_control.NotifySurfaceCreated(
+      engine, /*view_id=*/7, /*native_window_handle=*/0x2222, /*width=*/1920,
+      /*height=*/1080, /*pixel_ratio=*/2.0));
+  EXPECT_TRUE(surface_control.HasAttachedSurface(7));
+  EXPECT_EQ(state.add_view_calls, 1);
+  EXPECT_EQ(state.last_added_view_id, 7);
+
+  // Synchronous destruction of both views.
+  EXPECT_TRUE(surface_control.NotifySurfaceDestroyed(engine, /*view_id=*/7));
+  EXPECT_FALSE(surface_control.HasAttachedSurface(7));
+  EXPECT_EQ(state.remove_view_calls, 1);
+  EXPECT_EQ(state.last_removed_view_id, 7);
+
+  EXPECT_TRUE(surface_control.NotifySurfaceDestroyed(engine, /*view_id=*/0));
+  EXPECT_FALSE(surface_control.HasAttachedSurface(0));
+  EXPECT_EQ(state.notify_destroyed_calls, 1);
+}
+
+TEST(AndroidSurfaceControlTest,
+     TransfersFenceOwnershipOnValidHcppPresentationAndResetsFdToNegativeOne) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  auto engine = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xCAFE01);
+
+  std::vector<int> closed_fds;
+  AndroidSurfaceControl surface_control(jni_delegate, proc_table,
+                                        [&closed_fds](int fd) {
+                                          closed_fds.push_back(fd);
+                                          return 0;
+                                        });
+
+  ASSERT_TRUE(
+      surface_control.NotifySurfaceCreated(engine, 0, 0x1111, 1080, 2400, 3.0));
+
+  FlutterBackingStorePresentInfo present_info = {};
+  present_info.struct_size = sizeof(FlutterBackingStorePresentInfo);
+  present_info.synchronization_fence_fd = 42;
+
+  EXPECT_TRUE(surface_control.PresentBackingStore(
+      /*view_id=*/0, /*layer_id=*/10, /*hardware_buffer_handle=*/0xABCD, 1080,
+      2400, &present_info));
+
+  // Invariant 3: `synchronization_fence_fd` is reset to -1 immediately, handed
+  // off to `SetBufferWithFence`, and NOT double-closed by the embedder.
+  EXPECT_EQ(present_info.synchronization_fence_fd, -1);
+  ASSERT_EQ(jni_delegate->handed_off_fences.size(), 1u);
+  EXPECT_EQ(jni_delegate->handed_off_fences[0], 42);
+  EXPECT_TRUE(closed_fds.empty());
+}
+
+TEST(AndroidSurfaceControlTest,
+     ClosesSyncFenceFdOnErrorOrDestroyedSurfaceWithoutLeakingOrDoubleClosing) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  auto engine = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xCAFE01);
+
+  std::vector<int> closed_fds;
+  AndroidSurfaceControl surface_control(jni_delegate, proc_table,
+                                        [&closed_fds](int fd) {
+                                          closed_fds.push_back(fd);
+                                          return 0;
+                                        });
+
+  // Case 1: Presenting to an unattached/destroyed view closes fence_fd = 55.
+  FlutterBackingStorePresentInfo unattached_info = {};
+  unattached_info.struct_size = sizeof(FlutterBackingStorePresentInfo);
+  unattached_info.synchronization_fence_fd = 55;
+  EXPECT_FALSE(surface_control.PresentBackingStore(
+      /*view_id=*/99, /*layer_id=*/1, /*hardware_buffer_handle=*/0xABCD, 500,
+      500, &unattached_info));
+  EXPECT_EQ(unattached_info.synchronization_fence_fd, -1);
+  ASSERT_EQ(closed_fds.size(), 1u);
+  EXPECT_EQ(closed_fds[0], 55);
+
+  // Case 2: Presenting when SetBufferWithFence fails closes fence_fd = 77.
+  ASSERT_TRUE(
+      surface_control.NotifySurfaceCreated(engine, 0, 0x1111, 1080, 2400, 3.0));
+  jni_delegate->allow_set_buffer = false;
+
+  FlutterBackingStorePresentInfo failed_tx_info = {};
+  failed_tx_info.struct_size = sizeof(FlutterBackingStorePresentInfo);
+  failed_tx_info.synchronization_fence_fd = 77;
+  EXPECT_FALSE(surface_control.PresentBackingStore(
+      /*view_id=*/0, /*layer_id=*/1, /*hardware_buffer_handle=*/0xABCD, 500,
+      500, &failed_tx_info));
+  EXPECT_EQ(failed_tx_info.synchronization_fence_fd, -1);
+  ASSERT_EQ(closed_fds.size(), 2u);
+  EXPECT_EQ(closed_fds[1], 77);
+}
+
+TEST(AndroidSurfaceControlTest,
+     RecyclesSurfaceControlsAcrossConsecutiveFrames) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  auto engine = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xCAFE01);
+
+  AndroidSurfaceControl surface_control(jni_delegate, proc_table);
+  ASSERT_TRUE(
+      surface_control.NotifySurfaceCreated(engine, 0, 0x1111, 1080, 2400, 3.0));
+
+  FlutterBackingStorePresentInfo info = {};
+  info.struct_size = sizeof(FlutterBackingStorePresentInfo);
+  info.synchronization_fence_fd = -1;
+
+  // Frame 1 presents layers 1 and 2 -> allocates 2 SurfaceControls.
+  EXPECT_TRUE(surface_control.PresentBackingStore(0, /*layer_id=*/1, 0xA1, 400,
+                                                  400, &info));
+  EXPECT_TRUE(surface_control.PresentBackingStore(0, /*layer_id=*/2, 0xA2, 400,
+                                                  400, &info));
+  EXPECT_TRUE(surface_control.CommitTransaction(0));
+  EXPECT_EQ(surface_control.GetActiveLayerCount(0), 2u);
+  EXPECT_EQ(surface_control.GetPooledLayerCount(0), 0u);
+  EXPECT_EQ(jni_delegate->created_surface_controls.size(), 2u);
+
+  // Frame 2 presents only layer 1 -> layer 2 is recycled into free_layer_pool.
+  EXPECT_TRUE(surface_control.PresentBackingStore(0, /*layer_id=*/1, 0xA1, 400,
+                                                  400, &info));
+  EXPECT_TRUE(surface_control.CommitTransaction(0));
+  EXPECT_EQ(surface_control.GetActiveLayerCount(0), 1u);
+  EXPECT_EQ(surface_control.GetPooledLayerCount(0), 1u);
+
+  // Frame 3 presents layer 1 and new layer 3 -> layer 3 reuses pooled
+  // SurfaceControl without allocating a new one!
+  EXPECT_TRUE(surface_control.PresentBackingStore(0, /*layer_id=*/1, 0xA1, 400,
+                                                  400, &info));
+  EXPECT_TRUE(surface_control.PresentBackingStore(0, /*layer_id=*/3, 0xA3, 400,
+                                                  400, &info));
+  EXPECT_TRUE(surface_control.CommitTransaction(0));
+  EXPECT_EQ(surface_control.GetActiveLayerCount(0), 2u);
+  EXPECT_EQ(surface_control.GetPooledLayerCount(0), 0u);
+  EXPECT_EQ(jni_delegate->created_surface_controls.size(), 2u);
+}
+
+TEST(AndroidSurfaceControlTest, ReleasesNativeWindowOnSurfaceDestroyed) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  auto engine = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xCAFE01);
+
+  std::vector<uintptr_t> released_windows;
+  AndroidSurfaceControl surface_control(jni_delegate, proc_table,
+                                        /*fence_closer=*/nullptr,
+                                        [&released_windows](uintptr_t handle) {
+                                          released_windows.push_back(handle);
+                                        });
+
+  EXPECT_TRUE(surface_control.NotifySurfaceCreated(
+      engine, /*view_id=*/0, /*native_window_handle=*/0x3333, /*width=*/1080,
+      /*height=*/2400, /*pixel_ratio=*/3.0));
+  EXPECT_TRUE(released_windows.empty());
+
+  EXPECT_TRUE(surface_control.NotifySurfaceDestroyed(engine, /*view_id=*/0));
+  ASSERT_EQ(released_windows.size(), 1u);
+  EXPECT_EQ(released_windows[0], static_cast<uintptr_t>(0x3333));
+  EXPECT_EQ(surface_control.GetNativeWindowHandle(0),
+            static_cast<uintptr_t>(0));
+}
+
+TEST(AndroidSurfaceControlTest, DispatchesOnFirstFrameOnceUponPresentation) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  auto engine = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xCAFE01);
+
+  AndroidSurfaceControl surface_control(jni_delegate, proc_table);
+  EXPECT_TRUE(surface_control.NotifySurfaceCreated(
+      engine, /*view_id=*/0, /*native_window_handle=*/0x1111, /*width=*/1080,
+      /*height=*/2400, /*pixel_ratio=*/3.0));
+
+  EXPECT_EQ(jni_delegate->first_frame_count, 0);
+
+  FlutterBackingStorePresentInfo present_info1 = {};
+  present_info1.struct_size = sizeof(FlutterBackingStorePresentInfo);
+  present_info1.synchronization_fence_fd = -1;
+  EXPECT_TRUE(surface_control.PresentBackingStore(
+      /*view_id=*/0, /*layer_id=*/1, /*hardware_buffer_handle=*/0x2222,
+      /*width=*/1080, /*height=*/2400, &present_info1));
+  EXPECT_EQ(jni_delegate->first_frame_count, 1);
+
+  FlutterBackingStorePresentInfo present_info2 = {};
+  present_info2.struct_size = sizeof(FlutterBackingStorePresentInfo);
+  present_info2.synchronization_fence_fd = -1;
+  EXPECT_TRUE(surface_control.PresentBackingStore(
+      /*view_id=*/0, /*layer_id=*/1, /*hardware_buffer_handle=*/0x2222,
+      /*width=*/1080, /*height=*/2400, &present_info2));
+  EXPECT_EQ(jni_delegate->first_frame_count, 1);
 }
 
 }  // namespace testing
