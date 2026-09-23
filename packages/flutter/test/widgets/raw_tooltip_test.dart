@@ -3226,12 +3226,11 @@ void main() {
       final key = GlobalKey<RawTooltipState>();
       final siblingFocusNode = FocusNode();
       addTearDown(siblingFocusNode.dispose);
-      late final OverlayEntry entry;
-      addTearDown(
-        () => entry
-          ..remove()
-          ..dispose(),
-      );
+      OverlayEntry? entry;
+      addTearDown(() {
+        entry?.remove();
+        entry?.dispose();
+      });
       var siblingReceivedEscape = false;
 
       await tester.pumpWidget(
