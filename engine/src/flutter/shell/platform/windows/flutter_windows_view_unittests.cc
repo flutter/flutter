@@ -478,7 +478,10 @@ TEST(FlutterWindowsViewTest, AddSemanticsNodeUpdate) {
   // Verify the semantics hint is exposed as the accessible description.
   BSTR bdescription = nullptr;
   ASSERT_EQ(native_view->get_accDescription(varchild, &bdescription), S_OK);
-  std::string description(_com_util::ConvertBSTRToString(bdescription));
+  char* description_chars = _com_util::ConvertBSTRToString(bdescription);
+  std::string description(description_chars);
+  delete[] description_chars;
+  SysFreeString(bdescription);
   EXPECT_EQ(description, "description");
 
   // Verify node type is static text.
@@ -513,7 +516,11 @@ TEST(FlutterWindowsViewTest, AddSemanticsNodeUpdate) {
                                        &vardescription),
             S_OK);
   EXPECT_EQ(vardescription.vt, VT_BSTR);
-  description = _com_util::ConvertBSTRToString(vardescription.bstrVal);
+  description_chars =
+      _com_util::ConvertBSTRToString(vardescription.bstrVal);
+  description = description_chars;
+  delete[] description_chars;
+  VariantClear(&vardescription);
   EXPECT_EQ(description, "description");
 
   // Verify node control type is text.
