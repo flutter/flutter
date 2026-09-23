@@ -15,11 +15,18 @@
 
 #include <jni.h>
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/fml/task_runner.h"
+
+#if FML_OS_ANDROID
+#include <android/native_window.h>
+#else
+struct ANativeWindow;
+#endif
 
 namespace flutter {
 namespace android {
@@ -33,6 +40,12 @@ namespace android {
 class JvmInvoker {
  public:
   virtual ~JvmInvoker() = default;
+
+  /// @brief Returns native window for overlay surface id if available.
+  virtual ANativeWindow* GetOverlayWindow(int32_t id) {
+    (void)id;
+    return nullptr;
+  }
 
   /// @brief Attaches a Java object weak reference to this invoker.
   virtual void SetJavaObject(
@@ -380,6 +393,7 @@ class AndroidJvmInvoker : public JvmInvoker {
       const std::vector<uint8_t>& payload = {}) override;
 
   bool PostJvmTask(std::function<void()> task) override;
+  ANativeWindow* GetOverlayWindow(int32_t id) override;
 
  private:
   fml::jni::ScopedJavaLocalRef<jobject> GetJavaObjectLocalRef(
@@ -388,6 +402,9 @@ class AndroidJvmInvoker : public JvmInvoker {
   mutable std::mutex java_object_mutex_;
   std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> java_object_;
   fml::RefPtr<fml::TaskRunner> platform_task_runner_;
+
+  mutable std::mutex overlay_windows_mutex_;
+  std::unordered_map<int32_t, ANativeWindow*> overlay_windows_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidJvmInvoker);
 };

@@ -8025,6 +8025,85 @@ TEST_F(Phase63FinalGNIntegrationTest,
   EXPECT_FALSE(FlutterEmbedderNative::GetDefaultVMArgs().has_value());
 }
 
+TEST(FlutterEmbedderNativeImageTextureTest,
+     ImageTextureRegistrationAndLifecycle) {
+  auto native_instance = std::make_unique<FlutterEmbedderNative>();
+  ASSERT_NE(native_instance, nullptr);
+
+  // 101 represents a unique external texture ID.
+  constexpr int64_t kTextureId = 101;
+  constexpr size_t kWidth = 300;
+  constexpr size_t kHeight = 200;
+
+  // Verify that an unregistered texture returns false from OpenGL callback.
+  FlutterRendererConfig renderer_config = {};
+  native_instance->PopulateRendererConfig(&renderer_config);
+  ASSERT_EQ(renderer_config.type, kOpenGL);
+  ASSERT_NE(renderer_config.open_gl.gl_external_texture_frame_callback,
+            nullptr);
+
+  FlutterOpenGLTexture texture_out = {};
+  bool success = renderer_config.open_gl.gl_external_texture_frame_callback(
+      native_instance.get(), kTextureId, kWidth, kHeight, &texture_out);
+  EXPECT_FALSE(success);
+
+  // Register image texture without a Java object (testing native structure
+  // lifecycle).
+  native_instance->RegisterImageTexture(kTextureId, nullptr,
+                                        /*reset_on_background=*/true);
+
+  // With image texture registered, gl_external_texture_frame_callback should
+  // handle it and output valid external texture metadata.
+  success = renderer_config.open_gl.gl_external_texture_frame_callback(
+      native_instance.get(), kTextureId, kWidth, kHeight, &texture_out);
+  EXPECT_TRUE(success);
+  // GL_TEXTURE_EXTERNAL_OES = 0x8D65
+  EXPECT_EQ(texture_out.target, 0x8D65u);
+  // GL_RGBA8 = 0x8058
+  EXPECT_EQ(texture_out.format, 0x8058u);
+  EXPECT_EQ(texture_out.width, kWidth);
+  EXPECT_EQ(texture_out.height, kHeight);
+
+  // Unregister texture and verify it returns false again.
+  native_instance->UnregisterImageTexture(kTextureId);
+  FlutterOpenGLTexture unregistered_out = {};
+  success = renderer_config.open_gl.gl_external_texture_frame_callback(
+      native_instance.get(), kTextureId, kWidth, kHeight, &unregistered_out);
+  EXPECT_FALSE(success);
+}
+
+TEST(FlutterEmbedderNativeImageTextureTest, ConcurrentImageTextureOperations) {
+  auto native_instance = std::make_unique<FlutterEmbedderNative>();
+  ASSERT_NE(native_instance, nullptr);
+
+  FlutterRendererConfig renderer_config = {};
+  native_instance->PopulateRendererConfig(&renderer_config);
+
+  constexpr size_t kThreadCount = 4;
+  constexpr size_t kIterationsPerThread = 50;
+  std::vector<std::thread> workers;
+  workers.reserve(kThreadCount);
+
+  for (size_t t = 0; t < kThreadCount; ++t) {
+    workers.emplace_back([&, t]() {
+      for (size_t i = 0; i < kIterationsPerThread; ++i) {
+        int64_t tex_id = static_cast<int64_t>(t * 1000 + i);
+        native_instance->RegisterImageTexture(tex_id, nullptr, false);
+
+        FlutterOpenGLTexture texture_out = {};
+        renderer_config.open_gl.gl_external_texture_frame_callback(
+            native_instance.get(), tex_id, 100, 100, &texture_out);
+
+        native_instance->UnregisterImageTexture(tex_id);
+      }
+    });
+  }
+
+  for (auto& worker : workers) {
+    worker.join();
+  }
+}
+
 }  // namespace testing
 }  // namespace android
 }  // namespace flutter

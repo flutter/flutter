@@ -6,6 +6,11 @@
 
 #include <cstring>
 
+#if FML_OS_ANDROID
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
+#endif
+
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
@@ -291,6 +296,7 @@ static jmethodID g_mutators_stack_push_opacity = nullptr;
 
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_overlay_surface_class = nullptr;
 static jmethodID g_overlay_surface_get_id_method = nullptr;
+static jmethodID g_overlay_surface_get_surface_method = nullptr;
 
 bool AndroidJvmInvoker::RegisterJni(JNIEnv* env, jclass clazz) {
   if (!env || !clazz) {
@@ -383,6 +389,9 @@ bool AndroidJvmInvoker::RegisterJni(JNIEnv* env, jclass clazz) {
     env->DeleteLocalRef(local_surf_class);
     g_overlay_surface_get_id_method =
         env->GetMethodID(g_overlay_surface_class->obj(), "getId", "()I");
+    g_overlay_surface_get_surface_method =
+        env->GetMethodID(g_overlay_surface_class->obj(), "getSurface",
+                         "()Landroid/view/Surface;");
   }
   if (env->ExceptionCheck()) {
     env->ExceptionClear();
@@ -408,6 +417,15 @@ AndroidJvmInvoker::AndroidJvmInvoker(
 
 AndroidJvmInvoker::~AndroidJvmInvoker() {
   TRACE_EVENT0("flutter", "AndroidJvmInvoker::~AndroidJvmInvoker");
+#if FML_OS_ANDROID
+  std::lock_guard<std::mutex> lock(overlay_windows_mutex_);
+  for (auto& [id, window] : overlay_windows_) {
+    if (window != nullptr) {
+      ANativeWindow_release(window);
+    }
+  }
+  overlay_windows_.clear();
+#endif
 }
 
 void AndroidJvmInvoker::SetJavaObject(
@@ -922,6 +940,18 @@ bool AndroidJvmInvoker::InvokeVoidMethod(const std::string& method_name,
     if (method) {
       env->CallVoidMethod(java_object.obj(), method);
     }
+#if FML_OS_ANDROID
+    if (method_name == "destroyOverlaySurfaces" ||
+        method_name == "destroyOverlaySurface2") {
+      std::lock_guard<std::mutex> lock(overlay_windows_mutex_);
+      for (auto& [id, window] : overlay_windows_) {
+        if (window != nullptr) {
+          ANativeWindow_release(window);
+        }
+      }
+      overlay_windows_.clear();
+    }
+#endif
   } else if (signature == "(I)V") {
     int32_t val = 0;
     if (payload.size() >= sizeof(int32_t)) {
@@ -1133,6 +1163,34 @@ int64_t AndroidJvmInvoker::InvokeIntMethod(
     if (get_id_method) {
       id = env->CallIntMethod(surface_obj, get_id_method);
     }
+
+#if FML_OS_ANDROID
+    jmethodID get_surface_method = g_overlay_surface_get_surface_method;
+    if (!get_surface_method) {
+      jclass surf_class = env->GetObjectClass(surface_obj);
+      if (surf_class) {
+        get_surface_method = env->GetMethodID(surf_class, "getSurface",
+                                              "()Landroid/view/Surface;");
+        env->DeleteLocalRef(surf_class);
+      }
+    }
+    if (get_surface_method && id >= 0) {
+      jobject surface = env->CallObjectMethod(surface_obj, get_surface_method);
+      if (surface) {
+        ANativeWindow* window = ANativeWindow_fromSurface(env, surface);
+        env->DeleteLocalRef(surface);
+        if (window) {
+          std::lock_guard<std::mutex> lock(overlay_windows_mutex_);
+          auto it = overlay_windows_.find(id);
+          if (it != overlay_windows_.end() && it->second != nullptr) {
+            ANativeWindow_release(it->second);
+          }
+          overlay_windows_[id] = window;
+        }
+      }
+    }
+#endif
+
     env->DeleteLocalRef(surface_obj);
     if (env->ExceptionCheck()) {
       env->ExceptionClear();
@@ -1198,6 +1256,15 @@ bool AndroidJvmInvoker::PostJvmTask(std::function<void()> task) {
     return true;
   }
   return false;
+}
+
+ANativeWindow* AndroidJvmInvoker::GetOverlayWindow(int32_t id) {
+  std::lock_guard<std::mutex> lock(overlay_windows_mutex_);
+  auto it = overlay_windows_.find(id);
+  if (it != overlay_windows_.end()) {
+    return it->second;
+  }
+  return nullptr;
 }
 
 }  // namespace android

@@ -24,6 +24,12 @@ class MockPlatformViewDelegate : public AndroidCompositorPlatformViewDelegate {
     size_t mutations_count = 0;
   };
 
+  struct PresentedOverlay {
+    size_t overlay_index = 0;
+    FlutterPoint offset = {0, 0};
+    FlutterSize size = {0, 0};
+  };
+
   void OnPlatformViewPresented(
       int64_t view_id,
       const FlutterPoint& offset,
@@ -34,21 +40,34 @@ class MockPlatformViewDelegate : public AndroidCompositorPlatformViewDelegate {
         PresentedView{view_id, offset, size, mutations_count});
   }
 
+  void OnOverlayPresented(size_t overlay_index,
+                          const FlutterPoint& offset,
+                          const FlutterSize& size) override {
+    presented_overlays_.push_back(
+        PresentedOverlay{overlay_index, offset, size});
+  }
+
   void OnFramePresented() override { frame_presented_count_++; }
 
   const std::vector<PresentedView>& GetPresentedViews() const {
     return presented_views_;
   }
 
+  const std::vector<PresentedOverlay>& GetPresentedOverlays() const {
+    return presented_overlays_;
+  }
+
   size_t GetFramePresentedCount() const { return frame_presented_count_; }
 
   void Reset() {
     presented_views_.clear();
+    presented_overlays_.clear();
     frame_presented_count_ = 0;
   }
 
  private:
   std::vector<PresentedView> presented_views_;
+  std::vector<PresentedOverlay> presented_overlays_;
   size_t frame_presented_count_ = 0;
 };
 
@@ -337,7 +356,7 @@ TEST(AndroidCompositorTest, PopulateCompositorConfig) {
   ASSERT_NE(comp_config.create_backing_store_callback, nullptr);
   ASSERT_NE(comp_config.collect_backing_store_callback, nullptr);
   ASSERT_NE(comp_config.present_view_callback, nullptr);
-  EXPECT_FALSE(comp_config.avoid_backing_store_cache);
+  EXPECT_TRUE(comp_config.avoid_backing_store_cache);
 
   // Test callbacks through C-API trampolines
   FlutterBackingStoreConfig bs_config = {};
@@ -396,6 +415,86 @@ TEST(AndroidCompositorTest, BackingStoreRoundTrip) {
 
   EXPECT_TRUE(compositor->PresentLayers(layers, 1));
   EXPECT_TRUE(compositor->CollectBackingStore(&bs));
+}
+
+TEST(AndroidCompositorTest, MultiLayerPlatformViewWithOverlayDispatch) {
+  std::shared_ptr<AndroidSurfaceManager> surface_manager =
+      AndroidSurfaceManager::Create(AndroidRenderingAPI::kSkiaOpenGLES);
+  ASSERT_NE(surface_manager, nullptr);
+  EXPECT_TRUE(
+      surface_manager->SetNativeWindow(nullptr, /*is_fake_window=*/true));
+
+  auto delegate = std::make_shared<MockPlatformViewDelegate>();
+  auto compositor =
+      std::make_unique<AndroidCompositor>(surface_manager, delegate);
+
+  FlutterBackingStoreConfig config = {};
+  config.struct_size = sizeof(FlutterBackingStoreConfig);
+  // 150.0x150.0 dimensions matching smoke test golden size.
+  config.size = FlutterSize{150.0, 150.0};
+  config.view_id = 0;
+
+  FlutterBackingStore root_bs = {};
+  EXPECT_TRUE(compositor->CreateBackingStore(&config, &root_bs));
+
+  FlutterBackingStore overlay_bs = {};
+  EXPECT_TRUE(compositor->CreateBackingStore(&config, &overlay_bs));
+
+  // Layer 0: Root backing store below the platform view
+  FlutterLayer root_layer = {};
+  root_layer.struct_size = sizeof(FlutterLayer);
+  root_layer.type = kFlutterLayerContentTypeBackingStore;
+  root_layer.backing_store = &root_bs;
+  root_layer.offset = FlutterPoint{0.0, 0.0};
+  root_layer.size = FlutterSize{150.0, 150.0};
+
+  // Layer 1: Platform view in the middle
+  FlutterPlatformView platform_view = {};
+  platform_view.struct_size = sizeof(FlutterPlatformView);
+  // View ID 42 representing native view.
+  platform_view.identifier = 42;
+  platform_view.mutations_count = 0;
+  platform_view.mutations = nullptr;
+
+  FlutterLayer pv_layer = {};
+  pv_layer.struct_size = sizeof(FlutterLayer);
+  pv_layer.type = kFlutterLayerContentTypePlatformView;
+  pv_layer.platform_view = &platform_view;
+  pv_layer.offset = FlutterPoint{10.0, 10.0};
+  pv_layer.size = FlutterSize{100.0, 100.0};
+
+  // Layer 2: Overlay backing store above the platform view (the Flutter circle)
+  FlutterLayer overlay_layer = {};
+  overlay_layer.struct_size = sizeof(FlutterLayer);
+  overlay_layer.type = kFlutterLayerContentTypeBackingStore;
+  overlay_layer.backing_store = &overlay_bs;
+  overlay_layer.offset = FlutterPoint{15.0, 15.0};
+  overlay_layer.size = FlutterSize{120.0, 90.0};
+
+  const FlutterLayer* layers[] = {&root_layer, &pv_layer, &overlay_layer};
+  // 3 composited layers in total.
+  constexpr size_t kLayerCount = 3;
+
+  EXPECT_TRUE(compositor->PresentLayers(layers, kLayerCount));
+
+  EXPECT_EQ(compositor->GetPresentedFrameCount(), 1u);
+  EXPECT_EQ(compositor->GetLastPresentedLayersCount(), kLayerCount);
+  EXPECT_EQ(compositor->GetLastPresentedPlatformViewsCount(), 1u);
+  EXPECT_EQ(compositor->GetLastPresentedOverlaysCount(), 1u);
+
+  EXPECT_EQ(delegate->GetFramePresentedCount(), 1u);
+  ASSERT_EQ(delegate->GetPresentedViews().size(), 1u);
+  EXPECT_EQ(delegate->GetPresentedViews()[0].view_id, 42);
+
+  ASSERT_EQ(delegate->GetPresentedOverlays().size(), 1u);
+  EXPECT_EQ(delegate->GetPresentedOverlays()[0].overlay_index, 0u);
+  EXPECT_DOUBLE_EQ(delegate->GetPresentedOverlays()[0].offset.x, 15.0);
+  EXPECT_DOUBLE_EQ(delegate->GetPresentedOverlays()[0].offset.y, 15.0);
+  EXPECT_DOUBLE_EQ(delegate->GetPresentedOverlays()[0].size.width, 120.0);
+  EXPECT_DOUBLE_EQ(delegate->GetPresentedOverlays()[0].size.height, 90.0);
+
+  EXPECT_TRUE(compositor->CollectBackingStore(&root_bs));
+  EXPECT_TRUE(compositor->CollectBackingStore(&overlay_bs));
 }
 
 }  // namespace testing
