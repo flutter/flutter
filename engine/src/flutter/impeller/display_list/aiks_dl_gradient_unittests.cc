@@ -51,16 +51,18 @@ void CanRenderLinearGradient(AiksTest* aiks_test, DlTileMode tile_mode) {
   ASSERT_TRUE(aiks_test->OpenPlaygroundHere(builder.Build()));
 }
 
-/// Forces `SupportsSSBO()` to report false for the duration of the scope. All
-/// other capabilities are forwarded to the real device.
-///
-/// Only the Metal playground implements `SetCapabilities`, so `*NoSSBO` tests
-/// must skip every other backend.
-class ScopedForceNoSSBO {
- public:
-  explicit ScopedForceNoSSBO(AiksTest* aiks_test)
-      : aiks_test_(aiks_test),
-        old_capabilities_(aiks_test->GetContext()->GetCapabilities()) {
+}  // namespace
+
+/// Runs tests with `SupportsSSBO()` forced to false. All other capabilities are
+/// forwarded to the real device.
+class AiksTestNoSSBO : public AiksTest {
+ protected:
+  void SetUp() override {
+    AiksTest::SetUp();
+    if (::testing::Test::IsSkipped()) {
+      return;
+    }
+    old_capabilities_ = GetContext()->GetCapabilities();
     auto capabilities =
         std::make_shared<::testing::NiceMock<MockCapabilities>>();
     EXPECT_CALL(*capabilities, SupportsSSBO())
@@ -85,20 +87,31 @@ class ScopedForceNoSSBO {
     FLT_FORWARD(capabilities, old_capabilities_,
                 GetMaximumRenderPassAttachmentSize);
     FLT_FORWARD(capabilities, old_capabilities_, GetMaxSamplerAnisotropy);
-    EXPECT_TRUE(aiks_test->SetCapabilities(capabilities).ok());
+    EXPECT_TRUE(SetCapabilities(capabilities).ok());
   }
 
-  ~ScopedForceNoSSBO() {
-    std::ignore = aiks_test_->SetCapabilities(
-        std::const_pointer_cast<Capabilities>(old_capabilities_));
+  void TearDown() override {
+    if (old_capabilities_) {
+      std::ignore = SetCapabilities(
+          std::const_pointer_cast<Capabilities>(old_capabilities_));
+    }
+    AiksTest::TearDown();
   }
 
  private:
-  AiksTest* aiks_test_;
   std::shared_ptr<const Capabilities> old_capabilities_;
 };
 
-}  // namespace
+INSTANTIATE_TEST_SUITE_P(
+    Play,
+    AiksTestNoSSBO,
+    // Only run on MetalSDF: Metal is the only backend that implements
+    // `SetCapabilities`, and these tests are specifically to test UberSDF
+    // rendering without SSBO.
+    ::testing::Values(PlaygroundBackend::kMetalSDF),
+    [](const ::testing::TestParamInfo<AiksTestNoSSBO::ParamType>& info) {
+      return PlaygroundBackendToString(info.param);
+    });
 
 TEST_P(AiksTest, CanRenderLinearGradientClamp) {
   CanRenderLinearGradient(this, DlTileMode::kClamp);
@@ -115,12 +128,7 @@ TEST_P(AiksTest, CanRenderLinearGradientDecal) {
 
 // Test non-SSBO for a two-stop gradient resulting in a two texel gradient
 // texture.
-TEST_P(AiksTest, CanRenderLinearGradientClampNoSSBO) {
-  if (GetParam() != PlaygroundBackend::kMetalSDF) {
-    GTEST_SKIP() << "This backend doesn't support setting device capabilities, "
-                    "or doesn't use UberSDF.";
-  }
-  ScopedForceNoSSBO no_ssbo(this);
+TEST_P(AiksTestNoSSBO, CanRenderLinearGradientClamp) {
   CanRenderLinearGradient(this, DlTileMode::kClamp);
 }
 
@@ -285,12 +293,7 @@ TEST_P(AiksTest, CanRenderLinearGradientWithOverlappingStopsClamp) {
 
 // Test non-SSBO for overlapping stops, which results in a maximum size gradient
 // texture.
-TEST_P(AiksTest, CanRenderLinearGradientWithOverlappingStopsClampNoSSBO) {
-  if (GetParam() != PlaygroundBackend::kMetalSDF) {
-    GTEST_SKIP() << "This backend doesn't support setting device capabilities, "
-                    "or doesn't use UberSDF.";
-  }
-  ScopedForceNoSSBO no_ssbo(this);
+TEST_P(AiksTestNoSSBO, CanRenderLinearGradientWithOverlappingStopsClamp) {
   CanRenderLinearGradientWithOverlappingStops(this, DlTileMode::kClamp);
 }
 
@@ -406,21 +409,11 @@ TEST_P(AiksTest, CanRenderRadialGradientWithIncompleteStops) {
 
 // Test non-SSBO for UberSDF-supported gradients (linear and radial). Each of
 // these tests covers all four tile modes in one image.
-TEST_P(AiksTest, CanRenderLinearGradientWithIncompleteStopsNoSSBO) {
-  if (GetParam() != PlaygroundBackend::kMetalSDF) {
-    GTEST_SKIP() << "This backend doesn't support setting device capabilities, "
-                    "or doesn't use UberSDF.";
-  }
-  ScopedForceNoSSBO no_ssbo(this);
+TEST_P(AiksTestNoSSBO, CanRenderLinearGradientWithIncompleteStops) {
   CanRenderGradientWithIncompleteStops(this,
                                        DlColorSourceType::kLinearGradient);
 }
-TEST_P(AiksTest, CanRenderRadialGradientWithIncompleteStopsNoSSBO) {
-  if (GetParam() != PlaygroundBackend::kMetalSDF) {
-    GTEST_SKIP() << "This backend doesn't support setting device capabilities, "
-                    "or doesn't use UberSDF.";
-  }
-  ScopedForceNoSSBO no_ssbo(this);
+TEST_P(AiksTestNoSSBO, CanRenderRadialGradientWithIncompleteStops) {
   CanRenderGradientWithIncompleteStops(this,
                                        DlColorSourceType::kRadialGradient);
 }
