@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
 
 #include "flutter/shell/common/thread_host.h"
+#include "flutter/shell/platform/embedder/embedder_layers.h"
 #include "flutter/testing/testing.h"
 
 #include "gmock/gmock.h"
@@ -225,6 +226,86 @@ TEST(PlatformViewEmbedderTest, DeletionDisabledDispatch) {
   }
 
   EXPECT_FALSE(did_call);
+}
+
+TEST(PlatformViewEmbedderTest, SupportsOffPlatformThreadDispatch) {
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::kPlatform);
+  flutter::TaskRunners task_runners = flutter::TaskRunners(
+      "SupportsOffPlatformThreadDispatch",
+      thread_host.platform_thread->GetTaskRunner(), nullptr, nullptr, nullptr);
+  bool did_call = false;
+  std::thread::id caller_thread_id = std::this_thread::get_id();
+  std::thread::id handler_thread_id;
+
+  MockDelegate delegate;
+  EmbedderSurfaceSoftware::SoftwareDispatchTable software_dispatch_table;
+  PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table;
+  platform_dispatch_table.does_handle_platform_messages_on_platform_thread =
+      false;
+  platform_dispatch_table.platform_message_response_callback =
+      [&did_call,
+       &handler_thread_id](std::unique_ptr<PlatformMessage> message) {
+        did_call = true;
+        handler_thread_id = std::this_thread::get_id();
+      };
+  std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder;
+
+  std::unique_ptr<PlatformViewEmbedder> embedder;
+  fml::AutoResetWaitableEvent init_latch;
+  task_runners.GetPlatformTaskRunner()->PostTask([&]() {
+    embedder = std::make_unique<PlatformViewEmbedder>(
+        delegate, task_runners, software_dispatch_table,
+        platform_dispatch_table, external_view_embedder);
+    init_latch.Signal();
+  });
+  init_latch.Wait();
+
+  auto platform_message_handler = embedder->GetPlatformMessageHandler();
+  ASSERT_TRUE(platform_message_handler);
+  EXPECT_FALSE(
+      platform_message_handler->DoesHandlePlatformMessageOnPlatformThread());
+
+  fml::RefPtr<PlatformMessageResponse> response =
+      fml::MakeRefCounted<MockResponse>();
+  auto message =
+      std::make_unique<PlatformMessage>("background_channel", response);
+  platform_message_handler->HandlePlatformMessage(std::move(message));
+
+  EXPECT_TRUE(did_call);
+  EXPECT_EQ(caller_thread_id, handler_thread_id);
+
+  fml::AutoResetWaitableEvent cleanup_latch;
+  task_runners.GetPlatformTaskRunner()->PostTask([&]() {
+    embedder.reset();
+    cleanup_latch.Signal();
+  });
+  cleanup_latch.Wait();
+}
+
+TEST(PlatformViewEmbedderTest,
+     InitializesBackingStoreSynchronizationFenceFdToMinusOne) {
+  EmbedderLayers layers(DlISize(800, 600), 1.0, DlMatrix(), 0);
+  FlutterBackingStore store = {};
+  store.struct_size = sizeof(FlutterBackingStore);
+  layers.PushBackingStoreLayer(&store, {DlIRect::MakeWH(800, 600)});
+
+  bool invoked = false;
+  layers.InvokePresentCallback(
+      0,
+      [&](FlutterViewId view_id,
+          const std::vector<const FlutterLayer*>& presented_layers) -> bool {
+        EXPECT_EQ(presented_layers.size(), 1u);
+        if (!presented_layers.empty() &&
+            presented_layers[0]->backing_store_present_info != nullptr) {
+          EXPECT_EQ(presented_layers[0]
+                        ->backing_store_present_info->synchronization_fence_fd,
+                    -1);
+          invoked = true;
+        }
+        return true;
+      });
+  EXPECT_TRUE(invoked);
 }
 
 }  // namespace testing

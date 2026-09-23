@@ -21,7 +21,7 @@
     ]
   },
   "ratchet_state": {
-    "current_branch": "android-embedder-migration-v10/0.0-llm-configuration",
+    "current_branch": "android-embedder-migration-v10/1.0-embedder-c-api-extensions",
     "total_suite_tests": 10,
     "max_allowed_failing_tests": 10,
     "current_failing_test_count": 10,

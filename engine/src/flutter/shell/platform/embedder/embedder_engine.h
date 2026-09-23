@@ -23,7 +23,7 @@ struct ShellArgs;
 class EmbedderEngine {
  public:
   EmbedderEngine(
-      std::unique_ptr<EmbedderThreadHost> thread_host,
+      std::shared_ptr<EmbedderThreadHost> thread_host,
       const TaskRunners& task_runners,
       const Settings& settings,
       RunConfiguration run_configuration,
@@ -31,6 +31,12 @@ class EmbedderEngine {
       const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
       std::unique_ptr<EmbedderExternalTextureResolver>
           external_texture_resolver);
+
+  EmbedderEngine(std::shared_ptr<EmbedderThreadHost> thread_host,
+                 const TaskRunners& task_runners,
+                 std::unique_ptr<Shell> spawned_shell,
+                 std::unique_ptr<EmbedderExternalTextureResolver>
+                     external_texture_resolver);
 
   ~EmbedderEngine();
 
@@ -42,9 +48,13 @@ class EmbedderEngine {
 
   const TaskRunners& GetTaskRunners() const;
 
+  const std::shared_ptr<EmbedderThreadHost>& GetThreadHost() const;
+
   bool NotifyCreated();
 
   bool NotifyDestroyed();
+
+  bool SetGpuAvailability(FlutterGpuAvailability availability);
 
   bool RunRootIsolate();
 
@@ -91,7 +101,7 @@ class EmbedderEngine {
   Shell& GetShell();
 
  private:
-  std::unique_ptr<EmbedderThreadHost> thread_host_;
+  std::shared_ptr<EmbedderThreadHost> thread_host_;
   TaskRunners task_runners_;
   RunConfiguration run_configuration_;
   std::unique_ptr<ShellArgs> shell_args_;

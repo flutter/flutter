@@ -4316,6 +4316,153 @@ TEST_F(EmbedderTest, PlatformThreadIsolatesWithCustomPlatformTaskRunner) {
   ASSERT_EQ(platform_thread_id, ffi_call_thread_id);
 }
 
+TEST(EmbedderTestNoFixture, ProcTablePopulatesAndroidMigrationExtensions) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+  EXPECT_NE(procs.NotifyCreated, nullptr);
+  EXPECT_NE(procs.NotifyDestroyed, nullptr);
+  EXPECT_NE(procs.SetGpuAvailability, nullptr);
+  EXPECT_NE(procs.Spawn, nullptr);
+  EXPECT_NE(procs.LoadDartDeferredLibrary, nullptr);
+}
+
+TEST_F(EmbedderTest, NotifyCreatedAndDestroyedLifecycle) {
+  EXPECT_EQ(FlutterEngineNotifyCreated(nullptr), kInvalidArguments);
+  EXPECT_EQ(FlutterEngineNotifyDestroyed(nullptr), kInvalidArguments);
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+
+  // Detach and reattach surface dynamically via ProcTable.
+  EXPECT_EQ(procs.NotifyDestroyed(engine.get()), kSuccess);
+  EXPECT_EQ(procs.NotifyCreated(engine.get()), kSuccess);
+}
+
+TEST_F(EmbedderTest, SetGpuAvailabilityUpdatesSyncSwitch) {
+  EXPECT_EQ(FlutterEngineSetGpuAvailability(nullptr,
+                                            kFlutterGpuAvailabilityAvailable),
+            kInvalidArguments);
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  auto* embedder_engine = reinterpret_cast<EmbedderEngine*>(engine.get());
+  auto sync_switch = embedder_engine->GetShell().GetIsGpuDisabledSyncSwitch();
+
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+
+  bool is_disabled = false;
+  EXPECT_EQ(procs.SetGpuAvailability(
+                engine.get(), kFlutterGpuAvailabilityFlushAndMakeUnavailable),
+            kSuccess);
+  sync_switch->Execute(
+      fml::SyncSwitch::Handlers()
+          .SetIfTrue([&is_disabled] { is_disabled = true; })
+          .SetIfFalse([&is_disabled] { is_disabled = false; }));
+  EXPECT_TRUE(is_disabled);
+
+  EXPECT_EQ(
+      procs.SetGpuAvailability(engine.get(), kFlutterGpuAvailabilityAvailable),
+      kSuccess);
+  sync_switch->Execute(
+      fml::SyncSwitch::Handlers()
+          .SetIfTrue([&is_disabled] { is_disabled = true; })
+          .SetIfFalse([&is_disabled] { is_disabled = false; }));
+  EXPECT_FALSE(is_disabled);
+}
+
+TEST_F(EmbedderTest, CanSpawnChildEngineViaProcTable) {
+  FLUTTER_API_SYMBOL(FlutterEngine) spawned_raw = nullptr;
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+
+  EXPECT_EQ(FlutterEngineSpawn(nullptr, &spawn_config, &spawned_raw),
+            kInvalidArguments);
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent parent_latch;
+  context.AddIsolateCreateCallback(
+      [&parent_latch]() { parent_latch.Signal(); });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto parent_engine = builder.LaunchEngine();
+  ASSERT_TRUE(parent_engine.is_valid());
+  parent_latch.Wait();
+
+  EXPECT_EQ(FlutterEngineSpawn(parent_engine.get(), nullptr, &spawned_raw),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterEngineSpawn(parent_engine.get(), &spawn_config, nullptr),
+            kInvalidArguments);
+
+  spawn_config.project_args = &builder.GetProjectArgs();
+  spawn_config.renderer_config = &context.GetRendererConfig();
+  spawn_config.initial_route = "/spawned";
+  spawn_config.user_data = &context;
+
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+
+  ASSERT_EQ(procs.Spawn(parent_engine.get(), &spawn_config, &spawned_raw),
+            kSuccess);
+  ASSERT_NE(spawned_raw, nullptr);
+  UniqueEngine spawned_engine(spawned_raw);
+  EXPECT_TRUE(spawned_engine.is_valid());
+  spawned_engine.reset();
+}
+
+TEST_F(EmbedderTest, LoadDartDeferredLibraryFiresDestructionCallback) {
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(nullptr, nullptr),
+            kInvalidArguments);
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(engine.get(), nullptr),
+            kInvalidArguments);
+
+  bool destroyed = false;
+  uint8_t dummy_data[4] = {1, 2, 3, 4};
+  uint8_t dummy_instr[4] = {5, 6, 7, 8};
+
+  FlutterDartDeferredLibrary library = {};
+  library.struct_size = sizeof(FlutterDartDeferredLibrary);
+  library.loading_unit_id = 42;
+  library.snapshot_data = dummy_data;
+  library.snapshot_data_size = sizeof(dummy_data);
+  library.snapshot_instructions = dummy_instr;
+  library.snapshot_instructions_size = sizeof(dummy_instr);
+  library.user_data = &destroyed;
+  library.destruction_callback = [](void* user_data) {
+    *reinterpret_cast<bool*>(user_data) = true;
+  };
+
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+
+  ASSERT_EQ(procs.LoadDartDeferredLibrary(engine.get(), &library), kSuccess);
+  engine.reset();
+  EXPECT_TRUE(destroyed);
+}
+
 }  // namespace testing
 }  // namespace flutter
 

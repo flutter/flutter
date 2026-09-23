@@ -2189,7 +2189,25 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   flutter::PlatformViewEmbedder::PlatformMessageResponseCallback
       platform_message_response_callback = nullptr;
-  if (SAFE_ACCESS(args, platform_message_callback, nullptr) != nullptr) {
+  bool does_handle_platform_messages_on_platform_thread = true;
+  if (SAFE_ACCESS(args, platform_message_callback2, nullptr) != nullptr) {
+    does_handle_platform_messages_on_platform_thread = SAFE_ACCESS(
+        args, does_handle_platform_messages_on_platform_thread, true);
+    platform_message_response_callback =
+        [ptr = args->platform_message_callback2,
+         user_data](std::unique_ptr<flutter::PlatformMessage> message) {
+          auto handle = new FlutterPlatformMessageResponseHandle();
+          const FlutterPlatformMessage incoming_message = {
+              sizeof(FlutterPlatformMessage),  // struct_size
+              message->channel().c_str(),      // channel
+              message->data().GetMapping(),    // message
+              message->data().GetSize(),       // message_size
+              handle,                          // response_handle
+          };
+          handle->message = std::move(message);
+          return ptr(&incoming_message, user_data);
+        };
+  } else if (SAFE_ACCESS(args, platform_message_callback, nullptr) != nullptr) {
     platform_message_response_callback =
         [ptr = args->platform_message_callback,
          user_data](std::unique_ptr<flutter::PlatformMessage> message) {
@@ -2298,6 +2316,15 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
         };
   }
 
+  flutter::PlatformViewEmbedder::RequestDartDeferredLibraryCallback
+      request_dart_deferred_library_callback = nullptr;
+  if (SAFE_ACCESS(args, request_dart_deferred_library_callback, nullptr) !=
+      nullptr) {
+    request_dart_deferred_library_callback =
+        [ptr = args->request_dart_deferred_library_callback, user_data](
+            intptr_t loading_unit_id) { ptr(loading_unit_id, user_data); };
+  }
+
   auto external_view_embedder_result = InferExternalViewEmbedderFromArgs(
       SAFE_ACCESS(args, compositor, nullptr), settings.enable_impeller);
   if (!external_view_embedder_result.ok()) {
@@ -2308,13 +2335,15 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   flutter::PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table =
       {
-          update_semantics_callback,                  //
-          platform_message_response_callback,         //
-          vsync_callback,                             //
-          compute_platform_resolved_locale_callback,  //
-          on_pre_engine_restart_callback,             //
-          channel_update_callback,                    //
-          view_focus_change_request_callback,         //
+          update_semantics_callback,                         //
+          platform_message_response_callback,                //
+          vsync_callback,                                    //
+          compute_platform_resolved_locale_callback,         //
+          on_pre_engine_restart_callback,                    //
+          channel_update_callback,                           //
+          view_focus_change_request_callback,                //
+          does_handle_platform_messages_on_platform_thread,  //
+          request_dart_deferred_library_callback,            //
   };
 
   impeller::Flags impeller_flags;
@@ -3738,6 +3767,290 @@ FlutterEngineResult FlutterEngineSetNextFrameCallback(
   return kSuccess;
 }
 
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineNotifyCreated(FLUTTER_API_SYMBOL(FlutterEngine)
+                                                   engine) {
+  TRACE_EVENT0("flutter", "FlutterEngineNotifyCreated");
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
+  }
+
+  auto* embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  return embedder_engine->NotifyCreated()
+             ? kSuccess
+             : LOG_EMBEDDER_ERROR(kInvalidArguments,
+                                  "Could not notify engine surface created.");
+}
+
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineNotifyDestroyed(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+  TRACE_EVENT0("flutter", "FlutterEngineNotifyDestroyed");
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
+  }
+
+  auto* embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  return embedder_engine->NotifyDestroyed()
+             ? kSuccess
+             : LOG_EMBEDDER_ERROR(kInvalidArguments,
+                                  "Could not notify engine surface destroyed.");
+}
+
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineSetGpuAvailability(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterGpuAvailability availability) {
+  TRACE_EVENT0("flutter", "FlutterEngineSetGpuAvailability");
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
+  }
+
+  auto* embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  return embedder_engine->SetGpuAvailability(availability)
+             ? kSuccess
+             : LOG_EMBEDDER_ERROR(kInvalidArguments,
+                                  "Could not update GPU availability.");
+}
+
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine)
+                                           parent_engine,
+                                       const FlutterEngineSpawnConfig* config,
+                                       FLUTTER_API_SYMBOL(FlutterEngine) *
+                                           spawned_engine_out) {
+  TRACE_EVENT0("flutter", "FlutterEngineSpawn");
+  if (parent_engine == nullptr || config == nullptr ||
+      spawned_engine_out == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid spawn arguments.");
+  }
+
+  auto* parent_embedder_engine =
+      reinterpret_cast<flutter::EmbedderEngine*>(parent_engine);
+  if (!parent_embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Parent engine handle is not running.");
+  }
+
+  const FlutterProjectArgs* args = SAFE_ACCESS(config, project_args, nullptr);
+  const FlutterRendererConfig* renderer_config =
+      SAFE_ACCESS(config, renderer_config, nullptr);
+  if (args == nullptr || renderer_config == nullptr ||
+      !IsRendererValid(renderer_config)) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Spawn project_args or renderer_config invalid.");
+  }
+
+  void* user_data = SAFE_ACCESS(config, user_data, nullptr);
+  const auto& parent_settings =
+      parent_embedder_engine->GetShell().GetSettings();
+
+  flutter::PlatformViewEmbedder::UpdateSemanticsCallback
+      update_semantics_callback =
+          CreateEmbedderSemanticsUpdateCallback(args, user_data);
+
+  flutter::PlatformViewEmbedder::PlatformMessageResponseCallback
+      platform_message_response_callback = nullptr;
+  bool does_handle_platform_messages_on_platform_thread = true;
+  if (SAFE_ACCESS(args, platform_message_callback2, nullptr) != nullptr) {
+    does_handle_platform_messages_on_platform_thread = SAFE_ACCESS(
+        args, does_handle_platform_messages_on_platform_thread, true);
+    platform_message_response_callback =
+        [ptr = args->platform_message_callback2,
+         user_data](std::unique_ptr<flutter::PlatformMessage> message) {
+          auto handle = new FlutterPlatformMessageResponseHandle();
+          const FlutterPlatformMessage incoming_message = {
+              sizeof(FlutterPlatformMessage),  // struct_size
+              message->channel().c_str(),      // channel
+              message->data().GetMapping(),    // message
+              message->data().GetSize(),       // message_size
+              handle,                          // response_handle
+          };
+          handle->message = std::move(message);
+          return ptr(&incoming_message, user_data);
+        };
+  } else if (SAFE_ACCESS(args, platform_message_callback, nullptr) != nullptr) {
+    platform_message_response_callback =
+        [ptr = args->platform_message_callback,
+         user_data](std::unique_ptr<flutter::PlatformMessage> message) {
+          auto handle = new FlutterPlatformMessageResponseHandle();
+          const FlutterPlatformMessage incoming_message = {
+              sizeof(FlutterPlatformMessage),  // struct_size
+              message->channel().c_str(),      // channel
+              message->data().GetMapping(),    // message
+              message->data().GetSize(),       // message_size
+              handle,                          // response_handle
+          };
+          handle->message = std::move(message);
+          return ptr(&incoming_message, user_data);
+        };
+  }
+
+  flutter::VsyncWaiterEmbedder::VsyncCallback vsync_callback = nullptr;
+  if (SAFE_ACCESS(args, vsync_callback, nullptr) != nullptr) {
+    vsync_callback = [ptr = args->vsync_callback, user_data](intptr_t baton) {
+      return ptr(user_data, baton);
+    };
+  }
+
+  flutter::PlatformViewEmbedder::RequestDartDeferredLibraryCallback
+      request_dart_deferred_library_callback = nullptr;
+  if (SAFE_ACCESS(args, request_dart_deferred_library_callback, nullptr) !=
+      nullptr) {
+    request_dart_deferred_library_callback =
+        [ptr = args->request_dart_deferred_library_callback, user_data](
+            intptr_t loading_unit_id) { ptr(loading_unit_id, user_data); };
+  }
+
+  auto external_view_embedder_result = InferExternalViewEmbedderFromArgs(
+      SAFE_ACCESS(args, compositor, nullptr), parent_settings.enable_impeller);
+  if (!external_view_embedder_result.ok()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Spawn compositor arguments were invalid.");
+  }
+
+  flutter::PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table =
+      {
+          update_semantics_callback,                         //
+          platform_message_response_callback,                //
+          vsync_callback,                                    //
+          nullptr,                                           //
+          nullptr,                                           //
+          nullptr,                                           //
+          nullptr,                                           //
+          does_handle_platform_messages_on_platform_thread,  //
+          request_dart_deferred_library_callback,            //
+  };
+
+  impeller::Flags impeller_flags;
+  impeller_flags.use_sdfs = parent_settings.impeller_use_sdfs;
+
+  auto on_create_platform_view = InferPlatformViewCreationCallback(
+      renderer_config, user_data, platform_dispatch_table,
+      std::move(external_view_embedder_result.value()),
+      parent_settings.enable_impeller, impeller_flags);
+  if (!on_create_platform_view) {
+    return LOG_EMBEDDER_ERROR(
+        kInternalInconsistency,
+        "Could not infer platform view creation callback for spawned engine.");
+  }
+
+  flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
+      [](flutter::Shell& shell) {
+        return std::make_unique<flutter::Rasterizer>(shell);
+      };
+
+  auto run_configuration =
+      flutter::RunConfiguration::InferFromSettings(parent_settings);
+  const char* entrypoint = SAFE_ACCESS(config, entrypoint, nullptr);
+  const char* library_uri = SAFE_ACCESS(config, library_uri, nullptr);
+  if (entrypoint != nullptr && std::strlen(entrypoint) > 0) {
+    if (library_uri != nullptr && std::strlen(library_uri) > 0) {
+      run_configuration.SetEntrypointAndLibrary(std::string{entrypoint},
+                                                std::string{library_uri});
+    } else {
+      run_configuration.SetEntrypoint(std::string{entrypoint});
+    }
+  }
+  int entrypoint_argc = SAFE_ACCESS(config, entrypoint_argc, 0);
+  const char* const* entrypoint_argv =
+      SAFE_ACCESS(config, entrypoint_argv, nullptr);
+  if (entrypoint_argc > 0 && entrypoint_argv != nullptr) {
+    std::vector<std::string> arguments(entrypoint_argc);
+    for (int i = 0; i < entrypoint_argc; ++i) {
+      arguments[i] = std::string{entrypoint_argv[i]};
+    }
+    run_configuration.SetEntrypointArgs(std::move(arguments));
+  }
+
+  std::string initial_route;
+  if (SAFE_ACCESS(config, initial_route, nullptr) != nullptr) {
+    initial_route = std::string{config->initial_route};
+  }
+
+  std::unique_ptr<flutter::Shell> spawned_shell =
+      parent_embedder_engine->GetShell().Spawn(
+          std::move(run_configuration), initial_route, on_create_platform_view,
+          on_create_rasterizer);
+  if (!spawned_shell) {
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Failed to spawn child shell.");
+  }
+
+  auto external_texture_resolver =
+      std::make_unique<flutter::EmbedderExternalTextureResolver>();
+  auto spawned_engine = std::make_unique<flutter::EmbedderEngine>(
+      parent_embedder_engine->GetThreadHost(),
+      parent_embedder_engine->GetTaskRunners(), std::move(spawned_shell),
+      std::move(external_texture_resolver));
+  if (!spawned_engine->NotifyCreated()) {
+    return LOG_EMBEDDER_ERROR(
+        kInternalInconsistency,
+        "Failed to notify platform view creation on spawned engine.");
+  }
+
+  *spawned_engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(
+      spawned_engine.release());
+  return kSuccess;
+}
+
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineLoadDartDeferredLibrary(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterDartDeferredLibrary* library) {
+  TRACE_EVENT0("flutter", "FlutterEngineLoadDartDeferredLibrary");
+  if (engine == nullptr || library == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Invalid deferred library arguments.");
+  }
+
+  auto* embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine was invalid.");
+  }
+
+  struct DeferredLibraryLifetime {
+    VoidCallback destruction_callback = nullptr;
+    void* user_data = nullptr;
+    ~DeferredLibraryLifetime() {
+      if (destruction_callback != nullptr) {
+        destruction_callback(user_data);
+      }
+    }
+  };
+
+  auto lifetime = std::make_shared<DeferredLibraryLifetime>();
+  lifetime->destruction_callback =
+      SAFE_ACCESS(library, destruction_callback, nullptr);
+  lifetime->user_data = SAFE_ACCESS(library, user_data, nullptr);
+
+  const uint8_t* snapshot_data_ptr =
+      SAFE_ACCESS(library, snapshot_data, nullptr);
+  size_t snapshot_data_size = SAFE_ACCESS(library, snapshot_data_size, 0);
+  const uint8_t* snapshot_instructions_ptr =
+      SAFE_ACCESS(library, snapshot_instructions, nullptr);
+  size_t snapshot_instructions_size =
+      SAFE_ACCESS(library, snapshot_instructions_size, 0);
+
+  auto data_mapping = std::make_unique<fml::NonOwnedMapping>(
+      snapshot_data_ptr, snapshot_data_size,
+      [lifetime](const uint8_t* /*data*/, size_t /*size*/) {});
+  auto instructions_mapping = std::make_unique<fml::NonOwnedMapping>(
+      snapshot_instructions_ptr, snapshot_instructions_size,
+      [lifetime](const uint8_t* /*data*/, size_t /*size*/) {});
+
+  auto platform_view = embedder_engine->GetShell().GetPlatformView();
+  if (!platform_view) {
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "PlatformView unavailable.");
+  }
+
+  platform_view->LoadDartDeferredLibrary(
+      SAFE_ACCESS(library, loading_unit_id, 0), std::move(data_mapping),
+      std::move(instructions_mapping));
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -3794,6 +4107,11 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(AddView, FlutterEngineAddView);
   SET_PROC(RemoveView, FlutterEngineRemoveView);
   SET_PROC(SendViewFocusEvent, FlutterEngineSendViewFocusEvent);
+  SET_PROC(NotifyCreated, FlutterEngineNotifyCreated);
+  SET_PROC(NotifyDestroyed, FlutterEngineNotifyDestroyed);
+  SET_PROC(SetGpuAvailability, FlutterEngineSetGpuAvailability);
+  SET_PROC(Spawn, FlutterEngineSpawn);
+  SET_PROC(LoadDartDeferredLibrary, FlutterEngineLoadDartDeferredLibrary);
 #undef SET_PROC
 
   return kSuccess;

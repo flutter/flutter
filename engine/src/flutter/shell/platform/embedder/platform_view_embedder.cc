@@ -15,11 +15,23 @@ class PlatformViewEmbedder::EmbedderPlatformMessageHandler
  public:
   EmbedderPlatformMessageHandler(
       fml::WeakPtr<PlatformView> parent,
-      fml::RefPtr<fml::TaskRunner> platform_task_runner)
+      fml::RefPtr<fml::TaskRunner> platform_task_runner,
+      bool does_handle_on_platform_thread,
+      PlatformMessageResponseCallback direct_callback)
       : parent_(std::move(parent)),
-        platform_task_runner_(std::move(platform_task_runner)) {}
+        platform_task_runner_(std::move(platform_task_runner)),
+        does_handle_on_platform_thread_(does_handle_on_platform_thread),
+        direct_callback_(std::move(direct_callback)) {}
 
   virtual void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) {
+    if (!does_handle_on_platform_thread_) {
+      if (direct_callback_) {
+        direct_callback_(std::move(message));
+      } else if (message->response()) {
+        message->response()->CompleteEmpty();
+      }
+      return;
+    }
     platform_task_runner_->PostTask(fml::MakeCopyable(
         [parent = parent_, message = std::move(message)]() mutable {
           if (parent) {
@@ -32,7 +44,7 @@ class PlatformViewEmbedder::EmbedderPlatformMessageHandler
   }
 
   virtual bool DoesHandlePlatformMessageOnPlatformThread() const {
-    return true;
+    return does_handle_on_platform_thread_;
   }
 
   virtual void InvokePlatformMessageResponseCallback(
@@ -43,6 +55,8 @@ class PlatformViewEmbedder::EmbedderPlatformMessageHandler
  private:
   fml::WeakPtr<PlatformView> parent_;
   fml::RefPtr<fml::TaskRunner> platform_task_runner_;
+  bool does_handle_on_platform_thread_ = true;
+  PlatformMessageResponseCallback direct_callback_;
 };
 
 PlatformViewEmbedder::PlatformViewEmbedder(
@@ -59,7 +73,10 @@ PlatformViewEmbedder::PlatformViewEmbedder(
                                                     external_view_embedder_)),
       platform_message_handler_(new EmbedderPlatformMessageHandler(
           GetWeakPtr(),
-          task_runners.GetPlatformTaskRunner())),
+          task_runners.GetPlatformTaskRunner(),
+          platform_dispatch_table
+              .does_handle_platform_messages_on_platform_thread,
+          platform_dispatch_table.platform_message_response_callback)),
       platform_dispatch_table_(std::move(platform_dispatch_table)) {}
 
 #ifdef SHELL_ENABLE_GL
@@ -74,7 +91,10 @@ PlatformViewEmbedder::PlatformViewEmbedder(
       embedder_surface_(std::move(embedder_surface)),
       platform_message_handler_(new EmbedderPlatformMessageHandler(
           GetWeakPtr(),
-          task_runners.GetPlatformTaskRunner())),
+          task_runners.GetPlatformTaskRunner(),
+          platform_dispatch_table
+              .does_handle_platform_messages_on_platform_thread,
+          platform_dispatch_table.platform_message_response_callback)),
       platform_dispatch_table_(std::move(platform_dispatch_table)) {}
 #endif
 
@@ -90,7 +110,10 @@ PlatformViewEmbedder::PlatformViewEmbedder(
       embedder_surface_(std::move(embedder_surface)),
       platform_message_handler_(new EmbedderPlatformMessageHandler(
           GetWeakPtr(),
-          task_runners.GetPlatformTaskRunner())),
+          task_runners.GetPlatformTaskRunner(),
+          platform_dispatch_table
+              .does_handle_platform_messages_on_platform_thread,
+          platform_dispatch_table.platform_message_response_callback)),
       platform_dispatch_table_(std::move(platform_dispatch_table)) {}
 #endif
 
@@ -106,7 +129,10 @@ PlatformViewEmbedder::PlatformViewEmbedder(
       embedder_surface_(std::move(embedder_surface)),
       platform_message_handler_(new EmbedderPlatformMessageHandler(
           GetWeakPtr(),
-          task_runners.GetPlatformTaskRunner())),
+          task_runners.GetPlatformTaskRunner(),
+          platform_dispatch_table
+              .does_handle_platform_messages_on_platform_thread,
+          platform_dispatch_table.platform_message_response_callback)),
       platform_dispatch_table_(std::move(platform_dispatch_table)) {}
 #endif
 
@@ -221,6 +247,15 @@ void PlatformViewEmbedder::RequestViewFocusChange(
     const ViewFocusChangeRequest& request) {
   if (platform_dispatch_table_.view_focus_change_request_callback != nullptr) {
     platform_dispatch_table_.view_focus_change_request_callback(request);
+  }
+}
+
+void PlatformViewEmbedder::RequestDartDeferredLibrary(
+    intptr_t loading_unit_id) {
+  if (platform_dispatch_table_.request_dart_deferred_library_callback !=
+      nullptr) {
+    platform_dispatch_table_.request_dart_deferred_library_callback(
+        loading_unit_id);
   }
 }
 

@@ -1,9 +1,9 @@
 {
   "active_migration": "RFC 410: Android Embedder C-API Migration",
   "branch_slug": "android-embedder-migration-v10",
-  "current_branch": "android-embedder-migration-v10/0.0-llm-configuration",
-  "phase": "Phase 0: LLM Configuration, Skills, and PR Chain Setup",
-  "active_component": "pr-chain-manager",
+  "current_branch": "android-embedder-migration-v10/1.0-embedder-c-api-extensions",
+  "phase": "Phase 1: Embedder C-API Extensions (embedder.h / embedder.cc)",
+  "active_component": "shell/platform/embedder/embedder.h",
   "active_adrs": [
     "ADR-0000",
     "ADR-0001",
@@ -15,7 +15,8 @@
     "ADR-0007",
     "ADR-0008",
     "ADR-0009",
-    "ADR-0010"
+    "ADR-0010",
+    "ADR-0011"
   ],
   "ratchet_state": {
     "total_allowed_internal_headers": 98,
@@ -28,9 +29,10 @@
     "Compile with defines = [ 'FLUTTER_ENGINE_NO_PROTOTYPES' ]",
     "Route all C-API calls through FlutterEngineProcTable",
     "Strict ownership and closing of synchronization_fence_fd",
-    "Per-view frame state captured by value in present_view_callback"
+    "Per-view frame state captured by value in present_view_callback",
+    "Zero Shell::Create or AndroidShellHolder when EnableAndroidEmbedderApi is true"
   ],
   "last_verified_build": "dart pr_chain.dart status (clean)",
   "failing_tests": [],
-  "next_immediate_action": "Commit Phase 0 branch and prepare Phase 1: 1.0-embedder-c-api-extensions"
+  "next_immediate_action": "Implement and verify Phase 1 C-API extensions in embedder.h, embedder.cc, and embedder_unittests.cc"
 }

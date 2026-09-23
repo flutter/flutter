@@ -539,6 +539,48 @@ typedef struct {
   size_t height;
 } FlutterOpenGLTexture;
 
+/// Extended OpenGL external texture descriptor that includes a struct_size
+/// header and a UV coordinate transformation matrix (e.g. from Android
+/// SurfaceTexture.getTransformMatrix()).
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterOpenGLTexture2).
+  size_t struct_size;
+  /// Target texture of the active texture unit (example GL_TEXTURE_2D or
+  /// GL_TEXTURE_EXTERNAL_OES).
+  uint32_t target;
+  /// The name of the texture.
+  uint32_t name;
+  /// The texture format (example GL_RGBA8).
+  uint32_t format;
+  /// User data to be returned on the invocation of the destruction callback.
+  void* user_data;
+  /// Callback invoked (on an engine managed thread) that asks the embedder to
+  /// collect the texture.
+  VoidCallback destruction_callback;
+  /// Width of the texture.
+  size_t width;
+  /// Height of the texture.
+  size_t height;
+  /// 3x3 / affine UV coordinate transformation matrix applied when sampling the
+  /// external texture.
+  FlutterTransformation uv_transform;
+} FlutterOpenGLTexture2;
+
+/// Opaque handle to a native Android AHardwareBuffer.
+typedef void* FlutterAHardwareBufferHandle;
+
+/// Callback invoked to acquire a zero-copy AHardwareBuffer external texture
+/// frame on Android (used by SurfaceProducer across Vulkan and OpenGL ES).
+typedef bool (*FlutterHardwareBufferExternalTextureFrameCallback)(
+    void* /* user data */,
+    int64_t /* texture identifier */,
+    size_t /* width */,
+    size_t /* height */,
+    FlutterAHardwareBufferHandle* /* hardware_buffer_out */,
+    FlutterTransformation* /* uv_transform_out */,
+    VoidCallback* /* destruction_callback_out */,
+    void** /* destruction_user_data_out */);
+
 typedef struct {
   /// The format of the color attachment of the frame-buffer. For example,
   /// GL_RGBA8.
@@ -630,6 +672,11 @@ typedef bool (*TextureFrameCallback)(void* /* user data */,
                                      size_t /* width */,
                                      size_t /* height */,
                                      FlutterOpenGLTexture* /* texture out */);
+typedef bool (*TextureFrameCallback2)(void* /* user data */,
+                                      int64_t /* texture identifier */,
+                                      size_t /* width */,
+                                      size_t /* height */,
+                                      FlutterOpenGLTexture2* /* texture out */);
 typedef void (*VsyncCallback)(void* /* user data */, intptr_t /* baton */);
 typedef void (*OnPreEngineRestartCallback)(void* /* user data */);
 
@@ -811,6 +858,12 @@ typedef struct {
   /// ID. Not specifying populate_existing_damage will result in full
   /// repaint (i.e. rendering all the pixels on the screen at every frame).
   FlutterFrameBufferWithDamageCallback populate_existing_damage;
+  /// Extended OpenGL external texture callback supporting UV transformation
+  /// matrices (e.g. SurfaceTexture.getTransformMatrix()).
+  TextureFrameCallback2 gl_external_texture_frame_callback2;
+  /// Optional zero-copy AHardwareBuffer external texture frame callback.
+  FlutterHardwareBufferExternalTextureFrameCallback
+      hardware_buffer_external_texture_frame_callback;
 } FlutterOpenGLRendererConfig;
 
 /// Alias for id<MTLDevice>.
@@ -968,6 +1021,80 @@ typedef bool (*FlutterVulkanPresentCallback)(
     void* /* user data */,
     const FlutterVulkanImage* /* image */);
 
+/// Describes YCbCr sampler conversion parameters for Vulkan external textures
+/// (such as Android camera/video AHardwareBuffer frames).
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterVulkanYcbcrConversionInfo).
+  size_t struct_size;
+  /// The VkFormat of the image (0 if using an Android external format).
+  uint32_t format;
+  /// Vendor-specific external format identifier (VkExternalFormatANDROID).
+  uint64_t external_format;
+  /// VkSamplerYcbcrModelConversion value.
+  uint32_t ycbcr_model;
+  /// VkSamplerYcbcrRange value.
+  uint32_t ycbcr_range;
+  /// VkComponentMapping swizzle components (r, g, b, a).
+  uint32_t components_r;
+  uint32_t components_g;
+  uint32_t components_b;
+  uint32_t components_a;
+  /// VkChromaLocation x and y offsets.
+  uint32_t x_chroma_offset;
+  uint32_t y_chroma_offset;
+  /// VkFilter chroma filter.
+  uint32_t chroma_filter;
+  /// Whether explicit reconstruction is forced.
+  uint32_t force_explicit_reconstruction;
+} FlutterVulkanYcbcrConversionInfo;
+
+/// Discriminates the backing source of a FlutterVulkanExternalTexture.
+typedef enum {
+  /// Backing resource is a VkImage handle.
+  kFlutterVulkanExternalTextureSourceTypeImage = 0,
+  /// Backing resource is a native Android AHardwareBuffer handle.
+  kFlutterVulkanExternalTextureSourceTypeAHardwareBuffer = 1,
+} FlutterVulkanExternalTextureSourceType;
+
+/// Describes a Vulkan external texture frame supplied to the engine.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterVulkanExternalTexture).
+  size_t struct_size;
+  /// Discriminates whether `image` or `hardware_buffer` is active.
+  FlutterVulkanExternalTextureSourceType source_type;
+  union {
+    /// VkImage handle when `source_type` is
+    /// `kFlutterVulkanExternalTextureSourceTypeImage`.
+    FlutterVulkanImageHandle image;
+    /// AHardwareBuffer handle when `source_type` is
+    /// `kFlutterVulkanExternalTextureSourceTypeAHardwareBuffer`.
+    FlutterAHardwareBufferHandle hardware_buffer;
+  };
+  /// The VkFormat of the image (when applicable).
+  uint32_t format;
+  /// Width of the texture in physical pixels.
+  size_t width;
+  /// Height of the texture in physical pixels.
+  size_t height;
+  /// Optional YCbCr conversion descriptor (may be null for standard RGB/RGBA).
+  const FlutterVulkanYcbcrConversionInfo* ycbcr_conversion_info;
+  /// 3x3 / affine UV coordinate transformation matrix.
+  FlutterTransformation uv_transform;
+  /// User data passed to `destruction_callback`.
+  void* user_data;
+  /// Callback invoked when the engine has finished sampling the frame.
+  VoidCallback destruction_callback;
+} FlutterVulkanExternalTexture;
+
+/// Callback invoked by the engine on the raster thread to acquire a Vulkan
+/// external texture frame for composition.
+typedef bool (*FlutterVulkanExternalTextureFrameCallback)(
+    void* /* user data */,
+    int64_t /* texture identifier */,
+    size_t /* width */,
+    size_t /* height */,
+    FlutterVulkanExternalTexture* /* texture_out */);
+
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterVulkanRendererConfig).
   size_t struct_size;
@@ -1031,6 +1158,13 @@ typedef struct {
   /// without any additional synchronization.
   /// Not used if a FlutterCompositor is supplied in FlutterProjectArgs.
   FlutterVulkanPresentCallback present_image_callback;
+  /// Optional callback invoked when the engine composes a Vulkan external
+  /// texture.
+  FlutterVulkanExternalTextureFrameCallback external_texture_frame_callback;
+  /// Optional callback invoked when the engine composes a zero-copy
+  /// AHardwareBuffer external texture.
+  FlutterHardwareBufferExternalTextureFrameCallback
+      hardware_buffer_external_texture_frame_callback;
 
 } FlutterVulkanRendererConfig;
 
@@ -2195,6 +2329,16 @@ typedef struct {
   /// outside of this area are transparent and the embedder may choose not
   /// to render them. Coordinates are in physical pixels.
   FlutterRegion* paint_region;
+
+  /// Optional POSIX file descriptor for a hardware synchronization fence
+  /// (e.g., ASyncFence / VK_KHR_external_fence_fd on Android) that signals
+  /// when GPU rendering to this backing store is complete.
+  ///
+  /// Defaults to -1 when no synchronization fence is associated with the
+  /// backing store. When >= 0, ownership of the file descriptor is transferred
+  /// to the embedder, which MUST either transfer ownership to the OS compositor
+  /// (e.g. `ASurfaceTransaction_setBuffer`) or close it via `close(fd)`.
+  int synchronization_fence_fd;
 } FlutterBackingStorePresentInfo;
 
 typedef struct {
@@ -2524,7 +2668,58 @@ typedef void (*FlutterLogMessageCallback)(const char* /* tag */,
 /// FlutterEngine instance in AOT mode.
 typedef struct _FlutterEngineAOTData* FlutterEngineAOTData;
 
+/// Callback invoked by the engine directly on the originating thread when
+/// `does_handle_platform_messages_on_platform_thread` is false, allowing
+/// embedders to route background channel messages without hopping through the
+/// platform thread.
+typedef void (*FlutterPlatformMessageCallback2)(
+    const FlutterPlatformMessage* /* message */,
+    void* /* user_data */);
+
+/// Callback invoked when the Dart VM requests that a deferred library loading
+/// unit be downloaded/extracted and loaded into the engine via
+/// `FlutterEngineLoadDartDeferredLibrary`.
+typedef void (*FlutterRequestDartDeferredLibraryCallback)(
+    intptr_t /* loading_unit_id */,
+    void* /* user_data */);
+
+/// Describes a memory-mapped Dart deferred library snapshot to be loaded into a
+/// running engine via `FlutterEngineLoadDartDeferredLibrary`.
 typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterDartDeferredLibrary).
+  size_t struct_size;
+  /// Identifier of the deferred loading unit requested by the Dart VM.
+  intptr_t loading_unit_id;
+  /// Pointer to the memory-mapped isolate snapshot data buffer.
+  const uint8_t* snapshot_data;
+  /// Size in bytes of the snapshot_data buffer.
+  size_t snapshot_data_size;
+  /// Pointer to the memory-mapped isolate snapshot instructions buffer.
+  const uint8_t* snapshot_instructions;
+  /// Size in bytes of the snapshot_instructions buffer.
+  size_t snapshot_instructions_size;
+  /// User baton passed to `destruction_callback` when the Dart VM releases both
+  /// snapshot buffers.
+  void* user_data;
+  /// Callback invoked when the engine and Dart VM have finished referencing
+  /// `snapshot_data` and `snapshot_instructions`, allowing the embedder to
+  /// safely `munmap` or close the underlying asset handles.
+  VoidCallback destruction_callback;
+} FlutterDartDeferredLibrary;
+
+/// Represents the availability state of GPU resources (e.g. across mobile
+/// foreground/background transitions).
+typedef enum {
+  /// GPU resources are available and rendering may proceed normally.
+  kFlutterGpuAvailabilityAvailable = 0,
+  /// GPU resources are about to become unavailable; flush pending work and stop
+  /// issuing new GPU commands.
+  kFlutterGpuAvailabilityFlushAndMakeUnavailable = 1,
+  /// GPU resources are unavailable (e.g. application backgrounded).
+  kFlutterGpuAvailabilityUnavailable = 2,
+} FlutterGpuAvailability;
+
+typedef struct {  // NOLINT(clang-analyzer-optin.performance.Padding)
   /// The size of this struct. Must be sizeof(FlutterProjectArgs).
   size_t struct_size;
   /// The path to the Flutter assets directory containing project assets. The
@@ -2838,7 +3033,53 @@ typedef struct {
   /// If true, the engine will decode images in wide gamut color spaces
   /// (Display P3) when supported. If false, images are decoded to sRGB.
   bool enable_wide_gamut;
+
+  /// Whether platform messages must be dispatched on the platform thread.
+  /// When `platform_message_callback2` is set and this field is false,
+  /// `platform_message_callback2` is invoked directly on the calling thread.
+  /// When `platform_message_callback` (v1) is used without
+  /// `platform_message_callback2`, messages always dispatch on the platform
+  /// thread to preserve desktop zero-initialization compatibility.
+  bool does_handle_platform_messages_on_platform_thread;
+
+  /// Optional callback invoked by the engine directly on the thread from which
+  /// a platform message originates (typically the UI thread) when
+  /// `does_handle_platform_messages_on_platform_thread` is false, allowing
+  /// embedders (such as Android) to route messages to background task queues
+  /// without hopping through the platform thread.
+  FlutterPlatformMessageCallback2 platform_message_callback2;
+
+  /// Optional callback invoked when the Dart VM requests a deferred loading
+  /// unit to be downloaded/extracted and loaded via
+  /// `FlutterEngineLoadDartDeferredLibrary`.
+  FlutterRequestDartDeferredLibraryCallback
+      request_dart_deferred_library_callback;
 } FlutterProjectArgs;
+
+/// Configuration used to spawn a child engine instance from an existing parent
+/// engine via `FlutterEngineSpawn`, sharing the Dart VM, isolate group, and
+/// graphics context.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterEngineSpawnConfig).
+  size_t struct_size;
+  /// Custom Dart entrypoint name (defaults to "main" if null or empty).
+  const char* entrypoint;
+  /// Optional Dart library URI containing the custom entrypoint.
+  const char* library_uri;
+  /// Optional initial navigation route mounted by the spawned engine.
+  const char* initial_route;
+  /// Command line arguments passed to the Dart entrypoint.
+  const char* const* entrypoint_argv;
+  /// Number of elements in `entrypoint_argv`.
+  int entrypoint_argc;
+  /// User data baton associated with the spawned engine's callbacks.
+  void* user_data;
+  /// Project arguments configuring callbacks and compositor for the spawned
+  /// engine.
+  const FlutterProjectArgs* project_args;
+  /// Renderer configuration for the spawned engine.
+  const FlutterRendererConfig* renderer_config;
+} FlutterEngineSpawnConfig;
 
 typedef struct {
   /// The size of this struct. Must be
@@ -3640,6 +3881,79 @@ FlutterEngineResult FlutterEngineSetNextFrameCallback(
     VoidCallback callback,
     void* user_data);
 
+//------------------------------------------------------------------------------
+/// @brief      Notifies the engine that a rendering surface has been created
+///             or reattached (e.g., on Android `surfaceCreated`).
+///
+/// @param[in]  engine  A running engine instance.
+///
+/// @return     The result of the call.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineNotifyCreated(FLUTTER_API_SYMBOL(FlutterEngine)
+                                                   engine);
+
+//------------------------------------------------------------------------------
+/// @brief      Notifies the engine synchronously that the rendering surface has
+///             been destroyed (e.g., on Android `surfaceDestroyed`), releasing
+///             all swapchains and native window references before returning.
+///
+/// @param[in]  engine  A running engine instance.
+///
+/// @return     The result of the call.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineNotifyDestroyed(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine);
+
+//------------------------------------------------------------------------------
+/// @brief      Updates the availability state of GPU resources for the engine
+///             (e.g., when transitioning to/from background on Android).
+///
+/// @param[in]  engine        A running engine instance.
+/// @param[in]  availability  The new GPU availability state.
+///
+/// @return     The result of the call.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineSetGpuAvailability(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterGpuAvailability availability);
+
+//------------------------------------------------------------------------------
+/// @brief      Spawns a lightweight child engine instance from an existing
+///             running parent engine, sharing the Dart VM, isolate group,
+///             thread host, and GPU context.
+///
+/// @param[in]  parent_engine       A running parent engine instance.
+/// @param[in]  config              Configuration for the spawned engine.
+/// @param[out] spawned_engine_out  The newly spawned running engine instance.
+///
+/// @return     The result of the call.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine)
+                                           parent_engine,
+                                       const FlutterEngineSpawnConfig* config,
+                                       FLUTTER_API_SYMBOL(FlutterEngine) *
+                                           spawned_engine_out);
+
+//------------------------------------------------------------------------------
+/// @brief      Loads a memory-mapped Dart deferred library loading unit into a
+///             running engine instance.
+///
+/// @param[in]  engine   A running engine instance.
+/// @param[in]  library  Descriptor containing the memory-mapped snapshot data
+///                      and instructions buffers and their destruction
+///                      callback.
+///
+/// @return     The result of the call.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineLoadDartDeferredLibrary(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterDartDeferredLibrary* library);
+
 #endif  // !FLUTTER_ENGINE_NO_PROTOTYPES
 
 // Typedefs for the function pointers in FlutterEngineProcTable.
@@ -3774,6 +4088,20 @@ typedef FlutterEngineResult (*FlutterEngineRemoveViewFnPtr)(
 typedef FlutterEngineResult (*FlutterEngineSendViewFocusEventFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterViewFocusEvent* event);
+typedef FlutterEngineResult (*FlutterEngineNotifyCreatedFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine);
+typedef FlutterEngineResult (*FlutterEngineNotifyDestroyedFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine);
+typedef FlutterEngineResult (*FlutterEngineSetGpuAvailabilityFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterGpuAvailability availability);
+typedef FlutterEngineResult (*FlutterEngineSpawnFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) parent_engine,
+    const FlutterEngineSpawnConfig* config,
+    FLUTTER_API_SYMBOL(FlutterEngine) * spawned_engine_out);
+typedef FlutterEngineResult (*FlutterEngineLoadDartDeferredLibraryFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterDartDeferredLibrary* library);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -3824,6 +4152,11 @@ typedef struct {
   FlutterEngineRemoveViewFnPtr RemoveView;
   FlutterEngineSendViewFocusEventFnPtr SendViewFocusEvent;
   FlutterEngineSendSemanticsActionFnPtr SendSemanticsAction;
+  FlutterEngineNotifyCreatedFnPtr NotifyCreated;
+  FlutterEngineNotifyDestroyedFnPtr NotifyDestroyed;
+  FlutterEngineSetGpuAvailabilityFnPtr SetGpuAvailability;
+  FlutterEngineSpawnFnPtr Spawn;
+  FlutterEngineLoadDartDeferredLibraryFnPtr LoadDartDeferredLibrary;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------

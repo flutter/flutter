@@ -22,7 +22,7 @@ struct ShellArgs {
 };
 
 EmbedderEngine::EmbedderEngine(
-    std::unique_ptr<EmbedderThreadHost> thread_host,
+    std::shared_ptr<EmbedderThreadHost> thread_host,
     const flutter::TaskRunners& task_runners,
     const flutter::Settings& settings,
     RunConfiguration run_configuration,
@@ -35,6 +35,17 @@ EmbedderEngine::EmbedderEngine(
       shell_args_(std::make_unique<ShellArgs>(settings,
                                               on_create_platform_view,
                                               on_create_rasterizer)),
+      external_texture_resolver_(std::move(external_texture_resolver)) {}
+
+EmbedderEngine::EmbedderEngine(
+    std::shared_ptr<EmbedderThreadHost> thread_host,
+    const flutter::TaskRunners& task_runners,
+    std::unique_ptr<Shell> spawned_shell,
+    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
+    : thread_host_(std::move(thread_host)),
+      task_runners_(task_runners),
+      run_configuration_(nullptr),
+      shell_(std::move(spawned_shell)),
       external_texture_resolver_(std::move(external_texture_resolver)) {}
 
 EmbedderEngine::~EmbedderEngine() = default;
@@ -70,37 +81,38 @@ void EmbedderEngine::CollectThreadHost() {
     return;
   }
 
-  // Once the collected, EmbedderThreadHost::RunnerIsValid will return false for
-  // all runners belonging to this thread host. This must be done with UI task
-  // runner blocked to prevent possible raciness that could happen when
-  // destroying the thread host in the middle of UI task runner execution. This
-  // is not an issue for other runners, because raster task runner should not
-  // have anything scheduled after engine shutdown and platform task runner is
-  // where this method is called from.
-  if (thread_host_->GetTaskRunners().GetUITaskRunner() &&
-      !thread_host_->GetTaskRunners()
-           .GetUITaskRunner()
-           ->RunsTasksOnCurrentThread()) {
-    fml::AutoResetWaitableEvent ui_thread_running;
-    fml::AutoResetWaitableEvent ui_thread_block;
-    fml::AutoResetWaitableEvent ui_thread_finished;
+  // Only invalidate active runners when the last engine sharing this
+  // EmbedderThreadHost is being collected.
+  if (thread_host_.use_count() == 1) {
+    // Once collected, EmbedderThreadHost::RunnerIsValid will return false for
+    // all runners belonging to this thread host. This must be done with UI task
+    // runner blocked to prevent possible raciness that could happen when
+    // destroying the thread host in the middle of UI task runner execution.
+    if (thread_host_->GetTaskRunners().GetUITaskRunner() &&
+        !thread_host_->GetTaskRunners()
+             .GetUITaskRunner()
+             ->RunsTasksOnCurrentThread()) {
+      fml::AutoResetWaitableEvent ui_thread_running;
+      fml::AutoResetWaitableEvent ui_thread_block;
+      fml::AutoResetWaitableEvent ui_thread_finished;
 
-    thread_host_->GetTaskRunners().GetUITaskRunner()->PostTask([&] {
-      ui_thread_running.Signal();
-      ui_thread_block.Wait();
-      ui_thread_finished.Signal();
-    });
+      thread_host_->GetTaskRunners().GetUITaskRunner()->PostTask([&] {
+        ui_thread_running.Signal();
+        ui_thread_block.Wait();
+        ui_thread_finished.Signal();
+      });
 
-    // Wait until the task is running on the UI thread.
-    ui_thread_running.Wait();
-    thread_host_->InvalidateActiveRunners();
-    ui_thread_block.Signal();
+      // Wait until the task is running on the UI thread.
+      ui_thread_running.Wait();
+      thread_host_->InvalidateActiveRunners();
+      ui_thread_block.Signal();
 
-    // Needed to keep ui_thread_block in scope until the UI thread execution
-    // finishes.
-    ui_thread_finished.Wait();
-  } else {
-    thread_host_->InvalidateActiveRunners();
+      // Needed to keep ui_thread_block in scope until the UI thread execution
+      // finishes.
+      ui_thread_finished.Wait();
+    } else {
+      thread_host_->InvalidateActiveRunners();
+    }
   }
   thread_host_.reset();
 }
@@ -121,6 +133,11 @@ const TaskRunners& EmbedderEngine::GetTaskRunners() const {
   return task_runners_;
 }
 
+const std::shared_ptr<EmbedderThreadHost>& EmbedderEngine::GetThreadHost()
+    const {
+  return thread_host_;
+}
+
 bool EmbedderEngine::NotifyCreated() {
   if (!IsValid()) {
     return false;
@@ -137,6 +154,30 @@ bool EmbedderEngine::NotifyDestroyed() {
 
   shell_->GetPlatformView()->NotifyDestroyed();
 
+  return true;
+}
+
+bool EmbedderEngine::SetGpuAvailability(FlutterGpuAvailability availability) {
+  if (!IsValid()) {
+    return false;
+  }
+
+  GpuAvailability shell_availability = GpuAvailability::kAvailable;
+  switch (availability) {
+    case kFlutterGpuAvailabilityAvailable:
+      shell_availability = GpuAvailability::kAvailable;
+      break;
+    case kFlutterGpuAvailabilityFlushAndMakeUnavailable:
+      shell_availability = GpuAvailability::kFlushAndMakeUnavailable;
+      break;
+    case kFlutterGpuAvailabilityUnavailable:
+      shell_availability = GpuAvailability::kUnavailable;
+      break;
+    default:
+      return false;
+  }
+
+  shell_->SetGpuAvailability(shell_availability);
   return true;
 }
 

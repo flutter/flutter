@@ -340,16 +340,10 @@ Future<void> main(List<String> args) async {
         ? 'android_debug_unopt'
         : 'host_debug_unopt';
 
-    final secondaryVariant = primaryVariant == 'android_debug_unopt'
-        ? 'host_debug_unopt'
-        : 'android_debug_unopt';
-
     final clangTidyArgs = <String>[
       '$engineFlutterDir/tools/clang_tidy/bin/main.dart',
       '--src-dir=$engineSrcDir',
       '--target-variant=$primaryVariant',
-      if (File('$engineSrcDir/out/$secondaryVariant/compile_commands.json').existsSync())
-        '--shard-variants=$secondaryVariant',
       '--lint-regex=($regexPattern)',
     ];
 

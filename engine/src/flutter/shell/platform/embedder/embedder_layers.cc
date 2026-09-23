@@ -61,6 +61,7 @@ void EmbedderLayers::PushBackingStoreLayer(
   auto present_info = std::make_unique<FlutterBackingStorePresentInfo>();
   present_info->struct_size = sizeof(FlutterBackingStorePresentInfo);
   present_info->paint_region = paint_region.get();
+  present_info->synchronization_fence_fd = -1;
   regions_referenced_.push_back(std::move(paint_region));
   layer.backing_store_present_info = present_info.get();
   layer.presentation_time = presentation_time_;
