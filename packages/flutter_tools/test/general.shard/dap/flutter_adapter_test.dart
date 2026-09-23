@@ -353,6 +353,47 @@ void main() {
         // Also ensure we got console output with the error.
         expect(consoleOutputMessages, contains('App stopped due to an error\n'));
       });
+
+      test(
+        'does not throw unhandled exception if process exits before debugger initialized',
+        () async {
+          final debuggerCompleter = Completer<void>();
+          final adapter = FakeFlutterDebugAdapter(
+            fileSystem: MemoryFileSystem.test(style: fsStyle),
+            platform: platform,
+            customDebuggerInitialized: debuggerCompleter.future,
+          );
+          final responseCompleter = Completer<void>();
+          final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart');
+
+          final consoleOutputMessages = <String>[];
+          final StreamSubscription<String> consoleOutputMessagesSubscription = adapter
+              .dapToClientMessages
+              .where((Map<String, Object?> message) => message['event'] == 'output')
+              .map((Map<String, Object?> message) => message['body']! as Map<String, Object?>)
+              .where(
+                (Map<String, Object?> body) =>
+                    body['category'] == 'console' || body['category'] == null,
+              )
+              .map((Map<String, Object?> body) => body['output']! as String)
+              .listen(consoleOutputMessages.add);
+
+          await adapter.configurationDoneRequest(FakeRequest(), null, () {});
+          await adapter.launchRequest(FakeRequest(), args, responseCompleter.complete);
+          await responseCompleter.future;
+
+          expect(adapter.waitingForDebugger, isTrue);
+
+          adapter.handleExitCode(255);
+          await pumpEventQueue();
+          await consoleOutputMessagesSubscription.cancel();
+
+          expect(
+            consoleOutputMessages,
+            contains('Session terminated before debugger initialized: (255)\n'),
+          );
+        },
+      );
     });
 
     group('attachRequest', () {
@@ -545,6 +586,47 @@ void main() {
 
         expect(adapter.dapToFlutterRequests, contains('app.detach'));
       });
+
+      test(
+        'does not throw unhandled exception if process exits before debugger initialized',
+        () async {
+          final debuggerCompleter = Completer<void>();
+          final adapter = FakeFlutterDebugAdapter(
+            fileSystem: MemoryFileSystem.test(style: fsStyle),
+            platform: platform,
+            customDebuggerInitialized: debuggerCompleter.future,
+          );
+          final responseCompleter = Completer<void>();
+          final args = FlutterAttachRequestArguments(cwd: '.');
+
+          final consoleOutputMessages = <String>[];
+          final StreamSubscription<String> consoleOutputMessagesSubscription = adapter
+              .dapToClientMessages
+              .where((Map<String, Object?> message) => message['event'] == 'output')
+              .map((Map<String, Object?> message) => message['body']! as Map<String, Object?>)
+              .where(
+                (Map<String, Object?> body) =>
+                    body['category'] == 'console' || body['category'] == null,
+              )
+              .map((Map<String, Object?> body) => body['output']! as String)
+              .listen(consoleOutputMessages.add);
+
+          await adapter.configurationDoneRequest(FakeRequest(), null, () {});
+          await adapter.attachRequest(FakeRequest(), args, responseCompleter.complete);
+          await responseCompleter.future;
+
+          expect(adapter.waitingForDebugger, isTrue);
+
+          adapter.handleExitCode(255);
+          await pumpEventQueue();
+          await consoleOutputMessagesSubscription.cancel();
+
+          expect(
+            consoleOutputMessages,
+            contains('Session terminated before debugger initialized: (255)\n'),
+          );
+        },
+      );
     });
 
     group('forwards events', () {

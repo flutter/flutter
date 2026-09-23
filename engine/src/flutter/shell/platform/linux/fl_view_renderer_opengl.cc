@@ -4,8 +4,6 @@
 
 #include "flutter/shell/platform/linux/fl_view_renderer_opengl.h"
 
-#include <gdk/gdkwayland.h>
-
 #include "flutter/shell/platform/linux/fl_compositor_opengl.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_opengl_frame.h"
@@ -135,12 +133,7 @@ static void fl_view_renderer_opengl_realize(GtkWidget* widget) {
     return;
   }
 
-  // If using Wayland, then EGL is in use and we can access the frame
-  // from the Flutter context using EGLImage. If not (i.e. X11 using GLX)
-  // then we have to copy the texture via the CPU.
-  gboolean shareable =
-      GDK_IS_WAYLAND_DISPLAY(gtk_widget_get_display(GTK_WIDGET(self)));
-  self->frame = fl_opengl_frame_new(shareable);
+  self->frame = fl_opengl_frame_new();
   self->task_runner =
       FL_TASK_RUNNER(g_object_ref(fl_engine_get_task_runner(self->engine)));
   self->compositor =

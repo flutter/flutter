@@ -158,6 +158,120 @@ void main() {
 
     pumpFrame(phase: EnginePhase.flushSemantics);
   });
+
+  test(
+    'semantics geometry updates when dropped child with dirty parent data rejoins the semantics tree',
+    () {
+      final greatGrandChild = RenderTestParent();
+      greatGrandChild.explicitChildNode = true;
+
+      final grandChild = RenderTestTransformParent(child: greatGrandChild);
+      grandChild.explicitChildNode = true;
+
+      final child = RenderTestParent(child: grandChild);
+      child.explicitChildNode = true;
+
+      final container = RenderTestParent(child: child);
+      container.explicitChildNode = true;
+
+      final root = RenderTestLastChildSemanticsMultiChildParent(children: <RenderBox>[container]);
+      root.explicitChildNode = true;
+
+      TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics();
+      layout(root, phase: EnginePhase.flushSemantics);
+
+      // Initial state: root visits container, child, grandChild, and greatGrandChild.
+      expect(root.debugSemantics!.childrenCount, 1);
+      expect(greatGrandChild.debugSemantics!.transform, null);
+
+      // To trigger the scenario:
+      // Mark greatGrandChild as needing semantics update (setting parentData = null, parentDataDirty = true).
+      greatGrandChild.markNeedsSemanticsUpdate();
+
+      // Adding a new child to root makes it drop container and its subtree from semantics tree.
+      final newChild = RenderTestLayoutSemanticsBoundary();
+      newChild.isSemanticBoundary = true;
+      root.add(newChild);
+
+      pumpFrame(phase: EnginePhase.flushSemantics);
+
+      // Verify container and subtree were dropped.
+      expect(root.debugSemantics!.childrenCount, 1);
+      final children = <SemanticsNode>[];
+      root.debugSemantics!.visitChildren((SemanticsNode child) {
+        children.add(child);
+        return true;
+      });
+      expect(children.single, newChild.debugSemantics);
+
+      // Update grandChild's transform and remove newChild so subtree rejoins the semantics tree.
+      grandChild.transform = Matrix4.translationValues(20.0, 30.0, 0.0);
+      root.remove(newChild);
+
+      pumpFrame(phase: EnginePhase.flushSemantics);
+
+      // Verify greatGrandChild is back in the semantics tree and its geometry was updated with transform.
+      expect(root.debugSemantics!.childrenCount, 1);
+      expect(greatGrandChild.debugSemantics!.transform, Matrix4.translationValues(20.0, 30.0, 0.0));
+    },
+  );
+}
+
+class RenderTestTransformParent extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+  RenderTestTransformParent({RenderBox? child}) {
+    this.child = child;
+  }
+
+  bool isSemanticBoundary = false;
+  bool explicitChildNode = false;
+  Matrix4? transform = Matrix4.identity();
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = isSemanticBoundary;
+    config.explicitChildNodes = explicitChildNode;
+    config.label = 'Transform Parent';
+    config.textDirection = TextDirection.ltr;
+  }
+
+  @override
+  void setupParentData(RenderObject child) {
+    if (child.parentData is! BoxParentData) {
+      child.parentData = BoxParentData();
+    }
+  }
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      child!.layout(constraints.loosen());
+    }
+    size = constraints.biggest;
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    if (this.transform != null) {
+      transform.multiply(this.transform!);
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) {
+      if (transform != null) {
+        context.pushTransform(needsCompositing, offset, transform!, (
+          PaintingContext context,
+          Offset offset,
+        ) {
+          context.paintChild(child!, offset);
+        });
+      } else {
+        context.paintChild(child!, offset);
+      }
+    }
+  }
 }
 
 class RenderTestParentUsesSize extends RenderTestParent {

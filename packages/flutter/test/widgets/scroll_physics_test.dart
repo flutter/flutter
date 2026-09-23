@@ -30,6 +30,16 @@ class TestScrollPhysics extends ScrollPhysics {
 void main() {
   const kBlueColor = Color(0xFF0000FF);
 
+  test('ScrollPhysics.allowSelectionEdgeScrolling', () {
+    expect(const BouncingScrollPhysics().allowSelectionEdgeScrolling, isTrue);
+    expect(const PageScrollPhysics().allowSelectionEdgeScrolling, isFalse);
+    // Resolves through the parent chain so wrapped page physics still count.
+    expect(
+      const ClampingScrollPhysics(parent: PageScrollPhysics()).allowSelectionEdgeScrolling,
+      isFalse,
+    );
+  });
+
   test('ScrollPhysics applyTo()', () {
     const a = TestScrollPhysics(name: 'a');
     const b = TestScrollPhysics(name: 'b');

@@ -113,7 +113,7 @@ TEST_F(FlSubsurfaceEGLTest, Present) {
 
   EXPECT_CALL(epoxy, glBlitFramebuffer);
 
-  fl_subsurface_egl_present(egl, 1, kWidth, kHeight);
+  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
 }
 
 // The native window is resized if a frame of a different size arrives, so the
@@ -124,7 +124,7 @@ TEST_F(FlSubsurfaceEGLTest, PresentResizes) {
 
   EXPECT_CALL(wayland, EGLWindowResize(kWidth, kHeight));
 
-  fl_subsurface_egl_present(egl, 1, kWidth, kHeight);
+  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
 }
 
 // Drivers without glBlitFramebuffer draw the frame with a shader instead.
@@ -138,7 +138,7 @@ TEST_F(FlSubsurfaceEGLTest, PresentWithoutBlit) {
 
   EXPECT_CALL(epoxy, glBlitFramebuffer).Times(0);
 
-  fl_subsurface_egl_present(egl, 1, kWidth, kHeight);
+  fl_subsurface_egl_present(egl, 1, kWidth, kHeight, nullptr);
 }
 
 // The native window is released with the object.

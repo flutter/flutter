@@ -316,6 +316,78 @@ void main() {
     expect(boundaryParentObject.hasRebuildSemantics, isTrue);
     expect(grandBoundaryParentObject.hasRebuildSemantics, isFalse);
   });
+
+  testWidgets('MergeSemantics + sibling merge group on update', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+    const first = SemanticsTag('1');
+    const second = SemanticsTag('2');
+    const third = SemanticsTag('3');
+    ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
+      final builder = ChildSemanticsConfigurationsResultBuilder();
+      final sibling = <SemanticsConfiguration>[];
+      for (final config in configs) {
+        if (config.tagsChildrenWith(first) || config.tagsChildrenWith(third)) {
+          sibling.add(config);
+        } else {
+          builder.markAsMergeUp(config);
+        }
+      }
+      builder.markAsSiblingMergeGroup(sibling);
+      return builder.build();
+    }
+
+    Widget buildTree(String label) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MergeSemantics(
+          child: Semantics(
+            label: 'parent',
+            child: TestConfigDelegate(
+              delegate: delegate,
+              child: Column(
+                children: <Widget>[
+                  Semantics(
+                    label: label,
+                    tagForChildren: first,
+                    child: const SizedBox(width: 100, height: 100),
+                  ),
+                  Semantics(
+                    label: '2',
+                    tagForChildren: second,
+                    child: const SizedBox(width: 100, height: 100),
+                  ),
+                  Semantics(
+                    label: '3',
+                    tagForChildren: third,
+                    child: const SizedBox(width: 100, height: 100),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTree('1'));
+    // Trigger a semantics update on the second frame to verify cached sibling nodes
+    // maintain isMergedIntoParent = true.
+    await tester.pumpWidget(buildTree('1 updated'));
+
+    expect(tester.takeException(), isNull);
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[TestSemantics.rootChild(label: 'parent\n2\n1 updated\n3')],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+    semantics.dispose();
+  });
 }
 
 class MarkSemanticsDirtySpy extends SingleChildRenderObjectWidget {

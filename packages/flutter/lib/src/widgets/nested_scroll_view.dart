@@ -797,6 +797,10 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     double pixels, minRange, maxRange, correctionOffset;
     var extra = 0.0;
     if (innerPosition.pixels == innerPosition.minScrollExtent) {
+      // minRange/maxRange here always span the outer position's full range,
+      // so it can't degenerate the way it can in the `else` branch; see
+      // correctPixelsIfOutOfRange for why that branch needs the correction
+      // and this one doesn't.
       pixels = clampDouble(
         _outerPosition!.pixels,
         _outerPosition!.minScrollExtent,
@@ -808,6 +812,10 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       correctionOffset = 0.0;
     } else {
       assert(innerPosition.pixels != innerPosition.minScrollExtent);
+      // The `extra` computations below assume the outer position is within
+      // its own range; see correctPixelsIfOutOfRange for why that can
+      // transiently be false, and why it must be corrected here.
+      _outerPosition!.correctPixelsIfOutOfRange();
       if (innerPosition.pixels < innerPosition.minScrollExtent) {
         pixels =
             innerPosition.pixels - innerPosition.minScrollExtent + _outerPosition!.minScrollExtent;
@@ -1458,6 +1466,27 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       didStartScroll();
       didUpdateScrollPositionBy(pixels - oldPixels);
       didEndScroll();
+    }
+  }
+
+  /// Corrects [pixels] back within `[minScrollExtent, maxScrollExtent]` if
+  /// it is currently outside that range.
+  ///
+  /// A header sliver's extent (e.g. a [SliverAppBar]'s `expandedHeight`) can
+  /// change mid-fling, leaving this position transiently out of range for
+  /// one frame until the next layout catches up.
+  /// `RangeMaintainingScrollPhysics` intentionally skips its usual
+  /// correction while a ballistic activity is in flight, so nothing else
+  /// corrects it in that window. The coordinator calls this before computing
+  /// ballistic metrics so it never operates on a stale out-of-range value.
+  void correctPixelsIfOutOfRange() {
+    // Not haveDimensions: this can run before that bookkeeping flag is set,
+    // e.g. via ScrollPosition.restoreOffset -> jumpTo -> goBallistic during
+    // state restoration, even though pixels/minScrollExtent/maxScrollExtent
+    // already hold valid values by then.
+    assert(hasPixels && hasContentDimensions);
+    if (pixels < minScrollExtent || pixels > maxScrollExtent) {
+      correctPixels(clampDouble(pixels, minScrollExtent, maxScrollExtent));
     }
   }
 

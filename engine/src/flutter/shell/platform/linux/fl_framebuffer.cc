@@ -4,10 +4,7 @@
 
 #include "fl_framebuffer.h"
 
-#include <epoxy/egl.h>
 #include <epoxy/gl.h>
-
-#include "flutter/shell/platform/linux/fl_egl_image.h"
 
 struct _FlFramebuffer {
   GObject parent_instance;
@@ -29,9 +26,6 @@ struct _FlFramebuffer {
 
   // Depth and stencil renderbuffer associated with this framebuffer.
   GLuint depth_stencil;
-
-  // EGL image for this texture.
-  FlEGLImage* image;
 };
 
 G_DEFINE_TYPE(FlFramebuffer, fl_framebuffer, G_TYPE_OBJECT)
@@ -55,7 +49,6 @@ static void fl_framebuffer_dispose(GObject* object) {
     glDeleteRenderbuffers(1, &self->depth_stencil);
     self->depth_stencil = 0;
   }
-  g_clear_object(&self->image);
 
   G_OBJECT_CLASS(fl_framebuffer_parent_class)->dispose(object);
 }
@@ -100,10 +93,7 @@ static void attach_depth_stencil(GLuint depth_stencil) {
                             GL_RENDERBUFFER, depth_stencil);
 }
 
-FlFramebuffer* fl_framebuffer_new(GLint format,
-                                  size_t width,
-                                  size_t height,
-                                  gboolean shareable) {
+FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height) {
   FlFramebuffer* self =
       FL_FRAMEBUFFER(g_object_new(fl_framebuffer_get_type(), nullptr));
 
@@ -114,10 +104,6 @@ FlFramebuffer* fl_framebuffer_new(GLint format,
   glBindFramebuffer(GL_FRAMEBUFFER, self->framebuffer_id);
 
   self->texture_id = create_texture(format, width, height);
-
-  if (shareable) {
-    self->image = fl_egl_image_new(self->texture_id);
-  }
 
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                          self->texture_id, 0);
@@ -198,40 +184,6 @@ FlFramebuffer* fl_framebuffer_new_multisample(GLint format,
   }
 
   return self;
-}
-
-gboolean fl_framebuffer_get_shareable(FlFramebuffer* self) {
-  g_return_val_if_fail(FL_IS_FRAMEBUFFER(self), FALSE);
-  return self->image != nullptr;
-}
-
-FlFramebuffer* fl_framebuffer_create_sibling(FlFramebuffer* self) {
-  g_return_val_if_fail(FL_IS_FRAMEBUFFER(self), nullptr);
-  g_return_val_if_fail(self->image != nullptr, nullptr);
-
-  FlFramebuffer* sibling =
-      FL_FRAMEBUFFER(g_object_new(fl_framebuffer_get_type(), nullptr));
-
-  sibling->width = self->width;
-  sibling->height = self->height;
-  sibling->image = FL_EGL_IMAGE(g_object_ref(self->image));
-
-  // Make texture from existing image.
-  glGenTextures(1, &sibling->texture_id);
-  glBindTexture(GL_TEXTURE_2D, sibling->texture_id);
-  glEGLImageTargetTexture2DOES(GL_TEXTURE_2D,
-                               fl_egl_image_get_image(self->image));
-
-  // Make framebuffer that uses this texture.
-  glGenFramebuffers(1, &sibling->framebuffer_id);
-  GLint saved_framebuffer_binding;
-  glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &saved_framebuffer_binding);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, sibling->framebuffer_id);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                         sibling->texture_id, 0);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_framebuffer_binding);
-
-  return sibling;
 }
 
 GLuint fl_framebuffer_get_id(FlFramebuffer* self) {
