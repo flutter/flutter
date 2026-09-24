@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -36,15 +37,13 @@ import 'object.dart';
 ///  * [TextureRegistry Protocol](/ios-embedder/protocol_flutter_texture_registry-p.html)
 ///    for how to create and manage backend textures on iOS.
 class TextureBox extends RenderBox {
-  /// Creates a box backed by the texture identified by [textureId], and use
-  /// [filterQuality] to set texture's [FilterQuality].
+  /// Creates a box backed by the texture identified by [_textureId], and use
+  /// [_filterQuality] to set texture's [FilterQuality].
   TextureBox({
-    required int textureId,
-    bool freeze = false,
-    FilterQuality filterQuality = FilterQuality.low,
-  }) : _textureId = textureId,
-       _freeze = freeze,
-       _filterQuality = filterQuality;
+    required this._textureId,
+    this._freeze = false,
+    this._filterQuality = FilterQuality.low,
+  });
 
   /// The identity of the backend texture.
   int get textureId => _textureId;
@@ -52,6 +51,24 @@ class TextureBox extends RenderBox {
   set textureId(int value) {
     if (value != _textureId) {
       _textureId = value;
+      markNeedsPaint();
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    RendererBinding.instance.addTextureFrameAvailableCallback(_handleTextureFrameAvailable);
+  }
+
+  @override
+  void detach() {
+    RendererBinding.instance.removeTextureFrameAvailableCallback(_handleTextureFrameAvailable);
+    super.detach();
+  }
+
+  void _handleTextureFrameAvailable(int textureId) {
+    if (!_freeze && textureId == _textureId) {
       markNeedsPaint();
     }
   }
