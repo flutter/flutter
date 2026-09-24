@@ -524,6 +524,14 @@ void FlutterEmbedderNative::HandleCompositorFramePresented() {
       });
 }
 
+static bool HasCurrentEGLContext() {
+#if FML_OS_ANDROID
+  return eglGetCurrentContext() != EGL_NO_CONTEXT;
+#else
+  return true;
+#endif
+}
+
 void FlutterEmbedderNative::PopulateRendererConfig(
     FlutterRendererConfig* config) {
   if (!config) {
@@ -531,6 +539,10 @@ void FlutterEmbedderNative::PopulateRendererConfig(
   }
   std::memset(config, 0, sizeof(FlutterRendererConfig));
   AndroidRenderingAPI rendering_api = GetSelectedRenderingAPI();
+  if (rendering_api != AndroidRenderingAPI::kImpellerVulkan &&
+      rendering_api != AndroidRenderingAPI::kImpellerAutoselect) {
+    SetHcppEnabled(false);
+  }
   switch (rendering_api) {
 #if !SLIMPELLER
     case AndroidRenderingAPI::kSoftware:
@@ -1049,7 +1061,8 @@ FlutterEmbedderNative::FlutterEmbedderNative()
   InitializeRuntimeSubsystems();
   AttachWindowMetricsCallbacks();
   if (auto vm_args = GetVMArgs(); vm_args.has_value()) {
-    SetHcppEnabled(vm_args->enable_surface_control);
+    SetHcppEnabled(
+        ShouldEnableSurfaceControl(*vm_args, GetSelectedRenderingAPI()));
   }
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterEmbedderNative");
   FML_DLOG(INFO)
@@ -1161,7 +1174,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
   InitializeRuntimeSubsystems();
   AttachWindowMetricsCallbacks();
   if (auto vm_args = GetVMArgs(); vm_args.has_value()) {
-    SetHcppEnabled(vm_args->enable_surface_control);
+    SetHcppEnabled(
+        ShouldEnableSurfaceControl(*vm_args, GetSelectedRenderingAPI()));
   }
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::FlutterEmbedderNative(custom)");
@@ -1172,9 +1186,6 @@ FlutterEmbedderNative::~FlutterEmbedderNative() {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::~FlutterEmbedderNative");
   if (vsync_waiter_ != nullptr) {
     vsync_waiter_->SetEngine(nullptr);
-  }
-  if (android_task_runners_ != nullptr) {
-    android_task_runners_->SetEngine(nullptr);
   }
   if (compositor_delegate_ != nullptr) {
     compositor_delegate_->Detach();
@@ -1203,6 +1214,9 @@ FlutterEmbedderNative::~FlutterEmbedderNative() {
       }
     }
     SetEngine(nullptr);
+  }
+  if (android_task_runners_ != nullptr) {
+    android_task_runners_->SetEngine(nullptr);
   }
   if (!engine || initialize_engine_fn_) {
     for (auto& r : asset_resolvers_storage_) {
@@ -1271,13 +1285,16 @@ FlutterEmbedderNative::~FlutterEmbedderNative() {
         entry.current_image = nullptr;
       }
       if (entry.gl_texture_id != 0) {
-        typedef void (*PFNGLDELETETEXTURESPROC)(int, const uint32_t*);
-        static auto delete_textures_fn =
-            reinterpret_cast<PFNGLDELETETEXTURESPROC>(
-                renderer_config_.open_gl.gl_proc_resolver(nullptr,
-                                                          "glDeleteTextures"));
-        if (delete_textures_fn) {
-          delete_textures_fn(1, &entry.gl_texture_id);
+        if (HasCurrentEGLContext() &&
+            renderer_config_.open_gl.gl_proc_resolver) {
+          typedef void (*PFNGLDELETETEXTURESPROC)(int, const uint32_t*);
+          static auto delete_textures_fn =
+              reinterpret_cast<PFNGLDELETETEXTURESPROC>(
+                  renderer_config_.open_gl.gl_proc_resolver(
+                      nullptr, "glDeleteTextures"));
+          if (delete_textures_fn) {
+            delete_textures_fn(1, &entry.gl_texture_id);
+          }
         }
         entry.gl_texture_id = 0;
       }
@@ -3284,7 +3301,8 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
       entrypoint_argv_ptrs_.empty() ? nullptr : entrypoint_argv_ptrs_.data();
 
   AndroidVMArgs vm_args = GetVMArgs().value_or(AndroidVMArgs{});
-  SetHcppEnabled(vm_args.enable_surface_control);
+  SetHcppEnabled(
+      ShouldEnableSurfaceControl(vm_args, GetSelectedRenderingAPI()));
 
   command_line_args_storage_ = vm_args.command_line_args;
   if (command_line_args_storage_.empty()) {
@@ -3941,7 +3959,8 @@ void FlutterEmbedderNative::UnregisterSurfaceTexture(int64_t texture_id) {
       surface_texture_gl_ids_.erase(it);
     }
   }
-  if (gl_id != 0 && renderer_config_.open_gl.gl_proc_resolver) {
+  if (gl_id != 0 && HasCurrentEGLContext() &&
+      renderer_config_.open_gl.gl_proc_resolver) {
     typedef void (*PFNGLDELETETEXTURESPROC)(int, const uint32_t*);
     static PFNGLDELETETEXTURESPROC delete_textures_fn =
         reinterpret_cast<PFNGLDELETETEXTURESPROC>(
@@ -4002,15 +4021,16 @@ void FlutterEmbedderNative::UnregisterImageTexture(int64_t texture_id) {
         env->ExceptionClear();
       }
     }
-    if (it->second.gl_texture_id != 0 &&
-        renderer_config_.open_gl.gl_proc_resolver) {
-      typedef void (*PFNGLDELETETEXTURESPROC)(int, const uint32_t*);
-      static auto delete_textures_fn =
-          reinterpret_cast<PFNGLDELETETEXTURESPROC>(
-              renderer_config_.open_gl.gl_proc_resolver(nullptr,
-                                                        "glDeleteTextures"));
-      if (delete_textures_fn) {
-        delete_textures_fn(1, &it->second.gl_texture_id);
+    if (it->second.gl_texture_id != 0) {
+      if (HasCurrentEGLContext() && renderer_config_.open_gl.gl_proc_resolver) {
+        typedef void (*PFNGLDELETETEXTURESPROC)(int, const uint32_t*);
+        static auto delete_textures_fn =
+            reinterpret_cast<PFNGLDELETETEXTURESPROC>(
+                renderer_config_.open_gl.gl_proc_resolver(nullptr,
+                                                          "glDeleteTextures"));
+        if (delete_textures_fn) {
+          delete_textures_fn(1, &it->second.gl_texture_id);
+        }
       }
       it->second.gl_texture_id = 0;
     }

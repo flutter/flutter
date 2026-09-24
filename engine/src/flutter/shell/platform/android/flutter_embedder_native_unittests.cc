@@ -8511,6 +8511,128 @@ TEST(FlutterEmbedderNativePlatformMessageTest,
             static_cast<size_t>(kThreads * kMessagesPerThread));
 }
 
+TEST(
+    FlutterEmbedderNativeTeardownTest,
+    DestructorAllowsTaskRunnersToDrainDuringEngineDeinitializeAndMarksDestroyedAfter) {
+  auto native_instance = std::make_unique<FlutterEmbedderNative>();
+  ASSERT_NE(native_instance, nullptr);
+
+  auto task_runners = native_instance->GetTaskRunners();
+  auto vsync_waiter = native_instance->GetVsyncWaiter();
+  ASSERT_NE(task_runners, nullptr);
+  ASSERT_NE(vsync_waiter, nullptr);
+
+  auto fake_engine =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x9999);
+  native_instance->SetEngine(fake_engine);
+  task_runners->SetEngine(fake_engine);
+  vsync_waiter->SetEngine(fake_engine);
+
+  std::atomic<int> tasks_executed_on_engine{0};
+  task_runners->SetRunTaskFnForTesting(
+      [&tasks_executed_on_engine](
+          FLUTTER_API_SYMBOL(FlutterEngine) engine,
+          const FlutterTask* task) -> FlutterEngineResult {
+        if (engine != nullptr && task != nullptr) {
+          tasks_executed_on_engine.fetch_add(1);
+        }
+        return kSuccess;
+      });
+
+  bool deinit_called = false;
+  bool vsync_cleared_before_deinit = false;
+  bool task_runner_engine_valid_during_deinit = false;
+  bool raster_teardown_task_ran_during_deinit = false;
+
+  native_instance->SetDeinitializeEngineFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine) -> FlutterEngineResult {
+        deinit_called = true;
+        vsync_cleared_before_deinit = (vsync_waiter->GetEngine() == nullptr);
+        task_runner_engine_valid_during_deinit =
+            (task_runners->GetEngine() == fake_engine);
+
+        // Simulate Shell::~Shell() posting a synchronous teardown task to the
+        // raster task runner and waiting for it to execute on the raster
+        // thread.
+        FlutterTaskRunnerDescription raster_desc =
+            task_runners->GetRasterTaskRunnerDescription();
+        FlutterTask dummy_task = {};
+        dummy_task.runner = reinterpret_cast<FlutterTaskRunner>(0x1234);
+        dummy_task.task = 42;
+        raster_desc.post_task_callback(dummy_task, 0, raster_desc.user_data);
+
+        std::promise<void> raster_promise;
+        auto raster_future = raster_promise.get_future();
+        task_runners->GetRasterTaskRunner()->PostTask(
+            [&raster_promise]() { raster_promise.set_value(); });
+        raster_future.wait();
+
+        raster_teardown_task_ran_during_deinit =
+            (tasks_executed_on_engine.load() == 1);
+        return kSuccess;
+      });
+
+  // Trigger ~FlutterEmbedderNative().
+  native_instance.reset();
+
+  EXPECT_TRUE(deinit_called);
+  EXPECT_TRUE(vsync_cleared_before_deinit);
+  EXPECT_TRUE(task_runner_engine_valid_during_deinit);
+  EXPECT_TRUE(raster_teardown_task_ran_during_deinit);
+  EXPECT_EQ(task_runners->GetEngine(), nullptr);
+
+  // Verify that any task posted AFTER engine destruction is immediately
+  // discarded (not executed and not staged).
+  FlutterTaskRunnerDescription post_shutdown_desc =
+      task_runners->GetRasterTaskRunnerDescription();
+  FlutterTask late_task = {};
+  late_task.runner = reinterpret_cast<FlutterTaskRunner>(0x1234);
+  late_task.task = 99;
+  post_shutdown_desc.post_task_callback(late_task, 0,
+                                        post_shutdown_desc.user_data);
+
+  std::promise<void> drain_promise;
+  auto drain_future = drain_promise.get_future();
+  task_runners->GetRasterTaskRunner()->PostTask(
+      [&drain_promise]() { drain_promise.set_value(); });
+  drain_future.wait();
+  EXPECT_EQ(tasks_executed_on_engine.load(), 1);
+  EXPECT_EQ(task_runners->GetPendingTasksCount(), 0u);
+}
+
+TEST(FlutterEmbedderNativeHcppGatingTest,
+     HcppDisabledForOpenGLESEvenWhenEnableSurfaceControlIsTrue) {
+  auto vm_init = std::make_shared<AndroidVMInit>();
+  AndroidVMArgs gles_args;
+  gles_args.enable_surface_control = true;
+  gles_args.enable_impeller = true;
+  gles_args.api_level = 35;
+  gles_args.requested_rendering_backend = "opengles";
+  ASSERT_TRUE(vm_init->Init(gles_args));
+  EXPECT_EQ(vm_init->GetSelectedRenderingAPI(),
+            AndroidRenderingAPI::kImpellerOpenGLES);
+
+  FlutterEmbedderNative native_gles(nullptr, nullptr, nullptr, nullptr, nullptr,
+                                    nullptr, nullptr, nullptr, nullptr, nullptr,
+                                    nullptr, nullptr, nullptr, vm_init);
+  EXPECT_FALSE(native_gles.IsHcppEnabled());
+
+  auto vm_init_vk = std::make_shared<AndroidVMInit>();
+  AndroidVMArgs vk_args;
+  vk_args.enable_surface_control = true;
+  vk_args.enable_impeller = true;
+  vk_args.api_level = 35;
+  vk_args.requested_rendering_backend = "vulkan";
+  ASSERT_TRUE(vm_init_vk->Init(vk_args));
+  EXPECT_EQ(vm_init_vk->GetSelectedRenderingAPI(),
+            AndroidRenderingAPI::kImpellerVulkan);
+
+  FlutterEmbedderNative native_vk(nullptr, nullptr, nullptr, nullptr, nullptr,
+                                  nullptr, nullptr, nullptr, nullptr, nullptr,
+                                  nullptr, nullptr, nullptr, vm_init_vk);
+  EXPECT_TRUE(native_vk.IsHcppEnabled());
+}
+
 }  // namespace testing
 }  // namespace android
 }  // namespace flutter
