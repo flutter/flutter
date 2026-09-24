@@ -225,6 +225,93 @@ String _generateSupportJs({required bool requiresMultiMemory}) {
                 "`python3 engine/src/tools/dart/create_updated_flutter_deps.py` to update.",
             )
 
+    def test_ExtractDart2WasmSupportExpression_DoubleAndSingleQuotes(self):
+        mixed_quotes_compile_dart = """
+String _generateSupportJs(WasmCompilerOptions options) {
+  const String supportsWasmGC = "WebAssembly.validate(new Uint8Array([0,97,115,109]))";
+  const String supportsJsStringBuiltins =
+      '!WebAssembly.validate(new Uint8Array([0]),{"builtins":["js-string"]})';
+  final requiredFeatures = [
+    supportsWasmGC,
+    supportsJsStringBuiltins,
+  ];
+  return '(${requiredFeatures.join('&&')})';
+}
+"""
+        self.assertEqual(
+            ExtractDart2WasmSupportExpression(mixed_quotes_compile_dart),
+            '(WebAssembly.validate(new Uint8Array([0,97,115,109]))&&!WebAssembly.validate(new Uint8Array([0]),{"builtins":["js-string"]}))',
+        )
+
+    def test_ResolveDartCompileFileContent_PrecedenceAndWarning(self):
+        import argparse
+        import io
+        import tempfile
+        from unittest import mock
+        import create_updated_flutter_deps
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            local_sdk_dir = os.path.join(tmpdir, "pkg", "dart2wasm", "lib")
+            os.makedirs(local_sdk_dir, exist_ok=True)
+            local_compile = os.path.join(local_sdk_dir, "compile.dart")
+            with open(local_compile, "w", encoding="utf-8") as fp:
+                fp.write("// local stale compile.dart")
+            fake_deps = os.path.join(tmpdir, "DEPS")
+            with open(fake_deps, "w", encoding="utf-8") as fp:
+                fp.write("vars = {}")
+
+            # 1. When --dart_revision (-r) is passed, gitiles at that revision wins over stale local file.
+            args_with_rev = argparse.Namespace(
+                dart_compile_file=None,
+                dart_revision="new_target_rev",
+                dart_deps=fake_deps,
+                flutter_deps=None,
+            )
+            with mock.patch(
+                "create_updated_flutter_deps._FetchCompileDartFromGitiles",
+                return_value="// fetched for new_target_rev",
+            ) as mock_fetch:
+                resolved = create_updated_flutter_deps.ResolveDartCompileFileContent(
+                    args_with_rev, {"dart_revision": "old_flutter_rev"}
+                )
+                self.assertEqual(resolved, "// fetched for new_target_rev")
+                mock_fetch.assert_called_once_with("new_target_rev")
+
+            # 2. When no local file exists and --dart_revision is omitted, falls back to flutter_vars['dart_revision'].
+            args_no_local = argparse.Namespace(
+                dart_compile_file=None,
+                dart_revision=None,
+                dart_deps=None,
+                flutter_deps=None,
+            )
+            with mock.patch(
+                "create_updated_flutter_deps._FetchCompileDartFromGitiles",
+                return_value="// fetched for flutter_vars_rev",
+            ) as mock_fetch_fallback:
+                resolved_fallback = create_updated_flutter_deps.ResolveDartCompileFileContent(
+                    args_no_local, {"dart_revision": "flutter_vars_rev"}
+                )
+                self.assertEqual(resolved_fallback, "// fetched for flutter_vars_rev")
+                mock_fetch_fallback.assert_called_once_with("flutter_vars_rev")
+
+            # 3. SyncBrowserEnvironmentJs logs warning to stderr when compile.dart cannot be resolved.
+            fake_browser_env = os.path.join(tmpdir, "browser_environment.js")
+            with open(fake_browser_env, "w", encoding="utf-8") as fp:
+                fp.write("const supportsDart2Wasm = () => { return (true); }")
+            args_missing = argparse.Namespace(
+                browser_environment_js=fake_browser_env,
+                dart_compile_file=None,
+                dart_revision=None,
+                dart_deps=None,
+                flutter_deps=None,
+            )
+            stderr_buf = io.StringIO()
+            with mock.patch("sys.stderr", stderr_buf):
+                self.assertFalse(
+                    create_updated_flutter_deps.SyncBrowserEnvironmentJs(args_missing, {})
+                )
+            self.assertIn("could not resolve pkg/dart2wasm/lib/compile.dart", stderr_buf.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

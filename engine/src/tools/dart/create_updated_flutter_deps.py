@@ -216,12 +216,13 @@ def ExtractDart2WasmSupportExpression(compile_dart_content):
     )
   fn_body = fn_match.group(1)
 
-  feature_consts = dict(
-      re.findall(
-          r"const\s+String\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*'([^']+)';",
+  feature_consts = {
+      name: (single_quoted or double_quoted)
+      for name, single_quoted, double_quoted in re.findall(
+          r"""const\s+String\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?:'([^']+)'|"([^"]+)");""",
           fn_body,
       )
-  )
+  }
   req_match = re.search(
       r'final\s+requiredFeatures\s*=\s*\[(.*?)\];', fn_body, re.DOTALL
   )
@@ -284,11 +285,37 @@ def UpdateBrowserEnvironmentJsContent(browser_env_content, support_expr):
   return updated
 
 
+def _FetchCompileDartFromGitiles(revision):
+  """Fetches `pkg/dart2wasm/lib/compile.dart` at `revision` from dart.googlesource.com."""
+  url = (
+      f'https://dart.googlesource.com/sdk/+/{revision}/'
+      f'{DART_COMPILE_RELPATH}?format=TEXT'
+  )
+  try:
+    with urllib.request.urlopen(url, timeout=15) as response:
+      encoded = response.read()
+    return base64.b64decode(encoded).decode('utf-8')
+  except Exception as exc:  # pylint: disable=broad-except
+    sys.stderr.write(
+        f'Warning: failed to fetch {url} ({exc}); falling back to local checkout.\n'
+    )
+    return None
+
+
 def ResolveDartCompileFileContent(args, flutter_vars):
   """Resolves `pkg/dart2wasm/lib/compile.dart` content locally or via gitiles."""
   if getattr(args, 'dart_compile_file', None):
     with open(args.dart_compile_file, 'r', encoding='utf-8') as fp:
       return fp.read()
+
+  # When an explicit --dart_revision (-r) is passed (e.g. in roll-dart-dependencies.yml
+  # or a manual roll in a gclient checkout), fetch compile.dart at that revision first
+  # so a pre-existing local third_party/dart checkout does not shadow the target hash.
+  explicit_rev = getattr(args, 'dart_revision', None)
+  if explicit_rev:
+    fetched = _FetchCompileDartFromGitiles(explicit_rev)
+    if fetched:
+      return fetched
 
   # Check sibling of args.dart_deps (e.g., third_party/dart/DEPS or local SDK checkout).
   if getattr(args, 'dart_deps', None):
@@ -299,26 +326,6 @@ def ResolveDartCompileFileContent(args, flutter_vars):
     if os.path.isfile(candidate):
       with open(candidate, 'r', encoding='utf-8') as fp:
         return fp.read()
-
-  # If a specific --dart_revision was passed without a local SDK checkout (e.g., in
-  # roll-dart-dependencies.yml where only DEPS was downloaded), fetch compile.dart
-  # at that revision from dart.googlesource.com.
-  target_rev = getattr(args, 'dart_revision', None) or flutter_vars.get(
-      'dart_revision'
-  )
-  if getattr(args, 'dart_revision', None) and target_rev:
-    url = (
-        f'https://dart.googlesource.com/sdk/+/{target_rev}/'
-        f'{DART_COMPILE_RELPATH}?format=TEXT'
-    )
-    try:
-      with urllib.request.urlopen(url, timeout=15) as response:
-        encoded = response.read()
-      return base64.b64decode(encoded).decode('utf-8')
-    except Exception as exc:  # pylint: disable=broad-except
-      sys.stderr.write(
-          f'Warning: failed to fetch {url} ({exc}); falling back to local checkout.\n'
-      )
 
   # Fallback to flutter checkout's DART_SDK_ROOT if present on disk.
   if getattr(args, 'flutter_deps', None):
@@ -331,6 +338,12 @@ def ResolveDartCompileFileContent(args, flutter_vars):
       with open(candidate, 'r', encoding='utf-8') as fp:
         return fp.read()
 
+  # If no local SDK checkout exists on disk (e.g. a git-only flutter/flutter worktree)
+  # and --dart_revision was not passed, fall back to flutter_vars['dart_revision'].
+  fallback_rev = flutter_vars.get('dart_revision') if flutter_vars else None
+  if fallback_rev and fallback_rev != explicit_rev:
+    return _FetchCompileDartFromGitiles(fallback_rev)
+
   return None
 
 
@@ -342,6 +355,10 @@ def SyncBrowserEnvironmentJs(args, flutter_vars):
 
   compile_dart_content = ResolveDartCompileFileContent(args, flutter_vars)
   if not compile_dart_content:
+    sys.stderr.write(
+        'Warning: could not resolve pkg/dart2wasm/lib/compile.dart; '
+        'skipping browser_environment.js synchronization.\n'
+    )
     return False
 
   support_expr = ExtractDart2WasmSupportExpression(compile_dart_content)

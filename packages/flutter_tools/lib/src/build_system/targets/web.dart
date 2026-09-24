@@ -1447,7 +1447,10 @@ $supportsDart2WasmLine''';
     const Source.pattern('{PROJECT_DIR}/web/*/index.html'),
     const Source.pattern('{PROJECT_DIR}/web/flutter_bootstrap.js'),
     const Source.hostArtifact(HostArtifact.flutterWebSdk),
-    if (compileTargets?.any((Dart2WebTarget target) => target is Dart2WasmTarget) ?? false)
+    if (compileTargets?.any(
+          (Dart2WebTarget target) => target is Dart2WasmTarget && !target.compilerConfig.dryRun,
+        ) ??
+        false)
       const Source.pattern('{BUILD_DIR}/main.dart.support.js', optional: true),
     if (compileTargets != null)
       for (final Dart2WebTarget target in compileTargets!)

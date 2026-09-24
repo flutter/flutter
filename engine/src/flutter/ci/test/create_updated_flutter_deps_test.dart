@@ -17,7 +17,8 @@ void main() {
       'dart',
       'create_updated_flutter_deps_tests.py',
     );
-    final io.ProcessResult result = io.Process.runSync('python3', <String>[
+    final String python = io.Platform.isWindows ? 'python' : 'python3';
+    final io.ProcessResult result = io.Process.runSync(python, <String>[
       testScript,
     ], workingDirectory: srcDir.parent.path);
     expect(result.exitCode, 0, reason: 'stdout:\n${result.stdout}\nstderr:\n${result.stderr}');

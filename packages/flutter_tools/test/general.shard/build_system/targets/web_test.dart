@@ -3226,12 +3226,21 @@ _flutter.loader.load({
       expect(rewrittenBootstrap, contains('"assetManifest":"AssetManifest.bin.deadbeef.json"'));
       expect(rewrittenBootstrap, contains('_flutter.supportsDart2Wasm = $supportExpression;'));
 
-      // A dart2js-only build must not emit _flutter.supportsDart2Wasm even if a stale
+      // A dart2js-only build (including one with a dry-run Dart2WasmTarget) must not emit
+      // _flutter.supportsDart2Wasm or track main.dart.support.js in inputs even if a stale
       // main.dart.support.js exists in buildDir.
       final jsTarget = Dart2JSTarget(const JsCompilerConfig());
+      final dryRunWasmTarget = Dart2WasmTarget(
+        const WasmCompilerConfig(dryRun: true),
+        const NoOpAnalytics(),
+      );
       final templatedWithJsOnly = WebTemplatedFiles(
         <Map<String, Object?>>[],
-        compileTargets: <Dart2WebTarget>[jsTarget],
+        compileTargets: <Dart2WebTarget>[jsTarget, dryRunWasmTarget],
+      );
+      expect(
+        templatedWithJsOnly.inputs,
+        isNot(contains(const Source.pattern('{BUILD_DIR}/main.dart.support.js', optional: true))),
       );
       expect(
         templatedWithJsOnly.buildConfigString(environment),
