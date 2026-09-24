@@ -669,12 +669,37 @@ bool AndroidSurfaceManager::BlitAndSwapOverlaySurface(
       GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0,
       GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
   static PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer_fn = []() {
-    auto fn = reinterpret_cast<PFNGLBLITFRAMEBUFFERPROC>(
-        dlsym(RTLD_DEFAULT, "glBlitFramebuffer"));
+    PFNGLBLITFRAMEBUFFERPROC fn = nullptr;
+
+    // 1. Attempt lookup in libGLESv3.so directly.
+    void* gles3_handle = dlopen("libGLESv3.so", RTLD_NOW | RTLD_LOCAL);
+    if (gles3_handle) {
+      fn = reinterpret_cast<PFNGLBLITFRAMEBUFFERPROC>(
+          dlsym(gles3_handle, "glBlitFramebuffer"));
+    }
+
+    // 2. Fall back to libGLESv2.so (some Android devices ship unified GLES).
+    if (!fn) {
+      void* gles2_handle = dlopen("libGLESv2.so", RTLD_NOW | RTLD_LOCAL);
+      if (gles2_handle) {
+        fn = reinterpret_cast<PFNGLBLITFRAMEBUFFERPROC>(
+            dlsym(gles2_handle, "glBlitFramebuffer"));
+      }
+    }
+
+    // 3. Fall back to RTLD_DEFAULT.
+    if (!fn) {
+      fn = reinterpret_cast<PFNGLBLITFRAMEBUFFERPROC>(
+          dlsym(RTLD_DEFAULT, "glBlitFramebuffer"));
+    }
+
+    // 4. Fall back to eglGetProcAddress core symbol.
     if (!fn) {
       fn = reinterpret_cast<PFNGLBLITFRAMEBUFFERPROC>(
           eglGetProcAddress("glBlitFramebuffer"));
     }
+
+    // 5. Fall back to vendor extensions.
     if (!fn) {
       fn = reinterpret_cast<PFNGLBLITFRAMEBUFFERPROC>(
           eglGetProcAddress("glBlitFramebufferEXT"));
@@ -691,13 +716,20 @@ bool AndroidSurfaceManager::BlitAndSwapOverlaySurface(
   }();
 
   if (glBlitFramebuffer_fn) {
+    // GL_READ_FRAMEBUFFER = 0x8CA8
     constexpr GLenum kGLReadFramebuffer = 0x8CA8;
+    // GL_DRAW_FRAMEBUFFER = 0x8CA9
     constexpr GLenum kGLDrawFramebuffer = 0x8CA9;
     glBindFramebuffer(kGLReadFramebuffer, offscreen_fbo);
     glBindFramebuffer(kGLDrawFramebuffer, 0);
     glBlitFramebuffer_fn(0, 0, width, height, 0, 0, width, height,
                          GL_COLOR_BUFFER_BIT, GL_NEAREST);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  } else {
+    FML_LOG(ERROR)
+        << "glBlitFramebuffer could not be resolved; skipping overlay blit.";
+    eglMakeCurrent(egl_display_, prev_draw, prev_read, egl_onscreen_context_);
+    return false;
   }
 
   EGLBoolean swapped = eglSwapBuffers(egl_display_, overlay_surface);
