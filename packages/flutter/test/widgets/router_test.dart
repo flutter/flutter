@@ -2013,7 +2013,7 @@ class IntInheritedNotifier extends InheritedNotifier<ValueListenable<int>> {
   }
 }
 
-/// A button widget that calls [setState] on tap, causing a rebuild.
+/// A button widget that calls [State.setState] on tap, causing a rebuild.
 ///
 /// Unlike [TestButton] (which uses a stateless [GestureDetector]), this widget
 /// has internal state that changes on tap. This is needed for tests where the
