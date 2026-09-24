@@ -798,6 +798,8 @@ class AssetsEntry {
   final Uri uri;
   final Set<String> flavors;
   final Set<String> platforms;
+
+  /// The environment conditions under which this asset should be included.
   final Map<String, Set<String>> environment;
   final List<AssetTransformerEntry> transformers;
 
@@ -825,6 +827,10 @@ class AssetsEntry {
   static const _environmentKey = 'environment';
   static const _transformersKey = 'transformers';
 
+  /// Returns whether this asset entry matches the provided [buildEnvironment].
+  ///
+  /// An asset matches if all of its environment conditions are satisfied by the
+  /// build environment.
   bool matchesEnvironment(Map<String, String> buildEnvironment) {
     return environment.entries.every(
       (MapEntry<String, Set<String>> entry) => entry.value.contains(buildEnvironment[entry.key]),

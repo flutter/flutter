@@ -365,11 +365,14 @@ class Environment {
       buffer.write(key);
       buffer.write(defines[key]);
     }
-    final FlutterManifest? manifest = FlutterManifest.createFromPath(
-      projectDir.childFile('pubspec.yaml').path,
-      logger: logger,
-      fileSystem: fileSystem,
-    );
+    final File pubspecFile = projectDir.childFile('pubspec.yaml');
+    final FlutterManifest? manifest = pubspecFile.existsSync()
+        ? FlutterManifest.createFromPath(
+            pubspecFile.path,
+            logger: logger,
+            fileSystem: fileSystem,
+          )
+        : null;
     final assetEnvironmentKeys = <String>{
       for (final AssetsEntry asset in <AssetsEntry>[...?manifest?.assets, ...?manifest?.shaders])
         ...asset.environment.keys,

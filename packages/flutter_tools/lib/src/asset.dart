@@ -258,7 +258,7 @@ class ManifestAssetBundle implements AssetBundle {
   final _wildcardDirectories = <Uri, Directory>{};
 
   DateTime? _lastBuildTimestamp;
-  Map<String, String>? _lastAssetEnvironment;
+  Map<String, String?>? _lastAssetEnvironment;
 
   FlutterHookResult _lastHookResult;
 
@@ -280,14 +280,13 @@ class ManifestAssetBundle implements AssetBundle {
 
   @override
   bool needsBuild({String manifestPath = defaultManifestPath}) {
-    final FlutterManifest? manifest = FlutterManifest.createFromPath(
-      manifestPath,
-      logger: _logger,
-      fileSystem: _fileSystem,
-    );
-    final Map<String, String> assetEnvironment = _assetEnvironment(manifest);
-    if (!wasBuiltOnce() ||
-        !_mapsEqual(assetEnvironment, _lastAssetEnvironment) ||
+    if (!wasBuiltOnce()) {
+      return true;
+    }
+    final Map<String, String?> lastAssetEnvironment = _lastAssetEnvironment!;
+    if (lastAssetEnvironment.entries.any(
+      (MapEntry<String, String?> entry) => _platform.environment[entry.key] != entry.value,
+    ) ||
         // We need to re-run the Dart build.
         _lastHookResult.hasAnyModifiedFiles(_fileSystem) ||
         // We don't have to re-run the Dart build, but some files the Dart build
@@ -318,21 +317,12 @@ class ManifestAssetBundle implements AssetBundle {
     return false;
   }
 
-  Map<String, String> _assetEnvironment(FlutterManifest? manifest) {
+  Map<String, String?> _assetEnvironment(FlutterManifest? manifest) {
     final keys = <String>{
       for (final AssetsEntry asset in <AssetsEntry>[...?manifest?.assets, ...?manifest?.shaders])
         ...asset.environment.keys,
     };
-    return <String, String>{
-      for (final String key in keys)
-        if (_platform.environment[key] case final String value) key: value,
-    };
-  }
-
-  bool _mapsEqual(Map<String, String> first, Map<String, String>? second) {
-    return second != null &&
-        first.length == second.length &&
-        first.entries.every((MapEntry<String, String> entry) => second[entry.key] == entry.value);
+    return <String, String?>{for (final String key in keys) key: _platform.environment[key]};
   }
 
   @override
@@ -1726,9 +1716,11 @@ class _Asset {
     kind,
     ...flavors,
     ...platforms,
-    ...environment.entries.map(
-      (MapEntry<String, Set<String>> entry) =>
-          Object.hash(entry.key, Object.hashAllUnordered(entry.value)),
+    Object.hashAllUnordered(
+      environment.entries.map(
+        (MapEntry<String, Set<String>> entry) =>
+            Object.hash(entry.key, Object.hashAllUnordered(entry.value)),
+      ),
     ),
   ]);
 }
