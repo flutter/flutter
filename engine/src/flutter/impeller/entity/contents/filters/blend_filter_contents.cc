@@ -131,14 +131,15 @@ static std::optional<Entity> AdvancedBlend(
     }
   }
 
-  // The subpass render target is allocated with an integral size, so it only
-  // covers this much of |subpass_coverage|. The texture coordinates must
-  // describe the same rect as the quad, which spans the render target: if they
-  // describe the full, fractional coverage instead, the contents are scaled by
-  // the ratio between the two, and that ratio changes from frame to frame for
-  // animated content.
-  const Rect render_target_coverage = Rect::MakeOriginSize(
-      subpass_coverage.GetOrigin(), Size(ISize(subpass_coverage.GetSize())));
+  // The subpass render target has an integral size, so it only covers this
+  // much of |subpass_coverage|. The texture coordinates must describe the same
+  // rect as the quad, which spans the render target: if they describe the
+  // full, fractional coverage instead, the contents are scaled by the ratio
+  // between the two, and that ratio changes from frame to frame for animated
+  // content. Both the allocation and the sampled rect use this one size.
+  const Size render_target_size = subpass_coverage.GetSize().Floor();
+  const Rect render_target_coverage =
+      Rect::MakeOriginSize(subpass_coverage.GetOrigin(), render_target_size);
   if (render_target_coverage.IsEmpty()) {
     return std::nullopt;  // Nothing to render.
   }
@@ -255,12 +256,12 @@ static std::optional<Entity> AdvancedBlend(
     return std::nullopt;
   }
   fml::StatusOr<RenderTarget> render_target =
-      renderer.MakeSubpass("Advanced Blend Filter",            //
-                           ISize(subpass_coverage.GetSize()),  //
-                           command_buffer,                     //
-                           callback,                           //
-                           /*msaa_enabled=*/false,             //
-                           /*depth_stencil_enabled=*/false     //
+      renderer.MakeSubpass("Advanced Blend Filter",         //
+                           ISize(render_target_size),       //
+                           command_buffer,                  //
+                           callback,                        //
+                           /*msaa_enabled=*/false,          //
+                           /*depth_stencil_enabled=*/false  //
       );
   if (!render_target.ok()) {
     return std::nullopt;
