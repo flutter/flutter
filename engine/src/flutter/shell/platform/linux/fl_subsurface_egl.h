@@ -65,6 +65,22 @@ void fl_subsurface_egl_resize(FlSubsurfaceEGL* egl,
                               size_t height);
 
 /**
+ * fl_subsurface_egl_set_scale:
+ * @egl: an #FlSubsurfaceEGL.
+ * @scale: the new window scale factor.
+ *
+ * Records a change of the widget's scale factor, for example after the window
+ * moved to a monitor with a different scale. The subsurface's buffer scale is
+ * updated in the next fl_subsurface_egl_present() whose frame size is a
+ * multiple of @scale, so the new scale and a buffer of the matching size are
+ * committed together. Wayland requires buffer sizes to be a multiple of the
+ * buffer scale, so applying the scale to a frame of the old size could raise a
+ * protocol error. Safe to call from the GTK thread while frames are presented
+ * from another thread.
+ */
+void fl_subsurface_egl_set_scale(FlSubsurfaceEGL* egl, gint scale);
+
+/**
  * fl_subsurface_egl_present:
  * @egl: an #FlSubsurfaceEGL.
  * @texture_id: the OpenGL texture holding the frame to present.

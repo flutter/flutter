@@ -233,8 +233,28 @@ static void fl_view_renderer_subsurface_size_allocate(
 
   update_subsurface_position(self);
   if (self->egl != nullptr) {
+    fl_subsurface_egl_set_scale(self->egl, scale_factor);
     fl_subsurface_egl_resize(self->egl, width, height);
   }
+}
+
+// Called when the widget's scale factor changes, typically because the window
+// moved to a monitor with a different scale. GTK only queues a redraw for
+// this, not a resize, so the subsurface would keep its old buffer scale while
+// the engine renders frames at the new size, showing them at the wrong size.
+// Record the new scale for the subsurface and queue a resize so FlView sends
+// the engine new window metrics and the frame of the new size is waited for.
+static void fl_view_renderer_subsurface_scale_factor_changed(
+    GObject* object,
+    GParamSpec* pspec,
+    gpointer user_data) {
+  FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(object);
+  GtkWidget* widget = GTK_WIDGET(self);
+
+  if (self->egl != nullptr) {
+    fl_subsurface_egl_set_scale(self->egl, gtk_widget_get_scale_factor(widget));
+  }
+  gtk_widget_queue_resize(widget);
 }
 
 // Runs after the size_allocate default handler and, crucially, after FlView has
@@ -390,6 +410,10 @@ static void fl_view_renderer_subsurface_init(FlViewRendererSubsurface* self) {
   g_signal_connect_after(
       self, "size-allocate",
       G_CALLBACK(fl_view_renderer_subsurface_size_allocate_after), nullptr);
+
+  g_signal_connect(self, "notify::scale-factor",
+                   G_CALLBACK(fl_view_renderer_subsurface_scale_factor_changed),
+                   nullptr);
 }
 
 FlViewRendererSubsurface* fl_view_renderer_subsurface_new(

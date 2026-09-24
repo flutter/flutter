@@ -25,6 +25,14 @@ struct _FlSubsurfaceEGL {
   // Native Wayland window backing the EGL surface.
   struct wl_egl_window* egl_window;
 
+  // Buffer scale currently set on the Wayland surface.
+  gint scale;
+
+  // Scale factor requested by the widget; applied to the surface in present()
+  // once a frame of a matching size is available. Read and written atomically
+  // since it is set from the GTK thread and consumed from the render thread.
+  gint pending_scale;
+
   // EGL context used to blit engine frames. Shares resources with the engine's
   // render context.
   EGLContext egl_context;
@@ -120,6 +128,8 @@ static void setup(FlSubsurfaceEGL* self,
   }
 
   wl_surface_set_buffer_scale(surface, scale);
+  self->scale = scale;
+  g_atomic_int_set(&self->pending_scale, scale);
 
   eglMakeCurrent(egl_display, self->egl_surface, self->egl_surface,
                  self->egl_context);
@@ -212,6 +222,12 @@ void fl_subsurface_egl_resize(FlSubsurfaceEGL* self,
   }
 }
 
+void fl_subsurface_egl_set_scale(FlSubsurfaceEGL* self, gint scale) {
+  g_return_if_fail(FL_IS_SUBSURFACE_EGL(self));
+  g_return_if_fail(scale > 0);
+  g_atomic_int_set(&self->pending_scale, scale);
+}
+
 void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
                                GLuint texture_id,
                                size_t width,
@@ -268,6 +284,18 @@ void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
     glBindTexture(GL_TEXTURE_2D, texture_id);
     glDrawArrays(GL_TRIANGLES, 0, 6);
   }
+  // Apply a changed scale factor together with the first frame whose size is
+  // a multiple of it. The buffer scale is double-buffered surface state, so
+  // sending it here makes it take effect in the commit eglSwapBuffers performs
+  // below, atomically with the attached buffer.
+  gint scale = g_atomic_int_get(&self->pending_scale);
+  if (scale != self->scale && scale > 0 && width % scale == 0 &&
+      height % scale == 0) {
+    wl_surface_set_buffer_scale(fl_subsurface_get_surface(self->subsurface),
+                                scale);
+    self->scale = scale;
+  }
+
   eglSwapBuffers(egl_display, self->egl_surface);
 
   // Restore the engine's rendering context so the raster thread can continue
