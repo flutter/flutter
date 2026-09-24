@@ -26,7 +26,7 @@
                 },
                 {
                     "dependency": "open_jdk",
-                    "version": "version:21"
+                    "version": "version:25.0.2"
                 }
             ],
             "name": "ci/android_emulator_debug_x64",

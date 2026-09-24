@@ -1074,7 +1074,7 @@
       "dependencies": [
         {
           "dependency": "open_jdk",
-          "version": "version:21"
+          "version": "version:25.0.2"
         }
       ],
       "gn": [
@@ -1111,7 +1111,7 @@
       "dependencies": [
         {
           "dependency": "open_jdk",
-          "version": "version:21"
+          "version": "version:25.0.2"
         }
       ],
       "gn": [
