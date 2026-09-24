@@ -85,6 +85,7 @@ func updateSymlinkNoChange() async throws {
   try FlutterToolHelper.updateSymlink(
     targetBuildMode: targetBuildMode,
     integrationPackagePath: "/path/to/SwiftPackages/FlutterNativeIntegration",
+    useRemoteFlutterFramework: false,
     fileManager: fileManager
   )
 
@@ -108,6 +109,7 @@ func updateSymlinkSuccess() async throws {
   try FlutterToolHelper.updateSymlink(
     targetBuildMode: targetBuildMode,
     integrationPackagePath: flutterPluginRegistrantPath,
+    useRemoteFlutterFramework: false,
     fileManager: fileManager
   )
 
@@ -115,6 +117,32 @@ func updateSymlinkSuccess() async throws {
   #expect(fileManager.filesRemoved.first == currentLinkPath)
   #expect(fileManager.symlinksCreated.count == 1)
   #expect(fileManager.symlinksCreated[currentLinkPath] == expectedLink)
+}
+
+@Test
+func updateSymlinkThrowsWhenRemote() async throws {
+  let fileManager = MockFileManager()
+
+  let targetBuildMode = "Debug"
+  let targetName = "FlutterPluginRegistrant"
+  let expectedLink = "./\(targetBuildMode)"
+  let flutterPluginRegistrantPath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+  let currentLinkPath = "\(flutterPluginRegistrantPath)/\(targetName)"
+  let newTargetPath = "\(flutterPluginRegistrantPath)/\(expectedLink)"
+  fileManager.filesExist[newTargetPath] = true
+  fileManager.filesExist[currentLinkPath] = true
+
+  #expect(throws: XcodeErrorAndExit.self) {
+    try FlutterToolHelper.updateSymlink(
+      targetBuildMode: targetBuildMode,
+      integrationPackagePath: flutterPluginRegistrantPath,
+      useRemoteFlutterFramework: true,
+      fileManager: fileManager
+    )
+  }
+
+  #expect(fileManager.filesRemoved.count == 0)
+  #expect(fileManager.symlinksCreated.count == 0)
 }
 
 @Test
@@ -130,6 +158,7 @@ func updateSymlinkThrowsIfNewLinkDoesNotExist() async throws {
     try FlutterToolHelper.updateSymlink(
       targetBuildMode: targetBuildMode,
       integrationPackagePath: "/path/to/SwiftPackages/FlutterNativeIntegration",
+      useRemoteFlutterFramework: false,
       fileManager: fileManager
     )
   }

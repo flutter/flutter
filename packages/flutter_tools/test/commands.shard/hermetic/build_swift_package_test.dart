@@ -656,6 +656,73 @@ let package = Package(
           '/${xcframework.path}',
         );
       });
+
+      testWithoutContext('generateSwiftPackage with remote = true', () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final Directory packageDirectory = fs.directory(debugPackagesDirectoryPath);
+        final Directory tempDir = packageDirectory.childDirectory('temp');
+
+        final processManager = FakeProcessManager.list([
+          FakeCommand(
+            command: const ['swift', 'package', 'compute-checksum', 'artifacts.zip'],
+            workingDirectory: tempDir.path,
+            stdout: 'fake_checksum_12345\n',
+          ),
+        ]);
+        const FlutterDarwinPlatform targetPlatform = .ios;
+        final BuildSwiftPackageUtils testUtils = _createTestUtils(
+          fs: fs,
+          logger: logger,
+          processManager: processManager,
+        );
+        final flutterFrameworkDependency = FlutterFrameworkDependency(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+        await flutterFrameworkDependency.generateSwiftPackage(
+          packageDirectory,
+          buildMode: BuildMode.release,
+          remote: true,
+        );
+        expect(processManager, hasNoRemainingExpectations);
+        expect(packageDirectory.existsSync(), isTrue);
+        expect(packageDirectory.childDirectory('temp').existsSync(), isFalse);
+        final File manifest = packageDirectory
+            .childDirectory('FlutterFramework')
+            .childFile('Package.swift');
+        expect(manifest.existsSync(), isTrue);
+        expect(manifest.readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+// Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterFramework",
+    products: [
+        .library(name: "FlutterFramework", targets: ["FlutterFramework"])
+    ],
+    dependencies: [\n        \n    ],
+    targets: [
+        .target(
+            name: "FlutterFramework",
+            dependencies: [
+                .target(name: "Flutter")
+            ]
+        ),
+        .binaryTarget(
+            name: "Flutter",
+            url: "https://storage.googleapis.com/flutter_infra_release/flutter/$_engineVersion/ios-release/artifacts.zip",
+            checksum: "fake_checksum_12345"
+        )
+    ]
+)
+''');
+      });
     });
 
     group('AppFrameworkAndNativeAssetsDependencies', () {
@@ -3516,6 +3583,17 @@ class FakeCache extends Fake implements Cache {
 
   final FileSystem _fileSystem;
   final String flutterRoot;
+
+  @override
+  String get storageBaseUrl => 'https://storage.googleapis.com';
+
+  @override
+  String get engineRevision => _engineVersion;
+
+  @override
+  Future<void> downloadFile(String message, Uri url, Directory location) async {
+    location.childFile(_fileSystem.path.basename(url.path)).createSync(recursive: true);
+  }
 
   @override
   Directory getRoot() {

@@ -106,7 +106,8 @@ class BuildSwiftPackage extends BuildSubCommand {
         defaultsTo: availableBuildModes.map((e) => e.cliName).toList(),
         help: 'Build modes to include.',
       )
-      ..addFlag('static', help: 'Build CocoaPods plugins as static frameworks.');
+      ..addFlag('static', help: 'Build CocoaPods plugins as static frameworks.')
+      ..addFlag('remote', help: 'Uses a remote url for the Flutter framework.');
   }
 
   @override
@@ -167,6 +168,8 @@ class BuildSwiftPackage extends BuildSubCommand {
         if (buildModes.contains(mode.cliName)) await getBuildInfo(forcedBuildMode: mode),
     ];
   }
+
+  bool get useRemoteFlutterFramework => boolArg('remote');
 
   @override
   Future<void> validateCommand() async {
@@ -333,6 +336,7 @@ class BuildSwiftPackage extends BuildSubCommand {
         flutterIntegrationPackage: flutterIntegrationPackage,
         plugins: plugins,
         xcodeBuildConfiguration: xcodeBuildConfiguration,
+        buildMode: buildInfo.mode,
         xcframeworkOutput: xcframeworkOutput,
       );
     }
@@ -340,6 +344,7 @@ class BuildSwiftPackage extends BuildSubCommand {
       outputDirectory: outputDirectory,
       flutterIntegrationPackage: flutterIntegrationPackage,
       highestSupportedVersion: pluginSwiftDependencies.highestSupportedVersion,
+      useRemoteFlutterFramework: useRemoteFlutterFramework,
     );
     createSourcesSymlink(flutterIntegrationPackage, buildInfos.first.mode.uppercaseName);
 
@@ -365,11 +370,13 @@ class BuildSwiftPackage extends BuildSubCommand {
     required File codesignIdentityFile,
   }) async {
     logger.printStatus('Building for $xcodeBuildConfiguration...');
-    await flutterFrameworkDependency.generateArtifacts(
-      buildMode: buildInfo.mode,
-      xcframeworkOutput: xcframeworkOutput,
-      codesignIdentity: codesignIdentity,
-    );
+    if (!useRemoteFlutterFramework) {
+      await flutterFrameworkDependency.generateArtifacts(
+        buildMode: buildInfo.mode,
+        xcframeworkOutput: xcframeworkOutput,
+        codesignIdentity: codesignIdentity,
+      );
+    }
 
     await appAndNativeAssetsDependencies.generateArtifacts(
       buildInfo: buildInfo,
@@ -394,6 +401,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     required Directory flutterIntegrationPackage,
     required List<Plugin> plugins,
     required String xcodeBuildConfiguration,
+    required BuildMode buildMode,
     required Directory xcframeworkOutput,
   }) async {
     final Status status = logger.startProgress('   ├─Generating swift packages...');
@@ -403,7 +411,11 @@ class BuildSwiftPackage extends BuildSubCommand {
       );
       final Directory packagesForConfiguration = modeDirectory.childDirectory(_kPackages);
 
-      await flutterFrameworkDependency.generateSwiftPackage(packagesForConfiguration);
+      await flutterFrameworkDependency.generateSwiftPackage(
+        packagesForConfiguration,
+        buildMode: buildMode,
+        remote: useRemoteFlutterFramework,
+      );
 
       await pluginRegistrant.generateSwiftPackage(
         modeDirectory: modeDirectory,
@@ -663,7 +675,11 @@ class FlutterFrameworkDependency {
 
   /// Creates a FlutterFramework swift package within the [packagesForConfiguration]. This swift
   /// package vends the Flutter xcframework.
-  Future<void> generateSwiftPackage(Directory packagesForConfiguration) async {
+  Future<void> generateSwiftPackage(
+    Directory packagesForConfiguration, {
+    BuildMode buildMode = BuildMode.debug,
+    bool remote = false,
+  }) async {
     final flutterFrameworkPackage = SwiftPackage(
       manifest: packagesForConfiguration
           .childDirectory(kFlutterGeneratedFrameworkSwiftPackageTargetName)
@@ -682,9 +698,11 @@ class FlutterFrameworkDependency {
           name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
           dependencies: [SwiftPackageTargetDependency.target(name: _targetPlatform.binaryName)],
         ),
-        SwiftPackageTarget.binaryTarget(
-          name: _targetPlatform.binaryName,
-          relativePath: '../../$_kFrameworks/${_targetPlatform.binaryName}.xcframework',
+        await binaryTarget(
+          packageDirectory: packagesForConfiguration,
+          remote: remote,
+          platform: _targetPlatform,
+          mode: buildMode,
         ),
       ],
       templateRenderer: _utils.templateRenderer,
@@ -715,6 +733,49 @@ class FlutterFrameworkDependency {
     name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
     packageName: kFlutterGeneratedFrameworkSwiftPackageTargetName,
   );
+
+  Future<SwiftPackageTarget> binaryTarget({
+    required bool remote,
+    required Directory packageDirectory,
+    required FlutterDarwinPlatform platform,
+    required BuildMode mode,
+  }) async {
+    if (remote) {
+      final Uri url = Uri.parse(
+        '${_utils.cache.storageBaseUrl}/flutter_infra_release/flutter/${_utils.cache.engineRevision}/${platform.artifactName(mode)}/${platform.artifactZip}',
+      );
+      final Directory destination = packageDirectory.childDirectory('temp');
+      try {
+        await _utils.cache.downloadFile(
+          'Downloading ${platform.artifactName(mode)} framework for checksum...',
+          url,
+          destination,
+        );
+        final ProcessResult checksumResult = await _utils.processManager.run([
+          'swift',
+          'package',
+          'compute-checksum',
+          platform.artifactZip,
+        ], workingDirectory: destination.path);
+        if (checksumResult.exitCode != 0) {
+          throwToolExit(
+            'Failed to compute checksum for ${platform.artifactZip}: ${checksumResult.stderr}',
+          );
+        }
+        return SwiftPackageTarget.remoteBinaryTarget(
+          name: platform.binaryName,
+          zipUrl: url.toString(),
+          zipChecksum: checksumResult.stdout.toString().trim(),
+        );
+      } finally {
+        ErrorHandlingFileSystem.deleteIfExists(destination, recursive: true);
+      }
+    }
+    return SwiftPackageTarget.binaryTarget(
+      name: platform.binaryName,
+      relativePath: '../../$_kFrameworks/${platform.binaryName}.xcframework',
+    );
+  }
 }
 
 /// Class that encapsulates logic needed to copy Flutter plugins that support SwiftPM and generate
@@ -1863,6 +1924,7 @@ class FlutterNativeIntegrationSwiftPackage {
     required Directory outputDirectory,
     required Directory flutterIntegrationPackage,
     required SwiftPackageSupportedPlatform highestSupportedVersion,
+    bool useRemoteFlutterFramework = false,
   }) async {
     final Directory nativeToolsPackage = flutterIntegrationPackage.childDirectory(
       _kFlutterNativeTools,
@@ -1873,6 +1935,7 @@ class FlutterNativeIntegrationSwiftPackage {
     await _generateSourceFiles(
       scriptsDirectory: scriptsDirectory,
       nativeToolsPackage: nativeToolsPackage,
+      useRemoteFlutterFramework: useRemoteFlutterFramework,
     );
 
     final integrationPackage = SwiftPackage(
@@ -1928,9 +1991,13 @@ class FlutterNativeIntegrationSwiftPackage {
   Future<void> _generateSourceFiles({
     required Directory scriptsDirectory,
     required Directory nativeToolsPackage,
+    required bool useRemoteFlutterFramework,
   }) async {
     await _generateScripts(scriptsDirectory);
-    await _generateToolsSources(nativeToolsPackage.childDirectory(_kSources));
+    await _generateToolsSources(
+      nativeToolsPackage.childDirectory(_kSources),
+      useRemoteFlutterFramework: useRemoteFlutterFramework,
+    );
     await _generatePluginsSources(
       pluginsDirectory: nativeToolsPackage.childDirectory(_kSwiftPlugins),
     );
@@ -1964,7 +2031,10 @@ class FlutterNativeIntegrationSwiftPackage {
 
   /// Generate source files for Swift package executable tools to be used for integrating SwiftPM
   /// into the [sourcesDirectory].
-  Future<void> _generateToolsSources(Directory sourcesDirectory) async {
+  Future<void> _generateToolsSources(
+    Directory sourcesDirectory, {
+    required bool useRemoteFlutterFramework,
+  }) async {
     final Template toolsTemplate = await Template.fromName(
       _utils.fileSystem.path.join('add_to_app', 'darwin', _kTools),
       fileSystem: _utils.fileSystem,
@@ -1972,7 +2042,9 @@ class FlutterNativeIntegrationSwiftPackage {
       logger: _utils.logger,
       templateRenderer: _utils.templateRenderer,
     );
-    toolsTemplate.render(sourcesDirectory, <String, Object>{}, printStatusWhenWriting: false);
+    toolsTemplate.render(sourcesDirectory, <String, Object>{
+      'useRemoteFlutterFramework': useRemoteFlutterFramework,
+    }, printStatusWhenWriting: false);
   }
 
   /// Generate source files for Swift package plugins to be used for integrating SwiftPM into the
