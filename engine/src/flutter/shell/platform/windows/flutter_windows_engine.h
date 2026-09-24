@@ -136,6 +136,7 @@ class FlutterWindowsEngine {
       std::unique_ptr<WindowBindingHandler> window,
       bool is_sized_to_content,
       const BoxConstraints& box_constraints,
+      bool allow_implicit_view,
       FlutterWindowsViewSizingDelegate* sizing_delegate = nullptr);
 
   // Remove a view. The engine will no longer render into it.
