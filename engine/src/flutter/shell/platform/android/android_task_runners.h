@@ -33,12 +33,17 @@ void AndroidPlatformThreadConfigSetter(const fml::Thread::ThreadConfig& config);
 // public Flutter Embedder C-API.
 class AndroidTaskRunners {
  public:
+  using RunTaskFn =
+      std::function<FlutterEngineResult(FLUTTER_API_SYMBOL(FlutterEngine),
+                                        const FlutterTask*)>;
+
   struct SharedState {
     mutable std::mutex mutex;
     FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
     std::vector<std::pair<fml::RefPtr<fml::TaskRunner>, FlutterTask>>
         pending_tasks;
     bool destroyed = false;
+    RunTaskFn run_task_fn;
   };
 
   struct TaskRunnerContext {
@@ -71,6 +76,11 @@ class AndroidTaskRunners {
   void SetEngine(FLUTTER_API_SYMBOL(FlutterEngine) engine);
   FLUTTER_API_SYMBOL(FlutterEngine) GetEngine() const;
   size_t GetPendingTasksCount() const;
+
+  void SetRunTaskFnForTesting(RunTaskFn fn);
+  const FlutterTaskRunnerDescription& GetRasterTaskRunnerDescription() const {
+    return raster_description_;
+  }
 
   // Returns the FlutterCustomTaskRunners description suitable for passing to
   // FlutterProjectArgs::custom_task_runners.
