@@ -206,18 +206,16 @@ Future<void> testMain() async {
     final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
     final List<ui.LineMetrics> metrics = paragraph.computeLineMetrics();
-    for (final metric in metrics) {
-      for (var i = 0; i < text.length; i++) {
-        final int pos = (i == 5 || i == 11) ? i - 1 : i;
-        final ui.GlyphInfo? glyphInfo = paragraph.getGlyphInfoAt(pos);
-        if (glyphInfo != null) {
-          expect(glyphInfo.graphemeClusterCodeUnitRange, ui.TextRange(start: pos, end: pos + 1));
-          expect(glyphInfo.graphemeClusterLayoutBounds.height, closeTo(metric.height, epsilon));
-          expect(glyphInfo.writingDirection, ui.TextDirection.ltr);
-        } else {
-          assert(false, '${text.length}: glyphInfo[$i] should not be null');
-        }
-      }
+    for (var i = 0; i < text.length; i++) {
+      final ui.GlyphInfo? glyphInfo = paragraph.getGlyphInfoAt(i);
+      expect(glyphInfo, isNotNull, reason: '${text.length}: glyphInfo[$i] should not be null');
+      expect(glyphInfo!.graphemeClusterCodeUnitRange, ui.TextRange(start: i, end: i + 1));
+      final int lineIndex = paragraph.getLineNumberAt(i)!;
+      expect(
+        glyphInfo.graphemeClusterLayoutBounds.height,
+        closeTo(metrics[lineIndex].height, epsilon),
+      );
+      expect(glyphInfo.writingDirection, ui.TextDirection.ltr);
     }
   });
 

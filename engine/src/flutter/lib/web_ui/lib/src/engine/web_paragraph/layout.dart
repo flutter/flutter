@@ -208,18 +208,21 @@ class TextLayout {
   }
 
   double addLine(
-    ClusterRange contentRange,
-    ClusterRange whitespaceRange,
-    ClusterRange hardlineRange,
+    ClusterRange contentClusterRange,
+    ClusterRange whitespaceClusterRange,
+    ClusterRange hardlineClusterRange,
     double top, {
     required bool isSyntheticEmptyLine,
   }) {
-    assert(contentRange.end == whitespaceRange.start);
-    assert(whitespaceRange.end == hardlineRange.start);
+    assert(contentClusterRange.end == whitespaceClusterRange.start);
+    assert(whitespaceClusterRange.end == hardlineClusterRange.start);
     if (WebParagraphDebug.logging) {
-      final String allLineText = paragraph.getText(contentRange.start, whitespaceRange.end);
+      final String allLineText = paragraph.getText(
+        contentClusterRange.start,
+        whitespaceClusterRange.end,
+      );
       WebParagraphDebug.log(
-        'LINE "$allLineText" clusters:$contentRange+$whitespaceRange+$hardlineRange',
+        'LINE "$allLineText" clusters:$contentClusterRange+$whitespaceClusterRange+$hardlineClusterRange',
       );
     }
     // Prepare ellipsis block in case we need to get metrics for it
@@ -244,23 +247,36 @@ class TextLayout {
     }
 
     // Arrange line vertically, calculate metrics and bounds
-    final ui.TextRange contentTextRange = _mapping.toTextRange(contentRange);
-    final ui.TextRange whitespaceTextRange = _mapping.toTextRange(whitespaceRange);
-    final ui.TextRange hardlineTextRange = _mapping.toTextRange(hardlineRange);
+    final ui.TextRange contentTextRange = _mapping.toTextRange(contentClusterRange);
+    final ui.TextRange whitespaceTextRange = _mapping.toTextRange(whitespaceClusterRange);
+    final ui.TextRange hardlineTextRange = _mapping.toTextRange(hardlineClusterRange);
+    // A line includes the trailing newline if it has a hard line break that
+    // reaches the artificial EOF cluster at the end of the paragraph.
+    // Unlike `isSyntheticEmptyLine` (the artificial line added *after* `\n`),
+    // `includesTrailingNewline` applies to the content line ending with `\n`,
+    // telling `allTextRange` to encompass `\n` for `getLineBoundary`.
+    final bool includesTrailingNewline =
+        !isSyntheticEmptyLine &&
+        hardlineClusterRange.isNotEmpty &&
+        hardlineClusterRange.end == allClusters.length - 1;
     final allTextRange = ui.TextRange(
       start: contentTextRange.start,
-      end: isSyntheticEmptyLine ? hardlineTextRange.end : whitespaceTextRange.end,
+      end: isSyntheticEmptyLine || includesTrailingNewline
+          ? hardlineTextRange.end
+          : whitespaceTextRange.end,
     );
     // TODO(jlavrova): Should we use a TextLineBuilder pattern instead?
     final line = TextLine(
-      contentRange,
-      whitespaceRange,
-      hardlineRange,
+      contentClusterRange,
+      whitespaceClusterRange,
+      hardlineClusterRange,
       lines.length,
       contentTextRange,
       whitespaceTextRange,
       hardlineTextRange,
       allTextRange,
+      isSyntheticEmptyLine: isSyntheticEmptyLine,
+      includesTrailingNewline: includesTrailingNewline,
     );
 
     // Get logical bidi levels belonging to the line.
@@ -269,8 +285,8 @@ class TextLayout {
     for (var i = 0; i < bidiRuns.length; i++) {
       final BidiRun bidiRun = bidiRuns[i];
       final bool isOverlapping = bidiRun.clusterRange.overlapsWith(
-        contentRange.start,
-        hardlineRange.end,
+        contentClusterRange.start,
+        hardlineClusterRange.end,
       );
 
       final bool isFirstOverlap = isOverlapping && overlapStart == -1;
@@ -307,9 +323,13 @@ class TextLayout {
     for (final bidiRun in lineVisualRuns) {
       // We (almost always true) assume that trailing whitespaces do not affect the line height.
       // Let's keep it as is.
-      final ClusterRange textIntersection = bidiRun.clusterRange.intersect(contentRange);
-      final ClusterRange whitespacesIntersection = bidiRun.clusterRange.intersect(whitespaceRange);
-      final ClusterRange hardlineRangeIntersection = bidiRun.clusterRange.intersect(hardlineRange);
+      final ClusterRange textIntersection = bidiRun.clusterRange.intersect(contentClusterRange);
+      final ClusterRange whitespacesIntersection = bidiRun.clusterRange.intersect(
+        whitespaceClusterRange,
+      );
+      final ClusterRange hardlineRangeIntersection = bidiRun.clusterRange.intersect(
+        hardlineClusterRange,
+      );
 
       assert(() {
         // One of the intersections must be non-empty
@@ -335,7 +355,7 @@ class TextLayout {
       if (WebParagraphDebug.logging) {
         WebParagraphDebug.log(
           'Run: "${paragraph.getText(bidiLineTextRange.start, bidiLineTextRange.end)}" '
-          '${bidiRun.clusterRange} & $contentRange = $fullIntersection textRange:$bidiLineTextRange',
+          '${bidiRun.clusterRange} & $contentClusterRange = $fullIntersection textRange:$bidiLineTextRange',
         );
       }
 
@@ -370,9 +390,15 @@ class TextLayout {
           );
           blockWidth = span.width;
         } else {
+          final ClusterRange physicalClusterRange = bidiLineSpanPhysicalTextRange.isNotEmpty
+              ? _mapping.toClusterRange(
+                  bidiLineSpanPhysicalTextRange.start,
+                  bidiLineSpanPhysicalTextRange.end,
+                )
+              : bidiLineSpanRange;
           final WebCluster firstVisualClusterInBlock = bidiRun.isLtr
-              ? allClusters[bidiLineSpanRange.start]
-              : allClusters[bidiLineSpanRange.end - 1];
+              ? allClusters[physicalClusterRange.start]
+              : allClusters[physicalClusterRange.end - 1];
           final double blockShiftFromSpanStart = firstVisualClusterInBlock.advance.left;
           line.visualBlocks.add(
             block = TextBlock(
@@ -533,6 +559,9 @@ class TextLayout {
     final result = <ui.TextBox>[];
     for (var lineIndex = 0; lineIndex < lines.length; ++lineIndex) {
       final TextLine line = lines[lineIndex];
+      if (line.isSyntheticEmptyLine) {
+        continue;
+      }
       if (WebParagraphDebug.logging) {
         WebParagraphDebug.log(
           'Line: ${line.textClusterRange} & $textRange '
@@ -542,8 +571,7 @@ class TextLayout {
       // We take whitespaces and newlines into account
       final lineTextRange = ui.TextRange(
         start: line.allLineTextRange.start,
-        // The only way the last line has hard line break is if the text ends with \n and we have a special case for it
-        end: line.lastLine ? line.whitespacesRange.end : line.hardLineBreakRange.end,
+        end: line.hardLineBreakRange.end,
       );
       if (!lineTextRange.overlapsWith(start, end)) {
         continue;
@@ -864,7 +892,7 @@ class TextLayout {
     // The codepoint could be on a hard line break which is not in the visual blocks
     if (codeUnitOffset >= line.hardLineBreakRange.start &&
         codeUnitOffset < line.hardLineBreakRange.end) {
-      final WebCluster cluster = allClusters[line.hardLineBreakRange.start];
+      final WebCluster cluster = allClusters[line.hardLineBreakClusterRange.start];
       // Pretend that the hard line break is placed at the end of the last visual block
       final LineBlock? lastVisualBlock = line.visualBlocks.lastOrNull;
       final bool isLtr = lastVisualBlock?.isLtr ?? true;
@@ -1046,9 +1074,7 @@ abstract class WebCluster {
 }
 
 class TextCluster extends WebCluster {
-  TextCluster(this.span, this._cluster) : startInSpan = _cluster.start, endInSpan = _cluster.end {
-    _advance = span.getClusterSelection(this);
-  }
+  TextCluster(this.span, this._cluster) : startInSpan = _cluster.start, endInSpan = _cluster.end;
 
   @override
   final TextSpan span;
@@ -1062,10 +1088,7 @@ class TextCluster extends WebCluster {
   final int endInSpan;
 
   @override
-  ui.Rect get advance => _advance;
-
-  set advance(ui.Rect value) => _advance = value;
-  ui.Rect _advance = ui.Rect.zero;
+  late final ui.Rect advance = span.getClusterSelection(this);
 
   final DomTextCluster _cluster;
 
@@ -1362,8 +1385,10 @@ class TextLine {
     this.textRange,
     this.whitespacesRange,
     this.hardLineBreakRange,
-    this.allLineTextRange,
-  );
+    this.allLineTextRange, {
+    required this.isSyntheticEmptyLine,
+    required this.includesTrailingNewline,
+  });
 
   /// True if this line ends with an explicit line break, or is the end of the
   /// paragraph (matching dart:ui.LineMetrics and SkParagraph::endsWithHardLineBreak).
@@ -1398,6 +1423,27 @@ class TextLine {
   final ui.TextRange hardLineBreakRange;
   final ui.TextRange allLineTextRange;
   final int lineNumber;
+
+  /// True if this line is an artificial empty line added after a trailing
+  /// newline at the end of the text (e.g. Line 1 in `'Hello\n'`).
+  ///
+  /// This synthetic line contains no text characters or visual glyphs of its
+  /// own; it exists solely to provide line metrics and caret positioning for the
+  /// empty line after `\n`. It must be skipped during selection box queries
+  /// (such as `getBoxesForRange`) to prevent generating phantom 0-width boxes.
+  final bool isSyntheticEmptyLine;
+
+  /// True if this line ends with the paragraph's terminal newline character
+  /// (e.g. Line 0 in `'Hello\n'`).
+  ///
+  /// Unlike [isSyntheticEmptyLine] (which describes the empty line *after* the
+  /// newline), this describes the real content line ending with `\n`.
+  /// It indicates that [allLineTextRange] should extend to include the trailing
+  /// `\n` character so that `getLineBoundary` covers the newline at EOF.
+  /// (For interior newlines like `'Hello\nWorld'`, [allLineTextRange] excludes
+  /// `\n` to prevent colliding with the next line's start position).
+  final bool includesTrailingNewline;
+
   bool lastLine = false;
 
   ui.Rect advance = ui.Rect.zero;

@@ -370,12 +370,13 @@ class _LineBuilder {
       ClusterRange(start: _whitespaceStart, end: _whitespaceEnd),
       ClusterRange(start: _whitespaceEnd, end: _newlineEnd),
       _top,
-      isSyntheticEmptyLine: hasTrailingNewline,
+      isSyntheticEmptyLine: false,
     );
     _top += height;
 
-    // Flutter wants to have another (empty) line if \n is the last codepoint in the text
-    // This empty line gets in a way of detecting line visual runs (there isn't any)
+    // Flutter wants to have another (synthetic empty) line if \n is the last codepoint in the text
+    // so that the caret can be placed on the line after the newline.
+    // This synthetic line has no visual glyphs of its own.
     if (hasTrailingNewline) {
       if (!reachedMaxLines()) {
         _top += _layout.addLine(
