@@ -107,6 +107,11 @@ class TestApp {
       )
       ..pop();
 
+    final childLogicalSize = size * 0.25;
+    final childLogicalOffset = windowCenter - childLogicalSize.center(Offset.zero);
+    final childLogicalBounds = childLogicalOffset & childLogicalSize;
+    final List<Map<String, Object>> policyRegions = <Map<String, Object>>[];
+
     if (showOverlay) {
       final containerSize = size * 0.5;
       // Alignment.center
@@ -118,6 +123,16 @@ class TestApp {
         containerOffset.dx + containerSize.width - overlaySize.width,
         containerOffset.dy,
       );
+      final overlayLogicalBounds = overlayOffset & overlaySize;
+      policyRegions.add(<String, Object>{
+        'rectLTRB': <double>[
+          overlayLogicalBounds.left,
+          overlayLogicalBounds.top,
+          overlayLogicalBounds.right,
+          overlayLogicalBounds.bottom,
+        ],
+        'response': 'YES_PRIORITIZE',
+      });
       final overlayPhysicalSize = overlaySize * pixelRatio;
       final overlayPhysicalOffset = overlayOffset * pixelRatio;
       final overlayPhysicalBounds = overlayPhysicalOffset & overlayPhysicalSize;
@@ -136,6 +151,26 @@ class TestApp {
         ..addPicture(overlayPhysicalOffset, overlayPicture)
         ..pop();
     }
+
+    policyRegions.add(<String, Object>{
+      'rectLTRB': <double>[
+        childLogicalBounds.left,
+        childLogicalBounds.top,
+        childLogicalBounds.right,
+        childLogicalBounds.bottom,
+      ],
+      'response': 'NO',
+    });
+    final ByteData policyMessage = utf8
+        .encode(
+          json.encode(<String, Object>{
+            'method': 'View.setGestureResponsePolicy',
+            'args': <String, Object>{'defaultResponse': 'YES', 'regions': policyRegions},
+          }),
+        )
+        .buffer
+        .asByteData();
+    PlatformDispatcher.instance.sendPlatformMessage('flutter/platform_views', policyMessage, null);
 
     sceneBuilder.pop();
     window.render(sceneBuilder.build());
