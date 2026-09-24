@@ -508,6 +508,17 @@ public class FlutterFragmentTest {
     assertEquals(flags, fragment.getFlutterEngineFlags());
   }
 
+  @Test
+  @SuppressWarnings("deprecation")
+  public void newEngineFragmentBuilderSetsFlutterShellArgs() {
+    FlutterShellArgs shellArgs =
+        new FlutterShellArgs(new String[] {"--trace-startup", "--verbose-logging"});
+    FlutterFragment fragment = FlutterFragment.withNewEngine().flutterShellArgs(shellArgs).build();
+
+    assertEquals(
+        Arrays.asList("--trace-startup", "--verbose-logging"), fragment.getFlutterEngineFlags());
+  }
+
   public static class FragmentWithOverriddenShellArgs extends FlutterFragment {
     @NonNull
     @Override

@@ -257,7 +257,7 @@ public class FlutterFragment extends Fragment
     private String initialRoute = "/";
     private boolean handleDeeplinking = false;
     private String appBundlePath = null;
-    private FlutterShellArgs shellArgs = null;
+    private List<String> flutterEngineFlags = null;
     private RenderMode renderMode = RenderMode.surface;
     private TransparencyMode transparencyMode = TransparencyMode.transparent;
     private boolean shouldAttachEngineToActivity = true;
@@ -334,7 +334,7 @@ public class FlutterFragment extends Fragment
     /** Any special configuration arguments for the Flutter engine. */
     @NonNull
     public NewEngineFragmentBuilder flutterEngineFlags(@NonNull List<String> flags) {
-      this.shellArgs = new FlutterShellArgs(flags);
+      this.flutterEngineFlags = flags;
       return this;
     }
 
@@ -346,7 +346,7 @@ public class FlutterFragment extends Fragment
     @NonNull
     @Deprecated
     public NewEngineFragmentBuilder flutterShellArgs(@NonNull FlutterShellArgs shellArgs) {
-      this.shellArgs = shellArgs;
+      this.flutterEngineFlags = Arrays.asList(shellArgs.toArray());
       return this;
     }
 
@@ -472,8 +472,9 @@ public class FlutterFragment extends Fragment
           dartEntrypointArgs != null ? new ArrayList(dartEntrypointArgs) : null);
       // TODO(mattcarroll): determine if we should have an explicit FlutterTestFragment instead of
       // conflating.
-      if (null != shellArgs) {
-        args.putStringArray(ARG_FLUTTER_INITIALIZATION_ARGS, shellArgs.toArray());
+      if (null != flutterEngineFlags) {
+        args.putStringArray(
+            ARG_FLUTTER_INITIALIZATION_ARGS, flutterEngineFlags.toArray(new String[0]));
       }
       args.putString(
           ARG_FLUTTERVIEW_RENDER_MODE,
