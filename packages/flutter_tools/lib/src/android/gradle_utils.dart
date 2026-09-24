@@ -34,7 +34,6 @@ import 'android_sdk.dart';
 const templateDefaultGradleVersion = '9.5.0';
 
 // When bumping, also update:
-//  * AGP version constants in packages/flutter_tools/gradle/build.gradle.kts
 //  * AGP warn version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
 //  * AGP test constants in packages/flutter_tools/gradle/src/test/kotlin/FlutterPluginUtilsTest.kt
 // See https://mvnrepository.com/artifact/com.android.tools.build/gradle
