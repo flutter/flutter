@@ -982,7 +982,7 @@ ContentContext::ContentContext(
 
 ContentContext::~ContentContext() {
 #ifdef IMPELLER_RECORD_PIPELINE_VARIANTS
-  if (pipelines_->recorded_variants.empty() || !context_) {
+  if (!pipelines_ || pipelines_->recorded_variants.empty() || !context_) {
     return;
   }
   PipelineVariantObserver observer;
