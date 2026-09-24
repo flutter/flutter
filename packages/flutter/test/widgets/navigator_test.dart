@@ -4848,12 +4848,10 @@ void main() {
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       // Pushes a pageless route.
-      unawaited(
-        showDialog<void>(
-          useRootNavigator: false,
-          context: navigator.currentContext!,
-          builder: (BuildContext context) => const Text('dialog'),
-        ),
+      final Future<void> dialog = showDialog<void>(
+        useRootNavigator: false,
+        context: navigator.currentContext!,
+        builder: (BuildContext context) => const Text('dialog'),
       );
       await tester.pumpAndSettle();
       expect(find.text('dialog'), findsOneWidget);
@@ -4867,6 +4865,7 @@ void main() {
       // It should not crash the app.
       expect(tester.takeException(), isNull);
       await tester.pumpAndSettle();
+      await dialog;
       expect(find.text('initial'), findsOneWidget);
     });
 

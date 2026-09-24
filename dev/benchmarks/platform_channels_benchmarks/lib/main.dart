@@ -134,8 +134,7 @@ Future<void> _runTest({
   // The native handlers for 'dev.flutter.echo.reset' in AppDelegate.m and
   // MainActivity.kt do not invoke the reply callback, so awaiting this Future
   // would deadlock the benchmark.
-  // ignore: unawaited_futures
-  resetChannel.send(true);
+  unawaited(resetChannel.send(true));
   // Prime test.
   await test(1);
   printer.addResult(
