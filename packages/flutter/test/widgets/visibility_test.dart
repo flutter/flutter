@@ -632,6 +632,161 @@ void main() {
     );
     expect(tester.getSize(find.byType(Visibility)), Size.zero);
   });
+
+  group('Visibility.excludeFromSpacing', () {
+    Widget buildColumn({
+      required bool visible,
+      bool excludeFromSpacing = true,
+      bool maintainState = false,
+      List<String>? log,
+    }) {
+      Widget hidden = const SizedBox(key: Key('hidden'), height: 20.0);
+      if (log != null) {
+        hidden = TestState(log: log, child: hidden);
+      }
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: Column(
+            spacing: 10.0,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const SizedBox(height: 20.0),
+              Visibility(
+                visible: visible,
+                maintainState: maintainState,
+                excludeFromSpacing: excludeFromSpacing,
+                child: hidden,
+              ),
+              const SizedBox(key: Key('last'), height: 20.0),
+            ],
+          ),
+        ),
+      );
+    }
+
+    double lastTop(WidgetTester tester) => tester.getTopLeft(find.byKey(const Key('last'))).dy;
+
+    testWidgets('hidden Visibility receives spacing by default', (WidgetTester tester) async {
+      await tester.pumpWidget(buildColumn(visible: false, excludeFromSpacing: false));
+      expect(lastTop(tester), 40.0);
+      expect(tester.getSize(find.byType(Column)).height, 60.0);
+    });
+
+    testWidgets('hidden Visibility receives no spacing', (WidgetTester tester) async {
+      await tester.pumpWidget(buildColumn(visible: false));
+      expect(lastTop(tester), 30.0);
+      expect(tester.getSize(find.byType(Column)).height, 50.0);
+    });
+
+    testWidgets('visible Visibility still receives spacing', (WidgetTester tester) async {
+      await tester.pumpWidget(buildColumn(visible: true));
+      expect(tester.getTopLeft(find.byKey(const Key('hidden'))).dy, 30.0);
+      expect(lastTop(tester), 60.0);
+      expect(tester.getSize(find.byType(Column)).height, 80.0);
+    });
+
+    testWidgets('works with maintainState and keeps the state when toggled', (
+      WidgetTester tester,
+    ) async {
+      final log = <String>[];
+      await tester.pumpWidget(buildColumn(visible: true, maintainState: true, log: log));
+      expect(log, <String>['created new state']);
+      expect(lastTop(tester), 60.0);
+
+      await tester.pumpWidget(buildColumn(visible: false, maintainState: true, log: log));
+      expect(lastTop(tester), 30.0);
+
+      await tester.pumpWidget(buildColumn(visible: true, maintainState: true, log: log));
+      expect(lastTop(tester), 60.0);
+      expect(log, <String>['created new state']);
+    });
+
+    testWidgets('works inside Expanded', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 100.0,
+              child: Column(
+                spacing: 10.0,
+                children: <Widget>[
+                  SizedBox(height: 20.0),
+                  Expanded(
+                    child: Visibility(
+                      visible: false,
+                      excludeFromSpacing: true,
+                      child: SizedBox(height: 20.0),
+                    ),
+                  ),
+                  SizedBox(key: Key('last'), height: 20.0),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      // The hidden child takes the remaining space, with no spacing around it.
+      expect(lastTop(tester), 80.0);
+    });
+
+    test('cannot be combined with maintainSize', () {
+      expect(
+        () => Visibility(
+          maintainState: true,
+          maintainAnimation: true,
+          maintainSize: true,
+          excludeFromSpacing: true,
+          child: const SizedBox(),
+        ),
+        throwsAssertionError,
+      );
+    });
+
+    testWidgets('debugFillProperties', (WidgetTester tester) async {
+      final builder = DiagnosticPropertiesBuilder();
+      const Visibility(excludeFromSpacing: true, child: SizedBox()).debugFillProperties(builder);
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
+      expect(description, contains('excludeFromSpacing'));
+    });
+  });
+
+  testWidgets('ExcludeFromSpacing updates its render object', (WidgetTester tester) async {
+    Widget build({required bool excluding}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: Row(
+            spacing: 10.0,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const SizedBox(width: 20.0),
+              ExcludeFromSpacing(excluding: excluding, child: const SizedBox(width: 20.0)),
+              const SizedBox(key: Key('last'), width: 20.0),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(excluding: true));
+    final RenderExcludeFromSpacing renderObject = tester.renderObject(
+      find.byType(ExcludeFromSpacing),
+    );
+    expect(renderObject.excluding, isTrue);
+    expect(tester.getTopLeft(find.byKey(const Key('last'))).dx, 50.0);
+
+    await tester.pumpWidget(build(excluding: false));
+    expect(renderObject.excluding, isFalse);
+    expect(tester.getTopLeft(find.byKey(const Key('last'))).dx, 60.0);
+  });
 }
 
 class _ShowVisibility extends StatefulWidget {
