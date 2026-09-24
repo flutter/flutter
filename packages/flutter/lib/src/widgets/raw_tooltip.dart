@@ -486,7 +486,8 @@ class RawTooltip extends StatefulWidget {
   /// including those with mouse cursors currently hovering over them.
   ///
   /// This method returns true if it successfully dismisses at least one tooltip
-  /// and returns false if there is no tooltip currently displayed.
+  /// and returns false if there is no tooltip currently displayed or if all
+  /// displayed tooltips are already being dismissed.
   /// {@endtemplate}
   static bool dismissAllToolTips() {
     if (_openedTooltips.isEmpty) {
@@ -834,25 +835,32 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     return true;
   }
 
-  static KeyEventResult _handleEarlyKeyEvent(KeyEvent event) {
-    if ((event is KeyDownEvent || event is KeyRepeatEvent) &&
-        event.logicalKey == LogicalKeyboardKey.escape &&
-        RawTooltip._openedTooltips.isNotEmpty) {
-      return RawTooltip.dismissAllToolTips() ? KeyEventResult.handled : KeyEventResult.ignored;
+  static bool _handleEscapeKeyEvent(KeyEvent event) {
+    if (event.logicalKey != LogicalKeyboardKey.escape) {
+      return false;
     }
-    return KeyEventResult.ignored;
+    if (event is KeyDownEvent) {
+      return RawTooltip.dismissAllToolTips();
+    }
+    if (event is KeyRepeatEvent) {
+      // Consume repeat events while a tooltip is still animating out so that
+      // holding Escape to dismiss a tooltip does not fall through to ancestor
+      // SingleActivator(LogicalKeyboardKey.escape) shortcuts (which have
+      // includeRepeats: true by default).
+      return RawTooltip.dismissAllToolTips() || RawTooltip._openedTooltips.isNotEmpty;
+    }
+    return false;
+  }
+
+  static KeyEventResult _handleEarlyKeyEvent(KeyEvent event) {
+    return _handleEscapeKeyEvent(event) ? KeyEventResult.handled : KeyEventResult.ignored;
   }
 
   static bool _handleHardwareKeyEvent(KeyEvent event) {
     if (FocusManager.instance.primaryFocus != null) {
       return false;
     }
-    if ((event is KeyDownEvent || event is KeyRepeatEvent) &&
-        event.logicalKey == LogicalKeyboardKey.escape &&
-        RawTooltip._openedTooltips.isNotEmpty) {
-      return RawTooltip.dismissAllToolTips();
-    }
-    return false;
+    return _handleEscapeKeyEvent(event);
   }
 
   @protected

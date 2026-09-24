@@ -3320,16 +3320,41 @@ void main() {
 
       // First Escape starts dismissing the RawTooltip (75ms reverse animation)
       // and does not invoke DismissIntent.
-      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.escape);
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 30));
       expect(find.text(tooltipText), findsOneWidget);
       expect(dismissIntentInvoked, isFalse);
+      expect(RawTooltip.dismissAllToolTips(), isFalse);
 
-      // Second Escape sent while the tooltip is already animating out is not
-      // swallowed by the reversing tooltip and invokes DismissIntent.
+      // Holding Escape (repeat events during the reverse animation) is consumed
+      // and does not fall through to DismissIntent.
+      await tester.sendKeyRepeatEvent(LogicalKeyboardKey.escape);
+      await tester.pump();
+      expect(dismissIntentInvoked, isFalse);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.escape);
+
+      // Second Escape press sent while the tooltip is still animating out is
+      // not swallowed by the reversing tooltip and invokes DismissIntent.
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
       expect(find.text(tooltipText), findsNothing);
+      expect(dismissIntentInvoked, isTrue);
+
+      // Re-show the tooltip, dismiss it with Escape, let it fully settle, and
+      // verify a subsequent Escape after handler removal also invokes DismissIntent.
+      dismissIntentInvoked = false;
+      key.currentState!.ensureTooltipVisible();
+      await tester.pumpAndSettle();
+      expect(find.text(tooltipText), findsOneWidget);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(find.text(tooltipText), findsNothing);
+      expect(dismissIntentInvoked, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
       expect(dismissIntentInvoked, isTrue);
     },
   );
@@ -3367,7 +3392,10 @@ void main() {
     expect(FocusManager.instance.primaryFocus, isNull);
     expect(find.text(tooltipText), findsOneWidget);
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    expect(await tester.sendKeyEvent(LogicalKeyboardKey.escape), isTrue);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 30));
+    expect(await tester.sendKeyEvent(LogicalKeyboardKey.escape), isFalse);
     await tester.pumpAndSettle();
     expect(find.text(tooltipText), findsNothing);
   });
