@@ -495,6 +495,20 @@ let package = Package(
         )''');
     });
 
+    testWithoutContext('as remoteBinaryTarget', () {
+      final product = SwiftPackageTarget.remoteBinaryTarget(
+        name: 'ProductName',
+        zipUrl: 'https://example.com/artifacts.zip',
+        zipChecksum: '1234567890abcdef',
+      );
+      expect(product.format(), '''
+.binaryTarget(
+            name: "ProductName",
+            url: "https://example.com/artifacts.zip",
+            checksum: "1234567890abcdef"
+        )''');
+    });
+
     testWithoutContext('as executable', () {
       final product = SwiftPackageTarget.executableTarget(
         name: 'ProductName',

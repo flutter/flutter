@@ -4,6 +4,9 @@ import Foundation
 
 /// A helper class for Flutter tools and plugins.
 public class FlutterToolHelper {
+  /// Whether the project is configured to use a remote Flutter framework.
+  public static let useRemoteFlutterFramework = {{useRemoteFlutterFramework}}
+
   /// Parses the Flutter build mode from the environment variables.
   ///
   /// - Parameter env: A dictionary of environment variables.
@@ -80,10 +83,12 @@ public class FlutterToolHelper {
   ///     should point to.
   ///   - integrationPackagePath: The path to the FlutterNativeIntegration.
   ///   - fileManager: The file manager to use for file operations.
+  ///   - useRemoteFlutterFramework: Whether the project uses a remote Flutter framework.
   /// - Throws: `XcodeErrorAndExit.error` if the update fails.
   public static func updateSymlink(
     targetBuildMode: String,
     integrationPackagePath: String,
+    useRemoteFlutterFramework: Bool = FlutterToolHelper.useRemoteFlutterFramework,
     fileManager: FlutterToolsFileManager
   ) throws {
     let currentLinkName = "FlutterPluginRegistrant"
@@ -99,6 +104,23 @@ public class FlutterToolHelper {
         message: "\(currentLinkName) symlink is up-to-date."
       )
       return
+    }
+
+    if useRemoteFlutterFramework {
+      // Remote Flutter framework configuration must be switched manually. Direct user to update configuration.
+      let currentBuildMode = currentLinkTarget.map {
+        URL(fileURLWithPath: $0).lastPathComponent
+      } ?? "unknown"
+      throw XcodeErrorAndExit.error(
+        [
+          "The target build mode is set to \(targetBuildMode), but Flutter packages are set to \(currentBuildMode).",
+          "This project uses a remote Flutter framework and requires the build mode to be switched manually. Please complete one of the following:",
+        ]
+          + pluginInstructions(
+            targetBuildMode: targetBuildMode,
+            packagePath: integrationPackagePath
+          )
+      )
     }
 
     // Verify new target exists
@@ -139,6 +161,18 @@ public class FlutterToolHelper {
         "Failed to update symlink: \(error.localizedDescription)"
       ])
     }
+  }
+
+  /// Returns instructions for manually switching the Flutter build mode using the Swift package plugin.
+  public static func pluginInstructions(targetBuildMode: String, packagePath: String) -> [String] {
+    return [
+      "   1) Right click on FlutterNativeIntegration in Xcode's Project Navigator and select "
+        + "\"Switch to \(targetBuildMode) Mode\".",
+      "   or",
+      "   2) Run the following in a terminal:",
+      "       cd \(packagePath)",
+      "       swift package plugin --allow-writing-to-package-directory switch-to-\(targetBuildMode.lowercased())",
+    ]
   }
 
   /// Finds a value for a key in the environment variables or throws an error.
