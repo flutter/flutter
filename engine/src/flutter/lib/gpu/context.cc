@@ -154,6 +154,19 @@ extern bool InternalFlutterGpu_Context_GetSupportsManuallyMippedTextures(
       ->SupportsManuallyMippedTextures();
 }
 
+extern bool InternalFlutterGpu_Context_GetSupportsTextureArrays(
+    flutter::gpu::Context* wrapper) {
+  // TODO(bdero): Shader bundles do not carry an OpenGL ES 3.0 shader variant
+  // yet, so user shaders cannot sample 2D array textures on the GLES backend
+  // even when the context itself supports them. Once the bundle format gains
+  // an ES 3.0 variant, gate on the context capability alone.
+  if (wrapper->GetContext().GetBackendType() ==
+      impeller::Context::BackendType::kOpenGLES) {
+    return false;
+  }
+  return wrapper->GetContext().GetCapabilities()->SupportsTextureArrays();
+}
+
 extern int InternalFlutterGpu_Context_GetMaxSamplerAnisotropy(
     flutter::gpu::Context* wrapper) {
   return wrapper->GetContext().GetCapabilities()->GetMaxSamplerAnisotropy();

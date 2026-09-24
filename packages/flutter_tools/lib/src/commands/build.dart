@@ -6,7 +6,6 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../android/android_builder.dart';
-import '../android/android_sdk.dart';
 import '../android/gradle.dart';
 import '../artifacts.dart';
 import '../base/file_system.dart';
@@ -61,13 +60,11 @@ class BuildCommand extends FlutterCommand {
       :ProcessManager processManager,
     ) = toolContext;
     final Xcode xcode = appleContext.xcode;
-    final AndroidSdk? androidSdk = androidContext.androidSdk;
-
     final codesign = DarwinAddToAppCodesigning.fromContexts(
       appleContext: appleContext,
       toolContext: toolContext,
     );
-    final AndroidBuilder effectiveAndroidBuilder =
+    final AndroidBuilder builder =
         androidBuilder ??
         AndroidGradleBuilder.fromContexts(
           analytics: analytics,
@@ -76,15 +73,16 @@ class BuildCommand extends FlutterCommand {
         );
     _addSubcommand(
       BuildAarCommand(
-        androidSdk: androidSdk,
-        fileSystem: fileSystem,
-        logger: logger,
+        androidBuilder: builder,
+        androidContext: androidContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
     );
     _addSubcommand(
       BuildApkCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: builder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
@@ -93,7 +91,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildAppBundleCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: builder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
