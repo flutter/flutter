@@ -487,7 +487,8 @@ class RawTooltip extends StatefulWidget {
   ///
   /// This method returns true if it successfully dismisses at least one tooltip
   /// and returns false if there is no tooltip currently displayed or if all
-  /// displayed tooltips are already being dismissed.
+  /// displayed tooltips are already being dismissed (that is, they are still
+  /// visible but playing their exit animation).
   /// {@endtemplate}
   static bool dismissAllToolTips() {
     if (_openedTooltips.isEmpty) {
@@ -824,23 +825,30 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
 
   // The physical keys of Escape presses whose KeyDownEvent (or a subsequent
   // KeyRepeatEvent) dismissed at least one tooltip and which have not been
-  // released yet.
+  // released yet, mapped to whether the press's KeyUpEvent should also be
+  // consumed.
   //
-  // The subsequent KeyRepeatEvents and the KeyUpEvent of these presses are
-  // also consumed so that holding Escape to dismiss a tooltip does not fall
-  // through to ancestor SingleActivator(LogicalKeyboardKey.escape) shortcuts
-  // (which have includeRepeats: true by default) once the tooltip finishes
-  // animating out. The key event handlers stay registered until every press
-  // in this set is released, see _updateKeyEventHandlers.
-  static final Set<PhysicalKeyboardKey> _consumedEscapeKeys = <PhysicalKeyboardKey>{};
+  // The subsequent KeyRepeatEvents of these presses are also consumed so that
+  // holding Escape to dismiss a tooltip does not fall through to ancestor
+  // SingleActivator(LogicalKeyboardKey.escape) shortcuts (which have
+  // includeRepeats: true by default) once the tooltip finishes animating out.
+  //
+  // The KeyUpEvent is only consumed if the KeyDownEvent of the same press was
+  // consumed, so that widgets that received the KeyDownEvent (e.g. when a
+  // tooltip is shown while Escape is already held down) also receive the
+  // matching KeyUpEvent.
+  //
+  // The key event handlers stay registered until every press in this map is
+  // released, see _updateKeyEventHandlers.
+  static final Map<PhysicalKeyboardKey, bool> _consumedEscapeKeys = <PhysicalKeyboardKey, bool>{};
 
-  // The FocusManager that _handleEarlyKeyEvent is currently registered with,
-  // or null if it is not registered.
+  // The FocusManager that the key event handlers are currently registered
+  // with, or null if they are not registered.
   //
   // This is tracked by identity rather than with a bool because the
   // FocusManager can be replaced (e.g. between tests), in which case the
-  // handler must be registered with the new instance.
-  static FocusManager? _earlyKeyEventHandlerFocusManager;
+  // handlers must be registered again.
+  static FocusManager? _keyEventHandlersFocusManager;
 
   // Registers the key event handlers while at least one tooltip is open or
   // an Escape press that dismissed a tooltip is still held down, and
@@ -863,25 +871,31 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     // Forget presses that HardwareKeyboard no longer considers held down
     // (e.g. after HardwareKeyboard.clearState, or if a KeyUpEvent was never
     // delivered), so they do not keep the handlers registered indefinitely.
-    final Set<PhysicalKeyboardKey> pressedKeys = HardwareKeyboard.instance.physicalKeysPressed;
-    _consumedEscapeKeys.retainWhere(pressedKeys.contains);
+    if (_consumedEscapeKeys.isNotEmpty) {
+      final Set<PhysicalKeyboardKey> pressedKeys = HardwareKeyboard.instance.physicalKeysPressed;
+      _consumedEscapeKeys.removeWhere(
+        (PhysicalKeyboardKey key, bool consumeKeyUp) => !pressedKeys.contains(key),
+      );
+    }
 
     final bool shouldRegister =
         RawTooltip._openedTooltips.isNotEmpty || _consumedEscapeKeys.isNotEmpty;
 
     final FocusManager? focusManager = shouldRegister ? FocusManager.instance : null;
-    if (!identical(focusManager, _earlyKeyEventHandlerFocusManager)) {
-      _earlyKeyEventHandlerFocusManager?.removeEarlyKeyEventHandler(_handleEarlyKeyEvent);
-      focusManager?.addEarlyKeyEventHandler(_handleEarlyKeyEvent);
-      _earlyKeyEventHandlerFocusManager = focusManager;
+    if (identical(focusManager, _keyEventHandlersFocusManager)) {
+      return;
     }
-
-    // HardwareKeyboard.clearState can remove handlers without notice, so
-    // always remove before (re-)adding to keep exactly one registration.
+    _keyEventHandlersFocusManager?.removeEarlyKeyEventHandler(_handleEarlyKeyEvent);
+    // In tests, HardwareKeyboard.clearState removes all handlers without
+    // notice. The test binding also replaces the FocusManager at the same
+    // time, so always removing before (re-)adding here keeps exactly one
+    // registration without having to re-register on every call.
     HardwareKeyboard.instance.removeHandler(_handleHardwareKeyEvent);
-    if (shouldRegister) {
+    if (focusManager != null) {
+      focusManager.addEarlyKeyEventHandler(_handleEarlyKeyEvent);
       HardwareKeyboard.instance.addHandler(_handleHardwareKeyEvent);
     }
+    _keyEventHandlersFocusManager = focusManager;
   }
 
   static bool _handleEscapeKeyEvent(KeyEvent event) {
@@ -895,23 +909,25 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
         _consumedEscapeKeys.remove(event.physicalKey);
         final bool dismissed = RawTooltip.dismissAllToolTips();
         if (dismissed) {
-          _consumedEscapeKeys.add(event.physicalKey);
+          _consumedEscapeKeys[event.physicalKey] = true;
         }
         _updateKeyEventHandlers();
         return dismissed;
       case KeyRepeatEvent():
         // Also dismiss tooltips that were shown while Escape was held down.
+        // The KeyDownEvent of such a press was not consumed, so its KeyUpEvent
+        // is not consumed either.
         if (RawTooltip.dismissAllToolTips()) {
-          _consumedEscapeKeys.add(event.physicalKey);
+          _consumedEscapeKeys.putIfAbsent(event.physicalKey, () => false);
           _updateKeyEventHandlers();
         }
-        return _consumedEscapeKeys.contains(event.physicalKey);
+        return _consumedEscapeKeys.containsKey(event.physicalKey);
       case KeyUpEvent():
-        final bool consumed = _consumedEscapeKeys.remove(event.physicalKey);
+        final bool consumed = _consumedEscapeKeys.remove(event.physicalKey) ?? false;
         _updateKeyEventHandlers();
         return consumed;
     }
-    // KeyEvent is not a sealed class, so the switch above is not exhaustive.
+    // KeyEvent is abstract but not sealed, so a default return is required.
     return false;
   }
 
