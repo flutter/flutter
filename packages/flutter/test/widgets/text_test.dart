@@ -970,7 +970,7 @@ void main() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true));
     semantics.dispose();
-  }); // https://github.com/flutter/flutter/issues/62945
+  });
 
   testWidgets('TapGesture recognizers contribute link semantics', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
@@ -1061,7 +1061,7 @@ void main() {
       hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true),
     );
     semantics.dispose();
-  }); // https://github.com/flutter/flutter/issues/62945
+  });
 
   testWidgets('inline widgets semantic nodes scale', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
@@ -1132,7 +1132,7 @@ void main() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true));
     semantics.dispose();
-  }); // https://github.com/flutter/flutter/issues/62945
+  });
 
   testWidgets('receives fontFamilyFallback and package from DefaultTextStyle', (
     WidgetTester tester,
@@ -1182,7 +1182,7 @@ void main() {
     );
 
     expect(find.byType(Text), paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)));
-  }); // https://github.com/flutter/flutter/issues/87878
+  });
 
   testWidgets('Overflow is clipping correctly - short text with overflow: ellipsis', (
     WidgetTester tester,
@@ -1264,7 +1264,7 @@ void main() {
     final Size textSizeLongestLine = tester.getSize(find.byType(Text));
     expect(textSizeLongestLine.width, equals(630.0));
     expect(textSizeLongestLine.height, equals(fontHeight * 2));
-  }); // https://github.com/flutter/flutter/issues/44020
+  });
 
   testWidgets('textWidthBasis with textAlign still obeys parent alignment', (
     WidgetTester tester,
@@ -1314,7 +1314,7 @@ void main() {
     expect(tester.getSize(find.text('RIGHT ALIGNED, PARENT')).width, lessThan(width));
     expect(tester.getSize(find.text('LEFT ALIGNED, LONGEST LINE')).width, lessThan(width));
     expect(tester.getSize(find.text('RIGHT ALIGNED, LONGEST LINE')).width, equals(width));
-  }); // https://github.com/flutter/flutter/issues/44020
+  });
 
   testWidgets('textWidthBasis.longestLine confines the width of the paragraph '
       'when given loose constraints', (WidgetTester tester) async {
@@ -1431,7 +1431,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }); // https://github.com/flutter/flutter/issues/87877
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 2', (
@@ -1485,7 +1485,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }); // https://github.com/flutter/flutter/issues/87877
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 3', (
@@ -1545,7 +1545,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }); // https://github.com/flutter/flutter/issues/87877
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 4', (
@@ -1616,7 +1616,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }); // https://github.com/flutter/flutter/issues/87877
+  });
 
   testWidgets('RenderParagraph intrinsic width', (WidgetTester tester) async {
     await tester.pumpWidget(
