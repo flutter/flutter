@@ -116,8 +116,6 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
     if (renderTransparently) {
       getHolder().setFormat(PixelFormat.TRANSPARENT);
       setZOrderOnTop(true);
-    } else {
-      getHolder().setFormat(PixelFormat.RGBA_8888);
     }
 
     isContentSizingEnabled = ContentSizingFlag.isEnabled(getContext());
