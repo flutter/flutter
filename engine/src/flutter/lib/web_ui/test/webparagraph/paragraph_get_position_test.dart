@@ -374,7 +374,9 @@ Future<void> testMain() async {
     final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
-    expect(paragraph.height, 22);
+    // Font metrics for fallback font Arial at fontSize 20 can vary slightly across
+    // backends (23.0 on CanvasKit/Skia FreeType, 22.0 on WebParagraph Canvas2D).
+    expect(paragraph.height, anyOf(22, 23));
   });
 
   test('Text block height with leading distribution', () {

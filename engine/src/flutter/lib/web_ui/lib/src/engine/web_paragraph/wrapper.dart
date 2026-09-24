@@ -380,9 +380,9 @@ class _LineBuilder {
     if (hasTrailingNewline) {
       if (!reachedMaxLines()) {
         _top += _layout.addLine(
-          ClusterRange(start: _whitespaceEnd, end: _whitespaceEnd),
-          ClusterRange(start: _whitespaceEnd, end: _whitespaceEnd),
-          ClusterRange(start: _whitespaceEnd, end: _newlineEnd),
+          ClusterRange(start: _newlineEnd, end: _newlineEnd),
+          ClusterRange(start: _newlineEnd, end: _newlineEnd),
+          ClusterRange(start: _newlineEnd, end: _newlineEnd),
           _top,
           isSyntheticEmptyLine: true,
         );

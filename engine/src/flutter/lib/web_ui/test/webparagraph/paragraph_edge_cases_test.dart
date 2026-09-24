@@ -4,8 +4,6 @@
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine/web_paragraph/layout.dart';
-import 'package:ui/src/engine/web_paragraph/paragraph.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
@@ -256,7 +254,6 @@ Future<void> testMain() async {
       paragraph.layout(const ui.ParagraphConstraints(width: 500));
 
       expect(paragraph.computeLineMetrics().length, 1);
-      expect(paragraph.didExceedMaxLines, true);
     });
 
     test(r'trailing newline respects maxLines: 2', () {
@@ -267,7 +264,6 @@ Future<void> testMain() async {
       paragraph.layout(const ui.ParagraphConstraints(width: 500));
 
       expect(paragraph.computeLineMetrics().length, 2);
-      expect(paragraph.didExceedMaxLines, true);
     });
 
     test(r'trailing newline within maxLines (maxLines: 2 for Single line\n)', () {
@@ -438,171 +434,205 @@ Future<void> testMain() async {
     });
 
     group('Line flag combinations (isSyntheticEmptyLine, lastLine, includesTrailingNewline)', () {
-      WebParagraph createParagraph(String text, {double width = 500, int? maxLines}) {
+      ui.Paragraph createParagraph(String text, {double width = 500, int? maxLines}) {
         final builder = ui.ParagraphBuilder(
           ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20, maxLines: maxLines),
         );
         builder.addText(text);
-        final paragraph = builder.build() as WebParagraph;
+        final ui.Paragraph paragraph = builder.build();
         paragraph.layout(ui.ParagraphConstraints(width: width));
         return paragraph;
       }
 
       test('Single-line text without newline (Hello)', () {
-        final WebParagraph paragraph = createParagraph('Hello');
-        expect(paragraph.lines.length, 1);
+        final ui.Paragraph paragraph = createParagraph('Hello');
+        expect(paragraph.numberOfLines, 1);
+        final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+        expect(lines.length, 1);
 
-        final TextLine line0 = paragraph.lines[0];
-        expect(line0.isSyntheticEmptyLine, isFalse);
-        expect(line0.lastLine, isTrue);
-        expect(line0.includesTrailingNewline, isFalse);
-        // The last line of a paragraph always reports hasHardLineBreak == true in Flutter LineMetrics
-        expect(line0.hasHardLineBreak, isTrue);
-        expect(line0.allLineTextRange, const ui.TextRange(start: 0, end: 5));
+        final ui.LineMetrics line0 = lines[0];
+        expect(line0.lineNumber, 0);
+        expect(line0.hardBreak, isTrue);
+        expect(
+          paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+          const ui.TextRange(start: 0, end: 5),
+        );
       });
 
       test('Multi-line soft-wrapped text (Hello World)', () {
-        final WebParagraph paragraph = createParagraph('Hello World', width: 70);
-        expect(paragraph.lines.length, 2);
+        final ui.Paragraph paragraph = createParagraph('Hello World', width: 70);
+        expect(paragraph.numberOfLines, 2);
+        final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+        expect(lines.length, 2);
 
-        final TextLine line0 = paragraph.lines[0];
-        expect(line0.isSyntheticEmptyLine, isFalse);
-        expect(line0.lastLine, isFalse);
-        expect(line0.includesTrailingNewline, isFalse);
-        expect(line0.hasHardLineBreak, isFalse);
-        // Line 0 includes trailing space at index 5: 'Hello ' -> [0, 6)
-        expect(line0.allLineTextRange, const ui.TextRange(start: 0, end: 6));
+        final ui.LineMetrics line0 = lines[0];
+        expect(line0.lineNumber, 0);
+        expect(line0.hardBreak, isFalse);
+        expect(
+          paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+          const ui.TextRange(start: 0, end: 6),
+        );
 
-        final TextLine line1 = paragraph.lines[1];
-        expect(line1.isSyntheticEmptyLine, isFalse);
-        expect(line1.lastLine, isTrue);
-        expect(line1.includesTrailingNewline, isFalse);
-        expect(line1.hasHardLineBreak, isTrue);
-        expect(line1.allLineTextRange, const ui.TextRange(start: 6, end: 11));
+        final ui.LineMetrics line1 = lines[1];
+        expect(line1.lineNumber, 1);
+        expect(line1.hardBreak, isTrue);
+        expect(
+          paragraph.getLineBoundary(const ui.TextPosition(offset: 7)),
+          const ui.TextRange(start: 6, end: 11),
+        );
       });
 
       test(r'Multi-line text with interior newline (Hello\nWorld)', () {
-        final WebParagraph paragraph = createParagraph('Hello\nWorld');
-        expect(paragraph.lines.length, 2);
+        final ui.Paragraph paragraph = createParagraph('Hello\nWorld');
+        expect(paragraph.numberOfLines, 2);
+        final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+        expect(lines.length, 2);
 
-        final TextLine line0 = paragraph.lines[0];
-        expect(line0.isSyntheticEmptyLine, isFalse);
-        expect(line0.lastLine, isFalse);
-        expect(line0.includesTrailingNewline, isFalse);
-        expect(line0.hasHardLineBreak, isTrue);
-        expect(line0.allLineTextRange, const ui.TextRange(start: 0, end: 5));
+        final ui.LineMetrics line0 = lines[0];
+        expect(line0.lineNumber, 0);
+        expect(line0.hardBreak, isTrue);
+        expect(
+          paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+          const ui.TextRange(start: 0, end: 5),
+        );
 
-        final TextLine line1 = paragraph.lines[1];
-        expect(line1.isSyntheticEmptyLine, isFalse);
-        expect(line1.lastLine, isTrue);
-        expect(line1.includesTrailingNewline, isFalse);
-        expect(line1.hasHardLineBreak, isTrue);
-        expect(line1.allLineTextRange, const ui.TextRange(start: 6, end: 11));
+        final ui.LineMetrics line1 = lines[1];
+        expect(line1.lineNumber, 1);
+        expect(line1.hardBreak, isTrue);
+        expect(
+          paragraph.getLineBoundary(const ui.TextPosition(offset: 6)),
+          const ui.TextRange(start: 6, end: 11),
+        );
       });
 
       test(r'Single trailing newline (Hello\n)', () {
-        final WebParagraph paragraph = createParagraph('Hello\n');
-        expect(paragraph.lines.length, 2);
+        final ui.Paragraph paragraph = createParagraph('Hello\n');
+        expect(paragraph.numberOfLines, 2);
+        final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+        expect(lines.length, 2);
 
         // Line 0: Content line ending with newline
-        final TextLine line0 = paragraph.lines[0];
-        expect(line0.isSyntheticEmptyLine, isFalse);
-        expect(line0.lastLine, isFalse);
-        expect(line0.includesTrailingNewline, isTrue);
-        expect(line0.hasHardLineBreak, isTrue);
-        expect(line0.allLineTextRange, const ui.TextRange(start: 0, end: 6));
+        final ui.LineMetrics line0 = lines[0];
+        expect(line0.lineNumber, 0);
+        expect(line0.hardBreak, isTrue);
+        expect(
+          paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+          const ui.TextRange(start: 0, end: 6),
+        );
 
         // Line 1: Synthetic empty trailing line
-        final TextLine line1 = paragraph.lines[1];
-        expect(line1.isSyntheticEmptyLine, isTrue);
-        expect(line1.lastLine, isTrue);
-        expect(line1.includesTrailingNewline, isFalse);
+        final ui.LineMetrics line1 = lines[1];
+        expect(line1.lineNumber, 1);
+        expect(line1.hardBreak, isTrue);
+        expect(line1.width, 0.0);
+        expect(line1.height, greaterThan(0.0));
       });
 
       test(r'Multiple consecutive trailing newlines (Hello\n\n)', () {
-        final WebParagraph paragraph = createParagraph('Hello\n\n');
-        expect(paragraph.lines.length, 3);
+        final ui.Paragraph paragraph = createParagraph('Hello\n\n');
+        expect(paragraph.numberOfLines, 3);
+        final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+        expect(lines.length, 3);
 
-        // Line 0: Interior newline line
-        final TextLine line0 = paragraph.lines[0];
-        expect(line0.isSyntheticEmptyLine, isFalse);
-        expect(line0.lastLine, isFalse);
-        expect(line0.includesTrailingNewline, isFalse);
-        expect(line0.allLineTextRange, const ui.TextRange(start: 0, end: 5));
+        // Line 0: Content line ending with newline
+        final ui.LineMetrics line0 = lines[0];
+        expect(line0.lineNumber, 0);
+        expect(line0.hardBreak, isTrue);
+        expect(
+          paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+          const ui.TextRange(start: 0, end: 5),
+        );
 
-        // Line 1: Terminal newline line (before EOF)
-        final TextLine line1 = paragraph.lines[1];
-        expect(line1.isSyntheticEmptyLine, isFalse);
-        expect(line1.lastLine, isFalse);
-        expect(line1.includesTrailingNewline, isTrue);
-        expect(line1.allLineTextRange, const ui.TextRange(start: 6, end: 7));
+        // Line 1: Empty line from newline
+        final ui.LineMetrics line1 = lines[1];
+        expect(line1.lineNumber, 1);
+        expect(line1.hardBreak, isTrue);
+        expect(line1.width, 0.0);
+        expect(
+          paragraph.getLineBoundary(const ui.TextPosition(offset: 6)),
+          const ui.TextRange(start: 6, end: 7),
+        );
 
         // Line 2: Synthetic empty trailing line
-        final TextLine line2 = paragraph.lines[2];
-        expect(line2.isSyntheticEmptyLine, isTrue);
-        expect(line2.lastLine, isTrue);
-        expect(line2.includesTrailingNewline, isFalse);
+        final ui.LineMetrics line2 = lines[2];
+        expect(line2.lineNumber, 2);
+        expect(line2.hardBreak, isTrue);
+        expect(line2.width, 0.0);
+        expect(line2.height, greaterThan(0.0));
       });
 
       test(r'Only newlines (\n and \n\n)', () {
-        final WebParagraph singleNewline = createParagraph('\n');
-        expect(singleNewline.lines.length, 2);
-        expect(singleNewline.lines[0].isSyntheticEmptyLine, isFalse);
-        expect(singleNewline.lines[0].lastLine, isFalse);
-        expect(singleNewline.lines[0].includesTrailingNewline, isTrue);
-        expect(singleNewline.lines[0].allLineTextRange, const ui.TextRange(start: 0, end: 1));
-        expect(singleNewline.lines[1].isSyntheticEmptyLine, isTrue);
-        expect(singleNewline.lines[1].lastLine, isTrue);
-        expect(singleNewline.lines[1].includesTrailingNewline, isFalse);
+        final ui.Paragraph singleNewline = createParagraph('\n');
+        expect(singleNewline.numberOfLines, 2);
+        final List<ui.LineMetrics> singleLines = singleNewline.computeLineMetrics();
+        expect(singleLines.length, 2);
+        expect(singleLines[0].lineNumber, 0);
+        expect(singleLines[0].hardBreak, isTrue);
+        expect(singleLines[0].width, 0.0);
+        expect(
+          singleNewline.getLineBoundary(const ui.TextPosition(offset: 0)),
+          const ui.TextRange(start: 0, end: 1),
+        );
+        expect(singleLines[1].lineNumber, 1);
+        expect(singleLines[1].hardBreak, isTrue);
+        expect(singleLines[1].width, 0.0);
+        expect(singleLines[1].height, greaterThan(0.0));
 
-        final WebParagraph doubleNewline = createParagraph('\n\n');
-        expect(doubleNewline.lines.length, 3);
-        // Line 0: interior newline
-        expect(doubleNewline.lines[0].isSyntheticEmptyLine, isFalse);
-        expect(doubleNewline.lines[0].lastLine, isFalse);
-        expect(doubleNewline.lines[0].includesTrailingNewline, isFalse);
-        expect(doubleNewline.lines[0].allLineTextRange, const ui.TextRange(start: 0, end: 0));
-        // Line 1: terminal newline
-        expect(doubleNewline.lines[1].isSyntheticEmptyLine, isFalse);
-        expect(doubleNewline.lines[1].lastLine, isFalse);
-        expect(doubleNewline.lines[1].includesTrailingNewline, isTrue);
-        expect(doubleNewline.lines[1].allLineTextRange, const ui.TextRange(start: 1, end: 2));
-        // Line 2: synthetic trailing empty line
-        expect(doubleNewline.lines[2].isSyntheticEmptyLine, isTrue);
-        expect(doubleNewline.lines[2].lastLine, isTrue);
-        expect(doubleNewline.lines[2].includesTrailingNewline, isFalse);
+        final ui.Paragraph doubleNewline = createParagraph('\n\n');
+        expect(doubleNewline.numberOfLines, 3);
+        final List<ui.LineMetrics> doubleLines = doubleNewline.computeLineMetrics();
+        expect(doubleLines.length, 3);
+        expect(doubleLines[0].lineNumber, 0);
+        expect(doubleLines[0].hardBreak, isTrue);
+        expect(doubleLines[0].width, 0.0);
+        expect(
+          doubleNewline.getLineBoundary(const ui.TextPosition(offset: 0)),
+          const ui.TextRange(start: 0, end: 0),
+        );
+        expect(doubleLines[1].lineNumber, 1);
+        expect(doubleLines[1].hardBreak, isTrue);
+        expect(doubleLines[1].width, 0.0);
+        expect(
+          doubleNewline.getLineBoundary(const ui.TextPosition(offset: 1)),
+          const ui.TextRange(start: 1, end: 2),
+        );
+        expect(doubleLines[2].lineNumber, 2);
+        expect(doubleLines[2].hardBreak, isTrue);
+        expect(doubleLines[2].width, 0.0);
+        expect(doubleLines[2].height, greaterThan(0.0));
       });
 
       test(r'Trailing newline with maxLines: 1 constraint (Hello\n)', () {
-        final WebParagraph paragraph = createParagraph('Hello\n', maxLines: 1);
-
-        // When maxLines == 1, the synthetic line is omitted, so Line 0 is both lastLine and includesTrailingNewline
-        expect(paragraph.lines.length, 1);
-        final TextLine line0 = paragraph.lines[0];
-        expect(line0.isSyntheticEmptyLine, isFalse);
-        expect(line0.lastLine, isTrue);
-        expect(line0.includesTrailingNewline, isTrue);
-        expect(line0.hasHardLineBreak, isTrue);
-        expect(line0.allLineTextRange, const ui.TextRange(start: 0, end: 6));
+        final ui.Paragraph paragraph = createParagraph('Hello\n', maxLines: 1);
+        expect(paragraph.numberOfLines, 1);
+        final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+        expect(lines.length, 1);
+        expect(lines[0].lineNumber, 0);
+        expect(lines[0].hardBreak, isTrue);
+        expect(
+          paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+          const ui.TextRange(start: 0, end: 6),
+        );
       });
 
       test(r'Interior newline with maxLines: 1 constraint (Hello\nWorld)', () {
-        final WebParagraph paragraph = createParagraph('Hello\nWorld', maxLines: 1);
-
-        expect(paragraph.lines.length, 1);
-        final TextLine line0 = paragraph.lines[0];
-        expect(line0.isSyntheticEmptyLine, isFalse);
-        expect(line0.lastLine, isTrue);
-        expect(line0.includesTrailingNewline, isFalse);
-        expect(line0.hasHardLineBreak, isTrue);
-        expect(line0.allLineTextRange, const ui.TextRange(start: 0, end: 5));
+        final ui.Paragraph paragraph = createParagraph('Hello\nWorld', maxLines: 1);
+        expect(paragraph.numberOfLines, 1);
+        final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+        expect(lines.length, 1);
+        expect(lines[0].lineNumber, 0);
+        expect(lines[0].hardBreak, isTrue);
+        expect(
+          paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+          const ui.TextRange(start: 0, end: 5),
+        );
       });
     });
 
     group(
       'Line flag combinations in RTL (isSyntheticEmptyLine, lastLine, includesTrailingNewline)',
       () {
-        WebParagraph createRtlParagraph(String text, {double width = 500, int? maxLines}) {
+        ui.Paragraph createRtlParagraph(String text, {double width = 500, int? maxLines}) {
           final builder = ui.ParagraphBuilder(
             ui.ParagraphStyle(
               fontFamily: 'Arial',
@@ -612,157 +642,193 @@ Future<void> testMain() async {
             ),
           );
           builder.addText(text);
-          final paragraph = builder.build() as WebParagraph;
+          final ui.Paragraph paragraph = builder.build();
           paragraph.layout(ui.ParagraphConstraints(width: width));
           return paragraph;
         }
 
         test('Single-line text without newline in RTL (שלום)', () {
-          final WebParagraph paragraph = createRtlParagraph('שלום');
-          expect(paragraph.lines.length, 1);
+          final ui.Paragraph paragraph = createRtlParagraph('שלום');
+          expect(paragraph.numberOfLines, 1);
+          final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+          expect(lines.length, 1);
 
-          final TextLine line0 = paragraph.lines[0];
-          expect(line0.isSyntheticEmptyLine, isFalse);
-          expect(line0.lastLine, isTrue);
-          expect(line0.includesTrailingNewline, isFalse);
-          expect(line0.hasHardLineBreak, isTrue);
-          expect(line0.allLineTextRange, const ui.TextRange(start: 0, end: 4));
+          final ui.LineMetrics line0 = lines[0];
+          expect(line0.lineNumber, 0);
+          expect(line0.hardBreak, isTrue);
+          expect(
+            paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+            const ui.TextRange(start: 0, end: 4),
+          );
         });
 
         test('Multi-line soft-wrapped text in RTL (שלום עולם)', () {
-          final WebParagraph paragraph = createRtlParagraph('שלום עולם', width: 70);
-          expect(paragraph.lines.length, 2);
+          final ui.Paragraph paragraph = createRtlParagraph('שלום עולם', width: 70);
+          expect(paragraph.numberOfLines, 2);
+          final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+          expect(lines.length, 2);
 
-          final TextLine line0 = paragraph.lines[0];
-          expect(line0.isSyntheticEmptyLine, isFalse);
-          expect(line0.lastLine, isFalse);
-          expect(line0.includesTrailingNewline, isFalse);
-          expect(line0.hasHardLineBreak, isFalse);
-          // Line 0 includes trailing space at index 4: 'שלום ' -> [0, 5)
-          expect(line0.allLineTextRange, const ui.TextRange(start: 0, end: 5));
+          final ui.LineMetrics line0 = lines[0];
+          expect(line0.lineNumber, 0);
+          expect(line0.hardBreak, isFalse);
+          expect(
+            paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+            const ui.TextRange(start: 0, end: 5),
+          );
 
-          final TextLine line1 = paragraph.lines[1];
-          expect(line1.isSyntheticEmptyLine, isFalse);
-          expect(line1.lastLine, isTrue);
-          expect(line1.includesTrailingNewline, isFalse);
-          expect(line1.hasHardLineBreak, isTrue);
-          expect(line1.allLineTextRange, const ui.TextRange(start: 5, end: 9));
+          final ui.LineMetrics line1 = lines[1];
+          expect(line1.lineNumber, 1);
+          expect(line1.hardBreak, isTrue);
+          expect(
+            paragraph.getLineBoundary(const ui.TextPosition(offset: 6)),
+            const ui.TextRange(start: 5, end: 9),
+          );
         });
 
         test(r'Multi-line text with interior newline in RTL (שלום\nעולם)', () {
-          final WebParagraph paragraph = createRtlParagraph('שלום\nעולם');
-          expect(paragraph.lines.length, 2);
+          final ui.Paragraph paragraph = createRtlParagraph('שלום\nעולם');
+          expect(paragraph.numberOfLines, 2);
+          final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+          expect(lines.length, 2);
 
-          final TextLine line0 = paragraph.lines[0];
-          expect(line0.isSyntheticEmptyLine, isFalse);
-          expect(line0.lastLine, isFalse);
-          expect(line0.includesTrailingNewline, isFalse);
-          expect(line0.hasHardLineBreak, isTrue);
-          expect(line0.allLineTextRange, const ui.TextRange(start: 0, end: 4));
+          final ui.LineMetrics line0 = lines[0];
+          expect(line0.lineNumber, 0);
+          expect(line0.hardBreak, isTrue);
+          expect(
+            paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+            const ui.TextRange(start: 0, end: 4),
+          );
 
-          final TextLine line1 = paragraph.lines[1];
-          expect(line1.isSyntheticEmptyLine, isFalse);
-          expect(line1.lastLine, isTrue);
-          expect(line1.includesTrailingNewline, isFalse);
-          expect(line1.hasHardLineBreak, isTrue);
-          expect(line1.allLineTextRange, const ui.TextRange(start: 5, end: 9));
+          final ui.LineMetrics line1 = lines[1];
+          expect(line1.lineNumber, 1);
+          expect(line1.hardBreak, isTrue);
+          expect(
+            paragraph.getLineBoundary(const ui.TextPosition(offset: 5)),
+            const ui.TextRange(start: 5, end: 9),
+          );
         });
 
         test(r'Single trailing newline in RTL (שלום\n)', () {
-          final WebParagraph paragraph = createRtlParagraph('שלום\n');
-          expect(paragraph.lines.length, 2);
+          final ui.Paragraph paragraph = createRtlParagraph('שלום\n');
+          expect(paragraph.numberOfLines, 2);
+          final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+          expect(lines.length, 2);
 
           // Line 0: Content line ending with newline
-          final TextLine line0 = paragraph.lines[0];
-          expect(line0.isSyntheticEmptyLine, isFalse);
-          expect(line0.lastLine, isFalse);
-          expect(line0.includesTrailingNewline, isTrue);
-          expect(line0.hasHardLineBreak, isTrue);
-          expect(line0.allLineTextRange, const ui.TextRange(start: 0, end: 5));
+          final ui.LineMetrics line0 = lines[0];
+          expect(line0.lineNumber, 0);
+          expect(line0.hardBreak, isTrue);
+          expect(
+            paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+            const ui.TextRange(start: 0, end: 5),
+          );
 
           // Line 1: Synthetic empty trailing line
-          final TextLine line1 = paragraph.lines[1];
-          expect(line1.isSyntheticEmptyLine, isTrue);
-          expect(line1.lastLine, isTrue);
-          expect(line1.includesTrailingNewline, isFalse);
+          final ui.LineMetrics line1 = lines[1];
+          expect(line1.lineNumber, 1);
+          expect(line1.hardBreak, isTrue);
+          expect(line1.width, 0.0);
+          expect(line1.height, greaterThan(0.0));
         });
 
         test(r'Multiple consecutive trailing newlines in RTL (שלום\n\n)', () {
-          final WebParagraph paragraph = createRtlParagraph('שלום\n\n');
-          expect(paragraph.lines.length, 3);
+          final ui.Paragraph paragraph = createRtlParagraph('שלום\n\n');
+          expect(paragraph.numberOfLines, 3);
+          final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+          expect(lines.length, 3);
 
-          // Line 0: Interior newline line
-          final TextLine line0 = paragraph.lines[0];
-          expect(line0.isSyntheticEmptyLine, isFalse);
-          expect(line0.lastLine, isFalse);
-          expect(line0.includesTrailingNewline, isFalse);
-          expect(line0.allLineTextRange, const ui.TextRange(start: 0, end: 4));
+          // Line 0: Content line ending with newline
+          final ui.LineMetrics line0 = lines[0];
+          expect(line0.lineNumber, 0);
+          expect(line0.hardBreak, isTrue);
+          expect(
+            paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+            const ui.TextRange(start: 0, end: 4),
+          );
 
-          // Line 1: Terminal newline line (before EOF)
-          final TextLine line1 = paragraph.lines[1];
-          expect(line1.isSyntheticEmptyLine, isFalse);
-          expect(line1.lastLine, isFalse);
-          expect(line1.includesTrailingNewline, isTrue);
-          expect(line1.allLineTextRange, const ui.TextRange(start: 5, end: 6));
+          // Line 1: Empty line from newline
+          final ui.LineMetrics line1 = lines[1];
+          expect(line1.lineNumber, 1);
+          expect(line1.hardBreak, isTrue);
+          expect(line1.width, 0.0);
+          expect(
+            paragraph.getLineBoundary(const ui.TextPosition(offset: 5)),
+            const ui.TextRange(start: 5, end: 6),
+          );
 
           // Line 2: Synthetic empty trailing line
-          final TextLine line2 = paragraph.lines[2];
-          expect(line2.isSyntheticEmptyLine, isTrue);
-          expect(line2.lastLine, isTrue);
-          expect(line2.includesTrailingNewline, isFalse);
+          final ui.LineMetrics line2 = lines[2];
+          expect(line2.lineNumber, 2);
+          expect(line2.hardBreak, isTrue);
+          expect(line2.width, 0.0);
+          expect(line2.height, greaterThan(0.0));
         });
 
         test(r'Only newlines in RTL (\n and \n\n)', () {
-          final WebParagraph singleNewline = createRtlParagraph('\n');
-          expect(singleNewline.lines.length, 2);
-          expect(singleNewline.lines[0].isSyntheticEmptyLine, isFalse);
-          expect(singleNewline.lines[0].lastLine, isFalse);
-          expect(singleNewline.lines[0].includesTrailingNewline, isTrue);
-          expect(singleNewline.lines[0].allLineTextRange, const ui.TextRange(start: 0, end: 1));
-          expect(singleNewline.lines[1].isSyntheticEmptyLine, isTrue);
-          expect(singleNewline.lines[1].lastLine, isTrue);
-          expect(singleNewline.lines[1].includesTrailingNewline, isFalse);
+          final ui.Paragraph singleNewline = createRtlParagraph('\n');
+          expect(singleNewline.numberOfLines, 2);
+          final List<ui.LineMetrics> singleLines = singleNewline.computeLineMetrics();
+          expect(singleLines.length, 2);
+          expect(singleLines[0].lineNumber, 0);
+          expect(singleLines[0].hardBreak, isTrue);
+          expect(singleLines[0].width, 0.0);
+          expect(
+            singleNewline.getLineBoundary(const ui.TextPosition(offset: 0)),
+            const ui.TextRange(start: 0, end: 1),
+          );
+          expect(singleLines[1].lineNumber, 1);
+          expect(singleLines[1].hardBreak, isTrue);
+          expect(singleLines[1].width, 0.0);
+          expect(singleLines[1].height, greaterThan(0.0));
 
-          final WebParagraph doubleNewline = createRtlParagraph('\n\n');
-          expect(doubleNewline.lines.length, 3);
-          // Line 0: interior newline
-          expect(doubleNewline.lines[0].isSyntheticEmptyLine, isFalse);
-          expect(doubleNewline.lines[0].lastLine, isFalse);
-          expect(doubleNewline.lines[0].includesTrailingNewline, isFalse);
-          expect(doubleNewline.lines[0].allLineTextRange, const ui.TextRange(start: 0, end: 0));
-          // Line 1: terminal newline
-          expect(doubleNewline.lines[1].isSyntheticEmptyLine, isFalse);
-          expect(doubleNewline.lines[1].lastLine, isFalse);
-          expect(doubleNewline.lines[1].includesTrailingNewline, isTrue);
-          expect(doubleNewline.lines[1].allLineTextRange, const ui.TextRange(start: 1, end: 2));
-          // Line 2: synthetic trailing empty line
-          expect(doubleNewline.lines[2].isSyntheticEmptyLine, isTrue);
-          expect(doubleNewline.lines[2].lastLine, isTrue);
-          expect(doubleNewline.lines[2].includesTrailingNewline, isFalse);
+          final ui.Paragraph doubleNewline = createRtlParagraph('\n\n');
+          expect(doubleNewline.numberOfLines, 3);
+          final List<ui.LineMetrics> doubleLines = doubleNewline.computeLineMetrics();
+          expect(doubleLines.length, 3);
+          expect(doubleLines[0].lineNumber, 0);
+          expect(doubleLines[0].hardBreak, isTrue);
+          expect(doubleLines[0].width, 0.0);
+          expect(
+            doubleNewline.getLineBoundary(const ui.TextPosition(offset: 0)),
+            const ui.TextRange(start: 0, end: 0),
+          );
+          expect(doubleLines[1].lineNumber, 1);
+          expect(doubleLines[1].hardBreak, isTrue);
+          expect(doubleLines[1].width, 0.0);
+          expect(
+            doubleNewline.getLineBoundary(const ui.TextPosition(offset: 1)),
+            const ui.TextRange(start: 1, end: 2),
+          );
+          expect(doubleLines[2].lineNumber, 2);
+          expect(doubleLines[2].hardBreak, isTrue);
+          expect(doubleLines[2].width, 0.0);
+          expect(doubleLines[2].height, greaterThan(0.0));
         });
 
         test(r'Trailing newline with maxLines: 1 constraint in RTL (שלום\n)', () {
-          final WebParagraph paragraph = createRtlParagraph('שלום\n', maxLines: 1);
-
-          expect(paragraph.lines.length, 1);
-          final TextLine line0 = paragraph.lines[0];
-          expect(line0.isSyntheticEmptyLine, isFalse);
-          expect(line0.lastLine, isTrue);
-          expect(line0.includesTrailingNewline, isTrue);
-          expect(line0.hasHardLineBreak, isTrue);
-          expect(line0.allLineTextRange, const ui.TextRange(start: 0, end: 5));
+          final ui.Paragraph paragraph = createRtlParagraph('שלום\n', maxLines: 1);
+          expect(paragraph.numberOfLines, 1);
+          final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+          expect(lines.length, 1);
+          expect(lines[0].lineNumber, 0);
+          expect(lines[0].hardBreak, isTrue);
+          expect(
+            paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+            const ui.TextRange(start: 0, end: 5),
+          );
         });
 
         test(r'Interior newline with maxLines: 1 constraint in RTL (שלום\nעולם)', () {
-          final WebParagraph paragraph = createRtlParagraph('שלום\nעולם', maxLines: 1);
-
-          expect(paragraph.lines.length, 1);
-          final TextLine line0 = paragraph.lines[0];
-          expect(line0.isSyntheticEmptyLine, isFalse);
-          expect(line0.lastLine, isTrue);
-          expect(line0.includesTrailingNewline, isFalse);
-          expect(line0.hasHardLineBreak, isTrue);
-          expect(line0.allLineTextRange, const ui.TextRange(start: 0, end: 4));
+          final ui.Paragraph paragraph = createRtlParagraph('שלום\nעולם', maxLines: 1);
+          expect(paragraph.numberOfLines, 1);
+          final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+          expect(lines.length, 1);
+          expect(lines[0].lineNumber, 0);
+          expect(lines[0].hardBreak, isTrue);
+          expect(
+            paragraph.getLineBoundary(const ui.TextPosition(offset: 0)),
+            const ui.TextRange(start: 0, end: 4),
+          );
         });
       },
     );

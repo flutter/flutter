@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
@@ -27,9 +26,42 @@ Future<void> testMain() async {
     final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
-    final SegmentationResult result = segmentText(text);
+    const wordBoundaries = <int>[
+      0,
+      5,
+      6,
+      16,
+      17,
+      19,
+      20,
+      24,
+      25,
+      27,
+      28,
+      32,
+      33,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      50,
+      51,
+      53,
+      54,
+      58,
+      59,
+      61,
+      62,
+      67,
+      68,
+      80,
+      81,
+      82,
+    ];
     var start = 0;
-    for (final int end in result.words.skip(1)) {
+    for (final int end in wordBoundaries.skip(1)) {
       for (var i = start; i < end; i++) {
         expect(
           paragraph.getWordBoundary(

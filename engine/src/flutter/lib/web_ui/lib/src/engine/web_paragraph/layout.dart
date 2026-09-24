@@ -256,14 +256,10 @@ class TextLayout {
     // `includesTrailingNewline` applies to the content line ending with `\n`,
     // telling `allTextRange` to encompass `\n` for `getLineBoundary`.
     final bool includesTrailingNewline =
-        !isSyntheticEmptyLine &&
-        hardlineClusterRange.isNotEmpty &&
-        hardlineClusterRange.end == allClusters.length - 1;
+        hardlineClusterRange.isNotEmpty && hardlineClusterRange.end == allClusters.length - 1;
     final allTextRange = ui.TextRange(
       start: contentTextRange.start,
-      end: isSyntheticEmptyLine || includesTrailingNewline
-          ? hardlineTextRange.end
-          : whitespaceTextRange.end,
+      end: includesTrailingNewline ? hardlineTextRange.end : whitespaceTextRange.end,
     );
     // TODO(jlavrova): Should we use a TextLineBuilder pattern instead?
     final line = TextLine(
@@ -278,6 +274,19 @@ class TextLayout {
       isSyntheticEmptyLine: isSyntheticEmptyLine,
       includesTrailingNewline: includesTrailingNewline,
     );
+
+    if (isSyntheticEmptyLine) {
+      if (lines.isNotEmpty) {
+        line.fontBoundingBoxAscent = lines.last.fontBoundingBoxAscent;
+        line.fontBoundingBoxDescent = lines.last.fontBoundingBoxDescent;
+        line.paintBoundsAscent = lines.last.paintBoundsAscent;
+        line.paintBoundsDescent = lines.last.paintBoundsDescent;
+      }
+      line.advance = ui.Rect.fromLTWH(0, top, 0, line.height);
+      line.trailingSpacesWidth = 0.0;
+      lines.add(line);
+      return line.advance.height;
+    }
 
     // Get logical bidi levels belonging to the line.
     var overlapStart = -1; // Inclusive

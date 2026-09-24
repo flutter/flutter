@@ -221,7 +221,7 @@ Future<void> testMain() async {
     test(r'getLineBoundary on empty trailing line (Hello\n)', () {
       final ui.Paragraph paragraph = buildParagraph('Hello\n');
       // metric[0]: 0 6 5 6 6 true
-      // metric[1]: 5 6 6 6 6 true
+      // metric[1]: 6 6 6 6 6 true
 
       // Line 0 boundary (0..6)
       final ui.TextRange rangeLine0 = paragraph.getLineBoundary(const ui.TextPosition(offset: 2));
