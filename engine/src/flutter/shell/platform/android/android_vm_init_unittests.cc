@@ -521,6 +521,56 @@ TEST(AndroidVMInitTest, ParseHcppFlagMatrix) {
   }
 }
 
+TEST(AndroidVMInitTest, ParseMergedPlatformUIThreadFlagMatrix) {
+  // Test all affirmative flag variations enabling merged platform and UI
+  // thread.
+  const std::vector<std::string> affirmative_flags = {
+      "--merged-platform-ui-thread",
+      "--merged-platform-ui-thread=true",
+      "--merged-platform-ui-thread=1",
+      "--merged-platform-ui-thread=enabled",
+      "--enable-merged-platform-ui-thread",
+  };
+  for (const auto& flag : affirmative_flags) {
+    auto result = ParseMergedPlatformUIThreadFlag(flag);
+    ASSERT_TRUE(result.has_value()) << "Expected flag to be parsed: " << flag;
+    EXPECT_TRUE(*result)
+        << "Expected flag to enable merged platform UI thread: " << flag;
+  }
+
+  // Test all negative flag variations disabling merged platform and UI thread.
+  const std::vector<std::string> negative_flags = {
+      "--merged-platform-ui-thread=false",
+      "--merged-platform-ui-thread=0",
+      "--merged-platform-ui-thread=disabled",
+      "--no-merged-platform-ui-thread",
+      "--disable-merged-platform-ui-thread",
+      "--no-enable-merged-platform-ui-thread",
+  };
+  for (const auto& flag : negative_flags) {
+    auto result = ParseMergedPlatformUIThreadFlag(flag);
+    ASSERT_TRUE(result.has_value()) << "Expected flag to be parsed: " << flag;
+    EXPECT_FALSE(*result)
+        << "Expected flag to disable merged platform UI thread: " << flag;
+  }
+
+  // Test unrelated or non-matching flags.
+  const std::vector<std::string> unrelated_flags = {
+      "",
+      "--enable-impeller",
+      "--enable-impeller=true",
+      "--merged-platform-ui-thread-invalid",
+      "--merged-platform-ui-thread-suffix",
+      "--no-merged-platform-ui-thread-other",
+      "merged-platform-ui-thread",
+  };
+  for (const auto& flag : unrelated_flags) {
+    auto result = ParseMergedPlatformUIThreadFlag(flag);
+    EXPECT_FALSE(result.has_value())
+        << "Expected flag to return nullopt: " << flag;
+  }
+}
+
 }  // namespace testing
 }  // namespace android
 }  // namespace flutter
