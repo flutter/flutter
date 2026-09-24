@@ -2339,6 +2339,86 @@ void main() {
         expect(tester.takeException(), isNull);
       });
 
+      testWidgets(
+        'Destroying an active child test window controller restores activation to parent',
+        (WidgetTester tester) async {
+          final WindowingOwner previousOwner = WidgetsBinding.instance.windowingOwner;
+          tester.binding.resetWindowingOwner();
+          addTearDown(() {
+            WidgetsBinding.instance.windowingOwner = previousOwner;
+          });
+
+          final WindowController parent = WidgetsBinding.instance.windowingOwner
+              .createWindowController(delegate: WindowControllerDelegate(), resizable: true);
+          addTearDown(parent.dispose);
+          expect(parent.isActivated, isTrue);
+
+          final DialogWindowController child = WidgetsBinding.instance.windowingOwner
+              .createDialogWindowController(
+                delegate: DialogWindowControllerDelegate(),
+                resizable: true,
+                parent: parent,
+              );
+          addTearDown(child.dispose);
+          expect(child.isActivated, isTrue);
+          expect(parent.isActivated, isFalse);
+
+          child.destroy();
+          expect(child.isDestroyed, isTrue);
+          expect(child.isActivated, isFalse);
+          expect(parent.isActivated, isTrue);
+          expect(tester.platformDispatcher.views, isNot(contains(child.rootView)));
+          expect(tester.platformDispatcher.views, contains(parent.rootView));
+
+          parent.destroy();
+          expect(parent.isDestroyed, isTrue);
+          expect(parent.isActivated, isFalse);
+          expect(tester.platformDispatcher.views, isNot(contains(parent.rootView)));
+        },
+      );
+
+      testWidgets(
+        'Destroying a parent test window controller destroys child windows without re-activating parent',
+        (WidgetTester tester) async {
+          final WindowingOwner previousOwner = WidgetsBinding.instance.windowingOwner;
+          tester.binding.resetWindowingOwner();
+          addTearDown(() {
+            WidgetsBinding.instance.windowingOwner = previousOwner;
+          });
+
+          final WindowController parent = WidgetsBinding.instance.windowingOwner
+              .createWindowController(delegate: WindowControllerDelegate(), resizable: true);
+          addTearDown(parent.dispose);
+
+          final DialogWindowController child1 = WidgetsBinding.instance.windowingOwner
+              .createDialogWindowController(
+                delegate: DialogWindowControllerDelegate(),
+                resizable: true,
+                parent: parent,
+              );
+          addTearDown(child1.dispose);
+
+          final DialogWindowController child2 = WidgetsBinding.instance.windowingOwner
+              .createDialogWindowController(
+                delegate: DialogWindowControllerDelegate(),
+                resizable: true,
+                parent: parent,
+              );
+          addTearDown(child2.dispose);
+
+          parent.destroy();
+          expect(parent.isDestroyed, isTrue);
+          expect(child1.isDestroyed, isTrue);
+          expect(child2.isDestroyed, isTrue);
+          expect(parent.isActivated, isFalse);
+          expect(child1.isActivated, isFalse);
+          expect(child2.isActivated, isFalse);
+          expect(tester.platformDispatcher.views, isNot(contains(parent.rootView)));
+          expect(tester.platformDispatcher.views, isNot(contains(child1.rootView)));
+          expect(tester.platformDispatcher.views, isNot(contains(child2.rootView)));
+        },
+      );
+
       testWidgets('SatelliteWindow does not throw', (WidgetTester tester) async {
         final controller = _StubSatelliteWindowController(tester: tester);
         addTearDown(controller.dispose);

@@ -278,7 +278,7 @@ mixin _ChildWindowHierarchyMixin {
 
   /// Removes and destroys all child window controllers.
   void removeAllChildren() {
-    for (final BaseWindowController child in _children) {
+    for (final child in List<BaseWindowController>.of(_children)) {
       child.destroy();
     }
     _children.clear();
@@ -509,10 +509,10 @@ void _destroyTestWindowController({
     hierarchy.removeAllChildren();
   }
   windowingOwner._platformDispatcher.removeTestView(controller.rootView);
-  windowingOwner.deactivateWindowController(controller);
   if (parent != null) {
     _removeChildFromParent(parent, controller);
   }
+  windowingOwner.deactivateWindowController(controller);
   onWindowDestroyed();
 }
 
@@ -951,7 +951,7 @@ class _TestWindowingOwner extends WindowingOwner {
   }
 
   bool _tryActivateParent(BaseWindowController? parent) {
-    if (parent == null) {
+    if (parent == null || parent.isDestroyed) {
       return false;
     }
 
