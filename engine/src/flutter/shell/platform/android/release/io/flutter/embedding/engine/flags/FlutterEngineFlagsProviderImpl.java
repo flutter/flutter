@@ -30,7 +30,6 @@ public final class FlutterEngineFlagsProviderImpl implements FlutterEngineFlagsP
 
   @Override
   public boolean isSoftwareRenderingEnabled(@Nullable Intent intent) {
-    warnIfFlagsPresent(intent);
     // Release builds do not support engine flag configuration via Intent.
     return false;
   }

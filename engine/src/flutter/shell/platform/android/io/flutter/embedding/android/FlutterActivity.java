@@ -1036,15 +1036,6 @@ public class FlutterActivity extends Activity
     return lifecycle;
   }
 
-  private boolean isGetFlutterShellArgsOverridden() {
-    try {
-      return getClass().getMethod("getFlutterShellArgs").getDeclaringClass()
-          != FlutterActivity.class;
-    } catch (NoSuchMethodException | SecurityException e) {
-      return false;
-    }
-  }
-
   /**
    * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by {@link
    * FlutterActivityAndFragmentDelegate} to obtain Flutter shell arguments when initializing
@@ -1054,10 +1045,10 @@ public class FlutterActivity extends Activity
   @Override
   @SuppressWarnings("deprecation")
   public List<String> getFlutterEngineFlags() {
-    if (isGetFlutterShellArgsOverridden()) {
-      Log.w(
-          TAG,
-          "FlutterShellArgs is deprecated and will soon be removed. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries.");
+    if (FlutterActivityAndFragmentDelegate.isGetFlutterShellArgsOverridden(
+        FlutterActivity.class, this)) {
+      // If the user overrides getFlutterShellArgs(), we assume they want to
+      // use the deprecated method, and return the flags from there.
       return Arrays.asList(getFlutterShellArgs().toArray());
     }
     return FlutterEngineFlagsProviderImpl.INSTANCE.getFlags(getIntent());
@@ -1069,7 +1060,7 @@ public class FlutterActivity extends Activity
   public FlutterShellArgs getFlutterShellArgs() {
     Log.w(
         TAG,
-        "FlutterShellArgs is deprecated and will soon be removed. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries.");
+        "FlutterShellArgs is deprecated and will be removed in the next stable release. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries for details.");
     return new FlutterShellArgs(FlutterEngineFlagsProviderImpl.INSTANCE.getFlags(getIntent()));
   }
 

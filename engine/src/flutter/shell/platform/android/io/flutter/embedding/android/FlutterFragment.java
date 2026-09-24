@@ -1360,15 +1360,6 @@ public class FlutterFragment extends Fragment
     }
   }
 
-  private boolean isGetFlutterShellArgsOverridden() {
-    try {
-      return getClass().getMethod("getFlutterShellArgs").getDeclaringClass()
-          != FlutterFragment.class;
-    } catch (NoSuchMethodException | SecurityException e) {
-      return false;
-    }
-  }
-
   /**
    * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by {@link
    * FlutterActivityAndFragmentDelegate} to obtain Flutter shell arguments when initializing
@@ -1378,12 +1369,13 @@ public class FlutterFragment extends Fragment
   @NonNull
   @SuppressWarnings("deprecation")
   public List<String> getFlutterEngineFlags() {
-    if (isGetFlutterShellArgsOverridden()) {
-      Log.w(
-          TAG,
-          "FlutterShellArgs is deprecated and will soon be removed. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries.");
+    if (FlutterActivityAndFragmentDelegate.isGetFlutterShellArgsOverridden(
+        FlutterFragment.class, this)) {
+      // If the user overrides getFlutterShellArgs(), we assume they want to
+      // use the deprecated method, and return the flags from there.
       return Arrays.asList(getFlutterShellArgs().toArray());
     }
+
     String[] flutterShellArgsArray =
         getArguments() != null
             ? getArguments().getStringArray(ARG_FLUTTER_INITIALIZATION_ARGS)
@@ -1402,7 +1394,7 @@ public class FlutterFragment extends Fragment
   public FlutterShellArgs getFlutterShellArgs() {
     Log.w(
         TAG,
-        "FlutterShellArgs is deprecated and will soon be removed. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries.");
+        "FlutterShellArgs is deprecated and will be removed in the next stable release. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries for details.");
     String[] flutterShellArgsArray =
         getArguments() != null
             ? getArguments().getStringArray(ARG_FLUTTER_INITIALIZATION_ARGS)
