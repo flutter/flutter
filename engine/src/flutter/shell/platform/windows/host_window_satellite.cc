@@ -146,7 +146,7 @@ void HostWindowSatellite::ApplyInitialPosition() {
 
   // The positioner constrained the dimensions more than the current size, so
   // let the framework know about the size it actually got.
-  if (rect->width < window_size.width || rect->height < window_size.height) {
+  if (rect->width != window_size.width || rect->height != window_size.height) {
     auto metrics_event = view_controller_->view()->CreateWindowMetricsEvent();
     view_controller_->engine()->SendWindowMetricsEvent(metrics_event);
   }
@@ -213,6 +213,9 @@ void HostWindowSatellite::SetSatelliteParent(HWND new_parent) {
   // alongside it.
   SetWindowLongPtr(window_handle_, GWLP_HWNDPARENT,
                    reinterpret_cast<LONG_PTR>(new_parent));
+  SetWindowPos(window_handle_, nullptr, 0, 0, 0, 0,
+               SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE |
+                   SWP_FRAMECHANGED);
 
   // Re-anchor the movement tracking to the new parent's current position so
   // that reparenting does not move the satellite.
