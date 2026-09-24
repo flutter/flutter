@@ -39,81 +39,134 @@ class AccessDebugMembersOnlyInAsserts extends FlutterAnalysisRule {
 
   @override
   void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    registry.addCompilationUnit(this, _AccessDebugMembersOnlyInAssertsVisitor(this));
+    final visitor = _AccessDebugMembersOnlyInAssertsVisitor(this);
+    registry
+      ..addCompilationUnit(this, visitor)
+      ..addAssertInitializer(this, visitor)
+      ..addAssertStatement(this, visitor)
+      ..addConstructorDeclaration(this, visitor)
+      ..addFunctionDeclaration(this, visitor)
+      ..addMethodDeclaration(this, visitor)
+      ..addNamedType(this, visitor)
+      ..addSimpleIdentifier(this, visitor);
   }
 }
 
-class _AccessDebugMembersOnlyInAssertsVisitor extends GeneralizingAstVisitor<void> {
+class _AccessDebugMembersOnlyInAssertsVisitor extends SimpleAstVisitor<void> {
   _AccessDebugMembersOnlyInAssertsVisitor(this.rule);
 
   final AnalysisRule rule;
 
-  // Accessing debug symbols in asserts (either in the condition or in the message)
-  // is always allowed.
-  @override
-  void visitAssertInitializer(AssertInitializer node) {}
-  @override
-  void visitAssertStatement(AssertStatement node) {}
+  // The end offset of the most recently entered exempt scope (an assert or a
+  // debug-only function, method, or constructor declaration) in the current
+  // compilation unit.
+  //
+  // Because `RuleVisitorRegistry` only notifies visitors when entering a node
+  // (and not when exiting), `_exemptEndOffset` is not reset when traversal gets
+  // out of the node. Instead, we check whether a visited node's `offset` is
+  // before `_exemptEndOffset` (and only update `_exemptEndOffset` when a new
+  // exempt node ends after the current one, so nested nodes do not shrink the
+  // range).
+  int _exemptEndOffset = -1;
 
-  // We don't care about directives, comments, or metadata annotations.
-  @override
-  void visitDirective(Directive node) {}
-  @override
-  void visitComment(Comment node) {}
-  @override
-  void visitAnnotation(Annotation node) {}
+  bool _isInExemptScope(AstNode node) => node.offset < _exemptEndOffset;
 
-  // This rule also ignores parameter names. This prevents the rule from flagging certain
-  // constructor declarations such as `LabeledGlobalKey(this._debugLabel);`
-  // Accessing the _debugLabel field will still get flagged which is intended.
-  @override
-  void visitFormalParameterList(FormalParameterList node) {}
-
-  @override
-  void visitVariableDeclarationList(VariableDeclarationList node) {
-    if (node.variables.every((VariableDeclaration v) => v.name._isDebugOnlySymbol)) {
-      return;
+  void _recordExemptScope(AstNode node) {
+    if (node.end > _exemptEndOffset) {
+      _exemptEndOffset = node.end;
     }
-    super.visitVariableDeclarationList(node);
   }
 
   @override
-  void visitDeclaration(Declaration node) {
-    final bool isDebugDeclaration = switch (node) {
-      ClassDeclaration(:final namePart) ||
-      EnumDeclaration(:final namePart) ||
-      ExtensionTypeDeclaration(:final namePart) => namePart.typeName._isDebugOnlySymbol,
-      MixinDeclaration(:final name) ||
-      FunctionDeclaration(:final name) ||
-      TypeAlias(:final name) ||
-      MethodDeclaration(:final name) ||
-      VariableDeclaration(:final name) ||
-      EnumConstantDeclaration(:final name) ||
-      DeclaredIdentifier(:final name) ||
-      TypeParameter(:final name) => name._isDebugOnlySymbol,
-      ExtensionDeclaration(:final name) ||
-      ConstructorDeclaration(:final name) => name?._isDebugOnlySymbol ?? false,
-      // Every FieldDeclaration and TopLevelVariableDeclaration node must have a VariableDeclarationList child.
-      FieldDeclaration() || TopLevelVariableDeclaration() || PrimaryConstructorBody() => false,
-      _ => throw UnimplementedError('Unhandled Declaration subtype: ${node.runtimeType}'),
-    };
-    if (isDebugDeclaration) {
-      return;
+  void visitCompilationUnit(CompilationUnit node) {
+    _exemptEndOffset = -1;
+  }
+
+  @override
+  void visitAssertInitializer(AssertInitializer node) => _recordExemptScope(node);
+  @override
+  void visitAssertStatement(AssertStatement node) => _recordExemptScope(node);
+
+  @override
+  void visitConstructorDeclaration(ConstructorDeclaration node) {
+    if (node.name?._isDebugOnlySymbol ?? false) {
+      _recordExemptScope(node);
     }
-    super.visitDeclaration(node);
+  }
+
+  @override
+  void visitFunctionDeclaration(FunctionDeclaration node) {
+    if (node.name._isDebugOnlySymbol) {
+      _recordExemptScope(node);
+    }
+  }
+
+  @override
+  void visitMethodDeclaration(MethodDeclaration node) {
+    if (node.name._isDebugOnlySymbol) {
+      _recordExemptScope(node);
+    }
+  }
+
+  static bool _isAllowedDebugAccess(AstNode node) {
+    for (AstNode? ancestor = node.parent; ancestor != null; ancestor = ancestor.parent) {
+      switch (ancestor) {
+        // We don't care about directives, comments, or metadata annotations.
+        case Directive() || Comment() || Annotation():
+        // Ignores parameter names and default values (since they must be const).
+        // This prevents the rule from flagging certain constructor declarations such as `LabeledGlobalKey(this._debugLabel);`
+        // Accessing the _debugLabel field will still get flagged which is intended.
+        case FormalParameterList():
+          return true;
+        // This is the case where a variable declaration list's type is a DebugOnly type.
+        // We enforce that all declared variables must have a debug prefix.
+        case VariableDeclarationList(:final NodeList<VariableDeclaration> variables):
+          return variables.every((VariableDeclaration v) => v.name._isDebugOnlySymbol);
+        case ClassDeclaration(:final ClassNamePart namePart) ||
+            EnumDeclaration(:final ClassNamePart namePart) ||
+            ExtensionTypeDeclaration(:final ClassNamePart namePart):
+          return namePart.typeName._isDebugOnlySymbol;
+        case MixinDeclaration(:final Token name) ||
+            TypeAlias(:final Token name) ||
+            VariableDeclaration(:final Token name) ||
+            EnumConstantDeclaration(:final Token name):
+          return name._isDebugOnlySymbol;
+        case ExtensionDeclaration() || FunctionDeclaration():
+          return false;
+        case DeclaredIdentifier(:final Token name) || TypeParameter(:final Token name):
+          if (name._isDebugOnlySymbol) {
+            return true;
+          }
+        // Every FieldDeclaration and TopLevelVariableDeclaration node must have a VariableDeclarationList child,
+        // and non-debug class members defer to their enclosing type declaration.
+        case FieldDeclaration() ||
+            TopLevelVariableDeclaration() ||
+            MethodDeclaration() ||
+            ConstructorDeclaration() ||
+            PrimaryConstructorBody():
+          break;
+        case Declaration():
+          // The Declaration class isn't sealed. Throw a runtime error to indicate this rule
+          // needs updating.
+          throw UnimplementedError('Unhandled Declaration subtype: ${ancestor.runtimeType}');
+      }
+    }
+    return false;
   }
 
   @override
   void visitNamedType(NamedType node) {
-    if (node.name._isDebugOnlySymbol) {
+    if (!_isInExemptScope(node) && node.name._isDebugOnlySymbol && !_isAllowedDebugAccess(node)) {
       rule.reportAtToken(node.name, arguments: <Object>[node.name.lexeme]);
     }
-    super.visitNamedType(node);
   }
 
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
-    if (!node.inDeclarationContext() && node.token._isDebugOnlySymbol) {
+    if (!_isInExemptScope(node) &&
+        node.token._isDebugOnlySymbol &&
+        !node.inDeclarationContext() &&
+        !_isAllowedDebugAccess(node)) {
       rule.reportAtNode(node, arguments: <Object>[node.name]);
     }
   }
