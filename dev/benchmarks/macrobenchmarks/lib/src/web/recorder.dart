@@ -269,9 +269,9 @@ abstract class SceneBuilderRecorder extends Recorder {
         rethrow;
       }
     };
-    PlatformDispatcher.instance.onDrawFrame = () {
+    PlatformDispatcher.instance.onDrawFrame = () async {
       try {
-        _profile!.recordAsync('drawFrameDuration', () async {
+        await _profile!.recordAsync('drawFrameDuration', () async {
           final sceneBuilder = SceneBuilder();
           onDrawFrame(sceneBuilder);
           late final Scene scene;
