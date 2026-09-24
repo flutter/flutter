@@ -242,24 +242,22 @@ Future<void> testMain() async {
       // Get the glyph info at the current index, but for the newline characters, get the previous glyph info instead
       final int pos = (i == 5 || i == 11) ? i - 1 : i;
       final ui.GlyphInfo? glyphInfo = paragraph.getGlyphInfoAt(pos);
-      if (glyphInfo != null) {
-        final center = ui.Offset(
-          glyphInfo.graphemeClusterLayoutBounds.left + epsilon,
-          glyphInfo.graphemeClusterLayoutBounds.center.dy,
-        );
-        final ui.GlyphInfo? closestGlyphInfo = paragraph.getClosestGlyphInfoForOffset(center);
-        if (closestGlyphInfo != null) {
-          expect(
-            closestGlyphInfo,
-            equals(glyphInfo),
-            reason: 'Glyph[$i] @$center "${'Line1\nLine2\nLine3'.substring(pos, pos + 1)}"',
-          );
-        } else {
-          assert(false, '$length: closestGlyphInfo[$i] should not be null');
-        }
-      } else {
-        assert(false, '$length: getGlyphInfoAt[$i] should not be null');
-      }
+      expect(glyphInfo, isNotNull, reason: '$length: getGlyphInfoAt[$i] should not be null');
+      final center = ui.Offset(
+        glyphInfo!.graphemeClusterLayoutBounds.left + epsilon,
+        glyphInfo.graphemeClusterLayoutBounds.center.dy,
+      );
+      final ui.GlyphInfo? closestGlyphInfo = paragraph.getClosestGlyphInfoForOffset(center);
+      expect(
+        closestGlyphInfo,
+        isNotNull,
+        reason: '$length: closestGlyphInfo[$i] should not be null',
+      );
+      expect(
+        closestGlyphInfo,
+        equals(glyphInfo),
+        reason: 'Glyph[$i] @$center "${'Line1\nLine2\nLine3'.substring(pos, pos + 1)}"',
+      );
     }
   });
 
@@ -382,13 +380,11 @@ Future<void> testMain() async {
       final List<ui.TextBox> boxes = paragraph.getBoxesForRange(i, i + 1);
       final ui.GlyphInfo? glyph = paragraph.getGlyphInfoAt(i);
 
-      if (boxes.isNotEmpty && glyph != null) {
-        // Both should return non-zero dimensions
-        expect(boxes.first.toRect().width > 0, true);
-        expect(glyph.graphemeClusterLayoutBounds.width > 0, true);
-      } else {
-        assert(false);
-      }
+      expect(boxes, isNotEmpty, reason: 'boxes for character $i should not be empty');
+      expect(glyph, isNotNull, reason: 'glyph for character $i should not be null');
+      // Both should return non-zero dimensions
+      expect(boxes.first.toRect().width > 0, true);
+      expect(glyph!.graphemeClusterLayoutBounds.width > 0, true);
     }
   });
 }
