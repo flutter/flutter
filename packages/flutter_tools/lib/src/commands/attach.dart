@@ -261,7 +261,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       // However we exited from the runner, ensure the terminal has line mode
       // and echo mode enabled before we return the user to the shell.
       try {
-        _toolContext.terminal.singleCharMode = false;
+        toolContext.terminal.singleCharMode = false;
       } on StdinException {
         // Do nothing, if the STDIN handle is no longer available, there is nothing actionable for us to do at this point
       }
@@ -276,7 +276,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       :ProcessInfo processInfo,
       :Signals signals,
       :Terminal terminal,
-    ) = _toolContext;
+    ) = toolContext;
     terminal.usesTerminalUi = true;
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
     final onAppStart = Completer<void>.sync();
@@ -306,13 +306,13 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   Future<void> _attachDaemon({required Device device}) async {
     final ToolContext(:FileSystem fs, :Logger logger, :Platform platform, :Stdio stdio) =
-        _toolContext;
+        toolContext;
     final daemon = Daemon(
       DaemonConnection(
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
         logger: logger,
       ),
-      toolContext: _toolContext,
+      toolContext: toolContext,
       notifyingLogger: (logger is NotifyingLogger)
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
@@ -349,7 +349,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<ResidentRunner> _discoverVmServiceAndCreateResidentRunner({required Device device}) async {
-    final Logger logger = _toolContext.logger;
+    final Logger logger = toolContext.logger;
     final Future<Uri> vmServiceUri = _discoverVmService(device: device);
     vmServiceUri.ignore();
 
@@ -357,7 +357,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      toolContext: _toolContext,
+      toolContext: toolContext,
       buildInfo: buildInfo,
       target: targetFile,
       targetModelOverride: TargetModel(stringArg('target-model')!),
@@ -401,7 +401,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<Uri> _discoverVmService({required Device device}) async {
-    final Logger logger = _toolContext.logger;
+    final Logger logger = toolContext.logger;
     final bool usesIpv6 = ipv6!;
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
@@ -430,10 +430,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       logger: logger,
     );
 
-    _toolContext.logger.printStatus(
+    toolContext.logger.printStatus(
       'Waiting for a connection from Flutter on ${device.displayName}...',
     );
-    final Status discoveryStatus = _toolContext.logger.startSpinner(
+    final Status discoveryStatus = toolContext.logger.startSpinner(
       timeout: const Duration(seconds: 30),
       slowWarningCallback: () {
         // On iOS we rely on mDNS to find Dart VM Service.
