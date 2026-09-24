@@ -5,6 +5,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
 
 #include <CoreGraphics/CGColorSpace.h>
+#import <QuartzCore/CAMetalLayer.h>
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "fml/platform/darwin/cf_utils.h"
@@ -60,7 +61,9 @@ FLUTTER_ASSERT_ARC
 }
 
 + (Class)layerClass {
-  return [FlutterView layerClass];
+  // Experiment: keep the root Flutter surface on FlutterMetalLayer while
+  // presenting platform-view overlays through a standard CAMetalLayer.
+  return [CAMetalLayer class];
 }
 
 // TODO(amirh): implement drawLayer to support snapshotting.
