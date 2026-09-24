@@ -280,7 +280,7 @@ class GalleryTransitionBuildTest extends BuildTestTask {
         'android-arm,android-arm64',
       ];
     } else if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
-      return <String>['ios', '--codesign', '--profile', '-t', 'test_driver/$testFile.dart'];
+      return <String>['ios', '--codesign', '--profile', '-t', 'test_driver/$testFile.dart', '-v'];
     }
     throw Exception('$deviceOperatingSystem has no build configuration');
   }
@@ -302,6 +302,7 @@ class GalleryTransitionBuildTest extends BuildTestTask {
       'test_driver/$testDriver.dart',
       '-d',
       deviceId,
+      '-v'
     ];
   }
 
