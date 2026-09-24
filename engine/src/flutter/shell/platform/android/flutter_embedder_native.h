@@ -875,6 +875,11 @@ class FlutterEmbedderNative {
   /// @brief Unregisters an external ImageConsumer.
   void UnregisterImageTexture(int64_t texture_id);
 
+  /// @brief Test helper to populate mock EGLImage on an ImageTextureEntry.
+  void SetImageTextureCurrentEGLImageForTesting(int64_t texture_id,
+                                                void* egl_image,
+                                                void* egl_display = nullptr);
+
   /// @brief Registers an opaque C-API response handle and assigns an integer
   /// ID.
   int32_t RegisterResponseHandle(

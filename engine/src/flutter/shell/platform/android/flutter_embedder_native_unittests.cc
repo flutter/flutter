@@ -8248,8 +8248,14 @@ TEST(FlutterEmbedderNativeImageTextureTest,
   native_instance->RegisterImageTexture(kTextureId, nullptr,
                                         /*reset_on_background=*/true);
 
-  // With image texture registered, gl_external_texture_frame_callback should
-  // handle it and output valid external texture metadata.
+  // When registered without an EGL image, callback should return false.
+  success = renderer_config.open_gl.gl_external_texture_frame_callback(
+      native_instance.get(), kTextureId, kWidth, kHeight, &texture_out);
+  EXPECT_FALSE(success);
+
+  // Set mock EGL image to simulate a bound frame.
+  native_instance->SetImageTextureCurrentEGLImageForTesting(
+      kTextureId, reinterpret_cast<void*>(0x1234));
   success = renderer_config.open_gl.gl_external_texture_frame_callback(
       native_instance.get(), kTextureId, kWidth, kHeight, &texture_out);
   EXPECT_TRUE(success);
@@ -8331,14 +8337,24 @@ TEST(FlutterEmbedderNativeImageTextureTest, DoubleBufferingKeepsImageAlive) {
   FlutterOpenGLTexture texture_out = {};
   bool success = renderer_config.open_gl.gl_external_texture_frame_callback(
       native_instance.get(), kTextureId, 200, 200, &texture_out);
+  // Unbound texture returns false.
+  EXPECT_FALSE(success);
+
+  // Set mock EGL image to simulate bound frame.
+  native_instance->SetImageTextureCurrentEGLImageForTesting(
+      kTextureId, reinterpret_cast<void*>(0x5678));
+  success = renderer_config.open_gl.gl_external_texture_frame_callback(
+      native_instance.get(), kTextureId, 200, 200, &texture_out);
   EXPECT_TRUE(success);
+  // GL_TEXTURE_EXTERNAL_OES = 0x8D65
   EXPECT_EQ(texture_out.target, 0x8D65u);
 
-  // Calling frame callback a second time simulates next frame arrival.
+  // Calling frame callback a second time with bound image succeeds.
   FlutterOpenGLTexture texture_out2 = {};
   success = renderer_config.open_gl.gl_external_texture_frame_callback(
       native_instance.get(), kTextureId, 200, 200, &texture_out2);
   EXPECT_TRUE(success);
+  // GL_TEXTURE_EXTERNAL_OES = 0x8D65
   EXPECT_EQ(texture_out2.target, 0x8D65u);
 
   native_instance->UnregisterImageTexture(kTextureId);
