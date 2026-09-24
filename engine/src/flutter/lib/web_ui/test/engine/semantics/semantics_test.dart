@@ -5291,7 +5291,7 @@ void _testMenus() {
     );
   });
 
-  test('menu sets role="none" on unlabeled intermediate scrollable container', () {
+  test('menu sets role="none" on unlabeled intermediate generic and scrollable containers', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -5304,12 +5304,18 @@ void _testMenus() {
       children: <SemanticsNodeUpdate>[
         tester.updateNode(
           id: 1,
-          flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
-          actions: ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
           rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
           children: <SemanticsNodeUpdate>[
-            tester.updateNode(id: 2, role: ui.SemanticsRole.menuItem),
-            tester.updateNode(id: 3, role: ui.SemanticsRole.menuItem),
+            tester.updateNode(
+              id: 2,
+              flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
+              actions: ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
+              rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+              children: <SemanticsNodeUpdate>[
+                tester.updateNode(id: 3, role: ui.SemanticsRole.menuItem),
+                tester.updateNode(id: 4, role: ui.SemanticsRole.menuItem),
+              ],
+            ),
           ],
         ),
       ],
@@ -5317,8 +5323,10 @@ void _testMenus() {
     tester.apply();
 
     final SemanticsObject menuObject = tester.getSemanticsObject(0);
-    final SemanticsObject scrollableObject = tester.getSemanticsObject(1);
-    expect(menuObject.element.getAttribute('aria-owns'), 'flt-semantic-node-2 flt-semantic-node-3');
+    final SemanticsObject outerGenericObject = tester.getSemanticsObject(1);
+    final SemanticsObject scrollableObject = tester.getSemanticsObject(2);
+    expect(menuObject.element.getAttribute('aria-owns'), 'flt-semantic-node-3 flt-semantic-node-4');
+    expect(outerGenericObject.element.getAttribute('role'), 'none');
     expect(scrollableObject.element.getAttribute('role'), 'none');
     semantics().semanticsEnabled = false;
   });

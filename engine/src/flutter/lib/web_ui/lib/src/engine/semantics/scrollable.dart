@@ -115,7 +115,7 @@ class SemanticScrollable extends SemanticRole {
   void update() {
     super.update();
     semanticsObject.owner.addOneTimePostUpdateCallback(() {
-      if (!semanticsObject.hasLabel && _hasMenuAncestor()) {
+      if (!semanticsObject.hasLabel && hasMenuAncestor) {
         setAriaRole('none');
       } else {
         setAriaRole('group');
@@ -288,18 +288,6 @@ class SemanticScrollable extends SemanticRole {
       EngineSemantics.instance.removeGestureModeListener(_gestureModeListener!);
       _gestureModeListener = null;
     }
-  }
-
-  bool _hasMenuAncestor() {
-    SemanticsObject? current = semanticsObject.parent;
-    while (current != null) {
-      final EngineSemanticsRole? kind = current.semanticRole?.kind;
-      if (kind == EngineSemanticsRole.menu || kind == EngineSemanticsRole.menuBar) {
-        return true;
-      }
-      current = current.parent;
-    }
-    return false;
   }
 
   @override
