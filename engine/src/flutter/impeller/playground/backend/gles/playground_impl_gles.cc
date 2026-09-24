@@ -365,12 +365,9 @@ std::unique_ptr<Surface> PlaygroundImplGLES::AcquireSurfaceFrame(
 
 fml::Status PlaygroundImplGLES::SetCapabilities(
     const std::shared_ptr<Capabilities>& capabilities) {
-  if (!context_) {
-    return fml::Status(fml::StatusCode::kUnavailable,
-                       "PlaygroundImplGLES has no context.");
-  }
-  ContextGLES::Cast(*context_).SetCapabilities(capabilities);
-  return fml::Status();
+  return fml::Status(
+      fml::StatusCode::kUnimplemented,
+      "PlaygroundImplGLES doesn't support setting the capabilities.");
 }
 
 RuntimeStageBackend PlaygroundImplGLES::GetRuntimeStageBackend() const {

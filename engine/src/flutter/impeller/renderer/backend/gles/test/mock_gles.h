@@ -145,6 +145,21 @@ class IMockGLESImpl {
                                       const GLchar* uniformBlockName) {
     return 0;
   }
+  virtual GLuint CreateShader(GLenum type) { return 0; }
+  virtual GLuint CreateProgram() { return 0; }
+  virtual void GetShaderiv(GLuint shader, GLenum pname, GLint* params) {}
+  virtual void ActiveTexture(GLenum texture) {}
+  virtual void Uniform1i(GLint location, GLint v0) {}
+  virtual void GetActiveUniform(GLuint program,
+                                GLuint index,
+                                GLsizei bufSize,
+                                GLsizei* length,
+                                GLint* size,
+                                GLenum* type,
+                                GLchar* name) {}
+  virtual GLint GetUniformLocation(GLuint program, const GLchar* name) {
+    return -1;
+  }
 };
 
 class MockGLESImpl : public IMockGLESImpl {
@@ -348,6 +363,28 @@ class MockGLESImpl : public IMockGLESImpl {
   MOCK_METHOD(GLuint,
               GetUniformBlockIndex,
               (GLuint program, const GLchar* uniformBlockName),
+              (override));
+  MOCK_METHOD(GLuint, CreateShader, (GLenum type), (override));
+  MOCK_METHOD(GLuint, CreateProgram, (), (override));
+  MOCK_METHOD(void,
+              GetShaderiv,
+              (GLuint shader, GLenum pname, GLint* params),
+              (override));
+  MOCK_METHOD(void, ActiveTexture, (GLenum texture), (override));
+  MOCK_METHOD(void, Uniform1i, (GLint location, GLint v0), (override));
+  MOCK_METHOD(void,
+              GetActiveUniform,
+              (GLuint program,
+               GLuint index,
+               GLsizei bufSize,
+               GLsizei* length,
+               GLint* size,
+               GLenum* type,
+               GLchar* name),
+              (override));
+  MOCK_METHOD(GLint,
+              GetUniformLocation,
+              (GLuint program, const GLchar* name),
               (override));
 };
 

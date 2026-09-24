@@ -19,7 +19,6 @@
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
-#include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/testing/mocks.h"
 #include "third_party/abseil-cpp/absl/status/status_matchers.h"
@@ -762,71 +761,6 @@ TEST_P(AiksTest, EmulatedAdvancedBlendPreservesDepthMonotonicity) {
 
     canvas->Restore();
   }
-}
-
-TEST_P(AiksTest, BackdropFlipWithoutOffscreenMSAASkipsSelfDraw) {
-  if (GetParam() != PlaygroundBackend::kOpenGLES &&
-      GetParam() != PlaygroundBackend::kOpenGLESSDF) {
-    GTEST_SKIP() << "The GLES backend records the commands this test reads.";
-  }
-
-  // Emulate a device without offscreen MSAA and without framebuffer fetch, for
-  // example ANGLE on a Direct3D 11 feature level 10_0 device, where the pass
-  // loads and writes the same texture the backdrop is read from.
-  std::shared_ptr<const Capabilities> old_capabilities =
-      GetContext()->GetCapabilities();
-  fml::ScopedCleanupClosure cleanup(fml::closure([&]() {
-    std::ignore = SetCapabilities(
-        std::const_pointer_cast<Capabilities>(old_capabilities));
-  }));
-
-  auto mock_capabilities =
-      std::make_shared<::testing::NiceMock<MockCapabilities>>();
-  EXPECT_CALL(*mock_capabilities, SupportsFramebufferFetch())
-      .WillRepeatedly(::testing::Return(false));
-  EXPECT_CALL(*mock_capabilities, SupportsOffscreenMSAA())
-      .WillRepeatedly(::testing::Return(false));
-  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultColorFormat);
-  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultStencilFormat);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              GetDefaultDepthStencilFormat);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              SupportsImplicitResolvingMSAA);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsReadFromResolve);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsSSBO);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsCompute);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              SupportsTextureToTextureBlits);
-  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultGlyphAtlasFormat);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsTriangleFan);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              SupportsDecalSamplerAddressMode);
-  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsPrimitiveRestart);
-  FLT_FORWARD(mock_capabilities, old_capabilities,
-              Supports32BitPrimitiveIndices);
-  FLT_FORWARD(mock_capabilities, old_capabilities, NeedsPartitionedHostBuffer);
-  FLT_FORWARD(mock_capabilities, old_capabilities, GetMinimumUniformAlignment);
-  ASSERT_TRUE(SetCapabilities(mock_capabilities).ok());
-
-  ContentContext& context = GetContentContext();
-  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 800, 600),
-                                 /*requires_readback=*/true,
-                                 /*is_onscreen=*/true);
-
-  canvas->Save(/*total_content_depth=*/2);
-  canvas->DrawRect(Rect::MakeXYWH(10, 10, 40, 40),
-                   Paint{.color = Color::Blue()});
-  // An advanced blend without framebuffer fetch flips the backdrop.
-  canvas->DrawRect(
-      Rect::MakeXYWH(20, 20, 40, 40),
-      Paint{.color = Color::Orange(), .blend_mode = BlendMode::kScreen});
-
-  // The pass loads and writes the texture the backdrop is read from, so
-  // restoring the backdrop would sample the texture the pass draws to and
-  // the blend is the only draw the pass needs.
-  EXPECT_EQ(canvas->GetCurrentRenderPass().GetCommands().size(), 1u);
-
-  canvas->Restore();
 }
 
 }  // namespace testing

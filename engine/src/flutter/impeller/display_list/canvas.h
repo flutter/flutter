@@ -14,7 +14,6 @@
 
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/geometry/dl_path.h"
-#include "flutter/fml/macros.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/display_list/paint.h"
 #include "impeller/entity/contents/atlas_contents.h"
@@ -38,10 +37,6 @@
 #include "impeller/typographer/text_frame.h"
 
 namespace impeller {
-
-namespace testing {
-FML_TEST_CLASS(AiksTest, BackdropFlipWithoutOffscreenMSAASkipsSelfDraw);
-}  // namespace testing
 
 struct BackdropData {
   size_t backdrop_count = 0;
@@ -458,9 +453,6 @@ class Canvas {
       const Paint& paint);
 
   RenderPass& GetCurrentRenderPass() const;
-
-  FML_FRIEND_TEST(testing::AiksTest,
-                  BackdropFlipWithoutOffscreenMSAASkipsSelfDraw);
 
   Canvas(const Canvas&) = delete;
 

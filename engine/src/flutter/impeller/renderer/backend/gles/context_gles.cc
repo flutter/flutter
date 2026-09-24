@@ -161,11 +161,6 @@ const std::shared_ptr<const Capabilities>& ContextGLES::GetCapabilities()
   return device_capabilities_;
 }
 
-void ContextGLES::SetCapabilities(
-    const std::shared_ptr<const Capabilities>& capabilities) {
-  device_capabilities_ = capabilities;
-}
-
 // |Context|
 std::shared_ptr<CommandQueue> ContextGLES::GetCommandQueue() const {
   return command_queue_;
