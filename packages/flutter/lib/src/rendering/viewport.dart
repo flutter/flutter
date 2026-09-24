@@ -610,6 +610,17 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     markNeedsLayout();
   }
 
+  /// The relative position of the zero scroll offset.
+  ///
+  /// For example, if [anchor] is 0.5 and the [axisDirection] is
+  /// [AxisDirection.down] or [AxisDirection.up], then the zero scroll offset is
+  /// vertically centered within the viewport. If the [anchor] is 1.0, and the
+  /// [axisDirection] is [AxisDirection.right], then the zero scroll offset is
+  /// on the left edge of the viewport.
+  ///
+  /// {@macro flutter.rendering.GrowthDirection.sample}
+  double get anchor => 0.0;
+
   /// This value is set during layout based on the [scrollCacheExtent].
   ///
   /// When the style is [CacheExtentStyle.viewport], it is the main axis extent
@@ -1189,6 +1200,13 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     Rect targetRect = MatrixUtils.transformRect(transform, rect);
     final double extentOfPinnedSlivers = maxScrollObstructionExtentBefore(sliver);
 
+    final double anchorOffset =
+        anchor *
+        switch (axis) {
+          Axis.vertical => size.height,
+          Axis.horizontal => size.width,
+        };
+
     final double mainAxisExtentDifference = switch (axis) {
       Axis.horizontal => size.width - extentOfPinnedSlivers - rectLocal.width,
       Axis.vertical => size.height - extentOfPinnedSlivers - rectLocal.height,
@@ -1198,11 +1216,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       case GrowthDirection.forward:
         leadingScrollOffset -= extentOfPinnedSlivers;
         targetOffset = isPinned && alignment <= 0
-            ? math.max(offset.pixels, leadingScrollOffset)
-            : leadingScrollOffset - mainAxisExtentDifference * alignment;
+            ? math.max(offset.pixels, leadingScrollOffset + anchorOffset)
+            : leadingScrollOffset + anchorOffset - mainAxisExtentDifference * alignment;
       case GrowthDirection.reverse:
         if (isPinned && alignment >= 1) {
-          targetOffset = math.min(offset.pixels, leadingScrollOffset);
+          targetOffset = math.min(offset.pixels, leadingScrollOffset + anchorOffset);
         } else {
           // If child's growth direction is reverse, when viewport.offset is
           // `leadingScrollOffset`, it is positioned just outside of the leading
@@ -1211,7 +1229,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
             Axis.vertical => targetRect.height,
             Axis.horizontal => targetRect.width,
           };
-          targetOffset = leadingScrollOffset - mainAxisExtentDifference * alignment;
+          targetOffset = leadingScrollOffset + anchorOffset - mainAxisExtentDifference * alignment;
         }
     }
 
@@ -1571,7 +1589,10 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     super.scrollCacheExtent,
     super.paintOrder,
     super.clipBehavior,
-  }) : assert(anchor >= 0.0 && anchor <= 1.0),
+  }) : assert(
+         anchor >= 0.0 && anchor <= 1.0,
+         'The anchor must be between 0.0 and 1.0, inclusive, but was $anchor.',
+       ),
        assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
        _anchor = anchor,
        _center = center {
@@ -1619,30 +1640,25 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   );
 
   @override
-  void setupParentData(RenderObject child) {
-    if (child.parentData is! SliverPhysicalContainerParentData) {
-      child.parentData = SliverPhysicalContainerParentData();
-    }
-  }
-
-  /// The relative position of the zero scroll offset.
-  ///
-  /// For example, if [anchor] is 0.5 and the [axisDirection] is
-  /// [AxisDirection.down] or [AxisDirection.up], then the zero scroll offset is
-  /// vertically centered within the viewport. If the [anchor] is 1.0, and the
-  /// [axisDirection] is [AxisDirection.right], then the zero scroll offset is
-  /// on the left edge of the viewport.
-  ///
-  /// {@macro flutter.rendering.GrowthDirection.sample}
   double get anchor => _anchor;
   double _anchor;
   set anchor(double value) {
-    assert(value >= 0.0 && value <= 1.0);
+    assert(
+      value >= 0.0 && value <= 1.0,
+      'The anchor must be between 0.0 and 1.0, inclusive, but was $anchor',
+    );
     if (value == _anchor) {
       return;
     }
     _anchor = value;
     markNeedsLayout();
+  }
+
+  @override
+  void setupParentData(RenderObject child) {
+    if (child.parentData is! SliverPhysicalContainerParentData) {
+      child.parentData = SliverPhysicalContainerParentData();
+    }
   }
 
   /// The first child in the [GrowthDirection.forward] growth direction.
