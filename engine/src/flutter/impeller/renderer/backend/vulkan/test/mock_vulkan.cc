@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 
+#include <atomic>
 #include <cstdint>
 #include <cstring>
 #include <utility>
@@ -557,7 +558,9 @@ VkResult vkCreateImageView(VkDevice device,
                            const VkImageViewCreateInfo* pCreateInfo,
                            const VkAllocationCallbacks* pAllocator,
                            VkImageView* pView) {
-  *pView = reinterpret_cast<VkImageView>(0xFEE1DEAD);
+  // Handles are distinct so tests can tell two views of the same image apart.
+  static std::atomic_uint64_t next_handle = 0xFEE1DEAD;
+  *pView = reinterpret_cast<VkImageView>(next_handle.fetch_add(1));
   return VK_SUCCESS;
 }
 
