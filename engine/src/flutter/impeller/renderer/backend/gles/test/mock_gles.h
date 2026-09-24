@@ -364,7 +364,8 @@ class MockGLES final {
   static std::shared_ptr<MockGLES> Init(
       std::unique_ptr<MockGLESImpl> impl,
       const std::optional<std::vector<const char*>>& extensions = std::nullopt,
-      const char* version_string = "OpenGL ES 3.0");
+      const char* version_string = "OpenGL ES 3.0",
+      const char* renderer_string = "");
 
   /// @brief      Returns an initialized |MockGLES| instance.
   ///
@@ -374,7 +375,8 @@ class MockGLES final {
   static std::shared_ptr<MockGLES> Init(
       const std::optional<std::vector<const char*>>& extensions = std::nullopt,
       const char* version_string = "OpenGL ES 3.0",
-      ProcTableGLES::Resolver resolver = kMockResolverGLES);
+      ProcTableGLES::Resolver resolver = kMockResolverGLES,
+      const char* renderer_string = "");
 
   /// @brief      Returns a configured |ProcTableGLES| instance.
   const ProcTableGLES& GetProcTable() const { return proc_table_; }
