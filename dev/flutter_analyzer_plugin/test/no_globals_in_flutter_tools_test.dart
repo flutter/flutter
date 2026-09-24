@@ -8,11 +8,10 @@ import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/package_config_file_builder.dart';
 import 'package:flutter_analyzer_plugin/src/rules/no_globals_in_flutter_tools.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
 import '../tool/update_migrated_files.dart';
 
-@reflectiveTest
 class NoGlobalsInFlutterToolsRestrictedFileTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -156,7 +155,6 @@ void main() {
   }
 }
 
-@reflectiveTest
 class NoGlobalsInFlutterToolsUnrestrictedFileTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -194,7 +192,6 @@ void main() {
   }
 }
 
-@reflectiveTest
 class NoGlobalsInFlutterToolsOtherPackageTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -232,7 +229,6 @@ void main() {
   }
 }
 
-@reflectiveTest
 class NoGlobalsInFlutterToolsDefaultPathsTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -268,7 +264,6 @@ void main() {
   }
 }
 
-@reflectiveTest
 class NoGlobalsInFlutterToolsDefaultTestPathTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -304,7 +299,6 @@ void main() {
   }
 }
 
-@reflectiveTest
 class NoGlobalsInFlutterToolsWindowsRestrictedPathTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -342,7 +336,6 @@ void main() {
   }
 }
 
-@reflectiveTest
 class NoGlobalsInFlutterToolsVerificationTest {
   // ignore: non_constant_identifier_names
   void test_all_migrated_files_included_in_defaultRestrictedPaths() {
@@ -374,13 +367,115 @@ class NoGlobalsInFlutterToolsVerificationTest {
 }
 
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(NoGlobalsInFlutterToolsRestrictedFileTest);
-    defineReflectiveTests(NoGlobalsInFlutterToolsUnrestrictedFileTest);
-    defineReflectiveTests(NoGlobalsInFlutterToolsOtherPackageTest);
-    defineReflectiveTests(NoGlobalsInFlutterToolsDefaultPathsTest);
-    defineReflectiveTests(NoGlobalsInFlutterToolsDefaultTestPathTest);
-    defineReflectiveTests(NoGlobalsInFlutterToolsWindowsRestrictedPathTest);
-    defineReflectiveTests(NoGlobalsInFlutterToolsVerificationTest);
+  group('NoGlobalsInFlutterToolsRestrictedFileTest', () {
+    late NoGlobalsInFlutterToolsRestrictedFileTest testSuite;
+
+    setUp(() {
+      testSuite = NoGlobalsInFlutterToolsRestrictedFileTest()..setUp();
+    });
+
+    tearDown(() => testSuite.tearDown());
+
+    test('relative globals import', () => testSuite.test_relative_globals_import());
+    test(
+      'relative globals import with prefix',
+      () => testSuite.test_relative_globals_import_with_prefix(),
+    );
+    test('relative parent globals import', () => testSuite.test_relative_parent_globals_import());
+    test(
+      'relative parent globals import with prefix',
+      () => testSuite.test_relative_parent_globals_import_with_prefix(),
+    );
+    test(
+      'unrelated import with globals prefix',
+      () => testSuite.test_unrelated_import_with_globals_prefix(),
+    );
+    test(
+      'globals import with custom prefix',
+      () => testSuite.test_globals_import_with_custom_prefix(),
+    );
+    test('package globals import', () => testSuite.test_package_globals_import());
+    test('allowed other import', () => testSuite.test_allowed_other_import());
+    test(
+      'third party package globals import ignored',
+      () => testSuite.test_third_party_package_globals_import_ignored(),
+    );
+  });
+
+  group('NoGlobalsInFlutterToolsUnrestrictedFileTest', () {
+    late NoGlobalsInFlutterToolsUnrestrictedFileTest testSuite;
+
+    setUp(() {
+      testSuite = NoGlobalsInFlutterToolsUnrestrictedFileTest()..setUp();
+    });
+
+    tearDown(() => testSuite.tearDown());
+
+    test(
+      'unrestricted file can import globals',
+      () => testSuite.test_unrestricted_file_can_import_globals(),
+    );
+  });
+
+  group('NoGlobalsInFlutterToolsOtherPackageTest', () {
+    late NoGlobalsInFlutterToolsOtherPackageTest testSuite;
+
+    setUp(() {
+      testSuite = NoGlobalsInFlutterToolsOtherPackageTest()..setUp();
+    });
+
+    tearDown(() => testSuite.tearDown());
+
+    test('other package ignores rule', () => testSuite.test_other_package_ignores_rule());
+  });
+
+  group('NoGlobalsInFlutterToolsDefaultPathsTest', () {
+    late NoGlobalsInFlutterToolsDefaultPathsTest testSuite;
+
+    setUp(() {
+      testSuite = NoGlobalsInFlutterToolsDefaultPathsTest()..setUp();
+    });
+
+    tearDown(() => testSuite.tearDown());
+
+    test(
+      'clean command restricted by default',
+      () => testSuite.test_clean_command_restricted_by_default(),
+    );
+  });
+
+  group('NoGlobalsInFlutterToolsDefaultTestPathTest', () {
+    late NoGlobalsInFlutterToolsDefaultTestPathTest testSuite;
+
+    setUp(() {
+      testSuite = NoGlobalsInFlutterToolsDefaultTestPathTest()..setUp();
+    });
+
+    tearDown(() => testSuite.tearDown());
+
+    test(
+      'clean test restricted by default',
+      () => testSuite.test_clean_test_restricted_by_default(),
+    );
+  });
+
+  group('NoGlobalsInFlutterToolsWindowsRestrictedPathTest', () {
+    late NoGlobalsInFlutterToolsWindowsRestrictedPathTest testSuite;
+
+    setUp(() {
+      testSuite = NoGlobalsInFlutterToolsWindowsRestrictedPathTest()..setUp();
+    });
+
+    tearDown(() => testSuite.tearDown());
+
+    test(
+      'windows restricted path normalizes',
+      () => testSuite.test_windows_restricted_path_normalizes(),
+    );
+  });
+
+  test('all migrated files included in defaultRestrictedPaths', () {
+    NoGlobalsInFlutterToolsVerificationTest()
+        .test_all_migrated_files_included_in_defaultRestrictedPaths();
   });
 }
