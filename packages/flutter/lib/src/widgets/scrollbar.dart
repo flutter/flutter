@@ -1417,6 +1417,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   Offset? _lastDragUpdateOffset;
   double? _startDragThumbOffset;
   ScrollController? _cachedController;
+  late ScrollBehavior _scrollBehavior;
   Timer? _fadeoutTimer;
   late AnimationController _fadeoutAnimationController;
   late CurvedAnimation _fadeoutOpacityAnimation;
@@ -1500,6 +1501,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _scrollBehavior = ScrollConfiguration.of(context);
     assert(_debugScheduleCheckHasValidScrollPosition());
   }
 
@@ -2331,7 +2333,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     final ScrollPosition position = _cachedController!.position;
     final Set<LogicalKeyboardKey> pressed = HardwareKeyboard.instance.logicalKeysPressed;
     final bool flipAxes =
-        pressed.any(ScrollConfiguration.of(context).pointerAxisModifiers.contains) &&
+        pressed.any(_scrollBehavior.pointerAxisModifiers.contains) &&
         // Axes are only flipped for physical mouse wheel input. Trackpads
         // already provide both directional axes directly.
         event.kind == PointerDeviceKind.mouse;
