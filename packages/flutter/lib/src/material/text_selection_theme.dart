@@ -145,10 +145,8 @@ class TextSelectionThemeData with Diagnosticable {
 class TextSelectionTheme extends InheritedTheme {
   /// Creates a text selection theme widget that specifies the text
   /// selection properties for all widgets below it in the widget tree.
-  const TextSelectionTheme({super.key, required this.data, required Widget child})
-    : _child = child,
-      // See `get child` override below.
-      super(child: const _NullWidget());
+  const TextSelectionTheme({super.key, required this.data, required this._child})
+    : super(child: const _NullWidget());
 
   /// The properties for descendant [TextField] and [SelectableText] widgets.
   final TextSelectionThemeData data;

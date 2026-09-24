@@ -43,9 +43,33 @@ struct _FlSubsurfaceEGL {
   // Shader used to draw the engine frame when glBlitFramebuffer is unavailable.
   // NULL when [can_blit].
   FlCompositorOpenGLShader* shader;
+
+  // The buffer scale set on the subsurface. Buffer sizes have to be an integer
+  // multiple of this.
+  gint scale;
+
+  // The size egl_window has been resized to. The buffer for the next frame is
+  // acquired when the current one is swapped, so this is the size that buffer
+  // will be, not the size of the buffer being drawn into now.
+  size_t window_width;
+  size_t window_height;
+
+  // The size of the buffer the next frame is drawn into. eglQuerySurface()
+  // reports the size of the buffer that was last swapped rather than this one,
+  // so the size is tracked here instead.
+  size_t buffer_width;
+  size_t buffer_height;
 };
 
 G_DEFINE_TYPE(FlSubsurfaceEGL, fl_subsurface_egl, G_TYPE_OBJECT)
+
+// Rounds a size in device pixels up to a whole number of logical pixels.
+// Wayland requires buffer sizes to be an integer multiple of the buffer scale,
+// and a view that hasn't been allocated yet can produce a frame that isn't,
+// e.g. a single pixel frame on a display with a scale of two.
+static size_t round_to_scale(size_t size, gint scale) {
+  return ((size + scale - 1) / scale) * scale;
+}
 
 // Gets the EGL display the engine renders to. The subsurface shares this
 // display so its context can access the engine's frame texture directly.
@@ -60,6 +84,13 @@ static void setup(FlSubsurfaceEGL* self,
                   size_t width,
                   size_t height,
                   gint scale) {
+  // The native window is created in device pixels below.
+  self->scale = scale;
+  self->window_width = width * scale;
+  self->window_height = height * scale;
+  self->buffer_width = self->window_width;
+  self->buffer_height = self->window_height;
+
   // Share the engine's EGL display and render context so the engine's frame
   // texture can be accessed directly, without using EGLImage.
   EGLDisplay egl_display = get_display(self);
@@ -208,14 +239,19 @@ void fl_subsurface_egl_resize(FlSubsurfaceEGL* self,
   g_return_if_fail(FL_IS_SUBSURFACE_EGL(self));
 
   if (self->egl_window != nullptr) {
+    width = round_to_scale(width, self->scale);
+    height = round_to_scale(height, self->scale);
     wl_egl_window_resize(self->egl_window, width, height, 0, 0);
+    self->window_width = width;
+    self->window_height = height;
   }
 }
 
 void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
                                GLuint texture_id,
                                size_t width,
-                               size_t height) {
+                               size_t height,
+                               FlGLFence* fence) {
   g_return_if_fail(FL_IS_SUBSURFACE_EGL(self));
 
   // Present the composited frame to the subsurface window surface using the
@@ -224,14 +260,47 @@ void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
   eglMakeCurrent(egl_display, self->egl_surface, self->egl_surface,
                  self->egl_context);
 
-  EGLint surface_width = 0, surface_height = 0;
-  eglQuerySurface(egl_display, self->egl_surface, EGL_WIDTH, &surface_width);
-  eglQuerySurface(egl_display, self->egl_surface, EGL_HEIGHT, &surface_height);
-  if (self->egl_window != nullptr &&
-      (static_cast<size_t>(surface_width) != width ||
-       static_cast<size_t>(surface_height) != height)) {
-    wl_egl_window_resize(self->egl_window, width, height, 0, 0);
+  // Make this context wait for the frame to have finished rendering in the
+  // engine's context before it reads the texture below. This context is the one
+  // that reads the frame, so the waiting can be left to OpenGL and this thread
+  // doesn't have to block.
+  if (fence != nullptr) {
+    fl_gl_fence_wait(fence);
   }
+
+  size_t target_width = round_to_scale(width, self->scale);
+  size_t target_height = round_to_scale(height, self->scale);
+
+  if (self->egl_window != nullptr && (self->window_width != target_width ||
+                                      self->window_height != target_height)) {
+    wl_egl_window_resize(self->egl_window, target_width, target_height, 0, 0);
+    self->window_width = target_width;
+    self->window_height = target_height;
+  }
+
+  if (self->egl_window != nullptr && (self->buffer_width != target_width ||
+                                      self->buffer_height != target_height)) {
+    // The buffer a frame is drawn into is acquired when the previous frame is
+    // swapped, so resizing the window doesn't reach the buffer this frame
+    // would be drawn into. Swap that buffer away unused so this frame is drawn
+    // into one of the size it was rendered at. A window sized to its content
+    // only produces one frame at each size, so leaving this until the next
+    // frame would leave it showing a buffer that was never painted.
+    eglSwapBuffers(egl_display, self->egl_surface);
+    self->buffer_width = self->window_width;
+    self->buffer_height = self->window_height;
+  }
+
+  // The frame and the buffer are both window sized, so their dimensions fit in
+  // a GLint and the arithmetic below can stay signed.
+  GLint frame_width = static_cast<GLint>(width);
+  GLint frame_height = static_cast<GLint>(height);
+
+  // OpenGL puts the origin at the bottom left of the buffer but Wayland puts it
+  // at the top left, so the frame has to be written at the top of the buffer
+  // when the buffer is taller, which happens when the frame size was rounded up
+  // to a whole logical pixel above.
+  GLint dst_y0 = MAX(static_cast<GLint>(self->buffer_height) - frame_height, 0);
 
   // The subsurface context shares resources with the engine, so the engine's
   // frame texture can be read directly without using EGLImage.
@@ -246,13 +315,13 @@ void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
     glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                            GL_TEXTURE_2D, texture_id, 0);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
-                      GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(0, 0, frame_width, frame_height, 0, dst_y0, frame_width,
+                      dst_y0 + frame_height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
   } else {
     // glBlitFramebuffer is unavailable; draw the frame texture as a fullscreen
     // quad with the shader instead.
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, width, height);
+    glViewport(0, dst_y0, frame_width, frame_height);
     fl_compositor_opengl_shader_use(self->shader);
     fl_compositor_opengl_shader_set_offset(self->shader, 0, 0);
     fl_compositor_opengl_shader_set_scale(self->shader, 1, 1);
@@ -260,6 +329,8 @@ void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
     glDrawArrays(GL_TRIANGLES, 0, 6);
   }
   eglSwapBuffers(egl_display, self->egl_surface);
+  self->buffer_width = self->window_width;
+  self->buffer_height = self->window_height;
 
   // Restore the engine's rendering context so the raster thread can continue
   // rendering after this present.

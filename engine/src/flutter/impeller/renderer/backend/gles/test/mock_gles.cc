@@ -6,6 +6,7 @@
 
 #include "GLES3/gl3.h"
 #include "fml/logging.h"
+#include "impeller/base/thread_safety.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "impeller/renderer/backend/gles/test/mock_gles.h"
 
@@ -22,6 +23,7 @@ static std::weak_ptr<MockGLES> g_mock_gles;
 static std::vector<const char*> g_extensions;
 
 static const char* g_version;
+static const char* g_renderer;
 static std::string g_extensions_string;
 
 template <typename T, typename U>
@@ -64,6 +66,8 @@ const unsigned char* mockGetString(GLenum name) {
   switch (name) {
     case GL_VENDOR:
       return reinterpret_cast<const unsigned char*>(kMockVendor);
+    case GL_RENDERER:
+      return reinterpret_cast<const unsigned char*>(g_renderer);
     case GL_VERSION:
       return reinterpret_cast<const unsigned char*>(g_version);
     case GL_EXTENSIONS:
@@ -358,6 +362,13 @@ GLboolean mockIsTexture(GLuint texture) {
 static_assert(CheckSameSignature<decltype(mockIsTexture),  //
                                  decltype(glIsTexture)>::value);
 
+GLboolean mockIsProgram(GLuint program) {
+  return CallMockMethod(&IMockGLESImpl::IsProgram, program);
+}
+
+static_assert(CheckSameSignature<decltype(mockIsProgram),  //
+                                 decltype(glIsProgram)>::value);
+
 GLenum mockCheckFramebufferStatus(GLenum target) {
   return CallMockMethod(&IMockGLESImpl::CheckFramebufferStatus, target);
 }
@@ -462,10 +473,11 @@ static_assert(CheckSameSignature<decltype(mockVertexAttribDivisor),  //
                                  decltype(glVertexAttribDivisor)>::value);
 
 // static
-std::shared_ptr<MockGLES> MockGLES::Init(
+IPLR_NO_THREAD_SAFETY_ANALYSIS std::shared_ptr<MockGLES> MockGLES::Init(
     std::unique_ptr<MockGLESImpl> impl,
     const std::optional<std::vector<const char*>>& extensions,
-    const char* version_string) {
+    const char* version_string,
+    const char* renderer_string) {
   FML_CHECK(g_test_lock.try_lock())
       << "MockGLES is already being used by another test.";
   g_extensions = extensions.value_or(kExtensions);
@@ -477,16 +489,18 @@ std::shared_ptr<MockGLES> MockGLES::Init(
     g_extensions_string += ext;
   }
   g_version = version_string;
+  g_renderer = renderer_string;
   auto mock_gles = std::shared_ptr<MockGLES>(new MockGLES());
   mock_gles->impl_ = std::move(impl);
   g_mock_gles = mock_gles;
   return mock_gles;
 }
 
-std::shared_ptr<MockGLES> MockGLES::Init(
+IPLR_NO_THREAD_SAFETY_ANALYSIS std::shared_ptr<MockGLES> MockGLES::Init(
     const std::optional<std::vector<const char*>>& extensions,
     const char* version_string,
-    ProcTableGLES::Resolver resolver) {
+    ProcTableGLES::Resolver resolver,
+    const char* renderer_string) {
   // If we cannot obtain a lock, MockGLES is already being used elsewhere.
   FML_CHECK(g_test_lock.try_lock())
       << "MockGLES is already being used by another test.";
@@ -499,6 +513,7 @@ std::shared_ptr<MockGLES> MockGLES::Init(
     g_extensions_string += ext;
   }
   g_version = version_string;
+  g_renderer = renderer_string;
   auto mock_gles = std::shared_ptr<MockGLES>(new MockGLES(std::move(resolver)));
   g_mock_gles = mock_gles;
   return mock_gles;
@@ -561,6 +576,8 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockBufferSubData);
   } else if (strcmp(name, "glIsTexture") == 0) {
     return reinterpret_cast<void*>(mockIsTexture);
+  } else if (strcmp(name, "glIsProgram") == 0) {
+    return reinterpret_cast<void*>(mockIsProgram);
   } else if (strcmp(name, "glCheckFramebufferStatus") == 0) {
     return reinterpret_cast<void*>(mockCheckFramebufferStatus);
   } else if (strcmp(name, "glReadPixels") == 0) {

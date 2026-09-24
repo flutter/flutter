@@ -1,6 +1,6 @@
 import Flutter
+import Testing
 import UIKit
-import XCTest
 {{#withPlatformChannelPluginHook}}
 
 {{#withSwiftPackageManager}}
@@ -12,29 +12,25 @@ import XCTest
 
 // This demonstrates a simple unit test of the Swift portion of this plugin's implementation.
 //
-// See https://developer.apple.com/documentation/xctest for more information about using XCTest.
+// See https://developer.apple.com/xcode/swift-testing/ for more information about using
+// Swift Testing.
 {{/withPlatformChannelPluginHook}}
 
-class RunnerTests: XCTestCase {
+struct RunnerTests {
 
 {{#withPlatformChannelPluginHook}}
-  func testGetPlatformVersion() {
+  @Test func getPlatformVersionSucceeds() throws {
     let plugin = {{pluginClass}}()
 
-    let call = FlutterMethodCall(methodName: "getPlatformVersion", arguments: [])
-
-    let resultExpectation = expectation(description: "result block must be called.")
-    plugin.handle(call) { result in
-      XCTAssertEqual(result as! String, "iOS " + UIDevice.current.systemVersion)
-      resultExpectation.fulfill()
-    }
-    waitForExpectations(timeout: 1)
+    let result = try plugin.getPlatformVersion()
+    #expect(result == "iOS " + UIDevice.current.systemVersion)
   }
 {{/withPlatformChannelPluginHook}}
 {{^withPlatformChannelPluginHook}}
   func testExample() {
     // If you add code to the Runner application, consider adding tests here.
-    // See https://developer.apple.com/documentation/xctest for more information about using XCTest.
+    // See https://developer.apple.com/xcode/swift-testing/ for more information about using
+    // Swift Testing.
   }
 {{/withPlatformChannelPluginHook}}
 
