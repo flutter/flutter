@@ -55,13 +55,11 @@ const protocolVersion = '0.6.1';
 class DaemonCommand extends FlutterCommand {
   DaemonCommand({
     required super.toolContext,
-    required AndroidContext androidContext,
-    AndroidWorkflow? androidWorkflow,
-    DeviceManager? deviceManager,
+    required this._androidContext,
+    this._androidWorkflow,
+    this._deviceManager,
     this.hidden = false,
-  }) : _androidContext = androidContext,
-       _androidWorkflow = androidWorkflow,
-       _deviceManager = deviceManager {
+  }) {
     argParser.addOption(
       'listen-on-tcp-port',
       help: 'If specified, the daemon will be listening for commands on the specified port instead of stdio.',
@@ -170,8 +168,7 @@ class DaemonServer {
     this.analytics,
     this.androidSdk,
     this.androidWorkflow,
-    @visibleForTesting
-    Future<ServerSocket> Function(InternetAddress address, int port) bind = ServerSocket.bind,
+    @visibleForTesting this._bind = ServerSocket.bind,
     this.deviceManager,
     required this.featureFlags,
     this.fileSystem,
@@ -184,7 +181,7 @@ class DaemonServer {
     this.stdio,
     this.systemClock,
     this.terminal,
-  }) : _bind = bind;
+  });
 
   final int? port;
 
@@ -577,14 +574,11 @@ abstract class Domain {
 class DaemonDomain extends Domain {
   DaemonDomain(
     Daemon daemon, {
-    required FeatureFlags featureFlags,
+    required this._featureFlags,
     required FileSystem fileSystem,
-    required Logger logger,
-    Stdio? stdio,
+    required this._logger,
+    this._stdio,
   }) : _fs = fileSystem,
-       _featureFlags = featureFlags,
-       _logger = logger,
-       _stdio = stdio,
        super(daemon, 'daemon') {
     registerHandler('version', version);
     registerHandler('shutdown', shutdown);
@@ -1060,6 +1054,8 @@ class AppDomain extends Domain {
         }),
       );
     }
+    // Kept separate from [AppInstance.started]. Runners attach listeners to this
+    // completer that have no error handler, so it must only ever be completed.
     final appStartedCompleter = Completer<void>();
 
     // This future won't complete until the application has shutdown, so we don't want to
@@ -1085,18 +1081,31 @@ class AppDomain extends Domain {
       }
     });
 
-    await Future.any(<Future<void>>[
-      appStartedCompleter.future.then<void>((void value) {
-        _sendAppEvent(app, 'started');
-      }),
-      appRunFuture,
-    ]);
+    try {
+      await Future.any(<Future<void>>[
+        appStartedCompleter.future.then<void>((void value) {
+          app._markStarted();
+          _sendAppEvent(app, 'started');
+        }),
+        appRunFuture,
+      ]);
+    } on Object catch (error, stackTrace) {
+      // `appRunFuture` only converts an [Exception] into a `stop` event, so an
+      // [Error] thrown by the runner or by the `finally` above surfaces here.
+      // Settle anything waiting on [AppInstance.started] before it propagates,
+      // otherwise a deferred `app.restart` waits forever.
+      app._failedToStart(error, stackTrace);
+      rethrow;
+    }
 
     // If appRunFuture completes early due to a fatal initialization error
-    // without actually starting the app, we must explicitly throw an exception
-    // to prevent the IDE/client from hanging indefinitely.
+    // without actually starting the app, we must explicitly fail both this
+    // request and anything waiting on [AppInstance.started], to prevent the
+    // IDE/client from hanging indefinitely.
     if (!appStartedCompleter.isCompleted) {
-      throw DaemonException('App failed to start');
+      final failure = DaemonException('App failed to start');
+      app._failedToStart(failure);
+      throw failure;
     }
     return app;
   }
@@ -1119,6 +1128,14 @@ class AppDomain extends Domain {
     if (app == null) {
       throw DaemonException("app '$appId' not found");
     }
+
+    // The `app.start` event carries the app ID and is sent before the runner
+    // has finished starting up, so a client can ask for a restart while the
+    // initial compile is still in flight. Servicing it now would issue a
+    // recompile against a compiler that has not accepted its first compile
+    // yet. Defer instead of dropping it: the client may have edited a file
+    // that the initial compile did not pick up.
+    await app.started;
 
     return _queueAndDebounceReloadAction(
       app,
@@ -1254,10 +1271,8 @@ typedef _DeviceEventHandler = void Function(Device device);
 /// It exports a `getDevices()` call, as well as firing `device.added` and
 /// `device.removed` events.
 class DeviceDomain extends Domain {
-  DeviceDomain(Daemon daemon, {required Logger logger, DeviceManager? deviceManager})
-    : _deviceManager = deviceManager,
-      _logger = logger,
-      super(daemon, 'device') {
+  DeviceDomain(Daemon daemon, {required this._logger, this._deviceManager})
+    : super(daemon, 'device') {
     registerHandler('getDevices', getDevices);
     registerHandler('discoverDevices', discoverDevices);
     registerHandler('enable', enable);
@@ -1828,17 +1843,41 @@ class NotifyingLogger extends DelegatingLogger {
 
 /// A running application, started by this daemon.
 class AppInstance {
-  AppInstance(
-    this.id, {
-    required this.runner,
-    this.logToStdout = false,
-    required MachineOutputLogger logger,
-  }) : _logger = logger;
+  AppInstance(this.id, {required this.runner, this.logToStdout = false, required this._logger}) {
+    // Nothing is obliged to await [started], so make sure a failure never
+    // surfaces as an unhandled async error.
+    _startedCompleter.future.ignore();
+  }
 
   final String id;
   final ResidentRunner runner;
   final bool logToStdout;
   final MachineOutputLogger _logger;
+
+  final _startedCompleter = Completer<void>();
+
+  /// Completes once [runner] reports the app has started, which is the same
+  /// signal the `app.started` event is sent from, or with an error if the app
+  /// exited before it got there.
+  ///
+  /// For a runner with an incremental compiler this is after the initial
+  /// compile was accepted, which is what makes it safe to ask for a reload. It
+  /// does not mean the VM service is connected: the web runner attaches that
+  /// asynchronously afterwards, so the VM service may still be unattached once
+  /// this completes.
+  Future<void> get started => _startedCompleter.future;
+
+  void _markStarted() {
+    _startedCompleter.complete();
+  }
+
+  void _failedToStart(Object error, [StackTrace? stackTrace]) {
+    // Reachable after [_markStarted] when sending the `app.started` event is
+    // what threw, so this cannot assume the completer is still pending.
+    if (!_startedCompleter.isCompleted) {
+      _startedCompleter.completeError(error, stackTrace);
+    }
+  }
 
   Future<OperationResult> restart({bool fullRestart = false, bool pause = false, String? reason}) {
     return runner.restart(fullRestart: fullRestart, pause: pause, reason: reason);
@@ -1918,11 +1957,9 @@ class ProxyDomain extends Domain {
   ProxyDomain(
     Daemon daemon, {
     required FileSystem fileSystem,
-    required FileTransfer fileTransfer,
-    required Logger logger,
-  }) : _fileTransfer = fileTransfer,
-       _fs = fileSystem,
-       _logger = logger,
+    required this._fileTransfer,
+    required this._logger,
+  }) : _fs = fileSystem,
        super(daemon, 'proxy') {
     registerHandlerWithBinary('writeTempFile', writeTempFile);
     registerHandler('calculateFileHashes', calculateFileHashes);

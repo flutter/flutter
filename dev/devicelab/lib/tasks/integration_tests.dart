@@ -53,11 +53,13 @@ TaskFunction createIntegrationTestFlavorsTest({
 
 TaskFunction createExternalTexturesFrameRateIntegrationTest({
   List<String> extraOptions = const <String>[],
+  String? deviceIdOverride,
 }) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/external_textures',
     'lib/frame_rate_main.dart',
     extraOptions: extraOptions,
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 

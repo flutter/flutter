@@ -141,8 +141,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// [RenderView] object from configuring it. Typically, the object is created
   /// by the [View] widget and configured by the [RendererBinding] when the
   /// [RenderView] is registered with it by the [View] widget.
-  RenderView({RenderBox? child, ViewConfiguration? configuration, required ui.FlutterView view})
-    : _view = view {
+  RenderView({RenderBox? child, ViewConfiguration? configuration, required this._view}) {
     if (configuration != null) {
       this.configuration = configuration;
     }
@@ -264,6 +263,22 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   Matrix4? _rootTransform;
 
+  /// Whether this view must be composited on the next frame.
+  ///
+  /// This flag is cleared once the view gets successfully composited.
+  bool get needsCompositeFrame => _needsCompositeFrame;
+  bool _needsCompositeFrame = false;
+
+  /// Marks this view required to be composited on the next frame.
+  ///
+  /// This happens by the [PipelineOwner] during [PipelineOwner.flushPaint] if
+  /// there are any render objects that need to be painted. It is also set for
+  /// warmup frame or any frame requested by the engine (i.e. during return from
+  /// background).
+  void markNeedsCompositeFrame() {
+    _needsCompositeFrame = true;
+  }
+
   TransformLayer _updateMatricesAndCreateNewRootLayer() {
     assert(hasConfiguration);
     _rootTransform = configuration.toMatrix();
@@ -368,6 +383,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
         }
         return true;
       }());
+      _needsCompositeFrame = false;
     } finally {
       if (!kReleaseMode) {
         FlutterTimeline.finishSync();
@@ -574,5 +590,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 ///
 /// Used by [RenderView.debugAddPaintCallback] and
 /// [RenderView.debugRemovePaintCallback].
-typedef DebugPaintCallback =
-    void Function(PaintingContext context, Offset offset, RenderView renderView);
+typedef DebugPaintCallback = void Function(
+  PaintingContext context,
+  Offset offset,
+  RenderView renderView,
+);
