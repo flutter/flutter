@@ -55,6 +55,11 @@ class GoodToStringWithAssert {
     return 'GoodToStringWithAssert';
   }
 }
+
+class GoodToStringWithTypeComparison {
+  @override
+  String toString() => runtimeType == GoodToStringWithTypeComparison ? 'Good' : 'Subclass';
+}
 ''';
 
 void main() {
