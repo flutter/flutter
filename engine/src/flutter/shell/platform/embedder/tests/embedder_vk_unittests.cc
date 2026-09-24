@@ -64,7 +64,6 @@ int StrcmpFixed(const char* str1, const char (&str2)[N]) {
   return std::strcmp(str1, str2);
 }
 
-
 PFN_vkVoidFunction GetDeviceProcAddr(VkDevice device, const char* pName) {
   FML_DCHECK(g_vulkan_proc_info.get_device_proc_addr != nullptr);
   if (StrcmpFixed(pName, "vkQueueSubmit") == 0) {
