@@ -4047,6 +4047,56 @@ TEST_F(DisplayListTest, SaveLayerBoundsComputationOfFloodingColorFilter) {
   EXPECT_TRUE(expector.all_bounds_checked());
 }
 
+TEST_F(DisplayListTest,
+       SaveLayerBoundsOfRuntimeEffectFilterWithUnclippedInput) {
+  DlRect clip_rect = DlRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
+  DlRect straddling_rect = DlRect::MakeLTRB(50.0f, 120.0f, 150.0f, 180.0f);
+  DlRect outside_rect = DlRect::MakeLTRB(10.0f, 120.0f, 40.0f, 180.0f);
+  ASSERT_TRUE(clip_rect.IntersectsWithRect(straddling_rect));
+  ASSERT_FALSE(clip_rect.IntersectsWithRect(outside_rect));
+
+  auto make_display_list = [&](bool unclipped_input) {
+    auto filter = DlImageFilter::MakeRuntimeEffect(
+        kTestRuntimeEffect1, {nullptr},
+        std::make_shared<std::vector<uint8_t>>(),
+        DlImageSampling::kNearestNeighbor, unclipped_input);
+    DlPaint layer_paint = DlPaint().setImageFilter(filter);
+
+    DisplayListBuilder builder;
+    builder.ClipRect(clip_rect);
+    builder.SaveLayer(std::nullopt, &layer_paint);
+    {  //
+      builder.DrawRect(straddling_rect, DlPaint());
+      builder.DrawRect(outside_rect, DlPaint());
+    }
+    builder.Restore();
+    return builder.Build();
+  };
+
+  {
+    // By default, content outside of the clip is culled and does not
+    // contribute to the layer bounds.
+    auto display_list = make_display_list(/*unclipped_input=*/false);
+    EXPECT_EQ(display_list->op_count(), 4u);
+
+    SaveLayerBoundsExpector expector;
+    expector.addComputedExpectation(straddling_rect);
+    display_list->Dispatch(expector);
+    EXPECT_TRUE(expector.all_bounds_checked());
+  }
+
+  {
+    // With an unclipped input, all of the content is part of the layer.
+    auto display_list = make_display_list(/*unclipped_input=*/true);
+    EXPECT_EQ(display_list->op_count(), 5u);
+
+    SaveLayerBoundsExpector expector;
+    expector.addComputedExpectation(straddling_rect.Union(outside_rect));
+    display_list->Dispatch(expector);
+    EXPECT_TRUE(expector.all_bounds_checked());
+  }
+}
+
 TEST_F(DisplayListTest, SaveLayerBoundsClipDetectionSimpleUnclippedRect) {
   DlRect rect = DlRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
   DlRect save_rect = DlRect::MakeLTRB(50.0f, 50.0f, 250.0f, 250.0f);

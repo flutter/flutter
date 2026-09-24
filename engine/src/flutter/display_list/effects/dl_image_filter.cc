@@ -35,10 +35,11 @@ std::shared_ptr<DlImageFilter> DlImageFilter::MakeRuntimeEffect(
     sk_sp<DlRuntimeEffect> runtime_effect,
     std::vector<std::shared_ptr<DlColorSource>> samplers,
     std::shared_ptr<std::vector<uint8_t>> uniform_data,
-    DlImageSampling input_sampling) {
+    DlImageSampling input_sampling,
+    bool unclipped_input) {
   return DlRuntimeEffectImageFilter::Make(
       std::move(runtime_effect), std::move(samplers), std::move(uniform_data),
-      input_sampling);
+      input_sampling, unclipped_input);
 }
 
 std::shared_ptr<DlImageFilter> DlImageFilter::MakeColorFilter(

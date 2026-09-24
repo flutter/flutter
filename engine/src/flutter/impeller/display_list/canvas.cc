@@ -1782,6 +1782,7 @@ void Canvas::Save(uint32_t total_content_depth) {
       << " after allocating " << total_content_depth;
   entry.clip_height = transform_stack_.back().clip_height;
   entry.rendering_mode = Entity::RenderingMode::kDirect;
+  entry.unclipped_input = transform_stack_.back().unclipped_input;
   transform_stack_.push_back(entry);
 }
 
@@ -1818,6 +1819,14 @@ std::optional<Rect> Canvas::GetLocalCoverageLimit() const {
     return std::nullopt;
   }
 
+  // The image filter of an enclosing save layer needs its entire input, so
+  // content outside of the root render target must still be rendered into the
+  // subpass texture. The subpass texture itself is already bounded by the
+  // maximum texture size.
+  if (transform_stack_.back().unclipped_input) {
+    return maybe_coverage_limit;
+  }
+
   return maybe_coverage_limit->Intersection(
       Rect::MakeSize(render_target_.GetRenderTargetSize()));
 }
@@ -1852,6 +1861,10 @@ void Canvas::SaveLayer(const Paint& paint,
       renderer_, Rect(), transform_stack_.back().transform,
       Entity::RenderingMode::kSubpassPrependSnapshotTransform);
 
+  const ISize max_subpass_size = renderer_.GetContext()
+                                     ->GetCapabilities()
+                                     ->GetMaximumRenderPassAttachmentSize();
+
   std::optional<Rect> maybe_subpass_coverage = ComputeSaveLayerCoverage(
       bounds.value_or(Rect::MakeMaximum()),
       transform_stack_.back().transform,  //
@@ -1861,7 +1874,8 @@ void Canvas::SaveLayer(const Paint& paint,
       Entity::IsBlendModeDestructive(paint.blend_mode),  //
       /*flood_input_coverage=*/!!backdrop_filter ||
           (paint.color_filter &&
-           paint.color_filter->modifies_transparent_black())  //
+           paint.color_filter->modifies_transparent_black()),  //
+      /*max_texture_size=*/max_subpass_size                    //
   );
 
   if (!maybe_subpass_coverage.has_value()) {
@@ -1901,9 +1915,7 @@ void Canvas::SaveLayer(const Paint& paint,
   // When there are scaling filters present, these contents may exceed the
   // maximum texture size. Perform a clamp here, which may cause rendering
   // artifacts.
-  subpass_size = subpass_size.Min(renderer_.GetContext()
-                                      ->GetCapabilities()
-                                      ->GetMaximumRenderPassAttachmentSize());
+  subpass_size = subpass_size.Min(max_subpass_size);
 
   // Backdrop filter state, ignored if there is no BDF.
   std::shared_ptr<FilterContents> backdrop_filter_contents;
@@ -2035,6 +2047,10 @@ void Canvas::SaveLayer(const Paint& paint,
   entry.clip_height = transform_stack_.back().clip_height;
   entry.rendering_mode = Entity::RenderingMode::kSubpassAppendSnapshotTransform;
   entry.did_round_out = did_round_out;
+  entry.unclipped_input =
+      transform_stack_.back().unclipped_input ||
+      ImageFilterNeedsEntireInput(
+          filter_contents, transform_stack_.back().transform, coverage_limit);
   transform_stack_.emplace_back(entry);
 
   // Start non-collapsed subpasses with a fresh clip coverage stack limited by

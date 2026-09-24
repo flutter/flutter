@@ -597,5 +597,44 @@ TEST(CanvasTest, AntialiasedPaintCompatibleWithSDFRendering) {
   EXPECT_TRUE(Canvas::IsCompatibleWithSDFRendering(paint));
 }
 
+TEST_P(AiksTest,
+       UnclippedInputSaveLayerCoverageLimitIsNotClippedToRenderTarget) {
+  auto runtime_stages_result =
+      OpenAssetAsRuntimeStage("runtime_stage_filter_example.frag.iplr");
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
+  ASSERT_TRUE(runtime_stage);
+  auto uniform_data = std::make_shared<std::vector<uint8_t>>(sizeof(Vector2));
+
+  ContentContext& context = GetContentContext();
+  for (bool unclipped_input : {false, true}) {
+    auto filter = flutter::DlImageFilter::MakeRuntimeEffect(
+        flutter::DlRuntimeEffectImpeller::Make(runtime_stage), {nullptr},
+        uniform_data, flutter::DlImageSampling::kNearestNeighbor,
+        unclipped_input);
+
+    // The test canvas has a 100x100 render target. Move half of a 100x100
+    // layer outside of it.
+    auto canvas = CreateTestCanvas(context);
+    canvas->Translate(Vector3(-50, 0, 0));
+    Paint paint;
+    paint.image_filter = filter.get();
+    canvas->SaveLayer(paint, Rect::MakeLTRB(0, 0, 100, 100), nullptr,
+                      ContentBoundsPromise::kContainsContents,
+                      /*total_content_depth=*/1);
+
+    std::optional<Rect> coverage_limit = canvas->GetLocalCoverageLimit();
+    ASSERT_TRUE(coverage_limit.has_value());
+    if (unclipped_input) {
+      // Content of the layer outside of the render target is still rendered.
+      EXPECT_EQ(coverage_limit.value(), Rect::MakeLTRB(-50, 0, 50, 100));
+    } else {
+      EXPECT_EQ(coverage_limit.value(), Rect::MakeLTRB(0, 0, 50, 100));
+    }
+    canvas->Restore();
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller
