@@ -118,9 +118,9 @@ void main() {
       fileSystem.file('pubspec.yaml').createSync();
 
       await expectLater(
-        () => createTestCommandRunner(
-          command,
-        ).run(<String>['drive', '--no-pub', '--target', 'lib/app.dart']),
+        () =>
+            createTestCommandRunner(command)
+                .run(<String>['drive', '--no-pub', '--target', 'lib/app.dart']),
         throwsToolExit(message: 'Target file "lib/app.dart" not found'),
       );
 
@@ -178,9 +178,9 @@ void main() {
       fileSystem.file('pubspec.yaml').createSync();
 
       await expectLater(
-        () => createTestCommandRunner(
-          command,
-        ).run(<String>['drive', '--no-pub', '--target', 'test_driver/main_test.dart']),
+        () =>
+            createTestCommandRunner(command)
+                .run(<String>['drive', '--no-pub', '--target', 'test_driver/main_test.dart']),
         throwsToolExit(message: 'Test file not found: /test_driver/main_test_test.dart'),
       );
 
@@ -897,6 +897,60 @@ void main() {
       stringContainsInOrder(<String>['flutter drive', '--target', '--driver']),
     );
   }, overrides: <Type, Generator>{Logger: () => logger});
+
+  testUsingContext(
+    'flutter drive fails if driver test imports package:flutter_test',
+    () async {
+      final command = DriveCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
+        signals: signals,
+      );
+
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      final File driverTest = fileSystem.file('test_driver/main_test.dart')
+        ..createSync(recursive: true);
+      driverTest.writeAsStringSync('''
+import 'package:flutter_test/flutter_test.dart';
+void main() {}
+''');
+      fileSystem.file('pubspec.yaml').createSync();
+
+      // Create a mock package_config.json
+      fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "my_package",
+      "rootUri": "../",
+      "packageUriRoot": "lib/"
+    }
+  ]
+}
+''');
+
+      fakeDeviceManager.attachedDevices = <Device>[FakeChromiumDriveDevice()];
+
+      expect(
+        () => createTestCommandRunner(command).run(<String>['drive', '--no-pub', '-d', 'chrome']),
+        throwsToolExit(
+          message: 'flutter_driver test "/test_driver/main_test.dart" has invalid imports:',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Pub: () => FakePub(),
+      DeviceManager: () => fakeDeviceManager,
+    },
+  );
 }
 
 class ThrowingScreenshotDevice extends ScreenshotDevice {

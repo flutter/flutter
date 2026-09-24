@@ -110,17 +110,13 @@ class ResidentWebRunner extends ResidentRunner {
     required Terminal terminal,
     required Platform platform,
     required OutputPreferences outputPreferences,
-    required SystemClock systemClock,
-    required Analytics analytics,
-    UrlTunneller? urlTunneller,
-    Map<String, String> webDefines = const <String, String>{},
+    required this._systemClock,
+    required this._analytics,
+    this._urlTunneller,
+    this._webDefines = const <String, String>{},
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
-       _systemClock = systemClock,
-       _analytics = analytics,
-       _urlTunneller = urlTunneller,
-       _webDefines = webDefines,
        super(
          <FlutterDevice>[device],
          target: target ?? fileSystem.path.join('lib', 'main.dart'),
@@ -367,6 +363,13 @@ class ResidentWebRunner extends ResidentRunner {
         final Future<ConnectionResult?>? connectDebug = supportsServiceProtocol
             ? webDevFS.connect(useDebugExtension)
             : null;
+        // Unpause incoming HTTP requests now that:
+        // 1. Initial compilation has finished and WebMemoryFS has received the
+        //    compiled modules and merged metadata (preventing DWDS from memoizing
+        //    an empty module list).
+        // 2. `webDevFS.connect()` has begun listening for connected applications
+        //    so early connections are not dropped.
+        webDevFS.markReady();
         await flutterDevice!.device!.startApp(
           package,
           mainPath: target,
@@ -406,14 +409,14 @@ class ResidentWebRunner extends ResidentRunner {
         stackTrace: stackTrace,
       );
       throwToolExit('Failed to connect to the web debug service.');
-    } on DartDevelopmentServiceException catch (error) {
+    } on DartDevelopmentServiceException catch (error, stackTrace) {
       // The application may have started shutting down before DDS was able to finish establishing
       // its connection to DWDS. Don't treat this as an unhandled exception.
       appFailedToStart();
-      if (error.errorCode == DartDevelopmentServiceException.failedToStartError) {
-        throwToolExit(kExitMessage);
+      if (error.errorCode != DartDevelopmentServiceException.failedToStartError) {
+        _logger.printError(error.message, stackTrace: stackTrace);
       }
-      rethrow;
+      throwToolExit(kExitMessage);
     } on Exception {
       appFailedToStart();
       rethrow;
@@ -422,11 +425,7 @@ class ResidentWebRunner extends ResidentRunner {
 
   WebCompilerConfig get _compilerConfig {
     if (debuggingOptions.webUseWasm) {
-      return WasmCompilerConfig(
-        optimizationLevel: 0,
-        stripWasm: false,
-        renderer: debuggingOptions.webRenderer,
-      );
+      return WasmCompilerConfig(renderer: debuggingOptions.webRenderer);
     }
     return JsCompilerConfig.run(
       nativeNullAssertions: debuggingOptions.nativeNullAssertions,

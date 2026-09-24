@@ -83,8 +83,10 @@ export 'package:flutter/services.dart'
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
-typedef SelectionChangedCallback =
-    void Function(TextSelection selection, SelectionChangedCause? cause);
+typedef SelectionChangedCallback = void Function(
+  TextSelection selection,
+  SelectionChangedCause? cause,
+);
 
 /// Signature for the callback that reports the app private command results.
 typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
@@ -96,8 +98,10 @@ typedef AppPrivateCommandCallback = void Function(String action, Map<String, dyn
 ///
 ///  * [SelectableRegionContextMenuBuilder], which performs the same role for
 ///    [SelectableRegion].
-typedef EditableTextContextMenuBuilder =
-    Widget Function(BuildContext context, EditableTextState editableTextState);
+typedef EditableTextContextMenuBuilder = Widget Function(
+  BuildContext context,
+  EditableTextState editableTextState,
+);
 
 // Signature for a function that determines the target location of the given
 // [TextPosition] after applying the given [TextBoundary].
@@ -196,6 +200,14 @@ class _RenderCompositionCallback extends RenderProxyBox {
 /// between the framework and the input method. Consider using
 /// [TextInputFormatter]s instead for as-you-type text modification.
 ///
+/// [TextInputFormatter]s, such as those supplied to
+/// [EditableText.inputFormatters], only run when the user changes the text in
+/// the text field, for example using the keyboard or the text selection menu.
+/// They don't run when the text is changed programmatically through this
+/// controller, such as by setting [value] or [text], or by calling [clear].
+/// If a programmatically set value needs to be formatted, apply the
+/// formatting manually before updating the controller.
+///
 /// If both the [text] and [selection] properties need to be changed, set the
 /// controller's [value] instead. Setting [text] will clear the selection
 /// and composing range.
@@ -273,6 +285,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases. This property can
   /// be set from a listener added to this [TextEditingController].
+  ///
+  /// Setting this does not run [TextInputFormatter]s. Apply them manually if
+  /// needed.
   set text(String newText) {
     value = value.copyWith(
       text: newText,
@@ -281,6 +296,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     );
   }
 
+  /// Setting this does not run [TextInputFormatter]s. Apply them manually if
+  /// needed.
   @override
   set value(TextEditingValue newValue) {
     assert(
@@ -342,6 +359,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// If the new selection is outside the composing range, the composing range is
   /// cleared.
+  ///
+  /// Setting this does not run [TextInputFormatter]s. Apply them manually if
+  /// needed.
   set selection(TextSelection newSelection) {
     if (text.length < newSelection.end || text.length < newSelection.start) {
       throw FlutterError('invalid text selection: $newSelection');
@@ -361,6 +381,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
+  ///
+  /// Calling this method does not run [TextInputFormatter]s. Apply them
+  /// manually if needed.
   void clear() {
     value = const TextEditingValue(selection: TextSelection.collapsed(offset: 0));
   }
@@ -375,6 +398,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
+  ///
+  /// Calling this method does not run [TextInputFormatter]s. Apply them
+  /// manually if needed.
   void clearComposing() {
     value = value.copyWith(composing: TextRange.empty);
   }
@@ -838,7 +864,7 @@ class EditableText extends StatefulWidget {
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
     required this.style,
-    StrutStyle? strutStyle,
+    this._strutStyle,
     required this.cursorColor,
     required this.backgroundCursorColor,
     this.textAlign = TextAlign.start,
@@ -961,7 +987,6 @@ class EditableText extends StatefulWidget {
              spellCheckConfiguration.misspelledTextStyle != null,
          'spellCheckConfiguration must specify a misspelledTextStyle if spell check behavior is desired',
        ),
-       _strutStyle = strutStyle,
        keyboardType =
            keyboardType ?? _inferKeyboardType(autofillHints: autofillHints, maxLines: maxLines),
        inputFormatters = maxLines == 1
@@ -1420,12 +1445,22 @@ class EditableText extends StatefulWidget {
   /// of editing, such as when pressing the "done" button on the keyboard. That
   /// default behavior can be overridden. See [onEditingComplete] for details.
   ///
-  /// {@tool dartpad}
+  /// <callout-box>
+  ///
   /// This example shows how onChanged could be used to check the TextField's
   /// current value each time the user inserts or deletes a character.
   ///
-  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_changed.0.dart **
-  /// {@end-tool}
+  // TODO(framework): Replace the following block with a @dartpad directive
+  // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+  /// <small>
+  ///
+  /// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+  ///
+  /// </small>
+  ///
+  /// {@example /examples/api/lib/widgets/editable_text/editable_text.on_changed.0.dart#body}
+  ///
+  /// </callout-box>
   /// {@endtemplate}
   ///
   /// ## Handling emojis and other complex characters
@@ -1969,13 +2004,22 @@ class EditableText extends StatefulWidget {
   /// Additionally, set [ContentInsertionConfiguration.allowedMimeTypes]
   /// to limit the allowable mime types for inserted content.
   ///
-  /// {@tool dartpad}
+  /// <callout-box>
   ///
   /// This example shows how to access the data for inserted content in your
   /// `TextField`.
   ///
-  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart **
-  /// {@end-tool}
+  // TODO(framework): Replace the following block with a @dartpad directive
+  // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+  /// <small>
+  ///
+  /// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+  ///
+  /// </small>
+  ///
+  /// {@example /examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart#body}
+  ///
+  /// </callout-box>
   ///
   /// If [contentInsertionConfiguration] is not provided, by default
   /// an empty list of mime types will be sent to the Flutter Engine.
@@ -2019,19 +2063,39 @@ class EditableText extends StatefulWidget {
   /// [contextMenuBuilder] is ignored and the
   /// [TextSelectionControls.buildToolbar] method is used instead.
   ///
-  /// {@tool dartpad}
+  /// <callout-box>
+  ///
   /// This example shows how to customize the menu, in this case by keeping the
   /// default buttons for the platform but modifying their appearance.
   ///
-  /// ** See code in examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.0.dart **
-  /// {@end-tool}
+  // TODO(framework): Replace the following block with a @dartpad directive
+  // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+  /// <small>
   ///
-  /// {@tool dartpad}
+  /// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+  ///
+  /// </small>
+  ///
+  /// {@example /examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.0.dart#body}
+  ///
+  /// </callout-box>
+  ///
+  /// <callout-box>
+  ///
   /// This example shows how to show a custom button only when an email address
   /// is currently selected.
   ///
-  /// ** See code in examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.1.dart **
-  /// {@end-tool}
+  // TODO(framework): Replace the following block with a @dartpad directive
+  // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+  /// <small>
+  ///
+  /// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+  ///
+  /// </small>
+  ///
+  /// {@example /examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.1.dart#body}
+  ///
+  /// </callout-box>
   ///
   /// See also:
   ///   * [AdaptiveTextSelectionToolbar], which builds the default text selection
@@ -2771,9 +2835,8 @@ class EditableTextState extends State<EditableText>
       return;
     }
     final String text = textEditingValue.text;
-    Clipboard.setData(
-      ClipboardData(text: selection.textInside(text)),
-    ).catchError(_reportClipboardError('while copying selection to clipboard'));
+    Clipboard.setData(ClipboardData(text: selection.textInside(text)))
+        .catchError(_reportClipboardError('while copying selection to clipboard'));
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
       hideToolbar(false);
@@ -2810,9 +2873,8 @@ class EditableTextState extends State<EditableText>
     if (selection.isCollapsed) {
       return;
     }
-    Clipboard.setData(
-      ClipboardData(text: selection.textInside(text)),
-    ).catchError(_reportClipboardError('while cutting selection to clipboard'));
+    Clipboard.setData(ClipboardData(text: selection.textInside(text)))
+        .catchError(_reportClipboardError('while cutting selection to clipboard'));
     _replaceText(ReplaceTextIntent(textEditingValue, '', selection, cause));
     if (cause == SelectionChangedCause.toolbar) {
       // Schedule a call to bringIntoView() after renderEditable updates.
@@ -4036,12 +4098,13 @@ class EditableTextState extends State<EditableText>
   bool get _hasFocus => widget.focusNode.hasFocus;
   bool get _isMultiline => widget.maxLines != 1;
 
-  /// Flag to track whether this [EditableText] was in focus when [onTapOutside]
-  /// was called.
+  /// Flag to track whether this [EditableText] was in focus when
+  /// [EditableText.onTapOutside] was called.
   ///
-  /// This is used to determine whether [onTapUpOutside] should be called.
-  /// The reason [_hasFocus] can't be used directly is because [onTapOutside]
-  /// might unfocus this [EditableText] and block the [onTapUpOutside] call.
+  /// This is used to determine whether [EditableText.onTapUpOutside] should be
+  /// called. The reason [_hasFocus] can't be used directly is because
+  /// [EditableText.onTapOutside] might unfocus this [EditableText] and block
+  /// the [EditableText.onTapUpOutside] call.
   bool _hadFocusOnTapDown = false;
 
   // Finds the closest scroll offset to the current scroll offset that fully
@@ -4251,8 +4314,7 @@ class EditableTextState extends State<EditableText>
       _openInputConnection();
     } else {
       _flagInternalFocus();
-      widget.focusNode
-          .requestFocus(); // This eventually calls _openInputConnection also, see _handleFocusChanged.
+      widget.focusNode.requestFocus(); // This eventually calls _openInputConnection also, see _handleFocusChanged.
     }
   }
 
@@ -5931,9 +5993,8 @@ class EditableTextState extends State<EditableText>
                         // either case, glowing or stretching.
                         scrollBehavior:
                             widget.scrollBehavior ??
-                            ScrollConfiguration.of(
-                              context,
-                            ).copyWith(scrollbars: _isMultiline, overscroll: false),
+                            ScrollConfiguration.of(context)
+                                .copyWith(scrollbars: _isMultiline, overscroll: false),
                         viewportBuilder: (BuildContext context, ViewportOffset offset) {
                           return CompositedTransformTarget(
                             link: _toolbarLayerLink,
