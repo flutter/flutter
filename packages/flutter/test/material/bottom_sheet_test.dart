@@ -6,7 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -3337,14 +3337,23 @@ void main() {
                 body: Align(
                   alignment: alignment,
                   heightFactor: heightFactor,
-                  child: BottomSheet(
-                    enableDrag: false,
-                    bottomInset: 120.0,
-                    backgroundColor: Colors.red,
-                    onClosing: () {},
-                    builder: (BuildContext context) => Semantics(
+                  child: RepaintBoundary(
+                    child: Semantics(
                       container: true,
-                      child: const SizedBox(width: 300.0, height: 100.0, child: Text('Content')),
+                      child: BottomSheet(
+                        enableDrag: false,
+                        bottomInset: 120.0,
+                        backgroundColor: Colors.red,
+                        onClosing: () {},
+                        builder: (BuildContext context) => Semantics(
+                          container: true,
+                          child: const SizedBox(
+                            width: 300.0,
+                            height: 100.0,
+                            child: Text('Content'),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -3357,6 +3366,10 @@ void main() {
 
           await tester.pumpWidget(buildWithHeightFactor(0.4, Alignment.topCenter));
           expect(tester.getSemantics(find.text('Content')).rect.height, 40.0);
+          final RenderBox surfaceBox = tester.renderObject(find.byType(BottomSheet));
+          final hitResult = BoxHitTestResult();
+          expect(surfaceBox.hitTest(hitResult, position: const Offset(400.0, 50.0)), isFalse);
+          expect(surfaceBox.hitTest(hitResult, position: const Offset(400.0, 20.0)), isTrue);
 
           // Bottom-aligned heightFactor < 1.0 does not shift the bottom edge into bottomInset.
           await tester.pumpWidget(buildWithHeightFactor(0.4, Alignment.bottomCenter));

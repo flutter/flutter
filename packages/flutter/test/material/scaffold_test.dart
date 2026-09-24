@@ -727,6 +727,150 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(sheetKey), findsNothing);
     });
+
+    testWidgets(
+      'AppBar is never covered by extended bottom sheet surface when keyboard exceeds available height',
+      (WidgetTester tester) async {
+        for (final inset in <double>[200.0, 220.0, 250.0, 300.0]) {
+          await tester.pumpWidget(
+            MaterialApp(
+              themeAnimationDuration: Duration.zero,
+              home: RepaintBoundary(
+                key: _keyboardPaintKey,
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: SizedBox(
+                    width: 320.0,
+                    height: 250.0,
+                    child: MediaQuery(
+                      data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: inset)),
+                      child: Scaffold(
+                        backgroundColor: Colors.blue,
+                        appBar: AppBar(
+                          toolbarHeight: 56.0,
+                          backgroundColor: Colors.yellow,
+                          elevation: 0.0,
+                        ),
+                        bottomSheet: BottomSheet(
+                          enableDrag: false,
+                          backgroundColor: Colors.red,
+                          elevation: 12.0,
+                          onClosing: () {},
+                          builder: (_) => const SizedBox(width: double.infinity, height: 100.0),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          // The AppBar (y in [0, 56)) remains yellow; the extended sheet starts at y = 56.
+          expect(await _keyboardPixel(tester, 160, 10), isSameColorAs(Colors.yellow));
+          expect(await _keyboardPixel(tester, 160, 55), isSameColorAs(Colors.yellow));
+          expect(await _keyboardPixel(tester, 160, 56), isSameColorAs(Colors.red));
+          expect(await _keyboardPixel(tester, 160, 249), isSameColorAs(Colors.red));
+        }
+      },
+    );
+
+    testWidgets(
+      'updating or closing persistent bottom sheet while Offstage before layout does not throw',
+      (WidgetTester tester) async {
+        final key = GlobalKey<ScaffoldState>();
+        Widget buildOffstageScaffold(Widget? sheet) {
+          return MaterialApp(
+            home: Offstage(
+              child: Scaffold(key: key, body: const SizedBox.expand(), bottomSheet: sheet),
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildOffstageScaffold(const Text('Sheet A')));
+        await tester.pumpWidget(buildOffstageScaffold(const Text('Sheet B')));
+        await tester.pumpWidget(buildOffstageScaffold(null));
+        expect(tester.takeException(), isNull);
+
+        final PersistentBottomSheetController controller = key.currentState!.showBottomSheet(
+          (_) => const Text('Imperative sheet'),
+        );
+        controller.setState!(() {});
+        controller.close();
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+
+        // Unmounting an offstage Scaffold with an active bottomSheet disposes its ticker cleanly.
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Offstage(
+              child: Scaffold(
+                body: SizedBox.expand(),
+                bottomSheet: Text('Disposed while offstage'),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpWidget(const SizedBox());
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'Scaffold(bottomSheet: BottomSheet(...)) forwards animationController, theme showDragHandle, and preserves fling on close',
+      (WidgetTester tester) async {
+        final AnimationController userController = BottomSheet.createAnimationController(tester);
+        addTearDown(userController.dispose);
+        var showSheet = true;
+        late StateSetter setParentState;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(
+              bottomSheetTheme: const BottomSheetThemeData(
+                backgroundColor: Colors.red,
+                showDragHandle: true,
+              ),
+            ),
+            home: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                setParentState = setState;
+                return MediaQuery(
+                  data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 200.0)),
+                  child: Scaffold(
+                    body: const SizedBox.expand(),
+                    bottomSheet: showSheet
+                        ? BottomSheet(
+                            animationController: userController,
+                            onClosing: () => setParentState(() => showSheet = false),
+                            builder: (_) => const SizedBox(
+                              key: _keyboardSheetContentKey,
+                              width: double.infinity,
+                              height: 100.0,
+                            ),
+                          )
+                        : null,
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(userController.value, 1.0);
+
+        // BottomSheetThemeData.showDragHandle is honored (height = 100 content + 48 drag handle + 200 inset).
+        expect(tester.getSize(_keyboardSheetMaterial).height, 348.0);
+
+        // Dragging updates userController and flinging downward closes without reversing upward.
+        await tester.fling(find.byType(BottomSheet), const Offset(0.0, 150.0), 1000.0);
+        expect(showSheet, isFalse);
+        expect(userController.value, lessThan(1.0));
+        expect(userController.velocity, lessThan(0.0));
+        await tester.pumpAndSettle();
+        expect(find.byType(BottomSheet), findsNothing);
+      },
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/103741

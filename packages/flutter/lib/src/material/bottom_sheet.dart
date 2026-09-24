@@ -494,7 +494,8 @@ class _BottomSheetContentClip extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderBottomSheetContentClip renderObject) {
     renderObject
       ..enabled = enabled
-      ..animation = animation;
+      ..animation = animation
+      .._handleClipChange();
   }
 }
 
@@ -540,10 +541,17 @@ class _RenderBottomSheetContentClip extends RenderProxyBox {
     super.detach();
   }
 
+  void _handleClipChange() {
+    if (_enabled) {
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
+  }
+
   void _handleAnimationChanged() {
     markNeedsPaint();
     markNeedsSemanticsUpdate();
-    _findSurface()?.markNeedsSemanticsUpdate();
+    _findSurface()?._handleClipChange();
   }
 
   _RenderBottomSheetSurface? _findSurface() {
@@ -561,14 +569,6 @@ class _RenderBottomSheetContentClip extends RenderProxyBox {
         ? math.min(size.height, surface._visibleHeight())
         : size.height;
     return Rect.fromLTWH(0.0, 0.0, size.width, visibleHeight);
-  }
-
-  @override
-  bool hitTest(BoxHitTestResult result, {required Offset position}) {
-    if (_enabled && !_clipRect().contains(position)) {
-      return false;
-    }
-    return super.hitTest(result, position: position);
   }
 
   @override
@@ -621,7 +621,9 @@ class _BottomSheetSurface extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _RenderBottomSheetSurface renderObject) {
-    renderObject.bottom = bottom;
+    renderObject
+      ..bottom = bottom
+      .._handleClipChange();
   }
 
   @override
@@ -646,6 +648,13 @@ class _RenderBottomSheetSurface extends RenderProxyBox {
   }
 
   double? _lastVisibleHeight;
+
+  void _handleClipChange() {
+    if (_bottom > 0.0) {
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
+  }
 
   double _visibleHeight() {
     double visibleHeight = size.height;
@@ -705,6 +714,14 @@ class _RenderBottomSheetSurface extends RenderProxyBox {
   }
 
   @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    if (_bottom > 0.0 && position.dy >= _visibleHeight()) {
+      return false;
+    }
+    return super.hitTest(result, position: position);
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (_bottom > 0.0) {
       final double visibleHeight = _visibleHeight();
@@ -720,6 +737,11 @@ class _RenderBottomSheetSurface extends RenderProxyBox {
 
   @override
   Rect get paintBounds => super.paintBounds.expandToInclude(child!.paintBounds);
+
+  @override
+  Rect? describeApproximatePaintClip(RenderObject child) => _bottom > 0.0
+      ? Offset.zero & Size(size.width, _visibleHeight())
+      : super.describeApproximatePaintClip(child);
 
   @override
   Rect? describeSemanticsClip(RenderBox? child) => _bottom > 0.0

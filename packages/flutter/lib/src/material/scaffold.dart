@@ -1088,11 +1088,15 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     );
 
     // A bottom bar still owns the area below the sheet. Extend the sheet's
-    // surface only across the gap opened above the bottom bar by keyboard avoidance.
-    final double bottomSheetKeyboardInset = math.max(
-      0.0,
-      bottom - bottomWidgetsHeight - contentBottom,
+    // surface only across the gap opened above the bottom bar by keyboard avoidance,
+    // without intruding into the top bars (contentTop).
+    final double availableBottom = math.max(0.0, bottom - bottomWidgetsHeight);
+    final double bottomSheetBottom = clampDouble(
+      contentBottom,
+      math.min(contentTop, availableBottom),
+      availableBottom,
     );
+    final double bottomSheetKeyboardInset = math.max(0.0, availableBottom - bottomSheetBottom);
 
     if (hasChild(_ScaffoldSlot.body)) {
       double bodyMaxHeight = math.max(0.0, contentBottom - contentTop);
@@ -1155,14 +1159,20 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       final keyboardInset = bottomSheetKeyboardInset;
       final bottomSheetConstraints = _BottomSheetConstraints(
         keyboardInset: keyboardInset,
-        scaffoldSize: Size(size.width, contentBottom + keyboardInset),
+        scaffoldSize: Size(
+          size.width,
+          math.max(0.0, bottomSheetBottom + keyboardInset - contentTop),
+        ),
         maxWidth: fullWidthConstraints.maxWidth,
         maxHeight: math.max(0.0, contentBottom - contentTop),
       );
       bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, bottomSheetConstraints);
       positionChild(
         _ScaffoldSlot.bottomSheet,
-        Offset((size.width - bottomSheetSize.width) / 2.0, contentBottom - bottomSheetSize.height),
+        Offset(
+          (size.width - bottomSheetSize.width) / 2.0,
+          bottomSheetBottom - bottomSheetSize.height,
+        ),
       );
     }
 
@@ -2474,7 +2484,7 @@ class ScaffoldState extends State<Scaffold>
   }
 
   void _updatePersistentBottomSheet() {
-    _currentBottomSheetKey.currentState!.setState(() {});
+    _currentBottomSheetKey.currentState?.setState(() {});
     _currentBottomSheet?.setState?.call(() {});
   }
 
@@ -2517,31 +2527,7 @@ class ScaffoldState extends State<Scaffold>
       }
     }
 
-    void removeCurrentBottomSheet() {
-      removedEntry = true;
-      if (_currentBottomSheet == null) {
-        return;
-      }
-      assert(_currentBottomSheet!._widget == bottomSheet);
-      assert(bottomSheetKey.currentState != null);
-      _showFloatingActionButton();
-
-      if (isPersistent) {
-        removePersistentSheetHistoryEntryIfNeeded();
-      }
-
-      bottomSheetKey.currentState!.close();
-      setState(() {
-        _showBodyScrim = false;
-        _bottomSheetScrimAnimationController.value = 0.0;
-        _currentBottomSheet = null;
-      });
-
-      if (!animationController.isDismissed) {
-        _dismissedBottomSheets.add(bottomSheet);
-      }
-      completer.complete();
-    }
+    late void Function() removeCurrentBottomSheet;
 
     final LocalHistoryEntry? entry = isPersistent
         ? null
@@ -2560,6 +2546,46 @@ class ScaffoldState extends State<Scaffold>
         removedEntry = true;
       }
     }
+
+    var controllerDisposed = false;
+    void cleanupIfNeeded() {
+      doingDispose = true;
+      removeEntryIfNeeded();
+      if (shouldDisposeAnimationController && !controllerDisposed) {
+        controllerDisposed = true;
+        animationController.dispose();
+      }
+    }
+
+    removeCurrentBottomSheet = () {
+      removedEntry = true;
+      if (_currentBottomSheet == null) {
+        return;
+      }
+      assert(_currentBottomSheet!._widget == bottomSheet);
+      _showFloatingActionButton();
+
+      if (isPersistent) {
+        removePersistentSheetHistoryEntryIfNeeded();
+      }
+
+      final _StandardBottomSheetState? sheetState = bottomSheetKey.currentState;
+      if (sheetState != null) {
+        sheetState.close();
+        if (!animationController.isDismissed) {
+          _dismissedBottomSheets.add(bottomSheet);
+        }
+      } else {
+        cleanupIfNeeded();
+      }
+      setState(() {
+        _showBodyScrim = false;
+        _bottomSheetScrimAnimationController.value = 0.0;
+        _currentBottomSheet = null;
+      });
+
+      completer.complete();
+    };
 
     bottomSheet = _StandardBottomSheet(
       key: bottomSheetKey,
@@ -2580,13 +2606,7 @@ class ScaffoldState extends State<Scaffold>
           });
         }
       },
-      onDispose: () {
-        doingDispose = true;
-        removeEntryIfNeeded();
-        if (shouldDisposeAnimationController) {
-          animationController.dispose();
-        }
-      },
+      onDispose: cleanupIfNeeded,
       builder: builder,
       isPersistent: isPersistent,
       backgroundColor: backgroundColor,
@@ -2608,6 +2628,7 @@ class ScaffoldState extends State<Scaffold>
         bottomSheetKey.currentState?.setState(fn);
       },
       !isPersistent,
+      cleanupIfNeeded,
     );
   }
 
@@ -2924,6 +2945,7 @@ class ScaffoldState extends State<Scaffold>
   @protected
   @override
   void dispose() {
+    _currentBottomSheet?._cleanup();
     _geometryNotifier.dispose();
     _floatingActionButtonMoveController.dispose();
     _floatingActionButtonVisibilityController.dispose();
@@ -3472,6 +3494,46 @@ class _StandardBottomSheet extends StatefulWidget {
 class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   ParametricCurve<double> animationCurve = _standardBottomSheetCurve;
   BottomSheet? _persistentBottomSheet;
+  AnimationController? _userAnimationController;
+  bool _isClosing = false;
+
+  AnimationController get _effectiveAnimationController => !_isClosing
+      ? (_userAnimationController ?? widget.animationController)
+      : widget.animationController;
+
+  void _updateUserAnimationController(AnimationController? newController) {
+    if (_userAnimationController == newController) {
+      return;
+    }
+    _userAnimationController?.removeListener(_syncFromUserController);
+    _userAnimationController = newController;
+    if (newController != null) {
+      newController.addListener(_syncFromUserController);
+      if (!_isClosing) {
+        if (newController.status == AnimationStatus.dismissed &&
+            (widget.animationController.status == AnimationStatus.forward ||
+                widget.animationController.status == AnimationStatus.completed)) {
+          final double initialValue = widget.animationController.value;
+          final wasForward = widget.animationController.status == AnimationStatus.forward;
+          widget.animationController.stop();
+          if (wasForward) {
+            newController.forward(from: initialValue);
+          } else {
+            newController.value = initialValue;
+          }
+        } else {
+          widget.animationController.value = newController.value;
+        }
+      }
+    }
+  }
+
+  void _syncFromUserController() {
+    final AnimationController? userController = _userAnimationController;
+    if (userController != null && !_isClosing) {
+      widget.animationController.value = userController.value;
+    }
+  }
 
   @override
   void initState() {
@@ -3482,6 +3544,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
 
   @override
   void dispose() {
+    _userAnimationController?.removeListener(_syncFromUserController);
     widget.animationController.removeStatusListener(_handleStatusChange);
     widget.onDispose?.call();
     super.dispose();
@@ -3494,7 +3557,18 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   }
 
   void close() {
-    widget.animationController.reverse();
+    _isClosing = true;
+    final AnimationController? userController = _userAnimationController;
+    if (userController != null) {
+      widget.animationController.value = userController.value;
+      if (userController.velocity < 0.0 && widget.animationController.value > 0.0) {
+        widget.animationController.fling(velocity: userController.velocity);
+      } else if (widget.animationController.velocity >= 0.0) {
+        widget.animationController.reverse();
+      }
+    } else if (widget.animationController.velocity >= 0.0) {
+      widget.animationController.reverse();
+    }
     widget.onClosing?.call();
   }
 
@@ -3506,7 +3580,10 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
 
   void _handleDragEnd(DragEndDetails details, {bool? isClosing}) {
     // Allow the bottom sheet to animate smoothly from its current position.
-    animationCurve = Split(widget.animationController.value, endCurve: _standardBottomSheetCurve);
+    animationCurve = Split(
+      _effectiveAnimationController.value,
+      endCurve: _standardBottomSheetCurve,
+    );
     _persistentBottomSheet?.onDragEnd?.call(details, isClosing: isClosing ?? false);
   }
 
@@ -3544,8 +3621,10 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       switch (Scaffold.maybeOf(context)?.widget.bottomSheet) {
         case final BottomSheet sheet:
           _persistentBottomSheet = sheet;
+          _isClosing = false;
         case final Widget _:
           _persistentBottomSheet = null;
+          _isClosing = false;
         case null:
           break;
       }
@@ -3553,12 +3632,19 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       _persistentBottomSheet = null;
     }
     final BottomSheet? persistentBottomSheet = _persistentBottomSheet;
+    _updateUserAnimationController(persistentBottomSheet?.animationController);
     final bool enableDrag = persistentBottomSheet != null
         ? (persistentBottomSheet.enableDrag &&
               (persistentBottomSheet.animationController != null ||
                   persistentBottomSheet.onDragStart != null ||
                   persistentBottomSheet.onDragEnd != null))
         : widget.enableDrag;
+    final bool? showDragHandle =
+        widget.showDragHandle ??
+        persistentBottomSheet?.showDragHandle ??
+        (persistentBottomSheet != null && persistentBottomSheet.enableDrag
+            ? Theme.of(context).bottomSheetTheme.showDragHandle
+            : null);
     return AnimatedBuilder(
       animation: widget.animationController,
       builder: (BuildContext context, Widget? child) {
@@ -3579,9 +3665,9 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
               _BottomSheetKeyboardInset.of(context),
               persistentBottomSheet?.bottomInset ?? 0.0,
             ),
-            animationController: widget.animationController,
+            animationController: _effectiveAnimationController,
             enableDrag: enableDrag,
-            showDragHandle: widget.showDragHandle ?? persistentBottomSheet?.showDragHandle,
+            showDragHandle: showDragHandle,
             dragHandleColor: persistentBottomSheet?.dragHandleColor,
             dragHandleSize: persistentBottomSheet?.dragHandleSize,
             onDragStart: _handleDragStart,
@@ -3589,8 +3675,15 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
             onClosing: () {
               _persistentBottomSheet?.onClosing();
               widget.onClosing!();
-              if (widget.isPersistent && Scaffold.maybeOf(context)?.widget.bottomSheet != null) {
-                widget.animationController.forward();
+              if (widget.isPersistent) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted &&
+                      !_isClosing &&
+                      Scaffold.maybeOf(context)?.widget.bottomSheet != null) {
+                    _effectiveAnimationController.forward();
+                  }
+                });
+                WidgetsBinding.instance.scheduleFrame();
               }
             },
             builder: widget.builder,
@@ -3622,9 +3715,11 @@ class PersistentBottomSheetController
     super.close,
     StateSetter super.setState,
     this._isLocalHistoryEntry,
+    this._cleanup,
   ) : super._();
 
   final bool _isLocalHistoryEntry;
+  final VoidCallback _cleanup;
 }
 
 class _ScaffoldScope extends InheritedWidget {
