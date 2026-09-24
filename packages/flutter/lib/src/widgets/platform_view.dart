@@ -5,8 +5,6 @@
 /// @docImport 'gesture_detector.dart';
 library;
 
-import 'dart:async' show unawaited;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -957,8 +955,7 @@ abstract class _DarwinViewState<
       final int id = platformViewsRegistry.getNextPlatformViewId();
       final ControllerT controller = await createNewViewController(id);
       if (!mounted) {
-        unawaited(controller.dispose());
-        return;
+        return controller.dispose();
       }
       widget.onPlatformViewCreated?.call(id);
       setState(() {

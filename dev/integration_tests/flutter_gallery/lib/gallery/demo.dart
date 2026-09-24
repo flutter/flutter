@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -86,18 +84,16 @@ class _TabbedComponentDemoScaffoldState extends State<TabbedComponentDemoScaffol
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else if (context.mounted) {
-      unawaited(
-        showDialog<void>(
-          context: context,
-          builder: (BuildContext context) {
-            return SimpleDialog(
-              title: const Text("Couldn't display URL:"),
-              children: <Widget>[
-                Padding(padding: const EdgeInsets.symmetric(horizontal: 16.0), child: Text(url)),
-              ],
-            );
-          },
-        ),
+      await showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return SimpleDialog(
+            title: const Text("Couldn't display URL:"),
+            children: <Widget>[
+              Padding(padding: const EdgeInsets.symmetric(horizontal: 16.0), child: Text(url)),
+            ],
+          );
+        },
       );
     }
   }

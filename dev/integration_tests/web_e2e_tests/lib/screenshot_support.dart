@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter_driver/flutter_driver.dart';
@@ -21,9 +20,7 @@ Future<void> runTestWithScreenshots({
 }) async {
   final driver = await FlutterDriver.connect() as WebFlutterDriver;
 
-  unawaited(
-    (await driver.webDriver.window).setSize(Rectangle<int>(0, 0, browserWidth, browserHeight)),
-  );
+  await (await driver.webDriver.window).setSize(Rectangle<int>(0, 0, browserWidth, browserHeight));
 
   await test.integrationDriver(
     driver: driver,

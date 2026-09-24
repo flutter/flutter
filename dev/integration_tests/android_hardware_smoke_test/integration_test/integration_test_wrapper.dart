@@ -36,17 +36,14 @@ void main() {
       final ByteData message = const StringCodec().encodeMessage(request)!;
       final completer = Completer<String>();
 
-      unawaited(
-        // ignore: deprecated_member_use
-        ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-          testChannelName,
-          message,
-          (ByteData? replyData) {
-            final reply =
-                const JSONMessageCodec().decodeMessage(replyData) as Map<Object?, Object?>?;
-            completer.complete(json.encode(reply));
-          },
-        ),
+      // ignore: deprecated_member_use
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        testChannelName,
+        message,
+        (ByteData? replyData) {
+          final reply = const JSONMessageCodec().decodeMessage(replyData) as Map<Object?, Object?>?;
+          completer.complete(json.encode(reply));
+        },
       );
 
       return completer.future;

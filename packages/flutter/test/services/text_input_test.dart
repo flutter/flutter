@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert' show jsonDecode;
 
 import 'package:flutter/foundation.dart';
@@ -210,8 +209,8 @@ void main() {
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
       ]);
 
-      unawaited(
-        fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState')),
+      await fakeTextChannel.incoming!(
+        const MethodCall('TextInputClient.requestExistingInputState'),
       );
 
       expect(fakeTextChannel.outgoingCalls.length, 3);
@@ -233,8 +232,8 @@ void main() {
           MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
         ]);
 
-        unawaited(
-          fakeTextChannel.incoming!(const MethodCall('TextInputClient.requestExistingInputState')),
+        await fakeTextChannel.incoming!(
+          const MethodCall('TextInputClient.requestExistingInputState'),
         );
 
         expect(fakeTextChannel.outgoingCalls.length, 3);

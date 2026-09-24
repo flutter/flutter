@@ -14,23 +14,21 @@ void main() {
   final client = MockHttpClient();
 
   testWidgets('Headers', (WidgetTester tester) async {
-    unawaited(
-      HttpOverrides.runZoned<Future<void>>(
-        () async {
-          await tester.pumpWidget(
-            Image.network(
-              'https://www.example.com/images/frame.png',
-              headers: const <String, String>{'flutter': 'flutter'},
-            ),
-          );
+    await HttpOverrides.runZoned<Future<void>>(
+      () async {
+        await tester.pumpWidget(
+          Image.network(
+            'https://www.example.com/images/frame.png',
+            headers: const <String, String>{'flutter': 'flutter'},
+          ),
+        );
 
-          expect(MockHttpHeaders.headers['flutter'], <String>['flutter']);
-          imageCache.clear();
-        },
-        createHttpClient: (SecurityContext? _) {
-          return client;
-        },
-      ),
+        expect(MockHttpHeaders.headers['flutter'], <String>['flutter']);
+        imageCache.clear();
+      },
+      createHttpClient: (SecurityContext? _) {
+        return client;
+      },
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/57187
 }
