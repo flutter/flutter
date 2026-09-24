@@ -6,16 +6,17 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/tasks/build_android_host_app_with_module_aar.dart';
 import 'package:pub_semver/pub_semver.dart';
 
-/// Runs the module AAR test with the Gradle/AGP versions that work on CI's
-/// default JDK.
+/// Runs the module AAR test with older Gradle/AGP versions.
 ///
-/// Older Gradle/AGP versions that cannot run on the default JDK are covered by
-/// `android_java17_build_android_host_app_with_module_aar.dart`.
+/// Gradle 8.4 cannot run on newer JDKs (Java 25 requires Gradle 9.1.0+, see
+/// https://docs.gradle.org/current/userguide/compatibility.html), so this task
+/// runs on a CI target pinned to Java 17 to keep coverage of pre-AGP 8.3
+/// projects.
 Future<void> main() async {
   await task(
     combine(<TaskFunction>[
-      // Post AGP 8.3 + rc candidates can work
-      ModuleTest(gradleVersion: '9.5.0', agpVersion: Version.parse('9.3.1')).call,
+      // Pre AGP 8.3
+      ModuleTest(gradleVersion: '8.4', agpVersion: Version.parse('8.2.1')).call,
     ]),
   );
 }
