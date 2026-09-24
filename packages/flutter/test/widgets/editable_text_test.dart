@@ -572,7 +572,7 @@ void main() {
     expect(caretXPosition, lessThan(previousCaretXPosition));
 
     expect(state.currentTextEditingValue.text, equals('گیگ '));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/78550.
+  });
 
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
