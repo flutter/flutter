@@ -908,9 +908,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   TRACE_EVENT0("flutter", "PlatformViewsController::PerformSubmit");
   FML_DCHECK([[NSThread currentThread] isMainThread]);
 
-  // Keep platform-view mutations in UIKit's implicit transaction. Creating a
-  // nested transaction for each frame causes visible stutter while dragging.
-
   // Configure Flutter overlay views.
   for (const auto& [viewId, layerData] : platformViewLayers) {
     layerData.layer->UpdateViewState(self.flutterView,     //
