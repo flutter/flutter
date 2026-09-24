@@ -594,6 +594,7 @@ class WebTestsSuite {
 
     await _runFlutterWebTest(flutterPackageDirectory.path, testsToRun, useWasm);
 
+    // The last shard also runs the flutter_web_plugins and flutter_driver tests.
     if (isLastShard) {
       await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter_web_plugins'), <String>[
         'test',
