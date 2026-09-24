@@ -3325,36 +3325,45 @@ void main() {
       await tester.pump(const Duration(milliseconds: 30));
       expect(find.text(tooltipText), findsOneWidget);
       expect(dismissIntentInvoked, isFalse);
-      expect(RawTooltip.dismissAllToolTips(), isFalse);
 
-      // Holding Escape (repeat events during the reverse animation) is consumed
-      // and does not fall through to DismissIntent.
+      // Holding Escape: repeat events are consumed while the tooltip is still
+      // animating out...
+      await tester.sendKeyRepeatEvent(LogicalKeyboardKey.escape);
+      await tester.pump();
+      expect(dismissIntentInvoked, isFalse);
+
+      // ...and also after it has been fully dismissed, since OS key repeat
+      // delays are typically much longer than the reverse animation.
+      await tester.pumpAndSettle();
+      expect(find.text(tooltipText), findsNothing);
       await tester.sendKeyRepeatEvent(LogicalKeyboardKey.escape);
       await tester.pump();
       expect(dismissIntentInvoked, isFalse);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.escape);
 
-      // Second Escape press sent while the tooltip is still animating out is
-      // not swallowed by the reversing tooltip and invokes DismissIntent.
+      // Once released, a new Escape press with no open tooltip invokes
+      // DismissIntent.
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
-      expect(find.text(tooltipText), findsNothing);
       expect(dismissIntentInvoked, isTrue);
 
-      // Re-show the tooltip, dismiss it with Escape, let it fully settle, and
-      // verify a subsequent Escape after handler removal also invokes DismissIntent.
+      // Re-show the tooltip and start dismissing it with Escape.
       dismissIntentInvoked = false;
       key.currentState!.ensureTooltipVisible();
       await tester.pumpAndSettle();
       expect(find.text(tooltipText), findsOneWidget);
 
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-      await tester.pumpAndSettle();
-      expect(find.text(tooltipText), findsNothing);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 30));
       expect(dismissIntentInvoked, isFalse);
 
+      // A second Escape press sent while the tooltip is still animating out is
+      // not swallowed by the reversing tooltip and invokes DismissIntent.
+      expect(find.text(tooltipText), findsOneWidget);
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
+      expect(find.text(tooltipText), findsNothing);
       expect(dismissIntentInvoked, isTrue);
     },
   );
@@ -3392,12 +3401,58 @@ void main() {
     expect(FocusManager.instance.primaryFocus, isNull);
     expect(find.text(tooltipText), findsOneWidget);
 
+    expect(await tester.sendKeyDownEvent(LogicalKeyboardKey.escape), isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+    // Repeat and up events of the press that dismissed the tooltip are also
+    // consumed, even after the tooltip has been fully dismissed.
+    expect(await tester.sendKeyRepeatEvent(LogicalKeyboardKey.escape), isTrue);
+    expect(await tester.sendKeyUpEvent(LogicalKeyboardKey.escape), isTrue);
+
+    // Once released, Escape presses are no longer consumed.
+    expect(await tester.sendKeyEvent(LogicalKeyboardKey.escape), isFalse);
+
+    // An Escape press sent while the tooltip is animating out is not consumed.
+    key.currentState!.ensureTooltipVisible();
+    await tester.pumpAndSettle();
     expect(await tester.sendKeyEvent(LogicalKeyboardKey.escape), isTrue);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 30));
+    expect(find.text(tooltipText), findsOneWidget);
     expect(await tester.sendKeyEvent(LogicalKeyboardKey.escape), isFalse);
     await tester.pumpAndSettle();
     expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('dismissAllToolTips returns false when all open tooltips are animating out', (
+    WidgetTester tester,
+  ) async {
+    final key = GlobalKey<RawTooltipState>();
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: RawTooltip(
+          key: key,
+          semanticsTooltip: tooltipText,
+          tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+              const Text(tooltipText),
+          child: const SizedBox(width: 100.0, height: 100.0),
+        ),
+      ),
+    );
+
+    expect(RawTooltip.dismissAllToolTips(), isFalse);
+
+    key.currentState!.ensureTooltipVisible();
+    await tester.pumpAndSettle();
+    expect(RawTooltip.dismissAllToolTips(), isTrue);
+
+    await tester.pump(const Duration(milliseconds: 30));
+    expect(find.text(tooltipText), findsOneWidget);
+    expect(RawTooltip.dismissAllToolTips(), isFalse);
+
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+    expect(RawTooltip.dismissAllToolTips(), isFalse);
   });
 }
 
