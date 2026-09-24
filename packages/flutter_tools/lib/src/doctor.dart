@@ -198,10 +198,8 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 }
 
 class Doctor {
-  Doctor({required Logger logger, required SystemClock clock, Analytics? analytics})
-    : _logger = logger,
-      _clock = clock,
-      _analytics = analytics ?? globals.analytics;
+  Doctor({required this._logger, required this._clock, Analytics? analytics})
+    : _analytics = analytics ?? globals.analytics;
 
   final Logger _logger;
   final SystemClock _clock;
@@ -530,25 +528,16 @@ class Doctor {
 /// specific commit information.
 class FlutterValidator extends DoctorValidator {
   FlutterValidator({
-    required Platform platform,
-    required FlutterVersion Function() flutterVersion,
-    required String Function() devToolsVersion,
-    required FileSystem fileSystem,
-    required Artifacts artifacts,
-    required ProcessManager processManager,
-    required String Function() flutterRoot,
-    required OperatingSystemUtils operatingSystemUtils,
-    required FeatureFlags featureFlags,
-  }) : _flutterVersion = flutterVersion,
-       _devToolsVersion = devToolsVersion,
-       _platform = platform,
-       _fileSystem = fileSystem,
-       _artifacts = artifacts,
-       _processManager = processManager,
-       _flutterRoot = flutterRoot,
-       _operatingSystemUtils = operatingSystemUtils,
-       _featureFlags = featureFlags,
-       super('Flutter');
+    required this._platform,
+    required this._flutterVersion,
+    required this._devToolsVersion,
+    required this._fileSystem,
+    required this._artifacts,
+    required this._processManager,
+    required this._flutterRoot,
+    required this._operatingSystemUtils,
+    required this._featureFlags,
+  }) : super('Flutter');
 
   final Platform _platform;
   final FlutterVersion Function() _flutterVersion;
@@ -750,7 +739,13 @@ class FlutterValidator extends DoctorValidator {
       );
     }
     final String resolvedFlutterPath = flutterBin.resolveSymbolicLinksSync();
-    if (!_filePathContainsDirPath(flutterRoot, resolvedFlutterPath)) {
+    var resolvedFlutterRoot = flutterRoot;
+    try {
+      resolvedFlutterRoot = _fileSystem.directory(flutterRoot).resolveSymbolicLinksSync();
+    } on FileSystemException {
+      // If the root does not exist or cannot be resolved, retain the un-resolved path.
+    }
+    if (!_filePathContainsDirPath(resolvedFlutterRoot, resolvedFlutterPath)) {
       final hint =
           'Warning: `$binary` on your path resolves to '
           '$resolvedFlutterPath, which is not inside your current Flutter '
@@ -827,9 +822,9 @@ class DeviceValidator extends DoctorValidator {
     );
     var installedMessages = <ValidationMessage>[];
     if (devices.isNotEmpty) {
-      installedMessages = (await Device.descriptions(
-        devices,
-      )).map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
+      installedMessages = (await Device.descriptions(devices))
+          .map<ValidationMessage>((String msg) => ValidationMessage(msg))
+          .toList();
     }
 
     var diagnosticMessages = <ValidationMessage>[];

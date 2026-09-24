@@ -114,7 +114,7 @@ void doTests() {
       expect(computed, expected);
     });
 
-    test('limits physical width of element given custom dpr', () {
+    test('limits physical height of element given custom dpr', () {
       const double logicalWidth = 5000;
       const double logicalHeight = 10000;
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
@@ -160,6 +160,47 @@ void doTests() {
       expect(computed.right, 0);
       expect(computed.bottom, 0);
       expect(computed.left, 0);
+    });
+  });
+
+  group('computeSafeAreaInsets', () {
+    late CustomElementDimensionsProvider provider;
+    DomElement? viewportMeta;
+
+    setUp(() {
+      domDocument.body!.append(sizeSource);
+      provider = CustomElementDimensionsProvider(sizeSource);
+    });
+
+    tearDown(() {
+      provider.close(); // cleanup
+      sizeSource.remove();
+      viewportMeta?.remove();
+      viewportMeta = null;
+    });
+
+    test('always zero, even when the page opted into a full-bleed layout', () {
+      // An embedded view is positioned by the host application, so the engine
+      // deliberately reports no safe area for it, even when the page as a whole
+      // has one.
+      viewportMeta = createDomHTMLMetaElement()
+        ..setAttribute('flt-viewport', '')
+        ..name = 'viewport'
+        ..content = 'width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover';
+      domDocument.head!.append(viewportMeta!);
+
+      final ViewPadding computed = provider.computeSafeAreaInsets();
+
+      expect(computed.top, 0);
+      expect(computed.right, 0);
+      expect(computed.bottom, 0);
+      expect(computed.left, 0);
+    });
+
+    test('does not add any element to the page', () {
+      provider.computeSafeAreaInsets();
+
+      expect(domDocument.querySelector('[flt-safe-area-probe]'), isNull);
     });
   });
 

@@ -27,10 +27,15 @@ class FakePlatformViewController extends PlatformViewController {
     dispatchedPointerEvents.add(event);
   }
 
+  int rejectGestureCount = 0;
+  int? lastRejectGestureId;
+
   void clearTestingVariables() {
     dispatchedPointerEvents.clear();
     disposed = false;
     focusCleared = false;
+    rejectGestureCount = 0;
+    lastRejectGestureId = null;
   }
 
   @override
@@ -42,6 +47,12 @@ class FakePlatformViewController extends PlatformViewController {
   Future<void> clearFocus() async {
     focusCleared = true;
   }
+
+  @override
+  Future<void> rejectGesture({int? gestureId}) async {
+    rejectGestureCount++;
+    lastRejectGestureId = gestureId;
+  }
 }
 
 class FakeAndroidViewController implements AndroidViewController {
@@ -49,6 +60,7 @@ class FakeAndroidViewController implements AndroidViewController {
     this.viewId, {
     this.requiresSize = false,
     this.requiresViewComposition = false,
+    this.textureId = 0,
   });
 
   bool disposed = false;
@@ -114,7 +126,7 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  int get textureId => 0;
+  int? textureId;
 
   @override
   bool get awaitingCreation => !_createCalledSuccessfully;
@@ -158,6 +170,15 @@ class FakeAndroidViewController implements AndroidViewController {
 
   @override
   bool requiresViewComposition;
+
+  int rejectGestureCount = 0;
+  int? lastRejectGestureId;
+
+  @override
+  Future<void> rejectGesture({int? gestureId}) async {
+    rejectGestureCount++;
+    lastRejectGestureId = gestureId;
+  }
 }
 
 class FakeAndroidPlatformViewsController {
