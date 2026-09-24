@@ -159,6 +159,9 @@ struct FakeProcTableState {
   int mark_external_texture_frame_available_calls = 0;
   int update_semantics_enabled_calls = 0;
   int dispatch_semantics_action_calls = 0;
+  int update_asset_resolver_calls = 0;
+  size_t last_asset_resolvers_count = 0;
+  const FlutterAssetResolver* last_asset_resolver = nullptr;
   bool fail_load_deferred_library = false;
 
   intptr_t last_on_vsync_baton = 0;
@@ -185,7 +188,9 @@ FakeProcTableState* g_fake_state = nullptr;
 FlutterEngineProcTable CreateFakeProcTable(FakeProcTableState* state) {
   g_fake_state = state;
   FlutterEngineProcTable table = {};
-  table.struct_size = sizeof(FlutterEngineProcTable);
+  static std::unordered_map<FLUTTER_API_SYMBOL(FlutterEngine),
+                            FlutterAssetResolver>
+      engine_asset_resolvers;
 
   table.Initialize = [](size_t /*version*/,
                         const FlutterRendererConfig* /*config*/,
@@ -201,7 +206,13 @@ FlutterEngineProcTable CreateFakeProcTable(FakeProcTableState* state) {
     g_fake_state->saved_vsync_callback = args->vsync_callback;
     g_fake_state->saved_user_data = user_data;
     g_fake_state->passed_aot_data = args->aot_data;
+    g_fake_state->last_asset_resolvers_count = args->asset_resolvers_count;
     *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xCAFE01);
+    if (args->asset_resolvers != nullptr && args->asset_resolvers_count > 0 &&
+        args->asset_resolvers[0] != nullptr) {
+      g_fake_state->last_asset_resolver = args->asset_resolvers[0];
+      engine_asset_resolvers[*engine_out] = *args->asset_resolvers[0];
+    }
     return kSuccess;
   };
 
@@ -210,13 +221,33 @@ FlutterEngineProcTable CreateFakeProcTable(FakeProcTableState* state) {
     return kSuccess;
   };
 
-  table.Deinitialize = [](FLUTTER_API_SYMBOL(FlutterEngine) /*engine*/) {
+  table.Deinitialize = [](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
     g_fake_state->deinitialize_calls++;
+    auto it = engine_asset_resolvers.find(engine);
+    if (it != engine_asset_resolvers.end()) {
+      if (it->second.destruction_callback != nullptr) {
+        it->second.destruction_callback(it->second.user_data);
+      }
+      engine_asset_resolvers.erase(it);
+    }
+    if (g_fake_state != nullptr) {
+      g_fake_state->last_asset_resolver = nullptr;
+    }
     return kSuccess;
   };
 
-  table.Shutdown = [](FLUTTER_API_SYMBOL(FlutterEngine) /*engine*/) {
+  table.Shutdown = [](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
     g_fake_state->shutdown_calls++;
+    auto it = engine_asset_resolvers.find(engine);
+    if (it != engine_asset_resolvers.end()) {
+      if (it->second.destruction_callback != nullptr) {
+        it->second.destruction_callback(it->second.user_data);
+      }
+      engine_asset_resolvers.erase(it);
+    }
+    if (g_fake_state != nullptr) {
+      g_fake_state->last_asset_resolver = nullptr;
+    }
     return kSuccess;
   };
 
@@ -248,6 +279,18 @@ FlutterEngineProcTable CreateFakeProcTable(FakeProcTableState* state) {
       g_fake_state->last_spawn_route = config->initial_route;
     }
     *child_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xCAFE02);
+    if (config->project_args != nullptr) {
+      g_fake_state->last_asset_resolvers_count =
+          config->project_args->asset_resolvers_count;
+      if (config->project_args->asset_resolvers != nullptr &&
+          config->project_args->asset_resolvers_count > 0 &&
+          config->project_args->asset_resolvers[0] != nullptr) {
+        g_fake_state->last_asset_resolver =
+            config->project_args->asset_resolvers[0];
+        engine_asset_resolvers[*child_out] =
+            *config->project_args->asset_resolvers[0];
+      }
+    }
     return kSuccess;
   };
 
@@ -377,6 +420,26 @@ FlutterEngineProcTable CreateFakeProcTable(FakeProcTableState* state) {
       [](FLUTTER_API_SYMBOL(FlutterEngine) /*engine*/,
          int64_t /*texture_identifier*/) {
         g_fake_state->mark_external_texture_frame_available_calls++;
+        return kSuccess;
+      };
+
+  table.UpdateAssetResolver =
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+         const FlutterAssetResolverRegistrationInfo* info) {
+        g_fake_state->update_asset_resolver_calls++;
+        auto it = engine_asset_resolvers.find(engine);
+        if (it != engine_asset_resolvers.end()) {
+          if (it->second.destruction_callback != nullptr) {
+            it->second.destruction_callback(it->second.user_data);
+          }
+          engine_asset_resolvers.erase(it);
+        }
+        if (info != nullptr && info->resolver != nullptr) {
+          g_fake_state->last_asset_resolver = info->resolver;
+          engine_asset_resolvers[engine] = *info->resolver;
+        } else {
+          g_fake_state->last_asset_resolver = nullptr;
+        }
         return kSuccess;
       };
 
@@ -563,6 +626,33 @@ TEST(FlutterEmbedderNativeTest, SpawnsChildEngineSharingParentVmViaProcTable) {
   EXPECT_EQ(state.last_spawn_entrypoint, "childMain");
   EXPECT_EQ(state.last_spawn_route, "/home");
   EXPECT_EQ(FlutterEmbedderNative::FromHandle(child->ToHandle()), child.get());
+}
+
+TEST(FlutterEmbedderNativeTest, SpawnPropagatesAssetResolversFromParent) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto parent_jni = std::make_shared<MockJniDelegate>();
+  auto child_jni = std::make_shared<MockJniDelegate>();
+  Settings settings;
+
+  FlutterEmbedderNative parent(settings, parent_jni, proc_table);
+  auto fake_asset_manager = reinterpret_cast<AAssetManager*>(0x1234);
+  ASSERT_TRUE(parent.Launch("/assets", "/icudtl.dat", "main", "", {},
+                            /*engine_id=*/1, fake_asset_manager));
+  EXPECT_EQ(state.last_asset_resolvers_count, 1u);
+
+  state.last_asset_resolvers_count = 0;
+  state.last_asset_resolver = nullptr;
+
+  auto child = parent.Spawn(child_jni, "childMain", "package:app/child.dart",
+                            "/home", {}, /*engine_id=*/2);
+  ASSERT_NE(child, nullptr);
+  EXPECT_TRUE(child->IsValid());
+  EXPECT_EQ(state.spawn_calls, 1);
+  EXPECT_EQ(state.last_asset_resolvers_count, 1u);
+  ASSERT_NE(state.last_asset_resolver, nullptr);
+  EXPECT_EQ(state.last_asset_resolver->struct_size,
+            sizeof(FlutterAssetResolver));
 }
 
 TEST(FlutterEmbedderNativeTest,
@@ -1452,6 +1542,133 @@ TEST(AndroidSemanticsAndAssetsTest,
   EXPECT_EQ(loader.GetActiveMappedUnitCount(), 0u);
   ASSERT_EQ(unmapped_units.size(), 1u);
   EXPECT_EQ(unmapped_units[0], 9);
+}
+
+TEST(AndroidAssetResolverTest,
+     NormalizesAssetPathsWithAndWithoutLeadingSlashes) {
+  EXPECT_EQ(AndroidAssetResolver::NormalizeAssetPath(
+                "flutter_assets", "shaders/ink_sparkle.frag"),
+            "flutter_assets/shaders/ink_sparkle.frag");
+  EXPECT_EQ(AndroidAssetResolver::NormalizeAssetPath(
+                "flutter_assets/", "/shaders/ink_sparkle.frag"),
+            "flutter_assets/shaders/ink_sparkle.frag");
+  EXPECT_EQ(AndroidAssetResolver::NormalizeAssetPath(
+                "flutter_assets", "flutter_assets/shaders/ink_sparkle.frag"),
+            "flutter_assets/shaders/ink_sparkle.frag");
+  EXPECT_EQ(AndroidAssetResolver::NormalizeAssetPath("", "fonts/Roboto.ttf"),
+            "fonts/Roboto.ttf");
+  EXPECT_EQ(AndroidAssetResolver::NormalizeAssetPath("", "/fonts/Roboto.ttf"),
+            "fonts/Roboto.ttf");
+}
+
+TEST(AndroidAssetResolverTest, FindsAssetAndReturnsValidBufferMapping) {
+  const uint8_t mock_bytes[] = {'H', 'E', 'L', 'L', 'O'};
+  bool free_called = false;
+  AndroidAssetResolver resolver(
+      [&mock_bytes, &free_called](const std::string& name,
+                                  const uint8_t** out_data, size_t* out_size,
+                                  void** out_baton, VoidCallback* out_free) {
+        if (name == "test_asset.txt") {
+          *out_data = mock_bytes;
+          *out_size = sizeof(mock_bytes);
+          *out_baton = &free_called;
+          *out_free = [](void* baton) { *static_cast<bool*>(baton) = true; };
+          return true;
+        }
+        return false;
+      });
+
+  FlutterAssetResolver c_resolver = resolver.ToFlutterAssetResolver();
+  EXPECT_EQ(c_resolver.struct_size, sizeof(FlutterAssetResolver));
+  ASSERT_NE(c_resolver.find_asset_callback, nullptr);
+  EXPECT_TRUE(c_resolver.is_valid_callback(c_resolver.user_data));
+  EXPECT_TRUE(c_resolver.is_valid_after_change_callback(c_resolver.user_data));
+
+  FlutterAsset asset = {};
+  asset.struct_size = sizeof(FlutterAsset);
+  EXPECT_FALSE(c_resolver.find_asset_callback(c_resolver.user_data,
+                                              "nonexistent", &asset));
+
+  EXPECT_TRUE(c_resolver.find_asset_callback(c_resolver.user_data,
+                                             "test_asset.txt", &asset));
+  EXPECT_EQ(asset.struct_size, sizeof(FlutterAsset));
+  EXPECT_EQ(asset.size, sizeof(mock_bytes));
+  EXPECT_EQ(asset.data, mock_bytes);
+  ASSERT_NE(asset.asset_free_callback, nullptr);
+
+  asset.asset_free_callback(asset.user_data);
+  EXPECT_TRUE(free_called);
+
+  c_resolver.destruction_callback(c_resolver.user_data);
+}
+
+TEST(AndroidAssetResolverTest, RejectsInvalidCallbacksGracefully) {
+  FlutterAssetResolver resolver =
+      AndroidAssetResolver::CreateFlutterAssetResolver(nullptr, "assets");
+  EXPECT_EQ(resolver.struct_size, sizeof(FlutterAssetResolver));
+
+  FlutterAsset asset = {};
+  asset.struct_size = sizeof(FlutterAsset);
+  EXPECT_FALSE(
+      resolver.find_asset_callback(resolver.user_data, "shader.frag", &asset));
+  EXPECT_FALSE(resolver.find_asset_callback(nullptr, "shader.frag", &asset));
+  EXPECT_FALSE(
+      resolver.find_asset_callback(resolver.user_data, nullptr, &asset));
+  EXPECT_FALSE(
+      resolver.find_asset_callback(resolver.user_data, "shader.frag", nullptr));
+
+  resolver.destruction_callback(resolver.user_data);
+}
+
+TEST(FlutterEmbedderNativeTest,
+     LaunchConfiguresAssetResolversWhenAssetManagerProvided) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  Settings settings;
+  FlutterEmbedderNative embedder(settings, jni_delegate, proc_table);
+
+  auto fake_asset_manager = reinterpret_cast<AAssetManager*>(0x1234);
+  EXPECT_TRUE(embedder.Launch("assets", "icu", "main", "", {},
+                              /*engine_id=*/1, fake_asset_manager));
+  EXPECT_EQ(state.last_asset_resolvers_count, 1u);
+  ASSERT_NE(state.last_asset_resolver, nullptr);
+  EXPECT_EQ(state.last_asset_resolver->struct_size,
+            sizeof(FlutterAssetResolver));
+}
+
+TEST(FlutterEmbedderNativeTest, UpdatesAssetResolverViaProcTable) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  Settings settings;
+  FlutterEmbedderNative embedder(settings, jni_delegate, proc_table);
+
+  EXPECT_TRUE(
+      embedder.Launch("assets", "icu", "main", "", {}, /*engine_id=*/1));
+
+  auto fake_asset_manager = reinterpret_cast<AAssetManager*>(0x5678);
+  EXPECT_TRUE(embedder.UpdateAssetManager(fake_asset_manager, "new_bundle"));
+  EXPECT_EQ(state.update_asset_resolver_calls, 1);
+  ASSERT_NE(state.last_asset_resolver, nullptr);
+  EXPECT_EQ(state.last_asset_resolver->struct_size,
+            sizeof(FlutterAssetResolver));
+}
+
+TEST(FlutterEmbedderNativeTest,
+     DoesNotDoubleFreeAssetResolverOnEngineDestruction) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  Settings settings;
+  {
+    FlutterEmbedderNative embedder(settings, jni_delegate, proc_table);
+    auto fake_asset_manager = reinterpret_cast<AAssetManager*>(0x1234);
+    EXPECT_TRUE(embedder.Launch("assets", "icu", "main", "", {},
+                                /*engine_id=*/1, fake_asset_manager));
+  }
+  EXPECT_EQ(state.shutdown_calls, 1);
+  EXPECT_EQ(state.last_asset_resolver, nullptr);
 }
 
 }  // namespace testing

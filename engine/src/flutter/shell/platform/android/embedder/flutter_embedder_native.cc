@@ -266,6 +266,9 @@ FlutterEmbedderNative::~FlutterEmbedderNative() {
       embedder_api_.Shutdown(engine_);
     }
     engine_ = nullptr;
+    // Ownership of asset_resolver_.user_data was transferred to the engine and
+    // freed during Shutdown(). Clear the local copy to prevent a double free.
+    asset_resolver_ = {};
   }
   if (aot_data_ != nullptr && embedder_api_.CollectAOTData != nullptr) {
     embedder_api_.CollectAOTData(aot_data_);
@@ -278,6 +281,11 @@ FlutterEmbedderNative::~FlutterEmbedderNative() {
     attached_java_textures_.clear();
   }
 #endif
+  // Cleans up the asset resolver only if the engine was never initialized.
+  if (asset_resolver_.destruction_callback != nullptr) {
+    asset_resolver_.destruction_callback(asset_resolver_.user_data);
+    asset_resolver_ = {};
+  }
 }
 
 bool FlutterEmbedderNative::Launch(
@@ -286,7 +294,8 @@ bool FlutterEmbedderNative::Launch(
     const std::string& entrypoint,
     const std::string& library_url,
     const std::vector<std::string>& entrypoint_args,
-    int64_t engine_id) {
+    int64_t engine_id,
+    AAssetManager* asset_manager) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::Initialize[C-API]");
   EmitAndroidSystraceSlice("FlutterEmbedderNative::Initialize[C-API]");
   FML_LOG(IMPORTANT) << "[EMBEDDER_API_PROOF] path=C_EMBEDDER_API "
@@ -419,6 +428,15 @@ bool FlutterEmbedderNative::Launch(
     project_args.update_semantics_callback2 =
         &FlutterEmbedderNative::OnSemanticsUpdate2Callback;
   }
+  if (asset_manager != nullptr) {
+    asset_manager_ = asset_manager;
+    asset_bundle_path_ = resolved_assets_path;
+    asset_resolver_ = AndroidAssetResolver::CreateFlutterAssetResolver(
+        asset_manager, resolved_assets_path);
+    asset_resolvers_array_[0] = &asset_resolver_;
+    project_args.asset_resolvers = asset_resolvers_array_;
+    project_args.asset_resolvers_count = 1;
+  }
 
   if (embedder_api_.RunsAOTCompiledDartCode != nullptr &&
       embedder_api_.RunsAOTCompiledDartCode()) {
@@ -548,6 +566,19 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::Spawn(
 
   auto child = std::unique_ptr<FlutterEmbedderNative>(new FlutterEmbedderNative(
       settings_, std::move(child_jni_delegate), embedder_api_, nullptr));
+
+  if (asset_manager_ != nullptr) {
+    child->asset_manager_ = asset_manager_;
+    child->asset_bundle_path_ = asset_bundle_path_;
+#if defined(__ANDROID__)
+    child->java_asset_manager_.Reset(java_asset_manager_);
+#endif
+    child->asset_resolver_ = AndroidAssetResolver::CreateFlutterAssetResolver(
+        asset_manager_, asset_bundle_path_);
+    child->asset_resolvers_array_[0] = &child->asset_resolver_;
+    project_args.asset_resolvers = child->asset_resolvers_array_;
+    project_args.asset_resolvers_count = 1;
+  }
 
   FlutterEngineSpawnConfig spawn_config = {};
   spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
@@ -756,6 +787,35 @@ bool FlutterEmbedderNative::LoadDartDeferredLibrary(
     return false;
   }
   return embedder_api_.LoadDartDeferredLibrary(engine_, library) == kSuccess;
+}
+
+#if defined(__ANDROID__)
+void FlutterEmbedderNative::SetJavaAssetManager(JNIEnv* env,
+                                                jobject jasset_manager) {
+  if (env != nullptr && jasset_manager != nullptr) {
+    java_asset_manager_.Reset(env, jasset_manager);
+  } else {
+    java_asset_manager_.Reset();
+  }
+}
+#endif
+
+bool FlutterEmbedderNative::UpdateAssetManager(
+    AAssetManager* asset_manager,
+    const std::string& asset_bundle_path) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::UpdateAssetManager");
+  asset_manager_ = asset_manager;
+  asset_bundle_path_ = asset_bundle_path;
+  if (engine_ != nullptr && embedder_api_.UpdateAssetResolver != nullptr &&
+      asset_manager != nullptr) {
+    asset_resolver_ = AndroidAssetResolver::CreateFlutterAssetResolver(
+        asset_manager, asset_bundle_path);
+    FlutterAssetResolverRegistrationInfo info = {};
+    info.struct_size = sizeof(FlutterAssetResolverRegistrationInfo);
+    info.resolver = &asset_resolver_;
+    return embedder_api_.UpdateAssetResolver(engine_, &info) == kSuccess;
+  }
+  return false;
 }
 
 bool FlutterEmbedderNative::NotifyLowMemoryWarning() {

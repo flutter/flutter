@@ -7,6 +7,13 @@
 
 #include <atomic>
 #include <cstdint>
+#if defined(__ANDROID__)
+#include <jni.h>
+#include "flutter/fml/platform/android/scoped_java_ref.h"
+#else
+struct _JNIEnv;
+typedef struct _JNIEnv JNIEnv;
+#endif
 #include <memory>
 #include <mutex>
 #include <string>
@@ -76,7 +83,19 @@ class FlutterEmbedderNative {
               const std::string& entrypoint,
               const std::string& library_url,
               const std::vector<std::string>& entrypoint_args,
-              int64_t engine_id);
+              int64_t engine_id,
+              AAssetManager* asset_manager = nullptr);
+
+#if defined(__ANDROID__)
+  /// Retains the Java AssetManager via a global reference to prevent GC while
+  /// native code reads APK assets (ADR-0002).
+  void SetJavaAssetManager(JNIEnv* env, jobject jasset_manager);
+#endif
+
+  /// Updates or re-registers the asset resolver dynamically via
+  /// `embedder_api_.UpdateAssetResolver`.
+  bool UpdateAssetManager(AAssetManager* asset_manager,
+                          const std::string& asset_bundle_path = "");
 
   /// Spawns a child `FlutterEmbedderNative` sharing the parent's Dart VM and
   /// isolate group via `embedder_api_.Spawn` (ADR-0008).
@@ -233,7 +252,12 @@ class FlutterEmbedderNative {
   std::unordered_map<int64_t, fml::jni::ScopedJavaGlobalRef<jobject>>
       java_textures_;
   std::unordered_set<int64_t> attached_java_textures_;
+  fml::jni::ScopedJavaGlobalRef<jobject> java_asset_manager_;
 #endif
+  AAssetManager* asset_manager_ = nullptr;
+  std::string asset_bundle_path_;
+  FlutterAssetResolver asset_resolver_ = {};
+  const FlutterAssetResolver* asset_resolvers_array_[1] = {nullptr};
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterEmbedderNative);
 };

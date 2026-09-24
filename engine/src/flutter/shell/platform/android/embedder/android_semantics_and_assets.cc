@@ -184,4 +184,162 @@ void AndroidDeferredLibraryLoader::OnReleaseMappedUnitLease(void* user_data) {
   delete lease;
 }
 
+//------------------------------------------------------------------------------
+// AndroidAssetResolver
+//------------------------------------------------------------------------------
+
+AndroidAssetResolver::AndroidAssetResolver(AAssetManager* asset_manager,
+                                           std::string directory)
+    : asset_manager_(asset_manager), directory_(std::move(directory)) {}
+
+AndroidAssetResolver::AndroidAssetResolver(AssetFinder test_finder)
+    : test_finder_(std::move(test_finder)) {}
+
+AndroidAssetResolver::~AndroidAssetResolver() = default;
+
+bool AndroidAssetResolver::IsValid() const {
+  return asset_manager_ != nullptr || test_finder_ != nullptr;
+}
+
+std::string AndroidAssetResolver::NormalizeAssetPath(const std::string& dir,
+                                                     const std::string& asset) {
+  std::string clean_asset = asset;
+  while (!clean_asset.empty() && clean_asset.front() == '/') {
+    clean_asset.erase(0, 1);
+  }
+  std::string clean_dir = dir;
+  while (!clean_dir.empty() && clean_dir.back() == '/') {
+    clean_dir.pop_back();
+  }
+  while (!clean_dir.empty() && clean_dir.front() == '/') {
+    clean_dir.erase(0, 1);
+  }
+  if (clean_dir.empty()) {
+    return clean_asset;
+  }
+  if (clean_asset.rfind(clean_dir + "/", 0) == 0) {
+    return clean_asset;
+  }
+  return clean_dir + "/" + clean_asset;
+}
+
+bool AndroidAssetResolver::FindAssetCallback(void* user_data,
+                                             const char* asset_name,
+                                             FlutterAsset* asset_out) {
+  if (user_data == nullptr || asset_name == nullptr || asset_out == nullptr) {
+    return false;
+  }
+  auto* ctx = static_cast<Context*>(user_data);
+  TRACE_EVENT1("flutter", "AndroidAssetResolver::FindAsset", "asset",
+               asset_name);
+
+  if (ctx->test_finder != nullptr) {
+    const uint8_t* data = nullptr;
+    size_t size = 0;
+    void* baton = nullptr;
+    VoidCallback free_cb = nullptr;
+    if (!ctx->test_finder(asset_name, &data, &size, &baton, &free_cb)) {
+      return false;
+    }
+    asset_out->struct_size = sizeof(FlutterAsset);
+    asset_out->data = data;
+    asset_out->size = size;
+    asset_out->user_data = baton;
+    asset_out->asset_free_callback = free_cb;
+    return true;
+  }
+
+#if defined(__ANDROID__)
+  if (ctx->asset_manager == nullptr) {
+    return false;
+  }
+  std::string full_path = NormalizeAssetPath(ctx->directory, asset_name);
+  AAsset* asset = AAssetManager_open(ctx->asset_manager, full_path.c_str(),
+                                     AASSET_MODE_BUFFER);
+  if (asset == nullptr) {
+    std::string clean_asset = asset_name;
+    while (!clean_asset.empty() && clean_asset.front() == '/') {
+      clean_asset.erase(0, 1);
+    }
+    if (full_path.rfind("flutter_assets/", 0) != 0) {
+      std::string fallback_path = "flutter_assets/" + clean_asset;
+      asset = AAssetManager_open(ctx->asset_manager, fallback_path.c_str(),
+                                 AASSET_MODE_BUFFER);
+    } else if (clean_asset.rfind("flutter_assets/", 0) == 0 &&
+               clean_asset.length() > 15) {
+      std::string stripped = clean_asset.substr(15);
+      asset = AAssetManager_open(ctx->asset_manager, stripped.c_str(),
+                                 AASSET_MODE_BUFFER);
+    }
+    if (asset == nullptr && full_path != clean_asset) {
+      asset = AAssetManager_open(ctx->asset_manager, clean_asset.c_str(),
+                                 AASSET_MODE_BUFFER);
+    }
+  }
+  if (asset == nullptr) {
+    return false;
+  }
+  const void* buffer = AAsset_getBuffer(asset);
+  off_t length = AAsset_getLength(asset);
+  if (length < 0 || (buffer == nullptr && length > 0)) {
+    AAsset_close(asset);
+    return false;
+  }
+  asset_out->struct_size = sizeof(FlutterAsset);
+  asset_out->data = static_cast<const uint8_t*>(buffer);
+  asset_out->size = static_cast<size_t>(length);
+  asset_out->user_data = asset;
+  asset_out->asset_free_callback = [](void* user_data) {
+    if (user_data != nullptr) {
+      AAsset_close(static_cast<AAsset*>(user_data));
+    }
+  };
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool AndroidAssetResolver::IsValidCallback(void* user_data) {
+  return user_data != nullptr;
+}
+
+bool AndroidAssetResolver::IsValidAfterChangeCallback(void* user_data) {
+  return true;
+}
+
+void AndroidAssetResolver::DestructionCallback(void* user_data) {
+  if (user_data != nullptr) {
+    delete static_cast<Context*>(user_data);
+  }
+}
+
+FlutterAssetResolver AndroidAssetResolver::CreateFlutterAssetResolver(
+    AAssetManager* asset_manager,
+    std::string directory) {
+  auto* ctx = new Context{asset_manager, std::move(directory), nullptr};
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = ctx;
+  resolver.find_asset_callback = &AndroidAssetResolver::FindAssetCallback;
+  resolver.is_valid_callback = &AndroidAssetResolver::IsValidCallback;
+  resolver.is_valid_after_change_callback =
+      &AndroidAssetResolver::IsValidAfterChangeCallback;
+  resolver.destruction_callback = &AndroidAssetResolver::DestructionCallback;
+  return resolver;
+}
+
+FlutterAssetResolver AndroidAssetResolver::ToFlutterAssetResolver() const {
+  auto* ctx = new Context{asset_manager_, directory_, test_finder_};
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = ctx;
+  resolver.find_asset_callback = &AndroidAssetResolver::FindAssetCallback;
+  resolver.is_valid_callback = &AndroidAssetResolver::IsValidCallback;
+  resolver.is_valid_after_change_callback =
+      &AndroidAssetResolver::IsValidAfterChangeCallback;
+  resolver.destruction_callback = &AndroidAssetResolver::DestructionCallback;
+  return resolver;
+}
+
 }  // namespace flutter

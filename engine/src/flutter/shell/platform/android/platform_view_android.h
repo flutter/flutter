@@ -62,6 +62,7 @@ class PlatformViewAndroid final : public PlatformView {
 
   ~PlatformViewAndroid() override;
 
+  using PlatformView::NotifyCreated;
   void NotifyCreated(fml::RefPtr<AndroidNativeWindow> native_window);
 
   void NotifySurfaceWindowChanged(

@@ -13,6 +13,14 @@
 #include <unordered_map>
 #include <vector>
 
+#if defined(__ANDROID__)
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
+#else
+struct AAssetManager;
+typedef struct AAssetManager AAssetManager;
+#endif
+
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/embedder/jni_delegate.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -133,6 +141,58 @@ class AndroidDeferredLibraryLoader {
   size_t active_mapped_units_ = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidDeferredLibraryLoader);
+};
+
+//------------------------------------------------------------------------------
+/// @brief      Direct NDK `AAssetManager` asset resolver for the Flutter
+///             Embedder C-API (RFC 410.0000, ADR-0009).
+///
+///             Resolves flutter assets directly from the APK package using
+///             `AAssetManager` with fallback paths (`flutter_assets/`).
+///             Supports a pluggable `AssetFinder` delegate for host Linux x64
+///             compilation and unit testing under
+///             `FLUTTER_ENGINE_NO_PROTOTYPES` and `check_includes = true`.
+///
+class AndroidAssetResolver {
+ public:
+  using AssetFinder = std::function<bool(const std::string& name,
+                                         const uint8_t** out_data,
+                                         size_t* out_size,
+                                         void** out_baton,
+                                         VoidCallback* out_free)>;
+
+  AndroidAssetResolver(AAssetManager* asset_manager, std::string directory);
+  explicit AndroidAssetResolver(AssetFinder test_finder);
+  ~AndroidAssetResolver();
+
+  FlutterAssetResolver ToFlutterAssetResolver() const;
+
+  static FlutterAssetResolver CreateFlutterAssetResolver(
+      AAssetManager* asset_manager,
+      std::string directory);
+
+  static std::string NormalizeAssetPath(const std::string& dir,
+                                        const std::string& asset);
+
+  bool IsValid() const;
+
+ private:
+  struct Context {
+    AAssetManager* asset_manager = nullptr;
+    std::string directory;
+    AssetFinder test_finder = nullptr;
+  };
+
+  static bool FindAssetCallback(void* user_data,
+                                const char* asset_name,
+                                FlutterAsset* asset_out);
+  static bool IsValidCallback(void* user_data);
+  static bool IsValidAfterChangeCallback(void* user_data);
+  static void DestructionCallback(void* user_data);
+
+  AAssetManager* asset_manager_ = nullptr;
+  std::string directory_;
+  AssetFinder test_finder_ = nullptr;
 };
 
 }  // namespace flutter
