@@ -35,6 +35,14 @@ G_DECLARE_FINAL_TYPE(FlViewRendererOpenGL,
 FlViewRendererOpenGL* fl_view_renderer_opengl_new(FlEngine* engine,
                                                   gboolean sized_to_content);
 
+/**
+ * fl_view_renderer_opengl_cancel_wait:
+ * @renderer: an #FlViewRendererOpenGL.
+ *
+ * Cancels any active frame wait on @renderer when the view is being destroyed.
+ */
+void fl_view_renderer_opengl_cancel_wait(FlViewRendererOpenGL* renderer);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_RENDERER_OPENGL_H_
