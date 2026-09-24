@@ -69,22 +69,19 @@ Future<void> testMain() async {
     codec.dispose();
   });
 
-  test(
-    'instantiateImageCodecFromUrl works with generic application/octet-stream MIME type via data URL',
-    () async {
-      const dataUrl =
-          'data:application/octet-stream;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  test('instantiateImageCodecFromUrl works with generic application/octet-stream MIME type via data URL', () async {
+    const dataUrl =
+        'data:application/octet-stream;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
-      final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(Uri.parse(dataUrl));
-      expect(codec.frameCount, 1);
+    final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(Uri.parse(dataUrl));
+    expect(codec.frameCount, 1);
 
-      final ui.FrameInfo frame = await codec.getNextFrame();
-      expect(frame.image.width, 1);
-      expect(frame.image.height, 1);
+    final ui.FrameInfo frame = await codec.getNextFrame();
+    expect(frame.image.width, 1);
+    expect(frame.image.height, 1);
 
-      codec.dispose();
-    },
-  );
+    codec.dispose();
+  });
 
   test('BrowserImageDecoder closes native decoder if disposed during initialization', () async {
     if (!browserSupportsImageDecoder) {

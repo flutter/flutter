@@ -2615,12 +2615,12 @@ abstract mixin class RouteAware {
 class RawDialogRoute<T> extends PopupRoute<T> {
   /// A general dialog route which allows for customization of the dialog popup.
   RawDialogRoute({
-    required RoutePageBuilder pageBuilder,
-    bool barrierDismissible = true,
-    Color? barrierColor = const Color(0x80000000),
-    String? barrierLabel,
-    Duration transitionDuration = const Duration(milliseconds: 200),
-    RouteTransitionsBuilder? transitionBuilder,
+    required this._pageBuilder,
+    this._barrierDismissible = true,
+    this._barrierColor = const Color(0x80000000),
+    this._barrierLabel,
+    this._transitionDuration = const Duration(milliseconds: 200),
+    this._transitionBuilder,
     this.barrierBuilder,
     super.settings,
     super.requestFocus,
@@ -2628,12 +2628,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     super.traversalEdgeBehavior,
     super.directionalTraversalEdgeBehavior,
     this.fullscreenDialog = false,
-  }) : _pageBuilder = pageBuilder,
-       _barrierDismissible = barrierDismissible,
-       _barrierLabel = barrierLabel,
-       _barrierColor = barrierColor,
-       _transitionDuration = transitionDuration,
-       _transitionBuilder = transitionBuilder;
+  });
 
   final RoutePageBuilder _pageBuilder;
 
@@ -2846,12 +2841,11 @@ Future<T?> showGeneralDialog<T extends Object?>({
 /// Used in [PageRouteBuilder] and [showGeneralDialog].
 ///
 /// See [ModalRoute.buildPage] for complete definition of the parameters.
-typedef RoutePageBuilder =
-    Widget Function(
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-    );
+typedef RoutePageBuilder = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+  Animation<double> secondaryAnimation,
+);
 
 /// Signature for the function that builds a route's transitions.
 /// Used in [PageRouteBuilder] and [showGeneralDialog].
@@ -2868,13 +2862,12 @@ typedef RoutePageBuilder =
 /// [secondaryAnimation] remains [kAlwaysDismissedAnimation].
 ///
 /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
-typedef RouteTransitionsBuilder =
-    Widget Function(
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      Widget child,
-    );
+typedef RouteTransitionsBuilder = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+  Animation<double> secondaryAnimation,
+  Widget child,
+);
 
 /// Configuration details for a custom modal barrier.
 ///
@@ -2922,8 +2915,11 @@ class RouteBarrierDetails {
 /// that wraps this `barrier` (for instance, with a [Padding] or a [BackdropFilter]),
 /// rather than replacing it entirely, to preserve the built-in semantics and
 /// gestures.
-typedef RouteBarrierBuilder =
-    Widget Function(BuildContext context, RouteBarrierDetails details, Widget barrier);
+typedef RouteBarrierBuilder = Widget Function(
+  BuildContext context,
+  RouteBarrierDetails details,
+  Widget barrier,
+);
 
 /// A callback type for informing that a navigation pop has been invoked,
 /// whether or not it was handled successfully.

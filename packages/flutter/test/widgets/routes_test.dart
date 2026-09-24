@@ -2896,12 +2896,11 @@ void main() {
     showGeneralDialog<void>(
       context: navigatorKey.currentContext!,
       requestFocus: true,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) => const Text('dialog'),
+      pageBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) => const Text('dialog'),
     );
     await tester.pumpAndSettle();
     expect(FocusScope.of(tester.element(find.text('dialog'))).hasFocus, true);
@@ -2914,12 +2913,11 @@ void main() {
     showGeneralDialog<void>(
       context: navigatorKey.currentContext!,
       requestFocus: false,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) => const Text('dialog'),
+      pageBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) => const Text('dialog'),
     );
     await tester.pumpAndSettle();
     expect(FocusScope.of(tester.element(find.text('dialog'))).hasFocus, false);
@@ -2952,12 +2950,11 @@ void main() {
                           child: barrier,
                         );
                       },
-                  pageBuilder:
-                      (
-                        BuildContext context,
-                        Animation<double> animation,
-                        Animation<double> secondaryAnimation,
-                      ) => const SizedBox(),
+                  pageBuilder: (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => const SizedBox(),
                 );
               },
               child: const Text('Show Dialog'),
@@ -3071,12 +3068,11 @@ class DialogObserver extends NavigatorObserver {
 
 class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   _TestDialogRouteWithCustomBarrierCurve({
-    required Widget child,
+    required this._child,
     this.barrierLabel,
     this.barrierColor = _black,
-    Curve? barrierCurve,
-  }) : _barrierCurve = barrierCurve,
-       _child = child;
+    this._barrierCurve,
+  });
 
   final Widget _child;
 
@@ -3205,8 +3201,11 @@ class _RestorableDialogTestWidget extends StatelessWidget {
 }
 
 typedef _SimulationBuilder = Simulation Function({required double current, required bool forward});
-typedef _TransitionBuilder =
-    Widget Function(BuildContext context, Animation<double> animation, Widget child);
+typedef _TransitionBuilder = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+  Widget child,
+);
 
 // A route that is driven by a simulation.
 class _SimulationRoute extends PageRouteBuilder<void> {

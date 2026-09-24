@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
+
 import 'framework.dart';
 
 /// A rectangle upon which a backend texture is mapped.
