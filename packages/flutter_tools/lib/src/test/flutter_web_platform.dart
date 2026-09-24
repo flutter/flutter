@@ -305,8 +305,8 @@ class FlutterWebPlatform extends PlatformPlugin {
       assert(buildInfo.canaryFeatures);
     }
     final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = buildInfo.canaryFeatures
-        ? kDDCCanarySdkSourcemapArtifactMap
-        : kDDCCanarySdkSourcemapArtifactMap;
+        ? kDDCCanarySdkSourcemapsArtifactMap
+        : kDDCStableSdkSourcemapsArtifactMap;
     return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 

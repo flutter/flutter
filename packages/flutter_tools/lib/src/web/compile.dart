@@ -245,7 +245,7 @@ const kDDCCanarySdkArtifactMap = <WebRendererMode, HostArtifact>{
 };
 
 /// The correct source map artifact to use for each build and render mode for canary DDC.
-const kDDCCanarySdkSourcemapArtifactMap = <WebRendererMode, HostArtifact>{
+const kDDCCanarySdkSourcemapsArtifactMap = <WebRendererMode, HostArtifact>{
   WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCCanarySdkSourcemaps,
 };
 
