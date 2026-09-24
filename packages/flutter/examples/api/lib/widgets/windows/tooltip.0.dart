@@ -57,10 +57,13 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
-  WindowEntry _buildTooltipEntry(Rect? anchorRect) {
+  WindowEntry _buildTooltipEntry(
+    BuildContext context,
+    NestedWindowLayoutInfo info,
+  ) {
     final TooltipWindowController tooltipController = TooltipWindowController(
       parent: WindowScope.of(context),
-      anchorRect: anchorRect ?? Rect.zero,
+      anchorRect: info.anchorRect,
       positioner: const WindowPositioner(
         parentAnchor: WindowPositionerAnchor.right,
         childAnchor: WindowPositionerAnchor.left,
@@ -82,7 +85,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: NestedWindow(
+      child: NestedWindow.windowLayoutBuilder(
         controller: _nestedWindowController,
         entryBuilder: _buildTooltipEntry,
         child: MouseRegion(
@@ -93,7 +96,7 @@ class _MyAppState extends State<MyApp> {
             listenable: _nestedWindowController,
             builder: (BuildContext context, Widget? child) => AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              color: _nestedWindowController.showing
+              color: _nestedWindowController.isShowing
                   ? Colors.blueAccent
                   : Colors.blue,
               padding: const .all(12),

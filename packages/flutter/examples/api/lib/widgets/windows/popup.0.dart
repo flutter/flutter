@@ -57,10 +57,13 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
-  WindowEntry _buildPopupEntry(Rect? anchorRect) {
+  WindowEntry _buildPopupEntry(
+    BuildContext context,
+    NestedWindowLayoutInfo info,
+  ) {
     final PopupWindowController controller = PopupWindowController(
       parent: WindowScope.of(context),
-      anchorRect: anchorRect ?? Rect.zero,
+      anchorRect: info.anchorRect,
       positioner: const WindowPositioner(
         parentAnchor: .right,
         childAnchor: .left,
@@ -94,7 +97,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: NestedWindow(
+      child: NestedWindow.windowLayoutBuilder(
         controller: _nestedWindowController,
         entryBuilder: _buildPopupEntry,
         child: ElevatedButton(
@@ -102,7 +105,7 @@ class _MyAppState extends State<MyApp> {
           child: ListenableBuilder(
             listenable: _nestedWindowController,
             builder: (BuildContext context, Widget? child) => Text(
-              _nestedWindowController.showing ? 'Hide Popup' : 'Show Popup',
+              _nestedWindowController.isShowing ? 'Hide Popup' : 'Show Popup',
             ),
           ),
         ),

@@ -27,9 +27,9 @@ class _TooltipButtonState extends State<TooltipButton> {
     _anchorController.toggle();
   }
 
-  WindowEntry _buildEntry(Rect? anchorRect, WindowSettings windowSettings) {
+  WindowEntry _buildEntry(NestedWindowLayoutInfo info, WindowSettings windowSettings) {
     final controller = TooltipWindowController(
-      anchorRect: anchorRect ?? Rect.zero,
+      anchorRect: info.anchorRect,
       positioner: windowSettings.positioner,
       delegate: _TooltipWindowControllerDelegate(
         onDestroyed: () {
@@ -50,15 +50,16 @@ class _TooltipButtonState extends State<TooltipButton> {
   Widget build(BuildContext context) {
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
-    return NestedWindow(
+    return NestedWindow.windowLayoutBuilder(
       controller: _anchorController,
-      entryBuilder: (anchorRect) => _buildEntry(anchorRect, windowSettings),
+      entryBuilder: (BuildContext context, NestedWindowLayoutInfo info) =>
+          _buildEntry(info, windowSettings),
       child: OutlinedButton(
         onPressed: _onPressed,
         child: ListenableBuilder(
           listenable: _anchorController,
           builder: (BuildContext context, Widget? child) =>
-              Text(_anchorController.showing ? 'Hide Tooltip' : 'Show Tooltip'),
+              Text(_anchorController.isShowing ? 'Hide Tooltip' : 'Show Tooltip'),
         ),
       ),
     );
