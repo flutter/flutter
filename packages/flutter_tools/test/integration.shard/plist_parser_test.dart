@@ -141,13 +141,19 @@ void main() {
       file.writeAsBytesSync(const <int>[1, 2, 3, 4, 5, 6]);
 
       expect(parser.getValueFromFile<String>(file.path, 'CFBundleIdentifier'), null);
-      // plutil writes its parse diagnostic to stdout on macOS 15 and earlier
-      // but to stderr on macOS 26 and later. ProcessUtils.runSync forwards
-      // stdout to the status log and stderr to the error log, so accept the
-      // diagnostic from either stream.
+      // Before macOS 26, plutil writes its parse diagnostic to stdout; on
+      // macOS 26 it writes the same text to stderr. ProcessUtils.runSync
+      // forwards stdout to the status log and stderr to the error log, so
+      // accept the diagnostic from either stream.
       final String output = logger.statusText + logger.errorText;
-      expect(output, contains('Property List error: '));
-      expect(output, contains(' / JSON error: '));
+      expect(
+        output,
+        contains(
+          'Property List error: Unexpected character \x01 at line 1 / '
+          'JSON error: JSON text did not start with array or object and option to allow fragments not '
+          'set. around line 1, column 0.\n',
+        ),
+      );
       expect(
         logger.errorText,
         endsWith(
@@ -231,10 +237,16 @@ void main() {
       isFalse,
     );
     // See the malformed-plist getValueFromFile test above: the diagnostic
-    // comes from stdout on macOS 15 and earlier, stderr on macOS 26 and later.
+    // comes from stdout before macOS 26 and from stderr on macOS 26.
     final String output = logger.statusText + logger.errorText;
-    expect(output, contains('foo.plist: Property List error: '));
-    expect(output, contains(' / JSON error: '));
+    expect(
+      output,
+      contains(
+        'foo.plist: Property List error: Unexpected character \x01 '
+        'at line 1 / JSON error: JSON text did not start with array or object and option to allow '
+        'fragments not set. around line 1, column 0.\n',
+      ),
+    );
     expect(
       logger.errorText,
       endsWith(
