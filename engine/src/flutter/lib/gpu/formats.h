@@ -50,6 +50,50 @@ constexpr FlutterGPUStorageMode FromImpellerStorageMode(
   }
 }
 
+enum class FlutterGPUTextureType {
+  kTexture2D,
+  kTexture2DMultisample,
+  kTextureCube,
+  kTextureExternalOES,
+  kTexture2DArray,
+};
+
+constexpr impeller::TextureType ToImpellerTextureType(
+    FlutterGPUTextureType value) {
+  switch (value) {
+    case FlutterGPUTextureType::kTexture2D:
+      return impeller::TextureType::kTexture2D;
+    case FlutterGPUTextureType::kTexture2DMultisample:
+      return impeller::TextureType::kTexture2DMultisample;
+    case FlutterGPUTextureType::kTextureCube:
+      return impeller::TextureType::kTextureCube;
+    case FlutterGPUTextureType::kTextureExternalOES:
+      return impeller::TextureType::kTextureExternalOES;
+    case FlutterGPUTextureType::kTexture2DArray:
+      return impeller::TextureType::kTexture2DArray;
+  }
+}
+
+constexpr impeller::TextureType ToImpellerTextureType(int value) {
+  return ToImpellerTextureType(static_cast<FlutterGPUTextureType>(value));
+}
+
+constexpr FlutterGPUTextureType FromImpellerTextureType(
+    impeller::TextureType value) {
+  switch (value) {
+    case impeller::TextureType::kTexture2D:
+      return FlutterGPUTextureType::kTexture2D;
+    case impeller::TextureType::kTexture2DMultisample:
+      return FlutterGPUTextureType::kTexture2DMultisample;
+    case impeller::TextureType::kTextureCube:
+      return FlutterGPUTextureType::kTextureCube;
+    case impeller::TextureType::kTextureExternalOES:
+      return FlutterGPUTextureType::kTextureExternalOES;
+    case impeller::TextureType::kTexture2DArray:
+      return FlutterGPUTextureType::kTexture2DArray;
+  }
+}
+
 enum class FlutterGPUPixelFormat {
   kUnknown,
   kA8UNormInt,
