@@ -8300,6 +8300,50 @@ TEST(FlutterEmbedderNativeImageTextureTest, ConcurrentImageTextureOperations) {
   }
 }
 
+TEST(FlutterEmbedderNativeOverlayAllocationTest,
+     SynchronousOverlayAllocationDeadlockFree) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  auto mem_provider = std::make_shared<InMemoryPlatformViewsProvider>();
+  auto fake_window = reinterpret_cast<ANativeWindow*>(0x12345);
+  mem_provider->SetOverlayWindowForTesting(0, fake_window);
+
+  auto embedder_delegate = std::make_shared<JniDelegate>(
+      mock_invoker, nullptr, nullptr, mem_provider, nullptr, nullptr, nullptr,
+      nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+  FlutterEmbedderNative native(mock_invoker);
+  native.SetPlatformViewsProvider(mem_provider);
+
+  // Calling GetOverlayWindow(0) on frame 1 synchronously allocates overlay 0.
+  ANativeWindow* window = native.GetOverlayWindowForTesting(0);
+  EXPECT_EQ(window, fake_window);
+}
+
+TEST(FlutterEmbedderNativeImageTextureTest, DoubleBufferingKeepsImageAlive) {
+  auto native_instance = std::make_unique<FlutterEmbedderNative>();
+  ASSERT_NE(native_instance, nullptr);
+
+  FlutterRendererConfig renderer_config = {};
+  native_instance->PopulateRendererConfig(&renderer_config);
+
+  constexpr int64_t kTextureId = 8888;
+  native_instance->RegisterImageTexture(kTextureId, nullptr, false);
+
+  FlutterOpenGLTexture texture_out = {};
+  bool success = renderer_config.open_gl.gl_external_texture_frame_callback(
+      native_instance.get(), kTextureId, 200, 200, &texture_out);
+  EXPECT_TRUE(success);
+  EXPECT_EQ(texture_out.target, 0x8D65u);
+
+  // Calling frame callback a second time simulates next frame arrival.
+  FlutterOpenGLTexture texture_out2 = {};
+  success = renderer_config.open_gl.gl_external_texture_frame_callback(
+      native_instance.get(), kTextureId, 200, 200, &texture_out2);
+  EXPECT_TRUE(success);
+  EXPECT_EQ(texture_out2.target, 0x8D65u);
+
+  native_instance->UnregisterImageTexture(kTextureId);
+}
+
 }  // namespace testing
 }  // namespace android
 }  // namespace flutter
