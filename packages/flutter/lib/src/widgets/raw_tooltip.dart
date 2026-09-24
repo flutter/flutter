@@ -634,6 +634,11 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     }
   }
 
+  // Starts (or schedules, if `withDelay` is non-zero) dismissing this tooltip.
+  //
+  // Returns true if the tooltip was animating in or fully visible, and false
+  // if it was already dismissed or animating out, in which case this method
+  // has no effect other than canceling any pending timer.
   bool _scheduleDismissTooltip({Duration withDelay = Duration.zero}) {
     assert(mounted);
     assert(
@@ -817,8 +822,9 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     return true;
   }
 
-  // The physical keys of Escape presses whose KeyDownEvent dismissed at least
-  // one tooltip and which have not been released yet.
+  // The physical keys of Escape presses whose KeyDownEvent (or a subsequent
+  // KeyRepeatEvent) dismissed at least one tooltip and which have not been
+  // released yet.
   //
   // The subsequent KeyRepeatEvents and the KeyUpEvent of these presses are
   // also consumed so that holding Escape to dismiss a tooltip does not fall
@@ -828,37 +834,53 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   // in this set is released, see _updateKeyEventHandlers.
   static final Set<PhysicalKeyboardKey> _consumedEscapeKeys = <PhysicalKeyboardKey>{};
 
-  static bool _keyEventHandlersRegistered = false;
+  // The FocusManager that _handleEarlyKeyEvent is currently registered with,
+  // or null if it is not registered.
+  //
+  // This is tracked by identity rather than with a bool because the
+  // FocusManager can be replaced (e.g. between tests), in which case the
+  // handler must be registered with the new instance.
+  static FocusManager? _earlyKeyEventHandlerFocusManager;
 
   // Registers the key event handlers while at least one tooltip is open or
   // an Escape press that dismissed a tooltip is still held down, and
   // unregisters them otherwise.
+  //
+  // An early FocusManager key handler is registered, plus a HardwareKeyboard
+  // fallback for when primaryFocus is null:
+  // 1. FocusManager.addEarlyKeyEventHandler runs before walking the focus
+  //    tree and stops propagation when returning KeyEventResult.handled,
+  //    preventing Escape from simultaneously triggering focused
+  //    descendants (e.g. EditableText) or ancestor ModalRoute
+  //    DismissIntent handlers (e.g. closing DatePickerDialog while a
+  //    button tooltip is hovered).
+  // 2. KeyEventManager always dispatches to FocusManager.handleKeyMessage
+  //    even when a HardwareKeyboard handler returns true, and
+  //    FocusManager.handleKeyMessage is a no-op when primaryFocus is null,
+  //    so HardwareKeyboard.addHandler is used only as a fallback when
+  //    primaryFocus is null.
   static void _updateKeyEventHandlers() {
+    // Forget presses that HardwareKeyboard no longer considers held down
+    // (e.g. after HardwareKeyboard.clearState, or if a KeyUpEvent was never
+    // delivered), so they do not keep the handlers registered indefinitely.
+    final Set<PhysicalKeyboardKey> pressedKeys = HardwareKeyboard.instance.physicalKeysPressed;
+    _consumedEscapeKeys.retainWhere(pressedKeys.contains);
+
     final bool shouldRegister =
         RawTooltip._openedTooltips.isNotEmpty || _consumedEscapeKeys.isNotEmpty;
-    if (shouldRegister == _keyEventHandlersRegistered) {
-      return;
+
+    final FocusManager? focusManager = shouldRegister ? FocusManager.instance : null;
+    if (!identical(focusManager, _earlyKeyEventHandlerFocusManager)) {
+      _earlyKeyEventHandlerFocusManager?.removeEarlyKeyEventHandler(_handleEarlyKeyEvent);
+      focusManager?.addEarlyKeyEventHandler(_handleEarlyKeyEvent);
+      _earlyKeyEventHandlerFocusManager = focusManager;
     }
-    _keyEventHandlersRegistered = shouldRegister;
+
+    // HardwareKeyboard.clearState can remove handlers without notice, so
+    // always remove before (re-)adding to keep exactly one registration.
+    HardwareKeyboard.instance.removeHandler(_handleHardwareKeyEvent);
     if (shouldRegister) {
-      // Register an early FocusManager key handler (plus a HardwareKeyboard
-      // fallback when primaryFocus is null):
-      // 1. FocusManager.addEarlyKeyEventHandler runs before walking the focus
-      //    tree and stops propagation when returning KeyEventResult.handled,
-      //    preventing Escape from simultaneously triggering focused
-      //    descendants (e.g. EditableText) or ancestor ModalRoute
-      //    DismissIntent handlers (e.g. closing DatePickerDialog while a
-      //    button tooltip is hovered).
-      // 2. KeyEventManager always dispatches to FocusManager.handleKeyMessage
-      //    even when a HardwareKeyboard handler returns true, and
-      //    FocusManager.handleKeyMessage is a no-op when primaryFocus is null,
-      //    so HardwareKeyboard.addHandler is used only as a fallback when
-      //    primaryFocus is null.
-      FocusManager.instance.addEarlyKeyEventHandler(_handleEarlyKeyEvent);
       HardwareKeyboard.instance.addHandler(_handleHardwareKeyEvent);
-    } else {
-      FocusManager.instance.removeEarlyKeyEventHandler(_handleEarlyKeyEvent);
-      HardwareKeyboard.instance.removeHandler(_handleHardwareKeyEvent);
     }
   }
 
@@ -878,12 +900,18 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
         _updateKeyEventHandlers();
         return dismissed;
       case KeyRepeatEvent():
+        // Also dismiss tooltips that were shown while Escape was held down.
+        if (RawTooltip.dismissAllToolTips()) {
+          _consumedEscapeKeys.add(event.physicalKey);
+          _updateKeyEventHandlers();
+        }
         return _consumedEscapeKeys.contains(event.physicalKey);
       case KeyUpEvent():
         final bool consumed = _consumedEscapeKeys.remove(event.physicalKey);
         _updateKeyEventHandlers();
         return consumed;
     }
+    // KeyEvent is not a sealed class, so the switch above is not exhaustive.
     return false;
   }
 

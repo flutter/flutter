@@ -3280,37 +3280,12 @@ void main() {
   );
 
   testWidgets(
-    'Escape key dismisses open RawTooltip inside WidgetsApp without invoking ancestor DismissIntent, including during reverse animation',
+    'Escape key dismisses open RawTooltip inside WidgetsApp without invoking ancestor DismissIntent',
     (WidgetTester tester) async {
       final key = GlobalKey<RawTooltipState>();
       var dismissIntentInvoked = false;
-
       await tester.pumpWidget(
-        WidgetsApp(
-          color: const Color(0xFF000000),
-          onGenerateRoute: (RouteSettings settings) => PageRouteBuilder<void>(
-            pageBuilder: (BuildContext context, _, _) => Actions(
-              actions: <Type, Action<Intent>>{
-                DismissIntent: CallbackAction<DismissIntent>(
-                  onInvoke: (DismissIntent intent) {
-                    dismissIntentInvoked = true;
-                    return null;
-                  },
-                ),
-              },
-              child: Focus(
-                autofocus: true,
-                child: RawTooltip(
-                  key: key,
-                  semanticsTooltip: tooltipText,
-                  tooltipBuilder: (BuildContext context, Animation<double> animation) =>
-                      const Text(tooltipText),
-                  child: const SizedBox(width: 100.0, height: 100.0),
-                ),
-              ),
-            ),
-          ),
-        ),
+        _buildTooltipAppWithDismissIntent(key, () => dismissIntentInvoked = true),
       );
 
       key.currentState!.ensureTooltipVisible();
@@ -3346,9 +3321,18 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
       expect(dismissIntentInvoked, isTrue);
+    },
+  );
 
-      // Re-show the tooltip and start dismissing it with Escape.
-      dismissIntentInvoked = false;
+  testWidgets(
+    'Escape key pressed while RawTooltip is animating out invokes ancestor DismissIntent',
+    (WidgetTester tester) async {
+      final key = GlobalKey<RawTooltipState>();
+      var dismissIntentInvoked = false;
+      await tester.pumpWidget(
+        _buildTooltipAppWithDismissIntent(key, () => dismissIntentInvoked = true),
+      );
+
       key.currentState!.ensureTooltipVisible();
       await tester.pumpAndSettle();
       expect(find.text(tooltipText), findsOneWidget);
@@ -3367,6 +3351,172 @@ void main() {
       expect(dismissIntentInvoked, isTrue);
     },
   );
+
+  testWidgets('Holding Escape dismisses a RawTooltip shown while Escape is held down', (
+    WidgetTester tester,
+  ) async {
+    final key = GlobalKey<RawTooltipState>();
+    var dismissIntentInvoked = false;
+    await tester.pumpWidget(
+      _buildTooltipAppWithDismissIntent(key, () => dismissIntentInvoked = true),
+    );
+
+    // Escape is pressed while no tooltip is open, so it reaches DismissIntent.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(dismissIntentInvoked, isTrue);
+    dismissIntentInvoked = false;
+
+    // A tooltip is shown while Escape is still held down.
+    key.currentState!.ensureTooltipVisible();
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    // The next repeat event dismisses the tooltip and is consumed.
+    await tester.sendKeyRepeatEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+    expect(dismissIntentInvoked, isFalse);
+
+    // Subsequent repeat events of the same press are also consumed.
+    await tester.sendKeyRepeatEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(dismissIntentInvoked, isFalse);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.escape);
+  });
+
+  testWidgets(
+    'Escape repeat and up events are consumed after the RawTooltip they dismissed is disposed',
+    (WidgetTester tester) async {
+      final key = GlobalKey<RawTooltipState>();
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final receivedEscapeEvents = <KeyEvent>[];
+
+      Widget buildApp({required bool showTooltip}) {
+        return TestWidgetsApp(
+          home: Column(
+            children: <Widget>[
+              Focus(
+                focusNode: focusNode,
+                onKeyEvent: (FocusNode node, KeyEvent event) {
+                  if (event.logicalKey == LogicalKeyboardKey.escape) {
+                    receivedEscapeEvents.add(event);
+                  }
+                  return KeyEventResult.ignored;
+                },
+                child: const SizedBox(width: 100.0, height: 100.0),
+              ),
+              if (showTooltip)
+                RawTooltip(
+                  key: key,
+                  semanticsTooltip: tooltipText,
+                  tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                      const Text(tooltipText),
+                  child: const SizedBox(width: 100.0, height: 100.0),
+                ),
+            ],
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp(showTooltip: true));
+      focusNode.requestFocus();
+      key.currentState!.ensureTooltipVisible();
+      await tester.pumpAndSettle();
+      expect(find.text(tooltipText), findsOneWidget);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.escape);
+      await tester.pump();
+      expect(receivedEscapeEvents, isEmpty);
+
+      // Dispose the tooltip while Escape is still held down.
+      await tester.pumpWidget(buildApp(showTooltip: false));
+      await tester.pumpAndSettle();
+      expect(find.byType(RawTooltip), findsNothing);
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyRepeatEvent(LogicalKeyboardKey.escape);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.escape);
+      expect(receivedEscapeEvents, isEmpty);
+
+      // Once released, Escape presses reach the focused widget again.
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      expect(receivedEscapeEvents, hasLength(2));
+      expect(receivedEscapeEvents.first, isA<KeyDownEvent>());
+      expect(receivedEscapeEvents.last, isA<KeyUpEvent>());
+    },
+  );
+
+  // The following two tests must run in order: the first leaves Escape held
+  // down at the end of the test, and the second verifies that Escape handling
+  // still works with the fresh FocusManager and HardwareKeyboard state created
+  // for the next test.
+  testWidgets('Escape key left held down after dismissing a RawTooltip (part 1)', (
+    WidgetTester tester,
+  ) async {
+    final key = GlobalKey<RawTooltipState>();
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Focus(
+          autofocus: true,
+          child: RawTooltip(
+            key: key,
+            semanticsTooltip: tooltipText,
+            tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                const Text(tooltipText),
+            child: const SizedBox(width: 100.0, height: 100.0),
+          ),
+        ),
+      ),
+    );
+
+    key.currentState!.ensureTooltipVisible();
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    // Intentionally never send the matching KeyUpEvent.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Escape key dismisses RawTooltip after a previous test left Escape held (part 2)', (
+    WidgetTester tester,
+  ) async {
+    final key = GlobalKey<RawTooltipState>();
+    var focusedWidgetReceivedEscape = false;
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Focus(
+          autofocus: true,
+          onKeyEvent: (FocusNode node, KeyEvent event) {
+            if (event.logicalKey == LogicalKeyboardKey.escape) {
+              focusedWidgetReceivedEscape = true;
+            }
+            return KeyEventResult.ignored;
+          },
+          child: RawTooltip(
+            key: key,
+            semanticsTooltip: tooltipText,
+            tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                const Text(tooltipText),
+            child: const SizedBox(width: 100.0, height: 100.0),
+          ),
+        ),
+      ),
+    );
+
+    key.currentState!.ensureTooltipVisible();
+    await tester.pumpAndSettle();
+    expect(FocusManager.instance.primaryFocus, isNotNull);
+    expect(find.text(tooltipText), findsOneWidget);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+    expect(focusedWidgetReceivedEscape, isFalse);
+  });
 
   testWidgets('Escape key dismisses open RawTooltip when primaryFocus is null', (
     WidgetTester tester,
@@ -3514,4 +3664,35 @@ Future<void> _testGestureTap(WidgetTester tester, Finder tooltip) async {
 
 SemanticsNode _findDebugSemantics(RenderObject object) {
   return object.debugSemantics ?? _findDebugSemantics(object.parent!);
+}
+
+Widget _buildTooltipAppWithDismissIntent(
+  GlobalKey<RawTooltipState> key,
+  VoidCallback onDismissIntent,
+) {
+  return WidgetsApp(
+    color: const Color(0xFF000000),
+    onGenerateRoute: (RouteSettings settings) => PageRouteBuilder<void>(
+      pageBuilder: (BuildContext context, _, _) => Actions(
+        actions: <Type, Action<Intent>>{
+          DismissIntent: CallbackAction<DismissIntent>(
+            onInvoke: (DismissIntent intent) {
+              onDismissIntent();
+              return null;
+            },
+          ),
+        },
+        child: Focus(
+          autofocus: true,
+          child: RawTooltip(
+            key: key,
+            semanticsTooltip: tooltipText,
+            tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                const Text(tooltipText),
+            child: const SizedBox(width: 100.0, height: 100.0),
+          ),
+        ),
+      ),
+    ),
+  );
 }
