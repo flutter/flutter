@@ -113,7 +113,9 @@ class AnalyzeOnce extends AnalyzeBase {
       timer?.stop();
     }
 
-    final List<AnalysisError> errors = errorsByFile.values.expand((errors) => errors).toList();
+    final List<AnalysisError> errors = errorsByFile.values
+        .expand((List<AnalysisError> fileErrors) => fileErrors)
+        .toList();
 
     // emit benchmarks
     if (isBenchmarking) {
