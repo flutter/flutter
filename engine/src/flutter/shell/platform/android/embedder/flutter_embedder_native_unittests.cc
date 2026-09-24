@@ -167,6 +167,7 @@ struct FakeProcTableState {
   int schedule_frame_calls = 0;
   size_t last_pointer_event_count = 0;
   FlutterPointerPhase last_pointer_phase = kCancel;
+  std::vector<FlutterPointerEvent> last_pointer_events;
   FlutterAccessibilityFeature last_accessibility_flags =
       static_cast<FlutterAccessibilityFeature>(0);
   bool fail_load_deferred_library = false;
@@ -454,8 +455,10 @@ FlutterEngineProcTable CreateFakeProcTable(FakeProcTableState* state) {
                               const FlutterPointerEvent* events, size_t count) {
     g_fake_state->send_pointer_event_calls++;
     g_fake_state->last_pointer_event_count = count;
+    g_fake_state->last_pointer_events.clear();
     if (events != nullptr && count > 0) {
       g_fake_state->last_pointer_phase = events[0].phase;
+      g_fake_state->last_pointer_events.assign(events, events + count);
     }
     return kSuccess;
   };
@@ -1768,6 +1771,54 @@ TEST(FlutterEmbedderNativeTest,
   }
   EXPECT_EQ(state.shutdown_calls, 1);
   EXPECT_EQ(state.last_asset_resolver, nullptr);
+}
+
+TEST(FlutterEmbedderNativeTest,
+     DispatchPointerDataPacketPreservesEmbedderIdAndPlatformData) {
+  FakeProcTableState state;
+  FlutterEngineProcTable proc_table = CreateFakeProcTable(&state);
+  auto jni_delegate = std::make_shared<MockJniDelegate>();
+  Settings settings;
+  FlutterEmbedderNative embedder(settings, jni_delegate, proc_table);
+  ASSERT_TRUE(
+      embedder.Launch("assets", "icu", "main", "", {}, /*engine_id=*/1));
+
+  RawAndroidPointerData packet[2] = {};
+  packet[0].embedder_id = 42;
+  packet[0].time_stamp = 1000;
+  packet[0].change = RawAndroidPointerData::Change::kMove;
+  packet[0].kind = RawAndroidPointerData::DeviceKind::kTouch;
+  packet[0].device = 0;
+  packet[0].physical_x = 120.5;
+  packet[0].physical_y = 240.25;
+  packet[0].pressure = 0.8;
+  packet[0].pressure_min = 0.0;
+  packet[0].pressure_max = 1.0;
+  packet[0].size = 0.25;
+  packet[0].radius_major = 12.0;
+  packet[0].radius_minor = 8.0;
+  packet[0].orientation = 0.5;
+  packet[0].tilt = 0.1;
+  packet[0].platformData = 2 | (2 << 8);  // kPointerDataFlagMultiple | (2 << 8)
+
+  packet[1] = packet[0];
+  packet[1].device = 1;
+  packet[1].physical_x = 300.0;
+  packet[1].physical_y = 400.0;
+
+  EXPECT_TRUE(embedder.DispatchPointerDataPacket(
+      reinterpret_cast<const uint8_t*>(packet), sizeof(packet)));
+  EXPECT_EQ(state.send_pointer_event_calls, 1);
+  ASSERT_EQ(state.last_pointer_events.size(), 2u);
+  EXPECT_EQ(state.last_pointer_events[0].embedder_id, 42);
+  EXPECT_EQ(state.last_pointer_events[0].platform_data, 2 | (2 << 8));
+  EXPECT_DOUBLE_EQ(state.last_pointer_events[0].size, 0.25);
+  EXPECT_DOUBLE_EQ(state.last_pointer_events[0].radius_major, 12.0);
+  EXPECT_DOUBLE_EQ(state.last_pointer_events[0].radius_minor, 8.0);
+  EXPECT_DOUBLE_EQ(state.last_pointer_events[0].orientation, 0.5);
+  EXPECT_DOUBLE_EQ(state.last_pointer_events[0].tilt, 0.1);
+  EXPECT_EQ(state.last_pointer_events[1].embedder_id, 42);
+  EXPECT_EQ(state.last_pointer_events[1].platform_data, 2 | (2 << 8));
 }
 
 }  // namespace testing

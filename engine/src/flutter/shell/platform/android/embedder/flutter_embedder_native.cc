@@ -950,7 +950,6 @@ void FlutterEmbedderNative::HandleEnginePlatformMessage(
   }
 }
 
-<<<<<<< HEAD
 #if defined(__ANDROID__)
 void FlutterEmbedderNative::RegisterJavaTexture(JNIEnv* env,
                                                 int64_t texture_id,
@@ -1188,6 +1187,7 @@ bool FlutterEmbedderNative::DispatchPointerDataPacket(const uint8_t* data,
         event.phase = kPanZoomEnd;
         break;
     }
+    event.embedder_id = pd.embedder_id;
     event.timestamp = static_cast<size_t>(pd.time_stamp);
     event.x = pd.physical_x;
     event.y = pd.physical_y;
@@ -1221,6 +1221,16 @@ bool FlutterEmbedderNative::DispatchPointerDataPacket(const uint8_t* data,
     event.pressure = pd.pressure;
     event.pressure_min = pd.pressure_min;
     event.pressure_max = pd.pressure_max;
+    event.distance = pd.distance;
+    event.distance_max = pd.distance_max;
+    event.size = pd.size;
+    event.radius_major = pd.radius_major;
+    event.radius_minor = pd.radius_minor;
+    event.radius_min = pd.radius_min;
+    event.radius_max = pd.radius_max;
+    event.orientation = pd.orientation;
+    event.tilt = pd.tilt;
+    event.platform_data = pd.platformData;
     events.push_back(event);
   }
   return embedder_api_.SendPointerEvent(engine_, events.data(),

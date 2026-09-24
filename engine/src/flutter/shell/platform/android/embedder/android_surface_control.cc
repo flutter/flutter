@@ -202,28 +202,15 @@ bool AndroidSurfaceControl::NotifySurfaceChanged(
     int32_t height,
     double pixel_ratio) {
   TRACE_EVENT0("flutter", "AndroidSurfaceControl::NotifySurfaceChanged");
-  if (engine == nullptr || embedder_api_.SendWindowMetricsEvent == nullptr) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  auto it = views_.find(view_id);
+  if (it == views_.end() || !it->second.surface_attached) {
     return false;
   }
-
-  {
-    std::lock_guard<std::mutex> lock(mutex_);
-    auto it = views_.find(view_id);
-    if (it == views_.end() || !it->second.surface_attached) {
-      return false;
-    }
-    it->second.width = width;
-    it->second.height = height;
-    it->second.pixel_ratio = pixel_ratio;
-  }
-
-  FlutterWindowMetricsEvent metrics = {};
-  metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
-  metrics.width = static_cast<size_t>(width);
-  metrics.height = static_cast<size_t>(height);
-  metrics.pixel_ratio = pixel_ratio;
-  metrics.view_id = view_id;
-  return embedder_api_.SendWindowMetricsEvent(engine, &metrics) == kSuccess;
+  it->second.width = width;
+  it->second.height = height;
+  it->second.pixel_ratio = pixel_ratio;
+  return true;
 }
 
 bool AndroidSurfaceControl::NotifySurfaceDestroyed(

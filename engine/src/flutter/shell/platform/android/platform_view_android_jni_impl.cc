@@ -185,7 +185,10 @@ class AndroidJniDelegateAdapter : public JniDelegate {
  public:
   explicit AndroidJniDelegateAdapter(
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
-      : jni_facade_(std::move(jni_facade)) {}
+      : jni_facade_(std::move(jni_facade)) {
+    fml::MessageLoop::EnsureInitializedForCurrentThread();
+    platform_task_runner_ = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  }
 
   void HandlePlatformMessage(const std::string& channel,
                              const uint8_t* message,
@@ -223,9 +226,18 @@ class AndroidJniDelegateAdapter : public JniDelegate {
   }
 
   void OnFirstFrame() override {
-    if (jni_facade_) {
-      jni_facade_->FlutterViewOnFirstFrame();
+    TRACE_EVENT0("flutter", "AndroidJniDelegateAdapter::OnFirstFrame");
+    if (!jni_facade_) {
+      return;
     }
+    if (platform_task_runner_ &&
+        !platform_task_runner_->RunsTasksOnCurrentThread()) {
+      auto facade = jni_facade_;
+      platform_task_runner_->PostTask(
+          [facade]() { facade->FlutterViewOnFirstFrame(); });
+      return;
+    }
+    jni_facade_->FlutterViewOnFirstFrame();
   }
 
   void OnEngineRestart() override {
@@ -268,6 +280,7 @@ class AndroidJniDelegateAdapter : public JniDelegate {
 
  private:
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
+  fml::RefPtr<fml::TaskRunner> platform_task_runner_;
 };
 
 // Called By Java
@@ -448,9 +461,13 @@ static void SurfaceChanged(JNIEnv* env,
                            jlong shell_holder,
                            jint width,
                            jint height) {
+  TRACE_EVENT0("flutter", "FlutterJNI::SurfaceChanged");
   if (auto* embedder = FlutterEmbedderNative::FromHandle(shell_holder)) {
-    embedder->SendWindowMetrics(static_cast<size_t>(width),
-                                static_cast<size_t>(height), 1.0);
+    if (embedder->GetSurfaceControl() != nullptr) {
+      embedder->GetSurfaceControl()->NotifySurfaceChanged(
+          embedder->GetEngineHandle(), /*view_id=*/0, width, height,
+          /*pixel_ratio=*/1.0);
+    }
     return;
   }
   ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyChanged(
@@ -474,15 +491,23 @@ static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
                                             jobject jAssetManager,
                                             jobject jEntrypointArgs,
                                             jlong engineId) {
+  TRACE_EVENT0("flutter", "FlutterJNI::RunBundleAndSnapshotFromLibrary");
   auto bundle_path = fml::jni::JavaStringToString(env, jBundlePath);
   auto entrypoint = fml::jni::JavaStringToString(env, jEntrypoint);
   auto libraryUrl = fml::jni::JavaStringToString(env, jLibraryUrl);
   auto entrypoint_args = fml::jni::StringListToVector(env, jEntrypointArgs);
 
   if (auto* embedder = FlutterEmbedderNative::FromHandle(shell_holder)) {
+    AAssetManager* asset_manager = nullptr;
+#if defined(__ANDROID__)
+    embedder->SetJavaAssetManager(env, jAssetManager);
+    if (jAssetManager != nullptr) {
+      asset_manager = AAssetManager_fromJava(env, jAssetManager);
+    }
+#endif
     embedder->Launch(bundle_path,
                      FlutterMain::Get().GetSettings().icu_data_path, entrypoint,
-                     libraryUrl, entrypoint_args, engineId);
+                     libraryUrl, entrypoint_args, engineId, asset_manager);
     return;
   }
 
@@ -1058,7 +1083,20 @@ static void UpdateJavaAssetManager(JNIEnv* env,
                                    jlong shell_holder,
                                    jobject jAssetManager,
                                    jstring jAssetBundlePath) {
-  if (FlutterEmbedderNative::FromHandle(shell_holder) != nullptr) {
+  TRACE_EVENT0("flutter", "FlutterJNI::UpdateJavaAssetManager");
+  if (auto* embedder = FlutterEmbedderNative::FromHandle(shell_holder)) {
+    AAssetManager* asset_manager = nullptr;
+#if defined(__ANDROID__)
+    embedder->SetJavaAssetManager(env, jAssetManager);
+    if (jAssetManager != nullptr) {
+      asset_manager = AAssetManager_fromJava(env, jAssetManager);
+    }
+#endif
+    std::string bundle_path =
+        jAssetBundlePath != nullptr
+            ? fml::jni::JavaStringToString(env, jAssetBundlePath)
+            : "";
+    embedder->UpdateAssetManager(asset_manager, bundle_path);
     return;
   }
   auto asset_resolver = std::make_unique<flutter::APKAssetProvider>(
