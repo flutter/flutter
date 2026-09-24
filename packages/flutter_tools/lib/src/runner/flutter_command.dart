@@ -410,8 +410,7 @@ abstract class FlutterCommand extends Command<void> {
   /// This is true if `--ci` is passed to the command or if environment
   /// variable `LUCI_CI` is `True`.
   bool get usingCISystem {
-    return boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true) ||
-        (_platform.environment['LUCI_CI'] == 'True');
+    return getValue(CommonOptions.ci) || (_platform.environment['LUCI_CI'] == 'True');
   }
 
   String? get debugLogsDirectoryPath =>

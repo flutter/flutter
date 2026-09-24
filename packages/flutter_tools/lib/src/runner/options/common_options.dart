@@ -4,9 +4,18 @@
 
 import '../../build_info.dart';
 import '../flutter_command.dart';
+import '../flutter_command_runner.dart';
 
 /// Common typed option descriptors across flutter commands.
 abstract final class CommonOptions {
+  static const ci = FlagOptionDescriptor(
+    name: FlutterGlobalOptions.kContinuousIntegrationFlag,
+    negatable: false,
+    scope: OptionScope.global,
+    verboseOnly: true,
+    help: 'Enable a set of CI-specific test debug settings.',
+  );
+
   static const treeShakeIcons = FlagOptionDescriptor(
     name: 'tree-shake-icons',
     defaultsTo: true,

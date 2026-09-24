@@ -263,7 +263,7 @@ class BuildSwiftPackage extends BuildSubCommand {
   /// Test are only generated with `--ci` is passed in. This is only expected to be used
   /// by the Flutter CI. Tests are not needed by regular users of the command.
   bool get generateTests {
-    return usingCISystem;
+    return getValue(CommonOptions.ci);
   }
 
   @override
