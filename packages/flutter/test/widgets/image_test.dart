@@ -3136,8 +3136,7 @@ void main() {
     expect(
       reportedErrors,
       isEmpty,
-      reason:
-          'reportErrors was set to false when errorBuilder was present, so errors are not reported.',
+      reason: 'reportErrors was set to false when errorBuilder was present, so errors are not reported.',
     );
     // Also check takeException as a standard backup.
     expect(tester.takeException(), isNull);
@@ -3367,6 +3366,6 @@ enum _DisableMethod {
   /// Use [TickerMode.enabled].
   tickerMode,
 
-  /// Use [MedaiQueryData.disableAnimations].
+  /// Use [MediaQueryData.disableAnimations].
   mediaQuery,
 }

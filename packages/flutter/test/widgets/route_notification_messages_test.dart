@@ -216,12 +216,11 @@ void main() {
               onTap: () {
                 // Create a route with no name.
                 final Route<void> route = PageRouteBuilder<void>(
-                  pageBuilder:
-                      (
-                        BuildContext context,
-                        Animation<double> animation,
-                        Animation<double> secondaryAnimation,
-                      ) => const Text('Nameless Route'),
+                  pageBuilder: (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => const Text('Nameless Route'),
                 );
                 Navigator.push<void>(context, route);
               },
@@ -302,8 +301,10 @@ void main() {
   });
 }
 
-typedef SimpleRouterDelegateBuilder =
-    Widget Function(BuildContext context, RouteInformation information);
+typedef SimpleRouterDelegateBuilder = Widget Function(
+  BuildContext context,
+  RouteInformation information,
+);
 typedef SimpleRouterDelegatePopRoute = Future<bool> Function();
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
@@ -366,12 +367,11 @@ class TestPage extends Page<void> {
   Route<void> createRoute(BuildContext context) {
     return PageRouteBuilder<void>(
       settings: this,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) => const Placeholder(),
+      pageBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) => const Placeholder(),
     );
   }
 }
