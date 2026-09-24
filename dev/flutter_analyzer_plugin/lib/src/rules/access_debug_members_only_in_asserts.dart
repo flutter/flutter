@@ -52,6 +52,8 @@ class AccessDebugMembersOnlyInAsserts extends FlutterAnalysisRule {
   }
 }
 
+// The goal of this visitor is to catch debug-only member accesses, as well as
+// references to debug-only types in signatures.
 class _AccessDebugMembersOnlyInAssertsVisitor extends SimpleAstVisitor<void> {
   _AccessDebugMembersOnlyInAssertsVisitor(this.rule);
 
@@ -110,45 +112,31 @@ class _AccessDebugMembersOnlyInAssertsVisitor extends SimpleAstVisitor<void> {
 
   static bool _isAllowedDebugAccess(AstNode node) {
     for (AstNode? ancestor = node.parent; ancestor != null; ancestor = ancestor.parent) {
-      switch (ancestor) {
+      final bool isExempt = switch (ancestor) {
         // We don't care about directives, comments, or metadata annotations.
-        case Directive() || Comment() || Annotation():
-        // Ignores parameter names and default values (since they must be const).
-        // This prevents the rule from flagging certain constructor declarations such as `LabeledGlobalKey(this._debugLabel);`
-        // Accessing the _debugLabel field will still get flagged which is intended.
-        case FormalParameterList():
-          return true;
-        // This is the case where a variable declaration list's type is a DebugOnly type.
-        // We enforce that all declared variables must have a debug prefix.
-        case VariableDeclarationList(:final NodeList<VariableDeclaration> variables):
-          return variables.every((VariableDeclaration v) => v.name._isDebugOnlySymbol);
-        case ClassDeclaration(:final ClassNamePart namePart) ||
-            EnumDeclaration(:final ClassNamePart namePart) ||
-            ExtensionTypeDeclaration(:final ClassNamePart namePart):
-          return namePart.typeName._isDebugOnlySymbol;
-        case MixinDeclaration(:final Token name) ||
-            TypeAlias(:final Token name) ||
-            VariableDeclaration(:final Token name) ||
-            EnumConstantDeclaration(:final Token name):
-          return name._isDebugOnlySymbol;
-        case ExtensionDeclaration() || FunctionDeclaration():
-          return false;
-        case DeclaredIdentifier(:final Token name) || TypeParameter(:final Token name):
-          if (name._isDebugOnlySymbol) {
-            return true;
-          }
-        // Every FieldDeclaration and TopLevelVariableDeclaration node must have a VariableDeclarationList child,
-        // and non-debug class members defer to their enclosing type declaration.
-        case FieldDeclaration() ||
-            TopLevelVariableDeclaration() ||
-            MethodDeclaration() ||
-            ConstructorDeclaration() ||
-            PrimaryConstructorBody():
-          break;
-        case Declaration():
-          // The Declaration class isn't sealed. Throw a runtime error to indicate this rule
-          // needs updating.
-          throw UnimplementedError('Unhandled Declaration subtype: ${ancestor.runtimeType}');
+        Directive() || Comment() || Annotation() => true,
+        // When a variable declaration list's type is a debug-only type, all
+        // declared variables must have a debug prefix.
+        VariableDeclarationList(:final NodeList<VariableDeclaration> variables) => variables.every(
+          (VariableDeclaration v) => v.name._isDebugOnlySymbol,
+        ),
+        // A debug-only concrete type can access debug-only members and types.
+        ClassDeclaration(:final ClassNamePart namePart) ||
+        EnumDeclaration(:final ClassNamePart namePart) ||
+        ExtensionTypeDeclaration(
+          :final ClassNamePart namePart,
+        ) => namePart.typeName._isDebugOnlySymbol,
+        MixinDeclaration(:final Token name) ||
+        TypeAlias(:final Token name) ||
+        VariableDeclaration(:final Token name) ||
+        EnumConstantDeclaration(:final Token name) ||
+        // Explicitly prevents debug-only type references in type parameters,
+        // as those can be phantom types.
+        TypeParameter(:final Token name) => name._isDebugOnlySymbol,
+        _ => false,
+      };
+      if (isExempt) {
+        return true;
       }
     }
     return false;
