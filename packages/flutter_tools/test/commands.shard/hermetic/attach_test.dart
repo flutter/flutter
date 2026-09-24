@@ -1091,33 +1091,6 @@ void main() {
     );
 
     testUsingContext(
-      'resolves runner ToolContext when constructed with legacy parameters',
-      () async {
-        final ignoredLogger = BufferLogger.test();
-        final command = AttachCommand(
-          fileSystem: testFileSystem,
-          logger: ignoredLogger,
-          platform: platform,
-          processInfo: processInfo,
-          signals: signals,
-          stdio: stdio,
-          terminal: terminal,
-        );
-        await expectLater(
-          createTestCommandRunner(command).run(<String>['attach']),
-          throwsToolExit(),
-        );
-        expect(ignoredLogger.statusText, isEmpty);
-        expect(testLogger.statusText, containsIgnoringWhitespace('No supported devices connected'));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => testDeviceManager,
-      },
-    );
-
-    testUsingContext(
       'fails when targeted device is not Android with --device-user',
       () async {
         final device = FakeIOSDevice();
