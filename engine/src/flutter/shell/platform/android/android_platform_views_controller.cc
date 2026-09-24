@@ -622,7 +622,19 @@ void InMemoryPlatformViewsProvider::SetHcppEnabled(bool enabled) {
 
 ANativeWindow* InMemoryPlatformViewsProvider::GetOverlayWindow(int32_t id) {
   TRACE_EVENT0("flutter", "InMemoryPlatformViewsProvider::GetOverlayWindow");
+  std::lock_guard<std::mutex> lock(mutex_);
+  auto it = overlay_windows_.find(id);
+  if (it != overlay_windows_.end()) {
+    return it->second;
+  }
   return nullptr;
+}
+
+void InMemoryPlatformViewsProvider::SetOverlayWindowForTesting(
+    int32_t id,
+    ANativeWindow* window) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  overlay_windows_[id] = window;
 }
 
 void InMemoryPlatformViewsProvider::SetNextTextureId(int64_t texture_id) {
