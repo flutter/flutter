@@ -316,13 +316,18 @@ class SwiftPackageManagerUtils {
     final Directory sourcesDir = spmPluginDir
         .childDirectory('Sources')
         .childDirectory(plugin.pluginName);
-    final File swiftFile = sourcesDir.childFile('${plugin.className}.swift');
-    final String swiftContent = swiftFile.readAsStringSync();
+    final List<File> swiftFiles = sourcesDir
+        .listSync()
+        .whereType<File>()
+        .where((file) => file.path.endsWith('.swift'))
+        .toList();
 
     // Create Classes/ directory with the Swift file
     final Directory classesDir = platformDir.childDirectory('Classes');
     classesDir.createSync(recursive: true);
-    classesDir.childFile('${plugin.className}.swift').writeAsStringSync(swiftContent);
+    for (final swiftFile in swiftFiles) {
+      classesDir.childFile(swiftFile.basename).writeAsStringSync(swiftFile.readAsStringSync());
+    }
 
     // Delete the SwiftPM structure (pluginName directory with Package.swift and Sources)
     if (spmPluginDir.existsSync()) {
