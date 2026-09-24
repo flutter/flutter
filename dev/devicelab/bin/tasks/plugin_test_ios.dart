@@ -15,12 +15,8 @@ Future<void> main() async {
       ], cocoapodsTransitiveFlutterDependency: true).call,
       // Test that Dart-only plugins are supported.
       PluginTest('ios', <String>['--platforms=ios'], dartOnlyPlugin: true).call,
-      // Test that shared darwin directories are supported.
-      PluginTest('ios', <String>['--platforms=ios,macos'], sharedDarwinSource: true).call,
       // Test that FFI plugins are supported.
       PluginTest('ios', <String>['--platforms=ios'], template: 'plugin_ffi').call,
-      // Test that plugins support the darwin platform.
-      PluginTest('ios', <String>['--platforms=darwin']).call,
     ]),
   );
 }

@@ -70,16 +70,6 @@ void IOSExternalViewEmbedder::PrerollCompositeEmbeddedView(
 }
 
 // |ExternalViewEmbedder|
-PostPrerollResult IOSExternalViewEmbedder::PostPrerollAction(
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-  TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::PostPrerollAction");
-  FML_CHECK(platform_views_controller_);
-  PostPrerollResult result =
-      [platform_views_controller_ postPrerollActionWithThreadMerger:raster_thread_merger];
-  return result;
-}
-
-// |ExternalViewEmbedder|
 DlCanvas* IOSExternalViewEmbedder::CompositeEmbeddedView(int64_t view_id) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::CompositeEmbeddedView");
   FML_CHECK(platform_views_controller_);
@@ -109,15 +99,6 @@ void IOSExternalViewEmbedder::SubmitFlutterView(
                         withFlutterViewId:flutter_view_id];
   frame->Submit();
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::DidSubmitFrame");
-}
-
-// |ExternalViewEmbedder|
-void IOSExternalViewEmbedder::EndFrame(
-    bool should_resubmit_frame,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-  TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::EndFrame");
-  [platform_views_controller_ endFrameWithResubmit:should_resubmit_frame
-                                      threadMerger:raster_thread_merger];
 }
 
 // |ExternalViewEmbedder|

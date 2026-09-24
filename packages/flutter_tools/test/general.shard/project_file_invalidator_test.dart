@@ -132,5 +132,85 @@ void main() {
         );
       },
     );
+
+    testWithoutContext(
+      'File edited in same second as last compile is invalidated on Windows, asyncScanning: $asyncScanning',
+      () async {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final projectFileInvalidator = ProjectFileInvalidator(
+          fileSystem: fileSystem,
+          platform: FakePlatform(operatingSystem: 'windows'),
+          logger: BufferLogger.test(),
+        );
+
+        final lastCompiled = DateTime(2026, 8, 18, 3, 0, 0, 500); // 3:00:00.500
+        final fileMtime = DateTime(2026, 8, 18, 3); // 3:00:00.000 (truncated)
+
+        final File file = fileSystem.file('foo.dart')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('content');
+        file.setLastModifiedSync(fileMtime);
+
+        fileSystem.file('.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "packages": [],
+  "configVersion": 2
+}
+''');
+
+        expect(
+          (await projectFileInvalidator.findInvalidated(
+            lastCompiled: lastCompiled,
+            urisToMonitor: <Uri>[file.uri],
+            packagesPath: '.dart_tool/package_config.json',
+            asyncScanning: asyncScanning,
+            packageConfig: PackageConfig.empty,
+          )).uris,
+          contains(file.uri),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'File edited in same second as last compile is NOT invalidated on non-Windows, asyncScanning: $asyncScanning',
+      () async {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final projectFileInvalidator = ProjectFileInvalidator(
+          fileSystem: fileSystem,
+          platform: FakePlatform(),
+          logger: BufferLogger.test(),
+        );
+
+        final lastCompiled = DateTime(2026, 8, 18, 3, 0, 0, 500); // 3:00:00.500
+        final fileMtime = DateTime(2026, 8, 18, 3); // 3:00:00.000
+
+        final File file = fileSystem.file('foo.dart')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('content');
+        file.setLastModifiedSync(fileMtime);
+
+        fileSystem.file('.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "packages": [],
+  "configVersion": 2
+}
+''');
+
+        expect(
+          (await projectFileInvalidator.findInvalidated(
+            lastCompiled: lastCompiled,
+            urisToMonitor: <Uri>[file.uri],
+            packagesPath: '.dart_tool/package_config.json',
+            asyncScanning: asyncScanning,
+            packageConfig: PackageConfig.empty,
+          )).uris,
+          isEmpty,
+        );
+      },
+    );
   }
 }

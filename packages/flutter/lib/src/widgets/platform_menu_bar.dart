@@ -438,7 +438,7 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
 ///
 /// **This example will only work on macOS.**
 ///
-/// ** See code in examples/api/lib/material/platform_menu_bar/platform_menu_bar.0.dart **
+/// ** See code in examples/api/lib/widgets/platform_menu_bar/platform_menu_bar.0.dart **
 /// {@end-tool}
 ///
 /// The menus could just as effectively be managed without using the widget tree

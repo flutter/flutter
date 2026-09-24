@@ -33,6 +33,8 @@ class FlutterWindowsEngineBuilder {
 
   void SetImpellerSwitch(FlutterDesktopImpellerSwitch impeller_switch);
 
+  void SetEnableFlutterGpu(bool enable_flutter_gpu);
+
   void SetWindowsProcTable(
       std::shared_ptr<WindowsProcTable> windows_proc_table);
 

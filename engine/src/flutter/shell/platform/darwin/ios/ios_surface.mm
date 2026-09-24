@@ -6,16 +6,16 @@
 
 #include <memory>
 
+#include "flutter/fml/logging.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface_metal_impeller.h"
-#import "flutter/shell/platform/darwin/ios/ios_surface_noop.h"
 #include "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
 FLUTTER_ASSERT_ARC
 
 namespace flutter {
 
-std::unique_ptr<IOSSurface> IOSSurface::Create(std::shared_ptr<IOSContext> context,
+std::unique_ptr<IOSSurface> IOSSurface::Create(const std::shared_ptr<IOSContext>& context,
                                                CALayer* layer,
                                                bool render_to_surface) {
   FML_DCHECK(layer);
@@ -23,20 +23,18 @@ std::unique_ptr<IOSSurface> IOSSurface::Create(std::shared_ptr<IOSContext> conte
 
   if (@available(iOS METAL_IOS_VERSION_BASELINE, *)) {
     if ([layer isKindOfClass:[CAMetalLayer class]]) {
-      switch (context->GetBackend()) {
-        case IOSRenderingBackend::kSkia:
-          [FlutterLogger logFatal:@"Impeller opt-out unavailable."];
-          return nullptr;
-        case IOSRenderingBackend::kImpeller:
-          return std::make_unique<IOSSurfaceMetalImpeller>(
-              static_cast<CAMetalLayer*>(layer),  // Metal layer
-              std::move(context),                 // context
-              render_to_surface                   // render_to_surface
-          );
-      }
+      return std::make_unique<IOSSurfaceMetalImpeller>(
+          static_cast<CAMetalLayer*>(layer),  // Metal layer
+          context,                            // context
+          render_to_surface                   // render_to_surface
+      );
     }
   }
-  return std::make_unique<IOSSurfaceNoop>(std::move(context));
+  // The layer MUST be a CAMetalLayer or FlutterMetalLayer, which overrides
+  // isKindOfClass to return true for the above check. Anything else means the
+  // rendering surface was misconfigured.
+  FML_CHECK(false) << "Expected a Metal-backed layer for iOS rendering.";
+  FML_UNREACHABLE();
 }
 
 IOSSurface::IOSSurface(std::shared_ptr<IOSContext> ios_context)

@@ -199,7 +199,7 @@ TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
       Run, ([&run_called, engine_instance = engine.get()](
                 size_t version, const FlutterRendererConfig* config,
                 const FlutterProjectArgs* args, void* user_data,
-                FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -341,7 +341,7 @@ TEST_F(FlutterWindowsEngineTest, RunSkiaWithoutANGLEUsesSoftware) {
       Run, ([&run_called, engine_instance = engine.get()](
                 size_t version, const FlutterRendererConfig* config,
                 const FlutterProjectArgs* args, void* user_data,
-                FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
         // We don't have an EGL Manager, so we should be using software.
@@ -442,7 +442,7 @@ TEST_F(FlutterWindowsEngineTest, RunWithDefaultEnablesImpeller) {
       Run, ([&run_called, engine_instance = engine.get()](
                 size_t version, const FlutterRendererConfig* config,
                 const FlutterProjectArgs* args, void* user_data,
-                FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -503,7 +503,7 @@ TEST_F(FlutterWindowsEngineTest, RunWithProjectFlagEnableImpeller) {
   modifier.embedder_api().Run = MOCK_ENGINE_PROC(
       Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
                           const FlutterProjectArgs* args, void* user_data,
-                          FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -520,6 +520,115 @@ TEST_F(FlutterWindowsEngineTest, RunWithProjectFlagEnableImpeller) {
         }
         EXPECT_TRUE(has_impeller_switch);
         EXPECT_TRUE(has_sdf_switch);
+        return kSuccess;
+      }));
+
+  // Set the EGL manager to !nullptr to test ANGLE rendering.
+  modifier.SetEGLManager(std::make_unique<egl::MockManager>());
+
+  engine->Run();
+
+  EXPECT_TRUE(run_called);
+
+  modifier.embedder_api().Shutdown = [](auto engine) { return kSuccess; };
+  modifier.ReleaseEGLManager();
+}
+
+TEST_F(FlutterWindowsEngineTest, RunWithProjectFlagEnableFlutterGpu) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  builder.SetEnableFlutterGpu(true);
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+  EngineModifier modifier(engine.get());
+
+  modifier.embedder_api().NotifyDisplayUpdate =
+      MOCK_ENGINE_PROC(NotifyDisplayUpdate,
+                       ([](FLUTTER_API_SYMBOL(FlutterEngine) raw_engine,
+                           const FlutterEngineDisplaysUpdateType update_type,
+                           const FlutterEngineDisplay* embedder_displays,
+                           size_t display_count) { return kSuccess; }));
+
+  modifier.embedder_api().UpdateAccessibilityFeatures = MOCK_ENGINE_PROC(
+      UpdateAccessibilityFeatures,
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+         FlutterAccessibilityFeature flags) { return kSuccess; });
+
+  modifier.embedder_api().UpdateLocales = MOCK_ENGINE_PROC(
+      UpdateLocales, ([](auto engine, const FlutterLocale** locales,
+                         size_t locales_count) { return kSuccess; }));
+
+  modifier.embedder_api().SendPlatformMessage =
+      MOCK_ENGINE_PROC(SendPlatformMessage,
+                       ([](auto engine, auto message) { return kSuccess; }));
+
+  bool run_called = false;
+  modifier.embedder_api().Run = MOCK_ENGINE_PROC(
+      Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
+                          const FlutterProjectArgs* args, void* user_data,
+                          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        run_called = true;
+        *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
+
+        bool has_flutter_gpu_switch = false;
+        for (int i = 0; i < args->command_line_argc; ++i) {
+          if (strcmp(args->command_line_argv[i], "--enable-flutter-gpu") == 0) {
+            has_flutter_gpu_switch = true;
+          }
+        }
+        EXPECT_TRUE(has_flutter_gpu_switch);
+        return kSuccess;
+      }));
+
+  // Set the EGL manager to !nullptr to test ANGLE rendering.
+  modifier.SetEGLManager(std::make_unique<egl::MockManager>());
+
+  engine->Run();
+
+  EXPECT_TRUE(run_called);
+
+  modifier.embedder_api().Shutdown = [](auto engine) { return kSuccess; };
+  modifier.ReleaseEGLManager();
+}
+
+TEST_F(FlutterWindowsEngineTest, RunWithoutProjectFlagEnableFlutterGpu) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+  EngineModifier modifier(engine.get());
+
+  modifier.embedder_api().NotifyDisplayUpdate =
+      MOCK_ENGINE_PROC(NotifyDisplayUpdate,
+                       ([](FLUTTER_API_SYMBOL(FlutterEngine) raw_engine,
+                           const FlutterEngineDisplaysUpdateType update_type,
+                           const FlutterEngineDisplay* embedder_displays,
+                           size_t display_count) { return kSuccess; }));
+
+  modifier.embedder_api().UpdateAccessibilityFeatures = MOCK_ENGINE_PROC(
+      UpdateAccessibilityFeatures,
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+         FlutterAccessibilityFeature flags) { return kSuccess; });
+
+  modifier.embedder_api().UpdateLocales = MOCK_ENGINE_PROC(
+      UpdateLocales, ([](auto engine, const FlutterLocale** locales,
+                         size_t locales_count) { return kSuccess; }));
+
+  modifier.embedder_api().SendPlatformMessage =
+      MOCK_ENGINE_PROC(SendPlatformMessage,
+                       ([](auto engine, auto message) { return kSuccess; }));
+
+  bool run_called = false;
+  modifier.embedder_api().Run = MOCK_ENGINE_PROC(
+      Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
+                          const FlutterProjectArgs* args, void* user_data,
+                          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        run_called = true;
+        *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
+
+        bool has_flutter_gpu_switch = false;
+        for (int i = 0; i < args->command_line_argc; ++i) {
+          if (strcmp(args->command_line_argv[i], "--enable-flutter-gpu") == 0) {
+            has_flutter_gpu_switch = true;
+          }
+        }
+        EXPECT_FALSE(has_flutter_gpu_switch);
         return kSuccess;
       }));
 
@@ -564,7 +673,7 @@ TEST_F(FlutterWindowsEngineTest, RunWithProjectFlagDisableImpeller) {
   modifier.embedder_api().Run = MOCK_ENGINE_PROC(
       Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
                           const FlutterProjectArgs* args, void* user_data,
-                          FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -616,7 +725,7 @@ TEST_F(FlutterWindowsEngineTest, RunWithCommandLineDisableImpeller) {
   modifier.embedder_api().Run = MOCK_ENGINE_PROC(
       Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
                           const FlutterProjectArgs* args, void* user_data,
-                          FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -1023,9 +1132,8 @@ TEST_F(FlutterWindowsEngineTest, AccessibilityAnnouncement) {
   builder.SetDartEntrypoint("sendAccessibilityAnnouncement");
 
   bool done = false;
-  auto native_entry =
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry = CREATE_FFI_LAMBDA([&]() { done = true; });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   EnginePtr engine{builder.RunHeadless()};
   ASSERT_NE(engine, nullptr);
@@ -1061,9 +1169,8 @@ TEST_F(FlutterWindowsEngineTest, AccessibilityAnnouncementHeadless) {
   builder.SetDartEntrypoint("sendAccessibilityAnnouncement");
 
   bool done = false;
-  auto native_entry =
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry = CREATE_FFI_LAMBDA([&]() { done = true; });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   EnginePtr engine{builder.RunHeadless()};
   ASSERT_NE(engine, nullptr);
@@ -1087,9 +1194,8 @@ TEST_F(FlutterWindowsEngineTest, AccessibilityTooltip) {
   builder.SetDartEntrypoint("sendAccessibilityTooltipEvent");
 
   bool done = false;
-  auto native_entry =
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry = CREATE_FFI_LAMBDA([&]() { done = true; });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
@@ -1662,7 +1768,8 @@ TEST_F(FlutterWindowsEngineTest, AddViewFailureDoesNotHang) {
 
   std::unique_ptr<FlutterWindowsView> implicit_view =
       engine->CreateView(std::move(implicit_window),
-                         /*is_sized_to_content=*/false, BoxConstraints());
+                         /*is_sized_to_content=*/false, BoxConstraints(),
+                         /*allow_implicit_view=*/true);
 
   EXPECT_TRUE(implicit_view);
 
@@ -1671,7 +1778,8 @@ TEST_F(FlutterWindowsEngineTest, AddViewFailureDoesNotHang) {
 
   EXPECT_DEBUG_DEATH(
       engine->CreateView(std::move(second_window),
-                         /*is_sized_to_content=*/false, BoxConstraints()),
+                         /*is_sized_to_content=*/false, BoxConstraints(),
+                         /*allow_implicit_view=*/false),
       "FlutterEngineAddView returned an unexpected result");
 }
 
@@ -1701,10 +1809,9 @@ TEST_F(FlutterWindowsEngineTest, MergedUIThread) {
 
   std::optional<std::thread::id> ui_thread_id;
 
-  auto native_entry = CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-    ui_thread_id = std::this_thread::get_id();
-  });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry =
+      CREATE_FFI_LAMBDA([&]() { ui_thread_id = std::this_thread::get_id(); });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   EnginePtr engine{builder.RunHeadless()};
   while (!ui_thread_id) {
@@ -1737,9 +1844,8 @@ TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
 
   // Setup: a signal for when we have send out all of our semantics updates
   bool done = false;
-  auto native_entry =
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry = CREATE_FFI_LAMBDA([&]() { done = true; });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   // Setup: Create the engine and two views + enable semantics
   EnginePtr engine{builder.RunHeadless()};
@@ -1771,10 +1877,12 @@ TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
 
   auto view1 = windows_engine->CreateView(std::move(window_binding_handler1),
                                           /*is_sized_to_content=*/false,
-                                          BoxConstraints());
+                                          BoxConstraints(),
+                                          /*allow_implicit_view=*/false);
   auto view2 = windows_engine->CreateView(std::move(window_binding_handler2),
                                           /*is_sized_to_content=*/false,
-                                          BoxConstraints());
+                                          BoxConstraints(),
+                                          /*allow_implicit_view=*/false);
 
   // Act: UpdateSemanticsEnabled will trigger the semantics updates
   // to get sent.

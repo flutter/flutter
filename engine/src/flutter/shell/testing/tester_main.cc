@@ -571,7 +571,7 @@ int main(int argc, char* argv[]) {
 
   auto command_line = fml::CommandLineFromPlatformOrArgcArgv(argc, argv);
 
-  if (command_line.HasOption(flutter::FlagForSwitch(flutter::Switch::Help))) {
+  if (command_line.HasOption(flutter::FlagForSwitch(flutter::Switch::kHelp))) {
     flutter::PrintUsage("flutter_tester");
     return EXIT_SUCCESS;
   }
@@ -633,7 +633,7 @@ int main(int argc, char* argv[]) {
 
   return flutter::RunTester(settings,
                             command_line.HasOption(flutter::FlagForSwitch(
-                                flutter::Switch::RunForever)),
+                                flutter::Switch::kRunForever)),
                             command_line.HasOption(flutter::FlagForSwitch(
-                                flutter::Switch::ForceMultithreading)));
+                                flutter::Switch::kForceMultithreading)));
 }

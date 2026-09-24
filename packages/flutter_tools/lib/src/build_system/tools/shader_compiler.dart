@@ -21,21 +21,29 @@ import '../../convert.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals;
 import '../build_system.dart';
+import '../depfile.dart';
 
 /// A wrapper around [ShaderCompiler] to support hot reload of shader sources.
 class DevelopmentShaderCompiler {
   DevelopmentShaderCompiler({
-    required ShaderCompiler shaderCompiler,
+    required this._shaderCompiler,
     required FileSystem fileSystem,
+    required Logger logger,
     @visibleForTesting math.Random? random,
-  }) : _shaderCompiler = shaderCompiler,
-       _fileSystem = fileSystem,
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
+       _depfileService = DepfileService(fileSystem: fileSystem, logger: logger),
        _random = random ?? math.Random();
 
   final ShaderCompiler _shaderCompiler;
   final FileSystem _fileSystem;
+  final Logger _logger;
+  final DepfileService _depfileService;
   final Pool _compilationPool = Pool(4);
   final math.Random _random;
+
+  final _dependencies = <String, List<File>>{};
+  final _lastCompiledTime = <String, DateTime>{};
 
   late TargetPlatform _targetPlatform;
   var _debugConfigured = false;
@@ -55,6 +63,8 @@ class DevelopmentShaderCompiler {
   Future<DevFSContent?> recompileShader(DevFSContent inputShader) async {
     assert(_debugConfigured);
     final File output = _fileSystem.systemTempDirectory.childFile('${_random.nextDouble()}.temp');
+    final File depfile = _fileSystem.systemTempDirectory.childFile('${_random.nextDouble()}.d');
+    final startTime = DateTime.now();
     late File inputFile;
     var cleanupInput = false;
     Uint8List result;
@@ -73,19 +83,63 @@ class DevelopmentShaderCompiler {
         outputPath: output.path,
         targetPlatform: _targetPlatform,
         fatal: false,
+        depfilePath: depfile.path,
       );
       if (!success) {
         return null;
       }
       result = output.readAsBytesSync();
+
+      if (inputShader is DevFSFileContent) {
+        try {
+          if (depfile.existsSync()) {
+            final Depfile parsedDepfile = _depfileService.parse(depfile);
+            _dependencies[inputShader.file.path] = parsedDepfile.inputs;
+            _lastCompiledTime[inputShader.file.path] = startTime;
+          }
+        } on Exception catch (e) {
+          _logger.printTrace('Error parsing depfile: $e');
+        }
+      }
     } finally {
       resource?.release();
       ErrorHandlingFileSystem.deleteIfExists(output);
+      ErrorHandlingFileSystem.deleteIfExists(depfile);
       if (cleanupInput) {
         ErrorHandlingFileSystem.deleteIfExists(inputFile);
       }
     }
     return DevFSByteContent(result);
+  }
+
+  /// Returns true if any of the tracker dependencies of the [shaderContent]
+  /// have been modified since it was last compiled.
+  bool areDependenciesModified(DevFSContent shaderContent) {
+    if (shaderContent is! DevFSFileContent) {
+      return false;
+    }
+    final String path = shaderContent.file.path;
+    final List<File>? deps = _dependencies[path];
+    final DateTime? lastCompiled = _lastCompiledTime[path];
+    if (deps == null || lastCompiled == null) {
+      return false;
+    }
+    for (final File dep in deps) {
+      try {
+        if (!dep.existsSync()) {
+          return true;
+        }
+        if (dep.statSync().modified.isAfter(lastCompiled)) {
+          return true;
+        }
+      } on FileSystemException catch (e) {
+        _logger.printTrace(
+          'Error checking shader dependency modification time for ${dep.path}: $e',
+        );
+        return true;
+      }
+    }
+    return false;
   }
 }
 
@@ -93,15 +147,12 @@ class DevelopmentShaderCompiler {
 /// impellerc.
 class ShaderCompiler {
   ShaderCompiler({
-    required ProcessManager processManager,
-    required Logger logger,
+    required this._processManager,
+    required this._logger,
     required FileSystem fileSystem,
-    required Artifacts artifacts,
+    required this._artifacts,
     Platform? platform,
-  }) : _processManager = processManager,
-       _logger = logger,
-       _fs = fileSystem,
-       _artifacts = artifacts,
+  }) : _fs = fileSystem,
        _platform = platform ?? _lookupPlatform();
 
   static Platform _lookupPlatform() {
@@ -118,6 +169,7 @@ class ShaderCompiler {
   final Artifacts _artifacts;
   final Platform _platform;
   bool _hasLoggedSecurityBlockError = false;
+  final Set<String> _loggedWarningShaders = <String>{};
 
   List<String> _shaderTargetsFromTargetPlatform(TargetPlatform targetPlatform) {
     switch (targetPlatform) {
@@ -178,6 +230,7 @@ class ShaderCompiler {
     required String outputPath,
     required TargetPlatform targetPlatform,
     bool fatal = true,
+    String? depfilePath,
   }) async {
     final File impellerc = _fs.file(_artifacts.getHostArtifact(HostArtifact.impellerc));
     if (!impellerc.existsSync()) {
@@ -199,6 +252,7 @@ class ShaderCompiler {
       '--input-type=frag',
       '--include=${input.parent.path}',
       '--include=$shaderLibPath',
+      if (depfilePath != null) '--depfile=$depfilePath',
     ];
 
     try {
@@ -208,7 +262,7 @@ class ShaderCompiler {
       final List<String> shaderTargets = _shaderTargetsFromTargetPlatform(targetPlatform);
       final List<String> cmd = makeImpellercCommand(shaderTargets);
       _logger.printTrace('impellerc command: $cmd');
-      final ProcessResult result = await _runCommand(cmd);
+      ProcessResult result = await _runCommand(cmd);
       if (result.exitCode != 0) {
         // Maybe retry impellerc command without --sksl.
         if (!(shaderTargets.length > 1 && shaderTargets.contains('--sksl'))) {
@@ -229,6 +283,7 @@ class ShaderCompiler {
         if (retryResult.exitCode != 0) {
           // Retry failed.
           _logger.printError('impellerc failure: ${retryResult.stderr}');
+          result = retryResult;
           failure = true;
         } else {
           // Retry succeeded. Don't fail, but log a warning message and the sksl
@@ -245,12 +300,24 @@ class ShaderCompiler {
 
       if (failure) {
         if (fatal) {
+          final String? hint = _getHelpfulHint(result, input, outputPath, impellerc.path);
+          final message =
+              'Shader compilation of "${input.path}" to "$outputPath" '
+              'failed with exit code ${result.exitCode}.'
+              '${hint != null ? '\n$hint' : ''}';
           throw ShaderCompilerException._(
-            'Shader compilation of "${input.path}" to "$outputPath" '
-            'failed with exit code ${result.exitCode}.',
+            message,
+            stdout: result.stdout as String?,
+            stderr: result.stderr as String?,
           );
         }
         return false;
+      }
+      final String? stderr = (result.stderr as String?)?.trim();
+      if (stderr != null && stderr.isNotEmpty) {
+        if (_loggedWarningShaders.add(input.path)) {
+          _logger.printBox(stderr, title: 'Shader Warning');
+        }
       }
     } on _SecurityPolicyBlockException catch (_) {
       _logSecurityBlockError(impellerc.path);
@@ -263,9 +330,46 @@ class ShaderCompiler {
     return true;
   }
 
+  String? _getHelpfulHint(
+    ProcessResult result,
+    File input,
+    String outputPath,
+    String impellercPath,
+  ) {
+    final int exitCode = result.exitCode;
+    if (_platform.isMacOS && exitCode == -9) {
+      return 'The shader compiler (impellerc) may have been blocked by macOS Gatekeeper or run out of memory (OOM).\n'
+          'To resolve Gatekeeper issues, try running:\n'
+          '  xattr -d com.apple.quarantine "$impellercPath"';
+    }
+
+    final bool isWindowsAbort = _platform.isWindows && exitCode == 3;
+    final bool isPosixAbort = (_platform.isMacOS || _platform.isLinux) && exitCode == -6;
+
+    if (isWindowsAbort || isPosixAbort) {
+      var hint = 'The shader compiler (impellerc) aborted during compilation.';
+      if (_platform.isWindows) {
+        final bool hasNonAscii =
+            RegExp(r'[^\x00-\x7F]').hasMatch(input.path) ||
+            RegExp(r'[^\x00-\x7F]').hasMatch(outputPath);
+        if (hasNonAscii) {
+          hint +=
+              '\nWarning: The path contains non-ASCII characters, which is known to cause crashes on Windows.\n'
+              'Try moving your project to a path containing only ASCII characters.';
+        }
+      }
+      return hint;
+    }
+    return null;
+  }
+
   Future<ProcessResult> _runCommand(List<String> command) async {
     try {
-      return await _processManager.run(command, stderrEncoding: utf8);
+      return await _processManager.run(
+        command,
+        stdoutEncoding: utf8AllowMalformed,
+        stderrEncoding: utf8AllowMalformed,
+      );
     } on ProcessException catch (e) {
       if (_isBlockedBySecurityPolicy(e)) {
         throw _SecurityPolicyBlockException(e);
@@ -279,7 +383,9 @@ class ShaderCompiler {
       return false;
     }
     const winErrorAccessDisabledByPolicy = 1260;
-    return exception.errorCode == winErrorAccessDisabledByPolicy;
+    const winErrorSystemIntegrityPolicyViolation = 4551;
+    return exception.errorCode == winErrorAccessDisabledByPolicy ||
+        exception.errorCode == winErrorSystemIntegrityPolicyViolation;
   }
 
   void _logSecurityBlockError(String impellercPath) {
@@ -306,10 +412,26 @@ class _SecurityPolicyBlockException implements Exception {
 }
 
 class ShaderCompilerException implements Exception {
-  ShaderCompilerException._(this.message);
+  ShaderCompilerException._(this.message, {this.stdout, this.stderr});
 
   final String message;
+  final String? stdout;
+  final String? stderr;
 
   @override
-  String toString() => 'ShaderCompilerException: $message\n\n';
+  String toString() {
+    final buffer = StringBuffer();
+    buffer.write('ShaderCompilerException: $message\n');
+    final String? stdout = this.stdout;
+    if (stdout != null && stdout.trim().isNotEmpty) {
+      buffer.writeln('Stdout:');
+      buffer.writeln(stdout.trim());
+    }
+    final String? stderr = this.stderr;
+    if (stderr != null && stderr.trim().isNotEmpty) {
+      buffer.writeln('Stderr:');
+      buffer.writeln(stderr.trim());
+    }
+    return buffer.toString();
+  }
 }

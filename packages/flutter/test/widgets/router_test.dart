@@ -12,7 +12,6 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'button_tester.dart';
 import 'test_page_tester.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   const kWhite = Color(0xFFFFFFFF);
@@ -1735,14 +1734,20 @@ Widget buildBoilerPlate(Widget child) {
   return TestWidgetsApp(home: child);
 }
 
-typedef SimpleRouterDelegateBuilder =
-    Widget Function(BuildContext context, RouteInformation? information);
+typedef SimpleRouterDelegateBuilder = Widget Function(
+  BuildContext context,
+  RouteInformation? information,
+);
 typedef SimpleRouterDelegatePopRoute = Future<bool> Function();
 typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result);
-typedef RouterReportRouterInformation =
-    void Function(RouteInformation information, RouteInformationReportingType type);
-typedef CustomRouteInformationParserCallback =
-    RouteInformation Function(RouteInformation information, BuildContext context);
+typedef RouterReportRouterInformation = void Function(
+  RouteInformation information,
+  RouteInformationReportingType type,
+);
+typedef CustomRouteInformationParserCallback = RouteInformation Function(
+  RouteInformation information,
+  BuildContext context,
+);
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
   SimpleRouteInformationParser();
@@ -2006,7 +2011,7 @@ class IntInheritedNotifier extends InheritedNotifier<ValueListenable<int>> {
   }
 }
 
-/// A button widget that calls [setState] on tap, causing a rebuild.
+/// A button widget that calls [State.setState] on tap, causing a rebuild.
 ///
 /// Unlike [TestButton] (which uses a stateless [GestureDetector]), this widget
 /// has internal state that changes on tap. This is needed for tests where the

@@ -63,11 +63,6 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
       std::unique_ptr<flutter::EmbeddedViewParams> params) override;
 
   // |ExternalViewEmbedder|
-  PostPrerollResult PostPrerollAction(
-      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger)
-      override;
-
-  // |ExternalViewEmbedder|
   DlCanvas* CompositeEmbeddedView(int64_t view_id) override;
 
   // |ExternalViewEmbedder|
@@ -76,11 +71,6 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
       GrDirectContext* context,
       const std::shared_ptr<impeller::AiksContext>& aiks_context,
       std::unique_ptr<SurfaceFrame> frame) override;
-
-  // |ExternalViewEmbedder|
-  void EndFrame(bool should_resubmit_frame,
-                const fml::RefPtr<fml::RasterThreadMerger>&
-                    raster_thread_merger) override;
 
   // |ExternalViewEmbedder|
   bool SupportsDynamicThreadMerging() override;

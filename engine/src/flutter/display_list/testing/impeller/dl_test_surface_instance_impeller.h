@@ -9,9 +9,9 @@
 
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/impeller/display_list/aiks_context.h"
-#include "flutter/impeller/golden_tests/metal_screenshotter.h"
 #include "flutter/impeller/playground/playground_impl.h"
 #include "flutter/impeller/renderer/surface.h"
+#include "flutter/impeller/testing/metal/metal_screenshotter.h"
 #include "flutter/impeller/typographer/typographer_context.h"
 
 namespace flutter {
@@ -70,7 +70,6 @@ class DlSurfaceInstanceImpeller : public DlSurfaceInstance {
   void DoRenderDisplayList(const sk_sp<DisplayList>& display_list);
 
   static std::shared_ptr<impeller::TypographerContext> typographer_context_;
-  static impeller::testing::MetalScreenshotter snapshotter_;
 };
 
 }  // namespace testing

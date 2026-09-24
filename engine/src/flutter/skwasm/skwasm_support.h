@@ -39,8 +39,7 @@ extern uint32_t skwasm_getGlContextForCanvas(SkwasmObject canvas,
                                              bool antialias,
                                              Skwasm::Surface* surface);
 extern void skwasm_reportInitialized(Skwasm::Surface* surface,
-                                     uint32_t callback_id,
-                                     uint32_t context_lost_callback_id);
+                                     uint32_t callback_id);
 extern void skwasm_reportResizeComplete(Skwasm::Surface* surface,
                                         uint32_t callback_id);
 extern void skwasm_dispatchResizeSurface(unsigned long thread_id,
@@ -76,6 +75,9 @@ extern void skwasm_dispatchTransferCanvas(unsigned long thread_id,
                                           uint32_t callback_id);
 extern void skwasm_dispatchDisposeSurface(unsigned long thread_id,
                                           Skwasm::Surface* surface);
+extern void skwasm_dispatchSetResourceCacheLimit(unsigned long thread_id,
+                                                 Skwasm::Surface* surface,
+                                                 int bytes);
 extern void skwasm_dispatchRasterizeImage(unsigned long thread_id,
                                           Skwasm::Surface* surface,
                                           flutter::DlImage* image,

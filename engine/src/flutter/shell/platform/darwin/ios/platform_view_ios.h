@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "flutter/common/constants.h"
 #include "flutter/flow/surface.h"
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
@@ -20,7 +21,6 @@
 #import "flutter/shell/platform/darwin/ios/ios_external_view_embedder.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 #import "flutter/shell/platform/darwin/ios/platform_message_handler_ios.h"
-#import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
 @class FlutterViewController;
 
@@ -49,10 +49,8 @@ class PlatformViewIOS final : public PlatformView {
 
   explicit PlatformViewIOS(
       PlatformView::Delegate& delegate,
-      IOSRenderingAPI rendering_api,
       __weak FlutterPlatformViewsController* platform_views_controller,
       const flutter::TaskRunners& task_runners,
-      const std::shared_ptr<fml::ConcurrentTaskRunner>& worker_task_runner,
       const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch);
 
   ~PlatformViewIOS() override;
@@ -89,6 +87,7 @@ class PlatformViewIOS final : public PlatformView {
    *
    * Can be used to perform late initialization after `FlutterViewController`'s
    * init.
+   *
    */
   void attachView(FlutterViewIdentifier viewIdentifier);
 
@@ -100,9 +99,6 @@ class PlatformViewIOS final : public PlatformView {
 
   // |PlatformView|
   PointerDataDispatcherMaker GetDispatcherMaker() override;
-
-  // |PlatformView|
-  void SetSemanticsEnabled(bool enabled) override;
 
   // |PlatformView|
   void SetSemanticsTreeEnabled(bool enabled) override;
@@ -118,9 +114,6 @@ class PlatformViewIOS final : public PlatformView {
 
   // |PlatformView|
   std::shared_ptr<impeller::Context> GetImpellerContext() const override;
-
-  // |PlatformView|
-  void SetAccessibilityFeatures(int32_t flags) override;
 
   // |PlatformView|
   void UpdateSemantics(int64_t view_id,
@@ -158,18 +151,20 @@ class PlatformViewIOS final : public PlatformView {
   /**
    * Gets the accessibility bridge created in this platform view.
    */
-  AccessibilityBridge* GetAccessibilityBridge() {
-    return accessibility_bridges_.empty() ? nullptr : accessibility_bridges_.begin()->second.get();
+  AccessibilityBridge* GetAccessibilityBridge(
+      FlutterViewIdentifier viewIdentifier = kFlutterImplicitViewId) {
+    auto bridge = accessibility_bridges_.find(viewIdentifier);
+    return bridge == accessibility_bridges_.end() ? nullptr : bridge->second.get();
   }
 
  private:
   void ApplyLocaleToOwnerController();
+  void EnsureAccessibilityBridge(FlutterViewIdentifier viewIdentifier);
+  void PostSemanticsUpdateNotification(FlutterViewIdentifier viewIdentifier);
 
-  // __weak FlutterViewController* owner_controller_;
   std::string application_locale_;
   std::shared_ptr<IOSContext> ios_context_;
   __weak FlutterPlatformViewsController* platform_views_controller_;
-  // std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
   std::unordered_map<int64_t, std::unique_ptr<AccessibilityBridge>> accessibility_bridges_;
   bool semantics_tree_enabled_ = false;
   std::vector<std::string> platform_resolved_locale_;

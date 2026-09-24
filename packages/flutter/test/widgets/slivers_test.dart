@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 const Color _debugEvenColor = Color(0xFF00FF00);
 const Color _debugOddColor = Color(0xFFFF0000);
@@ -908,7 +907,6 @@ void main() {
           home: CustomScrollView(
             slivers: <Widget>[
               SliverIgnorePointer(
-                ignoringSemantics: false,
                 sliver: SliverToBoxAdapter(
                   child: GestureDetector(
                     child: const Text('a'),
@@ -925,35 +923,6 @@ void main() {
       expect(semantics.nodesWith(label: 'a'), hasLength(1));
       await tester.tap(find.byType(GestureDetector), warnIfMissed: false);
       expect(events, equals(<String>[]));
-      semantics.dispose();
-    });
-
-    testWidgets('ignores semantics', (WidgetTester tester) async {
-      final semantics = SemanticsTester(tester);
-      final events = <String>[];
-      await tester.pumpWidget(
-        TestWidgetsApp(
-          home: CustomScrollView(
-            slivers: <Widget>[
-              SliverIgnorePointer(
-                ignoring: false,
-                ignoringSemantics: true,
-                sliver: SliverToBoxAdapter(
-                  child: GestureDetector(
-                    child: const Text('a'),
-                    onTap: () {
-                      events.add('tap');
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-      expect(semantics.nodesWith(label: 'a'), hasLength(0));
-      await tester.tap(find.byType(GestureDetector));
-      expect(events, equals(<String>['tap']));
       semantics.dispose();
     });
 
@@ -976,34 +945,6 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('ignores pointer events & semantics', (WidgetTester tester) async {
-      final semantics = SemanticsTester(tester);
-      final events = <String>[];
-      await tester.pumpWidget(
-        TestWidgetsApp(
-          home: CustomScrollView(
-            slivers: <Widget>[
-              SliverIgnorePointer(
-                ignoringSemantics: true,
-                sliver: SliverToBoxAdapter(
-                  child: GestureDetector(
-                    child: const Text('a'),
-                    onTap: () {
-                      events.add('tap');
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-      expect(semantics.nodesWith(label: 'a'), hasLength(0));
-      await tester.tap(find.byType(GestureDetector), warnIfMissed: false);
-      expect(events, equals(<String>[]));
-      semantics.dispose();
-    });
-
     testWidgets('ignores nothing', (WidgetTester tester) async {
       final semantics = SemanticsTester(tester);
       final events = <String>[];
@@ -1013,7 +954,6 @@ void main() {
             slivers: <Widget>[
               SliverIgnorePointer(
                 ignoring: false,
-                ignoringSemantics: false,
                 sliver: SliverToBoxAdapter(
                   child: GestureDetector(
                     child: const Text('a'),

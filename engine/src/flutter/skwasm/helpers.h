@@ -79,13 +79,22 @@ enum class ImageByteFormat {
   png,
 };
 
-// This needs to be kept in sync with the "FilterQuality" enum in dart:ui
+// This needs to be kept in sync with the "FilterQuality" enum in dart:ui.
+// Skwasm's FFI passes dart:ui's `FilterQuality.index` as a raw int across
+// the WASM boundary and decodes it back to this enum, so the integer
+// values must match dart:ui's declaration order. Locking them here
+// turns any drift into a compile error instead of a silently wrong
+// sampling mode.
 enum class FilterQuality {
   none,
   low,
   medium,
   high,
 };
+static_assert(static_cast<int>(FilterQuality::none) == 0);
+static_assert(static_cast<int>(FilterQuality::low) == 1);
+static_assert(static_cast<int>(FilterQuality::medium) == 2);
+static_assert(static_cast<int>(FilterQuality::high) == 3);
 
 inline flutter::DlFilterMode FilterModeForQuality(FilterQuality quality) {
   switch (quality) {

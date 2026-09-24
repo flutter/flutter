@@ -19,7 +19,7 @@ class ContextMTL;
 
 class PlaygroundImplMTL final : public PlaygroundImpl {
  public:
-  explicit PlaygroundImplMTL(PlaygroundSwitches switches);
+  explicit PlaygroundImplMTL(const PlaygroundSwitches& switches);
 
   ~PlaygroundImplMTL();
 

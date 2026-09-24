@@ -39,6 +39,10 @@ class MockSnapshotDelegate : public SnapshotDelegate {
               (),
               (override));
   MOCK_METHOD(GrDirectContext*, GetGrContext, (), (override));
+  MOCK_METHOD(std::shared_ptr<impeller::AiksContext>,
+              GetAiksContext,
+              (),
+              (const, override));
   MOCK_METHOD(void,
               MakeSkiaSnapshot,
               (sk_sp<DisplayList>,
@@ -104,7 +108,7 @@ class MockDlImage : public impeller::DlImageImpeller {
   MOCK_METHOD(const DlImageSkia*, asSkiaImage, (), (const, override));
   MOCK_METHOD(std::shared_ptr<impeller::Texture>,
               GetImpellerTexture,
-              (const std::shared_ptr<impeller::Context>&),
+              (impeller::ContentContext&),
               (const, override));
 };
 #endif

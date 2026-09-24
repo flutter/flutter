@@ -13,6 +13,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
@@ -36,9 +37,7 @@ import 'plist_parser.dart';
 const iosSimulatorId = 'apple_ios_simulator';
 
 class IOSSimulators extends PollingDeviceDiscovery {
-  IOSSimulators({required IOSSimulatorUtils iosSimulatorUtils})
-    : _iosSimulatorUtils = iosSimulatorUtils,
-      super('iOS simulators');
+  IOSSimulators({required this._iosSimulatorUtils}) : super('iOS simulators');
 
   final IOSSimulatorUtils _iosSimulatorUtils;
 
@@ -63,16 +62,20 @@ class IOSSimulatorUtils {
     required Xcode xcode,
     required Logger logger,
     required ProcessManager processManager,
+    required this._operatingSystemUtils,
   }) : _simControl = SimControl(logger: logger, processManager: processManager, xcode: xcode),
        _xcode = xcode;
 
   final SimControl _simControl;
   final Xcode _xcode;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
     if (!_xcode.isInstalledAndMeetsVersionCheck || !_xcode.isSimctlInstalled) {
       return <IOSSimulator>[];
     }
+
+    final cpuArch = CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
 
     final List<BootedSimDevice> connected = await _simControl.getConnectedDevices();
     return connected
@@ -93,6 +96,7 @@ class IOSSimulatorUtils {
             simControl: _simControl,
             simulatorCategory: device.category,
             logger: _simControl._logger,
+            cpuArch: cpuArch,
           );
         })
         .whereType<IOSSimulator>()
@@ -110,9 +114,8 @@ class IOSSimulatorUtils {
 
 /// A wrapper around the `simctl` command line tool.
 class SimControl {
-  SimControl({required Logger logger, required ProcessManager processManager, required Xcode xcode})
+  SimControl({required Logger logger, required ProcessManager processManager, required this._xcode})
     : _logger = logger,
-      _xcode = xcode,
       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
   final Logger _logger;
@@ -357,10 +360,10 @@ class IOSSimulator extends Device {
     super.id, {
     required this.name,
     required this.simulatorCategory,
-    required SimControl simControl,
+    required this._simControl,
+    required this._cpuArch,
     required super.logger,
-  }) : _simControl = simControl,
-       super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true);
+  }) : super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true);
 
   @override
   final String name;
@@ -368,6 +371,8 @@ class IOSSimulator extends Device {
   final String simulatorCategory;
 
   final SimControl _simControl;
+
+  final CpuArch _cpuArch;
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
@@ -394,6 +399,9 @@ class IOSSimulator extends Device {
 
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode == BuildMode.debug;
+
+  @override
+  Future<CpuArch> get cpuArch async => _cpuArch;
 
   final _logReaders = <IOSApp?, DeviceLogReader>{};
   _IOSSimulatorDevicePortForwarder? _portForwarder;
@@ -829,7 +837,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
     final uisceneCrashInterceptor = LogInterceptor(
       identifier: 'uiscene_crash',
       pattern: RegExp(r'UIScene life\s?cycle is required'),
-      action: () {
+      action: (String message) {
         throwToolExit(kUISceneMigrationRequiredError);
       },
       excludeFromStream: false,

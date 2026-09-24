@@ -39,6 +39,7 @@ constexpr FlutterViewIdentifier kSecondaryFlutterViewId = flutter::kFlutterImpli
 - (void)handleSearchWebAction;
 - (void)handleLookUpAction;
 - (void)handleShareAction;
+- (void)handleTranslateAction;
 @end
 
 @interface FlutterTextInputViewSpy : FlutterTextInputView
@@ -141,6 +142,9 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
                                     bool transient) override {}
   void UpdateAssetResolverByType(std::unique_ptr<flutter::AssetResolver> updated_asset_resolver,
                                  flutter::AssetResolver::AssetResolverType type) override {}
+  std::shared_ptr<fml::BasicTaskRunner> OnPlatformViewGetShutdownSafeIOTaskRunner() const override {
+    return nullptr;
+  }
 
   flutter::Settings settings_;
 };
@@ -813,6 +817,22 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertEqual(substring.length, 0ul);
 }
 
+- (void)testInsertTextReplacesEntireMarkedRangeForDeadKeySequence {
+  // Regression test for https://github.com/flutter/flutter/issues/59541#issuecomment-4617810595.
+  NSDictionary* config = self.mutableTemplateCopy;
+  [self setClientId:123 configuration:config];
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+  FlutterTextInputView* inputView = inputFields[0];
+
+  [inputView setMarkedText:@"´" selectedRange:NSMakeRange(1, 0)];
+  [inputView insertText:@"Á"];
+
+  UITextRange* range = [inputView textRangeFromPosition:inputView.beginningOfDocument
+                                             toPosition:inputView.endOfDocument];
+  NSString* substring = [inputView textInRange:range];
+  XCTAssertEqualObjects(substring, @"Á");
+}
+
 - (void)testTextInRangeAcceptsNSNotFoundLocationGracefully {
   NSDictionary* config = self.mutableTemplateCopy;
   [self setClientId:123 configuration:config];
@@ -1112,12 +1132,8 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   thread_task_runner->PostTask([&] {
     auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
         /*delegate=*/mock_platform_view_delegate,
-        /*rendering_api=*/mock_platform_view_delegate.settings_.enable_impeller
-            ? flutter::IOSRenderingAPI::kMetal
-            : flutter::IOSRenderingAPI::kSoftware,
         /*platform_views_controller=*/nil,
         /*task_runners=*/runners,
-        /*worker_task_runner=*/nil,
         /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
 
     platform_view->SetOwnerViewController(mockFlutterViewController);
@@ -3834,10 +3850,13 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
     NSDictionary<NSString*, NSNumber*>* encodedTargetRect =
         @{@"x" : @(100), @"y" : @(200), @"width" : @(300), @"height" : @(400)};
 
-    NSArray<NSDictionary<NSString*, id>*>* encodedItems = @[
+    NSMutableArray<NSDictionary<NSString*, id>*>* encodedItems = [@[
       @{@"type" : @"searchWeb", @"title" : @"Search Web"},
       @{@"type" : @"lookUp", @"title" : @"Look Up"}, @{@"type" : @"share", @"title" : @"Share"}
-    ];
+    ] mutableCopy];
+    if (@available(iOS 17.4, *)) {
+      [encodedItems addObject:@{@"type" : @"translate", @"title" : @"Translate"}];
+    }
 
     BOOL shownEditMenu =
         [myInputPlugin showEditMenu:@{@"targetRect" : encodedTargetRect, @"items" : encodedItems}];
@@ -3851,7 +3870,11 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
     UIMenu* menu = [myInputView editMenuInteraction:mockInteraction
                                menuForConfiguration:OCMClassMock([UIEditMenuConfiguration class])
                                    suggestedActions:suggestedActions];
-    XCTAssert(menu.children.count == 3, @"There must be 3 menu items");
+    if (@available(iOS 17.4, *)) {
+      XCTAssert(menu.children.count == 4, @"There must be 4 menu items");
+    } else {
+      XCTAssert(menu.children.count == 3, @"There must be 3 menu items");
+    }
 
     XCTAssert(((UICommand*)menu.children[0]).action == @selector(handleSearchWebAction),
               @"Must create search web item in the tree.");
@@ -3859,6 +3882,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
               @"Must create look up item in the tree.");
     XCTAssert(((UICommand*)menu.children[2]).action == @selector(handleShareAction),
               @"Must create share item in the tree.");
+    if (@available(iOS 17.4, *)) {
+      XCTAssert(((UICommand*)menu.children[3]).action == @selector(handleTranslateAction),
+                @"Must create translate item in the tree.");
+    }
   }
 }
 

@@ -131,11 +131,6 @@ GetActualRenderingAPIForImpeller(
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
           .enable_gpu_tracing = settings.enable_gpu_tracing,
           .enable_surface_control = settings.enable_surface_control,
-          .impeller_flags =
-              {
-                  .antialiased_lines =
-                      settings.impeller_flags.antialiased_lines,
-              },
       });
   if (!vulkan_backend->IsValid()) {
     return nullptr;
@@ -145,13 +140,18 @@ GetActualRenderingAPIForImpeller(
 }  // namespace
 
 AndroidContextDynamicImpeller::AndroidContextDynamicImpeller(
-    const AndroidContext::ContextSettings& settings)
+    const AndroidContext::ContextSettings& settings,
+    std::shared_ptr<fml::BasicTaskRunner> io_task_runner)
     : AndroidContext(AndroidRenderingAPI::kImpellerVulkan),
-      settings_(settings) {}
+      settings_(settings),
+      io_task_runner_(std::move(io_task_runner)) {}
 
 AndroidContextDynamicImpeller::~AndroidContextDynamicImpeller() = default;
 
 AndroidRenderingAPI AndroidContextDynamicImpeller::RenderingApi() const {
+  // Block until the raster thread has chosen a backend. Without this, callers
+  // on the platform thread can observe kImpellerAutoselect during startup.
+  WaitForSetup();
   if (vk_context_) {
     return AndroidRenderingAPI::kImpellerVulkan;
   }
@@ -186,13 +186,42 @@ void AndroidContextDynamicImpeller::SetupImpellerContext() {
   if (vk_context_ || gl_context_) {
     return;
   }
+  // Recorded before the probe below, which is the slow part and therefore the
+  // window in which a re-entrant |WaitForSetup| would deadlock. Wrapped in a
+  // DCHECK so this bookkeeping compiles out of release builds along with the
+  // assert that consumes it. The store always evaluates to true.
+#ifdef FML_DCHECK_IS_ON
+  setup_thread_id_.store(std::this_thread::get_id(), std::memory_order_relaxed);
+#endif
   vk_context_ = GetActualRenderingAPIForImpeller(android_get_device_api_level(),
                                                  settings_);
   if (!vk_context_) {
     gl_context_ = std::make_shared<AndroidContextGLImpeller>(
         std::make_unique<impeller::egl::Display>(),
-        settings_.enable_gpu_tracing);
+        settings_.enable_gpu_tracing, io_task_runner_);
   }
+  // The id is only meaningful while setup is in flight. Cleared before the
+  // signal so a waiter can never observe a completed setup alongside a stale
+  // id and trip the assert in |WaitForSetup| spuriously. After this point the
+  // raster thread may freely call |RenderingApi|, which no longer blocks.
+#ifdef FML_DCHECK_IS_ON
+  setup_thread_id_.store(std::thread::id(), std::memory_order_relaxed);
+#endif
+  // Publish the backend selection to any thread blocked in |WaitForSetup|.
+  setup_complete_.Signal();
+}
+
+void AndroidContextDynamicImpeller::WaitForSetup() const {
+  // The thread performing setup cannot wait for setup to finish. Compiled out
+  // of release builds.
+#ifdef FML_DCHECK_IS_ON
+  FML_DCHECK(setup_thread_id_.load(std::memory_order_relaxed) !=
+             std::this_thread::get_id())
+      << "Deadlock: the thread running SetupImpellerContext() called "
+         "RenderingApi(), which waits on that same setup. Read GetGLContext() "
+         "or GetVKContext() directly from the raster thread instead.";
+#endif
+  setup_complete_.Wait();
 }
 
 }  // namespace flutter

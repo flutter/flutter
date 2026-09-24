@@ -9,12 +9,22 @@
 #include "flutter/flow/surface_frame.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
-#import "flutter/shell/platform/darwin/ios/ios_context_noop.h"
+#import "flutter/shell/platform/darwin/ios/ios_context.h"
 #import "flutter/shell/platform/darwin/ios/ios_external_view_embedder.h"
 
 FLUTTER_ASSERT_ARC
 
 namespace {
+// An IOSContext fake for tests that do not need a real GPU context.
+class FakeIOSContext : public flutter::IOSContext {
+ public:
+  std::unique_ptr<flutter::Texture> CreateExternalTexture(
+      int64_t texture_id,
+      NSObject<FlutterTexture>* texture) override {
+    return nullptr;
+  }
+};
+
 constexpr int64_t kSecondaryFlutterViewId = flutter::kFlutterImplicitViewId + 1;
 constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
 }  // namespace
@@ -66,7 +76,7 @@ constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
 @implementation IOSExternalViewEmbedderTest
 
 - (void)testPrepareFlutterViewCreatesPendingFrameAndExposesRootCanvas {
-  auto iosContext = std::make_shared<flutter::IOSContextNoop>();
+  auto iosContext = std::make_shared<FakeIOSContext>();
   FlutterPlatformViewsControllerSpy* controller = [[FlutterPlatformViewsControllerSpy alloc] init];
 
   int callbackCalls = 0;
@@ -109,7 +119,7 @@ constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
 }
 
 - (void)testSubmitFlutterViewSubmitsPendingFrameAndCurrentFrame {
-  auto iosContext = std::make_shared<flutter::IOSContextNoop>();
+  auto iosContext = std::make_shared<FakeIOSContext>();
   FlutterPlatformViewsControllerSpy* controller = [[FlutterPlatformViewsControllerSpy alloc] init];
 
   uintptr_t pendingFrameAddress = 0;
@@ -165,7 +175,7 @@ constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
 }
 
 - (void)testCollectViewForwardsToPlatformViewsController {
-  auto iosContext = std::make_shared<flutter::IOSContextNoop>();
+  auto iosContext = std::make_shared<FakeIOSContext>();
   FlutterPlatformViewsControllerSpy* controller = [[FlutterPlatformViewsControllerSpy alloc] init];
 
   flutter::IOSExternalViewEmbedder embedder(
@@ -201,7 +211,7 @@ constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
     bool& frame_destroyed_;
   };
 
-  auto iosContext = std::make_shared<flutter::IOSContextNoop>();
+  auto iosContext = std::make_shared<FakeIOSContext>();
   FlutterPlatformViewsControllerSpy* controller = [[FlutterPlatformViewsControllerSpy alloc] init];
   bool frameDestroyed = false;
   flutter::IOSExternalViewEmbedder embedder(

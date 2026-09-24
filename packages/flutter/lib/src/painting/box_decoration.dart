@@ -384,8 +384,9 @@ class BoxDecoration extends Decoration {
       case BoxShape.circle:
         // Circles are inscribed into our smallest dimension.
         final Offset center = size.center(Offset.zero);
-        final double distance = (position - center).distance;
-        return distance <= math.min(size.width, size.height) / 2.0;
+        final double radius = math.min(size.width, size.height) / 2.0;
+        // Comparing squared distances avoids computing sqrt(dx * dx + dy * dy).
+        return (position - center).distanceSquared <= radius * radius;
     }
   }
 

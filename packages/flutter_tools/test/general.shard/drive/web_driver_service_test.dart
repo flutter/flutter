@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -16,6 +17,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/web_driver_service.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/web/chrome_constants.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:test/fake.dart';
@@ -25,9 +27,15 @@ import 'package:webdriver/sync_io.dart' as sync_io;
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-const kChromeArgs = <String>[
+final kChromeArgs = <String>[
   '--bwsi',
   '--disable-background-timer-throttling',
+  '--disable-renderer-backgrounding',
+  '--disable-background-networking',
+  '--disable-sync',
+  '--disable-client-side-phishing-detection',
+  '--disable-notifications',
+  ...kGcmDisabledFlags,
   '--disable-default-apps',
   '--disable-extensions',
   '--disable-popup-blocking',
@@ -35,12 +43,15 @@ const kChromeArgs = <String>[
   '--no-default-browser-check',
   '--no-sandbox',
   '--no-first-run',
+  '--password-store=basic',
+  if (io.Platform.isMacOS) '--use-mock-keychain',
+  '--disable-search-engine-choice-screen',
 ];
 
 void main() {
   late FakeWebRunnerFactory fakeWebRunnerFactory;
 
-  testWithoutContext('getDesiredCapabilities Chrome with headless on', () {
+  testUsingContext('getDesiredCapabilities Chrome with headless on', () {
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'chrome',
@@ -50,7 +61,16 @@ void main() {
       },
       'goog:chromeOptions': <String, dynamic>{
         'w3c': true,
-        'args': <String>[...kChromeArgs, '--headless'],
+        'args': <String>[
+          ...kChromeArgs,
+          '--headless',
+          if (io.Platform.isLinux) ...<String>[
+            '--use-gl=angle',
+            '--use-angle=swiftshader',
+            '--enable-unsafe-swiftshader',
+            '--disable-gpu-sandbox',
+          ],
+        ],
         'perfLoggingPrefs': <String, String>{
           'traceCategories':
               'devtools.timeline,'
@@ -63,7 +83,7 @@ void main() {
     expect(getDesiredCapabilities(Browser.chrome, true), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities Chrome with headless off', () {
+  testUsingContext('getDesiredCapabilities Chrome with headless off', () {
     const chromeBinary = 'random-binary';
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
@@ -88,7 +108,7 @@ void main() {
     expect(getDesiredCapabilities(Browser.chrome, false, chromeBinary: chromeBinary), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities Chrome with browser flags', () {
+  testUsingContext('getDesiredCapabilities Chrome with browser flags', () {
     const webBrowserFlags = <String>[
       '--autoplay-policy=no-user-gesture-required',
       '--incognito',
@@ -124,7 +144,7 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities Firefox with headless on', () {
+  testUsingContext('getDesiredCapabilities Firefox with headless on', () {
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'firefox',
@@ -147,7 +167,7 @@ void main() {
     expect(getDesiredCapabilities(Browser.firefox, true), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities Firefox with headless off', () {
+  testUsingContext('getDesiredCapabilities Firefox with headless off', () {
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'firefox',
@@ -170,7 +190,7 @@ void main() {
     expect(getDesiredCapabilities(Browser.firefox, false), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities Firefox with browser flags', () {
+  testUsingContext('getDesiredCapabilities Firefox with browser flags', () {
     const webBrowserFlags = <String>['-url=https://example.com', '-private'];
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
@@ -197,19 +217,19 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities Edge', () {
+  testUsingContext('getDesiredCapabilities Edge', () {
     final expected = <String, dynamic>{'acceptInsecureCerts': true, 'browserName': 'edge'};
 
     expect(getDesiredCapabilities(Browser.edge, false), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities macOS Safari', () {
+  testUsingContext('getDesiredCapabilities macOS Safari', () {
     final expected = <String, dynamic>{'browserName': 'safari'};
 
     expect(getDesiredCapabilities(Browser.safari, false), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities iOS Safari', () {
+  testUsingContext('getDesiredCapabilities iOS Safari', () {
     final expected = <String, dynamic>{
       'platformName': 'ios',
       'browserName': 'safari',
@@ -219,7 +239,7 @@ void main() {
     expect(getDesiredCapabilities(Browser.iosSafari, false), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities android chrome', () {
+  testUsingContext('getDesiredCapabilities android chrome', () {
     const webBrowserFlags = <String>['--autoplay-policy=no-user-gesture-required', '--incognito'];
     final expected = <String, dynamic>{
       'browserName': 'chrome',
@@ -265,6 +285,25 @@ void main() {
       );
       await service.stop();
       expect(fakeWebRunnerFactory.lastPlatformArgs, <String, Object?>{'no-launch-chrome': true});
+    },
+    overrides: <Type, Generator>{
+      WebRunnerFactory: () => fakeWebRunnerFactory = FakeWebRunnerFactory(),
+    },
+  );
+
+  testUsingContext(
+    'WebDriverService forwards web-defines to the web runner',
+    () async {
+      final WebDriverService service = setUpDriverService();
+      final device = FakeDevice();
+      await service.start(
+        BuildInfo.profile,
+        device,
+        DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
+        webDefines: <String, String>{'VERSION': 'v1.2.3'},
+      );
+      await service.stop();
+      expect(fakeWebRunnerFactory.lastWebDefines, <String, String>{'VERSION': 'v1.2.3'});
     },
     overrides: <Type, Generator>{
       WebRunnerFactory: () => fakeWebRunnerFactory = FakeWebRunnerFactory(),
@@ -344,6 +383,7 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
 
   final bool doResolveToError;
   Map<String, Object?>? lastPlatformArgs;
+  Map<String, String>? lastWebDefines;
 
   @override
   ResidentRunner createWebRunner(
@@ -367,6 +407,7 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
   }) {
     expect(stayResident, isTrue);
     lastPlatformArgs = platformArgs;
+    lastWebDefines = webDefines;
     return FakeResidentRunner(
       doResolveToError: doResolveToError,
       debuggingOptions: debuggingOptions,

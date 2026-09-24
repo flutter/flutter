@@ -332,7 +332,7 @@ class TextSelectionOverlay {
   ///
   /// The [context] must have an [Overlay] as an ancestor.
   TextSelectionOverlay({
-    required TextEditingValue value,
+    required this._value,
     required this.context,
     Widget? debugRequiredFor,
     required LayerLink toolbarLayerLink,
@@ -340,15 +340,14 @@ class TextSelectionOverlay {
     required LayerLink endHandleLayerLink,
     required this.renderObject,
     this.selectionControls,
-    bool handlesVisible = false,
+    this._handlesVisible = false,
     required this.selectionDelegate,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     VoidCallback? onSelectionHandleTapped,
     ClipboardStatusNotifier? clipboardStatus,
     this.contextMenuBuilder,
     required TextMagnifierConfiguration magnifierConfiguration,
-  }) : _handlesVisible = handlesVisible,
-       _value = value {
+  }) {
     assert(debugMaybeDispatchCreated('widgets', 'TextSelectionOverlay', this));
     renderObject.selectionStartInViewport.addListener(_updateTextSelectionOverlayVisibilities);
     renderObject.selectionEndInViewport.addListener(_updateTextSelectionOverlayVisibilities);
@@ -548,22 +547,58 @@ class TextSelectionOverlay {
   }
 
   void _updateSelectionOverlay() {
+    final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
+    assert(endpoints.isNotEmpty);
+
+    final TextSelectionHandleType startHandleType;
+    final TextSelectionHandleType endHandleType;
+    if (_selection.isCollapsed) {
+      startHandleType = TextSelectionHandleType.collapsed;
+      endHandleType = TextSelectionHandleType.collapsed;
+    } else {
+      final TextDirection textDirection = renderObject.textDirection;
+      // UIKit keeps selection handles aligned with the field direction.
+      final preferRenderObjectDirectionForSelectionHandles =
+          defaultTargetPlatform == TargetPlatform.iOS;
+      final TextDirection startHandleDirection;
+      final TextDirection endHandleDirection;
+      // A non-collapsed selection might return fewer than two endpoints if the
+      // text layout lacks boxes for the selected range. This typically happens when:
+      //
+      //  * Render lag: The overlay updated with a new editing value before the
+      //    render object laid out the new text (selection offsets are out of bounds).
+      //  * Split graphemes: A selection boundary falls inside a multi-code-unit
+      //    cluster (like an emoji or combining character).
+      //  * Degenerate layout: The layout is temporarily squashed (e.g.,
+      //    preferredLineHeight is 0 during a fold transition).
+      //
+      // In these cases, we fall back to the field's textDirection.
+      if (preferRenderObjectDirectionForSelectionHandles || endpoints.length < 2) {
+        startHandleDirection = textDirection;
+        endHandleDirection = textDirection;
+      } else {
+        startHandleDirection = endpoints.first.direction ?? textDirection;
+        endHandleDirection = endpoints.last.direction ?? textDirection;
+      }
+
+      startHandleType = switch (startHandleDirection) {
+        TextDirection.ltr => TextSelectionHandleType.left,
+        TextDirection.rtl => TextSelectionHandleType.right,
+      };
+      endHandleType = switch (endHandleDirection) {
+        TextDirection.ltr => TextSelectionHandleType.right,
+        TextDirection.rtl => TextSelectionHandleType.left,
+      };
+    }
+
     _selectionOverlay
       // Update selection handle metrics.
-      ..startHandleType = _chooseType(
-        renderObject.textDirection,
-        TextSelectionHandleType.left,
-        TextSelectionHandleType.right,
-      )
+      ..startHandleType = startHandleType
       ..lineHeightAtStart = _getStartGlyphHeight()
-      ..endHandleType = _chooseType(
-        renderObject.textDirection,
-        TextSelectionHandleType.right,
-        TextSelectionHandleType.left,
-      )
+      ..endHandleType = endHandleType
       ..lineHeightAtEnd = _getEndGlyphHeight()
       // Update selection toolbar metrics.
-      ..selectionEndpoints = renderObject.getEndpointsForSelection(_selection)
+      ..selectionEndpoints = endpoints
       ..toolbarLocation = renderObject.lastSecondaryTapDownPosition;
   }
 
@@ -770,12 +805,20 @@ class TextSelectionOverlay {
   ///
   /// Both parameters must be in local coordinates because the untransformed
   /// line height is used, and the return value is in local coordinates as well.
-  double _getHandleDy(double dragDy, double handleDy) {
+  ///
+  /// Returns null if the layout is degenerate (e.g. [RenderEditable.preferredLineHeight]
+  /// is zero or coordinates are non-finite), indicating that the drag update should
+  /// be skipped.
+  double? _getHandleDy(double dragDy, double handleDy) {
+    final double preferredLineHeight = renderObject.preferredLineHeight;
+    assert(preferredLineHeight.isFinite, 'Preferred line height is expected to always be finite.');
+    if (preferredLineHeight <= 0.0 || !dragDy.isFinite || !handleDy.isFinite) {
+      return null;
+    }
     final double distanceDragged = dragDy - handleDy;
     final dragDirection = distanceDragged < 0.0 ? -1 : 1;
-    final int linesDragged =
-        dragDirection * (distanceDragged.abs() / renderObject.preferredLineHeight).floor();
-    return handleDy + linesDragged * renderObject.preferredLineHeight;
+    final int linesDragged = dragDirection * (distanceDragged.abs() / preferredLineHeight).floor();
+    return handleDy + linesDragged * preferredLineHeight;
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
@@ -787,10 +830,13 @@ class TextSelectionOverlay {
     // selection handle, whereas this is relative to the RenderEditable.
     final Offset localPosition = renderObject.globalToLocal(details.globalPosition);
 
-    final double nextEndHandleDragPositionLocal = _getHandleDy(
+    final double? nextEndHandleDragPositionLocal = _getHandleDy(
       localPosition.dy,
       renderObject.globalToLocal(Offset(0.0, _endHandleDragPosition)).dy,
     );
+    if (nextEndHandleDragPositionLocal == null) {
+      return;
+    }
     _endHandleDragPosition = renderObject
         .localToGlobal(Offset(0.0, nextEndHandleDragPositionLocal))
         .dy;
@@ -920,10 +966,14 @@ class TextSelectionOverlay {
     // This is NOT the same as details.localPosition. That is relative to the
     // selection handle, whereas this is relative to the RenderEditable.
     final Offset localPosition = renderObject.globalToLocal(details.globalPosition);
-    final double nextStartHandleDragPositionLocal = _getHandleDy(
+
+    final double? nextStartHandleDragPositionLocal = _getHandleDy(
       localPosition.dy,
       renderObject.globalToLocal(Offset(0.0, _startHandleDragPosition)).dy,
     );
+    if (nextStartHandleDragPositionLocal == null) {
+      return;
+    }
     _startHandleDragPosition = renderObject
         .localToGlobal(Offset(0.0, nextStartHandleDragPositionLocal))
         .dy;
@@ -1031,21 +1081,6 @@ class TextSelectionOverlay {
       SelectionChangedCause.drag,
     );
   }
-
-  TextSelectionHandleType _chooseType(
-    TextDirection textDirection,
-    TextSelectionHandleType ltrType,
-    TextSelectionHandleType rtlType,
-  ) {
-    if (_selection.isCollapsed) {
-      return TextSelectionHandleType.collapsed;
-    }
-
-    return switch (textDirection) {
-      TextDirection.ltr => ltrType,
-      TextDirection.rtl => rtlType,
-    };
-  }
 }
 
 /// An object that manages a pair of selection handles and a toolbar.
@@ -1059,20 +1094,20 @@ class SelectionOverlay {
   SelectionOverlay({
     required this.context,
     this.debugRequiredFor,
-    required TextSelectionHandleType startHandleType,
-    required double lineHeightAtStart,
+    required this._startHandleType,
+    required this._lineHeightAtStart,
     this.startHandlesVisible,
     this.onStartHandleDragStart,
     this.onStartHandleDragUpdate,
     this.onStartHandleDragEnd,
-    required TextSelectionHandleType endHandleType,
-    required double lineHeightAtEnd,
+    required this._endHandleType,
+    required this._lineHeightAtEnd,
     this.endHandlesVisible,
     this.onEndHandleDragStart,
     this.onEndHandleDragUpdate,
     this.onEndHandleDragEnd,
     this.toolbarVisible,
-    required List<TextSelectionPoint> selectionEndpoints,
+    required this._selectionEndpoints,
     required this.selectionControls,
     @Deprecated(
       'Use `contextMenuBuilder` in `showToolbar` instead. '
@@ -1089,15 +1124,9 @@ class SelectionOverlay {
       'Use `contextMenuBuilder` in `showToolbar` instead. '
       'This feature was deprecated after v3.3.0-0.5.pre.',
     )
-    Offset? toolbarLocation,
+    this._toolbarLocation,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
-  }) : _startHandleType = startHandleType,
-       _lineHeightAtStart = lineHeightAtStart,
-       _endHandleType = endHandleType,
-       _lineHeightAtEnd = lineHeightAtEnd,
-       _selectionEndpoints = selectionEndpoints,
-       _toolbarLocation = toolbarLocation,
-       assert(debugCheckHasOverlay(context)) {
+  }) : assert(debugCheckHasOverlay(context)) {
     assert(debugMaybeDispatchCreated('widgets', 'SelectionOverlay', this));
   }
 
@@ -2366,8 +2395,9 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   RenderEditable get renderEditable => editableText.renderEditable;
 
-  /// Returns `true` if a widget with the global key [delegate.editableTextKey]
-  /// is in the tree and the widget is mounted.
+  /// Returns `true` if a widget with the global key
+  /// [TextSelectionGestureDetectorBuilderDelegate.editableTextKey] is in the
+  /// tree and the widget is mounted.
   ///
   /// Otherwise returns `false`.
   bool get _isEditableTextMounted => delegate.editableTextKey.currentContext?.mounted ?? false;

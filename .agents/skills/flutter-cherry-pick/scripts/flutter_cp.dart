@@ -71,7 +71,12 @@ class CherryPickHelper {
 
   /// Adds the cherry-pick label (`cp: stable` or `cp: beta`) to the original PR.
   Future<void> addLabel() async {
-    _info('Adding "cp: $channel" label to PR #$pr...');
+    final String label = switch (channel) {
+      'stable' => 'cp: stable',
+      'beta' => 'cp: beta',
+      _ => throw ArgumentError('Invalid channel "$channel". Must be "stable" or "beta".'),
+    };
+    _info('Adding "$label" label to PR #$pr...');
     await runCmd([
       'gh',
       'api',
@@ -79,7 +84,7 @@ class CherryPickHelper {
       'POST',
       'repos/flutter/flutter/issues/$pr/labels',
       '-F',
-      'labels[]=cp:$channel',
+      'labels[]=$label',
     ]);
   }
 
@@ -359,7 +364,10 @@ void main(List<String> arguments) async {
     }
   }
 
-  if (pr == null || channel == null || action == null) {
+  if (pr == null ||
+      channel == null ||
+      action == null ||
+      (channel != 'stable' && channel != 'beta')) {
     _error(
       'Usage: dart flutter_cp.dart --pr <pr> --channel <stable|beta> --action <start|continue> [--repo-path <path>]',
     );

@@ -11,11 +11,13 @@
 
 #include "flutter/common/constants.h"
 #include "flutter/common/task_runners.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/gpu/gpu_surface_metal_impeller.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 
@@ -163,20 +165,14 @@ PlatformViewIOS::PlatformViewIOS(PlatformView::Delegate& delegate,
 
 PlatformViewIOS::PlatformViewIOS(
     PlatformView::Delegate& delegate,
-    IOSRenderingAPI rendering_api,
     __weak FlutterPlatformViewsController* platform_views_controller,
     const flutter::TaskRunners& task_runners,
-    const std::shared_ptr<fml::ConcurrentTaskRunner>& worker_task_runner,
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch)
-    : PlatformViewIOS(delegate,
-                      IOSContext::Create(rendering_api,
-                                         delegate.OnPlatformViewGetSettings().enable_impeller
-                                             ? IOSRenderingBackend::kImpeller
-                                             : IOSRenderingBackend::kSkia,
-                                         is_gpu_disabled_sync_switch,
-                                         delegate.OnPlatformViewGetSettings()),
-                      platform_views_controller,
-                      task_runners) {}
+    : PlatformViewIOS(
+          delegate,
+          IOSContext::Create(is_gpu_disabled_sync_switch, delegate.OnPlatformViewGetSettings()),
+          platform_views_controller,
+          task_runners) {}
 
 PlatformViewIOS::~PlatformViewIOS() = default;
 
@@ -251,13 +247,13 @@ void PlatformViewIOS::AddOwnerViewController(__weak FlutterViewController* owner
   owner_controller.applicationLocale =
       application_locale_.empty() ? nil : @(application_locale_.data());
 
-  if (semantics_tree_enabled_) {
-    accessibility_bridges_[viewIdentifier] =
-        std::make_unique<AccessibilityBridge>(owner_controller, this, platform_views_controller_);
-  }
-
-  if (owner_controller && owner_controller.isViewLoaded) {
+  if (owner_controller.isViewLoaded) {
     this->attachView(viewIdentifier);
+  } else {
+    EnsureAccessibilityBridge(viewIdentifier);
+    if (AccessibilityBridge* bridge = GetAccessibilityBridge(viewIdentifier)) {
+      bridge->SetViewController(owner_controller, nil);
+    }
   }
   // Do not call `NotifyCreated()` here - let FlutterViewController take care
   // of that when its Viewport is sized.  If `NotifyCreated()` is called here,
@@ -267,6 +263,8 @@ void PlatformViewIOS::AddOwnerViewController(__weak FlutterViewController* owner
 
 void PlatformViewIOS::RemoveOwnerViewController(FlutterViewIdentifier viewIdentifier) {
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+  FlutterViewController* controller = [view_controllers_ objectForKey:@(viewIdentifier)];
+  FlutterView* previousView = static_cast<FlutterView*>(controller.viewIfLoaded);
 
   // Rendering surfaces borrow the native surface as their delegate.
   NotifyViewRenderingSurfaceDestroyed(viewIdentifier);
@@ -275,9 +273,12 @@ void PlatformViewIOS::RemoveOwnerViewController(FlutterViewIdentifier viewIdenti
   ios_surfaces_manager_->RemoveSurface(viewIdentifier);
   [platform_views_controller_ detachFromFlutterViewController:viewIdentifier];
 
-  auto iter = accessibility_bridges_.find(viewIdentifier);
-  if (iter != accessibility_bridges_.end()) {
-    accessibility_bridges_.erase(viewIdentifier);
+  if (AccessibilityBridge* bridge = GetAccessibilityBridge(viewIdentifier)) {
+    bridge->SetViewController(nil, previousView);
+    // The implicit view remains in the engine and can receive semantics while detached.
+    if (viewIdentifier != kFlutterImplicitViewId) {
+      accessibility_bridges_.erase(viewIdentifier);
+    }
   }
 }
 
@@ -292,10 +293,12 @@ void PlatformViewIOS::attachView(FlutterViewIdentifier viewIdentifier) {
   FML_DCHECK(ios_surface != nullptr);
   ios_surfaces_manager_->AddSurface(viewIdentifier, std::move(ios_surface));
 
-  auto iter = accessibility_bridges_.find(owner_controller.viewIdentifier);
-  if (iter != accessibility_bridges_.end()) {
-    accessibility_bridges_[owner_controller.viewIdentifier] =
-        std::make_unique<AccessibilityBridge>(owner_controller, this, platform_views_controller_);
+  EnsureAccessibilityBridge(viewIdentifier);
+  if (AccessibilityBridge* bridge = GetAccessibilityBridge(viewIdentifier)) {
+    bridge->SetViewController(owner_controller, nil);
+    if (bridge->HasSemantics()) {
+      PostSemanticsUpdateNotification(viewIdentifier);
+    }
   }
 }
 
@@ -332,27 +335,19 @@ std::shared_ptr<impeller::Context> PlatformViewIOS::GetImpellerContext() const {
 }
 
 // |PlatformView|
-void PlatformViewIOS::SetSemanticsEnabled(bool enabled) {
-  PlatformView::SetSemanticsEnabled(enabled);
-}
-
-// |PlatformView|
-void PlatformViewIOS::SetAccessibilityFeatures(int32_t flags) {
-  PlatformView::SetAccessibilityFeatures(flags);
-}
-
-// |PlatformView|
 void PlatformViewIOS::UpdateSemantics(int64_t view_id,
                                       flutter::SemanticsNodeUpdates update,
                                       flutter::CustomAccessibilityActionUpdates actions) {
-  FlutterViewController* owner_controller = [view_controllers_ objectForKey:@(view_id)];
-  if (owner_controller) {
-    auto iter = accessibility_bridges_.find(owner_controller.viewIdentifier);
-    if (iter != accessibility_bridges_.end()) {
-      iter->second.get()->UpdateSemantics(std::move(update), actions);
-    }
-    [[NSNotificationCenter defaultCenter] postNotificationName:FlutterSemanticsUpdateNotification
-                                                        object:owner_controller];
+  EnsureAccessibilityBridge(view_id);
+  AccessibilityBridge* bridge = GetAccessibilityBridge(view_id);
+  if (!bridge) {
+    return;
+  }
+  bridge->UpdateSemantics(std::move(update), actions);
+  FlutterViewController* controller = [view_controllers_ objectForKey:@(view_id)];
+  if (controller.isViewLoaded) {
+    // Cached semantics are applied and notified by attachView once the UIKit view is loaded.
+    PostSemanticsUpdateNotification(view_id);
   }
 }
 
@@ -394,28 +389,18 @@ void PlatformViewIOS::SetApplicationLocale(std::string locale) {
 // |PlatformView|
 void PlatformViewIOS::SetSemanticsTreeEnabled(bool enabled) {
   semantics_tree_enabled_ = enabled;
-  if ([view_controllers_ count] > 0) {
-    NSEnumerator* e = [view_controllers_ objectEnumerator];
-    FlutterViewController* controller = nil;
-    while ((controller = [e nextObject])) {
-      if (enabled) {
-        auto iter = accessibility_bridges_.find(controller.viewIdentifier);
-        if (iter != accessibility_bridges_.end()) {
-          continue;
-        }
-
-        accessibility_bridges_[controller.viewIdentifier] =
-            std::make_unique<AccessibilityBridge>(controller, this, platform_views_controller_);
-      } else {
-        accessibility_bridges_.erase(controller.viewIdentifier);
-      }
+  if (enabled) {
+    for (FlutterViewController* controller in [view_controllers_ objectEnumerator]) {
+      EnsureAccessibilityBridge(controller.viewIdentifier);
     }
+  } else {
+    accessibility_bridges_.clear();
   }
 }
 
 // |PlatformView|
 std::unique_ptr<VsyncWaiter> PlatformViewIOS::CreateVSyncWaiter() {
-  return std::make_unique<VsyncWaiterIOS>(task_runners_);
+  return std::make_unique<VsyncWaiterIOS>(task_runners_, FlutterDisplayLinkManager.shared);
 }
 
 // |PlatformView|
@@ -472,6 +457,12 @@ std::unique_ptr<std::vector<std::string>> PlatformViewIOS::ComputePlatformResolv
   return out;
 }
 
+void PlatformViewIOS::PostSemanticsUpdateNotification(FlutterViewIdentifier viewIdentifier) {
+  [[NSNotificationCenter defaultCenter]
+      postNotificationName:FlutterSemanticsUpdateNotification
+                    object:[view_controllers_ objectForKey:@(viewIdentifier)]];
+}
+
 void PlatformViewIOS::ApplyLocaleToOwnerController() {
   if ([view_controllers_ count] > 0) {
     NSEnumerator* e = [view_controllers_ objectEnumerator];
@@ -480,6 +471,14 @@ void PlatformViewIOS::ApplyLocaleToOwnerController() {
       controller.applicationLocale =
           application_locale_.empty() ? nil : @(application_locale_.data());
     }
+  }
+}
+
+void PlatformViewIOS::EnsureAccessibilityBridge(FlutterViewIdentifier viewIdentifier) {
+  FlutterViewController* controller = [view_controllers_ objectForKey:@(viewIdentifier)];
+  if (semantics_tree_enabled_ && !GetAccessibilityBridge(viewIdentifier) && controller) {
+    accessibility_bridges_[viewIdentifier] =
+        std::make_unique<AccessibilityBridge>(controller, this, platform_views_controller_);
   }
 }
 

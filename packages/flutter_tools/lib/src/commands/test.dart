@@ -101,17 +101,23 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         valueHelp: 'substring',
         splitCommas: false,
       )
-      ..addOption(
+      ..addMultiOption(
         'tags',
         abbr: 't',
-        help:
-            'Run only tests associated with the specified tags. See: https://pub.dev/packages/test#tagging-tests',
+        help: 'Run only tests associated with the specified tags. See: https://pub.dev/packages/test#tagging-tests',
+        splitCommas: false,
       )
-      ..addOption(
+      ..addMultiOption(
         'exclude-tags',
         abbr: 'x',
-        help:
-            'Run only tests that do not have the specified tags. See: https://pub.dev/packages/test#tagging-tests',
+        help: 'Run only tests that do not have the specified tags. See: https://pub.dev/packages/test#tagging-tests',
+        splitCommas: false,
+      )
+      ..addMultiOption(
+        'preset',
+        abbr: 'P',
+        help: 'The configuration preset(s) to use. Presets are defined in "dart_test.yaml".',
+        splitCommas: false,
       )
       ..addFlag(
         'start-paused',
@@ -179,7 +185,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'update-goldens',
         negatable: false,
         help:
-            'Whether "matchesGoldenFile()" calls within your test methods should ' // flutter_ignore: golden_tag (see analyze.dart)
+            'Whether "matchesGoldenFile()" calls within your test methods should ' // ignore: golden_test_tags
             'update the golden files rather than test for an existing match.',
       )
       ..addOption(
@@ -251,16 +257,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addOption(
         'reporter',
         abbr: 'r',
-        help:
-            'Set how to print test results. If unset, value will default to either compact or expanded.',
+        help: 'Set how to print test results. If unset, value will default to either compact or expanded.',
         allowed: <String>['compact', 'expanded', 'failures-only', 'github', 'json', 'silent'],
         allowedHelp: <String, String>{
           'compact': 'A single line, updated continuously (the default).',
-          'expanded':
-              'A separate line for each update. May be preferred when logging to a file or in continuous integration.',
+          'expanded': 'A separate line for each update. May be preferred when logging to a file or in continuous integration.',
           'failures-only': 'A separate line for failing tests, with no output for passing tests.',
-          'github':
-              'A custom reporter for GitHub Actions (the default reporter when running on GitHub Actions).',
+          'github': 'A custom reporter for GitHub Actions (the default reporter when running on GitHub Actions).',
           'json': 'A machine-readable format. See: https://dart.dev/go/test-docs/json_reporter.md',
           'silent':
               'A reporter with no output. May be useful when only the exit code is meaningful.',
@@ -428,8 +431,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final bool buildTestAssets = boolArg('test-assets');
     final List<String> names = stringsArg('name');
     final List<String> plainNames = stringsArg('plain-name');
-    final String? tags = stringArg('tags');
-    final String? excludeTags = stringArg('exclude-tags');
+    final List<String> tags = stringsArg('tags');
+    final List<String> excludeTags = stringsArg('exclude-tags');
+    final List<String> presets = stringsArg('preset');
     final BuildInfo buildInfo = await getBuildInfo(
       forcedBuildMode: BuildMode.debug,
       forcedUseLocalCanvasKit: true,
@@ -495,7 +499,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           : null,
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
       webUseWasm: useWasm,
-      enableHcpp: boolArg('enable-hcpp'),
+      enableHcpp: explicitEnableHcpp,
       uninstallApp: boolArg('uninstall'),
     );
 
@@ -657,7 +661,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       }
 
       if (stringArg('flavor') != null && !integrationTestDevice.supportsFlavors) {
-        throwToolExit('--flavor is only supported for Android, macOS, and iOS devices.');
+        throwToolExit('--flavor is only supported for Android, Linux, macOS, and iOS devices.');
       }
     }
 
@@ -674,6 +678,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         plainNames: plainNames,
         tags: tags,
         excludeTags: excludeTags,
+        presets: presets,
         machine: outputMachineFormat,
         updateGoldens: boolArg('update-goldens'),
         concurrency: jobs,
@@ -700,6 +705,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         plainNames: plainNames,
         tags: tags,
         excludeTags: excludeTags,
+        presets: presets,
         watcher: watcher,
         enableVmService: collector != null || startPaused || enableVmService,
         machine: outputMachineFormat,
@@ -809,7 +815,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
     if (_needsRebuild(assetBundle.entries, flavor)) {
       await writeBundle(
-        globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
+        globals.fs.directory(
+          globals.fs.path.join(getBuildDirectory(globals.config, globals.fs), 'unit_test_assets'),
+        ),
         assetBundle.entries,
         targetPlatform: TargetPlatform.tester,
         impellerStatus: impellerStatus,
@@ -822,7 +830,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
 
       final File cachedFlavorFile = globals.fs.file(
-        globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
+        globals.fs.path.join(
+          getBuildDirectory(globals.config, globals.fs),
+          'test_cache',
+          'flavor.txt',
+        ),
       );
       if (cachedFlavorFile.existsSync()) {
         await cachedFlavorFile.delete();
@@ -840,7 +852,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     //  perform a `flutter clean` after upgrading.
     //  See https://github.com/flutter/flutter/issues/128563.
     final File manifest = globals.fs.file(
-      globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
+      globals.fs.path.join(
+        getBuildDirectory(globals.config, globals.fs),
+        'unit_test_assets',
+        'AssetManifest.bin',
+      ),
     );
     if (!manifest.existsSync()) {
       return true;
@@ -861,7 +877,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
 
     final File cachedFlavorFile = globals.fs.file(
-      globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
+      globals.fs.path.join(
+        getBuildDirectory(globals.config, globals.fs),
+        'test_cache',
+        'flavor.txt',
+      ),
     );
     final String? cachedFlavor = cachedFlavorFile.existsSync()
         ? cachedFlavorFile.readAsStringSync()

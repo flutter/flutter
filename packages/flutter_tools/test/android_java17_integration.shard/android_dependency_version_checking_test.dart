@@ -25,7 +25,7 @@ void main() {
   testUsingContext('AGP version out of "warn" support band but in "error" band builds '
       'successfully and prints warning', () async {
     final versionTuple = VersionTuple(
-      agpVersion: '8.7.0',
+      agpVersion: '8.12.0',
       gradleVersion: '8.14',
       kotlinVersion: '2.2.20',
     );
@@ -42,7 +42,7 @@ void main() {
     // Create a new flutter project.
     final versionTuple = VersionTuple(
       agpVersion: '8.11.1',
-      gradleVersion: '8.13',
+      gradleVersion: '8.14',
       kotlinVersion: '2.2.20',
     );
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
@@ -56,9 +56,9 @@ void main() {
   testUsingContext('Kotlin version out of "warn" support band but in "error" band builds '
       'successfully and prints warning', () async {
     final versionTuple = VersionTuple(
-      agpVersion: '8.7.0',
+      agpVersion: '8.11.1',
       gradleVersion: '8.14',
-      kotlinVersion: '2.1.20',
+      kotlinVersion: '2.3.0',
     );
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
       versions: versionTuple,
@@ -71,9 +71,9 @@ void main() {
 
   testUsingContext('No logs are printed when suppression flag is passed', () async {
     final versionTuple = VersionTuple(
-      agpVersion: '8.6.0',
-      gradleVersion: '8.7',
-      kotlinVersion: '2.0.0',
+      agpVersion: '8.11.1',
+      gradleVersion: '8.14',
+      kotlinVersion: '2.2.20',
     );
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
       versions: versionTuple,

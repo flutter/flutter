@@ -13,6 +13,7 @@ sealed class WebCompilerConfig {
     required this.renderer,
     this.optimizationLevel,
     required this.sourceMaps,
+    this.webContentHash = false,
   });
 
   /// Build environment flag for [optimizationLevel].
@@ -35,6 +36,9 @@ sealed class WebCompilerConfig {
   /// `true` if the compiler build should output source maps.
   final bool sourceMaps;
 
+  /// `true` if web output files should include a content hash in their filename.
+  final bool webContentHash;
+
   /// Returns which target this compiler outputs (js or wasm)
   CompileTarget get compileTarget;
   final WebRendererMode renderer;
@@ -49,6 +53,7 @@ sealed class WebCompilerConfig {
   Map<String, dynamic> get _buildKeyMap => <String, dynamic>{
     'optimizationLevel': optimizationLevel,
     'webRenderer': renderer.name,
+    'webContentHash': webContentHash,
   };
 }
 
@@ -61,6 +66,7 @@ class JsCompilerConfig extends WebCompilerConfig {
     super.optimizationLevel,
     this.useFrequencyBasedMinification = true,
     super.sourceMaps = true,
+    super.webContentHash = false,
     this.minify,
     super.renderer = WebRendererMode.defaultForJs,
   });
@@ -150,6 +156,8 @@ class WasmCompilerConfig extends WebCompilerConfig {
     this.minify,
     this.dryRun = false,
     super.sourceMaps = true,
+    super.webContentHash = false,
+    this.enableWasmDeferredLoading = false,
     super.renderer = WebRendererMode.defaultForWasm,
   });
 
@@ -162,6 +170,8 @@ class WasmCompilerConfig extends WebCompilerConfig {
   final bool? minify;
 
   final bool dryRun;
+
+  final bool enableWasmDeferredLoading;
 
   @override
   CompileTarget get compileTarget => CompileTarget.wasm;
@@ -189,6 +199,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
       if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
       if (buildMode == BuildMode.debug) '--extra-compiler-option=--enable-asserts',
       if (dryRun) '--extra-compiler-option=--dry-run',
+      if (enableWasmDeferredLoading) '--enable-deferred-loading',
     ];
   }
 
@@ -200,6 +211,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
       'minify': minify,
       'dryRun': dryRun,
       WebCompilerConfig.kSourceMapsEnabled: sourceMaps,
+      'enableWasmDeferredLoading': enableWasmDeferredLoading,
     };
     return jsonEncode(settings);
   }

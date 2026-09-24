@@ -5,7 +5,10 @@
 #include "impeller/renderer/backend/gles/capabilities_gles.h"
 
 #include <algorithm>
+#include <charconv>
+#include <string>
 
+#include "impeller/base/strings.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
@@ -60,6 +63,33 @@ static const constexpr char* kAppleTextureMaxLevelExt =
 // https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_filter_anisotropic.txt
 static const constexpr char* kTextureFilterAnisotropicExt =
     "GL_EXT_texture_filter_anisotropic";
+
+static bool MaliDriverNeedsTextureUploadRebind(const std::string& version) {
+  // Arm's version string includes a driver release, for example:
+  // "OpenGL ES 3.2 v1.r18p0-01rel0...". If it is unavailable, retain the
+  // workaround rather than assuming that the driver has been fixed.
+  const auto marker = version.find(" v1.r");
+  if (marker == std::string::npos) {
+    return true;
+  }
+  const char* end = version.data() + version.size();
+  unsigned int release = 0;
+  const auto release_result =
+      std::from_chars(version.data() + marker + 5, end, release);
+  if (release_result.ec != std::errc{} || release_result.ptr == end ||
+      *release_result.ptr != 'p') {
+    return true;
+  }
+  unsigned int patch = 0;
+  const auto patch_result = std::from_chars(release_result.ptr + 1, end, patch);
+  if (patch_result.ec != std::errc{} ||
+      (patch_result.ptr != end && *patch_result.ptr != '-')) {
+    return true;
+  }
+  // Arm erratum EN_ID 1,792,661 affects Bifrost/Valhall r17p0-r23p0 and was
+  // fixed in r24p0. OEM backports within that range cannot be detected.
+  return release >= 17 && release < 24;
+}
 
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
@@ -179,6 +209,11 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   }
   is_es_ = desc->IsES();
   is_angle_ = desc->IsANGLE();
+  needs_texture_upload_rebind_ =
+      is_es_ && !is_angle_ &&
+      (HasPrefix(desc->GetRenderer(), "Mali-G") ||
+       HasPrefix(desc->GetRenderer(), "Immortalis-G")) &&
+      MaliDriverNeedsTextureUploadRebind(desc->GetGlVersionString());
 
   // ETC2 and EAC are mandatory in OpenGL ES 3.0. BC and ASTC are gated behind
   // extensions and are not present on most mobile or desktop GLES. The whole BC
@@ -207,6 +242,17 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
                                 desc->GetGlVersion().major_version >= 3 ||
                                 desc->HasExtension(kAppleTextureMaxLevelExt);
 
+  // 2D array textures (GL_TEXTURE_2D_ARRAY, sampled as sampler2DArray) need the
+  // 3D texture upload entry points. These are core on desktop GL 3.0 and
+  // OpenGL ES 3.0, and reachable below them via GL_EXT_texture_array (desktop
+  // GL 2.x) or GL_NV_texture_array (OpenGL ES 2.0). Gate on the resolved procs
+  // rather than the version so a context that advertises an extension but does
+  // not actually provide the entry points is treated as unsupported, and so
+  // ES 2.0 devices that do expose them are supported.
+  supports_texture_array_ = gl.TexImage3D.IsAvailable() &&
+                            gl.TexSubImage3D.IsAvailable() &&
+                            gl.CompressedTexSubImage3D.IsAvailable();
+
   // Anisotropic filtering is not part of any core GL or GLES version; it is
   // always gated on GL_EXT_texture_filter_anisotropic. The query and the
   // texture parameter are applied with core ES 2.0 entry points (GetFloatv
@@ -218,6 +264,10 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
     // but is always an integer in practice, so floor it.
     max_sampler_anisotropy_ = static_cast<uint32_t>(std::max(value, 2.0f));
   }
+}
+
+bool CapabilitiesGLES::NeedsTextureUploadRebind() const {
+  return needs_texture_upload_rebind_;
 }
 
 bool CapabilitiesGLES::IsES() const {
@@ -236,6 +286,10 @@ bool CapabilitiesGLES::SupportsFramebufferRenderMipmap() const {
 
 bool CapabilitiesGLES::SupportsTextureMaxLevel() const {
   return supports_texture_max_level_;
+}
+
+bool CapabilitiesGLES::SupportsTextureArray() const {
+  return supports_texture_array_;
 }
 
 size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {

@@ -31,6 +31,10 @@ typedef int64_t FlutterViewIdentifier;
 /**
  * The name used for semantic update notifications via `NSNotificationCenter`.
  *
+ * A notification is posted after a semantics update is applied to a loaded Flutter view. If an
+ * update arrives before the associated `FlutterViewController` loads its view, the notification is
+ * deferred until the cached semantics are applied when the view loads.
+ *
  * The object passed as the sender is the `FlutterViewController` associated
  * with the update.
  */

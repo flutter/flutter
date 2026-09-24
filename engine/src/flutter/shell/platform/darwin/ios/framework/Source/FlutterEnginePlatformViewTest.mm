@@ -83,6 +83,9 @@ class FakeDelegate : public PlatformView::Delegate {
                                     bool transient) override {}
   void UpdateAssetResolverByType(std::unique_ptr<AssetResolver> updated_asset_resolver,
                                  AssetResolver::AssetResolverType type) override {}
+  std::shared_ptr<fml::BasicTaskRunner> OnPlatformViewGetShutdownSafeIOTaskRunner() const override {
+    return nullptr;
+  }
 
   flutter::Settings settings_;
   int on_platform_view_created_calls_ = 0;
@@ -112,6 +115,11 @@ class FakeDelegate : public PlatformView::Delegate {
 
 - (flutter::PlatformViewIOS*)platformView {
   return self.fakePlatformView;
+}
+
+- (FlutterPlatformViewsController*)platformViewsController {
+  // Match the fake platform view, which is created without a platform views controller.
+  return nil;
 }
 
 - (NSObject<FlutterBinaryMessenger>*)binaryMessenger {
@@ -146,12 +154,8 @@ flutter::FakeDelegate fake_delegate;
                                /*io=*/thread_task_runner);
   platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/fake_delegate,
-      /*rendering_api=*/fake_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/sync_switch);
   weak_factory = std::make_unique<fml::WeakPtrFactory<flutter::PlatformView>>(platform_view.get());
 }
@@ -528,7 +532,7 @@ flutter::FakeDelegate fake_delegate;
       @{@"type" : @"focus", @"data" : @{}, @"nodeId" : @(kSecondaryNodeId)}));
 }
 
-- (void)testAccessibilityHandlerSurvivesViewRemovalAndBridgeRecreation {
+- (void)testAccessibilityHandlerSurvivesViewRemovalAndSemanticsDisable {
   FlutterEngineWithFakePlatformView* engine =
       [[FlutterEngineWithFakePlatformView alloc] initWithName:@"tester"];
   engine.fakePlatformView = platform_view.get();
@@ -569,6 +573,15 @@ flutter::FakeDelegate fake_delegate;
     replied = YES;
   });
   XCTAssertTrue(replied);
+
+  platform_view->SetSemanticsTreeEnabled(false);
+  XCTAssertFalse(platform_view->GetAccessibilityBridge(primary.viewIdentifier));
+  replied = NO;
+  handler(message, ^(NSData* reply) {
+    replied = YES;
+  });
+  XCTAssertTrue(replied);
+
   [engine resetChannels];
   XCTAssertNil(handler);
   OCMVerify(times(1), [messenger setMessageHandlerOnChannel:@"flutter/accessibility"
@@ -750,11 +763,11 @@ flutter::FakeDelegate fake_delegate;
   engine.fakeBinaryMessenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   platform_view->SetSemanticsTreeEnabled(true);
 
+  fml::WeakPtr<flutter::AccessibilityBridge> weak_bridge;
   for (int attachment = 1; attachment <= 2; attachment++) {
     __weak FlutterViewController* weakViewController = nil;
     __weak CALayer* weakLayer = nil;
     __weak id<NSObject> weakObserver = nil;
-    fml::WeakPtr<flutter::AccessibilityBridge> weak_bridge;
     @autoreleasepool {
       FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
                                                                                     nibName:nil
@@ -766,7 +779,11 @@ flutter::FakeDelegate fake_delegate;
       weakObserver =
           engine.flutterViewControllerWillDeallocObservers[@(flutter::kFlutterImplicitViewId)];
       XCTAssertNotNil(weakObserver);
-      weak_bridge = platform_view->GetAccessibilityBridge()->GetWeakPtr();
+      if (weak_bridge) {
+        XCTAssertEqual(platform_view->GetAccessibilityBridge(), weak_bridge.get());
+      } else {
+        weak_bridge = platform_view->GetAccessibilityBridge()->GetWeakPtr();
+      }
       XCTAssertTrue(weak_bridge.get());
       [engine notifyViewRenderingSurfaceCreated:flutter::kFlutterImplicitViewId];
       XCTAssertEqual(fake_delegate.on_platform_view_created_calls_, attachment);
@@ -775,12 +792,14 @@ flutter::FakeDelegate fake_delegate;
     XCTAssertNil(weakViewController);
     XCTAssertNil(weakLayer);
     XCTAssertNil(weakObserver);
-    XCTAssertFalse(weak_bridge.get());
+    XCTAssertTrue(weak_bridge.get());
     XCTAssertNil(engine.viewController);
     XCTAssertNil(platform_view->GetOwnerViewController());
     XCTAssertEqual(engine.flutterViewControllerWillDeallocObservers.count, 0UL);
     XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, attachment);
   }
+  platform_view->SetSemanticsTreeEnabled(false);
+  XCTAssertFalse(weak_bridge.get());
   XCTAssertTrue(fake_delegate.added_view_ids_.empty());
   XCTAssertTrue(fake_delegate.removed_view_ids_.empty());
 }

@@ -301,6 +301,61 @@ void main() {
     });
   });
 
+  test('RenderAndroidView marks needs paint when a frame is available for its texture', () async {
+    final renderBox = RenderAndroidView(
+      viewController: FakeAndroidViewController(0),
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+    );
+    await _layoutAndPaintRenderAndroidView(renderBox);
+
+    binding.handleTextureFrameAvailable(0);
+
+    expect(renderBox.debugNeedsPaint, isTrue);
+  });
+
+  test('RenderAndroidView ignores frames for other textures', () async {
+    final renderBox = RenderAndroidView(
+      viewController: FakeAndroidViewController(0),
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+    );
+    await _layoutAndPaintRenderAndroidView(renderBox);
+
+    binding.handleTextureFrameAvailable(1);
+
+    expect(renderBox.debugNeedsPaint, isFalse);
+  });
+
+  test('RenderAndroidView unregisters texture frame callback on detach', () async {
+    final renderBox = RenderAndroidView(
+      viewController: FakeAndroidViewController(0),
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+    );
+    await _layoutAndPaintRenderAndroidView(renderBox);
+
+    layout(RenderCustomPaint(painter: _EmptyPainter()));
+    expect(renderBox.attached, isFalse);
+
+    binding.handleTextureFrameAvailable(0);
+
+    expect(renderBox.debugNeedsPaint, isFalse);
+  });
+
+  test('RenderAndroidView ignores texture frames when view composition is required', () async {
+    final renderBox = RenderAndroidView(
+      viewController: FakeAndroidViewController(0, requiresViewComposition: true, textureId: null),
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+    );
+    await _layoutAndPaintRenderAndroidView(renderBox);
+
+    binding.handleTextureFrameAvailable(0);
+
+    expect(renderBox.debugNeedsPaint, isFalse);
+  });
+
   test('markNeedsPaint does not get called on a disposed RO', () async {
     FakeAsync().run((FakeAsync async) {
       final AndroidViewController viewController = PlatformViewsService.initAndroidView(
@@ -343,6 +398,64 @@ void main() {
       pumpFrame(phase: EnginePhase.paint);
       expect(renderBox.debugLayer, isNull);
     });
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/190833.
+  test('RenderAndroidView does not set the platform view offset when not laid out', () {
+    final viewController = FakeAndroidViewController(0);
+    final renderBox = RenderAndroidView(
+      viewController: viewController,
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+    );
+    // Attached but not laid out, the state the render box is in when the
+    // platform view is mounted while a route transition is still in flight.
+    renderBox.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
+    expect(renderBox.debugNeedsLayout, isTrue);
+
+    binding.pumpCompleteFrame();
+
+    // The post frame callback ran and left the platform view alone, because
+    // the render box has no position on screen to report yet.
+    expect(viewController.offsets, isEmpty);
+
+    renderBox.detach();
+    layout(renderBox);
+    binding.pumpCompleteFrame();
+
+    expect(viewController.offsets, <Offset>[Offset.zero]);
+
+    renderBox.dispose();
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/190833.
+  test('RenderAndroidView does not size the platform view when not laid out', () async {
+    final renderBox = RenderAndroidView(
+      viewController: FakeAndroidViewController(0),
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+    );
+    // Attached but not laid out, the state the render box is in when the
+    // platform view is mounted while a route transition is still in flight.
+    renderBox.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
+    expect(renderBox.debugNeedsLayout, isTrue);
+
+    final viewController = FakeAndroidViewController(1);
+    renderBox.controller = viewController;
+    // The setter does not await the future it starts, so let it complete here.
+    await null;
+
+    // Swapping the controller left the platform view unsized, because the
+    // render box has no size to give it yet.
+    expect(viewController.sizes, isEmpty);
+
+    renderBox.detach();
+    layout(renderBox);
+
+    // performResize does the initial sizing once there is a size to send.
+    expect(viewController.sizes, <Size>[const Size(800, 600)]);
+
+    renderBox.dispose();
   });
 
   test('markNeedsPaint does not get called when setting the same viewController', () {
@@ -573,6 +686,114 @@ void main() {
     expect(config.isSemanticBoundary, true);
     expect(config.platformViewId, 0);
   });
+
+  test('rejectGesture invokes rejectGesture on the controller', () {
+    final viewController = FakePlatformViewController(0);
+    final renderBox = PlatformViewRenderBox(
+      controller: viewController,
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer()),
+      },
+    );
+    layout(renderBox);
+
+    expect(viewController.rejectGestureCount, 0);
+
+    // Compete in the arena: add a pointer down, then resolve the arena with rejection.
+    renderBox.handleEvent(
+      const PointerDownEvent(pointer: 1, position: Offset(10, 10), embedderId: 12345),
+      BoxHitTestEntry(renderBox, const Offset(10, 10)),
+    );
+
+    // Close and reject the gesture for this pointer by having another member win.
+    final GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(
+      1,
+      _WinningGestureArenaMember(),
+    );
+    GestureBinding.instance.gestureArena.close(1);
+    entry.resolve(GestureDisposition.accepted);
+
+    expect(viewController.rejectGestureCount, 1);
+    expect(viewController.lastRejectGestureId, 12345);
+  });
+
+  test('rejectGesture passes pointer embedderId to rejectGesture', () {
+    final viewController = FakePlatformViewController(0);
+    final renderBox = PlatformViewRenderBox(
+      controller: viewController,
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer()),
+      },
+    );
+    layout(renderBox);
+
+    // Finger 1 down with embedderId 101.
+    renderBox.handleEvent(
+      const PointerDownEvent(pointer: 1, position: Offset(10, 10), embedderId: 101),
+      BoxHitTestEntry(renderBox, const Offset(10, 10)),
+    );
+
+    // Finger 1 wins the gesture arena (accepted).
+    GestureBinding.instance.gestureArena.close(1);
+    GestureBinding.instance.gestureArena.sweep(1);
+
+    // Finger 2 down with embedderId 102 while Finger 1 is still down.
+    renderBox.handleEvent(
+      const PointerDownEvent(pointer: 2, position: Offset(20, 20), embedderId: 102),
+      BoxHitTestEntry(renderBox, const Offset(20, 20)),
+    );
+
+    // Finger 2 is rejected by the arena (e.g. Flutter scroll wins).
+    final GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(
+      2,
+      _WinningGestureArenaMember(),
+    );
+    GestureBinding.instance.gestureArena.close(2);
+    entry.resolve(GestureDisposition.accepted);
+
+    // The rejectGesture call passes the pointer's embedderId (102), which the
+    // platform embedder resolves to the native stream's downTime via MotionEventTracker.
+    expect(viewController.rejectGestureCount, 1);
+    expect(viewController.lastRejectGestureId, 102);
+  });
+
+  test('rejectGesture does not invoke controller when embedderId is 0', () {
+    final viewController = FakePlatformViewController(0);
+    final renderBox = PlatformViewRenderBox(
+      controller: viewController,
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer()),
+      },
+    );
+    layout(renderBox);
+
+    // Compete in the arena: pointer down with default embedderId (0).
+    renderBox.handleEvent(
+      const PointerDownEvent(pointer: 1, position: Offset(10, 10)),
+      BoxHitTestEntry(renderBox, const Offset(10, 10)),
+    );
+
+    // Reject gesture for this pointer.
+    final GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(
+      1,
+      _WinningGestureArenaMember(),
+    );
+    GestureBinding.instance.gestureArena.close(1);
+    entry.resolve(GestureDisposition.accepted);
+
+    expect(viewController.rejectGestureCount, 0);
+  });
+}
+
+class _WinningGestureArenaMember extends GestureArenaMember {
+  @override
+  void acceptGesture(int pointer) {}
+
+  @override
+  void rejectGesture(int pointer) {}
 }
 
 ui.PointerData _pointerData(
@@ -593,6 +814,13 @@ ui.PointerData _pointerData(
     kind: kind,
     device: device,
   );
+}
+
+Future<void> _layoutAndPaintRenderAndroidView(RenderAndroidView renderBox) async {
+  layout(renderBox, phase: EnginePhase.paint);
+  await null;
+  pumpFrame(phase: EnginePhase.paint);
+  expect(renderBox.debugNeedsPaint, isFalse);
 }
 
 class _EmptyPainter extends CustomPainter {

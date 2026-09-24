@@ -49,7 +49,7 @@ ScopedObject<Context> ContextVK::Create(const Settings& settings) {
   impeller::ContextVK::Settings impeller_settings;
   impeller_settings.shader_libraries_data = CreateShaderLibraryMappings();
   impeller_settings.cache_directory = fml::paths::GetCachesDirectory();
-  impeller_settings.enable_validation = true;
+  impeller_settings.enable_validation = settings.enable_validation;
   sContextVKProcAddressCallback = settings.instance_proc_address_callback;
   impeller_settings.proc_address_callback = ContextVKGetInstanceProcAddress;
   impeller_settings.flags = impeller::Flags{};
