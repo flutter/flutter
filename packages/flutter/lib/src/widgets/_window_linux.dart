@@ -1062,10 +1062,10 @@ String? _nativeToString(ffi.Pointer<ffi.Uint8> value) {
 
 /// Wraps GObject.
 class _GObject {
-  /// Creates a wrapper to an existing [GObject] in [instance].
+  /// Creates a wrapper to an existing GObject in [instance].
   const _GObject(this.instance);
 
-  /// The pointer to the underlying [GObject].
+  /// The pointer to the underlying GObject.
   final ffi.Pointer<ffi.NativeType> instance;
 
   /// Drop reference to this object.
@@ -1079,7 +1079,7 @@ class _GObject {
 
 /// Wraps GtkContainer.
 class _GtkContainer extends _GtkWidget {
-  /// Creates a wrapper to an existing [GtkContainer] in [instance].
+  /// Creates a wrapper to an existing GtkContainer in [instance].
   const _GtkContainer(super.instance);
 
   /// Adds [child] widget to this container.
@@ -1098,7 +1098,7 @@ class _GtkContainer extends _GtkWidget {
 
 /// Wraps GtkWidget.
 class _GtkWidget extends _GObject {
-  /// Creates a wrapper to an existing [GtkWidget] in [instance].
+  /// Creates a wrapper to an existing GtkWidget in [instance].
   const _GtkWidget(super.instance);
 
   /// Creates the GDK resources associated with a widget.
@@ -1224,13 +1224,13 @@ class _GtkWidget extends _GObject {
 
 /// Wraps GdkVisual.
 class _GdkVisual extends _GObject {
-  /// Creates a wrapper to an existing [GdkVisual] in [instance].
+  /// Creates a wrapper to an existing GdkVisual in [instance].
   const _GdkVisual(super.instance);
 }
 
 /// Wraps GdkScreen.
 class _GdkScreen extends _GObject {
-  /// Creates a wrapper to an existing [GdkScreen] in [instance].
+  /// Creates a wrapper to an existing GdkScreen in [instance].
   const _GdkScreen(super.instance);
 
   /// Gets the visual that supports translucent windows, or null if this screen
@@ -1261,7 +1261,7 @@ class _GdkScreen extends _GObject {
 
 /// Wraps GdkWindow.
 class _GdkWindow extends _GObject {
-  /// Creates a wrapper to an existing [GdkWindow] in [instance].
+  /// Creates a wrapper to an existing GdkWindow in [instance].
   const _GdkWindow(super.instance);
 
   /// Gets the window state.

@@ -80,15 +80,19 @@ class BuildAarCommand extends BuildSubCommand {
   final AndroidContext _androidContext;
   final BuildSystem _buildSystem;
 
+  /// The [AndroidBuilder] used to build the AAR.
   @visibleForTesting
   AndroidBuilder get androidBuilder => _androidBuilder;
 
+  /// The [AndroidContext] containing Android-specific toolchain dependencies.
   @visibleForTesting
   AndroidContext get androidContext => _androidContext;
 
+  /// The [AndroidSdk] instance, if available.
   @visibleForTesting
   AndroidSdk? get androidSdk => _androidContext.androidSdk;
 
+  /// The [BuildSystem] used for building the project.
   @visibleForTesting
   BuildSystem get buildSystem => _buildSystem;
 
