@@ -28,6 +28,26 @@ struct IxnHasher {
   }
 };
 
+// Axis-aligned rectangular region in logical view coordinates paired with a
+// TouchResponseType for Scenic's gesture disambiguation contest.
+struct GestureResponseRegion {
+  float left = 0.f;
+  float top = 0.f;
+  float right = 0.f;
+  float bottom = 0.f;
+  fuchsia::ui::pointer::TouchResponseType response =
+      fuchsia::ui::pointer::TouchResponseType::YES;
+  uint32_t defer_samples = 0;
+  fuchsia::ui::pointer::TouchResponseType defer_response =
+      fuchsia::ui::pointer::TouchResponseType::MAYBE;
+};
+
+struct GestureResponsePolicy {
+  std::vector<GestureResponseRegion> regions;
+  fuchsia::ui::pointer::TouchResponseType default_response =
+      fuchsia::ui::pointer::TouchResponseType::NO;
+};
+
 // Channel processors for fuchsia.ui.pointer.TouchSource and MouseSource
 // protocols. It manages the channel state, collects touch and mouse events, and
 // surfaces them to PlatformView as flutter::PointerData events for further
@@ -35,7 +55,10 @@ struct IxnHasher {
 class PointerDelegate {
  public:
   PointerDelegate(fuchsia::ui::pointer::TouchSourceHandle touch_source,
-                  fuchsia::ui::pointer::MouseSourceHandle mouse_source);
+                  fuchsia::ui::pointer::MouseSourceHandle mouse_source,
+                  bool intercept_all_input = true);
+
+  void SetGestureResponsePolicy(GestureResponsePolicy policy);
 
   // This function collects Fuchsia's TouchPointerSample and MousePointerSample
   // data and transforms them into flutter::PointerData structs. It then calls
@@ -50,6 +73,8 @@ class PointerDelegate {
 
   // Channel for touch events from Scenic.
   fuchsia::ui::pointer::TouchSourcePtr touch_source_;
+  bool intercept_all_input_ = true;
+  std::optional<GestureResponsePolicy> policy_;
 
   // Receive touch events from Scenic. Must be copyable.
   std::function<void(std::vector<fuchsia::ui::pointer::TouchEvent>)>

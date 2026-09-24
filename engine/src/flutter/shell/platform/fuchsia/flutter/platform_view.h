@@ -93,7 +93,8 @@ class PlatformView : public flutter::PlatformView {
       OnRequestAnnounceCallback on_request_announce_callback,
       OnShaderWarmupCallback on_shader_warmup_callback,
       AwaitVsyncCallback await_vsync_callback,
-      std::shared_ptr<sys::ServiceDirectory> dart_application_svc);
+      std::shared_ptr<sys::ServiceDirectory> dart_application_svc,
+      bool intercept_all_input = true);
 
   ~PlatformView() override;
 

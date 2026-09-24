@@ -86,10 +86,18 @@ const fuchsia_test_utils::Pixel kParentBackgroundColor(0xFF,
                                                        0x00,
                                                        0x00,
                                                        0xFF);  // Blue
+const fuchsia_test_utils::Pixel kParentTappedColor(0x00,
+                                                   0x00,
+                                                   0x00,
+                                                   0xFF);  // Black
 const fuchsia_test_utils::Pixel kChildBackgroundColor(0xFF,
                                                       0x00,
                                                       0xFF,
                                                       0xFF);  // Pink
+const fuchsia_test_utils::Pixel kChildTappedColor(0x00,
+                                                  0xFF,
+                                                  0xFF,
+                                                  0xFF);  // Yellow
 const fuchsia_test_utils::Pixel kFlatlandOverlayColor(0x00,
                                                       0xFF,
                                                       0x00,
@@ -133,7 +141,12 @@ class FlutterEmbedderTest : public ::loop_fixture::RealLoop,
       zx_koid_t view_ref_koid);
 
   void LaunchParentViewInRealm(
-      const std::vector<std::string>& component_args = {});
+      const std::vector<std::string>& component_args = {},
+      bool intercept_all_input = false);
+
+  void RegisterTouchScreen();
+
+  void InjectTap(int32_t x, int32_t y);
 
   fuchsia_test_utils::Screenshot TakeScreenshot();
 
@@ -149,6 +162,8 @@ class FlutterEmbedderTest : public ::loop_fixture::RealLoop,
   fuchsia::ui::test::scene::ControllerPtr scene_provider_;
   fuchsia::ui::observation::geometry::ViewTreeWatcherPtr view_tree_watcher_;
   fuchsia::ui::composition::ScreenshotPtr screenshot_;
+  fuchsia::ui::test::input::RegistryPtr input_registry_;
+  fuchsia::ui::test::input::TouchScreenPtr fake_touchscreen_;
 
   // Wrapped in optional since the view is not created until the middle of SetUp
   component_testing::RealmBuilder realm_builder_;
@@ -303,22 +318,36 @@ bool FlutterEmbedderTest::HasViewConnected(
 }
 
 void FlutterEmbedderTest::LaunchParentViewInRealm(
-    const std::vector<std::string>& component_args) {
+    const std::vector<std::string>& component_args,
+    bool intercept_all_input) {
   FML_LOG(INFO) << "Launching parent-view";
 
-  if (!component_args.empty()) {
-    // Construct a args.csv file containing the specified comma-separated
-    // component args.
-    std::string csv;
-    for (const auto& arg : component_args) {
-      csv += arg + ',';
-    }
-    // Remove last comma.
-    csv.pop_back();
-
+  if (!component_args.empty() || intercept_all_input) {
     auto config_directory_contents = DirectoryContents();
-    config_directory_contents.AddFile("args.csv", csv);
-    realm_builder_.RouteReadOnlyDirectory("config-data", {kParentViewRef},
+    if (intercept_all_input) {
+      config_directory_contents.AddFile("flutter_runner_config",
+                                        R"({"intercept_all_input":true})");
+    }
+    if (!component_args.empty()) {
+      // Construct a args.csv file containing the specified comma-separated
+      // component args.
+      std::string csv;
+      for (const auto& arg : component_args) {
+        csv += arg + ',';
+      }
+      // Remove last comma.
+      csv.pop_back();
+      config_directory_contents.AddFile("args.csv", csv);
+    }
+
+    std::vector<RouteEndpoint> targets = {kParentViewRef};
+    if (intercept_all_input) {
+      targets.push_back(kFlutterJitRunnerRef);
+      targets.push_back(kFlutterJitProductRunnerRef);
+      targets.push_back(kFlutterAotRunnerRef);
+      targets.push_back(kFlutterAotProductRunnerRef);
+    }
+    realm_builder_.RouteReadOnlyDirectory("config-data", std::move(targets),
                                           std::move(config_directory_contents));
   }
   realm_ = std::make_unique<RealmRoot>(realm_builder_.Build());
@@ -442,6 +471,80 @@ TEST_F(FlutterEmbedderTest, EmbeddingWithOverlay) {
         EXPECT_GT(histogram[kParentBackgroundColor],
                   histogram[kChildBackgroundColor]);
         EXPECT_GT(overlay_pixel_count, histogram[kChildBackgroundColor]);
+      }));
+}
+
+void FlutterEmbedderTest::RegisterTouchScreen() {
+  input_registry_ =
+      realm_->component().Connect<fuchsia::ui::test::input::Registry>();
+  input_registry_.set_error_handler([](auto) {
+    FML_LOG(ERROR) << "Error from fuchsia::ui::test::input::Registry";
+  });
+  bool touchscreen_registered = false;
+  fuchsia::ui::test::input::RegistryRegisterTouchScreenRequest request;
+  request.set_device(fake_touchscreen_.NewRequest());
+  input_registry_->RegisterTouchScreen(
+      std::move(request),
+      [&touchscreen_registered]() { touchscreen_registered = true; });
+  RunLoopUntil([&touchscreen_registered] { return touchscreen_registered; });
+}
+
+void FlutterEmbedderTest::InjectTap(int32_t x, int32_t y) {
+  fuchsia::ui::test::input::TouchScreenSimulateTapRequest tap_request;
+  tap_request.mutable_tap_location()->x = x;
+  tap_request.mutable_tap_location()->y = y;
+  bool tap_injected = false;
+  fake_touchscreen_->SimulateTap(std::move(tap_request),
+                                 [&tap_injected]() { tap_injected = true; });
+  RunLoopUntil([&tap_injected] { return tap_injected; });
+}
+
+TEST_F(FlutterEmbedderTest, EmbeddingGestureResponsePolicy) {
+  LaunchParentViewInRealm();
+  RegisterTouchScreen();
+
+  ASSERT_TRUE(TakeScreenshotUntil(kChildBackgroundColor));
+
+  // Tap center (inside child-view). Parent policy answers NO for child bounds
+  // and child policy answers YES, so child turns yellow while parent stays
+  // blue.
+  InjectTap(0, 0);
+  ASSERT_TRUE(TakeScreenshotUntil(
+      kChildTappedColor,
+      [](std::map<fuchsia_test_utils::Pixel, uint32_t> histogram) {
+        EXPECT_GT(histogram[kChildTappedColor], 0u);
+        EXPECT_GT(histogram[kParentBackgroundColor], 0u);
+        EXPECT_EQ(histogram[kParentTappedColor], 0u);
+      }));
+
+  // Tap outside child-view (500, 500). Parent policy answers YES via
+  // defaultResponse, so parent turns black.
+  InjectTap(500, 500);
+  ASSERT_TRUE(TakeScreenshotUntil(
+      kParentTappedColor,
+      [](std::map<fuchsia_test_utils::Pixel, uint32_t> histogram) {
+        EXPECT_GT(histogram[kParentTappedColor], 0u);
+        EXPECT_GT(histogram[kChildTappedColor], 0u);
+      }));
+}
+
+TEST_F(FlutterEmbedderTest, EmbeddingInterceptAllInput) {
+  LaunchParentViewInRealm(/*component_args=*/{}, /*intercept_all_input=*/true);
+  RegisterTouchScreen();
+
+  ASSERT_TRUE(TakeScreenshotUntil(kChildBackgroundColor));
+
+  // Tap center (inside child-view). Because intercept_all_input is true,
+  // parent-view's input shield intercepts all touches (even though parent-view
+  // declared a policy with NO for child bounds), so parent turns black while
+  // child stays pink.
+  InjectTap(0, 0);
+  ASSERT_TRUE(TakeScreenshotUntil(
+      kParentTappedColor,
+      [](std::map<fuchsia_test_utils::Pixel, uint32_t> histogram) {
+        EXPECT_GT(histogram[kParentTappedColor], 0u);
+        EXPECT_GT(histogram[kChildBackgroundColor], 0u);
+        EXPECT_EQ(histogram[kChildTappedColor], 0u);
       }));
 }
 
