@@ -75,7 +75,8 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   static RegisterViewFactory get _registerViewFactory =>
       debugOverrideRegisterViewFactory ?? ui_web.platformViewRegistry.registerViewFactory;
 
-  /// Override this to provide a custom implementation of [ui_web.platformViewRegistry.registerViewFactory].
+  /// Override this to provide a custom implementation of
+  /// [ui_web.PlatformViewRegistry.registerViewFactory].
   ///
   /// This should only be used for testing.
   // See `_platform_selectable_region_context_menu_io.dart`.
