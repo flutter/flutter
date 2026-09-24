@@ -99,7 +99,9 @@ export const browserEnvironment = {
   hasImageCodecs: hasImageCodecs(),
   hasChromiumBreakIterators: hasChromiumBreakIterators(),
   hasTextCluster: hasTextCluster(),
-  supportsDart2Wasm: supportsDart2Wasm(),
+  get supportsDart2Wasm() {
+    return supportsDart2Wasm();
+  },
   crossOriginIsolated: window.crossOriginIsolated,
   webGLVersion: detectWebGLVersion(),
   isChromeExtension: isChromeExtension(),
