@@ -44,6 +44,9 @@ const kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 const kWebDefinePrefix = 'webDefine:';
 
 class WebBuilder {
+  // TODO(bkonyi): Take a ToolContext instead of individual dependencies once
+  // ResidentWebRunner is migrated to ToolContext
+  // (https://github.com/flutter/flutter/issues/188471).
   WebBuilder({
     required this._logger,
     required this._processManager,
