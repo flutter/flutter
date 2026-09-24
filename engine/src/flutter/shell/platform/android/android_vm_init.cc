@@ -76,16 +76,16 @@ AndroidRenderingAPI SelectRenderingAPI(const AndroidVMArgs& args,
     }
     return AndroidRenderingAPI::kSoftware;
   }
+#endif  // !SLIMPELLER
 
-#ifndef FLUTTER_RELEASE
   if (args.requested_rendering_backend == "opengles" && args.enable_impeller) {
     return AndroidRenderingAPI::kImpellerOpenGLES;
   }
   if (args.requested_rendering_backend == "vulkan" && args.enable_impeller) {
     return AndroidRenderingAPI::kImpellerVulkan;
   }
-#endif
 
+#if !SLIMPELLER
   bool vivante = is_vivante.value_or(IsVivanteDevice());
   if (args.enable_impeller &&
       args.api_level >= kMinimumAndroidApiLevelForImpeller && !vivante) {
@@ -96,6 +96,31 @@ AndroidRenderingAPI SelectRenderingAPI(const AndroidVMArgs& args,
 #else
   return AndroidRenderingAPI::kImpellerAutoselect;
 #endif  // !SLIMPELLER
+}
+
+bool ShouldEnableSurfaceControl(const AndroidVMArgs& args,
+                                AndroidRenderingAPI rendering_api) {
+  if (!args.enable_surface_control || !args.enable_impeller) {
+    return false;
+  }
+  if (args.requested_rendering_backend == "opengles") {
+    return false;
+  }
+  int32_t effective_api_level = args.api_level;
+#if FML_OS_ANDROID
+  if (effective_api_level <= 0) {
+    effective_api_level = android_get_device_api_level();
+  }
+#else
+  if (effective_api_level <= 0) {
+    effective_api_level = kMinimumAndroidApiLevelForSurfaceControl;
+  }
+#endif
+  if (effective_api_level < kMinimumAndroidApiLevelForSurfaceControl) {
+    return false;
+  }
+  return rendering_api == AndroidRenderingAPI::kImpellerVulkan ||
+         rendering_api == AndroidRenderingAPI::kImpellerAutoselect;
 }
 
 // ---------------------------------------------------------------------------
@@ -442,6 +467,8 @@ bool AndroidVMInit::Init(const AndroidVMArgs& args) {
   }
   vm_args_ = args;
   rendering_api_ = SelectRenderingAPI(vm_args_);
+  vm_args_.enable_surface_control =
+      ShouldEnableSurfaceControl(vm_args_, rendering_api_);
 
   if (aot_data_ && aot_provider_) {
     aot_provider_->CollectAOTData(aot_data_);

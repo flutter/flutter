@@ -45,6 +45,10 @@ std::optional<bool> ParseMergedPlatformUIThreadFlag(std::string_view arg);
 /// @brief Minimum Android API level required for Impeller autoselection.
 constexpr int kMinimumAndroidApiLevelForImpeller = 29;
 
+/// @brief Minimum Android API level required for SurfaceControl / HCPP
+/// (Android 14 / API 34).
+constexpr int kMinimumAndroidApiLevelForSurfaceControl = 34;
+
 /// @brief VM initialization arguments and configuration parameters provided
 /// from the Android platform / Java embedder layer.
 struct AndroidVMArgs {
@@ -162,6 +166,11 @@ struct AndroidVMArgs {
 AndroidRenderingAPI SelectRenderingAPI(
     const AndroidVMArgs& args,
     std::optional<bool> is_vivante = std::nullopt);
+
+/// @brief Determines whether SurfaceControl / HCPP is supported for the given
+/// VM arguments and resolved rendering API.
+bool ShouldEnableSurfaceControl(const AndroidVMArgs& args,
+                                AndroidRenderingAPI rendering_api);
 
 /// @brief Abstract interface for font collection prefetching.
 ///

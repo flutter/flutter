@@ -117,6 +117,7 @@ static void AndroidTaskRunnerPostTask(FlutterTask task,
           return;
         }
         FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
+        AndroidTaskRunners::RunTaskFn run_task_fn;
         {
           std::lock_guard lock(state->mutex);
           if (state->destroyed) {
@@ -128,8 +129,13 @@ static void AndroidTaskRunnerPostTask(FlutterTask task,
             return;
           }
           engine = state->engine;
+          run_task_fn = state->run_task_fn;
         }
-        RunEngineTask(engine, &task);
+        if (run_task_fn) {
+          run_task_fn(engine, &task);
+        } else {
+          RunEngineTask(engine, &task);
+        }
       },
       time_point);
 }
@@ -196,8 +202,12 @@ void AndroidTaskRunners::SetEngine(FLUTTER_API_SYMBOL(FlutterEngine) engine) {
   {
     std::lock_guard lock(state_->mutex);
     state_->engine = engine;
-    if (engine) {
+    if (engine != nullptr) {
+      state_->destroyed = false;
       tasks_to_drain.swap(state_->pending_tasks);
+    } else {
+      state_->destroyed = true;
+      state_->pending_tasks.clear();
     }
   }
 
@@ -208,17 +218,31 @@ void AndroidTaskRunners::SetEngine(FLUTTER_API_SYMBOL(FlutterEngine) engine) {
         return;
       }
       FLUTTER_API_SYMBOL(FlutterEngine) current_engine = nullptr;
+      RunTaskFn run_task_fn;
       {
         std::lock_guard lock(state->mutex);
         if (state->engine && !state->destroyed) {
           current_engine = state->engine;
+          run_task_fn = state->run_task_fn;
         }
       }
       if (current_engine) {
-        RunEngineTask(current_engine, &task);
+        if (run_task_fn) {
+          run_task_fn(current_engine, &task);
+        } else {
+          RunEngineTask(current_engine, &task);
+        }
       }
     });
   }
+}
+
+void AndroidTaskRunners::SetRunTaskFnForTesting(RunTaskFn fn) {
+  if (!state_) {
+    return;
+  }
+  std::lock_guard lock(state_->mutex);
+  state_->run_task_fn = std::move(fn);
 }
 
 FLUTTER_API_SYMBOL(FlutterEngine) AndroidTaskRunners::GetEngine() const {

@@ -571,6 +571,71 @@ TEST(AndroidVMInitTest, ParseMergedPlatformUIThreadFlagMatrix) {
   }
 }
 
+TEST(AndroidVMInitTest,
+     SelectRenderingAPIHonorsRequestedBackendUnderSlimpeller) {
+  AndroidVMArgs gles_args;
+  gles_args.enable_impeller = true;
+  gles_args.requested_rendering_backend = "opengles";
+  gles_args.api_level = 35;
+  EXPECT_EQ(SelectRenderingAPI(gles_args, false),
+            AndroidRenderingAPI::kImpellerOpenGLES);
+
+  AndroidVMArgs vulkan_args;
+  vulkan_args.enable_impeller = true;
+  vulkan_args.requested_rendering_backend = "vulkan";
+  vulkan_args.api_level = 35;
+  EXPECT_EQ(SelectRenderingAPI(vulkan_args, false),
+            AndroidRenderingAPI::kImpellerVulkan);
+}
+
+TEST(AndroidVMInitTest, ShouldEnableSurfaceControlRequiresVulkanAndApi34) {
+  // 1. Vulkan on API 35 with enable_surface_control = true -> enabled.
+  AndroidVMArgs vulkan_35;
+  vulkan_35.enable_surface_control = true;
+  vulkan_35.enable_impeller = true;
+  vulkan_35.api_level = 35;
+  vulkan_35.requested_rendering_backend = "vulkan";
+  EXPECT_TRUE(ShouldEnableSurfaceControl(vulkan_35,
+                                         SelectRenderingAPI(vulkan_35, false)));
+
+  // 2. Autoselect on API 34 with enable_surface_control = true -> enabled.
+  AndroidVMArgs autoselect_34;
+  autoselect_34.enable_surface_control = true;
+  autoselect_34.enable_impeller = true;
+  autoselect_34.api_level = 34;
+  EXPECT_TRUE(ShouldEnableSurfaceControl(
+      autoselect_34, SelectRenderingAPI(autoselect_34, false)));
+
+  // 3. OpenGLES on API 35 with enable_surface_control = true -> disabled.
+  AndroidVMArgs gles_35;
+  gles_35.enable_surface_control = true;
+  gles_35.enable_impeller = true;
+  gles_35.api_level = 35;
+  gles_35.requested_rendering_backend = "opengles";
+  EXPECT_FALSE(
+      ShouldEnableSurfaceControl(gles_35, SelectRenderingAPI(gles_35, false)));
+  EXPECT_FALSE(ShouldEnableSurfaceControl(
+      gles_35, AndroidRenderingAPI::kImpellerAutoselect));
+
+  // 4. Vulkan on API 33 (below API 34 threshold) -> disabled.
+  AndroidVMArgs vulkan_33 = vulkan_35;
+  vulkan_33.api_level = 33;
+  EXPECT_FALSE(ShouldEnableSurfaceControl(
+      vulkan_33, AndroidRenderingAPI::kImpellerVulkan));
+
+  // 5. Impeller disabled -> disabled.
+  AndroidVMArgs impeller_off = vulkan_35;
+  impeller_off.enable_impeller = false;
+  EXPECT_FALSE(ShouldEnableSurfaceControl(
+      impeller_off, AndroidRenderingAPI::kImpellerVulkan));
+
+  // 6. SurfaceControl flag disabled -> disabled.
+  AndroidVMArgs sc_off = vulkan_35;
+  sc_off.enable_surface_control = false;
+  EXPECT_FALSE(
+      ShouldEnableSurfaceControl(sc_off, AndroidRenderingAPI::kImpellerVulkan));
+}
+
 }  // namespace testing
 }  // namespace android
 }  // namespace flutter
