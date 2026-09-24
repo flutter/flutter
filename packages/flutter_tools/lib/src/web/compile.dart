@@ -17,7 +17,6 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../cache.dart';
-import '../context/tool_context.dart';
 import '../flutter_plugins.dart';
 import '../platform_plugins.dart';
 import '../plugins.dart';
@@ -46,52 +45,32 @@ const kWebDefinePrefix = 'webDefine:';
 
 class WebBuilder {
   WebBuilder({
-    required Analytics analytics,
-    required BuildSystem buildSystem,
-    required ToolContext toolContext,
-    BuildTargets? buildTargets,
-  }) : this.fromParameters(
-         analytics: analytics,
-         artifacts: toolContext.artifacts,
-         buildSystem: buildSystem,
-         buildTargets: buildTargets,
-         cache: toolContext.cache,
-         config: toolContext.config,
-         fileSystem: toolContext.fs,
-         flutterVersion: toolContext.flutterVersion,
-         logger: toolContext.logger,
-         platform: toolContext.platform,
-         processManager: toolContext.processManager,
-         terminal: toolContext.terminal,
-       );
+    required this._logger,
+    required this._processManager,
+    required this._buildSystem,
+    required this._analytics,
+    required this._flutterVersion,
+    required this._fileSystem,
+    required this._artifacts,
+    required this._buildTargets,
+    required this._cache,
+    required this._config,
+    required this._platform,
+    required this._terminal,
+  });
 
-  WebBuilder.fromParameters({
-    required this.analytics,
-    required this.artifacts,
-    required this.buildSystem,
-    required this.cache,
-    required this.config,
-    required this.fileSystem,
-    required this.flutterVersion,
-    required this.logger,
-    required this.platform,
-    required this.processManager,
-    required this.terminal,
-    BuildTargets? buildTargets,
-  }) : _buildTargets = buildTargets ?? const NoOpBuildTargets();
-
-  final Analytics analytics;
-  final Artifacts artifacts;
-  final BuildSystem buildSystem;
+  final Logger _logger;
+  final ProcessManager _processManager;
+  final BuildSystem _buildSystem;
+  final Analytics _analytics;
+  final FlutterVersion _flutterVersion;
+  final FileSystem _fileSystem;
+  final Artifacts _artifacts;
   final BuildTargets _buildTargets;
-  final Cache cache;
-  final Config config;
-  final FileSystem fileSystem;
-  final FlutterVersion flutterVersion;
-  final Logger logger;
-  final Platform platform;
-  final ProcessManager processManager;
-  final Terminal terminal;
+  final Cache _cache;
+  final Config _config;
+  final Platform _platform;
+  final Terminal _terminal;
 
   /// Builds the web application using the specified compiler configurations
   /// and generates the necessary web assets in the output directory.
@@ -107,7 +86,7 @@ class WebBuilder {
     Map<String, String> webDefines = const <String, String>{},
   }) async {
     if (serviceWorkerStrategy != null) {
-      logger.printWarning(
+      _logger.printWarning(
         'The --pwa-strategy option is deprecated and will be removed in a future Flutter release.\n'
         'For more information, see: https://github.com/flutter/flutter/issues/156910',
       );
@@ -115,29 +94,31 @@ class WebBuilder {
 
     final bool hasWebPlugins = (await findPlugins(
       flutterProject,
-      logger: logger,
+      logger: _logger,
     )).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final Directory outputDirectory = outputDirectoryPath == null
-        ? fileSystem.directory(
-            fileSystem.path.join(
+        ? _fileSystem.directory(
+            _fileSystem.path.join(
               flutterProject.directory.path,
-              getWebBuildDirectory(config: config, fileSystem: fileSystem),
+              getWebBuildDirectory(config: _config, fileSystem: _fileSystem),
             ),
           )
-        : fileSystem.directory(outputDirectoryPath);
+        : _fileSystem.directory(outputDirectoryPath);
     outputDirectory.createSync(recursive: true);
 
     // The migrators to apply to a Web project.
-    final migrators = <ProjectMigrator>[ScrubGeneratedPluginRegistrant(flutterProject.web, logger)];
+    final migrators = <ProjectMigrator>[
+      ScrubGeneratedPluginRegistrant(flutterProject.web, _logger),
+    ];
 
     final migration = ProjectMigration(migrators);
     await migration.run();
 
-    final Status status = logger.startProgress('Compiling $target for the Web...');
+    final Status status = _logger.startProgress('Compiling $target for the Web...');
     final sw = Stopwatch()..start();
     try {
-      final BuildResult result = await buildSystem.build(
-        _buildTargets.webServiceWorker(fileSystem, compilerConfigs, analytics),
+      final BuildResult result = await _buildSystem.build(
+        _buildTargets.webServiceWorker(_fileSystem, compilerConfigs, _analytics),
         Environment(
           projectDir: flutterProject.directory,
           outputDir: outputDirectory,
@@ -155,15 +136,15 @@ class WebBuilder {
             for (final MapEntry(:key, :value) in webDefines.entries) '$kWebDefinePrefix$key': value,
           },
           packageConfigPath: buildInfo.packageConfigPath,
-          artifacts: artifacts,
-          fileSystem: fileSystem,
-          logger: logger,
-          processManager: processManager,
-          platform: platform,
-          analytics: analytics,
-          cacheDir: cache.getRoot(),
-          engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
-          flutterRootDir: fileSystem.directory(Cache.flutterRoot),
+          artifacts: _artifacts,
+          fileSystem: _fileSystem,
+          logger: _logger,
+          processManager: _processManager,
+          platform: _platform,
+          analytics: _analytics,
+          cacheDir: _cache.getRoot(),
+          engineVersion: _artifacts.usesLocalArtifacts ? null : _flutterVersion.engineRevision,
+          flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
           // Web uses a different Dart plugin registry.
           // https://github.com/flutter/flutter/issues/80406
           generateDartPluginRegistry: false,
@@ -171,7 +152,7 @@ class WebBuilder {
       );
       if (!result.success) {
         for (final ExceptionMeasurement measurement in result.exceptions.values) {
-          logger.printError(
+          _logger.printError(
             'Target ${measurement.target} failed: ${measurement.exception}',
             stackTrace: (measurement.fatal && measurement.exception is! ToolExit)
                 ? measurement.stackTrace
@@ -188,21 +169,21 @@ class WebBuilder {
 
     // We don't print a size because the output directory can contain
     // optional files not needed by the user.
-    logger.printStatus(
-      '${terminal.successMark} '
-      'Built ${fileSystem.path.relative(outputDirectory.path)}',
+    _logger.printStatus(
+      '${_terminal.successMark} '
+      'Built ${_fileSystem.path.relative(outputDirectory.path)}',
       color: TerminalColor.green,
     );
 
     final String buildSettingsString = _buildEventAnalyticsSettings(configs: compilerConfigs);
 
-    analytics.send(
+    _analytics.send(
       Event.flutterBuildInfo(label: 'web-compile', buildType: 'web', settings: buildSettingsString),
     );
 
     final Duration elapsedDuration = sw.elapsed;
     final variableName = compilerConfigs.length > 1 ? 'dual-compile' : 'dart2js';
-    analytics.send(
+    _analytics.send(
       Event.timing(
         workflow: 'build',
         variableName: variableName,

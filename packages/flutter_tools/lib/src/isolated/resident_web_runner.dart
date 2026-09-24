@@ -43,7 +43,6 @@ import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/file_generators/main_dart.dart' as main_dart;
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
-import 'build_targets.dart';
 import 'devfs_web.dart';
 import 'web_expression_compiler.dart';
 
@@ -339,19 +338,19 @@ class ResidentWebRunner extends ResidentRunner {
           flutterDevice!.generator!.accept();
           cacheInitialDillCompilation();
         } else {
-          final webBuilder = WebBuilder.fromParameters(
-            analytics: globals.analytics,
-            artifacts: globals.artifacts!,
+          final webBuilder = WebBuilder(
+            logger: _logger,
+            processManager: globals.processManager,
             buildSystem: globals.buildSystem,
-            cache: globals.cache,
-            config: globals.config,
             fileSystem: _fileSystem,
             flutterVersion: globals.flutterVersion,
-            logger: _logger,
-            platform: globals.platform,
-            processManager: globals.processManager,
+            analytics: globals.analytics,
+            artifacts: globals.artifacts!,
+            buildTargets: globals.buildTargets,
+            cache: globals.cache,
+            config: globals.config,
+            platform: _platform,
             terminal: globals.terminal,
-            buildTargets: const BuildTargetsImpl(),
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -502,19 +501,19 @@ class ResidentWebRunner extends ResidentRunner {
     } else {
       report = null;
       try {
-        final webBuilder = WebBuilder.fromParameters(
-          analytics: globals.analytics,
-          artifacts: globals.artifacts!,
+        final webBuilder = WebBuilder(
+          logger: _logger,
+          processManager: globals.processManager,
           buildSystem: globals.buildSystem,
-          cache: globals.cache,
-          config: globals.config,
           fileSystem: _fileSystem,
           flutterVersion: globals.flutterVersion,
-          logger: _logger,
-          platform: globals.platform,
-          processManager: globals.processManager,
+          analytics: globals.analytics,
+          artifacts: globals.artifacts!,
+          buildTargets: globals.buildTargets,
+          cache: globals.cache,
+          config: globals.config,
+          platform: _platform,
           terminal: globals.terminal,
-          buildTargets: const BuildTargetsImpl(),
         );
         await webBuilder.buildWeb(
           flutterProject,

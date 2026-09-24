@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
@@ -27,7 +28,6 @@ void main() {
   late BufferLogger logger;
   late FakeFlutterVersion flutterVersion;
   late FlutterProject flutterProject;
-  late FakeToolContext toolContext;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -37,7 +37,6 @@ void main() {
       fs: fileSystem,
       fakeFlutterVersion: flutterVersion,
     );
-    toolContext = FakeToolContext(flutterVersion: flutterVersion, fs: fileSystem, logger: logger);
     fileSystem.currentDirectory.childFile('pubspec.yaml')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -73,10 +72,18 @@ environement:
       });
 
       final webBuilder = WebBuilder(
-        analytics: fakeAnalytics,
+        logger: logger,
+        processManager: FakeProcessManager.any(),
         buildSystem: buildSystem,
-        toolContext: toolContext,
+        flutterVersion: flutterVersion,
+        fileSystem: fileSystem,
+        analytics: fakeAnalytics,
+        artifacts: FakeArtifacts(fileSystem: fileSystem),
         buildTargets: const BuildTargetsImpl(),
+        cache: FakeCache(fileSystem: fileSystem),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        terminal: FakeTerminal(),
       );
       await webBuilder.buildWeb(
         flutterProject,
@@ -138,10 +145,18 @@ environement:
       });
 
       final webBuilder = WebBuilder(
-        analytics: fakeAnalytics,
+        logger: logger,
+        processManager: FakeProcessManager.any(),
         buildSystem: buildSystem,
-        toolContext: toolContext,
+        flutterVersion: flutterVersion,
+        fileSystem: fileSystem,
+        analytics: fakeAnalytics,
+        artifacts: FakeArtifacts(fileSystem: fileSystem),
         buildTargets: const BuildTargetsImpl(),
+        cache: FakeCache(fileSystem: fileSystem),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        terminal: FakeTerminal(),
       );
       await webBuilder.buildWeb(
         flutterProject,
@@ -181,10 +196,18 @@ environement:
       });
 
       final webBuilder = WebBuilder(
-        analytics: fakeAnalytics,
+        logger: logger,
+        processManager: FakeProcessManager.any(),
         buildSystem: buildSystem,
-        toolContext: toolContext,
+        flutterVersion: flutterVersion,
+        fileSystem: fileSystem,
+        analytics: fakeAnalytics,
+        artifacts: FakeArtifacts(fileSystem: fileSystem),
         buildTargets: const BuildTargetsImpl(),
+        cache: FakeCache(fileSystem: fileSystem),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        terminal: FakeTerminal(),
       );
       await webBuilder.buildWeb(
         flutterProject,
@@ -221,10 +244,18 @@ environement:
       );
 
       final webBuilder = WebBuilder(
-        analytics: fakeAnalytics,
+        logger: logger,
+        processManager: FakeProcessManager.any(),
         buildSystem: buildSystem,
-        toolContext: toolContext,
+        flutterVersion: flutterVersion,
+        fileSystem: fileSystem,
+        analytics: fakeAnalytics,
+        artifacts: FakeArtifacts(fileSystem: fileSystem),
         buildTargets: const BuildTargetsImpl(),
+        cache: FakeCache(fileSystem: fileSystem),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        terminal: FakeTerminal(),
       );
       await expectLater(
         () async => webBuilder.buildWeb(
