@@ -141,18 +141,19 @@ void main() {
       file.writeAsBytesSync(const <int>[1, 2, 3, 4, 5, 6]);
 
       expect(parser.getValueFromFile<String>(file.path, 'CFBundleIdentifier'), null);
-      expect(
-        logger.statusText,
-        contains(
-          'Property List error: Unexpected character \x01 at line 1 / '
-          'JSON error: JSON text did not start with array or object and option to allow fragments not '
-          'set. around line 1, column 0.\n',
-        ),
-      );
+      // plutil writes its parse diagnostic to stdout on macOS 15 and earlier
+      // but to stderr on macOS 26 and later. ProcessUtils.runSync forwards
+      // stdout to the status log and stderr to the error log, so accept the
+      // diagnostic from either stream.
+      final String output = logger.statusText + logger.errorText;
+      expect(output, contains('Property List error: '));
+      expect(output, contains(' / JSON error: '));
       expect(
         logger.errorText,
-        'ProcessException: The command failed with exit code 1\n'
-        '  Command: /usr/bin/plutil -convert xml1 -o - ${file.absolute.path}\n',
+        endsWith(
+          'ProcessException: The command failed with exit code 1\n'
+          '  Command: /usr/bin/plutil -convert xml1 -o - ${file.absolute.path}\n',
+        ),
       );
     },
     skip: !platform.isMacOS, // [intended] requires macos tool chain.
@@ -229,17 +230,14 @@ void main() {
       parser.replaceKey(file.path, key: 'CFBundleIdentifier', value: 'dev.flutter.fake'),
       isFalse,
     );
-    expect(
-      logger.statusText,
-      contains(
-        'foo.plist: Property List error: Unexpected character \x01 '
-        'at line 1 / JSON error: JSON text did not start with array or object and option to allow '
-        'fragments not set. around line 1, column 0.\n',
-      ),
-    );
+    // See the malformed-plist getValueFromFile test above: the diagnostic
+    // comes from stdout on macOS 15 and earlier, stderr on macOS 26 and later.
+    final String output = logger.statusText + logger.errorText;
+    expect(output, contains('foo.plist: Property List error: '));
+    expect(output, contains(' / JSON error: '));
     expect(
       logger.errorText,
-      equals(
+      endsWith(
         'ProcessException: The command failed with exit code 1\n'
         '  Command: /usr/bin/plutil -replace CFBundleIdentifier -string dev.flutter.fake foo.plist\n',
       ),
