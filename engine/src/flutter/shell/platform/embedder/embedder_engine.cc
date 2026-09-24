@@ -28,24 +28,26 @@ EmbedderEngine::EmbedderEngine(
     RunConfiguration run_configuration,
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
     const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
-    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
+    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver,
+    std::vector<ImageGeneratorFactoryRegistration> image_generators)
     : thread_host_(std::move(thread_host)),
       task_runners_(task_runners),
       run_configuration_(std::move(run_configuration)),
       shell_args_(std::make_unique<ShellArgs>(settings,
                                               on_create_platform_view,
                                               on_create_rasterizer)),
-      external_texture_resolver_(std::move(external_texture_resolver)) {}
+      external_texture_resolver_(std::move(external_texture_resolver)),
+      image_generators_(std::move(image_generators)) {}
 
 EmbedderEngine::EmbedderEngine(
     std::shared_ptr<EmbedderThreadHost> thread_host,
     const flutter::TaskRunners& task_runners,
-    std::unique_ptr<Shell> spawned_shell,
+    std::unique_ptr<Shell> shell,
     std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
     : thread_host_(std::move(thread_host)),
       task_runners_(task_runners),
       run_configuration_(nullptr),
-      shell_(std::move(spawned_shell)),
+      shell_(std::move(shell)),
       external_texture_resolver_(std::move(external_texture_resolver)) {}
 
 EmbedderEngine::~EmbedderEngine() = default;
@@ -63,6 +65,12 @@ bool EmbedderEngine::LaunchShell() {
   shell_ = Shell::Create(
       flutter::PlatformData(), task_runners_, shell_args_->settings,
       shell_args_->on_create_platform_view, shell_args_->on_create_rasterizer);
+
+  for (auto& image_generator : image_generators_) {
+    RegisterImageGenerator(std::move(image_generator.factory),
+                           image_generator.priority);
+  }
+  image_generators_.clear();
 
   // Reset the args no matter what. They will never be used to initialize a
   // shell again.
@@ -83,11 +91,14 @@ void EmbedderEngine::CollectThreadHost() {
 
   // Only invalidate active runners when the last engine sharing this
   // EmbedderThreadHost is being collected.
+  // Once collected, EmbedderThreadHost::RunnerIsValid will return false for
+  // all runners belonging to this thread host. This must be done with UI task
+  // runner blocked to prevent possible raciness that could happen when
+  // destroying the thread host in the middle of UI task runner execution. This
+  // is not an issue for other runners, because raster task runner should not
+  // have anything scheduled after engine shutdown and platform task runner is
+  // where this method is called from.
   if (thread_host_.use_count() == 1) {
-    // Once collected, EmbedderThreadHost::RunnerIsValid will return false for
-    // all runners belonging to this thread host. This must be done with UI task
-    // runner blocked to prevent possible raciness that could happen when
-    // destroying the thread host in the middle of UI task runner execution.
     if (thread_host_->GetTaskRunners().GetUITaskRunner() &&
         !thread_host_->GetTaskRunners()
              .GetUITaskRunner()
@@ -388,6 +399,119 @@ bool EmbedderEngine::ScheduleFrame() {
 Shell& EmbedderEngine::GetShell() {
   FML_DCHECK(shell_);
   return *shell_.get();
+}
+
+std::unique_ptr<EmbedderEngine> EmbedderEngine::Spawn(
+    const std::shared_ptr<EmbedderThreadHost>& thread_host,
+    const TaskRunners& task_runners,
+    RunConfiguration run_configuration,
+    const std::string& initial_route,
+    const Shell::CreateCallback<PlatformView>& on_create_platform_view,
+    const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
+    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
+    const {
+  if (!IsValid()) {
+    FML_LOG(ERROR) << "Cannot spawn from an invalid engine.";
+    return nullptr;
+  }
+
+  std::unique_ptr<Shell> spawned_shell =
+      shell_->Spawn(std::move(run_configuration), initial_route,
+                    on_create_platform_view, on_create_rasterizer);
+  if (!spawned_shell) {
+    FML_LOG(ERROR) << "Failed to spawn shell.";
+    return nullptr;
+  }
+
+  std::shared_ptr<EmbedderThreadHost> target_thread_host =
+      thread_host ? thread_host : thread_host_;
+
+  return std::make_unique<EmbedderEngine>(
+      std::move(target_thread_host), task_runners, std::move(spawned_shell),
+      std::move(external_texture_resolver));
+}
+
+bool EmbedderEngine::UpdateAssetResolver(
+    std::unique_ptr<AssetResolver> updated_asset_resolver,
+    AssetResolver::AssetResolverType type) {
+  if (!IsValid()) {
+    return false;
+  }
+
+  auto platform_view = shell_->GetPlatformView();
+  if (!platform_view) {
+    return false;
+  }
+
+  platform_view->UpdateAssetResolverByType(std::move(updated_asset_resolver),
+                                           type);
+  return true;
+}
+
+bool EmbedderEngine::LoadDartDeferredLibrary(
+    intptr_t loading_unit_id,
+    std::unique_ptr<const fml::Mapping> snapshot_data,
+    std::unique_ptr<const fml::Mapping> snapshot_instructions) {
+  if (!IsValid()) {
+    return false;
+  }
+
+  auto platform_view = shell_->GetPlatformView();
+  if (!platform_view) {
+    return false;
+  }
+
+  platform_view->LoadDartDeferredLibrary(loading_unit_id,
+                                         std::move(snapshot_data),
+                                         std::move(snapshot_instructions));
+  return true;
+}
+
+bool EmbedderEngine::LoadDartDeferredLibraryError(
+    intptr_t loading_unit_id,
+    const std::string& error_message,
+    bool transient) {
+  if (!IsValid()) {
+    return false;
+  }
+
+  auto platform_view = shell_->GetPlatformView();
+  if (!platform_view) {
+    return false;
+  }
+
+  platform_view->LoadDartDeferredLibraryError(loading_unit_id, error_message,
+                                              transient);
+  return true;
+}
+
+bool EmbedderEngine::RegisterImageGenerator(ImageGeneratorFactory factory,
+                                            int32_t priority) {
+  if (!IsValid() || !shell_) {
+    return false;
+  }
+
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetPlatformTaskRunner(),
+      fml::MakeCopyable(
+          [this, &latch, factory = std::move(factory), priority]() mutable {
+            if (IsValid()) {
+              shell_->RegisterImageDecoder(std::move(factory), priority);
+            }
+            latch.Signal();
+          }));
+  latch.Wait();
+  return true;
+}
+
+Rasterizer::Screenshot EmbedderEngine::Screenshot(
+    Rasterizer::ScreenshotType type,
+    bool base64_encode) const {
+  if (!IsValid()) {
+    return {};
+  }
+  return shell_->Screenshot(type, base64_encode);
 }
 
 }  // namespace flutter

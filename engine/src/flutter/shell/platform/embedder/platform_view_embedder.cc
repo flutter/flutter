@@ -138,6 +138,40 @@ PlatformViewEmbedder::PlatformViewEmbedder(
 
 PlatformViewEmbedder::~PlatformViewEmbedder() = default;
 
+void PlatformViewEmbedder::NotifyCreated() {
+  if (platform_dispatch_table_.raster_context_setup_callback) {
+    fml::AutoResetWaitableEvent latch;
+    fml::TaskRunner::RunNowOrPostTask(
+        task_runners_.GetRasterTaskRunner(),
+        [&latch,
+         callback = platform_dispatch_table_.raster_context_setup_callback,
+         user_data = platform_dispatch_table_.raster_context_user_data]() {
+          callback(user_data);
+          latch.Signal();
+        });
+    latch.Wait();
+  }
+
+  PlatformView::NotifyCreated();
+}
+
+void PlatformViewEmbedder::NotifyDestroyed() {
+  PlatformView::NotifyDestroyed();
+
+  if (platform_dispatch_table_.raster_context_teardown_callback) {
+    fml::AutoResetWaitableEvent latch;
+    fml::TaskRunner::RunNowOrPostTask(
+        task_runners_.GetRasterTaskRunner(),
+        [&latch,
+         callback = platform_dispatch_table_.raster_context_teardown_callback,
+         user_data = platform_dispatch_table_.raster_context_user_data]() {
+          callback(user_data);
+          latch.Signal();
+        });
+    latch.Wait();
+  }
+}
+
 void PlatformViewEmbedder::UpdateSemantics(
     int64_t view_id,
     flutter::SemanticsNodeUpdates update,
@@ -228,6 +262,62 @@ PlatformViewEmbedder::ComputePlatformResolvedLocales(
   return out;
 }
 
+void PlatformViewEmbedder::RequestDartDeferredLibrary(
+    intptr_t loading_unit_id) {
+  if (platform_dispatch_table_.request_dart_deferred_library_callback !=
+      nullptr) {
+    platform_dispatch_table_.request_dart_deferred_library_callback(
+        loading_unit_id);
+  }
+  if (platform_dispatch_table_.dart_deferred_library_loading_unit_callback !=
+      nullptr) {
+    platform_dispatch_table_.dart_deferred_library_loading_unit_callback(
+        static_cast<int64_t>(loading_unit_id));
+  }
+}
+
+// |PlatformView|
+void PlatformViewEmbedder::LoadDartDeferredLibrary(
+    intptr_t loading_unit_id,
+    std::unique_ptr<const fml::Mapping> snapshot_data,
+    std::unique_ptr<const fml::Mapping> snapshot_instructions) {
+  delegate_.LoadDartDeferredLibrary(loading_unit_id, std::move(snapshot_data),
+                                    std::move(snapshot_instructions));
+}
+
+// |PlatformView|
+void PlatformViewEmbedder::LoadDartDeferredLibraryError(
+    intptr_t loading_unit_id,
+    const std::string error_message,
+    bool transient) {
+  delegate_.LoadDartDeferredLibraryError(loading_unit_id, error_message,
+                                         transient);
+}
+
+// |PlatformView|
+double PlatformViewEmbedder::GetScaledFontSize(double unscaled_font_size,
+                                               int configuration_id) const {
+  if (platform_dispatch_table_.get_scaled_font_size_callback != nullptr) {
+    return platform_dispatch_table_.get_scaled_font_size_callback(
+        unscaled_font_size, configuration_id);
+  }
+  return PlatformView::GetScaledFontSize(unscaled_font_size, configuration_id);
+}
+
+// |PlatformView|
+void PlatformViewEmbedder::SetApplicationLocale(std::string locale) {
+  if (platform_dispatch_table_.set_application_locale_callback != nullptr) {
+    platform_dispatch_table_.set_application_locale_callback(std::move(locale));
+  }
+}
+
+// |PlatformView|
+void PlatformViewEmbedder::SetSemanticsTreeEnabled(bool enabled) {
+  if (platform_dispatch_table_.set_semantics_tree_enabled_callback != nullptr) {
+    platform_dispatch_table_.set_semantics_tree_enabled_callback(enabled);
+  }
+}
+
 // |PlatformView|
 void PlatformViewEmbedder::OnPreEngineRestart() const {
   if (platform_dispatch_table_.on_pre_engine_restart_callback != nullptr) {
@@ -247,15 +337,6 @@ void PlatformViewEmbedder::RequestViewFocusChange(
     const ViewFocusChangeRequest& request) {
   if (platform_dispatch_table_.view_focus_change_request_callback != nullptr) {
     platform_dispatch_table_.view_focus_change_request_callback(request);
-  }
-}
-
-void PlatformViewEmbedder::RequestDartDeferredLibrary(
-    intptr_t loading_unit_id) {
-  if (platform_dispatch_table_.request_dart_deferred_library_callback !=
-      nullptr) {
-    platform_dispatch_table_.request_dart_deferred_library_callback(
-        loading_unit_id);
   }
 }
 
