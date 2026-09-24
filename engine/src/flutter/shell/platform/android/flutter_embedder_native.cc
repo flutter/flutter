@@ -25,6 +25,7 @@
 #include "flutter/fml/paths.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
 
 namespace flutter {
@@ -271,6 +272,7 @@ size_t EmbedderImageLRU::GetSize() const {
   return count;
 }
 
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_weak_reference_class = nullptr;
 static jmethodID g_weak_reference_get_method = nullptr;
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_surface_texture_wrapper_class =
     nullptr;
@@ -450,6 +452,47 @@ ANativeWindow* FlutterEmbedderNative::GetOverlayWindow(size_t overlay_index) {
       surface_id = overlay_surface_state_->surface_ids[overlay_index];
     }
   }
+
+  // If the surface was not pre-allocated, synchronously allocate missing
+  // surfaces.
+  if (surface_id == -1 && jni_router_ && android_task_runners_) {
+    auto platform_runner = android_task_runners_->GetPlatformTaskRunner();
+    if (platform_runner) {
+      while (true) {
+        {
+          std::scoped_lock lock(overlay_surface_state_->mutex);
+          if (overlay_index < overlay_surface_state_->surface_ids.size()) {
+            surface_id = overlay_surface_state_->surface_ids[overlay_index];
+            break;
+          }
+        }
+        std::optional<int32_t> maybe_id;
+        if (platform_runner->RunsTasksOnCurrentThread()) {
+          maybe_id = jni_router_->RouteCreateOverlaySurface();
+        } else {
+          fml::AutoResetWaitableEvent latch;
+          platform_runner->PostTask(
+              [router = jni_router_, &maybe_id, &latch]() {
+                maybe_id = router->RouteCreateOverlaySurface();
+                latch.Signal();
+              });
+          latch.Wait();
+        }
+        if (!maybe_id.has_value()) {
+          break;
+        }
+        {
+          std::scoped_lock lock(overlay_surface_state_->mutex);
+          overlay_surface_state_->surface_ids.push_back(*maybe_id);
+          if (overlay_index < overlay_surface_state_->surface_ids.size()) {
+            surface_id = overlay_surface_state_->surface_ids[overlay_index];
+            break;
+          }
+        }
+      }
+    }
+  }
+
   if (surface_id != -1) {
     if (platform_views_controller_) {
       return platform_views_controller_->GetOverlayWindow(surface_id);
@@ -624,7 +667,10 @@ void FlutterEmbedderNative::PopulateRendererConfig(
             if (env) {
               jobject target_obj = java_ref->obj();
               fml::jni::ScopedJavaLocalRef<jobject> local_target;
-              if (g_weak_reference_get_method) {
+              if (g_weak_reference_get_method && g_weak_reference_class &&
+                  !g_weak_reference_class->is_null() &&
+                  env->IsInstanceOf(target_obj,
+                                    g_weak_reference_class->obj())) {
                 jobject deref = env->CallObjectMethod(
                     target_obj, g_weak_reference_get_method);
                 if (deref) {
@@ -723,7 +769,9 @@ void FlutterEmbedderNative::PopulateRendererConfig(
           if (env) {
             jobject target_obj = weak_entry->obj();
             fml::jni::ScopedJavaLocalRef<jobject> local_target;
-            if (g_weak_reference_get_method) {
+            if (g_weak_reference_get_method && g_weak_reference_class &&
+                !g_weak_reference_class->is_null() &&
+                env->IsInstanceOf(target_obj, g_weak_reference_class->obj())) {
               jobject deref = env->CallObjectMethod(
                   target_obj, g_weak_reference_get_method);
               if (deref) {
@@ -782,11 +830,19 @@ void FlutterEmbedderNative::PopulateRendererConfig(
                                 if (new_egl_image) {
                                   typedef void (*PFNGLBINDTEXTUREPROC)(
                                       uint32_t, uint32_t);
-                                  static auto glBindTexture_fn =
-                                      reinterpret_cast<PFNGLBINDTEXTUREPROC>(
-                                          self->renderer_config_.open_gl
-                                              .gl_proc_resolver(
-                                                  nullptr, "glBindTexture"));
+                                  static PFNGLBINDTEXTUREPROC glBindTexture_fn =
+                                      []() {
+                                        auto fn = reinterpret_cast<
+                                            PFNGLBINDTEXTUREPROC>(dlsym(
+                                            RTLD_DEFAULT, "glBindTexture"));
+                                        if (!fn) {
+                                          fn = reinterpret_cast<
+                                              PFNGLBINDTEXTUREPROC>(
+                                              eglGetProcAddress(
+                                                  "glBindTexture"));
+                                        }
+                                        return fn;
+                                      }();
                                   typedef void (
                                       *PFNGLEGLIMAGETARGETTEXTURE2DOESPROC)(
                                       uint32_t, void*);
@@ -827,11 +883,37 @@ void FlutterEmbedderNative::PopulateRendererConfig(
                                             it2->second.current_egl_image);
                                       }
                                     }
+                                    if (it2->second.current_hardware_buffer) {
+                                      if (g_hardware_buffer_close_method) {
+                                        env->CallVoidMethod(
+                                            it2->second.current_hardware_buffer,
+                                            g_hardware_buffer_close_method);
+                                      }
+                                      env->DeleteGlobalRef(
+                                          it2->second.current_hardware_buffer);
+                                      it2->second.current_hardware_buffer =
+                                          nullptr;
+                                    }
+                                    if (it2->second.current_image) {
+                                      if (g_image_close_method) {
+                                        env->CallVoidMethod(
+                                            it2->second.current_image,
+                                            g_image_close_method);
+                                      }
+                                      env->DeleteGlobalRef(
+                                          it2->second.current_image);
+                                      it2->second.current_image = nullptr;
+                                    }
+
                                     it2->second.current_egl_image =
                                         new_egl_image;
                                     it2->second.current_egl_display = display;
                                     it2->second.current_buffer =
                                         std::move(buffer);
+                                    it2->second.current_hardware_buffer =
+                                        env->NewGlobalRef(hw_buf_obj);
+                                    it2->second.current_image =
+                                        env->NewGlobalRef(image_obj);
                                   } else {
                                     typedef unsigned int (
                                         *PFNEGLDESTROYIMAGEKHRPROC)(void*,
@@ -845,6 +927,15 @@ void FlutterEmbedderNative::PopulateRendererConfig(
                                       eglDestroyImageKHR_fn(display,
                                                             new_egl_image);
                                     }
+                                    if (g_hardware_buffer_close_method) {
+                                      env->CallVoidMethod(
+                                          hw_buf_obj,
+                                          g_hardware_buffer_close_method);
+                                    }
+                                    if (g_image_close_method) {
+                                      env->CallVoidMethod(image_obj,
+                                                          g_image_close_method);
+                                    }
                                   }
                                 }
                               }
@@ -853,14 +944,7 @@ void FlutterEmbedderNative::PopulateRendererConfig(
                         }
                       }
                     }
-                    if (g_hardware_buffer_close_method) {
-                      env->CallVoidMethod(hw_buf_obj,
-                                          g_hardware_buffer_close_method);
-                    }
                   }
-                }
-                if (g_image_close_method) {
-                  env->CallVoidMethod(image_obj, g_image_close_method);
                 }
               }
             }
@@ -1139,9 +1223,29 @@ FlutterEmbedderNative::~FlutterEmbedderNative() {
                                 entry.current_egl_image);
         }
         entry.current_egl_image = nullptr;
-        entry.current_egl_display = nullptr;
       }
       entry.current_buffer.reset();
+      if (entry.current_hardware_buffer) {
+        JNIEnv* env = fml::jni::AttachCurrentThread();
+        if (env) {
+          if (g_hardware_buffer_close_method) {
+            env->CallVoidMethod(entry.current_hardware_buffer,
+                                g_hardware_buffer_close_method);
+          }
+          env->DeleteGlobalRef(entry.current_hardware_buffer);
+        }
+        entry.current_hardware_buffer = nullptr;
+      }
+      if (entry.current_image) {
+        JNIEnv* env = fml::jni::AttachCurrentThread();
+        if (env) {
+          if (g_image_close_method) {
+            env->CallVoidMethod(entry.current_image, g_image_close_method);
+          }
+          env->DeleteGlobalRef(entry.current_image);
+        }
+        entry.current_image = nullptr;
+      }
       if (entry.gl_texture_id != 0) {
         typedef void (*PFNGLDELETETEXTURESPROC)(int, const uint32_t*);
         static auto delete_textures_fn =
@@ -1370,8 +1474,8 @@ bool FlutterEmbedderNative::BlitSoftwareRaster(
       uint32_t* dst_px = reinterpret_cast<uint32_t*>(dst_row);
 
       for (size_t x = 0; x < copy_width_px; ++x) {
-        // Little endian: byte 0=R, 1=G, 2=B, 3=X. Force opaque alpha channel on
-        // RGBX.
+        // Little endian: byte 0=R, 1=G, 2=B, 3=X. Force opaque alpha channel
+        // on RGBX.
         dst_px[x] = src_px[x] | 0xFF000000;
       }
 
@@ -3362,7 +3466,8 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::SpawnChild(
           ? nullptr
           : child->entrypoint_argv_ptrs_.data();
   // Note: FlutterEngineSpawn requires custom_task_runners to be nullptr in
-  // project_args because the spawned engine inherits task runners from parent.
+  // project_args because the spawned engine inherits task runners from
+  // parent.
   child->project_args_.custom_task_runners = nullptr;
   child->project_args_.compositor = &child->embedder_compositor_;
   child->project_args_.vsync_callback = &FlutterEmbedderNative::OnVsyncCallback;
@@ -3821,6 +3926,27 @@ void FlutterEmbedderNative::UnregisterImageTexture(int64_t texture_id) {
       it->second.current_egl_display = nullptr;
     }
     it->second.current_buffer.reset();
+    JNIEnv* env = fml::jni::AttachCurrentThread();
+    if (env) {
+      if (it->second.current_hardware_buffer) {
+        if (g_hardware_buffer_close_method) {
+          env->CallVoidMethod(it->second.current_hardware_buffer,
+                              g_hardware_buffer_close_method);
+        }
+        env->DeleteGlobalRef(it->second.current_hardware_buffer);
+        it->second.current_hardware_buffer = nullptr;
+      }
+      if (it->second.current_image) {
+        if (g_image_close_method) {
+          env->CallVoidMethod(it->second.current_image, g_image_close_method);
+        }
+        env->DeleteGlobalRef(it->second.current_image);
+        it->second.current_image = nullptr;
+      }
+      if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+      }
+    }
     if (it->second.gl_texture_id != 0 &&
         renderer_config_.open_gl.gl_proc_resolver) {
       typedef void (*PFNGLDELETETEXTURESPROC)(int, const uint32_t*);
@@ -3865,6 +3991,11 @@ void FlutterEmbedderNative::SetInitializeEngineFnForTesting(
 void FlutterEmbedderNative::SetRunInitializedEngineFnForTesting(
     RunInitializedEngineFn fn) {
   run_initialized_engine_fn_ = std::move(fn);
+}
+
+ANativeWindow* FlutterEmbedderNative::GetOverlayWindowForTesting(
+    size_t overlay_index) {
+  return GetOverlayWindow(overlay_index);
 }
 
 FlutterEngineResult FlutterEmbedderNative::DeinitializeEngine(
@@ -5351,27 +5482,27 @@ static jboolean FlutterJNI_FlutterTextUtilsIsEmojiModifier(JNIEnv* env,
 static jboolean FlutterJNI_FlutterTextUtilsIsEmojiModifierBase(JNIEnv* env,
                                                                jobject obj,
                                                                jint codePoint) {
-  TRACE_EVENT0(
-      "flutter",
-      "FlutterEmbedderNative::FlutterJNI_FlutterTextUtilsIsEmojiModifierBase");
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_"
+               "FlutterTextUtilsIsEmojiModifierBase");
   return u_hasBinaryProperty(codePoint, UProperty::UCHAR_EMOJI_MODIFIER_BASE);
 }
 
 static jboolean FlutterJNI_FlutterTextUtilsIsVariationSelector(JNIEnv* env,
                                                                jobject obj,
                                                                jint codePoint) {
-  TRACE_EVENT0(
-      "flutter",
-      "FlutterEmbedderNative::FlutterJNI_FlutterTextUtilsIsVariationSelector");
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_"
+               "FlutterTextUtilsIsVariationSelector");
   return u_hasBinaryProperty(codePoint, UProperty::UCHAR_VARIATION_SELECTOR);
 }
 
 static jboolean FlutterJNI_FlutterTextUtilsIsRegionalIndicator(JNIEnv* env,
                                                                jobject obj,
                                                                jint codePoint) {
-  TRACE_EVENT0(
-      "flutter",
-      "FlutterEmbedderNative::FlutterJNI_FlutterTextUtilsIsRegionalIndicator");
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_"
+               "FlutterTextUtilsIsRegionalIndicator");
   return u_hasBinaryProperty(codePoint, UProperty::UCHAR_REGIONAL_INDICATOR);
 }
 
@@ -5844,6 +5975,10 @@ bool FlutterEmbedderNative::RegisterJni(JNIEnv* env) {
 
   jclass weak_ref_class = env->FindClass("java/lang/ref/WeakReference");
   if (weak_ref_class) {
+    if (!g_weak_reference_class) {
+      g_weak_reference_class = new fml::jni::ScopedJavaGlobalRef<jclass>();
+    }
+    g_weak_reference_class->Reset(env, weak_ref_class);
     g_weak_reference_get_method =
         env->GetMethodID(weak_ref_class, "get", "()Ljava/lang/Object;");
   }
