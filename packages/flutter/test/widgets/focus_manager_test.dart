@@ -364,6 +364,8 @@ void main() {
     testWidgets(
       'automatic lifecycle policy keeps primary focus intact on Android and iOS.',
       (WidgetTester tester) async {
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
         tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic;
         final BuildContext context = await setupWidget(tester);
         final scope = FocusScopeNode(debugLabel: 'Scope');
@@ -392,6 +394,8 @@ void main() {
     );
 
     testWidgets('automatic lifecycle policy clears and restores primary focus on desktop.', (WidgetTester tester) async {
+      final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+      addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
       tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic;
       final BuildContext context = await setupWidget(tester);
       final scope = FocusScopeNode(debugLabel: 'Scope');
@@ -414,6 +418,8 @@ void main() {
     }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('automatic lifecycle policy does not restore a node that was detached while paused.', (WidgetTester tester) async {
+      final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+      addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
       tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic;
       final BuildContext context = await setupWidget(tester);
       final scope = FocusScopeNode(debugLabel: 'Scope');
@@ -439,6 +445,8 @@ void main() {
     testWidgets(
       'automatic lifecycle policy does not restore focus when another node requests focus while paused.',
       (WidgetTester tester) async {
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
         tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic;
         final BuildContext context = await setupWidget(tester);
         final scope = FocusScopeNode(debugLabel: 'Scope');
@@ -475,10 +483,9 @@ void main() {
     testWidgets(
       'suspendAndRestore lifecycle policy clears and restores primary focus.',
       (WidgetTester tester) async {
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
         tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.suspendAndRestore;
-        addTearDown(
-          () => tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic,
-        );
 
         final BuildContext context = await setupWidget(tester);
         final scope = FocusScopeNode(debugLabel: 'Scope');
@@ -508,10 +515,9 @@ void main() {
     testWidgets(
       'suspendAndRestore lifecycle policy does not restore a node that was detached while paused.',
       (WidgetTester tester) async {
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
         tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.suspendAndRestore;
-        addTearDown(
-          () => tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic,
-        );
 
         final BuildContext context = await setupWidget(tester);
         final scope = FocusScopeNode(debugLabel: 'Scope');
@@ -543,10 +549,9 @@ void main() {
     testWidgets(
       'suspendAndRestore lifecycle policy does not restore focus when another node requests focus while paused.',
       (WidgetTester tester) async {
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
         tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.suspendAndRestore;
-        addTearDown(
-          () => tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic,
-        );
 
         final BuildContext context = await setupWidget(tester);
         final scope = FocusScopeNode(debugLabel: 'Scope');
@@ -582,10 +587,9 @@ void main() {
     testWidgets(
       'keepFocused lifecycle policy keeps primary focus intact through lifecycle changes.',
       (WidgetTester tester) async {
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
         tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.keepFocused;
-        addTearDown(
-          () => tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic,
-        );
 
         final BuildContext context = await setupWidget(tester);
         final scope = FocusScopeNode(debugLabel: 'Scope');
@@ -614,10 +618,9 @@ void main() {
     testWidgets(
       'Switching back to automatic lifecycle policy on desktop re-enables lifecycle focus save and restore.',
       (WidgetTester tester) async {
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
         tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic;
-        addTearDown(
-          () => tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic,
-        );
 
         final BuildContext context = await setupWidget(tester);
         final scope = FocusScopeNode(debugLabel: 'Scope');
@@ -653,10 +656,9 @@ void main() {
     testWidgets(
       'Switching the lifecycle policy to keepFocused while app is paused discards the saved focus node.',
       (WidgetTester tester) async {
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
         tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.suspendAndRestore;
-        addTearDown(
-          () => tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic,
-        );
 
         final BuildContext context = await setupWidget(tester);
         final scope = FocusScopeNode(debugLabel: 'Scope');
@@ -688,10 +690,9 @@ void main() {
     testWidgets(
       'Switching back to automatic lifecycle policy on mobile stops lifecycle focus save and restore.',
       (WidgetTester tester) async {
+        final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+        addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
         tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.suspendAndRestore;
-        addTearDown(
-          () => tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic,
-        );
 
         final BuildContext context = await setupWidget(tester);
         final scope = FocusScopeNode(debugLabel: 'Scope');

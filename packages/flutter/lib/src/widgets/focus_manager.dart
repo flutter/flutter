@@ -1934,6 +1934,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       // we will no longer be restoring it.
       _suspendedNode = null;
     }
+    assert(shouldListen == (_appLifecycleListener != null));
   }
 
   void _appLifecycleChange(AppLifecycleState state) {
