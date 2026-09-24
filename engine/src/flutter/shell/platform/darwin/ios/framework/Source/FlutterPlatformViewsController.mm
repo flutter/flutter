@@ -14,6 +14,7 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
@@ -755,8 +756,27 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       }];
     }
 
+    auto previousSubmitInfo = background_frame->submit_info();
+    background_frame->set_submit_info({
+        .frame_damage = previousSubmitInfo.frame_damage,
+        .buffer_damage = previousSubmitInfo.buffer_damage,
+        .present_with_transaction = true,
+    });
+    const bool didEncode = background_frame->Encode();
+    auto task = fml::MakeCopyable(
+        [surfaceFrame = std::move(background_frame)]() mutable { surfaceFrame->Submit(); });
+    [self.taskRunner runNowOrPostTask:^{
+      if (@available(iOS 18.0, *)) {
+        [[FlutterPlatformViewTransactionCoordinator sharedCoordinator] enqueueAction:^{
+          task();
+        }];
+        return;
+      }
+      task();
+    }];
+
     self.hadPlatformViews = NO;
-    return background_frame->Submit();
+    return didEncode;
   }
   self.hadPlatformViews = !self.compositionOrder.empty();
 
@@ -856,6 +876,12 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   });
 
   [self.taskRunner runNowOrPostTask:^{
+    if (@available(iOS 18.0, *)) {
+      [[FlutterPlatformViewTransactionCoordinator sharedCoordinator] enqueueAction:^{
+        task();
+      }];
+      return;
+    }
     task();
   }];
   return didEncode;

@@ -282,6 +282,78 @@ private final class UIUpdateLinkClient: NSObject {
   }
 }
 
+/// Schedules platform-view composition immediately before UIKit commits the
+/// current Core Animation transaction. This is intentionally independent from
+/// Flutter's vsync delivery: raster work remains asynchronous, and only the
+/// newest ready composition is retained until the transaction boundary.
+@objc(FlutterPlatformViewTransactionCoordinator)
+final class PlatformViewTransactionCoordinator: NSObject {
+  private static let shared = PlatformViewTransactionCoordinator()
+  private var client: AnyObject?
+
+  @objc(sharedCoordinator)
+  class func sharedCoordinator() -> PlatformViewTransactionCoordinator {
+    shared
+  }
+
+  @objc(enqueueAction:)
+  func enqueueAction(_ action: @escaping @convention(block) () -> Void) {
+    precondition(Thread.isMainThread)
+
+    guard #available(iOS 18.0, *),
+      let scene = UIApplication.shared.connectedScenes.first(where: {
+        $0.activationState == .foregroundActive
+      }) as? UIWindowScene
+    else {
+      action()
+      return
+    }
+
+    let transactionClient: UITransactionCoordinator
+    if let existingClient = client as? UITransactionCoordinator, existingClient.scene === scene {
+      transactionClient = existingClient
+    } else {
+      transactionClient = UITransactionCoordinator(scene: scene)
+      client = transactionClient
+    }
+    transactionClient.enqueue(action)
+  }
+}
+
+@available(iOS 18.0, *)
+private final class UITransactionCoordinator: NSObject {
+  let scene: UIWindowScene
+  private var pendingAction: (() -> Void)?
+
+  private lazy var updateLink: UIUpdateLink = {
+    let link = UIUpdateLink(windowScene: scene)
+    link.addAction(to: .beforeCATransactionCommit) { [weak self] _, _ in
+      self?.submitPendingAction()
+    }
+    link.isEnabled = true
+    return link
+  }()
+
+  init(scene: UIWindowScene) {
+    self.scene = scene
+    super.init()
+  }
+
+  func enqueue(_ action: @escaping () -> Void) {
+    // Replacing an older frame prevents transaction-alignment delay from
+    // turning into a presentation queue.
+    pendingAction = action
+    updateLink.requiresContinuousUpdates = true
+  }
+
+  private func submitPendingAction() {
+    guard let action = pendingAction else { return }
+    pendingAction = nil
+    updateLink.requiresContinuousUpdates = false
+    action()
+  }
+}
+
 /// A weak proxy target for `CADisplayLink` callbacks to prevent retain cycles.
 ///
 /// `CADisplayLink` strongly retains its target. If the display link directly targeted
