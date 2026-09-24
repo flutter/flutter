@@ -361,6 +361,8 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
   std::unordered_map<int64_t, PlatformViewData> _platformViews;
   std::unordered_map<int64_t, flutter::EmbeddedViewParams> _currentCompositionParams;
   std::unordered_set<int64_t> _viewsToDispose;
+  // Acknowledge late Dart dispose messages after native Flutter view collection.
+  std::unordered_set<int64_t> _viewsDisposedByCollect;
   std::unordered_map<int64_t, std::vector<int64_t>> _flutterViewPreviousCompositionOrder;
   std::unordered_map<int64_t, BOOL> _flutterViewHadPlatformViews;
 }
@@ -490,6 +492,7 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
                                          .root_view = clippingView,              //
                                          .flutter_view_id = flutterViewId        //
                                      });
+  _viewsDisposedByCollect.erase(viewId);
 
   result(nil);
 }
@@ -497,6 +500,11 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
 - (void)onDispose:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSNumber* arg = [call arguments];
   int64_t viewId = [arg longLongValue];
+
+  if (_viewsDisposedByCollect.erase(viewId)) {
+    result(nil);
+    return;
+  }
 
   if (self.platformViews.count(viewId) == 0) {
     result([FlutterError errorWithCode:@"unknown_view"
@@ -888,6 +896,7 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
       [entry.second.root_view removeFromSuperview];
     }
     self.platformViews.clear();
+    self->_viewsDisposedByCollect.clear();
     self.flutterViewPreviousCompositionOrder.clear();
   }];
 
@@ -1318,8 +1327,36 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
 
 - (void)collectView:(int64_t)flutterViewId {
   self.flutterViewHadPlatformViews.erase(flutterViewId);
-  self.flutterViewPreviousCompositionOrder.erase(flutterViewId);
+  // Preroll rebuilds this cache for remaining views. Queued platform submissions own a copy.
+  self.currentCompositionParams.clear();
+  if (_currentFrameContext && _currentFrameContext->flutter_view_id == flutterViewId) {
+    [self resetFrameState];
+  }
+  std::vector<std::shared_ptr<flutter::OverlayLayer>> layers;
+  auto pool = _flutterViewLayerPools.find(flutterViewId);
+  if (pool != _flutterViewLayerPools.end()) {
+    pool->second->RecycleLayers();
+    layers = pool->second->RemoveUnusedLayers();
+  }
   _flutterViewLayerPools.erase(flutterViewId);
+  // CollectView runs on the raster thread. Queue UIKit cleanup after any pending submissions.
+  [self.taskRunner runNowOrPostTask:^{
+    for (const auto& layer : layers) {
+      [layer->overlay_view_wrapper removeFromSuperview];
+    }
+    self.flutterViewPreviousCompositionOrder.erase(flutterViewId);
+    for (auto it = self.platformViews.begin(); it != self.platformViews.end();) {
+      if (it->second.flutter_view_id == flutterViewId) {
+        [it->second.root_view removeFromSuperview];
+        if (!self.viewsToDispose.erase(it->first)) {
+          self->_viewsDisposedByCollect.insert(it->first);
+        }
+        it = self.platformViews.erase(it);
+      } else {
+        ++it;
+      }
+    }
+  }];
 }
 
 - (UIViewController<FlutterViewResponder>* _Nullable)flutterViewController {

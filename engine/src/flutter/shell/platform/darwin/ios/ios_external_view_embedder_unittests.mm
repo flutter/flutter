@@ -5,6 +5,7 @@
 #import <XCTest/XCTest.h>
 
 #include "flutter/common/constants.h"
+#include "flutter/common/graphics/gl_context_switch.h"
 #include "flutter/flow/surface_frame.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
@@ -185,6 +186,47 @@ constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
 
   XCTAssertEqual(controller->collectViewCalls_, 1);
   XCTAssertEqual(controller->lastCollectedViewId_, kTertiaryFlutterViewId);
+}
+
+- (void)testCancelFrameReleasesPendingFrameBeforePreparingAnotherView {
+  // SurfaceFrame owns this object and destroys it when the frame is released.
+  class TestContextResult : public flutter::GLContextResult {
+   public:
+    explicit TestContextResult(bool& frameDestroyed)
+        : GLContextResult(true), frame_destroyed_(frameDestroyed) {}
+
+    ~TestContextResult() override { frame_destroyed_ = true; }
+
+   private:
+    bool& frame_destroyed_;
+  };
+
+  auto iosContext = std::make_shared<flutter::IOSContextNoop>();
+  FlutterPlatformViewsControllerSpy* controller = [[FlutterPlatformViewsControllerSpy alloc] init];
+  bool frameDestroyed = false;
+  flutter::IOSExternalViewEmbedder embedder(
+      controller, iosContext, [&frameDestroyed](int64_t, flutter::DlISize& frame_size) {
+        frameDestroyed = false;
+        return std::make_unique<flutter::SurfaceFrame>(
+            /*surface=*/nullptr,
+            /*framebuffer_info=*/flutter::SurfaceFrame::FramebufferInfo{},
+            /*encode_callback=*/[](flutter::SurfaceFrame&, flutter::DlCanvas*) { return true; },
+            /*submit_callback=*/[](flutter::SurfaceFrame&) { return true; },
+            /*frame_size=*/frame_size,
+            /*context_result=*/std::make_unique<TestContextResult>(frameDestroyed),
+            /*display_list_fallback=*/true);
+      });
+  flutter::ExternalViewEmbedder& embedder_ref = embedder;
+  embedder_ref.PrepareFlutterView(kSecondaryFlutterViewId, flutter::DlISize(100, 100), 1.0);
+  XCTAssertFalse(frameDestroyed);
+
+  embedder_ref.CancelFrame();
+  XCTAssertTrue(frameDestroyed);
+
+  embedder_ref.PrepareFlutterView(kTertiaryFlutterViewId, flutter::DlISize(200, 200), 1.0);
+  XCTAssertFalse(frameDestroyed);
+  XCTAssertNotEqual(embedder_ref.GetRootCanvas(), nullptr);
+  XCTAssertEqual(controller->lastBeginFrameViewId_, kTertiaryFlutterViewId);
 }
 
 @end

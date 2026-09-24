@@ -16,6 +16,7 @@
 #include "flutter/common/constants.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/fml/memory/ref_ptr.h"
+#include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/thread.h"
@@ -65,6 +66,8 @@ class ManuallyFlushedTaskRunner final : public fml::TaskRunner {
 - (std::unordered_map<int64_t, std::vector<int64_t>>&)flutterViewPreviousCompositionOrder;
 
 - (std::unordered_map<int64_t, BOOL>&)flutterViewHadPlatformViews;
+
+- (std::unordered_map<int64_t, flutter::EmbeddedViewParams>&)currentCompositionParams;
 
 @end
 
@@ -3112,7 +3115,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
     OCMVerify([flutterViewController touchesBegan:touches1 withEvent:event1]);
 
     [flutterPlatformViewsController
-        detachFromFlutterViewController:flutterViewController.viewIdentifier];
+        detachFromFlutterViewController:[flutterViewController viewIdentifier]];
 
     // Allow the touch events to finish
     NSSet* touches2 = [[NSSet alloc] init];
@@ -3147,7 +3150,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
     OCMVerify([flutterViewController touchesBegan:touches1 withEvent:event1]);
 
     [flutterPlatformViewsController
-        detachFromFlutterViewController:flutterViewController.viewIdentifier];
+        detachFromFlutterViewController:[flutterViewController viewIdentifier]];
 
     // Allow the touch events to finish
     NSSet* touches2 = [[NSSet alloc] init];
@@ -3226,7 +3229,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   FlutterViewController* flutterViewController2 = OCMClassMock([FlutterViewController class]);
   [flutterPlatformViewsController
-      detachFromFlutterViewController:flutterViewController.viewIdentifier];
+      detachFromFlutterViewController:[flutterViewController viewIdentifier]];
   flutterPlatformViewsController.flutterViewController = flutterViewController2;
 
   // Touch events should still send to the old FlutterViewController if FlutterViewController
@@ -3394,7 +3397,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   FlutterPlatformViewsController* flutterPlatformViewsController =
       [[FlutterPlatformViewsController alloc] init];
   auto taskRunner = fml::MakeRefCounted<ManuallyFlushedTaskRunner>();
-  flutterPlatformViewsController.taskRunner = taskRunner;
+  flutterPlatformViewsController.taskRunner =
+      [[FlutterFMLTaskRunner alloc] initWithTaskRunner:taskRunner];
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
@@ -3493,7 +3497,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   FlutterPlatformViewsController* flutterPlatformViewsController =
       [[FlutterPlatformViewsController alloc] init];
   auto taskRunner = fml::MakeRefCounted<ManuallyFlushedTaskRunner>();
-  flutterPlatformViewsController.taskRunner = taskRunner;
+  flutterPlatformViewsController.taskRunner =
+      [[FlutterFMLTaskRunner alloc] initWithTaskRunner:taskRunner];
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
@@ -3531,7 +3536,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                                                               flutter::DlSize(100, 100), stack);
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2 withParams:std::move(params)];
 
-  __block BOOL didSubmit = NO;
+  BOOL didSubmit = NO;
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   auto surface = std::make_unique<flutter::SurfaceFrame>(
       nullptr, framebuffer_info,
@@ -3694,7 +3699,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   XCTAssertTrue([implicitFlutterView.subviews containsObject:platformRoot]);
 }
 
-- (void)testCollectViewOnlyClearsTargetFlutterViewState {
+- (void)testCollectViewReleasesTargetFlutterViewAndInvalidatesCompositionCache {
   FlutterPlatformViewsController* flutterPlatformViewsController =
       [[FlutterPlatformViewsController alloc] init];
   flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
@@ -3717,89 +3722,173 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   OCMStub([secondaryFlutterViewController view]).andReturn([[UIView alloc] init]);
   [flutterPlatformViewsController attachToFlutterViewController:secondaryFlutterViewController];
 
-  FlutterResult result = ^(id result) {
+  __weak UIView* secondaryPlatformView;
+  __weak UIView* secondaryRoot;
+  @autoreleasepool {
+    FlutterResult result = ^(id result) {
+      XCTAssertNil(result);
+    };
+    [flutterPlatformViewsController
+        onMethodCall:[FlutterMethodCall
+                         methodCallWithMethodName:@"create"
+                                        arguments:@{
+                                          @"id" : @2,
+                                          @"viewType" : @"MockFlutterPlatformView",
+                                          @"gestureBlockingPolicy" : @"eager",
+                                          @"flutterViewId" : @(flutter::kFlutterImplicitViewId),
+                                        }]
+              result:result];
+    [flutterPlatformViewsController
+        onMethodCall:[FlutterMethodCall
+                         methodCallWithMethodName:@"create"
+                                        arguments:@{
+                                          @"id" : @3,
+                                          @"viewType" : @"MockFlutterPlatformView",
+                                          @"gestureBlockingPolicy" : @"eager",
+                                          @"flutterViewId" : @(kSecondaryFlutterViewId),
+                                        }]
+              result:result];
+
+    flutter::DlScalar screenScale = [UIScreen mainScreen].scale;
+    flutter::DlMatrix screenScaleMatrix =
+        flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
+
+    [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                         flutterViewId:flutter::kFlutterImplicitViewId];
+    flutter::MutatorsStack implicitStack;
+    implicitStack.PushTransform(screenScaleMatrix);
+    auto implicitParams = std::make_unique<flutter::EmbeddedViewParams>(
+        screenScaleMatrix, flutter::DlSize(100, 100), implicitStack);
+    [flutterPlatformViewsController prerollCompositeEmbeddedView:2
+                                                      withParams:std::move(implicitParams)];
+    flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
+    auto implicitSurface = std::make_unique<flutter::SurfaceFrame>(
+        nullptr, framebuffer_info,
+        [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
+        [](const flutter::SurfaceFrame& surface_frame) { return true; },
+        /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
+    XCTAssertTrue([flutterPlatformViewsController
+              submitFrame:std::move(implicitSurface)
+           withIosContext:std::make_shared<flutter::IOSContextNoop>()
+        withFlutterViewId:flutter::kFlutterImplicitViewId]);
+
+    [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                         flutterViewId:kSecondaryFlutterViewId];
+    flutter::MutatorsStack secondaryStack;
+    secondaryStack.PushTransform(screenScaleMatrix);
+    auto secondaryParams = std::make_unique<flutter::EmbeddedViewParams>(
+        screenScaleMatrix, flutter::DlSize(100, 100), secondaryStack);
+    [flutterPlatformViewsController prerollCompositeEmbeddedView:3
+                                                      withParams:std::move(secondaryParams)];
+    auto secondarySurface = std::make_unique<flutter::SurfaceFrame>(
+        nullptr, framebuffer_info,
+        [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
+        [](const flutter::SurfaceFrame& surface_frame) { return true; },
+        /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
+    XCTAssertTrue([flutterPlatformViewsController
+              submitFrame:std::move(secondarySurface)
+           withIosContext:std::make_shared<flutter::IOSContextNoop>()
+        withFlutterViewId:kSecondaryFlutterViewId]);
+
+    auto& previousCompositionOrder =
+        [flutterPlatformViewsController flutterViewPreviousCompositionOrder];
+    auto& hadPlatformViews = [flutterPlatformViewsController flutterViewHadPlatformViews];
+    XCTAssertEqual(previousCompositionOrder[flutter::kFlutterImplicitViewId].size(), 1UL);
+    XCTAssertEqual(previousCompositionOrder[kSecondaryFlutterViewId].size(), 1UL);
+    XCTAssertEqual(hadPlatformViews[flutter::kFlutterImplicitViewId], YES);
+    XCTAssertEqual(hadPlatformViews[kSecondaryFlutterViewId], YES);
+    XCTAssertEqual([flutterPlatformViewsController currentCompositionParams].size(), 2UL);
+
+    secondaryPlatformView = [flutterPlatformViewsController platformViewForId:3];
+    secondaryRoot = secondaryPlatformView.superview.superview;
+    XCTAssertNotNil(secondaryPlatformView);
+    XCTAssertNotNil(secondaryRoot);
+    [flutterPlatformViewsController collectView:kSecondaryFlutterViewId];
+    XCTAssertNotNil([flutterPlatformViewsController platformViewForId:2]);
+    XCTAssertEqual(previousCompositionOrder.count(flutter::kFlutterImplicitViewId), 1UL);
+    XCTAssertEqual(previousCompositionOrder[flutter::kFlutterImplicitViewId].size(), 1UL);
+    XCTAssertEqual(previousCompositionOrder.count(kSecondaryFlutterViewId), 0UL);
+    XCTAssertEqual(hadPlatformViews.count(flutter::kFlutterImplicitViewId), 1UL);
+    XCTAssertEqual(hadPlatformViews[flutter::kFlutterImplicitViewId], YES);
+    XCTAssertEqual(hadPlatformViews.count(kSecondaryFlutterViewId), 0UL);
+    XCTAssertTrue([flutterPlatformViewsController currentCompositionParams].empty());
+
+    // The remaining view rebuilds its composition parameters on its next frame.
+    [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                         flutterViewId:flutter::kFlutterImplicitViewId];
+    auto remainingParams = std::make_unique<flutter::EmbeddedViewParams>(
+        screenScaleMatrix, flutter::DlSize(100, 100), implicitStack);
+    [flutterPlatformViewsController prerollCompositeEmbeddedView:2
+                                                      withParams:std::move(remainingParams)];
+    auto remainingSurface = std::make_unique<flutter::SurfaceFrame>(
+        nullptr, framebuffer_info,
+        [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
+        [](const flutter::SurfaceFrame& surface_frame) { return true; },
+        /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
+    XCTAssertTrue([flutterPlatformViewsController
+              submitFrame:std::move(remainingSurface)
+           withIosContext:std::make_shared<flutter::IOSContextNoop>()
+        withFlutterViewId:flutter::kFlutterImplicitViewId]);
+    XCTAssertEqual([flutterPlatformViewsController currentCompositionParams].size(), 1UL);
+    XCTAssertEqual([flutterPlatformViewsController currentCompositionParams].count(2), 1UL);
+  }
+  XCTAssertNil(secondaryPlatformView);
+  XCTAssertNil(secondaryRoot);
+}
+
+- (void)testCollectViewQueuesUnrenderedPlatformViewDisposal {
+  FlutterPlatformViewsController* controller = [[FlutterPlatformViewsController alloc] init];
+  auto taskRunner = fml::MakeRefCounted<ManuallyFlushedTaskRunner>();
+  controller.taskRunner = [[FlutterFMLTaskRunner alloc] initWithTaskRunner:taskRunner];
+  [controller registerViewFactory:[[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init]
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult success = ^(id result) {
+    XCTAssertNil(result);
   };
-  [flutterPlatformViewsController
-      onMethodCall:[FlutterMethodCall
-                       methodCallWithMethodName:@"create"
-                                      arguments:@{
-                                        @"id" : @2,
-                                        @"viewType" : @"MockFlutterPlatformView",
-                                        @"flutterViewId" : @(flutter::kFlutterImplicitViewId),
-                                      }]
-            result:result];
-  [flutterPlatformViewsController
-      onMethodCall:[FlutterMethodCall
-                       methodCallWithMethodName:@"create"
-                                      arguments:@{
-                                        @"id" : @3,
-                                        @"viewType" : @"MockFlutterPlatformView",
-                                        @"flutterViewId" : @(kSecondaryFlutterViewId),
-                                      }]
-            result:result];
+  __weak UIView* primary;
+  __weak UIView* secondary;
+  __weak UIView* pendingDisposal;
+  @autoreleasepool {
+    for (NSNumber* identifier in @[ @2, @3, @4 ]) {
+      NSNumber* flutterViewId = identifier.intValue == 2 ? @(flutter::kFlutterImplicitViewId)
+                                                         : @(kSecondaryFlutterViewId);
+      [controller
+          onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                         arguments:@{
+                                                           @"id" : identifier,
+                                                           @"viewType" : @"MockFlutterPlatformView",
+                                                           @"gestureBlockingPolicy" : @"eager",
+                                                           @"flutterViewId" : flutterViewId,
+                                                         }]
+                result:success];
+    }
+    primary = [controller platformViewForId:2];
+    secondary = [controller platformViewForId:3];
+    pendingDisposal = [controller platformViewForId:4];
+    [controller onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"dispose" arguments:@4]
+                      result:success];
 
-  flutter::DlScalar screenScale = [UIScreen mainScreen].scale;
-  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
+    [controller collectView:kSecondaryFlutterViewId];
+    XCTAssertNotNil([controller platformViewForId:3]);
+    XCTAssertNotNil([controller platformViewForId:4]);
+    taskRunner->FlushTasks();
+  }
 
-  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
-                                       flutterViewId:flutter::kFlutterImplicitViewId];
-  flutter::MutatorsStack implicitStack;
-  implicitStack.PushTransform(screenScaleMatrix);
-  auto implicitParams = std::make_unique<flutter::EmbeddedViewParams>(
-      screenScaleMatrix, flutter::DlSize(100, 100), implicitStack);
-  [flutterPlatformViewsController prerollCompositeEmbeddedView:2
-                                                    withParams:std::move(implicitParams)];
-  [flutterPlatformViewsController
-      compositeView:2
-         withParams:[flutterPlatformViewsController compositionParamsForView:2]];
-  flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
-  auto implicitSurface = std::make_unique<flutter::SurfaceFrame>(
-      nullptr, framebuffer_info,
-      [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
-      [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
-  XCTAssertTrue([flutterPlatformViewsController
-            submitFrame:std::move(implicitSurface)
-         withIosContext:std::make_shared<flutter::IOSContextNoop>()
-      withFlutterViewId:flutter::kFlutterImplicitViewId]);
-
-  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
-                                       flutterViewId:kSecondaryFlutterViewId];
-  flutter::MutatorsStack secondaryStack;
-  secondaryStack.PushTransform(screenScaleMatrix);
-  auto secondaryParams = std::make_unique<flutter::EmbeddedViewParams>(
-      screenScaleMatrix, flutter::DlSize(100, 100), secondaryStack);
-  [flutterPlatformViewsController prerollCompositeEmbeddedView:3
-                                                    withParams:std::move(secondaryParams)];
-  [flutterPlatformViewsController
-      compositeView:3
-         withParams:[flutterPlatformViewsController compositionParamsForView:3]];
-  auto secondarySurface = std::make_unique<flutter::SurfaceFrame>(
-      nullptr, framebuffer_info,
-      [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
-      [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
-  XCTAssertTrue([flutterPlatformViewsController
-            submitFrame:std::move(secondarySurface)
-         withIosContext:std::make_shared<flutter::IOSContextNoop>()
-      withFlutterViewId:kSecondaryFlutterViewId]);
-
-  auto& previousCompositionOrder =
-      [flutterPlatformViewsController flutterViewPreviousCompositionOrder];
-  auto& hadPlatformViews = [flutterPlatformViewsController flutterViewHadPlatformViews];
-  XCTAssertEqual(previousCompositionOrder[flutter::kFlutterImplicitViewId].size(), 1UL);
-  XCTAssertEqual(previousCompositionOrder[kSecondaryFlutterViewId].size(), 1UL);
-  XCTAssertEqual(hadPlatformViews[flutter::kFlutterImplicitViewId], YES);
-  XCTAssertEqual(hadPlatformViews[kSecondaryFlutterViewId], YES);
-
-  [flutterPlatformViewsController collectView:kSecondaryFlutterViewId];
-
-  XCTAssertEqual(previousCompositionOrder.count(flutter::kFlutterImplicitViewId), 1UL);
-  XCTAssertEqual(previousCompositionOrder[flutter::kFlutterImplicitViewId].size(), 1UL);
-  XCTAssertEqual(previousCompositionOrder.count(kSecondaryFlutterViewId), 0UL);
-  XCTAssertEqual(hadPlatformViews.count(flutter::kFlutterImplicitViewId), 1UL);
-  XCTAssertEqual(hadPlatformViews[flutter::kFlutterImplicitViewId], YES);
-  XCTAssertEqual(hadPlatformViews.count(kSecondaryFlutterViewId), 0UL);
+  XCTAssertNotNil(primary);
+  XCTAssertNil(secondary);
+  XCTAssertNil(pendingDisposal);
+  // Flutter may dispose the widget after its native Flutter view was removed.
+  [controller onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"dispose" arguments:@3]
+                    result:success];
+  [controller onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"dispose" arguments:@3]
+                    result:^(id result) {
+                      FlutterError* error = result;
+                      XCTAssertEqualObjects(error.code, @"unknown_view");
+                    }];
+  [controller collectView:kSecondaryFlutterViewId];
+  taskRunner->FlushTasks();
+  XCTAssertNotNil(primary);
 }
 
 - (void)testFlutterPlatformViewTouchesCancelledEventAreForcedToBeCancelled {
@@ -3846,8 +3935,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   UIGestureRecognizer* forwardGectureRecognizer =
       FindForwardingGestureRecognizer(touchInterceptorView);
-  id flutterViewController = OCMClassMock([FlutterViewController class]);
-  flutterPlatformViewsController.flutterViewController = flutterViewController;
 
   NSSet* touches1 = [NSSet setWithObject:@1];
   id event1 = OCMClassMock([UIEvent class]);
@@ -4772,10 +4859,10 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
-                               /*platform=*/GetDefaultTaskRunner(),
-                               /*raster=*/GetDefaultTaskRunner(),
-                               /*ui=*/GetDefaultTaskRunner(),
-                               /*io=*/GetDefaultTaskRunner());
+                               /*platform=*/[GetDefaultTaskRunner() taskRunner],
+                               /*raster=*/[GetDefaultTaskRunner() taskRunner],
+                               /*ui=*/[GetDefaultTaskRunner() taskRunner],
+                               /*io=*/[GetDefaultTaskRunner() taskRunner]);
   FlutterPlatformViewsController* flutterPlatformViewsController =
       [[FlutterPlatformViewsController alloc] init];
 

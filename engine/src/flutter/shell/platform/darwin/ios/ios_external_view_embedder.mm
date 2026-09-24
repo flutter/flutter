@@ -41,6 +41,7 @@ void IOSExternalViewEmbedder::CancelFrame() {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::CancelFrame");
   FML_CHECK(platform_views_controller_);
   [platform_views_controller_ cancelFrame];
+  pending_frame_.reset();
 }
 
 // |ExternalViewEmbedder|
