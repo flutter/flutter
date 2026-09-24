@@ -200,10 +200,11 @@ void FlutterMain::Init(JNIEnv* env,
   settings.enable_software_rendering =
       (android_rendering_api == AndroidRenderingAPI::kSoftware);
   settings.requested_rendering_backend = vm_args.requested_rendering_backend;
-  settings.enable_surface_control = vm_args.enable_surface_control;
-
   vm_args.enable_impeller = settings.enable_impeller;
   vm_args.enable_software_rendering = settings.enable_software_rendering;
+  vm_args.enable_surface_control =
+      android::ShouldEnableSurfaceControl(vm_args, android_rendering_api);
+  settings.enable_surface_control = vm_args.enable_surface_control;
   if (settings.enable_impeller) {
     vm_args.command_line_args.push_back("--enable-impeller=true");
   } else {
