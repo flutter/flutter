@@ -940,7 +940,23 @@ class MockSemanticsEnabler implements SemanticsEnabler {
   bool get isWaitingToEnableSemantics => throw UnimplementedError();
 
   @override
-  DomElement get accessibilityPlaceholder => throw UnimplementedError();
+  List<DomElement> get placeholders => throw UnimplementedError();
+
+  @override
+  DomElement? placeholderHostFor(DomElement viewRoot) => throw UnimplementedError();
+
+  @override
+  void removeAllPlaceholders() {}
+
+  @override
+  void addPlaceholderForView(DomElement viewRoot) {
+    throw UnimplementedError();
+  }
+
+  @override
+  void removePlaceholderForView(DomElement viewRoot) {
+    throw UnimplementedError();
+  }
 
   @override
   void updatePlaceholderLabel(String message) {
@@ -3403,61 +3419,66 @@ void _testSelectables() {
     semantics().semanticsEnabled = false;
   });
 
-  test(
-    'renders listBox and option with aria-selected and omits group on inner scrollable',
-    () async {
-      semantics()
-        ..debugOverrideTimestampFunction(() => _testTime)
-        ..semanticsEnabled = true;
+  test('renders listBox and option with aria-selected and omits group on inner generic and scrollable wrappers', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
 
-      final tester = SemanticsTester(owner());
-      tester.updateNode(
-        id: 0,
-        role: ui.SemanticsRole.listBox,
-        rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
-        children: <SemanticsNodeUpdate>[
-          tester.updateNode(
-            id: 1,
-            flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
-            scrollExtentMax: 100.0,
-            scrollPosition: 0.0,
-            rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
-            children: <SemanticsNodeUpdate>[
-              tester.updateNode(
-                id: 2,
-                role: ui.SemanticsRole.option,
-                label: 'apple',
-                hasTap: true,
-                flags: const ui.SemanticsFlags(isSelected: ui.Tristate.isTrue),
-                rect: const ui.Rect.fromLTRB(0, 0, 100, 30),
-              ),
-              tester.updateNode(
-                id: 3,
-                role: ui.SemanticsRole.option,
-                label: 'banana',
-                hasTap: true,
-                flags: const ui.SemanticsFlags(isSelected: ui.Tristate.isFalse),
-                rect: const ui.Rect.fromLTRB(0, 30, 100, 60),
-              ),
-            ],
-          ),
-        ],
-      );
-      tester.apply();
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.listBox,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(
+              id: 2,
+              flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
+              scrollExtentMax: 100.0,
+              scrollPosition: 0.0,
+              rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+              children: <SemanticsNodeUpdate>[
+                tester.updateNode(
+                  id: 3,
+                  role: ui.SemanticsRole.option,
+                  label: 'apple',
+                  hasTap: true,
+                  flags: const ui.SemanticsFlags(isSelected: ui.Tristate.isTrue),
+                  rect: const ui.Rect.fromLTRB(0, 0, 100, 30),
+                ),
+                tester.updateNode(
+                  id: 4,
+                  role: ui.SemanticsRole.option,
+                  label: 'banana',
+                  hasTap: true,
+                  flags: const ui.SemanticsFlags(isSelected: ui.Tristate.isFalse),
+                  rect: const ui.Rect.fromLTRB(0, 30, 100, 60),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    tester.apply();
 
-      expectSemanticsTree(owner(), '''
+    expectSemanticsTree(owner(), '''
 <sem role="listbox">
-    <sem role="none" style="overflow-y: scroll">
-        <sem role="option" aria-label="apple" aria-selected="true"></sem>
-        <sem role="option" aria-label="banana" aria-selected="false"></sem>
-        <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
+    <sem role="none">
+        <sem role="none" style="overflow-y: scroll">
+            <sem role="option" aria-label="apple" aria-selected="true"></sem>
+            <sem role="option" aria-label="banana" aria-selected="false"></sem>
+            <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
+        </sem>
     </sem>
 </sem>
 ''');
 
-      semantics().semanticsEnabled = false;
-    },
-  );
+    semantics().semanticsEnabled = false;
+  });
 
   test('Checkable takes precedence over selectable', () {
     semantics()

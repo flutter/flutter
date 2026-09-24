@@ -2071,8 +2071,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     MAIN(30),
     NAVIGATION(31),
     REGION(32),
-    LIST_BOX(33),
-    OPTION(34);
+    SLIDER(33),
+    LIST_BOX(34),
+    OPTION(35);
 
     final int value;
 

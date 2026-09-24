@@ -626,6 +626,9 @@ enum EngineSemanticsRole {
   /// An area that represents a form.
   form,
 
+  /// A graphic object that can be incremented or decremented as a slider.
+  slider,
+
   /// A widget that allows the user to select one or more items from a list of choices.
   listBox,
 
@@ -1028,6 +1031,22 @@ abstract class SemanticRole {
   bool get isDisposed => _isDisposed;
   bool _isDisposed = false;
 
+  /// Whether any ancestor of [semanticsObject] has the [EngineSemanticsRole.menu],
+  /// [EngineSemanticsRole.menuBar], or [EngineSemanticsRole.listBox] role.
+  bool get hasMenuOrListBoxAncestor {
+    SemanticsObject? current = semanticsObject.parent;
+    while (current != null) {
+      final EngineSemanticsRole? kind = current.semanticRole?.kind;
+      if (kind == EngineSemanticsRole.menu ||
+          kind == EngineSemanticsRole.menuBar ||
+          kind == EngineSemanticsRole.listBox) {
+        return true;
+      }
+      current = current.parent;
+    }
+    return false;
+  }
+
   /// Called when [semanticsObject] is removed, or when it changes its role such
   /// that this role is no longer relevant.
   ///
@@ -1083,9 +1102,20 @@ final class GenericRole extends SemanticRole {
     if (!semanticsObject.hasLabel) {
       // The node didn't get a more specific role, and it has no label. It is
       // likely that this node is simply there for positioning its children and
-      // has no other role for the screen reader to be aware of. In this case,
-      // the element does not need a `role` attribute at all.
+      // has no other role for the screen reader to be aware of. Normally the
+      // element does not need a `role` attribute at all, except when nested
+      // inside a menu, menubar, or listbox (such as the outer ListView
+      // semantics node in DropdownButton or RawAutocomplete), where omitting
+      // `role="none"` causes the browser to expose the element as an extra
+      // generic child of the container.
       super.update();
+      semanticsObject.owner.addOneTimePostUpdateCallback(() {
+        if (!semanticsObject.hasLabel && !semanticsObject.isTappable && hasMenuOrListBoxAncestor) {
+          setAriaRole('none');
+        } else {
+          removeAttribute('role');
+        }
+      });
       return;
     }
 
@@ -2274,6 +2304,8 @@ class SemanticsObject {
         return EngineSemanticsRole.loadingSpinner;
       case ui.SemanticsRole.progressBar:
         return EngineSemanticsRole.progressBar;
+      case ui.SemanticsRole.slider:
+        return EngineSemanticsRole.slider;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.dragHandle:
@@ -2318,6 +2350,7 @@ class SemanticsObject {
     return switch (role) {
       EngineSemanticsRole.textField => SemanticTextField(this),
       EngineSemanticsRole.scrollable => SemanticScrollable(this),
+      EngineSemanticsRole.slider => SemanticIncrementable(this, EngineSemanticsRole.slider),
       EngineSemanticsRole.incrementable => SemanticIncrementable(this),
       EngineSemanticsRole.button => SemanticButton(this),
       EngineSemanticsRole.radioGroup => SemanticRadioGroup(this),
