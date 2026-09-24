@@ -14,9 +14,6 @@
 //
 // See: https://github.com/flutter/flutter/issues/30701.
 
-/// @docImport 'dart:ui';
-library;
-
 import 'dart:ui' show Display, FlutterView;
 
 import 'package:flutter/foundation.dart';
@@ -30,31 +27,6 @@ import 'framework.dart';
 import 'inherited_model.dart';
 import 'transitions.dart';
 import 'view.dart';
-
-/// The [FlutterView] the platform dispatcher reports for [viewId].
-///
-/// Throws a [StateError] naming the id when it reports none, rather than the
-/// bare "Bad state: No element" a `firstWhere` over [PlatformDispatcher.views]
-/// produces.
-///
-/// Asks [WidgetsBinding.instance] rather than [PlatformDispatcher.instance], so
-/// that a binding which supplies its own dispatcher — a test binding, or one
-/// applying debug view metric overrides — is the one that answers, and the view
-/// a controller exposes as its `rootView` is the same object the rest of the
-/// framework sees.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-FlutterView flutterViewForId(int viewId) {
-  if (!isWindowingEnabled) {
-    throw UnsupportedError(_kWindowingDisabledErrorMessage);
-  }
-  final FlutterView? view = WidgetsBinding.instance.platformDispatcher.view(id: viewId);
-  if (view == null) {
-    throw StateError('No FlutterView with viewId $viewId was found on the platform dispatcher.');
-  }
-  return view;
-}
 
 const String _kWindowingDisabledErrorMessage = '''
 Windowing APIs are not enabled.
@@ -2570,9 +2542,6 @@ class WindowEntry {
 /// listens on the [WindowRegistry] and renders the new windows using the
 /// appropriate window widget as they are added or removed.
 ///
-/// If windowing is not enabled, this widgets renders [child] directly
-/// and does not provide the [WindowRegistry].
-///
 /// {@tool dartpad}
 /// An example usage might look like this, where the window manager wraps
 /// the root of the widget tree so that dialogs can be rendered at the same level
@@ -2590,7 +2559,8 @@ class WindowEntry {
 class WindowManager extends StatefulWidget {
   /// Creates a window manager.
   ///
-  /// The [child] is the content inside of the window manager.
+  /// The [initialWindows] are registered with the [WindowRegistry] when the
+  /// window manager is created.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal

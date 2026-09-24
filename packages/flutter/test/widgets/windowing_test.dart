@@ -22,8 +22,7 @@ import 'package:flutter/src/widgets/_window.dart'
         WindowControllerDelegate,
         WindowScope,
         WindowingOwner,
-        createDefaultWindowingOwner,
-        flutterViewForId;
+        createDefaultWindowingOwner;
 import 'package:flutter/src/widgets/_window_positioner.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,8 +30,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'multi_view_testing.dart';
 
 class _StubWindowController extends WindowController {
-  _StubWindowController(WidgetTester tester) : super.empty() {
-    rootView = FakeView(tester.view);
+  _StubWindowController(WidgetTester tester, {FlutterView? rootView}) : super.empty() {
+    this.rootView = rootView ?? FakeView(tester.view);
   }
 
   @override
@@ -409,10 +408,6 @@ void main() {
 
         expect(() => WindowScope.of(context), throwsUnsupportedError);
       });
-
-      testWidgets('flutterViewForId throws UnsupportedError', (WidgetTester tester) async {
-        expect(() => flutterViewForId(tester.view.viewId), throwsUnsupportedError);
-      });
     });
 
     group('isWindowingEnabled is true', () {
@@ -420,45 +415,45 @@ void main() {
         isWindowingEnabled = true;
       });
 
-      testWidgets('flutterViewForId returns the view the binding reports', (
-        WidgetTester tester,
-      ) async {
-        expect(flutterViewForId(tester.view.viewId), same(tester.view));
-      });
+      testWidgets(
+        'Window uses TestFlutterView metrics when rootView is resolved from WidgetsBinding.instance.platformDispatcher.view',
+        (WidgetTester tester) async {
+          tester.view.devicePixelRatio = 2.75;
+          addTearDown(tester.view.resetDevicePixelRatio);
 
-      testWidgets('flutterViewForId asks the binding rather than the engine singleton', (
-        WidgetTester tester,
-      ) async {
-        // PlatformDispatcher.instance answers with the engine's own FlutterView
-        // for this id. Getting the TestFlutterView back instead is what says the
-        // lookup went through WidgetsBinding.instance.platformDispatcher, which
-        // is what makes a controller's rootView the same object View.of and
-        // MediaQuery see.
-        expect(flutterViewForId(tester.view.viewId), isA<TestFlutterView>());
-        // Bound to a local and null-checked first: isNot(isA<TestFlutterView>())
-        // would also accept null, which would make this pass while proving
-        // nothing.
-        final FlutterView? engineView = PlatformDispatcher.instance.view(id: tester.view.viewId);
-        expect(engineView, isNotNull);
-        expect(engineView, isNot(isA<TestFlutterView>()));
-      });
+          final FlutterView? resolvedView = WidgetsBinding.instance.platformDispatcher.view(
+            id: tester.view.viewId,
+          );
+          expect(resolvedView, allOf(same(tester.view), isA<TestFlutterView>()));
+          expect(
+            PlatformDispatcher.instance.view(id: tester.view.viewId)?.devicePixelRatio,
+            isNot(2.75),
+          );
 
-      testWidgets('flutterViewForId throws a StateError naming the id it cannot find', (
-        WidgetTester tester,
-      ) async {
-        const absentViewId = 424242;
-        expect(WidgetsBinding.instance.platformDispatcher.view(id: absentViewId), isNull);
-        expect(
-          () => flutterViewForId(absentViewId),
-          throwsA(
-            isA<StateError>().having(
-              (StateError error) => error.message,
-              'message',
-              contains('$absentViewId'),
+          final controller = _StubWindowController(tester, rootView: resolvedView);
+          addTearDown(controller.dispose);
+          expect(controller.rootView.devicePixelRatio, 2.75);
+
+          late FlutterView capturedView;
+          late double capturedDevicePixelRatio;
+          await tester.pumpWidget(
+            wrapWithView: false,
+            Window(
+              controller: controller,
+              child: Builder(
+                builder: (BuildContext context) {
+                  capturedView = View.of(context);
+                  capturedDevicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+                  return const SizedBox.shrink();
+                },
+              ),
             ),
-          ),
-        );
-      });
+          );
+
+          expect(capturedView, same(tester.view));
+          expect(capturedDevicePixelRatio, 2.75);
+        },
+      );
 
       testWidgets('Window does not throw', (WidgetTester tester) async {
         final controller = _StubWindowController(tester);

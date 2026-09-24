@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:convert';
+library;
+
 import 'dart:convert' show utf8;
 import 'dart:ffi' hide Size;
 import 'dart:io';
@@ -39,6 +42,14 @@ To try experimental windowing APIs:
 
 See: https://github.com/flutter/flutter/issues/30701.
 ''';
+
+FlutterView _flutterViewForId(int viewId) {
+  final FlutterView? view = WidgetsBinding.instance.platformDispatcher.view(id: viewId);
+  if (view == null) {
+    throw StateError('No FlutterView with viewId $viewId was found on the platform dispatcher.');
+  }
+  return view;
+}
 
 /// [WindowingOwner] implementation for macOS.
 ///
@@ -164,7 +175,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
   /// The window handle is a pointer to the NSWindow instance.
   static Pointer<Void> getWindowHandle(FlutterView view) {
     return _MacOSPlatformInterface.getWindowHandle(
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       view.viewId,
     );
   }
@@ -327,8 +338,7 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
       parentViewId: parent.rootView.viewId,
     );
 
-    final FlutterView flutterView = flutterViewForId(viewId);
-    rootView = flutterView;
+    rootView = _flutterViewForId(viewId);
   }
 
   @override
@@ -420,8 +430,7 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
       parentViewId: parent.rootView.viewId,
     );
 
-    final FlutterView flutterView = flutterViewForId(viewId);
-    rootView = flutterView;
+    rootView = _flutterViewForId(viewId);
   }
 
   @override
@@ -521,8 +530,7 @@ class WindowControllerMacOS extends WindowController with _WindowControllerMixin
       onNotifyListeners: _onResize.nativeFunction,
       resizable: resizable,
     );
-    final FlutterView flutterView = flutterViewForId(viewId);
-    rootView = flutterView;
+    rootView = _flutterViewForId(viewId);
     if (title != null) {
       setTitle(title);
     }
@@ -657,8 +665,7 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
       parentViewId: parent?.rootView.viewId,
       resizable: resizable,
     );
-    final FlutterView flutterView = flutterViewForId(viewId);
-    rootView = flutterView;
+    rootView = _flutterViewForId(viewId);
     if (title != null) {
       setTitle(title);
     }
@@ -1007,7 +1014,10 @@ class _MacOSPlatformInterface {
       ..constraints.maxWidth = constraints.maxWidth
       ..constraints.maxHeight = constraints.maxHeight;
 
-    final int viewId = _createTooltipWindow(PlatformDispatcher.instance.engineId!, request);
+    final int viewId = _createTooltipWindow(
+      WidgetsBinding.instance.platformDispatcher.engineId!,
+      request,
+    );
     _allocator.free(request);
     return viewId;
   }
@@ -1049,7 +1059,10 @@ class _MacOSPlatformInterface {
       ..constraints.maxWidth = constraints.maxWidth
       ..constraints.maxHeight = constraints.maxHeight;
 
-    final int viewId = _createPopupWindow(PlatformDispatcher.instance.engineId!, request);
+    final int viewId = _createPopupWindow(
+      WidgetsBinding.instance.platformDispatcher.engineId!,
+      request,
+    );
     _allocator.free(request);
     return viewId;
   }

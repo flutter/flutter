@@ -58,12 +58,20 @@ To try experimental windowing APIs:
 See: https://github.com/flutter/flutter/issues/30701.
 ''';
 
+FlutterView _flutterViewForId(int viewId) {
+  final FlutterView? view = WidgetsBinding.instance.platformDispatcher.view(id: viewId);
+  if (view == null) {
+    throw StateError('No FlutterView with viewId $viewId was found on the platform dispatcher.');
+  }
+  return view;
+}
+
 /// Abstract handler class for Windows messages.
 ///
 /// Implementations of this class should register with
-/// [WindowingOwnerWin32.addMessageHandler] to begin receiving messages.
+/// [WindowingOwnerWin32._addMessageHandler] to begin receiving messages.
 /// When finished handling messages, implementations should deregister
-/// themselves with [WindowingOwnerWin32.removeMessageHandler].
+/// themselves with [WindowingOwnerWin32._removeMessageHandler].
 abstract class _WindowsMessageHandler {
   /// Handles a window message.
   ///
@@ -130,9 +138,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
 
   final List<_WindowsMessageHandler> _messageHandlers = <_WindowsMessageHandler>[];
 
-  /// The [Allocator] used for allocating native memory in this owner.
-  ///
-  /// This can be overridden via the [WindowingOwnerWin32.test] constructor.
+  /// The [ffi.Allocator] used for allocating native memory in this owner.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -258,8 +264,12 @@ class WindowingOwnerWin32 extends WindowingOwner {
   }
 
   void _onMessage(ffi.Pointer<_WindowsMessage> message) {
-    final int viewId = message.ref.viewId;
-    final FlutterView flutterView = flutterViewForId(viewId);
+    final FlutterView? flutterView = WidgetsBinding.instance.platformDispatcher.view(
+      id: message.ref.viewId,
+    );
+    if (flutterView == null) {
+      return;
+    }
 
     final int handlesLength = _messageHandlers.length;
     for (final _WindowsMessageHandler handler in _messageHandlers) {
@@ -364,8 +374,7 @@ class WindowControllerWin32 extends WindowController with BaseWindowControllerWi
       throw Exception('Windows failed to create a regular window with a valid view id.');
     }
 
-    final FlutterView flutterView = flutterViewForId(viewId);
-    rootView = flutterView;
+    rootView = _flutterViewForId(viewId);
   }
 
   final WindowingOwnerWin32 _owner;
@@ -615,8 +624,7 @@ class DialogWindowControllerWin32 extends DialogWindowController with BaseWindow
       throw Exception('Windows failed to create a dialog window with a valid view id.');
     }
 
-    final FlutterView flutterView = flutterViewForId(viewId);
-    rootView = flutterView;
+    rootView = _flutterViewForId(viewId);
   }
 
   final WindowingOwnerWin32 _owner;
@@ -766,10 +774,11 @@ class DialogWindowControllerWin32 extends DialogWindowController with BaseWindow
   }
 }
 
-typedef _GetWindowPositionNative = ffi.Pointer<_Rect> Function(
+typedef _GetWindowPositionNative = ffi.Void Function(
   ffi.Pointer<_Size> childSize,
   ffi.Pointer<_Rect> parentRect,
-  ffi.Pointer<_Rect> outputRect,
+  ffi.Pointer<_Rect> displayRect,
+  ffi.Pointer<_Rect> result, // output parameter
 );
 
 /// Implementation of [TooltipWindowController] for the Windows platform.
@@ -807,10 +816,10 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
     );
     final int viewId = _Win32PlatformInterface.createTooltipWindow(
       _owner.allocator,
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       contentSizeConstraints,
       _Win32PlatformInterface.getWindowHandle(
-        PlatformDispatcher.instance.engineId!,
+        WidgetsBinding.instance.platformDispatcher.engineId!,
         parent.rootView.viewId,
       ),
       _onGetWindowPosition.nativeFunction,
@@ -819,8 +828,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
       throw Exception('Windows failed to create a tooltip window with a valid view id.');
     }
 
-    final FlutterView flutterView = flutterViewForId(viewId);
-    rootView = flutterView;
+    rootView = _flutterViewForId(viewId);
   }
 
   final WindowingOwnerWin32 _owner;
@@ -834,12 +842,12 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   @internal
   bool get isDestroyed => _destroyed;
 
-  ffi.Pointer<_Rect> _handleGetWindowPosition(
+  void _handleGetWindowPosition(
     ffi.Pointer<_Size> childSize,
     ffi.Pointer<_Rect> parentRect,
-    ffi.Pointer<_Rect> outputRect,
+    ffi.Pointer<_Rect> displayRect,
+    ffi.Pointer<_Rect> result,
   ) {
-    final ffi.Pointer<_Rect> result = _owner.allocator<_Rect>();
     final double scale = rootView.devicePixelRatio;
     final scaledAnchorRect = Rect.fromLTWH(
       _anchorRect.left * scale,
@@ -856,13 +864,12 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
         parentRect.ref.top.toDouble(),
       ),
       parentRect: parentRect.ref.toRect(),
-      displayRect: outputRect.ref.toRect(),
+      displayRect: displayRect.ref.toRect(),
     );
     result.ref.left = targetRect.left.toInt();
     result.ref.top = targetRect.top.toInt();
     result.ref.width = targetRect.width.toInt();
     result.ref.height = targetRect.height.toInt();
-    return result;
   }
 
   /// Returns HWND pointer to the top level window.
@@ -870,7 +877,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   HWND get windowHandle {
     _ensureNotDestroyed();
     return _Win32PlatformInterface.getWindowHandle(
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       rootView.viewId,
     );
   }
@@ -997,10 +1004,10 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
     );
     final int viewId = _Win32PlatformInterface.createPopupWindow(
       _owner.allocator,
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       contentSizeConstraints,
       _Win32PlatformInterface.getWindowHandle(
-        PlatformDispatcher.instance.engineId!,
+        WidgetsBinding.instance.platformDispatcher.engineId!,
         parent.rootView.viewId,
       ),
       _onGetWindowPosition.nativeFunction,
@@ -1009,8 +1016,7 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
       throw Exception('Windows failed to create a popup window with a valid view id.');
     }
 
-    final FlutterView flutterView = flutterViewForId(viewId);
-    rootView = flutterView;
+    rootView = _flutterViewForId(viewId);
   }
 
   final WindowingOwnerWin32 _owner;
@@ -1024,10 +1030,11 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
   @internal
   bool get isDestroyed => _destroyed;
 
-  ffi.Pointer<_Rect> _handleGetWindowPosition(
+  void _handleGetWindowPosition(
     ffi.Pointer<_Size> childSize,
     ffi.Pointer<_Rect> parentRect,
-    ffi.Pointer<_Rect> outputRect,
+    ffi.Pointer<_Rect> displayRect,
+    ffi.Pointer<_Rect> result,
   ) {
     final double scale = rootView.devicePixelRatio;
     final scaledAnchorRect = Rect.fromLTWH(
@@ -1045,14 +1052,12 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
         parentRect.ref.top.toDouble(),
       ),
       parentRect: parentRect.ref.toRect(),
-      displayRect: outputRect.ref.toRect(),
+      displayRect: displayRect.ref.toRect(),
     );
-    final ffi.Pointer<_Rect> result = _owner.allocator<_Rect>();
     result.ref.left = targetRect.left.toInt();
     result.ref.top = targetRect.top.toInt();
     result.ref.width = targetRect.width.toInt();
     result.ref.height = targetRect.height.toInt();
-    return result;
   }
 
   /// Returns HWND pointer to the top level window.
@@ -1060,7 +1065,7 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
   HWND getWindowHandle() {
     _ensureNotDestroyed();
     return _Win32PlatformInterface.getWindowHandle(
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       rootView.viewId,
     );
   }
@@ -1107,7 +1112,7 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
     _ensureNotDestroyed();
     final HWND popupHandle = getWindowHandle();
     final HWND parentHandle = _Win32PlatformInterface.getWindowHandle(
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       parent.rootView.viewId,
     );
 
@@ -1133,6 +1138,27 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
     int wParam,
     int lParam,
   ) {
+    if (message == _WM_ACTIVATE) {
+      // If focus has changed for a window that is managed by this application
+      // AND the new focus is neither the parent window nor a descendant of the
+      // popup, close the popup.
+      final HWND parentHwnd = _Win32PlatformInterface.getWindowHandle(
+        WidgetsBinding.instance.platformDispatcher.engineId!,
+        parent.rootView.viewId,
+      );
+      final HWND hFocused = _Win32PlatformInterface.getForegroundWindow();
+      if (hFocused != parentHwnd &&
+          hFocused != getWindowHandle() &&
+          !_Win32PlatformInterface.isChild(getWindowHandle(), hFocused)) {
+        scheduleMicrotask(destroy);
+      }
+      return null;
+    }
+
+    if (view.viewId != rootView.viewId) {
+      return null;
+    }
+
     // WM_DESTROY is dispatched by the engine after destroyWindow is called.
     // It must be handled even after _destroyed is set by destroy().
     if (message == _WM_DESTROY) {
@@ -1145,39 +1171,6 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
       _owner._removeMessageHandler(this);
       _delegate.onWindowDestroyed();
       return 0;
-    }
-
-    // Once destruction has started, skip all other messages to avoid
-    // accessing the window handle after it has been invalidated.
-    if (_destroyed) {
-      return null;
-    }
-
-    if (view.viewId == parent.rootView.viewId) {
-      if (message == _WM_SIZE) {
-        // Popups should close when their parent window is resized.
-        // Queue the destroy on a microtask to avoid destroying the window
-        // while processing its message.
-        scheduleMicrotask(destroy);
-        return null;
-      }
-    }
-
-    if (message == _WM_ACTIVATE) {
-      // If focus has changed for a window that is managed by this application
-      // AND the new focus is neither the parent window nor a descendant of the
-      // popup, close the popup.
-      final HWND parentHwnd = _Win32PlatformInterface.getWindowHandle(
-        PlatformDispatcher.instance.engineId!,
-        parent.rootView.viewId,
-      );
-      final HWND hFocused = _Win32PlatformInterface.getForegroundWindow();
-      if (hFocused != parentHwnd &&
-          hFocused != getWindowHandle() &&
-          !_Win32PlatformInterface.isChild(getWindowHandle(), hFocused)) {
-        scheduleMicrotask(destroy);
-      }
-      return null;
     }
 
     return null;
@@ -1365,10 +1358,11 @@ class _Win32PlatformInterface {
     HWND parent,
     ffi.Pointer<
       ffi.NativeFunction<
-        ffi.Pointer<_Rect> Function(
+        ffi.Void Function(
           ffi.Pointer<_Size> childSize,
           ffi.Pointer<_Rect> parentRect,
-          ffi.Pointer<_Rect> outputRect,
+          ffi.Pointer<_Rect> displayRect,
+          ffi.Pointer<_Rect> result, // output parameter
         )
       >
     >
@@ -1401,10 +1395,11 @@ class _Win32PlatformInterface {
     HWND parent,
     ffi.Pointer<
       ffi.NativeFunction<
-        ffi.Pointer<_Rect> Function(
+        ffi.Void Function(
           ffi.Pointer<_Size> childSize,
           ffi.Pointer<_Rect> parentRect,
-          ffi.Pointer<_Rect> outputRect,
+          ffi.Pointer<_Rect> displayRect,
+          ffi.Pointer<_Rect> result, // output parameter
         )
       >
     >
@@ -1641,10 +1636,11 @@ final class _TooltipWindowCreationRequest extends ffi.Struct {
   external HWND parent;
   external ffi.Pointer<
     ffi.NativeFunction<
-      ffi.Pointer<_Rect> Function(
+      ffi.Void Function(
         ffi.Pointer<_Size> childSize,
         ffi.Pointer<_Rect> parentRect,
-        ffi.Pointer<_Rect> outputRect,
+        ffi.Pointer<_Rect> displayRect,
+        ffi.Pointer<_Rect> result,
       )
     >
   >
@@ -1656,10 +1652,11 @@ final class _PopupWindowCreationRequest extends ffi.Struct {
   external HWND parent;
   external ffi.Pointer<
     ffi.NativeFunction<
-      ffi.Pointer<_Rect> Function(
+      ffi.Void Function(
         ffi.Pointer<_Size> childSize,
         ffi.Pointer<_Rect> parentRect,
-        ffi.Pointer<_Rect> outputRect,
+        ffi.Pointer<_Rect> displayRect,
+        ffi.Pointer<_Rect> result,
       )
     >
   >
@@ -1819,12 +1816,12 @@ extension _Utf16Pointer on ffi.Pointer<_Utf16> {
   }
 }
 
-/// Extension method for converting a [String] to a `Pointer<Utf16>`.
+/// Extension method for converting a [String] to a `Pointer<_Utf16>`.
 extension _StringUtf16Pointer on String {
-  /// Creates a zero-terminated [Utf16] code-unit array from this String.
+  /// Creates a zero-terminated [_Utf16] code-unit array from this String.
   ///
   /// If this [String] contains NUL characters, converting it back to a string
-  /// using [Utf16Pointer.toDartString] will truncate the result if a length is
+  /// using [_Utf16Pointer.toDartString] will truncate the result if a length is
   /// not passed.
   ///
   /// Returns an [allocator]-allocated pointer to the result.
