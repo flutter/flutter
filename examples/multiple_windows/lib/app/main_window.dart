@@ -195,7 +195,7 @@ class _WindowCreatorCard extends StatelessWidget {
                           );
                         }
 
-                        showToplevelWindow(
+                        showWindow(
                           context: context,
                           entry: WindowEntry(
                             controller: controller,
@@ -223,7 +223,7 @@ class _WindowCreatorCard extends StatelessWidget {
                           );
                         }
 
-                        showToplevelWindow(
+                        showWindow(
                           context: context,
                           entry: WindowEntry(
                             controller: controller,
@@ -252,7 +252,7 @@ class _WindowCreatorCard extends StatelessWidget {
                           );
                         }
 
-                        showToplevelWindow(
+                        showWindow(
                           context: context,
                           entry: WindowEntry(
                             controller: controller,

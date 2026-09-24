@@ -78,7 +78,7 @@ class _MyAppState extends State<MyApp> {
         },
       ),
     );
-    showToplevelWindow(
+    showWindow(
       context: context,
       entry: WindowEntry(
         controller: controller,
