@@ -5379,7 +5379,6 @@ targets:
   - name: Mac_benchmark basic_material_app_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       task_name: basic_material_app_ios__compile
@@ -5488,7 +5487,6 @@ targets:
   - name: Mac_benchmark flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5518,7 +5516,6 @@ targets:
   - name: Mac_benchmark hello_world_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       task_name: hello_world_ios__compile
@@ -5526,7 +5523,6 @@ targets:
   - name: Mac_benchmark imitation_game_flutter
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       task_name: imitation_game_flutter__compile
