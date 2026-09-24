@@ -10,6 +10,8 @@ namespace testing {
 
 void ImpellerUnittestSetup();
 
+void ImpellerUnittestTeardown();
+
 }  // namespace testing
 }  // namespace impeller
 

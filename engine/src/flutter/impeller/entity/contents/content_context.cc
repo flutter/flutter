@@ -4,12 +4,17 @@
 
 #include "impeller/entity/contents/content_context.h"
 
+#include <atomic>
 #include <format>
 #include <memory>
+#include <string>
 #include <utility>
+#include <vector>
 
 #include "flutter/display_list/image/dl_image.h"
 #include "fml/trace_event.h"
+#include "impeller/base/thread.h"
+#include "impeller/base/thread_safety.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
@@ -29,27 +34,78 @@
 
 namespace impeller {
 
+// Pipeline variant recording (see `ContentContext::SetPipelineVariantObserver`)
+// is a test diagnostic, so it is compiled out of everything but debug builds.
+#if defined(FLUTTER_RUNTIME_MODE) && \
+    FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+#define IMPELLER_RECORD_PIPELINE_VARIANTS 1
+#endif
+
 namespace {
+
+#ifdef IMPELLER_RECORD_PIPELINE_VARIANTS
+/// The observer set with `ContentContext::SetPipelineVariantObserver`.
+///
+/// `gHasPipelineVariantObserver` lets the constructor skip all recording with a
+/// single atomic load when no observer is installed.
+std::atomic<bool> gHasPipelineVariantObserver = false;
+
+struct PipelineVariantObserverState {
+  Mutex mutex;
+  ContentContext::PipelineVariantObserver observer IPLR_GUARDED_BY(mutex);
+};
+
+PipelineVariantObserverState& GetPipelineVariantObserverState() {
+  static PipelineVariantObserverState* state =
+      new PipelineVariantObserverState();
+  return *state;
+}
+
+/// Installed for the duration of the `ContentContext` constructor when a
+/// pipeline variant observer is set. Every `Variants` container that receives
+/// its default while this is set records into it from then on.
+thread_local std::vector<ContentContext::RecordedVariant>* tVariantRecorder =
+    nullptr;
+
+class ScopedVariantRecorder {
+ public:
+  explicit ScopedVariantRecorder(
+      std::vector<ContentContext::RecordedVariant>* recorder)
+      : previous_(tVariantRecorder) {
+    tVariantRecorder = recorder;
+  }
+
+  ~ScopedVariantRecorder() { tVariantRecorder = previous_; }
+
+ private:
+  std::vector<ContentContext::RecordedVariant>* previous_;
+
+  ScopedVariantRecorder(const ScopedVariantRecorder&) = delete;
+
+  ScopedVariantRecorder& operator=(const ScopedVariantRecorder&) = delete;
+};
+#endif  // IMPELLER_RECORD_PIPELINE_VARIANTS
 
 /// A generic version of `Variants` which mostly exists to reduce code size.
 class GenericVariants {
  public:
   void Set(const ContentContextOptions& options,
            std::unique_ptr<GenericRenderPipelineHandle> pipeline) {
-    uint64_t p_key = options.ToKey();
-    for (const auto& [key, pipeline] : pipelines_) {
-      if (key == p_key) {
-        return;
-      }
-    }
-    pipelines_.push_back(std::make_pair(p_key, std::move(pipeline)));
+    Insert(options, std::move(pipeline), /*warmed=*/false);
   }
 
   void SetDefault(const ContentContextOptions& options,
                   std::unique_ptr<GenericRenderPipelineHandle> pipeline) {
     default_options_ = options;
+    bool warmed = false;
+#ifdef IMPELLER_RECORD_PIPELINE_VARIANTS
+    warmed = tVariantRecorder != nullptr;
+    if (warmed) {
+      recorder_ = tVariantRecorder;
+    }
+#endif  // IMPELLER_RECORD_PIPELINE_VARIANTS
     if (pipeline) {
-      Set(options, std::move(pipeline));
+      Insert(options, std::move(pipeline), warmed);
     }
   }
 
@@ -79,6 +135,37 @@ class GenericVariants {
   std::optional<ContentContextOptions> default_options_;
   std::vector<std::pair<uint64_t, std::unique_ptr<GenericRenderPipelineHandle>>>
       pipelines_;
+
+ private:
+#ifdef IMPELLER_RECORD_PIPELINE_VARIANTS
+  /// Where new variants are recorded for the pipeline variant observer. Set
+  /// when the default is warmed while a recorder is installed, so variants
+  /// created lazily later on are recorded too. Owned by the `ContentContext`.
+  std::vector<ContentContext::RecordedVariant>* recorder_ = nullptr;
+#endif  // IMPELLER_RECORD_PIPELINE_VARIANTS
+
+  void Insert(const ContentContextOptions& options,
+              std::unique_ptr<GenericRenderPipelineHandle> pipeline,
+              bool warmed) {
+    uint64_t p_key = options.ToKey();
+    for (const auto& [key, pipeline] : pipelines_) {
+      if (key == p_key) {
+        return;
+      }
+    }
+#ifdef IMPELLER_RECORD_PIPELINE_VARIANTS
+    if (recorder_ != nullptr && pipeline) {
+      std::optional<PipelineDescriptor> desc = pipeline->GetDescriptor();
+      if (desc.has_value()) {
+        recorder_->push_back(
+            ContentContext::RecordedVariant{.descriptor = std::move(*desc),
+                                            .options = options,
+                                            .warmed = warmed});
+      }
+    }
+#endif  // IMPELLER_RECORD_PIPELINE_VARIANTS
+    pipelines_.push_back(std::make_pair(p_key, std::move(pipeline)));
+  }
 };
 
 /// Holds multiple Pipelines associated with the same PipelineHandle types.
@@ -317,6 +404,13 @@ struct ContentContext::Pipelines {
   Variants<TextureDownsampleGlesPipeline> texture_downsample_gles;
 #endif  // IMPELLER_ENABLE_OPENGLES
   // clang-format on
+
+#ifdef IMPELLER_RECORD_PIPELINE_VARIANTS
+  /// The variants created by this context, both warmed by the constructor and
+  /// created lazily afterwards. Only populated when a pipeline variant observer
+  /// is set.
+  std::vector<ContentContext::RecordedVariant> recorded_variants;
+#endif  // IMPELLER_RECORD_PIPELINE_VARIANTS
 };
 
 void ContentContextOptions::ApplyToPipelineDescriptor(
@@ -571,6 +665,14 @@ ContentContext::ContentContext(
   if (!context_ || !context_->IsValid()) {
     return;
   }
+
+#ifdef IMPELLER_RECORD_PIPELINE_VARIANTS
+  // Record every variant created from here on so that the pipeline variant
+  // observer can be told about them when this context is destroyed.
+  ScopedVariantRecorder variant_recorder(gHasPipelineVariantObserver.load()
+                                             ? &pipelines_->recorded_variants
+                                             : nullptr);
+#endif  // IMPELLER_RECORD_PIPELINE_VARIANTS
 
   // On most backends, indexes and other data can be allocated into the same
   // buffers. However, some backends (namely WebGL) require indexes used in
@@ -878,7 +980,45 @@ ContentContext::ContentContext(
   InitializeCommonlyUsedShadersIfNeeded();
 }
 
-ContentContext::~ContentContext() = default;
+ContentContext::~ContentContext() {
+#ifdef IMPELLER_RECORD_PIPELINE_VARIANTS
+  if (pipelines_->recorded_variants.empty() || !context_) {
+    return;
+  }
+  PipelineVariantObserver observer;
+  {
+    PipelineVariantObserverState& state = GetPipelineVariantObserverState();
+    Lock lock(state.mutex);
+    observer = state.observer;
+  }
+  if (observer) {
+    observer(*context_, pipelines_->recorded_variants);
+  }
+#endif  // IMPELLER_RECORD_PIPELINE_VARIANTS
+}
+
+bool ContentContext::IsPipelineVariantRecordingSupported() {
+#ifdef IMPELLER_RECORD_PIPELINE_VARIANTS
+  return true;
+#else
+  return false;
+#endif  // IMPELLER_RECORD_PIPELINE_VARIANTS
+}
+
+void ContentContext::SetPipelineVariantObserver(
+    PipelineVariantObserver observer) {
+#ifdef IMPELLER_RECORD_PIPELINE_VARIANTS
+  PipelineVariantObserverState& state = GetPipelineVariantObserverState();
+  Lock lock(state.mutex);
+  gHasPipelineVariantObserver.store(static_cast<bool>(observer));
+  state.observer = std::move(observer);
+#else
+  if (observer) {
+    FML_LOG(ERROR) << "Pipeline variant recording is only available in debug "
+                      "builds. The observer will never be called.";
+  }
+#endif  // IMPELLER_RECORD_PIPELINE_VARIANTS
+}
 
 bool ContentContext::IsValid() const {
   return is_valid_;
