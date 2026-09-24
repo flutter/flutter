@@ -93,9 +93,6 @@ export class FlutterLoader {
           if (!(browserEnvironment.webGLVersion > 0)) {
             return "Skwasm requires WebGL support; this browser does not provide it.";
           }
-          if (!enableWasm) {
-            return `Skwasm is disabled by your wasmAllowList configuration for browser engine "${browserEnvironment.browserEngine}".`;
-          }
           return null;
         default:
           return null;
@@ -108,8 +105,13 @@ export class FlutterLoader {
      * log a useful explanation when the loader has to fall back.
      */
     const buildIncompatibilityReason = (build) => {
-      if (build.compileTarget === "dart2wasm" && !supportsDart2Wasm) {
-        return "dart2wasm requires WasmGC support; this browser does not implement it yet.";
+      if (build.compileTarget === "dart2wasm") {
+        if (!supportsDart2Wasm) {
+          return "dart2wasm requires WasmGC support; this browser does not implement it yet.";
+        }
+        if (!enableWasm) {
+          return `WebAssembly is disabled by your wasmAllowList configuration for browser engine "${browserEnvironment.browserEngine}".`;
+        }
       }
       if (config.renderer && config.renderer != build.renderer) {
         return `The application is configured to use the "${config.renderer}" renderer; this build targets "${build.renderer}".`;

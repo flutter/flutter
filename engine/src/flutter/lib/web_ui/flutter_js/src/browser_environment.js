@@ -53,7 +53,14 @@ const hasTextCluster = () => {
   return (typeof window.TextCluster !== "undefined");
 }
 
+const getFirefoxVersion = () => {
+  const match = navigator.userAgent.match(/firefox\/(\d+)/i);
+  return match ? parseInt(match[1], 10) : -1;
+}
+
 const supportsDart2Wasm = () => {
+  if (browserEngine === "gecko" && getFirefoxVersion() < 147) return false;
+
   // The `<app>.support.js` expression emitted by 
   // ```
   //   % dart compile wasm \
