@@ -11,17 +11,26 @@
 # and rewrites flutter DEPS file.
 
 import argparse
+import base64
 import os
 import re
 import sys
+import urllib.request
 
 DART_SCRIPT_DIR = os.path.dirname(sys.argv[0])
 OLD_DART_DEPS = os.path.realpath(os.path.join(DART_SCRIPT_DIR, '../../third_party/dart/DEPS'))
 DART_DEPS = os.path.realpath(os.path.join(DART_SCRIPT_DIR, '../../flutter/third_party/dart/DEPS'))
 FLUTTER_DEPS = os.path.realpath(os.path.join(DART_SCRIPT_DIR, '../../../../DEPS'))
+BROWSER_ENVIRONMENT_JS = os.path.realpath(
+    os.path.join(
+        DART_SCRIPT_DIR,
+        '../../flutter/lib/web_ui/flutter_js/src/browser_environment.js',
+    )
+)
 
 # Path to Dart SDK checkout within Flutter repo.
 DART_SDK_ROOT = 'engine/src/flutter/third_party/dart'
+DART_COMPILE_RELPATH = 'pkg/dart2wasm/lib/compile.dart'
 
 class VarImpl(object):
   def __init__(self, local_scope):
@@ -80,6 +89,14 @@ def ParseArgs(args):
   parser.add_argument('--dart_revision', '-r',
       type=GitHashArg,
       help='Dart revision to update to.')
+  parser.add_argument('--browser_environment_js',
+      type=str,
+      help='Path to browser_environment.js to keep in sync with dart2wasm.',
+      default=BROWSER_ENVIRONMENT_JS)
+  parser.add_argument('--dart_compile_file',
+      type=str,
+      help='Optional path to Dart SDK pkg/dart2wasm/lib/compile.dart.',
+      default=None)
   return parser.parse_args(args)
 
 def PrettifySourcePathForDEPS(flutter_vars, dep_path, source):
@@ -181,6 +198,166 @@ def ComputeDartDeps(flutter_vars, flutter_deps, dart_deps):
 
   return new_dart_deps
 
+
+def ExtractDart2WasmSupportExpression(compile_dart_content):
+  """Extracts the baseline JS expression from `_generateSupportJs` in compile.dart.
+
+  Parses `const String <name> = '<expr>';` definitions inside `_generateSupportJs`
+  and joins the unconditional entries in `final requiredFeatures = [...]` with `&&`.
+  """
+  fn_match = re.search(
+      r'String\s+_generateSupportJs\s*\([^)]*\)\s*\{(.*?)\n\}',
+      compile_dart_content,
+      re.DOTALL,
+  )
+  if not fn_match:
+    raise ValueError(
+        'Could not locate `_generateSupportJs` in pkg/dart2wasm/lib/compile.dart'
+    )
+  fn_body = fn_match.group(1)
+
+  feature_consts = dict(
+      re.findall(
+          r"const\s+String\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*'([^']+)';",
+          fn_body,
+      )
+  )
+  req_match = re.search(
+      r'final\s+requiredFeatures\s*=\s*\[(.*?)\];', fn_body, re.DOTALL
+  )
+  if not req_match:
+    raise ValueError(
+        'Could not locate `requiredFeatures` inside `_generateSupportJs`'
+    )
+
+  required_exprs = []
+  for raw_line in req_match.group(1).splitlines():
+    line = raw_line.split('//', 1)[0].strip()
+    if not line or line.startswith('if ') or line.startswith('if('):
+      continue
+    ident = line.rstrip(',').strip()
+    if not re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', ident):
+      raise ValueError(
+          f'Unrecognized entry in `requiredFeatures`: {raw_line.strip()!r}'
+      )
+    if ident not in feature_consts:
+      raise ValueError(
+          f'Feature `{ident}` in `requiredFeatures` has no `const String` definition'
+      )
+    required_exprs.append(feature_consts[ident])
+
+  if not required_exprs:
+    raise ValueError('No unconditional features found in `requiredFeatures`')
+
+  return f"({'&&'.join(required_exprs)})"
+
+
+def ExtractBrowserEnvironmentSupportExpression(browser_env_content):
+  """Extracts the current return expression inside `supportsDart2Wasm()`."""
+  match = re.search(
+      r'const\s+supportsDart2Wasm\s*=\s*\(\)\s*=>\s*\{.*?return\s+(\([^;]+\));\s*\}',
+      browser_env_content,
+      re.DOTALL,
+  )
+  if not match:
+    raise ValueError(
+        'Could not locate `supportsDart2Wasm` return expression in browser_environment.js'
+    )
+  return match.group(1)
+
+
+def UpdateBrowserEnvironmentJsContent(browser_env_content, support_expr):
+  """Updates the `return (...);` inside `supportsDart2Wasm` in browser_environment.js."""
+  pattern = re.compile(
+      r'(const\s+supportsDart2Wasm\s*=\s*\(\)\s*=>\s*\{.*?return\s+)\([^;]+\)(;\s*\})',
+      re.DOTALL,
+  )
+  updated, count = pattern.subn(
+      lambda m: f'{m.group(1)}{support_expr}{m.group(2)}',
+      browser_env_content,
+      count=1,
+  )
+  if count != 1:
+    raise ValueError(
+        'Could not update `supportsDart2Wasm` in browser_environment.js'
+    )
+  return updated
+
+
+def ResolveDartCompileFileContent(args, flutter_vars):
+  """Resolves `pkg/dart2wasm/lib/compile.dart` content locally or via gitiles."""
+  if getattr(args, 'dart_compile_file', None):
+    with open(args.dart_compile_file, 'r', encoding='utf-8') as fp:
+      return fp.read()
+
+  # Check sibling of args.dart_deps (e.g., third_party/dart/DEPS or local SDK checkout).
+  if getattr(args, 'dart_deps', None):
+    candidate = os.path.join(
+        os.path.dirname(os.path.realpath(args.dart_deps)),
+        DART_COMPILE_RELPATH,
+    )
+    if os.path.isfile(candidate):
+      with open(candidate, 'r', encoding='utf-8') as fp:
+        return fp.read()
+
+  # If a specific --dart_revision was passed without a local SDK checkout (e.g., in
+  # roll-dart-dependencies.yml where only DEPS was downloaded), fetch compile.dart
+  # at that revision from dart.googlesource.com.
+  target_rev = getattr(args, 'dart_revision', None) or flutter_vars.get(
+      'dart_revision'
+  )
+  if getattr(args, 'dart_revision', None) and target_rev:
+    url = (
+        f'https://dart.googlesource.com/sdk/+/{target_rev}/'
+        f'{DART_COMPILE_RELPATH}?format=TEXT'
+    )
+    try:
+      with urllib.request.urlopen(url, timeout=15) as response:
+        encoded = response.read()
+      return base64.b64decode(encoded).decode('utf-8')
+    except Exception as exc:  # pylint: disable=broad-except
+      sys.stderr.write(
+          f'Warning: failed to fetch {url} ({exc}); falling back to local checkout.\n'
+      )
+
+  # Fallback to flutter checkout's DART_SDK_ROOT if present on disk.
+  if getattr(args, 'flutter_deps', None):
+    candidate = os.path.join(
+        os.path.dirname(os.path.realpath(args.flutter_deps)),
+        DART_SDK_ROOT,
+        DART_COMPILE_RELPATH,
+    )
+    if os.path.isfile(candidate):
+      with open(candidate, 'r', encoding='utf-8') as fp:
+        return fp.read()
+
+  return None
+
+
+def SyncBrowserEnvironmentJs(args, flutter_vars):
+  """Synchronizes `supportsDart2Wasm` in `browser_environment.js` with `compile.dart`."""
+  browser_env_path = getattr(args, 'browser_environment_js', None)
+  if not browser_env_path or not os.path.isfile(browser_env_path):
+    return False
+
+  compile_dart_content = ResolveDartCompileFileContent(args, flutter_vars)
+  if not compile_dart_content:
+    return False
+
+  support_expr = ExtractDart2WasmSupportExpression(compile_dart_content)
+  with open(browser_env_path, 'r', encoding='utf-8') as fp:
+    original_content = fp.read()
+
+  updated_content = UpdateBrowserEnvironmentJsContent(
+      original_content, support_expr
+  )
+  if updated_content != original_content:
+    with open(browser_env_path, 'w', encoding='utf-8') as fp:
+      fp.write(updated_content)
+    return True
+  return False
+
+
 def Main(argv):
   args = ParseArgs(argv)
   if args.dart_deps == DART_DEPS and not os.path.isfile(DART_DEPS):
@@ -240,11 +417,17 @@ def Main(argv):
       updatedfile.write(lines[i])
     i = i + 1
 
+  updatedfile.close()
+  file.close()
+
   # Rename updated DEPS file into a new DEPS file
   os.remove(args.flutter_deps)
   os.rename(updatedfilename, args.flutter_deps)
+
+  SyncBrowserEnvironmentJs(args, flutter_vars)
 
   return 0
 
 if __name__ == '__main__':
   sys.exit(Main(sys.argv))
+

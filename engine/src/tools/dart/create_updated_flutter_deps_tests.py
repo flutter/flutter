@@ -8,12 +8,19 @@
 #
 # Unit tests for create_updated_flutter_deps.py script.
 
+import os
 import unittest
 
 from create_updated_flutter_deps import (
+    BROWSER_ENVIRONMENT_JS,
+    DART_COMPILE_RELPATH,
     DART_SDK_ROOT,
+    FLUTTER_DEPS,
     ComputeDartDeps,
+    ExtractBrowserEnvironmentSupportExpression,
+    ExtractDart2WasmSupportExpression,
     PrettifySourcePathForDEPS,
+    UpdateBrowserEnvironmentJsContent,
 )
 
 
@@ -113,5 +120,112 @@ class TestComputeDartDeps(unittest.TestCase):
         )
 
 
+class TestDart2WasmSupportSync(unittest.TestCase):
+    def test_ExtractDart2WasmSupportExpression_across_epochs(self):
+        # Epoch 1: WasmGC unconditional, js-string conditional.
+        epoch1 = """
+String _generateSupportJs(TranslatorOptions options) {
+  const String supportsWasmGC = 'WebAssembly.validate(new Uint8Array([1]))';
+  const String supportsJsStringBuiltins = '!WebAssembly.validate(new Uint8Array([2]),{"builtins":["js-string"]})';
+  final requiredFeatures = [
+    supportsWasmGC,
+    if (options.requireJsStringBuiltin) supportsJsStringBuiltins
+  ];
+  return '(${requiredFeatures.join('&&')})';
+}
+"""
+        self.assertEqual(
+            ExtractDart2WasmSupportExpression(epoch1),
+            "(WebAssembly.validate(new Uint8Array([1])))",
+        )
+
+        # Epoch 2: WasmGC + SIMD + js-string unconditional, multi-memory conditional.
+        epoch2 = """
+String _generateSupportJs({required bool requiresMultiMemory}) {
+  const String supportsWasmGC = 'WebAssembly.validate(new Uint8Array([1]))';
+  const String supportsWasmSimd = 'WebAssembly.validate(new Uint8Array([2]))';
+  const String supportsWasmMultiMemory = 'WebAssembly.validate(new Uint8Array([3]))';
+  const String supportsJsStringBuiltins = '!WebAssembly.validate(new Uint8Array([4]),{"builtins":["js-string"]})';
+  final requiredFeatures = [
+    supportsWasmGC,
+    supportsWasmSimd,
+    supportsJsStringBuiltins,
+    if (requiresMultiMemory) supportsWasmMultiMemory,
+  ];
+  return '(${requiredFeatures.join('&&')})';
+}
+"""
+        self.assertEqual(
+            ExtractDart2WasmSupportExpression(epoch2),
+            "(WebAssembly.validate(new Uint8Array([1]))&&WebAssembly.validate(new Uint8Array([2]))&&!WebAssembly.validate(new Uint8Array([4]),{\"builtins\":[\"js-string\"]}))",
+        )
+
+        # Epoch 3: try_table added unconditionally.
+        epoch3 = """
+String _generateSupportJs({required bool requiresMultiMemory}) {
+  const String supportsWasmGC = 'WebAssembly.validate(new Uint8Array([1]))';
+  const String supportsWasmSimd = 'WebAssembly.validate(new Uint8Array([2]))';
+  const String supportsWasmMultiMemory = 'WebAssembly.validate(new Uint8Array([3]))';
+  const String supportsJsStringBuiltins = '!WebAssembly.validate(new Uint8Array([4]),{"builtins":["js-string"]})';
+  const String supportsTryTable = 'WebAssembly.validate(new Uint8Array([5]))';
+  final requiredFeatures = [
+    supportsWasmGC,
+    supportsWasmSimd,
+    supportsJsStringBuiltins,
+    supportsTryTable,
+    if (requiresMultiMemory) supportsWasmMultiMemory,
+  ];
+  return '(${requiredFeatures.join('&&')})';
+}
+"""
+        self.assertEqual(
+            ExtractDart2WasmSupportExpression(epoch3),
+            "(WebAssembly.validate(new Uint8Array([1]))&&WebAssembly.validate(new Uint8Array([2]))&&!WebAssembly.validate(new Uint8Array([4]),{\"builtins\":[\"js-string\"]})&&WebAssembly.validate(new Uint8Array([5])))",
+        )
+
+    def test_UpdateBrowserEnvironmentJsContent(self):
+        sample_js = """const supportsDart2Wasm = () => {
+  // Comment
+  return (WebAssembly.validate(new Uint8Array([1]))&&WebAssembly.validate(new Uint8Array([2])));
+}
+"""
+        new_expr = "(WebAssembly.validate(new Uint8Array([1]))&&WebAssembly.validate(new Uint8Array([2]))&&WebAssembly.validate(new Uint8Array([3])))"
+        updated = UpdateBrowserEnvironmentJsContent(sample_js, new_expr)
+        self.assertEqual(
+            ExtractBrowserEnvironmentSupportExpression(updated),
+            new_expr,
+        )
+        # Idempotent when applied again.
+        self.assertEqual(
+            UpdateBrowserEnvironmentJsContent(updated, new_expr),
+            updated,
+        )
+
+    def test_LiveBrowserEnvironmentJsParity(self):
+        self.assertTrue(os.path.isfile(BROWSER_ENVIRONMENT_JS))
+        with open(BROWSER_ENVIRONMENT_JS, "r", encoding="utf-8") as fp:
+            browser_env_content = fp.read()
+        current_expr = ExtractBrowserEnvironmentSupportExpression(browser_env_content)
+        self.assertTrue(current_expr.startswith("(WebAssembly.validate("))
+
+        local_compile_dart = os.path.join(
+            os.path.dirname(FLUTTER_DEPS),
+            DART_SDK_ROOT,
+            DART_COMPILE_RELPATH,
+        )
+        if os.path.isfile(local_compile_dart):
+            with open(local_compile_dart, "r", encoding="utf-8") as fp:
+                compile_dart_content = fp.read()
+            expected_expr = ExtractDart2WasmSupportExpression(compile_dart_content)
+            self.assertEqual(
+                current_expr,
+                expected_expr,
+                "supportsDart2Wasm() in browser_environment.js is out of sync with "
+                "pkg/dart2wasm/lib/compile.dart. Run "
+                "`python3 engine/src/tools/dart/create_updated_flutter_deps.py` to update.",
+            )
+
+
 if __name__ == "__main__":
     unittest.main()
+

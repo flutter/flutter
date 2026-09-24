@@ -95,8 +95,8 @@ jobs:
         env:
           DART_HASH: ${{ inputs.dart_hash }}
         run: |
-          # Check if the root DEPS file has changed
-          if git diff --exit-code DEPS; then
+          # Check if the root DEPS file or browser_environment.js has changed
+          if git diff --exit-code DEPS engine/src/flutter/lib/web_ui/flutter_js/src/browser_environment.js; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "## ✅ Dart version already up to date" >> "$GITHUB_STEP_SUMMARY"
             echo "The DEPS file is already up to date with Dart hash \`$DART_HASH\`." >> "$GITHUB_STEP_SUMMARY"
@@ -108,7 +108,7 @@ jobs:
         if: steps.git-check.outputs.changed == 'true'
         run: |
           gh auth setup-git
-          git add DEPS
+          git add DEPS engine/src/flutter/lib/web_ui/flutter_js/src/browser_environment.js
           git commit -m "Update flutter DEPS to dart $DART_HASH"
           git push origin "$BRANCH_NAME" --force
 
