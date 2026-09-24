@@ -61,7 +61,10 @@ class _BodyVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
-    if (node case SimpleIdentifier(name: 'runtimeType')) {
+    final AstNode? parent = node.parent;
+    // Comparisons such as `runtimeType == Foo` do not convert the type to a string.
+    final bool isComparison = parent is BinaryExpression && parent.operator.type.isEqualityOperator;
+    if (node case SimpleIdentifier(name: 'runtimeType') when !isComparison) {
       rule.reportAtNode(node);
     }
     super.visitSimpleIdentifier(node);
