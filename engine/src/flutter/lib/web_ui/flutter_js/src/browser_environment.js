@@ -59,6 +59,9 @@ const getFirefoxVersion = () => {
 }
 
 const supportsDart2Wasm = () => {
+  // Firefox < 147 has a SpiderMonkey Ion WasmGC compilation bug that breaks dart2wasm builds.
+  // See: https://github.com/flutter/flutter/issues/186619
+  //      https://bugzilla.mozilla.org/show_bug.cgi?id=2006811
   if (browserEngine === "gecko" && getFirefoxVersion() < 147) return false;
 
   // The `<app>.support.js` expression emitted by 

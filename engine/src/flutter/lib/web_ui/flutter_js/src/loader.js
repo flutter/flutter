@@ -109,7 +109,10 @@ export class FlutterLoader {
           return "dart2wasm requires WasmGC support; this browser does not implement it yet.";
         }
         if (!enableWasm) {
-          return `WebAssembly is disabled by your wasmAllowList configuration for browser engine "${browserEnvironment.browserEngine}".`;
+          if (config.wasmAllowList?.[browserEnvironment.browserEngine] === false) {
+            return `WebAssembly is disabled by your wasmAllowList configuration for browser engine "${browserEnvironment.browserEngine}".`;
+          }
+          return `WebAssembly is disabled by default for browser engine "${browserEnvironment.browserEngine}".`;
         }
       }
       if (config.renderer && config.renderer != build.renderer) {
