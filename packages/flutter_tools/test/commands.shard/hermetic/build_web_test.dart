@@ -226,13 +226,8 @@ void main() {
     },
   );
 
-<<<<<<< HEAD
   testWithoutContext(
-    'Rejects --web-content-hash when web/index.html references main.dart.js or loadEntrypoint',
-=======
-  testUsingContext(
     'Rejects --web-content-hash when web/index.html or web/flutter_bootstrap.js is incompatible',
->>>>>>> origin/master
     () async {
       final TestWebBuildCommand buildCommand = createBuildCommand();
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
@@ -318,7 +313,6 @@ void main() {
     setupFileSystemForEndToEndTest(fileSystem);
     await runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']);
 
-<<<<<<< HEAD
     expect(
       logger.statusText,
       contains(
@@ -326,27 +320,9 @@ void main() {
       ),
     );
     expect(logger.statusText, contains('with "Cache-Control: no-cache"'));
+    expect(logger.statusText, contains('When "--no-web-resources-cdn" is used'));
+    expect(logger.statusText, contains('canvaskit/**'));
   });
-=======
-      expect(
-        logger.statusText,
-        contains(
-          'Serving tip: Configure your web host to serve "index.html" and "flutter_bootstrap.js"',
-        ),
-      );
-      expect(logger.statusText, contains('with "Cache-Control: no-cache"'));
-      expect(logger.statusText, contains('When "--no-web-resources-cdn" is used'));
-      expect(logger.statusText, contains('canvaskit/**'));
-    },
-    overrides: <Type, Generator>{
-      Platform: () => fakePlatform,
-      FileSystem: () => fileSystem,
-      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-      ProcessManager: () => processManager,
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
-    },
-  );
->>>>>>> origin/master
 
   testWithoutContext('Builds successfully without --web-define', () async {
     final TestWebBuildCommand buildCommand = createBuildCommand(

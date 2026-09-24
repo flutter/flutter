@@ -35,6 +35,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 
 ColdRunner createColdRunner(
   List<FlutterDevice> flutterDevices, {
