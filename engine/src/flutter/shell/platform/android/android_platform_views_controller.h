@@ -321,6 +321,7 @@ class InMemoryPlatformViewsProvider : public PlatformViewsProvider {
 
   void SetHcppEnabled(bool enabled) override;
   void SetNextTextureId(int64_t texture_id);
+  void SetOverlayWindowForTesting(int32_t id, ANativeWindow* window);
   void Clear();
 
   size_t GetCreatedViewsCount() const;
@@ -366,6 +367,7 @@ class InMemoryPlatformViewsProvider : public PlatformViewsProvider {
   std::set<int32_t> overlay_surfaces_;
   std::map<int32_t, PlatformViewOverlay> displayed_overlays_;
   std::set<int32_t> visible_overlays_;
+  std::map<int32_t, ANativeWindow*> overlay_windows_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(InMemoryPlatformViewsProvider);
 };

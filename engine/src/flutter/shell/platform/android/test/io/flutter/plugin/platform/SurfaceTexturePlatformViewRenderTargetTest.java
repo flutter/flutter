@@ -103,4 +103,25 @@ public class SurfaceTexturePlatformViewRenderTargetTest {
     verifyNoMoreInteractions(surface);
     verifyNoMoreInteractions(surfaceTexture);
   }
+
+  @Test
+  public void getSurface_doesNotFailWhenSurfaceTextureValid() {
+    final Surface surface = mock(Surface.class);
+    when(surface.isValid()).thenReturn(true);
+    final SurfaceTexture surfaceTexture = mock(SurfaceTexture.class);
+    final SurfaceTextureEntry surfaceTextureEntry = mock(SurfaceTextureEntry.class);
+    when(surfaceTextureEntry.surfaceTexture()).thenReturn(surfaceTexture);
+    when(surfaceTexture.isReleased()).thenReturn(false);
+
+    final SurfaceTexturePlatformViewRenderTarget renderTarget =
+        new SurfaceTexturePlatformViewRenderTarget(surfaceTextureEntry) {
+          @Override
+          protected Surface createSurface() {
+            return surface;
+          }
+        };
+
+    final Surface s = renderTarget.getSurface();
+    org.junit.Assert.assertNotNull(s);
+  }
 }

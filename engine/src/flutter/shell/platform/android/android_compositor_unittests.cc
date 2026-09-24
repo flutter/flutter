@@ -47,6 +47,17 @@ class MockPlatformViewDelegate : public AndroidCompositorPlatformViewDelegate {
         PresentedOverlay{overlay_index, offset, size});
   }
 
+  ANativeWindow* GetOverlayWindow(size_t overlay_index) override {
+    get_overlay_window_calls_++;
+    return fake_overlay_window_;
+  }
+
+  void SetFakeOverlayWindow(ANativeWindow* window) {
+    fake_overlay_window_ = window;
+  }
+
+  size_t GetOverlayWindowCalls() const { return get_overlay_window_calls_; }
+
   void OnFramePresented() override { frame_presented_count_++; }
 
   const std::vector<PresentedView>& GetPresentedViews() const {
@@ -69,6 +80,8 @@ class MockPlatformViewDelegate : public AndroidCompositorPlatformViewDelegate {
   std::vector<PresentedView> presented_views_;
   std::vector<PresentedOverlay> presented_overlays_;
   size_t frame_presented_count_ = 0;
+  ANativeWindow* fake_overlay_window_ = nullptr;
+  size_t get_overlay_window_calls_ = 0;
 };
 
 }  // namespace
@@ -492,6 +505,7 @@ TEST(AndroidCompositorTest, MultiLayerPlatformViewWithOverlayDispatch) {
   EXPECT_DOUBLE_EQ(delegate->GetPresentedOverlays()[0].offset.y, 15.0);
   EXPECT_DOUBLE_EQ(delegate->GetPresentedOverlays()[0].size.width, 120.0);
   EXPECT_DOUBLE_EQ(delegate->GetPresentedOverlays()[0].size.height, 90.0);
+  EXPECT_EQ(delegate->GetOverlayWindowCalls(), 1u);
 
   EXPECT_TRUE(compositor->CollectBackingStore(&root_bs));
   EXPECT_TRUE(compositor->CollectBackingStore(&overlay_bs));

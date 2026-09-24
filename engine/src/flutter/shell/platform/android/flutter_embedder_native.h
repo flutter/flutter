@@ -910,6 +910,7 @@ class FlutterEmbedderNative {
   using RunInitializedEngineFn =
       std::function<FlutterEngineResult(FLUTTER_API_SYMBOL(FlutterEngine))>;
   void SetRunInitializedEngineFnForTesting(RunInitializedEngineFn fn);
+  ANativeWindow* GetOverlayWindowForTesting(size_t overlay_index);
 
   /// @brief Deinitializes a FlutterEngine instance via C-API
   /// FlutterEngineDeinitialize.
@@ -1275,6 +1276,8 @@ class FlutterEmbedderNative {
     void* current_egl_image = nullptr;
     void* current_egl_display = nullptr;
     std::unique_ptr<AndroidHardwareBuffer> current_buffer;
+    jobject current_image = nullptr;
+    jobject current_hardware_buffer = nullptr;
   };
 
   mutable std::mutex image_textures_mutex_;

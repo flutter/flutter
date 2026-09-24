@@ -10,7 +10,6 @@ import static io.flutter.Build.API_LEVELS;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.view.Surface;
-import androidx.annotation.RequiresApi;
 import io.flutter.view.TextureRegistry;
 import io.flutter.view.TextureRegistry.SurfaceTextureEntry;
 
@@ -99,10 +98,12 @@ public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRende
     }
   }
 
-  @RequiresApi(API_LEVELS.API_26)
   public Surface getSurface() {
     recreateSurfaceIfNeeded();
-    if (surfaceTexture == null || surfaceTexture.isReleased()) {
+    if (surfaceTexture == null) {
+      return null;
+    }
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_26 && surfaceTexture.isReleased()) {
       return null;
     }
     return surface;

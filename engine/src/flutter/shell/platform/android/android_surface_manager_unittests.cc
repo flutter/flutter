@@ -382,6 +382,17 @@ TEST(AndroidSurfaceManagerTest, OffscreenFBOLifecycleAndPool) {
   manager->DestroyOverlaySurfaces();
 }
 
+TEST(AndroidSurfaceManagerTest, GlProcResolverResolvesViaDlsym) {
+  auto manager =
+      AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_NE(manager, nullptr);
+  FlutterOpenGLRendererConfig config = {};
+  manager->PopulateGLRendererConfig(&config);
+  ASSERT_NE(config.gl_proc_resolver, nullptr);
+  void* proc = config.gl_proc_resolver(nullptr, "dlsym");
+  EXPECT_NE(proc, nullptr);
+}
+
 INSTANTIATE_TEST_SUITE_P(
     Matrix,
     AndroidSurfaceManagerMultiBackendMatrixTest,

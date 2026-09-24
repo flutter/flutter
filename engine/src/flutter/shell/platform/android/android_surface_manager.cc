@@ -6,6 +6,7 @@
 
 #include "flutter/shell/platform/android/android_surface_manager.h"
 
+#include <dlfcn.h>
 #include <algorithm>
 #include <cstring>
 
@@ -542,9 +543,13 @@ void AndroidSurfaceManager::PopulateGLRendererConfig(
   };
   config->gl_proc_resolver = [](void*, const char* name) -> void* {
 #if FML_OS_ANDROID
-    return reinterpret_cast<void*>(eglGetProcAddress(name));
+    void* proc = reinterpret_cast<void*>(eglGetProcAddress(name));
+    if (!proc) {
+      proc = dlsym(RTLD_DEFAULT, name);
+    }
+    return proc;
 #else
-    return nullptr;
+    return dlsym(RTLD_DEFAULT, name);
 #endif
   };
 }
@@ -663,8 +668,27 @@ bool AndroidSurfaceManager::BlitAndSwapOverlaySurface(
   typedef void (*PFNGLBLITFRAMEBUFFERPROC)(
       GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0,
       GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
-  static auto glBlitFramebuffer_fn = reinterpret_cast<PFNGLBLITFRAMEBUFFERPROC>(
-      eglGetProcAddress("glBlitFramebuffer"));
+  static PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer_fn = []() {
+    auto fn = reinterpret_cast<PFNGLBLITFRAMEBUFFERPROC>(
+        dlsym(RTLD_DEFAULT, "glBlitFramebuffer"));
+    if (!fn) {
+      fn = reinterpret_cast<PFNGLBLITFRAMEBUFFERPROC>(
+          eglGetProcAddress("glBlitFramebuffer"));
+    }
+    if (!fn) {
+      fn = reinterpret_cast<PFNGLBLITFRAMEBUFFERPROC>(
+          eglGetProcAddress("glBlitFramebufferEXT"));
+    }
+    if (!fn) {
+      fn = reinterpret_cast<PFNGLBLITFRAMEBUFFERPROC>(
+          eglGetProcAddress("glBlitFramebufferANGLE"));
+    }
+    if (!fn) {
+      fn = reinterpret_cast<PFNGLBLITFRAMEBUFFERPROC>(
+          eglGetProcAddress("glBlitFramebufferNV"));
+    }
+    return fn;
+  }();
 
   if (glBlitFramebuffer_fn) {
     constexpr GLenum kGLReadFramebuffer = 0x8CA8;
