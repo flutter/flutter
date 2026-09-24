@@ -987,6 +987,86 @@ public class FlutterViewTest {
   }
 
   @Test
+  @Config(minSdk = API_LEVELS.API_29)
+  public void flutterImageView_retainsHardwareBufferAcrossDrawsAndClosesOnNewImage() {
+    final ImageReader mockReader = mock(ImageReader.class);
+    when(mockReader.getMaxImages()).thenReturn(2);
+
+    final Image mockImage1 = mock(Image.class);
+    final HardwareBuffer mockBuffer1 = mock(HardwareBuffer.class);
+    when(mockBuffer1.getUsage()).thenReturn(HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
+    when(mockImage1.getHardwareBuffer()).thenReturn(mockBuffer1);
+
+    final Image mockImage2 = mock(Image.class);
+    final HardwareBuffer mockBuffer2 = mock(HardwareBuffer.class);
+    when(mockBuffer2.getUsage()).thenReturn(HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
+    when(mockImage2.getHardwareBuffer()).thenReturn(mockBuffer2);
+
+    when(mockReader.acquireLatestImage()).thenReturn(mockImage1).thenReturn(mockImage2);
+
+    final FlutterImageView imageView =
+        spy(new FlutterImageView(ctx, mockReader, FlutterImageView.SurfaceKind.overlay));
+
+    final FlutterJNI jni = mock(FlutterJNI.class);
+    imageView.attachToRenderer(new FlutterRenderer(jni));
+    doNothing().when(imageView).invalidate();
+
+    // Acquire first image and draw multiple times
+    assertTrue(imageView.acquireLatestImage());
+    final Canvas mockCanvas = mock(Canvas.class);
+    when(mockCanvas.isHardwareAccelerated()).thenReturn(true);
+    imageView.onDraw(mockCanvas);
+    imageView.onDraw(mockCanvas);
+
+    // HardwareBuffer should NOT be closed while the image is active
+    verify(mockBuffer1, org.mockito.Mockito.never()).close();
+
+    // Acquire second image: now previous HardwareBuffer should be closed
+    assertTrue(imageView.acquireLatestImage());
+    verify(mockBuffer1, times(1)).close();
+    verify(mockBuffer2, org.mockito.Mockito.never()).close();
+
+    // Draw second image
+    imageView.onDraw(mockCanvas);
+
+    // Detach from renderer closes second HardwareBuffer
+    imageView.detachFromRenderer();
+    verify(mockBuffer2, times(1)).close();
+  }
+
+  @Test
+  @Config(minSdk = API_LEVELS.API_29)
+  public void flutterImageView_fallsBackToPlanesWhenHardwareBufferIsNull() {
+    final ImageReader mockReader = mock(ImageReader.class);
+    when(mockReader.getMaxImages()).thenReturn(2);
+
+    final Image mockImage = mock(Image.class);
+    when(mockImage.getHardwareBuffer()).thenReturn(null);
+    final Image.Plane mockPlane = mock(Image.Plane.class);
+    when(mockPlane.getBuffer()).thenReturn(java.nio.ByteBuffer.allocateDirect(16));
+    when(mockPlane.getRowStride()).thenReturn(4);
+    when(mockPlane.getPixelStride()).thenReturn(4);
+    when(mockImage.getPlanes()).thenReturn(new Image.Plane[] {mockPlane});
+    when(mockImage.getHeight()).thenReturn(1);
+    when(mockReader.acquireLatestImage()).thenReturn(mockImage);
+
+    final FlutterImageView imageView =
+        spy(new FlutterImageView(ctx, mockReader, FlutterImageView.SurfaceKind.overlay));
+
+    final FlutterJNI jni = mock(FlutterJNI.class);
+    imageView.attachToRenderer(new FlutterRenderer(jni));
+    doNothing().when(imageView).invalidate();
+
+    assertTrue(imageView.acquireLatestImage());
+    final Canvas mockCanvas = mock(Canvas.class);
+    when(mockCanvas.isHardwareAccelerated()).thenReturn(true);
+
+    // onDraw must not throw NullPointerException despite null HardwareBuffer
+    imageView.onDraw(mockCanvas);
+    verify(mockImage, times(1)).getPlanes();
+  }
+
+  @Test
   public void flutterImageView_workaroundWithOnePixelWhenResizeWithZero() {
     final ImageReader mockReader = mock(ImageReader.class);
     when(mockReader.getMaxImages()).thenReturn(2);
