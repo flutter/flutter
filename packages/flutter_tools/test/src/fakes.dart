@@ -1468,7 +1468,7 @@ class DelegatingToolContext extends Fake implements ToolContext {
   final UserMessages? _userMessages;
 
   @override
-  Artifacts get artifacts => _artifacts ?? globals.artifacts!;
+  Artifacts get artifacts => _artifacts ?? globals.artifacts ?? Artifacts.test();
 
   @override
   BotDetector get botDetector => _botDetector ?? globals.botDetector;
@@ -1636,31 +1636,4 @@ class FakeAppleContext extends Fake implements AppleContext {
   @override
   late final XcodeProjectInterpreter xcodeProjectInterpreter =
       _xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter();
-}
-
-class TestToolContext extends Fake implements ToolContext {
-  TestToolContext({
-    this._artifacts,
-    FileSystem? fileSystem,
-    this._logger,
-    this._processManager,
-    this._processInfo,
-  }) : _fs = fileSystem;
-
-  final Artifacts? _artifacts;
-  final FileSystem? _fs;
-  final Logger? _logger;
-  final ProcessManager? _processManager;
-  final ProcessInfo? _processInfo;
-
-  @override
-  Artifacts get artifacts => _artifacts ?? globals.artifacts!;
-  @override
-  FileSystem get fs => _fs ?? globals.fs;
-  @override
-  Logger get logger => _logger ?? globals.logger;
-  @override
-  ProcessManager get processManager => _processManager ?? globals.processManager;
-  @override
-  ProcessInfo get processInfo => _processInfo ?? globals.processInfo;
 }

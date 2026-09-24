@@ -22,6 +22,7 @@ import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -85,6 +86,30 @@ HotRunner createHotRunner(
   Terminal? terminal,
   Xcode? xcode,
 }) {
+  final ToolContext(
+    artifacts: contextArtifacts,
+    cache: contextCache,
+    config: contextConfig,
+    fs: contextFs,
+    logger: contextLogger,
+    os: contextOs,
+    outputPreferences: contextOutputPreferences,
+    platform: contextPlatform,
+    processManager: contextProcessManager,
+    terminal: contextTerminal,
+  ) = DelegatingToolContext(
+    artifacts: artifacts,
+    cache: cache,
+    config: config,
+    fs: fileSystem,
+    logger: logger,
+    os: osUtils,
+    outputPreferences: outputPreferences,
+    platform: platform,
+    processManager: processManager,
+    terminal: terminal as AnsiTerminal?,
+  );
+
   if (reassembleHelper != null) {
     return HotRunner(
       flutterDevices,
@@ -92,33 +117,33 @@ HotRunner createHotRunner(
       target: target,
       analytics: analytics,
       applicationBinary: applicationBinary,
-      artifacts: artifacts ?? globals.artifacts,
+      artifacts: contextArtifacts,
       benchmarkMode: benchmarkMode,
       buildSystem: buildSystem,
       buildTargets: buildTargets ?? const BuildTargetsImpl(),
-      cache: cache ?? globals.cache,
+      cache: contextCache,
       commandHelp: commandHelp,
-      config: config ?? globals.config,
+      config: contextConfig,
       dartBuilder: dartBuilder,
       dillOutputPath: dillOutputPath,
-      fileSystem: fileSystem ?? globals.fs,
+      fileSystem: contextFs,
       flutterVersion: flutterVersion,
       hostIsIde: hostIsIde,
       hotRunnerConfig: hotRunnerConfig,
-      logger: logger ?? globals.logger,
+      logger: contextLogger,
       machine: machine,
       nativeAssetsYamlFile: nativeAssetsYamlFile,
-      osUtils: osUtils ?? globals.os,
-      outputPreferences: outputPreferences ?? globals.outputPreferences,
-      platform: platform ?? globals.platform,
-      processManager: processManager ?? globals.processManager,
+      osUtils: contextOs,
+      outputPreferences: contextOutputPreferences,
+      platform: contextPlatform,
+      processManager: contextProcessManager,
       projectFileInvalidator: projectFileInvalidator,
       projectRootPath: projectRootPath,
       reassembleHelper: reassembleHelper,
       reloadSourcesHelper: reloadSourcesHelper,
       stayResident: stayResident,
       stopwatchFactory: stopwatchFactory,
-      terminal: terminal ?? globals.terminal,
+      terminal: contextTerminal,
       xcode: xcode,
     );
   }
@@ -128,32 +153,32 @@ HotRunner createHotRunner(
     target: target,
     analytics: analytics,
     applicationBinary: applicationBinary,
-    artifacts: artifacts ?? globals.artifacts,
+    artifacts: contextArtifacts,
     benchmarkMode: benchmarkMode,
     buildSystem: buildSystem,
     buildTargets: buildTargets ?? const BuildTargetsImpl(),
-    cache: cache ?? globals.cache,
+    cache: contextCache,
     commandHelp: commandHelp,
-    config: config ?? globals.config,
+    config: contextConfig,
     dartBuilder: dartBuilder,
     dillOutputPath: dillOutputPath,
-    fileSystem: fileSystem ?? globals.fs,
+    fileSystem: contextFs,
     flutterVersion: flutterVersion,
     hostIsIde: hostIsIde,
     hotRunnerConfig: hotRunnerConfig,
-    logger: logger ?? globals.logger,
+    logger: contextLogger,
     machine: machine,
     nativeAssetsYamlFile: nativeAssetsYamlFile,
-    osUtils: osUtils ?? globals.os,
-    outputPreferences: outputPreferences ?? globals.outputPreferences,
-    platform: platform ?? globals.platform,
-    processManager: processManager ?? globals.processManager,
+    osUtils: contextOs,
+    outputPreferences: contextOutputPreferences,
+    platform: contextPlatform,
+    processManager: contextProcessManager,
     projectFileInvalidator: projectFileInvalidator,
     projectRootPath: projectRootPath,
     reloadSourcesHelper: reloadSourcesHelper,
     stayResident: stayResident,
     stopwatchFactory: stopwatchFactory,
-    terminal: terminal ?? globals.terminal,
+    terminal: contextTerminal,
     xcode: xcode,
   );
 }
@@ -187,32 +212,56 @@ ColdRunner createColdRunner(
   bool traceStartup = false,
   Xcode? xcode,
 }) {
+  final ToolContext(
+    artifacts: contextArtifacts,
+    cache: contextCache,
+    config: contextConfig,
+    fs: contextFs,
+    logger: contextLogger,
+    os: contextOs,
+    outputPreferences: contextOutputPreferences,
+    platform: contextPlatform,
+    processManager: contextProcessManager,
+    terminal: contextTerminal,
+  ) = DelegatingToolContext(
+    artifacts: artifacts,
+    cache: cache,
+    config: config,
+    fs: fileSystem,
+    logger: logger,
+    os: osUtils,
+    outputPreferences: outputPreferences,
+    platform: platform,
+    processManager: processManager,
+    terminal: terminal as AnsiTerminal?,
+  );
+
   return ColdRunner(
     flutterDevices,
     debuggingOptions: debuggingOptions,
     target: target,
     analytics: analytics,
     applicationBinary: applicationBinary,
-    artifacts: artifacts ?? globals.artifacts,
+    artifacts: contextArtifacts,
     awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
     buildSystem: buildSystem,
     buildTargets: buildTargets,
-    cache: cache ?? globals.cache,
+    cache: contextCache,
     commandHelp: commandHelp,
-    config: config ?? globals.config,
+    config: contextConfig,
     dartBuilder: dartBuilder,
     dillOutputPath: dillOutputPath,
-    fileSystem: fileSystem ?? globals.fs,
+    fileSystem: contextFs,
     flutterVersion: flutterVersion,
-    logger: logger ?? globals.logger,
+    logger: contextLogger,
     machine: machine,
-    osUtils: osUtils ?? globals.os,
-    outputPreferences: outputPreferences ?? globals.outputPreferences,
-    platform: platform ?? globals.platform,
-    processManager: processManager ?? globals.processManager,
+    osUtils: contextOs,
+    outputPreferences: contextOutputPreferences,
+    platform: contextPlatform,
+    processManager: contextProcessManager,
     projectRootPath: projectRootPath,
     stayResident: stayResident,
-    terminal: terminal ?? globals.terminal,
+    terminal: contextTerminal,
     traceStartup: traceStartup,
     xcode: xcode,
   );
@@ -1502,12 +1551,8 @@ flutter:
     () => testbed.run(() async {
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         FakeDevice(targetPlatform: TargetPlatform.web_javascript),
-        artifacts: Artifacts.test(),
+        toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
         buildInfo: BuildInfo.profile,
-        fileSystem: globals.fs,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        processManager: FakeProcessManager.any(),
         target: 'lib/main.dart',
       );
 
@@ -1884,17 +1929,13 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                artifacts: globals.artifacts!,
+                toolContext: DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
                   treeShakeIcons: false,
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                fileSystem: globals.fs,
-                logger: BufferLogger.test(),
-                platform: FakePlatform(),
-                processManager: FakeProcessManager.any(),
                 target: null,
               )).generator
               as DefaultResidentCompiler?;
@@ -1940,7 +1981,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                artifacts: globals.artifacts!,
+                toolContext: DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1948,10 +1989,6 @@ flutter:
                   extraFrontEndOptions: <String>['--enable-experiment=non-nullable'],
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                fileSystem: globals.fs,
-                logger: BufferLogger.test(),
-                platform: FakePlatform(),
-                processManager: FakeProcessManager.any(),
                 target: null,
               )).generator
               as DefaultResidentCompiler?;
@@ -1997,7 +2034,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                artifacts: globals.artifacts!,
+                toolContext: DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -2005,10 +2042,6 @@ flutter:
                   extraFrontEndOptions: <String>[],
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                fileSystem: globals.fs,
-                logger: BufferLogger.test(),
-                platform: FakePlatform(),
-                processManager: FakeProcessManager.any(),
                 target: null,
               )).generator
               as DefaultResidentCompiler?;
@@ -2034,7 +2067,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                artifacts: globals.artifacts!,
+                toolContext: DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -2043,10 +2076,6 @@ flutter:
                   initializeFromDill: '/foo/bar.dill',
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                fileSystem: globals.fs,
-                logger: BufferLogger.test(),
-                platform: FakePlatform(),
-                processManager: FakeProcessManager.any(),
                 target: null,
               )).generator
               as DefaultResidentCompiler?;
@@ -2070,7 +2099,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                artifacts: globals.artifacts!,
+                toolContext: DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -2079,10 +2108,6 @@ flutter:
                   assumeInitializeFromDillUpToDate: true,
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                fileSystem: globals.fs,
-                logger: BufferLogger.test(),
-                platform: FakePlatform(),
-                processManager: FakeProcessManager.any(),
                 target: null,
               )).generator
               as DefaultResidentCompiler?;
@@ -2105,7 +2130,7 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                artifacts: globals.artifacts!,
+                toolContext: DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -2113,10 +2138,6 @@ flutter:
                   frontendServerStarterPath: '/foo/bar/frontend_server_starter.dart',
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                fileSystem: globals.fs,
-                logger: BufferLogger.test(),
-                platform: FakePlatform(),
-                processManager: FakeProcessManager.any(),
                 target: null,
               )).generator
               as DefaultResidentCompiler?;

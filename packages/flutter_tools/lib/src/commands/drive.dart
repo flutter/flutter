@@ -16,10 +16,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
-import '../base/signals.dart';
 import '../base/terminal.dart';
-import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
@@ -28,6 +25,7 @@ import '../device.dart';
 import '../drive/drive_service.dart';
 import '../drive/import_validator.dart';
 import '../drive/web_driver_service.dart' show Browser;
+import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart'
@@ -58,12 +56,13 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand({
+    required ToolContext toolContext,
     @visibleForTesting this._flutterDriverFactory,
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
-    required super.toolContext,
     super.verboseHelp = false,
-  }) {
+  }) : _toolContext = toolContext,
+       _fsUtils = FileSystemUtils(fileSystem: toolContext.fs, platform: toolContext.platform) {
     requiresPubspecYaml();
     addEnableExperimentation(hide: !verboseHelp);
 
@@ -178,8 +177,6 @@ class DriveCommand extends RunCommandBase {
       );
   }
 
-  ToolContext get _toolContext => toolContext!;
-
   static const _kKeepAppRunning = 'keep-app-running';
   static const _kUseExistingApp = 'use-existing-app';
 
@@ -198,6 +195,12 @@ class DriveCommand extends RunCommandBase {
   }
 
   FlutterDriverFactory? _flutterDriverFactory;
+  final FileSystemUtils _fsUtils;
+  final ToolContext _toolContext;
+
+  @override
+  ToolContext get toolContext => _toolContext;
+
   Timer? timeoutTimer;
   Map<ProcessSignal, Object>? screenshotTokens;
 
@@ -239,14 +242,13 @@ class DriveCommand extends RunCommandBase {
   // change it to be enabled.
   @override
   Future<bool> get disablePortPublication async {
-    final Logger logger = _toolContext.logger;
     final ArgResults? localArgResults = argResults;
     final Device? device = await targetedDevice;
     final bool isWirelessIOSDevice = device is IOSDevice && device.isWirelesslyConnected;
     if (isWirelessIOSDevice &&
         localArgResults != null &&
         !localArgResults.wasParsed('publish-port')) {
-      logger.printTrace(
+      _toolContext.logger.printTrace(
         'A wireless iOS device is being used. Changing `publish-port` to be enabled.',
       );
       return false;
@@ -256,15 +258,13 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<void> validateCommand() async {
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     if (userIdentifier != null) {
       final Device? device = await findTargetDevice();
       if (device is! AndroidDevice) {
         throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
       }
     }
-
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
 
     // Ensure host-side flutter_driver test scripts do not import device-side
     // libraries (e.g. dart:ui, package:flutter, package:flutter_test).
@@ -305,16 +305,12 @@ class DriveCommand extends RunCommandBase {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(
-      :Artifacts artifacts,
       :FileSystem fs,
       :Logger logger,
-      :OutputPreferences outputPreferences,
       :Platform platform,
-      :ProcessUtils processUtils,
-      :SystemClock systemClock,
-      :AnsiTerminal terminal,
+      :Terminal terminal,
+      :OutputPreferences outputPreferences,
     ) = _toolContext;
-
     final String? testFile = _getTestFile();
     if (testFile == null) {
       throwToolExit(null);
@@ -348,18 +344,10 @@ class DriveCommand extends RunCommandBase {
     final web = webDevServerConfig != null;
 
     _flutterDriverFactory ??= FlutterDriverFactory(
-      applicationPackageFactory: ApplicationPackageFactory.instance!,
-      dartSdkPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
-      devtoolsLauncher: DevtoolsLauncher.instance!,
-      fileSystem: fs,
-      logger: logger,
-      outputPreferences: outputPreferences,
-      platform: platform,
-      processUtils: processUtils,
-      terminal: terminal,
       toolContext: _toolContext,
-      analytics: analytics,
-      systemClock: systemClock,
+      applicationPackageFactory: ApplicationPackageFactory.instance!,
+      dartSdkPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+      devtoolsLauncher: DevtoolsLauncher.instance!,
     );
     final File packageConfigFile = findPackageConfigFileOrDefault(fs.currentDirectory);
 
@@ -392,6 +380,7 @@ class DriveCommand extends RunCommandBase {
             if (traceStartup) 'trace-startup': traceStartup,
             if (web) 'no-launch-chrome': true,
           },
+          webDefines: extractWebDefines(),
         );
       } else {
         final Uri? uri = Uri.tryParse(stringArg(_kUseExistingApp)!);
@@ -488,15 +477,12 @@ class DriveCommand extends RunCommandBase {
   }
 
   void _registerScreenshotCallbacks(Device device, Directory screenshotDir) {
-    final Logger logger = _toolContext.logger;
-    final Signals signals = _toolContext.signals;
-
-    logger.printTrace('Registering signal handlers...');
+    _toolContext.logger.printTrace('Registering signal handlers...');
     final tokens = <ProcessSignal, Object>{};
     for (final ProcessSignal signal in signalsToHandle) {
-      tokens[signal] = signals.addHandler(signal, (ProcessSignal signal) {
+      tokens[signal] = _toolContext.signals.addHandler(signal, (ProcessSignal signal) {
         _unregisterScreenshotCallbacks();
-        logger.printError('Caught $signal');
+        _toolContext.logger.printError('Caught $signal');
         return _takeScreenshot(device, screenshotDir);
       });
     }
@@ -513,22 +499,17 @@ class DriveCommand extends RunCommandBase {
   }
 
   void _unregisterScreenshotCallbacks() {
-    final Logger logger = _toolContext.logger;
-    final Signals signals = _toolContext.signals;
-
     if (screenshotTokens != null) {
-      logger.printTrace('Unregistering signal handlers...');
+      _toolContext.logger.printTrace('Unregistering signal handlers...');
       for (final MapEntry<ProcessSignal, Object> entry in screenshotTokens!.entries) {
-        signals.removeHandler(entry.key, entry.value);
+        _toolContext.signals.removeHandler(entry.key, entry.value);
       }
     }
     timeoutTimer?.cancel();
   }
 
   String? _getTestFile() {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     if (argResults!['driver'] != null) {
       return stringArg('driver');
     }
@@ -571,19 +552,16 @@ class DriveCommand extends RunCommandBase {
   }
 
   Future<void> _takeScreenshot(Device device, Directory outputDirectory) async {
-    final FileSystemUtils fsUtils = _toolContext.fileSystemUtils;
-    final Logger logger = _toolContext.logger;
-
     if (!device.supportsScreenshot) {
       return;
     }
     try {
       outputDirectory.createSync(recursive: true);
-      final File outputFile = fsUtils.getUniqueFile(outputDirectory, 'drive', 'png');
+      final File outputFile = _fsUtils.getUniqueFile(outputDirectory, 'drive', 'png');
       await device.takeScreenshot(outputFile);
-      logger.printStatus('Screenshot written to ${outputFile.path}');
+      _toolContext.logger.printStatus('Screenshot written to ${outputFile.path}');
     } on Exception catch (error) {
-      logger.printError('Error taking screenshot: $error');
+      _toolContext.logger.printError('Error taking screenshot: $error');
     }
   }
 }
