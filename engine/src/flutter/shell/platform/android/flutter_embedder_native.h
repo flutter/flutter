@@ -900,6 +900,7 @@ class FlutterEmbedderNative {
   void SetSendPlatformMessageFnForTesting(SendPlatformMessageFn fn);
   void SetSendPlatformMessageResponseFnForTesting(
       SendPlatformMessageResponseFn fn);
+  size_t GetPendingPlatformMessagesCountForTesting() const;
 
   using DeinitializeEngineFn =
       std::function<FlutterEngineResult(FLUTTER_API_SYMBOL(FlutterEngine))>;
@@ -1300,6 +1301,17 @@ class FlutterEmbedderNative {
                              const FlutterPlatformMessageResponseHandle*>
       response_handles_;
   mutable std::atomic<int32_t> next_response_id_{1};
+
+  struct PendingPlatformMessage {
+    std::string channel;
+    std::vector<uint8_t> message;
+    int32_t response_id = 0;
+  };
+
+  mutable std::mutex pending_messages_mutex_;
+  mutable std::vector<PendingPlatformMessage> pending_platform_messages_;
+
+  void FlushPendingPlatformMessages();
 
   void AttachWindowMetricsCallbacks();
 

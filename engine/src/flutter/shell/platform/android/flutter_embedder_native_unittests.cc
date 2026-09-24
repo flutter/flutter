@@ -8360,6 +8360,157 @@ TEST(FlutterEmbedderNativeImageTextureTest, DoubleBufferingKeepsImageAlive) {
   native_instance->UnregisterImageTexture(kTextureId);
 }
 
+TEST(FlutterEmbedderNativePlatformMessageTest,
+     SendPlatformMessageQueuesBeforeLaunch) {
+  auto native_instance = std::make_unique<FlutterEmbedderNative>();
+  ASSERT_NE(native_instance, nullptr);
+
+  EXPECT_EQ(native_instance->GetPendingPlatformMessagesCountForTesting(), 0u);
+
+  const std::string payload = "en_US";
+  FlutterEngineResult result = native_instance->SendPlatformMessage(
+      "flutter/localization", reinterpret_cast<const uint8_t*>(payload.data()),
+      payload.size(), 0);
+  EXPECT_EQ(result, kSuccess);
+  EXPECT_EQ(native_instance->GetPendingPlatformMessagesCountForTesting(), 1u);
+
+  const std::string payload2 = "true";
+  result = native_instance->SendPlatformMessage(
+      "flutter/settings", reinterpret_cast<const uint8_t*>(payload2.data()),
+      payload2.size(), 0);
+  EXPECT_EQ(result, kSuccess);
+  EXPECT_EQ(native_instance->GetPendingPlatformMessagesCountForTesting(), 2u);
+}
+
+TEST(FlutterEmbedderNativePlatformMessageTest,
+     LaunchFlushesPendingPlatformMessages) {
+  auto native_instance = std::make_unique<FlutterEmbedderNative>();
+  ASSERT_NE(native_instance, nullptr);
+
+  const std::string loc_payload = "en_US";
+  native_instance->SendPlatformMessage(
+      "flutter/localization",
+      reinterpret_cast<const uint8_t*>(loc_payload.data()), loc_payload.size(),
+      0);
+
+  const std::string settings_payload = "settings_data";
+  native_instance->SendPlatformMessage(
+      "flutter/settings",
+      reinterpret_cast<const uint8_t*>(settings_payload.data()),
+      settings_payload.size(), 0);
+
+  const std::string custom_payload = "custom_data";
+  native_instance->SendPlatformMessage(
+      "custom/channel", reinterpret_cast<const uint8_t*>(custom_payload.data()),
+      custom_payload.size(), 42);
+
+  EXPECT_EQ(native_instance->GetPendingPlatformMessagesCountForTesting(), 3u);
+
+  auto mock_engine =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0xABCD);
+
+  native_instance->SetInitializeEngineFnForTesting(
+      [&](const FlutterRendererConfig* config, const FlutterProjectArgs* args,
+          void* user_data, FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        *engine_out = mock_engine;
+        return kSuccess;
+      });
+
+  native_instance->SetRunInitializedEngineFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+        EXPECT_EQ(engine, mock_engine);
+        return kSuccess;
+      });
+
+  native_instance->SetDeinitializeEngineFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+        EXPECT_EQ(engine, mock_engine);
+        return kSuccess;
+      });
+
+  struct DispatchedMessage {
+    std::string channel;
+    std::string payload;
+    int32_t response_id;
+  };
+  std::vector<DispatchedMessage> received;
+  native_instance->SetSendPlatformMessageFnForTesting(
+      [&](const std::string& ch, const uint8_t* msg, size_t sz,
+          int32_t resp_id) {
+        received.push_back(
+            {ch, std::string(reinterpret_cast<const char*>(msg), sz), resp_id});
+        return kSuccess;
+      });
+
+  FlutterEngineResult launch_result = native_instance->Launch(
+      "customMain", "entrypoint_url", {"--arg1"}, 12345);
+  EXPECT_EQ(launch_result, kSuccess);
+
+  EXPECT_EQ(native_instance->GetPendingPlatformMessagesCountForTesting(), 0u);
+  ASSERT_EQ(received.size(), 3u);
+  EXPECT_EQ(received[0].channel, "flutter/localization");
+  EXPECT_EQ(received[0].payload, loc_payload);
+  EXPECT_EQ(received[0].response_id, 0);
+
+  EXPECT_EQ(received[1].channel, "flutter/settings");
+  EXPECT_EQ(received[1].payload, settings_payload);
+  EXPECT_EQ(received[1].response_id, 0);
+
+  EXPECT_EQ(received[2].channel, "custom/channel");
+  EXPECT_EQ(received[2].payload, custom_payload);
+  EXPECT_EQ(received[2].response_id, 42);
+}
+
+TEST(FlutterEmbedderNativePlatformMessageTest,
+     DestructorCleansUpPendingMessagesWithResponseId) {
+  auto mock_jvm = std::make_shared<MockJvmInvoker>();
+  EXPECT_CALL(*mock_jvm, HandlePlatformMessageResponse(42, nullptr, 0))
+      .Times(1);
+  EXPECT_CALL(*mock_jvm, HandlePlatformMessageResponse(99, nullptr, 0))
+      .Times(1);
+
+  {
+    auto native_instance = std::make_unique<FlutterEmbedderNative>(mock_jvm);
+    ASSERT_NE(native_instance, nullptr);
+
+    native_instance->SendPlatformMessage("flutter/localization", nullptr, 0, 0);
+    native_instance->SendPlatformMessage("custom/reply1", nullptr, 0, 42);
+    native_instance->SendPlatformMessage("custom/reply2", nullptr, 0, 99);
+    EXPECT_EQ(native_instance->GetPendingPlatformMessagesCountForTesting(), 3u);
+  }
+}
+
+TEST(FlutterEmbedderNativePlatformMessageTest,
+     ConcurrentSendPlatformMessageBeforeLaunch) {
+  auto native_instance = std::make_unique<FlutterEmbedderNative>();
+  ASSERT_NE(native_instance, nullptr);
+
+  constexpr int kThreads = 8;
+  constexpr int kMessagesPerThread = 50;
+  std::vector<std::thread> threads;
+  threads.reserve(kThreads);
+
+  for (int t = 0; t < kThreads; ++t) {
+    threads.emplace_back([&native_instance, t]() {
+      for (int i = 0; i < kMessagesPerThread; ++i) {
+        std::string payload =
+            "msg_" + std::to_string(t) + "_" + std::to_string(i);
+        native_instance->SendPlatformMessage(
+            "channel_" + std::to_string(t),
+            reinterpret_cast<const uint8_t*>(payload.data()), payload.size(),
+            0);
+      }
+    });
+  }
+
+  for (auto& th : threads) {
+    th.join();
+  }
+
+  EXPECT_EQ(native_instance->GetPendingPlatformMessagesCountForTesting(),
+            static_cast<size_t>(kThreads * kMessagesPerThread));
+}
+
 }  // namespace testing
 }  // namespace android
 }  // namespace flutter

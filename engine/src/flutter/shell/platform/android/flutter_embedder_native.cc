@@ -1218,6 +1218,16 @@ FlutterEmbedderNative::~FlutterEmbedderNative() {
     CollectAOTData(aot_data_);
     aot_data_ = nullptr;
   }
+  {
+    std::lock_guard<std::mutex> lock(pending_messages_mutex_);
+    for (const auto& msg : pending_platform_messages_) {
+      if (msg.response_id != 0 && jvm_invoker_) {
+        jvm_invoker_->HandlePlatformMessageResponse(msg.response_id, nullptr,
+                                                    0);
+      }
+    }
+    pending_platform_messages_.clear();
+  }
   std::lock_guard<std::mutex> pres_lock(presentation_mutex_);
   std::lock_guard<std::mutex> surf_lock(surface_mutex_);
   if (native_window_) {
@@ -3415,6 +3425,8 @@ FlutterEngineResult FlutterEmbedderNative::Launch(
     return run_result;
   }
 
+  FlushPendingPlatformMessages();
+
   if (!initialize_engine_fn_) {
     static FlutterEngineProcTable s_procs = []() {
       FlutterEngineProcTable procs = {};
@@ -3516,6 +3528,7 @@ std::unique_ptr<FlutterEmbedderNative> FlutterEmbedderNative::SpawnChild(
       }
       child->RegisterImageDecoder(spawned_engine);
       child->RunInitializedEngine(spawned_engine);
+      child->FlushPendingPlatformMessages();
     }
   } else if (GetRouter()) {
     int64_t spawned_id =
@@ -3747,20 +3760,23 @@ FlutterEngineResult FlutterEmbedderNative::SendPlatformMessage(
   TRACE_EVENT1("flutter", "FlutterEmbedderNative::SendPlatformMessage",
                "channel", channel.c_str());
 
-  if (send_platform_message_fn_) {
-    return send_platform_message_fn_(channel, message, size, response_id);
-  }
-
   auto engine = GetEngine();
   if (!engine) {
-    std::vector<uint8_t> data;
+    PendingPlatformMessage pending;
+    pending.channel = channel;
     if (message && size > 0) {
-      data.assign(message, message + size);
+      pending.message.assign(message, message + size);
     }
-    if (jni_router_) {
-      jni_router_->RoutePlatformMessage(channel, data, response_id);
+    pending.response_id = response_id;
+    {
+      std::lock_guard<std::mutex> lock(pending_messages_mutex_);
+      pending_platform_messages_.push_back(std::move(pending));
     }
     return kSuccess;
+  }
+
+  if (send_platform_message_fn_) {
+    return send_platform_message_fn_(channel, message, size, response_id);
   }
 
   FlutterPlatformMessage msg = {};
@@ -3883,6 +3899,25 @@ FlutterEmbedderNative::ReleaseResponseHandle(int32_t response_id) const {
     return handle;
   }
   return nullptr;
+}
+
+void FlutterEmbedderNative::FlushPendingPlatformMessages() {
+  std::vector<PendingPlatformMessage> messages_to_flush;
+  {
+    std::lock_guard<std::mutex> lock(pending_messages_mutex_);
+    messages_to_flush.swap(pending_platform_messages_);
+  }
+  for (const auto& msg : messages_to_flush) {
+    SendPlatformMessage(msg.channel,
+                        msg.message.empty() ? nullptr : msg.message.data(),
+                        msg.message.size(), msg.response_id);
+  }
+}
+
+size_t FlutterEmbedderNative::GetPendingPlatformMessagesCountForTesting()
+    const {
+  std::lock_guard<std::mutex> lock(pending_messages_mutex_);
+  return pending_platform_messages_.size();
 }
 
 void FlutterEmbedderNative::RegisterSurfaceTexture(
