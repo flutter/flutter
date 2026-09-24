@@ -1,0 +1,77 @@
+import 'package:pigeon/pigeon.dart';
+
+// This file is where you define the interface between Dart code and host
+// platform code. After editing this file, run
+//   dart run pigeon --input pigeon/messages.dart
+// to re-generate all of the output files.
+//
+// If you add new platforms to your plugin, add the corresponding output
+// options in the PigeonOptions below.
+//
+// To learn more about Pigeon, see https://pub.dev/packages/pigeon.
+
+@ConfigurePigeon(
+  PigeonOptions(
+    dartPackageName: '{{projectName}}',
+    dartOut: 'lib/src/messages.g.dart',
+{{#windows}}
+    cppHeaderOut: 'windows/messages.g.h',
+    cppSourceOut: 'windows/messages.g.cpp',
+    cppOptions: CppOptions(namespace: '{{projectName}}'),
+{{/windows}}
+{{#linux}}
+    gobjectHeaderOut: 'linux/messages.g.h',
+    gobjectSourceOut: 'linux/messages.g.cc',
+{{/linux}}
+{{#android}}
+{{#withJava}}
+    javaOut: 'android/src/main/java/{{androidIdentifierPosixPath}}/Messages.java',
+    javaOptions: JavaOptions(
+      className: 'Messages',
+      package: '{{androidIdentifier}}',
+    ),
+{{/withJava}}
+{{^withJava}}
+    kotlinOut:
+        'android/src/main/kotlin/{{androidIdentifierPosixPath}}/Messages.g.kt',
+    kotlinOptions: KotlinOptions(package: '{{androidIdentifier}}'),
+{{/withJava}}
+{{/android}}
+{{#darwin}}
+    swiftOut:
+{{#withSwiftPackageManager}}
+      'darwin/{{projectName}}/Sources/{{projectName}}/Messages.g.swift',
+{{/withSwiftPackageManager}}
+{{^withSwiftPackageManager}}
+      'darwin/Classes/Messages.g.swift',
+{{/withSwiftPackageManager}}
+{{/darwin}}
+{{^darwin}}
+{{#iosOrMacOS}}
+    swiftOut: [
+{{#ios}}
+{{#withSwiftPackageManager}}
+      'ios/{{projectName}}/Sources/{{projectName}}/Messages.g.swift',
+{{/withSwiftPackageManager}}
+{{^withSwiftPackageManager}}
+      'ios/Classes/Messages.g.swift',
+{{/withSwiftPackageManager}}
+{{/ios}}
+{{#macos}}
+{{#withSwiftPackageManager}}
+      'macos/{{projectName}}/Sources/{{projectName}}/Messages.g.swift',
+{{/withSwiftPackageManager}}
+{{^withSwiftPackageManager}}
+      'macos/Classes/Messages.g.swift',
+{{/withSwiftPackageManager}}
+{{/macos}}
+    ],
+{{/iosOrMacOS}}
+{{/darwin}}
+  ),
+)
+@HostApi()
+abstract class {{pluginClass}}Api {
+  /// Returns the system version of the host platform.
+  String getPlatformVersion();
+}

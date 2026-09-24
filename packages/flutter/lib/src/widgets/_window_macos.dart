@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:convert';
+library;
+
 import 'dart:convert' show utf8;
 import 'dart:ffi' hide Size;
 import 'dart:io';
