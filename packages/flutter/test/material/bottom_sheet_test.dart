@@ -3307,9 +3307,11 @@ void main() {
         expect(builderMaterialColor, Colors.red);
         expect(tester.getSize(find.byKey(contentKey)), const Size(300.0, 100.0));
         expect(tester.getSize(find.byType(BottomSheet)), const Size(800.0, 100.0));
-        final Finder outerMaterial = find
-            .descendant(of: find.byType(BottomSheet), matching: find.byType(Material))
-            .first;
+        final Finder outerMaterial = find.descendant(
+          of: find.byType(BottomSheet),
+          matching: find.byType(Material),
+        );
+        expect(outerMaterial, findsOneWidget);
         expect(tester.getSize(outerMaterial), const Size(300.0, 220.0));
         expect(tester.getSemantics(find.byType(BottomSheet)).rect.height, 100.0);
 
@@ -3323,6 +3325,76 @@ void main() {
         semantics.dispose();
       },
     );
+
+    testWidgets(
+      'reclips content and semantics when enclosing Align heightFactor changes without animationController',
+      (WidgetTester tester) async {
+        final SemanticsHandle semantics = tester.ensureSemantics();
+        try {
+          Widget buildWithHeightFactor(double heightFactor, Alignment alignment) {
+            return MaterialApp(
+              home: Scaffold(
+                body: Align(
+                  alignment: alignment,
+                  heightFactor: heightFactor,
+                  child: BottomSheet(
+                    enableDrag: false,
+                    bottomInset: 120.0,
+                    backgroundColor: Colors.red,
+                    onClosing: () {},
+                    builder: (BuildContext context) => Semantics(
+                      container: true,
+                      child: const SizedBox(width: 300.0, height: 100.0, child: Text('Content')),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+
+          await tester.pumpWidget(buildWithHeightFactor(1.0, Alignment.topCenter));
+          expect(tester.getSemantics(find.text('Content')).rect.height, 100.0);
+
+          await tester.pumpWidget(buildWithHeightFactor(0.4, Alignment.topCenter));
+          expect(tester.getSemantics(find.text('Content')).rect.height, 40.0);
+
+          // Bottom-aligned heightFactor < 1.0 does not shift the bottom edge into bottomInset.
+          await tester.pumpWidget(buildWithHeightFactor(0.4, Alignment.bottomCenter));
+          expect(tester.getSemantics(find.text('Content')).rect.height, 100.0);
+        } finally {
+          semantics.dispose();
+        }
+      },
+    );
+
+    testWidgets('Material 2 default canvasColor is exposed via Material.of(context).color', (
+      WidgetTester tester,
+    ) async {
+      Color? builderMaterialColor;
+      final m2Theme = ThemeData(useMaterial3: false, canvasColor: Colors.amber);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: m2Theme,
+          home: Scaffold(
+            body: BottomSheet(
+              enableDrag: false,
+              bottomInset: 100.0,
+              onClosing: () {},
+              builder: (BuildContext context) {
+                return Builder(
+                  builder: (BuildContext innerContext) {
+                    builderMaterialColor = Material.of(innerContext).color;
+                    return const SizedBox(height: 80.0);
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(builderMaterialColor, Colors.amber);
+    });
 
     testWidgets('preserves child state when bottomInset toggles between 0.0 and non-zero', (
       WidgetTester tester,

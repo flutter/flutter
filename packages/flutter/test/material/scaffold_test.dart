@@ -243,51 +243,53 @@ void main() {
       }
     });
 
-    testWidgets('dismissal excludes hidden content from accessibility', (
-      WidgetTester tester,
-    ) async {
-      final SemanticsHandle semantics = tester.ensureSemantics();
-      try {
-        final key = GlobalKey<ScaffoldState>();
-        final AnimationController controller = BottomSheet.createAnimationController(tester);
-        addTearDown(controller.dispose);
-        const target = ValueKey<String>('lower semantics');
-        await _pumpKeyboardSheetScaffold(tester, scaffoldKey: key);
-        key.currentState!.showBottomSheet(
-          (_) => SizedBox(
-            height: 100.0,
-            width: double.infinity,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                const SizedBox(height: 60.0),
-                Semantics(
-                  key: target,
-                  container: true,
-                  label: 'Lower content',
-                  child: const SizedBox(height: 40.0),
-                ),
-              ],
+    for (final inset in <double>[0.0, 200.0]) {
+      testWidgets('dismissal excludes hidden content from accessibility with inset $inset', (
+        WidgetTester tester,
+      ) async {
+        final SemanticsHandle semantics = tester.ensureSemantics();
+        try {
+          final key = GlobalKey<ScaffoldState>();
+          final AnimationController controller = BottomSheet.createAnimationController(tester);
+          addTearDown(controller.dispose);
+          const target = ValueKey<String>('lower semantics');
+          await _pumpKeyboardSheetScaffold(tester, scaffoldKey: key, inset: inset);
+          key.currentState!.showBottomSheet(
+            (_) => SizedBox(
+              height: 100.0,
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  const SizedBox(height: 60.0),
+                  Semantics(
+                    key: target,
+                    container: true,
+                    label: 'Lower content',
+                    child: const SizedBox(height: 40.0),
+                  ),
+                ],
+              ),
             ),
-          ),
-          transitionAnimationController: controller,
-        );
-        await tester.pumpAndSettle();
-        final SemanticsNode node = tester.getSemantics(find.byKey(target));
-        expect(node, matchesSemantics(label: 'Lower content', textDirection: TextDirection.ltr));
-        controller.value = 0.3;
-        await tester.pump();
-        expect(node.attached && !node.hasFlag(ui.SemanticsFlag.isHidden), isFalse);
-        controller.value = 1.0;
-        await tester.pump();
-        expect(
-          tester.getSemantics(find.byKey(target)),
-          matchesSemantics(label: 'Lower content', textDirection: TextDirection.ltr),
-        );
-      } finally {
-        semantics.dispose();
-      }
-    });
+            transitionAnimationController: controller,
+          );
+          await tester.pumpAndSettle();
+          final SemanticsNode node = tester.getSemantics(find.byKey(target));
+          expect(node, matchesSemantics(label: 'Lower content', textDirection: TextDirection.ltr));
+          controller.value = 0.3;
+          await tester.pump();
+          expect(node.attached && !node.hasFlag(ui.SemanticsFlag.isHidden), isFalse);
+          controller.value = 1.0;
+          await tester.pump();
+          expect(
+            tester.getSemantics(find.byKey(target)),
+            matchesSemantics(label: 'Lower content', textDirection: TextDirection.ltr),
+          );
+        } finally {
+          semantics.dispose();
+        }
+      });
+    }
 
     testWidgets('constrained Scaffold bounds excessive insets and clips the surface', (
       WidgetTester tester,
@@ -491,6 +493,30 @@ void main() {
       }
     });
 
+    testWidgets('keyboard inset transitions preserve Ink decorations without deactivating sheet', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey<ScaffoldState>();
+      final Widget sheet = Ink(color: Colors.green, width: double.infinity, height: 100.0);
+      for (final inset in <double>[0.0, 200.0, 0.0]) {
+        await _pumpKeyboardSheetScaffold(
+          tester,
+          scaffoldKey: key,
+          inset: inset,
+          theme: ThemeData(
+            bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.red),
+          ),
+          sheet: sheet,
+        );
+        await tester.pumpAndSettle();
+        final int contentSampleY = (600 - inset.toInt()) - 50;
+        expect(await _keyboardPixel(tester, 400, contentSampleY), isSameColorAs(Colors.green));
+        if (inset > 0.0) {
+          expect(await _keyboardPixel(tester, 400, 500), isSameColorAs(Colors.red));
+        }
+      }
+    });
+
     testWidgets('resize opt-out keeps the original sheet layout', (WidgetTester tester) async {
       await _pumpKeyboardSheetScaffold(
         tester,
@@ -632,14 +658,26 @@ void main() {
     testWidgets('Scaffold(bottomSheet: BottomSheet(...)) forwards sheet styling to keyboard area', (
       WidgetTester tester,
     ) async {
-      for (final color in <Color>[Colors.purple, Colors.orange]) {
+      const sheetKey = ValueKey<String>('persistent-bottom-sheet');
+      var closingCount = 0;
+      var dragStartCount = 0;
+      var dragEndCount = 0;
+      for (final color in <Color>[
+        Colors.purple,
+        Colors.orange,
+        Colors.purple.withValues(alpha: 0.5),
+      ]) {
         await _pumpKeyboardSheetScaffold(
           tester,
           sheet: BottomSheet(
-            enableDrag: false,
+            key: sheetKey,
+            showDragHandle: true,
+            onDragStart: (_) => dragStartCount++,
+            onDragEnd: (_, {required bool isClosing}) => dragEndCount++,
             backgroundColor: color,
+            elevation: 0.0,
             constraints: const BoxConstraints.tightFor(width: 300.0),
-            onClosing: () {},
+            onClosing: () => closingCount++,
             builder: (_) => const SizedBox(
               key: _keyboardSheetContentKey,
               width: double.infinity,
@@ -648,9 +686,46 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        expect(tester.getSize(_keyboardSheetMaterial), const Size(300.0, 300.0));
-        expect(await _keyboardPixel(tester, 400, 500), isSameColorAs(color));
+        expect(find.byType(BottomSheet), findsOneWidget);
+        expect(tester.widget<BottomSheet>(find.byKey(sheetKey)).backgroundColor, color);
+        expect(tester.getSize(_keyboardSheetMaterial), const Size(300.0, 348.0));
+        final Color expectedColor = Color.alphaBlend(color, Colors.blue);
+        expect(await _keyboardPixel(tester, 400, 350), isSameColorAs(expectedColor));
+        expect(await _keyboardPixel(tester, 400, 500), isSameColorAs(expectedColor));
       }
+
+      // Dragging the handle triggers forwarded onDragStart, onDragEnd, and onClosing.
+      await tester.drag(find.byKey(sheetKey), const Offset(0.0, 20.0));
+      await tester.pumpAndSettle();
+      expect(dragStartCount, greaterThan(0));
+      expect(dragEndCount, greaterThan(0));
+
+      // Tapping the drag handle via semantics triggers forwarded onClosing.
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        tester.getSemantics(find.byType(BottomSheet)).id,
+        SemanticsAction.tap,
+      );
+      // Also verify fling triggers onClosing while keeping the persistent sheet visible.
+      final closingBeforeFling = closingCount;
+      await tester.fling(find.byKey(sheetKey), const Offset(0.0, 150.0), 1000.0);
+      await tester.pumpAndSettle();
+      expect(closingCount, greaterThan(closingBeforeFling));
+      expect(tester.getSize(_keyboardSheetMaterial), const Size(300.0, 348.0));
+
+      // Removing bottomSheet while keyboard inset changes mid-dismissal preserves styling
+      // and does not spuriously invoke BottomSheet.onClosing during build.
+      final closingBeforeRemove = closingCount;
+      await _pumpKeyboardSheetScaffold(tester, inset: 100.0);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(closingCount, closingBeforeRemove);
+      expect(find.byKey(sheetKey), findsOneWidget);
+      expect(
+        tester.widget<BottomSheet>(find.byKey(sheetKey)).backgroundColor,
+        Colors.purple.withValues(alpha: 0.5),
+      );
+      expect(tester.getSize(_keyboardSheetMaterial).width, 300.0);
+      await tester.pumpAndSettle();
+      expect(find.byKey(sheetKey), findsNothing);
     });
   });
 

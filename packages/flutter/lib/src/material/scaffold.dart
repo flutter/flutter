@@ -2413,6 +2413,7 @@ class ScaffoldState extends State<Scaffold>
         assert(_dismissedBottomSheets.isEmpty);
       }
 
+      Widget? lastBottomSheet = widget.bottomSheet;
       _currentBottomSheet = _buildBottomSheet(
         (BuildContext context) {
           return NotificationListener<DraggableScrollableNotification>(
@@ -2421,7 +2422,14 @@ class ScaffoldState extends State<Scaffold>
               child: StatefulBuilder(
                 key: _currentBottomSheetKey,
                 builder: (BuildContext context, StateSetter setState) {
-                  return widget.bottomSheet ?? const SizedBox.shrink();
+                  if (widget.bottomSheet != null) {
+                    lastBottomSheet = widget.bottomSheet;
+                  }
+                  return switch (lastBottomSheet) {
+                    final BottomSheet sheet => Builder(builder: sheet.builder),
+                    final Widget sheet => sheet,
+                    null => const SizedBox.shrink(),
+                  };
                 },
               ),
             ),
@@ -3102,10 +3110,8 @@ class ScaffoldState extends State<Scaffold>
           return _BottomSheetKeyboardInset(
             bottom: keyboardInset,
             child: ClipRect(
-              clipBehavior: keyboardInset > 0.0 ? Clip.hardEdge : Clip.none,
               clipper: _BottomSheetClipper(constraints.scaffoldSize, keyboardInset),
               child: _BottomSheetSemanticsClip(
-                enabled: keyboardInset > 0.0,
                 child: Stack(
                   clipBehavior: Clip.none,
                   alignment: Alignment.bottomCenter,
@@ -3414,36 +3420,16 @@ class _BottomSheetClipper extends CustomClipper<Rect> {
 // The stack's layout bounds end at the keyboard, even while its sheets are
 // animating. Keep dismiss actions and other semantic bounds within that area.
 class _BottomSheetSemanticsClip extends SingleChildRenderObjectWidget {
-  const _BottomSheetSemanticsClip({required this.enabled, required super.child});
-
-  final bool enabled;
+  const _BottomSheetSemanticsClip({required super.child});
 
   @override
   _RenderBottomSheetSemanticsClip createRenderObject(BuildContext context) =>
-      _RenderBottomSheetSemanticsClip(enabled);
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderBottomSheetSemanticsClip renderObject) {
-    renderObject.enabled = enabled;
-  }
+      _RenderBottomSheetSemanticsClip();
 }
 
 class _RenderBottomSheetSemanticsClip extends RenderProxyBox {
-  _RenderBottomSheetSemanticsClip(this._enabled);
-
-  bool get enabled => _enabled;
-  bool _enabled;
-  set enabled(bool value) {
-    if (_enabled == value) {
-      return;
-    }
-    _enabled = value;
-    markNeedsSemanticsUpdate();
-  }
-
   @override
-  Rect? describeSemanticsClip(RenderBox? child) =>
-      enabled ? Offset.zero & size : super.describeSemanticsClip(child);
+  Rect? describeSemanticsClip(RenderBox? child) => Offset.zero & size;
 }
 
 class _StandardBottomSheet extends StatefulWidget {
@@ -3485,6 +3471,7 @@ class _StandardBottomSheet extends StatefulWidget {
 
 class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   ParametricCurve<double> animationCurve = _standardBottomSheetCurve;
+  BottomSheet? _persistentBottomSheet;
 
   @override
   void initState() {
@@ -3514,11 +3501,13 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   void _handleDragStart(DragStartDetails details) {
     // Allow the bottom sheet to track the user's finger accurately.
     animationCurve = Curves.linear;
+    _persistentBottomSheet?.onDragStart?.call(details);
   }
 
   void _handleDragEnd(DragEndDetails details, {bool? isClosing}) {
     // Allow the bottom sheet to animate smoothly from its current position.
     animationCurve = Split(widget.animationController.value, endCurve: _standardBottomSheetCurve);
+    _persistentBottomSheet?.onDragEnd?.call(details, isClosing: isClosing ?? false);
   }
 
   void _handleStatusChange(AnimationStatus status) {
@@ -3551,12 +3540,25 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final BottomSheet? persistentBottomSheet = switch (widget.isPersistent
-        ? Scaffold.maybeOf(context)?.widget.bottomSheet
-        : null) {
-      final BottomSheet sheet => sheet,
-      _ => null,
-    };
+    if (widget.isPersistent) {
+      switch (Scaffold.maybeOf(context)?.widget.bottomSheet) {
+        case final BottomSheet sheet:
+          _persistentBottomSheet = sheet;
+        case final Widget _:
+          _persistentBottomSheet = null;
+        case null:
+          break;
+      }
+    } else {
+      _persistentBottomSheet = null;
+    }
+    final BottomSheet? persistentBottomSheet = _persistentBottomSheet;
+    final bool enableDrag = persistentBottomSheet != null
+        ? (persistentBottomSheet.enableDrag &&
+              (persistentBottomSheet.animationController != null ||
+                  persistentBottomSheet.onDragStart != null ||
+                  persistentBottomSheet.onDragEnd != null))
+        : widget.enableDrag;
     return AnimatedBuilder(
       animation: widget.animationController,
       builder: (BuildContext context, Widget? child) {
@@ -3572,13 +3574,25 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
         child: NotificationListener<DraggableScrollableNotification>(
           onNotification: extentChanged,
           child: BottomSheet(
-            bottomInset: _BottomSheetKeyboardInset.of(context),
+            key: persistentBottomSheet?.key,
+            bottomInset: math.max(
+              _BottomSheetKeyboardInset.of(context),
+              persistentBottomSheet?.bottomInset ?? 0.0,
+            ),
             animationController: widget.animationController,
-            enableDrag: widget.enableDrag,
-            showDragHandle: widget.showDragHandle,
+            enableDrag: enableDrag,
+            showDragHandle: widget.showDragHandle ?? persistentBottomSheet?.showDragHandle,
+            dragHandleColor: persistentBottomSheet?.dragHandleColor,
+            dragHandleSize: persistentBottomSheet?.dragHandleSize,
             onDragStart: _handleDragStart,
             onDragEnd: _handleDragEnd,
-            onClosing: widget.onClosing!,
+            onClosing: () {
+              _persistentBottomSheet?.onClosing();
+              widget.onClosing!();
+              if (widget.isPersistent && Scaffold.maybeOf(context)?.widget.bottomSheet != null) {
+                widget.animationController.forward();
+              }
+            },
             builder: widget.builder,
             backgroundColor: widget.backgroundColor ?? persistentBottomSheet?.backgroundColor,
             shadowColor: persistentBottomSheet?.shadowColor,
