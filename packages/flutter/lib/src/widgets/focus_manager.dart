@@ -1984,7 +1984,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     // A node has requested to be the next focus, and isn't already the primary
     // focus.
     if (_markedForFocus != null && _markedForFocus != _primaryFocus) {
-      // The pending node might no longer be able to receive focus.
+      // The requested node might no longer be able to receive focus.
       // Find another valid node to focus on. If none is found, use the
       // current primary focus, or the root scope as a last fallback.
       if (!_markedForFocus!.canRequestFocus) {
