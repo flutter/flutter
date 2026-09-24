@@ -733,6 +733,7 @@ void FlutterEmbedderNative::PopulateRendererConfig(
         // 2. Check if this is an ImageConsumer external texture.
         std::shared_ptr<fml::jni::ScopedJavaGlobalRef<jobject>> weak_entry;
         uint32_t gl_tex_id = 0;
+        bool had_previous_image = false;
         {
           std::scoped_lock lock(self->image_textures_mutex_);
           auto it = self->image_textures_.find(texture_id);
@@ -756,14 +757,17 @@ void FlutterEmbedderNative::PopulateRendererConfig(
             }
 #endif
             if (it->second.gl_texture_id == 0) {
+              // Mock fallback GL texture ID for testing.
               static uint32_t s_mock_img_tex_id = 2000;
               it->second.gl_texture_id = ++s_mock_img_tex_id;
             }
           }
           gl_tex_id = it->second.gl_texture_id;
           weak_entry = it->second.weak_entry;
+          had_previous_image = (it->second.current_egl_image != nullptr);
         }
 
+        bool new_image_bound = false;
         if (weak_entry && weak_entry->obj()) {
           JNIEnv* env = fml::jni::AttachCurrentThread();
           if (env) {
@@ -914,6 +918,7 @@ void FlutterEmbedderNative::PopulateRendererConfig(
                                         env->NewGlobalRef(hw_buf_obj);
                                     it2->second.current_image =
                                         env->NewGlobalRef(image_obj);
+                                    new_image_bound = true;
                                   } else {
                                     typedef unsigned int (
                                         *PFNEGLDESTROYIMAGEKHRPROC)(void*,
@@ -954,7 +959,16 @@ void FlutterEmbedderNative::PopulateRendererConfig(
           }
         }
 
+        // If no new EGLImage was created and no previous EGLImage exists on
+        // this texture, do not return true with an empty/unbound texture
+        // handle.
+        if (!had_previous_image && !new_image_bound) {
+          return false;
+        }
+
+        // GL_TEXTURE_EXTERNAL_OES = 0x8D65
         constexpr uint32_t kGlTextureExternalOes = 0x8D65;
+        // GL_RGBA8 = 0x8058
         constexpr uint32_t kGlRgba8 = 0x8058;
         texture_out->target = kGlTextureExternalOes;
         texture_out->name = gl_tex_id;
@@ -3537,6 +3551,12 @@ FlutterEngineResult FlutterEmbedderNative::ScheduleFrame() const {
         texture_ids.push_back(id);
       }
     }
+    {
+      std::scoped_lock lock(image_textures_mutex_);
+      for (const auto& [id, _] : image_textures_) {
+        texture_ids.push_back(id);
+      }
+    }
     for (int64_t id : texture_ids) {
       s_procs.MarkExternalTextureFrameAvailable(engine, id);
     }
@@ -3960,6 +3980,18 @@ void FlutterEmbedderNative::UnregisterImageTexture(int64_t texture_id) {
       it->second.gl_texture_id = 0;
     }
     image_textures_.erase(it);
+  }
+}
+
+void FlutterEmbedderNative::SetImageTextureCurrentEGLImageForTesting(
+    int64_t texture_id,
+    void* egl_image,
+    void* egl_display) {
+  std::scoped_lock lock(image_textures_mutex_);
+  auto it = image_textures_.find(texture_id);
+  if (it != image_textures_.end()) {
+    it->second.current_egl_image = egl_image;
+    it->second.current_egl_display = egl_display;
   }
 }
 
