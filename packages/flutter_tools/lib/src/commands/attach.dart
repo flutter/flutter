@@ -63,36 +63,12 @@ import 'daemon.dart';
 /// To attach to a flutter mod running on a fuchsia device, `--module` must
 /// also be provided.
 class AttachCommand extends FlutterCommand {
-  /// Creates an [AttachCommand].
-  ///
-  /// The [fileSystem], [logger], [platform], [processInfo], [signals], [stdio],
-  /// and [terminal] parameters are retained temporarily for downstream
-  /// subclass compatibility and are ignored at runtime in favor of
-  /// [toolContext] (or the enclosing [FlutterCommandRunner.toolContext]).
-  // TODO(bkonyi): Remove legacy parameters once downstream subclasses migrate
-  // to ToolContext (https://github.com/flutter/flutter/issues/188471).
   AttachCommand({
-    FileSystem? fileSystem,
+    required ToolContext super.toolContext,
     HotRunnerFactory? hotRunnerFactory,
-    Logger? logger,
-    Platform? platform,
-    ProcessInfo? processInfo,
-    Signals? signals,
-    Stdio? stdio,
-    Terminal? terminal,
-    super.toolContext,
     bool verboseHelp = false,
-  }) : assert(
-         toolContext != null ||
-             (fileSystem != null &&
-                 logger != null &&
-                 platform != null &&
-                 processInfo != null &&
-                 signals != null &&
-                 stdio != null &&
-                 terminal != null),
-       ),
-       _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory() {
+  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
+       _toolContext = toolContext {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -157,12 +133,10 @@ class AttachCommand extends FlutterCommand {
   }
 
   final HotRunnerFactory _hotRunnerFactory;
+  final ToolContext _toolContext;
 
-  ToolContext get _toolContext =>
-      toolContext ??
-      (throw StateError(
-        'AttachCommand requires a ToolContext (pass toolContext or run via FlutterCommandRunner).',
-      ));
+  @override
+  ToolContext get toolContext => _toolContext;
 
   @override
   final name = 'attach';
