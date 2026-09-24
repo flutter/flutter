@@ -214,6 +214,10 @@ class FlutterEmbedderNative {
   /// @return True if JNI native registration succeeded.
   static bool RegisterJni(JNIEnv* env);
 
+  /// @brief Overrides the Android device API level returned in
+  /// GetDeviceApiLevel for unit testing. Pass std::nullopt to reset.
+  static void SetDeviceApiLevelForTesting(std::optional<int> api_level);
+
   /// @brief Sets the default global OSLibraryLoader instance.
   static void SetDefaultLibraryLoader(std::shared_ptr<OSLibraryLoader> loader);
 

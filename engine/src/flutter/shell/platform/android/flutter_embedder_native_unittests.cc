@@ -7120,7 +7120,10 @@ class Phase61JniRegistrationCutoverTest : public ::testing::Test {
 
   void SetUp() override { jvm_.SetJNIEnv(&mock_env_); }
 
-  void TearDown() override { jvm_.SetJNIEnv(nullptr); }
+  void TearDown() override {
+    jvm_.SetJNIEnv(nullptr);
+    FlutterEmbedderNative::SetDeviceApiLevelForTesting(std::nullopt);
+  }
 
   MockJNIEnv& mock_env() { return mock_env_; }
 
@@ -7260,6 +7263,199 @@ TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniNullOrFailureHandling) {
   EXPECT_CALL(mock_env_, RegisterNatives(kFlutterJNIClass, _, _))
       .WillOnce(Return(-1));
   EXPECT_FALSE(FlutterEmbedderNative::RegisterJni(&mock_env_));
+}
+
+TEST_F(Phase61JniRegistrationCutoverTest,
+       RegisterJniHandlesMissingImageMethodsCleanly) {
+  FlutterEmbedderNative::SetDeviceApiLevelForTesting(28);
+
+  const jclass kFlutterJNIClass = reinterpret_cast<jclass>(100);
+  const jclass kLongClass = reinterpret_cast<jclass>(101);
+  const jclass kCallbackInfoClass = reinterpret_cast<jclass>(102);
+  const jclass kImageClass = reinterpret_cast<jclass>(103);
+  const jfieldID kShellHolderField = reinterpret_cast<jfieldID>(200);
+  const jmethodID kJniConstructor = reinterpret_cast<jmethodID>(300);
+  const jmethodID kLongConstructor = reinterpret_cast<jmethodID>(301);
+  const jmethodID kCallbackConstructor = reinterpret_cast<jmethodID>(302);
+  const jmethodID kImageCloseMethod = reinterpret_cast<jmethodID>(303);
+
+  bool has_pending_exception = false;
+  bool check_jni_aborted = false;
+
+  EXPECT_CALL(mock_env_, FindClass(_))
+      .WillRepeatedly([&](const char* name) -> jclass {
+        if (has_pending_exception) {
+          check_jni_aborted = true;
+        }
+        if (strcmp(name, "io/flutter/embedding/engine/FlutterJNI") == 0) {
+          return kFlutterJNIClass;
+        }
+        if (strcmp(name, "java/lang/Long") == 0) {
+          return kLongClass;
+        }
+        if (strcmp(name, "io/flutter/view/FlutterCallbackInformation") == 0) {
+          return kCallbackInfoClass;
+        }
+        if (strcmp(name, "android/media/Image") == 0) {
+          return kImageClass;
+        }
+        return reinterpret_cast<jclass>(109);
+      });
+
+  EXPECT_CALL(mock_env_, GetFieldID(kFlutterJNIClass, "nativeShellHolderId",
+                                    "Ljava/lang/Long;"))
+      .WillRepeatedly([&](jclass, const char*, const char*) -> jfieldID {
+        if (has_pending_exception) {
+          check_jni_aborted = true;
+        }
+        return kShellHolderField;
+      });
+
+  EXPECT_CALL(mock_env_, GetMethodID(_, _, _))
+      .WillRepeatedly(
+          [&](jclass clazz, const char* name, const char* sig) -> jmethodID {
+            if (has_pending_exception) {
+              check_jni_aborted = true;
+            }
+            if (clazz == kImageClass) {
+              if (strcmp(name, "getHardwareBuffer") == 0) {
+                has_pending_exception = true;
+                return nullptr;
+              }
+              if (strcmp(name, "close") == 0) {
+                return kImageCloseMethod;
+              }
+            }
+            return kJniConstructor;
+          });
+
+  EXPECT_CALL(mock_env_,
+              GetStaticMethodID(kLongClass, "valueOf", "(J)Ljava/lang/Long;"))
+      .WillRepeatedly([&](jclass, const char*, const char*) -> jmethodID {
+        if (has_pending_exception) {
+          check_jni_aborted = true;
+        }
+        return kLongConstructor;
+      });
+
+  EXPECT_CALL(
+      mock_env_,
+      GetMethodID(kCallbackInfoClass, "<init>",
+                  "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V"))
+      .WillRepeatedly([&](jclass, const char*, const char*) -> jmethodID {
+        if (has_pending_exception) {
+          check_jni_aborted = true;
+        }
+        return kCallbackConstructor;
+      });
+
+  EXPECT_CALL(mock_env_, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env_, DeleteGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env_, GetObjectRefType(_))
+      .WillRepeatedly(Return(JNILocalRefType));
+
+  EXPECT_CALL(mock_env_, ExceptionCheck()).WillRepeatedly([&]() -> jboolean {
+    return has_pending_exception ? JNI_TRUE : JNI_FALSE;
+  });
+
+  EXPECT_CALL(mock_env_, ExceptionClear()).WillRepeatedly([&]() {
+    has_pending_exception = false;
+  });
+
+  EXPECT_CALL(mock_env_, RegisterNatives(kFlutterJNIClass, _, _))
+      .WillOnce(Return(0));
+
+  bool result = FlutterEmbedderNative::RegisterJni(&mock_env_);
+  EXPECT_TRUE(result);
+  EXPECT_FALSE(has_pending_exception);
+  EXPECT_FALSE(check_jni_aborted);
+
+  FlutterEmbedderNative::SetDeviceApiLevelForTesting(std::nullopt);
+}
+
+TEST_F(Phase61JniRegistrationCutoverTest,
+       RegisterJniSkipsHardwareBufferOnApiLessThan26) {
+  FlutterEmbedderNative::SetDeviceApiLevelForTesting(24);
+
+  const jclass kFlutterJNIClass = reinterpret_cast<jclass>(100);
+  const jclass kLongClass = reinterpret_cast<jclass>(101);
+  const jclass kCallbackInfoClass = reinterpret_cast<jclass>(102);
+  const jclass kImageClass = reinterpret_cast<jclass>(103);
+  const jfieldID kShellHolderField = reinterpret_cast<jfieldID>(200);
+  const jmethodID kJniConstructor = reinterpret_cast<jmethodID>(300);
+  const jmethodID kLongConstructor = reinterpret_cast<jmethodID>(301);
+  const jmethodID kCallbackConstructor = reinterpret_cast<jmethodID>(302);
+  const jmethodID kImageCloseMethod = reinterpret_cast<jmethodID>(303);
+
+  bool hardware_buffer_class_queried = false;
+  bool image_get_hardware_buffer_queried = false;
+
+  EXPECT_CALL(mock_env_, FindClass(_))
+      .WillRepeatedly([&](const char* name) -> jclass {
+        if (strcmp(name, "android/hardware/HardwareBuffer") == 0) {
+          hardware_buffer_class_queried = true;
+          return nullptr;
+        }
+        if (strcmp(name, "io/flutter/embedding/engine/FlutterJNI") == 0) {
+          return kFlutterJNIClass;
+        }
+        if (strcmp(name, "java/lang/Long") == 0) {
+          return kLongClass;
+        }
+        if (strcmp(name, "io/flutter/view/FlutterCallbackInformation") == 0) {
+          return kCallbackInfoClass;
+        }
+        if (strcmp(name, "android/media/Image") == 0) {
+          return kImageClass;
+        }
+        return reinterpret_cast<jclass>(109);
+      });
+
+  EXPECT_CALL(mock_env_, GetFieldID(kFlutterJNIClass, "nativeShellHolderId",
+                                    "Ljava/lang/Long;"))
+      .WillRepeatedly(Return(kShellHolderField));
+
+  EXPECT_CALL(mock_env_, GetMethodID(_, _, _))
+      .WillRepeatedly(
+          [&](jclass clazz, const char* name, const char* sig) -> jmethodID {
+            if (clazz == kImageClass) {
+              if (strcmp(name, "getHardwareBuffer") == 0) {
+                image_get_hardware_buffer_queried = true;
+                return nullptr;
+              }
+              if (strcmp(name, "close") == 0) {
+                return kImageCloseMethod;
+              }
+            }
+            return kJniConstructor;
+          });
+
+  EXPECT_CALL(mock_env_,
+              GetStaticMethodID(kLongClass, "valueOf", "(J)Ljava/lang/Long;"))
+      .WillRepeatedly(Return(kLongConstructor));
+
+  EXPECT_CALL(
+      mock_env_,
+      GetMethodID(kCallbackInfoClass, "<init>",
+                  "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V"))
+      .WillRepeatedly(Return(kCallbackConstructor));
+
+  EXPECT_CALL(mock_env_, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env_, DeleteGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env_, GetObjectRefType(_))
+      .WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(mock_env_, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+  EXPECT_CALL(mock_env_, ExceptionClear()).WillRepeatedly(Return());
+
+  EXPECT_CALL(mock_env_, RegisterNatives(kFlutterJNIClass, _, _))
+      .WillOnce(Return(0));
+
+  bool result = FlutterEmbedderNative::RegisterJni(&mock_env_);
+  EXPECT_TRUE(result);
+  EXPECT_FALSE(hardware_buffer_class_queried);
+  EXPECT_FALSE(image_get_hardware_buffer_queried);
+
+  FlutterEmbedderNative::SetDeviceApiLevelForTesting(std::nullopt);
 }
 
 TEST_F(Phase61JniRegistrationCutoverTest, AttachAndDestroyJNI) {

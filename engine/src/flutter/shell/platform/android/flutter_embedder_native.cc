@@ -12,6 +12,7 @@
 
 #if FML_OS_ANDROID
 #include <EGL/egl.h>
+#include <android/api-level.h>
 #include <android/log.h>
 #endif
 
@@ -28,6 +29,26 @@
 
 namespace flutter {
 namespace android {
+
+namespace {
+std::optional<int> g_device_api_level_override = std::nullopt;
+
+int GetDeviceApiLevel() {
+  if (g_device_api_level_override.has_value()) {
+    return *g_device_api_level_override;
+  }
+#if FML_OS_ANDROID
+  return android_get_device_api_level();
+#else
+  return 10000;
+#endif
+}
+}  // namespace
+
+void FlutterEmbedderNative::SetDeviceApiLevelForTesting(
+    std::optional<int> api_level) {
+  g_device_api_level_override = api_level;
+}
 
 std::mutex FlutterEmbedderNative::default_library_loader_mutex_;
 std::shared_ptr<OSLibraryLoader>
@@ -5879,24 +5900,44 @@ bool FlutterEmbedderNative::RegisterJni(JNIEnv* env) {
       g_image_class = new fml::jni::ScopedJavaGlobalRef<jclass>();
     }
     g_image_class->Reset(env, image_class);
-    g_image_get_hardware_buffer_method =
-        env->GetMethodID(image_class, "getHardwareBuffer",
-                         "()Landroid/hardware/HardwareBuffer;");
     g_image_close_method = env->GetMethodID(image_class, "close", "()V");
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+      g_image_close_method = nullptr;
+    }
+    if (GetDeviceApiLevel() >= 28) {
+      g_image_get_hardware_buffer_method =
+          env->GetMethodID(image_class, "getHardwareBuffer",
+                           "()Landroid/hardware/HardwareBuffer;");
+      if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+        g_image_get_hardware_buffer_method = nullptr;
+      }
+    } else {
+      g_image_get_hardware_buffer_method = nullptr;
+    }
   }
   if (env->ExceptionCheck()) {
     env->ExceptionClear();
   }
 
-  jclass hardware_buffer_class =
-      env->FindClass("android/hardware/HardwareBuffer");
-  if (hardware_buffer_class) {
-    if (!g_hardware_buffer_class) {
-      g_hardware_buffer_class = new fml::jni::ScopedJavaGlobalRef<jclass>();
+  if (GetDeviceApiLevel() >= 26) {
+    jclass hardware_buffer_class =
+        env->FindClass("android/hardware/HardwareBuffer");
+    if (hardware_buffer_class) {
+      if (!g_hardware_buffer_class) {
+        g_hardware_buffer_class = new fml::jni::ScopedJavaGlobalRef<jclass>();
+      }
+      g_hardware_buffer_class->Reset(env, hardware_buffer_class);
+      g_hardware_buffer_close_method =
+          env->GetMethodID(hardware_buffer_class, "close", "()V");
+      if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+        g_hardware_buffer_close_method = nullptr;
+      }
     }
-    g_hardware_buffer_class->Reset(env, hardware_buffer_class);
-    g_hardware_buffer_close_method =
-        env->GetMethodID(hardware_buffer_class, "close", "()V");
+  } else {
+    g_hardware_buffer_close_method = nullptr;
   }
   if (env->ExceptionCheck()) {
     env->ExceptionClear();

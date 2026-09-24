@@ -809,7 +809,6 @@ public class FlutterJNI {
   public void setPlatformViewsController(@NonNull PlatformViewsController platformViewsController) {
     ensureRunningOnMainThread();
     this.platformViewsController = platformViewsController;
-    platformViewsController.synchronizeToNativeViewHierarchy(false);
   }
 
   @UiThread
