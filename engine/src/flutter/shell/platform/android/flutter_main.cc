@@ -164,9 +164,9 @@ void FlutterMain::Init(JNIEnv* env,
           arg.substr(std::string("--impeller-backend=").length());
     } else if (auto hcpp = android::ParseHcppFlag(arg); hcpp.has_value()) {
       vm_args.enable_surface_control = *hcpp;
-    } else if (arg == "--merged-platform-ui-thread=disabled" ||
-               arg == "--no-merged-platform-ui-thread") {
-      vm_args.merged_platform_ui_thread = false;
+    } else if (auto merged = android::ParseMergedPlatformUIThreadFlag(arg);
+               merged.has_value()) {
+      vm_args.merged_platform_ui_thread = *merged;
     } else if (arg.rfind("--aot-shared-library-name=", 0) == 0) {
       std::string candidate =
           arg.substr(std::string("--aot-shared-library-name=").length());

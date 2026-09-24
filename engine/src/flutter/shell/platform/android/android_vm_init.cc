@@ -39,6 +39,25 @@ std::optional<bool> ParseHcppFlag(std::string_view arg) {
   return std::nullopt;
 }
 
+std::optional<bool> ParseMergedPlatformUIThreadFlag(std::string_view arg) {
+  if (arg == "--merged-platform-ui-thread" ||
+      arg == "--merged-platform-ui-thread=true" ||
+      arg == "--merged-platform-ui-thread=1" ||
+      arg == "--merged-platform-ui-thread=enabled" ||
+      arg == "--enable-merged-platform-ui-thread") {
+    return true;
+  }
+  if (arg == "--merged-platform-ui-thread=false" ||
+      arg == "--merged-platform-ui-thread=0" ||
+      arg == "--merged-platform-ui-thread=disabled" ||
+      arg == "--no-merged-platform-ui-thread" ||
+      arg == "--disable-merged-platform-ui-thread" ||
+      arg == "--no-enable-merged-platform-ui-thread") {
+    return false;
+  }
+  return std::nullopt;
+}
+
 static bool IsVivanteDevice() {
   char product_model[PROP_VALUE_MAX];
   __system_property_get("ro.hardware.egl", product_model);
