@@ -60,7 +60,7 @@ class _MyAppState extends State<MyApp> {
   WindowEntry _buildPopupEntry(Rect? anchorRect) {
     final PopupWindowController controller = PopupWindowController(
       parent: WindowScope.of(context),
-      anchorRect: anchorRect!,
+      anchorRect: anchorRect ?? Rect.zero,
       positioner: const WindowPositioner(
         parentAnchor: .right,
         childAnchor: .left,

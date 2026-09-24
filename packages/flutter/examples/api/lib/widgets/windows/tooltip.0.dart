@@ -60,7 +60,7 @@ class _MyAppState extends State<MyApp> {
   WindowEntry _buildTooltipEntry(Rect? anchorRect) {
     final TooltipWindowController tooltipController = TooltipWindowController(
       parent: WindowScope.of(context),
-      anchorRect: anchorRect!,
+      anchorRect: anchorRect ?? Rect.zero,
       positioner: const WindowPositioner(
         parentAnchor: WindowPositionerAnchor.right,
         childAnchor: WindowPositionerAnchor.left,

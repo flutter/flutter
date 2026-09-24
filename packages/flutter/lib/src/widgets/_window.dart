@@ -2300,9 +2300,18 @@ class _WindowEntryRenderState extends State<_WindowEntryRender> {
   }
 
   @override
+  void didUpdateWidget(_WindowEntryRender oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.entry.controller != oldWidget.entry.controller) {
+      oldWidget.entry.controller.removeListener(_handleWindowDestroyed);
+      widget.entry.controller.addListener(_handleWindowDestroyed);
+    }
+  }
+
+  @override
   void dispose() {
-    super.dispose();
     widget.entry.controller.removeListener(_handleWindowDestroyed);
+    super.dispose();
   }
 
   void _handleWindowDestroyed() {
@@ -2416,7 +2425,7 @@ typedef WindowEntryBuilder = WindowEntry Function(Rect?);
 class NestedWindowController extends ChangeNotifier {
   /// Creates a controller for an initially hidden [NestedWindow].
   NestedWindowController();
-  late final _NestedWindowState _anchor;
+  _NestedWindowState? _anchor;
   bool _showing = false;
 
   /// Whether the associated [NestedWindow] is showing its window content.
@@ -2436,7 +2445,7 @@ class NestedWindowController extends ChangeNotifier {
   ///
   /// The associated [NestedWindow] must be mounted.
   void show() {
-    _anchor._show();
+    _anchor?._show();
   }
 
   /// Destroys the native window and removes its content from [NestedWindow].
@@ -2446,14 +2455,14 @@ class NestedWindowController extends ChangeNotifier {
   ///
   /// The associated [NestedWindow] must be mounted.
   void hide() {
-    _anchor._hide();
+    _anchor?._hide();
   }
 
   /// Hides the window if it is showing, or shows it if it is hidden.
   ///
   /// The associated [NestedWindow] must be mounted.
   void toggle() {
-    _anchor._toggle();
+    _anchor?._toggle();
   }
 }
 
@@ -2587,8 +2596,23 @@ class _NestedWindowState extends State<NestedWindow> {
   }
 
   @override
+  void didUpdateWidget(NestedWindow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller._anchor = null;
+      widget.controller._anchor = this;
+      if (_entry != null) {
+        oldWidget.controller._setShowing(false);
+        widget.controller._setShowing(true);
+      }
+    }
+  }
+
+  @override
   void dispose() {
+    _entry?.controller.removeListener(_onDestroyed);
     _tracker?.dispose();
+    widget.controller._anchor = null;
     super.dispose();
   }
 
@@ -2684,7 +2708,7 @@ class _ElementPositionTracker {
       return null;
     }
     final RenderObject? renderBox = element.findRenderObject();
-    if (renderBox is! RenderBox) {
+    if (renderBox is! RenderBox || !renderBox.attached || !renderBox.hasSize) {
       return null;
     }
 
@@ -2710,6 +2734,9 @@ class _ElementPositionTracker {
 class _ElementPositionTrackerManager {
   _ElementPositionTrackerManager._() {
     WidgetsBinding.instance.addPersistentFrameCallback((_) {
+      if (_trackers.isEmpty) {
+        return;
+      }
       final trackersCopy = List<_ElementPositionTracker>.from(_trackers, growable: false);
       for (final tracker in trackersCopy) {
         tracker._updateSelf();

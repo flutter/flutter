@@ -29,7 +29,7 @@ class _PopupButtonState extends State<PopupButton> {
 
   WindowEntry _buildEntry(Rect? anchorRect, WindowSettings windowSettings) {
     final controller = PopupWindowController(
-      anchorRect: anchorRect!,
+      anchorRect: anchorRect ?? Rect.zero,
       positioner: windowSettings.positioner,
       delegate: _PopupWindowControllerDelegate(
         onDestroyed: () {

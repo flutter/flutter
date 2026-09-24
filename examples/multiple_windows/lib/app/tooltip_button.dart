@@ -29,7 +29,7 @@ class _TooltipButtonState extends State<TooltipButton> {
 
   WindowEntry _buildEntry(Rect? anchorRect, WindowSettings windowSettings) {
     final controller = TooltipWindowController(
-      anchorRect: anchorRect!,
+      anchorRect: anchorRect ?? Rect.zero,
       positioner: windowSettings.positioner,
       delegate: _TooltipWindowControllerDelegate(
         onDestroyed: () {
