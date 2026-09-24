@@ -37,10 +37,10 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required this._appleContext,
     required this._buildSystem,
     required this.codesign,
-    required ToolContext toolContext,
-    required bool verboseHelp,
+    required ToolContext super.toolContext,
+    required super.verboseHelp,
   }) : _toolContext = toolContext,
-       super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
+       super(logger: toolContext.logger) {
     registerOptionBundle(const DarwinAddToAppOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       debugMode,

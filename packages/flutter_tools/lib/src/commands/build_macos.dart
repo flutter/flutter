@@ -22,14 +22,9 @@ class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand({
     required this.buildSystem,
     required this.featureFlags,
-    required ToolContext toolContext,
-    required bool verboseHelp,
-  }) : super(
-         logger: toolContext.logger,
-         outputPreferences: toolContext.outputPreferences,
-         toolContext: toolContext,
-         verboseHelp: verboseHelp,
-       ) {
+    required ToolContext super.toolContext,
+    required super.verboseHelp,
+  }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
     registerOptionBundles(const <OptionBundle>[
       CommonBuildOptionsBundle(),
       BuildModeOptionsBundle(),

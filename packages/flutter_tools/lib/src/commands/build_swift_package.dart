@@ -73,8 +73,8 @@ class BuildSwiftPackage extends BuildSubCommand {
     required this._templateRenderer,
     required this._xcode,
     required this._codesign,
-    required bool verboseHelp,
-  }) : super(verboseHelp: verboseHelp) {
+    required super.verboseHelp,
+  }) {
     registerOptionBundle(const DarwinAddToAppOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       BuildInfoOptions.flavor,
