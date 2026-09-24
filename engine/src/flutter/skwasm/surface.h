@@ -49,7 +49,7 @@ class Surface {
 
   // Surface setup
   uint32_t SetCanvas(SkwasmObject canvas);
-  void OnInitialized(uint32_t callback_id);
+  void OnInitialized(uint32_t callback_id, bool success);
   void ReceiveCanvasOnWorker(SkwasmObject canvas, uint32_t callback_id);
 
   // Resizing
