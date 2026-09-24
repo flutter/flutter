@@ -5,6 +5,7 @@
 package io.flutter.embedding.android;
 
 import static android.content.ComponentCallbacks2.*;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -40,6 +41,7 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterEngineGroup;
 import io.flutter.embedding.engine.FlutterEngineGroupCache;
+import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
@@ -1503,6 +1505,41 @@ public class FlutterActivityAndFragmentDelegateTest {
     delegate.onAttach(ctx);
     FlutterEngine engineUnderTest = delegate.getFlutterEngine();
     assertEquals(engineUnderTest, mockFlutterEngine);
+  }
+
+  @Test
+  public void itPassesFlutterEngineFlagsToEngineGroupWhenCreatingNewEngine() {
+    FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
+    when(mockFlutterLoader.initialized()).thenReturn(false);
+    when(mockFlutterLoader.findAppBundlePath()).thenReturn("default_flutter_assets/path");
+
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    when(mockFlutterJNI.isAttached()).thenReturn(true);
+    FlutterJNI.Factory mockJniFactory = mock(FlutterJNI.Factory.class);
+    when(mockJniFactory.provideFlutterJNI()).thenReturn(mockFlutterJNI);
+
+    FlutterInjector.setInstance(
+        new FlutterInjector.Builder()
+            .setFlutterLoader(mockFlutterLoader)
+            .setFlutterJNIFactory(mockJniFactory)
+            .build());
+
+    List<String> flags = Arrays.asList("--test-flag", "--foo=bar");
+    when(mockHost.provideFlutterEngine(any(Context.class))).thenReturn(null);
+    when(mockHost.getCachedEngineId()).thenReturn(null);
+    when(mockHost.getCachedEngineGroupId()).thenReturn(null);
+    when(mockHost.getFlutterEngineFlags()).thenReturn(flags);
+    when(mockHost.shouldAttachEngineToActivity()).thenReturn(false);
+
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    delegate.onAttach(ctx);
+
+    verify(mockHost, times(1)).getFlutterEngineFlags();
+
+    ArgumentCaptor<String[]> flagsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterLoader, times(1))
+        .ensureInitializationComplete(any(Context.class), flagsCaptor.capture());
+    assertArrayEquals(new String[] {"--test-flag", "--foo=bar"}, flagsCaptor.getValue());
   }
 
   @Test

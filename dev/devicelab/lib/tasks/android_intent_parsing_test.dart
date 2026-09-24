@@ -21,7 +21,7 @@ TaskFunction createAndroidIntentParsingTest() {
     const mainActivityName = '$testPackageName/.MainActivity';
 
     Future<void> testMode({required String mode, required bool expectVerbose}) async {
-      print('--- Testing $mode mode ---');
+      section('--- Testing $mode mode ---');
       await inDirectory<void>(testDirectory, () async {
         await exec('flutter', <String>['build', 'apk', '--$mode']);
         final String apkPath = path.join('build', 'app', 'outputs', 'flutter-apk', 'app-$mode.apk');
@@ -37,7 +37,7 @@ TaskFunction createAndroidIntentParsingTest() {
           'shell',
           'am',
           'start',
-          '-W', // Wait for the app to finish launching
+          '-W',
           '-n',
           mainActivityName,
           '-a',
@@ -50,13 +50,18 @@ TaskFunction createAndroidIntentParsingTest() {
         // The app is fully launched. Give logcat a tiny buffer to flush.
         await Future<void>.delayed(const Duration(seconds: 1));
 
+        section('--- Check logcat for verbose logs in $mode ---');
         final String logcat = await eval('adb', <String>['-s', deviceId, 'logcat', '-d']);
         final bool foundInfoLog = logcat.contains('[INFO:flutter');
 
         if (expectVerbose && !foundInfoLog) {
-          throw 'Expected [INFO:] logs to be present in $mode mode when passing verbose-logging intent, but they were not found in logcat.';
+          throw TaskResult.failure(
+            'Expected [INFO:] logs to be present in $mode mode when passing verbose-logging intent, but they were not found in logcat.',
+          );
         } else if (!expectVerbose && foundInfoLog) {
-          throw 'Expected [INFO:] logs to be stripped in $mode mode, but they were found in logcat!';
+          throw TaskResult.failure(
+            'Expected [INFO:] logs to be stripped in $mode mode, but they were found in logcat!',
+          );
         }
 
         print(

@@ -33,13 +33,11 @@ import io.flutter.embedding.engine.FlutterEngineGroup;
 import io.flutter.embedding.engine.FlutterEngineGroupCache;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
-import io.flutter.embedding.engine.flags.FlutterEngineFlags;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.view.SensitiveContentPlugin;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Delegate that implements all Flutter logic that is the same between a {@link FlutterActivity} and
@@ -333,9 +331,6 @@ import java.util.Set;
         "No preferred FlutterEngine was provided. Creating a new FlutterEngine for"
             + " this FlutterFragment.");
 
-    if (host.getActivity() != null && host.getActivity().getIntent() != null) {
-      warnIfEngineFlagsSetViaIntent(host.getActivity().getIntent());
-    }
     FlutterEngineGroup group =
         engineGroup == null
             ? new FlutterEngineGroup(
@@ -348,32 +343,6 @@ import java.util.Set;
                     .setAutomaticallyRegisterPlugins(false)
                     .setWaitForRestorationData(host.shouldRestoreAndSaveState())));
     isFlutterEngineFromHost = false;
-  }
-
-  // As part of https://github.com/flutter/flutter/issues/180686, the ability
-  // to set engine flags via Intent extras will be removed, so warn
-  // developers that engine shell arguments set that way will be ignored.
-  private void warnIfEngineFlagsSetViaIntent(@Nullable Intent intent) {
-    if (intent == null || intent.getExtras() == null) {
-      return;
-    }
-
-    Bundle extras = intent.getExtras();
-    Set<String> extrasKeys = extras.keySet();
-
-    for (String extrasKey : extrasKeys) {
-      FlutterEngineFlags.Flag flag = FlutterEngineFlags.getFlagFromIntentKey(extrasKey);
-      if (flag != null) {
-        Log.i(
-            TAG,
-            "If you are attempting to set "
-                + flag.engineArgument
-                + " via Intent extras to launch a Flutter component outside of using the Flutter CLI, note that support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/180686 for more information on this breaking change. To migrate, set "
-                + flag.engineArgument
-                + " or any other flags specified via Intent extras on the command line instead or see https://github.com/flutter/flutter/blob/main/docs/engine/Flutter-Android-Engine-Flags.md for alternative methods.");
-        break;
-      }
-    }
   }
 
   /**
