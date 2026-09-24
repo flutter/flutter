@@ -382,6 +382,17 @@ TEST(AndroidSurfaceManagerTest, OffscreenFBOLifecycleAndPool) {
   manager->DestroyOverlaySurfaces();
 }
 
+TEST(AndroidSurfaceManagerTest,
+     BlitAndSwapOverlaySurfaceNullWindowGracefulReturn) {
+  auto manager =
+      AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_NE(manager, nullptr);
+
+  EXPECT_TRUE(manager->BlitAndSwapOverlaySurface(nullptr, /*offscreen_fbo=*/1,
+                                                 /*width=*/100,
+                                                 /*height=*/100));
+}
+
 TEST(AndroidSurfaceManagerTest, GlProcResolverResolvesViaDlsym) {
   auto manager =
       AndroidSurfaceManager::Create(AndroidRenderingAPI::kImpellerOpenGLES);

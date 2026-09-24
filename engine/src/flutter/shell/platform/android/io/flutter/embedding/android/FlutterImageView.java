@@ -44,6 +44,7 @@ public class FlutterImageView extends View implements RenderSurface {
 
   @NonNull private ImageReader imageReader;
   @Nullable private Image currentImage;
+  @Nullable private HardwareBuffer currentHardwareBuffer;
   @Nullable private Bitmap currentBitmap;
   @Nullable private FlutterRenderer flutterRenderer;
 
@@ -127,7 +128,9 @@ public class FlutterImageView extends View implements RenderSurface {
           height,
           PixelFormat.RGBA_8888,
           3,
-          HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_GPU_COLOR_OUTPUT);
+          HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE
+              | HardwareBuffer.USAGE_GPU_COLOR_OUTPUT
+              | HardwareBuffer.USAGE_CPU_READ_OFTEN);
     } else {
       return ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 3);
     }
@@ -176,10 +179,8 @@ public class FlutterImageView extends View implements RenderSurface {
     // Drop the latest image as it shouldn't render this image if this view is
     // attached to the renderer again.
     acquireLatestImage();
-    // Clear drawings.
-    currentBitmap = null;
 
-    // Close and clear the current image if any.
+    // Close and clear the current image, bitmap, and hardware buffer if any.
     closeCurrentImage();
     invalidate();
     isAttachedToFlutterRenderer = false;
@@ -254,16 +255,55 @@ public class FlutterImageView extends View implements RenderSurface {
       if (canvas.isHardwareAccelerated()) {
         canvas.drawBitmap(currentBitmap, 0, 0, null);
       } else {
-        Bitmap copyBitmap = currentBitmap.copy(Bitmap.Config.ARGB_8888, false);
+        Bitmap copyBitmap = null;
+        try {
+          copyBitmap = currentBitmap.copy(Bitmap.Config.ARGB_8888, false);
+        } catch (Exception e) {
+          Log.w(TAG, "Failed to copy hardware bitmap for non-hardware-accelerated canvas: " + e);
+        }
         if (copyBitmap != null) {
           canvas.drawBitmap(copyBitmap, 0, 0, null);
           copyBitmap.recycle();
+        } else {
+          drawSoftwareFallback(canvas);
         }
       }
     }
   }
 
+  private void drawSoftwareFallback(@NonNull Canvas canvas) {
+    if (currentImage == null) {
+      return;
+    }
+    final Image.Plane[] imagePlanes = currentImage.getPlanes();
+    if (imagePlanes == null || imagePlanes.length != 1) {
+      return;
+    }
+
+    final Image.Plane imagePlane = imagePlanes[0];
+    final int desiredWidth = imagePlane.getRowStride() / imagePlane.getPixelStride();
+    final int desiredHeight = currentImage.getHeight();
+
+    Bitmap softwareBitmap =
+        Bitmap.createBitmap(desiredWidth, desiredHeight, android.graphics.Bitmap.Config.ARGB_8888);
+    ByteBuffer buffer = imagePlane.getBuffer();
+    buffer.rewind();
+    softwareBitmap.copyPixelsFromBuffer(buffer);
+    canvas.drawBitmap(softwareBitmap, 0, 0, null);
+    softwareBitmap.recycle();
+  }
+
   private void closeCurrentImage() {
+    // Strictly recycle currentBitmap first before closing the underlying HardwareBuffer,
+    // as mandated by the Android Bitmap.wrapHardwareBuffer specification.
+    if (currentBitmap != null) {
+      currentBitmap.recycle();
+      currentBitmap = null;
+    }
+    if (currentHardwareBuffer != null) {
+      currentHardwareBuffer.close();
+      currentHardwareBuffer = null;
+    }
     // Close and clear the current image if any.
     if (currentImage != null) {
       currentImage.close();
@@ -272,31 +312,37 @@ public class FlutterImageView extends View implements RenderSurface {
   }
 
   private void updateCurrentBitmap() {
+    if (currentBitmap != null) {
+      return;
+    }
     if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
       final HardwareBuffer buffer = currentImage.getHardwareBuffer();
-      currentBitmap = Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB));
-      buffer.close();
-    } else {
-      final Image.Plane[] imagePlanes = currentImage.getPlanes();
-      if (imagePlanes.length != 1) {
+      if (buffer != null) {
+        currentHardwareBuffer = buffer;
+        currentBitmap = Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB));
         return;
       }
-
-      final Image.Plane imagePlane = imagePlanes[0];
-      final int desiredWidth = imagePlane.getRowStride() / imagePlane.getPixelStride();
-      final int desiredHeight = currentImage.getHeight();
-
-      if (currentBitmap == null
-          || currentBitmap.getWidth() != desiredWidth
-          || currentBitmap.getHeight() != desiredHeight) {
-        currentBitmap =
-            Bitmap.createBitmap(
-                desiredWidth, desiredHeight, android.graphics.Bitmap.Config.ARGB_8888);
-      }
-      ByteBuffer buffer = imagePlane.getBuffer();
-      buffer.rewind();
-      currentBitmap.copyPixelsFromBuffer(buffer);
     }
+
+    final Image.Plane[] imagePlanes = currentImage.getPlanes();
+    if (imagePlanes == null || imagePlanes.length != 1) {
+      return;
+    }
+
+    final Image.Plane imagePlane = imagePlanes[0];
+    final int desiredWidth = imagePlane.getRowStride() / imagePlane.getPixelStride();
+    final int desiredHeight = currentImage.getHeight();
+
+    if (currentBitmap == null
+        || currentBitmap.getWidth() != desiredWidth
+        || currentBitmap.getHeight() != desiredHeight) {
+      currentBitmap =
+          Bitmap.createBitmap(
+              desiredWidth, desiredHeight, android.graphics.Bitmap.Config.ARGB_8888);
+    }
+    ByteBuffer buffer = imagePlane.getBuffer();
+    buffer.rewind();
+    currentBitmap.copyPixelsFromBuffer(buffer);
   }
 
   @Override

@@ -644,6 +644,12 @@ bool AndroidSurfaceManager::BlitAndSwapOverlaySurface(
     if (it != overlay_egl_surfaces_.end()) {
       overlay_surface = it->second;
     } else {
+      EGLint format = 0;
+      if (eglGetConfigAttrib(egl_display_, egl_config_, EGL_NATIVE_VISUAL_ID,
+                             &format) == EGL_TRUE &&
+          format != 0) {
+        ANativeWindow_setBuffersGeometry(overlay_window, 0, 0, format);
+      }
       overlay_surface = eglCreateWindowSurface(egl_display_, egl_config_,
                                                overlay_window, nullptr);
       if (overlay_surface == EGL_NO_SURFACE) {
@@ -716,6 +722,36 @@ bool AndroidSurfaceManager::BlitAndSwapOverlaySurface(
   }();
 
   if (glBlitFramebuffer_fn) {
+    struct ScopedOverlayGLState {
+      GLboolean scissor_enabled = GL_FALSE;
+      GLint scissor_box[4] = {0, 0, 0, 0};
+      GLboolean color_mask[4] = {GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE};
+
+      ScopedOverlayGLState() {
+        scissor_enabled = glIsEnabled(GL_SCISSOR_TEST);
+        glGetIntegerv(GL_SCISSOR_BOX, scissor_box);
+        glGetBooleanv(GL_COLOR_WRITEMASK, color_mask);
+
+        if (scissor_enabled) {
+          glDisable(GL_SCISSOR_TEST);
+        }
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+      }
+
+      ~ScopedOverlayGLState() {
+        if (scissor_enabled) {
+          glEnable(GL_SCISSOR_TEST);
+          glScissor(scissor_box[0], scissor_box[1], scissor_box[2],
+                    scissor_box[3]);
+        } else {
+          glDisable(GL_SCISSOR_TEST);
+        }
+        glColorMask(color_mask[0], color_mask[1], color_mask[2], color_mask[3]);
+      }
+    };
+
+    ScopedOverlayGLState state_guard;
+
     // GL_READ_FRAMEBUFFER = 0x8CA8
     constexpr GLenum kGLReadFramebuffer = 0x8CA8;
     // GL_DRAW_FRAMEBUFFER = 0x8CA9
@@ -724,7 +760,14 @@ bool AndroidSurfaceManager::BlitAndSwapOverlaySurface(
     glBindFramebuffer(kGLDrawFramebuffer, 0);
     glBlitFramebuffer_fn(0, 0, width, height, 0, 0, width, height,
                          GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+    GLenum blit_err = glGetError();
+    if (blit_err != GL_NO_ERROR) {
+      FML_LOG(ERROR) << "glBlitFramebuffer failed with GL error: " << blit_err;
+    }
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glFlush();
   } else {
     FML_LOG(ERROR)
         << "glBlitFramebuffer could not be resolved; skipping overlay blit.";
