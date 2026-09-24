@@ -24,10 +24,18 @@ import '../cupertino_localizations.dart';
 // dart format off
 
 /// The translations for Afrikaans (`af`).
+@Deprecated(
+  'Use CupertinoLocalizationAf from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Afrikaans.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationAf from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationAf({
     super.localeName = 'af',
     required super.fullYearFormat,
@@ -214,10 +222,18 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Amharic (`am`).
+@Deprecated(
+  'Use CupertinoLocalizationAm from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Amharic.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationAm from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationAm({
     super.localeName = 'am',
     required super.fullYearFormat,
@@ -404,10 +420,18 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Arabic (`ar`).
+@Deprecated(
+  'Use CupertinoLocalizationAr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Arabic.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationAr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationAr({
     super.localeName = 'ar',
     required super.fullYearFormat,
@@ -594,10 +618,18 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Assamese (`as`).
+@Deprecated(
+  'Use CupertinoLocalizationAs from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Assamese.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationAs from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationAs({
     super.localeName = 'as',
     required super.fullYearFormat,
@@ -784,10 +816,18 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Azerbaijani (`az`).
+@Deprecated(
+  'Use CupertinoLocalizationAz from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Azerbaijani.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationAz from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationAz({
     super.localeName = 'az',
     required super.fullYearFormat,
@@ -974,10 +1014,18 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Belarusian (`be`).
+@Deprecated(
+  'Use CupertinoLocalizationBe from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Belarusian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationBe from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationBe({
     super.localeName = 'be',
     required super.fullYearFormat,
@@ -1164,10 +1212,18 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Bulgarian (`bg`).
+@Deprecated(
+  'Use CupertinoLocalizationBg from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Bulgarian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationBg from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationBg({
     super.localeName = 'bg',
     required super.fullYearFormat,
@@ -1354,10 +1410,18 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Bengali Bangla (`bn`).
+@Deprecated(
+  'Use CupertinoLocalizationBn from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Bengali Bangla.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationBn from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationBn({
     super.localeName = 'bn',
     required super.fullYearFormat,
@@ -1544,10 +1608,18 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Tibetan (`bo`).
+@Deprecated(
+  'Use CupertinoLocalizationBo from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationBo extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Tibetan.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationBo from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationBo({
     super.localeName = 'bo',
     required super.fullYearFormat,
@@ -1734,10 +1806,18 @@ class CupertinoLocalizationBo extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Bosnian (`bs`).
+@Deprecated(
+  'Use CupertinoLocalizationBs from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Bosnian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationBs from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationBs({
     super.localeName = 'bs',
     required super.fullYearFormat,
@@ -1924,10 +2004,18 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Catalan Valencian (`ca`).
+@Deprecated(
+  'Use CupertinoLocalizationCa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Catalan Valencian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationCa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationCa({
     super.localeName = 'ca',
     required super.fullYearFormat,
@@ -2114,10 +2202,18 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Czech (`cs`).
+@Deprecated(
+  'Use CupertinoLocalizationCs from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Czech.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationCs from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationCs({
     super.localeName = 'cs',
     required super.fullYearFormat,
@@ -2304,10 +2400,18 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Welsh (`cy`).
+@Deprecated(
+  'Use CupertinoLocalizationCy from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Welsh.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationCy from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationCy({
     super.localeName = 'cy',
     required super.fullYearFormat,
@@ -2494,10 +2598,18 @@ class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Danish (`da`).
+@Deprecated(
+  'Use CupertinoLocalizationDa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Danish.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationDa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationDa({
     super.localeName = 'da',
     required super.fullYearFormat,
@@ -2684,10 +2796,18 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for German (`de`).
+@Deprecated(
+  'Use CupertinoLocalizationDe from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for German.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationDe from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationDe({
     super.localeName = 'de',
     required super.fullYearFormat,
@@ -2874,10 +2994,18 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for German, as used in Switzerland (`de_CH`).
+@Deprecated(
+  'Use CupertinoLocalizationDeCh from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationDeCh extends CupertinoLocalizationDe {
   /// Create an instance of the translation bundle for German, as used in Switzerland.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationDeCh from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationDeCh({
     super.localeName = 'de_CH',
     required super.fullYearFormat,
@@ -2902,10 +3030,18 @@ class CupertinoLocalizationDeCh extends CupertinoLocalizationDe {
 }
 
 /// The translations for Modern Greek (`el`).
+@Deprecated(
+  'Use CupertinoLocalizationEl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Modern Greek.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEl({
     super.localeName = 'el',
     required super.fullYearFormat,
@@ -3092,10 +3228,18 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for English (`en`).
+@Deprecated(
+  'Use CupertinoLocalizationEn from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for English.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEn from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEn({
     super.localeName = 'en',
     required super.fullYearFormat,
@@ -3282,10 +3426,18 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for English, as used in Australia (`en_AU`).
+@Deprecated(
+  'Use CupertinoLocalizationEnAu from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEnAu extends CupertinoLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in Australia.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEnAu from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEnAu({
     super.localeName = 'en_AU',
     required super.fullYearFormat,
@@ -3319,10 +3471,18 @@ class CupertinoLocalizationEnAu extends CupertinoLocalizationEn {
 }
 
 /// The translations for English, as used in Canada (`en_CA`).
+@Deprecated(
+  'Use CupertinoLocalizationEnCa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEnCa extends CupertinoLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in Canada.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEnCa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEnCa({
     super.localeName = 'en_CA',
     required super.fullYearFormat,
@@ -3344,10 +3504,18 @@ class CupertinoLocalizationEnCa extends CupertinoLocalizationEn {
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).
+@Deprecated(
+  'Use CupertinoLocalizationEnGb from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEnGb extends CupertinoLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in the United Kingdom.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEnGb from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEnGb({
     super.localeName = 'en_GB',
     required super.fullYearFormat,
@@ -3381,10 +3549,18 @@ class CupertinoLocalizationEnGb extends CupertinoLocalizationEn {
 }
 
 /// The translations for English, as used in Ireland (`en_IE`).
+@Deprecated(
+  'Use CupertinoLocalizationEnIe from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEnIe extends CupertinoLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in Ireland.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEnIe from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEnIe({
     super.localeName = 'en_IE',
     required super.fullYearFormat,
@@ -3418,10 +3594,18 @@ class CupertinoLocalizationEnIe extends CupertinoLocalizationEn {
 }
 
 /// The translations for English, as used in India (`en_IN`).
+@Deprecated(
+  'Use CupertinoLocalizationEnIn from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEnIn extends CupertinoLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in India.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEnIn from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEnIn({
     super.localeName = 'en_IN',
     required super.fullYearFormat,
@@ -3455,10 +3639,18 @@ class CupertinoLocalizationEnIn extends CupertinoLocalizationEn {
 }
 
 /// The translations for English, as used in New Zealand (`en_NZ`).
+@Deprecated(
+  'Use CupertinoLocalizationEnNz from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEnNz extends CupertinoLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in New Zealand.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEnNz from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEnNz({
     super.localeName = 'en_NZ',
     required super.fullYearFormat,
@@ -3492,10 +3684,18 @@ class CupertinoLocalizationEnNz extends CupertinoLocalizationEn {
 }
 
 /// The translations for English, as used in Singapore (`en_SG`).
+@Deprecated(
+  'Use CupertinoLocalizationEnSg from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEnSg extends CupertinoLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in Singapore.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEnSg from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEnSg({
     super.localeName = 'en_SG',
     required super.fullYearFormat,
@@ -3529,10 +3729,18 @@ class CupertinoLocalizationEnSg extends CupertinoLocalizationEn {
 }
 
 /// The translations for English, as used in South Africa (`en_ZA`).
+@Deprecated(
+  'Use CupertinoLocalizationEnZa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEnZa extends CupertinoLocalizationEn {
   /// Create an instance of the translation bundle for English, as used in South Africa.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEnZa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEnZa({
     super.localeName = 'en_ZA',
     required super.fullYearFormat,
@@ -3566,10 +3774,18 @@ class CupertinoLocalizationEnZa extends CupertinoLocalizationEn {
 }
 
 /// The translations for Spanish Castilian (`es`).
+@Deprecated(
+  'Use CupertinoLocalizationEs from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Spanish Castilian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEs from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEs({
     super.localeName = 'es',
     required super.fullYearFormat,
@@ -3756,10 +3972,18 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
+@Deprecated(
+  'Use CupertinoLocalizationEs419 from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEs419 extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Latin America and the Caribbean.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEs419 from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEs419({
     super.localeName = 'es_419',
     required super.fullYearFormat,
@@ -3814,10 +4038,18 @@ class CupertinoLocalizationEs419 extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Argentina (`es_AR`).
+@Deprecated(
+  'Use CupertinoLocalizationEsAr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsAr extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Argentina.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsAr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsAr({
     super.localeName = 'es_AR',
     required super.fullYearFormat,
@@ -3872,10 +4104,18 @@ class CupertinoLocalizationEsAr extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Bolivia (`es_BO`).
+@Deprecated(
+  'Use CupertinoLocalizationEsBo from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsBo extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Bolivia.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsBo from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsBo({
     super.localeName = 'es_BO',
     required super.fullYearFormat,
@@ -3930,10 +4170,18 @@ class CupertinoLocalizationEsBo extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Chile (`es_CL`).
+@Deprecated(
+  'Use CupertinoLocalizationEsCl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsCl extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Chile.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsCl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsCl({
     super.localeName = 'es_CL',
     required super.fullYearFormat,
@@ -3988,10 +4236,18 @@ class CupertinoLocalizationEsCl extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Colombia (`es_CO`).
+@Deprecated(
+  'Use CupertinoLocalizationEsCo from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsCo extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Colombia.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsCo from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsCo({
     super.localeName = 'es_CO',
     required super.fullYearFormat,
@@ -4046,10 +4302,18 @@ class CupertinoLocalizationEsCo extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Costa Rica (`es_CR`).
+@Deprecated(
+  'Use CupertinoLocalizationEsCr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsCr extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Costa Rica.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsCr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsCr({
     super.localeName = 'es_CR',
     required super.fullYearFormat,
@@ -4104,10 +4368,18 @@ class CupertinoLocalizationEsCr extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in the Dominican Republic (`es_DO`).
+@Deprecated(
+  'Use CupertinoLocalizationEsDo from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsDo extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in the Dominican Republic.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsDo from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsDo({
     super.localeName = 'es_DO',
     required super.fullYearFormat,
@@ -4162,10 +4434,18 @@ class CupertinoLocalizationEsDo extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Ecuador (`es_EC`).
+@Deprecated(
+  'Use CupertinoLocalizationEsEc from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsEc extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Ecuador.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsEc from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsEc({
     super.localeName = 'es_EC',
     required super.fullYearFormat,
@@ -4220,10 +4500,18 @@ class CupertinoLocalizationEsEc extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Guatemala (`es_GT`).
+@Deprecated(
+  'Use CupertinoLocalizationEsGt from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsGt extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Guatemala.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsGt from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsGt({
     super.localeName = 'es_GT',
     required super.fullYearFormat,
@@ -4278,10 +4566,18 @@ class CupertinoLocalizationEsGt extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Honduras (`es_HN`).
+@Deprecated(
+  'Use CupertinoLocalizationEsHn from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsHn extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Honduras.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsHn from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsHn({
     super.localeName = 'es_HN',
     required super.fullYearFormat,
@@ -4336,10 +4632,18 @@ class CupertinoLocalizationEsHn extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Mexico (`es_MX`).
+@Deprecated(
+  'Use CupertinoLocalizationEsMx from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsMx extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Mexico.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsMx from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsMx({
     super.localeName = 'es_MX',
     required super.fullYearFormat,
@@ -4394,10 +4698,18 @@ class CupertinoLocalizationEsMx extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Nicaragua (`es_NI`).
+@Deprecated(
+  'Use CupertinoLocalizationEsNi from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsNi extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Nicaragua.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsNi from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsNi({
     super.localeName = 'es_NI',
     required super.fullYearFormat,
@@ -4452,10 +4764,18 @@ class CupertinoLocalizationEsNi extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Panama (`es_PA`).
+@Deprecated(
+  'Use CupertinoLocalizationEsPa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsPa extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Panama.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsPa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsPa({
     super.localeName = 'es_PA',
     required super.fullYearFormat,
@@ -4510,10 +4830,18 @@ class CupertinoLocalizationEsPa extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Peru (`es_PE`).
+@Deprecated(
+  'Use CupertinoLocalizationEsPe from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsPe extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Peru.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsPe from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsPe({
     super.localeName = 'es_PE',
     required super.fullYearFormat,
@@ -4568,10 +4896,18 @@ class CupertinoLocalizationEsPe extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Puerto Rico (`es_PR`).
+@Deprecated(
+  'Use CupertinoLocalizationEsPr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsPr extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Puerto Rico.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsPr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsPr({
     super.localeName = 'es_PR',
     required super.fullYearFormat,
@@ -4626,10 +4962,18 @@ class CupertinoLocalizationEsPr extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Paraguay (`es_PY`).
+@Deprecated(
+  'Use CupertinoLocalizationEsPy from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsPy extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Paraguay.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsPy from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsPy({
     super.localeName = 'es_PY',
     required super.fullYearFormat,
@@ -4684,10 +5028,18 @@ class CupertinoLocalizationEsPy extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in El Salvador (`es_SV`).
+@Deprecated(
+  'Use CupertinoLocalizationEsSv from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsSv extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in El Salvador.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsSv from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsSv({
     super.localeName = 'es_SV',
     required super.fullYearFormat,
@@ -4742,10 +5094,18 @@ class CupertinoLocalizationEsSv extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in the United States (`es_US`).
+@Deprecated(
+  'Use CupertinoLocalizationEsUs from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsUs extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in the United States.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsUs from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsUs({
     super.localeName = 'es_US',
     required super.fullYearFormat,
@@ -4800,10 +5160,18 @@ class CupertinoLocalizationEsUs extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Uruguay (`es_UY`).
+@Deprecated(
+  'Use CupertinoLocalizationEsUy from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsUy extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Uruguay.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsUy from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsUy({
     super.localeName = 'es_UY',
     required super.fullYearFormat,
@@ -4858,10 +5226,18 @@ class CupertinoLocalizationEsUy extends CupertinoLocalizationEs {
 }
 
 /// The translations for Spanish Castilian, as used in Venezuela (`es_VE`).
+@Deprecated(
+  'Use CupertinoLocalizationEsVe from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEsVe extends CupertinoLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Venezuela.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEsVe from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEsVe({
     super.localeName = 'es_VE',
     required super.fullYearFormat,
@@ -4916,10 +5292,18 @@ class CupertinoLocalizationEsVe extends CupertinoLocalizationEs {
 }
 
 /// The translations for Estonian (`et`).
+@Deprecated(
+  'Use CupertinoLocalizationEt from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Estonian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEt from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEt({
     super.localeName = 'et',
     required super.fullYearFormat,
@@ -5106,10 +5490,18 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Basque (`eu`).
+@Deprecated(
+  'Use CupertinoLocalizationEu from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Basque.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationEu from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationEu({
     super.localeName = 'eu',
     required super.fullYearFormat,
@@ -5296,10 +5688,18 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Persian (`fa`).
+@Deprecated(
+  'Use CupertinoLocalizationFa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Persian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationFa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationFa({
     super.localeName = 'fa',
     required super.fullYearFormat,
@@ -5486,10 +5886,18 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Finnish (`fi`).
+@Deprecated(
+  'Use CupertinoLocalizationFi from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Finnish.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationFi from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationFi({
     super.localeName = 'fi',
     required super.fullYearFormat,
@@ -5676,10 +6084,18 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Filipino Pilipino (`fil`).
+@Deprecated(
+  'Use CupertinoLocalizationFil from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Filipino Pilipino.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationFil from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationFil({
     super.localeName = 'fil',
     required super.fullYearFormat,
@@ -5866,10 +6282,18 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for French (`fr`).
+@Deprecated(
+  'Use CupertinoLocalizationFr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for French.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationFr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationFr({
     super.localeName = 'fr',
     required super.fullYearFormat,
@@ -6056,10 +6480,18 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for French, as used in Canada (`fr_CA`).
+@Deprecated(
+  'Use CupertinoLocalizationFrCa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationFrCa extends CupertinoLocalizationFr {
   /// Create an instance of the translation bundle for French, as used in Canada.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationFrCa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationFrCa({
     super.localeName = 'fr_CA',
     required super.fullYearFormat,
@@ -6111,10 +6543,18 @@ class CupertinoLocalizationFrCa extends CupertinoLocalizationFr {
 }
 
 /// The translations for Irish (`ga`).
+@Deprecated(
+  'Use CupertinoLocalizationGa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationGa extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Irish.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationGa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationGa({
     super.localeName = 'ga',
     required super.fullYearFormat,
@@ -6301,10 +6741,18 @@ class CupertinoLocalizationGa extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Galician (`gl`).
+@Deprecated(
+  'Use CupertinoLocalizationGl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Galician.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationGl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationGl({
     super.localeName = 'gl',
     required super.fullYearFormat,
@@ -6491,10 +6939,18 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Swiss German Alemannic Alsatian (`gsw`).
+@Deprecated(
+  'Use CupertinoLocalizationGsw from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Swiss German Alemannic Alsatian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationGsw from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationGsw({
     super.localeName = 'gsw',
     required super.fullYearFormat,
@@ -6681,10 +7137,18 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Gujarati (`gu`).
+@Deprecated(
+  'Use CupertinoLocalizationGu from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Gujarati.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationGu from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationGu({
     super.localeName = 'gu',
     required super.fullYearFormat,
@@ -6871,10 +7335,18 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Hebrew (`he`).
+@Deprecated(
+  'Use CupertinoLocalizationHe from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Hebrew.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationHe from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationHe({
     super.localeName = 'he',
     required super.fullYearFormat,
@@ -7061,10 +7533,18 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Hindi (`hi`).
+@Deprecated(
+  'Use CupertinoLocalizationHi from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Hindi.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationHi from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationHi({
     super.localeName = 'hi',
     required super.fullYearFormat,
@@ -7251,10 +7731,18 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Croatian (`hr`).
+@Deprecated(
+  'Use CupertinoLocalizationHr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Croatian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationHr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationHr({
     super.localeName = 'hr',
     required super.fullYearFormat,
@@ -7441,10 +7929,18 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Hungarian (`hu`).
+@Deprecated(
+  'Use CupertinoLocalizationHu from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Hungarian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationHu from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationHu({
     super.localeName = 'hu',
     required super.fullYearFormat,
@@ -7631,10 +8127,18 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Armenian (`hy`).
+@Deprecated(
+  'Use CupertinoLocalizationHy from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Armenian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationHy from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationHy({
     super.localeName = 'hy',
     required super.fullYearFormat,
@@ -7821,10 +8325,18 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Indonesian (`id`).
+@Deprecated(
+  'Use CupertinoLocalizationId from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Indonesian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationId from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationId({
     super.localeName = 'id',
     required super.fullYearFormat,
@@ -8011,10 +8523,18 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Icelandic (`is`).
+@Deprecated(
+  'Use CupertinoLocalizationIs from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Icelandic.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationIs from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationIs({
     super.localeName = 'is',
     required super.fullYearFormat,
@@ -8201,10 +8721,18 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Italian (`it`).
+@Deprecated(
+  'Use CupertinoLocalizationIt from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Italian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationIt from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationIt({
     super.localeName = 'it',
     required super.fullYearFormat,
@@ -8391,10 +8919,18 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Japanese (`ja`).
+@Deprecated(
+  'Use CupertinoLocalizationJa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Japanese.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationJa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationJa({
     super.localeName = 'ja',
     required super.fullYearFormat,
@@ -8581,10 +9117,18 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Georgian (`ka`).
+@Deprecated(
+  'Use CupertinoLocalizationKa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Georgian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationKa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationKa({
     super.localeName = 'ka',
     required super.fullYearFormat,
@@ -8771,10 +9315,18 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Kazakh (`kk`).
+@Deprecated(
+  'Use CupertinoLocalizationKk from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Kazakh.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationKk from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationKk({
     super.localeName = 'kk',
     required super.fullYearFormat,
@@ -8961,10 +9513,18 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Khmer Central Khmer (`km`).
+@Deprecated(
+  'Use CupertinoLocalizationKm from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Khmer Central Khmer.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationKm from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationKm({
     super.localeName = 'km',
     required super.fullYearFormat,
@@ -9151,10 +9711,18 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Kannada (`kn`).
+@Deprecated(
+  'Use CupertinoLocalizationKn from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Kannada.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationKn from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationKn({
     super.localeName = 'kn',
     required super.fullYearFormat,
@@ -9341,10 +9909,18 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Korean (`ko`).
+@Deprecated(
+  'Use CupertinoLocalizationKo from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Korean.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationKo from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationKo({
     super.localeName = 'ko',
     required super.fullYearFormat,
@@ -9531,10 +10107,18 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Kirghiz Kyrgyz (`ky`).
+@Deprecated(
+  'Use CupertinoLocalizationKy from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Kirghiz Kyrgyz.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationKy from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationKy({
     super.localeName = 'ky',
     required super.fullYearFormat,
@@ -9721,10 +10305,18 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Lao (`lo`).
+@Deprecated(
+  'Use CupertinoLocalizationLo from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Lao.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationLo from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationLo({
     super.localeName = 'lo',
     required super.fullYearFormat,
@@ -9911,10 +10503,18 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Lithuanian (`lt`).
+@Deprecated(
+  'Use CupertinoLocalizationLt from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Lithuanian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationLt from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationLt({
     super.localeName = 'lt',
     required super.fullYearFormat,
@@ -10101,10 +10701,18 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Latvian (`lv`).
+@Deprecated(
+  'Use CupertinoLocalizationLv from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Latvian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationLv from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationLv({
     super.localeName = 'lv',
     required super.fullYearFormat,
@@ -10291,10 +10899,18 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Macedonian (`mk`).
+@Deprecated(
+  'Use CupertinoLocalizationMk from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Macedonian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationMk from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationMk({
     super.localeName = 'mk',
     required super.fullYearFormat,
@@ -10481,10 +11097,18 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Malayalam (`ml`).
+@Deprecated(
+  'Use CupertinoLocalizationMl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Malayalam.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationMl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationMl({
     super.localeName = 'ml',
     required super.fullYearFormat,
@@ -10671,10 +11295,18 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Mongolian (`mn`).
+@Deprecated(
+  'Use CupertinoLocalizationMn from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Mongolian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationMn from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationMn({
     super.localeName = 'mn',
     required super.fullYearFormat,
@@ -10861,10 +11493,18 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Marathi (`mr`).
+@Deprecated(
+  'Use CupertinoLocalizationMr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Marathi.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationMr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationMr({
     super.localeName = 'mr',
     required super.fullYearFormat,
@@ -11051,10 +11691,18 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Malay (`ms`).
+@Deprecated(
+  'Use CupertinoLocalizationMs from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Malay.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationMs from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationMs({
     super.localeName = 'ms',
     required super.fullYearFormat,
@@ -11241,10 +11889,18 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Burmese (`my`).
+@Deprecated(
+  'Use CupertinoLocalizationMy from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Burmese.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationMy from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationMy({
     super.localeName = 'my',
     required super.fullYearFormat,
@@ -11431,10 +12087,18 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Norwegian Bokmål (`nb`).
+@Deprecated(
+  'Use CupertinoLocalizationNb from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Norwegian Bokmål.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationNb from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationNb({
     super.localeName = 'nb',
     required super.fullYearFormat,
@@ -11621,10 +12285,18 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Nepali (`ne`).
+@Deprecated(
+  'Use CupertinoLocalizationNe from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Nepali.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationNe from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationNe({
     super.localeName = 'ne',
     required super.fullYearFormat,
@@ -11811,10 +12483,18 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Dutch Flemish (`nl`).
+@Deprecated(
+  'Use CupertinoLocalizationNl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Dutch Flemish.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationNl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationNl({
     super.localeName = 'nl',
     required super.fullYearFormat,
@@ -12001,10 +12681,18 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Norwegian (`no`).
+@Deprecated(
+  'Use CupertinoLocalizationNo from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Norwegian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationNo from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationNo({
     super.localeName = 'no',
     required super.fullYearFormat,
@@ -12191,10 +12879,18 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Oriya (`or`).
+@Deprecated(
+  'Use CupertinoLocalizationOr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Oriya.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationOr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationOr({
     super.localeName = 'or',
     required super.fullYearFormat,
@@ -12381,10 +13077,18 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Panjabi Punjabi (`pa`).
+@Deprecated(
+  'Use CupertinoLocalizationPa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Panjabi Punjabi.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationPa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationPa({
     super.localeName = 'pa',
     required super.fullYearFormat,
@@ -12571,10 +13275,18 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Polish (`pl`).
+@Deprecated(
+  'Use CupertinoLocalizationPl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Polish.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationPl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationPl({
     super.localeName = 'pl',
     required super.fullYearFormat,
@@ -12761,10 +13473,18 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Portuguese (`pt`).
+@Deprecated(
+  'Use CupertinoLocalizationPt from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Portuguese.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationPt from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationPt({
     super.localeName = 'pt',
     required super.fullYearFormat,
@@ -12951,10 +13671,18 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Portuguese, as used in Portugal (`pt_PT`).
+@Deprecated(
+  'Use CupertinoLocalizationPtPt from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
   /// Create an instance of the translation bundle for Portuguese, as used in Portugal.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationPtPt from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationPtPt({
     super.localeName = 'pt_PT',
     required super.fullYearFormat,
@@ -13021,10 +13749,18 @@ class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
 }
 
 /// The translations for Romanian Moldavian Moldovan (`ro`).
+@Deprecated(
+  'Use CupertinoLocalizationRo from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Romanian Moldavian Moldovan.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationRo from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationRo({
     super.localeName = 'ro',
     required super.fullYearFormat,
@@ -13211,10 +13947,18 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Russian (`ru`).
+@Deprecated(
+  'Use CupertinoLocalizationRu from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Russian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationRu from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationRu({
     super.localeName = 'ru',
     required super.fullYearFormat,
@@ -13401,10 +14145,18 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Sinhala Sinhalese (`si`).
+@Deprecated(
+  'Use CupertinoLocalizationSi from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Sinhala Sinhalese.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSi from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSi({
     super.localeName = 'si',
     required super.fullYearFormat,
@@ -13591,10 +14343,18 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Slovak (`sk`).
+@Deprecated(
+  'Use CupertinoLocalizationSk from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Slovak.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSk from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSk({
     super.localeName = 'sk',
     required super.fullYearFormat,
@@ -13781,10 +14541,18 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Slovenian (`sl`).
+@Deprecated(
+  'Use CupertinoLocalizationSl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Slovenian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSl({
     super.localeName = 'sl',
     required super.fullYearFormat,
@@ -13971,10 +14739,18 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Albanian (`sq`).
+@Deprecated(
+  'Use CupertinoLocalizationSq from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Albanian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSq from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSq({
     super.localeName = 'sq',
     required super.fullYearFormat,
@@ -14161,10 +14937,18 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Serbian (`sr`).
+@Deprecated(
+  'Use CupertinoLocalizationSr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Serbian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSr({
     super.localeName = 'sr',
     required super.fullYearFormat,
@@ -14351,10 +15135,18 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Serbian, using the Cyrillic script (`sr_Cyrl`).
+@Deprecated(
+  'Use CupertinoLocalizationSrCyrl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSrCyrl extends CupertinoLocalizationSr {
   /// Create an instance of the translation bundle for Serbian, using the Cyrillic script.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSrCyrl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSrCyrl({
     super.localeName = 'sr_Cyrl',
     required super.fullYearFormat,
@@ -14370,10 +15162,18 @@ class CupertinoLocalizationSrCyrl extends CupertinoLocalizationSr {
 }
 
 /// The translations for Serbian, using the Latin script (`sr_Latn`).
+@Deprecated(
+  'Use CupertinoLocalizationSrLatn from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
   /// Create an instance of the translation bundle for Serbian, using the Latin script.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSrLatn from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSrLatn({
     super.localeName = 'sr_Latn',
     required super.fullYearFormat,
@@ -14509,10 +15309,18 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
 }
 
 /// The translations for Swedish (`sv`).
+@Deprecated(
+  'Use CupertinoLocalizationSv from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Swedish.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSv from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSv({
     super.localeName = 'sv',
     required super.fullYearFormat,
@@ -14699,10 +15507,18 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Swahili (`sw`).
+@Deprecated(
+  'Use CupertinoLocalizationSw from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Swahili.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationSw from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationSw({
     super.localeName = 'sw',
     required super.fullYearFormat,
@@ -14889,10 +15705,18 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Tamil (`ta`).
+@Deprecated(
+  'Use CupertinoLocalizationTa from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Tamil.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationTa from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationTa({
     super.localeName = 'ta',
     required super.fullYearFormat,
@@ -15079,10 +15903,18 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Telugu (`te`).
+@Deprecated(
+  'Use CupertinoLocalizationTe from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Telugu.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationTe from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationTe({
     super.localeName = 'te',
     required super.fullYearFormat,
@@ -15269,10 +16101,18 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Thai (`th`).
+@Deprecated(
+  'Use CupertinoLocalizationTh from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Thai.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationTh from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationTh({
     super.localeName = 'th',
     required super.fullYearFormat,
@@ -15459,10 +16299,18 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Tagalog (`tl`).
+@Deprecated(
+  'Use CupertinoLocalizationTl from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Tagalog.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationTl from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationTl({
     super.localeName = 'tl',
     required super.fullYearFormat,
@@ -15649,10 +16497,18 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Turkish (`tr`).
+@Deprecated(
+  'Use CupertinoLocalizationTr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Turkish.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationTr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationTr({
     super.localeName = 'tr',
     required super.fullYearFormat,
@@ -15839,10 +16695,18 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Uighur Uyghur (`ug`).
+@Deprecated(
+  'Use CupertinoLocalizationUg from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationUg extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Uighur Uyghur.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationUg from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationUg({
     super.localeName = 'ug',
     required super.fullYearFormat,
@@ -16029,10 +16893,18 @@ class CupertinoLocalizationUg extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Ukrainian (`uk`).
+@Deprecated(
+  'Use CupertinoLocalizationUk from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Ukrainian.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationUk from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationUk({
     super.localeName = 'uk',
     required super.fullYearFormat,
@@ -16219,10 +17091,18 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Urdu (`ur`).
+@Deprecated(
+  'Use CupertinoLocalizationUr from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Urdu.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationUr from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationUr({
     super.localeName = 'ur',
     required super.fullYearFormat,
@@ -16409,10 +17289,18 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Uzbek (`uz`).
+@Deprecated(
+  'Use CupertinoLocalizationUz from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Uzbek.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationUz from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationUz({
     super.localeName = 'uz',
     required super.fullYearFormat,
@@ -16599,10 +17487,18 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Vietnamese (`vi`).
+@Deprecated(
+  'Use CupertinoLocalizationVi from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Vietnamese.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationVi from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationVi({
     super.localeName = 'vi',
     required super.fullYearFormat,
@@ -16789,10 +17685,18 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Chinese (`zh`).
+@Deprecated(
+  'Use CupertinoLocalizationZh from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Chinese.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationZh from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationZh({
     super.localeName = 'zh',
     required super.fullYearFormat,
@@ -16979,10 +17883,18 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
+@Deprecated(
+  'Use CupertinoLocalizationZhHans from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationZhHans extends CupertinoLocalizationZh {
   /// Create an instance of the translation bundle for Chinese, using the Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationZhHans from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationZhHans({
     super.localeName = 'zh_Hans',
     required super.fullYearFormat,
@@ -16998,10 +17910,18 @@ class CupertinoLocalizationZhHans extends CupertinoLocalizationZh {
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
+@Deprecated(
+  'Use CupertinoLocalizationZhHant from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
   /// Create an instance of the translation bundle for Chinese, using the Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationZhHant from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationZhHant({
     super.localeName = 'zh_Hant',
     required super.fullYearFormat,
@@ -17101,10 +18021,18 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
+@Deprecated(
+  'Use CupertinoLocalizationZhHantHk from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationZhHantHk extends CupertinoLocalizationZhHant {
   /// Create an instance of the translation bundle for Chinese, as used in Hong Kong, using the Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationZhHantHk from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationZhHantHk({
     super.localeName = 'zh_Hant_HK',
     required super.fullYearFormat,
@@ -17120,10 +18048,18 @@ class CupertinoLocalizationZhHantHk extends CupertinoLocalizationZhHant {
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
+@Deprecated(
+  'Use CupertinoLocalizationZhHantTw from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
   /// Create an instance of the translation bundle for Chinese, as used in Taiwan, using the Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationZhHantTw from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationZhHantTw({
     super.localeName = 'zh_Hant_TW',
     required super.fullYearFormat,
@@ -17178,10 +18114,18 @@ class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
 }
 
 /// The translations for Zulu (`zu`).
+@Deprecated(
+  'Use CupertinoLocalizationZu from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Zulu.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  @Deprecated(
+    'Use CupertinoLocalizationZu from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const CupertinoLocalizationZu({
     super.localeName = 'zu',
     required super.fullYearFormat,
@@ -17378,6 +18322,10 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
 /// See also:
 ///
 ///  * [getCupertinoTranslation], whose documentation describes these values.
+@Deprecated(
+  'Use kCupertinoSupportedLanguages from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <String>[
   'af', // Afrikaans
   'am', // Amharic
@@ -17557,6 +18505,10 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///
 /// Generally speaking, this method is only intended to be used by
 /// [GlobalCupertinoLocalizations.delegate].
+@Deprecated(
+  'Use getCupertinoTranslation from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 GlobalCupertinoLocalizations? getCupertinoTranslation(
   Locale locale,
   intl.DateFormat fullYearFormat,
