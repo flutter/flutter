@@ -5,16 +5,20 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
 import '../android/android_workflow.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/signals.dart';
 import '../base/terminal.dart';
@@ -22,6 +26,7 @@ import '../base/time.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
+import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/apple_context.dart';
 import '../context/tool_context.dart';
@@ -36,6 +41,7 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 import '../tracing.dart';
+import '../version.dart';
 import '../web/compile.dart';
 import '../web/devfs_config.dart';
 import '../web/web_options.dart';
@@ -305,13 +311,13 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
 class RunCommand extends RunCommandBase {
   RunCommand({
+    required AppleContext appleContext,
+    required ToolContext toolContext,
     this._androidContext,
     this._androidWorkflow,
-    required AppleContext appleContext,
     this._buildSystem,
     this._buildTargets,
     this._deviceManager,
-    required ToolContext toolContext,
     super.verboseHelp = false,
   }) : _injectedAppleContext = appleContext,
        _injectedToolContext = toolContext {
@@ -597,10 +603,7 @@ class RunCommand extends RunCommandBase {
     }
     final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
     final webMode = webDevServerConfig != null;
-    final DeviceManager? effectiveDeviceManager = deviceManager;
-    if (effectiveDeviceManager != null &&
-        effectiveDeviceManager.hasSpecifiedAllDevices &&
-        runningWithPrebuiltApplication) {
+    if ((deviceManager?.hasSpecifiedAllDevices ?? false) && runningWithPrebuiltApplication) {
       throwToolExit(
         'Using "-d all" with "--${FlutterOptions.kUseApplicationBinary}" is not supported',
       );
@@ -625,12 +628,12 @@ class RunCommand extends RunCommandBase {
       throwToolExit('Skwasm renderer requires --wasm');
     }
 
+    final Logger logger = toolContext.logger;
     final String? flavor = stringArg('flavor');
     final bool flavorsSupportedOnEveryDevice = devices!.every(
       (Device device) => device.supportsFlavors,
     );
     if (flavor != null && !flavorsSupportedOnEveryDevice) {
-      final Logger logger = toolContext.logger;
       logger.printWarning(
         '--flavor is only supported for Android, Linux, macOS, iOS, and Windows devices. '
         'Flavor-related features may not function properly and could '
@@ -640,12 +643,12 @@ class RunCommand extends RunCommandBase {
 
     if (argResults!.wasParsed('build')) {
       if (boolArg('build')) {
-        toolContext.logger.printWarning(
+        logger.printWarning(
           'The "--build" flag is deprecated and will be removed in a future release. '
           'Building is the default behavior, so this flag can be safely removed.',
         );
       } else {
-        toolContext.logger.printWarning(
+        logger.printWarning(
           'The "--no-build" flag is deprecated and will be removed in a future release. '
           'To use a prebuilt application, pass "--${FlutterOptions.kUseApplicationBinary}".',
         );
@@ -661,10 +664,16 @@ class RunCommand extends RunCommandBase {
     required FlutterProject flutterProject,
   }) async {
     final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :Config config,
+      :FlutterVersion flutterVersion,
       :FileSystem fs,
       :Logger logger,
+      :OperatingSystemUtils os,
       :OutputPreferences outputPreferences,
       :Platform platform,
+      :ProcessManager processManager,
       :SystemClock systemClock,
       :Terminal terminal,
     ) = toolContext;
@@ -683,22 +692,22 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         analytics: analytics,
         applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
-        artifacts: toolContext.artifacts,
+        artifacts: artifacts,
         benchmarkMode: boolArg('benchmark'),
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
-        cache: toolContext.cache,
-        config: toolContext.config,
+        cache: cache,
+        config: config,
         dartBuilder: hookRunner,
         dillOutputPath: stringArg('output-dill'),
         fileSystem: fs,
-        flutterVersion: toolContext.flutterVersion,
+        flutterVersion: flutterVersion,
         logger: logger,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
-        osUtils: toolContext.os,
+        osUtils: os,
         outputPreferences: outputPreferences,
         platform: platform,
-        processManager: toolContext.processManager,
+        processManager: processManager,
         projectRootPath: stringArg('project-root'),
         stayResident: stayResident,
         terminal: terminal,
@@ -727,20 +736,20 @@ class RunCommand extends RunCommandBase {
       target: targetFile,
       analytics: analytics,
       applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
-      artifacts: toolContext.artifacts,
+      artifacts: artifacts,
       awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
       buildSystem: _buildSystem,
       buildTargets: _buildTargets,
-      cache: toolContext.cache,
-      config: toolContext.config,
+      cache: cache,
+      config: config,
       dartBuilder: hookRunner,
       fileSystem: fs,
-      flutterVersion: toolContext.flutterVersion,
+      flutterVersion: flutterVersion,
       logger: logger,
-      osUtils: toolContext.os,
+      osUtils: os,
       outputPreferences: outputPreferences,
       platform: platform,
-      processManager: toolContext.processManager,
+      processManager: processManager,
       stayResident: stayResident,
       terminal: terminal,
       traceStartup: traceStartup,
@@ -756,6 +765,7 @@ class RunCommand extends RunCommandBase {
       :Logger logger,
       :OutputPreferences outputPreferences,
       :Platform platform,
+      :ProcessManager processManager,
       :Stdio stdio,
       :SystemClock systemClock,
       :AnsiTerminal terminal,
@@ -771,7 +781,7 @@ class RunCommand extends RunCommandBase {
       logger: logger,
       outputPreferences: outputPreferences,
       platform: platform,
-      processManager: toolContext.processManager,
+      processManager: processManager,
       stdio: stdio,
       systemClock: systemClock,
       terminal: terminal,
@@ -955,11 +965,3 @@ typedef AnalyticsUsageValuesRecord = ({
   String runTargetOsVersion,
   bool? runEnableHcpp,
 });
-
-// TODO(bkonyi): This will be removed in a follow up PR once Google3 callers
-// provide AppleContext and ToolContext directly. This fallback context delegates to
-// globals.* to maintain backwards compatibility with existing Google3 commands.
-
-// TODO(bkonyi): This will be removed in a follow up PR once Google3 callers
-// provide AppleContext and ToolContext directly. This fallback context delegates to
-// globals.* to maintain backwards compatibility with existing Google3 commands.

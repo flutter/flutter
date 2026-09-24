@@ -6,7 +6,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/config.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -17,10 +16,10 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/hook_runner.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -73,51 +72,29 @@ HotRunner createHotRunner(
   Terminal? terminal,
   Xcode? xcode,
 }) {
-  HotRunnerConfig? contextHotRunnerConfig;
-  FileSystem? contextFs;
-  Platform? contextPlatform;
-  ProcessManager? contextPm;
-  Artifacts? contextArtifacts;
-  Logger? contextLogger;
-  try {
-    contextHotRunnerConfig = context.get<HotRunnerConfig>();
-  } on Object {
-    // ignore
-  }
-  try {
-    contextFs = globals.fs;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextPlatform = globals.platform;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextPm = globals.processManager;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextArtifacts = globals.artifacts;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextLogger = globals.logger;
-  } on Object {
-    // ignore
-  }
-
-  final HotRunnerConfig effectiveHotRunnerConfig =
-      hotRunnerConfig ?? (contextHotRunnerConfig ?? HotRunnerConfig());
-  final FileSystem effectiveFs = fileSystem ?? (contextFs ?? MemoryFileSystem.test());
-  final Platform effectivePlatform = platform ?? (contextPlatform ?? const LocalPlatform());
-  final ProcessManager effectiveProcessManager =
-      processManager ?? (contextPm ?? FakeProcessManager.any());
-  final Artifacts effectiveArtifacts = artifacts ?? (contextArtifacts ?? Artifacts.test());
-  final Logger effectiveLogger = logger ?? (contextLogger ?? BufferLogger.test());
+  final ToolContext(
+    artifacts: contextArtifacts,
+    cache: contextCache,
+    config: contextConfig,
+    fs: contextFs,
+    logger: contextLogger,
+    os: contextOs,
+    outputPreferences: contextOutputPreferences,
+    platform: contextPlatform,
+    processManager: contextProcessManager,
+    terminal: contextTerminal,
+  ) = DelegatingToolContext(
+    artifacts: artifacts,
+    cache: cache,
+    config: config,
+    fs: fileSystem,
+    logger: logger,
+    os: osUtils,
+    outputPreferences: outputPreferences,
+    platform: platform,
+    processManager: processManager,
+    terminal: terminal as AnsiTerminal?,
+  );
 
   if (reassembleHelper != null) {
     return HotRunner(
@@ -126,33 +103,33 @@ HotRunner createHotRunner(
       target: target,
       analytics: analytics,
       applicationBinary: applicationBinary,
-      artifacts: effectiveArtifacts,
+      artifacts: contextArtifacts,
       benchmarkMode: benchmarkMode,
       buildSystem: buildSystem,
       buildTargets: buildTargets ?? const BuildTargetsImpl(),
-      cache: cache ?? globals.cache,
+      cache: contextCache,
       commandHelp: commandHelp,
-      config: config ?? globals.config,
+      config: contextConfig,
       dartBuilder: dartBuilder,
       dillOutputPath: dillOutputPath,
-      fileSystem: effectiveFs,
+      fileSystem: contextFs,
       flutterVersion: flutterVersion,
       hostIsIde: hostIsIde,
-      hotRunnerConfig: effectiveHotRunnerConfig,
-      logger: effectiveLogger,
+      hotRunnerConfig: hotRunnerConfig,
+      logger: contextLogger,
       machine: machine,
       nativeAssetsYamlFile: nativeAssetsYamlFile,
-      osUtils: osUtils ?? globals.os,
-      outputPreferences: outputPreferences ?? globals.outputPreferences,
-      platform: effectivePlatform,
-      processManager: effectiveProcessManager,
+      osUtils: contextOs,
+      outputPreferences: contextOutputPreferences,
+      platform: contextPlatform,
+      processManager: contextProcessManager,
       projectFileInvalidator: projectFileInvalidator,
       projectRootPath: projectRootPath,
       reassembleHelper: reassembleHelper,
       reloadSourcesHelper: reloadSourcesHelper,
       stayResident: stayResident,
       stopwatchFactory: stopwatchFactory,
-      terminal: terminal ?? globals.terminal,
+      terminal: contextTerminal,
       xcode: xcode,
     );
   }
@@ -162,32 +139,32 @@ HotRunner createHotRunner(
     target: target,
     analytics: analytics,
     applicationBinary: applicationBinary,
-    artifacts: effectiveArtifacts,
+    artifacts: contextArtifacts,
     benchmarkMode: benchmarkMode,
     buildSystem: buildSystem,
     buildTargets: buildTargets ?? const BuildTargetsImpl(),
-    cache: cache ?? globals.cache,
+    cache: contextCache,
     commandHelp: commandHelp,
-    config: config ?? globals.config,
+    config: contextConfig,
     dartBuilder: dartBuilder,
     dillOutputPath: dillOutputPath,
-    fileSystem: effectiveFs,
+    fileSystem: contextFs,
     flutterVersion: flutterVersion,
     hostIsIde: hostIsIde,
-    hotRunnerConfig: effectiveHotRunnerConfig,
-    logger: effectiveLogger,
+    hotRunnerConfig: hotRunnerConfig,
+    logger: contextLogger,
     machine: machine,
     nativeAssetsYamlFile: nativeAssetsYamlFile,
-    osUtils: osUtils ?? globals.os,
-    outputPreferences: outputPreferences ?? globals.outputPreferences,
-    platform: effectivePlatform,
-    processManager: effectiveProcessManager,
+    osUtils: contextOs,
+    outputPreferences: contextOutputPreferences,
+    platform: contextPlatform,
+    processManager: contextProcessManager,
     projectFileInvalidator: projectFileInvalidator,
     projectRootPath: projectRootPath,
     reloadSourcesHelper: reloadSourcesHelper,
     stayResident: stayResident,
     stopwatchFactory: stopwatchFactory,
-    terminal: terminal ?? globals.terminal,
+    terminal: contextTerminal,
     xcode: xcode,
   );
 }
@@ -349,13 +326,13 @@ name: my_app
             debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
             target: 'main.dart',
             analytics: fakeAnalytics,
+            hotRunnerConfig: failingTestingConfig,
           ).restart(fullRestart: true);
           expect(result.isOk, false);
           expect(result.message, 'setupHotRestart failed');
           expect(failingTestingConfig.updateDevFSCompleteCalled, false);
         },
         overrides: <Type, Generator>{
-          HotRunnerConfig: () => failingTestingConfig,
           Artifacts: () => Artifacts.test(),
           FileSystem: () => fileSystem,
           Platform: () => FakePlatform(),
@@ -385,13 +362,13 @@ name: my_app
               String reloadMessage,
             ) async => ReassembleResult(<FlutterView?, FlutterVmService?>{null: null}, false, true),
             analytics: fakeAnalytics,
+            hotRunnerConfig: failingTestingConfig,
           ).restart();
           expect(result.isOk, false);
           expect(result.message, 'setupHotReload failed');
           expect(failingTestingConfig.updateDevFSCompleteCalled, false);
         },
         overrides: <Type, Generator>{
-          HotRunnerConfig: () => failingTestingConfig,
           Artifacts: () => Artifacts.test(),
           FileSystem: () => fileSystem,
           Platform: () => FakePlatform(),
@@ -416,12 +393,7 @@ name: my_app
           final devices = <FlutterDevice>[
             FlutterDevice(
               device,
-              toolContext: TestToolContext(
-                fileSystem: globals.fs,
-                logger: globals.logger,
-                processManager: globals.processManager,
-                artifacts: Artifacts.test(),
-              ),
+              toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
               targetPlatform: .unsupported,
               generator: residentCompiler,
               buildInfo: BuildInfo.debug,
@@ -433,11 +405,11 @@ name: my_app
             debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
             target: 'main.dart',
             analytics: fakeAnalytics,
+            hotRunnerConfig: shutdownTestingConfig,
           ).cleanupAfterSignal();
           expect(shutdownTestingConfig.shutdownHookCalled, true);
         },
         overrides: <Type, Generator>{
-          HotRunnerConfig: () => shutdownTestingConfig,
           Artifacts: () => Artifacts.test(),
           FileSystem: () => fileSystem,
           Platform: () => FakePlatform(),
@@ -453,12 +425,7 @@ name: my_app
           final devices = <FlutterDevice>[
             FlutterDevice(
               device,
-              toolContext: TestToolContext(
-                fileSystem: globals.fs,
-                logger: globals.logger,
-                processManager: globals.processManager,
-                artifacts: Artifacts.test(),
-              ),
+              toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
               targetPlatform: .unsupported,
               generator: residentCompiler,
               buildInfo: BuildInfo.debug,
@@ -470,11 +437,11 @@ name: my_app
             debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
             target: 'main.dart',
             analytics: fakeAnalytics,
+            hotRunnerConfig: shutdownTestingConfig,
           ).preExit();
           expect(shutdownTestingConfig.shutdownHookCalled, true);
         },
         overrides: <Type, Generator>{
-          HotRunnerConfig: () => shutdownTestingConfig,
           Artifacts: () => Artifacts.test(),
           FileSystem: () => fileSystem,
           Platform: () => FakePlatform(),
@@ -519,6 +486,7 @@ name: my_app
             target: 'main.dart',
             stopwatchFactory: fakeStopwatchFactory,
             analytics: fakeAnalytics,
+            hotRunnerConfig: testingConfig,
           ).restart(fullRestart: true);
 
           expect(result.isOk, true);
@@ -545,7 +513,6 @@ name: my_app
           expect(testingConfig.updateDevFSCompleteCalled, true);
         },
         overrides: <Type, Generator>{
-          HotRunnerConfig: () => testingConfig,
           Artifacts: () => Artifacts.test(),
           FileSystem: () => fileSystem,
           Platform: () => FakePlatform(),
@@ -592,6 +559,7 @@ name: my_app
             target: 'main.dart',
             stopwatchFactory: fakeStopwatchFactory,
             analytics: fakeAnalytics,
+            hotRunnerConfig: testingConfig,
             reloadSourcesHelper:
                 (
                   HotRunner hotRunner,
@@ -647,7 +615,6 @@ name: my_app
           expect(testingConfig.updateDevFSCompleteCalled, true);
         },
         overrides: <Type, Generator>{
-          HotRunnerConfig: () => testingConfig,
           Artifacts: () => Artifacts.test(),
           FileSystem: () => fileSystem,
           Platform: () => FakePlatform(),
@@ -675,6 +642,7 @@ name: my_app
             debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
             target: 'main.dart',
             analytics: fakeAnalytics,
+            hotRunnerConfig: testingConfig,
           );
 
           await expectLater(
@@ -690,7 +658,6 @@ name: my_app
           expect(testingConfig.updateDevFSCompleteCalled, true);
         },
         overrides: <Type, Generator>{
-          HotRunnerConfig: () => testingConfig,
           Artifacts: () => Artifacts.test(),
           FileSystem: () => fileSystem,
           Platform: () => FakePlatform(),
@@ -718,6 +685,7 @@ name: my_app
             debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
             target: 'main.dart',
             analytics: fakeAnalytics,
+            hotRunnerConfig: testingConfig,
           );
 
           await expectLater(
@@ -733,7 +701,6 @@ name: my_app
           expect(testingConfig.updateDevFSCompleteCalled, true);
         },
         overrides: <Type, Generator>{
-          HotRunnerConfig: () => testingConfig,
           Artifacts: () => Artifacts.test(),
           FileSystem: () => fileSystem,
           Platform: () => FakePlatform(),
@@ -779,11 +746,11 @@ name: my_app
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           target: 'main.dart',
           analytics: fakeAnalytics,
+          hotRunnerConfig: TestHotRunnerConfig(),
         ).attach(needsFullRestart: false);
         expect(exitCode, 2);
       },
       overrides: <Type, Generator>{
-        HotRunnerConfig: () => TestHotRunnerConfig(),
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
         Platform: () => FakePlatform(),

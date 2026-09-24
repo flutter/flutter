@@ -572,7 +572,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
         buildInfo: debuggingOptions.buildInfo,
-        shutdownHooks: shutdownHooks,
         target: target,
         toolContext: toolContext,
       );
