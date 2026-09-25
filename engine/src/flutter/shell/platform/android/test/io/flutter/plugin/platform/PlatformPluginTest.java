@@ -23,6 +23,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
@@ -994,9 +995,12 @@ public class PlatformPluginTest {
     when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
     when(mockActivity.getWindow()).thenReturn(fakeWindow);
     PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+    clearInvocations(fakeDecorView);
 
     platformPlugin.mPlatformMessageHandler.setSystemGestureExclusionRects(
         Arrays.asList(new Rect(0, 100, 48, 148)));
-    verify(fakeDecorView, never()).setSystemGestureExclusionRects(any());
+    // View.setSystemGestureExclusionRects doesn't exist before API 29, so it
+    // can't be referenced here. Verify the decor view isn't touched instead.
+    verifyNoInteractions(fakeDecorView);
   }
 }
