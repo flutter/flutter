@@ -81,9 +81,16 @@ class UnpackWindows extends Target {
         'ephemeral',
       ),
     );
+    // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter.
+    final bool hasVmserviceSnapshot = environment.fileSystem
+        .file(environment.fileSystem.path.join(engineSourcePath, 'libvmservice_snapshot.dll'))
+        .existsSync();
     final Depfile depfile = unpackDesktopArtifacts(
       fileSystem: environment.fileSystem,
-      artifacts: _kWindowsArtifacts,
+      artifacts: <String>[
+        ..._kWindowsArtifacts,
+        if (buildMode == BuildMode.profile && hasVmserviceSnapshot) 'libvmservice_snapshot.dll',
+      ],
       engineSourcePath: engineSourcePath,
       outputDirectory: outputDirectory,
       clientSourcePaths: <String>[clientSourcePath],
@@ -138,11 +145,21 @@ abstract class BundleWindowsAssets extends Target {
       outputDirectory.createSync();
     }
 
-    // Only copy the kernel blob in debug mode.
+    // Only copy the kernel blob and vmservice in debug mode.
     if (buildMode == BuildMode.debug) {
       environment.buildDir
           .childFile('app.dill')
           .copySync(outputDirectory.childFile('kernel_blob.bin').path);
+
+      final String vmserviceDill = environment.artifacts.getArtifactPath(
+        Artifact.vmserviceKernelDill,
+        mode: BuildMode.debug,
+      );
+      final File vmserviceDillFile = environment.fileSystem.file(vmserviceDill);
+      // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter.
+      if (vmserviceDillFile.existsSync()) {
+        vmserviceDillFile.copySync(outputDirectory.childFile('vmservice_snapshot.dill').path);
+      }
     }
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
