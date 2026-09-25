@@ -75,7 +75,7 @@ class _${blockName}DefaultsM3 extends SnackBarThemeData {
   Color? get closeIconColor => ${componentColor("$tokenGroup.icon")};
 
   @override
-  double get actionOverflowThreshold => 0.25;
+  double get actionOverflowThreshold => 0.50;
 }
 ''';
 }
