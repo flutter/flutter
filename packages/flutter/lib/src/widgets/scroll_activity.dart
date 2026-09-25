@@ -134,6 +134,27 @@ abstract class ScrollActivity {
   /// Called when the scroll view that is performing this activity changes its metrics.
   void applyNewDimensions() {}
 
+  /// Called when the scroll offset has been changed by [correction] to
+  /// account for a change in the layout of the content.
+  ///
+  /// An activity that holds absolute scroll offsets, such as the target offset
+  /// of an animation, must shift them by [correction] as well, otherwise its
+  /// next update undoes the correction and the content visibly jumps by that
+  /// amount. Implementations must not change the scroll position from this
+  /// method.
+  ///
+  /// The default implementation does nothing, which is correct for activities
+  /// that operate on relative offsets and for activities that restart from the
+  /// corrected position in [applyNewDimensions], which is called after any
+  /// correction, such as [BallisticScrollActivity].
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.correctBy], which calls this method.
+  ///  * [SliverGeometry.scrollOffsetCorrection], the usual origin of such a
+  ///    correction.
+  void correctBy(double correction) {}
+
   /// Whether the scroll view should ignore pointer events while performing this
   /// activity.
   ///
@@ -744,8 +765,21 @@ class DrivenScrollActivity extends ScrollActivity {
   /// animation to stop before it reaches the end.
   Future<void> get done => _completer.future;
 
+  /// Sum of the corrections received through [correctBy].
+  ///
+  /// [_controller] keeps producing offsets in the coordinate system the
+  /// animation started in, so each one is translated into the current
+  /// coordinate system before it is applied, otherwise the next tick would
+  /// undo the correction.
+  double _correction = 0.0;
+
+  @override
+  void correctBy(double correction) {
+    _correction += correction;
+  }
+
   void _tick() {
-    if (!applyMoveTo(_controller.value)) {
+    if (!applyMoveTo(_controller.value + _correction)) {
       delegate.goIdle();
     }
   }
