@@ -544,7 +544,7 @@ deps = {
   Var('flutter_git') + '/third_party/swiftshader.git' + '@' + '1be9f83618f8ba258431c0c13d7a083eb193df11',
 
   'engine/src/flutter/third_party/angle':
-  Var('flutter_git') + '/third_party/angle' + '@' + 'cc08479fbcc181697fa837069ce1103c58c15528',
+  Var('flutter_git') + '/third_party/angle' + '@' + 'a8d74ca3e5e9e4ffa241330ceedcbe302443e472',
 
   'engine/src/flutter/third_party/vulkan_memory_allocator':
   Var('chromium_git') + '/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator' + '@' + 'c788c52156f3ef7bc7ab769cb03c110a53ac8fcb',

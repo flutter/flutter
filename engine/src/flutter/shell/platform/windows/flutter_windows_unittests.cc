@@ -33,7 +33,9 @@ namespace {
 // An EGL manager that initializes EGL but fails to create surfaces.
 class HalfBrokenEGLManager : public egl::Manager {
  public:
-  HalfBrokenEGLManager() : egl::Manager(egl::GpuPreference::NoPreference) {}
+  HalfBrokenEGLManager()
+      : egl::Manager(egl::GpuPreference::NoPreference,
+                     /*allow_inverted_surface=*/false) {}
 
   std::unique_ptr<egl::WindowSurface>
   CreateWindowSurface(HWND hwnd, size_t width, size_t height) override {

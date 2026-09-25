@@ -60,10 +60,10 @@ class RenderPassGLESWithDiscardFrameBufferExtTest
 
 namespace {
 std::shared_ptr<ContextGLES> CreateFakeGLESContext(
-    ProcTableGLES::Resolver resolver = kMockResolverGLES) {
+    ProcTableGLES::Resolver resolver = kMockResolverGLES,
+    Flags flags = Flags{}) {
   auto dummy_gl_procs = std::make_unique<ProcTableGLES>(std::move(resolver));
   auto dummy_shader_library = std::vector<std::shared_ptr<fml::Mapping>>{};
-  auto flags = Flags{};
   return ContextGLES::Create(flags, std::move(dummy_gl_procs),
                              dummy_shader_library, false);
 }
@@ -238,14 +238,15 @@ class RenderPassGLESCommandTest : public ::testing::Test {
   // see, which is how a caller selects the hardware or emulated instancing
   // path.
   static RenderPassGLESContext CreateRenderPassGLESContext(
-      ProcTableGLES::Resolver resolver = kMockResolverGLES) {
+      ProcTableGLES::Resolver resolver = kMockResolverGLES,
+      Flags flags = Flags{}) {
     std::unique_ptr<NiceMock<MockGLESImpl>> mock_gl_impl =
         std::make_unique<NiceMock<MockGLESImpl>>();
     testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = *mock_gl_impl;
     std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gl_impl));
 
     std::shared_ptr<ContextGLES> context =
-        CreateFakeGLESContext(std::move(resolver));
+        CreateFakeGLESContext(std::move(resolver), flags);
     std::shared_ptr<MockWorker> dummy_worker = std::make_shared<MockWorker>();
     context->AddReactorWorker(dummy_worker);
     std::shared_ptr<ReactorGLES> reactor = context->GetReactor();
@@ -540,6 +541,86 @@ TEST_F(RenderPassGLESCommandTest, ZeroInstanceCountIssuesNoDraw) {
 
   EXPECT_CALL(mock_gl_impl_ref, DrawArrays(_, _, _)).Times(0);
   EXPECT_CALL(mock_gl_impl_ref, DrawArraysInstanced(_, _, _, _)).Times(0);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
+namespace {
+// Builds a render pass targeting a wrapped (embedder supplied) framebuffer,
+// which is the case whose orientation depends on the default framebuffer's
+// origin.
+std::shared_ptr<RenderPass> CreateWrappedFBORenderPass(
+    const std::shared_ptr<ContextGLES>& context,
+    const std::shared_ptr<ReactorGLES>& reactor,
+    const std::shared_ptr<CommandBuffer>& command_buffer) {
+  TextureDescriptor tex_desc;
+  tex_desc.size = {100, 100};
+  tex_desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  // A framebuffer that gets presented is never transient, and attaching a
+  // transient texture with a kStore store action fails validation.
+  tex_desc.storage_mode = StorageMode::kDevicePrivate;
+
+  RenderTarget target;
+  ColorAttachment color0;
+  color0.texture = TextureGLES::WrapFBO(reactor, tex_desc, /*fbo=*/1u);
+  color0.store_action = StoreAction::kStore;
+  color0.load_action = LoadAction::kClear;
+  target.SetColorAttachment(color0, 0);
+
+  return command_buffer->CreateRenderPass(target);
+}
+}  // namespace
+
+// By default the default framebuffer uses OpenGL's bottom-left origin, so a
+// wrapped FBO keeps the top-down to bottom-up viewport conversion.
+TEST_F(RenderPassGLESCommandTest, WrappedFBOConvertsViewportByDefault) {
+  auto ctx = CreateRenderPassGLESContext();
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  std::shared_ptr<RenderPass> render_pass =
+      CreateWrappedFBORenderPass(ctx.context, reactor, ctx.command_buffer);
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(1);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  render_pass->SetViewport(
+      Viewport{Rect::MakeXYWH(0, 0, 50, 50), DepthRange{0.0f, 1.0f}});
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  // flip_y = false, so y is converted: 100 - 0 - 50 == 50.
+  EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 50, 50, 50)).Times(1);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
+// When the embedder's default framebuffer has a top-left origin the whole
+// pipeline is stored top-down, so a wrapped FBO flips in the vertex shader and
+// passes the viewport through unconverted.
+TEST_F(RenderPassGLESCommandTest, WrappedFBOPassesViewportThroughWhenTopLeft) {
+  Flags flags;
+  flags.top_left_default_framebuffer_origin = true;
+
+  auto ctx = CreateRenderPassGLESContext(kMockResolverGLES, flags);
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  std::shared_ptr<RenderPass> render_pass =
+      CreateWrappedFBORenderPass(ctx.context, reactor, ctx.command_buffer);
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(1);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  render_pass->SetViewport(
+      Viewport{Rect::MakeXYWH(0, 0, 50, 50), DepthRange{0.0f, 1.0f}});
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  // flip_y = true, so y is used as-is.
+  EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 0, 50, 50)).Times(1);
 
   EXPECT_TRUE(render_pass->EncodeCommands());
   EXPECT_TRUE(reactor->React());

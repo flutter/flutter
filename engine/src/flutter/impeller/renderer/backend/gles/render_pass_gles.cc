@@ -358,7 +358,16 @@ static void EncodeViewport(const ProcTableGLES& gl,
 
   // Offscreen FBO passes flip in the vertex shader (the swapchain is
   // left alone); see https://github.com/flutter/flutter/issues/186554.
-  const bool flip_y = !is_wrapped_fbo;
+  //
+  // When the embedder's default framebuffer already has a top-left origin
+  // there is nothing to leave alone: every target, wrapped or not, is stored
+  // top-down. Keeping the whole pipeline in one orientation means the blit
+  // that presents a wrapped framebuffer to the swapchain is a straight 1:1
+  // copy, which lets the driver resolve or DMA it instead of running a
+  // full-screen shader pass to flip it.
+  const bool top_left_default_framebuffer_origin =
+      ContextGLES::Cast(*impeller_context).HasTopLeftDefaultFramebufferOrigin();
+  const bool flip_y = !is_wrapped_fbo || top_left_default_framebuffer_origin;
   const float y_flip_value = flip_y ? -1.0f : 1.0f;
 
   std::optional<Viewport> current_viewport;
