@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+
 import 'dart:io' as io;
 
 import 'package:fake_async/fake_async.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -22,6 +24,7 @@ import 'package:flutter_tools/src/commands/drive.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
+import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
@@ -30,22 +33,29 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   late FileSystem fileSystem;
   late BufferLogger logger;
   late Platform platform;
-  late Terminal terminal;
   late OutputPreferences outputPreferences;
   late FakeDeviceManager fakeDeviceManager;
   late FakeSignals signals;
+
+  DelegatingToolContext createToolContext({Signals? signalsOverride}) => DelegatingToolContext(
+    fs: fileSystem,
+    logger: logger,
+    outputPreferences: outputPreferences,
+    platform: platform,
+    signals: signalsOverride ?? signals,
+  );
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
     platform = FakePlatform();
-    terminal = Terminal.test();
     outputPreferences = OutputPreferences.test();
     fakeDeviceManager = FakeDeviceManager();
     signals = FakeSignals();
@@ -64,12 +74,7 @@ void main() {
     () async {
       final capturingDriverService = CapturingDriverService();
       final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: signals,
+        toolContext: createToolContext(),
         flutterDriverFactory: CapturingFlutterDriverFactory(capturingDriverService),
       );
 
@@ -105,14 +110,7 @@ void main() {
   testUsingContext(
     'fails if the specified --target is not found',
     () async {
-      final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: signals,
-      );
+      final command = DriveCommand(toolContext: createToolContext());
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
       fileSystem.file('pubspec.yaml').createSync();
@@ -136,14 +134,7 @@ void main() {
   testUsingContext(
     'fails if the default --target is not found',
     () async {
-      final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: signals,
-      );
+      final command = DriveCommand(toolContext: createToolContext());
       fileSystem.file('lib/app.dart').createSync(recursive: true);
       fileSystem.file('test_driver/app_test.dart').createSync(recursive: true);
       fileSystem.file('pubspec.yaml').createSync();
@@ -165,14 +156,7 @@ void main() {
   testUsingContext(
     'fails with an informative error message if --target looks like --driver',
     () async {
-      final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: signals,
-      );
+      final command = DriveCommand(toolContext: createToolContext());
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
       fileSystem.file('pubspec.yaml').createSync();
@@ -199,14 +183,7 @@ void main() {
   testUsingContext(
     'warns if screenshot is not supported but continues test',
     () async {
-      final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: signals,
-      );
+      final command = DriveCommand(toolContext: createToolContext());
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
       fileSystem.file('pubspec.yaml').createSync();
@@ -242,13 +219,9 @@ void main() {
     'does not register screenshot signal handler if --screenshot not provided',
     () async {
       final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: signals,
+        toolContext: createToolContext(),
         flutterDriverFactory: FailingFakeFlutterDriverFactory(),
+        signalsToHandle: const <ProcessSignal>{ProcessSignal.sigusr1},
       );
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
@@ -271,7 +244,7 @@ void main() {
         throwsToolExit(),
       );
       expect(logger.statusText, isNot(contains('Screenshot written to ')));
-      expect(signals.addedHandlers, isEmpty);
+      expect(signals.addedSignals, isNot(contains(ProcessSignal.sigusr1)));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -284,14 +257,7 @@ void main() {
   testUsingContext(
     'takes screenshot and rethrows on drive exception',
     () async {
-      final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: signals,
-      );
+      final command = DriveCommand(toolContext: createToolContext());
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
       fileSystem.file('pubspec.yaml').createSync();
@@ -327,12 +293,7 @@ void main() {
     'takes screenshot on drive test failure',
     () async {
       final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: signals,
+        toolContext: createToolContext(),
         flutterDriverFactory: FailingFakeFlutterDriverFactory(),
       );
 
@@ -380,14 +341,7 @@ void main() {
   testUsingContext(
     'drive --screenshot errors but does not fail if screenshot fails',
     () async {
-      final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: signals,
-      );
+      final command = DriveCommand(toolContext: createToolContext());
 
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
@@ -427,12 +381,7 @@ void main() {
     'drive --timeout takes screenshot and tool exits after timeout',
     () async {
       final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: Signals.test(),
+        toolContext: createToolContext(signalsOverride: Signals.test()),
         flutterDriverFactory: FakeFlutterDriverFactory(),
       );
 
@@ -494,12 +443,7 @@ void main() {
       final signal = FakeProcessSignal();
       final signalUnderTest = ProcessSignal(signal);
       final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: Signals.test(),
+        toolContext: createToolContext(signalsOverride: Signals.test()),
         flutterDriverFactory: FakeFlutterDriverFactory(
           onStartTest: () {
             signal.controller.add(signal);
@@ -553,14 +497,7 @@ void main() {
   testUsingContext(
     'shouldRunPub is true unless user specifies --no-pub',
     () async {
-      final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: signals,
-      );
+      final command = DriveCommand(toolContext: createToolContext());
 
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
@@ -592,14 +529,7 @@ void main() {
   testUsingContext(
     'flags propagate to debugging options',
     () async {
-      final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: signals,
-      );
+      final command = DriveCommand(toolContext: createToolContext());
 
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
@@ -652,20 +582,14 @@ void main() {
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
+      Pub: () => FakePub(),
     },
   );
 
   testUsingContext(
     'Port publication not disabled for wireless device',
     () async {
-      final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: signals,
-      );
+      final command = DriveCommand(toolContext: createToolContext());
 
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
@@ -688,20 +612,14 @@ void main() {
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       DeviceManager: () => fakeDeviceManager,
+      Pub: () => FakePub(),
     },
   );
 
   testUsingContext(
     'Port publication is disabled for wired device',
     () async {
-      final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: signals,
-      );
+      final command = DriveCommand(toolContext: createToolContext());
 
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
@@ -724,20 +642,14 @@ void main() {
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       DeviceManager: () => fakeDeviceManager,
+      Pub: () => FakePub(),
     },
   );
 
   testUsingContext(
     'Port publication does not default to enabled for wireless device if flag manually added',
     () async {
-      final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: signals,
-      );
+      final command = DriveCommand(toolContext: createToolContext());
 
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
@@ -760,6 +672,7 @@ void main() {
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       DeviceManager: () => fakeDeviceManager,
+      Pub: () => FakePub(),
     },
   );
 
@@ -771,12 +684,7 @@ void main() {
       final signal = FakeProcessSignal();
       final signalUnderTest = ProcessSignal(signal);
       final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: Signals.test(),
+        toolContext: createToolContext(),
         flutterDriverFactory: FakeFlutterDriverFactory(
           onStartTest: () async {
             signal.controller.add(signal);
@@ -829,12 +737,7 @@ void main() {
       final signal = FakeProcessSignal();
       final signalUnderTest = ProcessSignal(signal);
       final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: Signals.test(),
+        toolContext: createToolContext(),
         flutterDriverFactory: FakeFlutterDriverFactory(
           onStartTest: () async {
             signal.controller.add(signal);
@@ -881,14 +784,7 @@ void main() {
   );
 
   testUsingContext('flutter drive --help explains how to use the command', () async {
-    final command = DriveCommand(
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform,
-      terminal: terminal,
-      outputPreferences: outputPreferences,
-      signals: signals,
-    );
+    final command = DriveCommand(toolContext: createToolContext());
 
     await createTestCommandRunner(command).run(<String>['drive', '--help']);
 
@@ -901,14 +797,7 @@ void main() {
   testUsingContext(
     'flutter drive fails if driver test imports package:flutter_test',
     () async {
-      final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: signals,
-      );
+      final command = DriveCommand(toolContext: createToolContext());
 
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       final File driverTest = fileSystem.file('test_driver/main_test.dart')
@@ -1190,6 +1079,19 @@ class FakeIosDevice extends Fake implements IOSDevice {
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+
+  @override
+  Future<LaunchResult> startApp(
+    IOSApp? package, {
+    String? mainPath,
+    String? route,
+    required DebuggingOptions debuggingOptions,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    bool prebuiltApplication = false,
+    String? userIdentifier,
+    Duration? discoveryTimeout,
+    ShutdownHooks? shutdownHooks,
+  }) async => LaunchResult.failed();
 }
 
 class FakeChromiumDriveDevice extends Fake implements ChromiumDevice {
@@ -1234,10 +1136,12 @@ class FakeChromiumDriveDevice extends Fake implements ChromiumDevice {
 
 class FakeSignals extends Fake implements Signals {
   List<SignalHandler> addedHandlers = <SignalHandler>[];
+  final addedSignals = <ProcessSignal>[];
 
   @override
   Object addHandler(ProcessSignal signal, SignalHandler handler) {
     addedHandlers.add(handler);
+    addedSignals.add(signal);
     return const Object();
   }
 

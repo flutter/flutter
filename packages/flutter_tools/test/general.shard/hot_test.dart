@@ -248,6 +248,7 @@ name: my_app
           final devices = <FlutterDevice>[
             FlutterDevice(
               device,
+              toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
               targetPlatform: .unsupported,
               generator: residentCompiler,
               buildInfo: BuildInfo.debug,
@@ -279,6 +280,7 @@ name: my_app
           final devices = <FlutterDevice>[
             FlutterDevice(
               device,
+              toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
               targetPlatform: .unsupported,
               generator: residentCompiler,
               buildInfo: BuildInfo.debug,

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -21,6 +22,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 
 void main() {
   testUsingContext('Exits with code 2 when HttpException is thrown '
@@ -260,8 +262,9 @@ class TestFlutterDevice extends FlutterDevice {
     required ResidentCompiler generator,
     Future<Uri>? vmServiceUri,
   }) : super(
-         targetPlatform: .unsupported,
          device,
+         toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+         targetPlatform: .unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,
          developmentShaderCompiler: const FakeShaderCompiler(),
