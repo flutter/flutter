@@ -6054,6 +6054,111 @@ void main() {
     expect(selectedRange.endOffset, 0);
   });
 
+  testWidgets('selection style changes with a layout-affecting property with an active selection', (
+    WidgetTester tester,
+  ) async {
+    var useMaxHeightStyle = false;
+    var maxLines = 2;
+    late StateSetter setState;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: _selectableRegion(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return DefaultSelectionStyle.merge(
+                selectionHeightStyle: useMaxHeightStyle ? .max : .tight,
+                child: SizedBox(
+                  width: 100,
+                  child: Text('This text should wrap across multiple lines.', maxLines: maxLines),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    final SelectableRegionState selectionState = tester.state<SelectableRegionState>(
+      find.byType(SelectableRegion),
+    );
+    selectionState.selectAll(SelectionChangedCause.keyboard);
+    await tester.pump();
+
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(
+        of: find.text('This text should wrap across multiple lines.'),
+        matching: find.byType(RichText),
+      ),
+    );
+
+    setState(() {
+      maxLines = 1;
+      useMaxHeightStyle = true;
+    });
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    expect(paragraph.debugNeedsLayout, isFalse);
+  });
+
+  testWidgets('selection style changes can notify SelectionListener listeners outside build', (
+    WidgetTester tester,
+  ) async {
+    var useMaxHeightStyle = false;
+    var listenerCalls = 0;
+    late StateSetter setState;
+    final selectionNotifier = SelectionListenerNotifier();
+    addTearDown(selectionNotifier.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: _selectableRegion(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return DefaultSelectionStyle.merge(
+                selectionHeightStyle: useMaxHeightStyle ? .max : .tight,
+                child: SelectionListener(
+                  selectionNotifier: selectionNotifier,
+                  child: const Text(
+                    'This text is selectable.',
+                    style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0, height: 3.0),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    selectionNotifier.addListener(() {
+      listenerCalls += 1;
+      setState(() {});
+    });
+
+    final SelectableRegionState selectionState = tester.state<SelectableRegionState>(
+      find.byType(SelectableRegion),
+    );
+    selectionState.selectAll(SelectionChangedCause.keyboard);
+    await tester.pump();
+    listenerCalls = 0;
+    setState(() {
+      useMaxHeightStyle = true;
+    });
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+
+    await tester.pump();
+    expect(listenerCalls, greaterThan(0));
+  });
+
   testWidgets('onSelectionChanged SelectedContentRange is accurate', (WidgetTester tester) async {
     final dataModel = <String>['How are you?', 'Good, and you?', 'Fine, thank you.'];
     final selectionNotifier = SelectionListenerNotifier();

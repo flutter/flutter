@@ -11,7 +11,14 @@ library;
 import 'dart:math' as math;
 import 'dart:ui'
     as ui
-    show Image, ImageFilter, SemanticsHitTestBehavior, SemanticsInputType, TextHeightBehavior;
+    show
+        BoxHeightStyle,
+        BoxWidthStyle,
+        Image,
+        ImageFilter,
+        SemanticsHitTestBehavior,
+        SemanticsInputType,
+        TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -6474,6 +6481,9 @@ class Flow extends MultiChildRenderObjectWidget {
 /// The [selectionColor] also needs to be set if the selection is enabled to
 /// draw the selection highlights.
 ///
+/// The [selectionHeightStyle] and [selectionWidthStyle] properties control the
+/// shape of the selection highlights.
+///
 /// {@tool snippet}
 ///
 /// This sample demonstrates how to assign a [SelectionRegistrar] for RichTexts
@@ -6534,6 +6544,8 @@ class RichText extends MultiChildRenderObjectWidget {
     this.textHeightBehavior,
     this.selectionRegistrar,
     this.selectionColor,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
   }) : assert(maxLines == null || maxLines > 0),
        assert(selectionRegistrar == null || selectionColor != null),
        assert(
@@ -6643,6 +6655,12 @@ class RichText extends MultiChildRenderObjectWidget {
   /// widgets.
   final Color? selectionColor;
 
+  /// {@macro flutter.widgets.selectionHeightStyle}
+  final ui.BoxHeightStyle? selectionHeightStyle;
+
+  /// {@macro flutter.widgets.selectionWidthStyle}
+  final ui.BoxWidthStyle? selectionWidthStyle;
+
   double _getDevicePixelRatio(BuildContext context) =>
       MediaQuery.maybeDevicePixelRatioOf(context) ?? View.maybeOf(context)?.devicePixelRatio ?? 1.0;
 
@@ -6664,6 +6682,8 @@ class RichText extends MultiChildRenderObjectWidget {
       registrar: selectionRegistrar,
       selectionColor: selectionColor,
       devicePixelRatio: _getDevicePixelRatio(context),
+      selectionHeightStyle: selectionHeightStyle ?? .tight,
+      selectionWidthStyle: selectionWidthStyle ?? .tight,
     );
   }
 
@@ -6684,7 +6704,9 @@ class RichText extends MultiChildRenderObjectWidget {
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..registrar = selectionRegistrar
       ..selectionColor = selectionColor
-      ..devicePixelRatio = _getDevicePixelRatio(context);
+      ..devicePixelRatio = _getDevicePixelRatio(context)
+      ..selectionHeightStyle = selectionHeightStyle ?? .tight
+      ..selectionWidthStyle = selectionWidthStyle ?? .tight;
   }
 
   @override
@@ -6722,6 +6744,20 @@ class RichText extends MultiChildRenderObjectWidget {
       DiagnosticsProperty<TextHeightBehavior>(
         'textHeightBehavior',
         textHeightBehavior,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      EnumProperty<ui.BoxHeightStyle>(
+        'selectionHeightStyle',
+        selectionHeightStyle,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      EnumProperty<ui.BoxWidthStyle>(
+        'selectionWidthStyle',
+        selectionWidthStyle,
         defaultValue: null,
       ),
     );

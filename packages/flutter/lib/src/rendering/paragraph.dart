@@ -22,6 +22,7 @@ import 'dart:ui'
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
@@ -356,6 +357,8 @@ class RenderParagraph extends RenderBox
     this._selectionColor,
     SelectionRegistrar? registrar,
     this._devicePixelRatio = 1.0,
+    this._selectionHeightStyle = .tight,
+    this._selectionWidthStyle = .tight,
   }) : assert(text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
@@ -777,6 +780,50 @@ class RenderParagraph extends RenderBox
     }
   }
 
+  /// {@macro flutter.widgets.selectionHeightStyle}
+  ui.BoxHeightStyle get selectionHeightStyle => _selectionHeightStyle;
+  ui.BoxHeightStyle _selectionHeightStyle;
+
+  bool _selectionGeometryUpdateScheduled = false;
+
+  void _scheduleSelectionGeometryUpdate() {
+    if (_selectionGeometryUpdateScheduled) {
+      return;
+    }
+    _selectionGeometryUpdateScheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      _selectionGeometryUpdateScheduled = false;
+      if (!attached) {
+        return;
+      }
+      _lastSelectableFragments?.forEach(
+        (_SelectableFragment fragment) => fragment._updateSelectionGeometry(),
+      );
+    });
+  }
+
+  set selectionHeightStyle(ui.BoxHeightStyle value) {
+    if (_selectionHeightStyle == value) {
+      return;
+    }
+    _selectionHeightStyle = value;
+    _scheduleSelectionGeometryUpdate();
+    markNeedsPaint();
+  }
+
+  /// {@macro flutter.widgets.selectionWidthStyle}
+  ui.BoxWidthStyle get selectionWidthStyle => _selectionWidthStyle;
+  ui.BoxWidthStyle _selectionWidthStyle;
+
+  set selectionWidthStyle(ui.BoxWidthStyle value) {
+    if (_selectionWidthStyle == value) {
+      return;
+    }
+    _selectionWidthStyle = value;
+    _scheduleSelectionGeometryUpdate();
+    markNeedsPaint();
+  }
+
   Offset _getOffsetForPosition(TextPosition position) {
     return getOffsetForCaret(position, Rect.zero) + Offset(0, getFullHeightForCaret(position));
   }
@@ -1110,8 +1157,9 @@ class RenderParagraph extends RenderBox
   /// Returns a list of rects that bound the given selection.
   ///
   /// The [boxHeightStyle] and [boxWidthStyle] arguments may be used to select
-  /// the shape of the [TextBox]es. These properties default to
-  /// [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively.
+  /// the shape of the [TextBox]es. If they are null, [selectionHeightStyle] and
+  /// [selectionWidthStyle] are used respectively. Explicit values override the
+  /// corresponding selection style.
   ///
   /// A given selection might have more than one rect if the [RenderParagraph]
   /// contains multiple [InlineSpan]s or bidirectional text, because logically
@@ -1125,15 +1173,15 @@ class RenderParagraph extends RenderBox
   ///    the equivalent boxes.
   List<ui.TextBox> getBoxesForSelection(
     TextSelection selection, {
-    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle? boxHeightStyle,
+    ui.BoxWidthStyle? boxWidthStyle,
   }) {
     assert(!debugNeedsLayout);
     _layoutTextWithConstraints(constraints);
     return _textPainter.getBoxesForSelection(
       selection,
-      boxHeightStyle: boxHeightStyle,
-      boxWidthStyle: boxWidthStyle,
+      boxHeightStyle: boxHeightStyle ?? selectionHeightStyle,
+      boxWidthStyle: boxWidthStyle ?? selectionWidthStyle,
     );
   }
 
@@ -1379,7 +1427,11 @@ class RenderParagraph extends RenderBox
         placeholderIndex += 1;
       } else {
         final initialDirection = currentDirection;
-        final List<ui.TextBox> rects = getBoxesForSelection(selection);
+        final List<ui.TextBox> rects = getBoxesForSelection(
+          selection,
+          boxHeightStyle: .tight,
+          boxWidthStyle: .tight,
+        );
         if (rects.isEmpty) {
           continue;
         }
@@ -1496,6 +1548,20 @@ class RenderParagraph extends RenderBox
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
     properties.add(DoubleProperty('devicePixelRatio', devicePixelRatio, defaultValue: 1.0));
+    properties.add(
+      EnumProperty<ui.BoxHeightStyle>(
+        'selectionHeightStyle',
+        selectionHeightStyle,
+        defaultValue: ui.BoxHeightStyle.tight,
+      ),
+    );
+    properties.add(
+      EnumProperty<ui.BoxWidthStyle>(
+        'selectionWidthStyle',
+        selectionWidthStyle,
+        defaultValue: ui.BoxWidthStyle.tight,
+      ),
+    );
   }
 }
 
