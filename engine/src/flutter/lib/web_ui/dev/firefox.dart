@@ -63,13 +63,24 @@ class Firefox extends Browser {
     return Firefox._(
       BrowserProcess(() async {
         // Using a profile on opening will prevent popups related to profiles.
-        const profile = '''
+        final profile =
+            '''
 user_pref("browser.shell.checkDefaultBrowser", false);
 user_pref("dom.disable_open_during_load", false);
 user_pref("dom.max_script_run_time", 0);
 user_pref("trailhead.firstrun.branches", "nofirstrun-empty");
 user_pref("browser.aboutwelcome.enabled", false);
-''';
+// Ensure WebGL is enabled, using the hardware GPU when available and allowing
+// fallback to software rendering when no GPU is present.
+user_pref("webgl.force-enabled", true);
+user_pref("webgl.disabled", false);
+user_pref("webgl.disable-fail-if-major-performance-caveat", true);
+${isCi ? '''
+// GPU-less Linux CI containers require software WebRender and disabled content
+// sandboxes to initialize Mesa llvmpipe (swrast) in headless mode.
+user_pref("gfx.webrender.software", true);
+user_pref("security.sandbox.content.level", 0);
+''' : ''}''';
 
         final temporaryProfileDirectory = Directory(
           path.join(environment.webUiDartToolDir.path, 'firefox_profile'),
@@ -114,7 +125,23 @@ user_pref("browser.aboutwelcome.enabled", false);
           '--start-debugger-server $kDevtoolsPort',
         ];
 
-        final Process process = await Process.start(installation.executable, args);
+        final String? linuxDisplay = await _ensureLinuxDisplay();
+        final Process process = await Process.start(
+          installation.executable,
+          args,
+          environment: <String, String>{
+            ...Platform.environment,
+            if (linuxDisplay != null) 'DISPLAY': linuxDisplay,
+            if (!debug) 'MOZ_HEADLESS': '1',
+            if (isCi) ...<String, String>{
+              'LIBGL_ALWAYS_SOFTWARE': '1',
+              'MOZ_DISABLE_CONTENT_SANDBOX': '1',
+              'MOZ_DISABLE_GPU_SANDBOX': '1',
+              'MOZ_DISABLE_RDD_SANDBOX': '1',
+              'MOZ_DISABLE_SOCKET_PROCESS_SANDBOX': '1',
+            },
+          },
+        );
         process.stdout
             .transform<String>(const Utf8Decoder(allowMalformed: true))
             .listen((String string) => print('[Firefox:stdout] $string'));
@@ -139,6 +166,44 @@ user_pref("browser.aboutwelcome.enabled", false);
   }
 
   Firefox._(this._process, this.remoteDebuggerUrl);
+
+  static Future<String?>? _virtualDisplayFuture;
+
+  /// Creates a virtual X display on Linux when `DISPLAY` is unset so headless
+  /// Firefox can initialize WebGL.
+  static Future<String?> _ensureLinuxDisplay() {
+    if (!Platform.isLinux) {
+      return Future<String?>.value();
+    }
+    final String? existingDisplay = Platform.environment['DISPLAY'];
+    if (existingDisplay != null && existingDisplay.isNotEmpty) {
+      return Future<String?>.value(existingDisplay);
+    }
+    return _virtualDisplayFuture ??= () async {
+      const display = ':99';
+      final socketFile = File('/tmp/.X11-unix/X99');
+      if (!socketFile.existsSync()) {
+        try {
+          await Process.start('Xvfb', <String>[
+            display,
+            '-screen',
+            '0',
+            '1280x800x24',
+            '-ac',
+            '-nolisten',
+            'tcp',
+          ], mode: ProcessStartMode.detached);
+          for (var i = 0; i < 10 && !socketFile.existsSync(); i++) {
+            await Future<void>.delayed(const Duration(milliseconds: 500));
+          }
+        } on Object catch (error) {
+          print('[Firefox] Failed to start Xvfb on $display: $error');
+          return null;
+        }
+      }
+      return display;
+    }();
+  }
 
   static Future<void> printActualVersion(BrowserInstallation installation) async {
     final ProcessResult result = await Process.run(installation.executable, ['--version']);
