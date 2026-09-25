@@ -5,11 +5,14 @@
 #ifndef FLUTTER_IMPELLER_ENTITY_CONTENTS_CONTENT_CONTEXT_H_
 #define FLUTTER_IMPELLER_ENTITY_CONTENTS_CONTENT_CONTEXT_H_
 
+#include <functional>
 #include <initializer_list>
 #include <memory>
 #include <optional>
+#include <string>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
@@ -128,6 +131,45 @@ class ContentContext {
       std::shared_ptr<RenderTargetAllocator> render_target_allocator = nullptr);
 
   ~ContentContext();
+
+  //----------------------------------------------------------------------------
+  /// @brief      A pipeline variant created by a `ContentContext`.
+  ///
+  struct RecordedVariant {
+    /// The descriptor the variant's pipeline was created with. This is what
+    /// `PipelineLibrary::GetPipelineUseCounts` is keyed by.
+    PipelineDescriptor descriptor;
+    ContentContextOptions options;
+    /// True if the variant was created ahead of time (warmed) by the
+    /// constructor, false if it was created lazily on first request.
+    bool warmed = false;
+  };
+
+  using PipelineVariantObserver =
+      std::function<void(const Context& context,
+                         const std::vector<RecordedVariant>& variants)>;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Sets a process-wide observer that each `ContentContext` calls
+  ///             from its destructor with every pipeline variant it created.
+  ///             Pass an empty function to remove it.
+  ///
+  ///             Only `ContentContext`s created while an observer is set record
+  ///             their variants. Intended for test diagnostics, see
+  ///             `PipelineVariantRecorder` and the `--shader-report` and
+  ///             `--fail-on-unused-shaders` flags of `impeller_golden_tests`.
+  ///
+  ///             Recording is compiled out of everything but debug builds (see
+  ///             `IsPipelineVariantRecordingSupported`); elsewhere this logs an
+  ///             error and the observer is never called.
+  ///
+  static void SetPipelineVariantObserver(PipelineVariantObserver observer);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Whether pipeline variant recording is compiled into this
+  ///             build. Only true in debug builds.
+  ///
+  static bool IsPipelineVariantRecordingSupported();
 
   bool IsValid() const;
 
