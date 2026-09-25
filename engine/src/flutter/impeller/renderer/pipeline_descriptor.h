@@ -129,6 +129,21 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
   const std::vector<Scalar>& GetSpecializationConstants() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Mark this pipeline as needing to be compiled ahead of
+  ///             normal-priority pipelines.
+  ///
+  ///             This is a scheduling hint consumed by PipelineCompileQueue. It
+  ///             is intended for the small set of pipelines required to render
+  ///             the first frame.
+  ///
+  PipelineDescriptor& SetHighPriority(bool is_high_priority) {
+    is_high_priority_ = is_high_priority;
+    return *this;
+  }
+
+  bool IsHighPriority() const { return is_high_priority_; }
+
  private:
   std::string label_;
   SampleCount sample_count_ = SampleCount::kCount1;
@@ -148,6 +163,10 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
   PrimitiveType primitive_type_ = PrimitiveType::kTriangle;
   PolygonMode polygon_mode_ = PolygonMode::kFill;
   std::vector<Scalar> specialization_constants_;
+  // Scheduling hint only. Deliberately excluded from GetHash() and IsEqual() so
+  // that descriptors differing only in priority remain the same cache key in
+  // the compile queue, in pipeline_use_counts_, and in the backend PSO caches.
+  bool is_high_priority_ = false;
 };
 
 }  // namespace impeller

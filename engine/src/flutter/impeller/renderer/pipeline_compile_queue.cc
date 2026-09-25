@@ -19,7 +19,10 @@ bool PipelineCompileQueue::PostJobForDescriptor(const PipelineDescriptor& desc,
     return false;
   }
 
-  if (!AddJob(desc, job)) {
+  const Priority priority =
+      desc.IsHighPriority() ? Priority::kHigh : Priority::kNormal;
+
+  if (!AddJob(desc, job, priority)) {
     // This bit is being extremely conservative. If insertion did not take
     // place, someone gave the compile queue a job for the same description.
     // This is highly unusual but technically not impossible. Just run the job
@@ -35,33 +38,53 @@ bool PipelineCompileQueue::PostJobForDescriptor(const PipelineDescriptor& desc,
 }
 
 bool PipelineCompileQueue::AddJob(const PipelineDescriptor& desc,
-                                  const fml::closure& job) {
+                                  const fml::closure& job,
+                                  Priority priority) {
   Lock lock(pending_jobs_mutex_);
-  auto insertion_result = pending_jobs_.insert(std::make_pair(desc, job));
+  // Priority is not part of a descriptor's identity, so a descriptor already
+  // queued at one priority must not be queued again at another. Both closures
+  // would fulfill the same promise.
+  if (pending_jobs_.find(desc) != pending_jobs_.end() ||
+      pending_high_priority_jobs_.find(desc) !=
+          pending_high_priority_jobs_.end()) {
+    return false;
+  }
+  auto& jobs = priority == Priority::kHigh ? pending_high_priority_jobs_  //
+                                           : pending_jobs_;
+  auto insertion_result = jobs.insert(std::make_pair(desc, job));
   return insertion_result.second;
 }
 
 bool PipelineCompileQueue::HasPendingJobs() {
   Lock lock(pending_jobs_mutex_);
-  return !pending_jobs_.empty();
+  return !pending_high_priority_jobs_.empty() || !pending_jobs_.empty();
 }
 
 fml::closure PipelineCompileQueue::TakeNextJob() {
   Lock lock(pending_jobs_mutex_);
-  if (pending_jobs_.empty()) {
+  // Always drain high priority jobs first. These are the pipelines needed to
+  // render the first frame.
+  auto& jobs = pending_high_priority_jobs_.empty()
+                   ? pending_jobs_
+                   : pending_high_priority_jobs_;
+  if (jobs.empty()) {
     return nullptr;
   }
-  auto job_iterator = pending_jobs_.begin();
+  auto job_iterator = jobs.begin();
   auto job = job_iterator->second;
-  pending_jobs_.erase(job_iterator);
+  jobs.erase(job_iterator);
   return job;
 }
 
 fml::closure PipelineCompileQueue::TakeJob(const PipelineDescriptor& desc) {
   Lock lock(pending_jobs_mutex_);
-  auto found = pending_jobs_.find(desc);
-  if (found == pending_jobs_.end()) {
-    return nullptr;
+  auto found = pending_high_priority_jobs_.find(desc);
+  bool found_in_high_priority = found != pending_high_priority_jobs_.end();
+  if (!found_in_high_priority) {
+    found = pending_jobs_.find(desc);
+    if (found == pending_jobs_.end()) {
+      return nullptr;
+    }
   }
   // The pipeline compile job was somewhere in the task queue. However, a
   // rendering operation needed the job to be done ASAP. Instead of waiting for
@@ -74,7 +97,11 @@ fml::closure PipelineCompileQueue::TakeJob(const PipelineDescriptor& desc) {
                     reinterpret_cast<int64_t>(this),  // Trace Counter ID
                     "PrioritiesElevated", priorities_elevated_);
   auto job = found->second;
-  pending_jobs_.erase(found);
+  if (found_in_high_priority) {
+    pending_high_priority_jobs_.erase(found);
+  } else {
+    pending_jobs_.erase(found);
+  }
   return job;
 }
 
@@ -86,16 +113,10 @@ void PipelineCompileQueue::DoOneJob() {
 
 void PipelineCompileQueue::FinishAllJobs() {
   // This doesn't have to be fast. Just ensures the task queue is flushed when
-  // the compile queue is shutting down with jobs still in it.
-  while (true) {
-    bool has_jobs = false;
-    {
-      Lock lock(pending_jobs_mutex_);
-      has_jobs = !pending_jobs_.empty();
-    }
-    if (!has_jobs) {
-      return;
-    }
+  // the compile queue is shutting down with jobs still in it. Both priority
+  // queues must be drained; leaving a job behind means its promise is never
+  // fulfilled and any thread that later waits on it blocks forever.
+  while (HasPendingJobs()) {
     // Allow any remaining worker threads to take jobs from this queue.
     DoOneJob();
   }
