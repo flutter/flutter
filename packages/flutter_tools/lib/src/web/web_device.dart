@@ -138,6 +138,7 @@ abstract class ChromiumDevice extends WebDevice {
     }
     final launchChrome = platformArgs['no-launch-chrome'] != true;
     if (launchChrome) {
+      // cacheDir is ignored internally when --user-data-dir is a custom profile.
       _chrome = await chromeLauncher.launch(
         url,
         cacheDir: _fileSystem.currentDirectory
@@ -146,6 +147,7 @@ abstract class ChromiumDevice extends WebDevice {
         headless: debuggingOptions.webRunHeadless,
         debugPort: debuggingOptions.webBrowserDebugPort,
         webBrowserFlags: debuggingOptions.webBrowserFlags,
+        webBrowserDefaultFlags: debuggingOptions.webBrowserDefaultFlags,
       );
     }
     _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});
