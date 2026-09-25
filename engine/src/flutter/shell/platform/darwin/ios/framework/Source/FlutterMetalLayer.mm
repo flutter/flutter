@@ -183,6 +183,7 @@ FLUTTER_ASSERT_ARC
 
 - (instancetype)init {
   if (self = [super init]) {
+    self.opaque = NO;
     self.presentsWithTransaction = YES;
     self.device = MTLCreateSystemDefaultDevice();
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
@@ -198,6 +199,12 @@ FLUTTER_ASSERT_ARC
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)setOpaque:(BOOL)opaque {
+  // Direct presentation can stall while platform views are composited. Keep
+  // this layer in the Core Animation compositing path for stable presentation.
+  [super setOpaque:NO];
 }
 
 - (void)setPresentsWithTransaction:(BOOL)presentsWithTransaction {
