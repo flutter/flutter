@@ -37,6 +37,12 @@ EmbedderEngine::EmbedderEngine(
                                               on_create_rasterizer)),
       external_texture_resolver_(std::move(external_texture_resolver)) {}
 
+EmbedderEngine::EmbedderEngine(const flutter::TaskRunners& task_runners,
+                               std::unique_ptr<Shell> shell)
+    : task_runners_(task_runners),
+      run_configuration_(nullptr),
+      shell_(std::move(shell)) {}
+
 EmbedderEngine::~EmbedderEngine() = default;
 
 bool EmbedderEngine::LaunchShell() {
