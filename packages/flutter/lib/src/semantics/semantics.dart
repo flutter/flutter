@@ -3308,6 +3308,13 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (_traversalChildIdentifier case final Object identifier?) {
       owner!._traversalParentNodes[identifier]?._markDirty();
     }
+    if (_traversalParentIdentifier case final Object identifier?) {
+      if (owner!._traversalChildNodes[identifier] case final Set<SemanticsNode> childNodes?) {
+        for (final childNode in childNodes) {
+          childNode.parent?._markDirty();
+        }
+      }
+    }
 
     // Clean up the according entry in owner._traversalParentNodes map.
     owner!._traversalParentNodes.removeWhere((Object key, SemanticsNode node) => node == this);
@@ -3766,6 +3773,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
     final mergeAllDescendantsIntoThisNodeValueChanged =
         _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
 
+    if (_traversalChildIdentifier != config.traversalChildIdentifier) {
+      parent?._markDirty();
+    }
+
     _identifier = config.identifier;
     _traversalParentIdentifier = config.traversalParentIdentifier;
     _traversalChildIdentifier = config.traversalChildIdentifier;
@@ -4084,6 +4095,39 @@ class SemanticsNode with DiagnosticableTreeMixin {
     return childrenInTraversalOrder;
   }
 
+  bool _shouldSkipInHitTest([Set<SemanticsNode>? visited]) {
+    if (kIsWeb) {
+      return false;
+    }
+    if (_isTraversalChild && !(parent?._isTraversalParent ?? false)) {
+      final SemanticsNode? traversalParent =
+          owner!._traversalParentNodes[getSemanticsData().traversalChildIdentifier];
+      if (traversalParent == null) {
+        return true;
+      }
+      visited ??= <SemanticsNode>{};
+      if (!visited.add(this)) {
+        return false;
+      }
+      return traversalParent._isSkippedInHitTestTree(visited);
+    }
+    return false;
+  }
+
+  bool _isSkippedInHitTestTree([Set<SemanticsNode>? visited]) {
+    if (kIsWeb) {
+      return false;
+    }
+    SemanticsNode? current = this;
+    while (current != null) {
+      if (current._shouldSkipInHitTest(visited)) {
+        return true;
+      }
+      current = current.parent;
+    }
+    return false;
+  }
+
   List<SemanticsNode> _childrenInHitTestOrder() {
     if (_children == null) {
       return const <SemanticsNode>[];
@@ -4096,16 +4140,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // dropped from the hit-test tree to keep the two trees in sync.
     // Otherwise, the user might accidentally hit test a node that cannot
     // be traversed.
-    bool shouldNotSkipInHitTest(SemanticsNode child) {
-      if (child._isTraversalChild) {
-        final SemanticsNode? traversalParent =
-            owner!._traversalParentNodes[child.getSemanticsData().traversalChildIdentifier];
-        return traversalParent != null;
-      }
-      return true;
-    }
-
-    return _children!.where(shouldNotSkipInHitTest).toList();
+    return _children!.where((SemanticsNode child) => !child._shouldSkipInHitTest()).toList();
   }
 
   Int32List _childrenIdInHitTestOrder() {
@@ -5048,9 +5083,27 @@ class SemanticsOwner extends ChangeNotifier {
           }
         }
 
+        final bool hadSameTraversalParent =
+            node._isTraversalParent &&
+            _traversalParentNodes[node.traversalParentIdentifier!] == node;
+
         // Clean up the dirty entry in owner._traversalParentNodes map because it
         // will be updated later.
-        _traversalParentNodes.removeWhere((Object key, SemanticsNode oldNode) => node == oldNode);
+        _traversalParentNodes.removeWhere((Object key, SemanticsNode oldNode) {
+          if (node == oldNode) {
+            if (!kIsWeb && key != node.traversalParentIdentifier) {
+              if (_traversalChildNodes[key] case final Set<SemanticsNode> childNodes?) {
+                for (final childNode in childNodes) {
+                  if (childNode.parent != null && !visitedNodes.contains(childNode.parent)) {
+                    childNode.parent!._markDirty();
+                  }
+                }
+              }
+            }
+            return true;
+          }
+          return false;
+        });
         // Clean up the node from the value set in owner._traversalChildNodes.
         for (final Set<SemanticsNode> childSet in _traversalChildNodes.values) {
           childSet.removeWhere((SemanticsNode oldNode) => node == oldNode);
@@ -5088,6 +5141,31 @@ class SemanticsOwner extends ChangeNotifier {
               parentNode._markDirty();
             }
           }
+          if (node._isTraversalParent) {
+            final Set<SemanticsNode>? childNodes =
+                _traversalChildNodes[node.traversalParentIdentifier];
+            if (childNodes != null) {
+              for (final SemanticsNode childNode in childNodes) {
+                if (!childNode.attached) {
+                  continue;
+                }
+                if (!visitedNodes.contains(childNode)) {
+                  childNode._markDirty();
+                }
+                if (!hadSameTraversalParent) {
+                  if (childNode.parent != null && !visitedNodes.contains(childNode.parent)) {
+                    childNode.parent!._markDirty();
+                  }
+                  childNode._visitDescendants((SemanticsNode descendant) {
+                    if (!descendant.isMergedIntoParent && !visitedNodes.contains(descendant)) {
+                      descendant._markDirty();
+                    }
+                    return true;
+                  });
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -5113,7 +5191,14 @@ class SemanticsOwner extends ChangeNotifier {
       // which happens e.g. when the node is no longer contributing
       // semantics).
       if (node._dirty && node.attached) {
-        node._addToUpdate(builder, customSemanticsActionIds);
+        if (node._isSkippedInHitTestTree()) {
+          node._dirty = false;
+          if (node._isTraversalParent) {
+            _traversalParentNodes.remove(node.traversalParentIdentifier);
+          }
+        } else {
+          node._addToUpdate(builder, customSemanticsActionIds);
+        }
       }
     }
     _dirtyNodes.clear();
