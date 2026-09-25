@@ -999,7 +999,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// {@endtemplate}
   ///
   /// You should not use [BuildContext.dependOnInheritedWidgetOfExactType] from this
-  /// method. However, [didChangeDependencies] will be called immediately
+  /// method: the framework calls this method only once, and does not call it
+  /// again when an inherited widget changes, so a value read here is never
+  /// updated. However, [didChangeDependencies] will be called immediately
   /// following this method, and [BuildContext.dependOnInheritedWidgetOfExactType] can
   /// be used there.
   ///
@@ -6075,10 +6077,10 @@ class StatefulElement extends ComponentElement {
           ),
           ErrorDescription(
             'When an inherited widget changes, for example if the value of Theme.of() changes, '
-            "its dependent widgets are rebuilt. If the dependent widget's reference to "
-            'the inherited widget is in a constructor or an initState() method, '
-            'then the rebuilt dependent widget will not reflect the changes in the '
-            'inherited widget.',
+            'its dependent widgets are rebuilt. The framework calls initState() only once per '
+            'State object and does not call it again for those rebuilds, so a value that '
+            'initState() reads from an inherited widget is never updated when that inherited '
+            'widget changes.',
           ),
           ErrorHint(
             'Typically references to inherited widgets should occur in widget build() methods. Alternatively, '
