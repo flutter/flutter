@@ -664,7 +664,12 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
                 // traversal. Without this, TAB from the field would
                 // detour into focusable items in the options overlay
                 // instead of advancing to the next form field.
-                child: ExcludeFocus(child: child),
+                child: Semantics(
+                  role: SemanticsRole.listBox,
+                  container: true,
+                  explicitChildNodes: true,
+                  child: ExcludeFocus(child: child),
+                ),
               ),
             ),
           ),

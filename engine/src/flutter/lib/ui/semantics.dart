@@ -553,6 +553,21 @@ enum SemanticsRole {
   /// For more information, see:
   /// https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/region_role
   region,
+
+  /// A widget that allows the user to select one or more items from a list of
+  /// choices.
+  ///
+  /// See also:
+  ///
+  /// * [option], which is the role for selectable items inside a [listBox].
+  listBox,
+
+  /// A selectable item in a [listBox].
+  ///
+  /// See also:
+  ///
+  /// * [listBox], which is the container role for [option] items.
+  option,
 }
 
 /// Describe the type of data for an input field.
