@@ -1636,7 +1636,7 @@ class Transform extends SingleChildRenderObjectWidget {
     this.transformHitTests = true,
     this.filterQuality,
     super.child,
-  }) : transform = _computeRotation(angle);
+  }) : transform = computeRotation(angle);
 
   /// Creates a widget that transforms its child using a translation.
   ///
@@ -1755,9 +1755,12 @@ class Transform extends SingleChildRenderObjectWidget {
   }) : alignment = Alignment.center,
        transform = Matrix4.diagonal3Values(flipX ? -1.0 : 1.0, flipY ? -1.0 : 1.0, 1.0);
 
-  // Computes a rotation matrix for an angle in radians, attempting to keep rotations
-  // at integral values for angles of 0, π/2, π, 3π/2.
-  static Matrix4 _computeRotation(double radians) {
+  /// Computes a rotation matrix for an angle in radians, attempting to keep rotations
+  /// at integral values for angles of 0, π/2, π, 3π/2.
+  ///
+  /// This is used by [Transform.rotate] and [SliverTransform.rotate] to compute
+  /// their rotation matrix.
+  static Matrix4 computeRotation(double radians) {
     assert(radians.isFinite, 'Cannot compute the rotation matrix for a non-finite angle: $radians');
     if (radians == 0.0) {
       return Matrix4.identity();

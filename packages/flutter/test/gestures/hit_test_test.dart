@@ -120,6 +120,89 @@ void main() {
 
     expect(currentTransform(result), equals(m3 * m2));
   });
+
+  test('HitTestResult.addWithOutOfBandPosition should push and pop transforms correctly', () {
+    Matrix4? currentTransform(HitTestResult targetResult) {
+      final HitTestEntry entry = HitTestEntry(_DummyHitTestTarget());
+      targetResult.add(entry);
+      return entry.transform;
+    }
+
+    final result = HitTestResult();
+    var ran = false;
+
+    // Test with paintOffset
+    bool isHit = result.addWithOutOfBandPosition(
+      paintOffset: const Offset(20, 30),
+      hitTest: (HitTestResult result) {
+        expect(currentTransform(result), equals(Matrix4.translationValues(-20, -30, 0)));
+        ran = true;
+        return true;
+      },
+    );
+    expect(isHit, isTrue);
+    expect(ran, isTrue);
+    expect(currentTransform(result), equals(Matrix4.identity()));
+    ran = false;
+
+    // Test with rawTransform
+    final rawTransform = Matrix4.translationValues(10, 20, 0);
+    isHit = result.addWithOutOfBandPosition(
+      rawTransform: rawTransform,
+      hitTest: (HitTestResult result) {
+        expect(currentTransform(result), equals(rawTransform));
+        ran = true;
+        return true;
+      },
+    );
+    expect(isHit, isTrue);
+    expect(ran, isTrue);
+    expect(currentTransform(result), equals(Matrix4.identity()));
+    ran = false;
+
+    // Test with paintTransform
+    final paintTransform = Matrix4.translationValues(10, 20, 0);
+    isHit = result.addWithOutOfBandPosition(
+      paintTransform: paintTransform,
+      hitTest: (HitTestResult result) {
+        expect(currentTransform(result), equals(Matrix4.translationValues(-10, -20, 0)));
+        ran = true;
+        return true;
+      },
+    );
+    expect(isHit, isTrue);
+    expect(ran, isTrue);
+    expect(currentTransform(result), equals(Matrix4.identity()));
+    ran = false;
+
+    // Assert that paintTransform must be invertible
+    expect(
+      () {
+        result.addWithOutOfBandPosition(
+          paintTransform: Matrix4.zero(),
+          hitTest: (HitTestResult result) {
+            fail('non-invertible transform should be caught');
+          },
+        );
+      },
+      throwsA(
+        isAssertionError.having(
+          (AssertionError error) => error.message,
+          'message',
+          'paintTransform must be invertible.',
+        ),
+      ),
+    );
+
+    // Assert that at least one transform is provided
+    expect(() {
+      result.addWithOutOfBandPosition(
+        hitTest: (HitTestResult result) {
+          fail('addWithOutOfBandPosition should need some transformation');
+        },
+      );
+    }, throwsAssertionError);
+  });
 }
 
 class _DummyHitTestTarget implements HitTestTarget {
