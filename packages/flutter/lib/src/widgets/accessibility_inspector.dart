@@ -9,6 +9,38 @@ import '_accessibility_evaluations.dart';
 import 'binding.dart';
 import 'service_extensions.dart';
 
+/// Response map keys used by the [AccessibilityServiceExtensions.getSemanticsTree]
+/// service extension in [AccessibilityInspector].
+abstract final class AccessibilityInspectorKeys {
+  /// Top-level response map key containing the map of semantics node IDs to
+  /// serialized node entries.
+  static const String data = 'data';
+
+  /// Top-level response map key containing an error message if the semantics
+  /// tree could not be retrieved.
+  static const String error = 'error';
+
+  /// Top-level response map key indicating whether a new frame has been
+  /// scheduled and is needed before the semantics tree is available.
+  static const String needsFrame = 'needsFrame';
+
+  /// Entry map key containing the JSON serialized [SemanticsNode] (from
+  /// [SemanticsNode.toJson]).
+  static const String node = 'node';
+
+  /// Entry map key containing the list of accessibility issue maps detected on
+  /// the node.
+  static const String issues = 'issues';
+
+  /// Issue map key containing the [AccessibilityEvaluationType] `.name` of the
+  /// violated accessibility rule.
+  static const String rule = 'rule';
+
+  /// Issue map key containing the human-readable [Violation.reason] describing
+  /// why the node violated the rule.
+  static const String description = 'description';
+}
+
 /// Service that handles accessibility and semantics inspection.
 class AccessibilityInspector {
   AccessibilityInspector._();
@@ -64,18 +96,23 @@ class AccessibilityInspector {
   /// Evaluates and returns the semantics tree hierarchy of the application.
   Future<Map<String, Object?>> _getSemanticsTree(Map<String, String> parameters) async {
     if (!SemanticsBinding.instance.semanticsEnabled) {
-      return <String, Object?>{'error': 'Semantics not enabled.'};
+      return <String, Object?>{AccessibilityInspectorKeys.error: 'Semantics not enabled.'};
     }
     final RenderView? renderView = _findRenderView();
     final PipelineOwner? pipelineOwner = renderView?.owner;
     final SemanticsOwner? semanticsOwner = pipelineOwner?.semanticsOwner;
     if (renderView == null || semanticsOwner == null) {
-      return <String, Object?>{'error': 'No PipelineOwner with SemanticsOwner found'};
+      return <String, Object?>{
+        AccessibilityInspectorKeys.error: 'No PipelineOwner with SemanticsOwner found',
+      };
     }
     final SemanticsNode? root = semanticsOwner.rootSemanticsNode;
     if (root == null) {
       RendererBinding.instance.ensureVisualUpdate();
-      return <String, Object?>{'error': 'rootSemanticsNode is null', 'needsFrame': true};
+      return <String, Object?>{
+        AccessibilityInspectorKeys.error: 'rootSemanticsNode is null',
+        AccessibilityInspectorKeys.needsFrame: true,
+      };
     }
 
     // The violations are displayed in Devtool.
@@ -90,18 +127,21 @@ class AccessibilityInspector {
 
     final nodeIssues = <int, List<Map<String, Object?>>>{};
 
-    final evaluations = <(AccessibilityEvaluation, String)>[
-      (MinimumTapTargetEvaluation(size: minSize), 'tapTargetSize'),
-      (const LabeledTapTargetEvaluation(), 'missingLabel'),
-      (const UnlabeledLeafNodeEvaluation(), 'unlabeledLeafNode'),
+    final evaluations = <AccessibilityEvaluation>[
+      MinimumTapTargetEvaluation(size: minSize),
+      const LabeledTapTargetEvaluation(),
+      const UnlabeledLeafNodeEvaluation(),
     ];
 
-    for (final (evaluation, rule) in evaluations) {
+    for (final evaluation in evaluations) {
       final EvaluationResult result = await evaluation.evaluate(WidgetsBinding.instance);
       for (final Violation violation in result.violations) {
         if (violation.node.owner == semanticsOwner) {
           nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
-            <String, Object?>{'rule': rule, 'description': violation.reason},
+            <String, Object?>{
+              AccessibilityInspectorKeys.rule: evaluation.type.name,
+              AccessibilityInspectorKeys.description: violation.reason,
+            },
           );
         }
       }
@@ -117,8 +157,8 @@ class AccessibilityInspector {
       }
 
       nodes[node.id.toString()] = <String, Object?>{
-        'node': node.toJson(),
-        'issues': nodeIssues[node.id] ?? <Map<String, Object?>>[],
+        AccessibilityInspectorKeys.node: node.toJson(),
+        AccessibilityInspectorKeys.issues: nodeIssues[node.id] ?? <Map<String, Object?>>[],
       };
 
       for (final SemanticsNode child in node.debugListChildrenInOrder(
@@ -137,7 +177,7 @@ class AccessibilityInspector {
       }
     }
 
-    return <String, Object?>{'data': nodes};
+    return <String, Object?>{AccessibilityInspectorKeys.data: nodes};
   }
 
   // TODO(hannah-hyj): https://github.com/flutter/devtools/issues/9991 - This returns the first RenderView with a SemanticsOwner.
