@@ -54,19 +54,9 @@ VkResult QueueSubmit(VkQueue queue,
                                                    fence);
 }
 
-// Exact match. The previous form compared N - 1 bytes of a string literal,
-// which stops at its last character and so matched any name the literal is a
-// prefix of: "vkQueueSubmit" also claimed "vkQueueSubmit2", handing back a
-// function with the wrong signature. Both sides are null-terminated, so strcmp
-// says what is meant and cannot be off by one.
-template <size_t N>
-int StrcmpFixed(const char* str1, const char (&str2)[N]) {
-  return std::strcmp(str1, str2);
-}
-
 PFN_vkVoidFunction GetDeviceProcAddr(VkDevice device, const char* pName) {
   FML_DCHECK(g_vulkan_proc_info.get_device_proc_addr != nullptr);
-  if (StrcmpFixed(pName, "vkQueueSubmit") == 0) {
+  if (std::strcmp(pName, "vkQueueSubmit") == 0) {
     g_vulkan_proc_info.queue_submit_proc_addr =
         reinterpret_cast<decltype(vkQueueSubmit)*>(
             g_vulkan_proc_info.get_device_proc_addr(device, pName));
@@ -77,7 +67,7 @@ PFN_vkVoidFunction GetDeviceProcAddr(VkDevice device, const char* pName) {
 
 PFN_vkVoidFunction GetInstanceProcAddr(VkInstance instance, const char* pName) {
   FML_DCHECK(g_vulkan_proc_info.get_instance_proc_addr != nullptr);
-  if (StrcmpFixed(pName, "vkGetDeviceProcAddr") == 0) {
+  if (std::strcmp(pName, "vkGetDeviceProcAddr") == 0) {
     g_vulkan_proc_info.get_device_proc_addr =
         reinterpret_cast<decltype(vkGetDeviceProcAddr)*>(
             g_vulkan_proc_info.get_instance_proc_addr(instance, pName));
@@ -113,7 +103,7 @@ TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
   context.SetVulkanInstanceProcAddressCallback(
       [](void* user_data, FlutterVulkanInstanceHandle instance,
          const char* name) -> void* {
-        if (StrcmpFixed(name, "vkGetInstanceProcAddr") == 0) {
+        if (std::strcmp(name, "vkGetInstanceProcAddr") == 0) {
           g_vulkan_proc_info.get_instance_proc_addr =
               reinterpret_cast<decltype(vkGetInstanceProcAddr)*>(
                   EmbedderTestContextVulkan::InstanceProcAddr(user_data,
