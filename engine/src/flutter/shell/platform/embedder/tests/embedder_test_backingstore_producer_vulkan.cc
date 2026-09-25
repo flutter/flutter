@@ -84,6 +84,7 @@ bool EmbedderTestBackingStoreProducerVulkan::Create(
   backing_store_out->type = kFlutterBackingStoreTypeVulkan;
 
   FlutterVulkanImage* image = new FlutterVulkanImage();
+  image->struct_size = sizeof(FlutterVulkanImage);
   image->image = reinterpret_cast<uint64_t>(image_info.fImage);
   image->format = VK_FORMAT_R8G8B8A8_UNORM;
   backing_store_out->vulkan.image = image;
