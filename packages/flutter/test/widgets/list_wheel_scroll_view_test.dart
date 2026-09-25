@@ -2060,37 +2060,15 @@ void main() {
     },
   );
 
-  testWidgets('ScrollPhysics supports shorthands for FixedExtentScrollPhysics', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      ListWheelScrollView(
-        itemExtent: 20.0,
-        physics: const .fixedExtent(),
-        children: <Widget>[for (int i = 0; i < 20; i++) const SizedBox()],
-      ),
-    );
+  test('FixedExtentScrollPhysics supports shorthands', () {
+    FixedExtentScrollPhysics physics = const .fixedExtent();
 
-    expect(
-      tester.widget<ListWheelScrollView>(find.byType(ListWheelScrollView)).physics,
-      isA<FixedExtentScrollPhysics>(),
-    );
-    expect(
-      tester.widget<ListWheelScrollView>(find.byType(ListWheelScrollView)).physics?.parent,
-      isNull,
-    );
+    expect(physics, isA<FixedExtentScrollPhysics>());
+    expect(physics.parent, isNull);
 
-    await tester.pumpWidget(
-      ListWheelScrollView(
-        itemExtent: 20.0,
-        physics: const .fixedExtent(parent: ClampingScrollPhysics()),
-        children: <Widget>[for (int i = 0; i < 20; i++) const SizedBox()],
-      ),
-    );
+    physics = const .fixedExtent(parent: ClampingScrollPhysics());
 
-    expect(
-      tester.widget<ListWheelScrollView>(find.byType(ListWheelScrollView)).physics?.parent,
-      isA<ClampingScrollPhysics>(),
-    );
+    expect(physics, isA<FixedExtentScrollPhysics>());
+    expect(physics.parent, isA<ClampingScrollPhysics>());
   });
 }
