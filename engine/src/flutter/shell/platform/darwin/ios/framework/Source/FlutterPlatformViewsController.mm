@@ -249,6 +249,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::vector<int64_t> _visitedPlatformViews;
   std::unordered_set<int64_t> _viewsToRecomposite;
   std::vector<int64_t> _previousCompositionOrder;
+  NSUInteger _jointPendingFrames;
 }
 
 - (id)init {
@@ -760,6 +761,14 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   }
   self.hadPlatformViews = !self.compositionOrder.empty();
 
+  [self.taskRunner runNowOrPostTask:^{
+    FML_CHECK(NSThread.isMainThread);
+    if (self->_jointPendingFrames++ == 0) {
+      [CATransaction begin];
+      [CATransaction setDisableActions:YES];
+    }
+  }];
+
   bool didEncode = true;
   LayersMap platformViewLayers;
   std::vector<std::unique_ptr<flutter::SurfaceFrame>> surfaceFrames;
@@ -847,12 +856,20 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                                  compositionOrder = self.compositionOrder,                  //
                                  unusedLayers = std::move(unusedLayers),                    //
                                  surfaceFrames = std::move(surfaceFrames)]() mutable {
-    [self performSubmit:platformViewLayers
-        currentCompositionParams:currentCompositionParams
-              viewsToRecomposite:viewsToRecomposite
-                compositionOrder:compositionOrder
-                    unusedLayers:unusedLayers
-                   surfaceFrames:surfaceFrames];
+    @try {
+      [self performSubmit:platformViewLayers
+          currentCompositionParams:currentCompositionParams
+                viewsToRecomposite:viewsToRecomposite
+                  compositionOrder:compositionOrder
+                      unusedLayers:unusedLayers
+                     surfaceFrames:surfaceFrames];
+    } @finally {
+      FML_CHECK(NSThread.isMainThread);
+      FML_CHECK(self->_jointPendingFrames > 0);
+      if (--self->_jointPendingFrames == 0) {
+        [CATransaction commit];
+      }
+    }
   });
 
   [self.taskRunner runNowOrPostTask:^{
@@ -907,9 +924,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                    (const std::vector<std::unique_ptr<flutter::SurfaceFrame>>&)surfaceFrames {
   TRACE_EVENT0("flutter", "PlatformViewsController::PerformSubmit");
   FML_DCHECK([[NSThread currentThread] isMainThread]);
-
-  // Keep platform-view mutations in UIKit's implicit transaction. Creating a
-  // nested transaction for each frame causes visible stutter while dragging.
 
   // Configure Flutter overlay views.
   for (const auto& [viewId, layerData] : platformViewLayers) {
