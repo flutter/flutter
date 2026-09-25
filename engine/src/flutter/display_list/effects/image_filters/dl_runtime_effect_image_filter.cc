@@ -10,10 +10,11 @@ std::shared_ptr<DlImageFilter> DlRuntimeEffectImageFilter::Make(
     sk_sp<DlRuntimeEffect> runtime_effect,
     std::vector<std::shared_ptr<DlColorSource>> samplers,
     std::shared_ptr<std::vector<uint8_t>> uniform_data,
-    DlImageSampling input_sampling) {
+    DlImageSampling input_sampling,
+    bool unclipped_input) {
   return std::make_shared<DlRuntimeEffectImageFilter>(
       std::move(runtime_effect), std::move(samplers), std::move(uniform_data),
-      input_sampling);
+      input_sampling, unclipped_input);
 }
 
 DlRect* DlRuntimeEffectImageFilter::map_local_bounds(
@@ -36,6 +37,11 @@ DlIRect* DlRuntimeEffectImageFilter::get_input_device_bounds(
     const DlMatrix& ctm,
     DlIRect& input_bounds) const {
   input_bounds = output_bounds;
+  if (unclipped_input_) {
+    // The entire input is needed no matter how small the output is, so no
+    // promise can be made about the input bounds.
+    return nullptr;
+  }
   return &input_bounds;
 }
 
@@ -45,7 +51,8 @@ bool DlRuntimeEffectImageFilter::equals_(const DlImageFilter& other) const {
   if (runtime_effect_ != that->runtime_effect_ ||
       samplers_.size() != that->samplers().size() ||
       uniform_data_->size() != that->uniform_data()->size() ||
-      input_sampling_ != that->input_sampling()) {
+      input_sampling_ != that->input_sampling() ||
+      unclipped_input_ != that->unclipped_input()) {
     return false;
   }
   for (auto i = 0u; i < samplers_.size(); i++) {

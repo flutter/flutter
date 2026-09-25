@@ -85,7 +85,8 @@ class FilterContents : public Contents {
       FilterInput::Ref input,
       std::shared_ptr<RuntimeStage> runtime_stage,
       std::shared_ptr<std::vector<uint8_t>> uniforms,
-      std::vector<RuntimeEffectContents::TextureInput> texture_inputs);
+      std::vector<RuntimeEffectContents::TextureInput> texture_inputs,
+      bool unclipped_input = false);
 
   FilterContents();
 
@@ -178,7 +179,9 @@ class FilterContents : public Contents {
   ///
   /// @return The coverage bounds in the transformed space of any source pixel
   ///         that may be needed to produce output for the indicated filter
-  ///         that covers the indicated |output_limit|.
+  ///         that covers the indicated |output_limit|. This is
+  ///         |Rect::MakeMaximum| when the filter needs its entire input
+  ///         regardless of the |output_limit|.
   std::optional<Rect> GetSourceCoverage(const Matrix& effect_transform,
                                         const Rect& output_limit) const;
 
