@@ -93,14 +93,14 @@ TEST(CapabilitiesGLES, SupportsTextureArrayOnES3) {
   // 2D array textures are core on OpenGL ES 3.0, no extension needed.
   auto mock_gles = MockGLES::Init(std::nullopt, "OpenGL ES 3.0");
   auto capabilities = mock_gles->GetProcTable().GetCapabilities();
-  EXPECT_TRUE(capabilities->SupportsTextureArray());
+  EXPECT_TRUE(capabilities->SupportsTextureArrays());
 }
 
 TEST(CapabilitiesGLES, DoesNotSupportTextureArrayOnES2WithoutExtension) {
   auto const extensions = std::vector<const char*>{"GL_KHR_debug"};
   auto mock_gles = MockGLES::Init(extensions, "OpenGL ES 2.0");
   auto capabilities = mock_gles->GetProcTable().GetCapabilities();
-  EXPECT_FALSE(capabilities->SupportsTextureArray());
+  EXPECT_FALSE(capabilities->SupportsTextureArrays());
 }
 
 TEST(CapabilitiesGLES, SupportsTextureArrayViaNVExtensionOnES2) {
@@ -112,7 +112,7 @@ TEST(CapabilitiesGLES, SupportsTextureArrayViaNVExtensionOnES2) {
   };
   auto mock_gles = MockGLES::Init(extensions, "OpenGL ES 2.0");
   auto capabilities = mock_gles->GetProcTable().GetCapabilities();
-  EXPECT_TRUE(capabilities->SupportsTextureArray());
+  EXPECT_TRUE(capabilities->SupportsTextureArrays());
 }
 
 TEST(CapabilitiesGLES, SupportsTextureArrayViaEXTExtension) {
@@ -124,7 +124,7 @@ TEST(CapabilitiesGLES, SupportsTextureArrayViaEXTExtension) {
   };
   auto mock_gles = MockGLES::Init(extensions, "OpenGL ES 2.0");
   auto capabilities = mock_gles->GetProcTable().GetCapabilities();
-  EXPECT_TRUE(capabilities->SupportsTextureArray());
+  EXPECT_TRUE(capabilities->SupportsTextureArrays());
 }
 
 }  // namespace testing
