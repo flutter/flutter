@@ -23,11 +23,9 @@ class VMServiceFlutterDriver extends FlutterDriver {
   VMServiceFlutterDriver.connectedTo(
     this._serviceClient,
     this._appIsolate, {
-    bool printCommunication = false,
-    bool logCommunicationToFile = true,
-  }) : _printCommunication = printCommunication,
-       _logCommunicationToFile = logCommunicationToFile,
-       _driverId = _nextDriverId++ {
+    this._printCommunication = false,
+    this._logCommunicationToFile = true,
+  }) : _driverId = _nextDriverId++ {
     _logFilePathName = p.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log');
   }
 
@@ -483,8 +481,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       await _warnIfSlow<vms.Success>(
         future: _serviceClient.clearVMTimeline(),
         timeout: timeout,
-        message:
-            'VM is taking an unusually long time to respond to being told to clear its timeline buffer...',
+        message: 'VM is taking an unusually long time to respond to being told to clear its timeline buffer...',
       );
     } catch (error, stackTrace) {
       throw DriverError('Failed to clear event timeline due to remote error', error, stackTrace);
@@ -626,5 +623,7 @@ Future<T> _warnIfSlow<T>({
 }
 
 /// A function that connects to a Dart VM service given the `url` and `headers`.
-typedef VMServiceConnectFunction =
-    Future<vms.VmService> Function(String url, Map<String, dynamic>? headers);
+typedef VMServiceConnectFunction = Future<vms.VmService> Function(
+  String url,
+  Map<String, dynamic>? headers,
+);

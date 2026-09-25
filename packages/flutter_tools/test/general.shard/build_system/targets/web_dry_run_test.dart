@@ -182,7 +182,13 @@ package:foo/some/path.dart 6:1 - dart:html unsupported (0)
       expect(
         logger.statusText,
         contains(
-          'Migrate your project from dart:html and package:js to package:web and dart:js_interop.',
+          'dart:html, dart:js, and legacy JS interop libraries are deprecated and planned for removal',
+        ),
+      );
+      expect(
+        logger.statusText,
+        contains(
+          'from the Dart SDK in a future release. Migrate your project to package:web and dart:js_interop.',
         ),
       );
 
@@ -222,7 +228,13 @@ package:bar/some/path.dart 12:4 - dart:js_util unsupported (6)
       expect(
         logger.statusText,
         contains(
-          'Migrate your project from dart:html and package:js to package:web and dart:js_interop.',
+          'dart:html, dart:js, and legacy JS interop libraries are deprecated and planned for removal',
+        ),
+      );
+      expect(
+        logger.statusText,
+        contains(
+          'from the Dart SDK in a future release. Migrate your project to package:web and dart:js_interop.',
         ),
       );
     }),
@@ -576,6 +588,115 @@ package:morelong/some/path.dart 9:20 - dart:html unsupported (0)
       expect(event.eventData['exitCode'], 254);
       expect(event.eventData['E0'], hasLength(10));
       expect(event.eventData['E0'], 'foo:${_fakePackageVersions['foo']}');
+    }),
+  );
+  test(
+    'wasm dry run extracts correct package version when ancestor directory contains numbers',
+    () => testbed.run(() async {
+      writePackageConfigFiles(
+        directory: fs.currentDirectory,
+        packages: {'foo': 'file:///opt/flutter/3.22.0/.pub-cache/hosted/pub.dev/foo-1.0.0'},
+        mainLibName: 'my_app',
+      );
+
+      processManager.addCommand(
+        FakeCommand(
+          command: commandArgs,
+          exitCode: 254,
+          stdout: '''
+Found incompatibilities with WebAssembly.
+
+package:foo/some/path.dart 6:1 - dart:html unsupported (0)
+''',
+        ),
+      );
+      final Dart2WasmTarget target = createTarget();
+      await target.build(environment);
+
+      expect(fakeAnalytics.sentEvents, hasLength(1));
+
+      final Event event = fakeAnalytics.sentEvents[0];
+      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+      expect(event.eventData, hasLength(3));
+      expect(event.eventData['result'], 'findings');
+      expect(event.eventData['exitCode'], 254);
+      expect(event.eventData['E0'], 'foo:1.0.0');
+    }),
+  );
+
+  test(
+    'wasm dry run extracts package version from custom pub mirrors',
+    () => testbed.run(() async {
+      writePackageConfigFiles(
+        directory: fs.currentDirectory,
+        packages: {
+          'foo': 'file:///opt/flutter/3.22.0/.pub-cache/hosted/pub.flutter-io.cn/foo-1.0.0/',
+        },
+        mainLibName: 'my_app',
+      );
+
+      processManager.addCommand(
+        FakeCommand(
+          command: commandArgs,
+          exitCode: 254,
+          stdout: '''
+Found incompatibilities with WebAssembly.
+
+package:foo/some/path.dart 6:1 - dart:html unsupported (0)
+''',
+        ),
+      );
+      final Dart2WasmTarget target = createTarget();
+      await target.build(environment);
+
+      expect(fakeAnalytics.sentEvents, hasLength(1));
+
+      final Event event = fakeAnalytics.sentEvents[0];
+      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+      expect(event.eventData, hasLength(3));
+      expect(event.eventData['result'], 'findings');
+      expect(event.eventData['exitCode'], 254);
+      expect(event.eventData['E0'], 'foo:1.0.0');
+    }),
+  );
+
+  test(
+    'wasm dry run extracts package versions across multiple distinct hosted domains',
+    () => testbed.run(() async {
+      writePackageConfigFiles(
+        directory: fs.currentDirectory,
+        packages: {
+          'foo': 'file:///pubcache/.pub-cache/hosted/pub.dev/foo-1.0.0',
+          'bar': 'file:///pubcache/.pub-cache/hosted/pub.flutter-io.cn/bar-2.0.0',
+          'baz': 'file:///pubcache/.pub-cache/hosted/custom.repo.org%47/baz-3.0.0/',
+        },
+        mainLibName: 'my_app',
+      );
+
+      processManager.addCommand(
+        FakeCommand(
+          command: commandArgs,
+          exitCode: 254,
+          stdout: '''
+Found incompatibilities with WebAssembly.
+
+package:foo/some/path.dart 6:1 - dart:html unsupported (0)
+package:bar/some/path.dart 8:1 - dart:html unsupported (0)
+package:baz/some/path.dart 10:1 - dart:html unsupported (0)
+''',
+        ),
+      );
+      final Dart2WasmTarget target = createTarget();
+      await target.build(environment);
+
+      expect(fakeAnalytics.sentEvents, hasLength(1));
+
+      final Event event = fakeAnalytics.sentEvents[0];
+      expect(event.eventName, equals(DashEvent.flutterWasmDryRunPackage));
+      expect(event.eventData, hasLength(3));
+      expect(event.eventData['result'], 'findings');
+      expect(event.eventData['exitCode'], 254);
+      expect(event.eventData['E0'], 'baz:3.0.0,bar:2.0.0,foo:1.0.0');
     }),
   );
 }

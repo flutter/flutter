@@ -17,7 +17,6 @@ import '../base/version.dart';
 import '../base/version_range.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import 'android_sdk.dart';
 
@@ -31,25 +30,21 @@ import 'android_sdk.dart';
 
 // When bumping, also update:
 //  * Gradle warn version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
-//  * Gradle test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://gradle.org/releases
-const templateDefaultGradleVersion = '9.3.1';
+const templateDefaultGradleVersion = '9.5.0';
 
 // When bumping, also update:
-//  * AGP version constants in packages/flutter_tools/gradle/build.gradle.kts
 //  * AGP warn version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
-//  * AGP test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 //  * AGP test constants in packages/flutter_tools/gradle/src/test/kotlin/FlutterPluginUtilsTest.kt
 // See https://mvnrepository.com/artifact/com.android.tools.build/gradle
-const templateAndroidGradlePluginVersion = '9.1.0';
-const templateAndroidGradlePluginVersionForModule = '9.1.0';
+const templateAndroidGradlePluginVersion = '9.3.1';
+const templateAndroidGradlePluginVersionForModule = '9.3.1';
 
 // When bumping, also update:
 //  * KGP version constants in packages/flutter_tools/gradle/build.gradle.kts
 //  * KGP warn version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
-//  * KGP jvm constant in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://kotlinlang.org/docs/releases.html#release-details
-const templateKotlinGradlePluginVersion = '2.4.0';
+const templateKotlinGradlePluginVersion = '2.4.20';
 
 // The Flutter Gradle Plugin is only applied to app projects, and modules that
 // are built from source using (`include_flutter.groovy`). The remaining
@@ -82,29 +77,29 @@ const oneMajorVersionHigherJavaVersion = '26';
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const maxKnownAndSupportedGradleVersion = '9.3.1';
+const maxKnownAndSupportedGradleVersion = '9.5.0';
 
 // Update this with new KGP versions come out including minor versions.
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const maxKnownAndSupportedKgpVersion = '2.4.0';
+const maxKnownAndSupportedKgpVersion = '2.4.20';
 
 // Update this when new versions of AGP come out.
 //
 // Supported here means tooling is aware of this version's Java <-> AGP
 // compatibility.
 @visibleForTesting
-const maxKnownAndSupportedAgpVersion = '9.2';
+const maxKnownAndSupportedAgpVersion = '9.4';
 
 // Update this when new versions of AGP with Kotlin support come out.
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const maxKnownAgpVersionWithFullKotlinSupport = '9.1.0';
+const maxKnownAgpVersionWithFullKotlinSupport = '9.3.1';
 
 // Update this when new versions of AGP come out.
-const maxKnownAgpVersion = '9.2';
+const maxKnownAgpVersion = '9.4';
 
 // Supported here means tooling is aware of this versions
 // Java <-> AGP compatibility and does not imply broader flutter support.
@@ -218,14 +213,11 @@ const gradleWrapperPropertiesFilename = 'gradle-wrapper.properties';
 /// or constructing a Gradle project.
 class GradleUtils {
   GradleUtils({
-    required Platform platform,
-    required Logger logger,
-    required Cache cache,
-    required OperatingSystemUtils operatingSystemUtils,
-  }) : _platform = platform,
-       _logger = logger,
-       _cache = cache,
-       _operatingSystemUtils = operatingSystemUtils;
+    required this._platform,
+    required this._logger,
+    required this._cache,
+    required this._operatingSystemUtils,
+  });
 
   final Cache _cache;
   final Platform _platform;
@@ -594,7 +586,7 @@ bool validateGradleAndKGP(Logger logger, {required String? kgpV, required String
   // Continuous KGP version handling is preferred in case an emergency patch to a
   // past release is shipped this code will assume the version range that is closest.
 
-  // Documented max is 2.4.0, using 2.4.29 covers patch versions.
+  // Documented max is 2.4.20, using 2.4.29 covers patch versions.
   if (isWithinVersionRange(kgpV, min: '2.4.0', max: '2.4.29')) {
     return isWithinVersionRange(gradleV, min: '8.5', max: '9.5.99', inclusiveMax: false);
   }
@@ -712,8 +704,14 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
   // Continuous KGP version handling is preferred in case an emergency patch to a
   // past release is shipped this code will assume the version range that is closest.
 
-  // Documented max is 2.4.0, using 2.4.29 covers patch versions.
-  if (isWithinVersionRange(kgpV, min: '2.4.0', max: '2.4.29')) {
+  // Documented max is 2.4.20.
+  if (isWithinVersionRange(kgpV, min: '2.4.20', max: '2.4.29')) {
+    // Documented max is 9.3.1
+    return isWithinVersionRange(agpV, min: '8.2.2', max: '9.3.99', inclusiveMax: false);
+  }
+  // Documented max is 2.4.10, using 2.4.19 covers patch versions.
+  if (isWithinVersionRange(kgpV, min: '2.4.0', max: '2.4.19')) {
+    // Documented max is 9.2.0
     return isWithinVersionRange(agpV, min: '8.2.2', max: '9.2.99', inclusiveMax: false);
   }
   // Documented max is 2.3.10
@@ -825,10 +823,16 @@ bool validateGradleAndAgp(Logger logger, {required String? gradleV, required Str
   if (isWithinVersionRange(agpV, min: '9.1.0', max: '9.1.99')) {
     return isWithinVersionRange(gradleV, min: '9.3.1', max: maxKnownAndSupportedGradleVersion);
   }
+  if (isWithinVersionRange(agpV, min: '9.2.0', max: '9.2.99')) {
+    return isWithinVersionRange(gradleV, min: '9.3.1', max: maxKnownAndSupportedGradleVersion);
+  }
+  if (isWithinVersionRange(agpV, min: '9.3.0', max: '9.3.99')) {
+    return isWithinVersionRange(gradleV, min: '9.5.0', max: maxKnownAndSupportedGradleVersion);
+  }
   // Check if versions are newer than the max known versions.
   if (isWithinVersionRange(agpV, min: maxKnownAndSupportedAgpVersion, max: '100.100')) {
     // Assume versions we do not know about are valid but log.
-    final bool validGradle = isWithinVersionRange(gradleV, min: '9.3.1', max: '100.00');
+    final bool validGradle = isWithinVersionRange(gradleV, min: '9.5.0', max: '100.00');
     logger.printTrace(
       'Newer than known AGP version ($agpV), gradle ($gradleV).'
       '\n Treating as valid configuration.',
@@ -1138,6 +1142,8 @@ String getGradleVersionFor(String agpV) {
     GradleForAgp(agpMin: '8.13.0', agpMax: '8.13.99', minRequiredGradle: '8.14'),
     GradleForAgp(agpMin: '9.0', agpMax: '9.0.99', minRequiredGradle: '9.1.0'),
     GradleForAgp(agpMin: '9.1.0', agpMax: '9.1.99', minRequiredGradle: '9.3.1'),
+    GradleForAgp(agpMin: '9.2.0', agpMax: '9.2.99', minRequiredGradle: '9.3.1'),
+    GradleForAgp(agpMin: '9.3.0', agpMax: '9.3.99', minRequiredGradle: '9.5.0'),
     // Assume if AGP is newer than this code knows about return the highest gradle
     // version we know about.
     GradleForAgp(
@@ -1164,11 +1170,18 @@ String getGradleVersionFor(String agpV) {
 /// this will fail with a [ToolExit].
 void updateLocalProperties({
   required FlutterProject project,
+  Analytics? analytics,
+  AndroidSdk? androidSdk,
   BuildInfo? buildInfo,
+  FileSystemUtils? fileSystemUtils,
+  Logger? logger,
   bool requireAndroidSdk = true,
 }) {
-  if (requireAndroidSdk && globals.androidSdk == null) {
-    exitWithNoSdkMessage();
+  if (requireAndroidSdk && androidSdk == null) {
+    exitWithNoSdkMessage(
+      analytics: analytics ?? const NoOpAnalytics(),
+      logger: logger ?? BufferLogger.test(),
+    );
   }
   final File localProperties = project.android.localPropertiesFile;
   var changed = false;
@@ -1193,24 +1206,27 @@ void updateLocalProperties({
     changed = true;
   }
 
-  final AndroidSdk? androidSdk = globals.androidSdk;
+  final FileSystemUtils fsUtils =
+      fileSystemUtils ??
+      FileSystemUtils(fileSystem: project.directory.fileSystem, platform: const LocalPlatform());
+
   if (androidSdk != null) {
-    changeIfNecessary('sdk.dir', globals.fsUtils.escapePath(androidSdk.directory.path));
+    changeIfNecessary('sdk.dir', fsUtils.escapePath(androidSdk.directory.path));
   }
 
-  changeIfNecessary('flutter.sdk', globals.fsUtils.escapePath(Cache.flutterRoot!));
+  changeIfNecessary('flutter.sdk', fsUtils.escapePath(Cache.flutterRoot!));
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
     final String? buildName = validatedBuildNameForPlatform(
       TargetPlatform.android_arm,
       buildInfo.buildName ?? project.manifest.buildName,
-      globals.logger,
+      logger ?? BufferLogger.test(),
     );
     changeIfNecessary('flutter.versionName', buildName);
     final String? buildNumber = validatedBuildNumberForPlatform(
       TargetPlatform.android_arm,
       buildInfo.buildNumber ?? project.manifest.buildNumber,
-      globals.logger,
+      logger ?? BufferLogger.test(),
     );
     changeIfNecessary('flutter.versionCode', buildNumber);
   }
@@ -1220,20 +1236,9 @@ void updateLocalProperties({
   }
 }
 
-/// Writes standard Android local properties to the specified [properties] file.
-///
-/// Writes the path to the Android SDK, if known.
-void writeLocalProperties(File properties) {
-  final settings = SettingsFile();
-  final AndroidSdk? androidSdk = globals.androidSdk;
-  if (androidSdk != null) {
-    settings.values['sdk.dir'] = globals.fsUtils.escapePath(androidSdk.directory.path);
-  }
-  settings.writeContents(properties);
-}
-
-void exitWithNoSdkMessage() {
-  globals.analytics.send(
+/// Logs an analytics event indicating the Android SDK is missing and throws a [ToolExit].
+void exitWithNoSdkMessage({required Analytics analytics, required Logger logger}) {
+  analytics.send(
     Event.flutterBuildInfo(
       label: 'unsupported-project',
       buildType: 'gradle',
@@ -1241,7 +1246,7 @@ void exitWithNoSdkMessage() {
     ),
   );
   throwToolExit(
-    '${globals.logger.terminal.warningMark} No Android SDK found. '
+    '${logger.terminal.warningMark} No Android SDK found. '
     'Try setting the ANDROID_HOME environment variable.',
   );
 }

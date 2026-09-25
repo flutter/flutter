@@ -38,7 +38,7 @@ class UpdaterState extends State<Updater> {
     if (mounted) {
       final bool? wantsUpdate = await showDialog<bool>(context: context, builder: _buildDialog);
       if (wantsUpdate != null && updateUrl != null && wantsUpdate) {
-        launchUrl(Uri.parse(updateUrl));
+        await launchUrl(Uri.parse(updateUrl));
       }
     }
   }

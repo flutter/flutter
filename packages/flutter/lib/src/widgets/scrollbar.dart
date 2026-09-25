@@ -36,6 +36,7 @@ import 'scroll_position.dart';
 import 'scrollable.dart';
 import 'scrollable_helpers.dart';
 import 'ticker_provider.dart';
+import 'widget_state.dart';
 
 const double _kMinThumbExtent = 18.0;
 const double _kMinInteractiveSize = 48.0;
@@ -92,22 +93,22 @@ enum ScrollbarOrientation {
 class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Creates a scrollbar with customizations given by construction arguments.
   ScrollbarPainter({
-    required Color color,
+    required this._color,
     required this.fadeoutOpacityAnimation,
-    Color trackColor = const Color(0x00000000),
-    Color trackBorderColor = const Color(0x00000000),
+    this._trackColor = const Color(0x00000000),
+    this._trackBorderColor = const Color(0x00000000),
     TextDirection? textDirection,
-    double thickness = _kScrollbarThickness,
+    this._thickness = _kScrollbarThickness,
     EdgeInsetsGeometry padding = EdgeInsets.zero,
-    double mainAxisMargin = 0.0,
-    double crossAxisMargin = 0.0,
+    this._mainAxisMargin = 0.0,
+    this._crossAxisMargin = 0.0,
     Radius? radius,
-    Radius? trackRadius,
+    this._trackRadius,
     OutlinedBorder? shape,
     double minLength = _kMinThumbExtent,
     double? minOverscrollLength,
-    ScrollbarOrientation? scrollbarOrientation,
-    bool ignorePointer = false,
+    this._scrollbarOrientation,
+    this._ignorePointer = false,
   }) : assert(radius == null || shape == null),
        assert(minLength >= 0),
        assert(minOverscrollLength == null || minOverscrollLength <= minLength),
@@ -117,22 +118,13 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
          padding is! EdgeInsetsDirectional || textDirection != null,
          'A non-null textDirection must be provided when using EdgeInsetsDirectional for padding.',
        ),
-       _color = color,
        _textDirection = textDirection,
-       _thickness = thickness,
        _radius = radius,
        _shape = shape,
        _padding = padding,
        _resolvedPadding = padding.resolve(textDirection),
-       _mainAxisMargin = mainAxisMargin,
-       _crossAxisMargin = crossAxisMargin,
        _minLength = minLength,
-       _trackColor = trackColor,
-       _trackBorderColor = trackBorderColor,
-       _trackRadius = trackRadius,
-       _scrollbarOrientation = scrollbarOrientation,
-       _minOverscrollLength = minOverscrollLength ?? minLength,
-       _ignorePointer = ignorePointer {
+       _minOverscrollLength = minOverscrollLength ?? minLength {
     fadeoutOpacityAnimation.addListener(notifyListeners);
   }
 
@@ -898,7 +890,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// [Scrollable] in this case to prevent having multiple ScrollPositions
 /// attached to the PrimaryScrollController.
 ///
-/// {@tool dartpad}
+/// <callout-box>
+///
 /// This sample shows an app with two scrollables in the same route. Since by
 /// default, there is one [PrimaryScrollController] per route, and they both have a
 /// scroll direction of [Axis.vertical], they would both try to attach to that
@@ -912,8 +905,17 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// Alternatively, a new PrimaryScrollController could be created above one of
 /// the [ListView]s.
 ///
-/// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.0.dart **
-/// {@end-tool}
+// TODO(framework): Replace the following block with a @dartpad directive
+// when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+/// <small>
+///
+/// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+///
+/// </small>
+///
+/// {@example /examples/api/lib/widgets/scrollbar/raw_scrollbar.0.dart#body}
+///
+/// </callout-box>
 ///
 /// ### Automatic Scrollbars on Desktop Platforms
 ///
@@ -937,7 +939,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// Default Scrollbars can be disabled for the whole app by setting a
 /// [ScrollBehavior] with `scrollbars` set to false.
 ///
-/// {@tool snippet}
+/// <callout-box>
+///
+// TODO(framework): Add unit tests to this code snippet.
+// https://github.com/flutter/flutter/issues/188530
+///
 /// ```dart
 /// MaterialApp(
 ///   scrollBehavior: const MaterialScrollBehavior()
@@ -947,14 +953,25 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///   ),
 /// )
 /// ```
-/// {@end-tool}
 ///
-/// {@tool dartpad}
+/// </callout-box>
+///
+/// <callout-box>
+///
 /// This sample shows how to disable the default Scrollbar for a [Scrollable]
 /// widget to avoid duplicate Scrollbars when running on desktop platforms.
 ///
-/// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.desktop.0.dart **
-/// {@end-tool}
+// TODO(framework): Replace the following block with a @dartpad directive
+// when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+/// <small>
+///
+/// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+///
+/// </small>
+///
+/// {@example /examples/api/lib/widgets/scrollbar/raw_scrollbar.desktop.0.dart#body}
+///
+/// </callout-box>
 /// {@endtemplate}
 ///
 /// {@tool dartpad}
@@ -1010,6 +1027,7 @@ class RawScrollbar extends StatefulWidget {
     this.mainAxisMargin = 0.0,
     this.crossAxisMargin = 0.0,
     this.padding,
+    this.mouseCursor,
   }) : assert(
          !(thumbVisibility == false && (trackVisibility ?? false)),
          'A scrollbar track cannot be drawn without a scrollbar thumb.',
@@ -1044,9 +1062,13 @@ class RawScrollbar extends StatefulWidget {
   /// of this widget needs to manage the ScrollController and either pass it to
   /// a scrollable descendant or use a PrimaryScrollController to share it.
   ///
-  /// {@tool snippet}
+  /// <callout-box>
+  ///
   /// Here is an example of using the [controller] attribute to enable
   /// scrollbar dragging for multiple independent ListViews:
+  ///
+  // TODO(framework): Add unit tests to this code snippet.
+  // https://github.com/flutter/flutter/issues/188530
   ///
   /// ```dart
   /// // (e.g. in a stateful widget)
@@ -1084,7 +1106,8 @@ class RawScrollbar extends StatefulWidget {
   ///   );
   /// }
   /// ```
-  /// {@end-tool}
+  ///
+  /// </callout-box>
   /// {@endtemplate}
   final ScrollController? controller;
 
@@ -1110,7 +1133,10 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// Defaults to false when null.
   ///
-  /// {@tool snippet}
+  /// <callout-box>
+  ///
+  // TODO(framework): Add unit tests to this code snippet.
+  // https://github.com/flutter/flutter/issues/188530
   ///
   /// ```dart
   /// // (e.g. in a stateful widget)
@@ -1155,7 +1181,8 @@ class RawScrollbar extends StatefulWidget {
   ///   );
   /// }
   /// ```
-  /// {@end-tool}
+  ///
+  /// </callout-box>
   ///
   /// See also:
   ///
@@ -1343,6 +1370,36 @@ class RawScrollbar extends StatefulWidget {
   /// Defaults to null.
   final EdgeInsetsGeometry? padding;
 
+  /// {@template flutter.widgets.Scrollbar.mouseCursor}
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// scrollbar's thumb or track.
+  ///
+  /// Resolves in the following [WidgetState]s:
+  ///  * [WidgetState.dragged].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.disabled].
+  ///
+  /// The [WidgetState.hovered] state is resolved when the pointer is over the
+  /// painted scrollbar track or thumb (using the same hit test area as hover
+  /// interactions). The [WidgetState.dragged] state is resolved while the
+  /// scrollbar thumb is being dragged. The [WidgetState.disabled] state is
+  /// resolved when the scrollbar is not [interactive]; a non-interactive
+  /// scrollbar does not track pointer hovering, so ancestor cursors are
+  /// preserved over it.
+  ///
+  /// The cursor is applied while the pointer is over the painted scrollbar and
+  /// while the scrollbar thumb is being dragged, so the dragged cursor
+  /// (typically [SystemMouseCursors.grabbing]) remains stable even if the
+  /// pointer moves outside the scrollbar during a drag. When neither condition
+  /// holds, cursor resolution is deferred to ancestors, so a parent widget's
+  /// cursor (for example, the I-beam cursor of an enclosing [EditableText]) is
+  /// preserved.
+  ///
+  /// When this is null, or when its resolved value is null, [MouseCursor.defer]
+  /// is used and ancestor cursors are left unchanged.
+  /// {@endtemplate}
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
+
   @override
   RawScrollbarState<RawScrollbar> createState() => RawScrollbarState<RawScrollbar>();
 }
@@ -1364,6 +1421,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   late CurvedAnimation _fadeoutOpacityAnimation;
   final GlobalKey _scrollbarPainterKey = GlobalKey();
   bool _hoverIsActive = false;
+  bool _dragIsActive = false;
+  PointerDeviceKind? _thumbDragPointerKind;
+  MouseCursor _effectiveMouseCursor = MouseCursor.defer;
   Drag? _thumbDrag;
   bool _maxScrollExtentPermitsScrolling = false;
   ScrollHoldController? _thumbHold;
@@ -1606,6 +1666,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         _fadeoutAnimationController.reverse();
       }
     }
+    if (widget.mouseCursor != oldWidget.mouseCursor) {
+      updateMouseCursor();
+    }
+    _releaseStalePointerState();
   }
 
   void _maybeStartFadeoutTimer() {
@@ -1747,6 +1811,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _startDragScrollbarAxisOffset = localPosition;
     _lastDragUpdateOffset = localPosition;
     _startDragThumbOffset = scrollbarPainter.getThumbScrollOffset();
+    _dragIsActive = true;
+    updateMouseCursor();
   }
 
   /// Handler called when a currently active long press gesture moves.
@@ -1801,6 +1867,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @mustCallSuper
   void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
     assert(_debugCheckHasValidScrollPosition());
+    _dragIsActive = false;
+    updateMouseCursor();
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
@@ -1932,6 +2000,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       setState(() {
         _maxScrollExtentPermitsScrolling = !_maxScrollExtentPermitsScrolling;
       });
+      _releaseStalePointerState();
     }
 
     return false;
@@ -1989,6 +2058,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   void _handleThumbDragStart(DragStartDetails details) {
+    _thumbDragPointerKind = details.kind;
     handleThumbPressStart(_globalToScrollbar(details.globalPosition));
   }
 
@@ -1997,7 +2067,59 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   void _handleThumbDragEnd(DragEndDetails details) {
+    _updateHoverStateAfterThumbDrag(details.globalPosition);
     handleThumbPressEnd(_globalToScrollbar(details.globalPosition), details.velocity);
+  }
+
+  // Hover events are not delivered while a pointer button is held down, so
+  // _hoverIsActive can be stale by the time a thumb drag ends. Recompute it
+  // from the position the drag ended at, before handleThumbPressEnd resolves
+  // the cursor. Otherwise releasing a drag away from the scrollbar would leave
+  // the hovered cursor applied over the scroll view's content until the next
+  // pointer move.
+  //
+  // Only mouse and trackpad pointers drive the hover state, matching the kinds
+  // handled by handleHover. A touch or stylus drag must not clobber the hover
+  // state of a separate mouse pointer.
+  void _updateHoverStateAfterThumbDrag(Offset globalPosition) {
+    final PointerDeviceKind? kind = _thumbDragPointerKind;
+    _thumbDragPointerKind = null;
+    if (kind == null || !enableGestures) {
+      return;
+    }
+    switch (kind) {
+      case PointerDeviceKind.mouse:
+      case PointerDeviceKind.trackpad:
+        _hoverIsActive = isPointerOverScrollbar(globalPosition, kind, forHover: true);
+      case PointerDeviceKind.stylus:
+      case PointerDeviceKind.invertedStylus:
+      case PointerDeviceKind.touch:
+      case PointerDeviceKind.unknown:
+        break;
+    }
+  }
+
+  // The hover callbacks are only installed while the scrollbar is interactive,
+  // and the thumb drag recognizers only exist while the child is scrollable.
+  // When either stops being true the callbacks simply stop arriving, and a
+  // dropped drag recognizer is disposed without reporting a cancel, so the
+  // pointer state feeding the cursor has to be released here. Otherwise the
+  // resolved cursor would stay applied over the whole scroll view, with no
+  // event left to clear it.
+  void _releaseStalePointerState() {
+    final bool hoverIsStale = _hoverIsActive && !enableGestures;
+    final bool dragIsStale = _dragIsActive && !_canHandleScrollGestures();
+    if (!hoverIsStale && !dragIsStale) {
+      return;
+    }
+    if (hoverIsStale) {
+      _hoverIsActive = false;
+    }
+    if (dragIsStale) {
+      _dragIsActive = false;
+      _thumbDragPointerKind = null;
+    }
+    updateMouseCursor();
   }
 
   void _handleThumbDragCancel() {
@@ -2014,6 +2136,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _thumbDrag?.cancel();
     assert(_thumbHold == null);
     assert(_thumbDrag == null);
+    _thumbDragPointerKind = null;
+    if (_dragIsActive) {
+      _dragIsActive = false;
+      updateMouseCursor();
+    }
   }
 
   void _initThumbDragGestureRecognizer(DragGestureRecognizer instance) {
@@ -2128,15 +2255,20 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void handleHover(PointerHoverEvent event) {
     // Check if the position of the pointer falls over the painted scrollbar
     if (isPointerOverScrollbar(event.position, event.kind, forHover: true)) {
+      final bool wasHoverActive = _hoverIsActive;
       _hoverIsActive = true;
       // Bring the scrollbar back into view if it has faded or started to fade
       // away.
       _fadeoutAnimationController.forward();
       _fadeoutTimer?.cancel();
+      if (!wasHoverActive) {
+        updateMouseCursor();
+      }
     } else if (_hoverIsActive) {
       // Pointer is not over painted scrollbar.
       _hoverIsActive = false;
       _maybeStartFadeoutTimer();
+      updateMouseCursor();
     }
   }
 
@@ -2148,6 +2280,46 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void handleHoverExit(PointerExitEvent event) {
     _hoverIsActive = false;
     _maybeStartFadeoutTimer();
+    updateMouseCursor();
+  }
+
+  /// The set of [WidgetState]s used to resolve [RawScrollbar.mouseCursor].
+  ///
+  /// Contains [WidgetState.dragged] while the scrollbar thumb is being dragged,
+  /// [WidgetState.hovered] while a pointer is over the painted scrollbar track
+  /// or thumb, and [WidgetState.disabled] while the scrollbar is not
+  /// interactive.
+  ///
+  /// Subclasses can override this to add additional states.
+  @protected
+  Set<WidgetState> get cursorStates => <WidgetState>{
+    if (_dragIsActive) WidgetState.dragged,
+    if (_hoverIsActive) WidgetState.hovered,
+    if (!enableGestures) WidgetState.disabled,
+  };
+
+  /// Recomputes the effective mouse cursor for the scrollbar and updates the
+  /// active cursor if it has changed.
+  ///
+  /// Subclasses should call this after changes to state that affect cursor
+  /// resolution (for example, when entering or leaving a drag).
+  @protected
+  @mustCallSuper
+  void updateMouseCursor() {
+    // The wrapping MouseRegion covers the entire scrollable viewport rather
+    // than just the scrollbar painter. Therefore, _hoverIsActive is used to
+    // gate the cursor override to the painted scrollbar track/thumb; otherwise
+    // MouseCursor.defer is used to preserve ancestor cursors (e.g. the
+    // EditableText I-beam).
+    final MouseCursor? resolved = widget.mouseCursor?.resolve(cursorStates);
+    final MouseCursor desired = ((_hoverIsActive || _dragIsActive) && resolved != null)
+        ? resolved
+        : MouseCursor.defer;
+    if (desired != _effectiveMouseCursor) {
+      setState(() {
+        _effectiveMouseCursor = desired;
+      });
+    }
   }
 
   // Returns the delta that should result from applying [event] with axis and
@@ -2237,6 +2409,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
               key: _gestureDetectorKey,
               gestures: _gestures,
               child: MouseRegion(
+                cursor: _effectiveMouseCursor,
                 onExit: (PointerExitEvent event) {
                   switch (event.kind) {
                     case PointerDeviceKind.mouse:
@@ -2308,8 +2481,7 @@ bool _isTrackEvent(GlobalKey customPaintKey, PointerEvent event) {
 }
 
 class _TrackTapGestureRecognizer extends TapGestureRecognizer {
-  _TrackTapGestureRecognizer({required super.debugOwner, required GlobalKey customPaintKey})
-    : _customPaintKey = customPaintKey;
+  _TrackTapGestureRecognizer({required super.debugOwner, required this._customPaintKey});
 
   final GlobalKey _customPaintKey;
 
@@ -2322,8 +2494,8 @@ class _TrackTapGestureRecognizer extends TapGestureRecognizer {
 class _VerticalThumbDragGestureRecognizer extends VerticalDragGestureRecognizer {
   _VerticalThumbDragGestureRecognizer({
     required Object super.debugOwner,
-    required GlobalKey customPaintKey,
-  }) : _customPaintKey = customPaintKey;
+    required this._customPaintKey,
+  });
 
   final GlobalKey _customPaintKey;
 
@@ -2341,8 +2513,8 @@ class _VerticalThumbDragGestureRecognizer extends VerticalDragGestureRecognizer 
 class _HorizontalThumbDragGestureRecognizer extends HorizontalDragGestureRecognizer {
   _HorizontalThumbDragGestureRecognizer({
     required Object super.debugOwner,
-    required GlobalKey customPaintKey,
-  }) : _customPaintKey = customPaintKey;
+    required this._customPaintKey,
+  });
 
   final GlobalKey _customPaintKey;
 

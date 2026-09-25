@@ -22,23 +22,6 @@ class EmbedderExternalTextureGL : public flutter::Texture {
 
   ~EmbedderExternalTextureGL();
 
- private:
-  const ExternalTextureCallback& external_texture_callback_;
-  sk_sp<DlImage> last_image_;
-
-  sk_sp<DlImage> ResolveTexture(int64_t texture_id,
-                                GrDirectContext* context,
-                                impeller::AiksContext* aiks_context,
-                                const SkISize& size);
-
-  sk_sp<DlImage> ResolveTextureSkia(int64_t texture_id,
-                                    GrDirectContext* context,
-                                    const SkISize& size);
-
-  sk_sp<DlImage> ResolveTextureImpeller(int64_t texture_id,
-                                        impeller::AiksContext* aiks_context,
-                                        const SkISize& size);
-
   // |flutter::Texture|
   void Paint(PaintContext& context,
              const DlRect& bounds,
@@ -56,6 +39,23 @@ class EmbedderExternalTextureGL : public flutter::Texture {
 
   // |flutter::Texture|
   void OnTextureUnregistered() override;
+
+ private:
+  const ExternalTextureCallback& external_texture_callback_;
+  sk_sp<DlImage> last_image_;
+
+  sk_sp<DlImage> ResolveTexture(int64_t texture_id,
+                                GrDirectContext* context,
+                                impeller::AiksContext* aiks_context,
+                                const SkISize& size);
+
+  sk_sp<DlImage> ResolveTextureSkia(int64_t texture_id,
+                                    GrDirectContext* context,
+                                    const SkISize& size);
+
+  sk_sp<DlImage> ResolveTextureImpeller(int64_t texture_id,
+                                        impeller::AiksContext* aiks_context,
+                                        const SkISize& size);
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalTextureGL);
 };

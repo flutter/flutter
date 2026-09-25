@@ -4,7 +4,8 @@ This integration test suite validates engine related rendering tests using Skia 
 
 ## Running Locally
 ```sh
-flutter test dev/integration_tests/engine_integration_golden_test/integration_test/engine_integration_golden_test.dart -d <device_id>
+cd dev/integration_tests/engine_integration_golden_test
+flutter test integration_test/engine_integration_golden_test.dart -d <device_id>
 ```
 
 ## Running via Devicelab on Windows

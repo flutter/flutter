@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui' show FlutterView;
 
 import 'package:flutter/foundation.dart';
@@ -102,12 +103,11 @@ class OnTapPage extends StatelessWidget {
 class SlideInOutPageRoute<T> extends PageRouteBuilder<T> {
   SlideInOutPageRoute({required WidgetBuilder bodyBuilder, super.settings})
     : super(
-        pageBuilder:
-            (
-              BuildContext context,
-              Animation<double> animation,
-              Animation<double> secondaryAnimation,
-            ) => bodyBuilder(context),
+        pageBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+        ) => bodyBuilder(context),
         transitionsBuilder:
             (
               BuildContext context,
@@ -544,12 +544,81 @@ void main() {
       '/': (BuildContext context) => const Text('/'),
       '/second': (BuildContext context) => const Text('/second'),
     };
-    await tester.pumpWidget(MaterialApp(navigatorKey: nav, routes: routes));
+    await tester.pumpWidget(TestWidgetsApp(navigatorKey: nav, routes: routes));
     expect(find.text('/'), findsOneWidget);
     nav.currentState!.pushNamed<Object>('/second');
     await tester.pumpAndSettle();
     expect(find.text('/'), findsNothing);
     expect(find.text('/second'), findsOneWidget);
+  });
+
+  testWidgets('pushNamed can handle subtype of Object as type argument', (
+    WidgetTester tester,
+  ) async {
+    final routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const Text('/'),
+      '/second': (BuildContext context) => const Text('/second'),
+    };
+
+    await tester.pumpWidget(TestWidgetsApp(routes: routes));
+    expect(find.text('/'), findsOneWidget);
+
+    final NavigatorState navigator = Navigator.of(tester.element(find.text('/')));
+    final Future<bool?> result = navigator.pushNamed<bool>('/second');
+    await tester.pumpAndSettle();
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/second'), findsOneWidget);
+
+    navigator.pop<bool>(true);
+    await tester.pumpAndSettle();
+    expect(await result, isTrue);
+  });
+
+  testWidgets('pushReplacementNamed can handle subtype of Object as type argument', (
+    WidgetTester tester,
+  ) async {
+    final routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const Text('/'),
+      '/second': (BuildContext context) => const Text('/second'),
+    };
+
+    await tester.pumpWidget(TestWidgetsApp(routes: routes));
+    expect(find.text('/'), findsOneWidget);
+
+    final NavigatorState navigator = Navigator.of(tester.element(find.text('/')));
+    final Future<bool?> result = navigator.pushReplacementNamed<bool, void>('/second');
+    await tester.pumpAndSettle();
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/second'), findsOneWidget);
+
+    navigator.pop<bool>(true);
+    await tester.pumpAndSettle();
+    expect(await result, isTrue);
+  });
+
+  testWidgets('pushNamedAndRemoveUntil can handle subtype of Object as type argument', (
+    WidgetTester tester,
+  ) async {
+    final routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const Text('/'),
+      '/second': (BuildContext context) => const Text('/second'),
+    };
+
+    await tester.pumpWidget(TestWidgetsApp(routes: routes));
+    expect(find.text('/'), findsOneWidget);
+
+    final NavigatorState navigator = Navigator.of(tester.element(find.text('/')));
+    final Future<bool?> result = navigator.pushNamedAndRemoveUntil<bool>(
+      '/second',
+      (Route<dynamic> route) => false,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/second'), findsOneWidget);
+
+    navigator.pop<bool>(true);
+    await tester.pumpAndSettle();
+    expect(await result, isTrue);
   });
 
   testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
@@ -1341,6 +1410,77 @@ void main() {
     expect(firstReturnValue, isTrue);
     expect(secondReturnValue, isNull);
   });
+
+  testWidgets(
+    'popUntilWithResult returns value to the last popped route when destination route has local history entries',
+    (WidgetTester tester) async {
+      bool? firstReturnValue;
+      bool? secondReturnValue;
+
+      Widget buildPage(String id, VoidCallback? onTap) {
+        return GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: Center(child: Text(id, textDirection: TextDirection.ltr)),
+        );
+      }
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          initialRoute: '/',
+          onGenerateRoute: (RouteSettings settings) {
+            final String? routeName = settings.name;
+
+            switch (routeName) {
+              case '/':
+                return TestRoute<bool>(
+                  settings: settings,
+                  builder: (BuildContext context) => buildPage('/', () async {
+                    ModalRoute.of(context)!.addLocalHistoryEntry(LocalHistoryEntry());
+                    firstReturnValue = await Navigator.pushNamed(context, '/A');
+                  }),
+                );
+              case '/A':
+                return TestRoute<bool>(
+                  settings: settings,
+                  builder: (BuildContext context) => buildPage('A', () async {
+                    secondReturnValue = await Navigator.pushNamed(context, '/B');
+                  }),
+                );
+              case '/B':
+                return TestRoute<bool>(
+                  settings: settings,
+                  builder: (BuildContext context) => buildPage('B', () async {
+                    Navigator.popUntilWithResult<bool>(
+                      context,
+                      (Route<dynamic> route) => route.isFirst,
+                      true,
+                    );
+                  }),
+                );
+              default:
+                return null;
+            }
+          },
+        ),
+      );
+      expect(find.text('/'), findsOneWidget);
+
+      await tester.tap(find.text('/'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('A'));
+      await tester.pumpAndSettle();
+      expect(find.text('B'), findsOneWidget);
+
+      await tester.tap(find.text('B'));
+      await tester.pumpAndSettle();
+      expect(find.text('/'), findsOneWidget);
+
+      expect(firstReturnValue, isTrue);
+      expect(secondReturnValue, isNull);
+    },
+  );
 
   testWidgets('pushAndRemoveUntil triggers secondaryAnimation', (WidgetTester tester) async {
     final routes = <String, WidgetBuilder>{
@@ -4306,13 +4446,15 @@ void main() {
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       var initialPageless1Completed = false;
-      navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('initial-pageless1'),
-            ),
-          )
-          .then((_) => initialPageless1Completed = true);
+      unawaited(
+        navigator.currentState!
+            .push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('initial-pageless1'),
+              ),
+            )
+            .then((_) => initialPageless1Completed = true),
+      );
       await tester.pumpAndSettle();
 
       // Pushes second page route with two pageless routes.
@@ -4325,22 +4467,26 @@ void main() {
       );
       await tester.pumpAndSettle();
       var secondPageless1Completed = false;
-      navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('second-pageless1'),
-            ),
-          )
-          .then((_) => secondPageless1Completed = true);
+      unawaited(
+        navigator.currentState!
+            .push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('second-pageless1'),
+              ),
+            )
+            .then((_) => secondPageless1Completed = true),
+      );
       await tester.pumpAndSettle();
       var secondPageless2Completed = false;
-      navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('second-pageless2'),
-            ),
-          )
-          .then((_) => secondPageless2Completed = true);
+      unawaited(
+        navigator.currentState!
+            .push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('second-pageless2'),
+              ),
+            )
+            .then((_) => secondPageless2Completed = true),
+      );
       await tester.pumpAndSettle();
 
       // Pushes third page route with one pageless route.
@@ -4354,13 +4500,15 @@ void main() {
       );
       await tester.pumpAndSettle();
       var thirdPageless1Completed = false;
-      navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('third-pageless1'),
-            ),
-          )
-          .then((_) => thirdPageless1Completed = true);
+      unawaited(
+        navigator.currentState!
+            .push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('third-pageless1'),
+              ),
+            )
+            .then((_) => thirdPageless1Completed = true),
+      );
       await tester.pumpAndSettle();
 
       // Nothing has been popped.
@@ -4474,13 +4622,15 @@ void main() {
         ),
       );
       var initialPageless1Completed = false;
-      navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('initial-pageless1'),
-            ),
-          )
-          .then((_) => initialPageless1Completed = true);
+      unawaited(
+        navigator.currentState!
+            .push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('initial-pageless1'),
+              ),
+            )
+            .then((_) => initialPageless1Completed = true),
+      );
       await tester.pumpAndSettle();
 
       // Pushes second page route with two pageless routes.
@@ -4498,22 +4648,26 @@ void main() {
         ),
       );
       var secondPageless1Completed = false;
-      navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('second-pageless1'),
-            ),
-          )
-          .then((_) => secondPageless1Completed = true);
+      unawaited(
+        navigator.currentState!
+            .push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('second-pageless1'),
+              ),
+            )
+            .then((_) => secondPageless1Completed = true),
+      );
       await tester.pumpAndSettle();
       var secondPageless2Completed = false;
-      navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('second-pageless2'),
-            ),
-          )
-          .then((_) => secondPageless2Completed = true);
+      unawaited(
+        navigator.currentState!
+            .push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('second-pageless2'),
+              ),
+            )
+            .then((_) => secondPageless2Completed = true),
+      );
       await tester.pumpAndSettle();
 
       // Pushes third page route with one pageless route.
@@ -4532,13 +4686,15 @@ void main() {
         ),
       );
       var thirdPageless1Completed = false;
-      navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('third-pageless1'),
-            ),
-          )
-          .then((_) => thirdPageless1Completed = true);
+      unawaited(
+        navigator.currentState!
+            .push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('third-pageless1'),
+              ),
+            )
+            .then((_) => thirdPageless1Completed = true),
+      );
       await tester.pumpAndSettle();
 
       // Nothing has been popped.
@@ -4692,7 +4848,7 @@ void main() {
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       // Pushes a pageless route.
-      showDialog<void>(
+      final Future<void> dialog = showDialog<void>(
         useRootNavigator: false,
         context: navigator.currentContext!,
         builder: (BuildContext context) => const Text('dialog'),
@@ -4709,6 +4865,7 @@ void main() {
       // It should not crash the app.
       expect(tester.takeException(), isNull);
       await tester.pumpAndSettle();
+      await dialog;
       expect(find.text('initial'), findsOneWidget);
     });
 
@@ -6265,84 +6422,82 @@ void main() {
     clear();
   });
 
-  testWidgets(
-    'Navigator focus restoration reports error to FlutterError',
-    (WidgetTester tester) async {
-      final errorDetails = <FlutterErrorDetails>[];
-      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-      FlutterError.onError = (FlutterErrorDetails details) {
-        errorDetails.add(details);
-      };
+  testWidgets('Navigator focus restoration reports error to FlutterError', (
+    WidgetTester tester,
+  ) async {
+    final errorDetails = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorDetails.add(details);
+    };
 
-      try {
-        // Mock accessibility channel to throw error.
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (
-              dynamic message,
-            ) async {
-              final map = message as Map<dynamic, dynamic>;
-              if (map['type'] == 'focus') {
-                throw Exception('Focus restoration failed');
-              }
-              return null;
-            });
+    try {
+      // Mock accessibility channel to throw error.
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (
+            dynamic message,
+          ) async {
+            final map = message as Map<dynamic, dynamic>;
+            if (map['type'] == 'focus') {
+              throw Exception('Focus restoration failed');
+            }
+            return null;
+          });
 
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Builder(
-                builder: (BuildContext context) {
-                  return ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        NoAnimationPageRoute(
-                          pageBuilder: (BuildContext context) => Scaffold(
-                            appBar: AppBar(title: const Text('Second Route')),
-                            body: ElevatedButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Pop'),
-                            ),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      NoAnimationPageRoute(
+                        pageBuilder: (BuildContext context) => Scaffold(
+                          appBar: AppBar(title: const Text('Second Route')),
+                          body: ElevatedButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Pop'),
                           ),
                         ),
-                      );
-                    },
-                    child: const Text('Push'),
-                  );
-                },
-              ),
+                      ),
+                    );
+                  },
+                  child: const Text('Push'),
+                );
+              },
             ),
           ),
-        );
+        ),
+      );
 
-        // Record the last focus in route entry.
-        ServicesBinding.instance.accessibilityFocus.value = 123;
-        await tester.pump();
+      // Record the last focus in route entry.
+      ServicesBinding.instance.accessibilityFocus.value = 123;
+      await tester.pump();
 
-        // Push second route.
-        await tester.tap(find.text('Push'));
-        await tester.pumpAndSettle();
+      // Push second route.
+      await tester.tap(find.text('Push'));
+      await tester.pumpAndSettle();
 
-        // Now we are on the second route.
-        // Pop it.
-        await tester.tap(find.text('Pop'));
-        await tester.pumpAndSettle();
+      // Now we are on the second route.
+      // Pop it.
+      await tester.tap(find.text('Pop'));
+      await tester.pumpAndSettle();
 
-        expect(errorDetails.length, 1);
-        expect(errorDetails[0].exception.toString(), contains('Focus restoration failed'));
-        expect(errorDetails[0].library, 'widgets library');
-        expect(
-          errorDetails[0].context.toString(),
-          contains('while restoring focus in the navigator'),
-        );
-      } finally {
-        FlutterError.onError = oldHandler;
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
-      }
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+      expect(errorDetails.length, 1);
+      expect(errorDetails[0].exception.toString(), contains('Focus restoration failed'));
+      expect(errorDetails[0].library, 'widgets library');
+      expect(
+        errorDetails[0].context.toString(),
+        contains('while restoring focus in the navigator'),
+      );
+    } finally {
+      FlutterError.onError = oldHandler;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
+    }
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('Navigator.pop throws FlutterError when popped with mismatched type', (
     WidgetTester tester,
@@ -6397,7 +6552,7 @@ void main() {
         '   This usually happens when the type provided to Navigator.pop() is\n'
         '   not a subtype of the type expected by the Route (e.g.\n'
         '   DialogRoute<Null>), or when a generic type is explicitly provided\n'
-        '   to a route creation method (such as showDialog<T>()) but the\n'
+        '   to a route creation method (such as showRawDialog<T>()) but the\n'
         '   popped value does not match this type.\n'
         '   The route was: PageRouteBuilder<bool>(RouteSettings(none, null),\n'
         '     animation: AnimationController#00000(⏭ 1.000; paused; for\n'
@@ -6462,7 +6617,8 @@ void main() {
         '   Navigator.maybePop() is not a subtype of the type expected by the\n'
         '   Route (e.g. DialogRoute<Null>), or when a generic type is\n'
         '   explicitly provided to a route creation method (such as\n'
-        '   showDialog<T>()) but the popped value does not match this type.\n'
+        '   showRawDialog<T>()) but the popped value does not match this\n'
+        '   type.\n'
         '   The route was: PageRouteBuilder<bool>(RouteSettings(none, null),\n'
         '     animation: AnimationController#00000(⏭ 1.000; paused; for\n'
         '     PageRouteBuilder<bool>))\n'

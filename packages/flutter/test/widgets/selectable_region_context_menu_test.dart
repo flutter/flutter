@@ -14,6 +14,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
+import 'editable_text_tester.dart';
 import 'web_platform_view_registry_utils.dart';
 
 extension on web.HTMLCollection {
@@ -43,11 +44,23 @@ void main() {
     fakePlatformViewRegistry = FakePlatformViewRegistry();
     PlatformSelectableRegionContextMenu.debugOverrideRegisterViewFactory =
         fakePlatformViewRegistry.registerViewFactory;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.contextMenu,
+      (MethodCall call) {
+        // Just complete successfully, so that BrowserContextMenu thinks that
+        // the engine successfully received its call.
+        return Future<void>.value();
+      },
+    );
   });
 
   tearDown(() {
     PlatformSelectableRegionContextMenu.debugOverrideRegisterViewFactory = null;
     PlatformSelectableRegionContextMenu.debugResetRegistry();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.contextMenu,
+      null,
+    );
   });
 
   testWidgets('DOM element is set up correctly', (WidgetTester tester) async {
@@ -428,6 +441,44 @@ void main() {
       element.dispatchEvent(event);
       expect(event.defaultPrevented, isTrue);
     }
+  }, variant: _browserContextMenuEnabledVariants);
+
+  // Regression test for https://github.com/flutter/flutter/issues/186459
+  testWidgets('can rebuild SelectableRegion as browser context menu toggles', (
+    WidgetTester tester,
+  ) async {
+    await BrowserContextMenu.enableContextMenu();
+    addTearDown(BrowserContextMenu.enableContextMenu);
+
+    late StateSetter rebuild;
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            rebuild = setState;
+            return SelectableRegion(
+              selectionControls: testTextSelectionHandleControls,
+              child: const Text('How are you?'),
+            );
+          },
+        ),
+      ),
+    );
+
+    await BrowserContextMenu.disableContextMenu();
+    rebuild(() {});
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+
+    await BrowserContextMenu.enableContextMenu();
+    rebuild(() {});
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+
+    await BrowserContextMenu.disableContextMenu();
+    rebuild(() {});
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   }, variant: _browserContextMenuEnabledVariants);
 }
 

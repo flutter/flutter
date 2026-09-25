@@ -366,7 +366,8 @@ public class AndroidTouchProcessor {
             ? PointerSignalKind.SCROLL
             : PointerSignalKind.NONE;
 
-    long timeStamp = event.getEventTime() * 1000; // Convert from milliseconds to microseconds.
+    // Convert from milliseconds to microseconds.
+    long timeStamp = event.getEventTime() * 1000;
 
     packet.putLong(motionEventId); // motionEventId
     packet.putLong(timeStamp); // time_stamp

@@ -77,8 +77,10 @@ typedef TaskCallback<T> = FutureOr<T> Function();
 /// See also:
 ///
 ///  * [defaultSchedulingStrategy], the default [SchedulingStrategy] for [SchedulerBinding.schedulingStrategy].
-typedef SchedulingStrategy =
-    bool Function({required int priority, required SchedulerBinding scheduler});
+typedef SchedulingStrategy = bool Function({
+  required int priority,
+  required SchedulerBinding scheduler,
+});
 
 class _TaskEntry<T> {
   _TaskEntry(this.task, this.priority, this.debugLabel, this.flow) {
@@ -746,9 +748,10 @@ mixin SchedulerBinding on BindingBase {
         debugPrint('When the current transient callback was registered, this was the stack:');
         debugPrint(
           FlutterError.defaultStackFilter(
-            FlutterError.demangleStackTrace(
-              _FrameCallbackEntry.debugCurrentCallbackStack!,
-            ).toString().trimRight().split('\n'),
+            FlutterError.demangleStackTrace(_FrameCallbackEntry.debugCurrentCallbackStack!)
+                .toString()
+                .trimRight()
+                .split('\n'),
           ).join('\n'),
         );
       } else {
@@ -994,6 +997,14 @@ mixin SchedulerBinding on BindingBase {
   }
 
   bool _warmUpFrame = false;
+
+  /// Whether the scheduler is currently producing a warm-up frame.
+  ///
+  /// A warm-up frame is scheduled by [scheduleWarmUpFrame] and might not
+  /// produce visible output on screen (e.g., if the rendering surface is
+  /// not yet available).
+  @protected
+  bool get isWarmUpFrame => _warmUpFrame;
 
   /// Schedule a frame to run as soon as possible, rather than waiting for
   /// the engine to request a frame in response to a system "Vsync" signal.
