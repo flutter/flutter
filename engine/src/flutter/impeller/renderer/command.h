@@ -15,6 +15,7 @@
 #include "impeller/core/sampler.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/core/texture.h"
+#include "impeller/geometry/color.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/renderer/pipeline.h"
 
@@ -147,6 +148,26 @@ struct Command {
   /// @see         `PipelineDescriptor`
   ///
   uint32_t stencil_reference = 0u;
+
+  //----------------------------------------------------------------------------
+  /// The constant color read by `BlendFactor::kBlendColor` and the three
+  /// factors beside it. Which factors a pipeline uses is part of pipeline
+  /// setup; the constant they read is not, in the same way a stencil
+  /// operation is configured on the pipeline while its reference value is
+  /// set here.
+  ///
+  /// Defaults to transparent black. Note that this does not make the term
+  /// inert: the one-minus factors evaluate to one against it.
+  ///
+  /// Read per draw on OpenGL ES, where this member is the state. Metal and
+  /// Vulkan override `RenderPass::SetBlendColor` and write to the encoder
+  /// instead, so there the constant persists across draws until it is set
+  /// again. `stencil_reference` beside it is split the same way.
+  ///
+  /// @see         `BlendFactor`
+  /// @see         `ColorAttachmentDescriptor`
+  ///
+  Color blend_color = Color::BlackTransparent();
 
   //----------------------------------------------------------------------------
   /// The type of indices in the index buffer. The indices must be tightly

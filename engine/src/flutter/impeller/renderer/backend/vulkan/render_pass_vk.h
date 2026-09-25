@@ -35,6 +35,13 @@ class RenderPassVK final : public RenderPass {
   std::shared_ptr<Texture> color_image_vk_;
   std::shared_ptr<Texture> resolve_image_vk_;
   uint32_t current_stencil_ = 0;
+  // Seeded to match what the constructor writes to the command buffer, not to
+  // any Vulkan default: a dynamic state has no initial value, which is why
+  // both of these are recorded explicitly when the pass opens. Blend
+  // constants belong to the command buffer rather than the pass, and passes
+  // share buffers, so without that write this cache would speak for state a
+  // previous pass had left behind.
+  Color current_blend_color_ = Color::BlackTransparent();
 
   // Per-command state.
   std::array<vk::DescriptorImageInfo, kMaxBindings> image_workspace_;
@@ -65,6 +72,9 @@ class RenderPassVK final : public RenderPass {
 
   // |RenderPass|
   void SetStencilReference(uint32_t value) override;
+
+  // |RenderPass|
+  void SetBlendColor(Color color) override;
 
   // |RenderPass|
   void SetBaseVertex(uint64_t value) override;
