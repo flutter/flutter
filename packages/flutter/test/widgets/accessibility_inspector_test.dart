@@ -9,6 +9,7 @@ library;
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/widgets/_accessibility_evaluations.dart';
 import 'package:flutter/src/widgets/accessibility_inspector.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -59,17 +60,16 @@ void main() {
 
     Future<Map<String, Object?>> callExtension(String name) async {
       return json.decode(
-            json.encode(await accessibilityExtensions[name]!(const <String, String>{})),
-          )
-          as Map<String, Object?>;
+        json.encode(await accessibilityExtensions[name]!(const <String, String>{})),
+      ) as Map<String, Object?>;
     }
 
     // Calling getSemanticsTree before semantics is enabled returns an error.
     final Map<String, Object?> disabledResult = await callExtension(
       AccessibilityServiceExtensions.getSemanticsTree.extensionName,
     );
-    expect(disabledResult['error'], equals('Semantics not enabled.'));
-    expect(disabledResult['needsFrame'], isNull);
+    expect(disabledResult[AccessibilityInspectorKeys.error], equals('Semantics not enabled.'));
+    expect(disabledResult[AccessibilityInspectorKeys.needsFrame], isNull);
 
     // Calling enableSemantics enables semantics without returning the tree.
     // Ensure the returned map is mutable (required by BindingBase.registerServiceExtension).
@@ -85,8 +85,8 @@ void main() {
       AccessibilityServiceExtensions.getSemanticsTree.extensionName,
     );
 
-    expect(result1['error'], equals('rootSemanticsNode is null'));
-    expect(result1['needsFrame'], isTrue);
+    expect(result1[AccessibilityInspectorKeys.error], equals('rootSemanticsNode is null'));
+    expect(result1[AccessibilityInspectorKeys.needsFrame], isTrue);
 
     // Pump a frame to build/flush the semantics tree.
     await tester.pump();
@@ -96,15 +96,15 @@ void main() {
       AccessibilityServiceExtensions.getSemanticsTree.extensionName,
     );
 
-    expect(result2['error'], isNull);
-    expect(result2['data'], isA<Map<String, Object?>>());
-    final nodes = result2['data']! as Map<String, Object?>;
+    expect(result2[AccessibilityInspectorKeys.error], isNull);
+    expect(result2[AccessibilityInspectorKeys.data], isA<Map<String, Object?>>());
+    final nodes = result2[AccessibilityInspectorKeys.data]! as Map<String, Object?>;
     expect(nodes, isNotEmpty);
 
     Map<String, Object?> findNodeWithLabel(Map<String, Object?> nodes, String label) {
       for (final Object? value in nodes.values) {
         final entry = value! as Map<String, Object?>;
-        final node = entry['node']! as Map<String, Object?>;
+        final node = entry[AccessibilityInspectorKeys.node]! as Map<String, Object?>;
         if ((node['label']! as String).contains(label)) {
           return node;
         }
@@ -148,8 +148,8 @@ void main() {
     // Verify issues list and node object are present on all entries.
     for (final Object? value in nodes.values) {
       final entry = value! as Map<String, Object?>;
-      expect(entry['node'], isA<Map<String, Object?>>());
-      expect(entry['issues'], isA<List<Object?>>());
+      expect(entry[AccessibilityInspectorKeys.node], isA<Map<String, Object?>>());
+      expect(entry[AccessibilityInspectorKeys.issues], isA<List<Object?>>());
     }
 
     // Calling disposeSemantics succeeds and cleans up semantics handle.
@@ -209,9 +209,8 @@ void main() {
 
     Future<Map<String, Object?>> callExtension(String name) async {
       return json.decode(
-            json.encode(await accessibilityExtensions[name]!(const <String, String>{})),
-          )
-          as Map<String, Object?>;
+        json.encode(await accessibilityExtensions[name]!(const <String, String>{})),
+      ) as Map<String, Object?>;
     }
 
     await callExtension(AccessibilityServiceExtensions.enableSemantics.extensionName);
@@ -221,25 +220,25 @@ void main() {
       AccessibilityServiceExtensions.getSemanticsTree.extensionName,
     );
 
-    expect(result['error'], isNull);
-    final nodes = result['data']! as Map<String, Object?>;
+    expect(result[AccessibilityInspectorKeys.error], isNull);
+    final nodes = result[AccessibilityInspectorKeys.data]! as Map<String, Object?>;
 
-    // Find node with tapTargetSize issue.
+    // Find node with minimumTapTarget issue.
     final tapTargetNodes = <Map<String, Object?>>[];
     final missingLabelNodes = <Map<String, Object?>>[];
     final unlabeledImageNodes = <Map<String, Object?>>[];
 
     for (final Object? value in nodes.values) {
       final node = value! as Map<String, Object?>;
-      final List<Map<String, Object?>> issues = (node['issues']! as List<Object?>)
-          .cast<Map<String, Object?>>();
+      final List<Map<String, Object?>> issues =
+          (node[AccessibilityInspectorKeys.issues]! as List<Object?>).cast<Map<String, Object?>>();
       for (final issue in issues) {
-        switch (issue['rule'] as String?) {
-          case 'tapTargetSize':
+        switch (issue[AccessibilityInspectorKeys.rule] as String?) {
+          case final String rule when rule == AccessibilityEvaluationType.minimumTapTarget.name:
             tapTargetNodes.add(node);
-          case 'missingLabel':
+          case final String rule when rule == AccessibilityEvaluationType.labeledTapTarget.name:
             missingLabelNodes.add(node);
-          case 'unlabeledLeafNode':
+          case final String rule when rule == AccessibilityEvaluationType.unlabeledLeafNode.name:
             unlabeledImageNodes.add(node);
         }
       }
@@ -248,37 +247,60 @@ void main() {
     expect(tapTargetNodes, isNotEmpty);
     expect(missingLabelNodes, isNotEmpty);
     // The small unlabeled tap target node should contain multiple issues.
-    final tapTargetNode = tapTargetNodes.first['node']! as Map<String, Object?>;
-    final missingLabelNode = missingLabelNodes.first['node']! as Map<String, Object?>;
+    final tapTargetNode =
+        tapTargetNodes.first[AccessibilityInspectorKeys.node]! as Map<String, Object?>;
+    final missingLabelNode =
+        missingLabelNodes.first[AccessibilityInspectorKeys.node]! as Map<String, Object?>;
     expect(tapTargetNode['id'], missingLabelNode['id']);
     final List<Map<String, Object?>> multiIssueList =
-        (tapTargetNodes.first['issues']! as List<Object?>).cast<Map<String, Object?>>();
+        (tapTargetNodes.first[AccessibilityInspectorKeys.issues]! as List<Object?>)
+            .cast<Map<String, Object?>>();
     expect(
-      multiIssueList.map((Map<String, Object?> issue) => issue['rule']),
-      containsAll(<String>['tapTargetSize', 'missingLabel', 'unlabeledLeafNode']),
+      multiIssueList.map((Map<String, Object?> issue) => issue[AccessibilityInspectorKeys.rule]),
+      containsAll(<String>[
+        AccessibilityEvaluationType.minimumTapTarget.name,
+        AccessibilityEvaluationType.labeledTapTarget.name,
+        AccessibilityEvaluationType.unlabeledLeafNode.name,
+      ]),
     );
 
-    final Map<String, Object?> tapTargetIssue = (tapTargetNodes.first['issues']! as List<Object?>)
-        .cast<Map<String, Object?>>()
-        .firstWhere((Map<String, Object?> issue) => issue['rule'] == 'tapTargetSize');
-    expect(tapTargetIssue['description'], contains('expected tap target size'));
+    final Map<String, Object?> tapTargetIssue =
+        (tapTargetNodes.first[AccessibilityInspectorKeys.issues]! as List<Object?>)
+            .cast<Map<String, Object?>>()
+            .firstWhere(
+              (Map<String, Object?> issue) =>
+                  issue[AccessibilityInspectorKeys.rule] ==
+                  AccessibilityEvaluationType.minimumTapTarget.name,
+            );
+    expect(
+      tapTargetIssue[AccessibilityInspectorKeys.description],
+      contains('expected tap target size'),
+    );
 
     final Map<String, Object?> missingLabelIssue =
-        (missingLabelNodes.first['issues']! as List<Object?>)
+        (missingLabelNodes.first[AccessibilityInspectorKeys.issues]! as List<Object?>)
             .cast<Map<String, Object?>>()
-            .firstWhere((Map<String, Object?> issue) => issue['rule'] == 'missingLabel');
+            .firstWhere(
+              (Map<String, Object?> issue) =>
+                  issue[AccessibilityInspectorKeys.rule] ==
+                  AccessibilityEvaluationType.labeledTapTarget.name,
+            );
     expect(
-      missingLabelIssue['description'],
+      missingLabelIssue[AccessibilityInspectorKeys.description],
       contains('expected tappable node to have semantic label'),
     );
 
     expect(unlabeledImageNodes, isNotEmpty);
     final Map<String, Object?> unlabeledImageIssue =
-        (unlabeledImageNodes.first['issues']! as List<Object?>)
+        (unlabeledImageNodes.first[AccessibilityInspectorKeys.issues]! as List<Object?>)
             .cast<Map<String, Object?>>()
-            .firstWhere((Map<String, Object?> issue) => issue['rule'] == 'unlabeledLeafNode');
+            .firstWhere(
+              (Map<String, Object?> issue) =>
+                  issue[AccessibilityInspectorKeys.rule] ==
+                  AccessibilityEvaluationType.unlabeledLeafNode.name,
+            );
     expect(
-      unlabeledImageIssue['description'],
+      unlabeledImageIssue[AccessibilityInspectorKeys.description],
       contains('expected leaf semantics node to have a label, value, hint, or tooltip'),
     );
 
@@ -287,9 +309,10 @@ void main() {
         .map((Object? v) => v! as Map<String, Object?>)
         .firstWhere(
           (Map<String, Object?> node) =>
-              (node['node']! as Map<String, Object?>)['label'] == 'Accessible Button',
+              (node[AccessibilityInspectorKeys.node]! as Map<String, Object?>)['label'] ==
+              'Accessible Button',
         );
-    expect(accessibleButton['issues']! as List<Object?>, isEmpty);
+    expect(accessibleButton[AccessibilityInspectorKeys.issues]! as List<Object?>, isEmpty);
 
     await callExtension(AccessibilityServiceExtensions.disposeSemantics.extensionName);
     AccessibilityInspector.instance.resetAllState();
