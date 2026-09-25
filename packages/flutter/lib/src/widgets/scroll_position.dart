@@ -462,6 +462,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     );
     _pixels = _pixels! + correction;
     _didChangeViewportDimensionOrReceiveCorrection = true;
+    activity?.correctBy(correction);
   }
 
   /// Change the value of [pixels] to the new value, and notify any customers,
