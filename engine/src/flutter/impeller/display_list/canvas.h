@@ -145,7 +145,8 @@ class Canvas {
   /// @brief Update the backdrop data used to group together backdrop filters
   ///        within the same layer
   void SetBackdropData(std::unordered_map<int64_t, BackdropData> backdrop_data,
-                       size_t backdrop_count);
+                       size_t backdrop_count,
+                       std::deque<int64_t> generated_backdrop_ids = {});
 
   const std::unordered_map<int64_t, BackdropData>& GetBackdropData() const {
     return backdrop_data_;
@@ -330,6 +331,11 @@ class Canvas {
   /// This optimization is disabled on devices that do not support framebuffer
   /// fetch (iOS Simulator and certain OpenGLES devices).
   size_t backdrop_count_ = 0u;
+
+  /// Ordered queue of synthesized backdrop group IDs collected during display
+  /// list preprocessing. Consumed in sequence by [SaveLayer] when a backdrop
+  /// filter does not specify an explicit backdrop ID.
+  std::deque<int64_t> generated_backdrop_ids_;
 
   // All geometry objects created for regular draws can be stack allocated,
   // but clip geometries must be cached for record/replay for backdrop filters
