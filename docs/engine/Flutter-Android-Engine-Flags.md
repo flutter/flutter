@@ -7,7 +7,7 @@ You can set flags for the Flutter engine on Android in a few different ways:
 - Via Android `Intent` extras (for debugging purposes in debug and profile modes)
 
 Flags available on Android may be set via the command line, manifest metadata,
-**and/or** Intent extras depending on the flag and build mode. See
+**and/or** `Intent` extras depending on the flag and build mode. See
 `src/flutter/shell/platform/android/io/flutter/embedding/engine/flags/FlutterEngineFlags.java`
 for the list of flags that can be set for the Android shell, and see
 `src/flutter/shell/common/switch_defs.h` for the list of all supported flags.
@@ -40,21 +40,20 @@ See [below](#how-to-set-engine-flags-from-the-command-line) for how to set flags
 
 Use Android `Intent` extras when:
 
-- You want to pass flags during manual debugging or automated testing in debug and profile modes (e.g., via `adb shell am start` or programmatically from host Android code). Note that Intent flags are disabled in release mode for security reasons.
+- You want to pass flags during manual debugging or automated testing in debug and profile modes (e.g., via `adb shell am start` or programmatically from host Android code). Note that `Intent` flags are disabled in release mode for security reasons.
 
-See [below](#how-to-set-engine-flags-via-android-intents) for how to set flags via Intents.
+See [below](#how-to-set-engine-flags-via-android-intents) for how to set flags via `Intent`s.
 
 **Note on precedence:**
 
 - **Flags that take values or toggles** (e.g., `--enable-impeller=true|false` or `--trace-to-file=<path>`):
-  The command-line value takes precedence over the manifest value at runtime.
+  Command-line values and `Intent` extras take precedence over the manifest value at runtime.
 - **Presence-only boolean flags** (e.g., `--enable-software-rendering`, `--trace-startup`, `--verbose-logging`):
-  These flags enable a feature if specified in either the manifest or the command line.
-  They cannot be disabled from the command line if already enabled in the manifest.
+  These flags enable a feature if specified in the manifest, on the command line, or via `Intent` extras.
+  They cannot be disabled from the command line or `Intent` extras if already enabled in the manifest.
   If you need them enabled only for specific builds, specify them in variant-specific manifests
   (e.g., `src/debug/AndroidManifest.xml`). Issue [#193354](https://github.com/flutter/flutter/issues/193354)
-  tracks adding the ability to negate flags from the command line so manifest settings can be overridden.
-
+  tracks adding the ability to negate flags from the command line and `Intent` extras so manifest settings can be overridden.
 
 ## Release-mode restrictions
 
