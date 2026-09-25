@@ -30,4 +30,15 @@ TEST_F(SkiaParagraphBuilderTests, ParagraphStrutStyle) {
   strut_style = builder.TxtToSkia(style).getStrutStyle();
   ASSERT_TRUE(strut_style.getHalfLeading());
 }
+
+TEST_F(SkiaParagraphBuilderTests, FakeMissingFontStyles) {
+  ParagraphStyle style;
+  auto collection = std::make_shared<FontCollection>();
+  ParagraphBuilderSkia builder(style, collection, false);
+
+  EXPECT_TRUE(builder.TxtToSkia(style).fakeMissingFontStyles());
+
+  style.fake_missing_font_styles = false;
+  EXPECT_FALSE(builder.TxtToSkia(style).fakeMissingFontStyles());
+}
 }  // namespace txt
