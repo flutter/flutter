@@ -606,6 +606,12 @@ abstract final class SystemChrome {
   /// If your app targets Android SDK 16 (API 36) or later, then your Flutter app uses [SystemUiMode.edgeToEdge] by default
   /// on Android and setting any of the other [SystemUiMode]s will NOT work. There is
   /// no way to opt out of [SystemUiMode.edgeToEdge].
+  ///
+  /// On iOS 27 or later, applications linked against the iOS 27 SDK or later must
+  /// use view controller-based status bar appearance to change status bar
+  /// visibility. Set `UIViewControllerBasedStatusBarAppearance` to `true` in the
+  /// application's `Info.plist`, or omit the key to use its default value of
+  /// `true`.
   static Future<void> setEnabledSystemUIMode(
     SystemUiMode mode, {
     List<SystemUiOverlay>? overlays,
