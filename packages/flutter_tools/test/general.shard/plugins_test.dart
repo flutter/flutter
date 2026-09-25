@@ -2271,6 +2271,101 @@ iosPrefix: "FLT; evilInjectedCall(); //"
         );
       });
 
+      testUsingContext('Plugin.fromYaml rejects a non-string default_package', () async {
+        // Regression test for https://github.com/flutter/flutter/issues/162150.
+        // An empty `default_package:` entry used to reach a String cast and
+        // crash the tool with a type error.
+        const malformedYaml = '''
+platforms:
+  android:
+    default_package:
+''';
+        expect(
+          () => Plugin.fromYaml(
+            'malformed_plugin',
+            '',
+            loadYaml(malformedYaml) as YamlMap,
+            null,
+            const <String>[],
+            fileSystem: globals.fs,
+            isDevDependency: false,
+          ),
+          throwsToolExit(message: 'Invalid "android" plugin specification.'),
+        );
+      });
+
+      testUsingContext('Plugin.fromYaml rejects a non-string dartPluginClass', () async {
+        const malformedYaml = '''
+platforms:
+  linux:
+    pluginClass: SamplePlugin
+    dartPluginClass:
+''';
+        expect(
+          () => Plugin.fromYaml(
+            'malformed_plugin',
+            '',
+            loadYaml(malformedYaml) as YamlMap,
+            null,
+            const <String>[],
+            fileSystem: globals.fs,
+            isDevDependency: false,
+          ),
+          throwsToolExit(message: 'Invalid "linux" plugin specification.'),
+        );
+      });
+
+      testUsingContext('Plugin.fromYaml rejects a non-string dartFileName', () async {
+        // Only a value of the wrong type is rejected. An empty `dartFileName:`
+        // is valid, see the next test; it is read with a nullable cast and
+        // falls back to the default file name.
+        const malformedYaml = '''
+platforms:
+  windows:
+    pluginClass: SamplePlugin
+    dartPluginClass: SamplePlugin
+    dartFileName: 123
+''';
+        expect(
+          () => Plugin.fromYaml(
+            'malformed_plugin',
+            '',
+            loadYaml(malformedYaml) as YamlMap,
+            null,
+            const <String>[],
+            fileSystem: globals.fs,
+            isDevDependency: false,
+          ),
+          throwsToolExit(message: 'Invalid "windows" plugin specification.'),
+        );
+      });
+
+      testUsingContext('Plugin.fromYaml accepts an empty dartFileName', () async {
+        // Regression guard: this has always worked and must keep working. The
+        // key is present with no value, which is null, and null falls back to
+        // `<plugin>.dart` rather than being reported as malformed.
+        const yamlWithEmptyFileName = '''
+platforms:
+  windows:
+    pluginClass: SamplePlugin
+    dartPluginClass: SamplePlugin
+    dartFileName:
+''';
+        final plugin = Plugin.fromYaml(
+          'sample_plugin',
+          '',
+          loadYaml(yamlWithEmptyFileName) as YamlMap,
+          null,
+          const <String>[],
+          fileSystem: globals.fs,
+          isDevDependency: false,
+        );
+        expect(
+          plugin.pluginDartClassPlatforms['windows']?.dartFileName,
+          'sample_plugin.dart',
+        );
+      });
+
       testUsingContext(
         'Plugin.fromYaml reports every invalid legacy-format field at once',
         () async {

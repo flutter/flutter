@@ -309,6 +309,22 @@ class Plugin {
     }
   }
 
+  /// Whether [yaml] declares [key] with a value that is not a string.
+  ///
+  /// A key that is present with no value (`default_package:`) counts: the
+  /// entry is read with a non-nullable `as String` cast, so null crashes it.
+  static bool _hasNonStringValue(YamlMap yaml, String key) =>
+      yaml.containsKey(key) && yaml[key] is! String;
+
+  /// Whether [yaml] gives [key] a value that is neither absent nor a string.
+  ///
+  /// Unlike [_hasNonStringValue] this accepts null. `dartFileName` is read with
+  /// `as String?` and falls back to `<plugin>.dart` when it is null, so an
+  /// empty `dartFileName:` is valid and has always worked; only a value of the
+  /// wrong type (`dartFileName: 123`) reaches the cast and crashes the tool.
+  static bool _hasNonNullNonStringValue(YamlMap yaml, String key) =>
+      yaml[key] != null && yaml[key] is! String;
+
   static List<String> _validateMultiPlatformYaml({required YamlMap parentMap}) {
     final Object? platforms = parentMap['platforms'];
     if (platforms is! YamlMap?) {
@@ -329,7 +345,17 @@ class Plugin {
       if (yamlValue is! YamlMap) {
         return true;
       }
-      if (yamlValue.containsKey('default_package')) {
+      // These entries are cast to String while the plugin is constructed, so a
+      // value of the wrong type has to be rejected here. Otherwise a malformed
+      // pubspec crashes the tool with a type error instead of reporting the
+      // bad specification. `dartFileName` is the one whose cast is nullable,
+      // so null is left alone for it and only a wrong-typed value is rejected.
+      if (_hasNonStringValue(yamlValue, kDefaultPackage) ||
+          _hasNonStringValue(yamlValue, kDartPluginClass) ||
+          _hasNonNullNonStringValue(yamlValue, kDartFileName)) {
+        return true;
+      }
+      if (yamlValue.containsKey(kDefaultPackage)) {
         return false;
       }
       return !validate(yamlValue);
