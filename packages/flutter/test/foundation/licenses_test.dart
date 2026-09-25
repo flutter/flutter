@@ -194,6 +194,120 @@ S
     expect(paragraphs, hasLength(2));
   });
 
+  test('LicenseEntryWithLineBreaks - separator lines', () {
+    final List<LicenseParagraph> paragraphs = const LicenseEntryWithLineBreaks(<String>[], '''
+Mozilla Public License Version 2.0
+==================================
+1. Definitions
+--------------
+Some text
+that wraps.
+***
+-- not a separator
+__
+~~~~~~\u0020\u0020
+End''').paragraphs.toList();
+
+    expect(paragraphs.map((LicenseParagraph p) => p.text), <String>[
+      'Mozilla Public License Version 2.0',
+      '==================================',
+      '1. Definitions',
+      '--------------',
+      'Some text that wraps.',
+      '***',
+      '-- not a separator __',
+      '~~~~~~  ',
+      'End',
+    ]);
+    expect(paragraphs.map((LicenseParagraph p) => p.indent), everyElement(0));
+  });
+
+  test('LicenseEntryWithLineBreaks - separator line at the end', () {
+    final List<LicenseParagraph> paragraphs = const LicenseEntryWithLineBreaks(
+      <String>[],
+      'A\nB\n-----',
+    ).paragraphs.toList();
+
+    expect(paragraphs.map((LicenseParagraph p) => p.text), <String>['A B', '-----']);
+  });
+
+  test('LicenseEntryWithLineBreaks - headings', () {
+    final List<LicenseParagraph> paragraphs = const LicenseEntryWithLineBreaks(<String>[], '''
+PREAMBLE
+The goals of the license
+are stated here.
+
+PERMISSION & CONDITIONS
+Permission is hereby granted.
+
+THIS SOFTWARE IS PROVIDED
+BY THE AUTHORS "AS IS".
+
+THIS LINE IS FAR TOO LONG TO BE A HEADING
+so it is part of a paragraph.
+
+COPYRIGHT HOLDERS,
+and contributors.
+
+A
+lowercase text.
+
+NOTICE
+
+Followed by a blank line.
+
+   INDENTED HEADING
+   Indented text.''').paragraphs.toList();
+
+    expect(paragraphs.map((LicenseParagraph p) => p.text), <String>[
+      'PREAMBLE',
+      'The goals of the license are stated here.',
+      'PERMISSION & CONDITIONS',
+      'Permission is hereby granted.',
+      'THIS SOFTWARE IS PROVIDED BY THE AUTHORS "AS IS".',
+      'THIS LINE IS FAR TOO LONG TO BE A HEADING so it is part of a paragraph.',
+      'COPYRIGHT HOLDERS, and contributors.',
+      'A lowercase text.',
+      'NOTICE',
+      'Followed by a blank line.',
+      'INDENTED HEADING',
+      'Indented text.',
+    ]);
+    expect(paragraphs[10].indent, 1);
+    expect(paragraphs[11].indent, 1);
+  });
+
+  test('LicenseEntryWithLineBreaks - SIL Open Font License', () {
+    // Regression test for https://github.com/flutter/flutter/issues/145453.
+    final List<LicenseParagraph> paragraphs = const LicenseEntryWithLineBreaks(<String>[], '''
+This Font Software is licensed under
+the SIL Open Font License, Version 1.1.
+
+
+-----------------------------------------------------------
+SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
+-----------------------------------------------------------
+
+PREAMBLE
+The goals of the Open Font License (OFL) are
+to stimulate worldwide development.
+
+DEFINITIONS
+"Font Software" refers to the set of files
+released by the Copyright Holder(s).''').paragraphs.toList();
+
+    expect(paragraphs.map((LicenseParagraph p) => p.text), <String>[
+      'This Font Software is licensed under the SIL Open Font License, Version 1.1.',
+      '-----------------------------------------------------------',
+      'SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007',
+      '-----------------------------------------------------------',
+      'PREAMBLE',
+      'The goals of the Open Font License (OFL) are to stimulate worldwide development.',
+      'DEFINITIONS',
+      '"Font Software" refers to the set of files released by the Copyright Holder(s).',
+    ]);
+  });
+
   test('LicenseRegistry', () async {
     expect(await LicenseRegistry.licenses.toList(), isEmpty);
     LicenseRegistry.addLicense(() async* {
