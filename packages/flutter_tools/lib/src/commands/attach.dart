@@ -430,10 +430,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       logger: logger,
     );
 
-    toolContext.logger.printStatus(
-      'Waiting for a connection from Flutter on ${device.displayName}...',
-    );
-    final Status discoveryStatus = toolContext.logger.startSpinner(
+    logger.printStatus('Waiting for a connection from Flutter on ${device.displayName}...');
+    final Status discoveryStatus = logger.startSpinner(
       timeout: const Duration(seconds: 30),
       slowWarningCallback: () {
         // On iOS we rely on mDNS to find Dart VM Service.
