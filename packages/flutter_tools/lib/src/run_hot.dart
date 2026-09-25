@@ -275,6 +275,10 @@ class HotRunner extends ResidentRunner {
       return 2;
     }
 
+    if (needsFullRestart) {
+      await _detectAndApplyAppFlavor();
+    }
+
     for (final FlutterDevice? device in flutterDevices) {
       device!.developmentShaderCompiler.configureCompiler(device.targetPlatform);
     }
@@ -365,6 +369,49 @@ class HotRunner extends ResidentRunner {
     }
     await cleanupAtFinish();
     return result;
+  }
+
+  @visibleForTesting
+  Future<void> detectAndApplyAppFlavor() => _detectAndApplyAppFlavor();
+
+  Future<void> _detectAndApplyAppFlavor() async {
+    for (final FlutterDevice? device in flutterDevices) {
+      if (device == null) {
+        continue;
+      }
+      final FlutterVmService? vmService = device.vmService;
+      if (vmService == null) {
+        continue;
+      }
+      final String? detectedFlavor = await vmService.getAppFlavor();
+      final String? cliFlavor = device.buildInfo.flavor;
+
+      switch ((cliFlavor, detectedFlavor)) {
+        case (final String cli, final String detected) when cli != detected:
+          logger.printWarning(
+            'Warning: The app on the device was built with flavor "$detected", '
+            'but --flavor was set to "$cli". Hot restart will recompile the app with "$cli", '
+            'which may cause unexpected behavior.',
+          );
+        case (null, final String detected):
+          logger.printStatus('Automatically detected app flavor: "$detected".');
+          final updatedDartDefines = <String>[
+            ...device.buildInfo.dartDefines.where((String d) => !d.startsWith('$kAppFlavor=')),
+            '$kAppFlavor=$detectedFlavor',
+          ];
+          device.buildInfo = device.buildInfo.copyWith(
+            flavor: detectedFlavor,
+            dartDefines: updatedDartDefines,
+          );
+          debuggingOptions.buildInfo = debuggingOptions.buildInfo.copyWith(
+            flavor: detectedFlavor,
+            dartDefines: updatedDartDefines,
+          );
+          device.generator?.dartDefines = updatedDartDefines;
+        case _:
+          break;
+      }
+    }
   }
 
   @override
