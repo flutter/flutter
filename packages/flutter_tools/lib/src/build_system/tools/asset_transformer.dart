@@ -24,14 +24,25 @@ final class AssetTransformer {
     required this._fileSystem,
     required this._dartBinaryPath,
     required this._buildMode,
+    this._recordedUses,
   });
 
   static const buildModeEnvVar = 'FLUTTER_BUILD_MODE';
+
+  /// The environment variable naming a JSON file of the uses the compiled
+  /// program makes of definitions annotated with `@RecordUse()`, in the format
+  /// `package:record_use` reads.
+  ///
+  /// Only set in profile and release builds, where the program is compiled
+  /// before its assets are copied. A transformer can use it to drop the parts
+  /// of an asset the program never asks for.
+  static const recordedUsesEnvVar = 'FLUTTER_RECORDED_USES';
 
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
   final String _dartBinaryPath;
   final BuildMode _buildMode;
+  final File? _recordedUses;
 
   /// The [Source] inputs that targets using this should depend on.
   ///
@@ -128,7 +139,11 @@ final class AssetTransformer {
     final ProcessResult result = await _processManager.run(
       command,
       workingDirectory: workingDirectory,
-      environment: <String, String>{buildModeEnvVar: _buildMode.cliName},
+      environment: <String, String>{
+        buildModeEnvVar: _buildMode.cliName,
+        if (_recordedUses case final File recordedUses)
+          recordedUsesEnvVar: recordedUses.absolute.path,
+      },
     );
 
     final stdout = result.stdout as String;
