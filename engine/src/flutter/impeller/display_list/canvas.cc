@@ -185,7 +185,7 @@ static const constexpr RenderTarget::AttachmentConfig kDefaultStencilConfig =
         .storage_mode = StorageMode::kDeviceTransient,
         .load_action = LoadAction::kDontCare,
         .store_action = StoreAction::kDontCare,
-};
+    };
 
 static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
     ContentContext& renderer,
@@ -2605,14 +2605,11 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
   RenderPass& current_render_pass =
       *render_passes_.back().GetInlinePassContext()->GetRenderPass();
 
-  // Drawing input_texture into itself is a feedback loop, and ANGLE on D3D11
-  // samples zeros. Without offscreen MSAA the pass writes to input_texture and
-  // LoadAction::kLoad already put the backdrop there. DidLoadPreviousContents()
-  // would not say which texture the pass writes to, so we compare attachment 0.
-  const ColorAttachment color0 = render_passes_.back()
-                                     .GetEntityPassTarget()
-                                     ->GetRenderTarget()
-                                     .GetColorAttachment(0);
+  // If the current pass already contains the backdrop, which only happens when
+  // MSAA is not available, the eager restore below is unnecessary and would
+  // draw the texture into itself, which is undefined behavior.
+  const ColorAttachment color0 =
+      current_render_pass.GetRenderTarget().GetColorAttachment(0);
   const bool contents_already_present = color0.texture == input_texture;
   FML_DCHECK(!contents_already_present ||
              color0.load_action == LoadAction::kLoad)
