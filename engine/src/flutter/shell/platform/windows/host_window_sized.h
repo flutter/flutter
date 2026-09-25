@@ -66,12 +66,12 @@ class HostWindowSized : public HostWindow,
   virtual void ApplyContentSize(int32_t physical_width,
                                 int32_t physical_height);
 
+  // Returns the work area of the monitor that |hwnd| is on, or a large default
+  // area if the monitor cannot be determined.
+  static WindowRect GetWorkAreaForWindow(HWND hwnd);
+
   // Whether the user can manually resize this window.
   const bool resizable_;
-
-  // Used to track whether the view is still alive in tasks posted from the
-  // raster thread.
-  std::shared_ptr<int> view_alive_;
 
   // The last physical-pixel size reported to DidUpdateViewSize.
   int physical_width_ = 0;

@@ -13,9 +13,7 @@ namespace flutter {
 HostWindowSized::HostWindowSized(WindowManager* window_manager,
                                  FlutterWindowsEngine* engine,
                                  bool resizable)
-    : HostWindow(window_manager, engine),
-      resizable_(resizable),
-      view_alive_(std::make_shared<int>(0)) {}
+    : HostWindow(window_manager, engine), resizable_(resizable) {}
 
 HostWindowSized::~HostWindowSized() {
   // By the time the base destructor runs, the most-derived class must have
@@ -30,10 +28,9 @@ HostWindowSized::~HostWindowSized() {
 
 void HostWindowSized::DidUpdateViewSize(int32_t width, int32_t height) {
   // This is called from the raster thread.
-  std::weak_ptr<int> weak_view_alive = view_alive_;
-  engine_->task_runner()->PostTask([this, width, height, weak_view_alive]() {
-    auto const view_alive = weak_view_alive.lock();
-    if (!view_alive) {
+  std::weak_ptr<int> weak_alive = alive_;
+  engine_->task_runner()->PostTask([this, width, height, weak_alive]() {
+    if (weak_alive.expired()) {
       return;
     }
     if (physical_width_ == width && physical_height_ == height) {
@@ -79,10 +76,13 @@ void HostWindowSized::ApplyContentSize(int32_t physical_width,
 }
 
 WindowRect HostWindowSized::GetWorkArea() const {
+  return GetWorkAreaForWindow(window_handle_);
+}
+
+WindowRect HostWindowSized::GetWorkAreaForWindow(HWND hwnd) {
   constexpr int32_t kDefaultWorkAreaSize = 10000;
   WindowRect work_area = {0, 0, kDefaultWorkAreaSize, kDefaultWorkAreaSize};
-  HMONITOR const monitor =
-      MonitorFromWindow(window_handle_, MONITOR_DEFAULTTONEAREST);
+  HMONITOR const monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
   if (monitor) {
     MONITORINFO monitor_info = {};
     monitor_info.cbSize = sizeof(monitor_info);

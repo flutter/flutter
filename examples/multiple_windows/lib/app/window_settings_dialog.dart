@@ -37,6 +37,8 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
   final TextEditingController _regularHeightController = TextEditingController();
   final TextEditingController _dialogWidthController = TextEditingController();
   final TextEditingController _dialogHeightController = TextEditingController();
+  final TextEditingController _satelliteWidthController = TextEditingController();
+  final TextEditingController _satelliteHeightController = TextEditingController();
   final TextEditingController _offsetDxController = TextEditingController();
   final TextEditingController _offsetDyController = TextEditingController();
 
@@ -44,6 +46,8 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
   late bool _regularResizable;
   late bool _dialogShrinkWrap;
   late bool _dialogResizable;
+  late bool _satelliteShrinkWrap;
+  late bool _satelliteResizable;
 
   late bool _flipX;
   late bool _flipY;
@@ -71,6 +75,12 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
     _regularResizable = widget.settings.regularResizable;
     _dialogShrinkWrap = widget.settings.dialogShrinkWrap;
     _dialogResizable = widget.settings.dialogResizable;
+    _satelliteWidthController.text = widget.settings.satelliteSize.width.toString();
+    _satelliteHeightController.text = widget.settings.satelliteSize.height.toString();
+    _satelliteWidthController.addListener(_updateSatelliteSize);
+    _satelliteHeightController.addListener(_updateSatelliteSize);
+    _satelliteShrinkWrap = widget.settings.satelliteShrinkWrap;
+    _satelliteResizable = widget.settings.satelliteResizable;
     _offsetDxController.text = widget.settings.positioner.offset.dx.toString();
     _offsetDyController.text = widget.settings.positioner.offset.dy.toString();
     _flipX = widget.settings.positioner.constraintAdjustment.flipX;
@@ -103,7 +113,9 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                     _buildDivider(),
                     _buildDialogEditor(),
                     _buildDivider(),
-                    _buildTooltipAndPopupEditor(),
+                    _buildSatelliteEditor(),
+                    _buildDivider(),
+                    _buildPositionerEditor(),
                   ],
                 ),
               ),
@@ -207,13 +219,66 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
     );
   }
 
-  Widget _buildTooltipAndPopupEditor() {
+  Widget _buildSatelliteEditor() {
+    return ListTile(
+      title: const Text('Satellite'),
+      subtitle: Column(
+        crossAxisAlignment: .start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _satelliteWidthController,
+                  decoration: const InputDecoration(labelText: 'Initial width'),
+                  enabled: !_satelliteShrinkWrap,
+                  autovalidateMode: AutovalidateMode.always,
+                  validator: (String? value) =>
+                      _satelliteShrinkWrap ? null : validateWindowDimension(value),
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: TextFormField(
+                  controller: _satelliteHeightController,
+                  decoration: const InputDecoration(labelText: 'Initial height'),
+                  enabled: !_satelliteShrinkWrap,
+                  autovalidateMode: AutovalidateMode.always,
+                  validator: (String? value) =>
+                      _satelliteShrinkWrap ? null : validateWindowDimension(value),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const SizedBox(width: 100, child: Text('Sized to content')),
+              Switch(
+                value: _satelliteShrinkWrap,
+                onChanged: (bool value) => setState(() => _satelliteShrinkWrap = value),
+              ),
+              const SizedBox(width: 24),
+              const SizedBox(width: 70, child: Text('Resizable')),
+              Switch(
+                value: _satelliteResizable,
+                onChanged: (bool value) => setState(() => _satelliteResizable = value),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPositionerEditor() {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: const Text('Tooltips and Popups'),
+      title: const Text('Tooltips, Popups, and Satellites'),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const Text('Satellite positioning settings apply only when a window is created.'),
           const Text('Parent Anchor', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
           DropdownButton<WindowPositionerAnchor>(
             isExpanded: true,
@@ -378,6 +443,16 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
           const SizedBox(width: 12),
           FilledButton(
             onPressed: () {
+              if (!_satelliteShrinkWrap &&
+                  (validateWindowDimension(_satelliteWidthController.text) != null ||
+                      validateWindowDimension(_satelliteHeightController.text) != null)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Enter a positive, finite satellite width and height.'),
+                  ),
+                );
+                return;
+              }
               widget.settings.regularSize = Size(
                 double.tryParse(_regularWidthController.text) ?? widget.settings.regularSize.width,
                 double.tryParse(_regularHeightController.text) ??
@@ -391,6 +466,9 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
               );
               widget.settings.dialogShrinkWrap = _dialogShrinkWrap;
               widget.settings.dialogResizable = _dialogResizable;
+              _updateSatelliteSize();
+              widget.settings.satelliteShrinkWrap = _satelliteShrinkWrap;
+              widget.settings.satelliteResizable = _satelliteResizable;
 
               widget.settings.positioner = widget.settings.positioner.copyWith(
                 parentAnchor: _parentAnchor,
@@ -442,16 +520,31 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
     );
   }
 
+  void _updateSatelliteSize() {
+    if (validateWindowDimension(_satelliteWidthController.text) != null ||
+        validateWindowDimension(_satelliteHeightController.text) != null) {
+      return;
+    }
+    widget.settings.satelliteSize = Size(
+      double.parse(_satelliteWidthController.text),
+      double.parse(_satelliteHeightController.text),
+    );
+  }
+
   @override
   void dispose() {
     _regularWidthController.removeListener(_updateRegularSize);
     _regularHeightController.removeListener(_updateRegularSize);
     _dialogWidthController.removeListener(_updateDialogSize);
     _dialogHeightController.removeListener(_updateDialogSize);
+    _satelliteWidthController.removeListener(_updateSatelliteSize);
+    _satelliteHeightController.removeListener(_updateSatelliteSize);
     _regularWidthController.dispose();
     _regularHeightController.dispose();
     _dialogWidthController.dispose();
     _dialogHeightController.dispose();
+    _satelliteWidthController.dispose();
+    _satelliteHeightController.dispose();
     super.dispose();
   }
 }
