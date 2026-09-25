@@ -141,18 +141,18 @@ void main() {
   testUsingContext(
     'concurrent calls to getFlutterWidgetPreviews do not throw stream already subscribed',
     () async {
-      const kServiceStream = 'Service';
-
       final Future<FlutterWidgetPreviews> future1 = dtdServices.getFlutterWidgetPreviews();
       final Future<FlutterWidgetPreviews> future2 = dtdServices.getFlutterWidgetPreviews();
 
       // Allow both futures to initiate _waitForLspService and reach the waiting state.
       await pumpEventQueue();
 
-      // Simulate LSP service registering with DTD.
-      fakeDtd.postFakeEvent(kServiceStream, 'ServiceRegistered', <String, Object?>{
-        'service': WidgetPreviewDtdServices.kLspStream,
-      });
+      // Simulate LSP service finishing registration with DTD.
+      fakeDtd.postFakeEvent(
+        WidgetPreviewDtdServices.kLspStream,
+        WidgetPreviewDtdServices.kLspInitializedEvent,
+        <String, Object?>{},
+      );
 
       final (FlutterWidgetPreviews result1, FlutterWidgetPreviews result2) = await (
         future1,
@@ -166,8 +166,6 @@ void main() {
   );
 
   testUsingContext('mixed concurrent calls to getFlutterWidgetPreviews and getFlutterWidgetPreviewsForFile do not throw', () async {
-    const kServiceStream = 'Service';
-
     final Future<FlutterWidgetPreviews> future1 = dtdServices.getFlutterWidgetPreviews();
     final Future<FlutterWidgetPreviews> future2 = dtdServices.getFlutterWidgetPreviewsForFile(
       filePath: fs.path.join('lib', 'main.dart'),
@@ -175,9 +173,11 @@ void main() {
 
     await pumpEventQueue();
 
-    fakeDtd.postFakeEvent(kServiceStream, 'ServiceRegistered', <String, Object?>{
-      'service': WidgetPreviewDtdServices.kLspStream,
-    });
+    fakeDtd.postFakeEvent(
+      WidgetPreviewDtdServices.kLspStream,
+      WidgetPreviewDtdServices.kLspInitializedEvent,
+      <String, Object?>{},
+    );
 
     final (FlutterWidgetPreviews result1, FlutterWidgetPreviews result2) = await (
       future1,
@@ -190,33 +190,99 @@ void main() {
   });
 
   testUsingContext('getFlutterWidgetPreviews succeeds when stream is already subscribed', () async {
-    const kServiceStream = 'Service';
-
     // Simulate the stream already being subscribed on DTD prior to calling _waitForLspService.
-    fakeDtd.subscribedStreams.add(kServiceStream);
+    fakeDtd.subscribedStreams.add(WidgetPreviewDtdServices.kLspStream);
 
     final Future<FlutterWidgetPreviews> future = dtdServices.getFlutterWidgetPreviews();
     await pumpEventQueue();
 
-    fakeDtd.postFakeEvent(kServiceStream, 'ServiceRegistered', <String, Object?>{
-      'service': WidgetPreviewDtdServices.kLspStream,
-    });
+    fakeDtd.postFakeEvent(
+      WidgetPreviewDtdServices.kLspStream,
+      WidgetPreviewDtdServices.kLspInitializedEvent,
+      <String, Object?>{},
+    );
 
     final FlutterWidgetPreviews result = await future;
     expect(result.previews, isEmpty);
   });
 
   testUsingContext('waitForAnalysis calls Lsp.dart/workspace/analysis/complete over DTD', () async {
-    const kServiceStream = 'Service';
-
     final Future<void> future = dtdServices.waitForAnalysis(delay: Duration.zero);
     await pumpEventQueue();
 
-    fakeDtd.postFakeEvent(kServiceStream, 'ServiceRegistered', <String, Object?>{
-      'service': WidgetPreviewDtdServices.kLspStream,
-    });
+    fakeDtd.postFakeEvent(
+      WidgetPreviewDtdServices.kLspStream,
+      WidgetPreviewDtdServices.kLspInitializedEvent,
+      <String, Object?>{},
+    );
 
     await future;
     expect(fakeDtd.waitForAnalysisCallCount, 1);
   });
+
+  testUsingContext(
+    'waits for Lsp initialized event when only a subset of required Lsp methods are registered',
+    () async {
+      fakeDtd.registeredServicesResponse = RegisteredServicesResponse.fromDTDResponse(
+        DTDResponse('1', RegisteredServicesResponse.type, <String, Object?>{
+          'type': RegisteredServicesResponse.type,
+          'dtdServices': <String>[],
+          'clientServices': <Map<String, Object?>>[
+            <String, Object?>{
+              'name': WidgetPreviewDtdServices.kLspStream,
+              'methods': <Map<String, Object?>>[
+                <String, Object?>{'name': WidgetPreviewDtdServices.kGetFlutterWidgetPreviewsMethod},
+              ],
+            },
+          ],
+        }),
+      );
+
+      var completed = false;
+      final Future<FlutterWidgetPreviews> future = dtdServices.getFlutterWidgetPreviews().then((
+        FlutterWidgetPreviews value,
+      ) {
+        completed = true;
+        return value;
+      });
+
+      await pumpEventQueue();
+      expect(completed, isFalse);
+
+      fakeDtd.postFakeEvent(
+        WidgetPreviewDtdServices.kLspStream,
+        WidgetPreviewDtdServices.kLspInitializedEvent,
+        <String, Object?>{},
+      );
+
+      final FlutterWidgetPreviews result = await future;
+      expect(completed, isTrue);
+      expect(result.previews, isEmpty);
+    },
+  );
+
+  testUsingContext(
+    'proceeds without waiting for event when all required Lsp methods are already registered',
+    () async {
+      fakeDtd.registeredServicesResponse = RegisteredServicesResponse.fromDTDResponse(
+        DTDResponse('1', RegisteredServicesResponse.type, <String, Object?>{
+          'type': RegisteredServicesResponse.type,
+          'dtdServices': <String>[],
+          'clientServices': <Map<String, Object?>>[
+            <String, Object?>{
+              'name': WidgetPreviewDtdServices.kLspStream,
+              'methods': <Map<String, Object?>>[
+                for (final String method in WidgetPreviewDtdServices.kRequiredLspServices)
+                  <String, Object?>{'name': method},
+              ],
+            },
+          ],
+        }),
+      );
+
+      final FlutterWidgetPreviews result = await dtdServices.getFlutterWidgetPreviews();
+      expect(result.previews, isEmpty);
+      expect(fakeDtd.getRegisteredServicesCallCount, 1);
+    },
+  );
 }
