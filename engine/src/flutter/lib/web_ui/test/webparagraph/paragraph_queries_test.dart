@@ -164,6 +164,79 @@ Future<void> testMain() async {
     );
   });
 
+  test('Paragraph getLineBoundary respects affinity at a soft wrap', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('Test Text');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 150));
+    expect(paragraph.lines.map((TextLine line) => line.allLineTextRange), const <ui.TextRange>[
+      ui.TextRange(start: 0, end: 5),
+      ui.TextRange(start: 5, end: 9),
+    ]);
+
+    // Offset 5 is both the end of the first line and the start of the second.
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 5)),
+      const ui.TextRange(start: 5, end: 9),
+    );
+    expect(
+      paragraph.getLineBoundary(
+        const ui.TextPosition(offset: 5, affinity: ui.TextAffinity.upstream),
+      ),
+      const ui.TextRange(start: 0, end: 5),
+    );
+
+    // The end of the text belongs to the last line.
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 9)),
+      const ui.TextRange(start: 5, end: 9),
+    );
+  });
+
+  test('Paragraph getLineBoundary ignores affinity after a hard line break', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('Test\nText');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    // The two lines touch at offset 5 just as they do at a soft wrap, but the
+    // position after a newline is unambiguously on the next line.
+    expect(
+      paragraph.getLineBoundary(
+        const ui.TextPosition(offset: 5, affinity: ui.TextAffinity.upstream),
+      ),
+      const ui.TextRange(start: 5, end: 9),
+    );
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 5)),
+      const ui.TextRange(start: 5, end: 9),
+    );
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 9)),
+      const ui.TextRange(start: 5, end: 9),
+    );
+  });
+
+  test('Paragraph getLineBoundary at the end of text after a blank line', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('A\n\nB');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    // The end of the text belongs to the line holding 'B', even when layout
+    // adds an empty line after it.
+    expect(
+      paragraph.getLineBoundary(const ui.TextPosition(offset: 4)),
+      const ui.TextRange(start: 3, end: 4),
+    );
+  });
+
   test('Paragraph computeLineMetrics/getLineMetricsAt', () {
     final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
