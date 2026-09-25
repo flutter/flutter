@@ -77,7 +77,7 @@ struct ContentContextOptions {
 
   SampleCount sample_count = SampleCount::kCount1;
   BlendMode blend_mode = BlendMode::kSrcOver;
-  CompareFunction depth_compare = CompareFunction::kAlways;
+  CompareFunction depth_compare = CompareFunction::kGreaterEqual;
   StencilMode stencil_mode = ContentContextOptions::StencilMode::kIgnore;
   PrimitiveType primitive_type = PrimitiveType::kTriangle;
   PixelFormat color_attachment_pixel_format = PixelFormat::kUnknown;
