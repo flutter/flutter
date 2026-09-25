@@ -372,11 +372,54 @@ Future<vm_service.VmService> createVmServiceDelegate(
     compression: compression,
     logger: logger,
   );
+  // Guard against unhandled socket errors on the WebSocket's `done` future.
+  // When a socket reset or low-level connection reset occurs, `channel.done`
+  // can complete with an unhandled SocketException or WebSocketException.
+  unawaited(
+    channel.done.handleError((Object error, StackTrace stackTrace) {
+      logger.printTrace('VM service WebSocket done error: $error\n$stackTrace');
+    }),
+  );
+  // Guard the incoming stream from raising unhandled socket errors into the Zone.
+  // vm_service.VmService's inStream.listen does not provide an onError callback,
+  // so any stream errors (such as SocketException on connection reset) must be handled here.
+  final Stream<Object?> inStream = channel.handleError((Object error, StackTrace stackTrace) {
+    logger.printTrace('VM service WebSocket error: $error\n$stackTrace');
+  });
+  void handleWriteError(Object error, StackTrace stackTrace) {
+    logger.printTrace('Failed to send VM service message: $error\n$stackTrace');
+    try {
+      unawaited(channel.close().handleError((Object _, StackTrace _) {}));
+    } on Exception {
+      // Ignore errors while closing a failed channel.
+    } on StateError {
+      // Ignore errors while closing a failed channel.
+    }
+  }
+
   return vm_service.VmService(
-    channel,
-    channel.add,
+    inStream,
+    (String message) {
+      try {
+        channel.add(message);
+      } on Exception catch (error, stackTrace) {
+        handleWriteError(error, stackTrace);
+      } on StateError catch (error, stackTrace) {
+        handleWriteError(error, stackTrace);
+      }
+    },
     disposeHandler: () async {
-      await channel.close();
+      void logCloseError(Object error, StackTrace stackTrace) {
+        logger.printTrace('Error closing VM service channel: $error\n$stackTrace');
+      }
+
+      try {
+        await channel.close();
+      } on Exception catch (error, stackTrace) {
+        logCloseError(error, stackTrace);
+      } on StateError catch (error, stackTrace) {
+        logCloseError(error, stackTrace);
+      }
     },
   );
 }

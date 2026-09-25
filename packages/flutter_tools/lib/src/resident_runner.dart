@@ -319,11 +319,16 @@ class FlutterDevice {
     } else {
       logStream = (await device!.getLogReader(app: package)).logLines;
     }
-    _loggingSubscription = logStream.listen((String line) {
-      if (!line.contains(globals.kVMServiceMessageRegExp)) {
-        globals.printStatus(line, wrap: false);
-      }
-    });
+    _loggingSubscription = logStream.listen(
+      (String line) {
+        if (!line.contains(globals.kVMServiceMessageRegExp)) {
+          globals.printStatus(line, wrap: false);
+        }
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        globals.printTrace('Error on device log stream: $error\n$stackTrace');
+      },
+    );
   }
 
   Future<void> stopEchoingDeviceLog() async {
