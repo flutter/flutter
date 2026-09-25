@@ -78,8 +78,8 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "android_virtual_device", "version": "android_36_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8702262057250908257"},
+          {"dependency": "android_virtual_device", "version": "android_37_google_apis_ps16k_x64.textpb"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8670032186093418337"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -2116,7 +2116,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "0"
+      subshard: "1_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2138,7 +2138,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "1"
+      subshard: "2_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2160,7 +2160,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "2"
+      subshard: "3_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2182,7 +2182,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "3"
+      subshard: "4_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2204,7 +2204,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "4"
+      subshard: "5_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2226,7 +2226,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "5"
+      subshard: "6_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2248,7 +2248,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "6"
+      subshard: "7_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2270,7 +2270,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "7_last"
+      subshard: "8_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2292,7 +2292,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_skwasm_tests
-      subshard: "0"
+      subshard: "1_2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700" # 45 minutes to match the global `timeout` property.
@@ -2314,7 +2314,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_skwasm_tests
-      subshard: "1"
+      subshard: "2_2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700" # 45 minutes to match the global `timeout` property.
@@ -5370,7 +5370,6 @@ targets:
   - name: Mac_benchmark basic_material_app_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       task_name: basic_material_app_ios__compile
@@ -5479,7 +5478,6 @@ targets:
   - name: Mac_benchmark flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5509,7 +5507,6 @@ targets:
   - name: Mac_benchmark hello_world_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       task_name: hello_world_ios__compile
@@ -5517,7 +5514,6 @@ targets:
   - name: Mac_benchmark imitation_game_flutter
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       task_name: imitation_game_flutter__compile
