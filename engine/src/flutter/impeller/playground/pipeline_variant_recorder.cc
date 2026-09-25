@@ -486,14 +486,15 @@ size_t PipelineVariantRecorder::PrintUnusedShaders(std::ostream& out) const {
 
   out << std::format(
       "  {} shaders were created by a ContentContext but never drawn with, "
-      "with\n  any options, on any backend:\n\n",
+      "with\n  any options, on any backend (SC = specialization "
+      "constants):\n\n",
       unused.size());
   std::vector<std::string> names;
   size_t width = 0u;
   for (const UnusedShader& shader : unused) {
     std::string name = shader.label;
     if (!shader.specialization_constants.empty()) {
-      name += " spec=" +
+      name += " SC=" +
               FormatSpecializationConstants(shader.specialization_constants);
     }
     width = std::max(width, name.size());
@@ -547,7 +548,7 @@ class PipelineVariantRecorder::ReportPrinter {
       return entry.label;
     }
     return std::format(
-        "{} spec={}", entry.label,
+        "{} SC={}", entry.label,
         FormatSpecializationConstants(entry.specialization_constants));
   }
 
@@ -617,7 +618,7 @@ void PipelineVariantRecorder::PrintReport(std::ostream& out,
     return;
   }
 
-  out << "\n  Legend: spec = specialization constants, +flag = option "
+  out << "\n  Legend: SC = specialization constants, +flag = option "
          "enabled,\n          \"drawn as\" = how the same pipeline was "
          "actually drawn.\n";
 
