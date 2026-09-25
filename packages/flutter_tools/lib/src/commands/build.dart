@@ -6,7 +6,6 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../android/android_builder.dart';
-import '../android/android_sdk.dart';
 import '../android/gradle.dart';
 import '../artifacts.dart';
 import '../base/file_system.dart';
@@ -60,8 +59,7 @@ class BuildCommand extends FlutterCommand {
       :Platform platform,
       :ProcessManager processManager,
     ) = toolContext;
-    final AppleContext(:Xcode? xcode) = appleContext;
-    final AndroidContext(:AndroidSdk? androidSdk) = androidContext;
+    final Xcode xcode = appleContext.xcode;
 
     final codesign = DarwinAddToAppCodesigning.fromContexts(
       appleContext: appleContext,
@@ -76,9 +74,10 @@ class BuildCommand extends FlutterCommand {
         );
     _addSubcommand(
       BuildAarCommand(
-        androidSdk: androidSdk,
-        fileSystem: fileSystem,
-        logger: logger,
+        androidBuilder: effectiveAndroidBuilder,
+        androidContext: androidContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
     );
