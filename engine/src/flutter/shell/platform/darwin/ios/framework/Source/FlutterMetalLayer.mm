@@ -18,16 +18,10 @@ FLUTTER_ASSERT_ARC
 @class FlutterTexture;
 @class FlutterDrawable;
 
-// A grace period for app transitions, not a system animation-completion deadline.
-static constexpr int64_t kActivationCompositingDelay = 1500 * NSEC_PER_MSEC;
-
 @interface FlutterMetalLayer () {
   CGSize _drawableSize;
 
   NSUInteger _nextDrawableId;
-  BOOL _requestedOpaque;
-  BOOL _compositingHold;
-  NSUInteger _activationGeneration;
 
   // Access to these variables must be synchronized.
   NSMutableSet<FlutterTexture*>* _availableTextures;
@@ -180,7 +174,7 @@ static constexpr int64_t kActivationCompositingDelay = 1500 * NSEC_PER_MSEC;
 
 - (instancetype)init {
   if (self = [super init]) {
-    self.opaque = YES;
+    self.opaque = NO;
     self.presentsWithTransaction = YES;
     self.device = MTLCreateSystemDefaultDevice();
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
@@ -199,34 +193,9 @@ static constexpr int64_t kActivationCompositingDelay = 1500 * NSEC_PER_MSEC;
 }
 
 - (void)setOpaque:(BOOL)opaque {
-  // FlutterView can change this during the grace period. Preserve the latest
-  // requested value, including NO for a genuinely transparent view.
-  _requestedOpaque = opaque;
-  [super setOpaque:_compositingHold ? NO : opaque];
-}
-
-- (void)setApplicationActive:(BOOL)active {
-  // Temporarily avoid direct-to-display eligibility across app transitions to
-  // mitigate observed drawable stalls. Leave opacity and rendered pixels alone.
-  // A new transition invalidates any pending restoration from an earlier one.
-  const NSUInteger generation = ++_activationGeneration;
-  _compositingHold = YES;
+  // Direct presentation can stall while platform views are composited. Keep
+  // this layer in the Core Animation compositing path for stable presentation.
   [super setOpaque:NO];
-  if (!active) {
-    return;
-  }
-
-  // Do not keep a disposed layer alive just to restore an optimization hint.
-  __weak FlutterMetalLayer* weakSelf = self;
-  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, kActivationCompositingDelay),
-                 dispatch_get_main_queue(), ^{
-                   FlutterMetalLayer* layer = weakSelf;
-                   if (!layer || layer->_activationGeneration != generation) {
-                     return;
-                   }
-                   layer->_compositingHold = NO;
-                   layer.opaque = layer->_requestedOpaque;
-                 });
 }
 
 - (void)setPresentsWithTransaction:(BOOL)presentsWithTransaction {

@@ -11,10 +11,6 @@
 /// and presents their completed contents through the native drawable pipeline.
 @interface FlutterMetalLayer : CAMetalLayer
 
-/// Keeps the layer composited while inactive and briefly after activation.
-/// Call on the platform thread during lifecycle transitions of the owning view.
-- (void)setApplicationActive:(BOOL)active;
-
 /// Returns an IOSurface-backed drawable for Flutter rendering.
 - (nullable id<CAMetalDrawable>)nextFlutterDrawable;
 

@@ -77,6 +77,16 @@
   [self removeMetalLayer:layer];
 }
 
+- (void)testAlwaysComposited {
+  FlutterMetalLayer* layer = [self addMetalLayer];
+  XCTAssertFalse(layer.opaque);
+
+  layer.opaque = YES;
+  XCTAssertFalse(layer.opaque);
+
+  [self removeMetalLayer:layer];
+}
+
 // For unknown reason sometimes CI fails to create IOSurface. Bail out
 // to prevent flakiness.
 #define BAIL_IF_NO_DRAWABLE(drawable)                        \

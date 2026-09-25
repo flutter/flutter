@@ -1033,9 +1033,6 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 #pragma mark - Lifecycle shared
 
 - (void)appOrSceneBecameActive {
-  if ([self.flutterView.layer isKindOfClass:[FlutterMetalLayer class]]) {
-    [(FlutterMetalLayer*)self.flutterView.layer setApplicationActive:YES];
-  }
   self.keyboardInsetManager.isKeyboardInOrTransitioningFromBackground = NO;
   if (_viewportMetrics.physical_width) {
     [self surfaceUpdated:YES];
@@ -1046,9 +1043,6 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 }
 
 - (void)appOrSceneWillResignActive {
-  if ([self.flutterView.layer isKindOfClass:[FlutterMetalLayer class]]) {
-    [(FlutterMetalLayer*)self.flutterView.layer setApplicationActive:NO];
-  }
   [NSObject cancelPreviousPerformRequestsWithTarget:self
                                            selector:@selector(goToApplicationLifecycle:)
                                              object:@"AppLifecycleState.resumed"];
