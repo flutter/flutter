@@ -402,6 +402,34 @@ bool AndroidSurfaceManager::MakeCurrent() {
 #endif
 }
 
+void AndroidSurfaceManager::BindOffscreenPbufferIfCurrent() {
+  std::lock_guard<std::mutex> lock(window_mutex_);
+#if FML_OS_ANDROID
+  if (is_fake_window_ || egl_display_ == EGL_NO_DISPLAY ||
+      egl_onscreen_context_ == EGL_NO_CONTEXT) {
+    return;
+  }
+  if (eglGetCurrentContext() != egl_onscreen_context_) {
+    return;
+  }
+  if (egl_onscreen_surface_ != EGL_NO_SURFACE &&
+      (eglGetCurrentSurface(EGL_DRAW) == egl_onscreen_surface_ ||
+       eglGetCurrentSurface(EGL_READ) == egl_onscreen_surface_)) {
+    EGLSurface fallback_surface =
+        (egl_onscreen_pbuffer_surface_ != EGL_NO_SURFACE)
+            ? egl_onscreen_pbuffer_surface_
+            : (has_surfaceless_context_ ? EGL_NO_SURFACE : EGL_NO_SURFACE);
+    if (fallback_surface != EGL_NO_SURFACE || has_surfaceless_context_) {
+      eglMakeCurrent(egl_display_, fallback_surface, fallback_surface,
+                     egl_onscreen_context_);
+    } else {
+      eglMakeCurrent(egl_display_, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                     EGL_NO_CONTEXT);
+    }
+  }
+#endif
+}
+
 bool AndroidSurfaceManager::ClearCurrent() {
   std::lock_guard<std::mutex> lock(window_mutex_);
 #if FML_OS_ANDROID
@@ -624,56 +652,21 @@ void AndroidSurfaceManager::ReleaseOffscreenFBO(const OffscreenFBO& fbo) {
   offscreen_fbo_pool_.push_back(fbo);
 }
 
-bool AndroidSurfaceManager::BlitAndSwapOverlaySurface(
-    ANativeWindow* overlay_window,
-    uint32_t offscreen_fbo,
-    size_t width,
-    size_t height) {
 #if FML_OS_ANDROID
-  if (!overlay_window) {
-    return true;
-  }
-  if (egl_display_ == EGL_NO_DISPLAY ||
-      egl_onscreen_context_ == EGL_NO_CONTEXT) {
-    return false;
-  }
-  EGLSurface overlay_surface = EGL_NO_SURFACE;
-  {
-    std::lock_guard<std::mutex> lock(overlay_surfaces_mutex_);
-    auto it = overlay_egl_surfaces_.find(overlay_window);
-    if (it != overlay_egl_surfaces_.end()) {
-      overlay_surface = it->second;
-    } else {
-      EGLint format = 0;
-      if (eglGetConfigAttrib(egl_display_, egl_config_, EGL_NATIVE_VISUAL_ID,
-                             &format) == EGL_TRUE &&
-          format != 0) {
-        ANativeWindow_setBuffersGeometry(overlay_window, 0, 0, format);
-      }
-      overlay_surface = eglCreateWindowSurface(egl_display_, egl_config_,
-                                               overlay_window, nullptr);
-      if (overlay_surface == EGL_NO_SURFACE) {
-        FML_LOG(ERROR) << "eglCreateWindowSurface for overlay failed: "
-                       << eglGetError();
-        return false;
-      }
-      overlay_egl_surfaces_[overlay_window] = overlay_surface;
-    }
-  }
+namespace {
 
-  EGLSurface prev_draw = eglGetCurrentSurface(EGL_DRAW);
-  EGLSurface prev_read = eglGetCurrentSurface(EGL_READ);
+using PFNGLBLITFRAMEBUFFERPROC = void (*)(GLint srcX0,
+                                          GLint srcY0,
+                                          GLint srcX1,
+                                          GLint srcY1,
+                                          GLint dstX0,
+                                          GLint dstY0,
+                                          GLint dstX1,
+                                          GLint dstY1,
+                                          GLbitfield mask,
+                                          GLenum filter);
 
-  if (!eglMakeCurrent(egl_display_, overlay_surface, overlay_surface,
-                      egl_onscreen_context_)) {
-    FML_LOG(ERROR) << "eglMakeCurrent on overlay surface failed: "
-                   << eglGetError();
-    return false;
-  }
-
-  typedef void (*PFNGLBLITFRAMEBUFFERPROC)(
-      GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0,
-      GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
+PFNGLBLITFRAMEBUFFERPROC ResolveGlBlitFramebuffer() {
   static PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer_fn = []() {
     PFNGLBLITFRAMEBUFFERPROC fn = nullptr;
 
@@ -720,36 +713,148 @@ bool AndroidSurfaceManager::BlitAndSwapOverlaySurface(
     }
     return fn;
   }();
+  return glBlitFramebuffer_fn;
+}
 
+// 4-component RGBA/XYWH array size for OpenGL state queries.
+constexpr size_t kGLQuadComponentCount = 4;
+
+struct ScopedOverlayGLState {
+  GLboolean scissor_enabled = GL_FALSE;
+  GLint scissor_box[kGLQuadComponentCount] = {0, 0, 0, 0};
+  GLboolean color_mask[kGLQuadComponentCount] = {GL_TRUE, GL_TRUE, GL_TRUE,
+                                                 GL_TRUE};
+  GLfloat clear_color[kGLQuadComponentCount] = {0.0f, 0.0f, 0.0f, 0.0f};
+
+  ScopedOverlayGLState() {
+    scissor_enabled = glIsEnabled(GL_SCISSOR_TEST);
+    glGetIntegerv(GL_SCISSOR_BOX, scissor_box);
+    glGetBooleanv(GL_COLOR_WRITEMASK, color_mask);
+    glGetFloatv(GL_COLOR_CLEAR_VALUE, clear_color);
+
+    if (scissor_enabled) {
+      glDisable(GL_SCISSOR_TEST);
+    }
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+  }
+
+  ~ScopedOverlayGLState() {
+    if (scissor_enabled) {
+      glEnable(GL_SCISSOR_TEST);
+      glScissor(scissor_box[0], scissor_box[1], scissor_box[2], scissor_box[3]);
+    } else {
+      glDisable(GL_SCISSOR_TEST);
+    }
+    glColorMask(color_mask[0], color_mask[1], color_mask[2], color_mask[3]);
+    glClearColor(clear_color[0], clear_color[1], clear_color[2],
+                 clear_color[3]);
+  }
+};
+
+}  // namespace
+#endif
+
+bool AndroidSurfaceManager::BlitAndPresentOnscreenSurface(
+    uint32_t offscreen_fbo,
+    size_t width,
+    size_t height) {
+#if FML_OS_ANDROID
+  if (is_fake_window_ || offscreen_fbo == 0) {
+    return Present();
+  }
+  if (!MakeCurrent()) {
+    return false;
+  }
+  auto glBlitFramebuffer_fn = ResolveGlBlitFramebuffer();
   if (glBlitFramebuffer_fn) {
-    struct ScopedOverlayGLState {
-      GLboolean scissor_enabled = GL_FALSE;
-      GLint scissor_box[4] = {0, 0, 0, 0};
-      GLboolean color_mask[4] = {GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE};
+    ScopedOverlayGLState state_guard;
+    // GL_READ_FRAMEBUFFER = 0x8CA8
+    constexpr GLenum kGLReadFramebuffer = 0x8CA8;
+    // GL_DRAW_FRAMEBUFFER = 0x8CA9
+    constexpr GLenum kGLDrawFramebuffer = 0x8CA9;
+    glBindFramebuffer(kGLReadFramebuffer, offscreen_fbo);
+    glBindFramebuffer(kGLDrawFramebuffer, 0);
+    glBlitFramebuffer_fn(0, 0, width, height, 0, 0, width, height,
+                         GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glFlush();
+  }
+  return Present();
+#else
+  (void)offscreen_fbo;
+  (void)width;
+  (void)height;
+  return Present();
+#endif
+}
 
-      ScopedOverlayGLState() {
-        scissor_enabled = glIsEnabled(GL_SCISSOR_TEST);
-        glGetIntegerv(GL_SCISSOR_BOX, scissor_box);
-        glGetBooleanv(GL_COLOR_WRITEMASK, color_mask);
+bool AndroidSurfaceManager::ClearAndPresentOnscreenSurface() {
+#if FML_OS_ANDROID
+  if (is_fake_window_) {
+    return Present();
+  }
+  if (!MakeCurrent()) {
+    return false;
+  }
+  {
+    ScopedOverlayGLState state_guard;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glFlush();
+  }
+  return Present();
+#else
+  return Present();
+#endif
+}
 
-        if (scissor_enabled) {
-          glDisable(GL_SCISSOR_TEST);
-        }
-        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+bool AndroidSurfaceManager::BlitAndSwapOverlaySurface(
+    ANativeWindow* overlay_window,
+    uint32_t offscreen_fbo,
+    size_t width,
+    size_t height) {
+#if FML_OS_ANDROID
+  if (!overlay_window) {
+    return true;
+  }
+  if (egl_display_ == EGL_NO_DISPLAY ||
+      egl_onscreen_context_ == EGL_NO_CONTEXT) {
+    return false;
+  }
+  EGLSurface overlay_surface = EGL_NO_SURFACE;
+  {
+    std::lock_guard<std::mutex> lock(overlay_surfaces_mutex_);
+    auto it = overlay_egl_surfaces_.find(overlay_window);
+    if (it != overlay_egl_surfaces_.end()) {
+      overlay_surface = it->second;
+    } else {
+      EGLint format = 0;
+      if (eglGetConfigAttrib(egl_display_, egl_config_, EGL_NATIVE_VISUAL_ID,
+                             &format) == EGL_TRUE &&
+          format != 0) {
+        ANativeWindow_setBuffersGeometry(overlay_window, 0, 0, format);
       }
-
-      ~ScopedOverlayGLState() {
-        if (scissor_enabled) {
-          glEnable(GL_SCISSOR_TEST);
-          glScissor(scissor_box[0], scissor_box[1], scissor_box[2],
-                    scissor_box[3]);
-        } else {
-          glDisable(GL_SCISSOR_TEST);
-        }
-        glColorMask(color_mask[0], color_mask[1], color_mask[2], color_mask[3]);
+      overlay_surface = eglCreateWindowSurface(egl_display_, egl_config_,
+                                               overlay_window, nullptr);
+      if (overlay_surface == EGL_NO_SURFACE) {
+        FML_LOG(ERROR) << "eglCreateWindowSurface for overlay failed: "
+                       << eglGetError();
+        return false;
       }
-    };
+      overlay_egl_surfaces_[overlay_window] = overlay_surface;
+    }
+  }
 
+  if (!eglMakeCurrent(egl_display_, overlay_surface, overlay_surface,
+                      egl_onscreen_context_)) {
+    FML_LOG(ERROR) << "eglMakeCurrent on overlay surface failed: "
+                   << eglGetError();
+    return false;
+  }
+
+  auto glBlitFramebuffer_fn = ResolveGlBlitFramebuffer();
+  if (glBlitFramebuffer_fn) {
     ScopedOverlayGLState state_guard;
 
     // GL_READ_FRAMEBUFFER = 0x8CA8
@@ -771,7 +876,7 @@ bool AndroidSurfaceManager::BlitAndSwapOverlaySurface(
   } else {
     FML_LOG(ERROR)
         << "glBlitFramebuffer could not be resolved; skipping overlay blit.";
-    eglMakeCurrent(egl_display_, prev_draw, prev_read, egl_onscreen_context_);
+    MakeCurrent();
     return false;
   }
 
@@ -781,7 +886,7 @@ bool AndroidSurfaceManager::BlitAndSwapOverlaySurface(
                    << eglGetError();
   }
 
-  eglMakeCurrent(egl_display_, prev_draw, prev_read, egl_onscreen_context_);
+  MakeCurrent();
   return swapped == EGL_TRUE;
 #else
   (void)overlay_window;
