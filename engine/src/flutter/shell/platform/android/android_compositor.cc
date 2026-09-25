@@ -87,7 +87,11 @@ bool AndroidCompositor::CreateBackingStore(
       size_t width = static_cast<size_t>(std::round(config->size.width));
       size_t height = static_cast<size_t>(std::round(config->size.height));
 
-      if (backing_stores_created_in_frame_ == 0) {
+      bool has_current_egl_context = false;
+#if FML_OS_ANDROID
+      has_current_egl_context = (eglGetCurrentContext() != EGL_NO_CONTEXT);
+#endif
+      if (backing_stores_created_in_frame_ == 0 && !has_current_egl_context) {
         backing_store_out->user_data = nullptr;
         backing_store_out->open_gl.framebuffer.name =
             surface_manager_->GetFBO();
@@ -150,6 +154,7 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
   size_t platform_views_count = 0;
   size_t overlays_count = 0;
   backing_stores_created_in_frame_ = 0;
+  const FlutterLayer* root_backing_store_layer = nullptr;
 
   for (size_t i = 0; i < layers_count; ++i) {
     const FlutterLayer* layer = layers[i];
@@ -160,21 +165,7 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
     if (layer->type == kFlutterLayerContentTypeBackingStore) {
       if (layer->backing_store != nullptr) {
         if (platform_views_count == 0) {
-          if (layer->backing_store->type == kFlutterBackingStoreTypeSoftware) {
-            bool res = surface_manager_->PresentSoftware(
-                layer->backing_store->software.allocation,
-                layer->backing_store->software.row_bytes,
-                layer->backing_store->software.height);
-            if (!res && !surface_manager_->IsFakeWindow()) {
-              present_success = false;
-            }
-          } else if (layer->backing_store->type ==
-                     kFlutterBackingStoreTypeOpenGL) {
-            bool res = surface_manager_->Present();
-            if (!res && !surface_manager_->IsFakeWindow()) {
-              present_success = false;
-            }
-          }
+          root_backing_store_layer = layer;
         } else {
           if (layer->backing_store->type == kFlutterBackingStoreTypeOpenGL) {
             ANativeWindow* overlay_window = nullptr;
@@ -207,6 +198,40 @@ bool AndroidCompositor::PresentLayers(const FlutterLayer** layers,
                                           layer->platform_view->mutations);
       }
     }
+  }
+
+  if (root_backing_store_layer != nullptr) {
+    const FlutterBackingStore* bs = root_backing_store_layer->backing_store;
+    if (bs->type == kFlutterBackingStoreTypeSoftware) {
+      bool res = surface_manager_->PresentSoftware(
+          bs->software.allocation, bs->software.row_bytes, bs->software.height);
+      if (!res && !surface_manager_->IsFakeWindow()) {
+        present_success = false;
+      }
+    } else if (bs->type == kFlutterBackingStoreTypeOpenGL) {
+      uint32_t fbo = bs->open_gl.framebuffer.name;
+      bool res = false;
+      if (fbo != 0) {
+        res = surface_manager_->BlitAndPresentOnscreenSurface(
+            fbo,
+            static_cast<size_t>(
+                std::round(root_backing_store_layer->size.width)),
+            static_cast<size_t>(
+                std::round(root_backing_store_layer->size.height)));
+      } else {
+        res = surface_manager_->Present();
+      }
+      if (!res && !surface_manager_->IsFakeWindow()) {
+        present_success = false;
+      }
+    }
+  } else if (platform_views_count > 0 && surface_manager_->GetRenderingAPI() !=
+                                             AndroidRenderingAPI::kSoftware) {
+    // When a frame contains platform views (and optionally overlays) but no
+    // background Flutter layer, we still need to swap a transparent frame to
+    // the onscreen surface (which has been converted to FlutterImageView) so
+    // that FlutterView.acquireLatestImageViewFrame() succeeds in onEndFrame().
+    surface_manager_->ClearAndPresentOnscreenSurface();
   }
 
   if (delegate != nullptr) {

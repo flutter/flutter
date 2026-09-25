@@ -395,12 +395,61 @@ void FlutterEmbedderNative::HandleCompositorPlatformViewPresented(
   AndroidMutatorsStack mutators_stack =
       AndroidMutatorsMapper::MapMutations(mutations, mutations_count);
 
-  android_task_runners_->GetPlatformTaskRunner()->PostTask(
-      [router = jni_router_, view_id, x, y, width, height,
-       mutators_stack = std::move(mutators_stack)]() mutable {
-        router->RoutePlatformViewMutators(view_id, x, y, width, height, width,
-                                          height, mutators_stack);
-      });
+  auto platform_runner = android_task_runners_->GetPlatformTaskRunner();
+  if (!platform_runner) {
+    return;
+  }
+  if (platform_runner->RunsTasksOnCurrentThread()) {
+    jni_router_->RoutePlatformViewMutators(view_id, x, y, width, height, width,
+                                           height, mutators_stack);
+    return;
+  }
+  if (!IsHcppEnabled() && surface_attached_.load()) {
+    // Unbind the onscreen EGLSurface on the raster thread before blocking on
+    // the platform thread so that if onDisplayPlatformView triggers
+    // convertToImageView() -> SetNativeWindow(FlutterImageView), the platform
+    // thread can safely destroy the previous onscreen surface without
+    // encountering EGL_BAD_ACCESS.
+    if (surface_manager_) {
+      surface_manager_->BindOffscreenPbufferIfCurrent();
+    }
+    struct PlatformViewLatchState {
+      fml::AutoResetWaitableEvent done;
+    };
+    auto latch_state = std::make_shared<PlatformViewLatchState>();
+    platform_runner->PostTask(
+        [router = jni_router_, view_id, x, y, width, height,
+         mutators_stack = std::move(mutators_stack), latch_state]() mutable {
+          router->RoutePlatformViewMutators(view_id, x, y, width, height, width,
+                                            height, mutators_stack);
+          latch_state->done.Signal();
+        });
+    // Poll every 16ms (one 60Hz frame interval) for surface detachment to
+    // prevent deadlocking if the platform thread is concurrently tearing down
+    // the surface. Note: WaitWithTimeout returns true if the timeout expired
+    // without being signaled, and false if signaled.
+    constexpr int64_t kPlatformLatchWaitTimeoutMs = 16;
+    constexpr size_t kMaxWaitIterations = 60;
+    for (size_t iter = 0;
+         iter < kMaxWaitIterations &&
+         latch_state->done.WaitWithTimeout(
+             fml::TimeDelta::FromMilliseconds(kPlatformLatchWaitTimeoutMs));
+         ++iter) {
+      if (!surface_attached_.load()) {
+        break;
+      }
+    }
+    if (surface_manager_) {
+      surface_manager_->MakeCurrent();
+    }
+  } else {
+    platform_runner->PostTask(
+        [router = jni_router_, view_id, x, y, width, height,
+         mutators_stack = std::move(mutators_stack)]() mutable {
+          router->RoutePlatformViewMutators(view_id, x, y, width, height, width,
+                                            height, mutators_stack);
+        });
+  }
 }
 
 void FlutterEmbedderNative::HandleCompositorOverlayPresented(
@@ -470,13 +519,37 @@ ANativeWindow* FlutterEmbedderNative::GetOverlayWindow(size_t overlay_index) {
         if (platform_runner->RunsTasksOnCurrentThread()) {
           maybe_id = jni_router_->RouteCreateOverlaySurface();
         } else {
-          fml::AutoResetWaitableEvent latch;
-          platform_runner->PostTask(
-              [router = jni_router_, &maybe_id, &latch]() {
-                maybe_id = router->RouteCreateOverlaySurface();
-                latch.Signal();
-              });
-          latch.Wait();
+          bool was_surface_attached = surface_attached_.load();
+          if (surface_manager_) {
+            surface_manager_->BindOffscreenPbufferIfCurrent();
+          }
+          struct OverlayAllocLatchState {
+            fml::AutoResetWaitableEvent done;
+            std::optional<int32_t> id;
+          };
+          auto latch_state = std::make_shared<OverlayAllocLatchState>();
+          platform_runner->PostTask([router = jni_router_, latch_state]() {
+            latch_state->id = router->RouteCreateOverlaySurface();
+            latch_state->done.Signal();
+          });
+          // Poll every 16ms (one 60Hz frame interval) up to 60 iterations
+          // (~1 second max) for surface detachment. WaitWithTimeout returns
+          // true if the timeout expired without being signaled.
+          constexpr int64_t kPlatformLatchWaitTimeoutMs = 16;
+          constexpr size_t kMaxWaitIterations = 60;
+          for (size_t iter = 0; iter < kMaxWaitIterations &&
+                                latch_state->done.WaitWithTimeout(
+                                    fml::TimeDelta::FromMilliseconds(
+                                        kPlatformLatchWaitTimeoutMs));
+               ++iter) {
+            if (was_surface_attached && !surface_attached_.load()) {
+              break;
+            }
+          }
+          if (surface_manager_) {
+            surface_manager_->MakeCurrent();
+          }
+          maybe_id = latch_state->id;
         }
         if (!maybe_id.has_value()) {
           break;
@@ -539,7 +612,8 @@ void FlutterEmbedderNative::PopulateRendererConfig(
   }
   std::memset(config, 0, sizeof(FlutterRendererConfig));
   AndroidRenderingAPI rendering_api = GetSelectedRenderingAPI();
-  if (rendering_api != AndroidRenderingAPI::kImpellerVulkan &&
+  if (IsHcppEnabled() &&
+      rendering_api != AndroidRenderingAPI::kImpellerVulkan &&
       rendering_api != AndroidRenderingAPI::kImpellerAutoselect) {
     SetHcppEnabled(false);
   }
@@ -1061,8 +1135,11 @@ FlutterEmbedderNative::FlutterEmbedderNative()
   InitializeRuntimeSubsystems();
   AttachWindowMetricsCallbacks();
   if (auto vm_args = GetVMArgs(); vm_args.has_value()) {
-    SetHcppEnabled(
-        ShouldEnableSurfaceControl(*vm_args, GetSelectedRenderingAPI()));
+    bool enable_hcpp =
+        ShouldEnableSurfaceControl(*vm_args, GetSelectedRenderingAPI());
+    if (enable_hcpp || IsHcppEnabled()) {
+      SetHcppEnabled(enable_hcpp);
+    }
   }
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterEmbedderNative");
   FML_DLOG(INFO)
@@ -1174,8 +1251,11 @@ FlutterEmbedderNative::FlutterEmbedderNative(
   InitializeRuntimeSubsystems();
   AttachWindowMetricsCallbacks();
   if (auto vm_args = GetVMArgs(); vm_args.has_value()) {
-    SetHcppEnabled(
-        ShouldEnableSurfaceControl(*vm_args, GetSelectedRenderingAPI()));
+    bool enable_hcpp =
+        ShouldEnableSurfaceControl(*vm_args, GetSelectedRenderingAPI());
+    if (enable_hcpp || IsHcppEnabled()) {
+      SetHcppEnabled(enable_hcpp);
+    }
   }
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::FlutterEmbedderNative(custom)");

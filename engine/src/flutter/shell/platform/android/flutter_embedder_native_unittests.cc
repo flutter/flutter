@@ -8311,7 +8311,10 @@ TEST(FlutterEmbedderNativeOverlayAllocationTest,
   auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
   auto mem_provider = std::make_shared<InMemoryPlatformViewsProvider>();
   auto fake_window = reinterpret_cast<ANativeWindow*>(0x12345);
-  mem_provider->SetOverlayWindowForTesting(0, fake_window);
+  // InMemoryPlatformViewsProvider::CreateOverlaySurface() starts
+  // next_overlay_id_ at 1, so overlay_index 0 receives surface_id 1.
+  constexpr int32_t kFirstOverlaySurfaceId = 1;
+  mem_provider->SetOverlayWindowForTesting(kFirstOverlaySurfaceId, fake_window);
 
   auto embedder_delegate = std::make_shared<JniDelegate>(
       mock_invoker, nullptr, nullptr, mem_provider, nullptr, nullptr, nullptr,
@@ -8631,6 +8634,54 @@ TEST(FlutterEmbedderNativeHcppGatingTest,
                                   nullptr, nullptr, nullptr, nullptr, nullptr,
                                   nullptr, nullptr, nullptr, vm_init_vk);
   EXPECT_TRUE(native_vk.IsHcppEnabled());
+}
+
+TEST(FlutterEmbedderNativeHcppGatingTest,
+     NonHcppPlatformViewPresentedSynchronouslyWaitsForPlatformTaskRunner) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _)).WillByDefault(Return(true));
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(Return(true));
+
+  std::atomic<bool> mutators_pushed_on_platform_thread{false};
+  ON_CALL(*mock_invoker, PushPlatformViewMutators(_, _, _, _, _, _, _, _))
+      .WillByDefault([&mutators_pushed_on_platform_thread](
+                         int64_t, int32_t, int32_t, int32_t, int32_t, int32_t,
+                         int32_t, const std::vector<uint8_t>&) {
+        // 25ms simulated platform thread work during convertToImageView().
+        constexpr int64_t kPlatformWorkDelayMs = 25;
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(kPlatformWorkDelayMs));
+        mutators_pushed_on_platform_thread.store(true);
+        return true;
+      });
+
+  FlutterEmbedderNative native(mock_invoker);
+  EXPECT_TRUE(native.SetHcppEnabled(false));
+  EXPECT_FALSE(native.IsHcppEnabled());
+  native.NotifySurfaceCreated(nullptr, /*is_fake_window=*/true);
+
+  ASSERT_NE(native.GetCompositor(), nullptr);
+
+  FlutterPlatformView pv = {};
+  pv.struct_size = sizeof(FlutterPlatformView);
+  // Platform view ID 1 matching HybridAndroidViewTest.
+  pv.identifier = 1;
+  pv.mutations_count = 0;
+  pv.mutations = nullptr;
+
+  FlutterLayer pv_layer = {};
+  pv_layer.struct_size = sizeof(FlutterLayer);
+  pv_layer.type = kFlutterLayerContentTypePlatformView;
+  pv_layer.platform_view = &pv;
+  pv_layer.offset = FlutterPoint{0.0, 0.0};
+  pv_layer.size = FlutterSize{150.0, 150.0};
+
+  const FlutterLayer* layers[] = {&pv_layer};
+  EXPECT_TRUE(native.GetCompositor()->PresentLayers(layers, 1));
+  EXPECT_TRUE(mutators_pushed_on_platform_thread.load());
+
+  native.NotifySurfaceDestroyed();
 }
 
 }  // namespace testing

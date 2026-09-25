@@ -854,15 +854,86 @@ bool AndroidJvmInvoker::PushPlatformViewMutators(
     jfieldID pvc2_field = env->GetFieldID(
         jni_class, "platformViewsController2",
         "Lio/flutter/plugin/platform/PlatformViewsController2;");
-    if (pvc2_field) {
-      jobject pvc2 = env->GetObjectField(java_object.obj(), pvc2_field);
-      if (pvc2 != nullptr) {
-        is_hcpp = true;
-        env->DeleteLocalRef(pvc2);
-      }
-    }
     if (env->ExceptionCheck()) {
       env->ExceptionClear();
+    }
+    jfieldID pvc1_field =
+        env->GetFieldID(jni_class, "platformViewsController",
+                        "Lio/flutter/plugin/platform/PlatformViewsController;");
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+    }
+
+    jobject pvc2 = pvc2_field
+                       ? env->GetObjectField(java_object.obj(), pvc2_field)
+                       : nullptr;
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+    }
+    jobject pvc1 = pvc1_field
+                       ? env->GetObjectField(java_object.obj(), pvc1_field)
+                       : nullptr;
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+    }
+
+    if (pvc2 != nullptr) {
+      if (pvc1 == nullptr) {
+        is_hcpp = true;
+      } else if (hcpp_enabled_.load()) {
+        bool in_pvc2 = false;
+        jclass pvc2_cls = env->GetObjectClass(pvc2);
+        if (pvc2_cls) {
+          jmethodID get_view = env->GetMethodID(pvc2_cls, "getPlatformViewById",
+                                                "(I)Landroid/view/View;");
+          if (env->ExceptionCheck()) {
+            env->ExceptionClear();
+          }
+          if (get_view) {
+            jobject view = env->CallObjectMethod(pvc2, get_view,
+                                                 static_cast<jint>(view_id));
+            if (env->ExceptionCheck()) {
+              env->ExceptionClear();
+            }
+            if (view != nullptr) {
+              in_pvc2 = true;
+              env->DeleteLocalRef(view);
+            }
+          }
+          env->DeleteLocalRef(pvc2_cls);
+        }
+        bool in_pvc1 = false;
+        if (!in_pvc2) {
+          jclass pvc1_cls = env->GetObjectClass(pvc1);
+          if (pvc1_cls) {
+            jmethodID get_view1 = env->GetMethodID(
+                pvc1_cls, "getPlatformViewById", "(I)Landroid/view/View;");
+            if (env->ExceptionCheck()) {
+              env->ExceptionClear();
+            }
+            if (get_view1) {
+              jobject view1 = env->CallObjectMethod(pvc1, get_view1,
+                                                    static_cast<jint>(view_id));
+              if (env->ExceptionCheck()) {
+                env->ExceptionClear();
+              }
+              if (view1 != nullptr) {
+                in_pvc1 = true;
+                env->DeleteLocalRef(view1);
+              }
+            }
+            env->DeleteLocalRef(pvc1_cls);
+          }
+        }
+        is_hcpp = in_pvc2 || !in_pvc1;
+      }
+    }
+
+    if (pvc2) {
+      env->DeleteLocalRef(pvc2);
+    }
+    if (pvc1) {
+      env->DeleteLocalRef(pvc1);
     }
   }
 
@@ -903,6 +974,11 @@ bool AndroidJvmInvoker::InvokeVoidMethod(const std::string& method_name,
                                          const std::vector<uint8_t>& payload) {
   TRACE_EVENT1("flutter", "AndroidJvmInvoker::InvokeVoidMethod", "method",
                method_name.c_str());
+  if (method_name == "setHcppEnabled" && signature == "(Z)V") {
+    bool b = !payload.empty() && payload[0] != 0;
+    hcpp_enabled_.store(b);
+    return true;
+  }
   JNIEnv* env = nullptr;
   fml::jni::ScopedJavaLocalRef<jobject> java_object =
       GetJavaObjectLocalRef(env);

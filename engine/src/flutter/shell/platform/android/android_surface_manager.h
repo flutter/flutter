@@ -92,6 +92,12 @@ class AndroidSurfaceManager {
   /// Makes the onscreen EGL context and surface current on the calling thread.
   bool MakeCurrent();
 
+  /// If the onscreen EGL surface is currently bound on the calling thread,
+  /// binds the fallback pbuffer (or surfaceless) surface to the onscreen
+  /// context so that another thread can safely replace the onscreen window
+  /// surface.
+  void BindOffscreenPbufferIfCurrent();
+
   /// Clears the current EGL context and surface on the calling thread.
   bool ClearCurrent();
 
@@ -99,7 +105,16 @@ class AndroidSurfaceManager {
   bool MakeResourceCurrent();
 
   /// Swaps buffers on the onscreen surface.
-  bool Present();
+  virtual bool Present();
+
+  /// Blits an offscreen FBO to FBO 0 of the current onscreen surface and
+  /// swaps buffers.
+  virtual bool BlitAndPresentOnscreenSurface(uint32_t offscreen_fbo,
+                                             size_t width,
+                                             size_t height);
+
+  /// Clears the current onscreen surface to transparent and swaps buffers.
+  virtual bool ClearAndPresentOnscreenSurface();
 
   /// Returns the current FBO (typically 0 for onscreen window surfaces).
   uint32_t GetFBO() const;
