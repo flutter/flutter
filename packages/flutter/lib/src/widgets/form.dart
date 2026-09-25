@@ -808,8 +808,12 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Refresh a visible error when the locale changes, including the first
+    // dependency change after restoration. A restored error string can belong
+    // to a previous locale. Fields that are not already showing an error stay
+    // untouched.
     final Locale? locale = Localizations.maybeLocaleOf(context);
-    if (_locale != null && locale != _locale && widget.enabled && hasError) {
+    if (locale != _locale && widget.enabled && hasError) {
       _validate();
     }
     _locale = locale;
