@@ -12,6 +12,7 @@ namespace impeller::interop {
 SurfaceMTL::SurfaceMTL(Context& context, void* metal_drawable)
     : SurfaceMTL(context,
                  impeller::SurfaceMTL::MakeFromMetalLayerDrawable(
+                     nullptr,
                      context.GetContext(),
                      (__bridge id<CAMetalDrawable>)metal_drawable,
                      reinterpret_cast<interop::ContextMTL*>(&context)
