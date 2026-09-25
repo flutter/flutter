@@ -32,27 +32,26 @@ class BuildLinuxCommand extends BuildSubCommand {
       HostPlatform.linux_riscv64 => TargetPlatform.linux_riscv64,
       _ => TargetPlatform.linux_x64,
     };
+    _targetPlatformOption = DefaultedEnumOptionDescriptor<TargetPlatform>(
+      name: 'target-platform',
+      defaultsTo: defaultTargetPlatform,
+      values: const <TargetPlatform>[
+        TargetPlatform.linux_arm64,
+        TargetPlatform.linux_x64,
+        TargetPlatform.linux_riscv64,
+      ],
+      nameMapper: (TargetPlatform platform) => platform.getName(),
+      valueParser: TargetPlatform.fromName,
+      help: 'The target platform for which the app is compiled.',
+    );
     registerOptionBundles(const <OptionBundle>[DesktopBuildOptionsBundle()]);
     argParser.addDescriptors(<OptionDescriptor<Object?>>[
-      _targetPlatformOption(defaultTargetPlatform),
+      _targetPlatformOption,
       _targetSysroot,
     ], verboseHelp: verboseHelp);
   }
 
-  static DefaultedEnumOptionDescriptor<TargetPlatform> _targetPlatformOption(
-    TargetPlatform defaultPlatform,
-  ) => DefaultedEnumOptionDescriptor<TargetPlatform>(
-    name: 'target-platform',
-    defaultsTo: defaultPlatform,
-    values: const <TargetPlatform>[
-      TargetPlatform.linux_arm64,
-      TargetPlatform.linux_x64,
-      TargetPlatform.linux_riscv64,
-    ],
-    nameMapper: (TargetPlatform platform) => platform.getName(),
-    valueParser: TargetPlatform.fromName,
-    help: 'The target platform for which the app is compiled.',
-  );
+  late final DefaultedEnumOptionDescriptor<TargetPlatform> _targetPlatformOption;
 
   static const _targetSysroot = DefaultedStringOptionDescriptor(
     name: 'target-sysroot',
@@ -96,7 +95,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     final Platform platform = toolContext.platform;
 
     final BuildInfo buildInfo = await getBuildInfo();
-    final TargetPlatform targetPlatform = getValue(_targetPlatformOption(TargetPlatform.linux_x64));
+    final TargetPlatform targetPlatform = getValue(_targetPlatformOption);
     final needCrossBuild = os.hostPlatform.platformName != targetPlatform.simpleName;
 
     if (!_featureFlags.isLinuxEnabled) {
