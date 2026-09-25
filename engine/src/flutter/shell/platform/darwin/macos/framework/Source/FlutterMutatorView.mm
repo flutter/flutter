@@ -354,6 +354,8 @@ CATransform3D CATransformFromMutations(const MutationVector& mutations) {
       }
       case kFlutterPlatformViewMutationTypeClipRect:
       case kFlutterPlatformViewMutationTypeClipRoundedRect:
+      case kFlutterPlatformViewMutationTypeClipRoundSuperellipse:
+      case kFlutterPlatformViewMutationTypeClipPath:
       case kFlutterPlatformViewMutationTypeOpacity:
         break;
     }
@@ -371,6 +373,8 @@ float OpacityFromMutations(const MutationVector& mutations) {
         break;
       case kFlutterPlatformViewMutationTypeClipRect:
       case kFlutterPlatformViewMutationTypeClipRoundedRect:
+      case kFlutterPlatformViewMutationTypeClipRoundSuperellipse:
+      case kFlutterPlatformViewMutationTypeClipPath:
       case kFlutterPlatformViewMutationTypeTransformation:
         break;
     }
@@ -401,9 +405,17 @@ CGRect MasterClipFromMutations(CGRect bounds, const MutationVector& mutations) {
         master_clip = CGRectIntersection(rect, master_clip);
         break;
       }
+      case kFlutterPlatformViewMutationTypeClipRoundSuperellipse: {
+        CGAffineTransform affineTransform = CATransform3DGetAffineTransform(transform);
+        CGRect rect = CGRectApplyAffineTransform(
+            FromFlutterRect(mutation.clip_round_superellipse.rect), affineTransform);
+        master_clip = CGRectIntersection(rect, master_clip);
+        break;
+      }
       case kFlutterPlatformViewMutationTypeTransformation:
         transform = CATransform3DConcat(ToCATransform3D(mutation.transformation), transform);
         break;
+      case kFlutterPlatformViewMutationTypeClipPath:
       case kFlutterPlatformViewMutationTypeOpacity:
         break;
     }
@@ -429,6 +441,17 @@ NSMutableArray* ClipPathFromMutations(CGRect master_clip, const MutationVector& 
         rounded_rects.push_back({mutation.clip_rounded_rect, affineTransform});
         break;
       }
+      case kFlutterPlatformViewMutationTypeClipRoundSuperellipse: {
+        CGAffineTransform affineTransform = CATransform3DGetAffineTransform(transform);
+        rounded_rects.push_back(
+            {FlutterRoundedRect{mutation.clip_round_superellipse.rect,
+                                mutation.clip_round_superellipse.upper_left_corner_radius,
+                                mutation.clip_round_superellipse.upper_right_corner_radius,
+                                mutation.clip_round_superellipse.lower_right_corner_radius,
+                                mutation.clip_round_superellipse.lower_left_corner_radius},
+             affineTransform});
+        break;
+      }
       case kFlutterPlatformViewMutationTypeTransformation:
         transform = CATransform3DConcat(ToCATransform3D(mutation.transformation), transform);
         break;
@@ -443,6 +466,7 @@ NSMutableArray* ClipPathFromMutations(CGRect master_clip, const MutationVector& 
         }
         break;
       }
+      case kFlutterPlatformViewMutationTypeClipPath:
       case kFlutterPlatformViewMutationTypeOpacity:
         break;
     }

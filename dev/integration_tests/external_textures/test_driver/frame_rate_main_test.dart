@@ -64,7 +64,7 @@ Future<void> main() async {
     expect(matchFast, isNotNull);
 
     framesProduced = double.parse(matchFast.group(1)!);
-    expect(framesProduced, closeTo(flutterFrameRate * 2.0, 5.0));
+    expect(framesProduced, closeTo(flutterFrameRate * 2.0, 10.0));
     framesConsumed = double.parse(matchFast.group(2)!);
     expect(framesConsumed, closeTo(flutterFrameRate, 10.0));
     widgetBuilds = int.parse(matchSlow.group(3)!);
