@@ -622,7 +622,6 @@ void main() {
       const MediaQuery(
         data: MediaQueryData(padding: EdgeInsets.only(top: 128)),
         child: MaterialApp(
-          useInheritedMediaQuery: true,
           home: SafeArea(
             child: Scaffold(
               bottomNavigationBar: ShapeListener(

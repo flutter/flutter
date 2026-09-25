@@ -703,7 +703,7 @@ void main() {
       );
       return MediaQuery(
         data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: viewInsetsHeight)),
-        child: MaterialApp(useInheritedMediaQuery: true, home: scaffold),
+        child: MaterialApp(home: scaffold),
       );
     }
 

@@ -456,29 +456,6 @@ void main() {
     );
   });
 
-  testWidgets(
-    'When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available',
-    (WidgetTester tester) async {
-      late BuildContext capturedContext;
-      final uniqueKey = UniqueKey();
-      await tester.pumpWidget(
-        MediaQuery(
-          key: uniqueKey,
-          data: const MediaQueryData(),
-          child: CupertinoApp(
-            useInheritedMediaQuery: true,
-            builder: (BuildContext context, Widget? child) {
-              capturedContext = context;
-              return const Placeholder();
-            },
-            color: const Color(0xFF123456),
-          ),
-        ),
-      );
-      expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
-    },
-  );
-
   testWidgets('CupertinoApp uses the dark SystemUIOverlayStyle when the background is light', (
     WidgetTester tester,
   ) async {
