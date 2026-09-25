@@ -392,6 +392,46 @@ void main() {
       },
     );
   }
+
+  testUsingContext(
+    'createFlutterNativeAssetsBuildRunner includes dev dependencies for release test targets',
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+    () async {
+      writePackageConfigFiles(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
+      androidEnvironment.defines[kBuildMode] = BuildMode.release.cliName;
+
+      androidEnvironment.defines[kTargetFile] = fileSystem.path.join('lib', 'main.dart');
+      final FlutterNativeAssetsBuildRunner mainRunner = await createFlutterNativeAssetsBuildRunner(
+        androidEnvironment,
+      );
+      expect((mainRunner as FlutterNativeAssetsBuildRunnerImpl).includeDevDependencies, isFalse);
+
+      androidEnvironment.defines[kTargetFile] = fileSystem.path.join(
+        'integration_test',
+        'app_test.dart',
+      );
+      final FlutterNativeAssetsBuildRunner integrationTestRunner =
+          await createFlutterNativeAssetsBuildRunner(androidEnvironment);
+      expect(
+        (integrationTestRunner as FlutterNativeAssetsBuildRunnerImpl).includeDevDependencies,
+        isTrue,
+      );
+
+      androidEnvironment.defines[kTargetFile] = fileSystem.path.join('test_driver', 'app.dart');
+      final FlutterNativeAssetsBuildRunner driverRunner =
+          await createFlutterNativeAssetsBuildRunner(androidEnvironment);
+      expect((driverRunner as FlutterNativeAssetsBuildRunnerImpl).includeDevDependencies, isTrue);
+
+      androidEnvironment.defines[kTargetFile] = fileSystem.path.join('test', 'app_test.dart');
+      final FlutterNativeAssetsBuildRunner testRunner = await createFlutterNativeAssetsBuildRunner(
+        androidEnvironment,
+      );
+      expect((testRunner as FlutterNativeAssetsBuildRunnerImpl).includeDevDependencies, isTrue);
+    },
+  );
 }
 
 List<String> _resolvedOutputs(Target target, Environment environment) {
