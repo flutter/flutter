@@ -73,7 +73,9 @@ export 'package:flutter/rendering.dart'
         SingleChildLayoutDelegate,
         StackFit,
         SystemMouseCursors,
+        TextElision,
         TextOverflow,
+        TextTruncation,
         ValueChanged,
         ValueGetter,
         WrapAlignment,
@@ -6702,7 +6704,12 @@ class RichText extends MultiChildRenderObjectWidget {
       ),
     );
     properties.add(
-      EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip),
+      DiagnosticsProperty<TextOverflow>(
+        'overflow',
+        overflow,
+        description: overflow.name,
+        defaultValue: TextOverflow.clip,
+      ),
     );
     properties.add(
       DiagnosticsProperty<TextScaler>('textScaler', textScaler, defaultValue: TextScaler.noScaling),

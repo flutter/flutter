@@ -230,7 +230,14 @@ class DefaultTextStyle extends InheritedTheme {
         showName: true,
       ),
     );
-    properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<TextOverflow>(
+        'overflow',
+        overflow,
+        description: overflow.name,
+        defaultValue: null,
+      ),
+    );
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(
       EnumProperty<TextWidthBasis>(
@@ -832,7 +839,14 @@ class Text extends StatelessWidget {
         showName: true,
       ),
     );
-    properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<TextOverflow>(
+        'overflow',
+        overflow,
+        description: overflow?.name,
+        defaultValue: null,
+      ),
+    );
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(

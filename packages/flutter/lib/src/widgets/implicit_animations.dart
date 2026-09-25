@@ -2131,7 +2131,14 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
         showName: true,
       ),
     );
-    properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<TextOverflow>(
+        'overflow',
+        overflow,
+        description: overflow.name,
+        defaultValue: null,
+      ),
+    );
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(
       EnumProperty<TextWidthBasis>(

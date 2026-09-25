@@ -30,6 +30,7 @@ import 'strut_style.dart';
 import 'text_scaler.dart';
 import 'text_span.dart';
 import 'text_style.dart';
+import 'text_truncation.dart';
 
 export 'dart:ui' show LineMetrics;
 
@@ -45,18 +46,83 @@ const double kDefaultFontSize = 14.0;
 ///
 /// A [TextOverflow] can be passed to [Text] and [RichText] via their
 /// [Text.overflow] and [RichText.overflow] properties respectively.
-enum TextOverflow {
+///
+/// The built-in behaviors are [clip], [fade], [ellipsis], and [visible]. Custom
+/// truncation (for example, eliding the middle of the text, or the part of an
+/// email address before the `@`) is available through
+/// [TextOverflow.truncate].
+///
+/// This class was previously an enum. The built-in values still provide
+/// [name], [index], and [values] for compatibility, but switches over a
+/// [TextOverflow] are not exhaustive and need a default case.
+@immutable
+final class TextOverflow {
+  const TextOverflow._(this.name, this.index, [this.truncation]);
+
+  /// Truncate the text using [truncation] so that it fits.
+  ///
+  /// The text is shortened by applying the smallest level of [truncation]
+  /// whose result fits within the available width and [Text.maxLines]. If the
+  /// text does not fit even at [TextTruncation.maxLevel], it is clipped.
+  ///
+  /// Truncation only happens when the text would otherwise overflow, so it
+  /// should be combined with [Text.maxLines] or with [Text.softWrap] set to
+  /// false.
+  ///
+  /// Currently, only text consisting of plain [TextSpan]s with a single style
+  /// (such as the text of a [Text] widget created with a [String]) is supported.
+  /// Text with a [TextSpan.recognizer], nested styles, or [WidgetSpan]s is not
+  /// truncated.
+  const TextOverflow.truncate(TextTruncation truncation) : this._('truncate', 4, truncation);
+
   /// Clip the overflowing text to fix its container.
-  clip,
+  static const TextOverflow clip = TextOverflow._('clip', 0);
 
   /// Fade the overflowing text to transparent.
-  fade,
+  static const TextOverflow fade = TextOverflow._('fade', 1);
 
   /// Use an ellipsis to indicate that the text has overflowed.
-  ellipsis,
+  static const TextOverflow ellipsis = TextOverflow._('ellipsis', 2);
 
   /// Render overflowing text outside of its container.
-  visible,
+  static const TextOverflow visible = TextOverflow._('visible', 3);
+
+  /// The non-parameterized built-in values: [clip], [fade], [ellipsis], and
+  /// [visible].
+  ///
+  /// Values created with [TextOverflow.truncate] are not included.
+  static const List<TextOverflow> values = <TextOverflow>[clip, fade, ellipsis, visible];
+
+  /// The name of this overflow behavior, such as `'ellipsis'`.
+  ///
+  /// For values created with [TextOverflow.truncate], this is `'truncate'`.
+  final String name;
+
+  /// A numeric identifier for this overflow behavior.
+  ///
+  /// For the built-in values, this is the index into [values]. For values
+  /// created with [TextOverflow.truncate], this is 4.
+  final int index;
+
+  /// The truncation used to shorten overflowing text, if this value was
+  /// created with [TextOverflow.truncate]; otherwise null.
+  final TextTruncation? truncation;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is TextOverflow && other.index == index && other.truncation == truncation;
+  }
+
+  @override
+  int get hashCode => Object.hash(index, truncation);
+
+  @override
+  String toString() {
+    return truncation == null ? 'TextOverflow.$name' : 'TextOverflow.truncate($truncation)';
+  }
 }
 
 /// Holds the [Size] and baseline required to represent the dimensions of
@@ -962,7 +1028,7 @@ class TextPainter {
   /// After this is set, you must call [layout] before the next call to [paint].
   ///
   /// The higher layers of the system, such as the [Text] widget, represent
-  /// overflow effects using the [TextOverflow] enum. The
+  /// overflow effects using the [TextOverflow] class. The
   /// [TextOverflow.ellipsis] value corresponds to setting this property to
   /// U+2026 HORIZONTAL ELLIPSIS (…).
   String? get ellipsis => _ellipsis;

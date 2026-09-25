@@ -1681,7 +1681,14 @@ class TextStyle with Diagnosticable {
       );
     }
 
-    styles.add(EnumProperty<TextOverflow>('${prefix}overflow', overflow, defaultValue: null));
+    styles.add(
+      DiagnosticsProperty<TextOverflow>(
+        '${prefix}overflow',
+        overflow,
+        description: overflow?.name,
+        defaultValue: null,
+      ),
+    );
   }
 }
 

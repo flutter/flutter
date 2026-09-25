@@ -20,6 +20,7 @@ import 'dart:ui'
         TextBox,
         TextHeightBehavior;
 
+import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
@@ -324,6 +325,81 @@ class _UnspecifiedTextScaler extends TextScaler {
   Never scale(double fontSize) => throw UnimplementedError();
 }
 
+// The result of searching for the truncation level to display at a given
+// maxWidth.
+@immutable
+class _TruncationResult {
+  const _TruncationResult({required this.maxWidth, required this.level, this.displayText});
+
+  // The maxWidth of the constraints the search was performed with.
+  final double maxWidth;
+
+  // The chosen truncation level.
+  final int level;
+
+  // The plain text displayed at [level], or null if the original text is
+  // displayed.
+  final String? displayText;
+}
+
+// Returns `text` with each elision's range replaced by its replacement.
+//
+// The elisions must be sorted and non-overlapping.
+String _applyElisions(String text, List<TextElision> elisions) {
+  final buffer = StringBuffer();
+  var start = 0;
+  for (final elision in elisions) {
+    buffer
+      ..write(text.substring(start, elision.range.start))
+      ..write(elision.replacement);
+    start = elision.range.end;
+  }
+  buffer.write(text.substring(start));
+  return buffer.toString();
+}
+
+// Asserts that `elisions`, returned by `truncation` for `level`, are valid for
+// `text`. Always returns true so that it can be used inside an assert.
+bool _debugAssertValidElisions(
+  String text,
+  List<TextElision> elisions,
+  int level,
+  TextTruncation truncation,
+) {
+  assert(() {
+    final graphemeBoundaries = <int>{0};
+    var boundary = 0;
+    for (final String grapheme in text.characters) {
+      boundary += grapheme.length;
+      graphemeBoundaries.add(boundary);
+    }
+    var previousEnd = 0;
+    for (final elision in elisions) {
+      final TextRange range = elision.range;
+      final String problem;
+      if (!range.isValid || !range.isNormalized || range.end > text.length) {
+        problem = 'is not a valid, normalized range within the text';
+      } else if (range.start < previousEnd) {
+        problem = 'overlaps or is not sorted after the previous elision';
+      } else if (!graphemeBoundaries.contains(range.start) ||
+          !graphemeBoundaries.contains(range.end)) {
+        problem = 'is not aligned to grapheme cluster boundaries';
+      } else {
+        previousEnd = range.end;
+        continue;
+      }
+      throw FlutterError(
+        '$truncation returned an invalid elision for level $level.\n'
+        'The elision $elision $problem.\n'
+        'The text (length ${text.length}) was: "$text"\n'
+        'The elisions were: $elisions',
+      );
+    }
+    return true;
+  }());
+  return true;
+}
+
 /// A render object that displays a paragraph of text.
 class RenderParagraph extends RenderBox
     with
@@ -363,6 +439,7 @@ class RenderParagraph extends RenderBox
          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
        ),
        _overflow = overflow,
+       _originalText = text,
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -397,7 +474,8 @@ class RenderParagraph extends RenderBox
 
   TextPainter get _textIntrinsics {
     return (_textIntrinsicsCache ??= TextPainter())
-      ..text = _textPainter.text
+      // Intrinsics are always computed from the original (untruncated) text.
+      ..text = _originalText
       ..textAlign = _textPainter.textAlign
       ..textDirection = _textPainter.textDirection
       ..textScaler = _textPainter.textScaler
@@ -413,25 +491,39 @@ class RenderParagraph extends RenderBox
 
   List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
 
+  // The text provided by the owner of this render object.
+  //
+  // This is usually the same object as `_textPainter.text`, except when
+  // [TextOverflow.truncate] is in effect and the text overflows, in which case
+  // `_textPainter.text` holds the truncated text that is displayed.
+  InlineSpan _originalText;
+
   /// The text to display.
-  InlineSpan get text => _textPainter.text!;
+  ///
+  /// When [overflow] is a [TextOverflow.truncate], this is the original,
+  /// untruncated text.
+  InlineSpan get text => _originalText;
 
   set text(InlineSpan value) {
-    switch (_textPainter.text!.compareTo(value)) {
+    switch (_originalText.compareTo(value)) {
       case RenderComparison.identical:
         return;
       case RenderComparison.metadata:
-        _textPainter.text = value;
+        _setTextWithoutLayoutChange(value);
         _cachedCombinedSemanticsInfos = null;
         markNeedsSemanticsUpdate();
       case RenderComparison.paint:
-        _textPainter.text = value;
+        _setTextWithoutLayoutChange(value);
         _cachedAttributedLabels = null;
         _cachedCombinedSemanticsInfos = null;
         markNeedsPaint();
         markNeedsSemanticsUpdate();
       case RenderComparison.layout:
+        _originalText = value;
         _textPainter.text = value;
+        _truncatedDisplayText = null;
+        _cachedOriginalPlainText = null;
+        _cachedTextSupportsTruncation = null;
         _overflowShader = null;
         _cachedAttributedLabels = null;
         _cachedCombinedSemanticsInfos = null;
@@ -503,7 +595,11 @@ class RenderParagraph extends RenderBox
   }
 
   List<_SelectableFragment> _getSelectableFragments() {
-    final String plainText = text.toPlainText(includeSemanticsLabels: false);
+    // Selection operates on the displayed text, which differs from [text] when
+    // [TextOverflow.truncate] is in effect.
+    // TODO(gaaclarke): Map selections of truncated text back to the original
+    // text, https://github.com/flutter/flutter/issues/76943.
+    final String plainText = _textPainter.text!.toPlainText(includeSemanticsLabels: false);
     final result = <_SelectableFragment>[];
     var start = 0;
     while (start < plainText.length) {
@@ -556,6 +652,10 @@ class RenderParagraph extends RenderBox
     _lastSelectableFragments?.forEach(
       (_SelectableFragment element) => element.didChangeParagraphLayout(),
     );
+    // Any property that affects layout may affect which truncation level fits.
+    // Changes to the incoming constraints alone do not call markNeedsLayout,
+    // which lets _resolveTruncation reuse the previous result as a bound.
+    _truncationCache = null;
     super.markNeedsLayout();
   }
 
@@ -628,6 +728,9 @@ class RenderParagraph extends RenderBox
     }
     _overflow = value;
     _textPainter.ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null;
+    if (value.truncation == null) {
+      _applyTruncatedDisplayText(null);
+    }
     markNeedsLayout();
   }
 
@@ -877,6 +980,13 @@ class RenderParagraph extends RenderBox
   @visibleForTesting
   bool get debugHasOverflowShader => _overflowShader != null;
 
+  /// The truncated text currently displayed when [overflow] is a
+  /// [TextOverflow.truncate], or null if the original [text] is displayed.
+  ///
+  /// Used to test this object. Not for use in production.
+  @visibleForTesting
+  String? get debugTruncatedText => _truncatedDisplayText;
+
   @override
   void systemFontsDidChange() {
     super.systemFontsDidChange();
@@ -891,33 +1001,279 @@ class RenderParagraph extends RenderBox
   List<PlaceholderDimensions>? _placeholderDimensions;
 
   double _adjustMaxWidth(double maxWidth) {
+    // With TextOverflow.truncate and softWrap disabled, the text is laid out on
+    // a single line with unbounded width, and it fits if that line is no wider
+    // than maxWidth (see _fitsWithin).
     return softWrap || overflow == TextOverflow.ellipsis ? maxWidth : double.infinity;
   }
 
   void _layoutTextWithConstraints(BoxConstraints constraints) {
-    _textPainter
-      ..setPlaceholderDimensions(_placeholderDimensions)
-      ..layout(minWidth: constraints.minWidth, maxWidth: _adjustMaxWidth(constraints.maxWidth));
+    _textPainter.setPlaceholderDimensions(_placeholderDimensions);
+    if (_activeTruncation case final TextTruncation truncation) {
+      _resolveTruncation(truncation, constraints);
+    }
+    _textPainter.layout(
+      minWidth: constraints.minWidth,
+      maxWidth: _adjustMaxWidth(constraints.maxWidth),
+    );
+  }
+
+  // The result of the most recent truncation search on _textPainter.
+  //
+  // Cleared by markNeedsLayout, so a non-null value was computed with the
+  // current text and layout properties, although possibly for a different
+  // maxWidth.
+  _TruncationResult? _truncationCache;
+
+  // The truncated plain text currently displayed by _textPainter, or null if
+  // _textPainter displays _originalText.
+  String? _truncatedDisplayText;
+
+  String? _cachedOriginalPlainText;
+  String get _originalPlainText {
+    return _cachedOriginalPlainText ??= _originalText.toPlainText(includeSemanticsLabels: false);
+  }
+
+  bool? _cachedTextSupportsTruncation;
+  bool get _textSupportsTruncation {
+    return _cachedTextSupportsTruncation ??= _computeTextSupportsTruncation(_originalText);
+  }
+
+  // Whether `text` can be displayed with TextOverflow.truncate.
+  //
+  // Truncation currently only supports plain text with a single style: a tree
+  // of TextSpans where only the root may specify a style, and with no
+  // gesture recognizers, hover callbacks, or placeholders.
+  // TODO(gaaclarke): Support truncating styled InlineSpans,
+  // https://github.com/flutter/flutter/issues/76943.
+  static bool _computeTextSupportsTruncation(InlineSpan text) {
+    var supported = true;
+    text.visitChildren((InlineSpan span) {
+      if (span is! TextSpan ||
+          span.recognizer != null ||
+          span.onEnter != null ||
+          span.onExit != null ||
+          (!identical(span, text) && span.style != null)) {
+        supported = false;
+        return false;
+      }
+      return true;
+    });
+    return supported;
+  }
+
+  // The truncation to apply to the text, or null if the text should be laid
+  // out as-is.
+  TextTruncation? get _activeTruncation {
+    final TextTruncation? truncation = _overflow.truncation;
+    if (truncation == null) {
+      return null;
+    }
+    assert(
+      _textSupportsTruncation,
+      'TextOverflow.truncate only supports plain text with a single style. The '
+      'text must consist only of TextSpans without recognizers or hover '
+      'callbacks (no WidgetSpans), and only the root TextSpan may have a style.\n'
+      'The text was:\n'
+      '${_originalText.toStringDeep()}',
+    );
+    return _textSupportsTruncation ? truncation : null;
+  }
+
+  // Updates _originalText for a change that does not affect layout.
+  void _setTextWithoutLayoutChange(InlineSpan value) {
+    final bool? previouslySupportedTruncation = _cachedTextSupportsTruncation;
+    _originalText = value;
+    _cachedTextSupportsTruncation = null;
+    if (_overflow.truncation != null &&
+        previouslySupportedTruncation != null &&
+        previouslySupportedTruncation != _textSupportsTruncation) {
+      // For example, a recognizer was added to the text. The truncation needs
+      // to be recomputed.
+      _applyTruncatedDisplayText(null);
+      markNeedsLayout();
+      return;
+    }
+    _textPainter.text = _displaySpanFor(_truncatedDisplayText);
+  }
+
+  // Returns the span to display for the given truncated plain text, or
+  // _originalText if `displayText` is null.
+  InlineSpan _displaySpanFor(String? displayText) {
+    if (displayText == null) {
+      return _originalText;
+    }
+    final original = _originalText as TextSpan;
+    return TextSpan(
+      text: displayText,
+      style: original.style,
+      locale: original.locale,
+      spellOut: original.spellOut,
+      mouseCursor: original.mouseCursor,
+    );
+  }
+
+  // Makes _textPainter display `displayText` (or _originalText, if null), and
+  // updates the selectable fragments if the displayed string changed.
+  void _applyTruncatedDisplayText(String? displayText) {
+    final didChange = displayText != _truncatedDisplayText;
+    _truncatedDisplayText = displayText;
+    _textPainter.text = _displaySpanFor(displayText);
+    if (didChange) {
+      final List<_SelectableFragment>? fragments = _lastSelectableFragments;
+      if (fragments != null && fragments.isNotEmpty) {
+        // Truncation is only applied to text without placeholders, which has a
+        // single selectable fragment.
+        assert(fragments.length == 1);
+        fragments.single._didChangeFullText(
+          _textPainter.text!.toPlainText(includeSemanticsLabels: false),
+        );
+      }
+    }
+  }
+
+  // Resolves which truncation level _textPainter displays for `constraints`.
+  //
+  // The result is cached, since this is called from paint and from many
+  // geometry queries in addition to performLayout.
+  void _resolveTruncation(TextTruncation truncation, BoxConstraints constraints) {
+    final _TruncationResult? cached = _truncationCache;
+    if (cached != null && cached.maxWidth == constraints.maxWidth) {
+      return;
+    }
+    // If only the width changed since the last search, the previous level
+    // bounds the new one: a level that fit in less space still fits in more,
+    // and a level that did not fit in more space still does not fit in less.
+    var minLevel = 0;
+    int? maxLevel;
+    if (cached != null) {
+      if (constraints.maxWidth > cached.maxWidth) {
+        maxLevel = cached.level;
+      } else {
+        minLevel = cached.level;
+      }
+    }
+    final _TruncationResult result = _layoutTruncated(
+      _textPainter,
+      truncation,
+      constraints,
+      minLevel: minLevel,
+      maxLevel: maxLevel,
+    );
+    _truncationCache = result;
+    _applyTruncatedDisplayText(result.displayText);
+  }
+
+  // Whether `painter`, after layout, fits within `maxWidth` and its maxLines.
+  static bool _fitsWithin(TextPainter painter, double maxWidth) {
+    return !painter.didExceedMaxLines && painter.width <= maxWidth;
+  }
+
+  // Lays out `painter` with the smallest level of `truncation` in
+  // [minLevel, maxLevel] whose result fits within `constraints`, and returns
+  // that level.
+  //
+  // If no level in the range fits, `painter` is laid out with the largest
+  // level in the range, and the text is clipped.
+  //
+  // This assumes the truncation is monotonic (see TextTruncation.elide): the
+  // laid-out width never increases as the level increases.
+  _TruncationResult _layoutTruncated(
+    TextPainter painter,
+    TextTruncation truncation,
+    BoxConstraints constraints, {
+    int minLevel = 0,
+    int? maxLevel,
+  }) {
+    final String originalText = _originalPlainText;
+    final int textMaxLevel = math.max(0, truncation.maxLevel(originalText));
+    final int low = minLevel.clamp(0, textMaxLevel);
+    final int high = (maxLevel ?? textMaxLevel).clamp(low, textMaxLevel);
+    final double layoutMaxWidth = _adjustMaxWidth(constraints.maxWidth);
+
+    int? laidOutLevel;
+    String? laidOutText;
+    bool layoutAtLevel(int level) {
+      if (level == 0) {
+        laidOutText = null;
+      } else {
+        final List<TextElision> elisions = truncation.elide(originalText, level);
+        assert(_debugAssertValidElisions(originalText, elisions, level, truncation));
+        laidOutText = elisions.isEmpty ? null : _applyElisions(originalText, elisions);
+      }
+      laidOutLevel = level;
+      painter
+        ..text = _displaySpanFor(laidOutText)
+        ..layout(minWidth: constraints.minWidth, maxWidth: layoutMaxWidth);
+      return _fitsWithin(painter, constraints.maxWidth);
+    }
+
+    final int level;
+    if (low >= high) {
+      level = high;
+    } else if (layoutAtLevel(low)) {
+      // The common case: the text fits without truncation (low == 0).
+      level = low;
+    } else {
+      // Binary search for the smallest fitting level in (low, high]. If none
+      // fit, this ends at high.
+      int searchLow = low + 1;
+      var searchHigh = high;
+      while (searchLow < searchHigh) {
+        final int mid = searchLow + (searchHigh - searchLow) ~/ 2;
+        if (layoutAtLevel(mid)) {
+          searchHigh = mid;
+        } else {
+          searchLow = mid + 1;
+        }
+      }
+      level = searchLow;
+    }
+    if (laidOutLevel != level) {
+      layoutAtLevel(level);
+    }
+    return _TruncationResult(
+      maxWidth: constraints.maxWidth,
+      level: level,
+      displayText: laidOutText,
+    );
+  }
+
+  // Lays out `painter` (the intrinsics painter, laid out with the original
+  // text) for dry layout and dry baseline computations, applying truncation
+  // the same way _layoutTextWithConstraints does.
+  void _layoutDry(TextPainter painter, BoxConstraints constraints) {
+    final TextTruncation? truncation = _activeTruncation;
+    if (truncation == null) {
+      painter.layout(
+        minWidth: constraints.minWidth,
+        maxWidth: _adjustMaxWidth(constraints.maxWidth),
+      );
+      return;
+    }
+    final _TruncationResult? cached = _truncationCache;
+    if (cached != null && cached.maxWidth == constraints.maxWidth) {
+      painter
+        ..text = _displaySpanFor(cached.displayText)
+        ..layout(minWidth: constraints.minWidth, maxWidth: _adjustMaxWidth(constraints.maxWidth));
+      return;
+    }
+    _layoutTruncated(painter, truncation, constraints);
   }
 
   @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
-    final Size size =
-        (_textIntrinsics
-              ..setPlaceholderDimensions(
-                layoutInlineChildren(
-                  constraints.maxWidth,
-                  ChildLayoutHelper.dryLayoutChild,
-                  ChildLayoutHelper.getDryBaseline,
-                ),
-              )
-              ..layout(
-                minWidth: constraints.minWidth,
-                maxWidth: _adjustMaxWidth(constraints.maxWidth),
-              ))
-            .size;
-    return constraints.constrain(size);
+    final TextPainter painter = _textIntrinsics
+      ..setPlaceholderDimensions(
+        layoutInlineChildren(
+          constraints.maxWidth,
+          ChildLayoutHelper.dryLayoutChild,
+          ChildLayoutHelper.getDryBaseline,
+        ),
+      );
+    _layoutDry(painter, constraints);
+    return constraints.constrain(painter.size);
   }
 
   @override
@@ -937,16 +1293,16 @@ class RenderParagraph extends RenderBox
   @override
   double computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     assert(constraints.debugAssertIsValid());
-    _textIntrinsics
+    final TextPainter painter = _textIntrinsics
       ..setPlaceholderDimensions(
         layoutInlineChildren(
           constraints.maxWidth,
           ChildLayoutHelper.dryLayoutChild,
           ChildLayoutHelper.getDryBaseline,
         ),
-      )
-      ..layout(minWidth: constraints.minWidth, maxWidth: _adjustMaxWidth(constraints.maxWidth));
-    return _textIntrinsics.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+      );
+    _layoutDry(painter, constraints);
+    return painter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
   }
 
   @override
@@ -979,10 +1335,6 @@ class RenderParagraph extends RenderBox
         case TextOverflow.visible:
           _needsClipping = false;
           _overflowShader = null;
-        case TextOverflow.clip:
-        case TextOverflow.ellipsis:
-          _needsClipping = true;
-          _overflowShader = null;
         case TextOverflow.fade:
           _needsClipping = true;
           final fadeSizePainter = TextPainter(
@@ -1011,6 +1363,11 @@ class RenderParagraph extends RenderBox
             );
           }
           fadeSizePainter.dispose();
+        case _:
+          // TextOverflow.clip, TextOverflow.ellipsis, and TextOverflow.truncate
+          // (when the text overflows even at the largest truncation level).
+          _needsClipping = true;
+          _overflowShader = null;
       }
     } else {
       _needsClipping = false;
@@ -1489,7 +1846,9 @@ class RenderParagraph extends RenderBox
         showName: true,
       ),
     );
-    properties.add(EnumProperty<TextOverflow>('overflow', overflow));
+    properties.add(
+      DiagnosticsProperty<TextOverflow>('overflow', overflow, description: overflow.name),
+    );
     properties.add(
       DiagnosticsProperty<TextScaler>('textScaler', textScaler, defaultValue: TextScaler.noScaling),
     );
@@ -1517,9 +1876,11 @@ class _SelectableFragment
     _selectionGeometry = _getSelectionGeometry();
   }
 
-  final TextRange range;
+  // These change when the paragraph displays a different truncation of its
+  // text, see _didChangeFullText.
+  TextRange range;
   final RenderParagraph paragraph;
-  final String fullText;
+  String fullText;
 
   TextPosition? _textSelectionStart;
   TextPosition? _textSelectionEnd;
@@ -3609,6 +3970,22 @@ class _SelectableFragment
   void didChangeParagraphLayout() {
     _cachedRect = null;
     _cachedBoundingBoxes = null;
+  }
+
+  // Called when the paragraph displays a different string, which happens when
+  // TextOverflow.truncate picks a different truncation of the text.
+  //
+  // Truncated text has no placeholders, so this fragment spans the whole text.
+  void _didChangeFullText(String newFullText) {
+    fullText = newFullText;
+    range = TextRange(start: 0, end: newFullText.length);
+    if (_textSelectionStart != null) {
+      _textSelectionStart = _clampTextPosition(_textSelectionStart!);
+    }
+    if (_textSelectionEnd != null) {
+      _textSelectionEnd = _clampTextPosition(_textSelectionEnd!);
+    }
+    didChangeParagraphLayout();
   }
 
   @override
