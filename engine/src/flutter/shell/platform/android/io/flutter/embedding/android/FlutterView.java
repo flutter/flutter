@@ -891,6 +891,21 @@ public class FlutterView extends FrameLayout
 
   // -------- Start: Process UI I/O that Flutter cares about. -------
   /**
+   * Reports whether this {@code FlutterView} is currently acting as a text editor.
+   *
+   * <p>The Android framework passes this to the {@link android.view.inputmethod.InputMethodManager}
+   * as the {@code IS_TEXT_EDITOR} start-input flag. Devices that set {@code
+   * config_preventImeStartupUnlessTextEditor} (for example Android TV devices with the low-RAM
+   * overlay) refuse to bind an IME to a focused view that does not report itself as a text editor,
+   * which leaves a visible keyboard without an input session. Reporting the state of the attached
+   * {@link TextInputPlugin} here matches what a native {@code EditText} reports.
+   */
+  @Override
+  public boolean onCheckIsTextEditor() {
+    return isAttachedToFlutterEngine() && textInputPlugin.isTextEditor();
+  }
+
+  /**
    * Creates an {@link InputConnection} to work with a {@link
    * android.view.inputmethod.InputMethodManager}.
    *
