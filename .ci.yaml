@@ -3177,6 +3177,15 @@ targets:
         ["devicelab", "linux"]
       task_name: android_engine_flags_release_test
 
+  - name: Linux_android_emu android_intent_parsing_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "linux"]
+      task_name: android_intent_parsing_test
+
   # linux mokey benchmark
   - name: Linux_mokey new_gallery__crane_perf
     recipe: devicelab/devicelab_drone

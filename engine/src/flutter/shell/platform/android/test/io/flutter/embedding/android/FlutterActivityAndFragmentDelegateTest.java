@@ -5,6 +5,7 @@
 package io.flutter.embedding.android;
 
 import static android.content.ComponentCallbacks2.*;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -40,6 +41,7 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterEngineGroup;
 import io.flutter.embedding.engine.FlutterEngineGroupCache;
+import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.loader.FlutterLoader;
@@ -70,6 +72,7 @@ import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowLog;
 
 @RunWith(AndroidJUnit4.class)
 public class FlutterActivityAndFragmentDelegateTest {
@@ -91,7 +94,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     mockHost = mock(FlutterActivityAndFragmentDelegate.Host.class);
     when(mockHost.getContext()).thenReturn(ctx);
     when(mockHost.getLifecycle()).thenReturn(mock(Lifecycle.class));
-    when(mockHost.getFlutterShellArgs()).thenReturn(new FlutterShellArgs(new String[] {}));
+    when(mockHost.getFlutterEngineFlags()).thenReturn(new ArrayList<String>());
     when(mockHost.getDartEntrypointFunctionName()).thenReturn("main");
     when(mockHost.getDartEntrypointArgs()).thenReturn(null);
     when(mockHost.getAppBundlePath()).thenReturn("/fake/path");
@@ -108,7 +111,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     mockHost2 = mock(FlutterActivityAndFragmentDelegate.Host.class);
     when(mockHost2.getContext()).thenReturn(ctx);
     when(mockHost2.getLifecycle()).thenReturn(mock(Lifecycle.class));
-    when(mockHost2.getFlutterShellArgs()).thenReturn(new FlutterShellArgs(new String[] {}));
+    when(mockHost2.getFlutterEngineFlags()).thenReturn(new ArrayList<String>());
     when(mockHost2.getDartEntrypointFunctionName()).thenReturn("main");
     when(mockHost2.getDartEntrypointArgs()).thenReturn(null);
     when(mockHost2.getAppBundlePath()).thenReturn("/fake/path");
@@ -475,8 +478,7 @@ public class FlutterActivityAndFragmentDelegateTest {
           activity -> {
             when(customMockHost.getActivity()).thenReturn(activity);
             when(customMockHost.getLifecycle()).thenReturn(mock(Lifecycle.class));
-            when(customMockHost.getFlutterShellArgs())
-                .thenReturn(new FlutterShellArgs(new String[] {}));
+            when(customMockHost.getFlutterEngineFlags()).thenReturn(new ArrayList<String>());
             when(customMockHost.getDartEntrypointFunctionName()).thenReturn("main");
             when(customMockHost.getAppBundlePath()).thenReturn("/fake/path");
             when(customMockHost.getInitialRoute()).thenReturn("/");
@@ -1508,6 +1510,41 @@ public class FlutterActivityAndFragmentDelegateTest {
   }
 
   @Test
+  public void itPassesFlutterEngineFlagsToEngineGroupWhenCreatingNewEngine() {
+    FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
+    when(mockFlutterLoader.initialized()).thenReturn(false);
+    when(mockFlutterLoader.findAppBundlePath()).thenReturn("default_flutter_assets/path");
+
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    when(mockFlutterJNI.isAttached()).thenReturn(true);
+    FlutterJNI.Factory mockJniFactory = mock(FlutterJNI.Factory.class);
+    when(mockJniFactory.provideFlutterJNI()).thenReturn(mockFlutterJNI);
+
+    FlutterInjector.setInstance(
+        new FlutterInjector.Builder()
+            .setFlutterLoader(mockFlutterLoader)
+            .setFlutterJNIFactory(mockJniFactory)
+            .build());
+
+    List<String> flags = Arrays.asList("--test-flag", "--foo=bar");
+    when(mockHost.provideFlutterEngine(any(Context.class))).thenReturn(null);
+    when(mockHost.getCachedEngineId()).thenReturn(null);
+    when(mockHost.getCachedEngineGroupId()).thenReturn(null);
+    when(mockHost.getFlutterEngineFlags()).thenReturn(flags);
+    when(mockHost.shouldAttachEngineToActivity()).thenReturn(false);
+
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    delegate.onAttach(ctx);
+
+    verify(mockHost, times(1)).getFlutterEngineFlags();
+
+    ArgumentCaptor<String[]> flagsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterLoader, times(1))
+        .ensureInitializationComplete(any(Context.class), flagsCaptor.capture());
+    assertArrayEquals(new String[] {"--test-flag", "--foo=bar"}, flagsCaptor.getValue());
+  }
+
+  @Test
   public void itDoesAttachFlutterViewToEngine() {
     // ---- Test setup ----
     // Create the real object that we're testing.
@@ -1679,5 +1716,71 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(engine.getScribeChannel()).thenReturn(mock(ScribeChannel.class));
 
     return engine;
+  }
+
+  @Test
+  public void isGetFlutterShellArgsOverridden_detectsOverriddenMethodsAndLogsWarning() {
+    ShadowLog.clear();
+
+    assertFalse(
+        FlutterActivityAndFragmentDelegate.isGetFlutterShellArgsOverridden(
+            FlutterActivity.class, new HostWithoutOverride()));
+
+    List<ShadowLog.LogItem> logs = ShadowLog.getLogsForTag("FlutterActivity");
+    assertTrue(logs.isEmpty());
+
+    assertTrue(
+        FlutterActivityAndFragmentDelegate.isGetFlutterShellArgsOverridden(
+            FlutterActivity.class, new HostWithOverride()));
+
+    logs = ShadowLog.getLogsForTag("FlutterActivity");
+    boolean hasActivityWarning = false;
+    for (ShadowLog.LogItem log : logs) {
+      if (log.msg.contains("FlutterShellArgs is deprecated")) {
+        hasActivityWarning = true;
+        break;
+      }
+    }
+    assertTrue(hasActivityWarning);
+
+    assertFalse(
+        FlutterActivityAndFragmentDelegate.isGetFlutterShellArgsOverridden(
+            FlutterFragment.class, new FragmentWithoutOverride()));
+
+    assertTrue(
+        FlutterActivityAndFragmentDelegate.isGetFlutterShellArgsOverridden(
+            FlutterFragment.class, new FragmentWithOverride()));
+
+    List<ShadowLog.LogItem> fragmentLogs = ShadowLog.getLogsForTag("FlutterFragment");
+    boolean hasFragmentWarning = false;
+    for (ShadowLog.LogItem log : fragmentLogs) {
+      if (log.msg.contains("FlutterShellArgs is deprecated")) {
+        hasFragmentWarning = true;
+        break;
+      }
+    }
+    assertTrue(hasFragmentWarning);
+  }
+
+  static class HostWithoutOverride extends FlutterActivity {}
+
+  static class HostWithOverride extends FlutterActivity {
+    @NonNull
+    @Override
+    @SuppressWarnings("deprecation")
+    public FlutterShellArgs getFlutterShellArgs() {
+      return new FlutterShellArgs(new String[] {});
+    }
+  }
+
+  static class FragmentWithoutOverride extends FlutterFragment {}
+
+  static class FragmentWithOverride extends FlutterFragment {
+    @NonNull
+    @Override
+    @SuppressWarnings("deprecation")
+    public FlutterShellArgs getFlutterShellArgs() {
+      return new FlutterShellArgs(new String[] {});
+    }
   }
 }

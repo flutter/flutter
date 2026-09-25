@@ -45,6 +45,7 @@ import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -61,6 +62,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowLog;
 
 @RunWith(AndroidJUnit4.class)
 public class FlutterActivityTest {
@@ -252,7 +254,7 @@ public class FlutterActivityTest {
     assertNull(flutterActivity.getDartEntrypointLibraryUri());
     assertNull(flutterActivity.getDartEntrypointArgs());
     assertEquals("/", flutterActivity.getInitialRoute());
-    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
+    assertTrue(flutterActivity.getFlutterEngineFlags().isEmpty());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertNull(flutterActivity.getCachedEngineId());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
@@ -305,7 +307,7 @@ public class FlutterActivityTest {
     assertEquals("/custom/route", flutterActivity.getInitialRoute());
     assertArrayEquals(
         new String[] {"foo", "bar"}, flutterActivity.getDartEntrypointArgs().toArray());
-    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
+    assertTrue(flutterActivity.getFlutterEngineFlags().isEmpty());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertNull(flutterActivity.getCachedEngineId());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
@@ -330,7 +332,7 @@ public class FlutterActivityTest {
     assertEquals("my_cached_engine_group", flutterActivity.getCachedEngineGroupId());
     assertEquals("custom_entrypoint", flutterActivity.getDartEntrypointFunctionName());
     assertEquals("/custom/route", flutterActivity.getInitialRoute());
-    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
+    assertTrue(flutterActivity.getFlutterEngineFlags().isEmpty());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
     assertNull(flutterActivity.getCachedEngineId());
@@ -468,7 +470,7 @@ public class FlutterActivityTest {
         Robolectric.buildActivity(FlutterActivity.class, intent);
     FlutterActivity flutterActivity = activityController.get();
 
-    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
+    assertTrue(flutterActivity.getFlutterEngineFlags().isEmpty());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertEquals("my_cached_engine", flutterActivity.getCachedEngineId());
     assertFalse(flutterActivity.shouldDestroyEngineWithHost());
@@ -484,7 +486,7 @@ public class FlutterActivityTest {
         Robolectric.buildActivity(FlutterActivity.class, intent);
     FlutterActivity flutterActivity = activityController.get();
 
-    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
+    assertTrue(flutterActivity.getFlutterEngineFlags().isEmpty());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertEquals("my_cached_engine", flutterActivity.getCachedEngineId());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
@@ -853,6 +855,86 @@ public class FlutterActivityTest {
     public void onCreate(@NonNull LifecycleOwner lifecycleOwner) {
       assertTrue("State was restored before onCreate", stateRestored);
       onCreateCalled = true;
+    }
+  }
+
+  @Test
+  public void flutterActivity_forwardsOverriddenFlutterShellArgsToEngineFlags() {
+    ActivityController<FlutterActivityWithOverriddenShellArgs> activityController =
+        Robolectric.buildActivity(FlutterActivityWithOverriddenShellArgs.class);
+    FlutterActivityWithOverriddenShellArgs activity = activityController.get();
+
+    List<String> flags = activity.getFlutterEngineFlags();
+    assertEquals(2, flags.size());
+    assertTrue(flags.contains("--custom-flag-1"));
+    assertTrue(flags.contains("--custom-flag-2"));
+
+    List<ShadowLog.LogItem> logs = ShadowLog.getLogsForTag("FlutterActivity");
+    boolean hasDeprecationWarning = false;
+    for (ShadowLog.LogItem log : logs) {
+      if (log.msg.contains("FlutterShellArgs is deprecated")) {
+        hasDeprecationWarning = true;
+        break;
+      }
+    }
+    assertTrue(hasDeprecationWarning);
+  }
+
+  @Test
+  public void flutterActivity_superGetFlutterShellArgsDoesNotCauseRecursion() {
+    ActivityController<FlutterActivityWithSuperShellArgs> activityController =
+        Robolectric.buildActivity(FlutterActivityWithSuperShellArgs.class);
+    FlutterActivityWithSuperShellArgs activity = activityController.get();
+
+    List<String> flags = activity.getFlutterEngineFlags();
+    assertEquals(1, flags.size());
+    assertTrue(flags.contains(FlutterActivityWithSuperShellArgs.APPENDED_FLAG));
+  }
+
+  @Test
+  public void flutterActivity_superGetFlutterShellArgsIncludesIntentFlagsAndAppendedFlag() {
+    Intent intent = new Intent(ctx, FlutterActivityWithSuperShellArgs.class);
+    intent.putExtra("trace-startup", true);
+    ActivityController<FlutterActivityWithSuperShellArgs> activityController =
+        Robolectric.buildActivity(FlutterActivityWithSuperShellArgs.class, intent);
+    FlutterActivityWithSuperShellArgs activity = activityController.get();
+
+    List<String> flags = activity.getFlutterEngineFlags();
+    assertEquals(2, flags.size());
+    assertTrue(flags.contains("--trace-startup"));
+    assertTrue(flags.contains(FlutterActivityWithSuperShellArgs.APPENDED_FLAG));
+  }
+
+  @Test
+  public void flutterActivity_returnsEngineFlagsDirectlyWhenShellArgsNotOverridden() {
+    Intent intent = FlutterActivity.createDefaultIntent(ctx);
+    intent.putExtra("trace-startup", true);
+    FlutterActivity activity = RobolectricFlutterActivity.createFlutterActivity(intent);
+
+    List<String> flags = activity.getFlutterEngineFlags();
+    assertEquals(1, flags.size());
+    assertTrue(flags.contains("--trace-startup"));
+  }
+
+  static class FlutterActivityWithOverriddenShellArgs extends FlutterActivity {
+    @NonNull
+    @Override
+    @SuppressWarnings("deprecation")
+    public FlutterShellArgs getFlutterShellArgs() {
+      return new FlutterShellArgs(new String[] {"--custom-flag-1", "--custom-flag-2"});
+    }
+  }
+
+  static class FlutterActivityWithSuperShellArgs extends FlutterActivity {
+    static final String APPENDED_FLAG = "--appended-flag";
+
+    @NonNull
+    @Override
+    @SuppressWarnings("deprecation")
+    public FlutterShellArgs getFlutterShellArgs() {
+      FlutterShellArgs args = super.getFlutterShellArgs();
+      args.add(APPENDED_FLAG);
+      return args;
     }
   }
 }

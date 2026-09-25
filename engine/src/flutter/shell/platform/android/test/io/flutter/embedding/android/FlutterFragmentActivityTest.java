@@ -188,6 +188,21 @@ public class FlutterFragmentActivityTest {
   }
 
   @Test
+  public void createFlutterFragment_passesEngineFlags() {
+    Intent intent = new Intent();
+    intent.putExtra("verbose-logging", true);
+    final FlutterFragmentActivity activity =
+        new FakeFlutterFragmentActivity() {
+          @Override
+          public Intent getIntent() {
+            return intent;
+          }
+        };
+    assertTrue(
+        activity.createFlutterFragment().getFlutterEngineFlags().contains("--verbose-logging"));
+  }
+
+  @Test
   public void hasRootLayoutId() {
     FlutterFragmentActivityWithRootLayout activity =
         Robolectric.buildActivity(FlutterFragmentActivityWithRootLayout.class).get();
