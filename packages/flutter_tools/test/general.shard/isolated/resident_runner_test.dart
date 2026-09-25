@@ -4,9 +4,11 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 
@@ -14,6 +16,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 import '../../src/testbed.dart';
 import '../resident_runner_helpers.dart';
 
@@ -50,6 +53,8 @@ void main() {
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       final residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(
           const BuildInfo(
@@ -61,12 +66,13 @@ void main() {
           ),
         ),
         target: 'main.dart',
+        toolContext: DelegatingToolContext(),
+        xcode: null,
         analytics: getInitializedFakeAnalyticsInstance(
           fs: MemoryFileSystem.test(),
           fakeFlutterVersion: FakeFlutterVersion(),
         ),
         nativeAssetsYamlFile: 'foo.yaml',
-        logger: globals.logger,
       );
 
       final int result = await residentRunner.run();

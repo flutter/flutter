@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -23,6 +24,7 @@ import 'package:flutter_tools/src/commands/drive.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
+import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
@@ -219,6 +221,7 @@ void main() {
       final command = DriveCommand(
         toolContext: createToolContext(),
         flutterDriverFactory: FailingFakeFlutterDriverFactory(),
+        signalsToHandle: const <ProcessSignal>{ProcessSignal.sigusr1},
       );
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
@@ -241,7 +244,7 @@ void main() {
         throwsToolExit(),
       );
       expect(logger.statusText, isNot(contains('Screenshot written to ')));
-      expect(signals.addedHandlers, isEmpty);
+      expect(signals.addedSignals, isNot(contains(ProcessSignal.sigusr1)));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -1076,6 +1079,19 @@ class FakeIosDevice extends Fake implements IOSDevice {
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+
+  @override
+  Future<LaunchResult> startApp(
+    IOSApp? package, {
+    String? mainPath,
+    String? route,
+    required DebuggingOptions debuggingOptions,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    bool prebuiltApplication = false,
+    String? userIdentifier,
+    Duration? discoveryTimeout,
+    ShutdownHooks? shutdownHooks,
+  }) async => LaunchResult.failed();
 }
 
 class FakeChromiumDriveDevice extends Fake implements ChromiumDevice {
@@ -1120,10 +1136,12 @@ class FakeChromiumDriveDevice extends Fake implements ChromiumDevice {
 
 class FakeSignals extends Fake implements Signals {
   List<SignalHandler> addedHandlers = <SignalHandler>[];
+  final addedSignals = <ProcessSignal>[];
 
   @override
   Object addHandler(ProcessSignal signal, SignalHandler handler) {
     addedHandlers.add(handler);
+    addedSignals.add(signal);
     return const Object();
   }
 

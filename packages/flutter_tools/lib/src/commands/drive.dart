@@ -16,6 +16,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -477,12 +478,13 @@ class DriveCommand extends RunCommandBase {
   }
 
   void _registerScreenshotCallbacks(Device device, Directory screenshotDir) {
-    _toolContext.logger.printTrace('Registering signal handlers...');
+    final ToolContext(:Logger logger, :Signals signals) = _toolContext;
+    logger.printTrace('Registering signal handlers...');
     final tokens = <ProcessSignal, Object>{};
     for (final ProcessSignal signal in signalsToHandle) {
-      tokens[signal] = _toolContext.signals.addHandler(signal, (ProcessSignal signal) {
+      tokens[signal] = signals.addHandler(signal, (ProcessSignal signal) {
         _unregisterScreenshotCallbacks();
-        _toolContext.logger.printError('Caught $signal');
+        logger.printError('Caught $signal');
         return _takeScreenshot(device, screenshotDir);
       });
     }
@@ -500,9 +502,10 @@ class DriveCommand extends RunCommandBase {
 
   void _unregisterScreenshotCallbacks() {
     if (screenshotTokens != null) {
-      _toolContext.logger.printTrace('Unregistering signal handlers...');
+      final ToolContext(:Logger logger, :Signals signals) = _toolContext;
+      logger.printTrace('Unregistering signal handlers...');
       for (final MapEntry<ProcessSignal, Object> entry in screenshotTokens!.entries) {
-        _toolContext.signals.removeHandler(entry.key, entry.value);
+        signals.removeHandler(entry.key, entry.value);
       }
     }
     timeoutTimer?.cancel();
@@ -555,13 +558,14 @@ class DriveCommand extends RunCommandBase {
     if (!device.supportsScreenshot) {
       return;
     }
+    final Logger logger = _toolContext.logger;
     try {
       outputDirectory.createSync(recursive: true);
       final File outputFile = _fsUtils.getUniqueFile(outputDirectory, 'drive', 'png');
       await device.takeScreenshot(outputFile);
-      _toolContext.logger.printStatus('Screenshot written to ${outputFile.path}');
+      logger.printStatus('Screenshot written to ${outputFile.path}');
     } on Exception catch (error) {
-      _toolContext.logger.printError('Error taking screenshot: $error');
+      logger.printError('Error taking screenshot: $error');
     }
   }
 }

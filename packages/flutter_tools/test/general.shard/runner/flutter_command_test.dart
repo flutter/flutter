@@ -2270,6 +2270,8 @@ class _TestRunCommandThatOnlyValidates extends RunCommand {
   _TestRunCommandThatOnlyValidates({ToolContext? toolContext})
     : super(
         appleContext: FakeAppleContext(),
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
         toolContext:
             toolContext ??
             FakeToolContext(
