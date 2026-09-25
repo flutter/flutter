@@ -159,8 +159,7 @@ void main() {
                 : outputRunnerBinary.path;
             final bool helloStatic = AppleTestUtils.getExportedSymbols(binaryPath).any(
               (String symbol) =>
-                  symbol.contains('HelloPlugin') &&
-                  symbol.contains('getPlatformVersion'),
+                  symbol.contains('HelloPlugin') && symbol.contains('getPlatformVersion'),
             );
 
             // Plugin is a dynamic xor static framework.
@@ -438,8 +437,7 @@ void main() {
         final bool helloDynamic = pluginFrameworkBinary.existsSync();
         final bool helloStatic = AppleTestUtils.getExportedSymbols(runnerBinary.path).any(
           (String symbol) =>
-              symbol.contains('HelloPlugin') &&
-              symbol.contains('getPlatformVersion'),
+              symbol.contains('HelloPlugin') && symbol.contains('getPlatformVersion'),
         );
 
         // Plugin is a dynamic xor static framework.
