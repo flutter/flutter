@@ -38,12 +38,12 @@ fml::AutoResetWaitableEvent message_latch;
 class MockSyncSwitch {
  public:
   struct Handlers {
-    Handlers& SetIfTrue(const std::function<void()>& handler) {
-      true_handler = handler;
+    Handlers& SetIfTrue(std::function<void()> handler) {
+      true_handler = std::move(handler);
       return *this;
     }
-    Handlers& SetIfFalse(const std::function<void()>& handler) {
-      false_handler = handler;
+    Handlers& SetIfFalse(std::function<void()> handler) {
+      false_handler = std::move(handler);
       return *this;
     }
     std::function<void()> true_handler = [] {};
@@ -214,7 +214,7 @@ std::shared_ptr<impeller::Context> MakeConvertDlImageToSkImageContext(
   EXPECT_CALL(*context, GetResourceAllocator).WillRepeatedly(Return(allocator));
   EXPECT_CALL(*context, CreateCommandBuffer).WillOnce(Return(command_buffer));
   EXPECT_CALL(*device_buffer, OnGetContents).WillOnce(Return(buffer.data()));
-  EXPECT_CALL(*command_queue, Submit(_, _, _))
+  EXPECT_CALL(*command_queue, Submit(_, _))
       .WillRepeatedly(
           DoAll(InvokeArgument<1>(impeller::CommandBuffer::Status::kCompleted),
                 Return(fml::Status())));

@@ -148,9 +148,8 @@ class PluginTest {
     if (buildTarget == 'macos') {
       // When using a local engine, podhelper.rb will search for a "macos-"
       // directory within the FlutterMacOS.xcframework, so create a dummy one.
-      Directory(
-        path.join(buildDir.path, 'FlutterMacOS.xcframework/macos-arm64_x86_64'),
-      ).createSync(recursive: true);
+      Directory(path.join(buildDir.path, 'FlutterMacOS.xcframework/macos-arm64_x86_64'))
+          .createSync(recursive: true);
 
       // Clean before regenerating the config to ensure that the pod steps run.
       await inDirectory(Directory(app.rootPath), () async {
@@ -459,6 +458,8 @@ Pod::Spec.new do |s|
   s.source           = { :path => '.' }
   s.source_files = "Classes", "Classes/**/*.{h,m}"
   s.dependency 'plugintest'
+  s.ios.deployment_target = '12.0'
+  s.osx.deployment_target = '10.14'
 end
 ''');
 

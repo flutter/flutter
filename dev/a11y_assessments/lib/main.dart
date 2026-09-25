@@ -42,7 +42,7 @@ final ThemeData _highContrastDarkTheme = _buildTheme(
 );
 
 class App extends StatelessWidget {
-  const App({super.key, this.initialTags = const <Tag>{Tag.batch2}});
+  const App({super.key, this.initialTags = const <Tag>{Tag.batch3}});
 
   final Set<Tag> initialTags;
 

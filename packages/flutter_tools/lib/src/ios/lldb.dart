@@ -7,12 +7,14 @@ library;
 
 import 'dart:async';
 
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import 'device_support.dart';
 import 'xcodeproj.dart';
 
 /// LLDB is the default debugger in Xcode on macOS. Once the application has
@@ -21,14 +23,11 @@ import 'xcodeproj.dart';
 /// See `xcrun devicectl device process launch --help` for more information.
 class LLDB {
   LLDB({
-    required Logger logger,
-    required ProcessUtils processUtils,
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
-    required Version? deviceVersion,
-  }) : _logger = logger,
-       _processUtils = processUtils,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter,
-       _deviceVersion = deviceVersion;
+    required this._logger,
+    required this._processUtils,
+    required this._xcodeProjectInterpreter,
+    required this._deviceVersion,
+  });
 
   final Logger _logger;
   final ProcessUtils _processUtils;
@@ -42,6 +41,8 @@ class LLDB {
 
   /// Whether or not the LLDB process has attached and resumed the application process.
   var _isAttached = false;
+
+  var _warnedAboutMissingSymbols = false;
 
   /// The process id of the application running on the iOS device.
   int? get appProcessId => _lldbProcess?.appProcessId;
@@ -98,6 +99,12 @@ class LLDB {
     _stopHookProcessedPattern,
   ];
 
+  /// Pattern of lldb log when libobjc.A.dylib is being read from process memory. This indicates
+  /// that Device Support symbols were not found on the host machine.
+  static final missingSymbolsPattern = RegExp(
+    'warning: libobjc.A.dylib is being read from process memory.',
+  );
+
   /// Breakpoint script required for JIT on iOS.
   ///
   /// This should match the "handle_new_rx_page" function in [IosProject._lldbPythonHelperTemplate].
@@ -130,19 +137,24 @@ if not error.Success():
     required int appProcessId,
     required LLDBLogForwarder lldbLogForwarder,
     required BuildMode mode,
+    required IOSDeviceSupport deviceSupport,
   }) async {
     Timer? timer;
     try {
       timer = Timer(const Duration(minutes: 1), () {
-        _logger.printError(
-          'LLDB is taking longer than expected to start debugging the app. '
-          "LLDB debugging can be disabled for the project by adding the following in the project's pubspec.yaml:\n"
-          'flutter:\n'
-          '  config:\n'
-          '    enable-lldb-debugging: false\n'
-          'Or disable LLDB debugging globally with the following command:\n'
-          '  "flutter config --no-enable-lldb-debugging"',
-        );
+        final String? warning = deviceSupport.missingSymbolsWarning();
+        if (warning != null) {
+          _logger.printWarning(
+            'LLDB is taking longer than expected to start debugging the app. $warning',
+          );
+          _warnedAboutMissingSymbols = true;
+        } else {
+          _logger.printError(
+            'LLDB is taking longer than expected to start debugging the app. Try again using '
+            '--verbose and file a bug including the verbose logs '
+            'at https://github.com/flutter/flutter/issues/new?template=01_activation.yml',
+          );
+        }
       });
 
       // iOS 27+ devices sometimes fail to stop at the JIT breakpoint (only used in debug mode)
@@ -164,6 +176,8 @@ if not error.Success():
         return false;
       }
       await _selectDevice(deviceId);
+      await _addSymbolSearchPaths(deviceSupport);
+
       if (mode == BuildMode.debug) {
         await _setBreakpoint(manualContinue);
       }
@@ -174,6 +188,7 @@ if not error.Success():
       if (!manualContinue) {
         await _setupStopHooks();
       }
+      await _printDeviceSupportStatus();
       await _resumeProcess(mode);
       _isAttached = true;
     } on _LLDBError catch (e) {
@@ -310,12 +325,33 @@ if not error.Success():
     }
     _logCompleter = null;
     _isAttached = false;
+    _warnedAboutMissingSymbols = false;
     return success;
   }
 
   /// Selects a device for LLDB to interact with.
   Future<void> _selectDevice(String deviceId) async {
     await _lldbProcess?.stdinWriteln('device select $deviceId');
+  }
+
+  /// Adds the symbol search paths to the LLDB process.
+  Future<void> _addSymbolSearchPaths(IOSDeviceSupport deviceSupport) async {
+    final Directory? symbolDirectory = deviceSupport.existingDeviceSupportSymbols;
+    if (symbolDirectory == null) {
+      return;
+    }
+    await _lldbProcess?.stdinWriteln(
+      'platform select remote-ios --sysroot "${symbolDirectory.path}"',
+    );
+  }
+
+  /// Prints logs of available Device Support
+  Future<void> _printDeviceSupportStatus() async {
+    final Future<String> futureLog = _startWaitingForLog(RegExp(r'\s*Platform:'))
+        .then((value) => value, onError: _handleAsyncError);
+
+    await _lldbProcess?.stdinWriteln('platform status');
+    await futureLog;
   }
 
   /// Attaches LLDB to the [appProcessId] running on the device.
@@ -426,6 +462,13 @@ if not error.Success():
   }
 
   bool _ignoreLog(String log) {
+    // We only want to warn about missing symbols once.
+    if (log.contains(missingSymbolsPattern)) {
+      if (_warnedAboutMissingSymbols) {
+        return true;
+      }
+      _warnedAboutMissingSymbols = true;
+    }
     return _ignorePatterns.any((Pattern pattern) => log.contains(pattern));
   }
 }
@@ -464,9 +507,8 @@ class _LLDBLogPatternCompleter {
 /// A container class for associating a [Process] that is running LLDB with
 /// the iOS device process of an application.
 class _LLDBProcess {
-  _LLDBProcess({required Process process, required this.appProcessId, required Logger logger})
-    : _lldbProcess = process,
-      _logger = logger;
+  _LLDBProcess({required Process process, required this.appProcessId, required this._logger})
+    : _lldbProcess = process;
 
   final Process _lldbProcess;
   final int appProcessId;

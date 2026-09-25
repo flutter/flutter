@@ -20,62 +20,60 @@ Widget? _testChildBuilder(BuildContext context, ChildVicinity vicinity) {
 
 void main() {
   group('TwoDimensionalScrollView', () {
-    testWidgets(
-      'asserts the axis directions do not conflict with one another',
-      (WidgetTester tester) async {
-        final exceptions = <Object>[];
-        final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-        FlutterError.onError = (FlutterErrorDetails details) {
-          exceptions.add(details.exception);
-        };
-        // Horizontal wrong
-        late final TwoDimensionalChildBuilderDelegate delegate1;
-        addTearDown(() => delegate1.dispose());
-        await tester.pumpWidget(
-          TestWidgetsApp(
-            home: SimpleBuilderTableView(
-              delegate: delegate1 = TwoDimensionalChildBuilderDelegate(builder: (_, _) => null),
-              horizontalDetails: const ScrollableDetails.vertical(),
-              // Horizontal has default const ScrollableDetails.horizontal()
-            ),
+    testWidgets('asserts the axis directions do not conflict with one another', (
+      WidgetTester tester,
+    ) async {
+      final exceptions = <Object>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        exceptions.add(details.exception);
+      };
+      // Horizontal wrong
+      late final TwoDimensionalChildBuilderDelegate delegate1;
+      addTearDown(() => delegate1.dispose());
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SimpleBuilderTableView(
+            delegate: delegate1 = TwoDimensionalChildBuilderDelegate(builder: (_, _) => null),
+            horizontalDetails: const ScrollableDetails.vertical(),
+            // Horizontal has default const ScrollableDetails.horizontal()
           ),
-        );
+        ),
+      );
 
-        // Vertical wrong
-        late final TwoDimensionalChildBuilderDelegate delegate2;
-        addTearDown(() => delegate2.dispose());
-        await tester.pumpWidget(
-          TestWidgetsApp(
-            home: SimpleBuilderTableView(
-              delegate: delegate2 = TwoDimensionalChildBuilderDelegate(builder: (_, _) => null),
-              verticalDetails: const ScrollableDetails.horizontal(),
-              // Horizontal has default const ScrollableDetails.horizontal()
-            ),
+      // Vertical wrong
+      late final TwoDimensionalChildBuilderDelegate delegate2;
+      addTearDown(() => delegate2.dispose());
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SimpleBuilderTableView(
+            delegate: delegate2 = TwoDimensionalChildBuilderDelegate(builder: (_, _) => null),
+            verticalDetails: const ScrollableDetails.horizontal(),
+            // Horizontal has default const ScrollableDetails.horizontal()
           ),
-        );
+        ),
+      );
 
-        // Both wrong
-        late final TwoDimensionalChildBuilderDelegate delegate3;
-        addTearDown(() => delegate3.dispose());
-        await tester.pumpWidget(
-          TestWidgetsApp(
-            home: SimpleBuilderTableView(
-              delegate: delegate3 = TwoDimensionalChildBuilderDelegate(builder: (_, _) => null),
-              verticalDetails: const ScrollableDetails.horizontal(),
-              horizontalDetails: const ScrollableDetails.vertical(),
-            ),
+      // Both wrong
+      late final TwoDimensionalChildBuilderDelegate delegate3;
+      addTearDown(() => delegate3.dispose());
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SimpleBuilderTableView(
+            delegate: delegate3 = TwoDimensionalChildBuilderDelegate(builder: (_, _) => null),
+            verticalDetails: const ScrollableDetails.horizontal(),
+            horizontalDetails: const ScrollableDetails.vertical(),
           ),
-        );
+        ),
+      );
 
-        FlutterError.onError = oldHandler;
-        expect(exceptions.length, 3);
-        for (final exception in exceptions) {
-          expect(exception, isAssertionError);
-          expect((exception as AssertionError).message, contains('are not Axis'));
-        }
-      },
-      variant: TargetPlatformVariant.all(),
-    );
+      FlutterError.onError = oldHandler;
+      expect(exceptions.length, 3);
+      for (final exception in exceptions) {
+        expect(exception, isAssertionError);
+        expect((exception as AssertionError).message, contains('are not Axis'));
+      }
+    }, variant: TargetPlatformVariant.all());
 
     testWidgets(
       'ScrollableDetails.controller can set initial scroll positions, modify within bounds',

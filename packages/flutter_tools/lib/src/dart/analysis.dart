@@ -21,20 +21,19 @@ class AnalysisServer {
   AnalysisServer(
     this.sdkPath,
     this.directories, {
-    required FileSystem fileSystem,
-    required ProcessManager processManager,
-    required Logger logger,
-    required Platform platform,
-    required Terminal terminal,
+    required this._fileSystem,
+    required this._processManager,
+    required this._logger,
+    required this._platform,
+    required this._terminal,
     required this.suppressAnalytics,
-    String? protocolTrafficLog,
-  }) : _fileSystem = fileSystem,
-       _processManager = processManager,
-       _logger = logger,
-       _platform = platform,
-       _terminal = terminal,
-       _protocolTrafficLog = protocolTrafficLog;
+    this.withFineDependencies = true,
+    this.usePlugins = true,
+    this._protocolTrafficLog,
+  });
 
+  final bool withFineDependencies;
+  final bool usePlugins;
   final String sdkPath;
   final List<String> directories;
   final FileSystem _fileSystem;
@@ -50,34 +49,18 @@ class AnalysisServer {
   final _errorsController = StreamController<FileAnalysisErrors>.broadcast();
   var _didServerErrorOccur = false;
 
-  /// Whether the server is currently analyzing.
-  bool get isAnalyzing => _isAnalyzing;
-  bool _isAnalyzing = false;
-
-  /// Returns a [Future] that completes when the server is no longer analyzing.
+  /// Returns a [Future] that completes when the server has completed any
+  /// in-progress initialization or analysis.
   ///
-  /// If [delay] is provided, this method will wait for that duration before
-  /// checking if the server is analyzing. if the server starts analyzing during
-  /// that duration, it will wait for analysis to complete.
+  /// This method will wait for [delay] before calling the server. If not
+  /// provided, defaults to 100ms.
   ///
   /// This is useful to avoid the race condition where analysis hasn't started
   /// yet after a file change.
   Future<void> waitForAnalysis({Duration delay = const Duration(milliseconds: 100)}) async {
-    if (_isAnalyzing) {
-      await onAnalyzing.firstWhere((bool analyzing) => !analyzing);
-    }
-    if (delay != Duration.zero) {
-      // Wait for analysis to potentially start.
-      try {
-        await onAnalyzing.firstWhere((bool analyzing) => analyzing).timeout(delay);
-        // If analysis started, wait for it to finish.
-        if (_isAnalyzing) {
-          await onAnalyzing.firstWhere((bool analyzing) => !analyzing);
-        }
-      } on TimeoutException {
-        // Analysis didn't start within the delay, so we assume it's not going to.
-      }
-    }
+    await Future<void>.delayed(delay);
+
+    await sendRequest('dart/workspace/analysis/complete', {});
   }
 
   var _id = 0;
@@ -91,6 +74,8 @@ class AnalysisServer {
       sdkPath,
       '--disable-server-feature-completion',
       '--disable-server-feature-search',
+      if (!withFineDependencies) '--no-with-fine-dependencies',
+      if (!usePlugins) '--no-plugins',
       if (suppressAnalytics) '--suppress-analytics',
       if (_protocolTrafficLog != null) '--protocol-traffic-log=$_protocolTrafficLog',
     ];
@@ -146,6 +131,12 @@ class AnalysisServer {
 
   bool get didServerErrorOccur => _didServerErrorOccur;
 
+  /// A stream of booleans indicating that the server is starting or stopping
+  /// analysis.
+  ///
+  /// These statuses are intended to show progress to a user and not intended
+  /// as a reliable indicator that all analysis has completed. To know when
+  /// analysis has definitely completed, use [waitForAnalysis].
   Stream<bool> get onAnalyzing => _analyzingController.stream;
 
   Stream<FileAnalysisErrors> get onErrors => _errorsController.stream;
@@ -154,7 +145,8 @@ class AnalysisServer {
   Future<int?>? _onExit;
 
   void _writeMessage({required String message}) {
-    _process?.stdin.write('Content-Length: ${message.length}\r\n\r\n$message');
+    final List<int> encodedMessage = utf8.encode(message);
+    _process?.stdin.write('Content-Length: ${encodedMessage.length}\r\n\r\n$message');
   }
 
   Future<Map<String, Object?>?> sendRequest(String method, Map<String, Object?> params) async {
@@ -258,18 +250,6 @@ class AnalysisServer {
     final Object? response = json.decode(line);
 
     if (response is Map<String, Object?>) {
-      final Object? id = response['id'];
-      final Completer<Map<String, Object?>?>? completer = _outstandingRequests.remove(id);
-      if (completer != null) {
-        if (response case {'result': final Map<String, Object?>? result}) {
-          completer.complete(result);
-        } else if (response case {'error': final Map<String, Object?> error}) {
-          completer.completeError(error['message'] ?? error);
-        } else {
-          completer.completeError('Response for unknown request received: $response');
-        }
-      }
-
       final method = response['method'] as String?;
       if (method != null) {
         final Object? id = response['id'];
@@ -296,6 +276,18 @@ class AnalysisServer {
               _handleShowMessage(paramsMap);
           }
         }
+      } else {
+        final Object? id = response['id'];
+        final Completer<Map<String, Object?>?>? completer = _outstandingRequests.remove(id);
+        if (completer != null) {
+          if (response case {'result': final Map<String, Object?>? result}) {
+            completer.complete(result);
+          } else if (response case {'error': final Map<String, Object?> error}) {
+            completer.completeError(error['message'] ?? error);
+          } else {
+            completer.completeError('Response for unknown request received: $response');
+          }
+        }
       }
     }
   }
@@ -307,10 +299,8 @@ class AnalysisServer {
     if (value is Map<String, Object?>) {
       final kind = value['kind'] as String?;
       if (kind == 'begin') {
-        _isAnalyzing = true;
         _analyzingController.add(true);
       } else if (kind == 'end') {
-        _isAnalyzing = false;
         _analyzingController.add(false);
       }
     }
@@ -379,12 +369,10 @@ enum AnalysisSeverity { error, warning, info, none }
 class AnalysisError implements Comparable<AnalysisError> {
   AnalysisError(
     this.writtenError, {
-    required Platform platform,
-    required Terminal terminal,
-    required FileSystem fileSystem,
-  }) : _platform = platform,
-       _terminal = terminal,
-       _fileSystem = fileSystem;
+    required this._platform,
+    required this._terminal,
+    required this._fileSystem,
+  });
 
   final WrittenError writtenError;
   final Platform _platform;

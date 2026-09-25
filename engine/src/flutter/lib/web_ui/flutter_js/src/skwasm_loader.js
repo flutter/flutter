@@ -7,6 +7,9 @@ import { resolveUrlWithSegments } from "./utils.js";
 
 export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
   const needsHeavy = (!browserEnvironment.hasImageCodecs || !browserEnvironment.hasChromiumBreakIterators)
+  if (needsHeavy && config.enableWimp) {
+    console.error('Flutter Web: wimp_heavy is required but it hasn\'t been implemented yet.');
+  }
   const fileStem = needsHeavy
      ? 'skwasm_heavy'
      : (config.enableWimp ? 'wimp' : 'skwasm');
@@ -37,10 +40,7 @@ export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
     // loading required for multi-threaded workers. We force single-threaded
     // mode to prevent startup crashes.
     // See https://github.com/flutter/flutter/issues/177974.
-    //
-    // Also, as of right now, multi-threaded wimp is unstable and crashy.
-    // See https://github.com/flutter/flutter/issues/178749 for more details.
-    skwasmSingleThreaded: config.enableWimp || !browserEnvironment.crossOriginIsolated || browserEnvironment.isChromeExtension || config.forceSingleThreadedSkwasm,
+    skwasmSingleThreaded: !browserEnvironment.crossOriginIsolated || browserEnvironment.isChromeExtension || config.forceSingleThreadedSkwasm,
     instantiateWasm: wasmInstantiator,
     locateFile: (filename, scriptDirectory) => {
       // The wasm workers API has a separate .ww.js file that bootstraps the

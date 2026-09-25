@@ -164,12 +164,6 @@ def is_aarm64() -> bool:
   return aarm64
 
 
-def mac_hardware_model() -> str:
-  assert is_mac()
-  output = subprocess.check_output(['sysctl', '-n', 'hw.model'])
-  return output.decode('utf-8').strip()
-
-
 def is_linux() -> bool:
   return sys_platform.startswith('linux')
 
@@ -574,13 +568,7 @@ def run_cc_tests(
       )
     extra_env = metal_validation_env()
     extra_env.update(vulkan_validation_env(build_dir))
-    if mac_hardware_model() == 'Macmini9,1':
-      # For the Mac Minis used on CI, limit the number of Impeller test cases run in parallel
-      # in order to reduce the risk of resource exhaustion errors.
-      workers_flag = ['--workers=%d' % (os.cpu_count() - 2)]
-    else:
-      workers_flag = []
-    mac_impeller_unittests_flags = repeat_flags + workers_flag + [
+    mac_impeller_unittests_flags = repeat_flags + [
         '--gtest_filter=-*OpenGLES:*OpenGLESSDF',  # These are covered in the golden tests.
         '--',
         '--enable_vulkan_validation',
@@ -1088,7 +1076,6 @@ def build_dart_host_test_list() -> typing.List[str]:
       os.path.join('flutter', 'tools', 'api_check'),
       os.path.join('flutter', 'tools', 'build_bucket_golden_scraper'),
       os.path.join('flutter', 'tools', 'clang_tidy'),
-      os.path.join('flutter', 'tools', 'const_finder'),
       os.path.join('flutter', 'tools', 'engine_tool'),
       os.path.join('flutter', 'tools', 'githooks'),
       os.path.join('flutter', 'tools', 'header_guard_check'),

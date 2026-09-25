@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:code_assets/code_assets.dart';
-import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../base/file_system.dart';
 import '../../../build_info.dart';
 import '../macos/native_assets_host.dart';
 import '../native_assets.dart';
+import '../native_assets_manifest.dart';
 
 // TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
 const targetIOSVersion = 15;
@@ -34,47 +34,14 @@ Architecture getNativeIOSArchitecture(CpuArch cpuArch) {
 
 /// Groups native assets by their target framework path for iOS
 /// multi-architecture bundling.
-Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocationsIOS(
+Map<Uri, List<FlutterCodeAsset>> fatAssetTargetLocationsIOS(List<FlutterCodeAsset> nativeAssets) {
+  return fatAssetTargetLocations(assetTargetLocationsIOS(nativeAssets));
+}
+
+Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsIOS(
   List<FlutterCodeAsset> nativeAssets,
 ) {
-  return fatAssetTargetLocations(
-    nativeAssets,
-    (FlutterCodeAsset asset, Set<String> alreadyTakenNames) =>
-        _targetLocationIOS(asset, alreadyTakenNames),
-  );
-}
-
-Map<FlutterCodeAsset, KernelAsset> assetTargetLocationsIOS(List<FlutterCodeAsset> nativeAssets) {
-  final alreadyTakenNames = <String>{};
-  final idToPath = <String, KernelAssetPath>{};
-  final result = <FlutterCodeAsset, KernelAsset>{};
-  for (final asset in nativeAssets) {
-    final String assetId = asset.codeAsset.id;
-    final KernelAssetPath path =
-        idToPath[assetId] ?? _targetLocationIOS(asset, alreadyTakenNames).path;
-    idToPath[assetId] = path;
-    result[asset] = KernelAsset(id: assetId, target: asset.target, path: path);
-  }
-  return result;
-}
-
-KernelAsset _targetLocationIOS(FlutterCodeAsset asset, Set<String> alreadyTakenNames) {
-  final LinkMode linkMode = asset.codeAsset.linkMode;
-  final KernelAssetPath kernelAssetPath;
-  switch (linkMode) {
-    case DynamicLoadingSystem _:
-      kernelAssetPath = KernelAssetSystemPath(linkMode.uri);
-    case LookupInExecutable _:
-      kernelAssetPath = KernelAssetInExecutable();
-    case LookupInProcess _:
-      kernelAssetPath = KernelAssetInProcess();
-    case DynamicLoadingBundled _:
-      final String fileName = asset.codeAsset.file!.pathSegments.last;
-      kernelAssetPath = KernelAssetAbsolutePath(frameworkUri(fileName, alreadyTakenNames));
-    default:
-      throw Exception('Unsupported asset link mode $linkMode in asset $asset');
-  }
-  return KernelAsset(id: asset.codeAsset.id, target: asset.target, path: kernelAssetPath);
+  return assetTargetLocationsApple(nativeAssets);
 }
 
 /// Copies native assets into a framework per dynamic library.
@@ -91,7 +58,7 @@ KernelAsset _targetLocationIOS(FlutterCodeAsset asset, Set<String> alreadyTakenN
 /// in xcode_backend.dart.
 Future<List<File>> copyNativeCodeAssetsIOS(
   Uri targetUri,
-  Map<KernelAssetPath, List<FlutterCodeAsset>> assetTargetLocations,
+  Map<Uri, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
   FileSystem fileSystem,
@@ -101,9 +68,8 @@ Future<List<File>> copyNativeCodeAssetsIOS(
   final oldToNewInstallNames = <String, String>{};
   final dylibs = <(File, String, Directory)>[];
 
-  for (final MapEntry<KernelAssetPath, List<FlutterCodeAsset>> assetMapping
-      in assetTargetLocations.entries) {
-    final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
+  for (final MapEntry<Uri, List<FlutterCodeAsset>> assetMapping in assetTargetLocations.entries) {
+    final Uri target = assetMapping.key;
     final sources = <File>[
       for (final FlutterCodeAsset source in assetMapping.value)
         fileSystem.file(source.codeAsset.file),
@@ -126,8 +92,7 @@ Future<List<File>> copyNativeCodeAssetsIOS(
       );
     }
 
-    final String dylibFileName = dylibFile.basename;
-    final newInstallName = '@rpath/$dylibFileName.framework/$dylibFileName';
+    final String newInstallName = frameworkInstallName(target);
     final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
     for (final oldInstallName in oldInstallNames) {
       oldToNewInstallNames[oldInstallName] = newInstallName;

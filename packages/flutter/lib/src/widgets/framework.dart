@@ -1504,7 +1504,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   }
 
   // If @protected State methods are added or removed, the analysis rule should be
-  // updated accordingly (dev/bots/custom_rules/protect_public_state_subtypes.dart)
+  // updated accordingly (dev/flutter_analyzer_plugin/lib/src/rules/protect_public_state_subtypes.dart)
 }
 
 /// A widget that has a child widget provided to it, instead of building a new

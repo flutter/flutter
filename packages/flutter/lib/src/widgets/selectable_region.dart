@@ -448,6 +448,10 @@ class SelectableRegionState extends State<SelectableRegion>
   final _SelectableRegionSelectionStatusNotifier _selectionStatusNotifier =
       _SelectableRegionSelectionStatusNotifier._();
 
+  /// Preserves the selection status scope and root selection container when the
+  /// desktop web context menu wrapper is added or removed.
+  final GlobalKey _selectionStatusScopeKey = GlobalKey(debugLabel: 'selectionStatusScopeKey');
+
   @protected
   @override
   void initState() {
@@ -1959,6 +1963,7 @@ class SelectableRegionState extends State<SelectableRegion>
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
     Widget result = SelectableRegionSelectionStatusScope._(
+      key: _selectionStatusScopeKey,
       selectionStatusNotifier: _selectionStatusNotifier,
       child: SelectionContainer(registrar: this, delegate: _selectionDelegate, child: widget.child),
     );
@@ -3439,8 +3444,10 @@ typedef _SelectionInfo = ({int contentLength, SelectedContentRange? range});
 ///
 ///  * [EditableTextContextMenuBuilder], which performs the same role for
 ///    [EditableText].
-typedef SelectableRegionContextMenuBuilder =
-    Widget Function(BuildContext context, SelectableRegionState selectableRegionState);
+typedef SelectableRegionContextMenuBuilder = Widget Function(
+  BuildContext context,
+  SelectableRegionState selectableRegionState,
+);
 
 /// The status of the selection under a [SelectableRegion].
 ///
@@ -3516,6 +3523,7 @@ final class _SelectableRegionSelectionStatusNotifier extends ChangeNotifier
 /// does not change.
 final class SelectableRegionSelectionStatusScope extends InheritedWidget {
   const SelectableRegionSelectionStatusScope._({
+    super.key,
     required this.selectionStatusNotifier,
     required super.child,
   });
@@ -3619,8 +3627,7 @@ class _SelectionListenerState extends State<SelectionListener> {
 
 final class _SelectionListenerDelegate extends StaticSelectionContainerDelegate
     implements SelectionDetails {
-  _SelectionListenerDelegate({required SelectionListenerNotifier selectionNotifier})
-    : _selectionNotifier = selectionNotifier {
+  _SelectionListenerDelegate({required this._selectionNotifier}) {
     _selectionNotifier._registerSelectionListenerDelegate(this);
   }
 

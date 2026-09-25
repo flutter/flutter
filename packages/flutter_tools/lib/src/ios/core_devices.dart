@@ -21,6 +21,7 @@ import '../device.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
 import 'application_package.dart';
+import 'device_support.dart';
 import 'lldb.dart';
 import 'xcode_debug.dart';
 import 'xcodeproj.dart';
@@ -36,18 +37,15 @@ import 'xcodeproj.dart';
 /// - [launchAppWithXcodeDebugger]: Uses Xcode automation to install, launch, and debug the app.
 class IOSCoreDeviceLauncher {
   IOSCoreDeviceLauncher({
-    required IOSCoreDeviceControl coreDeviceControl,
+    required this._coreDeviceControl,
     required Logger logger,
-    required XcodeDebug xcodeDebug,
-    required FileSystem fileSystem,
+    required this._xcodeDebug,
+    required this._fileSystem,
     required ProcessUtils processUtils,
     required XcodeProjectInterpreter xcodeProjectInterpreter,
     required Version? deviceVersion,
     @visibleForTesting LLDB? lldb,
-  }) : _coreDeviceControl = coreDeviceControl,
-       _logger = logger,
-       _xcodeDebug = xcodeDebug,
-       _fileSystem = fileSystem,
+  }) : _logger = logger,
        _lldb =
            lldb ??
            LLDB(
@@ -104,6 +102,7 @@ class IOSCoreDeviceLauncher {
   /// Requires Xcode 16+.
   Future<bool> launchAppWithLLDBDebugger({
     required String deviceId,
+    required IOSDeviceSupport deviceSupport,
     required String bundlePath,
     required String bundleId,
     required List<String> launchArguments,
@@ -153,12 +152,22 @@ class IOSCoreDeviceLauncher {
       return false;
     }
 
+    // Kill LLDB and devicectl if the CLI shuts down so they do not hang in the background.
+    shutdownHooks.addShutdownHook(() async {
+      try {
+        await stopApp(deviceId: deviceId, processId: processId);
+      } on Exception {
+        // ignore any failures
+      }
+    });
+
     // Start LLDB and attach to the device process.
     final bool attachStatus = await _lldb.attachAndStart(
       deviceId: deviceId,
       appProcessId: processId,
       lldbLogForwarder: lldbLogForwarder,
       mode: mode,
+      deviceSupport: deviceSupport,
     );
 
     // If it fails to attach with lldb, kill the launched process so it doesn't stay hanging.
@@ -342,12 +351,10 @@ class IOSCoreDeviceControl {
   IOSCoreDeviceControl({
     required Logger logger,
     required ProcessManager processManager,
-    required Xcode xcode,
-    required FileSystem fileSystem,
+    required this._xcode,
+    required this._fileSystem,
   }) : _logger = logger,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _xcode = xcode,
-       _fileSystem = fileSystem;
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final Logger _logger;
   final ProcessUtils _processUtils;
@@ -720,6 +727,7 @@ class IOSCoreDeviceControl {
       'launch',
       '--device',
       deviceId,
+      '--terminate-existing',
       if (startStopped) '--start-stopped',
       if (attachToConsole) ...<String>[
         '--console',
