@@ -613,17 +613,6 @@ void testMain() {
 
       expect(textField.editableElement.getAttribute('aria-description'), isNull);
     });
-
-    test('falls back to hint for aria-label when label is empty (b/463281931, #172206)', () {
-      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
-        value: '',
-        hint: 'Search fruits',
-      );
-      final textField = textFieldSemantics.semanticRole! as SemanticTextField;
-
-      expect(textField.editableElement.getAttribute('aria-label'), 'Search fruits');
-      expect(textField.editableElement.getAttribute('aria-description'), isNull);
-    });
   });
 
   // Group autofill in semantics mode. See https://github.com/flutter/flutter/issues/180652

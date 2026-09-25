@@ -2932,6 +2932,39 @@ void _testIncrementables() {
 
     semantics().semanticsEnabled = false;
   });
+
+  test('propagates aria-label to inner slider input and cleans up when cleared', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+    addTearDown(() {
+      semantics().semanticsEnabled = false;
+    });
+
+    void pumpSlider({required String label}) {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        label: label,
+        hasIncrease: true,
+        hasDecrease: true,
+        flags: ui.SemanticsFlags(isEnabled: ui.Tristate.isTrue),
+        value: '50%',
+        increasedValue: '60%',
+        decreasedValue: '40%',
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+    }
+
+    pumpSlider(label: 'Volume');
+    final DomElement input = owner().debugSemanticsTree![0]!.element.querySelector('input')!;
+    expect(input.getAttribute('aria-label'), 'Volume');
+
+    pumpSlider(label: '');
+    expect(input.getAttribute('aria-label'), isNull);
+  });
 }
 
 void _testTextField() {
