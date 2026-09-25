@@ -17,6 +17,7 @@ import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'localizations.dart';
 import 'media_query.dart';
 import 'navigator.dart';
 import 'pop_scope.dart';
@@ -644,6 +645,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   late final RestorableStringN _errorText;
   final RestorableBool _hasInteractedByUser = RestorableBool(false);
   final FocusNode _focusNode = FocusNode();
+  Locale? _locale;
 
   /// The current value of the form field.
   T? get value => _value;
@@ -806,6 +808,15 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Refresh a visible error when the locale changes, including the first
+    // dependency change after restoration. A restored error string can belong
+    // to a previous locale. Fields that are not already showing an error stay
+    // untouched.
+    final Locale? locale = Localizations.maybeLocaleOf(context);
+    if (locale != _locale && widget.enabled && hasError) {
+      _validate();
+    }
+    _locale = locale;
     switch (Form.maybeOf(context)?.widget.autovalidateMode) {
       case AutovalidateMode.always:
         WidgetsBinding.instance.addPostFrameCallback((_) {
