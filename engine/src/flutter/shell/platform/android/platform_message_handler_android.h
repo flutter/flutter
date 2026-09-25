@@ -13,6 +13,7 @@
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/common/platform_message_handler.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
 class PlatformMessageHandlerAndroid : public PlatformMessageHandler {
@@ -29,12 +30,18 @@ class PlatformMessageHandlerAndroid : public PlatformMessageHandler {
 
   void InvokePlatformMessageEmptyResponseCallback(int response_id) override;
 
+  void SetEmbedderEngine(FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                         const FlutterEngineProcTable& proc_table);
+
  private:
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::atomic<int> next_response_id_ = 1;
   std::unordered_map<int, fml::RefPtr<flutter::PlatformMessageResponse>>
       pending_responses_;
   std::mutex pending_responses_mutex_;
+  std::mutex embedder_engine_mutex_;
+  FLUTTER_API_SYMBOL(FlutterEngine) embedder_engine_ = nullptr;
+  FlutterEngineProcTable proc_table_{};
 };
 }  // namespace flutter
 
