@@ -510,33 +510,13 @@ public class FlutterFragmentTest {
 
   @Test
   @SuppressWarnings("deprecation")
-  public void newEngineFragmentBuilderSetsFlutterShellArgs() {
+  public void newEngineFragmentBuilderSetsFlutterShellArgsViaFlutterEngineFlags() {
     FlutterShellArgs shellArgs =
         new FlutterShellArgs(new String[] {"--trace-startup", "--verbose-logging"});
     FlutterFragment fragment = FlutterFragment.withNewEngine().flutterShellArgs(shellArgs).build();
 
     assertEquals(
         Arrays.asList("--trace-startup", "--verbose-logging"), fragment.getFlutterEngineFlags());
-  }
-
-  public static class FragmentWithOverriddenShellArgs extends FlutterFragment {
-    @NonNull
-    @Override
-    @SuppressWarnings("deprecation")
-    public FlutterShellArgs getFlutterShellArgs() {
-      return new FlutterShellArgs(new String[] {"--frag-flag-1", "--frag-flag-2"});
-    }
-  }
-
-  public static class FragmentWithSuperShellArgs extends FlutterFragment {
-    @NonNull
-    @Override
-    @SuppressWarnings("deprecation")
-    public FlutterShellArgs getFlutterShellArgs() {
-      FlutterShellArgs args = super.getFlutterShellArgs();
-      args.add("--appended-frag-flag");
-      return args;
-    }
   }
 
   @Test
@@ -568,6 +548,43 @@ public class FlutterFragmentTest {
     fragment.setArguments(args);
 
     List<String> flags = fragment.getFlutterEngineFlags();
-    assertTrue(flags.contains("--appended-frag-flag"));
+    assertEquals(1, flags.size());
+    assertTrue(flags.contains(FragmentWithSuperShellArgs.APPENDED_FLAG));
+  }
+
+  @Test
+  public void flutterFragment_superGetFlutterShellArgsIncludesInitialFlagsAndAppendedFlag() {
+    FragmentWithSuperShellArgs fragment = new FragmentWithSuperShellArgs();
+    Bundle args = new Bundle();
+    args.putStringArray(
+        FlutterFragment.ARG_FLUTTER_INITIALIZATION_ARGS, new String[] {"--frag-flag-1"});
+    fragment.setArguments(args);
+
+    List<String> flags = fragment.getFlutterEngineFlags();
+    assertEquals(2, flags.size());
+    assertTrue(flags.contains("--frag-flag-1"));
+    assertTrue(flags.contains(FragmentWithSuperShellArgs.APPENDED_FLAG));
+  }
+
+  public static class FragmentWithOverriddenShellArgs extends FlutterFragment {
+    @NonNull
+    @Override
+    @SuppressWarnings("deprecation")
+    public FlutterShellArgs getFlutterShellArgs() {
+      return new FlutterShellArgs(new String[] {"--frag-flag-1", "--frag-flag-2"});
+    }
+  }
+
+  public static class FragmentWithSuperShellArgs extends FlutterFragment {
+    public static final String APPENDED_FLAG = "--appended-frag-flag";
+
+    @NonNull
+    @Override
+    @SuppressWarnings("deprecation")
+    public FlutterShellArgs getFlutterShellArgs() {
+      FlutterShellArgs args = super.getFlutterShellArgs();
+      args.add(APPENDED_FLAG);
+      return args;
+    }
   }
 }

@@ -24,7 +24,7 @@ TaskFunction createAndroidIntentParsingTest() {
     Future<void> testMode({required String mode, required bool expectVerbose}) async {
       section('--- Testing $mode mode ---');
       await inDirectory<void>(testDirectory, () async {
-        await exec('flutter', <String>['build', 'apk', '--$mode']);
+        await flutter('build', options: <String>['apk', '--$mode']);
         final String apkPath = path.join('build', 'app', 'outputs', 'flutter-apk', 'app-$mode.apk');
 
         // Ensure clean state
@@ -63,6 +63,16 @@ TaskFunction createAndroidIntentParsingTest() {
           throw TaskResult.failure(
             'Expected [INFO:] logs to be stripped in $mode mode, but they were found in logcat!',
           );
+        }
+
+        if (!expectVerbose) {
+          const expectedWarning =
+              'Setting engine flags via Intent is not supported in release mode and will be ignored.';
+          if (!logcat.contains(expectedWarning)) {
+            throw TaskResult.failure(
+              'Expected warning "$expectedWarning" to be present in $mode mode logcat, but it was not found.',
+            );
+          }
         }
 
         print(

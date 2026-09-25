@@ -858,26 +858,6 @@ public class FlutterActivityTest {
     }
   }
 
-  static class FlutterActivityWithOverriddenShellArgs extends FlutterActivity {
-    @NonNull
-    @Override
-    @SuppressWarnings("deprecation")
-    public FlutterShellArgs getFlutterShellArgs() {
-      return new FlutterShellArgs(new String[] {"--custom-flag-1", "--custom-flag-2"});
-    }
-  }
-
-  static class FlutterActivityWithSuperShellArgs extends FlutterActivity {
-    @NonNull
-    @Override
-    @SuppressWarnings("deprecation")
-    public FlutterShellArgs getFlutterShellArgs() {
-      FlutterShellArgs args = super.getFlutterShellArgs();
-      args.add("--appended-flag");
-      return args;
-    }
-  }
-
   @Test
   public void flutterActivity_forwardsOverriddenFlutterShellArgsToEngineFlags() {
     ActivityController<FlutterActivityWithOverriddenShellArgs> activityController =
@@ -907,15 +887,54 @@ public class FlutterActivityTest {
     FlutterActivityWithSuperShellArgs activity = activityController.get();
 
     List<String> flags = activity.getFlutterEngineFlags();
-    assertTrue(flags.contains("--appended-flag"));
+    assertEquals(1, flags.size());
+    assertTrue(flags.contains(FlutterActivityWithSuperShellArgs.APPENDED_FLAG));
+  }
+
+  @Test
+  public void flutterActivity_superGetFlutterShellArgsIncludesIntentFlagsAndAppendedFlag() {
+    Intent intent = new Intent(ctx, FlutterActivityWithSuperShellArgs.class);
+    intent.putExtra("trace-startup", true);
+    ActivityController<FlutterActivityWithSuperShellArgs> activityController =
+        Robolectric.buildActivity(FlutterActivityWithSuperShellArgs.class, intent);
+    FlutterActivityWithSuperShellArgs activity = activityController.get();
+
+    List<String> flags = activity.getFlutterEngineFlags();
+    assertEquals(2, flags.size());
+    assertTrue(flags.contains("--trace-startup"));
+    assertTrue(flags.contains(FlutterActivityWithSuperShellArgs.APPENDED_FLAG));
   }
 
   @Test
   public void flutterActivity_returnsEngineFlagsDirectlyWhenShellArgsNotOverridden() {
     Intent intent = FlutterActivity.createDefaultIntent(ctx);
+    intent.putExtra("trace-startup", true);
     FlutterActivity activity = RobolectricFlutterActivity.createFlutterActivity(intent);
 
     List<String> flags = activity.getFlutterEngineFlags();
-    assertEquals(0, flags.size());
+    assertEquals(1, flags.size());
+    assertTrue(flags.contains("--trace-startup"));
+  }
+
+  static class FlutterActivityWithOverriddenShellArgs extends FlutterActivity {
+    @NonNull
+    @Override
+    @SuppressWarnings("deprecation")
+    public FlutterShellArgs getFlutterShellArgs() {
+      return new FlutterShellArgs(new String[] {"--custom-flag-1", "--custom-flag-2"});
+    }
+  }
+
+  static class FlutterActivityWithSuperShellArgs extends FlutterActivity {
+    static final String APPENDED_FLAG = "--appended-flag";
+
+    @NonNull
+    @Override
+    @SuppressWarnings("deprecation")
+    public FlutterShellArgs getFlutterShellArgs() {
+      FlutterShellArgs args = super.getFlutterShellArgs();
+      args.add(APPENDED_FLAG);
+      return args;
+    }
   }
 }

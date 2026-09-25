@@ -16,10 +16,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
-public class FlutterEngineFlagsProviderTest {
+public class FlutterEngineFlagsProviderImplDebugTest {
 
   @Test
-  public void itProcessesStringExtras() {
+  public void getFlags_ProcessesStringExtras() {
     Intent intent = new Intent();
     intent.putExtra("dart-flags", "--observe --no-hot --no-pub");
     intent.putExtra("trace-skia-allowlist", "skia.a,skia.b");
@@ -35,7 +35,7 @@ public class FlutterEngineFlagsProviderTest {
   }
 
   @Test
-  public void itProcessesBooleanExtras() {
+  public void getFlags_processesBooleanExtras() {
     Intent intent = new Intent();
     intent.putExtra("trace-startup", true);
     intent.putExtra("start-paused", true);
@@ -81,7 +81,7 @@ public class FlutterEngineFlagsProviderTest {
   }
 
   @Test
-  public void itProcessesIntExtras() {
+  public void getFlags_processesIntExtras() {
     Intent intent = new Intent();
     intent.putExtra("vm-service-port", 12345);
 
@@ -93,7 +93,7 @@ public class FlutterEngineFlagsProviderTest {
   }
 
   @Test
-  public void itProcessesPresenceExtras() {
+  public void getFlags_processesPresenceExtras() {
     Intent intent = new Intent();
     intent.putExtra("profile-microtasks", true); // presence check
 
@@ -111,21 +111,27 @@ public class FlutterEngineFlagsProviderTest {
   }
 
   @Test
-  public void itDoesNotPropagateMissingExtras() {
+  public void getFlags_doesNotPropagateMissingExtras() {
     Intent intent = new Intent();
     List<String> args = FlutterEngineFlagsProviderImpl.INSTANCE.getFlags(intent);
     assertEquals(0, args.size());
   }
 
   @Test
-  public void itDetectsSoftwareRenderingEnabled() {
+  public void isSoftwareRenderingEnabled_detectsTrue() {
     Intent intent = new Intent();
     intent.putExtra("enable-software-rendering", true);
     assertTrue(FlutterEngineFlagsProviderImpl.INSTANCE.isSoftwareRenderingEnabled(intent));
+  }
 
+  @Test
+  public void isSoftwareRenderingEnabled_detectsFalse() {
+    // Test setting to false.
+    Intent intent = new Intent();
     intent.putExtra("enable-software-rendering", false);
     assertFalse(FlutterEngineFlagsProviderImpl.INSTANCE.isSoftwareRenderingEnabled(intent));
 
+    // Test not set.
     assertFalse(FlutterEngineFlagsProviderImpl.INSTANCE.isSoftwareRenderingEnabled(new Intent()));
     assertFalse(FlutterEngineFlagsProviderImpl.INSTANCE.isSoftwareRenderingEnabled(null));
   }

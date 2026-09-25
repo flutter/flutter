@@ -42,6 +42,7 @@ import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterEngineGroup;
 import io.flutter.embedding.engine.FlutterEngineGroupCache;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
@@ -71,6 +72,7 @@ import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowLog;
 
 @RunWith(AndroidJUnit4.class)
 public class FlutterActivityAndFragmentDelegateTest {
@@ -1714,5 +1716,71 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(engine.getScribeChannel()).thenReturn(mock(ScribeChannel.class));
 
     return engine;
+  }
+
+  @Test
+  public void isGetFlutterShellArgsOverridden_detectsOverriddenMethodsAndLogsWarning() {
+    ShadowLog.clear();
+
+    assertFalse(
+        FlutterActivityAndFragmentDelegate.isGetFlutterShellArgsOverridden(
+            FlutterActivity.class, new HostWithoutOverride()));
+
+    List<ShadowLog.LogItem> logs = ShadowLog.getLogsForTag("FlutterActivity");
+    assertTrue(logs.isEmpty());
+
+    assertTrue(
+        FlutterActivityAndFragmentDelegate.isGetFlutterShellArgsOverridden(
+            FlutterActivity.class, new HostWithOverride()));
+
+    logs = ShadowLog.getLogsForTag("FlutterActivity");
+    boolean hasActivityWarning = false;
+    for (ShadowLog.LogItem log : logs) {
+      if (log.msg.contains("FlutterShellArgs is deprecated")) {
+        hasActivityWarning = true;
+        break;
+      }
+    }
+    assertTrue(hasActivityWarning);
+
+    assertFalse(
+        FlutterActivityAndFragmentDelegate.isGetFlutterShellArgsOverridden(
+            FlutterFragment.class, new FragmentWithoutOverride()));
+
+    assertTrue(
+        FlutterActivityAndFragmentDelegate.isGetFlutterShellArgsOverridden(
+            FlutterFragment.class, new FragmentWithOverride()));
+
+    List<ShadowLog.LogItem> fragmentLogs = ShadowLog.getLogsForTag("FlutterFragment");
+    boolean hasFragmentWarning = false;
+    for (ShadowLog.LogItem log : fragmentLogs) {
+      if (log.msg.contains("FlutterShellArgs is deprecated")) {
+        hasFragmentWarning = true;
+        break;
+      }
+    }
+    assertTrue(hasFragmentWarning);
+  }
+
+  static class HostWithoutOverride extends FlutterActivity {}
+
+  static class HostWithOverride extends FlutterActivity {
+    @NonNull
+    @Override
+    @SuppressWarnings("deprecation")
+    public FlutterShellArgs getFlutterShellArgs() {
+      return new FlutterShellArgs(new String[] {});
+    }
+  }
+
+  static class FragmentWithoutOverride extends FlutterFragment {}
+
+  static class FragmentWithOverride extends FlutterFragment {
+    @NonNull
+    @Override
+    @SuppressWarnings("deprecation")
+    public FlutterShellArgs getFlutterShellArgs() {
+      return new FlutterShellArgs(new String[] {});
+    }
   }
 }

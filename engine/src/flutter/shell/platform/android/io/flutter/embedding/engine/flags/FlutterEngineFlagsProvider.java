@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface FlutterEngineFlagsProvider {
   /**
-   * Get the engine flags set via Intent to pass to a new {@link FlutterEngine}. Implementations
+   * Get the engine flags set via Intent to configure a new {@link FlutterEngine}. Implementations
    * should return an empty list in release builds for security purposes.
    *
    * @param intent The Intent that was used to launch the Flutter component.
