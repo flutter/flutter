@@ -7,9 +7,9 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -18,7 +18,24 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 import '../src/fakes.dart';
+
+MDnsVmServiceDiscovery _createDiscovery({
+  Analytics? analytics,
+  Logger? logger,
+  MDnsClient? mdnsClient,
+  Platform? platform,
+  MDnsClient? preliminaryMDnsClient,
+}) {
+  return MDnsVmServiceDiscovery(
+    analytics: analytics ?? const NoOpAnalytics(),
+    logger: logger ?? BufferLogger.test(),
+    mdnsClient: mdnsClient,
+    platform: platform ?? FakePlatform(operatingSystem: 'macos'),
+    preliminaryMDnsClient: preliminaryMDnsClient,
+  );
+}
 
 void main() {
   group('mDNS Discovery', () {
@@ -52,7 +69,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: emptyClient,
           preliminaryMDnsClient: client,
           logger: BufferLogger.test(),
@@ -82,7 +99,7 @@ void main() {
             },
           );
 
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
             preliminaryMDnsClient: emptyClient,
             logger: BufferLogger.test(),
@@ -110,7 +127,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: emptyClient,
           preliminaryMDnsClient: client,
           logger: BufferLogger.test(),
@@ -133,7 +150,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: emptyClient,
           preliminaryMDnsClient: client,
           logger: BufferLogger.test(),
@@ -160,7 +177,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: emptyClient,
           preliminaryMDnsClient: client,
           logger: BufferLogger.test(),
@@ -171,7 +188,7 @@ void main() {
       });
 
       testWithoutContext('No ports available', () async {
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: emptyClient,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -191,7 +208,7 @@ void main() {
             fs: fs,
             fakeFlutterVersion: FakeFlutterVersion(),
           );
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: emptyClient,
             preliminaryMDnsClient: emptyClient,
             logger: logger,
@@ -217,7 +234,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -240,7 +257,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -267,7 +284,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -295,7 +312,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -312,7 +329,7 @@ void main() {
           osErrorOnStart: true,
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -320,6 +337,76 @@ void main() {
         );
         expect(() async => portDiscovery.queryForAttach(), throwsException);
       });
+
+      testUsingContext(
+        'On macOS, throws ToolExit when client throws SocketException on start',
+        () async {
+          final MDnsClient client = FakeMDnsClient(
+            <PtrResourceRecord>[],
+            <String, List<SrvResourceRecord>>{},
+            socketExceptionOnStart: true,
+          );
+
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
+            mdnsClient: client,
+            preliminaryMDnsClient: emptyClient,
+            logger: BufferLogger.test(),
+            analytics: const NoOpAnalytics(),
+          );
+          expect(
+            () async => portDiscovery.queryForAttach(),
+            throwsToolExit(
+              message:
+                  'Flutter could not access the local network.\n'
+                  '\n'
+                  'Please ensure your IDE or terminal app has permission to access '
+                  'devices on the local network. This allows Flutter to connect to '
+                  'the Dart VM.\n'
+                  '\n'
+                  'You can grant this permission in System Settings > Privacy & '
+                  'Security > Local Network.\n',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{Platform: () => FakePlatform(operatingSystem: 'macos')},
+      );
+
+      testUsingContext('Throws UnsupportedError on non-macOS platforms', () async {
+        final MDnsClient client = FakeMDnsClient(
+          <PtrResourceRecord>[],
+          <String, List<SrvResourceRecord>>{},
+        );
+
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
+          mdnsClient: client,
+          platform: FakePlatform(),
+          preliminaryMDnsClient: emptyClient,
+        );
+        expect(() async => portDiscovery.queryForAttach(), throwsA(isA<UnsupportedError>()));
+      }, overrides: <Type, Generator>{Platform: () => FakePlatform()});
+
+      testUsingContext('On macOS, traces error and returns null when client throws SocketException on start with throwOnError: false', () async {
+        final MDnsClient client = FakeMDnsClient(
+          <PtrResourceRecord>[],
+          <String, List<SrvResourceRecord>>{},
+          socketExceptionOnStart: true,
+        );
+
+        final logger = BufferLogger.test();
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
+          mdnsClient: client,
+          preliminaryMDnsClient: emptyClient,
+          logger: logger,
+          analytics: const NoOpAnalytics(),
+        );
+
+        final MDnsVmServiceDiscoveryResult? result = await portDiscovery.queryForAttach(
+          throwOnError: false,
+        );
+
+        expect(result, isNull);
+        expect(logger.traceText, contains('mDNS discovery failed:'));
+      }, overrides: <Type, Generator>{Platform: () => FakePlatform(operatingSystem: 'macos')});
 
       testWithoutContext('Correctly builds VM Service URI with hostVmservicePort == 0', () async {
         final MDnsClient client = FakeMDnsClient(
@@ -332,7 +419,7 @@ void main() {
         );
 
         final device = FakeIOSDevice();
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -369,7 +456,7 @@ void main() {
         );
 
         final device = FakeIOSDevice();
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -406,7 +493,7 @@ void main() {
         );
 
         final device = FakeIOSDevice();
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -463,7 +550,7 @@ void main() {
             },
           );
           final device = FakeIOSDevice();
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
             preliminaryMDnsClient: emptyClient,
             logger: BufferLogger.test(),
@@ -495,7 +582,7 @@ void main() {
           },
         );
         final device = FakeIOSDevice();
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -515,7 +602,7 @@ void main() {
           <String, List<SrvResourceRecord>>{},
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -533,7 +620,7 @@ void main() {
           <String, List<SrvResourceRecord>>{},
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -555,7 +642,7 @@ void main() {
             <String, List<SrvResourceRecord>>{},
           );
           final logger = BufferLogger.test();
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
             logger: logger,
             analytics: const NoOpAnalytics(),
@@ -578,7 +665,7 @@ void main() {
           osErrorOnStart: true,
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -593,7 +680,7 @@ void main() {
       // On macOS, the mDNS client's socket stream creates a SocketException if
       // the app running the tool does not have Local Network permissions.
       // See: https://github.com/flutter/flutter/issues/150131
-      test(
+      testUsingContext(
         'On macOS, tool exits with a helpful message when mDNS lookup throws a SocketException',
         () async {
           final MDnsClient client = FakeMDnsClient(
@@ -602,7 +689,7 @@ void main() {
             socketExceptionOnLookup: true,
           );
 
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
             logger: BufferLogger.test(),
             analytics: const NoOpAnalytics(),
@@ -623,86 +710,84 @@ void main() {
             ),
           );
         },
-        // [intended] This tool exit message only works for macOS
-        skip: !globals.platform.isMacOS,
+        overrides: <Type, Generator>{Platform: () => FakePlatform(operatingSystem: 'macos')},
       );
 
       // On macOS, the mDNS client's socket stream creates a SocketException if
       // the app running the tool does not have Local Network permissions.
       // See: https://github.com/flutter/flutter/issues/150131
-      test(
-        'On macOS, tool exits with a helpful message when mDNS lookup throws an uncaught SocketException',
+      testUsingContext('On macOS, tool exits with a helpful message when mDNS lookup throws an uncaught SocketException', () async {
+        final MDnsClient client = FakeMDnsClient(
+          <PtrResourceRecord>[],
+          <String, List<SrvResourceRecord>>{},
+          uncaughtSocketExceptionOnLookup: true,
+        );
+
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
+          mdnsClient: client,
+          logger: BufferLogger.test(),
+          analytics: const NoOpAnalytics(),
+        );
+
+        expect(
+          () async => portDiscovery.firstMatchingVmService(client),
+          throwsToolExit(
+            message:
+                'Flutter could not access the local network.\n'
+                '\n'
+                'Please ensure your IDE or terminal app has permission to access '
+                'devices on the local network. This allows Flutter to connect to '
+                'the Dart VM.\n'
+                '\n'
+                'You can grant this permission in System Settings > Privacy & '
+                'Security > Local Network.\n',
+          ),
+        );
+      }, overrides: <Type, Generator>{Platform: () => FakePlatform(operatingSystem: 'macos')});
+
+      testUsingContext('On macOS, tool traces an error and returns null when mDNS lookup throws an uncaught SocketException and throwOnError is false', () async {
+        final MDnsClient client = FakeMDnsClient(
+          <PtrResourceRecord>[],
+          <String, List<SrvResourceRecord>>{},
+          uncaughtSocketExceptionOnLookup: true,
+        );
+
+        final logger = BufferLogger.test();
+
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
+          mdnsClient: client,
+          logger: logger,
+          analytics: const NoOpAnalytics(),
+        );
+
+        final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
+          client,
+          throwOnError: false,
+        );
+
+        expect(result, isNull);
+        expect(logger.traceText, contains('mDNS discovery failed:'));
+      }, overrides: <Type, Generator>{Platform: () => FakePlatform(operatingSystem: 'macos')});
+
+      testUsingContext(
+        'Throws UnsupportedError on non-macOS platforms for firstMatchingVmService',
         () async {
           final MDnsClient client = FakeMDnsClient(
             <PtrResourceRecord>[],
             <String, List<SrvResourceRecord>>{},
-            uncaughtSocketExceptionOnLookup: true,
           );
 
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
-            logger: BufferLogger.test(),
-            analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           );
 
           expect(
             () async => portDiscovery.firstMatchingVmService(client),
-            throwsToolExit(
-              message:
-                  'Flutter could not access the local network.\n'
-                  '\n'
-                  'Please ensure your IDE or terminal app has permission to access '
-                  'devices on the local network. This allows Flutter to connect to '
-                  'the Dart VM.\n'
-                  '\n'
-                  'You can grant this permission in System Settings > Privacy & '
-                  'Security > Local Network.\n',
-            ),
+            throwsA(isA<UnsupportedError>()),
           );
         },
-        // [intended] This tool exit message only works for macOS
-        skip: !globals.platform.isMacOS,
-      );
-
-      test(
-        'On macOS, tool prints a helpful message when mDNS lookup throws an uncaught SocketException',
-        () async {
-          final MDnsClient client = FakeMDnsClient(
-            <PtrResourceRecord>[],
-            <String, List<SrvResourceRecord>>{},
-            uncaughtSocketExceptionOnLookup: true,
-          );
-
-          final logger = BufferLogger.test();
-
-          final portDiscovery = MDnsVmServiceDiscovery(
-            mdnsClient: client,
-            logger: logger,
-            analytics: const NoOpAnalytics(),
-          );
-
-          final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
-            client,
-            throwOnMissingLocalNetworkPermissionsError: false,
-          );
-
-          expect(result, isNull);
-          expect(
-            logger.errorText,
-            contains(
-              'Flutter could not access the local network.\n'
-              '\n'
-              'Please ensure your IDE or terminal app has permission to access '
-              'devices on the local network. This allows Flutter to connect to '
-              'the Dart VM.\n'
-              '\n'
-              'You can grant this permission in System Settings > Privacy & '
-              'Security > Local Network.\n',
-            ),
-          );
-        },
-        // [intended] This tool exit message only works for macOS
-        skip: !globals.platform.isMacOS,
+        overrides: <Type, Generator>{Platform: () => FakePlatform()},
       );
 
       testWithoutContext('Correctly builds VM Service URI with hostVmservicePort == 0', () async {
@@ -716,7 +801,7 @@ void main() {
         );
 
         final device = FakeIOSDevice();
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -753,7 +838,7 @@ void main() {
         );
 
         final device = FakeIOSDevice();
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -790,7 +875,7 @@ void main() {
         );
 
         final device = FakeIOSDevice();
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -847,7 +932,7 @@ void main() {
             },
           );
           final device = FakeIOSDevice();
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
             logger: BufferLogger.test(),
             analytics: const NoOpAnalytics(),
@@ -882,7 +967,7 @@ void main() {
           },
         );
         final device = FakeIOSDevice(name: 'My Phone');
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -915,7 +1000,7 @@ void main() {
             },
           );
           final device = FakeIOSDevice(name: 'My Phone');
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
             logger: BufferLogger.test(),
             analytics: const NoOpAnalytics(),
@@ -930,7 +1015,7 @@ void main() {
 
     group('deviceNameMatchesTargetName', () {
       testWithoutContext('compares case insensitive and without spaces, hyphens, .local', () {
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -940,7 +1025,7 @@ void main() {
       });
 
       testWithoutContext('includes numbers in comparison', () {
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -992,7 +1077,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -1053,7 +1138,7 @@ void main() {
         },
       );
 
-      final portDiscovery = MDnsVmServiceDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
         analytics: const NoOpAnalytics(),
@@ -1091,7 +1176,7 @@ void main() {
         },
       );
 
-      final portDiscovery = MDnsVmServiceDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
         analytics: const NoOpAnalytics(),
@@ -1135,7 +1220,7 @@ void main() {
         },
       );
 
-      final portDiscovery = MDnsVmServiceDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
         analytics: const NoOpAnalytics(),
@@ -1181,7 +1266,7 @@ void main() {
         },
       );
 
-      final portDiscovery = MDnsVmServiceDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
         analytics: const NoOpAnalytics(),
@@ -1206,6 +1291,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     this.txtResponse = const <String, List<TxtResourceRecord>>{},
     this.ipResponse = const <String, List<IPAddressResourceRecord>>{},
     this.osErrorOnStart = false,
+    this.socketExceptionOnStart = false,
     this.socketExceptionOnLookup = false,
     this.uncaughtSocketExceptionOnLookup = false,
   });
@@ -1215,6 +1301,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
   final Map<String, List<TxtResourceRecord>> txtResponse;
   final Map<String, List<IPAddressResourceRecord>> ipResponse;
   final bool osErrorOnStart;
+  final bool socketExceptionOnStart;
   final bool socketExceptionOnLookup;
   final bool uncaughtSocketExceptionOnLookup;
 
@@ -1228,6 +1315,12 @@ class FakeMDnsClient extends Fake implements MDnsClient {
   }) async {
     if (osErrorOnStart) {
       throw const OSError('Operation not supported on socket', 102);
+    }
+    if (socketExceptionOnStart) {
+      throw const SocketException(
+        'Failed to create datagram socket',
+        osError: OSError('Address already in use', 48),
+      );
     }
   }
 
