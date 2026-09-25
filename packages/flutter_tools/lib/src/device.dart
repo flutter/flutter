@@ -1509,18 +1509,19 @@ class DebuggingOptions {
 }
 
 class LaunchResult {
-  LaunchResult.succeeded({this.vmServiceUri}) : started = true;
+  LaunchResult.succeeded({this.vmServiceUri, this.appInstalled = true}) : started = true;
 
-  LaunchResult.failed() : started = false, vmServiceUri = null;
+  LaunchResult.failed({this.appInstalled = false}) : started = false, vmServiceUri = null;
 
   bool get hasVmService => vmServiceUri != null;
 
   final bool started;
+  final bool appInstalled;
   final Uri? vmServiceUri;
 
   @override
   String toString() {
-    final buf = StringBuffer('started=$started');
+    final buf = StringBuffer('started=$started, appInstalled=$appInstalled');
     if (vmServiceUri != null) {
       buf.write(', vmService=$vmServiceUri');
     }
