@@ -137,8 +137,8 @@ class WebTemplate {
     }
     newContent = _applyVariableSubstitutions(newContent, logger, <String, String>{
       ...webDefines,
-      if (buildConfig != null) 'flutter_build_config': buildConfig,
-      if (flutterBootstrapJs != null) 'flutter_bootstrap_js': flutterBootstrapJs,
+      'flutter_build_config': ?buildConfig,
+      'flutter_bootstrap_js': ?flutterBootstrapJs,
       'flutter_js': flutterJsFile.readAsStringSync(),
       'flutter_service_worker_version': serviceWorkerVersion != null
           ? '"$serviceWorkerVersion" /* $_kServiceWorkerDeprecationNotice */'
