@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_JNI_PLATFORM_VIEW_ANDROID_JNI_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_JNI_PLATFORM_VIEW_ANDROID_JNI_H_
 
+#include <functional>
 #include <utility>
 
 #include "flutter/fml/mapping.h"
@@ -230,6 +231,28 @@ class PlatformViewAndroidJNI {
 
   // New Platform View Support.
   virtual ASurfaceTransaction* createTransaction() = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Creates a transaction that is not yet visible to the platform
+  ///             thread, along with a callback that publishes it once the
+  ///             caller has finished writing into it.
+  ///
+  ///             Callers that write into the transaction after creating it
+  ///             (for example, to set buffers or completion callbacks) must
+  ///             use this instead of `createTransaction`, otherwise the
+  ///             platform thread may merge, apply, or close the transaction
+  ///             while those writes are still in flight.
+  ///
+  /// @param[out] out_submit_callback  Receives the callback that publishes the
+  ///                                  transaction. May be null.
+  ///
+  virtual ASurfaceTransaction* createTransactionWithSubmitCallback(
+      std::function<void()>* out_submit_callback) {
+    if (out_submit_callback != nullptr) {
+      *out_submit_callback = nullptr;
+    }
+    return createTransaction();
+  }
 
   virtual void swapTransaction() = 0;
 
