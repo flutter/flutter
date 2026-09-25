@@ -28,23 +28,23 @@ You can grant this permission in System Settings > Privacy & Security > Local Ne
 $err
 ''';
 
+/// Callback type to create an [MDnsClient].
+typedef MDnsClientFactory = MDnsClient Function();
+
 /// A wrapper around [MDnsClient] to find a Dart VM Service instance.
 class MDnsVmServiceDiscovery {
-  /// Creates a new [MDnsVmServiceDiscovery] object.
-  ///
-  /// The [_client] parameter will be defaulted to a new [MDnsClient] if null.
   MDnsVmServiceDiscovery({
-    MDnsClient? mdnsClient,
-    MDnsClient? preliminaryMDnsClient,
-    required this._logger,
     required this._analytics,
-  }) : _client = mdnsClient ?? MDnsClient(),
+    required this._logger,
+    MDnsClientFactory mdnsClientFactory = MDnsClient.new,
+    MDnsClient? preliminaryMDnsClient,
+  }) : _clientFactory = mdnsClientFactory,
        _preliminaryClient = preliminaryMDnsClient;
 
-  final MDnsClient _client;
+  final MDnsClientFactory _clientFactory;
 
   // Used when discovering VM services with `queryForAttach` to do a preliminary
-  // check for already running services so that results are not cached in _client.
+  // check for already running services so that results are not cached in client.
   final MDnsClient? _preliminaryClient;
 
   final Logger _logger;
@@ -110,7 +110,7 @@ class MDnsVmServiceDiscovery {
     );
     if (results.isEmpty) {
       return firstMatchingVmService(
-        _client,
+        _clientFactory(),
         applicationId: applicationId,
         deviceVmservicePort: deviceVmservicePort,
         ipv6: ipv6,
@@ -174,7 +174,7 @@ class MDnsVmServiceDiscovery {
 
     // Query for a specific application matching on either device port or device name.
     return firstMatchingVmService(
-      _client,
+      _clientFactory(),
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
       deviceName: deviceName,
