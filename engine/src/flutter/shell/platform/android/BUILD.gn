@@ -392,7 +392,6 @@ android_java_sources = [
   "io/flutter/view/MenuRoleConfigurator.java",
   "io/flutter/view/ProgressBarRoleConfigurator.java",
   "io/flutter/view/RoleConfiguratorFactory.java",
-  "io/flutter/view/SliderRoleConfigurator.java",
   "io/flutter/view/TextureRegistry.java",
   "io/flutter/view/VsyncWaiter.java",
 ]
