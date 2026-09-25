@@ -69,7 +69,6 @@ void main() {
       AccessibilityServiceExtensions.getSemanticsTree.extensionName,
     );
     expect(disabledResult[AccessibilityInspectorKeys.error], equals('Semantics not enabled.'));
-    expect(disabledResult[AccessibilityInspectorKeys.needsFrame], isNull);
 
     // Calling enableSemantics enables semantics without returning the tree.
     // Ensure the returned map is mutable (required by BindingBase.registerServiceExtension).
@@ -85,8 +84,10 @@ void main() {
       AccessibilityServiceExtensions.getSemanticsTree.extensionName,
     );
 
-    expect(result1[AccessibilityInspectorKeys.error], equals('rootSemanticsNode is null'));
-    expect(result1[AccessibilityInspectorKeys.needsFrame], isTrue);
+    expect(
+      result1[AccessibilityInspectorKeys.error],
+      equals('rootSemanticsNode is null, needs a frame.'),
+    );
 
     // Pump a frame to build/flush the semantics tree.
     await tester.pump();
