@@ -22,9 +22,7 @@ import 'package:flutter/physics.dart';
 
 import 'binding.dart' show WidgetsBinding;
 import 'framework.dart';
-import 'list_wheel_scroll_view.dart' show FixedExtentScrollPhysics;
 import 'overscroll_indicator.dart';
-import 'page_view.dart' show PageScrollPhysics;
 import 'scroll_metrics.dart';
 import 'scroll_simulation.dart';
 import 'view.dart';
@@ -91,25 +89,22 @@ class ScrollPhysics {
   /// Creates an object with the default scroll physics.
   const ScrollPhysics({this.parent});
 
-  /// Creates a [AlwaysScrollableScrollPhysics] instance.
+  /// Creates an [AlwaysScrollableScrollPhysics] instance.
   const factory ScrollPhysics.alwaysScrollable({ScrollPhysics? parent}) =
       AlwaysScrollableScrollPhysics;
 
   /// Creates a [BouncingScrollPhysics] instance.
-  const factory ScrollPhysics.bouncing({ScrollPhysics? parent}) = BouncingScrollPhysics;
+  const factory ScrollPhysics.bouncing({
+    ScrollPhysics? parent,
+    ScrollDecelerationRate decelerationRate,
+  }) = BouncingScrollPhysics;
 
   /// Creates a [ClampingScrollPhysics] instance.
   const factory ScrollPhysics.clamping({ScrollPhysics? parent}) = ClampingScrollPhysics;
 
-  /// Creates a [FixedExtentScrollPhysics] instance.
-  const factory ScrollPhysics.fixedExtent({ScrollPhysics? parent}) = FixedExtentScrollPhysics;
-
   /// Creates a [NeverScrollableScrollPhysics] instance.
   const factory ScrollPhysics.neverScrollable({ScrollPhysics? parent}) =
       NeverScrollableScrollPhysics;
-
-  /// Creates a [PageScrollPhysics] instance.
-  const factory ScrollPhysics.page({ScrollPhysics? parent}) = PageScrollPhysics;
 
   /// Creates a [RangeMaintainingScrollPhysics] instance.
   const factory ScrollPhysics.rangeMaintaining({ScrollPhysics? parent}) =

@@ -482,6 +482,10 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
   /// Creates a scroll physics that always lands on items.
   const FixedExtentScrollPhysics({super.parent});
 
+  /// Creates a [FixedExtentScrollPhysics] instance.
+  const factory FixedExtentScrollPhysics.fixedExtent({ScrollPhysics? parent}) =
+      FixedExtentScrollPhysics;
+
   @override
   FixedExtentScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return FixedExtentScrollPhysics(parent: buildParent(ancestor));
