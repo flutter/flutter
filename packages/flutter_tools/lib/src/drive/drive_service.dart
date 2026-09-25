@@ -164,6 +164,14 @@ class FlutterDriverService extends DriverService {
       buildInfo: buildInfo,
       applicationBinary: applicationBinary,
     );
+    if (_applicationPackage == null) {
+      var message = 'No application found for $targetPlatform.';
+      final String? hint = await getMissingPackageHintForPlatform(targetPlatform);
+      if (hint != null) {
+        message += '\n$hint';
+      }
+      throwToolExit(message);
+    }
     var attempt = 0;
     LaunchResult? result;
     var prebuiltApplication = applicationBinary != null;
