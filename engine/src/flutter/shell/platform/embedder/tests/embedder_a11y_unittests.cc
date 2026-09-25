@@ -802,7 +802,7 @@ TEST_F(EmbedderA11yTest, A11yTreesAreConsistentWithMultipleViews) {
   const int64_t second_view_id = 2;
 
   // 2. Add the first view and wait for the add view callback.
-  FlutterWindowMetricsEvent window_metrics_event;
+  FlutterWindowMetricsEvent window_metrics_event = {};
   window_metrics_event.struct_size = sizeof(FlutterWindowMetricsEvent);
   window_metrics_event.width = 100;
   window_metrics_event.height = 100;
