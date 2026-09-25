@@ -3586,7 +3586,12 @@ class EditableTextState extends State<EditableText>
           _obscureShowCharTicksPending = 0;
           _obscureLatestCharIndex = null;
         }
-        _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
+
+        if (kIsWeb && obscureTextChanged) {
+          _scheduleRestartConnection();
+        } else {
+          _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
+        }
       }
     }
 
