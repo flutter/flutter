@@ -159,7 +159,6 @@ class _WindowsTable extends StatelessWidget {
 class _WindowCreatorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final WindowRegistry windowRegistry = WindowRegistry.of(context);
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
     final BaseWindowController windowController = WindowScope.of(context);
 
@@ -183,32 +182,26 @@ class _WindowCreatorCard extends StatelessWidget {
                   children: [
                     OutlinedButton(
                       onPressed: () {
-                        late final WindowEntry entry;
                         final WindowController controller;
                         if (windowSettings.shrinkWrap) {
                           controller = WindowController.shrinkWrap(
                             resizable: windowSettings.regularResizable,
-                            delegate: CallbackWindowControllerDelegate(
-                              onDestroyed: () => windowRegistry.unregister(entry),
-                            ),
                             title: 'Regular',
                           );
                         } else {
                           controller = WindowController(
-                            delegate: CallbackWindowControllerDelegate(
-                              onDestroyed: () => windowRegistry.unregister(entry),
-                            ),
                             title: 'Regular',
                             size: windowSettings.regularSize,
                           );
                         }
 
-                        entry = WindowEntry(
-                          controller: controller,
-                          builder: (BuildContext context) =>
-                              WindowContent(windowController: controller),
+                        showWindow(
+                          context: context,
+                          entry: WindowEntry(
+                            controller: controller,
+                            builder: (context) => WindowContent(windowController: controller),
+                          ),
                         );
-                        windowRegistry.register(entry);
                       },
                       child: const Text('Regular'),
                     ),
@@ -217,66 +210,56 @@ class _WindowCreatorCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     OutlinedButton(
                       onPressed: () {
-                        late final WindowEntry entry;
                         final DialogWindowController controller;
                         if (windowSettings.dialogShrinkWrap) {
                           controller = DialogWindowController.shrinkWrap(
                             resizable: windowSettings.dialogResizable,
-                            delegate: CallbackDialogWindowControllerDelegate(
-                              onDestroyed: () => windowRegistry.unregister(entry),
-                            ),
                             title: 'Modeless Dialog',
                           );
                         } else {
                           controller = DialogWindowController(
-                            delegate: CallbackDialogWindowControllerDelegate(
-                              onDestroyed: () => windowRegistry.unregister(entry),
-                            ),
                             title: 'Modeless Dialog',
                             size: windowSettings.dialogSize,
                           );
                         }
 
-                        entry = WindowEntry(
-                          controller: controller,
-                          builder: (BuildContext context) =>
-                              DialogWindowContent(dialogWindowController: controller),
+                        showWindow(
+                          context: context,
+                          entry: WindowEntry(
+                            controller: controller,
+                            builder: (context) =>
+                                DialogWindowContent(dialogWindowController: controller),
+                          ),
                         );
-                        windowRegistry.register(entry);
                       },
                       child: const Text('Modeless Dialog'),
                     ),
                     const SizedBox(height: 8),
                     OutlinedButton(
                       onPressed: () {
-                        late final WindowEntry entry;
                         final DialogWindowController controller;
                         if (windowSettings.dialogShrinkWrap) {
                           controller = DialogWindowController.shrinkWrap(
                             resizable: windowSettings.dialogResizable,
-                            delegate: CallbackDialogWindowControllerDelegate(
-                              onDestroyed: () => windowRegistry.unregister(entry),
-                            ),
                             title: 'Modal Dialog',
                             parent: windowController,
                           );
                         } else {
                           controller = DialogWindowController(
-                            delegate: CallbackDialogWindowControllerDelegate(
-                              onDestroyed: () => windowRegistry.unregister(entry),
-                            ),
                             title: 'Modal Dialog',
                             size: windowSettings.dialogSize,
                             parent: windowController,
                           );
                         }
 
-                        entry = WindowEntry(
-                          controller: controller,
-                          builder: (BuildContext context) =>
-                              DialogWindowContent(dialogWindowController: controller),
+                        showWindow(
+                          context: context,
+                          entry: WindowEntry(
+                            controller: controller,
+                            builder: (context) =>
+                                DialogWindowContent(dialogWindowController: controller),
+                          ),
                         );
-                        windowRegistry.register(entry);
                       },
                       child: const Text('Modal Dialog'),
                     ),

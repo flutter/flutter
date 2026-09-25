@@ -17,6 +17,8 @@
 import 'dart:ui' show Display, FlutterView;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart' show RenderView;
+import 'package:vector_math/vector_math_64.dart';
 
 import '../foundation/_features.dart';
 import '_window_io.dart' if (dart.library.js_interop) '_window_web.dart' as window_impl;
@@ -25,6 +27,7 @@ import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
 import 'inherited_model.dart';
+import 'overlay.dart';
 import 'transitions.dart';
 import 'view.dart';
 
@@ -112,7 +115,7 @@ sealed class BaseWindowController extends ChangeNotifier {
 /// See also:
 ///
 ///  * [WindowController], the controller that creates and manages regular windows.
-///  * [Window], the widget for a regular window.
+///  * [showWindow], which renders a window managed by this controller.
 @internal
 mixin class WindowControllerDelegate {
   /// Invoked when the user attempts to close the window.
@@ -155,9 +158,13 @@ mixin class WindowControllerDelegate {
 /// maximized, and closed. Upon construction, the window is created for the
 /// platform with the provided properties.
 ///
-/// This class does not interact with the widget tree. Instead, it is typically
-/// provided to the [Window] widget, who does the work of rendering the
-/// content inside of this window.
+/// {@template flutter.widgets.windowing.renderContent}
+/// This class does not interact with the widget tree. To render content in the
+/// window, provide this controller and a content builder in a [WindowEntry].
+/// Pass the entry to [WindowManager.initialWindows] when starting the application,
+/// to [showWindow] to open an additional top-level window, or return it
+/// from a [NestedWindow]'s entry builder to render a nested window.
+/// {@endtemplate}
 ///
 /// The user of this class is responsible for managing the lifecycle of the window.
 /// When the window is no longer needed, the user should call [destroy] on this
@@ -166,31 +173,39 @@ mixin class WindowControllerDelegate {
 /// {@tool snippet}
 /// An example usage might look like:
 ///
-///
 /// ```dart
 /// // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
 /// // ignore_for_file: invalid_use_of_internal_member
-/// import 'package:flutter/widgets.dart';
 /// import 'package:flutter/material.dart';
 /// import 'package:flutter/src/widgets/_window.dart';
 ///
 /// void main() {
+///   WidgetsFlutterBinding.ensureInitialized();
 ///   runWidget(
-///     Window(
-///       controller: WindowController(
-///         size: const Size(800, 600),
-///         constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-///         title: 'Example Window',
-///       ),
-///       child: MaterialApp(home: Container()),
+///     WindowManager(
+///       initialWindows: <WindowEntry>[
+///         WindowEntry(
+///           controller: WindowController(
+///             size: const Size(800, 600),
+///             constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+///             title: 'Example Window',
+///           ),
+///           builder: (BuildContext context) => const MaterialApp(
+///             home: Scaffold(body: Center(child: Text('Hello, World!'))),
+///           ),
+///         ),
+///       ],
 ///     ),
 ///   );
 /// }
 /// ```
 /// {@end-tool}
 ///
-/// Children of a [Window] widget can access the [WindowController]
-/// via the [WindowScope] inherited widget.
+/// {@template flutter.widgets.windowing.controllerScope}
+/// When mounted with [showWindow] or [NestedWindow], descendants of the
+/// window's content can access this controller via [WindowScope.of]. This also
+/// applies to windows provided in [WindowManager.initialWindows].
+/// {@endtemplate}
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
@@ -444,7 +459,8 @@ abstract class WindowController extends BaseWindowController {
 /// See also:
 ///
 ///  * [DialogWindowController], the controller that creates and manages dialog windows.
-///  * [DialogWindow], the widget for a dialog window.
+///  * [showWindow], which renders a dialog in a separate widget subtree.
+///  * [NestedWindow], which renders a dialog in the surrounding widget subtree.
 ///  * [WindowControllerDelegate], the delegate for regular window controllers.
 @internal
 mixin class DialogWindowControllerDelegate {
@@ -491,9 +507,7 @@ mixin class DialogWindowControllerDelegate {
 ///  * Modeless dialogs: created with a null parent. These dialogs can be
 ///    minimized (but not maximized), and have a disabled close button.
 ///
-/// This class does not interact with the widget tree. Instead, it is typically
-/// provided to the [DialogWindow] widget, which renders the content inside the
-/// dialog window.
+/// {@macro flutter.widgets.windowing.renderContent}
 ///
 /// The user of this class is responsible for managing the lifecycle of the window.
 /// When the window is no longer needed, the user should call [destroy] on this
@@ -505,20 +519,23 @@ mixin class DialogWindowControllerDelegate {
 /// ```dart
 /// // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
 /// // ignore_for_file: invalid_use_of_internal_member
-/// import 'package:flutter/widgets.dart';
 /// import 'package:flutter/material.dart';
 /// import 'package:flutter/src/widgets/_window.dart';
 ///
 /// void main() {
+///   WidgetsFlutterBinding.ensureInitialized();
 ///   runWidget(
-///     Window(
-///       controller: WindowController(
-///         size: const Size(800, 600),
-///         constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-///         title: 'Example Window',
-///       ),
-///       child: const MyApp()
-///     )
+///     WindowManager(
+///       initialWindows: <WindowEntry>[
+///         WindowEntry(
+///           controller: WindowController(
+///             size: const Size(800, 600),
+///             title: 'Example Window',
+///           ),
+///           builder: (BuildContext context) => const MaterialApp(home: MyApp()),
+///         ),
+///       ],
+///     ),
 ///   );
 /// }
 ///
@@ -527,23 +544,42 @@ mixin class DialogWindowControllerDelegate {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: DialogWindow(
-///         controller: DialogWindowController(
-///           size: const Size(400, 300),
-///           parent: WindowScope.of(context),
-///           title: 'Example Dialog'
+///     return Scaffold(
+///       body: Center(
+///         child: ElevatedButton(
+///           onPressed: () {
+///             final DialogWindowController controller = DialogWindowController(
+///               size: const Size(400, 300),
+///               parent: WindowScope.of(context),
+///               title: 'Example Dialog',
+///             );
+///             showWindow(
+///               context: context,
+///               entry: WindowEntry(
+///                 controller: controller,
+///                 builder: (BuildContext context) => MaterialApp(
+///                   home: Scaffold(
+///                     body: Center(
+///                       child: ElevatedButton(
+///                         onPressed: controller.destroy,
+///                         child: const Text('Close dialog'),
+///                       ),
+///                     ),
+///                   ),
+///                 ),
+///               ),
+///             );
+///           },
+///           child: const Text('Open dialog'),
 ///         ),
-///         child: const Text('Hello, World!')
-///       )
+///       ),
 ///     );
 ///   }
 /// }
 /// ```
 /// {@end-tool}
 ///
-/// Children of a [DialogWindow] widget can access the [DialogWindowController]
-/// via the [WindowScope] inherited widget.
+/// {@macro flutter.widgets.windowing.controllerScope}
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 abstract class DialogWindowController extends BaseWindowController {
@@ -737,7 +773,7 @@ abstract class DialogWindowController extends BaseWindowController {
 /// See also:
 ///
 /// * [TooltipWindowController], the controller that creates and manages tooltip windows.
-/// * [TooltipWindow], the widget for a tooltip window.
+/// * [NestedWindow], which renders a tooltip alongside its anchor widget.
 /// * [WindowControllerDelegate], the delegate for regular window controllers.
 mixin class TooltipWindowControllerDelegate {
   /// Invoked after the window is closed.
@@ -760,9 +796,7 @@ mixin class TooltipWindowControllerDelegate {
 /// focus from the user. It will however stay open when another window receives
 /// input focus.
 ///
-/// This class does not interact with the widget tree. Instead, it is typically
-/// provided to the [TooltipWindow] widget, which renders the content inside the
-/// tooltip window.
+/// {@macro flutter.widgets.windowing.renderContent}
 ///
 /// The user of this class is responsible for managing the lifecycle of the window.
 /// When the window is no longer needed, the user should call [destroy] on this
@@ -778,8 +812,7 @@ mixin class TooltipWindowControllerDelegate {
 /// ** See code in examples/api/lib/widgets/windows/tooltip.0.dart **
 /// {@end-tool}
 ///
-/// Children of a [TooltipWindow] widget can access the [TooltipWindowController]
-/// via the [WindowScope] inherited widget.
+/// {@macro flutter.widgets.windowing.controllerScope}
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 abstract class TooltipWindowController extends BaseWindowController {
@@ -797,8 +830,6 @@ abstract class TooltipWindowController extends BaseWindowController {
   ///
   /// The [constraints] are the constraints placed upon the size
   /// of the window.
-  ///
-  /// {@macro flutter.widgets.windowing.constraints}
   ///
   /// The [delegate] argument can be used to listen to the window's
   /// lifecycle. For example, it can be used to save state before
@@ -882,7 +913,7 @@ abstract class TooltipWindowController extends BaseWindowController {
 /// See also:
 ///
 /// * [PopupWindowController], the controller that creates and manages popup windows.
-/// * [PopupWindow], the widget for a popup window.
+/// * [NestedWindow], which renders a popup alongside its anchor widget.
 /// * [WindowControllerDelegate], the delegate for regular window controllers.
 mixin class PopupWindowControllerDelegate {
   /// Invoked after the window is closed.
@@ -902,9 +933,7 @@ mixin class PopupWindowControllerDelegate {
 /// menus. Popups may receive input focus. When another window receives input focus,
 /// the popup is closed.
 ///
-/// This class does not interact with the widget tree. Instead, it is typically
-/// provided to the [PopupWindow] widget, which renders the content inside the
-/// popup window.
+/// {@macro flutter.widgets.windowing.renderContent}
 ///
 /// The user of this class is responsible for managing the lifecycle of the window.
 /// When the window is no longer needed, the user should call [destroy] on this
@@ -920,8 +949,7 @@ mixin class PopupWindowControllerDelegate {
 /// ** See code in examples/api/lib/widgets/windows/popup.0.dart **
 /// {@end-tool}
 ///
-/// Children of a [PopupWindow] widget can access the [PopupWindowController]
-/// via the [WindowScope] [InheritedWidget].
+/// {@macro flutter.widgets.windowing.controllerScope}
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 abstract class PopupWindowController extends BaseWindowController {
@@ -937,7 +965,8 @@ abstract class PopupWindowController extends BaseWindowController {
   /// The [positioner] argument specifies how the popup should be positioned
   /// relative to the [anchorRect].
   ///
-  /// {@macro flutter.widgets.windowing.constraints}
+  /// The [constraints] limit the size of the window. If null, the window is
+  /// unconstrained.
   ///
   /// The [delegate] argument can be used to listen to the window's
   /// lifecycle. For example, it can be used to save state before
@@ -1066,7 +1095,7 @@ abstract class PopupWindowController extends BaseWindowController {
 /// See also:
 ///
 ///  * [SatelliteWindowController], the controller that creates and manages a satellite window.
-///  * [SatelliteWindow], the widget for a satellite window.
+///  * [showWindow], which renders a satellite in a separate widget subtree.
 @internal
 mixin class SatelliteWindowControllerDelegate {
   /// Invoked when the user attempts to close the window.
@@ -1125,9 +1154,7 @@ mixin class SatelliteWindowControllerDelegate {
 /// Upon construction, the window is created for the platform with the provided
 /// properties.
 ///
-/// This class does not interact with the widget tree. Instead, it is typically
-/// provided to the [SatelliteWindow] widget, who does the work of rendering the
-/// content inside of this window.
+/// {@macro flutter.widgets.windowing.renderContent}
 ///
 /// The user of this class is responsible for managing the lifecycle of the window.
 /// When the window is no longer needed, the user should call [destroy] on this
@@ -1146,8 +1173,7 @@ mixin class SatelliteWindowControllerDelegate {
 /// ** See code in examples/api/lib/widgets/windows/satellite.0.dart **
 /// {@end-tool}
 ///
-/// Children of a [SatelliteWindow] widget can access the [SatelliteWindowController]
-/// via the [WindowScope] inherited widget.
+/// {@macro flutter.widgets.windowing.controllerScope}
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
@@ -1514,358 +1540,6 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   }
 }
 
-/// The [Window] widget provides a way to render a regular window in the
-/// widget tree.
-///
-/// The provided [controller] creates the native window that backs
-/// the widget. The [child] widget is rendered into this newly created window.
-///
-/// When a [Window] widget is removed from the tree, the window that was created
-/// by the [controller] remains valid until the caller destroys it by calling
-/// [WindowController.destroy].
-///
-/// Widgets in the same tree as the [child] widget will have access to the
-/// [WindowController] via the [WindowScope] widget.
-///
-/// {@tool snippet}
-/// An example usage might look like:
-///
-/// ```dart
-/// // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
-/// // ignore_for_file: invalid_use_of_internal_member
-/// import 'package:flutter/widgets.dart';
-/// import 'package:flutter/material.dart';
-/// import 'package:flutter/src/widgets/_window.dart';
-///
-/// void main() {
-///   runWidget(
-///     Window(
-///       controller: WindowController(
-///         size: const Size(800, 600),
-///         constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-///         title: 'Example Window',
-///       ),
-///       child: MaterialApp(home: Container()),
-///     ),
-///   );
-/// }
-/// ```
-/// {@end-tool}
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-class Window extends StatelessWidget {
-  /// Creates a regular window widget.
-  ///
-  /// The [controller] creates the native backing window into which the
-  /// [child] widget is rendered.
-  ///
-  /// It is up to the caller to destroy the window by calling
-  /// [WindowController.destroy] when the window is no longer needed.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  Window({super.key, required this.controller, required this.child}) {
-    if (!isWindowingEnabled) {
-      throw UnsupportedError(_kWindowingDisabledErrorMessage);
-    }
-  }
-
-  /// Controller for this widget.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  final WindowController controller;
-
-  /// The content rendered into this window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  final Widget child;
-
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: controller,
-      builder: (BuildContext context, Widget? widget) => WindowScope(
-        controller: controller,
-        child: View(view: controller.rootView, child: child),
-      ),
-    );
-  }
-}
-
-/// The [DialogWindow] widget provides a way to render a dialog window in the
-/// widget tree.
-///
-/// The provided [controller] creates the native window that backs
-/// the widget. The [child] widget is rendered into this newly created window.
-///
-/// When a [DialogWindow] widget is removed from the tree, the window that was created
-/// by the [controller] remains valid until the caller destroys it by calling
-/// [DialogWindowController.destroy].
-///
-/// Widgets in the same tree as the [child] widget will have access to the
-/// [DialogWindowController] via the [WindowScope] widget.
-///
-/// {@tool snippet}
-/// An example usage might look like:
-///
-/// ```dart
-/// // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
-/// // ignore_for_file: invalid_use_of_internal_member
-/// import 'package:flutter/widgets.dart';
-/// import 'package:flutter/material.dart';
-/// import 'package:flutter/src/widgets/_window.dart';
-///
-/// void main() {
-///   runWidget(
-///     Window(
-///       controller: WindowController(
-///         size: const Size(800, 600),
-///         constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-///         title: 'Example Window',
-///       ),
-///       child: const MyApp()
-///     )
-///   );
-/// }
-///
-/// class MyApp extends StatelessWidget {
-///   const MyApp({super.key});
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: DialogWindow(
-///         controller: DialogWindowController(
-///           size: const Size(400, 300),
-///           parent: WindowScope.of(context),
-///           title: 'Example Dialog'
-///         ),
-///         child: const Text('Hello, World!')
-///       )
-///     );
-///   }
-/// }
-/// ```
-/// {@end-tool}
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-class DialogWindow extends StatelessWidget {
-  /// Creates a dialog window widget.
-  ///
-  /// The [controller] creates the native backing window into which the
-  /// [child] widget is rendered.
-  ///
-  /// It is up to the caller to destroy the window by calling
-  /// [DialogWindowController.destroy] when the window is no longer needed.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  DialogWindow({super.key, required this.controller, required this.child}) {
-    if (!isWindowingEnabled) {
-      throw UnsupportedError(_kWindowingDisabledErrorMessage);
-    }
-  }
-
-  /// Controller for this widget.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  final DialogWindowController controller;
-
-  /// The content rendered into this window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  final Widget child;
-
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: controller,
-      builder: (BuildContext context, Widget? widget) => WindowScope(
-        controller: controller,
-        child: View(view: controller.rootView, child: child),
-      ),
-    );
-  }
-}
-
-@internal
-class TooltipWindow extends StatelessWidget {
-  /// Creates a tooltip window widget.
-  ///
-  /// The [controller] creates the native backing window into which the
-  /// [child] widget is rendered.
-  ///
-  /// It is up to the caller to destroy the window by calling
-  /// [TooltipWindowController.destroy] when the window is no longer needed.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  TooltipWindow({super.key, required this.controller, required this.child}) {
-    if (!isWindowingEnabled) {
-      throw UnsupportedError(_kWindowingDisabledErrorMessage);
-    }
-  }
-
-  /// Controller for this widget.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  final TooltipWindowController controller;
-
-  /// The content rendered into this window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  final Widget child;
-
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: controller,
-      builder: (BuildContext context, Widget? widget) => WindowScope(
-        controller: controller,
-        child: View(view: controller.rootView, child: child),
-      ),
-    );
-  }
-}
-
-/// The [PopupWindow] widget provides a way to render a popup window in the
-/// widget tree.
-///
-/// The provided [controller] creates the native window that backs
-/// the widget. The [child] widget is rendered into this newly created window.
-///
-/// When a [PopupWindow] widget is removed from the tree, the window that was created
-/// by the [controller] remains valid until the caller destroys it by calling
-/// [PopupWindowController.destroy].
-///
-/// Widgets in the same tree as the [child] widget will have access to the
-/// [PopupWindowController] via the [WindowScope] widget.
-///
-/// {@tool snippet}
-/// An example usage of [PopupWindow] looks like:
-///
-/// ** See code in examples/api/lib/widgets/windows/popup.0.dart **
-/// {@end-tool}
-/// {@macro flutter.widgets.windowing.experimental}
-///
-/// See also:
-/// * [PopupWindowController], the controller that creates and manages popup windows.
-@internal
-class PopupWindow extends StatelessWidget {
-  /// Creates a popup window widget.
-  ///
-  /// The [controller] creates the native backing window into which the
-  /// [child] widget is rendered.
-  ///
-  /// It is up to the caller to destroy the window by calling
-  /// [PopupWindowController.destroy] when the window is no longer needed.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  PopupWindow({super.key, required this.controller, required this.child}) {
-    if (!isWindowingEnabled) {
-      throw UnsupportedError(_kWindowingDisabledErrorMessage);
-    }
-  }
-
-  /// Controller for this widget.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  final PopupWindowController controller;
-
-  /// The content rendered into this window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  final Widget child;
-
-  /// {@macro flutter.widgets.windowing.experimental}
-  @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: controller,
-      builder: (BuildContext context, Widget? widget) => WindowScope(
-        controller: controller,
-        child: View(view: controller.rootView, child: child),
-      ),
-    );
-  }
-}
-
-/// The [SatelliteWindow] widget provides a way to render a satellite window in the
-/// widget tree.
-///
-/// The provided [controller] creates the native window that backs
-/// the widget. The [child] widget is rendered into this newly created window.
-///
-/// When a [SatelliteWindow] widget is removed from the tree, the window that was created
-/// by the [controller] remains valid until the caller destroys it by calling
-/// [SatelliteWindowController.destroy].
-///
-/// Widgets in the same tree as the [child] widget will have access to the
-/// [SatelliteWindowController] via the [WindowScope] widget.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-///
-/// See also:
-///
-/// * [SatelliteWindowController], the controller that creates and manages satellite windows.
-@internal
-class SatelliteWindow extends StatelessWidget {
-  /// Creates a satellite window widget.
-  ///
-  /// The [controller] creates the native backing window into which the
-  /// [child] widget is rendered.
-  ///
-  /// It is up to the caller to destroy the window by calling
-  /// [SatelliteWindowController.destroy] when the window is no longer needed.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  SatelliteWindow({super.key, required this.controller, required this.child}) {
-    if (!isWindowingEnabled) {
-      throw UnsupportedError(_kWindowingDisabledErrorMessage);
-    }
-  }
-
-  /// Controller for this widget.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  final SatelliteWindowController controller;
-
-  /// The content rendered into this window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  final Widget child;
-
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: controller,
-      builder: (BuildContext context, Widget? widget) => WindowScope(
-        controller: controller,
-        child: View(view: controller.rootView, child: child),
-      ),
-    );
-  }
-}
-
 enum _WindowControllerAspect {
   contentSize,
   title,
@@ -1879,6 +1553,9 @@ enum _WindowControllerAspect {
 /// Provides descendants with access to the [BaseWindowController] associated with
 /// the window that is being rendered.
 ///
+/// [WindowManager] and [NestedWindow] provide a scope for each window's content,
+/// allowing descendants to access that window's controller via [WindowScope.of].
+///
 /// Windows created using native APIs do not have a [WindowScope].
 /// This includes the initial window created by the native entrypoint
 /// that [runApp] attaches to.
@@ -1887,13 +1564,14 @@ enum _WindowControllerAspect {
 ///
 /// See also:
 ///
-///  * [Window], the widget to create a regular window.
-///  * [DialogWindow], the widget to create a dialog window.
+///  * [WindowManager], which provides a scope for each top-level window.
+///  * [NestedWindow], which provides a scope for a nested window.
+///  * [showWindow], which adds a window to the nearest manager.
 @internal
 class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// Creates a new [WindowScope].
   ///
-  /// This widget is used by the window widgets to provide
+  /// This widget is used by [WindowManager] and [NestedWindow] to provide
   /// widgets in a window's subtree with access to information about
   /// the window.
   ///
@@ -1923,7 +1601,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   // A snapshot of the aspect values captured from [controller] at construction
   // time.
   //
-  // The window widgets rebuild this [WindowScope] with the same [controller]
+  // The window manager rebuilds this [WindowScope] with the same [controller]
   // instance whenever the controller notifies its listeners. Because the
   // controller is the same object across rebuilds, comparing the live
   // controller against itself in [updateShouldNotify] and
@@ -1946,7 +1624,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
 
   /// Returns the [BaseWindowController] for the window that hosts the given context.
   ///
-  /// {@template flutter.widgets.windowing.WindowScope.of}
+  /// {@template flutter.widgets.windowing.windowScope.of}
   /// If there is no [WindowScope] in scope, this method
   /// will throw a [TypeError] exception in release builds, and throws
   /// a descriptive [FlutterError] in debug builds.
@@ -1962,8 +1640,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// * [WindowController], the controller for regular top-level windows.
   /// * [DialogWindowController], the controller for dialog windows.
-  /// * [Window], the widget for a regular window.
-  /// * [DialogWindow], the widget for a dialog window.
+  /// * [WindowManager], which provides a scope for each top-level window.
   /// * [maybeOf], which doesn't throw or assert if it doesn't find a
   ///   [WindowScope] ancestor. It returns null instead.
   @internal
@@ -1979,8 +1656,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// * [WindowController], the controller for regular top-level windows.
   /// * [DialogWindowController], the controller for dialog windows.
-  /// * [Window], the widget for a regular window.
-  /// * [DialogWindow], the widget for a dialog window.
+  /// * [WindowManager], which provides a scope for each top-level window.
   /// * [of], which will throw if it doesn't find a [WindowScope] ancestor,
   ///   instead of returning null.
   @internal
@@ -2314,8 +1990,8 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
           ErrorHint(
             'No WindowScope ancestor could be found starting from the context '
             'that was passed to WindowScope.of(). This can happen because the '
-            'context used is not a descendant of a Window widget, which introduces '
-            'a WindowScope.',
+            'context used is not within the content of a window rendered by '
+            'WindowManager, which introduces a WindowScope for each window.',
           ),
         ]);
       }
@@ -2358,17 +2034,16 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   }
 }
 
-/// A registry used to render top-level windows.
+/// A registry providing access to the top-level windows rendered by a manager.
 ///
-/// The registry is often used to render top-level windows
-/// that are logically nested under a widget deep in the tree.
+/// The [WindowManager] provides a [WindowRegistry] to its descendants.
 ///
-/// The [WindowManager] provides a [WindowRegistry] to its descendents.
+/// Descendants of the manager can use [WindowRegistry.maybeOf] to access the
+/// registry and inspect [windows]. To add a window, use [showWindow].
+/// When a registered window's controller reports that it has been destroyed,
+/// the manager removes its entry from the registry.
 ///
-/// Descendents of the manager can use [WindowRegistry.maybeOf] to access the
-/// registry. With the registry, they can call [WindowRegistry.register] to
-/// add a new window to the registry and [WindowRegistry.unregister] to remove
-/// a window from the registry.
+/// Windows rendered by [NestedWindow] are not registered here.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 ///
@@ -2395,13 +2070,7 @@ class WindowRegistry extends ChangeNotifier {
   @internal
   List<WindowEntry> get windows => List<WindowEntry>.unmodifiable(_windows);
 
-  /// Registers a window.
-  ///
-  /// The [entry] parameter specifies the window to register.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void register(WindowEntry entry) {
+  void _register(WindowEntry entry) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
@@ -2410,17 +2079,7 @@ class WindowRegistry extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Unregisters a window.
-  ///
-  /// The window must be unregistered before it is destroyed. Call
-  /// [BaseWindowController.destroy] to destroy the window or listen
-  /// to the onWindowCloseRequested method of the window's delegate.
-  ///
-  /// The [entry] parameter specifies the window to unregister.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void unregister(WindowEntry entry) {
+  void _unregister(WindowEntry entry) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
@@ -2495,16 +2154,19 @@ class _WindowRegistryScope extends InheritedWidget {
   }
 }
 
-/// Represents an entry for a window such as a dialog.
+/// Pairs a native window controller with a builder for its widget content.
 ///
-/// This class holds the necessary information to build and manage
-/// a window within the application.
+/// Creating an entry does not mount its content. Pass it to
+/// [WindowManager.initialWindows] or [showWindow] to render it in a
+/// separate subtree, or return it from a [NestedWindow]'s entry builder to
+/// render it in the surrounding subtree.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 ///
 /// See also:
 ///
-///  * [WindowRegistry], where window entries can be registered.
+///  * [showWindow], which adds an entry to the nearest window manager.
+///  * [NestedWindow], which renders an entry without registering it with a manager.
 @internal
 class WindowEntry {
   /// Creates a window entry.
@@ -2529,23 +2191,40 @@ class WindowEntry {
 
   /// The builder function that builds the content of the window.
   ///
+  /// The returned widget is rendered in [BaseWindowController.rootView].
+  /// This callback may be invoked more than once and should not create the
+  /// native window; use [controller] for that window.
+  ///
+  /// When rendered by [WindowManager] or [NestedWindow], the supplied context
+  /// is below the window's [View] and [WindowScope], so it can be used to look
+  /// up that view or controller.
+  ///
+  /// When rendered by [NestedWindow], the context also inherits from the widgets
+  /// surrounding [NestedWindow].
+  ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   final WidgetBuilder builder;
 }
 
-/// The window manager provides a convenient way to render windows
-/// at the root of an application.
+/// Renders and manages a collection of top-level windows.
 ///
-/// Descendents of the [WindowManager] may access the [WindowRegistry] via
-/// [WindowRegistry.maybeOf] in order to register new windows. [WindowManager]
-/// listens on the [WindowRegistry] and renders the new windows using the
-/// appropriate window widget as they are added or removed.
+/// Pass a [WindowManager] to [runWidget] to render [initialWindows]. Initialize
+/// the binding with [WidgetsFlutterBinding.ensureInitialized] before creating
+/// the windows' controllers.
 ///
-/// {@tool dartpad}
-/// An example usage might look like this, where the window manager wraps
-/// the root of the widget tree so that dialogs can be rendered at the same level
-/// as a [Window].
+/// Descendants may use [showWindow] to add windows. Each entry is
+/// rendered in its own [View] and [WindowScope], as a sibling of the other
+/// entries. The manager provides a [WindowRegistry] for inspecting these entries
+/// and removes an entry when its controller reports that the window is destroyed.
+///
+/// This widget does not render into the implicit view used by [runApp].
+/// Windowing must be enabled; it does not provide a fallback for platforms
+/// without windowing support.
+///
+/// {@tool sample}
+/// This example starts with one window and uses [showWindow] to add a
+/// dialog as a sibling subtree.
 ///
 /// ** See code in examples/api/lib/widgets/windows/window_manager.0.dart **
 /// {@end-tool}
@@ -2554,19 +2233,24 @@ class WindowEntry {
 ///
 /// See also:
 ///
-///  * [WindowRegistry], where window entries can be registered.
+///  * [showWindow], a global function to render a window into the tree.
 @internal
 class WindowManager extends StatefulWidget {
   /// Creates a window manager.
   ///
-  /// The [initialWindows] are registered with the [WindowRegistry] when the
-  /// window manager is created.
+  /// The [initialWindows] are registered when this widget's state is initialized.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   const WindowManager({super.key, required this.initialWindows});
 
   /// The initial windows to be registered and managed by this window manager.
+  ///
+  /// This list is read only when the state is initialized. Updating it during a
+  /// rebuild does not add or remove windows. To open another window, use
+  /// [showWindow]; to close one, call [BaseWindowController.destroy].
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
   final List<WindowEntry> initialWindows;
 
   @override
@@ -2579,7 +2263,7 @@ class _WindowManagerState extends State<WindowManager> {
   @override
   void initState() {
     super.initState();
-    widget.initialWindows.forEach(_registry.register);
+    widget.initialWindows.forEach(_registry._register);
   }
 
   @override
@@ -2590,33 +2274,677 @@ class _WindowManagerState extends State<WindowManager> {
         listenable: _registry,
         builder: (BuildContext context, Widget? child) {
           final List<Widget> subViews = _registry.windows.map((WindowEntry entry) {
-            return switch (entry.controller) {
-              final DialogWindowController dialog => DialogWindow(
-                controller: dialog,
-                child: entry.builder(context),
-              ),
-              final WindowController regular => Window(
-                controller: regular,
-                child: entry.builder(context),
-              ),
-              final TooltipWindowController tooltip => TooltipWindow(
-                controller: tooltip,
-                child: entry.builder(context),
-              ),
-              final PopupWindowController popup => PopupWindow(
-                controller: popup,
-                child: entry.builder(context),
-              ),
-              final SatelliteWindowController satellite => SatelliteWindow(
-                controller: satellite,
-                child: entry.builder(context),
-              ),
-            };
+            return _WindowEntryRender(entry: entry, removeFromRegistry: true);
           }).toList();
 
           return ViewCollection(views: subViews);
         },
       ),
     );
+  }
+}
+
+class _WindowEntryRender extends StatefulWidget {
+  const _WindowEntryRender({required this.entry, required this.removeFromRegistry});
+
+  final WindowEntry entry;
+  final bool removeFromRegistry;
+
+  @override
+  State<_WindowEntryRender> createState() => _WindowEntryRenderState();
+}
+
+class _WindowEntryRenderState extends State<_WindowEntryRender> {
+  @override
+  void initState() {
+    super.initState();
+    widget.entry.controller.addListener(_handleWindowDestroyed);
+  }
+
+  @override
+  void didUpdateWidget(_WindowEntryRender oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.entry.controller != oldWidget.entry.controller) {
+      oldWidget.entry.controller.removeListener(_handleWindowDestroyed);
+      widget.entry.controller.addListener(_handleWindowDestroyed);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.entry.controller.removeListener(_handleWindowDestroyed);
+    super.dispose();
+  }
+
+  void _handleWindowDestroyed() {
+    if (!widget.removeFromRegistry) {
+      return;
+    }
+
+    if (widget.entry.controller.isDestroyed) {
+      final WindowRegistry windowRegistry = WindowRegistry.of(context);
+      windowRegistry._unregister(widget.entry);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final WindowEntry entry = widget.entry;
+    return ListenableBuilder(
+      listenable: entry.controller,
+      builder: (BuildContext context, Widget? widget) => WindowScope(
+        controller: entry.controller,
+        child: View(
+          view: entry.controller.rootView,
+          child: Builder(builder: entry.builder),
+        ),
+      ),
+    );
+  }
+}
+
+/// Mounts a window as a new entry in the nearest [WindowManager].
+///
+/// The [entry] pairs an existing native window controller with a builder for its
+/// content. The manager registers the entry and renders its content in the
+/// controller's [BaseWindowController.rootView] on a subsequent build.
+/// A native window must not be mounted more than once.
+///
+/// The new window's subtree is a sibling of the manager's other windows, not a
+/// descendant of the calling [context]. Inherited widgets below the manager in
+/// the caller's subtree are therefore not available to the new window.
+/// Inherited widgets above the manager remain available to all its windows.
+/// Typically, each entry builds its own `WidgetsApp` or `MaterialApp`.
+///
+/// The [context] must be a descendant of a [WindowManager]. Throws a [StateError]
+/// if no manager's [WindowRegistry] is available from that context.
+///
+/// The manager provides a [WindowScope] around the new window's content. Close
+/// the window by calling [BaseWindowController.destroy] on [WindowEntry.controller].
+/// Its entry is removed when the controller reports that it is destroyed.
+/// Removing the caller from the widget tree does not close the mounted window.
+///
+/// "Top-level" describes placement in the widget tree, not the native window
+/// type. An entry can use any [BaseWindowController], including a dialog with a
+/// native parent. To share the caller's inherited widgets instead, use
+/// [NestedWindow].
+///
+/// {@tool sample}
+/// This example adds a dialog to the manager from an existing window.
+///
+/// ** See code in examples/api/lib/widgets/windows/window_manager.0.dart **
+/// {@end-tool}
+///
+/// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+///  * [WindowManager.initialWindows], which supplies windows at startup.
+///  * [NestedWindow], which renders a window in the surrounding widget subtree.
+@internal
+void showWindow({required BuildContext context, required WindowEntry entry}) {
+  if (!isWindowingEnabled) {
+    throw UnsupportedError(_kWindowingDisabledErrorMessage);
+  }
+
+  final WindowRegistry? windowRegistry = WindowRegistry.maybeOf(context);
+  if (windowRegistry == null) {
+    throw StateError(
+      'To use `showWindow`, a `WindowManager` widget must be rendered in your hierarchy and accessible in via the context.',
+    );
+  }
+
+  windowRegistry._register(entry);
+}
+
+/// Creates a window entry when a [NestedWindow] is shown.
+///
+/// Used by [NestedWindow.entryBuilder], which is invoked on each transition from
+/// hidden to showing. The callback should create a new native window controller
+/// and return it with a content builder in a [WindowEntry], since hiding the
+/// nested window destroys the previous controller's native window.
+///
+/// The supplied `context` is the [BuildContext] of [NestedWindow.child], so it
+/// can be used to look up inherited widgets surrounding the [NestedWindow], such
+/// as the enclosing [WindowScope].
+///
+/// {@template flutter.widgets.windowing.nestedExperimental}
+/// Do not use this API in production applications or packages published to
+/// pub.dev. Flutter will make breaking changes to this API, even in patch
+/// versions.
+///
+/// This API throws an [UnsupportedError] error unless Flutter’s windowing
+/// feature is enabled by [isWindowingEnabled]. Where a nested window is
+/// ultimately placed is decided by the platform, which may ignore or adjust the
+/// requested placement.
+///
+/// See: https://github.com/flutter/flutter/issues/30701.
+/// {@endtemplate}
+@internal
+typedef WindowEntryBuilder = WindowEntry Function(BuildContext context);
+
+/// The signature of the window entry builder callback used in
+/// [NestedWindow.windowLayoutBuilder].
+///
+/// Like [WindowEntryBuilder], but the callback is additionally given the
+/// geometry of [NestedWindow.child] as a [NestedWindowLayoutInfo], so the native
+/// window can be created relative to the widget it is anchored to.
+///
+/// {@macro flutter.widgets.windowing.nestedExperimental}
+@internal
+typedef NestedWindowLayoutBuilder = WindowEntry Function(
+  BuildContext context,
+  NestedWindowLayoutInfo info,
+);
+
+/// The layout information available to the [NestedWindow.windowLayoutBuilder]
+/// callback.
+///
+/// This describes the geometry of [NestedWindow.child] at the moment the nested
+/// window is shown. It is the windowing counterpart of
+/// [OverlayChildLayoutInfo], which describes the geometry of
+/// [OverlayPortal.child] relative to its [Overlay].
+///
+/// All values are in logical pixels, and [childPaintTransform] and [viewSize]
+/// share the coordinate space of the [View] that contains [NestedWindow.child].
+///
+/// Unlike [OverlayChildLayoutInfo], this information is captured once per
+/// [NestedWindowController.show] rather than on every layout, because the entry
+/// it is passed to creates a native window. See
+/// [NestedWindow.windowLayoutBuilder] for how later changes to the anchor's
+/// geometry are handled.
+///
+/// {@macro flutter.widgets.windowing.nestedExperimental}
+@internal
+extension type NestedWindowLayoutInfo._(
+  (Size childSize, Matrix4 childPaintTransform, Size viewSize) _info,
+) {
+  /// The size of [NestedWindow.child] in its own coordinates.
+  Size get childSize => _info.$1;
+
+  /// The paint transform of [NestedWindow.child], in the coordinates of the
+  /// [View] that contains it.
+  Matrix4 get childPaintTransform => _info.$2;
+
+  /// The size of the [View] that contains [NestedWindow.child], in its own
+  /// coordinates.
+  Size get viewSize => _info.$3;
+
+  /// The bounds of [NestedWindow.child] in the coordinates of the [View] that
+  /// contains it.
+  ///
+  /// This is [childSize] transformed by [childPaintTransform], and is the
+  /// rectangle typically passed as the anchor rectangle of a
+  /// [PopupWindowController] or a [TooltipWindowController].
+  Rect get anchorRect => MatrixUtils.transformRect(childPaintTransform, Offset.zero & childSize);
+}
+
+/// Controls whether a [NestedWindow] renders its window content.
+///
+/// This controller controls the widget's visibility, not the native window's
+/// properties. The [BaseWindowController] returned by [NestedWindow.entryBuilder]
+/// or [NestedWindow.layoutEntryBuilder] manages the native window.
+///
+/// Keep this controller for the lifetime of one [NestedWindow] and call [show],
+/// [hide], or [toggle] only while that widget is mounted. Listeners are notified
+/// when [isShowing] changes. The owner is responsible for disposing this
+/// controller when it is no longer needed; disposing it does not close the
+/// native window.
+///
+/// This is the windowing counterpart of [OverlayPortalController].
+///
+/// {@macro flutter.widgets.windowing.experimental}
+@internal
+class NestedWindowController extends ChangeNotifier {
+  /// Creates a controller for an initially hidden [NestedWindow].
+  NestedWindowController();
+  _NestedWindowState? _anchor;
+  bool _isShowing = false;
+
+  /// Whether the associated [NestedWindow] is showing its window content.
+  ///
+  /// This tracks calls to [show] and [hide], not native visibility or activation.
+  bool get isShowing => _isShowing;
+
+  void _setShowing(bool showing) {
+    _isShowing = showing;
+    notifyListeners();
+  }
+
+  /// Creates and shows the associated [NestedWindow]'s native window.
+  ///
+  /// Calls [NestedWindow.entryBuilder] or [NestedWindow.layoutEntryBuilder] to
+  /// obtain a fresh entry. Does nothing if the nested window is already showing.
+  ///
+  /// The associated [NestedWindow] must be mounted, and its
+  /// [NestedWindow.child] must have been laid out.
+  void show() {
+    _anchor?._show();
+  }
+
+  /// Destroys the native window and removes its content from [NestedWindow].
+  ///
+  /// Does nothing if the nested window is already hidden. A subsequent [show]
+  /// creates a new entry rather than reusing the destroyed window.
+  ///
+  /// The associated [NestedWindow] must be mounted.
+  void hide() {
+    _anchor?._hide();
+  }
+
+  /// Hides the window if it is showing, or shows it if it is hidden.
+  ///
+  /// The associated [NestedWindow] must be mounted.
+  void toggle() {
+    _anchor?._toggle();
+  }
+}
+
+/// Renders a window alongside [child] in the surrounding widget subtree.
+///
+/// The [child] remains in its current view. When [controller] shows the window,
+/// the entry builder creates a [WindowEntry] whose content is rendered in a
+/// separate [View], attached with a [ViewAnchor]. The window's content inherits
+/// from ancestors of this widget, but not from [child] or its descendants.
+/// This widget must have a [View] ancestor for [child] to render into.
+///
+/// This widget is the windowing counterpart of [OverlayPortal]: [child] stays
+/// where it is, while additional content is rendered somewhere it cannot be
+/// clipped by this widget's bounds. Use
+/// [NestedWindow.windowLayoutBuilder] to build that content based on the size
+/// and location of [child], the same way
+/// [OverlayPortal.overlayChildLayoutBuilder] does for overlay children.
+///
+/// Unlike [showWindow], this widget does not require a [WindowManager]
+/// or add an entry to a [WindowRegistry]. It is useful for popups, tooltips, and
+/// other windows that need access to the surrounding inherited widgets.
+///
+/// Nesting in the widget tree does not set a native parent. Supply the appropriate
+/// parent when creating the native controller in the entry builder. This widget
+/// provides a [WindowScope] for that controller, so descendants of the window's
+/// content can access it via [WindowScope.of].
+///
+/// For [PopupWindowController] and [TooltipWindowController], this widget tracks
+/// [child]'s bounds in the containing view and requests position updates when
+/// those bounds change. The entry builder must still supply an initial anchor
+/// rectangle and a [WindowPositioner]. Native platform positioning restrictions
+/// still apply.
+///
+/// The window is initially hidden. Use [NestedWindowController.show],
+/// [NestedWindowController.hide], or [NestedWindowController.toggle] to change
+/// its visibility. Hiding destroys the native window; showing it again calls the
+/// entry builder for a new entry. Removing this widget from the tree also
+/// destroys the native window, if it is still showing.
+///
+/// {@tool snippet}
+/// This helper builds a button and a nested dialog in an existing window's
+/// `MaterialApp`. The dialog shares the surrounding app's inherited widgets.
+/// The caller keeps the controller in its state and disposes it when no longer
+/// needed, after closing the dialog.
+///
+/// ```dart
+/// // ignore_for_file: invalid_use_of_internal_member
+/// import 'package:flutter/material.dart';
+/// import 'package:flutter/src/widgets/_window.dart';
+///
+/// Widget buildNestedDialog(
+///   BuildContext context,
+///   NestedWindowController controller,
+/// ) {
+///   return NestedWindow(
+///     controller: controller,
+///     entryBuilder: (BuildContext context) {
+///       final DialogWindowController dialog = DialogWindowController(
+///         parent: WindowScope.of(context),
+///         size: const Size(400, 300),
+///         title: 'Nested dialog',
+///       );
+///       return WindowEntry(
+///         controller: dialog,
+///         builder: (BuildContext context) => Material(
+///           child: Center(
+///             child: ElevatedButton(
+///               onPressed: controller.hide,
+///               child: const Text('Close dialog'),
+///             ),
+///           ),
+///         ),
+///       );
+///     },
+///     child: ElevatedButton(
+///       onPressed: controller.show,
+///       child: const Text('Open dialog'),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@macro flutter.widgets.windowing.nestedExperimental}
+///
+/// See also:
+///
+///  * [NestedWindow.windowLayoutBuilder], which builds the window entry from the
+///    geometry of [child].
+///  * [showWindow], which renders content in a separate subtree under a
+///    window manager.
+///  * [OverlayPortal], which renders extra content in an [Overlay] rather than in
+///    a native window.
+///  * [ViewAnchor], which attaches a view alongside a widget in another view.
+@internal
+class NestedWindow extends StatefulWidget {
+  /// Creates a widget that can show a nested window alongside [child].
+  ///
+  /// The `entryBuilder` is called lazily when [controller] shows the window,
+  /// rather than when this widget is built.
+  const NestedWindow({
+    super.key,
+    required this.controller,
+    required WindowEntryBuilder this.entryBuilder,
+    required this.child,
+  }) : layoutEntryBuilder = null;
+
+  /// Creates a widget that can show a nested window positioned relative to
+  /// [child].
+  ///
+  /// Developers can use `entryBuilder` to configure the nested window based on
+  /// the size and the location of [child] within the containing [View], as well
+  /// as the size of the [View] itself. This allows the window to, for example,
+  /// be anchored to [child] and at the same time size itself based on how close
+  /// [child] is to the edges of the [View]. See [NestedWindowLayoutInfo] for the
+  /// geometry that is made available.
+  ///
+  /// `entryBuilder` is called only when the window transitions from hidden to
+  /// showing. Afterwards, this widget keeps tracking [child]'s bounds and forwards
+  /// them to [PopupWindowController.updatePosition] or
+  /// [TooltipWindowController.updatePosition], so popups and tooltips continue
+  /// to follow [child] without the callback being invoked again.
+  ///
+  /// The geometry passed to `entryBuilder` is computed from [child]'s
+  /// [RenderBox], so [child] must have been laid out before [controller] is
+  /// asked to show the window. The paint transform is read during the callback,
+  /// which means [RenderObject]s between [child] and the containing [View] that
+  /// only establish their paint transform when composited, such as the one
+  /// created by [CompositedTransformFollower], may report a stale transform.
+  const NestedWindow.windowLayoutBuilder({
+    super.key,
+    required this.controller,
+    required NestedWindowLayoutBuilder entryBuilder,
+    required this.child,
+  }) : layoutEntryBuilder = entryBuilder,
+       entryBuilder = null;
+
+  /// Controls whether the nested window is shown.
+  ///
+  /// Keep the same controller while this widget is mounted. The caller owns the
+  /// controller and is responsible for disposing it.
+  final NestedWindowController controller;
+
+  /// Creates the native window controller and content builder each time the
+  /// window is shown after being hidden.
+  ///
+  /// Return a fresh [WindowEntry] with a new controller on each call. Updating
+  /// this callback while the window is showing does not replace the current
+  /// entry.
+  ///
+  /// This is non-null if and only if this widget was created with the default
+  /// constructor. Widgets created with [NestedWindow.windowLayoutBuilder] use
+  /// [layoutEntryBuilder] instead.
+  final WindowEntryBuilder? entryBuilder;
+
+  /// Creates the native window controller and content builder from the geometry
+  /// of [child], each time the window is shown after being hidden.
+  ///
+  /// This is non-null if and only if this widget was created with
+  /// [NestedWindow.windowLayoutBuilder].
+  final NestedWindowLayoutBuilder? layoutEntryBuilder;
+
+  /// The widget that remains in the containing view whether the window is shown
+  /// or hidden.
+  ///
+  /// Its bounds are used to compute the [NestedWindowLayoutInfo] passed to
+  /// [layoutEntryBuilder], and to update the anchor rectangle for popup and
+  /// tooltip windows.
+  final Widget child;
+
+  @override
+  State<NestedWindow> createState() => _NestedWindowState();
+}
+
+class _NestedWindowState extends State<NestedWindow> {
+  WindowEntry? _entry;
+  _NestedWindowLayoutTracker? _tracker;
+  final GlobalKey _key = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller._anchor = this;
+  }
+
+  @override
+  void didUpdateWidget(NestedWindow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller._anchor = null;
+      widget.controller._anchor = this;
+      if (_entry != null) {
+        oldWidget.controller._setShowing(false);
+        widget.controller._setShowing(true);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller._anchor = null;
+    // Removing this widget destroys the window it owns. setState must not be
+    // called while disposing, so the entry is detached directly instead of
+    // going through _hide.
+    final wasShowing = _entry != null;
+    _detachEntry();
+    if (wasShowing) {
+      widget.controller._setShowing(false);
+    }
+    super.dispose();
+  }
+
+  WindowEntry _buildEntry(BuildContext context, NestedWindowLayoutInfo? layoutInfo) {
+    final WindowEntryBuilder? entryBuilder = widget.entryBuilder;
+    if (entryBuilder != null) {
+      return entryBuilder(context);
+    }
+    assert(
+      layoutInfo != null,
+      'NestedWindow.windowLayoutBuilder could not determine the geometry of '
+      'NestedWindow.child. The child must be laid out before the nested window '
+      'is shown.',
+    );
+    return widget.layoutEntryBuilder!(
+      context,
+      layoutInfo ?? NestedWindowLayoutInfo._((Size.zero, Matrix4.identity(), Size.zero)),
+    );
+  }
+
+  void _show() {
+    if (_entry != null) {
+      return;
+    }
+    final BuildContext? childContext = _key.currentContext;
+    assert(
+      childContext != null,
+      'A NestedWindow can only be shown after its child has been built. '
+      'Call NestedWindowController.show after the first frame in which the '
+      'NestedWindow is mounted.',
+    );
+    final tracker = _NestedWindowLayoutTracker(element: childContext!);
+    // Priming the tracker before the entry is built ensures that the window is
+    // not asked to reposition itself to where it already is on the next frame.
+    final NestedWindowLayoutInfo? layoutInfo = tracker.getLayoutInfo();
+    final WindowEntry entry = _buildEntry(childContext, layoutInfo);
+    tracker.onLayoutInfoChange = (NestedWindowLayoutInfo info) {
+      switch (entry.controller) {
+        case final PopupWindowController popup:
+          popup.updatePosition(anchorRect: info.anchorRect);
+        case final TooltipWindowController tooltip:
+          tooltip.updatePosition(anchorRect: info.anchorRect);
+        default:
+          break;
+      }
+    };
+    widget.controller._setShowing(true);
+    entry.controller.addListener(_onDestroyed);
+    setState(() {
+      _entry = entry;
+      _tracker = tracker;
+    });
+  }
+
+  // Stops tracking the anchor, stops listening to the current entry's
+  // controller and destroys its native window if the platform has not already
+  // destroyed it.
+  //
+  // This does not call setState, so callers that are still mounted must use
+  // _hide instead.
+  void _detachEntry() {
+    final WindowEntry? entry = _entry;
+    if (entry == null) {
+      return;
+    }
+
+    // The listener is removed before the window is destroyed so that
+    // _onDestroyed does not try to tear down the same entry a second time.
+    entry.controller.removeListener(_onDestroyed);
+    _tracker?.dispose();
+    _entry = null;
+    _tracker = null;
+    if (!entry.controller.isDestroyed) {
+      entry.controller.destroy();
+    }
+  }
+
+  // Destroys the current entry's native window, if any, removes its content
+  // from the tree and reports the change on the controller.
+  void _hide() {
+    if (_entry == null) {
+      return;
+    }
+
+    setState(_detachEntry);
+    widget.controller._setShowing(false);
+  }
+
+  void _onDestroyed() {
+    if (_entry == null || !_entry!.controller.isDestroyed) {
+      return;
+    }
+
+    _hide();
+  }
+
+  void _toggle() {
+    if (_entry == null) {
+      _show();
+    } else {
+      _hide();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ViewAnchor(
+      view: _entry != null ? _WindowEntryRender(entry: _entry!, removeFromRegistry: false) : null,
+      child: KeyedSubtree(key: _key, child: widget.child),
+    );
+  }
+}
+
+/// Tracks the [NestedWindowLayoutInfo] of the [Element] anchoring a
+/// [NestedWindow].
+class _NestedWindowLayoutTracker {
+  _NestedWindowLayoutTracker({required this.element}) {
+    _NestedWindowLayoutTrackerManager.instance.add(this);
+  }
+
+  void dispose() {
+    _NestedWindowLayoutTrackerManager.instance.remove(this);
+  }
+
+  /// Returns the current layout information for the tracked element, or `null`
+  /// if it is not available.
+  NestedWindowLayoutInfo? getLayoutInfo() {
+    final NestedWindowLayoutInfo? info = _computeLayoutInfo();
+    _lastReportedInfo = info;
+    return info;
+  }
+
+  /// Callback invoked every time the layout information of the tracked element
+  /// changes compared to the last result of [getLayoutInfo].
+  void Function(NestedWindowLayoutInfo info)? onLayoutInfoChange;
+
+  final BuildContext element;
+  NestedWindowLayoutInfo? _lastReportedInfo;
+
+  NestedWindowLayoutInfo? _computeLayoutInfo() {
+    if (!element.mounted) {
+      return null;
+    }
+    final RenderObject? renderBox = element.findRenderObject();
+    if (renderBox is! RenderBox || !renderBox.attached || !renderBox.hasSize) {
+      return null;
+    }
+
+    RenderObject root = renderBox;
+    while (root.parent != null) {
+      root = root.parent!;
+    }
+    final Size? viewSize = switch (root) {
+      final RenderView view => view.size,
+      final RenderBox box when box.hasSize => box.size,
+      _ => null,
+    };
+    if (viewSize == null) {
+      return null;
+    }
+
+    return NestedWindowLayoutInfo._((renderBox.size, renderBox.getTransformTo(null), viewSize));
+  }
+
+  void _updateSelf() {
+    final NestedWindowLayoutInfo? info = _computeLayoutInfo();
+    if (info == null) {
+      _NestedWindowLayoutTrackerManager.instance.remove(this);
+      return;
+    }
+    if (_lastReportedInfo != info) {
+      _lastReportedInfo = info;
+      onLayoutInfoChange?.call(info);
+    }
+  }
+}
+
+class _NestedWindowLayoutTrackerManager {
+  _NestedWindowLayoutTrackerManager._() {
+    WidgetsBinding.instance.addPersistentFrameCallback((_) {
+      if (_trackers.isEmpty) {
+        return;
+      }
+      final trackersCopy = List<_NestedWindowLayoutTracker>.from(_trackers, growable: false);
+      for (final tracker in trackersCopy) {
+        tracker._updateSelf();
+      }
+    });
+  }
+
+  static final _instance = _NestedWindowLayoutTrackerManager._();
+  static _NestedWindowLayoutTrackerManager get instance => _instance;
+  final List<_NestedWindowLayoutTracker> _trackers = <_NestedWindowLayoutTracker>[];
+
+  void add(_NestedWindowLayoutTracker tracker) {
+    _trackers.add(tracker);
+  }
+
+  void remove(_NestedWindowLayoutTracker tracker) {
+    _trackers.remove(tracker);
   }
 }

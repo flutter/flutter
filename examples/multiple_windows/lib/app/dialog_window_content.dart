@@ -35,24 +35,19 @@ class DialogWindowContent extends StatelessWidget {
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          final WindowRegistry windowRegistry = WindowRegistry.of(context);
-
-                          late final WindowEntry entry;
                           final controller = DialogWindowController(
-                            delegate: CallbackDialogWindowControllerDelegate(
-                              onDestroyed: () => windowRegistry.unregister(entry),
-                            ),
                             title: 'Modal Dialog',
                             size: windowSettings.dialogSize,
                             parent: dialogWindowController,
                           );
-
-                          entry = WindowEntry(
-                            controller: controller,
-                            builder: (BuildContext context) =>
-                                DialogWindowContent(dialogWindowController: controller),
+                          showWindow(
+                            context: context,
+                            entry: WindowEntry(
+                              controller: controller,
+                              builder: (BuildContext context) =>
+                                  DialogWindowContent(dialogWindowController: controller),
+                            ),
                           );
-                          windowRegistry.register(entry);
                         },
                         child: const Text('Create Modal Dialog'),
                       ),

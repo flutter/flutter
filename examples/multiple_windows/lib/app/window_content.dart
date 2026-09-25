@@ -105,65 +105,43 @@ class _WindowCreationButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
-    final WindowRegistry windowRegistry = WindowRegistry.of(context);
 
     return Column(
       mainAxisSize: .min,
       children: [
         ElevatedButton(
           onPressed: () {
-            late final WindowEntry entry;
-            final controller = WindowController(
-              delegate: CallbackWindowControllerDelegate(
-                onDestroyed: () => windowRegistry.unregister(entry),
+            final controller = WindowController(title: 'Regular', size: windowSettings.regularSize);
+            showWindow(
+              context: context,
+              entry: WindowEntry(
+                controller: controller,
+                builder: (context) => WindowContent(windowController: controller),
               ),
-              title: 'Regular',
-              size: windowSettings.regularSize,
             );
-
-            entry = WindowEntry(
-              controller: controller,
-              builder: (BuildContext context) => WindowContent(windowController: controller),
-            );
-            windowRegistry.register(entry);
           },
           child: const Text('Create Regular Window'),
         ),
         const SizedBox(height: 20),
         ElevatedButton(
           onPressed: () {
-            late final WindowEntry entry;
             final controller = DialogWindowController(
-              delegate: CallbackDialogWindowControllerDelegate(
-                onDestroyed: () => windowRegistry.unregister(entry),
-              ),
               title: 'Modal Dialog',
               size: windowSettings.dialogSize,
               parent: windowController,
             );
 
-            entry = WindowEntry(
-              controller: controller,
-              builder: (BuildContext context) =>
-                  DialogWindowContent(dialogWindowController: controller),
+            showWindow(
+              context: context,
+              entry: WindowEntry(
+                controller: controller,
+                builder: (context) => DialogWindowContent(dialogWindowController: controller),
+              ),
             );
-            windowRegistry.register(entry);
           },
           child: const Text('Create Modal Dialog'),
         ),
       ],
     );
   }
-}
-
-class CallbackWindowControllerDelegate with WindowControllerDelegate {
-  CallbackWindowControllerDelegate({required this.onDestroyed});
-
-  @override
-  void onWindowDestroyed() {
-    onDestroyed();
-    super.onWindowDestroyed();
-  }
-
-  final VoidCallback onDestroyed;
 }
