@@ -1512,6 +1512,50 @@ void main() {
     painter.dispose();
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/139201.
+  // The paint offset is only non-zero when the text is not left aligned, and
+  // the line metrics used to be translated into a brand new list on every call
+  // in that case, which broke VerticalCaretMovementRun.
+  test('TextPainter line metrics are cached when the paint offset is not zero', () {
+    for (final TextAlign textAlign in TextAlign.values) {
+      final painter = TextPainter()
+        ..textDirection = TextDirection.ltr
+        ..textAlign = textAlign
+        ..textWidthBasis = TextWidthBasis.longestLine
+        ..text = const TextSpan(text: 'word1 word2 word3', style: TextStyle(fontSize: 10.0));
+
+      painter.layout(maxWidth: 130);
+      final List<ui.LineMetrics> lines = painter.computeLineMetrics();
+      expect(lines.length, 2, reason: '$textAlign');
+      // The list identity is used by VerticalCaretMovementRun to tell whether
+      // the text layout changed, so an unchanged layout must keep returning the
+      // same list.
+      expect(identical(painter.computeLineMetrics(), lines), isTrue, reason: '$textAlign');
+
+      painter.layout(maxWidth: 1000);
+      expect(painter.computeLineMetrics().length, 1, reason: '$textAlign');
+      painter.dispose();
+    }
+  });
+
+  test('TextPainter line metrics are shifted by the paint offset', () {
+    // Each line is centered within the 100px the paragraph was laid out at (so
+    // 20px from the left), but the painter only reports a width of 60 (the
+    // longest line), which shifts the paragraph 20px to the left.
+    final painter = TextPainter()
+      ..textDirection = TextDirection.ltr
+      ..textAlign = TextAlign.center
+      ..textWidthBasis = TextWidthBasis.longestLine
+      ..text = const TextSpan(text: 'aaaaaa\naaaaaa', style: TextStyle(fontSize: 10.0));
+
+    painter.layout(maxWidth: 100);
+    expect(painter.width, 60);
+    for (final ui.LineMetrics metrics in painter.computeLineMetrics()) {
+      expect(metrics.left, 0);
+    }
+    painter.dispose();
+  });
+
   test('TextPainter throws with stack trace when accessing text layout', () {
     final painter = TextPainter()
       ..text = const TextSpan(text: 'TEXT')
