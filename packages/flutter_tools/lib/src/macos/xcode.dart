@@ -297,6 +297,10 @@ class Xcode {
   }
 }
 
+/// Determines the iOS [EnvironmentType] from [sdkroot].
+///
+/// Returns `null` for unrecognized or non-iOS SDK roots (e.g., `MacOSX.sdk` or
+/// `XROS.sdk`). Callers are responsible for handling a `null` return value.
 EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSystem) {
   // NOTE: If you modify this function, you should likely also update the equivalent implementation in
   // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterToolHelper.swift.tmpl
@@ -306,6 +310,5 @@ EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSyste
   if (sdkName.contains('iphone')) {
     return sdkName.contains('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
   }
-  assert(false);
   return null;
 }
