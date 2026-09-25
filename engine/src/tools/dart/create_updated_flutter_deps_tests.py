@@ -12,15 +12,14 @@ import os
 import unittest
 
 from create_updated_flutter_deps import (
-    BROWSER_ENVIRONMENT_JS,
     DART_COMPILE_RELPATH,
     DART_SDK_ROOT,
     FLUTTER_DEPS,
+    SUPPORTS_DART2WASM_JS,
     ComputeDartDeps,
-    ExtractBrowserEnvironmentSupportExpression,
     ExtractDart2WasmSupportExpression,
+    FormatSupportsDart2WasmJs,
     PrettifySourcePathForDEPS,
-    UpdateBrowserEnvironmentJsContent,
 )
 
 
@@ -183,30 +182,18 @@ String _generateSupportJs({required bool requiresMultiMemory}) {
             "(WebAssembly.validate(new Uint8Array([1]))&&WebAssembly.validate(new Uint8Array([2]))&&!WebAssembly.validate(new Uint8Array([4]),{\"builtins\":[\"js-string\"]})&&WebAssembly.validate(new Uint8Array([5])))",
         )
 
-    def test_UpdateBrowserEnvironmentJsContent(self):
-        sample_js = """const supportsDart2Wasm = () => {
-  // Comment
-  return (WebAssembly.validate(new Uint8Array([1]))&&WebAssembly.validate(new Uint8Array([2])));
-}
-"""
-        new_expr = "(WebAssembly.validate(new Uint8Array([1]))&&WebAssembly.validate(new Uint8Array([2]))&&WebAssembly.validate(new Uint8Array([3])))"
-        updated = UpdateBrowserEnvironmentJsContent(sample_js, new_expr)
-        self.assertEqual(
-            ExtractBrowserEnvironmentSupportExpression(updated),
-            new_expr,
-        )
-        # Idempotent when applied again.
-        self.assertEqual(
-            UpdateBrowserEnvironmentJsContent(updated, new_expr),
-            updated,
-        )
+    def test_FormatSupportsDart2WasmJs(self):
+        expr = "(WebAssembly.validate(new Uint8Array([1]))&&WebAssembly.validate(new Uint8Array([2])))"
+        formatted = FormatSupportsDart2WasmJs(expr)
+        self.assertIn("// GENERATED FILE. DO NOT EDIT.", formatted)
+        self.assertIn("export const supportsDart2Wasm = () => {\n  return " + expr + ";\n};\n", formatted)
 
-    def test_LiveBrowserEnvironmentJsParity(self):
-        self.assertTrue(os.path.isfile(BROWSER_ENVIRONMENT_JS))
-        with open(BROWSER_ENVIRONMENT_JS, "r", encoding="utf-8") as fp:
-            browser_env_content = fp.read()
-        current_expr = ExtractBrowserEnvironmentSupportExpression(browser_env_content)
-        self.assertTrue(current_expr.startswith("(WebAssembly.validate("))
+    def test_LiveSupportsDart2WasmJsParity(self):
+        self.assertTrue(os.path.isfile(SUPPORTS_DART2WASM_JS))
+        with open(SUPPORTS_DART2WASM_JS, "r", encoding="utf-8") as fp:
+            supports_js_content = fp.read()
+        self.assertIn("export const supportsDart2Wasm = () => {", supports_js_content)
+        self.assertIn("return (WebAssembly.validate(", supports_js_content)
 
         local_compile_dart = os.path.join(
             os.path.dirname(FLUTTER_DEPS),
@@ -217,10 +204,11 @@ String _generateSupportJs({required bool requiresMultiMemory}) {
             with open(local_compile_dart, "r", encoding="utf-8") as fp:
                 compile_dart_content = fp.read()
             expected_expr = ExtractDart2WasmSupportExpression(compile_dart_content)
+            expected_content = FormatSupportsDart2WasmJs(expected_expr)
             self.assertEqual(
-                current_expr,
-                expected_expr,
-                "supportsDart2Wasm() in browser_environment.js is out of sync with "
+                supports_js_content,
+                expected_content,
+                "supports_dart2wasm.js is out of sync with "
                 "pkg/dart2wasm/lib/compile.dart. Run "
                 "`python3 engine/src/tools/dart/create_updated_flutter_deps.py` to update.",
             )
@@ -294,12 +282,10 @@ String _generateSupportJs(WasmCompilerOptions options) {
                 self.assertEqual(resolved_fallback, "// fetched for flutter_vars_rev")
                 mock_fetch_fallback.assert_called_once_with("flutter_vars_rev")
 
-            # 3. SyncBrowserEnvironmentJs logs warning to stderr when compile.dart cannot be resolved.
-            fake_browser_env = os.path.join(tmpdir, "browser_environment.js")
-            with open(fake_browser_env, "w", encoding="utf-8") as fp:
-                fp.write("const supportsDart2Wasm = () => { return (true); }")
+            # 3. SyncSupportsDart2WasmJs logs warning to stderr when compile.dart cannot be resolved.
+            fake_supports_js = os.path.join(tmpdir, "supports_dart2wasm.js")
             args_missing = argparse.Namespace(
-                browser_environment_js=fake_browser_env,
+                supports_dart2wasm_js=fake_supports_js,
                 dart_compile_file=None,
                 dart_revision=None,
                 dart_deps=None,
@@ -308,11 +294,12 @@ String _generateSupportJs(WasmCompilerOptions options) {
             stderr_buf = io.StringIO()
             with mock.patch("sys.stderr", stderr_buf):
                 self.assertFalse(
-                    create_updated_flutter_deps.SyncBrowserEnvironmentJs(args_missing, {})
+                    create_updated_flutter_deps.SyncSupportsDart2WasmJs(args_missing, {})
                 )
             self.assertIn("could not resolve pkg/dart2wasm/lib/compile.dart", stderr_buf.getvalue())
 
 
 if __name__ == "__main__":
     unittest.main()
+
 
