@@ -72,8 +72,8 @@ class FlutterHookResult {
 
   static bool _wasAnyFileModifiedSince(FileSystem fileSystem, DateTime since, List<Uri> uris) {
     for (final uri in uris) {
-      final DateTime modified = fileSystem.statSync(uri.toFilePath()).modified;
-      if (modified.isAfter(since)) {
+      final FileStat stat = fileSystem.statSync(uri.toFilePath());
+      if (stat.type == FileSystemEntityType.notFound || stat.modified.isAfter(since)) {
         return true;
       }
     }
