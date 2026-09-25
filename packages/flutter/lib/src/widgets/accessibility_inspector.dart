@@ -20,10 +20,6 @@ abstract final class AccessibilityInspectorKeys {
   /// tree could not be retrieved.
   static const String error = 'error';
 
-  /// Top-level response map key indicating whether a new frame has been
-  /// scheduled and is needed before the semantics tree is available.
-  static const String needsFrame = 'needsFrame';
-
   /// Entry map key containing the JSON serialized [SemanticsNode] (from
   /// [SemanticsNode.toJson]).
   static const String node = 'node';
@@ -110,8 +106,7 @@ class AccessibilityInspector {
     if (root == null) {
       RendererBinding.instance.ensureVisualUpdate();
       return <String, Object?>{
-        AccessibilityInspectorKeys.error: 'rootSemanticsNode is null',
-        AccessibilityInspectorKeys.needsFrame: true,
+        AccessibilityInspectorKeys.error: 'rootSemanticsNode is null, needs a frame.',
       };
     }
 
