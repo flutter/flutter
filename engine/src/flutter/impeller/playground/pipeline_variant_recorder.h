@@ -113,6 +113,42 @@ class PipelineVariantRecorder {
   ///
   void PrintReport(std::ostream& out, const RunInfo& run_info) const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      A shader that a `ContentContext` created a pipeline for but
+  ///             that nothing drew with.
+  ///
+  struct UnusedShader {
+    std::string label;
+    std::vector<Scalar> specialization_constants;
+    /// The backends a `ContentContext` created a pipeline for it on, sorted.
+    std::vector<std::string> created_on;
+
+    bool operator==(const UnusedShader&) const = default;
+  };
+
+  //----------------------------------------------------------------------------
+  /// @brief      The shaders that were never drawn on any backend.
+  ///
+  ///             A shader is a pipeline label plus its specialization
+  ///             constants. Options such as the blend mode do not matter, so
+  ///             drawing any variant of a shader counts as using it. Neither
+  ///             does the backend, because some shaders only exist on some
+  ///             backends: a shader is only unused if none of the backends
+  ///             that created it ever drew with it.
+  ///
+  /// @return     The unused shaders, ordered by label and then by
+  ///             specialization constants.
+  ///
+  std::vector<UnusedShader> GetUnusedShaders() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Writes the shaders returned by `GetUnusedShaders`, or a line
+  ///             saying there are none.
+  ///
+  /// @return     The number of unused shaders.
+  ///
+  size_t PrintUnusedShaders(std::ostream& out) const;
+
  private:
   struct Entry {
     std::string label;

@@ -79,10 +79,5 @@ int main(int argc, char** argv) {
   listeners.Append(timeout_listener);
   auto result = RUN_ALL_TESTS();
   delete listeners.Release(timeout_listener);
-
-#ifdef IMPELLER_UNITTEST_SUITE
-  impeller::testing::ImpellerUnittestTeardown();
-#endif  // IMPELLER_UNITTEST_SUITE
-
   return result;
 }

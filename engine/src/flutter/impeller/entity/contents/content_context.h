@@ -156,8 +156,8 @@ class ContentContext {
   ///
   ///             Only `ContentContext`s created while an observer is set record
   ///             their variants. Intended for test diagnostics, see
-  ///             `PipelineVariantRecorder` and `--shader-report` in
-  ///             `impeller_unittests`.
+  ///             `PipelineVariantRecorder` and the `--shader-report` and
+  ///             `--fail-on-unused-shaders` flags of `impeller_golden_tests`.
   ///
   ///             Recording is compiled out of everything but debug builds (see
   ///             `IsPipelineVariantRecordingSupported`); elsewhere this logs an

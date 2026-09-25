@@ -38,9 +38,7 @@ impeller_component("impeller_unittest_suite") {
 
   deps = [
     "//flutter/fml",
-    "//flutter/impeller/playground:pipeline_variant_recorder",
     "//flutter/impeller/playground:playground_test",
-    "//flutter/testing:testing_lib",
   ]
 }
 

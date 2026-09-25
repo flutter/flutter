@@ -9,6 +9,7 @@
 #include <bit>
 #include <format>
 #include <functional>
+#include <set>
 #include <sstream>
 #include <string_view>
 #include <tuple>
@@ -436,6 +437,79 @@ PipelineVariantRecorder::GetBackendsWithUnclaimedDraws() const {
     AddUnclaimedDraws(record, backends[record.backend]);
   }
   return backends;
+}
+
+std::vector<PipelineVariantRecorder::UnusedShader>
+PipelineVariantRecorder::GetUnusedShaders() const {
+  Lock lock(mutex_);
+  struct Shader {
+    std::set<std::string> created_on;
+    bool drawn = false;
+  };
+  std::map<std::pair<std::string, std::vector<Scalar>>, Shader> shaders;
+  for (const auto& [backend, entries] : GetBackendsWithUnclaimedDraws()) {
+    for (const auto& [identity, entry] : entries) {
+      Shader& shader = shaders[{entry.label, entry.specialization_constants}];
+      // Only a `ContentContext` makes a shader one that has to be used. A
+      // draw of a pipeline it did not create still uses a shader it did, if
+      // the label and constants match.
+      if (entry.options.has_value()) {
+        shader.created_on.insert(backend);
+      }
+      shader.drawn = shader.drawn || entry.draw_count > 0u;
+    }
+  }
+
+  std::vector<UnusedShader> unused;
+  for (const auto& [key, shader] : shaders) {
+    if (shader.drawn || shader.created_on.empty()) {
+      continue;
+    }
+    unused.push_back(UnusedShader{
+        .label = key.first,
+        .specialization_constants = key.second,
+        .created_on = {shader.created_on.begin(), shader.created_on.end()},
+    });
+  }
+  return unused;
+}
+
+size_t PipelineVariantRecorder::PrintUnusedShaders(std::ostream& out) const {
+  const std::vector<UnusedShader> unused = GetUnusedShaders();
+  out << "\n" << std::string(kRuleWidth, '=') << "\n";
+  out << "Unused Impeller shaders\n";
+  out << std::string(kRuleWidth, '=') << "\n";
+  if (unused.empty()) {
+    out << "  Every shader a ContentContext created was drawn with.\n\n";
+    return 0u;
+  }
+
+  out << std::format(
+      "  {} shaders were created by a ContentContext but never drawn with, "
+      "with\n  any options, on any backend:\n\n",
+      unused.size());
+  std::vector<std::string> names;
+  size_t width = 0u;
+  for (const UnusedShader& shader : unused) {
+    std::string name = shader.label;
+    if (!shader.specialization_constants.empty()) {
+      name += " spec=" +
+              FormatSpecializationConstants(shader.specialization_constants);
+    }
+    width = std::max(width, name.size());
+    names.push_back(std::move(name));
+  }
+  for (size_t i = 0; i < unused.size(); i++) {
+    std::string backends;
+    for (const std::string& backend : unused[i].created_on) {
+      backends += backends.empty() ? "" : ", ";
+      backends += backend;
+    }
+    out << std::format("    {:<{}}  [{}]\n", names[i], width, backends);
+  }
+  out << "\n  Add a golden test that draws with each of them, or stop creating "
+         "them.\n\n";
+  return unused.size();
 }
 
 class PipelineVariantRecorder::ReportPrinter {

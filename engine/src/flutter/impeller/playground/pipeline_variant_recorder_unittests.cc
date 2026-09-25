@@ -455,5 +455,109 @@ TEST_F(PipelineVariantRecorderTest, OrdersTheReportDeterministically) {
   EXPECT_LT(report.find("Y Pipeline"), report.find("Z Pipeline"));
 }
 
+TEST_F(PipelineVariantRecorderTest, ReportsShadersNeverDrawnWithAnyOptions) {
+  auto library = std::make_shared<NiceMock<MockPipelineLibrary>>();
+  library->LogPipelineUsage(MakeDescriptor("Drawn Pipeline V#1"));
+  auto context = MakeContext(library, Context::BackendType::kVulkan);
+
+  PipelineVariantRecorder recorder;
+  recorder.Enable();
+  // The warmed variant of "Drawn Pipeline" is never drawn, but another variant
+  // of the same shader is, so only "Idle Pipeline" is unused.
+  recorder.Harvest(*context,
+                   {Warmed("Drawn Pipeline", 0), Lazy("Drawn Pipeline V#1", 1),
+                    Warmed("Idle Pipeline", 0), Lazy("Idle Pipeline V#1", 1)});
+
+  const std::vector<PipelineVariantRecorder::UnusedShader> expected = {
+      {.label = "Idle Pipeline", .created_on = {"Vulkan"}}};
+  EXPECT_EQ(recorder.GetUnusedShaders(), expected);
+}
+
+TEST_F(PipelineVariantRecorderTest, CountsAShaderDrawnOnAnyBackendAsUsed) {
+  // Some shaders only get drawn on some backends, which is not a reason to
+  // fail.
+  auto metal_library = std::make_shared<NiceMock<MockPipelineLibrary>>();
+  auto metal_context = MakeContext(metal_library, Context::BackendType::kMetal);
+  auto vulkan_library = std::make_shared<NiceMock<MockPipelineLibrary>>();
+  vulkan_library->LogPipelineUsage(MakeDescriptor("Split Pipeline"));
+  auto vulkan_context =
+      MakeContext(vulkan_library, Context::BackendType::kVulkan);
+  auto gles_library = std::make_shared<NiceMock<MockPipelineLibrary>>();
+  auto gles_context =
+      MakeContext(gles_library, Context::BackendType::kOpenGLES);
+
+  PipelineVariantRecorder recorder;
+  recorder.Enable();
+  recorder.Harvest(*metal_context,
+                   {Warmed("Split Pipeline"), Warmed("Idle Pipeline")});
+  recorder.Harvest(*vulkan_context, {Warmed("Split Pipeline")});
+  recorder.Harvest(*gles_context, {Warmed("Idle Pipeline")});
+
+  const std::vector<PipelineVariantRecorder::UnusedShader> expected = {
+      {.label = "Idle Pipeline", .created_on = {"Metal", "OpenGLES"}}};
+  EXPECT_EQ(recorder.GetUnusedShaders(), expected);
+}
+
+TEST_F(PipelineVariantRecorderTest, TellsSpecializationsOfAShaderApart) {
+  PipelineDescriptor drawn = MakeDescriptor("Specialized Pipeline");
+  drawn.SetSpecializationConstants({0.0f});
+  PipelineDescriptor idle = MakeDescriptor("Specialized Pipeline");
+  idle.SetSpecializationConstants({1.0f});
+
+  auto library = std::make_shared<NiceMock<MockPipelineLibrary>>();
+  library->LogPipelineUsage(drawn);
+  auto context = MakeContext(library, Context::BackendType::kMetal);
+
+  PipelineVariantRecorder recorder;
+  recorder.Enable();
+  recorder.Harvest(
+      *context,
+      {RecordedVariant{
+           .descriptor = drawn, .options = MakeOptions(0), .warmed = true},
+       RecordedVariant{
+           .descriptor = idle, .options = MakeOptions(0), .warmed = true}});
+
+  const std::vector<PipelineVariantRecorder::UnusedShader> expected = {
+      {.label = "Specialized Pipeline",
+       .specialization_constants = {1.0f},
+       .created_on = {"Metal"}}};
+  EXPECT_EQ(recorder.GetUnusedShaders(), expected);
+}
+
+TEST_F(PipelineVariantRecorderTest, IgnoresDrawsOfPipelinesItDidNotCreate) {
+  // Runtime effects and pipelines built by tests are never required to be
+  // drawn.
+  auto library = std::make_shared<NiceMock<MockPipelineLibrary>>();
+  library->LogPipelineUsage(MakeDescriptor("Keyless Pipeline"));
+  auto context = MakeContext(library, Context::BackendType::kMetal);
+
+  PipelineVariantRecorder recorder;
+  recorder.Enable();
+  recorder.Harvest(*context, {});
+
+  EXPECT_TRUE(recorder.GetUnusedShaders().empty());
+}
+
+TEST_F(PipelineVariantRecorderTest, PrintsUnusedShaders) {
+  auto library = std::make_shared<NiceMock<MockPipelineLibrary>>();
+  library->LogPipelineUsage(MakeDescriptor("Drawn Pipeline"));
+  auto context = MakeContext(library, Context::BackendType::kMetal);
+
+  PipelineVariantRecorder recorder;
+  recorder.Enable();
+  recorder.Harvest(*context, {Warmed("Drawn Pipeline")});
+
+  std::stringstream none;
+  EXPECT_EQ(recorder.PrintUnusedShaders(none), 0u);
+  EXPECT_THAT(none.str(), HasSubstr("Every shader a ContentContext created"));
+
+  recorder.Harvest(*context, {Warmed("Idle Pipeline", 1)});
+  std::stringstream some;
+  EXPECT_EQ(recorder.PrintUnusedShaders(some), 1u);
+  EXPECT_THAT(some.str(), HasSubstr("1 shaders were created"));
+  EXPECT_THAT(some.str(), HasSubstr("Idle Pipeline  [Metal]\n"));
+  EXPECT_THAT(some.str(), Not(HasSubstr("Drawn Pipeline")));
+}
+
 }  // namespace testing
 }  // namespace impeller
