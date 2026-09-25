@@ -19,6 +19,19 @@ Future<void> main() async {
   // Each test below must return back to the home page after finishing.
 
   test('MotionEvent recomposition', () async {
+    var navigated = false;
+    addTearDown(() async {
+      if (!navigated) {
+        return;
+      }
+      await driver?.runUnsynchronized(() async {
+        final SerializableFinder backButton = find.byValueKey('back');
+        await driver?.tap(backButton);
+        await driver?.waitFor(find.byValueKey('MotionEventsListTile'));
+      });
+    });
+
+    navigated = true;
     final SerializableFinder motionEventsListTile = find.byValueKey('MotionEventsListTile');
     await driver?.tap(motionEventsListTile);
     await driver?.runUnsynchronized(() async {
@@ -26,8 +39,6 @@ Future<void> main() async {
     });
     final String errorMessage = (await driver?.requestData('run test'))!;
     expect(errorMessage, '');
-    final SerializableFinder backButton = find.byValueKey('back');
-    await driver?.tap(backButton);
   }, timeout: Timeout.none);
 
   group('WindowManager', () {
