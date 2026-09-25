@@ -1394,7 +1394,7 @@ public class FlutterFragment extends Fragment
   public FlutterShellArgs getFlutterShellArgs() {
     Log.w(
         TAG,
-        "FlutterShellArgs is deprecated and will be removed in the next stable release. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries for details.");
+        "FlutterShellArgs is deprecated and will be removed in the next stable release. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-android-engine-flags-release-mode for details.");
     String[] flutterShellArgsArray =
         getArguments() != null
             ? getArguments().getStringArray(ARG_FLUTTER_INITIALIZATION_ARGS)

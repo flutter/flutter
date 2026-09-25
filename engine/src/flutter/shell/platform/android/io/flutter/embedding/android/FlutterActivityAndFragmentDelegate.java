@@ -1342,7 +1342,7 @@ import java.util.List;
       if (host.getClass().getMethod("getFlutterShellArgs").getDeclaringClass() != baseClass) {
         Log.w(
             baseClass.getSimpleName(),
-            "FlutterShellArgs is deprecated and will be removed in the next stable release. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries for details.");
+            "FlutterShellArgs is deprecated and will be removed in the next stable release. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-android-engine-flags-release-mode for details.");
         return true;
       }
       return false;

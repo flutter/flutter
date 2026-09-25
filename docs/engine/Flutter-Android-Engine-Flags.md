@@ -64,7 +64,7 @@ flags can be delivered and which flags are permitted:
   Android embedding ignores all engine flags passed via Android `Intent`
   extras in release builds. Setting engine flags via `Intent` is only
   supported in debug and profile modes. For more background on this security restriction
-  and how to migrate, see [Restrict command-line flags on prebuilt Android release binaries](https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries).
+  and how to migrate, see [Restrict command-line flags on prebuilt Android release binaries](https://docs.flutter.dev/release/breaking-changes/restrict-android-engine-flags-release-mode).
 - **Allowed flags in release mode:** Only specific security-reviewed flags are
   allowed in release mode. The Android embedding enforces this policy (see
   `src/flutter/shell/platform/android/io/flutter/embedding/engine/flags/FlutterEngineFlags.java`,

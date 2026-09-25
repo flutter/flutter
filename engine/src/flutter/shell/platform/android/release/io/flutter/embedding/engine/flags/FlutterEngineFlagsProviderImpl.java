@@ -47,7 +47,7 @@ public final class FlutterEngineFlagsProviderImpl implements FlutterEngineFlagsP
             "Engine flag "
                 + flag.engineArgument
                 + " was specified via Intent extras. Setting engine flags via Intent is not supported in release mode and will be ignored. "
-                + "To set engine flags, specify them on the command line or see https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries for alternative methods.");
+                + "To set engine flags, specify them on the command line or see https://docs.flutter.dev/release/breaking-changes/restrict-android-engine-flags-release-mode for alternative methods.");
         break;
       }
     }
