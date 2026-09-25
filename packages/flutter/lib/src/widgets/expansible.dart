@@ -5,6 +5,8 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
+import 'package:flutter/foundation.dart';
+
 import 'basic.dart';
 import 'framework.dart';
 import 'page_storage.dart';
@@ -223,7 +225,9 @@ class ExpansibleController extends ChangeNotifier {
 /// collapse" list entry. When used with scrolling widgets like [ListView], a
 /// unique [PageStorageKey] must be specified as the [key], to enable the
 /// [Expansible] to save and restore its expanded state when it is scrolled
-/// in and out of view.
+/// in and out of view. The expanded state is saved under an identifier of its
+/// own, so widgets in the body, such as a [Scrollable], can save their own
+/// state under the same [PageStorageKey].
 ///
 /// Provide [headerBuilder] and [bodyBuilder] callbacks to
 /// build the header and body widgets. An additional [expansibleBuilder]
@@ -383,34 +387,35 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     return widget.animationStyle?.reverseCurve ?? widget.reverseCurve;
   }
 
-  // Only persist the expansion state when this widget, or the widget that built
-  // it (such as ExpansionTile), has a PageStorageKey. Without one the state
-  // would land in the slot of some ancestor and collide with other widgets.
-  bool get _hasPageStorageKey {
-    if (widget.key is PageStorageKey) {
-      return true;
+  // The state is saved under an identifier of its own, built from the
+  // PageStorageKeys above this widget, so it never shares a slot with other
+  // widgets under the same keys, such as a Scrollable in the body.
+  Object? get _storageIdentifier {
+    final keys = <PageStorageKey<dynamic>>[];
+    void addKey(Widget widget) {
+      final Key? key = widget.key;
+      if (key is PageStorageKey) {
+        keys.add(key);
+      }
     }
-    var parentHasKey = false;
+
+    addKey(widget);
     context.visitAncestorElements((Element element) {
-      parentHasKey = element.widget.key is PageStorageKey;
-      return false;
+      addKey(element.widget);
+      return element.widget is! PageStorage;
     });
-    return parentHasKey;
+    return keys.isEmpty ? null : _ExpansibleStorageIdentifier(keys);
   }
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(duration: _duration, vsync: this);
-    // The slot is shared with other widgets under the same PageStorageKey, such
-    // as a Scrollable, so the stored value is not always a bool.
-    final Object? storedExpansionState = _hasPageStorageKey
-        ? PageStorage.maybeOf(context)?.readState(context)
-        : null;
-    final bool initiallyExpanded = switch (storedExpansionState) {
-      bool isExpanded => isExpanded,
-      _ => widget.controller.isExpanded,
-    };
+    final Object? identifier = _storageIdentifier;
+    final bool? storedExpansionState = identifier == null
+        ? null
+        : PageStorage.maybeOf(context)?.readState(context, identifier: identifier) as bool?;
+    final bool initiallyExpanded = storedExpansionState ?? widget.controller.isExpanded;
     if (initiallyExpanded) {
       _animationController.value = 1.0;
       widget.controller.expand();
@@ -474,8 +479,11 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
           });
         });
       }
-      if (_hasPageStorageKey) {
-        PageStorage.maybeOf(context)?.writeState(context, widget.controller.isExpanded);
+      final Object? identifier = _storageIdentifier;
+      if (identifier != null) {
+        PageStorage.maybeOf(
+          context,
+        )?.writeState(context, widget.controller.isExpanded, identifier: identifier);
       }
     });
   }
@@ -503,4 +511,21 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
       child: shouldRemoveBody ? null : result,
     );
   }
+}
+
+// Keeps the Expansible state apart from other state saved under the same
+// PageStorageKeys.
+@immutable
+class _ExpansibleStorageIdentifier {
+  const _ExpansibleStorageIdentifier(this.keys);
+
+  final List<PageStorageKey<dynamic>> keys;
+
+  @override
+  bool operator ==(Object other) {
+    return other is _ExpansibleStorageIdentifier && listEquals(other.keys, keys);
+  }
+
+  @override
+  int get hashCode => Object.hashAll(keys);
 }

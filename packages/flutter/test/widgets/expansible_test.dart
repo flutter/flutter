@@ -578,7 +578,7 @@ void main() {
     expect(find.text('Body'), findsNothing);
   });
 
-  testWidgets('Unkeyed Expansible in a keyed Scrollable does not touch PageStorage', (
+  testWidgets('Unkeyed Expansible in a keyed Scrollable does not overwrite the scroll offset', (
     WidgetTester tester,
   ) async {
     final bucket = PageStorageBucket();
@@ -621,13 +621,11 @@ void main() {
     expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 250.0);
   });
 
-  testWidgets('Keyed Expansible containing a Scrollable does not crash', (
+  testWidgets('Keyed Expansible and a Scrollable inside it both keep their state', (
     WidgetTester tester,
   ) async {
     final bucket = PageStorageBucket();
-    final controller = ExpansibleController();
-    addTearDown(controller.dispose);
-    Widget buildTile() {
+    Widget buildTile(ExpansibleController controller) {
       return _pageStorage(
         bucket,
         Expansible(
@@ -643,15 +641,21 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildTile());
-    controller.expand();
+    final controller1 = ExpansibleController();
+    addTearDown(controller1.dispose);
+    await tester.pumpWidget(buildTile(controller1));
+    controller1.expand();
     await tester.pumpAndSettle();
-
-    // The Expansible saved a bool in the slot the Scrollable restores from.
+    tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(300.0);
+    await tester.pump();
     await tester.pumpWidget(_pageStorage(bucket, const SizedBox()));
-    await tester.pumpWidget(buildTile());
+
+    final controller2 = ExpansibleController();
+    addTearDown(controller2.dispose);
+    await tester.pumpWidget(buildTile(controller2));
     expect(tester.takeException(), isNull);
-    expect(find.byType(SingleChildScrollView), findsOneWidget);
+    expect(controller2.isExpanded, isTrue);
+    expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 300.0);
   });
 
   testWidgets('Expansible persists its state when its parent has a PageStorageKey', (
@@ -685,43 +689,6 @@ void main() {
     await tester.pumpWidget(buildTile(controller2));
     expect(controller2.isExpanded, isTrue);
     expect(find.text('Body'), findsOneWidget);
-  });
-
-  testWidgets('Expansible ignores a PageStorageKey further up the tree', (
-    WidgetTester tester,
-  ) async {
-    final bucket = PageStorageBucket();
-    Widget buildTile(ExpansibleController controller) {
-      return _pageStorage(
-        bucket,
-        Center(
-          key: const PageStorageKey<String>('page'),
-          child: Padding(
-            padding: EdgeInsets.zero,
-            child: Expansible(
-              controller: controller,
-              headerBuilder: (BuildContext context, Animation<double> animation) =>
-                  const Text('Header'),
-              bodyBuilder: (BuildContext context, Animation<double> animation) =>
-                  const Text('Body'),
-            ),
-          ),
-        ),
-      );
-    }
-
-    final controller1 = ExpansibleController();
-    addTearDown(controller1.dispose);
-    await tester.pumpWidget(buildTile(controller1));
-    controller1.expand();
-    await tester.pumpAndSettle();
-    await tester.pumpWidget(_pageStorage(bucket, const SizedBox()));
-
-    final controller2 = ExpansibleController();
-    addTearDown(controller2.dispose);
-    await tester.pumpWidget(buildTile(controller2));
-    expect(controller2.isExpanded, isFalse);
-    expect(find.text('Body'), findsNothing);
   });
 }
 

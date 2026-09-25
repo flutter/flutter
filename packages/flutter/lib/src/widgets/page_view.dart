@@ -445,6 +445,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       final Object? value = PageStorage.maybeOf(
         context.storageContext,
       )?.readState(context.storageContext);
+      // Other widgets can save their own state under the same PageStorageKeys.
       if (value is double) {
         _pageToUseOnStartup = value;
       }
