@@ -11,6 +11,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
+import 'utils.dart' show isMultiThreaded, isSkwasm;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -106,6 +107,24 @@ void testMain() {
       final Surface surface = surfaceProvider.surfaceCreateFn(mockCanvasProvider);
       await surface.initialized;
     }, skip: isFirefox || isSafari || !browserSupportsOffscreenCanvas);
+
+    // Regression test for https://github.com/flutter/flutter/issues/193223.
+    // Skipped when [isMultiThreaded] because transferring an [OffscreenCanvas]
+    // to the raster Web Worker via `postMessage` throws `InvalidStateError` if
+    // a 2D rendering context was already bound on the main thread. The
+    // single-threaded suite (`chrome-force-st-dart2wasm-skwasm-ui`) exercises
+    // the `ReceiveCanvasOnWorker` -> `OnInitialized` failure path.
+    test(
+      'initialized completes with an error if a WebGL context cannot be created',
+      () async {
+        final Rasterizer rasterizer = renderer.rasterizer;
+        final surfaceProvider = rasterizer.surfaceProvider as OffscreenSurfaceProvider;
+        final Surface surface = surfaceProvider.surfaceCreateFn(NoWebGLOffscreenCanvasProvider());
+        await expectLater(surface.initialized, throwsStateError);
+      },
+      skip:
+          !isSkwasm || isMultiThreaded || isFirefox || isSafari || !browserSupportsOffscreenCanvas,
+    );
   });
 }
 
@@ -119,6 +138,17 @@ class MockOffscreenCanvasProvider extends OffscreenCanvasProvider {
       shouldTriggerContextLost = false;
       onContextLost();
     }
+    return canvas;
+  }
+}
+
+/// Hands out canvases that already have a 2D context, so any attempt to create
+/// a WebGL context on them fails.
+class NoWebGLOffscreenCanvasProvider extends OffscreenCanvasProvider {
+  @override
+  DomOffscreenCanvas acquireCanvas(BitmapSize size, {required ui.VoidCallback onContextLost}) {
+    final DomOffscreenCanvas canvas = super.acquireCanvas(size, onContextLost: onContextLost);
+    canvas.getContext('2d');
     return canvas;
   }
 }

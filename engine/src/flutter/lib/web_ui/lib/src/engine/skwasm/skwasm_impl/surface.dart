@@ -127,22 +127,35 @@ class SkwasmSurface implements OffscreenSurface {
     final CallbackId callbackId = surfaceSetCanvas(handle, _canvas);
 
     SkwasmCallbackHandler.instance.registerCallback(callbackId).then((JSAny contextLostCallbackId) {
-      // The context may have been lost before the Surface finished
-      // initializing.
-      if (!_initializedCompleter.isCompleted) {
-        _initializedCompleter.complete();
-      }
       // Once we have transferred control of the canvas to the Skwasm Surface,
       // the reference to the _canvas is no longer valid and any listeners
       // attached to it will never fire. Inform the CanvasProvider that it
       // should release its reference to the canvas and unregister any listeners
       // attached to it.
       _canvasProvider.releaseCanvas(_canvas);
-      SkwasmCallbackHandler.instance
-          .registerCallback((contextLostCallbackId as JSNumber).toDartInt)
-          .then((_) {
-            onContextLost();
-          });
+      final int contextLostId = (contextLostCallbackId as JSNumber).toDartInt;
+      if (contextLostId == 0) {
+        // Skwasm could not create a WebGL context for the canvas, so this
+        // surface can never render. Fail loudly rather than leaving every
+        // frame waiting on [initialized] forever.
+        const message =
+            'Skwasm failed to create a WebGL2 context. Nothing will be '
+            'rendered. This usually means WebGL2 is unavailable or the GPU '
+            'process failed in this browser.';
+        domWindow.console.error(message);
+        if (!_initializedCompleter.isCompleted) {
+          _initializedCompleter.completeError(StateError(message));
+        }
+        return;
+      }
+      // The context may have been lost before the Surface finished
+      // initializing.
+      if (!_initializedCompleter.isCompleted) {
+        _initializedCompleter.complete();
+      }
+      SkwasmCallbackHandler.instance.registerCallback(contextLostId).then((_) {
+        onContextLost();
+      });
     });
   }
 
