@@ -39,10 +39,10 @@ class DevicesCommand extends FlutterCommand {
   final name = 'devices';
 
   @override
-  final description = 'List all connected devices.';
+  String get description => 'List all connected devices.';
 
   @override
-  final String category = FlutterCommandCategory.tools;
+  String get category => FlutterCommandCategory.tools;
 
   @override
   ToolContext get toolContext => super.toolContext!;
@@ -219,8 +219,9 @@ class DevicesCommandOutput {
 
   Future<void> printDevicesAsJson(List<Device> devices) async {
     _logger.printStatus(
-      const JsonEncoder.withIndent('  ')
-          .convert(await Future.wait(devices.map((Device d) => d.toJson()))),
+      const JsonEncoder.withIndent(
+        '  ',
+      ).convert(await Future.wait(devices.map((Device d) => d.toJson()))),
     );
   }
 }
