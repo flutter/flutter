@@ -104,7 +104,8 @@ android {
     testImplementation "junit:junit:4.13.2"
     testImplementation "androidx.test.ext:junit:1.2.1"
 
-    def mockitoVersion = "5.17.0"
+    // Mockito >= 5.20.0 (Byte Buddy >= 1.17.7) is required to run on JDK 25.
+    def mockitoVersion = "5.20.0"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     mockitoAgent("org.mockito:mockito-core:$mockitoVersion") {
       transitive = false
