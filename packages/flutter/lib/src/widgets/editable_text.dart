@@ -489,8 +489,8 @@ class ContentInsertionConfiguration {
     this.allowedMimeTypes = kDefaultContentInsertionMimeTypes,
   }) : assert(allowedMimeTypes.isNotEmpty);
 
-  /// Called when a user inserts content through the virtual / on-screen keyboard,
-  /// currently only used on Android.
+  /// Called when a user inserts content that is not text: through the virtual /
+  /// on-screen keyboard on Android, or by pasting on iOS.
   ///
   /// [KeyboardInsertedContent] holds the data representing the inserted content.
   ///
@@ -508,8 +508,8 @@ class ContentInsertionConfiguration {
   final ValueChanged<KeyboardInsertedContent> onContentInserted;
 
   /// {@template flutter.widgets.contentInsertionConfiguration.allowedMimeTypes}
-  /// Used when a user inserts image-based content through the device keyboard,
-  /// currently only used on Android.
+  /// Used when a user inserts image-based content through the device keyboard on
+  /// Android, or pastes it on iOS.
   ///
   /// The passed list of strings will determine which MIME types are allowed to
   /// be inserted via the device keyboard.
