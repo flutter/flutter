@@ -11,8 +11,6 @@ import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../doctor.dart';
-import '../experimental/extension_device_manager.dart';
-import '../experimental/extension_manager.dart';
 import '../runner/flutter_command.dart';
 
 /// The `flutter devices` command, which lists all connected devices.
@@ -21,7 +19,6 @@ class DevicesCommand extends FlutterCommand {
     required DeviceManager deviceManager,
     required Doctor doctor,
     required super.toolContext,
-    this.extensionManager,
     super.verboseHelp,
   }) : _deviceManager = deviceManager,
        _doctor = doctor {
@@ -36,8 +33,6 @@ class DevicesCommand extends FlutterCommand {
     usesDeviceConnectionOption();
   }
 
-  /// The active tool extension manager, if extensions are enabled.
-  final ExtensionManager? extensionManager;
   final DeviceManager _deviceManager;
   final Doctor _doctor;
 
@@ -85,16 +80,6 @@ class DevicesCommand extends FlutterCommand {
         'information about installing additional components.',
         exitCode: 1,
       );
-    }
-
-    if (extensionManager case final manager?) {
-      if (!_deviceManager.deviceDiscoverers.any(
-        (DeviceDiscovery d) => d is ExtensionDeviceDiscovery,
-      )) {
-        _deviceManager.deviceDiscoverers.add(
-          ExtensionDeviceDiscovery(extensionManager: manager, logger: toolContext.logger),
-        );
-      }
     }
 
     final output = DevicesCommandOutput(

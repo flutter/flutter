@@ -25,7 +25,7 @@ void main() {
 
   group('Tool Extensions Device Integration - Disabled', () {
     testUsingContext(
-      'ExtensionDeviceDiscovery returns empty device list when feature flag disabled',
+      'ExtensionDevices returns empty device list when feature flag disabled',
       () async {
         final featureFlags = TestFeatureFlags();
         final manager = ExtensionManager(
@@ -34,7 +34,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final discovery = ExtensionDeviceDiscovery(extensionManager: manager, logger: testLogger);
+        final discovery = ExtensionDevices(extensionManager: manager, logger: testLogger);
 
         final List<Device> devices = await discovery.devices();
         expect(devices, isEmpty);
@@ -54,11 +54,14 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final testDeviceManager = TestDeviceManager();
+        final testDeviceManager = TestDeviceManager(
+          discoverers: <DeviceDiscovery>[
+            ExtensionDevices(extensionManager: manager, logger: testLogger),
+          ],
+        );
         final devicesCommand = DevicesCommand(
           deviceManager: testDeviceManager,
           doctor: FakeDoctor(),
-          extensionManager: manager,
           toolContext: FakeToolContext(logger: testLogger),
         );
         final CommandRunner<void> commandRunner = createTestCommandRunner(devicesCommand);
@@ -77,7 +80,7 @@ void main() {
 
   group('Tool Extensions Device Integration - Enabled', () {
     testUsingContext(
-      'ExtensionDeviceDiscovery discovers custom device when feature flag enabled',
+      'ExtensionDevices discovers custom device when feature flag enabled',
       () async {
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
@@ -86,7 +89,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final discovery = ExtensionDeviceDiscovery(extensionManager: manager, logger: testLogger);
+        final discovery = ExtensionDevices(extensionManager: manager, logger: testLogger);
 
         final List<Device> devices = await discovery.devices();
         expect(devices, hasLength(1));
@@ -95,6 +98,7 @@ void main() {
         expect(devices.first.category, equals(Category.desktop));
         expect(devices.first.platformType, equals(PlatformType.custom));
         expect(await devices.first.targetPlatform, equals(TargetPlatform.linux_x64));
+        expect(await devices.first.targetPlatformDisplayName, equals('linux-x64'));
         expect(await devices.first.sdkNameAndVersion, equals('Custom Linux 1.0.0'));
         expect(await devices.first.isSupported(), isTrue);
 
@@ -115,11 +119,14 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final testDeviceManager = TestDeviceManager();
+        final testDeviceManager = TestDeviceManager(
+          discoverers: <DeviceDiscovery>[
+            ExtensionDevices(extensionManager: manager, logger: testLogger),
+          ],
+        );
         final devicesCommand = DevicesCommand(
           deviceManager: testDeviceManager,
           doctor: FakeDoctor(),
-          extensionManager: manager,
           toolContext: FakeToolContext(logger: testLogger),
         );
         final CommandRunner<void> commandRunner = createTestCommandRunner(devicesCommand);

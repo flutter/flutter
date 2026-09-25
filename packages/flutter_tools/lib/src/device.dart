@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart' show Category;
 import 'package:meta/meta.dart';
 
 import 'application_package.dart';
@@ -21,25 +22,9 @@ import 'vmservice.dart';
 import 'web/compile.dart';
 import 'web/devfs_config.dart';
 
+export 'package:flutter_tools_core/flutter_tools_core.dart' show Category;
+
 DeviceManager? get deviceManager => context.get<DeviceManager>();
-
-/// A description of the kind of workflow the device supports.
-enum Category {
-  web._('web'),
-  desktop._('desktop'),
-  mobile._('mobile');
-
-  const Category._(this.value);
-
-  final String value;
-
-  @override
-  String toString() => value;
-
-  static Category? fromString(String category) {
-    return const <String, Category>{'web': web, 'desktop': desktop, 'mobile': mobile}[category];
-  }
-}
 
 /// The platform sub-folder that a device type supports.
 enum PlatformType {

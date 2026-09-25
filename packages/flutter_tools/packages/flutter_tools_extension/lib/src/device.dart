@@ -13,11 +13,14 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC method identifier to query contributed target devices.
   static const String getDevicesMethod = 'device.getDevices';
 
+  /// RPC parameter key for the project root URI.
+  static const String projectRootParam = 'projectRoot';
+
   @override
   String get namespace => serviceNamespace;
 
   /// Returns the target devices contributed by this extension.
-  Future<List<TargetDevice>> getDevices();
+  Future<List<TargetDevice>> getDevices({Uri? projectRoot});
 
   @override
   Future<Map<String, ExtensionRpcHandler>> initialize() async {
@@ -28,7 +31,9 @@ abstract base class DeviceService extends ToolExtensionService {
   Future<void> shutdown() async {}
 
   Future<List<Map<String, Object?>>> _getDevicesRpc(Map<String, Object?> params) async {
-    final List<TargetDevice> devices = await getDevices();
+    final projectRootStr = params[projectRootParam] as String?;
+    final Uri? projectRoot = projectRootStr != null ? Uri.parse(projectRootStr) : null;
+    final List<TargetDevice> devices = await getDevices(projectRoot: projectRoot);
     return devices.map((TargetDevice device) => device.toMap()).toList();
   }
 }

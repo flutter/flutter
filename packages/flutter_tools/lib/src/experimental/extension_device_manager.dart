@@ -8,6 +8,7 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 import '../application_package.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../device.dart';
@@ -26,13 +27,15 @@ final class ExtensionDeviceClient extends DeviceService {
   final Logger _logger;
 
   @override
-  Future<List<TargetDevice>> getDevices() async {
+  Future<List<TargetDevice>> getDevices({Uri? projectRoot}) async {
     _logger.printTrace(
       'ExtensionDeviceClient fetching devices via RPC ("${DeviceService.getDevicesMethod}")...',
     );
     try {
       final Object? rawResult = await connection
-          .sendRequest(DeviceService.getDevicesMethod)
+          .sendRequest(DeviceService.getDevicesMethod, <String, Object?>{
+            if (projectRoot != null) DeviceService.projectRootParam: projectRoot.toString(),
+          })
           .timeout(const Duration(seconds: 5));
       final List<TargetDevice> devices = TargetDevice.listFromJson(rawResult);
       _logger.printTrace('ExtensionDeviceClient received ${devices.length} device(s) via RPC.');
@@ -45,14 +48,19 @@ final class ExtensionDeviceClient extends DeviceService {
 }
 
 /// A host-side [DeviceDiscovery] mechanism that discovers devices registered by active extensions.
-class ExtensionDeviceDiscovery extends PollingDeviceDiscovery {
-  /// Creates an [ExtensionDeviceDiscovery] instance.
-  ExtensionDeviceDiscovery({required ExtensionManager extensionManager, required Logger logger})
-    : _extensionManager = extensionManager,
-      _logger = logger,
-      super('tool_extension');
+class ExtensionDevices extends PollingDeviceDiscovery {
+  /// Creates an [ExtensionDevices] instance.
+  ExtensionDevices({
+    required ExtensionManager extensionManager,
+    required Logger logger,
+    FileSystem? fileSystem,
+  }) : _extensionManager = extensionManager,
+       _fileSystem = fileSystem,
+       _logger = logger,
+       super('tool_extension');
 
   final ExtensionManager _extensionManager;
+  final FileSystem? _fileSystem;
   final Logger _logger;
 
   @override
@@ -69,28 +77,26 @@ class ExtensionDeviceDiscovery extends PollingDeviceDiscovery {
     Duration? timeout,
     bool forWirelessDiscovery = false,
   }) async {
-    _logger.printTrace('ExtensionDeviceDiscovery polling active tool extension devices...');
+    _logger.printTrace('ExtensionDevices polling active tool extension devices...');
     await _extensionManager.ensureInitialized();
     final List<DeviceService> deviceServices = _extensionManager.deviceExtensions;
     if (deviceServices.isEmpty) {
-      _logger.printTrace('ExtensionDeviceDiscovery found 0 active device extensions.');
+      _logger.printTrace('ExtensionDevices found 0 active device extensions.');
       return <Device>[];
     }
 
     final List<List<Device>> devicesPerService = await Future.wait(
-      deviceServices.map((DeviceService service) async {
+      deviceServices.whereType<ExtensionDeviceClient>().map((ExtensionDeviceClient service) async {
         try {
-          final List<TargetDevice> devices = await service.getDevices();
-          final ExtensionConnection? connection = switch (service) {
-            ExtensionDeviceClient(:final ExtensionConnection connection) => connection,
-            _ => null,
-          };
+          final List<TargetDevice> devices = await service.getDevices(
+            projectRoot: _fileSystem?.currentDirectory.uri,
+          );
           return devices
               .map(
                 (TargetDevice targetDevice) => ExtensionBackedDevice(
+                  connection: service.connection,
                   logger: _logger,
                   targetDevice: targetDevice,
-                  connection: connection,
                 ),
               )
               .toList();
@@ -103,9 +109,7 @@ class ExtensionDeviceDiscovery extends PollingDeviceDiscovery {
 
     final targetDevices = <Device>[for (final deviceList in devicesPerService) ...deviceList];
 
-    _logger.printTrace(
-      'ExtensionDeviceDiscovery retrieved ${targetDevices.length} target device(s).',
-    );
+    _logger.printTrace('ExtensionDevices retrieved ${targetDevices.length} target device(s).');
     return targetDevices;
   }
 
@@ -117,19 +121,19 @@ class ExtensionDeviceDiscovery extends PollingDeviceDiscovery {
 class ExtensionBackedDevice extends Device {
   /// Creates an [ExtensionBackedDevice] wrapping a [TargetDevice].
   ExtensionBackedDevice({
+    required this.connection,
     required super.logger,
     required TargetDevice targetDevice,
-    this.connection,
   }) : _targetDevice = targetDevice,
        super(
          targetDevice.id,
-         category: Category.fromString(targetDevice.category) ?? Category.desktop,
-         platformType: PlatformType.fromString(targetDevice.platformType) ?? PlatformType.custom,
+         category: targetDevice.category,
+         platformType: PlatformType.custom,
          ephemeral: targetDevice.ephemeral,
        );
 
   final TargetDevice _targetDevice;
-  final ExtensionConnection? connection;
+  final ExtensionConnection connection;
 
   @override
   String get name => _targetDevice.name;
@@ -148,7 +152,7 @@ class ExtensionBackedDevice extends Device {
       _targetDevice.sdkNameAndVersion ?? 'Tool Extension Device';
 
   @override
-  Future<String> get targetPlatformDisplayName async => _targetDevice.platformType;
+  Future<String> get targetPlatformDisplayName async => _targetDevice.targetPlatform ?? 'custom';
 
   @override
   Future<TargetPlatform> get targetPlatform async {
@@ -156,15 +160,11 @@ class ExtensionBackedDevice extends Device {
     if (platformName != null) {
       try {
         return TargetPlatform.fromName(platformName);
-      } on Object catch (_) {
+      } on Object {
         // Fall through if unrecognized target platform name supplied.
       }
     }
-    try {
-      return TargetPlatform.fromName(_targetDevice.platformType);
-    } on Object catch (_) {
-      return TargetPlatform.unsupported;
-    }
+    return TargetPlatform.unsupported;
   }
 
   @override

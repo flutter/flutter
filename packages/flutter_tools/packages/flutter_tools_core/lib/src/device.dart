@@ -4,6 +4,31 @@
 
 import 'package:meta/meta.dart';
 
+/// A description of the kind of workflow the device supports.
+enum Category {
+  /// Web browser target workflow.
+  web._('web'),
+
+  /// Desktop operating system target workflow.
+  desktop._('desktop'),
+
+  /// Mobile device or simulator target workflow.
+  mobile._('mobile');
+
+  const Category._(this.value);
+
+  /// Serialized string representation of the category.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  /// Parses a [Category] from its serialized [category] string representation.
+  static Category? fromString(String category) {
+    return const <String, Category>{'web': web, 'desktop': desktop, 'mobile': mobile}[category];
+  }
+}
+
 /// Representation of a target device provided by a tool extension.
 @immutable
 class TargetDevice {
@@ -12,7 +37,6 @@ class TargetDevice {
     required this.category,
     required this.id,
     required this.name,
-    required this.platformType,
     this.ephemeral = true,
     this.isSupported = true,
     this.isSupportedForProject = true,
@@ -23,10 +47,9 @@ class TargetDevice {
   /// Deserializes a [TargetDevice] from a JSON-serializable map.
   factory TargetDevice.fromJson(Map<String, Object?> json) {
     return TargetDevice(
-      category: json[categoryKey] as String? ?? '',
+      category: Category.fromString(json[categoryKey] as String? ?? '') ?? Category.desktop,
       id: json[idKey] as String? ?? '',
       name: json[nameKey] as String? ?? '',
-      platformType: json[platformTypeKey] as String? ?? '',
       ephemeral: json[ephemeralKey] as bool? ?? true,
       isSupported: json[isSupportedKey] as bool? ?? true,
       isSupportedForProject: json[isSupportedForProjectKey] as bool? ?? true,
@@ -43,9 +66,6 @@ class TargetDevice {
 
   /// Map key for [name].
   static const String nameKey = 'name';
-
-  /// Map key for [platformType].
-  static const String platformTypeKey = 'platformType';
 
   /// Map key for [ephemeral].
   static const String ephemeralKey = 'ephemeral';
@@ -73,8 +93,8 @@ class TargetDevice {
     return const <TargetDevice>[];
   }
 
-  /// Device category (e.g. `'desktop'`, `'mobile'`, `'web'`).
-  final String category;
+  /// Device category (e.g. [Category.desktop], [Category.mobile], [Category.web]).
+  final Category category;
 
   /// Unique identifier of the device.
   final String id;
@@ -82,10 +102,14 @@ class TargetDevice {
   /// Display name of the device.
   final String name;
 
-  /// Platform type (e.g. `'custom'`, `'linux'`, `'android'`).
-  final String platformType;
-
   /// Whether the device is ephemeral.
+  ///
+  /// Ephemeral devices are targets that can dynamically connect and disconnect
+  /// (such as physical mobile or embedded devices, or emulators and simulators)
+  /// and are prioritized for automatic target selection when a single ephemeral
+  /// device is attached. Non-ephemeral devices (`ephemeral: false`) represent
+  /// stationary host targets that are always available (such as desktop or web
+  /// targets).
   final bool ephemeral;
 
   /// Whether the device is supported by Flutter tooling on the host platform.
@@ -102,10 +126,9 @@ class TargetDevice {
 
   /// Serializes the target device to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
-    categoryKey: category,
+    categoryKey: category.value,
     idKey: id,
     nameKey: name,
-    platformTypeKey: platformType,
     ephemeralKey: ephemeral,
     isSupportedKey: isSupported,
     isSupportedForProjectKey: isSupportedForProject,
@@ -115,7 +138,7 @@ class TargetDevice {
 
   @override
   String toString() =>
-      'TargetDevice(id: $id, name: $name, category: $category, platformType: $platformType, '
+      'TargetDevice(id: $id, name: $name, category: $category, '
       'targetPlatform: $targetPlatform, sdkNameAndVersion: $sdkNameAndVersion, '
       'ephemeral: $ephemeral, isSupported: $isSupported, isSupportedForProject: $isSupportedForProject)';
 
@@ -126,7 +149,6 @@ class TargetDevice {
             other.category == category &&
             other.id == id &&
             other.name == name &&
-            other.platformType == platformType &&
             other.ephemeral == ephemeral &&
             other.isSupported == isSupported &&
             other.isSupportedForProject == isSupportedForProject &&
@@ -139,7 +161,6 @@ class TargetDevice {
     category,
     id,
     name,
-    platformType,
     ephemeral,
     isSupported,
     isSupportedForProject,

@@ -6,13 +6,22 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('Category', () {
+    test('serializes and parses from string', () {
+      expect(Category.fromString('web'), Category.web);
+      expect(Category.fromString('desktop'), Category.desktop);
+      expect(Category.fromString('mobile'), Category.mobile);
+      expect(Category.fromString('unknown'), isNull);
+      expect(Category.desktop.toString(), 'desktop');
+    });
+  });
+
   group('TargetDevice', () {
     test('serializes and deserializes correctly with all fields', () {
       const device = TargetDevice(
-        category: 'desktop',
+        category: Category.desktop,
         id: 'custom_linux_device',
         name: 'Linux Custom Extension Prototype Device',
-        platformType: 'custom',
         ephemeral: false,
         sdkNameAndVersion: 'Custom Linux 1.0.0',
         targetPlatform: 'linux-x64',
@@ -22,7 +31,6 @@ void main() {
       expect(map['id'], 'custom_linux_device');
       expect(map['name'], 'Linux Custom Extension Prototype Device');
       expect(map['category'], 'desktop');
-      expect(map['platformType'], 'custom');
       expect(map['ephemeral'], isFalse);
       expect(map['isSupported'], isTrue);
       expect(map['isSupportedForProject'], isTrue);
@@ -40,14 +48,12 @@ void main() {
         'id': 'minimal_device',
         'name': 'Minimal Device',
         'category': 'mobile',
-        'platformType': 'android',
       };
 
       final device = TargetDevice.fromJson(minimalJson);
       expect(device.id, 'minimal_device');
       expect(device.name, 'Minimal Device');
-      expect(device.category, 'mobile');
-      expect(device.platformType, 'android');
+      expect(device.category, Category.mobile);
       expect(device.ephemeral, isTrue);
       expect(device.isSupported, isTrue);
       expect(device.isSupportedForProject, isTrue);
@@ -64,7 +70,6 @@ void main() {
         'id': 'device_1',
         'name': 'Device 1',
         'category': 'desktop',
-        'platformType': 'custom',
       };
 
       final List<TargetDevice> devices = TargetDevice.listFromJson(<Object?>[validJson]);
@@ -77,18 +82,8 @@ void main() {
     });
 
     test('equality and hashCode distinguish different devices', () {
-      const device1 = TargetDevice(
-        category: 'desktop',
-        id: 'device_1',
-        name: 'Device 1',
-        platformType: 'custom',
-      );
-      const device2 = TargetDevice(
-        category: 'desktop',
-        id: 'device_2',
-        name: 'Device 2',
-        platformType: 'custom',
-      );
+      const device1 = TargetDevice(category: Category.desktop, id: 'device_1', name: 'Device 1');
+      const device2 = TargetDevice(category: Category.desktop, id: 'device_2', name: 'Device 2');
 
       expect(device1, isNot(equals(device2)));
       expect(device1.hashCode, isNot(equals(device2.hashCode)));

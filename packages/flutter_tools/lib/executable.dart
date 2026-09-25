@@ -109,6 +109,8 @@ Future<void> main(List<String> args) async {
     userMessages: UserMessages(),
   );
 
+  ExtensionManager? extensionManager;
+
   await runner.run(
     args,
     (ToolDependencies toolDependencies) {
@@ -118,6 +120,7 @@ Future<void> main(List<String> args) async {
         entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
         featureFlags: featureFlags,
       );
+      extensionManager = manager;
       final templateManager = ExtensionTemplateManager(
         extensionManager: manager,
         fileSystem: toolDependencies.toolContext.fs,
@@ -136,6 +139,7 @@ Future<void> main(List<String> args) async {
     muteCommandLogging: muteCommandLogging,
     verboseHelp: verboseHelp,
     overrides: <Type, Generator>{
+      ExtensionManager: () => extensionManager,
       FlutterHookRunner: () => FlutterHookRunnerNative(),
       // The web runner is not supported in google3 because it depends
       // on dwds.
@@ -295,7 +299,6 @@ List<FlutterCommand> generateCommands({
   DevicesCommand(
     deviceManager: globals.deviceManager!,
     doctor: globals.doctor!,
-    extensionManager: extensionManager,
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
   ),
