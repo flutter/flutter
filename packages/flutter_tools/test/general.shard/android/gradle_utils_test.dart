@@ -673,13 +673,13 @@ dependencies {
         // Newer AGP version supports max gradle version.
         GradleAgpTestData(
           true,
-          agpVersion: '9.2',
+          agpVersion: '9.4',
           gradleVersion: maxKnownAndSupportedGradleVersion,
         ),
         // Newer AGP version does not even meet current gradle version requirements.
-        GradleAgpTestData(false, agpVersion: '9.2', gradleVersion: '7.3'),
+        GradleAgpTestData(false, agpVersion: '9.4', gradleVersion: '7.3'),
         // Newer AGP version requires newer gradle version.
-        GradleAgpTestData(true, agpVersion: '9.2', gradleVersion: '9.3.1'),
+        GradleAgpTestData(true, agpVersion: '9.4', gradleVersion: '9.5.0'),
 
         // Template versions of Gradle/AGP.
         GradleAgpTestData(
@@ -1492,6 +1492,8 @@ allprojects {
       expect(getGradleVersionFor('8.13'), '8.14');
       expect(getGradleVersionFor('9.0.1'), '9.1.0');
       expect(getGradleVersionFor('9.1.0'), '9.3.1');
+      expect(getGradleVersionFor('9.2.0'), '9.3.1');
+      expect(getGradleVersionFor('9.3.1'), '9.5.0');
     });
 
     testWithoutContext('throws on unsupported versions', () {
