@@ -292,6 +292,18 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       transform.get(SkMatrix::kMPersp0), transform.get(SkMatrix::kMPersp1),
       transform.get(SkMatrix::kMPersp2)};
 
+  SkMatrix hit_test_transform = node.hitTestTransform.asM33();
+  FlutterTransformation flutter_hit_test_transform{
+      hit_test_transform.get(SkMatrix::kMScaleX),
+      hit_test_transform.get(SkMatrix::kMSkewX),
+      hit_test_transform.get(SkMatrix::kMTransX),
+      hit_test_transform.get(SkMatrix::kMSkewY),
+      hit_test_transform.get(SkMatrix::kMScaleY),
+      hit_test_transform.get(SkMatrix::kMTransY),
+      hit_test_transform.get(SkMatrix::kMPersp0),
+      hit_test_transform.get(SkMatrix::kMPersp1),
+      hit_test_transform.get(SkMatrix::kMPersp2)};
+
   auto label_attributes = CreateStringAttributes(node.labelAttributes);
   auto hint_attributes = CreateStringAttributes(node.hintAttributes);
   auto value_attributes = CreateStringAttributes(node.valueAttributes);
@@ -344,6 +356,16 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       flags_.back().get(),
       node.headingLevel,
       node.identifier.c_str(),
+      node.maxValueLength,
+      node.currentValueLength,
+      node.traversalParent,
+      node.minValue.c_str(),
+      node.maxValue.c_str(),
+      node.linkUrl.c_str(),
+      static_cast<FlutterSemanticsRole>(node.role),
+      static_cast<FlutterSemanticsValidationResult>(node.validationResult),
+      node.locale.c_str(),
+      flutter_hit_test_transform,
   });
 }
 
@@ -399,7 +421,7 @@ EmbedderSemanticsUpdate2::CreateStringAttributes(
         // All spell out attributes are identical and share a lazily created
         // instance.
         if (!spell_out_attribute_) {
-          auto spell_out_attribute_ =
+          spell_out_attribute_ =
               std::make_unique<FlutterSpellOutStringAttribute>();
           spell_out_attribute_->struct_size =
               sizeof(FlutterSpellOutStringAttribute);

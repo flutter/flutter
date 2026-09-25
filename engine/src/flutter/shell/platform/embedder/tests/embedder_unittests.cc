@@ -4,12 +4,17 @@
 
 #define FML_USED_ON_EMBEDDER
 
+#include <limits>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "embedder.h"
+#include "embedder_asset_resolver.h"
 #include "embedder_engine.h"
+#include "embedder_image_generator.h"
+#include "embedder_layers.h"
+#include "embedder_semantics_update.h"
 #include "flutter/common/constants.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/fml/file.h"
@@ -31,6 +36,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_unittests_util.h"
 #include "flutter/testing/assertions_skia.h"
 #include "flutter/testing/testing.h"
+#include "third_party/skia/include/core/SkPathBuilder.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
@@ -2189,6 +2195,62 @@ TEST_F(EmbedderTest, SendsViewFocusChangeRequest) {
   kill_latch.Wait();
 }
 
+TEST_F(EmbedderTest, ExtendedWindowMetricsReachTheFrameworkIntact) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("reportViewportMetricsDetails");
+
+  fml::AutoResetWaitableEvent latch;
+  std::string last_report;
+
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.Signal(); }));
+  context.AddFfiNativeCallback(
+      "NotifyStringValue", CREATE_FFI_LAMBDA([&](Dart_Handle value) {
+        last_report = tonic::DartConverter<std::string>::FromDart(value);
+        latch.Signal();
+      }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  // Wait until the metrics handler is attached.
+  latch.Wait();
+  latch.Reset();
+
+  // A state the engine does not know about, to prove it degrades rather than
+  // being rejected at the boundary.
+  const double kBounds[4] = {0.0, 0.0, 10.0, 600.0};
+  const int32_t kType[1] = {kFlutterDisplayFeatureTypeHinge};
+  const int32_t kState[1] = {kFlutterDisplayFeatureStatePostureHalfOpened + 1};
+
+  // Deliberately zero-initialized and then only partially populated, which is
+  // exactly what the header tells embedders to do.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  event.has_extended_metrics = true;
+  event.physical_padding_left = 4.0;
+  event.physical_padding_top = 8.0;
+  event.display_features_count = 1;
+  event.display_features_bounds = kBounds;
+  event.display_features_type = kType;
+  event.display_features_state = kState;
+
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  latch.Wait();
+
+  // `physical_touch_slop` was left at zero by the zero-initialization. The
+  // framework must see the platform default (null), not a touch slop of zero,
+  // which would turn every touch into an immediate drag.
+  EXPECT_EQ(last_report,
+            "touchSlop=null padding=4.0,8.0 features=1 "
+            "DisplayFeatureType.hinge/DisplayFeatureState.unknown");
+}
+
 TEST_F(EmbedderTest, CanSendViewFocusEvent) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   EmbedderConfigBuilder builder(context);
@@ -3123,6 +3185,122 @@ TEST_F(EmbedderTest, InvalidFlutterWindowMetricsEvent) {
   // Left/right insets cannot be greater than width.
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, InvalidFlutterWindowMetricsEventExtendedMetrics) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+
+  ASSERT_TRUE(engine.is_valid());
+
+  // A well formed event that the mutations below are applied to. Note the
+  // zero-initialization: every field of an extended metrics event must be
+  // initialized because the engine reads all of them once `struct_size` says
+  // they are present.
+  const double kBounds[4] = {0.0, 0.0, 10.0, 600.0};
+  const int32_t kType[1] = {kFlutterDisplayFeatureTypeHinge};
+  const int32_t kState[1] = {kFlutterDisplayFeatureStatePostureFlat};
+
+  FlutterWindowMetricsEvent valid = {};
+  valid.struct_size = sizeof(valid);
+  valid.width = 800;
+  valid.height = 600;
+  valid.pixel_ratio = 1.0;
+  valid.has_extended_metrics = true;
+  valid.display_features_count = 1;
+  valid.display_features_bounds = kBounds;
+  valid.display_features_type = kType;
+  valid.display_features_state = kState;
+
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &valid),
+            kSuccess);
+
+  // Padding must be non-negative.
+  FlutterWindowMetricsEvent negative_padding = valid;
+  negative_padding.physical_padding_left = -1.0;
+  ASSERT_EQ(
+      FlutterEngineSendWindowMetricsEvent(engine.get(), &negative_padding),
+      kInvalidArguments);
+
+  // System gesture insets must be non-negative.
+  FlutterWindowMetricsEvent negative_inset = valid;
+  negative_inset.physical_system_gesture_inset_bottom = -1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &negative_inset),
+            kInvalidArguments);
+
+  // The display feature count is capped so that it can never be used to size
+  // an allocation or overflow `count * 4`.
+  FlutterWindowMetricsEvent too_many_features = valid;
+  too_many_features.display_features_count = kFlutterMaxDisplayFeatures + 1;
+  ASSERT_EQ(
+      FlutterEngineSendWindowMetricsEvent(engine.get(), &too_many_features),
+      kInvalidArguments);
+
+  FlutterWindowMetricsEvent overflowing_features = valid;
+  overflowing_features.display_features_count =
+      std::numeric_limits<size_t>::max();
+  ASSERT_EQ(
+      FlutterEngineSendWindowMetricsEvent(engine.get(), &overflowing_features),
+      kInvalidArguments);
+
+  // All three arrays must be supplied when the count is non-zero.
+  FlutterWindowMetricsEvent missing_bounds = valid;
+  missing_bounds.display_features_bounds = nullptr;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &missing_bounds),
+            kInvalidArguments);
+
+  FlutterWindowMetricsEvent missing_type = valid;
+  missing_type.display_features_type = nullptr;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &missing_type),
+            kInvalidArguments);
+
+  FlutterWindowMetricsEvent missing_state = valid;
+  missing_state.display_features_state = nullptr;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &missing_state),
+            kInvalidArguments);
+
+  // Types are indices into a Dart enum that `hooks.dart` reads unchecked, so
+  // they must be in range.
+  const int32_t kOutOfRangeType[1] = {kFlutterDisplayFeatureTypeCutout + 1};
+  FlutterWindowMetricsEvent bad_type = valid;
+  bad_type.display_features_type = kOutOfRangeType;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &bad_type),
+            kInvalidArguments);
+
+  const int32_t kNegativeType[1] = {-1};
+  FlutterWindowMetricsEvent negative_type = valid;
+  negative_type.display_features_type = kNegativeType;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &negative_type),
+            kInvalidArguments);
+
+  // A state the engine does not know is forward compatible: `hooks.dart`
+  // bounds checks it and falls back to `DisplayFeatureState.unknown`, so a
+  // newer embedder must keep working against this engine.
+  const int32_t kUnknownState[1] = {
+      kFlutterDisplayFeatureStatePostureHalfOpened + 1};
+  FlutterWindowMetricsEvent newer_state = valid;
+  newer_state.display_features_state = kUnknownState;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &newer_state),
+            kSuccess);
+
+  // A negative state is not: that same guard is upper bound only, so Dart
+  // would index the enum with it and throw.
+  const int32_t kNegativeState[1] = {-1};
+  FlutterWindowMetricsEvent negative_state = valid;
+  negative_state.display_features_state = kNegativeState;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &negative_state),
+            kInvalidArguments);
+
+  // Zero display features with null arrays remains valid.
+  FlutterWindowMetricsEvent no_features = valid;
+  no_features.display_features_count = 0;
+  no_features.display_features_bounds = nullptr;
+  no_features.display_features_type = nullptr;
+  no_features.display_features_state = nullptr;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &no_features),
+            kSuccess);
 }
 
 TEST_F(EmbedderTest, WindowMetricsEventWithConstraints) {
@@ -4314,6 +4492,2303 @@ TEST_F(EmbedderTest, PlatformThreadIsolatesWithCustomPlatformTaskRunner) {
 
   // Check that the FFI call was executed on the platform thread.
   ASSERT_EQ(platform_thread_id, ffi_call_thread_id);
+}
+
+TEST_F(EmbedderTest, EmbedderAssetResolverDirect) {
+  std::string test_data = "Hello Flutter Assets!";
+
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = &test_data;
+  resolver.find_asset_callback = [](void* user_data, const char* name,
+                                    FlutterAsset* asset_out) -> bool {
+    auto* str = static_cast<std::string*>(user_data);
+    if (std::string(name) == "test_asset.txt") {
+      asset_out->struct_size = sizeof(FlutterAsset);
+      asset_out->data = reinterpret_cast<const uint8_t*>(str->data());
+      asset_out->size = str->size();
+      asset_out->user_data = nullptr;
+      asset_out->asset_free_callback = nullptr;
+      return true;
+    }
+    return false;
+  };
+  resolver.is_valid_callback = [](void* user_data) { return true; };
+  resolver.is_valid_after_change_callback = [](void* user_data) {
+    return true;
+  };
+  resolver.destruction_callback = [](void* user_data) {};
+
+  {
+    EmbedderAssetResolver embedder_resolver(resolver);
+    EXPECT_TRUE(embedder_resolver.IsValid());
+    EXPECT_TRUE(embedder_resolver.IsValidAfterAssetManagerChange());
+    EXPECT_EQ(embedder_resolver.GetType(),
+              AssetResolver::AssetResolverType::kCustomResolver);
+
+    auto mapping = embedder_resolver.GetAsMapping("test_asset.txt");
+    ASSERT_NE(mapping, nullptr);
+    EXPECT_EQ(mapping->GetSize(), test_data.size());
+    EXPECT_EQ(std::string(reinterpret_cast<const char*>(mapping->GetMapping()),
+                          mapping->GetSize()),
+              test_data);
+
+    auto missing_mapping = embedder_resolver.GetAsMapping("missing.txt");
+    EXPECT_EQ(missing_mapping, nullptr);
+
+    EmbedderAssetResolver identical_resolver(resolver);
+    EXPECT_TRUE(embedder_resolver == identical_resolver);
+
+    // Differing by `user_data` is compared as data, so no linker optimization
+    // can make these two look alike.
+    std::string other_data = test_data;
+    FlutterAssetResolver different_user_data_resolver = resolver;
+    different_user_data_resolver.user_data = &other_data;
+    EmbedderAssetResolver different_user_data(different_user_data_resolver);
+    EXPECT_FALSE(embedder_resolver == different_user_data);
+
+    // Differing by a callback has to be done with a body that is not merely
+    // another empty function: two identical captureless lambdas may be folded
+    // into a single function by the linker (MSVC's identical COMDAT folding
+    // does exactly that), which would give them the same address and make the
+    // two resolvers compare equal. The body must stay inert and must not
+    // dereference `user_data`, which still points at the `std::string` the
+    // original resolver was built with, not at anything this callback owns.
+    FlutterAssetResolver different_destructor_resolver = resolver;
+    different_destructor_resolver.destruction_callback = [](void* user_data) {
+      static int destruction_count = 0;
+      destruction_count++;
+    };
+    EmbedderAssetResolver different_resolver(different_destructor_resolver);
+    EXPECT_FALSE(embedder_resolver == different_resolver);
+  }
+}
+
+TEST_F(EmbedderTest, EmbedderAssetResolverFreeCallback) {
+  bool asset_freed = false;
+
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = &asset_freed;
+  resolver.find_asset_callback = [](void* user_data, const char* name,
+                                    FlutterAsset* asset_out) -> bool {
+    static const char kStaticData[] = "Resource To Free";
+    asset_out->struct_size = sizeof(FlutterAsset);
+    asset_out->data = reinterpret_cast<const uint8_t*>(kStaticData);
+    asset_out->size = sizeof(kStaticData);
+    asset_out->user_data = user_data;
+    asset_out->asset_free_callback = [](void* baton) {
+      *static_cast<bool*>(baton) = true;
+    };
+    return true;
+  };
+
+  {
+    EmbedderAssetResolver embedder_resolver(resolver);
+    auto mapping = embedder_resolver.GetAsMapping("test.txt");
+    ASSERT_NE(mapping, nullptr);
+    EXPECT_FALSE(asset_freed);
+  }
+  EXPECT_TRUE(asset_freed);
+}
+
+TEST_F(EmbedderTest, EmbedderAssetResolverNullDataFreeCallback) {
+  bool asset_freed = false;
+
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = &asset_freed;
+  resolver.find_asset_callback = [](void* user_data, const char* name,
+                                    FlutterAsset* asset_out) -> bool {
+    asset_out->struct_size = sizeof(FlutterAsset);
+    asset_out->data = nullptr;
+    asset_out->size = 0;
+    asset_out->user_data = user_data;
+    asset_out->asset_free_callback = [](void* baton) {
+      *static_cast<bool*>(baton) = true;
+    };
+    return true;
+  };
+
+  {
+    EmbedderAssetResolver embedder_resolver(resolver);
+    auto mapping = embedder_resolver.GetAsMapping("test.txt");
+    // An asset that resolves successfully with no bytes is a valid, empty
+    // asset. This matches `fml::FileMapping`, which reports a zero-length file
+    // as a valid mapping with a null pointer and a size of zero, so
+    // `DirectoryAssetBundle` returns a mapping for an empty asset too.
+    ASSERT_NE(mapping, nullptr);
+    EXPECT_EQ(mapping->GetSize(), 0u);
+    EXPECT_EQ(mapping->GetMapping(), nullptr);
+    // The asset is only released once the mapping that owns it is destroyed.
+    EXPECT_FALSE(asset_freed);
+  }
+  EXPECT_TRUE(asset_freed);
+}
+
+TEST_F(EmbedderTest, EmbedderAssetResolverDestructionCallback) {
+  bool resolver_destroyed = false;
+
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = &resolver_destroyed;
+  resolver.find_asset_callback = [](void* user_data, const char* name,
+                                    FlutterAsset* asset_out) -> bool {
+    return false;
+  };
+  resolver.destruction_callback = [](void* user_data) {
+    *static_cast<bool*>(user_data) = true;
+  };
+
+  {
+    EmbedderAssetResolver embedder_resolver(resolver);
+    EXPECT_FALSE(resolver_destroyed);
+  }
+  EXPECT_TRUE(resolver_destroyed);
+}
+
+TEST_F(EmbedderTest, EmbedderCustomAssetResolversInProjectArgs) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = nullptr;
+  resolver.find_asset_callback = [](void* user_data, const char* name,
+                                    FlutterAsset* asset_out) -> bool {
+    return false;
+  };
+
+  const FlutterAssetResolver* resolvers[] = {&resolver};
+  builder.GetProjectArgs().asset_resolvers = resolvers;
+  builder.GetProjectArgs().asset_resolvers_count = 1;
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+}
+
+TEST_F(EmbedderTest, EmbedderUpdateAssetResolver) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Test invalid arguments.
+  EXPECT_EQ(FlutterEngineUpdateAssetResolver(nullptr, nullptr),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterEngineUpdateAssetResolver(engine.get(), nullptr),
+            kInvalidArguments);
+
+  FlutterAssetResolverRegistrationInfo invalid_info = {};
+  invalid_info.struct_size = sizeof(FlutterAssetResolverRegistrationInfo) - 1;
+  EXPECT_EQ(FlutterEngineUpdateAssetResolver(engine.get(), &invalid_info),
+            kInvalidArguments);
+
+  FlutterAssetResolverRegistrationInfo info = {};
+  info.struct_size = sizeof(FlutterAssetResolverRegistrationInfo);
+  info.resolver = nullptr;
+  EXPECT_EQ(FlutterEngineUpdateAssetResolver(engine.get(), &info),
+            kInvalidArguments);
+
+  FlutterAssetResolver invalid_resolver = {};
+  invalid_resolver.struct_size = sizeof(FlutterAssetResolver) - 1;
+  info.resolver = &invalid_resolver;
+  EXPECT_EQ(FlutterEngineUpdateAssetResolver(engine.get(), &info),
+            kInvalidArguments);
+
+  FlutterAssetResolver missing_callback_resolver = {};
+  missing_callback_resolver.struct_size = sizeof(FlutterAssetResolver);
+  missing_callback_resolver.find_asset_callback = nullptr;
+  info.resolver = &missing_callback_resolver;
+  EXPECT_EQ(FlutterEngineUpdateAssetResolver(engine.get(), &info),
+            kInvalidArguments);
+
+  // Test valid update.
+  FlutterAssetResolver valid_resolver = {};
+  valid_resolver.struct_size = sizeof(FlutterAssetResolver);
+  valid_resolver.user_data = nullptr;
+  valid_resolver.find_asset_callback = [](void* user_data, const char* name,
+                                          FlutterAsset* asset_out) -> bool {
+    return false;
+  };
+  info.resolver = &valid_resolver;
+  EXPECT_EQ(FlutterEngineUpdateAssetResolver(engine.get(), &info), kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderGetProcAddressesUpdateAssetResolver) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  EXPECT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+  EXPECT_EQ(procs.UpdateAssetResolver, &FlutterEngineUpdateAssetResolver);
+}
+
+TEST_F(EmbedderTest, EmbedderSpawnInvalidArguments) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterEngine spawned_engine = nullptr;
+
+  // Null parent engine.
+  EXPECT_EQ(FlutterEngineSpawn(nullptr, nullptr, &spawned_engine),
+            kInvalidArguments);
+
+  // Null config.
+  EXPECT_EQ(FlutterEngineSpawn(engine.get(), nullptr, &spawned_engine),
+            kInvalidArguments);
+
+  // Null out pointer.
+  FlutterEngineSpawnConfig valid_config = {};
+  valid_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  valid_config.renderer_config = &context.GetRendererConfig();
+  EXPECT_EQ(FlutterEngineSpawn(engine.get(), &valid_config, nullptr),
+            kInvalidArguments);
+
+  // Invalid struct_size.
+  FlutterEngineSpawnConfig invalid_size_config = {};
+  invalid_size_config.struct_size = sizeof(FlutterEngineSpawnConfig) - 1;
+  invalid_size_config.renderer_config = &context.GetRendererConfig();
+  EXPECT_EQ(
+      FlutterEngineSpawn(engine.get(), &invalid_size_config, &spawned_engine),
+      kInvalidArguments);
+
+  // Invalid renderer config type. The out-of-range cast is intentional: this
+  // test exercises the engine's validation of a renderer type it does not know
+  // about.
+  FlutterRendererConfig invalid_renderer = {};
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
+  invalid_renderer.type = static_cast<FlutterRendererType>(999);
+  FlutterEngineSpawnConfig invalid_renderer_config = {};
+  invalid_renderer_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  invalid_renderer_config.renderer_config = &invalid_renderer;
+  EXPECT_EQ(FlutterEngineSpawn(engine.get(), &invalid_renderer_config,
+                               &spawned_engine),
+            kInvalidArguments);
+
+  // Invalid project_args struct_size.
+  FlutterProjectArgs invalid_project_args = {};
+  invalid_project_args.struct_size = sizeof(size_t) - 1;
+  FlutterEngineSpawnConfig invalid_args_config = {};
+  invalid_args_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  invalid_args_config.renderer_config = &context.GetRendererConfig();
+  invalid_args_config.project_args = &invalid_project_args;
+  EXPECT_EQ(
+      FlutterEngineSpawn(engine.get(), &invalid_args_config, &spawned_engine),
+      kInvalidArguments);
+
+  // Custom task runners in project_args are rejected.
+  FlutterCustomTaskRunners custom_runners = {};
+  custom_runners.struct_size = sizeof(FlutterCustomTaskRunners);
+  FlutterProjectArgs custom_runners_args = {};
+  custom_runners_args.struct_size = sizeof(FlutterProjectArgs);
+  custom_runners_args.custom_task_runners = &custom_runners;
+  FlutterEngineSpawnConfig custom_runners_config = {};
+  custom_runners_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  custom_runners_config.renderer_config = &context.GetRendererConfig();
+  custom_runners_config.project_args = &custom_runners_args;
+  EXPECT_EQ(
+      FlutterEngineSpawn(engine.get(), &custom_runners_config, &spawned_engine),
+      kInvalidArguments);
+
+  // Entrypoint argc > 0 with null argv.
+  FlutterEngineSpawnConfig null_argv_config = {};
+  null_argv_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  null_argv_config.renderer_config = &context.GetRendererConfig();
+  null_argv_config.entrypoint_argc = 1;
+  null_argv_config.entrypoint_argv = nullptr;
+  EXPECT_EQ(
+      FlutterEngineSpawn(engine.get(), &null_argv_config, &spawned_engine),
+      kInvalidArguments);
+
+  // Entrypoint argc > 0 with null element in argv.
+  const char* null_elem_argv[] = {nullptr};
+  FlutterEngineSpawnConfig null_elem_argv_config = {};
+  null_elem_argv_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  null_elem_argv_config.renderer_config = &context.GetRendererConfig();
+  null_elem_argv_config.entrypoint_argc = 1;
+  null_elem_argv_config.entrypoint_argv = null_elem_argv;
+  EXPECT_EQ(
+      FlutterEngineSpawn(engine.get(), &null_elem_argv_config, &spawned_engine),
+      kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, EmbedderSpawnInheritsParentRendererConfig) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // `FlutterEngineSpawnConfig::renderer_config` is documented as optional: a
+  // null value means the spawned engine inherits the parent's renderer
+  // configuration.
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_config.renderer_config = nullptr;
+
+  FlutterEngine spawned_engine = nullptr;
+  ASSERT_EQ(FlutterEngineSpawn(engine.get(), &spawn_config, &spawned_engine),
+            kSuccess);
+  ASSERT_NE(spawned_engine, nullptr);
+
+  UniqueEngine unique_spawned(spawned_engine);
+}
+
+TEST_F(EmbedderTest, EmbedderSpawnDirect) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  EmbedderTestContextSoftware context_spawned;
+  EmbedderConfigBuilder spawn_builder(context_spawned);
+  spawn_builder.SetSurface(DlISize(1, 1));
+
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_config.renderer_config = &context_spawned.GetRendererConfig();
+  spawn_config.project_args = &spawn_builder.GetProjectArgs();
+
+  FlutterEngine spawned_engine = nullptr;
+  ASSERT_EQ(FlutterEngineSpawn(engine.get(), &spawn_config, &spawned_engine),
+            kSuccess);
+  ASSERT_NE(spawned_engine, nullptr);
+
+  UniqueEngine unique_spawned(spawned_engine);
+
+  // Send a window metrics event to the spawned engine.
+  FlutterWindowMetricsEvent metrics = {};
+  metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics.width = 100;
+  metrics.height = 100;
+  metrics.pixel_ratio = 1.0;
+  EXPECT_EQ(FlutterEngineSendWindowMetricsEvent(spawned_engine, &metrics),
+            kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderSpawnCustomEntrypointAndArgs) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  static fml::AutoResetWaitableEvent spawn_latch;
+  auto entrypoint = []() { spawn_latch.Signal(); };
+  context.AddFfiNativeCallback("SayHiFromCustomEntrypoint",
+                               reinterpret_cast<void*>(+entrypoint));
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  EmbedderTestContextSoftware context_spawned;
+  EmbedderConfigBuilder spawn_builder(context_spawned);
+  spawn_builder.SetSurface(DlISize(1, 1));
+
+  const char* argv[] = {"test_arg1"};
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_config.entrypoint = "customEntrypoint";
+  spawn_config.entrypoint_argc = 1;
+  spawn_config.entrypoint_argv = argv;
+  spawn_config.engine_id = 42;
+  spawn_config.renderer_config = &context_spawned.GetRendererConfig();
+  spawn_config.project_args = &spawn_builder.GetProjectArgs();
+
+  FlutterEngine spawned_engine = nullptr;
+  ASSERT_EQ(FlutterEngineSpawn(engine.get(), &spawn_config, &spawned_engine),
+            kSuccess);
+  ASSERT_NE(spawned_engine, nullptr);
+  spawn_latch.Wait();
+
+  UniqueEngine unique_spawned(spawned_engine);
+}
+
+TEST_F(EmbedderTest, EmbedderSpawnCustomAssetResolver) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  EmbedderTestContextSoftware context_spawned;
+  EmbedderConfigBuilder spawn_builder(context_spawned);
+  spawn_builder.SetSurface(DlISize(1, 1));
+
+  bool find_asset_called = false;
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = &find_asset_called;
+  resolver.find_asset_callback = [](void* user_data, const char* name,
+                                    FlutterAsset* asset_out) -> bool {
+    *reinterpret_cast<bool*>(user_data) = true;
+    return false;
+  };
+
+  const FlutterAssetResolver* resolvers[] = {&resolver};
+  spawn_builder.GetProjectArgs().asset_resolvers = resolvers;
+  spawn_builder.GetProjectArgs().asset_resolvers_count = 1;
+
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_config.renderer_config = &context_spawned.GetRendererConfig();
+  spawn_config.project_args = &spawn_builder.GetProjectArgs();
+
+  FlutterEngine spawned_engine = nullptr;
+  ASSERT_EQ(FlutterEngineSpawn(engine.get(), &spawn_config, &spawned_engine),
+            kSuccess);
+  ASSERT_NE(spawned_engine, nullptr);
+
+  UniqueEngine unique_spawned(spawned_engine);
+}
+
+TEST_F(EmbedderTest, EmbedderSpawnIndependentShutdown) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto parent_engine = builder.LaunchEngine();
+  ASSERT_TRUE(parent_engine.is_valid());
+
+  EmbedderTestContextSoftware context_spawned;
+  EmbedderConfigBuilder spawn_builder(context_spawned);
+  spawn_builder.SetSurface(DlISize(1, 1));
+
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_config.renderer_config = &context_spawned.GetRendererConfig();
+  spawn_config.project_args = &spawn_builder.GetProjectArgs();
+
+  FlutterEngine spawned_engine = nullptr;
+  ASSERT_EQ(
+      FlutterEngineSpawn(parent_engine.get(), &spawn_config, &spawned_engine),
+      kSuccess);
+  ASSERT_NE(spawned_engine, nullptr);
+
+  // Shutdown parent engine first while spawned engine remains running.
+  parent_engine.reset();
+
+  // Verify spawned engine can still handle events without crashing.
+  FlutterWindowMetricsEvent metrics = {};
+  metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics.width = 200;
+  metrics.height = 200;
+  metrics.pixel_ratio = 1.0;
+  EXPECT_EQ(FlutterEngineSendWindowMetricsEvent(spawned_engine, &metrics),
+            kSuccess);
+
+  // Shutdown spawned engine cleanly.
+  EXPECT_EQ(FlutterEngineShutdown(spawned_engine), kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderSpawnChildFirstShutdown) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto parent_engine = builder.LaunchEngine();
+  ASSERT_TRUE(parent_engine.is_valid());
+
+  EmbedderTestContextSoftware context_spawned;
+  EmbedderConfigBuilder spawn_builder(context_spawned);
+  spawn_builder.SetSurface(DlISize(1, 1));
+
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_config.renderer_config = &context_spawned.GetRendererConfig();
+  spawn_config.project_args = &spawn_builder.GetProjectArgs();
+
+  FlutterEngine spawned_engine = nullptr;
+  ASSERT_EQ(
+      FlutterEngineSpawn(parent_engine.get(), &spawn_config, &spawned_engine),
+      kSuccess);
+  ASSERT_NE(spawned_engine, nullptr);
+
+  // Shutdown spawned engine first while parent engine remains running.
+  EXPECT_EQ(FlutterEngineShutdown(spawned_engine), kSuccess);
+
+  // Verify parent engine can still handle events without crashing.
+  FlutterWindowMetricsEvent metrics = {};
+  metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics.width = 200;
+  metrics.height = 200;
+  metrics.pixel_ratio = 1.0;
+  EXPECT_EQ(FlutterEngineSendWindowMetricsEvent(parent_engine.get(), &metrics),
+            kSuccess);
+
+  // Shutdown parent engine cleanly.
+  parent_engine.reset();
+}
+
+TEST_F(EmbedderTest, EmbedderGetProcAddressesSpawn) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  EXPECT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+  EXPECT_EQ(procs.Spawn, &FlutterEngineSpawn);
+}
+
+TEST_F(EmbedderTest, EmbedderLoadDartDeferredLibraryInvalidArguments) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Null engine.
+  FlutterDartDeferredLibrary valid_lib = {};
+  valid_lib.struct_size = sizeof(FlutterDartDeferredLibrary);
+  const uint8_t dummy_data[] = {0x01, 0x02};
+  valid_lib.data = dummy_data;
+  valid_lib.data_size = sizeof(dummy_data);
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(nullptr, &valid_lib),
+            kInvalidArguments);
+
+  // Null deferred library.
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(engine.get(), nullptr),
+            kInvalidArguments);
+
+  // Invalid struct_size.
+  FlutterDartDeferredLibrary invalid_size_lib = {};
+  invalid_size_lib.struct_size = sizeof(FlutterDartDeferredLibrary) - 1;
+  invalid_size_lib.data = dummy_data;
+  invalid_size_lib.data_size = sizeof(dummy_data);
+  EXPECT_EQ(
+      FlutterEngineLoadDartDeferredLibrary(engine.get(), &invalid_size_lib),
+      kInvalidArguments);
+
+  // Missing data and instructions.
+  FlutterDartDeferredLibrary empty_lib = {};
+  empty_lib.struct_size = sizeof(FlutterDartDeferredLibrary);
+  empty_lib.loading_unit_id = 1;
+  empty_lib.data = nullptr;
+  empty_lib.instructions = nullptr;
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(engine.get(), &empty_lib),
+            kInvalidArguments);
+}
+
+TEST_F(EmbedderTest,
+       EmbedderNotifyDartDeferredLibraryLoadErrorInvalidArguments) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterDartDeferredLibraryLoadError valid_error = {};
+  valid_error.struct_size = sizeof(FlutterDartDeferredLibraryLoadError);
+  valid_error.loading_unit_id = 1;
+  valid_error.error_message = "Test error";
+  valid_error.transient = true;
+
+  // Null engine.
+  EXPECT_EQ(
+      FlutterEngineNotifyDartDeferredLibraryLoadError(nullptr, &valid_error),
+      kInvalidArguments);
+
+  // Null error.
+  EXPECT_EQ(
+      FlutterEngineNotifyDartDeferredLibraryLoadError(engine.get(), nullptr),
+      kInvalidArguments);
+
+  // Invalid struct_size.
+  FlutterDartDeferredLibraryLoadError invalid_size_error = {};
+  invalid_size_error.struct_size =
+      sizeof(FlutterDartDeferredLibraryLoadError) - 1;
+  invalid_size_error.loading_unit_id = 1;
+  invalid_size_error.error_message = "Test error";
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(
+                engine.get(), &invalid_size_error),
+            kInvalidArguments);
+
+  // Null error message.
+  FlutterDartDeferredLibraryLoadError null_msg_error = {};
+  null_msg_error.struct_size = sizeof(FlutterDartDeferredLibraryLoadError);
+  null_msg_error.loading_unit_id = 1;
+  null_msg_error.error_message = nullptr;
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(engine.get(),
+                                                            &null_msg_error),
+            kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, EmbedderLoadDartDeferredLibraryDirect) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  bool destruction_called = false;
+  const uint8_t dummy_data[] = {0x00, 0x01, 0x02, 0x03};
+  const uint8_t dummy_instructions[] = {0x10, 0x11, 0x12, 0x13};
+
+  FlutterDartDeferredLibrary deferred_library = {};
+  deferred_library.struct_size = sizeof(FlutterDartDeferredLibrary);
+  deferred_library.loading_unit_id = 42;
+  deferred_library.data = dummy_data;
+  deferred_library.data_size = sizeof(dummy_data);
+  deferred_library.instructions = dummy_instructions;
+  deferred_library.instructions_size = sizeof(dummy_instructions);
+  deferred_library.user_data = &destruction_called;
+  deferred_library.destruction_callback = [](void* user_data) {
+    *reinterpret_cast<bool*>(user_data) = true;
+  };
+
+  EXPECT_EQ(
+      FlutterEngineLoadDartDeferredLibrary(engine.get(), &deferred_library),
+      kSuccess);
+
+  // Mappings are retained while engine is running.
+  EXPECT_FALSE(destruction_called);
+
+  // Shutdown engine to release snapshot mappings and trigger destruction
+  // callback.
+  engine.reset();
+  EXPECT_TRUE(destruction_called);
+}
+
+TEST_F(EmbedderTest, EmbedderNotifyDartDeferredLibraryLoadErrorDirect) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterDartDeferredLibraryLoadError error = {};
+  error.struct_size = sizeof(FlutterDartDeferredLibraryLoadError);
+  error.loading_unit_id = 99;
+  error.error_message = "Module failed to download from network.";
+  error.transient = true;
+
+  EXPECT_EQ(
+      FlutterEngineNotifyDartDeferredLibraryLoadError(engine.get(), &error),
+      kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderDartDeferredLibraryRequestCallback) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  struct CallbackPayload {
+    int64_t loading_unit_id = -1;
+    void* user_data = nullptr;
+  };
+
+  CallbackPayload payload;
+  EmbedderConfigBuilder builder(
+      context, EmbedderConfigBuilder::InitializationPreference::kNoInitialize);
+  builder.SetAssetsPath();
+  builder.SetSnapshots();
+  builder.SetSurface(DlISize(1, 1));
+  builder.GetProjectArgs().platform_message_callback = nullptr;
+  builder.GetProjectArgs().dart_deferred_library_loader_callback =
+      [](int64_t loading_unit_id, void* user_data) {
+        auto* data = reinterpret_cast<CallbackPayload*>(user_data);
+        data->loading_unit_id = loading_unit_id;
+        data->user_data = user_data;
+      };
+
+  FlutterEngine engine = nullptr;
+  auto renderer_config = context.GetRendererConfig();
+  auto project_args = builder.GetProjectArgs();
+  ASSERT_EQ(FlutterEngineInitialize(FLUTTER_ENGINE_VERSION, &renderer_config,
+                                    &project_args, &payload, &engine),
+            kSuccess);
+  ASSERT_EQ(FlutterEngineRunInitialized(engine), kSuccess);
+
+  flutter::Shell& shell = ToEmbedderEngine(engine)->GetShell();
+  shell.GetPlatformView()->RequestDartDeferredLibrary(77);
+
+  EXPECT_EQ(payload.loading_unit_id, 77);
+  EXPECT_EQ(payload.user_data, &payload);
+
+  EXPECT_EQ(FlutterEngineShutdown(engine), kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderGetProcAddressesDeferredLibrary) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  EXPECT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+  EXPECT_EQ(procs.LoadDartDeferredLibrary,
+            &FlutterEngineLoadDartDeferredLibrary);
+  EXPECT_EQ(procs.NotifyDartDeferredLibraryLoadError,
+            &FlutterEngineNotifyDartDeferredLibraryLoadError);
+}
+
+TEST_F(EmbedderTest, EmbedderNotifyCreatedInvalidArguments) {
+  EXPECT_EQ(FlutterEngineNotifyCreated(nullptr), kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, EmbedderNotifyDestroyedInvalidArguments) {
+  EXPECT_EQ(FlutterEngineNotifyDestroyed(nullptr), kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, EmbedderNotifyCreatedAndDestroyedDirect) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  EXPECT_EQ(FlutterEngineNotifyDestroyed(engine.get()), kSuccess);
+  EXPECT_EQ(FlutterEngineNotifyCreated(engine.get()), kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderRasterContextSetupAndTeardownCallbacks) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  struct RasterContextState {
+    int setup_count = 0;
+    int teardown_count = 0;
+  };
+
+  RasterContextState state;
+  EmbedderConfigBuilder builder(
+      context, EmbedderConfigBuilder::InitializationPreference::kNoInitialize);
+  builder.SetAssetsPath();
+  builder.SetSnapshots();
+  builder.SetSurface(DlISize(1, 1));
+  builder.GetProjectArgs().platform_message_callback = nullptr;
+  builder.GetProjectArgs().raster_context_setup_callback = [](void* user_data) {
+    auto* s = reinterpret_cast<RasterContextState*>(user_data);
+    s->setup_count++;
+  };
+  builder.GetProjectArgs().raster_context_teardown_callback =
+      [](void* user_data) {
+        auto* s = reinterpret_cast<RasterContextState*>(user_data);
+        s->teardown_count++;
+      };
+
+  FlutterEngine engine = nullptr;
+  auto renderer_config = context.GetRendererConfig();
+  auto project_args = builder.GetProjectArgs();
+  ASSERT_EQ(FlutterEngineInitialize(FLUTTER_ENGINE_VERSION, &renderer_config,
+                                    &project_args, &state, &engine),
+            kSuccess);
+  ASSERT_EQ(FlutterEngineRunInitialized(engine), kSuccess);
+
+  // Initial engine start should have triggered setup callback once.
+  EXPECT_EQ(state.setup_count, 1);
+  EXPECT_EQ(state.teardown_count, 0);
+
+  // Destroying surface should trigger teardown callback.
+  EXPECT_EQ(FlutterEngineNotifyDestroyed(engine), kSuccess);
+  EXPECT_EQ(state.setup_count, 1);
+  EXPECT_EQ(state.teardown_count, 1);
+
+  // Recreating surface should trigger setup callback.
+  EXPECT_EQ(FlutterEngineNotifyCreated(engine), kSuccess);
+  EXPECT_EQ(state.setup_count, 2);
+  EXPECT_EQ(state.teardown_count, 1);
+
+  // Engine shutdown triggers final teardown callback.
+  EXPECT_EQ(FlutterEngineShutdown(engine), kSuccess);
+  EXPECT_EQ(state.setup_count, 2);
+  EXPECT_EQ(state.teardown_count, 2);
+}
+
+TEST_F(EmbedderTest, EmbedderGetProcAddressesRasterContext) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  EXPECT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+  EXPECT_EQ(procs.NotifyCreated, &FlutterEngineNotifyCreated);
+  EXPECT_EQ(procs.NotifyDestroyed, &FlutterEngineNotifyDestroyed);
+}
+
+TEST_F(EmbedderTest, EmbedderSemanticsNode2ExtendedFieldsDirect) {
+  SemanticsNode node;
+  node.id = 42;
+  node.label = "Submit Form";
+  node.hint = "Double tap to submit";
+  node.value = "Active";
+  node.increasedValue = "More";
+  node.decreasedValue = "Less";
+  node.tooltip = "Submission Tooltip";
+  node.identifier = "submit_button_unique_id";
+  node.headingLevel = 2;
+  node.textDirection = 2;  // LTR
+  node.maxValueLength = 100;
+  node.currentValueLength = 25;
+  node.traversalParent = 10;
+  node.minValue = "1.0";
+  node.maxValue = "10.0";
+  node.linkUrl = "https://flutter.dev";
+  node.role = SemanticsRole::kTab;
+  node.validationResult = SemanticsValidationResult::kValid;
+  node.locale = "en-US";
+  node.rect = SkRect::MakeXYWH(10.0f, 20.0f, 100.0f, 50.0f);
+  node.transform = SkM44(1.0f, 0.0f, 0.0f, 15.0f,         //
+                         0.0f, 1.0f, 0.0f, 25.0f,         //
+                         0.0f, 0.0f, 1.0f, 0.0f,          //
+                         0.0f, 0.0f, 0.0f, 1.0f);         //
+  node.hitTestTransform = SkM44(2.0f, 0.0f, 0.0f, 30.0f,  //
+                                0.0f, 2.0f, 0.0f, 50.0f,  //
+                                0.0f, 0.0f, 1.0f, 0.0f,   //
+                                0.0f, 0.0f, 0.0f, 1.0f);  //
+  node.childrenInTraversalOrder = {43, 44};
+  node.childrenInHitTestOrder = {44, 43};
+  node.customAccessibilityActions = {101};
+
+  CustomAccessibilityAction custom_action;
+  custom_action.id = 101;
+  custom_action.overrideId = -1;
+  custom_action.label = "Custom Swipe";
+  custom_action.hint = "Performs custom swipe";
+
+  SemanticsNodeUpdates node_updates;
+  node_updates[node.id] = node;
+
+  CustomAccessibilityActionUpdates action_updates;
+  action_updates[custom_action.id] = custom_action;
+
+  const int64_t kTestViewId = 12345;
+  EmbedderSemanticsUpdate2 update(kTestViewId, node_updates, action_updates);
+  FlutterSemanticsUpdate2* raw_update = update.get();
+
+  ASSERT_NE(raw_update, nullptr);
+  EXPECT_EQ(raw_update->struct_size, sizeof(FlutterSemanticsUpdate2));
+  EXPECT_EQ(raw_update->view_id, kTestViewId);
+  EXPECT_EQ(raw_update->node_count, 1u);
+  EXPECT_EQ(raw_update->custom_action_count, 1u);
+
+  const FlutterSemanticsNode2* node2 = raw_update->nodes[0];
+  ASSERT_NE(node2, nullptr);
+  EXPECT_EQ(node2->struct_size, sizeof(FlutterSemanticsNode2));
+  EXPECT_EQ(node2->id, 42);
+  EXPECT_STREQ(node2->label, "Submit Form");
+  EXPECT_STREQ(node2->hint, "Double tap to submit");
+  EXPECT_STREQ(node2->value, "Active");
+  EXPECT_STREQ(node2->increased_value, "More");
+  EXPECT_STREQ(node2->decreased_value, "Less");
+  EXPECT_STREQ(node2->tooltip, "Submission Tooltip");
+  EXPECT_STREQ(node2->identifier, "submit_button_unique_id");
+  EXPECT_EQ(node2->heading_level, 2);
+  EXPECT_EQ(node2->text_direction, kFlutterTextDirectionLTR);
+  EXPECT_EQ(node2->rect.left, 10.0);
+  EXPECT_EQ(node2->rect.top, 20.0);
+  EXPECT_EQ(node2->rect.right, 110.0);
+  EXPECT_EQ(node2->rect.bottom, 70.0);
+
+  // Extended semantics fields
+  EXPECT_EQ(node2->max_value_length, 100);
+  EXPECT_EQ(node2->current_value_length, 25);
+  EXPECT_EQ(node2->traversal_parent, 10);
+  EXPECT_STREQ(node2->min_value, "1.0");
+  EXPECT_STREQ(node2->max_value, "10.0");
+  EXPECT_STREQ(node2->link_url, "https://flutter.dev");
+  EXPECT_EQ(node2->role, kFlutterSemanticsRoleTab);
+  EXPECT_EQ(node2->validation_result, kFlutterSemanticsValidationResultValid);
+  EXPECT_STREQ(node2->locale, "en-US");
+
+  // Transform check
+  EXPECT_DOUBLE_EQ(node2->transform.scaleX, 1.0);
+  EXPECT_DOUBLE_EQ(node2->transform.transX, 15.0);
+  EXPECT_DOUBLE_EQ(node2->transform.scaleY, 1.0);
+  EXPECT_DOUBLE_EQ(node2->transform.transY, 25.0);
+
+  // Hit test transform check
+  EXPECT_DOUBLE_EQ(node2->hit_test_transform.scaleX, 2.0);
+  EXPECT_DOUBLE_EQ(node2->hit_test_transform.transX, 30.0);
+  EXPECT_DOUBLE_EQ(node2->hit_test_transform.scaleY, 2.0);
+  EXPECT_DOUBLE_EQ(node2->hit_test_transform.transY, 50.0);
+
+  // Children order
+  EXPECT_EQ(node2->child_count, 2u);
+  EXPECT_EQ(node2->children_in_traversal_order[0], 43);
+  EXPECT_EQ(node2->children_in_traversal_order[1], 44);
+  EXPECT_EQ(node2->children_in_hit_test_order[0], 44);
+  EXPECT_EQ(node2->children_in_hit_test_order[1], 43);
+
+  // Custom actions
+  EXPECT_EQ(node2->custom_accessibility_actions_count, 1u);
+  EXPECT_EQ(node2->custom_accessibility_actions[0], 101);
+
+  const FlutterSemanticsCustomAction2* action2 = raw_update->custom_actions[0];
+  ASSERT_NE(action2, nullptr);
+  EXPECT_EQ(action2->struct_size, sizeof(FlutterSemanticsCustomAction2));
+  EXPECT_EQ(action2->id, 101);
+  // The engine forwards the framework's "no override action" sentinel (-1)
+  // verbatim, so the expected value is deliberately out of the enum's range.
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
+  EXPECT_EQ(action2->override_action, static_cast<FlutterSemanticsAction>(-1));
+  EXPECT_STREQ(action2->label, "Custom Swipe");
+  EXPECT_STREQ(action2->hint, "Performs custom swipe");
+}
+
+TEST_F(EmbedderTest, EmbedderSemanticsNode2DefaultValues) {
+  SemanticsNode node;
+  node.id = 1;
+
+  SemanticsNodeUpdates node_updates;
+  node_updates[node.id] = node;
+
+  CustomAccessibilityActionUpdates action_updates;
+
+  EmbedderSemanticsUpdate2 update(0, node_updates, action_updates);
+  FlutterSemanticsUpdate2* raw_update = update.get();
+
+  ASSERT_NE(raw_update, nullptr);
+  EXPECT_EQ(raw_update->node_count, 1u);
+  const FlutterSemanticsNode2* node2 = raw_update->nodes[0];
+  ASSERT_NE(node2, nullptr);
+  EXPECT_EQ(node2->struct_size, sizeof(FlutterSemanticsNode2));
+  EXPECT_EQ(node2->max_value_length, -1);
+  EXPECT_EQ(node2->current_value_length, -1);
+  EXPECT_EQ(node2->traversal_parent, 0);
+  EXPECT_STREQ(node2->min_value, "");
+  EXPECT_STREQ(node2->max_value, "");
+  EXPECT_STREQ(node2->link_url, "");
+  EXPECT_EQ(node2->role, kFlutterSemanticsRoleNone);
+  EXPECT_EQ(node2->validation_result, kFlutterSemanticsValidationResultNone);
+  EXPECT_STREQ(node2->locale, "");
+}
+
+TEST_F(EmbedderTest, EmbedderSemanticsNode2StringAttributes) {
+  SemanticsNode node;
+  node.id = 1;
+  node.label = "Spell out this text";
+
+  auto locale_attr = std::make_shared<LocaleStringAttribute>();
+  locale_attr->start = 0;
+  locale_attr->end = 5;
+  locale_attr->type = StringAttributeType::kLocale;
+  locale_attr->locale = "en-GB";
+
+  auto spell_out_attr = std::make_shared<SpellOutStringAttribute>();
+  spell_out_attr->start = 6;
+  spell_out_attr->end = 9;
+  spell_out_attr->type = StringAttributeType::kSpellOut;
+
+  node.labelAttributes = {locale_attr, spell_out_attr};
+
+  SemanticsNodeUpdates node_updates;
+  node_updates[node.id] = node;
+  CustomAccessibilityActionUpdates action_updates;
+
+  EmbedderSemanticsUpdate2 update(0, node_updates, action_updates);
+  FlutterSemanticsUpdate2* raw_update = update.get();
+
+  ASSERT_NE(raw_update, nullptr);
+  ASSERT_EQ(raw_update->node_count, 1u);
+  const FlutterSemanticsNode2* node2 = raw_update->nodes[0];
+  ASSERT_NE(node2, nullptr);
+  EXPECT_EQ(node2->label_attribute_count, 2u);
+  ASSERT_NE(node2->label_attributes, nullptr);
+
+  const FlutterStringAttribute* attr0 = node2->label_attributes[0];
+  ASSERT_NE(attr0, nullptr);
+  EXPECT_EQ(attr0->struct_size, sizeof(FlutterStringAttribute));
+  EXPECT_EQ(attr0->start, 0u);
+  EXPECT_EQ(attr0->end, 5u);
+  EXPECT_EQ(attr0->type, FlutterStringAttributeType::kLocale);
+  ASSERT_NE(attr0->locale, nullptr);
+  EXPECT_EQ(attr0->locale->struct_size, sizeof(FlutterLocaleStringAttribute));
+  EXPECT_STREQ(attr0->locale->locale, "en-GB");
+
+  const FlutterStringAttribute* attr1 = node2->label_attributes[1];
+  ASSERT_NE(attr1, nullptr);
+  EXPECT_EQ(attr1->struct_size, sizeof(FlutterStringAttribute));
+  EXPECT_EQ(attr1->start, 6u);
+  EXPECT_EQ(attr1->end, 9u);
+  EXPECT_EQ(attr1->type, FlutterStringAttributeType::kSpellOut);
+  ASSERT_NE(attr1->spell_out, nullptr);
+  EXPECT_EQ(attr1->spell_out->struct_size,
+            sizeof(FlutterSpellOutStringAttribute));
+}
+
+TEST_F(EmbedderTest, EmbedderSendSemanticsActionValidation) {
+  EXPECT_EQ(FlutterEngineSendSemanticsAction(nullptr, nullptr),
+            kInvalidArguments);
+
+  FlutterSendSemanticsActionInfo info = {};
+  info.struct_size = sizeof(FlutterSendSemanticsActionInfo);
+  info.node_id = 0;
+  info.action = kFlutterSemanticsActionTap;
+
+  EXPECT_EQ(FlutterEngineSendSemanticsAction(nullptr, &info),
+            kInvalidArguments);
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterSendSemanticsActionInfo invalid_size_info = {};
+  invalid_size_info.struct_size = sizeof(FlutterSendSemanticsActionInfo) - 1;
+  EXPECT_EQ(FlutterEngineSendSemanticsAction(engine.get(), &invalid_size_info),
+            kInvalidArguments);
+
+  FlutterSendSemanticsActionInfo null_data_with_length = {};
+  null_data_with_length.struct_size = sizeof(FlutterSendSemanticsActionInfo);
+  null_data_with_length.node_id = 0;
+  null_data_with_length.action = kFlutterSemanticsActionTap;
+  null_data_with_length.data = nullptr;
+  null_data_with_length.data_length = 16;
+  EXPECT_EQ(
+      FlutterEngineSendSemanticsAction(engine.get(), &null_data_with_length),
+      kInvalidArguments);
+
+  EXPECT_EQ(FlutterEngineSendSemanticsAction(engine.get(), &info), kSuccess);
+
+  uint8_t payload[] = {0x01, 0x02, 0x03, 0x04};
+  FlutterSendSemanticsActionInfo data_info = {};
+  data_info.struct_size = sizeof(FlutterSendSemanticsActionInfo);
+  data_info.node_id = 0;
+  data_info.action = kFlutterSemanticsActionSetSelection;
+  data_info.data = payload;
+  data_info.data_length = sizeof(payload);
+  EXPECT_EQ(FlutterEngineSendSemanticsAction(engine.get(), &data_info),
+            kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderScreenshotInvalidArguments) {
+  FlutterScreenshotRequest request = {};
+  request.struct_size = sizeof(FlutterScreenshotRequest);
+  request.type = kFlutterScreenshotTypeUncompressedImage;
+
+  FlutterScreenshot screenshot = {};
+  screenshot.struct_size = sizeof(FlutterScreenshot);
+
+  EXPECT_EQ(FlutterEngineScreenshot(nullptr, &request, &screenshot),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterEngineScreenshot(nullptr, nullptr, &screenshot),
+            kInvalidArguments);
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  EXPECT_EQ(FlutterEngineScreenshot(engine.get(), nullptr, &screenshot),
+            kInvalidArguments);
+
+  FlutterScreenshotRequest invalid_request_size = {};
+  invalid_request_size.struct_size = sizeof(FlutterScreenshotRequest) - 1;
+  invalid_request_size.type = kFlutterScreenshotTypeUncompressedImage;
+  EXPECT_EQ(
+      FlutterEngineScreenshot(engine.get(), &invalid_request_size, &screenshot),
+      kInvalidArguments);
+
+  FlutterScreenshotRequest invalid_request_type = {};
+  invalid_request_type.struct_size = sizeof(FlutterScreenshotRequest);
+  // The out-of-range cast is intentional: this test exercises the engine's
+  // validation of a screenshot type it does not know about.
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
+  invalid_request_type.type = static_cast<FlutterScreenshotType>(999);
+  EXPECT_EQ(
+      FlutterEngineScreenshot(engine.get(), &invalid_request_type, &screenshot),
+      kInvalidArguments);
+
+  EXPECT_EQ(FlutterEngineScreenshot(engine.get(), &request, nullptr),
+            kInvalidArguments);
+
+  FlutterScreenshot invalid_screenshot_size = {};
+  invalid_screenshot_size.struct_size = sizeof(FlutterScreenshot) - 1;
+  EXPECT_EQ(
+      FlutterEngineScreenshot(engine.get(), &request, &invalid_screenshot_size),
+      kInvalidArguments);
+
+  EXPECT_EQ(FlutterEngineFreeScreenshot(nullptr), kInvalidArguments);
+
+  FlutterScreenshot invalid_free_size = {};
+  invalid_free_size.struct_size = sizeof(FlutterScreenshot) - 1;
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&invalid_free_size), kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, EmbedderScreenshotBeforeRender) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterScreenshotRequest request = {};
+  request.struct_size = sizeof(FlutterScreenshotRequest);
+  request.type = kFlutterScreenshotTypeUncompressedImage;
+
+  FlutterScreenshot screenshot = {};
+  screenshot.struct_size = sizeof(FlutterScreenshot);
+
+  EXPECT_EQ(FlutterEngineScreenshot(engine.get(), &request, &screenshot),
+            kInternalInconsistency);
+}
+
+TEST_F(EmbedderTest, EmbedderScreenshotUncompressed) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("draw_solid_red");
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  fml::AutoResetWaitableEvent callback_latch;
+  VoidCallback callback = [](void* user_data) {
+    auto* latch = static_cast<fml::AutoResetWaitableEvent*>(user_data);
+    latch->Signal();
+  };
+
+  ASSERT_EQ(FlutterEngineSetNextFrameCallback(engine.get(), callback,
+                                              &callback_latch),
+            kSuccess);
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  callback_latch.Wait();
+
+  FlutterScreenshotRequest request = {};
+  request.struct_size = sizeof(FlutterScreenshotRequest);
+  request.type = kFlutterScreenshotTypeUncompressedImage;
+  request.base64_encode = false;
+
+  FlutterScreenshot screenshot = {};
+  screenshot.struct_size = sizeof(FlutterScreenshot);
+
+  ASSERT_EQ(FlutterEngineScreenshot(engine.get(), &request, &screenshot),
+            kSuccess);
+  EXPECT_NE(screenshot.data, nullptr);
+  EXPECT_GT(screenshot.data_length, 0u);
+  EXPECT_EQ(screenshot.width, 800u);
+  EXPECT_EQ(screenshot.height, 600u);
+  EXPECT_NE(screenshot.format_description, nullptr);
+  EXPECT_NE(screenshot.destruction_callback, nullptr);
+
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
+  EXPECT_EQ(screenshot.data, nullptr);
+  EXPECT_EQ(screenshot.data_length, 0u);
+  EXPECT_EQ(screenshot.format_description, nullptr);
+  EXPECT_EQ(screenshot.destruction_callback, nullptr);
+
+  // Calling free again safely no-ops.
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderScreenshotCompressedPng) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("draw_solid_red");
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  fml::AutoResetWaitableEvent callback_latch;
+  VoidCallback callback = [](void* user_data) {
+    auto* latch = static_cast<fml::AutoResetWaitableEvent*>(user_data);
+    latch->Signal();
+  };
+
+  ASSERT_EQ(FlutterEngineSetNextFrameCallback(engine.get(), callback,
+                                              &callback_latch),
+            kSuccess);
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 400;
+  event.height = 300;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  callback_latch.Wait();
+
+  FlutterScreenshotRequest request = {};
+  request.struct_size = sizeof(FlutterScreenshotRequest);
+  request.type = kFlutterScreenshotTypeCompressedImage;
+  request.base64_encode = false;
+
+  FlutterScreenshot screenshot = {};
+  screenshot.struct_size = sizeof(FlutterScreenshot);
+
+  ASSERT_EQ(FlutterEngineScreenshot(engine.get(), &request, &screenshot),
+            kSuccess);
+  ASSERT_NE(screenshot.data, nullptr);
+  ASSERT_GT(screenshot.data_length, 8u);
+  EXPECT_EQ(screenshot.width, 400u);
+  EXPECT_EQ(screenshot.height, 300u);
+
+  // Verify PNG magic header: 0x89 'P' 'N' 'G' 0x0D 0x0A 0x1A 0x0A
+  EXPECT_EQ(screenshot.data[0], 0x89);
+  EXPECT_EQ(screenshot.data[1], 'P');
+  EXPECT_EQ(screenshot.data[2], 'N');
+  EXPECT_EQ(screenshot.data[3], 'G');
+  EXPECT_EQ(screenshot.data[4], 0x0D);
+  EXPECT_EQ(screenshot.data[5], 0x0A);
+  EXPECT_EQ(screenshot.data[6], 0x1A);
+  EXPECT_EQ(screenshot.data[7], 0x0A);
+
+  ASSERT_NE(screenshot.destruction_callback, nullptr);
+  screenshot.destruction_callback(screenshot.user_data);
+}
+
+TEST_F(EmbedderTest, EmbedderScreenshotBase64Encoded) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("draw_solid_red");
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  fml::AutoResetWaitableEvent callback_latch;
+  VoidCallback callback = [](void* user_data) {
+    auto* latch = static_cast<fml::AutoResetWaitableEvent*>(user_data);
+    latch->Signal();
+  };
+
+  ASSERT_EQ(FlutterEngineSetNextFrameCallback(engine.get(), callback,
+                                              &callback_latch),
+            kSuccess);
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 100;
+  event.height = 100;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  callback_latch.Wait();
+
+  FlutterScreenshotRequest request = {};
+  request.struct_size = sizeof(FlutterScreenshotRequest);
+  request.type = kFlutterScreenshotTypeCompressedImage;
+  request.base64_encode = true;
+
+  FlutterScreenshot screenshot = {};
+  screenshot.struct_size = sizeof(FlutterScreenshot);
+
+  ASSERT_EQ(FlutterEngineScreenshot(engine.get(), &request, &screenshot),
+            kSuccess);
+  ASSERT_NE(screenshot.data, nullptr);
+  EXPECT_GT(screenshot.data_length, 0u);
+
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderGetProcAddressesScreenshot) {
+  FlutterEngineProcTable table = {};
+  table.struct_size = sizeof(FlutterEngineProcTable);
+
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&table), kSuccess);
+  EXPECT_EQ(table.Screenshot, &FlutterEngineScreenshot);
+  EXPECT_EQ(table.FreeScreenshot, &FlutterEngineFreeScreenshot);
+}
+
+TEST_F(EmbedderTest, EmbedderCallbackInformationInvalidArguments) {
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(42, nullptr),
+            kInvalidArguments);
+
+  FlutterCallbackInformation invalid_size_info = {};
+  invalid_size_info.struct_size = sizeof(FlutterCallbackInformation) - 1;
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(42, &invalid_size_info),
+            kInvalidArguments);
+
+  EXPECT_EQ(FlutterEngineSetCallbackCachePath(nullptr), kInvalidArguments);
+
+  int64_t handle = 0;
+  EXPECT_EQ(FlutterEngineGetCallbackHandle(nullptr, &handle),
+            kInvalidArguments);
+
+  FlutterCallbackInformation null_name_info = {};
+  null_name_info.struct_size = sizeof(FlutterCallbackInformation);
+  null_name_info.name = nullptr;
+  null_name_info.library_path = "lib.dart";
+  EXPECT_EQ(FlutterEngineGetCallbackHandle(&null_name_info, &handle),
+            kInvalidArguments);
+
+  FlutterCallbackInformation null_lib_info = {};
+  null_lib_info.struct_size = sizeof(FlutterCallbackInformation);
+  null_lib_info.name = "name";
+  null_lib_info.library_path = nullptr;
+  EXPECT_EQ(FlutterEngineGetCallbackHandle(&null_lib_info, &handle),
+            kInvalidArguments);
+
+  FlutterCallbackInformation valid_info = {};
+  valid_info.struct_size = sizeof(FlutterCallbackInformation);
+  valid_info.name = "name";
+  valid_info.library_path = "lib.dart";
+  EXPECT_EQ(FlutterEngineGetCallbackHandle(&valid_info, nullptr),
+            kInvalidArguments);
+
+  FlutterCallbackInformation invalid_get_handle_size = {};
+  invalid_get_handle_size.struct_size = sizeof(FlutterCallbackInformation) - 1;
+  invalid_get_handle_size.name = "name";
+  invalid_get_handle_size.library_path = "lib.dart";
+  EXPECT_EQ(FlutterEngineGetCallbackHandle(&invalid_get_handle_size, &handle),
+            kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, EmbedderCallbackInformationNotFound) {
+  FlutterCallbackInformation info = {};
+  info.struct_size = sizeof(FlutterCallbackInformation);
+
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(999999999999LL, &info),
+            kInternalInconsistency);
+}
+
+TEST_F(EmbedderTest, EmbedderCallbackInformationTopLevelFunction) {
+  FlutterCallbackInformation reg_info = {};
+  reg_info.struct_size = sizeof(FlutterCallbackInformation);
+  reg_info.name = "myCallback";
+  reg_info.class_name = nullptr;
+  reg_info.library_path = "package:my_app/main.dart";
+
+  int64_t handle = 0;
+  ASSERT_EQ(FlutterEngineGetCallbackHandle(&reg_info, &handle), kSuccess);
+  EXPECT_NE(handle, 0);
+
+  FlutterCallbackInformation info = {};
+  info.struct_size = sizeof(FlutterCallbackInformation);
+  ASSERT_EQ(FlutterEngineGetCallbackInformation(handle, &info), kSuccess);
+  EXPECT_EQ(info.struct_size, sizeof(FlutterCallbackInformation));
+  EXPECT_STREQ(info.name, "myCallback");
+  EXPECT_EQ(info.class_name, nullptr);
+  EXPECT_STREQ(info.library_path, "package:my_app/main.dart");
+}
+
+TEST_F(EmbedderTest, EmbedderCallbackInformationStaticMethod) {
+  FlutterCallbackInformation reg_info = {};
+  reg_info.struct_size = sizeof(FlutterCallbackInformation);
+  reg_info.name = "onNotification";
+  reg_info.class_name = "MyPlugin";
+  reg_info.library_path = "package:my_plugin/my_plugin.dart";
+
+  int64_t handle = 0;
+  ASSERT_EQ(FlutterEngineGetCallbackHandle(&reg_info, &handle), kSuccess);
+  EXPECT_NE(handle, 0);
+
+  FlutterCallbackInformation info = {};
+  info.struct_size = sizeof(FlutterCallbackInformation);
+  ASSERT_EQ(FlutterEngineGetCallbackInformation(handle, &info), kSuccess);
+  EXPECT_EQ(info.struct_size, sizeof(FlutterCallbackInformation));
+  EXPECT_STREQ(info.name, "onNotification");
+  EXPECT_STREQ(info.class_name, "MyPlugin");
+  EXPECT_STREQ(info.library_path, "package:my_plugin/my_plugin.dart");
+}
+
+TEST_F(EmbedderTest, EmbedderCallbackCacheDiskPersistence) {
+  fml::ScopedTemporaryDirectory temp_dir;
+  ASSERT_TRUE(temp_dir.fd().is_valid());
+
+  ASSERT_EQ(FlutterEngineSetCallbackCachePath(temp_dir.path().c_str()),
+            kSuccess);
+
+  FlutterCallbackInformation reg_info = {};
+  reg_info.struct_size = sizeof(FlutterCallbackInformation);
+  reg_info.name = "persistedCallback";
+  reg_info.class_name = "PersistedClass";
+  reg_info.library_path = "package:test/test.dart";
+
+  int64_t handle = 0;
+  ASSERT_EQ(FlutterEngineGetCallbackHandle(&reg_info, &handle), kSuccess);
+  EXPECT_NE(handle, 0);
+
+  // Verify that the callback cache JSON was saved to the specified disk path.
+  std::string cache_file =
+      fml::paths::JoinPaths({temp_dir.path(), "flutter_callback_cache.json"});
+  EXPECT_TRUE(fml::IsFile(cache_file));
+
+  ASSERT_EQ(FlutterEngineLoadCallbackCache(), kSuccess);
+
+  FlutterCallbackInformation info = {};
+  info.struct_size = sizeof(FlutterCallbackInformation);
+  ASSERT_EQ(FlutterEngineGetCallbackInformation(handle, &info), kSuccess);
+  EXPECT_STREQ(info.name, "persistedCallback");
+  EXPECT_STREQ(info.class_name, "PersistedClass");
+  EXPECT_STREQ(info.library_path, "package:test/test.dart");
+}
+
+TEST_F(EmbedderTest, EmbedderGetProcAddressesCallbackInformation) {
+  FlutterEngineProcTable table = {};
+  table.struct_size = sizeof(FlutterEngineProcTable);
+
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&table), kSuccess);
+  EXPECT_EQ(table.GetCallbackInformation, &FlutterEngineGetCallbackInformation);
+  EXPECT_EQ(table.SetCallbackCachePath, &FlutterEngineSetCallbackCachePath);
+  EXPECT_EQ(table.LoadCallbackCache, &FlutterEngineLoadCallbackCache);
+  EXPECT_EQ(table.GetCallbackHandle, &FlutterEngineGetCallbackHandle);
+}
+
+TEST_F(EmbedderTest, EmbedderPlatformViewMutationsClipRoundSuperellipse) {
+  MutatorsStack stack;
+  stack.PushClipRSE(DlRoundSuperellipse::MakeRectXY(
+      DlRect::MakeLTRB(10.0f, 20.0f, 110.0f, 120.0f), DlSize(8.0f, 12.0f)));
+
+  EmbeddedViewParams params(DlMatrix(), DlSize(100.0f, 100.0f), stack);
+  EmbedderLayers layers(DlISize(800, 600), 1.0, DlMatrix(), 0);
+  layers.PushPlatformViewLayer(42, params);
+
+  bool callback_invoked = false;
+  layers.InvokePresentCallback(0, [&](FlutterViewId view_id,
+                                      const std::vector<const FlutterLayer*>&
+                                          presented_layers) {
+    callback_invoked = true;
+    EXPECT_EQ(view_id, 0);
+    EXPECT_EQ(presented_layers.size(), 1u);
+    const auto* layer = presented_layers[0];
+    EXPECT_NE(layer, nullptr);
+    EXPECT_EQ(layer->type, kFlutterLayerContentTypePlatformView);
+    const auto* view = layer->platform_view;
+    EXPECT_NE(view, nullptr);
+    EXPECT_EQ(view->identifier, 42);
+    EXPECT_EQ(view->mutations_count, 1u);
+    const auto* mutation = view->mutations[0];
+    EXPECT_NE(mutation, nullptr);
+    EXPECT_EQ(mutation->type,
+              kFlutterPlatformViewMutationTypeClipRoundSuperellipse);
+    EXPECT_DOUBLE_EQ(mutation->clip_round_superellipse.rect.left, 10.0);
+    EXPECT_DOUBLE_EQ(mutation->clip_round_superellipse.rect.top, 20.0);
+    EXPECT_DOUBLE_EQ(mutation->clip_round_superellipse.rect.right, 110.0);
+    EXPECT_DOUBLE_EQ(mutation->clip_round_superellipse.rect.bottom, 120.0);
+    EXPECT_DOUBLE_EQ(
+        mutation->clip_round_superellipse.upper_left_corner_radius.width, 8.0);
+    EXPECT_DOUBLE_EQ(
+        mutation->clip_round_superellipse.upper_left_corner_radius.height,
+        12.0);
+    EXPECT_DOUBLE_EQ(
+        mutation->clip_round_superellipse.upper_right_corner_radius.width, 8.0);
+    EXPECT_DOUBLE_EQ(
+        mutation->clip_round_superellipse.upper_right_corner_radius.height,
+        12.0);
+    EXPECT_DOUBLE_EQ(
+        mutation->clip_round_superellipse.lower_right_corner_radius.width, 8.0);
+    EXPECT_DOUBLE_EQ(
+        mutation->clip_round_superellipse.lower_right_corner_radius.height,
+        12.0);
+    EXPECT_DOUBLE_EQ(
+        mutation->clip_round_superellipse.lower_left_corner_radius.width, 8.0);
+    EXPECT_DOUBLE_EQ(
+        mutation->clip_round_superellipse.lower_left_corner_radius.height,
+        12.0);
+    return true;
+  });
+  EXPECT_TRUE(callback_invoked);
+}
+
+TEST_F(EmbedderTest, EmbedderPlatformViewMutationsClipPathLinearAndCurves) {
+  SkPathBuilder builder;
+  builder.moveTo(10.0f, 20.0f);
+  builder.lineTo(30.0f, 40.0f);
+  builder.quadTo(50.0f, 60.0f, 70.0f, 80.0f);
+  builder.conicTo(90.0f, 100.0f, 110.0f, 120.0f, 0.75f);
+  builder.cubicTo(130.0f, 140.0f, 150.0f, 160.0f, 170.0f, 180.0f);
+  builder.close();
+  DlPath dl_path(builder.detach());
+
+  MutatorsStack stack;
+  stack.PushClipPath(dl_path);
+
+  EmbeddedViewParams params(DlMatrix(), DlSize(200.0f, 200.0f), stack);
+  EmbedderLayers layers(DlISize(800, 600), 1.0, DlMatrix(), 0);
+  layers.PushPlatformViewLayer(101, params);
+
+  bool callback_invoked = false;
+  layers.InvokePresentCallback(
+      0, [&](FlutterViewId view_id,
+             const std::vector<const FlutterLayer*>& presented_layers) {
+        callback_invoked = true;
+        EXPECT_EQ(view_id, 0);
+        EXPECT_EQ(presented_layers.size(), 1u);
+        const auto* layer = presented_layers[0];
+        EXPECT_NE(layer, nullptr);
+        EXPECT_EQ(layer->type, kFlutterLayerContentTypePlatformView);
+        const auto* view = layer->platform_view;
+        EXPECT_NE(view, nullptr);
+        EXPECT_EQ(view->identifier, 101);
+        EXPECT_EQ(view->mutations_count, 1u);
+        const auto* mutation = view->mutations[0];
+        EXPECT_NE(mutation, nullptr);
+        EXPECT_EQ(mutation->type, kFlutterPlatformViewMutationTypeClipPath);
+        EXPECT_EQ(mutation->clip_path.struct_size, sizeof(FlutterPath));
+        EXPECT_EQ(mutation->clip_path.fill_type, kFlutterPathFillTypeNonZero);
+        EXPECT_EQ(mutation->clip_path.segments_count, 7u);
+        EXPECT_NE(mutation->clip_path.segments, nullptr);
+
+        if (mutation->clip_path.segments_count >= 7) {
+          // Segment 0: MoveTo (10, 20)
+          EXPECT_EQ(mutation->clip_path.segments[0].verb, kFlutterPathVerbMove);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[0].points[0].x, 10.0);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[0].points[0].y, 20.0);
+
+          // Segment 1: LineTo (30, 40)
+          EXPECT_EQ(mutation->clip_path.segments[1].verb, kFlutterPathVerbLine);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[1].points[0].x, 30.0);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[1].points[0].y, 40.0);
+
+          // Segment 2: QuadTo (50, 60, 70, 80)
+          EXPECT_EQ(mutation->clip_path.segments[2].verb, kFlutterPathVerbQuad);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[2].points[0].x, 50.0);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[2].points[0].y, 60.0);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[2].points[1].x, 70.0);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[2].points[1].y, 80.0);
+
+          // Segment 3: ConicTo (90, 100, 110, 120, weight=0.75)
+          EXPECT_EQ(mutation->clip_path.segments[3].verb,
+                    kFlutterPathVerbConic);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[3].points[0].x, 90.0);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[3].points[0].y, 100.0);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[3].points[1].x, 110.0);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[3].points[1].y, 120.0);
+          EXPECT_NEAR(mutation->clip_path.segments[3].conic_weight, 0.75, 1e-4);
+
+          // Segment 4: CubicTo (130, 140, 150, 160, 170, 180)
+          EXPECT_EQ(mutation->clip_path.segments[4].verb,
+                    kFlutterPathVerbCubic);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[4].points[0].x, 130.0);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[4].points[0].y, 140.0);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[4].points[1].x, 150.0);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[4].points[1].y, 160.0);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[4].points[2].x, 170.0);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[4].points[2].y, 180.0);
+
+          // Segment 5: LineTo (10, 20) (closing line)
+          EXPECT_EQ(mutation->clip_path.segments[5].verb, kFlutterPathVerbLine);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[5].points[0].x, 10.0);
+          EXPECT_DOUBLE_EQ(mutation->clip_path.segments[5].points[0].y, 20.0);
+
+          // Segment 6: Close
+          EXPECT_EQ(mutation->clip_path.segments[6].verb,
+                    kFlutterPathVerbClose);
+        }
+        return true;
+      });
+  EXPECT_TRUE(callback_invoked);
+}
+
+TEST_F(EmbedderTest, EmbedderPlatformViewMutationsClipPathEvenOddFillType) {
+  SkPathBuilder builder;
+  builder.setFillType(SkPathFillType::kEvenOdd);
+  builder.addRect(SkRect::MakeLTRB(0, 0, 50, 50));
+  builder.addRect(SkRect::MakeLTRB(25, 25, 75, 75));
+  DlPath dl_path(builder.detach());
+
+  MutatorsStack stack;
+  stack.PushClipPath(dl_path);
+
+  EmbeddedViewParams params(DlMatrix(), DlSize(100.0f, 100.0f), stack);
+  EmbedderLayers layers(DlISize(800, 600), 1.0, DlMatrix(), 0);
+  layers.PushPlatformViewLayer(102, params);
+
+  bool callback_invoked = false;
+  layers.InvokePresentCallback(
+      0, [&](FlutterViewId view_id,
+             const std::vector<const FlutterLayer*>& presented_layers) {
+        callback_invoked = true;
+        EXPECT_EQ(presented_layers.size(), 1u);
+        const auto* view = presented_layers[0]->platform_view;
+        EXPECT_NE(view, nullptr);
+        EXPECT_EQ(view->mutations_count, 1u);
+        const auto* mutation = view->mutations[0];
+        EXPECT_NE(mutation, nullptr);
+        EXPECT_EQ(mutation->type, kFlutterPlatformViewMutationTypeClipPath);
+        EXPECT_EQ(mutation->clip_path.fill_type, kFlutterPathFillTypeEvenOdd);
+        EXPECT_GT(mutation->clip_path.segments_count, 0u);
+        return true;
+      });
+  EXPECT_TRUE(callback_invoked);
+}
+
+TEST_F(EmbedderTest, EmbedderPlatformViewMutationsClipPathEmpty) {
+  DlPath dl_path;
+  MutatorsStack stack;
+  stack.PushClipPath(dl_path);
+
+  EmbeddedViewParams params(DlMatrix(), DlSize(100.0f, 100.0f), stack);
+  EmbedderLayers layers(DlISize(800, 600), 1.0, DlMatrix(), 0);
+  layers.PushPlatformViewLayer(103, params);
+
+  bool callback_invoked = false;
+  layers.InvokePresentCallback(
+      0, [&](FlutterViewId view_id,
+             const std::vector<const FlutterLayer*>& presented_layers) {
+        callback_invoked = true;
+        EXPECT_EQ(presented_layers.size(), 1u);
+        const auto* view = presented_layers[0]->platform_view;
+        EXPECT_NE(view, nullptr);
+        EXPECT_EQ(view->mutations_count, 1u);
+        const auto* mutation = view->mutations[0];
+        EXPECT_NE(mutation, nullptr);
+        EXPECT_EQ(mutation->type, kFlutterPlatformViewMutationTypeClipPath);
+        EXPECT_EQ(mutation->clip_path.struct_size, sizeof(FlutterPath));
+        EXPECT_EQ(mutation->clip_path.segments_count, 0u);
+        EXPECT_EQ(mutation->clip_path.segments, nullptr);
+        return true;
+      });
+  EXPECT_TRUE(callback_invoked);
+}
+
+TEST_F(EmbedderTest, EmbedderPlatformViewMutationsComplexMixedStack) {
+  MutatorsStack stack;
+  stack.PushTransform(DlMatrix::MakeScale({2.0f, 2.0f, 1.0f}));
+  stack.PushClipRect(DlRect::MakeLTRB(5.0f, 5.0f, 50.0f, 50.0f));
+  stack.PushClipRRect(DlRoundRect::MakeRectXY(
+      DlRect::MakeLTRB(10.0f, 10.0f, 40.0f, 40.0f), 4.0f, 4.0f));
+  stack.PushClipRSE(DlRoundSuperellipse::MakeRectXY(
+      DlRect::MakeLTRB(15.0f, 15.0f, 35.0f, 35.0f), DlSize(3.0f, 3.0f)));
+  stack.PushClipPath(
+      DlPath::MakeRect(DlRect::MakeLTRB(20.0f, 20.0f, 30.0f, 30.0f)));
+  stack.PushOpacity(128);
+
+  EmbeddedViewParams params(DlMatrix(), DlSize(100.0f, 100.0f), stack);
+  EmbedderLayers layers(DlISize(800, 600), 1.0, DlMatrix(), 0);
+  layers.PushPlatformViewLayer(200, params);
+
+  bool callback_invoked = false;
+  layers.InvokePresentCallback(
+      0, [&](FlutterViewId view_id,
+             const std::vector<const FlutterLayer*>& presented_layers) {
+        callback_invoked = true;
+        EXPECT_EQ(presented_layers.size(), 1u);
+        const auto* view = presented_layers[0]->platform_view;
+        EXPECT_NE(view, nullptr);
+        EXPECT_EQ(view->identifier, 200);
+        EXPECT_EQ(view->mutations_count, 6u);
+
+        EXPECT_EQ(view->mutations[0]->type,
+                  kFlutterPlatformViewMutationTypeTransformation);
+        EXPECT_EQ(view->mutations[1]->type,
+                  kFlutterPlatformViewMutationTypeClipRect);
+        EXPECT_EQ(view->mutations[2]->type,
+                  kFlutterPlatformViewMutationTypeClipRoundedRect);
+        EXPECT_EQ(view->mutations[3]->type,
+                  kFlutterPlatformViewMutationTypeClipRoundSuperellipse);
+        EXPECT_EQ(view->mutations[4]->type,
+                  kFlutterPlatformViewMutationTypeClipPath);
+        EXPECT_EQ(view->mutations[5]->type,
+                  kFlutterPlatformViewMutationTypeOpacity);
+        return true;
+      });
+  EXPECT_TRUE(callback_invoked);
+}
+
+TEST_F(EmbedderTest, EmbedderRegisterImageGeneratorInvalidArguments) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.InitializeEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterImageGeneratorRegistrationInfo info = {};
+  info.struct_size = sizeof(FlutterImageGeneratorRegistrationInfo);
+  info.create_generator = [](const uint8_t*, size_t, void*,
+                             FlutterImageGenerator*) -> bool { return false; };
+
+  // Null engine.
+  EXPECT_EQ(FlutterEngineRegisterImageGenerator(nullptr, &info),
+            kInvalidArguments);
+
+  // Null info.
+  EXPECT_EQ(FlutterEngineRegisterImageGenerator(engine.get(), nullptr),
+            kInvalidArguments);
+
+  // Invalid struct_size.
+  FlutterImageGeneratorRegistrationInfo invalid_size_info = info;
+  invalid_size_info.struct_size =
+      sizeof(FlutterImageGeneratorRegistrationInfo) - 1;
+  EXPECT_EQ(
+      FlutterEngineRegisterImageGenerator(engine.get(), &invalid_size_info),
+      kInvalidArguments);
+
+  // Null create_generator callback.
+  FlutterImageGeneratorRegistrationInfo null_callback_info = info;
+  null_callback_info.create_generator = nullptr;
+  EXPECT_EQ(
+      FlutterEngineRegisterImageGenerator(engine.get(), &null_callback_info),
+      kInvalidArguments);
+
+  // Engine not in running state.
+  EXPECT_EQ(FlutterEngineRegisterImageGenerator(engine.get(), &info),
+            kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, EmbedderImageGeneratorDirectSingleFrame) {
+  struct TestContext {
+    uint32_t width = 64;
+    uint32_t height = 48;
+    bool destruction_called = false;
+  };
+
+  TestContext ctx;
+  FlutterImageGenerator generator = {};
+  generator.struct_size = sizeof(FlutterImageGenerator);
+  generator.user_data = &ctx;
+  generator.destruction_callback = [](void* user_data) {
+    static_cast<TestContext*>(user_data)->destruction_called = true;
+  };
+  generator.get_info = [](void* user_data,
+                          FlutterImageGeneratorInfo* info_out) -> bool {
+    auto* c = static_cast<TestContext*>(user_data);
+    info_out->width = c->width;
+    info_out->height = c->height;
+    info_out->color_type = kFlutterImageGeneratorColorTypeRGBA8888;
+    info_out->alpha_type = kFlutterImageGeneratorAlphaTypePremul;
+    return true;
+  };
+  generator.get_pixels =
+      [](void* user_data, const FlutterImageGeneratorInfo* info, void* pixels,
+         size_t row_bytes, uint32_t frame_index, int64_t prior_frame) -> bool {
+    auto* c = static_cast<TestContext*>(user_data);
+    EXPECT_EQ(info->width, c->width);
+    EXPECT_EQ(info->height, c->height);
+    EXPECT_EQ(frame_index, 0u);
+    EXPECT_EQ(prior_frame, -1);
+    auto* byte_ptr = static_cast<uint8_t*>(pixels);
+    for (size_t y = 0; y < info->height; ++y) {
+      uint8_t* row = byte_ptr + (y * row_bytes);
+      for (size_t x = 0; x < info->width; ++x) {
+        row[x * 4 + 0] = 0x11;
+        row[x * 4 + 1] = 0x22;
+        row[x * 4 + 2] = 0x33;
+        row[x * 4 + 3] = 0x44;
+      }
+    }
+    return true;
+  };
+  generator.get_scaled_dimensions = [](void* user_data, float scale,
+                                       uint32_t* scaled_width_out,
+                                       uint32_t* scaled_height_out) -> bool {
+    auto* c = static_cast<TestContext*>(user_data);
+    *scaled_width_out = static_cast<uint32_t>(c->width * scale);
+    *scaled_height_out = static_cast<uint32_t>(c->height * scale);
+    return true;
+  };
+
+  {
+    auto img_gen = MakeEmbedderImageGenerator(generator);
+    ASSERT_NE(img_gen, nullptr);
+
+    EXPECT_EQ(img_gen->GetInfo().width(), 64);
+    EXPECT_EQ(img_gen->GetInfo().height(), 48);
+    EXPECT_EQ(img_gen->GetInfo().colorType(), kRGBA_8888_SkColorType);
+    EXPECT_EQ(img_gen->GetInfo().alphaType(), kPremul_SkAlphaType);
+
+    EXPECT_EQ(img_gen->GetFrameCount(), 1u);
+    EXPECT_EQ(img_gen->GetPlayCount(), 1u);
+
+    auto frame_info = img_gen->GetFrameInfo(0);
+    EXPECT_EQ(frame_info.duration, 0u);
+    EXPECT_EQ(frame_info.disposal_method,
+              SkCodecAnimation::DisposalMethod::kKeep);
+    EXPECT_FALSE(frame_info.required_frame.has_value());
+    EXPECT_FALSE(frame_info.disposal_rect.has_value());
+    EXPECT_EQ(frame_info.blend_mode, SkCodecAnimation::Blend::kSrcOver);
+
+    SkISize scaled = img_gen->GetScaledDimensions(0.5f);
+    EXPECT_EQ(scaled.width(), 32);
+    EXPECT_EQ(scaled.height(), 24);
+
+    std::vector<uint8_t> pixel_buffer(64 * 48 * 4, 0);
+    EXPECT_TRUE(img_gen->GetPixels(img_gen->GetInfo(), pixel_buffer.data(),
+                                   64 * 4, 0, std::nullopt));
+    EXPECT_EQ(pixel_buffer[0], 0x11);
+    EXPECT_EQ(pixel_buffer[1], 0x22);
+    EXPECT_EQ(pixel_buffer[2], 0x33);
+    EXPECT_EQ(pixel_buffer[3], 0x44);
+
+    EXPECT_FALSE(ctx.destruction_called);
+  }
+
+  EXPECT_TRUE(ctx.destruction_called);
+}
+
+TEST_F(EmbedderTest, EmbedderImageGeneratorAnimatedMultiFrame) {
+  struct MultiFrameContext {
+    uint32_t width = 32;
+    uint32_t height = 32;
+    uint32_t decoded_frame = 0;
+  };
+
+  MultiFrameContext ctx;
+  FlutterImageGenerator generator = {};
+  generator.struct_size = sizeof(FlutterImageGenerator);
+  generator.user_data = &ctx;
+  generator.get_info = [](void* user_data,
+                          FlutterImageGeneratorInfo* info_out) -> bool {
+    auto* c = static_cast<MultiFrameContext*>(user_data);
+    info_out->width = c->width;
+    info_out->height = c->height;
+    info_out->color_type = kFlutterImageGeneratorColorTypeRGBA8888;
+    info_out->alpha_type = kFlutterImageGeneratorAlphaTypePremul;
+    return true;
+  };
+  generator.get_frame_count = [](void*) -> uint32_t { return 3; };
+  generator.get_play_count = [](void*) -> uint32_t {
+    return 0;
+  };  // Infinite loop
+  generator.get_frame_info =
+      [](void*, uint32_t frame_index,
+         FlutterImageGeneratorFrameInfo* frame_info_out) -> bool {
+    if (frame_index == 0) {
+      frame_info_out->required_frame = -1;
+      frame_info_out->duration_ms = 100;
+      frame_info_out->disposal_method =
+          kFlutterImageGeneratorDisposalMethodKeep;
+      frame_info_out->has_disposal_rect = false;
+      frame_info_out->blend_mode = kFlutterImageGeneratorBlendModeSrcOver;
+      return true;
+    } else if (frame_index == 1) {
+      frame_info_out->required_frame = 0;
+      frame_info_out->duration_ms = 200;
+      frame_info_out->disposal_method =
+          kFlutterImageGeneratorDisposalMethodRestoreBackground;
+      frame_info_out->has_disposal_rect = true;
+      frame_info_out->disposal_rect = {
+          .left = 5.0, .top = 5.0, .right = 25.0, .bottom = 25.0};
+      frame_info_out->blend_mode = kFlutterImageGeneratorBlendModeSrc;
+      return true;
+    } else if (frame_index == 2) {
+      frame_info_out->required_frame = 1;
+      frame_info_out->duration_ms = 150;
+      frame_info_out->disposal_method =
+          kFlutterImageGeneratorDisposalMethodRestorePrevious;
+      frame_info_out->has_disposal_rect = false;
+      frame_info_out->blend_mode = kFlutterImageGeneratorBlendModeSrcOver;
+      return true;
+    }
+    return false;
+  };
+  generator.get_pixels =
+      [](void* user_data, const FlutterImageGeneratorInfo* info, void* pixels,
+         size_t row_bytes, uint32_t frame_index, int64_t prior_frame) -> bool {
+    auto* c = static_cast<MultiFrameContext*>(user_data);
+    c->decoded_frame = frame_index;
+    auto* byte_ptr = static_cast<uint8_t*>(pixels);
+    std::memset(byte_ptr, static_cast<int>(frame_index + 1),
+                info->height * row_bytes);
+    return true;
+  };
+
+  auto img_gen = MakeEmbedderImageGenerator(generator);
+  ASSERT_NE(img_gen, nullptr);
+
+  EXPECT_EQ(img_gen->GetFrameCount(), 3u);
+  EXPECT_EQ(img_gen->GetPlayCount(), ImageGenerator::kInfinitePlayCount);
+
+  auto f0 = img_gen->GetFrameInfo(0);
+  EXPECT_EQ(f0.duration, 100u);
+  EXPECT_EQ(f0.disposal_method, SkCodecAnimation::DisposalMethod::kKeep);
+  EXPECT_FALSE(f0.required_frame.has_value());
+  EXPECT_FALSE(f0.disposal_rect.has_value());
+  EXPECT_EQ(f0.blend_mode, SkCodecAnimation::Blend::kSrcOver);
+
+  auto f1 = img_gen->GetFrameInfo(1);
+  EXPECT_EQ(f1.duration, 200u);
+  EXPECT_EQ(f1.disposal_method,
+            SkCodecAnimation::DisposalMethod::kRestoreBGColor);
+  ASSERT_TRUE(f1.required_frame.has_value());
+  EXPECT_EQ(f1.required_frame.value(), 0u);
+  ASSERT_TRUE(f1.disposal_rect.has_value());
+  EXPECT_EQ(f1.disposal_rect.value(), SkIRect::MakeLTRB(5, 5, 25, 25));
+  EXPECT_EQ(f1.blend_mode, SkCodecAnimation::Blend::kSrc);
+
+  auto f2 = img_gen->GetFrameInfo(2);
+  EXPECT_EQ(f2.duration, 150u);
+  EXPECT_EQ(f2.disposal_method,
+            SkCodecAnimation::DisposalMethod::kRestorePrevious);
+  ASSERT_TRUE(f2.required_frame.has_value());
+  EXPECT_EQ(f2.required_frame.value(), 1u);
+  EXPECT_FALSE(f2.disposal_rect.has_value());
+  EXPECT_EQ(f2.blend_mode, SkCodecAnimation::Blend::kSrcOver);
+
+  std::vector<uint8_t> buffer(32 * 32 * 4);
+  EXPECT_TRUE(
+      img_gen->GetPixels(img_gen->GetInfo(), buffer.data(), 32 * 4, 1, 0));
+  EXPECT_EQ(ctx.decoded_frame, 1u);
+  EXPECT_EQ(buffer[0], 2);
+}
+
+TEST_F(EmbedderTest, EmbedderImageGeneratorDestructionCallbacks) {
+  struct LifecycleContext {
+    bool factory_destroyed = false;
+    bool generator_destroyed = false;
+  };
+
+  LifecycleContext ctx;
+
+  {
+    FlutterImageGeneratorRegistrationInfo reg_info = {};
+    reg_info.struct_size = sizeof(FlutterImageGeneratorRegistrationInfo);
+    reg_info.user_data = &ctx;
+    reg_info.destruction_callback = [](void* user_data) {
+      static_cast<LifecycleContext*>(user_data)->factory_destroyed = true;
+    };
+    reg_info.create_generator =
+        [](const uint8_t* buffer, size_t size, void* user_data,
+           FlutterImageGenerator* generator_out) -> bool {
+      generator_out->struct_size = sizeof(FlutterImageGenerator);
+      generator_out->user_data = user_data;
+      generator_out->destruction_callback = [](void* ud) {
+        static_cast<LifecycleContext*>(ud)->generator_destroyed = true;
+      };
+      generator_out->get_info =
+          [](void*, FlutterImageGeneratorInfo* info_out) -> bool {
+        info_out->width = 16;
+        info_out->height = 16;
+        info_out->color_type = kFlutterImageGeneratorColorTypeRGBA8888;
+        info_out->alpha_type = kFlutterImageGeneratorAlphaTypePremul;
+        return true;
+      };
+      generator_out->get_pixels = [](void*, const FlutterImageGeneratorInfo*,
+                                     void*, size_t, uint32_t,
+                                     int64_t) -> bool { return true; };
+      return true;
+    };
+
+    ImageGeneratorFactory factory =
+        CreateEmbedderImageGeneratorFactory(reg_info);
+    ASSERT_TRUE(factory);
+
+    const uint8_t dummy_data[] = {0x01, 0x02, 0x03};
+    sk_sp<SkData> data = SkData::MakeWithCopy(dummy_data, sizeof(dummy_data));
+
+    {
+      std::shared_ptr<ImageGenerator> gen = factory(data);
+      ASSERT_NE(gen, nullptr);
+      EXPECT_FALSE(ctx.generator_destroyed);
+    }
+    EXPECT_TRUE(ctx.generator_destroyed);
+    EXPECT_FALSE(ctx.factory_destroyed);
+  }
+
+  EXPECT_TRUE(ctx.factory_destroyed);
+}
+
+TEST_F(EmbedderTest, EmbedderCustomImageGeneratorInProjectArgs) {
+  FlutterImageGeneratorRegistrationInfo reg_info = {};
+  reg_info.struct_size = sizeof(FlutterImageGeneratorRegistrationInfo);
+  reg_info.priority = 10;
+  reg_info.create_generator = [](const uint8_t*, size_t, void*,
+                                 FlutterImageGenerator*) -> bool {
+    return false;
+  };
+
+  const FlutterImageGeneratorRegistrationInfo* image_generators[] = {&reg_info};
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.GetProjectArgs().image_generators = image_generators;
+  builder.GetProjectArgs().image_generators_count = 1;
+  auto engine = builder.InitializeEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  EXPECT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderRegisterImageGeneratorDynamic) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.InitializeEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  EXPECT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
+
+  FlutterImageGeneratorRegistrationInfo reg_info = {};
+  reg_info.struct_size = sizeof(FlutterImageGeneratorRegistrationInfo);
+  reg_info.priority = 5;
+  reg_info.create_generator = [](const uint8_t*, size_t, void*,
+                                 FlutterImageGenerator*) -> bool {
+    return false;
+  };
+
+  EXPECT_EQ(FlutterEngineRegisterImageGenerator(engine.get(), &reg_info),
+            kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderImageGeneratorDestructionCallbackNullUserData) {
+  static bool g_factory_destroyed = false;
+  static bool g_generator_destroyed = false;
+  g_factory_destroyed = false;
+  g_generator_destroyed = false;
+
+  {
+    FlutterImageGeneratorRegistrationInfo reg_info = {};
+    reg_info.struct_size = sizeof(FlutterImageGeneratorRegistrationInfo);
+    reg_info.user_data = nullptr;
+    reg_info.destruction_callback = [](void* user_data) {
+      EXPECT_EQ(user_data, nullptr);
+      g_factory_destroyed = true;
+    };
+    reg_info.create_generator =
+        [](const uint8_t* buffer, size_t size, void* user_data,
+           FlutterImageGenerator* generator_out) -> bool {
+      generator_out->struct_size = sizeof(FlutterImageGenerator);
+      generator_out->user_data = nullptr;
+      generator_out->destruction_callback = [](void* ud) {
+        EXPECT_EQ(ud, nullptr);
+        g_generator_destroyed = true;
+      };
+      generator_out->get_info =
+          [](void*, FlutterImageGeneratorInfo* info_out) -> bool {
+        info_out->width = 16;
+        info_out->height = 16;
+        info_out->color_type = kFlutterImageGeneratorColorTypeRGBA8888;
+        info_out->alpha_type = kFlutterImageGeneratorAlphaTypePremul;
+        return true;
+      };
+      generator_out->get_pixels = [](void*, const FlutterImageGeneratorInfo*,
+                                     void*, size_t, uint32_t,
+                                     int64_t) -> bool { return true; };
+      return true;
+    };
+
+    ImageGeneratorFactory factory =
+        CreateEmbedderImageGeneratorFactory(reg_info);
+    ASSERT_TRUE(factory);
+
+    const uint8_t dummy_data[] = {0x01, 0x02, 0x03};
+    sk_sp<SkData> data = SkData::MakeWithCopy(dummy_data, sizeof(dummy_data));
+
+    {
+      std::shared_ptr<ImageGenerator> gen = factory(data);
+      ASSERT_NE(gen, nullptr);
+      EXPECT_FALSE(g_generator_destroyed);
+    }
+    EXPECT_TRUE(g_generator_destroyed);
+    EXPECT_FALSE(g_factory_destroyed);
+  }
+
+  EXPECT_TRUE(g_factory_destroyed);
+}
+
+TEST_F(EmbedderTest, EmbedderImageGeneratorDimensionOverflow) {
+  FlutterImageGenerator generator = {};
+  generator.struct_size = sizeof(FlutterImageGenerator);
+  generator.get_info = [](void*, FlutterImageGeneratorInfo* info_out) -> bool {
+    info_out->width =
+        static_cast<uint32_t>(std::numeric_limits<int32_t>::max()) + 100u;
+    info_out->height = 100;
+    info_out->color_type = kFlutterImageGeneratorColorTypeRGBA8888;
+    info_out->alpha_type = kFlutterImageGeneratorAlphaTypePremul;
+    return true;
+  };
+  generator.get_pixels = [](void*, const FlutterImageGeneratorInfo*, void*,
+                            size_t, uint32_t,
+                            int64_t) -> bool { return false; };
+
+  auto img_gen = MakeEmbedderImageGenerator(generator);
+  EXPECT_EQ(img_gen, nullptr);
+}
+
+TEST_F(EmbedderTest, EmbedderPrefetchDefaultFontManager) {
+  EXPECT_EQ(FlutterEnginePrefetchDefaultFontManager(), kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderVMServiceUriCallbackInvalidArguments) {
+  intptr_t handle = 0;
+  EXPECT_EQ(FlutterEngineRegisterVMServiceUriCallback(nullptr, &handle),
+            kInvalidArguments);
+
+  FlutterVMServiceUriCallbackConfig invalid_size_config = {};
+  invalid_size_config.struct_size = sizeof(size_t) - 1;
+  invalid_size_config.callback = [](const char*, void*) {};
+  EXPECT_EQ(
+      FlutterEngineRegisterVMServiceUriCallback(&invalid_size_config, &handle),
+      kInvalidArguments);
+
+  FlutterVMServiceUriCallbackConfig null_callback_config = {};
+  null_callback_config.struct_size = sizeof(FlutterVMServiceUriCallbackConfig);
+  null_callback_config.callback = nullptr;
+  EXPECT_EQ(
+      FlutterEngineRegisterVMServiceUriCallback(&null_callback_config, &handle),
+      kInvalidArguments);
+
+  EXPECT_EQ(FlutterEngineDeregisterVMServiceUriCallback(0), kInvalidArguments);
+  EXPECT_EQ(FlutterEngineDeregisterVMServiceUriCallback(999999),
+            kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, EmbedderVMServiceUriCallbackLifecycle) {
+  intptr_t handle = 0;
+  int user_data_val = 42;
+  FlutterVMServiceUriCallbackConfig config = {};
+  config.struct_size = sizeof(FlutterVMServiceUriCallbackConfig);
+  config.callback = [](const char* uri, void* user_data) {
+    auto* val = static_cast<int*>(user_data);
+    EXPECT_EQ(*val, 42);
+  };
+  config.user_data = &user_data_val;
+
+  ASSERT_EQ(FlutterEngineRegisterVMServiceUriCallback(&config, &handle),
+            kSuccess);
+  EXPECT_NE(handle, 0);
+
+  ASSERT_EQ(FlutterEngineDeregisterVMServiceUriCallback(handle), kSuccess);
+  EXPECT_EQ(FlutterEngineDeregisterVMServiceUriCallback(handle),
+            kInvalidArguments);
+
+  // handle_out can be null if embedder doesn't need to deregister
+  EXPECT_EQ(FlutterEngineRegisterVMServiceUriCallback(&config, nullptr),
+            kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderGetProcAddressesImageGenerator) {
+  FlutterEngineProcTable table = {};
+  table.struct_size = sizeof(FlutterEngineProcTable);
+
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&table), kSuccess);
+  EXPECT_EQ(table.RegisterImageGenerator, &FlutterEngineRegisterImageGenerator);
+  EXPECT_EQ(table.PrefetchDefaultFontManager,
+            &FlutterEnginePrefetchDefaultFontManager);
+  EXPECT_EQ(table.RegisterVMServiceUriCallback,
+            &FlutterEngineRegisterVMServiceUriCallback);
+  EXPECT_EQ(table.DeregisterVMServiceUriCallback,
+            &FlutterEngineDeregisterVMServiceUriCallback);
+}
+
+TEST(EmbedderTestNoFixture, ProcTablePopulatesAndroidMigrationExtensions) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+  EXPECT_NE(procs.NotifyCreated, nullptr);
+  EXPECT_NE(procs.NotifyDestroyed, nullptr);
+  EXPECT_NE(procs.SetGpuAvailability, nullptr);
+  EXPECT_NE(procs.Spawn, nullptr);
+  EXPECT_NE(procs.LoadDartDeferredLibrary, nullptr);
+}
+
+TEST_F(EmbedderTest, NotifyCreatedAndDestroyedLifecycle) {
+  EXPECT_EQ(FlutterEngineNotifyCreated(nullptr), kInvalidArguments);
+  EXPECT_EQ(FlutterEngineNotifyDestroyed(nullptr), kInvalidArguments);
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+
+  // Detach and reattach surface dynamically via ProcTable.
+  EXPECT_EQ(procs.NotifyDestroyed(engine.get()), kSuccess);
+  EXPECT_EQ(procs.NotifyCreated(engine.get()), kSuccess);
+}
+
+TEST_F(EmbedderTest, SetGpuAvailabilityUpdatesSyncSwitch) {
+  EXPECT_EQ(FlutterEngineSetGpuAvailability(nullptr,
+                                            kFlutterGpuAvailabilityAvailable),
+            kInvalidArguments);
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  auto* embedder_engine = reinterpret_cast<EmbedderEngine*>(engine.get());
+  auto sync_switch = embedder_engine->GetShell().GetIsGpuDisabledSyncSwitch();
+
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+
+  bool is_disabled = false;
+  EXPECT_EQ(procs.SetGpuAvailability(
+                engine.get(), kFlutterGpuAvailabilityFlushAndMakeUnavailable),
+            kSuccess);
+  sync_switch->Execute(
+      fml::SyncSwitch::Handlers()
+          .SetIfTrue([&is_disabled] { is_disabled = true; })
+          .SetIfFalse([&is_disabled] { is_disabled = false; }));
+  EXPECT_TRUE(is_disabled);
+
+  EXPECT_EQ(
+      procs.SetGpuAvailability(engine.get(), kFlutterGpuAvailabilityAvailable),
+      kSuccess);
+  sync_switch->Execute(
+      fml::SyncSwitch::Handlers()
+          .SetIfTrue([&is_disabled] { is_disabled = true; })
+          .SetIfFalse([&is_disabled] { is_disabled = false; }));
+  EXPECT_FALSE(is_disabled);
+}
+
+TEST_F(EmbedderTest, CanSpawnChildEngineViaProcTable) {
+  FLUTTER_API_SYMBOL(FlutterEngine) spawned_raw = nullptr;
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+
+  EXPECT_EQ(FlutterEngineSpawn(nullptr, &spawn_config, &spawned_raw),
+            kInvalidArguments);
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent parent_latch;
+  context.AddIsolateCreateCallback(
+      [&parent_latch]() { parent_latch.Signal(); });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto parent_engine = builder.LaunchEngine();
+  ASSERT_TRUE(parent_engine.is_valid());
+  parent_latch.Wait();
+
+  EXPECT_EQ(FlutterEngineSpawn(parent_engine.get(), nullptr, &spawned_raw),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterEngineSpawn(parent_engine.get(), &spawn_config, nullptr),
+            kInvalidArguments);
+
+  spawn_config.project_args = &builder.GetProjectArgs();
+  spawn_config.renderer_config = &context.GetRendererConfig();
+  spawn_config.initial_route = "/spawned";
+  spawn_config.user_data = &context;
+
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+
+  ASSERT_EQ(procs.Spawn(parent_engine.get(), &spawn_config, &spawned_raw),
+            kSuccess);
+  ASSERT_NE(spawned_raw, nullptr);
+  UniqueEngine spawned_engine(spawned_raw);
+  EXPECT_TRUE(spawned_engine.is_valid());
+  spawned_engine.reset();
+}
+
+TEST_F(EmbedderTest, LoadDartDeferredLibraryFiresDestructionCallback) {
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(nullptr, nullptr),
+            kInvalidArguments);
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(engine.get(), nullptr),
+            kInvalidArguments);
+
+  bool destroyed = false;
+  uint8_t dummy_data[4] = {1, 2, 3, 4};
+  uint8_t dummy_instr[4] = {5, 6, 7, 8};
+
+  FlutterDartDeferredLibrary library = {};
+  library.struct_size = sizeof(FlutterDartDeferredLibrary);
+  library.loading_unit_id = 42;
+  library.snapshot_data = dummy_data;
+  library.snapshot_data_size = sizeof(dummy_data);
+  library.snapshot_instructions = dummy_instr;
+  library.snapshot_instructions_size = sizeof(dummy_instr);
+  library.user_data = &destroyed;
+  library.destruction_callback = [](void* user_data) {
+    *reinterpret_cast<bool*>(user_data) = true;
+  };
+
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+
+  ASSERT_EQ(procs.LoadDartDeferredLibrary(engine.get(), &library), kSuccess);
+  engine.reset();
+  EXPECT_TRUE(destroyed);
 }
 
 }  // namespace testing

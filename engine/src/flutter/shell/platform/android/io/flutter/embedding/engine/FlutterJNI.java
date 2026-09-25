@@ -12,6 +12,7 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
+import android.os.Handler;
 import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -607,6 +608,10 @@ public class FlutterJNI {
   @VisibleForTesting
   @UiThread
   public void onFirstFrame() {
+    if (Looper.myLooper() != mainLooper && mainLooper != null) {
+      new Handler(mainLooper).post(this::onFirstFrame);
+      return;
+    }
     ensureRunningOnMainThread();
 
     for (FlutterUiDisplayListener listener : flutterUiDisplayListeners) {

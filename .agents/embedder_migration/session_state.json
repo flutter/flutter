@@ -1,0 +1,38 @@
+{
+  "active_migration": "RFC 410: Android Embedder C-API Migration",
+  "branch_slug": "android-embedder-migration-v10",
+  "current_branch": "android-embedder-migration-v10/4.0-legacy-purge",
+  "phase": "Phase 4: Legacy Class Purge and Terminal Build Decoupling",
+  "active_component": "shell/platform/android/ (Legacy Purge)",
+  "active_adrs": [
+    "ADR-0000",
+    "ADR-0001",
+    "ADR-0002",
+    "ADR-0003",
+    "ADR-0004",
+    "ADR-0005",
+    "ADR-0006",
+    "ADR-0007",
+    "ADR-0008",
+    "ADR-0009",
+    "ADR-0010",
+    "ADR-0011"
+  ],
+  "ratchet_state": {
+    "total_allowed_internal_headers": 0,
+    "active_subsystem": "Terminal Purge",
+    "subsystem_remaining": 0
+  },
+  "invariants": [
+    "Strict PR chain naming slug: android-embedder-migration-v10/*",
+    "All downstream branches rebased onto parent branch before merge",
+    "Compile with defines = [ 'FLUTTER_ENGINE_NO_PROTOTYPES' ]",
+    "Route all C-API calls through FlutterEngineProcTable",
+    "Strict ownership and closing of synchronization_fence_fd",
+    "Per-view frame state captured by value in present_view_callback",
+    "Zero Shell::Create or AndroidShellHolder when EnableAndroidEmbedderApi is true"
+  ],
+  "last_verified_build": "flutter_embedder_native_unittests (35/35 PASSED) + integration:android_engine_test (PASS)",
+  "failing_tests": [],
+  "next_immediate_action": "Phase 4 complete: all legacy classes purged, internal headers locked at 0, verified on-device and ready for merge"
+}
