@@ -4,19 +4,22 @@
 
 #include "impeller/renderer/backend/metal/pass_bindings_cache_mtl.h"
 
+#include "impeller/renderer/backend/metal/formats_mtl.h"
+
 namespace impeller {
 
 void PassBindingsCacheMTL::SetEncoder(id<MTLRenderCommandEncoder> encoder) {
   encoder_ = encoder;
 }
 
-void PassBindingsCacheMTL::SetRenderPipelineState(
+bool PassBindingsCacheMTL::SetRenderPipelineState(
     id<MTLRenderPipelineState> pipeline) {
   if (pipeline == pipeline_) {
-    return;
+    return false;
   }
   pipeline_ = pipeline;
   [encoder_ setRenderPipelineState:pipeline_];
+  return true;
 }
 
 void PassBindingsCacheMTL::SetDepthStencilState(
@@ -38,17 +41,25 @@ bool PassBindingsCacheMTL::SetBuffer(ShaderStage stage,
     // index to Metal, which has no bounds check and would crash.
     return true;
   }
-  auto& buffers_map = buffers_[stage];
-  auto found = buffers_map.find(index);
-  if (found != buffers_map.end() && found->second.buffer == buffer) {
+  if (!IsCacheableStage(stage) || index >= kMaxBindingIndex) {
+    VALIDATION_LOG << "Cannot bind buffer to an unknown stage or out of range "
+                      "binding index.";
+    return false;
+  }
+  auto& slots = buffers_[static_cast<size_t>(stage)];
+  if (index >= slots.size()) {
+    slots.resize(index + 1);
+  }
+  BufferOffsetPair& slot = slots[index];
+  if (slot.buffer == buffer) {
     // The right buffer is bound. Check if its offset needs to be updated.
-    if (found->second.offset == offset) {
+    if (slot.offset == offset) {
       // Buffer and its offset is identical. Nothing to do.
       return true;
     }
 
     // Only the offset needs to be updated.
-    found->second.offset = offset;
+    slot.offset = offset;
 
     switch (stage) {
       case ShaderStage::kVertex:
@@ -58,12 +69,10 @@ bool PassBindingsCacheMTL::SetBuffer(ShaderStage stage,
         [encoder_ setFragmentBufferOffset:offset atIndex:index];
         return true;
       default:
-        VALIDATION_LOG << "Cannot update buffer offset of an unknown stage.";
-        return false;
+        break;
     }
-    return true;
   }
-  buffers_map[index] = {buffer, static_cast<size_t>(offset)};
+  slot = {buffer, static_cast<size_t>(offset)};
   switch (stage) {
     case ShaderStage::kVertex:
       [encoder_ setVertexBuffer:buffer offset:offset atIndex:index];
@@ -72,8 +81,7 @@ bool PassBindingsCacheMTL::SetBuffer(ShaderStage stage,
       [encoder_ setFragmentBuffer:buffer offset:offset atIndex:index];
       return true;
     default:
-      VALIDATION_LOG << "Cannot bind buffer to unknown shader stage.";
-      return false;
+      break;
   }
   return false;
 }
@@ -85,13 +93,20 @@ bool PassBindingsCacheMTL::SetTexture(ShaderStage stage,
     // See SetBuffer: a dead-code-eliminated sampler has no argument-table slot.
     return true;
   }
-  auto& texture_map = textures_[stage];
-  auto found = texture_map.find(index);
-  if (found != texture_map.end() && found->second == texture) {
+  if (!IsCacheableStage(stage) || index >= kMaxBindingIndex) {
+    VALIDATION_LOG << "Cannot bind texture to an unknown stage or out of range "
+                      "binding index.";
+    return false;
+  }
+  auto& slots = textures_[static_cast<size_t>(stage)];
+  if (index >= slots.size()) {
+    slots.resize(index + 1);
+  }
+  if (slots[index] == texture) {
     // Already bound.
     return true;
   }
-  texture_map[index] = texture;
+  slots[index] = texture;
   switch (stage) {
     case ShaderStage::kVertex:
       [encoder_ setVertexTexture:texture atIndex:index];
@@ -100,8 +115,7 @@ bool PassBindingsCacheMTL::SetTexture(ShaderStage stage,
       [encoder_ setFragmentTexture:texture atIndex:index];
       return true;
     default:
-      VALIDATION_LOG << "Cannot bind buffer to unknown shader stage.";
-      return false;
+      break;
   }
   return false;
 }
@@ -113,13 +127,20 @@ bool PassBindingsCacheMTL::SetSampler(ShaderStage stage,
     // See SetBuffer: a dead-code-eliminated sampler has no argument-table slot.
     return true;
   }
-  auto& sampler_map = samplers_[stage];
-  auto found = sampler_map.find(index);
-  if (found != sampler_map.end() && found->second == sampler) {
+  if (!IsCacheableStage(stage) || index >= kMaxBindingIndex) {
+    VALIDATION_LOG << "Cannot bind sampler to an unknown stage or out of range "
+                      "binding index.";
+    return false;
+  }
+  auto& slots = samplers_[static_cast<size_t>(stage)];
+  if (index >= slots.size()) {
+    slots.resize(index + 1);
+  }
+  if (slots[index] == sampler) {
     // Already bound.
     return true;
   }
-  sampler_map[index] = sampler;
+  slots[index] = sampler;
   switch (stage) {
     case ShaderStage::kVertex:
       [encoder_ setVertexSamplerState:sampler atIndex:index];
@@ -128,8 +149,7 @@ bool PassBindingsCacheMTL::SetSampler(ShaderStage stage,
       [encoder_ setFragmentSamplerState:sampler atIndex:index];
       return true;
     default:
-      VALIDATION_LOG << "Cannot bind buffer to unknown shader stage.";
-      return false;
+      break;
   }
   return false;
 }
@@ -169,6 +189,32 @@ void PassBindingsCacheMTL::SetStencilRef(uint32_t stencil_ref) {
   }
   [encoder_ setStencilReferenceValue:stencil_ref];
   stencil_ref_ = stencil_ref;
+}
+
+void PassBindingsCacheMTL::SetWindingOrder(WindingOrder winding) {
+  if (winding_.has_value() && winding_.value() == winding) {
+    return;
+  }
+  [encoder_ setFrontFacingWinding:winding == WindingOrder::kClockwise
+                                      ? MTLWindingClockwise
+                                      : MTLWindingCounterClockwise];
+  winding_ = winding;
+}
+
+void PassBindingsCacheMTL::SetCullMode(CullMode cull_mode) {
+  if (cull_mode_.has_value() && cull_mode_.value() == cull_mode) {
+    return;
+  }
+  [encoder_ setCullMode:ToMTLCullMode(cull_mode)];
+  cull_mode_ = cull_mode;
+}
+
+void PassBindingsCacheMTL::SetPolygonMode(PolygonMode polygon_mode) {
+  if (polygon_mode_.has_value() && polygon_mode_.value() == polygon_mode) {
+    return;
+  }
+  [encoder_ setTriangleFillMode:ToMTLTriangleFillMode(polygon_mode)];
+  polygon_mode_ = polygon_mode;
 }
 
 }  // namespace impeller
