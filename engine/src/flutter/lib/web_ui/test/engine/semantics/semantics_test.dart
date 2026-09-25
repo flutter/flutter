@@ -6494,7 +6494,11 @@ void _testLoadingSpinner() {
       children: <SemanticsNodeUpdate>[
         tester.updateNode(
           id: 1,
-          flags: const ui.SemanticsFlags(isTextField: true, isFocused: ui.Tristate.isTrue),
+          flags: const ui.SemanticsFlags(
+            isTextField: true,
+            isFocused: ui.Tristate.isTrue,
+            isEnabled: ui.Tristate.isTrue,
+          ),
           rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
         ),
       ],
@@ -6514,7 +6518,11 @@ void _testLoadingSpinner() {
       children: <SemanticsNodeUpdate>[
         tester.updateNode(
           id: 1,
-          flags: const ui.SemanticsFlags(isTextField: true, isFocused: ui.Tristate.isTrue),
+          flags: const ui.SemanticsFlags(
+            isTextField: true,
+            isFocused: ui.Tristate.isTrue,
+            isEnabled: ui.Tristate.isTrue,
+          ),
           rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
         ),
       ],
