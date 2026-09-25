@@ -185,7 +185,7 @@ static const constexpr RenderTarget::AttachmentConfig kDefaultStencilConfig =
         .storage_mode = StorageMode::kDeviceTransient,
         .load_action = LoadAction::kDontCare,
         .store_action = StoreAction::kDontCare,
-    };
+};
 
 static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
     ContentContext& renderer,
