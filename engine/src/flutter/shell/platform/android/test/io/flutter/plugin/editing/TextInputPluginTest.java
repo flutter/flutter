@@ -1675,7 +1675,8 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.TEXT, false, false, false),
             EditorInfo.IME_ACTION_DONE,
             null,
             null,
@@ -1696,7 +1697,8 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.TEXT, false, false, false),
             EditorInfo.IME_ACTION_SEND,
             null,
             null,
