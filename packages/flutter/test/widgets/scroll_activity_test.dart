@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -338,6 +339,75 @@ void main() {
     expect(position.pixels, 2 * g);
   });
 
+  testWidgets('$DrivenScrollActivity follows a scroll offset correction', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/193338
+
+    // A spacer whose extent can be changed through setSpacerExtent, with an
+    // initial extent of 600 px, followed by a list of 100 px items.
+    var spacerExtent = 600.0;
+    late StateSetter setSpacerExtent;
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            setSpacerExtent = setState;
+            return CustomScrollView(
+              controller: controller,
+              slivers: <Widget>[
+                _CorrectingSpacer(extent: spacerExtent),
+                SliverFixedExtentList(
+                  itemExtent: 100.0,
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) => Text('Item $index'),
+                    childCount: 100,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    // Scroll past the spacer.
+    controller.jumpTo(1200.0);
+    await tester.pump();
+
+    // Then animate back towards it at 800 px/s, or 80 px/100 ms.
+    controller.animateTo(400.0, duration: const Duration(seconds: 1), curve: Curves.linear);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(controller.offset, moreOrLessEquals(960.0));
+
+    // Grow the spacer by 200 px while it is entirely above the viewport. In
+    // this frame the animation first moves to 880, then the spacer reports a
+    // correction of +200 during layout, so the frame ends at 880 + 200.
+    setSpacerExtent(() => spacerExtent = 800.0);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(controller.offset, moreOrLessEquals(880.0 + 200.0));
+    final double itemTopAfterCorrection = tester.getTopLeft(find.text('Item 3')).dy;
+    expect(itemTopAfterCorrection, moreOrLessEquals(20.0));
+
+    // Advance the animation by another 100 ms, which at 800 px/s should scroll
+    // up by 80 px.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(controller.offset, moreOrLessEquals(800.0 + 200.0));
+    expect(
+      tester.getTopLeft(find.text('Item 3')).dy,
+      moreOrLessEquals(itemTopAfterCorrection + 80.0),
+    );
+
+    // Let the animation finish, which should end at its initial target of
+    // 400 px, moved partway through the animation by the 200 px correction.
+    await tester.pumpAndSettle();
+    expect(controller.offset, moreOrLessEquals(400.0 + 200.0));
+  });
+
   test('$ScrollActivity dispatches memory events', () async {
     await expectLater(
       await memoryEvents(
@@ -557,4 +627,65 @@ class _ScrollActivityDelegate extends ScrollActivityDelegate {
 
   @override
   double setPixels(double pixels) => 0.0;
+}
+
+/// An empty sliver that reports a scroll offset correction when its [extent]
+/// changes.
+///
+/// The correction equals the change in [extent] and is only reported while the
+/// sliver is scrolled above the viewport. Otherwise the change is laid out like
+/// any other change in size.
+///
+/// See also:
+///
+///  * [SliverGeometry.scrollOffsetCorrection], which carries the correction.
+///  * [RenderSliverList], which reports corrections when children above the
+///    viewport have changed size.
+class _CorrectingSpacer extends LeafRenderObjectWidget {
+  const _CorrectingSpacer({required this.extent});
+
+  final double extent;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderCorrectingSpacer(extent);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderCorrectingSpacer renderObject) {
+    renderObject.extent = extent;
+  }
+}
+
+class _RenderCorrectingSpacer extends RenderSliver {
+  _RenderCorrectingSpacer(this._extent);
+
+  double _pendingCorrection = 0.0;
+
+  double get extent => _extent;
+  double _extent;
+  set extent(double value) {
+    if (value == _extent) {
+      return;
+    }
+
+    _pendingCorrection += value - _extent;
+    _extent = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void performLayout() {
+    if (_pendingCorrection != 0.0 && constraints.scrollOffset > 0.0) {
+      geometry = SliverGeometry(scrollOffsetCorrection: _pendingCorrection);
+      _pendingCorrection = 0.0;
+      return;
+    }
+
+    _pendingCorrection = 0.0;
+    geometry = SliverGeometry(
+      scrollExtent: _extent,
+      paintExtent: calculatePaintOffset(constraints, from: 0.0, to: _extent),
+      maxPaintExtent: _extent,
+      cacheExtent: calculateCacheOffset(constraints, from: 0.0, to: _extent),
+    );
+  }
 }
