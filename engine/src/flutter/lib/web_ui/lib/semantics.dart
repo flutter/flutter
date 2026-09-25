@@ -652,7 +652,6 @@ enum SemanticsRole {
   main,
   navigation,
   region,
-  slider,
   listBox,
   option,
 }

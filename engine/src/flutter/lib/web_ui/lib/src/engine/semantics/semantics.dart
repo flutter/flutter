@@ -626,9 +626,6 @@ enum EngineSemanticsRole {
   /// An area that represents a form.
   form,
 
-  /// A graphic object that can be incremented or decremented as a slider.
-  slider,
-
   /// A widget that allows the user to select one or more items from a list of choices.
   listBox,
 
@@ -2304,8 +2301,6 @@ class SemanticsObject {
         return EngineSemanticsRole.loadingSpinner;
       case ui.SemanticsRole.progressBar:
         return EngineSemanticsRole.progressBar;
-      case ui.SemanticsRole.slider:
-        return EngineSemanticsRole.slider;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.dragHandle:
@@ -2350,7 +2345,6 @@ class SemanticsObject {
     return switch (role) {
       EngineSemanticsRole.textField => SemanticTextField(this),
       EngineSemanticsRole.scrollable => SemanticScrollable(this),
-      EngineSemanticsRole.slider => SemanticIncrementable(this, EngineSemanticsRole.slider),
       EngineSemanticsRole.incrementable => SemanticIncrementable(this),
       EngineSemanticsRole.button => SemanticButton(this),
       EngineSemanticsRole.radioGroup => SemanticRadioGroup(this),
