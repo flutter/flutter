@@ -1865,6 +1865,9 @@ class FakePlugin extends Fake implements Plugin {
   final Map<String, PluginPlatform> platforms;
 
   @override
+  final List<String> dependencies = const <String>[];
+
+  @override
   String? get implementsPackage => null;
 
   @override
