@@ -1704,8 +1704,7 @@ void Shell::LoadDartDeferredLibrary(
     std::unique_ptr<const fml::Mapping> snapshot_data,
     std::unique_ptr<const fml::Mapping> snapshot_instructions) {
   task_runners_.GetUITaskRunner()->PostTask(fml::MakeCopyable(
-      [engine = engine_->GetWeakPtr(), loading_unit_id,
-       data = std::move(snapshot_data),
+      [engine = weak_engine_, loading_unit_id, data = std::move(snapshot_data),
        instructions = std::move(snapshot_instructions)]() mutable {
         if (engine) {
           engine->LoadDartDeferredLibrary(loading_unit_id, std::move(data),
@@ -1715,11 +1714,11 @@ void Shell::LoadDartDeferredLibrary(
 }
 
 void Shell::LoadDartDeferredLibraryError(intptr_t loading_unit_id,
-                                         const std::string error_message,
+                                         std::string error_message,
                                          bool transient) {
-  fml::TaskRunner::RunNowOrPostTask(
-      task_runners_.GetUITaskRunner(),
-      [engine = weak_engine_, loading_unit_id, error_message, transient] {
+  task_runners_.GetUITaskRunner()->PostTask(
+      [engine = weak_engine_, loading_unit_id,
+       error_message = std::move(error_message), transient] {
         if (engine) {
           engine->LoadDartDeferredLibraryError(loading_unit_id, error_message,
                                                transient);
@@ -1745,7 +1744,7 @@ void Shell::UpdateAssetResolverByType(
 // |Engine::Delegate|
 void Shell::RequestDartDeferredLibrary(intptr_t loading_unit_id) {
   task_runners_.GetPlatformTaskRunner()->PostTask(
-      [view = platform_view_->GetWeakPtr(), loading_unit_id] {
+      [view = weak_platform_view_, loading_unit_id] {
         if (view) {
           view->RequestDartDeferredLibrary(loading_unit_id);
         }

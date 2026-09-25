@@ -657,9 +657,10 @@ void RuntimeController::LoadDartDeferredLibrary(
     intptr_t loading_unit_id,
     std::unique_ptr<const fml::Mapping> snapshot_data,
     std::unique_ptr<const fml::Mapping> snapshot_instructions) {
-  root_isolate_.lock()->LoadLoadingUnit(loading_unit_id,
-                                        std::move(snapshot_data),
-                                        std::move(snapshot_instructions));
+  if (auto root_isolate = root_isolate_.lock()) {
+    root_isolate->LoadLoadingUnit(loading_unit_id, std::move(snapshot_data),
+                                  std::move(snapshot_instructions));
+  }
 }
 
 void RuntimeController::LoadDartDeferredLibraryError(
@@ -667,8 +668,10 @@ void RuntimeController::LoadDartDeferredLibraryError(
     const std::string
         error_message,  // NOLINT(performance-unnecessary-value-param)
     bool transient) {
-  root_isolate_.lock()->LoadLoadingUnitError(loading_unit_id, error_message,
-                                             transient);
+  if (auto root_isolate = root_isolate_.lock()) {
+    root_isolate->LoadLoadingUnitError(loading_unit_id, error_message,
+                                       transient);
+  }
 }
 
 void RuntimeController::RequestDartDeferredLibrary(intptr_t loading_unit_id) {

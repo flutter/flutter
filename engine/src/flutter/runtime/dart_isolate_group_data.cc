@@ -100,4 +100,10 @@ DartIsolateGroupData::GetKernelBuffers() const {
   return kernel_buffers_;
 }
 
+void DartIsolateGroupData::AddLoadingUnitSnapshot(
+    const fml::RefPtr<const DartSnapshot>& snapshot) {
+  std::scoped_lock lock(loading_unit_snapshots_mutex_);
+  loading_unit_snapshots_.push_back(snapshot);
+}
+
 }  // namespace flutter

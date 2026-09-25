@@ -431,7 +431,6 @@ class DartIsolate : public UIDartState {
 
   Phase phase_ = Phase::Unknown;
   std::vector<std::unique_ptr<AutoFireClosure>> shutdown_callbacks_;
-  std::unordered_set<fml::RefPtr<DartSnapshot>> loading_unit_snapshots_;
   fml::RefPtr<fml::TaskRunner> message_handling_task_runner_;
   const bool may_insecurely_connect_to_all_domains_;
   const bool is_platform_isolate_;

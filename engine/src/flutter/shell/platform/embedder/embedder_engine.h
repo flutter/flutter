@@ -88,6 +88,15 @@ class EmbedderEngine {
 
   bool ScheduleFrame();
 
+  bool LoadDartDeferredLibrary(
+      intptr_t loading_unit_id,
+      std::unique_ptr<const fml::Mapping> snapshot_data,
+      std::unique_ptr<const fml::Mapping> snapshot_instructions);
+
+  bool LoadDartDeferredLibraryError(intptr_t loading_unit_id,
+                                    const std::string& error_message,
+                                    bool transient);
+
   Shell& GetShell();
 
  private:
