@@ -103,6 +103,10 @@ class DeferredComponentModule {
     writeFile(
       fileSystem.path.join(dir.path, 'android', name, 'build.gradle'),
       r'''
+    plugins {
+        id "com.android.dynamic-feature"
+    }
+
     def localProperties = new Properties()
     def localPropertiesFile = rootProject.file('local.properties')
     if (localPropertiesFile.exists()) {
@@ -120,8 +124,6 @@ class DeferredComponentModule {
     if (flutterVersionName == null) {
         flutterVersionName = '1.0'
     }
-
-    apply plugin: "com.android.dynamic-feature"
 
     android {
         namespace = "com.example.''' +
