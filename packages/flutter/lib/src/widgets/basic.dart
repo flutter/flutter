@@ -6534,6 +6534,8 @@ class RichText extends MultiChildRenderObjectWidget {
     this.textHeightBehavior,
     this.selectionRegistrar,
     this.selectionColor,
+    this.searchHighlightColor,
+    this.activeSearchHighlightColor,
   }) : assert(maxLines == null || maxLines > 0),
        assert(selectionRegistrar == null || selectionColor != null),
        assert(
@@ -6643,6 +6645,16 @@ class RichText extends MultiChildRenderObjectWidget {
   /// widgets.
   final Color? selectionColor;
 
+  /// The color to use when painting passive Find-in-Page matches.
+  ///
+  /// This is ignored if [selectionRegistrar] is null.
+  final Color? searchHighlightColor;
+
+  /// The color to use when painting the active Find-in-Page match.
+  ///
+  /// This is ignored if [selectionRegistrar] is null.
+  final Color? activeSearchHighlightColor;
+
   double _getDevicePixelRatio(BuildContext context) =>
       MediaQuery.maybeDevicePixelRatioOf(context) ?? View.maybeOf(context)?.devicePixelRatio ?? 1.0;
 
@@ -6663,6 +6675,8 @@ class RichText extends MultiChildRenderObjectWidget {
       locale: locale ?? Localizations.maybeLocaleOf(context),
       registrar: selectionRegistrar,
       selectionColor: selectionColor,
+      searchHighlightColor: searchHighlightColor,
+      activeSearchHighlightColor: activeSearchHighlightColor,
       devicePixelRatio: _getDevicePixelRatio(context),
     );
   }
@@ -6684,6 +6698,8 @@ class RichText extends MultiChildRenderObjectWidget {
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..registrar = selectionRegistrar
       ..selectionColor = selectionColor
+      ..searchHighlightColor = searchHighlightColor
+      ..activeSearchHighlightColor = activeSearchHighlightColor
       ..devicePixelRatio = _getDevicePixelRatio(context);
   }
 

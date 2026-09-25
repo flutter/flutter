@@ -750,32 +750,37 @@ class Text extends StatelessWidget {
       (null, null) => MediaQuery.textScalerOf(context),
     };
     late Widget result;
+    final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
     if (registrar != null) {
-      result = MouseRegion(
-        cursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
-        child: _SelectableTextContainer(
-          textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
-          textDirection:
-              textDirection, // RichText uses Directionality.of to obtain a default if this is null.
-          locale:
-              locale, // RichText uses Localizations.localeOf to obtain a default if this is null
-          softWrap: softWrap ?? defaultTextStyle.softWrap,
-          overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
-          textScaler: textScaler,
-          maxLines: maxLines ?? defaultTextStyle.maxLines,
-          strutStyle: effectiveStrutStyle,
-          textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
-          textHeightBehavior:
-              textHeightBehavior ??
-              defaultTextStyle.textHeightBehavior ??
-              DefaultTextHeightBehavior.maybeOf(context),
-          selectionColor:
-              selectionColor ??
-              DefaultSelectionStyle.of(context).selectionColor ??
-              DefaultSelectionStyle.defaultColor,
-          text: effectiveTextSpan,
-        ),
+      final MouseCursor effectiveCursor = selectionStyle.mouseCursor ?? SystemMouseCursors.text;
+      result = _SelectableTextContainer(
+        textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
+        textDirection:
+            textDirection, // RichText uses Directionality.of to obtain a default if this is null.
+        locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
+        softWrap: softWrap ?? defaultTextStyle.softWrap,
+        overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
+        textScaler: textScaler,
+        maxLines: maxLines ?? defaultTextStyle.maxLines,
+        strutStyle: effectiveStrutStyle,
+        textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
+        textHeightBehavior:
+            textHeightBehavior ??
+            defaultTextStyle.textHeightBehavior ??
+            DefaultTextHeightBehavior.maybeOf(context),
+        selectionColor:
+            selectionColor ?? selectionStyle.selectionColor ?? DefaultSelectionStyle.defaultColor,
+        searchHighlightColor:
+            selectionStyle.searchHighlightColor ??
+            DefaultSelectionStyle.defaultSearchHighlightColor,
+        activeSearchHighlightColor:
+            selectionStyle.activeSearchHighlightColor ??
+            DefaultSelectionStyle.defaultActiveSearchHighlightColor,
+        text: effectiveTextSpan,
       );
+      if (effectiveCursor != MouseCursor.defer) {
+        result = MouseRegion(cursor: effectiveCursor, child: result);
+      }
     } else {
       result = RichText(
         textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
@@ -793,9 +798,13 @@ class Text extends StatelessWidget {
             defaultTextStyle.textHeightBehavior ??
             DefaultTextHeightBehavior.maybeOf(context),
         selectionColor:
-            selectionColor ??
-            DefaultSelectionStyle.of(context).selectionColor ??
-            DefaultSelectionStyle.defaultColor,
+            selectionColor ?? selectionStyle.selectionColor ?? DefaultSelectionStyle.defaultColor,
+        searchHighlightColor:
+            selectionStyle.searchHighlightColor ??
+            DefaultSelectionStyle.defaultSearchHighlightColor,
+        activeSearchHighlightColor:
+            selectionStyle.activeSearchHighlightColor ??
+            DefaultSelectionStyle.defaultActiveSearchHighlightColor,
         text: effectiveTextSpan,
       );
     }
@@ -868,6 +877,8 @@ class _SelectableTextContainer extends StatefulWidget {
     required this.textWidthBasis,
     this.textHeightBehavior,
     required this.selectionColor,
+    required this.searchHighlightColor,
+    required this.activeSearchHighlightColor,
   });
 
   final TextSpan text;
@@ -882,6 +893,8 @@ class _SelectableTextContainer extends StatefulWidget {
   final TextWidthBasis textWidthBasis;
   final ui.TextHeightBehavior? textHeightBehavior;
   final Color selectionColor;
+  final Color searchHighlightColor;
+  final Color activeSearchHighlightColor;
 
   @override
   State<_SelectableTextContainer> createState() => _SelectableTextContainerState();
@@ -922,6 +935,8 @@ class _SelectableTextContainerState extends State<_SelectableTextContainer> {
         textWidthBasis: widget.textWidthBasis,
         textHeightBehavior: widget.textHeightBehavior,
         selectionColor: widget.selectionColor,
+        searchHighlightColor: widget.searchHighlightColor,
+        activeSearchHighlightColor: widget.activeSearchHighlightColor,
         text: widget.text,
       ),
     );
@@ -943,6 +958,8 @@ class _RichText extends StatelessWidget {
     required this.textWidthBasis,
     this.textHeightBehavior,
     required this.selectionColor,
+    required this.searchHighlightColor,
+    required this.activeSearchHighlightColor,
   });
 
   final GlobalKey? textKey;
@@ -958,6 +975,8 @@ class _RichText extends StatelessWidget {
   final TextWidthBasis textWidthBasis;
   final ui.TextHeightBehavior? textHeightBehavior;
   final Color selectionColor;
+  final Color searchHighlightColor;
+  final Color activeSearchHighlightColor;
 
   @override
   Widget build(BuildContext context) {
@@ -976,6 +995,8 @@ class _RichText extends StatelessWidget {
       textHeightBehavior: textHeightBehavior,
       selectionRegistrar: registrar,
       selectionColor: selectionColor,
+      searchHighlightColor: searchHighlightColor,
+      activeSearchHighlightColor: activeSearchHighlightColor,
       text: text,
     );
   }
