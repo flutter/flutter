@@ -172,6 +172,39 @@ void main() {
       );
     });
 
+    testWithoutContext('only the latest diagnostics published for a file are reported', () async {
+      final process = MockLspServerProcess();
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'Artifact.engineDartSdkPath/bin/dart',
+            'language-server',
+            '--dart-sdk',
+            'Artifact.engineDartSdkPath',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--no-with-fine-dependencies',
+            '--suppress-analytics',
+          ],
+          process: process,
+        ),
+      ]);
+      final Uri targetUri = Uri.parse('file:///directoryA/foo');
+      await process.runSimulatedAnalysis(diagnosticsFor: targetUri);
+      await process.runSimulatedAnalysis(diagnosticsFor: targetUri, diagnosticsCount: 2);
+
+      await expectLater(
+        runner.run(<String>['analyze']),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            startsWith('2 issues found.'),
+          ),
+        ),
+      );
+    });
+
     testWithoutContext('--no-plugins passes --no-plugins to language-server', () async {
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
