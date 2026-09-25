@@ -13,6 +13,7 @@ enabled_branches:
 platform_properties:
   linux:
     properties:
+      presubmit_max_attempts: "3"
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
@@ -25,6 +26,7 @@ platform_properties:
       cpu: x86
   mac:
     properties:
+      presubmit_max_attempts: "3"
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
@@ -38,6 +40,7 @@ platform_properties:
         }
   windows:
     properties:
+      presubmit_max_attempts: "3"
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [

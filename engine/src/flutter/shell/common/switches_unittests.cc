@@ -95,11 +95,29 @@ TEST(SwitchesTest, EnableEmbedderAPI) {
     EXPECT_EQ(settings.enable_embedder_api, true);
   }
   {
+    // enable=true
+    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+        {"command", "--enable-embedder-api=true"});
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_embedder_api, true);
+  }
+  {
+    // enable=false
+    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+        {"command", "--enable-embedder-api=false"});
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_embedder_api, false);
+  }
+  {
     // default
     fml::CommandLine command_line =
         fml::CommandLineFromInitializerList({"command"});
     Settings settings = SettingsFromCommandLine(command_line);
+#if defined(FML_OS_ANDROID)
+    EXPECT_EQ(settings.enable_embedder_api, true);
+#else
     EXPECT_EQ(settings.enable_embedder_api, false);
+#endif
   }
 }
 

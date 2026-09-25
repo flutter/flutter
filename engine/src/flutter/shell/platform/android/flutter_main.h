@@ -6,10 +6,11 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_FLUTTER_MAIN_H_
 
 #include <jni.h>
+#include <cstdint>
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
-#include "flutter/runtime/dart_service_isolate.h"
+#include "flutter/fml/task_runner.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 
 namespace flutter {
@@ -29,10 +30,22 @@ class FlutterMain {
       const flutter::Settings& settings,
       int api_level);
 
+  // Returns true if the Android Embedder C-API architecture is enabled.
+  static bool IsEmbedderAPIEnabled();
+
+  // Test overrides for matrix testing of both legacy and embedder paths.
+  static void SetEmbedderAPIEnabledForTesting(bool enabled);
+  static void ResetEmbedderAPIEnabledForTesting();
+
+  // Test helpers to configure settings without JNI initialization.
+  static void SetSettingsForTesting(const flutter::Settings& settings);
+  static void ResetSettingsForTesting();
+
  private:
   const flutter::Settings settings_;
   const flutter::AndroidRenderingAPI android_rendering_api_;
-  DartServiceIsolate::CallbackHandle vm_service_uri_callback_ = 0;
+  intptr_t vm_service_uri_callback_ = 0;
+  fml::RefPtr<fml::TaskRunner> platform_runner_;
 
   explicit FlutterMain(const flutter::Settings& settings,
                        flutter::AndroidRenderingAPI android_rendering_api);

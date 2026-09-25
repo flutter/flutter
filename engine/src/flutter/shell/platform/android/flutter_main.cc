@@ -16,18 +16,14 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/native_library.h"
+#include "flutter/fml/paths.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/paths_android.h"
-#include "flutter/lib/ui/plugins/callback_cache.h"
-#include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/switches.h"
-#include "flutter/shell/platform/android/android_context_vk_impeller.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
-#include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/flutter_main.h"
-#include "impeller/base/validation.h"
-#include "impeller/toolkit/android/proc_table.h"
-#include "txt/platform.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
 
@@ -56,8 +52,25 @@ bool IsVivante() {
   __system_property_get("ro.hardware.egl", product_model);
   return strcmp(product_model, "VIVANTE") == 0;
 }
+
+bool CheckATraceIsEnabled() {
+  using ATraceIsEnabledProc = bool (*)();
+  static ATraceIsEnabledProc a_trace_is_enabled = []() -> ATraceIsEnabledProc {
+    static auto android_lib = fml::NativeLibrary::Create("libandroid.so");
+    if (!android_lib) {
+      return nullptr;
+    }
+    return reinterpret_cast<ATraceIsEnabledProc>(
+        const_cast<uint8_t*>(android_lib->ResolveSymbol("ATrace_isEnabled")));
+  }();
+  return a_trace_is_enabled ? a_trace_is_enabled() : false;
+}
 #else
 bool IsVivante() {
+  return false;
+}
+
+bool CheckATraceIsEnabled() {
   return false;
 }
 #endif  // FML_OS_ANDROID
@@ -68,9 +81,24 @@ FlutterMain::FlutterMain(const flutter::Settings& settings,
                          flutter::AndroidRenderingAPI android_rendering_api)
     : settings_(settings), android_rendering_api_(android_rendering_api) {}
 
-FlutterMain::~FlutterMain() = default;
+FlutterMain::~FlutterMain() {
+  if (vm_service_uri_callback_ != 0) {
+    FlutterEngineDeregisterVMServiceUriCallback(vm_service_uri_callback_);
+    vm_service_uri_callback_ = 0;
+  }
+}
+
+namespace {
+enum class OverrideState : int8_t {
+  kNotSet = -1,
+  kDisabled = 0,
+  kEnabled = 1,
+};
+}  // namespace
 
 static std::unique_ptr<FlutterMain> g_flutter_main;
+static std::atomic<int8_t> s_embedder_api_override_for_testing{
+    static_cast<int8_t>(OverrideState::kNotSet)};
 
 FlutterMain& FlutterMain::Get() {
   FML_CHECK(g_flutter_main) << "ensureInitializationComplete must have already "
@@ -84,6 +112,39 @@ const flutter::Settings& FlutterMain::GetSettings() const {
 
 flutter::AndroidRenderingAPI FlutterMain::GetAndroidRenderingAPI() {
   return android_rendering_api_;
+}
+
+bool FlutterMain::IsEmbedderAPIEnabled() {
+  int8_t override_val =
+      s_embedder_api_override_for_testing.load(std::memory_order_relaxed);
+  if (override_val != static_cast<int8_t>(OverrideState::kNotSet)) {
+    return override_val == static_cast<int8_t>(OverrideState::kEnabled);
+  }
+  if (g_flutter_main) {
+    return g_flutter_main->GetSettings().enable_embedder_api;
+  }
+  return true;
+}
+
+void FlutterMain::SetEmbedderAPIEnabledForTesting(bool enabled) {
+  s_embedder_api_override_for_testing.store(
+      enabled ? static_cast<int8_t>(OverrideState::kEnabled)
+              : static_cast<int8_t>(OverrideState::kDisabled),
+      std::memory_order_relaxed);
+}
+
+void FlutterMain::ResetEmbedderAPIEnabledForTesting() {
+  s_embedder_api_override_for_testing.store(
+      static_cast<int8_t>(OverrideState::kNotSet), std::memory_order_relaxed);
+}
+
+void FlutterMain::SetSettingsForTesting(const flutter::Settings& settings) {
+  g_flutter_main.reset(
+      new FlutterMain(settings, AndroidRenderingAPI::kSoftware));
+}
+
+void FlutterMain::ResetSettingsForTesting() {
+  g_flutter_main.reset();
 }
 
 void FlutterMain::Init(JNIEnv* env,
@@ -107,8 +168,7 @@ void FlutterMain::Init(JNIEnv* env,
   // Turn systracing on if ATrace_isEnabled is true and the user did not already
   // request systracing
   if (!settings.trace_systrace) {
-    settings.trace_systrace =
-        impeller::android::GetProcTable().TraceIsEnabled();
+    settings.trace_systrace = CheckATraceIsEnabled();
     if (settings.trace_systrace) {
       __android_log_print(
           ANDROID_LOG_INFO, "Flutter",
@@ -145,18 +205,17 @@ void FlutterMain::Init(JNIEnv* env,
   settings.enable_timeline_event_handler = settings.trace_systrace;
 #endif  // FLUTTER_RELEASE
 
-  // Restore the callback cache.
-  // TODO(chinmaygarde): Route all cache file access through FML and remove this
-  // setter.
-  flutter::DartCallbackCache::SetCachePath(
-      fml::jni::JavaStringToString(env, appStoragePath));
+  // Restore the callback cache via Embedder API.
+  std::string app_storage_path =
+      fml::jni::JavaStringToString(env, appStoragePath);
+  FlutterEngineSetCallbackCachePath(app_storage_path.c_str());
 
   fml::paths::InitializeAndroidCachesPath(
       fml::jni::JavaStringToString(env, engineCachesPath));
 
-  flutter::DartCallbackCache::LoadCacheFromDisk();
+  FlutterEngineLoadCallbackCache();
 
-  if (!flutter::DartVM::IsRunningPrecompiledCode() && kernelPath) {
+  if (!FlutterEngineRunsAOTCompiledDartCode() && kernelPath) {
     // Check to see if the appropriate kernel files are present and configure
     // settings accordingly.
     auto application_kernel_path =
@@ -164,7 +223,14 @@ void FlutterMain::Init(JNIEnv* env,
 
     if (fml::IsFile(application_kernel_path)) {
       settings.application_kernel_asset = application_kernel_path;
+      if (settings.assets_path.empty()) {
+        settings.assets_path =
+            fml::paths::GetDirectoryName(application_kernel_path);
+      }
     }
+  }
+  if (settings.assets_path.empty() && appStoragePath != nullptr) {
+    settings.assets_path = fml::jni::JavaStringToString(env, appStoragePath);
   }
 
   settings.task_observer_add = [](intptr_t key, const fml::closure& callback) {
@@ -207,37 +273,48 @@ void FlutterMain::Init(JNIEnv* env,
 }
 
 void FlutterMain::SetupDartVMServiceUriCallback(JNIEnv* env) {
-  g_flutter_jni_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
-      env, env->FindClass("io/flutter/embedding/engine/FlutterJNI"));
+  if (g_flutter_jni_class == nullptr) {
+    g_flutter_jni_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
+        env, env->FindClass("io/flutter/embedding/engine/FlutterJNI"));
+  }
   if (g_flutter_jni_class->is_null()) {
     return;
   }
-  jfieldID uri_field = env->GetStaticFieldID(
-      g_flutter_jni_class->obj(), "vmServiceUri", "Ljava/lang/String;");
-  if (uri_field == nullptr) {
-    return;
-  }
-
-  auto set_uri = [env, uri_field](const std::string& uri) {
-    fml::jni::ScopedJavaLocalRef<jstring> java_uri =
-        fml::jni::StringToJavaString(env, uri);
-    env->SetStaticObjectField(g_flutter_jni_class->obj(), uri_field,
-                              java_uri.obj());
-  };
 
   fml::MessageLoop::EnsureInitializedForCurrentThread();
-  fml::RefPtr<fml::TaskRunner> platform_runner =
-      fml::MessageLoop::GetCurrent().GetTaskRunner();
+  platform_runner_ = fml::MessageLoop::GetCurrent().GetTaskRunner();
 
-  vm_service_uri_callback_ = DartServiceIsolate::AddServerStatusCallback(
-      [platform_runner, set_uri](const std::string& uri) {
-        platform_runner->PostTask([uri, set_uri] { set_uri(uri); });
-      });
+  FlutterVMServiceUriCallbackConfig config = {
+      .struct_size = sizeof(FlutterVMServiceUriCallbackConfig),
+      .callback =
+          [](const char* uri, void* user_data) {
+            auto* runner = static_cast<fml::TaskRunner*>(user_data);
+            std::string uri_str(uri ? uri : "");
+            runner->PostTask([uri_str] {
+              JNIEnv* env = fml::jni::AttachCurrentThread();
+              if (!g_flutter_jni_class || g_flutter_jni_class->is_null()) {
+                return;
+              }
+              jfieldID uri_field =
+                  env->GetStaticFieldID(g_flutter_jni_class->obj(),
+                                        "vmServiceUri", "Ljava/lang/String;");
+              if (uri_field == nullptr) {
+                return;
+              }
+              fml::jni::ScopedJavaLocalRef<jstring> java_uri =
+                  fml::jni::StringToJavaString(env, uri_str);
+              env->SetStaticObjectField(g_flutter_jni_class->obj(), uri_field,
+                                        java_uri.obj());
+            });
+          },
+      .user_data = platform_runner_.get(),
+  };
+
+  FlutterEngineRegisterVMServiceUriCallback(&config, &vm_service_uri_callback_);
 }
 
 static void PrefetchDefaultFontManager(JNIEnv* env, jclass jcaller) {
-  // Initialize a singleton owned by Skia.
-  txt::GetDefaultFontManager();
+  FlutterEnginePrefetchDefaultFontManager();
 }
 
 bool FlutterMain::Register(JNIEnv* env) {
