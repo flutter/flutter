@@ -32,6 +32,8 @@ import '../tester/flutter_tester.dart';
 import '../version.dart';
 import '../web/web_device.dart';
 import 'local_engine.dart';
+import 'options/common_options.dart';
+import 'options/option_descriptor.dart';
 
 /// Common flutter command line options.
 abstract final class FlutterGlobalOptions {
@@ -250,12 +252,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       hide: !verboseHelp,
       help: 'List the special "web-server" device in device listings.',
     );
-    argParser.addFlag(
-      FlutterGlobalOptions.kContinuousIntegrationFlag,
-      negatable: false,
-      help: 'Enable a set of CI-specific test debug settings.',
-      hide: !verboseHelp,
-    );
+    argParser.addDescriptor(CommonOptions.ci, verboseHelp: verboseHelp);
     argParser.addOption(
       FlutterGlobalOptions.kDebugLogsDirectoryFlag,
       help: 'Path to a directory where logs for debugging may be added.',

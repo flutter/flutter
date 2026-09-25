@@ -220,9 +220,11 @@ void main() {
 
     var result = false;
     // SynchronousFuture should complete immediately.
-    dispatcher.invokeCallback(SynchronousFuture<bool>(false)).then((bool data) {
-      result = data;
-    });
+    unawaited(
+      dispatcher.invokeCallback(SynchronousFuture<bool>(false)).then((bool data) {
+        result = data;
+      }),
+    );
     expect(result, isTrue);
 
     await tester.pump();
