@@ -20,10 +20,11 @@ List<VersionTuple> versionTuples = <VersionTuple>[
   VersionTuple(agpVersion: '8.11.1', gradleVersion: '8.14', kotlinVersion: '2.2.20'),
   // Template and max known
   // TODO(jesswon): Separate max known once there exists a newer one: https://github.com/flutter/flutter/issues/189112.
-  VersionTuple(agpVersion: '9.1.0', gradleVersion: '9.3.1', kotlinVersion: '2.4.0'),
+  VersionTuple(agpVersion: '9.3.1', gradleVersion: '9.5.0', kotlinVersion: '2.4.20'),
   /* Others */
-  VersionTuple(agpVersion: '8.11.1', gradleVersion: '8.14', kotlinVersion: '2.2.20'),
   VersionTuple(agpVersion: '8.12.0', gradleVersion: '8.14', kotlinVersion: '2.2.20'),
+  // Previous template versions.
+  VersionTuple(agpVersion: '9.1.0', gradleVersion: '9.3.1', kotlinVersion: '2.4.0'),
 ]; // Max length is 7 entries until this test is split See https://github.com/flutter/flutter/issues/167495.
 
 Future<void> main() async {

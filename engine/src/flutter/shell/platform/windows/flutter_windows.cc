@@ -93,7 +93,8 @@ static FlutterDesktopViewControllerRef CreateViewController(
   }
 
   std::unique_ptr<flutter::FlutterWindowsView> view = engine_ptr->CreateView(
-      std::move(window_wrapper), false, flutter::BoxConstraints());
+      std::move(window_wrapper), false, flutter::BoxConstraints(),
+      /*allow_implicit_view=*/true);
   if (!view) {
     return nullptr;
   }
