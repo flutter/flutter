@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'tween_animation_builder.dart';
+library;
+
 import 'package:flutter/animation.dart';
 
 import 'framework.dart';

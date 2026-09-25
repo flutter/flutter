@@ -83,8 +83,10 @@ export 'package:flutter/services.dart'
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
-typedef SelectionChangedCallback =
-    void Function(TextSelection selection, SelectionChangedCause? cause);
+typedef SelectionChangedCallback = void Function(
+  TextSelection selection,
+  SelectionChangedCause? cause,
+);
 
 /// Signature for the callback that reports the app private command results.
 typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
@@ -96,8 +98,10 @@ typedef AppPrivateCommandCallback = void Function(String action, Map<String, dyn
 ///
 ///  * [SelectableRegionContextMenuBuilder], which performs the same role for
 ///    [SelectableRegion].
-typedef EditableTextContextMenuBuilder =
-    Widget Function(BuildContext context, EditableTextState editableTextState);
+typedef EditableTextContextMenuBuilder = Widget Function(
+  BuildContext context,
+  EditableTextState editableTextState,
+);
 
 // Signature for a function that determines the target location of the given
 // [TextPosition] after applying the given [TextBoundary].
@@ -860,7 +864,7 @@ class EditableText extends StatefulWidget {
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
     required this.style,
-    StrutStyle? strutStyle,
+    this._strutStyle,
     required this.cursorColor,
     required this.backgroundCursorColor,
     this.textAlign = TextAlign.start,
@@ -983,7 +987,6 @@ class EditableText extends StatefulWidget {
              spellCheckConfiguration.misspelledTextStyle != null,
          'spellCheckConfiguration must specify a misspelledTextStyle if spell check behavior is desired',
        ),
-       _strutStyle = strutStyle,
        keyboardType =
            keyboardType ?? _inferKeyboardType(autofillHints: autofillHints, maxLines: maxLines),
        inputFormatters = maxLines == 1
@@ -1442,12 +1445,22 @@ class EditableText extends StatefulWidget {
   /// of editing, such as when pressing the "done" button on the keyboard. That
   /// default behavior can be overridden. See [onEditingComplete] for details.
   ///
-  /// {@tool dartpad}
+  /// <callout-box>
+  ///
   /// This example shows how onChanged could be used to check the TextField's
   /// current value each time the user inserts or deletes a character.
   ///
-  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_changed.0.dart **
-  /// {@end-tool}
+  // TODO(framework): Replace the following block with a @dartpad directive
+  // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+  /// <small>
+  ///
+  /// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+  ///
+  /// </small>
+  ///
+  /// {@example /examples/api/lib/widgets/editable_text/editable_text.on_changed.0.dart#body}
+  ///
+  /// </callout-box>
   /// {@endtemplate}
   ///
   /// ## Handling emojis and other complex characters
@@ -1991,13 +2004,22 @@ class EditableText extends StatefulWidget {
   /// Additionally, set [ContentInsertionConfiguration.allowedMimeTypes]
   /// to limit the allowable mime types for inserted content.
   ///
-  /// {@tool dartpad}
+  /// <callout-box>
   ///
   /// This example shows how to access the data for inserted content in your
   /// `TextField`.
   ///
-  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart **
-  /// {@end-tool}
+  // TODO(framework): Replace the following block with a @dartpad directive
+  // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+  /// <small>
+  ///
+  /// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+  ///
+  /// </small>
+  ///
+  /// {@example /examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart#body}
+  ///
+  /// </callout-box>
   ///
   /// If [contentInsertionConfiguration] is not provided, by default
   /// an empty list of mime types will be sent to the Flutter Engine.
@@ -2041,19 +2063,39 @@ class EditableText extends StatefulWidget {
   /// [contextMenuBuilder] is ignored and the
   /// [TextSelectionControls.buildToolbar] method is used instead.
   ///
-  /// {@tool dartpad}
+  /// <callout-box>
+  ///
   /// This example shows how to customize the menu, in this case by keeping the
   /// default buttons for the platform but modifying their appearance.
   ///
-  /// ** See code in examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.0.dart **
-  /// {@end-tool}
+  // TODO(framework): Replace the following block with a @dartpad directive
+  // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+  /// <small>
   ///
-  /// {@tool dartpad}
+  /// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+  ///
+  /// </small>
+  ///
+  /// {@example /examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.0.dart#body}
+  ///
+  /// </callout-box>
+  ///
+  /// <callout-box>
+  ///
   /// This example shows how to show a custom button only when an email address
   /// is currently selected.
   ///
-  /// ** See code in examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.1.dart **
-  /// {@end-tool}
+  // TODO(framework): Replace the following block with a @dartpad directive
+  // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+  /// <small>
+  ///
+  /// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+  ///
+  /// </small>
+  ///
+  /// {@example /examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.1.dart#body}
+  ///
+  /// </callout-box>
   ///
   /// See also:
   ///   * [AdaptiveTextSelectionToolbar], which builds the default text selection
@@ -2793,9 +2835,8 @@ class EditableTextState extends State<EditableText>
       return;
     }
     final String text = textEditingValue.text;
-    Clipboard.setData(
-      ClipboardData(text: selection.textInside(text)),
-    ).catchError(_reportClipboardError('while copying selection to clipboard'));
+    Clipboard.setData(ClipboardData(text: selection.textInside(text)))
+        .catchError(_reportClipboardError('while copying selection to clipboard'));
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
       hideToolbar(false);
@@ -2832,9 +2873,8 @@ class EditableTextState extends State<EditableText>
     if (selection.isCollapsed) {
       return;
     }
-    Clipboard.setData(
-      ClipboardData(text: selection.textInside(text)),
-    ).catchError(_reportClipboardError('while cutting selection to clipboard'));
+    Clipboard.setData(ClipboardData(text: selection.textInside(text)))
+        .catchError(_reportClipboardError('while cutting selection to clipboard'));
     _replaceText(ReplaceTextIntent(textEditingValue, '', selection, cause));
     if (cause == SelectionChangedCause.toolbar) {
       // Schedule a call to bringIntoView() after renderEditable updates.
@@ -4058,12 +4098,13 @@ class EditableTextState extends State<EditableText>
   bool get _hasFocus => widget.focusNode.hasFocus;
   bool get _isMultiline => widget.maxLines != 1;
 
-  /// Flag to track whether this [EditableText] was in focus when [onTapOutside]
-  /// was called.
+  /// Flag to track whether this [EditableText] was in focus when
+  /// [EditableText.onTapOutside] was called.
   ///
-  /// This is used to determine whether [onTapUpOutside] should be called.
-  /// The reason [_hasFocus] can't be used directly is because [onTapOutside]
-  /// might unfocus this [EditableText] and block the [onTapUpOutside] call.
+  /// This is used to determine whether [EditableText.onTapUpOutside] should be
+  /// called. The reason [_hasFocus] can't be used directly is because
+  /// [EditableText.onTapOutside] might unfocus this [EditableText] and block
+  /// the [EditableText.onTapUpOutside] call.
   bool _hadFocusOnTapDown = false;
 
   // Finds the closest scroll offset to the current scroll offset that fully
@@ -4273,8 +4314,7 @@ class EditableTextState extends State<EditableText>
       _openInputConnection();
     } else {
       _flagInternalFocus();
-      widget.focusNode
-          .requestFocus(); // This eventually calls _openInputConnection also, see _handleFocusChanged.
+      widget.focusNode.requestFocus(); // This eventually calls _openInputConnection also, see _handleFocusChanged.
     }
   }
 
@@ -5172,7 +5212,17 @@ class EditableTextState extends State<EditableText>
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
     // Compare the current TextEditingValue with the pre-format new
     // TextEditingValue value, in case the formatter would reject the change.
-    final shouldShowCaret = widget.readOnly ? _value.selection != value.selection : _value != value;
+    // Do not automatically scroll to the caret during a selection drag.
+    // Viewport scrolling is instead managed downstream by _bringIntoViewBySelectionState
+    // (called via _formatAndSetValue), which ensures the active handle is kept in view.
+    // Bypassing the default caret auto-scroll here prevents conflicts that would snap
+    // the viewport back to the opposite, static selection end.
+    // TODO(Renzo-Olivares): Remove this special case once the caret reveal paths are
+    // consolidated, https://github.com/flutter/flutter/issues/192595.
+    final bool shouldShowCaret =
+        (widget.readOnly ? _value.selection != value.selection : _value != value) &&
+        cause != SelectionChangedCause.drag;
+
     if (shouldShowCaret) {
       _scheduleShowCaretOnScreen(withAnimation: true);
     }
@@ -5953,9 +6003,8 @@ class EditableTextState extends State<EditableText>
                         // either case, glowing or stretching.
                         scrollBehavior:
                             widget.scrollBehavior ??
-                            ScrollConfiguration.of(
-                              context,
-                            ).copyWith(scrollbars: _isMultiline, overscroll: false),
+                            ScrollConfiguration.of(context)
+                                .copyWith(scrollbars: _isMultiline, overscroll: false),
                         viewportBuilder: (BuildContext context, ViewportOffset offset) {
                           return CompositedTransformTarget(
                             link: _toolbarLayerLink,

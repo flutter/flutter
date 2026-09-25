@@ -78,8 +78,8 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "android_virtual_device", "version": "android_36_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8702262057250908257"},
+          {"dependency": "android_virtual_device", "version": "android_37_google_apis_ps16k_x64.textpb"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8670032186093418337"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -211,10 +211,15 @@ platform_properties:
           {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
       device_type: none
-      mac_model: "Macmini8,1"
+      # Benchmarks are pinned to a single Mac model so that timing metrics are
+      # comparable across runs. Macmini9,1 is the Apple Silicon (M1) Mac mini;
+      # the Intel Macmini8,1 bots are being turned down
+      # (https://flutter.dev/go/macos-intel-deprecation).
+      mac_model: "Macmini9,1"
+      cpu: arm64
       os: Mac-15.7
       tags: >
-        ["devicelab", "hostonly", "mac"]
+        ["devicelab", "hostonly", "mac", "arm64"]
       $flutter/osx_sdk : >-
         {
           "sdk_version": "17c52"
@@ -700,7 +705,6 @@ targets:
 
   - name: Linux snippets
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 30
     properties:
       tags: >
@@ -736,9 +740,9 @@ targets:
   - name: Linux flavors_test_linux
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
+      xvfb: "1"
       dependencies: >-
         [
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
@@ -1836,6 +1840,18 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
 
+  - name: Linux_android_emu_vulkan_stable android_engine_hcpp_tests
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: android_engine_hcpp_tests
+      tags: >
+         ["framework", "hostonly", "shard", "linux"]
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+        ]
+
   - name: Linux_android_emu android_engine_opengles_tests
     recipe: flutter/flutter_drone
     timeout: 60
@@ -1877,8 +1893,9 @@ targets:
         ]
 
   - name: Linux_android_emu_vulkan_stable android_hardware_smoke_vulkan_instrumented_tests
-    bringup: true
     recipe: flutter/flutter_drone
+    # Post-submit only: Instrumented tests are more resource-intensive; driver shards catch most regressions in presubmit.
+    presubmit: false
     timeout: 60
     properties:
       shard: android_hardware_smoke_vulkan_instrumented_tests
@@ -1890,8 +1907,9 @@ targets:
         ]
 
   - name: Linux_android_emu android_hardware_smoke_opengles_instrumented_tests
-    bringup: true
     recipe: flutter/flutter_drone
+    # Post-submit only: Instrumented tests are more resource-intensive; driver shards catch most regressions in presubmit.
+    presubmit: false
     timeout: 60
     properties:
       shard: android_hardware_smoke_opengles_instrumented_tests
@@ -2098,7 +2116,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "0"
+      subshard: "1_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2120,7 +2138,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "1"
+      subshard: "2_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2142,7 +2160,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "2"
+      subshard: "3_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2164,7 +2182,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "3"
+      subshard: "4_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2186,7 +2204,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "4"
+      subshard: "5_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2208,7 +2226,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "5"
+      subshard: "6_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2230,7 +2248,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "6"
+      subshard: "7_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2252,7 +2270,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "7_last"
+      subshard: "8_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2274,7 +2292,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_skwasm_tests
-      subshard: "0"
+      subshard: "1_2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700" # 45 minutes to match the global `timeout` property.
@@ -2296,7 +2314,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_skwasm_tests
-      subshard: "1"
+      subshard: "2_2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700" # 45 minutes to match the global `timeout` property.
@@ -2702,7 +2720,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "android", "linux", "mokey"]
@@ -2771,7 +2788,6 @@ targets:
 
   - name: Linux_android_emu external_textures_integration_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     # Functionally the same as "presubmit: false", except that we will run on
     # presubmit during engine rolls. This test is the *only* automated e2e
@@ -3668,6 +3684,19 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: animated_advanced_blend_perf__timeline_summary
 
+  - name: Mac ios_universal_link_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      task_name: ios_universal_link_test
+
   - name: Mac_ios animated_advanced_blend_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4500,7 +4529,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac module_uiscene_test_ios
+  - name: Mac uiscene_plugin_lifecycle_test_ios
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4510,7 +4539,7 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
-      task_name: module_uiscene_test_ios
+      task_name: uiscene_plugin_lifecycle_test_ios
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5338,18 +5367,15 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: backdrop_filter_perf_ios__timeline_summary
 
-  - name: Mac_arm64_ios basic_material_app_ios__compile
+  - name: Mac_benchmark basic_material_app_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
       task_name: basic_material_app_ios__compile
 
   - name: Mac channels_integration_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5411,19 +5437,22 @@ targets:
   #
   # Also, rename this to "external_textures_integration_test" to be consistent
   # with the Android test, but that can wait until we've figured out the flake.
-  - name: Mac_ios external_ui_integration_test_ios
+  - name: Mac external_ui_integration_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: external_textures_integration_test_ios
       ignore_flakiness: "true"
 
   - name: Mac route_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5446,13 +5475,15 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: flavors_test_ios
 
-  - name: Mac_arm64_ios flutter_gallery_ios__compile
+  - name: Mac_benchmark flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
-      tags: >
-        ["devicelab", "ios", "mac", "arm64"]
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       task_name: flutter_gallery_ios__compile
 
   - name: Mac_ios flutter_gallery_ios__start_up
@@ -5473,22 +5504,18 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_view_ios__start_up
 
-  - name: Mac_arm64_ios hello_world_ios__compile
+  - name: Mac_benchmark hello_world_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
-      tags: >
-        ["devicelab", "ios", "mac", "arm64"]
       task_name: hello_world_ios__compile
 
-  - name: Mac_arm64_ios imitation_game_flutter
+  - name: Mac_benchmark imitation_game_flutter
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
-      tags: >
-        ["devicelab", "ios", "mac", "arm64"]
       task_name: imitation_game_flutter__compile
 
   - name: Mac_arm64_ios imitation_game_swiftui
@@ -5653,13 +5680,17 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: ios_defines_test
 
-  - name: Mac_ios hello_world_impeller_ios_sdfs
+  - name: Mac hello_world_impeller_ios_sdfs
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: hello_world_impeller_ios_sdfs
 
   - name: Mac_ios large_image_changer_perf_ios
@@ -5795,7 +5826,6 @@ targets:
 
   - name: Mac platform_interaction_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -6736,7 +6766,6 @@ targets:
   - name: Windows flavors_test_windows
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -7152,7 +7181,6 @@ targets:
   - name: Windows tool_tests_commands_2_2
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -7257,7 +7285,6 @@ targets:
   - name: Windows windows_gradient_consistent_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7271,7 +7298,6 @@ targets:
   - name: Windows windows_gradient_dynamic_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7285,7 +7311,6 @@ targets:
   - name: Windows windows_gradient_static_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7325,7 +7350,6 @@ targets:
   - name: Windows new_gallery_windows_impeller__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7339,7 +7363,6 @@ targets:
   - name: Windows new_gallery_windows_skia__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7719,9 +7742,12 @@ targets:
   - name: Mac windowing_test
     recipe: devicelab/devicelab_drone
     presubmit: true
-    bringup: true
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: windowing_test_macos

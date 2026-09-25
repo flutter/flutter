@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// #region body
 import 'package:flutter/material.dart';
 
 /// Flutter code sample for [Scrollbar].
@@ -78,9 +79,8 @@ class _DesktopExampleState extends State<DesktopExample> {
                 thickness: 20.0,
                 thumbVisibility: true,
                 child: ScrollConfiguration(
-                  behavior: ScrollConfiguration.of(
-                    context,
-                  ).copyWith(scrollbars: false),
+                  behavior: ScrollConfiguration.of(context)
+                      .copyWith(scrollbars: false),
                   child: ListView.builder(
                     primary: true,
                     itemCount: 100,
@@ -103,3 +103,4 @@ class _DesktopExampleState extends State<DesktopExample> {
     );
   }
 }
+// #endregion body

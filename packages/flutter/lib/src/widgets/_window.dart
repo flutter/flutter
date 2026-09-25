@@ -2481,8 +2481,7 @@ class WindowRegistry extends ChangeNotifier {
 }
 
 class _WindowRegistryScope extends InheritedWidget {
-  _WindowRegistryScope({required WindowRegistry registry, required super.child})
-    : _registry = registry {
+  _WindowRegistryScope({required this._registry, required super.child}) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
@@ -2543,9 +2542,6 @@ class WindowEntry {
 /// listens on the [WindowRegistry] and renders the new windows using the
 /// appropriate window widget as they are added or removed.
 ///
-/// If windowing is not enabled, this widgets renders [child] directly
-/// and does not provide the [WindowRegistry].
-///
 /// {@tool dartpad}
 /// An example usage might look like this, where the window manager wraps
 /// the root of the widget tree so that dialogs can be rendered at the same level
@@ -2563,7 +2559,8 @@ class WindowEntry {
 class WindowManager extends StatefulWidget {
   /// Creates a window manager.
   ///
-  /// The [child] is the content inside of the window manager.
+  /// The [initialWindows] are registered with the [WindowRegistry] when the
+  /// window manager is created.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal

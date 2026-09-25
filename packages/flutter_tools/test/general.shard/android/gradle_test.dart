@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
+
 import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -282,6 +283,8 @@ void main() {
         () {
           gradle_utils.updateLocalProperties(
             project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+            analytics: globals.analytics,
+            logger: globals.logger,
           );
         },
         throwsToolExit(
