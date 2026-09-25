@@ -13,19 +13,19 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide
 
 import '../application_package.dart';
 import '../base/async_guard.dart';
-import '../base/command_help.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
-import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../dart/language_version.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
@@ -44,7 +44,6 @@ import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/file_generators/main_dart.dart' as main_dart;
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
-import 'build_targets.dart';
 import 'devfs_web.dart';
 import 'web_expression_compiler.dart';
 
@@ -53,38 +52,32 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
   @override
   ResidentRunner createWebRunner(
     FlutterDevice device, {
-    String? target,
-    required bool stayResident,
-    required FlutterProject flutterProject,
-    required DebuggingOptions debuggingOptions,
-    Map<String, Object?> platformArgs = const <String, Object?>{},
-    UrlTunneller? urlTunneller,
-    required Logger logger,
-    required Terminal terminal,
-    required Platform platform,
-    required OutputPreferences outputPreferences,
-    required FileSystem fileSystem,
-    required SystemClock systemClock,
     required Analytics analytics,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
+    required DebuggingOptions debuggingOptions,
+    required FlutterProject flutterProject,
+    required bool stayResident,
+    required ToolContext toolContext,
     bool machine = false,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    String? target,
+    UrlTunneller? urlTunneller,
     Map<String, String> webDefines = const <String, String>{},
   }) {
     return ResidentWebRunner(
       device,
-      target: target,
-      flutterProject: flutterProject,
+      analytics: analytics,
+      buildSystem: buildSystem,
+      buildTargets: buildTargets,
       debuggingOptions: debuggingOptions,
+      flutterProject: flutterProject,
+      toolContext: toolContext,
+      machine: machine,
       platformArgs: platformArgs,
       stayResident: stayResident,
+      target: target,
       urlTunneller: urlTunneller,
-      machine: machine,
-      analytics: analytics,
-      systemClock: systemClock,
-      fileSystem: fileSystem,
-      logger: logger,
-      terminal: terminal,
-      platform: platform,
-      outputPreferences: outputPreferences,
       webDefines: webDefines,
     );
   }
@@ -100,59 +93,34 @@ const kNoClientConnectedMessage = 'Recompile complete. No client connected.';
 class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(
     FlutterDevice device, {
-    String? target,
-    super.stayResident = true,
-    super.machine = false,
-    super.projectRootPath,
-    required this.flutterProject,
+    required super.analytics,
+    required super.buildSystem,
+    required super.buildTargets,
     required super.debuggingOptions,
+    required this.flutterProject,
+    required super.toolContext,
+    super.machine = false,
     this.platformArgs = const <String, Object?>{},
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Terminal terminal,
-    required Platform platform,
-    required OutputPreferences outputPreferences,
-    required this._systemClock,
-    required this._analytics,
+    super.projectRootPath,
+    super.stayResident = true,
+    String? target,
     this._urlTunneller,
     this._webDefines = const <String, String>{},
-    BuildTargets? buildTargets,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _platform = platform,
-       super(
+  }) : super(
          <FlutterDevice>[device],
-         target: target ?? fileSystem.path.join('lib', 'main.dart'),
-         analytics: _analytics,
-         buildTargets: buildTargets ?? const BuildTargetsImpl(),
-         commandHelp: CommandHelp(
-           logger: logger,
-           outputPreferences: outputPreferences,
-           platform: platform,
-           terminal: terminal,
-         ),
+         target: target ?? toolContext.fs.path.join('lib', 'main.dart'),
+         xcode: null,
          dartBuilder: hookRunner,
-         fileSystem: fileSystem,
-         logger: logger,
-         outputPreferences: outputPreferences,
-         platform: platform,
-         terminal: terminal,
        );
 
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final Platform _platform;
-  final SystemClock _systemClock;
-  final Analytics _analytics;
   final UrlTunneller? _urlTunneller;
   final Map<String, String> _webDefines;
   final Map<String, Object?> platformArgs;
 
-  @override
-  Logger get logger => _logger;
-
-  @override
-  FileSystem get fileSystem => _fileSystem;
+  FileSystem get _fileSystem => toolContext.fs;
+  Logger get _logger => toolContext.logger;
+  Platform get _platform => toolContext.platform;
+  SystemClock get _systemClock => toolContext.systemClock;
 
   FlutterDevice? get flutterDevice => flutterDevices.first;
   final FlutterProject flutterProject;
@@ -490,7 +458,7 @@ class ResidentWebRunner extends ResidentRunner {
         if (report.hotReloadRejected) {
           // We cannot capture the reason why the reload was rejected as it may
           // contain user information.
-          _analytics.send(
+          analytics.send(
             Event.hotRunnerInfo(
               label: 'reload-reject',
               targetPlatform: targetPlatform,
@@ -646,14 +614,14 @@ class ResidentWebRunner extends ResidentRunner {
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && _deviceIsDebuggable) {
       if (fullRestart) {
-        _analytics.send(
+        analytics.send(
           Event.timing(
             workflow: 'hot',
             variableName: 'web-incremental-restart',
             elapsedMilliseconds: elapsed.inMilliseconds,
           ),
         );
-        _analytics.send(
+        analytics.send(
           Event.hotRunnerInfo(
             label: 'restart',
             targetPlatform: targetPlatform,
@@ -671,14 +639,14 @@ class ResidentWebRunner extends ResidentRunner {
           ),
         );
       } else {
-        _analytics.send(
+        analytics.send(
           Event.timing(
             workflow: 'hot',
             variableName: 'reload',
             elapsedMilliseconds: elapsed.inMilliseconds,
           ),
         );
-        _analytics.send(
+        analytics.send(
           Event.hotRunnerInfo(
             label: 'reload',
             targetPlatform: targetPlatform,

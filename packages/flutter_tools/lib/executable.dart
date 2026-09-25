@@ -255,7 +255,13 @@ List<FlutterCommand> generateCommands({
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
   ),
-  AttachCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
+  AttachCommand(
+    buildSystem: toolDependencies.buildSystem,
+    buildTargets: const BuildTargetsImpl(),
+    toolContext: toolDependencies.toolContext,
+    xcode: toolDependencies.appleContext.xcode,
+    verboseHelp: verboseHelp,
+  ),
   BuildCommand(
     androidBuilder: AndroidGradleBuilder.fromContexts(
       analytics: toolDependencies.analytics,
@@ -296,9 +302,12 @@ List<FlutterCommand> generateCommands({
   DaemonCommand(
     androidContext: toolDependencies.androidContext,
     androidWorkflow: android_workflow.androidWorkflow,
+    buildSystem: toolDependencies.buildSystem,
+    buildTargets: const BuildTargetsImpl(),
     deviceManager: globals.deviceManager,
     hidden: !verboseHelp,
     toolContext: toolDependencies.toolContext,
+    xcode: toolDependencies.appleContext.xcode,
   ),
   DebugAdapterCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DevicesCommand(
@@ -341,11 +350,11 @@ List<FlutterCommand> generateCommands({
   ),
   RunCommand(
     appleContext: toolDependencies.appleContext,
+    buildSystem: toolDependencies.buildSystem,
+    buildTargets: toolDependencies.buildTargets ?? const BuildTargetsImpl(),
     toolContext: toolDependencies.toolContext,
     androidContext: toolDependencies.androidContext,
     androidWorkflow: android_workflow.androidWorkflow,
-    buildSystem: toolDependencies.buildSystem,
-    buildTargets: toolDependencies.buildTargets,
     deviceManager: globals.deviceManager,
     verboseHelp: verboseHelp,
   ),
@@ -356,7 +365,12 @@ List<FlutterCommand> generateCommands({
     verbose: verbose,
     nativeAssetsBuilder: toolDependencies.toolContext.nativeAssetsBuilder,
   ),
-  WidgetPreviewCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
+  WidgetPreviewCommand(
+    buildSystem: toolDependencies.buildSystem,
+    buildTargets: const BuildTargetsImpl(),
+    toolContext: toolDependencies.toolContext,
+    verboseHelp: verboseHelp,
+  ),
   UpgradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   SymbolizeCommand(toolContext: toolDependencies.toolContext),
   // Development-only commands. These are always hidden,
