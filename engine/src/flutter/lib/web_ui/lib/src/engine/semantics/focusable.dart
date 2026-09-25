@@ -63,6 +63,9 @@ class Focusable extends SemanticBehavior {
       );
     } else {
       _focusManager.stopManaging();
+      if (semanticsObject.isAccessibilityFocusBlocked) {
+        owner.element.removeAttribute('tabindex');
+      }
     }
   }
 
