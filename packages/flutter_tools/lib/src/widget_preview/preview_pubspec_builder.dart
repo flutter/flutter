@@ -84,6 +84,7 @@ class PreviewPubspecBuilder {
       uri: transformAssetUri(asset.uri),
       flavors: asset.flavors,
       platforms: asset.platforms,
+      environment: asset.environment,
       transformers: asset.transformers,
     );
   }

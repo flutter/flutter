@@ -37,7 +37,7 @@ void main() {
       testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync(
         'flutter_asset_bundle_test.',
       );
-      platform = FakePlatform();
+      platform = FakePlatform(environment: <String, String>{});
     });
 
     testUsingContext(
@@ -194,6 +194,40 @@ flutter:
             'assets/foo/fizz.txt',
           ]),
         );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        Platform: () => platform,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'environment changes invalidate environment-conditioned assets',
+      () async {
+        writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'my_app');
+        globals.fs.file('internal.txt').createSync();
+        globals.fs.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync(r'''
+name: my_app
+flutter:
+  assets:
+    - path: internal.txt
+      environment:
+        AUDIENCE: internal
+''');
+        platform.environment['AUDIENCE'] = 'production';
+        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
+        expect(bundle.needsBuild(), false);
+
+        platform.environment['AUDIENCE'] = 'internal';
+
+        expect(bundle.needsBuild(), true);
       },
       overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,

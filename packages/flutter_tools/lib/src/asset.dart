@@ -258,6 +258,7 @@ class ManifestAssetBundle implements AssetBundle {
   final _wildcardDirectories = <Uri, Directory>{};
 
   DateTime? _lastBuildTimestamp;
+  Map<String, String?>? _lastAssetEnvironment;
 
   FlutterHookResult _lastHookResult;
 
@@ -279,7 +280,13 @@ class ManifestAssetBundle implements AssetBundle {
 
   @override
   bool needsBuild({String manifestPath = defaultManifestPath}) {
-    if (!wasBuiltOnce() ||
+    if (!wasBuiltOnce()) {
+      return true;
+    }
+    final Map<String, String?> lastAssetEnvironment = _lastAssetEnvironment!;
+    if (lastAssetEnvironment.entries.any(
+      (MapEntry<String, String?> entry) => _platform.environment[entry.key] != entry.value,
+    ) ||
         // We need to re-run the Dart build.
         _lastHookResult.hasAnyModifiedFiles(_fileSystem) ||
         // We don't have to re-run the Dart build, but some files the Dart build
@@ -310,6 +317,14 @@ class ManifestAssetBundle implements AssetBundle {
     return false;
   }
 
+  Map<String, String?> _assetEnvironment(FlutterManifest? manifest) {
+    final keys = <String>{
+      for (final AssetsEntry asset in <AssetsEntry>[...?manifest?.assets, ...?manifest?.shaders])
+        ...asset.environment.keys,
+    };
+    return <String, String?>{for (final String key in keys) key: _platform.environment[key]};
+  }
+
   @override
   Future<int> build({
     FlutterHookResult? flutterHookResult,
@@ -332,6 +347,8 @@ class ManifestAssetBundle implements AssetBundle {
     }
 
     final FlutterManifest flutterManifest = flutterProject.manifest;
+    final Map<String, String> environment = _platform.environment;
+    _lastAssetEnvironment = _assetEnvironment(flutterManifest);
     // If the last build time isn't set before this early return, empty pubspecs will
     // hang on hot reload, as the incremental dill files will never be copied to the
     // device.
@@ -379,6 +396,7 @@ class ManifestAssetBundle implements AssetBundle {
       assetBasePath,
       targetPlatform,
       flavor: flavor,
+      environment: environment,
     );
 
     if (assetVariants == null) {
@@ -395,6 +413,7 @@ class ManifestAssetBundle implements AssetBundle {
           flutterProject.directory,
           targetPlatform: targetPlatform,
           flavor: flavor,
+          environment: environment,
         );
     if (!_splitDeferredAssets || !deferredComponentsEnabled) {
       // Include the assets in the regular set of assets if not using deferred
@@ -503,6 +522,7 @@ class ManifestAssetBundle implements AssetBundle {
           packageName: package.name,
           attributedPackage: package,
           flavor: flavor,
+          environment: environment,
         );
 
         if (packageAssets == null) {
@@ -875,6 +895,7 @@ class ManifestAssetBundle implements AssetBundle {
     Directory projectDirectory, {
     required TargetPlatform targetPlatform,
     String? flavor,
+    required Map<String, String> environment,
   }) {
     final List<DeferredComponent>? components = flutterManifest.deferredComponents;
     final deferredComponentsAssetVariants = <String, Map<_Asset, List<_Asset>>>{};
@@ -885,6 +906,9 @@ class ManifestAssetBundle implements AssetBundle {
       final cache = _AssetDirectoryCache(_fileSystem);
       final componentAssets = <_Asset, List<_Asset>>{};
       for (final AssetsEntry assetsEntry in component.assets) {
+        if (!assetsEntry.matchesEnvironment(environment)) {
+          continue;
+        }
         if (assetsEntry.uri.path.endsWith('/')) {
           wildcardDirectories.add(assetsEntry.uri);
           _parseAssetsFromFolder(
@@ -896,6 +920,7 @@ class ManifestAssetBundle implements AssetBundle {
             assetsEntry.uri,
             flavors: assetsEntry.flavors,
             platforms: assetsEntry.platforms,
+            environment: assetsEntry.environment,
             transformers: assetsEntry.transformers,
           );
         } else {
@@ -908,6 +933,7 @@ class ManifestAssetBundle implements AssetBundle {
             assetsEntry.uri,
             flavors: assetsEntry.flavors,
             platforms: assetsEntry.platforms,
+            environment: assetsEntry.environment,
             transformers: assetsEntry.transformers,
           );
         }
@@ -1061,11 +1087,15 @@ class ManifestAssetBundle implements AssetBundle {
     String? packageName,
     Package? attributedPackage,
     required String? flavor,
+    required Map<String, String> environment,
   }) {
     final result = <_Asset, List<_Asset>>{};
 
     final cache = _AssetDirectoryCache(_fileSystem);
     for (final AssetsEntry assetsEntry in flutterManifest.assets) {
+      if (!assetsEntry.matchesEnvironment(environment)) {
+        continue;
+      }
       if (assetsEntry.uri.path.endsWith('/')) {
         wildcardDirectories.add(assetsEntry.uri);
         _parseAssetsFromFolder(
@@ -1079,6 +1109,7 @@ class ManifestAssetBundle implements AssetBundle {
           attributedPackage: attributedPackage,
           flavors: assetsEntry.flavors,
           platforms: assetsEntry.platforms,
+          environment: assetsEntry.environment,
           transformers: assetsEntry.transformers,
         );
       } else {
@@ -1093,12 +1124,16 @@ class ManifestAssetBundle implements AssetBundle {
           attributedPackage: attributedPackage,
           flavors: assetsEntry.flavors,
           platforms: assetsEntry.platforms,
+          environment: assetsEntry.environment,
           transformers: assetsEntry.transformers,
         );
       }
     }
 
     for (final AssetsEntry shaderEntry in flutterManifest.shaders) {
+      if (!shaderEntry.matchesEnvironment(environment)) {
+        continue;
+      }
       final Uri shaderUri = shaderEntry.uri;
       for (final AssetsEntry assetEntry in flutterManifest.assets) {
         final String assetPath = assetEntry.uri.path;
@@ -1132,6 +1167,7 @@ class ManifestAssetBundle implements AssetBundle {
         assetKind: AssetKind.shader,
         flavors: shaderEntry.flavors,
         platforms: shaderEntry.platforms,
+        environment: shaderEntry.environment,
         transformers: shaderEntry.transformers,
       );
     }
@@ -1169,6 +1205,7 @@ class ManifestAssetBundle implements AssetBundle {
           assetKind: AssetKind.font,
           flavors: <String>{},
           platforms: <String>{},
+          environment: const <String, Set<String>>{},
           transformers: <AssetTransformerEntry>[],
         );
         final File baseAssetFile = baseAsset.lookupAssetFile(_fileSystem);
@@ -1196,6 +1233,7 @@ class ManifestAssetBundle implements AssetBundle {
     Package? attributedPackage,
     required Set<String> flavors,
     required Set<String> platforms,
+    required Map<String, Set<String>> environment,
     required List<AssetTransformerEntry> transformers,
   }) {
     final String directoryPath;
@@ -1222,6 +1260,7 @@ class ManifestAssetBundle implements AssetBundle {
         attributedPackage,
         flavors: flavors,
         platforms: platforms,
+        environment: environment,
         transformers: transformers,
       );
       if (packageAsset == null) {
@@ -1268,6 +1307,7 @@ class ManifestAssetBundle implements AssetBundle {
         originUri: assetUri,
         flavors: flavors,
         platforms: platforms,
+        environment: environment,
         transformers: transformers,
       );
     }
@@ -1286,6 +1326,7 @@ class ManifestAssetBundle implements AssetBundle {
     AssetKind assetKind = AssetKind.regular,
     required Set<String> flavors,
     required Set<String> platforms,
+    required Map<String, Set<String>> environment,
     required List<AssetTransformerEntry> transformers,
   }) {
     final _Asset asset = _resolveAsset(
@@ -1298,10 +1339,11 @@ class ManifestAssetBundle implements AssetBundle {
       originUri: originUri,
       flavors: flavors,
       platforms: platforms,
+      environment: environment,
       transformers: transformers,
     );
 
-    _checkForFlavorConflicts(asset, result.keys.toList());
+    _checkForConditionConflicts(asset, result.keys.toList());
 
     final variants = <_Asset>[];
     final File assetFile = asset.lookupAssetFile(_fileSystem);
@@ -1322,6 +1364,7 @@ class ManifestAssetBundle implements AssetBundle {
             kind: assetKind,
             flavors: flavors,
             platforms: platforms,
+            environment: environment,
             transformers: transformers,
           ),
         );
@@ -1360,43 +1403,50 @@ class ManifestAssetBundle implements AssetBundle {
   // to the vast majority of users (if any), we play it safe by throwing a `ToolExit`
   // in any of these situations. We can always loosen up this restriction later
   // without breaking anyone.
-  void _checkForFlavorConflicts(_Asset newAsset, List<_Asset> previouslyParsedAssets) {
-    bool cameFromDirectoryEntry(_Asset asset) {
-      return asset.originUri.path.endsWith('/');
-    }
-
-    String flavorErrorInfo(_Asset asset) {
-      if (asset.flavors.isEmpty) {
-        return 'An entry with the path "${asset.originUri}" does not specify any flavors.';
-      }
-
-      final Iterable<String> flavorsWrappedWithQuotes = asset.flavors.map((String e) => '"$e"');
-      return 'An entry with the path "${asset.originUri}" specifies the flavor(s): '
-          '${flavorsWrappedWithQuotes.join(', ')}.';
-    }
-
+  void _checkForConditionConflicts(_Asset newAsset, List<_Asset> previouslyParsedAssets) {
     final _Asset? preExistingAsset = previouslyParsedAssets
         .where((_Asset other) => other.entryUri == newAsset.entryUri)
         .firstOrNull;
-
-    if (preExistingAsset == null || preExistingAsset.hasEquivalentFlavorsWith(newAsset)) {
+    if (preExistingAsset == null) {
       return;
     }
 
-    final errorMessage = StringBuffer(
-      'Multiple assets entries include the file '
-      '"${newAsset.entryUri.path}", but they specify different lists of flavors.\n',
-    );
+    final bool flavorsMatch = preExistingAsset.hasEquivalentFlavorsWith(newAsset);
+    final bool environmentMatches = preExistingAsset.hasEquivalentEnvironmentWith(newAsset);
+    if (flavorsMatch && environmentMatches) {
+      return;
+    }
 
-    errorMessage.writeln(flavorErrorInfo(preExistingAsset));
-    errorMessage.writeln(flavorErrorInfo(newAsset));
+    String conditionInfo(_Asset asset) {
+      if (!environmentMatches) {
+        return asset.environment.isEmpty
+            ? 'An entry with the path "${asset.originUri}" does not specify any environment conditions.'
+            : 'An entry with the path "${asset.originUri}" specifies the environment conditions: ${asset.environment}.';
+      }
+      if (asset.flavors.isEmpty) {
+        return 'An entry with the path "${asset.originUri}" does not specify any flavors.';
+      }
+      return 'An entry with the path "${asset.originUri}" specifies the flavor(s): '
+          '${asset.flavors.map((String value) => '"$value"').join(', ')}.';
+    }
 
-    if (cameFromDirectoryEntry(newAsset) || cameFromDirectoryEntry(preExistingAsset)) {
-      errorMessage.writeln();
-      errorMessage.write(
-        'Consider organizing assets with different flavors '
-        'into different directories.',
-      );
+    final conditionTypes = !environmentMatches ? 'environment conditions' : 'lists of flavors';
+    final errorMessage =
+        StringBuffer(
+            'Multiple assets entries include the file '
+            '"${newAsset.entryUri.path}", but they specify different $conditionTypes.\n',
+          )
+          ..writeln(conditionInfo(preExistingAsset))
+          ..writeln(conditionInfo(newAsset));
+
+    if (newAsset.originUri.path.endsWith('/') || preExistingAsset.originUri.path.endsWith('/')) {
+      errorMessage
+        ..writeln()
+        ..write(
+          environmentMatches
+              ? 'Consider organizing assets with different flavors into different directories.'
+              : 'Consider organizing assets with different conditions into different directories.',
+        );
     }
 
     throwToolExit(errorMessage.toString());
@@ -1455,6 +1505,7 @@ class ManifestAssetBundle implements AssetBundle {
     AssetKind assetKind = AssetKind.regular,
     required Set<String> flavors,
     required Set<String> platforms,
+    required Map<String, Set<String>> environment,
     required List<AssetTransformerEntry> transformers,
   }) {
     _ensureAssetPathIsValid(
@@ -1476,6 +1527,7 @@ class ManifestAssetBundle implements AssetBundle {
         originUri: originUri,
         flavors: flavors,
         platforms: platforms,
+        environment: environment,
         transformers: transformers,
       );
       if (packageAsset != null) {
@@ -1496,6 +1548,7 @@ class ManifestAssetBundle implements AssetBundle {
       kind: assetKind,
       flavors: flavors,
       platforms: platforms,
+      environment: environment,
       transformers: transformers,
     );
   }
@@ -1508,6 +1561,7 @@ class ManifestAssetBundle implements AssetBundle {
     Uri? originUri,
     Set<String>? flavors,
     Set<String>? platforms,
+    Map<String, Set<String>>? environment,
     List<AssetTransformerEntry>? transformers,
   }) {
     assert(assetUri.pathSegments.first == 'packages');
@@ -1525,6 +1579,7 @@ class ManifestAssetBundle implements AssetBundle {
           originUri: originUri,
           flavors: flavors,
           platforms: platforms,
+          environment: environment,
           transformers: transformers,
         );
       }
@@ -1549,10 +1604,12 @@ class _Asset {
     this.kind = AssetKind.regular,
     Set<String>? flavors,
     Set<String>? platforms,
+    Map<String, Set<String>>? environment,
     List<AssetTransformerEntry>? transformers,
   }) : originUri = originUri ?? entryUri,
        flavors = flavors ?? const <String>{},
        platforms = platforms ?? const <String>{},
+       environment = environment ?? const <String, Set<String>>{},
        transformers = transformers ?? const <AssetTransformerEntry>[];
 
   final String baseDir;
@@ -1575,6 +1632,8 @@ class _Asset {
   final Set<String> flavors;
 
   final Set<String> platforms;
+
+  final Map<String, Set<String>> environment;
 
   final List<AssetTransformerEntry> transformers;
 
@@ -1620,6 +1679,14 @@ class _Asset {
     return setEquals(platforms, other.platforms);
   }
 
+  bool hasEquivalentEnvironmentWith(_Asset other) {
+    return environment.length == other.environment.length &&
+        environment.entries.every(
+          (MapEntry<String, Set<String>> entry) =>
+              setEquals(entry.value, other.environment[entry.key]),
+        );
+  }
+
   @override
   String toString() => 'asset: $entryUri';
 
@@ -1637,12 +1704,25 @@ class _Asset {
         other.entryUri == entryUri &&
         other.kind == kind &&
         hasEquivalentFlavorsWith(other) &&
-        hasEquivalentPlatformsWith(other);
+        hasEquivalentPlatformsWith(other) &&
+        hasEquivalentEnvironmentWith(other);
   }
 
   @override
-  int get hashCode =>
-      Object.hashAll(<Object>[baseDir, relativeUri, entryUri, kind, ...flavors, ...platforms]);
+  int get hashCode => Object.hashAll(<Object>[
+    baseDir,
+    relativeUri,
+    entryUri,
+    kind,
+    ...flavors,
+    ...platforms,
+    Object.hashAllUnordered(
+      environment.entries.map(
+        (MapEntry<String, Set<String>> entry) =>
+            Object.hash(entry.key, Object.hashAllUnordered(entry.value)),
+      ),
+    ),
+  ]);
 }
 
 // Given an assets directory like this:
