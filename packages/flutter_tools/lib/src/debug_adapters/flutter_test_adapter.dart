@@ -19,12 +19,23 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
     super.channel, {
     required super.fileSystem,
     required super.platform,
+    this.debuggerInitializationTimeout = defaultDebuggerInitializationTimeout,
     super.ipv6,
     super.enableFlutterDds = true,
     super.enableAuthCodes,
     super.logger,
     super.onError,
   });
+
+  /// Default timeout when waiting for the VM Service debugger connection to
+  /// initialize during `flutter test --machine --start-paused`.
+  static const defaultDebuggerInitializationTimeout = Duration(seconds: 60);
+
+  /// Maximum duration to wait for the debugger to initialize before failing the
+  /// launch request.
+  final Duration debuggerInitializationTimeout;
+
+  Uri? _vmServiceUri;
 
   /// Called by [attachRequest] to request that we actually connect to the app to be debugged.
   @override
@@ -82,7 +93,24 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
     // Delay responding until the debugger is connected.
     if (debug) {
       try {
-        await Future.any<void>([debuggerInitialized, debuggerInitializationFailedCompleter.future]);
+        await Future.any<void>(<Future<void>>[
+          debuggerInitialized,
+          debuggerInitializationFailedCompleter.future,
+        ]).timeout(
+          debuggerInitializationTimeout,
+          onTimeout: () {
+            final Uri? uri = _vmServiceUri;
+            final stateDescription = uri == null
+                ? 'waiting for test.startedProcess event from flutter test'
+                : 'connecting debugger to VM Service at $uri';
+            terminatePids(ProcessSignal.sigkill);
+            throw DebugAdapterException(
+              'Timed out after ${debuggerInitializationTimeout.inSeconds}s '
+              'waiting for debugger to initialize ($stateDescription).',
+            );
+          },
+        );
+        await ensureIsolatesResumedFromPauseStart();
       } finally {
         waitingForDebugger = false;
       }
@@ -171,6 +199,7 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
       return;
     }
     final Uri vmServiceUri = Uri.parse(vmServiceUriString);
+    _vmServiceUri = vmServiceUri;
     connectDebugger(vmServiceUri);
   }
 }
