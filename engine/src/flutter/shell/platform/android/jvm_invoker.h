@@ -405,6 +405,7 @@ class AndroidJvmInvoker : public JvmInvoker {
 
   mutable std::mutex overlay_windows_mutex_;
   std::unordered_map<int32_t, ANativeWindow*> overlay_windows_;
+  std::atomic<bool> hcpp_enabled_{false};
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidJvmInvoker);
 };

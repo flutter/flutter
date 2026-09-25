@@ -1459,6 +1459,13 @@ public class FlutterJNI {
       throw new RuntimeException(
           "platformViewsController must be set before attempting to position a platform view");
     }
+    if (platformViewsController2.getPlatformViewById(viewId) == null
+        && platformViewsController != null
+        && platformViewsController.getPlatformViewById(viewId) != null) {
+      platformViewsController.onDisplayPlatformView(
+          viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
+      return;
+    }
     platformViewsController2.onDisplayPlatformView(
         viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
   }
@@ -1676,6 +1683,13 @@ public class FlutterJNI {
     if (platformViewsController == null) {
       throw new RuntimeException(
           "platformViewsController must be set before attempting to position a platform view");
+    }
+    if (platformViewsController.getPlatformViewById(viewId) == null
+        && platformViewsController2 != null
+        && platformViewsController2.getPlatformViewById(viewId) != null) {
+      platformViewsController2.onDisplayPlatformView(
+          viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
+      return;
     }
     platformViewsController.onDisplayPlatformView(
         viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
