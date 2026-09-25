@@ -11,7 +11,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
-import 'utils.dart' show isSkwasm;
+import 'utils.dart' show isMultiThreaded, isSkwasm;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -109,12 +109,22 @@ void testMain() {
     }, skip: isFirefox || isSafari || !browserSupportsOffscreenCanvas);
 
     // Regression test for https://github.com/flutter/flutter/issues/193223.
-    test('initialized completes with an error if a WebGL context cannot be created', () async {
-      final Rasterizer rasterizer = renderer.rasterizer;
-      final surfaceProvider = rasterizer.surfaceProvider as OffscreenSurfaceProvider;
-      final Surface surface = surfaceProvider.surfaceCreateFn(NoWebGLOffscreenCanvasProvider());
-      await expectLater(surface.initialized, throwsStateError);
-    }, skip: !isSkwasm || isFirefox || isSafari || !browserSupportsOffscreenCanvas);
+    // Skipped when [isMultiThreaded] because transferring an [OffscreenCanvas]
+    // to the raster Web Worker via `postMessage` throws `InvalidStateError` if
+    // a 2D rendering context was already bound on the main thread. The
+    // single-threaded suite (`chrome-force-st-dart2wasm-skwasm-ui`) exercises
+    // the `ReceiveCanvasOnWorker` -> `OnInitialized` failure path.
+    test(
+      'initialized completes with an error if a WebGL context cannot be created',
+      () async {
+        final Rasterizer rasterizer = renderer.rasterizer;
+        final surfaceProvider = rasterizer.surfaceProvider as OffscreenSurfaceProvider;
+        final Surface surface = surfaceProvider.surfaceCreateFn(NoWebGLOffscreenCanvasProvider());
+        await expectLater(surface.initialized, throwsStateError);
+      },
+      skip:
+          !isSkwasm || isMultiThreaded || isFirefox || isSafari || !browserSupportsOffscreenCanvas,
+    );
   });
 }
 
