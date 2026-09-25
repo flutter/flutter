@@ -36,6 +36,9 @@ struct _FlViewRendererOpenGL {
 
   // Ensure Flutter and GTK can access the frame stored in the compositor.
   GMutex frame_mutex;
+
+  // TRUE once teardown has started and wait_for_frame should abort immediately.
+  gboolean destroyed;
 };
 
 G_DEFINE_TYPE(FlViewRendererOpenGL,
@@ -59,7 +62,8 @@ static void get_frame_size(FlViewRendererOpenGL* self,
 static gboolean redraw_cb(gpointer user_data) {
   g_autoptr(FlViewRendererOpenGL) self = FL_VIEW_RENDERER_OPENGL(user_data);
 
-  if (self->compositor == nullptr) {
+  if (self->destroyed || self->compositor == nullptr ||
+      self->engine == nullptr) {
     return G_SOURCE_REMOVE;
   }
 
@@ -91,6 +95,9 @@ static void wait_for_frame(FlViewRendererOpenGL* self,
                            gint scale_factor) {
   gint64 expiry_time = g_get_monotonic_time() + kRenderTimeoutMicroseconds;
   while (true) {
+    if (self->destroyed || self->compositor == nullptr) {
+      break;
+    }
     size_t width = gdk_window_get_width(window) * scale_factor;
     size_t height = gdk_window_get_height(window) * scale_factor;
     size_t frame_width, frame_height;
@@ -153,7 +160,7 @@ static gboolean fl_view_renderer_opengl_draw(GtkWidget* widget, cairo_t* cr) {
 
   // The compositor is created when the widget is realized; if it is not yet
   // available there is nothing to render beyond the background.
-  if (self->compositor == nullptr) {
+  if (self->destroyed || self->compositor == nullptr) {
     return TRUE;
   }
 
@@ -165,6 +172,11 @@ static gboolean fl_view_renderer_opengl_draw(GtkWidget* widget, cairo_t* cr) {
   // If frame not ready, then wait for it.
   if (!self->sized_to_content) {
     wait_for_frame(self, window, scale_factor);
+  }
+
+  if (self->destroyed || self->compositor == nullptr) {
+    g_mutex_unlock(&self->frame_mutex);
+    return FALSE;
   }
 
   // The frame is drawn from an OpenGL texture, so make a context current that
@@ -194,18 +206,22 @@ static gboolean fl_view_renderer_opengl_draw(GtkWidget* widget, cairo_t* cr) {
 }
 
 // Implements FlViewRenderer::present_layers.
+// Called on the Flutter raster thread.
 static void fl_view_renderer_opengl_present_layers(FlViewRenderer* renderer,
                                                    const FlutterLayer** layers,
                                                    size_t layers_count) {
   FlViewRendererOpenGL* self = FL_VIEW_RENDERER_OPENGL(renderer);
 
-  // Frames may be presented before the widget is realized and the compositor
-  // is set up; ignore them.
-  if (self->compositor == nullptr) {
+  g_mutex_lock(&self->frame_mutex);
+
+  // Check compositor and frame under frame_mutex so the GTK main thread cannot
+  // clear and free them in cleanup_opengl_resources() between the null check
+  // and fl_opengl_frame_composite().
+  if (self->compositor == nullptr || self->frame == nullptr) {
+    g_mutex_unlock(&self->frame_mutex);
     return;
   }
 
-  g_mutex_lock(&self->frame_mutex);
   fl_opengl_frame_composite(self->frame, self->compositor, layers,
                             layers_count);
   g_mutex_unlock(&self->frame_mutex);
@@ -217,13 +233,51 @@ static void fl_view_renderer_opengl_present_layers(FlViewRenderer* renderer,
   g_idle_add(redraw_cb, g_object_ref(self));
 }
 
+// Teardown of FlViewRendererOpenGL spans three GObject/GTK stages across two
+// threads (the GTK main thread and the Flutter raster thread):
+//
+// 1. unrealize() [GTK main thread]: Destroys the native X11 GdkWindow.
+// 2. dispose()   [GTK main thread]: Triggered by gtk_widget_destroy(). Detaches
+//    references immediately, even if the Flutter raster thread still holds a
+//    strong reference to FlView (and thus this renderer) inside
+//    present_layers().
+// 3. finalize()  [GTK main thread OR Flutter raster thread]: Runs when the
+//    final g_object_unref() drops ref_count to 0.
+//
+// Because FlCompositorOpenGLShader disposal calls
+// gdk_gl_context_clear_current() and binds platform_context,
+// self->render_context, self->compositor, and self->frame must be released on
+// the GTK main thread in unrealize()/dispose() under frame_mutex, whereas
+// self->task_runner and self->frame_mutex must remain valid until finalize().
+static void cleanup_opengl_resources(FlViewRendererOpenGL* self) {
+  g_mutex_lock(&self->frame_mutex);
+  // Only clear the GTK thread's current GdkGLContext if this window's
+  // render_context is the one currently bound, preserving any other window's
+  // active fallback GdkGLContext (see #192137).
+  if (self->render_context != nullptr &&
+      gdk_gl_context_get_current() == self->render_context) {
+    gdk_gl_context_clear_current();
+  }
+  g_clear_object(&self->render_context);
+  g_clear_object(&self->compositor);
+  g_clear_object(&self->frame);
+  g_mutex_unlock(&self->frame_mutex);
+}
+
+// Implements GtkWidget::unrealize.
+static void fl_view_renderer_opengl_unrealize(GtkWidget* widget) {
+  FlViewRendererOpenGL* self = FL_VIEW_RENDERER_OPENGL(widget);
+
+  cleanup_opengl_resources(self);
+
+  GTK_WIDGET_CLASS(fl_view_renderer_opengl_parent_class)->unrealize(widget);
+}
+
 static void fl_view_renderer_opengl_dispose(GObject* object) {
   FlViewRendererOpenGL* self = FL_VIEW_RENDERER_OPENGL(object);
 
+  cleanup_opengl_resources(self);
   g_clear_object(&self->engine);
-  g_clear_object(&self->render_context);
-  g_clear_object(&self->task_runner);
-  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_view_renderer_opengl_parent_class)->dispose(object);
 }
@@ -231,13 +285,12 @@ static void fl_view_renderer_opengl_dispose(GObject* object) {
 static void fl_view_renderer_opengl_finalize(GObject* object) {
   FlViewRendererOpenGL* self = FL_VIEW_RENDERER_OPENGL(object);
 
-  // The compositor is released here rather than in dispose() so it outlives a
-  // forced dispose (e.g. gtk_widget_destroy()) and is only freed once the last
-  // reference is dropped. This keeps it alive for the raster thread, which
-  // holds a strong reference on the view (and thus this renderer) while
-  // presenting.
-  g_clear_object(&self->compositor);
-  g_clear_object(&self->frame);
+  // Released in finalize() after the last reference is dropped so an in-flight
+  // present_layers() call on the Flutter raster thread can safely lock
+  // frame_mutex, observe self->compositor == nullptr, and unlock after
+  // gtk_widget_destroy().
+  g_clear_object(&self->task_runner);
+  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_view_renderer_opengl_parent_class)->finalize(object);
 }
@@ -250,6 +303,7 @@ static void fl_view_renderer_opengl_class_init(
 
   GtkWidgetClass* widget_class = GTK_WIDGET_CLASS(klass);
   widget_class->realize = fl_view_renderer_opengl_realize;
+  widget_class->unrealize = fl_view_renderer_opengl_unrealize;
   widget_class->draw = fl_view_renderer_opengl_draw;
 
   FlViewRendererClass* renderer_class = FL_VIEW_RENDERER_CLASS(klass);
@@ -269,4 +323,16 @@ FlViewRendererOpenGL* fl_view_renderer_opengl_new(FlEngine* engine,
   self->engine = FL_ENGINE(g_object_ref(engine));
   self->sized_to_content = sized_to_content;
   return self;
+}
+
+void fl_view_renderer_opengl_cancel_wait(FlViewRendererOpenGL* self) {
+  g_return_if_fail(FL_IS_VIEW_RENDERER_OPENGL(self));
+
+  g_mutex_lock(&self->frame_mutex);
+  self->destroyed = TRUE;
+  g_mutex_unlock(&self->frame_mutex);
+
+  if (self->task_runner != nullptr) {
+    fl_task_runner_stop_wait(self->task_runner);
+  }
 }

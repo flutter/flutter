@@ -343,6 +343,13 @@ abstract mixin class BaseWindowControllerLinux {
     _window.add(_view);
   }
 
+  /// Invokes the window destruction delegate callback at most once.
+  ///
+  /// Called synchronously from [destroy] (before the deferred native
+  /// `gtk_widget_destroy` runs on the GLib main loop) and wired to the
+  /// native `GtkWidget::destroy` signal for windows closed externally.
+  void _notifyWindowDestroyed() {}
+
   /// Destroys the native window and releases the monitors watching it.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -350,13 +357,21 @@ abstract mixin class BaseWindowControllerLinux {
     if (_destroyed) {
       return;
     }
-    _viewMonitor.close();
-    _viewMonitor.unref();
-    _window.destroy();
-    _windowMonitor.close();
-    _windowMonitor.unref();
     _destroyed = true;
+    // Unreference the native GObject monitors before closing their Dart
+    // NativeCallables. Dropping the final GObject reference disconnects all
+    // g_signal_connect_object handlers on the GtkWindow and FlView so no GTK
+    // signal emitted during teardown can invoke a closed NativeCallable.
+    //
+    // Disposing _viewMonitor also aborts any active wait_for_frame() on the
+    // renderer and schedules gtk_widget_destroy() on the GLib main loop after
+    // any active GtkWidget::draw stack frame unwinds.
+    _viewMonitor.unref();
+    _viewMonitor.close();
+    _windowMonitor.unref();
+    _windowMonitor.close();
     _owner.registrar.unregister(rootView.viewId);
+    _notifyWindowDestroyed();
     notifyListeners();
   }
 
@@ -510,16 +525,36 @@ abstract mixin class BaseWindowControllerLinux {
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 mixin _ToplevelWindowControllerLinux on BaseWindowControllerLinux {
+  VoidCallback? _onDestroy;
+
+  @override
+  void _notifyWindowDestroyed() {
+    final VoidCallback? onDestroy = _onDestroy;
+    _onDestroy = null;
+    onDestroy?.call();
+  }
+
   /// Watches the window for the changes a top level window can undergo.
   void _createWindowMonitor({required VoidCallback onClose, required VoidCallback onDestroy}) {
+    _onDestroy = onDestroy;
+    // Suppress listener notifications once _destroyed is true so GTK signals
+    // emitted while a window is being torn down (such as notify::is-active
+    // when an active dialog is closed under a window manager) do not trigger
+    // widget rebuilds for a destroyed view.
+    void notifyIfAlive() {
+      if (!_destroyed) {
+        notifyListeners();
+      }
+    }
+
     _windowMonitor = _FlWindowMonitor(
       _window,
-      onConfigure: notifyListeners,
-      onStateChanged: notifyListeners,
-      onIsActiveNotify: notifyListeners,
-      onTitleNotify: notifyListeners,
+      onConfigure: notifyIfAlive,
+      onStateChanged: notifyIfAlive,
+      onIsActiveNotify: notifyIfAlive,
+      onTitleNotify: notifyIfAlive,
       onClose: onClose,
-      onDestroy: onDestroy,
+      onDestroy: _notifyWindowDestroyed,
     );
   }
 
@@ -1155,11 +1190,6 @@ class _GtkWidget extends _GObject {
     _gtkWidgetSetVisual(instance, visual.instance);
   }
 
-  /// Destroy the widget.
-  void destroy() {
-    _gtkWindowDestroy(instance);
-  }
-
   @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Bool)>(
     symbol: 'gtk_widget_set_app_paintable',
   )
@@ -1195,9 +1225,6 @@ class _GtkWidget extends _GObject {
   external static ffi.Pointer<ffi.NativeType> _gtkWidgetGetWindow(
     ffi.Pointer<ffi.NativeType> widget,
   );
-
-  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_destroy')
-  external static void _gtkWindowDestroy(ffi.Pointer<ffi.NativeType> widget);
 
   @ffi.Native<ffi.Int Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_get_scale_factor')
   external static int _gtkWidgetGetScaleFactor(ffi.Pointer<ffi.NativeType> widget);

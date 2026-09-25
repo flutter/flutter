@@ -156,11 +156,17 @@ static void get_pointer_device_state(GdkEvent* event,
 
 // Called when the mouse cursor changes.
 static void cursor_changed_cb(FlView* self) {
+  if (self->engine == nullptr) {
+    return;
+  }
   FlMouseCursorHandler* handler =
       fl_engine_get_mouse_cursor_handler(self->engine);
   const gchar* cursor_name = fl_mouse_cursor_handler_get_cursor_name(handler);
   GdkWindow* window =
       gtk_widget_get_window(gtk_widget_get_toplevel(GTK_WIDGET(self)));
+  if (window == nullptr) {
+    return;
+  }
   g_autoptr(GdkCursor) cursor =
       gdk_cursor_new_from_name(gdk_window_get_display(window), cursor_name);
   gdk_window_set_cursor(window, cursor);
@@ -168,6 +174,9 @@ static void cursor_changed_cb(FlView* self) {
 
 // Set the mouse cursor.
 static void setup_cursor(FlView* self) {
+  if (self->engine == nullptr) {
+    return;
+  }
   FlMouseCursorHandler* handler =
       fl_engine_get_mouse_cursor_handler(self->engine);
 
@@ -180,7 +189,7 @@ static void setup_cursor(FlView* self) {
 // Updates the engine with the current window metrics.
 static void handle_geometry_changed(FlView* self) {
   // No updates required when size controlled by Flutter.
-  if (self->sized_to_content) {
+  if (self->sized_to_content || self->engine == nullptr) {
     return;
   }
 
@@ -547,10 +556,23 @@ static void fl_view_notify(GObject* object, GParamSpec* pspec) {
   }
 }
 
+void fl_view_begin_destroy(FlView* self) {
+  g_return_if_fail(FL_IS_VIEW(self));
+
+  if (FL_IS_VIEW_RENDERER_OPENGL(self->renderer)) {
+    fl_view_renderer_opengl_cancel_wait(
+        FL_VIEW_RENDERER_OPENGL(self->renderer));
+  }
+}
+
 static void fl_view_dispose(GObject* object) {
   FlView* self = FL_VIEW(object);
 
-  g_cancellable_cancel(self->cancellable);
+  fl_view_begin_destroy(self);
+
+  if (self->cancellable != nullptr) {
+    g_cancellable_cancel(self->cancellable);
+  }
 
   g_clear_object(&self->zoom_gesture);
   g_clear_object(&self->rotate_gesture);
@@ -650,10 +672,22 @@ static gboolean fl_view_key_release_event(GtkWidget* widget,
   return handle_key_event(self, key_event);
 }
 
+static void fl_view_finalize(GObject* object) {
+  FlView* self = FL_VIEW(object);
+
+  // Released in finalize rather than dispose so self->renderer remains valid if
+  // the Flutter raster thread holds a strong reference to this FlView (via
+  // get_renderable()) while gtk_container_dispose() destroys child widgets.
+  g_clear_object(&self->renderer);
+
+  G_OBJECT_CLASS(fl_view_parent_class)->finalize(object);
+}
+
 static void fl_view_class_init(FlViewClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
   object_class->notify = fl_view_notify;
   object_class->dispose = fl_view_dispose;
+  object_class->finalize = fl_view_finalize;
 
   GtkWidgetClass* widget_class = GTK_WIDGET_CLASS(klass);
   widget_class->realize = fl_view_realize;
@@ -704,6 +738,11 @@ static void setup_engine(FlView* self) {
       }
       break;
   }
+  // Retain a strong reference owned by FlView (released in fl_view_finalize).
+  // Without this, gtk_container_dispose() on self->event_box unrefs and frees
+  // self->renderer during dispose() while the raster thread may still call
+  // fl_view_present_layers(self->renderer).
+  g_object_ref_sink(self->renderer);
   gtk_widget_show(GTK_WIDGET(self->renderer));
   gtk_container_add(GTK_CONTAINER(self->event_box), GTK_WIDGET(self->renderer));
   g_signal_connect_swapped(self->renderer, "realize", G_CALLBACK(realize_cb),
