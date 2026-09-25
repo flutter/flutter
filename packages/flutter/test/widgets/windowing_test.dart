@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Display;
+import 'dart:ui' show Display, FlutterView, PlatformDispatcher;
 
 import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter/src/widgets/_window.dart'
@@ -30,8 +30,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'multi_view_testing.dart';
 
 class _StubWindowController extends WindowController {
-  _StubWindowController(WidgetTester tester) : super.empty() {
-    rootView = FakeView(tester.view);
+  _StubWindowController(WidgetTester tester, {FlutterView? rootView}) : super.empty() {
+    this.rootView = rootView ?? FakeView(tester.view);
   }
 
   @override
@@ -414,6 +414,46 @@ void main() {
       setUp(() {
         isWindowingEnabled = true;
       });
+
+      testWidgets(
+        'Window uses TestFlutterView metrics when rootView is resolved from WidgetsBinding.instance.platformDispatcher.view',
+        (WidgetTester tester) async {
+          tester.view.devicePixelRatio = 2.75;
+          addTearDown(tester.view.resetDevicePixelRatio);
+
+          final FlutterView? resolvedView = WidgetsBinding.instance.platformDispatcher.view(
+            id: tester.view.viewId,
+          );
+          expect(resolvedView, allOf(same(tester.view), isA<TestFlutterView>()));
+          expect(
+            PlatformDispatcher.instance.view(id: tester.view.viewId)?.devicePixelRatio,
+            isNot(2.75),
+          );
+
+          final controller = _StubWindowController(tester, rootView: resolvedView);
+          addTearDown(controller.dispose);
+          expect(controller.rootView.devicePixelRatio, 2.75);
+
+          late FlutterView capturedView;
+          late double capturedDevicePixelRatio;
+          await tester.pumpWidget(
+            wrapWithView: false,
+            Window(
+              controller: controller,
+              child: Builder(
+                builder: (BuildContext context) {
+                  capturedView = View.of(context);
+                  capturedDevicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          );
+
+          expect(capturedView, same(tester.view));
+          expect(capturedDevicePixelRatio, 2.75);
+        },
+      );
 
       testWidgets('Window does not throw', (WidgetTester tester) async {
         final controller = _StubWindowController(tester);
