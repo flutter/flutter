@@ -15,16 +15,19 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/commands/run.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -39,6 +42,7 @@ import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -2331,7 +2335,13 @@ class DaemonCapturingRunCommand extends RunCommand {
 }
 
 class CapturingAppDomain extends AppDomain {
-  CapturingAppDomain(super.daemon) : super(toolContext: DelegatingToolContext());
+  CapturingAppDomain(super.daemon)
+    : super(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: DelegatingToolContext(),
+        xcode: null,
+      );
 
   String? userIdentifier;
   bool? enableDevTools;
@@ -2412,19 +2422,16 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
   @override
   ResidentRunner createWebRunner(
     FlutterDevice device, {
-    String? target,
-    required bool stayResident,
-    required DebuggingOptions debuggingOptions,
     required analytics.Analytics analytics,
-    required FileSystem fileSystem,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
+    required DebuggingOptions debuggingOptions,
     required FlutterProject flutterProject,
-    Map<String, Object?> platformArgs = const <String, Object?>{},
-    required Logger logger,
-    required OutputPreferences outputPreferences,
-    required Platform platform,
-    required SystemClock systemClock,
-    required Terminal terminal,
+    required bool stayResident,
+    required ToolContext toolContext,
     bool machine = false,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    String? target,
     Future<String> Function(String)? urlTunneller,
     Map<String, String> webDefines = const <String, String>{},
   }) {

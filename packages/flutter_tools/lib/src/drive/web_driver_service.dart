@@ -15,7 +15,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
@@ -66,12 +65,6 @@ class WebDriverService extends DriverService {
     Map<String, Object> platformArgs = const <String, Object>{},
     Map<String, String> webDefines = const <String, String>{},
   }) async {
-    final ToolContext(
-      :Logger logger,
-      :Terminal terminal,
-      :Platform platform,
-      :OutputPreferences outputPreferences,
-    ) = _toolContext;
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       toolContext: _toolContext,
@@ -100,13 +93,10 @@ class WebDriverService extends DriverService {
       stayResident: true,
       webDefines: webDefines,
       flutterProject: FlutterProject.current(),
-      fileSystem: globals.fs,
       analytics: globals.analytics,
-      logger: logger,
-      terminal: terminal,
-      platform: platform,
-      outputPreferences: outputPreferences,
-      systemClock: globals.systemClock,
+      buildSystem: globals.buildSystem,
+      buildTargets: globals.buildTargets,
+      toolContext: _toolContext,
     );
     final appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(

@@ -19,10 +19,10 @@ import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/hook_runner.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
@@ -66,21 +66,11 @@ ColdRunner createColdRunner(
   bool traceStartup = false,
   Xcode? xcode,
 }) {
-  final ToolContext(
-    artifacts: contextArtifacts,
-    cache: contextCache,
-    config: contextConfig,
-    fs: contextFs,
-    logger: contextLogger,
-    os: contextOs,
-    outputPreferences: contextOutputPreferences,
-    platform: contextPlatform,
-    processManager: contextProcessManager,
-    terminal: contextTerminal,
-  ) = DelegatingToolContext(
+  final toolContext = DelegatingToolContext(
     artifacts: artifacts,
     cache: cache,
     config: config,
+    flutterVersion: flutterVersion,
     fs: fileSystem,
     logger: logger,
     os: osUtils,
@@ -92,32 +82,28 @@ ColdRunner createColdRunner(
 
   return ColdRunner(
     flutterDevices,
+    buildSystem:
+        buildSystem ??
+        FlutterBuildSystem(
+          fileSystem: toolContext.fs,
+          logger: toolContext.logger,
+          platform: toolContext.platform,
+        ),
+    buildTargets: buildTargets ?? const BuildTargetsImpl(),
     debuggingOptions: debuggingOptions,
     target: target,
+    toolContext: toolContext,
+    xcode: xcode,
     analytics: analytics,
     applicationBinary: applicationBinary,
-    artifacts: contextArtifacts,
     awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
-    buildSystem: buildSystem,
-    buildTargets: buildTargets,
-    cache: contextCache,
     commandHelp: commandHelp,
-    config: contextConfig,
     dartBuilder: dartBuilder,
     dillOutputPath: dillOutputPath,
-    fileSystem: contextFs,
-    flutterVersion: flutterVersion,
-    logger: contextLogger,
     machine: machine,
-    osUtils: contextOs,
-    outputPreferences: contextOutputPreferences,
-    platform: contextPlatform,
-    processManager: contextProcessManager,
     projectRootPath: projectRootPath,
     stayResident: stayResident,
-    terminal: contextTerminal,
     traceStartup: traceStartup,
-    xcode: xcode,
   );
 }
 

@@ -6,11 +6,14 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fakes.dart' show FakeToolContext, TestFeatureFlags;
+import '../../src/test_build_system.dart';
 
 void main() {
   testWithoutContext('binds on ipv4 normally', () async {
@@ -22,7 +25,10 @@ void main() {
     final bindPorts = <int>[];
 
     final server = DaemonServer(
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const BuildTargetsImpl(),
       toolContext: FakeToolContext(),
+      xcode: null,
       port: 123,
       logger: logger,
       featureFlags: TestFeatureFlags(),
@@ -48,7 +54,10 @@ void main() {
     final bindPorts = <int>[];
 
     final server = DaemonServer(
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const BuildTargetsImpl(),
       toolContext: FakeToolContext(),
+      xcode: null,
       port: 123,
       logger: logger,
       featureFlags: TestFeatureFlags(),

@@ -622,32 +622,22 @@ class RunCommand extends RunCommandBase {
     if (hotMode && !webMode) {
       return HotRunner(
         flutterDevices,
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
         debuggingOptions: debuggingOptions,
         target: targetFile,
+        toolContext: toolContext!,
+        xcode: globals.xcode,
         analytics: globals.analytics,
         applicationBinary: applicationBinaryPath == null
             ? null
             : globals.fs.file(applicationBinaryPath),
-        artifacts: globals.artifacts,
         benchmarkMode: boolArg('benchmark'),
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
-        cache: globals.cache,
-        config: globals.config,
         dartBuilder: hookRunner,
         dillOutputPath: stringArg('output-dill'),
-        fileSystem: globals.fs,
-        flutterVersion: globals.flutterVersion,
-        logger: globals.logger,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
-        osUtils: globals.os,
-        outputPreferences: globals.outputPreferences,
-        platform: globals.platform,
-        processManager: globals.processManager,
         projectRootPath: stringArg('project-root'),
         stayResident: stayResident,
-        terminal: globals.terminal,
-        xcode: globals.xcode,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -656,42 +646,29 @@ class RunCommand extends RunCommandBase {
         flutterProject: flutterProject,
         debuggingOptions: debuggingOptions,
         stayResident: stayResident,
-        fileSystem: globals.fs,
         analytics: globals.analytics,
-        logger: globals.logger,
-        terminal: globals.terminal,
-        platform: globals.platform,
-        outputPreferences: globals.outputPreferences,
-        systemClock: globals.systemClock,
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
+        toolContext: toolContext!,
         webDefines: extractWebDefines(),
       );
     }
     return ColdRunner(
       flutterDevices,
+      buildSystem: globals.buildSystem,
+      buildTargets: globals.buildTargets,
       debuggingOptions: debuggingOptions,
       target: targetFile,
+      toolContext: toolContext!,
+      xcode: globals.xcode,
       analytics: globals.analytics,
       applicationBinary: applicationBinaryPath == null
           ? null
           : globals.fs.file(applicationBinaryPath),
-      artifacts: globals.artifacts,
       awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
-      buildSystem: globals.buildSystem,
-      buildTargets: globals.buildTargets,
-      cache: globals.cache,
-      config: globals.config,
       dartBuilder: hookRunner,
-      fileSystem: globals.fs,
-      flutterVersion: globals.flutterVersion,
-      logger: globals.logger,
-      osUtils: globals.os,
-      outputPreferences: globals.outputPreferences,
-      platform: globals.platform,
-      processManager: globals.processManager,
       stayResident: stayResident,
-      terminal: globals.terminal,
       traceStartup: traceStartup,
-      xcode: globals.xcode,
     );
   }
 
@@ -701,18 +678,17 @@ class RunCommand extends RunCommandBase {
       analytics: globals.analytics,
       androidSdk: globals.androidSdk,
       androidWorkflow: android_workflow.androidWorkflow,
+      buildSystem: globals.buildSystem,
+      buildTargets: globals.buildTargets,
       deviceManager: globals.deviceManager,
       featureFlags: featureFlags,
       fileSystem: globals.fs,
       java: globals.java,
       logger: globals.logger,
-      outputPreferences: globals.outputPreferences,
-      platform: globals.platform,
       processManager: globals.processManager,
       stdio: globals.stdio,
-      systemClock: globals.systemClock,
-      terminal: globals.terminal,
       toolContext: toolContext!,
+      xcode: globals.xcode,
     );
   }
 

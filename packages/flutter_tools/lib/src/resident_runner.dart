@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
@@ -939,52 +938,36 @@ abstract class ResidentHandlers {
 abstract class ResidentRunner extends ResidentHandlers {
   ResidentRunner(
     this.flutterDevices, {
+    required this.buildSystem,
+    required this.buildTargets,
     required this.debuggingOptions,
     required this.target,
+    required this.toolContext,
+    required this.xcode,
     Analytics? analytics,
-    this._artifacts,
-    this._buildSystem,
-    this._buildTargets,
-    this._cache,
     CommandHelp? commandHelp,
-    this._config,
     this.dartBuilder,
     String? dillOutputPath,
-    FileSystem? fileSystem,
-    this._flutterVersion,
     this.hotMode = true,
-    Logger? logger,
     this.machine = false,
-    this._osUtils,
-    OutputPreferences? outputPreferences,
-    Platform? platform,
-    ProcessManager? processManager,
     String? projectRootPath,
     this.stayResident = true,
-    Terminal? terminal,
-    this._xcode,
-  }) : _analytics = analytics ?? const NoOpAnalytics(),
+  }) : analytics = analytics ?? const NoOpAnalytics(),
        _dillOutputPath = dillOutputPath,
-       _fileSystem = fileSystem ??= MemoryFileSystem.test(),
-       _logger = logger ??= BufferLogger.test(),
-       _outputPreferences = outputPreferences ??= OutputPreferences.test(),
-       _platform = platform ??= const LocalPlatform(),
-       _processManager = processManager ??= const LocalProcessManager(),
-       _terminal = terminal ??= Terminal.test(),
-       mainPath = fileSystem.file(target).absolute.path,
+       mainPath = toolContext.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
-       projectRootPath = projectRootPath ?? fileSystem.currentDirectory.path,
+       projectRootPath = projectRootPath ?? toolContext.fs.currentDirectory.path,
        artifactDirectory = dillOutputPath == null
-           ? fileSystem.systemTempDirectory.createTempSync('flutter_tool.')
-           : fileSystem.file(dillOutputPath).parent,
+           ? toolContext.fs.systemTempDirectory.createTempSync('flutter_tool.')
+           : toolContext.fs.file(dillOutputPath).parent,
        assetBundle = AssetBundleFactory.instance.createBundle(),
        commandHelp =
            commandHelp ??
            CommandHelp(
-             logger: logger,
-             terminal: terminal,
-             platform: platform,
-             outputPreferences: outputPreferences,
+             logger: toolContext.logger,
+             terminal: toolContext.terminal,
+             platform: toolContext.platform,
+             outputPreferences: toolContext.outputPreferences,
            ) {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
@@ -992,40 +975,29 @@ abstract class ResidentRunner extends ResidentHandlers {
   }
 
   @override
-  Logger get logger => _logger;
+  Logger get logger => toolContext.logger;
 
   @override
-  FileSystem get fileSystem => _fileSystem;
+  FileSystem get fileSystem => toolContext.fs;
 
-  Platform get platform => _platform;
-  Terminal get terminal => _terminal;
-  OutputPreferences get outputPreferences => _outputPreferences;
-  Artifacts? get artifacts => _artifacts;
-  Analytics get analytics => _analytics;
-  Config? get config => _config;
-  BuildTargets? get buildTargets => _buildTargets;
-  BuildSystem? get buildSystem => _buildSystem;
-  Cache? get cache => _cache;
-  FlutterVersion? get flutterVersion => _flutterVersion;
-  Xcode? get xcode => _xcode;
-  ProcessManager get processManager => _processManager;
-  OperatingSystemUtils? get osUtils => _osUtils;
+  Platform get platform => toolContext.platform;
+  Terminal get terminal => toolContext.terminal;
+  OutputPreferences get outputPreferences => toolContext.outputPreferences;
+  Artifacts get artifacts => toolContext.artifacts;
+  Config get config => toolContext.config;
+  Cache get cache => toolContext.cache;
+  FlutterVersion get flutterVersion => toolContext.flutterVersion;
+  ProcessManager get processManager => toolContext.processManager;
+  OperatingSystemUtils get osUtils => toolContext.os;
 
-  final Logger _logger;
-  final FileSystem _fileSystem;
-  final Platform _platform;
-  final Terminal _terminal;
-  final OutputPreferences _outputPreferences;
-  final Artifacts? _artifacts;
-  final Analytics _analytics;
-  final Config? _config;
-  final BuildTargets? _buildTargets;
-  final BuildSystem? _buildSystem;
-  final Cache? _cache;
-  final FlutterVersion? _flutterVersion;
-  final Xcode? _xcode;
-  final ProcessManager _processManager;
-  final OperatingSystemUtils? _osUtils;
+  /// The Xcode installation, or null on platforms without Xcode support.
+  final Xcode? xcode;
+
+  /// The injected dependencies used by this runner.
+  final ToolContext toolContext;
+  final Analytics analytics;
+  final BuildTargets buildTargets;
+  final BuildSystem buildSystem;
 
   @override
   final List<FlutterDevice> flutterDevices;
@@ -1051,34 +1023,18 @@ abstract class ResidentRunner extends ResidentHandlers {
   var _finished = Completer<int>();
   BuildResult? _lastBuild;
 
-  Artifacts get _defaultArtifacts =>
-      _artifacts ??
-      CachedArtifacts(
-        fileSystem: _fileSystem,
-        platform: _platform,
-        cache: _cache ?? Cache.test(fileSystem: _fileSystem, processManager: _processManager),
-        operatingSystemUtils:
-            _osUtils ??
-            OperatingSystemUtils(
-              fileSystem: _fileSystem,
-              logger: _logger,
-              platform: _platform,
-              processManager: _processManager,
-            ),
-      );
-
   late final _environment = Environment(
-    artifacts: _defaultArtifacts,
-    logger: _logger,
-    cacheDir: _cache?.getRoot() ?? _fileSystem.directory('cache'),
-    engineVersion: _flutterVersion?.engineRevision ?? 'engineVersion',
-    fileSystem: _fileSystem,
-    flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
-    outputDir: _fileSystem.directory(getBuildDirectory(_config, _fileSystem)),
-    processManager: _processManager,
-    platform: _platform,
-    analytics: _analytics,
-    projectDir: _fileSystem.directory(projectRootPath),
+    artifacts: artifacts,
+    logger: logger,
+    cacheDir: cache.getRoot(),
+    engineVersion: flutterVersion.engineRevision,
+    fileSystem: fileSystem,
+    flutterRootDir: fileSystem.directory(Cache.flutterRoot),
+    outputDir: fileSystem.directory(getBuildDirectory(config, fileSystem)),
+    processManager: processManager,
+    platform: platform,
+    analytics: analytics,
+    projectDir: fileSystem.directory(projectRootPath),
     packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
     generateDartPluginRegistry: generateDartPluginRegistry,
     defines: <String, String>{
@@ -1104,7 +1060,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   }
 
   String get dillOutputPath =>
-      _dillOutputPath ?? _fileSystem.path.join(artifactDirectory.path, 'app.dill');
+      _dillOutputPath ?? fileSystem.path.join(artifactDirectory.path, 'app.dill');
   String getReloadPath({bool resetCompiler = false, required bool swap}) {
     if (!resetCompiler) {
       return 'main.dart.incremental.dill';
@@ -1189,25 +1145,17 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @override
   Future<void> runSourceGenerators() async {
-    final BuildTargets? buildTargets = _buildTargets;
-    if (buildTargets == null) {
-      return;
-    }
     final compositeTarget = CompositeTarget(<Target>[
       buildTargets.generateLocalizationsTarget,
       buildTargets.dartPluginRegistrantTarget,
     ]);
-
-    final BuildSystem buildSystem =
-        _buildSystem ??
-        FlutterBuildSystem(fileSystem: _fileSystem, logger: _logger, platform: _platform);
 
     _lastBuild = await buildSystem.buildIncremental(compositeTarget, _environment, _lastBuild);
     if (!_lastBuild!.success) {
       for (final ExceptionMeasurement exceptionMeasurement in _lastBuild!.exceptions.values) {
         logger.printError(
           exceptionMeasurement.exception.toString(),
-          stackTrace: _logger.isVerbose ? exceptionMeasurement.stackTrace : null,
+          stackTrace: logger.isVerbose ? exceptionMeasurement.stackTrace : null,
         );
       }
     }
@@ -1219,7 +1167,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     if (debuggingOptions.vmserviceOutFile != null) {
       try {
         final address = flutterDevices.first.vmService!.wsAddress.toString();
-        final File vmserviceOutFile = _fileSystem.file(debuggingOptions.vmserviceOutFile);
+        final File vmserviceOutFile = fileSystem.file(debuggingOptions.vmserviceOutFile);
         vmserviceOutFile.createSync(recursive: true);
         vmserviceOutFile.writeAsStringSync(address);
       } on FileSystemException {
@@ -1282,7 +1230,8 @@ abstract class ResidentRunner extends ResidentHandlers {
       return;
     }
     logger.printTrace('Caching compiled dill');
-    final File outputDill = _fileSystem.file(dillOutputPath);
+    final ToolContext(:Config config, :FileSystem fs) = toolContext;
+    final File outputDill = fs.file(dillOutputPath);
     if (outputDill.existsSync()) {
       final TargetPlatform? targetPlatform = flutterDevices.firstOrNull?.targetPlatform;
       final TargetModel targetModel = TargetModel.fromTargetPlatform(targetPlatform);
@@ -1290,13 +1239,11 @@ abstract class ResidentRunner extends ResidentHandlers {
         trackWidgetCreation: trackWidgetCreation,
         dartDefines: debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
-        config:
-            _config ??
-            Config('settings', fileSystem: _fileSystem, logger: _logger, platform: _platform),
-        fileSystem: _fileSystem,
+        config: config,
+        fileSystem: fs,
         targetModel: targetModel,
       );
-      _fileSystem.file(copyPath).parent.createSync(recursive: true);
+      fs.file(copyPath).parent.createSync(recursive: true);
       outputDill.copySync(copyPath);
     }
   }
@@ -1322,7 +1269,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         }
       } else {
         logger.printError(
-          'Received an invalid ${_logger.terminal.bolden("Flutter.Error")} message from app: $json',
+          'Received an invalid ${logger.terminal.bolden("Flutter.Error")} message from app: $json',
         );
       }
     }
@@ -1398,7 +1345,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
     logger.printStatus('Lost connection to device.');
 
-    final Version? xcodeVersion = _xcode?.currentVersion;
+    final Version? xcodeVersion = xcode?.currentVersion;
     for (final FlutterDevice device in flutterDevices) {
       final Device? rawDevice = device.device;
       if (rawDevice is IOSDevice &&
