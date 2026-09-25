@@ -269,15 +269,6 @@ TEST_F(FlatlandConnectionTest, AwaitVsyncsBeforeOnNextFrameBegin) {
   AwaitVsyncChecked(flatland_connection, await_vsync_callback_fired,
                     kInitialFlatlandVsyncOffset);
   EXPECT_TRUE(await_vsync_callback_fired);
-
-  // AwaitVsync that comes before the first Present.
-  bool await_vsync_secondary_callback_fired = false;
-  flatland_connection.AwaitVsyncForSecondaryCallback(
-      [&await_vsync_secondary_callback_fired](fml::TimePoint frame_start,
-                                              fml::TimePoint frame_end) {
-        await_vsync_secondary_callback_fired = true;
-      });
-  EXPECT_TRUE(await_vsync_secondary_callback_fired);
 }
 
 TEST_F(FlatlandConnectionTest, RunsOutOfFuturePresentationInfos) {

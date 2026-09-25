@@ -162,15 +162,9 @@ class EngineAnimatorTest : public testing::FixtureTest {
   }
 
  protected:
-  void SetUp() override {
-    settings_ = CreateSettingsForFixture();
-    dispatcher_maker_ = [](PointerDataDispatcher::Delegate&) {
-      return nullptr;
-    };
-  }
+  void SetUp() override { settings_ = CreateSettingsForFixture(); }
 
   MockDelegate delegate_;
-  PointerDataDispatcherMaker dispatcher_maker_;
   ThreadHost thread_host_;
   TaskRunners task_runners_;
   Settings settings_;
@@ -240,29 +234,24 @@ class EngineContext {
                 const DartVMRef& vm,                 //
                 fml::RefPtr<const DartSnapshot> isolate_snapshot)
       : task_runners_(task_runners), vm_(vm) {
-    PostSync(task_runners.GetUITaskRunner(), [this, &settings, &animator,
-                                              &delegate, &isolate_snapshot] {
-      auto dispatcher_maker =
-          [](DefaultPointerDataDispatcher::Delegate& delegate) {
-            return std::make_unique<DefaultPointerDataDispatcher>(delegate);
-          };
-      std::promise<impeller::RuntimeStageBackend> rsb;
-      rsb.set_value(impeller::RuntimeStageBackend::kVulkan);
-      engine_ = std::make_unique<Engine>(
-          /*delegate=*/delegate,
-          /*dispatcher_maker=*/dispatcher_maker,
-          /*vm=*/*&vm_,
-          /*isolate_snapshot=*/std::move(isolate_snapshot),
-          /*task_runners=*/task_runners_,
-          /*platform_data=*/PlatformData(),
-          /*settings=*/settings,
-          /*animator=*/std::move(animator),
-          /*io_manager=*/io_manager_,
-          /*unref_queue=*/nullptr,
-          /*snapshot_delegate=*/snapshot_delegate_,
-          /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>(),
-          /*runtime_stage_backend=*/rsb.get_future());
-    });
+    PostSync(task_runners.GetUITaskRunner(),
+             [this, &settings, &animator, &delegate, &isolate_snapshot] {
+               std::promise<impeller::RuntimeStageBackend> rsb;
+               rsb.set_value(impeller::RuntimeStageBackend::kVulkan);
+               engine_ = std::make_unique<Engine>(
+                   /*delegate=*/delegate,
+                   /*vm=*/*&vm_,
+                   /*isolate_snapshot=*/std::move(isolate_snapshot),
+                   /*task_runners=*/task_runners_,
+                   /*platform_data=*/PlatformData(),
+                   /*settings=*/settings,
+                   /*animator=*/std::move(animator),
+                   /*io_manager=*/io_manager_,
+                   /*unref_queue=*/nullptr,
+                   /*snapshot_delegate=*/snapshot_delegate_,
+                   /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>(),
+                   /*runtime_stage_backend=*/rsb.get_future());
+             });
   }
 
   TaskRunners task_runners_;
@@ -331,8 +320,6 @@ TEST_F(EngineAnimatorTest, AnimatorAcceptsMultipleRenders) {
 
   native_latch.Wait();
 
-  engine_context->EngineTaskSync(
-      [](Engine& engine) { engine.ScheduleFrame(); });
   draw_latch.Wait();
 }
 
