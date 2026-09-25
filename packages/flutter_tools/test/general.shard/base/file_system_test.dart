@@ -418,6 +418,176 @@ void main() {
       }
     });
   });
+
+  group('FileSystemLocking', () {
+    late MemoryFileSystem memoryFs;
+    late _LockTestingFileSystem fs;
+    late BufferLogger logger;
+
+    setUp(() {
+      memoryFs = MemoryFileSystem.test();
+      fs = _LockTestingFileSystem(memoryFs);
+      logger = BufferLogger.test();
+    });
+
+    testWithoutContext(
+      'holds lock while executing scope and releases lock upon completion',
+      () async {
+        final String result = await fs.runLocked(
+          lockPath: '/test.lock',
+          scope: () {
+            expect(fs.lockCount, 1);
+            expect(fs.unlockCount, 0);
+            return 'done';
+          },
+        );
+
+        expect(result, 'done');
+        expect(fs.lockCount, 1);
+        expect(fs.unlockCount, 1);
+        expect(fs.lockAttempts, 1);
+      },
+    );
+
+    testWithoutContext('releases lock even when scope throws', () async {
+      await expectLater(
+        () => fs.runLocked<void>(
+          lockPath: '/test.lock',
+          scope: () => throw StateError('scope failed'),
+        ),
+        throwsStateError,
+      );
+
+      expect(fs.lockCount, 1);
+      expect(fs.unlockCount, 1);
+      expect(fs.lockAttempts, 1);
+    });
+
+    testWithoutContext('proceeds without lock when lockSync throws UnimplementedError', () async {
+      fs.errorToThrowOnLock = UnimplementedError('Not implemented');
+
+      final int result = await fs.runLocked<int>(
+        lockPath: '/test.lock',
+        scope: () => 42,
+        logger: logger,
+      );
+
+      expect(result, 42);
+      expect(fs.lockCount, 0);
+      expect(fs.unlockCount, 1);
+      expect(fs.lockAttempts, 1);
+      expect(logger.traceText, contains('Locking not supported (UnimplementedError).'));
+    });
+
+    testWithoutContext('proceeds without lock when lockSync throws UnsupportedError', () async {
+      fs.errorToThrowOnLock = UnsupportedError('Not supported');
+
+      final int result = await fs.runLocked<int>(
+        lockPath: '/test.lock',
+        scope: () => 42,
+        logger: logger,
+      );
+
+      expect(result, 42);
+      expect(fs.lockCount, 0);
+      expect(fs.unlockCount, 1);
+      expect(fs.lockAttempts, 1);
+      expect(logger.traceText, contains('Locking not supported (UnsupportedError).'));
+    });
+
+    for (final (String name, int errorCode) in <(String, int)>[
+      ('macOS ENOTSUP', 45),
+      ('macOS ENOLCK', 77),
+      ('macOS ENOSYS', 78),
+      ('POSIX EINVAL', 22),
+      ('Linux ENOTSUP', 95),
+      ('Linux ENOLCK', 37),
+      ('Linux ENOSYS', 38),
+      ('Windows ERROR_NOT_SUPPORTED', 50),
+    ]) {
+      testWithoutContext(
+        'proceeds without lock on FileSystemException with $name ($errorCode)',
+        () async {
+          fs.errorToThrowOnLock = FileSystemException(
+            'lock failed',
+            '/test.lock',
+            OSError('Unsupported', errorCode),
+          );
+
+          final String result = await fs.runLocked<String>(
+            lockPath: '/test.lock',
+            scope: () => 'proceeded',
+            logger: logger,
+          );
+
+          expect(result, 'proceeded');
+          expect(fs.lockCount, 0);
+          expect(fs.unlockCount, 1);
+          expect(fs.lockAttempts, 1);
+          expect(
+            logger.traceText,
+            contains('Locking not supported: FileSystemException: lock failed'),
+          );
+          expect(logger.warningText, isNot(contains('Waiting for another flutter command')));
+        },
+      );
+    }
+
+    testWithoutContext('proceeds without lock on FileSystemException when locking is unsupported and propagates scope exception', () async {
+      fs.errorToThrowOnLock = const FileSystemException(
+        'lock failed',
+        '/test.lock',
+        OSError('Unsupported', 45),
+      );
+
+      await expectLater(
+        () => fs.runLocked<void>(
+          lockPath: '/test.lock',
+          scope: () => throw StateError('scope failed'),
+          logger: logger,
+        ),
+        throwsStateError,
+      );
+
+      expect(fs.lockCount, 0);
+      expect(fs.unlockCount, 1);
+      expect(fs.lockAttempts, 1);
+      expect(logger.traceText, contains('Locking not supported: FileSystemException: lock failed'));
+    });
+
+    for (final (String name, int? errorCode) in <(String, int?)>[
+      ('null OSError (mock/test fakes)', null),
+      ('Linux EAGAIN (11)', 11),
+      ('POSIX EACCES (13)', 13),
+      ('macOS EAGAIN (35)', 35),
+      ('Windows ERROR_SHARING_VIOLATION (32)', 32),
+      ('Windows ERROR_LOCK_VIOLATION (33)', 33),
+    ]) {
+      testWithoutContext('retries on lock contention with $name and succeeds', () async {
+        fs.retryAttemptsBeforeSuccess = 1;
+        fs.errorToThrowOnLock = FileSystemException(
+          'lock failed',
+          '/test.lock',
+          errorCode == null ? null : OSError('Contention', errorCode),
+        );
+
+        final String result = await fs.runLocked<String>(
+          lockPath: '/test.lock',
+          scope: () => 'success',
+          logger: logger,
+        );
+
+        expect(result, 'success');
+        expect(fs.lockCount, 1);
+        expect(fs.unlockCount, 2);
+        expect(fs.lockAttempts, 2);
+        expect(
+          logger.warningText,
+          contains('Waiting for another flutter command to release the lock...'),
+        );
+      });
+    }
+  });
 }
 
 class FakeProcessSignal extends Fake implements io.ProcessSignal {
@@ -425,4 +595,77 @@ class FakeProcessSignal extends Fake implements io.ProcessSignal {
 
   @override
   Stream<io.ProcessSignal> watch() => controller.stream;
+}
+
+class _LockTestingFileSystem extends ForwardingFileSystem {
+  _LockTestingFileSystem(super.delegate);
+
+  int lockCount = 0;
+  int unlockCount = 0;
+  int lockAttempts = 0;
+  Object? errorToThrowOnLock;
+  int retryAttemptsBeforeSuccess = 0;
+
+  @override
+  File file(dynamic path) => _LockTestingFile(this, delegate.file(path));
+}
+
+class _LockTestingFile extends ForwardingFileSystemEntity<File, io.File> with ForwardingFile {
+  _LockTestingFile(this._fileSystem, this.delegate);
+
+  final _LockTestingFileSystem _fileSystem;
+
+  @override
+  final io.File delegate;
+
+  @override
+  FileSystem get fileSystem => _fileSystem;
+
+  @override
+  File wrapFile(io.File delegate) => _fileSystem.file(delegate.path);
+
+  @override
+  Directory wrapDirectory(io.Directory delegate) => _fileSystem.directory(delegate.path);
+
+  @override
+  Link wrapLink(io.Link delegate) => _fileSystem.link(delegate.path);
+
+  @override
+  RandomAccessFile openSync({FileMode mode = FileMode.read}) {
+    final RandomAccessFile delegateOpened = super.openSync(mode: mode);
+    return _LockTestingRandomAccessFile(_fileSystem, delegateOpened);
+  }
+}
+
+class _LockTestingRandomAccessFile extends Fake implements RandomAccessFile {
+  _LockTestingRandomAccessFile(this._fileSystem, this._delegate);
+
+  final _LockTestingFileSystem _fileSystem;
+  final RandomAccessFile _delegate;
+
+  @override
+  void lockSync([FileLock mode = FileLock.exclusive, int start = 0, int end = -1]) {
+    _fileSystem.lockAttempts++;
+    if (_fileSystem.errorToThrowOnLock != null) {
+      if (_fileSystem.retryAttemptsBeforeSuccess > 0) {
+        _fileSystem.retryAttemptsBeforeSuccess--;
+        _throwError(_fileSystem.errorToThrowOnLock!);
+      } else if (_fileSystem.retryAttemptsBeforeSuccess == 0 && _fileSystem.lockAttempts == 1) {
+        _throwError(_fileSystem.errorToThrowOnLock!);
+      }
+    }
+    _fileSystem.lockCount++;
+  }
+
+  Never _throwError(Object error) => switch (error) {
+    final Error err => throw err,
+    final Exception err => throw err,
+    _ => throw Exception(error.toString()),
+  };
+
+  @override
+  void closeSync() {
+    _fileSystem.unlockCount++;
+    _delegate.closeSync();
+  }
 }
