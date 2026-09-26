@@ -3,24 +3,109 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/command_help.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/hook_runner.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/tracing.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart' hide Event;
 import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
+
+ColdRunner createColdRunner(
+  List<FlutterDevice> flutterDevices, {
+  required DebuggingOptions debuggingOptions,
+  required String target,
+  Analytics? analytics,
+  File? applicationBinary,
+  Artifacts? artifacts,
+  bool awaitFirstFrameWhenTracing = true,
+  BuildSystem? buildSystem,
+  BuildTargets? buildTargets,
+  Cache? cache,
+  CommandHelp? commandHelp,
+  Config? config,
+  FlutterHookRunner? dartBuilder,
+  String? dillOutputPath,
+  FileSystem? fileSystem,
+  FlutterVersion? flutterVersion,
+  Logger? logger,
+  bool machine = false,
+  OperatingSystemUtils? osUtils,
+  OutputPreferences? outputPreferences,
+  Platform? platform,
+  ProcessManager? processManager,
+  String? projectRootPath,
+  bool stayResident = true,
+  Terminal? terminal,
+  bool traceStartup = false,
+  Xcode? xcode,
+}) {
+  final toolContext = DelegatingToolContext(
+    artifacts: artifacts,
+    cache: cache,
+    config: config,
+    flutterVersion: flutterVersion,
+    fs: fileSystem,
+    logger: logger,
+    os: osUtils,
+    outputPreferences: outputPreferences,
+    platform: platform,
+    processManager: processManager,
+    terminal: terminal as AnsiTerminal?,
+  );
+
+  return ColdRunner(
+    flutterDevices,
+    buildSystem:
+        buildSystem ??
+        FlutterBuildSystem(
+          fileSystem: toolContext.fs,
+          logger: toolContext.logger,
+          platform: toolContext.platform,
+        ),
+    buildTargets: buildTargets ?? const BuildTargetsImpl(),
+    debuggingOptions: debuggingOptions,
+    target: target,
+    toolContext: toolContext,
+    xcode: xcode,
+    analytics: analytics,
+    applicationBinary: applicationBinary,
+    awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
+    commandHelp: commandHelp,
+    dartBuilder: dartBuilder,
+    dillOutputPath: dillOutputPath,
+    machine: machine,
+    projectRootPath: projectRootPath,
+    stayResident: stayResident,
+    traceStartup: traceStartup,
+  );
+}
 
 void main() {
   testUsingContext('Exits with code 2 when HttpException is thrown '
@@ -42,7 +127,7 @@ void main() {
       ),
     ];
 
-    final int exitCode = await ColdRunner(
+    final int exitCode = await createColdRunner(
       devices,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
@@ -59,7 +144,7 @@ void main() {
 
       final devices = <FlutterDevice>[flutterDevice1, flutterDevice2];
 
-      await ColdRunner(
+      await createColdRunner(
         devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
@@ -86,7 +171,7 @@ void main() {
       final flutterDevice = FakeFlutterDevice(device)..runColdCode = 1;
       final devices = <FlutterDevice>[flutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
-      final int result = await ColdRunner(
+      final int result = await createColdRunner(
         devices,
         applicationBinary: applicationBinary,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -103,7 +188,7 @@ void main() {
         final flutterDevice = FakeFlutterDevice(device);
         final devices = <FlutterDevice>[flutterDevice];
         final File applicationBinary = MemoryFileSystem.test().file('binary');
-        final int result = await ColdRunner(
+        final int result = await createColdRunner(
           devices,
           applicationBinary: applicationBinary,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
@@ -136,7 +221,7 @@ void main() {
         final flutterDevice = FakeFlutterDevice(device);
         final devices = <FlutterDevice>[flutterDevice];
         final File applicationBinary = MemoryFileSystem.test().file('binary');
-        final int result = await ColdRunner(
+        final int result = await createColdRunner(
           devices,
           applicationBinary: applicationBinary,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
@@ -260,8 +345,9 @@ class TestFlutterDevice extends FlutterDevice {
     required ResidentCompiler generator,
     Future<Uri>? vmServiceUri,
   }) : super(
-         targetPlatform: .unsupported,
          device,
+         toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+         targetPlatform: .unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,
          developmentShaderCompiler: const FakeShaderCompiler(),

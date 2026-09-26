@@ -34,7 +34,7 @@ import 'daemon.dart';
 
 /// Shared logic between `flutter run` and `flutter drive` commands.
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  RunCommandBase({required bool verboseHelp}) {
+  RunCommandBase({super.toolContext, required super.verboseHelp}) {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesDartDefineOption();
     usesWebDefineOption();
@@ -291,7 +291,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 }
 
 class RunCommand extends RunCommandBase {
-  RunCommand({bool verboseHelp = false}) : super(verboseHelp: verboseHelp) {
+  RunCommand({super.toolContext, bool verboseHelp = false}) : super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
@@ -540,6 +540,14 @@ class RunCommand extends RunCommandBase {
   bool get stayResident => boolArg('resident');
   bool get awaitFirstFrameWhenTracing => boolArg('await-first-frame-when-tracing');
 
+  /// Optional [HotRunnerConfig] passed to [HotRunner].
+  @protected
+  HotRunnerConfig? get hotRunnerConfig => null;
+
+  /// Optional [ProjectFileInvalidator] passed to [HotRunner].
+  @protected
+  ProjectFileInvalidator? get projectFileInvalidator => null;
+
   @override
   Future<void> validateCommand() async {
     // When running with a prebuilt application, no command validation is
@@ -622,19 +630,24 @@ class RunCommand extends RunCommandBase {
     if (hotMode && !webMode) {
       return HotRunner(
         flutterDevices,
-        target: targetFile,
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
         debuggingOptions: debuggingOptions,
-        benchmarkMode: boolArg('benchmark'),
+        target: targetFile,
+        toolContext: toolContext!,
+        xcode: globals.xcode,
+        analytics: globals.analytics,
         applicationBinary: applicationBinaryPath == null
             ? null
             : globals.fs.file(applicationBinaryPath),
-        projectRootPath: stringArg('project-root'),
-        dillOutputPath: stringArg('output-dill'),
-        stayResident: stayResident,
-        analytics: globals.analytics,
-        nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+        benchmarkMode: boolArg('benchmark'),
         dartBuilder: hookRunner,
-        logger: globals.logger,
+        dillOutputPath: stringArg('output-dill'),
+        hotRunnerConfig: hotRunnerConfig,
+        nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+        projectFileInvalidator: projectFileInvalidator,
+        projectRootPath: stringArg('project-root'),
+        stayResident: stayResident,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -643,27 +656,29 @@ class RunCommand extends RunCommandBase {
         flutterProject: flutterProject,
         debuggingOptions: debuggingOptions,
         stayResident: stayResident,
-        fileSystem: globals.fs,
         analytics: globals.analytics,
-        logger: globals.logger,
-        terminal: globals.terminal,
-        platform: globals.platform,
-        outputPreferences: globals.outputPreferences,
-        systemClock: globals.systemClock,
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
+        toolContext: toolContext!,
         webDefines: extractWebDefines(),
       );
     }
     return ColdRunner(
       flutterDevices,
-      target: targetFile,
+      buildSystem: globals.buildSystem,
+      buildTargets: globals.buildTargets,
       debuggingOptions: debuggingOptions,
-      traceStartup: traceStartup,
-      awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
+      target: targetFile,
+      toolContext: toolContext!,
+      xcode: globals.xcode,
+      analytics: globals.analytics,
       applicationBinary: applicationBinaryPath == null
           ? null
           : globals.fs.file(applicationBinaryPath),
-      stayResident: stayResident,
+      awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
       dartBuilder: hookRunner,
+      stayResident: stayResident,
+      traceStartup: traceStartup,
     );
   }
 
@@ -673,17 +688,17 @@ class RunCommand extends RunCommandBase {
       analytics: globals.analytics,
       androidSdk: globals.androidSdk,
       androidWorkflow: android_workflow.androidWorkflow,
+      buildSystem: globals.buildSystem,
+      buildTargets: globals.buildTargets,
       deviceManager: globals.deviceManager,
       featureFlags: featureFlags,
       fileSystem: globals.fs,
       java: globals.java,
       logger: globals.logger,
-      outputPreferences: globals.outputPreferences,
-      platform: globals.platform,
       processManager: globals.processManager,
       stdio: globals.stdio,
-      systemClock: globals.systemClock,
-      terminal: globals.terminal,
+      toolContext: toolContext!,
+      xcode: globals.xcode,
     );
   }
 
@@ -762,10 +777,10 @@ class RunCommand extends RunCommandBase {
       for (final Device device in devices!)
         await FlutterDevice.create(
           device,
-          target: targetFile,
+          toolContext: toolContext!,
           buildInfo: buildInfo,
+          target: targetFile,
           userIdentifier: userIdentifier,
-          platform: globals.platform,
         ),
     ];
 

@@ -99,7 +99,7 @@ void main() {
         createFakeBuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          fileSystem: MemoryFileSystem.test(),
+          fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),

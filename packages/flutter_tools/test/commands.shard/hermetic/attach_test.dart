@@ -18,16 +18,21 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/device_vm_service_discovery_for_attach.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -40,12 +45,9 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
+import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
-
-class FakeStdio extends Fake implements Stdio {
-  @override
-  bool stdinHasTerminal = false;
-}
 
 class FakeProcessInfo extends Fake implements ProcessInfo {
   @override
@@ -63,13 +65,25 @@ void main() {
     late TestDeviceManager testDeviceManager;
     late Artifacts artifacts;
     late Stdio stdio;
-    late Terminal terminal;
+    late AnsiTerminal terminal;
     late Signals signals;
     late Platform platform;
     late ProcessInfo processInfo;
+    late TestBuildSystem buildSystem;
+
+    DelegatingToolContext createToolContext({Logger? loggerOverride}) => DelegatingToolContext(
+      fs: testFileSystem,
+      logger: loggerOverride ?? logger,
+      platform: platform,
+      processInfo: processInfo,
+      signals: signals,
+      stdio: stdio,
+      terminal: terminal,
+    );
 
     setUp(() {
       Cache.disableLocking();
+      buildSystem = TestBuildSystem.all(BuildResult(success: true));
       logger = StreamLogger();
       platform = FakePlatform();
       testFileSystem = MemoryFileSystem.test();
@@ -142,14 +156,11 @@ void main() {
 
           await createTestCommandRunner(
             AttachCommand(
+              buildSystem: buildSystem,
+              buildTargets: const BuildTargetsImpl(),
+              xcode: null,
+              toolContext: createToolContext(),
               hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
             ),
           ).run(<String>['attach']);
 
@@ -221,14 +232,11 @@ void main() {
 
           await createTestCommandRunner(
             AttachCommand(
+              buildSystem: buildSystem,
+              buildTargets: const BuildTargetsImpl(),
+              xcode: null,
+              toolContext: createToolContext(),
               hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
             ),
           ).run(<String>['attach']);
           await completer.future;
@@ -305,14 +313,11 @@ void main() {
 
           await createTestCommandRunner(
             AttachCommand(
+              buildSystem: buildSystem,
+              buildTargets: const BuildTargetsImpl(),
+              xcode: null,
+              toolContext: createToolContext(),
               hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
             ),
           ).run(<String>[
             'attach',
@@ -372,14 +377,11 @@ void main() {
 
           await createTestCommandRunner(
             AttachCommand(
+              buildSystem: buildSystem,
+              buildTargets: const BuildTargetsImpl(),
+              xcode: null,
+              toolContext: createToolContext(),
               hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
             ),
           ).run(<String>['attach']);
           await fakeLogReader.dispose();
@@ -451,14 +453,11 @@ void main() {
 
           await createTestCommandRunner(
             AttachCommand(
+              buildSystem: buildSystem,
+              buildTargets: const BuildTargetsImpl(),
+              xcode: null,
+              toolContext: createToolContext(),
               hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
             ),
           ).run(<String>['attach']);
           await fakeLogReader.dispose();
@@ -535,14 +534,11 @@ void main() {
 
           await createTestCommandRunner(
             AttachCommand(
+              buildSystem: buildSystem,
+              buildTargets: const BuildTargetsImpl(),
+              xcode: null,
+              toolContext: createToolContext(),
               hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
             ),
           ).run(<String>['attach', '--debug-port', '123']);
           await fakeLogReader.dispose();
@@ -632,14 +628,11 @@ void main() {
 
           await createTestCommandRunner(
             AttachCommand(
+              buildSystem: buildSystem,
+              buildTargets: const BuildTargetsImpl(),
+              xcode: null,
+              toolContext: createToolContext(),
               hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
             ),
           ).run(<String>['attach', '--debug-url', 'https://0.0.0.0:123']);
           await fakeLogReader.dispose();
@@ -730,13 +723,10 @@ void main() {
           });
           final Future<void> task = createTestCommandRunner(
             AttachCommand(
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
+              buildSystem: buildSystem,
+              buildTargets: const BuildTargetsImpl(),
+              xcode: null,
+              toolContext: createToolContext(),
             ),
           ).run(<String>['attach']);
           await completer.future;
@@ -774,13 +764,10 @@ void main() {
           expect(
             () => createTestCommandRunner(
               AttachCommand(
-                stdio: stdio,
-                logger: logger,
-                terminal: terminal,
-                signals: signals,
-                platform: platform,
-                processInfo: processInfo,
-                fileSystem: testFileSystem,
+                buildSystem: buildSystem,
+                buildTargets: const BuildTargetsImpl(),
+                xcode: null,
+                toolContext: createToolContext(),
               ),
             ).run(<String>['attach']),
             throwsToolExit(),
@@ -823,14 +810,11 @@ void main() {
           final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           final command = AttachCommand(
+            buildSystem: buildSystem,
+            buildTargets: const BuildTargetsImpl(),
+            toolContext: createToolContext(),
+            xcode: null,
             hotRunnerFactory: hotRunnerFactory,
-            stdio: stdio,
-            logger: logger,
-            terminal: terminal,
-            signals: signals,
-            platform: platform,
-            processInfo: processInfo,
-            fileSystem: testFileSystem,
           );
           await createTestCommandRunner(command).run(<String>[
             'attach',
@@ -871,13 +855,10 @@ void main() {
           testDeviceManager.devices = <Device>[device];
 
           final command = AttachCommand(
-            stdio: stdio,
-            logger: logger,
-            terminal: terminal,
-            signals: signals,
-            platform: platform,
-            processInfo: processInfo,
-            fileSystem: testFileSystem,
+            buildSystem: buildSystem,
+            buildTargets: const BuildTargetsImpl(),
+            xcode: null,
+            toolContext: createToolContext(),
           );
           await expectLater(
             createTestCommandRunner(command).run(<String>['attach', '--ipv6']),
@@ -929,14 +910,11 @@ void main() {
 
           await createTestCommandRunner(
             AttachCommand(
+              buildSystem: buildSystem,
+              buildTargets: const BuildTargetsImpl(),
+              xcode: null,
+              toolContext: createToolContext(),
               hotRunnerFactory: hotRunnerFactory,
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
             ),
           ).run(<String>['attach', '--ipv6']);
           await completer.future;
@@ -980,13 +958,10 @@ void main() {
           testDeviceManager.devices = <Device>[device];
 
           final command = AttachCommand(
-            stdio: stdio,
-            logger: logger,
-            terminal: terminal,
-            signals: signals,
-            platform: platform,
-            processInfo: processInfo,
-            fileSystem: testFileSystem,
+            buildSystem: buildSystem,
+            buildTargets: const BuildTargetsImpl(),
+            xcode: null,
+            toolContext: createToolContext(),
           );
           await expectLater(
             createTestCommandRunner(command).run(<String>['attach', '--vm-service-port', '100']),
@@ -1036,13 +1011,10 @@ void main() {
           });
           final Future<void> task = createTestCommandRunner(
             AttachCommand(
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
+              buildSystem: buildSystem,
+              buildTargets: const BuildTargetsImpl(),
+              xcode: null,
+              toolContext: createToolContext(),
             ),
           ).run(<String>['attach', '--debug-port', '$devicePort']);
           await completer.future;
@@ -1081,13 +1053,10 @@ void main() {
           });
           final Future<void> task = createTestCommandRunner(
             AttachCommand(
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
+              buildSystem: buildSystem,
+              buildTargets: const BuildTargetsImpl(),
+              xcode: null,
+              toolContext: createToolContext(),
             ),
           ).run(<String>['attach', '--debug-port', '$devicePort', '--ipv6']);
           await completer.future;
@@ -1127,13 +1096,10 @@ void main() {
           final Future<void> task =
               createTestCommandRunner(
                 AttachCommand(
-                  stdio: stdio,
-                  logger: logger,
-                  terminal: terminal,
-                  signals: signals,
-                  platform: platform,
-                  processInfo: processInfo,
-                  fileSystem: testFileSystem,
+                  buildSystem: buildSystem,
+                  buildTargets: const BuildTargetsImpl(),
+                  xcode: null,
+                  toolContext: createToolContext(),
                 ),
               ).run(<String>[
                 'attach',
@@ -1178,13 +1144,10 @@ void main() {
           final Future<void> task =
               createTestCommandRunner(
                 AttachCommand(
-                  stdio: stdio,
-                  logger: logger,
-                  terminal: terminal,
-                  signals: signals,
-                  platform: platform,
-                  processInfo: processInfo,
-                  fileSystem: testFileSystem,
+                  buildSystem: buildSystem,
+                  buildTargets: const BuildTargetsImpl(),
+                  xcode: null,
+                  toolContext: createToolContext(),
                 ),
               ).run(<String>[
                 'attach',
@@ -1217,13 +1180,10 @@ void main() {
       'exits when no device connected',
       () async {
         final command = AttachCommand(
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
+          buildSystem: buildSystem,
+          buildTargets: const BuildTargetsImpl(),
+          xcode: null,
+          toolContext: createToolContext(loggerOverride: testLogger),
         );
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach']),
@@ -1246,13 +1206,10 @@ void main() {
         expect(
           createTestCommandRunner(
             AttachCommand(
-              stdio: stdio,
-              logger: logger,
-              terminal: terminal,
-              signals: signals,
-              platform: platform,
-              processInfo: processInfo,
-              fileSystem: testFileSystem,
+              buildSystem: buildSystem,
+              buildTargets: const BuildTargetsImpl(),
+              xcode: null,
+              toolContext: createToolContext(),
             ),
           ).run(<String>['attach', '--device-user', '10']),
           throwsToolExit(message: '--device-user is only supported for Android'),
@@ -1269,13 +1226,10 @@ void main() {
       'exits when multiple devices connected',
       () async {
         final command = AttachCommand(
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
+          buildSystem: buildSystem,
+          buildTargets: const BuildTargetsImpl(),
+          xcode: null,
+          toolContext: createToolContext(loggerOverride: testLogger),
         );
         testDeviceManager.devices = <Device>[
           FakeAndroidDevice(id: 'xx1'),
@@ -1324,19 +1278,56 @@ void main() {
         testFileSystem.file('lib/main.dart').createSync();
 
         final command = AttachCommand(
+          buildSystem: buildSystem,
+          buildTargets: const BuildTargetsImpl(),
+          toolContext: createToolContext(),
+          xcode: null,
           hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
         );
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach']),
           throwsToolExit(message: 'Lost connection to device.'),
         );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
+      },
+    );
+
+    testUsingContext(
+      'passes the injected ToolContext to the hot runner',
+      () async {
+        final device = FakeAndroidDevice(id: '1')
+          ..portForwarder = const NoOpDevicePortForwarder()
+          ..onGetLogReader = () => NoOpDeviceLogReader('test');
+        final hotRunner = FakeHotRunner()
+          ..exited = false
+          ..isWaitingForVmService = false;
+        hotRunner.onAttach = (
+          Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          Completer<void>? appStartedCompleter,
+          bool enableDevTools,
+        ) async => 0;
+        final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+
+        testDeviceManager.devices = <Device>[device];
+        testFileSystem.file('lib/main.dart').createSync();
+
+        final DelegatingToolContext toolContext = createToolContext();
+        final command = AttachCommand(
+          buildSystem: buildSystem,
+          buildTargets: const BuildTargetsImpl(),
+          toolContext: toolContext,
+          xcode: null,
+          hotRunnerFactory: hotRunnerFactory,
+        );
+        await createTestCommandRunner(command).run(<String>['attach']);
+
+        final ToolContext? runnerToolContext = hotRunnerFactory.toolContext;
+        expect(runnerToolContext, same(toolContext));
+        expect(runnerToolContext!.fs, same(testFileSystem));
       },
       overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
@@ -1371,14 +1362,11 @@ void main() {
         testFileSystem.file('lib/main.dart').createSync();
 
         final command = AttachCommand(
+          buildSystem: buildSystem,
+          buildTargets: const BuildTargetsImpl(),
+          toolContext: createToolContext(),
+          xcode: null,
           hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
         );
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach']),
@@ -1418,14 +1406,11 @@ void main() {
         testFileSystem.file('lib/main.dart').createSync();
 
         final command = AttachCommand(
+          buildSystem: buildSystem,
+          buildTargets: const BuildTargetsImpl(),
+          toolContext: createToolContext(),
+          xcode: null,
           hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
         );
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach']),
@@ -1466,14 +1451,11 @@ void main() {
         testFileSystem.file('lib/main.dart').createSync();
 
         final command = AttachCommand(
+          buildSystem: buildSystem,
+          buildTargets: const BuildTargetsImpl(),
+          toolContext: createToolContext(),
+          xcode: null,
           hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
         );
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach']),
@@ -1515,14 +1497,11 @@ void main() {
         testFileSystem.file('lib/main.dart').createSync();
 
         final command = AttachCommand(
+          buildSystem: buildSystem,
+          buildTargets: const BuildTargetsImpl(),
+          toolContext: createToolContext(),
+          xcode: null,
           hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
         );
         await createTestCommandRunner(command).run(<String>['attach', '--verbose']);
 
@@ -1551,13 +1530,10 @@ void main() {
           FakeAsync().run((FakeAsync fakeAsync) {
             createTestCommandRunner(
               AttachCommand(
-                stdio: stdio,
-                logger: logger,
-                terminal: terminal,
-                signals: signals,
-                platform: platform,
-                processInfo: processInfo,
-                fileSystem: testFileSystem,
+                buildSystem: buildSystem,
+                buildTargets: const BuildTargetsImpl(),
+                xcode: null,
+                toolContext: createToolContext(),
               ),
             ).run(<String>['attach']);
 
@@ -1621,16 +1597,23 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
   String? dillOutputPath;
   String? projectRootPath;
   late List<FlutterDevice> devices;
+  ToolContext? toolContext;
   void Function(Artifacts artifacts)? _artifactTester;
 
   @override
   HotRunner build(
     List<FlutterDevice> devices, {
-    required String target,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
+    required String target,
+    required ToolContext toolContext,
+    required Xcode? xcode,
     bool benchmarkMode = false,
     File? applicationBinary,
     bool hostIsIde = false,
+    HotRunnerConfig? hotRunnerConfig,
+    ProjectFileInvalidator? projectFileInvalidator,
     String? projectRootPath,
     String? packagesFilePath,
     String? dillOutputPath,
@@ -1638,7 +1621,6 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     FlutterProject? flutterProject,
     String? nativeAssetsYamlFile,
     required Analytics analytics,
-    Logger? logger,
   }) {
     if (_artifactTester != null) {
       for (final device in devices) {
@@ -1648,6 +1630,7 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     this.devices = devices;
     this.dillOutputPath = dillOutputPath;
     this.projectRootPath = projectRootPath;
+    this.toolContext = toolContext;
     hotRunner.flutterDevices
       ..clear()
       ..addAll(devices);
