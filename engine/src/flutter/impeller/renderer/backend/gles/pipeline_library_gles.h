@@ -5,10 +5,13 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_PIPELINE_LIBRARY_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_PIPELINE_LIBRARY_GLES_H_
 
+#include <future>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
 #include "flutter/fml/hash_combine.h"
+#include "flutter/fml/macros.h"
 #include "flutter/fml/task_runner.h"
 #include "impeller/base/thread.h"
 #include "impeller/renderer/backend/gles/pipeline_compile_queue_gles.h"
@@ -18,6 +21,11 @@
 #include "impeller/renderer/shader_function.h"
 
 namespace impeller {
+
+namespace testing {
+FML_TEST_CLASS(PipelineLibraryGLESDeferredTest,
+               FailsPendingPipelinesWhenTheReactorCannotReact);
+}  // namespace testing
 
 class ContextGLES;
 class PipelineGLES;
@@ -35,6 +43,8 @@ class PipelineLibraryGLES final
 
  private:
   friend ContextGLES;
+  FML_FRIEND_TEST(testing::PipelineLibraryGLESDeferredTest,
+                  FailsPendingPipelinesWhenTheReactorCannotReact);
 
   //----------------------------------------------------------------------------
   /// @brief      A subset of the items in a pipeline descriptor (and the items
@@ -89,11 +99,34 @@ class PipelineLibraryGLES final
                                         ProgramKey::Hash,
                                         ProgramKey::Equal>;
 
+  using PipelinePromise =
+      std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>>;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Holds a pipeline whose program link was started with
+  ///             GL_KHR_parallel_shader_compile and not checked yet.
+  ///
+  struct PendingPipeline {
+    std::shared_ptr<PipelineGLES> pipeline;
+    std::shared_ptr<PipelinePromise> promise;
+    ProgramKey program_key;
+    /// The shaders are 0 if the pipeline reuses a program that another
+    /// pipeline is linking.
+    GLuint vert_shader = 0;
+    GLuint frag_shader = 0;
+  };
+
   std::shared_ptr<ReactorGLES> reactor_;
   PipelineMap pipelines_;
   Mutex programs_mutex_;
   ProgramMap programs_ IPLR_GUARDED_BY(programs_mutex_);
   std::shared_ptr<PipelineCompileQueueGLES> compile_queue_;
+  const bool supports_parallel_shader_compile_;
+  const size_t max_pending_links_;
+  Mutex pending_mutex_;
+  std::vector<PendingPipeline> pending_pipelines_
+      IPLR_GUARDED_BY(pending_mutex_);
+  bool is_watching_queue_ IPLR_GUARDED_BY(pending_mutex_) = false;
 
   explicit PipelineLibraryGLES(
       std::shared_ptr<ReactorGLES> reactor,
@@ -121,17 +154,53 @@ class PipelineLibraryGLES final
 
   const std::shared_ptr<ReactorGLES>& GetReactor() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Creates a pipeline and links its program.
+  ///
+  ///             With a deferred_promise, this starts the link and returns
+  ///             before it finishes. FinishPendingPipelines checks the link
+  ///             later and sets deferred_promise. That requires
+  ///             GL_KHR_parallel_shader_compile and a thread that runs a
+  ///             PipelineCompileQueueGLES job.
+  ///
   static std::shared_ptr<PipelineGLES> CreatePipeline(
       const std::weak_ptr<PipelineLibrary>& weak_library,
       const PipelineDescriptor& desc,
       const std::shared_ptr<const ShaderFunction>& vert_shader,
       const std::shared_ptr<const ShaderFunction>& frag_shader,
-      bool threadsafe);
+      bool threadsafe,
+      std::shared_ptr<PipelinePromise> deferred_promise = nullptr);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Checks the link of every pending pipeline and sets its
+  ///             promise. A status query here waits for the link.
+  ///
+  void FinishPendingPipelines(const ReactorGLES& reactor);
+
+  /// Sets the promise of every pending pipeline to null, so nothing waits for
+  /// a link that no thread will check, and removes the programs those
+  /// pipelines started from the cache.
+  void FailPendingPipelines();
+
+  std::shared_ptr<PipelineGLES> FinishPipeline(const ReactorGLES& reactor,
+                                               const PendingPipeline& item);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Asks the compile queue to report when it runs out of jobs,
+  ///             which is when the pending links are checked.
+  ///
+  void WatchQueueForDrain();
+
+  bool SupportsParallelShaderCompile() const;
 
   std::shared_ptr<UniqueHandleGLES> GetProgramForKey(const ProgramKey& key);
 
   void SetProgramForKey(const ProgramKey& key,
                         std::shared_ptr<UniqueHandleGLES> program);
+
+  /// Removes the entry for key only if it still holds program.
+  void RemoveProgramForKey(const ProgramKey& key,
+                           const std::shared_ptr<UniqueHandleGLES>& program);
   // |PipelineLibrary|
   PipelineCompileQueue* GetPipelineCompileQueue() const override;
 };
