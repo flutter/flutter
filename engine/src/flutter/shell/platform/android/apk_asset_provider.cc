@@ -405,44 +405,6 @@ class APKAssetProviderImpl : public APKAssetProviderInternal {
 
   FML_DISALLOW_COPY_AND_ASSIGN(APKAssetProviderImpl);
 };
-#else   // !defined(__ANDROID__)
-class APKAssetProviderImpl : public APKAssetProviderInternal {
- public:
-  explicit APKAssetProviderImpl([[maybe_unused]] JNIEnv* env,
-                                [[maybe_unused]] jobject jassetManager,
-                                std::string directory)
-      : directory_(std::move(directory)) {}
-
-  ~APKAssetProviderImpl() override = default;
-
-  std::unique_ptr<fml::Mapping> GetAsMapping(
-      [[maybe_unused]] const std::string& asset_name) const override {
-    TRACE_EVENT0("flutter",
-                 "APKAssetProviderImpl::GetAsMapping (Host fallback)");
-    return nullptr;
-  }
-
-  std::vector<std::unique_ptr<fml::Mapping>> GetAsMappings(
-      [[maybe_unused]] const std::string& asset_pattern,
-      [[maybe_unused]] const std::optional<std::string>& subdir)
-      const override {
-    TRACE_EVENT0("flutter",
-                 "APKAssetProviderImpl::GetAsMappings (Host fallback)");
-    return {};
-  }
-
-  const std::string& GetDirectory() const override { return directory_; }
-
- private:
-  const std::string directory_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(APKAssetProviderImpl);
-};
-#endif  // defined(__ANDROID__)
-
-// =============================================================================
-// APKAssetProvider Implementation
-// =============================================================================
 
 // =============================================================================
 // APKAssetProvider Implementation

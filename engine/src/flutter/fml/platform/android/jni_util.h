@@ -7,7 +7,6 @@
 
 #include <jni.h>
 
-#include <string>
 #include <vector>
 
 #include "flutter/fml/macros.h"

@@ -6,7 +6,6 @@
 
 #include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/message_loop_task_queues.h"
-#include "flutter/fml/trace_event.h"
 
 namespace flutter {
 
@@ -56,7 +55,6 @@ void EmbedderTaskRunner::PostTask(const fml::closure& task) {
 
 void EmbedderTaskRunner::PostTaskForTime(const fml::closure& task,
                                          fml::TimePoint target_time) {
-  TRACE_EVENT0("flutter", "EmbedderTaskRunner::PostTaskForTime");
   if (!task) {
     return;
   }
@@ -79,12 +77,10 @@ void EmbedderTaskRunner::PostDelayedTask(const fml::closure& task,
 }
 
 bool EmbedderTaskRunner::RunsTasksOnCurrentThread() {
-  TRACE_EVENT0("flutter", "EmbedderTaskRunner::RunsTasksOnCurrentThread");
   return dispatch_table_.runs_task_on_current_thread_callback();
 }
 
 bool EmbedderTaskRunner::PostTask(uint64_t baton) {
-  TRACE_EVENT0("flutter", "EmbedderTaskRunner::PostTask");
   fml::closure task;
 
   {
@@ -97,7 +93,7 @@ bool EmbedderTaskRunner::PostTask(uint64_t baton) {
     task = found->second;
     pending_tasks_.erase(found);
 
-    // Let go of the tasks mutex before executing the task.
+    // Let go of the tasks mutex befor executing the task.
   }
 
   FML_DCHECK(task);

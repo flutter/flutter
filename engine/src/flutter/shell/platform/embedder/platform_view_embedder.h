@@ -228,13 +228,6 @@ class PlatformViewEmbedder final : public PlatformView {
   // |PlatformView|
   void RequestViewFocusChange(const ViewFocusChangeRequest& request) override;
 
-  // |PlatformView|
-  void RequestDartDeferredLibrary(intptr_t loading_unit_id) override;
-
-  // |PlatformView|
-  double GetScaledFontSize(double unscaled_font_size,
-                           int configuration_id) const override;
-
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewEmbedder);
 };
 

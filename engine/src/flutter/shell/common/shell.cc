@@ -300,13 +300,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
        shell = shell.get()]() {
         TRACE_EVENT0("flutter", "ShellSetupGPUSubsystem");
         std::unique_ptr<Rasterizer> rasterizer(on_create_rasterizer(*shell));
-        if (rasterizer) {
-          rasterizer->SetImpellerContext(impeller_context_future);
-          snapshot_delegate_promise.set_value(
-              rasterizer->GetSnapshotDelegate());
-        } else {
-          snapshot_delegate_promise.set_value({});
-        }
+        rasterizer->SetImpellerContext(impeller_context_future);
+        snapshot_delegate_promise.set_value(rasterizer->GetSnapshotDelegate());
         rasterizer_promise.set_value(std::move(rasterizer));
       });
 
@@ -440,35 +435,11 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                              runtime_stage_future));
       }));
 
-  auto engine = engine_future.get();
-  auto rasterizer = rasterizer_future.get();
-  auto io_manager = io_manager_future.get();
-
   if (!shell->Setup(std::move(platform_view),  //
-                    std::move(engine),         //
-                    std::move(rasterizer),     //
-                    io_manager)                //
+                    engine_future.get(),       //
+                    rasterizer_future.get(),   //
+                    io_manager_future.get())   //
   ) {
-    if (engine) {
-      fml::TaskRunner::RunNowOrPostTask(
-          task_runners.GetUITaskRunner(),
-          fml::MakeCopyable(
-              [engine = std::move(engine)]() mutable { engine.reset(); }));
-    }
-    if (rasterizer) {
-      fml::TaskRunner::RunNowOrPostTask(
-          task_runners.GetRasterTaskRunner(),
-          fml::MakeCopyable([rasterizer = std::move(rasterizer)]() mutable {
-            rasterizer.reset();
-          }));
-    }
-    if (io_manager) {
-      fml::TaskRunner::RunNowOrPostTask(
-          task_runners.GetIOTaskRunner(),
-          fml::MakeCopyable([io_manager = std::move(io_manager)]() mutable {
-            io_manager.reset();
-          }));
-    }
     return nullptr;
   }
 
@@ -655,9 +626,7 @@ Shell::~Shell() {
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetPlatformTaskRunner(),
       fml::MakeCopyable([this, &platiso_latch]() mutable {
-        if (engine_) {
-          engine_->ShutdownPlatformIsolates();
-        }
+        engine_->ShutdownPlatformIsolates();
         platiso_latch.Signal();
       }));
   platiso_latch.Wait();
@@ -899,19 +868,6 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   }
 
   if (!platform_view || !engine || !rasterizer || !io_manager) {
-    if (engine) {
-      fml::TaskRunner::RunNowOrPostTask(
-          task_runners_.GetUITaskRunner(),
-          fml::MakeCopyable(
-              [engine = std::move(engine)]() mutable { engine.reset(); }));
-    }
-    if (rasterizer) {
-      fml::TaskRunner::RunNowOrPostTask(
-          task_runners_.GetRasterTaskRunner(),
-          fml::MakeCopyable([rasterizer = std::move(rasterizer)]() mutable {
-            rasterizer.reset();
-          }));
-    }
     return false;
   }
 

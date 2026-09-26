@@ -9,7 +9,6 @@
 #include <algorithm>
 
 #include "flutter/fml/message_loop.h"
-#include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/embedder/embedder_struct_macros.h"
 
 namespace flutter {
@@ -32,7 +31,6 @@ std::mutex EmbedderThreadHost::active_runners_mutex_;
 ///
 static std::pair<bool, fml::RefPtr<EmbedderTaskRunner>>
 CreateEmbedderTaskRunner(const FlutterTaskRunnerDescription* description) {
-  TRACE_EVENT0("flutter", "CreateEmbedderTaskRunner");
   if (description == nullptr) {
     // This is not embedder error. The embedder API will just have to create a
     // plain old task runner (and create a thread for it) instead of using a
@@ -130,8 +128,6 @@ std::unique_ptr<EmbedderThreadHost>
 EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost(
     const FlutterCustomTaskRunners* custom_task_runners,
     const flutter::ThreadConfigSetter& config_setter) {
-  TRACE_EVENT0("flutter",
-               "EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost");
   {
     auto host =
         CreateEmbedderManagedThreadHost(custom_task_runners, config_setter);
@@ -175,8 +171,6 @@ std::unique_ptr<EmbedderThreadHost>
 EmbedderThreadHost::CreateEmbedderManagedThreadHost(
     const FlutterCustomTaskRunners* custom_task_runners,
     const flutter::ThreadConfigSetter& config_setter) {
-  TRACE_EVENT0("flutter",
-               "EmbedderThreadHost::CreateEmbedderManagedThreadHost");
   if (custom_task_runners == nullptr) {
     return nullptr;
   }
@@ -301,7 +295,6 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
 std::unique_ptr<EmbedderThreadHost>
 EmbedderThreadHost::CreateEngineManagedThreadHost(
     const flutter::ThreadConfigSetter& config_setter) {
-  TRACE_EVENT0("flutter", "EmbedderThreadHost::CreateEngineManagedThreadHost");
   // Crate a thraed host config, and specified the thread name and priority.
   auto thread_host_config = ThreadHost::ThreadHostConfig(config_setter);
   thread_host_config.SetUIConfig(MakeThreadConfig(

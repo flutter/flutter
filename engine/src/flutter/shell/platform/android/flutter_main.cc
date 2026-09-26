@@ -8,11 +8,9 @@
 
 #include <android/log.h>
 #include <sys/system_properties.h>
-#endif
 #include <cstring>
 #include <memory>
 #include <optional>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -40,7 +38,7 @@ static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
 // See:
 //   * https://github.com/flutter/flutter/issues/167850
 //   * http://crbug.com/141785
-#if defined(__ANDROID__)
+#ifdef FML_OS_ANDROID
 bool IsVivante() {
   char product_model[PROP_VALUE_MAX];
   __system_property_get("ro.hardware.egl", product_model);
@@ -70,18 +68,6 @@ FlutterMain::~FlutterMain() {
 }
 
 static std::unique_ptr<FlutterMain> g_flutter_main;
-
-bool FlutterMain::IsInitialized() {
-  return g_flutter_main != nullptr;
-}
-
-void FlutterMain::ResetForTesting() {
-  g_flutter_main.reset();
-  if (g_flutter_jni_class) {
-    delete g_flutter_jni_class;
-    g_flutter_jni_class = nullptr;
-  }
-}
 
 FlutterMain& FlutterMain::Get() {
   TRACE_EVENT0("flutter", "FlutterMain::Get");
@@ -157,15 +143,8 @@ void FlutterMain::Init(JNIEnv* env,
 
   settings.log_message_callback = [](const std::string& tag,
                                      const std::string& message) {
-#if defined(__ANDROID__)
     __android_log_print(ANDROID_LOG_INFO, tag.c_str(), "%.*s",
                         static_cast<int>(message.size()), message.c_str());
-#else
-    if (!tag.empty()) {
-      std::cout << tag << ": ";
-    }
-    std::cout << message << std::endl;
-#endif
   };
 
   // Initialize AndroidVMArgs and parse flags.

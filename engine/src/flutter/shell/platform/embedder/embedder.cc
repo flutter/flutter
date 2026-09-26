@@ -43,7 +43,6 @@ extern const intptr_t kPlatformStrongDillSize;
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
 }
 
-#include "flutter/assets/asset_resolver.h"
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/common/task_runners.h"
@@ -174,55 +173,6 @@ static FlutterEngineResult LogEmbedderError(FlutterEngineResult code,
 
 #define LOG_EMBEDDER_ERROR(code, reason) \
   LogEmbedderError(code, reason, #code, __FUNCTION__, __FILE__, __LINE__)
-
-class CustomAssetResolver final : public flutter::AssetResolver {
- public:
-  explicit CustomAssetResolver(FlutterCustomAssetResolver resolver)
-      : resolver_(resolver) {}
-
-  ~CustomAssetResolver() override = default;
-
-  bool IsValid() const override { return resolver_.get_asset != nullptr; }
-
-  bool IsValidAfterAssetManagerChange() const override { return true; }
-
-  AssetResolverType GetType() const override {
-    return AssetResolverType::kCustomAssetResolver;
-  }
-
-  std::unique_ptr<fml::Mapping> GetAsMapping(
-      const std::string& asset_name) const override {
-    if (!resolver_.get_asset) {
-      return nullptr;
-    }
-    const uint8_t* buffer = nullptr;
-    size_t size = 0;
-    void* baton = nullptr;
-    if (!resolver_.get_asset(asset_name.c_str(), &buffer, &size, &baton,
-                             resolver_.user_data) ||
-        buffer == nullptr) {
-      return nullptr;
-    }
-    auto free_asset = resolver_.free_asset;
-    auto user_data = resolver_.user_data;
-    return std::make_unique<fml::NonOwnedMapping>(
-        buffer, size,
-        [free_asset, baton, user_data](const uint8_t* ptr, size_t size) {
-          if (free_asset) {
-            free_asset(baton, user_data);
-          }
-        });
-  }
-
-  bool operator==(const AssetResolver& other) const override {
-    return other.GetType() == GetType();
-  }
-
- private:
-  FlutterCustomAssetResolver resolver_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(CustomAssetResolver);
-};
 
 static bool IsOpenGLRendererConfigValid(const FlutterRendererConfig* config) {
   if (config->type != kOpenGL) {
@@ -1847,57 +1797,7 @@ MakeViewportMetricsFromWindowMetrics(
       SAFE_ACCESS(flutter_metrics, physical_view_inset_bottom, 0.0);
   metrics.physical_view_inset_left =
       SAFE_ACCESS(flutter_metrics, physical_view_inset_left, 0.0);
-  metrics.physical_padding_top =
-      SAFE_ACCESS(flutter_metrics, physical_padding_top, 0.0);
-  metrics.physical_padding_right =
-      SAFE_ACCESS(flutter_metrics, physical_padding_right, 0.0);
-  metrics.physical_padding_bottom =
-      SAFE_ACCESS(flutter_metrics, physical_padding_bottom, 0.0);
-  metrics.physical_padding_left =
-      SAFE_ACCESS(flutter_metrics, physical_padding_left, 0.0);
-  metrics.physical_system_gesture_inset_top =
-      SAFE_ACCESS(flutter_metrics, physical_system_gesture_inset_top, 0.0);
-  metrics.physical_system_gesture_inset_right =
-      SAFE_ACCESS(flutter_metrics, physical_system_gesture_inset_right, 0.0);
-  metrics.physical_system_gesture_inset_bottom =
-      SAFE_ACCESS(flutter_metrics, physical_system_gesture_inset_bottom, 0.0);
-  metrics.physical_system_gesture_inset_left =
-      SAFE_ACCESS(flutter_metrics, physical_system_gesture_inset_left, 0.0);
-  metrics.physical_touch_slop =
-      SAFE_ACCESS(flutter_metrics, physical_touch_slop, -1.0);
-  metrics.physical_display_corner_radius_top_left = SAFE_ACCESS(
-      flutter_metrics, physical_display_corner_radius_top_left, -1.0);
-  metrics.physical_display_corner_radius_top_right = SAFE_ACCESS(
-      flutter_metrics, physical_display_corner_radius_top_right, -1.0);
-  metrics.physical_display_corner_radius_bottom_right = SAFE_ACCESS(
-      flutter_metrics, physical_display_corner_radius_bottom_right, -1.0);
-  metrics.physical_display_corner_radius_bottom_left = SAFE_ACCESS(
-      flutter_metrics, physical_display_corner_radius_bottom_left, -1.0);
   metrics.display_id = SAFE_ACCESS(flutter_metrics, display_id, 0);
-
-  size_t display_features_count =
-      SAFE_ACCESS(flutter_metrics, display_features_count, 0);
-  if (display_features_count > 0) {
-    if (display_features_count > 1000) {
-      return "Display features count is invalid or unreasonably large.";
-    }
-    const double* bounds =
-        SAFE_ACCESS(flutter_metrics, display_features_bounds, nullptr);
-    const int32_t* types =
-        SAFE_ACCESS(flutter_metrics, display_features_type, nullptr);
-    const int32_t* states =
-        SAFE_ACCESS(flutter_metrics, display_features_state, nullptr);
-    if (!bounds || !types || !states) {
-      return "Display features count is greater than zero but feature arrays "
-             "are null.";
-    }
-    metrics.physical_display_features_bounds.assign(
-        bounds, bounds + (display_features_count * 4));
-    metrics.physical_display_features_type.assign(
-        types, types + display_features_count);
-    metrics.physical_display_features_state.assign(
-        states, states + display_features_count);
-  }
 
   if (metrics.device_pixel_ratio <= 0.0) {
     return "Device pixel ratio was invalid. It must be greater than zero.";
@@ -2815,17 +2715,18 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
         "Could not infer platform view creation callback.");
   }
 
-  auto on_create_rasterizer =
-      InferRasterizerCreationCallback(platform_dispatch_table);
+  flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
+      [](flutter::Shell& shell) {
+        return std::make_unique<flutter::Rasterizer>(shell);
+      };
 
   auto external_texture_resolver =
       CreateExternalTextureResolver(config, user_data);
   auto custom_task_runners = SAFE_ACCESS(args, custom_task_runners, nullptr);
   auto thread_config_callback = [&custom_task_runners](
                                     const fml::Thread::ThreadConfig& config) {
-    TRACE_EVENT0("flutter", "EmbedderSetThreadPriority");
     fml::Thread::SetCurrentThreadName(config);
-    if (!custom_task_runners) {
+    if (!custom_task_runners || !custom_task_runners->thread_priority_setter) {
       return;
     }
     FlutterThreadPriority priority = FlutterThreadPriority::kNormal;
@@ -2843,14 +2744,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
         priority = FlutterThreadPriority::kRaster;
         break;
     }
-    if (SAFE_ACCESS(custom_task_runners, thread_priority_setter_with_user_data,
-                    nullptr) != nullptr) {
-      custom_task_runners->thread_priority_setter_with_user_data(
-          priority, SAFE_ACCESS(custom_task_runners, user_data, nullptr));
-    } else if (SAFE_ACCESS(custom_task_runners, thread_priority_setter,
-                           nullptr) != nullptr) {
-      custom_task_runners->thread_priority_setter(priority);
-    }
+    custom_task_runners->thread_priority_setter(priority);
   };
   auto thread_host =
       flutter::EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost(
@@ -2997,11 +2891,6 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
         "Could not infer the Flutter project to run from given arguments.");
   }
 
-  std::optional<FlutterRendererConfig> renderer_config_copy;
-  if (config != nullptr) {
-    renderer_config_copy = *config;
-  }
-
   // Create the engine but don't launch the shell or run the root isolate.
   auto embedder_engine = std::make_unique<flutter::EmbedderEngine>(
       std::move(thread_host),                //
@@ -3062,152 +2951,6 @@ FlutterEngineResult FlutterEngineRunInitialized(
         "project arguments specified.");
   }
 
-  return kSuccess;
-}
-
-FLUTTER_EXPORT
-FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine)
-                                           parent_engine,
-                                       const FlutterEngineSpawnConfig* config,
-                                       FLUTTER_API_SYMBOL(FlutterEngine) *
-                                           engine_out) {
-  TRACE_EVENT0("flutter", "FlutterEngineSpawn");
-  if (parent_engine == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments,
-                              "Parent engine handle was invalid.");
-  }
-
-  auto parent_embedder_engine =
-      reinterpret_cast<flutter::EmbedderEngine*>(parent_engine);
-  if (!parent_embedder_engine->IsValid()) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments,
-                              "Parent engine must be running to spawn.");
-  }
-
-  if (engine_out == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments,
-                              "Engine out pointer was invalid.");
-  }
-
-  if (config == nullptr || !STRUCT_HAS_MEMBER(config, struct_size) ||
-      config->struct_size != sizeof(FlutterEngineSpawnConfig)) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments,
-                              "Spawn configuration was invalid.");
-  }
-
-  const FlutterRendererConfig* renderer_config =
-      SAFE_ACCESS(config, custom_renderer_config, nullptr);
-  if (renderer_config == nullptr &&
-      parent_embedder_engine->GetRendererConfig().has_value()) {
-    renderer_config = &parent_embedder_engine->GetRendererConfig().value();
-  }
-
-  if (renderer_config == nullptr || !IsRendererValid(renderer_config)) {
-    return LOG_EMBEDDER_ERROR(
-        kInvalidArguments,
-        "Could not determine valid renderer configuration for spawned engine.");
-  }
-
-  void* user_data = SAFE_ACCESS(config, user_data, nullptr);
-  const FlutterProjectArgs* custom_args =
-      SAFE_ACCESS(config, custom_args, nullptr);
-
-  std::string initial_route = "";
-  if (SAFE_ACCESS(config, initial_route, nullptr) != nullptr) {
-    initial_route = config->initial_route;
-  }
-
-  const auto& settings = parent_embedder_engine->GetShell().GetSettings();
-
-  std::unique_ptr<flutter::EmbedderExternalViewEmbedder> external_view_embedder;
-  if (custom_args != nullptr &&
-      SAFE_ACCESS(custom_args, compositor, nullptr) != nullptr) {
-    auto external_view_embedder_result = InferExternalViewEmbedderFromArgs(
-        custom_args->compositor, settings.enable_impeller);
-    if (!external_view_embedder_result.ok()) {
-      FML_LOG(ERROR) << external_view_embedder_result.status().message();
-      return LOG_EMBEDDER_ERROR(kInvalidArguments,
-                                "Compositor arguments were invalid.");
-    }
-    external_view_embedder = std::move(external_view_embedder_result.value());
-  }
-
-  auto platform_dispatch_table =
-      CreatePlatformDispatchTable(custom_args, user_data);
-
-  impeller::Flags impeller_flags;
-  impeller_flags.use_sdfs = settings.impeller_use_sdfs;
-
-  auto on_create_platform_view = InferPlatformViewCreationCallback(
-      renderer_config, user_data, platform_dispatch_table,
-      std::move(external_view_embedder), settings.enable_impeller,
-      impeller_flags);
-
-  if (!on_create_platform_view) {
-    return LOG_EMBEDDER_ERROR(
-        kInternalInconsistency,
-        "Could not infer platform view creation callback.");
-  }
-
-  auto on_create_rasterizer =
-      InferRasterizerCreationCallback(platform_dispatch_table);
-
-  auto external_texture_resolver =
-      CreateExternalTextureResolver(renderer_config, user_data);
-
-  auto run_configuration =
-      flutter::RunConfiguration::InferFromSettings(settings);
-
-  if (custom_args != nullptr) {
-    if (SAFE_ACCESS(custom_args, custom_dart_entrypoint, nullptr) != nullptr) {
-      auto dart_entrypoint = std::string{custom_args->custom_dart_entrypoint};
-      if (!dart_entrypoint.empty()) {
-        run_configuration.SetEntrypoint(std::move(dart_entrypoint));
-      }
-    }
-
-    if (SAFE_ACCESS(custom_args, dart_entrypoint_argc, 0) > 0) {
-      if (SAFE_ACCESS(custom_args, dart_entrypoint_argv, nullptr) == nullptr) {
-        return LOG_EMBEDDER_ERROR(
-            kInvalidArguments,
-            "Could not determine Dart entrypoint arguments as "
-            "dart_entrypoint_argc was set, but dart_entrypoint_argv was null.");
-      }
-      std::vector<std::string> arguments(custom_args->dart_entrypoint_argc);
-      for (int i = 0; i < custom_args->dart_entrypoint_argc; ++i) {
-        arguments[i] = std::string{custom_args->dart_entrypoint_argv[i]};
-      }
-      run_configuration.SetEntrypointArgs(std::move(arguments));
-    }
-
-    if (SAFE_ACCESS(custom_args, engine_id, 0) != 0) {
-      run_configuration.SetEngineId(custom_args->engine_id);
-    }
-  }
-
-  if (!run_configuration.IsValid()) {
-    return LOG_EMBEDDER_ERROR(
-        kInvalidArguments,
-        "Could not infer run configuration for spawned engine.");
-  }
-
-  std::optional<FlutterRendererConfig> renderer_config_copy;
-  if (renderer_config != nullptr) {
-    renderer_config_copy = *renderer_config;
-  }
-
-  auto spawned_engine = parent_embedder_engine->Spawn(
-      std::move(run_configuration), initial_route, on_create_platform_view,
-      on_create_rasterizer, std::move(external_texture_resolver),
-      renderer_config_copy);
-
-  if (!spawned_engine) {
-    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
-                              "Could not spawn engine from parent engine.");
-  }
-
-  *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(
-      spawned_engine.release());
   return kSuccess;
 }
 
@@ -3741,7 +3484,7 @@ FlutterEngineResult FlutterEngineSendPlatformMessage(
   }
 
   std::unique_ptr<flutter::PlatformMessage> message;
-  if (message_data == nullptr) {
+  if (message_size == 0) {
     message = std::make_unique<flutter::PlatformMessage>(
         flutter_message->channel, response);
   } else {
@@ -3822,11 +3565,11 @@ FlutterEngineResult FlutterEngineSendPlatformMessageResponse(
   auto response = handle->message->response();
 
   if (response) {
-    if (data == nullptr) {
+    if (data_length == 0) {
       response->CompleteEmpty();
     } else {
       response->Complete(std::make_unique<fml::DataMapping>(
-          std::vector<uint8_t>(data, data + data_length)));
+          std::vector<uint8_t>({data, data + data_length})));
     }
   }
 
@@ -4075,7 +3818,6 @@ uint64_t FlutterEngineGetCurrentTime() {
 FlutterEngineResult FlutterEngineRunTask(FLUTTER_API_SYMBOL(FlutterEngine)
                                              engine,
                                          const FlutterTask* task) {
-  TRACE_EVENT0("flutter", "FlutterEngineRunTask");
   if (engine == nullptr) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
   }

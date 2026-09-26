@@ -1756,15 +1756,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
   }
 
-  String _currentTestDescription = '';
-
   Future<void> _runTest(
     Future<void> Function() testBody,
     VoidCallback invariantTester,
     String description,
   ) {
     assert(inTest);
-    _currentTestDescription = description;
 
     // Set the handler only if there is currently none.
     if (TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(

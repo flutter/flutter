@@ -6,7 +6,9 @@
 # More information at:
 #  * https://github.com/flutter/cocoon/blob/main/CI_YAML.md
 enabled_branches:
-  - mboetger-experimental
+  - master
+  - flutter-\d+\.\d+-candidate\.\d+
+  - fuchsia_f\d+[a-z]*
 
 platform_properties:
   linux:

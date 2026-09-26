@@ -6,7 +6,6 @@
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_ENGINE_H_
 
 #include <memory>
-#include <optional>
 #include <unordered_map>
 
 #include "flutter/fml/macros.h"
@@ -156,7 +155,7 @@ class EmbedderEngine {
  private:
   std::shared_ptr<EmbedderThreadHost> thread_host_;
   TaskRunners task_runners_;
-  std::optional<RunConfiguration> run_configuration_;
+  RunConfiguration run_configuration_;
   std::unique_ptr<ShellArgs> shell_args_;
   std::unique_ptr<Shell> shell_;
   std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver_;

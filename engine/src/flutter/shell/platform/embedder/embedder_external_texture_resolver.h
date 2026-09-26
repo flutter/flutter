@@ -9,8 +9,6 @@
 
 #include "flutter/common/graphics/texture.h"
 
-#include "flutter/shell/platform/embedder/embedder_external_texture_hb.h"
-
 #ifdef SHELL_ENABLE_GL
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
 #endif

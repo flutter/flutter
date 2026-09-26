@@ -374,43 +374,6 @@ typedef enum {
   kFlutterTextDirectionLTR = 2,
 } FlutterTextDirection;
 
-/// Valid values for accessibility role of SemanticsNode.
-typedef enum {
-  kFlutterSemanticsRoleNone = 0,
-  kFlutterSemanticsRoleTab = 1,
-  kFlutterSemanticsRoleTabBar = 2,
-  kFlutterSemanticsRoleTabPanel = 3,
-  kFlutterSemanticsRoleDialog = 4,
-  kFlutterSemanticsRoleAlertDialog = 5,
-  kFlutterSemanticsRoleTable = 6,
-  kFlutterSemanticsRoleCell = 7,
-  kFlutterSemanticsRoleRow = 8,
-  kFlutterSemanticsRoleColumnHeader = 9,
-  kFlutterSemanticsRoleDragHandle = 10,
-  kFlutterSemanticsRoleSpinButton = 11,
-  kFlutterSemanticsRoleComboBox = 12,
-  kFlutterSemanticsRoleMenuBar = 13,
-  kFlutterSemanticsRoleMenu = 14,
-  kFlutterSemanticsRoleMenuItem = 15,
-  kFlutterSemanticsRoleMenuItemCheckbox = 16,
-  kFlutterSemanticsRoleMenuItemRadio = 17,
-  kFlutterSemanticsRoleList = 18,
-  kFlutterSemanticsRoleListItem = 19,
-  kFlutterSemanticsRoleForm = 20,
-  kFlutterSemanticsRoleTooltip = 21,
-  kFlutterSemanticsRoleLoadingSpinner = 22,
-  kFlutterSemanticsRoleProgressBar = 23,
-  kFlutterSemanticsRoleHotKey = 24,
-  kFlutterSemanticsRoleRadioGroup = 25,
-  kFlutterSemanticsRoleStatus = 26,
-  kFlutterSemanticsRoleAlert = 27,
-  kFlutterSemanticsRoleComplementary = 28,
-  kFlutterSemanticsRoleContentInfo = 29,
-  kFlutterSemanticsRoleMain = 30,
-  kFlutterSemanticsRoleNavigation = 31,
-  kFlutterSemanticsRoleRegion = 32,
-} FlutterSemanticsRole;
-
 /// Valid values for priority of Thread.
 typedef enum {
   /// Suitable for threads that shouldn't disrupt high priority work.
@@ -1111,84 +1074,6 @@ typedef struct {
   /// The VkFormat of the image (for example: VK_FORMAT_R8G8B8A8_UNORM).
   uint32_t format;
 } FlutterVulkanImage;
-
-/// Component swizzle for Vulkan YCbCr conversion or texture component mapping.
-typedef enum {
-  kFlutterVulkanComponentSwizzleIdentity = 0,
-  kFlutterVulkanComponentSwizzleZero = 1,
-  kFlutterVulkanComponentSwizzleOne = 2,
-  kFlutterVulkanComponentSwizzleR = 3,
-  kFlutterVulkanComponentSwizzleG = 4,
-  kFlutterVulkanComponentSwizzleB = 5,
-  kFlutterVulkanComponentSwizzleA = 6,
-} FlutterVulkanComponentSwizzle;
-
-/// Component mapping for Vulkan YCbCr conversion or texture swizzle.
-typedef struct {
-  /// The size of this struct. Must be sizeof(FlutterVulkanComponentMapping).
-  size_t struct_size;
-  FlutterVulkanComponentSwizzle r;
-  FlutterVulkanComponentSwizzle g;
-  FlutterVulkanComponentSwizzle b;
-  FlutterVulkanComponentSwizzle a;
-} FlutterVulkanComponentMapping;
-
-/// YCbCr conversion parameters for Vulkan external textures.
-typedef struct {
-  /// The size of this struct. Must be sizeof(FlutterVulkanYcbcrConversionInfo).
-  size_t struct_size;
-  /// Format of the image or 0 (VK_FORMAT_UNDEFINED) if using external_format.
-  uint32_t format;
-  /// Color model conversion (corresponds to VkSamplerYcbcrModelConversion).
-  uint32_t ycbcr_model;
-  /// Numerical range of color components (corresponds to VkSamplerYcbcrRange).
-  uint32_t ycbcr_range;
-  /// Component mapping for the conversion.
-  FlutterVulkanComponentMapping components;
-  /// Horizontal chroma location (corresponds to VkChromaLocation).
-  uint32_t x_chroma_offset;
-  /// Vertical chroma location (corresponds to VkChromaLocation).
-  uint32_t y_chroma_offset;
-  /// Filter used for chroma downsampling (corresponds to VkFilter).
-  uint32_t chroma_filter;
-  /// Force explicit reconstruction (corresponds to VkBool32).
-  uint32_t force_explicit_reconstruction;
-  /// External format ID for Android / vendor-specific buffers. When non-zero,
-  /// format must be 0 (VK_FORMAT_UNDEFINED).
-  uint64_t external_format;
-} FlutterVulkanYcbcrConversionInfo;
-
-/// Represents an external Vulkan texture provided by the embedder.
-typedef struct {
-  /// The size of this struct. Must be sizeof(FlutterVulkanExternalTexture).
-  size_t struct_size;
-  /// Width of the texture in pixels.
-  size_t width;
-  /// Height of the texture in pixels.
-  size_t height;
-  /// Handle to the VkImage (as a uint64_t / FlutterVulkanImageHandle).
-  FlutterVulkanImageHandle image;
-  /// The VkFormat of the image (for example: VK_FORMAT_R8G8B8A8_UNORM).
-  uint32_t format;
-  /// The VkImageLayout of the image (for example:
-  /// VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL).
-  uint32_t image_layout;
-  /// Optional pointer to YCbCr conversion info. If NULL, standard sampling is
-  /// used.
-  const FlutterVulkanYcbcrConversionInfo* ycbcr_conversion_info;
-  /// User data to be returned on the invocation of destruction_callback.
-  void* user_data;
-  /// Callback to collect the texture and associated embedder resources.
-  VoidCallback destruction_callback;
-} FlutterVulkanExternalTexture;
-
-/// Callback to provide an external Vulkan texture for a given texture_id.
-typedef bool (*FlutterVulkanExternalTextureFrameCallback)(
-    void* /* user data */,
-    int64_t /* texture identifier */,
-    size_t /* width */,
-    size_t /* height */,
-    FlutterVulkanExternalTexture* /* texture out */);
 
 /// Callback to fetch a Vulkan function pointer for a given instance. Normally,
 /// this should return the results of vkGetInstanceProcAddr.
@@ -2459,26 +2344,6 @@ typedef void (*FlutterViewFocusChangeRequestCallback)(
     const FlutterViewFocusChangeRequest* /* request */,
     void* /* user data */);
 
-/// Request from Dart to load a deferred library loading unit.
-typedef struct {
-  /// The size of this struct. Must be
-  /// sizeof(FlutterDartDeferredLibraryLoadingUnit).
-  size_t struct_size;
-  /// The unique ID of the loading unit.
-  int64_t loading_unit_id;
-} FlutterDartDeferredLibraryLoadingUnit;
-
-typedef void (*FlutterDartDeferredLibraryLoadingUnitCallback)(
-    const FlutterDartDeferredLibraryLoadingUnit* /* loading unit */,
-    void* /* user data */);
-
-/// Callback invoked on the raster thread in order to give the embedder the
-/// chance to manage thread/graphics context lifetimes (e.g. EGL context
-/// make current or clear current).
-///
-/// Should return true if the operation succeeded, false if an error occurred.
-typedef bool (*FlutterRasterThreadContextCallback)(void* /* user data */);
-
 typedef struct _FlutterTaskRunner* FlutterTaskRunner;
 
 typedef struct {
@@ -3593,31 +3458,6 @@ typedef struct {
 /// FlutterEngine instance in AOT mode.
 typedef struct _FlutterEngineAOTData* FlutterEngineAOTData;
 
-/// Callback to resolve an asset given its name.
-/// Returns true if the asset was found and populated, false otherwise.
-/// If true, `buffer_out`, `size_out`, and `allocation_baton_out` must be
-/// populated.
-typedef bool (*FlutterAssetResolverCallback)(const char* /* asset_name */,
-                                             const uint8_t** /* buffer_out */,
-                                             size_t* /* size_out */,
-                                             void** /* allocation_baton_out */,
-                                             void* /* user_data */);
-
-/// Callback to free an asset buffer returned by `FlutterAssetResolverCallback`.
-typedef void (*FlutterAssetResolverFreeCallback)(void* /* allocation_baton */,
-                                                 void* /* user_data */);
-
-typedef struct {
-  /// The size of this struct. Must be sizeof(FlutterCustomAssetResolver).
-  size_t struct_size;
-  /// User data passed to the callbacks.
-  void* user_data;
-  /// Callback to resolve an asset mapping.
-  FlutterAssetResolverCallback get_asset;
-  /// Callback to free an asset mapping.
-  FlutterAssetResolverFreeCallback free_asset;
-} FlutterCustomAssetResolver;
-
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterProjectArgs).
   size_t struct_size;
@@ -4237,32 +4077,6 @@ FlutterEngineResult FlutterEngineDeinitialize(FLUTTER_API_SYMBOL(FlutterEngine)
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineRunInitialized(
     FLUTTER_API_SYMBOL(FlutterEngine) engine);
-
-//------------------------------------------------------------------------------
-/// @brief      Spawns a new Flutter engine instance sharing the same Dart VM
-///             and task runners with the parent engine.
-///
-///             The spawned engine runs the isolate specified in the
-///             `FlutterEngineSpawnConfig` (or parent configuration if
-///             unspecified) in the same VM / isolate group. The new engine
-///             starts in a running state.
-///
-/// @param[in]  parent_engine  The parent Flutter engine instance. Must be a
-///                            valid running engine instance.
-/// @param[in]  config         The configuration for spawning the new engine.
-///                            Must not be null and must have a valid
-///                            struct_size.
-/// @param[out] engine_out     The engine handle for the spawned engine on
-///                            success.
-///
-/// @return     The result of the call to spawn the Flutter engine.
-///
-FLUTTER_EXPORT
-FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine)
-                                           parent_engine,
-                                       const FlutterEngineSpawnConfig* config,
-                                       FLUTTER_API_SYMBOL(FlutterEngine) *
-                                           engine_out);
 
 //------------------------------------------------------------------------------
 /// @brief      Adds a view.

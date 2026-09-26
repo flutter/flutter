@@ -297,7 +297,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           // The platform view is displayed using a PlatformViewLayer.
           final FlutterMutatorView parentView = platformViewParent.get(viewId);
           if (parentView != null) {
-            parentView.setTouchProcessor(null);
             parentView.removeAllViews();
             parentView.unsetOnDescendantFocusChangeListener();
 
@@ -1235,14 +1234,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   public void attachToFlutterRenderer(@NonNull FlutterRenderer flutterRenderer) {
     androidTouchProcessor = new AndroidTouchProcessor(flutterRenderer, /*trackMotionEvents=*/ true);
-    for (int index = 0; index < viewWrappers.size(); index++) {
-      final PlatformViewWrapper view = viewWrappers.valueAt(index);
-      view.setTouchProcessor(androidTouchProcessor);
-    }
-    for (int index = 0; index < platformViewParent.size(); index++) {
-      final FlutterMutatorView view = platformViewParent.valueAt(index);
-      view.setTouchProcessor(androidTouchProcessor);
-    }
   }
 
   /**

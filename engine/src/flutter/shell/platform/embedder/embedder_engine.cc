@@ -4,9 +4,6 @@
 
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 
-#include <cstdlib>
-#include <cstring>
-
 #include "flutter/fml/make_copyable.h"
 #include "flutter/shell/platform/embedder/vsync_waiter_embedder.h"
 
@@ -145,13 +142,10 @@ bool EmbedderEngine::HasValidRunConfiguration() const {
 }
 
 bool EmbedderEngine::RunRootIsolate() {
-  if (!IsValid() || !run_configuration_.has_value() ||
-      !run_configuration_->IsValid()) {
+  if (!IsValid() || !run_configuration_.IsValid()) {
     return false;
   }
-  auto config = std::move(run_configuration_.value());
-  run_configuration_.reset();
-  shell_->RunEngine(std::move(config));
+  shell_->RunEngine(std::move(run_configuration_));
   return true;
 }
 
@@ -326,7 +320,6 @@ bool EmbedderEngine::PostRenderThreadTask(const fml::closure& task) {
 }
 
 bool EmbedderEngine::RunTask(const FlutterTask* task) {
-  TRACE_EVENT0("flutter", "EmbedderEngine::RunTask");
   // The shell doesn't need to be running or valid for access to the thread
   // host. This is why there is no `IsValid` check here. This allows embedders
   // to perform custom task runner interop before the shell is running.
@@ -388,100 +381,6 @@ bool EmbedderEngine::ScheduleFrame() {
     return false;
   }
   platform_view->ScheduleFrame();
-  return true;
-}
-
-bool EmbedderEngine::LoadDartDeferredLibrary(
-    int64_t loading_unit_id,
-    std::unique_ptr<const fml::Mapping> snapshot_data,
-    std::unique_ptr<const fml::Mapping> snapshot_instructions) {
-  TRACE_EVENT0("flutter", "EmbedderEngine::LoadDartDeferredLibrary");
-  if (!IsValid() || !snapshot_data || !snapshot_instructions) {
-    return false;
-  }
-  auto platform_view = shell_->GetPlatformView();
-  if (!platform_view) {
-    return false;
-  }
-  platform_view->LoadDartDeferredLibrary(static_cast<intptr_t>(loading_unit_id),
-                                         std::move(snapshot_data),
-                                         std::move(snapshot_instructions));
-  return true;
-}
-
-bool EmbedderEngine::NotifyDartDeferredLibraryLoadError(
-    int64_t loading_unit_id,
-    const std::string& error_message,
-    bool transient) {
-  TRACE_EVENT0("flutter", "EmbedderEngine::NotifyDartDeferredLibraryLoadError");
-  if (!IsValid()) {
-    return false;
-  }
-  auto platform_view = shell_->GetPlatformView();
-  if (!platform_view) {
-    return false;
-  }
-  platform_view->LoadDartDeferredLibraryError(
-      static_cast<intptr_t>(loading_unit_id), error_message, transient);
-  return true;
-}
-
-bool EmbedderEngine::Screenshot(FlutterEngineScreenshotInfo* screenshot_out) {
-  TRACE_EVENT0("flutter", "EmbedderEngine::Screenshot");
-  if (!IsValid() || !screenshot_out) {
-    return false;
-  }
-  if (!shell_) {
-    return false;
-  }
-  auto raster_screenshot =
-      shell_->Screenshot(Rasterizer::ScreenshotType::UncompressedImage, false);
-  if (!raster_screenshot.data || raster_screenshot.data->size() == 0) {
-    return false;
-  }
-
-  TRACE_EVENT0("flutter", "EmbedderEngine::ScreenshotBufferAlloc");
-  const size_t size = raster_screenshot.data->size();
-  void* pixels = std::malloc(size);
-  if (!pixels) {
-    return false;
-  }
-  std::memcpy(pixels, raster_screenshot.data->data(), size);
-
-  screenshot_out->width = raster_screenshot.frame_size.width;
-  screenshot_out->height = raster_screenshot.frame_size.height;
-  screenshot_out->row_bytes = raster_screenshot.frame_size.height > 0
-                                  ? (size / raster_screenshot.frame_size.height)
-                                  : (raster_screenshot.frame_size.width * 4);
-  screenshot_out->pixels = pixels;
-  screenshot_out->pixels_size = size;
-
-  return true;
-}
-
-bool EmbedderEngine::RegisterImageDecoder(ImageGeneratorFactory factory,
-                                          int32_t priority) {
-  TRACE_EVENT0("flutter", "EmbedderEngine::RegisterImageDecoder");
-  if (!IsValid()) {
-    return false;
-  }
-  shell_->RegisterImageDecoder(std::move(factory), priority);
-  return true;
-}
-
-bool EmbedderEngine::UpdateAssetResolverByType(
-    std::unique_ptr<AssetResolver> updated_asset_resolver,
-    AssetResolver::AssetResolverType type) {
-  TRACE_EVENT0("flutter", "EmbedderEngine::UpdateAssetResolverByType");
-  if (!IsValid()) {
-    return false;
-  }
-  auto platform_view = shell_->GetPlatformView();
-  if (!platform_view) {
-    return false;
-  }
-  platform_view->UpdateAssetResolverByType(std::move(updated_asset_resolver),
-                                           type);
   return true;
 }
 
