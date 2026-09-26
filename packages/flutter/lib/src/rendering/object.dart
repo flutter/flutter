@@ -1659,6 +1659,9 @@ base class PipelineOwner with DiagnosticableTreeMixin {
               if (!parentInSemanticsTree.geometryDirty) {
                 targets.add(parentInSemanticsTree);
               } else {
+                // The cache may be left over from an earlier flush, when the
+                // ancestor it points to still had clean geometry.
+                parentInSemanticsTree.computeAncestorInfo(treeShapeToken);
                 final _RenderObjectSemantics? firstAncestorNodeWithCleanGeometry =
                     parentInSemanticsTree.firstAncestorNodeWithCleanGeometry;
                 // firstAncestorNodeWithCleanGeometry can be null if this is a blocked branch.
