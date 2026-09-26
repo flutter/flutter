@@ -343,6 +343,14 @@ static const int kSurfaceEvictionAge = 30;
 
 - (void)returnSurfaces:(nonnull NSArray<FlutterSurface*>*)returnedSurfaces {
   @synchronized(self) {
+    if (_surfaces.count > 0 && returnedSurfaces.count > 0 &&
+        !CGSizeEqualToSize(returnedSurfaces.firstObject.size, _surfaces.firstObject.size)) {
+      // Any cached surface size will match last requested size (see removeSurfaceForSize:). If the
+      // size of incoming surfaces don't match cached surface size it means they are stale and
+      // should be discarded. Keeping them would let removeSurfaceForSize: hand out a surface of
+      // the wrong size (https://github.com/flutter/flutter/issues/185394).
+      return;
+    }
     for (FlutterSurface* surface in returnedSurfaces) {
       [self setAge:0 forSurface:surface];
     }
