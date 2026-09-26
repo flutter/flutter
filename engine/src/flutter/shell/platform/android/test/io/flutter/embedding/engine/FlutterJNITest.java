@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -23,6 +24,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.LocaleList;
+import android.view.View;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
@@ -31,6 +33,7 @@ import io.flutter.embedding.engine.renderer.FlutterUiResizeListener;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
+import io.flutter.plugin.platform.PlatformViewsController2;
 import java.nio.ByteBuffer;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -191,6 +194,7 @@ public class FlutterJNITest {
     assertFalse(flutterJNI.semanticsEnabled);
   }
 
+  @Test
   public void onDisplayPlatformView_callsPlatformViewsController() {
     PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
 
@@ -209,6 +213,84 @@ public class FlutterJNITest {
         /*mutatorsStack=*/ stack);
 
     // --- Verify Results ---
+    verify(platformViewsController, times(1))
+        .onDisplayPlatformView(
+            /*viewId=*/ 1,
+            /*x=*/ 10,
+            /*y=*/ 20,
+            /*width=*/ 100,
+            /*height=*/ 200,
+            /*viewWidth=*/ 100,
+            /*viewHeight=*/ 200,
+            /*mutatorsStack=*/ stack);
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_34)
+  public void onDisplayPlatformView_delegatesToPlatformViewsController2OnApi34() {
+    PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
+    PlatformViewsController2 platformViewsController2 = mock(PlatformViewsController2.class);
+    View mockView = mock(View.class);
+    when(platformViewsController.getPlatformViewById(1)).thenReturn(null);
+    when(platformViewsController2.getPlatformViewById(1)).thenReturn(mockView);
+
+    FlutterJNI flutterJNI = new FlutterJNI();
+    flutterJNI.setPlatformViewsController(platformViewsController);
+    flutterJNI.setPlatformViewsController2(platformViewsController2);
+    FlutterMutatorsStack stack = new FlutterMutatorsStack();
+
+    flutterJNI.onDisplayPlatformView(
+        /*viewId=*/ 1,
+        /*x=*/ 10,
+        /*y=*/ 20,
+        /*width=*/ 100,
+        /*height=*/ 200,
+        /*viewWidth=*/ 100,
+        /*viewHeight=*/ 200,
+        /*mutatorsStack=*/ stack);
+
+    verify(platformViewsController2, times(1))
+        .onDisplayPlatformView(
+            /*viewId=*/ 1,
+            /*x=*/ 10,
+            /*y=*/ 20,
+            /*width=*/ 100,
+            /*height=*/ 200,
+            /*viewWidth=*/ 100,
+            /*viewHeight=*/ 200,
+            /*mutatorsStack=*/ stack);
+    verify(platformViewsController, never())
+        .onDisplayPlatformView(
+            anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), any());
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_33)
+  public void onDisplayPlatformView_doesNotDelegateToPlatformViewsController2BelowApi34() {
+    PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
+    PlatformViewsController2 platformViewsController2 = mock(PlatformViewsController2.class);
+    View mockView = mock(View.class);
+    when(platformViewsController.getPlatformViewById(1)).thenReturn(null);
+    when(platformViewsController2.getPlatformViewById(1)).thenReturn(mockView);
+
+    FlutterJNI flutterJNI = new FlutterJNI();
+    flutterJNI.setPlatformViewsController(platformViewsController);
+    flutterJNI.setPlatformViewsController2(platformViewsController2);
+    FlutterMutatorsStack stack = new FlutterMutatorsStack();
+
+    flutterJNI.onDisplayPlatformView(
+        /*viewId=*/ 1,
+        /*x=*/ 10,
+        /*y=*/ 20,
+        /*width=*/ 100,
+        /*height=*/ 200,
+        /*viewWidth=*/ 100,
+        /*viewHeight=*/ 200,
+        /*mutatorsStack=*/ stack);
+
+    verify(platformViewsController2, never())
+        .onDisplayPlatformView(
+            anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), any());
     verify(platformViewsController, times(1))
         .onDisplayPlatformView(
             /*viewId=*/ 1,
