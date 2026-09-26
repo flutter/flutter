@@ -333,14 +333,19 @@ CreateUberSDFGradientParameters(const ContentContext& renderer,
     return std::nullopt;
   }
 
-  GradientData gradient_data = CreateGradientBuffer(colors, stops);
-  std::shared_ptr<Texture> texture =
-      CreateGradientTexture(gradient_data, renderer.GetContext());
-  if (!texture) {
-    return std::nullopt;
+  if (renderer.GetDeviceCapabilities().SupportsSSBO()) {
+    gradient.colors = std::move(colors);
+    gradient.stops = std::move(stops);
+  } else {
+    GradientData gradient_data = CreateGradientBuffer(colors, stops);
+    std::shared_ptr<Texture> texture =
+        CreateGradientTexture(gradient_data, renderer.GetContext());
+    if (!texture) {
+      return std::nullopt;
+    }
+    gradient.texture = std::move(texture);
   }
 
-  gradient.texture = std::move(texture);
   return gradient;
 }
 
@@ -2006,7 +2011,7 @@ void Canvas::SaveLayer(const Paint& paint,
         backdrop_entity.SetBlendMode(paint.blend_mode);
 
         backdrop_entity.Render(renderer_, GetCurrentRenderPass());
-        Save(0);
+        Save(total_content_depth);
         return;
       }
     }
