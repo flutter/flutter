@@ -2599,6 +2599,11 @@ class EditableTextState extends State<EditableText>
   TextInputConnection? _textInputConnection;
   bool get _hasInputConnection => _textInputConnection?.attached ?? false;
 
+  // The connection the platform last reported closed, kept only so that
+  // [onFocusReceived] can take it back if the platform reattaches it. See
+  // [connectionClosed].
+  TextInputConnection? _closedConnection;
+
   TextSelectionOverlay? _selectionOverlay;
   ScrollNotificationObserverState? _scrollNotificationObserver;
   ({TextEditingValue value, Rect selectionBounds})? _dataWhenToolbarShowScheduled;
@@ -4183,6 +4188,7 @@ class EditableTextState extends State<EditableText>
       // _needsAutofill changes to false from true, the platform needs to be
       // notified to exclude this field from the autofill context. So we need to
       // provide the autofillId.
+      _closedConnection = null;
       _textInputConnection = _needsAutofill && currentAutofillScope != null
           ? currentAutofillScope!.attach(this, _effectiveAutofillClient.textInputConfiguration)
           : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
@@ -4269,6 +4275,14 @@ class EditableTextState extends State<EditableText>
   @override
   bool onFocusReceived() {
     if (mounted && !_hasFocus && widget.focusNode.canRequestFocus) {
+      // If the platform reattached the connection it had reported as closed,
+      // take it back rather than letting _openInputConnection attach a new one,
+      // so the client id the platform is using keeps matching this end.
+      final TextInputConnection? closed = _closedConnection;
+      if (_textInputConnection == null && (closed?.attached ?? false)) {
+        _textInputConnection = closed;
+      }
+      _closedConnection = null;
       widget.focusNode.requestFocus();
       return true;
     }
@@ -4279,6 +4293,7 @@ class EditableTextState extends State<EditableText>
   void connectionClosed() {
     if (_hasInputConnection) {
       _textInputConnection!.connectionClosedReceived();
+      _closedConnection = _textInputConnection;
       _textInputConnection = null;
       _lastKnownRemoteTextEditingValue = null;
       widget.focusNode.unfocus();
