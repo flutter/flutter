@@ -1192,12 +1192,12 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
           ? const <Page<Object?>>[]
           : _routes.value.split(',').map((String name) {
               if (name.startsWith('r-')) {
-                name = name.substring(2);
+                final String formattedName = name.substring(2);
                 return TestPage<void>(
-                  name: name,
-                  restorationId: name,
-                  key: ValueKey<String>(name),
-                  child: RouteWidget(name: name),
+                  name: formattedName,
+                  restorationId: formattedName,
+                  key: ValueKey<String>(formattedName),
+                  child: RouteWidget(name: formattedName),
                 );
               }
               return TestPage<void>(
