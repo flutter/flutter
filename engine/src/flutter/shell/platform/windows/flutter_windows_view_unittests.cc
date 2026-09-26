@@ -1993,7 +1993,8 @@ TEST(FlutterWindowsViewTest, PointerDownRecordsLastPointerKind) {
       std::make_unique<NiceMock<MockWindowBindingHandler>>();
   std::unique_ptr<FlutterWindowsView> view =
       engine->CreateView(std::move(window_binding_handler),
-                         /*is_sized_to_content=*/false, BoxConstraints());
+                         /*is_sized_to_content=*/false, BoxConstraints(),
+                         /*allow_implicit_view=*/true);
 
   ASSERT_NE(engine->text_input_plugin(), nullptr);
   view->OnPointerDown(10, 10, kFlutterPointerDeviceKindTouch, 0, 1, 0, 0);
@@ -2014,7 +2015,8 @@ TEST(FlutterWindowsViewTest, UnfocusDismissesOnScreenKeyboard) {
       std::make_unique<NiceMock<MockWindowBindingHandler>>();
   std::unique_ptr<FlutterWindowsView> view =
       engine->CreateView(std::move(window_binding_handler),
-                         /*is_sized_to_content=*/false, BoxConstraints());
+                         /*is_sized_to_content=*/false, BoxConstraints(),
+                         /*allow_implicit_view=*/true);
 
   HWND hwnd = reinterpret_cast<HWND>(1);
   EXPECT_CALL(*keyboard_ptr, Dismiss(hwnd)).Times(1);
@@ -2078,7 +2080,8 @@ TEST(FlutterWindowsViewTest, KeyboardVisibilityChangeResendsWindowMetrics) {
       .WillRepeatedly(Return(PhysicalWindowBounds{800, 600}));
   std::unique_ptr<FlutterWindowsView> view =
       engine->CreateView(std::move(window_binding_handler),
-                         /*is_sized_to_content=*/false, BoxConstraints());
+                         /*is_sized_to_content=*/false, BoxConstraints(),
+                         /*allow_implicit_view=*/true);
 
   bool received_metrics = false;
   modifier.embedder_api().SendWindowMetricsEvent = MOCK_ENGINE_PROC(
