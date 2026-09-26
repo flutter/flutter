@@ -943,6 +943,7 @@ class EditableText extends StatefulWidget {
     this.undoController,
     this.hintLocales,
     this.enableInlinePrediction,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(obscuringCharacter.length == 1),
        autocorrect = autocorrect ?? _inferAutocorrect(autofillHints: autofillHints),
        smartDashesType =
@@ -2140,6 +2141,9 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableInlinePrediction}
   final bool? enableInlinePrediction;
 
+  /// {@macro flutter.animation.AnimationController.animationBehavior}
+  final AnimationBehavior animationBehavior;
+
   /// The default value for [selectionHeightStyle].
   ///
   /// On web platforms, this defaults to [ui.BoxHeightStyle.max].
@@ -2555,6 +2559,13 @@ class EditableText extends StatefulWidget {
     properties.add(
       DiagnosticsProperty<List<Locale>?>('hintLocales', hintLocales, defaultValue: null),
     );
+    properties.add(
+      EnumProperty<AnimationBehavior>(
+        'animationBehavior',
+        animationBehavior,
+        defaultValue: AnimationBehavior.normal,
+      ),
+    );
   }
 }
 
@@ -2569,8 +2580,10 @@ class EditableTextState extends State<EditableText>
     implements AutofillClient {
   Timer? _cursorTimer;
   AnimationController get _cursorBlinkOpacityController {
-    return _backingCursorBlinkOpacityController ??= AnimationController(vsync: this)
-      ..addListener(_onCursorColorTick);
+    return _backingCursorBlinkOpacityController ??= AnimationController(
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    )..addListener(_onCursorColorTick);
   }
 
   AnimationController? _backingCursorBlinkOpacityController;
@@ -3861,8 +3874,10 @@ class EditableTextState extends State<EditableText>
 
   @override
   void updateFloatingCursor(RawFloatingCursorPoint point) {
-    _floatingCursorResetController ??= AnimationController(vsync: this)
-      ..addListener(_onFloatingCursorResetTick);
+    _floatingCursorResetController ??= AnimationController(
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    )..addListener(_onFloatingCursorResetTick);
     switch (point.state) {
       case FloatingCursorDragState.Start:
         if (_floatingCursorResetController!.isAnimating) {
@@ -4550,6 +4565,7 @@ class EditableTextState extends State<EditableText>
           ? null
           : _contextMenuBuilder,
       magnifierConfiguration: widget.magnifierConfiguration,
+      animationBehavior: widget.animationBehavior,
     );
 
     return selectionOverlay;
