@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui' show FlutterView;
 
 import 'package:flutter/foundation.dart';
@@ -102,12 +103,11 @@ class OnTapPage extends StatelessWidget {
 class SlideInOutPageRoute<T> extends PageRouteBuilder<T> {
   SlideInOutPageRoute({required WidgetBuilder bodyBuilder, super.settings})
     : super(
-        pageBuilder:
-            (
-              BuildContext context,
-              Animation<double> animation,
-              Animation<double> secondaryAnimation,
-            ) => bodyBuilder(context),
+        pageBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+        ) => bodyBuilder(context),
         transitionsBuilder:
             (
               BuildContext context,
@@ -4446,13 +4446,15 @@ void main() {
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       var initialPageless1Completed = false;
-      navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('initial-pageless1'),
-            ),
-          )
-          .then((_) => initialPageless1Completed = true);
+      unawaited(
+        navigator.currentState!
+            .push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('initial-pageless1'),
+              ),
+            )
+            .then((_) => initialPageless1Completed = true),
+      );
       await tester.pumpAndSettle();
 
       // Pushes second page route with two pageless routes.
@@ -4465,22 +4467,26 @@ void main() {
       );
       await tester.pumpAndSettle();
       var secondPageless1Completed = false;
-      navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('second-pageless1'),
-            ),
-          )
-          .then((_) => secondPageless1Completed = true);
+      unawaited(
+        navigator.currentState!
+            .push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('second-pageless1'),
+              ),
+            )
+            .then((_) => secondPageless1Completed = true),
+      );
       await tester.pumpAndSettle();
       var secondPageless2Completed = false;
-      navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('second-pageless2'),
-            ),
-          )
-          .then((_) => secondPageless2Completed = true);
+      unawaited(
+        navigator.currentState!
+            .push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('second-pageless2'),
+              ),
+            )
+            .then((_) => secondPageless2Completed = true),
+      );
       await tester.pumpAndSettle();
 
       // Pushes third page route with one pageless route.
@@ -4494,13 +4500,15 @@ void main() {
       );
       await tester.pumpAndSettle();
       var thirdPageless1Completed = false;
-      navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('third-pageless1'),
-            ),
-          )
-          .then((_) => thirdPageless1Completed = true);
+      unawaited(
+        navigator.currentState!
+            .push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('third-pageless1'),
+              ),
+            )
+            .then((_) => thirdPageless1Completed = true),
+      );
       await tester.pumpAndSettle();
 
       // Nothing has been popped.
@@ -4614,13 +4622,15 @@ void main() {
         ),
       );
       var initialPageless1Completed = false;
-      navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('initial-pageless1'),
-            ),
-          )
-          .then((_) => initialPageless1Completed = true);
+      unawaited(
+        navigator.currentState!
+            .push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('initial-pageless1'),
+              ),
+            )
+            .then((_) => initialPageless1Completed = true),
+      );
       await tester.pumpAndSettle();
 
       // Pushes second page route with two pageless routes.
@@ -4638,22 +4648,26 @@ void main() {
         ),
       );
       var secondPageless1Completed = false;
-      navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('second-pageless1'),
-            ),
-          )
-          .then((_) => secondPageless1Completed = true);
+      unawaited(
+        navigator.currentState!
+            .push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('second-pageless1'),
+              ),
+            )
+            .then((_) => secondPageless1Completed = true),
+      );
       await tester.pumpAndSettle();
       var secondPageless2Completed = false;
-      navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('second-pageless2'),
-            ),
-          )
-          .then((_) => secondPageless2Completed = true);
+      unawaited(
+        navigator.currentState!
+            .push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('second-pageless2'),
+              ),
+            )
+            .then((_) => secondPageless2Completed = true),
+      );
       await tester.pumpAndSettle();
 
       // Pushes third page route with one pageless route.
@@ -4672,13 +4686,15 @@ void main() {
         ),
       );
       var thirdPageless1Completed = false;
-      navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('third-pageless1'),
-            ),
-          )
-          .then((_) => thirdPageless1Completed = true);
+      unawaited(
+        navigator.currentState!
+            .push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => const Text('third-pageless1'),
+              ),
+            )
+            .then((_) => thirdPageless1Completed = true),
+      );
       await tester.pumpAndSettle();
 
       // Nothing has been popped.
@@ -4832,7 +4848,7 @@ void main() {
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       // Pushes a pageless route.
-      showDialog<void>(
+      final Future<void> dialog = showDialog<void>(
         useRootNavigator: false,
         context: navigator.currentContext!,
         builder: (BuildContext context) => const Text('dialog'),
@@ -4849,6 +4865,7 @@ void main() {
       // It should not crash the app.
       expect(tester.takeException(), isNull);
       await tester.pumpAndSettle();
+      await dialog;
       expect(find.text('initial'), findsOneWidget);
     });
 

@@ -411,8 +411,7 @@ class BuildInfo {
     return <String, String>{
       if (dartDefines.isNotEmpty) 'DART_DEFINES': encodeDartDefines(dartDefines),
       'DART_OBFUSCATION': dartObfuscation.toString(),
-      if (frontendServerStarterPath != null)
-        'FRONTEND_SERVER_STARTER_PATH': frontendServerStarterPath!,
+      'FRONTEND_SERVER_STARTER_PATH': ?frontendServerStarterPath,
       if (extraFrontEndOptions.isNotEmpty)
         'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
       if (extraGenSnapshotOptions.isNotEmpty)
@@ -422,8 +421,7 @@ class BuildInfo {
       'SPLIT_DEBUG_INFO': ?splitDebugInfoPath,
       'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
       'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
-      if (performanceMeasurementFile != null)
-        'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile!,
+      'PERFORMANCE_MEASUREMENT_FILE': ?performanceMeasurementFile,
       'PACKAGE_CONFIG': packageConfigPath,
       'CODE_SIZE_DIRECTORY': ?codeSizeDirectory,
       'FLAVOR': ?flavor,

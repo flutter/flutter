@@ -21,6 +21,7 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../compile.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';
 import '../device.dart';
@@ -54,29 +55,30 @@ typedef PlatformPluginRegistration = void Function(FlutterPlatform platform);
 /// (that is, one Dart file with a `*_test.dart` file name and a single `void
 /// main()`), you can set a VM Service port explicitly.
 FlutterPlatform installHook({
-  TestWrapper testWrapper = const TestWrapper(),
-  required String flutterTesterBinPath,
-  required DebuggingOptions debuggingOptions,
   required BuildInfo buildInfo,
-  required FileSystem fileSystem,
-  required Logger logger,
-  required ProcessManager processManager,
-  TestWatcher? watcher,
+  required DebuggingOptions debuggingOptions,
+  required String flutterTesterBinPath,
   bool enableVmService = false,
-  bool machine = false,
-  String? precompiledDillPath,
-  Map<String, String>? precompiledDillFiles,
-  bool updateGoldens = false,
-  String? testAssetDirectory,
-  InternetAddressType serverType = InternetAddressType.IPv4,
-  Uri? projectRootDirectory,
+  FileSystem? fileSystem,
   FlutterProject? flutterProject,
   String? icudtlPath,
-  PlatformPluginRegistration? platformPluginRegistration,
   Device? integrationTestDevice,
   String? integrationTestUserIdentifier,
-  TestTimeRecorder? testTimeRecorder,
+  Logger? logger,
+  bool machine = false,
   TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+  PlatformPluginRegistration? platformPluginRegistration,
+  Map<String, String>? precompiledDillFiles,
+  String? precompiledDillPath,
+  ProcessManager? processManager,
+  Uri? projectRootDirectory,
+  InternetAddressType serverType = .IPv4,
+  String? testAssetDirectory,
+  TestTimeRecorder? testTimeRecorder,
+  TestWrapper testWrapper = const TestWrapper(),
+  ToolContext? toolContext,
+  bool updateGoldens = false,
+  TestWatcher? watcher,
 }) {
   assert(
     enableVmService ||
@@ -108,9 +110,9 @@ FlutterPlatform installHook({
     testTimeRecorder: testTimeRecorder,
     nativeAssetsBuilder: nativeAssetsBuilder,
     buildInfo: buildInfo,
-    fileSystem: fileSystem,
-    logger: logger,
-    processManager: processManager,
+    fileSystem: fileSystem ?? toolContext!.fs,
+    logger: logger ?? toolContext!.logger,
+    processManager: processManager ?? toolContext!.processManager,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -573,8 +575,7 @@ class FlutterPlatform extends PlatformPlugin {
   ) async {
     globals.printTrace('test $ourTestCount: starting test $testPath');
 
-    _AsyncError?
-    outOfBandError; // error that we couldn't send to the harness that we need to send via our future
+    _AsyncError? outOfBandError; // error that we couldn't send to the harness that we need to send via our future
 
     // Will be run in reverse order.
     final finalizers = <Finalizer>[];
@@ -721,7 +722,7 @@ class FlutterPlatform extends PlatformPlugin {
             'test $ourTestCount: connected to test device, now awaiting test result',
           );
 
-          await _pipeHarnessToRemote(
+          await pipeHarnessToRemote(
             id: ourTestCount,
             harnessChannel: testHarnessChannel,
             remoteChannel: remoteChannel,
@@ -853,19 +854,18 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
 
   @override
   Future<dynamic> close() {
-    Future.wait<dynamic>(<Future<dynamic>>[_parent.close(), _shellProcessClosed]).then<void>((
-      List<dynamic> futureResults,
-    ) {
-      assert(futureResults.length == 2);
-      assert(futureResults.first == null);
-      final dynamic lastResult = futureResults.last;
-      if (lastResult is _AsyncError) {
-        _done.completeError(lastResult.error as Object, lastResult.stack);
-      } else {
-        assert(lastResult == null);
-        _done.complete();
-      }
-    }, onError: _done.completeError);
+    Future.wait<dynamic>(<Future<dynamic>>[_parent.close(), _shellProcessClosed])
+        .then<void>((List<dynamic> futureResults) {
+          assert(futureResults.length == 2);
+          assert(futureResults.first == null);
+          final dynamic lastResult = futureResults.last;
+          if (lastResult is _AsyncError) {
+            _done.completeError(lastResult.error as Object, lastResult.stack);
+          } else {
+            assert(lastResult == null);
+            _done.complete();
+          }
+        }, onError: _done.completeError);
     return done;
   }
 
@@ -889,9 +889,10 @@ class _AsyncError {
 ///
 /// The returned future completes when either side is closed, which also
 /// indicates when the tests have finished.
-Future<void> _pipeHarnessToRemote({
+@visibleForTesting
+Future<void> pipeHarnessToRemote({
   required int id,
-  required StreamChannel<dynamic> harnessChannel,
+  required StreamChannel<Object?> harnessChannel,
   required StreamChannel<String> remoteChannel,
 }) async {
   globals.printTrace('test $id: Waiting for test harness or tests to finish');
@@ -902,10 +903,18 @@ Future<void> _pipeHarnessToRemote({
     ) {
       globals.printTrace('test $id: Test process is no longer needed by test harness');
     }),
-    remoteChannel.stream.map<dynamic>(json.decode).pipe(harnessChannel.sink).then<void>((
-      void value,
-    ) {
-      globals.printTrace('test $id: Test harness is no longer needed by test process');
-    }),
+    remoteChannel.stream
+        .map<Object?>(json.decode)
+        .handleError((Object error) {
+          final formatException = error as FormatException;
+          globals.printWarning(
+            'Received unexpected non-JSON output from test runner: ${formatException.source}',
+          );
+          globals.printTrace('test $id: JSON decoding failed: $formatException');
+        }, test: (error) => error is FormatException)
+        .pipe(harnessChannel.sink)
+        .then<void>((void value) {
+          globals.printTrace('test $id: Test harness is no longer needed by test process');
+        }),
   ]);
 }

@@ -6,6 +6,7 @@
 
 #include "GLES3/gl3.h"
 #include "fml/logging.h"
+#include "impeller/base/thread_safety.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "impeller/renderer/backend/gles/test/mock_gles.h"
 
@@ -22,6 +23,7 @@ static std::weak_ptr<MockGLES> g_mock_gles;
 static std::vector<const char*> g_extensions;
 
 static const char* g_version;
+static const char* g_renderer;
 static std::string g_extensions_string;
 
 template <typename T, typename U>
@@ -64,6 +66,8 @@ const unsigned char* mockGetString(GLenum name) {
   switch (name) {
     case GL_VENDOR:
       return reinterpret_cast<const unsigned char*>(kMockVendor);
+    case GL_RENDERER:
+      return reinterpret_cast<const unsigned char*>(g_renderer);
     case GL_VERSION:
       return reinterpret_cast<const unsigned char*>(g_version);
     case GL_EXTENSIONS:
@@ -468,11 +472,80 @@ void mockVertexAttribDivisor(GLuint index, GLuint divisor) {
 static_assert(CheckSameSignature<decltype(mockVertexAttribDivisor),  //
                                  decltype(glVertexAttribDivisor)>::value);
 
+GLuint mockCreateShader(GLenum type) {
+  return CallMockMethod(&IMockGLESImpl::CreateShader, type);
+}
+
+static_assert(CheckSameSignature<decltype(mockCreateShader),  //
+                                 decltype(glCreateShader)>::value);
+
+GLuint mockCreateProgram() {
+  return CallMockMethod(&IMockGLESImpl::CreateProgram);
+}
+
+static_assert(CheckSameSignature<decltype(mockCreateProgram),  //
+                                 decltype(glCreateProgram)>::value);
+
+void mockGetShaderiv(GLuint shader, GLenum pname, GLint* params) {
+  CallMockMethod(&IMockGLESImpl::GetShaderiv, shader, pname, params);
+}
+
+static_assert(CheckSameSignature<decltype(mockGetShaderiv),  //
+                                 decltype(glGetShaderiv)>::value);
+
+void mockFramebufferTexture2D(GLenum target,
+                              GLenum attachment,
+                              GLenum textarget,
+                              GLuint texture,
+                              GLint level) {
+  CallMockMethod(&IMockGLESImpl::FramebufferTexture2D, target, attachment,
+                 textarget, texture, level);
+}
+
+static_assert(CheckSameSignature<decltype(mockFramebufferTexture2D),  //
+                                 decltype(glFramebufferTexture2D)>::value);
+
+void mockActiveTexture(GLenum texture) {
+  CallMockMethod(&IMockGLESImpl::ActiveTexture, texture);
+}
+
+static_assert(CheckSameSignature<decltype(mockActiveTexture),  //
+                                 decltype(glActiveTexture)>::value);
+
+void mockUniform1i(GLint location, GLint v0) {
+  CallMockMethod(&IMockGLESImpl::Uniform1i, location, v0);
+}
+
+static_assert(CheckSameSignature<decltype(mockUniform1i),  //
+                                 decltype(glUniform1i)>::value);
+
+void mockGetActiveUniform(GLuint program,
+                          GLuint index,
+                          GLsizei bufSize,
+                          GLsizei* length,
+                          GLint* size,
+                          GLenum* type,
+                          GLchar* name) {
+  CallMockMethod(&IMockGLESImpl::GetActiveUniform, program, index, bufSize,
+                 length, size, type, name);
+}
+
+static_assert(CheckSameSignature<decltype(mockGetActiveUniform),  //
+                                 decltype(glGetActiveUniform)>::value);
+
+GLint mockGetUniformLocation(GLuint program, const GLchar* name) {
+  return CallMockMethod(&IMockGLESImpl::GetUniformLocation, program, name);
+}
+
+static_assert(CheckSameSignature<decltype(mockGetUniformLocation),  //
+                                 decltype(glGetUniformLocation)>::value);
+
 // static
-std::shared_ptr<MockGLES> MockGLES::Init(
+IPLR_NO_THREAD_SAFETY_ANALYSIS std::shared_ptr<MockGLES> MockGLES::Init(
     std::unique_ptr<MockGLESImpl> impl,
     const std::optional<std::vector<const char*>>& extensions,
-    const char* version_string) {
+    const char* version_string,
+    const char* renderer_string) {
   FML_CHECK(g_test_lock.try_lock())
       << "MockGLES is already being used by another test.";
   g_extensions = extensions.value_or(kExtensions);
@@ -484,16 +557,18 @@ std::shared_ptr<MockGLES> MockGLES::Init(
     g_extensions_string += ext;
   }
   g_version = version_string;
+  g_renderer = renderer_string;
   auto mock_gles = std::shared_ptr<MockGLES>(new MockGLES());
   mock_gles->impl_ = std::move(impl);
   g_mock_gles = mock_gles;
   return mock_gles;
 }
 
-std::shared_ptr<MockGLES> MockGLES::Init(
+IPLR_NO_THREAD_SAFETY_ANALYSIS std::shared_ptr<MockGLES> MockGLES::Init(
     const std::optional<std::vector<const char*>>& extensions,
     const char* version_string,
-    ProcTableGLES::Resolver resolver) {
+    ProcTableGLES::Resolver resolver,
+    const char* renderer_string) {
   // If we cannot obtain a lock, MockGLES is already being used elsewhere.
   FML_CHECK(g_test_lock.try_lock())
       << "MockGLES is already being used by another test.";
@@ -506,6 +581,7 @@ std::shared_ptr<MockGLES> MockGLES::Init(
     g_extensions_string += ext;
   }
   g_version = version_string;
+  g_renderer = renderer_string;
   auto mock_gles = std::shared_ptr<MockGLES>(new MockGLES(std::move(resolver)));
   g_mock_gles = mock_gles;
   return mock_gles;
@@ -604,6 +680,22 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockGetActiveUniformBlockName);
   } else if (strcmp(name, "glGetUniformBlockIndex") == 0) {
     return reinterpret_cast<void*>(mockGetUniformBlockIndex);
+  } else if (strcmp(name, "glCreateShader") == 0) {
+    return reinterpret_cast<void*>(mockCreateShader);
+  } else if (strcmp(name, "glCreateProgram") == 0) {
+    return reinterpret_cast<void*>(mockCreateProgram);
+  } else if (strcmp(name, "glGetShaderiv") == 0) {
+    return reinterpret_cast<void*>(mockGetShaderiv);
+  } else if (strcmp(name, "glFramebufferTexture2D") == 0) {
+    return reinterpret_cast<void*>(mockFramebufferTexture2D);
+  } else if (strcmp(name, "glActiveTexture") == 0) {
+    return reinterpret_cast<void*>(mockActiveTexture);
+  } else if (strcmp(name, "glUniform1i") == 0) {
+    return reinterpret_cast<void*>(mockUniform1i);
+  } else if (strcmp(name, "glGetActiveUniform") == 0) {
+    return reinterpret_cast<void*>(mockGetActiveUniform);
+  } else if (strcmp(name, "glGetUniformLocation") == 0) {
+    return reinterpret_cast<void*>(mockGetUniformLocation);
   } else {
     return reinterpret_cast<void*>(&doNothing);
   }

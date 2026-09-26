@@ -24,7 +24,7 @@ import 'base/file_system.dart';
 /// example, a package might itself contain code from multiple third-party
 /// sources, and might need to include a license for each one.
 class LicenseCollector {
-  LicenseCollector({required FileSystem fileSystem}) : _fileSystem = fileSystem;
+  LicenseCollector({required this._fileSystem});
 
   final FileSystem _fileSystem;
 

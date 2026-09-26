@@ -35,10 +35,11 @@ void main() {
       addTearDown(manager.dispose);
       final Future<RestorationBucket?> rootBucketFuture = manager.rootBucket;
       RestorationBucket? rootBucket;
-      // ignore: unawaited_futures
-      rootBucketFuture.then((RestorationBucket? bucket) {
-        rootBucket = bucket;
-      });
+      unawaited(
+        rootBucketFuture.then((RestorationBucket? bucket) {
+          rootBucket = bucket;
+        }),
+      );
       expect(rootBucketFuture, isNotNull);
       expect(rootBucket, isNull);
 
@@ -65,10 +66,11 @@ void main() {
 
       // Accessing the root bucket again completes synchronously with same bucket.
       RestorationBucket? synchronousBucket;
-      // ignore: unawaited_futures
-      manager.rootBucket.then((RestorationBucket? bucket) {
-        synchronousBucket = bucket;
-      });
+      unawaited(
+        manager.rootBucket.then((RestorationBucket? bucket) {
+          synchronousBucket = bucket;
+        }),
+      );
       expect(synchronousBucket, isNotNull);
       expect(synchronousBucket, same(rootBucket));
     });
@@ -88,8 +90,7 @@ void main() {
       await _pushDataFromEngine(_createEncodedRestorationData1());
 
       RestorationBucket? rootBucket;
-      // ignore: unawaited_futures
-      manager.rootBucket.then((RestorationBucket? bucket) => rootBucket = bucket);
+      unawaited(manager.rootBucket.then((RestorationBucket? bucket) => rootBucket = bucket));
       // Root bucket is available synchronously.
       expect(rootBucket, isNotNull);
       // Engine was never asked.
@@ -112,8 +113,7 @@ void main() {
       addTearDown(manager.dispose);
 
       RestorationBucket? rootBucket;
-      // ignore: unawaited_futures
-      manager.rootBucket.then((RestorationBucket? bucket) => rootBucket = bucket);
+      unawaited(manager.rootBucket.then((RestorationBucket? bucket) => rootBucket = bucket));
       expect(rootBucket, isNull);
       expect(callsToEngine.single.method, 'get');
 
@@ -125,8 +125,7 @@ void main() {
       await tester.pump();
 
       RestorationBucket? rootBucket2;
-      // ignore: unawaited_futures
-      manager.rootBucket.then((RestorationBucket? bucket) => rootBucket2 = bucket);
+      unawaited(manager.rootBucket.then((RestorationBucket? bucket) => rootBucket2 = bucket));
       expect(rootBucket2, isNotNull);
       expect(rootBucket2, same(rootBucket));
       expect(rootBucket2!.read<int>('value1'), 10);
@@ -144,10 +143,11 @@ void main() {
       final manager = RestorationManager();
       addTearDown(manager.dispose);
       RestorationBucket? rootBucket;
-      // ignore: unawaited_futures
-      manager.rootBucket.then((RestorationBucket? bucket) {
-        rootBucket = bucket;
-      });
+      unawaited(
+        manager.rootBucket.then((RestorationBucket? bucket) {
+          rootBucket = bucket;
+        }),
+      );
       await tester.pump();
       expect(rootBucket, isNotNull);
       expect(rootBucket!.read<int>('value1'), 10);
@@ -199,11 +199,12 @@ void main() {
       addTearDown(manager.dispose);
       RestorationBucket? rootBucket;
       var rootBucketResolved = false;
-      // ignore: unawaited_futures
-      manager.rootBucket.then((RestorationBucket? bucket) {
-        rootBucketResolved = true;
-        rootBucket = bucket;
-      });
+      unawaited(
+        manager.rootBucket.then((RestorationBucket? bucket) {
+          rootBucketResolved = true;
+          rootBucket = bucket;
+        }),
+      );
       await tester.pump();
       expect(rootBucketResolved, isFalse);
       expect(listenerCount, 0);
@@ -216,19 +217,21 @@ void main() {
       // Switch to non-null.
       await _pushDataFromEngine(_createEncodedRestorationData1());
       expect(listenerCount, 1);
-      // ignore: unawaited_futures
-      manager.rootBucket.then((RestorationBucket? bucket) {
-        rootBucket = bucket;
-      });
+      unawaited(
+        manager.rootBucket.then((RestorationBucket? bucket) {
+          rootBucket = bucket;
+        }),
+      );
       expect(rootBucket, isNotNull);
 
       // Switch to null again.
       await _pushDataFromEngine(_packageRestorationData(enabled: false));
       expect(listenerCount, 2);
-      // ignore: unawaited_futures
-      manager.rootBucket.then((RestorationBucket? bucket) {
-        rootBucket = bucket;
-      });
+      unawaited(
+        manager.rootBucket.then((RestorationBucket? bucket) {
+          rootBucket = bucket;
+        }),
+      );
       expect(rootBucket, isNull);
     });
 
@@ -246,10 +249,11 @@ void main() {
       addTearDown(manager.dispose);
       final Future<RestorationBucket?> rootBucketFuture = manager.rootBucket;
       RestorationBucket? rootBucket;
-      // ignore: unawaited_futures
-      rootBucketFuture.then((RestorationBucket? bucket) {
-        rootBucket = bucket;
-      });
+      unawaited(
+        rootBucketFuture.then((RestorationBucket? bucket) {
+          rootBucket = bucket;
+        }),
+      );
       result.complete(_createEncodedRestorationData1());
       await tester.pump();
       expect(rootBucket, isNotNull);
@@ -285,10 +289,11 @@ void main() {
       expect(manager.isReplacing, isFalse);
 
       RestorationBucket? rootBucket;
-      // ignore: unawaited_futures
-      manager.rootBucket.then((RestorationBucket? bucket) {
-        rootBucket = bucket;
-      });
+      unawaited(
+        manager.rootBucket.then((RestorationBucket? bucket) {
+          rootBucket = bucket;
+        }),
+      );
       result.complete(_createEncodedRestorationData1());
       await tester.idle();
       expect(rootBucket, isNotNull);
@@ -301,10 +306,11 @@ void main() {
 
       manager.receiveDataFromEngine(enabled: true, data: null);
       RestorationBucket? rootBucket2;
-      // ignore: unawaited_futures
-      manager.rootBucket.then((RestorationBucket? bucket) {
-        rootBucket2 = bucket;
-      });
+      unawaited(
+        manager.rootBucket.then((RestorationBucket? bucket) {
+          rootBucket2 = bucket;
+        }),
+      );
       expect(rootBucket2, isNotNull);
       expect(rootBucket2, isNot(same(rootBucket)));
       expect(manager.isReplacing, isTrue);
@@ -319,10 +325,11 @@ void main() {
 
       manager.receiveDataFromEngine(enabled: false, data: null);
       RestorationBucket? rootBucket3;
-      // ignore: unawaited_futures
-      manager.rootBucket.then((RestorationBucket? bucket) {
-        rootBucket3 = bucket;
-      });
+      unawaited(
+        manager.rootBucket.then((RestorationBucket? bucket) {
+          rootBucket3 = bucket;
+        }),
+      );
       expect(rootBucket3, isNull);
       expect(manager.isReplacing, isFalse);
       await tester.idle();

@@ -21,11 +21,13 @@ import 'package:flutter_tools/src/project_validator.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 import 'analysis_server_mock.dart';
 
 void main() {
   setUpAll(() {
+    Cache.disableLocking();
     Cache.flutterRoot = getFlutterRoot();
   });
 
@@ -116,6 +118,76 @@ void main() {
     await server.dispose();
     expect(processManager, hasNoRemainingExpectations);
   });
+
+  testUsingContext(
+    'AnalysisServer handles server-initiated requests with same ID as outstanding request',
+    () async {
+      final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
+        'flutter_analysis_test.',
+      );
+      createSampleProject(tempDir);
+
+      final process = MockLspServerProcess();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            fileSystem.path.join('Artifact.engineDartSdkPath', 'bin', 'dart'),
+            'language-server',
+            '--dart-sdk',
+            'Artifact.engineDartSdkPath',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--suppress-analytics',
+          ],
+          process: process,
+        ),
+      ]);
+
+      final server = AnalysisServer(
+        'Artifact.engineDartSdkPath',
+        <String>[tempDir.path],
+        fileSystem: fileSystem,
+        platform: FakePlatform(),
+        processManager: processManager,
+        logger: logger,
+        terminal: terminal,
+        suppressAnalytics: true,
+      );
+
+      await server.start();
+      // Start simulated analysis so dart/workspace/analysis/complete will wait for it.
+      process.startSimulatedAnalysis();
+
+      final analysisCompleteReceived = Completer<int>();
+      process.onRequest = (Map<String, Object?> request) {
+        if (request['method'] == 'dart/workspace/analysis/complete') {
+          analysisCompleteReceived.complete(request['id']! as int);
+        }
+      };
+
+      // Start waiting for analysis. The client sends dart/workspace/analysis/complete.
+      final Future<void> waitFuture = server.waitForAnalysis(delay: Duration.zero);
+      final int requestId = await analysisCompleteReceived.future;
+
+      // Simulate server sending a request to the client (e.g. window/workDoneProgress/create)
+      // with the same ID while client request is still outstanding.
+      process.sendServerRequest('window/workDoneProgress/create', <String, Object?>{
+        'token': 'ANALYZING',
+      }, id: requestId);
+
+      await pumpEventQueue();
+
+      // Finish simulated analysis, allowing the server to respond to client request.
+      process.endSimulatedAnalysis();
+
+      // The client's waitForAnalysis future should complete successfully and not fail
+      // due to the server's request being mistaken for a response.
+      await expectLater(waitFuture, completes);
+
+      await server.dispose();
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
 
   testUsingContext('AnalysisServer handles non-ASCII project path', () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
@@ -272,14 +344,15 @@ void main() {
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(
-      terminal: Terminal.test(),
-      artifacts: artifacts,
-      logger: logger,
-      platform: FakePlatform(),
-      fileSystem: MemoryFileSystem.test(),
-      processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
       suppressAnalytics: false,
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        processManager: processManager,
+      ),
     );
 
     final commandRunner = TestFlutterCommandRunner();
@@ -309,14 +382,15 @@ void main() {
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(
-      terminal: Terminal.test(),
-      artifacts: artifacts,
-      logger: logger,
-      platform: FakePlatform(),
-      fileSystem: MemoryFileSystem.test(),
-      processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        processManager: processManager,
+      ),
     );
 
     final commandRunner = TestFlutterCommandRunner();
@@ -346,14 +420,15 @@ void main() {
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(
-      terminal: Terminal.test(),
-      artifacts: artifacts,
-      logger: logger,
-      platform: FakePlatform(),
-      fileSystem: fileSystem,
-      processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+      ),
     );
 
     final commandRunner = TestFlutterCommandRunner();
@@ -396,14 +471,15 @@ void main() {
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(
-      terminal: Terminal.test(),
-      artifacts: artifacts,
-      logger: logger,
-      platform: FakePlatform(),
-      fileSystem: MemoryFileSystem.test(),
-      processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: MemoryFileSystem.test(),
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+      ),
     );
 
     final commandRunner = TestFlutterCommandRunner();
@@ -450,14 +526,15 @@ void main() {
 
       final artifacts = Artifacts.test();
       final command = AnalyzeCommand(
-        terminal: Terminal.test(),
-        artifacts: artifacts,
-        logger: logger,
-        platform: FakePlatform(),
-        fileSystem: MemoryFileSystem.test(),
-        processManager: processManager,
         allProjectValidators: <ProjectValidator>[],
         suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          fs: MemoryFileSystem.test(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+        ),
       );
 
       final commandRunner = TestFlutterCommandRunner();
@@ -497,14 +574,15 @@ void main() {
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(
-      terminal: Terminal.test(),
-      artifacts: artifacts,
-      logger: logger,
-      platform: FakePlatform(),
-      fileSystem: fileSystem,
-      processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+      ),
     );
 
     final commandRunner = TestFlutterCommandRunner();

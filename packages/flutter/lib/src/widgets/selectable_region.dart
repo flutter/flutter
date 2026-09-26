@@ -2990,8 +2990,8 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       'This method should only be given selection events that select text boundaries.',
     );
     final Offset effectiveGlobalPosition = switch (event) {
-      SelectWordSelectionEvent(:final globalPosition) => globalPosition,
-      SelectParagraphSelectionEvent(:final globalPosition) => globalPosition,
+      SelectWordSelectionEvent(:final Offset globalPosition) => globalPosition,
+      SelectParagraphSelectionEvent(:final Offset globalPosition) => globalPosition,
       _ => throw ArgumentError('Unsupported selection event: $event'),
     };
     SelectionResult? lastSelectionResult;
@@ -3444,8 +3444,10 @@ typedef _SelectionInfo = ({int contentLength, SelectedContentRange? range});
 ///
 ///  * [EditableTextContextMenuBuilder], which performs the same role for
 ///    [EditableText].
-typedef SelectableRegionContextMenuBuilder =
-    Widget Function(BuildContext context, SelectableRegionState selectableRegionState);
+typedef SelectableRegionContextMenuBuilder = Widget Function(
+  BuildContext context,
+  SelectableRegionState selectableRegionState,
+);
 
 /// The status of the selection under a [SelectableRegion].
 ///
@@ -3625,8 +3627,7 @@ class _SelectionListenerState extends State<SelectionListener> {
 
 final class _SelectionListenerDelegate extends StaticSelectionContainerDelegate
     implements SelectionDetails {
-  _SelectionListenerDelegate({required SelectionListenerNotifier selectionNotifier})
-    : _selectionNotifier = selectionNotifier {
+  _SelectionListenerDelegate({required this._selectionNotifier}) {
     _selectionNotifier._registerSelectionListenerDelegate(this);
   }
 
