@@ -1941,16 +1941,4 @@ void main() {
       expect(identical(initialPhysics, currentPhysics), isTrue);
     },
   );
-
-  test('PageScrollPhysics supports shorthands', () {
-    PageScrollPhysics physics = const .page();
-
-    expect(physics, isA<PageScrollPhysics>());
-    expect(physics.parent, isNull);
-
-    physics = const PageScrollPhysics.page(parent: ClampingScrollPhysics());
-
-    expect(physics, isA<PageScrollPhysics>());
-    expect(physics.parent, isA<ClampingScrollPhysics>());
-  });
 }

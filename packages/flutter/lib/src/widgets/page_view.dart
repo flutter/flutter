@@ -576,9 +576,6 @@ class PageScrollPhysics extends ScrollPhysics {
   /// Creates physics for a [PageView].
   const PageScrollPhysics({super.parent});
 
-  /// Creates a [PageScrollPhysics] instance.
-  const factory PageScrollPhysics.page({ScrollPhysics? parent}) = PageScrollPhysics;
-
   @override
   PageScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return PageScrollPhysics(parent: buildParent(ancestor));
