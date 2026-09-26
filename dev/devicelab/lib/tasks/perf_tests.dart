@@ -853,7 +853,7 @@ void _addHcppSupportToManifest(String testDirectory) {
 
 void _addMergedPlatformThreadSupportToManifest(String testDirectory) {
   final keyPairs = <(String, String)>[
-    ('io.flutter.embedding.android.EnableMergedPlatformUIThread', 'true'),
+    ('io.flutter.embedding.android.MergedPlatformUIThread', 'true'),
   ];
   addMetadataToManifest(testDirectory, keyPairs);
 }

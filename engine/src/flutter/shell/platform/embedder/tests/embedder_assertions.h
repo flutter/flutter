@@ -46,6 +46,56 @@ inline bool operator==(const FlutterRoundedRect& a,
          a.lower_left_corner_radius == b.lower_left_corner_radius;
 }
 
+inline bool operator==(const FlutterRoundSuperellipse& a,
+                       const FlutterRoundSuperellipse& b) {
+  return a.rect == b.rect &&
+         a.upper_left_corner_radius == b.upper_left_corner_radius &&
+         a.upper_right_corner_radius == b.upper_right_corner_radius &&
+         a.lower_right_corner_radius == b.lower_right_corner_radius &&
+         a.lower_left_corner_radius == b.lower_left_corner_radius;
+}
+
+inline bool operator==(const FlutterPathSegment& a,
+                       const FlutterPathSegment& b) {
+  if (a.verb != b.verb) {
+    return false;
+  }
+  switch (a.verb) {
+    case kFlutterPathVerbMove:
+    case kFlutterPathVerbLine:
+      return a.points[0] == b.points[0];
+    case kFlutterPathVerbQuad:
+      return a.points[0] == b.points[0] && a.points[1] == b.points[1];
+    case kFlutterPathVerbConic:
+      return a.points[0] == b.points[0] && a.points[1] == b.points[1] &&
+             flutter::testing::NumberNear(a.conic_weight, b.conic_weight);
+    case kFlutterPathVerbCubic:
+      return a.points[0] == b.points[0] && a.points[1] == b.points[1] &&
+             a.points[2] == b.points[2];
+    case kFlutterPathVerbClose:
+      return true;
+  }
+  return false;
+}
+
+inline bool operator==(const FlutterPath& a, const FlutterPath& b) {
+  if (a.struct_size != b.struct_size || a.fill_type != b.fill_type ||
+      a.segments_count != b.segments_count) {
+    return false;
+  }
+  if (a.segments_count > 0) {
+    if (a.segments == nullptr || b.segments == nullptr) {
+      return a.segments == b.segments;
+    }
+    for (size_t i = 0; i < a.segments_count; ++i) {
+      if (!(a.segments[i] == b.segments[i])) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 inline bool operator==(const FlutterTransformation& a,
                        const FlutterTransformation& b) {
   return a.scaleX == b.scaleX && a.skewX == b.skewX && a.transX == b.transX &&
@@ -182,6 +232,10 @@ inline bool operator==(const FlutterPlatformViewMutation& a,
       return a.clip_rounded_rect == b.clip_rounded_rect;
     case kFlutterPlatformViewMutationTypeTransformation:
       return a.transformation == b.transformation;
+    case kFlutterPlatformViewMutationTypeClipRoundSuperellipse:
+      return a.clip_round_superellipse == b.clip_round_superellipse;
+    case kFlutterPlatformViewMutationTypeClipPath:
+      return a.clip_path == b.clip_path;
   }
 
   return false;
@@ -327,6 +381,30 @@ inline std::ostream& operator<<(std::ostream& out,
              << item.image << std::dec << " Format: " << item.format;
 }
 
+inline std::ostream& operator<<(std::ostream& out,
+                                const FlutterRoundSuperellipse& r) {
+  out << "Rect: " << r.rect << ", ";
+  out << "Upper Left Corner Radius: " << r.upper_left_corner_radius << ", ";
+  out << "Upper Right Corner Radius: " << r.upper_right_corner_radius << ", ";
+  out << "Lower Right Corner Radius: " << r.lower_right_corner_radius << ", ";
+  out << "Lower Left Corner Radius: " << r.lower_left_corner_radius;
+  return out;
+}
+
+inline std::ostream& operator<<(std::ostream& out,
+                                const FlutterPathSegment& seg) {
+  out << "Verb: " << seg.verb << ", Points: [";
+  out << seg.points[0] << ", " << seg.points[1] << ", " << seg.points[2]
+      << "], Weight: " << seg.conic_weight;
+  return out;
+}
+
+inline std::ostream& operator<<(std::ostream& out, const FlutterPath& p) {
+  out << "FillType: " << p.fill_type
+      << ", Segments Count: " << p.segments_count;
+  return out;
+}
+
 inline std::string FlutterPlatformViewMutationTypeToString(
     FlutterPlatformViewMutationType type) {
   switch (type) {
@@ -338,6 +416,10 @@ inline std::string FlutterPlatformViewMutationTypeToString(
       return "kFlutterPlatformViewMutationTypeClipRoundedRect";
     case kFlutterPlatformViewMutationTypeTransformation:
       return "kFlutterPlatformViewMutationTypeTransformation";
+    case kFlutterPlatformViewMutationTypeClipRoundSuperellipse:
+      return "kFlutterPlatformViewMutationTypeClipRoundSuperellipse";
+    case kFlutterPlatformViewMutationTypeClipPath:
+      return "kFlutterPlatformViewMutationTypeClipPath";
   }
   return "Unknown";
 }
@@ -349,12 +431,22 @@ inline std::ostream& operator<<(std::ostream& out,
   switch (m.type) {
     case kFlutterPlatformViewMutationTypeOpacity:
       out << "Opacity: " << m.opacity;
+      break;
     case kFlutterPlatformViewMutationTypeClipRect:
       out << "Clip Rect: " << m.clip_rect;
+      break;
     case kFlutterPlatformViewMutationTypeClipRoundedRect:
       out << "Clip Rounded Rect: " << m.clip_rounded_rect;
+      break;
     case kFlutterPlatformViewMutationTypeTransformation:
       out << "Transformation: " << m.transformation;
+      break;
+    case kFlutterPlatformViewMutationTypeClipRoundSuperellipse:
+      out << "Clip Round Superellipse: " << m.clip_round_superellipse;
+      break;
+    case kFlutterPlatformViewMutationTypeClipPath:
+      out << "Clip Path: " << m.clip_path;
+      break;
   }
   return out;
 }
