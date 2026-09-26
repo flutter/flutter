@@ -94,9 +94,6 @@ abstract class BoxBorder extends ShapeBorder {
   /// [Border.right]), and the 'horizontal' argument refers to the horizontal
   /// sides ([Border.top] and [Border.bottom]).
   ///
-  /// This is different from [EdgeInsets.symmetric], where 'vertical' applies
-  /// to the top and bottom offsets, and 'horizontal' applies to the left and right offsets.
-  ///
   /// All arguments default to [BorderSide.none].
   const factory BoxBorder.symmetric({BorderSide vertical, BorderSide horizontal}) =
       Border.symmetric;
@@ -451,9 +448,6 @@ class Border extends BoxBorder {
   ///
   /// The 'vertical' argument refers to the vertical sides ([left] and [right]),
   /// and the 'horizontal' argument refers to the horizontal sides ([top] and [bottom]).
-  ///
-  /// This is different from [EdgeInsets.symmetric], where 'vertical' applies
-  /// to the top and bottom offsets, and 'horizontal' applies to the left and right offsets.
   ///
   /// All arguments default to [BorderSide.none].
   const Border.symmetric({
