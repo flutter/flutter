@@ -4,9 +4,37 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
+
+#include <UIKit/UIKit.h>
+#include <objc/runtime.h>
+
+@interface FlutterLayoutTrampolineView : UIView {
+  void (^layoutCallback)(void);
+}
+@end
+
+@implementation FlutterLayoutTrampolineView
+
+- (instancetype)initWithLayoutCallback:(void (^)(void))callback {
+  self = [super init];
+  if (self) {
+    layoutCallback = [callback copy];
+  }
+  return self;
+}
+
+- (void)layoutSubviews {
+  [super layoutSubviews];
+  if (layoutCallback) {
+    layoutCallback();
+  }
+}
+
+@end
 
 FLUTTER_ASSERT_ARC
 
@@ -20,6 +48,12 @@ VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners,
     : VsyncWaiter(task_runners), display_link_manager_(display_link_manager) {
   FML_DCHECK(display_link_manager);
   auto vsyncCallback = ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
+    if (!waiting_for_vsync_) {
+      [client_ pause];
+      return;
+    }
+    waiting_for_vsync_ = false;
+
     // Compute delay using the same CACurrentMediaTime() clock.
     CFTimeInterval delay = CACurrentMediaTime() - startTime;
     if (delay < 0.0) {
@@ -35,7 +69,10 @@ VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners,
 
     // Align target time to the C++ steady_clock used by fml::TimePoint.
     fml::TimePoint target_time = start_time + fml::TimeDelta::FromSecondsF(duration);
-    FireCallback(start_time, target_time, true);
+    FireCallback(start_time, target_time);
+
+    // The layout callback will be triggered right before CACommit.
+    [layout_trampoline_view_ setNeedsLayout];
   };
   FlutterFMLTaskRunner* uiTaskRunner =
       [[FlutterFMLTaskRunner alloc] initWithTaskRunner:task_runners_.GetUITaskRunner()];
@@ -44,6 +81,7 @@ VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners,
       isVariableRefreshRateEnabled:display_link_manager_.maxRefreshRateEnabledOnIPhone
                     maxRefreshRate:display_link_manager_.displayRefreshRate
                           callback:vsyncCallback];
+  client_.allowPauseAfterVsync = false;
   max_refresh_rate_ = display_link_manager_.displayRefreshRate;
 }
 
@@ -51,6 +89,7 @@ VsyncWaiterIOS::~VsyncWaiterIOS() {
   // This way, we will get no more callbacks from the display link that holds a weak (non-nilling)
   // reference to this C++ object.
   [client_ invalidate];
+  [layout_trampoline_view_ removeFromSuperview];
 }
 
 void VsyncWaiterIOS::AwaitVSync() {
@@ -59,7 +98,49 @@ void VsyncWaiterIOS::AwaitVSync() {
     max_refresh_rate_ = new_max_refresh_rate;
     [client_ setMaxRefreshRate:max_refresh_rate_];
   }
-  [client_ await];
+
+  if (client_.displayLink.paused) {
+    [client_ await];
+    pending_vsync_on_ca_commit_ = true;
+    // The layout callback will be triggered right before the CACommit. VSync will
+    // be signaleld from this callback. It can not be signalled synchronously from here
+    // and using dispatch_async will miss the CA Commit which is already scheduled.
+    [layout_trampoline_view_ setNeedsLayout];
+  } else {
+    waiting_for_vsync_ = true;
+  }
+  waiting_for_content_ = true;
+}
+
+void VsyncWaiterIOS::UpdateFlutterView(UIView* flutterView) {
+  if (layout_trampoline_view_ == nil) {
+    layout_trampoline_view_ = [[FlutterLayoutTrampolineView alloc] initWithLayoutCallback:^{
+      OnBeforeCACommit();
+    }];
+  }
+  [flutterView addSubview:layout_trampoline_view_];
+}
+
+void VsyncWaiterIOS::FrameSubmitted() {
+  waiting_for_content_ = false;
+}
+
+void VsyncWaiterIOS::OnBeforeCACommit() {
+  if (pending_vsync_on_ca_commit_) {
+    pending_vsync_on_ca_commit_ = false;
+    const fml::TimePoint frame_start_time = fml::TimePoint::Now();
+    const fml::TimePoint frame_target_time =
+        frame_start_time + fml::TimeDelta::FromSecondsF(SnapDuration(0.0, max_refresh_rate_));
+    FireCallback(frame_start_time, frame_target_time);
+  }
+
+  // Block the main thread until content is available or a timeout occurs.
+  // This is necessary otherwise when CAMetalLayer is presenting with transaction
+  // and it misses the CA commit the frame pacing gets severely disrupted.
+  CFTimeInterval startTime = CACurrentMediaTime();
+  while (waiting_for_content_ && CACurrentMediaTime() - startTime < 0.1) {
+    [FlutterRunLoop.mainRunLoop pollFlutterMessagesOnce];
+  }
 }
 
 // |VariableRefreshRateReporter|

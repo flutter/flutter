@@ -41,6 +41,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
+#import "flutter/shell/platform/embedder/embedder_task_runner.h"
 #include "flutter/shell/profiling/sampling_profiler.h"
 
 FLUTTER_ASSERT_ARC
@@ -243,6 +244,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   // Reading the UIApplication lifecycle state and registering for UIKit notifications below both
   // require the main thread, as does running the engine.
   FML_DCHECK(NSThread.isMainThread) << "FlutterEngine must be created on the main thread.";
+  [FlutterRunLoop ensureMainLoopInitialized];
 
   _restorationEnabled = restorationEnabled;
   _allowHeadlessExecution = allowHeadlessExecution;
@@ -378,8 +380,18 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   }
 }
 
+- (void)onFrameSubmitted {
+  auto vsync_waiter = _shell->GetVsyncWaiter().lock();
+  auto vsync_waiter_ios = std::static_pointer_cast<flutter::VsyncWaiterIOS>(vsync_waiter);
+  vsync_waiter_ios->FrameSubmitted();
+}
+
 - (void)recreatePlatformViewsController {
   _platformViewsController = [[FlutterPlatformViewsController alloc] init];
+  __weak __typeof(self) weakSelf = self;
+  _platformViewsController.onFrameSubmitted = ^{
+    [weakSelf onFrameSubmitted];
+  };
 }
 
 - (void)dealloc {
@@ -581,6 +593,10 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
     self.flutterViewControllerWillDeallocObserver = nil;
     [self notifyLowMemory];
   }
+
+  auto vsync_waiter = _shell->GetVsyncWaiter().lock();
+  auto vsync_waiter_ios = std::static_pointer_cast<flutter::VsyncWaiterIOS>(vsync_waiter);
+  vsync_waiter_ios->UpdateFlutterView(self.viewController.view);
 }
 
 - (void)attachView {
@@ -990,7 +1006,22 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
   // The platform and UI threads are always merged on iOS, so the UI task runner is the platform
   // thread's task runner.
-  fml::RefPtr<fml::TaskRunner> platform_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  fml::RefPtr<fml::TaskRunner> platform_runner = fml::MakeRefCounted<flutter::EmbedderTaskRunner>(
+      flutter::EmbedderTaskRunner::DispatchTable{
+          .post_task_callback =
+              [](flutter::EmbedderTaskRunner* task_runner, uint64_t task_baton,
+                 fml::TimePoint target_time) {
+                [FlutterRunLoop.mainRunLoop
+                    performAfterDelay:std::max(0.0,
+                                               (target_time - fml::TimePoint::Now()).ToSecondsF())
+                                block:^{
+                                  task_runner->PostTask(task_baton);
+                                }];
+              },
+          .runs_task_on_current_thread_callback = []() { return [NSThread isMainThread]; },
+          .destruction_callback = []() {},
+      },
+      0);
   flutter::TaskRunners task_runners(threadLabel.UTF8String,                       // label
                                     platform_runner,                              // platform
                                     _threadHost->raster_thread->GetTaskRunner(),  // raster
