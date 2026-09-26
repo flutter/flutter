@@ -47,11 +47,11 @@
                     "test_dependencies": [
                         {
                             "dependency": "android_virtual_device",
-                            "version": "android_36_google_apis_x64.textpb"
+                            "version": "android_37_google_apis_ps16k_x64.textpb"
                         },
                         {
                             "dependency": "avd_cipd_version",
-                            "version": "build_id:8719362231152674241"
+                            "version": "build_id:8670032186093418337"
                         }
                     ],
                     "contexts": [
