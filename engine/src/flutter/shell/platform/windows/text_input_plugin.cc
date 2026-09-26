@@ -6,13 +6,17 @@
 
 #include <windows.h>
 
+#include <algorithm>
 #include <cstdint>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/string_conversion.h"
 #include "flutter/shell/platform/common/json_method_codec.h"
 #include "flutter/shell/platform/common/text_editing_delta.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
+#include "flutter/shell/platform/windows/on_screen_keyboard.h"
+#include "flutter/shell/platform/windows/tsf_bridge.h"
 
 static constexpr char kSetEditingStateMethod[] = "TextInput.setEditingState";
 static constexpr char kClearClientMethod[] = "TextInput.clearClient";
@@ -63,6 +67,16 @@ static constexpr char kInternalConsistencyError[] =
 
 static constexpr char kInputActionNewline[] = "TextInputAction.newline";
 
+namespace {
+
+bool IsTouchOrPenPointer(FlutterPointerDeviceKind kind) {
+  return kind == kFlutterPointerDeviceKindTouch ||
+         kind == kFlutterPointerDeviceKindStylus ||
+         kind == kFlutterPointerDeviceKindInvertedStylus;
+}
+
+}  // namespace
+
 namespace flutter {
 
 void TextInputPlugin::TextHook(const std::u16string& text) {
@@ -106,13 +120,27 @@ void TextInputPlugin::KeyboardHook(int key,
 }
 
 TextInputPlugin::TextInputPlugin(flutter::BinaryMessenger* messenger,
-                                 FlutterWindowsEngine* engine)
+                                 FlutterWindowsEngine* engine,
+                                 OnScreenKeyboard* on_screen_keyboard,
+                                 TsfBridge* tsf_bridge,
+                                 TaskRunner* task_runner,
+                                 std::function<HWND()> get_focus)
     : channel_(std::make_unique<flutter::MethodChannel<rapidjson::Document>>(
           messenger,
           kChannelName,
           &flutter::JsonMethodCodec::GetInstance())),
       engine_(engine),
-      active_model_(nullptr) {
+      on_screen_keyboard_(on_screen_keyboard),
+      tsf_bridge_(tsf_bridge),
+      task_runner_(task_runner != nullptr
+                       ? task_runner
+                       : (engine != nullptr ? engine->task_runner() : nullptr)),
+      get_focus_(std::move(get_focus)),
+      active_model_(nullptr),
+      weak_factory_(this) {
+  FML_DCHECK(engine_);
+  FML_DCHECK(task_runner_);
+  FML_DCHECK(get_focus_);
   channel_->SetMethodCallHandler(
       [this](
           const flutter::MethodCall<rapidjson::Document>& call,
@@ -121,7 +149,11 @@ TextInputPlugin::TextInputPlugin(flutter::BinaryMessenger* messenger,
       });
 }
 
-TextInputPlugin::~TextInputPlugin() = default;
+TextInputPlugin::~TextInputPlugin() {
+  if (tsf_bridge_ != nullptr) {
+    tsf_bridge_->ClearFocus();
+  }
+}
 
 void TextInputPlugin::ComposeBeginHook() {
   if (active_model_ == nullptr) {
@@ -214,8 +246,10 @@ void TextInputPlugin::HandleMethodCall(
     std::unique_ptr<flutter::MethodResult<rapidjson::Document>> result) {
   const std::string& method = method_call.method_name();
 
-  if (method.compare(kShowMethod) == 0 || method.compare(kHideMethod) == 0) {
-    // These methods are no-ops.
+  if (method.compare(kShowMethod) == 0) {
+    MaybeDisplayOnScreenKeyboard();
+  } else if (method.compare(kHideMethod) == 0) {
+    MaybeDismissOnScreenKeyboard();
   } else if (method.compare(kClearClientMethod) == 0) {
     FlutterWindowsView* view = engine_->view(view_id_);
     if (view == nullptr) {
@@ -231,7 +265,12 @@ void TextInputPlugin::HandleMethodCall(
       SendStateUpdate(*active_model_);
     }
     view->OnResetImeComposing();
+    AbortTsfComposition();
     active_model_ = nullptr;
+    ScheduleTsfNonEditable();
+    if (on_screen_keyboard_) {
+      on_screen_keyboard_->OnClientCleared();
+    }
   } else if (method.compare(kSetClientMethod) == 0) {
     if (!method_call.arguments() || method_call.arguments()->IsNull()) {
       result->Error(kBadArgumentError, "Method invoked without args");
@@ -282,7 +321,9 @@ void TextInputPlugin::HandleMethodCall(
         input_type_ = input_type_json->value.GetString();
       }
     }
+    CancelPendingTsfNonEditable();
     active_model_ = std::make_unique<TextInputModel>();
+    FocusTsfEditable();
   } else if (method.compare(kSetEditingStateMethod) == 0) {
     if (!method_call.arguments() || method_call.arguments()->IsNull()) {
       result->Error(kBadArgumentError, "Method invoked without args");
@@ -337,6 +378,10 @@ void TextInputPlugin::HandleMethodCall(
       active_model_->SetComposingRange(
           TextRange(composing_base, composing_extent), cursor_offset);
     }
+    if (tsf_bridge_) {
+      tsf_bridge_->NotifyTextChanged();
+      tsf_bridge_->NotifySelectionChanged();
+    }
   } else if (method.compare(kSetMarkedTextRect) == 0) {
     FlutterWindowsView* view = engine_->view(view_id_);
     if (view == nullptr) {
@@ -368,6 +413,9 @@ void TextInputPlugin::HandleMethodCall(
 
     Rect transformed_rect = GetCursorRect();
     view->OnCursorRectUpdated(transformed_rect);
+    if (tsf_bridge_) {
+      tsf_bridge_->NotifyLayoutChanged();
+    }
   } else if (method.compare(kSetEditableSizeAndTransform) == 0) {
     FlutterWindowsView* view = engine_->view(view_id_);
     if (view == nullptr) {
@@ -401,6 +449,9 @@ void TextInputPlugin::HandleMethodCall(
     }
     Rect transformed_rect = GetCursorRect();
     view->OnCursorRectUpdated(transformed_rect);
+    if (tsf_bridge_) {
+      tsf_bridge_->NotifyLayoutChanged();
+    }
   } else {
     result->NotImplemented();
     return;
@@ -507,6 +558,11 @@ void TextInputPlugin::OnViewRemoved(FlutterViewId view_id) {
     return;
   }
 
+  // Dismiss while the view is still registered so the HWND is valid.
+  DismissOnScreenKeyboard();
+  CancelPendingTsfNonEditable();
+  FocusTsfNonEditable();
+
   // If composing, commit and end composing. Skip sending state updates and
   // IME reset since the view is being removed.
   if (active_model_ != nullptr && active_model_->composing()) {
@@ -516,6 +572,164 @@ void TextInputPlugin::OnViewRemoved(FlutterViewId view_id) {
 
   active_model_ = nullptr;
   view_id_ = 0;
+}
+
+void TextInputPlugin::SetLastPointerKind(FlutterPointerDeviceKind device_kind) {
+  last_pointer_kind_ = device_kind;
+  pointer_gesture_is_valid_ = true;
+}
+
+void TextInputPlugin::OnWindowUnfocused(HWND hwnd) {
+  if (hwnd != GetClientWindowHandle()) {
+    return;
+  }
+  pointer_gesture_is_valid_ = false;
+}
+
+HWND TextInputPlugin::GetClientWindowHandle() const {
+  FlutterWindowsView* view = engine_->view(view_id_);
+  if (view == nullptr) {
+    return nullptr;
+  }
+  return view->GetWindowHandle();
+}
+
+bool TextInputPlugin::ClientWindowHasFocus(HWND hwnd) const {
+  if (hwnd == nullptr) {
+    return false;
+  }
+  return get_focus_() == hwnd;
+}
+
+void TextInputPlugin::MaybeDisplayOnScreenKeyboard() {
+  if (on_screen_keyboard_ == nullptr || active_model_ == nullptr) {
+    return;
+  }
+  HWND hwnd = GetClientWindowHandle();
+  const bool touch_or_pen =
+      pointer_gesture_is_valid_ && IsTouchOrPenPointer(last_pointer_kind_);
+  const bool window_has_focus = ClientWindowHasFocus(hwnd);
+  if (!touch_or_pen || !window_has_focus) {
+    return;
+  }
+  on_screen_keyboard_->Display(hwnd);
+}
+
+void TextInputPlugin::MaybeDismissOnScreenKeyboard() {
+  if (active_model_ != nullptr) {
+    return;
+  }
+  DismissOnScreenKeyboard();
+}
+
+void TextInputPlugin::DismissOnScreenKeyboard() {
+  if (on_screen_keyboard_ == nullptr) {
+    return;
+  }
+  HWND hwnd = GetClientWindowHandle();
+  on_screen_keyboard_->Dismiss(hwnd);
+}
+
+void TextInputPlugin::FocusTsfEditable() {
+  CancelPendingTsfNonEditable();
+  if (tsf_bridge_ == nullptr) {
+    return;
+  }
+  HWND hwnd = GetClientWindowHandle();
+  tsf_bridge_->FocusEditable(hwnd, this);
+}
+
+void TextInputPlugin::FocusTsfNonEditable() {
+  if (tsf_bridge_ == nullptr) {
+    return;
+  }
+  HWND hwnd = GetClientWindowHandle();
+  tsf_bridge_->AbortComposition();
+  tsf_bridge_->FocusNonEditable(hwnd);
+}
+
+void TextInputPlugin::AbortTsfComposition() {
+  if (tsf_bridge_ != nullptr) {
+    tsf_bridge_->AbortComposition();
+  }
+}
+
+void TextInputPlugin::ScheduleTsfNonEditable() {
+  if (tsf_bridge_ == nullptr) {
+    return;
+  }
+  const HWND hwnd = GetClientWindowHandle();
+  const uint64_t generation = ++tsf_focus_generation_;
+  task_runner_->PostDelayedTask(
+      [weak = weak_factory_.GetWeakPtr(), generation, hwnd]() {
+        if (!weak || generation != weak->tsf_focus_generation_ ||
+            weak->active_model_ != nullptr) {
+          return;
+        }
+        weak->tsf_bridge_->FocusNonEditable(hwnd);
+      },
+      kTsfFocusDebounce);
+}
+
+void TextInputPlugin::CancelPendingTsfNonEditable() {
+  ++tsf_focus_generation_;
+}
+
+std::u16string TextInputPlugin::GetTsfText() const {
+  if (active_model_ == nullptr) {
+    return {};
+  }
+  return fml::Utf8ToUtf16(active_model_->GetText());
+}
+
+TextRange TextInputPlugin::GetTsfSelection() const {
+  if (active_model_ == nullptr) {
+    return TextRange(0);
+  }
+  return active_model_->selection();
+}
+
+void TextInputPlugin::SetTsfSelection(const TextRange& range) {
+  if (active_model_ == nullptr) {
+    return;
+  }
+  active_model_->SetSelection(range);
+  SendStateUpdate(*active_model_);
+}
+
+void TextInputPlugin::ReplaceTsfText(const TextRange& range,
+                                     const std::u16string& text) {
+  if (active_model_ == nullptr) {
+    return;
+  }
+  active_model_->SetSelection(range);
+  if (text.empty()) {
+    active_model_->Delete();
+  } else {
+    active_model_->AddText(text);
+  }
+  SendStateUpdate(*active_model_);
+}
+
+void TextInputPlugin::OnTsfComposeBegin() {
+  ComposeBeginHook();
+}
+
+void TextInputPlugin::OnTsfComposeUpdate(const std::u16string& text,
+                                         int cursor_pos) {
+  ComposeChangeHook(text, cursor_pos);
+}
+
+void TextInputPlugin::OnTsfComposeEnd() {
+  ComposeEndHook();
+}
+
+Rect TextInputPlugin::GetTsfCaretRect() const {
+  return GetCursorRect();
+}
+
+HWND TextInputPlugin::GetTsfWindowHandle() const {
+  return GetClientWindowHandle();
 }
 
 }  // namespace flutter
