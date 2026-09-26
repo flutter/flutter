@@ -606,14 +606,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
-  isolate:
-    dependency: "direct main"
-    description:
-      name: isolate
-      sha256: "3554ab10fdeec965d27e0074c913ccb2229887633da080d2b35a6322da14938b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.1"
   jni:
     dependency: transitive
     description:
