@@ -10,8 +10,6 @@ import { loadCanvasKit } from './canvaskit_loader.js';
 import { loadSkwasm } from './skwasm_loader.js';
 import { getCanvaskitBaseUrl } from './utils.js';
 
-const supportsDart2Wasm = browserEnvironment.supportsDart2Wasm;
-
 /**
  * The public interface of _flutter.loader. Exposes two methods:
  * * loadEntrypoint (which coordinates the default Flutter web loading procedure)
@@ -78,6 +76,7 @@ export class FlutterLoader {
       throw "FlutterLoader.load requires _flutter.buildConfig to be set";
     }
 
+    const supportsDart2Wasm = _flutter.supportsDart2Wasm ?? browserEnvironment.supportsDart2Wasm;
     const enableWasm = config.wasmAllowList?.[browserEnvironment.browserEngine] ?? defaultWasmSupport[browserEnvironment.browserEngine];
 
     /**
