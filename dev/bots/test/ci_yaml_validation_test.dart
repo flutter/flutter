@@ -39,6 +39,28 @@ void main() {
 
     expect(properties['leak_tracking'], anyOf('true', 'false', isNull));
     expect(properties['test_randomization_off'], anyOf('true', 'false', isNull));
+
+    if (properties['shard'] == 'tool_integration_tests') {
+      final Object? timeoutSecsValue = properties['test_timeout_secs'];
+      expect(
+        timeoutSecsValue,
+        isNotNull,
+        reason: '${target.name} must specify test_timeout_secs (e.g. "2700") to avoid hitting the 30-minute step execution timeout.',
+      );
+      if (timeoutSecsValue != null) {
+        final int? timeoutSecs = int.tryParse(timeoutSecsValue.toString());
+        expect(
+          timeoutSecs,
+          isNotNull,
+          reason: '${target.name} test_timeout_secs must be a valid integer, got "$timeoutSecsValue".',
+        );
+        expect(
+          timeoutSecs!,
+          greaterThanOrEqualTo(2700),
+          reason: '${target.name} test_timeout_secs should be at least 2700s (45 minutes).',
+        );
+      }
+    }
   }
 
   group('framework', () {
