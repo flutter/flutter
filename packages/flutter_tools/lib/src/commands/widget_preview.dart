@@ -285,14 +285,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   /// The currently running instance of the widget preview scaffold.
   ResidentRunner? _widgetPreviewApp;
 
-  /// The location of the widget_preview_scaffold for the current execution of the command.
-  ///
-  /// This is only meant for testing as there's no simple mapping from the target project to the
-  /// scaffold project.
-  // TODO(bkonyi): remove once https://github.com/flutter/flutter/issues/179036 is resolved.
-  @visibleForTesting
-  static late Directory widgetPreviewScaffold;
-
   @override
   Future<FlutterCommandResult> runCommand() async {
     assert(toolContext.logger is WidgetPreviewMachineAwareLogger);
@@ -304,7 +296,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     await WidgetPreviewGitignoreMigration(rootProject, logger).migrate();
 
     final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
-    widgetPreviewScaffold = customPreviewScaffoldOutput != null
+    final Directory widgetPreviewScaffold = customPreviewScaffoldOutput != null
         ? fs.directory(customPreviewScaffoldOutput)
         : rootProject.widgetPreviewScaffold;
 
@@ -312,9 +304,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     // generate one.
     final bool generateScaffoldProject =
         customPreviewScaffoldOutput != null || _previewManifest.shouldGenerateProject();
-    // TODO(bkonyi): can this be moved?
     widgetPreviewScaffold.createSync(recursive: true);
-    fs.currentDirectory = widgetPreviewScaffold;
 
     if (generateScaffoldProject) {
       // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
