@@ -13,11 +13,13 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../compile.dart';
+import '../context/tool_context.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
@@ -26,6 +28,7 @@ import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
+import '../macos/xcode.dart';
 import '../mdns_discovery.dart';
 import '../project.dart';
 import '../resident_runner.dart';
@@ -63,16 +66,14 @@ import 'daemon.dart';
 /// also be provided.
 class AttachCommand extends FlutterCommand {
   AttachCommand({
-    bool verboseHelp = false,
+    required this._buildSystem,
+    required this._buildTargets,
+    required ToolContext super.toolContext,
+    required this._xcode,
     HotRunnerFactory? hotRunnerFactory,
-    required this._stdio,
-    required this._logger,
-    required this._terminal,
-    required this._signals,
-    required this._platform,
-    required this._processInfo,
-    required this._fileSystem,
-  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory() {
+    bool verboseHelp = false,
+  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
+       _toolContext = toolContext {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -137,13 +138,13 @@ class AttachCommand extends FlutterCommand {
   }
 
   final HotRunnerFactory _hotRunnerFactory;
-  final Stdio _stdio;
-  final Logger _logger;
-  final Terminal _terminal;
-  final Signals _signals;
-  final Platform _platform;
-  final ProcessInfo _processInfo;
-  final FileSystem _fileSystem;
+  final ToolContext _toolContext;
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
+  final Xcode? _xcode;
+
+  @override
+  ToolContext get toolContext => _toolContext;
 
   @override
   final name = 'attach';
@@ -202,6 +203,14 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
+
+  /// Optional [HotRunnerConfig] passed to [HotRunner].
+  @protected
+  HotRunnerConfig? get hotRunnerConfig => null;
+
+  /// Optional [ProjectFileInvalidator] passed to [HotRunner].
+  @protected
+  ProjectFileInvalidator? get projectFileInvalidator => null;
 
   @override
   Future<void> validateCommand() async {
@@ -268,7 +277,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       // However we exited from the runner, ensure the terminal has line mode
       // and echo mode enabled before we return the user to the shell.
       try {
-        _terminal.singleCharMode = false;
+        toolContext.terminal.singleCharMode = false;
       } on StdinException {
         // Do nothing, if the STDIN handle is no longer available, there is nothing actionable for us to do at this point
       }
@@ -278,7 +287,13 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attach({required Device device}) async {
-    _terminal.usesTerminalUi = true;
+    final ToolContext(
+      :Logger logger,
+      :ProcessInfo processInfo,
+      :Signals signals,
+      :Terminal terminal,
+    ) = toolContext;
+    terminal.usesTerminalUi = true;
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
     final onAppStart = Completer<void>.sync();
     TerminalHandler? terminalHandler;
@@ -287,10 +302,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         terminalHandler =
             TerminalHandler(
                 runner,
-                logger: _logger,
-                terminal: _terminal,
-                signals: _signals,
-                processInfo: _processInfo,
+                logger: logger,
+                terminal: terminal,
+                signals: signals,
+                processInfo: processInfo,
                 reportReady: boolArg('report-ready'),
                 pidFile: stringArg('pid-file'),
               )
@@ -306,14 +321,19 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attachDaemon({required Device device}) async {
+    final ToolContext(:FileSystem fs, :Logger logger, :Stdio stdio) = toolContext;
     final daemon = Daemon(
       DaemonConnection(
-        daemonStreams: DaemonStreams.fromStdio(_stdio, logger: _logger),
-        logger: _logger,
+        daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
+        logger: logger,
       ),
-      notifyingLogger: (_logger is NotifyingLogger)
-          ? _logger
-          : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
+      buildSystem: _buildSystem,
+      buildTargets: _buildTargets,
+      toolContext: toolContext,
+      xcode: _xcode,
+      notifyingLogger: (logger is NotifyingLogger)
+          ? logger
+          : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
       logToStdout: true,
       featureFlags: featureFlags,
     );
@@ -335,9 +355,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         device,
         null,
         true,
-        _fileSystem.currentDirectory,
+        fs.currentDirectory,
         LaunchMode.attach,
-        _logger as MachineOutputLogger,
+        logger as MachineOutputLogger,
       );
     } on Exception catch (error) {
       throwToolExit(error.toString());
@@ -353,11 +373,11 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
+      toolContext: toolContext,
+      buildInfo: buildInfo,
       target: targetFile,
       targetModelOverride: TargetModel(stringArg('target-model')!),
-      buildInfo: buildInfo,
       userIdentifier: userIdentifier,
-      platform: _platform,
     );
     flutterDevice.vmServiceUri = vmServiceUri;
     final flutterDevices = <FlutterDevice>[flutterDevice];
@@ -378,25 +398,35 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     return buildInfo.isDebug
         ? _hotRunnerFactory.build(
             flutterDevices,
-            target: targetFile,
+            buildSystem: _buildSystem,
+            buildTargets: _buildTargets,
             debuggingOptions: debuggingOptions,
+            target: targetFile,
+            toolContext: toolContext,
+            xcode: _xcode,
             packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
             projectRootPath: stringArg('project-root'),
             dillOutputPath: stringArg('output-dill'),
             flutterProject: FlutterProject.current(),
+            hotRunnerConfig: hotRunnerConfig,
             nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+            projectFileInvalidator: projectFileInvalidator,
             analytics: analytics,
-            logger: _logger,
           )
         : ColdRunner(
             flutterDevices,
-            target: targetFile,
+            buildSystem: _buildSystem,
+            buildTargets: _buildTargets,
             debuggingOptions: debuggingOptions,
+            target: targetFile,
+            toolContext: toolContext,
+            xcode: _xcode,
             dartBuilder: hookRunner,
           );
   }
 
   Future<Uri> _discoverVmService({required Device device}) async {
+    final Logger logger = toolContext.logger;
     final bool usesIpv6 = ipv6!;
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
@@ -422,11 +452,11 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       filterDevicePort: devicePort,
       expectedHostPort: hostVmservicePort,
       ipv6: usesIpv6,
-      logger: _logger,
+      logger: logger,
     );
 
-    _logger.printStatus('Waiting for a connection from Flutter on ${device.displayName}...');
-    final Status discoveryStatus = _logger.startSpinner(
+    logger.printStatus('Waiting for a connection from Flutter on ${device.displayName}...');
+    final Status discoveryStatus = logger.startSpinner(
       timeout: const Duration(seconds: 30),
       slowWarningCallback: () {
         // On iOS we rely on mDNS to find Dart VM Service.
@@ -469,33 +499,43 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 class HotRunnerFactory {
   HotRunner build(
     List<FlutterDevice> devices, {
-    required String target,
-    required DebuggingOptions debuggingOptions,
-    bool benchmarkMode = false,
-    File? applicationBinary,
-    bool hostIsIde = false,
-    String? projectRootPath,
-    String? packagesFilePath,
-    String? dillOutputPath,
-    bool stayResident = true,
-    FlutterProject? flutterProject,
-    String? nativeAssetsYamlFile,
     required Analytics analytics,
-    Logger? logger,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
+    required DebuggingOptions debuggingOptions,
+    required String target,
+    required ToolContext toolContext,
+    required Xcode? xcode,
+    File? applicationBinary,
+    bool benchmarkMode = false,
+    String? dillOutputPath,
+    FlutterProject? flutterProject,
+    bool hostIsIde = false,
+    HotRunnerConfig? hotRunnerConfig,
+    String? nativeAssetsYamlFile,
+    String? packagesFilePath,
+    ProjectFileInvalidator? projectFileInvalidator,
+    String? projectRootPath,
+    bool stayResident = true,
   }) => HotRunner(
     devices,
-    target: target,
+    buildSystem: buildSystem,
+    buildTargets: buildTargets,
     debuggingOptions: debuggingOptions,
+    target: target,
+    toolContext: toolContext,
+    xcode: xcode,
     benchmarkMode: benchmarkMode,
     applicationBinary: applicationBinary,
     hostIsIde: hostIsIde,
+    hotRunnerConfig: hotRunnerConfig,
+    projectFileInvalidator: projectFileInvalidator,
     projectRootPath: projectRootPath,
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     nativeAssetsYamlFile: nativeAssetsYamlFile,
     analytics: analytics,
     dartBuilder: hookRunner,
-    logger: logger,
   );
 }
 
