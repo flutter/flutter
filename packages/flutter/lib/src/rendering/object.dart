@@ -2822,8 +2822,35 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       _debugMutationsLocked = false;
       return true;
     }());
-    _needsLayout = false;
+    _markNeedsLayoutDoneOrReschedule();
     markNeedsPaint();
+  }
+
+  /// Clears [_needsLayout], unless [performLayout] (just completed by the
+  /// caller) ran a [RenderObjectWithLayoutCallbackMixin] layout callback that
+  /// asked to be scheduled again before returning.
+  ///
+  /// This happens when a descendant's layout - visited from inside this
+  /// node's own [performLayout] - synchronously triggers another
+  /// [RenderObjectWithLayoutCallbackMixin.scheduleLayoutCallback] call on
+  /// this node (for example, a widget rebuild inside the callback's subtree
+  /// calls [State.setState] while a descendant is still laying out). Because
+  /// this node's [_needsLayout] was still true at that point,
+  /// [RenderObject.markNeedsLayout] returned without re-registering it, so
+  /// the request would otherwise be lost the moment this method clears
+  /// [_needsLayout]: [RenderObjectWithLayoutCallbackMixin._needsRebuild]
+  /// would be left set with nothing left to ever clear it. Keeping the node
+  /// dirty and re-enqueuing it here instead makes [PipelineOwner.flushLayout]
+  /// visit it again within the same layout pass and run the callback.
+  ///
+  /// See https://github.com/flutter/flutter/issues/192945.
+  void _markNeedsLayoutDoneOrReschedule() {
+    final self = this;
+    if (self is RenderObjectWithLayoutCallbackMixin && self._needsRebuild) {
+      owner?._nodesNeedingLayout.add(this);
+    } else {
+      _needsLayout = false;
+    }
   }
 
   /// Compute the layout for this render object.
@@ -2978,7 +3005,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       _debugMutationsLocked = false;
       return true;
     }());
-    _needsLayout = false;
+    _markNeedsLayoutDoneOrReschedule();
     markNeedsPaint();
 
     if (!kReleaseMode && debugProfileLayoutsEnabled) {
