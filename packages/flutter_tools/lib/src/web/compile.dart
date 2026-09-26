@@ -7,15 +7,17 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -42,6 +44,9 @@ const kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 const kWebDefinePrefix = 'webDefine:';
 
 class WebBuilder {
+  // TODO(bkonyi): Take a ToolContext instead of individual dependencies once
+  // ResidentWebRunner is migrated to ToolContext
+  // (https://github.com/flutter/flutter/issues/188471).
   WebBuilder({
     required this._logger,
     required this._processManager,
@@ -49,6 +54,12 @@ class WebBuilder {
     required this._analytics,
     required this._flutterVersion,
     required this._fileSystem,
+    required this._artifacts,
+    required this._buildTargets,
+    required this._cache,
+    required this._config,
+    required this._platform,
+    required this._terminal,
   });
 
   final Logger _logger;
@@ -57,6 +68,12 @@ class WebBuilder {
   final Analytics _analytics;
   final FlutterVersion _flutterVersion;
   final FileSystem _fileSystem;
+  final Artifacts _artifacts;
+  final BuildTargets _buildTargets;
+  final Cache _cache;
+  final Config _config;
+  final Platform _platform;
+  final Terminal _terminal;
 
   /// Builds the web application using the specified compiler configurations
   /// and generates the necessary web assets in the output directory.
@@ -84,7 +101,10 @@ class WebBuilder {
     )).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final Directory outputDirectory = outputDirectoryPath == null
         ? _fileSystem.directory(
-            _fileSystem.path.join(flutterProject.directory.path, getWebBuildDirectory()),
+            _fileSystem.path.join(
+              flutterProject.directory.path,
+              getWebBuildDirectory(config: _config, fileSystem: _fileSystem),
+            ),
           )
         : _fileSystem.directory(outputDirectoryPath);
     outputDirectory.createSync(recursive: true);
@@ -101,7 +121,7 @@ class WebBuilder {
     final sw = Stopwatch()..start();
     try {
       final BuildResult result = await _buildSystem.build(
-        globals.buildTargets.webServiceWorker(_fileSystem, compilerConfigs, _analytics),
+        _buildTargets.webServiceWorker(_fileSystem, compilerConfigs, _analytics),
         Environment(
           projectDir: flutterProject.directory,
           outputDir: outputDirectory,
@@ -119,16 +139,14 @@ class WebBuilder {
             for (final MapEntry(:key, :value) in webDefines.entries) '$kWebDefinePrefix$key': value,
           },
           packageConfigPath: buildInfo.packageConfigPath,
-          artifacts: globals.artifacts!,
+          artifacts: _artifacts,
           fileSystem: _fileSystem,
           logger: _logger,
           processManager: _processManager,
-          platform: globals.platform,
+          platform: _platform,
           analytics: _analytics,
-          cacheDir: globals.cache.getRoot(),
-          engineVersion: globals.artifacts!.usesLocalArtifacts
-              ? null
-              : _flutterVersion.engineRevision,
+          cacheDir: _cache.getRoot(),
+          engineVersion: _artifacts.usesLocalArtifacts ? null : _flutterVersion.engineRevision,
           flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
           // Web uses a different Dart plugin registry.
           // https://github.com/flutter/flutter/issues/80406
@@ -154,9 +172,9 @@ class WebBuilder {
 
     // We don't print a size because the output directory can contain
     // optional files not needed by the user.
-    globals.printStatus(
-      '${globals.terminal.successMark} '
-      'Built ${globals.fs.path.relative(outputDirectory.path)}',
+    _logger.printStatus(
+      '${_terminal.successMark} '
+      'Built ${_fileSystem.path.relative(outputDirectory.path)}',
       color: TerminalColor.green,
     );
 
