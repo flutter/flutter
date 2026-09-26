@@ -15,6 +15,18 @@ namespace impeller {
 namespace compiler {
 namespace testing {
 
+/// Every backend a shader bundle can hold, the default when no platform flag
+/// narrows the selection.
+static std::vector<TargetPlatform> AllBundlePlatforms() {
+  return {
+      TargetPlatform::kMetalIOS,       //
+      TargetPlatform::kMetalDesktop,   //
+      TargetPlatform::kOpenGLES,       //
+      TargetPlatform::kOpenGLDesktop,  //
+      TargetPlatform::kVulkan,         //
+  };
+}
+
 const std::string kUnlitFragmentBundleConfig =
     "\"UnlitFragment\": {\"type\": \"fragment\", \"file\": "
     "\"shaders/flutter_gpu_unlit.frag\"}";
@@ -142,7 +154,7 @@ TEST(ShaderBundleTest, GenerateShaderBundleFlatbufferProducesCorrectResult) {
   options.source_language = SourceLanguage::kGLSL;
 
   std::optional<fb::shaderbundle::ShaderBundleT> bundle =
-      GenerateShaderBundleFlatbuffer(config, options);
+      GenerateShaderBundleFlatbuffer(config, options, AllBundlePlatforms());
   ASSERT_TRUE(bundle.has_value());
 
   // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -236,7 +248,8 @@ TEST(ShaderBundleTest,
 
   std::set<std::string> dependencies;
   std::optional<fb::shaderbundle::ShaderBundleT> bundle =
-      GenerateShaderBundleFlatbuffer(config, options, &dependencies);
+      GenerateShaderBundleFlatbuffer(config, options, AllBundlePlatforms(),
+                                     &dependencies);
   ASSERT_TRUE(bundle.has_value());
 
   // Every primary source file referenced by the bundle config should
@@ -265,8 +278,8 @@ TEST(ShaderBundleTest,
   options.source_language = SourceLanguage::kGLSL;
 
   std::optional<fb::shaderbundle::ShaderBundleT> bundle =
-      GenerateShaderBundleFlatbuffer(config, options, /*out_dependencies=*/
-                                     nullptr);
+      GenerateShaderBundleFlatbuffer(config, options, AllBundlePlatforms(),
+                                     /*out_dependencies=*/nullptr);
   ASSERT_TRUE(bundle.has_value());
 }
 
@@ -344,8 +357,55 @@ TEST(ShaderBundleTest, InjectsTargetDefinesDuringCompilation) {
   options.source_language = SourceLanguage::kGLSL;
 
   std::optional<fb::shaderbundle::ShaderBundleT> bundle =
-      GenerateShaderBundleFlatbuffer(config, options);
+      GenerateShaderBundleFlatbuffer(config, options, AllBundlePlatforms());
   EXPECT_FALSE(bundle.has_value());
+}
+
+TEST(ShaderBundleTest, OmitsBackendsThatWereNotRequested) {
+  std::string fixtures_path = flutter::testing::GetFixturesPath();
+  std::string config = "{\"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"" +
+                       fixtures_path + "/flutter_gpu_unlit.vert\"}}";
+
+  SourceOptions options;
+  options.target_platform = TargetPlatform::kRuntimeStageMetal;
+  options.source_language = SourceLanguage::kGLSL;
+
+  std::optional<fb::shaderbundle::ShaderBundleT> bundle =
+      GenerateShaderBundleFlatbuffer(
+          config, options,
+          {TargetPlatform::kMetalIOS, TargetPlatform::kVulkan});
+  ASSERT_TRUE(bundle.has_value());
+
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+  const auto* vertex = FindByName(bundle->shaders, "UnlitVertex");
+  ASSERT_NE(vertex, nullptr);
+
+  EXPECT_NE(vertex->metal_ios, nullptr);
+  EXPECT_NE(vertex->vulkan, nullptr);
+  EXPECT_EQ(vertex->metal_desktop, nullptr);
+  EXPECT_EQ(vertex->opengl_es, nullptr);
+  EXPECT_EQ(vertex->opengl_desktop, nullptr);
+
+  // The requested backends carry the same reflection they would in a full
+  // bundle.
+  EXPECT_STREQ(vertex->metal_ios->entrypoint.c_str(),
+               "flutter_gpu_unlit_vertex_main");
+  EXPECT_EQ(vertex->vulkan->stage, fb::shaderbundle::ShaderStage::kVertex);
+}
+
+TEST(ShaderBundleTest, FailsWhenATargetHasNoPlaceInTheBundle) {
+  std::string fixtures_path = flutter::testing::GetFixturesPath();
+  std::string config = "{\"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"" +
+                       fixtures_path + "/flutter_gpu_unlit.vert\"}}";
+
+  SourceOptions options;
+  options.target_platform = TargetPlatform::kRuntimeStageMetal;
+  options.source_language = SourceLanguage::kGLSL;
+
+  // Runtime stages and SkSL have no field on the bundled `Shader` table.
+  EXPECT_FALSE(GenerateShaderBundleFlatbuffer(
+                   config, options, {TargetPlatform::kRuntimeStageVulkan})
+                   .has_value());
 }
 
 }  // namespace testing
