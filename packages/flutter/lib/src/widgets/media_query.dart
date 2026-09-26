@@ -249,18 +249,6 @@ class MediaQueryData {
          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
        );
 
-  /// Deprecated. Use [MediaQueryData.fromView] instead.
-  ///
-  /// This constructor was operating on a single window assumption. In
-  /// preparation for Flutter's upcoming multi-window support, it has been
-  /// deprecated.
-  @Deprecated(
-    'Use MediaQueryData.fromView instead. '
-    'This constructor was deprecated in preparation for the upcoming multi-window support. '
-    'This feature was deprecated after v3.7.0-32.0.pre.',
-  )
-  factory MediaQueryData.fromWindow(ui.FlutterView window) = MediaQueryData.fromView;
-
   /// Creates data for a [MediaQuery] based on the given `view`.
   ///
   /// If provided, the `platformData` is used to fill in the platform-specific
@@ -1459,30 +1447,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     );
   }
 
-  /// Deprecated. Use [MediaQuery.fromView] instead.
-  ///
-  /// This constructor was operating on a single window assumption. In
-  /// preparation for Flutter's upcoming multi-window support, it has been
-  /// deprecated.
-  ///
-  /// Replaced by [MediaQuery.fromView], which requires specifying the
-  /// [FlutterView] the [MediaQuery] is constructed for. The [FlutterView] can,
-  /// for example, be obtained from the context via [View.of] or from
-  /// [PlatformDispatcher.views].
-  @Deprecated(
-    'Use MediaQuery.fromView instead. '
-    'This constructor was deprecated in preparation for the upcoming multi-window support. '
-    'This feature was deprecated after v3.7.0-32.0.pre.',
-  )
-  static Widget fromWindow({Key? key, required Widget child}) {
-    return _MediaQueryFromView(
-      key: key,
-      view: WidgetsBinding.instance.window,
-      ignoreParentData: true,
-      child: child,
-    );
-  }
-
   /// Wraps the [child] in a [MediaQuery] which is built using data from the
   /// provided [view].
   ///
@@ -2383,15 +2347,9 @@ enum NavigationMode {
 }
 
 class _MediaQueryFromView extends StatefulWidget {
-  const _MediaQueryFromView({
-    super.key,
-    required this.view,
-    this.ignoreParentData = false,
-    required this.child,
-  });
+  const _MediaQueryFromView({super.key, required this.view, required this.child});
 
   final FlutterView view;
-  final bool ignoreParentData;
   final Widget child;
 
   @override
@@ -2419,9 +2377,6 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   @override
   void didUpdateWidget(_MediaQueryFromView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.ignoreParentData != oldWidget.ignoreParentData) {
-      _updateParentData();
-    }
     if (_data == null || oldWidget.view != widget.view) {
       _updateData();
     }
@@ -2429,7 +2384,7 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   }
 
   void _updateParentData() {
-    _parentData = widget.ignoreParentData ? null : MediaQuery.maybeOf(context);
+    _parentData = MediaQuery.maybeOf(context);
     _data = null; // _updateData must be called again after changing parent data.
   }
 
