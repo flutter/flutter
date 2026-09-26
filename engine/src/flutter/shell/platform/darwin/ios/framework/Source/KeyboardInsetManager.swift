@@ -49,8 +49,8 @@ typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterval) -> V
 ///   layout.
 ///
 /// * View lifecycle:
-///   Notifications are ignored if the associated view is not loaded or if the delegate is not the
-///   active view controller.
+///   Notifications are ignored if the associated view is not loaded or if the delegate is no longer
+///   registered with the engine for its view identifier.
 ///
 /// @see [FlutterViewController], which owns this manager and acts as its delegate.
 @objc protocol FlutterKeyboardInsetManagerDelegate: NSObjectProtocol {
@@ -59,7 +59,7 @@ typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterval) -> V
   func physicalViewInsetBottom() -> CGFloat
   func uiTaskRunner() -> TaskRunner?
   func view() -> UIView
-  func engine() -> FlutterEngine?
+  func isViewControllerAttached() -> Bool
   func flutterScreenIfViewLoaded() -> UIScreen?
   func isPadInSlideOverOrStageManagerMode() -> Bool
   @objc(convertViewRectToScreen:)
@@ -192,7 +192,7 @@ typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterval) -> V
       return false
     }
 
-    // Ignore keyboard notifications related to other apps or view controllers.
+    // Ignore notifications from other apps, other screens, or detached delegates.
     if isKeyboardNotificationForDifferentView(notification) {
       return true
     }
@@ -208,11 +208,16 @@ typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterval) -> V
       return true
     }
     guard let delegate else { return false }
-    return delegate.engine()?.viewController !== (delegate as AnyObject)
+    // Keyboard frames use the coordinate space of the screen that contains the keyboard.
+    if let screen = notification.object as? UIScreen,
+      screen !== delegate.flutterScreenIfViewLoaded()
+    {
+      return true
+    }
+    return !delegate.isViewControllerAttached()
   }
 
-  @objc func calculateKeyboardAttachMode(_ notification: Notification) -> FlutterKeyboardMode
-  {
+  @objc func calculateKeyboardAttachMode(_ notification: Notification) -> FlutterKeyboardMode {
     // There are multiple types of keyboard: docked, undocked, split, split docked,
     // floating, expanded shortcuts bar, minimized shortcuts bar.
     //

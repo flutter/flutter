@@ -7,6 +7,8 @@
 
 #include <memory>
 
+#include "flutter/common/constants.h"
+#include "flutter/flow/surface.h"
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/common/platform_view.h"
@@ -23,6 +25,8 @@
 @class FlutterViewController;
 
 namespace flutter {
+
+class IOSSurfacesManager;
 
 /**
  * A bridge connecting the platform agnostic shell and the iOS embedding.
@@ -51,6 +55,14 @@ class PlatformViewIOS final : public PlatformView {
 
   ~PlatformViewIOS() override;
 
+  /// Creates the view's rendering surface and starts the shared pipeline if this is the first one.
+  /// Repeated calls for a view with a rendering surface have no effect.
+  void NotifyViewRenderingSurfaceCreated(int64_t view_id);
+
+  /// Destroys the view's rendering surface and stops the shared pipeline if this is the last one.
+  /// Calls for a view without a rendering surface have no effect.
+  void NotifyViewRenderingSurfaceDestroyed(int64_t view_id);
+
   /**
    * Returns the `FlutterViewController` currently attached to the `FlutterEngine` owning
    * this PlatformViewIOS.
@@ -64,6 +76,11 @@ class PlatformViewIOS final : public PlatformView {
    */
   void SetOwnerViewController(__weak FlutterViewController* owner_controller);
 
+  void AddOwnerViewController(__weak FlutterViewController* owner_controller);
+
+  /// For non-implicit views, call this after RemoveView has completed.
+  void RemoveOwnerViewController(FlutterViewIdentifier viewIdentifier);
+
   /**
    * Called one time per `FlutterViewController` when the `FlutterViewController`'s
    * UIView is first loaded.
@@ -71,9 +88,8 @@ class PlatformViewIOS final : public PlatformView {
    * Can be used to perform late initialization after `FlutterViewController`'s
    * init.
    *
-   * The `previousView` is the Flutter view that was attached before this one, if any.
    */
-  void attachView(FlutterView* previousView = nil);
+  void attachView(FlutterViewIdentifier viewIdentifier);
 
   /**
    * Called through when an external texture such as video or camera is
@@ -104,6 +120,10 @@ class PlatformViewIOS final : public PlatformView {
                        flutter::SemanticsNodeUpdates update,
                        flutter::CustomAccessibilityActionUpdates actions) override;
 
+  /// Routes an accessibility channel event to the bridge for its Flutter view.
+  /// Returns whether an owning bridge was found.
+  bool HandleAccessibilityEvent(NSDictionary<NSString*, id>* event);
+
   // |PlatformView|
   void SetApplicationLocale(std::string locale) override;
 
@@ -131,40 +151,27 @@ class PlatformViewIOS final : public PlatformView {
   /**
    * Gets the accessibility bridge created in this platform view.
    */
-  AccessibilityBridge* GetAccessibilityBridge() { return accessibility_bridge_.get(); }
+  AccessibilityBridge* GetAccessibilityBridge(
+      FlutterViewIdentifier viewIdentifier = kFlutterImplicitViewId) {
+    auto bridge = accessibility_bridges_.find(viewIdentifier);
+    return bridge == accessibility_bridges_.end() ? nullptr : bridge->second.get();
+  }
 
  private:
   void ApplyLocaleToOwnerController();
-  void EnsureAccessibilityBridge();
-  void PostSemanticsUpdateNotification();
+  void EnsureAccessibilityBridge(FlutterViewIdentifier viewIdentifier);
+  void PostSemanticsUpdateNotification(FlutterViewIdentifier viewIdentifier);
 
-  /// Smart pointer for use with objective-c observers.
-  /// This guarantees we remove the observer.
-  class ScopedObserver {
-   public:
-    ScopedObserver();
-    ~ScopedObserver();
-    void reset(id<NSObject> observer);
-    ScopedObserver(const ScopedObserver&) = delete;
-    ScopedObserver& operator=(const ScopedObserver&) = delete;
-
-   private:
-    id<NSObject> observer_ = nil;
-  };
-
-  __weak FlutterViewController* owner_controller_;
   std::string application_locale_;
-  // Since the `ios_surface_` is created on the platform thread but
-  // used on the raster thread we need to protect it with a mutex.
-  std::mutex ios_surface_mutex_;
-  std::unique_ptr<IOSSurface> ios_surface_;
   std::shared_ptr<IOSContext> ios_context_;
   __weak FlutterPlatformViewsController* platform_views_controller_;
-  std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
+  std::unordered_map<int64_t, std::unique_ptr<AccessibilityBridge>> accessibility_bridges_;
   bool semantics_tree_enabled_ = false;
-  ScopedObserver dealloc_view_controller_observer_;
   std::vector<std::string> platform_resolved_locale_;
   std::shared_ptr<PlatformMessageHandlerIos> platform_message_handler_;
+  std::shared_ptr<IOSSurfacesManager> ios_surfaces_manager_;
+  // It can't use NSDictionary, because the values need to be weak references.
+  NSMapTable* view_controllers_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewIOS);
 };

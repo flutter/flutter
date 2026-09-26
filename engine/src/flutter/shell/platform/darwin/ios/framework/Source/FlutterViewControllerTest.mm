@@ -5,6 +5,7 @@
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
+#include "flutter/common/constants.h"
 #include "flutter/fml/platform/darwin/message_loop_darwin.h"
 #import "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/window/pointer_data.h"
@@ -35,6 +36,9 @@ FLUTTER_ASSERT_ARC
 
 using namespace flutter::testing;
 
+namespace {
+constexpr FlutterViewIdentifier kSecondaryFlutterViewId = flutter::kFlutterImplicitViewId + 1;
+}  // namespace
 typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval targetTime);
 
 @interface FlutterKeyboardInsetManager (Test)
@@ -57,7 +61,6 @@ typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval targetTime);
 - (UIView*)keyboardAnimationView;
 - (SpringAnimation*)keyboardSpringAnimation;
 - (void)setUpKeyboardSpringAnimationIfNeeded:(CAAnimation*)keyboardAnimation;
-- (void)ensureViewportMetricsIsCorrect;
 - (void)invalidateKeyboardAnimationVSyncClient;
 @end
 
@@ -147,6 +150,7 @@ typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval targetTime);
 @property(nonatomic, strong) UIScreen* mockScreen;
 @property(nonatomic, strong) UIView* mockView;
 @property(nonatomic, strong) FlutterEngine* mockEngine;
+@property(nonatomic, assign) FlutterViewIdentifier viewIdentifier;
 @property(nonatomic, assign) CGFloat currentInset;
 @property(nonatomic, copy) void (^updateViewportMetricsBlock)(CGFloat inset);
 @property(nonatomic, assign) BOOL isViewLoaded;
@@ -189,6 +193,10 @@ typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval targetTime);
   return self.mockEngine;
 }
 
+- (BOOL)isViewControllerAttached {
+  return (id)[self.mockEngine viewControllerForIdentifier:self.viewIdentifier] == self;
+}
+
 - (UIScreen*)flutterScreenIfViewLoaded {
   return self.mockScreen;
 }
@@ -225,6 +233,7 @@ typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval targetTime);
 @property(nonatomic, strong) FlutterFMLTaskRunner* uiTaskRunner;
 
 - (FlutterTextInputPlugin*)textInputPlugin;
+- (FlutterViewController*)viewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier;
 
 - (void)sendKeyEvent:(const FlutterKeyEvent&)event
             callback:(nullable FlutterKeyEventCallback)callback
@@ -282,6 +291,13 @@ typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval targetTime);
                           callback(true, userData);
                         });
 }
+
+- (FlutterViewController*)viewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  if (viewIdentifier == flutter::kFlutterImplicitViewId) {
+    return self.viewController;
+  }
+  return nil;
+}
 @end
 
 @interface FlutterEngine ()
@@ -289,8 +305,9 @@ typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval targetTime);
          libraryURI:(NSString*)libraryURI
        initialRoute:(NSString*)initialRoute;
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
-- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics;
-- (void)attachView;
+- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics
+               viewIdentifier:(FlutterViewIdentifier)viewIdentifier;
+- (void)attachView:(FlutterViewIdentifier)viewIdentifier;
 @end
 
 @interface FlutterEngine (TestLowMemory)
@@ -309,6 +326,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 /// Used for testing deallocation.
 @interface MockEngine : NSObject
 @property(nonatomic, strong) FlutterDartProject* project;
+- (void)addViewController:(FlutterViewController*)viewController;
 @end
 
 @implementation MockEngine
@@ -316,6 +334,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   return nil;
 }
 - (void)setViewController:(FlutterViewController*)viewController {
+  // noop
+}
+- (void)addViewController:(FlutterViewController*)viewController {
   // noop
 }
 @end
@@ -335,6 +356,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 @interface FlutterViewController (Tests) <FlutterKeyboardInsetManagerDelegate>
 
+@property(nonatomic, readonly) FlutterView* flutterView;
 @property(nonatomic, assign) double targetViewInsetBottom;
 @property(nonatomic, assign) BOOL keyboardAnimationIsShowing;
 @property(nonatomic, strong) FlutterVSyncClient* keyboardAnimationVSyncClient;
@@ -672,7 +694,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
   // Stub the mock engine to return the mock view controller to pass
   // isKeyboardNotificationForDifferentView
-  OCMStub([self.mockEngine viewController]).andReturn(viewControllerMock);
+  OCMStub([self.mockEngine viewControllerForIdentifier:viewController.viewIdentifier])
+      .andReturn(viewControllerMock);
 
   // Exercise the real shouldIgnoreKeyboardNotification: implementation.
   FlutterKeyboardInsetManager* managerMock = [[FlutterKeyboardInsetManager alloc]
@@ -1086,6 +1109,75 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [manager invalidate];
 }
 
+- (void)testKeyboardNotificationsUpdateRegisteredExplicitViews {
+  UIScreen* screen = [self setUpMockScreen];
+  id otherScreen = OCMClassMock([UIScreen class]);
+  CGFloat screenWidth = CGRectGetWidth(screen.bounds);
+  CGFloat screenHeight = CGRectGetHeight(screen.bounds);
+  for (NSNumber* viewId in @[ @(kSecondaryFlutterViewId), @(kSecondaryFlutterViewId + 1) ]) {
+    TestKeyboardInsetDelegate* delegate = [[TestKeyboardInsetDelegate alloc] init];
+    delegate.viewIdentifier = viewId.longLongValue;
+    delegate.mockEngine = self.mockEngine;
+    delegate.isViewLoaded = YES;
+    delegate.mockScreen = screen;
+    delegate.mockView = [[UIView alloc] initWithFrame:screen.bounds];
+    delegate.mockConvertedViewRect = screen.bounds;
+    __block id registeredController = delegate;
+    OCMStub([self.mockEngine viewControllerForIdentifier:delegate.viewIdentifier])
+        .andDo(^(NSInvocation* invocation) {
+          [invocation setReturnValue:&registeredController];
+        });
+    FlutterKeyboardInsetManager* manager =
+        [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate
+                                           displayLinkManager:FlutterDisplayLinkManager.shared];
+    NSMutableDictionary* userInfo = [@{
+      UIKeyboardFrameEndUserInfoKey : @(CGRectMake(0, screenHeight - 320, screenWidth, 320)),
+      UIKeyboardAnimationDurationUserInfoKey : @0.25,
+      UIKeyboardIsLocalUserInfoKey : @YES,
+    } mutableCopy];
+
+    [manager handleKeyboardNotification:[NSNotification
+                                            notificationWithName:UIKeyboardWillShowNotification
+                                                          object:otherScreen
+                                                        userInfo:userInfo]];
+    XCTAssertEqual(manager.targetViewInsetBottom, 0);
+
+    [manager handleKeyboardNotification:[NSNotification
+                                            notificationWithName:UIKeyboardWillShowNotification
+                                                          object:screen
+                                                        userInfo:userInfo]];
+    XCTAssertEqual(manager.targetViewInsetBottom, 320 * screen.scale);
+
+    userInfo[UIKeyboardFrameEndUserInfoKey] =
+        @(CGRectMake(0, screenHeight - 200, screenWidth, 200));
+    [manager
+        handleKeyboardNotification:[NSNotification
+                                       notificationWithName:UIKeyboardWillChangeFrameNotification
+                                                     object:nil
+                                                   userInfo:userInfo]];
+    XCTAssertEqual(manager.targetViewInsetBottom, 200 * screen.scale);
+
+    registeredController = nil;
+    userInfo[UIKeyboardFrameEndUserInfoKey] =
+        @(CGRectMake(0, screenHeight - 100, screenWidth, 100));
+    [manager
+        handleKeyboardNotification:[NSNotification
+                                       notificationWithName:UIKeyboardWillChangeFrameNotification
+                                                     object:nil
+                                                   userInfo:userInfo]];
+    XCTAssertEqual(manager.targetViewInsetBottom, 200 * screen.scale);
+
+    userInfo[UIKeyboardAnimationDurationUserInfoKey] = @0;
+    [manager handleKeyboardNotification:[NSNotification
+                                            notificationWithName:UIKeyboardWillHideNotification
+                                                          object:otherScreen
+                                                        userInfo:userInfo]];
+    XCTAssertEqual(manager.targetViewInsetBottom, 0);
+    [manager invalidate];
+  }
+  [otherScreen stopMocking];
+}
+
 - (void)testEnsureBottomInsetIsZeroWhenKeyboardDismissed {
   FlutterEnginePartialMock* engine = [[FlutterEnginePartialMock alloc] init];
   [engine runWithEntrypoint:nil];
@@ -1300,6 +1392,30 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMVerify(never(), [viewControllerA onUserSettingsChanged:nil]);
 }
 
+- (void)testSecondaryViewControllerDoesNotSendLifecycleOrTearDownWhenNoLongerRegistered {
+  id lifecycleChannel = OCMClassMock([FlutterBasicMessageChannel class]);
+  FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
+  mockEngine.lifecycleChannel = lifecycleChannel;
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  [viewController setupViewIdentifier:kSecondaryFlutterViewId];
+  mockEngine.viewController = nil;
+
+  FlutterViewController* partialViewController = OCMPartialMock(viewController);
+  OCMStub([partialViewController stateIsActive]).andReturn(YES);
+
+  [partialViewController viewDidAppear:YES];
+  OCMVerify(never(), [lifecycleChannel sendMessage:@"AppLifecycleState.resumed"]);
+
+  [partialViewController viewWillDisappear:NO];
+  OCMVerify(never(), [lifecycleChannel sendMessage:@"AppLifecycleState.inactive"]);
+
+  [partialViewController viewDidDisappear:NO];
+  OCMVerify(never(), [partialViewController surfaceUpdated:NO]);
+}
+
 - (void)
     testEngineConfigSyncMethodWillExecuteWhenViewControllerInEngineIsCurrentViewControllerInViewWillDisappear {
   id lifecycleChannel = OCMClassMock([FlutterBasicMessageChannel class]);
@@ -1342,7 +1458,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   mockEngine.viewController = viewControllerB;
   [viewControllerA updateViewportMetricsIfNeeded];
   flutter::ViewportMetrics viewportMetrics;
-  OCMVerify(never(), [mockEngine updateViewportMetrics:viewportMetrics]);
+  OCMVerify(never(), [mockEngine updateViewportMetrics:viewportMetrics
+                                        viewIdentifier:viewControllerA.viewIdentifier]);
 }
 
 - (void)testUpdateViewportMetricsIfNeeded_DoesInvokeEngineWhenIsTheViewController {
@@ -1353,7 +1470,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                  bundle:nil];
   mockEngine.viewController = viewController;
   flutter::ViewportMetrics viewportMetrics;
-  OCMExpect([mockEngine updateViewportMetrics:viewportMetrics]).ignoringNonObjectArgs();
+  OCMExpect([mockEngine updateViewportMetrics:viewportMetrics
+                               viewIdentifier:viewController.viewIdentifier])
+      .ignoringNonObjectArgs();
   [viewController updateViewportMetricsIfNeeded];
   OCMVerifyAll(mockEngine);
 }
@@ -1415,7 +1534,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   // Should not trigger the engine call when during rotation.
   [viewController updateViewportMetricsIfNeeded];
 
-  OCMVerify(never(), [mockEngine updateViewportMetrics:flutter::ViewportMetrics()]);
+  OCMVerify(never(), [mockEngine updateViewportMetrics:flutter::ViewportMetrics()
+                                        viewIdentifier:viewController.viewIdentifier]);
 }
 
 - (void)testViewWillTransitionToSize_DoesDelayEngineCallIfNonZeroDuration {
@@ -1435,12 +1555,15 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMStub([mockCoordinator transitionDuration]).andReturn(transitionDuration);
 
   flutter::ViewportMetrics viewportMetrics;
-  OCMExpect([mockEngine updateViewportMetrics:viewportMetrics]).ignoringNonObjectArgs();
+  OCMExpect([mockEngine updateViewportMetrics:viewportMetrics
+                               viewIdentifier:viewController.viewIdentifier])
+      .ignoringNonObjectArgs();
 
   [viewController viewWillTransitionToSize:CGSizeZero withTransitionCoordinator:mockCoordinator];
   // Should not immediately call the engine (this request should be ignored).
   [viewController updateViewportMetricsIfNeeded];
-  OCMVerify(never(), [mockEngine updateViewportMetrics:flutter::ViewportMetrics()]);
+  OCMVerify(never(), [mockEngine updateViewportMetrics:flutter::ViewportMetrics()
+                                        viewIdentifier:viewController.viewIdentifier]);
 
   // Should delay the engine call for half of the transition duration.
   // Wait for additional transitionDuration to allow updateViewportMetrics calls if any.
@@ -1468,7 +1591,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMStub([mockCoordinator transitionDuration]).andReturn(0);
 
   flutter::ViewportMetrics viewportMetrics;
-  OCMExpect([mockEngine updateViewportMetrics:viewportMetrics]).ignoringNonObjectArgs();
+  OCMExpect([mockEngine updateViewportMetrics:viewportMetrics
+                               viewIdentifier:viewController.viewIdentifier])
+      .ignoringNonObjectArgs();
 
   // Should immediately trigger the engine call, without delay.
   [viewController viewWillTransitionToSize:CGSizeZero withTransitionCoordinator:mockCoordinator];
@@ -1490,7 +1615,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   mockEngine.viewController = viewControllerB;
   UIView* view = viewControllerA.view;
   XCTAssertNotNil(view);
-  OCMVerify(never(), [mockEngine attachView]);
+  OCMVerify(never(), [mockEngine attachView:viewControllerA.viewIdentifier]);
 }
 
 - (void)testViewDidLoadDoesInvokeEngineWhenIsTheViewController {
@@ -1503,7 +1628,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   mockEngine.viewController = viewController;
   UIView* view = viewController.view;
   XCTAssertNotNil(view);
-  OCMVerify(times(1), [mockEngine attachView]);
+  OCMVerify(times(1), [mockEngine attachView:viewController.viewIdentifier]);
 }
 
 - (void)testViewDidLoadDoesntInvokeEngineAttachViewWhenEngineNeedsLaunch {
@@ -1518,7 +1643,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   mockEngine.viewController = viewController;
   UIView* view = viewController.view;
   XCTAssertNotNil(view);
-  OCMVerify(never(), [mockEngine attachView]);
+  OCMVerify(never(), [mockEngine attachView:viewController.viewIdentifier]);
 }
 
 - (void)testSplashScreenViewRemoveNotCrash {
@@ -2095,6 +2220,38 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
     realVC = nil;
   }
   [self waitForExpectations:@[ expectation ] timeout:1.0];
+}
+
+- (void)testReplacingImplicitViewControllerKeepsNewControllerAfterOldDealloc {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
+  [engine createShell:@"" libraryURI:@"" initialRoute:nil];
+
+  __weak FlutterViewController* weakOldViewController = nil;
+  FlutterViewController* newViewController = nil;
+  @autoreleasepool {
+    FlutterViewController* oldViewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                     nibName:nil
+                                                                                      bundle:nil];
+    weakOldViewController = oldViewController;
+
+    newViewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                              nibName:nil
+                                                               bundle:nil];
+    XCTAssertEqual(engine.viewController, newViewController);
+
+    oldViewController = nil;
+  }
+
+  XCTAssertNil(weakOldViewController);
+
+  // Drain enqueued observer callbacks on the main queue.
+  XCTestExpectation* drainedMainQueue = [self expectationWithDescription:@"drained-main-queue"];
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [drainedMainQueue fulfill];
+  });
+  [self waitForExpectations:@[ drainedMainQueue ] timeout:1.0];
+
+  XCTAssertEqual(engine.viewController, newViewController);
 }
 
 - (void)testReleasesKeyboardManagerOnDealloc {

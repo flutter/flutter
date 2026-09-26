@@ -60,6 +60,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   void SetViewController(FlutterViewController* viewController, FlutterView* previousView);
   void UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
                        const flutter::CustomAccessibilityActionUpdates& actions);
+  bool HasSemanticsNode(int32_t node_id) const;
   // Returns true when a root semantics object is cached in the bridge.
   bool HasSemantics() const;
   void HandleEvent(NSDictionary<NSString*, id>* annotatedEvent);

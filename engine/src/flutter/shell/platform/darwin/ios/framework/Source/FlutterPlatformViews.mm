@@ -518,19 +518,23 @@ static BOOL _preparedOnce = NO;
 @property(nonatomic, weak, readonly) UIViewController<FlutterViewResponder>* flutterViewController;
 @property(nonatomic, weak, readonly) FlutterPlatformViewsController* platformViewsController;
 @property(nonatomic, readonly) FlutterDelayingGestureRecognizer* delayingRecognizer;
+@property(nonatomic, readwrite) FlutterPlatformViewGestureRecognizersBlockingPolicy blockingPolicy;
+@property(nonatomic, readonly) FlutterViewIdentifier flutterViewId;
 @end
 
 @implementation FlutterTouchInterceptingView
 - (instancetype)initWithEmbeddedView:(UIView*)embeddedView
              platformViewsController:(FlutterPlatformViewsController*)platformViewsController
     gestureRecognizersBlockingPolicy:
-        (FlutterPlatformViewGestureRecognizersBlockingPolicy)blockingPolicy {
+        (FlutterPlatformViewGestureRecognizersBlockingPolicy)blockingPolicy
+                       flutterViewId:(FlutterViewIdentifier)flutterViewId {
   self = [super initWithFrame:embeddedView.frame];
   if (self) {
     self.multipleTouchEnabled = YES;
     _embeddedView = embeddedView;
     _platformViewsController = platformViewsController;
-    _flutterViewController = platformViewsController.flutterViewController;
+    _flutterViewController =
+        [platformViewsController flutterViewControllerForIdentifier:flutterViewId];
     embeddedView.autoresizingMask =
         (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
 
@@ -545,6 +549,7 @@ static BOOL _preparedOnce = NO;
                                                           action:nil
                                             forwardingRecognizer:forwardingRecognizer];
     _blockingPolicy = blockingPolicy;
+    _flutterViewId = flutterViewId;
 
     // For hit test, don't block gestures using delaying recognizer. However, we still
     // forward touches so Flutter can process it in its gesture arena (e.g. dismiss a
@@ -621,10 +626,12 @@ static BOOL _preparedOnce = NO;
 }
 
 - (UIView*)hitTest:(CGPoint)point withEvent:(UIEvent*)event {
-  // In release mode, FlutterTouchInterceptingView's init is called before flutterViewController
-  // is set on platformViewsController.
-  if (self.flutterViewController == nil) {
-    _flutterViewController = self.platformViewsController.flutterViewController;
+  // The platform view can be created before its FlutterViewController is attached, and controllers
+  // can be replaced after creation. Resolve from the view id at the start of hit testing.
+  _flutterViewController =
+      [self.platformViewsController flutterViewControllerForIdentifier:self.flutterViewId];
+  if (_flutterViewController == nil) {
+    return self;
   }
   CGPoint pointInFlutterView = [self convertPoint:point toView:self.flutterViewController.view];
   // Consult the framework on if the touch should be handled by the platform view.
@@ -816,7 +823,9 @@ static BOOL _preparedOnce = NO;
     // At the start of each gesture sequence, we reset the `_flutterViewController`,
     // so that all the touch events in the same sequence are forwarded to the same
     // `_flutterViewController`.
-    _flutterViewController = _platformViewsController.flutterViewController;
+    FlutterTouchInterceptingView* touchInterceptingView = (FlutterTouchInterceptingView*)self.view;
+    _flutterViewController = [_platformViewsController
+        flutterViewControllerForIdentifier:touchInterceptingView.flutterViewId];
   }
   [_flutterViewController touchesBegan:touches withEvent:event];
   _currentTouchPointersCount += touches.count;

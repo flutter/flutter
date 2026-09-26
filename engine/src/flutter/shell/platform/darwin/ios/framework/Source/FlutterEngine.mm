@@ -108,6 +108,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
 @interface FlutterEngine () <FlutterIndirectScribbleDelegate,
                              FlutterUndoManagerDelegate,
+                             FlutterTextInputPluginDelegate,
                              FlutterTextInputDelegate,
                              FlutterBinaryMessenger,
                              FlutterTextureRegistry>
@@ -118,6 +119,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 @property(nonatomic, readonly, copy) NSString* labelPrefix;
 @property(nonatomic, readonly, assign) BOOL allowHeadlessExecution;
 @property(nonatomic, readonly, assign) BOOL restorationEnabled;
+@property(nonatomic, readonly, assign) BOOL multiViewEnabled;
 
 @property(nonatomic, strong) FlutterPlatformViewsController* platformViewsController;
 @property(nonatomic, strong) FlutterEnginePluginSceneLifeCycleDelegate* sceneLifeCycleDelegate;
@@ -130,10 +132,10 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
 @property(nonatomic, readwrite, copy) NSString* isolateId;
 @property(nonatomic, copy) NSString* initialRoute;
-
 // Whether the engine has been destroyed. A destroyed engine cannot be run again.
 @property(nonatomic, assign, getter=isDestroyed) BOOL destroyed;
-@property(nonatomic, strong) id<NSObject> flutterViewControllerWillDeallocObserver;
+@property(nonatomic, strong)
+    NSMutableDictionary<NSNumber*, id<NSObject>>* flutterViewControllerWillDeallocObservers;
 @property(nonatomic, strong) FlutterDartVMServicePublisher* publisher;
 @property(nonatomic, strong) FlutterConnectionCollection* connections;
 @property(nonatomic, assign) int64_t nextTextureId;
@@ -158,6 +160,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 @property(nonatomic, strong) FlutterMethodChannel* scribbleChannel;
 @property(nonatomic, strong) FlutterMethodChannel* spellCheckChannel;
 @property(nonatomic, strong) FlutterBasicMessageChannel* lifecycleChannel;
+@property(nonatomic, strong) FlutterBasicMessageChannel* accessibilityChannel;
 @property(nonatomic, strong) FlutterBasicMessageChannel* systemChannel;
 @property(nonatomic, strong) FlutterBasicMessageChannel* settingsChannel;
 @property(nonatomic, strong) FlutterBasicMessageChannel* keyEventChannel;
@@ -168,6 +171,27 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 @property(nonatomic, assign) BOOL enableEmbedderAPI;
 // Function pointers for interacting with the embedder.h API.
 @property(nonatomic) FlutterEngineProcTable& embedderAPI;
+
+/**
+ * An internal method that adds the view controller with the given ID.
+ *
+ * This method assigns the controller with the ID, puts the controller into the
+ * map, and does assertions related to the implicit view ID.
+ */
+- (void)registerViewController:(FlutterViewController*)controller
+                 forIdentifier:(FlutterViewIdentifier)viewIdentifier;
+
+- (void)removeFlutterViewControllerWillDeallocObserverForIdentifier:
+    (FlutterViewIdentifier)viewIdentifier;
+
+/**
+ * An internal method that removes the view controller with the given ID.
+ *
+ * This method clears the ID of the controller, removes the controller from the
+ * map. This is an no-op if the view ID is not associated with any view
+ * controllers.
+ */
+- (void)deregisterViewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier;
 
 @end
 
@@ -202,6 +226,16 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
   FlutterBinaryMessengerRelay* _binaryMessenger;
   FlutterTextureRegistryRelay* _textureRegistry;
+
+  // Maps from view IDs to view controllers registered to this engine.
+  //
+  // The view controllers are kept as weak references, since they are managed by the user app.
+  // Therefore this table must be a `NSMapTable`.
+  NSMapTable* _viewControllers;
+
+  // View identifier for the next view to be created.
+  // Only used when multiview is enabled.
+  FlutterViewIdentifier _nextViewIdentifier;
 
   FlutterFMLTaskRunner* _platformTaskRunnerWrapper;
   FlutterFMLTaskRunner* _rasterTaskRunnerWrapper;
@@ -248,6 +282,8 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   _allowHeadlessExecution = allowHeadlessExecution;
   _labelPrefix = [labelPrefix copy];
   _dartProject = project ?: [[FlutterDartProject alloc] init];
+  _viewControllers = [NSMapTable weakToWeakObjectsMapTable];
+  _nextViewIdentifier = 1;
 
   _enableEmbedderAPI = _dartProject.settings.enable_embedder_api;
   if (_enableEmbedderAPI) {
@@ -271,6 +307,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
   _textureRegistry = [[FlutterTextureRegistryRelay alloc] initWithParent:self];
   _connections = [[FlutterConnectionCollection alloc] init];
+  _flutterViewControllerWillDeallocObservers = [[NSMutableDictionary alloc] init];
 
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
   [center addObserver:self
@@ -289,6 +326,14 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   self.sceneLifeCycleDelegate = [[FlutterEnginePluginSceneLifeCycleDelegate alloc] init];
 
   return self;
+}
+
+- (void)enableMultiView {
+  if (!_multiViewEnabled) {
+    NSAssert(self.viewController == nil,
+             @"Multiview can only be enabled before adding any view controllers.");
+    _multiViewEnabled = YES;
+  }
 }
 
 + (FlutterEngine*)engineForIdentifier:(int64_t)identifier {
@@ -406,9 +451,13 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   _textureRegistry.parent = nil;
 
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
-  if (_flutterViewControllerWillDeallocObserver) {
-    [center removeObserver:_flutterViewControllerWillDeallocObserver];
+  if ([self.flutterViewControllerWillDeallocObservers count] > 0) {
+    [self.flutterViewControllerWillDeallocObservers
+        enumerateKeysAndObjectsUsingBlock:^(NSNumber* key, id<NSObject> observer, BOOL* stop) {
+          [center removeObserver:observer];
+        }];
   }
+
   [center removeObserver:self];
 }
 
@@ -417,11 +466,15 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   return *_shell;
 }
 
-- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics {
+- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics
+               viewIdentifier:(FlutterViewIdentifier)viewIdentifier {
   if (!self.platformView) {
     return;
   }
-  self.platformView->SetViewportMetrics(flutter::kFlutterImplicitViewId, viewportMetrics);
+  if ([_viewControllers objectForKey:@(viewIdentifier)] == nil) {
+    return;
+  }
+  self.platformView->SetViewportMetrics(viewIdentifier, viewportMetrics);
 }
 
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet {
@@ -468,18 +521,18 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   self.platformView->SetAccessibilityFeatures(flags);
 }
 
-- (void)notifyViewCreated {
+- (void)notifyViewRenderingSurfaceCreated:(FlutterViewIdentifier)viewIdentifier {
   if (!self.platformView) {
     return;
   }
-  self.platformView->NotifyCreated();
+  self.platformView->NotifyViewRenderingSurfaceCreated(viewIdentifier);
 }
 
-- (void)notifyViewDestroyed {
+- (void)notifyViewRenderingSurfaceDestroyed:(FlutterViewIdentifier)viewIdentifier {
   if (!self.platformView) {
     return;
   }
-  self.platformView->NotifyDestroyed();
+  self.platformView->NotifyViewRenderingSurfaceDestroyed(viewIdentifier);
 }
 
 - (flutter::PlatformViewIOS*)platformView {
@@ -557,57 +610,173 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)setViewController:(FlutterViewController*)viewController {
+  NSAssert(!_multiViewEnabled, @"setViewController: is only supported in single-view mode.");
+  if (_multiViewEnabled) {
+    return;
+  }
   FML_DCHECK(self.platformView);
-  _viewController = viewController;
+  if (viewController != nil) {
+    // Swap the existing `FlutterViewController` for backward compatibly.
+    [self registerViewController:viewController forIdentifier:flutter::kFlutterImplicitViewId];
+  } else {
+    [self deregisterViewControllerForIdentifier:flutter::kFlutterImplicitViewId];
+  }
+}
 
-  // Attaching a view controller makes it possible for app extensions to check GPU availability.
+- (FlutterViewController*)viewController {
+  if (!_multiViewEnabled) {
+    return [self viewControllerForIdentifier:flutter::kFlutterImplicitViewId];
+  }
+  NSArray<FlutterViewController*>* controllers = _viewControllers.objectEnumerator.allObjects;
+  FlutterViewController* attachedController = nil;
+  for (FlutterViewController* controller in controllers) {
+    UIView* view = controller.viewIfLoaded;
+    if (view.window && (controller.isFirstResponder || view.flutterFirstResponder)) {
+      return controller;
+    }
+    if (view.window && (!attachedController || view.window.isKeyWindow)) {
+      attachedController = controller;
+    }
+  }
+  return attachedController ?: (controllers.count == 1 ? controllers.firstObject : nil);
+}
+
+- (void)removeFlutterViewControllerWillDeallocObserverForIdentifier:
+    (FlutterViewIdentifier)viewIdentifier {
+  id<NSObject> observer =
+      [self.flutterViewControllerWillDeallocObservers objectForKey:@(viewIdentifier)];
+  if (!observer) {
+    return;
+  }
+  [[NSNotificationCenter defaultCenter] removeObserver:observer];
+  [self.flutterViewControllerWillDeallocObservers removeObjectForKey:@(viewIdentifier)];
+}
+
+- (void)registerViewController:(FlutterViewController*)controller
+                 forIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  [self removeFlutterViewControllerWillDeallocObserverForIdentifier:viewIdentifier];
+
+  [_viewControllers setObject:controller forKey:@(viewIdentifier)];
+  [controller setupViewIdentifier:viewIdentifier];
+  NSAssert(controller.viewIdentifier == viewIdentifier, @"Failed to assign view ID.");
+  // Attaching a controller lets app extensions determine GPU availability from its scene.
+  [self updateGpuAvailabilityFromLifecycleState];
+  __weak __block FlutterEngine* weakSelf = self;
+  id<NSObject> observer = [[NSNotificationCenter defaultCenter]
+      addObserverForName:FlutterViewControllerWillDealloc
+                  object:controller
+                   queue:[NSOperationQueue mainQueue]
+              usingBlock:^(NSNotification* note) {
+                FlutterViewController* view_controller = (FlutterViewController*)note.object;
+                FlutterEngine* engine = weakSelf;
+                if (engine.platformView) {
+                  flutter::AccessibilityBridge* bridge =
+                      engine.platformView->GetAccessibilityBridge(view_controller.viewIdentifier);
+                  if (bridge) {
+                    bridge->SetViewController(
+                        nil, static_cast<FlutterView*>(view_controller.viewIfLoaded));
+                  }
+                }
+                [engine notifyViewControllerDeallocated:view_controller.viewIdentifier];
+              }];
+  [self.flutterViewControllerWillDeallocObservers setObject:observer forKey:@(viewIdentifier)];
+
+  if (viewIdentifier == flutter::kFlutterImplicitViewId) {
+    self.platformView->SetOwnerViewController(controller);
+    [self maybeSetupPlatformViewChannels];
+    [self updateDisplays];
+  } else {
+    self.platformView->AddOwnerViewController(controller);
+    flutter::ViewportMetrics metrics = {};
+    bool added = false;
+    self.platformView->AddView(viewIdentifier, metrics, [&added](bool result) { added = result; });
+    // The callback should be called synchronously from platform thread.
+    FML_DCHECK(added);
+    if (!added) {
+      NSLog(@"Failed to add view with ID %llu", viewIdentifier);
+    }
+  }
+}
+
+- (void)deregisterViewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  [self.textInputPlugin removeViewControllerWithIdentifier:viewIdentifier];
+  [self removeFlutterViewControllerWillDeallocObserverForIdentifier:viewIdentifier];
+  {
+    if (viewIdentifier != flutter::kFlutterImplicitViewId) {
+      bool removed = NO;
+      dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+      self.platformView->RemoveView(viewIdentifier, [&removed, &sem](bool result) {
+        removed = result;
+        dispatch_semaphore_signal(sem);
+      });
+      dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+      // Raster-thread collection must finish before releasing the native surface.
+      FML_DCHECK(removed);
+      self.platformView->RemoveOwnerViewController(viewIdentifier);
+    } else {
+      self.platformView->SetOwnerViewController(nil);
+    }
+  }
+
+  [_viewControllers removeObjectForKey:@(viewIdentifier)];
   [self updateGpuAvailabilityFromLifecycleState];
 
-  self.platformView->SetOwnerViewController(_viewController);
-  [self maybeSetupPlatformViewChannels];
-  [self updateDisplays];
-  self.textInputPlugin.viewController = viewController;
-
-  if (viewController) {
-    __weak __block FlutterEngine* weakSelf = self;
-    self.flutterViewControllerWillDeallocObserver =
-        [[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
-                                                          object:viewController
-                                                           queue:[NSOperationQueue mainQueue]
-                                                      usingBlock:^(NSNotification* note) {
-                                                        [weakSelf notifyViewControllerDeallocated];
-                                                      }];
-  } else {
-    self.flutterViewControllerWillDeallocObserver = nil;
+  if ([_viewControllers count] == 0) {
+    [self updateDisplays];
     [self notifyLowMemory];
   }
 }
 
-- (void)attachView {
-  FML_DCHECK(self.platformView);
-  self.platformView->attachView();
-}
-
-- (void)setFlutterViewControllerWillDeallocObserver:(id<NSObject>)observer {
-  if (observer != _flutterViewControllerWillDeallocObserver) {
-    if (_flutterViewControllerWillDeallocObserver) {
-      [[NSNotificationCenter defaultCenter]
-          removeObserver:_flutterViewControllerWillDeallocObserver];
+- (void)addViewController:(FlutterViewController*)controller {
+  if (!_multiViewEnabled) {
+    // When multiview is disabled, the engine will only assign views to the implicit view ID.
+    // The implicit view ID can be reused if and only if the implicit view is unassigned.
+    if (self.viewController) {
+      NSString* errorMessage =
+          [NSString stringWithFormat:
+                        @"The supplied FlutterEngine %@ is already used with FlutterViewController "
+                         "instance %@. One instance of the FlutterEngine can only be attached to "
+                         "one FlutterViewController at a time. Set FlutterEngine.viewController to "
+                         "nil before attaching it to another FlutterViewController.",
+                        self.description, self.viewController.description];
+      [FlutterLogger logError:errorMessage];
     }
-    _flutterViewControllerWillDeallocObserver = observer;
+
+    self.viewController = controller;
+  } else {
+    // Explicit view IDs start at 1 and are never reused. The implicit view remains unassigned.
+    FlutterViewIdentifier viewIdentifier = _nextViewIdentifier++;
+    [self registerViewController:controller forIdentifier:viewIdentifier];
   }
 }
 
-- (void)notifyViewControllerDeallocated {
-  [self.lifecycleChannel sendMessage:@"AppLifecycleState.detached"];
-  self.textInputPlugin.viewController = nil;
-  if (!self.allowHeadlessExecution) {
+- (void)removeViewController:(FlutterViewIdentifier)viewIdentifier {
+  if ([_viewControllers count] == 1 && !_allowHeadlessExecution) {
+    [self.textInputPlugin removeViewControllerWithIdentifier:viewIdentifier];
     [self destroyContext];
   } else if (self.platformView) {
-    self.platformView->SetOwnerViewController({});
+    [self deregisterViewControllerForIdentifier:viewIdentifier];
   }
-  [self.textInputPlugin resetViewResponder];
-  _viewController = nil;
+}
+
+- (FlutterViewController*)viewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  FlutterViewController* controller = [_viewControllers objectForKey:@(viewIdentifier)];
+  NSAssert(controller == nil || controller.viewIdentifier == viewIdentifier,
+           @"The stored controller has unexpected view ID.");
+  return controller;
+}
+
+- (void)attachView:(FlutterViewIdentifier)viewIdentifier {
+  FML_DCHECK(self.platformView);
+  if ([_viewControllers objectForKey:@(viewIdentifier)] == nil) {
+    return;
+  }
+  self.platformView->attachView(viewIdentifier);
+}
+
+- (void)notifyViewControllerDeallocated:(FlutterViewIdentifier)viewIdentifier {
+  [self.lifecycleChannel sendMessage:@"AppLifecycleState.detached"];
+  [self removeViewController:viewIdentifier];
 }
 
 - (void)destroyContext {
@@ -630,6 +799,8 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)resetChannels {
+  [self.accessibilityChannel setMessageHandler:nil];
+  self.accessibilityChannel = nil;
   self.localizationChannel = nil;
   self.navigationChannel = nil;
   self.restorationChannel = nil;
@@ -735,6 +906,18 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
                                        binaryMessenger:self.binaryMessenger
                                                  codec:[FlutterStringCodec sharedInstance]];
 
+  self.accessibilityChannel = [[FlutterBasicMessageChannel alloc]
+         initWithName:@"flutter/accessibility"
+      binaryMessenger:self.binaryMessenger
+                codec:[FlutterStandardMessageCodec sharedInstance]];
+  [self.accessibilityChannel setMessageHandler:^(id message, FlutterReply reply) {
+    FlutterEngine* engine = weakSelf;
+    if (engine.platformView) {
+      engine.platformView->HandleAccessibilityEvent(message);
+    }
+    reply(nil);
+  }];
+
   self.systemChannel =
       [[FlutterBasicMessageChannel alloc] initWithName:@"flutter/system"
                                        binaryMessenger:self.binaryMessenger
@@ -750,7 +933,8 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
                                        binaryMessenger:self.binaryMessenger
                                                  codec:[FlutterJSONMessageCodec sharedInstance]];
 
-  self.textInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:self];
+  self.textInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:self
+                                                        textInputDelegate:self];
   self.textInputPlugin.indirectScribbleDelegate = self;
   [self.textInputPlugin setUpIndirectScribbleInteraction:self.viewController];
 

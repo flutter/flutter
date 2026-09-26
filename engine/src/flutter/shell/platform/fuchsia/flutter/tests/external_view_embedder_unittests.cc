@@ -334,7 +334,8 @@ void DrawSimpleFrame(ExternalViewEmbedder& external_view_embedder,
                      float frame_dpr,
                      std::function<void(flutter::DlCanvas*)> draw_callback) {
   external_view_embedder.BeginFrame(nullptr, nullptr);
-  external_view_embedder.PrepareFlutterView(frame_size, frame_dpr);
+  external_view_embedder.PrepareFlutterView(kImplicitViewId, frame_size,
+                                            frame_dpr);
   {
     flutter::DlCanvas* root_canvas = external_view_embedder.GetRootCanvas();
     external_view_embedder.PostPrerollAction(nullptr);
@@ -362,7 +363,8 @@ void DrawFrameWithView(
     std::function<void(flutter::DlCanvas*)> background_draw_callback,
     std::function<void(flutter::DlCanvas*)> overlay_draw_callback) {
   external_view_embedder.BeginFrame(nullptr, nullptr);
-  external_view_embedder.PrepareFlutterView(frame_size, frame_dpr);
+  external_view_embedder.PrepareFlutterView(kImplicitViewId, frame_size,
+                                            frame_dpr);
   {
     flutter::DlCanvas* root_canvas = external_view_embedder.GetRootCanvas();
     external_view_embedder.PrerollCompositeEmbeddedView(

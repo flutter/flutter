@@ -19,7 +19,7 @@
 
 #include "flutter/shell/platform/embedder/embedder.h"
 
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterIndirectScribbleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
@@ -39,15 +39,16 @@ NS_ASSUME_NONNULL_BEGIN
 // Indicates whether this engine has **ever** been manually registered to a scene.
 @property(nonatomic, assign) BOOL manuallyRegisteredToScene;
 
-- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics;
+- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics
+               viewIdentifier:(FlutterViewIdentifier)viewIdentifier;
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
 - (BOOL)platformViewShouldAcceptTouchAtTouchBeganLocation:(flutter::PointData)location
                                                    viewId:(uint64_t)viewId;
 
 - (void)installFirstFrameCallback:(void (^)(void))block;
 - (void)enableSemantics:(BOOL)enabled withFlags:(int64_t)flags;
-- (void)notifyViewCreated;
-- (void)notifyViewDestroyed;
+- (void)notifyViewRenderingSurfaceCreated:(FlutterViewIdentifier)viewIdentifier;
+- (void)notifyViewRenderingSurfaceDestroyed:(FlutterViewIdentifier)viewIdentifier;
 
 - (flutter::Rasterizer::Screenshot)screenshot:(flutter::Rasterizer::ScreenshotType)type
                                  base64Encode:(bool)base64Encode;
@@ -67,7 +68,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)createShell:(nullable NSString*)entrypoint
          libraryURI:(nullable NSString*)libraryOrNil
        initialRoute:(nullable NSString*)initialRoute NS_SWIFT_UI_ACTOR;
-- (void)attachView;
+- (void)attachView:(FlutterViewIdentifier)viewIdentifier;
 - (void)notifyLowMemory;
 
 /// Asynchronously waits until the first frame is presented or the timeout is exceeded, then invokes
@@ -132,6 +133,50 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion;
 
 - (void)onStatusBarTap;
+/**
+ * Enables multi-view support.
+ *
+ *  - When multiview is disabled, the engine will only assign views to the
+ *    implicit view ID. The implicit view ID can be reused if and only if the
+ *    implicit view ID is unassigned.
+ *  - When multiview is enabled, the engine assigns explicit view IDs starting
+ *    at 1. IDs are never reused, and no controller is assigned to the implicit view.
+ *
+ * Enable multiview before attaching a view controller. Dart code must use
+ * `runWidget` with explicit `View` widgets instead of `runApp`, which targets
+ * the implicit view.
+ *
+ * Calling enableMultiView when multiview is already enabled is a noop.
+ *
+ */
+- (void)enableMultiView;
+
+/**
+ * Attach a view controller to the engine.
+ *
+ * In single-view mode the controller is assigned to the implicit view. In
+ * multi-view mode it is assigned a new explicit view ID.
+ *
+ * The engine holds a weak reference to the attached view controller.
+ */
+- (void)addViewController:(FlutterViewController*)viewController;
+
+/**
+ * Notify the engine that a view for the given view controller has been loaded.
+ */
+// - (void)viewControllerViewDidLoad:(FlutterViewController*)viewController;
+
+/**
+ * Dissociate the given view controller from this engine.
+ *
+ * If the view controller is not associated with this engine, this call throws an
+ * assertion.
+ */
+- (void)removeViewController:(FlutterViewIdentifier)viewIdentifier;
+
+- (nullable FlutterViewController*)viewControllerForIdentifier:
+    (FlutterViewIdentifier)viewIdentifier;
+
 @end
 
 @interface FlutterImplicitEngineBridgeImpl : NSObject <FlutterImplicitEngineBridge>

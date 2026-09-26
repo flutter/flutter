@@ -114,7 +114,8 @@ void ExternalViewEmbedder::BeginFrame(
     const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {}
 
 // |ExternalViewEmbedder|
-void ExternalViewEmbedder::PrepareFlutterView(flutter::DlISize frame_size,
+void ExternalViewEmbedder::PrepareFlutterView(int64_t flutter_view_id,
+                                              flutter::DlISize frame_size,
                                               double device_pixel_ratio) {
   // Reset for new view.
   Reset();
