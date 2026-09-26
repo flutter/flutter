@@ -951,14 +951,12 @@ public class FlutterRendererTest {
 
   @Test
   public void ImageReaderSurfaceProducerSchedulesFrameIfQueueNotEmpty() throws Exception {
-    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
     FlutterRenderer.ImageReaderSurfaceProducer texture =
         (FlutterRenderer.ImageReaderSurfaceProducer) producer;
     texture.disableFenceForTest();
     texture.setSize(1, 1);
-
-    long textureId = texture.id();
 
     // Render two frames.
     for (int i = 0; i < 2; i++) {
@@ -970,26 +968,24 @@ public class FlutterRendererTest {
       shadowOf(Looper.getMainLooper()).idle();
     }
 
-    // Each enqueue of an image should result in a call to markTextureFrameAvailable.
-    // This ensures the dirty-view optimization works by notifying the framework
-    // which texture has a new frame.
-    verify(fakeFlutterJNI, times(2)).markTextureFrameAvailable(eq(textureId));
+    // Each enqueue of an image should result in a call to scheduleEngineFrame.
+    verify(flutterRenderer, times(2)).scheduleEngineFrame();
 
     // Consume the first image.
     Image image = texture.acquireLatestImage();
     shadowOf(Looper.getMainLooper()).idle();
 
-    // The dequeue should call markTextureFrameAvailable because another image
+    // The dequeue should call scheduleEngineFrame because another image
     // remains in the queue.
-    verify(fakeFlutterJNI, times(3)).markTextureFrameAvailable(eq(textureId));
+    verify(flutterRenderer, times(3)).scheduleEngineFrame();
 
     // Consume the second image.
     image = texture.acquireLatestImage();
     shadowOf(Looper.getMainLooper()).idle();
 
-    // The dequeue should not call markTextureFrameAvailable because the queue
+    // The dequeue should not call scheduleEngineFrame because the queue
     // is now empty.
-    verify(fakeFlutterJNI, times(3)).markTextureFrameAvailable(eq(textureId));
+    verify(flutterRenderer, times(3)).scheduleEngineFrame();
   }
 
   @Test
@@ -1012,19 +1008,19 @@ public class FlutterRendererTest {
   @Test
   public void ImageReaderSurfaceProducerDoesNotScheduleFrameWhenDetached() throws Exception {
     // Regression test for https://github.com/flutter/flutter/issues/188300.
-    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
     FlutterRenderer.ImageReaderSurfaceProducer texture =
         (FlutterRenderer.ImageReaderSurfaceProducer) producer;
     texture.disableFenceForTest();
     texture.setSize(1, 1);
-    long textureId = texture.id();
 
     // The engine detaches, e.g. because the Activity was destroyed, while this producer still has
     // a frame in flight.
     engineRule.setJniIsAttached(false);
 
-    // Render a frame. The ImageReader callback is delivered on the platform thread after detach.
+    // Render a frame. The ImageReader callback is delivered on the platform thread and reaches
+    // scheduleEngineFrame after the detach.
     Surface surface = texture.getSurface();
     assertNotNull(surface);
     Canvas canvas = surface.lockHardwareCanvas();
@@ -1032,8 +1028,9 @@ public class FlutterRendererTest {
     surface.unlockCanvasAndPost(canvas);
     shadowOf(Looper.getMainLooper()).idle();
 
-    // The late image must not be forwarded to the detached FlutterJNI, which would throw.
-    verify(fakeFlutterJNI, never()).markTextureFrameAvailable(eq(textureId));
+    // The image still reaches scheduleEngineFrame, ...
+    verify(flutterRenderer, times(1)).scheduleEngineFrame();
+    // ... but it must not be forwarded to the detached FlutterJNI, which would throw.
     verify(fakeFlutterJNI, never()).scheduleFrame();
   }
 
