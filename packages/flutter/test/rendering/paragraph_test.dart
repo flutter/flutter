@@ -1082,6 +1082,44 @@ void main() {
       expect(paintingContext.canvas.drawnRectPaint!.color, isSameColorAs(selectionColor));
     });
 
+    test('paints selection highlight across line spacing', () {
+      final registrar = TestSelectionRegistrar();
+      const selectionColor = Color(0xAF6694e8);
+      final paragraph = RenderParagraph(
+        const TextSpan(
+          text: 'first line\nsecond line',
+          style: TextStyle(fontSize: 14.0, height: 2.0),
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        selectionColor: selectionColor,
+      );
+      layout(paragraph);
+
+      for (final Selectable selectable in registrar.selectables) {
+        selectable.dispatchSelectionEvent(const SelectAllSelectionEvent());
+      }
+
+      final paintingContext = MockPaintingContext();
+      paragraph.paint(paintingContext, Offset.zero);
+
+      // Both lines should have a selection highlight.
+      expect(
+        paintingContext.operations.where((String operation) => operation == 'selectionRect'),
+        hasLength(2),
+      );
+
+      // The last selection rect is for the second line. With BoxHeightStyle.max,
+      // it should cover the full line height.
+      expect(paintingContext.canvas.drawnRect!.height, 28.0);
+      expect(paintingContext.canvas.drawnRect!.top, 28.0);
+      expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
+      expect(
+        paintingContext.canvas.drawnRectPaint!.color,
+        isSameColorAs(selectionColor),
+      );
+    });
+
     // Regression test for https://github.com/flutter/flutter/issues/182776.
     test('paints selection highlights outside fade layer and handles after text', () async {
       final registrar = TestSelectionRegistrar();
