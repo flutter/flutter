@@ -304,6 +304,7 @@ struct ContentContext::Pipelines {
   Variants<VerticesUber1Shader> vertices_uber_1_;
   Variants<VerticesUber2Shader> vertices_uber_2_;
   Variants<UberSDFPipeline> uber_sdf;
+  Variants<UberSDFSSBOPipeline> uber_sdf_ssbo;
   Variants<ComplexRSEPipeline> complex_rse;
   Variants<YUVToRGBFilterPipeline> yuv_to_rgb_filter;
 
@@ -638,7 +639,11 @@ ContentContext::ContentContext(
     pipelines_->fast_gradient.CreateDefault(*context_, options);
     pipelines_->circle.CreateDefault(*context_, options);
     if (context_->GetFlags().use_sdfs) {
-      pipelines_->uber_sdf.CreateDefault(*context_, options);
+      if (context_->GetCapabilities()->SupportsSSBO()) {
+        pipelines_->uber_sdf_ssbo.CreateDefault(*context_, options);
+      } else {
+        pipelines_->uber_sdf.CreateDefault(*context_, options);
+      }
       pipelines_->complex_rse.CreateDefault(*context_, options);
     }
 
@@ -1207,6 +1212,11 @@ PipelineRef ContentContext::GetYUVToRGBFilterPipeline(
 PipelineRef ContentContext::GetUberSDFPipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->uber_sdf, opts);
+}
+
+PipelineRef ContentContext::GetUberSDFSSBOPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->uber_sdf_ssbo, opts);
 }
 
 PipelineRef ContentContext::GetComplexRSEPipeline(

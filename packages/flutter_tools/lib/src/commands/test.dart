@@ -13,6 +13,7 @@ import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../context/tool_context.dart';
@@ -802,7 +803,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   /// Parses a test file/directory target passed as an argument and returns it
   /// as an absolute `file:///` [Uri] with optional querystring for name/line/col.
   Uri _parseTestArgument(String arg) {
-    final FileSystem fs = _toolContext.fs;
+    final ToolContext(:FileSystem fs, :Platform platform) = _toolContext;
 
     // We can't parse Windows paths as URIs if they have query strings, so
     // parse the file and query parts separately.
@@ -813,7 +814,16 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     filePart = fs.path.absolute(filePart);
     filePart = fs.path.normalize(filePart);
 
-    return Uri.file(filePart).replace(query: queryPart.isEmpty ? null : queryPart);
+    try {
+      return Uri.file(
+        filePart,
+        windows: platform.isWindows,
+      ).replace(query: queryPart.isEmpty ? null : queryPart);
+    } on ArgumentError catch (e) {
+      throwToolExit('Invalid test path "$arg": ${e.message}');
+    } on FormatException catch (e) {
+      throwToolExit('Invalid test path "$arg": ${e.message}');
+    }
   }
 
   Future<void> _buildTestAsset({
