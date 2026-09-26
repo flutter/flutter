@@ -22,7 +22,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, HitTestEntry, HitTestResult;
-import 'package:flutter/rendering.dart' show RenderMetaData;
+import 'package:flutter/rendering.dart' show RenderMetaData, RenderProxyBox;
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
@@ -1087,6 +1087,17 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       bottom - math.max(minInsets.bottom, bottomWidgetsHeight),
     );
 
+    // A bottom bar still owns the area below the sheet. Extend the sheet's
+    // surface only across the gap opened above the bottom bar by keyboard avoidance,
+    // without intruding into the top bars (contentTop).
+    final double availableBottom = math.max(0.0, bottom - bottomWidgetsHeight);
+    final double bottomSheetBottom = clampDouble(
+      contentBottom,
+      math.min(contentTop, availableBottom),
+      availableBottom,
+    );
+    final double bottomSheetKeyboardInset = math.max(0.0, availableBottom - bottomSheetBottom);
+
     if (hasChild(_ScaffoldSlot.body)) {
       double bodyMaxHeight = math.max(0.0, contentBottom - contentTop);
 
@@ -1141,14 +1152,27 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ScaffoldSlot.bottomSheet)) {
-      final bottomSheetConstraints = BoxConstraints(
+      // Keep the sheet's contents above the keyboard, but let its own Material
+      // continue to the bottom edge available above any bottom bars. The extent
+      // is local to this layout, rather than an unbounded keyboard height from
+      // MediaQuery.
+      final keyboardInset = bottomSheetKeyboardInset;
+      final bottomSheetConstraints = _BottomSheetConstraints(
+        keyboardInset: keyboardInset,
+        scaffoldSize: Size(
+          size.width,
+          math.max(0.0, bottomSheetBottom + keyboardInset - contentTop),
+        ),
         maxWidth: fullWidthConstraints.maxWidth,
         maxHeight: math.max(0.0, contentBottom - contentTop),
       );
       bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, bottomSheetConstraints);
       positionChild(
         _ScaffoldSlot.bottomSheet,
-        Offset((size.width - bottomSheetSize.width) / 2.0, contentBottom - bottomSheetSize.height),
+        Offset(
+          (size.width - bottomSheetSize.width) / 2.0,
+          bottomSheetBottom - bottomSheetSize.height,
+        ),
       );
     }
 
@@ -1926,6 +1950,13 @@ class Scaffold extends StatefulWidget {
   /// [showBottomSheet] and [showModalBottomSheet]. Typically it's a widget
   /// that includes [Material].
   ///
+  /// When [resizeToAvoidBottomInset] is true, the sheet's content avoids the
+  /// keyboard while its [Material] background extends behind it. Configure that
+  /// background with [BottomSheet] or [ThemeData.bottomSheetTheme]; decorations
+  /// painted by other child widgets do not extend into the keyboard region. The
+  /// extended decoration does not change the sheet's layout constraints or
+  /// interactive area.
+  ///
   /// See also:
   ///
   ///  * [showBottomSheet], which displays a bottom sheet as a route that can
@@ -2392,6 +2423,7 @@ class ScaffoldState extends State<Scaffold>
         assert(_dismissedBottomSheets.isEmpty);
       }
 
+      Widget? lastBottomSheet = widget.bottomSheet;
       _currentBottomSheet = _buildBottomSheet(
         (BuildContext context) {
           return NotificationListener<DraggableScrollableNotification>(
@@ -2400,7 +2432,14 @@ class ScaffoldState extends State<Scaffold>
               child: StatefulBuilder(
                 key: _currentBottomSheetKey,
                 builder: (BuildContext context, StateSetter setState) {
-                  return widget.bottomSheet ?? const SizedBox.shrink();
+                  if (widget.bottomSheet != null) {
+                    lastBottomSheet = widget.bottomSheet;
+                  }
+                  return switch (lastBottomSheet) {
+                    final BottomSheet sheet => Builder(builder: sheet.builder),
+                    final Widget sheet => sheet,
+                    null => const SizedBox.shrink(),
+                  };
                 },
               ),
             ),
@@ -2445,7 +2484,8 @@ class ScaffoldState extends State<Scaffold>
   }
 
   void _updatePersistentBottomSheet() {
-    _currentBottomSheetKey.currentState!.setState(() {});
+    _currentBottomSheetKey.currentState?.setState(() {});
+    _currentBottomSheet?.setState?.call(() {});
   }
 
   PersistentBottomSheetController _buildBottomSheet(
@@ -2487,31 +2527,7 @@ class ScaffoldState extends State<Scaffold>
       }
     }
 
-    void removeCurrentBottomSheet() {
-      removedEntry = true;
-      if (_currentBottomSheet == null) {
-        return;
-      }
-      assert(_currentBottomSheet!._widget == bottomSheet);
-      assert(bottomSheetKey.currentState != null);
-      _showFloatingActionButton();
-
-      if (isPersistent) {
-        removePersistentSheetHistoryEntryIfNeeded();
-      }
-
-      bottomSheetKey.currentState!.close();
-      setState(() {
-        _showBodyScrim = false;
-        _bottomSheetScrimAnimationController.value = 0.0;
-        _currentBottomSheet = null;
-      });
-
-      if (!animationController.isDismissed) {
-        _dismissedBottomSheets.add(bottomSheet);
-      }
-      completer.complete();
-    }
+    late void Function() removeCurrentBottomSheet;
 
     final LocalHistoryEntry? entry = isPersistent
         ? null
@@ -2530,6 +2546,46 @@ class ScaffoldState extends State<Scaffold>
         removedEntry = true;
       }
     }
+
+    var controllerDisposed = false;
+    void cleanupIfNeeded() {
+      doingDispose = true;
+      removeEntryIfNeeded();
+      if (shouldDisposeAnimationController && !controllerDisposed) {
+        controllerDisposed = true;
+        animationController.dispose();
+      }
+    }
+
+    removeCurrentBottomSheet = () {
+      removedEntry = true;
+      if (_currentBottomSheet == null) {
+        return;
+      }
+      assert(_currentBottomSheet!._widget == bottomSheet);
+      _showFloatingActionButton();
+
+      if (isPersistent) {
+        removePersistentSheetHistoryEntryIfNeeded();
+      }
+
+      final _StandardBottomSheetState? sheetState = bottomSheetKey.currentState;
+      if (sheetState != null) {
+        sheetState.close();
+        if (!animationController.isDismissed) {
+          _dismissedBottomSheets.add(bottomSheet);
+        }
+      } else {
+        cleanupIfNeeded();
+      }
+      setState(() {
+        _showBodyScrim = false;
+        _bottomSheetScrimAnimationController.value = 0.0;
+        _currentBottomSheet = null;
+      });
+
+      completer.complete();
+    };
 
     bottomSheet = _StandardBottomSheet(
       key: bottomSheetKey,
@@ -2550,13 +2606,7 @@ class ScaffoldState extends State<Scaffold>
           });
         }
       },
-      onDispose: () {
-        doingDispose = true;
-        removeEntryIfNeeded();
-        if (shouldDisposeAnimationController) {
-          animationController.dispose();
-        }
-      },
+      onDispose: cleanupIfNeeded,
       builder: builder,
       isPersistent: isPersistent,
       backgroundColor: backgroundColor,
@@ -2578,6 +2628,7 @@ class ScaffoldState extends State<Scaffold>
         bottomSheetKey.currentState?.setState(fn);
       },
       !isPersistent,
+      cleanupIfNeeded,
     );
   }
 
@@ -2639,6 +2690,12 @@ class ScaffoldState extends State<Scaffold>
   ///
   /// ** See code in examples/api/lib/material/scaffold/scaffold_state.show_bottom_sheet.1.dart **
   /// {@end-tool}
+  ///
+  /// When [Scaffold.resizeToAvoidBottomInset] is true, keyboard avoidance keeps
+  /// the content above the keyboard and extends the sheet's [Material]
+  /// background behind it. Set [backgroundColor] or [ThemeData.bottomSheetTheme]
+  /// to configure that surface; child decorations are not extended.
+  ///
   /// See also:
   ///
   ///  * [BottomSheet], which becomes the parent of the widget returned by the
@@ -2888,6 +2945,7 @@ class ScaffoldState extends State<Scaffold>
   @protected
   @override
   void dispose() {
+    _currentBottomSheet?._cleanup();
     _geometryNotifier.dispose();
     _floatingActionButtonMoveController.dispose();
     _floatingActionButtonVisibilityController.dispose();
@@ -3068,9 +3126,23 @@ class ScaffoldState extends State<Scaffold>
     double? snackBarWidth;
 
     if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
-      final Widget stack = Stack(
-        alignment: Alignment.bottomCenter,
-        children: <Widget>[..._dismissedBottomSheets, ?_currentBottomSheet?._widget],
+      final Widget stack = LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final double keyboardInset = (constraints as _BottomSheetConstraints).keyboardInset;
+          return _BottomSheetKeyboardInset(
+            bottom: keyboardInset,
+            child: ClipRect(
+              clipper: _BottomSheetClipper(constraints.scaffoldSize, keyboardInset),
+              child: _BottomSheetSemanticsClip(
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.bottomCenter,
+                  children: <Widget>[..._dismissedBottomSheets, ?_currentBottomSheet?._widget],
+                ),
+              ),
+            ),
+          );
+        },
       );
       _addIfNonNull(
         children,
@@ -3304,6 +3376,84 @@ class ScaffoldFeatureController<T extends Widget, U> {
   final StateSetter? setState;
 }
 
+// Carries Scaffold's layout result to its persistent sheet. BottomSheet receives
+// the value explicitly; standalone and nested sheets do not inherit it.
+class _BottomSheetKeyboardInset extends InheritedWidget {
+  const _BottomSheetKeyboardInset({required this.bottom, required super.child});
+
+  final double bottom;
+
+  static double of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_BottomSheetKeyboardInset>()!.bottom;
+
+  @override
+  bool updateShouldNotify(_BottomSheetKeyboardInset oldWidget) => bottom != oldWidget.bottom;
+}
+
+// Passed directly to the bottom-sheet LayoutBuilder so inset-only changes also
+// trigger layout when the logical sheet constraints remain unchanged.
+class _BottomSheetConstraints extends BoxConstraints {
+  const _BottomSheetConstraints({
+    required this.keyboardInset,
+    required this.scaffoldSize,
+    required super.maxWidth,
+    required super.maxHeight,
+  });
+
+  final double keyboardInset;
+  final Size scaffoldSize;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _BottomSheetConstraints &&
+      super == other &&
+      other.keyboardInset == keyboardInset &&
+      other.scaffoldSize == scaffoldSize;
+
+  @override
+  int get hashCode => Object.hash(super.hashCode, keyboardInset, scaffoldSize);
+}
+
+// The sheet is bottom-centered in its Scaffold. Clip at that boundary during
+// entrance and dismissal, but retain shadows outside the sheet's own bounds.
+class _BottomSheetClipper extends CustomClipper<Rect> {
+  const _BottomSheetClipper(this.scaffoldSize, this.bottom);
+
+  final double bottom;
+
+  final Size scaffoldSize;
+
+  @override
+  Rect getClip(Size size) => Rect.fromLTWH(
+    (size.width - scaffoldSize.width) / 2.0,
+    size.height + bottom - scaffoldSize.height,
+    scaffoldSize.width,
+    scaffoldSize.height,
+  );
+
+  @override
+  Rect getApproximateClipRect(Size size) => getClip(size);
+
+  @override
+  bool shouldReclip(_BottomSheetClipper oldClipper) =>
+      scaffoldSize != oldClipper.scaffoldSize || bottom != oldClipper.bottom;
+}
+
+// The stack's layout bounds end at the keyboard, even while its sheets are
+// animating. Keep dismiss actions and other semantic bounds within that area.
+class _BottomSheetSemanticsClip extends SingleChildRenderObjectWidget {
+  const _BottomSheetSemanticsClip({required super.child});
+
+  @override
+  _RenderBottomSheetSemanticsClip createRenderObject(BuildContext context) =>
+      _RenderBottomSheetSemanticsClip();
+}
+
+class _RenderBottomSheetSemanticsClip extends RenderProxyBox {
+  @override
+  Rect? describeSemanticsClip(RenderBox? child) => Offset.zero & size;
+}
+
 class _StandardBottomSheet extends StatefulWidget {
   const _StandardBottomSheet({
     super.key,
@@ -3343,6 +3493,47 @@ class _StandardBottomSheet extends StatefulWidget {
 
 class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   ParametricCurve<double> animationCurve = _standardBottomSheetCurve;
+  BottomSheet? _persistentBottomSheet;
+  AnimationController? _userAnimationController;
+  bool _isClosing = false;
+
+  AnimationController get _effectiveAnimationController => !_isClosing
+      ? (_userAnimationController ?? widget.animationController)
+      : widget.animationController;
+
+  void _updateUserAnimationController(AnimationController? newController) {
+    if (_userAnimationController == newController) {
+      return;
+    }
+    _userAnimationController?.removeListener(_syncFromUserController);
+    _userAnimationController = newController;
+    if (newController != null) {
+      newController.addListener(_syncFromUserController);
+      if (!_isClosing) {
+        if (newController.status == AnimationStatus.dismissed &&
+            (widget.animationController.status == AnimationStatus.forward ||
+                widget.animationController.status == AnimationStatus.completed)) {
+          final double initialValue = widget.animationController.value;
+          final wasForward = widget.animationController.status == AnimationStatus.forward;
+          widget.animationController.stop();
+          if (wasForward) {
+            newController.forward(from: initialValue);
+          } else {
+            newController.value = initialValue;
+          }
+        } else {
+          widget.animationController.value = newController.value;
+        }
+      }
+    }
+  }
+
+  void _syncFromUserController() {
+    final AnimationController? userController = _userAnimationController;
+    if (userController != null && !_isClosing) {
+      widget.animationController.value = userController.value;
+    }
+  }
 
   @override
   void initState() {
@@ -3353,6 +3544,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
 
   @override
   void dispose() {
+    _userAnimationController?.removeListener(_syncFromUserController);
     widget.animationController.removeStatusListener(_handleStatusChange);
     widget.onDispose?.call();
     super.dispose();
@@ -3365,18 +3557,34 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   }
 
   void close() {
-    widget.animationController.reverse();
+    _isClosing = true;
+    final AnimationController? userController = _userAnimationController;
+    if (userController != null) {
+      widget.animationController.value = userController.value;
+      if (userController.velocity < 0.0 && widget.animationController.value > 0.0) {
+        widget.animationController.fling(velocity: userController.velocity);
+      } else if (widget.animationController.velocity >= 0.0) {
+        widget.animationController.reverse();
+      }
+    } else if (widget.animationController.velocity >= 0.0) {
+      widget.animationController.reverse();
+    }
     widget.onClosing?.call();
   }
 
   void _handleDragStart(DragStartDetails details) {
     // Allow the bottom sheet to track the user's finger accurately.
     animationCurve = Curves.linear;
+    _persistentBottomSheet?.onDragStart?.call(details);
   }
 
   void _handleDragEnd(DragEndDetails details, {bool? isClosing}) {
     // Allow the bottom sheet to animate smoothly from its current position.
-    animationCurve = Split(widget.animationController.value, endCurve: _standardBottomSheetCurve);
+    animationCurve = Split(
+      _effectiveAnimationController.value,
+      endCurve: _standardBottomSheetCurve,
+    );
+    _persistentBottomSheet?.onDragEnd?.call(details, isClosing: isClosing ?? false);
   }
 
   void _handleStatusChange(AnimationStatus status) {
@@ -3409,6 +3617,34 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isPersistent) {
+      switch (Scaffold.maybeOf(context)?.widget.bottomSheet) {
+        case final BottomSheet sheet:
+          _persistentBottomSheet = sheet;
+          _isClosing = false;
+        case final Widget _:
+          _persistentBottomSheet = null;
+          _isClosing = false;
+        case null:
+          break;
+      }
+    } else {
+      _persistentBottomSheet = null;
+    }
+    final BottomSheet? persistentBottomSheet = _persistentBottomSheet;
+    _updateUserAnimationController(persistentBottomSheet?.animationController);
+    final bool enableDrag = persistentBottomSheet != null
+        ? (persistentBottomSheet.enableDrag &&
+              (persistentBottomSheet.animationController != null ||
+                  persistentBottomSheet.onDragStart != null ||
+                  persistentBottomSheet.onDragEnd != null))
+        : widget.enableDrag;
+    final bool? showDragHandle =
+        widget.showDragHandle ??
+        persistentBottomSheet?.showDragHandle ??
+        (persistentBottomSheet != null && persistentBottomSheet.enableDrag
+            ? Theme.of(context).bottomSheetTheme.showDragHandle
+            : null);
     return AnimatedBuilder(
       animation: widget.animationController,
       builder: (BuildContext context, Widget? child) {
@@ -3424,18 +3660,39 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
         child: NotificationListener<DraggableScrollableNotification>(
           onNotification: extentChanged,
           child: BottomSheet(
-            animationController: widget.animationController,
-            enableDrag: widget.enableDrag,
-            showDragHandle: widget.showDragHandle,
+            key: persistentBottomSheet?.key,
+            bottomInset: math.max(
+              _BottomSheetKeyboardInset.of(context),
+              persistentBottomSheet?.bottomInset ?? 0.0,
+            ),
+            animationController: _effectiveAnimationController,
+            enableDrag: enableDrag,
+            showDragHandle: showDragHandle,
+            dragHandleColor: persistentBottomSheet?.dragHandleColor,
+            dragHandleSize: persistentBottomSheet?.dragHandleSize,
             onDragStart: _handleDragStart,
             onDragEnd: _handleDragEnd,
-            onClosing: widget.onClosing!,
+            onClosing: () {
+              _persistentBottomSheet?.onClosing();
+              widget.onClosing!();
+              if (widget.isPersistent) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted &&
+                      !_isClosing &&
+                      Scaffold.maybeOf(context)?.widget.bottomSheet != null) {
+                    _effectiveAnimationController.forward();
+                  }
+                });
+                WidgetsBinding.instance.scheduleFrame();
+              }
+            },
             builder: widget.builder,
-            backgroundColor: widget.backgroundColor,
-            elevation: widget.elevation,
-            shape: widget.shape,
-            clipBehavior: widget.clipBehavior,
-            constraints: widget.constraints,
+            backgroundColor: widget.backgroundColor ?? persistentBottomSheet?.backgroundColor,
+            shadowColor: persistentBottomSheet?.shadowColor,
+            elevation: widget.elevation ?? persistentBottomSheet?.elevation,
+            shape: widget.shape ?? persistentBottomSheet?.shape,
+            clipBehavior: widget.clipBehavior ?? persistentBottomSheet?.clipBehavior,
+            constraints: widget.constraints ?? persistentBottomSheet?.constraints,
           ),
         ),
       ),
@@ -3458,9 +3715,11 @@ class PersistentBottomSheetController
     super.close,
     StateSetter super.setState,
     this._isLocalHistoryEntry,
+    this._cleanup,
   ) : super._();
 
   final bool _isLocalHistoryEntry;
+  final VoidCallback _cleanup;
 }
 
 class _ScaffoldScope extends InheritedWidget {
