@@ -7,6 +7,7 @@
 #include <array>
 #include <cstdint>
 
+#include "flutter/fml/trace_event.h"
 #include "fml/status.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/buffer_view.h"
@@ -149,6 +150,7 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
                            const RenderTarget& target,
                            std::shared_ptr<CommandBufferVK> command_buffer)
     : RenderPass(context, target), command_buffer_(std::move(command_buffer)) {
+  TRACE_EVENT0("impeller", "RenderPassVK::RenderPassVK");
   const ColorAttachment& color0 = render_target_.GetColorAttachment(0);
   color_image_vk_ = color0.texture;
   resolve_image_vk_ = color0.resolve_texture;
@@ -354,6 +356,7 @@ SharedHandleVK<vk::Framebuffer> RenderPassVK::CreateVKFramebuffer(
 
 // |RenderPass|
 void RenderPassVK::SetPipeline(PipelineRef pipeline) {
+  TRACE_EVENT0("impeller", "RenderPassVK::SetPipeline");
   pipeline_ = pipeline;
   if (!pipeline_) {
     return;
@@ -435,6 +438,7 @@ void RenderPassVK::SetInstanceCount(size_t count) {
 // |RenderPass|
 bool RenderPassVK::SetVertexBuffer(BufferView vertex_buffers[],
                                    size_t vertex_buffer_count) {
+  TRACE_EVENT0("impeller", "RenderPassVK::SetVertexBuffer");
   if (!ValidateVertexBuffers(vertex_buffers, vertex_buffer_count)) {
     return false;
   }
@@ -462,6 +466,7 @@ bool RenderPassVK::SetVertexBuffer(BufferView vertex_buffers[],
 // |RenderPass|
 bool RenderPassVK::SetIndexBuffer(BufferView index_buffer,
                                   IndexType index_type) {
+  TRACE_EVENT0("impeller", "RenderPassVK::SetIndexBuffer");
   if (!ValidateIndexBuffer(index_buffer, index_type)) {
     return false;
   }
@@ -500,6 +505,7 @@ bool RenderPassVK::SetIndexBuffer(BufferView index_buffer,
 
 // |RenderPass|
 fml::Status RenderPassVK::Draw() {
+  TRACE_EVENT0("impeller", "RenderPassVK::Draw");
   if (!pipeline_) {
     return fml::Status(fml::StatusCode::kCancelled,
                        "No valid pipeline is bound to the RenderPass.");
@@ -626,6 +632,7 @@ bool RenderPassVK::BindDynamicResource(ShaderStage stage,
 bool RenderPassVK::BindResource(size_t binding,
                                 DescriptorType type,
                                 BufferView view) {
+  TRACE_EVENT0("impeller", "RenderPassVK::BindResource(buffer)");
   if (bound_buffer_offset_ >= kMaxBindings) {
     return false;
   }
@@ -673,6 +680,7 @@ bool RenderPassVK::BindResource(ShaderStage stage,
                                 const ShaderMetadata* metadata,
                                 std::shared_ptr<const Texture> texture,
                                 raw_ptr<const Sampler> sampler) {
+  TRACE_EVENT0("impeller", "RenderPassVK::BindResource(texture)");
   if (bound_buffer_offset_ >= kMaxBindings) {
     return false;
   }
