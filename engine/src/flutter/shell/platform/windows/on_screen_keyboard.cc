@@ -468,8 +468,8 @@ bool OnScreenKeyboardWin::EnsureInputPane(HWND hwnd) {
   session->pane = pane;
 
   auto showing_handler = Callback<InputPaneVisibilityHandler>(
-    [this, view_hwnd = hwnd](IInputPane* /*sender*/,
-      IInputPaneVisibilityEventArgs* args) {
+      [this, view_hwnd = hwnd](IInputPane* /*sender*/,
+                               IInputPaneVisibilityEventArgs* args) {
         DipRect occluded_dip{};
         if (args) {
           Rect occluded{};
@@ -499,149 +499,148 @@ bool OnScreenKeyboardWin::EnsureInputPane(HWND hwnd) {
   auto hiding_handler = Callback<InputPaneVisibilityHandler>(
     [this](IInputPane* /*sender*/, IInputPaneVisibilityEventArgs* /*args*/) {[this](IInputPane* /*sender*/,
       IInputPaneVisibilityEventArgs* /*args*/) {
- RECT empty{};
- HandleVisibilityEvent(nullptr, false, DipRect{}, 1.0, POINT{0, 0},
-                       empty);
-        return S_OK;
+      RECT empty{};
+      HandleVisibilityEvent(nullptr, false, DipRect{}, 1.0, POINT{0, 0}, empty);
+      return S_OK;
       });
 
-  if (!showing_handler || !hiding_handler) {
-    LogInputPaneFailure("Callback", E_OUTOFMEMORY);
-    return false;
-  }
+    if (!showing_handler || !hiding_handler) {
+      LogInputPaneFailure("Callback", E_OUTOFMEMORY);
+      return false;
+    }
 
-  hr = pane->add_Showing(showing_handler.Get(), &session->showing_token);
-  if (FAILED(hr)) {
-    LogInputPaneFailure("add_Showing", hr);
-    return false;
-  }
-  session->showing_subscribed = true;
+    hr = pane->add_Showing(showing_handler.Get(), &session->showing_token);
+    if (FAILED(hr)) {
+      LogInputPaneFailure("add_Showing", hr);
+      return false;
+    }
+    session->showing_subscribed = true;
 
-  hr = pane->add_Hiding(hiding_handler.Get(), &session->hiding_token);
-  if (FAILED(hr)) {
-    LogInputPaneFailure("add_Hiding", hr);
-    return false;
-  }
-  session->hiding_subscribed = true;
+    hr = pane->add_Hiding(hiding_handler.Get(), &session->hiding_token);
+    if (FAILED(hr)) {
+      LogInputPaneFailure("add_Hiding", hr);
+      return false;
+    }
+    session->hiding_subscribed = true;
 
-  pane_session_ = std::move(session);
-  return true;
+    pane_session_ = std::move(session);
+    return true;
 }
 
 void OnScreenKeyboardWin::OnRootWindowMoveSizeEnded(HWND hwnd) {
-  task_runner_->RunNowOrPostTask([weak = weak_factory_.GetWeakPtr(), hwnd]() {
-    if (!weak || !weak->shown_ || hwnd != weak->tracked_root_) {
-      return;
-    }
-    // EVENT_SYSTEM_MOVESIZEEND represents the end of an interactive move
-    // or resize. Restore to that user-selected placement, rather than the
-    // placement from before the keyboard opened.
-    WINDOWPLACEMENT placement{};
-    placement.length = sizeof(placement);
-    if (weak->window_api_->GetPlacement(hwnd, &placement)) {
-      weak->original_window_placement_ = placement;
-      weak->original_placement_root_ = hwnd;
-    }
-    weak->UpdateWindowForOcclusion(hwnd, weak->tracked_view_);
-    weak->NotifyVisibilityChanged();
-  });
+    task_runner_->RunNowOrPostTask([weak = weak_factory_.GetWeakPtr(), hwnd]() {
+      if (!weak || !weak->shown_ || hwnd != weak->tracked_root_) {
+        return;
+      }
+      // EVENT_SYSTEM_MOVESIZEEND represents the end of an interactive move
+      // or resize. Restore to that user-selected placement, rather than the
+      // placement from before the keyboard opened.
+      WINDOWPLACEMENT placement{};
+      placement.length = sizeof(placement);
+      if (weak->window_api_->GetPlacement(hwnd, &placement)) {
+        weak->original_window_placement_ = placement;
+        weak->original_placement_root_ = hwnd;
+      }
+      weak->UpdateWindowForOcclusion(hwnd, weak->tracked_view_);
+      weak->NotifyVisibilityChanged();
+    });
 }
 
 void OnScreenKeyboardWin::StartTrackingWindow(HWND root, HWND view) {
-  if (tracked_root_ == root && tracked_view_ == view) {
-    return;
-  }
-  if (original_window_placement_ &&
-      window_api_->IsWindowValid(original_placement_root_)) {
-    window_api_->SetPlacement(original_placement_root_,
-                              *original_window_placement_);
-    original_window_placement_.reset();
-    original_placement_root_ = nullptr;
-  }
-  StopTrackingWindow();
-  tracked_root_ = root;
-  tracked_view_ = view;
-  move_size_hook_ = window_api_->SetMoveSizeEndHook(OnMoveSizeWinEvent);
-  if (move_size_hook_ != nullptr) {
-    std::lock_guard<std::mutex> lock(g_move_size_hooks_mutex);
-    g_move_size_hooks[move_size_hook_] = this;
-  }
+    if (tracked_root_ == root && tracked_view_ == view) {
+      return;
+    }
+    if (original_window_placement_ &&
+        window_api_->IsWindowValid(original_placement_root_)) {
+      window_api_->SetPlacement(original_placement_root_,
+                                *original_window_placement_);
+      original_window_placement_.reset();
+      original_placement_root_ = nullptr;
+    }
+    StopTrackingWindow();
+    tracked_root_ = root;
+    tracked_view_ = view;
+    move_size_hook_ = window_api_->SetMoveSizeEndHook(OnMoveSizeWinEvent);
+    if (move_size_hook_ != nullptr) {
+      std::lock_guard<std::mutex> lock(g_move_size_hooks_mutex);
+      g_move_size_hooks[move_size_hook_] = this;
+    }
 }
 
 void OnScreenKeyboardWin::StopTrackingWindow() {
-  if (move_size_hook_ != nullptr) {
-    {
-      std::lock_guard<std::mutex> lock(g_move_size_hooks_mutex);
-      g_move_size_hooks.erase(move_size_hook_);
+    if (move_size_hook_ != nullptr) {
+      {
+        std::lock_guard<std::mutex> lock(g_move_size_hooks_mutex);
+        g_move_size_hooks.erase(move_size_hook_);
+      }
+      window_api_->RemoveWinEventHook(move_size_hook_);
+      move_size_hook_ = nullptr;
     }
-    window_api_->RemoveWinEventHook(move_size_hook_);
-    move_size_hook_ = nullptr;
-  }
-  tracked_root_ = nullptr;
-  tracked_view_ = nullptr;
+    tracked_root_ = nullptr;
+    tracked_view_ = nullptr;
 }
 
 void OnScreenKeyboardWin::UpdateWindowForOcclusion(HWND root, HWND view) {
-  if (!window_api_->IsWindowValid(root) || !has_occluded_physical_screen_) {
-    return;
-  }
+    if (!window_api_->IsWindowValid(root) || !has_occluded_physical_screen_) {
+      return;
+    }
 
-  RECT view_client_screen{};
-  if (window_api_->IsWindowMaximized(root) ||
-      window_api_->IsWindowMinimized(root)) {
-    // A user-initiated maximize supersedes any placement that was saved while
-    // the keyboard was open.
-    original_window_placement_.reset();
-    original_placement_root_ = nullptr;
+    RECT view_client_screen{};
+    if (window_api_->IsWindowMaximized(root) ||
+        window_api_->IsWindowMinimized(root)) {
+      // A user-initiated maximize supersedes any placement that was saved while
+      // the keyboard was open.
+      original_window_placement_.reset();
+      original_placement_root_ = nullptr;
+      if (view != nullptr &&
+          window_api_->GetClientScreenRect(view, &view_client_screen)) {
+        physical_bottom_inset_ =
+            ComputeBottomInset(view_client_screen, occluded_physical_screen_);
+      }
+      return;
+    }
+
+    RECT work_area{};
+    RECT window_screen{};
+    if (!window_api_->GetWindowWorkArea(root, &work_area) ||
+        !window_api_->GetWindowScreenRect(root, &window_screen)) {
+      return;
+    }
+
+    const RECT adjusted = ComputeWindowRectAboveOcclusion(
+        window_screen, work_area, occluded_physical_screen_);
+    if (adjusted.left != window_screen.left ||
+        adjusted.top != window_screen.top ||
+        adjusted.right != window_screen.right ||
+        adjusted.bottom != window_screen.bottom) {
+      if (!original_window_placement_) {
+        WINDOWPLACEMENT placement{};
+        placement.length = sizeof(placement);
+        if (window_api_->GetPlacement(root, &placement)) {
+          original_window_placement_ = placement;
+          original_placement_root_ = root;
+        }
+      }
+      window_api_->SetPosition(root, adjusted);
+    }
+
     if (view != nullptr &&
         window_api_->GetClientScreenRect(view, &view_client_screen)) {
       physical_bottom_inset_ =
           ComputeBottomInset(view_client_screen, occluded_physical_screen_);
     }
-    return;
-  }
-
-  RECT work_area{};
-  RECT window_screen{};
-  if (!window_api_->GetWindowWorkArea(root, &work_area) ||
-      !window_api_->GetWindowScreenRect(root, &window_screen)) {
-    return;
-  }
-
-  const RECT adjusted = ComputeWindowRectAboveOcclusion(
-      window_screen, work_area, occluded_physical_screen_);
-  if (adjusted.left != window_screen.left ||
-      adjusted.top != window_screen.top ||
-      adjusted.right != window_screen.right ||
-      adjusted.bottom != window_screen.bottom) {
-    if (!original_window_placement_) {
-      WINDOWPLACEMENT placement{};
-      placement.length = sizeof(placement);
-      if (window_api_->GetPlacement(root, &placement)) {
-        original_window_placement_ = placement;
-        original_placement_root_ = root;
-      }
-    }
-    window_api_->SetPosition(root, adjusted);
-  }
-
-  if (view != nullptr &&
-      window_api_->GetClientScreenRect(view, &view_client_screen)) {
-    physical_bottom_inset_ =
-        ComputeBottomInset(view_client_screen, occluded_physical_screen_);
-  }
 }
 
 void OnScreenKeyboardWin::RestoreWindowAfterKeyboard() {
-  StopTrackingWindow();
-  if (original_window_placement_ &&
-      window_api_->IsWindowValid(original_placement_root_)) {
-    window_api_->SetPlacement(original_placement_root_,
-                              *original_window_placement_);
-  }
-  original_window_placement_.reset();
-  original_placement_root_ = nullptr;
-  has_occluded_physical_screen_ = false;
+    StopTrackingWindow();
+    if (original_window_placement_ &&
+        window_api_->IsWindowValid(original_placement_root_)) {
+      window_api_->SetPlacement(original_placement_root_,
+                                *original_window_placement_);
+    }
+    original_window_placement_.reset();
+    original_placement_root_ = nullptr;
+    has_occluded_physical_screen_ = false;
 }
 
 void OnScreenKeyboardWin::HandleVisibilityEvent(
@@ -651,59 +650,59 @@ void OnScreenKeyboardWin::HandleVisibilityEvent(
     double dpi_scale,
     POINT root_client_origin_screen,
     const RECT& view_client_screen) {
-  shown_ = shown;
-  bool notify_immediately = true;
-  if (shown) {
-    const uint64_t geometry_generation = ++geometry_generation_;
-    show_request_in_flight_ = false;
-    occluded_physical_screen_ = OccludedDipToPhysicalScreenRect(
-        occluded_dip, dpi_scale, root_client_origin_screen);
-    has_occluded_physical_screen_ = true;
-    HWND root =
-        view_hwnd != nullptr ? window_api_->GetRootWindow(view_hwnd) : nullptr;
-    if (root != nullptr && window_api_->IsWindowValid(root)) {
-      StartTrackingWindow(root, view_hwnd);
-      if (window_api_->IsWindowMaximized(root)) {
-        // Maximized windows remain fixed and consume the occlusion as an
-        // inset, so there is no geometry animation to coalesce.
-        UpdateWindowForOcclusion(root, view_hwnd);
+    shown_ = shown;
+    bool notify_immediately = true;
+    if (shown) {
+      const uint64_t geometry_generation = ++geometry_generation_;
+      show_request_in_flight_ = false;
+      occluded_physical_screen_ = OccludedDipToPhysicalScreenRect(
+          occluded_dip, dpi_scale, root_client_origin_screen);
+      has_occluded_physical_screen_ = true;
+      HWND root = view_hwnd != nullptr ? window_api_->GetRootWindow(view_hwnd)
+                                       : nullptr;
+      if (root != nullptr && window_api_->IsWindowValid(root)) {
+        StartTrackingWindow(root, view_hwnd);
+        if (window_api_->IsWindowMaximized(root)) {
+          // Maximized windows remain fixed and consume the occlusion as an
+          // inset, so there is no geometry animation to coalesce.
+          UpdateWindowForOcclusion(root, view_hwnd);
+        } else {
+          // InputPane may report several intermediate rectangles while opening.
+          // Apply restored-window geometry only after the final observation has
+          // remained stable for the debounce interval.
+          notify_immediately = false;
+          task_runner_->PostDelayedTask(
+              [weak = weak_factory_.GetWeakPtr(), geometry_generation, root,
+               view_hwnd]() {
+                if (!weak || !weak->shown_ ||
+                    geometry_generation != weak->geometry_generation_ ||
+                    root != weak->tracked_root_) {
+                  return;
+                }
+                weak->UpdateWindowForOcclusion(root, view_hwnd);
+                weak->NotifyVisibilityChanged();
+              },
+              kDisplayDismissDebounce);
+        }
       } else {
-        // InputPane may report several intermediate rectangles while opening.
-        // Apply restored-window geometry only after the final observation has
-        // remained stable for the debounce interval.
-        notify_immediately = false;
-        task_runner_->PostDelayedTask(
-            [weak = weak_factory_.GetWeakPtr(), geometry_generation, root,
-             view_hwnd]() {
-              if (!weak || !weak->shown_ ||
-                  geometry_generation != weak->geometry_generation_ ||
-                  root != weak->tracked_root_) {
-                return;
-              }
-              weak->UpdateWindowForOcclusion(root, view_hwnd);
-              weak->NotifyVisibilityChanged();
-            },
-            kDisplayDismissDebounce);
+        physical_bottom_inset_ =
+            ComputeBottomInset(view_client_screen, occluded_physical_screen_);
       }
     } else {
-      physical_bottom_inset_ =
-          ComputeBottomInset(view_client_screen, occluded_physical_screen_);
+      show_request_in_flight_ = false;
+      physical_bottom_inset_ = 0.0;
+      const uint64_t geometry_generation = ++geometry_generation_;
+      task_runner_->PostDelayedTask(
+          [weak = weak_factory_.GetWeakPtr(), geometry_generation]() {
+            if (weak && geometry_generation == weak->geometry_generation_) {
+              weak->RestoreWindowAfterKeyboard();
+            }
+          },
+          kDisplayDismissDebounce);
     }
-  } else {
-    show_request_in_flight_ = false;
-    physical_bottom_inset_ = 0.0;
-    const uint64_t geometry_generation = ++geometry_generation_;
-    task_runner_->PostDelayedTask(
-        [weak = weak_factory_.GetWeakPtr(), geometry_generation]() {
-          if (weak && geometry_generation == weak->geometry_generation_) {
-            weak->RestoreWindowAfterKeyboard();
-          }
-        },
-        kDisplayDismissDebounce);
-  }
-  if (notify_immediately) {
-    NotifyVisibilityChanged();
-  }
+    if (notify_immediately) {
+      NotifyVisibilityChanged();
+    }
 }
 
 }  // namespace flutter
