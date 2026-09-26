@@ -1567,6 +1567,118 @@ void main() {
       await tester.pumpAndSettle();
     });
 
+    testWidgets(
+      'excludes the handles from system gestures on Android',
+      (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/187647.
+        final log = <MethodCall>[];
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'SystemChrome.setSystemGestureExclusionRects') {
+            log.add(methodCall);
+          }
+          return null;
+        });
+        addTearDown(
+          () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            SystemChannels.platform,
+            null,
+          ),
+        );
+
+        final spy = TextSelectionControlsSpy();
+        final SelectionOverlay selectionOverlay = await pumpApp(tester, selectionControls: spy);
+        selectionOverlay
+          ..startHandleType = TextSelectionHandleType.left
+          ..lineHeightAtStart = 20.0
+          ..endHandleType = TextSelectionHandleType.right
+          ..lineHeightAtEnd = 20.0
+          ..selectionEndpoints = const <TextSelectionPoint>[
+            TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
+            TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
+          ];
+        selectionOverlay.showHandles();
+        await tester.pump();
+
+        // The spy's handles are 20x20 and anchored at the top left of their
+        // leaders. Their interactive areas are expanded to 48x48 around them.
+        final double devicePixelRatio = tester.view.devicePixelRatio;
+        Map<String, int> exclusionRectAt(Offset leaderTopLeft) {
+          final rect = Rect.fromLTWH(leaderTopLeft.dx - 14, leaderTopLeft.dy - 14, 48, 48);
+          return <String, int>{
+            'left': (rect.left * devicePixelRatio).floor(),
+            'top': (rect.top * devicePixelRatio).floor(),
+            'right': (rect.right * devicePixelRatio).ceil(),
+            'bottom': (rect.bottom * devicePixelRatio).ceil(),
+          };
+        }
+
+        expect(log, hasLength(1));
+        expect(log.single.arguments, <Map<String, int>>[
+          exclusionRectAt(tester.getTopLeft(find.text('start handle'))),
+          exclusionRectAt(tester.getTopLeft(find.text('end handle'))),
+        ]);
+
+        // Rebuilding the handles without moving them doesn't send an update.
+        log.clear();
+        selectionOverlay.markNeedsBuild();
+        await tester.pump();
+        expect(log, isEmpty);
+
+        selectionOverlay.hideHandles();
+        await tester.pump();
+        expect(log, hasLength(1));
+        expect(log.single.arguments, isEmpty);
+
+        selectionOverlay.dispose();
+        await tester.pumpAndSettle();
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+      skip: kIsWeb, // [intended] Exclusion rects are only sent on native Android.
+    );
+
+    testWidgets('does not exclude the handles from system gestures on other platforms', (
+      WidgetTester tester,
+    ) async {
+      final log = <MethodCall>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+        MethodCall methodCall,
+      ) async {
+        if (methodCall.method == 'SystemChrome.setSystemGestureExclusionRects') {
+          log.add(methodCall);
+        }
+        return null;
+      });
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+
+      final spy = TextSelectionControlsSpy();
+      final SelectionOverlay selectionOverlay = await pumpApp(tester, selectionControls: spy);
+      selectionOverlay
+        ..startHandleType = TextSelectionHandleType.left
+        ..lineHeightAtStart = 20.0
+        ..endHandleType = TextSelectionHandleType.right
+        ..lineHeightAtEnd = 20.0
+        ..selectionEndpoints = const <TextSelectionPoint>[
+          TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
+          TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
+        ];
+      selectionOverlay.showHandles();
+      await tester.pump();
+      selectionOverlay.hideHandles();
+      await tester.pump();
+
+      expect(log, isEmpty);
+
+      selectionOverlay.dispose();
+      await tester.pumpAndSettle();
+    }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.android}));
+
     testWidgets('only paints one collapsed handle', (WidgetTester tester) async {
       final spy = TextSelectionControlsSpy();
       final SelectionOverlay selectionOverlay = await pumpApp(tester, selectionControls: spy);
