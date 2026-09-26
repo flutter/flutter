@@ -80,29 +80,31 @@ class HotRunner extends ResidentRunner {
     super.dartBuilder,
     super.dillOutputPath,
     this.hostIsIde = false,
-    this._hotRunnerConfig,
+    HotRunnerConfig? hotRunnerConfig,
     super.machine,
     this._nativeAssetsYamlFile,
-    this._projectFileInvalidator,
+    ProjectFileInvalidator? projectFileInvalidator,
     super.projectRootPath,
     this._reassembleHelper,
     this._reloadSourcesHelper = defaultReloadSourcesHelper,
     super.stayResident,
     this._stopwatchFactory = const StopwatchFactory(),
-  }) : super(hotMode: true);
+  }) : hotRunnerConfig = hotRunnerConfig ?? HotRunnerConfig(),
+       projectFileInvalidator =
+           projectFileInvalidator ??
+           ProjectFileInvalidator(
+             fileSystem: toolContext.fs,
+             platform: toolContext.platform,
+             logger: toolContext.logger,
+           ),
+       super(hotMode: true);
 
   final StopwatchFactory _stopwatchFactory;
   final ReloadSourcesHelper _reloadSourcesHelper;
   final ReassembleHelper? _reassembleHelper;
   final String? _nativeAssetsYamlFile;
-  final ProjectFileInvalidator? _projectFileInvalidator;
-  final HotRunnerConfig? _hotRunnerConfig;
-
-  ProjectFileInvalidator get projectFileInvalidator =>
-      _projectFileInvalidator ??
-      ProjectFileInvalidator(fileSystem: fileSystem, platform: platform, logger: logger);
-
-  HotRunnerConfig get hotRunnerConfig => _hotRunnerConfig ?? HotRunnerConfig();
+  final ProjectFileInvalidator projectFileInvalidator;
+  final HotRunnerConfig hotRunnerConfig;
 
   final bool benchmarkMode;
   final File? applicationBinary;

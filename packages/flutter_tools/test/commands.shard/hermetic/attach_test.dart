@@ -1612,6 +1612,8 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     bool benchmarkMode = false,
     File? applicationBinary,
     bool hostIsIde = false,
+    HotRunnerConfig? hotRunnerConfig,
+    ProjectFileInvalidator? projectFileInvalidator,
     String? projectRootPath,
     String? packagesFilePath,
     String? dillOutputPath,
