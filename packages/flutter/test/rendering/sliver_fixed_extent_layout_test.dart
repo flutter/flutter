@@ -646,6 +646,32 @@ void main() {
     // 8 children: 4 * 100 + 4 * 50 = 600.
     expect(list.computeMaxScrollOffset(list.constraints, 0.0), 600.0);
   });
+
+  test('RenderSliverVariedExtentList handles precision issues for exact item constraints', () {
+    final children = List<RenderBox>.generate(5, (index) => RenderSizedBox(const Size(400.0, 0.1)));
+    final childManager = TestRenderSliverBoxChildManager(children: children);
+
+    final RenderSliverVariedExtentList list = childManager.createRenderSliverVariedExtentList(
+      (index, dimensions) => 0.1,
+    );
+
+    final root = RenderViewport(
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      cacheExtent: 0,
+      children: <RenderSliver>[list],
+    );
+    layout(root);
+
+    // Ensure that floating-point addition issues from offset accumulation do not
+    // cause precision loss in exact item extents. For example, 0.1 + 0.1 + 0.1 in
+    // IEEE 754 yields 0.30000000000000004. If the extent was calculated via subtraction
+    // (0.30000000000000004 - 0.2), it would erroneously yield 0.10000000000000003.
+    expect(list.paintExtentOf(children[2]), 0.1);
+
+    // The child should be laid out with tight constraints of exactly 0.1
+    expect(children[2].size.height, 0.1);
+  });
 }
 
 int testGetMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
