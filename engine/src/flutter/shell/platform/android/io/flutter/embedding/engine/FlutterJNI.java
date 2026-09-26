@@ -1670,6 +1670,7 @@ public class FlutterJNI {
 
   // @SuppressWarnings("unused")
   @UiThread
+  @SuppressLint("NewApi")
   public void onDisplayPlatformView(
       int viewId,
       int x,
@@ -1684,7 +1685,8 @@ public class FlutterJNI {
       throw new RuntimeException(
           "platformViewsController must be set before attempting to position a platform view");
     }
-    if (platformViewsController.getPlatformViewById(viewId) == null
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_34
+        && platformViewsController.getPlatformViewById(viewId) == null
         && platformViewsController2 != null
         && platformViewsController2.getPlatformViewById(viewId) != null) {
       platformViewsController2.onDisplayPlatformView(
