@@ -440,8 +440,7 @@ class RenderParagraph extends RenderBox
         // The selectable fragments only depend on the plain text. Keep them,
         // along with their selection, if the plain text did not change, for
         // example when only a style or a [PlaceholderSpan] changed.
-        if (oldPlainText == null ||
-            oldPlainText != value.toPlainText(includeSemanticsLabels: false)) {
+        if (oldPlainText == null || oldPlainText != _textPainter.plainText) {
           _removeSelectionRegistrarSubscription();
           _disposeSelectableFragments();
           _updateSelectionRegistrarSubscription();
