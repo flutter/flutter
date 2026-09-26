@@ -161,6 +161,7 @@ void main() {
     const kPrivilegeNotHeld = 1314;
     const kFatalDeviceHardwareError = 483;
     const kDeviceDoesNotExist = 433;
+    const kDirectoryNameInvalid = 267;
 
     late FileExceptionHandler exceptionHandler;
 
@@ -357,6 +358,23 @@ void main() {
       expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedMessage));
       expect(() => file.openSync(), throwsToolExit(message: expectedMessage));
       expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when directory name is invalid', () {
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
+      );
+      final Directory directory = fileSystem.directory('directory');
+
+      exceptionHandler.addError(
+        directory,
+        FileSystemOp.exists,
+        FileSystemException('', directory.path, const OSError('', kDirectoryNameInvalid)),
+      );
+
+      const expectedMessage = 'The directory name is invalid.';
+      expect(() => directory.existsSync(), throwsToolExit(message: expectedMessage));
     });
 
     testWithoutContext('when creating a temporary dir on a full device', () async {
@@ -1852,6 +1870,20 @@ Please ensure that the SDK and/or project is installed in a location that has re
       expect(
         () => file.readAsStringSync(),
         throwsToolExit(message: 'The file or directory could not be found'),
+      );
+    });
+
+    testWithoutContext('Windows kDirectoryNameInvalid (267) throws clean ToolExit', () {
+      const kDirectoryNameInvalid = 267;
+      final File file = windowsFileSystem.file('file');
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.read,
+        const FileSystemException('', '', OSError('', kDirectoryNameInvalid)),
+      );
+      expect(
+        () => file.readAsStringSync(),
+        throwsToolExit(message: 'The directory name is invalid.'),
       );
     });
   });
