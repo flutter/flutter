@@ -6,6 +6,7 @@
 
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/renderer/backend/gles/texture_gles.h"
+#include "impeller/display_list/aiks_context.h"
 
 namespace flutter {
 
@@ -38,8 +39,18 @@ sk_sp<flutter::DlImage> ImageExternalTextureGLImpeller::CreateDlImage(
   desc.size = {static_cast<int>(bounds.width()),
                static_cast<int>(bounds.height())};
   desc.mip_count = 1;
+  std::shared_ptr<impeller::ContextGLES> impeller_context = impeller_context_;
+  if (context.aiks_context && context.aiks_context->GetContext() &&
+      context.aiks_context->GetContext()->GetBackendType() ==
+          impeller::Context::BackendType::kOpenGLES) {
+    impeller_context = std::static_pointer_cast<impeller::ContextGLES>(
+        context.aiks_context->GetContext());
+  }
+  if (!impeller_context) {
+    return nullptr;
+  }
   auto texture = std::make_shared<impeller::TextureGLES>(
-      impeller_context_->GetReactor(), desc);
+      impeller_context->GetReactor(), desc);
   // The contents will be initialized later in the call to
   // `glEGLImageTargetTexture2DOES` instead of by Impeller.
   texture->MarkContentsInitialized();

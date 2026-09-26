@@ -12,8 +12,7 @@
 #include <android/hardware_buffer_jni.h>
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/lib/ui/window/platform_message.h"
-#include "flutter/shell/common/platform_view.h"
-#include "flutter/shell/common/snapshot_surface_producer.h"
+#include "flutter/shell/platform/android/android_engine.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_message_handler_android.h"
@@ -24,53 +23,37 @@
 
 namespace flutter {
 
-class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
- public:
-  AndroidSurfaceFactoryImpl(const std::shared_ptr<AndroidContext>& context,
-                            bool enable_impeller,
-                            bool lazy_shader_mode);
-
-  ~AndroidSurfaceFactoryImpl() override;
-
-  std::unique_ptr<AndroidSurface> CreateSurface() override;
-
- private:
-  const std::shared_ptr<AndroidContext>& android_context_;
-  const bool enable_impeller_;
-  const bool lazy_shader_mode_;
-};
-
-class PlatformViewAndroid final : public PlatformView {
+class PlatformViewAndroid final {
  public:
   static bool Register(JNIEnv* env);
 
-  PlatformViewAndroid(PlatformView::Delegate& delegate,
-                      const flutter::TaskRunners& task_runners,
-                      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-                      AndroidRenderingAPI rendering_api);
+  static std::shared_ptr<AndroidContext> CreateAndroidContext(
+      const flutter::TaskRunners& task_runners,
+      AndroidRenderingAPI android_rendering_api,
+      bool enable_opengl_gpu_tracing,
+      const AndroidContext::ContextSettings& settings,
+      std::shared_ptr<fml::BasicTaskRunner> io_task_runner);
 
-  //----------------------------------------------------------------------------
-  /// @brief      Creates a new PlatformViewAndroid but using an existing
-  ///             Android GPU context to create new surfaces. This maximizes
-  ///             resource sharing between 2 PlatformViewAndroids of 2 Shells.
-  ///
+  static AndroidContext::ContextSettings CreateContextSettings(
+      const Settings& settings);
+
+  static bool MeetsHCPPCriteria(const Settings& settings);
+
   PlatformViewAndroid(
-      PlatformView::Delegate& delegate,
       const flutter::TaskRunners& task_runners,
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
       const std::shared_ptr<flutter::AndroidContext>& android_context);
 
-  ~PlatformViewAndroid() override;
+  ~PlatformViewAndroid();
 
-  void NotifyCreated(fml::RefPtr<AndroidNativeWindow> native_window);
+  void NotifyCreated(const fml::RefPtr<AndroidNativeWindow>& native_window);
 
   void NotifySurfaceWindowChanged(
-      fml::RefPtr<AndroidNativeWindow> native_window);
+      const fml::RefPtr<AndroidNativeWindow>& native_window);
 
   void NotifyChanged(const DlISize& size);
 
-  // |PlatformView|
-  void NotifyDestroyed() override;
+  void NotifyDestroyed();
 
   void DispatchPlatformMessage(JNIEnv* env,
                                std::string name,
@@ -97,101 +80,96 @@ class PlatformViewAndroid final : public PlatformView {
       const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
       ImageExternalTexture::ImageLifecycle lifecycle);
 
-  // |PlatformView|
   void LoadDartDeferredLibrary(
       intptr_t loading_unit_id,
       std::unique_ptr<const fml::Mapping> snapshot_data,
-      std::unique_ptr<const fml::Mapping> snapshot_instructions) override;
+      std::unique_ptr<const fml::Mapping> snapshot_instructions);
 
   void LoadDartDeferredLibraryError(intptr_t loading_unit_id,
-                                    const std::string error_message,
-                                    bool transient) override;
+                                    const std::string& error_message,
+                                    bool transient);
 
-  // |PlatformView|
   void UpdateAssetResolverByType(
       std::unique_ptr<AssetResolver> updated_asset_resolver,
-      AssetResolver::AssetResolverType type) override;
+      AssetResolver::AssetResolverType type);
 
   const std::shared_ptr<AndroidContext>& GetAndroidContext() {
     return android_context_;
   }
 
-  std::shared_ptr<PlatformMessageHandler> GetPlatformMessageHandler()
-      const override {
+  std::shared_ptr<PlatformViewAndroidJNI> GetJniFacade() const {
+    return jni_facade_;
+  }
+
+  std::shared_ptr<PlatformMessageHandler> GetPlatformMessageHandler() const {
     return platform_message_handler_;
   }
 
   /// @brief Whether the SurfaceControl based swapchain is enabled and active.
   bool IsSurfaceControlEnabled() const;
 
-  // |PlatformView|
-  void SetupImpellerContext() override;
+  void UpdateSemantics(
+      int64_t view_id,
+      const flutter::SemanticsNodeUpdates& update,
+      const flutter::CustomAccessibilityActionUpdates& actions);
+
+  void HandlePlatformMessage(std::unique_ptr<flutter::PlatformMessage> message);
+
+  void OnPreEngineRestart() const;
+
+  std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocales(
+      const std::vector<std::string>& supported_locale_data);
+
+  void RequestDartDeferredLibrary(intptr_t loading_unit_id);
+
+  double GetScaledFontSize(double unscaled_font_size,
+                           int configuration_id) const;
+
+  void SendChannelUpdate(const std::string& name, bool listening);
+
+  void RequestViewFocusChange(const ViewFocusChangeRequest& request);
+
+  void OnVsyncCallback(intptr_t baton);
+
+  void SetApplicationLocale(std::string locale);
+
+  void SetSemanticsTreeEnabled(bool enabled);
+
+  void SetEngine(AndroidEngine* engine);
+
+  void SetSemanticsEnabled(bool enabled);
+
+  void SetAccessibilityFeatures(int32_t flags);
+
+  void SetViewportMetrics(int64_t view_id, const ViewportMetrics& metrics);
+
+  void DispatchPointerDataPacket(std::unique_ptr<PointerDataPacket> packet);
+
+  void RegisterTexture(std::shared_ptr<flutter::Texture> texture);
+
+  void UnregisterTexture(int64_t texture_id);
+
+  void MarkTextureFrameAvailable(int64_t texture_id);
+
+  void ScheduleFrame();
+
+  fml::WeakPtr<PlatformViewAndroid> GetWeakPtr() const;
 
  private:
+  const flutter::TaskRunners task_runners_;
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidContext> android_context_;
-  std::shared_ptr<AndroidSurfaceFactoryImpl> surface_factory_;
+  AndroidEngine* engine_ = nullptr;
 
   PlatformViewAndroidDelegate platform_view_android_delegate_;
 
-  std::unique_ptr<AndroidSurface> android_surface_;
   std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler_;
-  bool android_meets_hcpp_criteria_ = false;
-
-  // |PlatformView|
-  void UpdateSemantics(
-      int64_t view_id,
-      flutter::SemanticsNodeUpdates update,
-      flutter::CustomAccessibilityActionUpdates actions) override;
-
-  // |PlatformView|
-  void SetApplicationLocale(std::string locale) override;
-
-  // |PlatformView|
-  void SetSemanticsTreeEnabled(bool enabled) override;
-
-  // |PlatformView|
-  void HandlePlatformMessage(
-      std::unique_ptr<flutter::PlatformMessage> message) override;
-
-  // |PlatformView|
-  void OnPreEngineRestart() const override;
-
-  // |PlatformView|
-  std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
-
-  // |PlatformView|
-  std::unique_ptr<Surface> CreateRenderingSurface() override;
-
-  // |PlatformView|
-  std::shared_ptr<ExternalViewEmbedder> CreateExternalViewEmbedder() override;
-
-  // |PlatformView|
-  std::unique_ptr<SnapshotSurfaceProducer> CreateSnapshotSurfaceProducer()
-      override;
-
-  // |PlatformView|
-  sk_sp<GrDirectContext> CreateResourceContext() const override;
-
-  // |PlatformView|
-  void ReleaseResourceContext() const override;
-
-  // |PlatformView|
-  std::shared_ptr<impeller::Context> GetImpellerContext() const override;
-
-  // |PlatformView|
-  std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocales(
-      const std::vector<std::string>& supported_locale_data) override;
-
-  // |PlatformView|
-  void RequestDartDeferredLibrary(intptr_t loading_unit_id) override;
 
   void InstallFirstFrameCallback();
 
   void FireFirstFrameCallback();
 
-  double GetScaledFontSize(double unscaled_font_size,
-                           int configuration_id) const override;
+  fml::WeakPtrFactory<PlatformViewAndroid> weak_factory_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };

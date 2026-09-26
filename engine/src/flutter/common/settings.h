@@ -356,9 +356,10 @@ struct Settings {
   // Max bytes threshold of resource cache, or 0 for unlimited.
   size_t resource_cache_max_bytes_threshold = 0;
 
-  /// Enable embedder api on the embedder.
+  /// Enable the embedder API on iOS.
   ///
-  /// This is currently only used by iOS.
+  /// Android always uses the embedder API and ignores this setting; see
+  /// `AndroidShellHolder`.
   bool enable_embedder_api = false;
 
   /// Enable support for isolates that run on the platform thread.
