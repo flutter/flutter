@@ -173,6 +173,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
           return false;
         }
         surface->PresentWithTransaction(surface_frame.submit_info().present_with_transaction);
+        surface->SetFrameBoundary(surface_frame.submit_info().frame_boundary);
 
         if (clip_rect && clip_rect->IsEmpty()) {
           if (!surface->PreparePresent()) {
@@ -183,7 +184,6 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
         }
 
         impeller::Rect cull_rect = impeller::Rect::Make(surface->coverage());
-        surface->SetFrameBoundary(surface_frame.submit_info().frame_boundary);
 
         const bool reset_host_buffer = surface_frame.submit_info().frame_boundary;
         auto render_result = impeller::RenderToTarget(aiks_context->GetContentContext(),       //
