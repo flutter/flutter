@@ -185,6 +185,16 @@ class LspPreviewDetector {
     });
   }
 
+  /// Returns a [Future] that completes when the analysis server has completed
+  /// any in-progress initialization or analysis.
+  Future<void> waitForAnalysis() async {
+    if (_analysisServer != null) {
+      await _analysisServer!.waitForAnalysis();
+    } else {
+      await dtd.waitForAnalysis();
+    }
+  }
+
   Future<void> _fileAddedOrUpdated({required String filePath}) async {
     if (filePath.isPubspec) {
       onPubspecChangeDetected(filePath);
@@ -196,7 +206,7 @@ class LspPreviewDetector {
     previewAnalytics.startPreviewReloadStopwatch();
     FlutterWidgetPreviews? result;
     try {
-      await _analysisServer?.waitForAnalysis();
+      await waitForAnalysis();
       var retries = 5;
       while (retries > 0) {
         if (_disposed || shutdownHooks.isShuttingDown) {

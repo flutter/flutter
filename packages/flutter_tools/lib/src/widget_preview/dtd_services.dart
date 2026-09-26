@@ -33,14 +33,15 @@ typedef DtdService = (String, DTDServiceCallback);
 /// Provides services, streams, and RPC invocations to interact with the Widget Preview Scaffold.
 class WidgetPreviewDtdServices {
   WidgetPreviewDtdServices({
-    required this.previewAnalytics,
+    required this.addUuidToServiceName,
+    required this.dtdLauncher,
     required this.fs,
     required this.logger,
-    required this.shutdownHooks,
-    required this.dtdLauncher,
     required this.onHotRestartPreviewerRequest,
+    required this.previewAnalytics,
     required this.project,
-    required this.addUuidToServiceName,
+    required this.shutdownHooks,
+    @visibleForTesting this._dtd,
   }) {
     shutdownHooks.addShutdownHook(() async {
       await _dtd?.close();
@@ -74,6 +75,28 @@ class WidgetPreviewDtdServices {
 
   /// The name of the language server protocol stream written to by the analysis server.
   static const kLspStream = 'Lsp';
+
+  /// The event kind posted to [kLspStream] once all LSP services have been registered with DTD.
+  @visibleForTesting
+  static const kLspInitializedEvent = 'initialized';
+
+  @visibleForTesting
+  static const kGetFlutterWidgetPreviewsMethod = 'dart/workspace/getFlutterWidgetPreviews';
+
+  @visibleForTesting
+  static const kGetFlutterWidgetPreviewsForFileMethod =
+      'dart/textDocument/getFlutterWidgetPreviews';
+
+  @visibleForTesting
+  static const kWorkspaceAnalysisCompleteMethod = 'dart/workspace/analysis/complete';
+
+  /// The set of LSP service methods required by the widget previewer.
+  @visibleForTesting
+  static const kRequiredLspServices = <String>{
+    kGetFlutterWidgetPreviewsMethod,
+    kGetFlutterWidgetPreviewsForFileMethod,
+    kWorkspaceAnalysisCompleteMethod,
+  };
 
   /// The name of the event sent from the analysis server for widget preview updates.
   static const kLspWidgetPreviewEventKind = 'dart/textDocument/publishFlutterWidgetPreviews';
@@ -141,6 +164,7 @@ class WidgetPreviewDtdServices {
   /// Returns true if the LSP service is registered with the connected DTD instance.
   bool get lspServiceAvailable => _lspServiceAvailable;
   bool _lspServiceAvailable = false;
+  bool _allLspServicesRegistered = false;
 
   /// Starts DTD in a child process before invoking [connect] with a [Uri] pointing to the new
   /// DTD instance.
@@ -159,98 +183,105 @@ class WidgetPreviewDtdServices {
     _dtd = await DartToolingDaemon.connect(dtdWsUri);
 
     _lspServiceAvailable = false;
+    _allLspServicesRegistered = false;
     final RegisteredServicesResponse registeredServices = await _dtd!.getRegisteredServices();
     _lspServiceAvailable =
         registeredServices.dtdServices.contains(kLspStream) ||
         registeredServices.clientServices.any((service) => service.name == kLspStream);
+    _allLspServicesRegistered = _areRequiredLspServicesRegistered(registeredServices);
 
     await _registerServices();
     logger.printTrace('Connected to DTD and registered services.');
   }
 
   Future<FlutterWidgetPreviews> getFlutterWidgetPreviews() async {
-    await _waitForLspService();
-    const maxAttempts = 50;
-    for (var attempts = 0; attempts < maxAttempts; attempts++) {
-      try {
-        final DTDResponse result = await _dtd!.call(
-          'Lsp',
-          'dart/workspace/getFlutterWidgetPreviews',
-        );
-        return FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
-      } on RpcException catch (e) {
-        if (e.code == -32601 && attempts < maxAttempts - 1) {
-          // Method not found
-          await Future<void>.delayed(const Duration(milliseconds: 200));
-          continue;
-        }
-        rethrow;
-      }
-    }
-    throw StateError('Failed to call getFlutterWidgetPreviews after $maxAttempts attempts.');
+    final DTDResponse result = await _callLspService(kGetFlutterWidgetPreviewsMethod);
+    return FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
   }
 
   Future<FlutterWidgetPreviews> getFlutterWidgetPreviewsForFile({required String filePath}) async {
-    await _waitForLspService();
-    const maxAttempts = 50;
-    for (var attempts = 0; attempts < maxAttempts; attempts++) {
-      try {
-        final DTDResponse result = await _dtd!.call(
-          'Lsp',
-          'dart/textDocument/getFlutterWidgetPreviews',
-          params: {'uri': Uri.file(filePath).toString()},
-        );
-        return FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
-      } on RpcException catch (e) {
-        if (e.code == -32601 && attempts < maxAttempts - 1) {
-          // Method not found
-          await Future<void>.delayed(const Duration(milliseconds: 200));
-          continue;
-        }
-        rethrow;
-      }
-    }
-    throw StateError('Failed to call getFlutterWidgetPreviewsForFile after $maxAttempts attempts.');
+    final DTDResponse result = await _callLspService(
+      kGetFlutterWidgetPreviewsForFileMethod,
+      params: <String, Object?>{'uri': Uri.file(filePath).toString()},
+    );
+    return FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
   }
 
+  /// Returns a [Future] that completes when the analysis server connected to DTD
+  /// has completed any in-progress initialization or analysis.
+  ///
+  /// This method will wait for [delay] before calling the server. If not
+  /// provided, defaults to 100ms.
+  Future<void> waitForAnalysis({Duration delay = const Duration(milliseconds: 100)}) async {
+    await _waitForLspService();
+    await Future<void>.delayed(delay);
+    await _callLspService(kWorkspaceAnalysisCompleteMethod);
+  }
+
+  Future<DTDResponse> _callLspService(String methodName, {Map<String, Object?>? params}) async {
+    await _waitForLspService();
+    return _dtd!.call(kLspStream, methodName, params: params);
+  }
+
+  Future<void>? _waitForLspServiceFuture;
+
   Future<void> _waitForLspService() async {
-    if (_lspServiceAvailable) {
+    if (_allLspServicesRegistered) {
       return;
     }
+    final Future<void>? future = _waitForLspServiceFuture;
+    if (future != null) {
+      return future;
+    }
+    _waitForLspServiceFuture = _waitForLspServiceHelper();
+    try {
+      await _waitForLspServiceFuture;
+    } finally {
+      _waitForLspServiceFuture = null;
+    }
+  }
 
-    final lspRegisteredCompleter = Completer<void>();
+  bool _areRequiredLspServicesRegistered(RegisteredServicesResponse registeredServices) {
+    return registeredServices.clientServices.any(
+      (service) =>
+          service.name == kLspStream && kRequiredLspServices.every(service.methods.containsKey),
+    );
+  }
 
-    const kServiceStream = 'Service';
-    await _dtd!.streamListen(kServiceStream);
-    final StreamSubscription<DTDEvent> serviceSubscription = _dtd!.onEvent(kServiceStream).listen((
+  Future<void> _waitForLspServiceHelper() async {
+    final lspInitializedCompleter = Completer<void>();
+
+    final StreamSubscription<DTDEvent> lspSubscription = _dtd!.onEvent(kLspStream).listen((
       DTDEvent event,
     ) {
-      if (lspRegisteredCompleter.isCompleted) {
+      if (lspInitializedCompleter.isCompleted) {
         return;
       }
-      if (event case DTDEvent(kind: 'ServiceRegistered', data: {'service': kLspStream})) {
+      if (event.kind == kLspInitializedEvent) {
         _lspServiceAvailable = true;
-        lspRegisteredCompleter.complete();
+        _allLspServicesRegistered = true;
+        lspInitializedCompleter.complete();
       }
     });
+    await _dtd!.safeStreamListen(kLspStream);
 
     try {
       final RegisteredServicesResponse registeredServices = await _dtd!.getRegisteredServices();
-      final bool alreadyRegistered =
-          registeredServices.dtdServices.contains(kLspStream) ||
-          registeredServices.clientServices.any((service) => service.name == kLspStream);
-      if (alreadyRegistered) {
+      if (_areRequiredLspServicesRegistered(registeredServices)) {
         _lspServiceAvailable = true;
-        lspRegisteredCompleter.complete();
+        _allLspServicesRegistered = true;
+        if (!lspInitializedCompleter.isCompleted) {
+          lspInitializedCompleter.complete();
+        }
       } else {
         logger.printStatus('Waiting for analysis server to register Lsp service with DTD...');
-        await lspRegisteredCompleter.future.timeout(const Duration(seconds: 30));
+        await lspInitializedCompleter.future.timeout(const Duration(seconds: 30));
       }
     } on TimeoutException {
       logger.printWarning('Timed out waiting for the Lsp service to be registered with DTD.');
       rethrow;
     } finally {
-      await serviceSubscription.cancel();
+      await lspSubscription.cancel();
     }
   }
 
@@ -287,7 +318,7 @@ class WidgetPreviewDtdServices {
       }
     });
     await Future.wait(<Future<void>>[
-      dtd.streamListen(widgetPreviewScaffoldStream),
+      dtd.safeStreamListen(widgetPreviewScaffoldStream),
       for (final (String method, DTDServiceCallback callback) in services)
         dtd
             .registerService(widgetPreviewService, method, callback)
@@ -378,4 +409,17 @@ class DtdLauncher {
   final ProcessManager processManager;
 
   Process? _dtdProcess;
+}
+
+extension on DartToolingDaemon {
+  /// A [streamListen] implementation that ignores already subscribed exceptions.
+  Future<void> safeStreamListen(String streamId) async {
+    try {
+      await streamListen(streamId);
+    } on RpcException catch (e) {
+      if (e.code != RpcErrorCodes.kStreamAlreadySubscribed) {
+        rethrow;
+      }
+    }
+  }
 }
