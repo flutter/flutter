@@ -5933,6 +5933,125 @@ void main() {
     skip: kIsWeb, // [intended] Web uses its native context menu.
   );
 
+  testWidgets(
+    'keeps selection and context menu when rebuilt with a new WidgetSpan',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/179527.
+      final toolbarKey = UniqueKey();
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: _selectableRegion(
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  return SizedBox.shrink(key: toolbarKey);
+                },
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return Text.rich(
+                  TextSpan(
+                    text: 'How are you?',
+                    children: <InlineSpan>[
+                      // A new WidgetSpan is created on every build.
+                      WidgetSpan(
+                        child: Builder(
+                          builder: (BuildContext context) =>
+                              const SizedBox(width: 10.0, height: 10.0),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.textContaining('How are you?'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2));
+      addTearDown(gesture.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(paragraph.selections, <TextSelection>[
+        const TextSelection(baseOffset: 0, extentOffset: 3),
+      ]);
+      expect(find.byKey(toolbarKey), findsOneWidget);
+
+      setState(() {});
+      await tester.pumpAndSettle();
+      expect(paragraph.selections, <TextSelection>[
+        const TextSelection(baseOffset: 0, extentOffset: 3),
+      ]);
+      expect(find.byKey(toolbarKey), findsOneWidget);
+    },
+    skip: kIsWeb, // [intended] Web uses its native context menu.
+  );
+
+  testWidgets('selection settles when a SelectionListener rebuilds a new WidgetSpan', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/179527.
+    final selectionNotifier = SelectionListenerNotifier();
+    addTearDown(selectionNotifier.dispose);
+    late StateSetter setState;
+    selectionNotifier.addListener(() => setState(() {}));
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return _selectableRegion(
+              child: SelectionListener(
+                selectionNotifier: selectionNotifier,
+                child: Text.rich(
+                  TextSpan(
+                    text: 'How are you?',
+                    children: <InlineSpan>[
+                      // A new WidgetSpan is created on every build.
+                      WidgetSpan(
+                        child: Builder(
+                          builder: (BuildContext context) =>
+                              const SizedBox(width: 10.0, height: 10.0),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.textContaining('How are you?'), matching: find.byType(RichText)),
+    );
+    final TestGesture gesture = await tester.startGesture(
+      textOffsetToPosition(paragraph, 0),
+      kind: PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(paragraph, 3));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(paragraph.selections, <TextSelection>[
+      const TextSelection(baseOffset: 0, extentOffset: 3),
+    ]);
+    expect(selectionNotifier.selection.range, isNotNull);
+    expect(selectionNotifier.selection.range!.startOffset, 0);
+    expect(selectionNotifier.selection.range!.endOffset, 3);
+  });
+
   testWidgets('SelectionListener onSelectionChanged is accurate with WidgetSpans', (
     WidgetTester tester,
   ) async {
