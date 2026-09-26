@@ -583,6 +583,14 @@ class RunCommand extends RunCommandBase {
   bool get stayResident => boolArg('resident');
   bool get awaitFirstFrameWhenTracing => boolArg('await-first-frame-when-tracing');
 
+  /// Optional [HotRunnerConfig] passed to [HotRunner].
+  @protected
+  HotRunnerConfig? get hotRunnerConfig => null;
+
+  /// Optional [ProjectFileInvalidator] passed to [HotRunner].
+  @protected
+  ProjectFileInvalidator? get projectFileInvalidator => null;
+
   @override
   Future<void> validateCommand() async {
     // When running with a prebuilt application, no command validation is
@@ -680,7 +688,9 @@ class RunCommand extends RunCommandBase {
         benchmarkMode: boolArg('benchmark'),
         dartBuilder: hookRunner,
         dillOutputPath: stringArg('output-dill'),
+        hotRunnerConfig: hotRunnerConfig,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+        projectFileInvalidator: projectFileInvalidator,
         projectRootPath: stringArg('project-root'),
         stayResident: stayResident,
       );
