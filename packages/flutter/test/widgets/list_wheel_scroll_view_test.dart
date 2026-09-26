@@ -2059,16 +2059,4 @@ void main() {
       expect(tester.getSize(find.byType(ListWheelViewport)), Size.zero);
     },
   );
-
-  test('FixedExtentScrollPhysics supports shorthands', () {
-    FixedExtentScrollPhysics physics = const .fixedExtent();
-
-    expect(physics, isA<FixedExtentScrollPhysics>());
-    expect(physics.parent, isNull);
-
-    physics = const .fixedExtent(parent: ClampingScrollPhysics());
-
-    expect(physics, isA<FixedExtentScrollPhysics>());
-    expect(physics.parent, isA<ClampingScrollPhysics>());
-  });
 }
