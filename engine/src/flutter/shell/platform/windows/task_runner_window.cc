@@ -69,20 +69,12 @@ void TimerThread::TimerThreadMain() {
       callback_();
       lock.lock();
     }
-    if (schedule_changed) {
-      // ScheduleAt may have moved the deadline earlier. Start a new wait so
-      // wait_until uses the updated time point.
-      continue;
+    // If nothing was scheduled in the meanwhile park the timer.
+    if (scheduled_count == schedule_counter_ &&
+        next_fire_time_ <= std::chrono::high_resolution_clock::now()) {
+      next_fire_time_ =
+          std::chrono::time_point<std::chrono::high_resolution_clock>::max();
     }
-
-    // Park the timer before invoking the callback so that a concurrent
-    // ScheduleAt can install the next deadline.
-    next_fire_time_ =
-        std::chrono::time_point<std::chrono::high_resolution_clock>::max();
-    auto callback = callback_;
-    lock.unlock();
-    callback();
-    lock.lock();
   }
 }
 
