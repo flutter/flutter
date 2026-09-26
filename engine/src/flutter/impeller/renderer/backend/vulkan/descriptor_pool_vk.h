@@ -28,7 +28,7 @@ using DescriptorCacheMap = std::unordered_map<PipelineKey, DescriptorCache>;
 ///             pool must be collected after all the descriptors allocated from
 ///             it are done being used.
 ///
-///             The pool or it's descriptors may not be accessed from multiple
+///             The pool or its descriptors may not be accessed from multiple
 ///             threads.
 ///
 ///             Encoders create pools as necessary as they have the same
@@ -42,6 +42,13 @@ class DescriptorPoolVK {
                    std::vector<vk::UniqueDescriptorPool> pools);
 
   ~DescriptorPoolVK();
+
+  /// @brief      Release all VkDescriptorPool handles without calling
+  ///             vkDestroyDescriptorPool. Call after a fatal vkQueueSubmit
+  ///             failure where the driver has already freed internal
+  ///             resources (e.g. AMD non-conformant OOM) to prevent crashes
+  ///             in RAII destructors.
+  void AbandonForDriverCrash();
 
   fml::StatusOr<vk::DescriptorSet> AllocateDescriptorSets(
       const vk::DescriptorSetLayout& layout,
@@ -99,7 +106,7 @@ class DescriptorPoolRecyclerVK final
   std::vector<std::shared_ptr<DescriptorPoolVK>> recycled_
       IPLR_GUARDED_BY(recycled_mutex_);
 
-  /// @brief      Creates a new |vk::CommandPool|.
+  /// @brief      Creates a new |vk::DescriptorPool|.
   ///
   /// @returns    Returns a |std::nullopt| if a pool could not be created.
   vk::UniqueDescriptorPool Create();
