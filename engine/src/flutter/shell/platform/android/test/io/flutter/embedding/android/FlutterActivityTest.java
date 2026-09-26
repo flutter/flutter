@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.View;
 import android.window.BackEvent;
 import android.window.OnBackAnimationCallback;
 import android.window.OnBackInvokedCallback;
@@ -97,6 +98,21 @@ public class FlutterActivityTest {
     activity.onCreate(null);
     assertNotNull(activity.findViewById(FlutterActivity.FLUTTER_VIEW_ID));
     assertTrue(activity.findViewById(FlutterActivity.FLUTTER_VIEW_ID) instanceof FlutterView);
+  }
+
+  @Test
+  @SuppressWarnings("deprecation")
+  public void onCreatePreservesLightStatusBarFlag() {
+    Intent intent = FlutterActivity.createDefaultIntent(ctx);
+    FlutterActivity activity = Robolectric.buildActivity(FlutterActivity.class, intent).get();
+    View decorView = activity.getWindow().getDecorView();
+    decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+
+    activity.onCreate(null);
+
+    assertEquals(
+        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR,
+        decorView.getSystemUiVisibility() & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
   }
 
   @Test
