@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -45,6 +44,7 @@ import '../src/context.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 import '../src/package_config.dart';
+import '../src/test_build_system.dart';
 import '../src/testbed.dart';
 import '../src/throwing_pub.dart';
 import 'resident_runner_helpers.dart';
@@ -86,21 +86,11 @@ HotRunner createHotRunner(
   Terminal? terminal,
   Xcode? xcode,
 }) {
-  final ToolContext(
-    artifacts: contextArtifacts,
-    cache: contextCache,
-    config: contextConfig,
-    fs: contextFs,
-    logger: contextLogger,
-    os: contextOs,
-    outputPreferences: contextOutputPreferences,
-    platform: contextPlatform,
-    processManager: contextProcessManager,
-    terminal: contextTerminal,
-  ) = DelegatingToolContext(
+  final toolContext = DelegatingToolContext(
     artifacts: artifacts,
     cache: cache,
     config: config,
+    flutterVersion: flutterVersion,
     fs: fileSystem,
     logger: logger,
     os: osUtils,
@@ -109,77 +99,62 @@ HotRunner createHotRunner(
     processManager: processManager,
     terminal: terminal as AnsiTerminal?,
   );
+  buildSystem ??= FlutterBuildSystem(
+    fileSystem: toolContext.fs,
+    logger: toolContext.logger,
+    platform: toolContext.platform,
+  );
 
   if (reassembleHelper != null) {
     return HotRunner(
       flutterDevices,
-      debuggingOptions: debuggingOptions,
-      target: target,
-      analytics: analytics,
-      applicationBinary: applicationBinary,
-      artifacts: contextArtifacts,
-      benchmarkMode: benchmarkMode,
       buildSystem: buildSystem,
       buildTargets: buildTargets ?? const BuildTargetsImpl(),
-      cache: contextCache,
+      debuggingOptions: debuggingOptions,
+      target: target,
+      toolContext: toolContext,
+      xcode: xcode,
+      analytics: analytics,
+      applicationBinary: applicationBinary,
+      benchmarkMode: benchmarkMode,
       commandHelp: commandHelp,
-      config: contextConfig,
       dartBuilder: dartBuilder,
       dillOutputPath: dillOutputPath,
-      fileSystem: contextFs,
-      flutterVersion: flutterVersion,
       hostIsIde: hostIsIde,
       hotRunnerConfig: hotRunnerConfig,
-      logger: contextLogger,
       machine: machine,
       nativeAssetsYamlFile: nativeAssetsYamlFile,
-      osUtils: contextOs,
-      outputPreferences: contextOutputPreferences,
-      platform: contextPlatform,
-      processManager: contextProcessManager,
       projectFileInvalidator: projectFileInvalidator,
       projectRootPath: projectRootPath,
       reassembleHelper: reassembleHelper,
       reloadSourcesHelper: reloadSourcesHelper,
       stayResident: stayResident,
       stopwatchFactory: stopwatchFactory,
-      terminal: contextTerminal,
-      xcode: xcode,
     );
   }
   return HotRunner(
     flutterDevices,
-    debuggingOptions: debuggingOptions,
-    target: target,
-    analytics: analytics,
-    applicationBinary: applicationBinary,
-    artifacts: contextArtifacts,
-    benchmarkMode: benchmarkMode,
     buildSystem: buildSystem,
     buildTargets: buildTargets ?? const BuildTargetsImpl(),
-    cache: contextCache,
+    debuggingOptions: debuggingOptions,
+    target: target,
+    toolContext: toolContext,
+    xcode: xcode,
+    analytics: analytics,
+    applicationBinary: applicationBinary,
+    benchmarkMode: benchmarkMode,
     commandHelp: commandHelp,
-    config: contextConfig,
     dartBuilder: dartBuilder,
     dillOutputPath: dillOutputPath,
-    fileSystem: contextFs,
-    flutterVersion: flutterVersion,
     hostIsIde: hostIsIde,
     hotRunnerConfig: hotRunnerConfig,
-    logger: contextLogger,
     machine: machine,
     nativeAssetsYamlFile: nativeAssetsYamlFile,
-    osUtils: contextOs,
-    outputPreferences: contextOutputPreferences,
-    platform: contextPlatform,
-    processManager: contextProcessManager,
     projectFileInvalidator: projectFileInvalidator,
     projectRootPath: projectRootPath,
     reloadSourcesHelper: reloadSourcesHelper,
     stayResident: stayResident,
     stopwatchFactory: stopwatchFactory,
-    terminal: contextTerminal,
-    xcode: xcode,
   );
 }
 
@@ -212,21 +187,11 @@ ColdRunner createColdRunner(
   bool traceStartup = false,
   Xcode? xcode,
 }) {
-  final ToolContext(
-    artifacts: contextArtifacts,
-    cache: contextCache,
-    config: contextConfig,
-    fs: contextFs,
-    logger: contextLogger,
-    os: contextOs,
-    outputPreferences: contextOutputPreferences,
-    platform: contextPlatform,
-    processManager: contextProcessManager,
-    terminal: contextTerminal,
-  ) = DelegatingToolContext(
+  final toolContext = DelegatingToolContext(
     artifacts: artifacts,
     cache: cache,
     config: config,
+    flutterVersion: flutterVersion,
     fs: fileSystem,
     logger: logger,
     os: osUtils,
@@ -238,32 +203,28 @@ ColdRunner createColdRunner(
 
   return ColdRunner(
     flutterDevices,
+    buildSystem:
+        buildSystem ??
+        FlutterBuildSystem(
+          fileSystem: toolContext.fs,
+          logger: toolContext.logger,
+          platform: toolContext.platform,
+        ),
+    buildTargets: buildTargets ?? const BuildTargetsImpl(),
     debuggingOptions: debuggingOptions,
     target: target,
+    toolContext: toolContext,
+    xcode: xcode,
     analytics: analytics,
     applicationBinary: applicationBinary,
-    artifacts: contextArtifacts,
     awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
-    buildSystem: buildSystem,
-    buildTargets: buildTargets,
-    cache: contextCache,
     commandHelp: commandHelp,
-    config: contextConfig,
     dartBuilder: dartBuilder,
     dillOutputPath: dillOutputPath,
-    fileSystem: contextFs,
-    flutterVersion: flutterVersion,
-    logger: contextLogger,
     machine: machine,
-    osUtils: contextOs,
-    outputPreferences: contextOutputPreferences,
-    platform: contextPlatform,
-    processManager: contextProcessManager,
     projectRootPath: projectRootPath,
     stayResident: stayResident,
-    terminal: contextTerminal,
     traceStartup: traceStartup,
-    xcode: xcode,
   );
 }
 
@@ -1377,19 +1338,6 @@ flutter:
 
       // Completing this future ensures that the daemon can exit correctly.
       expect(await residentRunner.waitForAppToFinish(), 1);
-    }),
-  );
-
-  testUsingContext(
-    'ResidentRunner runSourceGenerators is a no-op when buildTargets is null',
-    () => testbed.run(() async {
-      final runner = HotRunner(
-        <FlutterDevice>[flutterDevice],
-        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
-        target: 'main.dart',
-      );
-
-      await expectLater(runner.runSourceGenerators(), completes);
     }),
   );
 
@@ -2545,16 +2493,14 @@ flutter:
         setup: () {
           residentRunner = TestHotRunner(
             <FlutterDevice>[flutterDevice],
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            buildTargets: const BuildTargetsImpl(),
             stayResident: false,
             debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
             target: 'main.dart',
+            toolContext: DelegatingToolContext(),
+            xcode: null,
             analytics: fakeAnalytics,
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            platform: globals.platform,
-            processManager: globals.processManager,
-            config: globals.config,
-            artifacts: globals.artifacts,
           );
           // Write the source dill file
           globals.fs.file(residentRunner.dillOutputPath)
@@ -2641,16 +2587,14 @@ flutter:
 class TestHotRunner extends HotRunner {
   TestHotRunner(
     super.flutterDevices, {
+    required super.buildSystem,
+    required super.buildTargets,
     required super.stayResident,
     required super.debuggingOptions,
     required super.target,
+    required super.toolContext,
+    required super.xcode,
     required super.analytics,
-    super.fileSystem,
-    super.logger,
-    super.platform,
-    super.processManager,
-    super.config,
-    super.artifacts,
   });
 
   void testCacheInitialDillCompilation() {

@@ -15,7 +15,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
@@ -66,12 +65,6 @@ class WebDriverService extends DriverService {
     Map<String, Object> platformArgs = const <String, Object>{},
     Map<String, String> webDefines = const <String, String>{},
   }) async {
-    final ToolContext(
-      :Logger logger,
-      :Terminal terminal,
-      :Platform platform,
-      :OutputPreferences outputPreferences,
-    ) = _toolContext;
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       toolContext: _toolContext,
@@ -100,13 +93,10 @@ class WebDriverService extends DriverService {
       stayResident: true,
       webDefines: webDefines,
       flutterProject: FlutterProject.current(),
-      fileSystem: globals.fs,
       analytics: globals.analytics,
-      logger: logger,
-      terminal: terminal,
-      platform: platform,
-      outputPreferences: outputPreferences,
-      systemClock: globals.systemClock,
+      buildSystem: globals.buildSystem,
+      buildTargets: globals.buildTargets,
+      toolContext: _toolContext,
     );
     final appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(
@@ -163,6 +153,7 @@ class WebDriverService extends DriverService {
     List<String>? browserDimension,
     String? profileMemory,
   }) async {
+    final ToolContext(:Logger logger, :Platform platform) = _toolContext;
     late async_io.WebDriver webDriver;
     final Browser browser = Browser.fromCliName(browserName);
     final isAndroidChrome = browser == Browser.androidChrome;
@@ -203,14 +194,14 @@ class WebDriverService extends DriverService {
         desired: getDesiredCapabilities(
           browser,
           headless,
-          platform: _toolContext.platform,
+          platform: platform,
           webBrowserFlags: webBrowserFlags,
           chromeBinary: chromeBinary,
           mobileEmulation: mobileEmulation,
         ),
       );
     } on SocketException catch (error) {
-      _toolContext.logger.printTrace('$error');
+      logger.printTrace('$error');
       throwToolExit(
         'Unable to start a WebDriver session for web testing.\n'
         'Make sure you have the correct WebDriver server (e.g. chromedriver) running at $driverPort.\n'
@@ -227,7 +218,7 @@ class WebDriverService extends DriverService {
     final int result = await _processUtils.stream(
       <String>[_dartSdkPath, ...arguments, testFile],
       environment: <String, String>{
-        ..._toolContext.platform.environment,
+        ...platform.environment,
         'VM_SERVICE_URL': _webUri.toString(),
         ..._additionalDriverEnvironment(webDriver, browserName, androidEmulator),
       },

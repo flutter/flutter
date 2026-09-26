@@ -12,21 +12,16 @@ import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
 import '../android/android_workflow.dart';
-import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
 import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../base/time.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
-import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/apple_context.dart';
 import '../context/tool_context.dart';
@@ -41,7 +36,6 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 import '../tracing.dart';
-import '../version.dart';
 import '../web/compile.dart';
 import '../web/devfs_config.dart';
 import '../web/web_options.dart';
@@ -312,11 +306,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 class RunCommand extends RunCommandBase {
   RunCommand({
     required AppleContext appleContext,
+    required this._buildSystem,
+    required this._buildTargets,
     required ToolContext toolContext,
     this._androidContext,
     this._androidWorkflow,
-    this._buildSystem,
-    this._buildTargets,
     this._deviceManager,
     super.verboseHelp = false,
   }) : _injectedAppleContext = appleContext,
@@ -399,8 +393,8 @@ class RunCommand extends RunCommandBase {
 
   final AndroidContext? _androidContext;
   final AndroidWorkflow? _androidWorkflow;
-  final BuildSystem? _buildSystem;
-  final BuildTargets? _buildTargets;
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
   final DeviceManager? _deviceManager;
   final AppleContext _injectedAppleContext;
   final ToolContext _injectedToolContext;
@@ -589,6 +583,14 @@ class RunCommand extends RunCommandBase {
   bool get stayResident => boolArg('resident');
   bool get awaitFirstFrameWhenTracing => boolArg('await-first-frame-when-tracing');
 
+  /// Optional [HotRunnerConfig] passed to [HotRunner].
+  @protected
+  HotRunnerConfig? get hotRunnerConfig => null;
+
+  /// Optional [ProjectFileInvalidator] passed to [HotRunner].
+  @protected
+  ProjectFileInvalidator? get projectFileInvalidator => null;
+
   @override
   Future<void> validateCommand() async {
     // When running with a prebuilt application, no command validation is
@@ -663,20 +665,7 @@ class RunCommand extends RunCommandBase {
     required String? applicationBinaryPath,
     required FlutterProject flutterProject,
   }) async {
-    final ToolContext(
-      :Artifacts artifacts,
-      :Cache cache,
-      :Config config,
-      :FlutterVersion flutterVersion,
-      :FileSystem fs,
-      :Logger logger,
-      :OperatingSystemUtils os,
-      :OutputPreferences outputPreferences,
-      :Platform platform,
-      :ProcessManager processManager,
-      :SystemClock systemClock,
-      :Terminal terminal,
-    ) = toolContext;
+    final FileSystem fs = toolContext.fs;
     final Analytics analytics = this.analytics;
 
     final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
@@ -688,72 +677,51 @@ class RunCommand extends RunCommandBase {
     if (hotMode && !webMode) {
       return HotRunner(
         flutterDevices,
-        debuggingOptions: debuggingOptions,
-        target: targetFile,
-        analytics: analytics,
-        applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
-        artifacts: artifacts,
-        benchmarkMode: boolArg('benchmark'),
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
-        cache: cache,
-        config: config,
+        debuggingOptions: debuggingOptions,
+        target: targetFile,
+        toolContext: toolContext,
+        xcode: appleContext.xcode,
+        analytics: analytics,
+        applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
+        benchmarkMode: boolArg('benchmark'),
         dartBuilder: hookRunner,
         dillOutputPath: stringArg('output-dill'),
-        fileSystem: fs,
-        flutterVersion: flutterVersion,
-        logger: logger,
+        hotRunnerConfig: hotRunnerConfig,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
-        osUtils: os,
-        outputPreferences: outputPreferences,
-        platform: platform,
-        processManager: processManager,
+        projectFileInvalidator: projectFileInvalidator,
         projectRootPath: stringArg('project-root'),
         stayResident: stayResident,
-        terminal: terminal,
-        xcode: appleContext.xcode,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
         flutterDevices.single,
-        target: targetFile,
-        flutterProject: flutterProject,
-        debuggingOptions: debuggingOptions,
-        stayResident: stayResident,
-        fileSystem: fs,
         analytics: analytics,
-        logger: logger,
-        terminal: terminal,
-        platform: platform,
-        outputPreferences: outputPreferences,
-        systemClock: systemClock,
+        buildSystem: _buildSystem,
+        buildTargets: _buildTargets,
+        debuggingOptions: debuggingOptions,
+        flutterProject: flutterProject,
+        stayResident: stayResident,
+        toolContext: toolContext,
+        target: targetFile,
         webDefines: extractWebDefines(),
       );
     }
     return ColdRunner(
       flutterDevices,
-      debuggingOptions: debuggingOptions,
-      target: targetFile,
-      analytics: analytics,
-      applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
-      artifacts: artifacts,
-      awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
       buildSystem: _buildSystem,
       buildTargets: _buildTargets,
-      cache: cache,
-      config: config,
-      dartBuilder: hookRunner,
-      fileSystem: fs,
-      flutterVersion: flutterVersion,
-      logger: logger,
-      osUtils: os,
-      outputPreferences: outputPreferences,
-      platform: platform,
-      processManager: processManager,
-      stayResident: stayResident,
-      terminal: terminal,
-      traceStartup: traceStartup,
+      debuggingOptions: debuggingOptions,
+      target: targetFile,
+      toolContext: toolContext,
       xcode: appleContext.xcode,
+      analytics: analytics,
+      applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
+      awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
+      dartBuilder: hookRunner,
+      stayResident: stayResident,
+      traceStartup: traceStartup,
     );
   }
 
@@ -763,29 +731,24 @@ class RunCommand extends RunCommandBase {
     final ToolContext(
       :FileSystem fs,
       :Logger logger,
-      :OutputPreferences outputPreferences,
-      :Platform platform,
       :ProcessManager processManager,
       :Stdio stdio,
-      :SystemClock systemClock,
-      :AnsiTerminal terminal,
     ) = toolContext;
     return Daemon.createMachineDaemon(
+      buildSystem: _buildSystem,
+      buildTargets: _buildTargets,
+      featureFlags: featureFlags,
+      logger: logger,
+      stdio: stdio,
+      toolContext: toolContext,
+      xcode: appleContext.xcode,
       analytics: analytics,
       androidSdk: _androidContext?.androidSdk,
       androidWorkflow: _androidWorkflow,
       deviceManager: _deviceManager,
-      featureFlags: featureFlags,
       fileSystem: fs,
       java: _androidContext?.java,
-      logger: logger,
-      outputPreferences: outputPreferences,
-      platform: platform,
       processManager: processManager,
-      stdio: stdio,
-      systemClock: systemClock,
-      terminal: terminal,
-      toolContext: toolContext,
     );
   }
 

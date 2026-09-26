@@ -12,17 +12,21 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
@@ -32,6 +36,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 
 /// Runs a callback using FakeAsync.run while continually pumping the
 /// microtask queue. This avoids a deadlock when tests `await` a Future
@@ -73,6 +78,8 @@ class FakeDaemonStreams implements DaemonStreams {
 void main() {
   late Daemon daemon;
   late NotifyingLogger notifyingLogger;
+  final buildSystem = TestBuildSystem.all(BuildResult(success: true));
+  const buildTargets = BuildTargetsImpl();
 
   group('daemon', () {
     late FakeDaemonStreams daemonStreams;
@@ -94,7 +101,10 @@ void main() {
     testUsingContext('daemon.version command should succeed', () async {
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -113,7 +123,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -225,7 +238,10 @@ void main() {
     testUsingContext('printError should send daemon.logMessage event', () async {
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -248,7 +264,10 @@ void main() {
     testUsingContext('printWarning should send daemon.logMessage event', () async {
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -272,7 +291,10 @@ void main() {
       final StringBuffer buffer = await capturedConsolePrint(() {
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           logToStdout: true,
           featureFlags: featureFlags,
@@ -289,7 +311,10 @@ void main() {
       final StringBuffer buffer = await capturedConsolePrint(() {
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           logToStdout: true,
           featureFlags: featureFlags,
@@ -307,7 +332,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -337,7 +365,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -361,7 +392,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -380,10 +414,57 @@ void main() {
       },
     );
 
+    testUsingContext('app.start creates a runner using the injected ToolContext', () async {
+      final toolContextFs = MemoryFileSystem.test();
+      final daemonFs = MemoryFileSystem.test();
+      final Directory projectDirectory = daemonFs.directory('/project')..createSync();
+      final toolContext = FakeToolContext(fs: toolContextFs);
+      daemon = Daemon(
+        daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
+        toolContext: toolContext,
+        xcode: null,
+        logger: MachineOutputLogger(parent: notifyingLogger),
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: daemonFs,
+      );
+      final appDomain = RunnerCapturingAppDomain(
+        daemon,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
+        toolContext: toolContext,
+        xcode: null,
+      );
+
+      await expectLater(
+        appDomain.startApp(
+          FakeDevice('device', 'device'),
+          projectDirectory.path,
+          'lib/main.dart',
+          null,
+          DebuggingOptions.enabled(BuildInfo.debug),
+          false,
+          trackWidgetCreation: false,
+        ),
+        throwsToolExit(),
+      );
+
+      final ResidentRunner? runner = appDomain.runner;
+      expect(runner, isA<ColdRunner>());
+      expect(runner!.fileSystem, same(toolContextFs));
+      expect(runner.toolContext, same(toolContext));
+      expect(runner.buildSystem, same(buildSystem));
+    });
+
     testUsingContext('daemon.shutdown command should stop daemon', () async {
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -400,7 +481,10 @@ void main() {
     testUsingContext('app.restart without an appId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -417,7 +501,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -439,7 +526,10 @@ void main() {
     testUsingContext('app.stop without appId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -454,7 +544,10 @@ void main() {
     testUsingContext('device.getDevices should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -470,7 +563,10 @@ void main() {
     testUsingContext('device.getDevices reports available devices', () async {
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -493,7 +589,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -553,7 +652,10 @@ void main() {
     testUsingContext('device.discoverDevices should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -569,7 +671,10 @@ void main() {
     testUsingContext('device.discoverDevices reports available devices', () async {
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -591,7 +696,10 @@ void main() {
     testUsingContext('device.supportsRuntimeMode returns correct value', () async {
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -617,7 +725,10 @@ void main() {
     testUsingContext('device.logReader.start and .stop starts and stops log reader', () async {
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -673,7 +784,10 @@ void main() {
       testUsingContext('device.startApp and .stopApp starts and stops an app', () async {
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -751,7 +865,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -823,7 +940,10 @@ void main() {
     testUsingContext('device.getDiagnostics returns correct value', () async {
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -850,7 +970,10 @@ void main() {
     testUsingContext('emulator.launch without an emulatorId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -867,7 +990,10 @@ void main() {
     testUsingContext('emulator.launch coldboot parameter must be boolean', () async {
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -884,7 +1010,10 @@ void main() {
     testUsingContext('emulator.getEmulators should respond with list', () async {
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -903,7 +1032,10 @@ void main() {
 
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -933,7 +1065,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -959,7 +1094,10 @@ void main() {
     testUsingContext('devtools.serve command should return null fields if null returned', () async {
       daemon = Daemon(
         daemonConnection,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: DelegatingToolContext(),
+        xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: featureFlags,
         fileSystem: globals.fs,
@@ -996,7 +1134,10 @@ void main() {
 
           daemon = Daemon(
             daemonConnection,
+            buildSystem: buildSystem,
+            buildTargets: buildTargets,
             toolContext: DelegatingToolContext(),
+            xcode: null,
             notifyingLogger: notifyingLogger,
             featureFlags: featureFlags,
             fileSystem: globals.fs,
@@ -1081,7 +1222,10 @@ void main() {
 
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -1112,7 +1256,10 @@ void main() {
 
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -1139,7 +1286,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -1184,7 +1334,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -1245,7 +1398,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -1304,7 +1460,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -1359,7 +1518,10 @@ void main() {
       () async {
         daemon = Daemon(
           daemonConnection,
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
           toolContext: DelegatingToolContext(),
+          xcode: null,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
           fileSystem: globals.fs,
@@ -1559,7 +1721,10 @@ void main() {
     testWithoutContext('has correct properties', () {
       final command = DaemonCommand(
         androidContext: FakeAndroidContext(),
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: FakeToolContext(),
+        xcode: null,
       );
 
       expect(command.name, 'daemon');
@@ -1568,7 +1733,10 @@ void main() {
 
       final hiddenCommand = DaemonCommand(
         androidContext: FakeAndroidContext(),
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: FakeToolContext(),
+        xcode: null,
         hidden: true,
       );
       expect(hiddenCommand.hidden, true);
@@ -1840,6 +2008,35 @@ class FakeSocket extends Fake implements io.Socket {
 
   @override
   void destroy() {}
+}
+
+/// An [AppDomain] that records the runner created by [AppDomain.startApp]
+/// instead of launching it.
+class RunnerCapturingAppDomain extends AppDomain {
+  RunnerCapturingAppDomain(
+    super.daemon, {
+    required super.buildSystem,
+    required super.buildTargets,
+    required super.toolContext,
+    required super.xcode,
+  });
+
+  ResidentRunner? runner;
+
+  @override
+  Future<AppInstance> launch(
+    ResidentRunner runner,
+    RunOrAttach runOrAttach,
+    Device device,
+    String? projectDirectory,
+    bool enableHotReload,
+    Directory cwd,
+    LaunchMode launchMode,
+    MachineOutputLogger logger,
+  ) async {
+    this.runner = runner;
+    throwToolExit('launch skipped');
+  }
 }
 
 class FakeResidentRunner extends Fake implements ResidentRunner {
