@@ -53,7 +53,17 @@ const hasTextCluster = () => {
   return (typeof window.TextCluster !== "undefined");
 }
 
+const getFirefoxVersion = () => {
+  const match = navigator.userAgent.match(/firefox\/(\d+)/i);
+  return match ? parseInt(match[1], 10) : -1;
+}
+
 const supportsDart2Wasm = () => {
+  // Firefox < 147 has a SpiderMonkey Ion WasmGC compilation bug that breaks dart2wasm builds.
+  // See: https://github.com/flutter/flutter/issues/186619
+  //      https://bugzilla.mozilla.org/show_bug.cgi?id=2006811
+  if (browserEngine === "gecko" && getFirefoxVersion() < 147) return false;
+
   // The `<app>.support.js` expression emitted by 
   // ```
   //   % dart compile wasm \
@@ -92,7 +102,9 @@ export const browserEnvironment = {
   hasImageCodecs: hasImageCodecs(),
   hasChromiumBreakIterators: hasChromiumBreakIterators(),
   hasTextCluster: hasTextCluster(),
-  supportsDart2Wasm: supportsDart2Wasm(),
+  get supportsDart2Wasm() {
+    return supportsDart2Wasm();
+  },
   crossOriginIsolated: window.crossOriginIsolated,
   webGLVersion: detectWebGLVersion(),
   isChromeExtension: isChromeExtension(),

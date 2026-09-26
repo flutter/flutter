@@ -10,8 +10,6 @@ import { loadCanvasKit } from './canvaskit_loader.js';
 import { loadSkwasm } from './skwasm_loader.js';
 import { getCanvaskitBaseUrl } from './utils.js';
 
-const supportsDart2Wasm = browserEnvironment.supportsDart2Wasm;
-
 /**
  * The public interface of _flutter.loader. Exposes two methods:
  * * loadEntrypoint (which coordinates the default Flutter web loading procedure)
@@ -78,6 +76,7 @@ export class FlutterLoader {
       throw "FlutterLoader.load requires _flutter.buildConfig to be set";
     }
 
+    const supportsDart2Wasm = browserEnvironment.supportsDart2Wasm;
     const enableWasm = config.wasmAllowList?.[browserEnvironment.browserEngine] ?? defaultWasmSupport[browserEnvironment.browserEngine];
 
     /**
@@ -93,9 +92,6 @@ export class FlutterLoader {
           if (!(browserEnvironment.webGLVersion > 0)) {
             return "Skwasm requires WebGL support; this browser does not provide it.";
           }
-          if (!enableWasm) {
-            return `Skwasm is disabled by your wasmAllowList configuration for browser engine "${browserEnvironment.browserEngine}".`;
-          }
           return null;
         default:
           return null;
@@ -108,8 +104,16 @@ export class FlutterLoader {
      * log a useful explanation when the loader has to fall back.
      */
     const buildIncompatibilityReason = (build) => {
-      if (build.compileTarget === "dart2wasm" && !supportsDart2Wasm) {
-        return "dart2wasm requires WasmGC support; this browser does not implement it yet.";
+      if (build.compileTarget === "dart2wasm") {
+        if (!supportsDart2Wasm) {
+          return "dart2wasm requires WasmGC support; this browser does not implement it yet.";
+        }
+        if (!enableWasm) {
+          if (config.wasmAllowList?.[browserEnvironment.browserEngine] === false) {
+            return `WebAssembly is disabled by your wasmAllowList configuration for browser engine "${browserEnvironment.browserEngine}".`;
+          }
+          return `WebAssembly is disabled by default for browser engine "${browserEnvironment.browserEngine}".`;
+        }
       }
       if (config.renderer && config.renderer != build.renderer) {
         return `The application is configured to use the "${config.renderer}" renderer; this build targets "${build.renderer}".`;
