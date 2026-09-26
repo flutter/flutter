@@ -165,6 +165,18 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   double requestAnimationFrame(DomRequestAnimationFrameCallback callback) =>
       _requestAnimationFrame(_makeAnimationFrameCallbackZoned(callback));
 
+  @JS('queueMicrotask')
+  external void _queueMicrotask(JSFunction callback);
+
+  /// Queues [callback] as a JavaScript microtask, bound to the current zone.
+  ///
+  /// Unlike `scheduleMicrotask` from `dart:async`, which adds [callback] to the
+  /// Dart microtask queue, this adds it to the browser's microtask queue. Dart
+  /// microtasks that are already scheduled, and any microtasks they schedule in
+  /// turn, run before [callback] does.
+  void queueMicrotask(void Function() callback) =>
+      _queueMicrotask(Zone.current.bindCallback(callback).toJS);
+
   @JS('postMessage')
   external void _postMessage(JSAny message, String targetOrigin, [JSArray<JSAny?> messagePorts]);
   void postMessage(Object message, String targetOrigin, [List<DomMessagePort>? messagePorts]) {
