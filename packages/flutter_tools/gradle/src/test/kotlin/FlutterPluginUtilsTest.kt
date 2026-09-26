@@ -1280,7 +1280,7 @@ class FlutterPluginUtilsTest {
 
             // This AGP version will should match the Flutter create template values.
             // In //packages/flutter_tools/lib/src/android/gradle_utils.dart
-            private val templateAgpVersion = AndroidPluginVersion(9, 1, 0)
+            private val templateAgpVersion = AndroidPluginVersion(9, 3, 1)
 
             private val errorAgpVersion = DependencyVersionChecker.errorAGPVersion
 

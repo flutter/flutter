@@ -59,14 +59,15 @@ void TimerThread::ScheduleAt(
 void TimerThread::TimerThreadMain() {
   std::unique_lock<std::mutex> lock(mutex_);
   while (callback_ != nullptr) {
-    const auto fire_time = next_fire_time_;
-    const auto scheduled_count = schedule_counter_;
-    const bool schedule_changed =
-        cv_.wait_until(lock, fire_time, [this, scheduled_count]() {
-          return callback_ == nullptr || schedule_counter_ != scheduled_count;
-        });
-    if (callback_ == nullptr) {
-      break;
+    cv_.wait_until(lock, next_fire_time_);
+    if (next_fire_time_ > std::chrono::high_resolution_clock::now()) {
+      continue;
+    }
+    auto scheduled_count = schedule_counter_;
+    if (callback_) {
+      lock.unlock();
+      callback_();
+      lock.lock();
     }
     if (schedule_changed) {
       // ScheduleAt may have moved the deadline earlier. Start a new wait so

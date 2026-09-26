@@ -12,6 +12,9 @@
 /dev/devicelab/bin/tasks/analyzer_benchmark.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/android_choreographer_do_frame_test.dart @reidbaker @flutter/engine
 /dev/devicelab/bin/tasks/android_defines_test.dart @jesswrd @flutter/android
+/dev/devicelab/bin/tasks/android_engine_flags_debug_test.dart @camsim99 @flutter/android
+/dev/devicelab/bin/tasks/android_engine_flags_release_test.dart @camsim99 @flutter/android
+/dev/devicelab/bin/tasks/android_intent_security_test.dart @camsim99 @flutter/android
 /dev/devicelab/bin/tasks/android_java11_dependency_smoke_tests.dart @jesswrd @flutter/android
 /dev/devicelab/bin/tasks/android_java17_dependency_smoke_tests.dart @jesswrd @flutter/android
 /dev/devicelab/bin/tasks/android_lifecycles_test.dart @reidbaker @flutter/engine
@@ -102,7 +105,7 @@
 /dev/devicelab/bin/tasks/platform_views_hcpp_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf__timeline_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_impeller__timeline_summary.dart @bdero @flutter/engine
-/dev/devicelab/bin/tasks/plugin_dependencies_test.dart @stuartmorgan-g @flutter/tool
+/dev/devicelab/bin/tasks/plugin_dependencies_test.dart @Piinks @flutter/plugin
 /dev/devicelab/bin/tasks/routing_test.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/rrect_blur_perf__timeline_summary.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/shader_mask_cache_perf__e2e_summary.dart @flar @flutter/engine
@@ -116,8 +119,6 @@
 /dev/devicelab/bin/tasks/web_size__compile_test.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/wide_gamut_ios.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/wide_gamut_macos.dart @gaaclarke @flutter/engine
-/dev/devicelab/bin/tasks/android_engine_flags_debug_test.dart @camsim99 @flutter/android
-/dev/devicelab/bin/tasks/android_engine_flags_release_test.dart @camsim99 @flutter/android
 
 ## Windows Android DeviceLab tests
 /dev/devicelab/bin/tasks/basic_material_app_win__compile.dart @bkonyi @flutter/tool
@@ -165,7 +166,7 @@
 /dev/devicelab/bin/tasks/new_gallery_opengles_impeller__transition_perf.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/picture_cache_perf__timeline_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/platform_channel_sample_test.dart @jtmcdole @flutter/engine
-/dev/devicelab/bin/tasks/platform_interaction_test.dart @stuartmorgan-g @flutter/plugin
+/dev/devicelab/bin/tasks/platform_interaction_test.dart @Piinks @flutter/plugin
 /dev/devicelab/bin/tasks/platform_view__start_up.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/run_release_test.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/service_extensions_test.dart @bkonyi @flutter/tool
@@ -224,7 +225,7 @@
 /dev/devicelab/bin/tasks/platform_channel_sample_test_swift.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_channels_benchmarks_ios.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/platform_interaction_test_ios.dart @hellohuanlin @flutter/engine
-/dev/devicelab/bin/tasks/platform_view_ios__start_up.dart @stuartmorgan-g @flutter/plugin
+/dev/devicelab/bin/tasks/platform_view_ios__start_up.dart @hellohuanlin @flutter/ios
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_ad_banners__timeline_summary.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_bottom_ad_banner__timeline_summary.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_ios__timeline_summary.dart @hellohuanlin @flutter/engine
@@ -258,7 +259,7 @@
 /dev/devicelab/bin/tasks/new_gallery_windows_skia__transition_perf.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_win_desktop__compile.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_win_desktop__start_up.dart @yaakovschectman @flutter/desktop
-/dev/devicelab/bin/tasks/dart_plugin_registry_test.dart @stuartmorgan-g @flutter/plugin
+/dev/devicelab/bin/tasks/dart_plugin_registry_test.dart @Piinks @flutter/plugin
 /dev/devicelab/bin/tasks/entrypoint_dart_registrant.dart @aaclarke @flutter/plugin
 /dev/devicelab/bin/tasks/flavors_test_linux.dart @robert-ancell @flutter/desktop
 /dev/devicelab/bin/tasks/flavors_test_macos.dart @vashworth @flutter/desktop
@@ -303,12 +304,12 @@
 /dev/devicelab/bin/tasks/platform_view_macos__start_up.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/platform_view_macos_impeller__start_up.dart @loic-sharma @flutter/desktop
 /dev/devicelab/bin/tasks/platform_view_win_desktop__start_up.dart @yaakovschectman @flutter/desktop
-/dev/devicelab/bin/tasks/plugin_lint_mac.dart @stuartmorgan-g @flutter/plugin
-/dev/devicelab/bin/tasks/plugin_test_android_standard.dart @stuartmorgan-g @flutter/plugin
-/dev/devicelab/bin/tasks/plugin_test_android_variants.dart @stuartmorgan-g @flutter/plugin
-/dev/devicelab/bin/tasks/plugin_test_ios.dart @stuartmorgan-g @flutter/ios
-/dev/devicelab/bin/tasks/plugin_test_darwin.dart @stuartmorgan-g @flutter/ios
-/dev/devicelab/bin/tasks/plugin_test_linux.dart @stuartmorgan-g @flutter/desktop
+/dev/devicelab/bin/tasks/plugin_lint_mac.dart @vashworth @flutter/ios
+/dev/devicelab/bin/tasks/plugin_test_android_standard.dart @mboetger @flutter/android
+/dev/devicelab/bin/tasks/plugin_test_android_variants.dart @mboetger @flutter/android
+/dev/devicelab/bin/tasks/plugin_test_ios.dart @vashworth @flutter/ios
+/dev/devicelab/bin/tasks/plugin_test_darwin.dart @vashworth @flutter/ios
+/dev/devicelab/bin/tasks/plugin_test_linux.dart @robert-ancell @flutter/desktop
 /dev/devicelab/bin/tasks/plugin_test_macos.dart @vashworth @flutter/desktop
 /dev/devicelab/bin/tasks/plugin_test_windows.dart @loic-sharma @flutter/desktop
 /dev/devicelab/bin/tasks/run_debug_test_android.dart @camsim99 @flutter/android
@@ -382,7 +383,7 @@
 # docs @justinmc @flutter/framework
 # snippets @justinmc @flutter/framework
 # flutter_packaging @christopherfujino @flutter/infra
-# flutter_plugins @stuartmorgan-g @flutter/plugin
+# flutter_plugins @Piinks @flutter/plugin
 # framework_tests @justinmc @flutter/framework
 # fuchsia_precache @bkonyi @flutter/tool
 # realm_checker @eyebrowsoffire @flutter/tool
